@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3916191524420619110
+--- !u!1 &2006006193389250573
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,40 +8,39 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2489490874785243373}
-  - component: {fileID: 4709259892523020829}
-  - component: {fileID: 2994708652585429939}
-  - component: {fileID: 4025440450135504126}
-  - component: {fileID: 3256655499764873674}
+  - component: {fileID: 7251949596342978670}
+  - component: {fileID: 7986213385262892117}
+  - component: {fileID: 2106856910825105411}
+  - component: {fileID: 7604068632987436907}
   m_Layer: 0
-  m_Name: SkillEffect_skill_02
+  m_Name: Part_TargetPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2489490874785243373
+--- !u!4 &7251949596342978670
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3916191524420619110}
+  m_GameObject: {fileID: 2006006193389250573}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 2489490874785243373}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!198 &4709259892523020829
+--- !u!198 &7986213385262892117
 ParticleSystem:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3916191524420619110}
+  m_GameObject: {fileID: 2006006193389250573}
   serializedVersion: 8
   lengthInSec: 1
   simulationSpeed: 1
@@ -4816,14 +4815,14 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
---- !u!199 &2994708652585429939
+--- !u!199 &2106856910825105411
 ParticleSystemRenderer:
   serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3916191524420619110}
+  m_GameObject: {fileID: 2006006193389250573}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -4842,7 +4841,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 971553be24f4cd4468f5ef82d0c4a56f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4896,21 +4895,53 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
---- !u!114 &4025440450135504126
+--- !u!114 &7604068632987436907
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3916191524420619110}
+  m_GameObject: {fileID: 2006006193389250573}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5661d793420cc5b49b082374b2273fa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.Presentation.ParticleSystemSkillEffectPresentation
-  _minimumDurationSeconds: 0.05
   _particleSystem: {fileID: 0}
   _applyContextScale: 0
+--- !u!1 &3916191524420619110
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2489490874785243373}
+  - component: {fileID: 3256655499764873674}
+  m_Layer: 0
+  m_Name: SkillEffect_skill_02
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2489490874785243373
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3916191524420619110}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7251949596342978670}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3256655499764873674
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4923,8 +4954,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 553b49c73e0570849bb2900e48defa53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.SkillEffectInstance
-  _presentations: []
-  _positionOffset: {x: 0, y: 0, z: 0}
-  _rotationOffset: {x: 0, y: 0, z: 0}
-  _followsRotation: 1
-  _maxLifetimeSeconds: 30
+  _parts:
+  - _partRoot: {fileID: 7251949596342978670}
+    _attachMode: 3
+    _betweenRatio: 0.5
+    _positionOffset: {x: 0, y: 0, z: 0}
+    _rotationOffset: {x: 0, y: 0, z: 0}
+    _followsRotation: 0
+    _presentations:
+    - {fileID: 7604068632987436907}
+  _prewarmCount: 1
+  _maxPoolSize: 4
+  _maxLifetimeSeconds: 5

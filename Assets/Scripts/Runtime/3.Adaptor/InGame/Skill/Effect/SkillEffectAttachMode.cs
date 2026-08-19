@@ -19,5 +19,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill.Effect
 
         /// <summary> Contextで指定されたワールド座標へ設置します。 </summary>
         WorldPoint = 4,
+
+        /// <summary> プレイヤーと対象を結ぶ線上へ配置します。ビームや軌跡に使用します。 </summary>
+        BetweenPlayerAndTarget = 5,
     }
 }

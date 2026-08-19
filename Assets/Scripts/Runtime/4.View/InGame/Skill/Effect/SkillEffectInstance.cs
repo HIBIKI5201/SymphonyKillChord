@@ -2,59 +2,64 @@ using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using KillChord.Runtime.View.InGame.Skill.Effect.Placement;
 using KillChord.Runtime.View.InGame.Skill.Effect.Presentation;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Skill.Effect
 {
     /// <summary>
-    ///     プールで再利用されるスキルエフェクト1体分のルートView。
-    ///     配置ストラテジーと再生ストラテジーを束ね、全再生の完了を待機してプールへの返却を通知する。
+    ///     プールで再利用されるスキルエフェクト1つ分のルートView。
+    ///     配置の異なる構成要素をまとめて保持し、全再生の完了を待機してプールへの返却を通知する。
     /// </summary>
     public sealed class SkillEffectInstance : MonoBehaviour, ISkillEffectHandle
     {
         /// <summary> 再生中かどうかです。 </summary>
         public bool IsPlaying => _isPlaying;
 
+        /// <summary> シーンロード時に事前生成する数です。 </summary>
+        public int PrewarmCount => _prewarmCount;
+
+        /// <summary> プールが保持する最大数です。 </summary>
+        public int MaxPoolSize => Mathf.Max(_prewarmCount, _maxPoolSize);
+
         /// <summary>
         ///     プール生成時の事前準備を行う。
         /// </summary>
         public void Prewarm()
         {
-            CachePresentations();
-            for (int i = 0; i < _presentations.Length; i++)
+            InitializeParts();
+            for (int i = 0; i < _parts.Length; i++)
             {
-                _presentations[i]?.Prewarm();
+                SkillEffectPresentationBase[] presentations = _parts[i].Presentations;
+                for (int j = 0; j < presentations.Length; j++)
+                {
+                    presentations[j]?.Prewarm();
+                }
             }
         }
 
         /// <summary>
-        ///     配置ストラテジーに従ってエフェクトの再生を開始する。
+        ///     構成要素ごとに配置を解決してエフェクトの再生を開始する。
         /// </summary>
-        /// <param name="placement"> 使用する配置ストラテジーです。 </param>
         /// <param name="context"> エフェクトの参照点です。 </param>
         /// <param name="onFinished"> 再生完了時に呼ばれるコールバックです。 </param>
         /// <returns> 再生を開始できた場合はtrue。 </returns>
-        public bool Play(ISkillEffectPlacement placement, in SkillEffectContext context, Action<SkillEffectInstance> onFinished)
+        public bool Play(in SkillEffectContext context, Action<SkillEffectInstance> onFinished)
         {
-            if (placement == null || !placement.TryResolve(context, out SkillEffectPose pose))
+            InitializeParts();
+            if (_parts.Length == 0)
             {
+                Debug.LogError($"[{nameof(SkillEffectInstance)}] 構成要素が1つも存在しません。", this);
                 return false;
             }
 
-            CachePresentations();
-            if (_presentations.Length == 0)
-            {
-                Debug.LogError($"[{nameof(SkillEffectInstance)}] 再生ストラテジーが1つも存在しません。", this);
-                return false;
-            }
-
-            _followTransform = placement.IsFollow ? pose.FollowTransform : null;
+            _context = context;
             _onFinished = onFinished;
             _elapsedSeconds = 0f;
             _isPlaying = true;
             _completionSource.Reset();
-            ApplyPose(pose.Position, pose.Rotation);
+            UpdatePlacements();
             ResetCancellation();
 
             // 再生自体は非同期だが、完了は必ずRunAsyncで待機し、返却漏れを起こさない。
@@ -85,27 +90,24 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _cancellationTokenSource?.Cancel();
         }
 
-        [SerializeField, Tooltip("このエフェクトが束ねる再生ストラテジーです。未設定時は子階層から収集します。")]
-        private SkillEffectPresentationBase[] _presentations;
+        [SerializeField, Tooltip("配置の異なる構成要素です。1スキル分の演出をここへまとめます。")]
+        private SkillEffectPart[] _parts;
 
-        [SerializeField, Tooltip("配置位置に加算するローカルオフセットです。")]
-        private Vector3 _positionOffset;
+        [SerializeField, Min(0), Tooltip("シーンロード時に事前生成する数です。同時再生数の想定値を設定します。")]
+        private int _prewarmCount = 1;
 
-        [SerializeField, Tooltip("配置回転に加算するオイラー角オフセットです。")]
-        private Vector3 _rotationOffset;
-
-        [SerializeField, Tooltip("追従型のとき、対象の回転にも追従するかです。")]
-        private bool _followsRotation = true;
+        [SerializeField, Min(1), Tooltip("プールが保持する最大数です。")]
+        private int _maxPoolSize = 4;
 
         [SerializeField, Min(0f), Tooltip("再生完了を検出できなかった場合に強制返却するまでの時間です。0なら無効です。")]
         private float _maxLifetimeSeconds = 30f;
 
         /// <summary>
-        ///     再生ストラテジーの参照を収集する。
+        ///     構成要素を初期化する。
         /// </summary>
         private void Awake()
         {
-            CachePresentations();
+            InitializeParts();
         }
 
         /// <summary>
@@ -118,7 +120,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
                 return;
             }
 
-            UpdateFollow();
+            UpdatePlacements();
 
             if (_maxLifetimeSeconds <= 0f)
             {
@@ -146,33 +148,78 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         }
 
         /// <summary>
-        ///     全再生ストラテジーを開始し、すべての完了を待機する。
+        ///     構成要素の参照と配置ストラテジーを解決する。
+        /// </summary>
+        private void InitializeParts()
+        {
+            _parts ??= Array.Empty<SkillEffectPart>();
+            if (_isPartsInitialized)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _parts.Length; i++)
+            {
+                _parts[i].CachePresentations();
+                _parts[i].ResolvePlacement();
+            }
+
+            _isPartsInitialized = true;
+        }
+
+        /// <summary>
+        ///     各構成要素の配置を解決して適用する。
+        /// </summary>
+        private void UpdatePlacements()
+        {
+            for (int i = 0; i < _parts.Length; i++)
+            {
+                SkillEffectPart part = _parts[i];
+
+                // 追従しない構成要素は再生開始時の姿勢を維持する。
+                if (_isPlacementApplied && !part.IsFollow)
+                {
+                    continue;
+                }
+
+                if (part.Placement != null && part.Placement.TryResolve(_context, out SkillEffectPose pose))
+                {
+                    part.ApplyPose(pose);
+                }
+            }
+
+            _isPlacementApplied = true;
+        }
+
+        /// <summary>
+        ///     全構成要素の再生を開始し、すべての完了を待機する。
         /// </summary>
         /// <param name="context"> エフェクトの参照点です。 </param>
         /// <param name="cancellationToken"> 再生を中断するためのキャンセルトークンです。 </param>
         /// <returns> 全再生の完了を待機するAwaitableです。 </returns>
         private async Awaitable RunAsync(SkillEffectContext context, CancellationToken cancellationToken)
         {
-            if (_runningPlaybacks == null || _runningPlaybacks.Length != _presentations.Length)
-            {
-                _runningPlaybacks = new Awaitable[_presentations.Length];
-            }
+            _runningPlaybacks.Clear();
 
             try
             {
                 // 先に全ストラテジーを開始し、同時再生させてから完了を待機する。
-                for (int i = 0; i < _presentations.Length; i++)
+                for (int i = 0; i < _parts.Length; i++)
                 {
-                    _runningPlaybacks[i] = _presentations[i]?.PlayAsync(context, cancellationToken);
+                    SkillEffectPresentationBase[] presentations = _parts[i].Presentations;
+                    for (int j = 0; j < presentations.Length; j++)
+                    {
+                        if (presentations[j] == null)
+                        {
+                            continue;
+                        }
+
+                        _runningPlaybacks.Add(presentations[j].PlayAsync(context, cancellationToken));
+                    }
                 }
 
-                for (int i = 0; i < _runningPlaybacks.Length; i++)
+                for (int i = 0; i < _runningPlaybacks.Count; i++)
                 {
-                    if (_runningPlaybacks[i] == null)
-                    {
-                        continue;
-                    }
-
                     await _runningPlaybacks[i];
                 }
             }
@@ -201,11 +248,12 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             }
 
             _isPlaying = false;
-            Array.Clear(_runningPlaybacks, 0, _runningPlaybacks.Length);
+            _isPlacementApplied = false;
+            _runningPlaybacks.Clear();
 
             Action<SkillEffectInstance> onFinished = _onFinished;
             _onFinished = null;
-            _followTransform = null;
+            _context = default;
 
             _completionSource.TrySetResult();
             onFinished?.Invoke(this);
@@ -221,52 +269,14 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
-        /// <summary>
-        ///     再生ストラテジーの参照をキャッシュする。
-        /// </summary>
-        private void CachePresentations()
-        {
-            if (_presentations != null && _presentations.Length > 0)
-            {
-                return;
-            }
-
-            // インスペクタ未設定時のみ、生成時に一度だけ子階層から収集する。
-            _presentations = GetComponentsInChildren<SkillEffectPresentationBase>(true);
-        }
-
-        /// <summary>
-        ///     追従対象へ位置と回転を追従させる。
-        /// </summary>
-        private void UpdateFollow()
-        {
-            if (_followTransform == null)
-            {
-                return;
-            }
-
-            ApplyPose(_followTransform.position, _followTransform.rotation);
-        }
-
-        /// <summary>
-        ///     オフセットを加味した姿勢を適用する。
-        /// </summary>
-        /// <param name="position"> 基準となるワールド座標です。 </param>
-        /// <param name="rotation"> 基準となるワールド回転です。 </param>
-        private void ApplyPose(Vector3 position, Quaternion rotation)
-        {
-            Quaternion appliedRotation = _followsRotation || _followTransform == null
-                ? rotation * Quaternion.Euler(_rotationOffset)
-                : transform.rotation;
-            transform.SetPositionAndRotation(position + rotation * _positionOffset, appliedRotation);
-        }
-
         private readonly AwaitableCompletionSource _completionSource = new();
-        private Awaitable[] _runningPlaybacks;
+        private readonly List<Awaitable> _runningPlaybacks = new();
         private CancellationTokenSource _cancellationTokenSource;
         private Action<SkillEffectInstance> _onFinished;
-        private Transform _followTransform;
+        private SkillEffectContext _context;
         private float _elapsedSeconds;
         private bool _isPlaying;
+        private bool _isPartsInitialized;
+        private bool _isPlacementApplied;
     }
 }

@@ -11,10 +11,17 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Placement
         ///     配置方式に対応するストラテジーを取得する。
         /// </summary>
         /// <param name="attachMode"> 配置方式です。 </param>
+        /// <param name="betweenRatio"> 2点間配置で使用する補間比率です。 </param>
         /// <returns> 対応するストラテジーです。 </returns>
-        public static ISkillEffectPlacement Resolve(SkillEffectAttachMode attachMode)
+        public static ISkillEffectPlacement Resolve(SkillEffectAttachMode attachMode, float betweenRatio = DEFAULT_BETWEEN_RATIO)
         {
-            // ストラテジーは状態を持たないため、GC削減のためインスタンスを使い回す。
+            // 補間比率を持つ2点間配置のみ、定義ごとに生成する。
+            if (attachMode == SkillEffectAttachMode.BetweenPlayerAndTarget)
+            {
+                return new BetweenPointsSkillEffectPlacement(betweenRatio);
+            }
+
+            // それ以外のストラテジーは状態を持たないため、GC削減のためインスタンスを使い回す。
             return attachMode switch
             {
                 SkillEffectAttachMode.PlayerFollow => PLAYER_FOLLOW,
@@ -25,6 +32,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Placement
                 _ => PLAYER_POINT,
             };
         }
+
+        private const float DEFAULT_BETWEEN_RATIO = 0.5f;
 
         private static readonly ISkillEffectPlacement PLAYER_FOLLOW = new PlayerFollowSkillEffectPlacement();
         private static readonly ISkillEffectPlacement PLAYER_POINT = new PlayerPointSkillEffectPlacement();

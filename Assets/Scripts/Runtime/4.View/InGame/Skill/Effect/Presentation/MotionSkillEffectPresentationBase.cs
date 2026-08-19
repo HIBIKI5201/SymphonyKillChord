@@ -20,16 +20,27 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         protected override async Awaitable OnPlayAsync(SkillEffectContext context, CancellationToken cancellationToken)
         {
             CancelMotion();
+            _isMotionCompleted = false;
             _motionHandle = CreateMotion(context);
             await _motionHandle.ToAwaitable(cancellationToken);
+
+            // 最後まで再生できた場合のみ完了扱いとし、停止時に終了値を保持する。
+            _isMotionCompleted = true;
         }
 
         /// <summary>
-        ///     再生中のTweenを中断し、見た目を初期状態へ戻す。
+        ///     再生中のTweenを中断する。中断された場合のみ見た目を初期状態へ戻す。
         /// </summary>
         protected override void OnStop()
         {
             CancelMotion();
+
+            // 完了後に初期状態へ戻すと、Tweenの結果が即座に打ち消されてしまう。
+            if (_isMotionCompleted)
+            {
+                return;
+            }
+
             OnRestoreState();
         }
 
@@ -70,5 +81,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         }
 
         private MotionHandle _motionHandle;
+        private bool _isMotionCompleted;
     }
 }

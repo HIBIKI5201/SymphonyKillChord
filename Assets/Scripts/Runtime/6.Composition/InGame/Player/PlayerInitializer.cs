@@ -89,7 +89,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private MobileStickFlickInputConfig _loadedMobileStickFlickInputConfig;
 
         private Action _onDodgeEndedHandler;
-        private ICharacterAnimationSignal _characterAnimationSignal;
+        private IPlayerCharacterAnimationSignal _characterAnimationSignal;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -337,7 +337,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
             AnimationComposition animationComposition = new AnimationComposition();
-            ICharacterAnimationViewContext animationContext = animationComposition.Init(
+            ICharacterAnimationViewContext animationContext = animationComposition.InitForPlayer(
                 _characterAnimationView,
                 _characterAnimationConfig,
                 musicSyncState,
@@ -356,7 +356,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             };
 
             _onDodgeEndedHandler = () => playerAttackController.StartAttackCooldown();
-            _characterAnimationSignal = animationContext.Signal;
+            _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
             _characterAnimationSignal.OnDodgeEnded += _onDodgeEndedHandler;
 
             PlayerMovementApplication move = new PlayerMovementApplication(parameter);
