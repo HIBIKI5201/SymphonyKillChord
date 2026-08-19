@@ -1095,6 +1095,13 @@ jobs:
               $ZipSize = (Get-Item $ZipPath).Length
 
               Write-Host "[INFO]: アーカイブ ($ZipName) が正常に作成されました。ファイルサイズ: $([Math]::Round($ZipSize / 1MB, 2)) MB"
+
+              # ZIP化が完了した生の成果物は同じ内容を二重に持つことになるため、
+              # ディスクのピーク使用量を抑える目的で即座に削除する。
+              $DirSize = (Get-ChildItem -Path $PlatformDir.FullName -Recurse -File -ErrorAction SilentlyContinue |
+                          Measure-Object -Property Length -Sum).Sum
+              Remove-Item -Path $PlatformDir.FullName -Recurse -Force -ErrorAction SilentlyContinue
+              Write-Host "[INFO]: 圧縮済みのビルド出力 ($($PlatformDir.Name), $([Math]::Round($DirSize / 1MB, 2)) MB) を削除しました。"
             } catch {
               Write-Host "[WARN]: $($PlatformDir.Name) のアーカイブ作成に失敗しました: $_"
               continue
@@ -1193,5 +1200,80 @@ jobs:
           } else {
             Write-Host "[WARN]: リリースの作成が完了しませんでした（失敗またはスキップ）。"
           }
+          Write-Host "::endgroup::"
+        shell: pwsh
+
+# ==================================================================================================
+
+      - name: ビルド後のディスククリーンアップ
+        if: always()
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::ビルド後のディスククリーンアップ"
+
+          # 事前クリーンアップはジョブ開始時にしか走らないため、ジョブが失敗して
+          # 終わると次回まで数十GBを抱えたままになる。成否にかかわらず、
+          # 再生成可能なものをここで片付ける。
+          $Workspace = "${{ github.workspace }}"
+
+          function Get-PathSizeMB([string]$Path) {
+            if (-not (Test-Path $Path)) { return $null }
+            $Item = Get-Item $Path -ErrorAction SilentlyContinue
+            if ($Item -and -not $Item.PSIsContainer) { return [Math]::Round($Item.Length / 1MB, 2) }
+            $Sum = (Get-ChildItem -Path $Path -Recurse -File -ErrorAction SilentlyContinue |
+                    Measure-Object -Property Length -Sum).Sum
+            return [Math]::Round($Sum / 1MB, 2)
+          }
+
+          # Library は .gitignore 対象で毎回作り直される。Bee (IL2CPP) だけで
+          # 数十GBに達するため、ここでの削除が最も効く。
+          $Targets = @(
+            (Join-Path $Workspace "Library"),
+            (Join-Path $Workspace "Builds"),
+            (Join-Path $env:RUNNER_TEMP "src_assets.zip"),
+            (Join-Path $env:RUNNER_TEMP "UnityPackages")
+          )
+
+          # ZIP はリリースへアップロード済みのため保持不要。
+          $Targets += (Get-ChildItem -Path $Workspace -Filter "*.zip" -File -ErrorAction SilentlyContinue |
+                       ForEach-Object { $_.FullName })
+
+          # パッケージ展開用の一時ディレクトリ。
+          $Targets += (Get-ChildItem -Path $env:RUNNER_TEMP -Filter "pkg_*" -Directory -ErrorAction SilentlyContinue |
+                       ForEach-Object { $_.FullName })
+
+          $TotalMB = 0
+          foreach ($Target in $Targets) {
+            $SizeMB = Get-PathSizeMB $Target
+            if ($null -eq $SizeMB) {
+              Write-Host "[INFO]: 存在しないためスキップ: $Target"
+              continue
+            }
+            Remove-Item -Path $Target -Recurse -Force -ErrorAction SilentlyContinue
+            if (Test-Path $Target) {
+              Write-Host "[WARN]: 削除しきれませんでした: $Target"
+            } else {
+              $TotalMB += $SizeMB
+              Write-Host "[INFO]: 削除しました ($([Math]::Round($SizeMB / 1024, 2)) GB): $Target"
+            }
+          }
+
+          Write-Host ""
+          Write-Host "[INFO]: 合計 $([Math]::Round($TotalMB / 1024, 2)) GB を解放しました。"
+
+          # 残り容量を記録しておくと、次回枯渇した際の切り分けが早くなる。
+          try {
+            if ($IsWindows) {
+              $Drive = (Get-Item $Workspace).PSDrive
+              Write-Host "[INFO]: ドライブ $($Drive.Name): 残り $([Math]::Round($Drive.Free / 1GB, 2)) GB"
+            } else {
+              & df -h $Workspace | ForEach-Object { Write-Host $_ }
+            }
+          } catch {
+            Write-Host "[WARN]: 残り容量を取得できませんでした: $_"
+          }
+
           Write-Host "::endgroup::"
         shell: pwsh
