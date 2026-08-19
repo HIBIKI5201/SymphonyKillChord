@@ -233,8 +233,8 @@ namespace KillChord.Runtime.View.InGame.Skill
         private void PlayFlareTriggered()
         {
             _progressFlareHandle.TryComplete();
-            _progressFlareHandle = LMotion.Create(1f, 0f, 0.1f)
-                    .WithLoops(4)
+            _progressFlareHandle = LMotion.Create(1f, 0f, 0.05f)
+                    .WithLoops(8)
                     .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
                     .WithOnComplete(() => _rhythmTriggerdFlareImage.enabled = false)
                     .BindToColorA(_rhythmTriggerdFlareImage);
@@ -243,8 +243,8 @@ namespace KillChord.Runtime.View.InGame.Skill
         private void PlayFlareReset()
         {
             _progressFlareHandle.TryComplete();
-            _progressFlareHandle = LMotion.Create(1f, 0f, 0.1f)
-                    .WithLoops(2)
+            _progressFlareHandle = LMotion.Create(1f, 0f, 0.05f)
+                    .WithLoops(4)
                     .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
                     .WithOnComplete(() => _rhythmResetFlareImage.enabled = false)
                     .BindToColorA(_rhythmResetFlareImage);
