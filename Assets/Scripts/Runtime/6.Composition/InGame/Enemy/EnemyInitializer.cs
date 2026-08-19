@@ -281,7 +281,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
                 _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator,
-                shellPool, _waveSpawnState, releaseCallback);
+                shellPool, _waveSpawnState, releaseCallback, enemyType);
         }
 
         /// <summary>
