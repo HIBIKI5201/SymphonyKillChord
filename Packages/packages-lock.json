@@ -666,10 +666,16 @@
       "depth": 0,
       "source": "git",
       "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.2.1",
-        "com.unity.addressables": "1.21.19"
+        "com.unity.addressables": "2.9.1",
+        "com.unity.inputsystem": "1.18.0",
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.uielements": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.2",
+        "com.unity.test-framework": "1.6.0"
       },
-      "hash": "544fe7daf07d93468a0f732170591178fbc77e22"
+      "hash": "8d610a15ab144d42bb668d40b0fc71e6a05b1636"
     },
     "taremin.copy-components-by-regex": {
       "version": "https://github.com/Taremin/CopyComponentsByRegex.git",
