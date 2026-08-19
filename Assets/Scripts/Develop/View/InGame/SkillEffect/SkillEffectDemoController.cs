@@ -110,13 +110,23 @@ namespace KillChord.Develop.View.InGame.SkillEffect
                     continue;
                 }
 
-                if (GUI.Button(new Rect(GUI_MARGIN, y, GUI_WIDTH, GUI_LINE_HEIGHT), $"Skill {skillId} を再生"))
+                if (GUI.Button(new Rect(GUI_MARGIN, y, GUI_WIDTH, GUI_LINE_HEIGHT), $"{ResolveSkillLabel(skillId)} を再生"))
                 {
                     PlaySkillEffect(skillId);
                 }
 
                 y += GUI_LINE_HEIGHT;
             }
+        }
+
+        /// <summary>
+        ///     ボタンに表示するスキル名を解決します。
+        /// </summary>
+        /// <param name="skillId"> 対象のスキルIDです。 </param>
+        /// <returns> 解決した表示名です。文字列IDが引けない場合は数値IDです。 </returns>
+        private string ResolveSkillLabel(int skillId)
+        {
+            return DataIDDebugUtility.TryGetId(skillId, out string id) ? id : skillId.ToString();
         }
 
         /// <summary>
