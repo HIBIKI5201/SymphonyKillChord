@@ -31,7 +31,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         {
             float barProgress = _musicSyncService.GetBarProgress();
 
-            float indicatorNormalized = _rhythmGuideUsecase.CalculateIndicatorNormalized(barProgress);
+            // インジケーターはジャスト位置を通過させるため1小節を超えた進捗を使用する。
+            // 拍種の解決は0〜1の判定範囲を前提とするため、クランプ済みの進捗をそのまま使う。
+            float indicatorBarProgress = _musicSyncService.GetBarProgressUnclamped();
+
+            float indicatorNormalized = _rhythmGuideUsecase.CalculateIndicatorNormalized(indicatorBarProgress);
 
             BeatType? currentBeatType = _rhythmGuideUsecase.CalculateCurrentBeatType(barProgress);
 

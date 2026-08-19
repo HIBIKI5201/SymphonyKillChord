@@ -92,7 +92,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary>
         ///    ビートの位置を更新する。
         /// </summary>
-        /// <param name="normalizeOffset"> ビートの位置(0～1の値範囲)</param>
+        /// <param name="normalizeOffset"> ビートの位置(1が1小節。ジャスト通過分として1を超える値も受け取る)</param>
         public void SetBeatsOffset(float normalizeOffset)
         {
             if (_beatPositionImages == null || _beatPositionImages.Length == 0 || _totalBeatBoxCount <= 0)
@@ -100,9 +100,11 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            // normalizeOffsetは1小節基準の進捗(0～1)。ゲージ全長はGUIDE_LENGTH_IN_BARS小節分のため、
+            // normalizeOffsetは1小節基準の進捗。ゲージ全長はGUIDE_LENGTH_IN_BARS小節分のため、
             // ゾーン・Just位置と同じ基準に揃えるためゲージ全長に対する位置へ変換する。
-            float gaugeNormalized = Mathf.Clamp01(normalizeOffset) / GUIDE_LENGTH_IN_BARS;
+            // 1を超える超過分も同じ換算で扱うことでゾーンとのズレを生まずにJust位置を通過させ、
+            // ゲージ全長(=1)で頭打ちにする。
+            float gaugeNormalized = Mathf.Clamp01(Mathf.Max(0f, normalizeOffset) / GUIDE_LENGTH_IN_BARS);
 
             for (int i = 0; i < _beatPositionImages.Length; i++)
             {
