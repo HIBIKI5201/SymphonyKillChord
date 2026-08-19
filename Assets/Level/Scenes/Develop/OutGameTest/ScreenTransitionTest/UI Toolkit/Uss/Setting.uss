@@ -68,7 +68,7 @@
     margin-bottom: 12px;
     padding-left: 22px;
     border-left-width: 6px;
-    border-left-color: rgba(0, 0, 0, 0);
+    border-left-color: rgb(150, 162, 170);
     font-size: 27px;
     -unity-font-style: bold;
     -unity-text-align: middle-left;
