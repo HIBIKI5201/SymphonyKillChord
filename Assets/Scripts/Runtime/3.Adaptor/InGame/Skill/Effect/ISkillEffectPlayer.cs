@@ -14,6 +14,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill.Effect
         ISkillEffectHandle Play(SkillEffectId effectId, in SkillEffectContext context);
 
         /// <summary>
+        ///     指定スキルに紐づくスキルエフェクトをすべて再生する。
+        /// </summary>
+        /// <param name="skillId"> 再生するスキルのIDです。 </param>
+        /// <param name="context"> エフェクトの参照点です。 </param>
+        void PlaySkillEffects(int skillId, in SkillEffectContext context);
+
+        /// <summary>
         ///     再生中のスキルエフェクトをすべて停止する。
         /// </summary>
         void StopAll();

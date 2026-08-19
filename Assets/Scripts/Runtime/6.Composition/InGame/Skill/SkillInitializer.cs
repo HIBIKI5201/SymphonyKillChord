@@ -8,6 +8,7 @@ using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.Composition.InGame.Skill.Effect;
 using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
@@ -18,6 +19,7 @@ using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
+using KillChord.Runtime.View.InGame.Skill.Effect;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
@@ -160,10 +162,16 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController, pendingAttackEffectService, targetRangeQuery, targetRadiusQuery);
             SkillUsecase skillUsecase = new SkillUsecase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
 
+            SkillView[] skillVisuals = ResolveSkillVisuals(playerModuleContainer.PlayerInitializer);
+            InitializeSkillVisuals(
+                skillVisuals,
+                playerModuleContainer.PlayerView.transform,
+                targetSystemContainer.TargetSystemViewModel);
+
             _skillController = new SkillController(musicSyncContainer.MusicSyncService);
             _skillController.Initialize(BuildSkillExecutionControllers(
                 equippedSkills,
-                ResolveSkillVisuals(playerModuleContainer.PlayerInitializer),
+                skillVisuals,
                 musicSyncContainer.MusicSyncState,
                 skillResultPresenter,
                 skillCheckService,
@@ -202,6 +210,39 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             ServiceLocator.UnregisterInstance<SkillModuleContainer>();
             _moduleContainer = null;
             _isRegistered = false;
+        }
+
+        /// <summary>
+        ///     スキル演出Viewへエフェクト再生の依存を注入します。
+        /// </summary>
+        /// <param name="skillVisuals"> 対象のスキル演出View一覧です。 </param>
+        /// <param name="playerTransform"> プレイヤーのTransformです。 </param>
+        /// <param name="targetSystemViewModel"> ターゲットシステムのViewModelです。 </param>
+        private void InitializeSkillVisuals(
+            IReadOnlyList<SkillView> skillVisuals,
+            Transform playerTransform,
+            ITargetSystemViewModel targetSystemViewModel)
+        {
+            if (skillVisuals == null || skillVisuals.Count == 0)
+            {
+                return;
+            }
+
+            // エフェクトモジュールは任意のため、未登録のシーンでもスキル自体は成立させる。
+            SkillEffectModuleContainer skillEffectContainer = ServiceLocator.GetInstance<SkillEffectModuleContainer>();
+            if (skillEffectContainer == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SkillInitializer)}] {nameof(SkillEffectModuleContainer)} が見つからないため、スキルエフェクトを再生しません。",
+                    this);
+                return;
+            }
+
+            SkillEffectContextFactory contextFactory = new SkillEffectContextFactory(playerTransform, targetSystemViewModel);
+            for (int i = 0; i < skillVisuals.Count; i++)
+            {
+                skillVisuals[i]?.Initialize(skillEffectContainer.SkillEffectPlayer, contextFactory);
+            }
         }
 
         /// <summary>
