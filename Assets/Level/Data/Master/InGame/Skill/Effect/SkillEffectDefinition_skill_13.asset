@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.SkillEffectDefinitionConfig
   _key: skill_13_main
   _prefab: {fileID: 1174767335462118641, guid: 9bdff612ad877f34f84e0c3606a1704a, type: 3}
-  _attachMode: 3
-  _prewarmCount: 2
-  _maxPoolSize: 8
+  _attachMode: 2
+  _prewarmCount: 1
+  _maxPoolSize: 4
