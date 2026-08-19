@@ -1,5 +1,6 @@
 using KillChord.Runtime.Composition.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.View.Persistent.Load;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,9 @@ namespace KillChord.Develop.Composition.InGame.SkillEffect
         [SerializeField, Tooltip("手動で実行する初期化モジュールです。自動収集を使わない場合に指定します。")]
         private InGameInitializationModuleBase[] _modules;
 
+        [SerializeField, Tooltip("常駐シーンのロード画面を非表示にするかです。デモシーンでは暗転が残るためtrueにします。")]
+        private bool _hidesLoadingScreen = true;
+
         /// <summary>
         ///     初期化ライフサイクルを開始します。
         /// </summary>
@@ -38,6 +42,12 @@ namespace KillChord.Develop.Composition.InGame.SkillEffect
         {
             try
             {
+                if (_hidesLoadingScreen)
+                {
+                    // ロード画面の出現を待つと初期化が遅れるため、別処理として並行させる。
+                    _ = StartHidingLoadingScreenAsync();
+                }
+
                 List<IInGameInitializationModule> modules = ResolveModules();
                 if (modules.Count == 0)
                 {
@@ -87,6 +97,45 @@ namespace KillChord.Develop.Composition.InGame.SkillEffect
         }
 
         /// <summary>
+        ///     常駐シーンのロード画面を探して非表示にし、再表示されないか一定時間監視します。
+        /// </summary>
+        /// <returns> 監視処理を待機するAwaitableです。 </returns>
+        private async Awaitable StartHidingLoadingScreenAsync()
+        {
+            try
+            {
+                // デモシーンには遷移先が無く、ロードセッションが完了しないため暗転が残り続ける。
+                // セッション制御は常駐シーン側の都合で差し替わるため、表示そのものを落とす。
+                for (int i = 0; i < MAX_LOADING_SCREEN_WATCH_FRAME; i++)
+                {
+                    HideLoadingScreen();
+                    await Awaitable.NextFrameAsync(destroyCancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     ロード画面のViewが存在すれば非表示にします。
+        /// </summary>
+        private void HideLoadingScreen()
+        {
+            LoadingScreenView loadingScreenView = FindAnyObjectByType<LoadingScreenView>(FindObjectsInactive.Exclude);
+            if (loadingScreenView == null)
+            {
+                return;
+            }
+
+            loadingScreenView.gameObject.SetActive(false);
+        }
+
+        /// <summary>
         ///     実行対象の初期化モジュールを実行順に並べて取得します。
         /// </summary>
         /// <returns> 実行対象モジュール一覧です。 </returns>
@@ -112,6 +161,8 @@ namespace KillChord.Develop.Composition.InGame.SkillEffect
             _isInitialized = isSuccess;
             _completionSource.TrySetResult();
         }
+
+        private const int MAX_LOADING_SCREEN_WATCH_FRAME = 600;
 
         private readonly AwaitableCompletionSource _completionSource = new();
         private readonly InGameInitializationCoordinator _initializationCoordinator = new();
