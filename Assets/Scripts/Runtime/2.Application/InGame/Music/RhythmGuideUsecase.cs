@@ -20,7 +20,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         public RhythmJudgmentDefinition RhythmJudgmentDefinition => _rhythmJudgmentDefinition;
 
         /// <summary> インジケーターがジャストタイミングを超えて進む量（小節基準の正規化値）。 </summary>
-        public const float INDICATOR_OVERRUN_NORMALIZED = 0.05f;
+        public const float INDICATOR_OVERRUN_NORMALIZED = 0.2f;
 
         /// <summary> インジケーター位置の上限（小節基準の正規化値）。 </summary>
         public const float MAX_INDICATOR_NORMALIZED = 1f + INDICATOR_OVERRUN_NORMALIZED;
