@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -6,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
 {
     /// <summary>
     ///     Timelineでスキルエフェクトを再生するストラテジー。
+    ///     再生は投げっぱなしにせず、Timelineの終了まで待機して完了を通知する。
     /// </summary>
     public sealed class TimelineSkillEffectPresentation : SkillEffectPresentationBase
     {
@@ -17,10 +19,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// </summary>
         private void Awake()
         {
-            if (_director == null)
-            {
-                _director = GetComponent<PlayableDirector>();
-            }
+            EnsureDirector();
         }
 
         /// <summary>
@@ -28,11 +27,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// </summary>
         protected override void OnPrewarm()
         {
-            if (_director == null)
-            {
-                _director = GetComponent<PlayableDirector>();
-            }
-
+            EnsureDirector();
             if (_director == null)
             {
                 return;
@@ -45,10 +40,12 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         }
 
         /// <summary>
-        ///     Timelineを先頭から再生する。
+        ///     Timelineを先頭から再生し、終端に達するまで待機する。
         /// </summary>
         /// <param name="context"> エフェクトの参照点です。 </param>
-        protected override void OnPlay(in SkillEffectContext context)
+        /// <param name="cancellationToken"> 再生を中断するためのキャンセルトークンです。 </param>
+        /// <returns> 再生完了を待機するAwaitableです。 </returns>
+        protected override async Awaitable OnPlayAsync(SkillEffectContext context, CancellationToken cancellationToken)
         {
             if (_director == null)
             {
@@ -57,10 +54,19 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
 
             _director.time = 0d;
             _director.Play();
+
+            // Playを呼んだ直後はstateが更新されていないため、1フレーム進めてから監視する。
+            await Awaitable.NextFrameAsync(cancellationToken);
+            while (_director != null
+                && _director.state == PlayState.Playing
+                && _director.time < _director.duration)
+            {
+                await Awaitable.NextFrameAsync(cancellationToken);
+            }
         }
 
         /// <summary>
-        ///     Timelineを停止する。
+        ///     Timelineを停止して先頭へ戻す。
         /// </summary>
         protected override void OnStop()
         {
@@ -74,18 +80,14 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         }
 
         /// <summary>
-        ///     再生時間の経過で再生継続を判定する。
+        ///     PlayableDirectorの参照を必要時に解決する。
         /// </summary>
-        /// <param name="elapsedSeconds"> 再生開始からの経過時間です。 </param>
-        /// <returns> 再生が継続している場合はtrue。 </returns>
-        protected override bool OnCheckPlaying(float elapsedSeconds)
+        private void EnsureDirector()
         {
             if (_director == null)
             {
-                return false;
+                _director = GetComponent<PlayableDirector>();
             }
-
-            return _director.state == PlayState.Playing && _director.time < _director.duration;
         }
     }
 }

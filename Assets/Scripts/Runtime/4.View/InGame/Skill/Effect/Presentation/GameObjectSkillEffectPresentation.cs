@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
@@ -8,52 +9,35 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     /// </summary>
     public sealed class GameObjectSkillEffectPresentation : SkillEffectPresentationBase
     {
-        [SerializeField, Tooltip("表示を切り替える対象のGameObjectです。未設定時は自身を使用します。")]
+        [SerializeField, Tooltip("表示を切り替える対象のGameObjectです。自身以外を指定します。")]
         private GameObject _targetObject;
 
         [SerializeField, Min(0f), Tooltip("表示を維持する時間です。")]
         private float _durationSeconds = 1f;
 
         /// <summary>
-        ///     対象GameObjectを解決して非表示にする。
-        /// </summary>
-        private void Awake()
-        {
-            if (_targetObject == null)
-            {
-                _targetObject = gameObject;
-            }
-        }
-
-        /// <summary>
         ///     対象GameObjectを非表示状態へ整える。
         /// </summary>
         protected override void OnPrewarm()
         {
-            if (_targetObject == null)
-            {
-                _targetObject = gameObject;
-            }
-
-            // 自身を含むルートを消すとプール制御と競合するため、別オブジェクトの場合のみ非表示にする。
-            if (_targetObject != gameObject)
-            {
-                _targetObject.SetActive(false);
-            }
+            OnStop();
         }
 
         /// <summary>
-        ///     対象GameObjectを表示する。
+        ///     対象GameObjectを表示し、指定時間だけ待機する。
         /// </summary>
         /// <param name="context"> エフェクトの参照点です。 </param>
-        protected override void OnPlay(in SkillEffectContext context)
+        /// <param name="cancellationToken"> 再生を中断するためのキャンセルトークンです。 </param>
+        /// <returns> 再生完了を待機するAwaitableです。 </returns>
+        protected override async Awaitable OnPlayAsync(SkillEffectContext context, CancellationToken cancellationToken)
         {
-            if (_targetObject == null || _targetObject == gameObject)
+            if (!HasValidTarget())
             {
                 return;
             }
 
             _targetObject.SetActive(true);
+            await Awaitable.WaitForSecondsAsync(_durationSeconds, cancellationToken);
         }
 
         /// <summary>
@@ -61,7 +45,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// </summary>
         protected override void OnStop()
         {
-            if (_targetObject == null || _targetObject == gameObject)
+            if (!HasValidTarget())
             {
                 return;
             }
@@ -70,13 +54,13 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         }
 
         /// <summary>
-        ///     表示時間の経過で再生継続を判定する。
+        ///     切り替え可能な対象が設定されているか判定する。
         /// </summary>
-        /// <param name="elapsedSeconds"> 再生開始からの経過時間です。 </param>
-        /// <returns> 再生が継続している場合はtrue。 </returns>
-        protected override bool OnCheckPlaying(float elapsedSeconds)
+        /// <returns> 自身以外の有効な対象が設定されている場合はtrueです。 </returns>
+        private bool HasValidTarget()
         {
-            return elapsedSeconds < _durationSeconds;
+            // 自身を消すとプールの有効・無効制御と競合するため、対象から除外する。
+            return _targetObject != null && _targetObject != gameObject;
         }
     }
 }

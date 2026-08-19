@@ -2,13 +2,14 @@ using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using KillChord.Runtime.View.InGame.Skill.Effect.Placement;
 using KillChord.Runtime.View.InGame.Skill.Effect.Presentation;
 using System;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Skill.Effect
 {
     /// <summary>
     ///     プールで再利用されるスキルエフェクト1体分のルートView。
-    ///     配置ストラテジーと再生ストラテジーを束ね、完了時にプールへの返却を通知する。
+    ///     配置ストラテジーと再生ストラテジーを束ね、全再生の完了を待機してプールへの返却を通知する。
     /// </summary>
     public sealed class SkillEffectInstance : MonoBehaviour, ISkillEffectHandle
     {
@@ -28,12 +29,12 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         }
 
         /// <summary>
-        ///     配置ストラテジーに従ってエフェクトを再生する。
+        ///     配置ストラテジーに従ってエフェクトの再生を開始する。
         /// </summary>
         /// <param name="placement"> 使用する配置ストラテジーです。 </param>
         /// <param name="context"> エフェクトの参照点です。 </param>
         /// <param name="onFinished"> 再生完了時に呼ばれるコールバックです。 </param>
-        /// <returns> 再生に成功した場合はtrue。 </returns>
+        /// <returns> 再生を開始できた場合はtrue。 </returns>
         public bool Play(ISkillEffectPlacement placement, in SkillEffectContext context, Action<SkillEffectInstance> onFinished)
         {
             if (placement == null || !placement.TryResolve(context, out SkillEffectPose pose))
@@ -52,14 +53,22 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _onFinished = onFinished;
             _elapsedSeconds = 0f;
             _isPlaying = true;
+            _completionSource.Reset();
             ApplyPose(pose.Position, pose.Rotation);
+            ResetCancellation();
 
-            for (int i = 0; i < _presentations.Length; i++)
-            {
-                _presentations[i]?.Play(context);
-            }
-
+            // 再生自体は非同期だが、完了は必ずRunAsyncで待機し、返却漏れを起こさない。
+            _ = RunAsync(context, _cancellationTokenSource.Token);
             return true;
+        }
+
+        /// <summary>
+        ///     エフェクトの再生完了を待機する。
+        /// </summary>
+        /// <returns> 再生完了を待機するAwaitableです。 </returns>
+        public Awaitable WaitForCompletionAsync()
+        {
+            return _completionSource.Awaitable;
         }
 
         /// <summary>
@@ -72,13 +81,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
                 return;
             }
 
-            _isPlaying = false;
-            for (int i = 0; i < _presentations.Length; i++)
-            {
-                _presentations[i]?.Stop();
-            }
-
-            NotifyFinished();
+            // 中断はキャンセルで伝播させ、完了処理はRunAsyncへ一本化する。
+            _cancellationTokenSource?.Cancel();
         }
 
         [SerializeField, Tooltip("このエフェクトが束ねる再生ストラテジーです。未設定時は子階層から収集します。")]
@@ -105,7 +109,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         }
 
         /// <summary>
-        ///     追従更新と完了判定を行う。
+        ///     追従の更新と最大再生時間の監視を行う。
         /// </summary>
         private void LateUpdate()
         {
@@ -114,35 +118,107 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
                 return;
             }
 
-            float deltaTime = Time.deltaTime;
-            _elapsedSeconds += deltaTime;
-
             UpdateFollow();
 
-            bool anyPlaying = false;
-            for (int i = 0; i < _presentations.Length; i++)
-            {
-                SkillEffectPresentationBase presentation = _presentations[i];
-                if (presentation == null)
-                {
-                    continue;
-                }
-
-                anyPlaying |= presentation.UpdatePlayback(deltaTime);
-            }
-
-            bool isExpired = _maxLifetimeSeconds > 0f && _elapsedSeconds >= _maxLifetimeSeconds;
-            if (anyPlaying && !isExpired)
+            if (_maxLifetimeSeconds <= 0f)
             {
                 return;
             }
 
-            if (isExpired)
+            _elapsedSeconds += Time.deltaTime;
+            if (_elapsedSeconds < _maxLifetimeSeconds)
             {
-                Debug.LogWarning($"[{nameof(SkillEffectInstance)}] 最大再生時間を超えたため強制的に返却します。 Effect: {name}", this);
+                return;
             }
 
+            Debug.LogWarning($"[{nameof(SkillEffectInstance)}] 最大再生時間を超えたため強制的に返却します。 Effect: {name}", this);
             Stop();
+        }
+
+        /// <summary>
+        ///     破棄時に再生を中断する。
+        /// </summary>
+        private void OnDestroy()
+        {
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+        }
+
+        /// <summary>
+        ///     全再生ストラテジーを開始し、すべての完了を待機する。
+        /// </summary>
+        /// <param name="context"> エフェクトの参照点です。 </param>
+        /// <param name="cancellationToken"> 再生を中断するためのキャンセルトークンです。 </param>
+        /// <returns> 全再生の完了を待機するAwaitableです。 </returns>
+        private async Awaitable RunAsync(SkillEffectContext context, CancellationToken cancellationToken)
+        {
+            if (_runningPlaybacks == null || _runningPlaybacks.Length != _presentations.Length)
+            {
+                _runningPlaybacks = new Awaitable[_presentations.Length];
+            }
+
+            try
+            {
+                // 先に全ストラテジーを開始し、同時再生させてから完了を待機する。
+                for (int i = 0; i < _presentations.Length; i++)
+                {
+                    _runningPlaybacks[i] = _presentations[i]?.PlayAsync(context, cancellationToken);
+                }
+
+                for (int i = 0; i < _runningPlaybacks.Length; i++)
+                {
+                    if (_runningPlaybacks[i] == null)
+                    {
+                        continue;
+                    }
+
+                    await _runningPlaybacks[i];
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // 停止要求による中断は正常系のため、そのまま完了処理へ進む。
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[{nameof(SkillEffectInstance)}] エフェクトの再生に失敗しました。 Effect: {name}, {exception}", this);
+            }
+            finally
+            {
+                CompletePlayback();
+            }
+        }
+
+        /// <summary>
+        ///     再生完了を確定し、待機者とプールへ通知する。
+        /// </summary>
+        private void CompletePlayback()
+        {
+            if (!_isPlaying)
+            {
+                return;
+            }
+
+            _isPlaying = false;
+            Array.Clear(_runningPlaybacks, 0, _runningPlaybacks.Length);
+
+            Action<SkillEffectInstance> onFinished = _onFinished;
+            _onFinished = null;
+            _followTransform = null;
+
+            _completionSource.TrySetResult();
+            onFinished?.Invoke(this);
+        }
+
+        /// <summary>
+        ///     キャンセル用トークンソースを再生開始前の状態へ戻す。
+        /// </summary>
+        private void ResetCancellation()
+        {
+            // 一度キャンセルしたトークンソースは再利用できないため、再生ごとに作り直す。
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -185,17 +261,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             transform.SetPositionAndRotation(position + rotation * _positionOffset, appliedRotation);
         }
 
-        /// <summary>
-        ///     再生完了を通知する。
-        /// </summary>
-        private void NotifyFinished()
-        {
-            Action<SkillEffectInstance> onFinished = _onFinished;
-            _onFinished = null;
-            _followTransform = null;
-            onFinished?.Invoke(this);
-        }
-
+        private readonly AwaitableCompletionSource _completionSource = new();
+        private Awaitable[] _runningPlaybacks;
+        private CancellationTokenSource _cancellationTokenSource;
         private Action<SkillEffectInstance> _onFinished;
         private Transform _followTransform;
         private float _elapsedSeconds;
