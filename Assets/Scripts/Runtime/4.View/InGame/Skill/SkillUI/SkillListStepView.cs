@@ -75,6 +75,8 @@ namespace KillChord.Runtime.View.InGame.Skill
 
         [SerializeField, Tooltip("アイコンを表示するImage。")]
         private Image _iconImage;
+        [SerializeField]
+        private Image _rhythmStepFlareImage;
 
         private Color _onColor;
         private Color _offColor;
@@ -83,7 +85,10 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Vector3 _baseLocalScale;
         private float _baseLocalEulerAngleZ;
         private bool _isActive;
-
+        private void Awake()
+        {
+            _rhythmStepFlareImage.enabled = false;
+        }
         /// <summary>
         ///     破棄時に再生中のアニメーションを停止する。
         /// </summary>
@@ -113,23 +118,11 @@ namespace KillChord.Runtime.View.InGame.Skill
             ResetAnimationTransform();
 
             Vector3 scaleStrength = _baseLocalScale * (_animationSetting.InputSuccessScaleMultiplier - 1f);
-            _inputSuccessMotion = LSequence.Create()
-                .Join(LMotion.Punch.Create(
-                        _baseLocalScale,
-                        scaleStrength,
-                        _animationSetting.InputSuccessDuration)
-                    .WithEase(_animationSetting.InputSuccessEase)
-                    .WithFrequency(1)
-                    .BindToLocalScale(transform))
-                .Join(LMotion.Punch.Create(
-                        _baseLocalEulerAngleZ,
-                        _animationSetting.InputSuccessRotationAngle,
-                        _animationSetting.InputSuccessDuration)
-                    .WithEase(_animationSetting.InputSuccessEase)
-                    .WithFrequency(_animationSetting.InputSuccessRotationFrequency)
-                    .WithDampingRatio(_animationSetting.InputSuccessRotationDampingRatio)
-                    .BindToLocalEulerAnglesZ(transform))
-                .Run(sequence => sequence.WithScheduler(MotionScheduler.UpdateIgnoreTimeScale));
+            _inputSuccessMotion = LMotion.Create(1f, 0f, 0.1f)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                    .WithOnComplete(() => _rhythmStepFlareImage.enabled = false)
+                    .BindToColorA(_rhythmStepFlareImage);
+            _rhythmStepFlareImage.enabled = true;
         }
 
         /// <summary>
