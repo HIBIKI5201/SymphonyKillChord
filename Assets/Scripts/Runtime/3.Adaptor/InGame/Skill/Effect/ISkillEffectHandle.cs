@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace KillChord.Runtime.Adaptor.InGame.Skill.Effect
 {
     /// <summary>
@@ -12,5 +14,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill.Effect
         ///     エフェクトを停止してプールへ返却する。
         /// </summary>
         void Stop();
+
+        /// <summary>
+        ///     エフェクトの再生完了を待機する。
+        /// </summary>
+        /// <returns> 再生完了を待機するAwaitableです。 </returns>
+        Awaitable WaitForCompletionAsync();
     }
 }

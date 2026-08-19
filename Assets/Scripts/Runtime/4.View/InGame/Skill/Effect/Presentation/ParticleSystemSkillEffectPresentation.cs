@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
@@ -19,10 +20,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// </summary>
         private void Awake()
         {
-            if (_particleSystem == null)
-            {
-                _particleSystem = GetComponent<ParticleSystem>();
-            }
+            EnsureParticleSystem();
         }
 
         /// <summary>
@@ -30,19 +28,17 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// </summary>
         protected override void OnPrewarm()
         {
-            if (_particleSystem == null)
-            {
-                _particleSystem = GetComponent<ParticleSystem>();
-            }
-
-            _particleSystem?.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            EnsureParticleSystem();
+            OnStop();
         }
 
         /// <summary>
-        ///     ParticleSystemを再生する。
+        ///     ParticleSystemを再生し、パーティクルが消滅するまで待機する。
         /// </summary>
         /// <param name="context"> エフェクトの参照点です。 </param>
-        protected override void OnPlay(in SkillEffectContext context)
+        /// <param name="cancellationToken"> 再生を中断するためのキャンセルトークンです。 </param>
+        /// <returns> 再生完了を待機するAwaitableです。 </returns>
+        protected override async Awaitable OnPlayAsync(SkillEffectContext context, CancellationToken cancellationToken)
         {
             if (_particleSystem == null)
             {
@@ -57,6 +53,13 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
 
             _particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             _particleSystem.Play(true);
+
+            // 再生開始直後は生存判定が安定しないため、1フレーム進めてから監視する。
+            await Awaitable.NextFrameAsync(cancellationToken);
+            while (_particleSystem != null && _particleSystem.IsAlive(true))
+            {
+                await Awaitable.NextFrameAsync(cancellationToken);
+            }
         }
 
         /// <summary>
@@ -64,17 +67,23 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// </summary>
         protected override void OnStop()
         {
-            _particleSystem?.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            if (_particleSystem == null)
+            {
+                return;
+            }
+
+            _particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 
         /// <summary>
-        ///     パーティクルが生存しているかで再生継続を判定する。
+        ///     ParticleSystemの参照を必要時に解決する。
         /// </summary>
-        /// <param name="elapsedSeconds"> 再生開始からの経過時間です。 </param>
-        /// <returns> 再生が継続している場合はtrue。 </returns>
-        protected override bool OnCheckPlaying(float elapsedSeconds)
+        private void EnsureParticleSystem()
         {
-            return _particleSystem != null && _particleSystem.IsAlive(true);
+            if (_particleSystem == null)
+            {
+                _particleSystem = GetComponent<ParticleSystem>();
+            }
         }
     }
 }

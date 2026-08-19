@@ -1,41 +1,36 @@
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using LitMotion;
+using System.Threading;
+using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
 {
     /// <summary>
     ///     LitMotionでスキルエフェクトを再生するストラテジーの基底クラス。
-    ///     Tween内容は派生クラスが決定する。
+    ///     Tween内容は派生クラスが決定し、完了までTweenを待機する。
     /// </summary>
     public abstract class MotionSkillEffectPresentationBase : SkillEffectPresentationBase
     {
         /// <summary>
-        ///     Tweenを生成して再生する。
+        ///     Tweenを生成し、完了まで待機する。
         /// </summary>
         /// <param name="context"> エフェクトの参照点です。 </param>
-        protected override void OnPlay(in SkillEffectContext context)
+        /// <param name="cancellationToken"> 再生を中断するためのキャンセルトークンです。 </param>
+        /// <returns> 再生完了を待機するAwaitableです。 </returns>
+        protected override async Awaitable OnPlayAsync(SkillEffectContext context, CancellationToken cancellationToken)
         {
             CancelMotion();
             _motionHandle = CreateMotion(context);
+            await _motionHandle.ToAwaitable(cancellationToken);
         }
 
         /// <summary>
-        ///     再生中のTweenを中断する。
+        ///     再生中のTweenを中断し、見た目を初期状態へ戻す。
         /// </summary>
         protected override void OnStop()
         {
             CancelMotion();
             OnRestoreState();
-        }
-
-        /// <summary>
-        ///     Tweenが生存しているかで再生継続を判定する。
-        /// </summary>
-        /// <param name="elapsedSeconds"> 再生開始からの経過時間です。 </param>
-        /// <returns> 再生が継続している場合はtrue。 </returns>
-        protected override bool OnCheckPlaying(float elapsedSeconds)
-        {
-            return _motionHandle.IsActive();
         }
 
         /// <summary>

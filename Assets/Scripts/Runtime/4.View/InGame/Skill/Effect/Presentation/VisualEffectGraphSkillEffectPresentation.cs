@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -23,7 +24,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         [SerializeField, Tooltip("Contextのスケール倍率を渡すExposed Property名です。空欄なら渡しません。")]
         private string _scalePropertyName;
 
-        [SerializeField, Min(0f), Tooltip("パーティクル数による完了判定を行わない場合の固定再生時間です。0なら生存数で判定します。")]
+        [SerializeField, Min(0f), Tooltip("固定再生時間です。0ならパーティクルの生存数で完了を判定します。")]
         private float _fixedDurationSeconds;
 
         /// <summary>
@@ -31,10 +32,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// </summary>
         private void Awake()
         {
-            if (_visualEffect == null)
-            {
-                _visualEffect = GetComponent<VisualEffect>();
-            }
+            EnsureVisualEffect();
         }
 
         /// <summary>
@@ -42,11 +40,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// </summary>
         protected override void OnPrewarm()
         {
-            if (_visualEffect == null)
-            {
-                _visualEffect = GetComponent<VisualEffect>();
-            }
-
+            EnsureVisualEffect();
             if (_visualEffect == null)
             {
                 return;
@@ -58,10 +52,12 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         }
 
         /// <summary>
-        ///     Visual Effectを再生する。
+        ///     Visual Effectを再生し、完了まで待機する。
         /// </summary>
         /// <param name="context"> エフェクトの参照点です。 </param>
-        protected override void OnPlay(in SkillEffectContext context)
+        /// <param name="cancellationToken"> 再生を中断するためのキャンセルトークンです。 </param>
+        /// <returns> 再生完了を待機するAwaitableです。 </returns>
+        protected override async Awaitable OnPlayAsync(SkillEffectContext context, CancellationToken cancellationToken)
         {
             if (_visualEffect == null)
             {
@@ -78,10 +74,24 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
             if (string.IsNullOrWhiteSpace(_playEventName))
             {
                 _visualEffect.Play();
+            }
+            else
+            {
+                _visualEffect.SendEvent(_playEventName);
+            }
+
+            if (_fixedDurationSeconds > 0f)
+            {
+                await Awaitable.WaitForSecondsAsync(_fixedDurationSeconds, cancellationToken);
                 return;
             }
 
-            _visualEffect.SendEvent(_playEventName);
+            // スポーン処理は即時に反映されないため、1フレーム進めてから生存数を監視する。
+            await Awaitable.NextFrameAsync(cancellationToken);
+            while (_visualEffect != null && _visualEffect.aliveParticleCount > 0)
+            {
+                await Awaitable.NextFrameAsync(cancellationToken);
+            }
         }
 
         /// <summary>
@@ -104,23 +114,14 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         }
 
         /// <summary>
-        ///     固定再生時間または生存パーティクル数で再生継続を判定する。
+        ///     Visual Effectの参照を必要時に解決する。
         /// </summary>
-        /// <param name="elapsedSeconds"> 再生開始からの経過時間です。 </param>
-        /// <returns> 再生が継続している場合はtrue。 </returns>
-        protected override bool OnCheckPlaying(float elapsedSeconds)
+        private void EnsureVisualEffect()
         {
             if (_visualEffect == null)
             {
-                return false;
+                _visualEffect = GetComponent<VisualEffect>();
             }
-
-            if (_fixedDurationSeconds > 0f)
-            {
-                return elapsedSeconds < _fixedDurationSeconds;
-            }
-
-            return _visualEffect.aliveParticleCount > 0;
         }
     }
 }

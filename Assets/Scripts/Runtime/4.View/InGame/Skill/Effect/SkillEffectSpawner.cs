@@ -61,13 +61,16 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             }
 
             SkillEffectInstance instance = entry.Pool.Get();
+
+            // 再生が即座に完了しても返却処理が追跡できるよう、開始前に登録する。
+            _activeInstances.Add(instance);
             if (instance.Play(entry.Placement, context, entry.ReleaseHandler))
             {
-                _activeInstances.Add(instance);
                 return instance;
             }
 
             // 配置解決に失敗した場合は再生せずに即座に返却する。
+            _activeInstances.Remove(instance);
             entry.Pool.Release(instance);
             return null;
         }
@@ -102,12 +105,11 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// </summary>
         public void StopAll()
         {
+            // 停止はキャンセル要求のため、返却は各インスタンスの完了処理から行われる。
             for (int i = _activeInstances.Count - 1; i >= 0; i--)
             {
                 _activeInstances[i]?.Stop();
             }
-
-            _activeInstances.Clear();
         }
 
         /// <summary>
@@ -116,6 +118,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         public void Clear()
         {
             StopAll();
+            _activeInstances.Clear();
             foreach (KeyValuePair<SkillEffectId, SkillEffectPoolEntry> pair in _pools)
             {
                 pair.Value.Pool.Clear();
