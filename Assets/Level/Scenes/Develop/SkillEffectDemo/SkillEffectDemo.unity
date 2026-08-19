@@ -368,7 +368,7 @@ Camera:
   field of view: 60
   orthographic: 0
   orthographic size: 5
-  m_Depth: -1
+  m_Depth: 100
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -633,6 +633,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.Composition.InGame.SkillEffect.SkillEffectDemoBoot
   _collectsModulesInScene: 1
   _modules: []
+  _hidesLoadingScreen: 1
 --- !u!114 &1992406703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -647,28 +648,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Skill.Effect.SkillEffectInitializer
   _skillEffectSpawner: {fileID: 2088723937}
   _fallbackEquippedSkills:
-  - _id: skill_00
-    _hashId: -876453005
-  - _id: skill_01
-    _hashId: -1127918619
-  - _id: skill_02
-    _hashId: 634126943
-  - _id: skill_03
-    _hashId: 1389048521
-  - _id: skill_04
-    _hashId: -860903574
-  - _id: skill_05
-    _hashId: -1146578948
-  - _id: skill_06
-    _hashId: 581027398
-  - _id: skill_07
-    _hashId: 1437005520
-  - _id: skill_08
-    _hashId: -988157119
-  - _id: skill_09
-    _hashId: -1306600489
-  - _id: skill_10
-    _hashId: -757509582
   - _id: skill_13
     _hashId: 1271923592
 --- !u!4 &1992406704
@@ -719,28 +698,6 @@ MonoBehaviour:
   _playerTransform: {fileID: 667205287}
   _targetTransform: {fileID: 1556811597}
   _demoSkillIds:
-  - _id: skill_00
-    _hashId: -876453005
-  - _id: skill_01
-    _hashId: -1127918619
-  - _id: skill_02
-    _hashId: 634126943
-  - _id: skill_03
-    _hashId: 1389048521
-  - _id: skill_04
-    _hashId: -860903574
-  - _id: skill_05
-    _hashId: -1146578948
-  - _id: skill_06
-    _hashId: 581027398
-  - _id: skill_07
-    _hashId: 1437005520
-  - _id: skill_08
-    _hashId: -988157119
-  - _id: skill_09
-    _hashId: -1306600489
-  - _id: skill_10
-    _hashId: -757509582
   - _id: skill_13
     _hashId: 1271923592
   _movesTarget: 1

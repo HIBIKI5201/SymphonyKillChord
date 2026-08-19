@@ -39,6 +39,8 @@ namespace KillChord.Develop.View.InGame.SkillEffect
         /// </summary>
         private async void Start()
         {
+            CacheSkillLabels();
+
             if (_demoBoot != null)
             {
                 await _demoBoot.WaitForInitializationAsync();
@@ -110,7 +112,7 @@ namespace KillChord.Develop.View.InGame.SkillEffect
                     continue;
                 }
 
-                if (GUI.Button(new Rect(GUI_MARGIN, y, GUI_WIDTH, GUI_LINE_HEIGHT), $"{ResolveSkillLabel(skillId)} を再生"))
+                if (GUI.Button(new Rect(GUI_MARGIN, y, GUI_WIDTH, GUI_LINE_HEIGHT), _skillLabels[i]))
                 {
                     PlaySkillEffect(skillId);
                 }
@@ -120,13 +122,22 @@ namespace KillChord.Develop.View.InGame.SkillEffect
         }
 
         /// <summary>
-        ///     ボタンに表示するスキル名を解決します。
+        ///     ボタンに表示する文字列を一度だけ構築してキャッシュします。
         /// </summary>
-        /// <param name="skillId"> 対象のスキルIDです。 </param>
-        /// <returns> 解決した表示名です。文字列IDが引けない場合は数値IDです。 </returns>
-        private string ResolveSkillLabel(int skillId)
+        private void CacheSkillLabels()
         {
-            return DataIDDebugUtility.TryGetId(skillId, out string id) ? id : skillId.ToString();
+            if (_demoSkillIds == null)
+            {
+                _skillLabels = System.Array.Empty<string>();
+                return;
+            }
+
+            // 文字列IDの逆引きはプロジェクト全アセットのロードを伴い、実行時には到底使えないため数値IDを表示する。
+            _skillLabels = new string[_demoSkillIds.Length];
+            for (int i = 0; i < _demoSkillIds.Length; i++)
+            {
+                _skillLabels[i] = "Skill " + _demoSkillIds[i].Id + " を再生";
+            }
         }
 
         /// <summary>
@@ -166,6 +177,7 @@ namespace KillChord.Develop.View.InGame.SkillEffect
         private const float GUI_LINE_HEIGHT = 24f;
 
         private ISkillEffectPlayer _skillEffectPlayer;
+        private string[] _skillLabels = System.Array.Empty<string>();
         private float _orbitAngleDegrees;
     }
 }

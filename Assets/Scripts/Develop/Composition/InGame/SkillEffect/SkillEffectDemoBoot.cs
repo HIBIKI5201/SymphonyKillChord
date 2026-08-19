@@ -106,10 +106,18 @@ namespace KillChord.Develop.Composition.InGame.SkillEffect
             {
                 // デモシーンには遷移先が無く、ロードセッションが完了しないため暗転が残り続ける。
                 // セッション制御は常駐シーン側の都合で差し替わるため、表示そのものを落とす。
-                for (int i = 0; i < MAX_LOADING_SCREEN_WATCH_FRAME; i++)
+                // 全シーン検索は高コストのため、毎フレームではなく間隔を空けて実行する。
+                for (int i = 0; i < MAX_LOADING_SCREEN_WATCH_COUNT; i++)
                 {
-                    HideLoadingScreen();
-                    await Awaitable.NextFrameAsync(destroyCancellationToken);
+                    if (HideLoadingScreen())
+                    {
+                        return;
+                    }
+
+                    for (int waitFrame = 0; waitFrame < LOADING_SCREEN_WATCH_INTERVAL_FRAME; waitFrame++)
+                    {
+                        await Awaitable.NextFrameAsync(destroyCancellationToken);
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -124,15 +132,17 @@ namespace KillChord.Develop.Composition.InGame.SkillEffect
         /// <summary>
         ///     ロード画面のViewが存在すれば非表示にします。
         /// </summary>
-        private void HideLoadingScreen()
+        /// <returns> 非表示にできた場合はtrueです。 </returns>
+        private bool HideLoadingScreen()
         {
             LoadingScreenView loadingScreenView = FindAnyObjectByType<LoadingScreenView>(FindObjectsInactive.Exclude);
             if (loadingScreenView == null)
             {
-                return;
+                return false;
             }
 
             loadingScreenView.gameObject.SetActive(false);
+            return true;
         }
 
         /// <summary>
@@ -162,7 +172,8 @@ namespace KillChord.Develop.Composition.InGame.SkillEffect
             _completionSource.TrySetResult();
         }
 
-        private const int MAX_LOADING_SCREEN_WATCH_FRAME = 600;
+        private const int MAX_LOADING_SCREEN_WATCH_COUNT = 40;
+        private const int LOADING_SCREEN_WATCH_INTERVAL_FRAME = 15;
 
         private readonly AwaitableCompletionSource _completionSource = new();
         private readonly InGameInitializationCoordinator _initializationCoordinator = new();
