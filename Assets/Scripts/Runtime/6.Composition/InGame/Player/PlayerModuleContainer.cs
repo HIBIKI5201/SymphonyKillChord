@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Character;
@@ -18,6 +19,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <param name="playerView"> プレイヤーViewです。 </param>
         /// <param name="playerEntity"> プレイヤーEntityです。 </param>
         /// <param name="playerStatusBonus"> プレイヤーステータスボーナスです。 </param>
+        /// <param name="actionRestrictionState"> プレイヤーの行動制限状態です。 </param>
         public PlayerModuleContainer(
             PlayerInitializer playerInitializer,
             PlayerView playerView,
@@ -41,6 +43,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         /// <summary> プレイヤーステータスボーナスです。 </summary>
         public PlayerStatusBonus PlayerStatusBonus { get; }
+
+        /// <summary> プレイヤー行動制限状態です。 </summary>
+        public PlayerActionRestrictionState PlayerActionRestrictionState { get; private set; }
 
         /// <summary> プレイヤー攻撃Controllerです。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
@@ -76,6 +81,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         public void SetInputSuppressionState(PlayerInputSuppressionState inputSuppressionState)
         {
             InputSuppressionState = inputSuppressionState;
+        }
+
+        public void SetActionRestrictionState(PlayerActionRestrictionState actionRestrictionState)
+        {
+            PlayerActionRestrictionState = actionRestrictionState;
         }
     }
 }
