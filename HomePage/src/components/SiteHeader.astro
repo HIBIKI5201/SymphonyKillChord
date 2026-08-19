@@ -23,10 +23,34 @@ const currentPath = Astro.url.pathname;
 
 <header class="site-header">
 	<a class="brand" href="/">Symphony Kill Chord</a>
-	<nav class="nav">
+
+	<nav class="nav" id="site-nav">
 		{
 			navItems.map((item) => (
 				<a class="nav-link" href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>
+					{item.label}
+				</a>
+			))
+		}
+	</nav>
+
+	<button
+		class="menu-toggle"
+		id="menu-toggle"
+		type="button"
+		aria-expanded="false"
+		aria-controls="mobile-nav"
+		aria-label="メニューを開く"
+	>
+		<span></span>
+		<span></span>
+		<span></span>
+	</button>
+
+	<nav class="mobile-nav" id="mobile-nav" data-open="false">
+		{
+			navItems.map((item) => (
+				<a class="mobile-nav-link" href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>
 					{item.label}
 				</a>
 			))
@@ -86,4 +110,114 @@ const currentPath = Astro.url.pathname;
 	.nav-link[aria-current='page'] {
 		color: var(--color-signal);
 	}
+
+	.menu-toggle {
+		display: none;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 5px;
+		width: 32px;
+		height: 32px;
+		padding: 0;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+	}
+
+	.menu-toggle span {
+		display: block;
+		width: 22px;
+		height: 2px;
+		background: var(--color-text-primary);
+		transition:
+			transform 0.2s ease,
+			opacity 0.2s ease;
+	}
+
+	.menu-toggle[aria-expanded='true'] span:nth-child(1) {
+		transform: translateY(7px) rotate(45deg);
+	}
+
+	.menu-toggle[aria-expanded='true'] span:nth-child(2) {
+		opacity: 0;
+	}
+
+	.menu-toggle[aria-expanded='true'] span:nth-child(3) {
+		transform: translateY(-7px) rotate(-45deg);
+	}
+
+	.mobile-nav {
+		display: none;
+	}
+
+	@media (max-width: 767px) {
+		.nav {
+			display: none;
+		}
+
+		.menu-toggle {
+			display: flex;
+		}
+
+		.mobile-nav {
+			position: fixed;
+			top: 64px;
+			left: 0;
+			right: 0;
+			z-index: 49;
+			flex-direction: column;
+			background: rgba(10, 13, 11, 0.96);
+			border-bottom: 1px solid var(--color-surface-border);
+			max-height: 0;
+			overflow: hidden;
+			transition: max-height 0.25s ease;
+		}
+
+		.mobile-nav[data-open='true'] {
+			display: flex;
+			max-height: 400px;
+		}
+
+		.mobile-nav-link {
+			padding: 16px 24px;
+			font-family: var(--font-mono);
+			letter-spacing: var(--tracking-label);
+			font-size: 13px;
+			color: var(--color-text-muted);
+			text-decoration: none;
+			text-transform: uppercase;
+			border-top: 1px solid var(--color-surface-border);
+		}
+
+		.mobile-nav-link:first-child {
+			border-top: none;
+		}
+
+		.mobile-nav-link[aria-current='page'] {
+			color: var(--color-signal);
+		}
+	}
 </style>
+
+<script>
+	const toggle = document.getElementById('menu-toggle');
+	const mobileNav = document.getElementById('mobile-nav');
+
+	if (toggle && mobileNav) {
+		toggle.addEventListener('click', () => {
+			const isOpen = mobileNav.dataset.open === 'true';
+			mobileNav.dataset.open = String(!isOpen);
+			toggle.setAttribute('aria-expanded', String(!isOpen));
+			toggle.setAttribute('aria-label', isOpen ? 'メニューを開く' : 'メニューを閉じる');
+		});
+
+		mobileNav.querySelectorAll('a').forEach((link) => {
+			link.addEventListener('click', () => {
+				mobileNav.dataset.open = 'false';
+				toggle.setAttribute('aria-expanded', 'false');
+				toggle.setAttribute('aria-label', 'メニューを開く');
+			});
+		});
+	}
+</script>
