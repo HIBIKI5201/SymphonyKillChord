@@ -72,6 +72,15 @@
       },
       "hash": "922f50ed0aabceda9f3f8a8ebcfbb960d1a5117a"
     },
+    "com.singularitygroup.hotreload": {
+      "version": "file:com.singularitygroup.hotreload",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0"
+      }
+    },
     "com.unity.2d.animation": {
       "version": "13.0.4",
       "depth": 1,
@@ -675,7 +684,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.2",
         "com.unity.test-framework": "1.6.0"
       },
-      "hash": "8d610a15ab144d42bb668d40b0fc71e6a05b1636"
+      "hash": "b88b339e45e9bf70492987297fe88df302468886"
     },
     "taremin.copy-components-by-regex": {
       "version": "https://github.com/Taremin/CopyComponentsByRegex.git",
