@@ -684,7 +684,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.2",
         "com.unity.test-framework": "1.6.0"
       },
-      "hash": "8d610a15ab144d42bb668d40b0fc71e6a05b1636"
+      "hash": "b88b339e45e9bf70492987297fe88df302468886"
     },
     "taremin.copy-components-by-regex": {
       "version": "https://github.com/Taremin/CopyComponentsByRegex.git",
