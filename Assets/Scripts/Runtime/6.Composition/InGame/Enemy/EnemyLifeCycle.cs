@@ -556,11 +556,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
 
             await PlayDeathMaterialEffectAsync();
-
-            if (waitSeconds > 0f)
-            {
-                await Awaitable.WaitForSecondsAsync(waitSeconds, destroyCancellationToken);
-            }
         }
 
         /// <summary>
