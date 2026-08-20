@@ -7,6 +7,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
     public enum InputActionKind
     {
         Option = 0,
+        BattlePause = 1,
         Submit = 10,
         Cancel = 11,
         Move = 100,

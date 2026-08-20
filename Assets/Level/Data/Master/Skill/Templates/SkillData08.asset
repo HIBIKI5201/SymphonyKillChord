@@ -17,17 +17,26 @@ MonoBehaviour:
     _hashId: -988157119
   _displayName: 8
   _pattern: 030000000300000003000000030000000300000003000000
-  _skillDetail: "3拍子の通常攻撃を行う。\nその通常攻撃が当たった敵とその敵の半径nメートル以内にいる敵に対して伝染状態を付与する。\n（伝染回数はs回で効果が消滅する。）\n\n【伝染状態】\n攻撃を受けたときすべての伝染状態の敵に対して、攻撃を受けた敵の被ダメージのn％のダメージを与える。\n他の伝染状態の敵に与えたときのダメージ判定は通常攻撃を受けたときと同じものを行う。\n（クリティカル判定やジャスト判定も行い、その倍率もかかる）"
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 6e336e81be2fe0143b9c12928461c846, type: 3}
+  _skillDetail: "3\u62CD\u5B50\u306E\u901A\u5E38\u653B\u6483\u3092\u884C\u3046\u3002\n\u305D\u306E\u901A\u5E38\u653B\u6483\u304C\u5F53\u305F\u3063\u305F\u6575\u3068\u305D\u306E\u6575\u306E\u534A\u5F84n\u30E1\u30FC\u30C8\u30EB\u4EE5\u5185\u306B\u3044\u308B\u6575\u306B\u5BFE\u3057\u3066\u4F1D\u67D3\u72B6\u614B\u3092\u4ED8\u4E0E\u3059\u308B\u3002\n\uFF08\u4F1D\u67D3\u56DE\u6570\u306Fs\u56DE\u3067\u52B9\u679C\u304C\u6D88\u6EC5\u3059\u308B\u3002\uFF09\n\n\u3010\u4F1D\u67D3\u72B6\u614B\u3011\n\u653B\u6483\u3092\u53D7\u3051\u305F\u3068\u304D\u3059\u3079\u3066\u306E\u4F1D\u67D3\u72B6\u614B\u306E\u6575\u306B\u5BFE\u3057\u3066\u3001\u653B\u6483\u3092\u53D7\u3051\u305F\u6575\u306E\u88AB\u30C0\u30E1\u30FC\u30B8\u306En\uFF05\u306E\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3002\n\u4ED6\u306E\u4F1D\u67D3\u72B6\u614B\u306E\u6575\u306B\u4E0E\u3048\u305F\u3068\u304D\u306E\u30C0\u30E1\u30FC\u30B8\u5224\u5B9A\u306F\u901A\u5E38\u653B\u6483\u3092\u53D7\u3051\u305F\u3068\u304D\u3068\u540C\u3058\u3082\u306E\u3092\u884C\u3046\u3002\n\uFF08\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u5224\u5B9A\u3084\u30B8\u30E3\u30B9\u30C8\u5224\u5B9A\u3082\u884C\u3044\u3001\u305D\u306E\u500D\u7387\u3082\u304B\u304B\u308B\uFF09"
+  _tips: 
   _effectDisplayMode: 0
   _effectParameters:
-  - _id: 0
-    _value: 5
-    _displayFormat: 3
+  - _id: 15
+    _value: 10
+    _displayFormat: 6
+  - _id: 16
+    _value: 3
+    _displayFormat: 4
+  - _id: 17
+    _value: 3
+    _displayFormat: 2
   _skillType: 0000000002000000
   _level: 0
   _cooldownNumerator: 1
   _cooldownDenomimator: 1
-  _skillEffectType: 0
+  _skillEffectType: 8
   _skillTargetingType: 2
+  _statusEffectReapplyPolicy: 3
+  _skillNormalAttackDamagePolicy: 0
   _animationKey: 

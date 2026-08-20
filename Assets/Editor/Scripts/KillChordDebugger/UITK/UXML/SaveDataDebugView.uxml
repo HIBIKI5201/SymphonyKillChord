@@ -1,9 +1,0 @@
-<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
-    <ui:VisualElement name="savedata-panel" class="kcd-panel">
-        <ui:VisualElement name="savedata-toolbar" class="kcd-panel__toolbar">
-            <ui:Button name="reload-all-button" text="全て再読み込み" class="kcd-button" />
-            <ui:Button name="save-all-button" text="全て保存" class="kcd-button kcd-button--primary" />
-        </ui:VisualElement>
-        <ui:ScrollView name="savedata-list" class="kcd-panel__list" />
-    </ui:VisualElement>
-</ui:UXML>

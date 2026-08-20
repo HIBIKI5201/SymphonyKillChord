@@ -23,13 +23,15 @@ namespace KillChord.Runtime.Domain.Player
             CharacterEntity playerEntity,
             BeatType currentBeatType,
             ReadOnlyMemory<CharacterEntity> targetEntities,
-            SkillEffectSpec effectSpec)
+            SkillEffectSpec effectSpec,
+            bool isJustHit)
         {
             TargetEntity = targetEntity;
             PlayerEntity = playerEntity;
             CurrentBeatType = currentBeatType;
             TargetEntities = targetEntities;
             EffectSpec = effectSpec;
+            IsJustHit = isJustHit;
         }
 
         /// <summary> 被スキル者です。 </summary>
@@ -46,5 +48,8 @@ namespace KillChord.Runtime.Domain.Player
 
         /// <summary> 発動するスキルの効果定義です。 </summary>
         public SkillEffectSpec EffectSpec { get; }
+
+        /// <summary> ジャスト入力によるスキル発動かどうか。 </summary>
+        public bool IsJustHit { get; }
     }
 }

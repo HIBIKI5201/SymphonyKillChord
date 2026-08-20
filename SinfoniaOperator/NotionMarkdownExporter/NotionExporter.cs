@@ -25,6 +25,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         private readonly object _warningLock = new();
         private readonly string _stagingRootDirectory;
         private readonly string _stagingDirectory;
+        private ExportManifest? _previousManifest;
         private int _warningCount;
 
         /// <summary>
@@ -51,23 +52,14 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         /// <returns>エクスポート結果。</returns>
         internal async Task<ExportSummary> ExportAsync()
         {
+            DateTimeOffset exportStartedAtUtc = DateTimeOffset.UtcNow;
             Directory.CreateDirectory(_options.OutputDirectory);
             Directory.CreateDirectory(_stagingDirectory);
             try
             {
-                ExportManifest? previousManifest = LoadPreviousManifest();
+                _previousManifest = LoadPreviousManifest();
                 Console.WriteLine($"ルートページを取得します: {_options.RootPageId}");
                 await BuildPageAsync(_options.RootPageId, _options.OutputDirectory, null);
-
-                if (previousManifest != null)
-                {
-                    Console.WriteLine("前回のエクスポートデータをクリーンアップします。");
-                    _watchdog.ReportProgress("前回エクスポートデータのクリーンアップ");
-                    ExportManifest.DeleteGeneratedFiles(
-                        previousManifest,
-                        _options.OutputDirectory,
-                        WriteWarning);
-                }
 
                 Dictionary<string, string> pagePaths = _pagesById.ToDictionary(
                     pair => pair.Key,
@@ -83,6 +75,16 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 using AssetDownloader assetDownloader = new(_watchdog);
                 foreach (PageExportNode page in _pages)
                 {
+                    if (!page.IsUpdated)
+                    {
+                        foreach (string previousFile in page.GeneratedFiles)
+                        {
+                            generatedFiles.Add(previousFile);
+                        }
+
+                        continue;
+                    }
+
                     _watchdog.ReportProgress($"Markdown出力: {page.Title}");
                     string rawMarkdown = await File.ReadAllTextAsync(page.StagingFilePath, Encoding.UTF8);
                     string markdown = CreatePageMarkdown(page, rawMarkdown);
@@ -93,22 +95,30 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                         page.FilePath,
                         pagePaths,
                         databasePaths);
+                    string pageRelativePath = Path.GetRelativePath(_options.OutputDirectory, page.FilePath);
+                    generatedFiles.Add(pageRelativePath);
+                    page.GeneratedFiles.Add(pageRelativePath);
                     if (_options.DownloadsAssets)
                     {
+                        HashSet<string> pageGeneratedFiles = new(StringComparer.OrdinalIgnoreCase);
                         AssetDownloadResult assets = await assetDownloader.DownloadAndRewriteAsync(
                             page.Id,
                             markdown,
                             page.FilePath,
                             _options.OutputDirectory,
-                            generatedFiles,
+                            pageGeneratedFiles,
                             WriteWarning);
                         markdown = assets.Markdown;
                         assetCount += assets.DownloadedCount;
+                        foreach (string generatedFile in pageGeneratedFiles)
+                        {
+                            generatedFiles.Add(generatedFile);
+                            page.GeneratedFiles.Add(generatedFile);
+                        }
                     }
 
                     await WriteMarkdownAsync(page.FilePath, markdown);
                     File.Delete(page.StagingFilePath);
-                    generatedFiles.Add(Path.GetRelativePath(_options.OutputDirectory, page.FilePath));
                 }
 
                 foreach (DatabaseExportNode database in _databases)
@@ -119,13 +129,31 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                     generatedFiles.Add(Path.GetRelativePath(_options.OutputDirectory, database.FilePath));
                 }
 
+                _watchdog.ReportProgress("不要ファイルのクリーンアップ");
+                ExportManifest.DeleteObsoleteFiles(
+                    _previousManifest,
+                    generatedFiles,
+                    _options.OutputDirectory,
+                    WriteWarning);
+
                 _watchdog.ReportProgress("マニフェストの保存");
-                await ExportManifest.SaveAsync(_options.OutputDirectory, _options.RootPageId, generatedFiles);
+                await ExportManifest.SaveAsync(
+                    _options.OutputDirectory,
+                    _options.RootPageId,
+                    exportStartedAtUtc,
+                    _options.DownloadsAssets,
+                    generatedFiles,
+                    _pages,
+                    _databases);
+
+                int updatedPageCount = _pages.Count(page => page.IsUpdated);
 
                 return new ExportSummary(
                     _pages.Count,
                     _databases.Count,
                     assetCount,
+                    updatedPageCount,
+                    _pages.Count - updatedPageCount,
                     _warningCount,
                     _options.OutputDirectory);
             }
@@ -155,16 +183,38 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             }
 
             PageMetadata metadata = knownMetadata ?? await _apiClient.GetPageAsync(pageId);
-            Console.WriteLine($"  ページ取得: {metadata.Title}");
-            MarkdownPayload payload = await _apiClient.GetCompleteMarkdownAsync(pageId);
-            foreach (string warning in payload.Warnings) { WriteWarning(warning); }
+            ExportedPageManifest? previousPage = FindPreviousPage(metadata.Id);
+            string? previousFilePath = TryGetPreviousPagePath(previousPage);
+            bool isUpdated = previousPage == null ||
+                             previousFilePath == null ||
+                             metadata.LastEditedTime == null ||
+                             _previousManifest == null ||
+                             _previousManifest.DownloadsAssets != _options.DownloadsAssets ||
+                             metadata.LastEditedTime > _previousManifest.ExportedAtUtc;
+            IReadOnlyList<MarkdownReference> pageReferences;
+            IReadOnlyList<MarkdownReference> databaseReferences;
+            string stagingFilePath = string.Empty;
+            if (isUpdated)
+            {
+                Console.WriteLine($"  ページ更新: {metadata.Title}");
+                MarkdownPayload payload = await _apiClient.GetCompleteMarkdownAsync(pageId);
+                foreach (string warning in payload.Warnings) { WriteWarning(warning); }
 
-            IReadOnlyList<MarkdownReference> pageReferences =
-                MarkdownReferenceProcessor.FindPageReferences(payload.Markdown);
-            IReadOnlyList<MarkdownReference> databaseReferences =
-                MarkdownReferenceProcessor.FindDatabaseReferences(payload.Markdown);
-            string stagingFilePath = Path.Combine(_stagingDirectory, metadata.Id + ".md");
-            await File.WriteAllTextAsync(stagingFilePath, payload.Markdown, new UTF8Encoding(false));
+                pageReferences = MarkdownReferenceProcessor.FindPageReferences(payload.Markdown);
+                databaseReferences = MarkdownReferenceProcessor.FindDatabaseReferences(payload.Markdown);
+                stagingFilePath = Path.Combine(_stagingDirectory, metadata.Id + ".md");
+                await File.WriteAllTextAsync(stagingFilePath, payload.Markdown, new UTF8Encoding(false));
+            }
+            else
+            {
+                Console.WriteLine($"  ページ省略: {metadata.Title}");
+                pageReferences = previousPage!.PageReferences
+                    .Select(reference => reference.CreateReference())
+                    .ToList();
+                databaseReferences = previousPage.DatabaseReferences
+                    .Select(reference => reference.CreateReference())
+                    .ToList();
+            }
 
             PageExportNode node;
             string childDirectory;
@@ -173,27 +223,57 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 // 別の並列経路が待機中に同じページを先に登録している場合は、その結果を採用する。
                 if (_pagesById.TryGetValue(pageId, out PageExportNode? raceExisting)) { return raceExisting; }
 
-                string nodeName;
-                lock (_reservedPathsLock)
+                string filePath;
+                if (previousFilePath != null)
                 {
-                    nodeName = PathUtility.ReserveName(parentDirectory, metadata.Title, metadata.Id, _reservedPaths);
+                    filePath = previousFilePath;
+                    childDirectory = Path.Combine(
+                        Path.GetDirectoryName(filePath) ?? parentDirectory,
+                        Path.GetFileNameWithoutExtension(filePath));
+                    lock (_reservedPathsLock)
+                    {
+                        _reservedPaths.Add(childDirectory);
+                        _reservedPaths.Add(filePath);
+                    }
+                }
+                else
+                {
+                    string nodeName;
+                    lock (_reservedPathsLock)
+                    {
+                        nodeName = PathUtility.ReserveName(parentDirectory, metadata.Title, metadata.Id, _reservedPaths);
+                    }
+
+                    filePath = Path.Combine(parentDirectory, nodeName + ".md");
+                    childDirectory = Path.Combine(parentDirectory, nodeName);
                 }
 
-                string filePath = Path.Combine(parentDirectory, nodeName + ".md");
-                childDirectory = Path.Combine(parentDirectory, nodeName);
                 string propertiesMarkdown = PropertyFormatter.CreateMarkdownTable(metadata.Properties);
-                node = new(metadata, propertiesMarkdown, stagingFilePath, filePath, childDirectory);
+                node = new(
+                    metadata,
+                    propertiesMarkdown,
+                    stagingFilePath,
+                    filePath,
+                    childDirectory,
+                    isUpdated,
+                    pageReferences,
+                    databaseReferences);
+                if (!isUpdated)
+                {
+                    node.GeneratedFiles.AddRange(previousPage!.Files);
+                }
+
                 _pagesById[metadata.Id] = node;
                 _pages.Add(node);
             }
 
             List<Task> childTasks = new();
-            foreach (MarkdownReference pageReference in pageReferences)
+            foreach (MarkdownReference pageReference in node.PageReferences)
             {
                 childTasks.Add(BuildChildPageAsync(pageReference, childDirectory));
             }
 
-            foreach (MarkdownReference databaseReference in databaseReferences)
+            foreach (MarkdownReference databaseReference in node.DatabaseReferences)
             {
                 childTasks.Add(BuildChildDatabaseAsync(databaseReference, childDirectory));
             }
@@ -251,6 +331,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
 
             DatabaseMetadata metadata = await _apiClient.GetDatabaseAsync(databaseId);
             Console.WriteLine($"  データベース取得: {metadata.Title}");
+            string? previousFilePath = TryGetPreviousDatabasePath(metadata.Id);
 
             DatabaseExportNode node;
             string directoryPath;
@@ -258,14 +339,29 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             {
                 if (_databasesById.ContainsKey(databaseId)) { return; }
 
-                string nodeName;
-                lock (_reservedPathsLock)
+                string filePath;
+                if (previousFilePath != null)
                 {
-                    nodeName = PathUtility.ReserveName(parentDirectory, metadata.Title, metadata.Id, _reservedPaths);
+                    filePath = previousFilePath;
+                    directoryPath = Path.GetDirectoryName(filePath) ?? parentDirectory;
+                    lock (_reservedPathsLock)
+                    {
+                        _reservedPaths.Add(directoryPath);
+                        _reservedPaths.Add(filePath);
+                    }
+                }
+                else
+                {
+                    string nodeName;
+                    lock (_reservedPathsLock)
+                    {
+                        nodeName = PathUtility.ReserveName(parentDirectory, metadata.Title, metadata.Id, _reservedPaths);
+                    }
+
+                    directoryPath = Path.Combine(parentDirectory, nodeName);
+                    filePath = Path.Combine(directoryPath, "_database.md");
                 }
 
-                directoryPath = Path.Combine(parentDirectory, nodeName);
-                string filePath = Path.Combine(directoryPath, "_database.md");
                 node = new(metadata, filePath, directoryPath);
                 _databasesById[metadata.Id] = node;
                 _databases.Add(node);
@@ -501,6 +597,66 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                     $"前回マニフェストを読み込めないため、安全にクリーンアップできません: {ex.Message}",
                     ex);
             }
+        }
+
+        /// <summary>
+        ///     同じルートページの前回マニフェストからページ情報を取得する。
+        /// </summary>
+        /// <param name="pageId">NotionページID。</param>
+        /// <returns>再利用可能な前回ページ情報。存在しない場合はnull。</returns>
+        private ExportedPageManifest? FindPreviousPage(string pageId)
+        {
+            if (_previousManifest == null ||
+                !string.Equals(
+                    _previousManifest.RootPageId,
+                    _options.RootPageId,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            return _previousManifest.FindPage(pageId);
+        }
+
+        /// <summary>
+        ///     前回ページのMarkdownが出力先内部に存在する場合、その絶対パスを取得する。
+        /// </summary>
+        /// <param name="previousPage">前回ページ情報。</param>
+        /// <returns>再利用可能なMarkdownパス。存在しない場合はnull。</returns>
+        private string? TryGetPreviousPagePath(ExportedPageManifest? previousPage)
+        {
+            if (previousPage == null || string.IsNullOrWhiteSpace(previousPage.File)) { return null; }
+
+            string filePath = Path.GetFullPath(Path.Combine(_options.OutputDirectory, previousPage.File));
+            if (!PathUtility.IsInsideDirectory(_options.OutputDirectory, filePath) || !File.Exists(filePath))
+            {
+                return null;
+            }
+
+            return filePath;
+        }
+
+        /// <summary>
+        ///     同じルートページの前回マニフェストからデータベースMarkdownの絶対パスを取得する。
+        /// </summary>
+        /// <param name="databaseId">NotionデータベースID。</param>
+        /// <returns>再利用可能なMarkdownパス。存在しない場合はnull。</returns>
+        private string? TryGetPreviousDatabasePath(string databaseId)
+        {
+            if (_previousManifest == null ||
+                !string.Equals(
+                    _previousManifest.RootPageId,
+                    _options.RootPageId,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            ExportedDatabaseManifest? previousDatabase = _previousManifest.FindDatabase(databaseId);
+            if (previousDatabase == null || string.IsNullOrWhiteSpace(previousDatabase.File)) { return null; }
+
+            string filePath = Path.GetFullPath(Path.Combine(_options.OutputDirectory, previousDatabase.File));
+            return PathUtility.IsInsideDirectory(_options.OutputDirectory, filePath) ? filePath : null;
         }
 
         /// <summary>

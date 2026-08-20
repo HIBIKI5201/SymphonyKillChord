@@ -93,13 +93,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         }
 
         /// <summary>
-        ///     指定したタイミングのターゲット拍へ向かう進捗を取得する。
-        ///     区間に入る前は0で、ターゲット拍の直前に1へ近づき、跨いだ時点で0へ戻る。
+        ///     予約済みの実行時刻へ向かう進捗を取得する。
+        ///     区間に入る前は0で、実行時刻に向かって1へ近づく。
         /// </summary>
-        /// <param name="musicSpec"> 対象となる音楽同期タイミング。 </param>
-        /// <param name="leadCount"> 0から1へ変化させる区間の長さ。拍子と同じ単位で指定する。 </param>
+        /// <param name="executionTime"> 対象の実行時刻（音源再生時間・秒）。 </param>
+        /// <param name="leadBeatCount"> 0から1へ変化させる区間の長さ。拍数で指定する。 </param>
         /// <returns> 0〜1の値。BPM未設定の場合は0。 </returns>
-        public float GetNormalizedApproach(in MusicSyncSpec musicSpec, double leadCount)
+        public float GetNormalizedApproach(double executionTime, double leadBeatCount)
         {
             if (BeatLength <= 0d)
             {
@@ -107,10 +107,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             }
 
             return MusicTimingCalculator.CalculateNormalizedApproach(
-                AccurateBeat,
-                musicSpec.TimeSignature,
-                musicSpec.TargetBeat,
-                leadCount);
+                executionTime - PlayTime,
+                BeatLength * leadBeatCount);
         }
 
         /// <summary>

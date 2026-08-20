@@ -20,14 +20,14 @@ MonoBehaviour:
     ExitBlendFrameCount: 0
   - ClipType: 1
     Key: 
-    Clip: {fileID: 7400000, guid: 9785a2c3720f7bd49bf7221facacfc0e, type: 2}
+    Clip: {fileID: 7400000, guid: a42e873e9c55e754aa634fff2446b2d1, type: 2}
     EnterBlendFrameCount: 0
     ExitBlendFrameCount: 0
   - ClipType: 2
     Key: 
-    Clip: {fileID: 7400000, guid: a002d9273920bbb47840e3e6f3f0ced8, type: 2}
-    EnterBlendFrameCount: 0
-    ExitBlendFrameCount: 0
+    Clip: {fileID: 1827226128182048838, guid: 08775fc75f38ca745ae88b4eb4550be2, type: 3}
+    EnterBlendFrameCount: 3
+    ExitBlendFrameCount: 5
   - ClipType: 3
     Key: 
     Clip: {fileID: 7400000, guid: ad99f450f4f323b46b8d98a222b706d2, type: 2}
@@ -35,13 +35,13 @@ MonoBehaviour:
     ExitBlendFrameCount: 0
   - ClipType: 3
     Key: Skill_Right
-    Clip: {fileID: 1827226128182048838, guid: 45969866f4d6e904fa22dbda4631351a, type: 3}
-    EnterBlendFrameCount: 0
-    ExitBlendFrameCount: 0
+    Clip: {fileID: 7400000, guid: f76ac7876d6fc0f49ae39bb52a4e0c49, type: 2}
+    EnterBlendFrameCount: 6
+    ExitBlendFrameCount: 12
   - ClipType: 3
     Key: Skill_Left
-    Clip: {fileID: 1827226128182048838, guid: adc10512a0603ef4a9638e66df5e3329, type: 3}
-    EnterBlendFrameCount: 0
-    ExitBlendFrameCount: 12
+    Clip: {fileID: 7400000, guid: 14b2c968a8a05ec42aa712515ba5e3ac, type: 2}
+    EnterBlendFrameCount: 3
+    ExitBlendFrameCount: 8
   _enterBlendFrameCount: 4
   _exitBlendFrameCount: 8

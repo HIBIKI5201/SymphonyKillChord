@@ -1,6 +1,8 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
+using KillChord.Runtime.Adaptor.InGame.Sequence;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.Persistent.Savedata;
@@ -10,13 +12,15 @@ using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Result;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
+using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace KillChord.Runtime.Composition.InGame.Sequence
 {
@@ -44,6 +48,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
             _stageSequenceVoiceView = FindFirstObjectByType<StageSequenceVoiceView>();
             _stageStartConstraintView = FindFirstObjectByType<StageStartConstraintView>();
+            _playerInputView = FindFirstObjectByType<PlayerInputView>();
+            _musicPlayer = FindFirstObjectByType<MusicPlayer>();
 
             if (_stageSequenceView == null
                 || _stageSequenceMessageView == null
@@ -51,7 +57,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 || _stageResultView == null
                 || _inGamePlayDirector == null
                 || _stageSequenceVoiceView == null
-                || _stageStartConstraintView == null)
+                || _stageStartConstraintView == null
+                || _playerInputView == null
+                || _musicPlayer == null)
             {
                 Debug.LogError(
                     $"[{nameof(SequenceInitializationModule)}] シーケンス関連参照の取得に失敗しました。",
@@ -62,6 +70,11 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _container = new SequenceModuleContainer();
             ServiceLocator.RegisterInstance(_container);
             _isRegistered = true;
+
+            _battlePauseModule = new BattlePauseModule(_musicPlayer);
+            _battlePauseController = new BattlePauseController(_battlePauseModule);
+            _container.BattlePauseController = _battlePauseController;
+
             return true;
         }
 
@@ -145,21 +158,21 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _selectedBattleStageState)
-                || !ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            if (!ServiceLocator.TryGetInstance(out _selectedBattleStageState))
             {
                 Debug.LogError(
                     $"[{nameof(SequenceInitializationModule)}] "
-                    + "ステージ選択状態またはセーブシステムを取得できませんでした。",
+                    + "ステージ選択状態を取得できませんでした。",
                     this);
                 return false;
             }
 
             _stageProgressSaveDataService =
-                new StageProgressSaveDataService(savedataSystem);
+                new StageProgressSaveDataService();
 
             ServiceLocator.TryGetInstance(out _pendingNodeTransitionState);
 
+            _playerInputView.OnBattlePauseInput += HandlePauseInput;
             _missionRuntimeService.OnMissionFinished += HandleMissionFinished;
             _inGamePlayDirector.StopGameplay();
 
@@ -172,6 +185,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// </summary>
         public override void Shutdown()
         {
+            _playerInputView.OnBattlePauseInput -= HandlePauseInput;
+
             UnsubscribeLoadingCompleted();
 
             _container?.SequenceDirector?.Cancel();
@@ -377,6 +392,19 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
         }
 
+        /// <summary>
+        ///     ポーズ入力時の処理。
+        /// </summary>
+        /// <param name="input">ポーズ入力</param>
+        private void HandlePauseInput(InputContext<float> input)
+        {
+            if (input.Phase != InputActionPhase.Started)
+            {
+                return;
+            }
+            _battlePauseController?.Toggle();
+        }
+
         private SequenceModuleContainer _container;
         private MissionRuntimeService _missionRuntimeService;
         private StageSequenceView _stageSequenceView;
@@ -391,6 +419,10 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private LoadingScreenController _loadingScreenController;
         private StageSequenceVoiceView _stageSequenceVoiceView;
         private StageStartConstraintView _stageStartConstraintView;
+        private MusicPlayer _musicPlayer;
+        private PlayerInputView _playerInputView;
+        private BattlePauseModule _battlePauseModule;
+        private BattlePauseController _battlePauseController;
         private bool _isWaitingForLoadingCompleted;
         private bool _isRegistered;
         private bool _hasStarted;

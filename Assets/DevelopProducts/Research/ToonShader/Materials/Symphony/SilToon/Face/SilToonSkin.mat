@@ -41,10 +41,17 @@ Material:
     - _IsForFace: 1
     - _NormalMapIntensity: 0
     - _SSSOn: 0
+    - _StencilComp: 8
+    - _StencilFail: 0
+    - _StencilPass: 2
+    - _StencilReadMask: 2
+    - _StencilRef: 2
+    - _StencilWriteMask: 2
     - _ZOffset: 0.01
     m_Colors:
-    - _ColorMiddle: {r: 1, g: 0.7905139, b: 0.798419, a: 1}
-    - _ColorShadow: {r: 0.9254902, g: 0.7647059, b: 0.78039217, a: 1}
+    - _ColorLit: {r: 0.85, g: 0.85, b: 0.85, a: 1}
+    - _ColorMiddle: {r: 0.95, g: 0.752549, b: 0.76, a: 1}
+    - _ColorShadow: {r: 0.9, g: 0.74364406, b: 0.75889826, a: 1}
     - _OutlineColor: {r: 0.5, g: 0.25, b: 0.27459013, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
