@@ -7,6 +7,7 @@ using KillChord.Runtime.Application.Player.SkillEffect;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Skill.Effect;
 using KillChord.Runtime.Composition.InGame.UI;
@@ -158,8 +159,15 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 targetSystemContainer.TargetEntityRegistry);
             SkillAttackController skillAttackController = new SkillAttackController(playerModuleContainer.PlayerEntity, targetResolver);
             PendingAttackEffectService pendingAttackEffectService = new PendingAttackEffectService();
+            _skillHitScheduler = new SkillHitScheduler();
             SkillEffectExecutorResolver effectExecutorResolver = new SkillEffectExecutorResolver();
-            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController, pendingAttackEffectService, targetRangeQuery, targetRadiusQuery);
+            SkillEffectExecutorFactory.RegisterDefaults(
+                effectExecutorResolver,
+                skillAttackController,
+                pendingAttackEffectService,
+                targetRangeQuery,
+                targetRadiusQuery,
+                _skillHitScheduler);
             SkillUsecase skillUsecase = new SkillUsecase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
 
             SkillView[] skillVisuals = ResolveSkillVisuals(playerModuleContainer.PlayerInitializer);
@@ -180,6 +188,29 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             _skillController.OnSkillAnimationRequested += playerModuleContainer.PlayerView.PlaySkillAnimation;
             _skillController.OnSkillVoiceRequested += playerModuleContainer.PlayerView.PlaySkillVoice;
             _boundPlayerView = playerModuleContainer.PlayerView;
+            // 連撃の適用を毎フレーム進めるループを接続する。
+            _skillHitController = new SkillHitController(_skillHitScheduler);
+            SkillHitLoopView skillHitLoopView = FindAnyObjectByType<SkillHitLoopView>();
+            if (skillHitLoopView != null)
+            {
+                skillHitLoopView.Initialize(_skillHitController);
+
+                // ゲームプレイ開始通知を受けないと更新が回らないため、Directorへ登録する。
+                InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
+                if (inGamePlayDirector != null)
+                {
+                    inGamePlayDirector.AddGamePlayControllable(skillHitLoopView);
+                }
+                else
+                {
+                    Debug.LogError($"[{nameof(SkillInitializer)}] {nameof(InGamePlayDirector)} が見つかりません。", this);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(SkillInitializer)}] {nameof(SkillHitLoopView)} が見つからないため、連撃が進行しません。", this);
+            }
+
             _moduleContainer.SetSkillController(_skillController);
             _moduleContainer.SetPendingAttackEffectService(pendingAttackEffectService);
             return true;
@@ -196,6 +227,9 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 _skillController.OnSkillVoiceRequested -= _boundPlayerView.PlaySkillVoice;
             }
 
+            _skillHitScheduler?.Clear();
+            _skillHitScheduler = null;
+            _skillHitController = null;
             _boundPlayerView = null;
             _skillController = null;
             _saveDataEquippedSkills = null;
@@ -503,6 +537,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private SkillInputProgressUIInitializer _skillInputProgressUIInitializer;
         private SkillCrosshairProgressUIInitializer _skillCrosshairProgressUIInitializer;
         private SkillListUIInitializer _skillListUIInitializer;
+        private SkillHitScheduler _skillHitScheduler;
+        private SkillHitController _skillHitController;
         private SkillController _skillController;
         private SkillResultViewModel _skillResultViewModel;
         private SkillModuleContainer _moduleContainer;

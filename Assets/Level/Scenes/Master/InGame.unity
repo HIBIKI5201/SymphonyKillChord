@@ -2860,7 +2860,7 @@ PrefabInstance:
       objectReference: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
     - target: {fileID: 5369553578249869401, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
       propertyPath: m_HorizontalAlignment
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5369553578249869401, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
       propertyPath: m_hasFontAssetChanged
@@ -4429,6 +4429,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1546686501}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1515403292
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1515403293}
+  - component: {fileID: 1515403294}
+  m_Layer: 0
+  m_Name: SkillHitLoop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1515403293
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515403292}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2100000001}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1515403294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1515403292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d925ab5f27cc25c49b82c6932dc0cdc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillHitLoopView
 --- !u!1 &1544702106
 GameObject:
   m_ObjectHideFlags: 0
@@ -6171,6 +6215,7 @@ Transform:
   - {fileID: 2200000001}
   - {fileID: 1776231712}
   - {fileID: 664140146}
+  - {fileID: 1515403293}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2100000002
