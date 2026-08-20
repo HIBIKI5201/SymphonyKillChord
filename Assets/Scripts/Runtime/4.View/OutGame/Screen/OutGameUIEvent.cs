@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 
 namespace KillChord.Runtime.View.OutGame.Screen
 {
@@ -38,11 +37,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> OutGame UIの表示状態を切り替えるイベント。 </summary>
         public Action<bool> OnOutGameUiVisibilityChanged;
 
-        /// <summary>
-        ///     戦闘準備画面を表示するイベントです。
-        ///     引数は遷移先のシーン名です。
-        /// </summary>
-        public Action<string> OnShownBattlePreparationScreen;
+        /// <summary> 戦闘準備画面を表示するイベントです。 </summary>
+        public Action OnShownBattlePreparationScreen;
 
         /// <summary> 設定画面を表示するイベント。 </summary>
         public Action OnShownSettingScreen;
@@ -61,6 +57,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> スキルノードが解放された時のイベント。 </summary>
         public Action OnSkillUnlocked;
+
+        /// <summary> スキルツリーのリセット確認表示を要求するイベント。 </summary>
+        public Action OnSkillTreeResetRequested;
+
+        /// <summary> スキルツリーのリセットを確定するイベント。 </summary>
+        public Action OnSkillTreeResetConfirmed;
+
+        /// <summary> スキルツリーのリセットをキャンセルするイベント。 </summary>
+        public Action OnSkillTreeResetCancelled;
 
         /// <summary> 入手済みスキル一覧が更新された時のイベント。 </summary>
         public Action OnOwnedSkillChanged;
@@ -83,16 +88,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 作戦画面の表示アニメーションが完了したことを通知するイベント。 </summary>
         public Action OnStageSelectScreenCompleted;
 
-        /// <summary> スキル編成が保存されたときのイベント。 </summary>
-        public Func<Task<bool>> OnSkillBuildSaved;
-
         /// <summary> スキルレベルアップが行われたときのイベント。 </summary>
         public Action OnSkillLevelUp;
 
-        /// <summary>
-        ///     インゲームへ遷移するイベントです。
-        ///     引数は遷移先のシーン名です。
-        /// </summary>
-        public Action<string> OnStartGame;
+        /// <summary> 選択中のバトルステージへ遷移するイベントです。 </summary>
+        public Action OnStartGame;
     }
 }

@@ -14,11 +14,14 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
         /// <param name="equippedSkills"> プレイヤーが装備しているスキル配列。 </param>
         public SkillBuildDefinition(EquippedSkill[] equippedSkills = null)
         {
-            _equippedSkills = BuildSlotArray(equippedSkills);
+            ReplaceEquippedSkills(BuildSlotArray(equippedSkills));
         }
 
+        /// <summary> 装備スキル構成が変更されたときに通知します。 </summary>
+        public event Action<IReadOnlyList<EquippedSkill>> OnEquippedSkillsChanged;
+
         /// <summary> プレイヤーが装備しているスキルの配列を取得する。 </summary>
-        public IReadOnlyList<EquippedSkill> EquippedSkills => _equippedSkills;
+        public IReadOnlyList<EquippedSkill> EquippedSkills => _equippedSkillsSnapshot;
 
         /// <summary> 現在のスロット数を取得する。 </summary>
         public int SlotCount => _equippedSkills.Length;
@@ -39,7 +42,8 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
                 throw new ArgumentNullException(nameof(newEquippedSkills));
             }
 
-            _equippedSkills = BuildSlotArray(newEquippedSkills);
+            ReplaceEquippedSkills(BuildSlotArray(newEquippedSkills));
+            OnEquippedSkillsChanged?.Invoke(_equippedSkillsSnapshot);
         }
 
         /// <summary>
@@ -63,45 +67,33 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
 
             EquippedSkill[] expandedSkills = new EquippedSkill[slotCount];
             Array.Copy(_equippedSkills, expandedSkills, _equippedSkills.Length);
-            _equippedSkills = expandedSkills;
+            ReplaceEquippedSkills(expandedSkills);
+            OnEquippedSkillsChanged?.Invoke(_equippedSkillsSnapshot);
         }
 
         /// <summary>
-        ///     プレイヤーが装備しているスキル配列の特定スロットを更新する。
+        ///     装備スキル構成が現在のスロット条件を満たすことを検証する。
         /// </summary>
-        /// <param name="slotIndex"> 更新するスロットのインデックス。 </param>
-        /// <param name="newEquippedSkill"> 新しい装備スキル。 </param>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public void ChangeEquippedSkill(int slotIndex, EquippedSkill newEquippedSkill)
+        /// <param name="equippedSkills"> 検証する装備スキル構成。 </param>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public void ValidateEquipment(IReadOnlyList<EquippedSkill> equippedSkills)
         {
-            if (slotIndex < 0 || slotIndex >= _equippedSkills.Length)
+            if (equippedSkills == null)
             {
-                throw new ArgumentOutOfRangeException(nameof(slotIndex), "スロットインデックスが範囲外です。");
+                throw new ArgumentNullException(nameof(equippedSkills));
             }
 
-            _equippedSkills[slotIndex] = newEquippedSkill;
-        }
-
-        /// <summary>
-        ///     プレイヤーが装備しているスキル配列の特定スロットを入れ替える。
-        /// </summary>
-        /// <param name="slotIndex1"> 入れ替え元のスロットインデックス。 </param>
-        /// <param name="slotIndex2"> 入れ替え先のスロットインデックス。 </param>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public void SwapEquippedSkills(int slotIndex1, int slotIndex2)
-        {
-            if (slotIndex1 < 0 || slotIndex1 >= _equippedSkills.Length ||
-                slotIndex2 < 0 || slotIndex2 >= _equippedSkills.Length)
+            if (equippedSkills.Count != SlotCount)
             {
-                throw new ArgumentOutOfRangeException("スロットインデックスが範囲外です。");
+                throw new ArgumentException(
+                    $"装備スキル数は現在のスロット数と一致する必要があります。 slotCount={SlotCount}",
+                    nameof(equippedSkills));
             }
-
-            EquippedSkill temp = _equippedSkills[slotIndex1];
-            _equippedSkills[slotIndex1] = _equippedSkills[slotIndex2];
-            _equippedSkills[slotIndex2] = temp;
         }
 
         private EquippedSkill[] _equippedSkills;
+        private IReadOnlyList<EquippedSkill> _equippedSkillsSnapshot;
 
         /// <summary>
         ///     スロット配列を最小スロット数を満たす形で構築する。
@@ -124,6 +116,16 @@ namespace KillChord.Runtime.Domain.OutGame.SkillBuild
             }
 
             return result;
+        }
+
+        /// <summary>
+        ///     内部配列を置き換え、外部公開用の読み取り専用スナップショットを更新する。
+        /// </summary>
+        /// <param name="equippedSkills"> 新しい内部配列。 </param>
+        private void ReplaceEquippedSkills(EquippedSkill[] equippedSkills)
+        {
+            _equippedSkills = equippedSkills;
+            _equippedSkillsSnapshot = Array.AsReadOnly(equippedSkills);
         }
     }
 }

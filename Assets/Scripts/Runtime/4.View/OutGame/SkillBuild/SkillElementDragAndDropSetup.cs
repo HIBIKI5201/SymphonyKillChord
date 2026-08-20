@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         /// <param name="uiDocument"> ドキュメントの UIDocument。 </param>
         /// <param name="skillBuildViewModel"> 一時スロット状態を保持する ViewModel。 </param>
-        public SkillElementDragAndDropSetup(UIDocument uiDocument, SkillBuildViewModel skillBuildViewModel)
+        public SkillElementDragAndDropSetup(UIDocument uiDocument, ISkillBuildViewModel skillBuildViewModel)
         {
             _uiDocument = uiDocument ?? throw new ArgumentNullException(nameof(uiDocument));
             _skillBuildViewModel = skillBuildViewModel ?? throw new ArgumentNullException(nameof(skillBuildViewModel));
@@ -26,15 +27,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         private readonly UIDocument _uiDocument;
-        private readonly SkillBuildViewModel _skillBuildViewModel;
+        private readonly ISkillBuildViewModel _skillBuildViewModel;
 
         private const string DRAGGABLE_CLASSNAME = "draggable";
         private const string SKILL_ELEMENT_CONTAINER_CLASSNAME = "skill-element-container";
         private const string SKILL_ELEMENT_SLOT_CLASSNAME = "skill-element-slot";
-        private const string SKILL_LABEL_NAME = "skill-label";
-        private const int EMPTY_SKILL_ID = -1;
-        private const string EMPTY_SKILL_LABEL = "未設定";
-
         /// <summary>
         ///     単一のスキル要素にドラッグ&ドロップ操作を設定する。
         ///     新規スキル入手時など、動的に追加された要素に対して呼び出す。
@@ -78,65 +75,53 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="slot"> スキル要素がドロップされたスロットの VisualElement。 </param>
         private void OnSkillElementDrop(VisualElement skill, VisualElement slot)
         {
-            // ドロップ結果に応じた UI 更新後の状態を走査し、
-            // 一時的なスロット状態を ViewModel へ同期する。
-            SyncTemporarySlotStateFromUi();
-
-#if UNITY_EDITOR
             if (slot == null)
             {
+#if UNITY_EDITOR
                 Debug.Log($"{skill?.name} は元の位置に戻されました。");
+#endif
                 return;
             }
 
+            if (skill?.userData is not int skillId)
+            {
+                Debug.LogError(
+                    $"[{nameof(SkillElementDragAndDropSetup)}] ドロップされた要素からスキル ID を取得できませんでした。");
+                return;
+            }
+
+            int? destinationSlotIndex = FindSlotIndex(slot);
+            _skillBuildViewModel.ApplyDrop(skillId, destinationSlotIndex);
+
+#if UNITY_EDITOR
             Debug.Log($"{skill?.name} が {slot.name} にドロップされました。");
 #endif
         }
 
         /// <summary>
-        ///     現在の UI 上のスロット状態を ViewModel に同期する。
-        ///     セーブボタン押下時にこの一時状態が SkillBuildDefinition へ反映される。
+        ///     ドロップ先要素に対応するスロット番号を取得する。
         /// </summary>
-        private void SyncTemporarySlotStateFromUi()
+        /// <param name="dropTarget"> ドロップ先。 </param>
+        /// <returns> スロット番号。一覧の場合は null。 </returns>
+        private int? FindSlotIndex(VisualElement dropTarget)
         {
-            VisualElement root = _uiDocument.rootVisualElement;
-            if (root == null)
+            if (!dropTarget.ClassListContains(SKILL_ELEMENT_SLOT_CLASSNAME))
             {
-                return;
+                return null;
             }
 
+            VisualElement root = _uiDocument.rootVisualElement;
             List<VisualElement> slots = root.Query<VisualElement>(className: SKILL_ELEMENT_SLOT_CLASSNAME).ToList();
-
             for (int i = 0; i < slots.Count; i++)
             {
-                VisualElement slot = slots[i];
-
-                // 非表示中のスロットはまだ解放されていないため、
-                // スキルがドロップされていない（＝元の位置に戻された）とみなす。
-                if (slot.resolvedStyle.display == DisplayStyle.None)
+                if (ReferenceEquals(slots[i], dropTarget))
                 {
-                    continue;
+                    return i;
                 }
-
-                VisualElement skillElement = slot.Q<VisualElement>(className: DRAGGABLE_CLASSNAME);
-
-                int skillId = EMPTY_SKILL_ID;
-                string skillLabel = EMPTY_SKILL_LABEL;
-
-                // ドロップされたスロットにドラッグ要素が存在する場合、その userData からスキル ID を取得し、スキル名ラベルを読み取る。
-                if (skillElement != null)
-                {
-                    if (skillElement.userData is int storedSkillId)
-                    {
-                        skillId = storedSkillId;
-                    }
-
-                    Label skillLabelElement = skillElement.Q<Label>(SKILL_LABEL_NAME);
-                    skillLabel = skillLabelElement?.text ?? EMPTY_SKILL_LABEL;
-                }
-
-                _skillBuildViewModel.UpdateSlot(i, skillId, skillLabel);
             }
+
+            throw new InvalidOperationException(
+                $"[{nameof(SkillElementDragAndDropSetup)}] ドロップ先スロットがルート要素内に見つかりません。");
         }
     }
 }

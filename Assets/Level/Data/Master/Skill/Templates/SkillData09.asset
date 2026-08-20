@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 438fff776206e3d4db49350ada23c706, type: 3}
+  m_Name: SkillData09
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillTemplateAsset
+  _id:
+    _id: skill_09
+    _hashId: -1306600489
+  _displayName: 9
+  _pattern: 02000000040000000800000008000000
+  _icon: {fileID: 21300000, guid: d2cd04803627d144e8195b13da46bbb9, type: 3}
+  _skillDetail: "n\u79D2\u9593\u3001\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u5224\u5B9A\u304C\u6210\u529F\u3057\u305F\u6575\u306B\u5BFE\u3057\u3066\n\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u30C0\u30E1\u30FC\u30B8\u306E\u500D\u7387\u304Cx\u500D"
+  _tips: 
+  _effectDisplayMode: 0
+  _effectParameters:
+  - _id: 4
+    _value: 2
+    _displayFormat: 3
+  - _id: 6
+    _value: 5
+    _displayFormat: 5
+  _skillType: 02000000
+  _level: 0
+  _cooldownNumerator: 1
+  _cooldownDenomimator: 1
+  _skillEffectType: 9
+  _skillTargetingType: 1
+  _statusEffectReapplyPolicy: 1
+  _skillNormalAttackDamagePolicy: 0
+  _animationKey: 

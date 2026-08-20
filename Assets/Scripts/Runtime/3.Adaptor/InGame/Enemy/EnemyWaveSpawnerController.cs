@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
@@ -9,14 +10,31 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyWaveSpawnerController : IDisposable
     {
-        public EnemyWaveSpawnerController(EnemyWaves waves, EnemyWaveSpawnerState state, IEnemySpawner infantrySpawner, IEnemySpawner artillerySpawner, IEnemyWaveTimerView waveTimer)
+        /// <summary>
+        ///     Wave生成を制御するControllerを生成する。
+        /// </summary>
+        /// <param name="waves">Wave定義。</param>
+        /// <param name="state">Wave進行状態。</param>
+        /// <param name="enemySpawner">個別の敵定義を解決する生成処理。</param>
+        /// <param name="waveTimer">Waveタイマー表示。</param>
+        /// <param name="autoAdvanceWaves">Waveクリア時に次のWaveへ自動進行する場合はtrue。</param>
+        public EnemyWaveSpawnerController(
+            EnemyWaves waves,
+            EnemyWaveSpawnerState state,
+            IEnemySpawner enemySpawner,
+            IEnemyWaveTimerView waveTimer,
+            bool autoAdvanceWaves)
         {
             _waves = waves;
             _state = state;
-            _infantrySpawner = infantrySpawner;
-            _artillerySpawner = artillerySpawner;
+            _enemySpawner = enemySpawner;
             _waveTimer = waveTimer;
-            _state.OnWaveCleared += SpawnNextWave;
+            _autoAdvanceWaves = autoAdvanceWaves;
+
+            if (_autoAdvanceWaves)
+            {
+                _state.OnWaveCleared += SpawnNextWave;
+            }
         }
 
         /// <summary>
@@ -52,17 +70,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
                 for (int i = 0; i < waveDefinition.Details.Length; i++)
                 {
-                    switch (waveDefinition.Details[i].EnemyType)
-                    {
-                        case EnemyType.Infantry:
-                            SpawnEnemies(_infantrySpawner, waveDefinition.Details[i].EnemyAmount);
-                            break;
-                        case EnemyType.Artillery:
-                            SpawnEnemies(_artillerySpawner, waveDefinition.Details[i].EnemyAmount);
-                            break;
-                        default:
-                            throw new Exception("[EnemyWaveSpawnerController] 敵種類が不正です。");
-                    }
+                    SpawnEnemies(
+                        waveDefinition.Details[i].EnemyDefinitionId,
+                        waveDefinition.Details[i].EnemyAmount,
+                        waveDefinition.SpawnPointCandidateHashes);
                 }
 
                 // Waveのタイマーを設定する
@@ -76,25 +87,36 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         public void Dispose()
         {
-            _state.OnWaveCleared -= SpawnNextWave;
+            if (_autoAdvanceWaves)
+            {
+                _state.OnWaveCleared -= SpawnNextWave;
+            }
         }
 
         private EnemyWaves _waves;
         private EnemyWaveSpawnerState _state;
-        private IEnemySpawner _infantrySpawner;
-        private IEnemySpawner _artillerySpawner;
+        private IEnemySpawner _enemySpawner;
         private IEnemyWaveTimerView _waveTimer;
         private bool _isSpawningWave;
         private int _lastSpawnFrame = -1;
+        private readonly bool _autoAdvanceWaves;
 
         /// <summary>
         ///     spawnerと数を指定して、敵生成処理を呼び出す。
         /// </summary>
-        /// <param name="spawner"></param>
+        /// <param name="enemyDefinitionId"> 生成する個別の敵定義IDです。 </param>
         /// <param name="amount"></param>
-        private void SpawnEnemies(IEnemySpawner spawner, int amount)
+        /// <param name="candidateSpawnPointHashes"> 候補とするスポーンポイントIDです。 </param>
+        private void SpawnEnemies(
+            EnemyDefinitionId enemyDefinitionId,
+            int amount,
+            IReadOnlyList<int> candidateSpawnPointHashes)
         {
-            spawner.SpawnEnemy(amount, AddStateEnemyCount);
+            _enemySpawner.SpawnEnemy(
+                enemyDefinitionId,
+                amount,
+                candidateSpawnPointHashes,
+                AddStateEnemyCount);
         }
 
         private void AddStateEnemyCount()

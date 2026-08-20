@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "source": "vitia",
+  "sourceRoot": "E:\\Document\\Ars\\vitia",
+  "revision": "3fa33c9e5e7913c35a2a085dbbe49631cdee9eae",
+  "profile": "ux-game-experience",
+  "neutrality": {
+    "required": true,
+    "compatibilityMarkersVerified": true,
+    "counterfactualRenameRequired": true
+  },
+  "files": [
+    {
+      "path": "SKILL.md",
+      "sha256": "11e4e643d855d2294fac5d3e6f6a3c217f727814a1c9e26e65463a8854f8fbb2"
+    },
+    {
+      "path": "references/ethics.md",
+      "sha256": "8f5511dc3b4515024ae49e4106e79bfa4c408f18c8b7a4d8d3122d08f6a7c133"
+    },
+    {
+      "path": "references/evidence.md",
+      "sha256": "738db3f1e7fe357c8dffd4a49d64111870f844ac67e9be3b4592a339826e8afc"
+    },
+    {
+      "path": "references/ux-onboarding.md",
+      "sha256": "cf277af039757659359cebffb36296673c3007ed1277eb88523be06c62622eb4"
+    },
+    {
+      "path": "references/game-experience.md",
+      "sha256": "ad3d26452496204e80498100b99dce0278c33b2ad1717552326bb3f6a3acdcb2"
+    },
+    {
+      "path": "scripts/audit_game_experience.py",
+      "sha256": "edb461379965629113ff65a85374f38f11f313939c3ffceb8cf11c82a044edb4"
+    },
+    {
+      "path": "scripts/score_vitia.py",
+      "sha256": "7cdac21a0f45215983922afd110b339f3967452699141162d1b3e2c612391919"
+    }
+  ]
+}

@@ -1,6 +1,4 @@
 using KillChord.Runtime.Domain.OutGame.Screen;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application.OutGame.Screen
 {
@@ -23,7 +21,7 @@ namespace KillChord.Runtime.Application.OutGame.Screen
         /// <summary>
         ///     ホーム画面へ復帰します。
         /// </summary>
-        public async Task Execute(CancellationToken token)
+        public void Execute()
         {
             ScreenTransitionState transitionState = _screenStateRepository.TransitionState;
             ScreenId? previousScreenId = transitionState.CurrentScreenId;
@@ -35,7 +33,7 @@ namespace KillChord.Runtime.Application.OutGame.Screen
                 ScreenId.Home,
                 clearHistory: true);
 
-            await _screenPresenter.Present(result, token);
+            _screenPresenter.Present(result);
         }
 
         private readonly IScreenPresenter _screenPresenter;

@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
@@ -26,16 +25,18 @@ namespace KillChord.Runtime.Application.InGame.Skill
         }
 
         /// <summary>
-        ///     スキルが発動可能な場合、発動する。
+        ///     スキルを発動する。対象を解決できない場合は演出のみの空撃ちとして扱う。
         /// </summary>
         /// <param name="skillDefinition"> 対象スキルです。 </param>
         /// <param name="beatType"> 入力の拍子種類です。 </param>
+        /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうか。 </param>
         /// <returns> 発動できた場合はtrue。 </returns>
-        public bool TryExecuteSkill(SkillDefinition skillDefinition, BeatType beatType)
+        public bool TryExecuteSkill(SkillDefinition skillDefinition, BeatType beatType, bool isJustHit)
         {
             if (!_targetResolver.TryResolveTargets(skillDefinition.EffectSpec.TargetingType, out SkillTargetResolveResult targetResult))
             {
-                return false;
+                // 対象が居なくても発動自体は成立させ、効果適用は行わない空撃ちにする。
+                return true;
             }
 
             if (!_effectExecutorResolver.TryResolve(skillDefinition.EffectSpec.EffectType, out ISkillEffectExecutor executor))
@@ -48,9 +49,10 @@ namespace KillChord.Runtime.Application.InGame.Skill
                 targetResult.PrimaryTargetEntity,
                 _playerEntity,
                 beatType,
-                targetResult.TargetEntities);
+                targetResult.TargetEntities,
+                skillDefinition.EffectSpec,
+                isJustHit);
             executor.Execute(context);
-            _playerEntity.BuffSystem.Execute(new BuffContext(_playerEntity, targetResult.PrimaryTargetEntity), BuffExecuteTiming.Skill);
             return true;
         }
 
