@@ -123,6 +123,8 @@ namespace KillChord.Editor.AutoBuilder
                 AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
                 return;
             }
+            
+            profiles = profiles.Where(profile => profile != null).ToArray();
 
             // 環境変数 UNITY_BUILD_OUTPUT_DIR が指定されていれば優先して使用する
             string envDir = Environment.GetEnvironmentVariable("UNITY_BUILD_OUTPUT_DIR");

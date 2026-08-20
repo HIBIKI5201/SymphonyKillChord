@@ -3,9 +3,10 @@
   <Project Path="CriMw.CriWare.Runtime.csproj" />
   <Project Path="MusicBattle_Mock.csproj" />
   <Project Path="KillChord.Adaptor.csproj" />
+  <Project Path="KillChord.View.csproj" />
+  <Project Path="MagicaClothV2.csproj" />
   <Project Path="KillChord.Composition.csproj" />
   <Project Path="DevelopProducts-Boss.csproj" />
-  <Project Path="KillChord.Utility.csproj" />
   <Project Path="VRM10.csproj" />
   <Project Path="KillChord.Domain.csproj" />
   <Project Path="KillChord.Structure.csproj" />
@@ -15,7 +16,6 @@
   <Project Path="UniHumanoid.csproj" />
   <Project Path="DevelopProducts-BindingSystem.csproj" />
   <Project Path="KillChord.Develop.csproj" />
-  <Project Path="KillChord.View.csproj" />
   <Project Path="VRM10.MToon10.Editor.csproj" />
   <Project Path="CharacterControl_Mock.csproj" />
   <Project Path="DevelopProducts-Achievement.csproj" />
@@ -26,15 +26,18 @@
   <Project Path="DevelopProducts-Pause.csproj" />
   <Project Path="UniGLTF.Editor.csproj" />
   <Project Path="SpringBoneJobs.csproj" />
+  <Project Path="KillChord.Utility.csproj" />
   <Project Path="DevelopProducts-Architecture.csproj" />
   <Project Path="VRM10.Editor.csproj" />
+  <Project Path="DevelopProducts-SilToon.csproj" />
   <Project Path="DevelopProducts-AnimationControl.csproj" />
   <Project Path="DevelopProducts-ToonShader.Editor.csproj" />
-  <Project Path="DevelopProducts-ToonShader.csproj" />
   <Project Path="UniGLTF.UniUnlit.csproj" />
   <Project Path="DevelopProducts-SkillTree.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
+  <Project Path="SingularityGroup.HotReload.Runtime.Public.csproj" />
+  <Project Path="DevelopProducts-SilToon.Editor.csproj" />
   <Project Path="DevelopProducts-EquipmentBGM.csproj" />
   <Project Path="VRM10.Tests.csproj" />
   <Project Path="DevelopProducts-RenderingExtension.csproj" />
@@ -49,6 +52,7 @@
   <Project Path="TPS_Mock.csproj" />
   <Project Path="FastSpringBone10.csproj" />
   <Project Path="UniHumanoid.Editor.Tests.csproj" />
+  <Project Path="DevelopProducts-ToonShader.csproj" />
   <Project Path="UniGLTF.UniUnlit.Editor.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj" />
