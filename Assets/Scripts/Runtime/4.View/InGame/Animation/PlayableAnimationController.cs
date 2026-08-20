@@ -105,7 +105,7 @@ namespace KillChord.Runtime.View
             }
 
             _playables[index].SetTime(0.0);
-            _mixer.SetInputWeight(index, 1f);
+            //_mixer.SetInputWeight(index, 1f);
         }
 
         /// <summary> PlayableGraphを破棄する。 </summary>
