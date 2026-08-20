@@ -29,6 +29,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Placement
                 SkillEffectAttachMode.TargetFollow => TARGET_FOLLOW,
                 SkillEffectAttachMode.TargetPoint => TARGET_POINT,
                 SkillEffectAttachMode.WorldPoint => WORLD_POINT,
+                SkillEffectAttachMode.WeaponFollow => WEAPON_FOLLOW,
                 _ => PLAYER_POINT,
             };
         }
@@ -40,5 +41,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Placement
         private static readonly ISkillEffectPlacement TARGET_FOLLOW = new TargetFollowSkillEffectPlacement();
         private static readonly ISkillEffectPlacement TARGET_POINT = new TargetPointSkillEffectPlacement();
         private static readonly ISkillEffectPlacement WORLD_POINT = new WorldPointSkillEffectPlacement();
+        private static readonly ISkillEffectPlacement WEAPON_FOLLOW = new WeaponFollowSkillEffectPlacement();
     }
 }

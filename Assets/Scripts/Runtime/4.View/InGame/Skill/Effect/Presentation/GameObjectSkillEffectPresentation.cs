@@ -37,7 +37,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
             }
 
             _targetObject.SetActive(true);
-            await Awaitable.WaitForSecondsAsync(_durationSeconds, cancellationToken);
+            await Awaitable.WaitForSecondsAsync(_durationSeconds / context.PlaybackSpeed, cancellationToken);
         }
 
         /// <summary>

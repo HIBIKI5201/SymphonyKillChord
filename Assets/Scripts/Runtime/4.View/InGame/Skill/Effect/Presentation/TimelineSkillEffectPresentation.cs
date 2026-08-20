@@ -55,6 +55,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
             _director.time = 0d;
             _director.Play();
 
+            // BPMに応じてTimeline全体の進行速度を合わせる。
+            ApplyPlaybackSpeed(context.PlaybackSpeed);
+
             // Playを呼んだ直後はstateが更新されていないため、1フレーム進めてから監視する。
             await Awaitable.NextFrameAsync(cancellationToken);
             while (_director != null
@@ -77,6 +80,20 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
 
             _director.Stop();
             _director.time = 0d;
+        }
+
+        /// <summary>
+        ///     再生速度をPlayableGraphへ適用する。
+        /// </summary>
+        /// <param name="playbackSpeed"> 適用する再生速度倍率です。 </param>
+        private void ApplyPlaybackSpeed(float playbackSpeed)
+        {
+            if (!_director.playableGraph.IsValid() || _director.playableGraph.GetRootPlayableCount() == 0)
+            {
+                return;
+            }
+
+            _director.playableGraph.GetRootPlayable(0).SetSpeed(playbackSpeed);
         }
 
         /// <summary>

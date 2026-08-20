@@ -63,8 +63,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
             Vector3 endPosition = Vector3.Lerp(startAnchor, endAnchor, _endRatio) + _worldOffset;
             _travelTarget.position = startPosition;
 
-            return LMotion.Create(startPosition, endPosition, _durationSeconds)
-                .WithDelay(_delaySeconds)
+            float playbackSpeed = context.PlaybackSpeed;
+            return LMotion.Create(startPosition, endPosition, _durationSeconds / playbackSpeed)
+                .WithDelay(_delaySeconds / playbackSpeed)
                 .WithEase(_ease)
                 .BindToPosition(_travelTarget);
         }

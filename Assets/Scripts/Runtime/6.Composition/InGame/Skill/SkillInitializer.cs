@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Skill;
@@ -11,12 +12,14 @@ using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Skill.Effect;
 using KillChord.Runtime.Composition.InGame.UI;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
+using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
@@ -160,6 +163,10 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             SkillAttackController skillAttackController = new SkillAttackController(playerModuleContainer.PlayerEntity, targetResolver);
             PendingAttackEffectService pendingAttackEffectService = new PendingAttackEffectService();
             _skillHitScheduler = new SkillHitScheduler();
+
+            // 演出とダメージの双方へ、BPMに応じた同じ再生速度倍率を適用する。
+            float playbackSpeed = MusicConstants.GetPlaybackSpeed(musicSyncContainer.MusicSyncState.Bpm);
+            _skillHitScheduler.SetPlaybackSpeed(playbackSpeed);
             SkillEffectExecutorResolver effectExecutorResolver = new SkillEffectExecutorResolver();
             SkillEffectExecutorFactory.RegisterDefaults(
                 effectExecutorResolver,
@@ -175,7 +182,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 skillVisuals,
                 ToSkillIds(equippedSkills),
                 playerModuleContainer.PlayerView.transform,
-                targetSystemContainer.TargetSystemViewModel);
+                targetSystemContainer.TargetSystemViewModel,
+                playbackSpeed);
 
             _skillController = new SkillController(musicSyncContainer.MusicSyncService);
             _skillController.Initialize(BuildSkillExecutionControllers(
@@ -186,6 +194,17 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 skillCheckService,
                 skillUsecase));
             _skillController.OnSkillAnimationRequested += playerModuleContainer.PlayerView.PlaySkillAnimation;
+
+            // スキル発動中も、その拍に対応した武器を構えさせる。
+            _attackWeaponView = FindAnyObjectByType<PlayerAttackWeaponView>();
+            if (_attackWeaponView != null)
+            {
+                _skillController.OnSkillWeaponRequested += HandleSkillWeaponRequestedHandler;
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(SkillInitializer)}] {nameof(PlayerAttackWeaponView)} が見つからないため、スキル中の武器を表示できません。", this);
+            }
             _skillController.OnSkillVoiceRequested += playerModuleContainer.PlayerView.PlaySkillVoice;
             _boundPlayerView = playerModuleContainer.PlayerView;
             // 連撃の適用を毎フレーム進めるループを接続する。
@@ -221,6 +240,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// </summary>
         public override void Shutdown()
         {
+            if (_skillController != null && _attackWeaponView != null)
+            {
+                _skillController.OnSkillWeaponRequested -= HandleSkillWeaponRequestedHandler;
+            }
+
+            _attackWeaponView = null;
+
             if (_skillController != null && _boundPlayerView != null)
             {
                 _skillController.OnSkillAnimationRequested -= _boundPlayerView.PlaySkillAnimation;
@@ -248,17 +274,28 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         }
 
         /// <summary>
+        ///     スキルで構える武器を表示します。
+        /// </summary>
+        /// <param name="beatType"> 構える武器を決めるBeatTypeです。 </param>
+        private void HandleSkillWeaponRequestedHandler(BeatType beatType)
+        {
+            _attackWeaponView.Play((int)beatType);
+        }
+
+        /// <summary>
         ///     スキル演出Viewへエフェクト再生の依存を注入します。
         /// </summary>
         /// <param name="skillVisuals"> 対象のスキル演出View一覧です。 </param>
         /// <param name="skillIds"> 解決済みの装備スキルID一覧です。 </param>
         /// <param name="playerTransform"> プレイヤーのTransformです。 </param>
         /// <param name="targetSystemViewModel"> ターゲットシステムのViewModelです。 </param>
+        /// <param name="playbackSpeed"> BPMに応じた再生速度倍率です。 </param>
         private void InitializeSkillVisuals(
             IReadOnlyList<SkillView> skillVisuals,
             IReadOnlyList<int> skillIds,
             Transform playerTransform,
-            ITargetSystemViewModel targetSystemViewModel)
+            ITargetSystemViewModel targetSystemViewModel,
+            float playbackSpeed)
         {
             if (skillVisuals == null || skillVisuals.Count == 0)
             {
@@ -278,7 +315,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             // 実行するスキルとプールの対象がずれないよう、解決済みの装備スキルで作り直す。
             skillEffectContainer.Prewarm(skillIds);
 
-            SkillEffectContextFactory contextFactory = new SkillEffectContextFactory(playerTransform, targetSystemViewModel);
+            // 武器へエフェクトを取り付けられるよう、プレイヤーの武器表示Viewを供給元にする。
+            ISkillEffectWeaponSource weaponSource = FindAnyObjectByType<PlayerAttackWeaponView>();
+            SkillEffectContextFactory contextFactory = new SkillEffectContextFactory(
+                playerTransform,
+                targetSystemViewModel,
+                playbackSpeed,
+                weaponSource);
             for (int i = 0; i < skillVisuals.Count; i++)
             {
                 skillVisuals[i]?.Initialize(skillEffectContainer.SkillEffectPlayer, contextFactory);
@@ -537,6 +580,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private SkillInputProgressUIInitializer _skillInputProgressUIInitializer;
         private SkillCrosshairProgressUIInitializer _skillCrosshairProgressUIInitializer;
         private SkillListUIInitializer _skillListUIInitializer;
+        private PlayerAttackWeaponView _attackWeaponView;
         private SkillHitScheduler _skillHitScheduler;
         private SkillHitController _skillHitController;
         private SkillController _skillController;

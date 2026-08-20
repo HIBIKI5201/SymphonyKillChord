@@ -45,6 +45,10 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
                 return;
             }
 
+            // BPMに応じて演出全体の速度を合わせる。
+            ParticleSystem.MainModule speedModule = _particleSystem.main;
+            speedModule.simulationSpeed = _baseSimulationSpeed * context.PlaybackSpeed;
+
             if (_applyContextScale)
             {
                 ParticleSystem.MainModule mainModule = _particleSystem.main;
@@ -84,6 +88,15 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
             {
                 _particleSystem = GetComponent<ParticleSystem>();
             }
+
+            if (_particleSystem != null && !_isBaseSimulationSpeedCached)
+            {
+                _baseSimulationSpeed = _particleSystem.main.simulationSpeed;
+                _isBaseSimulationSpeedCached = true;
+            }
         }
+
+        private float _baseSimulationSpeed = 1f;
+        private bool _isBaseSimulationSpeedCached;
     }
 }

@@ -42,6 +42,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         [SerializeField, Tooltip("使用するイージングです。")]
         private Ease _ease = Ease.OutQuad;
 
+        [SerializeField, Tooltip("到達点でエフェクト原点(対象)へ正面を向けるかです。")]
+        private bool _facesEffectOrigin = true;
+
         private const float FULL_TURN_DEGREES = 360f;
         private const float MINIMUM_SQR_MAGNITUDE = 0.0001f;
 
@@ -76,14 +79,25 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
 
             _travelTarget.localPosition = startLocalPosition;
 
+            // 到達点から対象中心へ向けて構えさせる。
+            if (_facesEffectOrigin)
+            {
+                Vector3 aimDirection = new Vector3(-endLocalPosition.x, 0f, -endLocalPosition.z);
+                if (aimDirection.sqrMagnitude > MINIMUM_SQR_MAGNITUDE)
+                {
+                    _travelTarget.localRotation = Quaternion.LookRotation(aimDirection);
+                }
+            }
+
             // プールからの再利用時に、前回位置からの軌跡が残らないよう消去する。
             if (_trailRenderer != null)
             {
                 _trailRenderer.Clear();
             }
 
-            return LMotion.Create(startLocalPosition, endLocalPosition, _durationSeconds)
-                .WithDelay(_delaySeconds)
+            float playbackSpeed = context.PlaybackSpeed;
+            return LMotion.Create(startLocalPosition, endLocalPosition, _durationSeconds / playbackSpeed)
+                .WithDelay(_delaySeconds / playbackSpeed)
                 .WithEase(_ease)
                 .BindToLocalPosition(_travelTarget);
         }

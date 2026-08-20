@@ -47,7 +47,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
             Vector3 targetScale = _defaultScale * (_punchScale * context.Scale);
             _scaleTarget.localScale = _defaultScale;
 
-            return LMotion.Create(_defaultScale, targetScale, _durationSeconds)
+            return LMotion.Create(_defaultScale, targetScale, _durationSeconds / context.PlaybackSpeed)
                 .WithEase(_ease)
                 .WithLoops(PUNCH_LOOP_COUNT, LoopType.Yoyo)
                 .BindToLocalScale(_scaleTarget);
