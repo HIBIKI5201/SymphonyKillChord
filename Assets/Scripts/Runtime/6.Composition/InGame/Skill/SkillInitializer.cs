@@ -165,6 +165,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             SkillView[] skillVisuals = ResolveSkillVisuals(playerModuleContainer.PlayerInitializer);
             InitializeSkillVisuals(
                 skillVisuals,
+                ToSkillIds(equippedSkills),
                 playerModuleContainer.PlayerView.transform,
                 targetSystemContainer.TargetSystemViewModel);
 
@@ -216,10 +217,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         ///     スキル演出Viewへエフェクト再生の依存を注入します。
         /// </summary>
         /// <param name="skillVisuals"> 対象のスキル演出View一覧です。 </param>
+        /// <param name="skillIds"> 解決済みの装備スキルID一覧です。 </param>
         /// <param name="playerTransform"> プレイヤーのTransformです。 </param>
         /// <param name="targetSystemViewModel"> ターゲットシステムのViewModelです。 </param>
         private void InitializeSkillVisuals(
             IReadOnlyList<SkillView> skillVisuals,
+            IReadOnlyList<int> skillIds,
             Transform playerTransform,
             ITargetSystemViewModel targetSystemViewModel)
         {
@@ -238,11 +241,40 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 return;
             }
 
+            // 実行するスキルとプールの対象がずれないよう、解決済みの装備スキルで作り直す。
+            skillEffectContainer.Prewarm(skillIds);
+
             SkillEffectContextFactory contextFactory = new SkillEffectContextFactory(playerTransform, targetSystemViewModel);
             for (int i = 0; i < skillVisuals.Count; i++)
             {
                 skillVisuals[i]?.Initialize(skillEffectContainer.SkillEffectPlayer, contextFactory);
             }
+        }
+
+        /// <summary>
+        ///     装備中スキル一覧から数値IDの配列を作ります。
+        /// </summary>
+        /// <param name="equippedSkills"> 解決済みの装備スキル一覧です。 </param>
+        /// <returns> 装備スキルのID一覧です。 </returns>
+        private static int[] ToSkillIds(IReadOnlyList<SkillTemplate> equippedSkills)
+        {
+            if (equippedSkills == null || equippedSkills.Count == 0)
+            {
+                return Array.Empty<int>();
+            }
+
+            List<int> skillIds = new List<int>(equippedSkills.Count);
+            for (int i = 0; i < equippedSkills.Count; i++)
+            {
+                if (equippedSkills[i] == null)
+                {
+                    continue;
+                }
+
+                skillIds.Add(equippedSkills[i].Id.Value);
+            }
+
+            return skillIds.ToArray();
         }
 
         /// <summary>

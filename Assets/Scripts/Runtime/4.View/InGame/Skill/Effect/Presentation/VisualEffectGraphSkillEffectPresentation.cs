@@ -66,7 +66,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
 
             _visualEffect.Reinit();
 
-            if (!string.IsNullOrWhiteSpace(_scalePropertyName))
+            // 未定義のプロパティへ書き込むと再生ごとに警告が出るため、存在を確認する。
+            if (!string.IsNullOrWhiteSpace(_scalePropertyName) && _visualEffect.HasFloat(_scalePropertyName))
             {
                 _visualEffect.SetFloat(_scalePropertyName, context.Scale);
             }

@@ -44,6 +44,13 @@ namespace KillChord.Develop.View.InGame.SkillEffect
             if (_demoBoot != null)
             {
                 await _demoBoot.WaitForInitializationAsync();
+
+                // 失敗時も待機は完了するため、成否を確認しないと待機表示のままになる。
+                if (!_demoBoot.IsInitialized)
+                {
+                    _statusMessage = "初期化に失敗しました。Consoleを確認してください。";
+                    return;
+                }
             }
 
             if (!ServiceLocator.TryGetInstance(out SkillEffectModuleContainer moduleContainer))
@@ -51,6 +58,7 @@ namespace KillChord.Develop.View.InGame.SkillEffect
                 Debug.LogError(
                     $"[{nameof(SkillEffectDemoController)}] {nameof(SkillEffectModuleContainer)} が取得できませんでした。",
                     this);
+                _statusMessage = "エフェクトモジュールを取得できませんでした。";
                 return;
             }
 
@@ -81,7 +89,7 @@ namespace KillChord.Develop.View.InGame.SkillEffect
         {
             if (_skillEffectPlayer == null)
             {
-                GUI.Label(new Rect(GUI_MARGIN, GUI_MARGIN, GUI_WIDTH, GUI_LINE_HEIGHT), "初期化待機中...");
+                GUI.Label(new Rect(GUI_MARGIN, GUI_MARGIN, GUI_WIDTH * 2f, GUI_LINE_HEIGHT), _statusMessage);
                 return;
             }
 
@@ -177,6 +185,7 @@ namespace KillChord.Develop.View.InGame.SkillEffect
         private const float GUI_LINE_HEIGHT = 24f;
 
         private ISkillEffectPlayer _skillEffectPlayer;
+        private string _statusMessage = "初期化待機中...";
         private string[] _skillLabels = System.Array.Empty<string>();
         private float _orbitAngleDegrees;
     }

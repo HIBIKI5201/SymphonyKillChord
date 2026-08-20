@@ -26,16 +26,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
             Clear();
 
-            // 装備状況に関わらず使用する共通エフェクトを先に生成する。
-            IReadOnlyList<SkillEffectInstance> commonPrefabs = _catalog.CommonPrefabs;
-            if (commonPrefabs != null)
-            {
-                for (int i = 0; i < commonPrefabs.Count; i++)
-                {
-                    RegisterPrefab(COMMON_POOL_KEY - i, commonPrefabs[i]);
-                }
-            }
-
             if (equippedSkillIds == null)
             {
                 return;
@@ -126,17 +116,17 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// <summary>
         ///     エフェクトプレハブ1件分のプールを生成する。
         /// </summary>
-        /// <param name="poolKey"> プールを識別するキーです。 </param>
+        /// <param name="skillId"> プールを識別するスキルIDです。 </param>
         /// <param name="prefab"> 生成対象のエフェクトプレハブです。 </param>
-        private void RegisterPrefab(int poolKey, SkillEffectInstance prefab)
+        private void RegisterPrefab(int skillId, SkillEffectInstance prefab)
         {
-            if (prefab == null || _pools.ContainsKey(poolKey))
+            if (prefab == null || _pools.ContainsKey(skillId))
             {
                 return;
             }
 
-            SkillEffectPoolEntry entry = new SkillEffectPoolEntry(poolKey, prefab, InstantiateInstance, ReleaseInstance);
-            _pools.Add(poolKey, entry);
+            SkillEffectPoolEntry entry = new SkillEffectPoolEntry(skillId, prefab, InstantiateInstance, ReleaseInstance);
+            _pools.Add(skillId, entry);
             entry.Prewarm();
         }
 
@@ -157,9 +147,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// <summary>
         ///     再生完了したインスタンスをプールへ返却する。
         /// </summary>
-        /// <param name="poolKey"> 対象のプールキーです。 </param>
+        /// <param name="skillId"> 対象のスキルIDです。 </param>
         /// <param name="instance"> 返却するインスタンスです。 </param>
-        private void ReleaseInstance(int poolKey, SkillEffectInstance instance)
+        private void ReleaseInstance(int skillId, SkillEffectInstance instance)
         {
             if (instance == null)
             {
@@ -167,7 +157,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             }
 
             _activeInstances.Remove(instance);
-            if (_pools.TryGetValue(poolKey, out SkillEffectPoolEntry entry))
+            if (_pools.TryGetValue(skillId, out SkillEffectPoolEntry entry))
             {
                 entry.Pool.Release(instance);
                 return;
@@ -175,8 +165,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
             Destroy(instance.gameObject);
         }
-
-        private const int COMMON_POOL_KEY = int.MinValue;
 
         private readonly Dictionary<int, SkillEffectPoolEntry> _pools = new();
         private readonly List<SkillEffectInstance> _activeInstances = new();
@@ -189,12 +177,12 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             /// <summary>
             ///     プールエントリを生成する。
             /// </summary>
-            /// <param name="poolKey"> プールを識別するキーです。 </param>
+            /// <param name="skillId"> プールを識別するスキルIDです。 </param>
             /// <param name="prefab"> 対象のエフェクトプレハブです。 </param>
             /// <param name="instantiator"> インスタンス生成処理です。 </param>
             /// <param name="releaser"> インスタンス返却処理です。 </param>
             public SkillEffectPoolEntry(
-                int poolKey,
+                int skillId,
                 SkillEffectInstance prefab,
                 Func<SkillEffectInstance, SkillEffectInstance> instantiator,
                 Action<int, SkillEffectInstance> releaser)
@@ -202,7 +190,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
                 _prefab = prefab;
 
                 // 再生完了コールバックは毎回同じデリゲートを渡し、再生ごとのアロケーションを避ける。
-                ReleaseHandler = instance => releaser(poolKey, instance);
+                ReleaseHandler = instance => releaser(skillId, instance);
                 Pool = new ObjectPool<SkillEffectInstance>(
                     createFunc: () => instantiator(prefab),
                     actionOnGet: OnGetFromPool,

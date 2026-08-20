@@ -58,6 +58,10 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _onFinished = onFinished;
             _elapsedSeconds = 0f;
             _isPlaying = true;
+            _isLifetimeExceeded = false;
+
+            // 前回の待機者を取り残さないよう、作り直す前に必ず完了させる。
+            _completionSource.TrySetResult();
             _completionSource.Reset();
             UpdatePlacements();
             ResetCancellation();
@@ -128,11 +132,13 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             }
 
             _elapsedSeconds += Time.deltaTime;
-            if (_elapsedSeconds < _maxLifetimeSeconds)
+            if (_elapsedSeconds < _maxLifetimeSeconds || _isLifetimeExceeded)
             {
                 return;
             }
 
+            // キャンセルの伝播に複数フレームかかるため、通知は1回だけ行う。
+            _isLifetimeExceeded = true;
             Debug.LogWarning($"[{nameof(SkillEffectInstance)}] 最大再生時間を超えたため強制的に返却します。 Effect: {name}", this);
             Stop();
         }
@@ -277,6 +283,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         private float _elapsedSeconds;
         private bool _isPlaying;
         private bool _isPartsInitialized;
+        private bool _isLifetimeExceeded;
         private bool _isPlacementApplied;
     }
 }

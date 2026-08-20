@@ -96,7 +96,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// <returns> 到達点のローカル座標です。 </returns>
         private Vector3 ResolveScatteredLocalPosition(Transform parent, Vector3 playerWorldPosition)
         {
-            Vector3 origin = parent != null ? parent.position : Vector3.zero;
+            // 親が無い構成では、エフェクト自身の位置を原点として扱う。
+            Vector3 origin = parent != null ? parent.position : _travelTarget.position;
 
             // プレイヤーから見た奥方向を基準角とし、その周囲を候補から外す。
             Vector3 awayDirection = origin - playerWorldPosition;

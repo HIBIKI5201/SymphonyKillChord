@@ -14,9 +14,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         menuName = "KillChord/View/Skill/Skill Effect Catalog")]
     public sealed class SkillEffectCatalogConfig : ScriptableObject
     {
-        /// <summary> 装備状況に関わらず常に事前生成するエフェクトです。 </summary>
-        public IReadOnlyList<SkillEffectInstance> CommonPrefabs => _commonPrefabs;
-
         /// <summary>
         ///     指定スキルに対応するエフェクトプレハブを取得する。
         /// </summary>
@@ -31,9 +28,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
         [SerializeField, Tooltip("スキルとエフェクトプレハブの対応表です。")]
         private SkillEffectEntry[] _entries;
-
-        [SerializeField, Tooltip("装備状況に関わらず常に事前生成するエフェクトです。")]
-        private SkillEffectInstance[] _commonPrefabs;
 
         /// <summary>
         ///     スキルID索引を必要時に構築する。
