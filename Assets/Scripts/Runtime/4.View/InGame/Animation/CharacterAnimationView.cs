@@ -225,6 +225,7 @@ namespace KillChord.Runtime.View
         private bool _shouldNotifyDodgeEnded;
         private bool _canCancelOverlayByMovement;
         private bool _isOverlayCancelling;
+        private bool _hasStoppedSinceOverlayStarted;
         private bool _hasNotifiedOneShotEnded;
 
         /// <summary>
@@ -241,7 +242,7 @@ namespace KillChord.Runtime.View
         }
 
         /// <summary>
-        ///     移動速度がしきい値を超えた場合にオーバーレイのキャンセルを開始する。
+        ///     停止状態から移動を開始した場合にオーバーレイのキャンセルを開始する。
         /// </summary>
         private void TryStartOverlayCancellation()
         {
@@ -257,7 +258,23 @@ namespace KillChord.Runtime.View
                 return;
             }
 
-            if (_context.ViewModel.Velocity.magnitude < CharacterAnimationLocomotionCalculator.WALK_THRESHOLD)
+            // 停止を観測するまではキャンセルしない。硬直中に移動入力が無効化される前提で、
+            // 「硬直解除後に移動を開始した」場合のみキャンセル対象とする。
+            if (_context.ViewModel.Velocity.sqrMagnitude < Square(CharacterAnimationLocomotionCalculator.WALK_THRESHOLD))
+            {
+                _hasStoppedSinceOverlayStarted = true;
+                return;
+            }
+
+            if (!_hasStoppedSinceOverlayStarted)
+            {
+                return;
+            }
+
+            // 開始ブレンド中はキャンセルしない。ウェイトが上がりきる前に0へ補間すると、
+            // キャンセル開始ウェイトが0のままとなりワンショットが一切再生されないため。
+            float enterBlendDuration = Mathf.Clamp(_overlayEnterBlendDuration, 0f, _overlayBaseDuration);
+            if (_overlayElapsedBaseTime < enterBlendDuration)
             {
                 return;
             }
@@ -308,6 +325,7 @@ namespace KillChord.Runtime.View
         private void ResetOverlayCancellation()
         {
             _isOverlayCancelling = false;
+            _hasStoppedSinceOverlayStarted = false;
             _overlayCancelStartWeight = 0f;
             _overlayCancelElapsedBaseTime = 0f;
         }
@@ -338,6 +356,14 @@ namespace KillChord.Runtime.View
             }
 
             return 1f;
+        }
+
+        /// <summary>
+        /// 2乗
+        /// </summary>
+        private float Square(float x)
+        {
+            return x * x;
         }
     }
 }
