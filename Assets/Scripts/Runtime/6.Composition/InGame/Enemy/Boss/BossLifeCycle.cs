@@ -16,6 +16,7 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
@@ -197,7 +198,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform);
+            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform, GetComponent<Collider>());
 
             // View接続
             _view.Initialize(aiController, target);
@@ -364,8 +365,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     ボス死亡時に実行する処理。
         /// </summary>
-        private void HandleEnemyDied(CharacterEntity _)
+        /// <param name="diedEnemy"> 死亡したボスのEntity。</param>
+        private void HandleEnemyDied(CharacterEntity diedEnemy)
         {
+            // 撃破演出用に、ボスの撃破を通知する。
+            EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(diedEnemy.Id));
+
             if (_missionEventController != null && _loadedMissionKeyAsset != null)
             {
                 _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
