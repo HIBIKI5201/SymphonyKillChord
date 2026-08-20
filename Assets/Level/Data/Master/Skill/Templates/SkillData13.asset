@@ -33,10 +33,10 @@ MonoBehaviour:
     _displayFormat: 3
   - _id: 18
     _value: 0.800000011920929
-    _displayFormat: 0
+    _displayFormat: 5
   - _id: 19
     _value: 0.05999999865889549
-    _displayFormat: 0
+    _displayFormat: 5
   _skillType: 00000000
   _level: 0
   _cooldownNumerator: 1

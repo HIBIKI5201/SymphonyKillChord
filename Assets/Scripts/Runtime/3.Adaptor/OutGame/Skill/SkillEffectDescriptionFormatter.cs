@@ -88,6 +88,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
                 SkillEffectParameterId.InfectionRange => "{InfectionRange}",
                 SkillEffectParameterId.InfectionTriggerCount => "{InfectionTriggerCount}",
                 SkillEffectParameterId.InfectionDamageRate => "{InfectionDamageRate}",
+                SkillEffectParameterId.HitDelaySeconds => "{HitDelaySeconds}",
+                SkillEffectParameterId.HitIntervalSeconds => "{HitIntervalSeconds}",
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(id),
                     id,
