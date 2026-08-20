@@ -87,7 +87,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
+  m_StaticShadowCaster: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -177,7 +177,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
+  m_StaticShadowCaster: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -297,6 +297,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -1666525612480894169, guid: 231376546cc429b439fcde6db87b1f74, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 231376546cc429b439fcde6db87b1f74, type: 3}
       propertyPath: m_Name
       value: Corner_wall_01_03
@@ -358,6 +362,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 6f789971f22025f4786004815ad57937, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1960949654998389076, guid: 6f789971f22025f4786004815ad57937, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 6f789971f22025f4786004815ad57937, type: 3}
       propertyPath: m_Name
@@ -421,6 +429,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -1666525612480894169, guid: 231376546cc429b439fcde6db87b1f74, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 231376546cc429b439fcde6db87b1f74, type: 3}
       propertyPath: m_Name
       value: Corner_wall_01_03 (2)
@@ -482,6 +494,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 231376546cc429b439fcde6db87b1f74, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1666525612480894169, guid: 231376546cc429b439fcde6db87b1f74, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 231376546cc429b439fcde6db87b1f74, type: 3}
       propertyPath: m_Name

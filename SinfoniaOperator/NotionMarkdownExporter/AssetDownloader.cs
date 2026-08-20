@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SinfoniaStudio.NotionMarkdownExporter
@@ -21,11 +22,25 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             "<(?:audio|video|file|pdf)\\b[^>]*\\bsrc=\"(?<url>https?://[^\"]+)\"",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
+        /// <summary> 同時にダウンロードする添付ファイル数の上限。 </summary>
+        private const int MAX_CONCURRENT_DOWNLOADS = 6;
+
         private readonly HttpClient _httpClient = new()
         {
             Timeout = TimeSpan.FromMinutes(10)
         };
+        private readonly SemaphoreSlim _concurrencyLimiter = new(MAX_CONCURRENT_DOWNLOADS, MAX_CONCURRENT_DOWNLOADS);
+        private readonly StallWatchdog _watchdog;
         private bool _isDisposed;
+
+        /// <summary>
+        ///     添付ファイルのダウンローダーを生成する。
+        /// </summary>
+        /// <param name="watchdog">処理の停止を監視するウォッチドッグ。</param>
+        internal AssetDownloader(StallWatchdog watchdog)
+        {
+            _watchdog = watchdog;
+        }
 
         /// <summary>
         ///     Markdown内のメディアURLをダウンロードし、ローカル相対パスへ書き換える。
@@ -49,55 +64,86 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             if (urls.Count == 0) { return new AssetDownloadResult(markdown, 0); }
 
             string assetsDirectory = Path.Combine(outputDirectory, "assets", NotionIdentifier.ToShortId(pageId));
+            Directory.CreateDirectory(assetsDirectory);
+
+            IEnumerable<Task<DownloadedAsset?>> downloadTasks = urls.Select((assetUrl, index) =>
+                DownloadOneAsync(pageId, assetUrl, assetsDirectory, index + 1, warning));
+            DownloadedAsset?[] downloaded = await Task.WhenAll(downloadTasks);
+
             string rewritten = markdown;
             int downloadedCount = 0;
-            int assetIndex = 1;
-
-            foreach (AssetUrl assetUrl in urls)
+            foreach (DownloadedAsset? asset in downloaded)
             {
-                try
+                if (asset == null) { continue; }
+
+                string relativePath = PathUtility.GetRelativeMarkdownPath(pageFilePath, asset.FilePath);
+                rewritten = rewritten.Replace(asset.AssetUrl.OriginalUrl, relativePath, StringComparison.Ordinal);
+                if (!string.Equals(asset.AssetUrl.OriginalUrl, asset.AssetUrl.DecodedUrl, StringComparison.Ordinal))
                 {
-                    using HttpRequestMessage request = new(HttpMethod.Get, assetUrl.DecodedUrl);
-                    using HttpResponseMessage response = await _httpClient.SendAsync(
-                        request,
-                        HttpCompletionOption.ResponseHeadersRead);
-                    response.EnsureSuccessStatusCode();
-
-                    Directory.CreateDirectory(assetsDirectory);
-                    string fileName = CreateAssetFileName(assetUrl.DecodedUrl, response, assetIndex++);
-                    string filePath = Path.Combine(assetsDirectory, fileName);
-                    await using (Stream input = await response.Content.ReadAsStreamAsync())
-                    await using (FileStream output = new(
-                        filePath,
-                        FileMode.Create,
-                        FileAccess.Write,
-                        FileShare.None,
-                        81920,
-                        true))
-                    {
-                        await input.CopyToAsync(output);
-                    }
-
-                    string relativePath = PathUtility.GetRelativeMarkdownPath(pageFilePath, filePath);
-                    rewritten = rewritten.Replace(assetUrl.OriginalUrl, relativePath, StringComparison.Ordinal);
-                    if (!string.Equals(assetUrl.OriginalUrl, assetUrl.DecodedUrl, StringComparison.Ordinal))
-                    {
-                        rewritten = rewritten.Replace(assetUrl.DecodedUrl, relativePath, StringComparison.Ordinal);
-                    }
-
-                    generatedFiles.Add(Path.GetRelativePath(outputDirectory, filePath));
-                    downloadedCount++;
+                    rewritten = rewritten.Replace(asset.AssetUrl.DecodedUrl, relativePath, StringComparison.Ordinal);
                 }
-                catch (Exception ex)
-                {
-                    string host = Uri.TryCreate(assetUrl.DecodedUrl, UriKind.Absolute, out Uri? uri)
-                        ? uri.Host
-                        : "不明なホスト";
-                    warning($"ページ {pageId} の添付ファイルを取得できませんでした（{host}）: {ex.Message}");
-                }
+
+                generatedFiles.Add(Path.GetRelativePath(outputDirectory, asset.FilePath));
+                downloadedCount++;
             }
 
             return new AssetDownloadResult(rewritten, downloadedCount);
+        }
+
+        /// <summary>
+        ///     単一のメディアURLをダウンロードする。同時実行数はセマフォで制限する。
+        /// </summary>
+        /// <param name="pageId">メディアを所有するページID。</param>
+        /// <param name="assetUrl">ダウンロード対象URL。</param>
+        /// <param name="assetsDirectory">保存先ディレクトリ。</param>
+        /// <param name="index">ページ内の連番。</param>
+        /// <param name="warning">警告出力。</param>
+        /// <returns>ダウンロード結果。失敗した場合はnull。</returns>
+        private async Task<DownloadedAsset?> DownloadOneAsync(
+            string pageId,
+            AssetUrl assetUrl,
+            string assetsDirectory,
+            int index,
+            Action<string> warning)
+        {
+            await _concurrencyLimiter.WaitAsync();
+            try
+            {
+                _watchdog.ReportProgress($"添付ファイル取得: {GetFileNameFromUrl(assetUrl.DecodedUrl)}");
+                using HttpRequestMessage request = new(HttpMethod.Get, assetUrl.DecodedUrl);
+                using HttpResponseMessage response = await _httpClient.SendAsync(
+                    request,
+                    HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+
+                string fileName = CreateAssetFileName(assetUrl.DecodedUrl, response, index);
+                string filePath = Path.Combine(assetsDirectory, fileName);
+                await using (Stream input = await response.Content.ReadAsStreamAsync())
+                await using (FileStream output = new(
+                    filePath,
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None,
+                    81920,
+                    true))
+                {
+                    await input.CopyToAsync(output);
+                }
+
+                return new DownloadedAsset(assetUrl, filePath);
+            }
+            catch (Exception ex)
+            {
+                string host = Uri.TryCreate(assetUrl.DecodedUrl, UriKind.Absolute, out Uri? uri)
+                    ? uri.Host
+                    : "不明なホスト";
+                warning($"ページ {pageId} の添付ファイルを取得できませんでした（{host}）: {ex.Message}");
+                return null;
+            }
+            finally
+            {
+                _concurrencyLimiter.Release();
+            }
         }
 
         /// <summary>
@@ -108,6 +154,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             if (_isDisposed) { return; }
 
             _httpClient.Dispose();
+            _concurrencyLimiter.Dispose();
             _isDisposed = true;
         }
 
@@ -211,6 +258,26 @@ namespace SinfoniaStudio.NotionMarkdownExporter
 
             internal string OriginalUrl { get; }
             internal string DecodedUrl { get; }
+        }
+
+        /// <summary>
+        ///     ダウンロード済み添付ファイルの元URLと保存先を保持するクラス。
+        /// </summary>
+        private sealed class DownloadedAsset
+        {
+            /// <summary>
+            ///     ダウンロード結果を生成する。
+            /// </summary>
+            /// <param name="assetUrl">元のURL情報。</param>
+            /// <param name="filePath">保存先パス。</param>
+            internal DownloadedAsset(AssetUrl assetUrl, string filePath)
+            {
+                AssetUrl = assetUrl;
+                FilePath = filePath;
+            }
+
+            internal AssetUrl AssetUrl { get; }
+            internal string FilePath { get; }
         }
     }
 

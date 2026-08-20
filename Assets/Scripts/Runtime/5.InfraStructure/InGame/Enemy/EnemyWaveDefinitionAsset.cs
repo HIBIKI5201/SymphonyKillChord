@@ -2,10 +2,12 @@ using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.InfraStructure.InGame.Stage;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Enemy;
 using SymphonyFrameWork.Attribute;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 {
@@ -15,6 +17,12 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     [CreateAssetMenu(fileName = "EnemyWavesDefinitionAsset", menuName = "KillChord/Enemy/" + nameof(EnemyWaveDefinitionAsset))]
     public class EnemyWaveDefinitionAsset : ScriptableObject
     {
+        /// <summary> 敵Wave定義IDです。 </summary>
+        public EnemyWaveDefinitionId Id => new EnemyWaveDefinitionId(_id.Id);
+
+        /// <summary> このWave定義が対象とするバトルシーン名です。 </summary>
+        public string BattleSceneName => _battleSceneName;
+
         /// <summary>
         ///     1ステージ分の敵Wave定義を生成する。
         /// </summary>
@@ -29,7 +37,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                 EnemyWaveDetail[] details = new EnemyWaveDetail[sourceDetails.Length];
                 for (int j = 0; j < sourceDetails.Length; j++)
                 {
-                    EnemyWaveDetail detail = new EnemyWaveDetail(sourceDetails[j].EnemyType, sourceDetails[j].EnemyAmount);
+                    EnemyWaveDetail detail = new EnemyWaveDetail(
+                        new EnemyDefinitionId(sourceDetails[j].EnemyDefinitionId.Id),
+                        sourceDetails[j].EnemyAmount);
                     details[j] = detail;
                 }
 
@@ -46,10 +56,25 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                     }
                 }
 
+                DataID[] sourceSpawnPointCandidates =
+                    sourceWaves[i].SpawnPointCandidates ?? Array.Empty<DataID>();
+                List<int> spawnPointCandidateHashes = new(sourceSpawnPointCandidates.Length);
+                for (int j = 0; j < sourceSpawnPointCandidates.Length; j++)
+                {
+                    // 未設定の要素は候補指定とみなさない。
+                    if (sourceSpawnPointCandidates[j].Id == 0)
+                    {
+                        continue;
+                    }
+
+                    spawnPointCandidateHashes.Add(sourceSpawnPointCandidates[j].Id);
+                }
+
                 EnemyWaveDefinition wave = new EnemyWaveDefinition(
                     details,
                     sourceWaves[i].WaveDuration,
-                    stageEffectIds);
+                    stageEffectIds,
+                    spawnPointCandidateHashes);
                 waves[i] = wave;
             }
 
@@ -88,6 +113,13 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             return catalog;
         }
 
+        [SerializeField, SourceDataCollection("Wave"), Tooltip("敵Wave定義を一意に識別するIDです。")]
+        private DataID _id;
+
+        // スポーン候補地はシーン内のオブジェクトを指すため、対象シーンはWave定義側が保持する。
+        [SerializeField, SceneNameSelector, Tooltip("このWave定義が対象とするバトルステージシーン名です。")]
+        private string _battleSceneName = "Stage_01";
+
         [SerializeField, Tooltip("1Wave分の定義")]
         private SingleWaveDefinition[] _waves;
         [SerializeField, Tooltip("全Wave終了後、繰り返して生成するか")]
@@ -98,22 +130,32 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         [Serializable]
         private class WaveDetailDefinition
         {
-            /// <summary> 敵種類 </summary>
-            [Tooltip("敵種類")] public EnemyType EnemyType;
+            /// <summary> 生成する個別の敵定義IDです。 </summary>
+            [SourceDataCollection("EnemyData"), Tooltip("生成する個別の敵データです。")]
+            public DataID EnemyDefinitionId;
             /// <summary> 敵の数 </summary>
             [Tooltip("敵の生成数"), Range(0, 20)] public int EnemyAmount;
+
+            [FormerlySerializedAs("EnemyType")]
+            [SerializeField, HideInInspector]
+            private EnemyType _legacyEnemyType;
         }
 
         [Serializable]
         private class SingleWaveDefinition
         {
-            /// <summary> 敵種類ごとの詳細 </summary>
-            [Tooltip("敵種類ごとの定義")] public WaveDetailDefinition[] Details;
+            /// <summary> 個別の敵データごとの詳細です。 </summary>
+            [Tooltip("個別の敵データごとの定義です。")]
+            public WaveDetailDefinition[] Details;
             /// <summary> 次Waveまでの時間 </summary>
             [Tooltip("Waveの継続時間(秒)"), Range(0, 1800)] public float WaveDuration;
             /// <summary> Wave開始時に予約するステージ演出です。 </summary>
             [SerializeReference, SubclassSelector, Tooltip("Wave開始時に音楽同期で実行するステージ演出です。")]
             public List<StageEffectAssetBase> StageEffects = new();
+            /// <summary> このWaveで敵を生成する際の候補スポーンポイントです。空の場合は全スポーンポイントが対象です。 </summary>
+            [SourceDataCollection(SpawnPositionPair.SPAWN_POINT_COLLECTION_KEY, isSceneScoped: true)]
+            [Tooltip("このWaveで敵を生成する際の候補スポーンポイントです。空の場合は全スポーンポイントが対象です。")]
+            public DataID[] SpawnPointCandidates = Array.Empty<DataID>();
         }
     }
 }

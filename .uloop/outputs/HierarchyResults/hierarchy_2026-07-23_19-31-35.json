@@ -1,0 +1,1147 @@
+{
+  "ExportTimestamp": "2026-07-23 19:31:35",
+  "Context": {
+    "sceneType": "editor",
+    "sceneName": "Stage_01",
+    "nodeCount": 86,
+    "maxDepth": 1
+  },
+  "Hierarchy": [
+    {
+      "sceneName": "Stage_01",
+      "stats": {
+        "rootCount": 37,
+        "nodeCount": 86,
+        "maxDepth": 1
+      },
+      "componentsLut": [
+        "Transform",
+        "Camera",
+        "AudioListener",
+        "UniversalAdditionalCameraData",
+        "Light",
+        "UniversalAdditionalLightData",
+        "Volume",
+        "OcclusionArea",
+        "NavMeshSurface",
+        "PlayerSpawnPoint",
+        "StageSceneObjects",
+        "SpawnPointsPairDrawer",
+        "SpawnPositionPair",
+        "MeshFilter",
+        "MeshRenderer",
+        "CapsuleCollider",
+        "NavMeshAgent",
+        "BehaviorGraphAgent",
+        "BossInitializer",
+        "BossLifeCycle",
+        "BossMoveView",
+        "EnemyHealthView",
+        "EnemyRaycastDetectView",
+        "TripleShotRaycastDetectView",
+        "NearestAttackPositionSearchView",
+        "ShellSpawner",
+        "BossBattleAIFacade",
+        "BossMovementAIFacade",
+        "BossSharedFacade",
+        "BossStateFacade",
+        "LineRenderer",
+        "RectTransform",
+        "Canvas",
+        "CanvasScaler",
+        "GraphicRaycaster",
+        "EnemyHealthBillboardView"
+      ],
+      "roots": [
+        {
+          "name": "Environment",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 0,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "Camera",
+              "isActive": false,
+              "componentsIdx": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "Directional Light",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                4,
+                5
+              ],
+              "siblingIndex": 1,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "Directional Light_1",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                4,
+                5
+              ],
+              "siblingIndex": 2,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "Global Volume",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                6
+              ],
+              "siblingIndex": 3,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "OcclusionCulling",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                7
+              ],
+              "siblingIndex": 4,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "Map",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                8
+              ],
+              "siblingIndex": 5,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "PlayerSpawnPoint",
+          "isActive": true,
+          "componentsIdx": [
+            0,
+            9
+          ],
+          "siblingIndex": 1,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "StageSceneInitializer",
+          "isActive": true,
+          "componentsIdx": [
+            0,
+            10
+          ],
+          "siblingIndex": 2,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "SpawnPositions",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 3,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "SpawnPointsDrawer",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                11
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "PositionPair",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                12
+              ],
+              "siblingIndex": 1,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "PositionPair_1",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                12
+              ],
+              "siblingIndex": 2,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "PositionPair_6",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                12
+              ],
+              "siblingIndex": 3,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "PositionPair_7",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                12
+              ],
+              "siblingIndex": 4,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "PositionPair_8",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                12
+              ],
+              "siblingIndex": 5,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "PositionPair_9",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                12
+              ],
+              "siblingIndex": 6,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "PositionPair_10",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                12
+              ],
+              "siblingIndex": 7,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "PositionPair_16",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                12
+              ],
+              "siblingIndex": 8,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            },
+            {
+              "name": "PositionPair_17",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                12
+              ],
+              "siblingIndex": 9,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "Boss",
+          "isActive": true,
+          "componentsIdx": [
+            0,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30
+          ],
+          "siblingIndex": 4,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "Canvas",
+              "isActive": true,
+              "componentsIdx": [
+                31,
+                32,
+                33,
+                34,
+                35
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 8,
+              "children": []
+            },
+            {
+              "name": "TripleLineDrawers",
+              "isActive": true,
+              "componentsIdx": [
+                0
+              ],
+              "siblingIndex": 1,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Tank_01",
+          "isActive": true,
+          "componentsIdx": [
+            0,
+            13,
+            14
+          ],
+          "siblingIndex": 5,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": []
+        },
+        {
+          "name": "BgMD_Donou_01",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 6,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_01_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_03",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 7,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_01_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_07",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 8,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_01_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_08",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 9,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_01_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_09",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 10,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_01_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_10",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 11,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_01_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_16",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 12,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_01_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_18",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 13,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_01_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_02",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 14,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_05",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 15,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_04",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 16,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_11",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 17,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_21",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 18,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_15",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 19,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_12",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 20,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_20",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 21,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_13",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 22,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_22",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 23,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_14",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 24,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_23",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 25,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_17",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 26,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_19",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 27,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Donou_06",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 28,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "donou_02_low",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Fence_01",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 29,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "WireFence_01",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Fence_02",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 30,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "WireFence_01",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Fence_03",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 31,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "WireFence_01",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Fence_04",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 32,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "WireFence_01",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Fence_05",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 33,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "WireFence_01",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Fence_06",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 34,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "WireFence_01",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Fence_07",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 35,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "WireFence_01",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "BgMD_Fence_08",
+          "isActive": true,
+          "componentsIdx": [
+            0
+          ],
+          "siblingIndex": 36,
+          "tag": "Untagged",
+          "layer": 0,
+          "children": [
+            {
+              "name": "WireFence_01",
+              "isActive": true,
+              "componentsIdx": [
+                0,
+                13,
+                14
+              ],
+              "siblingIndex": 0,
+              "tag": "Untagged",
+              "layer": 0,
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

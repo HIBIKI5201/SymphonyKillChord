@@ -12,14 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 627ee99fd40337244b7963aeef8c21a2, type: 3}
   m_Name: SkillNodeData-N2
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeData
+  UnlockCost: 10
+  SkillDetail: "\u30B9\u30AD\u30EB\u5927\n\uFF12\uFF0D\uFF11\n\u3042\n\u3044\n\u3046\n\u3048\n\u304A"
+  PreviewVideoClip: {fileID: 32900000, guid: 5e0d75b2b610b0c4eab7a704a940971b, type: 3}
+  _statusBonusEffects: []
+  _unlockSkills:
+  - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
   _nodeId:
     _id: node_n2
     _hashId: 1668731980
   _parentNodeIds:
   - _id: node_n102
     _hashId: -1988313497
-  UnlockCost: 10
-  SkillDetail: "\u30B9\u30AD\u30EB\u5927\n\uFF12\uFF0D\uFF11\n\u3042\n\u3044\n\u3046\n\u3048\n\u304A"
-  PreviewVideoClip: {fileID: 32900000, guid: 5e0d75b2b610b0c4eab7a704a940971b, type: 3}
-  _unlockSkills:
-  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
+  references:
+    version: 2
+    RefIds: []

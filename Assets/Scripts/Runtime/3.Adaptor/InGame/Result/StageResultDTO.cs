@@ -16,8 +16,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             string mainMissionText,
             string mainMissionStateText,
             ReadOnlySpan<StageResultMissionItemDTO> subMissionItems,
-            string battleTimeText,
-            string maxComboText,
+            float battleTimeSeconds,
+            int maxCombo,
             string rankText,
             string tipsText)
         {
@@ -26,8 +26,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             MainMissionText = mainMissionText ?? string.Empty;
             MainMissionStateText = mainMissionStateText ?? string.Empty;
             SubMissionItems = subMissionItems;
-            BattleTimeText = battleTimeText ?? string.Empty;
-            MaxComboText = maxComboText ?? string.Empty;
+            BattleTimeSeconds = battleTimeSeconds;
+            MaxCombo = maxCombo;
             RankText = rankText ?? string.Empty;
             TipsText = tipsText ?? string.Empty;
         }
@@ -47,11 +47,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         /// <summary> サブミッションのアイテムを取得します。 </summary>
         public ReadOnlySpan<StageResultMissionItemDTO> SubMissionItems { get; }
 
-        /// <summary> 戦闘時間のテキストを取得します。 </summary>
-        public string BattleTimeText { get; }
+        /// <summary> 戦闘時間（秒）を取得します。 </summary>
+        public float BattleTimeSeconds { get; }
 
-        /// <summary> 最大コンボ数のテキストを取得します。 </summary>
-        public string MaxComboText { get; }
+        /// <summary> 最大コンボ数を取得します。 </summary>
+        public int MaxCombo { get; }
 
         /// <summary> ランクのテキストを取得します。 </summary>
         public string RankText { get; }

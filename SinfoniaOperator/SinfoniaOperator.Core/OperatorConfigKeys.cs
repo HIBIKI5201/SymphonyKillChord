@@ -17,6 +17,9 @@
         /// <summary> BotトークンでのREST送信の代わりに使用するWebhook URL。 </summary>
         public const string DISCORD_WEBHOOK_URL = "DISCORD_WEBHOOK_URL";
 
+        /// <summary> Discordログの取得対象にするチャンネルID配列。 </summary>
+        public const string DISCORD_LOG_CHANNEL_IDS = "DISCORD_LOG_CHANNEL_IDS";
+
         public const string NOTION_TOKEN = "NOTION_TOKEN";
         public const string NOTION_TASK_DATABASE_ID = "NOTION_TASK_DATABASE_ID";
         public const string NOTION_SPRINT_DATABASE_ID = "NOTION_SPRINT_DATABASE_ID";
@@ -30,5 +33,11 @@
 
         /// <summary> Markdownエクスポートの出力先ディレクトリ。 </summary>
         public const string NOTION_EXPORT_OUTPUT = "NOTION_EXPORT_OUTPUT";
+
+        /// <summary>
+        ///     Markdown書き込みを許可するページIDの配列。
+        ///     ここに挙げたページの子孫だけが編集対象になる。
+        /// </summary>
+        public const string NOTION_WRITE_ALLOWED_ROOTS = "NOTION_WRITE_ALLOWED_ROOTS";
     }
 }
