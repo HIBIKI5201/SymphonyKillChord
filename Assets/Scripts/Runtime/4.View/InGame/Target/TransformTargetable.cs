@@ -25,6 +25,9 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary> 対象の一意なID。 </summary>
         public Guid TargetId => _targetId;
 
+        /// <summary> 追跡対象のTransform。無効な場合はnull。 </summary>
+        public Transform TargetTransform => IsAlive ? _targetTransform : null;
+
         /// <summary> 対象の現在位置。無効な場合は <see cref="Vector3.zero"/> を返す。 </summary>
         public Vector3 Position => IsAlive ? _targetTransform.position : Vector3.zero;
 
