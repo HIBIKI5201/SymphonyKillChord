@@ -130,6 +130,7 @@ namespace KillChord.Runtime.View.InGame.Music
             }
             SetBeatAnimation(activeIndex, isJustTiming);
             _currentOpenIndex = activeIndex;
+            UpdateCurrentBeatColor();
         }
 
         /// <summary>
@@ -217,6 +218,30 @@ namespace KillChord.Runtime.View.InGame.Music
             color = _beatColor[index];
             return true;
         }
+        
+        /// <summary>
+        /// 現在のビート色を表示用Imageへ反映する。
+        /// </summary>
+        private void UpdateCurrentBeatColor()
+        {
+            if (_currentBeatColorImages == null || _currentBeatColorImages.Length == 0)
+            {
+                return;
+            }
+
+            if (!TryGetCurrentBeatColor(out Color color))
+            {
+                return;
+            }
+
+            for (int i = 0; i < _currentBeatColorImages.Length; i++)
+            {
+                if (_currentBeatColorImages[i] != null)
+                {
+                    _currentBeatColorImages[i].color = color;
+                }
+            }
+        }
 
         /// <summary> ビート描画の基準全長の既定値。 </summary>
         private const float DEFAULT_DISPLAY_LENGTH = 120f;
@@ -245,6 +270,11 @@ namespace KillChord.Runtime.View.InGame.Music
         [SerializeField] private Image[] _beatPositionImages;
         [Tooltip("ビート位置を表示するRectTransform")]
         [SerializeField] private RectTransform[] _beatPositionRectTransforms;
+        
+        [Space]
+        [Tooltip("現在のビート色を表示するImage")]
+        [SerializeField]
+        private Image[] _currentBeatColorImages;
 
         [Space]
 
