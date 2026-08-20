@@ -6,7 +6,7 @@ OcclusionCullingSettings:
   serializedVersion: 2
   m_OcclusionBakeSettings:
     smallestOccluder: 1
-    smallestHole: 0.02
+    smallestHole: 0.1
     backfaceThreshold: 100
   m_SceneGUID: 01b70db0be70fc14eb319daa11636ecb
   m_OcclusionCullingData: {fileID: 36300000, guid: 14a55dcc68f19fa46a98d818884a63e2, type: 2}
@@ -11653,8 +11653,8 @@ OcclusionArea:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1003885046}
   serializedVersion: 2
-  m_Size: {x: 40.283543, y: 31.94064, z: 35.40549}
-  m_Center: {x: -40.435394, y: 9.02968, z: -14.840392}
+  m_Size: {x: 47.781197, y: 15.622647, z: 47.64588}
+  m_Center: {x: -43.033447, y: 0.8706851, z: -15.067066}
   m_IsViewVolume: 1
 --- !u!1001 &1017905230
 PrefabInstance:
