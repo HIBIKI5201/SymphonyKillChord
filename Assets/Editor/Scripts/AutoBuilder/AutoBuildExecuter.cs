@@ -194,9 +194,14 @@ namespace KillChord.Editor.AutoBuilder
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
+            ReplayPendingLogIfAny();
+            if (!IsRunning)
+            {
+                return;
+            }
+
             LogDebug("初期化処理（ドメインリロード後）を開始");
             Application.logMessageReceived += HandleLogMessage;
-            ReplayPendingLogIfAny();
 
             EditorApplication.delayCall += Resume;
         }
@@ -216,7 +221,7 @@ namespace KillChord.Editor.AutoBuilder
                 return;
             }
 
-            if (!BuildSession.LoadSession().Running)
+            if (!IsRunning)
             {
                 return;
             }
@@ -862,6 +867,12 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="methodName">呼び出し元のメソッド名（自動取得）</param>
         private static void LogDebug(string message = "", [System.Runtime.CompilerServices.CallerMemberName] string methodName = "")
         {
+            // バッチモードでの実行時のみログを出力する
+            if (!Application.isBatchMode)
+            {
+                return;
+            }
+
             string time = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
             string additionalMessage = string.IsNullOrEmpty(message) ? "" : $" - {message}";
             Debug.Log($"[{nameof(AutoBuildExecuter)}] [DEBUG] {time} | {methodName}{additionalMessage}");
