@@ -150,7 +150,7 @@
                 #pragma vertex vert
                 #pragma fragment frag
                 #pragma multi_compile _ FADE_ON
-                #pragma shader_feature_local SMEARS_ON
+                #pragma multi_compile_local _ SMEARS_ON
                 #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
 
                 #pragma multi_compile_vertex _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
