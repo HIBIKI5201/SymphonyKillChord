@@ -82,6 +82,9 @@ ExportedPackages/
 
 /SinfoniaOperator/sinfonia-operator.secrets.json
 
+# NotionMarkdownWriter が pull した編集用の作業ファイル。
+/SinfoniaOperator/.notion-work/
+
 # CRI Atom Craft 作曲プロジェクト実体 (バックアップ/セッション等を含み肥大化するため除外。
 # ランタイムは Assets/StreamingAssets の .acb/.acf のみ使用する)
 /[Aa]ssets/SymphonyKillChord/
@@ -99,3 +102,10 @@ __pycache__/
 
 # Hot Reload (有償アセット。各自でインストールするためリポジトリでは共有しない)
 Packages/com.singularitygroup.hotreload/
+
+# Entities のSubSceneベイクで生成されるキャッシュ
+Assets/SceneDependencyCache/
+Assets/SceneDependencyCache.meta
+
+# uloop-cli の出力
+.uloop/

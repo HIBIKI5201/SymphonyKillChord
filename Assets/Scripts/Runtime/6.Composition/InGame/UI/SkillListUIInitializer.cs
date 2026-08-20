@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Skill;
@@ -12,27 +13,33 @@ namespace KillChord.Runtime.Composition.InGame.UI
     ///     リズムGUI下部の <see cref="Skill.SkillInputProgressUIInitializer"/>（次の1拍のみ表示）や
     ///     クロスヘア用UIとは独立した、常時表示の一覧UIを担当する。
     /// </summary>
-    public sealed class SkillListUIInitializer : MonoBehaviour
+    public sealed class SkillListUIInitializer : InGameInitializationModuleBase
     {
-        private void Awake()
+        public override string ModuleName => nameof(SkillListUIInitializer);
+
+        public override int Order => 441;
+
+        public override bool Build()
         {
             if (_uiConfig == null)
             {
                 Debug.LogError($"[{nameof(SkillListUIInitializer)}] {nameof(_uiConfig)} が未設定です。", this);
-                return;
+                return false;
             }
             if (_rowViewPrefab == null || _stepViewPrefab == null || _rowRoot == null)
             {
                 Debug.LogError($"[{nameof(SkillListUIInitializer)}] Prefabまたは配置先Transformが未設定です。", this);
-                return;
+                return false;
             }
 
             _viewSetting = _uiConfig.Create();
             ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             _isRegistered = true;
+
+            return true;
         }
 
-        private void OnDestroy()
+        public override void Shutdown()
         {
             if (_isRegistered)
                 ServiceLocator.UnregisterInstance(this);
@@ -42,11 +49,12 @@ namespace KillChord.Runtime.Composition.InGame.UI
         ///     スキル定義データを指定し、一覧へ表示する1スキル分の行を生成する。
         /// </summary>
         /// <param name="definition"> 対象のスキル定義。 </param>
+        /// <param name="skillIcon"> 行に表示するスキルアイコン。未設定の場合はnull。 </param>
         /// <returns> 生成した行View。 </returns>
-        public ISkillInputProgressRowView CreateSkillListRow(SkillDefinition definition)
+        public ISkillInputProgressRowView CreateSkillListRow(SkillDefinition definition, Sprite skillIcon)
         {
             SkillListRowView rowView = Instantiate(_rowViewPrefab, _rowRoot);
-            rowView.Initialize(_viewSetting.AnimationSetting);
+            rowView.Initialize(_viewSetting.AnimationSetting, skillIcon);
 
             SkillListStepView[] stepViews = new SkillListStepView[definition.SkillPattern.Signatures.Length];
             for (int i = 0; i < definition.SkillPattern.Signatures.Length; i++)
@@ -74,5 +82,6 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         private SkillInputProgressViewSetting _viewSetting;
         private bool _isRegistered;
+
     }
 }

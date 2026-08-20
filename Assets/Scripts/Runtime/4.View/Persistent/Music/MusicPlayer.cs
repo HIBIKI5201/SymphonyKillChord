@@ -69,6 +69,22 @@ namespace KillChord.Runtime.View.Persistent.Music
             }
         }
 
+        /// <summary>
+        ///     BGM再生、及び再生時間を一時停止する。
+        /// </summary>
+        public void PauseBGM()
+        {
+            _cri.Pause(true);
+        }
+
+        /// <summary>
+        ///     BGM再生、及び再生時間の進行を再開する。
+        /// </summary>
+        public void ResumeBGM()
+        {
+            _cri.Pause(false);
+        }
+
         private const double MILLISECONDS_PER_SECOND = 1000d;
 
         private CriAtomSource _cri;

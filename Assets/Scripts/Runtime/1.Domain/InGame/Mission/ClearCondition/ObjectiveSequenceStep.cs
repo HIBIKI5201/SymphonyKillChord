@@ -1,10 +1,12 @@
+using KillChord.Runtime.Domain.InGame.Mission.StepEntryAction;
 using System;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 {
     /// <summary>
-    ///     目標シーケンスの1ステップを表すクラス。達成条件と、ステップ開始時に案内するメッセージを保持する。
-    ///     Wave開始やポップアップ表示などの特殊な振る舞いは、Step自体ではなく<see cref="Condition"/>側(デコレータ条件)が表現する。
+    ///     目標シーケンスの1ステップを表すクラス。達成条件、ステップ開始時に案内するメッセージ、
+    ///     およびステップ進入時アクションを保持する。
     /// </summary>
     public sealed class ObjectiveSequenceStep
     {
@@ -13,10 +15,15 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         /// </summary>
         /// <param name="condition"> このステップの達成条件です。 </param>
         /// <param name="guideMessageText"> ステップ開始時に案内するメッセージです。不要な場合は空文字またはnullです。 </param>
-        public ObjectiveSequenceStep(IMissionClearCondition condition, string guideMessageText)
+        /// <param name="entryActions">ステップ進入時に実行するアクション一覧です。不要な場合はnullまたは空の一覧です。</param>
+        public ObjectiveSequenceStep(
+            IMissionClearCondition condition,
+            string guideMessageText,
+            IReadOnlyList<IMissionStepEntryAction> entryActions)
         {
             Condition = condition ?? throw new ArgumentNullException(nameof(condition));
             GuideMessageText = guideMessageText;
+            EntryActions = CreateEntryActions(entryActions);
         }
 
         /// <summary> このステップの達成条件です。 </summary>
@@ -24,6 +31,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 
         /// <summary> ステップ開始時に案内するメッセージです。未設定の場合はnullまたは空文字です。 </summary>
         public string GuideMessageText { get; }
+
+        /// <summary> ステップ進入時に実行するアクション一覧です。 </summary>
+        public IReadOnlyList<IMissionStepEntryAction> EntryActions { get; }
 
         /// <summary>ステップ開始時の進行値を条件へ通知します。</summary>
         /// <param name="progress">Mission進行状況です。</param>
@@ -33,6 +43,33 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
             {
                 stepCondition.BeginStep(progress);
             }
+        }
+
+        /// <summary>
+        ///     ステップ進入時アクション一覧を生成します。
+        /// </summary>
+        /// <param name="entryActions">元となるアクション一覧</param>
+        /// <returns>変更できないアクション一覧です。</returns>
+        private static IReadOnlyList<IMissionStepEntryAction> CreateEntryActions(
+            IReadOnlyList<IMissionStepEntryAction> entryActions)
+        {
+            if (entryActions == null || entryActions.Count == 0)
+            {
+                return Array.Empty<IMissionStepEntryAction>();
+            }
+
+            List<IMissionStepEntryAction> actions = new(entryActions.Count);
+            for (int i = 0; i < entryActions.Count; i++)
+            {
+                IMissionStepEntryAction entryAction = entryActions[i];
+                if (entryAction == null)
+                {
+                    throw new ArgumentException($"{nameof(entryActions)}[{i}]がnull.", nameof(entryActions));
+                }
+                actions.Add(entryAction);
+            }
+
+            return actions.AsReadOnly();
         }
     }
 }
