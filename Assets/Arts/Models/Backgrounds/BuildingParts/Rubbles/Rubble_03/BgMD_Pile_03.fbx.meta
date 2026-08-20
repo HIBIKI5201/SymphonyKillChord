@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: fe6b8dd6fd7829b43bab03e14cbadda2
+guid: db95245824aa91941bc2a1f7261ac4bd
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,13 +7,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: BgM_Wire_01
+      name: Wire
     second: {fileID: 2100000, guid: aee02f8bbf96d3c449bd25693ecf1363, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: lambert1
-    second: {fileID: 2100000, guid: 0d20af6cd29c70642989f9f8e31e3e4f, type: 2}
+      name: openPBR_shader1
+    second: {fileID: 2100000, guid: f53e1b7cd4bda6d4f80a37fd1fc92e51, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

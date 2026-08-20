@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: fe6b8dd6fd7829b43bab03e14cbadda2
+guid: a1be7ea4e0055e745869120df4741b62
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,13 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: BgM_Wire_01
-    second: {fileID: 2100000, guid: aee02f8bbf96d3c449bd25693ecf1363, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: lambert1
-    second: {fileID: 2100000, guid: 0d20af6cd29c70642989f9f8e31e3e4f, type: 2}
+      name: BgM_WeaponBox_02
+    second: {fileID: 2100000, guid: e963216cc0bc6c74683f1e9b3a14e274, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
