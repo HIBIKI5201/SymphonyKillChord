@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: fe6b8dd6fd7829b43bab03e14cbadda2
+guid: e666b5672ba142944ba82d72a22de4e8
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,13 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: BgM_Wire_01
-    second: {fileID: 2100000, guid: aee02f8bbf96d3c449bd25693ecf1363, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: lambert1
-    second: {fileID: 2100000, guid: 0d20af6cd29c70642989f9f8e31e3e4f, type: 2}
+      name: BgM_Aircon_01
+    second: {fileID: 2100000, guid: ff737af694c06d046b699dcbc9ad3c47, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
