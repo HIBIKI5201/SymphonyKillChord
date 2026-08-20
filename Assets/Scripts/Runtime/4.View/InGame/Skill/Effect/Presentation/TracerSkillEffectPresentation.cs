@@ -9,6 +9,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     /// </summary>
     public sealed class TracerSkillEffectPresentation : SkillEffectPresentationBase
     {
+        private const float MINIMUM_SQR_MAGNITUDE = 0.0001f;
+
         [SerializeField, Tooltip("弾道を描くLineRendererです。未設定時は自身から取得します。")]
         private LineRenderer _lineRenderer;
 
@@ -23,6 +25,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
 
         [SerializeField, Min(0f), Tooltip("弾道を表示し続ける時間です。")]
         private float _visibleSeconds = 0.04f;
+
+        [SerializeField, Min(0f), Tooltip("着弾点を貫通して弾道を伸ばす距離です。")]
+        private float _penetrationDistance = 4f;
 
         /// <summary>
         ///     LineRendererの参照を解決する。
@@ -65,8 +70,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
             // 発射の瞬間に始点と終点を確定させる。
             _lineRenderer.useWorldSpace = true;
             _lineRenderer.positionCount = 2;
-            _lineRenderer.SetPosition(0, _muzzle != null ? _muzzle.position : transform.position);
-            _lineRenderer.SetPosition(1, ResolveImpactPosition(context));
+            Vector3 startPosition = _muzzle != null ? _muzzle.position : transform.position;
+            _lineRenderer.SetPosition(0, startPosition);
+            _lineRenderer.SetPosition(1, ResolveEndPosition(startPosition, context));
             _lineRenderer.enabled = true;
 
             await Awaitable.WaitForSecondsAsync(_visibleSeconds / playbackSpeed, cancellationToken);
@@ -86,16 +92,25 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         }
 
         /// <summary>
-        ///     着弾点を解決する。
+        ///     弾道の終点を解決する。着弾点で止めず、貫通させて奥へ伸ばす。
         /// </summary>
+        /// <param name="startPosition"> 弾道の始点です。 </param>
         /// <param name="context"> エフェクトの参照点です。 </param>
-        /// <returns> 着弾点のワールド座標です。 </returns>
-        private Vector3 ResolveImpactPosition(SkillEffectContext context)
+        /// <returns> 弾道終点のワールド座標です。 </returns>
+        private Vector3 ResolveEndPosition(Vector3 startPosition, SkillEffectContext context)
         {
             // 対象が消滅している場合も、解決済みのワールド座標へ撃ち込む。
             Vector3 impactPosition = context.HasTarget ? context.TargetTransform.position : context.WorldPosition;
             impactPosition.y += _targetHeightOffset;
-            return impactPosition;
+
+            // 着弾点で消えると視認しづらいため、そのまま奥へ通り抜けさせる。
+            Vector3 direction = impactPosition - startPosition;
+            if (direction.sqrMagnitude <= MINIMUM_SQR_MAGNITUDE)
+            {
+                return impactPosition;
+            }
+
+            return impactPosition + (direction.normalized * _penetrationDistance);
         }
 
         /// <summary>
