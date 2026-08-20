@@ -52,10 +52,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Floor_Break_01_06
       objectReference: {fileID: 0}
-    - target: {fileID: 2323541240719890075, guid: 98994716bc82a98478dac4de4f7cf178, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

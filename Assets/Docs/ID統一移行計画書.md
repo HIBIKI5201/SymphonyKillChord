@@ -188,10 +188,9 @@ private DataID _effectId;
 
 ### 移行対象外（調査済み・意図的に除外）
 
-> **2026-07-28追記**: `MissionId`は下記の除外理由が解消されたため、対象外リストから除外し実際に移行済み。`MissionId`をintラップへ変更し、`MissionDefinitionAsset._missionId`を`DataID`化（カテゴリ="Mission"）、`MissionDefinitionRepository`をID検索可能なリポジトリ化した。あわせて`BattleStageAsset._missionDefinitionAsset`（直接参照）も`DataID`（カテゴリ="Mission"）へ変更し、`MissionDefinition`の生成をOutGame選択時からInGame側（`InGameMissionInitializer`）へ遅延させた（`EnemyWaveDefinitionId`と同じ「OutGame→InGameをIDで受け渡し、InGame側で解決」方式）。
-
 | 対象 | 除外理由 |
 | --- | --- |
+| `MissionId` | リポジトリでのID検索に使われていない（`MissionDefinition`を直接参照で保持） |
 | `MissionEvaluationId` | 重複チェックにのみ使用され、IDからインスタンスを取得する用途がない |
 | `SkillNodeBindData.NodeName` | UI Toolkit要素名としてのキーであり、ゲームデータのIDではない |
 | `BossAttackEntryAsset.AttackIndex` | 配列の位置参照であり、authoring IDではない |

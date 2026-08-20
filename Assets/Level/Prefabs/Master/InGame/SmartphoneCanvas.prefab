@@ -119,8 +119,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.MobileInput
   _rayCaster: {fileID: 9110492341669116642}
-  _flickMaxDuration: 0.15
-  _flickMinDistance: 80
 --- !u!114 &4188388685522294109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,7 +131,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9701b95da49937d4abebd7fe3d8fd0d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.UI.PlatformSpecificUI
-  _showInEditor: 1
+  _showInEditor: 0
 --- !u!1 &1400745184052248713
 GameObject:
   m_ObjectHideFlags: 0
@@ -311,7 +309,6 @@ GameObject:
   - component: {fileID: 2652628754598871343}
   - component: {fileID: 2536562088308844932}
   - component: {fileID: 1483291918172049056}
-  - component: {fileID: 6352480008864750271}
   m_Layer: 5
   m_Name: VirtualStick
   m_TagString: Untagged
@@ -411,19 +408,6 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
---- !u!114 &6352480008864750271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5209047071007894219}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d54f4d0b6faec6647b9fd5b6977ac49d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Input.MobileStickFlickInput
-  _onScreenStick: {fileID: 1483291918172049056}
 --- !u!1 &9017162878079355475
 GameObject:
   m_ObjectHideFlags: 0

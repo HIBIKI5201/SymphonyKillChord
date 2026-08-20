@@ -16,27 +16,22 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private const float FORWARD_AREA_RANGE = 12f;
         private const float FORWARD_AREA_HALF_ANGLE = 30f;
         private const float FORWARD_LINE_HALF_WIDTH = 1.5f;
+        private const float FORWARD_LINE_LENGTH_MARGIN = 0.5f;
 
         /// <summary>
         ///     解決器を初期化します。
         /// </summary>
         /// <param name="targetSystemViewModel"> ターゲットViewModelです。 </param>
         /// <param name="targetEntityRegistry"> ターゲットEntityレジストリです。 </param>
-        /// <param name="targetAreaQuery"> 扇形範囲クエリです。 </param>
         /// <param name="playerTransform"> プレイヤーTransformです。 </param>
-        /// <param name="areaAttackRangeAddition"> 前方範囲攻撃の追加射程です。 </param>
         public SkillTargetResolver(
             ITargetSystemViewModel targetSystemViewModel,
             TargetEntityRegistry targetEntityRegistry,
-            TargetAreaQuery targetAreaQuery,
-            Transform playerTransform,
-            float areaAttackRangeAddition)
+            Transform playerTransform)
         {
             _targetSystemViewModel = targetSystemViewModel;
             _targetEntityRegistry = targetEntityRegistry;
-            _targetAreaQuery = targetAreaQuery;
             _playerTransform = playerTransform;
-            _forwardAreaRange = Mathf.Max(0f, FORWARD_AREA_RANGE + areaAttackRangeAddition);
         }
 
         /// <summary>
@@ -92,31 +87,53 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         {
             result = default;
 
-            if (_playerTransform == null || _targetAreaQuery == null)
+            if (_playerTransform == null)
             {
                 return false;
             }
 
-            _targetAreaQuery.QueryFanArea(
-                _playerTransform.position,
-                _playerTransform.forward,
-                _forwardAreaRange,
-                FORWARD_AREA_HALF_ANGLE,
-                _areaHitBuffer);
+            List<CharacterEntity> targetEntities = new List<CharacterEntity>();
+            ITargetableViewModel[] targets = _targetSystemViewModel.GetRegisteredTargetsSnapshot();
+            Vector3 origin = _playerTransform.position;
+            Vector3 forward = _playerTransform.forward;
+            float cosThreshold = Mathf.Cos(FORWARD_AREA_HALF_ANGLE * Mathf.Deg2Rad);
 
-            if (_areaHitBuffer.Count == 0)
+            for (int i = 0; i < targets.Length; i++)
+            {
+                ITargetableViewModel target = targets[i];
+                if (!TryResolveEntity(target, out CharacterEntity entity))
+                {
+                    continue;
+                }
+
+                Vector3 toTarget = target.Position - origin;
+                float sqrDistance = toTarget.sqrMagnitude;
+                if (sqrDistance > FORWARD_AREA_RANGE * FORWARD_AREA_RANGE)
+                {
+                    continue;
+                }
+
+                float distance = Mathf.Sqrt(sqrDistance);
+                if (distance <= Mathf.Epsilon)
+                {
+                    continue;
+                }
+
+                float dot = Vector3.Dot(forward, toTarget / distance);
+                if (dot < cosThreshold)
+                {
+                    continue;
+                }
+
+                targetEntities.Add(entity);
+            }
+
+            if (targetEntities.Count == 0)
             {
                 return false;
             }
 
-            // クエリは水平距離の昇順で返すため、先頭が最も近い対象になる。
-            CharacterEntity[] targetEntities = new CharacterEntity[_areaHitBuffer.Count];
-            for (int i = 0; i < _areaHitBuffer.Count; i++)
-            {
-                targetEntities[i] = _areaHitBuffer[i].Entity;
-            }
-
-            result = new SkillTargetResolveResult(targetEntities[0], targetEntities);
+            result = new SkillTargetResolveResult(targetEntities[0], targetEntities.ToArray());
             return true;
         }
 
@@ -142,17 +159,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
             Vector3 origin = _playerTransform.position;
             Vector3 targetDirection = currentTarget.Position - origin;
-
-            // 水平方向のみで判定するため、Y軸方向の差分を無視する。
-            targetDirection.y = 0f;
-
-            if (targetDirection.sqrMagnitude <= Mathf.Epsilon)
+            float targetDistance = targetDirection.magnitude;
+            if (targetDistance <= Mathf.Epsilon)
             {
                 result = new SkillTargetResolveResult(currentTargetEntity, new[] { currentTargetEntity });
                 return true;
             }
 
-            Vector3 lineDirection = targetDirection.normalized;
+            Vector3 lineDirection = targetDirection / targetDistance;
             List<CharacterEntity> targetEntities = new List<CharacterEntity> { currentTargetEntity };
             ITargetableViewModel[] targets = _targetSystemViewModel.GetRegisteredTargetsSnapshot();
 
@@ -170,20 +184,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 }
 
                 Vector3 toCandidate = target.Position - origin;
-                toCandidate.y = 0f;
-
-                // 直線上の射影距離を計算し、負の値の場合はプレイヤーの後方にあるためスキップする。
                 float projectedLength = Vector3.Dot(lineDirection, toCandidate);
-
-                if (projectedLength < 0f)
+                if (projectedLength < 0f || projectedLength > targetDistance + FORWARD_LINE_LENGTH_MARGIN)
                 {
                     continue;
                 }
 
-                // 射影距離に基づいて直線上の最近接点を計算し、候補との距離を測定する。
-                Vector3 closestPoint = lineDirection * projectedLength;
-                float distanceToLine = Vector3.Distance(toCandidate, closestPoint);
-
+                Vector3 closestPoint = origin + lineDirection * projectedLength;
+                float distanceToLine = Vector3.Distance(target.Position, closestPoint);
                 if (distanceToLine > FORWARD_LINE_HALF_WIDTH)
                 {
                     continue;
@@ -232,9 +240,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
         private readonly ITargetSystemViewModel _targetSystemViewModel;
         private readonly TargetEntityRegistry _targetEntityRegistry;
-        private readonly TargetAreaQuery _targetAreaQuery;
         private readonly Transform _playerTransform;
-        private readonly float _forwardAreaRange;
-        private readonly List<TargetAreaHit> _areaHitBuffer = new List<TargetAreaHit>();
     }
 }

@@ -34,9 +34,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             var fired = new HashSet<TextTimingTrigger>();
             await TryFireTriggersAsync(e.Triggers, fired, 0, string.Empty, ct);
 
-            // 話者名が空（ナレーション）の場合は "話者: " の接頭辞を付けない。
-            string speakerPrefix = string.IsNullOrEmpty(e.Speaker) ? string.Empty : $"{e.Speaker}: ";
-
             for (int i = 1; i <= e.Text.Length; i++)
             {
                 while (_playbackState.IsPaused)
@@ -47,7 +44,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
                     await Task.Delay(pauseDelay, ct);
                 }
 
-                await _textOutputPort.ShowTextAsync($"{speakerPrefix}{e.Text[..i]}", ct);
+                await _textOutputPort.ShowTextAsync($"{e.Speaker}: {e.Text[..i]}", ct);
                 string visibleText = e.Text[..i];
 
                 await TryFireTriggersAsync(e.Triggers, fired, i, visibleText, ct);

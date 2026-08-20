@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
@@ -31,6 +32,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _defender = enemyBattleState.Target;
             _entity.Reset(enemyBattleState.CurrentAttack);
             _reservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
+            _reservationUsecase.On2BeatBefore += Handle2BeatBefore;
+            _reservationUsecase.On1BeatBefore += Handle1BeatBefore;
             _reservationUsecase.ReserveDetonate();
         }
 
@@ -41,15 +44,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             _reservationUsecase.Cancel();
             _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
+            _reservationUsecase.On2BeatBefore -= Handle2BeatBefore;
+            _reservationUsecase.On1BeatBefore -= Handle1BeatBefore;
             _attacker = null;
             _defender = null;
         }
 
         public void Dispose()
         {
-            // 破棄する前に購読を解除する。
-            _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
             _reservationUsecase.Dispose();
+            _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
         }
 
         /// <summary>
@@ -75,13 +79,25 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         private void HandleReservedTimingReached()
         {
-            if (FindDamageTarget())
+            if(FindDamageTarget())
             {
                 DealDamage();
             }
             _viewModel.Detonate();
         }
 
+        private void Handle2BeatBefore()
+        {
+            Debug.Log("<color=yellow>[ShellController] 爆発の2拍前</color>");
+           _viewModel.ChangeShellColor(ShellColor.Yellow);
+        }
+
+        private void Handle1BeatBefore()
+        {
+            Debug.Log("<color=yellow>[ShellController] 爆発の1拍前</color>");
+            _viewModel.ChangeShellColor(ShellColor.Red);
+        }
+        
 
         private readonly ShellEntity _entity;
         private readonly ShellReservationUsecase _reservationUsecase;

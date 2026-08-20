@@ -1,43 +1,32 @@
-using KillChord.Runtime.Application.InGame.Battle;
+﻿using KillChord.Runtime.Application.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
+
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
-using KillChord.Runtime.Utility.Persistent;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
-    /// <summary>
+     /// <summary>
     ///     スキルID 00 のスキル効果を実装するクラス。
     /// </summary>
     public class Skill_00 : SkillBase
     {
+        public Skill_00(IBuff buff) : base(buff)
+        {
+        }
         public override void Execute(in SkillEffectContext context)
         {
-            float multiplier = (float)context.EffectSpec.GetRequiredValue(
-                SkillEffectParameterId.DamageMultiplier);
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
+            //  武器なし攻撃を実装するための箱替え。
+            AttackDefinition unbulletDefinition = new AttackDefinition(attackDefinition.AttackName,attackDefinition.AttackSpec,attackDefinition.AttackPipeline);
+            AttackResult result = AttackCalculator.Calculate(unbulletDefinition, context.PlayerEntity, context.TargetEntity,false,context.PlayerEntity.BaseDamage);
+            AttackResult attackResult = new AttackResult(result.FinalDamage * _multiplier, result.IsCritical);
 
-
-            AttackResult result = AttackCalculator.Calculate(
-                attackDefinition,
-                context.PlayerEntity,
-                context.TargetEntity,
-                context.IsJustHit,
-                context.PlayerEntity.BaseDamage,
-                applyWeaponDamageMultiplier: false);
-            result = result.WithFinalDamage(result.FinalDamage * multiplier);
-
-            result = DamageExecutor.Execute(
-                context.PlayerEntity,
-                context.TargetEntity,
-                result,
-                DamageAttackType.Skill);
-#if UNITY_EDITOR
-            Debug.Log($"Skill_00 発動" +
-                $"Damage: {result.FinalDamage.Value}," +
-                $" Critical: {result.IsCritical}");
-#endif
+            context.TargetEntity.TakeDamage(attackResult.FinalDamage);
+             Debug.Log($"<color=green>Skill_00 を実行しました:{attackResult.FinalDamage}ダメージです。 </color>");
         }
+
+        private float _multiplier = 5f; //ダメージ倍率。
     }
 }

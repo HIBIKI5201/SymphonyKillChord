@@ -48,7 +48,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 return false;
             }
 
-            return _outGameSortieController.RequestImmediateBattleSortie();
+            return _outGameSortieController.RequestImmediateBattleSortie(targetStageDefinition.TargetSceneName);
         }
 
         private readonly BattleSortieSelectionService _battleSortieSelectionService;

@@ -1,3 +1,4 @@
+using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Music;
@@ -28,9 +29,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
         /// <summary> 予約が存在するかどうかを示すプロパティ。 </summary>
         public bool HasReservation => _hasReservation;
-
-        /// <summary> 予約中の攻撃時刻（音源再生時間・秒）。予約が無い場合は無効。 </summary>
-        public double AttackExecutionTime { get; private set; }
 
         /// <summary> 予約タイミングが到達時に発火するイベント </summary>
         public event Action OnReservedTimingReached;
@@ -110,34 +108,25 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _cancellationTokenSource = new CancellationTokenSource();
             _hasReservation = true;
 
-            // 攻撃の絶対時刻を保持し、演出側が残り時間から進捗を算出できるようにする。
-            AttackExecutionTime = _musicActionScheduler.Schedule(
+            _musicActionScheduler.Schedule(
                 musicSpec,
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
 
-            ScheduleLeadNotification(musicSpec, TWO_BEAT_LEAD, Handle2BeatBefore);
-            ScheduleLeadNotification(musicSpec, ONE_BEAT_LEAD, Handle1BeatBefore);
-        }
-
-        /// <summary>
-        ///     攻撃タイミングから指定拍だけ遡った予告を予約する。
-        ///     遡った結果が小節の頭を跨ぐ場合は、小節フラグを繰り下げて前の小節へ割り当てる。
-        /// </summary>
-        /// <param name="musicSpec"> 攻撃本体のタイミング。 </param>
-        /// <param name="leadCount"> 遡る量。拍子と同じ単位で指定する。 </param>
-        /// <param name="handler"> 予告タイミングで実行する処理。 </param>
-        private void ScheduleLeadNotification(in MusicSyncSpec musicSpec, double leadCount, Action handler)
-        {
-            if (!MusicTimingCalculator.TryCreateLeadTiming(musicSpec, leadCount, out MusicSyncSpec leadSpec))
+            if(musicSpec.TargetBeat >= 3) // 指定ビートが3以上の場合のみ、2拍前と1拍前のイベントもスケジュールする
             {
-                return;
-            }
+            
+            _musicActionScheduler.Schedule(
+                new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 2),
+                Handle2BeatBefore,
+                _cancellationTokenSource.Token);
 
             _musicActionScheduler.Schedule(
-                leadSpec,
-                handler,
+                new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 1),
+                Handle1BeatBefore,
                 _cancellationTokenSource.Token);
+            }
+           
         }
 
         /// <summary>
@@ -166,12 +155,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             Debug.Log("攻撃の1拍前に到達しました。");
             On1BeatBefore?.Invoke();
         }
-
-
-        /// <summary> 2拍前の予告に使う遡り量。 </summary>
-        private const double TWO_BEAT_LEAD = 2d;
-        /// <summary> 1拍前の予告に使う遡り量。 </summary>
-        private const double ONE_BEAT_LEAD = 1d;
+        
 
         private readonly EnemyAttackMusicSpec _enemyAttackMusicSpec;
         private readonly IMusicActionScheduler _musicActionScheduler;

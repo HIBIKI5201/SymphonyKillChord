@@ -26,8 +26,7 @@ MonoBehaviour:
     probeVolumeBlendStatesCS: {fileID: 0}
   m_RendererFeatures:
   - {fileID: 2536950806114357992}
-  - {fileID: 4721814014904965341}
-  m_RendererFeatureMap: e852161b510f3523dd18df4dd4408741
+  m_RendererFeatureMap: e852161b510f3523
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -72,28 +71,8 @@ MonoBehaviour:
   m_Settings:
     technique: 2
     maxDrawDistance: 1000
-    decalLayers: 0
+    decalLayers: 1
     dBufferSettings:
       surfaceData: 2
     screenSpaceSettings:
       normalBlend: 0
---- !u!114 &4721814014904965341
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
-  m_Name: DamageEffect
-  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
-  m_Active: 1
-  injectionPoint: 600
-  fetchColorBuffer: 0
-  requirements: 0
-  passMaterial: {fileID: 2100000, guid: a9babcd2a43f65b49b6a2f74990276cc, type: 2}
-  passIndex: 0
-  bindDepthStencilAttachment: 0
-  m_Version: 1

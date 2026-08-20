@@ -3,6 +3,7 @@ using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Result
 {
@@ -14,6 +15,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         private const string MAIN_MISSION_CLEAR_TEXT = "達成";
         private const string MAIN_MISSION_FAIL_TEXT = "失敗";
         private const string DEFAULT_DEFEAT_TIP_TEXT = "敵の攻撃をよくみて、回避後の隙に攻撃しましょう。";
+        private const int SECOND_PER_MINUTE = 60;
 
         /// <summary>
         ///    ステージ結果画面の表示を行うプレゼンターを初期化する。
@@ -61,8 +63,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                 _missionRuntimeService.MissionDefinition.MainMissionText,
                 MAIN_MISSION_CLEAR_TEXT,
                 subMissionItems,
-                _missionRuntimeService.MissionProgress.ElapsedTime.Value,
-                _missionRuntimeService.MissionProgress.MaxCombo.Value,
+                FormatBattleTime(_missionRuntimeService.MissionProgress.ElapsedTime.Value),
+                _missionRuntimeService.MissionProgress.MaxCombo.Value.ToString(),
                 stageRank.ToString(),
                 string.Empty);
 
@@ -80,8 +82,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                 _missionRuntimeService.MissionDefinition.MainMissionText,
                 MAIN_MISSION_FAIL_TEXT,
                 Array.Empty<StageResultMissionItemDTO>(),
-                _missionRuntimeService.MissionProgress.ElapsedTime.Value,
-                _missionRuntimeService.MissionProgress.MaxCombo.Value,
+                FormatBattleTime(_missionRuntimeService.MissionProgress.ElapsedTime.Value),
+                _missionRuntimeService.MissionProgress.MaxCombo.Value.ToString(),
                 string.Empty,
                 SelectDefeatTip(_missionRuntimeService.MissionDefinition.DefeatTips));
 
@@ -112,6 +114,21 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             }
 
             return items;
+        }
+
+        /// <summary>
+        ///    経過時間を「mm:ss」形式の文字列に変換する。
+        /// </summary>
+        /// <param name="elapsedSeconds">経過時間（秒）。</param>
+        /// <returns>「mm:ss」形式の文字列。</returns>
+        private static string FormatBattleTime(float elapsedSeconds)
+        {
+            int totalSeconds = Mathf.Max(0, (int)Mathf.Floor(elapsedSeconds));
+
+            int minutes = totalSeconds / SECOND_PER_MINUTE;
+            int seconds = totalSeconds % SECOND_PER_MINUTE;
+
+            return $"{minutes:00}:{seconds:00}";
         }
 
         /// <summary>

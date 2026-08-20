@@ -9,8 +9,6 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
-#if UNITY_ANDROID
-
 namespace KillChord.Editor.Addressables
 {
     /// <summary>
@@ -177,5 +175,3 @@ namespace KillChord.Editor.Addressables
         }
     }
 }
-
-#endif

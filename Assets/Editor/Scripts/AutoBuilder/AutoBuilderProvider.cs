@@ -34,22 +34,12 @@ namespace KillChord.Editor.AutoBuilder
             masterPath.stringValue = EditorGUILayout.TextField(masterPath.stringValue);
             if (AutoBuilderSettings.IsPathNullOrEmpty(masterPath.stringValue)) { EditorGUILayout.HelpBox("MasterPathが空です。", MessageType.Warning); }
             if (!AutoBuilderSettings.IsPathEndsWithSlash(masterPath.stringValue)) { EditorGUILayout.HelpBox("MasterPathの末尾にスラッシュがありません。", MessageType.Warning); }
-            if (AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.MasterBuildProfiles)) { EditorGUILayout.HelpBox("MasterBuildProfilesが空です。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.MasterBuildProfiles) && 
-                AutoBuilderSettings.HasEmptyBuildProfile(AutoBuilderSettings.instance.MasterBuildProfiles)) { EditorGUILayout.HelpBox("MasterBuildProfilesに空のビルドプロファイルがあります。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.MasterBuildProfiles) && 
-                AutoBuilderSettings.HasDuplicateBuildProfiles(AutoBuilderSettings.instance.MasterBuildProfiles)) { EditorGUILayout.HelpBox("MasterBuildProfilesに重複するビルドプロファイルがあります。", MessageType.Warning); }
             EditorGUILayout.PropertyField(masterProp, true);
 
             EditorGUILayout.Space(10);
             devPath.stringValue = EditorGUILayout.TextField(devPath.stringValue);
             if (AutoBuilderSettings.IsPathNullOrEmpty(devPath.stringValue)) { EditorGUILayout.HelpBox("DevelopPathが空です。", MessageType.Warning); }
             if (!AutoBuilderSettings.IsPathEndsWithSlash(devPath.stringValue)) { EditorGUILayout.HelpBox("DevelopPathの末尾にスラッシュがありません。", MessageType.Warning); }
-            if (AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.DevelopBuildProfiles)) { EditorGUILayout.HelpBox("DevelopBuildProfilesが空です。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.DevelopBuildProfiles) && 
-                AutoBuilderSettings.HasEmptyBuildProfile(AutoBuilderSettings.instance.DevelopBuildProfiles)) { EditorGUILayout.HelpBox("DevelopBuildProfilesに空のビルドプロファイルがあります。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.DevelopBuildProfiles) && 
-                AutoBuilderSettings.HasDuplicateBuildProfiles(AutoBuilderSettings.instance.DevelopBuildProfiles)) { EditorGUILayout.HelpBox("DevelopBuildProfilesに重複するビルドプロファイルがあります。", MessageType.Warning); }
 
             EditorGUILayout.PropertyField(devProp, true);
 

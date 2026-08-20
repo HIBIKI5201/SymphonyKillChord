@@ -29,15 +29,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <param name="musicSpec"> 音楽同期スペック。 </param>
         /// <param name="action"> 実行するアクション。 </param>
         /// <param name="cancellationToken"> キャンセルトークン。 </param>
-        /// <returns> 実行される音源再生時間（秒）。 </returns>
-        public double Schedule(in MusicSyncSpec musicSpec,
+        public void Schedule(in MusicSyncSpec musicSpec,
             Action action,
             CancellationToken cancellationToken)
         {
             ExecuteRequestTiming timing = Convert(musicSpec);
             double accurateBeat = _musicSyncState.AccurateBeat;
 
-            return _musicSyncService.RegisterAction(
+            _musicSyncService.RegisterAction(
                 accurateBeat,
                 timing,
                 action,

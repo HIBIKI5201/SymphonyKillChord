@@ -173,24 +173,6 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
-        ///     現在登録されているターゲットを呼び出し側の再利用リストへコピーする。
-        /// </summary>
-        /// <param name="destination"> コピー先のリスト。既存要素は消去される。 </param>
-        public void CopyRegisteredTargetsTo(List<ITargetableViewModel> destination)
-        {
-            if (destination == null)
-            {
-                throw new ArgumentNullException(nameof(destination));
-            }
-
-            destination.Clear();
-            foreach (ITargetableViewModel target in _targets)
-            {
-                destination.Add(target);
-            }
-        }
-
-        /// <summary>
         ///     プレイヤー位置と方向をもとに最適なターゲットへ切り替える。
         /// </summary>
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>

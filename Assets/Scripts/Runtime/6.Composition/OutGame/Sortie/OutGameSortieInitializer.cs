@@ -58,10 +58,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                     outGameUIEvent,
                     inputComposition);
             OutGameSortieUseCase useCase =
-                new OutGameSortieUseCase(
-                    sceneTransitionUseCase,
-                    outputPort,
-                    destroyCancellationToken);
+                new OutGameSortieUseCase(sceneTransitionUseCase, outputPort);
 
             OutGameSortieController controller = new OutGameSortieController(useCase);
 

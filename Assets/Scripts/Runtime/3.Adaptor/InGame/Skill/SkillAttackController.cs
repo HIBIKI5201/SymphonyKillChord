@@ -4,7 +4,6 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
-using KillChord.Runtime.Utility.Persistent;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Skill
@@ -29,15 +28,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         ///     現在ターゲットに対して攻撃を実行します。
         /// </summary>
         /// <param name="beatType"> 攻撃ビートです。 </param>
-        /// <param name="isJustHit"> ジャストヒットかどうか </param>
-        public void Execute(int beatType, bool isJustHit)
+        public void Execute(int beatType)
         {
             if (!_targetResolver.TryResolveTargets(SkillTargetingType.CurrentTarget, out SkillTargetResolveResult result))
             {
                 return;
             }
 
-            ExecuteInternal((BeatType)beatType, result.PrimaryTargetEntity, isJustHit);
+            ExecuteInternal((BeatType)beatType, result.PrimaryTargetEntity);
         }
 
         /// <summary>
@@ -45,10 +43,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// </summary>
         /// <param name="beatType"> 攻撃ビートです。 </param>
         /// <param name="target"> 攻撃対象です。 </param>
-        /// <param name="isJustHit"> ジャストヒットかどうか </param>
-        public void Execute(int beatType, CharacterEntity target, bool isJustHit)
+        public void Execute(int beatType, CharacterEntity target)
         {
-            ExecuteInternal((BeatType)beatType, target, isJustHit);
+            ExecuteInternal((BeatType)beatType, target);
         }
 
         /// <summary>
@@ -56,8 +53,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// </summary>
         /// <param name="beatType"> 攻撃ビートです。 </param>
         /// <param name="target"> 攻撃対象です。 </param>
-        /// <param name="isJustHit"> ジャストヒットかどうか </param>
-        private void ExecuteInternal(BeatType beatType, CharacterEntity target, bool isJustHit)
+        private void ExecuteInternal(BeatType beatType, CharacterEntity target)
         {
             if (_playerEntity == null || target == null)
             {
@@ -67,8 +63,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             try
             {
                 AttackDefinition attackDefinition = _playerEntity.CombatSpec.GetAttackDefinitionByBeatType(beatType);
-                AttackResult result = AttackExecutor.Execute(attackDefinition, _playerEntity, target, isJustHit, _playerEntity.BaseDamage,damageAttackType: DamageAttackType.Skill);
-                EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, target.Id, DamageAttackType.Skill));
+                AttackExecutor.Execute(attackDefinition, _playerEntity, target, false, _playerEntity.BaseDamage);
             }
             catch (System.InvalidOperationException ex)
             {

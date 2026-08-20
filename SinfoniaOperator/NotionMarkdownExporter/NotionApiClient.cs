@@ -5,7 +5,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SinfoniaStudio.NotionMarkdownExporter
@@ -18,34 +17,17 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         private const string API_BASE_URL = "https://api.notion.com/v1";
         private const string NOTION_API_VERSION = "2026-03-11";
         private const int MAX_RETRY_COUNT = 4;
-        private const int DATA_SOURCE_PAGE_SIZE = 100;
-
-        /// <summary> Notion APIへ同時に送信するリクエスト数の上限。接続の張りすぎを防ぐ。 </summary>
-        private const int MAX_CONCURRENT_REQUESTS = 5;
-
-        /// <summary>
-        ///     Notion APIの実効レート制限（目安: 秒間3リクエスト）に対して余裕を持たせた送信ペース。
-        ///     並列取得時にリクエストがバーストして429が連発するのを防ぐため、送信自体をここで平準化する。
-        /// </summary>
-        private const double REQUESTS_PER_SECOND = 2.5;
-
-        /// <summary> 起動直後などに許容する瞬間的なバースト送信数。 </summary>
-        private const double REQUEST_BURST_CAPACITY = 3;
+        private const int DATA_SOURCE_PAGE_SIZE = 25;
 
         private readonly HttpClient _httpClient;
-        private readonly SemaphoreSlim _concurrencyLimiter = new(MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_REQUESTS);
-        private readonly RequestRateLimiter _rateLimiter = new(REQUESTS_PER_SECOND, REQUEST_BURST_CAPACITY);
-        private readonly StallWatchdog _watchdog;
         private bool _isDisposed;
 
         /// <summary>
         ///     Notion APIクライアントを生成する。
         /// </summary>
         /// <param name="notionToken">Notion内部インテグレーションのトークン。</param>
-        /// <param name="watchdog">処理の停止を監視するウォッチドッグ。</param>
-        internal NotionApiClient(string notionToken, StallWatchdog watchdog)
+        internal NotionApiClient(string notionToken)
         {
-            _watchdog = watchdog;
             _httpClient = new HttpClient
             {
                 Timeout = TimeSpan.FromMinutes(5)
@@ -185,7 +167,6 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             if (_isDisposed) { return; }
 
             _httpClient.Dispose();
-            _concurrencyLimiter.Dispose();
             _isDisposed = true;
         }
 
@@ -252,58 +233,33 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         {
             for (int attempt = 1; attempt <= MAX_RETRY_COUNT; attempt++)
             {
-                _watchdog.ReportProgress($"Notion API {method.Method} {CreateOperationPath(url)}");
                 using HttpRequestMessage request = new(method, url);
                 if (json != null)
                 {
                     request.Content = new StringContent(json, Encoding.UTF8, "application/json");
                 }
 
-                await _rateLimiter.WaitAsync();
-                await _concurrencyLimiter.WaitAsync();
-                HttpResponseMessage response;
-                try
+                using HttpResponseMessage response = await _httpClient.SendAsync(request);
+                string responseBody = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode) { return responseBody; }
+
+                bool canRetry = response.StatusCode == HttpStatusCode.TooManyRequests ||
+                                (int)response.StatusCode >= 500;
+                if (canRetry && attempt < MAX_RETRY_COUNT)
                 {
-                    response = await _httpClient.SendAsync(request);
-                }
-                finally
-                {
-                    _concurrencyLimiter.Release();
+                    TimeSpan waitTime = GetRetryDelay(response, attempt);
+                    Console.WriteLine($"  Notion APIが混雑しています。{waitTime.TotalSeconds:0}秒後に再試行します。");
+                    await Task.Delay(waitTime);
+                    continue;
                 }
 
-                using (response)
-                {
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    if (response.IsSuccessStatusCode) { return responseBody; }
-
-                    bool canRetry = response.StatusCode == HttpStatusCode.TooManyRequests ||
-                                    (int)response.StatusCode >= 500;
-                    if (canRetry && attempt < MAX_RETRY_COUNT)
-                    {
-                        TimeSpan waitTime = GetRetryDelay(response, attempt);
-                        Console.WriteLine($"  Notion APIが混雑しています。{waitTime.TotalSeconds:0}秒後に再試行します。");
-                        await Task.Delay(waitTime);
-                        continue;
-                    }
-
-                    string error = responseBody.Length > 800 ? responseBody[..800] : responseBody;
-                    throw new NotionApiException(
-                        response.StatusCode,
-                        $"Notion APIが {(int)response.StatusCode} {response.ReasonPhrase} を返しました。{error}");
-                }
+                string error = responseBody.Length > 800 ? responseBody[..800] : responseBody;
+                throw new NotionApiException(
+                    response.StatusCode,
+                    $"Notion APIが {(int)response.StatusCode} {response.ReasonPhrase} を返しました。{error}");
             }
 
             throw new InvalidOperationException("Notion APIへの再試行回数を超えました。");
-        }
-
-        /// <summary>
-        ///     警告表示用に、リクエストURLからAPIのベースURLを除いた部分を取得する。
-        /// </summary>
-        /// <param name="url">リクエストURL。</param>
-        /// <returns>ベースURLを除いたパス。</returns>
-        private static string CreateOperationPath(string url)
-        {
-            return url.StartsWith(API_BASE_URL, StringComparison.Ordinal) ? url[API_BASE_URL.Length..] : url;
         }
 
         /// <summary>

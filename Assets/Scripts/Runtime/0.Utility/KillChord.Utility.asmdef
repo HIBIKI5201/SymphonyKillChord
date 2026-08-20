@@ -2,8 +2,7 @@
     "name": "KillChord.Utility",
     "rootNamespace": "KillChord.Runtime.Utility",
     "references": [
-        "GUID:68a532f43eeefd5408e4e8871b769ee4",
-        "GUID:3b570a5146f9d4f0fa107ed4559471a3"
+        "GUID:68a532f43eeefd5408e4e8871b769ee4"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

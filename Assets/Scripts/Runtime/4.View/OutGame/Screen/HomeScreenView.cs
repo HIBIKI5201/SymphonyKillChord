@@ -7,7 +7,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// </summary>
     public sealed class HomeScreenView : ScreenViewBase
     {
-
         /// <summary>
         ///     View を初期化します。
         /// </summary>

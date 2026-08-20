@@ -1,10 +1,6 @@
-using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
-using KillChord.Runtime.InfraStructure.Repository;
-using System;
-using System.Collections.Generic;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
 {
@@ -12,12 +8,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     ///     スキルノードデータを纏めたリポジトリー。
     /// </summary>
     [CreateAssetMenu(fileName = "SkillNodeDataRepo", menuName = "SymphonyDev/SkillTree/SkillNodeDataRepo")]
-    public class SkillNodeDataRepo :
-        ScriptableObjectRepositoryBase<SkillNodeId, SkillNodeData, SkillNodeData>,
-        ISkillNodeRepository
+    public class SkillNodeDataRepo : ScriptableObject
     {
-        /// <summary> スキルノード定義Asset一覧です。 </summary>
-        public IReadOnlyList<SkillNodeData> SkillNodes => _skillNodes;
+        public SkillNodeData[] SkillNodes;
 
         /// <summary>
         ///     スキルノードのIDを指定して、スキルノードデータを取得する。
@@ -26,59 +19,26 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         /// <returns></returns>
         public SkillNodeData FindNodeData(SkillNodeId id)
         {
-            if (_skillNodes == null || _skillNodes.Length <= 0)
+            if (SkillNodes == null || SkillNodes.Length <= 0)
             {
                 Debug.LogError($"[SkillNodeDataRepo] スキルノード情報リポジトリーが空です。");
                 return null;
             }
-
-            if (!TryFind(id, out SkillNodeData node))
+            for(int i = 0; i < SkillNodes.Length; i++)
             {
-                Debug.LogError($"[SkillNodeDataRepo] 指定されてスキルノードIDが見つかりません。");
-                return null;
-            }
-
-            return node;
-        }
-
-        /// <summary>
-        ///     全てのスキルノード定義をDomain Entityとして取得します。
-        /// </summary>
-        /// <returns> スキルノード定義一覧です。 </returns>
-        public IReadOnlyCollection<SkillNodeEntity> GetAll()
-        {
-            if (_skillNodes == null || _skillNodes.Length == 0)
-            {
-                return Array.Empty<SkillNodeEntity>();
-            }
-
-            List<SkillNodeEntity> result =
-                new List<SkillNodeEntity>(_skillNodes.Length);
-            for (int i = 0; i < _skillNodes.Length; i++)
-            {
-                SkillNodeData skillNode = _skillNodes[i];
-                if (skillNode == null)
+                var node = SkillNodes[i];
+                if (node == null)
                 {
                     continue;
                 }
-
-                result.Add(skillNode.ToDomain());
+                if (node.NodeId == id)
+                {
+                    return node;
+                }
             }
-
-            return result;
+            Debug.LogError($"[SkillNodeDataRepo] 指定されてスキルノードIDが見つかりません。");
+            return null;
         }
 
-        [SerializeField, FormerlySerializedAs("SkillNodes")]
-        [Tooltip("スキルノード定義Asset一覧です。")]
-        private SkillNodeData[] _skillNodes;
-
-        protected override IReadOnlyList<SkillNodeData> GetEntries() => _skillNodes;
-
-        protected override bool TryBuild(SkillNodeData entry, out SkillNodeId id, out SkillNodeData value)
-        {
-            id = entry.NodeId;
-            value = entry;
-            return true;
-        }
     }
 }

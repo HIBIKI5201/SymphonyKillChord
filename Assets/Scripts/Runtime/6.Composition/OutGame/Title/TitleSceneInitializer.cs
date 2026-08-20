@@ -3,20 +3,18 @@ using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
-using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Addressables;
-using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
-using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading.Tasks;
@@ -58,21 +56,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
         private string _stageTreeAssetKey = "StageTreeAsset";
 
-        [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。バトルシーン名の解決に使用します。")]
-        private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
-
-        [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
-        private TextAsset _memberCsv;
-
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private TitleSceneView _titleSceneView;
         private TitleStartController _titleStartController;
         private ScreenController _screenController;
         private BattleSortieSelectionService _battleSortieSelectionService;
+        private SavedataSystem _savedataSystem;
         private ScreenRuleData _loadedRuleData;
         private StageTreeAsset _loadedStageTreeAsset;
-        private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
 
         private bool _isInitialized;
@@ -85,19 +77,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(System.Threading.CancellationToken cancellationToken)
         {
+            if (!ServiceLocator.TryGetInstance(out _savedataSystem))
+            {
+                Debug.LogError(
+                    $"[{nameof(TitleSceneInitializer)}] {nameof(SavedataSystem)}を取得できませんでした。",
+                    this);
+                return false;
+            }
+
             _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
             _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
-            _loadedEnemyWaveDefinitionRepository =
-                await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
-                    this,
-                    cancellationToken);
-            _loadedSaveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
-            return _loadedRuleData != null
-                && _loadedStageTreeAsset != null
-                && _loadedEnemyWaveDefinitionRepository != null
-                && _loadedSaveData != null;
+            _loadedSaveData = await _savedataSystem.LoadAsync<SaveData>();
+            return _loadedRuleData != null && _loadedStageTreeAsset != null && _loadedSaveData != null;
         }
 
         /// <summary>
@@ -134,7 +125,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             SceneTransitionController sceneTransitionController;
             MusicPlayer musicPlayer;
             SoundEffectVolumeManager sePlayer;
-            if (!TryGetServiceLocatorInstances(out sceneTransitionController, out musicPlayer, out sePlayer))
+            if (!TryGetServiceLocatorInstances(out sceneTransitionController, out musicPlayer, out sePlayer, out _savedataSystem))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
@@ -189,8 +180,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             DataResetTabView dataResetTab = new(optionRoot, _outGameUIEvent);
 
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
-
-            BuildMemberList(creditScreenView);
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
             IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedRuleData);
@@ -268,16 +257,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _ruleDataKey.ReleaseLoadedAsset(this);
             _stageTreeAssetKey.ReleaseLoadedAsset(this);
-            _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _loadedRuleData = null;
             _loadedStageTreeAsset = null;
-            _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
             _titleStartController = null;
             _battleSortieSelectionService = null;
             _screenController = null;
+            _savedataSystem = null;
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
@@ -289,14 +277,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <param name="sceneTransitionController"></param>
         /// <param name="musicPlayer"></param>
         /// <param name="sePlayer"></param>
+        /// <param name="savedataSystem"> セーブシステム。 </param>
         /// <returns></returns>
         private bool TryGetServiceLocatorInstances(
             out SceneTransitionController sceneTransitionController, out MusicPlayer musicPlayer,
-            out SoundEffectVolumeManager sePlayer)
+            out SoundEffectVolumeManager sePlayer, out SavedataSystem savedataSystem)
         {
             sceneTransitionController = null;
             musicPlayer = null;
             sePlayer = null;
+            savedataSystem = null;
 
             if (!ServiceLocator.TryGetInstance(out sceneTransitionController))
             {
@@ -322,27 +312,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            return true;
-        }
-
-        /// <summary>
-        ///     制作メンバー CSV を読み込み、クレジット画面へ一覧を反映します。
-        /// </summary>
-        /// <param name="creditScreenView"> 一覧の反映先となるクレジット画面 View です。 </param>
-        private void BuildMemberList(CreditScreenView creditScreenView)
-        {
-            if (_memberCsv == null)
+            if (!ServiceLocator.TryGetInstance(out savedataSystem))
             {
-                Debug.LogWarning(
-                    $"[{nameof(TitleSceneInitializer)}] 制作メンバー CSV が設定されていないため、クレジット画面のメンバー一覧は空になります。",
-                    this);
-                return;
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: SavedataSystem が ServiceLocator に登録されていません。");
+#endif
+                return false;
             }
 
-            IMemberRepository memberRepository = new MemberCsvRepository(_memberCsv.text);
-            IMemberListPresenter memberListPresenter = new MemberListPresenter(creditScreenView);
-            ShowMemberListUseCase showMemberListUseCase = new(memberRepository, memberListPresenter);
-            showMemberListUseCase.Execute();
+            return true;
         }
 
         /// <summary>
@@ -421,7 +399,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void HandleScreenClosed()
         {
-            _screenController.CloseCurrent();
+            _screenController.CloseCurrentImmediately();
         }
 
         /// <summary>
@@ -431,22 +409,17 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         {
             try
             {
-                await SaveStore.DeleteAsync<SaveData>();
+                await _savedataSystem.DeleteSaveDataAsync<SaveData>();
             }
             catch (Exception ex)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: セーブデータの削除中にエラーが発生しました。{ex.Message}");
 #endif
-                // 削除に失敗した状態で再読み込みと初期スキル補完を続けると、
-                // リセットできていないデータをリセット済みとして扱ってしまう。
-                return;
             }
 
             // セーブデータをロードして、初期状態に戻す。
             _loadedSaveData = await LoadSaveData();
-
-            await ApplyInitialSkillLoadoutAsync();
 
             // セーブデータをリセットした後、初回起動時の遷移先シーンを設定します。
             if (_loadedSaveData != null
@@ -463,45 +436,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///     リセット直後のセーブデータへ初期解放・初期装備スキルを補完して保存する。
-        ///     <para>
-        ///         補完処理は常駐シーンの起動時にしか走らないため、起動後のリセットでは
-        ///         ここで明示的に呼び直す必要がある。
-        ///     </para>
-        /// </summary>
-        private async ValueTask ApplyInitialSkillLoadoutAsync()
-        {
-            if (_loadedSaveData == null)
-            {
-                return;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out InitialSkillLoadoutService initialSkillLoadoutService))
-            {
-                Debug.LogError(
-                    $"[{nameof(TitleSceneInitializer)}] {nameof(InitialSkillLoadoutService)} が取得できませんでした。",
-                    this);
-                return;
-            }
-
-            if (!initialSkillLoadoutService.TryApply(_loadedSaveData))
-            {
-                return;
-            }
-
-            try
-            {
-                await SaveStore.SaveAsync<SaveData>();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError(
-                    $"[{nameof(TitleSceneInitializer)}] 初期スキルの保存中にエラーが発生しました。{ex.Message}",
-                    this);
-            }
-        }
-
-        /// <summary>
         ///     初回チュートリアル用の戦闘出撃準備を行います。
         /// </summary>
         /// <param name="tutorialTargetSceneName"> 遷移先シーン名です。 </param>
@@ -510,14 +444,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         {
             tutorialTargetSceneName = string.Empty;
 
-            if (_loadedStageTreeAsset == null
-                || _loadedEnemyWaveDefinitionRepository == null
-                || _battleSortieSelectionService == null)
+            if (_loadedStageTreeAsset == null || _battleSortieSelectionService == null)
             {
                 return false;
             }
 
-            StageTree stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
+            StageTree stageTree = _loadedStageTreeAsset.Create();
             if (!stageTree.TryGetTutorialNode(out StageNode tutorialNode)
                 || tutorialNode?.Definition == null)
             {
@@ -547,9 +479,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             SaveData saveData = null;
             try
             {
-                saveData = SaveStore.IsLoaded<SaveData>()
-                    ? SaveStore.Get<SaveData>()
-                    : await SaveStore.LoadAsync<SaveData>();
+                saveData = await _savedataSystem.LoadAsync<SaveData>();
                 return saveData;
             }
             catch (Exception ex)

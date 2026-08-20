@@ -13,34 +13,12 @@ namespace KillChord.Runtime.View.InGame.Character
         public abstract void Play();
 
         /// <summary>
-        ///     ParticleSystemを指定位置で再生します。
-        /// </summary>
-        /// <param name="position"> 再生する位置。 </param>
-        public void PlayAt(Vector3 position)
-        {
-            _playbackPos = position;
-            _hasPlaybackPos = true;
-
-            try
-            {
-                Play();
-            }
-            finally
-            {
-                _hasPlaybackPos = false;
-            }
-        }
-
-        /// <summary>
         ///     管理中のParticleSystemをすべて停止します。
         /// </summary>
         public abstract void StopAll();
 
         [SerializeField, Tooltip("再利用生成元として使うParticleSystemです。")]
         protected ParticleSystem _particleSystemTemplate;
-
-        private Vector3 _playbackPos;
-        private bool _hasPlaybackPos;
 
         /// <summary>
         ///     テンプレートが設定されているかです。
@@ -91,12 +69,8 @@ namespace KillChord.Runtime.View.InGame.Character
             particleSystem.gameObject.SetActive(true);
             Transform cacheTransform = particleSystem.transform;
             cacheTransform.SetParent(null, true);
-
-            Vector3 position = _hasPlaybackPos
-                ? _playbackPos
-                : _particleSystemTemplate.transform.position;
             cacheTransform.SetPositionAndRotation(
-                position,
+                _particleSystemTemplate.transform.position,
                 _particleSystemTemplate.transform.rotation);
             particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
@@ -113,13 +87,7 @@ namespace KillChord.Runtime.View.InGame.Character
             }
 
             particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-
-            // 親階層の無効化中はUnityがSetParentを許可しないため、再親子化を行いません。
-            if (gameObject.activeInHierarchy)
-            {
-                particleSystem.transform.SetParent(transform, false);
-            }
-
+            particleSystem.transform.SetParent(transform, false);
             particleSystem.gameObject.SetActive(false);
         }
 

@@ -35,13 +35,12 @@ namespace KillChord.Runtime.View
             {
                 if (clips[i] == null)
                 {
-                    _playables.Add(default);      // 未定義種別：再生対象なし・ウェイト0
-                    _mixer.SetInputWeight(i, 0f);
-                    continue;
+                    throw new ArgumentException($"Clip at index {i} is null.", nameof(clips));
                 }
                 var playable = AnimationClipPlayable.Create(_graph, clips[i]);
                 playable.SetApplyFootIK(false);
                 playable.SetApplyPlayableIK(false);
+
                 _graph.Connect(playable, 0, _mixer, i);
                 _mixer.SetInputWeight(i, 0f);
                 _playables.Add(playable);
@@ -76,10 +75,7 @@ namespace KillChord.Runtime.View
         {
             foreach (var playable in _playables)
             {
-                if (playable.IsValid())
-                {
-                    playable.SetSpeed(speed);
-                }
+                playable.SetSpeed(speed);
             }
         }
 

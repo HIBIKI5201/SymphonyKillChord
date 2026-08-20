@@ -1,4 +1,3 @@
-using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Constant;
 using System.Collections.Generic;
@@ -17,9 +16,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <summary>
         ///     ステージツリーを生成する。
         /// </summary>
-        /// <param name="waveDefinitionRepository"> バトルシーン名の解決に使う敵Wave定義リポジトリ。</param>
         /// <returns> 生成したステージツリー。</returns>
-        public StageTree Create(IEnemyWaveDefinitionRepository waveDefinitionRepository)
+        public StageTree Create()
         {
             List<StageNode> nodes = new(_stageAssets.Count);
             for (int i = 0; i < _stageAssets.Count; i++)
@@ -31,7 +29,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                         $"[{nameof(StageTreeAsset)}] ステージアセットが未設定です。Index: {i}");
                 }
 
-                nodes.Add(stageAsset.Create(waveDefinitionRepository));
+                nodes.Add(stageAsset.Create());
             }
 
             List<StageNodeConnection> connections = new(_bindAssets.Count);
@@ -64,17 +62,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// </summary>
         private void OnValidate()
         {
-            Dictionary<int, StageAssetBase> registeredStages = ValidateStageAssets();
+            HashSet<StageAssetBase> registeredStages = ValidateStageAssets();
             ValidateBindAssets(registeredStages);
         }
 
         /// <summary>
         ///     ステージアセット一覧を検証する。
         /// </summary>
-        /// <returns> StageIdをキーとした登録済みステージアセットの辞書。</returns>
-        private Dictionary<int, StageAssetBase> ValidateStageAssets()
+        /// <returns> 登録済みステージアセットの集合。</returns>
+        private HashSet<StageAssetBase> ValidateStageAssets()
         {
-            Dictionary<int, StageAssetBase> registeredStages = new();
+            HashSet<StageAssetBase> registeredStages = new();
+            HashSet<int> stageIds = new();
             int tutorialCount = 0;
 
             for (int i = 0; i < _stageAssets.Count; i++)
@@ -88,6 +87,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                     continue;
                 }
 
+                registeredStages.Add(stageAsset);
                 if (stageAsset.StageIdValue == 0)
                 {
                     Debug.LogError(
@@ -96,12 +96,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                     continue;
                 }
 
-                if (!registeredStages.TryAdd(stageAsset.StageIdValue, stageAsset))
+                if (!stageIds.Add(stageAsset.StageIdValue))
                 {
                     Debug.LogError(
                         $"[{nameof(StageTreeAsset)}] StageIdが重複しています。StageId: {stageAsset.StageIdValue}",
                         this);
-                    continue;
                 }
 
                 if (stageAsset.IsTutorial)
@@ -123,18 +122,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <summary>
         ///     Bindアセット一覧を検証する。
         /// </summary>
-        /// <param name="registeredStages"> StageIdをキーとした登録済みステージアセットの辞書。</param>
-        private void ValidateBindAssets(Dictionary<int, StageAssetBase> registeredStages)
+        /// <param name="registeredStages"> 登録済みステージアセットの集合。</param>
+        private void ValidateBindAssets(HashSet<StageAssetBase> registeredStages)
         {
             HashSet<(int FromStageId, int ToStageId)> connections = new();
             HashSet<int> autoAdvanceFromIds = new();
-            Dictionary<int, int> incomingCounts = new();
-            Dictionary<int, List<int>> outgoingStages = new();
+            Dictionary<StageAssetBase, int> incomingCounts = new();
+            Dictionary<StageAssetBase, List<StageAssetBase>> outgoingStages = new();
 
-            foreach (int stageId in registeredStages.Keys)
+            foreach (StageAssetBase stageAsset in registeredStages)
             {
-                incomingCounts.Add(stageId, 0);
-                outgoingStages.Add(stageId, new List<int>());
+                incomingCounts.Add(stageAsset, 0);
+                outgoingStages.Add(stageAsset, new List<StageAssetBase>());
             }
 
             for (int i = 0; i < _bindAssets.Count; i++)
@@ -153,8 +152,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                     continue;
                 }
 
-                int fromStageId = bindAsset.FromStageIdValue;
-                int toStageId = bindAsset.ToStageIdValue;
+                int fromStageId = bindAsset.FromStage.StageIdValue;
+                int toStageId = bindAsset.ToStage.StageIdValue;
                 if (!connections.Add((fromStageId, toStageId)))
                 {
                     Debug.LogError(
@@ -163,15 +162,15 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                     continue;
                 }
 
-                outgoingStages[fromStageId].Add(toStageId);
-                incomingCounts[toStageId]++;
+                outgoingStages[bindAsset.FromStage].Add(bindAsset.ToStage);
+                incomingCounts[bindAsset.ToStage]++;
 
                 if (bindAsset.AdvanceMode == StageAdvanceMode.AutoAdvance
                     && !autoAdvanceFromIds.Add(fromStageId))
                 {
                     Debug.LogError(
                         $"[{nameof(StageTreeAsset)}] 同じ接続元から複数の自動遷移は設定できません。" +
-                        $"FromStage: {registeredStages[fromStageId].name}",
+                        $"FromStage: {bindAsset.FromStage.name}",
                         this);
                 }
             }
@@ -182,25 +181,25 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <summary>
         ///     起点数と循環の有無を検証する。
         /// </summary>
-        /// <param name="registeredStages"> StageIdをキーとした登録済みステージアセットの辞書。</param>
-        /// <param name="incomingCounts"> StageId別の入力接続数。</param>
-        /// <param name="outgoingStages"> StageId別の後続StageId一覧。</param>
+        /// <param name="registeredStages"> 登録済みステージアセットの集合。</param>
+        /// <param name="incomingCounts"> ステージ別の入力接続数。</param>
+        /// <param name="outgoingStages"> ステージ別の後続ステージ一覧。</param>
         private void ValidateTopology(
-            Dictionary<int, StageAssetBase> registeredStages,
-            Dictionary<int, int> incomingCounts,
-            Dictionary<int, List<int>> outgoingStages)
+            HashSet<StageAssetBase> registeredStages,
+            Dictionary<StageAssetBase, int> incomingCounts,
+            Dictionary<StageAssetBase, List<StageAssetBase>> outgoingStages)
         {
             if (registeredStages.Count == 0)
             {
                 return;
             }
 
-            Queue<int> processingQueue = new();
-            foreach (int stageId in registeredStages.Keys)
+            Queue<StageAssetBase> processingQueue = new();
+            foreach (StageAssetBase stageAsset in registeredStages)
             {
-                if (incomingCounts[stageId] == 0)
+                if (incomingCounts[stageAsset] == 0)
                 {
-                    processingQueue.Enqueue(stageId);
+                    processingQueue.Enqueue(stageAsset);
                 }
             }
 
@@ -222,16 +221,16 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             int processedCount = 0;
             while (processingQueue.Count > 0)
             {
-                int currentStageId = processingQueue.Dequeue();
+                StageAssetBase currentStage = processingQueue.Dequeue();
                 processedCount++;
-                List<int> nextStageIds = outgoingStages[currentStageId];
-                for (int i = 0; i < nextStageIds.Count; i++)
+                List<StageAssetBase> nextStages = outgoingStages[currentStage];
+                for (int i = 0; i < nextStages.Count; i++)
                 {
-                    int nextStageId = nextStageIds[i];
-                    incomingCounts[nextStageId]--;
-                    if (incomingCounts[nextStageId] == 0)
+                    StageAssetBase nextStage = nextStages[i];
+                    incomingCounts[nextStage]--;
+                    if (incomingCounts[nextStage] == 0)
                     {
-                        processingQueue.Enqueue(nextStageId);
+                        processingQueue.Enqueue(nextStage);
                     }
                 }
             }
@@ -248,13 +247,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         ///     Bindの参照先を検証する。
         /// </summary>
         /// <param name="bindAsset"> 検証するBindアセット。</param>
-        /// <param name="registeredStages"> StageIdをキーとした登録済みステージアセットの辞書。</param>
+        /// <param name="registeredStages"> 登録済みステージアセットの集合。</param>
         /// <returns> 有効な場合はtrue。</returns>
         private bool ValidateBindReferences(
             StageBindAsset bindAsset,
-            Dictionary<int, StageAssetBase> registeredStages)
+            HashSet<StageAssetBase> registeredStages)
         {
-            if (bindAsset.FromStageIdValue == 0 || bindAsset.ToStageIdValue == 0)
+            if (bindAsset.FromStage == null || bindAsset.ToStage == null)
             {
                 Debug.LogError(
                     $"[{nameof(StageTreeAsset)}] BindのFromStageまたはToStageが未設定です。Asset: {bindAsset.name}",
@@ -262,7 +261,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 return false;
             }
 
-            if (bindAsset.FromStageIdValue == bindAsset.ToStageIdValue)
+            if (bindAsset.FromStage == bindAsset.ToStage)
             {
                 Debug.LogError(
                     $"[{nameof(StageTreeAsset)}] 自己接続は設定できません。Asset: {bindAsset.name}",
@@ -270,8 +269,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 return false;
             }
 
-            if (!registeredStages.ContainsKey(bindAsset.FromStageIdValue)
-                || !registeredStages.ContainsKey(bindAsset.ToStageIdValue))
+            if (!registeredStages.Contains(bindAsset.FromStage)
+                || !registeredStages.Contains(bindAsset.ToStage))
             {
                 Debug.LogError(
                     $"[{nameof(StageTreeAsset)}] StageTreeに未登録のステージがBindから参照されています。" +

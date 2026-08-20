@@ -1,4 +1,3 @@
-using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Constant;
 using UnityEngine;
@@ -25,15 +24,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <param name="flavorText"> フレーバーテキスト。</param>
         /// <param name="reward"> クリア報酬。</param>
         /// <param name="targetSceneName"> 遷移先シーン名。</param>
-        /// <param name="waveDefinitionRepository"> シナリオステージでは使用しません。</param>
         /// <returns> 生成したシナリオステージ定義。</returns>
         protected override StageDefinition CreateDefinition(
             StageId stageId,
             string stageName,
             string flavorText,
             StageReward reward,
-            string targetSceneName,
-            IEnemyWaveDefinitionRepository waveDefinitionRepository)
+            string targetSceneName)
         {
             return new ScenarioStageDefinition(
                 stageId,

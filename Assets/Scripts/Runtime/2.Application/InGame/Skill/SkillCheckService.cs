@@ -25,7 +25,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
 
             if (skillDefinition.IsMatch(reversedInput))
             {
-                Debug.Log($"[SkillCheckService({skillDefinition.Id.Value})] SKILL PATTERN MATCHED. SKILL ID: {skillDefinition.Id.Value}");
+                Debug.Log($"[SkillCheckService({skillDefinition.Id.Value})] SKILL TRIGGERED. SKILL ID: {skillDefinition.Id.Value}");
                 return true;
             }
             return false;

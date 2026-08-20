@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain.InGame.Skill;
-using System;
 
 namespace KillChord.Runtime.Domain.OutGame.SkillTree
 {
@@ -10,17 +9,13 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
     {
         public SkillNodeEntity(SkillNodeId nodeId,
             int cost, string skillDetail,
-            SkillId[] unlockSkillIds,
-            IStatusBonusEffect[] statusBonusEffects = null)
+            SkillId[] unlockSkillIds)
         {
             SkillNodeIdVO = nodeId;
             UnlockCost = new UnlockCost(cost);
             _parents = null;
             SkillDetail = skillDetail;
-            _unlockSkillIds = unlockSkillIds ?? Array.Empty<SkillId>();
-            _statusBonusEffects = statusBonusEffects == null || statusBonusEffects.Length == 0
-                ? Array.Empty<IStatusBonusEffect>()
-                : (IStatusBonusEffect[])statusBonusEffects.Clone();
+            _unlockSkillIds = unlockSkillIds;
         }
         /// <summary> ノードのID。 </summary>
         public SkillNodeId SkillNodeIdVO { get; }
@@ -54,34 +49,8 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             _isUnlocked = true;
         }
 
-        /// <summary>
-        ///     ノードを未解放に戻す。
-        /// </summary>
-        public void Lock()
-        {
-            _isUnlocked = false;
-        }
-
-        /// <summary>
-        ///     保持しているステータスボーナス効果を適用する。
-        /// </summary>
-        /// <param name="builder"> ボーナスの集計先。 </param>
-        public void ApplyStatusBonusEffects(PlayerStatusBonusBuilder builder)
-        {
-            if (builder == null)
-            {
-                throw new ArgumentNullException(nameof(builder));
-            }
-
-            for (int i = 0; i < _statusBonusEffects.Length; i++)
-            {
-                _statusBonusEffects[i]?.Apply(builder);
-            }
-        }
-
         private bool _isUnlocked = false;
         private SkillNodeEntity[] _parents;
         private SkillId[] _unlockSkillIds;
-        private IStatusBonusEffect[] _statusBonusEffects;
     }
 }

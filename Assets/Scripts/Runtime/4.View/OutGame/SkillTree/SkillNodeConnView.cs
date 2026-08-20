@@ -24,15 +24,6 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _root.AddToClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_CONN_PASSED);
         }
 
-        /// <summary>
-        ///     接続線を未通過に設定する。
-        /// </summary>
-        public void SetNotPassed()
-        {
-            _root.RemoveFromClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_CONN_PASSED);
-            _root.AddToClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_CONN_NOT_PASSED);
-        }
-
         private VisualElement _root;
     }
 }

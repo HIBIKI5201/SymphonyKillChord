@@ -1,6 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
-using KillChord.Runtime.Utility.Identity;
 using System;
 using UnityEngine;
 
@@ -15,15 +13,12 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <summary>
         ///     クリア条件を生成します。
         /// </summary>
-        /// <param name="missionKeyRepository"> 敵ミッションキーの解決に使うリポジトリです。 </param>
         /// <returns>クリア条件。</returns>
-        public override IMissionClearCondition Create(EnemyMissionKeyRepository missionKeyRepository)
+        public override IMissionClearCondition Create()
         {
-            if (missionKeyRepository == null
-                || _enemyMissionKeyId.Id == 0
-                || !missionKeyRepository.TryGetAsset(new EnemyMissionKey(_enemyMissionKeyId.Id), out EnemyMissionKeyAsset asset))
+            if (_enemyMissionKeyAsset == null)
             {
-                throw new InvalidOperationException($"{nameof(_enemyMissionKeyId)} に対応する EnemyMissionKeyAsset が見つかりません。");
+                throw new InvalidOperationException($"{nameof(_enemyMissionKeyAsset)} is required.");
             }
 
             if (_requiredKillCount <= 0)
@@ -32,9 +27,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
             }
 
             return new EnemyKillCountClearCondition(
-                asset.Id,
+                _enemyMissionKeyAsset.Id,
                 _requiredKillCount,
-                asset.DisplayName);
+                _enemyMissionKeyAsset.DisplayName);
         }
 
         /// <summary>
@@ -43,11 +38,11 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <returns>サマリー文字列。</returns>
         protected override string BuildSummary()
         {
-            return $"敵ミッションキー(Id:{_enemyMissionKeyId.Id})を{_requiredKillCount}体以上倒す条件";
+            string enemyName = _enemyMissionKeyAsset != null ? _enemyMissionKeyAsset.DisplayName : "null";
+            return $"{enemyName}を{_requiredKillCount}体以上倒す条件";
         }
 
-        [SerializeField, SourceDataCollection("EnemyMissionKey"), Tooltip("撃破対象となる敵のID。")]
-        private DataID _enemyMissionKeyId;
+        [SerializeField, Tooltip("撃破対象となる敵の定義アセット。")] private EnemyMissionKeyAsset _enemyMissionKeyAsset;
         [SerializeField, Tooltip("クリアに必要な撃破数。")] private int _requiredKillCount;
     }
 }

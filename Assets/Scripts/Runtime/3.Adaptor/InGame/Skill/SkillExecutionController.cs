@@ -44,9 +44,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <param name="beatType"> 現在ビートです。 </param>
         /// <param name="now"> 現在時刻です。 </param>
         /// <param name="battleActionType"> 行動種別です。 </param>
-        /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうか。 </param>
         /// <returns> 実行結果です。 </returns>
-        public SkillExecutionResult TryExecuteSkill(BeatType beatType, float now, BattleActionType battleActionType, bool isJustHit)
+        public SkillExecutionResult TryExecuteSkill(BeatType beatType, float now, BattleActionType battleActionType)
         {
             if (!_skillCooldownState.IsSkillReady(now))
             {
@@ -64,7 +63,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 return new SkillExecutionResult(SkillExecutionResultType.InputProgressed);
             }
 
-            bool canExecute = _skillUseCase.TryExecuteSkill(_skillDefinition, beatType, isJustHit);
+            bool canExecute = _skillUseCase.TryExecuteSkill(_skillDefinition, beatType);
             if (canExecute)
             {
                 ExecuteVisual();
@@ -72,17 +71,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 _skillRhythmState.Clear();
                 _skillCooldownState.SetSkillCooldown(now);
                 _progressController.SkillTriggered(now, _skillCooldownState.SkillReadyTimestamp);
-                return new SkillExecutionResult(
-                    SkillExecutionResultType.Executed,
-                    _skillDefinition.AnimationKey,
-                    _skillDefinition.EffectSpec.SkillNormalAttackDamagePolicy);
+                return new SkillExecutionResult(SkillExecutionResultType.Executed, _skillDefinition.AnimationKey);
             }
 
             ApplyFailurePolicy(now);
-            Debug.LogWarning(
-                $"[{nameof(SkillExecutionController)}] 入力パターンは一致しましたが、" +
-                $"対象を解決できないためスキルを実行しませんでした。ID: {_skillDefinition.Id.Value}, " +
-                $"TargetingType: {_skillDefinition.EffectSpec.TargetingType}");
             return new SkillExecutionResult(SkillExecutionResultType.RejectedByTargetPolicy);
         }
 

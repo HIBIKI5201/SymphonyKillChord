@@ -39,8 +39,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary>
         /// フェード演出要求をビューへ通知する。
         /// </summary>
-        public ValueTask FadeAsync(string target, float start, float end, float duration, CancellationToken ct)
-            => _fadeOutputPort.FadeAsync(target, start, end, duration, ct);
+        public ValueTask FadeAsync(float start, float end, float duration, CancellationToken ct)
+            => _fadeOutputPort.FadeAsync(start, end, duration, ct);
 
         /// <summary>
         /// 背景表示要求をビューへ通知する。

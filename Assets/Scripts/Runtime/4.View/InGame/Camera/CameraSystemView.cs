@@ -18,12 +18,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> 初回カメラ更新が完了している場合はtrueです。 </summary>
         public bool HasCompletedInitialUpdate => _hasCompletedInitialUpdate;
 
-        /// <summary> カメラの Transform。 </summary>
-        public Transform CameraTransform => _cameraT;
-
-        /// <summary> 外部から制御されている場合はtrueです。 </summary>
-        public bool IsExternallyControlled => _isExternallyControlled;
-
         /// <summary>
         ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
         /// </summary>
@@ -39,7 +33,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="lookAtRotationCalculator"> カメラ回転計算クラス。</param>
         /// <param name="lockOnRangeChecker"> 自動ロックオン対象の視野内判定クラス。</param>
         /// <param name="lockOnBreakTracker"> 強い視点操作によるロックオン解除判定クラス。</param>
-        /// <param name="shakeCalculator"> カメラシェイクの揺れ量計算クラス。</param>
         /// <param name="viewSettings"> View が利用するカメラ設定値。</param>
         /// <param name="playerT"> プレイヤーの Transform。</param>
         /// <param name="playerInputView"> プレイヤー入力の View クラス。</param>
@@ -56,7 +49,6 @@ namespace KillChord.Runtime.View.InGame.Camera
             CameraLookAtRotationCalculator lookAtRotationCalculator,
             CameraLockOnRangeChecker lockOnRangeChecker,
             CameraLockOnBreakTracker lockOnBreakTracker,
-            CameraShakeCalculator shakeCalculator,
             CameraConfig viewSettings,
             Transform playerT,
             PlayerInputView playerInputView)
@@ -73,7 +65,6 @@ namespace KillChord.Runtime.View.InGame.Camera
             _lookAtRotationCalculator = lookAtRotationCalculator;
             _lockOnRangeChecker = lockOnRangeChecker;
             _lockOnBreakTracker = lockOnBreakTracker;
-            _shakeCalculator = shakeCalculator;
             _viewSettings = viewSettings;
             _playerT = playerT;
             _inputView = playerInputView;
@@ -82,7 +73,6 @@ namespace KillChord.Runtime.View.InGame.Camera
                 : UnityEngine.Camera.main;
             _currentDistance = viewSettings.Distance;
             _hasCompletedInitialUpdate = false;
-            _isExternallyControlled = false;
 
 #if UNITY_ANDROID
             _inputView.OnMobileLookInput += LookHandlerMobile;
@@ -96,81 +86,6 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView.OnLockOnInput += LockOnHandler;
             _inputView.OnAttackInput += OnAttack;
             EventBus<EOnTakeDamage>.Register(OnTakeDamage);
-            EventBus<EOnEnemyDefeated>.Register(EnemyDefeatedHandler);
-            EventBus<EOnPlayerAttackExecuted>.Register(PlayerAttackExecutedHandler);
-            EventBus<EOnPlayerTakeDamage>.Register(PlayerTakeDamageHandler);
-        }
-
-        /// <summary>
-        ///     現在のプレイヤー位置・カメラ前方方向を基に、カメラの状態を即時更新する。
-        /// </summary>
-        /// <returns> 更新が成功したかどうかを示す値。 </returns>
-        public bool RefreshImmediate()
-        {
-            if (_isExternallyControlled || _playerT == null || _cameraT == null || _viewSettings == null)
-            {
-                return false;
-            }
-
-            Tick(0f);
-            return _hasCompletedInitialUpdate;
-        }
-
-        /// <summary>
-        ///     ステージ演出などへカメラTransformの制御を委譲するため、外部制御モードへ切り替える。
-        /// </summary>
-        public void BeginExternalControl()
-        {
-            ClearInputState();
-            _isExternallyControlled = true;
-        }
-
-        /// <summary>
-        ///     外部制御モードを終了し、カメラシステムの制御へ戻す。
-        /// </summary>
-        public void EndExternalControl()
-        {
-            ClearInputState();
-            _isExternallyControlled = false;
-        }
-
-        /// <summary>
-        ///     カメラの向きを指定した前方へ向け直し、ロックオンや入力状態を初期化する。
-        ///     プレイヤーをスタート地点へ戻す際などに、カメラの向きも合わせて戻すために使用する。
-        /// </summary>
-        /// <param name="forward"> カメラを向けたい前方(ワールド空間)。プレイヤーのスタート時の前方などを指定する。</param>
-        public void ResetOrientation(Vector3 forward)
-        {
-            // ロックオン中の場合は解除する。
-            if (IsLockOn())
-            {
-                ClearLockOn();
-            }
-
-            ClearInputState();
-
-            // 水平成分からヨーを求め、ピッチは水平(0)へ戻す。
-            Vector3 flatForward = forward;
-            flatForward.y = 0f;
-            if (flatForward.sqrMagnitude > float.Epsilon)
-            {
-                float yaw = Quaternion.LookRotation(flatForward.normalized, Vector3.up).eulerAngles.y;
-                _cameraBoneRotation = Quaternion.Euler(0f, yaw, 0f);
-            }
-            else
-            {
-                _cameraBoneRotation = Quaternion.identity;
-            }
-
-            _cameraRotation = Quaternion.identity;
-
-            if (_viewSettings != null)
-            {
-                _currentDistance = _viewSettings.Distance;
-            }
-
-            // 反映を即時に行い、カメラ位置・回転を更新する。
-            RefreshImmediate();
         }
 
         /// <summary> カメラ距離の補間速度。 </summary>
@@ -194,15 +109,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField, Tooltip("モバイルのカメラ感度")]
         private int _mobileLookSensitivity = 10;
 
-        [SerializeField, Tooltip("敵を撃破した時のカメラシェイク設定")]
-        private CameraShakeConfig _enemyDefeatedShakeConfig;
-
-        [SerializeField, Tooltip("プレイヤーが攻撃を実行した時のカメラシェイク設定")]
-        private CameraShakeConfig _playerAttackShakeConfig;
-
-        [SerializeField, Tooltip("プレイヤーが被弾した時のカメラシェイク設定")]
-        private CameraShakeConfig _playerDamageShakeConfig;
-
         private PlayerInputView _inputView;
         private UnityEngine.Camera _camera;
         private Transform _playerT;
@@ -220,7 +126,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraLookAtRotationCalculator _lookAtRotationCalculator;
         private CameraLockOnRangeChecker _lockOnRangeChecker;
         private CameraLockOnBreakTracker _lockOnBreakTracker;
-        private CameraShakeCalculator _shakeCalculator;
         private Action<Vector3, Vector3> _changeTargetAction;
         private Action<Vector3, Vector3> _updateCandidateAction;
         private Action _clearTargetAction;
@@ -231,16 +136,13 @@ namespace KillChord.Runtime.View.InGame.Camera
         private bool _hasCompletedInitialUpdate;
         private float _autoLockOnIdleTimer;
         private float _autoLockOnViewportGraceTimer;
-        private bool _isExternallyControlled;
 
         /// <summary>
         ///     FixedUpdate タイミングでカメラを更新する。
         /// </summary>
         private void FixedUpdate()
         {
-            if (_isExternallyControlled || _playerT == null) { return; }
             if (_updateMode != UpdateModeEnum.FixedUpdate) { return; }
-
             Tick(Time.fixedDeltaTime);
         }
 
@@ -249,7 +151,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void Update()
         {
-            if (_isExternallyControlled || _playerT == null) { return; }
+            if (_playerT == null) { return; }
 
             if (_updateMode != UpdateModeEnum.Update)
             { return; }
@@ -261,7 +163,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void LateUpdate()
         {
-            if (_isExternallyControlled || _playerT == null) { return; }
+            if (_playerT == null) { return; }
 
             if (_updateMode != UpdateModeEnum.LateUpdate)
             { return; }
@@ -269,19 +171,10 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     カメラシェイクを停止し、EventBusと入力イベントの購読解除を行う。
+        ///     入力イベントの購読解除を行う。
         /// </summary>
         private void OnDestroy()
         {
-            // 破棄後もPunchモーションが動き続けないよう停止する。
-            _shakeCalculator?.Reset();
-
-            // EventBusはstaticでシーンをまたいで生存するため、_inputViewの状態に関わらず必ず解除する。
-            EventBus<EOnTakeDamage>.Unregister(OnTakeDamage);
-            EventBus<EOnEnemyDefeated>.Unregister(EnemyDefeatedHandler);
-            EventBus<EOnPlayerAttackExecuted>.Unregister(PlayerAttackExecutedHandler);
-            EventBus<EOnPlayerTakeDamage>.Unregister(PlayerTakeDamageHandler);
-
             if (_inputView == null) { return; }
 
 #if UNITY_ANDROID
@@ -295,6 +188,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView.OnMoveInput -= MoveHandler;
             _inputView.OnLockOnInput -= LockOnHandler;
             _inputView.OnAttackInput -= OnAttack;
+            EventBus<EOnTakeDamage>.Unregister(OnTakeDamage);
         }
 
         /// <summary>
@@ -401,47 +295,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     敵の撃破イベントを受け取り、撃破時のカメラシェイクを要求する。
-        /// </summary>
-        /// <param name="eventData"> 敵撃破イベント。 </param>
-        private void EnemyDefeatedHandler(EOnEnemyDefeated eventData)
-        {
-            RequestShake(_enemyDefeatedShakeConfig);
-        }
-
-        /// <summary>
-        ///     プレイヤーの攻撃実行イベントを受け取り、攻撃時のカメラシェイクを要求する。
-        /// </summary>
-        /// <param name="eventData"> プレイヤー攻撃実行イベント。 </param>
-        private void PlayerAttackExecutedHandler(EOnPlayerAttackExecuted eventData)
-        {
-            RequestShake(_playerAttackShakeConfig);
-        }
-
-        /// <summary>
-        ///     プレイヤーの被弾イベントを受け取り、被弾時のカメラシェイクを要求する。
-        /// </summary>
-        /// <param name="eventData"> プレイヤー被弾イベント。 </param>
-        private void PlayerTakeDamageHandler(EOnPlayerTakeDamage eventData)
-        {
-            RequestShake(_playerDamageShakeConfig);
-        }
-
-        /// <summary>
-        ///     カメラシェイクの発生を要求する。
-        /// </summary>
-        /// <param name="config"> 要求するシェイクの設定。 </param>
-        private void RequestShake(CameraShakeConfig config)
-        {
-            if (_shakeCalculator == null)
-            {
-                return;
-            }
-
-            _shakeCalculator.TryRequestShake(config);
-        }
-
-        /// <summary>
         ///     カメラの追従・回転を計算し、カメラの Transform を更新する。
         /// </summary>
         /// <param name="deltaTime"> 前フレームからの経過時間。</param>
@@ -494,10 +347,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 frame.TargetPosition);
 
             Quaternion rotation = _cameraBoneRotation * _cameraRotation;
-
-            // シェイクはカメラ計算結果へ後乗せし、揺れが次フレームの計算へ影響しないようにする。
-            Vector3 shakeOffset = _shakeCalculator?.PositionOffset ?? Vector3.zero;
-            _cameraT.SetPositionAndRotation(position + (rotation * shakeOffset), rotation);
+            _cameraT.SetPositionAndRotation(position, rotation);
             _hasCompletedInitialUpdate = true;
         }
 
@@ -593,7 +443,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraUpdateFrame BuildFrame(float deltaTime)
         {
             Vector2 input = ApplyInvert(_input * _lookSensitivity);
-            CameraUpdateContext context = new(_playerT.position, input, _moveInput, deltaTime);
+            CameraUpdateContext context = new(_playerT.position, _playerT.forward, input, _moveInput, deltaTime);
 
             Vector3 targetPosition = Vector3.zero;
             if (IsLockOn())
@@ -718,18 +568,6 @@ namespace KillChord.Runtime.View.InGame.Camera
             }
 
             return input;
-        }
-
-        /// <summary>
-        ///     カメラ操作に使用する入力値と、発生中のシェイクを初期化します。
-        /// </summary>
-        private void ClearInputState()
-        {
-            _input = Vector2.zero;
-            _moveInput = Vector2.zero;
-
-            // 外部制御への切り替えや位置リセットをまたいで揺れが残らないようにする。
-            _shakeCalculator?.Reset();
         }
 
         /// <summary>

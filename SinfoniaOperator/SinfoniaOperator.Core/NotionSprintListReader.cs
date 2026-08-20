@@ -101,7 +101,6 @@ namespace SinfoniaStudio.SinfoniaOperator
                     output.AppendLine($"終了日時: {endDate:yyyy/MM/dd HH:mm}");
 
                     string pageContext = await _reader.GetPageContentAsync(page);
-                    pageContext = NotionMarkdownSanitizer.SanitizeForNotification(pageContext);
                     output.AppendLine(new string('-', 10));
                     output.AppendLine(pageContext.TrimEnd());
                     output.AppendLine(new string('-', 10));

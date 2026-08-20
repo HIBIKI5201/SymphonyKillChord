@@ -15,9 +15,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         {
             _elapsedTime = new MissionElapsedTime(0f);
             _enemyKillRecord = new EnemyKillRecord();
-            _actionRecord = new MissionActionRecord();
             _damageTaken = new MissionDamageTaken(0f);
-            _maxCombo = new MissionMaxCombo(0);
+            _maxCombo = new MissionCombo(0);
             _usedWeaponIds = new HashSet<string>(System.StringComparer.Ordinal);
             _endReason = MissionEndReason.None;
         }
@@ -26,16 +25,13 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         public MissionElapsedTime ElapsedTime => _elapsedTime;
         /// <summary> 敵撃破記録を取得します。 </summary>
         public EnemyKillRecord EnemyKillRecord => _enemyKillRecord;
-        /// <summary> プレイヤー行動の発動記録を取得します。 </summary>
-        public MissionActionRecord ActionRecord => _actionRecord;
         /// <summary> 累計被ダメージを取得します。 </summary>
         public MissionDamageTaken DamageTaken => _damageTaken;
         /// <summary> 使用した武器種類数を取得します。 </summary>
         public MissionWeaponVariety WeaponVariety => new(_usedWeaponIds.Count);
         /// <summary> 最大コンボ数を取得します。 </summary>
-        public MissionMaxCombo MaxCombo => _maxCombo;
-        /// <summary> コンボ数を取得します。 </summary>
-        public ComboCount ComboCount => _comboCount;
+        public MissionCombo MaxCombo => _maxCombo;
+
         /// <summary> プレイヤーが死亡したかどうかを取得します。 </summary>
         public bool IsPlayerDead => _isPlayerDead;
         /// <summary> ミッションが終了したかどうかを取得します。 </summary>
@@ -84,33 +80,19 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         }
 
         /// <summary>
-        ///     プレイヤー行動の発動を記録します。
+        ///     現在コンボ数から最大コンボを更新します。
         /// </summary>
-        /// <param name="actionKind"> 発動した行動の種別です。 </param>
-        public void RecordActionPerformed(MissionActionKind actionKind)
+        /// <param name="combo"> 現在コンボ数です。 </param>
+        public void RecordCombo(int combo)
         {
-            _actionRecord.RecordAction(actionKind);
-        }
-
-        /// <summary> 
-        ///     現在コンボ数を1増やし、最大コンボを必要に応じて更新します。 
-        /// </summary>
-        public void IncrementCombo()
-        {
-            _comboCount = new ComboCount(_comboCount.Value + 1);
-            if (_comboCount.Value > _maxCombo.Value)
+            if (combo <= _maxCombo.Value)
             {
-                _maxCombo = new MissionMaxCombo(_comboCount.Value);
+                return;
             }
+
+            _maxCombo = new MissionCombo(combo);
         }
 
-        /// <summary> 
-        ///     現在コンボ数を0にリセットします。 
-        /// </summary>
-        public void ResetCombo()
-        {
-            _comboCount = new ComboCount(0);
-        }
         /// <summary>
         ///     ミッションを終了させます。
         /// </summary>
@@ -125,33 +107,17 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             _endReason = reason;
         }
 
-        /// <summary> 目標シーケンスの現在のステップIndexを取得します。 </summary>
-        public int ObjectiveStepIndex => _objectiveStepIndex;
-
-        /// <summary>
-        ///     目標シーケンスの現在ステップを次へ進めます。
-        /// </summary>
-        public void AdvanceObjectiveStep()
-        {
-            _objectiveStepIndex++;
-        }
-
         /// <summary> 経過時間。 </summary>
         private MissionElapsedTime _elapsedTime;
         /// <summary> 敵撃破記録。 </summary>
         private readonly EnemyKillRecord _enemyKillRecord;
-        /// <summary> プレイヤー行動の発動記録。 </summary>
-        private readonly MissionActionRecord _actionRecord;
         private readonly HashSet<string> _usedWeaponIds;
         private MissionDamageTaken _damageTaken;
-        private MissionMaxCombo _maxCombo;
-        private ComboCount _comboCount;
+        private MissionCombo _maxCombo;
 
         /// <summary> プレイヤー死亡フラグ。 </summary>
         private bool _isPlayerDead;
         /// <summary> 終了理由。 </summary>
         private MissionEndReason _endReason;
-        /// <summary> 目標シーケンスの現在ステップIndex。 </summary>
-        private int _objectiveStepIndex;
     }
 }

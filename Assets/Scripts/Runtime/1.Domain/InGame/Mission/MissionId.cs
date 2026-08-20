@@ -11,18 +11,18 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         ///     MissionId 構造体の新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="value">IDの値。</param>
-        public MissionId(int value)
+        public MissionId(string value)
         {
-            if (value == 0)
+            if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ArgumentOutOfRangeException(nameof(value), "MissionIdに0は使用できません。");
+                throw new ArgumentException("MissionIdが空文字列またはnullです。", nameof(value));
             }
 
             _value = value;
         }
 
         /// <summary> IDの値を取得します。 </summary>
-        public int Value => _value;
+        public string Value => _value;
 
         /// <summary>
         ///     他のオブジェクトと等しいかどうかを判定します。
@@ -40,14 +40,14 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         ///     ハッシュコードを取得します。
         /// </summary>
         /// <returns>ハッシュコード。</returns>
-        public override int GetHashCode() => _value;
+        public override int GetHashCode() => _value != null ? _value.GetHashCode() : 0;
         /// <summary>
         ///     文字列形式を取得します。
         /// </summary>
         /// <returns>文字列形式。</returns>
-        public override string ToString() => _value.ToString();
+        public override string ToString() => _value;
 
         /// <summary> IDの値。 </summary>
-        private readonly int _value;
+        private readonly string _value;
     }
 }

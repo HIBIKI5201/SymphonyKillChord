@@ -3,7 +3,8 @@ using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Composition.OutGame.Screen
 {
@@ -33,49 +34,56 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         }
 
         /// <summary>
-        ///    指定画面を表示状態にします。
+        ///    指定画面を即時表示します。
         /// </summary>
         /// <param name="screenId"></param>
-        public void Show(ScreenId screenId)
+        /// <param name="targetSceneName"></param>
+        public void ShowImmediately(ScreenId screenId, string targetSceneName = null)
         {
-            if (!_views.TryGetValue(screenId, out ScreenViewBase view))
+            ScreenViewBase view = _views[screenId];
+            if (view is BattlePreparationScreen battlePreparationScreen)
             {
-                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
-                return;
+                battlePreparationScreen.SetTargetSceneName(targetSceneName);
             }
-            view.Show();
+            _views[screenId].ShowImmediately();
         }
 
         /// <summary>
-        ///    指定画面を非表示状態にします。
+        ///    指定画面を即時非表示にします。
         /// </summary>
-        public void Hide(ScreenId screenId)
+        public void HideImmediately(ScreenId screenId)
         {
-            if (!_views.TryGetValue(screenId, out ScreenViewBase view))
-            {
-                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
-                return;
-            }
-            view.Hide();
+            _views[screenId].HideImmediately();
         }
 
         /// <summary>
-        ///     全画面を非表示状態にします。
+        ///     指定画面を表示し、トランジションの完了を待機します。
         /// </summary>
-        public void HideAll()
+        public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)
         {
-            foreach (IScreenView screenView in _views.Values)
+            ScreenViewBase view = _views[screenId];
+            if (view is BattlePreparationScreen battlePreparationScreen)
             {
-                screenView.Hide();
+                battlePreparationScreen.SetTargetSceneName(targetSceneName);
             }
+
+            await _views[screenId].Show(token);
         }
 
         /// <summary>
-        ///     全画面をフェードなしで即座に非表示状態にします。
+        ///     指定画面を非表示にし、トランジションの完了を待機します。
+        /// </summary>
+        public async Task Hide(ScreenId screenId, CancellationToken token)
+        {
+            await _views[screenId].Hide(token);
+        }
+
+        /// <summary>
+        ///     全画面を即時非表示にします。
         /// </summary>
         public void HideAllImmediately()
         {
-            foreach (ScreenViewBase screenView in _views.Values)
+            foreach (IScreenView screenView in _views.Values)
             {
                 screenView.HideImmediately();
             }
@@ -86,7 +94,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public void Dispose()
         {
-            foreach (IDisposable disposable in _views.Values)
+            foreach(IDisposable disposable in _views.Values)
             {
                 disposable.Dispose();
             }

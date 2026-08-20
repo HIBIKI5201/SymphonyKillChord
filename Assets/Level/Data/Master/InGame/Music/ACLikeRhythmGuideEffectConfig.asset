@@ -25,8 +25,9 @@ MonoBehaviour:
   _justOvershootEase: 26
   _justReturnEase: 20
   _isVignetteEnabled: 1
-  _vignetteIntensity: 1
-  _normalVignetteIntensity: 0.3
-  _vignetteDuration: 0.4
-  _normalVignetteDuration: 0.2
+  _vignetteIntensity: 0.22
+  _vignetteDuration: 0.28
+  _vignetteSmoothness: 0.45
   _vignetteEase: 5
+  _vignettePriority: 100
+  _vignetteMinimumInterval: 0.08

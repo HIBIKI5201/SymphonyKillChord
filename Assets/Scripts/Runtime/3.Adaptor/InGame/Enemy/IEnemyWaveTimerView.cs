@@ -16,11 +16,5 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         ///     タイマーを停止する。
         /// </summary>
         public void StopTimer();
-
-        /// <summary>
-        ///     外部のゲームプレイ開始やタイムアウトによるWave自動生成を抑制します。
-        /// </summary>
-        /// <param name="suppressed"> 抑制する場合はtrueです。 </param>
-        public void SetAutoSpawnSuppressed(bool suppressed);
     }
 }

@@ -12,12 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 627ee99fd40337244b7963aeef8c21a2, type: 3}
   m_Name: SkillNodeData-N9
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeData
-  UnlockCost: 20
-  SkillDetail: 
-  PreviewVideoClip: {fileID: 0}
-  _statusBonusEffects: []
-  _unlockSkills:
-  - {fileID: 11400000, guid: 7a6b32830073d1844b3ea06510f79886, type: 2}
   _nodeId:
     _id: node_n9
     _hashId: -190575164
@@ -26,6 +20,6 @@ MonoBehaviour:
     _hashId: -535987287
   - _id: node_n123
     _hashId: -867308429
-  references:
-    version: 2
-    RefIds: []
+  UnlockCost: 20
+  SkillDetail: 
+  PreviewVideoClip: {fileID: 0}

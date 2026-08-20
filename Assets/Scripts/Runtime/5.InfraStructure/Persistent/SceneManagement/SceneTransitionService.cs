@@ -38,7 +38,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     0f,
                     LoadingConstants.SCENE_LOAD_END_PROGRESS);
 
-                bool loadSuccess = await SceneLoader.LoadSceneAsync(toSceneName,
+                bool loadSuccess = await SceneLoader.LoadScene(toSceneName,
                     CreateProgressCallback(loadProgress),
                     LoadSceneMode.Additive,
                     ScenePriorityResolver.Resolve(toSceneName),
@@ -62,7 +62,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     LoadingConstants.SCENE_LOAD_END_PROGRESS,
                     1f);
 
-                bool unloadSuccess = await SceneLoader.UnloadSceneAsync(
+                bool unloadSuccess = await SceneLoader.UnloadScene(
                     fromSceneName,
                     CreateProgressCallback(unloadProgress),
                     token: cancellationToken);
@@ -96,7 +96,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return true;
             }
 
-            bool loadSuccess = await SceneLoader.LoadSceneAsync(
+            bool loadSuccess = await SceneLoader.LoadScene(
                 sceneName,
                 CreateProgressCallback(progress),
                 LoadSceneMode.Additive,
@@ -135,7 +135,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return true;
             }
 
-            bool unloadSuccess = await SceneLoader.UnloadSceneAsync(
+            bool unloadSuccess = await SceneLoader.UnloadScene(
                    sceneName,
                    CreateProgressCallback(progress),
                    cancellationToken);
@@ -162,7 +162,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         {
             progress?.Report(0f);
 
-            if (!TrySetActiveScene(activeSceneName))
+            if (!SceneLoader.SetActiveScene(activeSceneName))
             {
                 Debug.LogError($"ActiveSceneの復帰に失敗しました。SceneName:{activeSceneName}");
                 return false;
@@ -181,7 +181,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     LoadingConstants.ACTIVE_SCENE_PROGRESS,
                     1f);
 
-                bool unloadSuccess = await SceneLoader.UnloadSceneAsync(
+                bool unloadSuccess = await SceneLoader.UnloadScene(
                     unloadSceneName,
                     CreateProgressCallback(unloadProgress),
                     token: cancellationToken);
@@ -232,7 +232,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                         return false;
                     }
 
-                    if (!TrySetActiveScene(fallbackScene.name))
+                    if (!SceneManager.SetActiveScene(fallbackScene))
                     {
                         Debug.LogError(
                             $"[{nameof(SceneTransitionService)}] " +
@@ -246,7 +246,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     CreateProgressRange(progress, 0f, LoadingConstants.SCENE_RELOAD_UNLOAD_END_PROGRESS);
 
                 bool unloadSuccess =
-                    await SceneLoader.UnloadSceneAsync(
+                    await SceneLoader.UnloadScene(
                         sceneName,
                         CreateProgressCallback(unloadProgress),
                         cancellationToken);
@@ -256,18 +256,6 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     Debug.LogError(
                         $"[{nameof(SceneTransitionService)}] " +
                         $"シーンのアンロードに失敗しました。" +
-                        $" SceneName: {sceneName}");
-
-                    return false;
-                }
-
-                if (!await WaitForSceneUnloadedAsync(
-                        sceneName,
-                        cancellationToken))
-                {
-                    Debug.LogError(
-                        $"[{nameof(SceneTransitionService)}] " +
-                        $"シーンのアンロード完了待機に失敗しました。" +
                         $" SceneName: {sceneName}");
 
                     return false;
@@ -283,10 +271,10 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 CreateProgressRange(
                     progress,
                     LoadingConstants.SCENE_RELOAD_UNLOAD_END_PROGRESS,
-                    1f);
+                    1f - LoadingConstants.ACTIVE_SCENE_PROGRESS);
 
             bool loadSuccess =
-                await SceneLoader.LoadSceneAsync(
+                await SceneLoader.LoadScene(
                     sceneName,
                     CreateProgressCallback(loadProgress),
                     LoadSceneMode.Additive,
@@ -303,11 +291,22 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return false;
             }
 
+            progress?.Report(
+                1f - LoadingConstants.ACTIVE_SCENE_PROGRESS);
+
+            if (!SceneLoader.SetActiveScene(sceneName))
+            {
+                Debug.LogError(
+                    $"[{nameof(SceneTransitionService)}] " +
+                    $"ActiveSceneの設定に失敗しました。" +
+                    $" SceneName: {sceneName}");
+
+                return false;
+            }
+
             progress?.Report(1f);
             return true;
         }
-
-        private const int MAX_SCENE_UNLOAD_WAIT_FRAME_COUNT = 120;
 
         /// <summary>
         ///     進捗範囲変換クラスを作成する。
@@ -330,64 +329,6 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 progress,
                 startProgress,
                 endProgress);
-        }
-
-        /// <summary>
-        ///     シーンのアンロードがUnityへ反映されるまで待機します。
-        /// </summary>
-        /// <param name="sceneName"> アンロードしたシーン名です。 </param>
-        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
-        /// <returns> アンロードを確認できた場合はtrueです。 </returns>
-        private static async Task<bool> WaitForSceneUnloadedAsync(
-            string sceneName,
-            CancellationToken cancellationToken)
-        {
-            for (int waitFrameCount = 0;
-                waitFrameCount < MAX_SCENE_UNLOAD_WAIT_FRAME_COUNT;
-                waitFrameCount++)
-            {
-                await Awaitable.NextFrameAsync(cancellationToken);
-
-                Scene scene = SceneManager.GetSceneByName(sceneName);
-                if (!scene.IsValid() || !scene.isLoaded)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        ///     対象シーンをActiveSceneへ設定し、既にActiveの場合は追跡情報を同期します。
-        /// </summary>
-        /// <param name="sceneName"> ActiveSceneへ設定するシーン名です。 </param>
-        /// <returns> ActiveSceneの設定または追跡情報の同期に成功した場合はtrueです。 </returns>
-        private static bool TrySetActiveScene(string sceneName)
-        {
-            if (!SceneLoader.GetExistScene(sceneName, out Scene scene)
-                || !scene.isLoaded)
-            {
-                return false;
-            }
-
-            Scene activeScene = SceneManager.GetActiveScene();
-            if (activeScene.IsValid()
-                && activeScene.handle == scene.handle)
-            {
-                return SceneLoader.RegisterLoadedScene(
-                    sceneName,
-                    ScenePriorityResolver.Resolve(sceneName));
-            }
-
-            if (!SceneManager.SetActiveScene(scene))
-            {
-                return false;
-            }
-
-            return SceneLoader.RegisterLoadedScene(
-                sceneName,
-                ScenePriorityResolver.Resolve(sceneName));
         }
 
         /// <summary>

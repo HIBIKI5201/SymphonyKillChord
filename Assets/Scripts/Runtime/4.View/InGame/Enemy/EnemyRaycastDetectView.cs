@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
-using System;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -14,21 +13,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         /// レイキャスト対象と警告ラインの初期設定を行います。
         /// </summary>
-        /// <param name="targetTransform"> レイキャスト対象です。 </param>
-        /// <param name="attackRange"> 攻撃の射程です。 </param>
-        /// <param name="justOffsetProvider">
-        /// 攻撃タイミングとなるターゲット拍への接近進捗(0〜1)を返す供給元です。
-        /// nullの場合は警告デカールへ拍情報を渡しません。
-        /// </param>
-        public void Initialize(
-            Transform targetTransform,
-            float attackRange,
-            Func<float> justOffsetProvider = null)
+        public void Initialize(Transform targetTransform, float attackRange)
         {
             _hitResults = new RaycastHit[_resultArraySize];
             _targetTransform = targetTransform;
             _attackRange = attackRange;
-            _justOffsetProvider = justOffsetProvider;
 
             if (targetTransform == null)
             {
@@ -102,7 +91,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             HideWarningInternal();
         }
 
-
         [SerializeField, Tooltip("Maximum number of raycast hits stored per query.")]
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
@@ -118,10 +106,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private WarningDisplayState _warningDisplayState;
         private Vector3 _lockedRayDirection;
         private Color _currentLineColor;
-        private Func<float> _justOffsetProvider;
-        private static readonly int DECAL_RATIO = Shader.PropertyToID("_Ratio");
-        private static readonly int DECAL_COLOR = Shader.PropertyToID("_BaseColor");
-        private static readonly int DECAL_EMISSION = Shader.PropertyToID("_BaseEmission");
 
 #if UNITY_EDITOR
         private bool _initializedFlg;
@@ -196,21 +180,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// ターゲット追従中は毎フレーム警告ラインを更新し、
-        /// 方向固定中も拍への接近進捗だけを更新し続けます。
+        /// ターゲット追従中は毎フレーム警告ラインを更新します。
         /// </summary>
         private void LateUpdate()
         {
-            if (_warningDisplayState == WarningDisplayState.Hidden) return;
+            if (_warningDisplayState != WarningDisplayState.Tracking) return;
             if (!IsReadyForLineUpdate()) return;
 
-            if (_warningDisplayState == WarningDisplayState.Tracking)
-            {
-                UpdateWarningLine();
-                return;
-            }
-
-            ApplyWarningDecalJustOffset();
+            UpdateWarningLine();
         }
         private void OnDestroy()
         {
@@ -268,25 +245,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _attackWarningDecal.transform.rotation = Quaternion.Euler(90, Quaternion.LookRotation(ray.direction, Vector3.up).eulerAngles.y, 0);
             _attackWarningDecal.size = size;
             _attackWarningDecal.pivot = new Vector3(0, _attackRange * 0.5f, 0);
-            ApplyWarningDecalJustOffset();
-        }
-
-        /// <summary>
-        ///     ターゲット拍への接近進捗を警告デカールのシェーダープロパティへ適用します。
-        /// </summary>
-        private void ApplyWarningDecalJustOffset()
-        {
-            if (_decalMaterial == null || _justOffsetProvider == null)
-            {
-                return;
-            }
-
-            if (!_decalMaterial.HasProperty(DECAL_RATIO))
-            {
-                return;
-            }
-
-            _decalMaterial.SetFloat(DECAL_RATIO, _justOffsetProvider.Invoke());
         }
 
         /// <summary>
@@ -366,8 +324,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 appliedColor.a = 1f;
             }
-            _decalMaterial.SetColor(DECAL_COLOR, appliedColor);
-            _decalMaterial.SetColor(DECAL_EMISSION, appliedColor);
+
+            if (_decalMaterial.HasProperty("_BaseColor"))
+            {
+                _decalMaterial.SetColor("_BaseColor", appliedColor);
+            }
+
+            if (_decalMaterial.HasProperty("_Color"))
+            {
+                _decalMaterial.SetColor("_Color", appliedColor);
+            }
         }
 
         /// <summary>

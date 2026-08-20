@@ -1,22 +1,20 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Mission;
+using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
-using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
-using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
@@ -48,13 +46,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             try
             {
-                CharacterDefinitionRepository characterRepository =
-                    await _characterRepositoryKey.LoadAssetAsync<CharacterDefinitionRepository>(this, cancellationToken);
-                characterRepository?.TryGetAsset(new CharacterDefinitionId(_characterId.Id), out _loadedEnemyData);
+                _loadedEnemyData = await _enemyDataKey.LoadAssetAsync<CharacterDefinitionAsset>(this, cancellationToken);
                 _loadedMoveData = await _moveDataKey.LoadAssetAsync<EnemyMoveSpecAsset>(this, cancellationToken);
-                EnemyMissionKeyRepository missionKeyRepository =
-                    await _missionKeyRepositoryKey.LoadAssetAsync<EnemyMissionKeyRepository>(this, cancellationToken);
-                missionKeyRepository?.TryGetAsset(new EnemyMissionKey(_missionKeyId.Id), out _loadedMissionKeyAsset);
+                _loadedMissionKeyAsset = await _missionKeyAssetKey.LoadAssetAsync<EnemyMissionKeyAsset>(this, cancellationToken);
                 _loadedAttackEntryRepo = await _attackEntryRepoKey.LoadAssetAsync<BossAttackEntryRepo>(this, cancellationToken);
             }
             catch (Exception ex) { Debug.LogException(ex, this); }
@@ -88,33 +82,28 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 Debug.LogError($"{nameof(BossMoveView)}の参照がありません。");
                 return;
             }
-
+                
             if (_healthView == null)
             {
                 Debug.LogError($"{nameof(EnemyHealthView)}の参照がありません。");
                 return;
             }
-
+                
             if (_raycastView == null)
             {
                 Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
                 return;
             }
-
+                
             if (_attackPositionSearchView == null)
             {
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
                 return;
             }
-
+                
             if (_loadedAttackEntryRepo?.AttackEntries == null || _loadedAttackEntryRepo.AttackEntries.Length == 0)
             {
                 Debug.LogError("攻撃エントリ(_attackEntryRepo)が設定されていません。");
-                return;
-            }
-            if (_targetTransform == null)
-            {
-                Debug.LogError("_targetTransformの参照がありません", this);
                 return;
             }
 
@@ -181,7 +170,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 {
                     raycastViews[typeof(EnemyInfantryAttackController)] = _raycastView;
                 }
-                if (controller is EnemyTripleShotAttackController)
+                if(controller is EnemyTripleShotAttackController)
                 {
                     raycastViews[typeof(EnemyTripleShotAttackController)] = _tripleShotRaycastView;
                 }
@@ -195,10 +184,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
-            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform, GetComponent<Collider>());
+            _targetable = new TransformTargetable(_enemyEntity.Id, transform);
 
             // View接続
             _view.Initialize(aiController, target);
@@ -323,8 +312,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private System.Action _spawnerCallback;
         private Action<BossLifeCycle> _releaseCallback;
 
-        [SerializeField, SourceDataAddress, Tooltip("キャラクター定義リポジトリの Addressables キーです。")] private string _characterRepositoryKey;
-        [SerializeField, SourceDataCollection("Character"), Tooltip("このボスが対応するキャラクター定義のIDです。")] private DataID _characterId;
+        [SerializeField, SourceDataAddress, Tooltip("ボス定義の Addressables キーです。")] private string _enemyDataKey;
         [SerializeField, SourceDataAddress, Tooltip("ボス移動仕様の Addressables キーです。")] private string _moveDataKey;
 
         [SerializeField] private BossMoveView _view;
@@ -332,8 +320,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private TripleShotRaycastDetectView _tripleShotRaycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
-        [SerializeField, SourceDataAddress, Tooltip("ボスミッションキーリポジトリの Addressables キーです。")] private string _missionKeyRepositoryKey;
-        [SerializeField, SourceDataCollection("EnemyMissionKey"), Tooltip("このボスが対応する敵ミッションキーのIDです。")] private DataID _missionKeyId;
+        [SerializeField, SourceDataAddress, Tooltip("ボスミッションキーの Addressables キーです。")] private string _missionKeyAssetKey;
         [SerializeField, SourceDataAddress, Tooltip("ボス攻撃定義群の Addressables キーです。")] private string _attackEntryRepoKey;
         [SerializeField] private BossMovementAIFacade _bossMovementAIFacade;
         [SerializeField] private BossBattleAIFacade _bossBattleAIFacade;
@@ -341,9 +328,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private BossSharedFacade _bossSharedFacade;
         [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
         [SerializeField] private NavMeshAgent _navMeshAgent;
-
-        [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
-        private Transform _targetTransform;
 
         [Header("砲撃攻撃を含む場合に必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
@@ -365,12 +349,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     ボス死亡時に実行する処理。
         /// </summary>
-        /// <param name="diedEnemy"> 死亡したボスのEntity。</param>
-        private void HandleEnemyDied(CharacterEntity diedEnemy)
+        private void HandleEnemyDied(CharacterEntity _)
         {
-            // 撃破演出用に、ボスの撃破を通知する。
-            EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(diedEnemy.Id));
-
             if (_missionEventController != null && _loadedMissionKeyAsset != null)
             {
                 _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
@@ -390,9 +370,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _targetingSystem?.UnregisterTarget(_targetable);
             _targetable?.Dispose();
-            _characterRepositoryKey.ReleaseLoadedAsset(this);
+            _enemyDataKey.ReleaseLoadedAsset(this);
             _moveDataKey.ReleaseLoadedAsset(this);
-            _missionKeyRepositoryKey.ReleaseLoadedAsset(this);
+            _missionKeyAssetKey.ReleaseLoadedAsset(this);
             _attackEntryRepoKey.ReleaseLoadedAsset(this);
             _loadedEnemyData = null;
             _loadedMoveData = null;

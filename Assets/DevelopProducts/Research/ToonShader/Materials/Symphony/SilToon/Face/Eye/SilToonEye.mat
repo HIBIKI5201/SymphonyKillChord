@@ -38,8 +38,6 @@ Material:
     m_Ints: []
     m_Floats:
     - _NormalMapIntensity: 0
-    - _OutlineWidthLit: 0.0005
-    - _OutlineWidthShadow: 0.0005
     - _StencilComp: 8
     - _StencilPass: 2
     m_Colors:

@@ -10,10 +10,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// </summary>
         public void SetUnlocked();
         /// <summary>
-        ///     スキルノードを未解放にする。
-        /// </summary>
-        public void SetLocked();
-        /// <summary>
         ///     スキルノードを選択中にする。
         /// </summary>
         public void SetSelected();

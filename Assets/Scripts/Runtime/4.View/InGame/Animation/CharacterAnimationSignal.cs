@@ -1,12 +1,13 @@
 using System;
 using KillChord.Runtime.Adaptor.InGame.Animation;
+using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
     /// <summary>
-    ///     キャラクター共通の瞬間アニメーションイベントを伝達するSignal。
+    ///     キャラクターアニメーションの瞬間イベントを伝達するSignal。
     /// </summary>
-    public class CharacterAnimationSignal : ICharacterAnimationSignal
+    public sealed class CharacterAnimationSignal : ICharacterAnimationSignal
     {
         /// <summary>
         ///     Signalを初期化する。
@@ -24,13 +25,51 @@ namespace KillChord.Runtime.View
             _timingCalculator = timingCalculator ?? new CharacterAnimationOneShotTimingCalculator();
         }
 
+        /// <summary> 回避アニメーションの再生終了イベントです。 </summary>
+        public event Action OnDodgeEnded;
+
         /// <summary>
-        ///     既定の攻撃アニメーションの再生を要求する。
+        ///     回避アニメーションの再生を要求する。
         /// </summary>
         /// <returns> 再生時間です。 </returns>
-        public virtual float RequestAttack()
+        public float RequestDodge()
         {
-            return RequestOneShot(_playbackMap.Attack);
+            return RequestOneShot(_playbackMap.Dodge, true);
+        }
+
+        /// <summary>
+        ///     攻撃アニメーションの再生を要求する。
+        /// </summary>
+        /// <param name="animationKey"> 置き換えたいアニメーションキー。未指定時は既定の攻撃アニメーション。 </param>
+        /// <returns> 再生時間です。 </returns>
+        public float RequestAttack(string animationKey = null)
+        {
+            if (!string.IsNullOrWhiteSpace(animationKey))
+            {
+                if (_playbackMap.TryGetOneShotIndex(animationKey, out int oneShotIndex))
+                {
+                    return RequestOneShot(oneShotIndex, false);
+                }
+
+                Debug.LogError($"[{nameof(CharacterAnimationSignal)}] ワンショットアニメーションキーが登録されていません。Key: {animationKey}");
+            }
+
+            return RequestOneShot(_playbackMap.Attack, false);
+        }
+
+        /// <summary>
+        ///     攻撃BeatTypeに対応するアニメーションの再生を要求します。
+        /// </summary>
+        /// <param name="attackType"> 攻撃結果のBeatTypeです。 </param>
+        /// <returns> 再生時間です。 </returns>
+        public float RequestAttack(int attackType)
+        {
+            if (_playbackMap.TryGetAttackIndex(attackType, out int attackIndex))
+            {
+                return RequestOneShot(attackIndex, false);
+            }
+
+            return RequestOneShot(_playbackMap.Attack, false);
         }
 
         /// <summary>
@@ -52,43 +91,30 @@ namespace KillChord.Runtime.View
                 return false;
             }
 
-            duration = RequestOneShot(oneShotIndex);
+            duration = RequestOneShot(oneShotIndex, false);
             return true;
         }
 
-        /// <summary> 派生Signalから参照する再生定義です。 </summary>
-        protected CharacterAnimationPlaybackMap PlaybackMap => _playbackMap;
-
-        private readonly CharacterAnimationPlaybackMap _playbackMap;
-        private readonly Func<float> _animationSpeedProvider;
-        private readonly CharacterAnimationOneShotTimingCalculator _timingCalculator;
+        /// <summary>
+        ///     内部再生要求イベントです。
+        /// </summary>
+        internal event Action<CharacterAnimationRequest> OnRequested;
 
         /// <summary>
-        ///     再生中のワンショットアニメーションを途中終了し、ロコモーションへ戻す。
+        ///     回避アニメーション再生終了を通知する。
         /// </summary>
-        public void CancelOneShot()
+        internal void NotifyDodgeEnded()
         {
-            OnCancelRequested?.Invoke();
+            OnDodgeEnded?.Invoke();
         }
-
-        /// <summary>
-        ///     内部ワンショット取り消し要求イベントです。
-        /// </summary>
-        internal event Action OnCancelRequested;
 
         /// <summary>
         ///     指定インデックスのワンショット再生を要求する。
         /// </summary>
         /// <param name="index"> 再生インデックスです。 </param>
-        /// <param name="skipEnterBlendOnSameClip"> 同一クリップ連続再生時に開始ブレンドを省略するならtrue。 </param>
-        /// <param name="canCancelByMovement"> 移動による再生キャンセルを許可するならtrue。 </param>
         /// <param name="shouldNotifyDodgeEnded"> 回避終了通知が必要ならtrue。 </param>
         /// <returns> 現在速度を加味した再生時間です。 </returns>
-        protected float RequestOneShot(
-            int index,
-            bool skipEnterBlendOnSameClip = false,
-            bool canCancelByMovement = false,
-            bool shouldNotifyDodgeEnded = false)
+        private float RequestOneShot(int index, bool shouldNotifyDodgeEnded)
         {
             float clipLength = _playbackMap.GetClipLength(index);
             float enterBlendDuration = _timingCalculator.GetEnterBlendDurationSeconds(
@@ -103,8 +129,6 @@ namespace KillChord.Runtime.View
                 clipLength,
                 enterBlendDuration,
                 exitBlendDuration,
-                skipEnterBlendOnSameClip,
-                canCancelByMovement,
                 shouldNotifyDodgeEnded));
 
             return _timingCalculator.GetPlaybackDurationSeconds(clipLength, GetAnimationSpeed());
@@ -121,16 +145,8 @@ namespace KillChord.Runtime.View
                 : 1f;
         }
 
-        /// <summary>
-        ///     内部再生要求イベントです。
-        /// </summary>
-        internal event Action<CharacterAnimationRequest> OnRequested;
-
-        /// <summary>
-        ///     通知オプション付きワンショットの再生終了を通知する。
-        /// </summary>
-        internal virtual void NotifyOneShotEnded()
-        {
-        }
+        private readonly CharacterAnimationPlaybackMap _playbackMap;
+        private readonly Func<float> _animationSpeedProvider;
+        private readonly CharacterAnimationOneShotTimingCalculator _timingCalculator;
     }
 }

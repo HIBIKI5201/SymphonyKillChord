@@ -1,5 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Skill;
-
 namespace KillChord.Runtime.Adaptor.InGame.Skill
 {
     /// <summary>
@@ -12,12 +10,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// </summary>
         /// <param name="resultType"> 結果種別です。 </param>
         /// <param name="animationKey"> 再生するアニメーションキーです。 </param>
-        /// <param name="skillNormalAttackDamagePolicy"> 通常攻撃のダメージ計算ポリシーです。 </param>
-        public SkillExecutionResult(SkillExecutionResultType resultType, string animationKey = null, SkillNormalAttackDamagePolicy skillNormalAttackDamagePolicy = SkillNormalAttackDamagePolicy.Apply)
+        public SkillExecutionResult(SkillExecutionResultType resultType, string animationKey = null)
         {
             ResultType = resultType;
             AnimationKey = animationKey;
-            SkillNormalAttackDamagePolicy = skillNormalAttackDamagePolicy;
         }
 
         /// <summary> 結果種別です。 </summary>
@@ -25,8 +21,5 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
         /// <summary> 再生するアニメーションキーです。 </summary>
         public string AnimationKey { get; }
-
-        /// <summary> 通常攻撃のダメージ計算ポリシーです。 </summary>
-        public SkillNormalAttackDamagePolicy SkillNormalAttackDamagePolicy { get; }
     }
 }

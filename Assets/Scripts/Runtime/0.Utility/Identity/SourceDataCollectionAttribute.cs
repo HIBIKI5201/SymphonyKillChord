@@ -13,19 +13,12 @@ namespace KillChord.Runtime.Utility.Identity
         ///     CollectionKeyを指定して属性を初期化します。
         /// </summary>
         /// <param name="collectionKey"> SourceDataProviderへ登録するCollectionKeyです。 </param>
-        /// <param name="isSceneScoped">
-        ///     シーン内で完結し、SourceDataProviderへ登録しないCollectionKeyの場合はtrueです。
-        /// </param>
-        public SourceDataCollectionAttribute(string collectionKey, bool isSceneScoped = false)
+        public SourceDataCollectionAttribute(string collectionKey)
         {
             CollectionKey = collectionKey;
-            IsSceneScoped = isSceneScoped;
         }
 
         /// <summary> SourceDataProviderへ登録されたCollectionKeyです。 </summary>
         public string CollectionKey { get; }
-
-        /// <summary> SourceDataProviderへ登録しないシーン内完結のCollectionKeyであるかです。 </summary>
-        public bool IsSceneScoped { get; }
     }
 }

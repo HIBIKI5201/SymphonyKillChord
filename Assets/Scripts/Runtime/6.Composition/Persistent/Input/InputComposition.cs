@@ -53,7 +53,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             InitializeInputMaps();
             BindViewToAdaptor();
             ServiceLocator.RegisterInstance(_playerInputView);
-            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
+            ServiceLocator.RegisterInstance(this, LocateType.Locator);
             return true;
         }
 

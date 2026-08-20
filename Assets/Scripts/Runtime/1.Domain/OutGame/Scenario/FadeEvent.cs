@@ -10,7 +10,7 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         /// <summary>
         /// フェードイベントを初期化する。
         /// </summary>
-        public FadeEvent(float start, float end, float duration, FadeTarget target = FadeTarget.Screen)
+        public FadeEvent(float start, float end, float duration)
         {
             if (float.IsNaN(start) || float.IsNaN(end) || float.IsNaN(duration))
                 throw new ArgumentException("FadeEvent values must not be NaN.");
@@ -18,7 +18,6 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
             Start = Math.Clamp(start, 0f, 1f);
             End = Math.Clamp(end, 0f, 1f);
             DurationSec = Math.Max(0f, duration);
-            Target = target;
         }
 
         /// <summary> Start を取得する。 </summary>
@@ -27,8 +26,6 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         public float End { get; }
         /// <summary> DurationSec を取得する。 </summary>
         public float DurationSec { get; }
-        /// <summary> フェード対象を取得する。 </summary>
-        public FadeTarget Target { get; }
         /// <summary> RequirePlayerAdvance を取得する。 </summary>
         public bool RequirePlayerAdvance => false;
     }

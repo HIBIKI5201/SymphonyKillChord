@@ -50,16 +50,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _missionHudPresenter.Present();
         }
 
-        /// <summary>
-        ///     プレイヤー行動が発動したことを通知します。
-        /// </summary>
-        /// <param name="actionKind">発動した行動の種別。</param>
-        public void NotifyActionPerformed(MissionActionKind actionKind)
-        {
-            _missionRuntimeService.OnActionPerformed(actionKind);
-            _missionHudPresenter.Present();
-        }
-
         /// <summary> ミッションランタイムサービス。 </summary>
         private readonly MissionRuntimeService _missionRuntimeService;
         /// <summary> ミッションHUDプレゼンター。 </summary>

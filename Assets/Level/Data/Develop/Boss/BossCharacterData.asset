@@ -12,9 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cda25d1a215c5d14581507734743b293, type: 3}
   m_Name: BossCharacterData
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Character.CharacterData
-  _id:
-    _id: boss_character
-    _hashId: 980508342
   _characterName: Boss
   _attackInterval: 0.5
   _maxHealth: 500

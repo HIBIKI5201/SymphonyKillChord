@@ -1,9 +1,9 @@
-using KillChord.Runtime.Application.InGame.Battle;
-using KillChord.Runtime.Application.InGame.SkillEffect;
-using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.Player;
 using System;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
@@ -15,10 +15,11 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// <summary>
         ///     スキル効果を初期化します。
         /// </summary>
-        /// <param name="effectService"> 攻撃実行サービス。 </param>
-        public Skill_02(PendingAttackEffectService effectService)
+        /// <param name="buff"> 付与バフです。 </param>
+        /// <param name="attackController"> 攻撃実行器です。 </param>
+        public Skill_02(IBuff buff, IAttackController attackController) : base(buff)
         {
-            _pendingAttackEffectService = effectService ?? throw new ArgumentNullException(nameof(effectService));
+            _attackController = attackController;
         }
 
         /// <summary>
@@ -27,22 +28,16 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// <param name="context"> 実行コンテキストです。 </param>
         public override void Execute(in SkillEffectContext context)
         {
-            float increaseRate = (float)context.EffectSpec.GetRequiredValue(
-                SkillEffectParameterId.DamageTakenIncreaseRate);
+            _attackController?.Execute((int)_shotGunBeat);
 
-            float durationSeconds = (float)context.EffectSpec.GetRequiredValue(
-                SkillEffectParameterId.DurationSeconds);
-
-            Debug.Log($"[Skill_02] 発動: ダメージ増加率={increaseRate}, 効果時間={durationSeconds}秒");
-
-            // 攻撃ヒット時にダメージ増加効果を付与する処理を登録します。
-            _pendingAttackEffectService.Register(
-                new DamageTakenIncreaseOnHitEffect(
-                    increaseRate,
-                    durationSeconds,
-                    context.EffectSpec.ReapplyPolicy));
+            ReadOnlySpan<CharacterEntity> targets = context.TargetEntities.Span;
+            for (int i = 0; i < targets.Length; i++)
+            {
+                targets[i]?.BuffSystem.Add(_buff);
+            }
         }
 
-        private readonly PendingAttackEffectService _pendingAttackEffectService;
+        private readonly BeatType _shotGunBeat = BeatType.Two;
+        private readonly IAttackController _attackController;
     }
 }

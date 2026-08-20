@@ -1,4 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.Utility.OutGame.Savedata;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 namespace KillChord.Runtime.Application.OutGame.SkillBuild
 {
     /// <summary>
-    ///     装備スキル構成の検証、保存、確定を行うユースケース。
+    ///     装備スキルのスロット操作や、装備スキルの保存・読み込みなど、装備スキルに関するビジネスロジックを担当するクラス。
     /// </summary>
     public sealed class SkillBuildUseCase
     {
@@ -14,56 +16,82 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
         ///     SkillBuildUseCase クラスのコンストラクタ。
         /// </summary>
         /// <param name="skillBuildDefinition"> 装備スキルの定義を表すオブジェクト。 </param>
-        /// <param name="skillBuildRepository"> 装備スキル構成リポジトリ。 </param>
+        /// <param name="savedataSystem"> セーブデータシステムです。 </param>
         public SkillBuildUseCase(
             SkillBuildDefinition skillBuildDefinition,
-            ISkillBuildRepository skillBuildRepository)
+            SavedataSystem savedataSystem)
         {
             _skillBuildDefinition = skillBuildDefinition
                 ?? throw new ArgumentNullException(nameof(skillBuildDefinition));
-            _skillBuildRepository = skillBuildRepository
-                ?? throw new ArgumentNullException(nameof(skillBuildRepository));
+            _savedataSystem = savedataSystem
+                ?? throw new ArgumentNullException(nameof(savedataSystem));
+        }
+
+        /// <summary>
+        ///     改造画面のセーブデータを非同期で読み込むメソッド。 
+        ///     <para> 装備スキルの ID リストとスキルレベルアップポイントを含む SkillBuildData オブジェクトを返す。</para>
+        /// </summary>
+        public async ValueTask<SkillBuildData> LoadSkillBuildAsync()
+        {
+            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            return saveData.SkillBuild;
         }
 
         /// <summary>
         ///     改造画面のセーブデータを非同期で保存するメソッド。
         /// </summary>
-        /// <param name="equippedSkills"> 保存する装備スキル構成。 </param>
+        /// <param name="equipmentSkillIDs"> 装備スキルの ID のリスト。 </param>
         /// <returns> 非同期操作の完了を表す Task オブジェクト。 </returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="ArgumentException"></exception>
-        public async Task SaveSkillBuildAsync(IReadOnlyList<EquippedSkill> equippedSkills)
+        public async Task SaveSkillBuildAsync(List<int> equipmentSkillIDs)
         {
-            if (equippedSkills == null)
-            {
-                throw new ArgumentNullException(nameof(equippedSkills));
-            }
+            _saveData = await _savedataSystem.LoadAsync<SaveData>();
+            _saveData.SkillBuild.SetEquipmentSkillIDs(equipmentSkillIDs);
+            await _savedataSystem.SaveAsync(_saveData);
+        }
 
-            _skillBuildDefinition.ValidateEquipment(equippedSkills);
-            EquippedSkill[] newEquippedSkills = CopyEquippedSkills(equippedSkills);
-            await _skillBuildRepository.SaveSkillBuildAsync(newEquippedSkills);
+        /// <summary>
+        ///    スキルレベルアップポイントを非同期で保存するメソッド。
+        /// </summary>
+        /// <param name="skillLevelupPoint"> スキルレベルアップポイント。 </param>
+        /// <returns> 非同期操作の完了を表す Task オブジェクト。 </returns>
+        public async Task SaveSkillLevelupPointAsync(int skillLevelupPoint)
+        {
+            _saveData = await _savedataSystem.LoadAsync<SaveData>();
+            _saveData.SkillBuild.SetSkillLevelupPoint(skillLevelupPoint);
+            await _savedataSystem.SaveAsync(_saveData);
+        }
 
-            // 永続化に成功した編成だけをドメインの確定状態へ反映する。
+        /// <summary>
+        ///     装備スキルの配列を更新するメソッド。
+        /// </summary>
+        /// <param name="newEquippedSkills"> 新しい装備スキルの配列。 </param>
+        public void UpdateEquippedSkills(in EquippedSkill[] newEquippedSkills)
+        {
             _skillBuildDefinition.UpdateEquippedSkills(newEquippedSkills);
         }
 
-        private readonly SkillBuildDefinition _skillBuildDefinition;
-        private readonly ISkillBuildRepository _skillBuildRepository;
+        /// <summary>
+        ///     プレイヤーが装備スキルのスロットを変更する際に呼び出されるメソッド。指定されたスロットインデックスに新しい装備スキルを設定する。
+        /// </summary>
+        /// <param name="slotIndex"> 変更するスロットのインデックス。 </param>
+        /// <param name="newEquippedSkill"> 新しい装備スキル。 </param>
+        public void ChangeEquippedSkill(int slotIndex, EquippedSkill newEquippedSkill)
+        {
+            _skillBuildDefinition.ChangeEquippedSkill(slotIndex, newEquippedSkill);
+        }
 
         /// <summary>
-        ///     装備スキル一覧を配列へコピーする。
+        ///     装備スキル同士の入れ替えを行うメソッド。
         /// </summary>
-        /// <param name="equippedSkills"> コピー元の装備スキル一覧。 </param>
-        /// <returns> コピーした装備スキル配列。 </returns>
-        private EquippedSkill[] CopyEquippedSkills(IReadOnlyList<EquippedSkill> equippedSkills)
+        /// <param name="slotIndex1"> 入れ替え元のスロットのインデックス。 </param>
+        /// <param name="slotIndex2"> 入れ替え先のスロットのインデックス。 </param>
+        public void SwapEquippedSkills(int slotIndex1, int slotIndex2)
         {
-            EquippedSkill[] result = new EquippedSkill[equippedSkills.Count];
-            for (int i = 0; i < equippedSkills.Count; i++)
-            {
-                result[i] = equippedSkills[i];
-            }
-
-            return result;
+            _skillBuildDefinition.SwapEquippedSkills(slotIndex1, slotIndex2);
         }
+
+        private readonly SkillBuildDefinition _skillBuildDefinition;
+        private readonly SavedataSystem _savedataSystem;
+        private SaveData _saveData;
     }
 }

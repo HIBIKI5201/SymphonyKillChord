@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Target
@@ -68,12 +67,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// </summary>
         /// <returns> 登録ターゲット一覧です。 </returns>
         ITargetableViewModel[] GetRegisteredTargetsSnapshot();
-
-        /// <summary>
-        ///     現在登録されているターゲットを呼び出し側の再利用リストへコピーする。
-        /// </summary>
-        /// <param name="destination"> コピー先のリスト。既存要素は消去される。 </param>
-        void CopyRegisteredTargetsTo(List<ITargetableViewModel> destination);
 
         /// <summary>
         ///     プレイヤー位置と方向をもとに最適なターゲットへ切り替える。

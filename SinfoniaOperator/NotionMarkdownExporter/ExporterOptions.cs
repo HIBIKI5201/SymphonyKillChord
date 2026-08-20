@@ -11,6 +11,8 @@ namespace SinfoniaStudio.NotionMarkdownExporter
     /// </summary>
     internal sealed class ExporterOptions
     {
+        private const string DEFAULT_CONFIG_FILE = "sinfonia-operator.settings.json";
+
         private ExporterOptions(
             string notionToken,
             string rootPageId,
@@ -48,72 +50,26 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             }
 
             string? explicitConfigPath = GetArgument(arguments, "config");
+            string? configPath = explicitConfigPath ?? FindConfigFile();
             if (explicitConfigPath != null && !File.Exists(explicitConfigPath))
             {
                 return ExporterOptionsResult.Failure($"設定ファイルが見つかりません: {explicitConfigPath}", false);
             }
 
-            string? environmentConfigPath = null;
-            string? secretsConfigPath = null;
-            string? legacyConfigPath = null;
-            string? configBasePath = explicitConfigPath;
-            OperatorConfig.ClearOverrides();
-            try
+            if (configPath != null)
             {
-                if (explicitConfigPath != null)
+                try
                 {
-                    if (!OperatorConfig.LoadJsonFile(explicitConfigPath))
+                    OperatorConfig.ClearOverrides();
+                    if (!OperatorConfig.LoadJsonFile(configPath))
                     {
-                        return ExporterOptionsResult.Failure($"設定ファイルが見つかりません: {explicitConfigPath}", false);
-                    }
-
-                    if (string.Equals(
-                            Path.GetFileName(explicitConfigPath),
-                            OperatorConfig.ENVIRONMENT_CONFIG_FILE_NAME,
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        string? directory = Path.GetDirectoryName(Path.GetFullPath(explicitConfigPath));
-                        string siblingSecretsPath = Path.Combine(
-                            directory ?? Directory.GetCurrentDirectory(),
-                            OperatorConfig.SECRETS_CONFIG_FILE_NAME);
-                        OperatorConfig.LoadJsonFile(siblingSecretsPath);
+                        return ExporterOptionsResult.Failure($"設定ファイルが見つかりません: {configPath}", false);
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    environmentConfigPath = FindConfigFile(OperatorConfig.ENVIRONMENT_CONFIG_FILE_NAME);
-                    secretsConfigPath = FindConfigFile(OperatorConfig.SECRETS_CONFIG_FILE_NAME);
-                    legacyConfigPath = FindConfigFile(OperatorConfig.LEGACY_CONFIG_FILE_NAME);
-                    configBasePath = environmentConfigPath ?? legacyConfigPath ?? secretsConfigPath;
-
-                    if (environmentConfigPath != null)
-                    {
-                        OperatorConfig.LoadJsonFile(environmentConfigPath);
-                    }
-
-                    if (secretsConfigPath != null)
-                    {
-                        OperatorConfig.LoadJsonFile(secretsConfigPath);
-                    }
-                    else if (legacyConfigPath != null)
-                    {
-                        if (environmentConfigPath == null)
-                        {
-                            OperatorConfig.LoadJsonFile(legacyConfigPath);
-                        }
-                        else
-                        {
-                            OperatorConfig.LoadJsonFile(
-                                legacyConfigPath,
-                                OperatorConfigKeys.DISCORD_BOT_TOKEN,
-                                OperatorConfigKeys.NOTION_TOKEN);
-                        }
-                    }
+                    return ExporterOptionsResult.Failure($"設定ファイルを読み込めませんでした: {ex.Message}", false);
                 }
-            }
-            catch (Exception ex)
-            {
-                return ExporterOptionsResult.Failure($"設定ファイルを読み込めませんでした: {ex.Message}", false);
             }
 
             bool isInteractive = args.Length == 0 && !Console.IsInputRedirected;
@@ -121,7 +77,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             if (string.IsNullOrWhiteSpace(notionToken))
             {
                 return ExporterOptionsResult.Failure(
-                    $"{OperatorConfigKeys.NOTION_TOKEN}を秘密設定ファイルまたは環境変数に設定してください。",
+                    $"{OperatorConfigKeys.NOTION_TOKEN}を共有設定ファイルまたは環境変数に設定してください。",
                     isInteractive);
             }
 
@@ -164,10 +120,10 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             }
 
             outputDirectory = Environment.ExpandEnvironmentVariables(outputDirectory);
-            if (!Path.IsPathRooted(outputDirectory) && outputArgument == null && configBasePath != null)
+            if (!Path.IsPathRooted(outputDirectory) && outputArgument == null && configPath != null)
             {
                 string baseDirectory = FindRepositoryRoot() ??
-                                       Path.GetDirectoryName(Path.GetFullPath(configBasePath)) ??
+                                       Path.GetDirectoryName(Path.GetFullPath(configPath)) ??
                                        Directory.GetCurrentDirectory();
                 outputDirectory = Path.Combine(baseDirectory, outputDirectory);
             }
@@ -188,12 +144,12 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             Console.WriteLine("オプション:");
             Console.WriteLine("  --root <URL|ID>     エクスポートするルートページ。");
             Console.WriteLine("  --output <PATH>     出力先。既定値はプロジェクトのDocs\\NotionSpecifications。");
-            Console.WriteLine("  --config <PATH>     明示的に読み込むJSON設定ファイル。");
+            Console.WriteLine("  --config <PATH>     JSON設定ファイル。");
             Console.WriteLine("  --no-assets         画像や添付ファイルをダウンロードしない。");
             Console.WriteLine("  --help              このヘルプを表示する。");
             Console.WriteLine();
             Console.WriteLine("設定キー:");
-            Console.WriteLine($"  {OperatorConfigKeys.NOTION_TOKEN}          必須。秘密設定または環境変数に置くNotionトークン。");
+            Console.WriteLine($"  {OperatorConfigKeys.NOTION_TOKEN}          必須。Notion内部インテグレーションのトークン。");
             Console.WriteLine($"  {OperatorConfigKeys.NOTION_EXPORT_ROOT_PAGE}  任意。ルートページURLまたはID。");
             Console.WriteLine($"  {OperatorConfigKeys.NOTION_EXPORT_OUTPUT}      任意。出力先。");
         }
@@ -264,14 +220,14 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         ///     カレントディレクトリと実行ファイル位置の祖先から既定設定ファイルを探す。
         /// </summary>
         /// <returns>見つかった設定ファイルのパス。見つからない場合はnull。</returns>
-        private static string? FindConfigFile(string fileName)
+        private static string? FindConfigFile()
         {
             foreach (string startDirectory in GetSearchStartDirectories())
             {
                 DirectoryInfo? current = new(Path.GetFullPath(startDirectory));
                 while (current != null)
                 {
-                    string candidate = Path.Combine(current.FullName, fileName);
+                    string candidate = Path.Combine(current.FullName, DEFAULT_CONFIG_FILE);
                     if (File.Exists(candidate)) { return candidate; }
                     current = current.Parent;
                 }

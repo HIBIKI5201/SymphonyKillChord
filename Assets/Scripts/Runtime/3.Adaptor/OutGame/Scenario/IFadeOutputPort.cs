@@ -8,6 +8,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface IFadeOutputPort
     {
-        ValueTask FadeAsync(string target, float start, float end, float duration, CancellationToken ct);
+        ValueTask FadeAsync(float start, float end, float duration, CancellationToken ct);
     }
 }

@@ -19,16 +19,7 @@ namespace KillChord.Runtime.View.InGame.UI
         public HUDEnemyHealthViewModel(HUDEnemyHealthView view)
         {
             _view = view;
-
-            // カメラが存在しない場合はTransform参照でNullReferenceExceptionになるため、購読を構成せず中断する。
             _mainCamera = Camera.main;
-            if (_mainCamera == null)
-            {
-                Debug.LogError($"[{nameof(HUDEnemyHealthViewModel)}] {nameof(Camera)}.main が見つかりません。");
-                return;
-            }
-
-            _cameraTransform = _mainCamera.transform;
 
             _currentHealth
                 .CombineLatest(_maxHealth, (current, max) => current / max)
@@ -60,20 +51,17 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <param name="dto"> 反映する表示情報。 </param>
         public void Update(in HUDEnemyHealthDTO dto)
         {
-            bool isBehindCamera = Vector3.Dot(_cameraTransform.forward, dto.TargetPosition - _cameraTransform.position) < 0f;
-
             _maxHealth.Value = dto.MaxHealth;
             _currentHealth.Value = dto.CurrentHealth;
-            _displayState.Value = isBehindCamera ? LockOnDisplayState.Hidden : dto.DisplayState;
+            _displayState.Value = dto.DisplayState;
 
-            if (dto.DisplayState != LockOnDisplayState.Hidden && !isBehindCamera)
+            if (dto.DisplayState != LockOnDisplayState.Hidden && _mainCamera != null)
             {
                 _uiPosition.Value = _mainCamera.WorldToScreenPoint(dto.TargetPosition);
             }
         }
 
         private readonly Camera _mainCamera;
-        private readonly Transform _cameraTransform;
         private readonly ReactiveProperty<Vector2> _uiPosition = new();
         private readonly ReactiveProperty<float> _maxHealth = new();
         private readonly ReactiveProperty<float> _currentHealth = new();

@@ -1,5 +1,3 @@
-using KillChord.Runtime.Domain.OutGame.SkillTree;
-using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
@@ -11,18 +9,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     [CreateAssetMenu(fileName = "SkillNodeBindData", menuName = "SymphonyDev/SkillTree/SkillNodeBindData")]
     public class SkillNodeBindData : ScriptableObject
     {
-        /// <summary> 対応するスキルノードのIDを取得する。 </summary>
-        public SkillNodeId SkillNodeId => new SkillNodeId(_skillNodeId.Id);
-
         /// <summary> UI Toolkit上の要素名 </summary>
         public string NodeName;
+        /// <summary> TODO 将来的ここは本番のスキルSOを入れる </summary>
+        public SkillNodeData SkillNodeData;
         /// <summary> 来ている方向の接続線の要素名 </summary>
         public string[] FromConnNames;
         /// <summary> 次に行ける接続線の要素名 </summary>
         public string[] ToConnNames;
-
-        [SerializeField, Tooltip("対応するスキルノードのID。")]
-        [SourceDataCollection("SkillNode")]
-        private DataID _skillNodeId;
     }
 }

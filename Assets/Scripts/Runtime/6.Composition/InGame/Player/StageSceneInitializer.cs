@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <summary> サービスロケーターへシーン参照を登録する。 </summary>
         private void Awake()
         {
-            ServiceLocator.RegisterInstance<IStageSceneInstance>(this, LocateTypeEnum.Locator);
+            ServiceLocator.RegisterInstance<IStageSceneInstance>(this, LocateType.Locator);
         }
 
         private void OnDestroy()

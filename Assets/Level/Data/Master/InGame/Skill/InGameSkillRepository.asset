@@ -13,15 +13,6 @@ MonoBehaviour:
   m_Name: InGameSkillRepository
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.Player.SkillRepository
   _skillDataAssets:
-  - {fileID: 11400000, guid: 114f8ed06b070604fbf83641b90742c9, type: 2}
-  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
   - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
+  - {fileID: 11400000, guid: 8836b3eb044a4af4fbfcb41d68328252, type: 2}
   - {fileID: 11400000, guid: bcb2d2e8e6440724ba463e8c0c8a008f, type: 2}
-  - {fileID: 11400000, guid: 730040b335a221b48b228f795c5102f5, type: 2}
-  - {fileID: 11400000, guid: 39ba548d2b9c7d0438aedf9d3dde754c, type: 2}
-  - {fileID: 11400000, guid: 4fa165e085293704bb6d7b0f9129caa8, type: 2}
-  - {fileID: 11400000, guid: 7a6b32830073d1844b3ea06510f79886, type: 2}
-  - {fileID: 11400000, guid: ec268234d5d0b214ea521185bf727f44, type: 2}
-  - {fileID: 11400000, guid: 793509aefd1e0b4458ddb0f72b645522, type: 2}
-  - {fileID: 11400000, guid: de05d226c70f7bd41a9248829e61fcc6, type: 2}
-  - {fileID: 11400000, guid: abad1036aca123d4ea07da79ddb89836, type: 2}

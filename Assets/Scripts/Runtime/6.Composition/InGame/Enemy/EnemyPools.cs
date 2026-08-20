@@ -1,9 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Enemy;
-using KillChord.Runtime.InfraStructure.InGame.Enemy;
-using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -23,62 +18,43 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <returns> 成功した場合はtrue。 </returns>
         public async Task<bool> LoadAddressableAssetsAsync(CancellationToken cancellationToken)
         {
+            bool infantryLoaded = _infantryPrefab != null && await _infantryPrefab.LoadAddressableAssetsAsync(cancellationToken);
+            bool artilleryLoaded = _artilleryPrefab != null && await _artilleryPrefab.LoadAddressableAssetsAsync(cancellationToken);
             bool shellLoaded = _shellPrefab != null && await _shellPrefab.LoadAddressableAssetsAsync(cancellationToken);
-            return shellLoaded;
+            return infantryLoaded && artilleryLoaded && shellLoaded;
         }
 
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        /// <param name="repository"> 個別の敵定義リポジトリです。 </param>
-        public void Initialize(EnemyDefinitionRepository repository)
+        public void Initialize()
         {
-            _enemyPools.Clear();
-            IReadOnlyList<EnemyDefinitionAsset> definitions = repository.Definitions;
-            for (int i = 0; i < definitions.Count; i++)
-            {
-                EnemyDefinitionAsset definition = definitions[i];
-                if (definition == null
-                    || definition.Id.Value == 0
-                    || definition.ViewPrefab == null
-                    || _enemyPools.ContainsKey(definition.Id))
-                {
-                    continue;
-                }
-
-                EnemyDefinitionId enemyDefinitionId = definition.Id;
-                _enemyPools[enemyDefinitionId] = new ObjectPool<EnemyLifeCycle>(
-                    createFunc: () => InstantiateEnemy(definition),
-                    collectionCheck: true,
-                    defaultCapacity: Mathf.Max(1, definition.DefaultPoolSize),
-                    maxSize: Mathf.Max(definition.DefaultPoolSize, definition.MaxPoolSize));
-            }
-
+            InitializeInfantryPool();
+            InitializeArtilleryPool();
             InitializeShellPool();
         }
 
         /// <summary>
-        ///     ボス単体検証など、通常敵を生成しない環境向けに砲弾Poolだけを初期化します。
+        ///     歩兵用のObject Poolを初期化する。
         /// </summary>
-        public void InitializeShellOnly()
+        public void InitializeInfantryPool()
         {
-            InitializeShellPool();
+            _infantryPool = new ObjectPool<EnemyLifeCycle>(
+                createFunc: InstantiateInfantry,
+                collectionCheck: true,
+                defaultCapacity: _defaultInfantryPoolSize,
+                maxSize: _maxInfantryPoolSize);
         }
-
         /// <summary>
-        ///     個別の敵定義に対応するObject Poolから敵を取り出します。
+        ///     砲兵用のObject Poolを初期化する。
         /// </summary>
-        /// <param name="enemyDefinitionId"> 取得する個別の敵定義IDです。 </param>
-        /// <returns> 取得した敵ライフサイクルです。 </returns>
-        public EnemyLifeCycle GetEnemy(EnemyDefinitionId enemyDefinitionId)
+        public void InitializeArtilleryPool()
         {
-            if (_enemyPools.TryGetValue(enemyDefinitionId, out IObjectPool<EnemyLifeCycle> pool))
-            {
-                return pool.Get();
-            }
-
-            throw new InvalidOperationException(
-                $"{nameof(EnemyDefinitionId)}に対応するObjectPoolがありません。 Id: {enemyDefinitionId.Value}");
+            _artilleryPool = new ObjectPool<EnemyLifeCycle>(
+                createFunc: InstantiateArtillery,
+                collectionCheck: true,
+                defaultCapacity: _defaultArtilleryPoolSize,
+                maxSize: _maxArtilleryPoolSize);
         }
         /// <summary>
         ///     砲弾用のObject Poolを初期化する。
@@ -93,31 +69,26 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         /// <summary>
-        ///     個別の敵定義が指定するGameObjectを生成し、初期化します。
+        ///     歩兵のGameObjectを生成し、初期化する。
         /// </summary>
-        /// <param name="definition"> 適用する個別の敵定義です。 </param>
-        /// <returns> 初期化した敵ライフサイクルです。 </returns>
-        public EnemyLifeCycle InstantiateEnemy(EnemyDefinitionAsset definition)
+        /// <returns></returns>
+        public EnemyLifeCycle InstantiateInfantry()
         {
-            GameObject instance = Instantiate(definition.ViewPrefab);
-            if (!instance.TryGetComponent(out EnemyLifeCycle lifeCycle))
-            {
-                Destroy(instance);
-                throw new InvalidOperationException(
-                    $"敵プレハブに{nameof(EnemyLifeCycle)}がありません。 Prefab: {definition.ViewPrefab.name}");
-            }
+            EnemyLifeCycle lifeCycle = Instantiate(_infantryPrefab);
+            lifeCycle.CopyLoadedAssetsFrom(_infantryPrefab);
+            _initializer.InitializeInfantry(lifeCycle, ReleaseInfantry);
+            return lifeCycle;
+        }
 
-            if (!lifeCycle.Configure(definition))
-            {
-                Destroy(instance);
-                throw new InvalidOperationException(
-                    $"敵定義の必須データが不足しています。 Definition: {definition.name}");
-            }
-
-            _initializer.InitializeEnemy(
-                lifeCycle,
-                definition.EnemyType,
-                element => ReleaseEnemy(definition.Id, element));
+        /// <summary>
+        ///     砲兵のGameObjectを生成し、初期化する。
+        /// </summary>
+        /// <returns></returns>
+        public EnemyLifeCycle InstantiateArtillery()
+        {
+            EnemyLifeCycle lifeCycle = Instantiate(_artilleryPrefab);
+            lifeCycle.CopyLoadedAssetsFrom(_artilleryPrefab);
+            _initializer.InitializeArtillery(lifeCycle, ReleaseArtillery);
             return lifeCycle;
         }
 
@@ -129,24 +100,44 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             ShellLifeCycle shell = Instantiate(_shellPrefab);
             shell.CopyLoadedAssetsFrom(_shellPrefab);
-            shell.Initialize(ReleaseShell, _shellExplosionEffectView);
+            shell.Initialize(ReleaseShell);
             return shell;
         }
 
         /// <summary>
-        ///     敵を対応する個別定義のObject Poolへ戻します。
+        ///     Object Poolから歩兵のGameObjectを取り出す。
         /// </summary>
-        /// <param name="enemyDefinitionId"> 敵定義IDです。 </param>
-        /// <param name="element"> 回収する敵です。 </param>
-        public void ReleaseEnemy(EnemyDefinitionId enemyDefinitionId, EnemyLifeCycle element)
+        /// <returns></returns>
+        public EnemyLifeCycle GetInfantry()
         {
-            if (_enemyPools.TryGetValue(enemyDefinitionId, out IObjectPool<EnemyLifeCycle> pool))
-            {
-                pool.Release(element);
-                return;
-            }
+            return _infantryPool.Get();
+        }
 
-            Destroy(element.gameObject);
+        /// <summary>
+        ///     歩兵のGameObjectをリリースし、Object Poolに戻す。
+        /// </summary>
+        /// <param name="element"></param>
+        public void ReleaseInfantry(EnemyLifeCycle element)
+        {
+            _infantryPool.Release(element);
+        }
+
+        /// <summary>
+        ///     Object Poolから砲兵のGameObjectを取り出す。
+        /// </summary>
+        /// <returns></returns>
+        public EnemyLifeCycle GetArtillery()
+        {
+            return _artilleryPool.Get();
+        }
+
+        /// <summary>
+        ///     砲兵のGameObjectをリリースし、Object Poolに戻す。
+        /// </summary>
+        /// <param name="element"></param>
+        public void ReleaseArtillery(EnemyLifeCycle element)
+        {
+            _artilleryPool.Release(element);
         }
 
         /// <summary>
@@ -167,17 +158,23 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _shellPool.Release(element);
         }
 
-        [SerializeField, Tooltip("敵インスタンスへランタイム依存を注入するInitializerです。")]
-        private EnemyInitializer _initializer;
+        [SerializeField] private EnemyInitializer _initializer;
 
-        [SerializeField, Tooltip("砲兵が使用する砲弾プレハブです。")]
-        private ShellLifeCycle _shellPrefab;
+        [Header("歩兵")]
+        [SerializeField] private EnemyLifeCycle _infantryPrefab;
+        [SerializeField, Tooltip("初期Poolサイズ")] private int _defaultInfantryPoolSize;
+        [SerializeField, Tooltip("最大Poolサイズ")] private int _maxInfantryPoolSize;
+
+        [Header("砲兵")]
+        [SerializeField] private EnemyLifeCycle _artilleryPrefab;
+        [SerializeField, Tooltip("初期Poolサイズ")] private int _defaultArtilleryPoolSize;
+        [SerializeField, Tooltip("最大Poolサイズ")] private int _maxArtilleryPoolSize;
+        [SerializeField] private ShellLifeCycle _shellPrefab;
         [SerializeField, Tooltip("初期Poolサイズ")] private int _defaultShellPoolSize;
         [SerializeField, Tooltip("最大Poolサイズ")] private int _maxShellPoolSize;
-        [SerializeField, Tooltip("砲弾着弾時の爆発エフェクトです。")]
-        private ReusableParticleSystemView _shellExplosionEffectView;
 
-        private readonly Dictionary<EnemyDefinitionId, IObjectPool<EnemyLifeCycle>> _enemyPools = new();
+        private IObjectPool<EnemyLifeCycle> _infantryPool;
+        private IObjectPool<EnemyLifeCycle> _artilleryPool;
         private IObjectPool<ShellLifeCycle> _shellPool;
     }
 }

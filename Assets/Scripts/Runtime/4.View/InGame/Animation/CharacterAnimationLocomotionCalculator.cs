@@ -7,9 +7,7 @@ namespace KillChord.Runtime.View
     /// </summary>
     public sealed class CharacterAnimationLocomotionCalculator
     {
-        /// <summary> 歩行アニメーションへ切り替える速度のしきい値。 </summary>
-        public const float WALK_THRESHOLD = 0.1f;
-
+        private const float WALK_THRESHOLD = 0.1f;
         private const float BASE_BPM = 60f;
 
         private float _bpm = BASE_BPM;

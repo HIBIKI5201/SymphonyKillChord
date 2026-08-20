@@ -5,93 +5,91 @@ using UnityEngine.UIElements;
 namespace KillChord.Runtime.View.OutGame.SkillBuild
 {
     /// <summary>
-    ///     スキル1件分の一覧・スロット表示を管理する View。
+    ///     スキル 1 枚分のアイコン UI を表す View クラス。
+    ///     SkillElementDragAndDropSetup によってドラッグ&ドロップのマニピュレーターが付与される。
+    ///     TODO : スキルの情報が実装されたときに、スキルの名前やタイプを表示するように拡張する。
     /// </summary>
-    public sealed class SkillElementView : IDisposable
+    public class SkillElementView
     {
         /// <summary>
-        ///     View を初期化する。
+        ///     SkillElementView のコンストラクタ。
+        ///     VisualElement の参照を取得し、draggable クラスを付与してクリックイベントを登録する。
         /// </summary>
-        /// <param name="rootElement"> スキル要素のルート。 </param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public SkillElementView(VisualElement rootElement)
+        /// <param name="root"> スキル要素のルート VisualElement。 </param>
+        public SkillElementView(VisualElement root)
         {
-            RootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
-            _icon = RootElement.Q<Image>(ICON_NAME)
-                ?? throw new InvalidOperationException(
+            RootElement = root
+                ?? throw new ArgumentNullException(nameof(root));
+
+            _icon = root.Q<Image>(ICON_NAME)
+                ?? throw new ArgumentNullException(
                     $"[{nameof(SkillElementView)}] {ICON_NAME} が見つかりませんでした。");
-            _nameLabel = RootElement.Q<Label>(NAME_LABEL_NAME)
-                ?? throw new InvalidOperationException(
+
+            _nameLabel = root.Q<Label>(NAME_LABEL_NAME)
+                ?? throw new ArgumentNullException(
                     $"[{nameof(SkillElementView)}] {NAME_LABEL_NAME} が見つかりませんでした。");
 
+            // ドラッグ&ドロップセットアップがクラス名で draggable 要素を検索するため
+            // コンストラクタで付与する。
             RootElement.AddToClassList(DRAGGABLE_CLASS_NAME);
-            RootElement.RegisterCallback<ClickEvent>(HandleClickHandler);
+
+            RootElement.RegisterCallback<ClickEvent>(OnClickHandler);
         }
 
-        /// <summary> スキルが選択された時にスキル ID を通知する。 </summary>
-        public event Action<int> OnSelected;
+        /// <summary> スキルが選択されたときに発火するイベント。 </summary>
+        public event Action<SkillViewDataDTO> OnSelected;
 
-        /// <summary> スキル要素のルート。 </summary>
+        /// <summary> スキル要素のルート VisualElement。マニピュレーターの付与に使用する。 </summary>
         public VisualElement RootElement { get; }
 
-        /// <summary> バインド中の表示データ。 </summary>
-        public SkillViewData? CurrentData { get; private set; }
+        /// <summary> 現在バインドされているスキルデータ。 </summary>
+        public SkillViewDataDTO? CurrentData { get; private set; }
 
         /// <summary>
-        ///     表示データを反映する。
+        ///     DTO を受け取りアイコン・名前・タイプを表示に反映する。
         /// </summary>
-        /// <param name="data"> 表示データ。 </param>
-        public void Bind(in SkillViewData data)
+        /// <param name="dto"> バインドするスキルデータ。 </param>
+        public void Bind(in SkillViewDataDTO dto)
         {
-            CurrentData = data;
-            RootElement.name = $"{SKILL_ELEMENT_NAME_PREFIX}{data.SkillId}";
-            RootElement.userData = data.SkillId;
-            _icon.sprite = data.Icon;
-            _nameLabel.text = data.DisplayName;
+            CurrentData = dto;
+            _icon.sprite = dto.Icon;
+            _nameLabel.text = dto.SkillId;
         }
 
         /// <summary>
-        ///     選択表示を更新する。
+        ///     表示をクリアしてバインドを解除する。
         /// </summary>
-        /// <param name="isSelected"> 選択中の場合は true。 </param>
-        public void SetSelected(bool isSelected)
+        public void Unbind()
         {
-            RootElement.EnableInClassList(SELECTED_CLASS_NAME, isSelected);
+            CurrentData = null;
+            _icon.sprite = null;
+            _nameLabel.text = string.Empty;
         }
 
         /// <summary>
-        ///     イベント購読を解除する。
+        ///     SkillElementView を破棄し、イベントの登録を解除する。
         /// </summary>
         public void Dispose()
         {
-            RootElement.UnregisterCallback<ClickEvent>(HandleClickHandler);
-            OnSelected = null;
-            CurrentData = null;
+            RootElement.UnregisterCallback<ClickEvent>(OnClickHandler);
         }
 
         private const string DRAGGABLE_CLASS_NAME = "draggable";
-        private const string DRAG_COMPLETED_CLASS_NAME = "drag-just-completed";
-        private const string SELECTED_CLASS_NAME = "is-selected";
-        private const string ICON_NAME = "skill-icon";
-        private const string NAME_LABEL_NAME = "skill-name";
-        private const string SKILL_ELEMENT_NAME_PREFIX = "skill-element-";
+        private const string ICON_NAME = "SkillIcon";
+        private const string NAME_LABEL_NAME = "SkillName";
 
         private readonly Image _icon;
         private readonly Label _nameLabel;
 
         /// <summary>
-        ///     クリックを選択通知へ変換する。
+        ///     クリック時に OnSelected イベントを発火するハンドラ。
         /// </summary>
-        /// <param name="evt"> クリックイベント。 </param>
-        private void HandleClickHandler(ClickEvent evt)
+        private void OnClickHandler(ClickEvent evt)
         {
-            if (RootElement.ClassListContains(DRAG_COMPLETED_CLASS_NAME) ||
-                !CurrentData.HasValue)
+            if (CurrentData.HasValue)
             {
-                return;
+                OnSelected?.Invoke(CurrentData.Value);
             }
-
-            OnSelected?.Invoke(CurrentData.Value.SkillId);
         }
     }
 }

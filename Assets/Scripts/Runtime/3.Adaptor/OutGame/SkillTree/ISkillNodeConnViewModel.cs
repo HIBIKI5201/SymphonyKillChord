@@ -11,10 +11,5 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         ///     接続線の見た目を「通過」にする。
         /// </summary>
         public void SetPassed();
-
-        /// <summary>
-        ///     接続線の見た目を「未通過」にする。
-        /// </summary>
-        public void SetNotPassed();
     }
 }

@@ -34,20 +34,13 @@ namespace SinfoniaStudio.NotionMarkdownExporter
 
             try
             {
-                ExportSummary summary;
-                // 入力待ちを停止と誤検出しないよう、監視はエクスポート中だけ有効にする。
-                using (StallWatchdog watchdog = new(WriteWarning))
-                using (NotionApiClient apiClient = new(optionsResult.Options.NotionToken, watchdog))
-                {
-                    NotionExporter exporter = new(apiClient, optionsResult.Options, watchdog);
-                    summary = await exporter.ExportAsync();
-                }
+                using NotionApiClient apiClient = new(optionsResult.Options.NotionToken);
+                NotionExporter exporter = new(apiClient, optionsResult.Options);
+                ExportSummary summary = await exporter.ExportAsync();
 
                 Console.WriteLine();
                 Console.WriteLine("エクスポートが完了しました。");
                 Console.WriteLine($"  ページ: {summary.PageCount}");
-                Console.WriteLine($"    更新: {summary.UpdatedPageCount}");
-                Console.WriteLine($"    省略: {summary.SkippedPageCount}");
                 Console.WriteLine($"  データベース: {summary.DatabaseCount}");
                 Console.WriteLine($"  添付ファイル: {summary.AssetCount}");
                 Console.WriteLine($"  出力先: {summary.OutputDirectory}");
@@ -66,15 +59,6 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 WaitForExit(optionsResult.IsInteractive);
                 return 1;
             }
-        }
-
-        /// <summary>
-        ///     警告を標準エラー出力へ表示する。
-        /// </summary>
-        /// <param name="message">警告内容。</param>
-        private static void WriteWarning(string message)
-        {
-            Console.Error.WriteLine($"  [警告] {message}");
         }
 
         /// <summary>

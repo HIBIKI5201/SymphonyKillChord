@@ -80,7 +80,7 @@ namespace KillChord.Runtime.Composition.OutGame
             }
 
             _outGameUiEvent = new OutGameUIEvent();
-            _isOwner = ServiceLocator.RegisterInstance(_outGameUiEvent, LocateTypeEnum.Locator);
+            _isOwner = ServiceLocator.RegisterInstance(_outGameUiEvent, LocateType.Locator);
             return _isOwner;
         }
 

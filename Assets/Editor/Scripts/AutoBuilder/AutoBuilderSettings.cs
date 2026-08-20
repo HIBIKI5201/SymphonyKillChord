@@ -1,7 +1,7 @@
-using System.Collections.Generic;
 using KillChord.Editor.Utility;
 using UnityEditor;
 using UnityEditor.Build.Profile;
+using UnityEngine;
 
 namespace KillChord.Editor.AutoBuilder
 {
@@ -32,49 +32,9 @@ namespace KillChord.Editor.AutoBuilder
         public static bool IsPathEndsWithSlash(string path)
         {
             if (path.Length < 1) { return false; }
-
             return path[^1] == '/' || path[^1] == '\\';
         }
 
-        public static bool IsBuildProfilesValid(BuildProfile[] profiles)
-        {
-            return !IsBuildProfilesNullOrEmpty(profiles) && !HasEmptyBuildProfile(profiles) && !HasDuplicateBuildProfiles(profiles);
-        }
-        
-        public static bool IsBuildProfilesNullOrEmpty(BuildProfile[] profiles)
-        {
-            return profiles == null || profiles.Length == 0;
-        }
-
-        public static bool HasEmptyBuildProfile(BuildProfile[] profiles)
-        {
-            foreach (BuildProfile profile in profiles)
-            {
-                if (profile == null)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static bool HasDuplicateBuildProfiles(BuildProfile[] profiles)
-        {
-            HashSet<BuildProfile> uniqueProfiles = new();
-
-            foreach (BuildProfile profile in profiles)
-            {
-                if (profile == null) { continue; }
-                if (!uniqueProfiles.Add(profile))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         public static void Save() => instance.Save(true);
-        }
     }
+}

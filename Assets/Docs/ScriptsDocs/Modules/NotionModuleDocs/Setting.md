@@ -1,13 +1,13 @@
 # 概要
 > 💡 **モジュール概要**
-> アウトゲームの設定画面（音声・画面・キー設定タブ）を構築するモジュールである。ドメインロジックを持たない薄いUI構築層で、既存の音量管理クラス（Music/Persistentモジュール）へ直接バインドする。Titleシーンにも独立した音量設定UI（`VolumeSettingsTabView`）が別途存在し、本モジュールとは重複した実装になっている。
+> アウトゲームの設定画面（音声・画面・キー設定タブ）を構築するモジュールです。ドメインロジックを持たない薄いUI構築層で、既存の音量管理クラス（Music/Persistentモジュール）へ直接バインドします。Titleシーンにも独立した音量設定UI（`VolumeSettingsTabView`）が別途存在し、本モジュールとは重複した実装になっています。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Setting |
 | **カテゴリ** | OutGame |
-| **ステータス** | 実装済み（画面設定タブは未完成） |
-| **最終更新日** | 2026-08-17 |
+| **ステータス** | 実装済み（画面設定タブは未完成、既知の課題を参照） |
+| **最終更新日** | 2026-07-15 |
 
 ---
 
@@ -20,7 +20,7 @@
 | **`SettingSlider` / `SettingToggle` / `SettingDropDown`** | View | `SettingBase`を継承した汎用バインド可能UIコントロール（`Bind(getter, setter)`） |
 | **`AudioSettingData`** | View | Master/BGM/SE/Voiceの4音量値と、それぞれの変更通知イベントを保持するプレーンモデル |
 | **`AudioConfig`** | View | 音声設定タブのUI一式（スライダー群）を構築するScriptableObject |
-| **`ScreenSettingData`** | View | 解像度インデックス・画面モード・VSync有無を保持する構造体 |
+| **`ScreenSettingData`** | View | 解像度インデックス・画面モード・VSync有無を保持する構造体（既知の課題を参照） |
 | **`ScreenConfig`** | View | 画面設定タブのUI一式（解像度/画面モードドロップダウン・VSyncトグル）を構築するScriptableObject |
 | **`SettingComposition`** | Composition | `ServiceLocator`から音量管理クラスを取得し、`AudioConfig`/`ScreenConfig`を構築する唯一のComposition層クラス |
 
@@ -62,10 +62,10 @@ graph TD
 
 * **`Music` / `Persistent`**
   * *依存箇所*: `MusicPlayer`, `SoundEffectVolumeManager`, `VoiceVolumeManager`（いずれも具象クラス）
-  * *詳細*: `SettingComposition.Build()`がこれらを`ServiceLocator`から取得し、現在の音量を`AudioSettingData`の初期値として読み込み、変更イベントを各Managerの`SetVolume`へ直結する
+  * *詳細*: `SettingComposition.Build()`がこれらを`ServiceLocator`から取得し、現在の音量を`AudioSettingData`の初期値として読み込み、変更イベントを各Managerの`SetVolume`へ直結します。
 * **`Screen`**
   * *依存箇所*: `OutGameUIEvent`, `ScreenInitializer`が構築する`SettingContainer`
-  * *詳細*: Screenモジュールが用意したコンテナへ設定UIを構築する（Order 140、Screenの100より後）
+  * *詳細*: Screenモジュールが用意したコンテナへ設定UIを構築します（Order 140、Screenの100より後）。
 
 ### 📤 依存されているもの
 
@@ -78,28 +78,28 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-当モジュールでは使用していない。
+当モジュールでは使用していません。
 ### ② Application
-当モジュールでは使用していない。
+当モジュールでは使用していません。
 ### ③ Adaptor
-当モジュールでは使用していない。
+当モジュールでは使用していません。
 ### ④ View
-`SettingBase`派生の汎用バインド可能コントロール（Slider/Toggle/DropDown）と、それらを組み立てる`AudioConfig`/`ScreenConfig`というScriptableObjectビルダーを実装する。
+`SettingBase`派生の汎用バインド可能コントロール（Slider/Toggle/DropDown）と、それらを組み立てる`AudioConfig`/`ScreenConfig`というScriptableObjectビルダーを実装します。
 ### ⑤ Infrastructure
-当モジュールでは使用していない。
+当モジュールでは使用していません。
 ### ⑥ Composition
-`SettingComposition`（Order 140）が音量管理クラス群を`ServiceLocator`から取得し、`AudioConfig`/`ScreenConfig`のUI構築を呼び出す。
+`SettingComposition`（Order 140）が音量管理クラス群を`ServiceLocator`から取得し、`AudioConfig`/`ScreenConfig`のUI構築を呼び出します。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はない。新しい設定タブを追加する場合は`Category` Enumへ値を追加し、対応する`Config`クラス（`SettingBase`派生）を実装、`SettingComposition`から呼び出す形になる。
+> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。新しい設定タブを追加する場合は`Category` Enumへ値を追加し、対応する`Config`クラス（`SettingBase`派生）を実装、`SettingComposition`から呼び出す形になります。
 
 ## 🔄処理フロー
 
-主要な処理フローは、それぞれ子ページに分けている。
+主要な処理フローごとに分けて記述します。
 
 ### ① 音量設定変更フロー
-設定画面のスライダー操作が、直接音量管理クラスへ反映される。
+設定画面のスライダー操作が、直接音量管理クラスへ反映されます。
 
 ```mermaid
 sequenceDiagram

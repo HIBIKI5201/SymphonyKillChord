@@ -1,13 +1,13 @@
 # 概要
 > 💡 **モジュール概要**
-> アウトゲーム内の画面遷移（Home/StageSelect/SkillTree/SkillBuild/Setting/BattlePreparation）を、ルールベースの履歴スタック（Replace/Overlay/Reset）で管理するナビゲーション基盤モジュールである。各画面のコンテナ（表示/非表示の器）を本モジュールが所有し、中身の構築は各機能モジュール（StageSelect/SkillTree等）が担当する。
+> アウトゲーム内の画面遷移（Home/StageSelect/SkillTree/SkillBuild/Setting/BattlePreparation）を、ルールベースの履歴スタック（Replace/Overlay/Reset）で管理するナビゲーション基盤モジュールです。各画面のコンテナ（表示/非表示の器）を本モジュールが所有し、中身の構築は各機能モジュール（StageSelect/SkillTree等）が担当します。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Screen |
 | **カテゴリ** | OutGame |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-08-17 |
+| **最終更新日** | 2026-07-15 |
 
 ---
 
@@ -25,23 +25,20 @@
 | **`CloseCurrentScreenUseCase`** | Application | 履歴を1つ戻す（`TryGoBack`） |
 | **`ResetToHomeScreenUseCase`** | Application | 履歴をクリアしHome画面へ強制リセット |
 | **`IScreenPresenter`** | Application | 画面遷移結果の出力境界 |
-| **`ShowScreenCommand`** | Application | 表示要求の対象画面（`ScreenId`）を表すコマンド |
-| **`ScreenTransitionResult`** | Application | 遷移の結果（表示・非表示にする画面）を表す戻り値 |
-| **`ScreenController`** / **`IScreenController`** | Adaptor | `ShowHome`/`ShowStageSelect`等、用途別メソッドで3つのUseCaseをラップする窓口とその抽象 |
+| **`ScreenController`** | Adaptor | `ShowHome`/`ShowStageSelect`等、用途別メソッドで3つのUseCaseをラップする窓口 |
 | **`ScreenPresenter`** | Adaptor | 遷移結果を`ScreenViewDTO`へ変換し`IScreenTransitionApplicable`へ渡す |
 | **`ScreenViewApplicator`** | Adaptor | `IScreenViewRegistry`経由で実際のView表示/非表示を実行 |
 | **`IScreenViewRegistry`** | Adaptor | 画面IDと具象View（Composition層で構築）を仲介する抽象 |
 | **`OutGameUIEvent`** | View | OutGameシーン全体で共有される約25個のAction/Funcを持つイベントバス。`OutGameSceneInitializer`（Order 0）が最初に登録し、Screen以外の全モジュールからも参照される |
 | **`ScreenViewBase`** | View | 表示/非表示・入力ブロック・トランジション終了待機を実装する画面基底クラス |
-| **`IScreenView`** | View | 画面Viewの共通契約 |
-| **`HomeScreenView` / `SettingScreenView` / `SkillTreeScreenView` / `SkillBuildScreenView` / `StageSelectScreenView` / `BattlePreparationScreen`** | View | 各画面のコンテナ・戻るボタン等の薄いシェル（中身は各機能モジュールが構築） |
+| **`HomeScreenView` / `SettingScreenView` / `SkillTreeScreenView` / `StageSelectScreenView` / `BattlePreparationScreen`** | View | 各画面のコンテナ・戻るボタン等の薄いシェル（中身は各機能モジュールが構築） |
 | **`ScreenRuleData`** | Infrastructure | 画面ごとの遷移ルールを定義するScriptableObject |
 | **`ScreenRuleRepository`** | Infrastructure | `ScreenRuleData`から`Dictionary<ScreenId, ScreenTransitionRule>`を構築 |
 | **`ScreenStateRepository`** | Infrastructure | `ScreenTransitionState`の単純な保持実装 |
 | **`ScreenInitializer`** | Composition | 画面コンテナ・遷移スタック一式を構築し、UI Toolkitの名前付きコンテナへ紐付ける |
 | **`ScreenViewRegistry`** | Composition | 画面IDと`ScreenViewBase`の対応表 |
 
-> `SkillBuildScreenView`はこのフォルダ（`4.View/OutGame/Screen/`）に物理的に置かれているが、内容的にはSkillモジュールに属する大きなView（約380行）である。StageSelect/SkillTreeの詳細な中身（`StageDetailScreenView`等）は、Screenモジュールが用意したコンテナへ、それぞれのモジュールが個別に構築・配置する。
+> `SkillBuildScreenView`はこのフォルダ（`4.View/OutGame/Screen/`）に物理的に置かれていますが、内容的にはSkillモジュールに属する大きなView（約380行）です。StageSelect/SkillTreeの詳細な中身（`StageDetailScreenView`等）は、Screenモジュールが用意したコンテナへ、それぞれのモジュールが個別に構築・配置します。
 
 ### 🧩 Composition初期化情報
 
@@ -93,13 +90,13 @@ graph TD
 
 * **`OutGame Bootstrap`**
   * *依存箇所*: `OutGameUIEvent`
-  * *詳細*: `OutGameSceneInitializer`（Order 0）が最初に登録するイベントバスを、画面遷移要求の受信・完了通知に使用する
+  * *詳細*: `OutGameSceneInitializer`（Order 0）が最初に登録するイベントバスを、画面遷移要求の受信・完了通知に使用します。
 
 ### 📤 依存されているもの
 
 * **`StageSelect` / `Skill` / `Setting`**
   * *参照箇所*: `ScreenInitializer`が構築するコンテナ（`StageSelectContainer`、`SkillTreeContainer`、`SkillBuildContainer`、`SettingContainer`等）
-  * *詳細*: 各モジュールの初期化（Order 110以降）はScreenモジュール（Order 100）が用意したコンテナへ中身を構築する。初期化順序が逆転すると対象コンテナが存在せず失敗する
+  * *詳細*: 各モジュールの初期化（Order 110以降）はScreenモジュール（Order 100）が用意したコンテナへ中身を構築します。初期化順序が逆転すると対象コンテナが存在せず失敗します。
 
 ---
 
@@ -108,28 +105,28 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-画面ID（`ScreenId`）と、画面ごとの遷移方針（`ScreenTransitionType`/`ScreenTransitionRule`）という、Unity非依存の純粋な定義を保持する。
+画面ID（`ScreenId`）と、画面ごとの遷移方針（`ScreenTransitionType`/`ScreenTransitionRule`）という、Unity非依存の純粋な定義を保持します。
 ### ② Application
-表示・戻る・ホームリセットの3つのUseCaseと、履歴スタックを管理する`ScreenTransitionState`を実装する。
+表示・戻る・ホームリセットの3つのUseCaseと、履歴スタックを管理する`ScreenTransitionState`を実装します。
 ### ③ Adaptor
-`ScreenController`が用途別メソッドでUseCase群をラップし、`ScreenPresenter`/`ScreenViewApplicator`が遷移結果を実際のView表示/非表示へ変換する。
+`ScreenController`が用途別メソッドでUseCase群をラップし、`ScreenPresenter`/`ScreenViewApplicator`が遷移結果を実際のView表示/非表示へ変換します。
 ### ④ View
-画面基底クラス`ScreenViewBase`と、各画面の薄いコンテナ・戻るボタンを担当する。`OutGameUIEvent`もこの層に属し、OutGameシーン全体のイベントハブとして機能する。
+画面基底クラス`ScreenViewBase`と、各画面の薄いコンテナ・戻るボタンを担当します。`OutGameUIEvent`もこの層に属し、OutGameシーン全体のイベントハブとして機能します。
 ### ⑤ Infrastructure
-`ScreenRuleData`（ScriptableObject）が画面ごとの遷移ルールをデザイナー向けに公開し、`ScreenRuleRepository`が実行時の辞書に変換する。
+`ScreenRuleData`（ScriptableObject）が画面ごとの遷移ルールをデザイナー向けに公開し、`ScreenRuleRepository`が実行時の辞書に変換します。
 ### ⑥ Composition
-`ScreenInitializer`（Order 100）が7つの名前付きUI Toolkitコンテナを解決し、全画面のView・Adaptor・Application・Infrastructureスタックを手動DIで一括構築する。
+`ScreenInitializer`（Order 100）が7つの名前付きUI Toolkitコンテナを解決し、全画面のView・Adaptor・Application・Infrastructureスタックを手動DIで一括構築します。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はない。新しい画面を追加する場合は、`ScreenId`への値追加、`ScreenRuleData`アセットへのルール追加、`ScreenViewRegistry`への登録が必要である（Enum+データ追加、コード側の登録漏れは起動時に検知されにくいため注意）。
+> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。新しい画面を追加する場合は、`ScreenId`への値追加、`ScreenRuleData`アセットへのルール追加、`ScreenViewRegistry`への登録が必要です（Enum+データ追加、コード側の登録漏れは起動時に検知されにくいため注意）。
 
 ## 🔄処理フロー
 
-主要な処理フローは、それぞれ子ページに分けている。
+主要な処理フローごとに分けて記述します。
 
 ### ① 画面遷移フロー（ボタン押下→新画面表示）
-Home画面からStageSelect画面への遷移を例にした標準的な流れである。
+Home画面からStageSelect画面への遷移を例にした標準的な流れです。
 
 ```mermaid
 sequenceDiagram

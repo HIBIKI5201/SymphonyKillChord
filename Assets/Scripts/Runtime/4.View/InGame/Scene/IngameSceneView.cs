@@ -14,44 +14,31 @@ namespace KillChord.Runtime.View.InGame.Scene
     {
         private List<string> _loadedScenes = new();
 
-        /// <summary>
-        ///     シーンを追加ロードする。
-        /// </summary>
-        /// <param name="sceneName">ロードするシーン名。</param>
-        /// <returns>ロードに成功したか。</returns>
-        public async ValueTask<bool> LoadScene(string sceneName)
+        public ValueTask<bool> LoadScene(string sceneName)
         {
             _loadedScenes.Add(sceneName);
-            return await SceneLoader.LoadSceneAsync(
+            return SceneLoader.LoadScene(
                 sceneName,
                 priority: ScenePriorityResolver.Resolve(sceneName));
         }
 
-        /// <summary>
-        ///     ロード済みのシーンをアンロードする。
-        /// </summary>
-        /// <param name="sceneName">アンロードするシーン名。</param>
-        /// <returns>アンロードに成功したか。</returns>
-        public async ValueTask<bool> UnloadScene(string sceneName)
+        public ValueTask<bool> UnloadScene(string sceneName)
         {
             if (_loadedScenes.Contains(sceneName))
             {
                 _loadedScenes.Remove(sceneName);
-                return await SceneLoader.UnloadSceneAsync(sceneName);
+                return SceneLoader.UnloadScene(sceneName);
             }
             else
             {
-                Debug.LogError($"[{nameof(IngameSceneView)}] Scene {sceneName} does not exist.", this);
-                return false;
+                Debug.LogError($"[IngameSceneView] Scene {sceneName} does not exist.");
+                return default;
             }
         }
 
-        /// <summary>
-        ///     ロード済みのシーンをすべてアンロードする。
-        /// </summary>
         public async ValueTask UnloadAllScenes()
         {
-            await SceneLoader.UnloadScenesAsync(_loadedScenes.ToArray());
+            await SceneLoader.UnloadScenes(_loadedScenes.ToArray());
         }
     }
 }

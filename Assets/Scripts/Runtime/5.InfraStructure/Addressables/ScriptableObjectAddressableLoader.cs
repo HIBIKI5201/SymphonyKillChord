@@ -26,7 +26,7 @@ namespace KillChord.Runtime.InfraStructure.Addressables
             this string key,
             Object context,
             CancellationToken cancellationToken)
-            where TAsset : class
+            where TAsset : ScriptableObject
         {
             if (string.IsNullOrWhiteSpace(key))
             {
@@ -74,7 +74,7 @@ namespace KillChord.Runtime.InfraStructure.Addressables
             string key,
             Object context,
             CancellationToken cancellationToken)
-            where TAsset : class
+            where TAsset : ScriptableObject
         {
             try
             {

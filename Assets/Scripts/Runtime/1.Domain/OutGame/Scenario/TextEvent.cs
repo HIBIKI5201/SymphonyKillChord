@@ -15,12 +15,12 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         /// </summary>
         public TextEvent(string speaker, string text, IReadOnlyList<TextTimingTrigger> triggers)
         {
+            if (speaker == null) throw new ArgumentNullException(nameof(speaker));
+            if (string.IsNullOrWhiteSpace(speaker)) throw new ArgumentException("speaker is empty.", nameof(speaker));
             if (text == null) throw new ArgumentNullException(nameof(text));
             if (string.IsNullOrWhiteSpace(text)) throw new ArgumentException("text is empty.", nameof(text));
 
-            // 話者名は地の文（ナレーション）用に空文字・空白文字を許可する。
-            // null や空白のみの場合は空文字（話者なし）へ正規化する。
-            Speaker = string.IsNullOrWhiteSpace(speaker) ? string.Empty : speaker;
+            Speaker = speaker;
             Text = text;
             Triggers = triggers ?? Array.Empty<TextTimingTrigger>();
         }

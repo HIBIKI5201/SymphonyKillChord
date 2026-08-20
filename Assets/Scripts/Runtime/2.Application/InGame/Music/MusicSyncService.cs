@@ -131,8 +131,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <param name="timing"> 実行するタイミング指定。 </param>
         /// <param name="action"> 実行するアクション。 </param>
         /// <param name="ct"> キャンセルトークン。 </param>
-        /// <returns> 実行される音源再生時間（秒）。 </returns>
-        public double RegisterAction(
+        public void RegisterAction(
             double accurateBeat,
             ExecuteRequestTiming timing,
             Action action,
@@ -140,7 +139,6 @@ namespace KillChord.Runtime.Application.InGame.Music
         {
             double executeTime = MusicTimingCalculator.CalculateExecutionTime(_rhythmDefinition, timing, accurateBeat);
             _scheduledActions.Enqueue(new ScheduledAction(action, ct), executeTime);
-            return executeTime;
         }
 
         /// <summary>

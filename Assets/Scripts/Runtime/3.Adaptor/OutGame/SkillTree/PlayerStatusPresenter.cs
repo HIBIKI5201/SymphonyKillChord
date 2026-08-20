@@ -1,55 +1,20 @@
-using KillChord.Runtime.Application.OutGame.SkillTree;
-using KillChord.Runtime.Domain.OutGame.SkillTree;
-using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 {
     /// <summary>
-    ///     プレイヤーステータス画面のPresenter。
+    ///     【一時】プレイヤーステータス画面のPresenter。
+    ///     TODO　正式的なデータが確定したらここの対応を行う。
     /// </summary>
     public class PlayerStatusPresenter
     {
         /// <summary>
-        ///     表示先、ボーナス計算器、基礎ステータスを設定する。
-        /// </summary>
-        public PlayerStatusPresenter(
-            IPlayerStatusViewModel viewModel,
-            PlayerStatusBonusCalculator bonusCalculator,
-            SkillTreeStatusEntity skillTreeStatus,
-            float baseHealth,
-            float baseAttack,
-            float baseCriticalChance,
-            float baseCriticalDamageMultiplier)
-        {
-            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-            _bonusCalculator = bonusCalculator ?? throw new ArgumentNullException(nameof(bonusCalculator));
-            _skillTreeStatus = skillTreeStatus ?? throw new ArgumentNullException(nameof(skillTreeStatus));
-            _baseHealth = baseHealth;
-            _baseAttack = baseAttack;
-            _baseCriticalChance = baseCriticalChance;
-            _baseCriticalDamageMultiplier = baseCriticalDamageMultiplier;
-        }
-
-        /// <summary>
         ///     プレイヤーのステータスを反映する。
+        ///     TODO：現段階実装無し
         /// </summary>
         public void Push()
         {
-            PlayerStatusBonus bonus = _bonusCalculator.Calculate(_skillTreeStatus.UnlockedNodes);
-            PlayerStatusDTO dto = new PlayerStatusDTO(
-                _baseHealth * bonus.MaxHealthMultiplier,
-                _baseAttack * bonus.AttackPowerMultiplier,
-                Math.Min(1f, _baseCriticalChance + bonus.CriticalChanceAddition),
-                _baseCriticalDamageMultiplier - 1f + bonus.CriticalMultiplierAddition);
-            _viewModel.Apply(dto);
-        }
 
-        private readonly IPlayerStatusViewModel _viewModel;
-        private readonly PlayerStatusBonusCalculator _bonusCalculator;
-        private readonly SkillTreeStatusEntity _skillTreeStatus;
-        private readonly float _baseHealth;
-        private readonly float _baseAttack;
-        private readonly float _baseCriticalChance;
-        private readonly float _baseCriticalDamageMultiplier;
+        }
     }
 }

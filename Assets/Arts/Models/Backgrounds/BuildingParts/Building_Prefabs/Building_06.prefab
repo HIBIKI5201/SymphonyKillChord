@@ -90,7 +90,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -180,7 +180,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -270,7 +270,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -360,7 +360,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -591,10 +591,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -5311322294723087748, guid: 49b65ba2f18ae4c4c8131d31c053994a, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 49b65ba2f18ae4c4c8131d31c053994a, type: 3}
       propertyPath: m_Name
       value: Floor_Break_01_03
@@ -656,10 +652,6 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -11202841114687429, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
       propertyPath: m_Name
@@ -727,10 +719,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: stairs_01_Broken_02
       objectReference: {fileID: 0}
-    - target: {fileID: 8900552761720269970, guid: 7de3eefdc9eed6d4c9967e1dacd9f0cf, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -788,10 +776,6 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -5222111046379411978, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_Name
@@ -855,10 +839,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -7682704584257626614, guid: 9643e9944272dc44d903986a8a5591e5, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9643e9944272dc44d903986a8a5591e5, type: 3}
       propertyPath: m_Name
       value: wall_1window_01_Broken_01 (1)
@@ -920,10 +900,6 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: bb2f67204212bfe44813911b91d24728, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -6610617100926390311, guid: bb2f67204212bfe44813911b91d24728, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: bb2f67204212bfe44813911b91d24728, type: 3}
       propertyPath: m_Name
@@ -987,10 +963,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -6610617100926390311, guid: bb2f67204212bfe44813911b91d24728, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: bb2f67204212bfe44813911b91d24728, type: 3}
       propertyPath: m_Name
       value: wall_Full_Broken_02
@@ -1053,10 +1025,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -7682704584257626614, guid: 9643e9944272dc44d903986a8a5591e5, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9643e9944272dc44d903986a8a5591e5, type: 3}
       propertyPath: m_Name
       value: wall_1window_01_Broken_01
@@ -1079,10 +1047,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2844529345429582890}
     m_Modifications:
-    - target: {fileID: -9015129283136432128, guid: 6b8dbfa04a99df143ad1aeaa9cc1b445, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6b8dbfa04a99df143ad1aeaa9cc1b445, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3
@@ -1185,10 +1149,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -11202841114687429, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
       propertyPath: m_Name
       value: pillar_Break_02
@@ -1251,10 +1211,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -5818706208074360890, guid: bb297bbcc78eea64b94c86a20eb00d78, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: bb297bbcc78eea64b94c86a20eb00d78, type: 3}
       propertyPath: m_Name
       value: Floor_Break_01_08
@@ -1316,10 +1272,6 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -2034711948156804434, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_Name
@@ -1387,10 +1339,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: wall_door_02_Broken_02
       objectReference: {fileID: 0}
-    - target: {fileID: 5632392195437883330, guid: d8fce47a78f055f4b8b0ea8cedcc1965, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1448,10 +1396,6 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -11202841114687429, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
       propertyPath: m_Name
@@ -1515,10 +1459,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -2034711948156804434, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_02
@@ -1580,10 +1520,6 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -5222111046379411978, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_Name
@@ -1651,10 +1587,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: stairs_01_Broken_02 (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 8900552761720269970, guid: 7de3eefdc9eed6d4c9967e1dacd9f0cf, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1712,10 +1644,6 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 9643e9944272dc44d903986a8a5591e5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -7682704584257626614, guid: 9643e9944272dc44d903986a8a5591e5, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9643e9944272dc44d903986a8a5591e5, type: 3}
       propertyPath: m_Name
@@ -1840,10 +1768,6 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 4b46f82e302652741a14492b3fbd819c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -4858154821898741431, guid: 4b46f82e302652741a14492b3fbd819c, type: 3}
-      propertyPath: m_StaticShadowCaster
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 4b46f82e302652741a14492b3fbd819c, type: 3}
       propertyPath: m_Name

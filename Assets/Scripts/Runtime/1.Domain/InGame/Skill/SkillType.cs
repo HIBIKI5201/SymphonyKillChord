@@ -5,11 +5,6 @@ namespace KillChord.Runtime.Domain.InGame.Skill
     /// </summary>
     public enum SkillType
     {
-        /// <summary> 攻撃スキル。 </summary>
-        Attack,
-        /// <summary> バフスキル。 </summary>
-        Buff,
-        /// <summary> デバフスキル。 </summary>
-        Debuff,
+    
     }
 }

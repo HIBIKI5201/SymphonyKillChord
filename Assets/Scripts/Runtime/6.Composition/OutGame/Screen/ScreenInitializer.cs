@@ -1,5 +1,5 @@
-using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -11,6 +11,7 @@ using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -63,7 +64,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return false;
             }
 
-            _screenController.ShowHome();
+            _transitionTask = _screenController.ShowHome(_ctsShow.Token);
             return true;
         }
 
@@ -76,14 +77,17 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _isSubscribed = false;
 
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
-            ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
+
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
 
+            CancelAndDispose(ref _ctsShow);
+            CancelAndDispose(ref _ctsHide);
             CancelAndDispose(ref _ctsTransition);
             _screenRuleDataKey.ReleaseLoadedAsset(this);
             _loadedScreenRuleData = null;
             _isInitialized = false;
+            _transitionTask = null;
         }
 
         /// <summary>
@@ -195,7 +199,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
-            ServiceLocator.RegisterInstance(battlePreparationScreen);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,
@@ -235,6 +238,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
+            _ctsShow = new();
+            _ctsHide = new();
             _ctsTransition = new();
 
             _isInitialized = true;
@@ -283,26 +288,33 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleHomeScreenShown()
         {
-            VisualElement rootElement = _uiDocument?.rootVisualElement;
-            if (rootElement != null
-                && rootElement.resolvedStyle.display == DisplayStyle.None)
-            {
-                // OutGame UIが非表示なら、復帰前の画面を描画せず即時に破棄する。
-                _screenViewRegistry.HideAllImmediately();
-            }
+            // 前回の画面の表示が完了していない場合は、完了するまで待機します。
+            if (IsTransitioning) { return; }
 
-            _screenController.ShowHome();
+            _transitionTask = _screenController.ShowHome(RenewShowToken());
         }
 
         /// <summary>
         ///     ステージ選択表示イベントを処理します。
+        ///     画面表示アニメーション完了後に OnStageSelectScreenCompleted を発火します。
         /// </summary>
-        /// <remarks>
-        ///     OnStageSelectScreenCompleted はフェード完了のタイミングで StageSelectScreenView 自身が発火します。
-        /// </remarks>
-        private void HandleStageSelectionScreenShown()
+        private async void HandleStageSelectionScreenShown()
         {
-            _screenController.ShowStageSelect();
+            // 前回の画面の表示が完了していない場合は、完了するまで待機します。
+            if (IsTransitioning) { return; }
+
+            _transitionTask = _screenController.ShowStageSelect(RenewShowToken());
+            try
+            {
+                await _transitionTask;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+
+            // 作戦画面の表示完了を通知する
+            _outGameUIEvent.OnStageSelectScreenCompleted?.Invoke();
         }
 
         /// <summary>
@@ -310,7 +322,10 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleSkillTreeScreenShown()
         {
-            _screenController.ShowSkillTree();
+            // 前回の画面の表示が完了していない場合は、完了するまで待機します。
+            if (IsTransitioning) { return; }
+
+            _transitionTask = _screenController.ShowSkillTree(RenewShowToken());
         }
 
         /// <summary>
@@ -318,7 +333,10 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleSkillBuildScreenShown()
         {
-            _screenController.ShowSkillBuild();
+            // 前回の画面の表示が完了していない場合は、完了するまで待機します。
+            if (IsTransitioning) { return; }
+
+            _transitionTask = _screenController.ShowSkillBuild(RenewShowToken());
         }
 
         /// <summary>
@@ -326,15 +344,21 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleSettingsShown()
         {
-            _screenController.ShowSetting();
+            // 前回の画面の表示が完了していない場合は、完了するまで待機します。
+            if (IsTransitioning) { return; }
+
+            _transitionTask = _screenController.ShowSetting(RenewShowToken());
         }
 
         /// <summary>
         ///     戦闘準備画面表示イベントを処理します。
         /// </summary>
-        private void HandleBattlePreparationScreenShown()
+        private void HandleBattlePreparationScreenShown(string targetSceneName)
         {
-            _screenController.ShowBattlePreparation();
+            // 前回の画面の表示が完了していない場合は、完了するまで待機します。
+            if (IsTransitioning) { return; }
+
+            _transitionTask = _screenController.ShowBattlePreparation(targetSceneName, RenewShowToken());
         }
 
         /// <summary>
@@ -342,28 +366,21 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleScreenClosed()
         {
-            _screenController.CloseCurrent();
+            // 前回の画面の非表示が完了していない場合は、完了するまで待機します。
+            if (IsTransitioning) { return; }
+
+            _transitionTask = _screenController.CloseCurrent(RenewHideToken());
         }
 
         /// <summary>
         ///     インゲームへの遷移イベントを処理します。
         /// </summary>
-        private async void HandleStartGame()
+        /// <param name="targetSceneName"> 遷移先のシーン名。 </param>
+        private async void HandleStartGame(string targetSceneName)
         {
             // 一度ゲーム開始処理が走った後は、二重に処理が走らないようにします。
             if (_isStartGame) { return; }
 
-            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
-                || !selectedBattleStageState.HasSelectedBattleStage
-                || string.IsNullOrWhiteSpace(selectedBattleStageState.InGameSceneName))
-            {
-                Debug.LogError(
-                    $"[{nameof(ScreenInitializer)}] 出撃対象のバトルステージが選択されていません。",
-                    this);
-                return;
-            }
-
-            string targetSceneName = selectedBattleStageState.InGameSceneName;
             _isStartGame = true;
             var currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             try
@@ -422,6 +439,28 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         }
 
         /// <summary>
+        ///     Task のキャンセルと新しい CancellationTokenSource の生成を行います。
+        /// </summary>
+        /// <returns> 新しい CancellationToken を返します。 </returns>
+        private CancellationToken RenewShowToken()
+        {
+            CancelAndDispose(ref _ctsShow);
+            _ctsShow = new();
+            return _ctsShow.Token;
+        }
+
+        /// <summary>
+        ///     Task のキャンセルと新しい CancellationTokenSource の生成を行います。
+        /// </summary>
+        /// <returns> 新しい CancellationToken を返します。 </returns>
+        private CancellationToken RenewHideToken()
+        {
+            CancelAndDispose(ref _ctsHide);
+            _ctsHide = new();
+            return _ctsHide.Token;
+        }
+
+        /// <summary>
         ///     CancellationTokenSource をキャンセルし、破棄します。
         ///     さらに、参照を null に設定します。
         /// </summary>
@@ -446,6 +485,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         [SerializeField, SourceDataAddress, Tooltip("画面遷移ルールデータの Addressables キーです。")]
         private string _screenRuleDataKey;
 
+        private bool IsTransitioning => _transitionTask != null && !_transitionTask.IsCompleted;
+
         private ScreenController _screenController;
         private OutGameUIEvent _outGameUIEvent;
         private ScreenViewRegistry _screenViewRegistry;
@@ -455,6 +496,10 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private bool _isSubscribed;
         private bool _isStartGame = false;
 
+        private Task _transitionTask;
+
+        private CancellationTokenSource _ctsShow;
+        private CancellationTokenSource _ctsHide;
         private CancellationTokenSource _ctsTransition;
     }
 }

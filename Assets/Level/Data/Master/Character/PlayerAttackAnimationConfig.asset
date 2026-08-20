@@ -15,25 +15,25 @@ MonoBehaviour:
   _entries:
   - _beatType: 1
     _clip: {fileID: 1827226128182048838, guid: ecc20323969b04e4080094b599672f80, type: 3}
-    _enterBlendFrameCount: 1
+    _enterBlendFrameCount: 4
     _exitBlendFrameCount: 12
   - _beatType: 2
     _clip: {fileID: 1827226128182048838, guid: ecc20323969b04e4080094b599672f80, type: 3}
-    _enterBlendFrameCount: 1
+    _enterBlendFrameCount: 4
     _exitBlendFrameCount: 12
   - _beatType: 3
     _clip: {fileID: 1827226128182048838, guid: a12ddb03c6d69194b8927c7f2ce0b83e, type: 3}
-    _enterBlendFrameCount: 1
+    _enterBlendFrameCount: 4
     _exitBlendFrameCount: 12
   - _beatType: 4
     _clip: {fileID: 1827226128182048838, guid: ecc20323969b04e4080094b599672f80, type: 3}
-    _enterBlendFrameCount: 1
+    _enterBlendFrameCount: 4
     _exitBlendFrameCount: 12
   - _beatType: 6
     _clip: {fileID: 1827226128182048838, guid: a12ddb03c6d69194b8927c7f2ce0b83e, type: 3}
-    _enterBlendFrameCount: 1
+    _enterBlendFrameCount: 4
     _exitBlendFrameCount: 12
   - _beatType: 8
     _clip: {fileID: 1827226128182048838, guid: a12ddb03c6d69194b8927c7f2ce0b83e, type: 3}
-    _enterBlendFrameCount: 1
+    _enterBlendFrameCount: 4
     _exitBlendFrameCount: 12

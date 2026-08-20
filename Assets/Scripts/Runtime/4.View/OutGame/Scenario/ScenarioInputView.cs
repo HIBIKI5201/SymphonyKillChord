@@ -37,10 +37,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
 
-            if (isActiveAndEnabled)
-            {
-                Subscribe();
-            }
+            Subscribe();
         }
 
         private void LateUpdate()
@@ -56,11 +53,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 _requestHideUI = false;
                 _scenarioUIHideView?.HideUI();
             }
-        }
-
-        private void OnEnable()
-        {
-            Subscribe();
         }
 
         private void OnDisable()

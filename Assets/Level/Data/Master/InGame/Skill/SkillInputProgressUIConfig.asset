@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.SkillInputProgressUIConfig
   _settings:
   - _beatType: 1
-    _normalColor: {r: 0.9578371, g: 0, b: 1, a: 1}
-    _activeColor: {r: 1, g: 1, b: 1, a: 1}
+    _normalColor: {r: 0.9578371, g: 0, b: 1, a: 0}
+    _activeColor: {r: 1, g: 1, b: 1, a: 0}
     _icon: {fileID: 0}
   - _beatType: 2
     _normalColor: {r: 0, g: 0.11887145, b: 1, a: 1}

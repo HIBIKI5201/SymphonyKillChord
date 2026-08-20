@@ -100,7 +100,7 @@ namespace KillChord.Editor.SourceDataProvider
                 return false;
             }
 
-            Dictionary<int, NodeInfo> nodeMap = new();
+            Dictionary<ScriptableObject, NodeInfo> nodeMap = new();
             for (int i = 0; i < stageAssets.arraySize; i++)
             {
                 if (stageAssets.GetArrayElementAtIndex(i).objectReferenceValue
@@ -111,14 +111,7 @@ namespace KillChord.Editor.SourceDataProvider
 
                 NodeInfo node = CreateNode(stageAsset, i);
                 nodes.Add(node);
-
-                SerializedProperty stageIdProperty = new SerializedObject(stageAsset)
-                    .FindProperty(STAGE_ID_PROPERTY_NAME)
-                    ?.FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME);
-                if (stageIdProperty != null)
-                {
-                    nodeMap[stageIdProperty.intValue] = node;
-                }
+                nodeMap[stageAsset] = node;
             }
 
             for (int i = 0; i < bindAssets.arraySize; i++)
@@ -130,15 +123,15 @@ namespace KillChord.Editor.SourceDataProvider
                 }
 
                 SerializedObject serializedBind = new(bindAsset);
-                SerializedProperty fromStageIdProperty = serializedBind.FindProperty(FROM_STAGE_PROPERTY_NAME)
-                    ?.FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME);
-                SerializedProperty toStageIdProperty = serializedBind.FindProperty(TO_STAGE_PROPERTY_NAME)
-                    ?.FindPropertyRelative(DATA_ID_HASH_PROPERTY_NAME);
+                ScriptableObject fromStage = serializedBind.FindProperty(FROM_STAGE_PROPERTY_NAME)
+                    ?.objectReferenceValue as ScriptableObject;
+                ScriptableObject toStage = serializedBind.FindProperty(TO_STAGE_PROPERTY_NAME)
+                    ?.objectReferenceValue as ScriptableObject;
                 SerializedProperty advanceMode = serializedBind.FindProperty(ADVANCE_MODE_PROPERTY_NAME);
-                if (fromStageIdProperty == null
-                    || toStageIdProperty == null
-                    || !nodeMap.TryGetValue(fromStageIdProperty.intValue, out NodeInfo fromNode)
-                    || !nodeMap.TryGetValue(toStageIdProperty.intValue, out NodeInfo toNode))
+                if (fromStage == null
+                    || toStage == null
+                    || !nodeMap.TryGetValue(fromStage, out NodeInfo fromNode)
+                    || !nodeMap.TryGetValue(toStage, out NodeInfo toNode))
                 {
                     continue;
                 }
@@ -405,10 +398,8 @@ namespace KillChord.Editor.SourceDataProvider
         private const string STAGE_ASSETS_PROPERTY_NAME = "_stageAssets";
         private const string BIND_ASSETS_PROPERTY_NAME = "_bindAssets";
         private const string STAGE_NAME_PROPERTY_NAME = "_stageName";
-        private const string STAGE_ID_PROPERTY_NAME = "_stageId";
-        private const string FROM_STAGE_PROPERTY_NAME = "_fromStageId";
-        private const string TO_STAGE_PROPERTY_NAME = "_toStageId";
-        private const string DATA_ID_HASH_PROPERTY_NAME = "_hashId";
+        private const string FROM_STAGE_PROPERTY_NAME = "_fromStage";
+        private const string TO_STAGE_PROPERTY_NAME = "_toStage";
         private const string ADVANCE_MODE_PROPERTY_NAME = "_advanceMode";
 
         private static readonly Color GRAPH_BACKGROUND_COLOR = new(0.14f, 0.14f, 0.16f, 1f);

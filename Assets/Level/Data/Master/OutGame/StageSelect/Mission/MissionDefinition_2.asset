@@ -13,18 +13,14 @@ MonoBehaviour:
   m_Name: MissionDefinition_2
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.MissionDefinitionAsset
   _plannerMemo: 
-  _missionId:
-    _id: Test
-    _hashId: 418143992
+  _missionId: Test
   _displayName: 
   _mainMissionText: "\u3059\u3079\u3066\u306E\u8D64\u3044\u5175\u58EB\u3092\u6BB2\u6EC5\u3059\u308B"
   _defeatTips:
   - "\u5371\u967A\u306A\u653B\u6483\u306F\u8DDD\u96E2\u3092\u53D6\u3063\u3066\u56DE\u907F\u3057\u3088\u3046"
   - "\u30B9\u30AD\u30EB\u306E\u6539\u9020\u3092\u3057\u3066\u307F\u3088\u3046\uFF01"
-  _clearConditionSteps:
-  - _condition:
-      rid: 4420578705146118
-    _guideMessageText: 
+  _clearCondition:
+    rid: 4420335376793716
   _failCondition:
     rid: 8885031662707802242
   _evaluationConditions:
@@ -33,26 +29,24 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 4420578705146118
+    - rid: 4420335376793716
       type: {class: AndClearConditionGroupAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _inspectorSummary: "\u3059\u3079\u3066\u6E80\u305F\u3059\u30AF\u30EA\u30A2\u6761\u4EF6\r\n-
           ElapsedTimeClearConditionAsset\r\n- EnemyKillCountClearConditionAsset\r\n"
         _childConditionAssets:
-        - rid: 4420578705146119
-        - rid: 4420578705146120
-    - rid: 4420578705146119
+        - rid: 4420335376793718
+        - rid: 4420335376793719
+    - rid: 4420335376793718
       type: {class: ElapsedTimeClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "10\u79D2\u751F\u5B58\u3059\u308B\u6761\u4EF6"
-        _requiredElapsedTime: 10
-    - rid: 4420578705146120
+        _inspectorSummary: "2\u79D2\u751F\u5B58\u3059\u308B\u6761\u4EF6"
+        _requiredElapsedTime: 2
+    - rid: 4420335376793719
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:1910175038)\u30921\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
-        _enemyMissionKeyId:
-          _id: boss_research
-          _hashId: 1910175038
+        _inspectorSummary: "Boss\u30921\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _enemyMissionKeyAsset: {fileID: 11400000, guid: 5f7d0445e780f7d4388f8a3fa59e25be, type: 2}
         _requiredKillCount: 1
     - rid: 8885031662707802230
       type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}

@@ -3,6 +3,8 @@ using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Title
@@ -35,50 +37,73 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///    指定された画面 ID の View を表示状態にします。
+        ///     指定された画面 ID の View を表示します。
         /// </summary>
         /// <param name="screenId"></param>
-        public void Show(ScreenId screenId)
+        /// <param name="token"></param>
+        /// <param name="targetSceneName"></param>
+        /// <returns></returns>
+        public async Task Show(ScreenId screenId, CancellationToken token, string targetSceneName = null)
         {
             if (!_views.TryGetValue(screenId, out var view))
             {
                 Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
                 return;
             }
-            view.Show();
+            await view.Show(token);
         }
 
         /// <summary>
-        ///     指定された画面 ID の View を非表示状態にします。
+        ///    指定された画面 ID の View を非表示にします。
         /// </summary>
         /// <param name="screenId"></param>
-        public void Hide(ScreenId screenId)
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public async Task Hide(ScreenId screenId, CancellationToken token)
         {
             if (!_views.TryGetValue(screenId, out var view))
             {
                 Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
                 return;
             }
-            view.Hide();
+            await view.Hide(token);
         }
 
         /// <summary>
-        ///   すべての View を非表示状態にします。
+        ///    指定された画面 ID の View を即座に表示します。
         /// </summary>
-        public void HideAll()
+        /// <param name="screenId"></param>
+        /// <param name="targetSceneName"></param>
+        public void ShowImmediately(ScreenId screenId, string targetSceneName = null)
         {
-            foreach (IScreenView view in _views.Values)
+            if (!_views.TryGetValue(screenId, out var view))
             {
-                view.Hide();
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
             }
+            view.ShowImmediately();
         }
 
         /// <summary>
-        ///     すべての View をフェードなしで即座に非表示状態にします。
+        ///     指定された画面 ID の View を即座に非表示にします。
+        /// </summary>
+        /// <param name="screenId"></param>
+        public void HideImmediately(ScreenId screenId)
+        {
+            if (!_views.TryGetValue(screenId, out var view))
+            {
+                Debug.LogWarning($"ScreenId {screenId} はレジストリに登録されていません。");
+                return;
+            }
+            view.HideImmediately();
+        }
+
+        /// <summary>
+        ///   すべての View を即座に非表示にします。
         /// </summary>
         public void HideAllImmediately()
         {
-            foreach (ScreenViewBase view in _views.Values)
+            foreach (IScreenView view in _views.Values)
             {
                 view.HideImmediately();
             }

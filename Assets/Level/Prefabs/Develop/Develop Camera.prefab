@@ -59,25 +59,5 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6368359331200307922, guid: f834f2394e5f06c4699f8087b7d489ca, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: -8017211913914367043}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f834f2394e5f06c4699f8087b7d489ca, type: 3}
---- !u!1 &7174448236225650049 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6368359331200307922, guid: f834f2394e5f06c4699f8087b7d489ca, type: 3}
-  m_PrefabInstance: {fileID: 4319013317496885075}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &-8017211913914367043
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7174448236225650049}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 993e1cfd21ad0a14f9a0005bda81cecb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.DestroyOnAwake

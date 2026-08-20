@@ -20,7 +20,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -119,9 +119,6 @@ Material:
     - _EnvironmentReflections: 1
     - _FadeAlpha: 1
     - _FadeOn: 0
-    - _FakeShadowDepthBias: 0.01
-    - _FakeShadowDistance: 0.1
-    - _FakeShadowOn: 0
     - _FresnelBackLight: 3
     - _FresnelBackRimLight: 0.3
     - _FresnelFrontRimLight: 1.2
@@ -134,8 +131,8 @@ Material:
     - _NormalMapIntensity: 2
     - _OcclusionStrength: 1
     - _OutlineWidth: 0.0005
-    - _OutlineWidthLit: 0.001
-    - _OutlineWidthShadow: 0.002
+    - _OutlineWidthLit: 0.0005
+    - _OutlineWidthShadow: 0.001
     - _PBROn: 0
     - _Parallax: 0.005
     - _PerspectiveRemovalRadius: 0.2
@@ -159,9 +156,7 @@ Material:
     - _StencilComp: 0
     - _StencilFail: 0
     - _StencilPass: 0
-    - _StencilReadMask: 1
     - _StencilRef: 1
-    - _StencilWriteMask: 1
     - _Surface: 0
     - _WorkflowMode: 1
     - _XRMotionVectorsPass: 1
@@ -174,9 +169,8 @@ Material:
     - _ColorMiddle: {r: 0.28431374, g: 0.28431374, b: 0.3, a: 1}
     - _ColorShadow: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FaceUp: {r: 0.0022517145, g: 0.99976754, b: 0.021457046, a: 0}
-    - _FakeShadowColor: {r: 0.6, g: 0.54999995, b: 0.6, a: 1}
-    - _Head: {r: 2.2472775, g: 1.2653241, b: -1.5610399, a: 0}
+    - _FaceUp: {r: -0.00000011920929, g: 0.9999999, b: -0.000000059604645, a: 0}
+    - _Head: {r: -0.00000000270408, g: 1.2650561, b: 0.57714033, a: 0}
     - _OutLineColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _SSSColor: {r: 1, g: 0.39999998, b: 0.29999998, a: 1}

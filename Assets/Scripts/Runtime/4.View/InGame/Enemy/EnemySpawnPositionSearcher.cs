@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
@@ -28,95 +27,31 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///     敵の生成位置をランダムで１つ選定する。
         /// </summary>
-        /// <param name="candidateSpawnPointHashes"> 候補とするスポーンポイントIDです。null/空の場合は全スポーンポイントが対象です。 </param>
         /// <returns> 使用する生成位置です。 </returns>
-        public async ValueTask<SpawnPositionPair> GetRandomSpawnPositionAsync(
-            IReadOnlyList<int> candidateSpawnPointHashes = null)
+        public async ValueTask<SpawnPositionPair> GetRandomSpawnPositionAsync()
         {
-            SpawnPositionPair[] candidates = ResolveCandidates(candidateSpawnPointHashes);
-
             int loopCnt = 0;
             while (loopCnt < _maxSearchLoop)
             {
-                ShuffulePositionPairs(candidates);
-                for (int i = 0; i < candidates.Length; i++)
+                ShuffulePositionPairs();
+                for (int i = 0; i < _positionPairs.Length; i++)
                 {
-                    if ((!candidates[i].IsInUse) && !IsPositionNearPlayer(candidates[i]))
+                    if ((!_positionPairs[i].IsInUse) && !IsPositionNearPlayer(_positionPairs[i]))
                     {
-                        return candidates[i];
+                        return _positionPairs[i];
                     }
                 }
                 // 使える生成位置がない場合、一定時間待って再探索する
                 await Task.Delay(_searchDelay);
                 loopCnt++;
             }
-            // 一定回数探索しても生成位置が見つからない場合、候補内かつ距離条件を満たす既定位置に限り使用する
-            if (IsUsableFallback(candidates))
+            // 一定回数探索しても生成位置が見つからない場合、明示された既定位置を使う
+            Debug.LogWarning("[EnemySpawnPositionSearcher] 予期せぬ原因により、敵生成位置取得が失敗しました。初期位置で敵を生成します。");
+            if (_defaultPositionPair != null)
             {
-                Debug.LogWarning(
-                    "[EnemySpawnPositionSearcher] 敵生成位置取得が失敗したため、既定位置で敵を生成します。");
                 return _defaultPositionPair;
             }
-
             throw new Exception("[EnemySpawnPositionSearcher] 使用可能な敵生成位置が見つかりませんでした。");
-        }
-
-        /// <summary>
-        ///     既定位置がフォールバックとして使用できるか判定する。
-        /// </summary>
-        /// <param name="candidates"> 探索対象の生成位置配列です。 </param>
-        /// <returns> 候補内かつプレイヤーとの距離条件を満たす場合はtrue。 </returns>
-        private bool IsUsableFallback(SpawnPositionPair[] candidates)
-        {
-            if (_defaultPositionPair == null)
-            {
-                return false;
-            }
-
-            // 候補外の既定位置を使うとステップごとの出現位置制御を破るため、候補内に限定する。
-            if (Array.IndexOf(candidates, _defaultPositionPair) < 0)
-            {
-                return false;
-            }
-
-            // 通常探索で見つからなかった場合は、使用中でも最後の手段として既定位置を許容する。
-            return !IsPositionNearPlayer(_defaultPositionPair);
-        }
-
-        /// <summary>
-        ///     候補スポーンポイントIDから探索対象の配列を解決する。
-        /// </summary>
-        /// <param name="candidateSpawnPointHashes"> 候補とするスポーンポイントIDです。 </param>
-        /// <returns> 探索対象の生成位置配列（呼び出しごとの独立コピー）です。 </returns>
-        private SpawnPositionPair[] ResolveCandidates(IReadOnlyList<int> candidateSpawnPointHashes)
-        {
-            if (candidateSpawnPointHashes == null || candidateSpawnPointHashes.Count == 0)
-            {
-                return (SpawnPositionPair[])_positionPairs.Clone();
-            }
-
-            List<SpawnPositionPair> filtered = new(candidateSpawnPointHashes.Count);
-            for (int i = 0; i < _positionPairs.Length; i++)
-            {
-                for (int j = 0; j < candidateSpawnPointHashes.Count; j++)
-                {
-                    if (_positionPairs[i].SpawnPointId.Id == candidateSpawnPointHashes[j])
-                    {
-                        filtered.Add(_positionPairs[i]);
-                        break;
-                    }
-                }
-            }
-
-            if (filtered.Count == 0)
-            {
-                // 全スポーンポイントへ広げるとステップごとの出現位置制御を破るため、設定エラーとして失敗させる。
-                throw new Exception(
-                    "[EnemySpawnPositionSearcher] 指定された候補スポーンポイントがシーン内に1件も見つかりませんでした。"
-                        + $" 指定ID: {string.Join(", ", candidateSpawnPointHashes)}");
-            }
-
-            return filtered.ToArray();
         }
         
         [Header("性能調整")]
@@ -137,13 +72,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///     生成位置の配列をシャッフルする。
         /// </summary>
-        /// <param name="positionPairs"> シャッフル対象の配列です。 </param>
-        private void ShuffulePositionPairs(SpawnPositionPair[] positionPairs)
+        private void ShuffulePositionPairs()
         {
-            for (int i = positionPairs.Length - 1; i > 0; i--)
+            for (int i = _positionPairs.Length - 1; i > 0; i--)
             {
                 int index = UnityEngine.Random.Range(0, i + 1);
-                (positionPairs[i], positionPairs[index]) = (positionPairs[index], positionPairs[i]);
+                (_positionPairs[i], _positionPairs[index]) = (_positionPairs[index], _positionPairs[i]);
             }
         }
 

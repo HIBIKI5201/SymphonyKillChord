@@ -21,10 +21,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <summary>
         ///     ミッションを選択します。
         /// </summary>
-        /// <param name="missionId">ミッションID。</param>
-        public void Select(MissionId missionId)
+        /// <param name="missionDefinition">ミッション定義情報。</param>
+        public void Select(MissionDefinition missionDefinition)
         {
-            _selectedMissionState.SelectMission(missionId);
+            _selectedMissionState.SelectMission(missionDefinition);
         }
 
         /// <summary> 選択されたミッションの状態。 </summary>

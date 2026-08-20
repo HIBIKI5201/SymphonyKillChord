@@ -6,20 +6,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     /// </summary>
     public readonly ref struct PlayerStatusDTO
     {
-        public PlayerStatusDTO(
-            float playerHealth,
-            float playerAttack,
-            float criticalChance,
-            float criticalDamage)
+        public PlayerStatusDTO(float playerHealth, float playerAttack, float criticalChance)
         {
             PlayerHealth = playerHealth;
             PlayerAttack = playerAttack;
             CriticalChance = criticalChance;
-            CriticalDamage = criticalDamage;
         }
         public readonly float PlayerHealth;
         public readonly float PlayerAttack;
         public readonly float CriticalChance;
-        public readonly float CriticalDamage;
     }
 }

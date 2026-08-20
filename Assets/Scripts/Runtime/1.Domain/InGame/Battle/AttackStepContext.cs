@@ -12,18 +12,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <param name="attackDefinition"></param>
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
-        /// <param name="isCriticalForced"> クリティカルヒットが強制されているかどうか </param>
-        /// <param name="criticalDamageMultiplierOverride"> この攻撃特有のクリティカルダメージ倍率のオーバーライド </param>
-        /// <param name="applyWeaponDamageMultiplier"> 武器のダメージ倍率を適用するかどうか </param>
-        public AttackStepContext(
-            AttackDefinition attackDefinition,
-            IAttacker attacker, IDefender defender,
-            bool isJustHit = false,
-            Damage baseDamage = default,
-            bool isOutOfRange = false,
-            bool isCriticalForced = false,
-            float? criticalDamageMultiplierOverride = null,
-            bool applyWeaponDamageMultiplier = true)
+        public AttackStepContext(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender, bool isJustHit = false, Damage baseDamage = default)
         {
             _attackDefinition = attackDefinition;
             _baseDamage = baseDamage;
@@ -32,10 +21,6 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _attacker = attacker;
             _defender = defender;
             _isJustHit = isJustHit;
-            _isOutOfRange = isOutOfRange;
-            _isCriticalForced = isCriticalForced;
-            _criticalDamageMultiplierOverride = criticalDamageMultiplierOverride;
-            _applyWeaponDamageMultiplier = applyWeaponDamageMultiplier;
         }
 
         /// <summary>
@@ -54,10 +39,6 @@ namespace KillChord.Runtime.Domain.InGame.Battle
             _defender = attackStepContext._defender;
             _isJustHit = attackStepContext._isJustHit;
             _baseDamage = attackStepContext._baseDamage;
-            _isOutOfRange = attackStepContext._isOutOfRange;
-            _isCriticalForced = attackStepContext._isCriticalForced;
-            _criticalDamageMultiplierOverride = attackStepContext._criticalDamageMultiplierOverride;
-            _applyWeaponDamageMultiplier = attackStepContext._applyWeaponDamageMultiplier;
         }
 
         /// <summary> 攻撃定義を取得する。 </summary>
@@ -76,22 +57,9 @@ namespace KillChord.Runtime.Domain.InGame.Battle
 
         /// <summary> 防御者を取得する。 </summary>
         public IDefender Defender => _defender;
-
+        
         /// <summary> リズムゲームのジャストタイミングで攻撃がヒットしたかを取得する。</summary>
         public bool IsJustHit => _isJustHit;
-
-        /// <summary> 攻撃対象が射程外にいるかを取得する。 </summary>
-        public bool IsOutOfRange => _isOutOfRange;
-
-        /// <summary> クリティカルヒットが強制されているかを取得する。 </summary>
-        public bool IsCriticalForced => _isCriticalForced;
-
-        /// <summary> この攻撃特有のクリティカルダメージ倍率のオーバーライドを取得する。 </summary>
-        public float? CriticalDamageMultiplierOverride => _criticalDamageMultiplierOverride;
-
-        /// <summary> 武器のダメージ倍率を適用するかを取得する。 </summary>
-        public bool ApplyWeaponDamageMultiplier => _applyWeaponDamageMultiplier;
-
         private readonly AttackDefinition _attackDefinition;
         private readonly Damage _damage;
         private readonly Damage _baseDamage;
@@ -99,9 +67,5 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         private readonly IAttacker _attacker;
         private readonly IDefender _defender;
         private readonly bool _isJustHit;
-        private readonly bool _isOutOfRange;
-        private readonly bool _isCriticalForced;
-        private readonly float? _criticalDamageMultiplierOverride;
-        private readonly bool _applyWeaponDamageMultiplier;
     }
 }

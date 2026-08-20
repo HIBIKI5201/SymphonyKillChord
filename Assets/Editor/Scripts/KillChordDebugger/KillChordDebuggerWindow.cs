@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using KillChord.Editor.Utility;
-using SymphonyFrameWork.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -20,7 +19,6 @@ namespace KillChord.Editor.Debugger
 
         private const string SAVE_DATA_PANEL_KEY = "savedata";
 
-        /// <summary> KillChordデバッガーを開きます。 </summary>
         [MenuItem(EditorWindowPathConst.KILL_CHORD_DEBUGGER_PATH)]
         private static void Open()
         {
@@ -29,11 +27,8 @@ namespace KillChord.Editor.Debugger
             window.minSize = new Vector2(480, 360);
         }
 
-        /// <summary> デバッガーのUIを構築します。 </summary>
         private void CreateGUI()
         {
-            _saveDataView?.Dispose();
-            _saveDataView = null;
             rootVisualElement.Clear();
             _panels.Clear();
 
@@ -54,9 +49,9 @@ namespace KillChord.Editor.Debugger
             VisualElement content = rootVisualElement.Q<VisualElement>("kcd-content");
             Button saveDataNavButton = rootVisualElement.Q<Button>("kcd-nav-savedata");
 
-            _saveDataView = new SaveDataWindow();
-            content.Add(_saveDataView);
-            _panels[SAVE_DATA_PANEL_KEY] = _saveDataView;
+            _saveDataView = new SaveDataDebugView();
+            content.Add(_saveDataView.Root);
+            _panels[SAVE_DATA_PANEL_KEY] = _saveDataView.Root;
 
             saveDataNavButton?.RegisterCallback<ClickEvent>(_ => ShowPanel(SAVE_DATA_PANEL_KEY, saveDataNavButton));
 
@@ -80,14 +75,7 @@ namespace KillChord.Editor.Debugger
                 button.EnableInClassList("kcd-nav__button--active", button == activeNavButton));
         }
 
-        private SaveDataWindow _saveDataView;
+        private SaveDataDebugView _saveDataView;
         private readonly Dictionary<string, VisualElement> _panels = new();
-
-        /// <summary> ウィンドウ無効化時にセーブデータパネルを破棄します。 </summary>
-        private void OnDisable()
-        {
-            _saveDataView?.Dispose();
-            _saveDataView = null;
-        }
     }
 }

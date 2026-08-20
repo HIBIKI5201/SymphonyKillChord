@@ -10,8 +10,6 @@ namespace KillChord.Runtime.View
     {
         /// <summary> 現在の移動速度ベクトルです。 </summary>
         public Vector2 Velocity { get; private set; }
-        /// <summary>  現在、アニメーションの予約状態かどうかを示す値です。 </summary>
-        public bool IsReserving { get; private set; }
 
         /// <summary>
         ///     移動速度ベクトルを更新する。
@@ -20,14 +18,6 @@ namespace KillChord.Runtime.View
         public void SetVelocity(Vector2 velocity)
         {
             Velocity = velocity;
-        }
-        /// <summary>
-        ///    アニメーションの予約状態を更新する。
-        /// </summary>
-        /// <param name="reserving"></param>
-        public void SetReserving(bool reserving)
-        {
-            IsReserving = reserving;
         }
     }
 }

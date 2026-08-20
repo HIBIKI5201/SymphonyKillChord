@@ -1,4 +1,3 @@
-using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Mission;
 using System;
 
@@ -18,9 +17,9 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="reward"> ステージの報酬情報。 </param>
         /// <param name="targetSceneName"> ステージのターゲットシーン名。 </param>
         /// <param name="battleSceneName"> バトルパートのシーン名。 </param>
-        /// <param name="missionId"> ミッションID。 </param>
+        /// <param name="missionDefinition"> ミッション定義。 </param>
         /// <param name="isTutorial"> チュートリアルステージの場合はtrue。 </param>
-        /// <param name="enemyWaveDefinitionId"> 敵Wave定義ID。 </param>
+        /// <param name="enemyWaveDefinitionAssetKey"> 敵Wave定義のAddressablesキー。 </param>
         public BattleStageDefinition(
             StageId stageId,
             string stageName,
@@ -28,9 +27,9 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             StageReward reward,
             string targetSceneName,
             string battleSceneName,
-            MissionId missionId,
+            MissionDefinition missionDefinition,
             bool isTutorial,
-            EnemyWaveDefinitionId enemyWaveDefinitionId)
+            string enemyWaveDefinitionAssetKey)
             : base(stageId, stageName, flavorText, reward, targetSceneName)
         {
             if (string.IsNullOrWhiteSpace(battleSceneName))
@@ -38,38 +37,38 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
                 throw new ArgumentException("Battle scene name must not be empty.", nameof(battleSceneName));
             }
 
-            if (missionId.Value == 0)
+            if (missionDefinition == null)
             {
-                throw new ArgumentOutOfRangeException(nameof(missionId), "Mission ID must not be zero.");
+                throw new ArgumentNullException(nameof(missionDefinition));
             }
 
-            if (enemyWaveDefinitionId.Value == 0)
+            if (string.IsNullOrWhiteSpace(enemyWaveDefinitionAssetKey))
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(enemyWaveDefinitionId),
-                    "Enemy wave definition ID must not be zero.");
+                throw new ArgumentException(
+                    "Enemy wave definition asset key must not be empty.",
+                    nameof(enemyWaveDefinitionAssetKey));
             }
 
             _battleSceneName = battleSceneName;
-            _missionId = missionId;
+            _missionDefinition = missionDefinition;
             _isTutorial = isTutorial;
-            _enemyWaveDefinitionId = enemyWaveDefinitionId;
+            _enemyWaveDefinitionAssetKey = enemyWaveDefinitionAssetKey;
         }
 
         /// <summary> ステージの種類。 </summary>
         public override StageType StageType => StageType.Battle;
         /// <summary> バトルパートのシーン名。 </summary>
         public string BattleSceneName => _battleSceneName;
-        /// <summary> ステージのミッションID。 </summary>
-        public MissionId MissionId => _missionId;
+        /// <summary> ステージのミッション定義。 </summary>
+        public MissionDefinition MissionDefinition => _missionDefinition;
         /// <summary> チュートリアルステージの場合はtrue。 </summary>
         public override bool IsTutorial => _isTutorial;
-        /// <summary> 敵Wave定義ID。 </summary>
-        public EnemyWaveDefinitionId EnemyWaveDefinitionId => _enemyWaveDefinitionId;
+        /// <summary> 敵Wave定義のAddressablesキー。 </summary>
+        public string EnemyWaveDefinitionAssetKey => _enemyWaveDefinitionAssetKey;
 
         private readonly string _battleSceneName;
-        private readonly MissionId _missionId;
+        private readonly MissionDefinition _missionDefinition;
         private readonly bool _isTutorial;
-        private readonly EnemyWaveDefinitionId _enemyWaveDefinitionId;
+        private readonly string _enemyWaveDefinitionAssetKey;
     }
 }

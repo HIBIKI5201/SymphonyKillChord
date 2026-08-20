@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.InGame.UI;
-using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.View.InGame.UI;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -9,29 +8,28 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     ///     InGameのHUDを初期化するクラス。
     /// </summary>
-    public sealed class InGameHudInitializer : InGameInitializationModuleBase
+    public class InGameHudInitializer : MonoBehaviour
     {
-        public override string ModuleName => nameof(InGameHudInitializer);
-
-        public override int Order => 495;
         /// <summary>
         ///     HPバーHUDの初期化。
         /// </summary>
-        /// <param name="healthHudViewModel">バインドするHP HUDのViewModel</param>
+        /// <param name="entity">表示対象のEntity</param>
+        /// <param name="healthHudView">表示対象のHP HUD View</param>
         public void InitializePlayerHpHud(IHealthHudViewModel healthHudViewModel)
         {
-            _playerHealthTextView.Bind(healthHudViewModel);
+            _playerHealthHudView.Bind(healthHudViewModel);
         }
-        public override bool Build()
+
+        [SerializeField] private HealthHudView _playerHealthHudView;
+
+        private void Awake()
         {
-            ServiceLocator.RegisterInstance<InGameHudInitializer>(this, LocateTypeEnum.Locator);
-            return true;
+            ServiceLocator.RegisterInstance<InGameHudInitializer>(this, LocateType.Locator);
         }
-        public override void Shutdown()
+
+        private void OnDestroy()
         {
             ServiceLocator.UnregisterInstance<InGameHudInitializer>(this);
         }
-
-        [SerializeField, Tooltip("プレイヤーのHPテキスト表示のView")] private HealthTextView _playerHealthTextView;
     }
 }

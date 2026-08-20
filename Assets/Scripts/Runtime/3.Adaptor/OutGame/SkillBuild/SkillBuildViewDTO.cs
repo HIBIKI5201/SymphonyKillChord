@@ -12,24 +12,16 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// </summary>
         /// <param name="slots"> スロット一覧。 </param>
         /// <param name="skills"> 入手済みスキル表示一覧。 </param>
-        /// <param name="ownedPoints"> 所持ポイント。 </param>
-        public SkillBuildViewDTO(
-            ReadOnlySpan<SkillBuildSlotData> slots,
-            ReadOnlySpan<SkillViewData> skills,
-            int ownedPoints)
+        public SkillBuildViewDTO(ReadOnlySpan<SkillBuildSlotDTO> slots, ReadOnlySpan<(int skillId, string label)> skills)
         {
             Slots = slots;
             Skills = skills;
-            OwnedPoints = ownedPoints;
         }
 
         /// <summary> スロット一覧。 </summary>
-        public ReadOnlySpan<SkillBuildSlotData> Slots { get; }
+        public ReadOnlySpan<SkillBuildSlotDTO> Slots { get; }
 
         /// <summary> 入手済みスキル表示一覧。 </summary>
-        public ReadOnlySpan<SkillViewData> Skills { get; }
-
-        /// <summary> 所持ポイント。 </summary>
-        public int OwnedPoints { get; }
+        public ReadOnlySpan<(int skillId, string label)> Skills { get; }
     }
 }

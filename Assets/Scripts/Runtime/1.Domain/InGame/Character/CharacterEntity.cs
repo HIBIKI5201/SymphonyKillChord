@@ -1,5 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Skill;
+
 using System;
 
 namespace KillChord.Runtime.Domain.InGame.Character
@@ -7,7 +9,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     キャラクターの基本的な情報を保持するクラス。
     /// </summary>
-    public class CharacterEntity : IAttacker, IDefender, IBarrierHolder
+    public class CharacterEntity : IAttacker, IDefender
     {
         /// <summary>
         ///     コンストラクタ。
@@ -16,14 +18,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <param name="attackInterval"></param>
         /// <param name="health"></param>
         /// <param name="combatSpec"></param>
-        /// <param name="criticalChance"> 会心率。武器ではなくキャラクターが持つ。 </param>
         public CharacterEntity(CharacterName name,
             HealthEntity health,
             CharacterCombatSpec combatSpec,
             AttackInterval attackInterval,
             Damage baseDamage,
-            IStatusEffectSystem statusEffectSystem,
-            CriticalChance criticalChance = default
+            IBuffSystem buffSystem
         )
         {
             if (health is null)
@@ -36,8 +36,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _combatSpec = combatSpec;
             _attackIntervalEntity = new AttackIntervalEntity(attackInterval);
             _baseDamage = baseDamage;
-            _statusEffectSystem = statusEffectSystem ?? throw new ArgumentNullException(nameof(statusEffectSystem));
-            _criticalChance = criticalChance;
+            _buffSystem = buffSystem;
         }
 
         /// <summary>
@@ -48,6 +47,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
         /// <summary> キャラクター死亡時に発火するイベント。 </summary>
         public event Action<CharacterEntity> OnDied;
+        /// <summary> キャラクターが対象にダメージを与えた時に発火するイベント。 </summary>
+        public event Action<Damage> OnSetDamage;
 
         /// <summary> 回避成功時に発火するイベント。 </summary>
         public event Action<Damage> OnDamageAvoided;
@@ -77,55 +78,46 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public AttackIntervalEntity AttackIntervalEntity => _attackIntervalEntity;
         /// <summary> キャラクターの基本攻撃のダメージを取得する。 </summary>
         public Damage BaseDamage => _baseDamage;
-
-        /// <summary> 状態効果システムを取得する。 </summary>
-        public IStatusEffectSystem StatusEffectSystem => _statusEffectSystem;
-
-        /// <summary> キャラクターの会心率を取得する。 </summary>
-        public CriticalChance CriticalChance => _criticalChance;
-
-        /// </inheritdoc />
-        public bool CanTakeDamage => !IsDead && !IsInvincible;
-
-        /// <inheritdoc />
-        public float CurrentBarrier => _barrierEntity.CurrentValue;
+        public IBuffSystem BuffSystem => _buffSystem;
 
         public void ChangeBaseDamage(Damage newDamage)
         {
             _baseDamage = newDamage;
         }
-
-        /// </inheritdoc> 
-        public Damage TakeDamage(Damage damage)
+        public void SetDamage(Damage damage)
+        {
+            OnSetDamage?.Invoke(damage);
+        }
+        /// <summary>
+        ///     ダメージを受ける処理。
+        ///     HealthEntityのChangeHealthを呼び出す。
+        /// </summary>
+        /// <param name="damage"></param>
+        public void TakeDamage(Damage damage)
         {
             if (IsDead)
             {
-                return default;
+                return;
             }
 
             if (_isInvincible)
             {
                 OnDamageAvoided?.Invoke(damage);
-                return default;
+                return;
             }
 
             float prevHealthValue = CurrentHealth.Value;
             float nextHealthValue = Math.Max(0, CurrentHealth.Value - damage.Value);
-
             Health nextHealth = new Health(nextHealthValue);
             _health.ChangeHealth(nextHealth);
-
-            float amountChanged = CurrentHealth.Value - prevHealthValue;
-            OnHealthChanged?.Invoke(CurrentHealth.Value, MaxHealth.Value, amountChanged);
+            float amountChanged = _health.CurrentHealth.Value - prevHealthValue;
+            OnHealthChanged?.Invoke(_health.CurrentHealth.Value, _health.MaxHealth.Value, amountChanged);
 
             if (CurrentHealth.Value <= 0f && !_isDeadNotified)
             {
                 _isDeadNotified = true;
                 OnDied?.Invoke(this);
             }
-
-            // 実際のダメージ量を返す（回避や無敵状態でダメージが減少する場合があるため）
-            return new Damage(prevHealthValue - CurrentHealth.Value);
         }
 
         /// <summary>
@@ -139,42 +131,6 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _health.ChangeHealth(nextHealth);
             float amountChanged = _health.CurrentHealth.Value - prevHealthValue;
             OnHealthChanged?.Invoke(_health.CurrentHealth.Value, _health.MaxHealth.Value, amountChanged);
-        }
-
-        /// <summary>
-        ///     HPを消費する処理。死亡しないように最低HPを1に設定する。
-        ///     バリア等を考慮せず、直接HPを消費する。
-        /// </summary>
-        /// <param name="healthCost"> 消費するHPの量 </param>
-        /// <returns> 実際に消費されたHPの量 s</returns>
-        public Health ConsumeHealth(Health healthCost)
-        {
-            if (IsDead || healthCost.Value <= 0f)
-            {
-                return default;
-            }
-
-            // 最低HPを1に設定することで、キャラクターが死亡しないようにする
-            const float minimumHealth = 1f;
-
-            // 消費可能なHPを計算する
-            float maxConsumableHealth = Math.Max(CurrentHealth.Value - minimumHealth, 0f);
-            // 実際に消費するHPを計算する
-            float consumableHealth = Math.Min(maxConsumableHealth, healthCost.Value);
-
-            if (consumableHealth <= 0f)
-            {
-                return default;
-            }
-
-            float prevHealthValue = CurrentHealth.Value;
-            Health nextHealth = new Health(CurrentHealth.Value - consumableHealth);
-
-            _health.ChangeHealth(nextHealth);
-            float amountChanged = _health.CurrentHealth.Value - prevHealthValue;
-            OnHealthChanged?.Invoke(CurrentHealth.Value, MaxHealth.Value, amountChanged);
-
-            return new Health(consumableHealth);
         }
 
         /// <summary>
@@ -192,35 +148,10 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public void Reset()
         {
             _health.ChangeHealth(new Health(_health.MaxHealth.Value));
-
-            _statusEffectSystem.Clear();
-            _barrierEntity.Clear();
-
             _isDeadNotified = false;
             _isInvincible = false;
         }
-
-        /// <inheritdoc />
-        public void AddBarrier(float amount)
-        {
-            _barrierEntity.Add(amount);
-        }
-
-        /// <inheritdoc />
-        public Damage AbsorbBarrier(Damage damage, out Damage absorbedDamage)
-        {
-            return _barrierEntity.Absorb(
-                damage,
-                out absorbedDamage);
-        }
-
-        /// <inheritdoc />
-        public void ClearBarrier()
-        {
-            _barrierEntity.Clear();
-        }
-
-        private readonly BarrierEntity _barrierEntity = new();
+        private IBuffSystem _buffSystem;
         private CharacterName _name;
         private HealthEntity _health;
         private CharacterCombatSpec _combatSpec;
@@ -228,7 +159,5 @@ namespace KillChord.Runtime.Domain.InGame.Character
         private bool _isDeadNotified;
         private bool _isInvincible;
         private Damage _baseDamage;
-        private IStatusEffectSystem _statusEffectSystem;
-        private CriticalChance _criticalChance;
     }
 }

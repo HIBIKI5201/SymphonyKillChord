@@ -46,7 +46,7 @@ namespace KillChord.Runtime.Domain.InGame.Music
         ///     それ以外の個数は [原曲, S1, S2, …] とし、常に原曲へ戻れる並びを保証する。
         /// </summary>
         /// <param name="originalLabel"> 原曲のセレクターラベル。 </param>
-        /// <param name="skillLabels"> 装備スキルのセレクターラベル列（ID昇順に整列済み）。 </param>
+        /// <param name="skillLabels"> 装備スキルのセレクターラベル列（スロット順）。 </param>
         /// <returns> 構築したシーケンス。スキルラベルが無い場合は空のシーケンス。 </returns>
         public static BgmSelectorSequence Build(string originalLabel, IReadOnlyList<string> skillLabels)
         {

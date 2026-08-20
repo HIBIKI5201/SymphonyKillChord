@@ -22,5 +22,5 @@ MonoBehaviour:
       type: {class: CriticalStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
       data: 
     - rid: 3714306694461522030
-      type: {class: WeaponDamageStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
+      type: {class: BeatStep, ns: KillChord.Runtime.Application.InGame.Battle, asm: KillChord.Application}
       data: 

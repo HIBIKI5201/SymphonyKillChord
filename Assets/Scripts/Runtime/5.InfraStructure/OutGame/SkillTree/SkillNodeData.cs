@@ -1,7 +1,7 @@
+﻿using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.InGame.Skill;
-using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
-using SymphonyFrameWork.Attribute;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
@@ -27,11 +27,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         public VideoClip PreviewVideoClip;
 
         [Header("ノードを解放した時の報酬")]
-        [SerializeReference, SubclassSelector, Tooltip("ノードを解放した時に獲得するステータスボーナス効果。")]
-        private IStatusBonusEffect[] _statusBonusEffects;
+        //[SerializeReference, SubclassSelector] private IParameterUpgradeEffect[] _nodeUnlockEffets;
         [SerializeField, Tooltip("ノードを解放した時に解放されるスキル")]
-        [SourceDataCollection("Skill")]
-        private DataID[] _unlockSkills;
+        private SkillTemplateAsset[] _unlockSkills;
 
         /// <summary>
         ///     保持するデータよりEntityを生成する。
@@ -43,20 +41,15 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
             List<SkillId> skillIds = new List<SkillId>(unlockSkills);
             for (var i = 0; i < unlockSkills; i++)
             {
-                if (_unlockSkills[i].Id == 0)
+                if (_unlockSkills[i] == null)
                 {
                     continue;
                 }
 
-                skillIds.Add(new SkillId(_unlockSkills[i].Id));
+                skillIds.Add(_unlockSkills[i].Id);
             }
 
-            return new SkillNodeEntity(
-                NodeId,
-                UnlockCost,
-                SkillDetail,
-                skillIds.ToArray(),
-                _statusBonusEffects);
+            return new SkillNodeEntity(NodeId, UnlockCost, SkillDetail, skillIds.ToArray());
         }
 
         /// <summary>

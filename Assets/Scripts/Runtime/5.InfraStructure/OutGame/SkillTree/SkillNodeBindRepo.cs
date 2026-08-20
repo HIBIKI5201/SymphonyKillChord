@@ -1,6 +1,5 @@
 using KillChord.Runtime.Domain.OutGame.SkillTree;
-using KillChord.Runtime.InfraStructure.Repository;
-using System.Collections.Generic;
+using KillChord.Runtime.Utility.Identity;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
@@ -9,7 +8,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     ///     スキルノードに対応するデータを纏めたリポジトリー。
     /// </summary>
     [CreateAssetMenu(fileName = "SkillNodeBindRepo", menuName = "SymphonyDev/SkillTree/SkillNodeBindRepo")]
-    public class SkillNodeBindRepo : ScriptableObjectRepositoryBase<SkillNodeId, SkillNodeBindData, SkillNodeBindData>
+    public class SkillNodeBindRepo : ScriptableObject
     {
         public SkillNodeBindData[] SkillNodeBinds;
 
@@ -20,7 +19,24 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         /// <returns></returns>
         public SkillNodeBindData FindById(SkillNodeId id)
         {
-            return TryFind(id, out SkillNodeBindData bind) ? bind : null;
+            if(SkillNodeBinds == null || SkillNodeBinds.Length <= 0)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < SkillNodeBinds.Length; i++)
+            {
+                var bind = SkillNodeBinds[i];
+                if (bind == null || bind.SkillNodeData == null)
+                {
+                    continue;
+                }
+                if (bind.SkillNodeData.NodeId == id)
+                {
+                    return bind;
+                }
+            }
+            return null;
         }
 
         public SkillNodeBindData FindByName(string name)
@@ -43,15 +59,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
                 }
             }
             return null;
-        }
-
-        protected override IReadOnlyList<SkillNodeBindData> GetEntries() => SkillNodeBinds;
-
-        protected override bool TryBuild(SkillNodeBindData entry, out SkillNodeId id, out SkillNodeBindData value)
-        {
-            value = entry;
-            id = entry.SkillNodeId;
-            return true;
         }
     }
 }

@@ -19,9 +19,6 @@ namespace KillChord.Runtime.Composition.InGame.Target
         /// <summary> ターゲットEntityレジストリです。 </summary>
         public TargetEntityRegistry TargetEntityRegistry { get; private set; }
 
-        /// <summary> 扇形範囲クエリです。 </summary>
-        public TargetAreaQuery TargetAreaQuery { get; private set; }
-
         /// <summary>
         ///     ターゲットシステムを初期化する。
         /// </summary>
@@ -30,7 +27,6 @@ namespace KillChord.Runtime.Composition.InGame.Target
             TargetEntityRegistry = new TargetEntityRegistry();
             TargetingSystemViewModel = new TargetingSystem();
             TargetSystemController = new TargetSystemController(TargetingSystemViewModel, TargetEntityRegistry);
-            TargetAreaQuery = new TargetAreaQuery(TargetingSystemViewModel, TargetEntityRegistry);
             ServiceLocator.RegisterInstance(TargetingSystemViewModel);
             ServiceLocator.RegisterInstance(TargetSystemController);
             _isRegistered = true;
@@ -51,7 +47,6 @@ namespace KillChord.Runtime.Composition.InGame.Target
             TargetSystemController = null;
             TargetingSystemViewModel = null;
             TargetEntityRegistry = null;
-            TargetAreaQuery = null;
             _isRegistered = false;
         }
 

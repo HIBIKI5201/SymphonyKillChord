@@ -1,8 +1,9 @@
+﻿using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Enemy;
@@ -127,7 +128,7 @@ namespace DevelopProducts.Boss
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
             _targetable = new TransformTargetable(_enemyEntity.Id, transform);

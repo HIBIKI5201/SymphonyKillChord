@@ -38,11 +38,14 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> フリールック時の回転速度。 </summary>
         public float FollowRotationSpeed => _followRotationSpeed;
 
-        /// <summary> 非ロックオン時、移動入力の x 成分でカメラの yaw を回転する速度。 </summary>
+        /// <summary> 非ロックオン時の移動方向追従速度。 </summary>
         public float MoveFollowRotationSpeed => _moveFollowRotationSpeed;
 
-        /// <summary> 視点入力中に移動入力による yaw 回転を無効にするしきい値。 </summary>
+        /// <summary> 移動方向追従を抑制する視点入力しきい値。 </summary>
         public float MoveFollowIdleLookThreshold => _moveFollowIdleLookThreshold;
+
+        /// <summary> 移動方向追従で無視する微小な角度差。 </summary>
+        public float MoveFollowAngleDeadZone => _moveFollowAngleDeadZone;
 
         /// <summary> ロックオン注視点の補間比率。 </summary>
         public float LockOnLookAtRatio => _lockOnLookAtRatio;
@@ -105,10 +108,13 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField] private float _lockOnAngleMargin = 10f;
         [Tooltip("非ロックオン時のカメラボーンの回転速度")]
         [SerializeField] private float _followRotationSpeed = 1.5f;
-        [Tooltip("非ロックオン時、移動入力の x 成分でカメラの yaw を回転する速度")]
+        [Tooltip("非ロックオン時に移動方向へ追従する回転速度")]
         [SerializeField] private float _moveFollowRotationSpeed = 90f;
-        [Tooltip("視点入力中に移動入力による yaw 回転を無効にするしきい値")]
+        [Tooltip("この値以上の視点入力がある間は移動方向追従を無効にするしきい値")]
         [SerializeField] private float _moveFollowIdleLookThreshold = 0.01f;
+        [Min(0f)]
+        [Tooltip("プレイヤーとカメラの相互追従による振動を防ぐ角度差のデッドゾーン")]
+        [SerializeField] private float _moveFollowAngleDeadZone = 1f;
 
         [Header("Camera Rotation")]
         [Tooltip("ロックオン時のカメラが向けるプレイヤー位置とターゲット位置の補間比率")]

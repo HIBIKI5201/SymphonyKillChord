@@ -1,5 +1,3 @@
-using KillChord.Runtime.Adaptor.InGame.Sequence;
-
 namespace KillChord.Runtime.Composition.InGame.Sequence
 {
     /// <summary>
@@ -9,7 +7,5 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
     {
         /// <summary> インゲームシーケンス演出です。 </summary>
         public InGameSequenceDirector SequenceDirector { get; set; }
-        /// <summary> ポーズ機能のコントローラーです。</summary>
-        public BattlePauseController BattlePauseController { get; set; }
     }
 }

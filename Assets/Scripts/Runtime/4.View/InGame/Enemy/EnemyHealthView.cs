@@ -47,8 +47,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             DamageNumberView view = Instantiate(_damageNumberPrefab, _damageNumberSpawnPoint);
-            MoveTowardCamera(view.transform);
-            view.Play(dto);
+            view.Play(dto.Damage);
         }
 
         private void OnDestroy()
@@ -59,33 +58,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("HP HUDのView")] private HealthHudView _healthHudView;
         [SerializeField, Tooltip("ダメージ数値の生成位置")] private Transform _damageNumberSpawnPoint;
         [SerializeField, Tooltip("ダメージ数値のPrefab")] private DamageNumberView _damageNumberPrefab;
-        [SerializeField, Min(0f), Tooltip("ダメージ数値をカメラ側へ寄せる距離。")]
-        private float _damageNumberCameraOffset = 0.2f;
         private IHealthHudPresenter _presenter;
-
-        /// <summary>
-        ///     ダメージ数値をカメラ方向へ移動する。
-        /// </summary>
-        /// <param name="target">移動するダメージ数値のTransform。</param>
-        private void MoveTowardCamera(Transform target)
-        {
-            UnityEngine.Camera targetCamera = UnityEngine.Camera.main;
-
-            if (targetCamera == null)
-            {
-                return;
-            }
-
-            Vector3 toCamera =
-                targetCamera.transform.position - target.position;
-
-            if (toCamera.sqrMagnitude <= Mathf.Epsilon)
-            {
-                return;
-            }
-
-            target.position +=
-                toCamera.normalized * _damageNumberCameraOffset;
-        }
     }
 }

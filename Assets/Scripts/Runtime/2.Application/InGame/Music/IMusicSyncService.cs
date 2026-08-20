@@ -53,8 +53,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <param name="timing"> 実行タイミング。 </param>
         /// <param name="action"> 実行アクション。 </param>
         /// <param name="ct"> キャンセルトークン。 </param>
-        /// <returns> 実行される音源再生時間（秒）。 </returns>
-        double RegisterAction(
+        void RegisterAction(
             double accurateBeat,
             ExecuteRequestTiming timing,
             Action action,

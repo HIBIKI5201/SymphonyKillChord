@@ -7,7 +7,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
     /// </summary>
     public sealed class SkillTreeScreenView : ScreenViewBase
     {
-
         /// <summary> View を初期化します。 </summary>
         public SkillTreeScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)

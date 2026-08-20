@@ -72,15 +72,9 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly Action<VisualElement, VisualElement> _onDropAction;
 
         private const string DRAGGABLE_CLASS_NAME = "draggable";
-        private const string DRAG_COMPLETED_CLASS_NAME = "drag-just-completed";
         private const string SKILL_ELEMENT_LIST_CLASS_NAME = "skill-element-list";
         private const string SKILL_BUILD_ROOT_NAME = "SkillBuildRoot";
-        private const float DRAG_START_THRESHOLD = 10f;
-
-        private bool _isPointerDown;
         private bool _isDragging;
-        private bool _isReparentingForDrag;
-        private int _activePointerId = -1;
 
         // ドラッグ開始時のパネル・ワールド座標を保持するフィールド。
         private Vector2 _pointerStartPanel;
@@ -105,16 +99,26 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             { return; }
 
 
-            _isPointerDown = true;
-            _isDragging = false;
-            _activePointerId = evt.pointerId;
+            // ドラッグ中はスキル要素を絶対位置に設定して、自由に移動できるようにする。
+            target.style.position = Position.Absolute;
+
+            _isDragging = true;
+
+            // ドラッグ開始時のパネル座標とスキル要素のワールド座標、親要素を保存する。
             _pointerStartPanel = (Vector2)evt.position;
             _elementStartWorld = target.worldBound.position;
             _startParent = target.parent;
-            target.CapturePointer(evt.pointerId);
 
-            // 親の ScrollView にポインター操作を渡すと、ドラッグ開始前に
-            // スクロール操作として扱われるため、スキル要素側で処理を完結させる。
+            // ドラッグ中にスキル要素を最前面に表示するために、
+            // スキルビルド画面のルート要素に一時的に追加する。
+            if (_skillBuildScreen != null)
+            {
+                _skillBuildScreen.Add(target);
+            }
+            target.BringToFront();
+
+
+            target.CapturePointer(evt.pointerId);
             evt.StopPropagation();
         }
 
@@ -125,30 +129,14 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="evt"></param>
         private void OnPointerMove(PointerMoveEvent evt)
         {
-            // ドラッグ開始前のポインタ移動イベントは無視する。
-            if (!_isPointerDown ||
-                evt.pointerId != _activePointerId)
+            if (!_isDragging || !target.HasPointerCapture(evt.pointerId))
             { return; }
-
-            // ドラッグ中にポインターキャプチャを保持していない場合は、ドラッグ操作を中断する。
-            if (_isDragging && !target.HasPointerCapture(evt.pointerId))
-            { return; }
-
-            Vector2 pointerCurrent = (Vector2)evt.position;
-            Vector2 pointerDelta = pointerCurrent - _pointerStartPanel;
-            if (!_isDragging)
-            {
-                if (pointerDelta.sqrMagnitude < DRAG_START_THRESHOLD * DRAG_START_THRESHOLD)
-                {
-                    evt.StopPropagation();
-                    return;
-                }
-
-                StartDragging(evt.pointerId);
-            }
 
             VisualElement parent = target.parent;
             if (parent == null) { return; }
+
+            Vector2 pointerCurrent = (Vector2)evt.position;
+            Vector2 pointerDelta = pointerCurrent - _pointerStartPanel;
 
             Vector2 newWorld = _elementStartWorld + pointerDelta;
 
@@ -166,33 +154,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="evt"></param>
         private void OnPointerUp(PointerUpEvent evt)
         {
-            if (!_isPointerDown ||
-                evt.pointerId != _activePointerId)
+            if (!_isDragging || !target.HasPointerCapture(evt.pointerId))
             { return; }
 
-            if (!_isDragging)
-            {
-                _isPointerDown = false;
-                _activePointerId = -1;
+            target.ReleasePointer(evt.pointerId);
 
-                if (target.HasPointerCapture(evt.pointerId))
-                {
-                    target.ReleasePointer(evt.pointerId);
-                }
-
-                return;
-            }
-
-            _isPointerDown = false;
-            _activePointerId = -1;
-
-            if (target.HasPointerCapture(evt.pointerId))
-            {
-                target.ReleasePointer(evt.pointerId);
-            }
-
-            MarkDragCompleted();
-            CompleteDrag();
             evt.StopPropagation();
         }
 
@@ -201,46 +167,6 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         /// <param name="evt"></param>
         private void OnPointerCaptureOut(PointerCaptureOutEvent evt)
-        {
-            if (!_isPointerDown ||
-                evt.pointerId != _activePointerId)
-            { return; }
-
-            // ドラッグ用ルートへの親変更で発生したキャプチャ解除は操作終了として扱わない。
-            // 再取得後に遅れて通知された場合も、現在キャプチャ中なら同様に無視する。
-            if (_isReparentingForDrag ||
-                target.HasPointerCapture(evt.pointerId))
-            { return; }
-
-            bool wasDragging = _isDragging;
-            _isPointerDown = false;
-            _activePointerId = -1;
-
-            if (!wasDragging)
-            {
-                return;
-            }
-
-            // OS や別要素にキャプチャを奪われた場合にも、最後に確認できた位置で
-            // ドロップを完了し、画面上に絶対配置の要素を残さない。
-            MarkDragCompleted();
-            CompleteDrag();
-        }
-
-        /// <summary>
-        ///     ドラッグ直後のクリックを選択操作として扱わないための印を付ける。
-        /// </summary>
-        private void MarkDragCompleted()
-        {
-            target.AddToClassList(DRAG_COMPLETED_CLASS_NAME);
-            target.schedule.Execute(() =>
-                target.RemoveFromClassList(DRAG_COMPLETED_CLASS_NAME));
-        }
-
-        /// <summary>
-        ///     現在位置に応じてドロップ、リストへの移動、または開始位置への復帰を行う。
-        /// </summary>
-        private void CompleteDrag()
         {
             if (!_isDragging) { return; }
 
@@ -257,22 +183,25 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
                 // ドラッグしたスキル要素をスロットへ移動する。
                 MoveSkillToSlot(target, targetElement);
+                _isDragging = false;
                 _onDropAction?.Invoke(target, targetElement);
             }
             else if (TryFindSkillList(requireOverlap: true, out targetElement))
             {
                 // ドロップ先が入手済みスキルリストの場合は、スキル要素を入手済みスキルリストへ移動する。
                 MoveSkillToList(target, targetElement);
+                _isDragging = false;
                 _onDropAction?.Invoke(target, targetElement);
             }
             else
             {
                 // ドロップ先スロットが見つからない場合は、ドラッグ開始位置に戻す。
                 SnapBackToStart();
+                _isDragging = false;
                 _onDropAction?.Invoke(target, null);
+                return;
             }
 
-            _isDragging = false;
         }
 
         /// <summary>
@@ -298,45 +227,6 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             if (_skillBuildScreen == null)
             {
                 Debug.LogError($"SkillElementDragAndDropManipulator: スキルビルド画面のルート要素 '{SKILL_BUILD_ROOT_NAME}' が見つかりません。ドラッグ&ドロップ操作が正しく機能しない可能性があります。");
-            }
-        }
-
-        /// <summary>
-        ///     移動閾値を超えた時にドラッグ状態へ移行する。
-        /// </summary>
-        private void StartDragging(int pointerId)
-        {
-            _isDragging = true;
-            target.style.position = Position.Absolute;
-
-            // キャプチャ中の要素を別の親へ移すと PointerCaptureOutEvent が発生するため、
-            // 親変更による通知を無視し、移動後にキャプチャを再取得する。
-            if (_skillBuildScreen != null)
-            {
-                _isReparentingForDrag = true;
-                try
-                {
-                    _skillBuildScreen.Add(target);
-                    Vector2 localPosition = _skillBuildScreen.WorldToLocal(_elementStartWorld);
-                    target.style.left = localPosition.x;
-                    target.style.top = localPosition.y;
-
-                    if (!target.HasPointerCapture(pointerId))
-                    {
-                        target.CapturePointer(pointerId);
-                    }
-                }
-                finally
-                {
-                    _isReparentingForDrag = false;
-                }
-            }
-
-            target.BringToFront();
-
-            if (!target.HasPointerCapture(pointerId))
-            {
-                target.CapturePointer(pointerId);
             }
         }
 
