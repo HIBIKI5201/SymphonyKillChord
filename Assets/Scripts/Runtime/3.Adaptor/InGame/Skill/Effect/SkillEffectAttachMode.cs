@@ -22,5 +22,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill.Effect
 
         /// <summary> プレイヤーと対象を結ぶ線上へ配置します。ビームや軌跡に使用します。 </summary>
         BetweenPlayerAndTarget = 5,
+
+        /// <summary> プレイヤーが構えている武器へ追従します。武器が無い場合はプレイヤーへ追従します。 </summary>
+        WeaponFollow = 6,
     }
 }

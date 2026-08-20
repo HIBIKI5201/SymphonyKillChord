@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Skill;
@@ -286,10 +287,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             // 実行するスキルとプールの対象がずれないよう、解決済みの装備スキルで作り直す。
             skillEffectContainer.Prewarm(skillIds);
 
+            // 武器へエフェクトを取り付けられるよう、プレイヤーの武器表示Viewを供給元にする。
+            ISkillEffectWeaponSource weaponSource = FindAnyObjectByType<PlayerAttackWeaponView>();
             SkillEffectContextFactory contextFactory = new SkillEffectContextFactory(
                 playerTransform,
                 targetSystemViewModel,
-                playbackSpeed);
+                playbackSpeed,
+                weaponSource);
             for (int i = 0; i < skillVisuals.Count; i++)
             {
                 skillVisuals[i]?.Initialize(skillEffectContainer.SkillEffectPlayer, contextFactory);
