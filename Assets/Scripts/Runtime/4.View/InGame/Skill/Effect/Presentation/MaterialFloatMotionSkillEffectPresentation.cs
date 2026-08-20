@@ -10,8 +10,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     /// </summary>
     public sealed class MaterialFloatMotionSkillEffectPresentation : MotionSkillEffectPresentationBase
     {
-        [SerializeField, Tooltip("対象のRendererです。未設定時は自身から取得します。")]
-        private Renderer _renderer;
+        [SerializeField, Tooltip("対象のRenderer一覧です。未設定時は自身の子階層から取得します。")]
+        private Renderer[] _renderers;
 
         [SerializeField, Tooltip("補間するマテリアルのfloatプロパティ名です。")]
         private string _propertyName = DEFAULT_PROPERTY_NAME;
@@ -77,9 +77,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// </summary>
         private void EnsureRenderer()
         {
-            if (_renderer == null)
+            if (_renderers == null || _renderers.Length == 0)
             {
-                _renderer = GetComponent<Renderer>();
+                _renderers = GetComponentsInChildren<Renderer>(true);
             }
 
             if (_propertyId == 0 && !string.IsNullOrWhiteSpace(_propertyName))
@@ -94,16 +94,25 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         /// <param name="value"> 適用する値です。 </param>
         private void ApplyValue(float value)
         {
-            if (_renderer == null)
+            if (_renderers == null)
             {
                 return;
             }
 
             // マテリアルの複製を避けるため、MaterialPropertyBlock経由で書き換える。
             _propertyBlock ??= new MaterialPropertyBlock();
-            _renderer.GetPropertyBlock(_propertyBlock);
-            _propertyBlock.SetFloat(_propertyId, value);
-            _renderer.SetPropertyBlock(_propertyBlock);
+            for (int i = 0; i < _renderers.Length; i++)
+            {
+                Renderer targetRenderer = _renderers[i];
+                if (targetRenderer == null)
+                {
+                    continue;
+                }
+
+                targetRenderer.GetPropertyBlock(_propertyBlock);
+                _propertyBlock.SetFloat(_propertyId, value);
+                targetRenderer.SetPropertyBlock(_propertyBlock);
+            }
         }
 
         private MaterialPropertyBlock _propertyBlock;
