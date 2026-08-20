@@ -475,7 +475,7 @@ MonoBehaviour:
     _followsRotation: 0
     _presentations:
     - {fileID: 3972743649150556942}
-    - {fileID: 777625102917364265}
+    - {fileID: 6951503579571874395}
     - {fileID: 3745442669906145756}
     - {fileID: 7515647354726347963}
     - {fileID: 1828549519363862205}
@@ -1716,7 +1716,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.4
+      scalar: 1
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -2299,7 +2299,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 140
+      scalar: 280
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -2797,7 +2797,7 @@ ParticleSystem:
         m_NumAlphaKeys: 2
   UVModule:
     serializedVersion: 2
-    enabled: 0
+    enabled: 1
     mode: 0
     timeMode: 0
     fps: 30
@@ -2908,8 +2908,8 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     speedRange: {x: 0, y: 1}
-    tilesX: 1
-    tilesY: 1
+    tilesX: 5
+    tilesY: 5
     animationType: 0
     rowIndex: 0
     cycles: 1
@@ -7292,31 +7292,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8117285142329486268, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.57346225
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 8117285142329486268, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.45004237
+      value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 8117285142329486268, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.47513646
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8117285142329486268, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.49279642
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8117285142329486268, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 2.744
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: 8117285142329486268, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -81.745
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8117285142329486268, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -83.722
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -7340,6 +7340,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7919298601048255703, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3745442669906145756}
+    - targetCorrespondingSourceObject: {fileID: 7919298601048255703, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6951503579571874395}
   m_SourcePrefab: {fileID: 100100000, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
 --- !u!1 &442821519950898912 stripped
 GameObject:
@@ -7445,6 +7448,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.Presentation.GameObjectSkillEffectPresentation
   _targetObject: {fileID: 5616783594282099309}
   _durationSeconds: 0.725
+--- !u!114 &6951503579571874395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 442821519950898912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7478cf30d85026b4785d53cf90b9da39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.SkillEffectMotionFunnel
+  _travelTarget: {fileID: 1973795005112918411}
 --- !u!23 &1611224398349242463 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 9051689621307808360, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
