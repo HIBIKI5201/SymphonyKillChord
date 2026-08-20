@@ -12,6 +12,7 @@ using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Skill.Effect;
 using KillChord.Runtime.Composition.InGame.UI;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
@@ -193,6 +194,17 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 skillCheckService,
                 skillUsecase));
             _skillController.OnSkillAnimationRequested += playerModuleContainer.PlayerView.PlaySkillAnimation;
+
+            // スキル発動中も、その拍に対応した武器を構えさせる。
+            _attackWeaponView = FindAnyObjectByType<PlayerAttackWeaponView>();
+            if (_attackWeaponView != null)
+            {
+                _skillController.OnSkillWeaponRequested += HandleSkillWeaponRequestedHandler;
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(SkillInitializer)}] {nameof(PlayerAttackWeaponView)} が見つからないため、スキル中の武器を表示できません。", this);
+            }
             _skillController.OnSkillVoiceRequested += playerModuleContainer.PlayerView.PlaySkillVoice;
             _boundPlayerView = playerModuleContainer.PlayerView;
             // 連撃の適用を毎フレーム進めるループを接続する。
@@ -228,6 +240,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// </summary>
         public override void Shutdown()
         {
+            if (_skillController != null && _attackWeaponView != null)
+            {
+                _skillController.OnSkillWeaponRequested -= HandleSkillWeaponRequestedHandler;
+            }
+
+            _attackWeaponView = null;
+
             if (_skillController != null && _boundPlayerView != null)
             {
                 _skillController.OnSkillAnimationRequested -= _boundPlayerView.PlaySkillAnimation;
@@ -252,6 +271,15 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             ServiceLocator.UnregisterInstance<SkillModuleContainer>();
             _moduleContainer = null;
             _isRegistered = false;
+        }
+
+        /// <summary>
+        ///     スキルで構える武器を表示します。
+        /// </summary>
+        /// <param name="beatType"> 構える武器を決めるBeatTypeです。 </param>
+        private void HandleSkillWeaponRequestedHandler(BeatType beatType)
+        {
+            _attackWeaponView.Play((int)beatType);
         }
 
         /// <summary>
@@ -552,6 +580,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private SkillInputProgressUIInitializer _skillInputProgressUIInitializer;
         private SkillCrosshairProgressUIInitializer _skillCrosshairProgressUIInitializer;
         private SkillListUIInitializer _skillListUIInitializer;
+        private PlayerAttackWeaponView _attackWeaponView;
         private SkillHitScheduler _skillHitScheduler;
         private SkillHitController _skillHitController;
         private SkillController _skillController;
