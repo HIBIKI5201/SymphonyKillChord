@@ -5,8 +5,8 @@ OcclusionCullingSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_OcclusionBakeSettings:
-    smallestOccluder: 5
-    smallestHole: 0.25
+    smallestOccluder: 1
+    smallestHole: 0.05
     backfaceThreshold: 100
   m_SceneGUID: 01b70db0be70fc14eb319daa11636ecb
   m_OcclusionCullingData: {fileID: 36300000, guid: 14a55dcc68f19fa46a98d818884a63e2, type: 2}
@@ -11613,6 +11613,49 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 1e7d4a5efd6d2a64baf21fa6ec49e67c, type: 3}
   m_PrefabInstance: {fileID: 1001962539}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1003885046
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1003885047}
+  - component: {fileID: 1003885048}
+  m_Layer: 0
+  m_Name: OcclusionCulling
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 2147483647
+  m_IsActive: 1
+--- !u!4 &1003885047
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1003885046}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1963956445}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!192 &1003885048
+OcclusionArea:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1003885046}
+  serializedVersion: 2
+  m_Size: {x: 73.99872, y: 31.94064, z: 55.302956}
+  m_Center: {x: -29.65761, y: 9.02968, z: -16.498512}
+  m_IsViewVolume: 1
 --- !u!1001 &1017905230
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14478,7 +14521,7 @@ Transform:
   - {fileID: 1406345821}
   - {fileID: 544814445}
   - {fileID: 741715725}
-  - {fileID: 2049387106}
+  - {fileID: 1003885047}
   - {fileID: 1040051875}
   - {fileID: 1676881198}
   m_Father: {fileID: 0}
@@ -14612,49 +14655,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1530974253}
   m_LocalEulerAnglesHint: {x: 0, y: -6.851, z: 0}
---- !u!1 &2049387105
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2049387106}
-  - component: {fileID: 2049387107}
-  m_Layer: 0
-  m_Name: OcclusionCulling
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
-  m_IsActive: 1
---- !u!4 &2049387106
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2049387105}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1963956445}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!192 &2049387107
-OcclusionArea:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2049387105}
-  serializedVersion: 2
-  m_Size: {x: 300, y: 50, z: 300}
-  m_Center: {x: 0, y: 0, z: 0}
-  m_IsViewVolume: 1
 --- !u!1001 &2052485569
 PrefabInstance:
   m_ObjectHideFlags: 0
