@@ -58,8 +58,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
         protected override MotionHandle CreateMotion(in SkillEffectContext context)
         {
             ApplyValue(_fromValue);
-            return LMotion.Create(_fromValue, _toValue, _durationSeconds)
-                .WithDelay(_delaySeconds)
+            float playbackSpeed = context.PlaybackSpeed;
+            return LMotion.Create(_fromValue, _toValue, _durationSeconds / playbackSpeed)
+                .WithDelay(_delaySeconds / playbackSpeed)
                 .WithEase(_ease)
                 .Bind(this, static (value, presentation) => presentation.ApplyValue(value));
         }

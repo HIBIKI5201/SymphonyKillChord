@@ -81,9 +81,12 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
                 _visualEffect.SendEvent(_playEventName);
             }
 
+            // BPMに応じて再生速度を合わせる。
+            _visualEffect.playRate = context.PlaybackSpeed;
+
             if (_fixedDurationSeconds > 0f)
             {
-                await Awaitable.WaitForSecondsAsync(_fixedDurationSeconds, cancellationToken);
+                await Awaitable.WaitForSecondsAsync(_fixedDurationSeconds / context.PlaybackSpeed, cancellationToken);
                 return;
             }
 

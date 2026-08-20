@@ -10,6 +10,16 @@ namespace KillChord.Runtime.Application.InGame.Battle
     public sealed class SkillHitScheduler
     {
         /// <summary>
+        ///     BPMに応じた再生速度倍率を設定する。
+        ///     演出と同じ倍率を適用し、ダメージのタイミングを揃える。
+        /// </summary>
+        /// <param name="playbackSpeed"> 再生速度倍率です。 </param>
+        public void SetPlaybackSpeed(float playbackSpeed)
+        {
+            _playbackSpeed = playbackSpeed > 0f ? playbackSpeed : 1f;
+        }
+
+        /// <summary>
         ///     連撃を予約する。
         /// </summary>
         /// <param name="hitCount"> 総ヒット数です。 </param>
@@ -23,7 +33,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 return;
             }
 
-            _pendingHits.Add(new PendingHit(hitCount, MathF.Max(0f, delaySeconds), MathF.Max(0f, intervalSeconds), onHit));
+            _pendingHits.Add(new PendingHit(
+                hitCount,
+                MathF.Max(0f, delaySeconds) / _playbackSpeed,
+                MathF.Max(0f, intervalSeconds) / _playbackSpeed,
+                onHit));
         }
 
         /// <summary>
@@ -59,6 +73,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
         }
 
         private readonly List<PendingHit> _pendingHits = new();
+        private float _playbackSpeed = 1f;
 
         /// <summary>
         ///     予約中の連撃1件分の状態を保持する構造体。

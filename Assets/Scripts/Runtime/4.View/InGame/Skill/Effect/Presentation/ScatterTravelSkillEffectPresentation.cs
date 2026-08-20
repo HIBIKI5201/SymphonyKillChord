@@ -82,8 +82,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
                 _trailRenderer.Clear();
             }
 
-            return LMotion.Create(startLocalPosition, endLocalPosition, _durationSeconds)
-                .WithDelay(_delaySeconds)
+            float playbackSpeed = context.PlaybackSpeed;
+            return LMotion.Create(startLocalPosition, endLocalPosition, _durationSeconds / playbackSpeed)
+                .WithDelay(_delaySeconds / playbackSpeed)
                 .WithEase(_ease)
                 .BindToLocalPosition(_travelTarget);
         }

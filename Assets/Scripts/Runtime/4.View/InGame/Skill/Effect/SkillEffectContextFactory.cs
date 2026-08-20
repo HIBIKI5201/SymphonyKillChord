@@ -15,10 +15,15 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// </summary>
         /// <param name="playerTransform"> プレイヤーのTransformです。 </param>
         /// <param name="targetSystemViewModel"> ターゲットシステムのViewModelです。 </param>
-        public SkillEffectContextFactory(Transform playerTransform, ITargetSystemViewModel targetSystemViewModel)
+        /// <param name="playbackSpeed"> BPMに応じた再生速度倍率です。 </param>
+        public SkillEffectContextFactory(
+            Transform playerTransform,
+            ITargetSystemViewModel targetSystemViewModel,
+            float playbackSpeed)
         {
             _playerTransform = playerTransform;
             _targetSystemViewModel = targetSystemViewModel;
+            _playbackSpeed = playbackSpeed;
         }
 
         /// <summary>
@@ -33,7 +38,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
                 _playerTransform,
                 targetTransform,
                 worldPosition,
-                ResolveDirection(worldPosition, hasTarget));
+                ResolveDirection(worldPosition, hasTarget),
+                playbackSpeed: _playbackSpeed);
         }
 
         /// <summary>
@@ -97,5 +103,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
         private readonly Transform _playerTransform;
         private readonly ITargetSystemViewModel _targetSystemViewModel;
+        private readonly float _playbackSpeed;
     }
 }

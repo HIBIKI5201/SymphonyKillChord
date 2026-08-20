@@ -15,13 +15,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill.Effect
         /// <param name="worldPosition"> ワールド設置座標、および対象未解決時のフォールバック座標です。 </param>
         /// <param name="direction"> エフェクトの向きです。ゼロベクトルの場合は既定の向きを使用します。 </param>
         /// <param name="scale"> エフェクトのスケール倍率です。 </param>
+        /// <param name="playbackSpeed"> BPMに応じた再生速度倍率です。 </param>
         public SkillEffectContext(
             Transform playerTransform,
             Transform targetTransform,
             Vector3 worldPosition,
             Vector3 direction,
-            float scale = DEFAULT_SCALE)
+            float scale = DEFAULT_SCALE,
+            float playbackSpeed = DEFAULT_PLAYBACK_SPEED)
         {
+            _playbackSpeed = playbackSpeed > 0f ? playbackSpeed : DEFAULT_PLAYBACK_SPEED;
             _playerTransform = playerTransform;
             _targetTransform = targetTransform;
             _worldPosition = worldPosition;
@@ -43,6 +46,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill.Effect
 
         /// <summary> エフェクトのスケール倍率です。 </summary>
         public float Scale => _scale;
+
+        /// <summary> BPMに応じた再生速度倍率です。 </summary>
+        public float PlaybackSpeed => _playbackSpeed;
 
         /// <summary> 対象が解決済みかどうかです。 </summary>
         public bool HasTarget => _targetTransform != null;
@@ -67,11 +73,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill.Effect
         }
 
         private const float DEFAULT_SCALE = 1f;
+        private const float DEFAULT_PLAYBACK_SPEED = 1f;
 
         private readonly Transform _playerTransform;
         private readonly Transform _targetTransform;
         private readonly Vector3 _worldPosition;
         private readonly Vector3 _direction;
         private readonly float _scale;
+        private readonly float _playbackSpeed;
     }
 }

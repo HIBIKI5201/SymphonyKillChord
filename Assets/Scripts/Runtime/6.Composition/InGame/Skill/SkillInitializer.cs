@@ -17,6 +17,7 @@ using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
+using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
@@ -160,6 +161,10 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             SkillAttackController skillAttackController = new SkillAttackController(playerModuleContainer.PlayerEntity, targetResolver);
             PendingAttackEffectService pendingAttackEffectService = new PendingAttackEffectService();
             _skillHitScheduler = new SkillHitScheduler();
+
+            // 演出とダメージの双方へ、BPMに応じた同じ再生速度倍率を適用する。
+            float playbackSpeed = MusicConstants.GetPlaybackSpeed(musicSyncContainer.MusicSyncState.Bpm);
+            _skillHitScheduler.SetPlaybackSpeed(playbackSpeed);
             SkillEffectExecutorResolver effectExecutorResolver = new SkillEffectExecutorResolver();
             SkillEffectExecutorFactory.RegisterDefaults(
                 effectExecutorResolver,
@@ -175,7 +180,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 skillVisuals,
                 ToSkillIds(equippedSkills),
                 playerModuleContainer.PlayerView.transform,
-                targetSystemContainer.TargetSystemViewModel);
+                targetSystemContainer.TargetSystemViewModel,
+                playbackSpeed);
 
             _skillController = new SkillController(musicSyncContainer.MusicSyncService);
             _skillController.Initialize(BuildSkillExecutionControllers(
@@ -254,11 +260,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <param name="skillIds"> 解決済みの装備スキルID一覧です。 </param>
         /// <param name="playerTransform"> プレイヤーのTransformです。 </param>
         /// <param name="targetSystemViewModel"> ターゲットシステムのViewModelです。 </param>
+        /// <param name="playbackSpeed"> BPMに応じた再生速度倍率です。 </param>
         private void InitializeSkillVisuals(
             IReadOnlyList<SkillView> skillVisuals,
             IReadOnlyList<int> skillIds,
             Transform playerTransform,
-            ITargetSystemViewModel targetSystemViewModel)
+            ITargetSystemViewModel targetSystemViewModel,
+            float playbackSpeed)
         {
             if (skillVisuals == null || skillVisuals.Count == 0)
             {
@@ -278,7 +286,10 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             // 実行するスキルとプールの対象がずれないよう、解決済みの装備スキルで作り直す。
             skillEffectContainer.Prewarm(skillIds);
 
-            SkillEffectContextFactory contextFactory = new SkillEffectContextFactory(playerTransform, targetSystemViewModel);
+            SkillEffectContextFactory contextFactory = new SkillEffectContextFactory(
+                playerTransform,
+                targetSystemViewModel,
+                playbackSpeed);
             for (int i = 0; i < skillVisuals.Count; i++)
             {
                 skillVisuals[i]?.Initialize(skillEffectContainer.SkillEffectPlayer, contextFactory);
