@@ -45,4 +45,4 @@ MonoBehaviour:
   _skillTargetingType: 2
   _statusEffectReapplyPolicy: 4
   _skillNormalAttackDamagePolicy: 1
-  _animationKey: Skill_Right
+  _animationKey: Skill_Left
