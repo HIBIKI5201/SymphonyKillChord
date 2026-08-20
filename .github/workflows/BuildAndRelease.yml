@@ -392,6 +392,65 @@ jobs:
 
 # ==================================================================================================
 
+      - name: AAPT2 override の設定
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+
+          Write-Host "::group::AAPT2 override の設定"
+
+          if (-not $env:UNITY_EXE_PATH) {
+            Write-Host "::error::UNITY_EXE_PATH が設定されていません。"
+            exit 1
+          }
+
+          if (-not (Test-Path $env:UNITY_EXE_PATH)) {
+            Write-Host "::error::UNITY_EXE_PATH が指すファイルが存在しません: $env:UNITY_EXE_PATH"
+            exit 1
+          }
+
+          # UNITY_EXE_PATH 例: C:\Program Files\Unity\Hub\Editor\2022.3.10f1\Editor\Unity.exe
+          # → Editor ディレクトリ配下の PlaybackEngines\AndroidPlayer\SDK を対象にする
+          $EditorDir = Split-Path $env:UNITY_EXE_PATH -Parent
+          $AndroidSdkRoot = Join-Path $EditorDir "Data\PlaybackEngines\AndroidPlayer\SDK"
+
+          if (-not (Test-Path $AndroidSdkRoot)) {
+            Write-Host "::error::Android SDK ディレクトリが見つかりません: $AndroidSdkRoot"
+            exit 1
+          }
+
+          $Aapt2 = Get-ChildItem $AndroidSdkRoot -Recurse -Filter "aapt2.exe" -ErrorAction SilentlyContinue |
+                    Select-Object -First 1
+
+          if (-not $Aapt2) {
+            Write-Host "::error::aapt2.exe が見つかりません: $AndroidSdkRoot"
+            exit 1
+          }
+
+          $GradleTemplatePath = Join-Path $env:GITHUB_WORKSPACE "Assets/Plugins/Android/gradleTemplate.properties"
+          if (-not (Test-Path $GradleTemplatePath)) {
+            Write-Host "::error::gradleTemplate.properties が見つかりません: $GradleTemplatePath"
+            exit 1
+          }
+
+          $NormalizedPath = $Aapt2.FullName -replace '\\', '/'
+          $OverrideLine = "android.aapt2FromMavenOverride=$NormalizedPath"
+
+          $Content = Get-Content -Path $GradleTemplatePath
+          if ($Content -match '^android\.aapt2FromMavenOverride=') {
+            $Content = $Content -replace '^android\.aapt2FromMavenOverride=.*$', $OverrideLine
+          } else {
+            $Content += $OverrideLine
+          }
+          Set-Content -Path $GradleTemplatePath -Value $Content
+
+          Write-Host "設定した aapt2 パス: $($Aapt2.FullName)"
+
+          Write-Host "::endgroup::"
+        shell: pwsh
+
+# ==================================================================================================
+
       - name: ビルド出力先の空確認とディスク残り容量の検証
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
