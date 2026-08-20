@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 
@@ -120,7 +121,38 @@ namespace KillChord.Runtime.Application.InGame.Battle
                     result,
                     attackType));
 
+            NotifySkillDamage(defender, result, attackType);
             return result;
+        }
+
+        /// <summary>
+        ///     スキルダメージを通知します。
+        /// </summary>
+        /// <param name="defender"> ダメージを受ける防御者です。 </param>
+        /// <param name="attackResult"> 攻撃結果です。 </param>
+        /// <param name="attackType"> 攻撃タイプです。 </param>
+        private static void NotifySkillDamage(
+            IDefender defender,
+            in AttackResult attackResult,
+            DamageAttackType attackType)
+        {
+            if (attackType != DamageAttackType.Skill &&
+                attackType != DamageAttackType.Infection)
+            {
+                return;
+            }
+
+            if (defender is not CharacterEntity character)
+            {
+                return;
+            }
+
+            EventBus<EOnTakeDamage>.Raise(
+                new EOnTakeDamage(
+                    attackResult.FinalDamage.Value,
+                    attackResult.IsCritical,
+                    character.Id,
+                    attackType));
         }
     }
 }
