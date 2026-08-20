@@ -169,6 +169,7 @@ MonoBehaviour:
   _targetHeightOffset: 1
   _delaySeconds: 0.98
   _visibleSeconds: 0.04
+  _penetrationDistance: 4
 --- !u!1 &156019625247414351
 GameObject:
   m_ObjectHideFlags: 0
@@ -876,6 +877,7 @@ MonoBehaviour:
   _targetHeightOffset: 1
   _delaySeconds: 1.04
   _visibleSeconds: 0.04
+  _penetrationDistance: 4
 --- !u!1 &5326971872458542963
 GameObject:
   m_ObjectHideFlags: 0
@@ -1045,6 +1047,7 @@ MonoBehaviour:
   _targetHeightOffset: 1
   _delaySeconds: 0.86
   _visibleSeconds: 0.04
+  _penetrationDistance: 4
 --- !u!1 &5616783594282099309
 GameObject:
   m_ObjectHideFlags: 0
@@ -1424,6 +1427,7 @@ MonoBehaviour:
   _targetHeightOffset: 1
   _delaySeconds: 0.92
   _visibleSeconds: 0.04
+  _penetrationDistance: 4
 --- !u!1 &6803237141714074009
 GameObject:
   m_ObjectHideFlags: 0
@@ -6871,7 +6875,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.Presentation.ScatterTravelSkillEffectPresentation
   _travelTarget: {fileID: 5098587454347733061}
   _trailRenderer: {fileID: 4945336688832337600}
-  _ringRadius: 1.6
+  _ringRadius: 3.1
   _ringHeight: 1
   _sectorCount: 4
   _sectorIndex: 2
@@ -7116,7 +7120,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.Presentation.ScatterTravelSkillEffectPresentation
   _travelTarget: {fileID: 2429863346342483821}
   _trailRenderer: {fileID: 7504756345567586259}
-  _ringRadius: 1.6
+  _ringRadius: 3.1
   _ringHeight: 1
   _sectorCount: 4
   _sectorIndex: 3
@@ -7356,7 +7360,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.Presentation.ScatterTravelSkillEffectPresentation
   _travelTarget: {fileID: 1973795005112918411}
   _trailRenderer: {fileID: 7984332425991607284}
-  _ringRadius: 1.6
+  _ringRadius: 3.1
   _ringHeight: 1
   _sectorCount: 4
   _sectorIndex: 0
@@ -7703,7 +7707,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Skill.Effect.Presentation.ScatterTravelSkillEffectPresentation
   _travelTarget: {fileID: 534887056571596421}
   _trailRenderer: {fileID: 5741073080898988700}
-  _ringRadius: 1.6
+  _ringRadius: 3.1
   _ringHeight: 1
   _sectorCount: 4
   _sectorIndex: 1
