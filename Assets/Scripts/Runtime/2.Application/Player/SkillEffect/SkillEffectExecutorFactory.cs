@@ -19,11 +19,13 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// <param name="effectService"> スキル用の保留中効果サービスです。 </param>
         /// <param name="rangeQuery"> スキル用の範囲判定クエリです。 </param>
         /// <param name="targetRadiusQuery"> スキル用の範囲半径判定クエリです。 </param>
+        /// <param name="hitScheduler"> 連撃を時間差で適用するスケジューラです。 </param>
         public static void RegisterDefaults(SkillEffectExecutorResolver resolver,
             IAttackController attackController,
             PendingAttackEffectService effectService,
             IPlayerTargetRangeQuery rangeQuery,
-            ITargetRadiusQuery targetRadiusQuery)
+            ITargetRadiusQuery targetRadiusQuery,
+            SkillHitScheduler hitScheduler)
         {
             resolver.Register(SkillEffectType.Skill00, new Skill_00());
             resolver.Register(SkillEffectType.Skill01, new Skill_01());
@@ -36,7 +38,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             resolver.Register(SkillEffectType.Skill08, new Skill_08(effectService, targetRadiusQuery));
             resolver.Register(SkillEffectType.Skill09, new Skill_09(rangeQuery));
             resolver.Register(SkillEffectType.Skill10, new Skill_10());
-            resolver.Register(SkillEffectType.Skill13, new Skill_13());
+            resolver.Register(SkillEffectType.Skill13, new Skill_13(hitScheduler));
         }
     }
 }
