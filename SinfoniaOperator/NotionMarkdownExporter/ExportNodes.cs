@@ -16,12 +16,18 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         /// <param name="stagingFilePath">取得直後のMarkdownを退避する一時ファイル。</param>
         /// <param name="filePath">保存先ファイル。</param>
         /// <param name="childDirectory">子要素の保存先。</param>
+        /// <param name="isUpdated">今回のエクスポートでページを更新するかどうか。</param>
+        /// <param name="pageReferences">ページ本文に含まれる子ページ参照。</param>
+        /// <param name="databaseReferences">ページ本文に含まれる子データベース参照。</param>
         internal PageExportNode(
             PageMetadata metadata,
             string propertiesMarkdown,
             string stagingFilePath,
             string filePath,
-            string childDirectory)
+            string childDirectory,
+            bool isUpdated,
+            IReadOnlyList<MarkdownReference> pageReferences,
+            IReadOnlyList<MarkdownReference> databaseReferences)
         {
             Id = metadata.Id;
             Title = metadata.Title;
@@ -31,6 +37,10 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             StagingFilePath = stagingFilePath;
             FilePath = filePath;
             ChildDirectory = childDirectory;
+            IsUpdated = isUpdated;
+            PageReferences = pageReferences;
+            DatabaseReferences = databaseReferences;
+            GeneratedFiles = new List<string>();
         }
 
         internal string Id { get; }
@@ -41,6 +51,10 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         internal string StagingFilePath { get; }
         internal string FilePath { get; }
         internal string ChildDirectory { get; }
+        internal bool IsUpdated { get; }
+        internal IReadOnlyList<MarkdownReference> PageReferences { get; }
+        internal IReadOnlyList<MarkdownReference> DatabaseReferences { get; }
+        internal List<string> GeneratedFiles { get; }
     }
 
     /// <summary>
@@ -101,18 +115,24 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         /// <param name="pageCount">ページ数。</param>
         /// <param name="databaseCount">データベース数。</param>
         /// <param name="assetCount">添付ファイル数。</param>
+        /// <param name="updatedPageCount">更新したページ数。</param>
+        /// <param name="skippedPageCount">更新を省略したページ数。</param>
         /// <param name="warningCount">警告数。</param>
         /// <param name="outputDirectory">出力先。</param>
         internal ExportSummary(
             int pageCount,
             int databaseCount,
             int assetCount,
+            int updatedPageCount,
+            int skippedPageCount,
             int warningCount,
             string outputDirectory)
         {
             PageCount = pageCount;
             DatabaseCount = databaseCount;
             AssetCount = assetCount;
+            UpdatedPageCount = updatedPageCount;
+            SkippedPageCount = skippedPageCount;
             WarningCount = warningCount;
             OutputDirectory = outputDirectory;
         }
@@ -120,6 +140,8 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         internal int PageCount { get; }
         internal int DatabaseCount { get; }
         internal int AssetCount { get; }
+        internal int UpdatedPageCount { get; }
+        internal int SkippedPageCount { get; }
         internal int WarningCount { get; }
         internal string OutputDirectory { get; }
     }

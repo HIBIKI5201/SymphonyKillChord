@@ -14,6 +14,7 @@ using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
+using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.Utility.Rendering;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Enemy;
@@ -83,7 +84,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
             EnemyWaveSpawnerState waveSpawnerState,
-            Action<EnemyLifeCycle> releaseCallback
+            Action<EnemyLifeCycle> releaseCallback,
+            EnemyType enemyType
             )
         {
             if (_view == null)
@@ -166,9 +168,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 spec.AttackRangeMax.Value,
                 GetAttackApproach);
 
-            _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
-            _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
-            _aiController.OnAttack += _raycastView.HideWarning;
+            if (enemyType == EnemyType.Infantry)
+            {
+                _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
+                _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
+                _aiController.OnAttack += _raycastView.HideWarning;
+            }
             _aiController.OnAttack += HandleEnemyAttackExecuted;
             _attackPositionSearchView.Initialize();
             if (_shellSpawner != null && shellPool != null)
@@ -555,11 +560,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
 
             await PlayDeathMaterialEffectAsync();
-
-            if (waitSeconds > 0f)
-            {
-                await Awaitable.WaitForSecondsAsync(waitSeconds, destroyCancellationToken);
-            }
         }
 
         /// <summary>
@@ -679,9 +679,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     敵死亡時に実行する処理。
         /// </summary>
-        /// <param name="_"></param>
-        private void HandleEnemyDied(CharacterEntity _)
+        /// <param name="diedEnemy"> 死亡した敵のEntity。</param>
+        private void HandleEnemyDied(CharacterEntity diedEnemy)
         {
+            // 撃破演出用に、敵の撃破を通知する。
+            EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(diedEnemy.Id));
+
             DieAsync();
         }
 
