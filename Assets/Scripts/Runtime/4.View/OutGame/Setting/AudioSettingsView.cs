@@ -3,17 +3,17 @@ using R3;
 using System;
 using UnityEngine.UIElements;
 
-namespace KillChord.Runtime.View.OutGame.Title
+namespace KillChord.Runtime.View.OutGame.Setting
 {
     /// <summary>
-    ///     タイトル画面の音量設定タブを共通音量設定へ接続するView。
+    ///     Home設定画面の音量ゲージを管理するView。
     /// </summary>
-    public sealed class VolumeSettingsTabView : IDisposable
+    public sealed class AudioSettingsView : IDisposable
     {
         /// <summary>
-        ///     音量設定タブを初期化する。
+        ///     UI要素を取得し、共通音量設定へバインドする。
         /// </summary>
-        public VolumeSettingsTabView(
+        public AudioSettingsView(
             VisualElement rootElement,
             IAudioSettingsViewModel audioSettingsViewModel,
             IAudioSettingsCommand audioSettingsCommand)
@@ -24,12 +24,13 @@ namespace KillChord.Runtime.View.OutGame.Title
                 ?? throw new ArgumentNullException(nameof(audioSettingsCommand));
             _bgmSlider = Require<SliderInt>(rootElement, BGM_SLIDER_NAME);
             _soundEffectSlider = Require<SliderInt>(rootElement, SOUND_EFFECT_SLIDER_NAME);
+            _voiceSlider = Require<SliderInt>(rootElement, VOICE_SLIDER_NAME);
             _bgmValueLabel = Require<Label>(rootElement, BGM_VALUE_LABEL_NAME);
             _soundEffectValueLabel = Require<Label>(rootElement, SOUND_EFFECT_VALUE_LABEL_NAME);
+            _voiceValueLabel = Require<Label>(rootElement, VOICE_VALUE_LABEL_NAME);
             _subscriptions = new CompositeDisposable();
 
-            _bgmSlider.RegisterValueChangedCallback(HandleBgmVolumeChanged);
-            _soundEffectSlider.RegisterValueChangedCallback(HandleSoundEffectVolumeChanged);
+            RegisterCallbacks();
             SubscribeViewModel();
         }
 
@@ -40,21 +41,36 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _bgmSlider.UnregisterValueChangedCallback(HandleBgmVolumeChanged);
             _soundEffectSlider.UnregisterValueChangedCallback(HandleSoundEffectVolumeChanged);
+            _voiceSlider.UnregisterValueChangedCallback(HandleVoiceVolumeChanged);
             _subscriptions.Dispose();
         }
 
-        private const string BGM_SLIDER_NAME = "BGMVolumeSlider";
-        private const string SOUND_EFFECT_SLIDER_NAME = "SEVolumeSlider";
-        private const string BGM_VALUE_LABEL_NAME = "BGMVolumeValue";
-        private const string SOUND_EFFECT_VALUE_LABEL_NAME = "SEVolumeValue";
+        private const string BGM_SLIDER_NAME = "BgmVolumeSlider";
+        private const string SOUND_EFFECT_SLIDER_NAME = "SoundEffectVolumeSlider";
+        private const string VOICE_SLIDER_NAME = "VoiceVolumeSlider";
+        private const string BGM_VALUE_LABEL_NAME = "BgmValueLabel";
+        private const string SOUND_EFFECT_VALUE_LABEL_NAME = "SoundEffectValueLabel";
+        private const string VOICE_VALUE_LABEL_NAME = "VoiceValueLabel";
 
         private readonly IAudioSettingsViewModel _audioSettingsViewModel;
         private readonly IAudioSettingsCommand _audioSettingsCommand;
         private readonly SliderInt _bgmSlider;
         private readonly SliderInt _soundEffectSlider;
+        private readonly SliderInt _voiceSlider;
         private readonly Label _bgmValueLabel;
         private readonly Label _soundEffectValueLabel;
+        private readonly Label _voiceValueLabel;
         private readonly CompositeDisposable _subscriptions;
+
+        /// <summary>
+        ///     UIと共通音量設定のコールバックを登録する。
+        /// </summary>
+        private void RegisterCallbacks()
+        {
+            _bgmSlider.RegisterValueChangedCallback(HandleBgmVolumeChanged);
+            _soundEffectSlider.RegisterValueChangedCallback(HandleSoundEffectVolumeChanged);
+            _voiceSlider.RegisterValueChangedCallback(HandleVoiceVolumeChanged);
+        }
 
         /// <summary>
         ///     共通音量設定の変更を購読する。
@@ -66,6 +82,9 @@ namespace KillChord.Runtime.View.OutGame.Title
                 .AddTo(_subscriptions);
             _audioSettingsViewModel.SoundEffectVolume
                 .Subscribe(HandleSoundEffectVolumePublished)
+                .AddTo(_subscriptions);
+            _audioSettingsViewModel.VoiceVolume
+                .Subscribe(HandleVoiceVolumePublished)
                 .AddTo(_subscriptions);
         }
 
@@ -86,6 +105,14 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         /// <summary>
+        ///     ボイスゲージの変更を共通音量設定へ渡す。
+        /// </summary>
+        private void HandleVoiceVolumeChanged(ChangeEvent<int> changeEvent)
+        {
+            _audioSettingsCommand.SetVoiceVolume(changeEvent.newValue);
+        }
+
+        /// <summary>
         ///     BGM音量をゲージと数値表示へ反映する。
         /// </summary>
         private void HandleBgmVolumePublished(int volume)
@@ -99,6 +126,14 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void HandleSoundEffectVolumePublished(int volume)
         {
             SetValue(_soundEffectSlider, _soundEffectValueLabel, volume);
+        }
+
+        /// <summary>
+        ///     ボイス音量をゲージと数値表示へ反映する。
+        /// </summary>
+        private void HandleVoiceVolumePublished(int volume)
+        {
+            SetValue(_voiceSlider, _voiceValueLabel, volume);
         }
 
         /// <summary>
@@ -118,7 +153,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             return rootElement.Q<T>(elementName)
                 ?? throw new InvalidOperationException(
-                    $"[{nameof(VolumeSettingsTabView)}] {elementName} が見つかりませんでした。");
+                    $"[{nameof(AudioSettingsView)}] {elementName} が見つかりませんでした。");
         }
     }
 }
