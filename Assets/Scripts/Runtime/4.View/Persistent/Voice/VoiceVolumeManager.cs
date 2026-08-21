@@ -63,6 +63,6 @@ namespace KillChord.Runtime.View.Persistent.Voice
         }
 
         private readonly List<VoiceSource> _sources = new();
-        private float _volume = 1f;
+        private float _volume = 0.5f;
     }
 }
