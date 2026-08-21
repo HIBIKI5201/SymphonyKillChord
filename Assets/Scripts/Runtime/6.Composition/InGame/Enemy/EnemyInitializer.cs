@@ -17,6 +17,7 @@ using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -153,11 +154,20 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
             MusicSyncModuleContainer musicSyncContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
             PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+
             if (targetSystemContainer == null
                 || musicSyncContainer == null
                 || playerModuleContainer == null)
             {
                 Debug.LogError($"[{nameof(EnemyInitializer)}] 必要なContainerの取得に失敗しました。", this);
+                return false;
+            }
+
+            _damageEffectView = playerModuleContainer.DamageEffectView;
+
+            if (_damageEffectView == null)
+            {
+                Debug.LogError($"[{nameof(EnemyInitializer)}] ダメージエフェクトViewの取得に失敗しました。", this);
                 return false;
             }
 
@@ -202,7 +212,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                     _enemyWaveTimerView);
             }
 
-            _moduleContainer.BossInitializer = TryInitializeBoss(targetSystemContainer.TargetSystemController, _enemyPools);
+            _moduleContainer.BossInitializer = TryInitializeBoss(targetSystemContainer.TargetSystemController, _enemyPools, _damageEffectView);
             if (_moduleContainer.BossInitializer != null)
             {
                 InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
@@ -281,7 +291,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
                 _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator,
-                shellPool, _damageNumberPoolView, _waveSpawnState, releaseCallback, enemyType);
+                shellPool, _damageNumberPoolView, _damageEffectView, _waveSpawnState, releaseCallback, enemyType);
         }
 
         /// <summary>
@@ -352,6 +362,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyWaves _loadedEnemyWaves;
         private IReadOnlyDictionary<int, IStageEffectDefinition> _loadedStageEffectCatalog;
         private MissionWaveController _missionWaveController;
+        private ReusableParticleSystemView _damageEffectView;
 
         /// <summary>
         ///     MissionがWave開始を制御する目標シーケンスを取得します。
@@ -402,8 +413,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         /// <param name="targetingSystem"> ターゲット制御です。 </param>
         /// <param name="enemyPools"> 敵プールです。 </param>
+        /// <param name="damageEffectView"> ダメージエフェクトViewです。 </param>
         /// <returns> 存在する場合はBossInitializer。 </returns>
-        private BossInitializer TryInitializeBoss(TargetSystemController targetingSystem, EnemyPools enemyPools)
+        private BossInitializer TryInitializeBoss(TargetSystemController targetingSystem, EnemyPools enemyPools, ReusableParticleSystemView damageEffectView)
         {
             BossInitializer initializer = GameObject.FindFirstObjectByType<BossInitializer>();
             if (initializer == null)
@@ -411,7 +423,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return null;
             }
 
-            initializer.Initialize(targetingSystem, enemyPools, _damageNumberPoolView);
+            initializer.Initialize(targetingSystem, enemyPools, _damageNumberPoolView, damageEffectView);
             return initializer;
         }
     }

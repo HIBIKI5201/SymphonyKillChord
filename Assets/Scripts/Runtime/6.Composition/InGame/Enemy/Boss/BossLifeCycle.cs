@@ -17,6 +17,7 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.Persistent;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
@@ -81,6 +82,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
             DamageNumberPoolView damageNumberPoolView,
+            ReusableParticleSystemView damageEffectView,
             Action<BossLifeCycle> releaseCallback
             )
         {
@@ -196,13 +198,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
+            var healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
+            _enemyHealthHudPresenter = healthHudPresenter;
+
+            _enemyHealthHudPresenter.OnDamaged += _view.PlayDamageFeedback;
 
             _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform, GetComponent<Collider>());
 
             // View接続
-            _view.Initialize(aiController, target);
+            _view.Initialize(aiController, target, damageEffectView);
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter, damageNumberPoolView);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
@@ -361,7 +366,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyMoveSpecAsset _loadedMoveData;
         private EnemyMissionKeyAsset _loadedMissionKeyAsset;
         private BossAttackEntryRepo _loadedAttackEntryRepo;
-
+        private EnemyHealthHudPresenter _enemyHealthHudPresenter;
 
         /// <summary>
         ///     ボス死亡時に実行する処理。
@@ -387,6 +392,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             if (_enemyEntity != null)
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
+            }
+
+            if (_enemyHealthHudPresenter != null)
+            {
+                _enemyHealthHudPresenter.OnDamaged -= _view.PlayDamageFeedback;
             }
 
             _healthHudPresenter?.Deactivate();

@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -39,7 +40,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     初期化処理
         /// </summary>
-        public bool Initialize(TargetSystemController targetingSystem, EnemyPools enemyPools, DamageNumberPoolView damageNumberPoolView)
+        public bool Initialize(
+            TargetSystemController targetingSystem,
+            EnemyPools enemyPools,
+            DamageNumberPoolView damageNumberPoolView,
+            ReusableParticleSystemView damageEffectView)
         {
             if (_boss == null)
             {
@@ -50,6 +55,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             if (damageNumberPoolView == null)
             {
                 Debug.LogError("DamageNumberPoolViewが見つかりません。", this);
+                return false;
+            }
+
+            if (damageEffectView == null)
+            {
+                Debug.LogError("DamageEffectViewが見つかりません。", this);
                 return false;
             }
 
@@ -92,6 +103,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 null,
                 _enemyPools,
                 damageNumberPoolView,
+                damageEffectView,
                 null);
             _initialized = true;
             return true;
