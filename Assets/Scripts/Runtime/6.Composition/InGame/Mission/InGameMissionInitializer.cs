@@ -1,14 +1,14 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Mission;
-using KillChord.Runtime.Adaptor.InGame.Sequence;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Composition.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.Sequence;
+using KillChord.Runtime.Composition.InGame.Skill;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
@@ -201,6 +201,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 new IMissionStepEntryActionExecutor[]
                 {
                     new SetSkillExecutionEnabledStepEntryActionExecutor(playerModuleContainer.PlayerActionRestrictionState),
+                    new ToggleEnemyBattleAiStepEntryActionExecutor(ServiceLocator.GetInstance<EnemyModuleContainer>().EnemyBattleAIRegistry)
                 });
 
             if (_scenarioUsecase != null
