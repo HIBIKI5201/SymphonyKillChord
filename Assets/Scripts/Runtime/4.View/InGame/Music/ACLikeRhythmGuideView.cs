@@ -74,6 +74,10 @@ namespace KillChord.Runtime.View.InGame.Music
             _canvasGroup.alpha = hasTarget ? _targetAlpha : _noTargetAlpha;
         }
 
+        /// <summary>
+        ///     チュートリアル等で対象となっているBeatCountを設定し、対象外ビートの表示を暗くする。
+        /// </summary>
+        /// <param name="targetBeatCount"> 対象のBeatCount。対象がない場合はnull。 </param>
         public void SetTargetBeatCount(int? targetBeatCount)
         {
             if (_targetBeatCount != targetBeatCount)
@@ -83,35 +87,48 @@ namespace KillChord.Runtime.View.InGame.Music
             }
         }
 
+        /// <summary>
+        ///     全ビートブロックの色を現在の対象BeatCountに応じて更新する。
+        /// </summary>
         private void UpdateBeatColors()
         {
             if (_leftBeatImages == null || _rightBeatImages == null || _totalBeatBoxCount <= 0) return;
             for (int i = 0; i < _totalBeatBoxCount; i++)
             {
+                // 実行中のBeatAnimation(Just判定のフラッシュ等)が動いていると、
+                // 直後の色代入がアニメーションのBindToColorに毎フレーム上書きされてしまうため、先に完了させる。
+                if (_handles != null && i < _handles.Length)
+                {
+                    _handles[i].TryComplete();
+                }
+
                 Color color = GetTargetColorForIndex(i);
                 _leftBeatImages[i].color = color;
                 _rightBeatImages[i].color = color;
             }
         }
 
+        /// <summary>
+        ///     指定ブロックが属する判定ゾーンの色を取得する。対象BeatCountと一致しない場合は暗くする。
+        /// </summary>
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <returns> 適用する色。 </returns>
         private Color GetTargetColorForIndex(int blockIndex)
         {
             int zoneIndex = GetBeatSectionIndex(blockIndex, _scale, _beatWidth);
             if (zoneIndex < 0 || zoneIndex >= _beatColor.Length) return default;
-            
+
             Color color = _beatColor[zoneIndex];
             if (_targetBeatCount.HasValue && zoneIndex < _zoneBeatCounts.Length)
             {
                 int beatCount = _zoneBeatCounts[zoneIndex];
                 if (beatCount != _targetBeatCount.Value)
                 {
-                    color.a *= _dimAlpha; // Dim the color
+                    color.a *= _dimAlpha; // 対象外ビートを暗くする
                 }
             }
             return color;
         }
-
-
 
         /// <summary>
         ///     判定ゾーン定義に応じてビートGUIを再構築する。
