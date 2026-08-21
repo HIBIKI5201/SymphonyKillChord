@@ -12,17 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 627ee99fd40337244b7963aeef8c21a2, type: 3}
   m_Name: SkillNodeData-N101
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeData
+  UnlockCost: 5
+  SkillDetail: 
+  PreviewVideoClip: {fileID: 0}
+  _statusBonusEffects:
+  - rid: 101001
+  _unlockSkills: []
   _nodeId:
     _id: node_n101
     _hashId: 276164573
   _parentNodeIds:
   - _id: node_n1
     _hashId: -92305930
-  UnlockCost: 5
-  SkillDetail: 
-  PreviewVideoClip: {fileID: 0}
-  _statusBonusEffects:
-  - rid: 101001
   references:
     version: 2
     RefIds:
@@ -30,4 +31,3 @@ MonoBehaviour:
       type: {class: MaxHealthMultiplierEffect, ns: KillChord.Runtime.Domain.OutGame.SkillTree, asm: KillChord.Domain}
       data:
         _multiplier: 0.0625
-  _unlockSkills: []

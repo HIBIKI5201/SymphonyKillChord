@@ -84,7 +84,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
             EnemyWaveSpawnerState waveSpawnerState,
-            Action<EnemyLifeCycle> releaseCallback
+            Action<EnemyLifeCycle> releaseCallback,
+            EnemyType enemyType,
+            EnemyAIControllerRegistry battleAiRegistry
             )
         {
             if (_view == null)
@@ -104,6 +106,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetingSystem = targetingSystem;
             _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
             _waveSpawnerState = waveSpawnerState;
+            _battleAIRegistry = battleAiRegistry;
 
             MissionModuleContainer missionModuleContainer = ServiceLocator.GetInstance<MissionModuleContainer>();
             _missionEventController = missionModuleContainer?.MissionEventController;
@@ -167,9 +170,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 spec.AttackRangeMax.Value,
                 GetAttackApproach);
 
-            _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
-            _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
-            _aiController.OnAttack += _raycastView.HideWarning;
+            if (enemyType == EnemyType.Infantry)
+            {
+                _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
+                _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
+                _aiController.OnAttack += _raycastView.HideWarning;
+            }
             _aiController.OnAttack += HandleEnemyAttackExecuted;
             _attackPositionSearchView.Initialize();
             if (_shellSpawner != null && shellPool != null)
@@ -202,6 +208,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _enemyEntity.OnDied += HandleEnemyDied;
             _targetingSystem?.RegisterTarget(_targetable, _enemyEntity);
+            _battleAIRegistry?.Register(_aiController);
 
             // コンポーネント有効化
             SetDyingCollidersEnabled(true);
@@ -293,6 +300,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
             }
             _targetingSystem?.UnregisterTarget(_targetable);
+            _battleAIRegistry?.Unregister(_aiController);
 
             _attackReservationUsecase.Deactivate();
             _aiController.Deactivate();
@@ -426,6 +434,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyAttackReservationUsecase _attackReservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _battleState;
+        private EnemyAIControllerRegistry _battleAIRegistry;
         private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
         private int _attackIndex;
@@ -522,6 +531,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
 
             _targetingSystem?.UnregisterTarget(_targetable);
+            _battleAIRegistry?.Unregister(_aiController);
             SetDyingCollidersEnabled(false);
         }
 
@@ -703,6 +713,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
 
             _targetingSystem?.UnregisterTarget(_targetable);
+            _battleAIRegistry?.Unregister(_aiController);
             _targetable?.Dispose();
             _loadedEnemyData = null;
             _loadedMoveData = null;

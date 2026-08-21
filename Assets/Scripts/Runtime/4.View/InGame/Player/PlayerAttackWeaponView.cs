@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Player
@@ -5,8 +6,11 @@ namespace KillChord.Runtime.View.InGame.Player
     /// <summary>
     ///     攻撃BeatTypeに応じた武器モデル表示と攻撃SE再生を担当するViewクラス。
     /// </summary>
-    public sealed class PlayerAttackWeaponView : MonoBehaviour
+    public sealed class PlayerAttackWeaponView : MonoBehaviour, ISkillEffectWeaponSource
     {
+        /// <summary> 現在構えている武器のTransformです。武器が無い場合はnull。 </summary>
+        public Transform WeaponTransform => _currentWeaponView != null ? _currentWeaponView.transform : null;
+
         /// <summary>
         ///     拍子に応じた演出を再生します。
         /// </summary>

@@ -141,6 +141,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _moduleContainer = new EnemyModuleContainer(new EnemyWaveSpawnerState());
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
+            _battleAIRegistry = new EnemyAIControllerRegistry();
+            _moduleContainer.EnemyBattleAIRegistry = _battleAIRegistry;
             return true;
         }
 
@@ -281,7 +283,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
                 _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator,
-                shellPool, _waveSpawnState, releaseCallback);
+                shellPool, _waveSpawnState, releaseCallback, enemyType, _battleAIRegistry);
         }
 
         /// <summary>
@@ -344,6 +346,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private bool _initialized = false;
         private bool _isModuleRegistered;
         private EnemyModuleContainer _moduleContainer;
+        private EnemyAIControllerRegistry _battleAIRegistry;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private EnemyDefinitionRepository _loadedEnemyDefinitionRepository;
         private EnemyWaves _loadedEnemyWaves;

@@ -75,7 +75,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 return new SkillExecutionResult(
                     SkillExecutionResultType.Executed,
                     _skillDefinition.AnimationKey,
-                    _skillDefinition.EffectSpec.SkillNormalAttackDamagePolicy);
+                    _skillDefinition.EffectSpec.SkillNormalAttackDamagePolicy,
+                    ResolveWeaponBeatType());
             }
 
             ApplyFailurePolicy(now);
@@ -84,6 +85,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 $"対象を解決できないためスキルを実行しませんでした。ID: {_skillDefinition.Id.Value}, " +
                 $"TargetingType: {_skillDefinition.EffectSpec.TargetingType}");
             return new SkillExecutionResult(SkillExecutionResultType.RejectedByTargetPolicy);
+        }
+
+        /// <summary>
+        ///     このスキルで構える武器を決めるBeatTypeを求めます。
+        /// </summary>
+        /// <returns> 入力パターンの最後のBeatTypeです。 </returns>
+        private BeatType ResolveWeaponBeatType()
+        {
+            // 決め手となる最後の拍の武器を構える。
+            System.ReadOnlySpan<BeatType> signatures = _skillDefinition.SkillPattern.Signatures;
+            return signatures.Length > 0 ? signatures[signatures.Length - 1] : default;
         }
 
         /// <summary>
