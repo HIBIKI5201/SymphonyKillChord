@@ -8815,10 +8815,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2982281720216178710, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
-      propertyPath: _parent
-      value: 
-      objectReference: {fileID: 40540017}
-    - target: {fileID: 2982281720216178710, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
       propertyPath: _uiDocument
       value: 
       objectReference: {fileID: 2119823347}
@@ -8875,11 +8871,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
---- !u!1 &40540017 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5763909906653179697, guid: fd69047763e1005458f3f86faaf8c0f4, type: 3}
-  m_PrefabInstance: {fileID: 40540016}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &48863679
 GameObject:
   m_ObjectHideFlags: 0
@@ -9552,6 +9543,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 2119823347}
   _screenRuleDataKey: OutGameScreenRuleData
+  _titleSceneName: Title
 --- !u!4 &510963396
 Transform:
   m_ObjectHideFlags: 0
