@@ -67,7 +67,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         ///     ActionKind自体はドメイン内部の実装詳細のため公開せず、表示に必要なBeatTypeのみを公開する。
         /// </summary>
         public BeatType? TargetBeatType => ConvertToBeatType(_actionKind);
-
+        /// <summary> 行動の種別。 </summary>
         private readonly MissionActionKind _actionKind;
         /// <summary> 必要な発動回数。 </summary>
         private readonly int _requiredCount;
