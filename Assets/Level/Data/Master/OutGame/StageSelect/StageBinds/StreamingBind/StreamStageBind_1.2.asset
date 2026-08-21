@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: StreamStageBind_1.2
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageBindAsset
   _fromStageId:
-    _id: 
-    _hashId: 0
+    _id: stage_01
+    _hashId: 2117502204
   _toStageId:
-    _id: 
-    _hashId: 0
+    _id: stage_02
+    _hashId: -415247034
   _advanceMode: 0

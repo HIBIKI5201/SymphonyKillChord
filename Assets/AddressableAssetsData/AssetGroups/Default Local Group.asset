@@ -181,7 +181,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f7154756892c57a4ea9dc8f22bcb8068
-    m_Address: Assets/Level/Data/Master/OutGame/StageSelect/Stream_StageTreeAsset.asset
+    m_Address: StageTreeAsset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
