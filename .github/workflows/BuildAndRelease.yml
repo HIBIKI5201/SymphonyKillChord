@@ -419,19 +419,13 @@ jobs:
             exit 1
           }
 
-          $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter "aapt2.exe" -ErrorAction SilentlyContinue |
+          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
+
+          $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -ErrorAction SilentlyContinue |
                     Select-Object -First 1
 
           if (-not $Aapt2) {
-            Write-Host "::error::aapt2.exe が見つかりません: $VersionRoot"
-            exit 1
-          }
-
-          $Aapt2 = Get-ChildItem $AndroidSdkRoot -Recurse -Filter "aapt2.exe" -ErrorAction SilentlyContinue |
-                    Select-Object -First 1
-
-          if (-not $Aapt2) {
-            Write-Host "::error::aapt2.exe が見つかりません: $AndroidSdkRoot"
+            Write-Host "::error::$Aapt2Name が見つかりません: $VersionRoot"
             exit 1
           }
 
