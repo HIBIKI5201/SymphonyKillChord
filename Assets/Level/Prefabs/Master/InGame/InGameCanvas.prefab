@@ -269,10 +269,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.UI.HUDEnemyHealthView
   _healthImage: {fileID: 2306585453071379658}
   _sprites:
-  - {fileID: 21300000, guid: 8ded325652821e84b8463692215e3c47, type: 3}
-  - {fileID: 21300000, guid: 3ae7df681d47399498d80507308c864f, type: 3}
-  - {fileID: 21300000, guid: 1ea7cc886bf102a4e8fade04fb61110e, type: 3}
-  - {fileID: 21300000, guid: 5baef819944cee446a927dca37caef1a, type: 3}
+  - {fileID: 21300000, guid: a35befcab1bca78489c0f1315a6842c0, type: 3}
+  - {fileID: 21300000, guid: a35befcab1bca78489c0f1315a6842c0, type: 3}
+  - {fileID: 21300000, guid: a35befcab1bca78489c0f1315a6842c0, type: 3}
+  - {fileID: 21300000, guid: a35befcab1bca78489c0f1315a6842c0, type: 3}
   _candidateSize: {x: 12, y: 12}
   _candidateColor: {r: 1, g: 0.85, b: 0.2, a: 1}
 --- !u!1 &508952041908265795
