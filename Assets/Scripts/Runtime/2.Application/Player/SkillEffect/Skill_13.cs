@@ -104,14 +104,6 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 result,
                 DamageAttackType.Skill);
 
-            // DamageExecutorは通知を行わないため、ダメージ表示用のイベントをここで発火する。
-            EventBus<EOnTakeDamage>.Raise(
-                new EOnTakeDamage(
-                    result.FinalDamage.Value,
-                    result.IsCritical,
-                    targetEntity.Id,
-                    DamageAttackType.Skill));
-
             Debug.Log($"[Skill_13] 発動　{hitIndex}ヒット目" +
                 $"[FinalDamage: {result.FinalDamage}" +
                 $" AppliedDamage: {result.AppliedDamage}," +
