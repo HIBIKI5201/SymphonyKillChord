@@ -10,7 +10,7 @@ interface Props {
 
 const {
 	navItems = [
-		{ label: 'ホーム', href: '/' },
+		{ label: 'ホーム', href: '/home' },
 		{ label: 'キャラクター', href: '/character' },
 		{ label: 'ゲームプレイ', href: '/gameplay' },
 		{ label: 'スキル', href: '/skill' },
@@ -22,7 +22,7 @@ const currentPath = Astro.url.pathname;
 ---
 
 <header class="site-header">
-	<a class="brand" href="/">Symphony Kill Chord</a>
+	<a class="brand" href="/home">Symphony Kill Chord</a>
 
 	<nav class="nav" id="site-nav">
 		{
