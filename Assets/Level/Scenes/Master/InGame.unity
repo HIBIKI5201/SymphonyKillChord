@@ -2714,6 +2714,84 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &820633124
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 820633125}
+  - component: {fileID: 820633127}
+  - component: {fileID: 820633126}
+  m_Layer: 0
+  m_Name: MissionVoiceSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &820633125
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820633124}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2100000001}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &820633126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820633124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54ab0f4c16c97d0408305aa7a4dcbc2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Voice.VoiceSource
+--- !u!114 &820633127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 820633124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 0
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 1
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: HandgunShoot_1
+  _cueSheet: CueSheet_0
 --- !u!1 &866643814
 GameObject:
   m_ObjectHideFlags: 0
@@ -2783,6 +2861,7 @@ MonoBehaviour:
   _popupInputSuppressionDuration: 1.5
   _missionDefinitionRepositoryKey: MissionDefinitionRepository
   _enemyMissionKeyRepositoryKey: EnemyMissionKeyRepository
+  _missionVoiceSource: {fileID: 820633126}
   _scenarioRoot: {fileID: 1701706915}
   _scenarioView: {fileID: 1713118610}
   _scenarioInputView: {fileID: 116443662}
@@ -6367,6 +6446,7 @@ Transform:
   - {fileID: 255723356}
   - {fileID: 456552177}
   - {fileID: 866643818}
+  - {fileID: 820633125}
   - {fileID: 1249666143}
   - {fileID: 2200000001}
   - {fileID: 1776231712}
