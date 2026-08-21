@@ -33,5 +33,11 @@
 
         /// <summary> Markdownエクスポートの出力先ディレクトリ。 </summary>
         public const string NOTION_EXPORT_OUTPUT = "NOTION_EXPORT_OUTPUT";
+
+        /// <summary>
+        ///     Markdown書き込みを許可するページIDの配列。
+        ///     ここに挙げたページの子孫だけが編集対象になる。
+        /// </summary>
+        public const string NOTION_WRITE_ALLOWED_ROOTS = "NOTION_WRITE_ALLOWED_ROOTS";
     }
 }

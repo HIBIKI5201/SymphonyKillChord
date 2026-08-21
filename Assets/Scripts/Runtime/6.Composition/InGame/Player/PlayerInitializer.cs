@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Mission;
@@ -88,7 +89,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private MobileStickFlickInputConfig _loadedMobileStickFlickInputConfig;
 
         private Action _onDodgeEndedHandler;
-        private ICharacterAnimationSignal _characterAnimationSignal;
+        private IPlayerCharacterAnimationSignal _characterAnimationSignal;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -313,10 +314,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
+            PlayerActionRestrictionState actionRestrictionState = new PlayerActionRestrictionState();
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
             PlayerAttackController playerAttackController = new PlayerAttackController(
                 attackResultPresenter,
                 playerBattleState,
+                actionRestrictionState,
                 skillController,
                 targetSystemContainer.TargetSystemController,
                 attackIntervalEvaluator,
@@ -327,13 +330,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 pendingAttackEffectService,
                 (float)parameter.AttackRotationSpeed,
                 (float)parameter.AttackCooldown.Value);
+            _moduleContainer.SetActionRestrictionState(actionRestrictionState);
             _moduleContainer.SetPlayerAttackController(playerAttackController);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
             AnimationComposition animationComposition = new AnimationComposition();
-            ICharacterAnimationViewContext animationContext = animationComposition.Init(
+            ICharacterAnimationViewContext animationContext = animationComposition.InitForPlayer(
                 _characterAnimationView,
                 _characterAnimationConfig,
                 musicSyncState,
@@ -352,7 +356,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             };
 
             _onDodgeEndedHandler = () => playerAttackController.StartAttackCooldown();
-            _characterAnimationSignal = animationContext.Signal;
+            _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
             _characterAnimationSignal.OnDodgeEnded += _onDodgeEndedHandler;
 
             PlayerMovementApplication move = new PlayerMovementApplication(parameter);
