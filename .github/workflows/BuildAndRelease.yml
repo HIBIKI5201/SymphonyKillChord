@@ -411,60 +411,36 @@ jobs:
           $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
           $Aapt2 = $null
 
-          # --- 戦略1: UNITY_EXE_PATH のバージョンルート配下をシンボリックリンクも辿って再帰探索 ---
-          $EditorDir = Split-Path $env:UNITY_EXE_PATH -Parent
-          $VersionRoot = Split-Path $EditorDir -Parent
-          Write-Host "[戦略1] 探索範囲: $VersionRoot (シンボリックリンク追跡あり)"
-
-          if (Test-Path $VersionRoot) {
-            $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -Force -FollowSymlink -ErrorAction SilentlyContinue |
-                      Select-Object -First 1
+          # UNITY_EXE_PATH からバンドルを遡り、Unity.app の親ディレクトリ（バージョンルート）を特定する
+          # 例: .../6000.3.10f1/Unity.app/Contents/MacOS/Unity → バージョンルートは .../6000.3.10f1
+          $CurrentPath = Split-Path $env:UNITY_EXE_PATH -Parent
+          $AppBundlePath = $null
+          while ($CurrentPath) {
+            if ($CurrentPath -match '\.app$') {
+              $AppBundlePath = $CurrentPath
+              break
+            }
+            $Parent = Split-Path $CurrentPath -Parent
+            if ($Parent -eq $CurrentPath) { break }
+            $CurrentPath = $Parent
           }
 
-          # --- 戦略2: PlaybackEngines 配下のシンボリックリンクを明示的に解決してから探索 ---
-          if (-not $Aapt2) {
-            Write-Host "[戦略2] PlaybackEngines のリンク先を解決して探索"
-            $PlaybackEnginesPath = Join-Path $VersionRoot "PlaybackEngines"
-            if (Test-Path $PlaybackEnginesPath) {
-              $Item = Get-Item $PlaybackEnginesPath -Force
-              $ResolvedTarget = if ($Item.LinkType) { $Item.Target } else { $PlaybackEnginesPath }
-              Write-Host "  解決結果: $ResolvedTarget"
-              if ($ResolvedTarget -and (Test-Path $ResolvedTarget)) {
-                $Aapt2 = Get-ChildItem $ResolvedTarget -Recurse -Filter $Aapt2Name -Force -FollowSymlink -ErrorAction SilentlyContinue |
-                          Select-Object -First 1
-              }
-            }
+          if ($AppBundlePath) {
+            # macOS: Unity.app の親ディレクトリがバージョンルート
+            $VersionRoot = Split-Path $AppBundlePath -Parent
+          } else {
+            # Windows: Editor 実行ファイルの1階層上がバージョンルート (Editor/Unity.exe → バージョンルート)
+            $VersionRoot = Split-Path (Split-Path $env:UNITY_EXE_PATH -Parent) -Parent
           }
 
-          # --- 戦略3: OS標準のAndroid SDKインストール場所を直接探索 ---
-          if (-not $Aapt2) {
-            Write-Host "[戦略3] OS標準インストール場所を探索"
-            $FallbackRoots = @(
-              $env:ANDROID_HOME,
-              $env:ANDROID_SDK_ROOT,
-              (Join-Path $HOME "Library/Android/sdk"),
-              (Join-Path $HOME "AppData/Local/Android/Sdk")
-            ) | Where-Object { $_ -and (Test-Path $_) }
+          Write-Host "算出したバージョンルート: $VersionRoot"
 
-            foreach ($Root in $FallbackRoots) {
-              Write-Host "  探索中: $Root"
-              $Found = Get-ChildItem $Root -Recurse -Filter $Aapt2Name -Force -FollowSymlink -ErrorAction SilentlyContinue |
-                        Select-Object -First 1
-              if ($Found) { $Aapt2 = $Found; break }
-            }
-          }
+          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
+          $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -Force -ErrorAction SilentlyContinue |
+                    Select-Object -First 1
 
           if (-not $Aapt2) {
-            Write-Host "::error::$Aapt2Name がどの探索範囲でも見つかりませんでした。"
-            Write-Host "[診断情報] VersionRoot 直下の構造:"
-            if (Test-Path $VersionRoot) {
-              Get-ChildItem $VersionRoot -Force -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.FullName)" }
-            }
-            Write-Host "[診断情報] PlaybackEngines 直下の構造:"
-            $PlaybackEnginesPath = Join-Path $VersionRoot "PlaybackEngines"
-            if (Test-Path $PlaybackEnginesPath) {
-              Get-ChildItem $PlaybackEnginesPath -Force -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.FullName)" }
-            }
+            Write-Host "::error::$Aapt2Name が見つかりません: $VersionRoot"
             exit 1
           }
 
