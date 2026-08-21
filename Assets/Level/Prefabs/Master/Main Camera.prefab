@@ -211,8 +211,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6d403a69f1a970429b8c41f575c9208, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.Persistent.Camera.PostProccessOverlayCamera
-  _focusLayers:
-    serializedVersion: 2
-    m_Bits: 640
-  _focusVolumeProfile: {fileID: 11400000, guid: c3af66e864dbb544381df71b9e2b433d, type: 2}
-  _focusVolumeWeight: 1

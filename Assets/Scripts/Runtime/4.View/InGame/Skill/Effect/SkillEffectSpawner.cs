@@ -1,7 +1,7 @@
-using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using System;
 using System.Collections.Generic;
+using KillChord.Runtime.View.Persistent.PostEffect;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -16,10 +16,10 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// <summary>
         ///     発動時の全画面演出に必要な依存を注入する。
         /// </summary>
-        /// <param name="focusPostEffectPlayer"> 全画面Volumeの再生先です。 </param>
-        public void Initialize(IFocusPostEffectPlayer focusPostEffectPlayer)
+        /// <param name="postEffectOverlayPlayer"> ポストプロセスの適用先です。 </param>
+        public void Initialize(IPostEffectOverlayPlayer postEffectOverlayPlayer)
         {
-            _focusPostEffectPlayer = focusPostEffectPlayer;
+            _postEffectOverlayPlayer = postEffectOverlayPlayer;
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _activeInstances.Add(instance);
             if (instance.Play(context, entry.ReleaseHandler))
             {
-                PlayFocusPostEffect(instance);
+                PlayPostEffect(instance);
                 return instance;
             }
 
@@ -88,7 +88,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// </summary>
         public void StopAll()
         {
-            _focusPostEffectPlayer?.Stop();
+            _postEffectOverlayPlayer?.RemoveAll();
 
             // 停止はキャンセル要求のため、返却は各インスタンスの完了処理から行われる。
             for (int i = _activeInstances.Count - 1; i >= 0; i--)
@@ -188,23 +188,20 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         }
 
         /// <summary>
-        ///     エフェクトごとに設定された秒数だけ全画面Volumeを再生する。
+        ///     エフェクトごとに設定されたConfigと秒数でポストプロセスを適用する。
         /// </summary>
         /// <param name="instance"> 再生を開始したエフェクトです。 </param>
-        private void PlayFocusPostEffect(SkillEffectInstance instance)
+        private void PlayPostEffect(SkillEffectInstance instance)
         {
-            if (_focusPostEffectPlayer == null)
+            if (_postEffectOverlayPlayer == null || instance.PostEffectConfig == null)
             {
                 return;
             }
 
-            float durationSeconds = instance.FocusPostEffectSeconds;
-            if (durationSeconds <= 0f)
-            {
-                return;
-            }
-
-            _focusPostEffectPlayer.Play(instance.FocusPostEffectDelaySeconds, durationSeconds);
+            _postEffectOverlayPlayer.AddForSeconds(
+                instance.PostEffectConfig,
+                instance.PostEffectDelaySeconds,
+                instance.PostEffectSeconds);
         }
 
         /// <summary>
@@ -225,7 +222,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
         private readonly Dictionary<int, SkillEffectPoolEntry> _pools = new();
         private readonly List<SkillEffectInstance> _activeInstances = new();
-        private IFocusPostEffectPlayer _focusPostEffectPlayer;
+        private IPostEffectOverlayPlayer _postEffectOverlayPlayer;
 
         /// <summary>
         ///     エフェクトプレハブ1件分のプールを保持するクラス。
