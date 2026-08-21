@@ -1,0 +1,30 @@
+/* レトロ×SF、1998年設定・技術偏重社会をイメージした配色/タイポグラフィのトークン定義 */
+:root {
+	/* 背景: 電源の入っていないブラウン管モニタのような、沈んだ暗緑がかった黒 */
+	--color-bg: #0a0d0b;
+	--color-bg-alt: #10140f;
+
+	/* パネル/カード面: 端末筐体の樹脂色をイメージした、わずかに緑みのあるグレー */
+	--color-surface: #171c17;
+	--color-surface-border: #2c352b;
+
+	/* 文字色: 燐光ディスプレイのにじみを想定したオフホワイト/グリーン */
+	--color-text-primary: #e6ece3;
+	--color-text-muted: #8a978a;
+
+	/* アクセント: 端末の稼働ランプ(フォスファーグリーン)と、警告表示(赤)の2系統 */
+	--color-signal: #4fe37a;
+	--color-signal-dim: #2a7a48;
+	--color-warning: #d1452c;
+
+	/* 罫線/グリッド: 図面や計器盤のような細い線 */
+	--color-grid-line: rgba(79, 227, 122, 0.14);
+
+	/* タイポグラフィ: 見出しはステンシル/ポスター的な圧のある書体、本文と計器表示は等幅を基調にする */
+	--font-display: 'Futura', 'Century Gothic', 'Arial Narrow', 'Hiragino Sans', sans-serif;
+	--font-mono: ui-monospace, 'SFMono-Regular', 'Courier New', 'MS Gothic', monospace;
+	--font-body: 'Hiragino Sans', 'Yu Gothic', 'Segoe UI', sans-serif;
+
+	--tracking-display: 0.12em;
+	--tracking-label: 0.28em;
+}

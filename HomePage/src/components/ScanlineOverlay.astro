@@ -1,0 +1,52 @@
+---
+---
+
+<div class="scanline-overlay" aria-hidden="true"></div>
+
+<style>
+	.scanline-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 40;
+		pointer-events: none;
+		background-image: repeating-linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0.18) 0px,
+			rgba(0, 0, 0, 0.18) 1px,
+			transparent 1px,
+			transparent 3px
+		);
+		mix-blend-mode: multiply;
+		animation: flicker 6s infinite steps(60);
+	}
+
+	.scanline-overlay::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.6) 135%);
+	}
+
+	@keyframes flicker {
+		0%,
+		96%,
+		100% {
+			opacity: 1;
+		}
+		97% {
+			opacity: 0.88;
+		}
+		98% {
+			opacity: 1;
+		}
+		99% {
+			opacity: 0.92;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.scanline-overlay {
+			animation: none;
+		}
+	}
+</style>

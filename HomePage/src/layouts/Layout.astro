@@ -1,23 +1,51 @@
+---
+import '../styles/tokens.css';
+import SiteHeader from '../components/SiteHeader.astro';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = 'Symphony Kill Chord',
+	description = 'リズムに乗せて「キルコード」を紡ぎ、戦況を切り開くリズムアクションゲーム。',
+} = Astro.props;
+---
+
 <!doctype html>
-<html lang="en">
+<html lang="ja">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<meta name="description" content={description} />
+		<title>{title}</title>
 	</head>
 	<body>
+		<SiteHeader />
 		<slot />
 	</body>
 </html>
 
 <style>
+	html {
+		color-scheme: dark;
+	}
+
 	html,
 	body {
 		margin: 0;
 		width: 100%;
 		height: 100%;
+		background: var(--color-bg);
+		color: var(--color-text-primary);
+		font-family: var(--font-body);
+	}
+
+	body {
+		padding-top: 64px;
 	}
 </style>
