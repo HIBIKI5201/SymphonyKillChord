@@ -106,6 +106,8 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
                     {
                         Debug.LogError(
                             $"[{nameof(AudioSettingsService)}] 音量設定の保存に失敗しました。{exception}");
+                        _hasPendingSave = true;
+                        return;
                     }
                 }
             }
