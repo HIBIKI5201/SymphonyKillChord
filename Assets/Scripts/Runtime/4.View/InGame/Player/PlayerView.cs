@@ -29,6 +29,9 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
         private PlayerAttackWeaponView _attackWeaponView;
 
+        [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
+        private ReusableParticleSystemView _damageEffectView;
+
         [SerializeField, Tooltip("被弾時のエフェクトを再生する位置です。")]
         private Transform _damageEffectPoint;
 
@@ -124,7 +127,6 @@ namespace KillChord.Runtime.View.InGame.Player
         private MotionHandle _dodgeMaterialEffectHandle;
         private MotionHandle _damageEffectHandle;
         private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
-        private ReusableParticleSystemView _damageEffectView;
 
         private float _attackFacingRemaining = 0f;
         private Quaternion _attackFacingRotation;
@@ -179,13 +181,11 @@ namespace KillChord.Runtime.View.InGame.Player
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter,
-            ReusableParticleSystemView damageEffectView,
             PlayerInputSuppressionState inputSuppressionState = null)
         {
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
             _inputSuppressionState = inputSuppressionState;
-            _damageEffectView = damageEffectView;
             _characterAnimationViewModel = animationContext.ViewModel;
             _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
             _musicSyncState = musicSyncState;

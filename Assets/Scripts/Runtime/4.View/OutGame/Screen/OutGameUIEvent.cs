@@ -43,12 +43,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 設定画面を表示するイベント。 </summary>
         public Action OnShownSettingScreen;
 
-        /// <summary> タイトル画面への復帰を要求するイベント。 </summary>
-        public Action OnReturnToTitleRequested;
-
-        /// <summary> タイトル画面への復帰要求が完了したことを通知するイベント。 </summary>
-        public Action<bool> OnReturnToTitleRequestCompleted;
-
         /// <summary> 画面を閉じるイベント。 </summary>
         public Action OnScreenClosed;
 

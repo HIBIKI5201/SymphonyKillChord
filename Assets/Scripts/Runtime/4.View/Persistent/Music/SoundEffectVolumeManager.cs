@@ -64,6 +64,6 @@ namespace KillChord.Runtime.View.Persistent.Music
         }
 
         private readonly List<SoundEffectSource> _sources = new();
-        private float _volume = 0.5f;
+        private float _volume = 1f;
     }
 }

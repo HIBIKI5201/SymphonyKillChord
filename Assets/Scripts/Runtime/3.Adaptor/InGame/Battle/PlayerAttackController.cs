@@ -282,6 +282,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             IReadOnlyList<IAttackHitEffect> pendingHitEffects,
             bool isJustHit)
         {
+            _hitDefenders.Clear();
             _attackTargets.Clear();
 
             // 一覧は水平距離の昇順。多段ヒットの途中で対象が倒れた場合は次に近い対象へ移る。
@@ -294,6 +295,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 }
 
                 bool isOutOfRange = hit.Distance > attackDefinition.Range;
+                _hitDefenders.Add(hit.Entity);
                 _attackTargets.Add(new AttackTarget(hit.Entity, isOutOfRange));
 
                 if (!attackDefinition.IsMultiTarget)
@@ -314,12 +316,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 isJustHit,
                 _battleState.Attacker.BaseDamage,
                 _hitResults,
-                pendingHitEffects,
-                notifyNormalDamage: true);
+                pendingHitEffects);
 
             for (int i = 0; i < _hitResults.Count; i++)
             {
                 AttackResult result = _hitResults[i];
+                EventBus<EOnTakeDamage>.Raise(
+                    new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, _hitDefenders[i].Id, DamageAttackType.Normal));
+
                 _presenter.Push(result);
             }
 
@@ -425,6 +429,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly Transform _playerTransform;
         private readonly PendingAttackEffectService _pendingAttackEffectService;
         private readonly List<TargetAreaHit> _hitTargets = new List<TargetAreaHit>();
+        private readonly List<CharacterEntity> _hitDefenders = new List<CharacterEntity>();
         private readonly List<AttackTarget> _attackTargets = new List<AttackTarget>();
         private readonly List<AttackResult> _hitResults = new List<AttackResult>();
         private IReadOnlyList<IAttackHitEffect> _pendingHitEffects = Array.Empty<IAttackHitEffect>();

@@ -50,7 +50,6 @@ Transform:
   - {fileID: 2696440774020137033}
   - {fileID: 3402944858344314455}
   - {fileID: 3430338019357516730}
-  - {fileID: 7935486888130287535}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &3780914556809270319
@@ -320,7 +319,6 @@ MonoBehaviour:
   _footstepInterval: 0.5
   _attackAttackReservedAnimation: Enemy_AttackReserved
   _weaponItemView: {fileID: 7563075547804833795}
-  _damageEffectTransform: {fileID: 7935486888130287535}
 --- !u!114 &-8573756187886522192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -335,6 +333,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyHealthView
   _healthHudView: {fileID: 4653749312874443366}
   _damageNumberSpawnPoint: {fileID: 7263208405152872925}
+  _damageNumberPrefab: {fileID: 2181947599002182845, guid: c29fc7bbbc9d4eb40b3adc7cd5939d2e, type: 3}
   _damageNumberCameraOffset: 0.2
 --- !u!114 &8900643656970599263
 MonoBehaviour:
@@ -521,6 +520,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.EnemyHealthView
   _healthHudView: {fileID: 4653749312874443366}
   _damageNumberSpawnPoint: {fileID: 7263208405152872925}
+  _damageNumberPrefab: {fileID: 2181947599002182845, guid: c29fc7bbbc9d4eb40b3adc7cd5939d2e, type: 3}
   _damageNumberCameraOffset: 1
 --- !u!114 &7563075547804833795
 MonoBehaviour:
@@ -539,37 +539,6 @@ MonoBehaviour:
   _attackEffect: {fileID: 0}
   _effectDelaySeconds: 0
   _effectRenderers: []
---- !u!1 &2188654145948044434
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7935486888130287535}
-  m_Layer: 8
-  m_Name: EffectPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7935486888130287535
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2188654145948044434}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3731371427858582317}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4337820504299893940
 GameObject:
   m_ObjectHideFlags: 0

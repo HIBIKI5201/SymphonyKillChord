@@ -29,8 +29,5 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         /// <summary> ボス初期化クラスです。 </summary>
         public BossInitializer BossInitializer { get; set; }
-
-        /// <summary> 敵AIを管理するクラスです。 </summary>
-        public EnemyAIControllerRegistry EnemyBattleAIRegistry { get; set; }
     }
 }

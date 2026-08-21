@@ -27,10 +27,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
             _defenderId = defenderId;
         }
-
-        /// <summary> 被弾時に呼び出されるイベント。 </summary>
-        public event Action OnDamaged;
-
         public void Dispose()
         {
             Deactivate();
@@ -68,11 +64,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _healthHudViewModel.UpdateHealth(new HealthHudDTO(currentHealth, maxHealth));
 
             Debug.Log($"[EnemyHealthHudPresenter] 敵HP更新：{currentHealth} / {maxHealth}　変化量：{amountChanged}");
-
-            if (amountChanged < 0)
-            {
-                OnDamaged?.Invoke();
-            }
         }
 
         private IDefender _entity;
@@ -111,8 +102,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 return DamageNumberType.Critical;
             }
 
-            if (eventData.AttackType == DamageAttackType.Skill ||
-                eventData.AttackType == DamageAttackType.Infection)
+            if (eventData.AttackType == DamageAttackType.Skill)
             {
                 return DamageNumberType.Skill;
             }

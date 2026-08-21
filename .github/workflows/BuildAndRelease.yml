@@ -178,28 +178,22 @@ jobs:
             Write-Host "[INFO]: 一時パッケージディレクトリ ($($_.Name)) を削除しました。"
           }
 
-          # 3. Gradle キャッシュ全体を削除する
-          $GradleCachesPath = Join-Path (Join-Path $HOME ".gradle") "caches"
-
-          if (Test-Path $GradleCachesPath) {
-            $SizeBytes = (Get-ChildItem -Path $GradleCachesPath -Recurse -File -ErrorAction SilentlyContinue |
-                          Measure-Object -Property Length -Sum).Sum
-            $SizeGB = [Math]::Round($SizeBytes / 1GB, 2)
-
-            Remove-Item -Path $GradleCachesPath -Recurse -Force -ErrorAction SilentlyContinue
-
-            if (Test-Path $GradleCachesPath) {
-              Write-Host "::error::Gradle キャッシュの削除に失敗しました: $GradleCachesPath"
-              exit 1
+          # 3. ワークスペース外に蓄積するグローバルキャッシュの削除（Gradle / NuGet）
+          # $HOME は Windows では USERPROFILE、macOS/Linux ではホームに解決される。
+          $GlobalCacheTargets = @(
+            (Join-Path (Join-Path $HOME ".gradle") "caches"),
+            (Join-Path (Join-Path $HOME ".nuget") "packages")
+          )
+          foreach ($CachePath in $GlobalCacheTargets) {
+            if (Test-Path $CachePath) {
+              $SizeBytes = (Get-ChildItem -Path $CachePath -Recurse -File -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+              $SizeGB = [Math]::Round($SizeBytes / 1GB, 2)
+              Remove-Item -Path $CachePath -Recurse -Force -ErrorAction SilentlyContinue
+              Write-Host "[INFO]: グローバルキャッシュ ($CachePath, $SizeGB GB) を削除しました。"
+            } else {
+              Write-Host "[INFO]: グローバルキャッシュが存在しないためスキップ: $CachePath"
             }
-
-            Write-Host "[INFO]: Gradle キャッシュ全体 ($SizeGB GB) を削除しました: $GradleCachesPath"
-          } else {
-            Write-Host "[INFO]: Gradle キャッシュは存在しないためスキップします。"
           }
-
-          # NuGet キャッシュは保持する（毎回再ダウンロードしない）
-          Write-Host "[INFO]: NuGet キャッシュは保持します。"
 
           Write-Host "::endgroup::"
         shell: pwsh
@@ -391,84 +385,6 @@ jobs:
             Write-Host "::endgroup::"
             exit 1
           }
-          Write-Host "::endgroup::"
-        shell: pwsh
-
-# ==================================================================================================
-
-      - name: AAPT2 override の設定
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
-
-          Write-Host "::group::AAPT2 override の設定"
-
-          if (-not $env:UNITY_EXE_PATH) {
-            Write-Host "::error::UNITY_EXE_PATH が設定されていません。"
-            exit 1
-          }
-          if (-not (Test-Path $env:UNITY_EXE_PATH)) {
-            Write-Host "::error::UNITY_EXE_PATH が指すファイルが存在しません: $env:UNITY_EXE_PATH"
-            exit 1
-          }
-
-          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
-          $Aapt2 = $null
-
-          # UNITY_EXE_PATH からバンドルを遡り、Unity.app の親ディレクトリ（バージョンルート）を特定する
-          # 例: .../6000.3.10f1/Unity.app/Contents/MacOS/Unity → バージョンルートは .../6000.3.10f1
-          $CurrentPath = Split-Path $env:UNITY_EXE_PATH -Parent
-          $AppBundlePath = $null
-          while ($CurrentPath) {
-            if ($CurrentPath -match '\.app$') {
-              $AppBundlePath = $CurrentPath
-              break
-            }
-            $Parent = Split-Path $CurrentPath -Parent
-            if ($Parent -eq $CurrentPath) { break }
-            $CurrentPath = $Parent
-          }
-
-          if ($AppBundlePath) {
-            # macOS: Unity.app の親ディレクトリがバージョンルート
-            $VersionRoot = Split-Path $AppBundlePath -Parent
-          } else {
-            # Windows: Editor 実行ファイルの1階層上がバージョンルート (Editor/Unity.exe → バージョンルート)
-            $VersionRoot = Split-Path (Split-Path $env:UNITY_EXE_PATH -Parent) -Parent
-          }
-
-          Write-Host "算出したバージョンルート: $VersionRoot"
-
-          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
-          $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -Force -ErrorAction SilentlyContinue |
-                    Select-Object -First 1
-
-          if (-not $Aapt2) {
-            Write-Host "::error::$Aapt2Name が見つかりません: $VersionRoot"
-            exit 1
-          }
-
-          Write-Host "見つかった aapt2 パス: $($Aapt2.FullName)"
-
-          $GradleTemplatePath = Join-Path $env:GITHUB_WORKSPACE "Assets/Plugins/Android/gradleTemplate.properties"
-          if (-not (Test-Path $GradleTemplatePath)) {
-            Write-Host "::error::gradleTemplate.properties が見つかりません: $GradleTemplatePath"
-            exit 1
-          }
-
-          $NormalizedPath = $Aapt2.FullName -replace '\\', '/'
-          $OverrideLine = "android.aapt2FromMavenOverride=$NormalizedPath"
-
-          $Content = Get-Content -Path $GradleTemplatePath
-          if ($Content -match '^android\.aapt2FromMavenOverride=') {
-            $Content = $Content -replace '^android\.aapt2FromMavenOverride=.*$', $OverrideLine
-          } else {
-            $Content += $OverrideLine
-          }
-          Set-Content -Path $GradleTemplatePath -Value $Content
-
-          Write-Host "設定した aapt2 パス: $($Aapt2.FullName)"
-
           Write-Host "::endgroup::"
         shell: pwsh
 

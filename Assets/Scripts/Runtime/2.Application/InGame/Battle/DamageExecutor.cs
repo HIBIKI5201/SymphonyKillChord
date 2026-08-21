@@ -1,5 +1,4 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 
@@ -8,6 +7,18 @@ namespace KillChord.Runtime.Application.InGame.Battle
     /// <summary>
     ///     ダメージ計算を実行するユーティリティクラス。
     /// </summary>
+    // TODO: ダメージ通知(EOnTakeDamage)の発火をここへ集約する。
+    //   現状は PlayerAttackController と SkillAttackController だけが個別に発火しており、
+    //   DamageExecutor を直接呼ぶ経路(Skill_00/01/03/05/13、InfectionGroup)は
+    //   ダメージが入るのに数値表示が出ない。呼び出し側での発火は漏れが起きやすい。
+    //   あるべき形は、ダメージを確定させたこのメソッドが唯一の通知元になること。
+    //   ただし AttackExecutor が内部で本メソッドを呼ぶため、そのまま発火を足すと
+    //   通常攻撃系が二重発火する。移行手順は以下。
+    //     1. 本メソッドの末尾で EOnTakeDamage を発火する
+    //     2. PlayerAttackController と SkillAttackController の明示的な発火を削除する
+    //     3. 発火値を FinalDamage と AppliedDamage のどちらに統一するか決める
+    //        (現状は表示側が FinalDamage 前提。軽減後の実ダメージを出すなら表示仕様の変更が要る)
+    //     4. 通常攻撃・スキル・感染ダメージの表示回数が変わらないことを確認する
     public static class DamageExecutor
     {
         /// <summary>
@@ -17,16 +28,14 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="defender"> 防御者です。 </param>
         /// <param name="attackResult"> 攻撃結果です。 </param>
         /// <param name="attackType"> 攻撃タイプです。 </param>
-        /// <param name="notifyNormalDamage"> 通常ダメージを通知するかどうかを示す値です。 </param>
         /// <returns> 計算結果の攻撃結果です。 </returns>
         public static AttackResult Execute(
             IAttacker attacker,
             IDefender defender,
             AttackResult attackResult,
-            DamageAttackType attackType,
-            bool notifyNormalDamage = false)
+            DamageAttackType attackType)
         {
-            return ExecuteInternal(attacker, defender, attackResult, attackType, true, notifyNormalDamage);
+            return ExecuteInternal(attacker, defender, attackResult, attackType, true);
         }
 
         /// <summary>
@@ -44,7 +53,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             AttackResult attackResult,
             DamageAttackType attackType)
         {
-            return ExecuteInternal(attacker, defender, attackResult, attackType, false, false);
+            return ExecuteInternal(attacker, defender, attackResult, attackType, false);
         }
 
         /// <summary>
@@ -61,8 +70,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             IDefender defender,
             AttackResult attackResult,
             DamageAttackType attackType,
-            bool applyOutgoingModifiers,
-            bool notifyNormalDamage)
+            bool applyOutgoingModifiers)
         {
             if (attacker == null)
             {
@@ -96,7 +104,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 damageToHealth = barrierHolder.AbsorbBarrier(result.FinalDamage, out barrierDamage);
             }
 
-            NotifySkillDamage(defender, result, attackType, notifyNormalDamage);
             Damage appliedDamage = default;
 
             // 防御者がダメージを受けることができる場合、またはダメージが0より大きい場合にのみ、ダメージを適用する
@@ -126,43 +133,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
                     attackType));
 
             return result;
-        }
-
-        /// <summary>
-        ///     スキルダメージを通知します。
-        /// </summary>
-        /// <param name="defender"> ダメージを受ける防御者です。 </param>
-        /// <param name="attackResult"> 攻撃結果です。 </param>
-        /// <param name="attackType"> 攻撃タイプです。 </param>
-        /// <param name="notifyNormalDamage"> 通常ダメージを通知するかどうかを示す値です。 </param>
-        private static void NotifySkillDamage(
-            IDefender defender,
-            in AttackResult attackResult,
-            DamageAttackType attackType,
-            bool notifyNormalDamage)
-        {
-            // スキルダメージ、感染ダメージ、または通常ダメージで通知が有効な場合にのみ通知する
-            bool shouldNotify =
-                attackType == DamageAttackType.Skill ||
-                attackType == DamageAttackType.Infection ||
-                attackType == DamageAttackType.Normal && notifyNormalDamage;
-
-            if (!shouldNotify)
-            {
-                return;
-            }
-
-            if (defender is not CharacterEntity character)
-            {
-                return;
-            }
-
-            EventBus<EOnTakeDamage>.Raise(
-                new EOnTakeDamage(
-                    attackResult.FinalDamage.Value,
-                    attackResult.IsCritical,
-                    character.Id,
-                    attackType));
         }
     }
 }

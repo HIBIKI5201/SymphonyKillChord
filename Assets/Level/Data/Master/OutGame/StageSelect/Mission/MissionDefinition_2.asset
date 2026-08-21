@@ -25,7 +25,6 @@ MonoBehaviour:
   - _condition:
       rid: 4420578705146118
     _guideMessageText: 
-    _entryActions: []
   _failCondition:
     rid: 8885031662707802242
   _evaluationConditions:
@@ -50,11 +49,11 @@ MonoBehaviour:
     - rid: 4420578705146120
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:1401557065)\u309210\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:1910175038)\u30921\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
         _enemyMissionKeyId:
-          _id: enemy_red
-          _hashId: 1401557065
-        _requiredKillCount: 10
+          _id: boss_research
+          _hashId: 1910175038
+        _requiredKillCount: 1
     - rid: 8885031662707802230
       type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:

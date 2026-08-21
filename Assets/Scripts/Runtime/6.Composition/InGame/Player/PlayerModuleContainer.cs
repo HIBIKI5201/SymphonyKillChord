@@ -3,7 +3,6 @@ using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
-using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Player;
 
 namespace KillChord.Runtime.Composition.InGame.Player
@@ -25,14 +24,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
             PlayerInitializer playerInitializer,
             PlayerView playerView,
             CharacterEntity playerEntity,
-            PlayerStatusBonus playerStatusBonus,
-            ReusableParticleSystemView damageEffectView)
+            PlayerStatusBonus playerStatusBonus)
         {
             PlayerInitializer = playerInitializer;
             PlayerView = playerView;
             PlayerEntity = playerEntity;
             PlayerStatusBonus = playerStatusBonus;
-            DamageEffectView = damageEffectView;
         }
 
         /// <summary> プレイヤー初期化クラスです。 </summary>
@@ -43,9 +40,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         /// <summary> プレイヤーEntityです。 </summary>
         public CharacterEntity PlayerEntity { get; }
-
-        /// <summary> キャラクター共通の被弾エフェクトViewです。 </summary>
-        public ReusableParticleSystemView DamageEffectView { get; }
 
         /// <summary> プレイヤーステータスボーナスです。 </summary>
         public PlayerStatusBonus PlayerStatusBonus { get; }
