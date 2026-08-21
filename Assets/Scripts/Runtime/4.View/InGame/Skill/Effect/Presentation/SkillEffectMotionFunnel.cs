@@ -1,4 +1,4 @@
-using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
+﻿using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using KillChord.Runtime.View.InGame.Skill.Effect.Presentation;
 using LitMotion;
 using Unity.Transforms;
@@ -24,6 +24,7 @@ namespace KillChord.Runtime.View
         {
             _handle.TryComplete();
 
+            if (_travelTarget == null) _travelTarget = transform;
 
             Transform parent = _travelTarget.parent;
 
