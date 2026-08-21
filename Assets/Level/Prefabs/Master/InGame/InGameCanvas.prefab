@@ -1334,6 +1334,7 @@ MonoBehaviour:
   _canvasGroup: {fileID: 2386361446383230203}
   _targetAlpha: 1
   _noTargetAlpha: 1
+  _dimAlpha: 0.15
   _justTimingSizeDelta: 256
   _inTimingSizeDelta: 128
   _outTimingSizeDelta: 8

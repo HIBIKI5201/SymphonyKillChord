@@ -80,11 +80,36 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
+            var missionContainer = ServiceLocator.GetInstance<KillChord.Runtime.Composition.InGame.Mission.MissionModuleContainer>();
+            var missionRuntimeService = missionContainer?.MissionRuntimeService;
+            ServiceLocator.TryGetInstance(out KillChord.Runtime.Adaptor.InGame.StageSelect.SelectedBattleStageState selectedBattleStageState);
+
+            System.Func<KillChord.Runtime.Domain.InGame.Mission.MissionActionKind?> targetActionProvider = () =>
+            {
+                if (selectedBattleStageState != null && selectedBattleStageState.HasSelectedBattleStage && selectedBattleStageState.CurrentStageDefinition.IsTutorial)
+                {
+                    if (missionRuntimeService != null && missionRuntimeService.MissionDefinition != null)
+                    {
+                        if (missionRuntimeService.MissionDefinition.ClearCondition is KillChord.Runtime.Domain.InGame.Mission.ClearCondition.ObjectiveSequenceClearCondition sequence)
+                        {
+                            var currentStepIndex = missionRuntimeService.MissionProgress.ObjectiveStepIndex;
+                            var currentStep = sequence.GetStep(currentStepIndex);
+                            if (currentStep != null && currentStep.Condition is KillChord.Runtime.Domain.InGame.Mission.ClearCondition.ActionRepeatCountClearCondition actionCondition)
+                            {
+                                return actionCondition.ActionKind;
+                            }
+                        }
+                    }
+                }
+                return null;
+            };
+
             // ガイド表示と判定は、音楽同期とターゲット状態の双方を参照するためPresenterへ集約する。
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
                 new RhythmGuideUsecase(_rhythmJudgmentDefinitionAsset.ToDefinition()),
-                targetingSystem
+                targetingSystem,
+                targetActionProvider
             );
 
             new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
