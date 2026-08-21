@@ -41,7 +41,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         {
             ApplyColor(_onColor);
 
-            _iconImage.color = Color.clear;
+            _iconImage.color = Color.black;
 
             if (_isActive)
             {
@@ -59,7 +59,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         {
             ApplyColor(_offColor);
 
-            _iconImage.color = Color.black;
+            _iconImage.color = Color.clear;
 
             if (_isActive)
             {
