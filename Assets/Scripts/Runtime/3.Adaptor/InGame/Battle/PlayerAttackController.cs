@@ -314,7 +314,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 isJustHit,
                 _battleState.Attacker.BaseDamage,
                 _hitResults,
-                pendingHitEffects);
+                pendingHitEffects,
+                notifyNormalDamage: true);
 
             for (int i = 0; i < _hitResults.Count; i++)
             {
