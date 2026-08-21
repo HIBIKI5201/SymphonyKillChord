@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Skill;
@@ -32,6 +33,10 @@ namespace KillChord.Runtime.Composition.InGame.Skill.Effect
                 Debug.LogError($"[{nameof(SkillEffectInitializer)}] {nameof(SkillEffectSpawner)} が未設定です。", this);
                 return false;
             }
+
+            // 全画面Volumeは常駐カメラ側が持つため、存在する場合のみ注入する。
+            ServiceLocator.TryGetInstance(out IFocusPostEffectPlayer focusPostEffectPlayer);
+            _skillEffectSpawner.Initialize(focusPostEffectPlayer);
 
             _moduleContainer = new SkillEffectModuleContainer(_skillEffectSpawner);
             ServiceLocator.RegisterInstance(_moduleContainer);

@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -29,6 +30,15 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
         public override bool Build()
         {
             ServiceLocator.RegisterInstance<ICameraTransform>(this, LocateTypeEnum.Locator);
+
+            // 注目レイヤー以外へVolumeを掛ける演出は、同じカメラ上のコンポーネントが担う。
+            _focusPostEffectPlayer = GetComponent<PostProccessOverlayCamera>();
+            if (_focusPostEffectPlayer != null)
+            {
+                ServiceLocator.RegisterInstance<IFocusPostEffectPlayer>(
+                    _focusPostEffectPlayer, LocateTypeEnum.Locator);
+            }
+
             return true;
         }
 
@@ -42,6 +52,14 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
             {
                 ServiceLocator.UnregisterInstance<ICameraTransform>();
             }
+
+            if (_focusPostEffectPlayer != null)
+            {
+                ServiceLocator.UnregisterInstance<IFocusPostEffectPlayer>();
+                _focusPostEffectPlayer = null;
+            }
         }
+
+        private PostProccessOverlayCamera _focusPostEffectPlayer;
     }
 }

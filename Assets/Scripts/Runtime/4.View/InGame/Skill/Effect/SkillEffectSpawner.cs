@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,15 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
     /// </summary>
     public sealed class SkillEffectSpawner : MonoBehaviour, ISkillEffectSpawner
     {
+        /// <summary>
+        ///     発動時の全画面演出に必要な依存を注入する。
+        /// </summary>
+        /// <param name="focusPostEffectPlayer"> 全画面Volumeの再生先です。 </param>
+        public void Initialize(IFocusPostEffectPlayer focusPostEffectPlayer)
+        {
+            _focusPostEffectPlayer = focusPostEffectPlayer;
+        }
+
         /// <summary>
         ///     装備スキルに応じたエフェクトのプールを事前生成する。
         /// </summary>
@@ -63,6 +73,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _activeInstances.Add(instance);
             if (instance.Play(context, entry.ReleaseHandler))
             {
+                PlayFocusPostEffect(instance);
                 return instance;
             }
 
@@ -77,6 +88,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// </summary>
         public void StopAll()
         {
+            _focusPostEffectPlayer?.Stop();
+
             // 停止はキャンセル要求のため、返却は各インスタンスの完了処理から行われる。
             for (int i = _activeInstances.Count - 1; i >= 0; i--)
             {
@@ -99,11 +112,16 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _pools.Clear();
         }
 
+        private const int DEFAULT_EFFECT_LAYER = 9;
+
         [SerializeField, Tooltip("スキルIDとエフェクトプレハブの対応表です。")]
         private SkillEffectCatalogConfig _catalog;
 
         [SerializeField, Tooltip("生成したエフェクトの親Transformです。未設定時は自身を使用します。")]
         private Transform _instanceRoot;
+
+        [SerializeField, Tooltip("生成したエフェクトへ設定するレイヤーです。Volumeの適用対象から除外されます。")]
+        private int _effectLayer = DEFAULT_EFFECT_LAYER;
 
         /// <summary>
         ///     破棄時にプールを解放する。
@@ -140,6 +158,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             Transform parent = _instanceRoot != null ? _instanceRoot : transform;
             SkillEffectInstance instance = Instantiate(prefab, parent);
             instance.name = prefab.name;
+
+            // Volumeの適用対象から外すため、エフェクトは専用レイヤーへ揃える。
+            SetLayerRecursively(instance.gameObject, _effectLayer);
             instance.Prewarm();
             return instance;
         }
@@ -166,8 +187,45 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             Destroy(instance.gameObject);
         }
 
+        /// <summary>
+        ///     エフェクトごとに設定された秒数だけ全画面Volumeを再生する。
+        /// </summary>
+        /// <param name="instance"> 再生を開始したエフェクトです。 </param>
+        private void PlayFocusPostEffect(SkillEffectInstance instance)
+        {
+            if (_focusPostEffectPlayer == null)
+            {
+                return;
+            }
+
+            float durationSeconds = instance.FocusPostEffectSeconds;
+            if (durationSeconds <= 0f)
+            {
+                return;
+            }
+
+            _focusPostEffectPlayer.Play(instance.FocusPostEffectDelaySeconds, durationSeconds);
+        }
+
+        /// <summary>
+        ///     指定オブジェクトとその子階層すべてへレイヤーを設定する。
+        /// </summary>
+        /// <param name="target"> 設定対象のオブジェクトです。 </param>
+        /// <param name="layer"> 設定するレイヤー番号です。 </param>
+        private static void SetLayerRecursively(GameObject target, int layer)
+        {
+            target.layer = layer;
+
+            Transform targetTransform = target.transform;
+            for (int i = 0; i < targetTransform.childCount; i++)
+            {
+                SetLayerRecursively(targetTransform.GetChild(i).gameObject, layer);
+            }
+        }
+
         private readonly Dictionary<int, SkillEffectPoolEntry> _pools = new();
         private readonly List<SkillEffectInstance> _activeInstances = new();
+        private IFocusPostEffectPlayer _focusPostEffectPlayer;
 
         /// <summary>
         ///     エフェクトプレハブ1件分のプールを保持するクラス。
