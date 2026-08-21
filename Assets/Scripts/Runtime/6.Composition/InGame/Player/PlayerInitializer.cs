@@ -31,6 +31,7 @@ using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Camera;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
@@ -74,6 +75,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         [SerializeField, SourceDataAddress, Tooltip("モバイルスティックのフリック判定設定の Addressables キーです。")]
         private string _mobileStickFlickInputConfigKey;
+        [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
+        private ReusableParticleSystemView _damageEffectView;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -198,7 +201,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 this,
                 _player,
                 _playerEntity,
-                playerStatusBonusContainer.PlayerStatusBonus);
+                playerStatusBonusContainer.PlayerStatusBonus,
+                _damageEffectView);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;
@@ -375,6 +379,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 cameraTransform.Transform,
                 inputView,
                 healthHudPresenter,
+                _damageEffectView,
                 inputSuppressionState);
 
             InitializeMobileStickFlickInput(inputView);
@@ -608,7 +613,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 || _playerViewPrefab == null
                 || _loadedPlayerData == null
                 || _characterAnimationConfig == null
-                || _playerAttackAnimationConfig == null)
+                || _playerAttackAnimationConfig == null
+                || _damageEffectView == null)
             {
                 Debug.LogError($"[{nameof(PlayerInitializer)}] プレイヤー初期化参照が不足しています。", this);
                 return false;
