@@ -23,8 +23,9 @@ const { role, names } = Astro.props;
 
 <style>
 	.credit-role {
-		padding: 28px 0;
-		border-bottom: 1px solid var(--color-surface-border);
+		flex: 1 1 240px;
+		padding: 20px 0;
+		border-top: 1px solid var(--color-surface-border);
 	}
 
 	.role-title {
@@ -35,12 +36,12 @@ const { role, names } = Astro.props;
 		font-family: var(--font-mono);
 		letter-spacing: var(--tracking-label);
 		font-size: 13px;
-		color: var(--color-signal-dim);
+		color: var(--color-text-muted);
 		text-transform: uppercase;
 	}
 
 	.role-marker {
-		color: var(--color-signal);
+		color: var(--color-text-muted);
 	}
 
 	.names {

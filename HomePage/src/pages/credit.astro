@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import ScanlineOverlay from '../components/ScanlineOverlay.astro';
 import SiteFooter from '../components/SiteFooter.astro';
-import CreditRole from '../components/CreditRole.astro';
+import CreditCategory from '../components/CreditCategory.astro';
 import credits from '../data/credits.json';
 ---
 
@@ -17,7 +17,7 @@ import credits from '../data/credits.json';
 		</section>
 
 		<section id="credit-list">
-			{credits.map((entry) => <CreditRole role={entry.role} names={entry.names} />)}
+			{credits.map((entry) => <CreditCategory category={entry.category} roles={entry.roles} />)}
 		</section>
 	</main>
 
