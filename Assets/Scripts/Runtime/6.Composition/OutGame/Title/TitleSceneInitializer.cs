@@ -61,6 +61,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。バトルシーン名の解決に使用します。")]
         private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
 
+        [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
+        private TextAsset _memberCsv;
+
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private TitleSceneView _titleSceneView;
@@ -193,6 +196,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
+            BuildMemberList(creditScreenView);
+
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
             IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedRuleData);
 
@@ -319,6 +324,26 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     制作メンバー CSV を読み込み、クレジット画面へ一覧を反映します。
+        /// </summary>
+        /// <param name="creditScreenView"> 一覧の反映先となるクレジット画面 View です。 </param>
+        private void BuildMemberList(CreditScreenView creditScreenView)
+        {
+            if (_memberCsv == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(TitleSceneInitializer)}] 制作メンバー CSV が設定されていないため、クレジット画面のメンバー一覧は空になります。",
+                    this);
+                return;
+            }
+
+            IMemberRepository memberRepository = new MemberCsvRepository(_memberCsv.text);
+            IMemberListPresenter memberListPresenter = new MemberListPresenter(creditScreenView);
+            ShowMemberListUseCase showMemberListUseCase = new(memberRepository, memberListPresenter);
+            showMemberListUseCase.Execute();
         }
 
         /// <summary>

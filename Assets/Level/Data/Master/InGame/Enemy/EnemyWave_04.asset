@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8351cdae6b9c6c14aa15be57fd69b4c7, type: 3}
+  m_Name: EnemyWave_04
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyWaveDefinitionAsset
+  _id:
+    _id: enemy_04
+    _hashId: -1493124437
+  _battleSceneName: Stage_01
+  _waves:
+  - Details:
+    - EnemyType: 0
+      EnemyAmount: 3
+    WaveDuration: 180
+    StageEffects:
+    - rid: 4309479946213916689
+    SpawnPointCandidates:
+    - _id: PositionPair_17
+      _hashId: 451004108
+  - Details:
+    - EnemyType: 0
+      EnemyAmount: 2
+    - EnemyType: 1
+      EnemyAmount: 1
+    WaveDuration: 90
+    StageEffects: []
+    SpawnPointCandidates:
+    - _id: PositionPair_9
+      _hashId: 983779639
+    - _id: PositionPair_17
+      _hashId: 451004108
+  _loop: 1
+  _loopStart: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 4309479946213916689
+      type: {class: ExplosionStageEffectAsset, ns: KillChord.Runtime.InfraStructure.InGame.Stage, asm: KillChord.Structure}
+      data:
+        _effectId:
+          _id: 
+          _hashId: 0
+        _barFlag: 0
+        _timeSignature: 4
+        _targetBeat: 1
+        _inspectorSummary: "\u7206\u767A\u6F14\u51FA: 0"
