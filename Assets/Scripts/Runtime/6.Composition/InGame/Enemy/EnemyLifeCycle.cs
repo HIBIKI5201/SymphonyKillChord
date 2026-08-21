@@ -17,6 +17,7 @@ using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.Utility.Rendering;
 using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using KillChord.Runtime.View.InGame.Sequence;
@@ -83,9 +84,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             TargetSystemController targetingSystem,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
+            DamageNumberPoolView damageNumberPoolView,
+            ReusableParticleSystemView damageEffectView,
             EnemyWaveSpawnerState waveSpawnerState,
             Action<EnemyLifeCycle> releaseCallback,
-            EnemyType enemyType
+            EnemyType enemyType,
+            EnemyAIControllerRegistry battleAiRegistry
             )
         {
             if (_view == null)
@@ -105,6 +109,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetingSystem = targetingSystem;
             _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
             _waveSpawnerState = waveSpawnerState;
+            _battleAIRegistry = battleAiRegistry;
 
             MissionModuleContainer missionModuleContainer = ServiceLocator.GetInstance<MissionModuleContainer>();
             _missionEventController = missionModuleContainer?.MissionEventController;
@@ -148,8 +153,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
+            var healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
+            _enemyHealthHudPresenter = healthHudPresenter;
+
+            _enemyHealthHudPresenter.OnDamaged += _view.PlayDamageFeedback;
 
             _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform, GetComponent<Collider>());
 
@@ -158,9 +166,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             ICharacterAnimationViewContext animationContext =
                 animationComposition.Init(_characterAnimationView, _characterAnimationConfig, musicSyncState);
             _characterAnimationContext = animationContext;
-            _view.Initialize(aiController, target, animationContext, musicSyncState);
+            _view.Initialize(aiController, target, animationContext, musicSyncState, damageEffectView);
             _healthView.Bind(viewModel);
-            _healthView.Initialize(healthHudPresenter);
+            _healthView.Initialize(healthHudPresenter, damageNumberPoolView);
             // 警告デカールへ、攻撃タイミングまでの進捗を0〜1で供給する。
             _musicSyncState = musicSyncState;
             _raycastView.Initialize(
@@ -206,6 +214,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _enemyEntity.OnDied += HandleEnemyDied;
             _targetingSystem?.RegisterTarget(_targetable, _enemyEntity);
+            _battleAIRegistry?.Register(_aiController);
 
             // コンポーネント有効化
             SetDyingCollidersEnabled(true);
@@ -297,6 +306,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
             }
             _targetingSystem?.UnregisterTarget(_targetable);
+            _battleAIRegistry?.Unregister(_aiController);
 
             _attackReservationUsecase.Deactivate();
             _aiController.Deactivate();
@@ -429,7 +439,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyAIController _aiController;
         private EnemyAttackReservationUsecase _attackReservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
+        private EnemyHealthHudPresenter _enemyHealthHudPresenter;
         private EnemyBattleState _battleState;
+        private EnemyAIControllerRegistry _battleAIRegistry;
         private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
         private int _attackIndex;
@@ -505,7 +517,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _aiController?.Deactivate();
             _enemyBattleAIFacade?.StopGameplay();
             _view?.StopGameplay();
-            _healthHudPresenter?.Deactivate();
 
             if (_behaviorGraphAgent != null)
             {
@@ -526,6 +537,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
 
             _targetingSystem?.UnregisterTarget(_targetable);
+            _battleAIRegistry?.Unregister(_aiController);
             SetDyingCollidersEnabled(false);
         }
 
@@ -706,7 +718,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
 
+            if (_enemyHealthHudPresenter != null)
+            {
+                _enemyHealthHudPresenter.OnDamaged -= _view.PlayDamageFeedback;
+            }
+
+            _healthHudPresenter?.Dispose();
             _targetingSystem?.UnregisterTarget(_targetable);
+            _battleAIRegistry?.Unregister(_aiController);
             _targetable?.Dispose();
             _loadedEnemyData = null;
             _loadedMoveData = null;
