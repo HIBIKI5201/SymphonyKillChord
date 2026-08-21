@@ -44,7 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d767a2459e6289f478f3ad608840f0a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::SettingComposition
-  _audioSetting: {fileID: 11400000, guid: e67c3bcf1e3ba514b9831333fbe7a079, type: 2}
-  _screenSetting: {fileID: 11400000, guid: f5db8c67aa8974c4cb760ffd15997566, type: 2}
   _uiDocument: {fileID: 0}
-  _parent: {fileID: 4353054652239010838}
