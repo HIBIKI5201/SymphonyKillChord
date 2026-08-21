@@ -168,11 +168,6 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                     this);
                 return false;
             }
-            if(_missionVoiceSource == null)
-            {
-                Debug.LogError($"[{nameof(InGameMissionInitializer)}] ミッションステップ用VoiceSourceが未設定です。", this);
-                return false;
-            }
 
             MissionProgressRecorderController recorderController =
                 new MissionProgressRecorderController(
