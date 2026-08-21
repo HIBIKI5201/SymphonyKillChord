@@ -15,4 +15,5 @@ MonoBehaviour:
   _isResetAndLoadOnPlay: 1
   _initializeSceneList:
   - Persistent
-  _resetIgnoreSceneList: []
+  _resetIgnoreSceneList:
+  - SkillEffectDemo
