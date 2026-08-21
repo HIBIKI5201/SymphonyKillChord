@@ -21,6 +21,9 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             _cancellationTokenSource = new CancellationTokenSource();
         }
 
+        /// <summary> 保存が上限回数まで失敗したことを通知する。 </summary>
+        public event Action<Exception> OnSaveFailed;
+
         /// <summary>
         ///     保存済みの音量設定を読み込む。
         /// </summary>
@@ -67,7 +70,12 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             _isDisposed = true;
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
+            OnSaveFailed = null;
         }
+
+        private const int MAX_SAVE_ATTEMPTS = 3;
+        private const int INITIAL_RETRY_DELAY_MILLISECONDS = 1000;
+        private const int RETRY_DELAY_MULTIPLIER = 2;
 
         private readonly IAudioSettingsRepository _audioSettingsRepository;
         private readonly CancellationTokenSource _cancellationTokenSource;
@@ -91,23 +99,49 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
                 {
                     AudioSettingsData settingsToSave = _pendingSettings;
                     _hasPendingSave = false;
+                    int retryDelayMilliseconds = INITIAL_RETRY_DELAY_MILLISECONDS;
 
-                    try
+                    for (int saveAttempt = 1; saveAttempt <= MAX_SAVE_ATTEMPTS; saveAttempt++)
                     {
-                        await _audioSettingsRepository.SaveAsync(
-                            settingsToSave,
-                            cancellationToken);
-                    }
-                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-                    catch (Exception exception)
-                    {
-                        Debug.LogError(
-                            $"[{nameof(AudioSettingsService)}] 音量設定の保存に失敗しました。{exception}");
-                        _hasPendingSave = true;
-                        return;
+                        try
+                        {
+                            await _audioSettingsRepository.SaveAsync(
+                                settingsToSave,
+                                cancellationToken);
+                            break;
+                        }
+                        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                        {
+                            return;
+                        }
+                        catch (Exception exception)
+                        {
+                            Debug.LogError(
+                                $"[{nameof(AudioSettingsService)}] 音量設定の保存に失敗しました。{exception}");
+
+                            if (_hasPendingSave)
+                            {
+                                break;
+                            }
+
+                            if (saveAttempt >= MAX_SAVE_ATTEMPTS)
+                            {
+                                _hasPendingSave = true;
+                                OnSaveFailed?.Invoke(exception);
+                                return;
+                            }
+
+                            try
+                            {
+                                await Task.Delay(retryDelayMilliseconds, cancellationToken);
+                            }
+                            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                            {
+                                return;
+                            }
+
+                            retryDelayMilliseconds *= RETRY_DELAY_MULTIPLIER;
+                        }
                     }
                 }
             }
