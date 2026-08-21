@@ -141,8 +141,13 @@ namespace KillChord.Runtime.Application.InGame.Battle
             DamageAttackType attackType,
             bool notifyNormalDamage)
         {
-            if (attackType != DamageAttackType.Skill &&
-                !notifyNormalDamage)
+            // スキルダメージ、感染ダメージ、または通常ダメージで通知が有効な場合にのみ通知する
+            bool shouldNotify =
+                attackType == DamageAttackType.Skill ||
+                attackType == DamageAttackType.Infection ||
+                attackType == DamageAttackType.Normal && notifyNormalDamage;
+
+            if (!shouldNotify)
             {
                 return;
             }
