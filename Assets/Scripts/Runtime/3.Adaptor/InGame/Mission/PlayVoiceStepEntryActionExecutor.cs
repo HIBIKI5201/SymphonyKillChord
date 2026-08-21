@@ -26,6 +26,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 throw new ArgumentException(
                     $"{nameof(entryAction)}の型が{nameof(PlayVoiceStepEntryAction)}ではない。", nameof(entryAction));
             }
+            if (_voiceSource == null)
+            {
+                Debug.LogWarning($"[PlayVoiceStepEntryActionExecutor] ボイス再生用のVoiceSourceがNULLのため、ボイスを再生しません。");
+                return;
+            }
             _voiceSource.Play(((PlayVoiceStepEntryAction)entryAction).VoiceCueName);
         }
 

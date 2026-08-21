@@ -12,7 +12,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.StepEntryAction
         {
             if (string.IsNullOrWhiteSpace(voiceCueName))
             {
-                throw new ArgumentException(nameof(voiceCueName), $"[PlayVoiceStepEntryAction] 再生ボイスのCueNameが未設定です。");
+                throw new ArgumentException($"[PlayVoiceStepEntryAction] 再生ボイスのCueNameが未設定です。", nameof(voiceCueName));
             }
             _voiceCueName = voiceCueName;
         }
