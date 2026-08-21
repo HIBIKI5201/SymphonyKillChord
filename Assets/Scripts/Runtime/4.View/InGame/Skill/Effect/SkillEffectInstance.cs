@@ -1,6 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using KillChord.Runtime.View.InGame.Skill.Effect.Placement;
-using KillChord.Runtime.View.Persistent.PostEffect;
 using KillChord.Runtime.View.InGame.Skill.Effect.Presentation;
 using System;
 using System.Collections.Generic;
@@ -20,15 +19,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
         /// <summary> シーンロード時に事前生成する数です。 </summary>
         public int PrewarmCount => _prewarmCount;
-
-        /// <summary> 発動時に適用するポストプロセスのConfigです。未設定なら演出しません。 </summary>
-        public PostEffectOverlayConfig PostEffectConfig => _postEffectConfig;
-
-        /// <summary> 発動からポストプロセスを掛け始めるまでの秒数です。 </summary>
-        public float PostEffectDelaySeconds => _postEffectDelaySeconds;
-
-        /// <summary> ポストプロセスを掛け続ける秒数です。0なら演出しません。 </summary>
-        public float PostEffectSeconds => _postEffectSeconds;
 
         /// <summary> プールが保持する最大数です。 </summary>
         public int MaxPoolSize => Mathf.Max(_prewarmCount, _maxPoolSize);
@@ -104,9 +94,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _cancellationTokenSource?.Cancel();
         }
 
-        private const float DEFAULT_POST_EFFECT_DELAY_SECONDS = 0.1f;
-        private const float DEFAULT_POST_EFFECT_SECONDS = 0.8f;
-
         [SerializeField, Tooltip("配置の異なる構成要素です。1スキル分の演出をここへまとめます。")]
         private SkillEffectPart[] _parts;
 
@@ -115,18 +102,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
 
         [SerializeField, Min(1), Tooltip("プールが保持する最大数です。")]
         private int _maxPoolSize = 4;
-
-        [SerializeField]
-        [Tooltip("発動時に適用するポストプロセスのConfigです。未設定なら演出しません。")]
-        private PostEffectOverlayConfig _postEffectConfig;
-
-        [SerializeField, Min(0f)]
-        [Tooltip("発動からポストプロセスを掛け始めるまでの秒数です。")]
-        private float _postEffectDelaySeconds = DEFAULT_POST_EFFECT_DELAY_SECONDS;
-
-        [SerializeField, Min(0f)]
-        [Tooltip("ポストプロセスを掛け続ける秒数です。0なら演出しません。")]
-        private float _postEffectSeconds = DEFAULT_POST_EFFECT_SECONDS;
 
         [SerializeField, Min(0f), Tooltip("再生完了を検出できなかった場合に強制返却するまでの時間です。0なら無効です。")]
         private float _maxLifetimeSeconds = 30f;

@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
-using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Sequence;
 using UnityEngine;
 using UnityEngine.AI;
@@ -16,11 +15,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///     初期化処理。
         /// </summary>
-        public void Initialize(BossAIController bossAIController, Transform target, ReusableParticleSystemView damageEffectView)
+        public void Initialize(BossAIController bossAIController, Transform target)
         {
             _bossAIController = bossAIController;
             _target = target;
-            _damageEffectView = damageEffectView;
             _isPlaying = false;
         }
 
@@ -76,24 +74,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _navMeshAgent.updateRotation = false;
         }
 
-        public void PlayDamageFeedback()
-        {
-            if (_damageEffectView == null)
-            {
-                return;
-            }
-
-            Vector3 effectPosition = _damageEffectTransform != null
-                ? _damageEffectTransform.position
-                : transform.position;
-
-            _damageEffectView.PlayAt(effectPosition);
-        }
-
-        [Header("Effects")]
-        [SerializeField, Tooltip("攻撃ヒット時に再生するエフェクトのTransformです。")]
-        private Transform _damageEffectTransform;
-
         [SerializeField, Tooltip("攻撃ヒット時に再生するエフェクトPrefab。")]
         private ParticleSystem _attackHitEffectPrefab;
 
@@ -105,7 +85,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private BossAIController _bossAIController;
         private ParticleSystem _attackHitEffectInstance;
         private ParticleSystem _attackReserveEffectInstance;
-        private ReusableParticleSystemView _damageEffectView;
         private bool _isPlaying;
 
         /// <summary>

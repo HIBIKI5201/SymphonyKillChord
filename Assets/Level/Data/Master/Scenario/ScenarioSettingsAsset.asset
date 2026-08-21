@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cbc8065f2671a841b110549a652fc11, type: 3}
   m_Name: ScenarioSettingsAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.ScenarioSettingsAsset
-  _normalTextCharIntervalSec: 0.05
-  _fastForwardTextCharIntervalSec: 0.025
+  _normalTextCharIntervalSec: 0.2
+  _fastForwardTextCharIntervalSec: 0.1
   _pausePollIntervalSec: 0.05
-  _closeDelayAfterCompleteSec: 5
-  _autoAdvanceDelaySec: 2
+  _closeDelayAfterCompleteSec: 3
   _skipClosesImmediately: 1
   _waitForInputOnLastText: 0
-  _layerBackToFront: 03000000000000000100000002000000
+  _defaultScenarioId: ScenarioTest

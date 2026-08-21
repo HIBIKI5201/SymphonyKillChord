@@ -320,6 +320,7 @@ Transform:
   - {fileID: 6123456789012345679}
   - {fileID: 3995544741731007589}
   - {fileID: 5890332583008626860}
+  - {fileID: 553895010777146882}
   - {fileID: 583479539431759966}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -339,6 +340,7 @@ MonoBehaviour:
   _animator: {fileID: 7554209699097654958}
   _rb: {fileID: 6619117660693068914}
   _attackWeaponView: {fileID: 3851009381707317853}
+  _damageEffectView: {fileID: 8394300424249730032}
   _damageEffectPoint: {fileID: 5890332583008626860}
   _dodgeEffect: {fileID: 8069809640888090386}
   _dodgeEffectRenderers:
@@ -1186,6 +1188,53 @@ Transform:
   m_Children: []
   m_Father: {fileID: 819485884254681340}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8521277584958584646
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 553895010777146882}
+  - component: {fileID: 8394300424249730032}
+  m_Layer: 7
+  m_Name: DamageEffectPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &553895010777146882
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8521277584958584646}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.95, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4877291778978284914}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8394300424249730032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8521277584958584646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f7a5317d2fd48579d1a768ba2e7d2ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Character.ParticleSystemPoolView
+  _particleSystemTemplate: {fileID: 2900518608499646599, guid: ed505ccf1e4e8d640a0aaad3c820fbba, type: 3}
+  _defaultCapacity: 2
+  _maxPoolSize: 4
 --- !u!1001 &1682462127240618144
 PrefabInstance:
   m_ObjectHideFlags: 0

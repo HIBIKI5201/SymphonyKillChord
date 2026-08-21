@@ -1,14 +1,14 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.Sequence;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
-using KillChord.Runtime.Composition.InGame.Enemy;
 using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
@@ -21,7 +21,6 @@ using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Combo;
 using KillChord.Runtime.View.InGame.Mission;
 using KillChord.Runtime.View.OutGame.Scenario;
-using KillChord.Runtime.View.Persistent.Voice;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
@@ -202,8 +201,6 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 new IMissionStepEntryActionExecutor[]
                 {
                     new SetSkillExecutionEnabledStepEntryActionExecutor(playerModuleContainer.PlayerActionRestrictionState),
-                    new ToggleEnemyBattleAiStepEntryActionExecutor(ServiceLocator.GetInstance<EnemyModuleContainer>().EnemyBattleAIRegistry),
-                    new PlayVoiceStepEntryActionExecutor(_missionVoiceSource)
                 });
 
             if (_scenarioUsecase != null
@@ -335,8 +332,6 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private string _missionDefinitionRepositoryKey;
         [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーリポジトリの Addressables キーです。")]
         private string _enemyMissionKeyRepositoryKey;
-        [SerializeField, Tooltip("ミッションのステップ開始時にボイス再生用VoiceSourceです。")]
-        private VoiceSource _missionVoiceSource;
         [SerializeField, Tooltip("シナリオ表示と入力をまとめて有効化するルート。ScenarioViewとScenarioInputViewを子に配置します。")]
         private GameObject _scenarioRoot;
         [SerializeField, Tooltip("インゲームで使用するシナリオ表示View。ScenarioPlaybackClearConditionを使う場合に必須です。")]
