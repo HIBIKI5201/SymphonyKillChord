@@ -1,0 +1,67 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ScanlineOverlay from '../components/ScanlineOverlay.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import CreditRole from '../components/CreditRole.astro';
+import credits from '../data/credits.json';
+---
+
+<Layout title="クレジット | Symphony Kill Chord">
+	<main>
+		<section id="page-header">
+			<p id="eyebrow">Credit</p>
+			<div id="title-wrap">
+				<h1>クレジット</h1>
+				<ScanlineOverlay contained />
+			</div>
+		</section>
+
+		<section id="credit-list">
+			{credits.map((entry) => <CreditRole role={entry.role} names={entry.names} />)}
+		</section>
+	</main>
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	#page-header {
+		padding: 64px 0 48px;
+		text-align: center;
+	}
+
+	#eyebrow {
+		margin: 0 0 8px;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--color-signal);
+		text-transform: uppercase;
+	}
+
+	#title-wrap {
+		position: relative;
+		display: inline-block;
+		overflow: hidden;
+	}
+
+	h1 {
+		margin: 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(1.75rem, 5vw, 2.5rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+
+	#credit-list {
+		border-top: 1px solid var(--color-surface-border);
+	}
+</style>

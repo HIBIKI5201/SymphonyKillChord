@@ -1,7 +1,12 @@
 ---
+interface Props {
+	contained?: boolean;
+}
+
+const { contained = false } = Astro.props;
 ---
 
-<div class="scanline-overlay" aria-hidden="true"></div>
+<div class="scanline-overlay" data-contained={contained} aria-hidden="true"></div>
 
 <style>
 	.scanline-overlay {
@@ -18,6 +23,11 @@
 		);
 		mix-blend-mode: multiply;
 		animation: flicker 6s infinite steps(60);
+	}
+
+	.scanline-overlay[data-contained='true'] {
+		position: absolute;
+		z-index: 5;
 	}
 
 	.scanline-overlay::after {

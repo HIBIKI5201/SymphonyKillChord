@@ -1,0 +1,63 @@
+---
+interface Props {
+	role: string;
+	names: string[];
+}
+
+const { role, names } = Astro.props;
+---
+
+<section class="credit-role">
+	<p class="role-title"><span class="role-marker">◈</span>{role}</p>
+	<div class="names">
+		{
+			names.map((name, index) => (
+				<>
+					{index > 0 && <span class="name-divider" aria-hidden="true">/</span>}
+					<span class="name">{name}</span>
+				</>
+			))
+		}
+	</div>
+</section>
+
+<style>
+	.credit-role {
+		padding: 28px 0;
+		border-bottom: 1px solid var(--color-surface-border);
+	}
+
+	.role-title {
+		margin: 0 0 16px;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		color: var(--color-signal-dim);
+		text-transform: uppercase;
+	}
+
+	.role-marker {
+		color: var(--color-signal);
+	}
+
+	.names {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 8px 12px;
+	}
+
+	.name {
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: 1.375rem;
+		color: var(--color-text-primary);
+	}
+
+	.name-divider {
+		color: var(--color-surface-border);
+	}
+</style>
