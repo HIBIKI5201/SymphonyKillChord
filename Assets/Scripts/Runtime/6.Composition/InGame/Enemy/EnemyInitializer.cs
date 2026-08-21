@@ -141,6 +141,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _moduleContainer = new EnemyModuleContainer(new EnemyWaveSpawnerState());
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
+            _battleAIRegistry = new EnemyAIControllerRegistry();
+            _moduleContainer.EnemyBattleAIRegistry = _battleAIRegistry;
             return true;
         }
 
@@ -281,7 +283,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
                 _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator,
-                shellPool, _waveSpawnState, releaseCallback, enemyType);
+                shellPool, _damageNumberPoolView, _waveSpawnState, releaseCallback, enemyType, _battleAIRegistry);
         }
 
         /// <summary>
@@ -335,6 +337,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("敵ウェーブタイマーViewです。")]
         private EnemyWaveTimerView _enemyWaveTimerView;
 
+        [SerializeField, Tooltip("ダメージ数値プールViewです。")]
+        private DamageNumberPoolView _damageNumberPoolView;
+
         private PlayerInitializer _playerInitializer;
         private PlayerView _playerView;
         private MusicSyncState _musicSyncState;
@@ -344,6 +349,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private bool _initialized = false;
         private bool _isModuleRegistered;
         private EnemyModuleContainer _moduleContainer;
+        private EnemyAIControllerRegistry _battleAIRegistry;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private EnemyDefinitionRepository _loadedEnemyDefinitionRepository;
         private EnemyWaves _loadedEnemyWaves;
@@ -384,7 +390,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 || _enemySpawnPositionSearcher == null
                 || _enemyInfantrySpawner == null
                 || _enemyArtillerySpawner == null
-                || _enemyWaveTimerView == null)
+                || _enemyWaveTimerView == null
+                || _damageNumberPoolView == null)
             {
                 Debug.LogError($"[{nameof(EnemyInitializer)}] 敵モジュール参照が不足しています。", this);
                 return false;
@@ -407,7 +414,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return null;
             }
 
-            initializer.Initialize(targetingSystem, enemyPools);
+            initializer.Initialize(targetingSystem, enemyPools, _damageNumberPoolView);
             return initializer;
         }
     }
