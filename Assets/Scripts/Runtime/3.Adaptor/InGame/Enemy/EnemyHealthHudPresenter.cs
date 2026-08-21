@@ -102,7 +102,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 return DamageNumberType.Critical;
             }
 
-            if (eventData.AttackType == DamageAttackType.Skill)
+            if (eventData.AttackType == DamageAttackType.Skill ||
+                eventData.AttackType == DamageAttackType.Infection)
             {
                 return DamageNumberType.Skill;
             }

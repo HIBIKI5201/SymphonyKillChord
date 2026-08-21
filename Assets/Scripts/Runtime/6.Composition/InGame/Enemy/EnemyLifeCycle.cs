@@ -83,6 +83,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             TargetSystemController targetingSystem,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
+            DamageNumberPoolView damageNumberPoolView,
             EnemyWaveSpawnerState waveSpawnerState,
             Action<EnemyLifeCycle> releaseCallback,
             EnemyType enemyType
@@ -160,7 +161,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _characterAnimationContext = animationContext;
             _view.Initialize(aiController, target, animationContext, musicSyncState);
             _healthView.Bind(viewModel);
-            _healthView.Initialize(healthHudPresenter);
+            _healthView.Initialize(healthHudPresenter, damageNumberPoolView);
             // 警告デカールへ、攻撃タイミングまでの進捗を0〜1で供給する。
             _musicSyncState = musicSyncState;
             _raycastView.Initialize(
@@ -505,7 +506,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _aiController?.Deactivate();
             _enemyBattleAIFacade?.StopGameplay();
             _view?.StopGameplay();
-            _healthHudPresenter?.Deactivate();
 
             if (_behaviorGraphAgent != null)
             {
@@ -706,6 +706,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
 
+            _healthHudPresenter?.Dispose();
             _targetingSystem?.UnregisterTarget(_targetable);
             _targetable?.Dispose();
             _loadedEnemyData = null;
