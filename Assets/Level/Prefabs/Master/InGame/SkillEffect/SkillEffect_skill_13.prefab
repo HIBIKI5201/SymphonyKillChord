@@ -497,6 +497,9 @@ MonoBehaviour:
     - {fileID: 6874469675825323037}
   _prewarmCount: 1
   _maxPoolSize: 4
+  _postEffectConfig: {fileID: 11400000, guid: b452cdad7adf14f4381192adabc0442d, type: 2}
+  _postEffectDelaySeconds: 0.1
+  _postEffectSeconds: 0.8
   _maxLifetimeSeconds: 5
 --- !u!1 &3381250932121629907
 GameObject:
