@@ -97,7 +97,7 @@ MonoBehaviour:
   - rid: 5112082995642630672
   - rid: 7260318751720734895
   - rid: 7260318751720734996
-  m_VersionTimestamp: 639229221719989924
+  m_VersionTimestamp: 639229560065062131
   m_SerializedVersion: 2
   m_DebugInfo: {fileID: 6394660027214620352}
   m_RuntimeGraph: {fileID: 4520507370308768518}
@@ -1483,8 +1483,8 @@ MonoBehaviour:
       type: {class: ConditionModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
         ConditionType:
-          m_SerializableType: IsBattleAiActivatedCondition, KillChord.View, Version=0.0.0.0,
-            Culture=neutral, PublicKeyToken=null
+          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition.IsBattleAiActivatedCondition,
+            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         ConditionTypeID:
           m_Value0: 14009081076726596068
           m_Value1: 18326607657190624177
@@ -1740,8 +1740,8 @@ MonoBehaviour:
           rid: 5112082935029432439
         BlackboardGroupReferences: []
         Root:
-          rid: 7260318751720735027
-        m_VersionTimestamp: 639229221719989924
+          rid: 7260318760695234560
+        m_VersionTimestamp: 639229560065062131
     - rid: 5112082935029432439
       type: {class: BlackboardReference, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -1757,54 +1757,6 @@ MonoBehaviour:
         - rid: 7260318751720734950
         - rid: 7260318751720734951
         - rid: 7260318751720734952
-    - rid: 7260318717000287089
-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: 1
-    - rid: 7260318717000287091
-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: 0
-    - rid: 7260318751720734889
-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: 1
-    - rid: 7260318751720734890
-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: 1
-    - rid: 7260318751720734891
-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: 0
-    - rid: 7260318751720734894
-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: 0
     - rid: 7260318751720734948
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -1845,15 +1797,7 @@ MonoBehaviour:
           m_Value1: 10859535363759142801
         Name: EnemySharedFacade
         m_Value: {fileID: 0}
-    - rid: 7260318751720734993
-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: 0
-    - rid: 7260318751720735027
+    - rid: 7260318760695234560
       type: {class: Start, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1864,10 +1808,10 @@ MonoBehaviour:
         m_Parent:
           rid: -2
         m_Child:
-          rid: 7260318751720735028
+          rid: 7260318760695234561
         Repeat: 1
         AllowMultipleRepeatsPerTick: 0
-    - rid: 7260318751720735028
+    - rid: 7260318760695234561
       type: {class: SelectorComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1876,14 +1820,14 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735027
+          rid: 7260318760695234560
         m_Children:
-        - rid: 7260318751720735029
-        - rid: 7260318751720735030
+        - rid: 7260318760695234562
+        - rid: 7260318760695234563
         m_RegisteredObservers:
         - Observer:
-            rid: 7260318751720735030
-    - rid: 7260318751720735029
+            rid: 7260318760695234563
+    - rid: 7260318760695234562
       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1892,14 +1836,14 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735028
+          rid: 7260318760695234561
         m_Child:
-          rid: 7260318751720735031
+          rid: 7260318760695234564
         m_Conditions:
-        - rid: 7260318751720735032
+        - rid: 7260318760695234565
         m_RequiresAllConditions: 0
         m_ObserverType: 0
-    - rid: 7260318751720735030
+    - rid: 7260318760695234563
       type: {class: ObserverAbortModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1908,14 +1852,14 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735028
+          rid: 7260318760695234561
         m_Child:
-          rid: 7260318751720735033
+          rid: 7260318760695234566
         m_Conditions:
-        - rid: 7260318751720735034
+        - rid: 7260318760695234567
         m_RequiresAllConditions: 1
         m_AbortTarget: 3
-    - rid: 7260318751720735031
+    - rid: 7260318760695234564
       type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1924,12 +1868,12 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735029
+          rid: 7260318760695234562
         m_Children:
-        - rid: 7260318751720735035
-        - rid: 7260318751720735036
+        - rid: 7260318760695234568
+        - rid: 7260318760695234569
         m_RegisteredObservers: []
-    - rid: 7260318751720735032
+    - rid: 7260318760695234565
       type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
       data:
         Graph:
@@ -1937,8 +1881,8 @@ MonoBehaviour:
         State:
           rid: 7260318751720734951
         Bool:
-          rid: 7260318717000287089
-    - rid: 7260318751720735033
+          rid: 7260318760695234570
+    - rid: 7260318760695234566
       type: {class: RepeatUntilFailModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1947,11 +1891,11 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735030
+          rid: 7260318760695234563
         m_Child:
-          rid: 7260318751720735037
+          rid: 7260318760695234571
         m_AllowMultipleRepeatsPerTick: 0
-    - rid: 7260318751720735034
+    - rid: 7260318760695234567
       type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
       data:
         Graph:
@@ -1959,8 +1903,8 @@ MonoBehaviour:
         State:
           rid: 7260318751720734951
         Bool:
-          rid: 7260318717000287091
-    - rid: 7260318751720735035
+          rid: 7260318760695234572
+    - rid: 7260318760695234568
       type: {class: StopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
       data:
         ID:
@@ -1969,12 +1913,12 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735031
+          rid: 7260318760695234564
         Movement:
           rid: 7260318751720734949
         State:
           rid: 7260318751720734951
-    - rid: 7260318751720735036
+    - rid: 7260318760695234569
       type: {class: GetStunnedAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
       data:
         ID:
@@ -1983,12 +1927,20 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735031
+          rid: 7260318760695234564
         State:
           rid: 7260318751720734951
         Battle:
           rid: 7260318751720734950
-    - rid: 7260318751720735037
+    - rid: 7260318760695234570
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: 1
+    - rid: 7260318760695234571
       type: {class: SelectorComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -1997,13 +1949,21 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735033
+          rid: 7260318760695234566
         m_Children:
-        - rid: 7260318751720735038
-        - rid: 7260318751720735039
-        - rid: 7260318751720735040
+        - rid: 7260318760695234573
+        - rid: 7260318760695234574
+        - rid: 7260318760695234575
         m_RegisteredObservers: []
-    - rid: 7260318751720735038
+    - rid: 7260318760695234572
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: 0
+    - rid: 7260318760695234573
       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -2012,14 +1972,14 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735037
+          rid: 7260318760695234571
         m_Child:
-          rid: 7260318751720735041
+          rid: 7260318760695234576
         m_Conditions:
-        - rid: 7260318751720735042
+        - rid: 7260318760695234577
         m_RequiresAllConditions: 0
         m_ObserverType: 0
-    - rid: 7260318751720735039
+    - rid: 7260318760695234574
       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -2028,16 +1988,16 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735037
+          rid: 7260318760695234571
         m_Child:
-          rid: 7260318751720735043
+          rid: 7260318760695234578
         m_Conditions:
-        - rid: 7260318751720735044
-        - rid: 7260318751720735045
-        - rid: 7260318751720735046
+        - rid: 7260318760695234579
+        - rid: 7260318760695234580
+        - rid: 7260318760695234581
         m_RequiresAllConditions: 1
         m_ObserverType: 0
-    - rid: 7260318751720735040
+    - rid: 7260318760695234575
       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -2046,14 +2006,14 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735037
+          rid: 7260318760695234571
         m_Child:
-          rid: 7260318751720735047
+          rid: 7260318760695234582
         m_Conditions:
-        - rid: 7260318751720735048
+        - rid: 7260318760695234583
         m_RequiresAllConditions: 1
         m_ObserverType: 0
-    - rid: 7260318751720735041
+    - rid: 7260318760695234576
       type: {class: StopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
       data:
         ID:
@@ -2062,21 +2022,21 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735038
+          rid: 7260318760695234573
         Movement:
           rid: 7260318751720734949
         State:
           rid: 7260318751720734951
-    - rid: 7260318751720735042
-      type: {class: IsBattleAiActivatedCondition, ns: , asm: KillChord.View}
+    - rid: 7260318760695234577
+      type: {class: IsBattleAiActivatedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
       data:
         Graph:
           rid: 5112082935029432438
         State:
           rid: 7260318751720734951
         Bool:
-          rid: 7260318751720734993
-    - rid: 7260318751720735043
+          rid: 7260318760695234584
+    - rid: 7260318760695234578
       type: {class: AttackTargetAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
       data:
         ID:
@@ -2085,12 +2045,12 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735039
+          rid: 7260318760695234574
         Battle:
           rid: 7260318751720734950
         State:
           rid: 7260318751720734951
-    - rid: 7260318751720735044
+    - rid: 7260318760695234579
       type: {class: IsTargetInAttackRangeCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
       data:
         Graph:
@@ -2098,8 +2058,8 @@ MonoBehaviour:
         State:
           rid: 7260318751720734951
         Bool:
-          rid: 7260318751720734889
-    - rid: 7260318751720735045
+          rid: 7260318760695234585
+    - rid: 7260318760695234580
       type: {class: IsAimSightClearCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
       data:
         Graph:
@@ -2107,8 +2067,8 @@ MonoBehaviour:
         State:
           rid: 7260318751720734951
         Bool:
-          rid: 7260318751720734890
-    - rid: 7260318751720735046
+          rid: 7260318760695234586
+    - rid: 7260318760695234581
       type: {class: IsAttackingCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
       data:
         Graph:
@@ -2116,8 +2076,8 @@ MonoBehaviour:
         State:
           rid: 7260318751720734951
         Bool:
-          rid: 7260318751720734891
-    - rid: 7260318751720735047
+          rid: 7260318760695234587
+    - rid: 7260318760695234582
       type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         ID:
@@ -2126,12 +2086,12 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735040
+          rid: 7260318760695234575
         m_Children:
-        - rid: 7260318751720735049
-        - rid: 7260318751720735050
+        - rid: 7260318760695234588
+        - rid: 7260318760695234589
         m_RegisteredObservers: []
-    - rid: 7260318751720735048
+    - rid: 7260318760695234583
       type: {class: IsAttackingCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
       data:
         Graph:
@@ -2139,8 +2099,40 @@ MonoBehaviour:
         State:
           rid: 7260318751720734951
         Bool:
-          rid: 7260318751720734894
-    - rid: 7260318751720735049
+          rid: 7260318760695234590
+    - rid: 7260318760695234584
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: 0
+    - rid: 7260318760695234585
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: 1
+    - rid: 7260318760695234586
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: 1
+    - rid: 7260318760695234587
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: 0
+    - rid: 7260318760695234588
       type: {class: MoveToAttackAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
       data:
         ID:
@@ -2149,12 +2141,12 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735047
+          rid: 7260318760695234582
         Movement:
           rid: 7260318751720734949
         State:
           rid: 7260318751720734951
-    - rid: 7260318751720735050
+    - rid: 7260318760695234589
       type: {class: StopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
       data:
         ID:
@@ -2163,11 +2155,19 @@ MonoBehaviour:
         Graph:
           rid: 5112082935029432438
         m_Parent:
-          rid: 7260318751720735047
+          rid: 7260318760695234582
         Movement:
           rid: 7260318751720734949
         State:
           rid: 7260318751720734951
+    - rid: 7260318760695234590
+      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: 0
 --- !u!114 &6394660027214620352
 MonoBehaviour:
   m_ObjectHideFlags: 0
