@@ -389,6 +389,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
 
+            _healthHudPresenter?.Deactivate();
             _targetingSystem?.UnregisterTarget(_targetable);
             _targetable?.Dispose();
             _characterRepositoryKey.ReleaseLoadedAsset(this);
