@@ -26,6 +26,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             if (_damageText == null)
             {
                 Debug.LogError("[DamageNumberView] TMP_Text が未設定です。", this);
+                Complete();
                 return;
             }
 
