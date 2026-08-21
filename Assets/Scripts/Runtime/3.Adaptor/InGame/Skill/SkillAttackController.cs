@@ -72,7 +72,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 AttackExecutor.Execute(
                     attackDefinition,
                     _playerEntity,
-                    target, isJustHit,
+                    target,
+                    isJustHit,
                     _playerEntity.
                     BaseDamage,
                     damageAttackType: DamageAttackType.Skill);
