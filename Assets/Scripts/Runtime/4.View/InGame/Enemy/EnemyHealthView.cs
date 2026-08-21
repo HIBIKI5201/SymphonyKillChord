@@ -14,9 +14,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
         ///     初期化する。
         /// </summary>
         /// <param name="presenter"> HP HUDのPresenter。 </param>
-        public void Initialize(IHealthHudPresenter presenter)
+        /// <param name="damageNumberPoolView"> ダメージ数値のプールView。 </param>
+        public void Initialize(IHealthHudPresenter presenter, DamageNumberPoolView damageNumberPoolView)
         {
             _presenter = presenter;
+            _damageNumberPoolView = damageNumberPoolView;
         }
 
         /// <summary>
@@ -40,15 +42,22 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="dto"> ダメージ数値のDTO。 </param>
         public void ShowDamage(in DamageNumberDTO dto)
         {
-            if (_damageNumberPrefab == null)
+            if (_damageNumberPoolView == null)
             {
-                Debug.LogError("[EnemyHealthView] DamageNumberView のPrefab参照がありません。", this);
+                Debug.LogError("[EnemyHealthView] DamageNumberPoolView の参照がありません。", this);
                 return;
             }
 
-            DamageNumberView view = Instantiate(_damageNumberPrefab, _damageNumberSpawnPoint);
-            MoveTowardCamera(view.transform);
-            view.Play(dto);
+            if (_damageNumberSpawnPoint == null)
+            {
+                Debug.LogError("[EnemyHealthView] DamageNumberSpawnPoint の参照がありません。", this);
+                return;
+            }
+
+            _damageNumberPoolView.ShowDamage(
+                dto,
+                GetDamageNumberPos(),
+                _damageNumberSpawnPoint.rotation);
         }
 
         private void OnDestroy()
@@ -58,34 +67,34 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         [SerializeField, Tooltip("HP HUDのView")] private HealthHudView _healthHudView;
         [SerializeField, Tooltip("ダメージ数値の生成位置")] private Transform _damageNumberSpawnPoint;
-        [SerializeField, Tooltip("ダメージ数値のPrefab")] private DamageNumberView _damageNumberPrefab;
         [SerializeField, Min(0f), Tooltip("ダメージ数値をカメラ側へ寄せる距離。")]
         private float _damageNumberCameraOffset = 0.2f;
         private IHealthHudPresenter _presenter;
+        private DamageNumberPoolView _damageNumberPoolView;
 
         /// <summary>
-        ///     ダメージ数値をカメラ方向へ移動する。
+        ///     ダメージ数値の表示位置を取得する。
         /// </summary>
-        /// <param name="target">移動するダメージ数値のTransform。</param>
-        private void MoveTowardCamera(Transform target)
+        /// <returns> ダメージ数値の表示位置。 </returns>
+        private Vector3 GetDamageNumberPos()
         {
+            Vector3 pos = _damageNumberSpawnPoint.position;
             UnityEngine.Camera targetCamera = UnityEngine.Camera.main;
 
             if (targetCamera == null)
             {
-                return;
+                return pos;
             }
 
             Vector3 toCamera =
-                targetCamera.transform.position - target.position;
+                targetCamera.transform.position - pos;
 
             if (toCamera.sqrMagnitude <= Mathf.Epsilon)
             {
-                return;
+                return pos;
             }
 
-            target.position +=
-                toCamera.normalized * _damageNumberCameraOffset;
+            return pos += toCamera.normalized * _damageNumberCameraOffset;
         }
     }
 }
