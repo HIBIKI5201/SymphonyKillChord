@@ -26,6 +26,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <summary> スキルの発動に成功したとき、対応するボイスを再生するためのイベント。 </summary>
         public event Action OnSkillVoiceRequested;
 
+        /// <summary> スキルで構える武器の表示を要求するイベントです。 </summary>
+        public event Action<BeatType> OnSkillWeaponRequested;
+
         /// <summary>
         ///     初期化処理。
         /// </summary>
@@ -62,6 +65,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 {
                     OnSkillAnimationRequested?.Invoke(result.AnimationKey);
                     OnSkillVoiceRequested?.Invoke();
+                    OnSkillWeaponRequested?.Invoke(result.WeaponBeatType);
 
                     if (result.SkillNormalAttackDamagePolicy == SkillNormalAttackDamagePolicy.Skip)
                     {
