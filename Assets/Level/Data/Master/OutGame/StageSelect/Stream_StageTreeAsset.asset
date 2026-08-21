@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageTreeAsset
   _stageAssets:
   - {fileID: 11400000, guid: 312205736429ccf4891c016ca3d8c168, type: 2}
-  - {fileID: 11400000, guid: 0c1491d88ed053e4f83d3a2a4c2fb6fa, type: 2}
+  - {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
   - {fileID: 11400000, guid: 9c000c4ece3bda444adbf52fbe49279c, type: 2}
   - {fileID: 11400000, guid: a19a4167dbdb8d74fa2ad539718df6d1, type: 2}
   _bindAssets:
