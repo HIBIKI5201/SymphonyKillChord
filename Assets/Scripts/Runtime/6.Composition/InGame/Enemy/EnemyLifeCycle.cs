@@ -706,6 +706,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
 
+            _healthHudPresenter?.Dispose();
             _targetingSystem?.UnregisterTarget(_targetable);
             _targetable?.Dispose();
             _loadedEnemyData = null;
