@@ -1,4 +1,3 @@
-using KillChord.Runtime.View.Persistent.PostEffect;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Skill;
@@ -33,10 +32,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill.Effect
                 Debug.LogError($"[{nameof(SkillEffectInitializer)}] {nameof(SkillEffectSpawner)} が未設定です。", this);
                 return false;
             }
-
-            // ポストプロセスの適用先は常駐カメラ側が持つため、存在する場合のみ注入する。
-            ServiceLocator.TryGetInstance(out IPostEffectOverlayPlayer postEffectOverlayPlayer);
-            _skillEffectSpawner.Initialize(postEffectOverlayPlayer);
 
             _moduleContainer = new SkillEffectModuleContainer(_skillEffectSpawner);
             ServiceLocator.RegisterInstance(_moduleContainer);

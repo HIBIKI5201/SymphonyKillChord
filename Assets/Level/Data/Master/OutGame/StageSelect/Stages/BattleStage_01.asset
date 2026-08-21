@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.BattleStageAsset
   _plannerMemo: 
   _stageId:
-    _id: stage_01
-    _hashId: 2117502204
+    _id: battle_stage_01
+    _hashId: 718734217
   _isInitiallyUnlocked: 0
   _stageName: "\u30D0\u30C8\u30EB"
   _flavorText: "\u30D0\u30C8\u30EB"

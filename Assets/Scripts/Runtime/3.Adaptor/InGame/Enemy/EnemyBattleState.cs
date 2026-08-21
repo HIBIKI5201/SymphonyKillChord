@@ -17,7 +17,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             CurrentAttack = currentAttack;
             FirstAttack = true;
             IsStunned = false;
-            IsBattleAIActivated = true;
         }
 
         /// <summary> 攻撃者（自身）のエンティティ </summary>
@@ -33,7 +32,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public bool FirstAttack { get; private set; }
         /// <summary> 硬直中か </summary>
         public bool IsStunned { get; private set; }
-        public bool IsBattleAIActivated { get; private set; }
 
         /// <summary> 攻撃目標が攻撃範囲に入った </summary>
         public void EnterRange() => IsInAttackRange = true;
@@ -45,10 +43,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public void Stunned() => IsStunned = true;
         /// <summary> 硬直から回復した </summary>
         public void StunRecover() => IsStunned = false;
-        /// <summary> 敵の戦闘系AIを有効化 </summary>
-        public void StartBattleAI() => IsBattleAIActivated = true;
-        /// <summary> 敵の戦闘系AIを無効化 </summary>
-        public void StopBattleAI() => IsBattleAIActivated = false;
 
         /// <summary>
         ///     再初期化処理。
@@ -58,7 +52,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             IsInAttackRange = false;
             FirstAttack = true;
             IsStunned = false;
-            IsBattleAIActivated = true;
         }
     }
 }

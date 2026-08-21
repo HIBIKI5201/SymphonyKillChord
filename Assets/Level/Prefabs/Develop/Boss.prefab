@@ -394,7 +394,6 @@ Transform:
   - {fileID: 6160254944126662673}
   - {fileID: 3614649647669050600}
   - {fileID: 7159300760531798261}
-  - {fileID: 641259276751464337}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &2087621487445895090
@@ -624,7 +623,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a11a9ddb6b358c24bb8c225c74a8287d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.BossMoveView
-  _damageEffectTransform: {fileID: 641259276751464337}
   _attackHitEffectPrefab: {fileID: 131285386190377671, guid: 8241b0826109c274081347d4d711a62d, type: 3}
   _attackReserveEffectPrefab: {fileID: 318648360357674666, guid: 3312f234a758f5148a83e6ef17016861, type: 3}
 --- !u!114 &1235429572548650314
@@ -641,7 +639,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.EnemyHealthView
   _healthHudView: {fileID: 2642388166834609292}
   _damageNumberSpawnPoint: {fileID: 68345443997882167}
-  _damageNumberCameraOffset: 0.2
+  _damageNumberPrefab: {fileID: 2181947599002182845, guid: c29fc7bbbc9d4eb40b3adc7cd5939d2e, type: 3}
 --- !u!114 &8457508100998247417
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1008,37 +1006,6 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
---- !u!1 &7117347039140968157
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 641259276751464337}
-  m_Layer: 0
-  m_Name: DamageEffectPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &641259276751464337
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7117347039140968157}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4381861589023682040}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8262758777597959542
 GameObject:
   m_ObjectHideFlags: 0

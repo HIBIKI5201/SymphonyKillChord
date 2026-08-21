@@ -17,9 +17,9 @@ MonoBehaviour:
     _id: scenario_stage_01
     _hashId: -51041808
   _isInitiallyUnlocked: 1
-  _stageName: "\u7B2C1\u8A71\u300CZeroDivide\u300D"
+  _stageName: "\u30B7\u30CA\u30EA\u30AA1"
   _flavorText: "\u30B7\u30CA\u30EA\u30AA1\n"
   _targetSceneName: Scenario
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2
-  _scenarioId: Episode_1
+  _scenarioId: ScenarioTest

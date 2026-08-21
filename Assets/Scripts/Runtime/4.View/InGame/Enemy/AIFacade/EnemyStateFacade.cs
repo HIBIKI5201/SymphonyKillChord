@@ -33,8 +33,6 @@ namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
         public bool IsAttacking => _aiController.IsAttacking;
         /// <summary> 硬直中か。 </summary>
         public bool IsStunned => _battleState.IsStunned;
-        /// <summary> 敵の戦闘AIが有効な状態か </summary>
-        public bool IsBattleAiActivated => _battleState.IsBattleAIActivated;
 
         private EnemyAIController _aiController;
         private Transform _target;

@@ -54,22 +54,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
             _isActive = false;
         }
-        /// <summary>
-        ///     戦闘系行動に関するAIを有効にする。
-        /// </summary>
-        public void StartBattleAI()
-        {
-            _enemyBattleState.StartBattleAI();
-        }
-
-        /// <summary>
-        ///     戦闘系行動に関するAIを無効にする。
-        /// </summary>
-        public void StopBattleAI()
-        {
-            CancelAttack();
-            _enemyBattleState.StopBattleAI();
-        }
 
         // Debug用のイベント。
         /// <summary> 攻撃を予約時に発火するイベント </summary>

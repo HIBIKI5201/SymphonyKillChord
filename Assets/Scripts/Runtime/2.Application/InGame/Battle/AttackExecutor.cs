@@ -28,8 +28,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             Damage baseDamage,
             bool isOutOfRange = false,
             IReadOnlyList<IAttackHitEffect> hitEffects = null,
-            DamageAttackType damageAttackType = DamageAttackType.Normal,
-            bool notifyNormalDamage = false
+            DamageAttackType damageAttackType = DamageAttackType.Normal
                )
         {
             if (attackDefinition == null)
@@ -50,7 +49,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             // 計算を行い、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit, baseDamage, isOutOfRange);
 
-            result = DamageExecutor.Execute(attacker, defender, result, damageAttackType, notifyNormalDamage);
+            result = DamageExecutor.Execute(attacker, defender, result, damageAttackType);
 
             ApplyHitEffects(attacker, defender, result, hitEffects);
 
@@ -74,7 +73,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="baseDamage"> 基礎ダメージ。 </param>
         /// <param name="results"> 攻撃結果の格納先。呼び出し時に内容がクリアされる。 </param>
         /// <param name="damageAttackType"> ダメージの攻撃タイプ。 </param>
-        /// <param name="notifyNormalDamage"> 通常ダメージを通知するかどうかを示す値です。 </param>
         public static void Execute(
             AttackDefinition attackDefinition,
             IAttacker attacker,
@@ -83,8 +81,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             Damage baseDamage,
             List<AttackResult> results,
             IReadOnlyList<IAttackHitEffect> hitEffects = null,
-            DamageAttackType damageAttackType = DamageAttackType.Normal,
-            bool notifyNormalDamage = false
+            DamageAttackType damageAttackType = DamageAttackType.Normal
                )
         {
             if (targets == null)
@@ -104,15 +101,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             {
                 AttackTarget target = targets[i];
                 results.Add(Execute(
-                    attackDefinition,
-                    attacker,
-                    target.Defender,
-                    isJustHit,
-                    baseDamage,
-                    target.IsOutOfRange,
-                    hitEffects,
-                    damageAttackType,
-                    notifyNormalDamage));
+                    attackDefinition, attacker, target.Defender, isJustHit, baseDamage, target.IsOutOfRange, hitEffects, damageAttackType));
             }
         }
 

@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using System;
 using System.Collections.Generic;
-using KillChord.Runtime.View.Persistent.PostEffect;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -13,15 +12,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
     /// </summary>
     public sealed class SkillEffectSpawner : MonoBehaviour, ISkillEffectSpawner
     {
-        /// <summary>
-        ///     発動時の全画面演出に必要な依存を注入する。
-        /// </summary>
-        /// <param name="postEffectOverlayPlayer"> ポストプロセスの適用先です。 </param>
-        public void Initialize(IPostEffectOverlayPlayer postEffectOverlayPlayer)
-        {
-            _postEffectOverlayPlayer = postEffectOverlayPlayer;
-        }
-
         /// <summary>
         ///     装備スキルに応じたエフェクトのプールを事前生成する。
         /// </summary>
@@ -73,7 +63,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _activeInstances.Add(instance);
             if (instance.Play(context, entry.ReleaseHandler))
             {
-                PlayPostEffect(instance);
                 return instance;
             }
 
@@ -88,8 +77,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
         /// </summary>
         public void StopAll()
         {
-            _postEffectOverlayPlayer?.RemoveAll();
-
             // 停止はキャンセル要求のため、返却は各インスタンスの完了処理から行われる。
             for (int i = _activeInstances.Count - 1; i >= 0; i--)
             {
@@ -112,16 +99,11 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             _pools.Clear();
         }
 
-        private const int DEFAULT_EFFECT_LAYER = 9;
-
         [SerializeField, Tooltip("スキルIDとエフェクトプレハブの対応表です。")]
         private SkillEffectCatalogConfig _catalog;
 
         [SerializeField, Tooltip("生成したエフェクトの親Transformです。未設定時は自身を使用します。")]
         private Transform _instanceRoot;
-
-        [SerializeField, Tooltip("生成したエフェクトへ設定するレイヤーです。Volumeの適用対象から除外されます。")]
-        private int _effectLayer = DEFAULT_EFFECT_LAYER;
 
         /// <summary>
         ///     破棄時にプールを解放する。
@@ -158,9 +140,6 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             Transform parent = _instanceRoot != null ? _instanceRoot : transform;
             SkillEffectInstance instance = Instantiate(prefab, parent);
             instance.name = prefab.name;
-
-            // Volumeの適用対象から外すため、エフェクトは専用レイヤーへ揃える。
-            SetLayerRecursively(instance.gameObject, _effectLayer);
             instance.Prewarm();
             return instance;
         }
@@ -187,42 +166,8 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
             Destroy(instance.gameObject);
         }
 
-        /// <summary>
-        ///     エフェクトごとに設定されたConfigと秒数でポストプロセスを適用する。
-        /// </summary>
-        /// <param name="instance"> 再生を開始したエフェクトです。 </param>
-        private void PlayPostEffect(SkillEffectInstance instance)
-        {
-            if (_postEffectOverlayPlayer == null || instance.PostEffectConfig == null)
-            {
-                return;
-            }
-
-            _postEffectOverlayPlayer.AddForSeconds(
-                instance.PostEffectConfig,
-                instance.PostEffectDelaySeconds,
-                instance.PostEffectSeconds);
-        }
-
-        /// <summary>
-        ///     指定オブジェクトとその子階層すべてへレイヤーを設定する。
-        /// </summary>
-        /// <param name="target"> 設定対象のオブジェクトです。 </param>
-        /// <param name="layer"> 設定するレイヤー番号です。 </param>
-        private static void SetLayerRecursively(GameObject target, int layer)
-        {
-            target.layer = layer;
-
-            Transform targetTransform = target.transform;
-            for (int i = 0; i < targetTransform.childCount; i++)
-            {
-                SetLayerRecursively(targetTransform.GetChild(i).gameObject, layer);
-            }
-        }
-
         private readonly Dictionary<int, SkillEffectPoolEntry> _pools = new();
         private readonly List<SkillEffectInstance> _activeInstances = new();
-        private IPostEffectOverlayPlayer _postEffectOverlayPlayer;
 
         /// <summary>
         ///     エフェクトプレハブ1件分のプールを保持するクラス。

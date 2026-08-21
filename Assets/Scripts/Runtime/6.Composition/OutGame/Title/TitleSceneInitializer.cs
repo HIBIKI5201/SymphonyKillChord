@@ -5,7 +5,6 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
-using KillChord.Runtime.Composition.Persistent.Music;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
@@ -15,6 +14,7 @@ using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
+using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -74,9 +74,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private StageTreeAsset _loadedStageTreeAsset;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
-        private AudioSettingsModuleContainer _audioSettingsContainer;
-        private VolumeSettingsTabView _volumeSettingsTabView;
-        private DataResetTabView _dataResetTabView;
 
         private bool _isInitialized;
         private bool _isSubscribed;
@@ -135,9 +132,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             SceneTransitionController sceneTransitionController;
-            if (!TryGetServiceLocatorInstances(
-                    out sceneTransitionController,
-                    out _audioSettingsContainer))
+            MusicPlayer musicPlayer;
+            SoundEffectVolumeManager sePlayer;
+            if (!TryGetServiceLocatorInstances(out sceneTransitionController, out musicPlayer, out sePlayer))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
@@ -188,11 +185,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
-            _volumeSettingsTabView = new VolumeSettingsTabView(
-                optionRoot,
-                _audioSettingsContainer.ViewModel,
-                _audioSettingsContainer.Command);
-            _dataResetTabView = new DataResetTabView(optionRoot, _outGameUIEvent);
+            VolumeSettingsTabView audioVolumeTab = new(optionRoot, musicPlayer, sePlayer);
+            DataResetTabView dataResetTab = new(optionRoot, _outGameUIEvent);
 
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
 
@@ -279,11 +273,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedStageTreeAsset = null;
             _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
-            _volumeSettingsTabView?.Dispose();
-            _volumeSettingsTabView = null;
-            _dataResetTabView?.Dispose();
-            _dataResetTabView = null;
-            _audioSettingsContainer = null;
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
             _titleStartController = null;
@@ -298,14 +287,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         ///    ServiceLocator から必要なインスタンスを取得する。
         /// </summary>
         /// <param name="sceneTransitionController"></param>
-        /// <param name="audioSettingsContainer"></param>
+        /// <param name="musicPlayer"></param>
+        /// <param name="sePlayer"></param>
         /// <returns></returns>
         private bool TryGetServiceLocatorInstances(
-            out SceneTransitionController sceneTransitionController,
-            out AudioSettingsModuleContainer audioSettingsContainer)
+            out SceneTransitionController sceneTransitionController, out MusicPlayer musicPlayer,
+            out SoundEffectVolumeManager sePlayer)
         {
             sceneTransitionController = null;
-            audioSettingsContainer = null;
+            musicPlayer = null;
+            sePlayer = null;
 
             if (!ServiceLocator.TryGetInstance(out sceneTransitionController))
             {
@@ -315,10 +306,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out audioSettingsContainer))
+            if (!ServiceLocator.TryGetInstance<MusicPlayer>(out musicPlayer))
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: AudioSettingsModuleContainer が ServiceLocator に登録されていません。");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: MusicPlayer が ServiceLocator に登録されていません。");
+#endif
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance<SoundEffectVolumeManager>(out sePlayer))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: SoundEffectVolumeManager が ServiceLocator に登録されていません。");
 #endif
                 return false;
             }
@@ -448,7 +447,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedSaveData = await LoadSaveData();
 
             await ApplyInitialSkillLoadoutAsync();
-            _audioSettingsContainer?.Command.ResetToDefaults();
 
             // セーブデータをリセットした後、初回起動時の遷移先シーンを設定します。
             if (_loadedSaveData != null

@@ -1,65 +1,21 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
-    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Setting.uss?fileID=7433441132597879392&amp;guid=f378558ec06b41f4da7ec06e1044e9ae&amp;type=3#Setting"/>
-    <ui:VisualElement name="Root" picking-mode="Position" class="setting-root">
-        <ui:VisualElement name="BackGround" class="setting-window">
-            <ui:VisualElement class="setting-top-bar">
-                <ui:Button text="← ホームへ戻る" name="BackButton" class="setting-back-button"/>
-                <ui:Label text="設定" name="Title" class="setting-title"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
+    <ui:VisualElement picking-mode="Position" name="Root" style="flex-grow: 1; width: 100%; height: 100%; justify-content: center; align-items: center; align-content: center; position: relative; transition-duration: 0.5s; transition-timing-function: ease-in-cubic; background-color: rgba(0, 0, 0, 0.15); display: flex; opacity: 1;">
+        <ui:VisualElement name="BackGround" style="flex-grow: 0; width: 95%; height: 80%; background-color: rgb(94, 87, 87); position: relative;">
+            <ui:Label text="設定" name="Title" class="title" style="white-space: pre; font-size: 36px; -unity-font-style: bold;"/>
+            <ui:VisualElement name="CategoryBar" style="flex-grow: 0; width: 100%; height: 20%; flex-direction: row; align-self: auto; justify-content: center; flex-shrink: 1;">
+                <ui:Button text="Button" name="AudioCategory" style="flex-grow: 0; flex-shrink: 1;"/>
+                <ui:Button text="Button" name="ScreenCategory" style="flex-grow: 0; flex-shrink: 1;"/>
+                <ui:Button text="Button" name="KeyCategory" style="flex-shrink: 1;"/>
             </ui:VisualElement>
-            <ui:VisualElement name="SettingLayout" class="setting-layout">
-                <ui:VisualElement class="setting-category-list">
-                    <ui:Button text="サウンド" name="SoundCategoryButton" class="setting-category-button"/>
-                    <ui:Button text="システム" name="SystemCategoryButton" class="setting-category-button"/>
-                </ui:VisualElement>
-                <ui:ScrollView name="SettingContent" mode="Vertical" class="setting-content-scroll">
-                    <ui:VisualElement name="SoundPanel" class="setting-panel">
-                        <ui:Label text="サウンド" class="setting-panel-title"/>
-                        <ui:VisualElement class="setting-row">
-                            <ui:VisualElement class="setting-row-header">
-                                <ui:Label text="BGM" class="setting-row-label"/>
-                            </ui:VisualElement>
-                            <ui:VisualElement class="setting-control-row">
-                                <ui:Label text="5" name="BgmValueLabel" class="setting-value-label"/>
-                                <ui:SliderInt name="BgmVolumeSlider" low-value="0" high-value="10" value="5" show-input-field="false" page-size="1" class="setting-slider"/>
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="setting-row">
-                            <ui:VisualElement class="setting-row-header">
-                                <ui:Label text="効果音" class="setting-row-label"/>
-                            </ui:VisualElement>
-                            <ui:VisualElement class="setting-control-row">
-                                <ui:Label text="5" name="SoundEffectValueLabel" class="setting-value-label"/>
-                                <ui:SliderInt name="SoundEffectVolumeSlider" low-value="0" high-value="10" value="5" show-input-field="false" page-size="1" class="setting-slider"/>
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="setting-row">
-                            <ui:VisualElement class="setting-row-header">
-                                <ui:Label text="ボイス" class="setting-row-label"/>
-                            </ui:VisualElement>
-                            <ui:VisualElement class="setting-control-row">
-                                <ui:Label text="5" name="VoiceValueLabel" class="setting-value-label"/>
-                                <ui:SliderInt name="VoiceVolumeSlider" low-value="0" high-value="10" value="5" show-input-field="false" page-size="1" class="setting-slider"/>
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement name="SystemPanel" class="setting-panel" style="display: none;">
-                        <ui:Label text="システム" class="setting-panel-title"/>
-                        <ui:Label text="タイトル画面へ戻ります" class="setting-system-description"/>
-                        <ui:Label text="現在の音量設定は保存されます" class="setting-system-note"/>
-                        <ui:Button text="タイトル画面に戻る" name="ReturnToTitleButton" class="setting-return-title-button"/>
-                    </ui:VisualElement>
-                </ui:ScrollView>
+            <ui:VisualElement name="Content" style="flex-grow: 1; width: 100%; height: 80%;">
+                <ui:VisualElement name="ScreenPage" style="flex-grow: 1; width: 100%; height: 100%; display: none;"/>
+                <ui:VisualElement name="AudioPage" style="flex-grow: 1; width: 100%; height: 100%; display: none;"/>
+                <ui:VisualElement name="KeyPage" style="flex-grow: 1; width: 100%; height: 100%; display: none;"/>
             </ui:VisualElement>
-            <ui:VisualElement name="ReturnToTitleDialog" picking-mode="Position" class="setting-dialog-overlay" style="display: none;">
-                <ui:VisualElement class="setting-dialog">
-                    <ui:Label text="タイトル画面に戻りますか？" class="setting-dialog-message"/>
-                    <ui:VisualElement class="setting-dialog-buttons">
-                        <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button"/>
-                        <ui:Button text="タイトル画面に戻る" name="ConfirmReturnToTitleButton" class="setting-dialog-button setting-dialog-confirm"/>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-            </ui:VisualElement>
+            <ui:Button text="戻る" name="BackButton" class="button back-button" style="color: rgb(255, 255, 255); font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 4px; -unity-text-align: middle-center; margin-left: 1%; margin-top: 1%;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.BattleStageAsset
   _plannerMemo: 
   _stageId:
-    _id: stage_02
-    _hashId: -415247034
+    _id: battle_stage_02
+    _hashId: -1277275597
   _isInitiallyUnlocked: 0
-  _stageName: Stage_02
+  _stageName: "\u30DC\u30B9"
   _flavorText: "\u30DC\u30B9"
   _targetSceneName: InGame
   _rewardSkillBuildPoint: 2

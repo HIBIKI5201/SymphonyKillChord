@@ -8,7 +8,6 @@ using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
-using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
@@ -239,7 +238,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _ctsTransition = new();
 
             _isInitialized = true;
-            _isSceneTransitioning = false;
+            _isStartGame = false;
             return true;
         }
 
@@ -257,7 +256,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownSettingScreen += HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnStartGame += HandleStartGame;
-            _outGameUIEvent.OnReturnToTitleRequested += HandleReturnToTitleRequested;
             _outGameUIEvent.OnOutGameUiVisibilityChanged += HandleOutGameUiVisibilityChanged;
             _isSubscribed = true;
         }
@@ -276,7 +274,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownSettingScreen -= HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnStartGame -= HandleStartGame;
-            _outGameUIEvent.OnReturnToTitleRequested -= HandleReturnToTitleRequested;
             _outGameUIEvent.OnOutGameUiVisibilityChanged -= HandleOutGameUiVisibilityChanged;
             _isSubscribed = false;
         }
@@ -354,7 +351,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private async void HandleStartGame()
         {
             // 一度ゲーム開始処理が走った後は、二重に処理が走らないようにします。
-            if (_isSceneTransitioning) { return; }
+            if (_isStartGame) { return; }
 
             if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage
@@ -367,7 +364,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             string targetSceneName = selectedBattleStageState.InGameSceneName;
-            _isSceneTransitioning = true;
+            _isStartGame = true;
             var currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             try
             {
@@ -383,7 +380,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                     return;
                 }
 
-                _isSceneTransitioning = false;
+                _isStartGame = false;
 
                 Debug.LogError(
                     $"[{nameof(ScreenInitializer)}] " +
@@ -393,65 +390,13 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
             catch (OperationCanceledException)
             {
-                _isSceneTransitioning = false;
+                _isStartGame = false;
             }
             catch (Exception exception)
             {
-                _isSceneTransitioning = false;
+                _isStartGame = false;
                 Debug.LogException(exception, this);
             }
-        }
-
-        /// <summary>
-        ///     OutGameからタイトル画面へ遷移する。
-        /// </summary>
-        private async void HandleReturnToTitleRequested()
-        {
-            if (_isSceneTransitioning)
-            {
-                _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(false);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(_titleSceneName))
-            {
-                Debug.LogError(
-                    $"[{nameof(ScreenInitializer)}] タイトルシーン名が設定されていません。",
-                    this);
-                _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(false);
-                return;
-            }
-
-            _isSceneTransitioning = true;
-            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-
-            try
-            {
-                bool success = await _sceneTransitionController.ChangeSceneAsync(
-                    currentSceneName,
-                    _titleSceneName,
-                    _ctsTransition.Token);
-                if (success)
-                {
-                    _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(true);
-                    return;
-                }
-
-                Debug.LogError(
-                    $"[{nameof(ScreenInitializer)}] タイトル画面への遷移に失敗しました。"
-                    + $" SceneName: {_titleSceneName}",
-                    this);
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, this);
-            }
-
-            _isSceneTransitioning = false;
-            _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(false);
         }
 
         /// <summary>
@@ -500,8 +445,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private UIDocument _uiDocument;
         [SerializeField, SourceDataAddress, Tooltip("画面遷移ルールデータの Addressables キーです。")]
         private string _screenRuleDataKey;
-        [SerializeField, SceneNameSelector, Tooltip("設定画面から戻るタイトルシーン名です。")]
-        private string _titleSceneName = "Title";
 
         private ScreenController _screenController;
         private OutGameUIEvent _outGameUIEvent;
@@ -510,7 +453,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private ScreenRuleData _loadedScreenRuleData;
         private bool _isInitialized = false;
         private bool _isSubscribed;
-        private bool _isSceneTransitioning = false;
+        private bool _isStartGame = false;
 
         private CancellationTokenSource _ctsTransition;
     }
