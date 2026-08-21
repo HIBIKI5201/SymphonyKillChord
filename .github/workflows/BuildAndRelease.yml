@@ -410,12 +410,20 @@ jobs:
           }
 
           # UNITY_EXE_PATH 例: C:\Program Files\Unity\Hub\Editor\2022.3.10f1\Editor\Unity.exe
-          # → Editor ディレクトリ配下の PlaybackEngines\AndroidPlayer\SDK を対象にする
+          # → バージョンルート (2022.3.10f1) 配下を再帰探索して aapt2.exe を直接見つける
           $EditorDir = Split-Path $env:UNITY_EXE_PATH -Parent
-          $AndroidSdkRoot = Join-Path $EditorDir "Data\PlaybackEngines\AndroidPlayer\SDK"
+          $VersionRoot = Split-Path $EditorDir -Parent
 
-          if (-not (Test-Path $AndroidSdkRoot)) {
-            Write-Host "::error::Android SDK ディレクトリが見つかりません: $AndroidSdkRoot"
+          if (-not (Test-Path $VersionRoot)) {
+            Write-Host "::error::Unity バージョンルートディレクトリが見つかりません: $VersionRoot"
+            exit 1
+          }
+
+          $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter "aapt2.exe" -ErrorAction SilentlyContinue |
+                    Select-Object -First 1
+
+          if (-not $Aapt2) {
+            Write-Host "::error::aapt2.exe が見つかりません: $VersionRoot"
             exit 1
           }
 
