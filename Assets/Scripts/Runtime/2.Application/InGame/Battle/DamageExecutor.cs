@@ -105,6 +105,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 damageToHealth = barrierHolder.AbsorbBarrier(result.FinalDamage, out barrierDamage);
             }
 
+            NotifySkillDamage(defender, result, attackType);
             Damage appliedDamage = default;
 
             // 防御者がダメージを受けることができる場合、またはダメージが0より大きい場合にのみ、ダメージを適用する
@@ -133,7 +134,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
                     result,
                     attackType));
 
-            NotifySkillDamage(defender, result, attackType);
             return result;
         }
 
