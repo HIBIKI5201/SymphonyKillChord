@@ -403,31 +403,72 @@ jobs:
             Write-Host "::error::UNITY_EXE_PATH が設定されていません。"
             exit 1
           }
-
           if (-not (Test-Path $env:UNITY_EXE_PATH)) {
             Write-Host "::error::UNITY_EXE_PATH が指すファイルが存在しません: $env:UNITY_EXE_PATH"
             exit 1
           }
 
-          # UNITY_EXE_PATH 例: C:\Program Files\Unity\Hub\Editor\2022.3.10f1\Editor\Unity.exe
-          # → バージョンルート (2022.3.10f1) 配下を再帰探索して aapt2.exe を直接見つける
+          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
+          $Aapt2 = $null
+
+          # --- 戦略1: UNITY_EXE_PATH のバージョンルート配下をシンボリックリンクも辿って再帰探索 ---
           $EditorDir = Split-Path $env:UNITY_EXE_PATH -Parent
           $VersionRoot = Split-Path $EditorDir -Parent
+          Write-Host "[戦略1] 探索範囲: $VersionRoot (シンボリックリンク追跡あり)"
 
-          if (-not (Test-Path $VersionRoot)) {
-            Write-Host "::error::Unity バージョンルートディレクトリが見つかりません: $VersionRoot"
-            exit 1
+          if (Test-Path $VersionRoot) {
+            $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -Force -FollowSymlink -ErrorAction SilentlyContinue |
+                      Select-Object -First 1
           }
 
-          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
+          # --- 戦略2: PlaybackEngines 配下のシンボリックリンクを明示的に解決してから探索 ---
+          if (-not $Aapt2) {
+            Write-Host "[戦略2] PlaybackEngines のリンク先を解決して探索"
+            $PlaybackEnginesPath = Join-Path $VersionRoot "PlaybackEngines"
+            if (Test-Path $PlaybackEnginesPath) {
+              $Item = Get-Item $PlaybackEnginesPath -Force
+              $ResolvedTarget = if ($Item.LinkType) { $Item.Target } else { $PlaybackEnginesPath }
+              Write-Host "  解決結果: $ResolvedTarget"
+              if ($ResolvedTarget -and (Test-Path $ResolvedTarget)) {
+                $Aapt2 = Get-ChildItem $ResolvedTarget -Recurse -Filter $Aapt2Name -Force -FollowSymlink -ErrorAction SilentlyContinue |
+                          Select-Object -First 1
+              }
+            }
+          }
 
-          $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -ErrorAction SilentlyContinue |
-                    Select-Object -First 1
+          # --- 戦略3: OS標準のAndroid SDKインストール場所を直接探索 ---
+          if (-not $Aapt2) {
+            Write-Host "[戦略3] OS標準インストール場所を探索"
+            $FallbackRoots = @(
+              $env:ANDROID_HOME,
+              $env:ANDROID_SDK_ROOT,
+              (Join-Path $HOME "Library/Android/sdk"),
+              (Join-Path $HOME "AppData/Local/Android/Sdk")
+            ) | Where-Object { $_ -and (Test-Path $_) }
+
+            foreach ($Root in $FallbackRoots) {
+              Write-Host "  探索中: $Root"
+              $Found = Get-ChildItem $Root -Recurse -Filter $Aapt2Name -Force -FollowSymlink -ErrorAction SilentlyContinue |
+                        Select-Object -First 1
+              if ($Found) { $Aapt2 = $Found; break }
+            }
+          }
 
           if (-not $Aapt2) {
-            Write-Host "::error::$Aapt2Name が見つかりません: $VersionRoot"
+            Write-Host "::error::$Aapt2Name がどの探索範囲でも見つかりませんでした。"
+            Write-Host "[診断情報] VersionRoot 直下の構造:"
+            if (Test-Path $VersionRoot) {
+              Get-ChildItem $VersionRoot -Force -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.FullName)" }
+            }
+            Write-Host "[診断情報] PlaybackEngines 直下の構造:"
+            $PlaybackEnginesPath = Join-Path $VersionRoot "PlaybackEngines"
+            if (Test-Path $PlaybackEnginesPath) {
+              Get-ChildItem $PlaybackEnginesPath -Force -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.FullName)" }
+            }
             exit 1
           }
+
+          Write-Host "見つかった aapt2 パス: $($Aapt2.FullName)"
 
           $GradleTemplatePath = Join-Path $env:GITHUB_WORKSPACE "Assets/Plugins/Android/gradleTemplate.properties"
           if (-not (Test-Path $GradleTemplatePath)) {
