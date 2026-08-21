@@ -80,6 +80,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             TargetSystemController targetingSystem,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
+            DamageNumberPoolView damageNumberPoolView,
             Action<BossLifeCycle> releaseCallback
             )
         {
@@ -203,7 +204,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // View接続
             _view.Initialize(aiController, target);
             _healthView.Bind(viewModel);
-            _healthView.Initialize(healthHudPresenter);
+            _healthView.Initialize(healthHudPresenter, damageNumberPoolView);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
             _tripleShotRaycastView.Initialize(target, spec.AttackRangeMax.Value);
             _attackPositionSearchView.Initialize();

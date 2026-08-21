@@ -8,6 +8,18 @@ namespace KillChord.Runtime.Application.InGame.Battle
     /// <summary>
     ///     ダメージ計算を実行するユーティリティクラス。
     /// </summary>
+    // TODO: ダメージ通知(EOnTakeDamage)の発火をここへ集約する。
+    //   現状は PlayerAttackController と SkillAttackController だけが個別に発火しており、
+    //   DamageExecutor を直接呼ぶ経路(Skill_00/01/03/05/13、InfectionGroup)は
+    //   ダメージが入るのに数値表示が出ない。呼び出し側での発火は漏れが起きやすい。
+    //   あるべき形は、ダメージを確定させたこのメソッドが唯一の通知元になること。
+    //   ただし AttackExecutor が内部で本メソッドを呼ぶため、そのまま発火を足すと
+    //   通常攻撃系が二重発火する。移行手順は以下。
+    //     1. 本メソッドの末尾で EOnTakeDamage を発火する
+    //     2. PlayerAttackController と SkillAttackController の明示的な発火を削除する
+    //     3. 発火値を FinalDamage と AppliedDamage のどちらに統一するか決める
+    //        (現状は表示側が FinalDamage 前提。軽減後の実ダメージを出すなら表示仕様の変更が要る)
+    //     4. 通常攻撃・スキル・感染ダメージの表示回数が変わらないことを確認する
     public static class DamageExecutor
     {
         /// <summary>

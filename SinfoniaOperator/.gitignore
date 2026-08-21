@@ -6,6 +6,9 @@
 /NotionMarkdownExporter/obj/
 /NotionMarkdownExporter/bin/
 /NotionMarkdownExporter/publish/
+/NotionMarkdownWriter/obj/
+/NotionMarkdownWriter/bin/
+/NotionMarkdownWriter/publish/
 /DiscordLogExporter/obj/
 /DiscordLogExporter/bin/
 /DiscordLogExporter/publish/
@@ -14,4 +17,5 @@
 !/SinfoniaOperator/SinfoniaOperator.csproj
 !/SinfoniaOperator.Core/SinfoniaOperator.Core.csproj
 !/NotionMarkdownExporter/NotionMarkdownExporter.csproj
+!/NotionMarkdownWriter/NotionMarkdownWriter.csproj
 !/DiscordLogExporter/DiscordLogExporter.csproj
