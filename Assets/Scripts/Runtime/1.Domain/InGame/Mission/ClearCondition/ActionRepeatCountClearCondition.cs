@@ -1,4 +1,5 @@
 using System;
+using KillChord.Runtime.Domain.InGame.Music;
 
 namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 {
@@ -61,11 +62,36 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         /// <inheritdoc />
         public int RequiredCount => _requiredCount;
 
+        /// <summary>
+        ///     UI表示用の対象BeatType。ActionKindに対応するBeatTypeが存在しない場合はnull。
+        ///     ActionKind自体はドメイン内部の実装詳細のため公開せず、表示に必要なBeatTypeのみを公開する。
+        /// </summary>
+        public BeatType? TargetBeatType => ConvertToBeatType(_actionKind);
         /// <summary> 行動の種別。 </summary>
-        public MissionActionKind ActionKind => _actionKind;
         private readonly MissionActionKind _actionKind;
         /// <summary> 必要な発動回数。 </summary>
         private readonly int _requiredCount;
         private int _baselineCount;
+
+        /// <summary>
+        ///     MissionActionKindを対応するBeatTypeへ変換します。
+        /// </summary>
+        /// <param name="actionKind">変換元の行動種別。</param>
+        /// <returns>対応するBeatType。対応が存在しない場合はnull。</returns>
+        private static BeatType? ConvertToBeatType(MissionActionKind actionKind)
+        {
+            int? beatCount = actionKind switch
+            {
+                MissionActionKind.AttackOneBeat => 1,
+                MissionActionKind.AttackTwoBeat => 2,
+                MissionActionKind.AttackThreeBeat => 3,
+                MissionActionKind.AttackFourBeat => 4,
+                MissionActionKind.AttackSixBeat => 6,
+                MissionActionKind.AttackEightBeat => 8,
+                _ => (int?)null
+            };
+
+            return beatCount.HasValue ? (BeatType)beatCount.Value : null;
+        }
     }
 }
