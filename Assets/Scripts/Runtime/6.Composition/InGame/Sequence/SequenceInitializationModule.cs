@@ -47,6 +47,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageResultView = FindFirstObjectByType<StageResultView>();
             _inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
             _stageSequenceVoiceView = FindFirstObjectByType<StageSequenceVoiceView>();
+            _stageSequenceMusicView = FindFirstObjectByType<StageSequenceMusicView>();
             _stageStartConstraintView = FindFirstObjectByType<StageStartConstraintView>();
             _playerInputView = FindFirstObjectByType<PlayerInputView>();
             _musicPlayer = FindFirstObjectByType<MusicPlayer>();
@@ -57,6 +58,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 || _stageResultView == null
                 || _inGamePlayDirector == null
                 || _stageSequenceVoiceView == null
+                || _stageSequenceMusicView == null
                 || _stageStartConstraintView == null
                 || _playerInputView == null
                 || _musicPlayer == null)
@@ -132,6 +134,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _stageSequenceVoiceView.Initialize(
                 playerContainer.PlayerView);
+
+            _stageSequenceMusicView.Initialize(
+                _musicPlayer);
 
             _stageResultController = stageResultContainer.Controller;
 
@@ -421,6 +426,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private LoadingScreenController _loadingScreenController;
         private StageSequenceVoiceView _stageSequenceVoiceView;
+        private StageSequenceMusicView _stageSequenceMusicView;
         private StageStartConstraintView _stageStartConstraintView;
         private MusicPlayer _musicPlayer;
         private PlayerInputView _playerInputView;
