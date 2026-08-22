@@ -99,6 +99,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             EventBus<EOnEnemyDefeated>.Register(EnemyDefeatedHandler);
             EventBus<EOnPlayerAttackExecuted>.Register(PlayerAttackExecutedHandler);
             EventBus<EOnPlayerTakeDamage>.Register(PlayerTakeDamageHandler);
+            EventBus<EOnSkillExecuted>.Register(SkillExecutedHandler);
         }
 
         /// <summary>
@@ -203,6 +204,9 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField, Tooltip("プレイヤーが被弾した時のカメラシェイク設定")]
         private CameraShakeConfig _playerDamageShakeConfig;
 
+        [SerializeField, Tooltip("スキルを発動した時のカメラシェイク設定")]
+        private CameraShakeConfig _skillExecutedShakeConfig;
+
         private PlayerInputView _inputView;
         private UnityEngine.Camera _camera;
         private Transform _playerT;
@@ -281,6 +285,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             EventBus<EOnEnemyDefeated>.Unregister(EnemyDefeatedHandler);
             EventBus<EOnPlayerAttackExecuted>.Unregister(PlayerAttackExecutedHandler);
             EventBus<EOnPlayerTakeDamage>.Unregister(PlayerTakeDamageHandler);
+            EventBus<EOnSkillExecuted>.Unregister(SkillExecutedHandler);
 
             if (_inputView == null) { return; }
 
@@ -425,6 +430,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void PlayerTakeDamageHandler(EOnPlayerTakeDamage eventData)
         {
             RequestShake(_playerDamageShakeConfig);
+        }
+
+        /// <summary>
+        ///     スキルの発動イベントを受け取り、発動時のカメラシェイクを要求する。
+        /// </summary>
+        /// <param name="eventData"> スキル発動イベント。 </param>
+        private void SkillExecutedHandler(EOnSkillExecuted eventData)
+        {
+            RequestShake(_skillExecutedShakeConfig);
         }
 
         /// <summary>
