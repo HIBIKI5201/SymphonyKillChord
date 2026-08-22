@@ -45,6 +45,10 @@ MonoBehaviour:
     _guideMessageText: "\u30B8\u30E3\u30B9\u30C8\u653B\u6483\u306E\u7A2E\u985E\u306B\u3064\u3044\u3066"
     _entryActions: []
   - _condition:
+      rid: 1841141534832459778
+    _guideMessageText: "\u653B\u6483\u3092\u3057\u3066\u307F\u3088\u3046"
+    _entryActions: []
+  - _condition:
       rid: 4420609062208001
     _guideMessageText: "\u7DD1\u306E\u30BF\u30A4\u30DF\u30F3\u30B0\u3067\u653B\u6483\u3057\u3066\u307F\u3088\u3046\u3002"
     _entryActions: []
@@ -366,6 +370,12 @@ MonoBehaviour:
         _inspectorSummary: "Dodge\u30922\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
         _actionKind: 0
         _requiredCount: 2
+    - rid: 1841141534832459778
+      type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "Attack\u30924\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
+        _actionKind: 1
+        _requiredCount: 4
     - rid: 4309480265444753537
       type: {class: PlayVoiceStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
