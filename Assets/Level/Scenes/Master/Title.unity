@@ -255,6 +255,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1266340407}
   - component: {fileID: 1266340406}
+  - component: {fileID: 1266340409}
+  - component: {fileID: 1266340408}
   m_Layer: 0
   m_Name: OutGameSceneInitializer
   m_TagString: Untagged
@@ -289,6 +291,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1266340408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1266340405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6928ca8b1bf5f5438c22a302f574d90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Audio.OutGameUiSoundEffectInitializer
+  _uiDocument: {fileID: 2119823347}
+  _uiSoundEffectConfigKey: UISoundEffectConfig
+--- !u!114 &1266340409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1266340405}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16beefbd86b1c83488ed098193b1d96a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Music.OutGameBgmInitializer
+  _cueName: BGM_Title
 --- !u!1 &2119823346
 GameObject:
   m_ObjectHideFlags: 0
