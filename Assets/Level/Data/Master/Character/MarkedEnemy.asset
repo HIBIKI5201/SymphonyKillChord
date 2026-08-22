@@ -17,7 +17,7 @@ MonoBehaviour:
     _hashId: 474237749
   _characterName: MarkedEnemy
   _attackInterval: 0.5
-  _maxHealth: 500
+  _maxHealth: 250
   _attackDifinitions:
   - {fileID: 11400000, guid: 1119c366324871145b5c08ecd5b9ebaa, type: 2}
   _baseDamage: 15
