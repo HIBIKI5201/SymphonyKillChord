@@ -4762,6 +4762,8 @@ PlayableDirector:
     value: {fileID: 191554240}
   - key: {fileID: -7748223446315980234, guid: 252c229c1ace560449da8eedd843f14b, type: 2}
     value: {fileID: 395575201}
+  - key: {fileID: 4774193548017005291, guid: 252c229c1ace560449da8eedd843f14b, type: 2}
+    value: {fileID: 1435826636}
   m_ExposedReferences:
     m_References: []
 --- !u!114 &1191764216 stripped
@@ -5349,6 +5351,7 @@ GameObject:
   - component: {fileID: 1435826634}
   - component: {fileID: 1435826636}
   - component: {fileID: 1435826635}
+  - component: {fileID: 1435826637}
   m_Layer: 0
   m_Name: StageSequenceRoot
   m_TagString: Untagged
@@ -5436,12 +5439,38 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+        - m_Target: {fileID: 1435826637}
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.Sequence.StageSequenceMusicView,
+            KillChord.View
+          m_MethodName: PlayStageClearBgm
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
     - m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 1435826635}
           m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.Sequence.StageSequenceVoiceView,
             KillChord.View
           m_MethodName: PlayGameOverVoice
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+        - m_Target: {fileID: 1435826637}
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.Sequence.StageSequenceMusicView,
+            KillChord.View
+          m_MethodName: PlayGameOverBgm
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -5481,6 +5510,20 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
+--- !u!114 &1435826637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1435826633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 147e44e44b88be446a4632b7ff363bd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.StageSequenceMusicView
+  _stageClearCueName: 
+  _gameOverCueName: SE_Gameover
 --- !u!1 &1438587864
 GameObject:
   m_ObjectHideFlags: 0
