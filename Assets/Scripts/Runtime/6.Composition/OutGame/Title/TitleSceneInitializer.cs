@@ -1,15 +1,16 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
+using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Music;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
-using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
@@ -430,6 +431,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private async void HandleDataResetButtonClicked()
         {
+            // リセット前の音量設定を保持する。
+            AudioSettingsData preservedAudioSettings = GetPreservedAudioSettings();
+
             try
             {
                 await SaveStore.DeleteAsync<SaveData>();
@@ -448,7 +452,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedSaveData = await LoadSaveData();
 
             await ApplyInitialSkillLoadoutAsync();
-            _audioSettingsContainer?.Command.ResetToDefaults();
+
+            await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
 
             // セーブデータをリセットした後、初回起動時の遷移先シーンを設定します。
             if (_loadedSaveData != null
@@ -500,6 +505,53 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 Debug.LogError(
                     $"[{nameof(TitleSceneInitializer)}] 初期スキルの保存中にエラーが発生しました。{ex.Message}",
                     this);
+            }
+        }
+
+        /// <summary>
+        ///     ViewModel が保持している現在の音量設定値を取得する。
+        ///     <para>
+        ///          AudioSettingsController が保持する最新値は _loadedSaveData.AudioSettings に
+        ///         反映されないため、必ずViewModel経由で取得する必要がある。
+        ///     </para>
+        /// </summary>
+        /// <returns> 現在の音量設定を表す <see cref="AudioSettingsData"/>。 </returns>
+        private AudioSettingsData GetPreservedAudioSettings()
+        {
+            if (_audioSettingsContainer?.ViewModel == null)
+            {
+                return new AudioSettingsData();
+            }
+
+            IAudioSettingsViewModel viewModel = _audioSettingsContainer.ViewModel;
+            return new AudioSettingsData(
+                viewModel.BgmVolume.CurrentValue,
+                viewModel.SoundEffectVolume.CurrentValue,
+                viewModel.VoiceVolume.CurrentValue);
+        }
+
+        /// <summary>
+        ///     リセット前に保持した音量設定を、リセット後のセーブデータへ反映して保存する。
+        /// </summary>
+        private async ValueTask ApplyPreservedAudioSettingsAsync(AudioSettingsData preservedAudioSettings)
+        {
+            if (_loadedSaveData == null || preservedAudioSettings == null)
+            {
+                return;
+            }
+
+            _loadedSaveData.AudioSettings.SetVolumes(
+                preservedAudioSettings.BgmVolume,
+                preservedAudioSettings.SoundEffectVolume,
+                preservedAudioSettings.VoiceVolume);
+
+            try
+            {
+                await SaveStore.SaveAsync<SaveData>();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: 音量設定の再保存中にエラーが発生しました。{ex.Message}");
             }
         }
 

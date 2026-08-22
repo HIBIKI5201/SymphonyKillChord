@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.PostEffect.PostEffectOverlayConfig
   _excludedLayers:
     serializedVersion: 2
-    m_Bits: 640
+    m_Bits: 896
   _volumeProfile: {fileID: 11400000, guid: c3af66e864dbb544381df71b9e2b433d, type: 2}
   _volumeWeight: 1
+  _fadeInSeconds: 0.1
+  _fadeOutSeconds: 0.2
+  _fadeEase: 20

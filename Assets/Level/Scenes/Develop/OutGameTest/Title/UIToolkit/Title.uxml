@@ -2,7 +2,7 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/USS/Title.uss?fileID=7433441132597879392&amp;guid=aa7e6b8f1a3c44f4395a085a6dc77fd4&amp;type=3#Title"/>
     <ui:VisualElement name="Title" style="flex-grow: 1;">
         <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; position: relative; background-color: rgb(94, 94, 94); color: rgb(255, 255, 255); background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/Title/title_steel.jpg?fileID=21300000&amp;guid=0880bbb37d644c24cbe467e80b5d93a6&amp;type=3#title_steel&quot;); -unity-background-scale-mode: scale-and-crop;">
-            <ui:VisualElement name="TouchArea" style="position: absolute; width: 100%; height: 100%;"/>
+            <ui:VisualElement name="TouchArea" class="ui-se-title-start" style="position: absolute; width: 100%; height: 100%;"/>
             <ui:Button text="≡" name="OptionButton" class="button" style="width: 6%; top: 2%; left: 3%; font-size: 140px; -unity-font-style: bold;"/>
             <ui:Label text="Tap to&#10;Start" name="Instruction" style="right: 2%; bottom: 4%; position: absolute; font-size: 64px; rotate: -20deg; top: auto; left: auto; -unity-text-align: middle-center;"/>
             <ui:Image name="TitleLogo" source="project://database/Assets/Arts/Images/Sprites/Title/title_logo.png?fileID=2800000&amp;guid=588b3ba42d03e204e820a5a36e1094f1&amp;type=3#title_logo" uv="0,0,1,1" style="opacity: 1; display: flex; visibility: visible; overflow: visible; position: relative; top: -272px; left: 625px; right: 0; bottom: 4px; width: 75%; height: 75%;"/>
