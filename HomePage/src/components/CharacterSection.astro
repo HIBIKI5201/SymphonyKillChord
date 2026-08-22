@@ -1,0 +1,147 @@
+---
+interface Props {
+	id: string;
+	name: string;
+	formalName: string;
+	catchphrase: string;
+	description: string[];
+	cv: string;
+	reverse?: boolean;
+}
+
+const { id, name, formalName, catchphrase, description, cv, reverse = false } = Astro.props;
+---
+
+<section class="character-section" id={id} data-reverse={reverse}>
+	<p class="bg-name" aria-hidden="true">{name}</p>
+
+	<div class="visual">
+		<span class="no-image">NO IMAGE</span>
+	</div>
+
+	<div class="info">
+		<h2 class="name">{name}</h2>
+		<p class="formal-name">{formalName}</p>
+		<p class="catchphrase">{catchphrase}</p>
+		<div class="description">
+			{description.map((line) => <p>{line}</p>)}
+		</div>
+		<p class="cv">CV：{cv}</p>
+	</div>
+</section>
+
+<style>
+	.character-section {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: 48px;
+		padding: 96px 0;
+		overflow: hidden;
+	}
+
+	.character-section[data-reverse='true'] {
+		flex-direction: row-reverse;
+	}
+
+	.bg-name {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		margin: 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(4rem, 14vw, 12rem);
+		font-weight: 800;
+		color: var(--color-surface);
+		white-space: nowrap;
+		z-index: 0;
+		pointer-events: none;
+	}
+
+	.visual {
+		position: relative;
+		z-index: 1;
+		flex: 0 0 auto;
+		width: min(320px, 40vw);
+		aspect-ratio: 3 / 4;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px dashed var(--color-surface-border);
+		background: var(--color-surface);
+	}
+
+	.no-image {
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		color: var(--color-text-muted);
+		text-transform: uppercase;
+	}
+
+	.info {
+		position: relative;
+		z-index: 1;
+		flex: 1 1 320px;
+	}
+
+	.name {
+		margin: 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(1.75rem, 4vw, 2.75rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+
+	.formal-name {
+		margin: 8px 0 0;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		color: var(--color-signal-dim);
+		text-transform: uppercase;
+	}
+
+	.catchphrase {
+		margin: 24px 0 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: 1.25rem;
+		color: var(--color-signal);
+	}
+
+	.description {
+		margin-top: 20px;
+	}
+
+	.description p {
+		margin: 0 0 8px;
+		font-size: 0.9375rem;
+		line-height: 1.8;
+		color: var(--color-text-muted);
+	}
+
+	.cv {
+		margin: 20px 0 0;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		color: var(--color-text-muted);
+	}
+
+	@media (max-width: 767px) {
+		.character-section,
+		.character-section[data-reverse='true'] {
+			flex-direction: column;
+			gap: 32px;
+			padding: 64px 0;
+		}
+
+		.visual {
+			width: min(280px, 70vw);
+		}
+	}
+</style>

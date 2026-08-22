@@ -1,0 +1,66 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import CharacterSection from '../components/CharacterSection.astro';
+import CharacterNav from '../components/CharacterNav.astro';
+import characters from '../data/characters.json';
+---
+
+<Layout title="キャラクター | Symphony Kill Chord">
+	<main>
+		<section id="page-header">
+			<p id="eyebrow">Character</p>
+			<h1>キャラクター</h1>
+		</section>
+
+		{
+			characters.map((character, index) => (
+				<CharacterSection
+					id={character.id}
+					name={character.name}
+					formalName={character.formalName}
+					catchphrase={character.catchphrase}
+					description={character.description}
+					cv={character.cv}
+					reverse={index % 2 === 1}
+				/>
+			))
+		}
+	</main>
+
+	<CharacterNav characters={characters.map(({ id, name }) => ({ id, name }))} />
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		max-width: 1080px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	#page-header {
+		padding: 64px 0 0;
+		text-align: center;
+	}
+
+	#eyebrow {
+		margin: 0 0 8px;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--color-signal);
+		text-transform: uppercase;
+	}
+
+	h1 {
+		margin: 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(1.75rem, 5vw, 2.5rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+</style>
