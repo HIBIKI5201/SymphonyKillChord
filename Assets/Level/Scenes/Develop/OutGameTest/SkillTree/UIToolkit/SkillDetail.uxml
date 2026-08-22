@@ -4,7 +4,7 @@
         <ui:VisualElement name="Buttons" style="flex-grow: initial; justify-content: flex-end; align-self: stretch; flex-direction: column; bottom: 0; top: auto; position: relative; align-content: flex-start;">
             <ui:Button text="スキル動画を表示する" name="PreviewButton" style="font-size: 24px; -unity-font-style: bold;"/>
             <ui:Button text="スキルを解放する　必要ポイント：99999" name="UnlockButton" style="width: auto; height: auto; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; font-size: 24px; -unity-font-style: bold;"/>
-            <ui:Button text="戻る" name="BackButton" style="width: auto; height: auto; font-size: 24px; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; position: relative; translate: 0 0; top: auto; left: auto; right: auto; bottom: auto; -unity-font-style: bold;"/>
+            <ui:Button text="戻る" name="BackButton" class="ui-se-cancel" style="width: auto; height: auto; font-size: 24px; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; position: relative; translate: 0 0; top: auto; left: auto; right: auto; bottom: auto; -unity-font-style: bold;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
