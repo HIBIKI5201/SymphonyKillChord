@@ -17,6 +17,7 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
     {
         /// <summary>
         ///     指定Configのポストプロセスを開始する。
+        ///     フェードインの秒数が設定されている場合は、現在の強さから設定値まで持ち上げる。
         /// </summary>
         /// <param name="config"> 開始する対象のConfigです。 </param>
         public void Add(PostEffectOverlayConfig config)
@@ -35,9 +36,12 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
                     return;
                 }
 
-                // フェードアウト中の再要求は、モーションを完了させて辞書から消し切ってから作り直す。
-                entry.Handle.TryComplete();
-                FinalizeRemove(config, entry);
+                // フェードアウト中の再要求は、描画資源を作り直さず今の強さから戻す。
+                // 作り直すと強さが一度0まで落ちて絵がちらつき、CameraとVolumeの生成も毎回走る。
+                entry.Handle.TryCancel();
+                entry.ReferenceCount = 1;
+                PlayFadeIn(config, entry);
+                return;
             }
 
             // 最初の1件を起動する時だけ、Base側のポストプロセスを有効化する。
@@ -77,8 +81,9 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
                 return;
             }
 
-            // フェードインが残っていると開始値が競合するため、先に完了させる。
-            entry.Handle.TryComplete();
+            // フェードインが残っていると開始値が競合するため、今の強さで止める。
+            // 完了させると強さが設定値まで跳ね上がってから落ちるため、取り消しで受け渡す。
+            entry.Handle.TryCancel();
 
             if (!TryPlayFadeOut(config, entry))
             {
@@ -327,7 +332,7 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
         /// <param name="entry"> 対象のエントリです。 </param>
         private void FinalizeRemove(PostEffectOverlayConfig config, OverlayEntry entry)
         {
-            // フェードアウトの完了と再要求時のTryCompleteの双方から呼ばれるため、二重実行を弾く。
+            // フェードアウトの完了と秒数未設定時の即時取り下げの双方から呼ばれるため、二重実行を弾く。
             if (!_overlays.TryGetValue(config, out OverlayEntry current) || current != entry)
             {
                 return;
