@@ -20,8 +20,8 @@ MonoBehaviour:
   _stageName: BattleStage_04
   _flavorText: 
   _targetSceneName: InGame
-  _rewardSkillBuildPoint: 2
-  _rewardSkillUnlockPoint: 2
+  _rewardSkillBuildPoint: 10
+  _rewardSkillUnlockPoint: 5
   _isTutorial: 0
   _enemyWaveDefinitionId:
     _id: enemy_wave_04
