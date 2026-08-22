@@ -23,5 +23,5 @@ MonoBehaviour:
   _battleMusicSpec: {fileID: 11400000, guid: 2d1972e01a7a86243aac0caff66ff428, type: 2}
   _missionKey: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
   _attackIndex: 0
-  _defaultPoolSize: 10
+  _defaultPoolSize: 5
   _maxPoolSize: 20

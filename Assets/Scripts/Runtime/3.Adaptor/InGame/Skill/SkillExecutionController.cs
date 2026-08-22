@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
 
@@ -68,6 +69,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             if (canExecute)
             {
                 ExecuteVisual();
+
+                // カメラシェイクなどの演出用に、スキルが発動したことを通知する。対象の有無は問わない。
+                EventBus<EOnSkillExecuted>.Raise(new EOnSkillExecuted(_skillDefinition.Id.Value));
+
                 _presenter.Push(_skillDefinition);
                 _skillRhythmState.Clear();
                 _skillCooldownState.SetSkillCooldown(now);

@@ -6,6 +6,7 @@ using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Adaptor.InGame.Mission
 {
@@ -75,6 +76,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// </summary>
         public void Unbind()
         {
+            _pendingAttackBeatKind = null;
+
             if (_playerEntity != null)
             {
                 _playerEntity.OnHealthChanged -= HandleHealthChanged;
@@ -125,6 +128,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private PlayerController _playerController;
         private TargetSystemController _targetSystemController;
         private ComboHudPresenter _comboHudPresenter;
+        /// <summary> <see cref="HandleAttackExecuted"/>と一緒に通知する、保留中の拍子攻撃です。 </summary>
+        private MissionActionKind? _pendingAttackBeatKind;
+        private readonly List<MissionActionKind> _attackActionBuffer = new();
 
         /// <summary>
         ///     回避の実行をミッションへ通知します。敵の攻撃を実際に避けられたかどうかは問いません。
@@ -147,12 +153,18 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         }
 
         /// <summary>
-        ///     攻撃拍子をMissionへ通知します。
+        ///     攻撃拍子を保留します。
+        ///     <para>
+        ///         1回の攻撃では拍子付きの行動が先に、汎用の<see cref="MissionActionKind.Attack"/>が後に発火します。
+        ///         個別に通知すると、拍子側でミッションのステップが進んだ場合に
+        ///         Attack側が次のステップへ計上されてしまうため、
+        ///         ここでは通知せず<see cref="HandleAttackExecuted"/>でまとめて通知します。
+        ///     </para>
         /// </summary>
         /// <param name="beatType"> 実行した攻撃の拍子です。 </param>
         private void HandleAttackBeatExecuted(BeatType beatType)
         {
-            MissionActionKind actionKind = beatType switch
+            _pendingAttackBeatKind = beatType switch
             {
                 BeatType.One => MissionActionKind.AttackOneBeat,
                 BeatType.Two => MissionActionKind.AttackTwoBeat,
@@ -162,7 +174,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 BeatType.Eight => MissionActionKind.AttackEightBeat,
                 _ => MissionActionKind.Attack,
             };
-            _missionEventController.NotifyActionPerformed(actionKind);
         }
 
         /// <summary>
@@ -194,7 +205,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private void HandleAttackExecuted(string weaponId, bool hasHit)
         {
             _missionProgress.RecordWeaponUse(weaponId);
-            _missionEventController.NotifyActionPerformed(MissionActionKind.Attack);
+            NotifyAttackActions();
 
             if (!hasHit)
             {
@@ -204,6 +215,24 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             }
             _missionProgress.IncrementCombo();
             _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
+        }
+
+        /// <summary>
+        ///     1回の攻撃で発生した行動を、まとめてMissionへ通知します。
+        /// </summary>
+        private void NotifyAttackActions()
+        {
+            _attackActionBuffer.Clear();
+
+            if (_pendingAttackBeatKind.HasValue
+                && _pendingAttackBeatKind.Value != MissionActionKind.Attack)
+            {
+                _attackActionBuffer.Add(_pendingAttackBeatKind.Value);
+            }
+
+            _pendingAttackBeatKind = null;
+            _attackActionBuffer.Add(MissionActionKind.Attack);
+            _missionEventController.NotifyActionsPerformed(_attackActionBuffer);
         }
 
         /// <summary>

@@ -17,11 +17,11 @@
                     <ui:VisualElement name="EquippedSkillEffectList" class="battle-preparation-effect-list"/>
                 </ui:ScrollView>
                 <ui:VisualElement name="FooterButtons" class="battle-preparation-footer">
-                    <ui:Button text="出撃" name="StartButton" class="button battle-preparation-start-button" style="right: 1%;"/>
-                    <ui:Button text="改造" name="SkillBuildButton" class="button battle-preparation-back-button" style="left: 1%; position: absolute;"/>
+                    <ui:Button text="出撃" name="StartButton" class="button battle-preparation-start-button ui-se-sortie" style="right: 1%;"/>
+                    <ui:Button text="改造" name="SkillBuildButton" class="button battle-preparation-back-button ui-se-window" style="left: 1%; position: absolute;"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:Button text="戻る" name="BackButton" class="button back-button" style="left: auto;"/>
+        <ui:Button text="戻る" name="BackButton" class="button back-button ui-se-cancel" style="left: auto;"/>
     </ui:VisualElement>
 </ui:UXML>

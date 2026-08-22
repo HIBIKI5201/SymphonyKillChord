@@ -11,7 +11,7 @@
                 <ui:Label text="所持ポイント：" class="owned-points-heading"/>
                 <ui:Label text="0" name="OwnedPointsLabel" class="owned-points-value"/>
             </ui:VisualElement>
-            <ui:Button text="戻る" name="BackButton" class="button back-button" style="color: rgb(0, 0, 0); font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 30px; left: auto; right: 1%;"/>
+            <ui:Button text="戻る" name="BackButton" class="button back-button ui-se-cancel" style="color: rgb(0, 0, 0); font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 30px; left: auto; right: 1%;"/>
         </ui:VisualElement>
         <ui:VisualElement name="MiddleSection" style="flex-grow: 0; width: 100%; height: 55%; flex-direction: row; top: 5%;">
             <ui:VisualElement name="SkillSlot" style="flex-grow: 0; flex-shrink: 1; width: 45%; height: 80%; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); border-top-width: 10px; border-right-width: 10px; border-bottom-width: 10px; border-left-width: 10px; border-top-left-radius: 5%; border-top-right-radius: 5%; border-bottom-right-radius: 5%; border-bottom-left-radius: 5%; left: 1.5%;">
@@ -29,7 +29,7 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-grow: 0; width: 100%; height: 20%; justify-content: center; top: 5%;">
-                        <ui:Button text="保存" name="SkillBuildSaveButton" class="button" style="position: relative; flex-shrink: 1; flex-grow: 0; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px; width: 40%; height: 100%; align-self: center; font-size: 24px; -unity-font-style: bold; background-color: rgb(92, 225, 230); min-height: 100px;"/>
+                        <ui:Button text="保存" name="SkillBuildSaveButton" class="button ui-se-select" style="position: relative; flex-shrink: 1; flex-grow: 0; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px; width: 40%; height: 100%; align-self: center; font-size: 24px; -unity-font-style: bold; background-color: rgb(92, 225, 230); min-height: 100px;"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
