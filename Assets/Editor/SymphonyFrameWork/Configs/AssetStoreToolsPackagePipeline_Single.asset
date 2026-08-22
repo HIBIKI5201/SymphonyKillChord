@@ -16,6 +16,7 @@ MonoBehaviour:
   - rid: 1841141192632303616
   - rid: 1841141192632303617
   - rid: 1841141192632303618
+  - rid: 1841141508243456149
   references:
     version: 2
     RefIds:
@@ -28,3 +29,7 @@ MonoBehaviour:
     - rid: 1841141192632303618
       type: {class: AssetStoreToolsCreateZipStrategy, ns: SymphonyFrameWork.Editor, asm: SymphonyFrameWork.Editor}
       data: 
+    - rid: 1841141508243456149
+      type: {class: DriveUploadPackageStrategy, ns: KillChord.Editor.AssetStorePackagePipeline, asm: KillChord.Editor}
+      data:
+        _folderId: 1zz9tVUJa_ipBIQOm21Yos-calEk-5AbC

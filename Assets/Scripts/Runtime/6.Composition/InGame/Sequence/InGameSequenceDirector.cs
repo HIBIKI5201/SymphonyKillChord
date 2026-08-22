@@ -30,6 +30,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             StageResultView resultView,
             StageStartConstraintView stageStartConstraintView,
             StageResultPresenter resultPresenter,
+            InGameHudVisibilityView hudVisibilityView,
             IGameplayControllable gameplayControllable)
         {
             _stageSequenceView = stageSequenceView ?? throw new ArgumentNullException(nameof(stageSequenceView));
@@ -39,6 +40,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageResultView = resultView ?? throw new ArgumentNullException(nameof(resultView));
             _stageResultPresenter = resultPresenter ?? throw new ArgumentNullException(nameof(resultPresenter));
             _gameplayControllable = gameplayControllable ?? throw new ArgumentNullException(nameof(gameplayControllable));
+            _gameHudVisibilityView = hudVisibilityView ?? throw new ArgumentNullException(nameof(hudVisibilityView));
         }
 
         /// <summary>
@@ -60,6 +62,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceMessageView?.SetStageStartMessage();
             _stageStartFadeView.ShowBlackImmediate();
 
+
+            // PlayStageStartが完了コールバックを同期的に呼ぶ場合があるため、再生前にHUDを非表示にする。
+            _gameHudVisibilityView.Hide();
 
             _stageSequenceView.PlayStageStart(HandleTimelineCompleted);
             _stageStartFadeView.PlayFadeOut();
@@ -138,6 +143,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private readonly StageResultPresenter _stageResultPresenter;
         private readonly StageStartConstraintView _stageStartConstraintView;
         private readonly IGameplayControllable _gameplayControllable;
+        private readonly InGameHudVisibilityView _gameHudVisibilityView;
 
         private bool _isStartPlaying;
         private bool _isTimelineCompleted;
@@ -161,6 +167,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             // SourceのAddはModule(Ready)で行う。開始演出が完了したのでここで解放する。
             _stageStartConstraintView.RemoveSource();
+            _gameHudVisibilityView.Show();
         }
 
         /// <summary>
