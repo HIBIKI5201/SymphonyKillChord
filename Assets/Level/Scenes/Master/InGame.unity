@@ -6818,7 +6818,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1809620229}
   - component: {fileID: 1809620230}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: DamageNumberPool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7687,7 +7687,7 @@ GameObject:
   - component: {fileID: 2092701039}
   - component: {fileID: 2092701038}
   - component: {fileID: 2092701037}
-  m_Layer: 5
+  m_Layer: 7
   m_Name: DamageNumberCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
