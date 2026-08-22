@@ -20,6 +20,9 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャストタイミング位置を示す帯の高さ。 </summary>
         public float MarkerHeight => _markerHeight;
 
+        /// <summary> ジャストタイミング位置を示す帯の垂直方向の位置補正。 </summary>
+        public float MarkerVerticalOffset => _markerVerticalOffset;
+
         /// <summary> ジャストタイミング成立時のフラッシュ色。 </summary>
         public Color FlashColor => _flashColor;
 
@@ -53,20 +56,17 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャストタイミング成立時のVignette強度。 </summary>
         public float VignetteIntensity => _vignetteIntensity;
 
+        /// <summary> ジャストタイミング以外の入力時のVignette強度。 </summary>
+        public float NormalVignetteIntensity => _normalVignetteIntensity;
+
         /// <summary> ジャストタイミング成立時のVignette時間。 </summary>
         public float VignetteDuration => _vignetteDuration;
 
-        /// <summary> ジャストタイミング成立時のVignette境界の滑らかさ。 </summary>
-        public float VignetteSmoothness => _vignetteSmoothness;
+        /// <summary> ジャストタイミング以外の入力時のVignette時間。 </summary>
+        public float NormalVignetteDuration => _normalVignetteDuration;
 
         /// <summary> ジャストタイミング成立時のVignetteイージング。 </summary>
         public Ease VignetteEase => _vignetteEase;
-
-        /// <summary> ジャストタイミング用Volumeの優先度。 </summary>
-        public float VignettePriority => _vignettePriority;
-
-        /// <summary> Vignetteを連続再生できる最小間隔。 </summary>
-        public float VignetteMinimumInterval => _vignetteMinimumInterval;
 
         [Header("判定ウィンドウ")]
         [SerializeField, Tooltip("ジャストタイミング位置を示す帯の色。")]
@@ -77,6 +77,9 @@ namespace KillChord.Runtime.View.InGame.Music
 
         [SerializeField, Min(0.1f), Tooltip("ジャストタイミング位置を示す帯の高さ。")]
         private float _markerHeight = 192f;
+
+        [SerializeField, Tooltip("ジャストタイミング位置を示す帯の垂直方向の位置補正。帯の下端をガイドの基準線へ合わせるために使用します。")]
+        private float _markerVerticalOffset = -20f;
 
         [Header("判定色")]
         [SerializeField, Tooltip("ジャストタイミング成立時にビートを一瞬変更する色。")]
@@ -114,19 +117,16 @@ namespace KillChord.Runtime.View.InGame.Music
         [SerializeField, Range(0f, 1f), Tooltip("ジャストタイミング成立時のVignette強度。")]
         private float _vignetteIntensity = 0.22f;
 
+        [SerializeField, Range(0f, 1f), Tooltip("ジャストタイミング以外の入力時のVignette強度。")]
+        private float _normalVignetteIntensity = 0.1f;
+
         [SerializeField, Min(0.01f), Tooltip("ジャストタイミング成立時のVignette時間（秒）。")]
         private float _vignetteDuration = 0.28f;
 
-        [SerializeField, Range(0f, 1f), Tooltip("ジャストタイミング成立時のVignette境界の滑らかさ。")]
-        private float _vignetteSmoothness = 0.45f;
+        [SerializeField, Min(0.01f), Tooltip("ジャストタイミング以外の入力時のVignette時間（秒）。")]
+        private float _normalVignetteDuration = 0.14f;
 
         [SerializeField, Tooltip("ジャストタイミング成立時のVignetteイージング。")]
         private Ease _vignetteEase = Ease.OutQuad;
-
-        [SerializeField, Tooltip("ジャストタイミング用Volumeの優先度。ステージ側より高い値にする。")]
-        private float _vignettePriority = 100f;
-
-        [SerializeField, Min(0f), Tooltip("Vignetteの過剰な連続点滅を防ぐ最小間隔（秒）。")]
-        private float _vignetteMinimumInterval = 0.08f;
     }
 }

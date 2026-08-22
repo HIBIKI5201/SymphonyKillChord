@@ -343,7 +343,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                     continue;
                 }
 
-                fade.Time += Time.deltaTime;
+                fade.Time += Time.unscaledDeltaTime;
                 float t = fade.Duration <= 0f ? 1f : Mathf.Clamp01(fade.Time / fade.Duration);
                 ApplyFadeAlpha(fade.Group, Mathf.Lerp(fade.Start, fade.End, t), fade.FloorAlpha);
                 if (t >= 1f)

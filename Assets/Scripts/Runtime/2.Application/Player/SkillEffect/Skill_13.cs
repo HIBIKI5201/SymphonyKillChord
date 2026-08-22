@@ -1,64 +1,130 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
-using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Persistent;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
 {
     /// <summary>
     ///     スキルID 13 のスキル効果を実装するクラス。
+    ///     発動後、一定間隔で連撃を適用する。
     /// </summary>
     public class Skill_13 : SkillBase
     {
-        public Skill_13(IBuff buff) : base(buff)
-        {
-
-        }
         /// <summary>
-        ///     スキル効果を実行するメソッド。スキルの効果を対象のキャラクターエンティティに適用する。
+        ///     連撃の予約先を受け取って初期化する。
+        /// </summary>
+        /// <param name="hitScheduler"> 連撃を時間差で適用するスケジューラです。 </param>
+        public Skill_13(SkillHitScheduler hitScheduler)
+        {
+            _hitScheduler = hitScheduler;
+        }
+
+        /// <summary>
+        ///     スキル効果を実行するメソッド。連撃を予約し、以降はスケジューラが適用する。
         /// </summary>
         /// <param name="context">スキル効果の発動に必要な情報をまとめた構造体。</param>
         public override void Execute(in SkillEffectContext context)
         {
             float damageMultiplier = (float)context.EffectSpec.GetRequiredValue(
                 SkillEffectParameterId.DamageMultiplier);
+
             int attackCount = (int)context.EffectSpec.GetRequiredValue(
                 SkillEffectParameterId.HitCount);
+
             float criticalMultiplier = (float)context.EffectSpec.GetRequiredValue(
                 SkillEffectParameterId.CriticalMultiplier);
-            AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
-            //  武器なし攻撃を実装するための箱替え。
-            AttackDefinition unbulletDefinition = new AttackDefinition(
-                attackDefinition.AttackName,
-                attackDefinition.AttackSpec,
-                attackDefinition.AttackPipeline,
-                attackDefinition.BeatType,
-                attackDefinition.JustDamageMultiplier,
-                attackDefinition.WeaponDamageMultiplier,
-                attackDefinition.Range,
-                attackDefinition.HalfAngleDegrees,
-                attackDefinition.IsMultiTarget,
-                attackDefinition.HitCount,
-                attackDefinition.HitInterval);
 
+            float hitDelaySeconds = GetOptionalValue(context.EffectSpec, SkillEffectParameterId.HitDelaySeconds);
+            float hitIntervalSeconds = GetOptionalValue(context.EffectSpec, SkillEffectParameterId.HitIntervalSeconds);
 
-            for (int i = 0; i < attackCount; i++)
+            AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec
+                .GetAttackDefinitionByBeatType(context.CurrentBeatType);
+
+            CharacterEntity playerEntity = context.PlayerEntity;
+            CharacterEntity targetEntity = context.TargetEntity;
+            bool isJustHit = context.IsJustHit;
+
+            // ダメージのタイミングはマスタデータが持ち、エフェクトの生成可否には依存させない。
+            _hitScheduler.Schedule(
+                attackCount,
+                hitDelaySeconds,
+                hitIntervalSeconds,
+                hitIndex => ApplyHit(
+                    attackDefinition,
+                    playerEntity,
+                    targetEntity,
+                    isJustHit,
+                    damageMultiplier,
+                    criticalMultiplier,
+                    hitIndex));
+        }
+
+        /// <summary>
+        ///     1ヒット分のダメージを適用する。
+        /// </summary>
+        /// <param name="attackDefinition"> 使用する攻撃定義です。 </param>
+        /// <param name="playerEntity"> 攻撃側のエンティティです。 </param>
+        /// <param name="targetEntity"> 対象のエンティティです。 </param>
+        /// <param name="isJustHit"> ジャスト入力かどうかです。 </param>
+        /// <param name="damageMultiplier"> ダメージ倍率です。 </param>
+        /// <param name="criticalMultiplier"> クリティカル倍率です。 </param>
+        /// <param name="hitIndex"> 何発目かです。 </param>
+        /// <returns> 連撃を継続する場合はtrueです。 </returns>
+        private static bool ApplyHit(
+            AttackDefinition attackDefinition,
+            CharacterEntity playerEntity,
+            CharacterEntity targetEntity,
+            bool isJustHit,
+            float damageMultiplier,
+            float criticalMultiplier,
+            int hitIndex)
+        {
+            // 連撃の途中で対象が失われた場合は、以降のヒットを打ち切る。
+            if (targetEntity == null || targetEntity.IsDead)
             {
-                AttackResult result = AttackCalculator.Calculate(unbulletDefinition, context.PlayerEntity, context.TargetEntity, false, context.PlayerEntity.BaseDamage);
-                Damage damage = result.FinalDamage * damageMultiplier;
-                if (result.IsCritical)
-                {
-                    damage /= unbulletDefinition.AttackSpec.CriticalMultiplier.Value; //元の攻撃定義のクリティカル倍率でダメージを補正してから、スキル固有のクリティカル倍率を適用
-                    damage *= criticalMultiplier; //クリティカルヒットのダメージを補正
-                }
-                context.TargetEntity.TakeDamage(damage);
-#if UNITY_EDITOR
-                Debug.Log($"{i + 1} 回目の、Skill_13 を実行しました:{damage}ダメージです。 ");
-#endif
+                return false;
             }
 
+            AttackResult result = AttackCalculator.Calculate(
+                attackDefinition,
+                playerEntity,
+                targetEntity,
+                isJustHit,
+                playerEntity.BaseDamage,
+                criticalDamageMultiplierOverride: criticalMultiplier);
+
+            result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
+            result = DamageExecutor.Execute(
+                playerEntity,
+                targetEntity,
+                result,
+                DamageAttackType.Skill);
+
+            Debug.Log($"[Skill_13] 発動　{hitIndex}ヒット目" +
+                $"[FinalDamage: {result.FinalDamage}" +
+                $" AppliedDamage: {result.AppliedDamage}," +
+                $"IsCritical: {result.IsCritical}]");
+
+            return !targetEntity.IsDead;
         }
+
+        /// <summary>
+        ///     任意パラメータを取得する。未設定の場合は0を返す。
+        /// </summary>
+        /// <param name="effectSpec"> 参照するスキル効果仕様です。 </param>
+        /// <param name="parameterId"> 取得するパラメータIDです。 </param>
+        /// <returns> 取得した値です。 </returns>
+        private static float GetOptionalValue(SkillEffectSpec effectSpec, SkillEffectParameterId parameterId)
+        {
+            return effectSpec.TryGetParameter(parameterId, out SkillEffectParameter parameter)
+                ? (float)parameter.Value
+                : 0f;
+        }
+
+        private readonly SkillHitScheduler _hitScheduler;
     }
 }

@@ -17,17 +17,20 @@ MonoBehaviour:
     _hashId: -1127918619
   _displayName: 1
   _pattern: 020000000400000001000000
-  _skillDetail: "ターゲットに強力な一回攻撃。\n\n確定でクリティカル発生"
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 4c65db539275a8f43bac501545e065fd, type: 3}
+  _skillDetail: "\u30BF\u30FC\u30B2\u30C3\u30C8\u306B\u5F37\u529B\u306A\u4E00\u56DE\u653B\u6483\u3002\n\n\u78BA\u5B9A\u3067\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u767A\u751F"
+  _tips: 
   _effectDisplayMode: 0
   _effectParameters:
-  - _id: 1
-    _value: 0.9
-    _displayFormat: 2
+  - _id: 0
+    _value: 2
+    _displayFormat: 3
   _skillType: 00000000
   _level: 0
   _cooldownNumerator: 1
   _cooldownDenomimator: 1
   _skillEffectType: 1
   _skillTargetingType: 2
+  _statusEffectReapplyPolicy: 4
+  _skillNormalAttackDamagePolicy: 1
   _animationKey: Skill_Left

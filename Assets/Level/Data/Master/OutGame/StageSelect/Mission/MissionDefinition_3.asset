@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f368caefeeb82b439f56866e03ca24a, type: 3}
+  m_Name: MissionDefinition_3
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Mission.MissionDefinitionAsset
+  _plannerMemo: 
+  _missionId:
+    _id: Durability
+    _hashId: -1224982200
+  _displayName: "\u8010\u4E45\u6226"
+  _mainMissionText: "\u6226\u5834\u3092120\u79D2\u9593\u751F\u304D\u6B8B\u308C"
+  _defeatTips:
+  - "\u9752\u653B\u6483\u306A\u3069\u306E\u7BC4\u56F2\u653B\u6483\u306A\u3069\u3092\u4F7F\u3046\u3068\u6575\u3092\u6BB2\u6EC5\u3067\u304D\u308B\u305E"
+  _clearConditionSteps:
+  - _condition:
+      rid: 4309480244433387708
+    _guideMessageText: 
+    _entryActions: []
+  _failCondition:
+    rid: 4309480244433387709
+  _evaluationConditions:
+  - rid: 4309480244433387712
+  - rid: 4309480244433387711
+  - rid: 4309480244433387713
+  references:
+    version: 2
+    RefIds:
+    - rid: 4309480244433387708
+      type: {class: ElapsedTimeClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "120\u79D2\u751F\u5B58\u3059\u308B\u6761\u4EF6"
+        _requiredElapsedTime: 120
+    - rid: 4309480244433387709
+      type: {class: PlayerDeadFailConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FC\u304C\u6B7B\u3093\u3060\u3089\u5931\u6557\u3059\u308B\u6761\u4EF6"
+    - rid: 4309480244433387711
+      type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _evaluationId: Damege_50
+        _displayText: "\u53D7\u3051\u305F\u30C0\u30E1\u30FC\u30B8\u304C50\u30C0\u30E1\u30FC\u30B8\u4EE5\u4E0B"
+        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C50\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _maximumDamage: 50
+    - rid: 4309480244433387712
+      type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _evaluationId: Damege_25
+        _displayText: "\u53D7\u3051\u305F\u30C0\u30E1\u30FC\u30B8\u304C75\u30C0\u30E1\u30FC\u30B8\u4EE5\u4E0B"
+        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C75\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _maximumDamage: 75
+    - rid: 4309480244433387713
+      type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _evaluationId: Damege_75
+        _displayText: "\u53D7\u3051\u305F\u30C0\u30E1\u30FC\u30B8\u304C25\u30C0\u30E1\u30FC\u30B8\u4EE5\u4E0B"
+        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C25\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _maximumDamage: 25

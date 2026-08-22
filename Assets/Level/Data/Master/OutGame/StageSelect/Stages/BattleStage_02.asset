@@ -18,14 +18,14 @@ MonoBehaviour:
     _hashId: -415247034
   _isInitiallyUnlocked: 0
   _stageName: Stage_02
-  _flavorText: "\u30DC\u30B9"
+  _flavorText: "\u6575\u306E\u731B\u653B\u3092\u8010\u3048\u3057\u306E\u3050"
   _targetSceneName: InGame
-  _rewardSkillBuildPoint: 2
-  _rewardSkillUnlockPoint: 2
+  _rewardSkillBuildPoint: 10
+  _rewardSkillUnlockPoint: 5
   _isTutorial: 0
   _enemyWaveDefinitionId:
-    _id: enemy_wave_01
-    _hashId: 480330467
+    _id: enemy_wave_02
+    _hashId: -2052582567
   _missionDefinitionId:
-    _id: AllKill
-    _hashId: 1531565721
+    _id: Durability
+    _hashId: -1224982200

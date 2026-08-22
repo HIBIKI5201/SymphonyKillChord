@@ -1,22 +1,23 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
+using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Music;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
-using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
-using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading.Tasks;
@@ -61,17 +62,22 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。バトルシーン名の解決に使用します。")]
         private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
 
+        [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
+        private TextAsset _memberCsv;
+
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private TitleSceneView _titleSceneView;
         private TitleStartController _titleStartController;
         private ScreenController _screenController;
         private BattleSortieSelectionService _battleSortieSelectionService;
-        private SavedataSystem _savedataSystem;
         private ScreenRuleData _loadedRuleData;
         private StageTreeAsset _loadedStageTreeAsset;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
+        private AudioSettingsModuleContainer _audioSettingsContainer;
+        private VolumeSettingsTabView _volumeSettingsTabView;
+        private DataResetTabView _dataResetTabView;
 
         private bool _isInitialized;
         private bool _isSubscribed;
@@ -83,21 +89,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(System.Threading.CancellationToken cancellationToken)
         {
-            if (!ServiceLocator.TryGetInstance(out _savedataSystem))
-            {
-                Debug.LogError(
-                    $"[{nameof(TitleSceneInitializer)}] {nameof(SavedataSystem)}を取得できませんでした。",
-                    this);
-                return false;
-            }
-
             _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
             _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
             _loadedEnemyWaveDefinitionRepository =
                 await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
                     this,
                     cancellationToken);
-            _loadedSaveData = await _savedataSystem.LoadAsync<SaveData>();
+            _loadedSaveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             return _loadedRuleData != null
                 && _loadedStageTreeAsset != null
                 && _loadedEnemyWaveDefinitionRepository != null
@@ -136,9 +136,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             SceneTransitionController sceneTransitionController;
-            MusicPlayer musicPlayer;
-            SoundEffectVolumeManager sePlayer;
-            if (!TryGetServiceLocatorInstances(out sceneTransitionController, out musicPlayer, out sePlayer, out _savedataSystem))
+            if (!TryGetServiceLocatorInstances(
+                    out sceneTransitionController,
+                    out _audioSettingsContainer))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
@@ -189,10 +189,15 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
-            VolumeSettingsTabView audioVolumeTab = new(optionRoot, musicPlayer, sePlayer);
-            DataResetTabView dataResetTab = new(optionRoot, _outGameUIEvent);
+            _volumeSettingsTabView = new VolumeSettingsTabView(
+                optionRoot,
+                _audioSettingsContainer.ViewModel,
+                _audioSettingsContainer.Command);
+            _dataResetTabView = new DataResetTabView(optionRoot, _outGameUIEvent);
 
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
+
+            BuildMemberList(creditScreenView);
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
             IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedRuleData);
@@ -275,12 +280,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedStageTreeAsset = null;
             _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
+            _volumeSettingsTabView?.Dispose();
+            _volumeSettingsTabView = null;
+            _dataResetTabView?.Dispose();
+            _dataResetTabView = null;
+            _audioSettingsContainer = null;
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
             _titleStartController = null;
             _battleSortieSelectionService = null;
             _screenController = null;
-            _savedataSystem = null;
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
@@ -290,18 +299,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         ///    ServiceLocator から必要なインスタンスを取得する。
         /// </summary>
         /// <param name="sceneTransitionController"></param>
-        /// <param name="musicPlayer"></param>
-        /// <param name="sePlayer"></param>
-        /// <param name="savedataSystem"> セーブシステム。 </param>
+        /// <param name="audioSettingsContainer"></param>
         /// <returns></returns>
         private bool TryGetServiceLocatorInstances(
-            out SceneTransitionController sceneTransitionController, out MusicPlayer musicPlayer,
-            out SoundEffectVolumeManager sePlayer, out SavedataSystem savedataSystem)
+            out SceneTransitionController sceneTransitionController,
+            out AudioSettingsModuleContainer audioSettingsContainer)
         {
             sceneTransitionController = null;
-            musicPlayer = null;
-            sePlayer = null;
-            savedataSystem = null;
+            audioSettingsContainer = null;
 
             if (!ServiceLocator.TryGetInstance(out sceneTransitionController))
             {
@@ -311,31 +316,35 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance<MusicPlayer>(out musicPlayer))
+            if (!ServiceLocator.TryGetInstance(out audioSettingsContainer))
             {
 #if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: MusicPlayer が ServiceLocator に登録されていません。");
-#endif
-                return false;
-            }
-
-            if (!ServiceLocator.TryGetInstance<SoundEffectVolumeManager>(out sePlayer))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: SoundEffectVolumeManager が ServiceLocator に登録されていません。");
-#endif
-                return false;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out savedataSystem))
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: SavedataSystem が ServiceLocator に登録されていません。");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: AudioSettingsModuleContainer が ServiceLocator に登録されていません。");
 #endif
                 return false;
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     制作メンバー CSV を読み込み、クレジット画面へ一覧を反映します。
+        /// </summary>
+        /// <param name="creditScreenView"> 一覧の反映先となるクレジット画面 View です。 </param>
+        private void BuildMemberList(CreditScreenView creditScreenView)
+        {
+            if (_memberCsv == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(TitleSceneInitializer)}] 制作メンバー CSV が設定されていないため、クレジット画面のメンバー一覧は空になります。",
+                    this);
+                return;
+            }
+
+            IMemberRepository memberRepository = new MemberCsvRepository(_memberCsv.text);
+            IMemberListPresenter memberListPresenter = new MemberListPresenter(creditScreenView);
+            ShowMemberListUseCase showMemberListUseCase = new(memberRepository, memberListPresenter);
+            showMemberListUseCase.Execute();
         }
 
         /// <summary>
@@ -422,21 +431,29 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private async void HandleDataResetButtonClicked()
         {
+            // リセット前の音量設定を保持する。
+            AudioSettingsData preservedAudioSettings = GetPreservedAudioSettings();
+
             try
             {
-                await _savedataSystem.DeleteSaveDataAsync<SaveData>();
+                await SaveStore.DeleteAsync<SaveData>();
             }
             catch (Exception ex)
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: セーブデータの削除中にエラーが発生しました。{ex.Message}");
 #endif
+                // 削除に失敗した状態で再読み込みと初期スキル補完を続けると、
+                // リセットできていないデータをリセット済みとして扱ってしまう。
+                return;
             }
 
             // セーブデータをロードして、初期状態に戻す。
             _loadedSaveData = await LoadSaveData();
 
             await ApplyInitialSkillLoadoutAsync();
+
+            await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
 
             // セーブデータをリセットした後、初回起動時の遷移先シーンを設定します。
             if (_loadedSaveData != null
@@ -481,13 +498,60 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             try
             {
-                await _savedataSystem.SaveAsync(_loadedSaveData);
+                await SaveStore.SaveAsync<SaveData>();
             }
             catch (Exception ex)
             {
                 Debug.LogError(
                     $"[{nameof(TitleSceneInitializer)}] 初期スキルの保存中にエラーが発生しました。{ex.Message}",
                     this);
+            }
+        }
+
+        /// <summary>
+        ///     ViewModel が保持している現在の音量設定値を取得する。
+        ///     <para>
+        ///          AudioSettingsController が保持する最新値は _loadedSaveData.AudioSettings に
+        ///         反映されないため、必ずViewModel経由で取得する必要がある。
+        ///     </para>
+        /// </summary>
+        /// <returns> 現在の音量設定を表す <see cref="AudioSettingsData"/>。 </returns>
+        private AudioSettingsData GetPreservedAudioSettings()
+        {
+            if (_audioSettingsContainer?.ViewModel == null)
+            {
+                return new AudioSettingsData();
+            }
+
+            IAudioSettingsViewModel viewModel = _audioSettingsContainer.ViewModel;
+            return new AudioSettingsData(
+                viewModel.BgmVolume.CurrentValue,
+                viewModel.SoundEffectVolume.CurrentValue,
+                viewModel.VoiceVolume.CurrentValue);
+        }
+
+        /// <summary>
+        ///     リセット前に保持した音量設定を、リセット後のセーブデータへ反映して保存する。
+        /// </summary>
+        private async ValueTask ApplyPreservedAudioSettingsAsync(AudioSettingsData preservedAudioSettings)
+        {
+            if (_loadedSaveData == null || preservedAudioSettings == null)
+            {
+                return;
+            }
+
+            _loadedSaveData.AudioSettings.SetVolumes(
+                preservedAudioSettings.BgmVolume,
+                preservedAudioSettings.SoundEffectVolume,
+                preservedAudioSettings.VoiceVolume);
+
+            try
+            {
+                await SaveStore.SaveAsync<SaveData>();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: 音量設定の再保存中にエラーが発生しました。{ex.Message}");
             }
         }
 
@@ -537,7 +601,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             SaveData saveData = null;
             try
             {
-                saveData = await _savedataSystem.LoadAsync<SaveData>();
+                saveData = SaveStore.IsLoaded<SaveData>()
+                    ? SaveStore.Get<SaveData>()
+                    : await SaveStore.LoadAsync<SaveData>();
                 return saveData;
             }
             catch (Exception ex)

@@ -29,6 +29,13 @@ namespace KillChord.Runtime.Application.InGame.Music
         float GetBarProgress();
 
         /// <summary>
+        ///     直前のアクション入力からの経過を小節長で正規化した進捗を、上限なしで取得する。
+        ///     1小節を超えた超過分を表示に使いたい場合に使用する。
+        /// </summary>
+        /// <returns> 0以上の進捗。1で1小節経過。 </returns>
+        float GetBarProgressUnclamped();
+
+        /// <summary>
         ///     拍の種類履歴を取得する。
         /// </summary>
         /// <returns> 拍の種類スパン。 </returns>
@@ -53,7 +60,8 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <param name="timing"> 実行タイミング。 </param>
         /// <param name="action"> 実行アクション。 </param>
         /// <param name="ct"> キャンセルトークン。 </param>
-        void RegisterAction(
+        /// <returns> 実行される音源再生時間（秒）。 </returns>
+        double RegisterAction(
             double accurateBeat,
             ExecuteRequestTiming timing,
             Action action,

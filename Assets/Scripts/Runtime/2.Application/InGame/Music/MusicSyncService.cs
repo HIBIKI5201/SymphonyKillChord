@@ -131,7 +131,8 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <param name="timing"> 実行するタイミング指定。 </param>
         /// <param name="action"> 実行するアクション。 </param>
         /// <param name="ct"> キャンセルトークン。 </param>
-        public void RegisterAction(
+        /// <returns> 実行される音源再生時間（秒）。 </returns>
+        public double RegisterAction(
             double accurateBeat,
             ExecuteRequestTiming timing,
             Action action,
@@ -139,6 +140,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         {
             double executeTime = MusicTimingCalculator.CalculateExecutionTime(_rhythmDefinition, timing, accurateBeat);
             _scheduledActions.Enqueue(new ScheduledAction(action, ct), executeTime);
+            return executeTime;
         }
 
         /// <summary>
@@ -164,6 +166,25 @@ namespace KillChord.Runtime.Application.InGame.Music
 
             double elapsedSeconds = _currentPlayTime - _rhythmState.LastTiming;
             return _rhythmDefinition.CalculateNormalizedBarProgress(elapsedSeconds);
+        }
+
+        /// <summary>
+        ///     直前のアクション入力からの経過を小節長で正規化した進捗を、上限なしで取得する。
+        ///     1小節を超えた超過分を表示に使いたい場合に使用する。
+        /// </summary>
+        /// <returns> 0以上の進捗。1で1小節経過。 </returns>
+        public float GetBarProgressUnclamped()
+        {
+            if (_rhythmState.Count == 0)
+            {
+                return 0f;
+            }
+
+            double elapsedSeconds = _currentPlayTime - _rhythmState.LastTiming;
+            double elapsedBarCount = _rhythmDefinition.CalculateElapsedBarCount(elapsedSeconds);
+
+            // 再生位置の巻き戻し等で負値になった場合は小節頭として扱う。
+            return elapsedBarCount > 0d ? (float)elapsedBarCount : 0f;
         }
 
         private const int BUFFER_SIZE = 64;
