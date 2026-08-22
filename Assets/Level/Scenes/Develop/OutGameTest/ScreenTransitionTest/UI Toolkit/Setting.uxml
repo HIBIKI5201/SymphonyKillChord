@@ -4,13 +4,13 @@
     <ui:VisualElement name="Root" picking-mode="Position" class="setting-root">
         <ui:VisualElement name="BackGround" class="setting-window">
             <ui:VisualElement class="setting-top-bar">
-                <ui:Button text="← ホームへ戻る" name="BackButton" class="setting-back-button"/>
+                <ui:Button text="← ホームへ戻る" name="BackButton" class="setting-back-button ui-se-cancel"/>
                 <ui:Label text="設定" name="Title" class="setting-title"/>
             </ui:VisualElement>
             <ui:VisualElement name="SettingLayout" class="setting-layout">
                 <ui:VisualElement class="setting-category-list">
-                    <ui:Button text="サウンド" name="SoundCategoryButton" class="setting-category-button"/>
-                    <ui:Button text="システム" name="SystemCategoryButton" class="setting-category-button"/>
+                    <ui:Button text="サウンド" name="SoundCategoryButton" class="setting-category-button ui-se-select"/>
+                    <ui:Button text="システム" name="SystemCategoryButton" class="setting-category-button ui-se-select"/>
                 </ui:VisualElement>
                 <ui:ScrollView name="SettingContent" mode="Vertical" class="setting-content-scroll">
                     <ui:VisualElement name="SoundPanel" class="setting-panel">
@@ -55,7 +55,7 @@
                 <ui:VisualElement class="setting-dialog">
                     <ui:Label text="タイトル画面に戻りますか？" class="setting-dialog-message"/>
                     <ui:VisualElement class="setting-dialog-buttons">
-                        <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button"/>
+                        <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button ui-se-cancel"/>
                         <ui:Button text="タイトル画面に戻る" name="ConfirmReturnToTitleButton" class="setting-dialog-button setting-dialog-confirm"/>
                     </ui:VisualElement>
                 </ui:VisualElement>

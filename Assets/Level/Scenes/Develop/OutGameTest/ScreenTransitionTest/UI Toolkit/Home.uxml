@@ -3,10 +3,10 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
     <ui:VisualElement name="VisualElement" class="screen-visible" style="position: relative; background-color: rgba(53, 65, 72, 0);">
         <ui:VisualElement name="ButtonRoot" style="flex-grow: 1; justify-content: flex-start; align-items: flex-end; padding-right: 50px; padding-top: 50px; flex-direction: column;">
-            <ui:Button text="作戦" name="StageSelect" class="button" style="color: rgb(210, 210, 210); display: flex; opacity: 1;"/>
-            <ui:Button text="研究" name="SkillTree" class="button" style="height: 100px; width: 200px; -unity-text-align: middle-center; font-size: 36px; -unity-font-style: bold; background-color: rgba(255, 255, 255, 0); color: rgb(209, 209, 209); display: flex; opacity: 1;"/>
-            <ui:Button text="改造" name="SkillBuild" class="button" style="height: 100px; width: 200px; -unity-text-align: middle-center; font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); color: rgb(210, 210, 210); display: flex; opacity: 1;"/>
-            <ui:Button text="設定" name="Setting" class="button" style="height: 100px; width: 200px; -unity-text-align: middle-center; font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); color: rgb(210, 210, 210); display: flex; opacity: 1;"/>
+            <ui:Button text="作戦" name="StageSelect" class="button ui-se-window" style="color: rgb(210, 210, 210); display: flex; opacity: 1;"/>
+            <ui:Button text="研究" name="SkillTree" class="button ui-se-window" style="height: 100px; width: 200px; -unity-text-align: middle-center; font-size: 36px; -unity-font-style: bold; background-color: rgba(255, 255, 255, 0); color: rgb(209, 209, 209); display: flex; opacity: 1;"/>
+            <ui:Button text="改造" name="SkillBuild" class="button ui-se-window" style="height: 100px; width: 200px; -unity-text-align: middle-center; font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); color: rgb(210, 210, 210); display: flex; opacity: 1;"/>
+            <ui:Button text="設定" name="Setting" class="button ui-se-window" style="height: 100px; width: 200px; -unity-text-align: middle-center; font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); color: rgb(210, 210, 210); display: flex; opacity: 1;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

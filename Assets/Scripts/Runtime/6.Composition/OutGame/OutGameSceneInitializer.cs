@@ -12,7 +12,7 @@ using UnityEngine;
 namespace KillChord.Runtime.Composition.OutGame
 {
     /// <summary>
-     ///     アウトゲーム共通 Signal を生成して公開するクラスです。
+    ///     アウトゲーム共通 Signal を生成して公開するクラスです。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class OutGameSceneInitializer : OutGameInitializationModuleBase
@@ -65,7 +65,10 @@ namespace KillChord.Runtime.Composition.OutGame
             }
             finally
             {
-                CompleteSceneInitialization(isSuccess);
+                if (this != null)
+                {
+                    CompleteSceneInitialization(isSuccess);
+                }
             }
         }
 
