@@ -146,6 +146,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _stageResultView,
                 _stageStartConstraintView,
                 stageResultContainer.Presenter,
+                _visibilityView,
                 _inGamePlayDirector);
 
             _missionRuntimeService = missionContainer.MissionRuntimeService;
@@ -212,6 +213,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _hasStarted = false;
             _isEnding = false;
         }
+
+        [SerializeField] private InGameHudVisibilityView _visibilityView;
 
         /// <summary>
         ///     ロード画面の終了後にステージ開始シーケンスを開始します。
