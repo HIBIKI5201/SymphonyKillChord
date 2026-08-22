@@ -165,6 +165,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e8857ce462a9a1f45bcc30148f8cd756
+    m_Address: UISoundEffectConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ed00377b3610b1e45b0f1c7da00f007a
     m_Address: SkillBuildRepositoryDebug
     m_ReadOnly: 0
