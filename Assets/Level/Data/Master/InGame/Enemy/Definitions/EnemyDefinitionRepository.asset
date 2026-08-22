@@ -15,3 +15,4 @@ MonoBehaviour:
   _enemyDefinitionAssets:
   - {fileID: 11400000, guid: 83dbcdcd16d7f5d4383a8b6bb93b7339, type: 2}
   - {fileID: 11400000, guid: 846d2eabbe6937441bf872fb023a2b04, type: 2}
+  - {fileID: 11400000, guid: f3c0fec457b15584dbde6912065eef3f, type: 2}

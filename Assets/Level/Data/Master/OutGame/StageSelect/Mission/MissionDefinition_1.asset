@@ -16,40 +16,55 @@ MonoBehaviour:
   _missionId:
     _id: AllKill
     _hashId: 1531565721
-  _displayName: 
+  _displayName: "\u6BB2\u6EC5\u6226"
   _mainMissionText: "\u5168\u3066\u306E\u8D64\u3044\u5175\u58EB\u3092\u6BB2\u6EC5\u3059\u308B"
   _defeatTips:
   - "\u5371\u967A\u306A\u653B\u6483\u306F\u8DDD\u96E2\u3092\u53D6\u3063\u3066\u56DE\u907F\u3057\u3088\u3046"
   - "\u30B9\u30AD\u30EB\u306E\u6539\u9020\u3092\u3057\u3066\u307F\u3088\u3046\uFF01"
-
+  _clearConditionSteps:
+  - _condition:
+      rid: 4309480244433387718
+    _guideMessageText: 
+    _entryActions: []
   _failCondition:
-    rid: 3765890502741459054
+    rid: 4309480244433387717
   _evaluationConditions:
-  - rid: 8885031662707802230
-  - rid: 8885031662707802243
-  - rid: 8885031662707802244
+  - rid: 4309480244433387714
+  - rid: 4309480244433387715
+  - rid: 4309480244433387716
   references:
     version: 2
     RefIds:
-
-    - rid: 8885031662707802230
-      type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+    - rid: 4309480244433387714
+      type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _evaluationId: DamageTaken_01
-        _displayText: "100\u30C0\u30E1\u30FC\u30B8\u4EE5\u5185\u3067\u30AF\u30EA\u30A2\u3059\u308B"
-        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C100\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
-        _maximumDamage: 100
-    - rid: 8885031662707802243
-      type: {class: WeaponVarietyEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+        _evaluationId: time_200
+        _displayText: "\u6311\u6226\u6642\u9593\u304C200\u79D2\u3092\u8D85\u3048\u306A\u3044"
+        _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C200\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _clearTime: 200
+    - rid: 4309480244433387715
+      type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _evaluationId: WeaponVariety_01
-        _displayText: "2\u7A2E\u985E\u4EE5\u4E0A\u306E\u9283\u3092\u4F7F\u7528\u3059\u308B"
-        _inspectorSummary: "2\u7A2E\u985E\u4EE5\u4E0A\u306E\u6B66\u5668\u3092\u4F7F\u7528\u3059\u308B\u6761\u4EF6"
-        _requiredVariety: 2
-    - rid: 8885031662707802244
-      type: {class: ComboEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+        _evaluationId: time_180
+        _displayText: "\u6311\u6226\u6642\u9593\u304C180\u79D2\u3092\u8D85\u3048\u306A\u3044"
+        _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C180\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _clearTime: 180
+    - rid: 4309480244433387716
+      type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _evaluationId: Combo_01
-        _displayText: "10\u30B3\u30F3\u30DC\u4EE5\u4E0A\u3092\u9054\u6210\u3059\u308B"
-        _inspectorSummary: "\u6700\u5927\u30B3\u30F3\u30DC\u6570\u304C10\u4EE5\u4E0A\u3067\u3042\u308B\u6761\u4EF6"
-        _requiredCombo: 10
+        _evaluationId: time_150
+        _displayText: "\u6311\u6226\u6642\u9593\u304C150\u79D2\u3092\u8D85\u3048\u306A\u3044"
+        _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C150\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _clearTime: 150
+    - rid: 4309480244433387717
+      type: {class: PlayerDeadFailConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FC\u304C\u6B7B\u3093\u3060\u3089\u5931\u6557\u3059\u308B\u6761\u4EF6"
+    - rid: 4309480244433387718
+      type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:1401557065)\u309240\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _enemyMissionKeyId:
+          _id: enemy_red
+          _hashId: 1401557065
+        _requiredKillCount: 40
