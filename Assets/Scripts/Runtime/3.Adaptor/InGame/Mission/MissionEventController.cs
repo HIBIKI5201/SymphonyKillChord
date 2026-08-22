@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Adaptor.InGame.Mission
 {
@@ -57,6 +58,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         public void NotifyActionPerformed(MissionActionKind actionKind)
         {
             _missionRuntimeService.OnActionPerformed(actionKind);
+            _missionHudPresenter.Present();
+        }
+
+        /// <summary>
+        ///     ひとつの操作から発生した複数のプレイヤー行動を、まとめて通知します。
+        /// </summary>
+        /// <param name="actionKinds">同時に発動した行動の種別一覧。</param>
+        public void NotifyActionsPerformed(IReadOnlyList<MissionActionKind> actionKinds)
+        {
+            _missionRuntimeService.OnActionsPerformed(actionKinds);
             _missionHudPresenter.Present();
         }
 

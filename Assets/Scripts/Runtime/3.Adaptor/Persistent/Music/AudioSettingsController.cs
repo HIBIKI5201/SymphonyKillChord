@@ -91,9 +91,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Music
         public void ResetToDefaults()
         {
             _settings.SetVolumes(
-                AudioSettingsData.DEFAULT_VOLUME,
-                AudioSettingsData.DEFAULT_VOLUME,
-                AudioSettingsData.DEFAULT_VOLUME);
+                AudioSettingsData.DEFAULT_BGM_VOLUME,
+                AudioSettingsData.DEFAULT_SOUND_EFFECT_VOLUME,
+                AudioSettingsData.DEFAULT_VOICE_VOLUME);
             ApplyAllVolumes();
             SaveAndPresentSettings();
         }

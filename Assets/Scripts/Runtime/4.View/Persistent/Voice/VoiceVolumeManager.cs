@@ -63,6 +63,7 @@ namespace KillChord.Runtime.View.Persistent.Voice
         }
 
         private readonly List<VoiceSource> _sources = new();
-        private float _volume = 0.5f;
+        /// <summary> 音量設定の読み込み前に登録されたSourceへ適用する暫定音量です。 </summary>
+        private float _volume = 0.8f;
     }
 }
