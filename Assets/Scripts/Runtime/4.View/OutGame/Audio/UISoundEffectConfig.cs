@@ -36,8 +36,14 @@ namespace KillChord.Runtime.View.OutGame.Audio
         }
 
         private const string USS_CLASS_PREFIX = "ui-se-";
+
+        // UISoundEffectKindからCueを解決するUSSクラス名は、既定対応との不整合を防ぐため定数化する。
         private const string SELECT_USS_CLASS_NAME = "ui-se-select";
         private const string SKILL_SET_USS_CLASS_NAME = "ui-se-skill-set";
+
+        // Validate時の列挙値配列生成を防ぐため、型初期化時に一度だけ取得する。
+        private static readonly UISoundEffectKind[] UI_SOUND_EFFECT_KINDS =
+            (UISoundEffectKind[])Enum.GetValues(typeof(UISoundEffectKind));
 
         [SerializeField, Tooltip("明示的な音用USSクラスがないButtonに使用するClick Cue。")]
         private string _defaultButtonClickCue = "SE_Click";
@@ -45,11 +51,11 @@ namespace KillChord.Runtime.View.OutGame.Audio
         [SerializeField, Tooltip("ClickEvent用のUSSクラスとCue名の対応。")]
         private List<SoundMapping> _clickMappings = new()
         {
-            new("ui-se-select", "SE_Select"),
+            new(SELECT_USS_CLASS_NAME, "SE_Select"),
             new("ui-se-cancel", "SE_Cancel"),
             new("ui-se-window", "SE_Window"),
             new("ui-se-sortie", "SE_Sortie"),
-            new("ui-se-skill-set", "SE_SkillSet")
+            new(SKILL_SET_USS_CLASS_NAME, "SE_SkillSet")
         };
 
         [SerializeField, Tooltip("PointerDownEvent用のUSSクラスとCue名の対応。")]
@@ -76,16 +82,14 @@ namespace KillChord.Runtime.View.OutGame.Audio
                 return false;
             }
 
-            if (!TryGetCue(UISoundEffectKind.Select, out _))
+            for (int i = 0; i < UI_SOUND_EFFECT_KINDS.Length; i++)
             {
-                errorMessage = $"{SELECT_USS_CLASS_NAME}に対応するCueが設定されていません。";
-                return false;
-            }
-
-            if (!TryGetCue(UISoundEffectKind.SkillSet, out _))
-            {
-                errorMessage = $"{SKILL_SET_USS_CLASS_NAME}に対応するCueが設定されていません。";
-                return false;
+                UISoundEffectKind kind = UI_SOUND_EFFECT_KINDS[i];
+                if (!TryGetCue(kind, out _))
+                {
+                    errorMessage = $"{kind}に対応するCueが設定されていません。";
+                    return false;
+                }
             }
 
             return ValidateMappings(_pointerDownMappings, "PointerDownEvent", out errorMessage);

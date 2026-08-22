@@ -166,6 +166,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
                 return;
             }
 
+            bool isButtonOrDescendant = IsButtonOrDescendant(target);
             for (VisualElement element = target; element != null; element = element.parent)
             {
                 if (!element.enabledInHierarchy)
@@ -178,11 +179,12 @@ namespace KillChord.Runtime.View.OutGame.Audio
                     out string cueName,
                     out bool hasMultipleMatches))
                 {
-                    if (element is Button)
+                    if (isButtonOrDescendant)
                     {
                         Debug.LogWarning(
                             $"[{nameof(UIToolkitSoundEffectBinder)}] " +
-                            $"Buttonの{element.name}にPointerDownEvent用の音クラスが設定されています。");
+                            $"Buttonまたはその子要素{element.name}に" +
+                            "PointerDownEvent用の音クラスが設定されています。");
                         return;
                     }
 
@@ -203,6 +205,29 @@ namespace KillChord.Runtime.View.OutGame.Audio
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        ///     指定要素自身または祖先がButtonか確認する。
+        /// </summary>
+        /// <param name="target"> 確認を開始する要素。 </param>
+        /// <returns> Button自身またはその子要素の場合はtrue。 </returns>
+        private bool IsButtonOrDescendant(VisualElement target)
+        {
+            for (VisualElement element = target; element != null; element = element.parent)
+            {
+                if (element is Button)
+                {
+                    return true;
+                }
+
+                if (ReferenceEquals(element, _root))
+                {
+                    break;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
