@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using R3;
@@ -58,9 +59,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         /// <param name="skillElementTemplate"> スキル要素テンプレート。 </param>
         /// <param name="onSkillElementCreated"> スキル要素生成時コールバック。 </param>
+        /// <param name="soundEffectCommand"> UI操作音の再生コマンド。 </param>
         public void InitializeSkillList(
             VisualTreeAsset skillElementTemplate,
-            Action<VisualElement> onSkillElementCreated = null)
+            Action<VisualElement> onSkillElementCreated,
+            IUISoundEffectCommand soundEffectCommand)
         {
             if (_skillListView != null)
             {
@@ -70,7 +73,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillListView = new SkillListView(
                 _skillElementList,
                 skillElementTemplate,
-                onSkillElementCreated);
+                onSkillElementCreated,
+                soundEffectCommand);
             _skillBuildSlotLayout = new SkillBuildSlotLayout(
                 RootElement,
                 _skillElementList,

@@ -114,10 +114,10 @@ namespace KillChord.Runtime.View.InGame.UI
         {
             _visibleHandle.TryComplete();
             _visibleHandle = LSequence.Create()
-                .Join(LMotion.Create(_lockedOnSize * 2f, _lockedOnSize, 0.1f)
+                .Join(LMotion.Create(_lockedOnSize * 3f, _lockedOnSize, 0.1f)
                     .WithEase(Ease.Linear)
                     .BindToSizeDelta(_healthImage.rectTransform))
-                .Join(LMotion.Create(0f, 1f, 0.1f)
+                .Join(LMotion.Create(0f, _lockedOnColor.a, 0.1f)
                     .WithEase(Ease.Linear)
                     .BindToColorA(_healthImage))
                 .Run();

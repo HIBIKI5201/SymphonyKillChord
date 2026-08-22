@@ -10,7 +10,7 @@ namespace KillChord.Runtime.View.Persistent.Music
     ///     音楽再生の実装を行うViewクラス。
     /// </summary>
     [RequireComponent(typeof(CriAtomSource)), DefaultExecutionOrder(-1000)]
-    public class MusicPlayer : MonoBehaviour, IVolumeManager, IBgmSelectorPlayer
+    public class MusicPlayer : MonoBehaviour, IVolumeManager, IBgmCuePlayer, IBgmSelectorPlayer
     {
         /// <summary> 音楽用ビューモデル。 </summary>
         public MusicViewModel MusicVM => _musicVm;
@@ -34,6 +34,15 @@ namespace KillChord.Runtime.View.Persistent.Music
         public void Initialize()
         {
             _cri = GetComponent<CriAtomSource>();
+        }
+
+        /// <summary>
+        ///     再生するBGM CueをViewModelへ設定する。
+        /// </summary>
+        /// <param name="cueName"> 再生するCue名。空の場合は停止する。 </param>
+        public void SetCue(string cueName)
+        {
+            _musicVm?.UpdateMusicCue(cueName);
         }
 
         public void SetVolume(float volume)
