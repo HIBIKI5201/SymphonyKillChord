@@ -1,0 +1,166 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8351cdae6b9c6c14aa15be57fd69b4c7, type: 3}
+  m_Name: EnemyWaveDefinitionAsset
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyWaveDefinitionAsset
+  _id:
+    _id: enemy_wave_04
+    _hashId: 1825289836
+  _battleSceneName: Stage_01
+  _waves:
+  - Details:
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
+      EnemyAmount: 6
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
+      EnemyAmount: 1
+      _legacyEnemyType: 0
+    WaveDuration: 30
+    StageEffects: []
+    SpawnPointCandidates:
+    - _id: PositionPair_1
+      _hashId: 880328965
+    - _id: PositionPair_8
+      _hashId: 1302624673
+    - _id: PositionPair_9
+      _hashId: 983779639
+    - _id: PositionPair_10
+      _hashId: -2071637137
+  - Details:
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
+      EnemyAmount: 8
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
+      EnemyAmount: 2
+      _legacyEnemyType: 0
+    WaveDuration: 40
+    StageEffects: []
+    SpawnPointCandidates:
+    - _id: PositionPair_10
+      _hashId: -2071637137
+    - _id: PositionPair
+      _hashId: 299204591
+    - _id: PositionPair_16
+      _hashId: 1843852890
+  - Details:
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
+      EnemyAmount: 10
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
+      EnemyAmount: 4
+      _legacyEnemyType: 0
+    WaveDuration: 30
+    StageEffects: []
+    SpawnPointCandidates:
+    - _id: PositionPair_16
+      _hashId: 1843852890
+    - _id: PositionPair_8
+      _hashId: 1302624673
+    - _id: PositionPair_9
+      _hashId: 983779639
+    - _id: PositionPair
+      _hashId: 299204591
+    - _id: PositionPair_10
+      _hashId: -2071637137
+  - Details:
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
+      EnemyAmount: 12
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
+      EnemyAmount: 4
+      _legacyEnemyType: 0
+    WaveDuration: 30
+    StageEffects: []
+    SpawnPointCandidates:
+    - _id: PositionPair_17
+      _hashId: 451004108
+    - _id: PositionPair_16
+      _hashId: 1843852890
+    - _id: PositionPair_10
+      _hashId: -2071637137
+    - _id: PositionPair
+      _hashId: 299204591
+  - Details:
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
+      EnemyAmount: 8
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
+      EnemyAmount: 8
+      _legacyEnemyType: 0
+    WaveDuration: 30
+    StageEffects: []
+    SpawnPointCandidates:
+    - _id: PositionPair
+      _hashId: 299204591
+    - _id: PositionPair_7
+      _hashId: -585407440
+    - _id: PositionPair_8
+      _hashId: 1302624673
+    - _id: PositionPair_9
+      _hashId: 983779639
+    - _id: PositionPair_10
+      _hashId: -2071637137
+  - Details:
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
+      EnemyAmount: 12
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
+      EnemyAmount: 10
+      _legacyEnemyType: 0
+    WaveDuration: 40
+    StageEffects: []
+    SpawnPointCandidates:
+    - _id: PositionPair_16
+      _hashId: 1843852890
+    - _id: PositionPair
+      _hashId: 299204591
+    - _id: PositionPair_1
+      _hashId: 880328965
+    - _id: PositionPair_17
+      _hashId: 451004108
+    - _id: PositionPair_10
+      _hashId: -2071637137
+    - _id: PositionPair_9
+      _hashId: 983779639
+    - _id: PositionPair_8
+      _hashId: 1302624673
+    - _id: PositionPair_7
+      _hashId: -585407440
+  _loop: 0
+  _loopStart: 0
+  references:
+    version: 2
+    RefIds: []

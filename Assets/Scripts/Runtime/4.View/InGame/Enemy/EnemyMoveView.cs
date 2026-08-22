@@ -26,16 +26,18 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="target"> 攻撃対象です。 </param>
         /// <param name="animationContext"> アニメーション文脈です。 </param>
         /// <param name="musicSyncState"> 音楽同期状態です。 </param>
+        /// <param name="damageEffectView"> ダメージエフェクトViewです。 </param>
         public void Initialize(
             EnemyAIController enemyAIController,
             Transform target,
             ICharacterAnimationViewContext animationContext,
-            MusicSyncState musicSyncState)
-
+            MusicSyncState musicSyncState,
+            ReusableParticleSystemView damageEffectView)
         {
             _enemyAIController = enemyAIController;
             _target = target;
             _characterAnimationViewModel = animationContext.ViewModel;
+            _damageEffectView = damageEffectView;
             _characterAnimationSignal = animationContext.Signal;
             _musicSyncState = musicSyncState;
             _isPlaying = false;
@@ -183,6 +185,18 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _navMeshAgent.updateRotation = false;
         }
 
+        public void PlayDamageFeedback()
+        {
+            if (_damageEffectView != null)
+            {
+                Vector3 effectPos = _damageEffectTransform != null
+                    ? _damageEffectTransform.position
+                    : transform.position;
+
+                _damageEffectView.PlayAt(effectPos);
+            }
+        }
+
         /// <summary>
         ///     有効化処理。
         /// </summary>
@@ -243,6 +257,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("武器アイテムビューです。")]
         private WeaponItemView _weaponItemView;
 
+        [Header("Effects")]
+        [SerializeField,Tooltip("攻撃ヒット時に再生するエフェクトのTransformです。")]
+        private Transform _damageEffectTransform;
+
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
@@ -252,6 +270,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private ICharacterAnimationViewModel _characterAnimationViewModel;
         private ICharacterAnimationSignal _characterAnimationSignal;
         private MusicSyncState _musicSyncState;
+        private ReusableParticleSystemView _damageEffectView;
         private ParticleSystem _attackHitEffectInstance;
         private ParticleSystem _attackReserveEffectInstance;
         private bool _isPlaying;

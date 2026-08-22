@@ -6,6 +6,7 @@
             <ui:Button text="≡" name="OptionButton" class="button" style="width: 6%; top: 2%; left: 3%; font-size: 140px; -unity-font-style: bold;"/>
             <ui:Label text="Tap to&#10;Start" name="Instruction" style="right: 2%; bottom: 4%; position: absolute; font-size: 64px; rotate: -20deg; top: auto; left: auto; -unity-text-align: middle-center;"/>
             <ui:Image name="TitleLogo" source="project://database/Assets/Arts/Images/Sprites/Title/title_logo.png?fileID=2800000&amp;guid=588b3ba42d03e204e820a5a36e1094f1&amp;type=3#title_logo" uv="0,0,1,1" style="opacity: 1; display: flex; visibility: visible; overflow: visible; position: relative; top: -272px; left: 625px; right: 0; bottom: 4px; width: 75%; height: 75%;"/>
+            <ui:VisualElement style="width: 10%; height: 15%; background-image: url(&quot;project://database/Assets/AssetStoreTools/CRIMW/CriWare/Icons/criware_logo01.png?fileID=2800000&amp;guid=9692167e13919854d88ac421e458b4d0&amp;type=3#criware_logo01&quot;); bottom: 3%; left: 3%;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
