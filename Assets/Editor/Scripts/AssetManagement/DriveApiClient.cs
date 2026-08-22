@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
@@ -18,6 +21,9 @@ namespace KillChord.Editor.AssetManagement
     {
         private const string FILES_ENDPOINT = "https://www.googleapis.com/drive/v3/files";
         private const string FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
+        private const string UPLOAD_ENDPOINT =
+            "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true";
+        private const int UPLOAD_TIMEOUT_SECONDS = 600;
 
         [Serializable]
         private class FileEntry
@@ -160,5 +166,70 @@ namespace KillChord.Editor.AssetManagement
                 throw new Exception($"Drive API download failed ({request.responseCode}): {request.error}");
             }
         }
+
+        /// <summary>
+        ///     ローカルファイルを Google Drive の指定フォルダへアップロードする。
+        /// </summary>
+        /// <remarks>
+        ///     UnityWebRequest ではなく HttpClient を使用する。
+        ///     UnityWebRequest はメインスレッドのループでしか進行しないため、
+        ///     同期的に完了を待つ呼び出し元(パッケージ出力手順など)から使用できない。
+        /// </remarks>
+        /// <param name="sourceAbsolutePath"> アップロードするローカルファイルの絶対パス。 </param>
+        /// <param name="folderId"> アップロード先の Google Drive フォルダ ID。 </param>
+        /// <param name="credential"> Drive API への認証情報。書き込み可能なスコープが必要。 </param>
+        /// <param name="ct"> 操作をキャンセルするためのトークン。 </param>
+        /// <returns> 作成されたファイルの ID。 </returns>
+        public static async Task<string> UploadFileAsync(
+            string sourceAbsolutePath,
+            string folderId,
+            ServiceAccountCredential credential,
+            CancellationToken ct = default)
+        {
+            if (!File.Exists(sourceAbsolutePath))
+            {
+                throw new FileNotFoundException($"アップロード対象のファイルが存在しません: {sourceAbsolutePath}");
+            }
+
+            var accessToken = await credential.GetAccessTokenForRequestAsync(cancellationToken: ct);
+
+            // 1リクエストでメタデータと本体を送るため multipart/related を使用する。
+            var metadata = "{\"name\":\"" + EscapeJsonString(Path.GetFileName(sourceAbsolutePath)) + "\"," +
+                           "\"parents\":[\"" + EscapeJsonString(folderId) + "\"]}";
+
+            using var content = new MultipartContent("related");
+            var metadataContent = new StringContent(metadata, Encoding.UTF8);
+            metadataContent.Headers.ContentType = new MediaTypeHeaderValue("application/json") { CharSet = "UTF-8" };
+            content.Add(metadataContent);
+
+            // ファイル全体をメモリへ載せず、ストリームのまま送信する。
+            using var fileStream = File.OpenRead(sourceAbsolutePath);
+            var fileContent = new StreamContent(fileStream);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            content.Add(fileContent);
+
+            using var http = new HttpClient();
+            http.Timeout = TimeSpan.FromSeconds(UPLOAD_TIMEOUT_SECONDS);
+            using var message = new HttpRequestMessage(HttpMethod.Post, UPLOAD_ENDPOINT) { Content = content };
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            using var response = await http.SendAsync(message, ct);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Drive API upload failed ({(int)response.StatusCode}): {body}");
+            }
+
+            return JsonUtility.FromJson<FileEntry>(body)?.id;
+        }
+
+        /// <summary>
+        ///     JSON の文字列リテラルとして安全な形へエスケープする。
+        /// </summary>
+        /// <param name="value"> エスケープ対象の文字列。 </param>
+        /// <returns> エスケープ済みの文字列。 </returns>
+        private static string EscapeJsonString(string value)
+            => value.Replace("\\", "\\\\").Replace("\"", "\\\"");
     }
 }
