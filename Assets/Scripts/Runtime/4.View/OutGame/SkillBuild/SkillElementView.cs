@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using System;
 using UnityEngine.UIElements;
@@ -13,10 +14,14 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         ///     View を初期化する。
         /// </summary>
         /// <param name="rootElement"> スキル要素のルート。 </param>
+        /// <param name="soundEffectCommand"> UI操作音の再生コマンド。 </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public SkillElementView(VisualElement rootElement)
+        public SkillElementView(
+            VisualElement rootElement,
+            IUISoundEffectCommand soundEffectCommand)
         {
             RootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
+            _soundEffectCommand = soundEffectCommand;
             _icon = RootElement.Q<Image>(ICON_NAME)
                 ?? throw new InvalidOperationException(
                     $"[{nameof(SkillElementView)}] {ICON_NAME} が見つかりませんでした。");
@@ -78,6 +83,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
         private readonly Image _icon;
         private readonly Label _nameLabel;
+        private readonly IUISoundEffectCommand _soundEffectCommand;
 
         /// <summary>
         ///     クリックを選択通知へ変換する。
@@ -91,6 +97,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
+            _soundEffectCommand?.Play(UISoundEffectKind.Select);
             OnSelected?.Invoke(CurrentData.Value.SkillId);
         }
     }
