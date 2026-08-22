@@ -63,10 +63,11 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartFadeView.ShowBlackImmediate();
 
 
+            // PlayStageStartが完了コールバックを同期的に呼ぶ場合があるため、再生前にHUDを非表示にする。
+            _gameHudVisibilityView.Hide();
+
             _stageSequenceView.PlayStageStart(HandleTimelineCompleted);
             _stageStartFadeView.PlayFadeOut();
-
-            _gameHudVisibilityView.Hide();
         }
 
         /// <summary>
