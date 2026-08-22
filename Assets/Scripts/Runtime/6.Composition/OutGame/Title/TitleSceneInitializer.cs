@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
+using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
@@ -431,8 +432,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private async void HandleDataResetButtonClicked()
         {
             // リセット前の音量設定を保持する。
-            AudioSettingsData preservedAudioSettings =
-                _loadedSaveData?.AudioSettings?.Copy() ?? new AudioSettingsData();
+            AudioSettingsData preservedAudioSettings = GetPreservedAudioSettings();
 
             try
             {
@@ -509,6 +509,28 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
+        ///     ViewModel が保持している現在の音量設定値を取得する。
+        ///     <para>
+        ///          AudioSettingsController が保持する最新値は _loadedSaveData.AudioSettings に
+        ///         反映されないため、必ずViewModel経由で取得する必要がある。
+        ///     </para>
+        /// </summary>
+        /// <returns> 現在の音量設定を表す <see cref="AudioSettingsData"/>。 </returns>
+        private AudioSettingsData GetPreservedAudioSettings()
+        {
+            if (_audioSettingsContainer?.ViewModel == null)
+            {
+                return new AudioSettingsData();
+            }
+
+            IAudioSettingsViewModel viewModel = _audioSettingsContainer.ViewModel;
+            return new AudioSettingsData(
+                viewModel.BgmVolume.CurrentValue,
+                viewModel.SoundEffectVolume.CurrentValue,
+                viewModel.VoiceVolume.CurrentValue);
+        }
+
+        /// <summary>
         ///     リセット前に保持した音量設定を、リセット後のセーブデータへ反映して保存する。
         /// </summary>
         private async ValueTask ApplyPreservedAudioSettingsAsync(AudioSettingsData preservedAudioSettings)
@@ -529,9 +551,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
             catch (Exception ex)
             {
-#if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: 音量設定の再保存中にエラーが発生しました。{ex.Message}");
-#endif
             }
         }
 
