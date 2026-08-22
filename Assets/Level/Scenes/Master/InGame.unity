@@ -2092,6 +2092,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2eaabd98139b1143b8a961726363cef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Sequence.SequenceInitializationModule
+  _visibilityView: {fileID: 1560420932}
 --- !u!114 &438459096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3597,7 +3598,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 2100000003}
     m_Modifications:
     - target: {fileID: 1345183333299979680, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
       propertyPath: m_IsActive
@@ -3752,7 +3753,10 @@ PrefabInstance:
     - {fileID: 1345183333299979680, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
     - {fileID: 8007761601716104921, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4011713318222993239, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1560420932}
   m_SourcePrefab: {fileID: 100100000, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
 --- !u!223 &887821559 stripped
 Canvas:
@@ -4925,7 +4929,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!1 &1249666140
 GameObject:
@@ -5944,6 +5948,30 @@ Transform:
   - {fileID: 708479944}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1560420930 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4011713318222993239, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &1560420931 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8234020887636748037, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1560420932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1560420930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 338f2f44bb6aae34c949d4d1d0caede1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.InGameHudVisibilityView
+  _hudCanvases:
+  - {fileID: 887821559}
 --- !u!1 &1561725408
 GameObject:
   m_ObjectHideFlags: 0
@@ -7990,6 +8018,7 @@ RectTransform:
   - {fileID: 1660467405200683237}
   - {fileID: 203025885}
   - {fileID: 2092701036}
+  - {fileID: 1560420931}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -8193,7 +8222,6 @@ SceneRoots:
   - {fileID: 1898526996}
   - {fileID: 2031779337}
   - {fileID: 2100000003}
-  - {fileID: 887821556}
   - {fileID: 1546686501}
   - {fileID: 1435826634}
   - {fileID: 1544702108}
