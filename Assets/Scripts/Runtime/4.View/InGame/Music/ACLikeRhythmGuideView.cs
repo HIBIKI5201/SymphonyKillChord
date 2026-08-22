@@ -84,6 +84,8 @@ namespace KillChord.Runtime.View.InGame.Music
             {
                 _targetBeatCount = targetBeatCount;
                 UpdateBeatColors();
+                // 現在ビートの表示色は次のブロック遷移まで更新されないため、ここで即座に反映する。
+                UpdateCurrentBeatColor();
             }
         }
 

@@ -41,7 +41,15 @@ namespace KillChord.Runtime.View.InGame.UI
             // 参照欠落時は更新しない
             if (_healthBarImage == null) return;
 
-            float newFillAmount = dto.CurrentHealth / dto.MaxHealth;
+            // 最大HPが未設定(0以下)の場合はゼロ除算になるため、空表示にして抜ける。
+            if (dto.MaxHealth <= 0f)
+            {
+                _handle.TryComplete();
+                _healthBarImage.fillAmount = 0f;
+                return;
+            }
+
+            float newFillAmount = Mathf.Clamp01(dto.CurrentHealth / dto.MaxHealth);
             float currentFillAmount = _healthBarImage.fillAmount;
 
             if (currentFillAmount == newFillAmount)
