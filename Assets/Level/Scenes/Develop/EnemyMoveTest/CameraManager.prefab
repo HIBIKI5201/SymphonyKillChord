@@ -97,6 +97,7 @@ MonoBehaviour:
   _enemyDefeatedShakeConfig: {fileID: 11400000, guid: 09d7363c2f70ac243977d9606327dab3, type: 2}
   _playerAttackShakeConfig: {fileID: 11400000, guid: 78d7323ed9b8c4b4f963e621fb271699, type: 2}
   _playerDamageShakeConfig: {fileID: 11400000, guid: 278b2ba5c358d5c4d9075cb73c3ddf87, type: 2}
+  _skillExecutedShakeConfig: {fileID: 11400000, guid: fde7af9a64f846a5b973922797594073, type: 2}
 --- !u!114 &2786661489550224862
 MonoBehaviour:
   m_ObjectHideFlags: 0
