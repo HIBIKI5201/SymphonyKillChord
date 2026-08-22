@@ -29,6 +29,8 @@ namespace KillChord.Runtime.View.InGame.UI
             switch (displayState)
             {
                 case LockOnDisplayState.Candidate:
+                    // ロックオン表示のモーションが残っているとアルファを上書きされるため、先に停止する。
+                    _visibleHandle.TryCancel();
                     _healthImage.enabled = true;
                     _healthImage.sprite = null;
                     _reticleAlpha.alpha = 0f;
@@ -40,6 +42,8 @@ namespace KillChord.Runtime.View.InGame.UI
                     MotionVisibleLockedOn();
                     break;
                 default:
+                    // ロックオン表示のモーションが残っているとアルファを上書きされるため、先に停止する。
+                    _visibleHandle.TryCancel();
                     _reticleAlpha.alpha = 0f;
                     _healthImage.enabled = false;
                     break;
@@ -85,6 +89,7 @@ namespace KillChord.Runtime.View.InGame.UI
         }
         private void MotionVisibleLockedOn()
         {
+            _barHandle.TryComplete();
             _visibleHandle.TryComplete();
             _visibleHandle = LSequence.Create()
                 .Join(LMotion.Create(_lockedOnSize * 3f, _lockedOnSize, 0.1f)
