@@ -12,13 +12,8 @@ namespace KillChord.Runtime.View.InGame.Mission
     public class MissionStepPopupView : MonoBehaviour, IMissionStepPopupView
     {
         /// <inheritdoc />
-        public void Show(string message, Sprite image)
+        public void Show(Sprite image)
         {
-            if (_messageText != null)
-            {
-                _messageText.text = message;
-            }
-
             if (_popupImage != null)
             {
                 _popupImage.sprite = image;
@@ -42,9 +37,6 @@ namespace KillChord.Runtime.View.InGame.Mission
 
         [SerializeField, Tooltip("ポップアップ全体のCanvasGroup。")]
         private CanvasGroup _canvasGroup;
-
-        [SerializeField, Tooltip("ポップアップに表示するメッセージのText。")]
-        private TextMeshProUGUI _messageText;
 
         [SerializeField, Tooltip("ポップアップに表示する画像のImage。")]
         private Image _popupImage;
