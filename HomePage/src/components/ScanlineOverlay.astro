@@ -14,13 +14,12 @@ const { contained = false } = Astro.props;
 		inset: 0;
 		z-index: 40;
 		pointer-events: none;
-		background-image: repeating-linear-gradient(
-			to bottom,
-			rgba(0, 0, 0, 0.18) 0px,
-			rgba(0, 0, 0, 0.18) 1px,
-			transparent 1px,
-			transparent 3px
-		);
+		/* repeating-linear-gradientはCSSピクセル境界をdevicePixelRatioごとに物理ピクセルへスナップするため、
+		   DPRが1.25等の非整数値だと線の太さ・濃さが環境によってブレる。
+		   SVGパターンをbackground-imageとして使うとブラウザが拡大縮小時に補間するため、DPRに関わらず見た目が安定する。 */
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Crect width='4' height='1' fill='black' fill-opacity='0.18'/%3E%3C/svg%3E");
+		background-size: 4px 4px;
+		background-repeat: repeat;
 		mix-blend-mode: multiply;
 		animation: flicker 6s infinite steps(60);
 	}
