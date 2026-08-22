@@ -19,7 +19,7 @@ MonoBehaviour:
   - _id: node_n9
     _hashId: -190575164
   UnlockCost: 10
-  SkillDetail: 
+  SkillDetail: "\u30B9\u30C6\u30FC\u30BF\u30B9\u5F37\u5316\n\n\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u7387\u3000\uFF0B2\uFF05"
   PreviewVideoClip: {fileID: 0}
   _statusBonusEffects:
   - rid: 130001
