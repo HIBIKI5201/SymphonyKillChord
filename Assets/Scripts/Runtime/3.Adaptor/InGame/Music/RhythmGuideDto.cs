@@ -10,19 +10,21 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <summary>
         ///     新しいリズムガイドDTOを生成する。
         /// </summary>
-        /// <param name="indicatorNormalized"> インジケーターの正規化位置。 </param>
+        /// <param name="indicatorNormalized"> インジケーターの正規化位置。1が1小節でジャスト通過分だけ1を超える。 </param>
         /// <param name="currentBeatCount"> 現在の拍数。 </param>
         /// <param name="zones"> 判定ゾーンのリスト。 </param>
         /// <param name="hasTarget"> ターゲットの有無。 </param>
-        public RhythmGuideDto(float indicatorNormalized, int? currentBeatCount, IReadOnlyList<RhythmGuideZoneDto> zones, bool hasTarget)
+        /// <param name="targetBeatCount"> チュートリアル中等のミッション指定拍数。 </param>
+        public RhythmGuideDto(float indicatorNormalized, int? currentBeatCount, IReadOnlyList<RhythmGuideZoneDto> zones, bool hasTarget, int? targetBeatCount = null)
         {
             IndicatorNormalized = indicatorNormalized;
             CurrentBeatCount = currentBeatCount;
             Zones = zones;
             HasTarget = hasTarget;
+            TargetBeatCount = targetBeatCount;
         }
 
-        /// <summary> インジケーターの正規化位置。 </summary>
+        /// <summary> インジケーターの正規化位置。1が1小節でジャスト通過分だけ1を超える。 </summary>
         public float IndicatorNormalized { get; }
         /// <summary> 現在の拍数。 </summary>
         public int? CurrentBeatCount { get; }
@@ -30,5 +32,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         public IReadOnlyList<RhythmGuideZoneDto> Zones { get; }
         /// <summary> ターゲットの有無。 </summary>
         public bool HasTarget { get; }
+        /// <summary> チュートリアル等のミッション指定拍数。 </summary>
+        public int? TargetBeatCount { get; }
     }
 }

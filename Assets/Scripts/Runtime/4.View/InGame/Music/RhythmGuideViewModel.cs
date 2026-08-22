@@ -9,7 +9,7 @@ namespace KillChord.Runtime.View.InGame.Music
     /// </summary>
     public class RhythmGuideViewModel
     {
-        /// <summary> インジケーターの正規化位置。 </summary>
+        /// <summary> インジケーターの正規化位置。1が1小節でジャスト通過分だけ1を超える。 </summary>
         public float IndicatorNormalized { get; private set; }
         /// <summary> 現在の拍の種類。 </summary>
         public int? CurrentBeatType { get; private set; }
