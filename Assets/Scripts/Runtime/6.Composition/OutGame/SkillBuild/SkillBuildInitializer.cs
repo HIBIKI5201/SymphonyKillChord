@@ -1,6 +1,8 @@
+using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.Skill;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
+using KillChord.Runtime.Composition.OutGame.Audio;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
@@ -157,6 +159,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return false;
             }
 
+            ServiceLocator.TryGetInstance(
+                out OutGameUISoundEffectModuleContainer soundEffectContainer);
+            IUISoundEffectCommand soundEffectCommand = soundEffectContainer?.Command;
+
             if (!ServiceLocator.TryGetInstance(out _skillBuildScreenView))
             {
                 _skillBuildScreenView = CreateSkillBuildScreenView();
@@ -192,9 +198,15 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 new SkillDisplayTextFormatter(skillEffectDescriptionFormatter);
             _skillBuildPresenter = new(_skillBuildViewModel, textFormatter);
 
-            _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(_uiDocument, _skillBuildViewModel);
+            _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(
+                _uiDocument,
+                _skillBuildViewModel,
+                soundEffectCommand);
 
-            _skillBuildScreenView.InitializeSkillList(_skillElementTemplate, _skillElementDragAndDropSetup.SetupDraggable);
+            _skillBuildScreenView.InitializeSkillList(
+                _skillElementTemplate,
+                _skillElementDragAndDropSetup.SetupDraggable,
+                soundEffectCommand);
             _skillBuildScreenView.Bind(_skillBuildViewModel);
             _skillBuildPresenter.Push(
                 _skillBuildDefinition.EquippedSkills,

@@ -37,9 +37,17 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         {
             try
             {
-                _loadedScreenRuleData = await _screenRuleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
+                _loadedScreenRuleData = await _screenRuleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
             }
-            catch (Exception ex) { Debug.LogException(ex, this); }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+
             return _loadedScreenRuleData != null;
         }
 
