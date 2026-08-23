@@ -15,6 +15,12 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 			<p id="catch">独自のビートを刻み、KillChordで爽快にキルを重ねろ。</p>
 		</section>
 
+		<section id="gameplay-video">
+			<p id="video-eyebrow">Play Movie</p>
+			<h2>プレイ映像</h2>
+			<video src="/movies/DummyData.mp4" autoplay loop muted playsinline></video>
+		</section>
+
 		<section id="type-scale">
 			<h1>{testText}</h1>
 			<h2>{testText}</h2>
@@ -76,6 +82,42 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 		font-family: var(--font-body);
 		font-size: 18px;
 		color: var(--color-text-primary);
+	}
+
+	#gameplay-video {
+		padding: 64px 0;
+		text-align: center;
+		background: var(--color-bg);
+		margin: 0 -24px;
+		padding-left: 24px;
+		padding-right: 24px;
+	}
+
+	#video-eyebrow {
+		margin: 0 0 8px;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--color-signal);
+		text-transform: uppercase;
+	}
+
+	#gameplay-video h2 {
+		margin: 0 0 32px;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(1.5rem, 4vw, 2.25rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+
+	#gameplay-video video {
+		width: 100%;
+		max-width: 800px;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
+		border: 1px solid var(--color-surface-border);
 	}
 
 	#type-scale {
