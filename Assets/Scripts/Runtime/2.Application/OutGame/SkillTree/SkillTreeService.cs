@@ -47,8 +47,9 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 Debug.LogWarning($"[SkillTreeService] ノードID {nodeId} が見つかりません。");
                 return -1;
             }
-            // 解放済み、或いは親ノードがない場合、探索終了する
-            if (node.IsUnlocked || node.Parents == null || node.Parents.Length <= 0)
+            // 解放済みの場合は支払うコストがないため探索終了する。
+            // 親ノードを持たない起点ノードは、自身のコストのみで解放できるため探索を続行する。
+            if (node.IsUnlocked)
             {
                 return -1;
             }
