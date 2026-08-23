@@ -32,7 +32,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             _damageText.SetText("{0}", Mathf.CeilToInt(dTO.Damage));
 
-            ApplyRandomPosition();
             ApplyStyle(dTO.Type);
             PlayMovement();
             PlayFade();
@@ -65,12 +64,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("ダメージ数値の移動距離")]
         private float _moveDistance;
 
-        [SerializeField, Tooltip("ダメージ数値のランダム表示位置の最小値")]
-        private Vector2 _randomPositionMin;
-
-        [SerializeField, Tooltip("ダメージ数値のランダム表示位置の最大値")]
-        private Vector2 _randomPositionMax;
-
         [SerializeField, Tooltip("イージングタイプ")]
         private Ease _easeType = Ease.OutQuad;
 
@@ -83,20 +76,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             ResetMotion();
             _completed = null;
-        }
-
-        /// <summary>
-        ///     ダメージ数値の表示位置をランダムにずらす。
-        /// </summary>
-        private void ApplyRandomPosition()
-        {
-            float randomX = UnityEngine.Random.Range(_randomPositionMin.x, _randomPositionMax.x);
-            float randomY = UnityEngine.Random.Range(_randomPositionMin.y, _randomPositionMax.y);
-
-            Vector3 position = transform.localPosition;
-            position.x += randomX;
-            position.y += randomY;
-            transform.localPosition = position;
         }
 
         /// <summary>
