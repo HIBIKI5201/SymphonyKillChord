@@ -66,9 +66,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
             try
             {
-                AttackDefinition attackDefinition = _playerEntity.CombatSpec.GetAttackDefinitionByBeatType(beatType);
-                AttackResult result = AttackExecutor.Execute(attackDefinition, _playerEntity, target, isJustHit, _playerEntity.BaseDamage,damageAttackType: DamageAttackType.Skill);
-                EventBus<EOnTakeDamage>.Raise(new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, target.Id, DamageAttackType.Skill));
+                AttackDefinition attackDefinition =
+                    _playerEntity.CombatSpec.GetAttackDefinitionByBeatType(beatType);
+
+                AttackExecutor.Execute(
+                    attackDefinition,
+                    _playerEntity,
+                    target,
+                    isJustHit,
+                    _playerEntity.
+                    BaseDamage,
+                    damageAttackType: DamageAttackType.Skill);
             }
             catch (System.InvalidOperationException ex)
             {

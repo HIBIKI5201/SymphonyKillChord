@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
@@ -29,9 +30,6 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
         private PlayerAttackWeaponView _attackWeaponView;
 
-        [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
-        private ReusableParticleSystemView _damageEffectView;
-
         [SerializeField, Tooltip("被弾時のエフェクトを再生する位置です。")]
         private Transform _damageEffectPoint;
 
@@ -47,7 +45,7 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("被弾時のポストエフェクトのfrom値。")]
         private float _damageEffectFrom = 50f;
 
-        [SerializeField,Tooltip("被弾時のポストエフェクト再生間隔。")]
+        [SerializeField, Tooltip("被弾時のポストエフェクト再生間隔。")]
         private float _damageEffectInterval = 0.1f;
         [SerializeField, Tooltip("被弾時のポストエフェクトMaterial。")]
         private Material _damageEffectMaterial;
@@ -80,6 +78,9 @@ namespace KillChord.Runtime.View.InGame.Player
 
         [SerializeField, Tooltip("回避SE用Source。")]
         private SoundEffectSource _dodgeSoundSource;
+
+        [SerializeField, Tooltip("Critical SE用Source。")]
+        private SoundEffectSource _criticalSoundSource;
 
         [SerializeField, Tooltip("足音演出Viewです。")]
         private FootStepView _footStepView;
@@ -127,6 +128,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private MotionHandle _dodgeMaterialEffectHandle;
         private MotionHandle _damageEffectHandle;
         private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
+        private ReusableParticleSystemView _damageEffectView;
 
         private float _attackFacingRemaining = 0f;
         private Quaternion _attackFacingRotation;
@@ -157,6 +159,8 @@ namespace KillChord.Runtime.View.InGame.Player
 
         private void OnDestroy()
         {
+            EventBus<EOnTakeDamage>.Unregister(HandleTakeDamage);
+
             if (_playerInputView != null)
             {
                 UnRegisterActions();
@@ -181,11 +185,13 @@ namespace KillChord.Runtime.View.InGame.Player
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter,
+            ReusableParticleSystemView damageEffectView,
             PlayerInputSuppressionState inputSuppressionState = null)
         {
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
             _inputSuppressionState = inputSuppressionState;
+            _damageEffectView = damageEffectView;
             _characterAnimationViewModel = animationContext.ViewModel;
             _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
             _musicSyncState = musicSyncState;
@@ -194,6 +200,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
             _healthHudPresenter.OnDamaged += PlayDamageFeedback;
+            EventBus<EOnTakeDamage>.Register(HandleTakeDamage);
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
@@ -805,6 +812,18 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _lastFootstepTime = Time.time;
+        }
+
+        /// <summary>
+        ///     敵への攻撃で被弾した際に、Criticalヒット時のSEを再生します。
+        /// </summary>
+        /// <param name="e"> イベント情報です。 </param>
+        private void HandleTakeDamage(EOnTakeDamage e)
+        {
+            if (e.Critical && e.Damage > 0)
+            {
+                PlaySound(_criticalSoundSource, null);
+            }
         }
 
         /// <summary>

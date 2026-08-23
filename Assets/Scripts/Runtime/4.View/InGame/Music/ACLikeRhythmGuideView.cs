@@ -75,6 +75,104 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
+        ///     チュートリアル等で対象となっているBeatCountを設定し、対象外ビートの表示を暗くする。
+        /// </summary>
+        /// <param name="targetBeatCount"> 対象のBeatCount。対象がない場合はnull。 </param>
+        public void SetTargetBeatCount(int? targetBeatCount)
+        {
+            if (_targetBeatCount != targetBeatCount)
+            {
+                _targetBeatCount = targetBeatCount;
+                UpdateBeatColors();
+                // 現在ビートの表示色は次のブロック遷移まで更新されないため、ここで即座に反映する。
+                UpdateCurrentBeatColor();
+            }
+        }
+
+        /// <summary>
+        ///     全ビートブロックの色を現在の対象BeatCountに応じて更新する。
+        /// </summary>
+        private void UpdateBeatColors()
+        {
+            if (_leftBeatImages == null || _rightBeatImages == null || _totalBeatBoxCount <= 0) return;
+            for (int i = 0; i < _totalBeatBoxCount; i++)
+            {
+                // 実行中のBeatAnimation(Just判定のフラッシュ等)が動いていると、
+                // 直後の色代入がアニメーションのBindToColorに毎フレーム上書きされてしまうため、先に完了させる。
+                if (_handles != null && i < _handles.Length)
+                {
+                    _handles[i].TryComplete();
+                }
+
+                Color color = GetTargetColorForIndex(i);
+                _leftBeatImages[i].color = color;
+                _rightBeatImages[i].color = color;
+            }
+        }
+
+        /// <summary>
+        ///     指定ブロックが属する判定ゾーンの色を、対象外ビートの減光を適用せずに取得する。
+        ///     判定ゾーンが未構築などで解決できない場合はfalseを返す。
+        /// </summary>
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <param name="color"> 判定ゾーンの色。取得できない場合は既定値。 </param>
+        /// <param name="zoneIndex"> 解決した判定ゾーンのインデックス。取得できない場合は-1。 </param>
+        /// <returns> 取得できた場合はtrue。 </returns>
+        private bool TryGetZoneColor(int blockIndex, out Color color, out int zoneIndex)
+        {
+            color = default;
+            zoneIndex = GetBeatSectionIndex(blockIndex, _scale, _beatWidth);
+
+            // 判定ゾーン未構築時はGetBeatSectionIndexが-1を返すため、色を解決できない状態として扱う。
+            if (zoneIndex < 0 || zoneIndex >= _beatColor.Length)
+            {
+                zoneIndex = -1;
+                return false;
+            }
+
+            color = _beatColor[zoneIndex];
+            return true;
+        }
+
+        /// <summary>
+        ///     ガイド表示用に、対象BeatCountと一致しない判定ゾーンの色を暗くする。
+        /// </summary>
+        /// <param name="color"> 減光前の色。 </param>
+        /// <param name="zoneIndex"> 対象の判定ゾーンのインデックス。 </param>
+        /// <returns> 減光を適用した色。 </returns>
+        private Color ApplyTargetDim(Color color, int zoneIndex)
+        {
+            if (!_targetBeatCount.HasValue || zoneIndex < 0 || zoneIndex >= _zoneBeatCounts.Length)
+            {
+                return color;
+            }
+
+            // 対象外ビートを暗くする。
+            if (_zoneBeatCounts[zoneIndex] != _targetBeatCount.Value)
+            {
+                color.a *= _dimAlpha;
+            }
+
+            return color;
+        }
+
+        /// <summary>
+        ///     ガイド表示に適用するブロックの色を取得する。対象BeatCountと一致しない場合は暗くする。
+        ///     判定ゾーンを解決できない場合は既定値を返す。
+        /// </summary>
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <returns> 適用する色。 </returns>
+        private Color GetTargetColorForIndex(int blockIndex)
+        {
+            if (!TryGetZoneColor(blockIndex, out Color color, out int zoneIndex))
+            {
+                return default;
+            }
+
+            return ApplyTargetDim(color, zoneIndex);
+        }
+
+        /// <summary>
         ///     判定ゾーン定義に応じてビートGUIを再構築する。
         /// </summary>
         /// <param name="zones"> 判定ゾーンの一覧。 </param>
@@ -92,7 +190,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary>
         ///    ビートの位置を更新する。
         /// </summary>
-        /// <param name="normalizeOffset"> ビートの位置(0～1の値範囲)</param>
+        /// <param name="normalizeOffset"> ビートの位置(1が1小節。ジャスト通過分として1を超える値も受け取る)</param>
         public void SetBeatsOffset(float normalizeOffset)
         {
             if (_beatPositionImages == null || _beatPositionImages.Length == 0 || _totalBeatBoxCount <= 0)
@@ -100,9 +198,11 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            // normalizeOffsetは1小節基準の進捗(0～1)。ゲージ全長はGUIDE_LENGTH_IN_BARS小節分のため、
+            // normalizeOffsetは1小節基準の進捗。ゲージ全長はGUIDE_LENGTH_IN_BARS小節分のため、
             // ゾーン・Just位置と同じ基準に揃えるためゲージ全長に対する位置へ変換する。
-            float gaugeNormalized = Mathf.Clamp01(normalizeOffset) / GUIDE_LENGTH_IN_BARS;
+            // 1を超える超過分も同じ換算で扱うことでゾーンとのズレを生まずにJust位置を通過させ、
+            // ゲージ全長(=1)で頭打ちにする。
+            float gaugeNormalized = Mathf.Clamp01(Mathf.Max(0f, normalizeOffset) / GUIDE_LENGTH_IN_BARS);
 
             for (int i = 0; i < _beatPositionImages.Length; i++)
             {
@@ -128,6 +228,7 @@ namespace KillChord.Runtime.View.InGame.Music
             }
             SetBeatAnimation(activeIndex, isJustTiming);
             _currentOpenIndex = activeIndex;
+            UpdateCurrentBeatColor();
         }
 
         /// <summary>
@@ -179,7 +280,7 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             _handles[openIndex].TryComplete();
-            Color beatColor = _beatColor[GetBeatSectionIndex(openIndex, _scale, _beatWidth)];
+            Color beatColor = GetTargetColorForIndex(openIndex);
 
             if (isJustTiming)
             {
@@ -194,6 +295,9 @@ namespace KillChord.Runtime.View.InGame.Music
 
         /// <summary>
         ///     現在カーソルが乗っているビートブロックの色を取得する。
+        ///     全画面演出へ渡す色のため、ガイド表示上の減光は適用しない。
+        ///     減光はガイド上で対象ビートを強調するための表現であり、演出の明るさまで変えると
+        ///     対象外ビートの入力だけ演出が弱くなってしまう。
         /// </summary>
         /// <param name="color"> ビートブロックの色。 </param>
         /// <returns> 取得できた場合はtrue。 </returns>
@@ -207,13 +311,36 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             int beatIndex = Mathf.Max(0, _currentOpenIndex);
-            int index = GetBeatSectionIndex(beatIndex, _scale, _beatWidth);
-            if (index < 0)
+            return TryGetZoneColor(beatIndex, out color, out _);
+        }
+
+        /// <summary>
+        ///     現在のビート色を表示用Imageへ反映する。
+        /// </summary>
+        private void UpdateCurrentBeatColor()
+        {
+            if (_currentBeatColorImages == null || _currentBeatColorImages.Length == 0)
             {
-                return false;
+                return;
             }
-            color = _beatColor[index];
-            return true;
+
+            int beatIndex = Mathf.Max(0, _currentOpenIndex);
+
+            // 現在ビートの表示はガイドUIの一部のため、対象外ビートの減光を適用する。
+            if (!TryGetZoneColor(beatIndex, out Color color, out int zoneIndex))
+            {
+                return;
+            }
+
+            color = ApplyTargetDim(color, zoneIndex);
+
+            for (int i = 0; i < _currentBeatColorImages.Length; i++)
+            {
+                if (_currentBeatColorImages[i] != null)
+                {
+                    _currentBeatColorImages[i].color = color;
+                }
+            }
         }
 
         /// <summary> ビート描画の基準全長の既定値。 </summary>
@@ -243,6 +370,11 @@ namespace KillChord.Runtime.View.InGame.Music
         [SerializeField] private Image[] _beatPositionImages;
         [Tooltip("ビート位置を表示するRectTransform")]
         [SerializeField] private RectTransform[] _beatPositionRectTransforms;
+        
+        [Space]
+        [Tooltip("現在のビート色を表示するImage")]
+        [SerializeField]
+        private Image[] _currentBeatColorImages;
 
         [Space]
 
@@ -255,6 +387,10 @@ namespace KillChord.Runtime.View.InGame.Music
         [Tooltip("非ターゲット時の透明度。")]
         [Range(0f, 1f)]
         [SerializeField] private float _noTargetAlpha;
+
+        [Tooltip("チュートリアル中、ミッション対象外ビートの透明度倍率。")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _dimAlpha = 0.3f;
 
         [Space]
         [Tooltip("ジャストタイミング内にあるビートのSizeDelta")]
@@ -278,6 +414,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private float[] _zoneStarts = Array.Empty<float>();
         private float[] _zoneEnds = Array.Empty<float>();
         private int[] _zoneBeatCounts = Array.Empty<int>();
+        private int? _targetBeatCount;
 
         /// <summary>
         ///     演出設定の設定漏れを検知し、ビートGUIを構築する。
@@ -476,7 +613,10 @@ namespace KillChord.Runtime.View.InGame.Music
             markerRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             markerRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             markerRectTransform.pivot = new Vector2(0.5f, 0.5f);
-            markerRectTransform.anchoredPosition = anchoredPosition;
+            // 帯はpivot中央のため、高さの半分だけ持ち上げると下端がガイドの基準線に揃う。
+            // そこからの微調整はレイアウト依存のためConfigの補正値で行う。
+            float verticalOffset = _effectConfig.MarkerHeight * 0.5f + _effectConfig.MarkerVerticalOffset;
+            markerRectTransform.anchoredPosition = anchoredPosition + Vector2.up * verticalOffset;
             markerRectTransform.sizeDelta = new Vector2(
                 Mathf.Max(0.1f, _effectConfig.MarkerWidth),
                 Mathf.Max(0.1f, _effectConfig.MarkerHeight));
@@ -608,7 +748,7 @@ namespace KillChord.Runtime.View.InGame.Music
             //スペクトラム風ビートのブロックを生成
             for (int i = 0; i < beatBlockCount; i++)
             {
-                Color color = _beatColor[GetBeatSectionIndex(i, scale, beatWidth)];
+                Color color = GetTargetColorForIndex(i);
 
                 GameObject leftBeat = new GameObject($"LeftBeat_{i}", typeof(RectTransform), typeof(Image));
                 leftBeat.transform.SetParent(parent.transform, false);

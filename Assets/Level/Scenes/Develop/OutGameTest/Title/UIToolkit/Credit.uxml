@@ -6,19 +6,19 @@
     <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; justify-content: center;">
         <ui:VisualElement name="Root" class="tab-root">
             <ui:TabView class="tab-view">
-                <ui:Tab label="制作メンバー" name="ProductionTeam">
+                <ui:Tab label="制作メンバー" name="ProductionTeam" class="tab-se-select">
                     <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; flex-grow: 1; position: relative; background-color: rgb(255, 255, 255); display: none;"/>
                     <ui:ScrollView name="MemberScrollView" style="height: 100%; width: 100%;">
                         <ui:Label text="Label"/>
                     </ui:ScrollView>
                 </ui:Tab>
-                <ui:Tab label="使用アセット" name="AssetsUsed">
+                <ui:Tab label="使用アセット" name="AssetsUsed" class="tab-se-select">
                     <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; flex-grow: 1; position: relative; background-color: rgb(113, 113, 113);">
                         <ui:ListView style="width: 100%; height: 100%;"/>
                     </ui:VisualElement>
                 </ui:Tab>
             </ui:TabView>
-            <ui:Button text="戻る" name="BackButton" class="back-button button" style="position: absolute; background-color: rgb(188, 188, 188); left: auto; right: 1%;"/>
+            <ui:Button text="戻る" name="BackButton" class="back-button button ui-se-cancel" style="position: absolute; background-color: rgb(188, 188, 188); left: auto; right: 1%;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

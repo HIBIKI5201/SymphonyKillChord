@@ -63,7 +63,17 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                     throw new InvalidOperationException($"{nameof(_entryActions)}[{i}] is required.");
                 }
 
-                actions.Add(entryAction.Create());
+                try
+                {
+                    actions.Add(entryAction.Create());
+                }
+                catch (Exception exception)
+                {
+                    throw new InvalidOperationException(
+                        $"{nameof(_entryActions)}[{i}] ({entryAction.GetType().Name}) の生成に失敗しました。"
+                        + $" GuideMessageText: {_guideMessageText}",
+                        exception);
+                }
             }
 
             return actions;
