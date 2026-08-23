@@ -10,6 +10,7 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.System.SaveSystem;
@@ -397,6 +398,61 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
                 entity.SetParent(parents);
             }
+
+            MarkInitialFocusNode();
+        }
+
+        /// <summary>
+        ///     親を持たない起点ノードへ、初期フォーカス用のUSSクラスを付与します。
+        /// </summary>
+        private void MarkInitialFocusNode()
+        {
+            SkillNodeEntity rootEntity = null;
+            int rootCount = 0;
+
+            foreach (SkillNodeEntity entity in _skillNodeEntities.Values)
+            {
+                if (entity.Parents != null && entity.Parents.Length > 0)
+                {
+                    continue;
+                }
+
+                rootCount++;
+
+                // 起点が複数ある場合でも結果が実行ごとに変わらないよう、
+                // ノードIDが最小のものを採用する。Dictionaryの列挙順は保証されないため。
+                if (rootEntity == null || entity.SkillNodeIdVO.Id < rootEntity.SkillNodeIdVO.Id)
+                {
+                    rootEntity = entity;
+                }
+            }
+
+            if (rootEntity == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SkillTreeInitializer)}] 親を持たない起点ノードが見つかりません。"
+                    + " 初期フォーカスは戻るボタンへフォールバックします。");
+                return;
+            }
+
+            if (rootCount > 1)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SkillTreeInitializer)}] 親を持たない起点ノードが{rootCount}件あります。"
+                    + $" ノードID {rootEntity.SkillNodeIdVO.Id} を初期フォーカス先に採用しました。");
+            }
+
+            // 辞書はViewModelインターフェースで保持しているため、要素を持つ実装型へ絞り込む。
+            if (!_skillNodeViews.TryGetValue(rootEntity.SkillNodeIdVO.Id, out ISkillNodeViewModel viewModel)
+                || viewModel is not SkillNodeView nodeView)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SkillTreeInitializer)}] 起点ノードのViewが取得できませんでした。"
+                    + $" ノードID: {rootEntity.SkillNodeIdVO.Id}");
+                return;
+            }
+
+            nodeView.RootElement.AddToClassList(UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME);
         }
 
         /// <summary>
