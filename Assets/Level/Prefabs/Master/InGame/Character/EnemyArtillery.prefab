@@ -394,6 +394,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyHealthView
   _healthHudView: {fileID: 3195145979150290354}
   _damageNumberSpawnPoint: {fileID: 580429503840945673}
+  _damageNumberCircleCenterOffset: 1.1
+  _damageNumberCircleRadius: 1.1
   _damageNumberCameraOffset: 0.2
 --- !u!114 &8900643656970599263
 MonoBehaviour:
@@ -1335,11 +1337,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4674212844608207637, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 1.4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4674212844608207637, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 2.2
+      value: 1.75
       objectReference: {fileID: 0}
     - target: {fileID: 7243839929005732014, guid: b44e72070710d394cb0ededfd5d4bc67, type: 3}
       propertyPath: m_Enabled
