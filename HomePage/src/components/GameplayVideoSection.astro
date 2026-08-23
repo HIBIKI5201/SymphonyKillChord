@@ -1,16 +1,12 @@
 ---
 interface Props {
-	eyebrow: string;
-	title: string;
 	src: string;
 }
 
-const { eyebrow, title, src } = Astro.props;
+const { src } = Astro.props;
 ---
 
 <section id="gameplay-video">
-	<p class="eyebrow">{eyebrow}</p>
-	<h2>{title}</h2>
 	<video src={src} autoplay loop muted playsinline></video>
 </section>
 
@@ -22,15 +18,6 @@ const { eyebrow, title, src } = Astro.props;
 		margin: 0 -24px;
 		padding-left: 24px;
 		padding-right: 24px;
-	}
-
-	h2 {
-		margin: 0 0 32px;
-		font-family: var(--font-display);
-		letter-spacing: var(--tracking-display);
-		font-size: clamp(1.5rem, 4vw, 2.25rem);
-		font-weight: 800;
-		color: var(--color-text-primary);
 	}
 
 	video {

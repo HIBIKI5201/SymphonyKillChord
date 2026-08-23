@@ -1,4 +1,6 @@
 ---
+import logoSrc from '../assets/images/logo/Title_Logo.png';
+
 interface NavItem {
 	label: string;
 	href: string;
@@ -22,7 +24,9 @@ const currentPath = Astro.url.pathname;
 ---
 
 <header class="site-header">
-	<a class="brand" href="/home">Symphony Kill Chord</a>
+	<a class="brand" href="/home">
+		<img class="brand-logo" src={logoSrc.src} alt="Symphony Kill Chord" />
+	</a>
 
 	<nav class="nav" id="site-nav">
 		{
@@ -77,13 +81,14 @@ const currentPath = Astro.url.pathname;
 	}
 
 	.brand {
-		font-family: var(--font-display);
-		letter-spacing: var(--tracking-display);
-		font-size: 16px;
-		font-weight: 800;
-		color: var(--color-text-primary);
+		display: flex;
+		align-items: center;
 		text-decoration: none;
-		white-space: nowrap;
+	}
+
+	.brand-logo {
+		height: 52px;
+		width: auto;
 	}
 
 	.nav {

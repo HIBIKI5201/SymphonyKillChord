@@ -4,6 +4,11 @@ import SiteFooter from '../components/SiteFooter.astro';
 import CharacterSection from '../components/CharacterSection.astro';
 import CharacterNav from '../components/CharacterNav.astro';
 import characters from '../data/characters.json';
+import alphaImage from '../assets/images/characters/symphony立ち絵-ポーズ差分.png';
+
+const characterImages: Record<string, ImageMetadata> = {
+	'char-01': alphaImage,
+};
 ---
 
 <Layout title="キャラクター | Symphony Kill Chord">
@@ -22,13 +27,16 @@ import characters from '../data/characters.json';
 					catchphrase={character.catchphrase}
 					description={character.description}
 					cv={character.cv}
+					image={characterImages[character.id]}
 					reverse={index % 2 === 1}
 				/>
 			))
 		}
 	</main>
 
-	<CharacterNav characters={characters.map(({ id, name }) => ({ id, name }))} />
+	<CharacterNav
+		characters={characters.map(({ id, name }) => ({ id, name, image: characterImages[id] }))}
+	/>
 
 	<SiteFooter />
 </Layout>
