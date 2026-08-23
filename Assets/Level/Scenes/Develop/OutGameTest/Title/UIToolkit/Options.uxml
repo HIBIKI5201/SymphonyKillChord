@@ -4,7 +4,7 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
     <ui:VisualElement name="BackGround" style="flex-grow: 1; justify-content: center;">
         <ui:VisualElement name="Root" class="tab-root" style="background-color: rgb(123, 123, 123);">
-            <ui:TabView class="tab-view">
+            <ui:TabView name="SettingsTabView" class="tab-view">
                 <ui:Tab label="音量設定" name="VolumeSettings" class="tab-se-select">
                     <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; flex-grow: 1; padding-left: 8%; padding-right: 8%; padding-top: 7%; background-color: rgb(78, 86, 91);">
                         <ui:VisualElement style="min-height: 120px; margin-bottom: 22px; padding: 18px; background-color: rgb(93, 102, 108);">

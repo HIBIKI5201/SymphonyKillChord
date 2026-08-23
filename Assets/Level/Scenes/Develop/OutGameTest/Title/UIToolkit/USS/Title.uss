@@ -6,7 +6,20 @@
     aspect-ratio: 1;
     left: 3%;
     top: 4%;
+    scale: 1 1;
+    transition-property: scale;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
 }
+.button:hover,
+.button:focus {
+    scale: 1.2 1.2;
+}
+
+.button:active {
+    scale: 0.9 0.9;
+}
+
 
 .titleLabel {
     -unity-font-style: bold;
