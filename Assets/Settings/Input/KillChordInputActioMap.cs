@@ -385,8 +385,8 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
-                    ""id"": ""94b7b630-617a-4b5b-9e5e-38886dbdc3a8"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""id"": ""3c663c8d-d467-4846-bf4f-f38ecfe431ec"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -418,8 +418,8 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
-                    ""id"": ""3c663c8d-d467-4846-bf4f-f38ecfe431ec"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""id"": ""94b7b630-617a-4b5b-9e5e-38886dbdc3a8"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -578,7 +578,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""name"": ""Submit"",
                     ""type"": ""Button"",
                     ""id"": ""cd0a1233-ef04-436b-8287-f26be44c1326"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
