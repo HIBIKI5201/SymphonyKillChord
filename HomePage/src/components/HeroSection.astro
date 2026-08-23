@@ -1,0 +1,43 @@
+---
+interface Props {
+	eyebrow: string;
+	title: string;
+	catchphrase: string;
+}
+
+const { eyebrow, title, catchphrase } = Astro.props;
+---
+
+<section id="hero">
+	<p class="eyebrow">{eyebrow}</p>
+	<h1>{title}</h1>
+	<p id="catch">{catchphrase}</p>
+</section>
+
+<style>
+	#hero {
+		padding: 48px 24px 64px;
+		margin: 0 -24px;
+		text-align: center;
+		background-image: linear-gradient(rgba(10, 13, 11, 0.55), rgba(10, 13, 11, 0.55)),
+			url('../assets/images/title_steel.jpg');
+		background-size: cover;
+		background-position: center;
+	}
+
+	h1 {
+		margin: 0 0 16px;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(2rem, 6vw, 3.5rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+
+	#catch {
+		margin: 0;
+		font-family: var(--font-body);
+		font-size: 18px;
+		color: var(--color-text-primary);
+	}
+</style>
