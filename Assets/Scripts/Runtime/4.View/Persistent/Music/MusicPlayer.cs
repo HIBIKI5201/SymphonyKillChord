@@ -34,6 +34,7 @@ namespace KillChord.Runtime.View.Persistent.Music
         public void Initialize()
         {
             _cri = GetComponent<CriAtomSource>();
+            _cri.player?.SetVoicePriority(255);
         }
 
         /// <summary>
