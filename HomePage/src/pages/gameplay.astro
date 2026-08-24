@@ -1,7 +1,49 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import FeatureCard from '../components/FeatureCard.astro';
+import features from '../data/gameplayFeatures.json';
 ---
 
 <Layout title="ゲームプレイ | Symphony Kill Chord">
-	<main></main>
+	<main>
+		<section id="page-header">
+			<p class="eyebrow">Gameplay</p>
+			<h1>ゲームプレイ</h1>
+		</section>
+
+		<section id="feature-list">
+			{features.map((feature) => <FeatureCard name={feature.name} description={feature.description} />)}
+		</section>
+	</main>
+
+	<SiteFooter />
 </Layout>
+
+<style>
+	main {
+		max-width: 1080px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	#page-header {
+		padding: 64px 0 48px;
+		text-align: center;
+	}
+
+	h1 {
+		margin: 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(1.75rem, 5vw, 2.5rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+
+	#feature-list {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 48px;
+	}
+</style>

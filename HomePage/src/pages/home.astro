@@ -4,8 +4,6 @@ import ScanlineOverlay from '../components/ScanlineOverlay.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import HeroSection from '../components/HeroSection.astro';
 import GameplayVideoSection from '../components/GameplayVideoSection.astro';
-
-const testText = 'この文章は、テストです。1〜　⭐️';
 ---
 
 <Layout>
@@ -18,16 +16,6 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 		/>
 
 		<GameplayVideoSection src="/movies/DummyData.mp4" />
-
-		<section id="type-scale">
-			<p class="scale-h1">{testText}</p>
-			<h2>{testText}</h2>
-			<h3>{testText}</h3>
-			<h4>{testText}</h4>
-			<p class="body-mono">{testText}</p>
-			<p class="body-text">{testText}</p>
-			<p class="body-small">{testText}</p>
-		</section>
 	</main>
 
 	<SiteFooter />
@@ -38,79 +26,5 @@ const testText = 'この文章は、テストです。1〜　⭐️';
 		max-width: 960px;
 		margin: 0 auto;
 		padding: 0 24px;
-	}
-
-	/*
-	 * 世界観・トーンがチーム内でまだ確定していないため、
-	 * type-scale(文字サイズ確認用)セクションは現状の見た目(白背景)を維持する。
-	 * 本採用のダークテーマ(--color-bg等)とは別に、このセクション専用の一時トークンとして定義する。
-	 */
-	#type-scale {
-		--test-bg: #ffffff;
-		--test-text: #111827;
-		--test-border: #d1d5db;
-		--test-text-muted: #6b7280;
-
-		padding: 48px 24px;
-		margin: 0 -24px;
-		background: var(--test-bg);
-		color: var(--test-text);
-		border-top: 1px dashed var(--test-border);
-		display: flex;
-		flex-direction: column;
-		gap: 20px;
-	}
-
-	#type-scale .scale-h1 {
-		margin: 0;
-		font-family: var(--font-display);
-		letter-spacing: var(--tracking-display);
-		font-size: 3rem;
-		font-weight: 800;
-	}
-
-	#type-scale h2 {
-		margin: 0;
-		font-family: var(--font-display);
-		letter-spacing: var(--tracking-display);
-		font-size: 2.25rem;
-		font-weight: 700;
-	}
-
-	#type-scale h3 {
-		margin: 0;
-		font-family: var(--font-mono);
-		letter-spacing: var(--tracking-label);
-		font-size: 1.5rem;
-		font-weight: 600;
-		color: var(--color-signal-dim);
-	}
-
-	#type-scale h4 {
-		margin: 0;
-		font-family: var(--font-body);
-		font-size: 1.125rem;
-		font-weight: 700;
-	}
-
-	#type-scale .body-mono {
-		margin: 0;
-		font-family: var(--font-mono);
-		font-size: 1rem;
-		color: var(--color-warning);
-	}
-
-	#type-scale .body-text {
-		margin: 0;
-		font-family: var(--font-body);
-		font-size: 1rem;
-		color: var(--test-text);
-	}
-
-	#type-scale .body-small {
-		margin: 0;
-		font-family: var(--font-body);
-		font-size: 0.8125rem;
-		color: var(--test-text-muted);
 	}
 </style>
