@@ -93,10 +93,27 @@ const { id, name, formalName, catchphrase, description, cv, image, reverse = fal
 		justify-content: center;
 		border: 1px dashed var(--color-surface-border);
 		background: var(--color-surface);
+		opacity: 0;
+		transform: translateX(-48px);
+		transition:
+			opacity 0.7s ease,
+			transform 0.7s ease;
+	}
+
+	.character-section[data-reverse='true'] .visual {
+		transform: translateX(48px);
+	}
+
+	.character-section.is-visible .visual {
+		opacity: 1;
+		transform: translateX(0);
 	}
 
 	.visual[data-has-image='true'] {
+		width: min(260px, 28vw);
 		aspect-ratio: 2670 / 5576;
+		border: none;
+		background: none;
 	}
 
 	.visual img {
@@ -117,6 +134,40 @@ const { id, name, formalName, catchphrase, description, cv, image, reverse = fal
 		position: relative;
 		z-index: 1;
 		flex: 1 1 320px;
+	}
+
+	.info > * {
+		opacity: 0;
+		transform: translateY(24px);
+		transition:
+			opacity 0.6s ease,
+			transform 0.6s ease;
+		transition-delay: var(--reveal-delay, 0s);
+	}
+
+	.info > *:nth-child(1) {
+		--reveal-delay: 0.15s;
+	}
+
+	.info > *:nth-child(2) {
+		--reveal-delay: 0.25s;
+	}
+
+	.info > *:nth-child(3) {
+		--reveal-delay: 0.35s;
+	}
+
+	.info > *:nth-child(4) {
+		--reveal-delay: 0.45s;
+	}
+
+	.info > *:nth-child(5) {
+		--reveal-delay: 0.55s;
+	}
+
+	.character-section.is-visible .info > * {
+		opacity: 1;
+		transform: translateY(0);
 	}
 
 	.name {
@@ -176,4 +227,31 @@ const { id, name, formalName, catchphrase, description, cv, image, reverse = fal
 			width: min(340px, 80vw);
 		}
 	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.visual,
+		.info > * {
+			opacity: 1;
+			transform: none;
+			transition: none;
+		}
+	}
 </style>
+
+<script>
+	const sections = document.querySelectorAll<HTMLElement>('.character-section');
+
+	const observer = new IntersectionObserver(
+		(entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					entry.target.classList.add('is-visible');
+					observer.unobserve(entry.target);
+				}
+			});
+		},
+		{ threshold: 0.2 },
+	);
+
+	sections.forEach((section) => observer.observe(section));
+</script>
