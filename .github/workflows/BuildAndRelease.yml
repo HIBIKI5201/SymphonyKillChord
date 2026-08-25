@@ -132,6 +132,12 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          Remove-Item (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Force -ErrorAction SilentlyContinue
 
           Write-Host "::group::クローン先プロジェクトフォルダおよびディスク事前クリーンアップ"
           $Workspace = "${{ github.workspace }}"
@@ -218,6 +224,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           $BaseRef = "${{ github.base_ref }}"
           if (-not $BaseRef) {
@@ -248,6 +258,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::ビルド出力先パスの取得"
 
@@ -298,6 +312,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::Unity実行ファイルの解決と検証"
 
@@ -400,6 +418,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::AAPT2 override の設定"
 
@@ -478,6 +500,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::ビルド出力先の空確認とディスク残り容量の検証"
 
@@ -530,6 +556,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::ビルドワークフロー環境情報"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローを開始しました。"
@@ -560,6 +590,11 @@ jobs:
 
       - name: Unityライセンス状態の事前確認
         run: |
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
           $LogPath = "unity_license_check.log"
           if (Test-Path $LogPath) { Remove-Item $LogPath -Force }
 
@@ -606,6 +641,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           # ==========================================
           # 1. 準備 および Google Drive からの ZIP ダウンロード
@@ -795,6 +834,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
           Write-Host "::group::NuGetForUnity.Cli による NuGet パッケージの復元"
           dotnet tool install --global NuGetForUnity.Cli 2>&1 | Out-String | Write-Host
           $ToolsPath = Join-Path (Join-Path $HOME ".dotnet") "tools"
@@ -818,6 +861,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::Unity ビルドプロセスの開始"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ビルドのため Unity を起動中..."
@@ -935,6 +982,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::ビルド成果物の検証"
           $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
@@ -990,6 +1041,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::現行ビルドバージョンの解決"
 
@@ -1083,6 +1138,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::リリースタグの生成"
           
@@ -1104,6 +1163,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::ビルド成果物ZIPへのタグ付与と配置"
 
@@ -1195,6 +1258,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::リリースパッチ番号のインクリメント"
           $VarName      = $env:PATCH_NUMBER_VAR_NAME
@@ -1236,6 +1303,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::ワークフロー実行サマリー"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローが完了しました。"
@@ -1280,6 +1351,19 @@ jobs:
           Write-Host "（各ログの全文は unity-build-log Artifact としてもアップロードされています）"
           Write-Host ""
 
+          # 各ステップがWrite-Hostで出したWARN/ERROR/annotationは、各ステップ側の
+          # オーバーライドによりworkflow_issues.logへも同時記録している。
+          $IssuesLogPath = Join-Path $env:RUNNER_TEMP 'workflow_issues.log'
+          if (Test-Path $IssuesLogPath) {
+            Write-Host "---- 全ステップのWARN/ERROR一覧 ----"
+            Get-Content -Path $IssuesLogPath | ForEach-Object { Write-Host $_ }
+            Write-Host "-------------------------------------"
+            Write-Host ""
+          } else {
+            Write-Host "[INFO]: WARN/ERRORは記録されていません。"
+            Write-Host ""
+          }
+
           # 1. Unityライセンス確認ログ（ログ自体が問題を示している場合のみ表示する）
           $LicenseLogPath = "unity_license_check.log"
           if (Test-Path $LicenseLogPath) {
@@ -1320,6 +1404,10 @@ jobs:
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::ビルド後のディスククリーンアップ"
 
