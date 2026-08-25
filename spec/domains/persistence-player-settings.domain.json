@@ -1,0 +1,29 @@
+{
+  "name": "Persistence and Player Settings",
+  "description": "五分類の永続データ、プラットフォーム別保存、暗号化・移行・破損回復、および音量・操作・表示設定の確定/取消を所有する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[0-6]\\.[^/]+/Persistent/(Savedata|Input)/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/OutGame/Setting/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/0\\.Utility/(Identity|Savedata)/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/5\\.InfraStructure/Addressables/"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-07-persistence",
+    "spec/feature/game-spec.md#gs-09-navigation-guidance-and-recovery"
+  ],
+  "rationale": "platform-services のSave/Loadと ui-screens のSettingを同じプレイヤーデータ境界へ割り当てる。"
+}
