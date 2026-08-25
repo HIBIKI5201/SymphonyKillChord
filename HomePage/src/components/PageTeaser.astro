@@ -1,0 +1,70 @@
+---
+interface Props {
+	title: string;
+	catchphrase: string;
+	href: string;
+}
+
+const { title, catchphrase, href } = Astro.props;
+---
+
+<a class="page-teaser" href={href}>
+	<div class="visual">
+		<span class="no-image">NO IMAGE</span>
+	</div>
+	<h2>{title}</h2>
+	<p class="catch">{catchphrase}</p>
+</a>
+
+<style>
+	.page-teaser {
+		display: block;
+		padding: 64px 0;
+		text-align: center;
+		background: var(--color-bg);
+		margin: 0 -24px;
+		padding-left: 24px;
+		padding-right: 24px;
+		text-decoration: none;
+		transition: background-color 0.2s ease;
+	}
+
+	.page-teaser:hover {
+		background: var(--color-surface);
+	}
+
+	.visual {
+		width: 100%;
+		max-width: 800px;
+		aspect-ratio: 16 / 9;
+		margin: 0 auto;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px dashed var(--color-surface-border);
+		background: var(--color-surface);
+	}
+
+	.no-image {
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		color: var(--color-text-muted);
+		text-transform: uppercase;
+	}
+
+	h2 {
+		margin: 24px 0 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(1.5rem, 4vw, 2.25rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+
+	.catch {
+		margin: 8px 0 0;
+		font-size: 0.9375rem;
+		color: var(--color-text-muted);
+	}
+</style>
