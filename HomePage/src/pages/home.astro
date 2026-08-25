@@ -4,7 +4,13 @@ import ScanlineOverlay from '../components/ScanlineOverlay.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import HeroSection from '../components/HeroSection.astro';
 import GameplayVideoSection from '../components/GameplayVideoSection.astro';
-import PageTeaser from '../components/PageTeaser.astro';
+import CharacterFileTeaser from '../components/CharacterFileTeaser.astro';
+import GameplayOrderTeaser from '../components/GameplayOrderTeaser.astro';
+import SkillDossierTeaser from '../components/SkillDossierTeaser.astro';
+import characters from '../data/characters.json';
+import gameplayFeatures from '../data/gameplayFeatures.json';
+import skills from '../data/skills.json';
+import symphonyImage from '../assets/images/characters/symphony立ち絵-ポーズ差分.png';
 ---
 
 <Layout>
@@ -18,9 +24,25 @@ import PageTeaser from '../components/PageTeaser.astro';
 
 		<GameplayVideoSection src="/movies/DummyData.mp4" />
 
-		<PageTeaser title="キャラクター" catchphrase="彼らの物語を知る" href="/character" />
-		<PageTeaser title="ゲームプレイ" catchphrase="独自のビートで戦え" href="/gameplay" />
-		<PageTeaser title="スキル" catchphrase="一撃の可能性を広げる" href="/skill" />
+		<CharacterFileTeaser
+			name={characters[0].name}
+			formalName={characters[0].formalName}
+			catchphrase="彼らの物語を知る"
+			image={symphonyImage}
+			href="/character"
+		/>
+		<GameplayOrderTeaser
+			title="ゲームプレイ"
+			orderNumber="047"
+			items={gameplayFeatures.map((feature) => feature.name)}
+			href="/gameplay"
+		/>
+		<SkillDossierTeaser
+			title="スキル"
+			code="SKILL-DOSSIER"
+			skills={skills.map((skill) => skill.name)}
+			href="/skill"
+		/>
 	</main>
 
 	<SiteFooter />
