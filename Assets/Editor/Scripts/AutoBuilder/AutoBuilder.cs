@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEngine;
 
@@ -20,44 +19,8 @@ namespace KillChord.Editor.AutoBuilder
         public static void RunFromCli()
         {
             string buildMode = GetCliArg("-buildMode");
-            PerformMultipleBuilds(isBatchMode: true, buildMode: buildMode);
-        }
-        
-        /// <summary>
-        ///     【GitHub Actions 用エントリポイント】
-        ///     ビルド対象プラットフォームのモジュールがインストール済みかを確認し、
-        ///     結果をログへ出力してエディタを終了する。
-        /// </summary>
-        public static void CheckRequiredModules()
-        {
-            (BuildTarget target, string label)[] requiredTargets =
-            {
-                (BuildTarget.Android, "Android"),
-                (BuildTarget.StandaloneOSX, "macOS"),
-            };
-
-            bool allSupported = true;
-            List<string> missingModules = new();
-
-            foreach ((BuildTarget target, string label) in requiredTargets)
-            {
-                BuildTargetGroup group = BuildPipeline.GetBuildTargetGroup(target);
-                bool supported = BuildPipeline.IsBuildTargetSupported(group, target);
-
-                Debug.Log($"MODULE_CHECK|{label}|{(supported ? "OK" : "MISSING")}");
-
-                if (!supported)
-                {
-                    allSupported = false;
-                    missingModules.Add(label);
-                }
-            }
-
-            string msg = allSupported ?
-                $"[{nameof(AutoBuildExecuter)}] 全ての必要なモジュールがインストール済みです。" :
-                $"[{nameof(AutoBuildExecuter)}] 不足モジュール: {string.Join(", ", missingModules)}";
-            Debug.Log(msg);
-            AutoBuildExecuter.ExitIfBatchMode(true, exitCode: allSupported ? 0 : 1);
+            string selectedProfiles = GetCliArg("-selectedProfiles");
+            PerformMultipleBuilds(isBatchMode: true, buildMode: buildMode, selectedProfiles: selectedProfiles);
         }
 
         /// <summary>
@@ -83,7 +46,8 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         /// <param name="isBatchMode"> true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。false の場合は手動実行扱い。 </param>
         /// <param name="buildMode"> "Development" または "Master" を指定した場合、該当プロファイルのみビルドする。null または未指定時は両方をビルドする。 </param>
-        private static void PerformMultipleBuilds(bool isBatchMode = false, string buildMode = null)
+        /// <param name="selectedProfiles"> カンマ区切りのプロファイル名。指定時は該当名のみへさらに絞り込む。null または空文字時は絞り込みなし。 </param>
+        private static void PerformMultipleBuilds(bool isBatchMode = false, string buildMode = null, string selectedProfiles = null)
         {
             Debug.Log(
                 $"[{nameof(AutoBuilder)}] Starting multiple builds process via BuildProfile. BuildMode: {buildMode ?? "All"}");
@@ -125,6 +89,37 @@ namespace KillChord.Editor.AutoBuilder
             }
             
             profiles = profiles.Where(profile => profile != null).ToArray();
+
+            // -selectedProfiles 指定時はプロファイル名で一致するものだけに絞り込む。
+            // 未指定・空文字時は buildMode の結果をそのまま使う（従来動作を維持）。
+            if (!string.IsNullOrWhiteSpace(selectedProfiles))
+            {
+                string[] requestedNames = selectedProfiles
+                    .Split(',')
+                    .Select(name => name.Trim())
+                    .Where(name => !string.IsNullOrEmpty(name))
+                    .ToArray();
+
+                HashSet<string> availableNames = profiles.Select(p => p.name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                foreach (string requestedName in requestedNames)
+                {
+                    if (!availableNames.Contains(requestedName))
+                    {
+                        Debug.LogWarning($"[{nameof(AutoBuilder)}] Requested profile not found in buildMode '{buildMode ?? "All"}': {requestedName}");
+                    }
+                }
+
+                profiles = profiles
+                    .Where(profile => requestedNames.Contains(profile.name, StringComparer.OrdinalIgnoreCase))
+                    .ToArray();
+
+                if (profiles.Length == 0)
+                {
+                    Debug.LogError($"[{nameof(AutoBuilder)}] selectedProfiles matched no profiles: {selectedProfiles}");
+                    AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
+                    return;
+                }
+            }
 
             // 環境変数 UNITY_BUILD_OUTPUT_DIR が指定されていれば優先して使用する
             string envDir = Environment.GetEnvironmentVariable("UNITY_BUILD_OUTPUT_DIR");

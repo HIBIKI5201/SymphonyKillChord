@@ -17,6 +17,22 @@ on:
         options:
           - Development
           - Master
+      profile_android:
+        description: 'Android'
+        type: boolean
+        default: true
+      profile_windows:
+        description: 'Windows'
+        type: boolean
+        default: true
+      profile_macos:
+        description: 'MacOS'
+        type: boolean
+        default: true
+      profile_ios:
+        description: 'iOS'
+        type: boolean
+        default: true
 
 permissions: {}
 
@@ -250,6 +266,19 @@ jobs:
           "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
+
+          # workflow_dispatch以外（PRマージ起動時）はこの入力自体が存在せず空文字になり、
+          # 後続でのプロファイル絞り込みは行われず全件ビルドの従来動作を維持する。
+          $SelectedProfiles = @()
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            if ("${{ inputs.profile_android }}" -eq "true") { $SelectedProfiles += "Android" }
+            if ("${{ inputs.profile_windows }}" -eq "true") { $SelectedProfiles += "Windows" }
+            if ("${{ inputs.profile_macos }}" -eq "true")   { $SelectedProfiles += "MacOS" }
+            if ("${{ inputs.profile_ios }}" -eq "true")     { $SelectedProfiles += "iOS" }
+          }
+          $TargetProfiles = $SelectedProfiles -join ","
+          Write-Host "対象プロファイル: $(if ($TargetProfiles) { $TargetProfiles } else { '指定なし（全件）' })"
+          "SELECTED_PROFILES=$TargetProfiles" | Add-Content -Path $env:GITHUB_ENV
         shell: pwsh
 
 # ==================================================================================================
@@ -910,6 +939,9 @@ jobs:
             "-buildMode", "$env:BUILD_MODE",
             "-logFile", "unity_build.log"
           )
+          if ($env:SELECTED_PROFILES) {
+            $UnityArgs += @("-selectedProfiles", "$env:SELECTED_PROFILES")
+          }
 
           $UnityProcess = Start-Process `
             -FilePath "$env:UNITY_EXE_PATH" `
@@ -923,10 +955,7 @@ jobs:
               $UnityProcess.ProcessorAffinity = $AffinityMask
               Write-Host "[INFO]: Unity プロセッサアフィニティを設定しました。"
             } catch {
-              Write-Host "[ERROR]: Unity プロセッサアフィニティの設定に失敗しました: $_"
-              $UnityProcess.Kill()
-              Write-Host "::endgroup::"
-              exit 1
+              Write-Host "[WARN]: Unity プロセッサアフィニティの設定に失敗しました。ビルドは続行します: $_"
             }
           } else {
             Write-Host "[INFO]: $($PSVersionTable.Platform) ではプロセッサアフィニティの指定はサポート外のためスキップします。"
