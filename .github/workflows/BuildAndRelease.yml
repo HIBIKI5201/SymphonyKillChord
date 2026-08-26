@@ -277,7 +277,6 @@ jobs:
             if ("${{ inputs.profile_ios }}" -eq "true")     { $SelectedProfiles += "iOS" }
           }
           $TargetProfiles = $SelectedProfiles -join ","
-          Write-Host "対象プロファイル: $(if ($TargetProfiles) { $TargetProfiles } else { '指定なし（全件）' })"
           "SELECTED_PROFILES=$TargetProfiles" | Add-Content -Path $env:GITHUB_ENV
         shell: pwsh
 
@@ -602,6 +601,7 @@ jobs:
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
           Write-Host "Unity実行メソッド: $(if ($env:UNITY_BUILD_EXECUTE_METHOD) { $env:UNITY_BUILD_EXECUTE_METHOD } else { '未設定 (デフォルト使用)' })"
           Write-Host "Unityビルドタイムアウト: $(if ($env:UNITY_BUILD_TIMEOUT_SEC) { "$env:UNITY_BUILD_TIMEOUT_SEC 秒" } else { '未設定 (デフォルト使用)' })"
+          Write-Host "対象プロファイル: $(if ($env:SELECTED_PROFILES) { $env:SELECTED_PROFILES } else { '指定なし（全件）' })"
           Write-Host ""
 
           # NuGetForUnity.Cli (dotnet tool) の実行可否に関わるため、ここで併せて確認する。
@@ -650,10 +650,6 @@ jobs:
           Start-Sleep -Seconds 5
 
           $LogContent = Get-Content -Path $LogPath -Raw
-          Write-Host "---- unity_license_check.log 全文 ----"
-          Write-Host $LogContent
-          Write-Host "--------------------------------------"
-
           $HasLicenseError = $LogContent -match "No valid Unity Editor license found"
 
           if ($HasLicenseError -or $Process.ExitCode -ne 0) {
@@ -914,8 +910,11 @@ jobs:
             Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' が未設定です。デフォルト値 '$TimeoutSec 秒' を使用します。"
           }
 
+          $LogFileName = "unity_build_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+          "log_file=$LogFileName" | Add-Content -Path $env:GITHUB_OUTPUT
+
           Write-Host "実行メソッド: $ExecuteMethod"
-          Write-Host "ログ出力先: unity_build.log"
+          Write-Host "ログ出力先: $LogFileName"
           Write-Host ""
           Write-Host "タイムアウト: $TimeoutSec 秒 ($([Math]::Round($TimeoutSec / 60, 1)) 分)"
           Write-Host ""
@@ -937,7 +936,7 @@ jobs:
             "-projectPath", "${{ github.workspace }}",
             "-executeMethod", "$ExecuteMethod",
             "-buildMode", "$env:BUILD_MODE",
-            "-logFile", "unity_build.log"
+            "-logFile", "$LogFileName"
           )
           if ($env:SELECTED_PROFILES) {
             $UnityArgs += @("-selectedProfiles", "$env:SELECTED_PROFILES")
@@ -983,7 +982,7 @@ jobs:
             Write-Host "警告: Unity ビルドプロセスがゼロ以外の終了コード ($UnityExitCode) を返しました。"
             Write-Host "          一部のビルドプロファイルが失敗した可能性がありますが、"
             Write-Host "          成功したプロファイルがあれば後続のステップでリリースへアップロードします。"
-            Write-Host "          詳細は unity_build.log を参照してください。"
+            Write-Host "          詳細は $LogFileName を参照してください。"
           }
 
           "exit_code=$UnityExitCode" | Add-Content -Path $env:GITHUB_OUTPUT
@@ -1002,7 +1001,7 @@ jobs:
         if: always()
         with:
           name: unity-build-log
-          path: unity_build.log
+          path: ${{ steps.unity_build.outputs.log_file }}
 
 # ==================================================================================================
 
@@ -1387,6 +1386,7 @@ jobs:
         env:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
           UNITY_EXIT_CODE: ${{ steps.unity_build.outputs.exit_code }}
+          UNITY_LOG_FILE: ${{ steps.unity_build.outputs.log_file }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -1407,7 +1407,7 @@ jobs:
             } else {
               Write-Host "[WARN]: 一部のビルドプロファイルが失敗しましたが、成功したプロファイルのみでリリースを作成しました。"
               Write-Host "     タグ: $env:TAG_NAME"
-              Write-Host "     詳細は unity_build.log およびUnityビルドの実行ステップのログを確認してください。"
+              Write-Host "     詳細は $env:UNITY_LOG_FILE およびUnityビルドの実行ステップのログを確認してください。"
             }
           } else {
             Write-Host "[WARN]: リリースの作成が完了しませんでした（失敗またはスキップ）。"
@@ -1427,15 +1427,12 @@ jobs:
 
       - name: トラブルシューティング用ログの集約
         if: always()
-        env:
-          UNITY_EXIT_CODE: ${{ steps.unity_build.outputs.exit_code }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
 
           Write-Host "::group::トラブルシューティング用ログの集約"
-          Write-Host "問題が発生した場合の切り分け用に、主要なログをここへ集約表示します。"
-          Write-Host "（各ログの全文は unity-build-log Artifact としてもアップロードされています）"
+          Write-Host "問題が発生した場合の切り分け用に、各ステップのWARN/ERRORをここへ集約表示します。"
           Write-Host ""
 
           # 各ステップがWrite-Hostで出したWARN/ERROR/annotationは、各ステップ側の
@@ -1445,40 +1442,8 @@ jobs:
             Write-Host "---- 全ステップのWARN/ERROR一覧 ----"
             Get-Content -Path $IssuesLogPath | ForEach-Object { Write-Host $_ }
             Write-Host "-------------------------------------"
-            Write-Host ""
           } else {
             Write-Host "[INFO]: WARN/ERRORは記録されていません。"
-            Write-Host ""
-          }
-
-          # 1. Unityライセンス確認ログ（ログ自体が問題を示している場合のみ表示する）
-          $LicenseLogPath = "unity_license_check.log"
-          if (Test-Path $LicenseLogPath) {
-            $LicenseLogContent = Get-Content -Path $LicenseLogPath -Raw
-            if ($LicenseLogContent -match "No valid Unity Editor license found" -or $LicenseLogContent -match "(?i)error") {
-              Write-Host "---- unity_license_check.log（ライセンス確認で問題を検出） ----"
-              Write-Host $LicenseLogContent
-              Write-Host "---------------------------------------------------------------"
-              Write-Host ""
-            }
-          }
-
-          # 2. Unityビルドログ（エラー/警告件数と末尾）
-          $BuildLogPath = "unity_build.log"
-          if (Test-Path $BuildLogPath) {
-            $ErrorCount = Select-String -Path $BuildLogPath -Pattern "error|failed" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
-            $WarningCount = Select-String -Path $BuildLogPath -Pattern "warning" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
-
-            Write-Host "---- unity_build.log 集計 ----"
-            Write-Host "Unity終了コード: $(if ($env:UNITY_EXIT_CODE) { $env:UNITY_EXIT_CODE } else { '不明（ビルドステップ未到達の可能性）' })"
-            Write-Host "検出されたエラー数: $ErrorCount"
-            Write-Host "検出された警告数: $WarningCount"
-            Write-Host ""
-            Write-Host "末尾50行:"
-            Get-Content -Path $BuildLogPath -Tail 50 | ForEach-Object { Write-Host $_ }
-            Write-Host "-------------------------------"
-          } else {
-            Write-Host "[INFO]: unity_build.log が見つかりません（Unityビルドの実行ステップまで到達していない可能性があります）。"
           }
 
           Write-Host "::endgroup::"
