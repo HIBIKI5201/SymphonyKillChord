@@ -1,7 +1,12 @@
 ---
+interface NameEntry {
+	name: string;
+	lead?: boolean;
+}
+
 interface Props {
 	role: string;
-	names: string[];
+	names: NameEntry[];
 }
 
 const { role, names } = Astro.props;
@@ -11,10 +16,13 @@ const { role, names } = Astro.props;
 	<p class="role-title"><span class="role-marker">◈</span>{role}</p>
 	<div class="names">
 		{
-			names.map((name, index) => (
+			names.map((entry, index) => (
 				<>
 					{index > 0 && <span class="name-divider" aria-hidden="true">/</span>}
-					<span class="name">{name}</span>
+					<span class="name">
+						{entry.lead && <span class="lead-mark" aria-hidden="true">★</span>}
+						{entry.name}
+					</span>
 				</>
 			))
 		}
@@ -52,10 +60,21 @@ const { role, names } = Astro.props;
 	}
 
 	.name {
+		position: relative;
+		display: inline-block;
 		font-family: var(--font-display);
 		letter-spacing: var(--tracking-display);
 		font-size: 1.375rem;
 		color: var(--color-text-primary);
+	}
+
+	.lead-mark {
+		position: absolute;
+		top: -2px;
+		left: -13px;
+		font-size: 11px;
+		line-height: 1;
+		color: var(--color-signal);
 	}
 
 	.name-divider {

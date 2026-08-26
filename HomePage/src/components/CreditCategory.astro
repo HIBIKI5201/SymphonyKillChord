@@ -1,9 +1,14 @@
 ---
 import CreditRole from './CreditRole.astro';
 
+interface NameEntry {
+	name: string;
+	lead?: boolean;
+}
+
 interface RoleEntry {
 	role: string;
-	names: string[];
+	names: NameEntry[];
 }
 
 interface Props {
