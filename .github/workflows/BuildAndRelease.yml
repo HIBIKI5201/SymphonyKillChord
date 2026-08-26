@@ -1067,6 +1067,7 @@ jobs:
         if: steps.unity_build.outputs.exit_code != '124'
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
+          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -1080,15 +1081,43 @@ jobs:
           # VERSION_BASE_{BuildMode} にバージョン文字列全体（例: v1.0.X）を格納する。
           # 未設定時は v1.0.X として扱い、BUILD_VERSION_{BuildMode} のパッチ番号を末尾に適用する。
           $VarName = "VERSION_BASE_$env:BUILD_MODE"
-          $Headers = @{
+          $script:Headers = @{
               "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
+          $script:UsingFallbackToken = $false
+
+          function Invoke-GitHubApi {
+              param([string]$Uri, [string]$Method, $Body = $null)
+
+              $Parameters = @{ Uri = $Uri; Method = $Method; Headers = $script:Headers }
+              if ($null -ne $Body) {
+                  $Parameters.Body = $Body
+                  $Parameters.ContentType = "application/json"
+              }
+
+              try {
+                  return Invoke-RestMethod @Parameters
+              } catch {
+                  $StatusCode = if ($_.Exception.Response) { $_.Exception.Response.StatusCode.value__ } else { 0 }
+                  if ($script:UsingFallbackToken -or $StatusCode -ne 401) { throw }
+                  if ([string]::IsNullOrWhiteSpace($env:VAR_UPDATE_TOKEN_FALLBACK)) {
+                      throw "VAR_UPDATE_TOKEN_FALLBACK が設定されていません。"
+                  }
+
+                  Write-Host "[WARN]: 通常トークンによるGitHub REST API認証に失敗しました。フォールバックトークンで再試行します。"
+                  $script:Headers.Authorization = "Bearer $env:VAR_UPDATE_TOKEN_FALLBACK"
+                  $script:UsingFallbackToken = $true
+                  return Invoke-RestMethod @Parameters
+              }
+          }
+
+          Write-Host "[INFO]: Repository Variables API には通常トークンを使用します。"
           $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
 
           try {
-              $VarResponse = Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers
+              $VarResponse = Invoke-GitHubApi -Uri $GetUrl -Method GET
               $VersionString = $VarResponse.value
           } catch {
               if ($_.Exception.Response.StatusCode.value__ -eq 404) {
@@ -1096,7 +1125,7 @@ jobs:
                   $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
                   $Body = @{ "name" = $VarName; "value" = "v1.0.X" } | ConvertTo-Json
                   try {
-                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      Invoke-GitHubApi -Uri $CreateUrl -Method POST -Body $Body | Out-Null
                       $VersionString = "v1.0.X"
                       Write-Host "[INFO]: '$VarName' がデフォルト値 'v1.0.X' で作成されました。"
                   } catch {
@@ -1115,7 +1144,7 @@ jobs:
           $PatchVarName = "BUILD_VERSION_$env:BUILD_MODE"
           $PatchGetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$PatchVarName"
           try {
-              $PatchVarResponse = Invoke-RestMethod -Uri $PatchGetUrl -Method GET -Headers $Headers
+              $PatchVarResponse = Invoke-GitHubApi -Uri $PatchGetUrl -Method GET
               $PatchNumber = $PatchVarResponse.value
           } catch {
               if ($_.Exception.Response.StatusCode.value__ -eq 404) {
@@ -1123,7 +1152,7 @@ jobs:
                   $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
                   $Body = @{ "name" = $PatchVarName; "value" = "0" } | ConvertTo-Json
                   try {
-                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      Invoke-GitHubApi -Uri $CreateUrl -Method POST -Body $Body | Out-Null
                       $PatchNumber = "0"
                       Write-Host "[INFO]: '$PatchVarName' がデフォルト値 '0' で作成されました。"
                   } catch {
@@ -1284,6 +1313,7 @@ jobs:
         if: steps.create_release.outcome == 'success'
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
+          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -1302,17 +1332,45 @@ jobs:
           Write-Host "次のパッチ番号: $NextPatchNumber"
           
           # Update repository variable using GitHub API
-          $Headers = @{
+          $script:Headers = @{
               "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
+          $script:UsingFallbackToken = $false
+
+          function Invoke-GitHubApi {
+              param([string]$Uri, [string]$Method, $Body = $null)
+
+              $Parameters = @{ Uri = $Uri; Method = $Method; Headers = $script:Headers }
+              if ($null -ne $Body) {
+                  $Parameters.Body = $Body
+                  $Parameters.ContentType = "application/json"
+              }
+
+              try {
+                  return Invoke-RestMethod @Parameters
+              } catch {
+                  $StatusCode = if ($_.Exception.Response) { $_.Exception.Response.StatusCode.value__ } else { 0 }
+                  if ($script:UsingFallbackToken -or $StatusCode -ne 401) { throw }
+                  if ([string]::IsNullOrWhiteSpace($env:VAR_UPDATE_TOKEN_FALLBACK)) {
+                      throw "VAR_UPDATE_TOKEN_FALLBACK が設定されていません。"
+                  }
+
+                  Write-Host "[WARN]: 通常トークンによるGitHub REST API認証に失敗しました。フォールバックトークンで再試行します。"
+                  $script:Headers.Authorization = "Bearer $env:VAR_UPDATE_TOKEN_FALLBACK"
+                  $script:UsingFallbackToken = $true
+                  return Invoke-RestMethod @Parameters
+              }
+          }
+
+          Write-Host "[INFO]: Repository Variables API には通常トークンを使用します。"
 
           $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
           $Body = @{ "name" = $VarName; "value" = "$NextPatchNumber" } | ConvertTo-Json
 
           try {
-              Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+              Invoke-GitHubApi -Uri $Url -Method PATCH -Body $Body | Out-Null
               Write-Host "[INFO]: $VarName を $NextPatchNumber に更新しました。"
           } catch {
               Write-Host "[ERROR]: $VarName の更新に失敗しました: $_"
