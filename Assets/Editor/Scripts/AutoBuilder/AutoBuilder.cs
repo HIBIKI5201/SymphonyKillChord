@@ -100,17 +100,17 @@ namespace KillChord.Editor.AutoBuilder
                     .Where(name => !string.IsNullOrEmpty(name))
                     .ToArray();
 
-                HashSet<string> availableNames = profiles.Select(p => p.name).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 foreach (string requestedName in requestedNames)
                 {
-                    if (!availableNames.Contains(requestedName))
+                    bool isMatched = profiles.Any(p => IsProfileMatch(p.name, requestedName));
+                    if (!isMatched)
                     {
                         Debug.LogWarning($"[{nameof(AutoBuilder)}] Requested profile not found in buildMode '{buildMode ?? "All"}': {requestedName}");
                     }
                 }
 
                 profiles = profiles
-                    .Where(profile => requestedNames.Contains(profile.name, StringComparer.OrdinalIgnoreCase))
+                    .Where(profile => requestedNames.Any(requested => IsProfileMatch(profile.name, requested)))
                     .ToArray();
 
                 if (profiles.Length == 0)
@@ -142,6 +142,51 @@ namespace KillChord.Editor.AutoBuilder
 
             // 実行プロセスをAutoBuildExecuterへ委譲する。
             AutoBuildExecuter.Run(baseOutputDir, profiles, isBatchMode);
+        }
+
+        /// <summary>
+        ///     文字列から英数字のみを抽出し、小文字に変換した正規化文字列を返します。
+        /// </summary>
+        /// <param name="input">対象文字列</param>
+        /// <returns>英数字のみの小文字文字列。</returns>
+        private static string NormalizeProfileName(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+
+            char[] chars = input
+                .Where(char.IsLetterOrDigit)
+                .Select(char.ToLowerInvariant)
+                .ToArray();
+
+            return new string(chars);
+        }
+
+        /// <summary>
+        ///     プロファイル名と要求された名前が一致するかどうかを判定します。
+        ///     大文字小文字の違い、記号の有無、プレフィックスや部分一致を考慮して柔軟に照合します。
+        /// </summary>
+        /// <param name="profileName">プロファイル名</param>
+        /// <param name="requestedName">要求されたプロファイル名</param>
+        /// <returns>一致する場合は true、それ以外は false。</returns>
+        private static bool IsProfileMatch(string profileName, string requestedName)
+        {
+            if (string.Equals(profileName, requestedName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            string normProfile = NormalizeProfileName(profileName);
+            string normRequested = NormalizeProfileName(requestedName);
+
+            if (string.IsNullOrEmpty(normProfile) || string.IsNullOrEmpty(normRequested))
+            {
+                return false;
+            }
+
+            return normProfile.Contains(normRequested) || normRequested.Contains(normProfile);
         }
     }
 }
