@@ -870,6 +870,7 @@ MonoBehaviour:
     - line: '|   il2cppCodeGeneration: {}'
     - line: '|   il2cppStacktraceInformation: {}'
     - line: '|   managedStrippingLevel:'
+    - line: '|     Android: 1'
     - line: '|     EmbeddedLinux: 1'
     - line: '|     GameCoreScarlett: 1'
     - line: '|     GameCoreXboxOne: 1'
@@ -1016,7 +1017,7 @@ MonoBehaviour:
         m_BuildSubtarget: 0
         m_BuildSystem: 1
         m_ExportAsGoogleAndroidProject: 0
-        m_DebugSymbolLevel: 1
+        m_DebugSymbolLevel: 0
         m_DebugSymbolFormat: 5
         m_CurrentDeploymentTargetId: __builtin__target_default
         m_BuildType: 1
