@@ -1,0 +1,25 @@
+{
+  "name": "Player Action and Combat Targeting",
+  "description": "移動、照準、攻撃、回避、硬直・クールダウン・キャンセル、遮蔽物を含む標的選択を所有し、プレイヤー意図を戦闘要求へ変換する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/(Player|Target)/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/Player/(?!SkillEffect)"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/Skill/(SkillTarget|SkillAttackController)"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-02-rhythm-command-combat"
+  ],
+  "rationale": "combat-core のうちプレイヤー意図・移動・照準・標的選択を所有し、効果解決は Combat State へ分離する。"
+}
