@@ -223,6 +223,30 @@ jobs:
           # NuGet キャッシュは保持する（毎回再ダウンロードしない）
           Write-Host "[INFO]: NuGet キャッシュは保持します。"
 
+          # 4. ランナー本体の _diag ログをローテーションする（自動削除されず蓄積し続けるため）
+          $RunnerRoot = Split-Path (Split-Path $env:RUNNER_WORKSPACE -Parent) -Parent
+          $DiagDir = Join-Path $RunnerRoot "_diag"
+          if (Test-Path $DiagDir) {
+            $OldLogs = Get-ChildItem -Path $DiagDir -Filter "*.log" -File -ErrorAction SilentlyContinue |
+                       Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-1) }
+            $FreedBytes = ($OldLogs | Measure-Object -Property Length -Sum).Sum
+            $OldLogs | Remove-Item -Force -ErrorAction SilentlyContinue
+            Write-Host "[INFO]: _diag の1日以上前のログ $($OldLogs.Count)件 ($([Math]::Round($FreedBytes / 1MB, 2)) MB) を削除しました。"
+          } else {
+            Write-Host "[INFO]: _diag フォルダが見つからないためスキップします。"
+          }
+
+          # 5. Android SDK のキャッシュを削除する（SDK本体・AVD・署名鍵は対象外）
+          foreach ($SubDir in @("cache", "build-cache")) {
+            $AndroidCachePath = Join-Path (Join-Path $HOME ".android") $SubDir
+            if (Test-Path $AndroidCachePath) {
+              $SizeBytes = (Get-ChildItem -Path $AndroidCachePath -Recurse -File -ErrorAction SilentlyContinue |
+                            Measure-Object -Property Length -Sum).Sum
+              Remove-Item -Path $AndroidCachePath -Recurse -Force -ErrorAction SilentlyContinue
+              Write-Host "[INFO]: Android $SubDir キャッシュ ($([Math]::Round($SizeBytes / 1MB, 2)) MB) を削除しました。"
+            }
+          }
+
           Write-Host "::endgroup::"
         shell: pwsh
 
@@ -261,7 +285,7 @@ jobs:
              exit 1
           }
  
-          Write-Host "ベースブランチ: $BaseRef -> ビルドモード: $BuildMode, タグの接頭辞: $TagPrefix"
+          Write-Host "ベースブランチ: $BaseRef, タグの接頭辞: $TagPrefix"
           "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
           "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
@@ -593,6 +617,7 @@ jobs:
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローを開始しました。"
           Write-Host "実行環境: ${{ runner.os }} (アーキテクチャ: ${{ runner.arch }})"
           Write-Host "プロジェクトパス: ${{ github.workspace }}"
+          Write-Host "ビルドモード: $env:BUILD_MODE"
           Write-Host ""
           Write-Host "Google Drive APIキー設定状況: $(if ($env:GOOGLE_DRIVE_API_KEY) { '設定済み' } else { '未設定' })"
           Write-Host "Google Drive フォルダID設定状況: $(if ($env:GOOGLE_DRIVE_FOLDER_ID) { '設定済み' } else { '未設定' })"
