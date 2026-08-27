@@ -46,6 +46,13 @@ const {
 	}
 
 	body {
-		padding-top: 64px;
+		padding-left: var(--side-nav-width);
+	}
+
+	@media (max-width: 767px) {
+		body {
+			padding-left: 0;
+			padding-top: var(--header-height-mobile);
+		}
 	}
 </style>

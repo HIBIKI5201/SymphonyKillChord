@@ -27,6 +27,10 @@
 
 	--tracking-display: 0.12em;
 	--tracking-label: 0.28em;
+
+	/* サイドナビ: 閉じた状態の幅。ホバー/フォーカス時はコンポーネント側でこの値を拡張する */
+	--side-nav-width: 72px;
+	--header-height-mobile: 64px;
 }
 
 /* 各ページの見出し上に置く小さなラベル(EYEBROW)の共通スタイル */

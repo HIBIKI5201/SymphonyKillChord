@@ -63,41 +63,64 @@ const currentPath = Astro.url.pathname;
 </header>
 
 <style>
+	/*
+	 * デスクトップでは左サイドの縦ナビ(ホバーで展開)、
+	 * モバイルでは従来通り上部の固定バー+ハンバーガーメニューに切り替える。
+	 */
 	.site-header {
 		position: fixed;
 		top: 0;
 		left: 0;
-		right: 0;
 		z-index: 50;
 		display: flex;
+		flex-direction: column;
 		align-items: center;
-		justify-content: space-between;
-		gap: 16px;
-		height: 64px;
-		padding: 0 24px;
-		background: rgba(10, 13, 11, 0.72);
+		gap: 32px;
+		width: var(--side-nav-width);
+		height: 100vh;
+		padding: 20px 0;
+		background: rgba(10, 13, 11, 0.85);
 		backdrop-filter: blur(6px);
-		border-bottom: 1px solid var(--color-surface-border);
+		border-right: 1px solid var(--color-surface-border);
+		overflow: hidden;
+		transition:
+			width 0.25s ease,
+			background 0.25s ease;
+	}
+
+	.site-header:hover,
+	.site-header:focus-within {
+		width: 200px;
 	}
 
 	.brand {
+		flex-shrink: 0;
 		display: flex;
 		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
 		text-decoration: none;
 	}
 
 	.brand-logo {
-		height: 52px;
-		width: auto;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
 	}
 
 	.nav {
 		display: flex;
-		gap: 24px;
-		overflow-x: auto;
+		flex-direction: column;
+		gap: 28px;
+		width: 100%;
 	}
 
 	.nav-link {
+		display: flex;
+		align-items: center;
+		width: 100%;
+		padding: 0 24px;
 		font-family: var(--font-mono);
 		letter-spacing: var(--tracking-label);
 		font-size: 12px;
@@ -157,6 +180,28 @@ const currentPath = Astro.url.pathname;
 	}
 
 	@media (max-width: 767px) {
+		.site-header {
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+			width: 100%;
+			height: var(--header-height-mobile);
+			padding: 0 24px;
+			border-right: none;
+			border-bottom: 1px solid var(--color-surface-border);
+			overflow: visible;
+		}
+
+		.site-header:hover,
+		.site-header:focus-within {
+			width: 100%;
+		}
+
+		.brand {
+			width: auto;
+			height: 52px;
+		}
+
 		.nav {
 			display: none;
 		}
@@ -167,7 +212,7 @@ const currentPath = Astro.url.pathname;
 
 		.mobile-nav {
 			position: fixed;
-			top: 64px;
+			top: var(--header-height-mobile);
 			left: 0;
 			right: 0;
 			z-index: 49;
@@ -201,6 +246,12 @@ const currentPath = Astro.url.pathname;
 
 		.mobile-nav-link[aria-current='page'] {
 			color: var(--color-signal);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.site-header {
+			transition: none;
 		}
 	}
 </style>
