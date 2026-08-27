@@ -1,8 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import SiteFooter from '../components/SiteFooter.astro';
-import FeatureCard from '../components/FeatureCard.astro';
-import features from '../data/gameplayFeatures.json';
+import GameplayCarousel from '../components/GameplayCarousel.astro';
 ---
 
 <Layout title="ゲームプレイ | Symphony Kill Chord">
@@ -12,9 +11,7 @@ import features from '../data/gameplayFeatures.json';
 			<h1>ゲームプレイ</h1>
 		</section>
 
-		<section id="feature-list">
-			{features.map((feature) => <FeatureCard name={feature.name} description={feature.description} />)}
-		</section>
+		<GameplayCarousel />
 	</main>
 
 	<SiteFooter />
@@ -39,11 +36,5 @@ import features from '../data/gameplayFeatures.json';
 		font-size: clamp(1.75rem, 5vw, 2.5rem);
 		font-weight: 800;
 		color: var(--color-text-primary);
-	}
-
-	#feature-list {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-		gap: 48px;
 	}
 </style>

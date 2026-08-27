@@ -1,17 +1,38 @@
 [
 	{
-		"id": "feature-01",
-		"name": "仮の特徴名1",
-		"description": "仮の説明文です。実際のゲームプレイ内容が決まり次第、この文章を差し替えてください。"
+		"id": "pillar-01",
+		"code": "GS-01 / GS-02",
+		"name": "リズムコマンド戦闘",
+		"description": "移動・射撃・回避の上に、入力の間隔をBPMで補正した拍が重なる。判定された拍種が、選択中の敵へ放つ武器を決める。",
+		"ringLabel": "拍 → 武器",
+		"ringSegments": [
+			{ "value": "2", "caption": "ショットガン" },
+			{ "value": "4", "caption": "ハンドガン" },
+			{ "value": "8", "caption": "サブマシンガン" }
+		]
 	},
 	{
-		"id": "feature-02",
-		"name": "仮の特徴名2",
-		"description": "仮の説明文です。実際のゲームプレイ内容が決まり次第、この文章を差し替えてください。"
+		"id": "pillar-02",
+		"code": "GS-03",
+		"name": "キルコード編成",
+		"description": "記録した拍のパターンと、攻撃・回避などのアクション種別の組み合わせでキルコードが発動する。攻撃・バフ・デバフはスキルツリーで解放・強化する。",
+		"ringLabel": "装備枠",
+		"ringSegments": [
+			{ "value": "1", "caption": "初期解放" },
+			{ "value": "2", "caption": "初期解放" },
+			{ "value": "3", "caption": "特殊ノード", "locked": true }
+		]
 	},
 	{
-		"id": "feature-03",
-		"name": "仮の特徴名3",
-		"description": "仮の説明文です。実際のゲームプレイ内容が決まり次第、この文章を差し替えてください。"
+		"id": "pillar-03",
+		"code": "GS-04",
+		"name": "同期する戦場",
+		"description": "敵は戦闘BGMの拍に合わせて攻撃し、事前にline・areaで予告する。装備したキルコードに応じて、BGMのループも差し替わる。",
+		"ringLabel": "BGM構成",
+		"ringSegments": [
+			{ "value": "Intro", "caption": "導入" },
+			{ "value": "Loop", "caption": "差し替え可能" },
+			{ "value": "Outro", "caption": "終幕" }
+		]
 	}
 ]
