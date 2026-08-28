@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
 import CharacterSection from '../components/CharacterSection.astro';
 import CharacterNav from '../components/CharacterNav.astro';
 import characters from '../data/characters.json';
@@ -13,10 +14,7 @@ const characterImages: Record<string, ImageMetadata> = {
 
 <Layout title="キャラクター | Symphony Kill Chord">
 	<main>
-		<section id="page-header">
-			<p id="eyebrow">Character</p>
-			<h1>キャラクター</h1>
-		</section>
+		<PageHeader eyebrow="Character" title="キャラクター" tight />
 
 		{
 			characters.map((character, index) => (
@@ -46,29 +44,5 @@ const characterImages: Record<string, ImageMetadata> = {
 		max-width: 1080px;
 		margin: 0 auto;
 		padding: 0 24px 96px;
-	}
-
-	#page-header {
-		padding: 64px 0 0;
-		text-align: center;
-	}
-
-	#eyebrow {
-		margin: 0 0 8px;
-		font-family: var(--font-mono);
-		letter-spacing: var(--tracking-label);
-		font-size: 13px;
-		font-weight: 600;
-		color: var(--color-signal);
-		text-transform: uppercase;
-	}
-
-	h1 {
-		margin: 0;
-		font-family: var(--font-display);
-		letter-spacing: var(--tracking-display);
-		font-size: clamp(1.75rem, 5vw, 2.5rem);
-		font-weight: 800;
-		color: var(--color-text-primary);
 	}
 </style>

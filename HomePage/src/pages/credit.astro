@@ -1,20 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ScanlineOverlay from '../components/ScanlineOverlay.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
 import CreditCategory from '../components/CreditCategory.astro';
 import credits from '../data/credits.json';
 ---
 
 <Layout title="クレジット | Symphony Kill Chord">
 	<main>
-		<section id="page-header">
-			<p class="eyebrow">Credit</p>
-			<div id="title-wrap">
-				<h1>クレジット</h1>
-				<ScanlineOverlay contained />
-			</div>
-		</section>
+		<PageHeader eyebrow="Credit" title="クレジット" scanline />
 
 		<section id="credit-list">
 			{credits.map((entry) => <CreditCategory category={entry.category} roles={entry.roles} />)}
@@ -29,26 +23,6 @@ import credits from '../data/credits.json';
 		max-width: 720px;
 		margin: 0 auto;
 		padding: 0 24px 96px;
-	}
-
-	#page-header {
-		padding: 64px 0 48px;
-		text-align: center;
-	}
-
-	#title-wrap {
-		position: relative;
-		display: inline-block;
-		overflow: hidden;
-	}
-
-	h1 {
-		margin: 0;
-		font-family: var(--font-display);
-		letter-spacing: var(--tracking-display);
-		font-size: clamp(1.75rem, 5vw, 2.5rem);
-		font-weight: 800;
-		color: var(--color-text-primary);
 	}
 
 	#credit-list {
