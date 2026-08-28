@@ -33,10 +33,13 @@ const { code, name, description, ringLabel, ringSegments } = Astro.props;
 <style>
 	.slide {
 		display: grid;
-		grid-template-columns: 240px 1fr;
+		grid-template-columns: 240px minmax(0, 460px);
 		align-items: center;
+		justify-content: center;
 		gap: 48px;
 		height: 100%;
+		max-width: 800px;
+		margin: 0 auto;
 		padding: 48px 16px;
 	}
 

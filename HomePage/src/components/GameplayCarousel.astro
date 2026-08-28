@@ -135,8 +135,8 @@ const total = String(features.length).padStart(2, '0');
 
 	.corner {
 		position: absolute;
-		width: 16px;
-		height: 16px;
+		width: 24px;
+		height: 24px;
 		border: 2px solid var(--color-signal-dim);
 	}
 
@@ -229,22 +229,25 @@ const total = String(features.length).padStart(2, '0');
 	}
 
 	.nav {
-		width: 36px;
-		height: 36px;
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
 		border: 1px solid var(--color-surface-border);
-		background: transparent;
+		background: var(--color-surface);
 		color: var(--color-text-primary);
-		font-size: 18px;
+		font-size: 20px;
 		line-height: 1;
 		cursor: pointer;
 		transition:
 			border-color 0.2s ease,
-			color 0.2s ease;
+			color 0.2s ease,
+			background-color 0.2s ease;
 	}
 
 	.nav:hover:not(:disabled) {
 		border-color: var(--color-signal);
-		color: var(--color-signal);
+		color: var(--color-bg);
+		background: var(--color-signal);
 	}
 
 	.nav:disabled {
