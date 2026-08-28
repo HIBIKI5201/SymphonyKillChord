@@ -99,7 +99,6 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
 
             Dictionary<SkillNodeEntity, int> distanceByNode =
                 new Dictionary<SkillNodeEntity, int>(candidateNodes.Count);
-            HashSet<SkillNodeEntity> nodesBeingCalculated = new HashSet<SkillNodeEntity>();
             foreach (SkillNodeEntity node in candidateNodes)
             {
                 if (!TryGetDistanceFromStart(
