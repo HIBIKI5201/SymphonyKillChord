@@ -1,20 +1,13 @@
 ---
 interface Props {
-	eyebrow: string;
 	title: string;
-	catchphrase: string;
 }
 
-const { eyebrow, title, catchphrase } = Astro.props;
+const { title } = Astro.props;
 ---
 
 <section id="hero">
 	<div class="backdrop"></div>
-
-	<div class="stage">
-		<p class="eyebrow">{eyebrow}</p>
-		<p id="catch">{catchphrase}</p>
-	</div>
 
 	<h1 class="visually-hidden">{title}</h1>
 </section>
@@ -23,9 +16,6 @@ const { eyebrow, title, catchphrase } = Astro.props;
 	#hero {
 		position: relative;
 		aspect-ratio: 2000 / 850;
-		display: flex;
-		align-items: flex-end;
-		justify-content: center;
 		overflow: hidden;
 		margin: 0 -24px;
 	}
@@ -40,26 +30,6 @@ const { eyebrow, title, catchphrase } = Astro.props;
 		background-size: contain;
 		background-position: center;
 		background-repeat: no-repeat;
-	}
-
-	.stage {
-		position: relative;
-		z-index: 1;
-		width: 100%;
-		max-width: 1200px;
-		padding: 0 24px clamp(32px, 8vh, 72px);
-		text-align: center;
-	}
-
-	.eyebrow {
-		margin: 0 0 8px;
-	}
-
-	#catch {
-		margin: 0;
-		font-family: var(--font-body);
-		font-size: 18px;
-		color: var(--color-text-primary);
 	}
 
 	.visually-hidden {
@@ -85,10 +55,6 @@ const { eyebrow, title, catchphrase } = Astro.props;
 				url('../assets/images/hero/KeyVisual_Mobile.png');
 			background-size: cover;
 			background-position: center;
-		}
-
-		.stage {
-			padding-bottom: 40px;
 		}
 	}
 </style>
