@@ -68,6 +68,19 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     現在の初期フォーカス要求を中止する。
+        /// </summary>
+        public void CancelFocus()
+        {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            CompleteFocusRequest();
+        }
+
+        /// <summary>
         ///     初期フォーカス対象のノードIDを設定する。
         /// </summary>
         /// <param name="nodeIds"> 初期フォーカス対象のノードID。 </param>
@@ -184,8 +197,13 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             VisualElement viewport = _scrollView.contentViewport;
             Rect viewportBounds = viewport.worldBound;
             Rect pointsBounds = _points.worldBound;
-            if (!IsElementVisible(_scrollView)
-                || !IsValidRect(viewportBounds)
+            if (!IsElementVisible(_scrollView))
+            {
+                CompleteFocusRequest();
+                return;
+            }
+
+            if (!IsValidRect(viewportBounds)
                 || !IsValidRect(pointsBounds))
             {
                 RegisterScreenGeometryCallback();
@@ -273,8 +291,6 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                     isLayoutPending = true;
                     continue;
                 }
-
-                Debug.Log($"[SkillTreeViewportView] フォーカス対象VisualElement名: {nodeElement.name}");
 
                 if (!hasTarget)
                 {
@@ -415,6 +431,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// </summary>
         private void RequestFocusTargets()
         {
+            _pendingLayoutItem?.Pause();
             _pendingLayoutItem = null;
             if (_isDisposed || !_isFocusRequested)
             {

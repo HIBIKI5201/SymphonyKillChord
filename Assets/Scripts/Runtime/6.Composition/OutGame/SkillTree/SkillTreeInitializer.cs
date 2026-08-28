@@ -505,6 +505,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillPreviewButtonClicked += HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked += HandlePreviewClosed;
             _outGameUIEvent.OnShownSkillTreeScreen += HandleSkillTreeScreenShownHandler;
+            _outGameUIEvent.OnScreenClosed += HandleScreenClosedHandler;
             _skillTreeViewportView.OnFocusTargetsRequested += HandleFocusTargetsRequestedHandler;
             _isSubscribed = true;
         }
@@ -528,6 +529,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillPreviewButtonClicked -= HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked -= HandlePreviewClosed;
             _outGameUIEvent.OnShownSkillTreeScreen -= HandleSkillTreeScreenShownHandler;
+            _outGameUIEvent.OnScreenClosed -= HandleScreenClosedHandler;
             _skillTreeViewportView.OnFocusTargetsRequested -= HandleFocusTargetsRequestedHandler;
             _isSubscribed = false;
         }
@@ -624,6 +626,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             _skillTreeViewportView.RequestFocus();
+        }
+
+        /// <summary>
+        ///     画面を閉じる時に保留中の初期フォーカス処理を中止する。
+        /// </summary>
+        private void HandleScreenClosedHandler()
+        {
+            _skillTreeViewportView?.CancelFocus();
         }
 
         /// <summary>
