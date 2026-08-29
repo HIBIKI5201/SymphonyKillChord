@@ -1,0 +1,25 @@
+{
+  "name": "Musical Time and Adaptive Arrangement",
+  "description": "音楽時間、BPM・拍子・小節位置、ビート同期スケジューリング、および装備中のキルコードに応じたイントロ・ループ・アウトロと2小節ブロックの動的編成を所有する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/(InGame|Persistent)/Music/(Music|ScheduledAction|ExecuteRequestTiming|IMusicActionScheduler|MusicScheduler|Beat\\.cs)"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/0\\.Utility/Constant/MusicConstants\\.cs$"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/4\\.View/Persistent/Music/MusicPlayer\\.cs$"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-04-music-and-encounter-synchronization"
+  ],
+  "rationale": "コード起点 rhythm-music のうち音楽時計・同期予約・BGM編成を所有し、入力判定は Rhythm Input へ分離する。"
+}
