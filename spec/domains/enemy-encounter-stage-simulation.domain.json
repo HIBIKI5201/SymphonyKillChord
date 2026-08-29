@@ -1,0 +1,20 @@
+{
+  "name": "Enemy Encounter and Stage Simulation",
+  "description": "敵の判断、スポーン・プール・ウェーブ、予告付きビート攻撃、ボス、ステージギミック、および遭遇開始から終了までのシミュレーションを所有する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/(Enemy|Stage)/"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-02-rhythm-command-combat",
+    "spec/feature/game-spec.md#gs-05-stage-mission-and-result"
+  ],
+  "rationale": "コード起点 enemy と stage-barrage を遭遇シミュレーションとして統合する。"
+}

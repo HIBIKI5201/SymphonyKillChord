@@ -7,7 +7,7 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillNode.uss?fileID=7433441132597879392&amp;guid=ff35371d7c270e245a828cfec20cb46f&amp;type=3#SkillNode"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillNodeConn.uss?fileID=7433441132597879392&amp;guid=8a472d3ba336aec4780157542cb10f7b&amp;type=3#SkillNodeConn"/>
     <ui:VisualElement name="SkillTreeScreenRoot" style="flex-grow: 1; background-color: rgb(55, 164, 164);">
-        <ui:ScrollView mode="Vertical" touch-scroll-type="Elastic" name="SkillTreeContainer" style="flex-grow: 1; align-content: flex-end; width: 1920px; height: 1080px; position: relative; justify-content: flex-end; align-items: stretch; align-self: auto;">
+        <ui:ScrollView mode="Vertical" touch-scroll-type="Elastic" name="SkillTreeContainer" style="flex-grow: 1; align-content: flex-end; width: 100%; height: 100%; position: relative; justify-content: flex-end; align-items: stretch; align-self: auto;">
             <ui:VisualElement name="SkillTreeRoot" picking-mode="Position" enabled="true" style="flex-grow: 1; position: relative; bottom: auto; top: auto; left: auto; right: auto; overflow: visible; align-self: auto; align-items: stretch; align-content: center; width: 100%; height: 1380px;">
                 <ui:VisualElement name="Phase1Container" focusable="false" enabled="true" picking-mode="Ignore" style="flex-grow: 1; position: absolute; bottom: auto; left: auto; align-self: center; align-content: flex-end; width: 33%; height: 100%;">
                     <ui:Button text="発" name="N1" selectable="false" focusable="false" view-data-key="Node1" class="skill-node ui-se-select skill-node-node skill-node-font" style="position: absolute; top: auto; left: 280px; bottom: 10px; right: auto; border-top-left-radius: 53px; border-top-right-radius: 53px; border-bottom-right-radius: 53px; border-bottom-left-radius: 53px;"/>
@@ -120,6 +120,7 @@
                     <ui:VisualElement name="C7-137" class="skill-node-conn" style="flex-grow: 0; width: 5px; height: 89px; position: absolute; flex-shrink: 0; rotate: 60deg; bottom: 359px; left: 393px;"/>
                 </ui:VisualElement>
             </ui:VisualElement>
+            <ui:VisualElement name="SkillTreeBottomSpacer" picking-mode="Ignore" style="height: 600px; min-height: 600px; flex-grow: 0; flex-shrink: 0;"/>
         </ui:ScrollView>
         <ui:Label text="研究" name="Title" selectable="false" focusable="false" picking-mode="Ignore" class="title" style="font-size: 36px; -unity-font-style: bold; width: 200px; height: 100px; -unity-text-align: middle-center; top: 1%;"/>
         <ui:Label text="所持ポイント：XXXX" name="Points" selectable="false" focusable="false" picking-mode="Ignore" class="title" style="font-size: 36px; -unity-font-style: bold; width: 200px; height: 100px; -unity-text-align: middle-center; top: auto; bottom: 1%;"/>
