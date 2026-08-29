@@ -1,0 +1,34 @@
+{
+  "source": "https://lying-foxglove-81a.notion.site/Symphony-Kill-Chord-27d7c2c6cc02801d9648fbe2769f1971",
+  "fetchedAt": "2026-08-24T05:38:49.100Z",
+  "pageCount": 2,
+  "pages": [
+    {
+      "id": "27d7c2c6cc02801d9648fbe2769f1971",
+      "title": "Symphony Kill Chord",
+      "url": "https://lying-foxglove-81a.notion.site/Symphony-Kill-Chord-27d7c2c6cc02801d9648fbe2769f1971",
+      "file": "001-Symphony-Kill-Chord-769f1971.md",
+      "blockCount": 40,
+      "textLength": 351
+    },
+    {
+      "id": "27d7c2c6cc0281fa8790e2145dba5ecf",
+      "title": "トンマナ",
+      "url": "https://lying-foxglove-81a.notion.site/27d7c2c6cc0281fa8790e2145dba5ecf",
+      "file": "002-トンマナ-5dba5ecf.md",
+      "blockCount": 30,
+      "textLength": 600
+    }
+  ],
+  "failures": [
+    {
+      "url": "https://lying-foxglove-81a.notion.site/27d7c2c6cc0281b2ac02c453db82c5d6",
+      "error": "page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.notion-page-content') to be visible\u001b[22m\n"
+    }
+  ],
+  "crawlDiagnostics": {
+    "discoveredCandidates": 32,
+    "fullTreePassSucceeded": 3,
+    "fullTreePassFailed": 29
+  }
+}

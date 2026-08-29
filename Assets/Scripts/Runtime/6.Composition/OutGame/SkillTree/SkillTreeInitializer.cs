@@ -75,15 +75,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private PlayerStatusScreenView _playerStatusScreenView;
         private PreviewVideoScreenView _previewVideoScreenView;
         private SkillTreeResetDialogView _skillTreeResetDialogView;
+        private SkillTreeViewportView _skillTreeViewportView;
         private SkillTreeController _skillTreeController;
+        private SkillTreeService _skillTreeService;
         private SkillDetailPresenter _skillDetailPresenter;
         private PlayerStatusPresenter _playerStatusPresenter;
+        private SkillTreeFocusPresenter _skillTreeFocusPresenter;
         private SkillUnlockData _skillUnlockData;
         private OutGameUIEvent _outGameUIEvent;
         private CancellationTokenSource _cts;
         private RenderTexture _renderTexture;
         private Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntities;
         private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
+        private Dictionary<int, VisualElement> _skillNodeElements;
         private Dictionary<string, ISkillNodeConnViewModel> _skillNodeConnViews;
         private Dictionary<int, string[]> _skillNodeConnBinds;
         private Dictionary<int, VisualElement> _unlockPhases;
@@ -269,16 +273,20 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
             _previewVideoScreenView.HideImmediately();
             _skillTreeResetDialogView = new SkillTreeResetDialogView(_rootElement, _outGameUIEvent);
+            _skillTreeViewportView = new SkillTreeViewportView(_rootElement, _skillNodeElements);
 
             SkillTreeStatusEntity skillTreeEntity = new(
                 _skillUnlockData.ResearchPoint,
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
-            SkillTreeService skillTreeService = new(_skillNodeEntities);
+            _skillTreeService = new SkillTreeService(_skillNodeEntities);
             PlayerStatusBonusCalculator playerStatusBonusCalculator =
                 new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 
             _skillDetailPresenter = new SkillDetailPresenter(_skillDetailScreenView);
+            _skillTreeFocusPresenter = new SkillTreeFocusPresenter(
+                _skillTreeService,
+                _skillTreeViewportView);
             _playerStatusPresenter = new PlayerStatusPresenter(
                 _playerStatusScreenView,
                 playerStatusBonusCalculator,
@@ -292,7 +300,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillDetailScreenView,
                 _skillDetailPresenter,
                 _currentPointsLabel,
-                skillTreeService,
+                _skillTreeService,
                 _playerStatusPresenter,
                 _previewVideoScreenView,
                 _previewVideoScreenView,
@@ -361,6 +369,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             List<Button> nodes = _rootElement.Query<Button>(className: UssClassNameConstants.USS_CLASS_SKILL_NODE).ToList();
             _skillNodeEntities = new();
             _skillNodeViews = new();
+            _skillNodeElements = new();
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -378,6 +387,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
                 _skillNodeEntities.Add(nodeData.NodeId, nodeEntity);
                 _skillNodeViews.Add(nodeData.NodeId.Id, nodeView);
+                _skillNodeElements.Add(nodeData.NodeId.Id, nodes[i]);
             }
 
             foreach (SkillNodeEntity entity in _skillNodeEntities.Values)
@@ -550,6 +560,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillTreeResetCancelled += HandleSkillTreeResetCancelled;
             _outGameUIEvent.OnSkillPreviewButtonClicked += HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked += HandlePreviewClosed;
+            _outGameUIEvent.OnShownSkillTreeScreen += HandleSkillTreeScreenShownHandler;
+            _outGameUIEvent.OnScreenClosed += HandleScreenClosedHandler;
+            _skillTreeViewportView.OnFocusTargetsRequested += HandleFocusTargetsRequestedHandler;
             _isSubscribed = true;
         }
 
@@ -571,6 +584,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillTreeResetCancelled -= HandleSkillTreeResetCancelled;
             _outGameUIEvent.OnSkillPreviewButtonClicked -= HandlePreviewButtonClicked;
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked -= HandlePreviewClosed;
+            _outGameUIEvent.OnShownSkillTreeScreen -= HandleSkillTreeScreenShownHandler;
+            _outGameUIEvent.OnScreenClosed -= HandleScreenClosedHandler;
+            _skillTreeViewportView.OnFocusTargetsRequested -= HandleFocusTargetsRequestedHandler;
             _isSubscribed = false;
         }
 
@@ -586,9 +602,13 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillDetailScreenView?.Dispose();
             _skillDetailScreenView = null;
             _playerStatusScreenView = null;
+            _skillTreeViewportView?.Dispose();
+            _skillTreeViewportView = null;
             _skillTreeController = null;
+            _skillTreeService = null;
             _skillDetailPresenter = null;
             _playerStatusPresenter = null;
+            _skillTreeFocusPresenter = null;
 
             if (_skillNodeViews != null)
             {
@@ -603,6 +623,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             _skillNodeEntities = null;
             _skillNodeViews = null;
+            _skillNodeElements = null;
             _skillNodeConnViews = null;
             _skillNodeConnBinds = null;
             _unlockPhases = null;
@@ -645,6 +666,46 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillUnlocked()
         {
             _skillTreeController.OnSkillUnlocked();
+        }
+
+        /// <summary>
+        ///     研究画面が表示された時に初期フォーカス対象を反映する。
+        /// </summary>
+        private void HandleSkillTreeScreenShownHandler()
+        {
+            if (_skillTreeViewportView == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SkillTreeInitializer)}] スキルツリーの初期フォーカス表示を要求できませんでした。",
+                    this);
+                return;
+            }
+
+            _skillTreeViewportView.RequestFocus();
+        }
+
+        /// <summary>
+        ///     画面を閉じる時に保留中の初期フォーカス処理を中止する。
+        /// </summary>
+        private void HandleScreenClosedHandler()
+        {
+            _skillTreeViewportView?.CancelFocus();
+        }
+
+        /// <summary>
+        ///     表示中の候補から初期フォーカス対象を再計算する。
+        /// </summary>
+        /// <param name="visibleCandidateNodeIds"> 表示中の初期フォーカス候補ノードID。 </param>
+        private void HandleFocusTargetsRequestedHandler(
+            IReadOnlyList<int> visibleCandidateNodeIds)
+        {
+            if (_skillTreeFocusPresenter == null
+                || !_skillTreeFocusPresenter.Push(visibleCandidateNodeIds))
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SkillTreeInitializer)}] スキルツリーの初期フォーカス対象を取得できませんでした。",
+                    this);
+            }
         }
 
         /// <summary>
