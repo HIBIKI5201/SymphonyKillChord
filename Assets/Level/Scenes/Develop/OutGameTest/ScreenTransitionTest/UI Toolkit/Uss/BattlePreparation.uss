@@ -245,7 +245,7 @@
     background-color: rgba(0, 0, 0, 0);
     -unity-background-scale-mode: scale-to-fit;
     width: 49%;
-    min-width: 700px;
+    min-width: 431px;
     height: 80%;
     min-height: 900px;
     display: flex;
