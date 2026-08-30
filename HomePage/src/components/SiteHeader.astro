@@ -18,19 +18,22 @@ interface Props {
 
 const {
 	navItems = [
-		{ label: 'Home', href: '/home', icon: homeIcon },
-		{ label: 'Character', href: '/character', icon: characterIcon },
-		{ label: 'Gameplay', href: '/gameplay', icon: gameplayIcon },
-		{ label: 'Skill', href: '/skill', icon: skillIcon },
-		{ label: 'Credit', href: '/credit', icon: creditIcon },
+		{ label: 'Home', href: `${import.meta.env.BASE_URL}home`, icon: homeIcon },
+		{ label: 'Character', href: `${import.meta.env.BASE_URL}character`, icon: characterIcon },
+		{ label: 'Gameplay', href: `${import.meta.env.BASE_URL}gameplay`, icon: gameplayIcon },
+		{ label: 'Skill', href: `${import.meta.env.BASE_URL}skill`, icon: skillIcon },
+		{ label: 'Credit', href: `${import.meta.env.BASE_URL}credit`, icon: creditIcon },
 	],
 } = Astro.props;
 
-const currentPath = Astro.url.pathname;
+// ビルド出力(directory形式)ではAstro.url.pathnameが末尾スラッシュ付きになるため、
+// 比較前に両者から末尾スラッシュを取り除いて揃える。
+const normalize = (path: string) => path.replace(/\/$/, '');
+const currentPath = normalize(Astro.url.pathname);
 ---
 
 <header class="site-header">
-	<a class="brand" href="/home">
+	<a class="brand" href={`${import.meta.env.BASE_URL}home`}>
 		<img class="brand-logo" src={logoSrc.src} alt="Symphony Kill Chord" />
 	</a>
 
