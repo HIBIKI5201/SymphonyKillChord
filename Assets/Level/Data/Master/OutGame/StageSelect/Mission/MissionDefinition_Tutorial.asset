@@ -107,15 +107,11 @@ MonoBehaviour:
     _entryActions:
     - rid: 4364854031301738870
   - _condition:
-      rid: 4420609062207642
-    _guideMessageText: "\u6226\u95D8\u306B\u3064\u3044\u3066\n"
-    _entryActions:
-    - rid: 4309480265444753541
-  - _condition:
       rid: 4420578705146136
     _guideMessageText: "\u6575\u3092\u6483\u7834\u3057\u3088\u3046\u3002"
     _entryActions:
     - rid: 7260318751720735099
+    - rid: 1841141540767924224
   _failCondition:
     rid: 4420565426504021
   _evaluationConditions: []
@@ -213,12 +209,6 @@ MonoBehaviour:
         _inspectorSummary: "Wave\u958B\u59CB + PlayerBuffClearConditionAsset"
         _innerCondition:
           rid: 4420609062207897
-    - rid: 4420609062207642
-      type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _inspectorSummary: "Attack\u30922\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
-        _actionKind: 1
-        _requiredCount: 2
     - rid: 4420609062207874
       type: {class: WaveStartClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
@@ -376,6 +366,11 @@ MonoBehaviour:
         _inspectorSummary: "Attack\u30924\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
         _actionKind: 1
         _requiredCount: 4
+    - rid: 1841141540767924224
+      type: {class: PlayVoiceStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30DC\u30A4\u30B9\u3092\u518D\u751F\u3059\u308B\uFF1AVOICE_Triad_Tutorial9"
+        _voiceCueName: VOICE_Triad_Tutorial9
     - rid: 4309480265444753537
       type: {class: PlayVoiceStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
@@ -386,11 +381,6 @@ MonoBehaviour:
       data:
         _inspectorSummary: "\u30DC\u30A4\u30B9\u3092\u518D\u751F\u3059\u308B\uFF1AVOICE_Triad_Tutorial7"
         _voiceCueName: VOICE_Triad_Tutorial7
-    - rid: 4309480265444753541
-      type: {class: PlayVoiceStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _inspectorSummary: "\u30DC\u30A4\u30B9\u3092\u518D\u751F\u3059\u308B\uFF1AVOICE_Triad_Tutorial9"
-        _voiceCueName: VOICE_Triad_Tutorial9
     - rid: 4364854031301738869
       type: {class: SetSkillExecutionEnabledStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:

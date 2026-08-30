@@ -60,3 +60,19 @@
     border-top-color: rgb(0, 255, 127);
     border-bottom-color: rgb(0, 255, 127);
 }
+
+/* 選択中は拡大し、押している間は縮める。 */
+.stage-node {
+    scale: 1 1;
+    transition-property: scale;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
+}
+.stage-node:hover,
+.stage-node:focus {
+    scale: 1.2 1.2;
+}
+
+.stage-node:active {
+    scale: 0.9 0.9;
+}

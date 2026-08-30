@@ -59,6 +59,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillBuildPresenter _skillBuildPresenter;
         private OutGameUIEvent _outGameUIEvent;
         private SkillElementDragAndDropSetup _skillElementDragAndDropSetup;
+        private SkillElementControllerEquipController _skillElementControllerEquipController;
         private OwnedSkillRepository _loadedOwnedSkillRepository;
         private SkillBuildRepository _loadedSkillBuildRepository;
         private IReadOnlyList<EquippedSkill> _loadedEquippedSkills;
@@ -202,10 +203,21 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 _uiDocument,
                 _skillBuildViewModel,
                 soundEffectCommand);
+            _skillElementControllerEquipController = new SkillElementControllerEquipController(
+                _uiDocument,
+                _skillBuildViewModel,
+                soundEffectCommand);
+
+            // 動的に生成されるスキル要素へ、マウスとコントローラーの両方の操作を設定する。
+            void SetupSkillElement(VisualElement element)
+            {
+                _skillElementDragAndDropSetup.SetupDraggable(element);
+                _skillElementControllerEquipController.SetupSkillElement(element);
+            }
 
             _skillBuildScreenView.InitializeSkillList(
                 _skillElementTemplate,
-                _skillElementDragAndDropSetup.SetupDraggable,
+                SetupSkillElement,
                 soundEffectCommand);
             _skillBuildScreenView.Bind(_skillBuildViewModel);
             _skillBuildPresenter.Push(
@@ -376,6 +388,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _skillBuildViewModel = null;
             _skillBuildPresenter = null;
             _skillElementDragAndDropSetup = null;
+            _skillElementControllerEquipController?.Dispose();
+            _skillElementControllerEquipController = null;
         }
 
         /// <summary>
