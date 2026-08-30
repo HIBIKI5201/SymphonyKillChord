@@ -1,6 +1,7 @@
 using SymphonyFrameWork.Utility;
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
@@ -568,6 +569,17 @@ namespace KillChord.Editor.AutoBuilder
                         hasFailure = true;
                     }
 
+                    // プロファイルごとにZIP化・元データ削除を行い、ディスク使用量を1プロファイル分に抑える。
+                    // 失敗したプロファイルはZIP化せず削除し、リリース対象へ含めない。
+                    if (hasFailure)
+                    {
+                        TryDeleteFailedBuildOutput(buildDir, profile.name);
+                    }
+                    else if (!TryArchiveBuildOutput(buildDir, profile.name, session.OutputPath))
+                    {
+                        hasFailure = true;
+                    }
+
                     NextSession(hasFailure);
                 }
 
@@ -662,6 +674,87 @@ namespace KillChord.Editor.AutoBuilder
 
             // 念のためさらに1フレーム待つ。
             await Awaitable.NextFrameAsync();
+        }
+
+        /// <summary>
+        ///     失敗したプロファイルのビルド出力ディレクトリを削除します。
+        /// </summary>
+        /// <param name="buildDir"> 削除対象のビルド出力ディレクトリです。 </param>
+        /// <param name="profileName"> ビルドプロファイル名です（ログ表示用）。 </param>
+        private static void TryDeleteFailedBuildOutput(string buildDir, string profileName)
+        {
+            LogDebug($"失敗したビルド出力の削除処理を開始: {profileName}");
+
+            if (!Directory.Exists(buildDir))
+            {
+                return;
+            }
+
+            try
+            {
+                Directory.Delete(buildDir, true);
+                Debug.Log($"[{nameof(AutoBuildExecuter)}] 失敗したビルドの出力ディレクトリを削除しました（リリース対象外）。Profile: {profileName}, Path: {buildDir}");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] 失敗したビルドの出力ディレクトリの削除に失敗しました。Profile: {profileName}, Path: {buildDir}\n{exception}");
+            }
+        }
+
+        /// <summary>
+        ///     1プロファイル分のビルド出力ディレクトリをZIP圧縮し、圧縮元のディレクトリを削除します。
+        /// </summary>
+        /// <param name="buildDir"> 圧縮対象のビルド出力ディレクトリです。 </param>
+        /// <param name="profileName"> ビルドプロファイル名です。ZIPファイル名（拡張子を除く部分）に使用します。 </param>
+        /// <param name="outputRoot"> ZIPファイルの出力先ルートディレクトリです（全プロファイル共通の出力先）。 </param>
+        /// <returns> 圧縮に成功した場合はtrueです。ディレクトリ削除の失敗はビルド失敗として扱いません。 </returns>
+        private static bool TryArchiveBuildOutput(string buildDir, string profileName, string outputRoot)
+        {
+            LogDebug($"ビルド出力のZIP圧縮処理を開始: {profileName}");
+
+            if (!Directory.Exists(buildDir))
+            {
+                Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] 圧縮対象のビルド出力ディレクトリが見つかりません。ZIP化をスキップします。Path: {buildDir}");
+                return false;
+            }
+
+            string zipPath = Path.Combine(outputRoot, profileName + ".zip");
+
+            try
+            {
+                // ドメインリロード後の再試行等で同名ZIPが残っている場合は上書きする。
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
+
+                Debug.Log($"[{nameof(AutoBuildExecuter)}] ビルド出力をZIP圧縮しています: {buildDir} -> {zipPath}");
+
+                ZipFile.CreateFromDirectory(buildDir, zipPath, System.IO.Compression.CompressionLevel.Optimal, includeBaseDirectory: false);
+
+                long zipSizeBytes = new FileInfo(zipPath).Length;
+                Debug.Log($"[{nameof(AutoBuildExecuter)}] ZIP圧縮が完了しました: {zipPath} ({zipSizeBytes / 1024.0 / 1024.0:F2} MB)");
+            }
+            catch (Exception exception)
+            {
+                // ZIP化に失敗した場合、この時点の生データも中途半端なZIPも成果物として不完全なため、
+                // 呼び出し元でビルド失敗として扱わせる。生データは復旧の余地を残すため削除しない。
+                Debug.LogError($"[{nameof(AutoBuildExecuter)}] ビルド出力のZIP圧縮に失敗しました。Profile: {profileName}, Path: {buildDir}\n{exception}");
+                return false;
+            }
+
+            try
+            {
+                Directory.Delete(buildDir, true);
+                LogDebug($"圧縮済みのビルド出力ディレクトリを削除しました: {buildDir}");
+            }
+            catch (Exception exception)
+            {
+                // ZIP自体は作成済みで成果物としては確保できているため、削除失敗はビルド失敗として扱わない。
+                Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] 圧縮済みのビルド出力ディレクトリの削除に失敗しました。Path: {buildDir}\n{exception}");
+            }
+
+            return true;
         }
 
         /// <summary>
