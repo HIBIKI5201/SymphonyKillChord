@@ -48,17 +48,13 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         }
 
         /// <summary>
-        ///     編集対象が許可ルートの子孫であることをAPIで確認する。許可ルート自身は編集対象にしない。
+        ///     編集対象が許可ルート自身、またはその子孫であることをAPIで確認する。
         /// </summary>
         /// <param name="page">編集対象ページ。</param>
         /// <returns>一致した許可ルートID。</returns>
         internal async Task<string> AuthorizeEditAsync(NotionPageInfo page)
         {
-            if (_allowedRootPageIds.Contains(page.Id))
-            {
-                throw new WriterException(
-                    "書き込み許可ページ自身は編集できません。編集できるのはその子孫ページだけです。");
-            }
+            if (_allowedRootPageIds.Contains(page.Id)) { return page.Id; }
 
             string? allowedRootId = await FindAllowedAncestorAsync(page.Parent);
             if (allowedRootId == null)

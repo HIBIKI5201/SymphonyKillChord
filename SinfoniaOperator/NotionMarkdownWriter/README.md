@@ -7,9 +7,8 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 
 ## 安全のための制限
 
-- **書き込めるのは許可ページの配下だけ**です。`sinfonia-operator.env.json`の
-  `NOTION_WRITE_ALLOWED_ROOTS`に列挙したページIDの子孫以外は、送信前に拒否します。
-  許可ページ自身の本文は編集できません（作成先の親としてだけ指定できます）。
+- **書き込めるのは許可ページとその配下だけ**です。`sinfonia-operator.env.json`の
+  `NOTION_WRITE_ALLOWED_ROOTS`に列挙したページID自身か、その子孫以外は、送信前に拒否します。
 - **更新は部分置換（`update_content`）だけ**です。全文置換（`replace_content`）と
   子ページ削除（`allow_deleting_content`）は実装していません。
 - `--confirm`を付けるまで**何も送信しません**。既定は差分表示のみです。
