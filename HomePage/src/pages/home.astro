@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ScanlineOverlay from '../components/ScanlineOverlay.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import HeroSection from '../components/HeroSection.astro';
+import GameplayVideoSection from '../components/GameplayVideoSection.astro';
+import CharacterFileTeaser from '../components/CharacterFileTeaser.astro';
+import GameplayOrderTeaser from '../components/GameplayOrderTeaser.astro';
+import SkillDossierTeaser from '../components/SkillDossierTeaser.astro';
+import characters from '../data/characters.json';
+import gameplayFeatures from '../data/gameplayFeatures.json';
+import skills from '../data/skills.json';
+import symphonyImage from '../assets/images/characters/symphony立ち絵-ポーズ差分.png';
+---
+
+<Layout>
+	<ScanlineOverlay />
+	<main>
+		<HeroSection title="Symphony Kill Chord" />
+
+		<GameplayVideoSection src="/movies/DummyData.mp4" />
+
+		<CharacterFileTeaser
+			name={characters[0].name}
+			formalName={characters[0].formalName}
+			catchphrase="彼らの物語を知る"
+			image={symphonyImage}
+			href="/character"
+		/>
+		<GameplayOrderTeaser
+			title="ゲームプレイ"
+			orderNumber="047"
+			items={gameplayFeatures.map((feature) => feature.name)}
+			href="/gameplay"
+		/>
+		<SkillDossierTeaser
+			title="スキル"
+			code="SKILL-DOSSIER"
+			skills={skills.map((skill) => skill.name)}
+			href="/skill"
+		/>
+	</main>
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		max-width: 960px;
+		margin: 0 auto;
+		padding: 0 24px;
+	}
+</style>
