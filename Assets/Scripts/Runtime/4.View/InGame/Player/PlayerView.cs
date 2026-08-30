@@ -133,25 +133,6 @@ namespace KillChord.Runtime.View.InGame.Player
         private float _attackFacingRemaining = 0f;
         private Quaternion _attackFacingRotation;
 
-#if UNITY_EDITOR
-        [Header("Debug (Editor Only)")]
-        [SerializeField, Tooltip("（エディタ確認用）攻撃時に対象へ瞬時に向き直る挙動の有効/無効。ビルドでは常に有効。")]
-        private bool _enableAttackAutoFacing = true;
-#endif
-
-        /// <summary>
-        ///     攻撃時の自動向き直り（対象へのスナップ回転）が有効かどうか。
-        ///     エディタでのみ <see cref="_enableAttackAutoFacing"/> で切り替えられ、ビルドでは常に true。
-        /// </summary>
-        private bool IsAttackAutoFacingEnabled
-        {
-#if UNITY_EDITOR
-            get => _enableAttackAutoFacing;
-#else
-            get => true;
-#endif
-        }
-
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
 
@@ -561,7 +542,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
                 _attackWeaponView?.Play(resultBeatType);
 
-                if (PlayerAttackController.HasCurrentLockOnTarget && IsAttackAutoFacingEnabled)
+                if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
                     StartAttackRotate();
                 }
