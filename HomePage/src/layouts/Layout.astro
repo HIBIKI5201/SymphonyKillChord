@@ -58,6 +58,12 @@ const {
 
 	body :global(main) {
 		flex: 1 0 auto;
+		/*
+		 * flexアイテムのデフォルトmin-width:autoにより、内部のvideo要素等の
+		 * 固有サイズがmainの最小幅として伝播し、横スクロールを引き起こしていたため、
+		 * 明示的にリセットする。
+		 */
+		min-width: 0;
 	}
 
 	@media (max-width: 767px) {
