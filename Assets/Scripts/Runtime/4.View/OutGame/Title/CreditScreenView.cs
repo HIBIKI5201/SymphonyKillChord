@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         public override void Dispose()
         {
             UnregisterButtonCallbacks();
+            base.Dispose();
         }
 
         /// <summary>
@@ -56,6 +58,9 @@ namespace KillChord.Runtime.View.OutGame.Title
                 _memberScrollView.Add(CreateMemberElement(members[i]));
             }
         }
+
+        /// <inheritdoc />
+        protected override VisualElement CancelTargetElement => _backButton;
 
         private const string BACK_BUTTON_NAME = "BackButton";
         private const string BACK_GROUND_NAME = "BackGround";
@@ -98,7 +103,10 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void RegisterButtonCallbacks()
         {
-            _backButton.clicked += OnBackButtonClicked;
+            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
+
+            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
+            _backButton.ExcludeFromNavigation();
             _backGround.RegisterCallback<PointerDownEvent>(OnPointDownEvent);
         }
 
@@ -107,7 +115,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void UnregisterButtonCallbacks()
         {
-            _backButton.clicked -= OnBackButtonClicked;
+            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
             _backGround.UnregisterCallback<PointerDownEvent>(OnPointDownEvent);
         }
 
@@ -115,7 +123,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// <summary>
         ///     戻るボタンが押されたときの処理。
         /// </summary>
-        private void OnBackButtonClicked()
+        /// <param name="clickEvent"> クリックイベント。 </param>
+        private void OnBackButtonClicked(ClickEvent clickEvent)
         {
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }

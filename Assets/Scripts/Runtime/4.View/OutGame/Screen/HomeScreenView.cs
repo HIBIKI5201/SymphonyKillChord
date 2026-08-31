@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.OutGame.Navigation;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -51,6 +52,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillTreeButton.RegisterCallback<ClickEvent>(OnSkillTreeClicked);
             _skillBuildButton.RegisterCallback<ClickEvent>(OnSkillBuildClicked);
             _settingButton.RegisterCallback<ClickEvent>(OnSettingClicked);
+
+            // 処理を ClickEvent で受けているため、決定操作もクリックとして流し込む。
+            _stageSelectButton.EnableSubmitAsClick();
+            _skillTreeButton.EnableSubmitAsClick();
+            _skillBuildButton.EnableSubmitAsClick();
+            _settingButton.EnableSubmitAsClick();
         }
 
         /// <summary>
@@ -104,6 +111,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             OutGameUIEvent.OnShownSettingScreen?.Invoke();
         }
 
+
+        /// <inheritdoc />
+        protected override VisualElement InitialFocusElement => _stageSelectButton;
 
         private const string STAGE_SELECT_BUTTON_NAME = "StageSelect";
         private const string SKILL_TREE_BUTTON_NAME = "SkillTree";

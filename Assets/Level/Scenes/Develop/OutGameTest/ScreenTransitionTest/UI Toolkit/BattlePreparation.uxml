@@ -6,7 +6,7 @@
     <ui:VisualElement class="screen-visible battle-preparation-screen">
         <ui:Label text="戦闘準備" name="Title" class="title battle-preparation-title" style="display: none;"/>
         <ui:VisualElement name="CharacterContent" class="battle-preparation-character-content">
-            <ui:Image name="ChracterImage" class="battle-preparation-character-image" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/Character/CHS_Symphony.png?fileID=21300000&amp;guid=73534d0913c2bb14abf3fe8eb451058c&amp;type=3#CHS_Symphony&quot;);"/>
+            <ui:Image name="ChracterImage" class="battle-preparation-character-image" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/Character/CHS_Symphony.png&quot;);"/>
         </ui:VisualElement>
         <ui:VisualElement name="PreparationContent" class="battle-preparation-content">
             <ui:VisualElement name="PreparationPanel" class="battle-preparation-panel">

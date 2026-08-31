@@ -1,0 +1,70 @@
+---
+interface FooterLink {
+	label: string;
+	href: string;
+}
+
+interface Props {
+	links?: FooterLink[];
+	copyright?: string;
+}
+
+const {
+	links = [{ label: 'プライバシーポリシー', href: '/policy' }],
+	copyright = '&copy; Symphony Kill Chord',
+} = Astro.props;
+---
+
+<footer class="site-footer">
+	<nav class="footer-links">
+		{
+			links.map((link, index) => (
+				<>
+					{index > 0 && <span class="link-divider" aria-hidden="true">◈</span>}
+					<a href={link.href}>{link.label}</a>
+				</>
+			))
+		}
+	</nav>
+
+	<p class="copyright" set:html={copyright} />
+</footer>
+
+<style>
+	.site-footer {
+		flex-shrink: 0;
+		padding: 64px 24px 48px;
+		background: var(--color-bg-alt);
+		border-top: 1px solid var(--color-surface-border);
+		text-align: center;
+		color: var(--color-text-muted);
+		font-family: var(--font-body);
+	}
+
+	.footer-links {
+		margin: 0 0 24px;
+		font-family: var(--font-mono);
+		font-size: 12px;
+	}
+
+	.footer-links a {
+		color: var(--color-text-muted);
+		text-decoration: none;
+	}
+
+	.footer-links a:hover {
+		color: var(--color-signal);
+	}
+
+	.link-divider {
+		margin: 0 12px;
+		color: var(--color-surface-border);
+	}
+
+	.copyright {
+		margin: 0;
+		font-family: var(--font-mono);
+		font-size: 12px;
+		color: var(--color-text-muted);
+	}
+</style>

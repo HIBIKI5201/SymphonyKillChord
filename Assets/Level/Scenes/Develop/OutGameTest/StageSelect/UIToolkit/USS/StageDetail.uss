@@ -18,3 +18,29 @@
 .mission-check-mission-achieved {
     background-color: rgb(255, 227, 93);
 }
+
+/*
+    出撃 / 閉じるボタン。
+    枠線色は UXML のインライン指定から移設した。
+    インラインスタイルは USS より優先されるため、そのままでは
+    OutGameNavigation.uss のフォーカスリングが上書きされて見えなかった。
+*/
+.stage-detail-button {
+    border-left-color: rgba(149, 149, 149, 0);
+    border-right-color: rgba(149, 149, 149, 0);
+    border-top-color: rgba(149, 149, 149, 0);
+    border-bottom-color: rgba(149, 149, 149, 0);
+    scale: 1 1;
+    transition-property: scale, border-color;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
+}
+
+.stage-detail-button:hover,
+.stage-detail-button:focus {
+    scale: 1.2 1.2;
+}
+
+.stage-detail-button:active {
+    scale: 0.9 0.9;
+}

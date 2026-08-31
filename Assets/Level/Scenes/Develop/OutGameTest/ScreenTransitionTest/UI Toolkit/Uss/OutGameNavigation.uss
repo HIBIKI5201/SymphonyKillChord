@@ -1,0 +1,41 @@
+/*
+    コントローラー操作のフォーカス表示。
+    UINavigationExtensions.MakeNavigable() が付与する navigable クラスを対象にする。
+    マウス操作時は :focus が付かないため、見た目は従来どおり変わらない。
+
+    拡大縮小(選択中1.1倍 / 押下中0.9倍)は各要素のUSS側で指定している。
+    scale は加算されず「最も詳細度の高い1つ」が採用されるため、
+    ここでは scale を書かない。
+*/
+
+.navigable:focus {
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(255, 220, 90);
+    border-right-color: rgb(255, 220, 90);
+    border-top-color: rgb(255, 220, 90);
+    border-bottom-color: rgb(255, 220, 90);
+}
+
+/* UI Toolkit 既定の点線フォーカスリングは使わない。 */
+.navigable:focus {
+    --unity-focus-outline-color: rgba(0, 0, 0, 0);
+}
+
+/* 操作できないノードはフォーカス表示も出さない。 */
+.navigable:disabled:focus {
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+}
+
+/*
+    改造画面で「持ち上げ」中のスキル。
+    SkillElementControllerEquipController が is-carried を付与する。
+*/
+.is-carried {
+    opacity: 0.6;
+}

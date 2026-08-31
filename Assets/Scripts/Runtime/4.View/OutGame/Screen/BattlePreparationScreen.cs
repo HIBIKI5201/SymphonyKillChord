@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.Adaptor.OutGame.BattlePreparation;
 using R3;
 using System;
@@ -92,6 +93,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
             _startButton.RegisterCallback<ClickEvent>(OnStartButtonClicked);
             _skillBuildButton.RegisterCallback<ClickEvent>(OnSkillBuildButtonClicked);
+
+            // 処理を ClickEvent で受けているため、決定操作もクリックとして流し込む。
+            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
+            _backButton.ExcludeFromNavigation();
+            _startButton.EnableSubmitAsClick();
+            _skillBuildButton.EnableSubmitAsClick();
         }
 
         /// <summary>
@@ -260,6 +267,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string EMPTY_SLOT_SYMBOL = "—";
         private const string SKILL_TYPE_HEADING = "スキルの種類　：";
         private const string SKILL_EFFECT_HEADING = "スキル効果";
+
+        /// <inheritdoc />
+        protected override VisualElement InitialFocusElement => _startButton;
+
+        /// <inheritdoc />
+        protected override VisualElement CancelTargetElement => _backButton;
 
         private readonly Button _backButton;
         private readonly Button _startButton;
