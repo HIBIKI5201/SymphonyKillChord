@@ -1,5 +1,6 @@
 ---
 import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
 
 interface Props {
 	name: string;
@@ -10,6 +11,9 @@ interface Props {
 }
 
 const { name, formalName, catchphrase, image, href } = Astro.props;
+
+const photoAvif = await getImage({ src: image, format: 'avif', width: 640, quality: 70 });
+const photoWebp = await getImage({ src: image, format: 'webp', width: 640, quality: 75 });
 ---
 
 <section id="character-file">
@@ -17,7 +21,11 @@ const { name, formalName, catchphrase, image, href } = Astro.props;
 		<span class="stamp">機密</span>
 
 		<div class="photo">
-			<img src={image.src} alt={name} />
+			<picture>
+				<source srcset={photoAvif.src} type="image/avif" />
+				<source srcset={photoWebp.src} type="image/webp" />
+				<img src={photoWebp.src} alt={name} />
+			</picture>
 			<span class="corner corner-tl"></span>
 			<span class="corner corner-tr"></span>
 			<span class="corner corner-bl"></span>
@@ -98,6 +106,10 @@ const { name, formalName, catchphrase, image, href } = Astro.props;
 		aspect-ratio: 3 / 4;
 		overflow: hidden;
 		background: #b9ab7c;
+	}
+
+	.photo picture {
+		display: contents;
 	}
 
 	.photo img {

@@ -1,5 +1,6 @@
 ---
 import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
 
 interface Props {
 	id: string;
@@ -13,12 +14,15 @@ interface Props {
 }
 
 const { id, name, formalName, catchphrase, description, cv, image, reverse = false } = Astro.props;
+
+const portraitAvif = image ? await getImage({ src: image, format: 'avif', width: 520, quality: 70 }) : null;
+const portraitWebp = image ? await getImage({ src: image, format: 'webp', width: 520, quality: 75 }) : null;
 ---
 
 <section class="character-section" id={id} data-reverse={reverse}>
 	{
-		image ? (
-			<div class="bg-image" style={{ backgroundImage: `url("${image.src}")` }} aria-hidden="true" />
+		portraitWebp ? (
+			<div class="bg-image" style={{ backgroundImage: `url("${portraitWebp.src}")` }} aria-hidden="true" />
 		) : (
 			<p class="bg-name" aria-hidden="true">
 				{name}
@@ -27,7 +31,15 @@ const { id, name, formalName, catchphrase, description, cv, image, reverse = fal
 	}
 
 	<div class="visual" data-has-image={Boolean(image)}>
-		{image ? <img src={image.src} alt={name} /> : <span class="no-image">NO IMAGE</span>}
+		{portraitWebp && portraitAvif ? (
+			<picture>
+				<source srcset={portraitAvif.src} type="image/avif" />
+				<source srcset={portraitWebp.src} type="image/webp" />
+				<img src={portraitWebp.src} alt={name} />
+			</picture>
+		) : (
+			<span class="no-image">NO IMAGE</span>
+		)}
 	</div>
 
 	<div class="info">
@@ -111,9 +123,13 @@ const { id, name, formalName, catchphrase, description, cv, image, reverse = fal
 
 	.visual[data-has-image='true'] {
 		width: min(260px, 28vw);
-		aspect-ratio: 2670 / 5576;
+		aspect-ratio: 1342 / 5046;
 		border: none;
 		background: none;
+	}
+
+	.visual picture {
+		display: contents;
 	}
 
 	.visual img {
