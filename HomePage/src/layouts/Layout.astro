@@ -48,6 +48,12 @@ const {
 		flex-direction: column;
 		min-height: 100svh;
 		padding-left: var(--side-nav-width);
+		/*
+		 * iOS SafariにはSafari独自のバグ「mix-blend-modeを持つ要素と同居する
+		 * position:fixed要素(ヘッダー等)がレンダリングされない」不具合があるため、
+		 * mix-blend-modeの合成範囲をbody内に明示的に分離する。
+		 */
+		isolation: isolate;
 	}
 
 	body :global(main) {
