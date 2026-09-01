@@ -1,0 +1,60 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<section id="hero">
+	<div class="backdrop"></div>
+
+	<h1 class="visually-hidden">{title}</h1>
+</section>
+
+<style>
+	#hero {
+		position: relative;
+		aspect-ratio: 2000 / 850;
+		overflow: hidden;
+		margin: 0 -24px;
+	}
+
+	.backdrop {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		background-color: var(--color-bg);
+		background-image: linear-gradient(180deg, rgba(10, 13, 11, 0) 0%, rgba(10, 13, 11, 0.1) 70%, rgba(10, 13, 11, 0.85) 100%),
+			url('../assets/images/hero/KeyVisual_PC.png');
+		background-size: contain;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	@media (max-width: 767px) {
+		#hero {
+			aspect-ratio: auto;
+			min-height: calc(100svh - var(--header-height-mobile));
+		}
+
+		.backdrop {
+			background-image: linear-gradient(180deg, rgba(10, 13, 11, 0) 0%, rgba(10, 13, 11, 0.25) 58%, rgba(10, 13, 11, 0.95) 82%),
+				url('../assets/images/hero/KeyVisual_Mobile.png');
+			background-size: cover;
+			background-position: center;
+		}
+	}
+</style>

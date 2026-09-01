@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using UnityEngine.UIElements;
@@ -25,6 +26,9 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
             _root.AddToClassList(CLASS_SELECT_SOUND);
             _root.RegisterCallback<ClickEvent>(OnNodeClicked);
+
+            // 素の VisualElement はフォーカスを持てないため、コントローラー操作用に有効化する。
+            _root.EnableSubmitAsClick();
         }
 
         /// <summary>
@@ -62,6 +66,9 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         {
             _root.UnregisterCallback<ClickEvent>(OnNodeClicked);
         }
+
+        /// <summary> このノードの要素を取得します。初期フォーカスの設定に使用します。 </summary>
+        public VisualElement RootElement => _root;
 
         /// <summary>
         ///     ノードがクリックされたときの処理。

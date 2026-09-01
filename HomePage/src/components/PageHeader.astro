@@ -1,0 +1,52 @@
+---
+import ScanlineOverlay from './ScanlineOverlay.astro';
+
+interface Props {
+	eyebrow: string;
+	title: string;
+	tight?: boolean;
+	scanline?: boolean;
+}
+
+const { eyebrow, title, tight = false, scanline = false } = Astro.props;
+---
+
+<section id="page-header" data-tight={tight}>
+	<p class="eyebrow">{eyebrow}</p>
+	{
+		scanline ? (
+			<div id="title-wrap">
+				<h1>{title}</h1>
+				<ScanlineOverlay contained />
+			</div>
+		) : (
+			<h1>{title}</h1>
+		)
+	}
+</section>
+
+<style>
+	#page-header {
+		padding: 64px 0 48px;
+		text-align: center;
+	}
+
+	#page-header[data-tight='true'] {
+		padding-bottom: 0;
+	}
+
+	#title-wrap {
+		position: relative;
+		display: inline-block;
+		overflow: hidden;
+	}
+
+	h1 {
+		margin: 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(1.75rem, 5vw, 2.5rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+</style>

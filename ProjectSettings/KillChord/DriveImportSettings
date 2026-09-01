@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 036788cd86b83fd4690819241763c0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Editor::AssetManagement.DriveImportSettings
-  basePath: 
   excludeFolderNames:
   - ' Document'
   - Document

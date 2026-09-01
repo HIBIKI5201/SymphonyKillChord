@@ -1,0 +1,26 @@
+{
+  "name": "Progression, Research and Loadout",
+  "description": "ステージ解放、報酬ポイント、研究ツリー、スキル獲得・レベル、装備スロットと末尾ノーツ競合、出撃編成を所有する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/OutGame/(StageSelect|SkillTree|SkillBuild|Sortie)/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/Player/(SkillRepository|SkillTemplateAsset)"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/2\\.Application/Persistent/Savedata/StageProgressSaveDataService\\.cs$"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-03-kill-chord-skills-and-build",
+    "spec/feature/game-spec.md#gs-06-out-game-and-progression"
+  ],
+  "rationale": "skill-progression と sortie-stageselect の編成責務を統合し、画面遷移は Narrativeへ分離する。"
+}

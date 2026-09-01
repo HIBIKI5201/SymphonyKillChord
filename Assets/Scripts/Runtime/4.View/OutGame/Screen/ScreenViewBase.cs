@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.OutGame.Navigation;
 using LitMotion;
 using System;
 using System.Threading;
@@ -22,6 +23,21 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             _brocker = CreateBrocker();
             _currentOpacity = RootElement.resolvedStyle.opacity;
+
+            RootElement.RegisterCallback<NavigationCancelEvent>(HandleNavigationCancelHandler);
+        }
+
+        /// <summary> この画面内で現在フォーカスされている要素を取得します。 </summary>
+        public VisualElement FocusedElement
+        {
+            get
+            {
+                VisualElement focusedElement =
+                    RootElement.panel?.focusController?.focusedElement as VisualElement;
+                return focusedElement != null && RootElement.Contains(focusedElement)
+                    ? focusedElement
+                    : null;
+            }
         }
 
         /// <summary>
@@ -41,7 +57,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             _opacityMotionHandle = LMotion.Create(_currentOpacity, 1f, FADE_DURATION)
                 .WithEase(FADE_IN_EASE)
-                .WithOnComplete(RemoveBrocker)
+                .WithOnComplete(HandleShowCompleted)
                 .Bind(this, static (opacity, state) => state.SetOpacity(opacity));
 
             return _opacityMotionHandle.ToValueTask(cancellationToken);
@@ -90,6 +106,75 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             _opacityMotionHandle.TryCancel();
             _brocker.RemoveFromHierarchy();
+            RootElement.UnregisterCallback<NavigationCancelEvent>(HandleNavigationCancelHandler);
+        }
+
+        /// <summary>
+        ///     初期フォーカス先を外部から指定します。
+        ///     <para>
+        ///         ノードのように実行時に生成される要素へフォーカスさせる場合に使用します。
+        ///         指定した場合は <see cref="InitialFocusElement"/> より優先されます。
+        ///     </para>
+        /// </summary>
+        /// <param name="element"> 次回表示時のフォーカス先です。nullで指定を解除します。 </param>
+        public void SetInitialFocusElement(VisualElement element)
+        {
+            _explicitInitialFocusElement = element;
+        }
+
+        /// <summary>
+        ///     コントローラー操作の起点となる要素を返します。
+        ///     <para>
+        ///         画面の表示完了時にこの要素へフォーカスが移ります。
+        ///         nullを返した場合はフォーカス移動を行いません。
+        ///     </para>
+        /// </summary>
+        protected virtual VisualElement InitialFocusElement => null;
+
+        /// <summary>
+        ///     コントローラーのキャンセル操作で作動させる要素を返します。
+        ///     <para>
+        ///         通常は「戻る」ボタンを返します。キャンセル操作を受けると、
+        ///         その要素をクリックしたときと同じ経路を通ります。
+        ///         nullを返した場合はキャンセル操作を処理しません。
+        ///     </para>
+        /// </summary>
+        protected virtual VisualElement CancelTargetElement => null;
+
+        /// <summary>
+        ///     フェードイン完了後に呼び出され、ブロッカーを取り除いて初期フォーカスを設定します。
+        /// </summary>
+        private void HandleShowCompleted()
+        {
+            RemoveBrocker();
+            VisualElement focusElement = _explicitInitialFocusElement ?? InitialFocusElement;
+            _explicitInitialFocusElement = null;
+            focusElement?.FocusDeferred();
+        }
+
+        /// <summary>
+        ///     キャンセル操作を「戻る」相当の動作へ変換します。
+        /// </summary>
+        /// <param name="navigationEvent"> ナビゲーションキャンセルイベントです。 </param>
+        private void HandleNavigationCancelHandler(NavigationCancelEvent navigationEvent)
+        {
+            VisualElement cancelTarget = CancelTargetElement;
+
+            // 処理しない画面ではイベントを消費せず、親側の処理に委ねる。
+            if (cancelTarget == null || !cancelTarget.enabledInHierarchy)
+            {
+                return;
+            }
+
+            if (cancelTarget.resolvedStyle.display == DisplayStyle.None)
+            {
+                return;
+            }
+
+            using ClickEvent clickEvent = ClickEvent.GetPooled();
+            clickEvent.target = cancelTarget;
+            cancelTarget.SendEvent(clickEvent);
+            navigationEvent.StopPropagation();
         }
 
         /// <summary>
@@ -159,6 +244,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> フェード中の入力を遮断するブロッカー要素。 </summary>
         private readonly VisualElement _brocker;
+
+        /// <summary> 外部から指定された初期フォーカス先。未指定の場合はnull。 </summary>
+        private VisualElement _explicitInitialFocusElement;
 
         private MotionHandle _opacityMotionHandle;
         /// <summary> 直近に書き込んだ opacity。フェード再開時の始点として使用します。 </summary>

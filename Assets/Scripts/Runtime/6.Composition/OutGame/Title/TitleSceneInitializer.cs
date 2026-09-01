@@ -16,6 +16,7 @@ using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
+using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -186,6 +187,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
+
+            // コントローラーのOptionsボタンからオプション画面を開けるようにする。
+            if (ServiceLocator.TryGetInstance(out PlayerInputView playerInputView))
+            {
+                _titleSceneView.BindOptionInput(playerInputView);
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"{nameof(TitleSceneInitializer)}: PlayerInputView が ServiceLocator に登録されていません。"
+                    + " Optionsボタンでのオプション表示は無効になります。");
+            }
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
@@ -259,6 +272,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             RegisterUIEventCallbacks();
+            _titleScreenViewRegistry.ResetFocusHistory();
             _screenController.ShowTitle();
             return true;
         }
@@ -391,6 +405,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void HandleTitleScreenShown()
         {
+            _titleScreenViewRegistry.ResetFocusHistory();
             _screenController.ShowTitle();
         }
 
