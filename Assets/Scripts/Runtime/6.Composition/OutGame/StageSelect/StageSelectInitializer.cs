@@ -50,6 +50,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private const string BATTLE_NODE_USS_CLASS = "stage-node--boss";
         /// <summary> ステージノードラベルのUSSクラス名。 </summary>
         private const string NODE_LABEL_USS_CLASS = "stage-node__label";
+        /// <summary> クリックしたノードに残すフレームのUSSクラス名。 </summary>
+        private const string FOCUS_FRAME_USS_CLASS = "stage-node-focus-frame";
+        /// <summary> フレーム要素名。 </summary>
+        private const string FOCUS_FRAME_NAME = "StageNodeFocusFrame";
         /// <summary> 作戦マップScrollView要素名。 </summary>
         private const string STAGE_MAP_SCROLL_VIEW_NAME = "StageNodeRoot";
         /// <summary> 作戦マップ内容要素名。 </summary>
@@ -110,6 +114,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private VisualElement _stageMapContent;
         private VisualElement _stageMapCanvas;
         private float _stageMapCanvasHeight;
+        private VisualElement _stageNodeFocusFrame;
+        private bool _isFocusFrameLocked;
         private bool _isSubscribed;
 
         /// <summary>
@@ -233,6 +239,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleStageDetailClosed()
         {
+            _isFocusFrameLocked = false;
             _detailScreenView.Hide();
         }
 
@@ -241,6 +248,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleScreenClosed()
         {
+            _isFocusFrameLocked = false;
             _detailScreenView.Hide();
         }
 
@@ -506,6 +514,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageMapContent = null;
             _stageMapCanvas = null;
             _stageMapCanvasHeight = 0.0f;
+            _stageNodeFocusFrame = null;
+            _isFocusFrameLocked = false;
             _battleSortieSelectionService = null;
             _isInitialized = false;
         }
@@ -819,7 +829,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     ステージごとのノード要素を生成する。
+        ///     ステージごとのノード要素と、クリックしたノードに残すフレームを生成する。
+        ///     フレームは表示対象ノードの子として付け替え、ノードの scale アニメーションに追従させる。
         /// </summary>
         /// <param name="mapContent"> ノードを格納する要素。</param>
         /// <param name="nodeCenters"> ステージID別のノード中心座標。</param>
@@ -829,6 +840,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             Dictionary<StageId, Vector2> nodeCenters,
             Dictionary<StageId, VisualElement> nodeElementMap)
         {
+            _stageNodeFocusFrame = new VisualElement
+            {
+                name = FOCUS_FRAME_NAME,
+                pickingMode = PickingMode.Ignore,
+            };
+            _stageNodeFocusFrame.AddToClassList(FOCUS_FRAME_USS_CLASS);
+            _isFocusFrameLocked = false;
+
             for (int i = 0; i < _stageTree.Nodes.Count; i++)
             {
                 StageNode node = _stageTree.Nodes[i];
@@ -850,6 +869,20 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 nodeElement.style.width = NODE_SIZE;
                 nodeElement.style.height = NODE_SIZE;
 
+                // ホバー中はフレームをそのノードの子へ付け替える。クリック固定中は動かさない。
+                VisualElement focusTargetNode = nodeElement;
+                nodeElement.RegisterCallback<PointerEnterEvent>(_ =>
+                {
+                    if (_isFocusFrameLocked) { return; }
+                    AttachFocusFrameTo(focusTargetNode);
+                });
+                // クリックしたノードへフレームを固定する。詳細画面を閉じるまで解除されない。
+                nodeElement.RegisterCallback<ClickEvent>(_ =>
+                {
+                    AttachFocusFrameTo(focusTargetNode);
+                    _isFocusFrameLocked = true;
+                });
+
                 var label = new Label(node.Definition.StageName)
                 {
                     pickingMode = PickingMode.Ignore,
@@ -859,6 +892,20 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 mapContent.Add(nodeElement);
                 nodeElementMap.Add(node.Id, nodeElement);
             }
+        }
+
+        /// <summary>
+        ///     フレームを指定ノードの子へ付け替えて表示する。
+        ///     VisualElement は親を1つしか持てないため、元の親からは自動で外れる。
+        ///     Insert(0) でラベルより背面へ入れ、ラベルの視認性を保つ。
+        /// </summary>
+        /// <param name="node"> フレームを乗せる対象ノード。</param>
+        private void AttachFocusFrameTo(VisualElement node)
+        {
+            if (_stageNodeFocusFrame == null || node == null) { return; }
+
+            node.Insert(0, _stageNodeFocusFrame);
+            _stageNodeFocusFrame.style.display = DisplayStyle.Flex;
         }
 
         /// <summary>

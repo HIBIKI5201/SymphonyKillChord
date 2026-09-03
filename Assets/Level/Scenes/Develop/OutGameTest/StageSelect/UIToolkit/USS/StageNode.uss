@@ -69,13 +69,24 @@
     background-image: none;
 }
 
-.stage-node:hover,
+.stage-node:hover {
+    scale: 1.2 1.2;
+}
+
+.stage-node:focus,
 .stage-node:focus {
     scale: 1.2 1.2;
-    background-image: url("project://database/Assets/drive-download-20260903T081243Z-1-001/UI_StageSelect_Flame.png?fileID=2800000&guid=9e77a7c740b359a4c9ffbfc6142b0821&type=3#UI_StageSelect_Flame");
 }
 
 .stage-node:active {
     scale: 0.9 0.9;
-    background-image: url("project://database/Assets/drive-download-20260903T081243Z-1-001/UI_StageSelect_Flame.png?fileID=2800000&guid=9e77a7c740b359a4c9ffbfc6142b0821&type=3#UI_StageSelect_Flame");
+}
+
+.stage-node-focus-frame {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    display: none;
+    background-image: url("project://database/Assets/Arts/TestUI/UI_StageSelect_Flame.png?fileID=2800000&guid=9e77a7c740b359a4c9ffbfc6142b0821&type=3#UI_StageSelect_Flame");
+    -unity-background-scale-mode: scale-to-fit;
 }
