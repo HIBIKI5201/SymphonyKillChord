@@ -105,6 +105,11 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 		transition:
 			width 0.25s ease,
 			background 0.25s ease;
+		/*
+		 * 環境によってはwidthのtransitionがbackdrop-filterとの組み合わせで
+		 * 描画更新されない事例があったため、複合レイヤーの生成を明示的にヒントする。
+		 */
+		will-change: width;
 	}
 
 	.site-header:hover,
