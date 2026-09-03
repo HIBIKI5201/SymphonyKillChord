@@ -118,22 +118,24 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 	}
 
 	.brand {
-		flex-shrink: 0;
+		/*
+		 * ヘッダーの通常フロー(flex)から外し、常に一定の位置・サイズで固定する。
+		 * ホバー展開時の変化はnav-labelのフェードインのみが担う。
+		 */
+		position: absolute;
+		top: 20px;
+		/*
+		 * left:50%だとヘッダー自体の幅(ホバーで72px→200pxに変化)が基準になり、
+		 * 展開時にロゴの中心位置がズレてしまうため、閉時の固定幅を基準値にする。
+		 */
+		left: calc(var(--side-nav-width) / 2);
+		transform: translateX(-50%);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		width: 44px;
 		height: 44px;
 		text-decoration: none;
-		transition:
-			width 0.25s ease,
-			height 0.25s ease;
-	}
-
-	.site-header:hover .brand,
-	.site-header:focus-within .brand {
-		width: 140px;
-		height: 140px;
 	}
 
 	.brand picture {
@@ -150,6 +152,8 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 		display: flex;
 		flex-direction: column;
 		width: 100%;
+		/* ロゴのtop(20px)+固定サイズ(44px)+ロゴ下のgap(16px)ぶんを確保する */
+		margin-top: 80px;
 	}
 
 	.nav-link {
@@ -261,6 +265,8 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 		.brand,
 		.site-header:hover .brand,
 		.site-header:focus-within .brand {
+			position: static;
+			transform: none;
 			width: auto;
 			height: 52px;
 		}
