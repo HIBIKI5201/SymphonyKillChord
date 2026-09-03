@@ -77,7 +77,8 @@ const total = String(features.length).padStart(2, '0');
 
 		let index = 0;
 
-		const clamp = (value: number) => Math.max(0, Math.min(slides.length - 1, value));
+		// 最後の次は最初、最初の前は最後に戻るループ方式(負値でも正しく巡回するよう剰余の前に長さを足す)
+		const wrap = (value: number) => (value + slides.length) % slides.length;
 
 		function render() {
 			if (track) {
@@ -90,12 +91,10 @@ const total = String(features.length).padStart(2, '0');
 			if (currentLabel) {
 				currentLabel.textContent = String(index + 1).padStart(2, '0');
 			}
-			if (prevButton) prevButton.disabled = index === 0;
-			if (nextButton) nextButton.disabled = index === slides.length - 1;
 		}
 
 		function goTo(next: number) {
-			index = clamp(next);
+			index = wrap(next);
 			render();
 		}
 
