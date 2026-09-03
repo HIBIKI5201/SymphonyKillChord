@@ -10,11 +10,8 @@ interface Props {
 }
 
 const {
-	links = [
-		{ label: 'お問い合わせ', href: '#' },
-		{ label: 'プライバシーポリシー', href: '/policy' },
-	],
-	copyright = '&copy; Symphony Kill Chord',
+	links = [{ label: 'プライバシーポリシー', href: `${import.meta.env.BASE_URL}policy` }],
+	copyright = '&copy; Sinfonia Studio',
 } = Astro.props;
 ---
 
@@ -35,6 +32,7 @@ const {
 
 <style>
 	.site-footer {
+		flex-shrink: 0;
 		padding: 64px 24px 48px;
 		background: var(--color-bg-alt);
 		border-top: 1px solid var(--color-surface-border);

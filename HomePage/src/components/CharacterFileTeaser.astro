@@ -1,0 +1,204 @@
+---
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+
+interface Props {
+	name: string;
+	formalName: string;
+	catchphrase: string;
+	image: ImageMetadata;
+	href: string;
+}
+
+const { name, formalName, catchphrase, image, href } = Astro.props;
+
+const photoAvif = await getImage({ src: image, format: 'avif', width: 640, quality: 70 });
+const photoWebp = await getImage({ src: image, format: 'webp', width: 640, quality: 75 });
+---
+
+<section id="character-file">
+	<a class="folder" href={href}>
+		<span class="stamp">機密</span>
+
+		<div class="photo">
+			<picture>
+				<source srcset={photoAvif.src} type="image/avif" />
+				<source srcset={photoWebp.src} type="image/webp" />
+				<img src={photoWebp.src} alt={name} />
+			</picture>
+			<span class="corner corner-tl"></span>
+			<span class="corner corner-tr"></span>
+			<span class="corner corner-bl"></span>
+			<span class="corner corner-br"></span>
+		</div>
+
+		<dl class="fields">
+			<div class="field">
+				<dt>ID</dt>
+				<dd>{formalName}</dd>
+			</div>
+			<div class="field">
+				<dt>NAME</dt>
+				<dd>{name}</dd>
+			</div>
+		</dl>
+
+		<p class="catch">{catchphrase}</p>
+	</a>
+</section>
+
+<style>
+	/*
+	 * ソ連の機密人事ファイル(личное дело)を模した「紙」の質感を出すため、
+	 * ダークテーマのトークン(--color-*)とは別に、このフォルダ専用のローカル変数を定義する。
+	 */
+	#character-file {
+		--paper-bg: #d9cca4;
+		--paper-bg-alt: #cfc093;
+		--paper-ink: #2c2418;
+		--paper-ink-muted: #6b5f45;
+		--paper-border: #8f7f57;
+
+		padding: 56px 24px;
+		text-align: center;
+		background: var(--color-bg);
+		margin: 0 -24px;
+	}
+
+	.folder {
+		display: inline-block;
+		width: min(320px, 84vw);
+		padding: 28px 24px 32px;
+		background: linear-gradient(180deg, var(--paper-bg) 0%, var(--paper-bg-alt) 100%);
+		border: 1px solid var(--paper-border);
+		box-shadow: 0 18px 32px rgba(0, 0, 0, 0.45);
+		text-decoration: none;
+		transform: rotate(-4deg);
+		transition:
+			transform 0.3s ease,
+			box-shadow 0.3s ease;
+		position: relative;
+	}
+
+	.folder:hover {
+		transform: rotate(0deg) translateY(-6px);
+		box-shadow: 0 24px 40px rgba(0, 0, 0, 0.55);
+	}
+
+	.stamp {
+		position: absolute;
+		top: 16px;
+		right: 12px;
+		padding: 4px 10px;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--color-warning);
+		border: 2px solid var(--color-warning);
+		transform: rotate(8deg);
+		opacity: 0.85;
+	}
+
+	.photo {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 3 / 4;
+		overflow: hidden;
+		background: #b9ab7c;
+	}
+
+	.photo picture {
+		display: contents;
+	}
+
+	.photo img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: top center;
+		filter: grayscale(1) contrast(1.15) brightness(0.95);
+	}
+
+	.corner {
+		position: absolute;
+		width: 14px;
+		height: 14px;
+		border: 2px solid var(--paper-ink);
+		opacity: 0.7;
+	}
+
+	.corner-tl {
+		top: 4px;
+		left: 4px;
+		border-right: none;
+		border-bottom: none;
+	}
+
+	.corner-tr {
+		top: 4px;
+		right: 4px;
+		border-left: none;
+		border-bottom: none;
+	}
+
+	.corner-bl {
+		bottom: 4px;
+		left: 4px;
+		border-right: none;
+		border-top: none;
+	}
+
+	.corner-br {
+		bottom: 4px;
+		right: 4px;
+		border-left: none;
+		border-top: none;
+	}
+
+	.fields {
+		margin: 20px 0 0;
+		padding-top: 12px;
+		border-top: 1px dashed var(--paper-border);
+		text-align: left;
+	}
+
+	.field {
+		display: flex;
+		gap: 8px;
+		margin: 0 0 6px;
+	}
+
+	.field:last-child {
+		margin-bottom: 0;
+	}
+
+	.field dt {
+		flex: 0 0 auto;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 11px;
+		color: var(--paper-ink-muted);
+	}
+
+	.field dd {
+		margin: 0;
+		font-family: var(--font-mono);
+		font-size: 13px;
+		color: var(--paper-ink);
+	}
+
+	.catch {
+		margin: 16px 0 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: 1rem;
+		color: var(--paper-ink);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.folder {
+			transition: none;
+		}
+	}
+</style>

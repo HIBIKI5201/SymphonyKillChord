@@ -1,0 +1,168 @@
+---
+interface Props {
+	title: string;
+	orderNumber: string;
+	items: string[];
+	href: string;
+}
+
+const { title, orderNumber, items, href } = Astro.props;
+---
+
+<section id="gameplay-order">
+	<a class="order" href={href}>
+		<span class="tape tape-left" aria-hidden="true"></span>
+		<span class="tape tape-right" aria-hidden="true"></span>
+		<span class="stamp">至急</span>
+
+		<div class="order-header">
+			<span class="order-label">ОПЕРАЦИЯ</span>
+			<span class="order-number">№{orderNumber}</span>
+		</div>
+
+		<h2 class="title">{title}</h2>
+
+		<ul class="items">
+			{items.map((item) => <li>{item}</li>)}
+		</ul>
+	</a>
+</section>
+
+<style>
+	/*
+	 * 作戦指令書を模した紙質のため、キャラファイルとは別トーンのローカル変数を定義する。
+	 */
+	#gameplay-order {
+		--order-bg: #4f4d34;
+		--order-bg-alt: #43412b;
+		--order-ink: #e9e4cf;
+		--order-ink-muted: #b3ac8c;
+		--order-border: #6c6947;
+
+		padding: 56px 24px;
+		text-align: center;
+		background: var(--color-bg);
+		margin: 0 -24px;
+	}
+
+	.order {
+		position: relative;
+		display: inline-block;
+		width: min(560px, 88vw);
+		padding: 32px 36px;
+		text-align: left;
+		background:
+			repeating-linear-gradient(0deg, var(--color-grid-line) 0, var(--color-grid-line) 1px, transparent 1px, transparent 32px),
+			repeating-linear-gradient(90deg, var(--color-grid-line) 0, var(--color-grid-line) 1px, transparent 1px, transparent 32px),
+			linear-gradient(180deg, var(--order-bg) 0%, var(--order-bg-alt) 100%);
+		border: 1px solid var(--order-border);
+		box-shadow: 0 18px 32px rgba(0, 0, 0, 0.45);
+		text-decoration: none;
+		transition:
+			transform 0.3s ease,
+			box-shadow 0.3s ease;
+	}
+
+	.order:hover {
+		transform: translateY(-6px);
+		box-shadow: 0 24px 40px rgba(0, 0, 0, 0.55);
+	}
+
+	.tape {
+		position: absolute;
+		top: -14px;
+		width: 64px;
+		height: 24px;
+		background: rgba(230, 236, 227, 0.28);
+		border: 1px solid rgba(230, 236, 227, 0.4);
+	}
+
+	.tape-left {
+		left: 32px;
+		transform: rotate(-6deg);
+	}
+
+	.tape-right {
+		right: 32px;
+		transform: rotate(5deg);
+	}
+
+	.stamp {
+		position: absolute;
+		top: 24px;
+		right: 28px;
+		padding: 4px 10px;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--color-warning);
+		border: 2px solid var(--color-warning);
+		transform: rotate(6deg);
+		opacity: 0.85;
+	}
+
+	.order-header {
+		display: flex;
+		align-items: baseline;
+		gap: 12px;
+		padding-bottom: 12px;
+		border-bottom: 1px dashed var(--order-border);
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 12px;
+		color: var(--order-ink-muted);
+		text-transform: uppercase;
+	}
+
+	.order-number {
+		color: var(--order-ink);
+	}
+
+	.title {
+		margin: 20px 0 0;
+		max-width: 70%;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(1.5rem, 4vw, 2rem);
+		font-weight: 800;
+		color: var(--order-ink);
+	}
+
+	.items {
+		margin: 20px 0 0;
+		padding: 0;
+		list-style: none;
+		max-width: 70%;
+	}
+
+	.items li {
+		position: relative;
+		margin: 0 0 8px;
+		padding-left: 20px;
+		font-family: var(--font-mono);
+		font-size: 0.875rem;
+		line-height: 1.7;
+		color: var(--order-ink-muted);
+	}
+
+	.items li::before {
+		content: '›';
+		position: absolute;
+		left: 0;
+		color: var(--order-ink);
+	}
+
+	@media (max-width: 767px) {
+		.title,
+		.items {
+			max-width: 100%;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.order {
+			transition: none;
+		}
+	}
+</style>

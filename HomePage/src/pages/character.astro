@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
+import CharacterSection from '../components/CharacterSection.astro';
+import CharacterNav from '../components/CharacterNav.astro';
+import characters from '../data/characters.json';
+import alphaImage from '../assets/images/characters/symphony立ち絵-ポーズ差分.png';
+
+const characterImages: Record<string, ImageMetadata> = {
+	'char-01': alphaImage,
+};
+---
+
+<Layout title="キャラクター | Symphony Kill Chord">
+	<main>
+		<PageHeader eyebrow="Character" title="キャラクター" tight />
+
+		{
+			characters.map((character, index) => (
+				<CharacterSection
+					id={character.id}
+					name={character.name}
+					formalName={character.formalName}
+					catchphrase={character.catchphrase}
+					description={character.description}
+					cv={character.cv}
+					image={characterImages[character.id]}
+					reverse={index % 2 === 1}
+				/>
+			))
+		}
+	</main>
+
+	<CharacterNav
+		characters={characters.map(({ id, name }) => ({ id, name, image: characterImages[id] }))}
+	/>
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		max-width: 1080px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+</style>

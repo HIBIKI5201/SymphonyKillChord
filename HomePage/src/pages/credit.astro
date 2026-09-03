@@ -1,0 +1,31 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
+import CreditCategory from '../components/CreditCategory.astro';
+import credits from '../data/credits.json';
+---
+
+<Layout title="クレジット | Symphony Kill Chord">
+	<main>
+		<PageHeader eyebrow="Credit" title="クレジット" />
+
+		<section id="credit-list">
+			{credits.map((entry) => <CreditCategory category={entry.category} roles={entry.roles} />)}
+		</section>
+	</main>
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	#credit-list {
+		border-top: 1px solid var(--color-surface-border);
+	}
+</style>
