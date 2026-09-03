@@ -8,7 +8,7 @@ import credits from '../data/credits.json';
 
 <Layout title="クレジット | Symphony Kill Chord">
 	<main>
-		<PageHeader eyebrow="Credit" title="クレジット" scanline />
+		<PageHeader eyebrow="Credit" title="クレジット" />
 
 		<section id="credit-list">
 			{credits.map((entry) => <CreditCategory category={entry.category} roles={entry.roles} />)}
