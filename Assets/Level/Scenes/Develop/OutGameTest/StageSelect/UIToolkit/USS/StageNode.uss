@@ -55,24 +55,27 @@
 }
 
 .stage-node--cleared {
-    border-left-color: rgb(0, 255, 127);
-    border-right-color: rgb(0, 255, 127);
-    border-top-color: rgb(0, 255, 127);
-    border-bottom-color: rgb(0, 255, 127);
+    border-left-color: rgba(0, 255, 127, 0);
+    border-right-color: rgba(0, 255, 127, 0);
+    border-top-color: rgba(0, 255, 127, 0);
+    border-bottom-color: rgba(0, 255, 127, 0);
 }
 
-/* 選択中は拡大し、押している間は縮める。 */
 .stage-node {
     scale: 1 1;
     transition-property: scale;
     transition-duration: 0.1s;
     transition-timing-function: ease-out-circ;
+    background-image: none;
 }
+
 .stage-node:hover,
 .stage-node:focus {
     scale: 1.2 1.2;
+    background-image: url("project://database/Assets/drive-download-20260903T081243Z-1-001/UI_StageSelect_Flame.png?fileID=2800000&guid=9e77a7c740b359a4c9ffbfc6142b0821&type=3#UI_StageSelect_Flame");
 }
 
 .stage-node:active {
     scale: 0.9 0.9;
+    background-image: url("project://database/Assets/drive-download-20260903T081243Z-1-001/UI_StageSelect_Flame.png?fileID=2800000&guid=9e77a7c740b359a4c9ffbfc6142b0821&type=3#UI_StageSelect_Flame");
 }
