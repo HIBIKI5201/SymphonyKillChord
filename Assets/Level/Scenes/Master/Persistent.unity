@@ -1597,6 +1597,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Load.LoadingScreenView
   _canvasGroup: {fileID: 1437668363}
+  _hideFadeDuration: 0.5
+  _hideFadeEase: 8
   _progressImage: {fileID: 751172100}
   _progressText: {fileID: 583077720}
   _fadeImage: {fileID: 1610276353}
