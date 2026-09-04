@@ -161,6 +161,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 new EOnTakeDamage(
                     attackResult.FinalDamage.Value,
                     attackResult.IsCritical,
+                    attackResult.IsJustHit,
                     character.Id,
                     attackType));
         }
