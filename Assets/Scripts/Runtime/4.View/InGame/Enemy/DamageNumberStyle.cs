@@ -10,13 +10,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
     [Serializable]
     public class DamageNumberStyle
     {
-        // <summary> ダメージ数値の種類を取得します。 </summary>
+        /// <summary> ダメージ数値の種類を取得します。 </summary>
         public DamageNumberType Type => _type;
 
-        // <summary> ダメージ数値の色を取得します。 </summary>
+        /// <summary> ダメージ数値の色を取得します。 </summary>
         public Color TextColor => _textColor;
 
-        // <summary> ダメージ数値の背景スプライトを取得します。 </summary>
+        /// <summary> ダメージ数値のフォントマテリアルを取得します。 </summary>
+        public Material FontMaterial => _fontMaterial;
+
+        /// <summary> ダメージ数値の背景スプライトを取得します。 </summary>
         public Sprite BackGroundSprite => _backGroundSprite;
 
         [SerializeField, Tooltip("ダメージ数値の種類")]
@@ -24,6 +27,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         [SerializeField, Tooltip("ダメージ数値の色")]
         private Color _textColor;
+
+        [SerializeField, Tooltip("ダメージ数値のフォントマテリアル")]
+        private Material _fontMaterial;
 
         [SerializeField, Tooltip("ダメージ数値の背景スプライト")]
         private Sprite _backGroundSprite;
