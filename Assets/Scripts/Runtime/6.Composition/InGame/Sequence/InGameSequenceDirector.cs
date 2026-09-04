@@ -43,6 +43,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _gameHudVisibilityView = hudVisibilityView ?? throw new ArgumentNullException(nameof(hudVisibilityView));
         }
 
+        /// <summary> 開始演出の再生中かどうか。 </summary>
+        public bool IsStartSequencePlaying => _isStartPlaying;
+
         /// <summary>
         ///    ゲームプレイの開始演出を開始する。
         /// </summary>

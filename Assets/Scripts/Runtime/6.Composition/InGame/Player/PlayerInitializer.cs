@@ -299,7 +299,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             // 位置リセット入力を購読する。
             _playerInputView = inputView;
-            _playerInputView.OnResetPositionInput += HandleResetPositionInput;
 
             TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
             if (targetSystemContainer == null || targetSystemContainer.TargetSystemController == null)
@@ -437,21 +436,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
-        ///     位置リセット入力を受け取ってプレイヤーをスタート地点へ戻します。
-        /// </summary>
-        /// <param name="input"> 位置リセット入力です。 </param>
-        private void HandleResetPositionInput(InputContext<float> input)
-        {
-            // 押下開始時のみ実行する。
-            if (input.Phase != InputActionPhase.Started)
-            {
-                return;
-            }
-
-            ResetPlayerToSpawn();
-        }
-
-        /// <summary>
         ///     回避成功時の演出を再生します。
         /// </summary>
         /// <param name="damage"> 回避したダメージです。 </param>
@@ -496,7 +480,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             if (_playerInputView != null)
             {
-                _playerInputView.OnResetPositionInput -= HandleResetPositionInput;
                 _playerInputView = null;
             }
 
