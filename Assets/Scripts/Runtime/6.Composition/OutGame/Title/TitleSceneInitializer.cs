@@ -14,6 +14,7 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
 using KillChord.Runtime.View.Persistent.Input;
@@ -199,9 +200,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     $"{nameof(TitleSceneInitializer)}: PlayerInputView が ServiceLocator に登録されていません。"
                     + " Optionsボタンでのオプション表示は無効になります。");
             }
+            HierarchicalNavigationScope optionNavgationScope = new(optionRoot);
+            HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
+
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
-            OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
-            CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
+            OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent, optionNavgationScope);
+            CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent, creditNavgationScope);
             _volumeSettingsTabView = new VolumeSettingsTabView(
                 optionRoot,
                 _audioSettingsContainer.ViewModel,
@@ -299,6 +303,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _dataResetTabView?.Dispose();
             _dataResetTabView = null;
             _audioSettingsContainer = null;
+            _titleScreenViewRegistry?.Dispose();
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
             _titleStartController = null;
