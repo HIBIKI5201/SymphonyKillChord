@@ -43,6 +43,10 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _gameHudVisibilityView = hudVisibilityView ?? throw new ArgumentNullException(nameof(hudVisibilityView));
         }
 
+        /// <summary> 開始演出の再生中かどうか。 </summary>
+        public bool IsStartSequencePlaying => _isStartPlaying;
+        /// <summary> 結果表示中かどうか。 </summary>
+        public bool IsResultActive => _isResultActive;
         /// <summary>
         ///    ゲームプレイの開始演出を開始する。
         /// </summary>
@@ -101,6 +105,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             CancellationToken cancellationToken)
         {
             Cancel();
+            _isResultActive = true;
 
             _gameplayControllable.StopGameplay();
             _stageSequenceMessageView?.ShowClear();
@@ -122,6 +127,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         public async Awaitable GameOverAsync(CancellationToken cancellationToken)
         {
             Cancel();
+            _isResultActive = true;
 
             _gameplayControllable.StopGameplay();
             _stageSequenceMessageView?.ShowGameOver();
@@ -147,6 +153,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
         private bool _isStartPlaying;
         private bool _isTimelineCompleted;
+        private bool _isResultActive;
 
         /// <summary>
         ///     ゲームプレイ開始演出の完了条件を確認し、すべての条件が満たされていればゲームプレイを開始します。

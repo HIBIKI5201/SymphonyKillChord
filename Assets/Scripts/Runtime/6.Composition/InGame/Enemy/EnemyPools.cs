@@ -81,6 +81,100 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 $"{nameof(EnemyDefinitionId)}に対応するObjectPoolがありません。 Id: {enemyDefinitionId.Value}");
         }
         /// <summary>
+        ///     個別の敵定義に対応するObject Poolを事前にウォームアップします。
+        /// </summary>
+        /// <param name="enemyDefinitionId"> ウォームアップする個別の敵定義IDです。 </param>
+        /// <param name="count"> 事前生成する数です。 </param>
+        public void PrewarmEnemy(EnemyDefinitionId enemyDefinitionId, int count)
+        {
+            if (count <= 0 || !_enemyPools.ContainsKey(enemyDefinitionId))
+            {
+                return;
+            }
+
+            EnemyLifeCycle[] warmedInstances = new EnemyLifeCycle[count];
+            for (int i = 0; i < count; i++)
+            {
+                EnemyLifeCycle instance = GetEnemy(enemyDefinitionId);
+                warmedInstances[i] = instance;
+
+                RenderForShaderWarmup(instance);
+                instance.gameObject.SetActive(false);
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                ReleaseEnemy(enemyDefinitionId, warmedInstances[i]);
+            }
+        }
+
+        /// <summary>
+        ///     指定した敵インスタンスを画面外の専用カメラで1回描画します。
+        /// </summary>
+        /// <param name="instance"> 描画ウォームアップ対象の敵インスタンスです。 </param>
+        private void RenderForShaderWarmup(EnemyLifeCycle instance)
+        {
+            if (!_renderWarmupEnabled)
+            {
+                return;
+            }
+
+            UnityEngine.Camera warmupCamera = GetOrCreateWarmupCamera();
+            instance.transform.SetPositionAndRotation(WARMUP_POSITION, Quaternion.identity);
+            instance.gameObject.SetActive(true);
+            warmupCamera.Render();
+        }
+
+        /// <summary>
+        ///     シェーダーウォームアップ専用の非表示カメラを取得します。未生成なら作成します。
+        /// </summary>
+        /// <returns> ウォームアップ用カメラです。 </returns>
+        private UnityEngine.Camera GetOrCreateWarmupCamera()
+        {
+            if (_warmupCamera != null)
+            {
+                return _warmupCamera;
+            }
+
+            GameObject cameraObject = new GameObject(nameof(EnemyPools) + "ShaderWarmupCamera");
+            cameraObject.hideFlags = HideFlags.HideAndDontSave;
+            cameraObject.transform.SetPositionAndRotation(
+                WARMUP_POSITION + new Vector3(0f, 0f, -WARMUP_CAMERA_DISTANCE),
+                Quaternion.identity);
+
+            _warmupCamera = cameraObject.AddComponent<UnityEngine.Camera>();
+            _warmupCamera.enabled = false;
+            _warmupCamera.clearFlags = CameraClearFlags.SolidColor;
+            _warmupCamera.backgroundColor = Color.clear;
+            _warmupCamera.nearClipPlane = 0.1f;
+            _warmupCamera.farClipPlane = WARMUP_CAMERA_DISTANCE * 4f;
+
+            _warmupRenderTexture = new RenderTexture(4, 4, 16);
+            _warmupCamera.targetTexture = _warmupRenderTexture;
+
+            return _warmupCamera;
+        }
+
+        /// <summary>
+        ///     ウォームアップ用カメラと RenderTexture を破棄します。
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (_warmupCamera != null)
+            {
+                Destroy(_warmupCamera.gameObject);
+                _warmupCamera = null;
+            }
+
+            if (_warmupRenderTexture != null)
+            {
+                _warmupRenderTexture.Release();
+                Destroy(_warmupRenderTexture);
+                _warmupRenderTexture = null;
+            }
+        }
+
+        /// <summary>
         ///     砲弾用のObject Poolを初期化する。
         /// </summary>
         public void InitializeShellPool()
@@ -177,7 +271,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("砲弾着弾時の爆発エフェクトです。")]
         private ReusableParticleSystemView _shellExplosionEffectView;
 
+        [SerializeField, Tooltip("プール事前生成時に、画面外の専用カメラで1回描画してシェーダーコンパイルを" +
+            "前払いするかどうかです。レンダーパイプラインの都合で問題が起きる場合はfalseにしてください。")]
+        private bool _renderWarmupEnabled = true;
+
+        private static readonly Vector3 WARMUP_POSITION = new(0f, -5000f, 0f);
+        private const float WARMUP_CAMERA_DISTANCE = 3f;
+
         private readonly Dictionary<EnemyDefinitionId, IObjectPool<EnemyLifeCycle>> _enemyPools = new();
         private IObjectPool<ShellLifeCycle> _shellPool;
+        private UnityEngine.Camera _warmupCamera;
+        private RenderTexture _warmupRenderTexture;
     }
 }
