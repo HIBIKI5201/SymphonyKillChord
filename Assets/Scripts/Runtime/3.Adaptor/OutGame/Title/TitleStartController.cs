@@ -58,10 +58,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
             {
                 if (!string.IsNullOrWhiteSpace(_tutorialBattleSceneName))
                 {
-                    isSuccess = await _sceneTransitionController.ChangeSceneKeepingLoadingAsync(
-                        currentSceneName,
-                        _tutorialBattleSceneName,
-                        token);
+                    // Title のアンロードで View が破棄されても、遷移先の初期化完了まで待機する。
+                    isSuccess = await _sceneTransitionController
+                        .ChangeSceneKeepingLoadingWithPersistentLifetimeAsync(
+                            currentSceneName,
+                            _tutorialBattleSceneName);
 
                     if (!isSuccess)
                     {

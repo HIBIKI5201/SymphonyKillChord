@@ -46,6 +46,23 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
         }
 
         /// <summary>
+        ///     常駐シーンの寿命に従って、ロード画面を閉じずにシーン遷移を実行する。
+        ///     遷移元シーンがアンロードされても、遷移先の初期化完了まで待機するために使用する。
+        /// </summary>
+        /// <param name="fromSceneName"> 遷移元シーン名。 </param>
+        /// <param name="toSceneName"> 遷移先シーン名。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public Task<bool> ChangeSceneKeepingLoadingWithPersistentLifetimeAsync(
+            string fromSceneName,
+            string toSceneName)
+        {
+            return _useCase.ChangeSceneKeepLoadingAsync(
+                fromSceneName,
+                toSceneName,
+                _persistentLifetimeToken);
+        }
+
+        /// <summary>
         ///     シーンをAdditiveロードする。
         /// </summary>
         public Task<bool> LoadAdditiveAsync(
