@@ -391,30 +391,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 .SetPlayerMoveSpec(parameter);
 #endif
         }
-
-        /// <summary>
-        ///     プレイヤーをステージのスタート地点へ戻します。
-        /// </summary>
-        public void ResetPlayerToSpawn()
-        {
-            if (_player == null)
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(PlayerView)} が存在しないため位置リセットできません。", this);
-                return;
-            }
-
-            if (!TryResolvePlayerSpawnPointTransform(out Transform spawnPointTransform))
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] スタート地点が見つからないため位置リセットできません。", this);
-                return;
-            }
-
-            _player.ResetToSpawn(spawnPointTransform.position, spawnPointTransform.rotation);
-
-            // カメラの向きもスタート時の前方へ戻す。
-            ResetCameraOrientation(spawnPointTransform.forward);
-        }
-
         /// <summary>
         ///     カメラの向きを指定した前方へ戻します。
         /// </summary>
