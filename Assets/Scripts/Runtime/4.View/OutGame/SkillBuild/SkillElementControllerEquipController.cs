@@ -73,6 +73,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             RemoveDetachedSkillElements();
 
             element.MakeNavigable();
+            element.RegisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
             element.RegisterCallback<NavigationSubmitEvent>(HandleSkillElementSubmitHandler);
             _skillElements.Add(element);
         }
@@ -99,11 +100,13 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             for (int i = 0; i < _skillElements.Count; i++)
             {
+                _skillElements[i].UnregisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
                 _skillElements[i].UnregisterCallback<NavigationSubmitEvent>(HandleSkillElementSubmitHandler);
             }
 
             for (int i = 0; i < _slots.Count; i++)
             {
+                _slots[i].UnregisterCallback<FocusInEvent>(HandleSlotFocusInHandler);
                 _slots[i].UnregisterCallback<NavigationSubmitEvent>(HandleSlotSubmitHandler);
             }
 
@@ -127,6 +130,20 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly List<VisualElement> _slots = new List<VisualElement>();
 
         /// <summary>
+        ///     コントローラーのフォーカス対象を詳細表示へ反映する。
+        /// </summary>
+        /// <param name="evt"> フォーカスイベント。 </param>
+        private void HandleSkillElementFocusInHandler(FocusInEvent evt)
+        {
+            if (!CarriedSkillId.HasValue &&
+                evt.currentTarget is VisualElement element &&
+                element.userData is int skillId)
+            {
+                _skillBuildViewModel.SelectSkill(skillId);
+            }
+        }
+
+        /// <summary>
         ///     スキル一覧要素の決定操作を持ち上げ状態へ変換する。
         /// </summary>
         /// <param name="evt"> ナビゲーション決定イベント。 </param>
@@ -138,16 +155,17 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
-            CarriedSkillId = skillId;
-            _soundEffectCommand?.Play(UISoundEffectKind.Select);
-            for (int i = 0; i < _skillElements.Count; i++)
+            VisualElement sourceSlot = FindContainingSlot(element);
+            if (CarriedSkillId.HasValue && sourceSlot != null)
             {
-                _skillElements[i].EnableInClassList(
-                    CARRIED_CLASS_NAME,
-                    ReferenceEquals(_skillElements[i], element));
+                ApplyCarriedSkillToSlot(sourceSlot);
+                evt.StopPropagation();
+                return;
             }
 
-            FindSlotToFocus()?.FocusDeferred();
+            BeginCarry(skillId, element);
+
+            (sourceSlot ?? FindSlotToFocus())?.FocusDeferred();
             evt.StopPropagation();
         }
 
@@ -157,24 +175,46 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="evt"> ナビゲーション決定イベント。 </param>
         private void HandleSlotSubmitHandler(NavigationSubmitEvent evt)
         {
-            if (!CarriedSkillId.HasValue ||
+            if (evt.currentTarget is not VisualElement slot)
+            {
+                return;
+            }
+
+            int slotIndex = FindSlotIndex(slot);
+            if (!CarriedSkillId.HasValue)
+            {
+                if (!TryFindSlotSkillId(slotIndex, out int slotSkillId))
+                {
+                    return;
+                }
+
+                BeginCarry(slotSkillId, FindSkillElement(slotSkillId));
+                evt.StopPropagation();
+                return;
+            }
+
+            ApplyCarriedSkillToSlot(slot);
+            evt.StopPropagation();
+        }
+
+        /// <summary>
+        ///     装備スロットへフォーカスした時、装備中のスキルを選択状態へ反映する。
+        /// </summary>
+        /// <param name="evt"> フォーカスイベント。 </param>
+        private void HandleSlotFocusInHandler(FocusInEvent evt)
+        {
+            // 持ち上げ中は移動先スロットの内容ではなく、持ち上げたスキルの詳細を維持する。
+            if (CarriedSkillId.HasValue ||
                 evt.currentTarget is not VisualElement slot)
             {
                 return;
             }
 
-            int carriedSkillId = CarriedSkillId.Value;
             int slotIndex = FindSlotIndex(slot);
-            bool playsSkillSetSound = IsDifferentSkillSet(carriedSkillId, slotIndex);
-            _skillBuildViewModel.ApplyDrop(carriedSkillId, slotIndex);
-            if (playsSkillSetSound)
+            if (TryFindSlotSkillId(slotIndex, out int skillId))
             {
-                _soundEffectCommand?.Play(UISoundEffectKind.SkillSet);
+                _skillBuildViewModel.SelectSkill(skillId);
             }
-
-            ClearCarry();
-            FocusSkillListDeferred();
-            evt.StopPropagation();
         }
 
         /// <summary>
@@ -189,6 +229,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             }
 
             ClearCarry();
+            if (evt.target is VisualElement focusedElement)
+            {
+                SelectFocusedElementSkill(focusedElement);
+            }
+
             evt.StopPropagation();
         }
 
@@ -204,6 +249,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                     continue;
                 }
 
+                _skillElements[i].UnregisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
                 _skillElements[i].UnregisterCallback<NavigationSubmitEvent>(HandleSkillElementSubmitHandler);
                 _skillElements.RemoveAt(i);
             }
@@ -216,8 +262,79 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private void SetupSlot(VisualElement slot)
         {
             slot.MakeNavigable();
+            slot.RegisterCallback<FocusInEvent>(HandleSlotFocusInHandler);
             slot.RegisterCallback<NavigationSubmitEvent>(HandleSlotSubmitHandler);
             _slots.Add(slot);
+        }
+
+        /// <summary>
+        ///     指定したスキルをコントローラーでの持ち上げ状態にする。
+        /// </summary>
+        /// <param name="skillId"> 持ち上げるスキル ID。 </param>
+        /// <param name="element"> 持ち上げるスキル要素。 </param>
+        private void BeginCarry(int skillId, VisualElement element)
+        {
+            CarriedSkillId = skillId;
+            _skillBuildViewModel.SelectSkill(skillId);
+            _soundEffectCommand?.Play(UISoundEffectKind.Select);
+
+            for (int i = 0; i < _skillElements.Count; i++)
+            {
+                _skillElements[i].EnableInClassList(
+                    CARRIED_CLASS_NAME,
+                    ReferenceEquals(_skillElements[i], element));
+            }
+        }
+
+        /// <summary>
+        ///     持ち上げ中のスキルを指定したスロットへ反映する。
+        /// </summary>
+        /// <param name="slot"> 反映先の装備スロット。 </param>
+        private void ApplyCarriedSkillToSlot(VisualElement slot)
+        {
+            if (!CarriedSkillId.HasValue)
+            {
+                return;
+            }
+
+            int carriedSkillId = CarriedSkillId.Value;
+            int slotIndex = FindSlotIndex(slot);
+            bool playsSkillSetSound = IsDifferentSkillSet(carriedSkillId, slotIndex);
+            _skillBuildViewModel.ApplyDrop(carriedSkillId, slotIndex);
+            if (playsSkillSetSound)
+            {
+                _soundEffectCommand?.Play(UISoundEffectKind.SkillSet);
+            }
+
+            ClearCarry();
+            slot.FocusDeferred();
+        }
+
+        /// <summary>
+        ///     フォーカス中の要素に対応するスキルを選択状態へ反映する。
+        /// </summary>
+        /// <param name="element"> フォーカス中の要素。 </param>
+        private void SelectFocusedElementSkill(VisualElement element)
+        {
+            if (element.userData is int skillId)
+            {
+                _skillBuildViewModel.SelectSkill(skillId);
+                return;
+            }
+
+            VisualElement slot = _slots.Contains(element)
+                ? element
+                : FindContainingSlot(element);
+            if (slot == null)
+            {
+                return;
+            }
+
+            int slotIndex = FindSlotIndex(slot);
+            if (TryFindSlotSkillId(slotIndex, out skillId))
+            {
+                _skillBuildViewModel.SelectSkill(skillId);
+            }
         }
 
         /// <summary>
@@ -261,42 +378,40 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     レイアウト確定後に、スキル一覧の要素へフォーカスを戻します。
+        ///     指定した要素を内包する装備スロットを取得する。
         /// </summary>
-        /// <remarks>
-        ///     装備直後は、装備したスキル要素がスロットへ移動し終えていない場合があります。
-        ///     その時点で探索するとスロット内の要素を選んでしまうため、
-        ///     移動が反映されてから探索します。
-        /// </remarks>
-        private void FocusSkillListDeferred()
+        /// <param name="element"> 検索対象の要素。 </param>
+        /// <returns> 内包するスロット。スロット外の場合は null。 </returns>
+        private VisualElement FindContainingSlot(VisualElement element)
         {
-            VisualElement root = _rootElement;
-            if (root == null || root.panel == null)
+            VisualElement current = element?.parent;
+            while (current != null)
             {
-                return;
-            }
-
-            root.schedule.Execute(() =>
-            {
-                if (root.panel == null)
+                for (int i = 0; i < _slots.Count; i++)
                 {
-                    return;
+                    if (ReferenceEquals(current, _slots[i]))
+                    {
+                        return current;
+                    }
                 }
 
-                FindSkillListElementToFocus()?.FocusDeferred();
-            });
+                current = current.parent;
+            }
+
+            return null;
         }
 
         /// <summary>
-        ///     装備確定後にフォーカスを戻す、スキル一覧の要素を返します。
+        ///     指定したスキル ID の表示要素を取得する。
         /// </summary>
-        /// <returns> フォーカス先の要素です。対象が無い場合はnullです。 </returns>
-        private VisualElement FindSkillListElementToFocus()
+        /// <param name="skillId"> 検索対象のスキル ID。 </param>
+        /// <returns> 対応する表示要素。見つからない場合は null。 </returns>
+        private VisualElement FindSkillElement(int skillId)
         {
             for (int i = 0; i < _skillElements.Count; i++)
             {
                 VisualElement element = _skillElements[i];
-                if (element.panel != null && !IsInsideSlot(element))
+                if (element.userData is int elementSkillId && elementSkillId == skillId)
                 {
                     return element;
                 }
@@ -306,26 +421,25 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     指定した要素が、いずれかの装備スロットの子孫かどうかを判定します。
+        ///     指定したスロットに装備中のスキル ID を取得する。
         /// </summary>
-        /// <param name="element"> 判定対象の要素です。 </param>
-        /// <returns> いずれかのスロットの子孫である場合はtrueです。 </returns>
-        private bool IsInsideSlot(VisualElement element)
+        /// <param name="slotIndex"> スロット番号。 </param>
+        /// <param name="skillId"> 装備中のスキル ID。 </param>
+        /// <returns> スキルが装備されている場合は true。 </returns>
+        private bool TryFindSlotSkillId(int slotIndex, out int skillId)
         {
-            VisualElement parent = element.parent;
-            while (parent != null)
+            IReadOnlyList<SkillBuildSlotState> slots = _skillBuildViewModel.Slots.CurrentValue;
+            for (int i = 0; i < slots.Count; i++)
             {
-                for (int i = 0; i < _slots.Count; i++)
+                SkillBuildSlotState slot = slots[i];
+                if (slot.SlotIndex == slotIndex && slot.CurrentSkillId != EMPTY_SKILL_ID)
                 {
-                    if (ReferenceEquals(parent, _slots[i]))
-                    {
-                        return true;
-                    }
+                    skillId = slot.CurrentSkillId;
+                    return true;
                 }
-
-                parent = parent.parent;
             }
 
+            skillId = EMPTY_SKILL_ID;
             return false;
         }
 
