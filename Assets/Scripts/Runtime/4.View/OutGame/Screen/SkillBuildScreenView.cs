@@ -1,3 +1,4 @@
+
 using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.View.OutGame.Navigation;
@@ -193,28 +194,37 @@ namespace KillChord.Runtime.View.OutGame.Screen
             Array.Empty<SkillBuildSlotState>();
         private int? _currentSelectedSkillId;
         private bool _isSavingSkillBuild;
+        private IDisposable _backButtonActivation;
+        private IDisposable _skillBuildSaveButtonActivation;
+        private IDisposable _skillLevelUpButtonActivation;
+        private IDisposable _unsavedSaveAndCloseButtonActivation;
+        private IDisposable _unsavedDiscardAndCloseButtonActivation;
 
         /// <summary>
         ///     ボタンのコールバックを登録する。
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _backButton.RegisterCallback<ClickEvent>(HandleBackButtonClickedHandler);
-            _skillBuildSaveButton.RegisterCallback<ClickEvent>(HandleSkillBuildSaveButtonClickedHandler);
-            _skillLevelUpButton.RegisterCallback<ClickEvent>(HandleSkillLevelUpButtonClickedHandler);
-            _unsavedSaveAndCloseButton.RegisterCallback<ClickEvent>(HandleUnsavedSaveAndCloseButtonClickedHandler);
-            _unsavedDiscardAndCloseButton.RegisterCallback<ClickEvent>(HandleUnsavedDiscardAndCloseButtonClickedHandler);
             _unsavedChangesDialogOverlay.RegisterCallback<ClickEvent>(HandleUnsavedDialogBackgroundClickedHandler);
             _dialogPanel.RegisterCallback<ClickEvent>(HandleUnsavedDialogPanelClickedHandler);
 
-            // 処理を ClickEvent で受けているため、決定操作もクリックとして流し込む。
             // オーバーレイとダイアログ本体は背景クリックの判定用であり、フォーカス対象にしない。
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
-            _skillBuildSaveButton.EnableSubmitAsClick();
-            _skillLevelUpButton.EnableSubmitAsClick();
-            _unsavedSaveAndCloseButton.EnableSubmitAsClick();
-            _unsavedDiscardAndCloseButton.EnableSubmitAsClick();
+            _skillBuildSaveButton.MakeNavigable();
+            _skillLevelUpButton.MakeNavigable();
+            _unsavedSaveAndCloseButton.MakeNavigable();
+            _unsavedDiscardAndCloseButton.MakeNavigable();
+
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
+            _skillBuildSaveButtonActivation =
+                _skillBuildSaveButton.RegisterActivation(HandleSkillBuildSaveButtonActivationHandler);
+            _skillLevelUpButtonActivation =
+                _skillLevelUpButton.RegisterActivation(HandleSkillLevelUpButtonActivationHandler);
+            _unsavedSaveAndCloseButtonActivation =
+                _unsavedSaveAndCloseButton.RegisterActivation(HandleUnsavedSaveAndCloseButtonActivationHandler);
+            _unsavedDiscardAndCloseButtonActivation =
+                _unsavedDiscardAndCloseButton.RegisterActivation(HandleUnsavedDiscardAndCloseButtonActivationHandler);
         }
 
         /// <summary>
@@ -222,11 +232,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallback()
         {
-            _backButton.UnregisterCallback<ClickEvent>(HandleBackButtonClickedHandler);
-            _skillBuildSaveButton.UnregisterCallback<ClickEvent>(HandleSkillBuildSaveButtonClickedHandler);
-            _skillLevelUpButton.UnregisterCallback<ClickEvent>(HandleSkillLevelUpButtonClickedHandler);
-            _unsavedSaveAndCloseButton.UnregisterCallback<ClickEvent>(HandleUnsavedSaveAndCloseButtonClickedHandler);
-            _unsavedDiscardAndCloseButton.UnregisterCallback<ClickEvent>(HandleUnsavedDiscardAndCloseButtonClickedHandler);
+            _backButtonActivation?.Dispose();
+            _skillBuildSaveButtonActivation?.Dispose();
+            _skillLevelUpButtonActivation?.Dispose();
+            _unsavedSaveAndCloseButtonActivation?.Dispose();
+            _unsavedDiscardAndCloseButtonActivation?.Dispose();
             _unsavedChangesDialogOverlay.UnregisterCallback<ClickEvent>(HandleUnsavedDialogBackgroundClickedHandler);
             _dialogPanel.UnregisterCallback<ClickEvent>(HandleUnsavedDialogPanelClickedHandler);
         }
@@ -310,8 +320,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary>
         ///     戻るボタンを処理する。
         /// </summary>
-        /// <param name="evt"> クリックイベント。 </param>
-        private void HandleBackButtonClickedHandler(ClickEvent evt)
+        private void HandleBackButtonActivationHandler()
         {
             if (_viewModel != null && _viewModel.HasUnsavedChanges())
             {
@@ -325,8 +334,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary>
         ///     保存ボタンを処理する。
         /// </summary>
-        /// <param name="evt"> クリックイベント。 </param>
-        private async void HandleSkillBuildSaveButtonClickedHandler(ClickEvent evt)
+        private async void HandleSkillBuildSaveButtonActivationHandler()
         {
             await TrySaveCurrentSkillBuildAsync();
         }
@@ -334,8 +342,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary>
         ///     レベルアップボタンを処理する。
         /// </summary>
-        /// <param name="evt"> クリックイベント。 </param>
-        private void HandleSkillLevelUpButtonClickedHandler(ClickEvent evt)
+        private void HandleSkillLevelUpButtonActivationHandler()
         {
             OutGameUIEvent.OnSkillLevelUp?.Invoke();
         }
@@ -343,8 +350,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary>
         ///     保存して閉じる操作を処理する。
         /// </summary>
-        /// <param name="evt"> クリックイベント。 </param>
-        private async void HandleUnsavedSaveAndCloseButtonClickedHandler(ClickEvent evt)
+        private async void HandleUnsavedSaveAndCloseButtonActivationHandler()
         {
             bool isSaved = await TrySaveCurrentSkillBuildAsync();
             if (!isSaved)
@@ -359,8 +365,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary>
         ///     変更を破棄して閉じる操作を処理する。
         /// </summary>
-        /// <param name="evt"> クリックイベント。 </param>
-        private void HandleUnsavedDiscardAndCloseButtonClickedHandler(ClickEvent evt)
+        private void HandleUnsavedDiscardAndCloseButtonActivationHandler()
         {
             _viewModel?.ResetSlots();
             HideUnsavedChangesDialog();

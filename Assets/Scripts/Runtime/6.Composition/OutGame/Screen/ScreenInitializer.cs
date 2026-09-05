@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
@@ -72,6 +73,20 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out _loadingScreenController))
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] LoadingScreenControllerを取得できませんでした。", this);
+                return false;
+            }
+
+            if (!_isLoadingSubscribed)
+            {
+                _loadingScreenController.LoadingStarted += HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted += HandleLoadingCompleted;
+                _isLoadingSubscribed = true;
+            }
+
+            ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
             _screenController.ShowHome();
             return true;
         }
@@ -81,6 +96,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public override void Shutdown()
         {
+            UnsubscribeLoading();
             Unsubscribe();
             _isSubscribed = false;
 
@@ -93,6 +109,52 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _screenRuleDataKey.ReleaseLoadedAsset(this);
             _loadedScreenRuleData = null;
             _isInitialized = false;
+        }
+
+        /// <summary>
+        ///     ロード開始時に登録画面の操作を禁止する。
+        /// </summary>
+        private void HandleLoadingStarted()
+        {
+            ApplyInteractionEnabled(false);
+        }
+
+        /// <summary>
+        ///     ロード終了時は成否にかかわらず画面操作と現在画面のフォーカスを復元する。
+        /// </summary>
+        private void HandleLoadingCompleted(bool success)
+        {
+            ApplyInteractionEnabled(true);
+        }
+
+        /// <summary>
+        ///     取得済みRegistryへ入力許可を適用し、例外で他のロード購読者の通知を中断させない。
+        /// </summary>
+        private void ApplyInteractionEnabled(bool isEnabled)
+        {
+            try
+            {
+                _screenViewRegistry?.SetInteractionEnabled(isEnabled);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     View破棄より先にロード通知の購読を一度だけ解除する。
+        /// </summary>
+        private void UnsubscribeLoading()
+        {
+            if (_isLoadingSubscribed && _loadingScreenController != null)
+            {
+                _loadingScreenController.LoadingStarted -= HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted -= HandleLoadingCompleted;
+            }
+
+            _isLoadingSubscribed = false;
+            _loadingScreenController = null;
         }
 
         /// <summary>
@@ -518,6 +580,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private ScreenRuleData _loadedScreenRuleData;
         private bool _isInitialized = false;
         private bool _isSubscribed;
+        private bool _isLoadingSubscribed;
+        private LoadingScreenController _loadingScreenController;
         private bool _isSceneTransitioning = false;
 
         private CancellationTokenSource _ctsTransition;
