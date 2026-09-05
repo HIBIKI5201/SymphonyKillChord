@@ -38,6 +38,15 @@ namespace KillChord.Runtime.View.InGame.UI
             }
         }
 
+        /// <summary>
+        ///     再生中のアニメーションを停止する。
+        ///     シーンのアンロード後もモーションが動き続け、破棄済みのImageを触らないようにする。
+        /// </summary>
+        private void OnDestroy()
+        {
+            _healthBarDamageMotion.TryCancel();
+        }
+
         [SerializeField] private Image _healthBarImage;
         [SerializeField] private Image _healthBarImageRed;
         [SerializeField] private TextMeshProUGUI _currentHealthText;
