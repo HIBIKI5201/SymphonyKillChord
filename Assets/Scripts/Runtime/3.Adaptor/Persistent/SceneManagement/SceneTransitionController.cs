@@ -10,10 +10,13 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
     /// </summary>
     public class SceneTransitionController
     {
-        public SceneTransitionController(SceneTransitionUsecase usecase)
+        public SceneTransitionController(
+            SceneTransitionUsecase usecase,
+            CancellationToken persistentLifetimeToken = default)
         {
             _useCase = usecase
                 ?? throw new ArgumentNullException(nameof(usecase));
+            _persistentLifetimeToken = persistentLifetimeToken;
         }
 
         /// <summary>
@@ -67,6 +70,17 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
         }
 
         /// <summary>
+        ///     常駐シーンの寿命に従ってシーンをアンロードする。
+        ///     呼び出し元のシーンがアンロードされても、アンロード完了後の後処理まで実行するために使用する。
+        /// </summary>
+        /// <param name="sceneName"> アンロードするシーン名。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public Task<bool> UnloadWithPersistentLifetimeAsync(string sceneName)
+        {
+            return _useCase.UnloadAsync(sceneName, _persistentLifetimeToken);
+        }
+
+        /// <summary>
         ///     対象シーンをUnloadし、ActiveSceneを指定シーンへ戻す。
         /// </summary>
         public Task<bool> UnloadAndSetActiveAsync(
@@ -81,5 +95,6 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
         }
 
         private readonly SceneTransitionUsecase _useCase;
+        private readonly CancellationToken _persistentLifetimeToken;
     }
 }
