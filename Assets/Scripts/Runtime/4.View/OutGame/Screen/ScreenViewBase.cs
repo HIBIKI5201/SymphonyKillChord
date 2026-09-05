@@ -135,7 +135,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         ///     コントローラーのキャンセル操作で作動させる要素を返します。
         ///     <para>
         ///         通常は「戻る」ボタンを返します。キャンセル操作を受けると、
-        ///         その要素をクリックしたときと同じ経路を通ります。
+        ///         その要素へ明示的な作動要求を送ります。
         ///         nullを返した場合はキャンセル操作を処理しません。
         ///     </para>
         /// </summary>
@@ -171,9 +171,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 return;
             }
 
-            using ClickEvent clickEvent = ClickEvent.GetPooled();
-            clickEvent.target = cancelTarget;
-            cancelTarget.SendEvent(clickEvent);
+            using UIActivationEvent activationEvent = UIActivationEvent.GetPooled();
+            activationEvent.target = cancelTarget;
+            cancelTarget.SendEvent(activationEvent);
             navigationEvent.StopPropagation();
         }
 

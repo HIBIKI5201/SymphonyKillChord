@@ -18,17 +18,15 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _nodeId = nodeId;
             _outGameUIEvent = outGameUIEvent;
 
-            _root.RegisterCallback<ClickEvent>(OnNodeClicked);
-
-            // 素の VisualElement はフォーカスを持てないため、コントローラー操作用に有効化する。
-            _root.EnableSubmitAsClick();
+            _root.MakeNavigable();
+            _activationRegistration = _root.RegisterActivation(HandleActivationHandler);
 
             SetLocked();
         }
 
         public void Dispose()
         {
-            _root.UnregisterCallback<ClickEvent>(OnNodeClicked);
+            _activationRegistration.Dispose();
         }
 
         /// <summary> このノードの要素を取得します。初期フォーカスの設定に使用します。 </summary>
@@ -72,12 +70,12 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly int _nodeId;
         private readonly VisualElement _root;
         private readonly OutGameUIEvent _outGameUIEvent;
+        private readonly IDisposable _activationRegistration;
 
         /// <summary>
-        ///     スキルノードをクリックした時の処理。
+        ///     スキルノードが作動した時の処理。
         /// </summary>
-        /// <param name="evt"></param>
-        private void OnNodeClicked(ClickEvent evt)
+        private void HandleActivationHandler()
         {
             SetSelected();
             _outGameUIEvent.OnSkillNodeSelected?.Invoke(_root.name);
