@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
@@ -83,6 +84,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
         private bool _isInitialized;
         private bool _isSubscribed;
+        private bool _isLoadingSubscribed;
+        private LoadingScreenController _loadingScreenController;
 
         /// <summary>
         ///     タイトル画面に必要なアセットをロードします。
@@ -275,6 +278,20 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out _loadingScreenController))
+            {
+                Debug.LogError($"[{nameof(TitleSceneInitializer)}] LoadingScreenControllerを取得できませんでした。", this);
+                return false;
+            }
+
+            if (!_isLoadingSubscribed)
+            {
+                _loadingScreenController.LoadingStarted += HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted += HandleLoadingCompleted;
+                _isLoadingSubscribed = true;
+            }
+
+            ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
             RegisterUIEventCallbacks();
             _titleScreenViewRegistry.ResetFocusHistory();
             _screenController.ShowTitle();
@@ -286,6 +303,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         public override void Shutdown()
         {
+            UnsubscribeLoading();
             if (_outGameUIEvent != null && _isSubscribed)
             {
                 UnRegisterUIEventCallbacks();
@@ -312,6 +330,52 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
+        }
+
+        /// <summary>
+        ///     ロード開始時に登録画面の操作を禁止する。
+        /// </summary>
+        private void HandleLoadingStarted()
+        {
+            ApplyInteractionEnabled(false);
+        }
+
+        /// <summary>
+        ///     ロード終了時は成否にかかわらず画面操作と現在画面のフォーカスを復元する。
+        /// </summary>
+        private void HandleLoadingCompleted(bool success)
+        {
+            ApplyInteractionEnabled(true);
+        }
+
+        /// <summary>
+        ///     取得済みRegistryへ入力許可を適用し、例外で他のロード購読者の通知を中断させない。
+        /// </summary>
+        private void ApplyInteractionEnabled(bool isEnabled)
+        {
+            try
+            {
+                _titleScreenViewRegistry?.SetInteractionEnabled(isEnabled);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     View破棄より先にロード通知の購読を一度だけ解除する。
+        /// </summary>
+        private void UnsubscribeLoading()
+        {
+            if (_isLoadingSubscribed && _loadingScreenController != null)
+            {
+                _loadingScreenController.LoadingStarted -= HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted -= HandleLoadingCompleted;
+            }
+
+            _isLoadingSubscribed = false;
+            _loadingScreenController = null;
         }
 
         /// <summary>
