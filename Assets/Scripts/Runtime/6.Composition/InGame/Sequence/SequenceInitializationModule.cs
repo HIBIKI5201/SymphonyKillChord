@@ -417,6 +417,12 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return;
             }
 
+            // 戦闘終了後～リザルト表示中もポーズ不可
+            if (_container?.SequenceDirector?.IsResultActive ?? false)
+            {
+                return;
+            }
+
             _battlePauseController?.Toggle();
         }
 
