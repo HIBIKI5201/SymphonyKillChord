@@ -22,8 +22,8 @@
     "*"
   ],
   "specRefs": [
-    "spec/feature/game-spec.md#gs-07-persistence",
-    "spec/feature/game-spec.md#gs-09-navigation-guidance-and-recovery"
+    "spec/feature/game-spec.md#gs-07-永続化",
+    "spec/feature/game-spec.md#gs-09-導線ガイダンス回復"
   ],
   "rationale": "platform-services のSave/Loadと ui-screens のSettingを同じプレイヤーデータ境界へ割り当てる。"
 }
