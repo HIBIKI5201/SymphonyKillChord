@@ -20,10 +20,6 @@ MonoBehaviour:
   PreviewVideoClip: {fileID: 0}
   _statusBonusEffects: []
   _unlockSkills:
-  - _id: skill_00
-    _hashId: -876453005
-  - _id: skill_13
-    _hashId: 1271923592
   - _id: skill_01
     _hashId: -1127918619
   _nodeId:

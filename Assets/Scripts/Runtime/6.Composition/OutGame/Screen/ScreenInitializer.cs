@@ -259,7 +259,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             HomeScreenView homeScreenView = new HomeScreenView(homeRoot, _outGameUIEvent);
             StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
-            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent);
+            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent, null, null, null, null, null);
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);

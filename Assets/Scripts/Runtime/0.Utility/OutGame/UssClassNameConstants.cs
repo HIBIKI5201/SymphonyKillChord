@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Utility.OutGame
         public const string USS_CLASS_SKILL_NODE_UNLOCKED = "skill-node-unlocked";
         public const string USS_CLASS_SKILL_NODE_SELECTED = "skill-node-selected";
         public const string USS_CLASS_SKILL_NODE_NOT_SELECTED = "skill-node-not-selected";
+        public const string USS_CLASS_SKILL_NODE_ICON = "skill-node-icon";
 
         // スキルノードの接続線
         public const string USS_CLASS_SKILL_NODE_CONN = "skill-node-conn";

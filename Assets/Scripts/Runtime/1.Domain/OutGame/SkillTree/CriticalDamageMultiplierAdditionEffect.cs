@@ -23,6 +23,9 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             _value = value;
         }
 
+        /// <summary> この効果の種別。 </summary>
+        public StatusBonusEffectKind Kind => StatusBonusEffectKind.CriticalDamage;
+
         /// <summary>
         ///     クリティカルダメージ倍率の加算値をボーナスへ適用する。
         /// </summary>

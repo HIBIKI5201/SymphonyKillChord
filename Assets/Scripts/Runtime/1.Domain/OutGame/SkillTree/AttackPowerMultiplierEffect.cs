@@ -23,6 +23,9 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             _multiplier = multiplier;
         }
 
+        /// <summary> この効果の種別。 </summary>
+        public StatusBonusEffectKind Kind => StatusBonusEffectKind.AttackPower;
+
         /// <summary>
         ///     攻撃力の倍率加算値をボーナスへ適用する。
         /// </summary>
