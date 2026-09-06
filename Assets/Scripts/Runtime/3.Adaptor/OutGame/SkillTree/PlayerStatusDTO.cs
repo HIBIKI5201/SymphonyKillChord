@@ -10,16 +10,19 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             float playerHealth,
             float playerAttack,
             float criticalChance,
-            float criticalDamage)
+            float criticalDamage,
+            float areaAttackRangeMultiplier)
         {
             PlayerHealth = playerHealth;
             PlayerAttack = playerAttack;
             CriticalChance = criticalChance;
             CriticalDamage = criticalDamage;
+            AreaAttackRangeMultiplier = areaAttackRangeMultiplier;
         }
         public readonly float PlayerHealth;
         public readonly float PlayerAttack;
         public readonly float CriticalChance;
         public readonly float CriticalDamage;
+        public readonly float AreaAttackRangeMultiplier;
     }
 }

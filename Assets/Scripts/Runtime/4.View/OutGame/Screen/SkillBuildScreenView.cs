@@ -7,6 +7,7 @@ using R3;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -41,6 +42,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILL_DETAIL_NAME} が見つかりませんでした。");
             _skillDetailView = new SkillDetailView(skillDetailRoot);
             _skillDetailView.Clear();
+
+            VisualElement skillGenreFilterBarRoot = rootElement.Q<VisualElement>(SKILL_GENRE_FILTER_BAR_NAME)
+                ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILL_GENRE_FILTER_BAR_NAME} が見つかりませんでした。");
+            _skillGenreFilterBarView = new SkillGenreFilterBarView(skillGenreFilterBarRoot);
+            _skillGenreFilterBarView.OnGenreFilterSelected += HandleGenreFilterBarSelectedHandler;
 
             _skillBuildDialog = rootElement.Q<VisualElement>(SKILLBUILD_DIALOG_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILLBUILD_DIALOG_NAME} が見つかりませんでした。");
@@ -79,9 +85,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 soundEffectCommand);
             _skillBuildSlotLayout = new SkillBuildSlotLayout(
                 RootElement,
-                _skillElementList,
-                _skillListView.FindSkillElementRoot);
+                ResolveSkillData,
+                HandleSlotTappedHandler);
             _skillListView.OnSkillSelected += HandleSkillSelectedHandler;
+            _skillListView.OnGenreBadgeSelected += HandleGenreBadgeSelectedHandler;
         }
 
         /// <summary>
@@ -132,7 +139,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _subscriptions = null;
             _viewModel = null;
             _currentSlots = Array.Empty<SkillBuildSlotState>();
+            _currentSkills = Array.Empty<SkillViewData>();
             _currentSelectedSkillId = null;
+            _activeGenreFilter = null;
+            _skillGenreFilterBarView.SetActiveGenre(null);
         }
 
         /// <summary>
@@ -147,11 +157,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
             if (_skillListView != null)
             {
                 _skillListView.OnSkillSelected -= HandleSkillSelectedHandler;
+                _skillListView.OnGenreBadgeSelected -= HandleGenreBadgeSelectedHandler;
                 _skillListView.Dispose();
                 _skillListView = null;
             }
 
+            _skillBuildSlotLayout?.Dispose();
             _skillBuildSlotLayout = null;
+
+            _skillGenreFilterBarView.OnGenreFilterSelected -= HandleGenreFilterBarSelectedHandler;
+            _skillGenreFilterBarView.Dispose();
         }
 
         /// <inheritdoc />
@@ -161,6 +176,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string SKILLBUILD_SAVEBUTTON_NAME = "SkillBuildSaveButton";
         private const string SKILLLEVELUP_BUTTON_NAME = "SkillLevelUpButton";
         private const string SKILL_DETAIL_NAME = "SkillDetail";
+        private const string SKILL_GENRE_FILTER_BAR_NAME = "SkillGenreFilterBar";
         private const string SKILL_ELEMENT_LIST_CLASS_NAME = "skill-element-list";
         private const string SKILLBUILD_DIALOG_NAME = "SkillBuildDialog";
         private const string DIALOG_BACKGROUND_NAME = "BackGround";
@@ -177,6 +193,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly Label _ownedPointsLabel;
         private readonly VisualElement _skillElementList;
         private readonly SkillDetailView _skillDetailView;
+        private readonly SkillGenreFilterBarView _skillGenreFilterBarView;
         private readonly VisualElement _skillBuildDialog;
         private readonly VisualElement _dialogPanel;
         private readonly Button _unsavedSaveAndCloseButton;
@@ -192,7 +209,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private CompositeDisposable _subscriptions;
         private IReadOnlyList<SkillBuildSlotState> _currentSlots =
             Array.Empty<SkillBuildSlotState>();
+        private IReadOnlyList<SkillViewData> _currentSkills =
+            Array.Empty<SkillViewData>();
         private int? _currentSelectedSkillId;
+        private int? _activeGenreFilter;
         private bool _isSavingSkillBuild;
         private IDisposable _backButtonActivation;
         private IDisposable _skillBuildSaveButtonActivation;
@@ -247,22 +267,73 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <param name="skills"> 所持スキル一覧。 </param>
         private void HandleSkillsChangedHandler(IReadOnlyList<SkillViewData> skills)
         {
-            _skillListView.SetSkills(skills);
-            _skillListView.SetSelectedSkill(_currentSelectedSkillId);
-            SyncEquippedSkillsToSlots();
+            _currentSkills = skills ?? Array.Empty<SkillViewData>();
+            _skillGenreFilterBarView.SetAvailableGenres(ExtractDistinctGenres(_currentSkills));
+            RefreshSkillListOrder();
+        }
+
+        /// <summary>
+        ///     スキル一覧から、絞り込みボタン表示用のジャンル一覧を重複排除して抽出する。
+        /// </summary>
+        /// <param name="skills"> スキル一覧。 </param>
+        /// <returns> ジャンル ID とアイコンの一覧(ジャンル ID 昇順)。 </returns>
+        private static List<(int GenreId, Sprite Icon)> ExtractDistinctGenres(
+            IReadOnlyList<SkillViewData> skills)
+        {
+            SortedDictionary<int, Sprite> genreIcons = new();
+            for (int i = 0; i < skills.Count; i++)
+            {
+                SkillViewData skill = skills[i];
+                if (skill.GenreIds == null || skill.GenreIds.Length == 0)
+                {
+                    continue;
+                }
+
+                int genreId = skill.GenreIds[0];
+                if (!genreIcons.ContainsKey(genreId))
+                {
+                    genreIcons[genreId] = skill.GenreIcon;
+                }
+            }
+
+            List<(int GenreId, Sprite Icon)> result = new(genreIcons.Count);
+            foreach (KeyValuePair<int, Sprite> entry in genreIcons)
+            {
+                result.Add((entry.Key, entry.Value));
+            }
+
+            return result;
         }
 
         /// <summary>
         ///     スロット状態を表示へ反映する。
+        ///     装備/解除のたびに一覧の並び(解放済み/未開放のソート・区切り線)も再構築する。
         /// </summary>
         /// <param name="slots"> スロット状態。 </param>
         private void HandleSlotsChangedHandler(IReadOnlyList<SkillBuildSlotState> slots)
         {
-            IReadOnlyList<SkillBuildSlotState> previousSlots = _currentSlots;
             _currentSlots = slots ?? Array.Empty<SkillBuildSlotState>();
-            _skillBuildSlotLayout?.ApplyChanges(
-                previousSlots,
-                _currentSlots);
+            SyncEquippedSkillsToSlots();
+
+            // ドラッグ完了処理の呼び出し元(要素自身のイベントコールバック)から
+            // 同期的に要素を破棄すると危険なため、一覧の再構築は次フレームへ遅延させる。
+            RootElement.schedule.Execute(RefreshSkillListOrder);
+        }
+
+        /// <summary>
+        ///     現在のスキル一覧を再構築し、選択状態・ジャンル絞り込み・装備バッジを再適用する。
+        /// </summary>
+        private void RefreshSkillListOrder()
+        {
+            if (RootElement.panel == null)
+            {
+                return;
+            }
+
+            _skillListView.SetSkills(_currentSkills);
+            _skillListView.SetSelectedSkill(_currentSelectedSkillId);
+            _skillListView.ApplyGenreFilter(_activeGenreFilter);
+            SyncEquippedSkillsToSlots();
         }
 
         /// <summary>
@@ -310,11 +381,94 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
-        ///     現在の装備状態をスロットへ反映する。
+        ///     現在の装備状態をスロットおよび一覧のバッジへ反映する。
         /// </summary>
         private void SyncEquippedSkillsToSlots()
         {
-            _skillBuildSlotLayout?.ApplyAll(_currentSlots);
+            _skillBuildSlotLayout?.Apply(_currentSlots);
+            _skillListView.SetEquippedSkillIds(ComputeEquippedSkillIds(_currentSlots));
+        }
+
+        /// <summary>
+        ///     スロット状態から装備中スキル ID の集合を構築する。
+        /// </summary>
+        /// <param name="slots"> スロット状態。 </param>
+        /// <returns> 装備中スキル ID の集合。 </returns>
+        private static HashSet<int> ComputeEquippedSkillIds(IReadOnlyList<SkillBuildSlotState> slots)
+        {
+            const int EMPTY_SKILL_ID = -1;
+            HashSet<int> result = new();
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i].CurrentSkillId != EMPTY_SKILL_ID)
+                {
+                    result.Add(slots[i].CurrentSkillId);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     スキル ID から表示データを検索する。
+        /// </summary>
+        /// <param name="skillId"> スキル ID。 </param>
+        /// <returns> 表示データ。見つからない場合は null。 </returns>
+        private SkillViewData? ResolveSkillData(int skillId)
+        {
+            for (int i = 0; i < _currentSkills.Count; i++)
+            {
+                if (_currentSkills[i].SkillId == skillId)
+                {
+                    return _currentSkills[i];
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     スロットタップによる装備解除を処理する。
+        /// </summary>
+        /// <param name="skillId"> 解除するスキル ID。 </param>
+        private void HandleSlotTappedHandler(int skillId)
+        {
+            _viewModel?.ApplyDrop(skillId, null);
+        }
+
+        /// <summary>
+        ///     ジャンルバッジの選択によりジャンル絞り込みを切り替える。
+        /// </summary>
+        /// <param name="genreId"> 選択されたジャンル ID。 </param>
+        private void HandleGenreBadgeSelectedHandler(int genreId)
+        {
+            SetActiveGenreFilter(_activeGenreFilter == genreId ? null : genreId);
+        }
+
+        /// <summary>
+        ///     ジャンルフィルタバーの選択を処理する。
+        /// </summary>
+        /// <param name="genreId"> 選択されたジャンル ID。全てボタンの場合は null。 </param>
+        private void HandleGenreFilterBarSelectedHandler(int? genreId)
+        {
+            if (!genreId.HasValue)
+            {
+                SetActiveGenreFilter(null);
+                return;
+            }
+
+            SetActiveGenreFilter(_activeGenreFilter == genreId.Value ? null : genreId.Value);
+        }
+
+        /// <summary>
+        ///     ジャンル絞り込み状態を更新し、一覧表示とフィルタバーの両方へ反映する。
+        /// </summary>
+        /// <param name="genreId"> 絞り込むジャンル ID。全件表示の場合は null。 </param>
+        private void SetActiveGenreFilter(int? genreId)
+        {
+            _activeGenreFilter = genreId;
+            _skillListView.ApplyGenreFilter(_activeGenreFilter);
+            _skillGenreFilterBarView.SetActiveGenre(_activeGenreFilter);
         }
 
         /// <summary>

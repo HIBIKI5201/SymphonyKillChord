@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 {
     /// <summary>
@@ -5,9 +7,25 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     /// </summary>
     public readonly ref struct SkillDetailDTO
     {
-        public SkillDetailDTO(int skillnodeId, string skillDetail, int unlockCost, bool canUnlock, bool unlocked, bool hasPreviewVideo)
+        public SkillDetailDTO(
+            int skillnodeId,
+            bool hasSkill,
+            string skillName,
+            string skillCommand,
+            string skillGenre,
+            Sprite skillGenreIcon,
+            string skillDetail,
+            int unlockCost,
+            bool canUnlock,
+            bool unlocked,
+            bool hasPreviewVideo)
         {
             SkillNodeId = skillnodeId;
+            HasSkill = hasSkill;
+            SkillName = skillName == null ? "" : skillName;
+            SkillCommand = skillCommand == null ? "" : skillCommand;
+            SkillGenre = skillGenre == null ? "" : skillGenre;
+            SkillGenreIcon = skillGenreIcon;
             SkillDetail = skillDetail == null ? "" : skillDetail;
             UnlockCost = unlockCost;
             CanUnlock = canUnlock;
@@ -16,6 +34,16 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         }
         /// <summary> スキルノードのID </summary>
         public readonly int SkillNodeId;
+        /// <summary> ノードがスキルを解放するか(falseの場合はステータス強化のみのノード) </summary>
+        public readonly bool HasSkill;
+        /// <summary> ノードが解放するスキルの名前 </summary>
+        public readonly string SkillName;
+        /// <summary> ノードが解放するスキルの発動コマンド </summary>
+        public readonly string SkillCommand;
+        /// <summary> ノードが解放するスキルのジャンル表示文 </summary>
+        public readonly string SkillGenre;
+        /// <summary> ノードが解放するスキルのジャンルアイコン </summary>
+        public readonly Sprite SkillGenreIcon;
         /// <summary> スキルの詳細文 </summary>
         public readonly string SkillDetail;
         /// <summary> 解放するための必要ポイント </summary>
