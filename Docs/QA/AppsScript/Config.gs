@@ -10,7 +10,7 @@ const CONFIG = {
    * スプレッドシートのURL https://docs.google.com/spreadsheets/d/【ここ】/edit の部分。
    * 空文字のままにする場合は CREATE_SPREADSHEET_IF_MISSING を true にすること。
    */
-  DESTINATION_SPREADSHEET_ID: '',
+  DESTINATION_SPREADSHEET_ID: '1g3NfpsxYKHK5FMxiSqd3pAEkX7CCiHfw9fWVXzvBiqE',
 
   /**
    * DESTINATION_SPREADSHEET_ID が空のときに、新しいスプレッドシートを作るかどうか。

@@ -1,60 +1,108 @@
 /**
- * CBT QAフォーム生成 — 実行の入口。
+ * QAフォーム生成 — 実行の入口。
  *
  * 責務: 前提条件の検証、生成の順次実行、結果の出力。
  * フォームの作り方そのものは FormFactory / FormItemBuilder の責務。
  *
- * 使い方は README.md を参照。エディタで createQaForms を選んで実行する。
+ * 使い方は README.md を参照。エディタで createQaForms (Android/CBT) または
+ * createPcQaForms (PC/Steam) を選んで実行する。
  */
 
-/** 二重実行を検知するために、生成済みフォームIDを保存するキー。 */
+/** 二重実行を検知するために、生成済みフォームIDを保存するキー (Android/CBT用)。 */
 const CREATED_FORMS_PROPERTY_KEY = 'SKC_CBT_QA_CREATED_FORMS';
 
+/** 二重実行を検知するために、生成済みフォームIDを保存するキー (PC用)。 */
+const CREATED_PC_FORMS_PROPERTY_KEY = 'SKC_PC_QA_CREATED_FORMS';
+
+/** Android/CBT用の回答スプレッドシートのタブ名。 */
+const FORM_URL_SHEET_NAME = 'フォームURL一覧';
+
+/** PC用の回答スプレッドシートのタブ名。Android用と同じシートを汚さないよう別タブにする。 */
+const PC_FORM_URL_SHEET_NAME = 'フォームURL一覧 (PC)';
+
 /**
- * エントリポイント。5つのフォームを作り、URL一覧をログに出す。
+ * エントリポイント (Android/CBT)。5つのフォームを作り、URL一覧をログに出す。
  */
 function createQaForms() {
-  assertNotAlreadyCreated_();
+  createForms_({
+    definitions: buildFormDefinitions(),
+    propertyKey: CREATED_FORMS_PROPERTY_KEY,
+    sheetName: FORM_URL_SHEET_NAME,
+  });
+}
+
+/**
+ * エントリポイント (PC/Steam)。4つのフォームを作り、URL一覧をログに出す。
+ * Android/CBT用フォームとは二重実行の記録・出力タブを分けているため、
+ * 片方だけを作り直すことができる。
+ */
+function createPcQaForms() {
+  createForms_({
+    definitions: buildPcFormDefinitions(),
+    propertyKey: CREATED_PC_FORMS_PROPERTY_KEY,
+    sheetName: PC_FORM_URL_SHEET_NAME,
+  });
+}
+
+/**
+ * 生成済みフォームの記録を消す (Android/CBT)。
+ * ALLOW_RECREATE を使わずに作り直したい場合や、
+ * 手作業でフォームを消した後に記録だけ残った場合に実行する。
+ */
+function resetCreatedFormsRecord() {
+  resetCreatedFormsRecord_(CREATED_FORMS_PROPERTY_KEY, 'createQaForms');
+}
+
+/** 生成済みフォームの記録を消す (PC)。用途は resetCreatedFormsRecord と同じ。 */
+function resetCreatedPcFormsRecord() {
+  resetCreatedFormsRecord_(CREATED_PC_FORMS_PROPERTY_KEY, 'createPcQaForms');
+}
+
+/**
+ * フォーム定義一式からフォームを作り、記録・出力タブ・ログを揃える。
+ * Android/CBT と PC のどちらの実行にも使う共通処理。
+ *
+ * @param {{definitions: Array<Object>, propertyKey: string, sheetName: string}} options
+ */
+function createForms_(options) {
+  const propertyKey = options.propertyKey;
+  const sheetName = options.sheetName;
+
+  assertNotAlreadyCreated_(propertyKey, sheetName);
 
   const spreadsheetId = resolveDestinationSpreadsheetId_();
-  const definitions = buildFormDefinitions();
   const results = [];
 
-  definitions.forEach(function (definition) {
+  options.definitions.forEach(function (definition) {
     const result = createForm(definition, spreadsheetId);
     results.push(result);
     Logger.log('作成しました: ' + result.title);
   });
 
-  saveCreatedForms_(results);
-  writeSummarySheet_(spreadsheetId, results);
-  logSummary_(spreadsheetId, results);
+  saveCreatedForms_(propertyKey, results);
+  writeSummarySheet_(spreadsheetId, sheetName, results);
+  logSummary_(spreadsheetId, sheetName, results);
 }
 
-/**
- * 生成済みフォームの記録を消す。
- * ALLOW_RECREATE を使わずに作り直したい場合や、
- * 手作業でフォームを消した後に記録だけ残った場合に実行する。
- */
-function resetCreatedFormsRecord() {
-  PropertiesService.getScriptProperties().deleteProperty(CREATED_FORMS_PROPERTY_KEY);
-  Logger.log('生成済みの記録を消しました。次回 createQaForms を実行すると作り直します。');
+function resetCreatedFormsRecord_(propertyKey, entryPointName) {
+  PropertiesService.getScriptProperties().deleteProperty(propertyKey);
+  Logger.log('生成済みの記録を消しました。次回 ' + entryPointName + ' を実行すると作り直します。');
 }
 
 /**
  * 二重実行を止める。
  * フォームが重複すると、どちらに回答されたか分からなくなり集計が壊れる。
  */
-function assertNotAlreadyCreated_() {
+function assertNotAlreadyCreated_(propertyKey, sheetName) {
   if (CONFIG.ALLOW_RECREATE) {
     return;
   }
-  const saved = PropertiesService.getScriptProperties().getProperty(CREATED_FORMS_PROPERTY_KEY);
+  const saved = PropertiesService.getScriptProperties().getProperty(propertyKey);
   if (saved) {
     throw new Error(
       'フォームは既に作成済みです。作り直す場合は Config.gs の ALLOW_RECREATE を true にするか、' +
-        'resetCreatedFormsRecord を実行してください。作成済みのURLはログまたは回答スプレッドシートの' +
-        '「フォームURL一覧」タブで確認できます。'
+        '対応する resetCreated...FormsRecord を実行してください。作成済みのURLはログまたは回答スプレッドシートの' +
+        '「' + sheetName + '」タブで確認できます。'
     );
   }
 }
@@ -98,20 +146,16 @@ function assertSpreadsheetAccessible_(spreadsheetId) {
   }
 }
 
-function saveCreatedForms_(results) {
-  PropertiesService.getScriptProperties().setProperty(
-    CREATED_FORMS_PROPERTY_KEY,
-    JSON.stringify(results)
-  );
+function saveCreatedForms_(propertyKey, results) {
+  PropertiesService.getScriptProperties().setProperty(propertyKey, JSON.stringify(results));
 }
 
 /**
  * 回答スプレッドシートに、配布用のURL一覧タブを作る。
  * QAメンバーへ配るときにここを見れば済むようにする。
  */
-function writeSummarySheet_(spreadsheetId, results) {
+function writeSummarySheet_(spreadsheetId, sheetName, results) {
   const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-  const sheetName = 'フォームURL一覧';
   const existing = spreadsheet.getSheetByName(sheetName);
   const sheet = existing ? existing : spreadsheet.insertSheet(sheetName, 0);
   sheet.clear();
@@ -126,11 +170,11 @@ function writeSummarySheet_(spreadsheetId, results) {
   sheet.autoResizeColumns(1, rows[0].length);
 }
 
-function logSummary_(spreadsheetId, results) {
+function logSummary_(spreadsheetId, sheetName, results) {
   Logger.log('--- 作成結果 ---');
   Logger.log('回答スプレッドシート: ' + SpreadsheetApp.openById(spreadsheetId).getUrl());
   results.forEach(function (result) {
     Logger.log(result.key + ' ' + result.title + ' : ' + result.publishedUrl);
   });
-  Logger.log('配布用URLは回答スプレッドシートの「フォームURL一覧」タブにも書き出しました。');
+  Logger.log('配布用URLは回答スプレッドシートの「' + sheetName + '」タブにも書き出しました。');
 }
