@@ -95,18 +95,25 @@ Unity.exe -runTests -batchmode -projectPath . \
           -logFile -
 ```
 
-`.augur/tests.config.json` の runner 定義をこれに合わせる。**現在の設定は
-`-testPlatform` と `-testResults` を持っていないので追記が要る**:
+`.augur/tests.config.json` の runner 定義はこれに合わせてある:
 
 ```jsonc
 "runners": {
   "unity": {
     "command": ["Unity.exe", "-runTests", "-batchmode", "-projectPath", ".",
-                "-testResults", "TestResults/results.xml", "-logFile", "-"],
-    "selectorFlag": "-testFilter"
-  }
+                "-testPlatform", "EditMode",
+                "-testResults", "TestResults/editmode-results.xml", "-logFile", "-"],
+    "selectorFlag": "-testFilter",
+    "reporter": "nunit3"
+  },
+  "command": {}
 }
 ```
+
+`TestRecord.runner` は列挙値 (`vitest` / `cargo` / `gtest` / `unity` / `command`) なので
+**`unity-playmode` のような runner 名は足せない**。`unity` を EditMode 既定とし、
+**PlayMode と Performance のテストは `runner: "command"` で argv を明示して登録する**
+(`-testPlatform PlayMode` と別の `-testResults` を持たせる)。
 
 - `Unity.exe` は PATH に無いので、**バス側で絶対パスに解決する**
   (`augur.config.json` の `buses` に Unity のインストールパスを持つ wrapper バスを足す)。
@@ -132,5 +139,9 @@ Unity.exe -runTests -batchmode -projectPath . \
 4. `augur tests register --from-plan <planId>` で台帳へ載せ、`augur tests run --bundle domain:<name>` を通す
 5. Performance は最後。実機 (Android) が要るので CI ではなく手元のバスで回す
 
-**QA-CS-01 (ダメージ式) と QA-PR-01 (枠拡張) は、仕様側の矛盾が解けるまで書けない**
-(`spec/plan/07-spec-gaps.md` の決定事項 1 と 2)。期待値が 2 通りあるため。
+**QA-PR-02 (装備枠拡張) は仕様側の矛盾が解けるまで書けない** — 枠が 2→3 になる条件が
+「6 個解放後の特別なノード」「バフ・デバフ 1,2 と攻撃 2 を取得」「ノードをすべて獲得した時」の
+3 系統に割れている (`spec/plan/07-spec-gaps.md` の決定事項 2)。
+**QA-CS-01 (ダメージ式) はバフ・デバフ無しの条件なら書ける**。攻撃力バフを含む条件だけが、
+プレイヤー式の除算と敵式の乗算の矛盾 (同 決定事項 1) が解けるまで保留になる。
+QA-PR-01 (末尾ノーツ競合) は仕様に具体例があるので保留ではない。

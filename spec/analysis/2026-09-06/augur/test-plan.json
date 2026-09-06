@@ -1,5 +1,5 @@
 {
-  "planId": "plan_01M1VM26DPAGPDDG0PF6AY9HBX",
+  "planId": "plan_01M1VR4ZQP8NNJXJENGNPGT7VY",
   "repository": "MELPOT/SymphonyKillChord",
   "headSha": "0a624fa2f",
   "source": {
@@ -26,7 +26,7 @@
         "0140074059659583"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -66,7 +66,7 @@
         "0557f5d00760cc09"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -108,7 +108,7 @@
         "0a218b7f2da09642"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -148,7 +148,7 @@
         "0a83a1fa6a3219c9"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -191,7 +191,7 @@
         "17d5e20a16b59f51"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -233,7 +233,7 @@
         "1a2ad96fbe4e5946"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -273,7 +273,7 @@
         "1ddf65e619a0f818"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -315,7 +315,7 @@
         "1f707dd2c1be1094"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -357,7 +357,7 @@
         "20d002cd2d40ecd4"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -399,7 +399,7 @@
         "24dc0b735591edcd"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -441,7 +441,7 @@
         "24fb5b5e2b47d604"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -483,7 +483,7 @@
         "26b99788c93111c2"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -525,7 +525,7 @@
         "27db24ed3f3cc02b"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -568,7 +568,7 @@
         "294f18693cd49424"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -611,7 +611,7 @@
         "2ef7d0a8a4da080c"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -653,7 +653,7 @@
         "2f12b4320d414883"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -693,7 +693,7 @@
         "3177dc227d910a09"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -736,7 +736,7 @@
         "389d4541b3d2efd3"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -778,7 +778,7 @@
         "3c325b7fe78da3cd"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -821,7 +821,7 @@
         "41c05a8dc16e3688"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -864,7 +864,7 @@
         "4c5853964e4b4e68"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -906,7 +906,7 @@
         "4f2b0a7a8c129941"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -949,7 +949,7 @@
         "51a9e55ef7890ff6"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -991,7 +991,7 @@
         "52a8724cf84c0f91"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1033,7 +1033,7 @@
         "53cb1cc741e385a8"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1076,7 +1076,7 @@
         "590a658a71ff8fab"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1119,7 +1119,7 @@
         "5ecf0519b538cdc2"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1162,7 +1162,7 @@
         "5fa78ef9efe662bc"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1204,7 +1204,7 @@
         "710b299249a0f158"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1246,7 +1246,7 @@
         "71140ea94e4101d0"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1288,7 +1288,7 @@
         "737b959a374e37f4"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1328,7 +1328,7 @@
         "7c4fb4678891c72d"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScopeTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScopeTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1370,7 +1370,7 @@
         "80fc6983794dc3cc"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1412,7 +1412,7 @@
         "83e617b24c6a2fe8"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1454,7 +1454,7 @@
         "8ea4fbd363c0bd01"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1494,7 +1494,7 @@
         "9765882327876cb7"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1534,7 +1534,7 @@
         "97fb1c763adf37aa"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1576,7 +1576,7 @@
         "9d05c6b3af0908fc"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1618,7 +1618,7 @@
         "a93b2f79338bfffc"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1658,7 +1658,7 @@
         "b03a6e106771944f"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1700,7 +1700,7 @@
         "b8848fa2ad1d10fe"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1742,7 +1742,7 @@
         "bc4aa4e8c320e8cf"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1784,7 +1784,7 @@
         "c0d797162398bd7c"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializerTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializerTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1826,7 +1826,7 @@
         "c5ebbc472f549f94"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -1868,7 +1868,7 @@
         "d173bd129c07d7e5"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/Persistent/Music/MusicPlayerTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/Persistent/Music/MusicPlayerTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1908,7 +1908,7 @@
         "d85ed2533ad70209"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1950,7 +1950,7 @@
         "e0c25f7dd4c86271"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -1992,7 +1992,7 @@
         "e16a7970803777a7"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
       "runner": "unity",
       "runtime": false,
       "brief": {
@@ -2034,7 +2034,7 @@
         "e4eefd3e5b77c9da"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillTreeFocusPresenterTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillTreeFocusPresenterTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -2074,7 +2074,7 @@
         "e73afaff382545e9"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemViewTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemViewTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -2114,7 +2114,7 @@
         "f31fa31f9eb8b115"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -2154,7 +2154,7 @@
         "ff9678396d015369"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -2196,7 +2196,7 @@
         "ffa3d3d2bee4fa97"
       ],
       "impacted": [],
-      "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializerTests.cs",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializerTests.cs",
       "runner": "unity",
       "runtime": true,
       "brief": {
@@ -2239,7 +2239,7 @@
           "003c596bb24dca66"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Develop/Composition/OutGame/DevelopSkillUnlockInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Develop/Composition/OutGame/DevelopSkillUnlockInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2285,7 +2285,7 @@
           "0103b75a36fc0b69"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2331,7 +2331,7 @@
           "0379810282050cc4"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2377,7 +2377,7 @@
           "06f91bfa98827895"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2420,7 +2420,7 @@
           "07b31fa4986a2f7e"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2463,7 +2463,7 @@
           "0c7f6e368d72a8ec"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScopeTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScopeTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2506,7 +2506,7 @@
           "0d0746ca591d2152"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2551,7 +2551,7 @@
           "0fdb1f753dc77129"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2597,7 +2597,7 @@
           "106fc584baaf947c"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2643,7 +2643,7 @@
           "130d02489f83b7eb"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2686,7 +2686,7 @@
           "14826b08bd9523b1"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2731,7 +2731,7 @@
           "1621d90b997c0bb6"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2777,7 +2777,7 @@
           "16324f260f484464"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2823,7 +2823,7 @@
           "1afa29117b80a0c9"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2866,7 +2866,7 @@
           "1feca574ac9e2673"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2912,7 +2912,7 @@
           "24d0dbe4cfa0e541"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -2958,7 +2958,7 @@
           "253decb05f83974a"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3003,7 +3003,7 @@
           "25fdb94d49b84604"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3048,7 +3048,7 @@
           "2b4199fe7ede6167"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3094,7 +3094,7 @@
           "2be10b8d776ad610"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3140,7 +3140,7 @@
           "2ff8a36b4a5df990"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillDetailScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillDetailScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3186,7 +3186,7 @@
           "3264e3af3b6047f4"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3232,7 +3232,7 @@
           "32733825672354d8"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/BattlePreparationScreenTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/BattlePreparationScreenTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3278,7 +3278,7 @@
           "35241c73cf424438"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageNodeViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageNodeViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3321,7 +3321,7 @@
           "39a68bca375e9016"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3364,7 +3364,7 @@
           "39eb532784f9680d"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3410,7 +3410,7 @@
           "3b6db0ffa0ab5396"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/StageSelectScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/StageSelectScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3455,7 +3455,7 @@
           "3c11982441cfddae"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3500,7 +3500,7 @@
           "3dcd348e54e73ee6"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3545,7 +3545,7 @@
           "3ea4652faaeaecf1"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3591,7 +3591,7 @@
           "433601936ebc13b3"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3637,7 +3637,7 @@
           "44239b7036d096cb"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3683,7 +3683,7 @@
           "49a5d534b28a7b5d"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/HomeScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/HomeScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3728,7 +3728,7 @@
           "4cd8d7d36518fe16"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3774,7 +3774,7 @@
           "4cf138da10bcee18"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3820,7 +3820,7 @@
           "5061d386cf10b37b"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3865,7 +3865,7 @@
           "510a4e28a2cbdc1b"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3911,7 +3911,7 @@
           "51e84da0f48a4f0b"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/BattlePreparationScreenTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/BattlePreparationScreenTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -3954,7 +3954,7 @@
           "58acbe151d679d0c"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/AutoBuilder/AutoBuilderTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/AutoBuilder/AutoBuilderTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4000,7 +4000,7 @@
           "590d8db22fd133d2"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4046,7 +4046,7 @@
           "594c4a9e02948829"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4089,7 +4089,7 @@
           "5d07c8e7ab4211ab"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScopeTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScopeTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4135,7 +4135,7 @@
           "60bde972fcb8b559"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/BattlePreparationScreenTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/BattlePreparationScreenTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4181,7 +4181,7 @@
           "61ff0a5ff5fa141a"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4224,7 +4224,7 @@
           "62c7ea5be19b0fb4"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4270,7 +4270,7 @@
           "64a725c8ef065559"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4315,7 +4315,7 @@
           "64d49290f5798dec"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4361,7 +4361,7 @@
           "65802aff73645216"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -4407,7 +4407,7 @@
           "66d8d6ef9b57f3a7"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4453,7 +4453,7 @@
           "6996894eea4941e9"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -4498,7 +4498,7 @@
           "6aba978fa68b1c3c"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4544,7 +4544,7 @@
           "6ac7dbee21875ab8"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4590,7 +4590,7 @@
           "6c1d21017f1e3506"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4636,7 +4636,7 @@
           "6d4fd61e36b6a1d4"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4681,7 +4681,7 @@
           "6ded5deb68e24239"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4727,7 +4727,7 @@
           "6f80742315b9d60c"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4773,7 +4773,7 @@
           "70e6390e80db5097"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/PreviewVideoScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/PreviewVideoScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4819,7 +4819,7 @@
           "71714b705e585599"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4865,7 +4865,7 @@
           "73c13e41fc360abf"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4911,7 +4911,7 @@
           "79fa3ab6a931ffac"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -4956,7 +4956,7 @@
           "7a6717b871f743ab"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5002,7 +5002,7 @@
           "7a76ca11fa71d577"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5045,7 +5045,7 @@
           "7b08bc1df7fc7538"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5091,7 +5091,7 @@
           "7fa02ae293788cab"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5137,7 +5137,7 @@
           "7fb9509ead69dafb"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5183,7 +5183,7 @@
           "8012c00a43cc32d4"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5228,7 +5228,7 @@
           "83a8b589c66ea820"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5274,7 +5274,7 @@
           "83ae2fa28caf61a7"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenViewTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -5320,7 +5320,7 @@
           "843318f21a93d3ac"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5366,7 +5366,7 @@
           "84b6ccbef433878e"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5409,7 +5409,7 @@
           "869d1cb283ef6259"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/AutoBuilder/AutoBuilderTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/AutoBuilder/AutoBuilderTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5455,7 +5455,7 @@
           "8800d48d993c8fa0"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5500,7 +5500,7 @@
           "882dcab7c9c8b078"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5546,7 +5546,7 @@
           "8ad6efe7afb651d9"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5592,7 +5592,7 @@
           "8add0c5c9a130285"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5637,7 +5637,7 @@
           "8b44074c8d99a507"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5680,7 +5680,7 @@
           "8b44760c32ef1940"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5725,7 +5725,7 @@
           "8d365fecf545cc71"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5768,7 +5768,7 @@
           "902125d7c81f95d8"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5811,7 +5811,7 @@
           "905ea4517bda58de"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Develop/Composition/OutGame/DevelopSkillUnlockInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Develop/Composition/OutGame/DevelopSkillUnlockInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5854,7 +5854,7 @@
           "923778a529d8296e"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5900,7 +5900,7 @@
           "92fdbe11535bb3e3"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -5943,7 +5943,7 @@
           "9386a719c21e86a1"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScopeTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScopeTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -5988,7 +5988,7 @@
           "9532e8e9c939079a"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6034,7 +6034,7 @@
           "957b2bc3797c859a"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6080,7 +6080,7 @@
           "966b94a903bec86c"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6126,7 +6126,7 @@
           "976495835e161392"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6171,7 +6171,7 @@
           "98f097543b8b7e1c"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6214,7 +6214,7 @@
           "99cd4a7796a2a973"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -6257,7 +6257,7 @@
           "9d3bc99b88c887f7"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6302,7 +6302,7 @@
           "9f30f4a4adaaa639"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6348,7 +6348,7 @@
           "a367604e27524e78"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6391,7 +6391,7 @@
           "a387f068767d6fca"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6436,7 +6436,7 @@
           "a412fdbb9d4909b3"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6482,7 +6482,7 @@
           "a43b555dac7aaf80"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6525,7 +6525,7 @@
           "a4c84e3287f4e0a9"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6568,7 +6568,7 @@
           "a53bd25ebc990b28"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -6611,7 +6611,7 @@
           "a6d02f39f440fefb"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -6654,7 +6654,7 @@
           "a74d6e5f642c8677"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -6700,7 +6700,7 @@
           "a7a2730d0091367c"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6746,7 +6746,7 @@
           "a807822c499360cd"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6791,7 +6791,7 @@
           "acc602ececa151c8"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6834,7 +6834,7 @@
           "ad74e3a34ccd23fe"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemViewTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -6880,7 +6880,7 @@
           "aff0831f96c645b5"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6926,7 +6926,7 @@
           "b0383876001a06f7"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/StageSelectScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/StageSelectScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -6972,7 +6972,7 @@
           "b2a9e8e61dbf2ad5"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -7018,7 +7018,7 @@
           "b47c5daa373345e8"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7064,7 +7064,7 @@
           "b4b64a366c9f0b54"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7107,7 +7107,7 @@
           "b4e66e0a4784b71a"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7150,7 +7150,7 @@
           "b9bb3d4882ab6c76"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7196,7 +7196,7 @@
           "ba14e5b389f16c40"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7242,7 +7242,7 @@
           "ba1b3d2ed8f7acbb"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7288,7 +7288,7 @@
           "bcb7796f37397c9e"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7334,7 +7334,7 @@
           "bdc437a13d840aa7"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageDetailScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageDetailScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7379,7 +7379,7 @@
           "c0ddf96c7967e922"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7425,7 +7425,7 @@
           "c1d6558f0ea74414"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7471,7 +7471,7 @@
           "c24cee00d84c0dc2"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7517,7 +7517,7 @@
           "c4a9a497203c0a29"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7560,7 +7560,7 @@
           "c516b7cfe15cf28d"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -7606,7 +7606,7 @@
           "c6d00ee37806398d"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7652,7 +7652,7 @@
           "c7863fd1027debaf"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7698,7 +7698,7 @@
           "c81e490898df0607"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7741,7 +7741,7 @@
           "c8bc2e67551f6286"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -7787,7 +7787,7 @@
           "c911567baa4b2297"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/HomeScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/HomeScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7832,7 +7832,7 @@
           "c952b8e62a2ecafe"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7878,7 +7878,7 @@
           "c9588617d46ee914"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7924,7 +7924,7 @@
           "ca87469d60b15256"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -7970,7 +7970,7 @@
           "cd0599c56430689d"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -8016,7 +8016,7 @@
           "ce148268a0818699"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8062,7 +8062,7 @@
           "d0d76fe31a4d7dc7"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8108,7 +8108,7 @@
           "d2085af4fdb33714"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillNodeViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillNodeViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8154,7 +8154,7 @@
           "d43a4eabb827b7fd"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8197,7 +8197,7 @@
           "d4f8f0f0fbac0428"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -8243,7 +8243,7 @@
           "da05cf6e62fd55c6"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8286,7 +8286,7 @@
           "dc8e8b793c764bfb"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuterTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8332,7 +8332,7 @@
           "dca7217f1b60d098"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageDetailScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageDetailScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8378,7 +8378,7 @@
           "de0f0c8569b5e6bf"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8424,7 +8424,7 @@
           "e086366747194c45"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8469,7 +8469,7 @@
           "e49c7d9b13c4d018"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -8514,7 +8514,7 @@
           "e69a1e2d3e4d934f"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8560,7 +8560,7 @@
           "e7c6e4a03845ce6e"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8603,7 +8603,7 @@
           "e7f42cc7d0587198"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -8648,7 +8648,7 @@
           "e889f606367e70e8"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8691,7 +8691,7 @@
           "e924128145f0ee5c"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8734,7 +8734,7 @@
           "e93a10be2481be44"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/AutoBuilder/AutoBuilderTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/AutoBuilder/AutoBuilderTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8777,7 +8777,7 @@
           "e98eec07f8891a93"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8823,7 +8823,7 @@
           "e9bfe659ee275bab"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8869,7 +8869,7 @@
           "e9f52cc2f780d000"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -8914,7 +8914,7 @@
           "ed327e498fd4b557"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -8957,7 +8957,7 @@
           "eed7692c277cb3e1"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/Build/FontBuildValidatorTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9002,7 +9002,7 @@
           "eeec01d9e424ebd0"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9048,7 +9048,7 @@
           "f0187cdf8dba730f"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9091,7 +9091,7 @@
           "f0d8b90b0f28d0a7"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Editor/Scripts/AutoBuilder/AutoBuilderTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Editor/Scripts/AutoBuilder/AutoBuilderTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9137,7 +9137,7 @@
           "f2950a4abc2ae8a6"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
         "runner": "unity",
         "runtime": true,
         "brief": {
@@ -9183,7 +9183,7 @@
           "f386116d62989c4d"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9228,7 +9228,7 @@
           "f5f5edc9751c378f"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9273,7 +9273,7 @@
           "f60f62647344bf9c"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillTreeFocusPresenterTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillTreeFocusPresenterTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9319,7 +9319,7 @@
           "f6177cd1828f4f9a"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9365,7 +9365,7 @@
           "f6a2b5430bc0a9c1"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenViewTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9411,7 +9411,7 @@
           "f6b2eddc10900f1a"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9457,7 +9457,7 @@
           "f766ad4adb5c3101"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {
@@ -9503,7 +9503,7 @@
           "f7a1e2d1fa0d3eac"
         ],
         "impacted": [],
-        "file": "Assets/Tests/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
+        "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
         "runner": "unity",
         "runtime": false,
         "brief": {

@@ -4,7 +4,7 @@ Anatomia のビジネスドメイン (10) x `spec/feature/game-spec.md` GS-01〜
 
 | 総数 | critical | high | medium | 機械 | 人間 | 機械+人間 | CBTシートへ追加 | 仕様未確定で保留 |
 |---|---|---|---|---|---|---|---|---|
-| 56 | 17 | 29 | 10 | 29 | 19 | 8 | 13 | 7 |
+| 56 | 17 | 29 | 10 | 29 | 19 | 8 | 13 | 6 |
 
 **読み方** — 各行は `ID (実行者 / 優先度 / 種別 / 走らせ方) 概要 — 期待結果` + 補足。
 
@@ -18,7 +18,7 @@ Anatomia のビジネスドメイン (10) x `spec/feature/game-spec.md` GS-01〜
 ## Rhythm Input and Kill Chord Resolution (6)
 
 - **QA-RH-01** (機械+人間 / critical / assurance / EditMode) **6拍種の判定** — 入力間隔をBPM補正した拍種が1,2,3,4,6,8のいずれかで記録され、HUDのノーツ表示と一致する
-  - GS-01 ・ CBT 4-3/4-4 ・ ⚠ 要裁定(GS-01矛盾: コアメカニクスは12/16を含む8拍種)
+  - GS-01 ・ CBT 4-3/4-4
 - **QA-RH-02** (機械 / critical / assurance / EditMode) **Allノーツになる3条件** — 3条件すべてで拍が判定されずAllノーツとなり、コマンド先頭でのみ使用できる
   - GS-01 ・ CBT 4-5〜4-7
 - **QA-RH-03** (機械+人間 / high / assurance / EditMode) **Just判定** — grid一致入力のみJust判定になり、判定表示が区別できる
@@ -45,9 +45,9 @@ Anatomia のビジネスドメイン (10) x `spec/feature/game-spec.md` GS-01〜
 
 ## Combat State and Effect Resolution (6)
 
-- **QA-CS-01** (機械 / critical / assurance / EditMode) **通常ダメージ計算** — 非criticalダメージ = 攻撃力 x 攻撃時補正
-  - GS-02 ・ CBT 5-10
-- **QA-CS-02** (機械 / high / assurance / EditMode) **クリティカル倍率** — 通常計算にcritical倍率がさらに乗る
+- **QA-CS-01** (機械 / critical / assurance / EditMode) **ダメージ計算式 (バフ・デバフ無し)** — GS-02 の統一式どおり 基礎ダメージ量 × Justダメージ倍率 × クリティカルダメージ倍率 になる (バフ・デバフ項は 1 倍)
+  - GS-02 ・ CBT 5-10 ・ ⚠ バフ・デバフ有りの条件は保留 — GS-02 の統一式がプレイヤー側は攻撃力バフで除算、敵側は乗算で矛盾
+- **QA-CS-02** (機械 / high / assurance / EditMode) **クリティカル倍率** — クリティカル率%の確率で発生し、発生時は通常計算にクリティカルダメージ倍率が乗る
   - GS-02 ・ CBT 5-10
 - **QA-CS-03** (機械 / high / regression / EditMode) **多段ヒット抑制** — 1回の攻撃で同一対象に重複ダメージが入らない
   - GS-02 ・ CBT 5-18 追加
@@ -88,8 +88,8 @@ Anatomia のビジネスドメイン (10) x `spec/feature/game-spec.md` GS-01〜
   - GS-05 ・ CBT 8-3
 - **QA-ME-02** (人間 / high / assurance) **敗北リザルトの表示項目** — サブミッション/ランクの代わりに攻略Tipsが表示され、完了と再出撃が選べる
   - GS-05 ・ CBT 8-4/8-5
-- **QA-ME-03** (機械 / high / assurance / EditMode) **ランク判定 C/B/A/S** — C/B/A/S が仕様どおり決まる
-  - GS-06 ・ CBT 8-6 ・ ⚠ 要裁定(GS-06: ランク計算式が仕様に無い)
+- **QA-ME-03** (機械 / high / assurance / EditMode) **ランク判定 C/B/A/S** — メインのみ=C / サブ1つ達成=B / 2つ=A / 3つ=S になる (サブミッションは重複ありで3つ課される)
+  - GS-06 ・ CBT 8-6
 - **QA-ME-04** (機械 / medium / assurance / EditMode) **リザルト後の戻り先** — 仕様で定めた画面へ戻る
   - GS-05 ・ CBT 8-10 ・ ⚠ 要裁定(GS-05矛盾: Home と 作戦/StageSelect で記述が割れる)
 - **QA-ME-05** (機械+人間 / high / assurance / PlayMode) **再出撃** — 同じステージが編成を保ったまま開始する
