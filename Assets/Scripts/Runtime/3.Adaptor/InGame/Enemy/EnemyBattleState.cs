@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
@@ -18,6 +19,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             FirstAttack = true;
             IsStunned = false;
             IsBattleAIActivated = true;
+            IsDiscovered = false;
         }
 
         /// <summary> 攻撃者（自身）のエンティティ </summary>
@@ -34,6 +36,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary> 硬直中か </summary>
         public bool IsStunned { get; private set; }
         public bool IsBattleAIActivated { get; private set; }
+        /// <summary> 攻撃後の行動選択によって一時的に上書きされた移動先 </summary>
+        public Vector3? OverrideDestination { get; private set; }
+        /// <summary> プレイヤーを発見済みか </summary>
+        public bool IsDiscovered { get; private set; }
 
         /// <summary> 攻撃目標が攻撃範囲に入った </summary>
         public void EnterRange() => IsInAttackRange = true;
@@ -49,6 +55,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public void StartBattleAI() => IsBattleAIActivated = true;
         /// <summary> 敵の戦闘系AIを無効化 </summary>
         public void StopBattleAI() => IsBattleAIActivated = false;
+        /// <summary> 攻撃後の一時的な移動先を設定する </summary>
+        public void SetOverrideDestination(Vector3 destination) => OverrideDestination = destination;
+        /// <summary> 一時的な移動先の上書きを解除する </summary>
+        public void ClearOverrideDestination() => OverrideDestination = null;
+        /// <summary> プレイヤーを発見済みにする </summary>
+        public void Discover() => IsDiscovered = true;
 
         /// <summary>
         ///     再初期化処理。
@@ -59,6 +71,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             FirstAttack = true;
             IsStunned = false;
             IsBattleAIActivated = true;
+            OverrideDestination = null;
+            IsDiscovered = false;
         }
     }
 }
