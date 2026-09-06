@@ -71,9 +71,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly string _slotName;
         private readonly Action<VisualElement, VisualElement> _onDropAction;
 
-        private const string DRAGGABLE_CLASS_NAME = "draggable";
         private const string DRAG_COMPLETED_CLASS_NAME = "drag-just-completed";
-        private const string SKILL_ELEMENT_LIST_CLASS_NAME = "skill-element-list";
         private const string SKILL_BUILD_ROOT_NAME = "SkillBuildRoot";
         private const float DRAG_START_THRESHOLD = 10f;
 
@@ -90,6 +88,10 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
         // ドラッグ開始時のスキル要素の親要素を保持するフィールド。
         private VisualElement _startParent;
+
+        // ドラッグ開始時のスキル要素の並び順(インデックス)を保持するフィールド。
+        // スナップバック時に一覧の末尾へ追加されてしまわないよう、元の位置へ挿入し直すために使う。
+        private int _startIndex;
 
         // ドラッグ中にスキル要素を一時的に追加するスキルビルド画面のルート要素を保持するフィールド。
         private VisualElement _skillBuildScreen;
@@ -111,6 +113,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _pointerStartPanel = (Vector2)evt.position;
             _elementStartWorld = target.worldBound.position;
             _startParent = target.parent;
+            _startIndex = GetChildIndex(_startParent, target);
             target.CapturePointer(evt.pointerId);
 
             // 親の ScrollView にポインター操作を渡すと、ドラッグ開始前に
@@ -238,39 +241,20 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     現在位置に応じてドロップ、リストへの移動、または開始位置への復帰を行う。
+        ///     ドロップ位置を判定して装備状態の更新を通知し、
+        ///     スキル要素は結果によらず常に一覧上の元の位置へ戻す。
         /// </summary>
         private void CompleteDrag()
         {
             if (!_isDragging) { return; }
 
-            VisualElement targetElement;
+            bool droppedOnSlot = TryFindClosestSlot(requireOverlap: true, out VisualElement slotElement);
 
-            if (TryFindClosestSlot(requireOverlap: true, out targetElement))
-            {
-                // スロットに既存のスキル要素がある場合は、元の親要素へ移動させてスワップする。
-                VisualElement existingSkill = FindSkillInSlot(targetElement);
-                if (existingSkill != null)
-                {
-                    SwapSkillToParent(existingSkill, _startParent);
-                }
+            // カード要素は装備の成否によらず、常に一覧の元位置へ戻す。
+            // 装備状態はバッジ表示で示すため、スロットへの再親化は行わない。
+            SnapBackToStart();
 
-                // ドラッグしたスキル要素をスロットへ移動する。
-                MoveSkillToSlot(target, targetElement);
-                _onDropAction?.Invoke(target, targetElement);
-            }
-            else if (TryFindSkillList(requireOverlap: true, out targetElement))
-            {
-                // ドロップ先が入手済みスキルリストの場合は、スキル要素を入手済みスキルリストへ移動する。
-                MoveSkillToList(target, targetElement);
-                _onDropAction?.Invoke(target, targetElement);
-            }
-            else
-            {
-                // ドロップ先スロットが見つからない場合は、ドラッグ開始位置に戻す。
-                SnapBackToStart();
-                _onDropAction?.Invoke(target, null);
-            }
+            _onDropAction?.Invoke(target, droppedOnSlot ? slotElement : null);
 
             _isDragging = false;
         }
@@ -391,36 +375,17 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     ドロップ可能な入手済みスキルリストを検索するメソッド。
-        /// </summary>
-        /// <param name="requireOverlap"></param>
-        /// <param name="element"></param>
-        /// <returns></returns>
-        private bool TryFindSkillList(bool requireOverlap, out VisualElement element)
-        {
-            element = null;
-            if (target.panel == null || _skillBuildScreen == null) { return false; }
-
-            VisualElement skillListRoot =
-                _skillBuildScreen.Query<VisualElement>(className: SKILL_ELEMENT_LIST_CLASS_NAME);
-
-            if (skillListRoot == null) { return false; }
-            if (requireOverlap && !target.worldBound.Overlaps(skillListRoot.worldBound)) { return false; }
-
-            element = skillListRoot;
-            return true;
-        }
-
-        /// <summary>
-        ///    ドロップ可能なスロットが見つからない場合や、ドロップがキャンセルされた場合に、
-        ///    スキル要素をドラッグ開始位置にスナップバックさせるメソッド。
+        ///    ドロップ結果によらず、スキル要素をドラッグ開始位置(一覧上の元位置)へ
+        ///    スナップバックさせるメソッド。
         /// </summary>
         private void SnapBackToStart()
         {
             if (target.parent == null) { return; }
 
-            // ドラッグ開始位置にスキル要素を戻すために、ドラッグ開始時の親要素に再度追加する。
-            _startParent.Add(target);
+            // Add() は末尾に追加されてしまい元の並び順が崩れるため、
+            // ドラッグ開始時のインデックスへ挿入し直して並び順を保つ。
+            int insertIndex = Mathf.Clamp(_startIndex, 0, _startParent.childCount);
+            _startParent.Insert(insertIndex, target);
 
             // スタイルをリセットする。
             target.style.position = Position.Relative;
@@ -431,76 +396,27 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     指定スロット内に含まれるスキル要素を返すメソッド。
-        ///     スロット直下に draggable クラスを持つ子要素が存在する場合にそれを返す。
-        ///     存在しない場合は null を返す。
+        ///     指定した親要素における子要素のインデックスを取得するメソッド。
         /// </summary>
-        /// <param name="slot"> 検索対象のスロット VisualElement。 </param>
-        /// <returns> スロット内のスキル要素。存在しない場合は null。 </returns>
-        private VisualElement FindSkillInSlot(VisualElement slot)
+        /// <param name="parent"> 検索対象の親要素。 </param>
+        /// <param name="child"> 検索するインデックス。 </param>
+        /// <returns> 子要素のインデックス。見つからない場合は -1。 </returns>
+        private static int GetChildIndex(VisualElement parent, VisualElement child)
         {
-            // スロット直下の draggable クラスを持つ要素を検索する。
-            return slot.Q<VisualElement>(className: DRAGGABLE_CLASS_NAME);
-        }
+            if (parent == null) { return -1; }
 
-        /// <summary>
-        ///     スキル要素を指定した親要素へ移動させるメソッド。
-        ///     スワップ時に既存スキルをドラッグ元の親へ戻す際に使用する。
-        /// </summary>
-        /// <param name="skill"> 移動対象のスキル VisualElement。 </param>
-        /// <param name="newParent"> 移動先の親 VisualElement。 </param>
-        private void SwapSkillToParent(VisualElement skill, VisualElement newParent)
-        {
-            if (skill == null || newParent == null) { return; }
+            int index = 0;
+            foreach (VisualElement current in parent.Children())
+            {
+                if (ReferenceEquals(current, child))
+                {
+                    return index;
+                }
 
-            // 移動先の親要素にスキル要素を追加する（元の親から自動的に切り離される）。
-            newParent.Add(skill);
+                index++;
+            }
 
-            // 移動先の親要素のレイアウトに合わせて、スキル要素のスタイルをリセットする。
-            skill.style.position = Position.Relative;
-            skill.style.left = StyleKeyword.Null;
-            skill.style.top = StyleKeyword.Null;
-        }
-
-        /// <summary>
-        ///     スキル要素をスロットへ移動し、スロット中央にスナップさせるメソッド。
-        /// </summary>
-        /// <param name="skill"> 移動対象のスキル VisualElement。 </param>
-        /// <param name="slot"> 移動先のスロット VisualElement。 </param>
-        private void MoveSkillToSlot(VisualElement skill, VisualElement slot)
-        {
-            if (skill == null || slot == null) { return; }
-
-            // スロットにスキル要素を追加する（元の親から自動的に切り離される）。
-            slot.Add(skill);
-
-            Vector2 skillElementSize = new Vector2(skill.resolvedStyle.width, skill.resolvedStyle.height);
-
-            // スキル要素の中心がスロットの中心に来るように位置を設定する。
-            Vector2 desiredWorld = slot.worldBound.center - (skillElementSize * 0.5f);
-            Vector2 desiredLocal = slot.WorldToLocal(desiredWorld);
-
-            skill.style.position = Position.Absolute;
-            skill.style.left = desiredLocal.x;
-            skill.style.top = desiredLocal.y;
-        }
-
-        /// <summary>
-        ///     ドロップされたスキル要素を入手済みスキルリストへ移動させるメソッド。
-        /// </summary>
-        /// <param name="skill"> 移動対象のスキル VisualElement。 </param>
-        /// <param name="list"> 移動先の入手済みスキルリスト VisualElement。 </param>
-        private void MoveSkillToList(VisualElement skill, VisualElement list)
-        {
-            if (skill == null || list == null) { return; }
-
-            // 入手済みスキルリストにスキル要素を追加する（元の親から自動的に切り離される）。
-            list.Add(skill);
-
-            // スタイルをリセットする。
-            skill.style.position = Position.Relative;
-            skill.style.left = StyleKeyword.Null;
-            skill.style.top = StyleKeyword.Null;
+            return -1;
         }
     }
 }

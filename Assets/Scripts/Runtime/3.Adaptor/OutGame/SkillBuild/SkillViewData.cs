@@ -20,6 +20,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <param name="effectDescription"> 効果説明。 </param>
         /// <param name="tips"> 改造画面に表示するスキルTips。 </param>
         /// <param name="level"> レベル。 </param>
+        /// <param name="isUnlocked"> 解放済みの場合は true。 </param>
+        /// <param name="genreIcon"> ジャンルバッジアイコン。 </param>
+        /// <param name="genreIds"> スキルが属するジャンル ID 一覧(絞り込み判定用、Domain 非依存)。 </param>
         public SkillViewData(
             int skillId,
             string displayName,
@@ -29,7 +32,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             bool hasEffectDescription,
             string effectDescription,
             string tips,
-            int level)
+            int level,
+            bool isUnlocked,
+            Sprite genreIcon,
+            int[] genreIds)
         {
             SkillId = skillId;
             DisplayName = displayName ?? string.Empty;
@@ -40,6 +46,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             EffectDescription = effectDescription ?? string.Empty;
             Tips = tips ?? string.Empty;
             Level = level;
+            IsUnlocked = isUnlocked;
+            GenreIcon = genreIcon;
+            GenreIds = genreIds ?? Array.Empty<int>();
         }
 
         /// <summary> スキル ID。 </summary>
@@ -69,6 +78,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <summary> レベル。 </summary>
         public int Level { get; }
 
+        /// <summary> 解放済みの場合は true。 </summary>
+        public bool IsUnlocked { get; }
+
+        /// <summary> ジャンルバッジアイコン。 </summary>
+        public Sprite GenreIcon { get; }
+
+        /// <summary> スキルが属するジャンル ID 一覧(絞り込み判定用、Domain 非依存)。 </summary>
+        public int[] GenreIds { get; }
+
         /// <summary>
         ///     等値比較を行う。
         /// </summary>
@@ -84,7 +102,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                    HasEffectDescription == other.HasEffectDescription &&
                    EffectDescription == other.EffectDescription &&
                    Tips == other.Tips &&
-                   Level == other.Level;
+                   Level == other.Level &&
+                   IsUnlocked == other.IsUnlocked &&
+                   GenreIcon == other.GenreIcon;
         }
 
         /// <summary>
@@ -113,6 +133,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             hashCode.Add(EffectDescription);
             hashCode.Add(Tips);
             hashCode.Add(Level);
+            hashCode.Add(IsUnlocked);
+            hashCode.Add(GenreIcon);
             return hashCode.ToHashCode();
         }
     }
