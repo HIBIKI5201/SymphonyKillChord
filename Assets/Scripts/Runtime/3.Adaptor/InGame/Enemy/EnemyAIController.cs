@@ -17,7 +17,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             EnemyAttackReservationUsecase enemyAttackReservationUsecase,
             EnemyBattleState enemyBattleState,
             IEnemyStateFacade stateFacade,
-            IEnemyAttackController attackController
+            IEnemyAttackController attackController,
+            EnemyPostAttackBehaviorUsecase postAttackBehaviorUsecase,
+            ObstacleSearchService obstacleSearchService,
+            EnemyAIControllerRegistry registry
             )
         {
             _enemyMoveUsecase = enemyMoveUsecase;
@@ -25,6 +28,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _enemyBattleState = enemyBattleState;
             _stateFacade = stateFacade;
             _attackController = attackController;
+            _postAttackBehaviorUsecase = postAttackBehaviorUsecase;
+            _obstacleSearchService = obstacleSearchService;
+            _registry = registry;
             _isActive = false;
         }
 
@@ -83,6 +89,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         /// <summary> 敵が攻撃中か。 </summary>
         public bool IsAttacking => _enemyAttackReservationUsecase.HasReservation;
+        /// <summary> 直近に取得した自身の位置。 </summary>
+        public Vector3 CurrentPosition => _lastKnownPosition;
 
         /// <summary>
         ///     位置情報より行動意思を取得する。
@@ -92,6 +100,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <returns></returns>
         public EnemyMoveInstruction GetMoveInstruction(Vector3 enemyPosition, Vector3 targetPosition)
         {
+            _lastKnownPosition = enemyPosition;
+
+            // 攻撃後の行動選択で移動先が上書きされている場合、そちらを優先する
+            if (_enemyBattleState.OverrideDestination.HasValue)
+            {
+                Vector3 overrideDestination = _enemyBattleState.OverrideDestination.Value;
+                if (Vector3.Distance(enemyPosition, overrideDestination) > _postAttackBehaviorUsecase.ArrivalThreshold)
+                {
+                    return new EnemyMoveInstruction(true, overrideDestination, _enemyMoveUsecase.MoveSpeed);
+                }
+                _enemyBattleState.ClearOverrideDestination();
+            }
+
             EnemyMoveDecision moveDecision = _enemyMoveUsecase.Evaluate(enemyPosition, targetPosition);
             if (moveDecision.ShouldMove)
             {
@@ -174,6 +195,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             _attackController.ExecuteAttack();
             _enemyBattleState.AttackExcuted();
+            ChoosePostAttackBehavior();
             OnAttack?.Invoke();
         }
 
@@ -211,11 +233,34 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             }
         }
 
+        /// <summary>
+        ///     攻撃後の行動(再攻撃/合流/障害物接近)を選択し、必要であれば移動先を上書きする。
+        /// </summary>
+        private void ChoosePostAttackBehavior()
+        {
+            Vector3? allyPosition = _registry != null && _registry.TryFindNearestOtherActive(this, _lastKnownPosition, out EnemyAIController nearestAlly)
+                ? nearestAlly.CurrentPosition
+                : (Vector3?)null;
+
+            Vector3? obstaclePosition = _obstacleSearchService.TryFindNearestObstaclePosition(_lastKnownPosition, out Vector3 nearestObstacle)
+                ? nearestObstacle
+                : (Vector3?)null;
+
+            if (_postAttackBehaviorUsecase.TryDecideOverrideDestination(_lastKnownPosition, allyPosition, obstaclePosition, out Vector3 overrideDestination))
+            {
+                _enemyBattleState.SetOverrideDestination(overrideDestination);
+            }
+        }
+
         private readonly EnemyMoveUsecase _enemyMoveUsecase;
         private readonly EnemyAttackReservationUsecase _enemyAttackReservationUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
+        private readonly EnemyPostAttackBehaviorUsecase _postAttackBehaviorUsecase;
+        private readonly ObstacleSearchService _obstacleSearchService;
+        private readonly EnemyAIControllerRegistry _registry;
         private IEnemyAttackController _attackController;
         private bool _isActive;
+        private Vector3 _lastKnownPosition;
     }
 }
