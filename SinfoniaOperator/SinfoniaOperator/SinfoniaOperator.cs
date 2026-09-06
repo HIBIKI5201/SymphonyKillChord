@@ -1,16 +1,35 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
+using SinfoniaStudio.SinfoniaOperator.SpecSearch;
 
 namespace SinfoniaStudio.SinfoniaOperator
 {
     internal static class SinfoniaOperator
     {
+        /// <summary>
+        ///     指定されたサブコマンドまたは既存の定期通知処理を実行する。
+        /// </summary>
+        /// <param name="args">コマンドライン引数。</param>
         public static async Task Main(string[] args)
         {
             if (args.Length > 0 && string.Equals(args[0], "send", StringComparison.OrdinalIgnoreCase))
             {
                 await RunSendCommandAsync(args[1..]);
+                return;
+            }
+
+            if (args.Length > 0 && string.Equals(args[0], "index", StringComparison.OrdinalIgnoreCase))
+            {
+                await RunIndexCommandAsync(args[1..]);
+                return;
+            }
+
+            if (args.Length > 0 && string.Equals(args[0], "serve", StringComparison.OrdinalIgnoreCase))
+            {
+                await RunServeCommandAsync(args[1..]);
                 return;
             }
 
@@ -63,6 +82,10 @@ namespace SinfoniaStudio.SinfoniaOperator
             await Task.WhenAll(taskListTask, sprintTask);
             Console.WriteLine("[Main] 全ての処理が完了しました。");
         }
+
+        private const int DEFAULT_TOP_K = 3;
+        private const int MAXIMUM_TOP_K = 10;
+        private const string TOKENIZER_FILE_NAME = "sentencepiece.bpe.model";
 
         /// <summary>
         ///     JSON設定ファイルの読み込みを試みる。
@@ -225,6 +248,187 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
         }
 
+        /// <summary>
+        ///     仕様書を埋め込み、検索インデックスを生成する。
+        /// </summary>
+        /// <param name="args">"index"を除いたJSON設定ファイルのパス。</param>
+        private static async Task RunIndexCommandAsync(string[] args)
+        {
+            if (!TryLoadConfig(args))
+            {
+                Environment.ExitCode = 1;
+                return;
+            }
+
+            try
+            {
+                string indexPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_INDEX_PATH);
+                string modelPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_EMBEDDING_MODEL_PATH);
+                string tokenizerPath = GetTokenizerPath(modelPath);
+                string repositoryRoot = FindRepositoryRoot();
+                MarkdownChunker chunker = new(repositoryRoot);
+                using OnnxEmbeddingModel embeddingModel = new(modelPath, tokenizerPath);
+                SpecIndexBuilder indexBuilder = new(chunker, embeddingModel);
+                SpecIndex index = await indexBuilder.BuildAndSaveAsync(indexPath);
+                Console.WriteLine($"[SpecSearch] インデックスを生成しました: {indexPath} ({index.Records.Count} 件)");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SpecSearch] インデックス生成に失敗しました: {ex.Message}");
+                Environment.ExitCode = 1;
+            }
+        }
+
+        /// <summary>
+        ///     Discordの仕様検索Botを起動し、終了シグナルまで待機する。
+        /// </summary>
+        /// <param name="args">"serve"を除いたJSON設定ファイルのパス。</param>
+        private static async Task RunServeCommandAsync(string[] args)
+        {
+            if (!TryLoadConfig(args))
+            {
+                Environment.ExitCode = 1;
+                return;
+            }
+
+            try
+            {
+                string discordBotToken = GetRequiredConfigValue(OperatorConfigKeys.DISCORD_BOT_TOKEN);
+                string indexPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_INDEX_PATH);
+                string modelPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_EMBEDDING_MODEL_PATH);
+                string tokenizerPath = GetTokenizerPath(modelPath);
+                ulong? guildId = ParseOptionalGuildId(OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_DISCORD_GUILD_ID));
+                int topK = ParseTopK(OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_TOP_K));
+                SpecIndex index = SpecIndex.Load(indexPath);
+                using OnnxEmbeddingModel embeddingModel = new(modelPath, tokenizerPath);
+                await using DiscordBotManager discordBot = new(discordBotToken);
+                discordBot.ConfigureSpecSearch(index, embeddingModel, guildId, topK);
+
+                TaskCompletionSource shutdownSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
+                using PosixSignalRegistration interruptRegistration = PosixSignalRegistration.Create(
+                    PosixSignal.SIGINT,
+                    context =>
+                    {
+                        context.Cancel = true;
+                        shutdownSource.TrySetResult();
+                    });
+                using PosixSignalRegistration terminateRegistration = PosixSignalRegistration.Create(
+                    PosixSignal.SIGTERM,
+                    context =>
+                    {
+                        context.Cancel = true;
+                        shutdownSource.TrySetResult();
+                    });
+
+                await discordBot.Awake();
+                Console.WriteLine("[SpecSearch] 仕様検索Botを起動しました。終了シグナルを待機します。");
+                await shutdownSource.Task;
+                Console.WriteLine("[SpecSearch] 終了シグナルを受信しました。");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SpecSearch] Botの実行に失敗しました: {ex.Message}");
+                Environment.ExitCode = 1;
+            }
+        }
+
+        /// <summary>
+        ///     必須の設定値を取得する。
+        /// </summary>
+        /// <param name="key">設定キー。</param>
+        /// <returns>空でない設定値。</returns>
+        private static string GetRequiredConfigValue(string key)
+        {
+            string value = OperatorConfig.GetValue(key);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidOperationException($"必須設定 {key} が指定されていません。");
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        ///     ONNXモデルと同じディレクトリにあるトークナイザのパスを取得する。
+        /// </summary>
+        /// <param name="modelPath">ONNXモデルファイルのパス。</param>
+        /// <returns>SentencePieceモデルファイルのパス。</returns>
+        private static string GetTokenizerPath(string modelPath)
+        {
+            string? directoryPath = Path.GetDirectoryName(Path.GetFullPath(modelPath));
+            return Path.Combine(directoryPath ?? Directory.GetCurrentDirectory(), TOKENIZER_FILE_NAME);
+        }
+
+        /// <summary>
+        ///     仕様書ディレクトリを含むリポジトリルートを探索する。
+        /// </summary>
+        /// <returns>リポジトリルートの絶対パス。</returns>
+        private static string FindRepositoryRoot()
+        {
+            string[] startDirectories = [Directory.GetCurrentDirectory(), AppContext.BaseDirectory];
+            foreach (string startDirectory in startDirectories)
+            {
+                DirectoryInfo? directory = new(Path.GetFullPath(startDirectory));
+                while (directory != null)
+                {
+                    string specificationPath = Path.Combine(directory.FullName, "Docs", "NotionSpecifications");
+                    if (Directory.Exists(specificationPath))
+                    {
+                        return directory.FullName;
+                    }
+
+                    directory = directory.Parent;
+                }
+            }
+
+            throw new DirectoryNotFoundException("Docs/NotionSpecificationsを含むリポジトリルートが見つかりません。");
+        }
+
+        /// <summary>
+        ///     任意のDiscord Guild IDを解析する。
+        /// </summary>
+        /// <param name="value">設定された文字列。</param>
+        /// <returns>設定されたGuild ID。未設定の場合はnull。</returns>
+        private static ulong? ParseOptionalGuildId(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            if (!ulong.TryParse(value, out ulong guildId))
+            {
+                throw new FormatException($"{OperatorConfigKeys.SPEC_SEARCH_DISCORD_GUILD_ID} は符号なし整数で指定してください。");
+            }
+
+            return guildId;
+        }
+
+        /// <summary>
+        ///     仕様検索の取得件数を解析する。
+        /// </summary>
+        /// <param name="value">設定された文字列。</param>
+        /// <returns>許容範囲に収めた取得件数。</returns>
+        private static int ParseTopK(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return DEFAULT_TOP_K;
+            }
+
+            if (!int.TryParse(value, out int topK) || topK <= 0 || topK > MAXIMUM_TOP_K)
+            {
+                throw new FormatException($"{OperatorConfigKeys.SPEC_SEARCH_TOP_K} は1から{MAXIMUM_TOP_K}の整数で指定してください。");
+            }
+
+            return topK;
+        }
+
+        /// <summary>
+        ///     今日のタスクとタスクアラートをDiscordへ送信する。
+        /// </summary>
+        /// <param name="reader">タスクの読み取り元。</param>
+        /// <param name="discordBot">Discord Bot。</param>
         private static async Task PushTaskList(NotionTaskListReader reader, DiscordBotManager discordBot)
         {
             if (DateTimeUtility.IsTodayByDayOfWeek(DayOfWeek.Sunday))
@@ -260,6 +464,11 @@ namespace SinfoniaStudio.SinfoniaOperator
             await Task.WhenAll(tasks);
         }
 
+        /// <summary>
+        ///     月曜日にスプリント情報をDiscordへ送信する。
+        /// </summary>
+        /// <param name="reader">スプリントの読み取り元。</param>
+        /// <param name="discordBot">Discord Bot。</param>
         private static async Task PushSprint(NotionSprintListReader reader, DiscordBotManager discordBot)
         {
             await discordBot.AwakeTask;

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SinfoniaOperator.Core\SinfoniaOperator.Core.csproj" />
+    <ProjectReference Include="..\SinfoniaOperator.SpecSearch\SinfoniaOperator.SpecSearch.csproj" />
   </ItemGroup>
 
 </Project>
