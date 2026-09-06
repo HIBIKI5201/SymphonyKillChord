@@ -1,4 +1,5 @@
 using KillChord.Runtime.View.OutGame.Navigation;
+using System;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -48,16 +49,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallbacks()
         {
-            _stageSelectButton.RegisterCallback<ClickEvent>(OnStageSelectClicked);
-            _skillTreeButton.RegisterCallback<ClickEvent>(OnSkillTreeClicked);
-            _skillBuildButton.RegisterCallback<ClickEvent>(OnSkillBuildClicked);
-            _settingButton.RegisterCallback<ClickEvent>(OnSettingClicked);
+            _stageSelectButton.MakeNavigable();
+            _skillTreeButton.MakeNavigable();
+            _skillBuildButton.MakeNavigable();
+            _settingButton.MakeNavigable();
 
-            // 処理を ClickEvent で受けているため、決定操作もクリックとして流し込む。
-            _stageSelectButton.EnableSubmitAsClick();
-            _skillTreeButton.EnableSubmitAsClick();
-            _skillBuildButton.EnableSubmitAsClick();
-            _settingButton.EnableSubmitAsClick();
+            _stageSelectActivation = _stageSelectButton.RegisterActivation(HandleStageSelectActivationHandler);
+            _skillTreeActivation = _skillTreeButton.RegisterActivation(HandleSkillTreeActivationHandler);
+            _skillBuildActivation = _skillBuildButton.RegisterActivation(HandleSkillBuildActivationHandler);
+            _settingActivation = _settingButton.RegisterActivation(HandleSettingActivationHandler);
         }
 
         /// <summary>
@@ -65,48 +65,44 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallbacks()
         {
-            _stageSelectButton?.UnregisterCallback<ClickEvent>(OnStageSelectClicked);
-            _skillTreeButton?.UnregisterCallback<ClickEvent>(OnSkillTreeClicked);
-            _skillBuildButton?.UnregisterCallback<ClickEvent>(OnSkillBuildClicked);
-            _settingButton?.UnregisterCallback<ClickEvent>(OnSettingClicked);
+            _stageSelectActivation?.Dispose();
+            _skillTreeActivation?.Dispose();
+            _skillBuildActivation?.Dispose();
+            _settingActivation?.Dispose();
         }
 
         /// <summary>
-        ///     作戦ボタンがクリックリされたときのコールバックです。
+        ///     作戦ボタンが作動したときのコールバックです。
         ///     作戦画面を表示するイベントを発行します。
         /// </summary>
-        /// <param name="evt"> クリックイベントの情報。 </param>
-        private void OnStageSelectClicked(ClickEvent evt)
+        private void HandleStageSelectActivationHandler()
         {
             OutGameUIEvent.OnShownStageSelectionScreen?.Invoke();
         }
 
         /// <summary>
-        ///     研究ボタンがクリックされたときのコールバックです。
+        ///     研究ボタンが作動したときのコールバックです。
         ///     研究画面を表示するイベントを発行します。
         /// </summary>
-        /// <param name="evt"> クリックイベントの情報。 </param>
-        private void OnSkillTreeClicked(ClickEvent evt)
+        private void HandleSkillTreeActivationHandler()
         {
             OutGameUIEvent.OnShownSkillTreeScreen?.Invoke();
         }
 
         /// <summary>
-        ///     改造ボタンがクリックされたときのコールバックです。
+        ///     改造ボタンが作動したときのコールバックです。
         ///     改造画面を表示するイベントを発行します。
         /// </summary>
-        /// <param name="evt"> クリックイベントの情報。 </param>
-        private void OnSkillBuildClicked(ClickEvent evt)
+        private void HandleSkillBuildActivationHandler()
         {
             OutGameUIEvent.OnShownSkillBuildScreen?.Invoke();
         }
 
         /// <summary>
-        ///     設定ボタンがクリックされたときのコールバックです。
+        ///     設定ボタンが作動したときのコールバックです。
         ///     設定画面を表示するイベントを発行します。
         /// </summary>
-        /// <param name="evt"> クリックイベントの情報。 </param>
-        private void OnSettingClicked(ClickEvent evt)
+        private void HandleSettingActivationHandler()
         {
             OutGameUIEvent.OnShownSettingScreen?.Invoke();
         }
@@ -124,5 +120,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly Button _skillTreeButton;
         private readonly Button _skillBuildButton;
         private readonly Button _settingButton;
+        private IDisposable _stageSelectActivation;
+        private IDisposable _skillTreeActivation;
+        private IDisposable _skillBuildActivation;
+        private IDisposable _settingActivation;
     }
 }

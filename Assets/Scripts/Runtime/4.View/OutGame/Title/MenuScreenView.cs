@@ -15,7 +15,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         ///    メニュー画面の View を初期化します。
         /// </summary>
         public MenuScreenView(
-            VisualElement rootElement, 
+            VisualElement rootElement,
             OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
         {
@@ -46,6 +46,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private Button _creditButton;
 
         private Button _backButton;
+        private IDisposable _backButtonActivation;
 
         /// <summary>
         ///     メニュー画面の UI 要素を初期化します。
@@ -76,12 +77,14 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void RegisterButtonCallbacks()
         {
+            _optionButton.MakeNavigable();
+            _creditButton.MakeNavigable();
             _optionButton.clicked += OnOptionButtonClicked;
             _creditButton.clicked += OnCreditButtonClicked;
-            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
 
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
         }
 
         /// <summary>
@@ -91,7 +94,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _optionButton.clicked -= OnOptionButtonClicked;
             _creditButton.clicked -= OnCreditButtonClicked;
-            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
+            _backButtonActivation?.Dispose();
         }
 
         /// <summary>
@@ -111,10 +114,9 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         /// <summary>
-        ///     戻るボタンがクリックされたときの処理。
+        ///     戻るボタンが作動したときの処理。
         /// </summary>
-        /// <param name="clickEvent"> クリックイベント。 </param>
-        private void OnBackButtonClicked(ClickEvent clickEvent)
+        private void HandleBackButtonActivationHandler()
         {
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }

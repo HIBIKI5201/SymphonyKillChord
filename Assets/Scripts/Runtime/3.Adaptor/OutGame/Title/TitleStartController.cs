@@ -41,7 +41,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
         /// </summary>
         /// <param name="currentSceneName"> 現在のシーン名。 </param>
         /// <param name="targetSceneName"> 遷移先のシーン名。 </param>
-        /// <param name="token"> キャンセルトークン。 </param>
+        /// <param name="token"> Title View の寿命に従うキャンセルトークン。 </param>
         /// <returns> 遷移が成功したかどうか。 </returns>
         public async Task<bool> StartGameAsync(string currentSceneName, string targetSceneName, CancellationToken token)
         {
@@ -58,10 +58,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
             {
                 if (!string.IsNullOrWhiteSpace(_tutorialBattleSceneName))
                 {
-                    isSuccess = await _sceneTransitionController.ChangeSceneKeepingLoadingAsync(
-                        currentSceneName,
-                        _tutorialBattleSceneName,
-                        token);
+                    // Title のアンロードで View が破棄されても、遷移先の初期化完了まで待機する。
+                    isSuccess = await _sceneTransitionController
+                        .ChangeSceneKeepingLoadingWithPersistentLifetimeAsync(
+                            currentSceneName,
+                            _tutorialBattleSceneName);
 
                     if (!isSuccess)
                     {
@@ -80,7 +81,16 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
                     return false;
                 }
 
-                await _sceneTransitionController.UnloadAsync(currentSceneName, token);
+                // Title のアンロードは自身の View を破棄するため、View のトークンでは待機しない。
+                // 常駐シーンの寿命で完了を待機し、ロードセッションとシーン初期化追跡を正常終了させる。
+                bool unloadSuccess = await _sceneTransitionController
+                    .UnloadWithPersistentLifetimeAsync(currentSceneName);
+
+                if (!unloadSuccess)
+                {
+                    _isActivate = false;
+                    return false;
+                }
 
                 return true;
             }

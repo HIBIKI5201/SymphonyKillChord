@@ -40,9 +40,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         public override void Dispose()
         {
             base.Dispose();
-            _unlockButton.UnregisterCallback<ClickEvent>(OnUnlockButtonClicked);
-            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
-            _previewVideoButton.UnregisterCallback<ClickEvent>(OnPreviewButtonClicked);
+            _unlockButtonActivation?.Dispose();
+            _backButtonActivation?.Dispose();
+            _previewVideoButtonActivation?.Dispose();
         }
 
         private const string E_NAME_SKILL_DETAIL_LABEL = "SkillDetailLabel";
@@ -61,28 +61,29 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private Button _backButton;
         private OutGameUIEvent _outGameUIEvent;
         private int _currentNodeId;
+        private IDisposable _unlockButtonActivation;
+        private IDisposable _backButtonActivation;
+        private IDisposable _previewVideoButtonActivation;
 
         /// <summary>
         ///     各画面要素のイベント登録を行う。
         /// </summary>
         private void RegisterEvents()
         {
-            _unlockButton.RegisterCallback<ClickEvent>(OnUnlockButtonClicked);
-            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
-            _previewVideoButton.RegisterCallback<ClickEvent>(OnPreviewButtonClicked);
-
-            // 処理を ClickEvent で受けているため、決定操作もクリックとして流し込む。
-            _unlockButton.EnableSubmitAsClick();
+            _unlockButton.MakeNavigable();
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
-            _previewVideoButton.EnableSubmitAsClick();
+            _previewVideoButton.MakeNavigable();
+
+            _unlockButtonActivation = _unlockButton.RegisterActivation(HandleUnlockButtonActivationHandler);
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
+            _previewVideoButtonActivation = _previewVideoButton.RegisterActivation(HandlePreviewButtonActivationHandler);
         }
 
         /// <summary>
         ///     スキル解放ボタン押下時の処理。
         /// </summary>
-        /// <param name="ctx"></param>
-        private void OnUnlockButtonClicked(ClickEvent ctx)
+        private void HandleUnlockButtonActivationHandler()
         {
             _outGameUIEvent.OnSkillUnlocked?.Invoke();
         }
@@ -90,8 +91,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <summary>
         ///     スキル詳細の戻るボタンを押下時の処理。
         /// </summary>
-        /// <param name="ctx"></param>
-        private void OnBackButtonClicked(ClickEvent ctx)
+        private void HandleBackButtonActivationHandler()
         {
             _outGameUIEvent.OnSkillDetailClosed?.Invoke(_currentNodeId);
         }
@@ -99,8 +99,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <summary>
         ///     スキルプレビューボタンを押下時の処理。
         /// </summary>
-        /// <param name="ctx"></param>
-        private void OnPreviewButtonClicked(ClickEvent ctx)
+        private void HandlePreviewButtonActivationHandler()
         {
             _outGameUIEvent.OnSkillPreviewButtonClicked?.Invoke();
         }

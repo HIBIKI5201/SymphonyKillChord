@@ -1,4 +1,5 @@
 using KillChord.Runtime.View.OutGame.Navigation;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.UIElements;
@@ -66,9 +67,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
             _returnToTitleButton.clicked += ShowReturnToTitleDialog;
             _cancelReturnToTitleButton.clicked += HideReturnToTitleDialog;
             _confirmReturnToTitleButton.clicked += RequestReturnToTitle;
@@ -81,7 +82,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallback()
         {
-            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
+            _backButtonActivation?.Dispose();
             _returnToTitleButton.clicked -= ShowReturnToTitleDialog;
             _cancelReturnToTitleButton.clicked -= HideReturnToTitleDialog;
             _confirmReturnToTitleButton.clicked -= RequestReturnToTitle;
@@ -90,9 +91,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
-        ///     画面を閉じるボタンがクリックされたときの処理です。
+        ///     画面を閉じるボタンが作動したときの処理です。
         /// </summary>
-        private void OnBackButtonClicked(ClickEvent evt)
+        private void HandleBackButtonActivationHandler()
         {
             if (_isReturnToTitleDialogVisible || _isReturnToTitleRequested)
             {
@@ -128,6 +129,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly Button _confirmReturnToTitleButton;
         private readonly VisualElement _returnToTitleDialog;
         private readonly VisualElement _outsideClickArea;
+        private IDisposable _backButtonActivation;
         private bool _isReturnToTitleDialogVisible;
         private bool _isReturnToTitleRequested;
 
