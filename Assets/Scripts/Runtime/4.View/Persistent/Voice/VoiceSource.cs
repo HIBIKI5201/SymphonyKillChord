@@ -44,20 +44,23 @@ namespace KillChord.Runtime.View.Persistent.Voice
         }
 
         /// <summary>
-        ///     Voice音量を適用します。
+        ///     Voice全体音量の比率を適用します。
         /// </summary>
-        /// <param name="volume"> 音量。 </param> 
-        public void ApplyVolume(float volume)
+        /// <param name="volumeRatio"> 0から1の音量比率。 </param>
+        public void ApplyVolume(float volumeRatio)
         {
-            _source.volume = volume;
+            _source.volume = _baseVolume * volumeRatio;
         }
 
         private CriAtomSource _source;
         private PersistentAudioVolumeRegistryView _volumeRegistryView;
+        private float _baseVolume = 1f;
+        private bool _baseVolumeCaptured;
 
         private void Awake()
         {
             _source = GetComponent<CriAtomSource>();
+            CaptureBaseVolume();
         }
 
         private void OnEnable()
@@ -69,6 +72,20 @@ namespace KillChord.Runtime.View.Persistent.Voice
         private void OnDisable()
         {
             _volumeRegistryView?.UnregisterVoiceSource(this);
+        }
+
+        /// <summary>
+        ///     CriAtomSourceに設定されている元の音量を保持します。
+        /// </summary>
+        private void CaptureBaseVolume()
+        {
+            if (_baseVolumeCaptured)
+            {
+                return;
+            }
+
+            _baseVolume = _source.volume;
+            _baseVolumeCaptured = true;
         }
     }
 }
