@@ -1,0 +1,262 @@
+{
+  "dir": "E:\\Document\\Ars\\SymphonyKillChord\\spec\\domains",
+  "domains": [
+    {
+      "name": "Combat State and Effect Resolution",
+      "description": "体力と能力値、攻撃定義、ダメージ・クリティカル、多段ヒット抑制、バフ・デバフ・回復の一回限りの適用を所有する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/(Battle|Buff|Character)/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/2\\.Application/Player/SkillEffect/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/Skill/(SkillEffect|ISkillEffect)"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/1\\.Domain/Player/SkillEffectContext\\.cs$"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-02-リズムコマンド戦闘",
+        "spec/feature/game-spec.md#gs-03-キルコードと編成"
+      ],
+      "rationale": "combat-core と skill-runtime のうちHP・ダメージ・状態効果の解決を所有する。"
+    },
+    {
+      "name": "Enemy Encounter and Stage Simulation",
+      "description": "敵の判断、スポーン・プール・ウェーブ、予告付きビート攻撃、ボス、ステージギミック、および遭遇開始から終了までのシミュレーションを所有する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/(Enemy|Stage)/"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-02-リズムコマンド戦闘",
+        "spec/feature/game-spec.md#gs-05-ステージミッションリザルト",
+        "spec/feature/game-spec.md#gs-11-敵と遭遇"
+      ],
+      "rationale": "コード起点 enemy と stage-barrage を遭遇シミュレーションとして統合する。"
+    },
+    {
+      "name": "Guidance, Feedback and Recovery",
+      "description": "リズム・BGM要素・敵攻撃・ミッションの可視化、チュートリアル転移、ポーズ/再開カウントダウン、失敗Tips、ロード進捗を通じて行動発見と回復可能性を所有する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[3-6]\\.[^/]+/InGame/(UI|Music/RhythmGuide|Music/ACLikeRhythmGuide|Skill/SkillUI|Mission/.*Hud)"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[2-6]\\.[^/]+/Persistent/Load/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/4\\.View/OutGame/(Screen|SkillBuild|SkillTree|StageSelect|Title)/"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-04-音楽と遭遇の同期",
+        "spec/feature/game-spec.md#gs-05-ステージミッションリザルト",
+        "spec/feature/game-spec.md#gs-09-導線ガイダンス回復"
+      ],
+      "rationale": "presentation-fx と ui-screens を独立製品ドメインへ昇格させず、cue・tutorial・回復規則の実装として所有する。"
+    },
+    {
+      "name": "Mission Evaluation and Result",
+      "description": "メイン・サブミッション、成功・失敗条件、経過時間・最大コンボ・ランク・報酬、勝敗リザルトと再出撃判断を所有する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/(Mission|Result)/"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-05-ステージミッションリザルト"
+      ],
+      "rationale": "コード起点 mission を主要実装とし、Result表示はUI adapterとして境界外に置く。"
+    },
+    {
+      "name": "Musical Time and Adaptive Arrangement",
+      "description": "音楽時間、BPM・拍子・小節位置、ビート同期スケジューリング、および装備中のキルコードに応じたイントロ・ループ・アウトロと2小節ブロックの動的編成を所有する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/(InGame|Persistent)/Music/(Music|ScheduledAction|ExecuteRequestTiming|IMusicActionScheduler|MusicScheduler|Beat\\.cs)"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/0\\.Utility/Constant/MusicConstants\\.cs$"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/4\\.View/Persistent/Music/MusicPlayer\\.cs$"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-04-音楽と遭遇の同期"
+      ],
+      "rationale": "コード起点 rhythm-music のうち音楽時計・同期予約・BGM編成を所有し、入力判定は Rhythm Input へ分離する。"
+    },
+    {
+      "name": "Narrative and Game Flow",
+      "description": "新規/継続開始、シナリオ読了、ホーム・作戦・準備・戦闘・リザルト間の遷移、およびシーン完了の一回性を所有する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/OutGame/(Scenario|Screen|Title)/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/Persistent/SceneManagement/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/OutGame/StageSelect/StageSelectOpenUseCase\\.cs$"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-06-アウトゲームと成長",
+        "spec/feature/game-spec.md#gs-09-導線ガイダンス回復",
+        "spec/feature/game-spec.md#gs-15-体験版-tgs"
+      ],
+      "rationale": "scenario-narrative、sortie-stageselect、ui-screensに分散する物語と全体遷移を所有する。"
+    },
+    {
+      "name": "Persistence and Player Settings",
+      "description": "五分類の永続データ、プラットフォーム別保存、暗号化・移行・破損回復、および音量・操作・表示設定の確定/取消を所有する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[0-6]\\.[^/]+/Persistent/(Savedata|Input)/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/OutGame/Setting/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/0\\.Utility/(Identity|Savedata)/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/5\\.InfraStructure/Addressables/"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-07-永続化",
+        "spec/feature/game-spec.md#gs-09-導線ガイダンス回復"
+      ],
+      "rationale": "platform-services のSave/Loadと ui-screens のSettingを同じプレイヤーデータ境界へ割り当てる。"
+    },
+    {
+      "name": "Player Action and Combat Targeting",
+      "description": "移動、照準、攻撃、回避、硬直・クールダウン・キャンセル、遮蔽物を含む標的選択を所有し、プレイヤー意図を戦闘要求へ変換する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/(Player|Target)/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/Player/(?!SkillEffect)"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/Skill/(SkillTarget|SkillAttackController)"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-02-リズムコマンド戦闘",
+        "spec/feature/game-spec.md#gs-10-プレイヤーの移動と回避",
+        "spec/feature/game-spec.md#gs-12-ターゲットとカメラ"
+      ],
+      "rationale": "combat-core のうちプレイヤー意図・移動・照準・標的選択を所有し、効果解決は Combat State へ分離する。"
+    },
+    {
+      "name": "Progression, Research and Loadout",
+      "description": "ステージ解放、報酬ポイント、研究ツリー、スキル獲得・レベル、装備スロットと末尾ノーツ競合、出撃編成を所有する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/OutGame/(StageSelect|SkillTree|SkillBuild|Sortie)/"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/Player/(SkillRepository|SkillTemplateAsset)"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/2\\.Application/Persistent/Savedata/StageProgressSaveDataService\\.cs$"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-03-キルコードと編成",
+        "spec/feature/game-spec.md#gs-06-アウトゲームと成長",
+        "spec/feature/game-spec.md#gs-13-レベルデザインと難易度対応"
+      ],
+      "rationale": "skill-progression と sortie-stageselect の編成責務を統合し、画面遷移は Narrativeへ分離する。"
+    },
+    {
+      "name": "Rhythm Input and Kill Chord Resolution",
+      "description": "攻撃・回避入力の間隔をノーツへ判定し、All/Just/タイムアウト規則とアクション種別を使ってキルコード列を照合し発動可否を決定する。",
+      "presetRules": [],
+      "templateRules": [],
+      "membership": [
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/Music/(BeatType|Rhythm|MusicTimingCalculator)"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/Skill/(SkillPattern|SkillRhythm|SkillCheck|SkillExecution|SkillInput|SkillUseCase)"
+        },
+        {
+          "pathPattern": "(^|/)Assets/Scripts/Runtime/1\\.Domain/InGame/Skill/SkillDefinition\\.cs$"
+        }
+      ],
+      "source": "manual",
+      "lockedFields": [
+        "*"
+      ],
+      "specRefs": [
+        "spec/feature/game-spec.md#gs-01-リズム判定",
+        "spec/feature/game-spec.md#gs-03-キルコードと編成"
+      ],
+      "rationale": "コード起点 rhythm-music と skill-runtime に分散する入力判定・列照合を一つの仕様境界として所有する。"
+    }
+  ]
+}

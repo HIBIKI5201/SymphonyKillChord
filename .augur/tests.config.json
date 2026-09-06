@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "repository": "MELPOT/SymphonyKillChord",
+  "defaultBus": "local",
+  "runners": {
+    "unity": {
+      "command": ["Unity.exe", "-runTests", "-batchmode", "-projectPath", "."],
+      "selectorFlag": "-testFilter"
+    },
+    "command": {}
+  },
+  "quota": {
+    "default": { "max": 12 },
+    "byPriority": { "critical": 24, "high": 16, "medium": 10, "low": 6 },
+    "domains": {
+      "Rhythm Input and Kill Chord Resolution": { "priority": "critical" },
+      "Player Action and Combat Targeting": { "priority": "critical" },
+      "Combat State and Effect Resolution": { "priority": "high" },
+      "Musical Time and Adaptive Arrangement": { "priority": "high" },
+      "Enemy Encounter and Stage Simulation": { "priority": "high" },
+      "Mission Evaluation and Result": { "priority": "medium" },
+      "Progression, Research and Loadout": { "priority": "high" },
+      "Persistence and Player Settings": { "priority": "high" },
+      "Narrative and Game Flow": { "priority": "medium" },
+      "Guidance, Feedback and Recovery": { "priority": "medium" }
+    }
+  },
+  "retirement": {
+    "probationAfterDays": 90,
+    "probationAfterPasses": 30,
+    "retireAfterDays": 180,
+    "incidentHorizonDays": 365,
+    "exemptKinds": ["guardrail"],
+    "exemptAlways": true
+  },
+  "impact": { "callerDepth": 2 },
+  "layout": { "newTestPath": "Assets/Tests/{module}Tests.cs" },
+  "timeoutMs": 1800000
+}
