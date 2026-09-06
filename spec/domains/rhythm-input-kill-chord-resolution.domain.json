@@ -19,8 +19,8 @@
     "*"
   ],
   "specRefs": [
-    "spec/feature/game-spec.md#gs-01-rhythm-judgment",
-    "spec/feature/game-spec.md#gs-03-kill-chord-skills-and-build"
+    "spec/feature/game-spec.md#gs-01-リズム判定",
+    "spec/feature/game-spec.md#gs-03-キルコードと編成"
   ],
   "rationale": "コード起点 rhythm-music と skill-runtime に分散する入力判定・列照合を一つの仕様境界として所有する。"
 }

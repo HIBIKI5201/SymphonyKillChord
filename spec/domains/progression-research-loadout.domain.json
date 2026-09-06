@@ -19,8 +19,9 @@
     "*"
   ],
   "specRefs": [
-    "spec/feature/game-spec.md#gs-03-kill-chord-skills-and-build",
-    "spec/feature/game-spec.md#gs-06-out-game-and-progression"
+    "spec/feature/game-spec.md#gs-03-キルコードと編成",
+    "spec/feature/game-spec.md#gs-06-アウトゲームと成長",
+    "spec/feature/game-spec.md#gs-13-レベルデザインと難易度対応"
   ],
   "rationale": "skill-progression と sortie-stageselect の編成責務を統合し、画面遷移は Narrativeへ分離する。"
 }
