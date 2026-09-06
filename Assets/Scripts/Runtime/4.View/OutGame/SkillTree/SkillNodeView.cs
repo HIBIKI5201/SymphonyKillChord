@@ -3,6 +3,7 @@ using KillChord.Runtime.Utility.OutGame;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.SkillTree
@@ -65,6 +66,23 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         public void SetUnSelected()
         {
             _root.RemoveFromClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_SELECTED);
+        }
+
+        /// <summary>
+        ///     ノードが強化するステータスの種別アイコンを設定する。
+        /// </summary>
+        /// <param name="icon"> 表示するアイコン。null の場合はアイコンを非表示にする。 </param>
+        public void SetIcon(Sprite icon)
+        {
+            if (icon == null)
+            {
+                _root.style.backgroundImage = new StyleBackground();
+                _root.RemoveFromClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_ICON);
+                return;
+            }
+
+            _root.style.backgroundImage = new StyleBackground(icon);
+            _root.AddToClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_ICON);
         }
 
         private readonly int _nodeId;
