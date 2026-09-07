@@ -1,6 +1,5 @@
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
-using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
@@ -8,12 +7,9 @@ using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Music;
-using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
-using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
-using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -58,13 +54,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名")]
         private string _targetSceneName;
 
-        [SerializeField, SourceDataAddress, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
-
-        private string _stageTreeAssetKey = "StageTreeAsset";
-
-        [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。バトルシーン名の解決に使用します。")]
-        private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
-
         [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
         private TextAsset _memberCsv;
 
@@ -73,10 +62,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private TitleSceneView _titleSceneView;
         private TitleStartController _titleStartController;
         private ScreenController _screenController;
-        private BattleSortieSelectionService _battleSortieSelectionService;
         private ScreenRuleData _loadedRuleData;
-        private StageTreeAsset _loadedStageTreeAsset;
-        private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
         private AudioSettingsModuleContainer _audioSettingsContainer;
         private VolumeSettingsTabView _volumeSettingsTabView;
@@ -95,18 +81,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         public override async Awaitable<bool> ResourceLoadAsync(System.Threading.CancellationToken cancellationToken)
         {
             _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
-            _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
-            _loadedEnemyWaveDefinitionRepository =
-                await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
-                    this,
-                    cancellationToken);
             _loadedSaveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
-            return _loadedRuleData != null
-                && _loadedStageTreeAsset != null
-                && _loadedEnemyWaveDefinitionRepository != null
-                && _loadedSaveData != null;
+            return _loadedRuleData != null && _loadedSaveData != null;
         }
 
         /// <summary>
@@ -152,7 +130,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _titleStartController = new(sceneTransitionController);
-            _battleSortieSelectionService = new BattleSortieSelectionService();
 
             var titleRoot = root.Q<VisualElement>(TITLE_SCREEN_NAME);
             var menuRoot = root.Q<VisualElement>(MENU_SCREEN_NAME);
@@ -243,25 +220,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
-            bool isTutorialCompleted = _loadedSaveData.Tutorial.IsTutorialCompleted;
-
-            if (!isTutorialCompleted
-                && TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName))
-            {
-#if UNITY_EDITOR
-                Debug.Log($"{nameof(TitleSceneInitializer)}: 初回起動時の遷移先シーンを設定します。{tutorialTargetSceneName}");
-#endif
-                _titleStartController.SetTutorialBattleTarget(tutorialTargetSceneName);
-                _titleSceneView.SetTargetSceneName(tutorialTargetSceneName);
-            }
-            else
-            {
-#if UNITY_EDITOR
-                Debug.Log($"{nameof(TitleSceneInitializer)}: セーブデータが存在するため、通常の遷移先シーンを設定します。{_targetSceneName}");
-#endif
-                _titleStartController.ClearTutorialBattleTarget();
-                _titleSceneView.SetTargetSceneName(_targetSceneName);
-            }
+            _titleSceneView.SetTargetSceneName(_targetSceneName);
 
             _isInitialized = true;
             return true;
@@ -310,11 +269,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _ruleDataKey.ReleaseLoadedAsset(this);
-            _stageTreeAssetKey.ReleaseLoadedAsset(this);
-            _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _loadedRuleData = null;
-            _loadedStageTreeAsset = null;
-            _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
             _volumeSettingsTabView?.Dispose();
             _volumeSettingsTabView = null;
@@ -325,7 +280,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
             _titleStartController = null;
-            _battleSortieSelectionService = null;
             _screenController = null;
             _outGameUIEvent = null;
             _isInitialized = false;
@@ -539,17 +493,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
 
-            // セーブデータをリセットした後、初回起動時の遷移先シーンを設定します。
-            if (_loadedSaveData != null
-                && !_loadedSaveData.Tutorial.IsTutorialCompleted
-                && TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName))
-            {
-                _titleStartController.SetTutorialBattleTarget(tutorialTargetSceneName);
-                _titleSceneView.SetTargetSceneName(tutorialTargetSceneName);
-                return;
-            }
-
-            _titleStartController.ClearTutorialBattleTarget();
             _titleSceneView.SetTargetSceneName(_targetSceneName);
         }
 
@@ -637,43 +580,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: 音量設定の再保存中にエラーが発生しました。{ex.Message}");
             }
-        }
-
-        /// <summary>
-        ///     初回チュートリアル用の戦闘出撃準備を行います。
-        /// </summary>
-        /// <param name="tutorialTargetSceneName"> 遷移先シーン名です。 </param>
-        /// <returns> 準備に成功した場合はtrueです。 </returns>
-        private bool TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName)
-        {
-            tutorialTargetSceneName = string.Empty;
-
-            if (_loadedStageTreeAsset == null
-                || _loadedEnemyWaveDefinitionRepository == null
-                || _battleSortieSelectionService == null)
-            {
-                return false;
-            }
-
-            StageTree stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
-            if (!stageTree.TryGetTutorialNode(out StageNode tutorialNode)
-                || tutorialNode?.Definition == null)
-            {
-                return false;
-            }
-
-            if (tutorialNode.Definition is not BattleStageDefinition tutorialStageDefinition)
-            {
-                return false;
-            }
-
-            if (!_battleSortieSelectionService.TryPrepareBattleSortie(tutorialStageDefinition, _targetSceneName))
-            {
-                return false;
-            }
-
-            tutorialTargetSceneName = tutorialStageDefinition.TargetSceneName;
-            return true;
         }
 
         /// <summary>
