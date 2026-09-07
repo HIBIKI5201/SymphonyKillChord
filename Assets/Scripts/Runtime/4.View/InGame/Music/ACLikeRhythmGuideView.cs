@@ -26,28 +26,9 @@ namespace KillChord.Runtime.View.InGame.Music
 
         /// <summary>
         ///     現在のビート位置がジャストタイミングのブロック上にあるか。
-        ///     ガイドに表示しているJustTimingMarkerと同じ基準で判定する。
+        ///     ガイド上で強調表示しているブロックと同じ基準で判定する。
         /// </summary>
-        public bool IsOnJustTiming
-        {
-            get
-            {
-                if (_justTimingBeatBoxIndex == null || _currentOpenIndex < 0)
-                {
-                    return false;
-                }
-
-                for (int i = 0; i < _justTimingBeatBoxIndex.Length; i++)
-                {
-                    if (_currentOpenIndex == _justTimingBeatBoxIndex[i])
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
+        public bool IsOnJustTiming => IsJustTimingIndex(_currentOpenIndex);
 
         /// <summary>
         ///     ゲームプレイ開始を購読側へ通知する。
@@ -135,6 +116,54 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
+        ///     指定したブロックがジャストタイミング位置かを判定する。
+        /// </summary>
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <returns> ジャストタイミング位置の場合はtrue。 </returns>
+        private bool IsJustTimingIndex(int blockIndex)
+        {
+            if (_justTimingBeatBoxIndex == null || blockIndex < 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _justTimingBeatBoxIndex.Length; i++)
+            {
+                if (blockIndex == _justTimingBeatBoxIndex[i])
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     ジャストタイミング位置のブロック色を、色相を保ったまま彩度と明度を上げて強調する。
+        ///     ジャストタイミング位置以外や演出設定が未設定の場合は元の色をそのまま返す。
+        /// </summary>
+        /// <param name="color"> 強調前の色。 </param>
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <returns> 強調を適用した色。 </returns>
+        private Color ApplyJustHighlight(Color color, int blockIndex)
+        {
+            if (_effectConfig == null || !IsJustTimingIndex(blockIndex))
+            {
+                return color;
+            }
+
+            // 色相を変えると判定ゾーンごとの色分けが崩れるため、彩度と明度だけを持ち上げる。
+            Color.RGBToHSV(color, out float hue, out float saturation, out float brightness);
+            saturation = Mathf.Clamp01(saturation * _effectConfig.JustSaturationMultiplier);
+            brightness = Mathf.Clamp01(brightness * _effectConfig.JustValueMultiplier);
+
+            Color highlighted = Color.HSVToRGB(hue, saturation, brightness);
+            // HSVToRGBはαを持たないため、減光の対象であるαは元の値を引き継ぐ。
+            highlighted.a = color.a;
+            return highlighted;
+        }
+
+        /// <summary>
         ///     ガイド表示用に、対象BeatCountと一致しない判定ゾーンの色を暗くする。
         /// </summary>
         /// <param name="color"> 減光前の色。 </param>
@@ -157,8 +186,9 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ガイド表示に適用するブロックの色を取得する。対象BeatCountと一致しない場合は暗くする。
-        ///     判定ゾーンを解決できない場合は既定値を返す。
+        ///     ガイド表示に適用するブロックの色を取得する。ジャストタイミング位置は彩度と明度を上げて強調し、
+        ///     対象BeatCountと一致しない場合は暗くする。判定ゾーンを解決できない場合は既定値を返す。
+        ///     全画面演出へ渡す色はTryGetCurrentBeatColorが別経路で取得するため、強調はここには閉じる。
         /// </summary>
         /// <param name="blockIndex"> ブロックのインデックス。 </param>
         /// <returns> 適用する色。 </returns>
@@ -168,6 +198,10 @@ namespace KillChord.Runtime.View.InGame.Music
             {
                 return default;
             }
+
+            // 素の色を強調してから表示都合の減光を掛ける。強調はS・V、減光はαを触るため
+            // 現状は順序で結果が変わらないが、意味の順序を固定しておく。
+            color = ApplyJustHighlight(color, blockIndex);
 
             return ApplyTargetDim(color, zoneIndex);
         }
@@ -217,16 +251,7 @@ namespace KillChord.Runtime.View.InGame.Music
             {
                 return;
             }
-            bool isJustTiming = false;
-            for (int i = 0; i < _justTimingBeatBoxIndex.Length; i++)
-            {
-                if (activeIndex == _justTimingBeatBoxIndex[i])
-                {
-                    isJustTiming = true;
-                    break;
-                }
-            }
-            SetBeatAnimation(activeIndex, isJustTiming);
+            SetBeatAnimation(activeIndex, IsJustTimingIndex(activeIndex));
             _currentOpenIndex = activeIndex;
             UpdateCurrentBeatColor();
         }
@@ -406,7 +431,6 @@ namespace KillChord.Runtime.View.InGame.Music
         private Image[] _leftBeatImages;
         private RectTransform[] _rightBeatRectTransforms;
         private Image[] _rightBeatImages;
-        private RectTransform[] _justTimingMarkers;
         private int[] _justTimingBeatBoxIndex;
         private MotionHandle[] _handles;
         private int _totalBeatBoxCount;
@@ -475,7 +499,9 @@ namespace KillChord.Runtime.View.InGame.Music
                 out _handles,
                 out _justTimingBeatBoxIndex);
 
-            CreateJustTimingMarkers();
+            // ブロック生成時点では_justTimingBeatBoxIndexが未確定のため、
+            // Just位置が確定してから色を貼り直して強調を反映する。
+            UpdateBeatColors();
             _currentOpenIndex = -1;
         }
 
@@ -484,17 +510,6 @@ namespace KillChord.Runtime.View.InGame.Music
         /// </summary>
         private void ClearGeneratedBeatObjects()
         {
-            if (_justTimingMarkers != null)
-            {
-                for (int i = 0; i < _justTimingMarkers.Length; i++)
-                {
-                    if (_justTimingMarkers[i] != null)
-                    {
-                        Destroy(_justTimingMarkers[i].gameObject);
-                    }
-                }
-            }
-
             if (_leftBeatRectTransforms != null)
             {
                 for (int i = 0; i < _leftBeatRectTransforms.Length; i++)
@@ -570,61 +585,6 @@ namespace KillChord.Runtime.View.InGame.Music
                     .WithEase(_effectConfig.JustReturnEase)
                     .BindToSizeDeltaY(_rightBeatRectTransforms[index]))
                 .Run(sequence => sequence.WithScheduler(MotionScheduler.UpdateIgnoreTimeScale));
-        }
-
-        /// <summary>
-        ///     ジャストタイミング位置を事前表示する帯を生成する。
-        /// </summary>
-        private void CreateJustTimingMarkers()
-        {
-            if (_effectConfig == null || _justTimingBeatBoxIndex == null || _canvasGroup == null)
-            {
-                _justTimingMarkers = Array.Empty<RectTransform>();
-                return;
-            }
-
-            _justTimingMarkers = new RectTransform[_justTimingBeatBoxIndex.Length * 2];
-            for (int i = 0; i < _justTimingBeatBoxIndex.Length; i++)
-            {
-                float horizontalPosition = (_justTimingBeatBoxIndex[i] + 0.5f) * _beatWidth;
-                _justTimingMarkers[i * 2] = CreateJustTimingMarker(
-                    $"JustTimingMarker_Left_{i}",
-                    Vector2.left * horizontalPosition);
-                _justTimingMarkers[i * 2 + 1] = CreateJustTimingMarker(
-                    $"JustTimingMarker_Right_{i}",
-                    Vector2.right * horizontalPosition);
-            }
-        }
-
-        /// <summary>
-        ///     指定位置へジャストタイミング表示用の帯を生成する。
-        /// </summary>
-        /// <param name="objectName"> 生成するオブジェクト名。 </param>
-        /// <param name="anchoredPosition"> 生成位置。 </param>
-        /// <returns> 生成した帯のRectTransform。 </returns>
-        private RectTransform CreateJustTimingMarker(string objectName, Vector2 anchoredPosition)
-        {
-            GameObject markerObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
-            markerObject.layer = gameObject.layer;
-            markerObject.transform.SetParent(_canvasGroup.transform, false);
-            markerObject.transform.SetAsFirstSibling();
-
-            RectTransform markerRectTransform = markerObject.GetComponent<RectTransform>();
-            markerRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-            markerRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            markerRectTransform.pivot = new Vector2(0.5f, 0.5f);
-            // 帯はpivot中央のため、高さの半分だけ持ち上げると下端がガイドの基準線に揃う。
-            // そこからの微調整はレイアウト依存のためConfigの補正値で行う。
-            float verticalOffset = _effectConfig.MarkerHeight * 0.5f + _effectConfig.MarkerVerticalOffset;
-            markerRectTransform.anchoredPosition = anchoredPosition + Vector2.up * verticalOffset;
-            markerRectTransform.sizeDelta = new Vector2(
-                Mathf.Max(0.1f, _effectConfig.MarkerWidth),
-                Mathf.Max(0.1f, _effectConfig.MarkerHeight));
-
-            Image markerImage = markerObject.GetComponent<Image>();
-            markerImage.color = _effectConfig.MarkerColor;
-            markerImage.raycastTarget = false;
-            return markerRectTransform;
         }
 
         /// <summary>

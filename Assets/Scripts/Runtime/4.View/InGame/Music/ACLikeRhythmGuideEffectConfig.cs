@@ -11,17 +11,11 @@ namespace KillChord.Runtime.View.InGame.Music
         menuName = "KillChord/InGame/Music/ACLikeRhythmGuideEffectConfig")]
     public sealed class ACLikeRhythmGuideEffectConfig : ScriptableObject
     {
-        /// <summary> ジャストタイミング位置を示す帯の色。 </summary>
-        public Color MarkerColor => _markerColor;
+        /// <summary> ジャストタイミング位置のビート色に掛ける彩度の倍率。 </summary>
+        public float JustSaturationMultiplier => _justSaturationMultiplier;
 
-        /// <summary> ジャストタイミング位置を示す帯の幅。 </summary>
-        public float MarkerWidth => _markerWidth;
-
-        /// <summary> ジャストタイミング位置を示す帯の高さ。 </summary>
-        public float MarkerHeight => _markerHeight;
-
-        /// <summary> ジャストタイミング位置を示す帯の垂直方向の位置補正。 </summary>
-        public float MarkerVerticalOffset => _markerVerticalOffset;
+        /// <summary> ジャストタイミング位置のビート色に掛ける明度の倍率。 </summary>
+        public float JustValueMultiplier => _justValueMultiplier;
 
         /// <summary> ジャストタイミング成立時のフラッシュ色。 </summary>
         public Color FlashColor => _flashColor;
@@ -68,18 +62,12 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャストタイミング成立時のVignetteイージング。 </summary>
         public Ease VignetteEase => _vignetteEase;
 
-        [Header("判定ウィンドウ")]
-        [SerializeField, Tooltip("ジャストタイミング位置を示す帯の色。")]
-        private Color _markerColor = new Color(1f, 0.85f, 0.25f, 0.45f);
+        [Header("ジャスト位置の強調")]
+        [SerializeField, Min(1f), Tooltip("ジャストタイミング位置のビート色に掛ける彩度の倍率。1で強調なし。")]
+        private float _justSaturationMultiplier = 1.5f;
 
-        [SerializeField, Min(0.1f), Tooltip("ジャストタイミング位置を示す帯の幅。")]
-        private float _markerWidth = 3f;
-
-        [SerializeField, Min(0.1f), Tooltip("ジャストタイミング位置を示す帯の高さ。")]
-        private float _markerHeight = 192f;
-
-        [SerializeField, Tooltip("ジャストタイミング位置を示す帯の垂直方向の位置補正。帯の下端をガイドの基準線へ合わせるために使用します。")]
-        private float _markerVerticalOffset = -20f;
+        [SerializeField, Min(1f), Tooltip("ジャストタイミング位置のビート色に掛ける明度の倍率。1で強調なし。彩度が既に高い色でも差を出すために使用します。")]
+        private float _justValueMultiplier = 1.1f;
 
         [Header("判定色")]
         [SerializeField, Tooltip("ジャストタイミング成立時にビートを一瞬変更する色。")]

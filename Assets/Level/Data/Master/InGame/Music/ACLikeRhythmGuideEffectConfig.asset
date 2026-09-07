@@ -12,10 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6c3f17d9e2b4a3f8c4d5e6f708192ab, type: 3}
   m_Name: ACLikeRhythmGuideEffectConfig
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Music.ACLikeRhythmGuideEffectConfig
-  _markerColor: {r: 1, g: 0.85, b: 0.25, a: 0.45}
-  _markerWidth: 3
-  _markerHeight: 96
-  _markerVerticalOffset: -20
+  _justSaturationMultiplier: 1.5
+  _justValueMultiplier: 1.1
   _flashColor: {r: 1, g: 0.9, b: 0.45, a: 1}
   _flashDuration: 0.2
   _flashEase: 5
