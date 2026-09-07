@@ -123,7 +123,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
 
                     section.Clear();
                     int level = headingMatch.Groups["marks"].Value.Length;
-                    headings[level - 1] = headingMatch.Groups["text"].Value.Trim();
+                    headings[level - 1] = StripHeadingAttributes(headingMatch.Groups["text"].Value);
                     Array.Clear(headings, level, headings.Length - level);
                     breadcrumb = string.Join(BREADCRUMB_SEPARATOR, headings.Where(value => !string.IsNullOrWhiteSpace(value)));
                     continue;
@@ -191,11 +191,28 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         }
 
         /// <summary>
+        ///     見出し末尾のNotionブロック属性記法を取り除く。
+        /// </summary>
+        /// <param name="headingText">属性記法を含む可能性がある見出し。</param>
+        /// <returns>属性記法を取り除いた見出し。</returns>
+        private static string StripHeadingAttributes(string headingText)
+        {
+            return HeadingAttributesRegex().Replace(headingText, string.Empty).Trim();
+        }
+
+        /// <summary>
         ///     対象見出しを抽出する正規表現を生成する。
         /// </summary>
         /// <returns>コンパイル済みの正規表現。</returns>
         [GeneratedRegex(@"^(?<marks>#{1,3})\s+(?<text>.+?)\s*$", RegexOptions.CultureInvariant)]
         private static partial Regex HeadingRegex();
+
+        /// <summary>
+        ///     見出し末尾のNotionブロック属性記法を抽出する正規表現を生成する。
+        /// </summary>
+        /// <returns>コンパイル済みの正規表現。</returns>
+        [GeneratedRegex(@"\s*\{[^{}]*\}\s*$", RegexOptions.CultureInvariant)]
+        private static partial Regex HeadingAttributesRegex();
 
         /// <summary>
         ///     Notionリンクを抽出する正規表現を生成する。

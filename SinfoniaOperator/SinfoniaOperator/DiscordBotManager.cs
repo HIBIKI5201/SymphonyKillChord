@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using SinfoniaStudio.SinfoniaOperator.SpecSearch;
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SinfoniaStudio.SinfoniaOperator
@@ -10,7 +11,7 @@ namespace SinfoniaStudio.SinfoniaOperator
     /// <summary>
     ///     Discord Botの接続、通知送信、仕様検索コマンドを管理する。
     /// </summary>
-    internal sealed class DiscordBotManager : IAsyncDisposable
+    internal sealed partial class DiscordBotManager : IAsyncDisposable
     {
         /// <summary>
         ///     既存の通知用Discord設定でBotを生成する。
@@ -235,12 +236,12 @@ namespace SinfoniaStudio.SinfoniaOperator
                     try
                     {
                         string summary = await _geminiSummarizer.SummarizeAsync(query, records);
-                        embedBuilder = BuildSummarizedResultEmbed(summary, records);
+                        embedBuilder = BuildSummarizedResultEmbed(query, summary, records);
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"[DiscordBot] AI要約の生成に失敗しました: {ex.Message}");
-                        embedBuilder = BuildSummarizedResultEmbed("AI要約の生成に失敗しました。", records);
+                        embedBuilder = BuildSummarizedResultEmbed(query, "AI要約の生成に失敗しました。", records);
                     }
                 }
 
@@ -301,7 +302,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             foreach (SpecChunkRecord record in records)
             {
-                string fieldName = Truncate(record.HeadingBreadcrumb, MAX_FIELD_NAME_LENGTH);
+                string fieldName = Truncate(SanitizeHeadingBreadcrumb(record.HeadingBreadcrumb), MAX_FIELD_NAME_LENGTH);
                 string excerpt = Truncate(record.Text, EXCERPT_LENGTH);
                 string notionLink = string.IsNullOrWhiteSpace(record.NotionUrl)
                     ? "Notionリンクなし"
@@ -315,19 +316,21 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <summary>
         ///     AI要約と参照したNotionリンクをDiscord Embedへ変換する。
         /// </summary>
+        /// <param name="query">ユーザーが入力した検索文字列。</param>
         /// <param name="summary">AIが生成した要約文または生成失敗メッセージ。</param>
         /// <param name="records">要約の根拠にした仕様書チャンク。</param>
         /// <returns>AI要約結果のEmbed構築器。</returns>
-        private static EmbedBuilder BuildSummarizedResultEmbed(string summary, SpecChunkRecord[] records)
+        private static EmbedBuilder BuildSummarizedResultEmbed(string query, string summary, SpecChunkRecord[] records)
         {
+            string description = $"検索: {Truncate(query, MAX_QUERY_DISPLAY_LENGTH)}\n\n{summary}";
             EmbedBuilder builder = new EmbedBuilder()
                 .WithTitle("仕様検索結果")
-                .WithDescription(Truncate(summary, MAX_EMBED_DESCRIPTION_LENGTH))
+                .WithDescription(Truncate(description, MAX_EMBED_DESCRIPTION_LENGTH))
                 .WithColor(Color.Blue);
 
             foreach (SpecChunkRecord record in records)
             {
-                string fieldName = Truncate(record.HeadingBreadcrumb, MAX_FIELD_NAME_LENGTH);
+                string fieldName = Truncate(SanitizeHeadingBreadcrumb(record.HeadingBreadcrumb), MAX_FIELD_NAME_LENGTH);
                 string notionLink = string.IsNullOrWhiteSpace(record.NotionUrl)
                     ? "Notionリンクなし"
                     : $"[Notionで開く]({record.NotionUrl})";
@@ -335,6 +338,16 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
 
             return builder;
+        }
+
+        /// <summary>
+        ///     見出しパンくず末尾のNotionブロック属性記法を取り除く。
+        /// </summary>
+        /// <param name="headingBreadcrumb">属性記法を含む可能性がある見出しパンくず。</param>
+        /// <returns>属性記法を取り除いた見出しパンくず。</returns>
+        private static string SanitizeHeadingBreadcrumb(string headingBreadcrumb)
+        {
+            return HeadingAttributesRegex().Replace(headingBreadcrumb, string.Empty).Trim();
         }
 
         /// <summary>
@@ -352,6 +365,13 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             return value[..(maximumLength - OMITTED_MARK.Length)] + OMITTED_MARK;
         }
+
+        /// <summary>
+        ///     見出し末尾のNotionブロック属性記法を抽出する正規表現を生成する。
+        /// </summary>
+        /// <returns>コンパイル済みの正規表現。</returns>
+        [GeneratedRegex(@"\s*\{[^{}]*\}\s*$", RegexOptions.CultureInvariant)]
+        private static partial Regex HeadingAttributesRegex();
 
         /// <summary>
         ///     指定されたDiscordチャンネルへ文字列を分割送信する。
