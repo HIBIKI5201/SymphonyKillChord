@@ -26,6 +26,12 @@
         /// <summary> 仕様検索の優先度ルールJSONファイルの任意のパス。 </summary>
         public const string SPEC_SEARCH_PRIORITY_PATH = "SPEC_SEARCH_PRIORITY_PATH";
 
+        /// <summary> Gemini APIキー。秘匿情報であり、未設定の場合はAI要約を無効化する。 </summary>
+        public const string GEMINI_API_KEY = "GEMINI_API_KEY";
+
+        /// <summary> AI要約に使用するGeminiモデル名。 </summary>
+        public const string GEMINI_MODEL = "GEMINI_MODEL";
+
         /// <summary> Unityエディタの作業ログ機能が送信先とするチャンネルID。 </summary>
         public const string DISCORD_WORK_LOG_CHANNEL_ID = "DISCORD_WORK_LOG_CHANNEL_ID";
 

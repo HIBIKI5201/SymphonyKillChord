@@ -85,6 +85,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 
         private const int DEFAULT_TOP_K = 3;
         private const int MAXIMUM_TOP_K = 10;
+        private const string DEFAULT_GEMINI_MODEL = "gemini-3.6-flash";
         private const string TOKENIZER_FILE_NAME = "sentencepiece.bpe.model";
 
         /// <summary>
@@ -303,10 +304,12 @@ namespace SinfoniaStudio.SinfoniaOperator
                 SpecPriorityTable? priorityTable = string.IsNullOrWhiteSpace(priorityPath)
                     ? null
                     : SpecPriorityTable.Load(priorityPath);
+                string geminiApiKey = OperatorConfig.GetValue(OperatorConfigKeys.GEMINI_API_KEY);
                 SpecIndex index = SpecIndex.Load(indexPath);
                 using OnnxEmbeddingModel embeddingModel = new(modelPath, tokenizerPath);
+                using GeminiSummarizer? summarizer = CreateGeminiSummarizer(geminiApiKey);
                 await using DiscordBotManager discordBot = new(discordBotToken);
-                discordBot.ConfigureSpecSearch(index, embeddingModel, guildId, topK, priorityTable);
+                discordBot.ConfigureSpecSearch(index, embeddingModel, guildId, topK, priorityTable, summarizer);
 
                 TaskCompletionSource shutdownSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
                 using PosixSignalRegistration interruptRegistration = PosixSignalRegistration.Create(
@@ -426,6 +429,25 @@ namespace SinfoniaStudio.SinfoniaOperator
             }
 
             return topK;
+        }
+
+        /// <summary>
+        ///     APIキーが設定されている場合にGemini要約器を生成する。
+        /// </summary>
+        /// <param name="apiKey">Gemini APIキー。</param>
+        /// <returns>生成した要約器。APIキーが未設定の場合はnull。</returns>
+        private static GeminiSummarizer? CreateGeminiSummarizer(string apiKey)
+        {
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                return null;
+            }
+
+            string configuredModel = OperatorConfig.GetValue(OperatorConfigKeys.GEMINI_MODEL);
+            string model = string.IsNullOrWhiteSpace(configuredModel)
+                ? DEFAULT_GEMINI_MODEL
+                : configuredModel;
+            return new GeminiSummarizer(apiKey, model);
         }
 
         /// <summary>

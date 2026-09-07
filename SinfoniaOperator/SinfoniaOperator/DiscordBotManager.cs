@@ -54,18 +54,21 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <param name="guildId">コマンドを限定登録する任意のGuild ID。</param>
         /// <param name="topK">返却する検索結果の件数。</param>
         /// <param name="priorityTable">ソースファイルごとの任意の検索優先度テーブル。</param>
+        /// <param name="summarizer">検索結果を要約する任意のGemini要約器。</param>
         public void ConfigureSpecSearch(
             SpecIndex specIndex,
             IEmbeddingModel embeddingModel,
             ulong? guildId,
             int topK,
-            SpecPriorityTable? priorityTable = null)
+            SpecPriorityTable? priorityTable = null,
+            GeminiSummarizer? summarizer = null)
         {
             _specIndex = specIndex ?? throw new ArgumentNullException(nameof(specIndex));
             _embeddingModel = embeddingModel ?? throw new ArgumentNullException(nameof(embeddingModel));
             _specSearchGuildId = guildId;
             _specSearchTopK = topK;
             _specSearchPriorityTable = priorityTable;
+            _geminiSummarizer = summarizer;
         }
 
         /// <summary>
@@ -140,6 +143,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private const int MAX_MESSAGE_LENGTH = 2000;
         private const int EXCERPT_LENGTH = 400;
         private const int MAX_FIELD_NAME_LENGTH = 256;
+        private const int MAX_EMBED_DESCRIPTION_LENGTH = 4096;
         private const int MAX_QUERY_DISPLAY_LENGTH = 500;
         private const string SPEC_COMMAND_NAME = "spec";
         private const string QUERY_OPTION_NAME = "query";
@@ -157,6 +161,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private ulong? _specSearchGuildId;
         private int _specSearchTopK;
         private SpecPriorityTable? _specSearchPriorityTable;
+        private GeminiSummarizer? _geminiSummarizer;
         private bool _isSpecCommandRegistered;
 
         /// <summary>
@@ -220,7 +225,25 @@ namespace SinfoniaStudio.SinfoniaOperator
                 IEmbeddingModel embeddingModel = _embeddingModel ?? throw new InvalidOperationException("埋め込みモデルが設定されていません。");
                 float[] queryVector = await embeddingModel.EmbedAsync(QUERY_PREFIX + query);
                 SpecChunkRecord[] records = index.TopK(queryVector, _specSearchTopK, _specSearchPriorityTable);
-                EmbedBuilder embedBuilder = BuildSearchResultEmbed(query, records);
+                EmbedBuilder embedBuilder;
+                if (_geminiSummarizer == null)
+                {
+                    embedBuilder = BuildSearchResultEmbed(query, records);
+                }
+                else
+                {
+                    try
+                    {
+                        string summary = await _geminiSummarizer.SummarizeAsync(query, records);
+                        embedBuilder = BuildSummarizedResultEmbed(summary, records);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[DiscordBot] AI要約の生成に失敗しました: {ex.Message}");
+                        embedBuilder = BuildSummarizedResultEmbed("AI要約の生成に失敗しました。", records);
+                    }
+                }
+
                 await command.FollowupAsync(embeds: [embedBuilder.Build()]);
             }
             catch (Exception ex)
@@ -284,6 +307,31 @@ namespace SinfoniaStudio.SinfoniaOperator
                     ? "Notionリンクなし"
                     : $"[Notionで開く]({record.NotionUrl})";
                 builder.AddField(fieldName, $"{excerpt}\n\n{notionLink}");
+            }
+
+            return builder;
+        }
+
+        /// <summary>
+        ///     AI要約と参照したNotionリンクをDiscord Embedへ変換する。
+        /// </summary>
+        /// <param name="summary">AIが生成した要約文または生成失敗メッセージ。</param>
+        /// <param name="records">要約の根拠にした仕様書チャンク。</param>
+        /// <returns>AI要約結果のEmbed構築器。</returns>
+        private static EmbedBuilder BuildSummarizedResultEmbed(string summary, SpecChunkRecord[] records)
+        {
+            EmbedBuilder builder = new EmbedBuilder()
+                .WithTitle("仕様検索結果")
+                .WithDescription(Truncate(summary, MAX_EMBED_DESCRIPTION_LENGTH))
+                .WithColor(Color.Blue);
+
+            foreach (SpecChunkRecord record in records)
+            {
+                string fieldName = Truncate(record.HeadingBreadcrumb, MAX_FIELD_NAME_LENGTH);
+                string notionLink = string.IsNullOrWhiteSpace(record.NotionUrl)
+                    ? "Notionリンクなし"
+                    : $"[Notionで開く]({record.NotionUrl})";
+                builder.AddField(fieldName, notionLink);
             }
 
             return builder;

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Discord.Net.WebSocket" Version="3.19.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
