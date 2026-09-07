@@ -299,10 +299,14 @@ namespace SinfoniaStudio.SinfoniaOperator
                 string tokenizerPath = GetTokenizerPath(modelPath);
                 ulong? guildId = ParseOptionalGuildId(OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_DISCORD_GUILD_ID));
                 int topK = ParseTopK(OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_TOP_K));
+                string priorityPath = OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_PRIORITY_PATH);
+                SpecPriorityTable? priorityTable = string.IsNullOrWhiteSpace(priorityPath)
+                    ? null
+                    : SpecPriorityTable.Load(priorityPath);
                 SpecIndex index = SpecIndex.Load(indexPath);
                 using OnnxEmbeddingModel embeddingModel = new(modelPath, tokenizerPath);
                 await using DiscordBotManager discordBot = new(discordBotToken);
-                discordBot.ConfigureSpecSearch(index, embeddingModel, guildId, topK);
+                discordBot.ConfigureSpecSearch(index, embeddingModel, guildId, topK, priorityTable);
 
                 TaskCompletionSource shutdownSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
                 using PosixSignalRegistration interruptRegistration = PosixSignalRegistration.Create(

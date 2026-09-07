@@ -23,6 +23,9 @@
         /// <summary> 仕様検索で返す最大件数。 </summary>
         public const string SPEC_SEARCH_TOP_K = "SPEC_SEARCH_TOP_K";
 
+        /// <summary> 仕様検索の優先度ルールJSONファイルの任意のパス。 </summary>
+        public const string SPEC_SEARCH_PRIORITY_PATH = "SPEC_SEARCH_PRIORITY_PATH";
+
         /// <summary> Unityエディタの作業ログ機能が送信先とするチャンネルID。 </summary>
         public const string DISCORD_WORK_LOG_CHANNEL_ID = "DISCORD_WORK_LOG_CHANNEL_ID";
 

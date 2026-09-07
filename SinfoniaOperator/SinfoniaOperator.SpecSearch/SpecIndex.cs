@@ -30,8 +30,9 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         /// </summary>
         /// <param name="queryVector">検索クエリの埋め込みベクトル。</param>
         /// <param name="k">取得する最大件数。</param>
-        /// <returns>類似度の降順に並んだ仕様書チャンク。</returns>
-        public SpecChunkRecord[] TopK(float[] queryVector, int k)
+        /// <param name="priorityTable">ソースファイルごとの任意の検索優先度テーブル。</param>
+        /// <returns>重み付けした類似度の降順に並んだ仕様書チャンク。</returns>
+        public SpecChunkRecord[] TopK(float[] queryVector, int k, SpecPriorityTable? priorityTable = null)
         {
             ArgumentNullException.ThrowIfNull(queryVector);
             if (k <= 0)
@@ -50,8 +51,15 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
             }
 
             return _records
-                .Select(record => new { Record = record, Similarity = CalculateCosineSimilarity(queryVector, record.Vector) })
-                .OrderByDescending(result => result.Similarity)
+                .Select(record =>
+                {
+                    double similarity = CalculateCosineSimilarity(queryVector, record.Vector);
+                    double score = priorityTable == null
+                        ? similarity
+                        : similarity * priorityTable.GetWeight(record.SourceFile);
+                    return new { Record = record, Score = score };
+                })
+                .OrderByDescending(result => result.Score)
                 .ThenBy(result => result.Record.SourceFile, StringComparer.Ordinal)
                 .Take(k)
                 .Select(result => result.Record)

@@ -53,12 +53,19 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <param name="embeddingModel">クエリ用の埋め込みモデル。</param>
         /// <param name="guildId">コマンドを限定登録する任意のGuild ID。</param>
         /// <param name="topK">返却する検索結果の件数。</param>
-        public void ConfigureSpecSearch(SpecIndex specIndex, IEmbeddingModel embeddingModel, ulong? guildId, int topK)
+        /// <param name="priorityTable">ソースファイルごとの任意の検索優先度テーブル。</param>
+        public void ConfigureSpecSearch(
+            SpecIndex specIndex,
+            IEmbeddingModel embeddingModel,
+            ulong? guildId,
+            int topK,
+            SpecPriorityTable? priorityTable = null)
         {
             _specIndex = specIndex ?? throw new ArgumentNullException(nameof(specIndex));
             _embeddingModel = embeddingModel ?? throw new ArgumentNullException(nameof(embeddingModel));
             _specSearchGuildId = guildId;
             _specSearchTopK = topK;
+            _specSearchPriorityTable = priorityTable;
         }
 
         /// <summary>
@@ -149,6 +156,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private IEmbeddingModel? _embeddingModel;
         private ulong? _specSearchGuildId;
         private int _specSearchTopK;
+        private SpecPriorityTable? _specSearchPriorityTable;
         private bool _isSpecCommandRegistered;
 
         /// <summary>
@@ -211,7 +219,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 SpecIndex index = _specIndex ?? throw new InvalidOperationException("仕様検索インデックスが設定されていません。");
                 IEmbeddingModel embeddingModel = _embeddingModel ?? throw new InvalidOperationException("埋め込みモデルが設定されていません。");
                 float[] queryVector = await embeddingModel.EmbedAsync(QUERY_PREFIX + query);
-                SpecChunkRecord[] records = index.TopK(queryVector, _specSearchTopK);
+                SpecChunkRecord[] records = index.TopK(queryVector, _specSearchTopK, _specSearchPriorityTable);
                 EmbedBuilder embedBuilder = BuildSearchResultEmbed(query, records);
                 await command.FollowupAsync(embeds: [embedBuilder.Build()]);
             }
