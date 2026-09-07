@@ -13,7 +13,7 @@
     "*"
   ],
   "specRefs": [
-    "spec/feature/game-spec.md#gs-05-stage-mission-and-result"
+    "spec/feature/game-spec.md#gs-05-ステージミッションリザルト"
   ],
   "rationale": "コード起点 mission を主要実装とし、Result表示はUI adapterとして境界外に置く。"
 }
