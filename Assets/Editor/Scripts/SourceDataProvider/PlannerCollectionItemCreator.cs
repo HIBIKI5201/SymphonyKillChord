@@ -73,7 +73,10 @@ namespace KillChord.Editor.SourceDataProvider
                 return false;
             }
 
-            string directory = mapping.AssetCreationDirectory.Replace('\\', '/').TrimEnd('/');
+            string directory = ResolveVariantCreationDirectory(
+                sourceAsset,
+                mapping.AssetCreationDirectory);
+            EnsureFolder(directory);
             string assetPath = AssetDatabase.GenerateUniqueAssetPath(
                 $"{directory}/{assetType.Name}.asset");
             createdAsset = ScriptableObject.CreateInstance(assetType);
@@ -174,6 +177,49 @@ namespace KillChord.Editor.SourceDataProvider
 
             errorMessage = string.Empty;
             return true;
+        }
+
+        /// <summary>
+        ///     Demo編集中はMaster側の生成先を同じ相対構造のDemoフォルダーへ切り替えます。
+        /// </summary>
+        private static string ResolveVariantCreationDirectory(
+            ScriptableObject sourceAsset,
+            string configuredDirectory)
+        {
+            string directory = configuredDirectory.Replace('\\', '/').TrimEnd('/');
+            string sourcePath = AssetDatabase.GetAssetPath(sourceAsset).Replace('\\', '/');
+            if (GameDataVariantEditorState.SelectedVariant == GameDataVariant.Demo
+                && sourcePath.StartsWith(DEMO_DATA_ROOT, StringComparison.Ordinal)
+                && directory.StartsWith(RELEASE_DATA_ROOT, StringComparison.Ordinal))
+            {
+                return DEMO_DATA_ROOT + directory.Substring(RELEASE_DATA_ROOT.Length);
+            }
+
+            return directory;
+        }
+
+        /// <summary>
+        ///     Plannerが切り替えたvariant側の生成先フォルダーを必要な分だけ作成します。
+        /// </summary>
+        private static void EnsureFolder(string directory)
+        {
+            if (AssetDatabase.IsValidFolder(directory))
+            {
+                return;
+            }
+
+            string current = "Assets";
+            string[] segments = directory.Substring("Assets/".Length).Split('/');
+            for (int i = 0; i < segments.Length; i++)
+            {
+                string next = $"{current}/{segments[i]}";
+                if (!AssetDatabase.IsValidFolder(next))
+                {
+                    AssetDatabase.CreateFolder(current, segments[i]);
+                }
+
+                current = next;
+            }
         }
 
         /// <summary>
@@ -319,5 +365,8 @@ namespace KillChord.Editor.SourceDataProvider
                 }
             }
         }
+
+        private const string RELEASE_DATA_ROOT = "Assets/Level/Data/Master/";
+        private const string DEMO_DATA_ROOT = "Assets/Level/Data/Demo/";
     }
 }
