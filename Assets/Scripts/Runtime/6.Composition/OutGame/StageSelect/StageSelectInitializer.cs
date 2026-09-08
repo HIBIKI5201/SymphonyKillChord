@@ -641,7 +641,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     return;
                 }
 
-                await TryStartHomeTutorialAsync();
             }
             catch (OperationCanceledException)
             {
@@ -664,7 +663,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageCleared += HandleStageCleared;
             _outGameUIEvent.OnSortieRequested += HandleSortieRequested;
             _outGameUIEvent.OnStageSelectScreenCompleted += HandleStageSelectScreenCompleted;
-            _outGameUIEvent.OnHomeTutorialCompleted += HandleHomeTutorialCompleted;
             _isSubscribed = true;
         }
 
@@ -680,52 +678,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageCleared -= HandleStageCleared;
             _outGameUIEvent.OnSortieRequested -= HandleSortieRequested;
             _outGameUIEvent.OnStageSelectScreenCompleted -= HandleStageSelectScreenCompleted;
-            _outGameUIEvent.OnHomeTutorialCompleted -= HandleHomeTutorialCompleted;
             _isSubscribed = false;
-        }
-
-        /// <summary>
-        ///     チュートリアル戦闘から初めてホームへ戻った時にホームチュートリアルを開始します。
-        /// </summary>
-        private async Task TryStartHomeTutorialAsync()
-        {
-            if (_loadedSaveData == null
-                || _loadedSaveData.Tutorial.Phase < TutorialPhase.BattleCompleted
-                || _loadedSaveData.Tutorial.IsTutorialCompleted)
-            {
-                return;
-            }
-
-            if (_loadedSaveData.Tutorial.StartHome())
-            {
-                await SaveStore.SaveAsync<SaveData>(_cts.Token);
-            }
-
-            await Awaitable.NextFrameAsync(_cts.Token);
-            _outGameUIEvent.OnHomeTutorialStarted?.Invoke();
-        }
-
-        /// <summary>
-        ///     ホームチュートリアルViewからの完了通知をセーブへ反映します。
-        /// </summary>
-        private async void HandleHomeTutorialCompleted()
-        {
-            if (_loadedSaveData == null || !_loadedSaveData.Tutorial.Complete())
-            {
-                return;
-            }
-
-            try
-            {
-                await SaveStore.SaveAsync<SaveData>(_cts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, this);
-            }
         }
 
         /// <summary>
