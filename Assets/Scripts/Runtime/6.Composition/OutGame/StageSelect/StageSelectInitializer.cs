@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.OutGame.StageSelect;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
@@ -119,6 +120,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private bool _isSubscribed;
         private StageSelectModuleContainer _moduleContainer;
         private bool _isModuleContainerRegistered;
+        private LoadingScreenController _loadingScreenController;
+        private bool _isWaitingForLoadingCompleted;
+        private bool _isAutomaticTutorialFlowStarted;
 
         /// <summary>
         ///     単体で実行できる初期化を行います。
@@ -210,9 +214,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         public override bool Ready()
         {
             Subscribe();
-            TryExecutePendingNodeTransitionAfterReturn();
-            TryStartTutorialSegment();
-            TryStartHomeTutorial();
+            StartAutomaticTutorialFlowAfterLoading();
             return _isInitialized;
         }
 
@@ -519,6 +521,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         public override void Shutdown()
         {
+            UnsubscribeLoadingCompleted();
             Unsubscribe();
             _isSubscribed = false;
             if (_isModuleContainerRegistered
@@ -543,7 +546,110 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageNodeFocusFrame = null;
             _isFocusFrameLocked = false;
             _battleSortieSelectionService = null;
+            _loadingScreenController = null;
+            _isAutomaticTutorialFlowStarted = false;
             _isInitialized = false;
+        }
+
+        /// <summary>
+        ///     OutGameを開いたロードが完了してからチュートリアルの自動遷移を開始します。
+        /// </summary>
+        private void StartAutomaticTutorialFlowAfterLoading()
+        {
+            if (!ServiceLocator.TryGetInstance(out _loadingScreenController)
+                || !_loadingScreenController.IsLoading)
+            {
+                ExecuteAutomaticTutorialFlow();
+                return;
+            }
+
+            _loadingScreenController.LoadingCompleted += HandleLoadingCompleted;
+            _isWaitingForLoadingCompleted = true;
+
+            // 状態確認とイベント購読の間にロードが完了した場合にも開始を取りこぼさない。
+            if (!_loadingScreenController.IsLoading)
+            {
+                UnsubscribeLoadingCompleted();
+                ExecuteAutomaticTutorialFlow();
+            }
+        }
+
+        /// <summary>
+        ///     OutGameを開いたロードの完了通知を受け取ります。
+        /// </summary>
+        /// <param name="isSuccess"> ロードに成功した場合はtrueです。 </param>
+        private void HandleLoadingCompleted(bool isSuccess)
+        {
+            UnsubscribeLoadingCompleted();
+            if (isSuccess)
+            {
+                ExecuteAutomaticTutorialFlow();
+            }
+        }
+
+        /// <summary>
+        ///     ロード完了イベントの購読を解除します。
+        /// </summary>
+        private void UnsubscribeLoadingCompleted()
+        {
+            if (!_isWaitingForLoadingCompleted || _loadingScreenController == null)
+            {
+                return;
+            }
+
+            _loadingScreenController.LoadingCompleted -= HandleLoadingCompleted;
+            _isWaitingForLoadingCompleted = false;
+        }
+
+        /// <summary>
+        ///     保存状態に応じたチュートリアルの自動処理を一つずつ実行します。
+        /// </summary>
+        private async void ExecuteAutomaticTutorialFlow()
+        {
+            if (_isAutomaticTutorialFlowStarted)
+            {
+                return;
+            }
+
+            _isAutomaticTutorialFlowStarted = true;
+            try
+            {
+                // LoadingCompletedの他の購読者が旧セッションの後処理を終えてから次のロードを開始する。
+                await Awaitable.NextFrameAsync(_cts.Token);
+                if (!_isInitialized)
+                {
+                    return;
+                }
+
+                // Title開始処理はOutGameロード完了後にTitleアンロードを続けて実行する。
+                // 次のセッションが始まっていた場合は、その完了も待ってから自動遷移する。
+                if (_loadingScreenController != null
+                    && _loadingScreenController.IsLoading)
+                {
+                    _isAutomaticTutorialFlowStarted = false;
+                    StartAutomaticTutorialFlowAfterLoading();
+                    return;
+                }
+
+                if (await TryExecutePendingNodeTransitionAfterReturnAsync())
+                {
+                    return;
+                }
+
+                if (TryStartTutorialSegment())
+                {
+                    return;
+                }
+
+                await TryStartHomeTutorialAsync();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -581,7 +687,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <summary>
         ///     チュートリアル戦闘から初めてホームへ戻った時にホームチュートリアルを開始します。
         /// </summary>
-        private async void TryStartHomeTutorial()
+        private async Task TryStartHomeTutorialAsync()
         {
             if (_loadedSaveData == null
                 || _loadedSaveData.Tutorial.Phase < TutorialPhase.BattleCompleted
@@ -590,23 +696,13 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return;
             }
 
-            try
+            if (_loadedSaveData.Tutorial.StartHome())
             {
-                if (_loadedSaveData.Tutorial.StartHome())
-                {
-                    await SaveStore.SaveAsync<SaveData>(_cts.Token);
-                }
+                await SaveStore.SaveAsync<SaveData>(_cts.Token);
+            }
 
-                await Awaitable.NextFrameAsync(_cts.Token);
-                _outGameUIEvent.OnHomeTutorialStarted?.Invoke();
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, this);
-            }
+            await Awaitable.NextFrameAsync(_cts.Token);
+            _outGameUIEvent.OnHomeTutorialStarted?.Invoke();
         }
 
         /// <summary>
@@ -1045,119 +1141,61 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <summary>
         ///     バトルからホームへ戻った後の予約済み自動遷移を実行する。
         /// </summary>
-        private async void TryExecutePendingNodeTransitionAfterReturn()
+        private async Task<bool> TryExecutePendingNodeTransitionAfterReturnAsync()
         {
             if (_pendingNodeTransitionState == null
                 || !_pendingNodeTransitionState.HasPending)
             {
-                return;
+                return false;
             }
 
             if (!_pendingNodeTransitionState.TryConsumeCompleted(
                     out PendingNodeTransition pendingNodeTransition))
             {
                 _pendingNodeTransitionState.Clear();
-                return;
+                return true;
             }
 
-            try
-            {
-                if (!await ExecutePendingNodeTransitionAsync(pendingNodeTransition))
-                {
-                    _pendingNodeTransitionState.Clear();
-                }
-            }
-            catch (System.OperationCanceledException)
-            {
-            }
-            catch (System.Exception exception)
+            if (!await ExecutePendingNodeTransitionAsync(pendingNodeTransition))
             {
                 _pendingNodeTransitionState.Clear();
-                Debug.LogException(exception, this);
             }
+
+            return true;
         }
 
         /// <summary>
         ///     保存済みの進行段階に対応する初回チュートリアル区間を開始します。
         /// </summary>
-        private async void TryStartTutorialSegment()
+        private bool TryStartTutorialSegment()
         {
             if (!_isInitialized
                 || _loadedSaveData == null
                 || _pendingNodeTransitionState.HasPending)
             {
-                return;
+                return false;
             }
 
-            try
+            switch (_loadedSaveData.Tutorial.Phase)
             {
-                switch (_loadedSaveData.Tutorial.Phase)
-                {
-                    case TutorialPhase.NotStarted:
-                        if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario))
-                        {
-                            Debug.LogError(
-                                $"[{nameof(StageSelectInitializer)}] 起点となるチュートリアルシナリオがありません。",
-                                this);
-                            return;
-                        }
+                case TutorialPhase.OpeningScenarioCompleted:
+                    if (!_stageTree.TryGetTutorialNode(out StageNode tutorialNode)
+                        || tutorialNode.Definition is not BattleStageDefinition tutorialBattle
+                        || !TryPrepareBattleSortie(tutorialBattle))
+                    {
+                        Debug.LogError(
+                            $"[{nameof(StageSelectInitializer)}] チュートリアル戦闘を準備できませんでした。",
+                            this);
+                        return true;
+                    }
 
-                        ReserveNodeTransitionChain(openingScenario);
-                        _selectedBattleStageState.Clear();
-                        _selectedMissionState.Clear();
-                        _selectedScenarioState.SelectScenario(openingScenario);
-                        await _outGameSortieController.RequestSortieAsync(
-                            StageType.Scenario,
-                            _currentSceneName,
-                            openingScenario.TargetSceneName,
-                            _cts.Token);
-                        return;
-
-                    case TutorialPhase.OpeningScenarioCompleted:
-                        if (!_stageTree.TryGetTutorialNode(out StageNode tutorialNode)
-                            || tutorialNode.Definition is not BattleStageDefinition tutorialBattle
-                            || !TryPrepareBattleSortie(tutorialBattle))
-                        {
-                            Debug.LogError(
-                                $"[{nameof(StageSelectInitializer)}] チュートリアル戦闘を準備できませんでした。",
-                                this);
-                            return;
-                        }
-
-                        _selectedScenarioState.Clear();
-                        _outGameSortieController.RequestImmediateBattleSortie();
-                        return;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception, this);
-            }
-        }
-
-        /// <summary>
-        ///     前提ノードを持たない最初のシナリオステージを取得します。
-        /// </summary>
-        /// <param name="scenarioStageDefinition"> 取得したシナリオステージです。 </param>
-        /// <returns> 対象を取得できた場合はtrueです。 </returns>
-        private bool TryGetOpeningScenario(out ScenarioStageDefinition scenarioStageDefinition)
-        {
-            for (int i = 0; i < _stageTree.Nodes.Count; i++)
-            {
-                StageNode node = _stageTree.Nodes[i];
-                if (node.Definition is ScenarioStageDefinition candidate
-                    && _stageTree.GetPreviousIds(node.Id).Count == 0)
-                {
-                    scenarioStageDefinition = candidate;
+                    _selectedScenarioState.Clear();
+                    _outGameSortieController.RequestImmediateBattleSortie();
                     return true;
-                }
-            }
 
-            scenarioStageDefinition = null;
-            return false;
+                default:
+                    return false;
+            }
         }
 
         /// <summary>

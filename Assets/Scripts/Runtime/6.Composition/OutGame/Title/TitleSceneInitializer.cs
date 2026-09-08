@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.Music;
@@ -7,9 +8,12 @@ using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Music;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
+using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -54,6 +58,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SceneNameSelector, Tooltip("遷移先のシーン名")]
         private string _targetSceneName;
 
+        [SerializeField, SourceDataAddress, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
+        private string _stageTreeAssetKey = "StageTreeAsset";
+
+        [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。")]
+        private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
+
         [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
         private TextAsset _memberCsv;
 
@@ -63,6 +73,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private TitleStartController _titleStartController;
         private ScreenController _screenController;
         private ScreenRuleData _loadedRuleData;
+        private StageTreeAsset _loadedStageTreeAsset;
+        private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
         private AudioSettingsModuleContainer _audioSettingsContainer;
         private VolumeSettingsTabView _volumeSettingsTabView;
@@ -81,10 +93,19 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         public override async Awaitable<bool> ResourceLoadAsync(System.Threading.CancellationToken cancellationToken)
         {
             _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
+            _loadedStageTreeAsset =
+                await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
+            _loadedEnemyWaveDefinitionRepository =
+                await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
+                    this,
+                    cancellationToken);
             _loadedSaveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
-            return _loadedRuleData != null && _loadedSaveData != null;
+            return _loadedRuleData != null
+                && _loadedStageTreeAsset != null
+                && _loadedEnemyWaveDefinitionRepository != null
+                && _loadedSaveData != null;
         }
 
         /// <summary>
@@ -220,7 +241,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
-            _titleSceneView.SetTargetSceneName(_targetSceneName);
+            if (!ApplyStartDestination())
+            {
+                return false;
+            }
 
             _isInitialized = true;
             return true;
@@ -269,7 +293,11 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _ruleDataKey.ReleaseLoadedAsset(this);
+            _stageTreeAssetKey.ReleaseLoadedAsset(this);
+            _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _loadedRuleData = null;
+            _loadedStageTreeAsset = null;
+            _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
             _volumeSettingsTabView?.Dispose();
             _volumeSettingsTabView = null;
@@ -493,7 +521,82 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
 
-            _titleSceneView.SetTargetSceneName(_targetSceneName);
+            ApplyStartDestination();
+        }
+
+        /// <summary>
+        ///     チュートリアル進行状態に応じてタイトルからの遷移先を設定します。
+        /// </summary>
+        /// <returns> 遷移先を設定できた場合はtrueです。 </returns>
+        private bool ApplyStartDestination()
+        {
+            if (_titleSceneView == null || _loadedSaveData == null)
+            {
+                return false;
+            }
+
+            if (_loadedSaveData.Tutorial.Phase != TutorialPhase.NotStarted)
+            {
+                if (ServiceLocator.TryGetInstance(out SelectedScenarioState existingScenarioState))
+                {
+                    existingScenarioState.Clear();
+                }
+
+                _titleSceneView.SetTargetSceneName(_targetSceneName);
+                return true;
+            }
+
+            if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario))
+            {
+                Debug.LogError(
+                    $"[{nameof(TitleSceneInitializer)}] 起点となるチュートリアルシナリオがありません。",
+                    this);
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState))
+            {
+                selectedScenarioState = new SelectedScenarioState();
+                if (!ServiceLocator.RegisterInstance(selectedScenarioState))
+                {
+                    Debug.LogError(
+                        $"[{nameof(TitleSceneInitializer)}] {nameof(SelectedScenarioState)} を登録できませんでした。",
+                        this);
+                    return false;
+                }
+            }
+
+            selectedScenarioState.SelectScenario(openingScenario);
+            _titleSceneView.SetTargetSceneName(openingScenario.TargetSceneName);
+            return true;
+        }
+
+        /// <summary>
+        ///     選択中のゲームデータから前提ノードを持たない最初のシナリオを取得します。
+        /// </summary>
+        /// <param name="scenarioStageDefinition"> 取得したシナリオステージです。 </param>
+        /// <returns> 対象を取得できた場合はtrueです。 </returns>
+        private bool TryGetOpeningScenario(out ScenarioStageDefinition scenarioStageDefinition)
+        {
+            scenarioStageDefinition = null;
+            if (_loadedStageTreeAsset == null || _loadedEnemyWaveDefinitionRepository == null)
+            {
+                return false;
+            }
+
+            StageTree stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
+            for (int i = 0; i < stageTree.Nodes.Count; i++)
+            {
+                StageNode node = stageTree.Nodes[i];
+                if (node.Definition is ScenarioStageDefinition candidate
+                    && stageTree.GetPreviousIds(node.Id).Count == 0)
+                {
+                    scenarioStageDefinition = candidate;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
