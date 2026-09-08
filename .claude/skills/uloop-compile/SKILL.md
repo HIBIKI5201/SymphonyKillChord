@@ -3,22 +3,25 @@ name: uloop-compile
 description: "Compile the Unity project and report errors/warnings. Use after C# edits or when a full Domain Reload compile is needed."
 ---
 
-# npx --yes uloop-cli@2.2.0 compile
+# uloop compile
 
 Execute Unity project compilation.
 
 ## Usage
 
 ```bash
-npx --yes uloop-cli@2.2.0 compile [--force-recompile <true|false>] [--wait-for-domain-reload <true|false>]
+uloop compile [--force-recompile] [--no-wait-for-domain-reload] [--stop-on-external-scene-changes]
 ```
 
 ## Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `--force-recompile` | boolean value | `false` | Force full recompilation (triggers Domain Reload). Pass `true` or `false`; bare flags are not accepted. |
-| `--wait-for-domain-reload` | boolean value | `false` | Wait until Domain Reload completes before returning. Pass `true` or `false`; bare flags are not accepted. |
+V3 boolean options take no value — presence means enabled, absence means the documented default. Run `uloop compile --help` to confirm current defaults.
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--force-recompile` | disabled | Force full recompilation (triggers Domain Reload). |
+| `--no-wait-for-domain-reload` | (waits by default) | Return without waiting for Domain Reload to complete. |
+| `--stop-on-external-scene-changes` | (reloads by default) | Stop instead of reloading when external scene changes are detected. |
 
 ## Global Options
 
@@ -30,16 +33,13 @@ npx --yes uloop-cli@2.2.0 compile [--force-recompile <true|false>] [--wait-for-d
 
 ```bash
 # Check compilation
-npx --yes uloop-cli@2.2.0 compile
+uloop compile
 
 # Force full recompilation
-npx --yes uloop-cli@2.2.0 compile --force-recompile true
+uloop compile --force-recompile
 
-# Force recompilation and wait for Domain Reload completion
-npx --yes uloop-cli@2.2.0 compile --force-recompile true --wait-for-domain-reload true
-
-# Wait for Domain Reload completion even without force recompilation
-npx --yes uloop-cli@2.2.0 compile --force-recompile false --wait-for-domain-reload true
+# Force recompilation without waiting for Domain Reload completion
+uloop compile --force-recompile --no-wait-for-domain-reload
 ```
 
 ## Output
@@ -56,15 +56,15 @@ Diagnose the failure mode before retrying.
 **Stale lock files** (CLI hangs or shows "Unity is busy" while Unity Editor *is* running):
 
 ```bash
-npx --yes uloop-cli@2.2.0 fix
+uloop fix
 ```
 
-This removes any leftover lock files (`compiling.lock`, `domainreload.lock`, `serverstarting.lock`) from the Unity project's Temp directory. Then retry `npx --yes uloop-cli@2.2.0 compile`.
+This removes any leftover lock files (`compiling.lock`, `domainreload.lock`, `serverstarting.lock`) from the Unity project's Temp directory. Then retry `uloop compile`.
 
 **Unity Editor not running** (CLI returns a connection failure and no Unity process is alive):
 
 ```bash
-npx --yes uloop-cli@2.2.0 launch
+uloop launch
 ```
 
-`npx --yes uloop-cli@2.2.0 launch` auto-detects the project at the current working directory and opens it in the matching Unity Editor version. After Unity finishes launching, retry `npx --yes uloop-cli@2.2.0 compile`.
+`uloop launch` auto-detects the project at the current working directory and opens it in the matching Unity Editor version. After Unity finishes launching, retry `uloop compile`.

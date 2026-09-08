@@ -3,7 +3,7 @@ name: uloop-get-hierarchy
 description: "Get the Unity scene hierarchy as a structured tree. Use for parent-child structure, descendants, roots, or subtrees under objects the user currently selected."
 ---
 
-# npx --yes uloop-cli@2.2.0 get-hierarchy
+# uloop get-hierarchy
 
 Get Unity Hierarchy structure from the whole scene, a root path, or selected Hierarchy objects.
 
@@ -12,20 +12,22 @@ Use this for hierarchy structure, especially descendants under the current selec
 ## Usage
 
 ```bash
-npx --yes uloop-cli@2.2.0 get-hierarchy [options]
+uloop get-hierarchy [options]
 ```
 
 ## Parameters
+
+V3 boolean options take no value — presence means enabled, absence means the documented default. Run `uloop get-hierarchy --help` to confirm current defaults.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `--root-path` | string | - | Root GameObject path to start from |
 | `--max-depth` | integer | `-1` | Maximum depth (-1 for unlimited) |
-| `--include-components` | boolean | `true` | Include component information |
-| `--include-inactive` | boolean | `true` | Include inactive GameObjects |
-| `--include-paths` | boolean | `false` | Include full path information |
+| `--no-include-components` | flag | (included by default) | Exclude component information |
+| `--no-include-inactive` | flag | (included by default) | Exclude inactive GameObjects |
+| `--include-paths` | flag | disabled | Include full path information |
 | `--use-components-lut` | string | `auto` | Use LUT for components (`auto`, `true`, `false`) |
-| `--use-selection` | boolean | `false` | Use selected GameObject(s) as root(s). When true, `--root-path` is ignored. |
+| `--use-selection` | flag | disabled | Use selected GameObject(s) as root(s). When set, `--root-path` is ignored. |
 
 ## Global Options
 
@@ -37,19 +39,19 @@ npx --yes uloop-cli@2.2.0 get-hierarchy [options]
 
 ```bash
 # Get entire hierarchy
-npx --yes uloop-cli@2.2.0 get-hierarchy
+uloop get-hierarchy
 
 # Get hierarchy from specific root
-npx --yes uloop-cli@2.2.0 get-hierarchy --root-path "Canvas/UI"
+uloop get-hierarchy --root-path "Canvas/UI"
 
 # Limit depth
-npx --yes uloop-cli@2.2.0 get-hierarchy --max-depth 2
+uloop get-hierarchy --max-depth 2
 
 # Without components
-npx --yes uloop-cli@2.2.0 get-hierarchy --include-components false
+uloop get-hierarchy --no-include-components
 
 # Get hierarchy from currently selected GameObjects
-npx --yes uloop-cli@2.2.0 get-hierarchy --use-selection
+uloop get-hierarchy --use-selection
 ```
 
 ## Output

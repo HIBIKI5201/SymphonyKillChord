@@ -3,7 +3,7 @@ name: uloop-find-game-objects
 description: "Find or inspect Unity GameObjects, especially objects the user currently selected in the Hierarchy. Use for details, components, tags, layers, or name/path searches."
 ---
 
-# npx --yes uloop-cli@2.2.0 find-game-objects
+# uloop find-game-objects
 
 Find GameObjects with search criteria or get details for currently selected Hierarchy objects.
 
@@ -12,10 +12,12 @@ Use this before `execute-dynamic-code` when identifying or inspecting selected G
 ## Usage
 
 ```bash
-npx --yes uloop-cli@2.2.0 find-game-objects [options]
+uloop find-game-objects [options]
 ```
 
 ## Parameters
+
+V3 boolean options take no value — presence means enabled, absence means disabled. Run `uloop find-game-objects --help` to confirm current defaults. Note: a bare `--include-inactive` flag is the correct V3 form here (default disabled) — do not confuse it with `get-hierarchy`'s `--no-include-inactive`, which has the opposite default.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -25,8 +27,8 @@ npx --yes uloop-cli@2.2.0 find-game-objects [options]
 | `--tag` | string | - | Tag filter |
 | `--layer` | integer | - | Layer filter (layer number) |
 | `--max-results` | integer | `20` | Maximum number of results |
-| `--include-inactive` | boolean | `false` | Include inactive GameObjects |
-| `--include-inherited-properties` | boolean | `false` | Include inherited properties in results |
+| `--include-inactive` | flag | disabled | Include inactive GameObjects |
+| `--include-inherited-properties` | flag | disabled | Include inherited properties in results |
 
 ## Search Modes
 
@@ -48,22 +50,22 @@ npx --yes uloop-cli@2.2.0 find-game-objects [options]
 
 ```bash
 # Find by name
-npx --yes uloop-cli@2.2.0 find-game-objects --name-pattern "Player"
+uloop find-game-objects --name-pattern "Player"
 
 # Find with component
-npx --yes uloop-cli@2.2.0 find-game-objects --required-components Rigidbody
+uloop find-game-objects --required-components Rigidbody
 
 # Find by tag
-npx --yes uloop-cli@2.2.0 find-game-objects --tag "Enemy"
+uloop find-game-objects --tag "Enemy"
 
 # Regex search
-npx --yes uloop-cli@2.2.0 find-game-objects --name-pattern "UI_.*" --search-mode Regex
+uloop find-game-objects --name-pattern "UI_.*" --search-mode Regex
 
 # Get selected GameObjects
-npx --yes uloop-cli@2.2.0 find-game-objects --search-mode Selected
+uloop find-game-objects --search-mode Selected
 
 # Get selected including inactive
-npx --yes uloop-cli@2.2.0 find-game-objects --search-mode Selected --include-inactive
+uloop find-game-objects --search-mode Selected --include-inactive
 ```
 
 ## Output

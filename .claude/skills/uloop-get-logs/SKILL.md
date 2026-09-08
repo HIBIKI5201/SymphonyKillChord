@@ -3,26 +3,28 @@ name: uloop-get-logs
 description: "Read current Unity Console entries from a running Editor. Use during bug investigation after compile, tests, PlayMode, or dynamic code to inspect logs, warnings, errors, and stack traces."
 ---
 
-# npx --yes uloop-cli@2.2.0 get-logs
+# uloop get-logs
 
 Retrieve logs from Unity Console.
 
 ## Usage
 
 ```bash
-npx --yes uloop-cli@2.2.0 get-logs [options]
+uloop get-logs [options]
 ```
 
 ## Parameters
+
+V3 boolean options take no value — presence means enabled, absence means disabled. Run `uloop get-logs --help` to confirm current defaults.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `--log-type` | string | `All` | Log type filter: `Error`, `Warning`, `Log`, `All` |
 | `--max-count` | integer | `100` | Maximum number of logs to retrieve |
 | `--search-text` | string | - | Text to search within logs |
-| `--include-stack-trace` | boolean | `false` | Include stack trace in output |
-| `--use-regex` | boolean | `false` | Use regex for search |
-| `--search-in-stack-trace` | boolean | `false` | Search within stack trace |
+| `--include-stack-trace` | flag | disabled | Include stack trace in output |
+| `--use-regex` | flag | disabled | Use regex for search |
+| `--search-in-stack-trace` | flag | disabled | Search within stack trace |
 
 ## Global Options
 
@@ -34,16 +36,16 @@ npx --yes uloop-cli@2.2.0 get-logs [options]
 
 ```bash
 # Get all logs
-npx --yes uloop-cli@2.2.0 get-logs
+uloop get-logs
 
 # Get only errors
-npx --yes uloop-cli@2.2.0 get-logs --log-type Error
+uloop get-logs --log-type Error
 
 # Search for specific text
-npx --yes uloop-cli@2.2.0 get-logs --search-text "NullReference"
+uloop get-logs --search-text "NullReference"
 
 # Regex search
-npx --yes uloop-cli@2.2.0 get-logs --search-text "Missing.*Component" --use-regex
+uloop get-logs --search-text "Missing.*Component" --use-regex
 ```
 
 ## Output
@@ -58,4 +60,4 @@ Returns JSON with:
 - `Logs` (array): Each entry has:
   - `Type` (string): `"Error"`, `"Warning"`, or `"Log"`
   - `Message` (string): Log message body
-  - `StackTrace` (string): Stack trace text. Empty when `--include-stack-trace` is `false`.
+  - `StackTrace` (string): Stack trace text. Empty unless `--include-stack-trace` is set.

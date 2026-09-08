@@ -3,21 +3,23 @@ name: uloop-clear-console
 description: "Clear Unity Console entries. Use before compile, tests, or debugging when stale logs would hide the current result."
 ---
 
-# npx --yes uloop-cli@2.2.0 clear-console
+# uloop clear-console
 
 Clear Unity console logs.
 
 ## Usage
 
 ```bash
-npx --yes uloop-cli@2.2.0 clear-console [--add-confirmation-message]
+uloop clear-console [--add-confirmation-message]
 ```
 
 ## Parameters
 
+V3 boolean options take no value — presence means enabled, absence means disabled. Run `uloop clear-console --help` to confirm current defaults.
+
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `--add-confirmation-message` | boolean | `false` | Add confirmation message after clearing |
+| `--add-confirmation-message` | flag | disabled | Add confirmation message after clearing |
 
 ## Global Options
 
@@ -29,10 +31,10 @@ npx --yes uloop-cli@2.2.0 clear-console [--add-confirmation-message]
 
 ```bash
 # Clear console
-npx --yes uloop-cli@2.2.0 clear-console
+uloop clear-console
 
 # Clear with confirmation
-npx --yes uloop-cli@2.2.0 clear-console --add-confirmation-message
+uloop clear-console --add-confirmation-message
 ```
 
 ## Output
