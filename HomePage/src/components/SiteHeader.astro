@@ -28,8 +28,8 @@ const {
 		{ label: 'Skill', href: `${import.meta.env.BASE_URL}skill`, icon: skillIcon },
 		{ label: 'Credit', href: `${import.meta.env.BASE_URL}credit`, icon: creditIcon },
 	],
-	// TODO: 仮のリンク先。配信サイトのURLが決まり次第、呼び出し側から渡して差し替える
-	downloadHref = '#',
+	// TODO: 配信サイトのURLが決まるまでリンク先を未設定にし、機能しないボタンとして表示する
+	downloadHref,
 	downloadLabel = 'Download',
 } = Astro.props;
 
