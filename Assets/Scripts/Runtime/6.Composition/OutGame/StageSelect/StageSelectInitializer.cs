@@ -117,6 +117,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private VisualElement _stageNodeFocusFrame;
         private bool _isFocusFrameLocked;
         private bool _isSubscribed;
+        private StageSelectModuleContainer _moduleContainer;
+        private bool _isModuleContainerRegistered;
 
         /// <summary>
         ///     単体で実行できる初期化を行います。
@@ -209,6 +211,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             Subscribe();
             TryExecutePendingNodeTransitionAfterReturn();
+            TryStartTutorialSegment();
+            TryStartHomeTutorial();
             return _isInitialized;
         }
 
@@ -492,6 +496,19 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             // --- Adaptor 層 ---
             BuildControllers();
 
+            _moduleContainer = new StageSelectModuleContainer(
+                _stageTree,
+                _battleSortieSelectionService,
+                _currentSceneName);
+            _isModuleContainerRegistered = ServiceLocator.RegisterInstance(_moduleContainer);
+            if (!_isModuleContainerRegistered)
+            {
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] {nameof(StageSelectModuleContainer)} を登録できませんでした。",
+                    this);
+                return false;
+            }
+
             _cts = new CancellationTokenSource();
             _isInitialized = true;
             return true;
@@ -504,6 +521,15 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             Unsubscribe();
             _isSubscribed = false;
+            if (_isModuleContainerRegistered
+                && ServiceLocator.TryGetInstance(out StageSelectModuleContainer registeredContainer)
+                && ReferenceEquals(registeredContainer, _moduleContainer))
+            {
+                ServiceLocator.UnregisterInstance<StageSelectModuleContainer>();
+            }
+
+            _moduleContainer = null;
+            _isModuleContainerRegistered = false;
             UnregisterStageMapGeometryCallback();
             _cts?.Cancel();
             DisposeNodeComponents();
@@ -532,6 +558,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageCleared += HandleStageCleared;
             _outGameUIEvent.OnSortieRequested += HandleSortieRequested;
             _outGameUIEvent.OnStageSelectScreenCompleted += HandleStageSelectScreenCompleted;
+            _outGameUIEvent.OnHomeTutorialCompleted += HandleHomeTutorialCompleted;
             _isSubscribed = true;
         }
 
@@ -547,7 +574,62 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _outGameUIEvent.OnStageCleared -= HandleStageCleared;
             _outGameUIEvent.OnSortieRequested -= HandleSortieRequested;
             _outGameUIEvent.OnStageSelectScreenCompleted -= HandleStageSelectScreenCompleted;
+            _outGameUIEvent.OnHomeTutorialCompleted -= HandleHomeTutorialCompleted;
             _isSubscribed = false;
+        }
+
+        /// <summary>
+        ///     チュートリアル戦闘から初めてホームへ戻った時にホームチュートリアルを開始します。
+        /// </summary>
+        private async void TryStartHomeTutorial()
+        {
+            if (_loadedSaveData == null
+                || _loadedSaveData.Tutorial.Phase < TutorialPhase.BattleCompleted
+                || _loadedSaveData.Tutorial.IsTutorialCompleted)
+            {
+                return;
+            }
+
+            try
+            {
+                if (_loadedSaveData.Tutorial.StartHome())
+                {
+                    await SaveStore.SaveAsync<SaveData>(_cts.Token);
+                }
+
+                await Awaitable.NextFrameAsync(_cts.Token);
+                _outGameUIEvent.OnHomeTutorialStarted?.Invoke();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     ホームチュートリアルViewからの完了通知をセーブへ反映します。
+        /// </summary>
+        private async void HandleHomeTutorialCompleted()
+        {
+            if (_loadedSaveData == null || !_loadedSaveData.Tutorial.Complete())
+            {
+                return;
+            }
+
+            try
+            {
+                await SaveStore.SaveAsync<SaveData>(_cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -993,6 +1075,89 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _pendingNodeTransitionState.Clear();
                 Debug.LogException(exception, this);
             }
+        }
+
+        /// <summary>
+        ///     保存済みの進行段階に対応する初回チュートリアル区間を開始します。
+        /// </summary>
+        private async void TryStartTutorialSegment()
+        {
+            if (!_isInitialized
+                || _loadedSaveData == null
+                || _pendingNodeTransitionState.HasPending)
+            {
+                return;
+            }
+
+            try
+            {
+                switch (_loadedSaveData.Tutorial.Phase)
+                {
+                    case TutorialPhase.NotStarted:
+                        if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario))
+                        {
+                            Debug.LogError(
+                                $"[{nameof(StageSelectInitializer)}] 起点となるチュートリアルシナリオがありません。",
+                                this);
+                            return;
+                        }
+
+                        ReserveNodeTransitionChain(openingScenario);
+                        _selectedBattleStageState.Clear();
+                        _selectedMissionState.Clear();
+                        _selectedScenarioState.SelectScenario(openingScenario);
+                        await _outGameSortieController.RequestSortieAsync(
+                            StageType.Scenario,
+                            _currentSceneName,
+                            openingScenario.TargetSceneName,
+                            _cts.Token);
+                        return;
+
+                    case TutorialPhase.OpeningScenarioCompleted:
+                        if (!_stageTree.TryGetTutorialNode(out StageNode tutorialNode)
+                            || tutorialNode.Definition is not BattleStageDefinition tutorialBattle
+                            || !TryPrepareBattleSortie(tutorialBattle))
+                        {
+                            Debug.LogError(
+                                $"[{nameof(StageSelectInitializer)}] チュートリアル戦闘を準備できませんでした。",
+                                this);
+                            return;
+                        }
+
+                        _selectedScenarioState.Clear();
+                        _outGameSortieController.RequestImmediateBattleSortie();
+                        return;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     前提ノードを持たない最初のシナリオステージを取得します。
+        /// </summary>
+        /// <param name="scenarioStageDefinition"> 取得したシナリオステージです。 </param>
+        /// <returns> 対象を取得できた場合はtrueです。 </returns>
+        private bool TryGetOpeningScenario(out ScenarioStageDefinition scenarioStageDefinition)
+        {
+            for (int i = 0; i < _stageTree.Nodes.Count; i++)
+            {
+                StageNode node = _stageTree.Nodes[i];
+                if (node.Definition is ScenarioStageDefinition candidate
+                    && _stageTree.GetPreviousIds(node.Id).Count == 0)
+                {
+                    scenarioStageDefinition = candidate;
+                    return true;
+                }
+            }
+
+            scenarioStageDefinition = null;
+            return false;
         }
 
         /// <summary>

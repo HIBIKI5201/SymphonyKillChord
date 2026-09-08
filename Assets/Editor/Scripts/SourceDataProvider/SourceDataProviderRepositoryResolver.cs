@@ -22,21 +22,55 @@ namespace KillChord.Editor.SourceDataProvider
         /// <returns> SourceAssetを解決できた場合はtrueです。 </returns>
         public static bool TryResolveAsset(string addressableKey, out ScriptableObject sourceAsset)
         {
+            return TryResolveAsset(
+                addressableKey,
+                GameDataVariantEditorState.SelectedVariant,
+                out sourceAsset,
+                out _,
+                out _);
+        }
+
+        /// <summary>
+        ///     Addressableキーとゲームデータ種別からSourceAssetを取得します。
+        /// </summary>
+        /// <param name="addressableKey"> SourceAssetのAddressableキーです。 </param>
+        /// <param name="variant"> 解決対象のゲームデータ種別です。 </param>
+        /// <param name="sourceAsset"> 解決したSourceAssetです。 </param>
+        /// <param name="groupName"> 解決元のAddressables Group名です。 </param>
+        /// <param name="errorMessage"> 解決できなかった理由です。 </param>
+        /// <returns> SourceAssetを一意に解決できた場合はtrueです。 </returns>
+        public static bool TryResolveAsset(
+            string addressableKey,
+            GameDataVariant variant,
+            out ScriptableObject sourceAsset,
+            out string groupName,
+            out string errorMessage)
+        {
             sourceAsset = null;
+            groupName = string.Empty;
             if (string.IsNullOrWhiteSpace(addressableKey))
             {
+                errorMessage = "Addressableキーが未設定です。";
                 return false;
             }
 
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null)
             {
+                errorMessage = "Addressables Settingsを取得できません。";
                 return false;
             }
 
+            string variantGroupName = GameDataVariantEditorState.GetGroupName(variant);
+            List<AddressableAssetEntry> matches = new();
             foreach (AddressableAssetGroup group in settings.groups)
             {
-                if (group == null)
+                if (group == null
+                    || (!string.Equals(group.Name, variantGroupName, StringComparison.Ordinal)
+                        && !string.Equals(
+                            group.Name,
+                            GameDataVariantEditorState.SHARED_GROUP_NAME,
+                            StringComparison.Ordinal)))
                 {
                     continue;
                 }
@@ -49,12 +83,35 @@ namespace KillChord.Editor.SourceDataProvider
                         continue;
                     }
 
-                    sourceAsset = AssetDatabase.LoadMainAssetAtPath(entry.AssetPath) as ScriptableObject;
-                    return sourceAsset != null;
+                    matches.Add(entry);
                 }
             }
 
-            return false;
+            // variant Groupの移行前だけ、Project全体で一意な従来エントリを互換用に使用する。
+            if (matches.Count == 0)
+            {
+                CollectLegacyMatches(settings, addressableKey, matches);
+            }
+
+            if (matches.Count != 1)
+            {
+                errorMessage = matches.Count == 0
+                    ? $"{variant}用のAddressableキー「{addressableKey}」がありません。"
+                    : $"{variant}用のAddressableキー「{addressableKey}」が複数の有効Groupに存在します。";
+                return false;
+            }
+
+            AddressableAssetEntry resolvedEntry = matches[0];
+            sourceAsset = AssetDatabase.LoadMainAssetAtPath(resolvedEntry.AssetPath) as ScriptableObject;
+            groupName = resolvedEntry.parentGroup?.Name ?? string.Empty;
+            if (sourceAsset == null)
+            {
+                errorMessage = $"Addressableキー「{addressableKey}」のAssetがScriptableObjectではありません。";
+                return false;
+            }
+
+            errorMessage = string.Empty;
+            return true;
         }
 
         /// <summary>
@@ -451,6 +508,38 @@ namespace KillChord.Editor.SourceDataProvider
 
             return fieldType.IsGenericType
                 && fieldType.GetGenericTypeDefinition() == typeof(List<>);
+        }
+
+        /// <summary>
+        ///     variant Group移行前のAddressableエントリを収集します。
+        /// </summary>
+        /// <param name="settings"> Addressables Settingsです。 </param>
+        /// <param name="addressableKey"> 検索するAddressableキーです。 </param>
+        /// <param name="matches"> 収集先です。 </param>
+        private static void CollectLegacyMatches(
+            AddressableAssetSettings settings,
+            string addressableKey,
+            List<AddressableAssetEntry> matches)
+        {
+            foreach (AddressableAssetGroup group in settings.groups)
+            {
+                if (group == null
+                    || string.Equals(group.Name, GameDataVariantEditorState.RELEASE_GROUP_NAME, StringComparison.Ordinal)
+                    || string.Equals(group.Name, GameDataVariantEditorState.DEMO_GROUP_NAME, StringComparison.Ordinal)
+                    || string.Equals(group.Name, GameDataVariantEditorState.SHARED_GROUP_NAME, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                foreach (AddressableAssetEntry entry in group.entries)
+                {
+                    if (entry != null
+                        && string.Equals(entry.address, addressableKey, StringComparison.Ordinal))
+                    {
+                        matches.Add(entry);
+                    }
+                }
+            }
         }
 
         internal const string ID_PROPERTY_NAME = "_id";

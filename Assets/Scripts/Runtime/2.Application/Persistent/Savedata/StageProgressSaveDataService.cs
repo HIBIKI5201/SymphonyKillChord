@@ -42,7 +42,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
                 saveData.StageProgress.RecordClear(stageId.Value, achievedEvaluationIds);
-            bool tutorialChanged = isTutorial && saveData.Tutorial.Complete();
+            bool tutorialChanged = isTutorial && saveData.Tutorial.CompleteBattle();
 
             if (!stageProgressChanged && !tutorialChanged && !isFirstClear)
             {
@@ -68,7 +68,9 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
                 saveData.StageProgress.RecordClear(stageId.Value, Array.Empty<string>());
-            if (!stageProgressChanged)
+            bool tutorialChanged = saveData.Tutorial.Phase == TutorialPhase.NotStarted
+                && saveData.Tutorial.CompleteOpeningScenario();
+            if (!stageProgressChanged && !tutorialChanged)
             {
                 return false;
             }

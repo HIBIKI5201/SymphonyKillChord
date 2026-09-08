@@ -15,7 +15,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         public StageResultController(
             SceneTransitionUsecase usecase,
             SelectedBattleStageState selectedBattleStageState,
-            SelectedMissionState selectedMissionState)
+            SelectedMissionState selectedMissionState,
+            IStageResultExitPolicy exitPolicy = null)
         {
             _usecase = usecase
                 ?? throw new ArgumentNullException(
@@ -28,6 +29,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             _selectedMissionState = selectedMissionState
                 ?? throw new ArgumentNullException(
                     nameof(selectedMissionState));
+
+            _exitPolicy = exitPolicy;
         }
 
         /// <summary>
@@ -36,12 +39,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         /// <returns>遷移に成功した場合はtrue。</returns>
         public async Task<bool> CompleteAsync()
         {
+            string destinationSceneName = ResolveDestinationScene(
+                StageResultExitAction.Complete,
+                _selectedBattleStageState.ReturnSceneName);
             bool success =
                 await _usecase
                     .UnloadThenChangeSceneAsync(
                         _selectedBattleStageState.BattleSceneName,
                         _selectedBattleStageState.InGameSceneName,
-                        _selectedBattleStageState.ReturnSceneName,
+                        destinationSceneName,
                         CancellationToken.None);
 
             if (!success)
@@ -59,18 +65,67 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         ///     同じステージへ再出撃する。
         /// </summary>
         /// <returns>再出撃に成功した場合はtrue。</returns>
-        public Task<bool> RetryAsync()
+        public async Task<bool> RetryAsync()
         {
-            return _usecase
-                .UnloadThenReloadSceneAsync(
-                    _selectedBattleStageState.BattleSceneName,
-                    _selectedBattleStageState.InGameSceneName,
-                    CancellationToken.None);
+            if (!TryResolvePolicyDestination(
+                    StageResultExitAction.Retry,
+                    out string destinationSceneName))
+            {
+                return await _usecase
+                    .UnloadThenReloadSceneAsync(
+                        _selectedBattleStageState.BattleSceneName,
+                        _selectedBattleStageState.InGameSceneName,
+                        CancellationToken.None);
+            }
+
+            bool success = await _usecase.UnloadThenChangeSceneAsync(
+                _selectedBattleStageState.BattleSceneName,
+                _selectedBattleStageState.InGameSceneName,
+                destinationSceneName,
+                CancellationToken.None);
+            if (success)
+            {
+                _selectedBattleStageState.Clear();
+                _selectedMissionState.Clear();
+            }
+
+            return success;
+        }
+
+        /// <summary>
+        ///     リザルト終了ポリシーを適用した遷移先を取得します。
+        /// </summary>
+        private string ResolveDestinationScene(
+            StageResultExitAction action,
+            string defaultSceneName)
+        {
+            return TryResolvePolicyDestination(
+                action,
+                out string destinationSceneName)
+                ? destinationSceneName
+                : defaultSceneName;
+        }
+
+        /// <summary>
+        ///     未登録または空のポリシー応答を通常遷移として扱います。
+        /// </summary>
+        private bool TryResolvePolicyDestination(
+            StageResultExitAction action,
+            out string destinationSceneName)
+        {
+            destinationSceneName = string.Empty;
+            return _exitPolicy != null
+                && _exitPolicy.TryGetDestinationScene(
+                    action,
+                    _selectedBattleStageState,
+                    out destinationSceneName)
+                && !string.IsNullOrWhiteSpace(destinationSceneName);
         }
 
 
         private readonly SceneTransitionUsecase _usecase;
         private readonly SelectedBattleStageState _selectedBattleStageState;
         private readonly SelectedMissionState _selectedMissionState;
+        private readonly IStageResultExitPolicy _exitPolicy;
     }
 }
