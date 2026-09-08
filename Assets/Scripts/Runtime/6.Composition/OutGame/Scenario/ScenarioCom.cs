@@ -214,6 +214,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             }
 
             _scenarioInputView.Initialize(_inputController, _inputComposition.GetInputView);
+            _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.Scenario);
             _ = RunScenarioAsync();
             return true;
         }
@@ -324,6 +325,8 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
+            // ScenarioのShutdownより前に、ロード抑止解除後の入力マップをOutGameへ予約する。
+            _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
             return await _sceneTransitionController.UnloadWithPersistentLifetimeAsync(
                 scenarioSceneName);
         }

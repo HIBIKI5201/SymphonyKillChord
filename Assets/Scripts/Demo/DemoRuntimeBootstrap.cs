@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
-using KillChord.Runtime.Application.Persistent.Load;
+using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
@@ -10,6 +10,8 @@ using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 
 namespace KillChord.Demo
@@ -19,17 +21,76 @@ namespace KillChord.Demo
     /// </summary>
     public sealed class DemoRuntimeBootstrap : MonoBehaviour
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void CreateInstance()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
         {
-            if (FindAnyObjectByType<DemoRuntimeBootstrap>() != null)
+            _isCreating = false;
+            _prefabAssetHandle = default;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static async void CreateInstance()
+        {
+            if (_isCreating
+                || ServiceLocator.TryGetInstance<IDemoSession>(out _)
+                || FindAnyObjectByType<DemoRuntimeBootstrap>() != null)
             {
                 return;
             }
 
-            GameObject gameObject = new(nameof(DemoRuntimeBootstrap));
-            DontDestroyOnLoad(gameObject);
-            gameObject.AddComponent<DemoRuntimeBootstrap>();
+            _isCreating = true;
+            AsyncOperationHandle<GameObject> handle = default;
+            try
+            {
+                handle = Addressables.LoadAssetAsync<GameObject>(PREFAB_ADDRESS);
+                GameObject prefab = await handle.Task;
+                if (!Application.isPlaying)
+                {
+                    return;
+                }
+
+                if (prefab == null)
+                {
+                    Debug.LogError(
+                        $"[{nameof(DemoRuntimeBootstrap)}] {PREFAB_ADDRESS} をロードできませんでした。");
+                    return;
+                }
+
+                if (ServiceLocator.TryGetInstance<IDemoSession>(out _)
+                    || FindAnyObjectByType<DemoRuntimeBootstrap>() != null)
+                {
+                    return;
+                }
+
+                GameObject instance = Instantiate(prefab);
+                DemoRuntimeBootstrap bootstrap =
+                    instance.GetComponent<DemoRuntimeBootstrap>();
+                if (bootstrap == null)
+                {
+                    Debug.LogError(
+                        $"[{nameof(DemoRuntimeBootstrap)}] PrefabにBootstrapがありません。",
+                        instance);
+                    Destroy(instance);
+                    return;
+                }
+
+                _prefabAssetHandle = handle;
+                bootstrap._ownsPrefabAssetHandle = true;
+                DontDestroyOnLoad(instance);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+            }
+            finally
+            {
+                if (!_prefabAssetHandle.IsValid() && handle.IsValid())
+                {
+                    Addressables.Release(handle);
+                }
+
+                _isCreating = false;
+            }
         }
 
         private async void Start()
@@ -45,6 +106,27 @@ namespace KillChord.Demo
                     return;
                 }
 
+                _sessionState.Configure(_config);
+                _isSessionOwner =
+                    ServiceLocator.RegisterInstance<IDemoSession>(_sessionState);
+                if (!_isSessionOwner)
+                {
+                    Debug.LogError(
+                        $"[{nameof(DemoRuntimeBootstrap)}] {nameof(IDemoSession)} を登録できませんでした。",
+                        this);
+                    return;
+                }
+
+                _timerView ??= GetComponentInChildren<DemoTimerView>(true);
+                if (_timerView == null)
+                {
+                    Debug.LogError(
+                        $"[{nameof(DemoRuntimeBootstrap)}] {nameof(DemoTimerView)} がありません。",
+                        this);
+                    return;
+                }
+
+                _timerView.Initialize(_sessionState);
                 _exitPolicy = new DemoStageResultExitPolicy(_sessionState, _config);
                 _isExitPolicyOwner = ServiceLocator.RegisterInstance<IStageResultExitPolicy>(_exitPolicy);
                 SceneManager.sceneLoaded += HandleSceneLoaded;
@@ -70,7 +152,8 @@ namespace KillChord.Demo
             bool isOutGameActive = ServiceLocator.TryGetInstance(
                 out StageSelectModuleContainer stageSelectContainer);
             TryStartSession(isOutGameActive);
-            _sessionState.Tick(Time.unscaledDeltaTime, isOutGameActive, _config);
+            _sessionState.Tick(Time.unscaledDeltaTime, isOutGameActive);
+            _timerView?.Refresh();
 
             if (_sessionState.IsHomeTimeExpired && isOutGameActive)
             {
@@ -92,7 +175,19 @@ namespace KillChord.Demo
                 ServiceLocator.UnregisterInstance<IStageResultExitPolicy>();
             }
 
+            if (_isSessionOwner
+                && ServiceLocator.TryGetInstance<IDemoSession>(out var registeredSession)
+                && ReferenceEquals(registeredSession, _sessionState))
+            {
+                ServiceLocator.UnregisterInstance<IDemoSession>();
+            }
+
             CONFIG_ADDRESS.ReleaseLoadedAsset(this);
+            if (_ownsPrefabAssetHandle && _prefabAssetHandle.IsValid())
+            {
+                Addressables.Release(_prefabAssetHandle);
+                _prefabAssetHandle = default;
+            }
         }
 
         /// <summary>
@@ -209,14 +304,23 @@ namespace KillChord.Demo
         }
 
         private const string CONFIG_ADDRESS = nameof(DemoExperienceConfig);
+        private const string PREFAB_ADDRESS = "DemoRuntime";
 
         private readonly DemoSessionState _sessionState = new();
+        [SerializeField, Tooltip("常駐表示する体験版タイマーViewです。")]
+        private DemoTimerView _timerView;
+
         private DemoExperienceConfig _config;
         private DemoStageResultExitPolicy _exitPolicy;
         private bool _isExitPolicyOwner;
+        private bool _isSessionOwner;
         private bool _isSceneLoadedSubscribed;
         private bool _isStartingSession;
         private bool _isForcedSortiePrepared;
         private bool _isSaveDataReset;
+        private bool _ownsPrefabAssetHandle;
+
+        private static bool _isCreating;
+        private static AsyncOperationHandle<GameObject> _prefabAssetHandle;
     }
 }
