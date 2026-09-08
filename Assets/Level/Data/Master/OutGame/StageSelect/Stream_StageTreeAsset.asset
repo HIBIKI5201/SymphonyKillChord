@@ -17,7 +17,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
   - {fileID: 11400000, guid: 9c000c4ece3bda444adbf52fbe49279c, type: 2}
   - {fileID: 11400000, guid: a19a4167dbdb8d74fa2ad539718df6d1, type: 2}
+  - {fileID: 11400000, guid: e6bfbbbe2a09ecb42aae4940b52b9422, type: 2}
   _bindAssets:
   - {fileID: 11400000, guid: 52286389d076d2845b47f363c7c21f4b, type: 2}
   - {fileID: 11400000, guid: 3226f43db290fa34482ccbc376099741, type: 2}
   - {fileID: 11400000, guid: 3825a39cb1b47584d9f6045b892f35ea, type: 2}
+  - {fileID: 11400000, guid: b93c2f8c049c10443981a395a15601f3, type: 2}
