@@ -9589,6 +9589,9 @@ MonoBehaviour:
   _skillNodeDataRepoKey: SkillNodeDataRepo
   _skillNodeBindRepoKey: SkillNodeBindRepo
   _skillNodePhaseBindRepoKey: SkillNodePhaseBindDataRepo
+  _statusBonusEffectIconCatalogKey: StatusBonusEffectIconCatalogAsset
+  _skillRepositoryKey: OutGameSkillRepository
+  _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
   _videoPlayer: {fileID: 1876322594}
 --- !u!114 &510963399
 MonoBehaviour:
@@ -9605,6 +9608,8 @@ MonoBehaviour:
   _uiDocument: {fileID: 2119823347}
   _ownedSkillRepositoryKey: OwnedSkillRepository
   _skillBuildRepositoryKey: SkillBuildRepository
+  _skillRepositoryKey: OutGameSkillRepository
+  _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
 --- !u!114 &510963400
 MonoBehaviour:
@@ -10258,6 +10263,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 434490ef9a2c4724b8cb7984f7150eb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Develop::KillChord.Develop.Composition.OutGame.DevelopSkillUnlockInitializer
+  _developUnlockedSkills: []
 --- !u!4 &1480631850
 Transform:
   m_ObjectHideFlags: 0

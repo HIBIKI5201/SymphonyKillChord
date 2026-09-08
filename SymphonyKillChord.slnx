@@ -10,10 +10,13 @@
   <Project Path="VRM10.csproj" />
   <Project Path="KillChord.Domain.csproj" />
   <Project Path="KillChord.Structure.csproj" />
+  <Project Path="MagicaClothV2.Editor.csproj" />
   <Project Path="DevelopProducts-SaveSystem.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="SingularityGroup.HotReload.Editor.csproj" />
   <Project Path="KillChord.Application.csproj" />
   <Project Path="UniHumanoid.csproj" />
+  <Project Path="SingularityGroup.HotReload.Runtime.csproj" />
   <Project Path="DevelopProducts-BindingSystem.csproj" />
   <Project Path="KillChord.Develop.csproj" />
   <Project Path="VRM10.MToon10.Editor.csproj" />
@@ -34,6 +37,7 @@
   <Project Path="DevelopProducts-ToonShader.Editor.csproj" />
   <Project Path="UniGLTF.UniUnlit.csproj" />
   <Project Path="DevelopProducts-SkillTree.csproj" />
+  <Project Path="MagicaCloth2Example.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
   <Project Path="SingularityGroup.HotReload.Runtime.Public.csproj" />

@@ -1,3 +1,14 @@
-.detail-panel-back-button{
+.detail-panel-back-button {
+    scale: 1 1;
+    transition-property: scale;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
+}
+.detail-panel-back-button:hover,
+.detail-panel-back-button:focus {
+    scale: 1.2 1.2;
+}
 
+.detail-panel-back-button:active {
+    scale: 0.9 0.9;
 }

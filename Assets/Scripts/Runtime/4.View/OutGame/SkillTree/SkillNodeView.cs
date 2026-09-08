@@ -1,7 +1,9 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Utility.OutGame;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.SkillTree
@@ -17,15 +19,19 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _nodeId = nodeId;
             _outGameUIEvent = outGameUIEvent;
 
-            _root.RegisterCallback<ClickEvent>(OnNodeClicked);
+            _root.MakeNavigable();
+            _activationRegistration = _root.RegisterActivation(HandleActivationHandler);
 
             SetLocked();
         }
 
         public void Dispose()
         {
-            _root.UnregisterCallback<ClickEvent>(OnNodeClicked);
+            _activationRegistration.Dispose();
         }
+
+        /// <summary> このノードの要素を取得します。初期フォーカスの設定に使用します。 </summary>
+        public VisualElement RootElement => _root;
 
         /// <summary>
         ///     スキルノードを解放済みにする。
@@ -62,15 +68,32 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _root.RemoveFromClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_SELECTED);
         }
 
+        /// <summary>
+        ///     ノードが強化するステータスの種別アイコンを設定する。
+        /// </summary>
+        /// <param name="icon"> 表示するアイコン。null の場合はアイコンを非表示にする。 </param>
+        public void SetIcon(Sprite icon)
+        {
+            if (icon == null)
+            {
+                _root.style.backgroundImage = new StyleBackground();
+                _root.RemoveFromClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_ICON);
+                return;
+            }
+
+            _root.style.backgroundImage = new StyleBackground(icon);
+            _root.AddToClassList(UssClassNameConstants.USS_CLASS_SKILL_NODE_ICON);
+        }
+
         private readonly int _nodeId;
         private readonly VisualElement _root;
         private readonly OutGameUIEvent _outGameUIEvent;
+        private readonly IDisposable _activationRegistration;
 
         /// <summary>
-        ///     スキルノードをクリックした時の処理。
+        ///     スキルノードが作動した時の処理。
         /// </summary>
-        /// <param name="evt"></param>
-        private void OnNodeClicked(ClickEvent evt)
+        private void HandleActivationHandler()
         {
             SetSelected();
             _outGameUIEvent.OnSkillNodeSelected?.Invoke(_root.name);

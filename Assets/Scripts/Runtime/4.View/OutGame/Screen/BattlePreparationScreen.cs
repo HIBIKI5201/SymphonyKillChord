@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.BattlePreparation;
+using KillChord.Runtime.View.OutGame.Navigation;
 using R3;
 using System;
 using System.Collections.Generic;
@@ -89,9 +90,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
-            _startButton.RegisterCallback<ClickEvent>(OnStartButtonClicked);
-            _skillBuildButton.RegisterCallback<ClickEvent>(OnSkillBuildButtonClicked);
+            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
+            _backButton.ExcludeFromNavigation();
+            _startButton.MakeNavigable();
+            _skillBuildButton.MakeNavigable();
+
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
+            _startButtonActivation = _startButton.RegisterActivation(HandleStartButtonActivationHandler);
+            _skillBuildButtonActivation = _skillBuildButton.RegisterActivation(HandleSkillBuildButtonActivationHandler);
         }
 
         /// <summary>
@@ -99,32 +105,31 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallback()
         {
-            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
-            _startButton.UnregisterCallback<ClickEvent>(OnStartButtonClicked);
-            _skillBuildButton.UnregisterCallback<ClickEvent>(OnSkillBuildButtonClicked);
+            _backButtonActivation?.Dispose();
+            _startButtonActivation?.Dispose();
+            _skillBuildButtonActivation?.Dispose();
         }
 
         /// <summary>
-        ///     画面を閉じるボタンがクリックされたときの処理です。
+        ///     画面を閉じるボタンが作動したときの処理です。
         /// </summary>
-        private void OnBackButtonClicked(ClickEvent evt)
+        private void HandleBackButtonActivationHandler()
         {
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
         /// <summary>
-        ///     ゲーム開始ボタンがクリックされたときの処理です。
+        ///     ゲーム開始ボタンが作動したときの処理です。
         /// </summary>
-        private void OnStartButtonClicked(ClickEvent evt)
+        private void HandleStartButtonActivationHandler()
         {
             OutGameUIEvent.OnStartGame?.Invoke();
         }
 
         /// <summary>
-        ///     スキル編成ボタンがクリックされたときの処理です。
+        ///     スキル編成ボタンが作動したときの処理です。
         /// </summary>
-        /// <param name="evt"></param>
-        private void OnSkillBuildButtonClicked(ClickEvent evt)
+        private void HandleSkillBuildButtonActivationHandler()
         {
             OutGameUIEvent.OnShownSkillBuildScreen?.Invoke();
         }
@@ -261,12 +266,21 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string SKILL_TYPE_HEADING = "スキルの種類　：";
         private const string SKILL_EFFECT_HEADING = "スキル効果";
 
+        /// <inheritdoc />
+        protected override VisualElement InitialFocusElement => _startButton;
+
+        /// <inheritdoc />
+        protected override VisualElement CancelTargetElement => _backButton;
+
         private readonly Button _backButton;
         private readonly Button _startButton;
         private readonly Button _skillBuildButton;
         private readonly VisualElement _equippedSkillStrip;
         private readonly ScrollView _effectScrollView;
         private readonly VisualElement _effectList;
+        private IDisposable _backButtonActivation;
+        private IDisposable _startButtonActivation;
+        private IDisposable _skillBuildButtonActivation;
 
         private IBattlePreparationSkillViewModel _viewModel;
         private CompositeDisposable _subscriptions;

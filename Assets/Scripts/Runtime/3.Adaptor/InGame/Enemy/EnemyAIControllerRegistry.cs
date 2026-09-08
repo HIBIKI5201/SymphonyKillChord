@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
 {
@@ -61,6 +62,31 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                     controller.StopBattleAI();
                 }
             }
+        }
+
+        /// <summary>
+        ///     自分以外で最も近い有効な敵コントローラーを検索する。
+        /// </summary>
+        /// <param name="self"></param>
+        /// <param name="selfPosition"></param>
+        /// <param name="nearestAlly"></param>
+        /// <returns> 見つかった場合はtrue。 </returns>
+        public bool TryFindNearestOtherActive(EnemyAIController self, Vector3 selfPosition, out EnemyAIController nearestAlly)
+        {
+            nearestAlly = null;
+            float minDistanceSqr = float.MaxValue;
+            foreach (EnemyAIController controller in _activeControllers)
+            {
+                if (controller == self) continue;
+
+                float distanceSqr = (controller.CurrentPosition - selfPosition).sqrMagnitude;
+                if (distanceSqr < minDistanceSqr)
+                {
+                    minDistanceSqr = distanceSqr;
+                    nearestAlly = controller;
+                }
+            }
+            return nearestAlly != null;
         }
 
         private HashSet<EnemyAIController> _activeControllers;

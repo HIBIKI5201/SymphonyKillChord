@@ -1,15 +1,34 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="VisualElement" picking-mode="Ignore" style="flex-grow: 1; width: 500px; height: 100%; align-self: flex-end; background-color: rgb(148, 173, 176); flex-direction: column; left: auto; top: auto; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; opacity: 1; justify-content: flex-start; align-items: center;">
+    <ui:VisualElement name="VisualElement" picking-mode="Ignore" style="flex-grow: 1; width: 500px; height: 100%; align-self: flex-end; background-color: rgb(148, 173, 176); flex-direction: column; left: auto; top: auto; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; opacity: 1; justify-content: flex-start; align-items: stretch;">
         <ui:Label text="ステータス" name="TitleLable" style="position: relative; -unity-text-align: upper-center; width: auto; height: auto; font-size: 30px; -unity-font-style: normal; top: 0; align-self: stretch; align-items: stretch;"/>
-        <ui:VisualElement name="StatusContainer" style="flex-grow: initial; align-items: flex-start; align-content: auto; flex-direction: row; flex-wrap: wrap; justify-content: center;">
-            <ui:Label text="HP：" name="HealthLabel" style="position: relative; -unity-text-align: upper-right; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; left: auto;"/>
-            <ui:Label text="99" name="HealthPreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
-            <ui:Label text="攻撃力：" name="AttackLabel" style="position: relative; -unity-text-align: upper-right; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; left: auto;"/>
-            <ui:Label text="10&#10;" name="AttackPreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
-            <ui:Label text="クリティカル率：" name="CriticalChanceLabel" style="position: relative; -unity-text-align: upper-right; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; left: auto;"/>
-            <ui:Label text="5%" name="CriticalChancePreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
-            <ui:Label text="クリティカルダメージ：" name="CriticalDamageLabel" style="position: relative; -unity-text-align: upper-right; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; left: auto;"/>
-            <ui:Label text="50%" name="CriticalDamagePreviewLabel" style="position: relative; -unity-text-align: upper-left; width: 45%; height: auto; font-size: 30px; -unity-font-style: normal; top: auto; align-self: stretch; align-items: stretch; right: auto;"/>
+        <ui:VisualElement name="TitleDivider" style="height: 2px; background-color: rgb(18, 33, 31); margin-top: 6px; margin-bottom: 10px;"/>
+        <ui:VisualElement name="StatusContainer" style="flex-grow: initial; flex-direction: column; align-items: stretch;">
+            <ui:VisualElement name="HealthRow" style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+                <ui:Image name="HealthIcon" style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;"/>
+                <ui:Label text="HP" name="HealthLabel" style="-unity-text-align: middle-left; width: auto; height: auto; font-size: 24px;"/>
+                <ui:Label text="99" name="HealthPreviewLabel" style="flex-grow: 1; -unity-text-align: middle-right; width: auto; height: auto; font-size: 24px;"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="AttackRow" style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+                <ui:Image name="AttackIcon" style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;"/>
+                <ui:Label text="攻撃力" name="AttackLabel" style="-unity-text-align: middle-left; width: auto; height: auto; font-size: 24px;"/>
+                <ui:Label text="10" name="AttackPreviewLabel" style="flex-grow: 1; -unity-text-align: middle-right; width: auto; height: auto; font-size: 24px;"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="CriticalChanceRow" style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+                <ui:Image name="CriticalChanceIcon" style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;"/>
+                <ui:Label text="会心率" name="CriticalChanceLabel" style="-unity-text-align: middle-left; width: auto; height: auto; font-size: 24px;"/>
+                <ui:Label text="5%" name="CriticalChancePreviewLabel" style="flex-grow: 1; -unity-text-align: middle-right; width: auto; height: auto; font-size: 24px;"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="CriticalDamageRow" style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+                <ui:Image name="CriticalDamageIcon" style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;"/>
+                <ui:Label text="会心ダメージ" name="CriticalDamageLabel" style="-unity-text-align: middle-left; width: auto; height: auto; font-size: 24px;"/>
+                <ui:Label text="50%" name="CriticalDamagePreviewLabel" style="flex-grow: 1; -unity-text-align: middle-right; width: auto; height: auto; font-size: 24px;"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="AreaAttackRangeRow" style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+                <ui:Image name="AreaAttackRangeIcon" style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;"/>
+                <ui:Label text="射程範囲" name="AreaAttackRangeLabel" style="-unity-text-align: middle-left; width: auto; height: auto; font-size: 24px;"/>
+                <ui:Label text="1.00倍" name="AreaAttackRangePreviewLabel" style="flex-grow: 1; -unity-text-align: middle-right; width: auto; height: auto; font-size: 24px;"/>
+            </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="BottomDivider" style="height: 2px; background-color: rgb(18, 33, 31); margin-top: 2px;"/>
     </ui:VisualElement>
 </ui:UXML>

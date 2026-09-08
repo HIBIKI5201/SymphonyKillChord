@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a08faf39c6359b340bbf11966fd059d3, type: 3}
+  m_Name: EnemyDefinition_Artillery_Marked
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyDefinitionAsset
+  _id:
+    _id: enemy_artillery_marked
+    _hashId: -1476855641
+  _enemyType: 1
+  _viewPrefab: {fileID: 1465007639519197220, guid: 1ab6a5de809632041ab1e245aa451b28, type: 3}
+  _characterDefinition: {fileID: 11400000, guid: b66d3fbff34b143458ba52a436e06d6f, type: 2}
+  _moveSpec: {fileID: 11400000, guid: 71243b714fe682a479522c36402275ac, type: 2}
+  _encounterMusicSpec: {fileID: 11400000, guid: bad017c822c5b8c4da79df297d30324c, type: 2}
+  _battleMusicSpec: {fileID: 11400000, guid: 2d1972e01a7a86243aac0caff66ff428, type: 2}
+  _missionKey: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}
+  _attackIndex: 0
+  _defaultPoolSize: 2
+  _maxPoolSize: 5
