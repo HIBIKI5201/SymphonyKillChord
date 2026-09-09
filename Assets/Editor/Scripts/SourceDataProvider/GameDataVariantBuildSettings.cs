@@ -25,12 +25,14 @@ namespace KillChord.Editor.SourceDataProvider
         private static void SelectRelease()
         {
             GameDataVariantEditorState.SetSelectedVariant(GameDataVariant.Release);
+            Apply(GameDataVariant.Release);
         }
 
         [MenuItem("KillChord/Game Data Variant/Demo")]
         private static void SelectDemo()
         {
             GameDataVariantEditorState.SetSelectedVariant(GameDataVariant.Demo);
+            Apply(GameDataVariant.Demo);
         }
 
         [MenuItem("KillChord/Game Data Variant/Release", true)]

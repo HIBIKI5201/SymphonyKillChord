@@ -87,7 +87,7 @@ namespace KillChord.Editor.SourceDataProvider
                 }
             }
 
-            // variant Groupの移行前だけ、Project全体で一意な従来エントリを互換用に使用する。
+            // variant Groupの移行前だけ、旧Default Local Groupの従来エントリを互換用に使用する。
             if (matches.Count == 0)
             {
                 CollectLegacyMatches(settings, addressableKey, matches);
@@ -524,9 +524,7 @@ namespace KillChord.Editor.SourceDataProvider
             foreach (AddressableAssetGroup group in settings.groups)
             {
                 if (group == null
-                    || string.Equals(group.Name, GameDataVariantEditorState.RELEASE_GROUP_NAME, StringComparison.Ordinal)
-                    || string.Equals(group.Name, GameDataVariantEditorState.DEMO_GROUP_NAME, StringComparison.Ordinal)
-                    || string.Equals(group.Name, GameDataVariantEditorState.SHARED_GROUP_NAME, StringComparison.Ordinal))
+                    || !string.Equals(group.Name, LEGACY_GROUP_NAME, StringComparison.Ordinal))
                 {
                     continue;
                 }
@@ -541,6 +539,8 @@ namespace KillChord.Editor.SourceDataProvider
                 }
             }
         }
+
+        private const string LEGACY_GROUP_NAME = "Default Local Group";
 
         internal const string ID_PROPERTY_NAME = "_id";
         internal const string HASH_PROPERTY_NAME = "_hashId";
