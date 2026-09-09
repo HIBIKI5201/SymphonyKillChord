@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: SaveDataConfig
   m_EditorClassIdentifier: SymphonyFrameWork::SymphonyFrameWork.SaveDataConfig
   _loader:
-    rid: 1841141166107001087
+    rid: 277665365726330880
   references:
     version: 2
     RefIds:
-    - rid: 1841141166107001087
-      type: {class: PersistentFileSaveDataLoaderStrategy, ns: KillChord.Runtime.InfraStructure.Persistent.Savedata, asm: KillChord.Structure}
+    - rid: 277665365726330880
+      type: {class: JsonUtilitySaveDataLoaderStrategy, ns: SymphonyFrameWork.System.SaveSystem, asm: SymphonyFrameWork}
       data: 

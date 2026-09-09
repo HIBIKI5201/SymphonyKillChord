@@ -13,5 +13,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         Critical,
         /// <summary> スキルダメージ </summary>
         Skill,
+        /// <summary> ジャストヒットダメージ </summary>
+        JustHit
     }
 }

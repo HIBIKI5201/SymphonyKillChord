@@ -21,10 +21,16 @@ namespace KillChord.Editor.AssetManagement
     /// </summary>
     internal static class DriveAuthProvider
     {
-        /// <summary> Drive API へのアクセス権限。読み取り専用。 </summary>
+        /// <summary> Drive API の読み取り専用スコープ。 </summary>
+        public const string SCOPE_READONLY = "https://www.googleapis.com/auth/drive.readonly";
+
+        /// <summary> Drive API のうち、自身が作成したファイルのみを操作できるスコープ。アップロードに使用する。 </summary>
+        public const string SCOPE_FILE = "https://www.googleapis.com/auth/drive.file";
+
+        /// <summary> 既定のアクセス権限。読み取り専用。 </summary>
         private static readonly string[] Scopes =
         {
-            "https://www.googleapis.com/auth/drive.readonly"
+            SCOPE_READONLY
         };
 
         /// <summary>
@@ -34,6 +40,46 @@ namespace KillChord.Editor.AssetManagement
         /// <returns> Service Account 認証情報。 </returns>
         /// <exception cref="InvalidOperationException"> JSON 解析失敗またはフィールド不足。 </exception>
         public static ServiceAccountCredential GetCredential(string serviceAccountJsonKey)
+        {
+            ServiceAccountKeyFile keyFile = ParseKeyFile(serviceAccountJsonKey);
+
+            var initializer = new ServiceAccountCredential.Initializer(keyFile.client_email)
+            {
+                Scopes = Scopes
+            }.FromPrivateKey(keyFile.private_key);
+
+            return new ServiceAccountCredential(initializer);
+        }
+
+        /// <summary>
+        ///     スコープを指定して Google Drive API の認証情報を取得する。
+        /// </summary>
+        /// <remarks>
+        ///     アップロードのように読み取り専用スコープでは行えない操作のために用意している。
+        /// </remarks>
+        /// <param name="serviceAccountJsonKey"> Service Account JSON 鍵の文字列。 </param>
+        /// <param name="scopes"> 要求するアクセス権限。 </param>
+        /// <returns> Service Account 認証情報。 </returns>
+        /// <exception cref="InvalidOperationException"> JSON 解析失敗またはフィールド不足。 </exception>
+        public static ServiceAccountCredential GetCredential(string serviceAccountJsonKey, string[] scopes)
+        {
+            ServiceAccountKeyFile keyFile = ParseKeyFile(serviceAccountJsonKey);
+
+            var initializer = new ServiceAccountCredential.Initializer(keyFile.client_email)
+            {
+                Scopes = scopes is { Length: > 0 } ? scopes : Scopes
+            }.FromPrivateKey(keyFile.private_key);
+
+            return new ServiceAccountCredential(initializer);
+        }
+
+        /// <summary>
+        ///     Service Account JSON 鍵を解析し、認証に必要なフィールドが揃っていることを確認する。
+        /// </summary>
+        /// <param name="serviceAccountJsonKey"> Service Account JSON 鍵の文字列。 </param>
+        /// <returns> 解析済みの鍵情報。 </returns>
+        /// <exception cref="InvalidOperationException"> JSON 解析失敗またはフィールド不足。 </exception>
+        private static ServiceAccountKeyFile ParseKeyFile(string serviceAccountJsonKey)
         {
             if (string.IsNullOrEmpty(serviceAccountJsonKey))
             {
@@ -58,12 +104,7 @@ namespace KillChord.Editor.AssetManagement
                     "Service Account JSON鍵の形式が不正です(client_email/private_keyを取得できません)。");
             }
 
-            var initializer = new ServiceAccountCredential.Initializer(keyFile.client_email)
-            {
-                Scopes = Scopes
-            }.FromPrivateKey(keyFile.private_key);
-
-            return new ServiceAccountCredential(initializer);
+            return keyFile;
         }
     }
 }

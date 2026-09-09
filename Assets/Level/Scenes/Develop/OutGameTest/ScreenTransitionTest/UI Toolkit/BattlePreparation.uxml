@@ -6,7 +6,7 @@
     <ui:VisualElement class="screen-visible battle-preparation-screen">
         <ui:Label text="戦闘準備" name="Title" class="title battle-preparation-title" style="display: none;"/>
         <ui:VisualElement name="CharacterContent" class="battle-preparation-character-content">
-            <ui:Image name="ChracterImage" class="battle-preparation-character-image" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/Character/CHS_Symphony.png?fileID=21300000&amp;guid=73534d0913c2bb14abf3fe8eb451058c&amp;type=3#CHS_Symphony&quot;);"/>
+            <ui:Image name="ChracterImage" class="battle-preparation-character-image" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/Character/CHS_Symphony.png&quot;);"/>
         </ui:VisualElement>
         <ui:VisualElement name="PreparationContent" class="battle-preparation-content">
             <ui:VisualElement name="PreparationPanel" class="battle-preparation-panel">
@@ -17,11 +17,11 @@
                     <ui:VisualElement name="EquippedSkillEffectList" class="battle-preparation-effect-list"/>
                 </ui:ScrollView>
                 <ui:VisualElement name="FooterButtons" class="battle-preparation-footer">
-                    <ui:Button text="出撃" name="StartButton" class="button battle-preparation-start-button" style="right: 1%;"/>
-                    <ui:Button text="改造" name="SkillBuildButton" class="button battle-preparation-back-button" style="left: 1%; position: absolute;"/>
+                    <ui:Button text="出撃" name="StartButton" class="button battle-preparation-start-button ui-se-sortie" style="right: 1%;"/>
+                    <ui:Button text="改造" name="SkillBuildButton" class="button battle-preparation-back-button ui-se-window" style="left: 1%; position: absolute;"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:Button text="戻る" name="BackButton" class="button back-button" style="left: auto;"/>
+        <ui:Button text="戻る" name="BackButton" class="button back-button ui-se-cancel" style="left: auto;"/>
     </ui:VisualElement>
 </ui:UXML>

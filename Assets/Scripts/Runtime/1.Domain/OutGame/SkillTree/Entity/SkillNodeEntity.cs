@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Skill;
 using System;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Domain.OutGame.SkillTree
 {
@@ -36,6 +37,9 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
 
         /// <summary> 解放されるスキルの ID。 </summary>
         public SkillId[] UnlockSkillIds => _unlockSkillIds;
+
+        /// <summary> 保持しているステータスボーナス効果。 </summary>
+        public IReadOnlyList<IStatusBonusEffect> StatusBonusEffects => _statusBonusEffects;
 
         /// <summary>
         ///     親ノードを設定する。

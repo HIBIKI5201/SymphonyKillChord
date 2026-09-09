@@ -11,7 +11,7 @@ namespace KillChord.Runtime.View.InGame.UI
     /// <summary>
     ///     現在HPと最大HPをテキストのみで表示するViewクラス。
     /// </summary>
-    public class HealthTextView : MonoBehaviour
+    public sealed class HealthTextView : MonoBehaviour
     {
         /// <summary>
         ///     依存関係構築、及びReactivePropertyの購読。

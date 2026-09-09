@@ -870,6 +870,7 @@ MonoBehaviour:
     - line: '|   il2cppCodeGeneration: {}'
     - line: '|   il2cppStacktraceInformation: {}'
     - line: '|   managedStrippingLevel:'
+    - line: '|     Android: 1'
     - line: '|     EmbeddedLinux: 1'
     - line: '|     GameCoreScarlett: 1'
     - line: '|     GameCoreXboxOne: 1'

@@ -1,0 +1,25 @@
+{
+  "layers": [
+    { "glob": "Assets/Scripts/Runtime/0.Utility/**", "layer": "shared" },
+    { "glob": "Assets/Scripts/Runtime/1.Domain/**", "layer": "domain" },
+    { "glob": "Assets/Scripts/Runtime/2.Application/**", "layer": "application" },
+    { "glob": "Assets/Scripts/Runtime/3.Adaptor/**", "layer": "adaptor" },
+    { "glob": "Assets/Scripts/Runtime/4.View/**", "layer": "view" },
+    { "glob": "Assets/Scripts/Runtime/5.InfraStructure/**", "layer": "infrastructure" },
+    { "glob": "Assets/Scripts/Runtime/6.Composition/**", "layer": "composition" },
+    { "glob": "Assets/Scripts/Develop/**", "layer": "develop-test" },
+    { "glob": "Assets/Scripts/Shaders/**", "layer": "view" },
+    { "glob": "Assets/Scripts/SymphonyFrameWork/**", "layer": "shared" },
+    { "glob": "Assets/Settings/**", "layer": "shared" },
+    { "glob": "Assets/Level/**", "layer": "develop-test" },
+    { "glob": "Assets/Editor/**", "layer": "editor-tooling" },
+    { "glob": "Assets/DevelopProducts/TicketSystem/**", "layer": "editor-tooling" },
+    { "glob": "Assets/DevelopProducts/Utility/**", "layer": "editor-tooling" },
+    { "glob": "Assets/DevelopProducts/Mocks/**", "layer": "mock-prototype" },
+    { "glob": "Assets/DevelopProducts/Research/**", "layer": "research-prototype" },
+    { "glob": "Assets/DevelopProducts/Design/**", "layer": "research-prototype" },
+    { "glob": "Assets/Arts/**", "layer": "vendor" },
+    { "glob": "SinfoniaOperator/**", "layer": "external-tooling" }
+  ],
+  "mergeCouplingThreshold": 1
+}

@@ -5,6 +5,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -12,7 +13,7 @@ using UnityEngine;
 namespace KillChord.Editor.Addressables
 {
     /// <summary>
-    ///     Addressablesのアドレスがファイル名形式で一意になっているか検証します。
+    ///     Addressablesのアドレスがファイル名に含まれる文字列で一意になっているか検証します。
     /// </summary>
     public sealed class AddressableKeyValidator : IPreprocessBuildWithReport
     {
@@ -71,7 +72,7 @@ namespace KillChord.Editor.Addressables
 
             foreach (AddressableAssetGroup group in settings.groups)
             {
-                if (group == null)
+                if (group == null || !IsIncludedInBuild(group))
                 {
                     continue;
                 }
@@ -91,6 +92,15 @@ namespace KillChord.Editor.Addressables
             errorMessage = $"[{nameof(AddressableKeyValidator)}] Addressablesのアドレスに不備があります。\n- "
                 + string.Join("\n- ", errors);
             return false;
+        }
+
+        /// <summary>
+        ///     現在のデータ種別でビルド対象になっているGroupか判定します。
+        /// </summary>
+        private static bool IsIncludedInBuild(AddressableAssetGroup group)
+        {
+            BundledAssetGroupSchema schema = group.GetSchema<BundledAssetGroupSchema>();
+            return schema == null || schema.IncludeInBuild;
         }
 
         /// <summary>
@@ -126,11 +136,11 @@ namespace KillChord.Editor.Addressables
                 errors.Add($"アドレスにパス区切り文字を使用できません。Address: {address}");
             }
 
-            string expectedAddress = Path.GetFileNameWithoutExtension(assetPath);
+            string fileName = Path.GetFileNameWithoutExtension(assetPath);
 
-            if (!string.Equals(address, expectedAddress, StringComparison.Ordinal))
+            if (!fileName.Contains(address, StringComparison.Ordinal))
             {
-                errors.Add($"アドレスは拡張子を除いたファイル名にしてください。Address: {address}, Expected: {expectedAddress}");
+                errors.Add($"アドレスは拡張子を除いたファイル名に含まれる文字列にしてください。Address: {address}, FileName: {fileName}");
             }
 
             if (assetPathByAddress.TryGetValue(address, out string registeredAssetPath))
