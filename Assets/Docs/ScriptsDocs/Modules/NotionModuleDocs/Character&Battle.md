@@ -7,7 +7,7 @@
 | **モジュール名** | Character & Battle |
 | **カテゴリ** | InGame / Core |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-08-17 |
+| **最終更新日** | 2026-09-09 |
 
 ---
 
@@ -38,6 +38,7 @@
 | **`AttackIntervalEvaluator`** | Application | 攻撃開始からの硬直時間を計測し、攻撃中フラグを管理する |
 | **`PendingAttackEffectService`** | Application | 次の通常攻撃へ付与する追加効果を管理する |
 | **`IAttackHitEffect`** | Application | 命中時の追加効果の契約 |
+| **`SkillHitScheduler`** | Application | 連撃スキルのヒットを時間差で適用するスケジューラ。`SetPlaybackSpeed`/`Schedule`/`Tick`/`Clear`の4APIを持つ。ダメージのタイミングの権限を持ち、エフェクトの生成可否には依存しない。実体はSkillモジュールの`SkillHitController`・`Skill_13`等から利用される |
 | **`PlayerAttackController`** | Adaptor | プレイヤーの攻撃を制御し、`OnAttackExecuted`を公開する。実体はPlayerモジュールの`PlayerModuleContainer`が保持する |
 | **`PlayerBattleState`** | Adaptor | プレイヤーの戦闘中の状態を保持する |
 | **`IDamageable`** | Adaptor | ダメージを受けられるオブジェクトの契約 |
@@ -148,7 +149,7 @@ graph TD
 主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① プレイヤー攻撃実行フロー（入力イベント時）
-プレイヤーが攻撃ボタンを押した際、ターゲット取得・バフ適用・パイプライン計算・ダメージ反映までの一連の処理である。
+プレイヤーが攻撃ボタンを押した際、ターゲット取得・スキル連携・複数対象探索・パイプライン計算・ダメージ反映までの一連の処理である。ロックオン対象がいる場合、扇形範囲クエリで生存中の対象を探索し、単体攻撃なら最も近い1体、複数対象攻撃（`AttackDefinition.IsMultiTarget`）なら全件へ命中させる。`AttackDefinition.HitCount`が2以上の攻撃は、1発目をこのフローで即時適用し、2発目以降を`PlayerAttackController.UpdatePendingHits`が毎フレーム・ヒット間隔ごとに消化する。
 
 ```mermaid
 sequenceDiagram
@@ -156,25 +157,45 @@ sequenceDiagram
     actor Player as プレイヤー入力
     participant PAC as PlayerAttackController
     participant TSC as TargetSystemController (Targetモジュール)
-    participant PBState as PlayerBattleState
+    participant SkillC as SkillController (Skillモジュール)
+    participant TAQ as TargetAreaQuery
     participant AExec as AttackExecutor
     participant ACalc as AttackCalculator
     participant Pipeline as IAttackPipeline
+    participant DExec as DamageExecutor
+    participant Sys as StatusEffectSystem (StatusEffectモジュール)
     participant ARP as AttackResultPresenter
 
     Player ->> PAC: 攻撃ボタン押下 (ExecuteAttack)
-    PAC ->> TSC: 現在のロックオンターゲット取得 (TryGetCurrentTargetEntity)
+    PAC ->> TSC: 現在のロックオンターゲット取得・更新 (TryUpdateCurrentTarget)
     TSC -->> PAC: ターゲット Entity 返却
-    PAC ->> PBState: ターゲットを戦闘ステートに設定 (ChangeTarget)
-    PAC ->> AExec: 攻撃実行要求 (Execute: attackDefinition, attacker, defender, isJustHit, baseDamage)
-    AExec ->> ACalc: ダメージ計算要求 (Calculate)
-    ACalc ->> Pipeline: パイプライン実行 (Execute: AttackStepContext)
-    Pipeline -->> ACalc: AttackResult 返却 (WeaponDamageStep → CriticalStep → OutOfRangeDamageStep → ConfirmedDamage)
-    ACalc -->> AExec: AttackResult 返却
-    AExec ->> AExec: defender.TakeDamage にダメージを適用
-    AExec -->> PAC: AttackResult 返却
-    PAC ->> ARP: 結果を Push (AttackResultPresenter.Push)
+    PAC ->> SkillC: スキル連携を試行 (TryExecuteSkill)
+    SkillC -->> PAC: 通常攻撃ダメージポリシー返却（スキップ可否）
+    PAC ->> TAQ: 扇形範囲で対象探索 (QueryFanArea)
+    TAQ -->> PAC: 命中候補一覧（水平距離昇順）
+    PAC ->> PAC: 生存する対象を抽出（単体攻撃は最も近い1体、複数対象攻撃は全件）
+    PAC ->> AExec: 攻撃実行要求 (Execute: attackDefinition, attacker, targets[], isJustHit, baseDamage)
+    loop 対象ごと
+        AExec ->> ACalc: ダメージ計算要求 (Calculate)
+        ACalc ->> Pipeline: パイプライン実行 (WeaponDamageStep → CriticalStep → OutOfRangeDamageStep → ConfirmedDamage)
+        Pipeline -->> ACalc: AttackResult 返却
+        AExec ->> DExec: ダメージ適用要求 (Execute)
+        DExec ->> Sys: 攻撃者側の与ダメージ補正 (ApplyOutgoingDamageModifiers)
+        DExec ->> Sys: 防御側の被ダメージ補正 (ApplyIncomingDamageModifiers)
+        opt 防御側がバリア保持者 (IBarrierHolder)
+            DExec ->> DExec: バリアで吸収 (AbsorbBarrier)
+        end
+        DExec ->> DExec: EOnTakeDamage を通知（Skill / Infection / 通常ダメージ）
+        DExec ->> DExec: defender.TakeDamage にダメージを適用
+        DExec ->> Sys: 被弾側へ通知 (NotifyDamageTaken)
+        DExec ->> Sys: 攻撃側へ通知 (NotifyDamageDealt)
+        DExec -->> AExec: AttackResult 返却（バリアダメージ・適用ダメージ込み）
+        AExec ->> AExec: 命中後の追加効果を適用 (ApplyHitEffects)
+    end
+    AExec -->> PAC: AttackResult[] 返却
+    PAC ->> ARP: 結果を一括 Push (AttackResultPresenter.Push)
     ARP -->> ARP: AttackResultDTO に変換して View へ通知
+    Note over PAC: HitCount > 1 の攻撃は、2発目以降を UpdatePendingHits が毎フレーム消化する
 ```
 
 ### ② HP 変化とHUDへの反映フロー（ダメージ被弾時）
@@ -214,4 +235,28 @@ sequenceDiagram
     Note over PAC: AttackPipeline によるコアダメージ計算を実施
     PAC ->> Sys: DamageDealtContext を通知
     Sys ->> Effect: ライフスティール等の後処理を実行
+```
+
+### ④ SkillHitSchedulerによる連撃タイミング制御
+
+連撃スキル（例: スキルID13）は、ヒットのタイミングを`SkillHitScheduler`に一任する。エフェクトの再生可否に関わらずダメージ自体は確実に発生させるため、スキル効果側は発動時にヒット内容を予約するだけで、実際の適用はスケジューラの`Tick`が行う。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant SkillEffect as Skill_13 等 (Skillモジュール)
+    participant Scheduler as SkillHitScheduler
+    participant Controller as SkillHitController (Skillモジュール)
+    participant AExec as AttackExecutor
+
+    Note over Scheduler: 音楽同期時にBPMへ応じた再生速度を設定 (SetPlaybackSpeed)
+    SkillEffect ->> Scheduler: 連撃を予約 (Schedule: hitCount, delaySeconds, intervalSeconds, onHit)
+    loop 毎フレーム
+        Controller ->> Scheduler: 経過時間を進める (Tick)
+        alt 予約時刻に到達したヒットがある
+            Scheduler ->> SkillEffect: onHit コールバックを実行
+            SkillEffect ->> AExec: 1ヒット分のダメージ適用要求
+        end
+    end
+    Note over Controller: ゲームプレイ停止等では Clear で予約中の連撃を破棄する
 ```

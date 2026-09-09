@@ -16,12 +16,14 @@
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
 | **`PlayerMoveSpec`** | Domain | 移動速度や回避距離などの設定値を保持するピュアクラス |
+| **`PlayerActionRestrictionReason`** | Domain | プレイヤーの行動制限理由を表すenum（`None`/`Tutorial`/`Silence`）。`Silence`は現状未使用で将来の沈黙効果向けに定義済み |
 | **`PlayerApplication`** | Application | プレイヤーの状態・挙動を総括するメインユースケース |
 | **`PlayerMovementApplication`** | Application | 通常移動時の物理演算・補間 |
 | **`PlayerDodgeMovementApplication`** | Application | 回避アクションのタイムラインと無敵時間処理 |
 | **`PlayerController`** | Adaptor | 入力バッファから操作を取り出してApplicationに委譲するコントローラー（`IPlayerController`実装） |
 | **`PlayerHealthHudPresenter`** | Adaptor | プレイヤーHPをHUDへ反映するPresenter |
 | **`PlayerInputSuppressionState`** | Adaptor | プレイヤー入力を一定時間だけ無効化する状態を管理 |
+| **`PlayerActionRestrictionState`** | Adaptor | スキル発動の制限状態を管理。理由（`PlayerActionRestrictionReason`）をHashSetで複数保持できるため、チュートリアル・沈黙など複数要因が重なっても正しく解除される。`CanUseSkill`（制限0件でtrue）、`AddSkillRestriction`/`RemoveSkillRestriction`を公開する |
 | **`PlayerAttackController`** | Adaptor | プレイヤーの攻撃実行を制御。`OnAttackExecuted`イベントを公開し、Missionモジュール等から購読される（namespace上は`Adaptor.InGame.Battle`） |
 | **`PlayerView`** | View | 実際のRigidbodyやTransformを操作するMonoBehaviour |
 | **`PlayerAttackWeaponView`** | View | 攻撃BeatTypeに応じた武器モデルの表示切替と攻撃SE再生 |
@@ -31,7 +33,7 @@
 | **`PlayerSpawnPoint`** | View | プレイヤー生成位置を示すマーカー |
 | **`PlayerMoveSpecAsset`** | Infrastructure | 移動・回避の設定値を保持するScriptableObject（`PlayerMoveSpec`の供給元） |
 | **`PlayerInitializer`** | Composition | インプット、カメラ、HUD、攻撃制御などのシステムをプレイヤー具象にDIする |
-| **`PlayerModuleContainer`** | Composition | `PlayerInitializer`/`PlayerView`/`PlayerEntity`/`PlayerAttackController`をServiceLocatorへ公開するContainer。Enemy/Bossモジュールが参照する |
+| **`PlayerModuleContainer`** | Composition | `PlayerInitializer`/`PlayerView`/`PlayerEntity`/`PlayerAttackController`/`PlayerActionRestrictionState`をServiceLocatorへ公開するContainer。Enemy/Bossモジュールが参照する |
 | **`PlayerStatusBonusInitializer`** / **`PlayerStatusBonusModuleContainer`** | Composition | インゲームで適用するステータスボーナスの初期化と公開（Order 490） |
 | **`StageSceneInitializer`** / **`IStageSceneInstance`** | Composition | ステージシーン内で共有する参照（生成位置など）の登録と公開 |
 | **`PlayerMoveSpecDebug`** | Composition | 移動設定値をデバッグ表示・調整するための補助 |
@@ -42,7 +44,7 @@
 | --- | --- |
 | **Initializerクラス** | `PlayerInitializer` |
 | **Order** | 500（`PlayerInitializer`）／490（`PlayerStatusBonusInitializer`） |
-| **公開する ModuleContainer / ServiceLocator登録型** | `PlayerModuleContainer`（`PlayerInitializer`, `PlayerView`, `PlayerEntity`（`CharacterEntity`）, `PlayerAttackController`を保持） |
+| **公開する ModuleContainer / ServiceLocator登録型** | `PlayerModuleContainer`（`PlayerInitializer`, `PlayerView`, `PlayerEntity`（`CharacterEntity`）, `PlayerAttackController`, `PlayerActionRestrictionState`を保持） |
 
 ---
 
@@ -52,7 +54,7 @@
 graph TD
     %% 定義 (接続のないレイヤーは省略)
     subgraph PlayerModule [Player モジュール]
-        P_Adaptor["Adaptor<br>PlayerController, PlayerAttackController"]
+        P_Adaptor["Adaptor<br>PlayerController, PlayerAttackController, PlayerActionRestrictionState"]
         P_Composition["Composition<br>PlayerInitializer, PlayerModuleContainer"]
         P_Adaptor --> P_Composition
     end
@@ -88,6 +90,7 @@ graph TD
     P_Adaptor -->|"攻撃対象の解決"| T_Adaptor
     P_Adaptor -->|"死亡/被ダメージ/回避成績を通知"| MS_Adaptor
     MS_Adaptor -->|"OnAttackExecuted / OnHealthChanged を購読"| P_Adaptor
+    MS_Adaptor -->|"PlayerActionRestrictionState へスキル制限の付与/解除（チュートリアル進行に応じて）"| P_Adaptor
     E_Composition -->|"PlayerModuleContainer を直接取得"| P_Composition
 ```
 
@@ -111,6 +114,7 @@ graph TD
 * **`Mission`**
   * *依存箇所*: `MissionEventController`
   * *詳細*: プレイヤーの死亡や被ダメージ、回避成功実績などのイベントをミッションシステムへ通知する
+  * *補足*: 逆方向に、Missionモジュールの`SetSkillExecutionEnabledStepEntryActionExecutor`（チュートリアルのステップ進行アクション）が`PlayerModuleContainer.PlayerActionRestrictionState`を取得し、`AddSkillRestriction`/`RemoveSkillRestriction`で`PlayerActionRestrictionReason.Tutorial`を付与・解除する。この制限状態は`PlayerAttackController.ExecuteAttack`内で`CanUseSkill`として参照され、`SkillController.TryExecuteSkill`の可否に反映される
 
 ### 📤 依存されているもの
 

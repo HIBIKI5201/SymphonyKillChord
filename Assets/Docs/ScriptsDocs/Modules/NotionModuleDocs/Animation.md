@@ -18,9 +18,11 @@
 | **`ICharacterAnimationViewModel`** | Adaptor | アニメーションの連続状態を扱う契約 |
 | **`ICharacterAnimationSignal`** | Adaptor | 瞬間イベントとワンショット要求を扱う契約 |
 | **`ICharacterAnimationViewContext`** | Adaptor | アニメーションに必要な依存をまとめる契約 |
+| **`IPlayerCharacterAnimationSignal`** | Adaptor | `ICharacterAnimationSignal`を継承し、プレイヤー専用の要求（回避・攻撃キー指定・BeatType指定攻撃）を追加定義する契約 |
 | **`CharacterAnimationView`** | View | 再生と計算をView層で完結させる。当モジュールの本体 |
 | **`CharacterAnimationViewModel`** | View | 連続状態（移動速度など）を保持する |
 | **`CharacterAnimationSignal`** | View | 瞬間イベント（攻撃・被弾など）を伝達する |
+| **`PlayerCharacterAnimationSignal`** | View | `CharacterAnimationSignal`を継承し`IPlayerCharacterAnimationSignal`を実装するプレイヤー専用差分クラス。`RequestDodge`（回避）、`RequestAttack(string)`（キー指定）、`RequestAttack(int)`（BeatType指定）を追加し、いずれも内部の`RequestPlayerAttack`（同一クリップ再突入時のブレンドスキップ・移動によるキャンセル許可を付与）へ委譲する。`NotifyOneShotEnded`をoverrideし、回避終了時に`OnDodgeEnded`を通知する |
 | **`CharacterAnimationViewContext`** | View | View側の依存をまとめる |
 | **`PlayableAnimationController`** | View | PlayableGraphを構築してクリップをブレンド再生する純粋クラス |
 | **`CharacterAnimationLocomotionCalculator`** | View | 移動速度とBPMから基本アニメーションのブレンド値と再生速度を計算する |
@@ -42,6 +44,8 @@
 | **公開する ModuleContainer / ServiceLocator登録型** | なし。キャラクター単位で構築され、`PlayerInitializer`と`EnemyLifeCycle`が生成して各Viewへ渡す |
 
 ServiceLocatorへは登録しない。アニメーションはキャラクターごとに独立した状態を持つため、キャラクターの生成に合わせて構築する。
+
+`AnimationComposition`は`Init`（敵など共通クラス`CharacterAnimationSignal`を生成する既定パス）と`InitForPlayer`（プレイヤー専用の`PlayerCharacterAnimationSignal`を生成する専用パス）の2つの初期化エントリを持つ。両者は内部の`InitInternal`へSignal生成用のファクトリを渡すことで共通化されており、`InitForPlayer`はさらに`PlayerAttackAnimationConfig`（プレイヤー攻撃アニメーション設定）を受け取り、BeatType別のクリップを`attackIndices`として組み込む点が`Init`との差分である。
 
 ---
 
