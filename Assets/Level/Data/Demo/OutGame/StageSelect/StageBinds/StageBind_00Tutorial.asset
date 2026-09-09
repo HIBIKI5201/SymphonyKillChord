@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: StageBind_00Tutorial
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageBindAsset
   _fromStageId:
-    _id: stage_tutorial
-    _hashId: 877351343
+    _id: stage_Tutorial
+    _hashId: -851627015
   _toStageId:
     _id: scenario_stage_02
     _hashId: 1711044682

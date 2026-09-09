@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: GameData.Demo
   m_GUID: 70c68c677a8b2074d9c8378b336551e0
   m_SerializeEntries:
+  - m_GUID: 3f4d09cd641ccfc4fab0b94b0ce1d228
+    m_Address: EnemyMissionKeyRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6bd8b40c3cd3c3c42ae98746fe9137f4
     m_Address: StageTreeAsset
     m_ReadOnly: 0
@@ -22,6 +27,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8ac548bc33c8cc74e9e072aa1bd6eee4
     m_Address: DemoRuntime
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b9c7e28d8b6f9ee4f96c22d7521e389d
+    m_Address: MissionDefinitionRepository
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
