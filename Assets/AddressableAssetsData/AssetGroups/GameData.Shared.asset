@@ -195,11 +195,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f7154756892c57a4ea9dc8f22bcb8068
-    m_Address: StageTreeAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fa8820e093edab1489d8bbed0db664af
     m_Address: SkillTreeTestInputData
     m_ReadOnly: 0
