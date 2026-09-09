@@ -77,11 +77,13 @@ const total = String(features.length).padStart(2, '0');
 
 		let index = 0;
 
-		const clamp = (value: number) => Math.max(0, Math.min(slides.length - 1, value));
+		// 最後の次は最初、最初の前は最後に戻るループ方式(負値でも正しく巡回するよう剰余の前に長さを足す)
+		const wrap = (value: number) => (value + slides.length) % slides.length;
 
 		function render() {
 			if (track) {
-				track.style.transform = `translateX(-${index * 100}%)`;
+				// trackの幅はslide数倍(--slide-count)のため、100%はtrack全体を指す。1枚分の移動量に換算する。
+				track.style.transform = `translateX(-${(index * 100) / slides.length}%)`;
 			}
 			dots.forEach((dot, i) => {
 				dot.classList.toggle('is-active', i === index);
@@ -90,12 +92,10 @@ const total = String(features.length).padStart(2, '0');
 			if (currentLabel) {
 				currentLabel.textContent = String(index + 1).padStart(2, '0');
 			}
-			if (prevButton) prevButton.disabled = index === 0;
-			if (nextButton) nextButton.disabled = index === slides.length - 1;
 		}
 
 		function goTo(next: number) {
-			index = clamp(next);
+			index = wrap(next);
 			render();
 		}
 
@@ -203,6 +203,7 @@ const total = String(features.length).padStart(2, '0');
 
 	.track {
 		display: flex;
+		width: calc(var(--slide-count) * 100%);
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -210,7 +211,7 @@ const total = String(features.length).padStart(2, '0');
 	}
 
 	.slide-item {
-		flex: 0 0 100%;
+		flex: 0 0 calc(100% / var(--slide-count));
 		min-width: 0;
 	}
 
