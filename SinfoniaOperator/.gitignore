@@ -12,6 +12,13 @@
 /DiscordLogExporter/obj/
 /DiscordLogExporter/bin/
 /DiscordLogExporter/publish/
+/SinfoniaOperator.SpecSearch/obj/
+/SinfoniaOperator.SpecSearch/bin/
+/publish/
+/models/
+*.onnx
+*.gguf
+spec-index.bin
 
 # Exception for specific project file
 !/SinfoniaOperator/SinfoniaOperator.csproj
@@ -19,3 +26,4 @@
 !/NotionMarkdownExporter/NotionMarkdownExporter.csproj
 !/NotionMarkdownWriter/NotionMarkdownWriter.csproj
 !/DiscordLogExporter/DiscordLogExporter.csproj
+!/SinfoniaOperator.SpecSearch/SinfoniaOperator.SpecSearch.csproj
