@@ -93,6 +93,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         private Action _onDodgeEndedHandler;
         private IPlayerCharacterAnimationSignal _characterAnimationSignal;
+        private PlayerAttackSignal _playerAttackSignal;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -197,12 +198,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
             _player.transform.SetPositionAndRotation(
                 spawnPointTransform.position,
                 spawnPointTransform.rotation);
+            _playerAttackSignal = new PlayerAttackSignal();
             _moduleContainer = new PlayerModuleContainer(
                 this,
                 _player,
                 _playerEntity,
                 playerStatusBonusContainer.PlayerStatusBonus,
-                _damageEffectView);
+                _damageEffectView,
+                _playerAttackSignal);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;
@@ -316,11 +319,13 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
+            PlayerAttackPresenter playerAttackPresenter = new PlayerAttackPresenter(_playerAttackSignal);
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
             PlayerActionRestrictionState actionRestrictionState = new PlayerActionRestrictionState();
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
             PlayerAttackController playerAttackController = new PlayerAttackController(
                 attackResultPresenter,
+                playerAttackPresenter,
                 playerBattleState,
                 actionRestrictionState,
                 skillController,
@@ -452,6 +457,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void OnDestroy()
         {
+            _playerAttackSignal?.Dispose();
+            _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();
 
             if (_playerInputView != null)
@@ -487,6 +494,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         public override void Shutdown()
         {
+            _playerAttackSignal?.Dispose();
+            _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();
 #if UNITY_ANDROID || UNITY_EDITOR
             _mobileStickFlickInputConfigKey.ReleaseLoadedAsset(this);

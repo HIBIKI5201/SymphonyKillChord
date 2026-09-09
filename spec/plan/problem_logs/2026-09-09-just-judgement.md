@@ -41,7 +41,7 @@
 静的確認結果:
 
 - `GetCurrentBeatType(out bool)` の呼出元は攻撃ControllerとガイドPresenterへ統一。副作用を持つ `RhythmJustService` は削除した。
-- 攻撃Controllerは入力履歴更新前に判定し、スキル・ダメージ・多段ヒット保持値・`OnAttackBeatExecuted` に同じboolを渡す。全画面演出は同イベントから拍種と成否を受け取る。
+- 攻撃Controllerは入力履歴更新前に判定し、スキル・ダメージ・多段ヒット保持値・`PlayerAttackPresenter` に同じboolを渡す。PresenterがDTOへ変換し、DIされたView層の `PlayerAttackSignal` から全画面演出へ伝える。
 - 変更したイベントの購読・解除とミッション側ハンドラを確認した。
 - ガイドが個別にアセットをロードする経路を削除し、MusicSyncServiceの判定定義をDTO経由で共有する。マーカー幅を別設定する未使用項目も削除した。
 - マスターの判定アセットはリポジトリ内で1件。全6拍種へジャスト範囲を追加した。
@@ -64,3 +64,11 @@
 ## Follow-up
 
 実機でのジャスト補正とガイド・全画面演出の一致は未確認としてPRに記載する。
+
+## PR #1512 レビュー対応（2026-09-09）
+
+- 指摘: View通知はPresenterの責務であり、View向けイベントはDIされたSignalに置く。
+- Controllerの `OnAttackBeatExecuted` は従来のミッション記録専用の拍種通知へ戻す。Viewのジャスト成否通知は `PlayerAttackPresenter` → `IPlayerAttackSignal` / `PlayerAttackSignal` に分離する。
+- ヒットごとのダメージ表示を担当する `AttackResultPresenter` と、入力1回の攻撃成立を表示へ伝える `PlayerAttackPresenter` を分け、空振り・スキルによる通常攻撃スキップ・多段ヒットでも演出通知は入力1回につき1回とする。
+- `PlayerInitializer` がSignalを生成してPresenterへDIし、既存の `PlayerModuleContainer` で公開する。ガイド初期化側はControllerでなくSignalを注入する。
+- Signalの破棄とPresenterの購読解除をそれぞれ所有元の終了処理で行う。コンパイル・動作テストはユーザー指定により未実施。

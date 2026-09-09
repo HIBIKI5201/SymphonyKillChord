@@ -5,6 +5,8 @@
 - Docs/NotionSpecifications
 
 # 自律AIエージェントのブランチ・PR運用
+- 編集・修正・コミットは必ず自分に指定された作業ブランチ（例: `feature/demo/just-judgement/agent`）で行う。レビュー対応も同じ作業ブランチで行う。
+- 同階層の `master` で直接編集・コミットしない。`master` の更新は作業ブランチからのセルフマージのみで行う。
 - `feature/` で始まる作業ブランチは、同じ階層の `master` ブランチへセルフマージする。
 - 例: `feature/demo/just-judgement/agent` → `feature/demo/just-judgement/master`。
 - 作業ブランチから直接 `develop` にPRを作成せず、取り込み後の `master` から `develop` にPRを作成する。

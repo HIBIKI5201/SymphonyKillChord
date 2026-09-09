@@ -102,18 +102,19 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            PlayerAttackController playerAttackController =
-                ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerAttackController;
+            IPlayerAttackSignal playerAttackSignal =
+                ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerAttackSignal;
 
-            if (playerAttackController == null)
+            if (playerAttackSignal == null)
             {
-                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(PlayerAttackController)} が見つかりません。PlayerInitializer が先に初期化されているか確認してください。", this);
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(IPlayerAttackSignal)} が見つかりません。PlayerInitializer が先に初期化されているか確認してください。", this);
                 return false;
             }
 
-            // Presenterは攻撃入力時に確定した判定を購読し、ViewModelが演出設定に基づいて表示する。
+            // 攻撃PresenterからSignalへ渡された判定を購読し、演出設定に基づいて表示する。
+            _postEffectPresenter?.Dispose();
             _postEffectPresenter = new RhythmGuidePostEffectPresenter(
-                playerAttackController,
+                playerAttackSignal,
                 _rhythmGuideView,
                 new RhythmGuidePostEffectViewModel(_rhythmGuidePostEffectView, _effectConfig));
 
