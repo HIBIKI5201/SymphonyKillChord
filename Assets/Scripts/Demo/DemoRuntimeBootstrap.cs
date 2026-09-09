@@ -123,10 +123,11 @@ namespace KillChord.Demo
                     Debug.LogError(
                         $"[{nameof(DemoRuntimeBootstrap)}] {nameof(DemoTimerView)} がありません。",
                         this);
-                    return;
                 }
-
-                _timerView.Initialize(_sessionState);
+                else
+                {
+                    _timerView.Initialize(_sessionState);
+                }
                 _exitPolicy = new DemoStageResultExitPolicy(_sessionState, _config);
                 _isExitPolicyOwner = ServiceLocator.RegisterInstance<IStageResultExitPolicy>(_exitPolicy);
                 SceneManager.sceneLoaded += HandleSceneLoaded;
@@ -151,6 +152,7 @@ namespace KillChord.Demo
 
             bool isOutGameActive = ServiceLocator.TryGetInstance(
                 out StageSelectModuleContainer stageSelectContainer);
+            TrySubscribeHomeTutorialStarted(isOutGameActive);
             TryStartSession(isOutGameActive);
             _sessionState.Tick(Time.unscaledDeltaTime, isOutGameActive);
             _timerView?.Refresh();
@@ -166,6 +168,11 @@ namespace KillChord.Demo
             if (_isSceneLoadedSubscribed)
             {
                 SceneManager.sceneLoaded -= HandleSceneLoaded;
+            }
+
+            if (_isOutGameUiEventSubscribed && _outGameUIEvent != null)
+            {
+                _outGameUIEvent.OnHomeTutorialStarted -= HandleHomeTutorialStarted;
             }
 
             if (_isExitPolicyOwner
@@ -191,7 +198,7 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     チュートリアル戦闘後、初めてOutGameが有効になった時点で両タイマーを開始します。
+        ///     Homeチュートリアル開始状態が保存された後、初めてOutGameが有効になった時点で両タイマーを開始します。
         /// </summary>
         private async void TryStartSession(bool isOutGameActive)
         {
@@ -207,7 +214,9 @@ namespace KillChord.Demo
                     ? SaveStore.Get<SaveData>()
                     : await SaveStore.LoadAsync<SaveData>(destroyCancellationToken);
                 if (saveData == null
-                    || saveData.Tutorial.Phase < TutorialPhase.BattleCompleted)
+                    || saveData.Tutorial.Phase < TutorialPhase.HomeStarted
+                    || (saveData.Tutorial.Phase == TutorialPhase.HomeStarted
+                        && !_isHomeTutorialStartedNotified))
                 {
                     return;
                 }
@@ -256,7 +265,6 @@ namespace KillChord.Demo
                     $"[{nameof(DemoRuntimeBootstrap)}] 強制出撃ステージを準備できませんでした。"
                     + $" StageId: {_config.ForcedStageId}",
                     this);
-                _isForcedSortiePrepared = true;
                 return;
             }
 
@@ -269,14 +277,15 @@ namespace KillChord.Demo
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
-            if (_config != null
-                && string.Equals(scene.name, _config.EndSceneName, StringComparison.Ordinal)
-                && ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
-            {
-                readiness.Complete(scene.name, true);
-            }
-
             TryResetSaveDataOnEndScene(scene);
+        }
+
+        /// <summary>
+        ///     Homeチュートリアル開始状態の保存完了通知を受け取ります。
+        /// </summary>
+        private void HandleHomeTutorialStarted()
+        {
+            _isHomeTutorialStartedNotified = true;
         }
 
         /// <summary>
@@ -295,12 +304,44 @@ namespace KillChord.Demo
             try
             {
                 await SaveStore.DeleteAsync<SaveData>();
+                if (ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+                {
+                    readiness.Complete(scene.name, true);
+                }
             }
             catch (Exception exception)
             {
                 _isSaveDataReset = false;
                 Debug.LogException(exception, this);
             }
+        }
+
+        /// <summary>
+        ///     OutGameサービスの構築後にHomeチュートリアル開始通知を購読します。
+        /// </summary>
+        /// <param name="isOutGameActive"> OutGame内にいる場合はtrueです。 </param>
+        private void TrySubscribeHomeTutorialStarted(bool isOutGameActive)
+        {
+            if (!isOutGameActive
+                || !ServiceLocator.TryGetInstance(out OutGameUIEvent currentOutGameUIEvent))
+            {
+                return;
+            }
+
+            if (_isOutGameUiEventSubscribed
+                && ReferenceEquals(_outGameUIEvent, currentOutGameUIEvent))
+            {
+                return;
+            }
+
+            if (_isOutGameUiEventSubscribed && _outGameUIEvent != null)
+            {
+                _outGameUIEvent.OnHomeTutorialStarted -= HandleHomeTutorialStarted;
+            }
+
+            _outGameUIEvent = currentOutGameUIEvent;
+            _outGameUIEvent.OnHomeTutorialStarted += HandleHomeTutorialStarted;
+            _isOutGameUiEventSubscribed = true;
         }
 
         private const string CONFIG_ADDRESS = nameof(DemoExperienceConfig);
@@ -312,9 +353,12 @@ namespace KillChord.Demo
 
         private DemoExperienceConfig _config;
         private DemoStageResultExitPolicy _exitPolicy;
+        private OutGameUIEvent _outGameUIEvent;
         private bool _isExitPolicyOwner;
         private bool _isSessionOwner;
         private bool _isSceneLoadedSubscribed;
+        private bool _isOutGameUiEventSubscribed;
+        private bool _isHomeTutorialStartedNotified;
         private bool _isStartingSession;
         private bool _isForcedSortiePrepared;
         private bool _isSaveDataReset;
