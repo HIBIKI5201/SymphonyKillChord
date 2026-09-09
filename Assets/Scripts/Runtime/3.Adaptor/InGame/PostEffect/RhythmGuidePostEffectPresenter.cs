@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace KillChord.Runtime.Adaptor.InGame.PostEffect
         ///     全画面演出に必要な依存を受け取り、攻撃実行の通知へ購読する。
         /// </summary>
         /// <param name="playerAttackController"> 攻撃実行の通知元。 </param>
-        /// <param name="beatViewModel"> ジャスト成否とビート色の取得元。 </param>
+        /// <param name="beatViewModel"> 拍種ごとのビート色の取得元。 </param>
         /// <param name="viewModel"> 表示データの反映先。 </param>
         public RhythmGuidePostEffectPresenter(
             PlayerAttackController playerAttackController,
@@ -25,7 +26,7 @@ namespace KillChord.Runtime.Adaptor.InGame.PostEffect
             _beatViewModel = beatViewModel ?? throw new ArgumentNullException(nameof(beatViewModel));
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
 
-            _playerAttackController.OnAttackExecuted += AttackExecutedHandler;
+            _playerAttackController.OnAttackBeatExecuted += AttackExecutedHandler;
         }
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace KillChord.Runtime.Adaptor.InGame.PostEffect
                 return;
             }
 
-            _playerAttackController.OnAttackExecuted -= AttackExecutedHandler;
+            _playerAttackController.OnAttackBeatExecuted -= AttackExecutedHandler;
             _playerAttackController = null;
         }
 
@@ -49,18 +50,18 @@ namespace KillChord.Runtime.Adaptor.InGame.PostEffect
         /// <summary>
         ///     攻撃入力時にジャスト成否とビート色をViewModelへ送る。
         /// </summary>
-        /// <param name="attackName"> 実行された攻撃名。演出の出し分けには使用しない。 </param>
-        /// <param name="hasHit"> 敵にヒットしたか。演出はヒット有無に依らず入力に対して返すため使用しない。 </param>
-        private void AttackExecutedHandler(string attackName, bool hasHit)
+        /// <param name="beatType"> 入力時に確定した攻撃の拍種。 </param>
+        /// <param name="isJustHit"> 攻撃・スキルに適用したジャスト成否。 </param>
+        private void AttackExecutedHandler(BeatType beatType, bool isJustHit)
         {
             // ビート色を取得できない場合はガイドが未構築のため、演出を出さない。
-            if (!_beatViewModel.TryGetCurrentBeatColor(out Color color))
+            if (!_beatViewModel.TryGetBeatColor((int)beatType, out Color color))
             {
                 return;
             }
 
-            // ガイド上のJustTimingMarkerにカーソルが乗っている入力のみをジャストとして扱う。
-            _viewModel.Play(new RhythmGuidePostEffectDto(_beatViewModel.IsOnJustTiming, color));
+            // 履歴更新後の時刻や描画済みカーソルから再判定せず、入力結果をそのまま表示する。
+            _viewModel.Play(new RhythmGuidePostEffectDto(isJustHit, color));
         }
     }
 }

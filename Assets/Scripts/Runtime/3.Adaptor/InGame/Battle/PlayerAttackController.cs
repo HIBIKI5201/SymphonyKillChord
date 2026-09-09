@@ -66,8 +66,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary> プレイヤーが攻撃を実行したときに発火します。入力1回につき1回だけ発火します。 </summary>
         public event Action<string, bool> OnAttackExecuted;
 
-        /// <summary> プレイヤーが指定拍子の攻撃を実行したときに発火します。 </summary>
-        public event Action<BeatType> OnAttackBeatExecuted;
+        /// <summary> 成立した攻撃の拍種と、履歴更新前に確定したジャスト成否を通知します。 </summary>
+        public event Action<BeatType, bool> OnAttackBeatExecuted;
 
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
@@ -99,8 +99,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             }
 
             float now = Time.unscaledTime;
-            BeatType beatType = _musicSyncService.GetCurrentBeatType();
-            bool isJustHit = RhythmJustService.Instance.IsJustHit();
+            BeatType beatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
 
             bool hasTarget = TryUpdateCurrentTarget();
 
@@ -117,7 +116,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             StartAttackInterval();
             StartAttackCooldown();
-            OnAttackBeatExecuted?.Invoke(beatType);
+            OnAttackBeatExecuted?.Invoke(beatType, isJustHit);
             resultBeatType = (int)beatType;
 
             // 攻撃演出用に、攻撃が成立したことを通知する。命中の有無は問わない。

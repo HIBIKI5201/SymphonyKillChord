@@ -162,7 +162,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         ///     </para>
         /// </summary>
         /// <param name="beatType"> 実行した攻撃の拍子です。 </param>
-        private void HandleAttackBeatExecuted(BeatType beatType)
+        /// <param name="isJustHit"> ジャスト成否。拍種の記録では使用しません。 </param>
+        private void HandleAttackBeatExecuted(BeatType beatType, bool isJustHit)
         {
             _pendingAttackBeatKind = beatType switch
             {

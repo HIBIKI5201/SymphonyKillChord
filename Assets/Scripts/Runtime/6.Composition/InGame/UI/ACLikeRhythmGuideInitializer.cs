@@ -8,7 +8,6 @@ using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
-using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.PostEffect;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -33,7 +32,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
-            if (_rhythmJudgmentDefinitionAsset == null || _rhythmGuideView == null)
+            if (_rhythmGuideView == null)
             {
                 Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] リズムガイド参照が不足しています。", this);
                 return false;
@@ -61,7 +60,6 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 初期化に成功した場合はtrueです。 </returns>
         public bool Initialize()
         {
-            Debug.Assert(_rhythmJudgmentDefinitionAsset != null, "RhythmJudgmentDefinitionAsset の参照が未設定です。RhythmJudgmentDefinitionAsset を設定してください。");
             Debug.Assert(_rhythmGuideView != null, "RhythmGuideView の参照が未設定です。RhythmGuideView を設定してください。");
 
             IMusicSyncService musicSyncService = ServiceLocator.GetInstance<MusicSyncModuleContainer>()?.MusicSyncService;
@@ -90,7 +88,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             // ガイド表示と判定は、音楽同期・ターゲット状態・ミッション進行状況を参照するためPresenterへ集約する。
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
-                new RhythmGuideUsecase(_rhythmJudgmentDefinitionAsset.ToDefinition()),
+                new RhythmGuideUsecase(),
                 targetingSystem,
                 missionRuntimeServiceProvider,
                 selectedBattleStageState
@@ -113,7 +111,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            // 攻撃入力の購読とジャスト判定はPresenterが持ち、ViewModelは設定に基づく表示反映のみを担う。
+            // Presenterは攻撃入力時に確定した判定を購読し、ViewModelが演出設定に基づいて表示する。
             _postEffectPresenter = new RhythmGuidePostEffectPresenter(
                 playerAttackController,
                 _rhythmGuideView,
@@ -132,8 +130,6 @@ namespace KillChord.Runtime.Composition.InGame.UI
             _isRegisteredToPlayDirector = false;
         }
 
-        [Tooltip("リズム判定定義アセット。")]
-        [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
         [Tooltip("リズムガイドView。")]
         [SerializeField] private ACLikeRhythmGuideView _rhythmGuideView;
         [Tooltip("リズムガイドのフルスクリーン演出View。")]
