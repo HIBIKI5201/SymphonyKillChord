@@ -95,11 +95,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8353de4b09cc6674393d85367d46fcab
-    m_Address: EnemyMissionKeyRepository
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 888c47664981fed459937f475b632964
     m_Address: ScenarioSettingsAsset
     m_ReadOnly: 0
@@ -137,11 +132,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b11f6152160bbfc42b59af15ef998adc
     m_Address: InitialSkillLoadout
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b30935a5032ae8148a6abe059bf9f941
-    m_Address: MissionDefinitionRepository
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
