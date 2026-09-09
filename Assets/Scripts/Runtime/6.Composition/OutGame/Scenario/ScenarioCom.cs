@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -60,6 +61,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private SelectedScenarioState _selectedScenarioState;
         private OutGameUIEvent _outGameUIEvent;
         private OutGameSortieController _outGameSortieController;
+        private SceneTransitionController _sceneTransitionController;
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private StageProgressSaveDataService _stageProgressSaveDataService;
         private BackgroundCatalogAsset _loadedBackgroundCatalog;
@@ -194,15 +196,12 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
-            {
-                Debug.LogError($"[{nameof(ScenarioCom)}] OutGameUIEvent が取得できませんでした。", this);
-                return false;
-            }
+            ServiceLocator.TryGetInstance(out _outGameUIEvent);
+            ServiceLocator.TryGetInstance(out _outGameSortieController);
 
-            if (!ServiceLocator.TryGetInstance(out _outGameSortieController))
+            if (!ServiceLocator.TryGetInstance(out _sceneTransitionController))
             {
-                Debug.LogError($"[{nameof(ScenarioCom)}] OutGameSortieController が取得できませんでした。", this);
+                Debug.LogError($"[{nameof(ScenarioCom)}] SceneTransitionController が取得できませんでした。", this);
                 return false;
             }
 
@@ -215,6 +214,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             }
 
             _scenarioInputView.Initialize(_inputController, _inputComposition.GetInputView);
+            _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.Scenario);
             _ = RunScenarioAsync();
             return true;
         }
@@ -248,6 +248,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             _selectedScenarioState = null;
             _outGameUIEvent = null;
             _outGameSortieController = null;
+            _sceneTransitionController = null;
             _pendingNodeTransitionState = null;
             _stageProgressSaveDataService = null;
             _isInitialized = false;
@@ -286,9 +287,11 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 string scenarioSceneName = gameObject.scene.name;
                 SelectedScenarioState selectedScenarioState = _selectedScenarioState;
 
-                bool transitioned = await _outGameSortieController.ReturnFromScenarioAsync(
-                    scenarioSceneName,
-                    _returnSceneName);
+                bool transitioned = _outGameSortieController != null
+                    ? await _outGameSortieController.ReturnFromScenarioAsync(
+                        scenarioSceneName,
+                        _returnSceneName)
+                    : await ReturnToUnloadedOutGameAsync(scenarioSceneName);
 
                 if (!transitioned)
                 {
@@ -305,6 +308,27 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             {
                 Debug.LogException(exception, this);
             }
+        }
+
+        /// <summary>
+        ///     タイトルから直接開いたシナリオを終了し、OutGameを新たにロードします。
+        /// </summary>
+        /// <param name="scenarioSceneName"> 終了するシナリオシーン名です。 </param>
+        /// <returns> OutGameへの復帰に成功した場合はtrueです。 </returns>
+        private async Task<bool> ReturnToUnloadedOutGameAsync(string scenarioSceneName)
+        {
+            bool loadSuccess = await _sceneTransitionController.LoadAdditiveAsync(
+                _returnSceneName,
+                destroyCancellationToken);
+            if (!loadSuccess)
+            {
+                return false;
+            }
+
+            // ScenarioのShutdownより前に、ロード抑止解除後の入力マップをOutGameへ予約する。
+            _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+            return await _sceneTransitionController.UnloadWithPersistentLifetimeAsync(
+                scenarioSceneName);
         }
 
         /// <summary>

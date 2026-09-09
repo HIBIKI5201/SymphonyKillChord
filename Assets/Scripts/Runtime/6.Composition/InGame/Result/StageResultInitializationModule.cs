@@ -80,7 +80,10 @@ namespace KillChord.Runtime.Composition.InGame.Result
             _container.Controller = new StageResultController(
                 sceneTransitionUsecase,
                 selectedBattleStageState,
-                selectedMissionState);
+                selectedMissionState,
+                ServiceLocator.TryGetInstance(out IStageResultExitPolicy exitPolicy)
+                    ? exitPolicy
+                    : null);
             _container.View.Initialize(viewModel, _container.Controller);
             return true;
         }
