@@ -38,6 +38,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     "push" => await PushCommand.RunAsync(commandArguments),
                     "create" => await CreateCommand.RunAsync(commandArguments),
                     "set-properties" => await PropertiesCommand.RunAsync(commandArguments),
+                    "rename" => await RenameCommand.RunAsync(commandArguments),
                     _ => WriteUnknownCommand(command)
                 };
             }
@@ -85,6 +86,8 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             Console.WriteLine("      親がデータベースの場合は --set でタイトルを含むプロパティを指定する（複数可）。");
             Console.WriteLine("  NotionMarkdownWriter.exe set-properties <Markdownパス|URL|ID> --set <名前=値> [--confirm]");
             Console.WriteLine("      データベース内の既存ページのプロパティ（カテゴリー等、複数可）を後から設定・更新する。本文には触れない。");
+            Console.WriteLine("  NotionMarkdownWriter.exe rename <Markdownパス|URL|ID> --title <ページ名> [--confirm]");
+            Console.WriteLine("      既存ページのタイトルだけを変更する。本文には触れない。");
             Console.WriteLine();
             Console.WriteLine("設定キー:");
             Console.WriteLine($"  {OperatorConfigKeys.NOTION_TOKEN}                必須。秘密設定または環境変数に置くNotionトークン。");
