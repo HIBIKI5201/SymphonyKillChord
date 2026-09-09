@@ -27,7 +27,6 @@ namespace KillChord.Editor.SourceDataProvider
         public static void SetSelectedVariant(GameDataVariant variant)
         {
             EditorPrefs.SetString(EDITOR_PREFS_KEY, variant.ToString());
-            GameDataVariantBuildSettings.Apply(variant);
         }
 
         /// <summary>

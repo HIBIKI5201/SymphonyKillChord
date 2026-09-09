@@ -83,6 +83,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private bool _isInitialized;
         private bool _isSubscribed;
         private bool _isLoadingSubscribed;
+        private bool _isResettingSaveData;
         private LoadingScreenController _loadingScreenController;
 
         /// <summary>
@@ -497,31 +498,74 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private async void HandleDataResetButtonClicked()
         {
+            if (_isResettingSaveData)
+            {
+                return;
+            }
+
+            _isResettingSaveData = true;
+            ApplyInteractionEnabled(false);
             // リセット前の音量設定を保持する。
             AudioSettingsData preservedAudioSettings = GetPreservedAudioSettings();
+            bool canResumeInteraction = false;
 
             try
             {
                 await SaveStore.DeleteAsync<SaveData>();
+
+                // セーブデータをロードして、初期状態に戻す。
+                _loadedSaveData = await LoadSaveData();
+                if (_loadedSaveData == null)
+                {
+                    Debug.LogError(
+                        $"[{nameof(TitleSceneInitializer)}] リセット後のセーブデータをロードできませんでした。",
+                        this);
+                    return;
+                }
+
+                await ApplyInitialSkillLoadoutAsync();
+                await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
+
+                canResumeInteraction = ApplyStartDestination();
+                if (!canResumeInteraction)
+                {
+                    Debug.LogError(
+                        $"[{nameof(TitleSceneInitializer)}] リセット後の遷移先を設定できませんでした。",
+                        this);
+                }
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: セーブデータの削除中にエラーが発生しました。{ex.Message}");
-#endif
-                // 削除に失敗した状態で再読み込みと初期スキル補完を続けると、
-                // リセットできていないデータをリセット済みとして扱ってしまう。
-                return;
+                Debug.LogException(exception, this);
+            }
+            finally
+            {
+                if (!canResumeInteraction)
+                {
+                    canResumeInteraction = await TryRecoverStartDestinationAsync();
+                }
+
+                ApplyInteractionEnabled(canResumeInteraction);
+                _isResettingSaveData = false;
+            }
+        }
+
+        /// <summary>
+        ///     リセット失敗後にセーブデータと開始遷移先を復旧します。
+        /// </summary>
+        /// <returns> 開始操作を安全に再開できる場合はtrueです。 </returns>
+        private async ValueTask<bool> TryRecoverStartDestinationAsync()
+        {
+            _loadedSaveData = await LoadSaveData();
+            if (_loadedSaveData != null && ApplyStartDestination())
+            {
+                return true;
             }
 
-            // セーブデータをロードして、初期状態に戻す。
-            _loadedSaveData = await LoadSaveData();
-
-            await ApplyInitialSkillLoadoutAsync();
-
-            await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
-
-            ApplyStartDestination();
+            Debug.LogError(
+                $"[{nameof(TitleSceneInitializer)}] 開始遷移先を復旧できないため、タイトル操作を停止します。",
+                this);
+            return false;
         }
 
         /// <summary>
@@ -566,7 +610,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 }
             }
 
-            selectedScenarioState.SelectScenario(openingScenario);
+            selectedScenarioState.SelectOpeningTutorialScenario(openingScenario);
             _titleSceneView.SetTargetSceneName(openingScenario.TargetSceneName);
             return true;
         }

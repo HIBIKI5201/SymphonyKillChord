@@ -68,14 +68,14 @@ namespace KillChord.Editor.SourceDataProvider
             out string errorMessage)
         {
             createdAsset = null;
-            if (!ValidateAssetCreation(mapping, collectionProperty, assetType, out errorMessage))
+            string directory = ResolveVariantCreationDirectory(
+                sourceAsset,
+                mapping.AssetCreationDirectory);
+            if (!ValidateAssetCreation(directory, collectionProperty, assetType, out errorMessage))
             {
                 return false;
             }
 
-            string directory = ResolveVariantCreationDirectory(
-                sourceAsset,
-                mapping.AssetCreationDirectory);
             EnsureFolder(directory);
             string assetPath = AssetDatabase.GenerateUniqueAssetPath(
                 $"{directory}/{assetType.Name}.asset");
@@ -136,13 +136,13 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     ScriptableObject生成に必要な設定を検証します。
         /// </summary>
-        /// <param name="mapping"> Collection設定です。 </param>
+        /// <param name="directory"> 選択中variantへ展開済みの生成先です。 </param>
         /// <param name="collectionProperty"> Collectionプロパティです。 </param>
         /// <param name="assetType"> 生成対象型です。 </param>
         /// <param name="errorMessage"> 検証エラーです。 </param>
         /// <returns> 生成可能な場合はtrueです。 </returns>
         private static bool ValidateAssetCreation(
-            SourceDataProviderSettings.SourceCollectionMapping mapping,
+            string directory,
             SerializedProperty collectionProperty,
             Type assetType,
             out string errorMessage)
@@ -161,7 +161,6 @@ namespace KillChord.Editor.SourceDataProvider
                 return false;
             }
 
-            string directory = mapping.AssetCreationDirectory?.Replace('\\', '/').TrimEnd('/');
             if (string.IsNullOrWhiteSpace(directory))
             {
                 errorMessage = "Source Data Provider設定でAsset Creation Directoryを指定してください。";
@@ -169,9 +168,10 @@ namespace KillChord.Editor.SourceDataProvider
             }
 
             if (!directory.StartsWith("Assets/", StringComparison.Ordinal)
-                || !AssetDatabase.IsValidFolder(directory))
+                || directory.Contains(VARIANT_TOKEN)
+                || Array.IndexOf(directory.Split('/'), "..") >= 0)
             {
-                errorMessage = "生成先には存在するAssets配下のフォルダを指定してください。";
+                errorMessage = "生成先にはAssets配下の有効なフォルダを指定してください。";
                 return false;
             }
 
@@ -186,7 +186,18 @@ namespace KillChord.Editor.SourceDataProvider
             ScriptableObject sourceAsset,
             string configuredDirectory)
         {
-            string directory = configuredDirectory.Replace('\\', '/').TrimEnd('/');
+            if (string.IsNullOrWhiteSpace(configuredDirectory))
+            {
+                return string.Empty;
+            }
+
+            string variantDirectoryName = GameDataVariantEditorState.SelectedVariant == GameDataVariant.Demo
+                ? DEMO_DIRECTORY_NAME
+                : RELEASE_DIRECTORY_NAME;
+            string directory = configuredDirectory
+                .Replace(VARIANT_TOKEN, variantDirectoryName)
+                .Replace('\\', '/')
+                .TrimEnd('/');
             string sourcePath = AssetDatabase.GetAssetPath(sourceAsset).Replace('\\', '/');
             if (GameDataVariantEditorState.SelectedVariant == GameDataVariant.Demo
                 && sourcePath.StartsWith(DEMO_DATA_ROOT, StringComparison.Ordinal)
@@ -368,5 +379,8 @@ namespace KillChord.Editor.SourceDataProvider
 
         private const string RELEASE_DATA_ROOT = "Assets/Level/Data/Master/";
         private const string DEMO_DATA_ROOT = "Assets/Level/Data/Demo/";
+        private const string RELEASE_DIRECTORY_NAME = "Master";
+        private const string DEMO_DIRECTORY_NAME = "Demo";
+        private const string VARIANT_TOKEN = "{Variant}";
     }
 }
