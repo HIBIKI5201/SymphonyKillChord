@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ACLikeRhythmGuideEffectConfig
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Music.ACLikeRhythmGuideEffectConfig
   _justSaturationMultiplier: 1.5
-  _justValueMultiplier: 1.1
+  _justValueMultiplier: 0.5
   _flashColor: {r: 1, g: 0.9, b: 0.45, a: 1}
   _flashDuration: 0.2
   _flashEase: 5
