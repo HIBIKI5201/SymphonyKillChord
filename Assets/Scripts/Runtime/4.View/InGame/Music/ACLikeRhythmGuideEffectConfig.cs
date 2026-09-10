@@ -63,10 +63,10 @@ namespace KillChord.Runtime.View.InGame.Music
         public Ease VignetteEase => _vignetteEase;
 
         [Header("ジャスト位置の強調")]
-        [SerializeField, Min(1f), Tooltip("ジャストタイミング位置のビート色に掛ける彩度の倍率。1で強調なし。")]
+        [SerializeField, Min(0f), Tooltip("ジャストタイミング位置のビート色に掛ける彩度の倍率。1で強調なし。")]
         private float _justSaturationMultiplier = 1.5f;
 
-        [SerializeField, Min(1f), Tooltip("ジャストタイミング位置のビート色に掛ける明度の倍率。1で強調なし。彩度が既に高い色でも差を出すために使用します。")]
+        [SerializeField, Min(0f), Tooltip("ジャストタイミング位置のビート色に掛ける明度の倍率。1で強調なし。彩度が既に高い色でも差を出すために使用します。")]
         private float _justValueMultiplier = 1.1f;
 
         [Header("判定色")]
