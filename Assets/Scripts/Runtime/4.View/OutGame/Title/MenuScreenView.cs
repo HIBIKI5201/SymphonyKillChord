@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         ///    メニュー画面の View を初期化します。
         /// </summary>
         public MenuScreenView(
-            VisualElement rootElement, 
+            VisualElement rootElement,
             OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
         {
@@ -28,7 +29,14 @@ namespace KillChord.Runtime.View.OutGame.Title
         public override void Dispose()
         {
             UnregisterButtonCallbacks();
+            base.Dispose();
         }
+
+        /// <inheritdoc />
+        protected override VisualElement InitialFocusElement => _optionButton;
+
+        /// <inheritdoc />
+        protected override VisualElement CancelTargetElement => _backButton;
 
         private const string OPTION_BUTTON_NAME = "OptionButton";
         private const string CREDIT_BUTTON_NAME = "CreditButton";
@@ -38,6 +46,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private Button _creditButton;
 
         private Button _backButton;
+        private IDisposable _backButtonActivation;
 
         /// <summary>
         ///     メニュー画面の UI 要素を初期化します。
@@ -68,9 +77,14 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void RegisterButtonCallbacks()
         {
+            _optionButton.MakeNavigable();
+            _creditButton.MakeNavigable();
             _optionButton.clicked += OnOptionButtonClicked;
             _creditButton.clicked += OnCreditButtonClicked;
-            _backButton.clicked += OnBackButtonClicked;
+
+            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
+            _backButton.ExcludeFromNavigation();
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
         }
 
         /// <summary>
@@ -80,7 +94,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _optionButton.clicked -= OnOptionButtonClicked;
             _creditButton.clicked -= OnCreditButtonClicked;
-            _backButton.clicked -= OnBackButtonClicked;
+            _backButtonActivation?.Dispose();
         }
 
         /// <summary>
@@ -100,9 +114,9 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         /// <summary>
-        ///     戻るボタンがクリックされたときの処理。
+        ///     戻るボタンが作動したときの処理。
         /// </summary>
-        private void OnBackButtonClicked()
+        private void HandleBackButtonActivationHandler()
         {
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }

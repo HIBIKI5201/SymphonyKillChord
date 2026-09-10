@@ -31,6 +31,7 @@ using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Camera;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
@@ -74,6 +75,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         [SerializeField, SourceDataAddress, Tooltip("モバイルスティックのフリック判定設定の Addressables キーです。")]
         private string _mobileStickFlickInputConfigKey;
+        [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
+        private ReusableParticleSystemView _damageEffectView;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -198,7 +201,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 this,
                 _player,
                 _playerEntity,
-                playerStatusBonusContainer.PlayerStatusBonus);
+                playerStatusBonusContainer.PlayerStatusBonus,
+                _damageEffectView);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;
@@ -295,7 +299,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             // 位置リセット入力を購読する。
             _playerInputView = inputView;
-            _playerInputView.OnResetPositionInput += HandleResetPositionInput;
 
             TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
             if (targetSystemContainer == null || targetSystemContainer.TargetSystemController == null)
@@ -375,6 +378,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 cameraTransform.Transform,
                 inputView,
                 healthHudPresenter,
+                _damageEffectView,
                 inputSuppressionState);
 
             InitializeMobileStickFlickInput(inputView);
@@ -387,30 +391,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 .SetPlayerMoveSpec(parameter);
 #endif
         }
-
-        /// <summary>
-        ///     プレイヤーをステージのスタート地点へ戻します。
-        /// </summary>
-        public void ResetPlayerToSpawn()
-        {
-            if (_player == null)
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(PlayerView)} が存在しないため位置リセットできません。", this);
-                return;
-            }
-
-            if (!TryResolvePlayerSpawnPointTransform(out Transform spawnPointTransform))
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] スタート地点が見つからないため位置リセットできません。", this);
-                return;
-            }
-
-            _player.ResetToSpawn(spawnPointTransform.position, spawnPointTransform.rotation);
-
-            // カメラの向きもスタート時の前方へ戻す。
-            ResetCameraOrientation(spawnPointTransform.forward);
-        }
-
         /// <summary>
         ///     カメラの向きを指定した前方へ戻します。
         /// </summary>
@@ -429,21 +409,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             _cameraSystemView.ResetOrientation(forward);
-        }
-
-        /// <summary>
-        ///     位置リセット入力を受け取ってプレイヤーをスタート地点へ戻します。
-        /// </summary>
-        /// <param name="input"> 位置リセット入力です。 </param>
-        private void HandleResetPositionInput(InputContext<float> input)
-        {
-            // 押下開始時のみ実行する。
-            if (input.Phase != InputActionPhase.Started)
-            {
-                return;
-            }
-
-            ResetPlayerToSpawn();
         }
 
         /// <summary>
@@ -491,7 +456,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             if (_playerInputView != null)
             {
-                _playerInputView.OnResetPositionInput -= HandleResetPositionInput;
                 _playerInputView = null;
             }
 
@@ -608,7 +572,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 || _playerViewPrefab == null
                 || _loadedPlayerData == null
                 || _characterAnimationConfig == null
-                || _playerAttackAnimationConfig == null)
+                || _playerAttackAnimationConfig == null
+                || _damageEffectView == null)
             {
                 Debug.LogError($"[{nameof(PlayerInitializer)}] プレイヤー初期化参照が不足しています。", this);
                 return false;

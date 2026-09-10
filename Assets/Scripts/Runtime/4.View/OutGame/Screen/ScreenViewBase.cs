@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.OutGame.Navigation;
 using LitMotion;
 using System;
 using System.Threading;
@@ -22,6 +23,21 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             _brocker = CreateBrocker();
             _currentOpacity = RootElement.resolvedStyle.opacity;
+
+            RootElement.RegisterCallback<NavigationCancelEvent>(HandleNavigationCancelHandler);
+        }
+
+        /// <summary> この画面内で現在フォーカスされている要素を取得します。 </summary>
+        public VisualElement FocusedElement
+        {
+            get
+            {
+                VisualElement focusedElement =
+                    RootElement.panel?.focusController?.focusedElement as VisualElement;
+                return focusedElement != null && RootElement.Contains(focusedElement)
+                    ? focusedElement
+                    : null;
+            }
         }
 
         /// <summary>
@@ -30,7 +46,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public virtual ValueTask Show(CancellationToken cancellationToken = default)
         {
+            if (_isDisposed)
+            {
+                return default;
+            }
+
             _opacityMotionHandle.TryComplete();
+            _focusRequestGeneration++;
+            _isShowing = true;
+            _isShowCompleted = false;
+            _isFocusRestorePending = true;
 
             RootElement.style.display = DisplayStyle.Flex;
             RootElement.BringToFront();
@@ -41,7 +66,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             _opacityMotionHandle = LMotion.Create(_currentOpacity, 1f, FADE_DURATION)
                 .WithEase(FADE_IN_EASE)
-                .WithOnComplete(RemoveBrocker)
+                .WithOnComplete(HandleShowCompleted)
                 .Bind(this, static (opacity, state) => state.SetOpacity(opacity));
 
             return _opacityMotionHandle.ToValueTask(cancellationToken);
@@ -58,6 +83,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public virtual ValueTask Hide(CancellationToken cancellationToken = default)
         {
             _opacityMotionHandle.TryComplete();
+            InvalidateFocusRestore();
 
             // フェード中は入力を受け付けないようブロッカーを最前面に配置する。
             RootElement.Add(_brocker);
@@ -77,6 +103,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public virtual void HideImmediately()
         {
             _opacityMotionHandle.TryComplete();
+            InvalidateFocusRestore();
 
             SetOpacity(0f);
             RootElement.style.display = DisplayStyle.None;
@@ -88,8 +115,212 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public virtual void Dispose()
         {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isDisposed = true;
+            InvalidateFocusRestore();
             _opacityMotionHandle.TryCancel();
             _brocker.RemoveFromHierarchy();
+            RootElement.UnregisterCallback<NavigationCancelEvent>(HandleNavigationCancelHandler);
+        }
+
+        /// <summary>
+        ///     初期フォーカス先を外部から指定します。
+        ///     <para>
+        ///         ノードのように実行時に生成される要素へフォーカスさせる場合に使用します。
+        ///         指定した場合は <see cref="InitialFocusElement"/> より優先されます。
+        ///     </para>
+        /// </summary>
+        /// <param name="element"> 次回表示時のフォーカス先です。nullで指定を解除します。 </param>
+        public void SetInitialFocusElement(VisualElement element)
+        {
+            _explicitInitialFocusElement = element;
+        }
+
+        /// <summary>
+        ///     画面の外部入力許可を切り替え、禁止時はフォーカス候補を保存して予約を失効させる。
+        /// </summary>
+        public void SetInteractionEnabled(bool isEnabled)
+        {
+            if (_isDisposed || _isInteractionEnabled == isEnabled)
+            {
+                return;
+            }
+
+            if (!isEnabled)
+            {
+                VisualElement focusedElement = FocusedElement;
+                if (IsAvailableFocusElement(focusedElement))
+                {
+                    _focusBeforeSuppression = focusedElement;
+                }
+
+                _focusRequestGeneration++;
+                _isFocusRestorePending = _isShowing;
+                _isInteractionEnabled = false;
+                focusedElement?.Blur();
+            }
+            else
+            {
+                _isInteractionEnabled = true;
+            }
+
+            RootElement.SetEnabled(isEnabled);
+        }
+
+        /// <summary>
+        ///     現在画面のフォーカス復元を予約する。入力禁止中とフェード中は表示完了まで保留する。
+        /// </summary>
+        public void RestoreFocus()
+        {
+            if (_isDisposed || !_isShowing)
+            {
+                return;
+            }
+
+            _isFocusRestorePending = true;
+            if (!_isInteractionEnabled || !_isShowCompleted)
+            {
+                return;
+            }
+
+            int generation = ++_focusRequestGeneration;
+            RootElement.schedule.Execute(() =>
+            {
+                if (generation != _focusRequestGeneration || _isDisposed
+                    || !_isInteractionEnabled || !_isShowCompleted || !_isFocusRestorePending)
+                {
+                    return;
+                }
+
+                VisualElement focusElement = GetAvailableFocusElement();
+                if (focusElement == null)
+                {
+                    return;
+                }
+
+                _isFocusRestorePending = false;
+                _focusBeforeSuppression = null;
+                _explicitInitialFocusElement = null;
+                focusElement.Focus();
+            });
+        }
+
+        /// <summary>
+        ///     コントローラー操作の起点となる要素を返します。
+        ///     <para>
+        ///         画面の表示完了時にこの要素へフォーカスが移ります。
+        ///         nullを返した場合はフォーカス移動を行いません。
+        ///     </para>
+        /// </summary>
+        protected virtual VisualElement InitialFocusElement => null;
+
+        /// <summary>
+        ///     コントローラーのキャンセル操作で作動させる要素を返します。
+        ///     <para>
+        ///         通常は「戻る」ボタンを返します。キャンセル操作を受けると、
+        ///         その要素へ明示的な作動要求を送ります。
+        ///         nullを返した場合はキャンセル操作を処理しません。
+        ///     </para>
+        /// </summary>
+        protected virtual VisualElement CancelTargetElement => null;
+
+        /// <summary>
+        ///     フェードイン完了後に呼び出され、ブロッカーを取り除いて初期フォーカスを設定します。
+        /// </summary>
+        private void HandleShowCompleted()
+        {
+            _isShowCompleted = true;
+            RemoveBrocker();
+            RestoreFocus();
+        }
+
+        /// <summary>
+        ///     キャンセル操作を「戻る」相当の動作へ変換します。
+        /// </summary>
+        /// <param name="navigationEvent"> ナビゲーションキャンセルイベントです。 </param>
+        private void HandleNavigationCancelHandler(NavigationCancelEvent navigationEvent)
+        {
+            if (_isDisposed || !_isInteractionEnabled || !_isShowCompleted)
+            {
+                return;
+            }
+
+            VisualElement cancelTarget = CancelTargetElement;
+
+            // 処理しない画面ではイベントを消費せず、親側の処理に委ねる。
+            if (cancelTarget == null || !cancelTarget.enabledInHierarchy)
+            {
+                return;
+            }
+
+            if (cancelTarget.resolvedStyle.display == DisplayStyle.None)
+            {
+                return;
+            }
+
+            using UIActivationEvent activationEvent = UIActivationEvent.GetPooled();
+            activationEvent.target = cancelTarget;
+            cancelTarget.SendEvent(activationEvent);
+            navigationEvent.StopPropagation();
+        }
+
+        /// <summary>
+        ///     ロック直前、画面履歴、画面既定の順で復元可能なフォーカス候補を選ぶ。
+        /// </summary>
+        private VisualElement GetAvailableFocusElement()
+        {
+            if (IsAvailableFocusElement(_focusBeforeSuppression))
+            {
+                return _focusBeforeSuppression;
+            }
+
+            if (IsAvailableFocusElement(_explicitInitialFocusElement))
+            {
+                return _explicitInitialFocusElement;
+            }
+
+            VisualElement initialFocusElement = InitialFocusElement;
+            return IsAvailableFocusElement(initialFocusElement) ? initialFocusElement : null;
+        }
+
+        /// <summary>
+        ///     同じ画面とパネルに属し、祖先を含めて表示中かつ入力可能なフォーカス先か判定する。
+        /// </summary>
+        private bool IsAvailableFocusElement(VisualElement element)
+        {
+            if (element == null || RootElement.panel == null || element.panel != RootElement.panel
+                || (element != RootElement && !RootElement.Contains(element))
+                || !element.focusable || !element.enabledInHierarchy)
+            {
+                return false;
+            }
+
+            for (VisualElement ancestor = element; ancestor != null; ancestor = ancestor.parent)
+            {
+                if (ancestor.resolvedStyle.display == DisplayStyle.None
+                    || ancestor.resolvedStyle.visibility != Visibility.Visible)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     非表示と破棄に伴い、遅延予約とロック直前のフォーカス候補を破棄する。
+        /// </summary>
+        private void InvalidateFocusRestore()
+        {
+            _focusRequestGeneration++;
+            _isShowing = false;
+            _isShowCompleted = false;
+            _isFocusRestorePending = false;
+            _focusBeforeSuppression = null;
         }
 
         /// <summary>
@@ -160,6 +391,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> フェード中の入力を遮断するブロッカー要素。 </summary>
         private readonly VisualElement _brocker;
 
+        /// <summary> 外部から指定された初期フォーカス先。未指定の場合はnull。 </summary>
+        private VisualElement _explicitInitialFocusElement;
+
+        private bool _isInteractionEnabled = true;
+        private bool _isShowing;
+        private bool _isShowCompleted;
+        private bool _isFocusRestorePending;
+        private bool _isDisposed;
+        private int _focusRequestGeneration;
+        private VisualElement _focusBeforeSuppression;
         private MotionHandle _opacityMotionHandle;
         /// <summary> 直近に書き込んだ opacity。フェード再開時の始点として使用します。 </summary>
         private float _currentOpacity;

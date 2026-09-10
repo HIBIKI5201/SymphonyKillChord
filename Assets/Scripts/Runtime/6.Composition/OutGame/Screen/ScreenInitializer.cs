@@ -1,13 +1,17 @@
+using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
+using SymphonyFrameWork.Attribute;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
@@ -36,9 +40,17 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         {
             try
             {
-                _loadedScreenRuleData = await _screenRuleDataKey.LoadAssetAsync<ScreenRuleData>(this, destroyCancellationToken);
+                _loadedScreenRuleData = await _screenRuleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
             }
-            catch (Exception ex) { Debug.LogException(ex, this); }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+
             return _loadedScreenRuleData != null;
         }
 
@@ -63,7 +75,25 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return false;
             }
 
-            _screenController.ShowHome();
+            if (!ServiceLocator.TryGetInstance(out _loadingScreenController))
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] LoadingScreenControllerを取得できませんでした。", this);
+                return false;
+            }
+
+            if (!_isLoadingSubscribed)
+            {
+                _loadingScreenController.LoadingStarted += HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted += HandleLoadingCompleted;
+                _isLoadingSubscribed = true;
+            }
+
+            ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
+            if (!SaveStore.IsLoaded<SaveData>()
+                || SaveStore.Get<SaveData>().Tutorial.Phase >= TutorialPhase.BattleCompleted)
+            {
+                _screenController.ShowHome();
+            }
             return true;
         }
 
@@ -72,6 +102,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public override void Shutdown()
         {
+            UnsubscribeLoading();
             Unsubscribe();
             _isSubscribed = false;
 
@@ -84,6 +115,52 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _screenRuleDataKey.ReleaseLoadedAsset(this);
             _loadedScreenRuleData = null;
             _isInitialized = false;
+        }
+
+        /// <summary>
+        ///     ロード開始時に登録画面の操作を禁止する。
+        /// </summary>
+        private void HandleLoadingStarted()
+        {
+            ApplyInteractionEnabled(false);
+        }
+
+        /// <summary>
+        ///     ロード終了時は成否にかかわらず画面操作と現在画面のフォーカスを復元する。
+        /// </summary>
+        private void HandleLoadingCompleted(bool success)
+        {
+            ApplyInteractionEnabled(true);
+        }
+
+        /// <summary>
+        ///     取得済みRegistryへ入力許可を適用し、例外で他のロード購読者の通知を中断させない。
+        /// </summary>
+        private void ApplyInteractionEnabled(bool isEnabled)
+        {
+            try
+            {
+                _screenViewRegistry?.SetInteractionEnabled(isEnabled);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     View破棄より先にロード通知の購読を一度だけ解除する。
+        /// </summary>
+        private void UnsubscribeLoading()
+        {
+            if (_isLoadingSubscribed && _loadingScreenController != null)
+            {
+                _loadingScreenController.LoadingStarted -= HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted -= HandleLoadingCompleted;
+            }
+
+            _isLoadingSubscribed = false;
+            _loadingScreenController = null;
         }
 
         /// <summary>
@@ -188,7 +265,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             HomeScreenView homeScreenView = new HomeScreenView(homeRoot, _outGameUIEvent);
             StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
-            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent);
+            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent, null, null, null, null, null);
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
@@ -238,7 +315,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _ctsTransition = new();
 
             _isInitialized = true;
-            _isStartGame = false;
+            _isSceneTransitioning = false;
             return true;
         }
 
@@ -256,6 +333,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownSettingScreen += HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnStartGame += HandleStartGame;
+            _outGameUIEvent.OnReturnToTitleRequested += HandleReturnToTitleRequested;
             _outGameUIEvent.OnOutGameUiVisibilityChanged += HandleOutGameUiVisibilityChanged;
             _isSubscribed = true;
         }
@@ -274,6 +352,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownSettingScreen -= HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnStartGame -= HandleStartGame;
+            _outGameUIEvent.OnReturnToTitleRequested -= HandleReturnToTitleRequested;
             _outGameUIEvent.OnOutGameUiVisibilityChanged -= HandleOutGameUiVisibilityChanged;
             _isSubscribed = false;
         }
@@ -351,7 +430,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private async void HandleStartGame()
         {
             // 一度ゲーム開始処理が走った後は、二重に処理が走らないようにします。
-            if (_isStartGame) { return; }
+            if (_isSceneTransitioning) { return; }
 
             if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage
@@ -364,7 +443,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             string targetSceneName = selectedBattleStageState.InGameSceneName;
-            _isStartGame = true;
+            _isSceneTransitioning = true;
             var currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             try
             {
@@ -380,7 +459,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                     return;
                 }
 
-                _isStartGame = false;
+                _isSceneTransitioning = false;
 
                 Debug.LogError(
                     $"[{nameof(ScreenInitializer)}] " +
@@ -390,13 +469,65 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
             catch (OperationCanceledException)
             {
-                _isStartGame = false;
+                _isSceneTransitioning = false;
             }
             catch (Exception exception)
             {
-                _isStartGame = false;
+                _isSceneTransitioning = false;
                 Debug.LogException(exception, this);
             }
+        }
+
+        /// <summary>
+        ///     OutGameからタイトル画面へ遷移する。
+        /// </summary>
+        private async void HandleReturnToTitleRequested()
+        {
+            if (_isSceneTransitioning)
+            {
+                _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(false);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_titleSceneName))
+            {
+                Debug.LogError(
+                    $"[{nameof(ScreenInitializer)}] タイトルシーン名が設定されていません。",
+                    this);
+                _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(false);
+                return;
+            }
+
+            _isSceneTransitioning = true;
+            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
+            try
+            {
+                bool success = await _sceneTransitionController.ChangeSceneAsync(
+                    currentSceneName,
+                    _titleSceneName,
+                    _ctsTransition.Token);
+                if (success)
+                {
+                    _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(true);
+                    return;
+                }
+
+                Debug.LogError(
+                    $"[{nameof(ScreenInitializer)}] タイトル画面への遷移に失敗しました。"
+                    + $" SceneName: {_titleSceneName}",
+                    this);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+
+            _isSceneTransitioning = false;
+            _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(false);
         }
 
         /// <summary>
@@ -445,6 +576,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private UIDocument _uiDocument;
         [SerializeField, SourceDataAddress, Tooltip("画面遷移ルールデータの Addressables キーです。")]
         private string _screenRuleDataKey;
+        [SerializeField, SceneNameSelector, Tooltip("設定画面から戻るタイトルシーン名です。")]
+        private string _titleSceneName = "Title";
 
         private ScreenController _screenController;
         private OutGameUIEvent _outGameUIEvent;
@@ -453,7 +586,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private ScreenRuleData _loadedScreenRuleData;
         private bool _isInitialized = false;
         private bool _isSubscribed;
-        private bool _isStartGame = false;
+        private bool _isLoadingSubscribed;
+        private LoadingScreenController _loadingScreenController;
+        private bool _isSceneTransitioning = false;
 
         private CancellationTokenSource _ctsTransition;
     }

@@ -13,11 +13,13 @@ MonoBehaviour:
   m_Name: SkillNodeData-N2
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeData
   UnlockCost: 10
-  SkillDetail: "\u30B9\u30AD\u30EB\u5927\n\uFF12\uFF0D\uFF11\n\u3042\n\u3044\n\u3046\n\u3048\n\u304A"
+  SkillDetail: "\u30B9\u30AD\u30EB2\n\u30B3\u30DE\u30F3\u30C9           :4\u21924\u21922\n\n\u30B9\u30AD\u30EB\u30B8\u30E3\u30F3\u30EB 
+    :\u3000\u30D0\u30D5\n\n\u30B9\u30AD\u30EB\u52B9\u679C\n\u901A\u5E38\u653B\u6483\u306E\u30B7\u30E7\u30C3\u30C8\u30AC\u30F3\u306E\u653B\u6483\u3092\n\u767A\u52D5\u3057\u3001\u305D\u306E\u653B\u6483\u5BFE\u8C61\u306B\n\u88AB\u30C0\u30E1\u30FC\u30B8\u91CF25%\u5897\u52A0\u306E\u30C7\u30D0\u30D5\u3092\n5\u79D2\u9593\u4ED8\u4E0E\u3059\u308B"
   PreviewVideoClip: {fileID: 32900000, guid: 5e0d75b2b610b0c4eab7a704a940971b, type: 3}
   _statusBonusEffects: []
   _unlockSkills:
-  - {fileID: 11400000, guid: 97ff6066886518248be12b6b9f0fe11d, type: 2}
+  - _id: skill_02
+    _hashId: 634126943
   _nodeId:
     _id: node_n2
     _hashId: 1668731980

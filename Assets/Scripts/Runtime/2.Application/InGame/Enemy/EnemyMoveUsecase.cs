@@ -19,6 +19,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _nearestAttackPositionSearcher = nearestAttackPositionSearcher;
         }
 
+        /// <summary> 敵の基本移動速度 </summary>
+        public float MoveSpeed => _enemyMoveSpec.MoveSpeed.Value;
+
         /// <summary>
         ///     移動の意思決定を行うメソッド。
         ///     敵とプレイヤーの位置を受け取り、移動すべきか、目的地、速度を返す。

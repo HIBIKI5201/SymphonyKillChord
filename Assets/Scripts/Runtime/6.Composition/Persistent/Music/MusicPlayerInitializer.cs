@@ -28,7 +28,28 @@ namespace KillChord.Runtime.Composition.Persistent.Music
             MusicViewModel musicViewModel = new MusicViewModel();
             _musicPlayer.Bind(musicViewModel);
             _musicPlayer.Initialize();
-            ServiceLocator.RegisterInstance(_musicPlayer, LocateTypeEnum.Locator);
+            if (!ServiceLocator.RegisterInstance(_musicPlayer, LocateTypeEnum.Locator))
+            {
+                Debug.LogError(
+                    $"[{nameof(MusicPlayerInitializer)}] {nameof(MusicPlayer)}を登録できませんでした。",
+                    this);
+                _musicPlayer = null;
+                return false;
+            }
+
+            _moduleContainer = new MusicPlayerModuleContainer(_musicPlayer);
+            if (!ServiceLocator.RegisterInstance(_moduleContainer))
+            {
+                Debug.LogError(
+                    $"[{nameof(MusicPlayerInitializer)}] " +
+                    $"{nameof(MusicPlayerModuleContainer)}を登録できませんでした。",
+                    this);
+                ServiceLocator.UnregisterInstance<MusicPlayer>();
+                _moduleContainer = null;
+                _musicPlayer = null;
+                return false;
+            }
+
             return true;
         }
 
@@ -37,15 +58,23 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         /// </summary>
         public override void Shutdown()
         {
+            if (ServiceLocator.TryGetInstance(out MusicPlayerModuleContainer registeredContainer)
+                && ReferenceEquals(registeredContainer, _moduleContainer))
+            {
+                ServiceLocator.UnregisterInstance<MusicPlayerModuleContainer>();
+            }
+
             if (ServiceLocator.TryGetInstance(out MusicPlayer registeredMusicPlayer)
                 && ReferenceEquals(registeredMusicPlayer, _musicPlayer))
             {
                 ServiceLocator.UnregisterInstance<MusicPlayer>();
             }
 
+            _moduleContainer = null;
             _musicPlayer = null;
         }
 
+        private MusicPlayerModuleContainer _moduleContainer;
         private MusicPlayer _musicPlayer;
     }
 }

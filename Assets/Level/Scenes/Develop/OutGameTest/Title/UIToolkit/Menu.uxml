@@ -8,6 +8,6 @@
             <ui:VisualElement name="Space" style="height: 5%;"/>
             <ui:Button text="クレジット" name="CreditButton" class="title-option-button"/>
         </ui:VisualElement>
-        <ui:Button text="戻る" name="BackButton" class="back-button button" style="position: absolute; background-color: rgb(188, 188, 188); left: auto; right: 1%;"/>
+        <ui:Button text="戻る" name="BackButton" class="back-button button ui-se-cancel" style="position: absolute; background-color: rgb(188, 188, 188); left: auto; right: 1%;"/>
     </ui:VisualElement>
 </ui:UXML>

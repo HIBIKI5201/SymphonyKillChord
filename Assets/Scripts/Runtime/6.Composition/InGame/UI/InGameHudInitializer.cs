@@ -21,6 +21,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         public void InitializePlayerHpHud(IHealthHudViewModel healthHudViewModel)
         {
             _playerHealthTextView.Bind(healthHudViewModel);
+            _playerHealthBarView.Bind(healthHudViewModel);
         }
         public override bool Build()
         {
@@ -33,5 +34,6 @@ namespace KillChord.Runtime.Composition.InGame.UI
         }
 
         [SerializeField, Tooltip("プレイヤーのHPテキスト表示のView")] private HealthTextView _playerHealthTextView;
+        [SerializeField, Tooltip("プレイヤーのHPバーのView")] private HealthBarView _playerHealthBarView;
     }
 }

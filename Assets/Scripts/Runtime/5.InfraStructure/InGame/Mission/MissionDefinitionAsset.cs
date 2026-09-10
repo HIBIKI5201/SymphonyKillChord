@@ -61,7 +61,16 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                             $"クリア条件ステップ[{i}]が未設定です。 MissionId: {_missionId.Id}");
                     }
 
-                    steps.Add(_clearConditionSteps[i].Create(missionKeyRepository));
+                    try
+                    {
+                        steps.Add(_clearConditionSteps[i].Create(missionKeyRepository));
+                    }
+                    catch (Exception exception)
+                    {
+                        throw new InvalidOperationException(
+                            $"クリア条件ステップ[{i}]の生成に失敗しました。 MissionId: {_missionId.Id}, Asset: {name}",
+                            exception);
+                    }
                 }
             }
 

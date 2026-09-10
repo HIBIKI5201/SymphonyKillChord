@@ -33,6 +33,15 @@ namespace KillChord.Runtime.InfraStructure.Repository
         }
 
         /// <summary>
+        ///     登録済みの全ての値を返します。
+        /// </summary>
+        protected IReadOnlyCollection<TValue> GetAllValues()
+        {
+            EnsureMap();
+            return _map.Values;
+        }
+
+        /// <summary>
         ///     シリアライズされたエントリの一覧を返します。
         /// </summary>
         protected abstract IReadOnlyList<TEntry> GetEntries();
