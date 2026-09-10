@@ -51,6 +51,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartConstraintView = FindFirstObjectByType<StageStartConstraintView>();
             _playerInputView = FindFirstObjectByType<PlayerInputView>();
             _musicPlayer = FindFirstObjectByType<MusicPlayer>();
+            _ambienceSoundView = FindFirstObjectByType<AmbienceSoundView>();
 
             if (_stageSequenceView == null
                 || _stageSequenceMessageView == null
@@ -61,7 +62,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 || _stageSequenceMusicView == null
                 || _stageStartConstraintView == null
                 || _playerInputView == null
-                || _musicPlayer == null)
+                || _musicPlayer == null
+                || _ambienceSoundView == null)
             {
                 Debug.LogError(
                     $"[{nameof(SequenceInitializationModule)}] シーケンス関連参照の取得に失敗しました。",
@@ -152,7 +154,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _stageStartConstraintView,
                 stageResultContainer.Presenter,
                 _visibilityView,
-                _inGamePlayDirector);
+                _inGamePlayDirector,
+                _ambienceSoundView);
 
             _missionRuntimeService = missionContainer.MissionRuntimeService;
             if (_missionRuntimeService == null)
@@ -442,6 +445,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private StageSequenceMusicView _stageSequenceMusicView;
         private StageStartConstraintView _stageStartConstraintView;
         private MusicPlayer _musicPlayer;
+        private AmbienceSoundView _ambienceSoundView;
         private PlayerInputView _playerInputView;
         private BattlePauseModule _battlePauseModule;
         private BattlePauseController _battlePauseController;

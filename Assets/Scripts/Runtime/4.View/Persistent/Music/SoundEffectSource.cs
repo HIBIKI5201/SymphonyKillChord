@@ -46,6 +46,19 @@ namespace KillChord.Runtime.View.Persistent.Music
         }
 
         /// <summary>
+        ///     再生中のCueを停止する。ループ再生するSE（環境音など）を明示的に止める用途に使用する。
+        /// </summary>
+        public void Stop()
+        {
+            if (!TryEnsureSource())
+            {
+                return;
+            }
+
+            _source.Stop();
+        }
+
+        /// <summary>
         ///     SE全体音量の比率を適用する。
         /// </summary>
         /// <param name="volumeRatio"> 0から1の音量比率。 </param>
