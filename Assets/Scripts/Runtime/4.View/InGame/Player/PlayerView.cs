@@ -82,6 +82,9 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("Critical SE用Source。")]
         private SoundEffectSource _criticalSoundSource;
 
+        [SerializeField, Tooltip("敵への通常Hit時のSE用Source。")]
+        private SoundEffectSource _hitSoundSource;
+
         [SerializeField, Tooltip("足音演出Viewです。")]
         private FootStepView _footStepView;
 
@@ -815,14 +818,25 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
-        ///     敵への攻撃で被弾した際に、Criticalヒット時のSEを再生します。
+        ///     プレイヤーの攻撃が敵に命中した際のHit SEを再生します。
+        ///     Criticalヒットの場合はCritical用SE、それ以外は通常Hit用SEを再生します。
+        ///     射程外ヒットなどダメージが0の場合は「当たったが効いていない」表示のみのため再生しません。
         /// </summary>
         /// <param name="e"> イベント情報です。 </param>
         private void HandleTakeDamage(EOnTakeDamage e)
         {
-            if (e.Critical && e.Damage > 0)
+            if (e.Damage <= 0)
+            {
+                return;
+            }
+
+            if (e.Critical)
             {
                 PlaySound(_criticalSoundSource, null);
+            }
+            else
+            {
+                PlaySound(_hitSoundSource, null);
             }
         }
 
