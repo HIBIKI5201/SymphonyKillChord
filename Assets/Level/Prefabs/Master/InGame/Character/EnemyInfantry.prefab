@@ -49,6 +49,8 @@ Transform:
   - {fileID: 6203434615119270402}
   - {fileID: 6523754249061918103}
   - {fileID: 2696440774020137033}
+  - {fileID: 7271014143788975582}
+  - {fileID: 3735015655962321325}
   - {fileID: 3402944858344314455}
   - {fileID: 3430338019357516730}
   - {fileID: 7935486888130287535}
@@ -314,16 +316,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3de89e5405d9b6c4aa1649b59b3b8281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.EnemyMoveView
-  _attackSoundSource: {fileID: 0}
+  _attackSoundSource: {fileID: 4554744431032350602}
+  _attackAlertFirstSoundSource: {fileID: 7799542667074616855}
+  _attackAlertSecondSoundSource: {fileID: 2982125588937624228}
   _attackHitEffectPrefab: {fileID: 131285386190377671, guid: 8241b0826109c274081347d4d711a62d, type: 3}
   _attackReserveEffectPrefab: {fileID: 318648360357674666, guid: 3312f234a758f5148a83e6ef17016861, type: 3}
   _footStepView: {fileID: 733036131092522326}
-  _defaultFootstepCueName: FootStep
+  _defaultFootstepCueName: SE_Enemy_Footsteps
   _footstepSoundConfigs:
   - SurfaceLayer:
       serializedVersion: 2
       m_Bits: 4294967295
-    CueName: FootStep
+    CueName: SE_Enemy_Footsteps
   _footstepRayOffset: {x: 0, y: 0.2, z: 0}
   _footstepRayDistance: 1.5
   _footstepInterval: 0.5
@@ -404,6 +408,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyStateFacade
   _viewAngleDegrees: 60
   _sightRange: 15
+  _lookAroundRotationSpeed: 60
 --- !u!114 &-117008544252888282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -606,6 +611,84 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3731371427858582317}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2271819511043797233
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7271014143788975582}
+  - component: {fileID: 4196256280448774612}
+  - component: {fileID: 7799542667074616855}
+  m_Layer: 8
+  m_Name: AttackAlertFirst
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7271014143788975582
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2271819511043797233}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3731371427858582317}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4196256280448774612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2271819511043797233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 1
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 1
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: SE_Enemy_Infantry_Alert_First
+  _cueSheet: CueSheet_0
+--- !u!114 &7799542667074616855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2271819511043797233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
 --- !u!1 &4337820504299893940
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,6 +828,84 @@ MonoBehaviour:
   m_FadeFactor: 0.3
   version: 1
   m_DecalLayerMask: 1
+--- !u!1 &6902873449469318415
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3735015655962321325}
+  - component: {fileID: 4365630377267040066}
+  - component: {fileID: 2982125588937624228}
+  m_Layer: 8
+  m_Name: AttackAlertSecond
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3735015655962321325
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6902873449469318415}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3731371427858582317}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4365630377267040066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6902873449469318415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 1
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 1
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: SE_Enemy_Infantry_Alert_Second
+  _cueSheet: CueSheet_0
+--- !u!114 &2982125588937624228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6902873449469318415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
 --- !u!1 &7607462969056446081
 GameObject:
   m_ObjectHideFlags: 0
@@ -809,8 +970,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: RifleShoot_2
-  _cueSheet: GunSound
+  _cueName: SE_Enemy_Infantry_Attack
+  _cueSheet: CueSheet_0
 --- !u!114 &4554744431032350602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1009,8 +1170,8 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: FootStep
-  _cueSheet: BattleSE
+  _cueName: SE_Enemy_Footsteps
+  _cueSheet: CueSheet_0
 --- !u!114 &733036131092522325
 MonoBehaviour:
   m_ObjectHideFlags: 0

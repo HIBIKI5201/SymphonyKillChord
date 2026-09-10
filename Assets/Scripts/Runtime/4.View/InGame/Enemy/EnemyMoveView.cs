@@ -228,6 +228,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("敵攻撃SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
         private SoundEffectSource _attackSoundSource;
 
+        [SerializeField, Tooltip("攻撃予測1回目（2拍前）SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
+        private SoundEffectSource _attackAlertFirstSoundSource;
+
+        [SerializeField, Tooltip("攻撃予測2回目（1拍前）SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
+        private SoundEffectSource _attackAlertSecondSoundSource;
+
         [SerializeField, Tooltip("攻撃ヒット時に再生するエフェクトPrefab。")]
         private ParticleSystem _attackHitEffectPrefab;
 
@@ -499,13 +505,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
             StopMoving();
             StopRotating();
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            PlaySound(_attackAlertSecondSoundSource, null);
         }
         /// <summary>
         ///     攻撃の2拍前に呼び出される処理。
         /// </summary>
         private void On2BeatBefore()
         {
-
+            PlaySound(_attackAlertFirstSoundSource, null);
         }
 
         /// <summary>

@@ -139,11 +139,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private ShellReservationUsecase _reservationUsecase;
         private ShellAttackSpecAsset _loadedAttackData;
         private EnemyMusicSpecAsset _loadedMusicData;
-        /// <summary> 爆発予告デカールの進捗を0から1へ変化させる区間の長さ（拍）。 </summary>
-        private const double DETONATE_LEAD_BEAT_COUNT = 2d;
 
         /// <summary>
         ///     予約済みの爆発時刻までの残り時間から、0〜1の接近進捗を算出します。
+        ///     区間の長さ（拍）はShellMusicConstants.DETONATE_LEAD_BEAT_COUNTを使用し、
+        ///     着弾予告SEの再生タイミング（ShellReservationUsecase側）と同じ値で揃える。
         /// </summary>
         /// <returns> 0〜1の進捗。予約が無い場合や算出できない場合は0。 </returns>
         private float GetDetonateApproach()
@@ -161,7 +161,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             return musicSyncState.GetNormalizedApproach(
                 _reservationUsecase.DetonateExecutionTime,
-                DETONATE_LEAD_BEAT_COUNT);
+                ShellMusicConstants.DETONATE_LEAD_BEAT_COUNT);
         }
 
         /// <summary>
