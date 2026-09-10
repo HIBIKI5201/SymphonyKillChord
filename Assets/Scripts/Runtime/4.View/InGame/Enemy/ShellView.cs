@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Character;
+using KillChord.Runtime.View.Persistent.Music;
 using System;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -88,6 +89,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             // TODO 爆発エフェクトなど
             _systemView?.PlayAt(transform.position);
+            _explosionSoundSource?.Play();
             _dedonateCallback?.Invoke();
         }
 
@@ -99,6 +101,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             int hits = Physics.OverlapSphereNonAlloc(transform.position, _shellSpecPresenter.ExplosionRadius, _overlapResults, _damageLayer);
             return hits > 0;
+        }
+
+        /// <summary>
+        ///     着弾予告デカールの変化開始タイミングで再生するSEを鳴らす。
+        /// </summary>
+        public void PlayAreaWarning()
+        {
+            _areaWarningSoundSource?.Play();
         }
         /// <summary>
         ///     爆発までの接近進捗をデカールのシェーダープロパティへ適用する。
@@ -129,6 +139,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private LayerMask _damageLayer;
         [SerializeField, Tooltip("爆発範囲表示用")]
         private DecalProjector _indicator;
+        [SerializeField, Tooltip("着弾（爆発）時に再生するSE用Source。")]
+        private SoundEffectSource _explosionSoundSource;
+        [SerializeField, Tooltip("着弾予告デカール表示時に再生するSE用Source。")]
+        private SoundEffectSource _areaWarningSoundSource;
 
         /// <summary>
         ///     デカールの接近進捗を初期値へ戻す。
