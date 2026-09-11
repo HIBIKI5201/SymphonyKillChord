@@ -1,0 +1,2508 @@
+diff --git a/Assets/Level/BehaviorGraphs/EnemyAIGraph.asset b/Assets/Level/BehaviorGraphs/EnemyAIGraph.asset
+index f94ff08ec..7a9669f11 100644
+--- a/Assets/Level/BehaviorGraphs/EnemyAIGraph.asset
++++ b/Assets/Level/BehaviorGraphs/EnemyAIGraph.asset
+@@ -95,7 +95,10 @@ MonoBehaviour:
+   - rid: 5112082980088054430
+   - rid: 5112082995642630437
+   - rid: 5112082995642630672
+-  m_VersionTimestamp: 639231309104704045
++  - rid: 8941665139880624409
++  - rid: 8941665139880624410
++  - rid: 8941665139880624871
++  m_VersionTimestamp: 639240584775988346
+   m_SerializedVersion: 2
+   m_DebugInfo: {fileID: 6394660027214620352}
+   m_RuntimeGraph: {fileID: 4520507370308768518}
+@@ -239,6 +242,22 @@ MonoBehaviour:
+       Tooltip: 
+     NamedChildren: []
+     IsPlaceholder: 0
++  - Name: WaitForDiscovery
++    Story: "\u30D7\u30EC\u30A4\u30E4\u30FC\u3092\u767A\u898B\u3059\u308B\u307E\u3067\u5F85\u6A5F\u3059\u308B
++      [State]"
++    RuntimeTypeString: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action.WaitForDiscoveryAction,
++      KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++    RuntimeTypeID:
++      m_Value0: 4485786063967571069
++      m_Value1: 8101797940477762207
++    Variables:
++    - Name: State
++      Type:
++        m_SerializableType: KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade,
++          KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++      Tooltip: 
++    NamedChildren: []
++    IsPlaceholder: 0
+   m_Blackboards: []
+   m_MainBlackboardAuthoringAsset: {fileID: 3023340878292519551}
+   m_CommandBuffer:
+@@ -284,7 +303,7 @@ MonoBehaviour:
+     - rid: 5112082949080088926
+       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+-        Position: {x: 458.27, y: 602.3622}
++        Position: {x: 978.3779, y: 617.6894}
+         ID:
+           m_Value0: 2617725138129330875
+           m_Value1: 6836317177621401305
+@@ -417,11 +436,12 @@ MonoBehaviour:
+           rid: 5112082976799719568
+         m_Connections:
+         - rid: 5112082980088054022
++        - rid: 8941665139880624412
+         - rid: 5112082979707945497
+     - rid: 5112082976799719723
+       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+-        Position: {x: 458.27, y: 692.3622}
++        Position: {x: 978.3779, y: 707.6894}
+         ID:
+           m_Value0: 4204141831513638362
+           m_Value1: 1607003898239000803
+@@ -518,7 +538,7 @@ MonoBehaviour:
+     - rid: 5112082976799719790
+       type: {class: ConditionalGuardNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+-        Position: {x: 128.26999, y: 492.36215}
++        Position: {x: 648.3779, y: 507.68958}
+         ID:
+           m_Value0: 8028446526194526458
+           m_Value1: 5878117330673317957
+@@ -692,7 +712,7 @@ MonoBehaviour:
+     - rid: 5112082976799720108
+       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+-        Position: {x: 128.26999, y: 658.3622}
++        Position: {x: 648.3779, y: 673.6894}
+         ID:
+           m_Value0: 17285828235500123636
+           m_Value1: 8760651140244970739
+@@ -779,7 +799,7 @@ MonoBehaviour:
+     - rid: 5112082976799720239
+       type: {class: ConditionalGuardNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+-        Position: {x: 458.27, y: 492.36215}
++        Position: {x: 978.3779, y: 507.68958}
+         ID:
+           m_Value0: 12863759775462633926
+           m_Value1: 7249811654929659861
+@@ -941,7 +961,7 @@ MonoBehaviour:
+     - rid: 5112082979707945496
+       type: {class: ObserverAbortNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+-        Position: {x: 263.77, y: 202.36215}
++        Position: {x: 783.8779, y: 217.6895}
+         ID:
+           m_Value0: 8059377522235996716
+           m_Value1: 13645910012074944492
+@@ -1146,7 +1166,7 @@ MonoBehaviour:
+     - rid: 5112082980088054346
+       type: {class: RepeatNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+-        Position: {x: 263.77, y: 312.36215}
++        Position: {x: 783.8779, y: 327.68967}
+         ID:
+           m_Value0: 15834078492322473785
+           m_Value1: 2524649365557812799
+@@ -1191,7 +1211,7 @@ MonoBehaviour:
+     - rid: 5112082980088054430
+       type: {class: CompositeNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+-        Position: {x: 263.77, y: 402.36215}
++        Position: {x: 783.8779, y: 417.68967}
+         ID:
+           m_Value0: 9459176262264402063
+           m_Value1: 12671750493191957905
+@@ -1286,7 +1306,7 @@ MonoBehaviour:
+         LocalValue:
+           rid: 5112082995642630441
+         LinkedVariable:
+-          rid: 5112082995642630487
++          rid: 8941665139880624423
+     - rid: 5112082995642630441
+       type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+@@ -1295,16 +1315,6 @@ MonoBehaviour:
+           m_Value1: 0
+         Name: 
+         m_Value: {fileID: 0}
+-    - rid: 5112082995642630487
+-      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+-      data:
+-        ID:
+-          m_Value0: 204066741708314993
+-          m_Value1: 254365869257419029
+-        Name: EnemyStateFacade
+-        IsExposed: 1
+-        m_IsShared: 0
+-        m_Value: {fileID: 0}
+     - rid: 5112082995642630566
+       type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+@@ -1315,7 +1325,7 @@ MonoBehaviour:
+         LocalValue:
+           rid: 5112082995642630567
+         LinkedVariable:
+-          rid: 5112082995642630568
++          rid: 8941665139880624424
+     - rid: 5112082995642630567
+       type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+@@ -1324,16 +1334,6 @@ MonoBehaviour:
+           m_Value1: 0
+         Name: 
+         m_Value: {fileID: 0}
+-    - rid: 5112082995642630568
+-      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+-      data:
+-        ID:
+-          m_Value0: 1618065121561699408
+-          m_Value1: 7913689795733594968
+-        Name: EnemyBattleAIFacade
+-        IsExposed: 1
+-        m_IsShared: 0
+-        m_Value: {fileID: 0}
+     - rid: 5112082995642630672
+       type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+@@ -1384,7 +1384,7 @@ MonoBehaviour:
+         LocalValue:
+           rid: 5112082995642630677
+         LinkedVariable:
+-          rid: 5112082995642630764
++          rid: 8941665139880624425
+     - rid: 5112082995642630676
+       type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+       data:
+@@ -1395,7 +1395,7 @@ MonoBehaviour:
+         LocalValue:
+           rid: 5112082995642630678
+         LinkedVariable:
+-          rid: 5112082995642630791
++          rid: 8941665139880624423
+     - rid: 5112082995642630677
+       type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+@@ -1412,7 +1412,133 @@ MonoBehaviour:
+           m_Value1: 0
+         Name: 
+         m_Value: {fileID: 0}
+-    - rid: 5112082995642630764
++    - rid: 8941665139880624409
++      type: {class: ConditionalGuardNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
++      data:
++        Position: {x: 212.55458, y: 221.67088}
++        ID:
++          m_Value0: 7083771075200678057
++          m_Value1: 4343693152445170592
++        Parents: []
++        PortModels:
++        - rid: 8941665139880624412
++        - rid: 8941665139880624413
++        NodeType:
++          m_SerializableType: Unity.Behavior.ConditionalGuardModifier, Unity.Behavior,
++            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++        NodeTypeID:
++          m_Value0: 3048858705937822632
++          m_Value1: 3282115049331433116
++        m_FieldValues: []
++        m_Mode: 1
++        <ConditionModels>k__BackingField:
++        - rid: 8941665139880624656
++        <RequiresAllConditionsTrue>k__BackingField: 0
++        <ShouldTruncateNodeUI>k__BackingField: 0
++        <ObserverType>k__BackingField: 0
++    - rid: 8941665139880624410
++      type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
++      data:
++        Position: {x: 212.58485, y: 315.31552}
++        ID:
++          m_Value0: 4970536816680678755
++          m_Value1: 14137395200745831753
++        Parents: []
++        PortModels:
++        - rid: 8941665139880624415
++        - rid: 8941665139880624416
++        NodeType:
++          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action.StopMovingAction,
++            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++        NodeTypeID:
++          m_Value0: 8589369632881435506
++          m_Value1: 5096057573258365483
++        m_FieldValues:
++        - rid: 8941665139880624417
++        - rid: 8941665139880624418
++    - rid: 8941665139880624412
++      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
++      data:
++        m_Name: InputPort
++        m_PortDataFlowType: 0
++        m_IsFloating: 0
++        m_NodeModel:
++          rid: 8941665139880624409
++        m_Connections:
++        - rid: 5112082976799719570
++    - rid: 8941665139880624413
++      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
++      data:
++        m_Name: OutputPort
++        m_PortDataFlowType: 1
++        m_IsFloating: 0
++        m_NodeModel:
++          rid: 8941665139880624409
++        m_Connections:
++        - rid: 8941665139880624415
++    - rid: 8941665139880624415
++      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
++      data:
++        m_Name: InputPort
++        m_PortDataFlowType: 0
++        m_IsFloating: 0
++        m_NodeModel:
++          rid: 8941665139880624410
++        m_Connections:
++        - rid: 8941665139880624413
++    - rid: 8941665139880624416
++      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
++      data:
++        m_Name: OutputPort
++        m_PortDataFlowType: 1
++        m_IsFloating: 0
++        m_NodeModel:
++          rid: 8941665139880624410
++        m_Connections:
++        - rid: 8941665139880624872
++    - rid: 8941665139880624417
++      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
++      data:
++        FieldName: Movement
++        Type:
++          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyMovementAIFacade,
++            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++        LocalValue:
++          rid: 8941665139880624428
++        LinkedVariable:
++          rid: 8941665139880624425
++    - rid: 8941665139880624418
++      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
++      data:
++        FieldName: State
++        Type:
++          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade,
++            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++        LocalValue:
++          rid: 8941665139880624429
++        LinkedVariable:
++          rid: 8941665139880624423
++    - rid: 8941665139880624423
++      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
++      data:
++        ID:
++          m_Value0: 204066741708314993
++          m_Value1: 254365869257419029
++        Name: EnemyStateFacade
++        IsExposed: 1
++        m_IsShared: 0
++        m_Value: {fileID: 0}
++    - rid: 8941665139880624424
++      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
++      data:
++        ID:
++          m_Value0: 1618065121561699408
++          m_Value1: 7913689795733594968
++        Name: EnemyBattleAIFacade
++        IsExposed: 1
++        m_IsShared: 0
++        m_Value: {fileID: 0}
++    - rid: 8941665139880624425
+       type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
+       data:
+         ID:
+@@ -1422,15 +1548,132 @@ MonoBehaviour:
+         IsExposed: 1
+         m_IsShared: 0
+         m_Value: {fileID: 0}
+-    - rid: 5112082995642630791
+-      type: {class: 'TypedVariableModel`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
++    - rid: 8941665139880624428
++      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: {fileID: 0}
++    - rid: 8941665139880624429
++      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: {fileID: 0}
++    - rid: 8941665139880624656
++      type: {class: ConditionModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
++      data:
++        ConditionType:
++          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition.IsDiscoveredCondition,
++            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++        ConditionTypeID:
++          m_Value0: 9169550817393506483
++          m_Value1: 10523496045777301926
++        NodeModel:
++          rid: 8941665139880624409
++        m_FieldValues:
++        - rid: 8941665139880624657
++        - rid: 8941665139880624658
++        OperatorFieldModel:
++          rid: -2
++    - rid: 8941665139880624657
++      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
++      data:
++        FieldName: Bool
++        Type:
++          m_SerializableType: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
++            PublicKeyToken=b77a5c561934e089
++        LocalValue:
++          rid: 8941665139880624659
++        LinkedVariable:
++          rid: -2
++    - rid: 8941665139880624658
++      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
++      data:
++        FieldName: State
++        Type:
++          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade,
++            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++        LocalValue:
++          rid: 8941665139880624660
++        LinkedVariable:
++          rid: 8941665139880624423
++    - rid: 8941665139880624659
++      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: 0
++    - rid: 8941665139880624660
++      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: {fileID: 0}
++    - rid: 8941665139880624871
++      type: {class: ActionNodeModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
++      data:
++        Position: {x: 212.79164, y: 436.83655}
+         ID:
+-          m_Value0: 204066741708314993
+-          m_Value1: 254365869257419029
+-        Name: EnemyStateFacade
+-        IsExposed: 1
+-        m_IsShared: 0
++          m_Value0: 9381633296552663459
++          m_Value1: 8378971844413169785
++        Parents: []
++        PortModels:
++        - rid: 8941665139880624872
++        - rid: 8941665139880624873
++        NodeType:
++          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action.WaitForDiscoveryAction,
++            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++        NodeTypeID:
++          m_Value0: 4485786063967571069
++          m_Value1: 8101797940477762207
++        m_FieldValues:
++        - rid: 8941665139880624874
++    - rid: 8941665139880624872
++      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
++      data:
++        m_Name: InputPort
++        m_PortDataFlowType: 0
++        m_IsFloating: 0
++        m_NodeModel:
++          rid: 8941665139880624871
++        m_Connections:
++        - rid: 8941665139880624416
++    - rid: 8941665139880624873
++      type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
++      data:
++        m_Name: OutputPort
++        m_PortDataFlowType: 1
++        m_IsFloating: 0
++        m_NodeModel:
++          rid: 8941665139880624871
++        m_Connections: []
++    - rid: 8941665139880624874
++      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
++      data:
++        FieldName: State
++        Type:
++          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade,
++            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
++        LocalValue:
++          rid: 8941665139880624875
++        LinkedVariable:
++          rid: 8941665139880624423
++    - rid: 8941665139880624875
++      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
+         m_Value: {fileID: 0}
+ --- !u!114 &3023340878292519551
+ MonoBehaviour:
+@@ -1531,7 +1774,131 @@ MonoBehaviour:
+     RefIds:
+     - rid: -2
+       type: {class: , ns: , asm: }
+-    - rid: 277665705189965853
++    - rid: 5112082935029432438
++      type: {class: BehaviorGraphModule, ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        AuthoringAssetID:
++          m_Value0: 15298916761841218890
++          m_Value1: 10423536786047875179
++        m_DebugInfo: {fileID: 6394660027214620352}
++        BlackboardReference:
++          rid: 5112082935029432439
++        BlackboardGroupReferences: []
++        Root:
++          rid: 8941665139880625048
++        m_VersionTimestamp: 639240584775988346
++    - rid: 5112082935029432439
++      type: {class: BlackboardReference, ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        m_Blackboard:
++          rid: 5112082935029432441
++        m_Source: {fileID: -1687900579865694322}
++    - rid: 5112082935029432441
++      type: {class: Blackboard, ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        m_Variables:
++        - rid: 7260318751720734948
++        - rid: 7260318751720734949
++        - rid: 7260318751720734950
++        - rid: 7260318751720734951
++        - rid: 7260318751720734952
++    - rid: 7260318751720734948
++      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 1
++          m_Value1: 0
++        Name: Self
++        m_Value: {fileID: 0}
++    - rid: 7260318751720734949
++      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 5211698399387829366
++          m_Value1: 6142912991580524478
++        Name: EnemyMovementAIFacade
++        m_Value: {fileID: 0}
++    - rid: 7260318751720734950
++      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 1618065121561699408
++          m_Value1: 7913689795733594968
++        Name: EnemyBattleAIFacade
++        m_Value: {fileID: 0}
++    - rid: 7260318751720734951
++      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 204066741708314993
++          m_Value1: 254365869257419029
++        Name: EnemyStateFacade
++        m_Value: {fileID: 0}
++    - rid: 7260318751720734952
++      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 17569852969880927499
++          m_Value1: 10859535363759142801
++        Name: EnemySharedFacade
++        m_Value: {fileID: 0}
++    - rid: 8941665139880624444
++      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: 1
++    - rid: 8941665139880624446
++      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: 0
++    - rid: 8941665139880624455
++      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: 1
++    - rid: 8941665139880624456
++      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: 1
++    - rid: 8941665139880624457
++      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: 0
++    - rid: 8941665139880624460
++      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: 0
++    - rid: 8941665139880625008
++      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        GUID:
++          m_Value0: 0
++          m_Value1: 0
++        Name: 
++        m_Value: 0
++    - rid: 8941665139880625048
+       type: {class: Start, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1542,10 +1909,10 @@ MonoBehaviour:
+         m_Parent:
+           rid: -2
+         m_Child:
+-          rid: 277665705189965854
++          rid: 8941665139880625049
+         Repeat: 1
+         AllowMultipleRepeatsPerTick: 0
+-    - rid: 277665705189965854
++    - rid: 8941665139880625049
+       type: {class: SelectorComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1554,14 +1921,15 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965853
++          rid: 8941665139880625048
+         m_Children:
+-        - rid: 277665705189965855
+-        - rid: 277665705189965856
++        - rid: 8941665139880625050
++        - rid: 8941665139880625051
++        - rid: 8941665139880625052
+         m_RegisteredObservers:
+         - Observer:
+-            rid: 277665705189965856
+-    - rid: 277665705189965855
++            rid: 8941665139880625052
++    - rid: 8941665139880625050
+       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1570,14 +1938,30 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965854
++          rid: 8941665139880625049
+         m_Child:
+-          rid: 277665705189965857
++          rid: 8941665139880625053
+         m_Conditions:
+-        - rid: 277665705189965858
++        - rid: 8941665139880625054
+         m_RequiresAllConditions: 0
+         m_ObserverType: 0
+-    - rid: 277665705189965856
++    - rid: 8941665139880625051
++      type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        ID:
++          m_Value0: 7083771075200678057
++          m_Value1: 4343693152445170592
++        Graph:
++          rid: 5112082935029432438
++        m_Parent:
++          rid: 8941665139880625049
++        m_Child:
++          rid: 8941665139880625055
++        m_Conditions:
++        - rid: 8941665139880625056
++        m_RequiresAllConditions: 0
++        m_ObserverType: 0
++    - rid: 8941665139880625052
+       type: {class: ObserverAbortModifier, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1586,14 +1970,14 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965854
++          rid: 8941665139880625049
+         m_Child:
+-          rid: 277665705189965859
++          rid: 8941665139880625057
+         m_Conditions:
+-        - rid: 277665705189965860
++        - rid: 8941665139880625058
+         m_RequiresAllConditions: 0
+         m_AbortTarget: 1
+-    - rid: 277665705189965857
++    - rid: 8941665139880625053
+       type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1602,12 +1986,12 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965855
++          rid: 8941665139880625050
+         m_Children:
+-        - rid: 277665705189965861
+-        - rid: 277665705189965862
++        - rid: 8941665139880625059
++        - rid: 8941665139880625060
+         m_RegisteredObservers: []
+-    - rid: 277665705189965858
++    - rid: 8941665139880625054
+       type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
+       data:
+         Graph:
+@@ -1615,8 +1999,31 @@ MonoBehaviour:
+         State:
+           rid: 7260318751720734951
+         Bool:
+-          rid: 277665705189965863
+-    - rid: 277665705189965859
++          rid: 8941665139880624444
++    - rid: 8941665139880625055
++      type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
++      data:
++        ID:
++          m_Value0: 4970536816680678755
++          m_Value1: 14137395200745831753
++        Graph:
++          rid: 5112082935029432438
++        m_Parent:
++          rid: 8941665139880625051
++        m_Children:
++        - rid: 8941665139880625061
++        - rid: 8941665139880625062
++        m_RegisteredObservers: []
++    - rid: 8941665139880625056
++      type: {class: IsDiscoveredCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
++      data:
++        Graph:
++          rid: 5112082935029432438
++        State:
++          rid: 7260318751720734951
++        Bool:
++          rid: 8941665139880625008
++    - rid: 8941665139880625057
+       type: {class: RepeatUntilFailModifier, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1625,11 +2032,11 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965856
++          rid: 8941665139880625052
+         m_Child:
+-          rid: 277665705189965864
++          rid: 8941665139880625063
+         m_AllowMultipleRepeatsPerTick: 0
+-    - rid: 277665705189965860
++    - rid: 8941665139880625058
+       type: {class: IsStunnedCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
+       data:
+         Graph:
+@@ -1637,8 +2044,8 @@ MonoBehaviour:
+         State:
+           rid: 7260318751720734951
+         Bool:
+-          rid: 277665705189965865
+-    - rid: 277665705189965861
++          rid: 8941665139880624446
++    - rid: 8941665139880625059
+       type: {class: StopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
+       data:
+         ID:
+@@ -1647,12 +2054,12 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965857
++          rid: 8941665139880625053
+         Movement:
+           rid: 7260318751720734949
+         State:
+           rid: 7260318751720734951
+-    - rid: 277665705189965862
++    - rid: 8941665139880625060
+       type: {class: GetStunnedAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
+       data:
+         ID:
+@@ -1661,20 +2068,40 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965857
++          rid: 8941665139880625053
+         State:
+           rid: 7260318751720734951
+         Battle:
+           rid: 7260318751720734950
+-    - rid: 277665705189965863
+-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
++        _postRecoveryDelaySeconds: 0.3
++        _postRecoveryDelayVariance: 0.3
++    - rid: 8941665139880625061
++      type: {class: StopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
+       data:
+-        GUID:
+-          m_Value0: 0
+-          m_Value1: 0
+-        Name: 
+-        m_Value: 1
+-    - rid: 277665705189965864
++        ID:
++          m_Value0: 4970536816680678755
++          m_Value1: 14137395200745831753
++        Graph:
++          rid: 5112082935029432438
++        m_Parent:
++          rid: 8941665139880625055
++        Movement:
++          rid: 7260318751720734949
++        State:
++          rid: 7260318751720734951
++    - rid: 8941665139880625062
++      type: {class: WaitForDiscoveryAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
++      data:
++        ID:
++          m_Value0: 9381633296552663459
++          m_Value1: 8378971844413169785
++        Graph:
++          rid: 5112082935029432438
++        m_Parent:
++          rid: 8941665139880625055
++        State:
++          rid: 7260318751720734951
++    - rid: 8941665139880625063
+       type: {class: SelectorComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1683,20 +2110,12 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965859
++          rid: 8941665139880625057
+         m_Children:
+-        - rid: 277665705189965866
+-        - rid: 277665705189965867
++        - rid: 8941665139880625064
++        - rid: 8941665139880625065
+         m_RegisteredObservers: []
+-    - rid: 277665705189965865
+-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 0
+-          m_Value1: 0
+-        Name: 
+-        m_Value: 0
+-    - rid: 277665705189965866
++    - rid: 8941665139880625064
+       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1705,16 +2124,16 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965864
++          rid: 8941665139880625063
+         m_Child:
+-          rid: 277665705189965868
++          rid: 8941665139880625066
+         m_Conditions:
+-        - rid: 277665705189965869
+-        - rid: 277665705189965870
+-        - rid: 277665705189965871
++        - rid: 8941665139880625067
++        - rid: 8941665139880625068
++        - rid: 8941665139880625069
+         m_RequiresAllConditions: 1
+         m_ObserverType: 0
+-    - rid: 277665705189965867
++    - rid: 8941665139880625065
+       type: {class: ConditionalGuardModifier, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1723,14 +2142,14 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965864
++          rid: 8941665139880625063
+         m_Child:
+-          rid: 277665705189965872
++          rid: 8941665139880625070
+         m_Conditions:
+-        - rid: 277665705189965873
++        - rid: 8941665139880625071
+         m_RequiresAllConditions: 1
+         m_ObserverType: 0
+-    - rid: 277665705189965868
++    - rid: 8941665139880625066
+       type: {class: AttackTargetAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
+       data:
+         ID:
+@@ -1739,12 +2158,12 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965866
++          rid: 8941665139880625064
+         Battle:
+           rid: 7260318751720734950
+         State:
+           rid: 7260318751720734951
+-    - rid: 277665705189965869
++    - rid: 8941665139880625067
+       type: {class: IsTargetInAttackRangeCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
+       data:
+         Graph:
+@@ -1752,8 +2171,8 @@ MonoBehaviour:
+         State:
+           rid: 7260318751720734951
+         Bool:
+-          rid: 277665705189965874
+-    - rid: 277665705189965870
++          rid: 8941665139880624455
++    - rid: 8941665139880625068
+       type: {class: IsAimSightClearCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
+       data:
+         Graph:
+@@ -1761,8 +2180,8 @@ MonoBehaviour:
+         State:
+           rid: 7260318751720734951
+         Bool:
+-          rid: 277665705189965875
+-    - rid: 277665705189965871
++          rid: 8941665139880624456
++    - rid: 8941665139880625069
+       type: {class: IsAttackingCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
+       data:
+         Graph:
+@@ -1770,8 +2189,8 @@ MonoBehaviour:
+         State:
+           rid: 7260318751720734951
+         Bool:
+-          rid: 277665705189965876
+-    - rid: 277665705189965872
++          rid: 8941665139880624457
++    - rid: 8941665139880625070
+       type: {class: SequenceComposite, ns: Unity.Behavior, asm: Unity.Behavior}
+       data:
+         ID:
+@@ -1780,12 +2199,12 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965867
++          rid: 8941665139880625065
+         m_Children:
+-        - rid: 277665705189965877
+-        - rid: 277665705189965878
++        - rid: 8941665139880625072
++        - rid: 8941665139880625073
+         m_RegisteredObservers: []
+-    - rid: 277665705189965873
++    - rid: 8941665139880625071
+       type: {class: IsAttackingCondition, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition, asm: KillChord.View}
+       data:
+         Graph:
+@@ -1793,32 +2212,8 @@ MonoBehaviour:
+         State:
+           rid: 7260318751720734951
+         Bool:
+-          rid: 277665705189965879
+-    - rid: 277665705189965874
+-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 0
+-          m_Value1: 0
+-        Name: 
+-        m_Value: 1
+-    - rid: 277665705189965875
+-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 0
+-          m_Value1: 0
+-        Name: 
+-        m_Value: 1
+-    - rid: 277665705189965876
+-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 0
+-          m_Value1: 0
+-        Name: 
+-        m_Value: 0
+-    - rid: 277665705189965877
++          rid: 8941665139880624460
++    - rid: 8941665139880625072
+       type: {class: MoveToAttackAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
+       data:
+         ID:
+@@ -1827,12 +2222,12 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965872
++          rid: 8941665139880625070
+         Movement:
+           rid: 7260318751720734949
+         State:
+           rid: 7260318751720734951
+-    - rid: 277665705189965878
++    - rid: 8941665139880625073
+       type: {class: StopMovingAction, ns: KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action, asm: KillChord.View}
+       data:
+         ID:
+@@ -1841,87 +2236,11 @@ MonoBehaviour:
+         Graph:
+           rid: 5112082935029432438
+         m_Parent:
+-          rid: 277665705189965872
++          rid: 8941665139880625070
+         Movement:
+           rid: 7260318751720734949
+         State:
+           rid: 7260318751720734951
+-    - rid: 277665705189965879
+-      type: {class: 'BlackboardVariable`1[[System.Boolean, mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 0
+-          m_Value1: 0
+-        Name: 
+-        m_Value: 0
+-    - rid: 5112082935029432438
+-      type: {class: BehaviorGraphModule, ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        AuthoringAssetID:
+-          m_Value0: 15298916761841218890
+-          m_Value1: 10423536786047875179
+-        m_DebugInfo: {fileID: 6394660027214620352}
+-        BlackboardReference:
+-          rid: 5112082935029432439
+-        BlackboardGroupReferences: []
+-        Root:
+-          rid: 277665705189965853
+-        m_VersionTimestamp: 639231309104704045
+-    - rid: 5112082935029432439
+-      type: {class: BlackboardReference, ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        m_Blackboard:
+-          rid: 5112082935029432441
+-        m_Source: {fileID: -1687900579865694322}
+-    - rid: 5112082935029432441
+-      type: {class: Blackboard, ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        m_Variables:
+-        - rid: 7260318751720734948
+-        - rid: 7260318751720734949
+-        - rid: 7260318751720734950
+-        - rid: 7260318751720734951
+-        - rid: 7260318751720734952
+-    - rid: 7260318751720734948
+-      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 1
+-          m_Value1: 0
+-        Name: Self
+-        m_Value: {fileID: 0}
+-    - rid: 7260318751720734949
+-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyMovementAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 5211698399387829366
+-          m_Value1: 6142912991580524478
+-        Name: EnemyMovementAIFacade
+-        m_Value: {fileID: 0}
+-    - rid: 7260318751720734950
+-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyBattleAIFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 1618065121561699408
+-          m_Value1: 7913689795733594968
+-        Name: EnemyBattleAIFacade
+-        m_Value: {fileID: 0}
+-    - rid: 7260318751720734951
+-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 204066741708314993
+-          m_Value1: 254365869257419029
+-        Name: EnemyStateFacade
+-        m_Value: {fileID: 0}
+-    - rid: 7260318751720734952
+-      type: {class: 'BlackboardVariable`1[[KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemySharedFacade, KillChord.View]]', ns: Unity.Behavior, asm: Unity.Behavior}
+-      data:
+-        GUID:
+-          m_Value0: 17569852969880927499
+-          m_Value1: 10859535363759142801
+-        Name: EnemySharedFacade
+-        m_Value: {fileID: 0}
+ --- !u!114 &6394660027214620352
+ MonoBehaviour:
+   m_ObjectHideFlags: 0
+diff --git a/Assets/Level/Prefabs/Master/InGame/Character/EnemyArtillery.prefab b/Assets/Level/Prefabs/Master/InGame/Character/EnemyArtillery.prefab
+index 9f6fa4403..416bd425e 100644
+--- a/Assets/Level/Prefabs/Master/InGame/Character/EnemyArtillery.prefab
++++ b/Assets/Level/Prefabs/Master/InGame/Character/EnemyArtillery.prefab
+@@ -25,6 +25,7 @@ GameObject:
+   - component: {fileID: 3385280616353316531}
+   - component: {fileID: 2793673215862482267}
+   - component: {fileID: -8188648159191096068}
++  - component: {fileID: 735825971126831396}
+   m_Layer: 8
+   m_Name: EnemyArtillery
+   m_TagString: Untagged
+@@ -151,6 +152,7 @@ MonoBehaviour:
+   _healthView: {fileID: -5582845147010298855}
+   _raycastView: {fileID: 8900643656970599263}
+   _attackPositionSearchView: {fileID: -1587367200165867470}
++  _obstacleSearchView: {fileID: 735825971126831396}
+   _enemyMovementAIFacade: {fileID: -1108031046539433984}
+   _enemyBattleAIFacade: {fileID: -7434688505541404117}
+   _enemyStateFacade: {fileID: 3390705430803442452}
+@@ -351,6 +353,13 @@ MonoBehaviour:
+   _deathEffectDuration: 1
+   _deathSwampSinkDuration: 3
+   _targetTransform: {fileID: 125480086020897926}
++  _postAttackStayWeight: 0.5
++  _postAttackRegroupWeight: 0.25
++  _postAttackObstacleWeight: 0.25
++  _regroupDistanceMin: 2
++  _regroupDistanceMax: 3
++  _obstacleApproachRatio: 0.3
++  _overrideArrivalThreshold: 0.5
+   _shellSpawner: {fileID: -2597676450090958460}
+ --- !u!114 &6024709665745219317
+ MonoBehaviour:
+@@ -380,6 +389,8 @@ MonoBehaviour:
+   _attackAttackReservedAnimation: Enemy_AttackReserved
+   _weaponItemView: {fileID: -8188648159191096068}
+   _damageEffectTransform: {fileID: 896641383679223216}
++  _speedVarianceMin: 0.9
++  _speedVarianceMax: 1.1
+ --- !u!114 &-5582845147010298855
+ MonoBehaviour:
+   m_ObjectHideFlags: 0
+@@ -450,6 +461,8 @@ MonoBehaviour:
+   m_Script: {fileID: 11500000, guid: 87fe872ba5861de44bc88a6a5d4520b5, type: 3}
+   m_Name: 
+   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyStateFacade
++  _viewAngleDegrees: 60
++  _sightRange: 30
+ --- !u!114 &-1587367200165867470
+ MonoBehaviour:
+   m_ObjectHideFlags: 0
+@@ -464,6 +477,8 @@ MonoBehaviour:
+   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.NearestAttackPositionSearchView
+   _samplingCount: 24
+   _searchInterval: 0.166
++  _angleJitterDegrees: 10
++  _nearOptimalTolerance: 1.15
+   _agent: {fileID: 3385280616353316531}
+   _raycastView: {fileID: 8900643656970599263}
+ --- !u!114 &-2597676450090958460
+@@ -597,6 +612,23 @@ MonoBehaviour:
+   _attackEffect: {fileID: 0}
+   _effectDelaySeconds: 0
+   _effectRenderers: []
++--- !u!114 &735825971126831396
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 1465007639519197220}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: 61d43c8ef9697094da6aa66248af0ed5, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.NearbyObstacleSearchView
++  _searchRadius: 10
++  _obstacleLayers:
++    serializedVersion: 2
++    m_Bits: 64
++  _resultArraySize: 8
+ --- !u!1 &1615154112970335870
+ GameObject:
+   m_ObjectHideFlags: 0
+diff --git a/Assets/Level/Prefabs/Master/InGame/Character/EnemyInfantry.prefab b/Assets/Level/Prefabs/Master/InGame/Character/EnemyInfantry.prefab
+index 30e0f5976..8b6e67cb3 100644
+--- a/Assets/Level/Prefabs/Master/InGame/Character/EnemyInfantry.prefab
++++ b/Assets/Level/Prefabs/Master/InGame/Character/EnemyInfantry.prefab
+@@ -23,6 +23,7 @@ GameObject:
+   - component: {fileID: 3385280616353316531}
+   - component: {fileID: 4632999564934893021}
+   - component: {fileID: 7563075547804833795}
++  - component: {fileID: 8589014418611058041}
+   m_Layer: 8
+   m_Name: EnemyInfantry
+   m_TagString: Untagged
+@@ -92,6 +93,7 @@ MonoBehaviour:
+   _healthView: {fileID: -8573756187886522192}
+   _raycastView: {fileID: 8900643656970599263}
+   _attackPositionSearchView: {fileID: -117008544252888282}
++  _obstacleSearchView: {fileID: 8589014418611058041}
+   _enemyMovementAIFacade: {fileID: -1108031046539433984}
+   _enemyBattleAIFacade: {fileID: -7434688505541404117}
+   _enemyStateFacade: {fileID: 3390705430803442452}
+@@ -292,6 +294,13 @@ MonoBehaviour:
+   _deathEffectDuration: 1
+   _deathSwampSinkDuration: 3
+   _targetTransform: {fileID: 3340112347866897855}
++  _postAttackStayWeight: 0.5
++  _postAttackRegroupWeight: 0.25
++  _postAttackObstacleWeight: 0.25
++  _regroupDistanceMin: 2
++  _regroupDistanceMax: 3
++  _obstacleApproachRatio: 0.3
++  _overrideArrivalThreshold: 0.5
+   _shellSpawner: {fileID: 0}
+ --- !u!114 &6024709665745219317
+ MonoBehaviour:
+@@ -321,6 +330,8 @@ MonoBehaviour:
+   _attackAttackReservedAnimation: Enemy_AttackReserved
+   _weaponItemView: {fileID: 7563075547804833795}
+   _damageEffectTransform: {fileID: 7935486888130287535}
++  _speedVarianceMin: 0.9
++  _speedVarianceMax: 1.1
+ --- !u!114 &-8573756187886522192
+ MonoBehaviour:
+   m_ObjectHideFlags: 0
+@@ -391,6 +402,8 @@ MonoBehaviour:
+   m_Script: {fileID: 11500000, guid: 87fe872ba5861de44bc88a6a5d4520b5, type: 3}
+   m_Name: 
+   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyStateFacade
++  _viewAngleDegrees: 60
++  _sightRange: 15
+ --- !u!114 &-117008544252888282
+ MonoBehaviour:
+   m_ObjectHideFlags: 0
+@@ -405,6 +418,8 @@ MonoBehaviour:
+   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.NearestAttackPositionSearchView
+   _samplingCount: 24
+   _searchInterval: 0.16
++  _angleJitterDegrees: 10
++  _nearOptimalTolerance: 1.15
+   _agent: {fileID: 3385280616353316531}
+   _raycastView: {fileID: 8900643656970599263}
+ --- !u!114 &4514743631212080455
+@@ -543,6 +558,23 @@ MonoBehaviour:
+   _attackEffect: {fileID: 0}
+   _effectDelaySeconds: 0
+   _effectRenderers: []
++--- !u!114 &8589014418611058041
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 1465007639519197220}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: 61d43c8ef9697094da6aa66248af0ed5, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.NearbyObstacleSearchView
++  _searchRadius: 10
++  _obstacleLayers:
++    serializedVersion: 2
++    m_Bits: 64
++  _resultArraySize: 8
+ --- !u!1 &2188654145948044434
+ GameObject:
+   m_ObjectHideFlags: 0
+diff --git a/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorKind.cs b/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorKind.cs
+new file mode 100644
+index 000000000..3f32b3e7e
+--- /dev/null
++++ b/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorKind.cs
+@@ -0,0 +1,15 @@
++namespace KillChord.Runtime.Domain.InGame.Enemy
++{
++    /// <summary>
++    ///     攻撃後に敵が選択する行動の種類。
++    /// </summary>
++    public enum EnemyPostAttackBehaviorKind
++    {
++        /// <summary> その場に留まり再攻撃を狙う。 </summary>
++        Stay,
++        /// <summary> 近くの味方に合流する。 </summary>
++        RegroupWithAlly,
++        /// <summary> 近くの障害物に接近する。 </summary>
++        ApproachObstacle,
++    }
++}
+diff --git a/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorKind.cs.meta b/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorKind.cs.meta
+new file mode 100644
+index 000000000..d4f1db700
+--- /dev/null
++++ b/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorKind.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 8216cbab4d14a7f489df17ed12bf6b99
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorSpec.cs b/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorSpec.cs
+new file mode 100644
+index 000000000..7dc4cf92f
+--- /dev/null
++++ b/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorSpec.cs
+@@ -0,0 +1,72 @@
++using System;
++
++namespace KillChord.Runtime.Domain.InGame.Enemy
++{
++    /// <summary>
++    ///     攻撃後の行動選択に関する能力値。
++    /// </summary>
++    public readonly struct EnemyPostAttackBehaviorSpec
++    {
++        public EnemyPostAttackBehaviorSpec(
++            float stayWeight,
++            float regroupWeight,
++            float obstacleApproachWeight,
++            float regroupDistanceMin,
++            float regroupDistanceMax,
++            float obstacleApproachRatio,
++            float arrivalThreshold)
++        {
++            if (stayWeight < 0f)
++            {
++                throw new ArgumentOutOfRangeException(nameof(stayWeight), "重みの値は0より小さい。");
++            }
++            if (regroupWeight < 0f)
++            {
++                throw new ArgumentOutOfRangeException(nameof(regroupWeight), "重みの値は0より小さい。");
++            }
++            if (obstacleApproachWeight < 0f)
++            {
++                throw new ArgumentOutOfRangeException(nameof(obstacleApproachWeight), "重みの値は0より小さい。");
++            }
++            if (regroupDistanceMin < 0f)
++            {
++                throw new ArgumentOutOfRangeException(nameof(regroupDistanceMin), "距離の値は0より小さい。");
++            }
++            if (regroupDistanceMax < regroupDistanceMin)
++            {
++                throw new ArgumentOutOfRangeException(nameof(regroupDistanceMax), "最大距離が最小距離を下回っている。");
++            }
++            if (obstacleApproachRatio < 0f || obstacleApproachRatio > 1f)
++            {
++                throw new ArgumentOutOfRangeException(nameof(obstacleApproachRatio), "接近割合の値は0から1の範囲外。");
++            }
++            if (arrivalThreshold < 0f)
++            {
++                throw new ArgumentOutOfRangeException(nameof(arrivalThreshold), "到達判定距離の値は0より小さい。");
++            }
++
++            StayWeight = stayWeight;
++            RegroupWeight = regroupWeight;
++            ObstacleApproachWeight = obstacleApproachWeight;
++            RegroupDistanceMin = regroupDistanceMin;
++            RegroupDistanceMax = regroupDistanceMax;
++            ObstacleApproachRatio = obstacleApproachRatio;
++            ArrivalThreshold = arrivalThreshold;
++        }
++
++        /// <summary> その場に留まり再攻撃する重み </summary>
++        public float StayWeight { get; }
++        /// <summary> 近くの味方に合流する重み </summary>
++        public float RegroupWeight { get; }
++        /// <summary> 近くの障害物に接近する重み </summary>
++        public float ObstacleApproachWeight { get; }
++        /// <summary> 合流時、味方から離れる最小距離 </summary>
++        public float RegroupDistanceMin { get; }
++        /// <summary> 合流時、味方から離れる最大距離 </summary>
++        public float RegroupDistanceMax { get; }
++        /// <summary> 障害物へ接近する割合(0〜1) </summary>
++        public float ObstacleApproachRatio { get; }
++        /// <summary> 上書き移動先への到達とみなす距離 </summary>
++        public float ArrivalThreshold { get; }
++    }
++}
+diff --git a/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorSpec.cs.meta b/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorSpec.cs.meta
+new file mode 100644
+index 000000000..8e6f761d4
+--- /dev/null
++++ b/Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyPostAttackBehaviorSpec.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 95fb7e09ce30a4a45bacaff0255785b0
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyMoveUsecase.cs b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyMoveUsecase.cs
+index 5c89e7c16..697fe7508 100644
+--- a/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyMoveUsecase.cs
++++ b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyMoveUsecase.cs
+@@ -19,6 +19,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
+             _nearestAttackPositionSearcher = nearestAttackPositionSearcher;
+         }
+ 
++        /// <summary> 敵の基本移動速度 </summary>
++        public float MoveSpeed => _enemyMoveSpec.MoveSpeed.Value;
++
+         /// <summary>
+         ///     移動の意思決定を行うメソッド。
+         ///     敵とプレイヤーの位置を受け取り、移動すべきか、目的地、速度を返す。
+diff --git a/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyPostAttackBehaviorUsecase.cs b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyPostAttackBehaviorUsecase.cs
+new file mode 100644
+index 000000000..9a49e84bf
+--- /dev/null
++++ b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyPostAttackBehaviorUsecase.cs
+@@ -0,0 +1,106 @@
++using KillChord.Runtime.Domain.InGame.Enemy;
++using UnityEngine;
++
++namespace KillChord.Runtime.Application.InGame.Enemy
++{
++    /// <summary>
++    ///     攻撃後の行動(再攻撃/合流/障害物接近)を決定するロジック。
++    /// </summary>
++    public class EnemyPostAttackBehaviorUsecase
++    {
++        public EnemyPostAttackBehaviorUsecase(EnemyPostAttackBehaviorSpec spec)
++        {
++            _spec = spec;
++        }
++
++        /// <summary> 上書き移動先への到達とみなす距離 </summary>
++        public float ArrivalThreshold => _spec.ArrivalThreshold;
++
++        /// <summary>
++        ///     攻撃後の行動を抽選し、移動が必要な場合は移動先を返す。
++        /// </summary>
++        /// <param name="selfPosition"></param>
++        /// <param name="nearestAllyPosition"></param>
++        /// <param name="nearestObstaclePosition"></param>
++        /// <param name="overrideDestination"></param>
++        /// <returns> 移動が必要な場合はtrue。 </returns>
++        public bool TryDecideOverrideDestination(
++            Vector3 selfPosition,
++            Vector3? nearestAllyPosition,
++            Vector3? nearestObstaclePosition,
++            out Vector3 overrideDestination)
++        {
++            EnemyPostAttackBehaviorKind kind = ChooseKind(nearestAllyPosition.HasValue, nearestObstaclePosition.HasValue);
++
++            if (kind == EnemyPostAttackBehaviorKind.RegroupWithAlly)
++            {
++                overrideDestination = CalculateRegroupDestination(selfPosition, nearestAllyPosition.Value);
++                return true;
++            }
++
++            if (kind == EnemyPostAttackBehaviorKind.ApproachObstacle)
++            {
++                overrideDestination = CalculateObstacleApproachDestination(selfPosition, nearestObstaclePosition.Value);
++                return true;
++            }
++
++            overrideDestination = selfPosition;
++            return false;
++        }
++
++        /// <summary>
++        ///     重みに基づき行動の種類を抽選する。
++        /// </summary>
++        private EnemyPostAttackBehaviorKind ChooseKind(bool hasAlly, bool hasObstacle)
++        {
++            float stayWeight = _spec.StayWeight;
++            float regroupWeight = hasAlly ? _spec.RegroupWeight : 0f;
++            float obstacleWeight = hasObstacle ? _spec.ObstacleApproachWeight : 0f;
++            float totalWeight = stayWeight + regroupWeight + obstacleWeight;
++
++            // 抽選可能な重みが無い場合はその場に留まる。
++            if (totalWeight <= 0f)
++            {
++                return EnemyPostAttackBehaviorKind.Stay;
++            }
++
++            float roll = Random.Range(0f, totalWeight);
++            if (roll < stayWeight)
++            {
++                return EnemyPostAttackBehaviorKind.Stay;
++            }
++            if (roll < stayWeight + regroupWeight)
++            {
++                return EnemyPostAttackBehaviorKind.RegroupWithAlly;
++            }
++            return EnemyPostAttackBehaviorKind.ApproachObstacle;
++        }
++
++        /// <summary>
++        ///     味方から一定距離だけ離れた合流地点を計算する。
++        /// </summary>
++        private Vector3 CalculateRegroupDestination(Vector3 selfPosition, Vector3 allyPosition)
++        {
++            Vector3 direction = selfPosition - allyPosition;
++            if (direction.sqrMagnitude <= Mathf.Epsilon)
++            {
++                // 味方と完全に重なっている場合のフォールバック方向。
++                direction = Vector3.forward;
++            }
++            direction.Normalize();
++
++            float distance = Random.Range(_spec.RegroupDistanceMin, _spec.RegroupDistanceMax);
++            return allyPosition + direction * distance;
++        }
++
++        /// <summary>
++        ///     障害物に一定割合だけ近づいた地点を計算する。
++        /// </summary>
++        private Vector3 CalculateObstacleApproachDestination(Vector3 selfPosition, Vector3 obstaclePosition)
++        {
++            return Vector3.Lerp(selfPosition, obstaclePosition, _spec.ObstacleApproachRatio);
++        }
++
++        private readonly EnemyPostAttackBehaviorSpec _spec;
++    }
++}
+diff --git a/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyPostAttackBehaviorUsecase.cs.meta b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyPostAttackBehaviorUsecase.cs.meta
+new file mode 100644
+index 000000000..a7d748002
+--- /dev/null
++++ b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyPostAttackBehaviorUsecase.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 31c1c4bc0be1e2444968f10d37f2978d
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/2.Application/InGame/Enemy/IObstacleSearchRepository.cs b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/IObstacleSearchRepository.cs
+new file mode 100644
+index 000000000..f3ee7d6db
+--- /dev/null
++++ b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/IObstacleSearchRepository.cs
+@@ -0,0 +1,18 @@
++using UnityEngine;
++
++namespace KillChord.Runtime.Application.InGame.Enemy
++{
++    /// <summary>
++    ///     周囲の障害物を検索するRepositoryインターフェース。
++    /// </summary>
++    public interface IObstacleSearchRepository
++    {
++        /// <summary>
++        ///     指定位置周辺で最も近い障害物の位置を検索する。
++        /// </summary>
++        /// <param name="sourcePosition"></param>
++        /// <param name="obstaclePosition"></param>
++        /// <returns> 障害物が見つかった場合はtrue。 </returns>
++        public bool TryFindNearestObstaclePosition(Vector3 sourcePosition, out Vector3 obstaclePosition);
++    }
++}
+diff --git a/Assets/Scripts/Runtime/2.Application/InGame/Enemy/IObstacleSearchRepository.cs.meta b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/IObstacleSearchRepository.cs.meta
+new file mode 100644
+index 000000000..5ec2d3b92
+--- /dev/null
++++ b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/IObstacleSearchRepository.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 4c0406068591e76449f8f0822ae170b0
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/2.Application/InGame/Enemy/ObstacleSearchService.cs b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/ObstacleSearchService.cs
+new file mode 100644
+index 000000000..eef78b44d
+--- /dev/null
++++ b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/ObstacleSearchService.cs
+@@ -0,0 +1,28 @@
++using UnityEngine;
++
++namespace KillChord.Runtime.Application.InGame.Enemy
++{
++    /// <summary>
++    ///     周囲の障害物を検索する。
++    /// </summary>
++    public class ObstacleSearchService
++    {
++        public ObstacleSearchService(IObstacleSearchRepository repository)
++        {
++            _repository = repository;
++        }
++
++        /// <summary>
++        ///     指定位置周辺で最も近い障害物の位置を検索する。
++        /// </summary>
++        /// <param name="sourcePosition"></param>
++        /// <param name="obstaclePosition"></param>
++        /// <returns> 障害物が見つかった場合はtrue。 </returns>
++        public bool TryFindNearestObstaclePosition(Vector3 sourcePosition, out Vector3 obstaclePosition)
++        {
++            return _repository.TryFindNearestObstaclePosition(sourcePosition, out obstaclePosition);
++        }
++
++        private IObstacleSearchRepository _repository;
++    }
++}
+diff --git a/Assets/Scripts/Runtime/2.Application/InGame/Enemy/ObstacleSearchService.cs.meta b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/ObstacleSearchService.cs.meta
+new file mode 100644
+index 000000000..1d90101ee
+--- /dev/null
++++ b/Assets/Scripts/Runtime/2.Application/InGame/Enemy/ObstacleSearchService.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 46899e91a76931d47939b6292891f668
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIController.cs b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIController.cs
+index a995f2a1a..77c236935 100644
+--- a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIController.cs
++++ b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIController.cs
+@@ -17,7 +17,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+             EnemyAttackReservationUsecase enemyAttackReservationUsecase,
+             EnemyBattleState enemyBattleState,
+             IEnemyStateFacade stateFacade,
+-            IEnemyAttackController attackController
++            IEnemyAttackController attackController,
++            EnemyPostAttackBehaviorUsecase postAttackBehaviorUsecase,
++            ObstacleSearchService obstacleSearchService,
++            EnemyAIControllerRegistry registry
+             )
+         {
+             _enemyMoveUsecase = enemyMoveUsecase;
+@@ -25,6 +28,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+             _enemyBattleState = enemyBattleState;
+             _stateFacade = stateFacade;
+             _attackController = attackController;
++            _postAttackBehaviorUsecase = postAttackBehaviorUsecase;
++            _obstacleSearchService = obstacleSearchService;
++            _registry = registry;
+             _isActive = false;
+         }
+ 
+@@ -83,6 +89,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+ 
+         /// <summary> 敵が攻撃中か。 </summary>
+         public bool IsAttacking => _enemyAttackReservationUsecase.HasReservation;
++        /// <summary> 直近に取得した自身の位置。 </summary>
++        public Vector3 CurrentPosition => _lastKnownPosition;
+ 
+         /// <summary>
+         ///     位置情報より行動意思を取得する。
+@@ -92,6 +100,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+         /// <returns></returns>
+         public EnemyMoveInstruction GetMoveInstruction(Vector3 enemyPosition, Vector3 targetPosition)
+         {
++            _lastKnownPosition = enemyPosition;
++
++            // 攻撃後の行動選択で移動先が上書きされている場合、そちらを優先する
++            if (_enemyBattleState.OverrideDestination.HasValue)
++            {
++                Vector3 overrideDestination = _enemyBattleState.OverrideDestination.Value;
++                if (Vector3.Distance(enemyPosition, overrideDestination) > _postAttackBehaviorUsecase.ArrivalThreshold)
++                {
++                    return new EnemyMoveInstruction(true, overrideDestination, _enemyMoveUsecase.MoveSpeed);
++                }
++                _enemyBattleState.ClearOverrideDestination();
++            }
++
+             EnemyMoveDecision moveDecision = _enemyMoveUsecase.Evaluate(enemyPosition, targetPosition);
+             if (moveDecision.ShouldMove)
+             {
+@@ -174,6 +195,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+         {
+             _attackController.ExecuteAttack();
+             _enemyBattleState.AttackExcuted();
++            ChoosePostAttackBehavior();
+             OnAttack?.Invoke();
+         }
+ 
+@@ -211,11 +233,34 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+             }
+         }
+ 
++        /// <summary>
++        ///     攻撃後の行動(再攻撃/合流/障害物接近)を選択し、必要であれば移動先を上書きする。
++        /// </summary>
++        private void ChoosePostAttackBehavior()
++        {
++            Vector3? allyPosition = _registry != null && _registry.TryFindNearestOtherActive(this, _lastKnownPosition, out EnemyAIController nearestAlly)
++                ? nearestAlly.CurrentPosition
++                : (Vector3?)null;
++
++            Vector3? obstaclePosition = _obstacleSearchService.TryFindNearestObstaclePosition(_lastKnownPosition, out Vector3 nearestObstacle)
++                ? nearestObstacle
++                : (Vector3?)null;
++
++            if (_postAttackBehaviorUsecase.TryDecideOverrideDestination(_lastKnownPosition, allyPosition, obstaclePosition, out Vector3 overrideDestination))
++            {
++                _enemyBattleState.SetOverrideDestination(overrideDestination);
++            }
++        }
++
+         private readonly EnemyMoveUsecase _enemyMoveUsecase;
+         private readonly EnemyAttackReservationUsecase _enemyAttackReservationUsecase;
+         private readonly EnemyBattleState _enemyBattleState;
+         private readonly IEnemyStateFacade _stateFacade;
++        private readonly EnemyPostAttackBehaviorUsecase _postAttackBehaviorUsecase;
++        private readonly ObstacleSearchService _obstacleSearchService;
++        private readonly EnemyAIControllerRegistry _registry;
+         private IEnemyAttackController _attackController;
+         private bool _isActive;
++        private Vector3 _lastKnownPosition;
+     }
+ }
+diff --git a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIControllerRegistry.cs b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIControllerRegistry.cs
+index 7094471e5..fe05deda1 100644
+--- a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIControllerRegistry.cs
++++ b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIControllerRegistry.cs
+@@ -1,4 +1,5 @@
+ using System.Collections.Generic;
++using UnityEngine;
+ 
+ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+ {
+@@ -63,6 +64,31 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+             }
+         }
+ 
++        /// <summary>
++        ///     自分以外で最も近い有効な敵コントローラーを検索する。
++        /// </summary>
++        /// <param name="self"></param>
++        /// <param name="selfPosition"></param>
++        /// <param name="nearestAlly"></param>
++        /// <returns> 見つかった場合はtrue。 </returns>
++        public bool TryFindNearestOtherActive(EnemyAIController self, Vector3 selfPosition, out EnemyAIController nearestAlly)
++        {
++            nearestAlly = null;
++            float minDistanceSqr = float.MaxValue;
++            foreach (EnemyAIController controller in _activeControllers)
++            {
++                if (controller == self) continue;
++
++                float distanceSqr = (controller.CurrentPosition - selfPosition).sqrMagnitude;
++                if (distanceSqr < minDistanceSqr)
++                {
++                    minDistanceSqr = distanceSqr;
++                    nearestAlly = controller;
++                }
++            }
++            return nearestAlly != null;
++        }
++
+         private HashSet<EnemyAIController> _activeControllers;
+         private bool _isBattleAIActivated;
+     }
+diff --git a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyBattleState.cs b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyBattleState.cs
+index 229f47e1d..b3ace12e9 100644
+--- a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyBattleState.cs
++++ b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyBattleState.cs
+@@ -1,5 +1,6 @@
+ using KillChord.Runtime.Domain.InGame.Battle;
+ using KillChord.Runtime.Domain.InGame.Character;
++using UnityEngine;
+ 
+ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+ {
+@@ -18,6 +19,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+             FirstAttack = true;
+             IsStunned = false;
+             IsBattleAIActivated = true;
++            IsDiscovered = false;
+         }
+ 
+         /// <summary> 攻撃者（自身）のエンティティ </summary>
+@@ -34,6 +36,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+         /// <summary> 硬直中か </summary>
+         public bool IsStunned { get; private set; }
+         public bool IsBattleAIActivated { get; private set; }
++        /// <summary> 攻撃後の行動選択によって一時的に上書きされた移動先 </summary>
++        public Vector3? OverrideDestination { get; private set; }
++        /// <summary> プレイヤーを発見済みか </summary>
++        public bool IsDiscovered { get; private set; }
+ 
+         /// <summary> 攻撃目標が攻撃範囲に入った </summary>
+         public void EnterRange() => IsInAttackRange = true;
+@@ -49,6 +55,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+         public void StartBattleAI() => IsBattleAIActivated = true;
+         /// <summary> 敵の戦闘系AIを無効化 </summary>
+         public void StopBattleAI() => IsBattleAIActivated = false;
++        /// <summary> 攻撃後の一時的な移動先を設定する </summary>
++        public void SetOverrideDestination(Vector3 destination) => OverrideDestination = destination;
++        /// <summary> 一時的な移動先の上書きを解除する </summary>
++        public void ClearOverrideDestination() => OverrideDestination = null;
++        /// <summary> プレイヤーを発見済みにする </summary>
++        public void Discover() => IsDiscovered = true;
+ 
+         /// <summary>
+         ///     再初期化処理。
+@@ -59,6 +71,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
+             FirstAttack = true;
+             IsStunned = false;
+             IsBattleAIActivated = true;
++            OverrideDestination = null;
++            IsDiscovered = false;
+         }
+     }
+ }
+diff --git a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/IObstacleSearchViewModel.cs b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/IObstacleSearchViewModel.cs
+new file mode 100644
+index 000000000..acdc96daf
+--- /dev/null
++++ b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/IObstacleSearchViewModel.cs
+@@ -0,0 +1,18 @@
++using UnityEngine;
++
++namespace KillChord.Runtime.Adaptor.InGame.Enemy
++{
++    /// <summary>
++    ///     周囲の障害物を検索するViewModelインターフェース。
++    /// </summary>
++    public interface IObstacleSearchViewModel
++    {
++        /// <summary>
++        ///     指定位置周辺で最も近い障害物の位置を検索する。
++        /// </summary>
++        /// <param name="sourcePosition"></param>
++        /// <param name="obstaclePosition"></param>
++        /// <returns> 障害物が見つかった場合はtrue。 </returns>
++        public bool TryFindNearestObstaclePosition(Vector3 sourcePosition, out Vector3 obstaclePosition);
++    }
++}
+diff --git a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/IObstacleSearchViewModel.cs.meta b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/IObstacleSearchViewModel.cs.meta
+new file mode 100644
+index 000000000..aba8fdc47
+--- /dev/null
++++ b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/IObstacleSearchViewModel.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 5dba50108255cc9438699e44fbe16715
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/ObstacleSearchController.cs b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/ObstacleSearchController.cs
+new file mode 100644
+index 000000000..0de9d95ba
+--- /dev/null
++++ b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/ObstacleSearchController.cs
+@@ -0,0 +1,29 @@
++using KillChord.Runtime.Application.InGame.Enemy;
++using UnityEngine;
++
++namespace KillChord.Runtime.Adaptor.InGame.Enemy
++{
++    /// <summary>
++    ///     周囲の障害物を検索する。
++    /// </summary>
++    public class ObstacleSearchController : IObstacleSearchRepository
++    {
++        public ObstacleSearchController(IObstacleSearchViewModel viewModel)
++        {
++            _viewModel = viewModel;
++        }
++
++        /// <summary>
++        ///     指定位置周辺で最も近い障害物の位置を検索する。
++        /// </summary>
++        /// <param name="sourcePosition"></param>
++        /// <param name="obstaclePosition"></param>
++        /// <returns> 障害物が見つかった場合はtrue。 </returns>
++        public bool TryFindNearestObstaclePosition(Vector3 sourcePosition, out Vector3 obstaclePosition)
++        {
++            return _viewModel.TryFindNearestObstaclePosition(sourcePosition, out obstaclePosition);
++        }
++
++        private IObstacleSearchViewModel _viewModel;
++    }
++}
+diff --git a/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/ObstacleSearchController.cs.meta b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/ObstacleSearchController.cs.meta
+new file mode 100644
+index 000000000..c09f7862c
+--- /dev/null
++++ b/Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/ObstacleSearchController.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 8d3edd22de3eb614bb91166667099751
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/AIFacade/EnemyStateFacade.cs b/Assets/Scripts/Runtime/4.View/InGame/Enemy/AIFacade/EnemyStateFacade.cs
+index d7d6be778..c27c018e8 100644
+--- a/Assets/Scripts/Runtime/4.View/InGame/Enemy/AIFacade/EnemyStateFacade.cs
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/AIFacade/EnemyStateFacade.cs
+@@ -1,6 +1,7 @@
+ using KillChord.Runtime.Adaptor.InGame.Enemy;
+ using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
+ using UnityEngine;
++using UnityEngine.AI;
+ 
+ namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
+ {
+@@ -35,11 +36,49 @@ namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
+         public bool IsStunned => _battleState.IsStunned;
+         /// <summary> 敵の戦闘AIが有効な状態か </summary>
+         public bool IsBattleAiActivated => _battleState.IsBattleAIActivated;
++        /// <summary> プレイヤーを発見済みか </summary>
++        public bool IsDiscovered => _battleState.IsDiscovered;
++        /// <summary> プレイヤーが視野角・索敵距離・視線のすべてを満たし発見可能な状態か </summary>
++        public bool IsPlayerDiscoverable
++        {
++            get
++            {
++                if (_target == null) return false;
++
++                // 水平面での方向のみで視野角を判定する(上下は無視)
++                Vector3 toTarget = _target.position - transform.position;
++                toTarget.y = 0f;
++                if (toTarget.magnitude > _sightRange) return false;
++
++                float angle = Vector3.Angle(transform.forward, toTarget);
++                if (angle > _viewAngleDegrees) return false;
++
++                // 索敵の視線判定は攻撃射程ではなく索敵距離を基準に行う
++                return _raycastDetectView.CheckCanRaycastHitTargetAtRange(transform.position, _sightRange);
++            }
++        }
+ 
++        [SerializeField, Tooltip("索敵に使う視野角(度)。正面から左右それぞれこの角度までを視野内とする。"), Range(0f, 180f)]
++        private float _viewAngleDegrees = 60f;
++        [SerializeField, Tooltip("索敵距離(m)。"), Min(0f)]
++        private float _sightRange = 15f;
++        [SerializeField, Tooltip("未発見時、周囲を確認するために向きを変える速さ(度/秒)。"), Min(0f)]
++        private float _lookAroundRotationSpeed = 60f;
+         private EnemyAIController _aiController;
+         private Transform _target;
+         private EnemyRaycastDetectView _raycastDetectView;
+         private EnemyBattleState _battleState;
++        private NavMeshAgent _navMeshAgent;
++        private float _lookAroundTargetYaw;
++        private bool _hasLookAroundTarget;
++
++        /// <summary>
++        ///     参照コンポーネントの取得処理。
++        /// </summary>
++        private void Awake()
++        {
++            _navMeshAgent = GetComponent<NavMeshAgent>();
++        }
+ 
+         /// <summary>
+         ///     硬直発生。
+@@ -56,5 +95,36 @@ namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
+         {
+             _battleState.StunRecover();
+         }
++        /// <summary>
++        ///     プレイヤーを発見済みにする。
++        /// </summary>
++        public void Discover()
++        {
++            _battleState.Discover();
++        }
++        /// <summary>
++        ///     未発見時、その場で周囲を確認するように少しずつ向きを変える。
++        /// </summary>
++        public void LookAround()
++        {
++            if (_navMeshAgent != null)
++            {
++                // NavMeshAgentによる向きの自動上書きを止め、見回しの回転を優先する
++                _navMeshAgent.updateRotation = false;
++            }
++
++            Quaternion targetRotation = Quaternion.Euler(0f, _lookAroundTargetYaw, 0f);
++            if (!_hasLookAroundTarget || Quaternion.Angle(transform.rotation, targetRotation) < 1f)
++            {
++                _lookAroundTargetYaw = transform.eulerAngles.y + Random.Range(-150f, 150f);
++                _hasLookAroundTarget = true;
++                targetRotation = Quaternion.Euler(0f, _lookAroundTargetYaw, 0f);
++            }
++
++            transform.rotation = Quaternion.RotateTowards(
++                transform.rotation,
++                targetRotation,
++                _lookAroundRotationSpeed * Time.deltaTime);
++        }
+     }
+ }
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/GetStunnedAction.cs b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/GetStunnedAction.cs
+index b01f371f2..0f80e698f 100644
+--- a/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/GetStunnedAction.cs
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/GetStunnedAction.cs
+@@ -13,6 +13,15 @@ namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
+         [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
+         [SerializeReference] public BlackboardVariable<EnemyBattleAIFacade> Battle;
+ 
++        [SerializeField, Tooltip("硬直解除の直後、体勢を立て直すために動きを止めておく時間(秒)の基準値。")]
++        private float _postRecoveryDelaySeconds = 0.3f;
++        [SerializeField, Tooltip("上記の基準値に対するランダムな幅の割合。個体ごとに立て直し時間をばらつかせる。")]
++        private float _postRecoveryDelayVariance = 0.3f;
++
++        private bool _isRecovering;
++        private float _recoveryTimer;
++        private float _recoveryDuration;
++
+         protected override Unity.Behavior.Node.Status OnStart()
+         {
+             if (State?.Value?.gameObject == null || Battle?.Value == null)
+@@ -24,12 +33,27 @@ namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
+             EnemyBattleAIFacade battle = Battle.Value;
+             battle.CancelAttack();
+             state.Stunned();
++            _isRecovering = false;
++            _recoveryTimer = 0f;
+             return Unity.Behavior.Node.Status.Running;
+         }
+ 
+         protected override Unity.Behavior.Node.Status OnUpdate()
+         {
+             if (State.Value.IsStunned) return Unity.Behavior.Node.Status.Running;
++
++            // 硬直解除の瞬間に即座に動き出すと機械的に見えるため、一呼吸だけ立て直す時間を置く
++            if (!_isRecovering)
++            {
++                _isRecovering = true;
++                _recoveryTimer = 0f;
++                _recoveryDuration = _postRecoveryDelaySeconds
++                    * (1f + UnityEngine.Random.Range(-_postRecoveryDelayVariance, _postRecoveryDelayVariance));
++            }
++
++            _recoveryTimer += Time.deltaTime;
++            if (_recoveryTimer < _recoveryDuration) return Unity.Behavior.Node.Status.Running;
++
+             return Unity.Behavior.Node.Status.Success;
+         }
+ 
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/WaitForDiscoveryAction.cs b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/WaitForDiscoveryAction.cs
+new file mode 100644
+index 000000000..d2e6a64b5
+--- /dev/null
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/WaitForDiscoveryAction.cs
+@@ -0,0 +1,52 @@
++using KillChord.Runtime.View.InGame.Enemy.AIFacade;
++using System;
++using Unity.Behavior;
++using Unity.Properties;
++using UnityEngine;
++
++namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
++{
++    [Serializable, GeneratePropertyBag]
++    [NodeDescription(name: "WaitForDiscovery", story: "プレイヤーを発見するまで待機する [State]", category: "Action", id: "7d4c2f91a8b6403e9f1a2b3c4d5e6f70")]
++    public partial class WaitForDiscoveryAction : Unity.Behavior.Action
++    {
++        [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
++
++        protected override Unity.Behavior.Node.Status OnStart()
++        {
++            if (State?.Value?.gameObject == null)
++            {
++                return Unity.Behavior.Node.Status.Failure;
++            }
++            return Unity.Behavior.Node.Status.Running;
++        }
++
++        protected override Unity.Behavior.Node.Status OnUpdate()
++        {
++            // 硬直が発生した場合、この待機を中断してSelectorに評価をやり直させ、硬直分岐へ切り替える
++            if (State.Value.IsStunned)
++            {
++                return Unity.Behavior.Node.Status.Failure;
++            }
++
++            if (State.Value.IsDiscovered)
++            {
++                return Unity.Behavior.Node.Status.Success;
++            }
++
++            if (State.Value.IsPlayerDiscoverable)
++            {
++                State.Value.Discover();
++                return Unity.Behavior.Node.Status.Success;
++            }
++
++            // 発見できていない間は、その場で周囲を見回して索敵を続ける
++            State.Value.LookAround();
++            return Unity.Behavior.Node.Status.Running;
++        }
++
++        protected override void OnEnd()
++        {
++        }
++    }
++}
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/WaitForDiscoveryAction.cs.meta b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/WaitForDiscoveryAction.cs.meta
+new file mode 100644
+index 000000000..3f62b8ba3
+--- /dev/null
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/WaitForDiscoveryAction.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 303bbeb82cdf49b4e8d2cd4afcf343b7
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsDiscoveredCondition.cs b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsDiscoveredCondition.cs
+new file mode 100644
+index 000000000..d3c78f108
+--- /dev/null
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsDiscoveredCondition.cs
+@@ -0,0 +1,29 @@
++using KillChord.Runtime.View.InGame.Enemy.AIFacade;
++using System;
++using Unity.Behavior;
++using UnityEngine;
++
++namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition
++{
++    [Serializable, Unity.Properties.GeneratePropertyBag]
++    [Condition(name: "IsDiscovered", story: "プレイヤーを発見済みである [Bool] [State]", category: "Conditions", id: "b3f8a1d4e2c9407fa6b1c8d3e5f70a92")]
++    public partial class IsDiscoveredCondition : Unity.Behavior.Condition
++    {
++        [SerializeReference] public BlackboardVariable<EnemyStateFacade> State;
++        [SerializeReference] public BlackboardVariable<bool> Bool;
++
++        public override bool IsTrue()
++        {
++            if (State?.Value == null) return false;
++            return State.Value.IsDiscovered == Bool.Value;
++        }
++
++        public override void OnStart()
++        {
++        }
++
++        public override void OnEnd()
++        {
++        }
++    }
++}
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsDiscoveredCondition.cs.meta b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsDiscoveredCondition.cs.meta
+new file mode 100644
+index 000000000..7f69a8f15
+--- /dev/null
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsDiscoveredCondition.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 85c458d7a45f54943bed451013e8abb7
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyMoveView.cs b/Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyMoveView.cs
+index 7cacfbc8f..b1ee9cd1a 100644
+--- a/Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyMoveView.cs
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyMoveView.cs
+@@ -41,6 +41,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
+             _characterAnimationSignal = animationContext.Signal;
+             _musicSyncState = musicSyncState;
+             _isPlaying = false;
++            _speedVarianceMultiplier = Random.Range(_speedVarianceMin, _speedVarianceMax);
+             SyncFootstepTiming();
+         }
+ 
+@@ -88,7 +89,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
+                 return false;
+             }
+ 
+-            _navMeshAgent.speed = 3f;
++            _navMeshAgent.speed = 3f * _speedVarianceMultiplier;
+             _navMeshAgent.isStopped = false;
+             _navMeshAgent.updateRotation = true;
+             if (!_navMeshAgent.SetDestination(target))
+@@ -146,7 +147,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
+             EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
+             if (intruction.ShouldMove)
+             {
+-                _navMeshAgent.speed = intruction.MoveSpeed;
++                _navMeshAgent.speed = intruction.MoveSpeed * _speedVarianceMultiplier;
+                 _navMeshAgent.isStopped = false;
+                 _navMeshAgent.updateRotation = true;
+                 _navMeshAgent.SetDestination(intruction.Destination);
+@@ -261,9 +262,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
+         [SerializeField,Tooltip("攻撃ヒット時に再生するエフェクトのTransformです。")]
+         private Transform _damageEffectTransform;
+ 
++        [Header("人間味調整")]
++        [SerializeField, Tooltip("移動速度の個体差(倍率)の下限。1体ごとに初期化時抽選されます。")]
++        private float _speedVarianceMin = 0.9f;
++        [SerializeField, Tooltip("移動速度の個体差(倍率)の上限。1体ごとに初期化時抽選されます。")]
++        private float _speedVarianceMax = 1.1f;
++
+         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
+         private float _lastFootstepTime;
+         private int _lastFootstepEighthIndex = int.MinValue;
++        private float _speedVarianceMultiplier = 1f;
+         private NavMeshAgent _navMeshAgent;
+         private Transform _target;
+         private EnemyAIController _enemyAIController;
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyRaycastDetectView.cs b/Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyRaycastDetectView.cs
+index 9f07b0bec..1946bfe89 100644
+--- a/Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyRaycastDetectView.cs
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyRaycastDetectView.cs
+@@ -61,7 +61,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
+         /// </summary>
+         public bool CheckCanRaycastHitTarget(Vector3 sourcePosition)
+         {
+-            return CheckRaycastHitTarget(sourcePosition);
++            return CheckRaycastHitTarget(sourcePosition, _attackRange);
++        }
++
++        /// <summary>
++        /// 指定位置から指定距離までの自由なレイがターゲットに届くかを返します。
++        /// 索敵など、攻撃射程と異なる距離での視線判定に使用します。
++        /// </summary>
++        public bool CheckCanRaycastHitTargetAtRange(Vector3 sourcePosition, float maxDistance)
++        {
++            return CheckRaycastHitTarget(sourcePosition, maxDistance);
+         }
+ 
+         /// <summary>
+@@ -132,20 +141,20 @@ namespace KillChord.Runtime.View.InGame.Enemy
+         /// </summary>
+         private bool CheckCurrentAttackRaycastHitTarget()
+         {
+-            return CheckRaycastHitTarget(transform.position);
++            return CheckRaycastHitTarget(transform.position, _attackRange);
+         }
+ 
+         /// <summary>
+-        /// 指定位置から飛ばしたレイが最初にターゲットへ到達するかを判定します。
++        /// 指定位置から飛ばしたレイが、指定距離以内で最初にターゲットへ到達するかを判定します。
+         /// </summary>
+-        private bool CheckRaycastHitTarget(Vector3 sourcePosition)
++        private bool CheckRaycastHitTarget(Vector3 sourcePosition, float maxDistance)
+         {
+             if (!IsReadyForRaycast())
+             {
+                 return false;
+             }
+ 
+-            int hitCount = CastAndGetHitCount(sourcePosition);
++            int hitCount = CastAndGetHitCount(sourcePosition, maxDistance);
+             if (hitCount <= 0)
+             {
+                 return false;
+@@ -156,9 +165,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
+         }
+ 
+         /// <summary>
+-        /// 指定位置からレイを飛ばし、記録されたヒット数を返します。
++        /// 指定位置から指定距離までレイを飛ばし、記録されたヒット数を返します。
+         /// </summary>
+-        private int CastAndGetHitCount(Vector3 sourcePosition)
++        private int CastAndGetHitCount(Vector3 sourcePosition, float maxDistance)
+         {
+             Ray ray = CreateRay(sourcePosition);
+             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
+@@ -166,7 +175,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
+                 return 0;
+             }
+ 
+-            return Physics.RaycastNonAlloc(ray, _hitResults, _attackRange, _hitLayers);
++            return Physics.RaycastNonAlloc(ray, _hitResults, maxDistance, _hitLayers);
+         }
+ 
+         /// <summary>
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearbyObstacleSearchView.cs b/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearbyObstacleSearchView.cs
+new file mode 100644
+index 000000000..72c0d9e00
+--- /dev/null
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearbyObstacleSearchView.cs
+@@ -0,0 +1,59 @@
++using KillChord.Runtime.Adaptor.InGame.Enemy;
++using UnityEngine;
++
++namespace KillChord.Runtime.View.InGame.Enemy
++{
++    /// <summary>
++    ///     周囲の障害物を検索するViewクラス。
++    /// </summary>
++    public class NearbyObstacleSearchView : MonoBehaviour, IObstacleSearchViewModel
++    {
++        /// <summary>
++        ///     指定位置周辺で最も近い障害物の位置を検索する。
++        /// </summary>
++        /// <param name="sourcePosition"></param>
++        /// <param name="obstaclePosition"></param>
++        /// <returns> 障害物が見つかった場合はtrue。 </returns>
++        public bool TryFindNearestObstaclePosition(Vector3 sourcePosition, out Vector3 obstaclePosition)
++        {
++            int hitCount = Physics.OverlapSphereNonAlloc(sourcePosition, _searchRadius, _hitColliders, _obstacleLayers);
++            if (hitCount <= 0)
++            {
++                obstaclePosition = sourcePosition;
++                return false;
++            }
++
++            float minDistanceSqr = float.MaxValue;
++            Vector3 nearestPoint = sourcePosition;
++            for (int i = 0; i < hitCount; i++)
++            {
++                Vector3 closestPoint = _hitColliders[i].ClosestPoint(sourcePosition);
++                float distanceSqr = (closestPoint - sourcePosition).sqrMagnitude;
++                if (distanceSqr < minDistanceSqr)
++                {
++                    minDistanceSqr = distanceSqr;
++                    nearestPoint = closestPoint;
++                }
++            }
++
++            obstaclePosition = nearestPoint;
++            return true;
++        }
++
++        [SerializeField, Tooltip("障害物検索半径(m)。"), Range(0f, 30f)]
++        private float _searchRadius = 10f;
++        [SerializeField, Tooltip("障害物として扱うレイヤー。視線遮蔽(EnemyRaycastDetectViewのHitLayers)と同じレイヤーを設定してください。")]
++        private LayerMask _obstacleLayers;
++        [SerializeField, Tooltip("OverlapSphereで一度に取得する最大コライダー数。"), Min(1)]
++        private int _resultArraySize = 8;
++        private Collider[] _hitColliders;
++
++        /// <summary>
++        ///     検索結果バッファの初期化処理。
++        /// </summary>
++        private void Awake()
++        {
++            _hitColliders = new Collider[_resultArraySize];
++        }
++    }
++}
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearbyObstacleSearchView.cs.meta b/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearbyObstacleSearchView.cs.meta
+new file mode 100644
+index 000000000..fff774fdb
+--- /dev/null
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearbyObstacleSearchView.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 61d43c8ef9697094da6aa66248af0ed5
+\ No newline at end of file
+diff --git a/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearestAttackPositionSearchView.cs b/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearestAttackPositionSearchView.cs
+index ab9847201..4f91b0e4a 100644
+--- a/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearestAttackPositionSearchView.cs
++++ b/Assets/Scripts/Runtime/4.View/InGame/Enemy/NearestAttackPositionSearchView.cs
+@@ -1,4 +1,5 @@
+ using KillChord.Runtime.Adaptor.InGame.Enemy;
++using System.Collections.Generic;
+ using UnityEngine;
+ using UnityEngine.AI;
+ 
+@@ -17,6 +18,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
+             _timer = 0;
+             Vector3 initPos = transform.position;
+             _positionSamples = new Vector3[_samplingCount];
++            _pathLengths = new float[_samplingCount];
++            _nearOptimalIndices = new List<int>(_samplingCount);
+             for (int i = 0; i < _positionSamples.Length; i++)
+             {
+                 _positionSamples[i] = initPos;
+@@ -40,21 +43,23 @@ namespace KillChord.Runtime.View.InGame.Enemy
+             }
+ 
+             // プレイヤーを中心に、攻撃範囲の円周上にサンプリングポイントを生成
++            // 角度に揺らぎを加え、毎回まったく同じ位置取りにならないようにする
+             for (int i = 0; i < _positionSamples.Length; i++)
+             {
+-                float angle = i * Mathf.PI * 2 / _samplingCount;
++                float angle = i * Mathf.PI * 2 / _samplingCount
++                    + Random.Range(-_angleJitterDegrees, _angleJitterDegrees) * Mathf.Deg2Rad;
+ 
+                 Vector3 dir = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
+                 Vector3 candidate = playerPosition + dir * attackRangeMin;
+                 _positionSamples[i] = candidate;
++                _pathLengths[i] = float.MaxValue;
+             }
+ 
+             float minDistance = float.MaxValue;
+-            Vector3 nearestDestination = enemyPosition;
+ 
+             for (int i = 0; i < _positionSamples.Length; i++)
+             {
+-                // ここの1fは、NavMesh上でのサンプリングの半径。敵身長の2倍が推奨な値らしい 
++                // ここの1fは、NavMesh上でのサンプリングの半径。敵身長の2倍が推奨な値らしい
+                 if (!NavMesh.SamplePosition(_positionSamples[i], out NavMeshHit hit, 1f, NavMesh.AllAreas))
+                 {
+                     continue;
+@@ -71,18 +76,25 @@ namespace KillChord.Runtime.View.InGame.Enemy
+                         {
+                             pathLength += Vector3.Distance(_path.corners[j - 1], _path.corners[j]);
+                         }
+-                        // 最短、かつプレイヤーに直撃できるポジションを目的地とする
+-                        if (pathLength < minDistance)
++                        // プレイヤーに直撃できるポジションのみ候補として記録する
++                        if (_raycastView.CheckCanRaycastHitTarget(_positionSamples[i]))
+                         {
+-                            if (_raycastView.CheckCanRaycastHitTarget(_positionSamples[i]))
++                            _pathLengths[i] = pathLength;
++                            if (pathLength < minDistance)
+                             {
+                                 minDistance = pathLength;
+-                                nearestDestination = _positionSamples[i];
+                             }
+                         }
+                     }
+                 }
+             }
++
++            // 最短経路そのものではなく、それに近い候補群からランダムに選ぶことで
++            // 常に数学的な最適解へ吸い付くような機械的な位置取りを避ける
++            Vector3 nearestDestination = minDistance < float.MaxValue
++                ? PickRandomNearOptimalPosition(minDistance)
++                : enemyPosition;
++
+             _destinationCache = nearestDestination;
+             _timer = 0;
+             return nearestDestination;
+@@ -108,13 +120,39 @@ namespace KillChord.Runtime.View.InGame.Enemy
+             Gizmos.DrawSphere(_destinationCache, 0.2f);
+         }
+ 
++        /// <summary>
++        ///     最短経路に近い候補の中からランダムに1つ選ぶ。
++        /// </summary>
++        /// <param name="minDistance">候補群の中の最短経路長。</param>
++        private Vector3 PickRandomNearOptimalPosition(float minDistance)
++        {
++            float threshold = minDistance * _nearOptimalTolerance;
++            _nearOptimalIndices.Clear();
++            for (int i = 0; i < _pathLengths.Length; i++)
++            {
++                if (_pathLengths[i] <= threshold)
++                {
++                    _nearOptimalIndices.Add(i);
++                }
++            }
++            int pickedIndex = _nearOptimalIndices[Random.Range(0, _nearOptimalIndices.Count)];
++            return _positionSamples[pickedIndex];
++        }
++
+         [Header("性能調整")]
+         [SerializeField, Tooltip("探索の侯選ポジション数")] private int _samplingCount;
+         [SerializeField, Tooltip("探索間隔(秒)"), Range(0f, 1f)] private float _searchInterval;
++        [Header("人間味調整")]
++        [SerializeField, Tooltip("サンプリング角度に加えるランダムな揺らぎ幅(度)"), Range(0f, 45f)]
++        private float _angleJitterDegrees = 10f;
++        [SerializeField, Tooltip("最短経路の何倍までを「同程度に近い」候補として扱うか"), Range(1f, 1.5f)]
++        private float _nearOptimalTolerance = 1.15f;
+         [Space]
+         [SerializeField] private NavMeshAgent _agent;
+         [SerializeField] private EnemyRaycastDetectView _raycastView;
+         private Vector3[] _positionSamples;
++        private float[] _pathLengths;
++        private List<int> _nearOptimalIndices;
+         private NavMeshPath _path;
+         private float _timer;
+         private Vector3 _destinationCache;
+diff --git a/Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyLifeCycle.cs b/Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyLifeCycle.cs
+index 22992e784..a19aa4f00 100644
+--- a/Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyLifeCycle.cs
++++ b/Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyLifeCycle.cs
+@@ -100,6 +100,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
+                 Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
+             if (_attackPositionSearchView == null)
+                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
++            if (_obstacleSearchView == null)
++                Debug.LogError($"{nameof(NearbyObstacleSearchView)}の参照がありません。");
+             if (_targetTransform == null)
+             {
+                 Debug.LogError("_targetTransformの参照がありません", this);
+@@ -124,9 +126,21 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
+             NearestAttackPositionSearchController attackPositionSearchController = new NearestAttackPositionSearchController(_attackPositionSearchView);
+             NearestAttackPositionSearchService attackPositionSearchService = new NearestAttackPositionSearchService(attackPositionSearchController);
+ 
++            // 障害物探索
++            ObstacleSearchController obstacleSearchController = new ObstacleSearchController(_obstacleSearchView);
++            ObstacleSearchService obstacleSearchService = new ObstacleSearchService(obstacleSearchController);
++
+             // Domain生成
+             EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_loadedMoveData);
+             EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_loadedEncounterMusicData, _loadedBattleMusicData);
++            EnemyPostAttackBehaviorSpec postAttackBehaviorSpec = new EnemyPostAttackBehaviorSpec(
++                _postAttackStayWeight,
++                _postAttackRegroupWeight,
++                _postAttackObstacleWeight,
++                _regroupDistanceMin,
++                _regroupDistanceMax,
++                _obstacleApproachRatio,
++                _overrideArrivalThreshold);
+ 
+             AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
+ 
+@@ -137,6 +151,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
+             EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
+             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
+             EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
++            EnemyPostAttackBehaviorUsecase postAttackBehaviorUsecase = new EnemyPostAttackBehaviorUsecase(postAttackBehaviorSpec);
+             _attackReservationUsecase = attackReservationUsecase;
+ 
+ 
+@@ -148,7 +163,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
+ 
+             // Controller
+             IEnemyAttackController attackController = _attackControllerGenerator.Generate(attackControllerContext);
+-            EnemyAIController aiController = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
++            EnemyAIController aiController = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController, postAttackBehaviorUsecase, obstacleSearchService, battleAiRegistry);
+             _aiController = aiController;
+ 
+             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
+@@ -393,6 +408,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
+         [SerializeField] private EnemyHealthView _healthView;
+         [SerializeField] private EnemyRaycastDetectView _raycastView;
+         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
++        [SerializeField, Tooltip("周囲の障害物を検索するViewです。")] private NearbyObstacleSearchView _obstacleSearchView;
+         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
+         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
+         [SerializeField] private EnemyStateFacade _enemyStateFacade;
+@@ -428,6 +444,22 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
+         [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
+         private Transform _targetTransform;
+ 
++        [Header("攻撃後行動")]
++        [SerializeField, Min(0f), Tooltip("その場に留まり再攻撃する重み。")]
++        private float _postAttackStayWeight = 0.5f;
++        [SerializeField, Min(0f), Tooltip("近くの味方に合流する重み。")]
++        private float _postAttackRegroupWeight = 0.25f;
++        [SerializeField, Min(0f), Tooltip("近くの障害物に接近する重み。")]
++        private float _postAttackObstacleWeight = 0.25f;
++        [SerializeField, Min(0f), Tooltip("合流時、味方から離れる最小距離(m)。")]
++        private float _regroupDistanceMin = 2f;
++        [SerializeField, Min(0f), Tooltip("合流時、味方から離れる最大距離(m)。")]
++        private float _regroupDistanceMax = 3f;
++        [SerializeField, Range(0f, 1f), Tooltip("障害物へ近づく割合。自身と障害物の距離をこの割合だけ縮める。")]
++        private float _obstacleApproachRatio = 0.3f;
++        [SerializeField, Min(0f), Tooltip("上書き移動先への到達とみなす距離(m)。")]
++        private float _overrideArrivalThreshold = 0.5f;
++
+         [Header("砲兵の場合のみ必要")]
+         [SerializeField] private ShellSpawner _shellSpawner;
+ 
