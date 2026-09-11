@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab4898890207e8145ab6fbb7ee2c2fef, type: 3}
   m_Name: UISoundEffectConfig
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGame.Audio.UiSoundEffectConfig
-  _defaultButtonClickCue: SE_Click
-  _clickMappings:
+  _defaultButtonActivationCue: SE_Click
+  _activationMappings:
   - _ussClassName: ui-se-select
     _cueName: SE_Select
   - _ussClassName: ui-se-cancel
@@ -22,8 +22,11 @@ MonoBehaviour:
     _cueName: SE_Window
   - _ussClassName: ui-se-sortie
     _cueName: SE_Sortie
-  - _ussClassName: ui-se-skill-set
-    _cueName: SE_SkillSet
-  _pointerDownMappings:
+  _pointerDownActivationMappings:
   - _ussClassName: ui-se-title-start
     _cueName: SE_Gamestart
+  _explicitCueMappings:
+  - _kind: 0
+    _cueName: SE_Select
+  - _kind: 1
+    _cueName: SE_SkillSet

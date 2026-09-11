@@ -15,7 +15,7 @@ MonoBehaviour:
   _id:
     _id: skill_01
     _hashId: -1127918619
-  _displayName: 1
+  _displayName: スキル1
   _pattern: 020000000400000001000000
   _icon: {fileID: 21300000, guid: 4c65db539275a8f43bac501545e065fd, type: 3}
   _skillDetail: "\u30BF\u30FC\u30B2\u30C3\u30C8\u306B\u5F37\u529B\u306A\u4E00\u56DE\u653B\u6483\u3002\n\n\u78BA\u5B9A\u3067\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u767A\u751F"

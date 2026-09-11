@@ -19,8 +19,9 @@
     "*"
   ],
   "specRefs": [
-    "spec/feature/game-spec.md#gs-06-out-game-and-progression",
-    "spec/feature/game-spec.md#gs-09-navigation-guidance-and-recovery"
+    "spec/feature/game-spec.md#gs-06-アウトゲームと成長",
+    "spec/feature/game-spec.md#gs-09-導線ガイダンス回復",
+    "spec/feature/game-spec.md#gs-15-体験版-tgs"
   ],
   "rationale": "scenario-narrative、sortie-stageselect、ui-screensに分散する物語と全体遷移を所有する。"
 }

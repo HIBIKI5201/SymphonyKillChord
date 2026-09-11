@@ -25,6 +25,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> ホーム画面を表示するイベント。 </summary>
         public Action OnShownHomeScreen;
 
+        /// <summary> ホームチュートリアルを開始または再開するイベント。 </summary>
+        public Action OnHomeTutorialStarted;
+
+        /// <summary> ホームチュートリアルの完了を通知するイベント。 </summary>
+        public Action OnHomeTutorialCompleted;
+
         /// <summary> 作戦画面を表示するイベント。 </summary>
         public Action OnShownStageSelectionScreen;
 

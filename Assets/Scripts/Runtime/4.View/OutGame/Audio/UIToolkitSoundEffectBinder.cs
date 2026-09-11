@@ -1,5 +1,5 @@
-using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.Persistent.Music;
+using KillChord.Runtime.View.OutGame.Navigation;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,6 +30,8 @@ namespace KillChord.Runtime.View.OutGame.Audio
 
             _root.RegisterCallback<ClickEvent>(HandleClickedHandler, TrickleDown.TrickleDown);
             _root.RegisterCallback<PointerDownEvent>(HandlePointerDownHandler, TrickleDown.TrickleDown);
+            _root.RegisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitHandler, TrickleDown.TrickleDown);
+            _root.RegisterCallback<UIActivationEvent>(HandleActivationHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -44,11 +46,12 @@ namespace KillChord.Runtime.View.OutGame.Audio
 
             _root.UnregisterCallback<ClickEvent>(HandleClickedHandler, TrickleDown.TrickleDown);
             _root.UnregisterCallback<PointerDownEvent>(HandlePointerDownHandler, TrickleDown.TrickleDown);
+            _root.UnregisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitHandler, TrickleDown.TrickleDown);
+            _root.UnregisterCallback<UIActivationEvent>(HandleActivationHandler, TrickleDown.TrickleDown);
             _isDisposed = true;
         }
 
         private const string DRAG_COMPLETED_CLASS_NAME = "drag-just-completed";
-        private const string SELECT_SOUND_TAB_CLASS_NAME = "tab-se-select";
 
         private readonly Dictionary<VisualElement, Tab> _tabByHeader = new();
         private readonly VisualElement _root;
@@ -57,42 +60,80 @@ namespace KillChord.Runtime.View.OutGame.Audio
         private bool _isDisposed;
 
         /// <summary>
-        ///     ClickEventに対応するCueを解決して再生する。
+        ///     ClickEventに対応するActivation Cueを解決して再生する。
         /// </summary>
         /// <param name="evt"> 観測したClickEvent。 </param>
         private void HandleClickedHandler(ClickEvent evt)
         {
-            if (evt.target is not VisualElement target)
+            if (!IsPrimaryPointerActivation(evt.pointerType, evt.button, evt.isPrimary)
+                || evt.target is not VisualElement target)
             {
                 return;
             }
 
-            ProcessClick(target);
+            ProcessActivation(target);
         }
 
         /// <summary>
-        ///     PointerDownEventに明示されたCueを解決して再生する。
+        ///     主ポインターのPointerDownEventに対応する作動Cueを解決して再生する。
         /// </summary>
         /// <param name="evt"> 観測したPointerDownEvent。 </param>
         private void HandlePointerDownHandler(PointerDownEvent evt)
         {
+            if (!IsPrimaryPointerActivation(evt.pointerType, evt.button, evt.isPrimary)
+                || evt.target is not VisualElement target)
+            {
+                return;
+            }
+
+            ProcessPointerDownActivation(target);
+        }
+
+        /// <summary>
+        ///     NavigationSubmitEventに対応するActivation Cueを解決して再生する。
+        /// </summary>
+        /// <param name="evt"> 観測したNavigationSubmitEvent。 </param>
+        private void HandleNavigationSubmitHandler(NavigationSubmitEvent evt)
+        {
             if (evt.target is not VisualElement target)
             {
                 return;
             }
 
-            ProcessPointerDown(target);
+            if (ProcessActivation(target))
+            {
+                return;
+            }
+
+            // タイトル開始領域はPointerDown作動として設定されているため、
+            // 通常Activationで未解決の場合だけ同じCueを決定操作にも適用する。
+            ProcessPointerDownActivation(target);
         }
 
         /// <summary>
-        ///     指定された要素からClickEvent用のCueを解決して再生する。
+        ///     UIActivationEventに対応するActivation Cueを解決して再生する。
         /// </summary>
-        /// <param name="target"> ClickEventのtarget要素。 </param>
-        internal void ProcessClick(VisualElement target)
+        /// <param name="evt"> 観測したUIActivationEvent。 </param>
+        private void HandleActivationHandler(UIActivationEvent evt)
+        {
+            if (evt.target is not VisualElement target)
+            {
+                return;
+            }
+
+            ProcessActivation(target);
+        }
+
+        /// <summary>
+        ///     指定された要素からActivation Cueを解決して再生する。
+        /// </summary>
+        /// <param name="target"> Activationイベントのtarget要素。 </param>
+        /// <returns> 再生または抑止の判断が完了した場合はtrue。対象を解決できない場合はfalse。 </returns>
+        internal bool ProcessActivation(VisualElement target)
         {
             if (_isDisposed || target == null)
             {
-                return;
+                return true;
             }
 
             Button nearestButton = null;
@@ -101,26 +142,29 @@ namespace KillChord.Runtime.View.OutGame.Audio
             {
                 if (element.ClassListContains(DRAG_COMPLETED_CLASS_NAME))
                 {
-                    return;
+                    return true;
                 }
 
                 if (!element.enabledInHierarchy)
                 {
-                    return;
+                    return true;
                 }
 
-                if (_config.TryResolveClickCue(element, out string cueName, out bool hasMultipleMatches))
+                if (_config.TryResolveActivationCue(
+                    element,
+                    out string cueName,
+                    out bool hasMultipleMatches))
                 {
                     _player.Play(cueName);
-                    return;
+                    return true;
                 }
 
                 if (hasMultipleMatches)
                 {
                     Debug.LogWarning(
                         $"[{nameof(UIToolkitSoundEffectBinder)}] " +
-                        $"要素{element.name}にClickEvent用の音クラスが複数設定されています。");
-                    return;
+                        $"要素{element.name}にActivation用の音クラスが複数設定されています。");
+                    return true;
                 }
 
                 nearestButton ??= element as Button;
@@ -138,35 +182,47 @@ namespace KillChord.Runtime.View.OutGame.Audio
 
             if (nearestTab != null && nearestTab.enabledInHierarchy)
             {
-                if (nearestTab.ClassListContains(SELECT_SOUND_TAB_CLASS_NAME)
-                    && _config.TryGetCue(UISoundEffectKind.Select, out string cueName))
+                if (_config.TryResolveActivationCue(
+                    nearestTab,
+                    out string cueName,
+                    out bool hasMultipleMatches))
                 {
                     _player.Play(cueName);
-                    return;
+                    return true;
                 }
 
-                _player.Play(_config.DefaultButtonClickCue);
-                return;
+                if (hasMultipleMatches)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(UIToolkitSoundEffectBinder)}] " +
+                        $"要素{nearestTab.name}にActivation用の音クラスが複数設定されています。");
+                    return true;
+                }
+
+                _player.Play(_config.DefaultButtonActivationCue);
+                return true;
             }
 
             if (nearestButton != null && nearestButton.enabledInHierarchy)
             {
-                _player.Play(_config.DefaultButtonClickCue);
+                _player.Play(_config.DefaultButtonActivationCue);
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>
-        ///     指定された要素からPointerDownEvent用のCueを解決して再生する。
+        ///     指定された要素からPointerDown作動用のCueを解決して再生する。
         /// </summary>
         /// <param name="target"> PointerDownEventのtarget要素。 </param>
-        internal void ProcessPointerDown(VisualElement target)
+        internal void ProcessPointerDownActivation(VisualElement target)
         {
-            if (_isDisposed || target == null)
+            if (_isDisposed || target == null || IsButtonOrTabHeaderDescendant(target))
             {
                 return;
             }
 
-            bool isButtonOrDescendant = IsButtonOrDescendant(target);
             for (VisualElement element = target; element != null; element = element.parent)
             {
                 if (!element.enabledInHierarchy)
@@ -174,20 +230,11 @@ namespace KillChord.Runtime.View.OutGame.Audio
                     return;
                 }
 
-                if (_config.TryResolvePointerDownCue(
+                if (_config.TryResolvePointerDownActivationCue(
                     element,
                     out string cueName,
                     out bool hasMultipleMatches))
                 {
-                    if (isButtonOrDescendant)
-                    {
-                        Debug.LogWarning(
-                            $"[{nameof(UIToolkitSoundEffectBinder)}] " +
-                            $"Buttonまたはその子要素{element.name}に" +
-                            "PointerDownEvent用の音クラスが設定されています。");
-                        return;
-                    }
-
                     _player.Play(cueName);
                     return;
                 }
@@ -196,7 +243,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
                 {
                     Debug.LogWarning(
                         $"[{nameof(UIToolkitSoundEffectBinder)}] " +
-                        $"要素{element.name}にPointerDownEvent用の音クラスが複数設定されています。");
+                        $"要素{element.name}にPointerDown作動用の音クラスが複数設定されています。");
                     return;
                 }
 
@@ -208,15 +255,32 @@ namespace KillChord.Runtime.View.OutGame.Audio
         }
 
         /// <summary>
-        ///     指定要素自身または祖先がButtonか確認する。
+        ///     ポインターイベントが左クリックまたは主タッチか確認する。
+        /// </summary>
+        /// <param name="pointerType"> ポインターの種類。 </param>
+        /// <param name="button"> 操作されたボタン。 </param>
+        /// <param name="isPrimary"> 主ポインターの場合はtrue。 </param>
+        /// <returns> 左クリックまたは主タッチの場合はtrue。 </returns>
+        private static bool IsPrimaryPointerActivation(
+            string pointerType,
+            int button,
+            bool isPrimary)
+        {
+            return pointerType == UnityEngine.UIElements.PointerType.mouse
+                ? button == (int)MouseButton.LeftMouse
+                : pointerType == UnityEngine.UIElements.PointerType.touch && isPrimary;
+        }
+
+        /// <summary>
+        ///     指定要素自身または祖先がButtonかTabヘッダーか確認する。
         /// </summary>
         /// <param name="target"> 確認を開始する要素。 </param>
-        /// <returns> Button自身またはその子要素の場合はtrue。 </returns>
-        private bool IsButtonOrDescendant(VisualElement target)
+        /// <returns> ButtonまたはTabヘッダー自身か、その子要素の場合はtrue。 </returns>
+        private bool IsButtonOrTabHeaderDescendant(VisualElement target)
         {
             for (VisualElement element = target; element != null; element = element.parent)
             {
-                if (element is Button)
+                if (element is Button || _tabByHeader.ContainsKey(element))
                 {
                     return true;
                 }

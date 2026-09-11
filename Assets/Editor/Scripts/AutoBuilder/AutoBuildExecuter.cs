@@ -468,7 +468,11 @@ namespace KillChord.Editor.AutoBuilder
                 // Profile切替。
                 BuildProfile.SetActiveBuildProfile(profile);
 
-                await WaitForEditorReady();
+                // プラットフォーム切替（特にAndroid/iOS）はスクリプトの全再コンパイルを
+                // 引き起こすことがあり、Libraryがまっさらな状態では120秒を超えることがある。
+                // ここだけデフォルトより長めに待つ（超過時は例外を投げてこのプロファイルを
+                // スキップする挙動は変えない）。
+                await WaitForEditorReady(timeoutSeconds: 900);
                 LogDebug($"プロファイル切替後のエディタ準備完了: {profile.name}");
 
                 string[] scenes = profile.GetScenesForBuild()

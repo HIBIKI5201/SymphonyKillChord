@@ -85,7 +85,9 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 _sceneTransitionService,
                 _loadingOperationExecutor,
                 _sceneInitializationReadiness);
-            _sceneTransitionController = new SceneTransitionController(_sceneTransitionUsecase);
+            _sceneTransitionController = new SceneTransitionController(
+                _sceneTransitionUsecase,
+                destroyCancellationToken);
 
             ServiceLocator.RegisterInstance(_loadingScreenController);
             ServiceLocator.RegisterInstance<ILoadingSessionFactory>(_loadingScreenController);

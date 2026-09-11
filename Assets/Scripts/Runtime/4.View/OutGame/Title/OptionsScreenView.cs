@@ -1,6 +1,8 @@
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -14,13 +16,25 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// <summary>
         ///    オプション画面の View を初期化します。
         /// </summary>
-        /// <param name="rootElement"></param>
-        /// <param name="outGameUIEvent"></param>
-        public OptionsScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
+        /// <param name="rootElement"> オプション画面のルート要素です。 </param>
+        /// <param name="outGameUIEvent"> アウトゲームの UI イベントです。 </param>
+        /// <param name="hierarchicalNavigationScope"> オプション画面の階層ごとにフォーカスを管理するクラスです。 </param>
+        public OptionsScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent,
+            HierarchicalNavigationScope hierarchicalNavigationScope)
             : base(rootElement, outGameUIEvent)
         {
-            Initialize(rootElement);
+            Initialize(rootElement, hierarchicalNavigationScope);
             RegisterButtonCallbacks();
+        }
+
+        /// <summary>
+        ///     タブ選択状態へ戻してオプション画面を表示する。
+        /// </summary>
+        public override ValueTask Show(CancellationToken cancellationToken = default)
+        {
+            NormalizeActiveTab();
+            _navigationScope.ResetToRootLevel();
+            return base.Show(cancellationToken);
         }
 
         /// <summary>
@@ -29,6 +43,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         public override void Dispose()
         {
             UnregisterButtonCallbacks();
+            _navigationScope.Dispose();
             base.Dispose();
         }
 
@@ -45,7 +60,9 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const string VOLUME_SETTINGS_TAB_NAME = "VolumeSettings";
         private const string DATA_RESET_TAB_NAME = "DetaReset";
         private const string BGM_VOLUME_SLIDER_NAME = "BGMVolumeSlider";
+        private const string SOUND_EFFECT_VOLUME_SLIDER_NAME = "SEVolumeSlider";
         private const string DATA_RESET_BUTTON_NAME = "DataResetButton";
+        private const int VOLUME_STEP = 1;
 
         private Button _backButton;
         private VisualElement _backGround;
@@ -53,14 +70,18 @@ namespace KillChord.Runtime.View.OutGame.Title
         private Tab _volumeSettingsTab;
         private Tab _dataResetTab;
         private SliderInt _bgmVolumeSlider;
+        private SliderInt _soundEffectVolumeSlider;
         private Button _dataResetButton;
+        private HierarchicalNavigationScope _navigationScope;
+        private IDisposable _backButtonActivation;
 
         /// <summary>
         ///     オプション画面の UI 要素を初期化します。
         /// </summary>
-        /// <param name="rootElement"></param>
-        /// <exception cref="NullReferenceException"></exception>
-        private void Initialize(VisualElement rootElement)
+        /// <param name="rootElement"> オプション画面のルート要素です。 </param>
+        /// <param name="hierarchicalNavigationScope"> オプション画面の階層ごとにフォーカスを管理するクラスです。 </param>
+        /// <exception cref="NullReferenceException"> 必要な UI 要素が見つからない場合に発生します。 </exception>
+        private void Initialize(VisualElement rootElement, HierarchicalNavigationScope hierarchicalNavigationScope)
         {
             if (rootElement == null)
             {
@@ -69,9 +90,15 @@ namespace KillChord.Runtime.View.OutGame.Title
 #endif
                 return;
             }
+            if (hierarchicalNavigationScope == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(OptionsScreenView)}: HierarchicalNavigationScopeがnullです。");
+#endif
+            }
 
             _backButton = rootElement.Q<Button>(BACK_BUTTON_NAME)
-                ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {BACK_BUTTON_NAME}が見つかりません。"); 
+                ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {BACK_BUTTON_NAME}が見つかりません。");
 
             _backGround = rootElement.Q<VisualElement>(BACK_GROUND_NAME)
                 ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {BACK_GROUND_NAME}が見つかりません。");
@@ -83,11 +110,31 @@ namespace KillChord.Runtime.View.OutGame.Title
                 ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {DATA_RESET_TAB_NAME}が見つかりません。");
             _bgmVolumeSlider = rootElement.Q<SliderInt>(BGM_VOLUME_SLIDER_NAME)
                 ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {BGM_VOLUME_SLIDER_NAME}が見つかりません。");
+            _soundEffectVolumeSlider = rootElement.Q<SliderInt>(SOUND_EFFECT_VOLUME_SLIDER_NAME)
+                ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {SOUND_EFFECT_VOLUME_SLIDER_NAME}が見つかりません。");
             _dataResetButton = rootElement.Q<Button>(DATA_RESET_BUTTON_NAME)
                 ?? throw new NullReferenceException($"{nameof(OptionsScreenView)}: {DATA_RESET_BUTTON_NAME}が見つかりません。");
-
-            _volumeSettingsTab.tabHeader.MakeNavigable();
-            _dataResetTab.tabHeader.MakeNavigable();
+            _navigationScope = hierarchicalNavigationScope;
+            _navigationScope.SetRootLevel(new VisualElement[]
+            {
+                _volumeSettingsTab.tabHeader,
+                _dataResetTab.tabHeader,
+            });
+            _navigationScope.AddChildLevel(
+                _volumeSettingsTab.tabHeader,
+                new VisualElement[]
+                {
+                    _bgmVolumeSlider,
+                    _soundEffectVolumeSlider,
+                },
+                _bgmVolumeSlider);
+            _navigationScope.AddChildLevel(
+                _dataResetTab.tabHeader,
+                new VisualElement[]
+                {
+                    _dataResetButton,
+                },
+                _dataResetButton);
         }
 
         /// <summary>
@@ -95,16 +142,18 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void RegisterButtonCallbacks()
         {
-            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
-
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
 
             _backGround.RegisterCallback<PointerDownEvent>(OnPointDownEvent);
             _volumeSettingsTab.tabHeader.RegisterCallback<ClickEvent>(HandleVolumeTabClickedHandler);
             _volumeSettingsTab.tabHeader.RegisterCallback<NavigationSubmitEvent>(HandleVolumeTabSubmittedHandler);
             _dataResetTab.tabHeader.RegisterCallback<ClickEvent>(HandleDataResetTabClickedHandler);
             _dataResetTab.tabHeader.RegisterCallback<NavigationSubmitEvent>(HandleDataResetTabSubmittedHandler);
+            RootElement.RegisterCallback<NavigationMoveEvent>(
+                HandleVolumeSliderNavigationHandler,
+                TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -112,12 +161,15 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void UnregisterButtonCallbacks()
         {
-            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
+            _backButtonActivation?.Dispose();
             _backGround.UnregisterCallback<PointerDownEvent>(OnPointDownEvent);
             _volumeSettingsTab.tabHeader.UnregisterCallback<ClickEvent>(HandleVolumeTabClickedHandler);
             _volumeSettingsTab.tabHeader.UnregisterCallback<NavigationSubmitEvent>(HandleVolumeTabSubmittedHandler);
             _dataResetTab.tabHeader.UnregisterCallback<ClickEvent>(HandleDataResetTabClickedHandler);
             _dataResetTab.tabHeader.UnregisterCallback<NavigationSubmitEvent>(HandleDataResetTabSubmittedHandler);
+            RootElement.UnregisterCallback<NavigationMoveEvent>(
+                HandleVolumeSliderNavigationHandler,
+                TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -125,7 +177,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void HandleVolumeTabClickedHandler(ClickEvent clickEvent)
         {
-            SelectTab(_volumeSettingsTab, _bgmVolumeSlider);
+            SelectTab(_volumeSettingsTab);
         }
 
         /// <summary>
@@ -133,7 +185,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void HandleVolumeTabSubmittedHandler(NavigationSubmitEvent navigationEvent)
         {
-            SelectTab(_volumeSettingsTab, _bgmVolumeSlider);
+            SelectTab(_volumeSettingsTab);
             navigationEvent.StopPropagation();
         }
 
@@ -142,7 +194,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void HandleDataResetTabClickedHandler(ClickEvent clickEvent)
         {
-            SelectTab(_dataResetTab, _dataResetButton);
+            SelectTab(_dataResetTab);
         }
 
         /// <summary>
@@ -150,16 +202,67 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void HandleDataResetTabSubmittedHandler(NavigationSubmitEvent navigationEvent)
         {
-            SelectTab(_dataResetTab, _dataResetButton);
+            SelectTab(_dataResetTab);
             navigationEvent.StopPropagation();
+        }
+
+        /// <summary>
+        ///     音量スライダー間の上下フォーカス移動を明示的に処理する。
+        /// </summary>
+        /// <param name="navigationEvent"> ナビゲーション移動イベント。 </param>
+        private void HandleVolumeSliderNavigationHandler(NavigationMoveEvent navigationEvent)
+        {
+            VisualElement focusedElement = FocusedElement;
+            if (focusedElement == null)
+            {
+                return;
+            }
+
+            bool isBgmFocused = ReferenceEquals(focusedElement, _bgmVolumeSlider) ||
+                _bgmVolumeSlider.Contains(focusedElement);
+            bool isSoundEffectFocused = ReferenceEquals(focusedElement, _soundEffectVolumeSlider) ||
+                _soundEffectVolumeSlider.Contains(focusedElement);
+
+            if (!isBgmFocused && !isSoundEffectFocused)
+            {
+                return;
+            }
+
+            SliderInt focusedSlider = isBgmFocused
+                ? _bgmVolumeSlider
+                : _soundEffectVolumeSlider;
+
+            switch (navigationEvent.direction)
+            {
+                case NavigationMoveEvent.Direction.Left:
+                    ChangeVolume(focusedSlider, -VOLUME_STEP);
+                    break;
+                case NavigationMoveEvent.Direction.Right:
+                    ChangeVolume(focusedSlider, VOLUME_STEP);
+                    break;
+                case NavigationMoveEvent.Direction.Up when isSoundEffectFocused:
+                    _bgmVolumeSlider.Focus();
+                    break;
+                case NavigationMoveEvent.Direction.Down when isBgmFocused:
+                    _soundEffectVolumeSlider.Focus();
+                    break;
+                case NavigationMoveEvent.Direction.Up:
+                case NavigationMoveEvent.Direction.Down:
+                    break;
+                default:
+                    return;
+            }
+
+            // スライダー操作中は TabView の内部要素へフォーカスを逃がさない。
+            RootElement.panel?.focusController?.IgnoreEvent(navigationEvent);
+            navigationEvent.StopImmediatePropagation();
         }
 
 
         /// <summary>
         ///     戻るボタンが押されたときの処理。
         /// </summary>
-        /// <param name="clickEvent"> クリックイベント。 </param>
-        private void OnBackButtonClicked(ClickEvent clickEvent)
+        private void HandleBackButtonActivationHandler()
         {
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
@@ -167,7 +270,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// <summary>
         ///     バックグラウンドが押されたときの処理。
         /// </summary>
-        /// <param name="evt"></param>
+        /// <param name="evt"> ポインター押下イベント。 </param>
         private void OnPointDownEvent(PointerDownEvent evt)
         {
             // バックグラウンドの子要素が押された場合は処理を行わない
@@ -177,14 +280,38 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         /// <summary>
-        ///     指定タブを選択し、そのタブ内の先頭項目へフォーカスを移す。
+        ///     指定タブを選択し、そのタブの内容操作へ切り替える。
         /// </summary>
         /// <param name="tab"> 選択するタブ。 </param>
-        /// <param name="firstItem"> タブ内の先頭項目。 </param>
-        private void SelectTab(Tab tab, VisualElement firstItem)
+        private void SelectTab(Tab tab)
         {
             _tabView.activeTab = tab;
-            firstItem.FocusDeferred();
+            _navigationScope.EnterLevel(tab.tabHeader);
+        }
+
+        /// <summary>
+        ///     指定した音量スライダーの値を範囲内で増減する。
+        /// </summary>
+        /// <param name="slider"> 操作対象の音量スライダー。 </param>
+        /// <param name="delta"> 音量へ加算する値。 </param>
+        private static void ChangeVolume(SliderInt slider, int delta)
+        {
+            int minimum = Mathf.Min(slider.lowValue, slider.highValue);
+            int maximum = Mathf.Max(slider.lowValue, slider.highValue);
+            slider.value = Mathf.Clamp(slider.value + delta, minimum, maximum);
+        }
+
+        /// <summary>
+        ///     現在表示中のタブを既知のタブへ正規化する。
+        /// </summary>
+        private void NormalizeActiveTab()
+        {
+            if (ReferenceEquals(_tabView.activeTab, _dataResetTab))
+            {
+                return;
+            }
+
+            _tabView.activeTab = _volumeSettingsTab;
         }
     }
 }

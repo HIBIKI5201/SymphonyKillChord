@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 3385280616353316531}
   - component: {fileID: 2793673215862482267}
   - component: {fileID: -8188648159191096068}
+  - component: {fileID: 735825971126831396}
   m_Layer: 8
   m_Name: EnemyArtillery
   m_TagString: Untagged
@@ -151,6 +152,7 @@ MonoBehaviour:
   _healthView: {fileID: -5582845147010298855}
   _raycastView: {fileID: 8900643656970599263}
   _attackPositionSearchView: {fileID: -1587367200165867470}
+  _obstacleSearchView: {fileID: 735825971126831396}
   _enemyMovementAIFacade: {fileID: -1108031046539433984}
   _enemyBattleAIFacade: {fileID: -7434688505541404117}
   _enemyStateFacade: {fileID: 3390705430803442452}
@@ -351,6 +353,13 @@ MonoBehaviour:
   _deathEffectDuration: 1
   _deathSwampSinkDuration: 3
   _targetTransform: {fileID: 125480086020897926}
+  _postAttackStayWeight: 0.5
+  _postAttackRegroupWeight: 0.25
+  _postAttackObstacleWeight: 0.25
+  _regroupDistanceMin: 2
+  _regroupDistanceMax: 3
+  _obstacleApproachRatio: 0.3
+  _overrideArrivalThreshold: 0.5
   _shellSpawner: {fileID: -2597676450090958460}
 --- !u!114 &6024709665745219317
 MonoBehaviour:
@@ -380,6 +389,8 @@ MonoBehaviour:
   _attackAttackReservedAnimation: Enemy_AttackReserved
   _weaponItemView: {fileID: -8188648159191096068}
   _damageEffectTransform: {fileID: 896641383679223216}
+  _speedVarianceMin: 0.9
+  _speedVarianceMax: 1.1
 --- !u!114 &-5582845147010298855
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -450,6 +461,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87fe872ba5861de44bc88a6a5d4520b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.EnemyStateFacade
+  _viewAngleDegrees: 60
+  _sightRange: 30
 --- !u!114 &-1587367200165867470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -464,6 +477,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.NearestAttackPositionSearchView
   _samplingCount: 24
   _searchInterval: 0.166
+  _angleJitterDegrees: 10
+  _nearOptimalTolerance: 1.15
   _agent: {fileID: 3385280616353316531}
   _raycastView: {fileID: 8900643656970599263}
 --- !u!114 &-2597676450090958460
@@ -597,6 +612,23 @@ MonoBehaviour:
   _attackEffect: {fileID: 0}
   _effectDelaySeconds: 0
   _effectRenderers: []
+--- !u!114 &735825971126831396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1465007639519197220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61d43c8ef9697094da6aa66248af0ed5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Enemy.NearbyObstacleSearchView
+  _searchRadius: 10
+  _obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  _resultArraySize: 8
 --- !u!1 &1615154112970335870
 GameObject:
   m_ObjectHideFlags: 0
