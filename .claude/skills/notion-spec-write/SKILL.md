@@ -37,8 +37,8 @@ Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を�
 
 ## 書き込める範囲
 
-`sinfonia-operator.env.json`の`NOTION_WRITE_ALLOWED_ROOTS`に列挙されたページの**子孫だけ**が対象。
-許可ページ自身の本文は編集できず、作成先の親としてのみ指定できる。
+`sinfonia-operator.env.json`の`NOTION_WRITE_ALLOWED_ROOTS`に列挙された**ページ自身とその子孫**が対象。
+許可ページ自身の本文も編集でき、作成先の親としても指定できる。
 
 範囲外のページを頼まれた場合は、勝手に許可リストへ追記せず、ユーザーへ確認する
 （この設定はGit共有で、追加はリポジトリの変更としてレビューされる前提のもの）。

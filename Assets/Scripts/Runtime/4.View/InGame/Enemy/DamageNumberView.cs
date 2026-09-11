@@ -32,8 +32,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             _damageText.SetText("{0}", Mathf.CeilToInt(dTO.Damage));
 
-            ApplyRandomPosition();
-            ApplyStyle(dTO.Type);
+            ApplyStyle(dTO.Type, dTO.IsCritical);
             PlayMovement();
             PlayFade();
         }
@@ -65,12 +64,6 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("ダメージ数値の移動距離")]
         private float _moveDistance;
 
-        [SerializeField, Tooltip("ダメージ数値のランダム表示位置の最小値")]
-        private Vector2 _randomPositionMin;
-
-        [SerializeField, Tooltip("ダメージ数値のランダム表示位置の最大値")]
-        private Vector2 _randomPositionMax;
-
         [SerializeField, Tooltip("イージングタイプ")]
         private Ease _easeType = Ease.OutQuad;
 
@@ -86,24 +79,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        ///     ダメージ数値の表示位置をランダムにずらす。
-        /// </summary>
-        private void ApplyRandomPosition()
-        {
-            float randomX = UnityEngine.Random.Range(_randomPositionMin.x, _randomPositionMax.x);
-            float randomY = UnityEngine.Random.Range(_randomPositionMin.y, _randomPositionMax.y);
-
-            Vector3 position = transform.localPosition;
-            position.x += randomX;
-            position.y += randomY;
-            transform.localPosition = position;
-        }
-
-        /// <summary>
         ///     ダメージ種類に応じた表示スタイルを適用する。
         /// </summary>
         /// <param name="type">ダメージ種類</param>
-        private void ApplyStyle(DamageNumberType type)
+        /// <param name="isCritical">クリティカルかどうか</param>
+        private void ApplyStyle(DamageNumberType type, bool isCritical)
         {
             DamageNumberStyle style = FindStyle(type);
 
@@ -114,6 +94,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
+            Debug.Log($"[DamageNumberView] Type:{type} Color:{style.TextColor} Material:{style.FontMaterial?.name}", this);
+
+            if (style.FontMaterial != null)
+            {
+                // これで用意済みのTMP Material Assetを切り替える。
+                _damageText.fontSharedMaterial = style.FontMaterial;
+            }
+
             _damageText.color = style.TextColor;
 
             if (_backGroundImage == null)
@@ -121,20 +109,30 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
-            Sprite backgroundSprite = style.BackGroundSprite;
 
-            // 通常時等表示しない場合は背景画像を非表示にする。
-            bool hasBackground = backgroundSprite != null;
-
-            _backGroundImage.sprite = backgroundSprite;
-            _backGroundImage.enabled = hasBackground;
-
-            if (hasBackground)
+            // ダメージ数値の背景画像はクリティカル時のみ表示する。
+            if (!isCritical)
             {
-                Color color = _backGroundImage.color;
-                color.a = 1f;
-                _backGroundImage.color = color;
+                HideBackground();
+                return;
             }
+
+            DamageNumberStyle criticalStyle = FindStyle(DamageNumberType.Critical);
+
+            if (criticalStyle == null || criticalStyle.BackGroundSprite == null)
+            {
+                HideBackground();
+                return;
+            }
+
+            Sprite backgroundSprite = criticalStyle.BackGroundSprite;
+            _backGroundImage.sprite = backgroundSprite;
+            _backGroundImage.enabled = true;
+
+
+            Color color = _backGroundImage.color;
+            color.a = 1f;
+            _backGroundImage.color = color;
         }
 
         /// <summary>

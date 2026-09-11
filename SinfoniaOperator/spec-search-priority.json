@@ -1,0 +1,16 @@
+[
+  { "PathContains": "Symphony Kill Chord/基本情報.md", "Weight": 1.5 },
+  { "PathContains": "Symphony Kill Chord/仕様概要/", "Weight": 1.5 },
+  { "PathContains": "Symphony Kill Chord/システム概要/", "Weight": 1.5 },
+  { "PathContains": "Symphony Kill Chord/世界観設定/", "Weight": 1.2 },
+  { "PathContains": "Symphony Kill Chord/背景設定/", "Weight": 1.2 },
+  { "PathContains": "Symphony Kill Chord/キャラクター設定/", "Weight": 1.2 },
+  { "PathContains": "Symphony Kill Chord/ステータスリスト/", "Weight": 1.2 },
+  { "PathContains": "Symphony Kill Chord/用語/", "Weight": 1.2 },
+  { "PathContains": "Symphony Kill Chord/マスターデータ/", "Weight": 1.2 },
+  { "PathContains": "Symphony Kill Chord/ワークフロー/", "Weight": 1.2 },
+  { "PathContains": "Symphony Kill Chord/議事録/", "Weight": 0.7 },
+  { "PathContains": "Symphony Kill Chord/スケジュール/", "Weight": 0.7 },
+  { "PathContains": "Symphony Kill Chord/仕様検討フォーラム/", "Weight": 0.4 },
+  { "PathContains": "Symphony Kill Chord/スケジュール/タスク管理/", "Weight": 0.4 }
+]

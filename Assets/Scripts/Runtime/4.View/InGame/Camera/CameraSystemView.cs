@@ -99,6 +99,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             EventBus<EOnEnemyDefeated>.Register(EnemyDefeatedHandler);
             EventBus<EOnPlayerAttackExecuted>.Register(PlayerAttackExecutedHandler);
             EventBus<EOnPlayerTakeDamage>.Register(PlayerTakeDamageHandler);
+            EventBus<EOnSkillExecuted>.Register(SkillExecutedHandler);
         }
 
         /// <summary>
@@ -203,6 +204,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField, Tooltip("プレイヤーが被弾した時のカメラシェイク設定")]
         private CameraShakeConfig _playerDamageShakeConfig;
 
+        [SerializeField, Tooltip("スキルを発動した時のカメラシェイク設定")]
+        private CameraShakeConfig _skillExecutedShakeConfig;
+
+#if UNITY_EDITOR
+        [Header("Debug (Editor Only)")]
+        [SerializeField, Tooltip("（エディタ確認用）攻撃時に自動でカメラが敵をロックオンする挙動の有効/無効。ビルドでは常に有効。")]
+        private bool _enableAttackAutoLockOn = true;
+#endif
+
         private PlayerInputView _inputView;
         private UnityEngine.Camera _camera;
         private Transform _playerT;
@@ -232,6 +242,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         private float _autoLockOnIdleTimer;
         private float _autoLockOnViewportGraceTimer;
         private bool _isExternallyControlled;
+
+#if UNITY_EDITOR
+        /// <summary>
+        ///     攻撃をきっかけとした自動ロックオン（オートフォーカス）が有効かどうか。
+        ///     エディタ専用。<see cref="_enableAttackAutoLockOn"/> で切り替える。
+        ///     手動ロックオンには影響しない。
+        /// </summary>
+        private bool IsAttackAutoLockOnEnabled => _enableAttackAutoLockOn;
+#endif
 
         /// <summary>
         ///     FixedUpdate タイミングでカメラを更新する。
@@ -281,6 +300,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             EventBus<EOnEnemyDefeated>.Unregister(EnemyDefeatedHandler);
             EventBus<EOnPlayerAttackExecuted>.Unregister(PlayerAttackExecutedHandler);
             EventBus<EOnPlayerTakeDamage>.Unregister(PlayerTakeDamageHandler);
+            EventBus<EOnSkillExecuted>.Unregister(SkillExecutedHandler);
 
             if (_inputView == null) { return; }
 
@@ -374,6 +394,13 @@ namespace KillChord.Runtime.View.InGame.Camera
         {
             if (context.Phase == InputActionPhase.Started)
             {
+#if UNITY_EDITOR
+                if (!IsAttackAutoLockOnEnabled)
+                {
+                    return;
+                }
+#endif
+
                 TryActiveAutoLockOn(_playerT.position, GetCurrentForward());
             }
         }
@@ -388,6 +415,13 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 return;
             }
+
+#if UNITY_EDITOR
+            if (!IsAttackAutoLockOnEnabled)
+            {
+                return;
+            }
+#endif
 
             if (_trySetTargetByIdFunc == null || !_trySetTargetByIdFunc.Invoke(eventData.DefenderId))
             {
@@ -425,6 +459,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void PlayerTakeDamageHandler(EOnPlayerTakeDamage eventData)
         {
             RequestShake(_playerDamageShakeConfig);
+        }
+
+        /// <summary>
+        ///     スキルの発動イベントを受け取り、発動時のカメラシェイクを要求する。
+        /// </summary>
+        /// <param name="eventData"> スキル発動イベント。 </param>
+        private void SkillExecutedHandler(EOnSkillExecuted eventData)
+        {
+            RequestShake(_skillExecutedShakeConfig);
         }
 
         /// <summary>

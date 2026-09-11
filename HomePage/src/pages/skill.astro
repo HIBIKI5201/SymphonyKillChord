@@ -1,0 +1,33 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
+import FeatureCard from '../components/FeatureCard.astro';
+import skills from '../data/skills.json';
+---
+
+<Layout title="スキル | Symphony Kill Chord">
+	<main>
+		<PageHeader eyebrow="Skill" title="スキル" />
+
+		<section id="skill-list">
+			{skills.map((skill) => <FeatureCard name={skill.name} description={skill.description} />)}
+		</section>
+	</main>
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		max-width: 1080px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	#skill-list {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 48px;
+	}
+</style>
