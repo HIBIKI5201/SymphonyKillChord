@@ -28,6 +28,18 @@ namespace KillChord.Runtime.InfraStructure.Player
             return TryFind(id, out skillData);
         }
 
+        /// <summary>
+        ///     登録されている全てのスキルデータを取得します。
+        /// </summary>
+        /// <returns> 全スキルデータ。 </returns>
+        public IReadOnlyCollection<SkillTemplate> GetAllSkills()
+        {
+#if UNITY_EDITOR
+            InvalidateCache();
+#endif
+            return GetAllValues();
+        }
+
         public SkillDefinition GetSkill(SkillId id, double bpm)
         {
 #if UNITY_EDITOR

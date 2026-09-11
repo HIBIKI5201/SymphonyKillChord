@@ -1,7 +1,13 @@
+using KillChord.Runtime.Adaptor.OutGame.Skill;
+using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Application.OutGame.SkillTree;
+using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Domain.Player;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -29,8 +35,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             Dictionary<int, VisualElement> unlockPhases,
             Dictionary<int, VideoClip> videoClipBinds,
             SkillTreeStatusEntity skillTreeStatusEntity,
-            Action ownedSkillChanged)
+            Action ownedSkillChanged,
+            ISkillRepository skillRepository,
+            SkillDisplayTextFormatter skillDisplayTextFormatter,
+            IReadOnlyDictionary<SkillType, Sprite> skillGenreIcons)
         {
+            _skillRepository = skillRepository;
+            _skillDisplayTextFormatter = skillDisplayTextFormatter;
+            _skillGenreIcons = skillGenreIcons;
             _skillDetailPresenter = presenter;
             _currentPointsLabel = currentPointsLabel;
             _skillDetailView = skillDetailView;
@@ -73,6 +85,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(nodeId);
             SkillDetailDTO dto = new SkillDetailDTO(
                 entity.SkillNodeIdVO.Id,
+                HasUnlockSkill(entity.UnlockSkillIds),
+                ResolveSkillName(entity.UnlockSkillIds),
+                ResolveSkillCommand(entity.UnlockSkillIds),
+                ResolveSkillGenre(entity.UnlockSkillIds),
+                ResolveSkillGenreIcon(entity.UnlockSkillIds),
                 entity.SkillDetail,
                 _costToUnlock,
                 canUnlock,
@@ -119,7 +136,18 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
             SkillNodeEntity selectedNode = _skillNodeEntities[new SkillNodeId(_selectedNodeId)];
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(_selectedNodeId);
-            SkillDetailDTO dto = new SkillDetailDTO(selectedNode.SkillNodeIdVO.Id, selectedNode.SkillDetail, -1, false, selectedNode.IsUnlocked, hasVideo);
+            SkillDetailDTO dto = new SkillDetailDTO(
+                selectedNode.SkillNodeIdVO.Id,
+                HasUnlockSkill(selectedNode.UnlockSkillIds),
+                ResolveSkillName(selectedNode.UnlockSkillIds),
+                ResolveSkillCommand(selectedNode.UnlockSkillIds),
+                ResolveSkillGenre(selectedNode.UnlockSkillIds),
+                ResolveSkillGenreIcon(selectedNode.UnlockSkillIds),
+                selectedNode.SkillDetail,
+                -1,
+                false,
+                selectedNode.IsUnlocked,
+                hasVideo);
             _skillDetailPresenter.Push(dto);
             _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
             _playerStatusPresenter.Push();
@@ -200,6 +228,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private Dictionary<int, string[]> _skillNodeConnBinds;
         private Dictionary<string, ISkillNodeConnViewModel> _nodeConns;
         private Dictionary<int, VideoClip> _videoClipBinds;
+        private ISkillRepository _skillRepository;
+        private SkillDisplayTextFormatter _skillDisplayTextFormatter;
+        private IReadOnlyDictionary<SkillType, Sprite> _skillGenreIcons;
         private ISkillDetailShowable _skillDetailView;
         private SkillDetailPresenter _skillDetailPresenter;
         private SkillTreeService _skillTreeService;
@@ -214,6 +245,163 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private bool _isResetting;
 
         private const string CURRENT_POINTS_LABEL_TEXT = "所持ポイント：";
+        private const string SKILL_NAME_SEPARATOR = "、";
+        private const string COMMAND_SEPARATOR = " → ";
+
+        /// <summary>
+        ///     ノードがスキルを解放するかどうかを判定する。
+        /// </summary>
+        /// <param name="skillIds"> 解放対象のスキルID一覧。 </param>
+        /// <returns> 1件以上のスキルを解放する場合は true。 </returns>
+        private static bool HasUnlockSkill(SkillId[] skillIds)
+        {
+            return skillIds != null && skillIds.Length > 0;
+        }
+
+        /// <summary>
+        ///     ノードが解放するスキルの名前を解決する。
+        /// </summary>
+        /// <param name="skillIds"> 解放対象のスキルID一覧。 </param>
+        /// <returns> スキル名を「、」で連結した文字列。解決できない場合は空文字列。 </returns>
+        private string ResolveSkillName(SkillId[] skillIds)
+        {
+            if (_skillRepository == null || skillIds == null || skillIds.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < skillIds.Length; i++)
+            {
+                if (!_skillRepository.TryGetSkill(skillIds[i], out SkillTemplate skillData))
+                {
+                    continue;
+                }
+
+                if (builder.Length > 0)
+                {
+                    builder.Append(SKILL_NAME_SEPARATOR);
+                }
+                builder.Append(skillData.DisplayName);
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        ///     ノードが解放するスキルの発動コマンドを解決する(値のみ、キャプション無し)。
+        /// </summary>
+        /// <param name="skillIds"> 解放対象のスキルID一覧。 </param>
+        /// <returns> 発動コマンド表示を「、」で連結した文字列。解決できない場合は空文字列。 </returns>
+        private string ResolveSkillCommand(SkillId[] skillIds)
+        {
+            if (_skillRepository == null || skillIds == null || skillIds.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < skillIds.Length; i++)
+            {
+                if (!_skillRepository.TryGetSkill(skillIds[i], out SkillTemplate skillData))
+                {
+                    continue;
+                }
+
+                if (builder.Length > 0)
+                {
+                    builder.Append(SKILL_NAME_SEPARATOR);
+                }
+                builder.Append(BuildCommandLabel(skillData.Pattern));
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        ///     入力パターンから「2 → 4 → 1」形式のコマンド表示を構築する。
+        /// </summary>
+        /// <param name="pattern"> 入力パターン。 </param>
+        /// <returns> コマンド表示文字列。 </returns>
+        private static string BuildCommandLabel(BeatType[] pattern)
+        {
+            if (pattern == null || pattern.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < pattern.Length; i++)
+            {
+                if (i > 0)
+                {
+                    builder.Append(COMMAND_SEPARATOR);
+                }
+                builder.Append((int)pattern[i]);
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        ///     ノードが解放するスキルのジャンルを解決する(値のみ、キャプション無し)。
+        /// </summary>
+        /// <param name="skillIds"> 解放対象のスキルID一覧。 </param>
+        /// <returns> ジャンル表示を「、」で連結した文字列。解決できない場合は空文字列。 </returns>
+        private string ResolveSkillGenre(SkillId[] skillIds)
+        {
+            if (_skillRepository == null || _skillDisplayTextFormatter == null || skillIds == null || skillIds.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < skillIds.Length; i++)
+            {
+                if (!_skillRepository.TryGetSkill(skillIds[i], out SkillTemplate skillData))
+                {
+                    continue;
+                }
+
+                if (builder.Length > 0)
+                {
+                    builder.Append(SKILL_NAME_SEPARATOR);
+                }
+                builder.Append(_skillDisplayTextFormatter.Format(skillData).SkillTypeLabel);
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        ///     ノードが解放するスキルのジャンルアイコンを解決する。
+        /// </summary>
+        /// <param name="skillIds"> 解放対象のスキルID一覧。 </param>
+        /// <returns> 最初に解決できたスキルの最初のジャンルのアイコン。解決できない場合は null。 </returns>
+        private Sprite ResolveSkillGenreIcon(SkillId[] skillIds)
+        {
+            if (_skillRepository == null || _skillGenreIcons == null || skillIds == null || skillIds.Length == 0)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < skillIds.Length; i++)
+            {
+                if (!_skillRepository.TryGetSkill(skillIds[i], out SkillTemplate skillData))
+                {
+                    continue;
+                }
+
+                if (skillData.Type == null || skillData.Type.Length == 0)
+                {
+                    continue;
+                }
+
+                return _skillGenreIcons.TryGetValue(skillData.Type[0], out Sprite icon) ? icon : null;
+            }
+
+            return null;
+        }
 
         /// <summary>
         ///     スキル解放時、解放段階が進むかチェックして、実行する。

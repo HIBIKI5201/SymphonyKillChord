@@ -5,6 +5,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -71,7 +72,7 @@ namespace KillChord.Editor.Addressables
 
             foreach (AddressableAssetGroup group in settings.groups)
             {
-                if (group == null)
+                if (group == null || !IsIncludedInBuild(group))
                 {
                     continue;
                 }
@@ -91,6 +92,15 @@ namespace KillChord.Editor.Addressables
             errorMessage = $"[{nameof(AddressableKeyValidator)}] Addressablesのアドレスに不備があります。\n- "
                 + string.Join("\n- ", errors);
             return false;
+        }
+
+        /// <summary>
+        ///     現在のデータ種別でビルド対象になっているGroupか判定します。
+        /// </summary>
+        private static bool IsIncludedInBuild(AddressableAssetGroup group)
+        {
+            BundledAssetGroupSchema schema = group.GetSchema<BundledAssetGroupSchema>();
+            return schema == null || schema.IncludeInBuild;
         }
 
         /// <summary>

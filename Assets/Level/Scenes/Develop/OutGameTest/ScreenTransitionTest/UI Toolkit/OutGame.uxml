@@ -7,6 +7,7 @@
     <ui:Template name="StageSelect" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/StageSelect.uxml?fileID=9197481963319205126&amp;guid=6114da1f8d46b1a48ab03c626ed1d9e9&amp;type=3#StageSelect"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Layer.uss?fileID=7433441132597879392&amp;guid=b30038ace8edcc245a8817f3a1b52b55&amp;type=3#Layer"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameNavigation.uss?fileID=7433441132597879392&amp;guid=606450f367b1594449ec1a91c2a55f34&amp;type=3#OutGameNavigation"/>
     <ui:VisualElement name="VisualElement" picking-mode="Ignore" style="flex-grow: 1; background-color: rgba(53, 65, 72, 0);">
         <ui:VisualElement name="ScreenLayer" picking-mode="Ignore" class="layer" style="flex-grow: 1;">
             <ui:Instance template="Home" name="HomeContainer" class="screen" style="height: 100%; width: 100%; position: absolute;"/>

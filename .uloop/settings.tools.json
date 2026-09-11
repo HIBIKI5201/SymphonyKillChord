@@ -1,13 +1,6 @@
 {
     "disabledTools": [
-        "simulate-mouse-ui",
-        "simulate-mouse-input",
-        "simulate-keyboard",
-        "run-tests",
-        "replay-input",
         "raycast",
-        "focus-window",
-        "control-play-mode"
-    ],
-    "skillCliInvocation": "npx"
+        "focus-window"
+    ]
 }
