@@ -18,7 +18,7 @@ TagManager:
   - Player
   - Enemy
   - SkillEffect
-  - 
+  - HomeCharacterPreview
   - 
   - 
   - 
@@ -46,5 +46,3 @@ TagManager:
     locked: 0
   m_RenderingLayers:
   - Default
-  - Character
-  - Decal

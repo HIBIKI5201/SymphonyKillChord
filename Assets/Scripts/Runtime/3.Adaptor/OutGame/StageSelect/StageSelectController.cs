@@ -49,7 +49,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             _selectedStageId = stageId;
             _hasSelectedStage = true;
 
-            // TODO: ノードのデータを渡す時に、セーブデータからミッションの達成状況を受け取るようにする
             _detailPresenter.Push(node);
             _detailScreenView.Show();
         }

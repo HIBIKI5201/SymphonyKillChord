@@ -53,6 +53,9 @@ MonoBehaviour:
   - _addressableKey: EnemyDefinitionRepository
   - _addressableKey: EnemyDirectionIndicatorConfig
   - _addressableKey: UISoundEffectConfig
+  - _addressableKey: StatusBonusEffectIconCatalogAsset
+  - _addressableKey: SkillGenreIconCatalogAsset
+  - _addressableKey: Assets/Level/Data/Master/OutGame/StageSelect/Stream_StageTreeAsset.asset
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset

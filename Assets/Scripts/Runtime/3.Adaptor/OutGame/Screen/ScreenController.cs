@@ -38,14 +38,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         }
 
         /// <summary>
-        ///     オプション画面を表示します。
-        /// </summary>
-        public void ShowOptions()
-        {
-            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Options));
-        }
-
-        /// <summary>
         ///    クレジット画面を表示します。
         /// </summary>
         public void ShowCredit()

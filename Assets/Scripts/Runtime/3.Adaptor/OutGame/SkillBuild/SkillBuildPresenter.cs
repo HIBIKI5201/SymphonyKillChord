@@ -133,7 +133,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 skillTemplate.Level.Value,
                 isUnlocked,
                 ResolveGenreIcon(skillTemplate),
-                ResolveGenreIds(skillTemplate));
+                ResolveGenreIds(skillTemplate),
+                text.ComboStepColors);
         }
 
         /// <summary>

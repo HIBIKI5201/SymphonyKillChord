@@ -1,5 +1,6 @@
 using KillChord.Runtime.View.OutGame.Navigation;
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -32,7 +33,39 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 ?? throw new System.InvalidOperationException(
                     $"{SETTING_BUTTON_NAME} が見つかりません。");
 
+            _rebuildPointsLabel = RootElement.Q<Label>(REBUILD_POINTS_LABEL_NAME)
+                ?? throw new System.InvalidOperationException(
+                    $"{REBUILD_POINTS_LABEL_NAME} が見つかりません。");
+
+            _unlockPointsLabel = RootElement.Q<Label>(UNLOCK_POINTS_LABEL_NAME)
+                ?? throw new System.InvalidOperationException(
+                    $"{UNLOCK_POINTS_LABEL_NAME} が見つかりません。");
+
+            _characterImage = RootElement.Q<Image>(CHARACTER_IMAGE_NAME)
+                ?? throw new System.InvalidOperationException(
+                    $"{CHARACTER_IMAGE_NAME} が見つかりません。");
+
             RegisterButtonCallbacks();
+        }
+
+        /// <summary>
+        ///     トップバーに表示するポイントを更新します。
+        /// </summary>
+        /// <param name="rebuildPoints"> 改造ポイント。 </param>
+        /// <param name="unlockPoints"> 解放ポイント。 </param>
+        public void SetPoints(int rebuildPoints, int unlockPoints)
+        {
+            _rebuildPointsLabel.text = $"改造P：{rebuildPoints}";
+            _unlockPointsLabel.text = $"解放P：{unlockPoints}";
+        }
+
+        /// <summary>
+        ///     キャラクター表示領域に描画するテクスチャを設定します。
+        /// </summary>
+        /// <param name="texture"> 3Dキャラクターをレンダリングしたテクスチャ。 </param>
+        public void SetCharacterTexture(RenderTexture texture)
+        {
+            _characterImage.style.backgroundImage = Background.FromRenderTexture(texture);
         }
 
         /// <summary>
@@ -114,12 +147,18 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string STAGE_SELECT_BUTTON_NAME = "StageSelect";
         private const string SKILL_TREE_BUTTON_NAME = "SkillTree";
         private const string SKILL_BUILD_BUTTON_NAME = "SkillBuild";
-        private const string SETTING_BUTTON_NAME = "Setting";
+        private const string SETTING_BUTTON_NAME = "OptionIcon";
+        private const string REBUILD_POINTS_LABEL_NAME = "RebuildPointsLabel";
+        private const string UNLOCK_POINTS_LABEL_NAME = "UnlockPointsLabel";
+        private const string CHARACTER_IMAGE_NAME = "CharacterImage";
 
         private readonly Button _stageSelectButton;
         private readonly Button _skillTreeButton;
         private readonly Button _skillBuildButton;
         private readonly Button _settingButton;
+        private readonly Label _rebuildPointsLabel;
+        private readonly Label _unlockPointsLabel;
+        private readonly Image _characterImage;
         private IDisposable _stageSelectActivation;
         private IDisposable _skillTreeActivation;
         private IDisposable _skillBuildActivation;

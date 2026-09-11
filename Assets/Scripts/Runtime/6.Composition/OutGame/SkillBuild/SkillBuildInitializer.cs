@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Composition.OutGame.Audio;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
@@ -14,6 +15,7 @@ using KillChord.Runtime.InfraStructure.OutGame.Skill;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using SymphonyFrameWork.System.SaveSystem;
@@ -59,6 +61,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         [Tooltip("スキルジャンルアイコンカタログの Addressables キーです。読み込みに失敗してもアイコンなしで続行します。")]
         private string _skillGenreIconCatalogKey;
 
+        [SerializeField, SourceDataAddress]
+        [Tooltip("発動コマンドの拍子ごとの色設定(SkillInputProgressUIConfig)の Addressables キーです。読み込みに失敗しても既定色で続行します。")]
+        private string _skillInputProgressUIConfigKey;
+
         [SerializeField]
         [Tooltip("スキル要素のテンプレート UXML（Skill.uxml）です。")]
         private VisualTreeAsset _skillElementTemplate;
@@ -76,6 +82,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillRepository _loadedSkillRepository;
         private SkillGenreIconCatalogAsset _loadedSkillGenreIconCatalog;
         private Dictionary<SkillType, Sprite> _skillGenreIcons;
+        private SkillInputProgressUIConfig _loadedSkillInputProgressUIConfig;
+        private Dictionary<int, Color> _skillBeatColors;
         private IReadOnlyList<EquippedSkill> _loadedEquippedSkills;
         private SkillTemplate[] _loadedOwnedSkillTemplates;
         private IReadOnlyCollection<SkillTemplate> _loadedAllSkillTemplates;
@@ -128,7 +136,23 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 _loadedSkillGenreIconCatalog = null;
             }
 
+            try
+            {
+                _loadedSkillInputProgressUIConfig =
+                    await _skillInputProgressUIConfigKey.LoadAssetAsync<SkillInputProgressUIConfig>(this, destroyCancellationToken);
+            }
+            catch (System.Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning(
+                    $"[{nameof(SkillBuildInitializer)}] SkillInputProgressUIConfigの読み込みに失敗しました。既定色で続行します。{ex.Message}",
+                    this);
+#endif
+                _loadedSkillInputProgressUIConfig = null;
+            }
+
             BuildSkillGenreIconMap();
+            BuildSkillBeatColorMap();
 
             _loadedEquippedSkills = await GetEquippedSkillsAsync();
             IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
@@ -170,11 +194,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
             _skillRepositoryKey.ReleaseLoadedAsset(this);
             _skillGenreIconCatalogKey.ReleaseLoadedAsset(this);
+            _skillInputProgressUIConfigKey.ReleaseLoadedAsset(this);
             _loadedOwnedSkillRepository = null;
             _loadedSkillBuildRepository = null;
             _loadedSkillRepository = null;
             _loadedSkillGenreIconCatalog = null;
             _skillGenreIcons = null;
+            _loadedSkillInputProgressUIConfig = null;
+            _skillBeatColors = null;
             _loadedEquippedSkills = null;
             _loadedOwnedSkillTemplates = null;
             _loadedAllSkillTemplates = null;
@@ -250,7 +277,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             SkillEffectDescriptionFormatter skillEffectDescriptionFormatter =
                 new SkillEffectDescriptionFormatter();
             SkillDisplayTextFormatter textFormatter =
-                new SkillDisplayTextFormatter(skillEffectDescriptionFormatter);
+                new SkillDisplayTextFormatter(skillEffectDescriptionFormatter, _skillBeatColors);
             _skillBuildPresenter = new(_skillBuildViewModel, textFormatter, _skillGenreIcons);
 
             _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(
@@ -356,6 +383,33 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 if (entry.Icon != null)
                 {
                     _skillGenreIcons[entry.Genre] = entry.Icon;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     発動コマンドの拍子(BeatType)と色の対応表を構築します。
+        ///     実際のインゲーム入力進行UIと同じ色設定(SkillInputProgressUIConfig)を流用します。
+        /// </summary>
+        private void BuildSkillBeatColorMap()
+        {
+            _skillBeatColors = new Dictionary<int, Color>();
+            if (_loadedSkillInputProgressUIConfig == null)
+            {
+                return;
+            }
+
+            SkillInputProgressViewSetting viewSetting = _loadedSkillInputProgressUIConfig.Create();
+            foreach (BeatType beatType in System.Enum.GetValues(typeof(BeatType)))
+            {
+                try
+                {
+                    SkillBeatVisualSetting setting = viewSetting.GetSetting((int)beatType);
+                    _skillBeatColors[(int)beatType] = setting.NormalColor;
+                }
+                catch (System.InvalidOperationException)
+                {
+                    // 該当する拍子の設定が存在しない場合はスキップする。
                 }
             }
         }

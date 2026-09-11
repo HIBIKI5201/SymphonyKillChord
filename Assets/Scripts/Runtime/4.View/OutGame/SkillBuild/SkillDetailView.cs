@@ -1,5 +1,7 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.View.OutGame.Common;
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.SkillBuild
@@ -27,6 +29,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {NAME_LABEL_NAME} が見つかりませんでした。");
             _comboLabel = rootElement.Q<Label>(COMBO_LABEL_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {COMBO_LABEL_NAME} が見つかりませんでした。");
+            _comboRow = rootElement.Q<VisualElement>(COMBO_ROW_NAME)
+                ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {COMBO_ROW_NAME} が見つかりませんでした。");
             _skillTypeLabel = rootElement.Q<Label>(SKILL_TYPE_LABEL_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {SKILL_TYPE_LABEL_NAME} が見つかりませんでした。");
             _descriptionLabel = rootElement.Q<Label>(DESCRIPTION_LABEL_NAME)
@@ -48,6 +52,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _icon.sprite = data.Icon;
             _nameLabel.text = data.DisplayName;
             _comboLabel.text = data.ComboLabel;
+            SetComboSteps(data.ComboStepColors);
             _skillTypeLabel.text = data.SkillTypeLabel;
             _descriptionLabel.text = data.HasEffectDescription
                 ? data.EffectDescription
@@ -68,6 +73,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _icon.sprite = null;
             _nameLabel.text = EMPTY_SELECTION_LABEL;
             _comboLabel.text = string.Empty;
+            SetComboSteps(Array.Empty<Color>());
             _skillTypeLabel.text = string.Empty;
             _descriptionLabel.text = string.Empty;
             _tipsLabel.text = string.Empty;
@@ -79,6 +85,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string ICON_NAME = "skill-detail-icon";
         private const string NAME_LABEL_NAME = "skill-name-label";
         private const string COMBO_LABEL_NAME = "skill-combo-label";
+        private const string COMBO_ROW_NAME = "ComboRow";
+        private const string COMBO_HEX_CLASS_NAME = "skillbuild-combo-hex";
+        private const string COMBO_HEX_CAP_TOP_CLASS_NAME = "skillbuild-combo-hex-cap-top";
+        private const string COMBO_HEX_RECT_CLASS_NAME = "skillbuild-combo-hex-rect";
+        private const string COMBO_HEX_CAP_BOTTOM_CLASS_NAME = "skillbuild-combo-hex-cap-bottom";
         private const string SKILL_TYPE_LABEL_NAME = "skill-type-label";
         private const string DESCRIPTION_LABEL_NAME = "skill-description-label";
         private const string TIPS_HEADING_LABEL_NAME = "skill-tips-heading";
@@ -91,10 +102,26 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly Image _icon;
         private readonly Label _nameLabel;
         private readonly Label _comboLabel;
+        private readonly VisualElement _comboRow;
         private readonly Label _skillTypeLabel;
         private readonly Label _descriptionLabel;
         private readonly Label _tipsHeadingLabel;
         private readonly Label _tipsLabel;
         private readonly Label _levelLabel;
+
+        /// <summary>
+        ///     発動コマンドの各入力を、実際の発動色で塗った六角形アイコンの行として反映する。
+        /// </summary>
+        /// <param name="stepColors"> 発動コマンドの入力順に並んだ色一覧。 </param>
+        private void SetComboSteps(Color[] stepColors)
+        {
+            ComboHexRowBuilder.Build(
+                _comboRow,
+                stepColors,
+                COMBO_HEX_CLASS_NAME,
+                COMBO_HEX_CAP_TOP_CLASS_NAME,
+                COMBO_HEX_RECT_CLASS_NAME,
+                COMBO_HEX_CAP_BOTTOM_CLASS_NAME);
+        }
     }
 }

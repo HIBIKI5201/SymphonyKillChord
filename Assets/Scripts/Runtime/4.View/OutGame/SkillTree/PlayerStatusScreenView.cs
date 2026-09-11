@@ -74,11 +74,35 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <param name="dto"></param>
         public void Apply(PlayerStatusDTO dto)
         {
-            _healthPreviewLabel.text = FormatTruncated(dto.PlayerHealth);
-            _attackPreviewLabel.text = FormatTruncated(dto.PlayerAttack);
-            _criticalChancePreviewLabel.text = FormatPercentage(dto.CriticalChance);
-            _criticalDamagePreviewLabel.text = FormatPercentage(dto.CriticalDamage);
-            _areaAttackRangePreviewLabel.text = FormatMultiplier(dto.AreaAttackRangeMultiplier);
+            _healthPreviewLabel.text = FormatWithPreview(
+                dto.PlayerHealth, dto.PreviewPlayerHealth, FormatTruncated);
+            _attackPreviewLabel.text = FormatWithPreview(
+                dto.PlayerAttack, dto.PreviewPlayerAttack, FormatTruncated);
+            _criticalChancePreviewLabel.text = FormatWithPreview(
+                dto.CriticalChance, dto.PreviewCriticalChance, FormatPercentage);
+            _criticalDamagePreviewLabel.text = FormatWithPreview(
+                dto.CriticalDamage, dto.PreviewCriticalDamage, FormatPercentage);
+            _areaAttackRangePreviewLabel.text = FormatWithPreview(
+                dto.AreaAttackRangeMultiplier, dto.PreviewAreaAttackRangeMultiplier, FormatMultiplier);
+        }
+
+        /// <summary>
+        ///     現在値と、選択中ノードを解放した場合の値を「現在値 → 変化後の値」形式へ変換する。
+        ///     変化がない場合は矢印のみを表示し、変化後の値は表示しない。
+        /// </summary>
+        /// <param name="current"> 現在値。 </param>
+        /// <param name="preview"> 選択中ノードを解放した場合の値。 </param>
+        /// <param name="format"> 数値の表示形式を決めるフォーマッタ。 </param>
+        /// <returns> 「現在値 → 」または「現在値 → 変化後の値」形式の文字列。 </returns>
+        private static string FormatWithPreview(float current, float preview, Func<float, string> format)
+        {
+            string currentText = format(current);
+            if (Mathf.Approximately(current, preview))
+            {
+                return $"{currentText} {PREVIEW_ARROW}";
+            }
+
+            return $"{currentText} {PREVIEW_ARROW} {format(preview)}";
         }
 
         /// <summary>
@@ -126,6 +150,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             icon.sprite = sprite;
             icon.style.display = sprite == null ? DisplayStyle.None : DisplayStyle.Flex;
         }
+
+        private const string PREVIEW_ARROW = "→";
 
         private Label _healthPreviewLabel;
         private Label _attackPreviewLabel;

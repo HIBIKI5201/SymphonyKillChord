@@ -1,33 +1,38 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="VisualElement" style="flex-grow: 1; width: 500px; height: 100%; align-self: flex-start; background-color: rgb(148, 173, 176); flex-direction: column; left: auto; top: auto; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
-        <ui:VisualElement name="NameRow" style="flex-direction: row; align-items: stretch; margin-bottom: 8px;">
-            <ui:Label text="スキル名：XXX" name="SkillNameLabel" style="flex-grow: 1; -unity-text-align: middle-left; width: auto; height: auto; font-size: 32px; -unity-font-style: bold; border-width: 2px; border-color: rgb(18, 33, 31); border-radius: 8px; padding: 6px 10px; background-color: rgba(255, 255, 255, 0.6); margin-right: 6px;"/>
-            <ui:Image name="SkillHeaderGenreIcon" style="width: 56px; height: 56px; border-width: 2px; border-color: rgb(18, 33, 31); border-radius: 8px; background-color: rgba(255, 255, 255, 0.6); -unity-background-scale-mode: scale-to-fit;"/>
-        </ui:VisualElement>
-        <ui:VisualElement name="DividerTop" style="height: 2px; background-color: rgb(18, 33, 31); margin-bottom: 8px; display: none;"/>
-        <ui:VisualElement name="CommandRow" style="flex-direction: row; align-items: stretch; margin-bottom: 8px;">
-            <ui:Label text="発動コンボ" style="white-space: nowrap; width: auto; -unity-text-align: middle-left; font-size: 20px; border-width: 2px; border-color: rgb(18, 33, 31); border-radius: 8px; padding: 6px 10px; background-color: rgba(255, 255, 255, 0.4); margin-right: 6px;"/>
-            <ui:Label text="2 → 4 → 1" name="SkillCommandLabel" style="flex-grow: 1; -unity-text-align: middle-left; width: auto; height: auto; font-size: 20px; border-width: 2px; border-color: rgb(18, 33, 31); border-radius: 8px; padding: 6px 10px; background-color: rgba(255, 255, 255, 0.6);"/>
-        </ui:VisualElement>
-        <ui:VisualElement name="GenreRow" style="flex-direction: row; align-items: stretch; margin-bottom: 8px;">
-            <ui:Label text="スキルジャンル" style="white-space: nowrap; width: auto; -unity-text-align: middle-left; font-size: 20px; border-width: 2px; border-color: rgb(18, 33, 31); border-radius: 8px; padding: 6px 10px; background-color: rgba(255, 255, 255, 0.4); margin-right: 6px;"/>
-            <ui:VisualElement name="GenreValueBox" style="flex-grow: 1; flex-direction: row; align-items: center; border-width: 2px; border-color: rgb(18, 33, 31); border-radius: 8px; padding: 6px 10px; background-color: rgba(255, 255, 255, 0.6);">
-                <ui:Label text="攻撃" name="SkillGenreLabel" style="-unity-text-align: middle-left; width: auto; height: auto; font-size: 20px; margin-right: 6px;"/>
-                <ui:Image name="SkillGenreIcon" style="width: 24px; height: 24px; -unity-background-scale-mode: scale-to-fit;"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillTreeLayout.uss?fileID=7433441132597879392&amp;guid=26021df5ccc97f84d9802e0b454cd7e2&amp;type=3#SkillTreeLayout"/>
+    <ui:VisualElement name="VisualElement" style="flex-grow: 0; width: 360px; height: auto; align-self: flex-end;" class="skilltree-panel">
+        <ui:Label text="情報" name="InfoHeaderLabel" class="skilltree-panel-header-bar"/>
+        <ui:VisualElement name="Body" class="skilltree-panel-body">
+            <ui:VisualElement name="NameRow" class="skilltree-info-top" style="flex-shrink: 0;">
+                <ui:Image name="SkillHeaderGenreIcon" class="skilltree-info-icon"/>
+                <ui:VisualElement style="flex-grow: 1;">
+                    <ui:Label text="スキル名：XXX" name="SkillNameLabel" class="skilltree-info-name"/>
+                    <ui:VisualElement name="ComboRow" class="skilltree-combo-row"/>
+                </ui:VisualElement>
             </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:VisualElement name="EffectSection" style="flex-grow: 1; flex-direction: column; border-width: 2px; border-color: rgb(18, 33, 31); border-radius: 8px; padding: 6px; background-color: rgba(255, 255, 255, 0.15); margin-bottom: 8px;">
-            <ui:Label text="スキル効果" name="EffectCaptionLabel" style="white-space: nowrap; width: auto; align-self: flex-start; -unity-text-align: middle-left; font-size: 18px; border-width: 2px; border-color: rgb(18, 33, 31); border-radius: 8px; padding: 4px 8px; background-color: rgba(255, 255, 255, 0.4); margin-bottom: 6px;"/>
-            <ui:ScrollView name="SkillDetailScrollView" mode="Vertical" style="flex-grow: 1; min-height: 120px; border-width: 2px; border-color: rgb(18, 33, 31); border-radius: 8px; padding: 6px 10px; background-color: rgba(255, 255, 255, 0.6);">
-                <ui:Label text="スキル名：XXX&#10;スキル説明になります。&#10;これ結構長くなりそうだから&#10;ちょっと多めに書いてみる&#10;blahblahblah&#10;何とかかんとか&#10;いろはにほへと&#10;ちりぬるを&#10;" name="SkillDetailLabel" style="position: relative; -unity-text-align: upper-left; width: auto; height: auto; font-size: 30px; -unity-font-style: normal; top: 0; align-self: stretch; align-items: stretch;"/>
-            </ui:ScrollView>
-        </ui:VisualElement>
-        <ui:VisualElement name="DividerBottom" style="height: 2px; background-color: rgb(18, 33, 31); margin-bottom: 8px; display: none;"/>
-        <ui:VisualElement name="Buttons" style="flex-grow: initial; flex-shrink: 0; justify-content: flex-end; align-self: stretch; flex-direction: column; bottom: 0; top: auto; position: relative; align-content: flex-start;">
-            <ui:Button text="スキルを解放する　必要ポイント：99999" name="UnlockButton" style="width: auto; height: auto; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; font-size: 24px; -unity-font-style: bold; margin-bottom: 6px;"/>
-            <ui:VisualElement name="BottomButtonsRow" style="flex-direction: row;">
-                <ui:Button text="スキル動画を表示する" name="PreviewButton" style="flex-grow: 1; font-size: 22px; -unity-font-style: bold; margin-right: 6px;"/>
-                <ui:Button text="戻る" name="BackButton" class="ui-se-cancel" style="flex-grow: 1; width: auto; height: auto; font-size: 22px; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; position: relative; translate: 0 0; top: auto; left: auto; right: auto; bottom: auto; -unity-font-style: bold;"/>
+            <ui:VisualElement name="DividerTop" style="height: 2px; background-color: rgb(58, 84, 135); margin-bottom: 8px; display: none; flex-shrink: 0;"/>
+            <ui:VisualElement name="CommandRow" style="flex-direction: row; align-items: stretch; margin-bottom: 8px; display: none; flex-shrink: 0;">
+                <ui:Label text="発動コンボ" style="white-space: nowrap; width: auto; -unity-text-align: middle-left; font-size: 14px; color: rgb(207, 214, 230); margin-right: 6px;"/>
+                <ui:Label text="2 → 4 → 1" name="SkillCommandLabel" style="flex-grow: 1; -unity-text-align: middle-left; width: auto; height: auto; font-size: 14px; color: rgb(255, 255, 255);"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="GenreRow" style="flex-direction: row; align-items: center; margin-bottom: 10px; flex-shrink: 0;">
+                <ui:Label text="スキルジャンル：" style="white-space: nowrap; width: auto; -unity-text-align: middle-left; font-size: 16px; color: rgb(207, 214, 230); margin-right: 6px;"/>
+                <ui:Label text="攻撃" name="SkillGenreLabel" style="-unity-text-align: middle-left; width: auto; height: auto; font-size: 16px; color: rgb(255, 255, 255); margin-right: 6px;"/>
+                <ui:Image name="SkillGenreIcon" style="width: 20px; height: 20px; -unity-background-scale-mode: scale-to-fit;"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="EffectSection" style="flex-grow: 1; flex-direction: column; margin-bottom: 8px;">
+                <ui:Label text="スキル効果" name="EffectCaptionLabel" style="white-space: nowrap; width: auto; align-self: flex-start; -unity-text-align: middle-left; font-size: 15px; color: rgb(207, 214, 230); margin-bottom: 4px; flex-shrink: 0;"/>
+                <ui:ScrollView name="SkillDetailScrollView" mode="Vertical" vertical-scroller-visibility="Hidden" style="flex-grow: 1; min-height: 100px; max-height: 170px; border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; padding: 8px 10px; background-color: rgba(0, 0, 0, 0.22);">
+                    <ui:Label text="スキル名：XXX&#10;スキル説明になります。&#10;これ結構長くなりそうだから&#10;ちょっと多めに書いてみる&#10;blahblahblah&#10;何とかかんとか&#10;いろはにほへと&#10;ちりぬるを&#10;" name="SkillDetailLabel" style="position: relative; -unity-text-align: upper-left; width: auto; height: auto; font-size: 16px; color: rgb(230, 233, 242); -unity-font-style: normal; top: 0; align-self: stretch; align-items: stretch; white-space: normal;"/>
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement name="DividerBottom" style="height: 2px; background-color: rgb(58, 84, 135); margin-bottom: 8px; display: none; flex-shrink: 0;"/>
+            <ui:VisualElement name="Buttons" style="flex-grow: initial; flex-shrink: 0; justify-content: flex-end; align-self: stretch; flex-direction: column; align-content: flex-start;">
+                <ui:Button text="スキルを解放する　必要ポイント：99999" name="UnlockButton" class="skilltree-info-action-button" style="width: auto; height: auto; font-size: 18px;"/>
+                <ui:VisualElement name="BottomButtonsRow" style="flex-direction: row;">
+                    <ui:Button text="スキル動画を表示する" name="PreviewButton" class="skilltree-info-action-button" style="flex-grow: 1; font-size: 15px; margin-right: 6px;"/>
+                    <ui:Button text="戻る" name="BackButton" class="skilltree-info-action-button ui-se-cancel" style="flex-grow: 1; width: auto; height: auto; font-size: 18px; position: relative; translate: 0 0; top: auto; left: auto; right: auto; bottom: auto;"/>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

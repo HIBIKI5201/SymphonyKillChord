@@ -534,6 +534,7 @@ MonoBehaviour:
   _statusBonusEffectIconCatalogKey: StatusBonusEffectIconCatalogAsset
   _skillRepositoryKey: OutGameSkillRepository
   _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
+  _skillInputProgressUIConfigKey: SkillInputProgressUIConfig
   _videoPlayer: {fileID: 0}
 --- !u!1 &1370918365
 GameObject:

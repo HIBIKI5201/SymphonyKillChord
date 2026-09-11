@@ -23,6 +23,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <param name="isUnlocked"> 解放済みの場合は true。 </param>
         /// <param name="genreIcon"> ジャンルバッジアイコン。 </param>
         /// <param name="genreIds"> スキルが属するジャンル ID 一覧(絞り込み判定用、Domain 非依存)。 </param>
+        /// <param name="comboStepColors"> 発動コマンドの入力順に並んだ、拍子に対応する色一覧。 </param>
         public SkillViewData(
             int skillId,
             string displayName,
@@ -35,7 +36,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             int level,
             bool isUnlocked,
             Sprite genreIcon,
-            int[] genreIds)
+            int[] genreIds,
+            Color[] comboStepColors)
         {
             SkillId = skillId;
             DisplayName = displayName ?? string.Empty;
@@ -49,6 +51,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             IsUnlocked = isUnlocked;
             GenreIcon = genreIcon;
             GenreIds = genreIds ?? Array.Empty<int>();
+            ComboStepColors = comboStepColors ?? Array.Empty<Color>();
         }
 
         /// <summary> スキル ID。 </summary>
@@ -86,6 +89,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
 
         /// <summary> スキルが属するジャンル ID 一覧(絞り込み判定用、Domain 非依存)。 </summary>
         public int[] GenreIds { get; }
+
+        /// <summary> 発動コマンドの入力順に並んだ、拍子に対応する色一覧。 </summary>
+        public Color[] ComboStepColors { get; }
 
         /// <summary>
         ///     等値比較を行う。

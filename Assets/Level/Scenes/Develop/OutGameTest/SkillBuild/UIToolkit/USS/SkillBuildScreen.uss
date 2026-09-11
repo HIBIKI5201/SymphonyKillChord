@@ -70,6 +70,41 @@
     white-space: normal;
 }
 
+.skillbuild-combo-row {
+    flex-direction: row;
+    margin-top: 8px;
+}
+
+.skillbuild-combo-hex {
+    width: 48px;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 14px;
+}
+
+.skillbuild-combo-hex-cap-top,
+.skillbuild-combo-hex-cap-bottom {
+    width: 0;
+    height: 0;
+    border-left-width: 24px;
+    border-right-width: 24px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+}
+
+.skillbuild-combo-hex-cap-top {
+    border-bottom-width: 14px;
+}
+
+.skillbuild-combo-hex-cap-bottom {
+    border-top-width: 14px;
+}
+
+.skillbuild-combo-hex-rect {
+    width: 48px;
+    height: 26px;
+}
+
 .skill-description {
     flex-grow: 0;
     width: 95%;

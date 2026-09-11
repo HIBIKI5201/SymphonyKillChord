@@ -1,6 +1,8 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.View.OutGame.Common;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.SkillBuild
@@ -82,6 +84,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string SKILL_ELEMENT_SLOT_CLASS_NAME = "skill-element-slot";
         private const string SLOT_ICON_NAME = "skill-slot-icon";
         private const string SLOT_NAME_LABEL_NAME = "skill-slot-name";
+        private const string SLOT_COMBO_ROW_NAME = "ComboRow";
+        private const string SLOT_COMBO_HEX_CLASS_NAME = "skillbuild-slot-combo-hex";
+        private const string SLOT_COMBO_HEX_CAP_TOP_CLASS_NAME = "skillbuild-slot-combo-hex-cap-top";
+        private const string SLOT_COMBO_HEX_RECT_CLASS_NAME = "skillbuild-slot-combo-hex-rect";
+        private const string SLOT_COMBO_HEX_CAP_BOTTOM_CLASS_NAME = "skillbuild-slot-combo-hex-cap-bottom";
         private const string SLOT_FILLED_CLASS_NAME = "is-filled";
         private const int EMPTY_SKILL_ID = -1;
 
@@ -100,6 +107,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         {
             Image icon = slotElement.Q<Image>(SLOT_ICON_NAME);
             Label nameLabel = slotElement.Q<Label>(SLOT_NAME_LABEL_NAME);
+            VisualElement comboRow = slotElement.Q<VisualElement>(SLOT_COMBO_ROW_NAME);
 
             if (skillId == EMPTY_SKILL_ID)
             {
@@ -115,6 +123,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                     nameLabel.text = string.Empty;
                 }
 
+                SetComboSteps(comboRow, Array.Empty<Color>());
                 return;
             }
 
@@ -130,6 +139,29 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 nameLabel.text = data?.DisplayName ?? string.Empty;
             }
+
+            SetComboSteps(comboRow, data?.ComboStepColors ?? Array.Empty<Color>());
+        }
+
+        /// <summary>
+        ///     スロット下に、発動コマンドの各入力を色分けした六角形アイコンの行として反映する。
+        /// </summary>
+        /// <param name="row"> 六角形を並べる行要素。 </param>
+        /// <param name="stepColors"> 発動コマンドの入力順に並んだ色一覧。 </param>
+        private static void SetComboSteps(VisualElement row, Color[] stepColors)
+        {
+            if (row == null)
+            {
+                return;
+            }
+
+            ComboHexRowBuilder.Build(
+                row,
+                stepColors,
+                SLOT_COMBO_HEX_CLASS_NAME,
+                SLOT_COMBO_HEX_CAP_TOP_CLASS_NAME,
+                SLOT_COMBO_HEX_RECT_CLASS_NAME,
+                SLOT_COMBO_HEX_CAP_BOTTOM_CLASS_NAME);
         }
 
         /// <summary>

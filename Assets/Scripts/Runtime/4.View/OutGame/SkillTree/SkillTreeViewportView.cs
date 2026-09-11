@@ -47,6 +47,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             {
                 _nodeElements.Add(pair.Key, pair.Value);
             }
+
+            _scrollView.RegisterCallback<PointerDownEvent>(HandleScrollViewPointerDown, TrickleDown.TrickleDown);
         }
 
         /// <summary> 初期フォーカス対象の再取得が必要な時に表示候補IDを通知するイベント。 </summary>
@@ -115,6 +117,59 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     選択したノードへツリー全体をズームイン(拡大+中央寄せ)する。
+        /// </summary>
+        /// <param name="nodeId"> ズーム対象のノードID。 </param>
+        public void FocusOnNode(int nodeId)
+        {
+            if (_isDisposed
+                || !_nodeElements.TryGetValue(nodeId, out VisualElement nodeElement))
+            {
+                return;
+            }
+
+            Rect nodeWorldBound = nodeElement.worldBound;
+            Rect viewportBounds = _scrollView.contentViewport.worldBound;
+            if (!IsValidRect(nodeWorldBound) || !IsValidRect(viewportBounds))
+            {
+                return;
+            }
+
+            Vector2 nodeLocalCenter = _skillTreeRoot.WorldToLocal(nodeWorldBound.center);
+            _skillTreeRoot.style.transformOrigin =
+                new TransformOrigin(nodeLocalCenter.x, nodeLocalCenter.y);
+
+            if (!_isZoomed)
+            {
+                _scrollOffsetYBeforeZoom = _scrollView.scrollOffset.y;
+                _isZoomed = true;
+            }
+
+            _skillTreeRoot.AddToClassList(ZOOMED_USS_CLASS);
+
+            float targetCenterInContent = nodeWorldBound.center.y
+                - viewportBounds.yMin
+                + _scrollView.scrollOffset.y;
+            float focusY = viewportBounds.height * ZOOM_FOCUS_POSITION_RATIO;
+            AnimateScrollOffsetYTo(ClampScrollOffsetY(targetCenterInContent - focusY));
+        }
+
+        /// <summary>
+        ///     ノードへのズームインを解除し、ズーム前の拡大率とスクロール位置へ戻す。
+        /// </summary>
+        public void ClearFocusZoom()
+        {
+            if (_isDisposed || !_isZoomed)
+            {
+                return;
+            }
+
+            _isZoomed = false;
+            _skillTreeRoot.RemoveFromClassList(ZOOMED_USS_CLASS);
+            AnimateScrollOffsetYTo(_scrollOffsetYBeforeZoom);
+        }
+
+        /// <summary>
         ///     保留中のレイアウト処理とレイアウト変更購読を停止する。
         /// </summary>
         public void Dispose()
@@ -124,9 +179,13 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 return;
             }
 
+            _scrollView.UnregisterCallback<PointerDownEvent>(HandleScrollViewPointerDown, TrickleDown.TrickleDown);
+            _zoomScrollAnimationItem?.Pause();
+            _skillTreeRoot.RemoveFromClassList(ZOOMED_USS_CLASS);
             CancelPendingLayout();
             _focusTargetNodeIds = Array.Empty<int>();
             _isFocusRequested = false;
+            _isZoomed = false;
             _isDisposed = true;
         }
 
@@ -134,7 +193,11 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string SKILL_TREE_CONTAINER_NAME = "SkillTreeContainer";
         private const string SKILL_TREE_ROOT_NAME = "SkillTreeRoot";
         private const string POINTS_NAME = "Points";
+        private const string ZOOMED_USS_CLASS = "skill-tree-canvas--zoomed";
         private const float FOCUS_POSITION_RATIO = 0.6f;
+        private const float ZOOM_FOCUS_POSITION_RATIO = 0.5f;
+        private const float ZOOM_ANIMATION_DURATION_SECONDS = 0.35f;
+        private const long ZOOM_ANIMATION_INTERVAL_MS = 16L;
         private const float POINTS_SAFE_MARGIN = 24.0f;
         private const long LAYOUT_RETRY_DELAY_MILLISECONDS = 16L;
 
@@ -144,7 +207,10 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly VisualElement _points;
         private readonly Dictionary<int, VisualElement> _nodeElements;
         private IVisualElementScheduledItem _pendingLayoutItem;
+        private IVisualElementScheduledItem _zoomScrollAnimationItem;
         private int[] _focusTargetNodeIds = Array.Empty<int>();
+        private float _scrollOffsetYBeforeZoom;
+        private bool _isZoomed;
         private bool _isWaitingForScreenGeometry;
         private bool _isFocusRequested;
         private bool _isDisposed;
@@ -261,6 +327,56 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             Vector2 scrollOffset = _scrollView.scrollOffset;
             scrollOffset.y = Mathf.Clamp(scrollOffsetY, lowValue, highValue);
             _scrollView.scrollOffset = scrollOffset;
+        }
+
+        /// <summary>
+        ///     Y方向のスクロールオフセットを現在のスクロール範囲へクランプする。
+        /// </summary>
+        /// <param name="rawScrollOffsetY"> クランプ前のスクロールオフセットY。 </param>
+        /// <returns> クランプ後のスクロールオフセットY。範囲が取得できない場合は入力値をそのまま返す。 </returns>
+        private float ClampScrollOffsetY(float rawScrollOffsetY)
+        {
+            float lowValue = _scrollView.verticalScroller.lowValue;
+            float highValue = _scrollView.verticalScroller.highValue;
+            if (!IsFinite(lowValue) || !IsFinite(highValue))
+            {
+                return rawScrollOffsetY;
+            }
+
+            return Mathf.Clamp(rawScrollOffsetY, lowValue, highValue);
+        }
+
+        /// <summary>
+        ///     ScrollViewのY方向スクロール位置を指定値まで滑らかに移動させる。
+        ///     scrollOffsetはUSSトランジション非対応のため、スケジューラで手動補間する。
+        /// </summary>
+        /// <param name="targetY"> 目標のスクロールオフセットY。 </param>
+        private void AnimateScrollOffsetYTo(float targetY)
+        {
+            _zoomScrollAnimationItem?.Pause();
+
+            float startY = _scrollView.scrollOffset.y;
+            float elapsedSeconds = 0.0f;
+            _zoomScrollAnimationItem = _scrollView.schedule.Execute(() =>
+            {
+                elapsedSeconds += ZOOM_ANIMATION_INTERVAL_MS / 1000.0f;
+                float t = Mathf.Clamp01(elapsedSeconds / ZOOM_ANIMATION_DURATION_SECONDS);
+                float eased = 1.0f - Mathf.Pow(1.0f - t, 3.0f);
+                float y = Mathf.Lerp(startY, targetY, eased);
+                Vector2 offset = _scrollView.scrollOffset;
+                offset.y = y;
+                _scrollView.scrollOffset = offset;
+                if (t >= 1.0f) { _zoomScrollAnimationItem.Pause(); }
+            }).Every(ZOOM_ANIMATION_INTERVAL_MS);
+        }
+
+        /// <summary>
+        ///     ユーザーが手動でツリーへ触れた時に、進行中のズームスクロールアニメーションを止める。
+        /// </summary>
+        /// <param name="evt"> ポインタ押下イベント。 </param>
+        private void HandleScrollViewPointerDown(PointerDownEvent evt)
+        {
+            _zoomScrollAnimationItem?.Pause();
         }
 
         /// <summary>

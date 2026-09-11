@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.OutGame.Skill;
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
@@ -13,6 +14,7 @@ using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame;
+using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
@@ -77,6 +79,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         [Tooltip("スキルジャンルアイコンカタログの Addressables キーです。読み込みに失敗してもアイコンなしで続行します。")]
         private string _skillGenreIconCatalogKey;
 
+        [SerializeField, SourceDataAddress]
+        [Tooltip("発動コマンドの拍子ごとの色設定(SkillInputProgressUIConfig)の Addressables キーです。読み込みに失敗しても既定色で続行します。")]
+        private string _skillInputProgressUIConfigKey;
+
         [SerializeField]
         [Tooltip("スキルプレビュー動画を再生する VideoPlayer です。")]
         private VideoPlayer _videoPlayer;
@@ -116,8 +122,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private StatusBonusEffectIconCatalogAsset _loadedStatusBonusEffectIconCatalog;
         private SkillRepository _loadedSkillRepository;
         private SkillGenreIconCatalogAsset _loadedSkillGenreIconCatalog;
+        private SkillInputProgressUIConfig _loadedSkillInputProgressUIConfig;
+        private Dictionary<int, Color> _skillBeatColors;
         private bool _isInitialized;
         private bool _isSubscribed;
+        private bool _isSkillDetailOpen;
 
         /// <summary>
         ///     非同期のリソースロードを行います。
@@ -192,6 +201,24 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _loadedSkillGenreIconCatalog = null;
             }
 
+            try
+            {
+                _loadedSkillInputProgressUIConfig =
+                    await _skillInputProgressUIConfigKey.LoadAssetAsync<SkillInputProgressUIConfig>(this, destroyCancellationToken);
+            }
+            catch (System.OperationCanceledException)
+            {
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                // 発動コマンドの色は付加情報のため、読み込みに失敗してもスキルツリー画面自体の初期化は継続する。
+                Debug.LogWarning(
+                    $"[{nameof(SkillTreeInitializer)}] SkillInputProgressUIConfigの読み込みに失敗しました。既定色で続行します。{ex.Message}",
+                    this);
+                _loadedSkillInputProgressUIConfig = null;
+            }
+
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
@@ -236,6 +263,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         public override void Shutdown()
         {
             Unsubscribe();
+            if (_rootElement != null)
+            {
+                _rootElement.UnregisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
+            }
+            _isSkillDetailOpen = false;
             DisposeComponents();
             CancelAndDisposeCts();
 
@@ -245,12 +277,15 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _statusBonusEffectIconCatalogKey.ReleaseLoadedAsset(this);
             _skillRepositoryKey.ReleaseLoadedAsset(this);
             _skillGenreIconCatalogKey.ReleaseLoadedAsset(this);
+            _skillInputProgressUIConfigKey.ReleaseLoadedAsset(this);
             _loadedSkillNodeDataRepo = null;
             _loadedSkillNodeBindRepo = null;
             _loadedSkillNodePhaseBindRepo = null;
             _loadedStatusBonusEffectIconCatalog = null;
             _loadedSkillRepository = null;
             _loadedSkillGenreIconCatalog = null;
+            _loadedSkillInputProgressUIConfig = null;
+            _skillBeatColors = null;
             _skillUnlockData = null;
             _outGameUIEvent = null;
             _isInitialized = false;
@@ -344,6 +379,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             BuildStatusBonusEffectIconMap();
             BuildSkillGenreIconMap();
+            BuildSkillBeatColorMap();
             BuildSkillNodes();
             BuildNodeConns();
             BuildConnBinds();
@@ -405,7 +441,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 () => _outGameUIEvent.OnOwnedSkillChanged?.Invoke(),
                 _loadedSkillRepository,
                 new SkillDisplayTextFormatter(new SkillEffectDescriptionFormatter()),
-                _skillGenreIcons);
+                _skillGenreIcons,
+                _skillBeatColors);
+
+            _rootElement.RegisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
 
             _isInitialized = true;
             return true;
@@ -732,6 +771,33 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     発動コマンドの拍子(BeatType)と色の対応表を構築します。
+        ///     実際のインゲーム入力進行UIと同じ色設定(SkillInputProgressUIConfig)を流用します。
+        /// </summary>
+        private void BuildSkillBeatColorMap()
+        {
+            _skillBeatColors = new Dictionary<int, Color>();
+            if (_loadedSkillInputProgressUIConfig == null)
+            {
+                return;
+            }
+
+            SkillInputProgressViewSetting viewSetting = _loadedSkillInputProgressUIConfig.Create();
+            foreach (BeatType beatType in System.Enum.GetValues(typeof(BeatType)))
+            {
+                try
+                {
+                    SkillBeatVisualSetting setting = viewSetting.GetSetting((int)beatType);
+                    _skillBeatColors[(int)beatType] = setting.NormalColor;
+                }
+                catch (System.InvalidOperationException)
+                {
+                    // 該当する拍子の設定が存在しない場合はスキップする。
+                }
+            }
+        }
+
+        /// <summary>
         ///     イベントを購読します。
         /// </summary>
         private void Subscribe()
@@ -839,6 +905,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         {
             SkillNodeId nodeId = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeId;
             _skillTreeController.OnSkillNodeSelected(nodeId.Id);
+            _isSkillDetailOpen = true;
+            _skillTreeResetDialogView.SetResetButtonVisible(false);
         }
 
         /// <summary>
@@ -847,8 +915,41 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="nodeId"> 対象ノードIDです。 </param>
         private void HandleSkillDetailClosed(int nodeId)
         {
+            _isSkillDetailOpen = false;
             _skillTreeController.OnSkillDetailClosed();
             _skillDetailScreenView.Hide();
+            _skillTreeResetDialogView.SetResetButtonVisible(true);
+        }
+
+        /// <summary>
+        ///     選択中のノードと、その詳細を表示しているウィンドウ以外がクリックされたときに選択を解除する。
+        /// </summary>
+        /// <param name="evt"> ポインタ押下イベント。 </param>
+        private void HandleRootPointerDown(PointerDownEvent evt)
+        {
+            if (!_isSkillDetailOpen) { return; }
+
+            if (evt.target is not VisualElement target) { return; }
+
+            if (_skillDetailRoot != null && _skillDetailRoot.Contains(target)) { return; }
+            if (IsSkillNodeElement(target)) { return; }
+
+            _outGameUIEvent.OnSkillDetailClosed?.Invoke(0);
+        }
+
+        /// <summary>
+        ///     指定要素がスキルノード要素(またはその子孫)かどうかを判定する。
+        /// </summary>
+        /// <param name="element"> 判定対象の要素。 </param>
+        /// <returns> スキルノード要素の内側であればtrue。 </returns>
+        private static bool IsSkillNodeElement(VisualElement element)
+        {
+            for (VisualElement current = element; current != null; current = current.parent)
+            {
+                if (current.ClassListContains(UssClassNameConstants.USS_CLASS_SKILL_NODE)) { return true; }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -880,6 +981,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void HandleScreenClosedHandler()
         {
+            _isSkillDetailOpen = false;
             _skillTreeViewportView?.CancelFocus();
         }
 
@@ -940,7 +1042,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             dialogView.Hide();
+            _isSkillDetailOpen = false;
             _skillDetailScreenView?.HideImmediately();
+            dialogView.SetResetButtonVisible(true);
         }
 
         /// <summary>

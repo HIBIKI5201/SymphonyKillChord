@@ -1,13 +1,47 @@
-<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:screen="KillChord.Runtime.View.OutGame.Screen" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/USS/Menu.uss?fileID=7433441132597879392&amp;guid=d317849855421ec45937a3da5ae38ede&amp;type=3#Menu"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
-    <ui:VisualElement name="Root" style="width: 100%; height: 100%; background-color: rgb(130, 130, 130);">
-        <ui:VisualElement name="ButtonRoot" style="align-self: center; width: 100%; height: 100%; justify-content: center;">
-            <ui:Button text="オプション" name="OptionButton" class="title-option-button"/>
-            <ui:VisualElement name="Space" style="height: 5%;"/>
-            <ui:Button text="クレジット" name="CreditButton" class="title-option-button"/>
+    <ui:VisualElement name="BackGround" style="width: 100%; height: 100%;">
+        <ui:VisualElement name="Root" style="position: absolute; top: 8%; left: 8%; width: 50%; height: 50%; background-color: rgb(93, 102, 106);">
+            <ui:VisualElement name="ButtonRoot" style="align-self: center; width: 100%; height: 100%; justify-content: center;">
+                <ui:VisualElement name="VolumeSettingsRoot" style="width: 80%; align-self: center; margin-top: -40px;">
+                    <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgb(93, 102, 106); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; padding: 14px; margin-bottom: 16px;">
+                        <ui:VisualElement style="background-color: rgb(63, 70, 74); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 11px;">
+                            <ui:Label text="BGM" style="font-size: 25px; -unity-font-style: bold; color: white;"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement style="background-color: rgb(63, 70, 74); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 14px;">
+                            <ui:Label text="5" name="BGMVolumeValue" style="font-size: 25px; -unity-font-style: bold; color: white; -unity-text-align: middle-center;"/>
+                        </ui:VisualElement>
+                        <ui:SliderInt name="BGMVolumeSlider" low-value="0" high-value="10" value="5" page-size="1" class="volume-slider" style="flex-grow: 1; height: 45px;"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgb(93, 102, 106); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; padding: 14px;">
+                        <ui:VisualElement style="background-color: rgb(63, 70, 74); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 11px;">
+                            <ui:Label text="効果音" style="font-size: 25px; -unity-font-style: bold; color: white;"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement style="background-color: rgb(63, 70, 74); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 14px;">
+                            <ui:Label text="5" name="SEVolumeValue" style="font-size: 25px; -unity-font-style: bold; color: white; -unity-text-align: middle-center;"/>
+                        </ui:VisualElement>
+                        <ui:SliderInt name="SEVolumeSlider" low-value="0" high-value="10" value="5" page-size="1" class="volume-slider" style="flex-grow: 1; height: 45px;"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="BottomButtonRoot" class="bottom-button-root">
+                <ui:Button text="データリセット" name="DataResetButton" class="title-option-button"/>
+                <ui:VisualElement name="BottomButtonSpace" style="width: 5%;"/>
+                <ui:Button text="クレジット" name="CreditButton" class="title-option-button"/>
+            </ui:VisualElement>
+            <screen:AlphaHitTestButton name="BackButton" class="back-button button ui-se-cancel" style="position: absolute;"/>
         </ui:VisualElement>
-        <ui:Button text="戻る" name="BackButton" class="back-button button ui-se-cancel" style="position: absolute; background-color: rgb(188, 188, 188); left: auto; right: 1%;"/>
+        <ui:VisualElement name="DataResetConfirmDialog" style="position: absolute; width: 100%; height: 100%; justify-content: center; background-color: rgba(0, 0, 0, 0.59); display: none;">
+            <ui:VisualElement style="background-color: rgb(128, 128, 128); width: 50%; height: 40%; align-self: center; justify-content: center; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px;">
+                <ui:Label text="セーブデータをリセットしますか？" name="DataResetMessage" style="-unity-text-align: middle-center; width: 100%; height: 50%; font-size: 30px; -unity-font-style: bold; white-space: normal;"/>
+                <ui:VisualElement style="flex-direction: row; justify-content: center;">
+                    <ui:Button text="キャンセル" name="DataResetCancelButton" class="button ui-se-cancel" style="font-size: 24px; width: 160px; background-color: rgb(188, 188, 188); border-top-left-radius: 17px; border-top-right-radius: 17px; border-bottom-right-radius: 17px; border-bottom-left-radius: 17px;"/>
+                    <ui:VisualElement style="width: 10%; max-width: 100px;"/>
+                    <ui:Button text="リセット" name="DataResetConfirmButton" class="button" style="font-size: 24px; width: 160px; background-color: rgb(216, 90, 48); color: rgb(255, 255, 255); border-top-left-radius: 17px; border-top-right-radius: 17px; border-bottom-right-radius: 17px; border-bottom-left-radius: 17px;"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

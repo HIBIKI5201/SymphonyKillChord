@@ -24,4 +24,6 @@ public enum LayersEnum : int
     Enemy = 1 << 7,
     /// <summary> SkillEffectを表す。 </summary>
     SkillEffect = 1 << 8,
+    /// <summary> HomeCharacterPreviewを表す。 </summary>
+    HomeCharacterPreview = 1 << 9,
 }

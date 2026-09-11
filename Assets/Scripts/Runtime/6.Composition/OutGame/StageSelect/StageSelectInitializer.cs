@@ -6,15 +6,19 @@ using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.OutGame.StageSelect;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
+using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.OutGame.SkillTree;
 using KillChord.Runtime.View.OutGame.StageSelect;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -51,6 +55,18 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private const string BATTLE_NODE_USS_CLASS = "stage-node--boss";
         /// <summary> ステージノードラベルのUSSクラス名。 </summary>
         private const string NODE_LABEL_USS_CLASS = "stage-node__label";
+        /// <summary> ステージノード種別アイコンのUSSクラス名。 </summary>
+        private const string NODE_ICON_USS_CLASS = "stage-node__icon";
+        /// <summary> バトルステージノード種別アイコンのUSSクラス名。 </summary>
+        private const string NODE_ICON_BATTLE_USS_CLASS = "stage-node__icon--battle";
+        /// <summary> シナリオステージノード種別アイコンのUSSクラス名。 </summary>
+        private const string NODE_ICON_SCENARIO_USS_CLASS = "stage-node__icon--scenario";
+        /// <summary> ノード下部の星表示行のUSSクラス名。 </summary>
+        private const string NODE_STAR_ROW_USS_CLASS = "stage-node__star-row";
+        /// <summary> 星アイコン要素のUSSクラス名。 </summary>
+        private const string NODE_STAR_USS_CLASS = "stage-node__star";
+        /// <summary> ノードあたりの星表示上限数。サブミッションの表示上限(3件)と合わせる。 </summary>
+        private const int NODE_STAR_MAX_COUNT = 3;
         /// <summary> クリックしたノードに残すフレームのUSSクラス名。 </summary>
         private const string FOCUS_FRAME_USS_CLASS = "stage-node-focus-frame";
         /// <summary> フレーム要素名。 </summary>
@@ -61,20 +77,40 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private const string STAGE_MAP_CONTENT_NAME = "MainRow";
         /// <summary> 自動生成する作戦マップ描画領域名。 </summary>
         private const string STAGE_MAP_CANVAS_NAME = "StageMapCanvas";
+        /// <summary> 作戦マップ描画領域のUSSクラス。 </summary>
+        private const string STAGE_MAP_CANVAS_USS_CLASS = "stage-map-canvas";
+        /// <summary> 作戦マップ描画領域のズーム中USSクラス。 </summary>
+        private const string STAGE_MAP_CANVAS_ZOOMED_USS_CLASS = "stage-map-canvas--zoomed";
+        /// <summary> ズーム演出の所要時間(秒)。USS側のtransition-durationと一致させる。 </summary>
+        private const float ZOOM_TRANSITION_DURATION_SECONDS = 0.35f;
+        /// <summary> スクロール位置補間の実行間隔(ミリ秒)。 </summary>
+        private const long SCROLL_ANIMATION_INTERVAL_MS = 16L;
         /// <summary> 接続線塗りつぶし要素名。 </summary>
         private const string CONNECTION_FILL_NAME = "ConnectionFill";
         /// <summary> ステージ詳細画面のルート要素名。 </summary>
         private const string DETAIL_SCREEN_NAME = "StageDetailContainer";
+        /// <summary> 作戦マップ背景画像要素名。 </summary>
+        private const string BACKGROUND_IMAGE_NAME = "BackgroundImage";
+        /// <summary> 設定画面ショートカットボタン要素名。 </summary>
+        private const string SETTING_SHORTCUT_BUTTON_NAME = "SettingShortcutButton";
+        /// <summary> 装備スキルスロットが空であることを表すID。 </summary>
+        private const int EMPTY_SKILL_ID = -1;
         /// <summary> ノードの一辺の長さ。 </summary>
-        private const float NODE_SIZE = 100.0f;
+        private const float NODE_SIZE = 125.0f;
         /// <summary> 列間の中心距離。 </summary>
-        private const float HORIZONTAL_SPACING = 220.0f;
+        private const float HORIZONTAL_SPACING = 275.0f;
         /// <summary> 行間の中心距離。 </summary>
-        private const float VERTICAL_SPACING = 160.0f;
+        private const float VERTICAL_SPACING = 200.0f;
         /// <summary> マップ内容の周囲余白。 </summary>
-        private const float MAP_PADDING = 40.0f;
+        private const float MAP_PADDING = 50.0f;
         /// <summary> 接続線の太さ。 </summary>
-        private const float CONNECTION_THICKNESS = 14.0f;
+        private const float CONNECTION_THICKNESS = 17.5f;
+        /// <summary> 開いた直後の見た目を変えずに左方向へドラッグできる余白幅。 </summary>
+        private const float MAP_LEFT_DRAG_BUFFER = 500.0f;
+        /// <summary> クリック時ズームでノード中心を合わせる、画面全体に対する横位置の割合(0〜1)。 </summary>
+        private const float FOCUS_TARGET_SCREEN_RATIO = 0.25f;
+        /// <summary> 縦中央位置からのノード配置オフセット(px)。負の値で上方向へ移動する。 </summary>
+        private const float NODE_VERTICAL_OFFSET = 100.0f;
 
         [SerializeField, Tooltip("ステージ選択画面のUIDocumentです。")]
         private UIDocument _uiDocument;
@@ -87,6 +123,15 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
         [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。バトルシーン名の解決に使用します。")]
         private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
+
+        [SerializeField, SourceDataAddress, Tooltip("装備スキルのアイコン解決に使う SkillRepository の Addressables キーです。読み込みに失敗してもアイコンなしで続行します。")]
+        private string _skillRepositoryKey = "OutGameSkillRepository";
+
+        [SerializeField, Tooltip("サブミッション達成済みを表す星アイコンです。")]
+        private Sprite _achievedStarSprite;
+
+        [SerializeField, Tooltip("サブミッション未達成を表す星アイコンです。")]
+        private Sprite _unachievedStarSprite;
 
         private OutGameUIEvent _outGameUIEvent;
         private StageTree _stageTree;
@@ -110,14 +155,26 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private StageTreeAsset _loadedStageTreeAsset;
         private MissionDefinitionRepository _loadedMissionDefinitionRepository;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
+        private SkillRepository _loadedSkillRepository;
         private SaveData _loadedSaveData;
+        private SubMissionAchievementResolver _subMissionAchievementResolver;
         private ScrollView _stageMapScrollView;
         private VisualElement _stageMapContent;
         private VisualElement _stageMapCanvas;
         private float _stageMapCanvasHeight;
+        private float _stageMapCanvasWidth;
+        private float _scrollOffsetBeforeZoom;
+        private IVisualElementScheduledItem _scrollAnimationItem;
+        private ScrollViewDragManipulator _stageMapDragManipulator;
         private VisualElement _stageNodeFocusFrame;
         private bool _isFocusFrameLocked;
         private bool _isSubscribed;
+        private VisualElement _rootVisualElement;
+        private VisualElement _detailScreenRoot;
+        private VisualElement _backgroundImageElement;
+        private IVisualElementScheduledItem _backgroundParallaxItem;
+        private Button _settingShortcutButton;
+        private Dictionary<StageId, VisualElement> _nodeStarRowMap;
         private StageSelectModuleContainer _moduleContainer;
         private bool _isModuleContainerRegistered;
         private LoadingScreenController _loadingScreenController;
@@ -195,6 +252,24 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return false;
             }
 
+            // 装備スキルアイコン表示に使うだけの補助リソースのため、失敗してもアイコンなしで続行する。
+            try
+            {
+                _loadedSkillRepository =
+                    await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(StageSelectInitializer)}] SkillRepositoryの読み込みに失敗しました。装備スキルアイコンなしで続行します。{exception.Message}",
+                    this);
+                _loadedSkillRepository = null;
+            }
+
             return true;
         }
 
@@ -229,6 +304,11 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _loadedMissionDefinitionRepository = null;
             _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _loadedEnemyWaveDefinitionRepository = null;
+            if (_loadedSkillRepository != null)
+            {
+                _skillRepositoryKey.ReleaseLoadedAsset(this);
+                _loadedSkillRepository = null;
+            }
             _loadedSaveData = null;
         }
 
@@ -238,6 +318,56 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private void HandleStageNodeSelected(int stageIdValue)
         {
             _stageSelectController.OnStageNodeSelected(stageIdValue);
+            ShowStarRowForSelectedNode(new StageId(stageIdValue));
+        }
+
+        /// <summary>
+        ///     選択されたノードのサブミッション進捗の星を表示し、それ以外のノードの星は非表示にする。
+        /// </summary>
+        /// <param name="selectedStageId"> 選択されたステージのID。 </param>
+        private void ShowStarRowForSelectedNode(StageId selectedStageId)
+        {
+            HideAllStarRows();
+
+            if (_nodeStarRowMap == null
+                || !_nodeStarRowMap.TryGetValue(selectedStageId, out VisualElement starRow))
+            {
+                return;
+            }
+
+            if (!_stageTree.TryGetNode(selectedStageId, out StageNode node)) { return; }
+
+            bool[] subMissionCleared = _subMissionAchievementResolver?.Resolve(node);
+            if (subMissionCleared == null || subMissionCleared.Length == 0) { return; }
+
+            for (int i = 0; i < starRow.childCount; i++)
+            {
+                if (starRow[i] is not Image star) { continue; }
+
+                if (i >= subMissionCleared.Length)
+                {
+                    star.style.display = DisplayStyle.None;
+                    continue;
+                }
+
+                star.sprite = subMissionCleared[i] ? _achievedStarSprite : _unachievedStarSprite;
+                star.style.display = DisplayStyle.Flex;
+            }
+
+            starRow.style.display = DisplayStyle.Flex;
+        }
+
+        /// <summary>
+        ///     全ノードのサブミッション進捗の星を非表示にする。
+        /// </summary>
+        private void HideAllStarRows()
+        {
+            if (_nodeStarRowMap == null) { return; }
+
+            foreach (VisualElement starRow in _nodeStarRowMap.Values)
+            {
+                starRow.style.display = DisplayStyle.None;
+            }
         }
 
         /// <summary>
@@ -246,7 +376,75 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private void HandleStageDetailClosed()
         {
             _isFocusFrameLocked = false;
+            ResetMapZoom();
             _detailScreenView.Hide();
+            HideAllStarRows();
+        }
+
+        /// <summary>
+        ///     セーブデータの装備スキルIDから、ステージ詳細パネルに表示するアイコン一覧を組み立てる。
+        /// </summary>
+        /// <returns> 装備スキルのアイコン一覧。空スロットまたはSkillRepository未解決の場合はnull要素になる。 </returns>
+        private List<Sprite> BuildEquippedSkillIcons()
+        {
+            IReadOnlyList<int> equipmentSkillIds = _loadedSaveData.SkillBuild.EquipmentSkillIDs;
+            var icons = new List<Sprite>(equipmentSkillIds.Count);
+
+            for (int i = 0; i < equipmentSkillIds.Count; i++)
+            {
+                int skillId = equipmentSkillIds[i];
+                Sprite icon = null;
+                // スキルIDはハッシュ由来で負の値も取り得るため、空スロットの判定は「-1(EMPTY_SKILL_ID)かどうか」で行う。
+                if (skillId != EMPTY_SKILL_ID
+                    && _loadedSkillRepository != null
+                    && _loadedSkillRepository.TryGetSkill(new SkillId(skillId), out SkillTemplate template))
+                {
+                    icon = template.Icon;
+                }
+
+                icons.Add(icon);
+            }
+
+            return icons;
+        }
+
+        /// <summary>
+        ///     設定画面ショートカットボタンがクリックされたときの処理。
+        /// </summary>
+        private void HandleSettingShortcutButtonClicked(ClickEvent evt)
+        {
+            _outGameUIEvent.OnShownSettingScreen?.Invoke();
+        }
+
+        /// <summary>
+        ///     選択中のノードと、その詳細を表示しているウィンドウ以外がクリックされたときに選択を解除する。
+        /// </summary>
+        /// <param name="evt"> ポインタ押下イベント。 </param>
+        private void HandleRootPointerDown(PointerDownEvent evt)
+        {
+            if (!_isFocusFrameLocked) { return; }
+
+            if (evt.target is not VisualElement target) { return; }
+
+            if (_detailScreenRoot != null && _detailScreenRoot.Contains(target)) { return; }
+            if (IsStageNodeElement(target)) { return; }
+
+            _outGameUIEvent.OnStageDetailClosed?.Invoke();
+        }
+
+        /// <summary>
+        ///     指定要素がステージノード要素(またはその子孫)かどうかを判定する。
+        /// </summary>
+        /// <param name="element"> 判定対象の要素。 </param>
+        /// <returns> ステージノード要素の内側であればtrue。 </returns>
+        private static bool IsStageNodeElement(VisualElement element)
+        {
+            for (VisualElement current = element; current != null; current = current.parent)
+            {
+                if (current.ClassListContains(NODE_USS_CLASS)) { return true; }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -255,7 +453,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private void HandleScreenClosed()
         {
             _isFocusFrameLocked = false;
+            ResetMapZoom();
             _detailScreenView.Hide();
+            HideAllStarRows();
         }
 
         /// <summary>
@@ -353,6 +553,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageSelectScreenCompleted()
         {
+            // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
+            _detailScreenView.SetEquippedSkillIcons(BuildEquippedSkillIcons());
             await ApplyNewlyClearedStagesAsync(_cts.Token);
         }
 
@@ -461,6 +663,18 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
             _detailScreenView.HideImmediately();
+            _detailScreenView.SetEquippedSkillIcons(BuildEquippedSkillIcons());
+
+            _rootVisualElement = root;
+            _detailScreenRoot = detailRoot;
+            _rootVisualElement.RegisterCallback<PointerDownEvent>(
+                HandleRootPointerDown, TrickleDown.TrickleDown);
+
+            _settingShortcutButton = root.Q<Button>(SETTING_SHORTCUT_BUTTON_NAME);
+            if (_settingShortcutButton != null)
+            {
+                _settingShortcutButton.RegisterCallback<ClickEvent>(HandleSettingShortcutButtonClicked);
+            }
 
             // --- View 層（接続線・ノード）---
             var layoutBuilder = new StageMapLayoutBuilder();
@@ -533,7 +747,28 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             _moduleContainer = null;
             _isModuleContainerRegistered = false;
+            if (_rootVisualElement != null)
+            {
+                _rootVisualElement.UnregisterCallback<PointerDownEvent>(
+                    HandleRootPointerDown, TrickleDown.TrickleDown);
+                _rootVisualElement = null;
+            }
+            _detailScreenRoot = null;
+            if (_settingShortcutButton != null)
+            {
+                _settingShortcutButton.UnregisterCallback<ClickEvent>(HandleSettingShortcutButtonClicked);
+                _settingShortcutButton = null;
+            }
+            _backgroundParallaxItem?.Pause();
+            _backgroundParallaxItem = null;
+            _backgroundImageElement = null;
             UnregisterStageMapGeometryCallback();
+            if (_stageMapDragManipulator != null)
+            {
+                _stageMapDragManipulator.DragStarted -= HandleStageMapDragStarted;
+                _stageMapDragManipulator.target = null;
+                _stageMapDragManipulator = null;
+            }
             _cts?.Cancel();
             DisposeNodeComponents();
             _cts?.Dispose();
@@ -543,11 +778,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageMapContent = null;
             _stageMapCanvas = null;
             _stageMapCanvasHeight = 0.0f;
+            _stageMapCanvasWidth = 0.0f;
             _stageNodeFocusFrame = null;
             _isFocusFrameLocked = false;
             _battleSortieSelectionService = null;
             _loadingScreenController = null;
             _isAutomaticTutorialFlowStarted = false;
+            _subMissionAchievementResolver = null;
+            _nodeStarRowMap = null;
             _isInitialized = false;
         }
 
@@ -708,12 +946,19 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             }
 
             UnregisterStageMapGeometryCallback();
+            if (_stageMapDragManipulator != null)
+            {
+                _stageMapDragManipulator.DragStarted -= HandleStageMapDragStarted;
+                _stageMapDragManipulator.target = null;
+                _stageMapDragManipulator = null;
+            }
             mapContent.Clear();
             var mapCanvas = new VisualElement
             {
                 name = STAGE_MAP_CANVAS_NAME,
                 pickingMode = PickingMode.Position,
             };
+            mapCanvas.AddToClassList(STAGE_MAP_CANVAS_USS_CLASS);
             mapContent.Add(mapCanvas);
             Dictionary<StageId, Vector2> nodeCenters = BuildNodeCenterMap(
                 mapCanvas,
@@ -721,8 +966,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 out float canvasWidth,
                 out float canvasHeight);
             mapContent.style.position = Position.Relative;
-            mapContent.style.width = canvasWidth;
+            mapContent.style.width = canvasWidth + MAP_LEFT_DRAG_BUFFER;
             mapContent.style.flexShrink = 0.0f;
+            mapCanvas.style.left = MAP_LEFT_DRAG_BUFFER;
             BuildConnectionElements(mapCanvas, nodeCenters, connectionViewMap);
             BuildNodeElements(mapCanvas, nodeCenters, nodeElementMap);
 
@@ -730,12 +976,49 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageMapContent = mapContent;
             _stageMapCanvas = mapCanvas;
             _stageMapCanvasHeight = canvasHeight;
+            _stageMapCanvasWidth = canvasWidth;
             _stageMapScrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(
                 StageMapViewportGeometryChangedHandler);
+            _stageMapDragManipulator = new ScrollViewDragManipulator(_stageMapScrollView, ScrollDragAxis.Horizontal);
+            _stageMapDragManipulator.DragStarted += HandleStageMapDragStarted;
             UpdateStageMapVerticalAlignment(
                 _stageMapScrollView.contentViewport.resolvedStyle.height);
             _stageMapScrollView.schedule.Execute(UpdateStageMapVerticalAlignmentAfterLayout);
+            _stageMapScrollView.schedule.Execute(() =>
+            {
+                if (_stageMapScrollView == null) { return; }
+                _stageMapScrollView.scrollOffset =
+                    new Vector2(MAP_LEFT_DRAG_BUFFER, _stageMapScrollView.scrollOffset.y);
+            });
+
+            _backgroundImageElement = root.Q<VisualElement>(BACKGROUND_IMAGE_NAME);
+            _backgroundParallaxItem?.Pause();
+            _backgroundParallaxItem = _stageMapScrollView.schedule
+                .Execute(UpdateBackgroundParallax)
+                .Every(SCROLL_ANIMATION_INTERVAL_MS);
             return true;
+        }
+
+        /// <summary>
+        ///     作戦マップのスクロール位置に合わせて背景画像を左右にパンする。
+        ///     背景はズーム表示ではみ出した右側分を、スクロール0%で画像の左端、100%で右端が見えるよう按分してずらす。
+        /// </summary>
+        private void UpdateBackgroundParallax()
+        {
+            if (_backgroundImageElement == null || _stageMapScrollView == null) { return; }
+
+            float lowValue = _stageMapScrollView.horizontalScroller.lowValue;
+            float highValue = _stageMapScrollView.horizontalScroller.highValue;
+            float range = highValue - lowValue;
+            float t = range > 0.0f
+                ? Mathf.Clamp01((_stageMapScrollView.scrollOffset.x - lowValue) / range)
+                : 0.0f;
+
+            float viewportWidth = GetStageMapViewportWidth();
+            float scaleX = _backgroundImageElement.resolvedStyle.scale.value.x;
+            float extraWidth = viewportWidth * Mathf.Max(0.0f, scaleX - 1.0f);
+
+            _backgroundImageElement.style.translate = new Translate(-t * extraWidth, 0.0f);
         }
 
         /// <summary>
@@ -778,7 +1061,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             }
 
             float contentHeight = Mathf.Max(_stageMapCanvasHeight, viewportHeight);
-            float canvasTop = (contentHeight - _stageMapCanvasHeight) * 0.5f;
+            float canvasTop = (contentHeight - _stageMapCanvasHeight) * 0.5f + NODE_VERTICAL_OFFSET;
             _stageMapContent.style.height = contentHeight;
             _stageMapCanvas.style.top = canvasTop;
         }
@@ -802,6 +1085,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             _stageMapScrollView?.contentViewport?.UnregisterCallback<GeometryChangedEvent>(
                 StageMapViewportGeometryChangedHandler);
+        }
+
+        /// <summary>
+        ///     作戦マップのドラッグパン開始時に、進行中のズームスクロールアニメーションを止めて競合を避ける。
+        /// </summary>
+        private void HandleStageMapDragStarted()
+        {
+            _scrollAnimationItem?.Pause();
         }
 
         /// <summary>
@@ -978,6 +1269,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             };
             _stageNodeFocusFrame.AddToClassList(FOCUS_FRAME_USS_CLASS);
             _isFocusFrameLocked = false;
+            _nodeStarRowMap = new Dictionary<StageId, VisualElement>(_stageTree.Nodes.Count);
 
             for (int i = 0; i < _stageTree.Nodes.Count; i++)
             {
@@ -1012,7 +1304,19 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 {
                     AttachFocusFrameTo(focusTargetNode);
                     _isFocusFrameLocked = true;
+                    ZoomMapToNode(center);
                 });
+
+                var icon = new VisualElement
+                {
+                    pickingMode = PickingMode.Ignore,
+                };
+                icon.AddToClassList(NODE_ICON_USS_CLASS);
+                icon.AddToClassList(
+                    node.Definition.StageType == StageType.Battle
+                        ? NODE_ICON_BATTLE_USS_CLASS
+                        : NODE_ICON_SCENARIO_USS_CLASS);
+                nodeElement.Add(icon);
 
                 var label = new Label(node.Definition.StageName)
                 {
@@ -1020,6 +1324,25 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 };
                 label.AddToClassList(NODE_LABEL_USS_CLASS);
                 nodeElement.Add(label);
+
+                var starRow = new VisualElement
+                {
+                    pickingMode = PickingMode.Ignore,
+                };
+                starRow.AddToClassList(NODE_STAR_ROW_USS_CLASS);
+                for (int starIndex = 0; starIndex < NODE_STAR_MAX_COUNT; starIndex++)
+                {
+                    var star = new Image
+                    {
+                        pickingMode = PickingMode.Ignore,
+                        sprite = _unachievedStarSprite,
+                    };
+                    star.AddToClassList(NODE_STAR_USS_CLASS);
+                    starRow.Add(star);
+                }
+                nodeElement.Add(starRow);
+                _nodeStarRowMap.Add(node.Id, starRow);
+
                 mapContent.Add(nodeElement);
                 nodeElementMap.Add(node.Id, nodeElement);
             }
@@ -1040,11 +1363,108 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     指定ノードが画面中央に来るよう作戦マップをスクロールしつつ、
+        ///     そのノード中心を基点にマップ全体を拡大表示する。
+        /// </summary>
+        /// <param name="nodeCenterInCanvas"> StageMapCanvasローカル座標でのノード中心。 </param>
+        private void ZoomMapToNode(Vector2 nodeCenterInCanvas)
+        {
+            if (_stageMapCanvas == null || _stageMapScrollView == null) { return; }
+
+            _stageMapCanvas.style.transformOrigin =
+                new TransformOrigin(nodeCenterInCanvas.x, nodeCenterInCanvas.y);
+            _stageMapCanvas.AddToClassList(STAGE_MAP_CANVAS_ZOOMED_USS_CLASS);
+
+            _scrollOffsetBeforeZoom = _stageMapScrollView.scrollOffset.x;
+            float targetScrollX = CalculateCenteredScrollOffsetX(nodeCenterInCanvas.x);
+            AnimateScrollOffsetXTo(targetScrollX);
+        }
+
+        /// <summary>
+        ///     作戦マップの拡大表示を解除し、ズーム前のスクロール位置へ戻す。
+        /// </summary>
+        private void ResetMapZoom()
+        {
+            if (_stageMapCanvas == null) { return; }
+
+            _stageMapCanvas.RemoveFromClassList(STAGE_MAP_CANVAS_ZOOMED_USS_CLASS);
+            AnimateScrollOffsetXTo(_scrollOffsetBeforeZoom);
+        }
+
+        /// <summary>
+        ///     作戦マップScrollViewの表示領域幅を取得する。
+        /// </summary>
+        /// <returns> レイアウト確定済みの表示領域幅。未確定の場合はresolvedStyleの値。 </returns>
+        private float GetStageMapViewportWidth()
+        {
+            float viewportWidth = _stageMapScrollView.contentViewport.layout.width;
+            if (!IsValidLayoutLength(viewportWidth))
+            {
+                viewportWidth = _stageMapScrollView.contentViewport.resolvedStyle.width;
+            }
+
+            return viewportWidth;
+        }
+
+        /// <summary>
+        ///     水平スクロールオフセットをスクロール可能範囲内へクランプする。
+        /// </summary>
+        /// <param name="rawScrollX"> クランプ前のスクロールオフセットX。 </param>
+        /// <returns> スクロール可能範囲にクランプされたスクロールオフセット。 </returns>
+        private float ClampScrollOffsetX(float rawScrollX)
+        {
+            float maxScrollX = Mathf.Max(
+                0.0f,
+                _stageMapCanvasWidth + MAP_LEFT_DRAG_BUFFER - GetStageMapViewportWidth());
+            return Mathf.Clamp(rawScrollX, 0.0f, maxScrollX);
+        }
+
+        /// <summary>
+        ///     指定のキャンバスX座標が画面全体の25%位置に来るスクロールオフセットを求める。
+        /// </summary>
+        /// <param name="canvasX"> StageMapCanvasローカル座標でのX位置。 </param>
+        /// <returns> スクロール可能範囲にクランプされた目標スクロールオフセット。 </returns>
+        private float CalculateCenteredScrollOffsetX(float canvasX)
+        {
+            float contentX = MAP_LEFT_DRAG_BUFFER + canvasX;
+            float targetScreenX = GetStageMapViewportWidth() * FOCUS_TARGET_SCREEN_RATIO;
+            return ClampScrollOffsetX(contentX - targetScreenX);
+        }
+
+        /// <summary>
+        ///     ScrollViewの水平スクロール位置を指定値まで滑らかに移動させる。
+        ///     scrollOffsetはUSSトランジション非対応のため、スケジューラで手動補間する。
+        /// </summary>
+        /// <param name="targetX"> 目標のスクロールオフセットX。 </param>
+        private void AnimateScrollOffsetXTo(float targetX)
+        {
+            _scrollAnimationItem?.Pause();
+
+            float startX = _stageMapScrollView.scrollOffset.x;
+            float elapsedSeconds = 0.0f;
+            _scrollAnimationItem = _stageMapScrollView.schedule.Execute(() =>
+            {
+                elapsedSeconds += SCROLL_ANIMATION_INTERVAL_MS / 1000.0f;
+                float t = Mathf.Clamp01(elapsedSeconds / ZOOM_TRANSITION_DURATION_SECONDS);
+                float eased = 1.0f - Mathf.Pow(1.0f - t, 3.0f);
+                float x = Mathf.Lerp(startX, targetX, eased);
+                _stageMapScrollView.scrollOffset = new Vector2(x, _stageMapScrollView.scrollOffset.y);
+                if (t >= 1.0f) { _scrollAnimationItem.Pause(); }
+            }).Every(SCROLL_ANIMATION_INTERVAL_MS);
+        }
+
+        /// <summary>
         ///     Adaptor 層のコントローラーを構築します。
         /// </summary>
         private void BuildControllers()
         {
-            var detailPresenter = new StageDetailPresenter(_detailScreenView, _loadedMissionDefinitionRepository);
+            _subMissionAchievementResolver = new SubMissionAchievementResolver(
+                _loadedMissionDefinitionRepository,
+                _loadedSaveData.StageProgress);
+            var detailPresenter = new StageDetailPresenter(
+                _detailScreenView,
+                _loadedMissionDefinitionRepository,
+                _subMissionAchievementResolver);
             _stageSelectController = new StageSelectController(_stageTree, detailPresenter, _detailScreenView);
         }
 

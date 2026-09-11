@@ -1,4 +1,4 @@
-<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:screen="KillChord.Runtime.View.OutGame.Screen" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Template name="PlayerStatus" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/PlayerStatus.uxml?fileID=9197481963319205126&amp;guid=b830745eccca76a4a8e611e7fad64341&amp;type=3#PlayerStatus"/>
     <ui:Template name="SkillDetail" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/SkillDetail.uxml?fileID=9197481963319205126&amp;guid=d2131e70ce3bdd74b9bec6a9c72be2aa&amp;type=3#SkillDetail"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
@@ -6,9 +6,10 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillNode.uss?fileID=7433441132597879392&amp;guid=ff35371d7c270e245a828cfec20cb46f&amp;type=3#SkillNode"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillNodeConn.uss?fileID=7433441132597879392&amp;guid=8a472d3ba336aec4780157542cb10f7b&amp;type=3#SkillNodeConn"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillTreeLayout.uss?fileID=7433441132597879392&amp;guid=26021df5ccc97f84d9802e0b454cd7e2&amp;type=3#SkillTreeLayout"/>
     <ui:VisualElement name="SkillTreeScreenRoot" style="flex-grow: 1; background-color: rgb(55, 164, 164);">
         <ui:ScrollView mode="Vertical" touch-scroll-type="Elastic" name="SkillTreeContainer" style="flex-grow: 1; align-content: flex-end; width: 100%; height: 100%; position: relative; justify-content: flex-end; align-items: stretch; align-self: auto;">
-            <ui:VisualElement name="SkillTreeRoot" picking-mode="Position" enabled="true" style="flex-grow: 1; position: relative; bottom: auto; top: auto; left: auto; right: auto; overflow: visible; align-self: auto; align-items: stretch; align-content: center; width: 100%; height: 1380px;">
+            <ui:VisualElement name="SkillTreeRoot" picking-mode="Position" enabled="true" class="skill-tree-canvas" style="flex-grow: 1; position: relative; bottom: auto; top: auto; left: auto; right: auto; overflow: visible; align-self: auto; align-items: stretch; align-content: center; width: 100%; height: 1380px;">
                 <ui:VisualElement name="Phase1Container" focusable="false" enabled="true" picking-mode="Ignore" style="flex-grow: 1; position: absolute; bottom: auto; left: auto; align-self: center; align-content: flex-end; width: 33%; height: 100%;">
                     <ui:Button text="発" name="N1" selectable="false" focusable="false" view-data-key="Node1" class="skill-node ui-se-select skill-node-node skill-node-font" style="position: absolute; top: auto; left: 280px; bottom: 10px; right: auto; border-top-left-radius: 53px; border-top-right-radius: 53px; border-bottom-right-radius: 53px; border-bottom-left-radius: 53px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/SkillIcon/UI_Skill1.png?fileID=2800000&amp;guid=4c65db539275a8f43bac501545e065fd&amp;type=3#UI_Skill1&quot;);"/>
                     <ui:Button text="" name="N101" view-data-key="Path1-1" class="skill-node skill-node-path" style="position: absolute; top: auto; left: 189px; bottom: 73px; right: auto; border-top-left-radius: 53px; border-top-right-radius: 53px; border-bottom-right-radius: 53px; border-bottom-left-radius: 53px; background-image: url(&quot;project://database/Assets/drive-download-20260903T081243Z-1-001/UI_Status_HP.png?fileID=2800000&amp;guid=60c822bcc6532514780c4983c83708e2&amp;type=3#UI_Status_HP&quot;);"/>
@@ -122,14 +123,21 @@
             </ui:VisualElement>
             <ui:VisualElement name="SkillTreeBottomSpacer" picking-mode="Ignore" style="height: 600px; min-height: 600px; flex-grow: 0; flex-shrink: 0;"/>
         </ui:ScrollView>
-        <ui:Label text="研究" name="Title" selectable="false" focusable="false" picking-mode="Ignore" class="title" style="font-size: 36px; -unity-font-style: bold; width: 200px; height: 100px; -unity-text-align: middle-center; top: 1%;"/>
-        <ui:Label text="所持ポイント：XXXX" name="Points" selectable="false" focusable="false" picking-mode="Ignore" class="title" style="font-size: 36px; -unity-font-style: bold; width: 200px; height: 100px; -unity-text-align: middle-center; top: auto; bottom: 1%;"/>
-        <ui:Button text="振り直す" name="ResetButton" class="button" style="position: absolute; width: 200px; height: 100px; right: auto; bottom: 5%; left: 3%; background-color: rgb(188, 188, 188); border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px; font-size: 30px;"/>
-        <ui:Button text="戻る" name="BackButton" tabindex="-1" class="button back-button ui-se-cancel" style="width: 200px; height: 100px; font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 30px; top: 1%;"/>
+        <ui:VisualElement name="TopBar" picking-mode="Ignore" class="skilltree-top-bar">
+            <ui:Label text="研究" name="Title" selectable="false" focusable="false" class="skilltree-top-bar-title"/>
+            <ui:Label text="解放P：XXXX" name="Points" selectable="false" focusable="false" class="skilltree-top-bar-points"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="TopRightIcons" picking-mode="Position" style="position: absolute; top: 12px; right: 16px; flex-direction: row;">
+            <ui:Button name="SettingShortcutButton" class="button setting-shortcut-button ui-se-window" style="position: relative; left: 0; top: 0; margin-right: 8px; background-image: url(&quot;project://database/Assets/Arts/UI/UI_btn_square.png?fileID=21300000&amp;guid=007fb3301cfef074a98bd9243797cad4&amp;type=3#UI_btn_square&quot;);">
+                <ui:Image name="SettingIconGlyph" picking-mode="Ignore" class="home-option-icon-glyph" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_OptionIocn.png?fileID=21300000&amp;guid=bd80c72ceb0921245907a0bb0ceb0cc1&amp;type=3#UI_OptionIocn&quot;);"/>
+            </ui:Button>
+            <screen:AlphaHitTestButton name="BackButton" tabindex="-1" class="button back-button ui-se-cancel" style="position: relative; left: 0; top: 0; margin-right: 0;"/>
+        </ui:VisualElement>
+        <ui:Button text="振り直す" name="ResetButton" class="skilltree-reset-button"/>
     </ui:VisualElement>
     <ui:VisualElement name="Overlay" enabled="true" picking-mode="Ignore" style="flex-grow: 1; position: absolute; top: 0; left: 0; right: auto; bottom: auto; display: flex; visibility: visible; opacity: 1; background-color: rgba(255, 255, 255, 0); -unity-background-image-tint-color: rgba(255, 255, 255, 0); width: 100%; height: 100%;">
-        <ui:Instance template="SkillDetail" name="SkillDetail" enabled="true" style="position: absolute; top: 0; left: 0; display: flex; align-self: flex-start; width: 500px; height: 100%;"/>
-        <ui:Instance template="PlayerStatus" name="PlayerStatus" picking-mode="Ignore" enabled="false" style="position: absolute; right: 0; top: 0; opacity: 1; align-self: auto; left: auto; align-items: stretch; width: 500px; height: 100%;"/>
+        <ui:Instance template="SkillDetail" name="SkillDetail" enabled="true" style="position: absolute; top: 130px; right: 16px; left: auto; bottom: auto; display: flex; align-self: flex-end; width: 360px; height: auto;"/>
+        <ui:Instance template="PlayerStatus" name="PlayerStatus" picking-mode="Ignore" enabled="false" style="position: absolute; left: 16px; bottom: 16px; top: auto; right: auto; opacity: 1; align-self: auto; align-items: stretch; width: 260px; height: auto;"/>
         <ui:VisualElement name="PreviewVideoContainer" picking-mode="Position" enabled="true" style="flex-grow: 0; align-content: center; align-items: center; flex-shrink: 1; justify-content: center; background-color: rgba(0, 0, 0, 0.24); display: flex; visibility: visible; align-self: stretch; width: 100%; height: 100%;">
             <ui:VisualElement name="PreviewVideo" style="flex-grow: 0; width: 66%; height: 66%; background-color: rgb(155, 155, 155); display: flex;"/>
             <ui:Button text="動画を閉じる" name="ClosePreviewButton" style="font-size: 24px; -unity-font-style: bold;"/>

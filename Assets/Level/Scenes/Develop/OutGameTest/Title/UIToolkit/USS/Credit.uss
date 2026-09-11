@@ -1,27 +1,41 @@
-.member-container {
-    flex-direction: row;
+.member-role-group {
     align-items: center;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 16px;
-    padding-right: 16px;
+    width: 100%;
+    margin-bottom: 24px;
 }
 
 .member-role-label {
     -unity-font-style: bold;
     color: yellow;
     font-size: 32px;
-    min-width: 240px;
+    width: 100%;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+}
+
+.member-name-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
+.member-name-item {
+    align-items: center;
+    margin-left: 16px;
+    margin-right: 16px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.member-name-caption {
+    font-size: 24px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
 }
 
 .member-name-label {
-    font-size: 32px;
+    font-size: 44px;
     color: rgb(255, 255, 255);
-    flex-grow: 1;
-}
-
-.member-affiliation-label {
-    font-size: 24px;
-    color: rgb(190, 190, 190);
-    -unity-text-align: middle-right;
+    -unity-text-align: middle-center;
 }

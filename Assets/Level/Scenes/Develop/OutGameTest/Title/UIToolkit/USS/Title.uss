@@ -7,13 +7,15 @@
     left: 3%;
     top: 4%;
     scale: 1 1;
-    transition-property: scale;
+    color: rgb(255, 255, 255);
+    transition-property: scale, color;
     transition-duration: 0.1s;
     transition-timing-function: ease-out-circ;
 }
 .button:hover,
 .button:focus {
     scale: 1.2 1.2;
+    color: rgb(140, 140, 140);
 }
 
 .button:active {

@@ -43,6 +43,26 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         }
 
         /// <summary>
+        ///     評価条件のEvaluationId一覧を取得します。GetEvaluationDescriptions()と同じ並び順です。
+        /// </summary>
+        /// <returns> 評価条件のEvaluationId一覧です。 </returns>
+        public IReadOnlyList<string> GetEvaluationIds()
+        {
+            List<string> ids = new(_evaluationConditions.Count);
+            for (int i = 0; i < _evaluationConditions.Count; i++)
+            {
+                if (_evaluationConditions[i] == null)
+                {
+                    continue;
+                }
+
+                ids.Add(_evaluationConditions[i].EvaluationIdValue);
+            }
+
+            return ids;
+        }
+
+        /// <summary>
         ///     ミッション定義を生成します。
         /// </summary>
         /// <param name="missionKeyRepository"> 敵ミッションキーの解決に使うリポジトリです。 </param>

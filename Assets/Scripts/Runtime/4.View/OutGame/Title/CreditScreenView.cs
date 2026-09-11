@@ -1,8 +1,10 @@
 using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.OutGame.SkillTree;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -47,6 +49,12 @@ namespace KillChord.Runtime.View.OutGame.Title
             UnregisterButtonCallbacks();
             _navigationScope.Dispose();
             base.Dispose();
+
+            if (_dragScrollManipulator != null)
+            {
+                _dragScrollManipulator.target = null;
+                _dragScrollManipulator = null;
+            }
         }
 
         /// <summary>
@@ -68,9 +76,12 @@ namespace KillChord.Runtime.View.OutGame.Title
                 return;
             }
 
-            for (int i = 0; i < members.Count; i++)
+            // 同じ役職はまとめて表示するため、括弧補足を除いたベース役職名でグループ化する。
+            // GroupBy は先頭出現順を維持するため、CSV の並び順はそのまま保たれる。
+            foreach (IGrouping<string, MemberViewDTO> group in
+                members.GroupBy(member => SplitAtFullWidthParenthesis(member.ClassName).Body))
             {
-                _memberScrollView.Add(CreateMemberElement(members[i]));
+                _memberScrollView.Add(CreateRoleGroupElement(group.Key, group));
             }
         }
 
@@ -88,10 +99,38 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const string ASSETS_USED_TAB_NAME = "AssetsUsed";
         private const float MEMBER_SCROLL_STEP = 80f;
 
-        private const string MEMBER_CONTAINER_CLASS = "member-container";
+        private const string MEMBER_ROLE_GROUP_CLASS = "member-role-group";
         private const string MEMBER_ROLE_LABEL_CLASS = "member-role-label";
+        private const string MEMBER_NAME_ROW_CLASS = "member-name-row";
+        private const string MEMBER_NAME_ITEM_CLASS = "member-name-item";
+        private const string MEMBER_NAME_CAPTION_CLASS = "member-name-caption";
         private const string MEMBER_NAME_LABEL_CLASS = "member-name-label";
-        private const string MEMBER_AFFILIATION_LABEL_CLASS = "member-affiliation-label";
+
+        private const char OPEN_PARENTHESIS = '（';
+        private const char CLOSE_PARENTHESIS = '）';
+
+        /// <summary>
+        ///     役職補足に含まれていれば、その補足全体の代わりに行のグループキーとして使う部門名。
+        ///     (例: 「背景リードデザイナー」は「背景」キーとして、同じ「背景」の人と同じ行にまとまる)
+        /// </summary>
+        private static readonly string[] DetailGroupKeywords = { "キャラクター", "背景", "武器" };
+
+        /// <summary>
+        ///     部門名からは自動判定できないが同じ行にまとめたい、役職と役職補足の組み合わせ。
+        ///     キー: (ベース役職, 役職補足) → まとめる行のグループキー。
+        /// </summary>
+        private static readonly Dictionary<(string Role, string Detail), string> ManualRowGroupOverrides = new()
+        {
+            [("プログラマー", "テクニカルアーティスト")] = "テクニカルアーティスト・ウェブデザイナー",
+            [("プログラマー", "ウェブデザイナー")] = "テクニカルアーティスト・ウェブデザイナー",
+            [("イラストレーター", "背景")] = "背景・ロゴUI",
+            [("イラストレーター", "ロゴ,UI")] = "背景・ロゴUI",
+        };
+
+        /// <summary>
+        ///     この人数以下の役職グループは、部門(役職補足)が異なっていても改行せず1行にまとめる。
+        /// </summary>
+        private const int MAX_MEMBERS_WITHOUT_LINE_BREAK = 3;
 
         private Button _backButton;
         private VisualElement _backGround;
@@ -102,6 +141,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private ListView _assetsUsedListView;
         private HierarchicalNavigationScope _navigationScope;
         private IDisposable _backButtonActivation;
+        private ScrollViewDragManipulator _dragScrollManipulator;
 
         /// <summary>
         ///     クレジット画面の UI 要素を初期化します。
@@ -159,6 +199,8 @@ namespace KillChord.Runtime.View.OutGame.Title
                     _assetsUsedListView,
                 },
                 _assetsUsedListView);
+
+            _dragScrollManipulator = new ScrollViewDragManipulator(_memberScrollView);
         }
 
         /// <summary>
@@ -301,28 +343,134 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         /// <summary>
-        ///     制作メンバー 1 人分の表示要素を生成します。
+        ///     役職1グループ分の表示要素を生成します。役職名を1回だけ表示し、
+        ///     その下に同じ役職のメンバー名を横並びで配置します。
         /// </summary>
-        /// <param name="member"> 表示する制作メンバー DTO です。 </param>
+        /// <param name="role"> 役職名です。 </param>
+        /// <param name="members"> その役職に属する制作メンバー DTO の一覧です。 </param>
         /// <returns> 生成した表示要素です。 </returns>
-        private static VisualElement CreateMemberElement(in MemberViewDTO member)
+        private static VisualElement CreateRoleGroupElement(string role, IEnumerable<MemberViewDTO> members)
         {
-            var memberContainer = new VisualElement();
-            memberContainer.AddToClassList(MEMBER_CONTAINER_CLASS);
+            var groupContainer = new VisualElement();
+            groupContainer.AddToClassList(MEMBER_ROLE_GROUP_CLASS);
 
-            var roleLabel = new Label(member.ClassName);
+            var roleLabel = new Label(role);
             roleLabel.AddToClassList(MEMBER_ROLE_LABEL_CLASS);
+            groupContainer.Add(roleLabel);
 
-            var nameLabel = new Label(member.Name);
+            List<MemberViewDTO> memberList = members.ToList();
+
+            if (memberList.Count <= MAX_MEMBERS_WITHOUT_LINE_BREAK)
+            {
+                // 人数が少ないグループは、部門(役職補足)が異なっていても1行にまとめる。
+                groupContainer.Add(CreateNameRowElement(memberList));
+            }
+            else
+            {
+                // 部門(役職補足)が異なるメンバーは行を分けて表示する。
+                // GroupBy は先頭出現順を維持するため、行の並び順は CSV の並び順に従う。
+                foreach (IGrouping<string, MemberViewDTO> detailGroup in
+                    memberList.GroupBy(member => GetDetailGroupKey(role, SplitAtFullWidthParenthesis(member.ClassName).Detail)))
+                {
+                    groupContainer.Add(CreateNameRowElement(detailGroup));
+                }
+            }
+
+            return groupContainer;
+        }
+
+        /// <summary>
+        ///     1行分の名前表示要素を生成します。
+        /// </summary>
+        /// <param name="members"> その行に含めるメンバー DTO の一覧です。 </param>
+        /// <returns> 生成した行の表示要素です。 </returns>
+        private static VisualElement CreateNameRowElement(IEnumerable<MemberViewDTO> members)
+        {
+            var nameRow = new VisualElement();
+            nameRow.AddToClassList(MEMBER_NAME_ROW_CLASS);
+
+            foreach (MemberViewDTO member in members)
+            {
+                string displayName = SplitAtFullWidthParenthesis(member.Name).Body;
+                string roleDetail = SplitAtFullWidthParenthesis(member.ClassName).Detail;
+                nameRow.Add(CreateNameItemElement(displayName, roleDetail));
+            }
+
+            return nameRow;
+        }
+
+        /// <summary>
+        ///     役職補足を行分けのためのグループキーへ変換します。
+        ///     まず<see cref="ManualRowGroupOverrides"/>の手動指定を確認し、無ければ
+        ///     既知の部門名(<see cref="DetailGroupKeywords"/>)を含むかどうかで判定し、
+        ///     それにも該当しなければ補足文字列そのものをキーにします。
+        /// </summary>
+        /// <param name="role"> ベース役職名です。 </param>
+        /// <param name="roleDetail"> 役職の括弧補足です。 </param>
+        /// <returns> 行のグループキーです。 </returns>
+        private static string GetDetailGroupKey(string role, string roleDetail)
+        {
+            if (ManualRowGroupOverrides.TryGetValue((role, roleDetail), out string overrideKey))
+            {
+                return overrideKey;
+            }
+
+            foreach (string keyword in DetailGroupKeywords)
+            {
+                if (roleDetail.Contains(keyword, StringComparison.Ordinal))
+                {
+                    return keyword;
+                }
+            }
+
+            return roleDetail;
+        }
+
+        /// <summary>
+        ///     1人分の名前表示要素を生成します。役職に部門などの補足がある場合は、
+        ///     その補足を上段に小さく、氏名を下段に大きく表示します。
+        /// </summary>
+        /// <param name="displayName"> 括弧を除いた表示用の氏名です。 </param>
+        /// <param name="roleDetail"> 役職の括弧補足です。無い場合は空文字列です。 </param>
+        /// <returns> 生成した表示要素です。 </returns>
+        private static VisualElement CreateNameItemElement(string displayName, string roleDetail)
+        {
+            var nameItem = new VisualElement();
+            nameItem.AddToClassList(MEMBER_NAME_ITEM_CLASS);
+
+            if (!string.IsNullOrEmpty(roleDetail))
+            {
+                var captionLabel = new Label(roleDetail);
+                captionLabel.AddToClassList(MEMBER_NAME_CAPTION_CLASS);
+                nameItem.Add(captionLabel);
+            }
+
+            var nameLabel = new Label(displayName);
             nameLabel.AddToClassList(MEMBER_NAME_LABEL_CLASS);
+            nameItem.Add(nameLabel);
 
-            var affiliationLabel = new Label(member.AffiliationName);
-            affiliationLabel.AddToClassList(MEMBER_AFFILIATION_LABEL_CLASS);
+            return nameItem;
+        }
 
-            memberContainer.Add(roleLabel);
-            memberContainer.Add(nameLabel);
-            memberContainer.Add(affiliationLabel);
-            return memberContainer;
+        /// <summary>
+        ///     文字列を全角括弧の前後で本体と補足に分離します。
+        ///     全角括弧が無い場合は補足無しとして文字列全体をそのまま本体として返します。
+        /// </summary>
+        /// <param name="raw"> 分離対象の文字列です。 </param>
+        /// <returns> 本体と補足のタプルです。補足が無い場合は空文字列になります。 </returns>
+        private static (string Body, string Detail) SplitAtFullWidthParenthesis(string raw)
+        {
+            int openIndex = raw.IndexOf(OPEN_PARENTHESIS);
+            int closeIndex = raw.IndexOf(CLOSE_PARENTHESIS, openIndex + 1);
+
+            if (openIndex < 0 || closeIndex < 0 || closeIndex <= openIndex)
+            {
+                return (raw, string.Empty);
+            }
+
+            string body = raw[..openIndex].TrimEnd();
+            string detail = raw[(openIndex + 1)..closeIndex];
+            return (body, detail);
         }
     }
 }
