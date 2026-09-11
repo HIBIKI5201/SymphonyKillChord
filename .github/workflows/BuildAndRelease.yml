@@ -33,6 +33,10 @@ on:
         description: 'iOS'
         type: boolean
         default: true
+      clean_build:
+        description: 'クリーンビルド（Libraryを含め完全に作り直す。通常は不要、トラブル時のみON）'
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -145,6 +149,8 @@ jobs:
 
     steps:
       - name: クローン先プロジェクトフォルダおよびディスク事前クリーンアップ
+        env:
+          CLEAN_BUILD: ${{ github.event.inputs.clean_build }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -157,7 +163,9 @@ jobs:
 
           Write-Host "::group::クローン先プロジェクトフォルダおよびディスク事前クリーンアップ"
           $Workspace = "${{ github.workspace }}"
+          $CleanBuild = $env:CLEAN_BUILD -eq 'true'
           Write-Host "対象プロジェクトフォルダ: $Workspace"
+          Write-Host "[INFO]: clean_build = $CleanBuild"
 
           # 1. プロジェクトフォルダが存在する場合、未追跡ファイルや残渣を整理
           if (Test-Path $Workspace) {
@@ -165,7 +173,13 @@ jobs:
               Write-Host "[INFO]: 既存のリポジトリ環境を検出しました。未追跡ファイルおよび無視されたファイルをクリーンアップします..."
               Push-Location $Workspace
               try {
-                git -c core.longpaths=true clean -ffdx
+                if ($CleanBuild) {
+                  Write-Host "[INFO]: clean_build が有効なため、Library を含めて完全にクリーンアップします。"
+                  git -c core.longpaths=true clean -ffdx
+                } else {
+                  Write-Host "[INFO]: Library はビルド高速化のため保持します（トラブル時は workflow_dispatch の clean_build を有効にして実行してください）。"
+                  git -c core.longpaths=true clean -ffdx -e Library/
+                }
                 if ($LASTEXITCODE -ne 0) {
                   throw "git clean が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
                 }
@@ -514,8 +528,23 @@ jobs:
           Write-Host "算出したバージョンルート: $VersionRoot"
 
           $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
-          $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -Force -ErrorAction SilentlyContinue |
-                    Select-Object -First 1
+
+          # VersionRoot 全体（全プラットフォームの PlaybackEngines を含む）を再帰検索すると、
+          # 外部/低速ストレージに配置されたEditorではファイル数が膨大なため極端に遅くなることがある。
+          # aapt2 は Android SDK の build-tools 配下にしか存在しないため、まずそこだけを検索し、
+          # 見つからない場合のみ VersionRoot 全体にフォールバックする。
+          $AndroidSdkSearchRoot = Join-Path $VersionRoot "PlaybackEngines/AndroidPlayer/SDK/build-tools"
+          $Aapt2 = $null
+          if (Test-Path $AndroidSdkSearchRoot) {
+            $Aapt2 = Get-ChildItem $AndroidSdkSearchRoot -Recurse -Filter $Aapt2Name -Force -ErrorAction SilentlyContinue |
+                      Select-Object -First 1
+          }
+
+          if (-not $Aapt2) {
+            Write-Host "[WARN]: $AndroidSdkSearchRoot 配下で $Aapt2Name が見つからなかったため、VersionRoot全体を検索します（時間がかかる場合があります）: $VersionRoot"
+            $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -Force -ErrorAction SilentlyContinue |
+                      Select-Object -First 1
+          }
 
           if (-not $Aapt2) {
             Write-Host "::error::$Aapt2Name が見つかりません: $VersionRoot"
@@ -1478,6 +1507,8 @@ jobs:
 
       - name: ビルド後のディスククリーンアップ
         if: always()
+        env:
+          CLEAN_BUILD: ${{ github.event.inputs.clean_build }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -1492,6 +1523,7 @@ jobs:
           # 終わると次回まで数十GBを抱えたままになる。成否にかかわらず、
           # 再生成可能なものをここで片付ける。
           $Workspace = "${{ github.workspace }}"
+          $CleanBuild = $env:CLEAN_BUILD -eq 'true'
 
           function Get-PathSizeMB([string]$Path) {
             if (-not (Test-Path $Path)) { return $null }
@@ -1504,12 +1536,20 @@ jobs:
 
           # Library は .gitignore 対象で毎回作り直される。Bee (IL2CPP) だけで
           # 数十GBに達するため、ここでの削除が最も効く。
+          # ただし clean_build が無効な通常運用時は、次回ビルドを高速化するために
+          # あえて残しておく（事前クリーンアップ側も同じ方針で Library を保持している）。
           $Targets = @(
-            (Join-Path $Workspace "Library"),
             (Join-Path $Workspace "Builds"),
             (Join-Path $env:RUNNER_TEMP "src_assets.zip"),
             (Join-Path $env:RUNNER_TEMP "UnityPackages")
           )
+
+          if ($CleanBuild) {
+            Write-Host "[INFO]: clean_build が有効なため Library も削除します。"
+            $Targets += (Join-Path $Workspace "Library")
+          } else {
+            Write-Host "[INFO]: Library は次回ビルド高速化のため保持します。"
+          }
 
           # ZIP はリリースへアップロード済みのため保持不要。
           $Targets += (Get-ChildItem -Path $Workspace -Filter "*.zip" -File -ErrorAction SilentlyContinue |
