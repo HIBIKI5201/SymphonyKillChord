@@ -18,7 +18,7 @@ on:
           - Development
           - Master
       build_variant:
-        description: 'Masterビルド種別'
+        description: 'ゲームデータ種別'
         required: true
         default: 'demo'
         type: choice
@@ -55,13 +55,11 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    environment: 'AutoBuildAndRelease'
     outputs:
       should_run: ${{ steps.release_age.outputs.should_run }}
       hours: ${{ steps.release_age.outputs.hours }}
     env:
       RELEASE_THRESHOLD_HOURS: ${{ vars.RELEASE_THRESHOLD_HOURS }}
-      AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
 
     steps:
       - name: 最終リリースからの経過時間をチェック
@@ -86,11 +84,7 @@ jobs:
           # ターゲットブランチに応じたタグプレフィックスを特定します
           TAG_PREFIX="dev"
           if [ "${{ github.base_ref }}" = "main" ]; then
-            TAG_PREFIX="${AUTO_BUILD_VARIANT}"
-            if [ "${TAG_PREFIX}" != "demo" ] && [ "${TAG_PREFIX}" != "release" ]; then
-              echo "[ERROR]: AutoBuildAndRelease環境変数 BUILD_VARIANT には demo または release を設定してください。現在値: '${TAG_PREFIX}'"
-              exit 1
-            fi
+            TAG_PREFIX="release"
           fi
 
           # GitHub APIからリリース一覧（最大100件）を取得します
@@ -306,24 +300,24 @@ jobs:
           }
           if ($BaseRef -eq "main") {
             $BuildMode = "Master"
-            $BuildVariant = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-              "${{ inputs.build_variant }}"
-            } else {
-              $env:AUTO_BUILD_VARIANT
-            }
-            $BuildVariant = ([string]$BuildVariant).Trim().ToLowerInvariant()
-            if ($BuildVariant -notin @("demo", "release")) {
-              Write-Host "[ERROR]: ビルド種別には demo または release を指定してください。現在値: '$BuildVariant'"
-              exit 1
-            }
-            $TagPrefix = $BuildVariant
+            $TagPrefix = "release"
           } elseif ($BaseRef -eq "develop") {
             $BuildMode = "Development"
-            $BuildVariant = ""
             $TagPrefix = "dev"
           } else {
              Write-Host "[ERROR]: サポートされていないベースブランチです: $BaseRef"
              exit 1
+          }
+
+          $BuildVariant = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            "${{ inputs.build_variant }}"
+          } else {
+            $env:AUTO_BUILD_VARIANT
+          }
+          $BuildVariant = ([string]$BuildVariant).Trim().ToLowerInvariant()
+          if ($BuildVariant -notin @("demo", "release")) {
+            Write-Host "[ERROR]: ゲームデータ種別には demo または release を指定してください。現在値: '$BuildVariant'"
+            exit 1
           }
  
           Write-Host "ベースブランチ: $BaseRef, ビルド種別: $BuildVariant, タグの接頭辞: $TagPrefix"

@@ -22,7 +22,7 @@ namespace KillChord.Editor.AutoBuilder
             string buildMode = GetCliArg("-buildMode");
             string gameDataVariant = GetCliArg("-gameDataVariant");
             string selectedProfiles = GetCliArg("-selectedProfiles");
-            if (!TryApplyGameDataVariant(buildMode, gameDataVariant))
+            if (!TryApplyGameDataVariant(gameDataVariant))
             {
                 AutoBuildExecuter.ExitIfBatchMode(isBatchMode: true, exitCode: 1);
                 return;
@@ -50,23 +50,17 @@ namespace KillChord.Editor.AutoBuilder
         }
 
         /// <summary>
-        ///     Masterビルドへ指定されたゲームデータ種別を適用します。
+        ///     指定されたゲームデータ種別をビルドへ適用します。
         /// </summary>
-        /// <param name="buildMode"> ビルドモードです。 </param>
         /// <param name="gameDataVariant"> release または demo です。 </param>
         /// <returns> ビルドを継続できる場合は true、それ以外は false です。 </returns>
-        private static bool TryApplyGameDataVariant(string buildMode, string gameDataVariant)
+        private static bool TryApplyGameDataVariant(string gameDataVariant)
         {
-            if (!string.Equals(buildMode, "Master", StringComparison.Ordinal))
-            {
-                return true;
-            }
-
             if (!Enum.TryParse(gameDataVariant, ignoreCase: true, out GameDataVariant variant)
                 || !Enum.IsDefined(typeof(GameDataVariant), variant))
             {
                 Debug.LogError(
-                    $"[{nameof(AutoBuilder)}] Master build requires -gameDataVariant release or demo. Value: '{gameDataVariant ?? string.Empty}'");
+                    $"[{nameof(AutoBuilder)}] Build requires -gameDataVariant release or demo. Value: '{gameDataVariant ?? string.Empty}'");
                 return false;
             }
 
