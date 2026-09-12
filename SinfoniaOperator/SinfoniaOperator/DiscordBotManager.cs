@@ -179,12 +179,18 @@ namespace SinfoniaStudio.SinfoniaOperator
                     _isSpecCommandRegistered = true;
                 }
 
+                if (_gitHubRepository != null && !_isBranchesCommandRegistered)
+                {
+                    await RegisterBranchesCommandAsync();
+                    _isBranchesCommandRegistered = true;
+                }
+
                 _readySource.TrySetResult();
             }
             catch (Exception ex)
             {
                 _readySource.TrySetException(ex);
-                Console.WriteLine($"[DiscordBot] 仕様検索コマンドの登録に失敗しました: {ex.Message}");
+                Console.WriteLine($"[DiscordBot] スラッシュコマンドの登録に失敗しました: {ex.Message}");
             }
         }
 
@@ -199,13 +205,20 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     Discord Interactionを仕様検索処理へ振り分ける。
+        ///     Discord Interactionを各スラッシュコマンドの処理へ振り分ける。
         /// </summary>
         /// <param name="interaction">受信したInteraction。</param>
         private async Task InteractionCreatedHandler(SocketInteraction interaction)
         {
-            if (interaction is not SocketSlashCommand command ||
-                !string.Equals(command.Data.Name, SPEC_COMMAND_NAME, StringComparison.Ordinal))
+            if (interaction is not SocketSlashCommand command) { return; }
+
+            if (string.Equals(command.Data.Name, BRANCHES_COMMAND_NAME, StringComparison.Ordinal))
+            {
+                await HandleBranchesCommandAsync(command);
+                return;
+            }
+
+            if (!string.Equals(command.Data.Name, SPEC_COMMAND_NAME, StringComparison.Ordinal))
             {
                 return;
             }
