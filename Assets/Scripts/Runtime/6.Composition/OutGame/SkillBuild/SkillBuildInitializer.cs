@@ -20,6 +20,7 @@ using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -400,14 +401,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             }
 
             SkillInputProgressViewSetting viewSetting = _loadedSkillInputProgressUIConfig.Create();
-            foreach (BeatType beatType in System.Enum.GetValues(typeof(BeatType)))
+            foreach (BeatType beatType in Enum.GetValues(typeof(BeatType)))
             {
                 try
                 {
                     SkillBeatVisualSetting setting = viewSetting.GetSetting((int)beatType);
                     _skillBeatColors[(int)beatType] = setting.NormalColor;
                 }
-                catch (System.InvalidOperationException)
+                catch (InvalidOperationException)
                 {
                     // 該当する拍子の設定が存在しない場合はスキップする。
                 }

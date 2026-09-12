@@ -1,6 +1,98 @@
 :root {
 }
 
+.skillbuild-root {
+    flex-direction: column;
+    background-color: rgb(12, 21, 38);
+    padding: 16px;
+    position: relative;
+}
+
+.skillbuild-header {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(18, 33, 61);
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    border-bottom-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 12px;
+    padding-right: 24px;
+    margin-left: -16px;
+    margin-top: -16px;
+}
+
+.skillbuild-header-title {
+    color: rgb(255, 255, 255);
+    font-size: 28px;
+    -unity-font-style: bold;
+    margin-left: 8px;
+    margin-right: 16px;
+}
+
+.skillbuild-header-points {
+    flex-direction: row;
+    align-items: center;
+}
+
+.skillbuild-header-points-heading,
+.skillbuild-header-points-value {
+    color: rgb(207, 214, 230);
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.skillbuild-body-row {
+    flex-direction: row;
+    flex-grow: 1;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.skillbuild-panel {
+    width: 47%;
+    height: 100%;
+    flex-direction: column;
+    background-color: rgb(17, 29, 51);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(58, 84, 135);
+    border-right-color: rgb(58, 84, 135);
+    border-top-color: rgb(58, 84, 135);
+    border-bottom-color: rgb(58, 84, 135);
+    padding: 20px 16px 16px 16px;
+}
+
+.skillbuild-panel-title {
+    align-self: flex-start;
+    margin-bottom: 14px;
+    background-color: rgb(28, 46, 77);
+    color: rgb(255, 255, 255);
+    font-size: 26px;
+    -unity-font-style: bold;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(58, 84, 135);
+    border-right-color: rgb(58, 84, 135);
+    border-top-color: rgb(58, 84, 135);
+    border-bottom-color: rgb(58, 84, 135);
+    padding: 6px 22px;
+}
+
 .owned-points {
     position: absolute;
     right: 240px;
@@ -32,19 +124,17 @@
 .skill-detail-top {
     flex-grow: 0;
     width: 100%;
-    height: 25%;
     flex-direction: row;
     align-items: center;
-    padding-left: 2%;
-    padding-right: 2%;
+    margin-bottom: 12px;
 }
 
 .skill-detail-icon {
-    width: 110px;
-    height: 110px;
-    min-width: 110px;
-    min-height: 110px;
-    background-color: rgb(145, 145, 145);
+    width: 170px;
+    height: 170px;
+    min-width: 170px;
+    min-height: 170px;
+    background-color: rgb(0, 0, 0);
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
     border-bottom-right-radius: 50%;
@@ -54,29 +144,38 @@
 
 .skill-detail-heading {
     flex-grow: 1;
-    margin-left: 24px;
+    align-self: flex-start;
+    margin-left: 20px;
+    margin-top: 14px;
     justify-content: center;
 }
 
 .skill-name-label {
-    font-size: 30px;
+    font-size: 36px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(255, 255, 255);
 }
 
 .skill-combo-label {
     margin-top: 8px;
     font-size: 22px;
     white-space: normal;
+    color: rgb(230, 230, 230);
 }
 
 .skillbuild-combo-row {
     flex-direction: row;
-    margin-top: 8px;
+    margin-top: 14px;
 }
 
+/*
+    六角形アイコン。UI Toolkit には多角形(clip-path相当)の指定手段がないため、
+    上下の三角形(枠線トリック: width/height 0 の要素に左右透明の境界線+上下いずれかだけ色付きの境界線)と
+    中央の矩形を同色で縦に組み合わせて六角形に見せている。
+*/
 .skillbuild-combo-hex {
-    width: 48px;
+    width: 54px;
     flex-direction: column;
     align-items: center;
     margin-right: 14px;
@@ -86,8 +185,8 @@
 .skillbuild-combo-hex-cap-bottom {
     width: 0;
     height: 0;
-    border-left-width: 24px;
-    border-right-width: 24px;
+    border-left-width: 27px;
+    border-right-width: 27px;
     border-left-color: rgba(0, 0, 0, 0);
     border-right-color: rgba(0, 0, 0, 0);
 }
@@ -101,90 +200,220 @@
 }
 
 .skillbuild-combo-hex-rect {
-    width: 48px;
+    width: 54px;
     height: 26px;
 }
 
 .skill-description {
     flex-grow: 0;
-    width: 95%;
-    height: 50%;
+    height: 150px;
+    width: 100%;
     align-self: center;
-    border-top-width: 6px;
-    border-right-width: 6px;
-    border-bottom-width: 6px;
-    border-left-width: 6px;
-    border-top-left-radius: 25px;
-    border-top-right-radius: 25px;
-    border-bottom-right-radius: 25px;
-    border-bottom-left-radius: 25px;
-    border-left-color: rgb(0, 0, 0);
-    border-right-color: rgb(0, 0, 0);
-    border-top-color: rgb(0, 0, 0);
-    border-bottom-color: rgb(0, 0, 0);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
+    border-bottom-left-radius: 14px;
+    border-left-color: rgb(58, 84, 135);
+    border-right-color: rgb(58, 84, 135);
+    border-top-color: rgb(58, 84, 135);
+    border-bottom-color: rgb(58, 84, 135);
+    background-color: rgb(12, 24, 48);
+    margin-bottom: 12px;
 }
 
 .skill-type-row {
     width: 95%;
     align-self: center;
-    padding-top: 16px;
+    margin-bottom: 12px;
     flex-direction: row;
 }
 
 .skill-type-heading {
-    font-size: 24px;
+    font-size: 18px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(207, 214, 230);
 }
 
 .skill-type-label {
     flex-grow: 1;
-    font-size: 24px;
+    font-size: 18px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(255, 255, 255);
 }
 
 .skill-effect-heading {
     width: 95%;
     align-self: center;
-    margin-top: 12px;
-    font-size: 24px;
+    margin-top: 10px;
+    font-size: 18px;
     -unity-font-style: bold;
+    color: rgb(207, 214, 230);
 }
 
 .skill-description-label {
     width: 92%;
     align-self: center;
     padding-top: 4px;
-    padding-bottom: 16px;
-    padding-left: 24px;
-    font-size: 24px;
+    padding-bottom: 12px;
+    padding-left: 16px;
+    font-size: 18px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(230, 230, 230);
 }
 
 .skill-tips-heading {
     width: 95%;
     align-self: center;
-    margin-top: 12px;
-    font-size: 24px;
+    margin-top: 10px;
+    font-size: 18px;
     -unity-font-style: bold;
+    color: rgb(207, 214, 230);
 }
 
 .skill-tips-label {
     width: 92%;
     align-self: center;
     padding-top: 4px;
-    padding-bottom: 16px;
-    padding-left: 24px;
-    font-size: 24px;
+    padding-bottom: 12px;
+    padding-left: 16px;
+    font-size: 18px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(230, 230, 230);
+}
+
+.skillbuild-level-label {
+    color: rgb(207, 214, 230);
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+.skillbuild-panel-button-row {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.skillbuild-action-button {
+    background-color: rgb(238, 240, 228);
+    color: rgb(26, 26, 26);
+    font-size: 20px;
+    -unity-font-style: bold;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    min-width: 160px;
+    min-height: 56px;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.skillbuild-slot-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.skillbuild-slot {
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
+    min-height: 90px;
+    background-color: rgb(0, 0, 0);
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.skillbuild-list-section {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.skillbuild-list-scrollview {
+    flex-grow: 0;
+    flex-direction: row;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.skillbuild-bottom-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.skillbuild-bottom-row > .skillbuild-action-button {
+    margin-left: 12px;
+    margin-right: 12px;
 }
 
 .skill-element-slot {
     align-items: center;
     justify-content: center;
+}
+
+/*
+    スロット下に表示する発動コマンド入力の六角形行。
+    個数=入力回数、色=入力コマンド(ComboStepColors)。「詳細」パネルの
+    skillbuild-combo-hex と同じ仕組み(ComboHexRowBuilder)を、スロットの
+    小さい面積向けに縮小したサイズで再利用する。
+*/
+.skillbuild-slot-combo-row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin-top: 6px;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.skillbuild-slot-combo-hex {
+    width: 19px;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 1px;
+    margin-right: 1px;
+}
+
+.skillbuild-slot-combo-hex-cap-top,
+.skillbuild-slot-combo-hex-cap-bottom {
+    width: 0;
+    height: 0;
+    border-left-width: 9.5px;
+    border-right-width: 9.5px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+}
+
+.skillbuild-slot-combo-hex-cap-top {
+    border-bottom-width: 5px;
+}
+
+.skillbuild-slot-combo-hex-cap-bottom {
+    border-top-width: 5px;
+}
+
+.skillbuild-slot-combo-hex-rect {
+    width: 19px;
+    height: 9px;
 }
 
 .skill-slot-icon {

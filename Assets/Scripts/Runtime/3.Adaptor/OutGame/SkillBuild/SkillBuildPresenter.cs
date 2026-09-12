@@ -96,6 +96,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 (isUnlocked ? unlockedSkills : lockedSkills).Add(viewData);
             }
 
+
             // SkillId は文字列IDから焼き込まれたハッシュ値のため番号順にならない。
             // 表示名末尾の数字を「スキル番号」として抽出し、昇順に並び替える。
             unlockedSkills.Sort(CompareBySkillNumber);
