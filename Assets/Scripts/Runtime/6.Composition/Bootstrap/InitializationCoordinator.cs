@@ -91,9 +91,8 @@ namespace KillChord.Runtime.Composition.Bootstrap
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 TModule module = modules[i];
-                if (!module.Init())
+                if (!RunSynchronousPhase(module, InitializationPhase.Init, module.Init))
                 {
-                    LogPhaseFailure(module, InitializationPhase.Init);
                     return false;
                 }
 
@@ -124,7 +123,22 @@ namespace KillChord.Runtime.Composition.Bootstrap
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 TModule module = modules[i];
-                if (!await module.ResourceLoadAsync(cancellationToken))
+                bool success;
+                try
+                {
+                    success = await module.ResourceLoadAsync(cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception)
+                {
+                    LogPhaseFailure(module, InitializationPhase.ResourceLoadAsync);
+                    throw;
+                }
+
+                if (!success)
                 {
                     LogPhaseFailure(module, InitializationPhase.ResourceLoadAsync);
                     return false;
@@ -156,9 +170,8 @@ namespace KillChord.Runtime.Composition.Bootstrap
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 TModule module = modules[i];
-                if (!module.Build())
+                if (!RunSynchronousPhase(module, InitializationPhase.Build, module.Build))
                 {
-                    LogPhaseFailure(module, InitializationPhase.Build);
                     return false;
                 }
 
@@ -189,9 +202,8 @@ namespace KillChord.Runtime.Composition.Bootstrap
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 TModule module = modules[i];
-                if (!module.Ready())
+                if (!RunSynchronousPhase(module, InitializationPhase.Ready, module.Ready))
                 {
-                    LogPhaseFailure(module, InitializationPhase.Ready);
                     return false;
                 }
 
@@ -200,6 +212,36 @@ namespace KillChord.Runtime.Composition.Bootstrap
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     同期フェーズを実行し、falseと例外のどちらでも失敗箇所を記録します。
+        /// </summary>
+        /// <param name="module"> 実行対象のモジュールです。 </param>
+        /// <param name="phase"> 実行するフェーズです。 </param>
+        /// <param name="operation"> フェーズの処理です。 </param>
+        /// <returns> 成功した場合はtrueです。 </returns>
+        private bool RunSynchronousPhase(TModule module, InitializationPhase phase, Func<bool> operation)
+        {
+            try
+            {
+                bool success = operation();
+                if (!success)
+                {
+                    LogPhaseFailure(module, phase);
+                }
+
+                return success;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                LogPhaseFailure(module, phase);
+                throw;
+            }
         }
 
         /// <summary>

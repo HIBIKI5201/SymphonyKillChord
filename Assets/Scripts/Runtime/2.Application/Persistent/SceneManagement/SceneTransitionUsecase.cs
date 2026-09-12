@@ -61,6 +61,27 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         }
 
         /// <summary>
+        ///     初期化状態を破棄してシーンを再読み込みし、初期化完了後にロード画面を閉じます。
+        /// </summary>
+        /// <param name="sceneName"> 再読み込みするシーン名です。 </param>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 再読み込みと初期化に成功した場合はtrueです。 </returns>
+        public Task<bool> ReloadSceneAsync(string sceneName, CancellationToken cancellationToken)
+        {
+            return _executor.ExecuteAsync(
+                progress =>
+                {
+                    _sceneInitializationReadiness.Clear(sceneName);
+                    return LoadSceneAndWaitForReadyAsync(
+                        sceneName,
+                        () => _service.ReloadSceneAsync(sceneName, progress, cancellationToken),
+                        null,
+                        cancellationToken);
+                },
+                cancellationToken);
+        }
+
+        /// <summary>
         ///    シーン遷移を行うが、ロード画面を閉じずに進捗を保持する。
         ///    既にアクティブなロードセッションが存在する場合（例: シーン初期化中に続けて次のシーンへ
         ///    遷移する場合）は、新規セッションを開始せずそのセッションを引き継いで完了させる。
