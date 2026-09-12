@@ -41,6 +41,15 @@
         /// <summary> Discordログの取得対象にするチャンネルID配列。 </summary>
         public const string DISCORD_LOG_CHANNEL_IDS = "DISCORD_LOG_CHANNEL_IDS";
 
+        /// <summary> GitHub APIのアクセストークン。秘匿情報。未設定の場合は匿名アクセスとなりレート制限が厳しくなる。 </summary>
+        public const string GITHUB_TOKEN = "GITHUB_TOKEN";
+
+        /// <summary> ブランチ調査の対象とする "owner/name" 形式のリポジトリ。 </summary>
+        public const string GITHUB_REPOSITORY = "GITHUB_REPOSITORY";
+
+        /// <summary> ブランチ調査コマンドを登録する任意のDiscord Guild ID。 </summary>
+        public const string BRANCH_CLEANUP_DISCORD_GUILD_ID = "BRANCH_CLEANUP_DISCORD_GUILD_ID";
+
         public const string NOTION_TOKEN = "NOTION_TOKEN";
         public const string NOTION_TASK_DATABASE_ID = "NOTION_TASK_DATABASE_ID";
         public const string NOTION_SPRINT_DATABASE_ID = "NOTION_SPRINT_DATABASE_ID";
