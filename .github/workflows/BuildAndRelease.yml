@@ -17,6 +17,14 @@ on:
         options:
           - Development
           - Master
+      build_variant:
+        description: 'ゲームデータ種別'
+        required: true
+        default: 'demo'
+        type: choice
+        options:
+          - demo
+          - release
       profile_android:
         description: 'Android'
         type: boolean
@@ -145,7 +153,9 @@ jobs:
       UNITY_EXE_PATH: ${{ vars.UNITY_EXE_PATH }}
       UNITY_BUILD_EXECUTE_METHOD: ${{ vars.UNITY_BUILD_EXECUTE_METHOD }}
       UNITY_BUILD_TIMEOUT_SEC: ${{ vars.UNITY_BUILD_TIMEOUT_SEC }}
+      AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
       BUILD_MODE: ''
+      BUILD_VARIANT: ''
 
     steps:
       - name: クローン先プロジェクトフォルダおよびディスク事前クリーンアップ
@@ -298,11 +308,24 @@ jobs:
              Write-Host "[ERROR]: サポートされていないベースブランチです: $BaseRef"
              exit 1
           }
+
+          $BuildVariant = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            "${{ inputs.build_variant }}"
+          } else {
+            $env:AUTO_BUILD_VARIANT
+          }
+          $BuildVariant = ([string]$BuildVariant).Trim().ToLowerInvariant()
+          if ($BuildVariant -notin @("demo", "release")) {
+            Write-Host "[ERROR]: ゲームデータ種別には demo または release を指定してください。現在値: '$BuildVariant'"
+            exit 1
+          }
  
-          Write-Host "ベースブランチ: $BaseRef, タグの接頭辞: $TagPrefix"
+          Write-Host "ベースブランチ: $BaseRef, ビルド種別: $BuildVariant, タグの接頭辞: $TagPrefix"
           "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
+          "BUILD_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
           "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
+          "build_variant=$BuildVariant" | Add-Content -Path $env:GITHUB_OUTPUT
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
 
           # workflow_dispatch以外（PRマージ起動時）はこの入力自体が存在せず空文字になり、
@@ -995,6 +1018,9 @@ jobs:
           if ($env:SELECTED_PROFILES) {
             $UnityArgs += @("-selectedProfiles", "$env:SELECTED_PROFILES")
           }
+          if ($env:BUILD_VARIANT) {
+            $UnityArgs += @("-gameDataVariant", "$env:BUILD_VARIANT")
+          }
 
           $UnityProcess = Start-Process `
             -FilePath "$env:UNITY_EXE_PATH" `
@@ -1335,7 +1361,7 @@ jobs:
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: ${{ steps.tag_gen.outputs.TAG_NAME }}
-          prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' }}
+          prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' || steps.determine_mode.outputs.build_variant == 'demo' }}
           body: |
             Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
 
@@ -1344,6 +1370,7 @@ jobs:
             **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
             **ビルドモード:** ${{ steps.determine_mode.outputs.build_mode }}
+            **ビルド種別:** ${{ steps.determine_mode.outputs.build_variant || 'development' }}
 
             **ビルド結果:** ${{ steps.unity_build.outputs.exit_code == '0' && '全プロファイル成功' || format('一部のプロファイルが失敗しました（Unity終了コード: {0}）。本リリースには成功したプロファイルの成果物のみ含まれます。詳細はワークフロー実行のログを確認してください。', steps.unity_build.outputs.exit_code) }}
 
