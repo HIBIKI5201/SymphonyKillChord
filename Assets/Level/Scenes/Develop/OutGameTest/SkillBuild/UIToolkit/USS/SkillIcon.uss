@@ -13,8 +13,8 @@
     height: 150px;
     width: 150px;
     overflow: hidden;
-    margin-left: 1%;
-    margin-right: 1%;
+    margin-left: 4%;
+    margin-right: 4%;
     border-left-width: 4px;
     border-right-width: 4px;
     border-top-width: 4px;
@@ -90,3 +90,75 @@
     border-top-color: rgb(92, 225, 230);
     border-bottom-color: rgb(92, 225, 230);
 }
+
+.skill-genre-badge {
+    position: absolute;
+    left: -4px;
+    top: -4px;
+    width: 32px;
+    height: 32px;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    background-color: rgb(60, 60, 60);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(255, 255, 255);
+    border-right-color: rgb(255, 255, 255);
+    border-top-color: rgb(255, 255, 255);
+    border-bottom-color: rgb(255, 255, 255);
+    -unity-background-scale-mode: scale-to-fit;
+    display: none;
+}
+
+.skill-equipped-badge {
+    position: absolute;
+    right: -4px;
+    top: -4px;
+    width: 28px;
+    height: 28px;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    background-color: rgb(255, 193, 7);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(255, 255, 255);
+    border-right-color: rgb(255, 255, 255);
+    border-top-color: rgb(255, 255, 255);
+    border-bottom-color: rgb(255, 255, 255);
+    display: none;
+}
+
+.is-equipped .skill-equipped-badge {
+    display: flex;
+}
+
+.skill-locked-label {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.55);
+    color: rgb(230, 230, 230);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    font-size: 20px;
+    display: none;
+}
+
+.is-locked .skill-icon-image {
+    opacity: 0.4;
+}
+
+.is-locked .skill-locked-label {
+    display: flex;
+}
+

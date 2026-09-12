@@ -19,7 +19,9 @@
     "*"
   ],
   "specRefs": [
-    "spec/feature/game-spec.md#gs-02-rhythm-command-combat"
+    "spec/feature/game-spec.md#gs-02-リズムコマンド戦闘",
+    "spec/feature/game-spec.md#gs-10-プレイヤーの移動と回避",
+    "spec/feature/game-spec.md#gs-12-ターゲットとカメラ"
   ],
   "rationale": "combat-core のうちプレイヤー意図・移動・照準・標的選択を所有し、効果解決は Combat State へ分離する。"
 }

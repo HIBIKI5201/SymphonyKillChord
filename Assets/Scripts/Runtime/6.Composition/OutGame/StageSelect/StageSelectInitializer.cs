@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.OutGame.StageSelect;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
@@ -50,6 +51,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private const string BATTLE_NODE_USS_CLASS = "stage-node--boss";
         /// <summary> ステージノードラベルのUSSクラス名。 </summary>
         private const string NODE_LABEL_USS_CLASS = "stage-node__label";
+        /// <summary> クリックしたノードに残すフレームのUSSクラス名。 </summary>
+        private const string FOCUS_FRAME_USS_CLASS = "stage-node-focus-frame";
+        /// <summary> フレーム要素名。 </summary>
+        private const string FOCUS_FRAME_NAME = "StageNodeFocusFrame";
         /// <summary> 作戦マップScrollView要素名。 </summary>
         private const string STAGE_MAP_SCROLL_VIEW_NAME = "StageNodeRoot";
         /// <summary> 作戦マップ内容要素名。 </summary>
@@ -110,7 +115,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private VisualElement _stageMapContent;
         private VisualElement _stageMapCanvas;
         private float _stageMapCanvasHeight;
+        private VisualElement _stageNodeFocusFrame;
+        private bool _isFocusFrameLocked;
         private bool _isSubscribed;
+        private StageSelectModuleContainer _moduleContainer;
+        private bool _isModuleContainerRegistered;
+        private LoadingScreenController _loadingScreenController;
+        private bool _isWaitingForLoadingCompleted;
+        private bool _isAutomaticTutorialFlowStarted;
 
         /// <summary>
         ///     単体で実行できる初期化を行います。
@@ -202,7 +214,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         public override bool Ready()
         {
             Subscribe();
-            TryExecutePendingNodeTransitionAfterReturn();
+            StartAutomaticTutorialFlowAfterLoading();
             return _isInitialized;
         }
 
@@ -233,6 +245,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleStageDetailClosed()
         {
+            _isFocusFrameLocked = false;
             _detailScreenView.Hide();
         }
 
@@ -241,6 +254,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleScreenClosed()
         {
+            _isFocusFrameLocked = false;
             _detailScreenView.Hide();
         }
 
@@ -484,6 +498,19 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             // --- Adaptor 層 ---
             BuildControllers();
 
+            _moduleContainer = new StageSelectModuleContainer(
+                _stageTree,
+                _battleSortieSelectionService,
+                _currentSceneName);
+            _isModuleContainerRegistered = ServiceLocator.RegisterInstance(_moduleContainer);
+            if (!_isModuleContainerRegistered)
+            {
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] {nameof(StageSelectModuleContainer)} を登録できませんでした。",
+                    this);
+                return false;
+            }
+
             _cts = new CancellationTokenSource();
             _isInitialized = true;
             return true;
@@ -494,8 +521,18 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         public override void Shutdown()
         {
+            UnsubscribeLoadingCompleted();
             Unsubscribe();
             _isSubscribed = false;
+            if (_isModuleContainerRegistered
+                && ServiceLocator.TryGetInstance(out StageSelectModuleContainer registeredContainer)
+                && ReferenceEquals(registeredContainer, _moduleContainer))
+            {
+                ServiceLocator.UnregisterInstance<StageSelectModuleContainer>();
+            }
+
+            _moduleContainer = null;
+            _isModuleContainerRegistered = false;
             UnregisterStageMapGeometryCallback();
             _cts?.Cancel();
             DisposeNodeComponents();
@@ -506,8 +543,112 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageMapContent = null;
             _stageMapCanvas = null;
             _stageMapCanvasHeight = 0.0f;
+            _stageNodeFocusFrame = null;
+            _isFocusFrameLocked = false;
             _battleSortieSelectionService = null;
+            _loadingScreenController = null;
+            _isAutomaticTutorialFlowStarted = false;
             _isInitialized = false;
+        }
+
+        /// <summary>
+        ///     OutGameを開いたロードが完了してからチュートリアルの自動遷移を開始します。
+        /// </summary>
+        private void StartAutomaticTutorialFlowAfterLoading()
+        {
+            if (!ServiceLocator.TryGetInstance(out _loadingScreenController)
+                || !_loadingScreenController.IsLoading)
+            {
+                ExecuteAutomaticTutorialFlow();
+                return;
+            }
+
+            _loadingScreenController.LoadingCompleted += HandleLoadingCompleted;
+            _isWaitingForLoadingCompleted = true;
+
+            // 状態確認とイベント購読の間にロードが完了した場合にも開始を取りこぼさない。
+            if (!_loadingScreenController.IsLoading)
+            {
+                UnsubscribeLoadingCompleted();
+                ExecuteAutomaticTutorialFlow();
+            }
+        }
+
+        /// <summary>
+        ///     OutGameを開いたロードの完了通知を受け取ります。
+        /// </summary>
+        /// <param name="isSuccess"> ロードに成功した場合はtrueです。 </param>
+        private void HandleLoadingCompleted(bool isSuccess)
+        {
+            UnsubscribeLoadingCompleted();
+            if (isSuccess)
+            {
+                ExecuteAutomaticTutorialFlow();
+            }
+        }
+
+        /// <summary>
+        ///     ロード完了イベントの購読を解除します。
+        /// </summary>
+        private void UnsubscribeLoadingCompleted()
+        {
+            if (!_isWaitingForLoadingCompleted || _loadingScreenController == null)
+            {
+                return;
+            }
+
+            _loadingScreenController.LoadingCompleted -= HandleLoadingCompleted;
+            _isWaitingForLoadingCompleted = false;
+        }
+
+        /// <summary>
+        ///     保存状態に応じたチュートリアルの自動処理を一つずつ実行します。
+        /// </summary>
+        private async void ExecuteAutomaticTutorialFlow()
+        {
+            if (_isAutomaticTutorialFlowStarted)
+            {
+                return;
+            }
+
+            _isAutomaticTutorialFlowStarted = true;
+            try
+            {
+                // LoadingCompletedの他の購読者が旧セッションの後処理を終えてから次のロードを開始する。
+                await Awaitable.NextFrameAsync(_cts.Token);
+                if (!_isInitialized)
+                {
+                    return;
+                }
+
+                // Title開始処理はOutGameロード完了後にTitleアンロードを続けて実行する。
+                // 次のセッションが始まっていた場合は、その完了も待ってから自動遷移する。
+                if (_loadingScreenController != null
+                    && _loadingScreenController.IsLoading)
+                {
+                    _isAutomaticTutorialFlowStarted = false;
+                    StartAutomaticTutorialFlowAfterLoading();
+                    return;
+                }
+
+                if (await TryExecutePendingNodeTransitionAfterReturnAsync())
+                {
+                    return;
+                }
+
+                if (TryStartTutorialSegment())
+                {
+                    return;
+                }
+
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -819,7 +960,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     ステージごとのノード要素を生成する。
+        ///     ステージごとのノード要素と、クリックしたノードに残すフレームを生成する。
+        ///     フレームは表示対象ノードの子として付け替え、ノードの scale アニメーションに追従させる。
         /// </summary>
         /// <param name="mapContent"> ノードを格納する要素。</param>
         /// <param name="nodeCenters"> ステージID別のノード中心座標。</param>
@@ -829,6 +971,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             Dictionary<StageId, Vector2> nodeCenters,
             Dictionary<StageId, VisualElement> nodeElementMap)
         {
+            _stageNodeFocusFrame = new VisualElement
+            {
+                name = FOCUS_FRAME_NAME,
+                pickingMode = PickingMode.Ignore,
+            };
+            _stageNodeFocusFrame.AddToClassList(FOCUS_FRAME_USS_CLASS);
+            _isFocusFrameLocked = false;
+
             for (int i = 0; i < _stageTree.Nodes.Count; i++)
             {
                 StageNode node = _stageTree.Nodes[i];
@@ -850,6 +1000,20 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 nodeElement.style.width = NODE_SIZE;
                 nodeElement.style.height = NODE_SIZE;
 
+                // ホバー中はフレームをそのノードの子へ付け替える。クリック固定中は動かさない。
+                VisualElement focusTargetNode = nodeElement;
+                nodeElement.RegisterCallback<PointerEnterEvent>(_ =>
+                {
+                    if (_isFocusFrameLocked) { return; }
+                    AttachFocusFrameTo(focusTargetNode);
+                });
+                // クリックしたノードへフレームを固定する。詳細画面を閉じるまで解除されない。
+                nodeElement.RegisterCallback<ClickEvent>(_ =>
+                {
+                    AttachFocusFrameTo(focusTargetNode);
+                    _isFocusFrameLocked = true;
+                });
+
                 var label = new Label(node.Definition.StageName)
                 {
                     pickingMode = PickingMode.Ignore,
@@ -859,6 +1023,20 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 mapContent.Add(nodeElement);
                 nodeElementMap.Add(node.Id, nodeElement);
             }
+        }
+
+        /// <summary>
+        ///     フレームを指定ノードの子へ付け替えて表示する。
+        ///     VisualElement は親を1つしか持てないため、元の親からは自動で外れる。
+        ///     Insert(0) でラベルより背面へ入れ、ラベルの視認性を保つ。
+        /// </summary>
+        /// <param name="node"> フレームを乗せる対象ノード。</param>
+        private void AttachFocusFrameTo(VisualElement node)
+        {
+            if (_stageNodeFocusFrame == null || node == null) { return; }
+
+            node.Insert(0, _stageNodeFocusFrame);
+            _stageNodeFocusFrame.style.display = DisplayStyle.Flex;
         }
 
         /// <summary>
@@ -916,35 +1094,60 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <summary>
         ///     バトルからホームへ戻った後の予約済み自動遷移を実行する。
         /// </summary>
-        private async void TryExecutePendingNodeTransitionAfterReturn()
+        private async Task<bool> TryExecutePendingNodeTransitionAfterReturnAsync()
         {
             if (_pendingNodeTransitionState == null
                 || !_pendingNodeTransitionState.HasPending)
             {
-                return;
+                return false;
             }
 
             if (!_pendingNodeTransitionState.TryConsumeCompleted(
                     out PendingNodeTransition pendingNodeTransition))
             {
                 _pendingNodeTransitionState.Clear();
-                return;
+                return true;
             }
 
-            try
-            {
-                if (!await ExecutePendingNodeTransitionAsync(pendingNodeTransition))
-                {
-                    _pendingNodeTransitionState.Clear();
-                }
-            }
-            catch (System.OperationCanceledException)
-            {
-            }
-            catch (System.Exception exception)
+            if (!await ExecutePendingNodeTransitionAsync(pendingNodeTransition))
             {
                 _pendingNodeTransitionState.Clear();
-                Debug.LogException(exception, this);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     保存済みの進行段階に対応する初回チュートリアル区間を開始します。
+        /// </summary>
+        private bool TryStartTutorialSegment()
+        {
+            if (!_isInitialized
+                || _loadedSaveData == null
+                || _pendingNodeTransitionState.HasPending)
+            {
+                return false;
+            }
+
+            switch (_loadedSaveData.Tutorial.Phase)
+            {
+                case TutorialPhase.OpeningScenarioCompleted:
+                    if (!_stageTree.TryGetTutorialNode(out StageNode tutorialNode)
+                        || tutorialNode.Definition is not BattleStageDefinition tutorialBattle
+                        || !TryPrepareBattleSortie(tutorialBattle))
+                    {
+                        Debug.LogError(
+                            $"[{nameof(StageSelectInitializer)}] チュートリアル戦闘を準備できませんでした。",
+                            this);
+                        return true;
+                    }
+
+                    _selectedScenarioState.Clear();
+                    _outGameSortieController.RequestImmediateBattleSortie();
+                    return true;
+
+                default:
+                    return false;
             }
         }
 

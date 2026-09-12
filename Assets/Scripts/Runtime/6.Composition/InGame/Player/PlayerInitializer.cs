@@ -93,6 +93,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         private Action _onDodgeEndedHandler;
         private IPlayerCharacterAnimationSignal _characterAnimationSignal;
+        private PlayerAttackSignal _playerAttackSignal;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -197,12 +198,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
             _player.transform.SetPositionAndRotation(
                 spawnPointTransform.position,
                 spawnPointTransform.rotation);
+            _playerAttackSignal = new PlayerAttackSignal();
             _moduleContainer = new PlayerModuleContainer(
                 this,
                 _player,
                 _playerEntity,
                 playerStatusBonusContainer.PlayerStatusBonus,
-                _damageEffectView);
+                _damageEffectView,
+                _playerAttackSignal);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;
@@ -299,7 +302,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             // 位置リセット入力を購読する。
             _playerInputView = inputView;
-            _playerInputView.OnResetPositionInput += HandleResetPositionInput;
 
             TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
             if (targetSystemContainer == null || targetSystemContainer.TargetSystemController == null)
@@ -317,11 +319,13 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
+            PlayerAttackPresenter playerAttackPresenter = new PlayerAttackPresenter(_playerAttackSignal);
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
             PlayerActionRestrictionState actionRestrictionState = new PlayerActionRestrictionState();
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
             PlayerAttackController playerAttackController = new PlayerAttackController(
                 attackResultPresenter,
+                playerAttackPresenter,
                 playerBattleState,
                 actionRestrictionState,
                 skillController,
@@ -392,30 +396,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 .SetPlayerMoveSpec(parameter);
 #endif
         }
-
-        /// <summary>
-        ///     プレイヤーをステージのスタート地点へ戻します。
-        /// </summary>
-        public void ResetPlayerToSpawn()
-        {
-            if (_player == null)
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(PlayerView)} が存在しないため位置リセットできません。", this);
-                return;
-            }
-
-            if (!TryResolvePlayerSpawnPointTransform(out Transform spawnPointTransform))
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] スタート地点が見つからないため位置リセットできません。", this);
-                return;
-            }
-
-            _player.ResetToSpawn(spawnPointTransform.position, spawnPointTransform.rotation);
-
-            // カメラの向きもスタート時の前方へ戻す。
-            ResetCameraOrientation(spawnPointTransform.forward);
-        }
-
         /// <summary>
         ///     カメラの向きを指定した前方へ戻します。
         /// </summary>
@@ -434,21 +414,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             _cameraSystemView.ResetOrientation(forward);
-        }
-
-        /// <summary>
-        ///     位置リセット入力を受け取ってプレイヤーをスタート地点へ戻します。
-        /// </summary>
-        /// <param name="input"> 位置リセット入力です。 </param>
-        private void HandleResetPositionInput(InputContext<float> input)
-        {
-            // 押下開始時のみ実行する。
-            if (input.Phase != InputActionPhase.Started)
-            {
-                return;
-            }
-
-            ResetPlayerToSpawn();
         }
 
         /// <summary>
@@ -492,11 +457,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void OnDestroy()
         {
+            _playerAttackSignal?.Dispose();
+            _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();
 
             if (_playerInputView != null)
             {
-                _playerInputView.OnResetPositionInput -= HandleResetPositionInput;
                 _playerInputView = null;
             }
 
@@ -528,6 +494,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         public override void Shutdown()
         {
+            _playerAttackSignal?.Dispose();
+            _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();
 #if UNITY_ANDROID || UNITY_EDITOR
             _mobileStickFlickInputConfigKey.ReleaseLoadedAsset(this);

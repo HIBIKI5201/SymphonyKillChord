@@ -527,9 +527,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.SkillTree.SkillTreeInitializer
   _uiDocument: {fileID: 452244044}
+  _playerData: {fileID: 0}
   _skillNodeDataRepoKey: SkillNodeDataRepo
   _skillNodeBindRepoKey: SkillNodeBindRepo
   _skillNodePhaseBindRepoKey: SkillNodePhaseBindDataRepo
+  _statusBonusEffectIconCatalogKey: StatusBonusEffectIconCatalogAsset
+  _skillRepositoryKey: OutGameSkillRepository
+  _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
+  _videoPlayer: {fileID: 0}
 --- !u!1 &1370918365
 GameObject:
   m_ObjectHideFlags: 0
@@ -561,6 +566,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 452244044}
   _screenRuleDataKey: OutGameScreenRuleData
+  _titleSceneName: Title
 --- !u!4 &1370918367
 Transform:
   m_ObjectHideFlags: 0

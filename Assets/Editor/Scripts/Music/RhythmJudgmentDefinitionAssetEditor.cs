@@ -24,7 +24,7 @@ namespace KillChord.Editor.Music
             serializedObject.ApplyModifiedProperties();
 
             EditorGUILayout.Space(SECTION_SPACING);
-            EditorGUILayout.LabelField("判定ゾーン ビジュアライズ（1小節基準）", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("判定ゾーン / ジャスト範囲（1.2小節まで表示）", EditorStyles.boldLabel);
 
             DrawGauge(rangeData);
         }
@@ -65,17 +65,19 @@ namespace KillChord.Editor.Music
                 int beatType = element.FindPropertyRelative(BEAT_TYPE_PROPERTY_NAME).intValue;
                 float start = element.FindPropertyRelative(START_NORMALIZED_PROPERTY_NAME).floatValue;
                 float end = element.FindPropertyRelative(END_NORMALIZED_PROPERTY_NAME).floatValue;
+                float justStart = element.FindPropertyRelative(JUST_START_PROPERTY_NAME).floatValue;
+                float justEnd = element.FindPropertyRelative(JUST_END_PROPERTY_NAME).floatValue;
 
                 Rect zoneRect = new Rect(
-                    gaugeRect.x + gaugeRect.width * Mathf.Clamp01(start),
+                    gaugeRect.x + gaugeRect.width * Mathf.Clamp01(start / GAUGE_LENGTH_IN_BARS),
                     gaugeRect.y,
-                    gaugeRect.width * Mathf.Max(0f, Mathf.Clamp01(end) - Mathf.Clamp01(start)),
+                    gaugeRect.width * Mathf.Max(0f, Mathf.Clamp01(end / GAUGE_LENGTH_IN_BARS) - Mathf.Clamp01(start / GAUGE_LENGTH_IN_BARS)),
                     gaugeRect.height);
                 EditorGUI.DrawRect(zoneRect, GetZoneColor(beatType));
 
-                float justNormalized = beatType > 0 ? 1f / beatType : 0f;
-                bool isJustWithinZone = justNormalized >= start && justNormalized <= end;
-                DrawJustMarker(gaugeRect, justNormalized, isJustWithinZone);
+                bool isJustRangeValid = justStart >= 0f && justEnd > justStart
+                    && !float.IsInfinity(justStart) && !float.IsInfinity(justEnd);
+                DrawJustMarker(gaugeRect, justStart, justEnd, isJustRangeValid);
 
                 Rect labelRect = new Rect(
                     zoneRect.x,
@@ -84,14 +86,13 @@ namespace KillChord.Editor.Music
                     LABEL_AREA_HEIGHT);
                 GUI.Label(
                     labelRect,
-                    $"n={beatType}\n[{start:0.###}, {end:0.###}]\nJust={justNormalized:0.###}",
+                    $"n={beatType}\n[{start:0.###}, {end:0.###}]\nJust=[{justStart:0.###}, {justEnd:0.###})",
                     EditorStyles.miniLabel);
 
-                if (!isJustWithinZone)
+                if (!isJustRangeValid)
                 {
                     warnings.Add(
-                        $"BeatType {beatType}: Just位置({justNormalized:0.###})が自身の判定ウィンドウ" +
-                        $"[{start:0.###}, {end:0.###}]の外側にあります。");
+                        $"BeatType {beatType}: ジャスト開始・終了には有限値を指定し、0 ≦ 開始 < 終了としてください。");
                 }
             }
 
@@ -110,7 +111,7 @@ namespace KillChord.Editor.Music
         {
             for (int i = 0; i <= SCALE_TICK_COUNT; i++)
             {
-                float normalized = (float)i / SCALE_TICK_COUNT;
+                float normalized = (float)i / SCALE_TICK_COUNT / GAUGE_LENGTH_IN_BARS;
                 float x = gaugeRect.x + gaugeRect.width * normalized;
                 Rect tickRect = new Rect(x - TICK_WIDTH * 0.5f, gaugeRect.y, TICK_WIDTH, gaugeRect.height);
                 EditorGUI.DrawRect(tickRect, SCALE_TICK_COLOR);
@@ -118,20 +119,27 @@ namespace KillChord.Editor.Music
         }
 
         /// <summary>
-        ///     Just位置を示すマーカー線を描画する。
+        ///     実際のジャスト範囲を示す帯を描画する。
         /// </summary>
         /// <param name="gaugeRect"> ゲージの描画領域。 </param>
-        /// <param name="justNormalized"> Justの正規化位置(0～1)。 </param>
-        /// <param name="isWithinZone"> 自身の判定ゾーン内にJust位置が収まっているか。 </param>
-        private static void DrawJustMarker(Rect gaugeRect, float justNormalized, bool isWithinZone)
+        /// <param name="justStart"> ジャスト開始位置。 </param>
+        /// <param name="justEnd"> ジャスト終了位置。 </param>
+        /// <param name="isValid"> 有効なジャスト範囲か。 </param>
+        private static void DrawJustMarker(Rect gaugeRect, float justStart, float justEnd, bool isValid)
         {
-            float x = gaugeRect.x + gaugeRect.width * Mathf.Clamp01(justNormalized);
+            if (!isValid)
+            {
+                return;
+            }
+
+            float start = Mathf.Clamp01(justStart / GAUGE_LENGTH_IN_BARS);
+            float end = Mathf.Clamp01(justEnd / GAUGE_LENGTH_IN_BARS);
             Rect markerRect = new Rect(
-                x - MARKER_WIDTH * 0.5f,
+                gaugeRect.x + gaugeRect.width * start,
                 gaugeRect.y - MARKER_OVERHANG,
-                MARKER_WIDTH,
+                gaugeRect.width * (end - start),
                 gaugeRect.height + MARKER_OVERHANG * 2f);
-            EditorGUI.DrawRect(markerRect, isWithinZone ? JUST_MARKER_COLOR : JUST_MARKER_WARNING_COLOR);
+            EditorGUI.DrawRect(markerRect, JUST_MARKER_COLOR);
         }
 
         /// <summary>
@@ -149,13 +157,15 @@ namespace KillChord.Editor.Music
         private const string BEAT_TYPE_PROPERTY_NAME = "BeatType";
         private const string START_NORMALIZED_PROPERTY_NAME = "StartNormalized";
         private const string END_NORMALIZED_PROPERTY_NAME = "EndNormalized";
+        private const string JUST_START_PROPERTY_NAME = "JustStartNormalized";
+        private const string JUST_END_PROPERTY_NAME = "JustEndNormalized";
 
+        private const float GAUGE_LENGTH_IN_BARS = 1.2f;
         private const float SECTION_SPACING = 12f;
         private const float WARNING_SPACING = 4f;
         private const float GAUGE_HEIGHT = 32f;
         private const float LABEL_AREA_HEIGHT = 40f;
         private const float MIN_LABEL_WIDTH = 70f;
-        private const float MARKER_WIDTH = 2f;
         private const float MARKER_OVERHANG = 4f;
         private const float TICK_WIDTH = 1f;
         private const int SCALE_TICK_COUNT = 4;
@@ -166,6 +176,5 @@ namespace KillChord.Editor.Music
         private static readonly Color BACKGROUND_COLOR = new(0.15f, 0.15f, 0.15f, 1f);
         private static readonly Color SCALE_TICK_COLOR = new(1f, 1f, 1f, 0.25f);
         private static readonly Color JUST_MARKER_COLOR = new(1f, 1f, 1f, 0.95f);
-        private static readonly Color JUST_MARKER_WARNING_COLOR = new(1f, 0.15f, 0.15f, 0.95f);
     }
 }

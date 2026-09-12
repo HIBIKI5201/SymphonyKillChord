@@ -1,5 +1,5 @@
-using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.Adaptor.OutGame.BattlePreparation;
+using KillChord.Runtime.View.OutGame.Navigation;
 using R3;
 using System;
 using System.Collections.Generic;
@@ -75,6 +75,26 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _viewModel = null;
         }
 
+        /// <summary> 強制出撃モードの場合はtrueです。 </summary>
+        public bool IsForcedSortieMode => _isForcedSortieMode;
+
+        /// <summary>
+        ///     戻る・装備変更を禁止し、出撃だけを許可する状態を切り替えます。
+        /// </summary>
+        /// <param name="isForced"> 強制出撃モードにする場合はtrueです。 </param>
+        public void SetForcedSortieMode(bool isForced)
+        {
+            _isForcedSortieMode = isForced;
+            _backButton.SetEnabled(!isForced);
+            _skillBuildButton.SetEnabled(!isForced);
+            _startButton.SetEnabled(true);
+
+            if (isForced)
+            {
+                SetInitialFocusElement(_startButton);
+            }
+        }
+
         /// <summary>
         ///     View が保持するリソースを解放します。
         /// </summary>
@@ -90,15 +110,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
-            _startButton.RegisterCallback<ClickEvent>(OnStartButtonClicked);
-            _skillBuildButton.RegisterCallback<ClickEvent>(OnSkillBuildButtonClicked);
-
-            // 処理を ClickEvent で受けているため、決定操作もクリックとして流し込む。
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
-            _startButton.EnableSubmitAsClick();
-            _skillBuildButton.EnableSubmitAsClick();
+            _startButton.MakeNavigable();
+            _skillBuildButton.MakeNavigable();
+
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
+            _startButtonActivation = _startButton.RegisterActivation(HandleStartButtonActivationHandler);
+            _skillBuildButtonActivation = _skillBuildButton.RegisterActivation(HandleSkillBuildButtonActivationHandler);
         }
 
         /// <summary>
@@ -106,33 +125,42 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallback()
         {
-            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
-            _startButton.UnregisterCallback<ClickEvent>(OnStartButtonClicked);
-            _skillBuildButton.UnregisterCallback<ClickEvent>(OnSkillBuildButtonClicked);
+            _backButtonActivation?.Dispose();
+            _startButtonActivation?.Dispose();
+            _skillBuildButtonActivation?.Dispose();
         }
 
         /// <summary>
-        ///     画面を閉じるボタンがクリックされたときの処理です。
+        ///     画面を閉じるボタンが作動したときの処理です。
         /// </summary>
-        private void OnBackButtonClicked(ClickEvent evt)
+        private void HandleBackButtonActivationHandler()
         {
+            if (_isForcedSortieMode)
+            {
+                return;
+            }
+
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
         /// <summary>
-        ///     ゲーム開始ボタンがクリックされたときの処理です。
+        ///     ゲーム開始ボタンが作動したときの処理です。
         /// </summary>
-        private void OnStartButtonClicked(ClickEvent evt)
+        private void HandleStartButtonActivationHandler()
         {
             OutGameUIEvent.OnStartGame?.Invoke();
         }
 
         /// <summary>
-        ///     スキル編成ボタンがクリックされたときの処理です。
+        ///     スキル編成ボタンが作動したときの処理です。
         /// </summary>
-        /// <param name="evt"></param>
-        private void OnSkillBuildButtonClicked(ClickEvent evt)
+        private void HandleSkillBuildButtonActivationHandler()
         {
+            if (_isForcedSortieMode)
+            {
+                return;
+            }
+
             OutGameUIEvent.OnShownSkillBuildScreen?.Invoke();
         }
 
@@ -280,8 +308,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly VisualElement _equippedSkillStrip;
         private readonly ScrollView _effectScrollView;
         private readonly VisualElement _effectList;
+        private IDisposable _backButtonActivation;
+        private IDisposable _startButtonActivation;
+        private IDisposable _skillBuildButtonActivation;
 
         private IBattlePreparationSkillViewModel _viewModel;
         private CompositeDisposable _subscriptions;
+        private bool _isForcedSortieMode;
     }
 }

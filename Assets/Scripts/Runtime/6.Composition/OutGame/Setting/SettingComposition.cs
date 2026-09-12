@@ -1,5 +1,6 @@
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Music;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Setting;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -52,7 +53,8 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
 
             try
             {
-                _settingCategoryView = new SettingCategoryView(settingRoot);
+                HierarchicalNavigationScope settingNavigationScope = new(settingRoot);
+                _settingCategoryView = new SettingCategoryView(settingRoot, settingNavigationScope);
                 _audioSettingsView = new AudioSettingsView(
                     settingRoot,
                     audioSettingsContainer.ViewModel,

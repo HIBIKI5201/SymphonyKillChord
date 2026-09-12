@@ -1,5 +1,6 @@
+using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
-using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
@@ -14,6 +15,7 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
 using KillChord.Runtime.View.Persistent.Input;
@@ -57,10 +59,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private string _targetSceneName;
 
         [SerializeField, SourceDataAddress, Tooltip("ステージツリー定義アセットの Addressables キーです。")]
-
         private string _stageTreeAssetKey = "StageTreeAsset";
 
-        [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。バトルシーン名の解決に使用します。")]
+        [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。")]
         private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
 
         [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
@@ -71,7 +72,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private TitleSceneView _titleSceneView;
         private TitleStartController _titleStartController;
         private ScreenController _screenController;
-        private BattleSortieSelectionService _battleSortieSelectionService;
         private ScreenRuleData _loadedRuleData;
         private StageTreeAsset _loadedStageTreeAsset;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
@@ -82,6 +82,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
         private bool _isInitialized;
         private bool _isSubscribed;
+        private bool _isLoadingSubscribed;
+        private bool _isResettingSaveData;
+        private LoadingScreenController _loadingScreenController;
 
         /// <summary>
         ///     タイトル画面に必要なアセットをロードします。
@@ -91,7 +94,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         public override async Awaitable<bool> ResourceLoadAsync(System.Threading.CancellationToken cancellationToken)
         {
             _loadedRuleData = await _ruleDataKey.LoadAssetAsync<ScreenRuleData>(this, cancellationToken);
-            _loadedStageTreeAsset = await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
+            _loadedStageTreeAsset =
+                await _stageTreeAssetKey.LoadAssetAsync<StageTreeAsset>(this, cancellationToken);
             _loadedEnemyWaveDefinitionRepository =
                 await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
                     this,
@@ -148,7 +152,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _titleStartController = new(sceneTransitionController);
-            _battleSortieSelectionService = new BattleSortieSelectionService();
 
             var titleRoot = root.Q<VisualElement>(TITLE_SCREEN_NAME);
             var menuRoot = root.Q<VisualElement>(MENU_SCREEN_NAME);
@@ -199,9 +202,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     $"{nameof(TitleSceneInitializer)}: PlayerInputView が ServiceLocator に登録されていません。"
                     + " Optionsボタンでのオプション表示は無効になります。");
             }
+            HierarchicalNavigationScope optionNavgationScope = new(optionRoot);
+            HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
+
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
-            OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent);
-            CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent);
+            OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent, optionNavgationScope);
+            CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent, creditNavgationScope);
             _volumeSettingsTabView = new VolumeSettingsTabView(
                 optionRoot,
                 _audioSettingsContainer.ViewModel,
@@ -236,24 +242,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
-            bool isTutorialCompleted = _loadedSaveData.Tutorial.IsTutorialCompleted;
-
-            if (!isTutorialCompleted
-                && TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName))
+            if (!ApplyStartDestination())
             {
-#if UNITY_EDITOR
-                Debug.Log($"{nameof(TitleSceneInitializer)}: 初回起動時の遷移先シーンを設定します。{tutorialTargetSceneName}");
-#endif
-                _titleStartController.SetTutorialBattleTarget(tutorialTargetSceneName);
-                _titleSceneView.SetTargetSceneName(tutorialTargetSceneName);
-            }
-            else
-            {
-#if UNITY_EDITOR
-                Debug.Log($"{nameof(TitleSceneInitializer)}: セーブデータが存在するため、通常の遷移先シーンを設定します。{_targetSceneName}");
-#endif
-                _titleStartController.ClearTutorialBattleTarget();
-                _titleSceneView.SetTargetSceneName(_targetSceneName);
+                return false;
             }
 
             _isInitialized = true;
@@ -271,6 +262,20 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out _loadingScreenController))
+            {
+                Debug.LogError($"[{nameof(TitleSceneInitializer)}] LoadingScreenControllerを取得できませんでした。", this);
+                return false;
+            }
+
+            if (!_isLoadingSubscribed)
+            {
+                _loadingScreenController.LoadingStarted += HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted += HandleLoadingCompleted;
+                _isLoadingSubscribed = true;
+            }
+
+            ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
             RegisterUIEventCallbacks();
             _titleScreenViewRegistry.ResetFocusHistory();
             _screenController.ShowTitle();
@@ -282,6 +287,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         public override void Shutdown()
         {
+            UnsubscribeLoading();
             if (_outGameUIEvent != null && _isSubscribed)
             {
                 UnRegisterUIEventCallbacks();
@@ -299,14 +305,60 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _dataResetTabView?.Dispose();
             _dataResetTabView = null;
             _audioSettingsContainer = null;
+            _titleScreenViewRegistry?.Dispose();
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
             _titleStartController = null;
-            _battleSortieSelectionService = null;
             _screenController = null;
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
+        }
+
+        /// <summary>
+        ///     ロード開始時に登録画面の操作を禁止する。
+        /// </summary>
+        private void HandleLoadingStarted()
+        {
+            ApplyInteractionEnabled(false);
+        }
+
+        /// <summary>
+        ///     ロード終了時は成否にかかわらず画面操作と現在画面のフォーカスを復元する。
+        /// </summary>
+        private void HandleLoadingCompleted(bool success)
+        {
+            ApplyInteractionEnabled(true);
+        }
+
+        /// <summary>
+        ///     取得済みRegistryへ入力許可を適用し、例外で他のロード購読者の通知を中断させない。
+        /// </summary>
+        private void ApplyInteractionEnabled(bool isEnabled)
+        {
+            try
+            {
+                _titleScreenViewRegistry?.SetInteractionEnabled(isEnabled);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     View破棄より先にロード通知の購読を一度だけ解除する。
+        /// </summary>
+        private void UnsubscribeLoading()
+        {
+            if (_isLoadingSubscribed && _loadingScreenController != null)
+            {
+                _loadingScreenController.LoadingStarted -= HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted -= HandleLoadingCompleted;
+            }
+
+            _isLoadingSubscribed = false;
+            _loadingScreenController = null;
         }
 
         /// <summary>
@@ -446,42 +498,149 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private async void HandleDataResetButtonClicked()
         {
+            if (_isResettingSaveData)
+            {
+                return;
+            }
+
+            _isResettingSaveData = true;
+            ApplyInteractionEnabled(false);
             // リセット前の音量設定を保持する。
             AudioSettingsData preservedAudioSettings = GetPreservedAudioSettings();
+            bool canResumeInteraction = false;
 
             try
             {
                 await SaveStore.DeleteAsync<SaveData>();
-            }
-            catch (Exception ex)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: セーブデータの削除中にエラーが発生しました。{ex.Message}");
-#endif
-                // 削除に失敗した状態で再読み込みと初期スキル補完を続けると、
-                // リセットできていないデータをリセット済みとして扱ってしまう。
-                return;
-            }
 
-            // セーブデータをロードして、初期状態に戻す。
+                // セーブデータをロードして、初期状態に戻す。
+                _loadedSaveData = await LoadSaveData();
+                if (_loadedSaveData == null)
+                {
+                    Debug.LogError(
+                        $"[{nameof(TitleSceneInitializer)}] リセット後のセーブデータをロードできませんでした。",
+                        this);
+                    return;
+                }
+
+                await ApplyInitialSkillLoadoutAsync();
+                await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
+
+                canResumeInteraction = ApplyStartDestination();
+                if (!canResumeInteraction)
+                {
+                    Debug.LogError(
+                        $"[{nameof(TitleSceneInitializer)}] リセット後の遷移先を設定できませんでした。",
+                        this);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+            finally
+            {
+                if (!canResumeInteraction)
+                {
+                    canResumeInteraction = await TryRecoverStartDestinationAsync();
+                }
+
+                ApplyInteractionEnabled(canResumeInteraction);
+                _isResettingSaveData = false;
+            }
+        }
+
+        /// <summary>
+        ///     リセット失敗後にセーブデータと開始遷移先を復旧します。
+        /// </summary>
+        /// <returns> 開始操作を安全に再開できる場合はtrueです。 </returns>
+        private async ValueTask<bool> TryRecoverStartDestinationAsync()
+        {
             _loadedSaveData = await LoadSaveData();
-
-            await ApplyInitialSkillLoadoutAsync();
-
-            await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
-
-            // セーブデータをリセットした後、初回起動時の遷移先シーンを設定します。
-            if (_loadedSaveData != null
-                && !_loadedSaveData.Tutorial.IsTutorialCompleted
-                && TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName))
+            if (_loadedSaveData != null && ApplyStartDestination())
             {
-                _titleStartController.SetTutorialBattleTarget(tutorialTargetSceneName);
-                _titleSceneView.SetTargetSceneName(tutorialTargetSceneName);
-                return;
+                return true;
             }
 
-            _titleStartController.ClearTutorialBattleTarget();
-            _titleSceneView.SetTargetSceneName(_targetSceneName);
+            Debug.LogError(
+                $"[{nameof(TitleSceneInitializer)}] 開始遷移先を復旧できないため、タイトル操作を停止します。",
+                this);
+            return false;
+        }
+
+        /// <summary>
+        ///     チュートリアル進行状態に応じてタイトルからの遷移先を設定します。
+        /// </summary>
+        /// <returns> 遷移先を設定できた場合はtrueです。 </returns>
+        private bool ApplyStartDestination()
+        {
+            if (_titleSceneView == null || _loadedSaveData == null)
+            {
+                return false;
+            }
+
+            if (_loadedSaveData.Tutorial.Phase != TutorialPhase.NotStarted)
+            {
+                if (ServiceLocator.TryGetInstance(out SelectedScenarioState existingScenarioState))
+                {
+                    existingScenarioState.Clear();
+                }
+
+                _titleSceneView.SetTargetSceneName(_targetSceneName);
+                return true;
+            }
+
+            if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario))
+            {
+                Debug.LogError(
+                    $"[{nameof(TitleSceneInitializer)}] 起点となるチュートリアルシナリオがありません。",
+                    this);
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState))
+            {
+                selectedScenarioState = new SelectedScenarioState();
+                if (!ServiceLocator.RegisterInstance(selectedScenarioState))
+                {
+                    Debug.LogError(
+                        $"[{nameof(TitleSceneInitializer)}] {nameof(SelectedScenarioState)} を登録できませんでした。",
+                        this);
+                    return false;
+                }
+            }
+
+            selectedScenarioState.SelectOpeningTutorialScenario(openingScenario);
+            _titleSceneView.SetTargetSceneName(openingScenario.TargetSceneName);
+            return true;
+        }
+
+        /// <summary>
+        ///     選択中のゲームデータから前提ノードを持たない最初のシナリオを取得します。
+        /// </summary>
+        /// <param name="scenarioStageDefinition"> 取得したシナリオステージです。 </param>
+        /// <returns> 対象を取得できた場合はtrueです。 </returns>
+        private bool TryGetOpeningScenario(out ScenarioStageDefinition scenarioStageDefinition)
+        {
+            scenarioStageDefinition = null;
+            if (_loadedStageTreeAsset == null || _loadedEnemyWaveDefinitionRepository == null)
+            {
+                return false;
+            }
+
+            StageTree stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
+            for (int i = 0; i < stageTree.Nodes.Count; i++)
+            {
+                StageNode node = stageTree.Nodes[i];
+                if (node.Definition is ScenarioStageDefinition candidate
+                    && stageTree.GetPreviousIds(node.Id).Count == 0)
+                {
+                    scenarioStageDefinition = candidate;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -568,43 +727,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: 音量設定の再保存中にエラーが発生しました。{ex.Message}");
             }
-        }
-
-        /// <summary>
-        ///     初回チュートリアル用の戦闘出撃準備を行います。
-        /// </summary>
-        /// <param name="tutorialTargetSceneName"> 遷移先シーン名です。 </param>
-        /// <returns> 準備に成功した場合はtrueです。 </returns>
-        private bool TryPrepareTutorialBattleSortie(out string tutorialTargetSceneName)
-        {
-            tutorialTargetSceneName = string.Empty;
-
-            if (_loadedStageTreeAsset == null
-                || _loadedEnemyWaveDefinitionRepository == null
-                || _battleSortieSelectionService == null)
-            {
-                return false;
-            }
-
-            StageTree stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
-            if (!stageTree.TryGetTutorialNode(out StageNode tutorialNode)
-                || tutorialNode?.Definition == null)
-            {
-                return false;
-            }
-
-            if (tutorialNode.Definition is not BattleStageDefinition tutorialStageDefinition)
-            {
-                return false;
-            }
-
-            if (!_battleSortieSelectionService.TryPrepareBattleSortie(tutorialStageDefinition, _targetSceneName))
-            {
-                return false;
-            }
-
-            tutorialTargetSceneName = tutorialStageDefinition.TargetSceneName;
-            return true;
         }
 
         /// <summary>

@@ -22,8 +22,8 @@
     "*"
   ],
   "specRefs": [
-    "spec/feature/game-spec.md#gs-02-rhythm-command-combat",
-    "spec/feature/game-spec.md#gs-03-kill-chord-skills-and-build"
+    "spec/feature/game-spec.md#gs-02-リズムコマンド戦闘",
+    "spec/feature/game-spec.md#gs-03-キルコードと編成"
   ],
   "rationale": "combat-core と skill-runtime のうちHP・ダメージ・状態効果の解決を所有する。"
 }

@@ -42,6 +42,7 @@ namespace KillChord.Runtime.View.Persistent.Load
             Unsubscribe();
             _handle.TryCancel();
             _medalHandle.TryCancel();
+            _visibilityHandle.TryCancel();
         }
 
         /// <summary>
@@ -109,7 +110,7 @@ namespace KillChord.Runtime.View.Persistent.Load
         }
 
         /// <summary>
-        ///     ロード終了時に画面を非表示にする。
+        ///     ロード終了時に画面をフェードアウトして非表示にする。
         /// </summary>
         /// <param name="success"> ロードが成功したかどうか。 </param>
         private void HandleLoadingCompleted(bool success)
@@ -120,7 +121,7 @@ namespace KillChord.Runtime.View.Persistent.Load
             }
 
             StopMedalRotation();
-            SetVisible(false);
+            HideWithFade();
         }
 
         /// <summary>
@@ -238,6 +239,8 @@ namespace KillChord.Runtime.View.Persistent.Load
                 return;
             }
 
+            _visibilityHandle.TryCancel();
+
             _canvasGroup.alpha = isVisible ? 1f : 0f;
             _canvasGroup.interactable = isVisible;
             _canvasGroup.blocksRaycasts = isVisible;
@@ -251,8 +254,43 @@ namespace KillChord.Runtime.View.Persistent.Load
             }
         }
 
+        /// <summary>
+        ///     ロード完了時に、ロード画面をアルファフェードで非表示にする。
+        /// </summary>
+        private void HideWithFade()
+        {
+            _isVisible = false;
+
+            if (_canvasGroup == null)
+            {
+                return;
+            }
+
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
+
+            _visibilityHandle.TryCancel();
+
+            if (_hideFadeDuration <= 0f)
+            {
+                _canvasGroup.alpha = 0f;
+                return;
+            }
+
+            _visibilityHandle = LMotion.Create(_canvasGroup.alpha, 0f, _hideFadeDuration)
+                .WithEase(_hideFadeEase)
+                .BindToAlpha(_canvasGroup);
+        }
+
         [SerializeField, Tooltip("ロード画面のCanvasGroup")]
         private CanvasGroup _canvasGroup;
+
+        [Header("非表示フェード設定")]
+        [SerializeField, Min(0f), Tooltip("ロード完了時にロード画面をフェードアウトする時間（秒）。0でフェードなしの瞬時非表示。")]
+        private float _hideFadeDuration = 0.25f;
+
+        [SerializeField, Tooltip("ロード完了時のフェードアウトに使用するイージング")]
+        private Ease _hideFadeEase = Ease.OutCubic;
 
         [SerializeField, Tooltip("伸縮するロードゲージのImage（FillAmountに使う）")]
         private Image _progressImage;
@@ -289,5 +327,6 @@ namespace KillChord.Runtime.View.Persistent.Load
         private Vector3 _medalInitialEulerAngles;
         private MotionHandle _handle;
         private MotionHandle _medalHandle;
+        private MotionHandle _visibilityHandle;
     }
 }

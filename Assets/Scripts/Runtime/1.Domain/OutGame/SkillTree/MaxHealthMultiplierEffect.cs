@@ -23,6 +23,9 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             _multiplier = multiplier;
         }
 
+        /// <summary> この効果の種別。 </summary>
+        public StatusBonusEffectKind Kind => StatusBonusEffectKind.MaxHealth;
+
         /// <summary>
         ///     最大体力の倍率加算値をボーナスへ適用する。
         /// </summary>
