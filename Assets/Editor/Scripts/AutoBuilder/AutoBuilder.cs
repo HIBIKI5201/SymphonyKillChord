@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using KillChord.Editor.SourceDataProvider;
 using UnityEditor.Build.Profile;
 using UnityEngine;
 
@@ -19,7 +20,14 @@ namespace KillChord.Editor.AutoBuilder
         public static void RunFromCli()
         {
             string buildMode = GetCliArg("-buildMode");
+            string gameDataVariant = GetCliArg("-gameDataVariant");
             string selectedProfiles = GetCliArg("-selectedProfiles");
+            if (!TryApplyGameDataVariant(buildMode, gameDataVariant))
+            {
+                AutoBuildExecuter.ExitIfBatchMode(isBatchMode: true, exitCode: 1);
+                return;
+            }
+
             PerformMultipleBuilds(isBatchMode: true, buildMode: buildMode, selectedProfiles: selectedProfiles);
         }
 
@@ -39,6 +47,33 @@ namespace KillChord.Editor.AutoBuilder
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        ///     Masterビルドへ指定されたゲームデータ種別を適用します。
+        /// </summary>
+        /// <param name="buildMode"> ビルドモードです。 </param>
+        /// <param name="gameDataVariant"> release または demo です。 </param>
+        /// <returns> ビルドを継続できる場合は true、それ以外は false です。 </returns>
+        private static bool TryApplyGameDataVariant(string buildMode, string gameDataVariant)
+        {
+            if (!string.Equals(buildMode, "Master", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (!Enum.TryParse(gameDataVariant, ignoreCase: true, out GameDataVariant variant)
+                || !Enum.IsDefined(typeof(GameDataVariant), variant))
+            {
+                Debug.LogError(
+                    $"[{nameof(AutoBuilder)}] Master build requires -gameDataVariant release or demo. Value: '{gameDataVariant ?? string.Empty}'");
+                return false;
+            }
+
+            GameDataVariantEditorState.SetSelectedVariant(variant);
+            GameDataVariantBuildSettings.Apply(variant);
+            Debug.Log($"[{nameof(AutoBuilder)}] Applied game data variant: {variant}.");
+            return true;
         }
 
         /// <summary>
