@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageHeader from '../components/PageHeader.astro';
-import FeatureCard from '../components/FeatureCard.astro';
+import SkillCard from '../components/SkillCard.astro';
 import skills from '../data/skills.json';
 ---
 
@@ -11,7 +11,17 @@ import skills from '../data/skills.json';
 		<PageHeader eyebrow="Skill" title="スキル" />
 
 		<section id="skill-list">
-			{skills.map((skill) => <FeatureCard name={skill.name} description={skill.description} />)}
+			{
+				skills.map((skill) => (
+					<SkillCard
+						code={skill.code}
+						type={skill.type}
+						beatPattern={skill.beatPattern}
+						name={skill.name}
+						description={skill.description}
+					/>
+				))
+			}
 		</section>
 	</main>
 
@@ -20,6 +30,7 @@ import skills from '../data/skills.json';
 
 <style>
 	main {
+		width: 100%;
 		max-width: 1080px;
 		margin: 0 auto;
 		padding: 0 24px 96px;

@@ -9,6 +9,19 @@
 	box-sizing: border-box;
 }
 
+/* サイト全体でテキストのドラッグ選択を禁止する */
+* {
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+/* フォーム入力欄は選択・編集操作が必要なため対象外にする */
+input,
+textarea {
+	-webkit-user-select: text;
+	user-select: text;
+}
+
 /* レトロ×SF、1998年設定・技術偏重社会をイメージした配色/タイポグラフィのトークン定義 */
 :root {
 	/* 背景: 電源の入っていないブラウン管モニタのような、沈んだ暗緑がかった黒 */

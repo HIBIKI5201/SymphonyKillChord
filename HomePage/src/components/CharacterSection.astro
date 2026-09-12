@@ -17,9 +17,15 @@ const { id, name, formalName, catchphrase, description, cv, image, reverse = fal
 
 const portraitAvif = image ? await getImage({ src: image, format: 'avif', width: 520, quality: 70 }) : null;
 const portraitWebp = image ? await getImage({ src: image, format: 'webp', width: 520, quality: 75 }) : null;
+const portraitRatio = image ? `${image.width} / ${image.height}` : undefined;
 ---
 
-<section class="character-section" id={id} data-reverse={reverse}>
+<section
+	class="character-section"
+	id={id}
+	data-reverse={reverse}
+	style={portraitRatio ? { '--portrait-ratio': portraitRatio } : undefined}
+>
 	{
 		portraitWebp ? (
 			<div class="bg-image" style={{ backgroundImage: `url("${portraitWebp.src}")` }} aria-hidden="true" />
@@ -58,7 +64,8 @@ const portraitWebp = image ? await getImage({ src: image, format: 'webp', width:
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 48px;
+		justify-content: center;
+		gap: 64px;
 		padding: 96px 0;
 		overflow: hidden;
 	}
@@ -122,8 +129,9 @@ const portraitWebp = image ? await getImage({ src: image, format: 'webp', width:
 	}
 
 	.visual[data-has-image='true'] {
-		width: min(260px, 28vw);
-		aspect-ratio: 1342 / 5046;
+		width: auto;
+		height: min(587px, 64vw);
+		aspect-ratio: var(--portrait-ratio, 1342 / 5046);
 		border: none;
 		background: none;
 	}
@@ -138,8 +146,8 @@ const portraitWebp = image ? await getImage({ src: image, format: 'webp', width:
 		object-fit: contain;
 		/* 暗い背景に立ち絵の暗色部分が沈んで見づらいため、輪郭にうっすら発光を添えて見切りを付ける */
 		filter:
-			drop-shadow(0 0 16px rgba(79, 227, 122, 0.28))
-			drop-shadow(0 0 36px rgba(79, 227, 122, 0.14));
+			drop-shadow(0 0 16px rgba(255, 255, 255, 0.2))
+			drop-shadow(0 0 36px rgba(255, 255, 255, 0.1));
 	}
 
 	.no-image {
@@ -153,7 +161,7 @@ const portraitWebp = image ? await getImage({ src: image, format: 'webp', width:
 	.info {
 		position: relative;
 		z-index: 1;
-		flex: 1 1 320px;
+		flex: 0 1 480px;
 	}
 
 	.info > * {
@@ -239,12 +247,21 @@ const portraitWebp = image ? await getImage({ src: image, format: 'webp', width:
 		.character-section,
 		.character-section[data-reverse='true'] {
 			flex-direction: column;
-			gap: 32px;
-			padding: 64px 0;
+			gap: 24px;
+			padding: 40px 0;
 		}
 
 		.visual {
 			width: min(340px, 80vw);
+		}
+
+		.visual[data-has-image='true'] {
+			width: auto;
+			height: min(260px, 32vh);
+		}
+
+		.info {
+			flex: 0 0 auto;
 		}
 	}
 
