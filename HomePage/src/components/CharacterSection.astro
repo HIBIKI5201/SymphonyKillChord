@@ -17,9 +17,15 @@ const { id, name, formalName, catchphrase, description, cv, image, reverse = fal
 
 const portraitAvif = image ? await getImage({ src: image, format: 'avif', width: 520, quality: 70 }) : null;
 const portraitWebp = image ? await getImage({ src: image, format: 'webp', width: 520, quality: 75 }) : null;
+const portraitRatio = image ? `${image.width} / ${image.height}` : undefined;
 ---
 
-<section class="character-section" id={id} data-reverse={reverse}>
+<section
+	class="character-section"
+	id={id}
+	data-reverse={reverse}
+	style={portraitRatio ? { '--portrait-ratio': portraitRatio } : undefined}
+>
 	{
 		portraitWebp ? (
 			<div class="bg-image" style={{ backgroundImage: `url("${portraitWebp.src}")` }} aria-hidden="true" />
@@ -125,7 +131,7 @@ const portraitWebp = image ? await getImage({ src: image, format: 'webp', width:
 	.visual[data-has-image='true'] {
 		width: auto;
 		height: min(587px, 64vw);
-		aspect-ratio: 1342 / 5046;
+		aspect-ratio: var(--portrait-ratio, 1342 / 5046);
 		border: none;
 		background: none;
 	}
