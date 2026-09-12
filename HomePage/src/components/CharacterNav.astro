@@ -1,5 +1,6 @@
 ---
 import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
 
 interface CharacterEntry {
 	id: string;
@@ -12,14 +13,20 @@ interface Props {
 }
 
 const { characters } = Astro.props;
+
+const thumbnails = await Promise.all(
+	characters.map((character) =>
+		character.image ? getImage({ src: character.image, format: 'webp', width: 160, quality: 75 }) : null,
+	),
+);
 ---
 
 <nav class="character-nav" aria-label="キャラクター一覧">
 	{
-		characters.map((character) => (
+		characters.map((character, index) => (
 			<a class="nav-item" href={`#${character.id}`} data-nav-id={character.id}>
-				{character.image ? (
-					<span class="nav-thumb-image" style={{ backgroundImage: `url("${character.image.src}")` }} />
+				{thumbnails[index] ? (
+					<span class="nav-thumb-image" style={{ backgroundImage: `url("${thumbnails[index]!.src}")` }} />
 				) : (
 					<span class="nav-thumb">NO IMAGE</span>
 				)}
