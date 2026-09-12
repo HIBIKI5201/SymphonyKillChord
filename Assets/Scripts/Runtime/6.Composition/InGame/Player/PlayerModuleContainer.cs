@@ -20,19 +20,22 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <param name="playerView"> プレイヤーViewです。 </param>
         /// <param name="playerEntity"> プレイヤーEntityです。 </param>
         /// <param name="playerStatusBonus"> プレイヤーステータスボーナスです。 </param>
-        /// <param name="actionRestrictionState"> プレイヤーの行動制限状態です。 </param>
+        /// <param name="damageEffectView"> 被弾エフェクトViewです。 </param>
+        /// <param name="playerAttackSignal"> 攻撃成立を表示側へ伝えるSignalです。 </param>
         public PlayerModuleContainer(
             PlayerInitializer playerInitializer,
             PlayerView playerView,
             CharacterEntity playerEntity,
             PlayerStatusBonus playerStatusBonus,
-            ReusableParticleSystemView damageEffectView)
+            ReusableParticleSystemView damageEffectView,
+            IPlayerAttackSignal playerAttackSignal)
         {
             PlayerInitializer = playerInitializer;
             PlayerView = playerView;
             PlayerEntity = playerEntity;
             PlayerStatusBonus = playerStatusBonus;
             DamageEffectView = damageEffectView;
+            PlayerAttackSignal = playerAttackSignal;
         }
 
         /// <summary> プレイヤー初期化クラスです。 </summary>
@@ -55,6 +58,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         /// <summary> プレイヤー攻撃Controllerです。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
+
+        /// <summary> 攻撃成立を表示側へ伝えるSignalです。 </summary>
+        public IPlayerAttackSignal PlayerAttackSignal { get; }
 
         /// <summary> プレイヤー移動Controllerです。 </summary>
         public PlayerController PlayerController { get; private set; }

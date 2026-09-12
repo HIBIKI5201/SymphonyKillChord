@@ -1,8 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Domain.InGame.Music;
-using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -19,9 +17,9 @@ namespace KillChord.Runtime.Composition.InGame.Music
         /// </summary>
         public void Initialize()
         {
-            if (_rhythmJudgmentDefinitionAsset == null || _rhythmGuideView == null || _rhythmGuideUpdateView == null)
+            if (_rhythmGuideView == null || _rhythmGuideUpdateView == null)
             {
-                Debug.LogError("RhythmGuideInitializer の参照が未設定です。RhythmJudgmentDefinitionAsset / RhythmGuideView / RhythmGuideUpdeteView を設定してください。");
+                Debug.LogError($"[{nameof(RhythmGuideInitializer)}] RhythmGuideView / RhythmGuideUpdateView の参照を設定してください。", this);
                 return;
             }
 
@@ -43,8 +41,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 return;
             }
 
-            RhythmJudgmentDefinition definition = _rhythmJudgmentDefinitionAsset.ToDefinition();
-            RhythmGuideUsecase usecase = new RhythmGuideUsecase(definition);
+            RhythmGuideUsecase usecase = new RhythmGuideUsecase();
 
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
@@ -61,8 +58,6 @@ namespace KillChord.Runtime.Composition.InGame.Music
             );
         }
 
-        [Tooltip("リズム判定定義アセット。")]
-        [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
         [Tooltip("リズムガイドView。")]
         [SerializeField] private RhythmGuideView _rhythmGuideView;
         [Tooltip("リズムガイド更新View。")]
