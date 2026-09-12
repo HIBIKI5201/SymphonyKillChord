@@ -3,7 +3,7 @@
 ## 作業段階と範囲
 
 - 2026-09-12、投稿者より「初期化失敗の線で調査と修正を進めて」と指示。
-- 作業段階: 投稿者の再発なし報告と明示的な終了指示により、今回の調査・対応を終了。
+- 作業段階: 一度終了後、投稿者からの具体的な例外ログと修正方針の提示を受けて再開。BGM初期化順序を修正、実機検証待ち。
 - branch: `agent/tutorial-home-initialization`。既存のQA変更を含めないよう、ローカル `develop` (`8f67a3361`) からプロジェクト内worktreeを作成した。
 - 最新の自動確認の指示に従い、Unity起動、PlayMode、テスト、push、mergeは実施しない。
 - Cc上の段階・branch登録は未更新。外部資料へのアクセスは禁止されているため、ここに実際の作業段階を記録する。
@@ -25,6 +25,25 @@
 `OutGameSceneInitializer.Start` は失敗をログとシーン初期化結果へ通知するだけで、復帰操作を表示しなかった。また、例外で中断したフェーズにはモジュール名・フェーズ名の失敗ログがなく、未構築モジュールのShutdown例外が以降の後始末も中断し得た。
 
 発生環境で最初に失敗したモジュールは未確定。本変更は初期化失敗後の操作不能に対する復帰経路と診断情報の追加であり、個別の初期化エラーが解消したとは判断していない。
+
+## 再開後に特定・修正したBGM初期化不具合
+
+投稿者が `C:\Users\takut\AppData\LocalLow\Sinfonia Studio\Symphony Kill Chord\Player-prev.log`（投稿内で「今日18:08、該当ビルドの実行分」と説明）に次の例外が2回あると報告した。ファイル自体はこのセッションでは開かず、投稿された抜粋と現行コードを照合した。
+
+```text
+R3 UnhandleException: System.NullReferenceException: Object reference not set to an instance of an object
+  at KillChord.Runtime.View.Persistent.Music.MusicPlayer.ChangeBgm (System.String cueName) [0x00000]
+```
+
+`MusicPlayerInitializer.Build` は `Bind` → `Initialize` の順だった。`Bind` が `MusicViewModel.CueName` を購読すると、ReactivePropertyの現在値である空文字が即時通知される。`ChangeBgm` は空文字の判定より先に `_cri.cueName` を読むが、`_cri` は後続の `Initialize` で初めて設定されるため、この順序でNullReferenceExceptionが発生する。
+
+- `Initialize` → `Bind` に変更し、即時通知前にCriAtomSourceを取得する。
+- `ChangeBgm` と `StopBgm` の先頭にUnityオブジェクトのnullガードを追加する。
+- 新規クラスやBGMコンテナの変更は不要。以前の復帰画面追加とは別commitに分ける。
+
+このNREがホーム非表示を引き起こしたかは未確定。投稿者によると同ログにはCoordinatorのフェーズ失敗ログがない。R3の未処理例外ログがあることから、Buildの中断やMusicPlayerModuleContainerの未登録を直接推論することはできない。初期化失敗を成功扱いにしたり、BGMモジュールのfail-fastを外したりはしない。
+
+確認範囲は呼び出し順・空Cueの停止経路・nullガード位置・差分の静的確認まで。Unityコンパイル、起動、テスト、発生ビルドの再検証は未実施。修正適用後に同じ起動経路で当該NREが消えること、BGMの開始・停止、チュートリアル帰還時のホーム操作を確認する必要がある。
 
 ## 修正
 
