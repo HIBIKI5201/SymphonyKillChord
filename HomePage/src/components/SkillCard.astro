@@ -1,0 +1,120 @@
+---
+type SkillType = 'attack' | 'buff' | 'debuff' | 'undecided';
+
+interface Props {
+	code: string;
+	type: SkillType;
+	beatPattern: number[];
+	name: string;
+	description: string;
+}
+
+const { code, type, beatPattern, name, description } = Astro.props;
+
+const typeLabel: Record<SkillType, string> = {
+	attack: 'ATTACK',
+	buff: 'BUFF',
+	debuff: 'DEBUFF',
+	undecided: '未定',
+};
+---
+
+<article class="skill-card" data-type={type}>
+	<p class="code">{code}</p>
+
+	<ul class="beat-strip" aria-label={`拍パターン: ${beatPattern.join(' → ')}`}>
+		{
+			beatPattern.map((beat) => (
+				<li class="beat-cell" style={{ '--beat-value': beat }}>
+					{beat}
+				</li>
+			))
+		}
+	</ul>
+
+	<p class="type-badge">{typeLabel[type]}</p>
+	<h2 class="name">{name}</h2>
+	<p class="description">{description}</p>
+</article>
+
+<style>
+	.skill-card {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		padding: 20px;
+		border: 1px solid var(--color-surface-border);
+		background: var(--color-surface);
+	}
+
+	.code {
+		margin: 0;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 12px;
+		color: var(--color-signal-dim);
+		text-transform: uppercase;
+	}
+
+	.beat-strip {
+		display: flex;
+		align-items: flex-end;
+		gap: 6px;
+		height: 48px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.beat-cell {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		/* 拍の値が小さいほど大きく(ゆったりした拍)、大きいほど小さく(細かい拍)表示する */
+		width: calc(44px / var(--beat-value) + 16px);
+		height: calc(44px / var(--beat-value) + 16px);
+		border: 1px solid var(--color-signal-dim);
+		background: var(--color-bg);
+		font-family: var(--font-mono);
+		font-size: 12px;
+		color: var(--color-signal);
+	}
+
+	.type-badge {
+		margin: 0;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 11px;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		text-transform: uppercase;
+	}
+
+	.skill-card[data-type='attack'] .type-badge {
+		color: var(--color-signal);
+	}
+
+	.skill-card[data-type='debuff'] .type-badge {
+		color: var(--color-warning);
+	}
+
+	.skill-card[data-type='buff'] .type-badge {
+		color: var(--color-text-primary);
+	}
+
+	.name {
+		margin: 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: 1.125rem;
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+
+	.description {
+		margin: 0;
+		font-size: 0.875rem;
+		line-height: 1.8;
+		color: var(--color-text-muted);
+	}
+</style>
