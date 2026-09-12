@@ -205,7 +205,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         /// <param name="assignments">「プロパティ名=値」形式の指定。</param>
         /// <param name="displayValues">確認表示用の値。</param>
         /// <returns>APIへ送るプロパティ。</returns>
-        private static Dictionary<string, object> BuildProperties(
+        internal static Dictionary<string, object> BuildProperties(
             NotionDatabaseInfo database,
             IReadOnlyList<string> assignments,
             out Dictionary<string, string> displayValues)

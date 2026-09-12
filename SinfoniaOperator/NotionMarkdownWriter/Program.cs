@@ -37,6 +37,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     "pull" => await PullCommand.RunAsync(commandArguments),
                     "push" => await PushCommand.RunAsync(commandArguments),
                     "create" => await CreateCommand.RunAsync(commandArguments),
+                    "set-properties" => await PropertiesCommand.RunAsync(commandArguments),
                     "rename" => await RenameCommand.RunAsync(commandArguments),
                     _ => WriteUnknownCommand(command)
                 };
@@ -83,6 +84,8 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             Console.WriteLine("      許可ルート配下にページを作成する。");
             Console.WriteLine("      親がページの場合は本文の先頭h1見出しがページ名になる。");
             Console.WriteLine("      親がデータベースの場合は --set でタイトルを含むプロパティを指定する（複数可）。");
+            Console.WriteLine("  NotionMarkdownWriter.exe set-properties <Markdownパス|URL|ID> --set <名前=値> [--confirm]");
+            Console.WriteLine("      データベース内の既存ページのプロパティ（カテゴリー等、複数可）を後から設定・更新する。本文には触れない。");
             Console.WriteLine("  NotionMarkdownWriter.exe rename <Markdownパス|URL|ID> --title <ページ名> [--confirm]");
             Console.WriteLine("      既存ページのタイトルだけを変更する。本文には触れない。");
             Console.WriteLine();
