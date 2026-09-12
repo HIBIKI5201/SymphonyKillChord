@@ -1,0 +1,26 @@
+{
+  "name": "Narrative and Game Flow",
+  "description": "新規/継続開始、シナリオ読了、ホーム・作戦・準備・戦闘・リザルト間の遷移、およびシーン完了の一回性を所有する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/OutGame/(Scenario|Screen|Title)/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/Persistent/SceneManagement/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/OutGame/StageSelect/StageSelectOpenUseCase\\.cs$"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-06-out-game-and-progression",
+    "spec/feature/game-spec.md#gs-09-navigation-guidance-and-recovery"
+  ],
+  "rationale": "scenario-narrative、sortie-stageselect、ui-screensに分散する物語と全体遷移を所有する。"
+}

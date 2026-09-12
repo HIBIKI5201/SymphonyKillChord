@@ -1,13 +1,13 @@
 # 概要
 > 💡 **モジュール概要**
-> シーンの追加ロード・アンロード・切り替えと、ロード画面の表示・非表示を司る常駐モジュールです。単にシーンオブジェクトグラフの読み込みが終わるだけでなく、遷移先シーンの初期化モジュール（`Init→ResourceLoadAsync→Build→Ready`）が完了するまでロード画面を表示し続けます。
+> シーンの追加ロード・アンロード・切り替えと、ロード画面の表示・非表示を司る常駐モジュールである。単にシーンオブジェクトグラフの読み込みが終わるだけでなく、遷移先シーンの初期化モジュール（`Init→ResourceLoadAsync→Build→Ready`）が完了するまでロード画面を表示し続ける。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | SceneManagement |
 | **カテゴリ** | Persistent |
 | **ステータス** | 実装済み |
-| **最終更新日** | 2026-07-15 |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -29,6 +29,8 @@
 | **`LoadingScreenView`** | View | ロード画面本体の表示/非表示（`LoadingScreenController`のイベントを購読） |
 | **`SceneTransitionService`** | Infrastructure | `ISceneTransitionService`実装。実際に`SceneLoader`（Unity）を呼び出す |
 | **`SceneTransitionInitializer`** | Composition | 上記スタック一式の構築・ServiceLocatorへの登録 |
+
+> ロード画面まわりのクラス（`ILoadingOperationExecutor`・`LoadingOperationExecutor`・`ILoadingSession`・`ILoadingSessionFactory`・`LoadingExecutionOptions`・`LoadingProgressRange`・`LoadingScreenController`・`LoadingScreenView`）は`Persistent/Load/`配下にある。シーン遷移と一体で動くため、独立したモジュール文書は設けず本書で扱う。
 
 ### 🧩 Composition初期化情報
 
@@ -74,22 +76,22 @@ graph TD
 ### 📥 依存しているもの
 
 * なし
-  * *詳細*: 本モジュールは他モジュールのDomain/Application型に依存しない、独立した基盤モジュールです。
+  * *詳細*: 本モジュールは他モジュールのDomain/Application型に依存しない、独立した基盤モジュールである
 
 ### 📤 依存されているもの
 
 * **各シーンのルート初期化クラス（`OutGameSceneInitializer`、`IngameComposition`、`TitleSceneInitializer`等）**
   * *参照箇所*: `ISceneInitializationReadiness.BeginTracking`/`Complete`
-  * *詳細*: 各シーンのComposition初期化が完了した際にこのレジストリへ完了を通知します。通知が来るまで、シーン遷移を要求した側のロード画面は表示され続けます。
+  * *詳細*: 各シーンのComposition初期化が完了した際にこのレジストリへ完了を通知する。通知が来るまで、シーン遷移を要求した側のロード画面は表示され続ける
 * **`Title`**
   * *参照箇所*: `SceneTransitionController.LoadAdditiveAsync`/`UnloadAsync`
-  * *詳細*: `TitleStartController.StartGameAsync`がシーン遷移に使用します。
+  * *詳細*: `TitleStartController.StartGameAsync`がシーン遷移に使用する
 * **`Result`**
   * *参照箇所*: `SceneTransitionUsecase.UnloadThenChangeSceneAsync`/`UnloadThenReloadSceneAsync`
-  * *詳細*: `StageResultController`の完了/リトライボタンから使用されます。
+  * *詳細*: `StageResultController`の完了/リトライボタンから使用される
 * **`StageSelect` / `Scenario`**
   * *参照箇所*: `SceneTransitionUsecase.LoadAdditiveAsync`/`ChangeSceneAsync`
-  * *詳細*: 出撃・シナリオ再生開始時のシーン遷移に使用されます。
+  * *詳細*: 出撃・シナリオ再生開始時のシーン遷移に使用される
 
 ---
 
@@ -98,25 +100,25 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ② Application
-`SceneTransitionUsecase`がシーンロードと初期化完了待機を1つの継続処理として扱い、`ISceneInitializationReadiness`がシーン名ごとの完了状態を管理します。`ILoadingOperationExecutor`/`LoadingOperationExecutor`がロードセッションの実行制御を担います。
+`SceneTransitionUsecase`がシーンロードと初期化完了待機を1つの継続処理として扱い、`ISceneInitializationReadiness`がシーン名ごとの完了状態を管理する。`ILoadingOperationExecutor`/`LoadingOperationExecutor`がロードセッションの実行制御を担う。
 ### ③ Adaptor
-`SceneTransitionController`がViewからの要求を仲介し、`LoadingScreenController`がロードセッションの開始・成功・失敗イベントを発行します。
+`SceneTransitionController`がViewからの要求を仲介し、`LoadingScreenController`がロードセッションの開始・成功・失敗イベントを発行する。
 ### ④ View
-`LoadingScreenView`がロード画面の表示/非表示を、`SceneTransitionView`がデバッグ表示を担当します。
+`LoadingScreenView`がロード画面の表示/非表示を、`SceneTransitionView`がデバッグ表示を担当する。
 ### ⑤ Infrastructure
-`SceneTransitionService`が実際のUnityシーンロード（`SceneLoader`）を呼び出します。
+`SceneTransitionService`が実際のUnityシーンロード（`SceneLoader`）を呼び出す。`ChangeSceneAsync`はロードとアンロードだけを行い、アクティブシーンは切り替えない。切り替えるのは`UnloadAndSetActiveAsync`と`ReloadSceneAsync`の2つで、いずれも`TrySetActiveScene`で成否を確認し、失敗した場合はエラーログを出して`false`を返す。`ReloadSceneAsync`は再読み込み中の退避先として、別のシーンを一時的にアクティブへ切り替える。
 ### ⑥ Composition
-`SceneTransitionInitializer`（Order 0）が上記スタック全体を構築し、既存インスタンスが無い場合のみ新規登録します（Persistentシーンの再読み込み等での二重登録を防止）。
+`SceneTransitionInitializer`（Order 0）が上記スタック全体を構築し、既存インスタンスが無い場合のみ新規登録する（Persistentシーンの再読み込み等での二重登録を防止）。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。
+> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はない。
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① シーン追加ロード＋初期化完了待機フロー
 

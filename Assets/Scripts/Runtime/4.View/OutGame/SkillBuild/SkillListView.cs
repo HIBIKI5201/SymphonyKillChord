@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using System;
 using System.Collections.Generic;
@@ -16,15 +17,18 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="scrollView"> 表示先。 </param>
         /// <param name="skillElementTemplate"> 各要素のテンプレート。 </param>
         /// <param name="onSkillElementCreated"> 要素生成時のコールバック。 </param>
+        /// <param name="soundEffectCommand"> UI操作音の再生コマンド。 </param>
         /// <exception cref="ArgumentNullException"></exception>
         public SkillListView(
             VisualElement scrollView,
             VisualTreeAsset skillElementTemplate,
-            Action<VisualElement> onSkillElementCreated = null)
+            Action<VisualElement> onSkillElementCreated,
+            IUISoundEffectCommand soundEffectCommand)
         {
             _scrollView = scrollView ?? throw new ArgumentNullException(nameof(scrollView));
             _skillElementTemplate = skillElementTemplate ?? throw new ArgumentNullException(nameof(skillElementTemplate));
             _onSkillElementCreated = onSkillElementCreated;
+            _soundEffectCommand = soundEffectCommand;
             ConfigureScrollView();
         }
 
@@ -47,7 +51,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             for (int i = 0; i < skills.Count; i++)
             {
                 TemplateContainer rootElement = _skillElementTemplate.Instantiate();
-                SkillElementView skillElementView = new(rootElement);
+                SkillElementView skillElementView = new(rootElement, _soundEffectCommand);
                 SkillViewData data = skills[i];
                 skillElementView.Bind(in data);
                 skillElementView.OnSelected += HandleSkillSelectedHandler;
@@ -103,6 +107,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly VisualElement _scrollView;
         private readonly VisualTreeAsset _skillElementTemplate;
         private readonly Action<VisualElement> _onSkillElementCreated;
+        private readonly IUISoundEffectCommand _soundEffectCommand;
         private readonly List<SkillElementView> _skillElementViews = new();
 
         /// <summary>

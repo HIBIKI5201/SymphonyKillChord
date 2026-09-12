@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using LitMotion;
 using LitMotion.Extensions;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,22 +17,34 @@ namespace KillChord.Runtime.View.InGame.Enemy
         ///     ダメージ数値の表示を開始する。
         /// </summary>
         /// <param name="dTO">ダメージ数値DTO</param>
-        public void Play(in DamageNumberDTO dTO)
+        /// <param name="completed">表示完了時のコールバック</param>
+        public void Play(in DamageNumberDTO dTO, Action<DamageNumberView> completed)
         {
+            ResetMotion();
+            _completed = completed;
+
             if (_damageText == null)
             {
                 Debug.LogError("[DamageNumberView] TMP_Text が未設定です。", this);
+                Complete();
                 return;
             }
 
             _damageText.SetText("{0}", Mathf.CeilToInt(dTO.Damage));
 
-            ApplyRandomPosition();
             ApplyStyle(dTO.Type);
             PlayMovement();
             PlayFade();
         }
 
+        /// <summary>
+        ///     プールに戻すために初期化する。
+        /// </summary>
+        public void ResetView()
+        {
+            ResetMotion();
+            _completed = null;
+        }
 
         [SerializeField, Tooltip("ダメージ数値のテキスト")]
         private TMP_Text _damageText;
@@ -51,27 +64,18 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("ダメージ数値の移動距離")]
         private float _moveDistance;
 
-        [SerializeField, Tooltip("ダメージ数値のランダム表示位置の最小値")]
-        private Vector2 _randomPositionMin;
-
-        [SerializeField, Tooltip("ダメージ数値のランダム表示位置の最大値")]
-        private Vector2 _randomPositionMax;
-
         [SerializeField, Tooltip("イージングタイプ")]
         private Ease _easeType = Ease.OutQuad;
 
-        /// <summary>
-        ///     ダメージ数値の表示位置をランダムにずらす。
-        /// </summary>
-        private void ApplyRandomPosition()
-        {
-            float randomX = Random.Range(_randomPositionMin.x, _randomPositionMax.x);
-            float randomY = Random.Range(_randomPositionMin.y, _randomPositionMax.y);
+        private Action<DamageNumberView> _completed;
+        private MotionHandle _movementHandle;
+        private MotionHandle _fadeHandle;
+        private MotionHandle _backgroundFadeHandle;
 
-            Vector3 position = transform.localPosition;
-            position.x += randomX;
-            position.y += randomY;
-            transform.localPosition = position;
+        private void OnDestroy()
+        {
+            ResetMotion();
+            _completed = null;
         }
 
         /// <summary>
@@ -103,6 +107,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             _backGroundImage.sprite = backgroundSprite;
             _backGroundImage.enabled = hasBackground;
+
+            if (hasBackground)
+            {
+                Color color = _backGroundImage.color;
+                color.a = 1f;
+                _backGroundImage.color = color;
+            }
         }
 
         /// <summary>
@@ -176,7 +187,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             float startY = transform.localPosition.y;
             float endY = startY + distance;
 
-            LMotion.Create(startY, endY, _duration)
+            _movementHandle = LMotion.Create(startY, endY, _duration)
                 .WithEase(_easeType)
                 .Bind(value =>
                 {
@@ -191,9 +202,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void PlayFade()
         {
-            LMotion.Create(_damageText.color.a, 0f, _duration)
+            _fadeHandle = LMotion.Create(_damageText.color.a, 0f, _duration)
                 .WithEase(_easeType)
-                .WithOnComplete(() => Destroy(gameObject))
+                .WithOnComplete(Complete)
                 .BindToColorA(_damageText);
 
             if (_backGroundImage == null || !_backGroundImage.enabled)
@@ -202,9 +213,30 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             // 背景画像のフェードアウト演出
-            LMotion.Create(_backGroundImage.color.a, 0f, _duration)
+            _backgroundFadeHandle = LMotion.Create(_backGroundImage.color.a, 0f, _duration)
                 .WithEase(_easeType)
                 .BindToColorA(_backGroundImage);
+        }
+
+        /// <summary>
+        ///     ダメージ数値の演出をリセットする。
+        /// </summary>
+        private void ResetMotion()
+        {
+            _movementHandle.TryCancel();
+            _fadeHandle.TryCancel();
+            _backgroundFadeHandle.TryCancel();
+        }
+
+        /// <summary>
+        ///     ダメージ数値の演出が完了したことを通知する。
+        /// </summary>
+        private void Complete()
+        {
+            Action<DamageNumberView> completed = _completed;
+            _completed = null;
+
+            completed?.Invoke(this);
         }
     }
 }

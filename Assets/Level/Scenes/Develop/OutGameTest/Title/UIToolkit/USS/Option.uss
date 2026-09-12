@@ -93,3 +93,7 @@
     font-size: 24px;
     -unity-font-style: bold;
 }
+
+.role-label {
+    color: rgb(255, 255, 255);
+}

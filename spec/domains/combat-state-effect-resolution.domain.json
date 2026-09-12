@@ -1,0 +1,29 @@
+{
+  "name": "Combat State and Effect Resolution",
+  "description": "体力と能力値、攻撃定義、ダメージ・クリティカル、多段ヒット抑制、バフ・デバフ・回復の一回限りの適用を所有する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/(Battle|Buff|Character)/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/2\\.Application/Player/SkillEffect/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/Skill/(SkillEffect|ISkillEffect)"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/1\\.Domain/Player/SkillEffectContext\\.cs$"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-02-rhythm-command-combat",
+    "spec/feature/game-spec.md#gs-03-kill-chord-skills-and-build"
+  ],
+  "rationale": "combat-core と skill-runtime のうちHP・ダメージ・状態効果の解決を所有する。"
+}

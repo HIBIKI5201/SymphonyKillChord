@@ -12,6 +12,7 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.StageSelect;
 using SymphonyFrameWork.System.SaveSystem;
@@ -684,6 +685,12 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 StageId stageId = node.Id;
                 VisualElement nodeElement = nodeElementMap[stageId];
                 var nodeView = new StageNodeView(nodeElement, stageId.Value, _outGameUIEvent);
+
+                // 親を持たない起点ステージ(マップ最左)を初期フォーカス先として印を付ける。
+                if (_stageTree.GetPreviousIds(stageId).Count == 0)
+                {
+                    nodeElement.AddToClassList(UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME);
+                }
 
                 // このノードへの接続線View一覧を取得する（存在しない場合はnull）。
                 connectionViewMap.TryGetValue(stageId, out List<IStageConnectionViewModel> incomingConnectionViews);

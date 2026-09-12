@@ -1,0 +1,19 @@
+{
+  "name": "Mission Evaluation and Result",
+  "description": "メイン・サブミッション、成功・失敗条件、経過時間・最大コンボ・ランク・報酬、勝敗リザルトと再出撃判断を所有する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/(Mission|Result)/"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-05-stage-mission-and-result"
+  ],
+  "rationale": "コード起点 mission を主要実装とし、Result表示はUI adapterとして境界外に置く。"
+}

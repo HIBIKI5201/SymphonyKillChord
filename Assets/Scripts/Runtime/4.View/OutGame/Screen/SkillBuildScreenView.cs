@@ -1,4 +1,6 @@
+using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using R3;
 using System;
@@ -58,9 +60,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         /// <param name="skillElementTemplate"> スキル要素テンプレート。 </param>
         /// <param name="onSkillElementCreated"> スキル要素生成時コールバック。 </param>
+        /// <param name="soundEffectCommand"> UI操作音の再生コマンド。 </param>
         public void InitializeSkillList(
             VisualTreeAsset skillElementTemplate,
-            Action<VisualElement> onSkillElementCreated = null)
+            Action<VisualElement> onSkillElementCreated,
+            IUISoundEffectCommand soundEffectCommand)
         {
             if (_skillListView != null)
             {
@@ -70,7 +74,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillListView = new SkillListView(
                 _skillElementList,
                 skillElementTemplate,
-                onSkillElementCreated);
+                onSkillElementCreated,
+                soundEffectCommand);
             _skillBuildSlotLayout = new SkillBuildSlotLayout(
                 RootElement,
                 _skillElementList,
@@ -148,6 +153,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillBuildSlotLayout = null;
         }
 
+        /// <inheritdoc />
+        protected override VisualElement InitialFocusElement => _skillBuildSaveButton;
+
         private const string BACKBUTTON_NAME = "BackButton";
         private const string SKILLBUILD_SAVEBUTTON_NAME = "SkillBuildSaveButton";
         private const string SKILLLEVELUP_BUTTON_NAME = "SkillLevelUpButton";
@@ -158,6 +166,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string DISCARD_AND_CLOSE_BUTTON_NAME = "DiscardAndCloseButton";
         private const string SAVE_AND_CLOSE_BUTTON_NAME = "SaveAndCloseButton";
         private const string OWNED_POINTS_LABEL_NAME = "OwnedPointsLabel";
+
+        /// <inheritdoc />
+        protected override VisualElement CancelTargetElement => _backButton;
 
         private readonly Button _backButton;
         private readonly Button _skillBuildSaveButton;
@@ -170,6 +181,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly Button _unsavedSaveAndCloseButton;
         private readonly Button _unsavedDiscardAndCloseButton;
         private readonly VisualElement _unsavedChangesDialogOverlay;
+
+        /// <summary> 未保存確認ダイアログ表示中、フォーカスを内側へ閉じ込める。 </summary>
+        private readonly ModalNavigationScope _dialogNavigationScope = new();
 
         private SkillListView _skillListView;
         private SkillBuildSlotLayout _skillBuildSlotLayout;
@@ -192,6 +206,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _unsavedDiscardAndCloseButton.RegisterCallback<ClickEvent>(HandleUnsavedDiscardAndCloseButtonClickedHandler);
             _unsavedChangesDialogOverlay.RegisterCallback<ClickEvent>(HandleUnsavedDialogBackgroundClickedHandler);
             _dialogPanel.RegisterCallback<ClickEvent>(HandleUnsavedDialogPanelClickedHandler);
+
+            // 処理を ClickEvent で受けているため、決定操作もクリックとして流し込む。
+            // オーバーレイとダイアログ本体は背景クリックの判定用であり、フォーカス対象にしない。
+            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
+            _backButton.ExcludeFromNavigation();
+            _skillBuildSaveButton.EnableSubmitAsClick();
+            _skillLevelUpButton.EnableSubmitAsClick();
+            _unsavedSaveAndCloseButton.EnableSubmitAsClick();
+            _unsavedDiscardAndCloseButton.EnableSubmitAsClick();
         }
 
         /// <summary>
@@ -368,6 +391,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private void ShowUnsavedChangesDialog()
         {
             _skillBuildDialog.style.display = DisplayStyle.Flex;
+
+            // 背面のスキル一覧やスロットへフォーカスが抜けないようにする。
+            _dialogNavigationScope.Activate(_skillBuildDialog);
         }
 
         /// <summary>
@@ -375,6 +401,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void HideUnsavedChangesDialog()
         {
+            _dialogNavigationScope.Deactivate();
             _skillBuildDialog.style.display = DisplayStyle.None;
         }
 

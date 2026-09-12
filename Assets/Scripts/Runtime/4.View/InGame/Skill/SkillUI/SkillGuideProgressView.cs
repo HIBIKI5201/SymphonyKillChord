@@ -22,10 +22,12 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// <param name="stepSettings"> スキルパターンの各拍子に対応する表示設定（Signatures順）。 </param>
         /// <param name="animationSetting"> アニメーション設定。 </param>
         /// <param name="rhythmGuideView"> ジャストタイミング位置の参照元となるリズムガイドView。未設定の場合はX座標を更新しない。 </param>
+        /// <param name="skillIcon"> この行が担当するスキルのアイコン。未設定の場合はnull。 </param>
         public void Initialize(
             SkillBeatVisualSetting[] stepSettings,
             SkillInputProgressAnimationSetting animationSetting,
-            ACLikeRhythmGuideView rhythmGuideView)
+            ACLikeRhythmGuideView rhythmGuideView,
+            Sprite skillIcon)
         {
             _stepSettings = stepSettings ?? throw new ArgumentNullException(nameof(stepSettings));
             _animationSetting = animationSetting ?? throw new ArgumentNullException(nameof(animationSetting));
@@ -33,11 +35,16 @@ namespace KillChord.Runtime.View.InGame.Skill
             _baseLocalScale = _leftIconImage.rectTransform.localScale;
             _baseLocalEulerAngleZ = _leftIconImage.rectTransform.localEulerAngles.z;
 
+            // スキルアイコンは入力進捗によらず不変のため、初期化時に一度だけ適用する。
+            ApplySkillIcon(skillIcon);
+
             // ジャストタイミング位置が確定するまでは、誤った位置が見えてしまわないようアイコン・背景ごと隠す。
             // リズムガイド未設定（X座標追従を使わない構成）の場合は待たずにそのまま表示する。
             _isPositioned = _rhythmGuideView == null;
             ApplyVisibility();
             ApplyStep(0);
+
+            SetCooldownFillAmount(1f);
         }
 
         /// <inheritdoc />
@@ -125,17 +132,12 @@ namespace KillChord.Runtime.View.InGame.Skill
         }
 
         /// <summary>
-        ///     指定インデックスの拍子アイコンを、左右対称のジャストタイミング位置に表示する。
+        ///     指定インデックスの拍に合わせて、左右のアイコンを対称なジャストタイミング位置へ移動する。
+        ///     表示するSprite自体はスキルアイコンで固定のため、ここでは位置のみを更新する。
         /// </summary>
         /// <param name="index"> 表示するSignaturesのインデックス。 </param>
         private void ApplyStep(int index)
         {
-            SkillBeatVisualSetting setting = _stepSettings[index];
-            _leftIconImage.sprite = setting.Icon;
-            _leftIconImage.color = setting.ActiveColor;
-            _rightIconImage.sprite = setting.Icon;
-            _rightIconImage.color = setting.ActiveColor;
-
             RefreshIconPosition(index);
         }
 
@@ -175,6 +177,7 @@ namespace KillChord.Runtime.View.InGame.Skill
             bool visible = _isPositioned && _isDisplayAllowed;
             _leftIconImage.enabled = visible;
             _rightIconImage.enabled = visible;
+
             if (_cooldownBackgroundImage == null)
             {
                 return;
@@ -183,6 +186,17 @@ namespace KillChord.Runtime.View.InGame.Skill
             {
                 _cooldownBackgroundImage[i].enabled = visible;
             }
+        }
+
+        /// <summary>
+        ///     この行が担当するスキルのアイコンを適用する。
+        ///     アイコン用Imageを持たないPrefab構成でも動作するよう、未設定時は何もしない。
+        /// </summary>
+        /// <param name="skillIcon"> 適用するスキルアイコン。未設定の場合はnull。 </param>
+        private void ApplySkillIcon(Sprite skillIcon)
+        {
+            _leftIconImage.sprite = skillIcon;
+            _rightIconImage.sprite = skillIcon;
         }
 
         /// <summary>
@@ -298,7 +312,7 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
             for (int i = 0; i < _cooldownBackgroundImage.Length; i++)
             {
-                _cooldownBackgroundImage[i].fillAmount = fillAmount;
+                _cooldownBackgroundImage[i].fillAmount = 1f - fillAmount;
             }
         }
 

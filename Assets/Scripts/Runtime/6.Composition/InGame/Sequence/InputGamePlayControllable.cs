@@ -23,7 +23,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return;
             }
 
-            inputComposition.GetInputMapController.EnableOnly(InputMapNames.InGame);
+            inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.InGame);
         }
 
         /// <summary>

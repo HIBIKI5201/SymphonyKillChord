@@ -47,12 +47,13 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary>
         ///     インジケーターの回転を更新する。
         /// </summary>
-        /// <param name="normalized"> 正規化された位置。 </param>
+        /// <param name="normalized"> 正規化された位置。1を超える超過分は使用しない。 </param>
         private void RenderIndicator(float normalized)
         {
             if (_indicatorRoot == null) return;
 
-            float angle = _startAngle + normalized * _sweepAngle;
+            // ダイアル表示は1小節=Sweep全域のため、ジャスト通過分の超過は切り捨てる。
+            float angle = _startAngle + Mathf.Clamp01(normalized) * _sweepAngle;
             _indicatorRoot.localRotation = Quaternion.Euler(0f, 0f, angle);
         }
 

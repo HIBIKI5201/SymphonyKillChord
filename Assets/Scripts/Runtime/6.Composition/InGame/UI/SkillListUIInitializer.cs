@@ -49,11 +49,12 @@ namespace KillChord.Runtime.Composition.InGame.UI
         ///     スキル定義データを指定し、一覧へ表示する1スキル分の行を生成する。
         /// </summary>
         /// <param name="definition"> 対象のスキル定義。 </param>
+        /// <param name="skillIcon"> 行に表示するスキルアイコン。未設定の場合はnull。 </param>
         /// <returns> 生成した行View。 </returns>
-        public ISkillInputProgressRowView CreateSkillListRow(SkillDefinition definition)
+        public ISkillInputProgressRowView CreateSkillListRow(SkillDefinition definition, Sprite skillIcon)
         {
             SkillListRowView rowView = Instantiate(_rowViewPrefab, _rowRoot);
-            rowView.Initialize(_viewSetting.AnimationSetting);
+            rowView.Initialize(_viewSetting.AnimationSetting, skillIcon);
 
             SkillListStepView[] stepViews = new SkillListStepView[definition.SkillPattern.Signatures.Length];
             for (int i = 0; i < definition.SkillPattern.Signatures.Length; i++)

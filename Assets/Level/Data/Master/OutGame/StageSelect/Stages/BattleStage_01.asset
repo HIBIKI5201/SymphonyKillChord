@@ -14,18 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.BattleStageAsset
   _plannerMemo: 
   _stageId:
-    _id: battle_stage_01
-    _hashId: 718734217
+    _id: stage_01
+    _hashId: 2117502204
   _isInitiallyUnlocked: 0
-  _stageName: "\u30D0\u30C8\u30EB"
-  _flavorText: "\u30D0\u30C8\u30EB"
+  _stageName: 1
+  _flavorText: "\u30B9\u30C6\u30FC\u30B81\n\u6575\u3092\u6BB2\u6EC5\u305B\u3088"
   _targetSceneName: InGame
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2
   _isTutorial: 0
   _enemyWaveDefinitionId:
-    _id: enemy_wave_default
-    _hashId: -1074717099
+    _id: enemy_wave_01
+    _hashId: 480330467
   _missionDefinitionId:
     _id: AllKill
     _hashId: 1531565721

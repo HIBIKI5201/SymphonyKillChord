@@ -4,7 +4,9 @@ using UnityEngine;
 namespace KillChord.Runtime.Utility.Persistent
 {
     /// <summary>
-    ///     イベント定義：ダメージを受ける時
+    ///     イベント定義：ダメージを受ける時。
+    ///     発火元はプレイヤー側の攻撃処理のみのため、実質的に敵が被弾した時に発火する。
+    ///     プレイヤーの被弾は <see cref="EOnPlayerTakeDamage"/> を使用する。
     /// </summary>
     public readonly struct EOnTakeDamage : IEvent
     {

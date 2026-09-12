@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System.Text;
 using UnityEngine.UIElements;
@@ -103,6 +104,11 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         {
             _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
             _sortieButton.RegisterCallback<ClickEvent>(OnSortieButtonClicked);
+
+            // 処理を ClickEvent で受けているため、決定操作もクリックとして流し込む。
+            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
+            _backButton.ExcludeFromNavigation();
+            _sortieButton.EnableSubmitAsClick();
         }
 
         /// <summary>
@@ -151,6 +157,13 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private readonly Label _subMissionLabel1;
         private readonly Label _subMissionLabel2;
         private readonly VisualElement _missionSection;
+        /// <inheritdoc />
+        /// <remarks> ノードを選択して詳細が開いたら、そのまま出撃できるようにする。 </remarks>
+        protected override VisualElement InitialFocusElement => _sortieButton;
+
+        /// <inheritdoc />
+        protected override VisualElement CancelTargetElement => _backButton;
+
         private readonly Button _backButton;
         private readonly Button _sortieButton;
     }

@@ -34,6 +34,9 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
         private int _sceneInitializationTimeoutFrameCount =
             DEFAULT_SCENE_INITIALIZATION_TIMEOUT_FRAME_COUNT;
 
+        [SerializeField, Min(0f), Tooltip("ロード画面の最低表示時間")]
+        private float _minimumLoadingScreenDisplayTime = 0.8f;
+
         /// <summary>
         ///     シーン遷移システムを構築して登録する。
         /// </summary>
@@ -73,7 +76,8 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
 
             _loadingScreenController = new LoadingScreenController();
 
-            _loadingOperationExecutor = new LoadingOperationExecutor(_loadingScreenController);
+            _loadingOperationExecutor = new LoadingOperationExecutor(
+                _loadingScreenController, _minimumLoadingScreenDisplayTime);
             _sceneTransitionService = new SceneTransitionService();
             _sceneInitializationReadiness = new SceneInitializationReadinessRegistry(
                 _sceneInitializationTimeoutFrameCount);

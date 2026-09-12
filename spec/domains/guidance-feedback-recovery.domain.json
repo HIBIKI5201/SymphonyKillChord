@@ -1,0 +1,27 @@
+{
+  "name": "Guidance, Feedback and Recovery",
+  "description": "リズム・BGM要素・敵攻撃・ミッションの可視化、チュートリアル転移、ポーズ/再開カウントダウン、失敗Tips、ロード進捗を通じて行動発見と回復可能性を所有する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[3-6]\\.[^/]+/InGame/(UI|Music/RhythmGuide|Music/ACLikeRhythmGuide|Skill/SkillUI|Mission/.*Hud)"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[2-6]\\.[^/]+/Persistent/Load/"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/4\\.View/OutGame/(Screen|SkillBuild|SkillTree|StageSelect|Title)/"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-04-music-and-encounter-synchronization",
+    "spec/feature/game-spec.md#gs-05-stage-mission-and-result",
+    "spec/feature/game-spec.md#gs-09-navigation-guidance-and-recovery"
+  ],
+  "rationale": "presentation-fx と ui-screens を独立製品ドメインへ昇格させず、cue・tutorial・回復規則の実装として所有する。"
+}

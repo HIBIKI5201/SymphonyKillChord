@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.OutGame.Navigation;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,6 +52,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private void RegisterButtonCallback()
         {
             _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
+            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
+            _backButton.ExcludeFromNavigation();
         }
 
         /// <summary>
@@ -70,6 +73,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         private const string BACKBUTTON_NAME = "BackButton";
+
+        /// <inheritdoc />
+        protected override VisualElement CancelTargetElement => _backButton;
+
+        /// <inheritdoc />
+        /// <remarks> 起点ノード(マップ最左)が無い場合は戻るボタンへフォールバックします。 </remarks>
+        protected override VisualElement InitialFocusElement =>
+            RootElement.Q<VisualElement>(className: UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME)
+            ?? _backButton;
 
         private readonly Button _backButton;
     }

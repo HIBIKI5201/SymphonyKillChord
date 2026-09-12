@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// <summary>
     /// シナリオ再生の進行と操作状態を管理するユースケース。
     /// </summary>
-    public class ScenarioUsecase : IScenarioEventEmitter, IScenarioPlaybackControl, IScenarioPlaybackState
+    public class ScenarioUsecase : IScenarioEventEmitter, IScenarioPlaybackControl, IScenarioPlaybackState, IScenarioPlaybackService
     {
         /// <summary>
         /// シナリオ再生ユースケースの依存関係を受け取る。

@@ -1,0 +1,26 @@
+{
+  "name": "Rhythm Input and Kill Chord Resolution",
+  "description": "攻撃・回避入力の間隔をノーツへ判定し、All/Just/タイムアウト規則とアクション種別を使ってキルコード列を照合し発動可否を決定する。",
+  "presetRules": [],
+  "templateRules": [],
+  "membership": [
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/Music/(BeatType|Rhythm|MusicTimingCalculator)"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/[1-6]\\.[^/]+/InGame/Skill/(SkillPattern|SkillRhythm|SkillCheck|SkillExecution|SkillInput|SkillUseCase)"
+    },
+    {
+      "pathPattern": "(^|/)Assets/Scripts/Runtime/1\\.Domain/InGame/Skill/SkillDefinition\\.cs$"
+    }
+  ],
+  "source": "manual",
+  "lockedFields": [
+    "*"
+  ],
+  "specRefs": [
+    "spec/feature/game-spec.md#gs-01-rhythm-judgment",
+    "spec/feature/game-spec.md#gs-03-kill-chord-skills-and-build"
+  ],
+  "rationale": "コード起点 rhythm-music と skill-runtime に分散する入力判定・列照合を一つの仕様境界として所有する。"
+}

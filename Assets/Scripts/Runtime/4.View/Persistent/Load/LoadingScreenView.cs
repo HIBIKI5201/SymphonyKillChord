@@ -26,7 +26,9 @@ namespace KillChord.Runtime.View.Persistent.Load
 
             if (_controller != null && _controller.IsLoading)
             {
+                ApplyRandomTip();
                 SetVisible(true);
+                StartMedalRotation();
             }
             else
             {
@@ -39,6 +41,7 @@ namespace KillChord.Runtime.View.Persistent.Load
         {
             Unsubscribe();
             _handle.TryCancel();
+            _medalHandle.TryCancel();
         }
 
         /// <summary>
@@ -91,7 +94,9 @@ namespace KillChord.Runtime.View.Persistent.Load
         private void HandleLoadingStarted()
         {
             ApplyProgress(0f);
+            ApplyRandomTip();
             SetVisible(true);
+            StartMedalRotation();
         }
 
         /// <summary>
@@ -114,7 +119,90 @@ namespace KillChord.Runtime.View.Persistent.Load
                 ApplyProgress(1f);
             }
 
+            StopMedalRotation();
             SetVisible(false);
+        }
+
+        /// <summary>
+        ///     Tipsをランダムに選んで表示する。
+        /// </summary>
+        private void ApplyRandomTip()
+        {
+            if (_tipsText == null)
+            {
+                return;
+            }
+
+            // Tips設定が存在する場合はランダムにTipsを取得し、存在しない場合は空文字列を設定する。
+            string tip = _tipsConfig != null ? _tipsConfig.GetRandomTip() : string.Empty;
+            _tipsText.SetText(tip);
+        }
+
+        /// <summary>
+        ///     勲章の回転を開始する。
+        /// </summary>
+        private void StartMedalRotation()
+        {
+            _medalHandle.TryCancel();
+
+            if (_medalHandle == null)
+            {
+                return;
+            }
+
+            _medalInitialEulerAngles = _medalTransform.localEulerAngles;
+            PlayMedalRotation();
+        }
+
+        /// <summary>
+        ///     勲章を1回転させるアニメーションを再帰的に実行する。
+        /// </summary>
+        private void PlayMedalRotation()
+        {
+            if (!_isVisible || _medalTransform == null)
+            {
+                return;
+            }
+
+            _medalHandle = LSequence.Create()
+                .Append(LMotion.Create(0f, 360f, _medalRotationDuration)
+                    .WithEase(_medalRotationEase)
+                    .Bind(this, (value, state) =>
+                        state.ApplyMedalRotation(value)))
+                .AppendInterval(_medalRotationDelay)
+                .Run(sequence => sequence
+                    .WithOnComplete(() => PlayMedalRotation()));
+        }
+
+        /// <summary>
+        ///     勲章のY軸回転を適用する。
+        /// </summary>
+        /// <param name="angle"> 回転させる角度（度） </param>
+        private void ApplyMedalRotation(float angle)
+        {
+            if (_medalTransform == null)
+            {
+                return;
+            }
+
+            Vector3 eulerAngles = _medalInitialEulerAngles;
+            eulerAngles.y += angle;
+            _medalTransform.localEulerAngles = eulerAngles;
+        }
+
+        /// <summary>
+        ///     勲章の回転を停止する。
+        /// </summary>
+        private void StopMedalRotation()
+        {
+            _medalHandle.TryCancel();
+
+            if (_medalHandle == null)
+            {
+                return;
+            }
+
+            _medalTransform.localEulerAngles = _medalInitialEulerAngles;
         }
 
         /// <summary>
@@ -143,6 +231,8 @@ namespace KillChord.Runtime.View.Persistent.Load
         /// <param name="isVisible"> 表示する場合はtrue。 </param>
         private void SetVisible(bool isVisible)
         {
+            _isVisible = isVisible;
+
             if (_canvasGroup == null)
             {
                 return;
@@ -173,8 +263,31 @@ namespace KillChord.Runtime.View.Persistent.Load
         [SerializeField]
         private Image _fadeImage;
 
+        [Header("Tips表示設定")]
+        [SerializeField, Tooltip("ロード画面に表示するTipsの設定")]
+        private LoadingTipsConfig _tipsConfig;
+
+        [SerializeField, Tooltip("ロード画面に表示するTipsのText")]
+        private TMP_Text _tipsText;
+
+        [Header("勲章回転設定")]
+        [SerializeField, Tooltip("Y軸回転させる勲章")]
+        private RectTransform _medalTransform;
+
+        [SerializeField, Min(0.01f), Tooltip("勲章が1回転するのにかかる時間（秒）")]
+        private float _medalRotationDuration;
+
+        [SerializeField, Tooltip("勲章が1回転した後に待機する時間（秒）")]
+        private float _medalRotationDelay;
+
+        [SerializeField, Tooltip("勲章の回転に使用するイージング")]
+        private Ease _medalRotationEase;
+
         private LoadingScreenController _controller;
         private bool _isSubscribed;
+        private bool _isVisible;
+        private Vector3 _medalInitialEulerAngles;
         private MotionHandle _handle;
+        private MotionHandle _medalHandle;
     }
 }

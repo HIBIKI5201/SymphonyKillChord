@@ -80,11 +80,20 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            // ガイド表示と判定は、音楽同期とターゲット状態の双方を参照するためPresenterへ集約する。
+            ServiceLocator.TryGetInstance(out KillChord.Runtime.Adaptor.InGame.StageSelect.SelectedBattleStageState selectedBattleStageState);
+
+            // MissionModuleContainer自体がミッション切り替えのたびに再生成・再登録される可能性があるため、
+            // Container参照ではなくServiceLocatorへの問い合わせそのものをデリゲート化し、呼び出しの都度最新状態を取得する。
+            System.Func<KillChord.Runtime.Application.InGame.Mission.MissionRuntimeService> missionRuntimeServiceProvider =
+                () => ServiceLocator.GetInstance<KillChord.Runtime.Composition.InGame.Mission.MissionModuleContainer>()?.MissionRuntimeService;
+
+            // ガイド表示と判定は、音楽同期・ターゲット状態・ミッション進行状況を参照するためPresenterへ集約する。
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
                 new RhythmGuideUsecase(_rhythmJudgmentDefinitionAsset.ToDefinition()),
-                targetingSystem
+                targetingSystem,
+                missionRuntimeServiceProvider,
+                selectedBattleStageState
             );
 
             new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);

@@ -19,13 +19,69 @@ namespace KillChord.Runtime.Composition
         /// <param name="view"> アニメーション再生View。 </param>
         /// <param name="config"> キャラクター共通のアニメーション設定。 </param>
         /// <param name="musicSyncState"> BPM参照元。 </param>
-        /// <param name="playerAttackConfig"> プレイヤー攻撃アニメーション設定。 </param>
         /// <returns> 初期化済みのView側依存群。 </returns>
         public ICharacterAnimationViewContext Init(
             CharacterAnimationView view,
             CharacterAnimationCatalogConfig config,
+            MusicSyncState musicSyncState)
+        {
+            return InitInternal(
+                view,
+                config,
+                musicSyncState,
+                null,
+                (playbackMap, animationSpeedProvider, timingCalculator) =>
+                    new CharacterAnimationSignal(
+                        playbackMap,
+                        animationSpeedProvider,
+                        timingCalculator));
+        }
+
+        /// <summary>
+        ///     プレイヤー固有の攻撃アニメーション設定を含めて初期化する。
+        /// </summary>
+        /// <param name="view"> アニメーション再生View。 </param>
+        /// <param name="config"> キャラクター共通のアニメーション設定。 </param>
+        /// <param name="musicSyncState"> BPM参照元。 </param>
+        /// <param name="playerAttackConfig"> プレイヤー攻撃アニメーション設定。 </param>
+        /// <returns> 初期化済みのView側依存群。 </returns>
+        public ICharacterAnimationViewContext InitForPlayer(
+            CharacterAnimationView view,
+            CharacterAnimationCatalogConfig config,
             MusicSyncState musicSyncState,
-            PlayerAttackAnimationConfig playerAttackConfig = null)
+            PlayerAttackAnimationConfig playerAttackConfig)
+        {
+            return InitInternal(
+                view,
+                config,
+                musicSyncState,
+                playerAttackConfig,
+                (playbackMap, animationSpeedProvider, timingCalculator) =>
+                    new PlayerCharacterAnimationSignal(
+                        playbackMap,
+                        animationSpeedProvider,
+                        timingCalculator));
+        }
+
+        /// <summary>
+        ///     共通のクリップ一覧を構築し、指定されたSignalでアニメーションを初期化する。
+        /// </summary>
+        /// <param name="view"> アニメーション再生View。 </param>
+        /// <param name="config"> キャラクター共通のアニメーション設定。 </param>
+        /// <param name="musicSyncState"> BPM参照元。 </param>
+        /// <param name="playerAttackConfig"> プレイヤー攻撃アニメーション設定。 </param>
+        /// <param name="signalFactory"> Signal生成処理です。 </param>
+        /// <returns> 初期化済みのView側依存群。 </returns>
+        private ICharacterAnimationViewContext InitInternal(
+            CharacterAnimationView view,
+            CharacterAnimationCatalogConfig config,
+            MusicSyncState musicSyncState,
+            PlayerAttackAnimationConfig playerAttackConfig,
+            Func<
+                CharacterAnimationPlaybackMap,
+                Func<float>,
+                CharacterAnimationOneShotTimingCalculator,
+                CharacterAnimationSignal> signalFactory)
         {
             var baseClipTypes = (CharacterAnimationClipType[])Enum.GetValues(typeof(CharacterAnimationClipType));
             var baseClips = new AnimationClip[baseClipTypes.Length];
@@ -143,9 +199,10 @@ namespace KillChord.Runtime.Composition
                 oneShotIndices: oneShotIndices,
                 attackIndices: attackIndices);
             CharacterAnimationOneShotTimingCalculator timingCalculator = new CharacterAnimationOneShotTimingCalculator();
-            CharacterAnimationSignal signal = new CharacterAnimationSignal(
+            Func<float> animationSpeedProvider = () => GetAnimationSpeed(musicSyncState);
+            CharacterAnimationSignal signal = signalFactory.Invoke(
                 playbackMap,
-                () => GetAnimationSpeed(musicSyncState),
+                animationSpeedProvider,
                 timingCalculator);
             CharacterAnimationViewContext context = new CharacterAnimationViewContext(viewModel, signal);
 

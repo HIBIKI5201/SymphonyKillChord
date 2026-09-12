@@ -48,7 +48,7 @@
     white-space: normal;
 }
 
-.skill-icon:hover {
+.draggable:hover > .skill-icon {
     border-left-color: rgb(92, 225, 230);
     border-right-color: rgb(92, 225, 230);
     border-top-color: rgb(92, 225, 230);
@@ -60,4 +60,33 @@
     border-right-color: rgb(255, 193, 7);
     border-top-color: rgb(255, 193, 7);
     border-bottom-color: rgb(255, 193, 7);
+}
+
+/*
+    スキル要素のルートは Skill.uxml をInstantiateしたTemplateContainerで、
+    .skill-icon はその子要素。hover/focus/active はルート側に付くため、
+    子孫セレクタで .skill-icon へ反映する。
+*/
+.skill-icon {
+    scale: 1 1;
+    transition-property: scale, border-color;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
+}
+
+.draggable:hover > .skill-icon,
+.draggable:focus > .skill-icon {
+    scale: 1.2 1.2;
+}
+
+.draggable:active > .skill-icon {
+    scale: 0.9 0.9;
+}
+
+/* コントローラーで選択中の強調。マウスホバーと同じ色にする。 */
+.draggable:focus > .skill-icon {
+    border-left-color: rgb(92, 225, 230);
+    border-right-color: rgb(92, 225, 230);
+    border-top-color: rgb(92, 225, 230);
+    border-bottom-color: rgb(92, 225, 230);
 }

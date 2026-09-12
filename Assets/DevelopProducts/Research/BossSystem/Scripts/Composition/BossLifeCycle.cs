@@ -48,6 +48,7 @@ namespace DevelopProducts.Boss
             TargetSystemController targetSystemController,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
+            DamageNumberPoolView damageNumberPoolView,
             Action<BossLifeCycle> releaseCallback
             )
         {
@@ -135,7 +136,7 @@ namespace DevelopProducts.Boss
             // View接続
             _view.Initialize(aiController, target);
             _healthView.Bind(viewModel);
-            _healthView.Initialize(healthHudPresenter);
+            _healthView.Initialize(healthHudPresenter, damageNumberPoolView);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
             _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
             _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;

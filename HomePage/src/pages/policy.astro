@@ -1,0 +1,37 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
+---
+
+<Layout title="プライバシーポリシー | Symphony Kill Chord">
+	<main>
+		<PageHeader eyebrow="Privacy Policy" title="プライバシーポリシー" />
+
+		<section id="policy-body">
+			<p>ここに内容を記載する。</p>
+		</section>
+	</main>
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	#policy-body {
+		border-top: 1px solid var(--color-surface-border);
+		padding-top: 40px;
+	}
+
+	#policy-body p {
+		margin: 0;
+		font-size: 0.9375rem;
+		line-height: 1.8;
+		color: var(--color-text-muted);
+	}
+</style>

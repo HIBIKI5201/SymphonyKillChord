@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using UnityEngine.UIElements;
@@ -54,6 +55,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private Label _skillDetail;
         private Button _previewVideoButton;
         private Button _unlockButton;
+        /// <inheritdoc />
+        protected override VisualElement CancelTargetElement => _backButton;
+
         private Button _backButton;
         private OutGameUIEvent _outGameUIEvent;
         private int _currentNodeId;
@@ -66,6 +70,12 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _unlockButton.RegisterCallback<ClickEvent>(OnUnlockButtonClicked);
             _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
             _previewVideoButton.RegisterCallback<ClickEvent>(OnPreviewButtonClicked);
+
+            // 処理を ClickEvent で受けているため、決定操作もクリックとして流し込む。
+            _unlockButton.EnableSubmitAsClick();
+            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
+            _backButton.ExcludeFromNavigation();
+            _previewVideoButton.EnableSubmitAsClick();
         }
 
         /// <summary>

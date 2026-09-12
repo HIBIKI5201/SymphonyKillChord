@@ -52,6 +52,7 @@ MonoBehaviour:
   - _addressableKey: MobileStickFlickInputConfig
   - _addressableKey: EnemyDefinitionRepository
   - _addressableKey: EnemyDirectionIndicatorConfig
+  - _addressableKey: UISoundEffectConfig
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset

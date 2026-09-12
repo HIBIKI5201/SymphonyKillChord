@@ -1,0 +1,22 @@
+{
+  "_comment": "OSごとの Unity Hub エディターインストール先。editorRoots は上から順に探索し、最初に見つかったものを使う。'~' はホームディレクトリに展開される。",
+  "Windows": {
+    "editorRoots": [
+      "C:\\Program Files\\Unity\\Hub\\Editor"
+    ],
+    "executableSuffix": "Editor\\Unity.exe"
+  },
+  "macOS": {
+    "editorRoots": [
+      "~/Applications/Unity/Hub/Editor",
+      "/Applications/Unity/Hub/Editor"
+    ],
+    "executableSuffix": "Unity.app/Contents/MacOS/Unity"
+  },
+  "Linux": {
+    "editorRoots": [
+      "~/Unity/Hub/Editor"
+    ],
+    "executableSuffix": "Editor/Unity"
+  }
+}

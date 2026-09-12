@@ -23,5 +23,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         InfectionRange = 15,
         InfectionTriggerCount = 16,
         InfectionDamageRate = 17,
+        HitDelaySeconds = 18,
+        HitIntervalSeconds = 19,
     }
 }

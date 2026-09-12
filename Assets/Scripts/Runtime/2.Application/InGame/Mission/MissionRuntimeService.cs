@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using System;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Application.InGame.Mission
 {
@@ -99,6 +100,33 @@ namespace KillChord.Runtime.Application.InGame.Mission
                 return;
             }
             _missionActionPerformedUseCase.Execute(_missionProgress, actionKind);
+            CheckObjectiveStepChanged();
+            _missionRuleRunner.Evaluate(_missionProgress);
+            CheckMissionFinished();
+        }
+
+        /// <summary>
+        ///     ひとつの操作から発生した複数のプレイヤー行動を、まとめて処理します。
+        ///     <para>
+        ///         1回の攻撃は拍子付きの行動と汎用の<see cref="MissionActionKind.Attack"/>の2件を発生させます。
+        ///         これらを個別に処理すると、1件目でステップが進んだ場合に2件目が次のステップへ計上され、
+        ///         操作していないのに次ステップが即座に達成されてしまいます。
+        ///         全件を記録してから一度だけ進行判定を行うことで、この伝播を防ぎます。
+        ///     </para>
+        /// </summary>
+        /// <param name="actionKinds"> 同時に発動した行動の種別一覧です。 </param>
+        public void OnActionsPerformed(IReadOnlyList<MissionActionKind> actionKinds)
+        {
+            if (_missionProgress.IsFinished || actionKinds == null || actionKinds.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < actionKinds.Count; i++)
+            {
+                _missionActionPerformedUseCase.Execute(_missionProgress, actionKinds[i]);
+            }
+
             CheckObjectiveStepChanged();
             _missionRuleRunner.Evaluate(_missionProgress);
             CheckMissionFinished();

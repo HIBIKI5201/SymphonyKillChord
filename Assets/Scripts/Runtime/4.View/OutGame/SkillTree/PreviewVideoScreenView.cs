@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using System.Collections.Generic;
@@ -56,6 +57,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private Dictionary<int, VideoClip> _videoClips;
         private VideoPlayer _player;
         private VisualElement _root;
+        /// <inheritdoc />
+        protected override VisualElement CancelTargetElement => _closeButton;
+
         private VisualElement _closeButton;
         private OutGameUIEvent _outGameUIEvent;
 
@@ -64,6 +68,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private void RegisterEvents()
         {
             _closeButton.RegisterCallback<ClickEvent>(HandleCloseButtonClicked);
+            // キャンセル操作で閉じられるため、フォーカス移動の対象からは外す。
+            _closeButton.ExcludeFromNavigation();
         }
 
         /// <summary>

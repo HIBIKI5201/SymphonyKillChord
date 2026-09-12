@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Utility.OutGame;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using UnityEngine.UIElements;
@@ -19,6 +20,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
 
             _root.RegisterCallback<ClickEvent>(OnNodeClicked);
 
+            // 素の VisualElement はフォーカスを持てないため、コントローラー操作用に有効化する。
+            _root.EnableSubmitAsClick();
+
             SetLocked();
         }
 
@@ -26,6 +30,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         {
             _root.UnregisterCallback<ClickEvent>(OnNodeClicked);
         }
+
+        /// <summary> このノードの要素を取得します。初期フォーカスの設定に使用します。 </summary>
+        public VisualElement RootElement => _root;
 
         /// <summary>
         ///     スキルノードを解放済みにする。

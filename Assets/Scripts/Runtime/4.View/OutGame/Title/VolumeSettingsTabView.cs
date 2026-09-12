@@ -1,107 +1,124 @@
-using KillChord.Runtime.View.Persistent.Music;
+using KillChord.Runtime.Adaptor.Persistent.Music;
+using R3;
 using System;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Title
 {
     /// <summary>
-    ///     音量設定タブの View クラス。
+    ///     タイトル画面の音量設定タブを共通音量設定へ接続するView。
     /// </summary>
     public sealed class VolumeSettingsTabView : IDisposable
     {
         /// <summary>
-        ///    音量設定タブの UI 要素を初期化します。
+        ///     音量設定タブを初期化する。
         /// </summary>
-        /// <param name="rootElement"></param>
-        /// <param name="musicPlayer"></param>
-        /// <param name="sePlayer"></param>
-        /// <exception cref="NullReferenceException"></exception>
-        public VolumeSettingsTabView(VisualElement rootElement, MusicPlayer musicPlayer, SoundEffectVolumeManager sePlayer)
+        public VolumeSettingsTabView(
+            VisualElement rootElement,
+            IAudioSettingsViewModel audioSettingsViewModel,
+            IAudioSettingsCommand audioSettingsCommand)
         {
-            _musicPlayer = musicPlayer;
-            _sePlayer = sePlayer;
+            _audioSettingsViewModel = audioSettingsViewModel
+                ?? throw new ArgumentNullException(nameof(audioSettingsViewModel));
+            _audioSettingsCommand = audioSettingsCommand
+                ?? throw new ArgumentNullException(nameof(audioSettingsCommand));
+            _bgmSlider = Require<SliderInt>(rootElement, BGM_SLIDER_NAME);
+            _soundEffectSlider = Require<SliderInt>(rootElement, SOUND_EFFECT_SLIDER_NAME);
+            _bgmValueLabel = Require<Label>(rootElement, BGM_VALUE_LABEL_NAME);
+            _soundEffectValueLabel = Require<Label>(rootElement, SOUND_EFFECT_VALUE_LABEL_NAME);
+            _subscriptions = new CompositeDisposable();
 
-            _bgmVolumeSlider = rootElement.Q<VisualElement>(BGM_SLIDER_NAME)
-                ?? throw new NullReferenceException($"{BGM_SLIDER_NAME} が見つかりません。");
-            _seVolumeSlider = rootElement.Q<VisualElement>(SE_SLIDER_NAME)
-                ?? throw new NullReferenceException($"{SE_SLIDER_NAME} が見つかりません。");
-
-            // 音量スライダーの参照を取得
-            _bgmSlider = _bgmVolumeSlider.Q<Slider>()
-                ?? throw new NullReferenceException($"{BGM_SLIDER_NAME} のスライダーが見つかりません。");
-            _seSlider = _seVolumeSlider.Q<Slider>()
-                ?? throw new NullReferenceException($"{SE_SLIDER_NAME} のスライダーが見つかりません。");
-
-            // 音量スライダーの初期値を設定
-            _bgmSlider.value = musicPlayer.GetVolume();
-            _seSlider.value = sePlayer.GetVolume();
-
-            // 名前での検索ではないのは、スライダーエレメント上には単一のラベルしか存在しないため。
-            var bgmLabel = _bgmVolumeSlider.Q<Label>()
-                ?? throw new NullReferenceException($"{BGM_SLIDER_NAME} のラベルが見つかりません。");
-            var seLabel = _seVolumeSlider.Q<Label>()
-                ?? throw new NullReferenceException($"{SE_SLIDER_NAME} のラベルが見つかりません。");
-
-            bgmLabel.text = "BGM";
-            seLabel.text = "SE";
-
-            RegisterCallbacks();
+            _bgmSlider.RegisterValueChangedCallback(HandleBgmVolumeChanged);
+            _soundEffectSlider.RegisterValueChangedCallback(HandleSoundEffectVolumeChanged);
+            SubscribeViewModel();
         }
 
         /// <summary>
-        ///   音量設定タブの View のリソースを解放します。
+        ///     登録済みコールバックを解除する。
         /// </summary>
         public void Dispose()
         {
-            UnregisterCallbacks();
+            _bgmSlider.UnregisterValueChangedCallback(HandleBgmVolumeChanged);
+            _soundEffectSlider.UnregisterValueChangedCallback(HandleSoundEffectVolumeChanged);
+            _subscriptions.Dispose();
         }
 
         private const string BGM_SLIDER_NAME = "BGMVolumeSlider";
-        private const string SE_SLIDER_NAME = "SEVolumeSlider";
+        private const string SOUND_EFFECT_SLIDER_NAME = "SEVolumeSlider";
+        private const string BGM_VALUE_LABEL_NAME = "BGMVolumeValue";
+        private const string SOUND_EFFECT_VALUE_LABEL_NAME = "SEVolumeValue";
 
-        private VisualElement _bgmVolumeSlider;
-        private VisualElement _seVolumeSlider;
-
-        private Slider _bgmSlider;
-        private Slider _seSlider;
-
-        private MusicPlayer _musicPlayer;
-        private SoundEffectVolumeManager _sePlayer;
+        private readonly IAudioSettingsViewModel _audioSettingsViewModel;
+        private readonly IAudioSettingsCommand _audioSettingsCommand;
+        private readonly SliderInt _bgmSlider;
+        private readonly SliderInt _soundEffectSlider;
+        private readonly Label _bgmValueLabel;
+        private readonly Label _soundEffectValueLabel;
+        private readonly CompositeDisposable _subscriptions;
 
         /// <summary>
-        ///     音量スライダーのコールバックを登録します。
+        ///     共通音量設定の変更を購読する。
         /// </summary>
-        private void RegisterCallbacks()
+        private void SubscribeViewModel()
         {
-            _bgmSlider.RegisterValueChangedCallback(UpdateBGMVolume);
-            _seSlider.RegisterValueChangedCallback(UpdateSEVolume);
+            _audioSettingsViewModel.BgmVolume
+                .Subscribe(HandleBgmVolumePublished)
+                .AddTo(_subscriptions);
+            _audioSettingsViewModel.SoundEffectVolume
+                .Subscribe(HandleSoundEffectVolumePublished)
+                .AddTo(_subscriptions);
         }
 
         /// <summary>
-        ///     音量スライダーのコールバックを解除します。
+        ///     BGMゲージの変更を共通音量設定へ渡す。
         /// </summary>
-        private void UnregisterCallbacks()
+        private void HandleBgmVolumeChanged(ChangeEvent<int> changeEvent)
         {
-            _bgmSlider.UnregisterValueChangedCallback(UpdateBGMVolume);
-            _seSlider.UnregisterValueChangedCallback(UpdateSEVolume);
+            _audioSettingsCommand.SetBgmVolume(changeEvent.newValue);
         }
 
         /// <summary>
-        ///     BGM 音量スライダーの値が変更されたときに呼び出されるコールバック。
+        ///     効果音ゲージの変更を共通音量設定へ渡す。
         /// </summary>
-        /// <param name="evt"></param>
-        private void UpdateBGMVolume(ChangeEvent<float> evt)
+        private void HandleSoundEffectVolumeChanged(ChangeEvent<int> changeEvent)
         {
-            _musicPlayer.SetVolume(evt.newValue);
+            _audioSettingsCommand.SetSoundEffectVolume(changeEvent.newValue);
         }
 
         /// <summary>
-        ///     SE 音量スライダーの値が変更されたときに呼び出されるコールバック。
+        ///     BGM音量をゲージと数値表示へ反映する。
         /// </summary>
-        /// <param name="evt"></param>
-        private void UpdateSEVolume(ChangeEvent<float> evt)
+        private void HandleBgmVolumePublished(int volume)
         {
-            _sePlayer.SetVolume(evt.newValue);
+            SetValue(_bgmSlider, _bgmValueLabel, volume);
+        }
+
+        /// <summary>
+        ///     効果音音量をゲージと数値表示へ反映する。
+        /// </summary>
+        private void HandleSoundEffectVolumePublished(int volume)
+        {
+            SetValue(_soundEffectSlider, _soundEffectValueLabel, volume);
+        }
+
+        /// <summary>
+        ///     ゲージと数値ラベルへ同じ値を設定する。
+        /// </summary>
+        private static void SetValue(SliderInt slider, Label valueLabel, int value)
+        {
+            slider.SetValueWithoutNotify(value);
+            valueLabel.text = value.ToString();
+        }
+
+        /// <summary>
+        ///     必須UI要素を取得する。
+        /// </summary>
+        private static T Require<T>(VisualElement rootElement, string elementName)
+            where T : VisualElement
+        {
+            return rootElement.Q<T>(elementName)
+                ?? throw new InvalidOperationException(
+                    $"[{nameof(VolumeSettingsTabView)}] {elementName} が見つかりませんでした。");
         }
     }
 }

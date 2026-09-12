@@ -7,4 +7,17 @@
     -unity-font-style: bold;
     font-size: 36px;
     aspect-ratio: 2;
+    scale: 1 1;
+    transition-property: scale;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
 }
+.title-option-button:hover,
+.title-option-button:focus {
+    scale: 1.2 1.2;
+}
+
+.title-option-button:active {
+    scale: 0.9 0.9;
+}
+
