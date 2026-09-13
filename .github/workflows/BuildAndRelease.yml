@@ -956,11 +956,17 @@ jobs:
             Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_EXECUTE_METHOD' が未設定です。デフォルト値 '$ExecuteMethod' を使用します。"
           }
 
+          $MinimumTimeoutSec = 21600
           if ($env:UNITY_BUILD_TIMEOUT_SEC) {
-            $TimeoutSec = [int]$env:UNITY_BUILD_TIMEOUT_SEC
-            Write-Host "[INFO]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' の値を使用します: $TimeoutSec 秒"
+            $ConfiguredTimeoutSec = [int]$env:UNITY_BUILD_TIMEOUT_SEC
+            $TimeoutSec = [Math]::Max($MinimumTimeoutSec, $ConfiguredTimeoutSec)
+            if ($ConfiguredTimeoutSec -lt $MinimumTimeoutSec) {
+              Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' の値 ($ConfiguredTimeoutSec 秒) は複数プラットフォームビルドの最低値 ($MinimumTimeoutSec 秒) 未満のため、$TimeoutSec 秒へ補正します。"
+            } else {
+              Write-Host "[INFO]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' の値を使用します: $TimeoutSec 秒"
+            }
           } else {
-            $TimeoutSec = 21600
+            $TimeoutSec = $MinimumTimeoutSec
             Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' が未設定です。デフォルト値 '$TimeoutSec 秒' を使用します。"
           }
 

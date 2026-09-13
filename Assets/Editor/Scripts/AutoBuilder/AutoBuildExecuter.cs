@@ -216,12 +216,12 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="type"> ログ種別です。 </param>
         private static void HandleLogMessage(string message, string stackTrace, LogType type)
         {
-            LogDebug("ログメッセージ捕捉処理を開始");
             if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert)
             {
                 return;
             }
 
+            LogDebug("ログメッセージ捕捉処理を開始");
             if (!IsRunning)
             {
                 return;
