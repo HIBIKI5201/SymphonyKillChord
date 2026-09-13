@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using KillChord.Editor.SourceDataProvider;
 using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
@@ -216,12 +217,12 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="type"> ログ種別です。 </param>
         private static void HandleLogMessage(string message, string stackTrace, LogType type)
         {
-            LogDebug("ログメッセージ捕捉処理を開始");
             if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert)
             {
                 return;
             }
 
+            LogDebug("ログメッセージ捕捉処理を開始");
             if (!IsRunning)
             {
                 return;
@@ -464,6 +465,9 @@ namespace KillChord.Editor.AutoBuilder
 
                 Debug.Log($"[{nameof(AutoBuildExecuter)}] Start Build : {profile.name}");
                 ShowBuildProgress(session, $"{profile.name} をビルドしています。");
+
+                // 体験版Profileは、グローバルのシーン一覧に終了シーンを加えた一覧へ揃えてからビルドする。
+                GameDataVariantProfiles.SynchronizeDemoScenes(profile);
 
                 // Profile切替。
                 BuildProfile.SetActiveBuildProfile(profile);

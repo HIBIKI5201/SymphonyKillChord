@@ -46,8 +46,9 @@ Clean Architectureの6層はEditor拡張には厳密対応しないため、実�
 | **`DataIDRebuildMenu`** | Editor拡張(一括処理) | プロジェクト内の全ScriptableObject／Prefab／Sceneを走査し、`DataID`のハッシュを`DataIDHasher`で再計算・再焼き込みするメニュー。走査中にハッシュ衝突も検出しログ出力する |
 | **`SpawnPositionPairIndexMigrationMenu`** | Editor拡張(一括処理) | ステージシーン配下の`SpawnPositionPair`へGameObject名ベースのIDを一括付与する移行用メニュー |
 | **`GameDataVariant`** | Editor拡張(Variant) | Editor上で扱うゲームデータ種別を表す列挙（`Release` / `Demo`） |
-| **`GameDataVariantEditorState`** | Editor拡張(Variant) | 選択中の`GameDataVariant`を`EditorPrefs`（ユーザー単位）で保持し、変更時に`GameDataVariantBuildSettings.Apply`を呼び出す |
-| **`GameDataVariantBuildSettings`** / **`GameDataVariantBuildPreprocessor`** | Editor拡張(Variant) | 選択中Variantに応じてAddressables Groupの`IncludeInBuild`、体験版用スクリプティングシンボル（`KILLCHORD_DEMO`）、体験版終了シーンのBuild Settings登録可否を一括切り替える。`IPreprocessBuildWithReport`としてビルド直前にも強制再適用する |
+| **`GameDataVariantEditorState`** | Editor拡張(Variant) | Planner Master Data Windowで表示する`GameDataVariant`を`EditorPrefs`（ユーザー単位）で保持する。ビルド成果物やアクティブなBuild Profileには影響しない |
+| **`GameDataVariantProfiles`** | Editor拡張(Variant) | Build ProfileのScripting Definesに`KILLCHORD_DEMO`があるかでゲームデータ種別を判定する（Build Profileが正本）。体験版Profileのシーン一覧を、グローバルのシーン一覧に`Demo/DemoEnd.unity`を加えた内容へ同期する |
+| **`GameDataVariantBuildSettings`** / **`GameDataVariantBuildPreprocessor`** | Editor拡張(Variant) | アクティブなBuild Profileの種別に応じてAddressables Groupの`IncludeInBuild`を切り替える。ドメインリロード後に自動適用し、`IPreprocessBuildWithReport`としてビルド直前にも再適用する。シンボルとシーン一覧はBuild Profile側が保持するため変更しない |
 
 ---
 
@@ -114,7 +115,7 @@ Editor拡張という性質上、Domain/Application/Adaptor/View/Infrastructure/
 `DataIDPropertyDrawer`と`SourceDataAddressSelectorDrawer`がInspector上のUIを差し替え、`SourceDataRegistrationHeader`がInspectorヘッダーに登録状態を追加する。`PlannerMasterDataWindow`はこれらとは独立したEditorWindowで、Page単位のナビゲーションと詳細編集・プレビューをまとめて提供する。
 
 ### Editor拡張(Variant)
-`GameDataVariant`／`GameDataVariantEditorState`／`GameDataVariantBuildSettings`はマスターデータそのものではなく、「どのAddressables GroupをビルドへIncludeするか」を切り替える層である。Planner Master Data Window自体はGroupのIncludeInBuild状態を見ずに全SourceAssetを表示するため、**Variant切替はEditor上の表示を絞り込むものではなく、ビルド成果物からRelease/Demoそれぞれ不要なデータを除外するための機構**である点に注意する。
+`GameDataVariant`／`GameDataVariantProfiles`／`GameDataVariantBuildSettings`はマスターデータそのものではなく、「どのAddressables GroupをビルドへIncludeするか」を切り替える層である。種別の正本は`Assets/Settings/Build Profiles/`の`<Variant>_<Mode>_<Platform>`（例: `Demo_Master_Windows`）で、Demo版Profileだけが`KILLCHORD_DEMO`を持つ。Planner Master Data Window自体はGroupのIncludeInBuild状態を見ずに全SourceAssetを表示するため、**Variant切替はEditor上の表示を絞り込むものではなく、ビルド成果物からRelease/Demoそれぞれ不要なデータを除外するための機構**である点に注意する。
 
 ## 🔌 拡張ポイント
 
@@ -181,21 +182,21 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Engineer as エンジニア
-    participant Menu as KillChord/Game Data Variant メニュー
-    participant State as GameDataVariantEditorState
+    participant Toolbar as ツールバー BuildProfileToolbar
+    participant Profile as Build Profile (<Variant>_<Mode>_<Platform>)
+    participant Profiles as GameDataVariantProfiles
     participant BuildSettings as GameDataVariantBuildSettings
     participant Addr as Addressables Groups
-    participant Player as PlayerSettings / EditorBuildSettings
 
-    Engineer ->> Menu: Release または Demo を選択
-    Menu ->> State: SetSelectedVariant(variant)
-    State -->> State: EditorPrefsへユーザー単位で保存
-    State ->> BuildSettings: Apply(variant)
-    BuildSettings ->> Addr: GameData.Release / GameData.Demo / GameData.Shared をEnsureGroup
+    Engineer ->> Toolbar: Demo_Dev_Windows などのProfileを選択
+    Toolbar ->> Profiles: SynchronizeDemoScenes(profile)
+    Profiles -->> Profile: 体験版ならグローバルのシーン一覧 + DemoEnd.unity で上書き
+    Toolbar ->> Profile: BuildProfile.SetActiveBuildProfile
+    Profile -->> Profile: Profile自身のScripting Defines(KILLCHORD_DEMO)が有効になりドメインリロード
+    Toolbar ->> BuildSettings: ApplyActiveProfile()
+    BuildSettings ->> Profiles: GetActiveVariant()
     BuildSettings -->> Addr: 選択中Variantのgroupだけ IncludeInBuild=true（Sharedは常にtrue）
-    BuildSettings ->> Player: KILLCHORD_DEMO の Scripting Define Symbol を追加/削除
-    BuildSettings ->> Player: Demo/DemoEnd.unity を EditorBuildSettings.scenes へ有効/無効登録
-    Note over BuildSettings: IPreprocessBuildWithReport(GameDataVariantBuildPreprocessor)が<br/>ビルド直前にも同じApply()を強制実行し、選択忘れによる不整合を防ぐ
+    Note over BuildSettings: ドメインリロード後の[InitializeOnLoadMethod]と<br/>GameDataVariantBuildPreprocessor(ビルド直前)でも<br/>アクティブなProfileを基準に同じ適用を行う
 ```
 
 > Planner Master Data Window自体はどちらのVariantでも両方のGroupの中身を等しく表示する（`SourceDataProviderRepositoryResolver`はGroupのIncludeInBuildを見ない）。データそのものをRelease/Demo間で出し分けたい場合は、対象ScriptableObjectの所属Addressables GroupをGameData.Release / GameData.Demo / GameData.Sharedのいずれかへ振り分けることで、ビルド成果物の含有可否を制御する。
