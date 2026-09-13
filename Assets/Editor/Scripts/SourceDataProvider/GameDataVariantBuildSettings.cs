@@ -24,15 +24,19 @@ namespace KillChord.Editor.SourceDataProvider
         [MenuItem("KillChord/Game Data Variant/Release")]
         private static void SelectRelease()
         {
-            GameDataVariantEditorState.SetSelectedVariant(GameDataVariant.Release);
-            Apply(GameDataVariant.Release);
+            if (Apply(GameDataVariant.Release))
+            {
+                GameDataVariantEditorState.SetSelectedVariant(GameDataVariant.Release);
+            }
         }
 
         [MenuItem("KillChord/Game Data Variant/Demo")]
         private static void SelectDemo()
         {
-            GameDataVariantEditorState.SetSelectedVariant(GameDataVariant.Demo);
-            Apply(GameDataVariant.Demo);
+            if (Apply(GameDataVariant.Demo))
+            {
+                GameDataVariantEditorState.SetSelectedVariant(GameDataVariant.Demo);
+            }
         }
 
         [MenuItem("KillChord/Game Data Variant/Release", true)]
@@ -56,13 +60,14 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     選択種別に合わせてGroupとコンパイルシンボルを更新します。
         /// </summary>
-        public static void Apply(GameDataVariant variant)
+        /// <returns> 設定を適用できた場合は true、それ以外は false です。 </returns>
+        public static bool Apply(GameDataVariant variant)
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null)
             {
                 Debug.LogError($"[{nameof(GameDataVariantBuildSettings)}] Addressables Settingsがありません。");
-                return;
+                return false;
             }
 
             AddressableAssetGroup releaseGroup = EnsureGroup(
@@ -81,6 +86,7 @@ namespace KillChord.Editor.SourceDataProvider
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true);
             UpdateDemoEndScene(variant == GameDataVariant.Demo);
             UpdateDemoDefine(variant == GameDataVariant.Demo);
+            return true;
         }
 
         /// <summary>
@@ -188,7 +194,10 @@ namespace KillChord.Editor.SourceDataProvider
         /// <inheritdoc />
         public void OnPreprocessBuild(BuildReport report)
         {
-            GameDataVariantBuildSettings.Apply(GameDataVariantEditorState.SelectedVariant);
+            if (!GameDataVariantBuildSettings.Apply(GameDataVariantEditorState.SelectedVariant))
+            {
+                throw new BuildFailedException("ゲームデータ種別のビルド設定を適用できませんでした。");
+            }
         }
     }
 }
