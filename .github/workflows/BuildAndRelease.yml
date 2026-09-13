@@ -1005,6 +1005,31 @@ jobs:
             Microsoft.PowerShell.Utility\Write-Host $Object
           }
 
+          function Get-CompletedProcessExitCode {
+            param(
+              [Parameter(Mandatory = $true)]
+              [System.Diagnostics.Process]$Process,
+              [Parameter(Mandatory = $true)]
+              [string]$ProcessName
+            )
+
+            # Windows PowerShellではタイムアウト付きWaitForExitの直後に
+            # ExitCodeが未更新の場合があるため、同期完了後に状態を再取得する。
+            $Process.WaitForExit()
+            $Process.Refresh()
+
+            if (-not $Process.HasExited) {
+              throw "$ProcessName の終了を確認できませんでした。"
+            }
+
+            $ExitCode = $Process.ExitCode
+            if ($null -eq $ExitCode) {
+              throw "$ProcessName の終了コードを取得できませんでした。"
+            }
+
+            return [int]$ExitCode
+          }
+
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] プロファイル単位のUnityビルドを開始します。"
 
           if ($env:UNITY_BUILD_EXECUTE_METHOD) {
@@ -1056,8 +1081,16 @@ jobs:
             exit 1
           }
 
-          if ($DiscoveryProcess.ExitCode -ne 0 -or -not (Test-Path $ProfileListFile)) {
-            Write-Host "[ERROR]: ビルドプロファイルを検出できませんでした（Unity終了コード: $($DiscoveryProcess.ExitCode)）。"
+          try {
+            $DiscoveryExitCode = Get-CompletedProcessExitCode $DiscoveryProcess "プロファイル検出用Unityプロセス"
+          } catch {
+            Write-Host "[ERROR]: プロファイル検出用Unityプロセスの終了状態を取得できませんでした: $_"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          if ($DiscoveryExitCode -ne 0 -or -not (Test-Path $ProfileListFile)) {
+            Write-Host "[ERROR]: ビルドプロファイルを検出できませんでした（Unity終了コード: $DiscoveryExitCode）。"
             Write-Host "::endgroup::"
             exit 1
           }
@@ -1175,7 +1208,7 @@ jobs:
                 continue
               }
 
-              $UnityExitCode = $UnityProcess.ExitCode
+              $UnityExitCode = Get-CompletedProcessExitCode $UnityProcess "$ProfileName のUnityプロセス"
               Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] $ProfileName のUnityプロセスがコード $UnityExitCode で終了しました。"
               if ($UnityExitCode -ne 0) {
                 $FailedProfiles += $ProfileName
