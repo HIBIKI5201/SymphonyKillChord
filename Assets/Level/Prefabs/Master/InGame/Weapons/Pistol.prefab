@@ -90,7 +90,7 @@ GameObject:
   - component: {fileID: 9088758330681558347}
   - component: {fileID: 6428250948987602701}
   m_Layer: 7
-  m_Name: Pistor
+  m_Name: Pistol
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
