@@ -366,9 +366,19 @@ jobs:
             exit 1
           }
 
+          # AutoBuilderSettings はゲームデータ種別×ビルドモードごとに出力先パスを持つ（例: DemoMasterPath）。
+          switch ($env:BUILD_VARIANT) {
+            "demo"    { $VariantKey = "Demo" }
+            "release" { $VariantKey = "Release" }
+            default {
+              Write-Host "::error::未知の BUILD_VARIANT です: $env:BUILD_VARIANT"
+              exit 1
+            }
+          }
+
           switch ($env:BUILD_MODE) {
-            "Master"      { $TargetKey = "MasterPath" }
-            "Development" { $TargetKey = "DevelopPath" }
+            "Master"      { $TargetKey = "${VariantKey}MasterPath" }
+            "Development" { $TargetKey = "${VariantKey}DevelopPath" }
             default {
               Write-Host "::error::未知の BUILD_MODE です: $env:BUILD_MODE"
               exit 1
@@ -1417,7 +1427,7 @@ jobs:
             5. **Unity ビルド処理**: ${{ steps.determine_mode.outputs.build_mode }} ビルドプロファイルに基づき、Unity バッチモードによるビルドを実行。
 
             **ビルド対象プロファイル:**
-            ${{ steps.determine_mode.outputs.build_mode == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
+            - ビルドプロファイル枠: ${{ steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release' }}${{ steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master' }}BuildProfiles
           files: "*.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

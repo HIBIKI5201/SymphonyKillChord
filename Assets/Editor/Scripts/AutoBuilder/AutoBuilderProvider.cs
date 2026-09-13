@@ -1,6 +1,7 @@
 using KillChord.Editor.Utility;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.Build.Profile;
 
 namespace KillChord.Editor.AutoBuilder
 {
@@ -21,37 +22,20 @@ namespace KillChord.Editor.AutoBuilder
 
         public override void OnGUI(string searchContext)
         {
-            SerializedObject so = new SerializedObject(AutoBuilderSettings.instance);
-
-            SerializedProperty masterPath = so.FindProperty(nameof(AutoBuilderSettings.instance.MasterPath));
-            SerializedProperty masterProp = so.FindProperty(nameof(AutoBuilderSettings.instance.MasterBuildProfiles));
-            
-            SerializedProperty devPath = so.FindProperty(nameof(AutoBuilderSettings.instance.DevelopPath));
-            SerializedProperty devProp = so.FindProperty(nameof(AutoBuilderSettings.instance.DevelopBuildProfiles));
+            AutoBuilderSettings settings = AutoBuilderSettings.instance;
+            SerializedObject so = new SerializedObject(settings);
 
             EditorGUI.BeginChangeCheck();
 
-            masterPath.stringValue = EditorGUILayout.TextField(masterPath.stringValue);
-            if (AutoBuilderSettings.IsPathNullOrEmpty(masterPath.stringValue)) { EditorGUILayout.HelpBox("MasterPathが空です。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsPathEndsWithSlash(masterPath.stringValue)) { EditorGUILayout.HelpBox("MasterPathの末尾にスラッシュがありません。", MessageType.Warning); }
-            if (AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.MasterBuildProfiles)) { EditorGUILayout.HelpBox("MasterBuildProfilesが空です。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.MasterBuildProfiles) && 
-                AutoBuilderSettings.HasEmptyBuildProfile(AutoBuilderSettings.instance.MasterBuildProfiles)) { EditorGUILayout.HelpBox("MasterBuildProfilesに空のビルドプロファイルがあります。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.MasterBuildProfiles) && 
-                AutoBuilderSettings.HasDuplicateBuildProfiles(AutoBuilderSettings.instance.MasterBuildProfiles)) { EditorGUILayout.HelpBox("MasterBuildProfilesに重複するビルドプロファイルがあります。", MessageType.Warning); }
-            EditorGUILayout.PropertyField(masterProp, true);
+            for (int i = 0; i < AutoBuilderSettings.SLOTS.Length; i++)
+            {
+                if (i > 0)
+                {
+                    EditorGUILayout.Space(SLOT_SPACING);
+                }
 
-            EditorGUILayout.Space(10);
-            devPath.stringValue = EditorGUILayout.TextField(devPath.stringValue);
-            if (AutoBuilderSettings.IsPathNullOrEmpty(devPath.stringValue)) { EditorGUILayout.HelpBox("DevelopPathが空です。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsPathEndsWithSlash(devPath.stringValue)) { EditorGUILayout.HelpBox("DevelopPathの末尾にスラッシュがありません。", MessageType.Warning); }
-            if (AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.DevelopBuildProfiles)) { EditorGUILayout.HelpBox("DevelopBuildProfilesが空です。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.DevelopBuildProfiles) && 
-                AutoBuilderSettings.HasEmptyBuildProfile(AutoBuilderSettings.instance.DevelopBuildProfiles)) { EditorGUILayout.HelpBox("DevelopBuildProfilesに空のビルドプロファイルがあります。", MessageType.Warning); }
-            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(AutoBuilderSettings.instance.DevelopBuildProfiles) && 
-                AutoBuilderSettings.HasDuplicateBuildProfiles(AutoBuilderSettings.instance.DevelopBuildProfiles)) { EditorGUILayout.HelpBox("DevelopBuildProfilesに重複するビルドプロファイルがあります。", MessageType.Warning); }
-
-            EditorGUILayout.PropertyField(devProp, true);
+                DrawSlot(so, settings, AutoBuilderSettings.SLOTS[i]);
+            }
 
             so.ApplyModifiedProperties();
 
@@ -59,5 +43,32 @@ namespace KillChord.Editor.AutoBuilder
         }
 
         private const string SETTINGS_PATH = ProviderConst.PROJECT_PATH + "AutoBuilder";
+        private const float SLOT_SPACING = 10.0f;
+
+        /// <summary>
+        ///     一つの枠の出力先パスとBuild Profile一覧を描画します。
+        /// </summary>
+        /// <param name="so"> 設定のSerializedObjectです。 </param>
+        /// <param name="settings"> 設定インスタンスです。 </param>
+        /// <param name="slot"> 描画する枠です。 </param>
+        private static void DrawSlot(SerializedObject so, AutoBuilderSettings settings, AutoBuildSlot slot)
+        {
+            SerializedProperty pathProperty = so.FindProperty(slot.PathPropertyName);
+            SerializedProperty profilesProperty = so.FindProperty(slot.ProfilesPropertyName);
+            BuildProfile[] profiles = settings.GetProfiles(slot);
+
+            EditorGUILayout.LabelField(slot.Label, EditorStyles.boldLabel);
+
+            pathProperty.stringValue = EditorGUILayout.TextField(pathProperty.stringValue);
+            if (AutoBuilderSettings.IsPathNullOrEmpty(pathProperty.stringValue)) { EditorGUILayout.HelpBox($"{slot.PathPropertyName}が空です。", MessageType.Warning); }
+            if (!AutoBuilderSettings.IsPathEndsWithSlash(pathProperty.stringValue)) { EditorGUILayout.HelpBox($"{slot.PathPropertyName}の末尾にスラッシュがありません。", MessageType.Warning); }
+            if (AutoBuilderSettings.IsBuildProfilesNullOrEmpty(profiles)) { EditorGUILayout.HelpBox($"{slot.ProfilesPropertyName}が空です。", MessageType.Warning); }
+            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(profiles) &&
+                AutoBuilderSettings.HasEmptyBuildProfile(profiles)) { EditorGUILayout.HelpBox($"{slot.ProfilesPropertyName}に空のビルドプロファイルがあります。", MessageType.Warning); }
+            if (!AutoBuilderSettings.IsBuildProfilesNullOrEmpty(profiles) &&
+                AutoBuilderSettings.HasDuplicateBuildProfiles(profiles)) { EditorGUILayout.HelpBox($"{slot.ProfilesPropertyName}に重複するビルドプロファイルがあります。", MessageType.Warning); }
+
+            EditorGUILayout.PropertyField(profilesProperty, true);
+        }
     }
 }

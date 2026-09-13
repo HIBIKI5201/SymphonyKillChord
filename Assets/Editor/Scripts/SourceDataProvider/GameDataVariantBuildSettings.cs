@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
@@ -11,55 +9,25 @@ using UnityEngine;
 namespace KillChord.Editor.SourceDataProvider
 {
     /// <summary>
-    ///     Release/DemoのコンパイルシンボルとAddressables Group有効状態を一括で切り替えます。
+    ///     アクティブなBuild Profileのゲームデータ種別に合わせて、Addressables Groupの有効状態を切り替えます。
+    ///     コンパイルシンボルとシーン一覧はBuild Profile自身が保持するため、ここでは変更しません。
     /// </summary>
     internal static class GameDataVariantBuildSettings
     {
-        [InitializeOnLoadMethod]
-        private static void ApplySelectedVariantAfterLoad()
+        /// <summary>
+        ///     アクティブなBuild Profileの種別をGroupへ反映し、体験版Profileのシーン一覧を同期します。
+        /// </summary>
+        /// <returns> 設定を適用できた場合は true、それ以外は false です。 </returns>
+        public static bool ApplyActiveProfile()
         {
-            EditorApplication.delayCall += () => Apply(GameDataVariantEditorState.SelectedVariant);
-        }
-
-        [MenuItem("KillChord/Game Data Variant/Release")]
-        private static void SelectRelease()
-        {
-            if (Apply(GameDataVariant.Release))
-            {
-                GameDataVariantEditorState.SetSelectedVariant(GameDataVariant.Release);
-            }
-        }
-
-        [MenuItem("KillChord/Game Data Variant/Demo")]
-        private static void SelectDemo()
-        {
-            if (Apply(GameDataVariant.Demo))
-            {
-                GameDataVariantEditorState.SetSelectedVariant(GameDataVariant.Demo);
-            }
-        }
-
-        [MenuItem("KillChord/Game Data Variant/Release", true)]
-        private static bool ValidateReleaseMenu()
-        {
-            Menu.SetChecked(
-                "KillChord/Game Data Variant/Release",
-                GameDataVariantEditorState.SelectedVariant == GameDataVariant.Release);
-            return true;
-        }
-
-        [MenuItem("KillChord/Game Data Variant/Demo", true)]
-        private static bool ValidateDemoMenu()
-        {
-            Menu.SetChecked(
-                "KillChord/Game Data Variant/Demo",
-                GameDataVariantEditorState.SelectedVariant == GameDataVariant.Demo);
-            return true;
+            GameDataVariantProfiles.SynchronizeActiveProfileScenes();
+            return Apply(GameDataVariantProfiles.GetActiveVariant());
         }
 
         /// <summary>
-        ///     選択種別に合わせてGroupとコンパイルシンボルを更新します。
+        ///     指定種別に合わせてAddressables Groupのビルド含有状態を更新します。
         /// </summary>
+        /// <param name="variant"> 反映するゲームデータ種別です。 </param>
         /// <returns> 設定を適用できた場合は true、それ以外は false です。 </returns>
         public static bool Apply(GameDataVariant variant)
         {
@@ -84,14 +52,24 @@ namespace KillChord.Editor.SourceDataProvider
             SetIncludeInBuild(demoGroup, variant == GameDataVariant.Demo);
             SetIncludeInBuild(sharedGroup, true);
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true);
-            UpdateDemoEndScene(variant == GameDataVariant.Demo);
-            UpdateDemoDefine(variant == GameDataVariant.Demo);
             return true;
+        }
+
+        /// <summary>
+        ///     Build Profile切り替えによるドメインリロード後に、アクティブなProfileの設定を反映します。
+        /// </summary>
+        [InitializeOnLoadMethod]
+        private static void ApplyActiveProfileAfterLoad()
+        {
+            EditorApplication.delayCall += () => ApplyActiveProfile();
         }
 
         /// <summary>
         ///     指定名のGroupを取得し、なければ標準Schema付きで作成します。
         /// </summary>
+        /// <param name="settings"> Addressablesの設定です。 </param>
+        /// <param name="groupName"> 取得するGroup名です。 </param>
+        /// <returns> 取得または作成したGroupです。 </returns>
         private static AddressableAssetGroup EnsureGroup(
             AddressableAssetSettings settings,
             string groupName)
@@ -115,6 +93,8 @@ namespace KillChord.Editor.SourceDataProvider
         /// <summary>
         ///     Groupのビルド含有状態を設定します。
         /// </summary>
+        /// <param name="group"> 対象のGroupです。 </param>
+        /// <param name="includeInBuild"> ビルドへ含める場合はtrueです。 </param>
         private static void SetIncludeInBuild(AddressableAssetGroup group, bool includeInBuild)
         {
             BundledAssetGroupSchema schema = group?.GetSchema<BundledAssetGroupSchema>();
@@ -124,67 +104,10 @@ namespace KillChord.Editor.SourceDataProvider
                 EditorUtility.SetDirty(schema);
             }
         }
-
-        /// <summary>
-        ///     現在のビルドターゲットへ体験版専用defineを反映します。
-        /// </summary>
-        private static void UpdateDemoDefine(bool enabled)
-        {
-            NamedBuildTarget namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(
-                EditorUserBuildSettings.selectedBuildTargetGroup);
-            string currentValue = PlayerSettings.GetScriptingDefineSymbols(namedBuildTarget);
-            HashSet<string> defines = new(
-                currentValue.Split(';', StringSplitOptions.RemoveEmptyEntries),
-                StringComparer.Ordinal);
-            bool changed = enabled
-                ? defines.Add(DEMO_DEFINE)
-                : defines.Remove(DEMO_DEFINE);
-            if (!changed)
-            {
-                return;
-            }
-
-            PlayerSettings.SetScriptingDefineSymbols(
-                namedBuildTarget,
-                string.Join(";", defines));
-        }
-
-        /// <summary>
-        ///     体験版終了シーンをDemoビルドだけへ含めます。
-        /// </summary>
-        private static void UpdateDemoEndScene(bool enabled)
-        {
-            List<EditorBuildSettingsScene> scenes = new(EditorBuildSettings.scenes);
-            int index = scenes.FindIndex(scene => string.Equals(
-                scene.path,
-                DEMO_END_SCENE_PATH,
-                StringComparison.Ordinal));
-            if (index < 0)
-            {
-                if (AssetDatabase.LoadAssetAtPath<SceneAsset>(DEMO_END_SCENE_PATH) != null)
-                {
-                    scenes.Add(new EditorBuildSettingsScene(DEMO_END_SCENE_PATH, enabled));
-                    EditorBuildSettings.scenes = scenes.ToArray();
-                }
-
-                return;
-            }
-
-            if (scenes[index].enabled == enabled)
-            {
-                return;
-            }
-
-            scenes[index] = new EditorBuildSettingsScene(DEMO_END_SCENE_PATH, enabled);
-            EditorBuildSettings.scenes = scenes.ToArray();
-        }
-
-        internal const string DEMO_DEFINE = "KILLCHORD_DEMO";
-        private const string DEMO_END_SCENE_PATH = "Assets/Level/Scenes/Demo/DemoEnd.unity";
     }
 
     /// <summary>
-    ///     ビルド直前に選択データ種別と成果物設定の不整合を防止します。
+    ///     ビルド直前に、ビルドするBuild Profileの種別とAddressables Groupの不整合を防止します。
     /// </summary>
     internal sealed class GameDataVariantBuildPreprocessor : IPreprocessBuildWithReport
     {
@@ -194,7 +117,8 @@ namespace KillChord.Editor.SourceDataProvider
         /// <inheritdoc />
         public void OnPreprocessBuild(BuildReport report)
         {
-            if (!GameDataVariantBuildSettings.Apply(GameDataVariantEditorState.SelectedVariant))
+            // AutoBuildExecuterはビルド前にProfileをアクティブ化するため、アクティブなProfileを正本とする。
+            if (!GameDataVariantBuildSettings.Apply(GameDataVariantProfiles.GetActiveVariant()))
             {
                 throw new BuildFailedException("ゲームデータ種別のビルド設定を適用できませんでした。");
             }
