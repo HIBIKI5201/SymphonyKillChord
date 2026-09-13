@@ -1,6 +1,105 @@
 :root {
 }
 
+.skillbuild-root {
+    flex-direction: column;
+    background-color: rgb(12, 21, 38);
+    padding: 16px;
+    position: relative;
+}
+
+.skillbuild-header {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OutGame_SceneTab.png?fileID=21300000&guid=96c8d94dd68b3104fa34a3f388529d63&type=3#UI_OutGame_SceneTab");
+    -unity-background-scale-mode: stretch-to-fill;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 12px;
+    padding-right: 24px;
+    margin-left: -16px;
+    margin-top: -16px;
+}
+
+.skillbuild-header-title {
+    color: rgb(255, 255, 255);
+    font-size: 28px;
+    -unity-font-style: bold;
+    margin-left: 8px;
+    margin-right: 16px;
+}
+
+.skillbuild-header-points {
+    flex-direction: row;
+    align-items: center;
+}
+
+.skillbuild-header-points-heading,
+.skillbuild-header-points-value {
+    color: rgb(207, 214, 230);
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.skillbuild-body-row {
+    flex-direction: row;
+    flex-grow: 1;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.skillbuild-panel {
+    width: 47%;
+    height: 100%;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Build_Panel.png?fileID=21300000&guid=a54aaa7603081784687325749f91661e&type=3#UI_Build_Panel");
+    -unity-background-scale-mode: stretch-to-fill;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(58, 84, 135);
+    border-right-color: rgb(58, 84, 135);
+    border-top-color: rgb(58, 84, 135);
+    border-bottom-color: rgb(58, 84, 135);
+    padding: 20px 16px 16px 16px;
+}
+
+.skillbuild-formation-column {
+    width: 47%;
+    height: 100%;
+    flex-direction: column;
+}
+
+.skillbuild-panel-nested {
+    width: 100%;
+    height: auto;
+    flex-grow: 0;
+}
+
+.skillbuild-list-panel {
+    flex-grow: 1;
+    margin-top: 12px;
+}
+
+.skillbuild-panel-title {
+    align-self: flex-start;
+    margin-bottom: 14px;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/OutGame_NameTab.png?fileID=21300000&guid=18615c4bf6c358c419b0f3486d76158e&type=3#OutGame_NameTab");
+    -unity-background-scale-mode: stretch-to-fill;
+    color: rgb(40, 46, 66);
+    font-size: 26px;
+    -unity-font-style: bold;
+    padding: 6px 22px;
+}
+
 .owned-points {
     position: absolute;
     right: 240px;
@@ -25,26 +124,32 @@
 
 .skill-icon {
     height: 100%;
-    margin-right: 4%;
-    margin-left: 4%;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.skillbuild-detail-content {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OverFrame.png?fileID=21300000&guid=bd57903fba6f6a34ebf4de577d8e26b0&type=3#UI_OverFrame");
+    -unity-background-scale-mode: stretch-to-fill;
+    padding: 16px 16px 8px 16px;
 }
 
 .skill-detail-top {
     flex-grow: 0;
     width: 100%;
-    height: 25%;
     flex-direction: row;
     align-items: center;
-    padding-left: 2%;
-    padding-right: 2%;
+    margin-bottom: 12px;
 }
 
 .skill-detail-icon {
-    width: 110px;
-    height: 110px;
-    min-width: 110px;
-    min-height: 110px;
-    background-color: rgb(145, 145, 145);
+    width: 170px;
+    height: 170px;
+    min-width: 170px;
+    min-height: 170px;
+    background-color: rgb(0, 0, 0);
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
     border-bottom-right-radius: 50%;
@@ -54,97 +159,221 @@
 
 .skill-detail-heading {
     flex-grow: 1;
-    margin-left: 24px;
+    align-self: flex-start;
+    margin-left: 20px;
+    margin-top: 14px;
     justify-content: center;
 }
 
 .skill-name-label {
-    font-size: 30px;
+    font-size: 36px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(40, 46, 66);
 }
 
 .skill-combo-label {
     margin-top: 8px;
     font-size: 22px;
     white-space: normal;
+    color: rgb(60, 70, 90);
+}
+
+.skillbuild-combo-row {
+    flex-direction: row;
+    margin-top: 14px;
+}
+
+/*
+    六角形アイコン。正六角形スプライト(Assets/Arts/UI/UI_hexagon.png)を
+    Image.tintColor で色分けして表示する。
+*/
+.skillbuild-combo-hex {
+    width: 54px;
+    height: 54px;
+    margin-right: 14px;
 }
 
 .skill-description {
     flex-grow: 0;
-    width: 95%;
-    height: 50%;
+    height: 150px;
+    width: 100%;
     align-self: center;
-    border-top-width: 6px;
-    border-right-width: 6px;
-    border-bottom-width: 6px;
-    border-left-width: 6px;
-    border-top-left-radius: 25px;
-    border-top-right-radius: 25px;
-    border-bottom-right-radius: 25px;
-    border-bottom-left-radius: 25px;
-    border-left-color: rgb(0, 0, 0);
-    border-right-color: rgb(0, 0, 0);
-    border-top-color: rgb(0, 0, 0);
-    border-bottom-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_%20ResearchScene_EmphasisPanel.png?fileID=21300000&guid=e6318de12d6a75243b82af77667114df&type=3#UI_%20ResearchScene_EmphasisPanel");
+    -unity-background-scale-mode: stretch-to-fill;
+    margin-bottom: 12px;
 }
 
 .skill-type-row {
     width: 95%;
     align-self: center;
-    padding-top: 16px;
+    margin-bottom: 12px;
+    padding-top: 10px;
+    border-top-width: 1px;
+    border-top-color: rgb(58, 84, 135);
     flex-direction: row;
 }
 
 .skill-type-heading {
-    font-size: 24px;
+    font-size: 18px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(60, 70, 90);
 }
 
 .skill-type-label {
     flex-grow: 1;
-    font-size: 24px;
+    font-size: 18px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(40, 46, 66);
 }
 
 .skill-effect-heading {
     width: 95%;
     align-self: center;
-    margin-top: 12px;
-    font-size: 24px;
+    margin-top: 10px;
+    font-size: 18px;
     -unity-font-style: bold;
+    color: rgb(60, 70, 90);
 }
 
 .skill-description-label {
     width: 92%;
     align-self: center;
     padding-top: 4px;
-    padding-bottom: 16px;
-    padding-left: 24px;
-    font-size: 24px;
+    padding-bottom: 12px;
+    padding-left: 16px;
+    font-size: 18px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(40, 46, 66);
 }
 
 .skill-tips-heading {
     width: 95%;
     align-self: center;
-    margin-top: 12px;
-    font-size: 24px;
+    margin-top: 10px;
+    font-size: 18px;
     -unity-font-style: bold;
+    color: rgb(60, 70, 90);
 }
 
 .skill-tips-label {
     width: 92%;
     align-self: center;
     padding-top: 4px;
-    padding-bottom: 16px;
-    padding-left: 24px;
-    font-size: 24px;
+    padding-bottom: 12px;
+    padding-left: 16px;
+    font-size: 18px;
     -unity-font-style: bold;
     white-space: normal;
+    color: rgb(40, 46, 66);
+}
+
+.skillbuild-info-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_%20ResearchScene_EmphasisPanel.png?fileID=21300000&guid=e6318de12d6a75243b82af77667114df&type=3#UI_%20ResearchScene_EmphasisPanel");
+    -unity-background-scale-mode: stretch-to-fill;
+    height: 40px;
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-bottom: 10px;
+}
+
+.skillbuild-info-row-heading,
+.skillbuild-info-row-value {
+    color: rgb(40, 46, 66);
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.skillbuild-panel-button-row {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.skillbuild-action-button {
+    background-color: rgb(238, 240, 228);
+    color: rgb(26, 26, 26);
+    font-size: 20px;
+    -unity-font-style: bold;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    min-width: 160px;
+    min-height: 56px;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.skillbuild-reinforce-button {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    -unity-background-scale-mode: stretch-to-fill;
+    color: rgb(40, 46, 66);
+}
+
+.skillbuild-slot-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 32px;
+    background-color: rgba(0, 0, 0, 0);
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.skillbuild-slot {
+    width: 130px;
+    height: 140px;
+    min-width: 130px;
+    min-height: 140px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_%20ResearchScene_SkillPanel_Select.png?fileID=21300000&guid=410fcd0e1b64a00408e3c27b7d6fe77b&type=3#UI_%20ResearchScene_SkillPanel_Select");
+    -unity-background-scale-mode: stretch-to-fill;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.skillbuild-list-section {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+    overflow: hidden;
+}
+
+.skillbuild-list-scrollview {
+    flex-grow: 0;
+    flex-direction: row;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_AllSkill_View.png?fileID=21300000&guid=0350aa1abf4fbcb49b76222d3a7b2420&type=3#UI_AllSkill_View");
+    -unity-background-scale-mode: stretch-to-fill;
+    overflow: hidden;
+}
+
+.skillbuild-bottom-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.skillbuild-bottom-row > .skillbuild-action-button {
+    margin-left: 12px;
+    margin-right: 12px;
 }
 
 .skill-element-slot {
@@ -152,12 +381,30 @@
     justify-content: center;
 }
 
+/*
+    スロット下に表示する発動コマンド入力の六角形行。
+    個数=入力回数、色=入力コマンド(ComboStepColors)。「詳細」パネルの
+    skillbuild-combo-hex と同じ仕組み(ComboHexRowBuilder)を、スロットの
+    小さい面積向けに縮小したサイズで再利用する。
+*/
+.skillbuild-slot-combo-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.skillbuild-slot-combo-hex {
+    width: 16px;
+    height: 16px;
+    margin-left: 1px;
+    margin-right: 1px;
+}
+
 .skill-slot-icon {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    min-height: 80px;
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
     border-bottom-right-radius: 50%;
@@ -166,12 +413,8 @@
 }
 
 .skill-slot-name {
-    position: absolute;
-    left: 6px;
-    right: 6px;
-    bottom: 12px;
-    min-height: 24px;
-    background-color: rgba(0, 0, 0, 0.65);
+    width: 100%;
+    margin-bottom: 6px;
     color: rgb(255, 255, 255);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
@@ -196,6 +439,8 @@
 }
 
 .draggable {
+    margin-left: 4%;
+    margin-right: 4%;
 }
 
 .skill-element-container {
@@ -230,43 +475,35 @@
 .skill-genre-filter-button-all,
 .skill-genre-filter-button {
     flex: 0 0 auto;
-    width: 64px;
-    height: 64px;
-    margin-right: 14px;
+    width: 90px;
+    height: 26px;
+    margin-right: 4px;
     padding: 0;
-    border-top-left-radius: 50%;
-    border-top-right-radius: 50%;
-    border-bottom-right-radius: 50%;
-    border-bottom-left-radius: 50%;
-    background-color: rgb(255, 255, 255);
-    border-left-width: 3px;
-    border-right-width: 3px;
-    border-top-width: 3px;
-    border-bottom-width: 3px;
-    border-left-color: rgb(120, 120, 120);
-    border-right-color: rgb(120, 120, 120);
-    border-top-color: rgb(120, 120, 120);
-    border-bottom-color: rgb(120, 120, 120);
+    align-items: center;
+    justify-content: center;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Panel_tab_off.png?fileID=21300000&guid=c27ffb2c61799194fbed912bd417a179&type=3#UI_Panel_tab_off");
+    -unity-background-scale-mode: stretch-to-fill;
 }
 
 .skill-genre-filter-button-all {
-    font-size: 15px;
+    font-size: 13px;
+    color: rgb(255, 255, 255);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
 
 .skill-genre-filter-button-icon {
-    width: 100%;
-    height: 100%;
+    width: 20px;
+    height: 20px;
+    align-self: center;
     -unity-background-scale-mode: scale-to-fit;
 }
 
 .skill-genre-filter-button-all.is-active,
 .skill-genre-filter-button.is-active {
-    border-left-color: rgb(255, 193, 7);
-    border-right-color: rgb(255, 193, 7);
-    border-top-color: rgb(255, 193, 7);
-    border-bottom-color: rgb(255, 193, 7);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Panel_tab.png?fileID=21300000&guid=2634097f27d94f04cab60440a40fcb28&type=3#UI_Panel_tab");
 }
 
 .skill-group-container {
@@ -277,10 +514,10 @@
     height: 174px;
     padding-left: 12px;
     padding-right: 12px;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
-    border-bottom-right-radius: 24px;
-    border-bottom-left-radius: 24px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
     border-left-width: 2px;
     border-right-width: 2px;
     border-top-width: 2px;

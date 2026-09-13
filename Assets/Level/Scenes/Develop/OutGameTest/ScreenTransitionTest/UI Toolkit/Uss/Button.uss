@@ -21,8 +21,39 @@
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    width: 300px;
-    height: 170px;
+}
+
+.home-card-large {
+    width: 800px;
+    height: 420px;
+}
+
+.home-card-small {
+    width: 390px;
+    height: 210px;
+}
+
+.home-button-wrapper {
+    position: relative;
+    margin-top: 10px;
+    scale: 1.0 1.0 1.0;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
+}
+
+.home-button-wrapper > .button {
+    margin-top: 0;
+}
+
+.home-button-panel {
+    position: absolute;
+    top: 3%;
+    right: 1.5%;
+    bottom: 3%;
+    left: 1.5%;
+    background-color: rgb(255, 255, 255);
+    border-radius: 4px;
+    translate: 0 -4px;
 }
 
 .button:hover,
@@ -36,6 +67,24 @@
     scale: 0.9 0.9;
     transition-duration: 0.05s;
     transition-timing-function: ease-out-circ;
+}
+
+.home-button-wrapper:hover {
+    scale: 1.2 1.2;
+    transition-duration: 0.05s;
+    transition-timing-function: ease-out-circ;
+}
+
+.home-button-wrapper:active {
+    scale: 0.9 0.9;
+    transition-duration: 0.05s;
+    transition-timing-function: ease-out-circ;
+}
+
+.home-button-wrapper > .button:hover,
+.home-button-wrapper > .button:focus,
+.home-button-wrapper > .button:active {
+    scale: 1.0 1.0;
 }
 
 

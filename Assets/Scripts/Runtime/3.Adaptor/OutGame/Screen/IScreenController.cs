@@ -12,9 +12,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary> メニュー画面を表示します。 </summary>
         void ShowMenu();
 
-        /// <summary> オプション画面を表示します。 </summary>
-        void ShowOptions();
-
         /// <summary> クレジット画面を表示します。 </summary>
         void ShowCredit();
 

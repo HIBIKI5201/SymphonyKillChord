@@ -24,7 +24,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             int rewardSkillBuildPoint,
             int rewardSkillUnlockPoint,
             string mainMissionText,
-            string[] subMissionTexts)
+            string[] subMissionTexts,
+            bool[] subMissionCleared)
         {
             StageName = stageName;
             FlavorText = flavorText;
@@ -32,6 +33,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             RewardSkillUnlockPoint = rewardSkillUnlockPoint;
             MainMissionText = mainMissionText;
             SubMissionTexts = subMissionTexts;
+            SubMissionCleared = subMissionCleared;
         }
 
         /// <summary> ステージ名。 </summary>
@@ -52,10 +54,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         ///     シナリオパートの場合は null。
         /// </summary>
         public string[] SubMissionTexts { get; }
+        /// <summary>
+        ///     サブミッションごとの達成状況。SubMissionTextsと同じ並び順。
+        ///     シナリオパートの場合は null。
+        /// </summary>
+        public bool[] SubMissionCleared { get; }
 
         /// <summary> バトルパートかどうか。 </summary>
         public bool IsBattle => MainMissionText != null;
-
-        // TODO: ミッション達成状況を反映するためのプロパティを追加する。
     }
 }

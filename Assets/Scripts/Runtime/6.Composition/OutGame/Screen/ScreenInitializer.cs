@@ -108,6 +108,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
             ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
+            ServiceLocator.UnregisterInstance<HomeScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
 
@@ -263,16 +264,20 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             HomeScreenView homeScreenView = new HomeScreenView(homeRoot, _outGameUIEvent);
+            _homeScreenView = homeScreenView;
+            _getHomePointsUseCase = new GetHomePointsUseCase();
             StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
             PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent, null, null, null, null, null);
-            SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
+            SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent, _comboHexIcon);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
             ServiceLocator.RegisterInstance(battlePreparationScreen);
+            // HomeCharacterPreviewInitializer から取得できるように登録する。
+            ServiceLocator.RegisterInstance(homeScreenView);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,
@@ -371,6 +376,16 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             _screenController.ShowHome();
+            RefreshHomePointsAsync();
+        }
+
+        /// <summary>
+        ///     ホーム画面のトップバーに表示するポイントを最新の状態へ更新します。
+        /// </summary>
+        private async void RefreshHomePointsAsync()
+        {
+            HomePoints points = await _getHomePointsUseCase.ExecuteAsync();
+            _homeScreenView?.SetPoints(points.RebuildPoints, points.UnlockPoints);
         }
 
         /// <summary>
@@ -574,6 +589,10 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         [SerializeField]
         [Tooltip("画面表示に使用する UIDocument です。")]
         private UIDocument _uiDocument;
+
+        [SerializeField]
+        [Tooltip("発動コマンド表示に使う正六角形スプライト（Assets/Arts/UI/UI_hexagon.png）です。")]
+        private Sprite _comboHexIcon;
         [SerializeField, SourceDataAddress, Tooltip("画面遷移ルールデータの Addressables キーです。")]
         private string _screenRuleDataKey;
         [SerializeField, SceneNameSelector, Tooltip("設定画面から戻るタイトルシーン名です。")]
@@ -584,6 +603,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private ScreenViewRegistry _screenViewRegistry;
         private SceneTransitionController _sceneTransitionController;
         private ScreenRuleData _loadedScreenRuleData;
+        private HomeScreenView _homeScreenView;
+        private GetHomePointsUseCase _getHomePointsUseCase;
         private bool _isInitialized = false;
         private bool _isSubscribed;
         private bool _isLoadingSubscribed;

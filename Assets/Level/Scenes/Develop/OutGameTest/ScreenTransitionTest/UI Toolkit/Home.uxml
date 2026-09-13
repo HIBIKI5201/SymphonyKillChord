@@ -1,12 +1,36 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
     <ui:VisualElement name="VisualElement" class="screen-visible" style="position: relative; background-color: rgba(53, 65, 72, 0);">
-        <ui:VisualElement name="ButtonRoot" style="flex-grow: 1; justify-content: flex-start; align-items: flex-end; padding-right: 50px; padding-top: 50px; flex-direction: column; padding-bottom: 0; padding-left: 0;">
-            <ui:Button name="StageSelect" class="button home-image-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_StageSelect.png?fileID=2800000&amp;guid=37233648607f0f44abf0f98dde48c18c&amp;type=3#UI_SelectionFrame_StageSelect&quot;);"/>
-            <ui:Button name="SkillTree" class="button home-image-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_SkillTree.png?fileID=2800000&amp;guid=c91513483b1fc6644bfa4cc9af798ff3&amp;type=3#UI_SelectionFrame_SkillTree&quot;);"/>
-            <ui:Button name="SkillBuild" class="button home-image-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_SkillBuild.png?fileID=2800000&amp;guid=d99daf5b923835945ab24447149b51ef&amp;type=3#UI_SelectionFrame_SkillBuild&quot;);"/>
-            <ui:Button name="Setting" class="button home-image-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_Setting.png?fileID=2800000&amp;guid=4fe31bb96a700ce4096ca80e3cc44bb4&amp;type=3#UI_SelectionFrame_Setting&quot;);"/>
+        <ui:VisualElement name="BackgroundImage" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/BackGround_Home.jpg?fileID=21300000&amp;guid=05ed42cb1b0ef8542bdc9cfce91adc3c&amp;type=3#BackGround_Home&quot;); -unity-background-scale-mode: scale-and-crop;"/>
+        <ui:VisualElement name="CharacterContent" picking-mode="Ignore" style="position: absolute; left: 0; bottom: 0; width: 45%; height: 92%; align-items: flex-start; justify-content: flex-end;">
+            <ui:Image name="CharacterImage" picking-mode="Ignore" style="width: 100%; height: 100%; -unity-background-scale-mode: scale-to-fit;"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="TopBar" picking-mode="Position" class="home-top-bar">
+            <ui:Button name="OptionIcon" class="button home-option-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/UI/UI_btn_square.png?fileID=21300000&amp;guid=007fb3301cfef074a98bd9243797cad4&amp;type=3#UI_btn_square&quot;);">
+                <ui:Image name="OptionIconGlyph" picking-mode="Ignore" class="home-option-icon-glyph" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_OptionIocn.png?fileID=21300000&amp;guid=bd80c72ceb0921245907a0bb0ceb0cc1&amp;type=3#UI_OptionIocn&quot;);"/>
+            </ui:Button>
+            <ui:VisualElement name="PointsRow" class="home-points-row">
+                <ui:Label name="RebuildPointsLabel" text="改造P：0" class="home-point-label"/>
+                <ui:Label name="UnlockPointsLabel" text="解放P：0" class="home-point-label"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ButtonRoot" style="position: absolute; top: 0; right: 0; height: 100%; justify-content: flex-start; align-items: flex-end; padding-right: 90px; padding-top: 260px; flex-direction: column; padding-bottom: 0; padding-left: 0;">
+            <ui:VisualElement name="StageSelectWrapper" class="home-button-wrapper home-card-large" style="margin-top: 0;">
+                <ui:VisualElement name="StageSelectPanel" class="home-button-panel"/>
+                <ui:Button name="StageSelect" class="button home-image-button ui-se-window home-card-large" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_StageSelect.png?fileID=2800000&amp;guid=37233648607f0f44abf0f98dde48c18c&amp;type=3#UI_SelectionFrame_StageSelect&quot;);"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="SmallCardRow" style="flex-direction: row; margin-top: 50px;">
+                <ui:VisualElement name="SkillBuildWrapper" class="home-button-wrapper home-card-small" style="margin-top: 0; margin-right: 20px;">
+                    <ui:VisualElement name="SkillBuildPanel" class="home-button-panel"/>
+                    <ui:Button name="SkillBuild" class="button home-image-button ui-se-window home-card-small" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_SkillBuild.png?fileID=2800000&amp;guid=d99daf5b923835945ab24447149b51ef&amp;type=3#UI_SelectionFrame_SkillBuild&quot;);"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="SkillTreeWrapper" class="home-button-wrapper home-card-small" style="margin-top: 0;">
+                    <ui:VisualElement name="SkillTreePanel" class="home-button-panel"/>
+                    <ui:Button name="SkillTree" class="button home-image-button ui-se-window home-card-small" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_SkillTree.png?fileID=2800000&amp;guid=c91513483b1fc6644bfa4cc9af798ff3&amp;type=3#UI_SelectionFrame_SkillTree&quot;);"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -668,7 +668,7 @@
         "com.unity.nuget.newtonsoft-json": "3.2.1",
         "com.unity.nuget.mono-cecil": "1.11.6"
       },
-      "hash": "67899884605d0171684cbdd55a1efca06e9c41fb"
+      "hash": "4fdd112593ba7508b3fa2211f67bd8f97cefe1ee"
     },
     "symphonyframework": {
       "version": "https://github.com/HIBIKI5201/SymphonyFramework.git",

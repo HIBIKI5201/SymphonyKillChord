@@ -15,12 +15,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// </summary>
         /// <param name="viewModel"> 反映先の ViewModel。</param>
         /// <param name="missionPreviewProvider"> ミッションテキストプレビューの解決に使うプロバイダー。 </param>
+        /// <param name="subMissionAchievementResolver"> サブミッションの達成状況を解決するリゾルバー。 </param>
         public StageDetailPresenter(
             IStageDetailViewModel viewModel,
-            IMissionPreviewProvider missionPreviewProvider)
+            IMissionPreviewProvider missionPreviewProvider,
+            SubMissionAchievementResolver subMissionAchievementResolver)
         {
             _viewModel = viewModel ?? throw new System.ArgumentNullException(nameof(viewModel));
             _missionPreviewProvider = missionPreviewProvider;
+            _subMissionAchievementResolver = subMissionAchievementResolver;
         }
 
         /// <summary>
@@ -48,12 +51,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 _missionPreviewProvider.TryGetPreview(
                     battleDefinition.MissionId,
                     out mainMissionText,
-                    out evaluationDescriptions);
+                    out evaluationDescriptions,
+                    out _);
             }
 
             var subMissionTexts = evaluationDescriptions?.ToArray();
-
-            // TODO: セーブデータから、ミッション達成状況を取得して反映する。
+            var subMissionCleared = _subMissionAchievementResolver?.Resolve(node);
 
             var dto = new StageDetailDTO(
                 def.StageName,
@@ -61,12 +64,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 def.Reward.SkillBuildPoint,
                 def.Reward.SkillUnlockPoint,
                 mainMissionText,
-                subMissionTexts);
+                subMissionTexts,
+                subMissionCleared);
 
             _viewModel.Apply(in dto);
         }
 
         private readonly IStageDetailViewModel _viewModel;
         private readonly IMissionPreviewProvider _missionPreviewProvider;
+        private readonly SubMissionAchievementResolver _subMissionAchievementResolver;
     }
 }

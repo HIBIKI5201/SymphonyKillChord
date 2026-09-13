@@ -21,7 +21,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
                     $"[{nameof(SettingScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
 
             _returnToTitleButton = Require<Button>(rootElement, RETURN_TO_TITLE_BUTTON_NAME);
-            _soundCategoryButton = Require<Button>(rootElement, SOUND_CATEGORY_BUTTON_NAME);
+            _environmentSettingButton = Require<Button>(rootElement, ENVIRONMENT_SETTING_BUTTON_NAME);
             _cancelReturnToTitleButton = Require<Button>(rootElement, CANCEL_RETURN_BUTTON_NAME);
             _confirmReturnToTitleButton = Require<Button>(rootElement, CONFIRM_RETURN_BUTTON_NAME);
             _returnToTitleDialog = Require<VisualElement>(rootElement, RETURN_TO_TITLE_DIALOG_NAME);
@@ -67,8 +67,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
-            _backButton.ExcludeFromNavigation();
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
             _returnToTitleButton.clicked += ShowReturnToTitleDialog;
             _cancelReturnToTitleButton.clicked += HideReturnToTitleDialog;
@@ -103,8 +101,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
-        private const string BACKBUTTON_NAME = "BackButton";
-        private const string SOUND_CATEGORY_BUTTON_NAME = "SoundCategoryButton";
+        private const string BACKBUTTON_NAME = "CloseButton";
+        private const string ENVIRONMENT_SETTING_BUTTON_NAME = "EnvironmentSettingButton";
         private const string RETURN_TO_TITLE_BUTTON_NAME = "ReturnToTitleButton";
         private const string CANCEL_RETURN_BUTTON_NAME = "CancelReturnToTitleButton";
         private const string CONFIRM_RETURN_BUTTON_NAME = "ConfirmReturnToTitleButton";
@@ -115,7 +113,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         protected override VisualElement CancelTargetElement => _backButton;
 
         /// <inheritdoc />
-        protected override VisualElement InitialFocusElement => _soundCategoryButton;
+        protected override VisualElement InitialFocusElement => _environmentSettingButton;
 
         /// <summary> 設定画面表示中、フォーカスを画面内へ閉じ込める。 </summary>
         private readonly ModalNavigationScope _screenNavigationScope = new();
@@ -123,7 +121,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly ModalNavigationScope _dialogNavigationScope = new();
 
         private readonly Button _backButton;
-        private readonly Button _soundCategoryButton;
+        private readonly Button _environmentSettingButton;
         private readonly Button _returnToTitleButton;
         private readonly Button _cancelReturnToTitleButton;
         private readonly Button _confirmReturnToTitleButton;
