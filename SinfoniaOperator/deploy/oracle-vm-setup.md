@@ -8,7 +8,7 @@ Oracle Cloud InfrastructureでUbuntu 22.04 ARM64のAmpere A1 Computeを作成し
 
 ```bash
 sudo apt-get update
-sudo apt-get install --yes ca-certificates curl git
+sudo apt-get install --yes ca-certificates curl file git
 sudo useradd --system --create-home --shell /usr/sbin/nologin sinfonia
 sudo mkdir -p /opt/sinfonia-specsearch
 sudo chown -R sinfonia:sinfonia /opt/sinfonia-specsearch
