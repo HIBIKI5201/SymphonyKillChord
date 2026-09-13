@@ -64,8 +64,12 @@ namespace KillChord.Editor.AutoBuilder
                 return false;
             }
 
+            if (!GameDataVariantBuildSettings.Apply(variant))
+            {
+                return false;
+            }
+
             GameDataVariantEditorState.SetSelectedVariant(variant);
-            GameDataVariantBuildSettings.Apply(variant);
             Debug.Log($"[{nameof(AutoBuilder)}] Applied game data variant: {variant}.");
             return true;
         }
