@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Domain.OutGame.Scenario;
 using KillChord.Runtime.Utility.Identity;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
@@ -35,13 +35,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             IReadOnlyList<IScenarioEvent> events = new List<IScenarioEvent>
             {
                 new TextEvent("misa", "Hello", CreateTriggers(
-                    TextTimingTrigger.AtCharIndex(0, _fadeIn),
-                    TextTimingTrigger.AtKeyword("danger", backgroundRoom))),
+                    TextTimingTrigger.CreateAtCharIndex(0, _fadeIn),
+                    TextTimingTrigger.CreateAtKeyword("danger", backgroundRoom))),
                 new TextEvent("misa", "World danger", CreateTriggers(
-                    TextTimingTrigger.AtCharIndex(5, heroIdle),
-                    TextTimingTrigger.AtKeyword("danger", backgroundStreet))),
+                    TextTimingTrigger.CreateAtCharIndex(5, heroIdle),
+                    TextTimingTrigger.CreateAtKeyword("danger", backgroundStreet))),
                 new TextEvent("satoru", "Goodbye", CreateTriggers(
-                    TextTimingTrigger.AtCharIndex(1, _fadeOut))),
+                    TextTimingTrigger.CreateAtCharIndex(1, _fadeOut))),
             };
 
             return new ValueTask<ScenarioDefinition>(new ScenarioDefinition(events));

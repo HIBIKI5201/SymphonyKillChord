@@ -18,11 +18,17 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
             FadeMode mode = FadeMode.Alpha)
         {
             if (!float.IsFinite(start) || !float.IsFinite(end) || !float.IsFinite(duration))
+            {
                 throw new ArgumentException("FadeEvent values must be finite.");
+            }
             if (!Enum.IsDefined(typeof(FadeTarget), target))
+            {
                 throw new ArgumentOutOfRangeException(nameof(target), target, "FadeTarget is not defined.");
+            }
             if (!Enum.IsDefined(typeof(FadeMode), mode))
+            {
                 throw new ArgumentOutOfRangeException(nameof(mode), mode, "FadeMode is not defined.");
+            }
             if (mode == FadeMode.Black
                 && target is not FadeTarget.PortraitLeft
                 && target is not FadeTarget.PortraitCenter

@@ -363,7 +363,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 case AT_CHAR_INDEX_TRIGGER_TYPE:
                     {
                         int charIndex = ParseRequiredInt(GetAuthoringField(fields, 4), TRIGGER_INDEX_COLUMN, lineNo);
-                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                        return TextTimingTrigger.CreateAtCharIndex(charIndex, fireEvent);
                     }
                 case AT_KEYWORD_TRIGGER_TYPE:
                     {
@@ -372,7 +372,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {lineNo}: {TRIGGER_KEYWORD_COLUMN} is required.");
                         }
-                        return TextTimingTrigger.AtKeyword(keyword, fireEvent);
+                        return TextTimingTrigger.CreateAtKeyword(keyword, fireEvent);
                     }
                 case AT_SUFFIX_TRIGGER_TYPE:
                     {
@@ -381,12 +381,12 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                         {
                             throw new FormatException($"line {lineNo}: {TRIGGER_KEYWORD_COLUMN} is required.");
                         }
-                        return TextTimingTrigger.AtSuffix(suffix, fireEvent);
+                        return TextTimingTrigger.CreateAtSuffix(suffix, fireEvent);
                     }
                 case AT_TEXT_END_TRIGGER_TYPE:
                     {
                         int charIndex = string.IsNullOrEmpty(text) ? 0 : text.Length;
-                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                        return TextTimingTrigger.CreateAtCharIndex(charIndex, fireEvent);
                     }
                 default:
                     throw new FormatException($"line {lineNo}: unknown {TRIGGER_TYPE_COLUMN} '{triggerTypeRaw}'.");
@@ -694,7 +694,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                             throw new FormatException(
                                 $"line {lineNo}: {TRIGGER_INDEX_COLUMN} must be int for AtCharIndex.");
                         }
-                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                        return TextTimingTrigger.CreateAtCharIndex(charIndex, fireEvent);
                     }
                 case AT_KEYWORD_TRIGGER_TYPE:
                     {
@@ -704,7 +704,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                             throw new FormatException(
                                 $"line {lineNo}: {TRIGGER_KEYWORD_COLUMN} is required for AtKeyword.");
                         }
-                        return TextTimingTrigger.AtKeyword(keyword, fireEvent);
+                        return TextTimingTrigger.CreateAtKeyword(keyword, fireEvent);
                     }
                 case AT_SUFFIX_TRIGGER_TYPE:
                     {
@@ -714,12 +714,12 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                             throw new FormatException(
                                 $"line {lineNo}: {TRIGGER_KEYWORD_COLUMN} is required for AtSuffix.");
                         }
-                        return TextTimingTrigger.AtSuffix(suffix, fireEvent);
+                        return TextTimingTrigger.CreateAtSuffix(suffix, fireEvent);
                     }
                 case AT_TEXT_END_TRIGGER_TYPE:
                     {
                         int charIndex = string.IsNullOrEmpty(text) ? 0 : text.Length;
-                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                        return TextTimingTrigger.CreateAtCharIndex(charIndex, fireEvent);
                     }
                 default:
                     throw new FormatException($"line {lineNo}: unknown {TRIGGER_TYPE_COLUMN} '{triggerTypeRaw}'.");
