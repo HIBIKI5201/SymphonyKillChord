@@ -309,7 +309,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 607703632}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.04169964, y: 0.9329474, z: -0.11488438, w: 0.33863235}
   m_LocalPosition: {x: -0.448, y: 0.177, z: 0.536}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -418,7 +418,7 @@ MonoBehaviour:
     m_Value: 10
   OutputChannel: 1
   StandbyUpdate: 2
-  m_StreamingVersion: 0
+  m_StreamingVersion: 20241001
   m_LegacyPriority: 0
   Target:
     TrackingTarget: {fileID: 395609687}
@@ -517,7 +517,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -846,81 +846,81 @@ MonoBehaviour:
         y: 0.177
         z: 0.536
       TangentIn:
-        x: -0
-        y: -0
-        z: -0.112076096
+        x: 0
+        y: 0
+        z: -0.582941
       TangentOut:
         x: 0
         y: 0
-        z: 0.112076096
+        z: 0.582941
       Rotation:
         value:
-          x: -0.3011064
-          y: 0.6917256
-          z: 0.40051726
-          w: 0.520035
+          x: -0.3114191
+          y: 0.6612164
+          z: 0.43465635
+          w: 0.52619857
     - Position:
         x: 0.088
         y: 1.149
         z: 0.381
       TangentIn:
-        x: -0
-        y: -0
-        z: -0.265073
+        x: 0
+        y: 0
+        z: -0.2489323
       TangentOut:
         x: 0
         y: 0
-        z: 0.179011
+        z: 0.2489323
       Rotation:
         value:
-          x: -0.3146834
-          y: 0.82212657
-          z: 0.21228935
-          w: 0.42428228
+          x: -0.29487723
+          y: 0.77593625
+          z: 0.2453872
+          w: 0.500755
     - Position:
         x: 0.351
         y: 1.26
         z: -0.043
       TangentIn:
-        x: -0
-        y: -0
-        z: -0.15542638
+        x: 0
+        y: 0
+        z: -0.17344719
       TangentOut:
         x: 0
         y: 0
-        z: 0.1779697
+        z: 0.17344719
       Rotation:
         value:
-          x: -0.05714119
-          y: 0.9886232
-          z: 0.13903534
-          w: 0.0053090127
+          x: -0.07315938
+          y: 0.9953874
+          z: 0.027017606
+          w: -0.055871487
     - Position:
         x: 0
         y: 1.43
         z: -0.588
       TangentIn:
-        x: -0
-        y: -0
-        z: -0.06701686
+        x: 0
+        y: 0
+        z: -0
       TangentOut:
         x: 0
         y: 0
-        z: 0.06701686
+        z: 0
       Rotation:
         value:
-          x: 0.03608871
-          y: 0.9514787
-          z: 0.122686006
-          w: -0.27988225
+          x: 0.54301685
+          y: 0.0000000045018234
+          z: -0.14270593
+          w: 0.8275069
     m_MetaData:
-    - Mode: 0
+    - Mode: 2
       Tension: 0.5
-    - Mode: 0
+    - Mode: 2
       Tension: 0.5
-    - Mode: 0
+    - Mode: 2
       Tension: 0.5
-    - Mode: 0
+    - Mode: 2
       Tension: 0.5
     m_Closed: 0
     m_IntData:
@@ -1055,7 +1055,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 100
@@ -1160,7 +1160,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -1297,7 +1297,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
