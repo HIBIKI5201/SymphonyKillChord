@@ -10,6 +10,7 @@ jobs:
 
     permissions:
       contents: write  # ブランチ作成に必要な権限。
+      pull-requests: write  # develop向けDraft PRの作成に必要な権限。
 
     steps:
       - name: Extract original branch name
@@ -88,6 +89,7 @@ jobs:
 
       # 新しい master ブランチを作成。
       - name: Create new branch
+        id: create-branch
         uses: actions/github-script@v7
         env:
           TARGET_BRANCH: ${{ env.TARGET_BRANCH }}
@@ -105,10 +107,78 @@ jobs:
                 sha: sha,
               });
               console.log("Created branch: " + target);
+              core.setOutput("created", "true");
             } catch (e) {
               if (e.status === 422) {
                 console.log("Branch already exists: " + target);
+                core.setOutput("created", "false");
               } else {
                 throw e;
               }
+            }
+
+      # 作成したmasterブランチからdevelopへDraft PRを作成。
+      - name: Create draft pull request to develop
+        if: steps.create-branch.outputs.created == 'true'
+        uses: actions/github-script@v7
+        env:
+          TARGET_BRANCH: ${{ env.TARGET_BRANCH }}
+        with:
+          script: |
+            const head = process.env.TARGET_BRANCH;
+            const base = "develop";
+            const repo = context.repo;
+
+            const existingPullRequests = await github.rest.pulls.list({
+              owner: repo.owner,
+              repo: repo.repo,
+              head: `${repo.owner}:${head}`,
+              base: base,
+              state: "open",
+            });
+
+            if (existingPullRequests.data.length > 0) {
+              console.log(`Pull request already exists: ${existingPullRequests.data[0].html_url}`);
+              return;
+            }
+
+            const body = `## 必須チェック（未チェックのPRは提出しないでください）
+            - [ ] コンパイルエラーが無いことを確認した
+            - [ ] 変更が関係しうるシーンでPlayModeを最低1回通した
+
+            ## 概要
+            ${head} の変更を develop に取り込むための自動生成Draft PRです。
+
+            ## 原因
+            なし。
+
+            ## 対処
+            feature配下の作業ブランチを同階層のmasterへ集約し、運用規定に従ってdevelopへ取り込みます。
+
+            ## 確認済みの内容
+            - GitHub ActionsによりDraft PRが自動生成されたこと。
+
+            ## 未確認・残論点
+            - コンパイルおよびPlayModeでの動作確認は未実施です。
+
+            ご確認いただけますと幸いです。`;
+
+            try {
+              const pullRequest = await github.rest.pulls.create({
+                owner: repo.owner,
+                repo: repo.repo,
+                title: `${head} → develop`,
+                head: head,
+                base: base,
+                body: body,
+                draft: true,
+              });
+              console.log(`Created draft pull request: ${pullRequest.data.html_url}`);
+            } catch (e) {
+              if (e.status === 422) {
+                console.log(`Draft pull request was not created: ${e.message}`);
+                return;
+              }
+
+              throw e;
             }
