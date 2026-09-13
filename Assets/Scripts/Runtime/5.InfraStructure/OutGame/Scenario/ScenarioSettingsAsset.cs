@@ -71,8 +71,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         {
             ScenarioLayer.Background,
             ScenarioLayer.Portrait,
-            ScenarioLayer.Text,
             ScenarioLayer.Effect,
+            ScenarioLayer.Text,
         };
     }
 }
