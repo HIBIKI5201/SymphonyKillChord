@@ -133,7 +133,7 @@ namespace KillChord.Demo
                 _isExitPolicyOwner = ServiceLocator.RegisterInstance<IStageResultExitPolicy>(_exitPolicy);
                 SceneManager.sceneLoaded += HandleSceneLoaded;
                 _isSceneLoadedSubscribed = true;
-                TryResetSaveDataOnEndScene(SceneManager.GetActiveScene());
+                HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
             }
             catch (OperationCanceledException)
             {
@@ -290,14 +290,23 @@ namespace KillChord.Demo
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
-            if (_config != null
-                && string.Equals(scene.name, _config.EndSceneName, StringComparison.Ordinal))
+            if (_config == null)
+            {
+                return;
+            }
+
+            if (string.Equals(scene.name, _config.EndSceneName, StringComparison.Ordinal))
             {
                 _sessionState.End();
                 _timerView?.Refresh(false);
+                TryResetSaveDataOnEndScene(scene);
+                return;
             }
 
-            TryResetSaveDataOnEndScene(scene);
+            if (string.Equals(scene.name, _config.TitleSceneName, StringComparison.Ordinal))
+            {
+                ResetSessionOnTitleEntry();
+            }
         }
 
         /// <summary>
@@ -312,6 +321,29 @@ namespace KillChord.Demo
             }
 
             _wasOutGameActive = isOutGameActive;
+        }
+
+        /// <summary>
+        ///     タイトルへ戻った時点で、次のプレイに持ち越してはいけない体験版状態を初期化します。
+        /// </summary>
+        private void ResetSessionOnTitleEntry()
+        {
+            _sessionState.Reset();
+            _timerView?.Refresh(false);
+
+            if (_isOutGameUiEventSubscribed && _outGameUIEvent != null)
+            {
+                _outGameUIEvent.OnHomeTutorialStarted -= HandleHomeTutorialStarted;
+            }
+
+            _outGameUIEvent = null;
+            _isOutGameUiEventSubscribed = false;
+            _isHomeTutorialStartedNotified = false;
+            _isTransitioningToEndScene = false;
+            _isFinalStageConfigured = false;
+            _isForcedSortiePrepared = false;
+            _wasOutGameActive = false;
+            _isSaveDataReset = false;
         }
 
         /// <summary>

@@ -15,3 +15,4 @@ MonoBehaviour:
   _homeTimeLimitSeconds: 180
   _overallTimeLimitSeconds: 480
   _endSceneName: DemoEnd
+  _titleSceneName: Title

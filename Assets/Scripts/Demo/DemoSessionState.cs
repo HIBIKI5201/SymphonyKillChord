@@ -61,6 +61,16 @@ namespace KillChord.Demo
             IsStarted = false;
         }
 
+        /// <summary> 新しい体験版セッションを開始できる初期状態へ戻します。 </summary>
+        public void Reset()
+        {
+            IsStarted = false;
+            IsHomeTimeExpired = false;
+            IsOverallTimeExpired = false;
+            HomeElapsedSeconds = 0.0f;
+            OverallElapsedSeconds = 0.0f;
+        }
+
         /// <summary> ホームタイマーを初期状態へ戻します。 </summary>
         public void ResetHomeTimer()
         {

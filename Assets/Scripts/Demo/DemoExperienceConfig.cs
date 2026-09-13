@@ -18,6 +18,9 @@ namespace KillChord.Demo
         /// <summary> 体験版終了シーン名です。 </summary>
         public string EndSceneName => _endSceneName;
 
+        /// <summary> 体験版セッションをリセットするタイトルシーン名です。 </summary>
+        public string TitleSceneName => _titleSceneName;
+
         [SerializeField, Min(0.0f), Tooltip("ホームへ入ってから強制出撃するまでの秒数です。ホームへ戻るたびにリセットされます。")]
         private float _homeTimeLimitSeconds = 180.0f;
 
@@ -26,5 +29,8 @@ namespace KillChord.Demo
 
         [SerializeField, SceneNameSelector, Tooltip("演出と案内を表示する体験版終了専用シーンです。")]
         private string _endSceneName = "DemoEnd";
+
+        [SerializeField, SceneNameSelector, Tooltip("体験版セッションをリセットするタイトルシーンです。")]
+        private string _titleSceneName = "Title";
     }
 }
