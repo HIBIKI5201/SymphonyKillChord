@@ -24,7 +24,7 @@ namespace KillChord.Editor.AutoBuilder
             string selectedProfiles = GetCliArg("-selectedProfiles");
             if (!TryApplyGameDataVariant(gameDataVariant))
             {
-                AutoBuildExecuter.ExitIfBatchMode(isBatchMode: true, exitCode: 1);
+                AutoBuildExecuter.ExitIfBatchMode(forceBatchMode: true, exitCode: 1);
                 return;
             }
 
