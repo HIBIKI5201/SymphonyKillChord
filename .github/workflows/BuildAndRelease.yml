@@ -163,7 +163,9 @@ jobs:
           CLEAN_BUILD: ${{ github.event.inputs.clean_build }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -272,7 +274,7 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
@@ -287,7 +289,9 @@ jobs:
         id: determine_mode
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -339,14 +343,16 @@ jobs:
           }
           $TargetProfiles = $SelectedProfiles -join ","
           "SELECTED_PROFILES=$TargetProfiles" | Add-Content -Path $env:GITHUB_ENV
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
       - name: ビルド出力先パスの取得
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -393,14 +399,16 @@ jobs:
           "UNITY_BUILD_OUTPUT_DIR=$ResolvedOutputDir" | Add-Content -Path $env:GITHUB_ENV
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
       - name: Unity実行ファイルの解決と検証
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -499,14 +507,16 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
       - name: AAPT2 override の設定
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -523,7 +533,7 @@ jobs:
             exit 1
           }
 
-          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
+          $Aapt2Name = if ($env:RUNNER_OS -eq "Windows") { "aapt2.exe" } else { "aapt2" }
           $Aapt2 = $null
 
           # UNITY_EXE_PATH からバンドルを遡り、Unity.app の親ディレクトリ（バージョンルート）を特定する
@@ -550,7 +560,7 @@ jobs:
 
           Write-Host "算出したバージョンルート: $VersionRoot"
 
-          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
+          $Aapt2Name = if ($env:RUNNER_OS -eq "Windows") { "aapt2.exe" } else { "aapt2" }
 
           # VersionRoot 全体（全プラットフォームの PlaybackEngines を含む）を再帰検索すると、
           # 外部/低速ストレージに配置されたEditorではファイル数が膨大なため極端に遅くなることがある。
@@ -568,7 +578,6 @@ jobs:
             $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -Force -ErrorAction SilentlyContinue |
                       Select-Object -First 1
           }
-
           if (-not $Aapt2) {
             Write-Host "::error::$Aapt2Name が見つかりません: $VersionRoot"
             exit 1
@@ -591,19 +600,25 @@ jobs:
           } else {
             $Content += $OverrideLine
           }
-          Set-Content -Path $GradleTemplatePath -Value $Content
+          [System.IO.File]::WriteAllLines(
+            $GradleTemplatePath,
+            [string[]]$Content,
+            [System.Text.UTF8Encoding]::new($false)
+          )
 
           Write-Host "設定した aapt2 パス: $($Aapt2.FullName)"
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
       - name: ビルド出力先の空確認とディスク残り容量の検証
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -652,14 +667,16 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
       - name: 環境情報の表示
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -690,12 +707,16 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
       - name: Unityライセンス状態の事前確認
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -735,14 +756,16 @@ jobs:
           }
 
           Write-Host "Unityライセンス: 有効"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
       - name: パッケージのダウンロードとインポート
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -842,7 +865,7 @@ jobs:
           $ProjectRoot = "${{ github.workspace }}"
           $Sep         = [System.IO.Path]::DirectorySeparatorChar
           # Windows の 260 文字制限を回避する接頭辞。他OSでは不要。
-          $LongProjectRoot = if ($IsWindows) { "\\?\" + $ProjectRoot.TrimEnd('\') } else { $ProjectRoot.TrimEnd('/') }
+          $LongProjectRoot = if ($env:RUNNER_OS -eq "Windows") { "\\?\" + $ProjectRoot.TrimEnd('\') } else { $ProjectRoot.TrimEnd('/') }
           $Packages       = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
           $TotalPlaced    = 0
           $FailedPackages = @()
@@ -928,14 +951,16 @@ jobs:
           Write-Host ""
           Write-Host "[INFO]: すべてのパッケージがインストールされました。配置された総アセットファイル数: $TotalPlaced"
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
       - name: NuGetパッケージの復元
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -954,7 +979,7 @@ jobs:
           }
           Write-Host "[INFO]: NuGet パッケージが復元されました。"
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
@@ -962,7 +987,9 @@ jobs:
         id: unity_build
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1029,7 +1056,7 @@ jobs:
             -NoNewWindow
 
           # ProcessorAffinity は Windows 専用API。macOS/Linux ではスキップする。
-          if ($IsWindows) {
+          if ($env:RUNNER_OS -eq "Windows") {
             try {
               $UnityProcess.ProcessorAffinity = $AffinityMask
               Write-Host "[INFO]: Unity プロセッサアフィニティを設定しました。"
@@ -1072,7 +1099,7 @@ jobs:
           # 成果物すらリリースできなくなる。判定はexit_codeを見た後続ステップに委ねるため、
           # ここでは常に0を返す。
           exit 0
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
@@ -1089,7 +1116,9 @@ jobs:
         if: steps.unity_build.outputs.exit_code != '124'
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1138,7 +1167,7 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
         
 # ==================================================================================================
 
@@ -1149,7 +1178,9 @@ jobs:
           VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1265,7 +1296,7 @@ jobs:
           "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
           Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
         
 # ==================================================================================================
 
@@ -1274,7 +1305,9 @@ jobs:
         if: steps.unity_build.outputs.exit_code != '124'
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1289,7 +1322,7 @@ jobs:
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[INFO]: タグ名を生成しました: $TagName"
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
         
 # ==================================================================================================
 
@@ -1299,7 +1332,9 @@ jobs:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1350,7 +1385,7 @@ jobs:
             }
           }
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
         
 # ==================================================================================================
 
@@ -1396,7 +1431,9 @@ jobs:
           VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1458,7 +1495,7 @@ jobs:
               exit 1
           }
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
         
 # ==================================================================================================
 
@@ -1470,7 +1507,9 @@ jobs:
           UNITY_LOG_FILE: ${{ steps.unity_build.outputs.log_file }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1502,7 +1541,7 @@ jobs:
             Write-Host "::warning::Unity ビルドが正常終了しなかったため（終了コード: $env:UNITY_EXIT_CODE）、ワークフローを失敗として記録します。成功したプロファイルの成果物は既にリリースへアップロード済みです。"
             exit 1
           }
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
@@ -1510,7 +1549,9 @@ jobs:
         if: always()
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
           Write-Host "::group::トラブルシューティング用ログの集約"
           Write-Host "問題が発生した場合の切り分け用に、各ステップのWARN/ERRORをここへ集約表示します。"
@@ -1528,7 +1569,7 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
 
 # ==================================================================================================
 
@@ -1538,7 +1579,9 @@ jobs:
           CLEAN_BUILD: ${{ github.event.inputs.clean_build }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1607,7 +1650,7 @@ jobs:
 
           # 残り容量を記録しておくと、次回枯渇した際の切り分けが早くなる。
           try {
-            if ($IsWindows) {
+            if ($env:RUNNER_OS -eq "Windows") {
               $Drive = (Get-Item $Workspace).PSDrive
               Write-Host "[INFO]: ドライブ $($Drive.Name): 残り $([Math]::Round($Drive.Free / 1GB, 2)) GB"
             } else {
@@ -1618,4 +1661,4 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
