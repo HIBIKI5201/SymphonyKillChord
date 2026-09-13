@@ -17,6 +17,14 @@ on:
         options:
           - Development
           - Master
+      build_variant:
+        description: 'ゲームデータ種別'
+        required: true
+        default: 'demo'
+        type: choice
+        options:
+          - demo
+          - release
       profile_android:
         description: 'Android'
         type: boolean
@@ -127,7 +135,7 @@ jobs:
   build-and-release:
     needs: check
     if: needs.check.outputs.should_run == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
-    runs-on: self-hosted
+    runs-on: [self-hosted, windows]
     concurrency:
       group: unity-self-hosted-build
       cancel-in-progress: false
@@ -144,8 +152,10 @@ jobs:
       # 未設定の場合は .github/unity-paths.json から OS 別に自動解決される。
       UNITY_EXE_PATH: ${{ vars.UNITY_EXE_PATH }}
       UNITY_BUILD_EXECUTE_METHOD: ${{ vars.UNITY_BUILD_EXECUTE_METHOD }}
-      UNITY_BUILD_TIMEOUT_SEC: ${{ vars.UNITY_BUILD_TIMEOUT_SEC }}
+      UNITY_PROFILE_BUILD_TIMEOUT_SEC: 7200
+      AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
       BUILD_MODE: ''
+      BUILD_VARIANT: ''
 
     steps:
       - name: クローン先プロジェクトフォルダおよびディスク事前クリーンアップ
@@ -153,7 +163,9 @@ jobs:
           CLEAN_BUILD: ${{ github.event.inputs.clean_build }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -262,7 +274,7 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
@@ -277,7 +289,9 @@ jobs:
         id: determine_mode
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -298,11 +312,24 @@ jobs:
              Write-Host "[ERROR]: サポートされていないベースブランチです: $BaseRef"
              exit 1
           }
+
+          $BuildVariant = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            "${{ inputs.build_variant }}"
+          } else {
+            $env:AUTO_BUILD_VARIANT
+          }
+          $BuildVariant = ([string]$BuildVariant).Trim().ToLowerInvariant()
+          if ($BuildVariant -notin @("demo", "release")) {
+            Write-Host "[ERROR]: ゲームデータ種別には demo または release を指定してください。現在値: '$BuildVariant'"
+            exit 1
+          }
  
-          Write-Host "ベースブランチ: $BaseRef, タグの接頭辞: $TagPrefix"
+          Write-Host "ベースブランチ: $BaseRef, ビルド種別: $BuildVariant, タグの接頭辞: $TagPrefix"
           "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
+          "BUILD_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
           "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
+          "build_variant=$BuildVariant" | Add-Content -Path $env:GITHUB_OUTPUT
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
 
           # workflow_dispatch以外（PRマージ起動時）はこの入力自体が存在せず空文字になり、
@@ -316,14 +343,16 @@ jobs:
           }
           $TargetProfiles = $SelectedProfiles -join ","
           "SELECTED_PROFILES=$TargetProfiles" | Add-Content -Path $env:GITHUB_ENV
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
       - name: ビルド出力先パスの取得
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -337,9 +366,19 @@ jobs:
             exit 1
           }
 
+          # AutoBuilderSettings はゲームデータ種別×ビルドモードごとに出力先パスを持つ（例: DemoMasterPath）。
+          switch ($env:BUILD_VARIANT) {
+            "demo"    { $VariantKey = "Demo" }
+            "release" { $VariantKey = "Release" }
+            default {
+              Write-Host "::error::未知の BUILD_VARIANT です: $env:BUILD_VARIANT"
+              exit 1
+            }
+          }
+
           switch ($env:BUILD_MODE) {
-            "Master"      { $TargetKey = "MasterPath" }
-            "Development" { $TargetKey = "DevelopPath" }
+            "Master"      { $TargetKey = "${VariantKey}MasterPath" }
+            "Development" { $TargetKey = "${VariantKey}DevelopPath" }
             default {
               Write-Host "::error::未知の BUILD_MODE です: $env:BUILD_MODE"
               exit 1
@@ -370,14 +409,16 @@ jobs:
           "UNITY_BUILD_OUTPUT_DIR=$ResolvedOutputDir" | Add-Content -Path $env:GITHUB_ENV
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
       - name: Unity実行ファイルの解決と検証
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -476,14 +517,16 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
       - name: AAPT2 override の設定
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -500,7 +543,7 @@ jobs:
             exit 1
           }
 
-          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
+          $Aapt2Name = if ($env:RUNNER_OS -eq "Windows") { "aapt2.exe" } else { "aapt2" }
           $Aapt2 = $null
 
           # UNITY_EXE_PATH からバンドルを遡り、Unity.app の親ディレクトリ（バージョンルート）を特定する
@@ -527,7 +570,7 @@ jobs:
 
           Write-Host "算出したバージョンルート: $VersionRoot"
 
-          $Aapt2Name = if ($IsWindows) { "aapt2.exe" } else { "aapt2" }
+          $Aapt2Name = if ($env:RUNNER_OS -eq "Windows") { "aapt2.exe" } else { "aapt2" }
 
           # VersionRoot 全体（全プラットフォームの PlaybackEngines を含む）を再帰検索すると、
           # 外部/低速ストレージに配置されたEditorではファイル数が膨大なため極端に遅くなることがある。
@@ -545,7 +588,6 @@ jobs:
             $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -Force -ErrorAction SilentlyContinue |
                       Select-Object -First 1
           }
-
           if (-not $Aapt2) {
             Write-Host "::error::$Aapt2Name が見つかりません: $VersionRoot"
             exit 1
@@ -568,19 +610,25 @@ jobs:
           } else {
             $Content += $OverrideLine
           }
-          Set-Content -Path $GradleTemplatePath -Value $Content
+          [System.IO.File]::WriteAllLines(
+            $GradleTemplatePath,
+            [string[]]$Content,
+            [System.Text.UTF8Encoding]::new($false)
+          )
 
           Write-Host "設定した aapt2 パス: $($Aapt2.FullName)"
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
       - name: ビルド出力先の空確認とディスク残り容量の検証
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -629,14 +677,16 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
       - name: 環境情報の表示
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -654,7 +704,7 @@ jobs:
           Write-Host "ビルド出力ディレクトリ: $env:UNITY_BUILD_OUTPUT_DIR"
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
           Write-Host "Unity実行メソッド: $(if ($env:UNITY_BUILD_EXECUTE_METHOD) { $env:UNITY_BUILD_EXECUTE_METHOD } else { '未設定 (デフォルト使用)' })"
-          Write-Host "Unityビルドタイムアウト: $(if ($env:UNITY_BUILD_TIMEOUT_SEC) { "$env:UNITY_BUILD_TIMEOUT_SEC 秒" } else { '未設定 (デフォルト使用)' })"
+          Write-Host "プロファイルごとのUnityビルドタイムアウト: $env:UNITY_PROFILE_BUILD_TIMEOUT_SEC 秒"
           Write-Host "対象プロファイル: $(if ($env:SELECTED_PROFILES) { $env:SELECTED_PROFILES } else { '指定なし（全件）' })"
           Write-Host ""
 
@@ -667,12 +717,16 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
       - name: Unityライセンス状態の事前確認
         run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -712,14 +766,16 @@ jobs:
           }
 
           Write-Host "Unityライセンス: 有効"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
       - name: パッケージのダウンロードとインポート
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -819,7 +875,7 @@ jobs:
           $ProjectRoot = "${{ github.workspace }}"
           $Sep         = [System.IO.Path]::DirectorySeparatorChar
           # Windows の 260 文字制限を回避する接頭辞。他OSでは不要。
-          $LongProjectRoot = if ($IsWindows) { "\\?\" + $ProjectRoot.TrimEnd('\') } else { $ProjectRoot.TrimEnd('/') }
+          $LongProjectRoot = if ($env:RUNNER_OS -eq "Windows") { "\\?\" + $ProjectRoot.TrimEnd('\') } else { $ProjectRoot.TrimEnd('/') }
           $Packages       = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
           $TotalPlaced    = 0
           $FailedPackages = @()
@@ -905,14 +961,16 @@ jobs:
           Write-Host ""
           Write-Host "[INFO]: すべてのパッケージがインストールされました。配置された総アセットファイル数: $TotalPlaced"
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
       - name: NuGetパッケージの復元
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -931,7 +989,7 @@ jobs:
           }
           Write-Host "[INFO]: NuGet パッケージが復元されました。"
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
@@ -939,14 +997,15 @@ jobs:
         id: unity_build
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
           }
 
-          Write-Host "::group::Unity ビルドプロセスの開始"
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ビルドのため Unity を起動中..."
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] プロファイル単位のUnityビルドを開始します。"
 
           if ($env:UNITY_BUILD_EXECUTE_METHOD) {
             $ExecuteMethod = $env:UNITY_BUILD_EXECUTE_METHOD
@@ -956,21 +1015,68 @@ jobs:
             Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_EXECUTE_METHOD' が未設定です。デフォルト値 '$ExecuteMethod' を使用します。"
           }
 
-          if ($env:UNITY_BUILD_TIMEOUT_SEC) {
-            $TimeoutSec = [int]$env:UNITY_BUILD_TIMEOUT_SEC
-            Write-Host "[INFO]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' の値を使用します: $TimeoutSec 秒"
-          } else {
-            $TimeoutSec = 21600
-            Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_TIMEOUT_SEC' が未設定です。デフォルト値 '$TimeoutSec 秒' を使用します。"
+          $ProfileTimeoutSec = [int]$env:UNITY_PROFILE_BUILD_TIMEOUT_SEC
+          $RunTimestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+          $LogFilePattern = "unity_build_${RunTimestamp}_*.log"
+          "log_file=$LogFilePattern" | Add-Content -Path $env:GITHUB_OUTPUT
+          "exit_code=1" | Add-Content -Path $env:GITHUB_OUTPUT
+          "timed_out_profiles=" | Add-Content -Path $env:GITHUB_OUTPUT
+
+          $ProfileListFile = Join-Path $env:RUNNER_TEMP "unity_build_profiles_$RunTimestamp.txt"
+          $DiscoveryLogFile = "unity_build_${RunTimestamp}_profile-discovery.log"
+          $DiscoveryArgs = @(
+            "-batchmode",
+            "-projectPath", "${{ github.workspace }}",
+            "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.ExportProfileNamesFromCli",
+            "-buildMode", "$env:BUILD_MODE",
+            "-gameDataVariant", "$env:BUILD_VARIANT",
+            "-profileListFile", "$ProfileListFile",
+            "-logFile", "$DiscoveryLogFile"
+          )
+          if ($env:SELECTED_PROFILES) {
+            $DiscoveryArgs += @("-selectedProfiles", "$env:SELECTED_PROFILES")
           }
 
-          $LogFileName = "unity_build_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
-          "log_file=$LogFileName" | Add-Content -Path $env:GITHUB_OUTPUT
+          Write-Host "::group::ビルドプロファイルの自動検出"
+          $DiscoveryProcess = Start-Process `
+            -FilePath "$env:UNITY_EXE_PATH" `
+            -ArgumentList $DiscoveryArgs `
+            -PassThru `
+            -NoNewWindow
+
+          if (-not $DiscoveryProcess.WaitForExit($ProfileTimeoutSec * 1000)) {
+            Write-Host "[ERROR]: ビルドプロファイルの検出が $ProfileTimeoutSec 秒後にタイムアウトしました。"
+            try {
+              $DiscoveryProcess.Kill()
+              $DiscoveryProcess.WaitForExit()
+            } catch {
+              Write-Host "[WARN]: プロファイル検出用Unityプロセスの終了処理に失敗しました: $_"
+            }
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          if ($DiscoveryProcess.ExitCode -ne 0 -or -not (Test-Path $ProfileListFile)) {
+            Write-Host "[ERROR]: ビルドプロファイルを検出できませんでした（Unity終了コード: $($DiscoveryProcess.ExitCode)）。"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          $TargetProfiles = @(Get-Content -Path $ProfileListFile | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+          if ($TargetProfiles.Count -eq 0) {
+            Write-Host "[ERROR]: ビルド対象プロファイルが0件です。"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          Write-Host "[INFO]: $($TargetProfiles.Count)件のビルドプロファイルを検出しました: $($TargetProfiles -join ', ')"
+          Write-Host "::endgroup::"
 
           Write-Host "実行メソッド: $ExecuteMethod"
-          Write-Host "ログ出力先: $LogFileName"
+          Write-Host "対象プロファイル: $($TargetProfiles -join ', ')"
+          Write-Host "ログ出力先: $LogFilePattern"
           Write-Host ""
-          Write-Host "タイムアウト: $TimeoutSec 秒 ($([Math]::Round($TimeoutSec / 60, 1)) 分)"
+          Write-Host "プロファイルごとのタイムアウト: $ProfileTimeoutSec 秒 ($([Math]::Round($ProfileTimeoutSec / 60, 1)) 分)"
           Write-Host ""
 
           # CPUコア数の設定
@@ -985,68 +1091,117 @@ jobs:
           Write-Host "Unity CPU アフィニティマスク: 0x$('{0:X}' -f $AffinityMask)"
           Write-Host ""
 
-          $UnityArgs = @(
-            "-batchmode",
-            "-projectPath", "${{ github.workspace }}",
-            "-executeMethod", "$ExecuteMethod",
-            "-buildMode", "$env:BUILD_MODE",
-            "-logFile", "$LogFileName"
-          )
-          if ($env:SELECTED_PROFILES) {
-            $UnityArgs += @("-selectedProfiles", "$env:SELECTED_PROFILES")
-          }
+          $OverallExitCode = 0
+          $FailedProfiles = @()
+          $TimedOutProfiles = @()
 
-          $UnityProcess = Start-Process `
-            -FilePath "$env:UNITY_EXE_PATH" `
-            -ArgumentList $UnityArgs `
-            -PassThru `
-            -NoNewWindow
+          function Remove-TimedOutProfileOutput($ProfileName) {
+            $CleanOutputDir = $env:UNITY_BUILD_OUTPUT_DIR.Trim('"').Trim("'")
+            $OutputRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
+            $OutputRootPrefix = $OutputRoot.TrimEnd(
+              [System.IO.Path]::DirectorySeparatorChar,
+              [System.IO.Path]::AltDirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
 
-          # ProcessorAffinity は Windows 専用API。macOS/Linux ではスキップする。
-          if ($IsWindows) {
-            try {
-              $UnityProcess.ProcessorAffinity = $AffinityMask
-              Write-Host "[INFO]: Unity プロセッサアフィニティを設定しました。"
-            } catch {
-              Write-Host "[WARN]: Unity プロセッサアフィニティの設定に失敗しました。ビルドは続行します: $_"
+            $Targets = @(
+              (Join-Path $OutputRoot $ProfileName),
+              (Join-Path $OutputRoot "$ProfileName.zip")
+            )
+
+            foreach ($Target in $Targets) {
+              $ResolvedTarget = [System.IO.Path]::GetFullPath($Target)
+              if (-not $ResolvedTarget.StartsWith($OutputRootPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+                Write-Host "[WARN]: 出力ルート外を指すためタイムアウト成果物の削除をスキップします: $ResolvedTarget"
+                continue
+              }
+
+              if (Test-Path -LiteralPath $ResolvedTarget) {
+                Remove-Item -LiteralPath $ResolvedTarget -Recurse -Force -ErrorAction Stop
+                Write-Host "[INFO]: タイムアウトしたプロファイルの不完全な成果物を削除しました: $ResolvedTarget"
+              }
             }
-          } else {
-            Write-Host "[INFO]: $($PSVersionTable.Platform) ではプロセッサアフィニティの指定はサポート外のためスキップします。"
           }
 
-          if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
-            Write-Host ""
-            Write-Host "[ERROR]: Unity ビルドが $TimeoutSec 秒後にタイムアウトしました。"
-            $UnityProcess.Kill()
-            "exit_code=124" | Add-Content -Path $env:GITHUB_OUTPUT
+          foreach ($ProfileName in $TargetProfiles) {
+            $SafeProfileName = $ProfileName -replace '[^A-Za-z0-9._-]', '_'
+            $LogFileName = "unity_build_${RunTimestamp}_${SafeProfileName}.log"
+            Write-Host "::group::Unityビルド: $ProfileName"
+            Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] $ProfileName のビルドを開始します。"
+
+            $UnityArgs = @(
+              "-batchmode",
+              "-projectPath", "${{ github.workspace }}",
+              "-executeMethod", "$ExecuteMethod",
+              "-buildMode", "$env:BUILD_MODE",
+              "-selectedProfiles", "$ProfileName",
+              "-logFile", "$LogFileName"
+            )
+            if ($env:BUILD_VARIANT) {
+              $UnityArgs += @("-gameDataVariant", "$env:BUILD_VARIANT")
+            }
+
+            try {
+              $UnityProcess = Start-Process `
+                -FilePath "$env:UNITY_EXE_PATH" `
+                -ArgumentList $UnityArgs `
+                -PassThru `
+                -NoNewWindow
+
+              # ProcessorAffinity は Windows 専用API。macOS/Linux ではスキップする。
+              if ($env:RUNNER_OS -eq "Windows") {
+                try {
+                  $UnityProcess.ProcessorAffinity = $AffinityMask
+                  Write-Host "[INFO]: Unity プロセッサアフィニティを設定しました。"
+                } catch {
+                  Write-Host "[WARN]: Unity プロセッサアフィニティの設定に失敗しました。ビルドは続行します: $_"
+                }
+              }
+
+              if (-not $UnityProcess.WaitForExit($ProfileTimeoutSec * 1000)) {
+                Write-Host "[ERROR]: $ProfileName のビルドが $ProfileTimeoutSec 秒後にタイムアウトしました。"
+                try {
+                  $UnityProcess.Kill()
+                  $UnityProcess.WaitForExit()
+                } catch {
+                  Write-Host "[WARN]: タイムアウトした $ProfileName のUnityプロセス終了処理に失敗しました: $_"
+                }
+                try {
+                  Remove-TimedOutProfileOutput $ProfileName
+                } catch {
+                  Write-Host "[WARN]: タイムアウトした $ProfileName の不完全な成果物を削除できませんでした: $_"
+                }
+                $TimedOutProfiles += $ProfileName
+                $OverallExitCode = 1
+                Write-Host "::endgroup::"
+                continue
+              }
+
+              $UnityExitCode = $UnityProcess.ExitCode
+              Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] $ProfileName のUnityプロセスがコード $UnityExitCode で終了しました。"
+              if ($UnityExitCode -ne 0) {
+                $FailedProfiles += $ProfileName
+                $OverallExitCode = 1
+              }
+            } catch {
+              Write-Host "[ERROR]: $ProfileName のUnityプロセス実行に失敗しました: $_"
+              $FailedProfiles += $ProfileName
+              $OverallExitCode = 1
+            }
+
             Write-Host "::endgroup::"
-            # タイムアウトはプロセスを強制終了した状態であり、ZIP化の途中である可能性もあるため
-            # 後続の判定用にexit_codeだけ出力し、ステップ自体は失敗させずにジョブを続行させる。
-            # リリースへ進めるかどうかは後続ステップがexit_codeを見て判断する。
-            exit 0
           }
 
-          $UnityExitCode = $UnityProcess.ExitCode
-          Write-Host ""
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity ビルドプロセスがコード $UnityExitCode で終了しました。"
-          
-          if ($UnityExitCode -eq 0) {
-            Write-Host "成功: Unity ビルドが正常に完了しました。"
-          } else {
-            Write-Host "警告: Unity ビルドプロセスがゼロ以外の終了コード ($UnityExitCode) を返しました。"
-            Write-Host "          一部のビルドプロファイルが失敗した可能性がありますが、"
-            Write-Host "          成功したプロファイルがあれば後続のステップでリリースへアップロードします。"
-            Write-Host "          詳細は $LogFileName を参照してください。"
-          }
+          Write-Host "全プロファイルの実行が完了しました。"
+          Write-Host "失敗: $(if ($FailedProfiles.Count -gt 0) { $FailedProfiles -join ', ' } else { 'なし' })"
+          Write-Host "タイムアウト: $(if ($TimedOutProfiles.Count -gt 0) { $TimedOutProfiles -join ', ' } else { 'なし' })"
 
-          "exit_code=$UnityExitCode" | Add-Content -Path $env:GITHUB_OUTPUT
+          "exit_code=$OverallExitCode" | Add-Content -Path $env:GITHUB_OUTPUT
+          "timed_out_profiles=$($TimedOutProfiles -join ',')" | Add-Content -Path $env:GITHUB_OUTPUT
 
-          Write-Host "::endgroup::"
           # このステップ自体を失敗させると後続ステップがスキップされ、成功したプロファイルの
           # 成果物すらリリースできなくなる。判定はexit_codeを見た後続ステップに委ねるため、
           # ここでは常に0を返す。
           exit 0
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
@@ -1060,10 +1215,11 @@ jobs:
 # ==================================================================================================
 
       - name: ビルド成果物のチェック
-        if: steps.unity_build.outputs.exit_code != '124'
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1112,18 +1268,19 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
         
 # ==================================================================================================
 
       - name: 現行ビルドバージョンの解決
-        if: steps.unity_build.outputs.exit_code != '124'
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
           VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1239,16 +1396,17 @@ jobs:
           "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
           Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
         
 # ==================================================================================================
 
       - name: リリースタグの生成
         id: tag_gen
-        if: steps.unity_build.outputs.exit_code != '124'
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1263,17 +1421,18 @@ jobs:
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[INFO]: タグ名を生成しました: $TagName"
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
         
 # ==================================================================================================
 
       - name: ビルド成果物ZIPへのタグ付与と配置
-        if: steps.unity_build.outputs.exit_code != '124'
         env:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1324,18 +1483,17 @@ jobs:
             }
           }
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
         
 # ==================================================================================================
 
       - name: リリース作成とアセットのアップロード
         id: create_release
-        if: steps.unity_build.outputs.exit_code != '124'
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
         with:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: ${{ steps.tag_gen.outputs.TAG_NAME }}
-          prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' }}
+          prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' || steps.determine_mode.outputs.build_variant == 'demo' }}
           body: |
             Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
 
@@ -1344,18 +1502,20 @@ jobs:
             **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
             **ビルドモード:** ${{ steps.determine_mode.outputs.build_mode }}
+            **ビルド種別:** ${{ steps.determine_mode.outputs.build_variant || 'development' }}
 
             **ビルド結果:** ${{ steps.unity_build.outputs.exit_code == '0' && '全プロファイル成功' || format('一部のプロファイルが失敗しました（Unity終了コード: {0}）。本リリースには成功したプロファイルの成果物のみ含まれます。詳細はワークフロー実行のログを確認してください。', steps.unity_build.outputs.exit_code) }}
+            **タイムアウトしたプロファイル:** ${{ steps.unity_build.outputs.timed_out_profiles || 'なし' }}
 
             **実行プロセス:**
             1. **環境・Unity インストールの検証**: ランナー環境の確認と、Unity エディタの存在検証。
             2. **.NET SDK 環境の確認**: 必要に応じて .NET SDK のインストール・パス確認を実施。
             3. **アセットパッケージのダウンロード・インポート**: Google Drive から ZIP をダウンロードし、各 .unitypackage からファイルを展開して適切なパスに直接配置。
             4. **NuGet パッケージ復元**: `NuGetForUnity.Cli` を用いた Unity 起動前のパッケージ復元処理。
-            5. **Unity ビルド処理**: ${{ steps.determine_mode.outputs.build_mode }} ビルドプロファイルに基づき、Unity バッチモードによるビルドを実行。
+            5. **Unity ビルド処理**: ${{ steps.determine_mode.outputs.build_mode }} ビルドプロファイルをプロファイルごとに別の Unity バッチプロセスで実行（各プロファイルのタイムアウトは2時間）。
 
             **ビルド対象プロファイル:**
-            ${{ steps.determine_mode.outputs.build_mode == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
+            - ビルドプロファイル枠: ${{ steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release' }}${{ steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master' }}BuildProfiles
           files: "*.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1369,7 +1529,9 @@ jobs:
           VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1431,7 +1593,7 @@ jobs:
               exit 1
           }
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
         
 # ==================================================================================================
 
@@ -1441,9 +1603,12 @@ jobs:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
           UNITY_EXIT_CODE: ${{ steps.unity_build.outputs.exit_code }}
           UNITY_LOG_FILE: ${{ steps.unity_build.outputs.log_file }}
+          TIMED_OUT_PROFILES: ${{ steps.unity_build.outputs.timed_out_profiles }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1452,6 +1617,7 @@ jobs:
           Write-Host "::group::ワークフロー実行サマリー"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローが完了しました。"
           Write-Host "Unity ビルドの終了コード: $env:UNITY_EXIT_CODE"
+          Write-Host "タイムアウトしたプロファイル: $(if ($env:TIMED_OUT_PROFILES) { $env:TIMED_OUT_PROFILES } else { 'なし' })"
 
           if ("${{ steps.create_release.outcome }}" -eq "success") {
             if ($env:UNITY_EXIT_CODE -eq "0") {
@@ -1469,13 +1635,13 @@ jobs:
           Write-Host "::endgroup::"
 
           # 成功したプロファイルの成果物は既にアップロード済みだが、Unityビルド自体に
-          # 失敗（1）またはタイムアウト（124）があった事実はワークフローのステータスとして
+          # 失敗またはプロファイル単位のタイムアウトがあった事実はワークフローのステータスとして
           # 可視化しておく必要があるため、ここで改めてジョブを失敗として終了させる。
           if ($env:UNITY_EXIT_CODE -ne "0") {
             Write-Host "::warning::Unity ビルドが正常終了しなかったため（終了コード: $env:UNITY_EXIT_CODE）、ワークフローを失敗として記録します。成功したプロファイルの成果物は既にリリースへアップロード済みです。"
             exit 1
           }
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
@@ -1483,7 +1649,9 @@ jobs:
         if: always()
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
           Write-Host "::group::トラブルシューティング用ログの集約"
           Write-Host "問題が発生した場合の切り分け用に、各ステップのWARN/ERRORをここへ集約表示します。"
@@ -1501,7 +1669,7 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell
 
 # ==================================================================================================
 
@@ -1511,7 +1679,9 @@ jobs:
           CLEAN_BUILD: ${{ github.event.inputs.clean_build }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
           function Write-Host($Object) {
             if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
             Microsoft.PowerShell.Utility\Write-Host $Object
@@ -1580,7 +1750,7 @@ jobs:
 
           # 残り容量を記録しておくと、次回枯渇した際の切り分けが早くなる。
           try {
-            if ($IsWindows) {
+            if ($env:RUNNER_OS -eq "Windows") {
               $Drive = (Get-Item $Workspace).PSDrive
               Write-Host "[INFO]: ドライブ $($Drive.Name): 残り $([Math]::Round($Drive.Free / 1GB, 2)) GB"
             } else {
@@ -1591,4 +1761,4 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+        shell: powershell

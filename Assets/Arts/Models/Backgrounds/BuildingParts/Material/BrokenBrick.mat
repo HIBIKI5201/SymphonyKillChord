@@ -170,7 +170,7 @@ Material:
     - _Concrete_Color_01: {r: 1, g: 1, b: 1, a: 1}
     - _Concrete_Color_02: {r: 0.5471698, g: 0.53942686, b: 0.5239409, a: 1}
     - _DirtColor: {r: 0.3490566, g: 0.3113327, b: 0.3013083, a: 1}
-    - _DirtColor2: {r: 0.25471696, g: 0.20305267, b: 0.20305267, a: 1}
+    - _DirtColor_2: {r: 0.25471696, g: 0.20305267, b: 0.20305267, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

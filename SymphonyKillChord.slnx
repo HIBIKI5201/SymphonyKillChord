@@ -14,6 +14,7 @@
   <Project Path="DevelopProducts-SaveSystem.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="SingularityGroup.HotReload.Editor.csproj" />
+  <Project Path="KillChord.Demo.csproj" />
   <Project Path="KillChord.Application.csproj" />
   <Project Path="UniHumanoid.csproj" />
   <Project Path="SingularityGroup.HotReload.Runtime.csproj" />
@@ -32,6 +33,7 @@
   <Project Path="KillChord.Utility.csproj" />
   <Project Path="DevelopProducts-Architecture.csproj" />
   <Project Path="VRM10.Editor.csproj" />
+  <Project Path="KillChord.Demo.Editor.csproj" />
   <Project Path="DevelopProducts-SilToon.csproj" />
   <Project Path="DevelopProducts-AnimationControl.csproj" />
   <Project Path="DevelopProducts-ToonShader.Editor.csproj" />
