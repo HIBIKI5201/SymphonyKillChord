@@ -99,3 +99,33 @@ sudo systemctl status sinfonia-specsearch.service
 sudo journalctl --unit sinfonia-specsearch.service --follow
 sudo systemctl stop sinfonia-specsearch.service
 ```
+
+## 7. GitHub Actionsから自動デプロイする
+
+`Deploy Sinfonia Operator`ワークフローは、`develop`のSinfoniaOperator関連ファイルが更新されたとき、または手動実行されたときに次の処理を行います。
+
+1. Oracle VMのCPUに合う自己完結バイナリを発行する。
+2. Oracle VMへ成果物を転送する。
+3. `/opt/sinfonia-specsearch/releases/<commit SHA>-<run ID>-<attempt>`へ展開する。
+4. `publish`シンボリックリンクを新リリースへ切り替える。
+5. systemdサービスを再起動し、最大3分間、稼働状態と`/branches`登録ログを確認する。
+6. 稼働確認に失敗した場合は直前のリリースへ戻し、成功時は新しい3リリースだけを保持する。
+
+GitHubの`Sinfonia Operator` Environmentに以下のSecretsを登録してください。
+
+| Secret | 内容 |
+|---|---|
+| `ORACLE_HOST` | Oracle VMのホスト名またはIPアドレス。 |
+| `ORACLE_SSH_USER` | 配備先を所有し、対象serviceを`sudo systemctl`で操作できるユーザー。 |
+| `ORACLE_SSH_PRIVATE_KEY` | 上記ユーザーのOpenSSH秘密鍵。 |
+| `ORACLE_KNOWN_HOSTS` | `ssh-keyscan`などで事前に検証したOracle VMのhost key行。 |
+
+現在のVMはx86-64なので、Environment Variableの`ORACLE_RUNTIME`には`linux-x64`を設定します。未設定時も`linux-x64`が使われます。Ampere A1へ移行した場合は`linux-arm64`へ変更してください。配備スクリプトも実機とバイナリのCPU形式を照合し、不一致の場合はサービスを止める前に中断します。
+
+Botが参照する設定ファイルはデプロイ対象に含めません。DiscordやGitHubのトークンはOracle VMにだけ保存します。`/branches`を有効にする場合は、Botへ渡すJSONまたは環境ファイルに以下を設定してください。
+
+```json
+"GITHUB_REPOSITORY": "HIBIKI5201/SymphonyKillChord"
+```
+
+`BRANCH_CLEANUP_DISCORD_GUILD_ID`を省略した場合は`SPEC_SEARCH_DISCORD_GUILD_ID`が使われます。GitHub APIの匿名レート制限を避ける場合は、読み取り権限だけを持つ`GITHUB_TOKEN`もOracle VM側へ設定します。
