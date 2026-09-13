@@ -32,6 +32,59 @@ namespace KillChord.Editor.AutoBuilder
         }
 
         /// <summary>
+        ///     GitHub Actions がプロファイルごとにUnityプロセスを分離できるよう、
+        ///     指定されたゲームデータ種別とビルドモードに登録されたプロファイル名をファイルへ出力します。
+        /// </summary>
+        public static void ExportProfileNamesFromCli()
+        {
+            string buildMode = GetCliArg("-buildMode");
+            string gameDataVariant = GetCliArg("-gameDataVariant");
+            string selectedProfiles = GetCliArg("-selectedProfiles");
+            string outputPath = GetCliArg("-profileListFile");
+            AutoBuilderSettings settings = AutoBuilderSettings.instance;
+
+            if (settings == null
+                || string.IsNullOrWhiteSpace(outputPath)
+                || !TryParseVariant(gameDataVariant, out GameDataVariant variant)
+                || !TryResolveModes(buildMode, out AutoBuildMode[] modes))
+            {
+                Debug.LogError(
+                    $"[{nameof(AutoBuilder)}] Failed to export build profiles. " +
+                    $"Variant: '{gameDataVariant}', BuildMode: '{buildMode}', OutputPath: '{outputPath}'");
+                AutoBuildExecuter.ExitIfBatchMode(forceBatchMode: true, exitCode: 1);
+                return;
+            }
+
+            BuildProfile[] profiles = CollectProfiles(settings, variant, modes);
+            if (profiles.Length == 0 || !ValidateProfileVariants(profiles, variant))
+            {
+                Debug.LogError(
+                    $"[{nameof(AutoBuilder)}] No valid build profiles found for variant '{variant}' / buildMode '{buildMode}'");
+                AutoBuildExecuter.ExitIfBatchMode(forceBatchMode: true, exitCode: 1);
+                return;
+            }
+
+            profiles = FilterProfiles(profiles, selectedProfiles, variant, buildMode);
+            if (profiles.Length == 0)
+            {
+                Debug.LogError($"[{nameof(AutoBuilder)}] selectedProfiles matched no profiles: {selectedProfiles}");
+                AutoBuildExecuter.ExitIfBatchMode(forceBatchMode: true, exitCode: 1);
+                return;
+            }
+
+            string[] profileNames = profiles
+                .Where(profile => profile != null)
+                .Select(profile => profile.name)
+                .ToArray();
+
+            string fullOutputPath = Path.GetFullPath(outputPath);
+            Directory.CreateDirectory(Path.GetDirectoryName(fullOutputPath) ?? Directory.GetCurrentDirectory());
+            File.WriteAllLines(fullOutputPath, profileNames);
+            Debug.Log($"[{nameof(AutoBuilder)}] Exported {profileNames.Length} build profile names to: {fullOutputPath}");
+            AutoBuildExecuter.ExitIfBatchMode(forceBatchMode: true, exitCode: 0);
+        }
+
+        /// <summary>
         ///     コマンドライン引数から指定された値を取得します。
         /// </summary>
         /// <param name="name">取得したいコマンドライン引数の名前</param>
@@ -96,36 +149,12 @@ namespace KillChord.Editor.AutoBuilder
                 return;
             }
 
-            // -selectedProfiles 指定時はプロファイル名で一致するものだけに絞り込む。
-            // 枠で種別とモードが確定しているため、プラットフォーム名だけで一意に絞り込める。
-            if (!string.IsNullOrWhiteSpace(selectedProfiles))
+            profiles = FilterProfiles(profiles, selectedProfiles, variant, buildMode);
+            if (profiles.Length == 0)
             {
-                string[] requestedNames = selectedProfiles
-                    .Split(',')
-                    .Select(name => name.Trim())
-                    .Where(name => !string.IsNullOrEmpty(name))
-                    .ToArray();
-
-                foreach (string requestedName in requestedNames)
-                {
-                    bool isMatched = profiles.Any(p => IsProfileMatch(p.name, requestedName));
-                    if (!isMatched)
-                    {
-                        Debug.LogWarning(
-                            $"[{nameof(AutoBuilder)}] Requested profile not found in variant '{variant}' / buildMode '{buildMode ?? "All"}': {requestedName}");
-                    }
-                }
-
-                profiles = profiles
-                    .Where(profile => requestedNames.Any(requested => IsProfileMatch(profile.name, requested)))
-                    .ToArray();
-
-                if (profiles.Length == 0)
-                {
-                    Debug.LogError($"[{nameof(AutoBuilder)}] selectedProfiles matched no profiles: {selectedProfiles}");
-                    AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
-                    return;
-                }
+                Debug.LogError($"[{nameof(AutoBuilder)}] selectedProfiles matched no profiles: {selectedProfiles}");
+                AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
+                return;
             }
 
             // 環境変数 UNITY_BUILD_OUTPUT_DIR が指定されていれば優先して使用する
@@ -221,6 +250,47 @@ namespace KillChord.Editor.AutoBuilder
             }
 
             return profiles.ToArray();
+        }
+
+        /// <summary>
+        ///     指定された名前に一致するビルドプロファイルへ絞り込みます。
+        /// </summary>
+        /// <param name="profiles"> 絞り込み対象のビルドプロファイルです。 </param>
+        /// <param name="selectedProfiles"> カンマ区切りのプロファイル名です。空の場合は絞り込みません。 </param>
+        /// <param name="variant"> 対象のゲームデータ種別です。 </param>
+        /// <param name="buildMode"> 対象のビルドモードです。 </param>
+        /// <returns> 名前に一致したビルドプロファイルです。 </returns>
+        private static BuildProfile[] FilterProfiles(
+            BuildProfile[] profiles,
+            string selectedProfiles,
+            GameDataVariant variant,
+            string buildMode)
+        {
+            if (string.IsNullOrWhiteSpace(selectedProfiles))
+            {
+                return profiles;
+            }
+
+            string[] requestedNames = selectedProfiles
+                .Split(',')
+                .Select(name => name.Trim())
+                .Where(name => !string.IsNullOrEmpty(name))
+                .ToArray();
+
+            foreach (string requestedName in requestedNames)
+            {
+                bool isMatched = profiles.Any(profile => IsProfileMatch(profile.name, requestedName));
+                if (!isMatched)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(AutoBuilder)}] Requested profile not found in variant '{variant}' / " +
+                        $"buildMode '{buildMode ?? "All"}': {requestedName}");
+                }
+            }
+
+            return profiles
+                .Where(profile => requestedNames.Any(requested => IsProfileMatch(profile.name, requested)))
+                .ToArray();
         }
 
         /// <summary>
