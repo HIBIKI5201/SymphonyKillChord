@@ -1,3 +1,4 @@
+using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Utility.Collections;
@@ -7,7 +8,9 @@ using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.Composition.OutGame
 {
@@ -68,6 +71,10 @@ namespace KillChord.Runtime.Composition.OutGame
                 if (this != null)
                 {
                     CompleteSceneInitialization(isSuccess);
+                    if (!isSuccess && !destroyCancellationToken.IsCancellationRequested)
+                    {
+                        ShowInitializationFailure();
+                    }
                 }
             }
         }
@@ -92,11 +99,27 @@ namespace KillChord.Runtime.Composition.OutGame
         /// </summary>
         private void OnDestroy()
         {
+            if (_failureView != null)
+            {
+                _failureView.OnRecoveryRequested -= RecoveryRequestedHandler;
+            }
+
             if (_modules != null)
             {
                 for (int i = _modules.Count - 1; i >= 0; i--)
                 {
-                    _modules[i]?.Shutdown();
+                    try
+                    {
+                        _modules[i]?.Shutdown();
+                    }
+                    catch (Exception exception)
+                    {
+                        // 初期化途中のモジュールが失敗しても、残りの登録解除を続けます。
+                        Debug.LogError(
+                            $"[{nameof(OutGameSceneInitializer)}] {_modules[i]?.ModuleName} の終了処理に失敗しました。",
+                            this);
+                        Debug.LogException(exception, this);
+                    }
                 }
 
                 _modules = null;
@@ -180,9 +203,90 @@ namespace KillChord.Runtime.Composition.OutGame
             readiness.Complete(gameObject.scene.name, isSuccess);
         }
 
+        /// <summary>
+        ///     不完全な通常UIを無効にし、アセット不要の復帰画面を表示します。
+        /// </summary>
+        private void ShowInitializationFailure()
+        {
+            UIDocument[] documents = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            foreach (UIDocument document in documents)
+            {
+                if (document.gameObject.scene == gameObject.scene)
+                {
+                    document.enabled = false;
+                }
+            }
+
+            _failureView = gameObject.AddComponent<OutGameInitializationFailureView>();
+            _failureView.Initialize(gameObject.scene.name == _titleSceneName ? "もう一度読み込む" : "タイトルへ戻る");
+            _failureView.OnRecoveryRequested += RecoveryRequestedHandler;
+        }
+
+        /// <summary>
+        ///     初期化に失敗したシーンからタイトルへ復帰します。タイトル自身の失敗時は再読み込みします。
+        /// </summary>
+        private async void RecoveryRequestedHandler()
+        {
+            if (_isRecovering)
+            {
+                return;
+            }
+
+            // 初期化失敗を受け取った元のロード処理が終了するまでは、次のロードを開始しません。
+            if (ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var executor)
+                && executor.IsSessionActive)
+            {
+                return;
+            }
+
+            _isRecovering = true;
+            _failureView.SetBusy(true);
+            try
+            {
+                if (!ServiceLocator.TryGetInstance<SceneTransitionUsecase>(out var transition))
+                {
+                    Debug.LogError($"[{nameof(OutGameSceneInitializer)}] シーン遷移サービスが取得できませんでした。", this);
+                    _failureView.ShowRecoveryFailed();
+                    return;
+                }
+
+                string currentSceneName = gameObject.scene.name;
+                // 復帰元の破棄後も、遷移先の初期化とロード画面の終了まで継続します。
+                bool success = currentSceneName == _titleSceneName
+                    ? await transition.ReloadSceneAsync(currentSceneName, CancellationToken.None)
+                    : await transition.ChangeSceneAsync(currentSceneName, _titleSceneName, CancellationToken.None);
+
+                if (!success && this != null)
+                {
+                    _failureView.ShowRecoveryFailed();
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+                if (this != null)
+                {
+                    _failureView.ShowRecoveryFailed();
+                }
+            }
+            finally
+            {
+                if (this != null)
+                {
+                    _isRecovering = false;
+                    _failureView.SetBusy(false);
+                }
+            }
+        }
+
+        [SerializeField, Tooltip("初期化失敗時の復帰先となるタイトルシーン名です。")]
+        private string _titleSceneName = "Title";
+
         private readonly OutGameInitializationCoordinator _initializationCoordinator = new();
         private List<IOutGameInitializationModule> _modules;
         private OutGameUIEvent _outGameUiEvent;
         private bool _isOwner;
+        private OutGameInitializationFailureView _failureView;
+        private bool _isRecovering;
     }
 }
