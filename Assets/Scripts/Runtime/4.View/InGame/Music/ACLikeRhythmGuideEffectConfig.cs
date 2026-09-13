@@ -14,9 +14,6 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャストタイミング位置を示す帯の色。 </summary>
         public Color MarkerColor => _markerColor;
 
-        /// <summary> ジャストタイミング位置を示す帯の幅。 </summary>
-        public float MarkerWidth => _markerWidth;
-
         /// <summary> ジャストタイミング位置を示す帯の高さ。 </summary>
         public float MarkerHeight => _markerHeight;
 
@@ -71,9 +68,6 @@ namespace KillChord.Runtime.View.InGame.Music
         [Header("判定ウィンドウ")]
         [SerializeField, Tooltip("ジャストタイミング位置を示す帯の色。")]
         private Color _markerColor = new Color(1f, 0.85f, 0.25f, 0.45f);
-
-        [SerializeField, Min(0.1f), Tooltip("ジャストタイミング位置を示す帯の幅。")]
-        private float _markerWidth = 3f;
 
         [SerializeField, Min(0.1f), Tooltip("ジャストタイミング位置を示す帯の高さ。")]
         private float _markerHeight = 192f;
