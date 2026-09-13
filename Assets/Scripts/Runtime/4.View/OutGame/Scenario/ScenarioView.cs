@@ -34,9 +34,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             SubscribeToViewModel();
             BuildCatalogMaps(backgroundByKey, animationByKey, portraitByKey);
             EnsurePortraitSlots();
+            CaptureDefaultDisplayState();
             CapturePortraitBaseColors();
-            _defaultTextBoxSprite = _textBoxImage != null ? _textBoxImage.sprite : null;
-            ResetFadeChannels();
+            ResetDisplayState();
         }
 
         /// <summary>
@@ -49,11 +49,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             EnsurePortraitSlots();
             CapturePortraitBaseColors();
             CancelAllFadeMotions();
-            ResetFadeChannels();
-            if (_textBoxImage != null)
-            {
-                _textBoxImage.sprite = _defaultTextBoxSprite;
-            }
+            ResetDisplayState();
 
             _viewModel?.ClearText();
         }
@@ -97,9 +93,13 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         {
             TargetBackground,
             LayerPortrait,
-            TargetText,
             LayerEffect,
+            TargetText,
         };
+
+        private static readonly Vector2 PORTRAIT_LEFT_DEFAULT_POSITION = new(-420f, -120f);
+        private static readonly Vector2 PORTRAIT_CENTER_DEFAULT_POSITION = new(0f, -120f);
+        private static readonly Vector2 PORTRAIT_RIGHT_DEFAULT_POSITION = new(420f, -120f);
 
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField, Tooltip("フェード対象から除外するUI（テキストボックス等）。指定したCanvasGroupはフェードの影響を受けません。未設定ならテキストへ自動付与します。")]
@@ -128,7 +128,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private ScenarioViewModel _viewModel;
         private IReadOnlyList<string> _layerBackToFront;
         private Image _blackOverlay;
+        private Sprite _defaultBackgroundSprite;
         private Sprite _defaultTextBoxSprite;
+        private bool _hasCapturedDefaultDisplayState;
 
         /// <summary>
         /// 表示に必要な参照を初期化する。
@@ -138,6 +140,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             TryAutoAssignReferences();
             EnsureNonFadingUi();
             EnsurePortraitSlots();
+            CaptureDefaultDisplayState();
         }
 
         /// <summary>
@@ -584,11 +587,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// 再生開始時の透明度と立ち絵色を適用する。
+        /// 再生開始時の表示内容、透明度、立ち絵色を初期状態へ戻す。
         /// </summary>
-        private void ResetFadeChannels()
+        private void ResetDisplayState()
         {
             ApplyAlphaValue(ScenarioFadeTarget.Screen, 1f);
+            ApplyAlphaValue(ScenarioFadeTarget.Background, 1f);
             ApplyAlphaValue(ScenarioFadeTarget.Text, 1f);
             ApplyAlphaValue(ScenarioFadeTarget.PortraitLeft, 1f);
             ApplyAlphaValue(ScenarioFadeTarget.PortraitCenter, 1f);
@@ -598,6 +602,53 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             ApplyPortraitBlackValue(ScenarioFadeTarget.PortraitLeft, 0f);
             ApplyPortraitBlackValue(ScenarioFadeTarget.PortraitCenter, 0f);
             ApplyPortraitBlackValue(ScenarioFadeTarget.PortraitRight, 0f);
+
+            if (_backgroundImage != null)
+            {
+                _backgroundImage.sprite = _defaultBackgroundSprite;
+            }
+
+            if (_textBoxImage != null)
+            {
+                _textBoxImage.sprite = _defaultTextBoxSprite;
+            }
+
+            ResetPortraitSlot(SlotLeft, PORTRAIT_LEFT_DEFAULT_POSITION);
+            ResetPortraitSlot(SlotCenter, PORTRAIT_CENTER_DEFAULT_POSITION);
+            ResetPortraitSlot(SlotRight, PORTRAIT_RIGHT_DEFAULT_POSITION);
+        }
+
+        /// <summary>
+        /// Prefabまたはシーンに設定された初期表示を一度だけ記録する。
+        /// </summary>
+        private void CaptureDefaultDisplayState()
+        {
+            if (_hasCapturedDefaultDisplayState)
+            {
+                return;
+            }
+
+            _defaultBackgroundSprite = _backgroundImage != null ? _backgroundImage.sprite : null;
+            _defaultTextBoxSprite = _textBoxImage != null ? _textBoxImage.sprite : null;
+            _hasCapturedDefaultDisplayState = true;
+        }
+
+        /// <summary>
+        /// 立ち絵スロットの表示内容とTransformを初期状態へ戻す。
+        /// </summary>
+        /// <param name="slot">初期化する立ち絵スロット。</param>
+        /// <param name="defaultPosition">スロットの初期座標。</param>
+        private void ResetPortraitSlot(string slot, Vector2 defaultPosition)
+        {
+            if (!_portraitBySlot.TryGetValue(slot, out Image portraitImage) || portraitImage == null)
+            {
+                return;
+            }
+
+            portraitImage.sprite = null;
+            portraitImage.enabled = false;
+            portraitImage.rectTransform.anchoredPosition = defaultPosition;
+            portraitImage.rectTransform.localScale = Vector3.one;
         }
 
         /// <summary>
@@ -812,9 +863,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void EnsurePortraitSlots()
         {
-            EnsurePortraitSlot(SlotLeft, PortraitObjectLeft, new Vector2(-420f, -120f));
-            EnsurePortraitSlot(SlotCenter, PortraitObjectCenter, new Vector2(0f, -120f));
-            EnsurePortraitSlot(SlotRight, PortraitObjectRight, new Vector2(420f, -120f));
+            EnsurePortraitSlot(SlotLeft, PortraitObjectLeft, PORTRAIT_LEFT_DEFAULT_POSITION);
+            EnsurePortraitSlot(SlotCenter, PortraitObjectCenter, PORTRAIT_CENTER_DEFAULT_POSITION);
+            EnsurePortraitSlot(SlotRight, PortraitObjectRight, PORTRAIT_RIGHT_DEFAULT_POSITION);
             ApplyPortraitSizeToExistingSlots();
             // 立ち絵生成で重なり順が変わるため、優先度順へ並べ直す。
             ApplyLayerOrder();
