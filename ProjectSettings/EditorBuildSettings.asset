@@ -29,7 +29,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Level/Scenes/Develop/Dodge/InGameDodgeTest.unity
     guid: b76418d614253e54d9f443a3cd8b359c
-  - enabled: 0
+  - enabled: 1
     path: Assets/Level/Scenes/Demo/DemoEnd.unity
     guid: 7264dcc8376fefc4bb2d5fbc90ff0bb5
   m_configObjects:
