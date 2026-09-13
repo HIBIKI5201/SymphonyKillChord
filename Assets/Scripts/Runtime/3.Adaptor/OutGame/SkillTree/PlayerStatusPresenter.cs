@@ -19,7 +19,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             float baseHealth,
             float baseAttack,
             float baseCriticalChance,
-            float baseCriticalDamageMultiplier)
+            float baseCriticalDamageMultiplier,
+            float baseAreaAttackRange)
         {
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
             _bonusCalculator = bonusCalculator ?? throw new ArgumentNullException(nameof(bonusCalculator));
@@ -28,6 +29,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _baseAttack = baseAttack;
             _baseCriticalChance = baseCriticalChance;
             _baseCriticalDamageMultiplier = baseCriticalDamageMultiplier;
+            _baseAreaAttackRange = baseAreaAttackRange;
         }
 
         /// <summary>
@@ -36,11 +38,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         public void Push()
         {
             PlayerStatusBonus bonus = _bonusCalculator.Calculate(_skillTreeStatus.UnlockedNodes);
+            float areaAttackRangeMultiplier = _baseAreaAttackRange <= 0f
+                ? 1f
+                : (_baseAreaAttackRange + bonus.AreaAttackRangeAddition) / _baseAreaAttackRange;
             PlayerStatusDTO dto = new PlayerStatusDTO(
                 _baseHealth * bonus.MaxHealthMultiplier,
                 _baseAttack * bonus.AttackPowerMultiplier,
                 Math.Min(1f, _baseCriticalChance + bonus.CriticalChanceAddition),
-                _baseCriticalDamageMultiplier - 1f + bonus.CriticalMultiplierAddition);
+                _baseCriticalDamageMultiplier - 1f + bonus.CriticalMultiplierAddition,
+                areaAttackRangeMultiplier);
             _viewModel.Apply(dto);
         }
 
@@ -51,5 +57,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private readonly float _baseAttack;
         private readonly float _baseCriticalChance;
         private readonly float _baseCriticalDamageMultiplier;
+        private readonly float _baseAreaAttackRange;
     }
 }

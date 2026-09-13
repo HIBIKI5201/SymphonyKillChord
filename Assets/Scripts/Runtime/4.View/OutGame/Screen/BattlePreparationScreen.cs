@@ -75,6 +75,26 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _viewModel = null;
         }
 
+        /// <summary> 強制出撃モードの場合はtrueです。 </summary>
+        public bool IsForcedSortieMode => _isForcedSortieMode;
+
+        /// <summary>
+        ///     戻る・装備変更を禁止し、出撃だけを許可する状態を切り替えます。
+        /// </summary>
+        /// <param name="isForced"> 強制出撃モードにする場合はtrueです。 </param>
+        public void SetForcedSortieMode(bool isForced)
+        {
+            _isForcedSortieMode = isForced;
+            _backButton.SetEnabled(!isForced);
+            _skillBuildButton.SetEnabled(!isForced);
+            _startButton.SetEnabled(true);
+
+            if (isForced)
+            {
+                SetInitialFocusElement(_startButton);
+            }
+        }
+
         /// <summary>
         ///     View が保持するリソースを解放します。
         /// </summary>
@@ -115,6 +135,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void HandleBackButtonActivationHandler()
         {
+            if (_isForcedSortieMode)
+            {
+                return;
+            }
+
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
@@ -131,6 +156,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void HandleSkillBuildButtonActivationHandler()
         {
+            if (_isForcedSortieMode)
+            {
+                return;
+            }
+
             OutGameUIEvent.OnShownSkillBuildScreen?.Invoke();
         }
 
@@ -284,5 +314,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         private IBattlePreparationSkillViewModel _viewModel;
         private CompositeDisposable _subscriptions;
+        private bool _isForcedSortieMode;
     }
 }

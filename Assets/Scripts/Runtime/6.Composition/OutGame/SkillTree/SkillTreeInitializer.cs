@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.OutGame.Skill;
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -7,7 +8,9 @@ using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Character;
+using KillChord.Runtime.InfraStructure.OutGame.Skill;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
+using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame;
 using KillChord.Runtime.View.OutGame.Navigation;
@@ -41,6 +44,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private const string E_NAME_PREVIEW_VIDEO = "PreviewVideo";
         private const string E_NAME_CURRENT_POINTS_LABEL = "Points";
         private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 1f;
+        private const float DEFAULT_AREA_ATTACK_RANGE = 1f;
 
         [SerializeField]
         [Tooltip("スキルツリー画面のUIDocumentです。")]
@@ -60,6 +64,18 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         [SerializeField, SourceDataAddress]
         [Tooltip("スキルツリー段階定義リポジトリの Addressables キーです。")]
         private string _skillNodePhaseBindRepoKey;
+
+        [SerializeField, SourceDataAddress]
+        [Tooltip("ステータスボーナス効果アイコンカタログの Addressables キーです。読み込みに失敗してもアイコンなしで続行します。")]
+        private string _statusBonusEffectIconCatalogKey;
+
+        [SerializeField, SourceDataAddress]
+        [Tooltip("ノードが解放するスキルの名前解決に使う SkillRepository の Addressables キーです。読み込みに失敗しても名前なしで続行します。")]
+        private string _skillRepositoryKey = "OutGameSkillRepository";
+
+        [SerializeField, SourceDataAddress]
+        [Tooltip("スキルジャンルアイコンカタログの Addressables キーです。読み込みに失敗してもアイコンなしで続行します。")]
+        private string _skillGenreIconCatalogKey;
 
         [SerializeField]
         [Tooltip("スキルプレビュー動画を再生する VideoPlayer です。")]
@@ -92,9 +108,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private Dictionary<int, string[]> _skillNodeConnBinds;
         private Dictionary<int, VisualElement> _unlockPhases;
         private Dictionary<int, VideoClip> _skillPreviewVideos;
+        private Dictionary<StatusBonusEffectKind, Sprite> _statusBonusEffectIcons;
+        private Dictionary<SkillType, Sprite> _skillGenreIcons;
         private SkillNodeDataRepo _loadedSkillNodeDataRepo;
         private SkillNodeBindRepo _loadedSkillNodeBindRepo;
         private SkillNodePhaseBindDataRepo _loadedSkillNodePhaseBindRepo;
+        private StatusBonusEffectIconCatalogAsset _loadedStatusBonusEffectIconCatalog;
+        private SkillRepository _loadedSkillRepository;
+        private SkillGenreIconCatalogAsset _loadedSkillGenreIconCatalog;
         private bool _isInitialized;
         private bool _isSubscribed;
 
@@ -115,6 +136,60 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 || _loadedSkillNodePhaseBindRepo == null)
             {
                 return false;
+            }
+
+            try
+            {
+                _loadedStatusBonusEffectIconCatalog =
+                    await _statusBonusEffectIconCatalogKey.LoadAssetAsync<StatusBonusEffectIconCatalogAsset>(this, destroyCancellationToken);
+            }
+            catch (System.OperationCanceledException)
+            {
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                // アイコンは付加情報のため、読み込みに失敗してもスキルツリー画面自体の初期化は継続する。
+                Debug.LogWarning(
+                    $"[{nameof(SkillTreeInitializer)}] ステータスボーナス効果アイコンカタログの読み込みに失敗しました。アイコンなしで続行します。{ex.Message}",
+                    this);
+                _loadedStatusBonusEffectIconCatalog = null;
+            }
+
+            try
+            {
+                _loadedSkillRepository =
+                    await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, destroyCancellationToken);
+            }
+            catch (System.OperationCanceledException)
+            {
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                // スキル名は付加情報のため、読み込みに失敗してもスキルツリー画面自体の初期化は継続する。
+                Debug.LogWarning(
+                    $"[{nameof(SkillTreeInitializer)}] SkillRepositoryの読み込みに失敗しました。スキル名なしで続行します。{ex.Message}",
+                    this);
+                _loadedSkillRepository = null;
+            }
+
+            try
+            {
+                _loadedSkillGenreIconCatalog =
+                    await _skillGenreIconCatalogKey.LoadAssetAsync<SkillGenreIconCatalogAsset>(this, destroyCancellationToken);
+            }
+            catch (System.OperationCanceledException)
+            {
+                throw;
+            }
+            catch (System.Exception ex)
+            {
+                // アイコンは付加情報のため、読み込みに失敗してもスキルツリー画面自体の初期化は継続する。
+                Debug.LogWarning(
+                    $"[{nameof(SkillTreeInitializer)}] SkillGenreIconCatalogの読み込みに失敗しました。アイコンなしで続行します。{ex.Message}",
+                    this);
+                _loadedSkillGenreIconCatalog = null;
             }
 
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
@@ -167,9 +242,15 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeDataRepoKey.ReleaseLoadedAsset(this);
             _skillNodeBindRepoKey.ReleaseLoadedAsset(this);
             _skillNodePhaseBindRepoKey.ReleaseLoadedAsset(this);
+            _statusBonusEffectIconCatalogKey.ReleaseLoadedAsset(this);
+            _skillRepositoryKey.ReleaseLoadedAsset(this);
+            _skillGenreIconCatalogKey.ReleaseLoadedAsset(this);
             _loadedSkillNodeDataRepo = null;
             _loadedSkillNodeBindRepo = null;
             _loadedSkillNodePhaseBindRepo = null;
+            _loadedStatusBonusEffectIconCatalog = null;
+            _loadedSkillRepository = null;
+            _loadedSkillGenreIconCatalog = null;
             _skillUnlockData = null;
             _outGameUIEvent = null;
             _isInitialized = false;
@@ -261,6 +342,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _renderTexture = _videoPlayer.targetTexture;
             _previewVideoRoot.style.backgroundImage = Background.FromRenderTexture(_renderTexture);
 
+            BuildStatusBonusEffectIconMap();
+            BuildSkillGenreIconMap();
             BuildSkillNodes();
             BuildNodeConns();
             BuildConnBinds();
@@ -269,7 +352,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             _skillDetailScreenView = new SkillDetailScreenView(_skillDetailRoot, _outGameUIEvent);
             _skillDetailScreenView.HideImmediately();
-            _playerStatusScreenView = new PlayerStatusScreenView(_playerStatusRoot, _outGameUIEvent);
+            _playerStatusScreenView = new PlayerStatusScreenView(
+                _playerStatusRoot,
+                _outGameUIEvent,
+                GetStatusIcon(StatusBonusEffectKind.MaxHealth),
+                GetStatusIcon(StatusBonusEffectKind.AttackPower),
+                GetStatusIcon(StatusBonusEffectKind.CriticalChance),
+                GetStatusIcon(StatusBonusEffectKind.CriticalDamage),
+                GetStatusIcon(StatusBonusEffectKind.AreaAttackRange));
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
             _previewVideoScreenView.HideImmediately();
             _skillTreeResetDialogView = new SkillTreeResetDialogView(_rootElement, _outGameUIEvent);
@@ -294,7 +384,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _playerData.MaxHealth,
                 _playerData.BaseDamage,
                 GetBaseCriticalChance(),
-                GetBaseCriticalDamageMultiplier());
+                GetBaseCriticalDamageMultiplier(),
+                GetBaseAreaAttackRange());
             _playerStatusPresenter.Push();
             _skillTreeController = new SkillTreeController(
                 _skillDetailScreenView,
@@ -311,7 +402,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _unlockPhases,
                 _skillPreviewVideos,
                 skillTreeEntity,
-                () => _outGameUIEvent.OnOwnedSkillChanged?.Invoke());
+                () => _outGameUIEvent.OnOwnedSkillChanged?.Invoke(),
+                _loadedSkillRepository,
+                new SkillDisplayTextFormatter(new SkillEffectDescriptionFormatter()),
+                _skillGenreIcons);
 
             _isInitialized = true;
             return true;
@@ -350,6 +444,29 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     プレイヤーの先頭攻撃定義から基礎射程を取得します。
+        /// </summary>
+        /// <returns> 基礎射程。攻撃定義がない場合は既定値。 </returns>
+        private float GetBaseAreaAttackRange()
+        {
+            AttackDefinitionAsset[] attackDefinitions = _playerData.AttackDefinitionAssets;
+            if (attackDefinitions == null)
+            {
+                return DEFAULT_AREA_ATTACK_RANGE;
+            }
+
+            for (int i = 0; i < attackDefinitions.Length; i++)
+            {
+                if (attackDefinitions[i] != null)
+                {
+                    return attackDefinitions[i].Range;
+                }
+            }
+
+            return DEFAULT_AREA_ATTACK_RANGE;
+        }
+
+        /// <summary>
         ///     スキルノードと接続線の紐づきを作成します。
         /// </summary>
         private void BuildConnBinds()
@@ -384,6 +501,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 SkillNodeEntity nodeEntity = nodeData.ToDomain();
                 SkillNodeView nodeView = new SkillNodeView(nodes[i], nodeData.NodeId.Id, _outGameUIEvent);
                 SetNodeUnlockState(nodeView, nodeEntity);
+                nodeView.SetIcon(GetNodeIcon(nodeEntity));
 
                 _skillNodeEntities.Add(nodeData.NodeId, nodeEntity);
                 _skillNodeViews.Add(nodeData.NodeId.Id, nodeView);
@@ -543,6 +661,77 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     ステータスボーナス効果種別とアイコンの紐づきを作成します。
+        /// </summary>
+        private void BuildStatusBonusEffectIconMap()
+        {
+            _statusBonusEffectIcons = new();
+            if (_loadedStatusBonusEffectIconCatalog == null)
+            {
+                return;
+            }
+
+            foreach (StatusBonusEffectIconCatalogEntry entry in _loadedStatusBonusEffectIconCatalog.Entries)
+            {
+                if (entry.Icon != null)
+                {
+                    _statusBonusEffectIcons[entry.Kind] = entry.Icon;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     ノードが持つ代表的なステータスボーナス効果からアイコンを取得します。
+        /// </summary>
+        /// <param name="nodeEntity"> 対象のノードEntity。 </param>
+        /// <returns> 対応するアイコン。効果を持たない、または対応アイコンが無い場合はnull。 </returns>
+        private Sprite GetNodeIcon(SkillNodeEntity nodeEntity)
+        {
+            if (nodeEntity.StatusBonusEffects.Count == 0 || _statusBonusEffectIcons == null)
+            {
+                return null;
+            }
+
+            StatusBonusEffectKind kind = nodeEntity.StatusBonusEffects[0].Kind;
+            return _statusBonusEffectIcons.TryGetValue(kind, out Sprite icon) ? icon : null;
+        }
+
+        /// <summary>
+        ///     ステータス種別に対応するアイコンを取得します。
+        /// </summary>
+        /// <param name="kind"> 対象のステータス種別。 </param>
+        /// <returns> 対応するアイコン。見つからない場合はnull。 </returns>
+        private Sprite GetStatusIcon(StatusBonusEffectKind kind)
+        {
+            if (_statusBonusEffectIcons == null)
+            {
+                return null;
+            }
+
+            return _statusBonusEffectIcons.TryGetValue(kind, out Sprite icon) ? icon : null;
+        }
+
+        /// <summary>
+        ///     スキルジャンルとアイコンの紐づきを作成します。
+        /// </summary>
+        private void BuildSkillGenreIconMap()
+        {
+            _skillGenreIcons = new();
+            if (_loadedSkillGenreIconCatalog == null)
+            {
+                return;
+            }
+
+            foreach (SkillGenreIconCatalogEntry entry in _loadedSkillGenreIconCatalog.Entries)
+            {
+                if (entry.Icon != null)
+                {
+                    _skillGenreIcons[entry.Genre] = entry.Icon;
+                }
+            }
+        }
+
+        /// <summary>
         ///     イベントを購読します。
         /// </summary>
         private void Subscribe()
@@ -628,6 +817,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeConnBinds = null;
             _unlockPhases = null;
             _skillPreviewVideos = null;
+            _statusBonusEffectIcons = null;
+            _skillGenreIcons = null;
         }
 
         /// <summary>

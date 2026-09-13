@@ -19,23 +19,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
         }
 
         /// <summary>
-        ///     タイトルから直接遷移するチュートリアル戦闘シーンを設定します。
-        /// </summary>
-        /// <param name="tutorialBattleSceneName"> 遷移先シーン名です。 </param>
-        public void SetTutorialBattleTarget(string tutorialBattleSceneName)
-        {
-            _tutorialBattleSceneName = tutorialBattleSceneName;
-        }
-
-        /// <summary>
-        ///     タイトルから直接遷移するチュートリアル戦闘シーン設定を解除します。
-        /// </summary>
-        public void ClearTutorialBattleTarget()
-        {
-            _tutorialBattleSceneName = string.Empty;
-        }
-
-        /// <summary>
         ///     ゲームを開始する。
         ///     アウトゲームシーンに遷移する。
         /// </summary>
@@ -56,22 +39,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
 
             try
             {
-                if (!string.IsNullOrWhiteSpace(_tutorialBattleSceneName))
-                {
-                    // Title のアンロードで View が破棄されても、遷移先の初期化完了まで待機する。
-                    isSuccess = await _sceneTransitionController
-                        .ChangeSceneKeepingLoadingWithPersistentLifetimeAsync(
-                            currentSceneName,
-                            _tutorialBattleSceneName);
-
-                    if (!isSuccess)
-                    {
-                        _isActivate = false;
-                    }
-
-                    return isSuccess;
-                }
-
                 isSuccess =
                     await _sceneTransitionController.LoadAdditiveAsync(targetSceneName, token);
 
@@ -108,6 +75,5 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
         ///    多重呼び出しを防ぐために使用する。
         /// </summary>
         private bool _isActivate = false;
-        private string _tutorialBattleSceneName = string.Empty;
     }
 }

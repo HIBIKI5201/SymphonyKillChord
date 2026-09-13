@@ -46,27 +46,24 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <returns> リズムガイドDTO。 </returns>
         public RhythmGuideDto CreateDto()
         {
-            float barProgress = _musicSyncService.GetBarProgress();
-
             // インジケーターはジャスト位置を通過させるため1小節を超えた進捗を使用する。
-            // 拍種の解決は0〜1の判定範囲を前提とするため、クランプ済みの進捗をそのまま使う。
             float indicatorBarProgress = _musicSyncService.GetBarProgressUnclamped();
 
             float indicatorNormalized = _rhythmGuideUsecase.CalculateIndicatorNormalized(indicatorBarProgress);
 
-            BeatType? currentBeatType = _rhythmGuideUsecase.CalculateCurrentBeatType(barProgress);
-
-            int? currentBeatCount = currentBeatType.HasValue
-                ? (int?)currentBeatType.Value : null;
+            BeatType currentBeatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
+            int currentBeatCount = (int)currentBeatType;
 
             _zones.Clear();
 
-            foreach (RhythmJudgmentRange range in _rhythmGuideUsecase.RhythmJudgmentDefinition.JudgmentRanges)
+            foreach (RhythmJudgmentRange range in _musicSyncService.RhythmJudgmentDefinition.JudgmentRanges)
             {
                 _zones.Add(new RhythmGuideZoneDto(
                     (int)range.BeatType,
                     range.StartNormalized,
-                    range.EndNormalized
+                    range.EndNormalized,
+                    range.JustStartNormalized,
+                    range.JustEndNormalized
                 ));
             }
 
@@ -78,6 +75,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
                 currentBeatCount,
                 _zones,
                 hasTarget,
+                isJustHit,
                 targetBeatCount
             );
         }

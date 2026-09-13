@@ -411,7 +411,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             for (int i = 0; i < _skillElements.Count; i++)
             {
                 VisualElement element = _skillElements[i];
-                if (element.userData is int elementSkillId && elementSkillId == skillId)
+                if (element.panel != null && element.userData is int elementSkillId && elementSkillId == skillId)
                 {
                     return element;
                 }

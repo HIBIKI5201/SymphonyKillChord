@@ -36,6 +36,10 @@
     -unity-font-style: bold;
 }
 
+.skill-node-icon {
+    -unity-background-scale-mode: scale-to-fit;
+}
+
 /* 選択中は拡大し、押している間は縮める。 */
 .skill-node-node,
 .skill-node-path {

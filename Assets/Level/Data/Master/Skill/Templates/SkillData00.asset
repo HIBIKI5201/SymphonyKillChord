@@ -15,7 +15,7 @@ MonoBehaviour:
   _id:
     _id: skill_00
     _hashId: -876453005
-  _displayName: 0
+  _displayName: スキル0
   _pattern: 040000000400000004000000
   _icon: {fileID: 21300000, guid: 0bed0458bd4d8f94ca79a97fbbb6fe2e, type: 3}
   _skillDetail: "\u30BF\u30FC\u30B2\u30C3\u30C8\u3092\u884C\u3063\u3066\u3044\u308B\u6575\u5358\u4F53\u306B\u653B\u6483\u529B{DamageMultiplier}\u306E\u4E00\u56DE\u653B\u6483\u3092\u884C\u3046\u3002"

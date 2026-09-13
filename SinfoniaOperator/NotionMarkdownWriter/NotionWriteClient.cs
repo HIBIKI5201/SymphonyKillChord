@@ -344,6 +344,61 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         }
 
         /// <summary>
+        ///     既存ページのデータベースプロパティ（カテゴリー等）を更新する。
+        ///     本文には触れない。作成時に付け忘れたプロパティを後から設定する用途を想定する。
+        /// </summary>
+        /// <param name="pageId">ページID。</param>
+        /// <param name="properties">設定するプロパティ。</param>
+        /// <returns>更新後のページ情報。</returns>
+        internal async Task<NotionPageInfo> UpdatePropertiesAsync(
+            string pageId,
+            IReadOnlyDictionary<string, object> properties)
+        {
+            Dictionary<string, object> requestBody = new() { ["properties"] = properties };
+            string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
+            string responseBody = await SendAsync(
+                HttpMethod.Patch,
+                $"{API_BASE_URL}/pages/{Uri.EscapeDataString(pageId)}",
+                json,
+                false);
+            using JsonDocument document = JsonDocument.Parse(responseBody);
+            return ParsePageInfo(document.RootElement);
+        }
+
+        /// <summary>
+        ///     既存ページのタイトルだけを更新する。本文には触れない。
+        /// </summary>
+        /// <param name="pageId">ページID。</param>
+        /// <param name="title">新しいページ名。</param>
+        internal async Task UpdatePageTitleAsync(string pageId, string title)
+        {
+            Dictionary<string, object> requestBody = new()
+            {
+                ["properties"] = new Dictionary<string, object>
+                {
+                    ["title"] = new Dictionary<string, object>
+                    {
+                        ["title"] = new List<Dictionary<string, object>>
+                        {
+                            new()
+                            {
+                                ["type"] = "text",
+                                ["text"] = new Dictionary<string, string> { ["content"] = title }
+                            }
+                        }
+                    }
+                }
+            };
+
+            string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
+            await SendAsync(
+                HttpMethod.Patch,
+                $"{API_BASE_URL}/pages/{Uri.EscapeDataString(pageId)}",
+                json,
+                true);
+        }
+
+        /// <summary>
         ///     既存ページの本文を部分置換で更新する。
         ///     全文置換（replace_content）と子ページ削除（allow_deleting_content）は意図的に実装しない。
         /// </summary>

@@ -15,7 +15,7 @@ MonoBehaviour:
   _id:
     _id: skill_13
     _hashId: 1271923592
-  _displayName: 13
+  _displayName: スキル13
   _pattern: 020000000800000008000000
   _icon: {fileID: 21300000, guid: c3911bea9360eb84db691f0c717dcc6a, type: 3}
   _skillDetail: "\u30BF\u30FC\u30B2\u30C3\u30C8\u3092\u884C\u3063\u3066\u3044\u308B\u6575\u5358\u4F53\u306B\u653B\u6483\u529B{DamageMultiplier}\u306E{HitCount}\u653B\u6483\u3092\u884C\u3046\u3002\n\n\u3053\u306E\u653B\u6483\u3067\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u304C\u767A\u751F\u3057\u305F\u5834\u5408\u3001\u30AF\u30EA\u30C6\u30A3\u30AB\u30EB\u30C0\u30E1\u30FC\u30B8\u306F{CriticalMultiplier}\u306B\u306A\u308B\u3002"

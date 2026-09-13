@@ -2322,7 +2322,6 @@
     "isMainTexture": false,
     "useTilingAndOffset": false,
     "useTexelSize": true,
-    "isHDR": false,
     "m_Modifiable": true,
     "m_DefaultType": 4
 }
@@ -3792,13 +3791,12 @@
     "m_PerRendererData": false,
     "m_customAttributes": [],
     "m_Value": {
-        "m_SerializedTexture": "{\"texture\":{\"fileID\":2800000,\"guid\":\"0cc5a2d9845f1c243a311cd5fe2d190e\",\"type\":3}}",
+        "m_SerializedTexture": "",
         "m_Guid": ""
     },
     "isMainTexture": false,
     "useTilingAndOffset": false,
     "useTexelSize": true,
-    "isHDR": false,
     "m_Modifiable": true,
     "m_DefaultType": 0
 }
@@ -5993,7 +5991,7 @@
     "m_Title": "DamageMask",
     "m_Position": {
         "x": -4438.0,
-        "y": 372.0
+        "y": 372.00018310546877
     }
 }
 
@@ -6845,7 +6843,6 @@
     "isMainTexture": false,
     "useTilingAndOffset": false,
     "useTexelSize": true,
-    "isHDR": false,
     "m_Modifiable": true,
     "m_DefaultType": 0
 }
@@ -8026,7 +8023,7 @@
     "m_ObjectId": "75eac4a515cc462d84418bfe043f685c",
     "m_Title": "baseBC",
     "m_Position": {
-        "x": -4518.0,
+        "x": -4517.99951171875,
         "y": -2071.0
     }
 }
@@ -8769,7 +8766,6 @@
     "isMainTexture": false,
     "useTilingAndOffset": false,
     "useTexelSize": true,
-    "isHDR": false,
     "m_Modifiable": true,
     "m_DefaultType": 3
 }
@@ -10248,7 +10244,7 @@
     "m_ObjectId": "a97e4594d47b4647b537ae4ab200f28c",
     "m_Title": "DotDirt",
     "m_Position": {
-        "x": -4943.0,
+        "x": -4942.99951171875,
         "y": -843.0
     }
 }
@@ -11801,7 +11797,6 @@
     "isMainTexture": false,
     "useTilingAndOffset": false,
     "useTexelSize": true,
-    "isHDR": false,
     "m_Modifiable": true,
     "m_DefaultType": 4
 }
@@ -12019,7 +12014,7 @@
     "m_ObjectId": "cf44fdb6a152419bafe05ec5a945179c",
     "m_Title": "DirtBase",
     "m_Position": {
-        "x": -2395.0,
+        "x": -2394.999755859375,
         "y": -2058.0
     }
 }
@@ -13482,7 +13477,6 @@
     "isMainTexture": false,
     "useTilingAndOffset": false,
     "useTexelSize": true,
-    "isHDR": false,
     "m_Modifiable": true,
     "m_DefaultType": 0
 }
@@ -13835,7 +13829,6 @@
     "isMainTexture": false,
     "useTilingAndOffset": false,
     "useTexelSize": true,
-    "isHDR": false,
     "m_Modifiable": true,
     "m_DefaultType": 3
 }

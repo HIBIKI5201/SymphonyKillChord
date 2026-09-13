@@ -4,12 +4,15 @@ using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Composition.OutGame.Audio;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.OutGame.Skill;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
+using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
@@ -48,6 +51,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         [Tooltip("セーブデータから装備済みスキルを取得するリポジトリの Addressables キーです。")]
         private string _skillBuildRepositoryKey;
 
+        [SerializeField, SourceDataAddress]
+        [Tooltip("全スキルデータを取得する SkillRepository の Addressables キーです。未開放スキルの一覧表示に使用します。")]
+        private string _skillRepositoryKey = "OutGameSkillRepository";
+
+        [SerializeField, SourceDataAddress]
+        [Tooltip("スキルジャンルアイコンカタログの Addressables キーです。読み込みに失敗してもアイコンなしで続行します。")]
+        private string _skillGenreIconCatalogKey;
+
         [SerializeField]
         [Tooltip("スキル要素のテンプレート UXML（Skill.uxml）です。")]
         private VisualTreeAsset _skillElementTemplate;
@@ -62,8 +73,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillElementControllerEquipController _skillElementControllerEquipController;
         private OwnedSkillRepository _loadedOwnedSkillRepository;
         private SkillBuildRepository _loadedSkillBuildRepository;
+        private SkillRepository _loadedSkillRepository;
+        private SkillGenreIconCatalogAsset _loadedSkillGenreIconCatalog;
+        private Dictionary<SkillType, Sprite> _skillGenreIcons;
         private IReadOnlyList<EquippedSkill> _loadedEquippedSkills;
         private SkillTemplate[] _loadedOwnedSkillTemplates;
+        private IReadOnlyCollection<SkillTemplate> _loadedAllSkillTemplates;
         private int _loadedOwnedPoints;
         private bool _isInitialized;
         private bool _isSubscribed;
@@ -83,9 +98,42 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return false;
             }
 
+            try
+            {
+                _loadedSkillRepository =
+                    await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, destroyCancellationToken);
+            }
+            catch (System.Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning(
+                    $"[{nameof(SkillBuildInitializer)}] SkillRepositoryの読み込みに失敗しました。未開放スキル一覧なしで続行します。{ex.Message}",
+                    this);
+#endif
+                _loadedSkillRepository = null;
+            }
+
+            try
+            {
+                _loadedSkillGenreIconCatalog =
+                    await _skillGenreIconCatalogKey.LoadAssetAsync<SkillGenreIconCatalogAsset>(this, destroyCancellationToken);
+            }
+            catch (System.Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning(
+                    $"[{nameof(SkillBuildInitializer)}] SkillGenreIconCatalogAssetの読み込みに失敗しました。ジャンルアイコンなしで続行します。{ex.Message}",
+                    this);
+#endif
+                _loadedSkillGenreIconCatalog = null;
+            }
+
+            BuildSkillGenreIconMap();
+
             _loadedEquippedSkills = await GetEquippedSkillsAsync();
             IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
             _loadedOwnedSkillTemplates = BuildOwnedSkills(ownedSkills);
+            _loadedAllSkillTemplates = BuildAllSkills();
             _loadedOwnedPoints = await GetOwnedPointsAsync();
 
             return _loadedEquippedSkills != null && _loadedOwnedSkillTemplates != null;
@@ -120,10 +168,16 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 
             _ownedSkillRepositoryKey.ReleaseLoadedAsset(this);
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
+            _skillRepositoryKey.ReleaseLoadedAsset(this);
+            _skillGenreIconCatalogKey.ReleaseLoadedAsset(this);
             _loadedOwnedSkillRepository = null;
             _loadedSkillBuildRepository = null;
+            _loadedSkillRepository = null;
+            _loadedSkillGenreIconCatalog = null;
+            _skillGenreIcons = null;
             _loadedEquippedSkills = null;
             _loadedOwnedSkillTemplates = null;
+            _loadedAllSkillTemplates = null;
             _loadedOwnedPoints = 0;
             _outGameUIEvent = null;
             _isInitialized = false;
@@ -197,7 +251,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 new SkillEffectDescriptionFormatter();
             SkillDisplayTextFormatter textFormatter =
                 new SkillDisplayTextFormatter(skillEffectDescriptionFormatter);
-            _skillBuildPresenter = new(_skillBuildViewModel, textFormatter);
+            _skillBuildPresenter = new(_skillBuildViewModel, textFormatter, _skillGenreIcons);
 
             _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(
                 _uiDocument,
@@ -223,6 +277,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _skillBuildPresenter.Push(
                 _skillBuildDefinition.EquippedSkills,
                 _loadedOwnedSkillTemplates,
+                _loadedAllSkillTemplates,
                 _loadedOwnedPoints);
 
             _isInitialized = true;
@@ -269,6 +324,40 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             }
 
             return result;
+        }
+
+        /// <summary>
+        ///     全スキル一覧(未開放を含む)を構築します。
+        /// </summary>
+        /// <returns> 全スキル一覧です。読み込み失敗時は空。 </returns>
+        private IReadOnlyCollection<SkillTemplate> BuildAllSkills()
+        {
+            if (_loadedSkillRepository == null)
+            {
+                return System.Array.Empty<SkillTemplate>();
+            }
+
+            return _loadedSkillRepository.GetAllSkills();
+        }
+
+        /// <summary>
+        ///     スキルジャンルとアイコンの対応表を構築します。
+        /// </summary>
+        private void BuildSkillGenreIconMap()
+        {
+            _skillGenreIcons = new Dictionary<SkillType, Sprite>();
+            if (_loadedSkillGenreIconCatalog == null)
+            {
+                return;
+            }
+
+            foreach (SkillGenreIconCatalogEntry entry in _loadedSkillGenreIconCatalog.Entries)
+            {
+                if (entry.Icon != null)
+                {
+                    _skillGenreIcons[entry.Genre] = entry.Icon;
+                }
+            }
         }
 
         /// <summary>
@@ -327,6 +416,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 _skillBuildPresenter?.Push(
                     _skillBuildDefinition.EquippedSkills,
                     ownedSkillData,
+                    _loadedAllSkillTemplates,
                     ownedPoints);
                 if (resetsDetailToDefault)
                 {

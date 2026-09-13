@@ -24,6 +24,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// </summary>
         /// <param name="attackIntervalEvaluator"></param>
         /// <param name="presenter"></param>
+        /// <param name="attackPresenter"> 攻撃成立の判定結果を表示側へ渡すPresenter。 </param>
         /// <param name="battleState"></param>
         /// <param name="skillController"></param>
         /// <param name="targetingSystem"></param>
@@ -33,6 +34,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <param name="pendingAttackEffectService"> 攻撃の多段ヒットを管理するサービスです。 </param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
+            PlayerAttackPresenter attackPresenter,
             PlayerBattleState battleState,
             PlayerActionRestrictionState actionRestrictionState,
             SkillController skillController,
@@ -49,6 +51,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
             _presenter = presenter;
+            _attackPresenter = attackPresenter ?? throw new ArgumentNullException(nameof(attackPresenter));
             _battleState = battleState;
             _actionRestrictionState = actionRestrictionState;
             _skillController = skillController;
@@ -66,7 +69,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary> プレイヤーが攻撃を実行したときに発火します。入力1回につき1回だけ発火します。 </summary>
         public event Action<string, bool> OnAttackExecuted;
 
-        /// <summary> プレイヤーが指定拍子の攻撃を実行したときに発火します。 </summary>
+        /// <summary> ミッション記録向けに成立した攻撃の拍種を通知します。 </summary>
         public event Action<BeatType> OnAttackBeatExecuted;
 
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
@@ -99,8 +102,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             }
 
             float now = Time.unscaledTime;
-            BeatType beatType = _musicSyncService.GetCurrentBeatType();
-            bool isJustHit = RhythmJustService.Instance.IsJustHit();
+            BeatType beatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
 
             bool hasTarget = TryUpdateCurrentTarget();
 
@@ -118,6 +120,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             StartAttackInterval();
             StartAttackCooldown();
             OnAttackBeatExecuted?.Invoke(beatType);
+            _attackPresenter.Push(beatType, isJustHit);
             resultBeatType = (int)beatType;
 
             // 攻撃演出用に、攻撃が成立したことを通知する。命中の有無は問わない。
@@ -415,6 +418,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         }
 
         private readonly AttackResultPresenter _presenter;
+        private readonly PlayerAttackPresenter _attackPresenter;
         private readonly PlayerBattleState _battleState;
         private readonly PlayerActionRestrictionState _actionRestrictionState;
         private readonly SkillController _skillController;

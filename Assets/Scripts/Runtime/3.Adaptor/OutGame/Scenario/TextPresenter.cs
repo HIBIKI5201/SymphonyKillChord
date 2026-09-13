@@ -19,10 +19,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary>
         /// テキスト表示要求をビューへ通知する。
         /// </summary>
-        public ValueTask ShowTextAsync(string message, CancellationToken ct)
+        public ValueTask ShowTextAsync(string speaker, string message, CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
-            _viewSink.SetText(message);
+            var dto = new ScenarioTextViewDTO(speaker, message);
+            _viewSink.SetText(in dto);
             return default;
         }
 

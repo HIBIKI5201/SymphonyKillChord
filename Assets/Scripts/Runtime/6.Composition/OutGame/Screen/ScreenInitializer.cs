@@ -4,12 +4,14 @@ using KillChord.Runtime.Adaptor.OutGame.Screen;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using SymphonyFrameWork.Attribute;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
@@ -87,7 +89,11 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
-            _screenController.ShowHome();
+            if (!SaveStore.IsLoaded<SaveData>()
+                || SaveStore.Get<SaveData>().Tutorial.Phase >= TutorialPhase.BattleCompleted)
+            {
+                _screenController.ShowHome();
+            }
             return true;
         }
 
@@ -259,7 +265,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             HomeScreenView homeScreenView = new HomeScreenView(homeRoot, _outGameUIEvent);
             StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
-            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent);
+            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent, null, null, null, null, null);
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);

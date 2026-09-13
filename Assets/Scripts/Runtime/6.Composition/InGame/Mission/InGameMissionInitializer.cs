@@ -297,6 +297,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _scenarioController = null;
             }
 
+            _scenarioView?.EndPlayback();
             SetScenarioDisplayActive(false);
 
             _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
@@ -373,7 +374,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private ScenarioSettingsAsset _loadedScenarioSettings;
         private ScenarioUsecase _scenarioUsecase;
         private ScenarioInputController _scenarioInputController;
-        private ViewModel _scenarioViewModel;
+        private ScenarioViewModel _scenarioViewModel;
 
         /// <summary>
         ///     Mission定義にシナリオ再生ステップがあるか確認します。
@@ -402,7 +403,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             }
 
             ScenarioAdvanceGate advanceGate = new();
-            _scenarioViewModel = new ViewModel();
+            _scenarioViewModel = new ScenarioViewModel();
             ScenarioHandlerRepo handlerRepo = new();
             IScenarioRepository scenarioRepository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_loadedBackgroundCatalog);
@@ -486,7 +487,10 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
-            _scenarioInputView.Initialize(_scenarioInputController, inputComposition.GetInputView);
+            _scenarioInputView.Initialize(
+                _scenarioInputController,
+                inputComposition.GetInputView,
+                _scenarioViewModel);
             _scenarioController = new MissionScenarioController(
                 _moduleContainer.MissionRuntimeService,
                 _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
@@ -505,6 +509,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private void HandleScenarioPlaybackStarted()
         {
             SetScenarioDisplayActive(true);
+            _scenarioInputView.RestoreUIForPlayback();
+            _scenarioView.PrepareForPlayback();
         }
 
         /// <summary>
@@ -512,6 +518,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// </summary>
         private void HandleScenarioPlaybackEnded()
         {
+            _scenarioView.EndPlayback();
             SetScenarioDisplayActive(false);
         }
 
@@ -521,11 +528,28 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// <param name="isActive">有効にする場合はtrueです。</param>
         private void SetScenarioDisplayActive(bool isActive)
         {
-            if (_scenarioRoot != null && _scenarioRoot.activeSelf != isActive)
+            if (isActive)
             {
-                _scenarioRoot.SetActive(isActive);
-                // ScenarioViewは自身を非Activateにするため、ここでActiveにする
-                _scenarioView.gameObject.SetActive(isActive);
+                if (_scenarioRoot != null && !_scenarioRoot.activeSelf)
+                {
+                    _scenarioRoot.SetActive(true);
+                }
+
+                if (_scenarioView != null && !_scenarioView.gameObject.activeSelf)
+                {
+                    _scenarioView.gameObject.SetActive(true);
+                }
+                return;
+            }
+
+            if (_scenarioView != null && _scenarioView.gameObject.activeSelf)
+            {
+                _scenarioView.gameObject.SetActive(false);
+            }
+
+            if (_scenarioRoot != null && _scenarioRoot.activeSelf)
+            {
+                _scenarioRoot.SetActive(false);
             }
         }
 

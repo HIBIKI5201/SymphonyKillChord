@@ -14,13 +14,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <param name="currentBeatCount"> 現在の拍数。 </param>
         /// <param name="zones"> 判定ゾーンのリスト。 </param>
         /// <param name="hasTarget"> ターゲットの有無。 </param>
+        /// <param name="isJustTiming"> 音楽同期サービスによる現在のジャスト成否。 </param>
         /// <param name="targetBeatCount"> チュートリアル中等のミッション指定拍数。 </param>
-        public RhythmGuideDto(float indicatorNormalized, int? currentBeatCount, IReadOnlyList<RhythmGuideZoneDto> zones, bool hasTarget, int? targetBeatCount = null)
+        public RhythmGuideDto(float indicatorNormalized, int? currentBeatCount, IReadOnlyList<RhythmGuideZoneDto> zones, bool hasTarget, bool isJustTiming, int? targetBeatCount = null)
         {
             IndicatorNormalized = indicatorNormalized;
             CurrentBeatCount = currentBeatCount;
             Zones = zones;
             HasTarget = hasTarget;
+            IsJustTiming = isJustTiming;
             TargetBeatCount = targetBeatCount;
         }
 
@@ -32,6 +34,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         public IReadOnlyList<RhythmGuideZoneDto> Zones { get; }
         /// <summary> ターゲットの有無。 </summary>
         public bool HasTarget { get; }
+        /// <summary> 音楽同期サービスによる現在のジャスト成否。 </summary>
+        public bool IsJustTiming { get; }
         /// <summary> チュートリアル等のミッション指定拍数。 </summary>
         public int? TargetBeatCount { get; }
     }

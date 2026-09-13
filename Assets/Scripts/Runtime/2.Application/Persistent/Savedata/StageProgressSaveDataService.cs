@@ -42,7 +42,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
                 saveData.StageProgress.RecordClear(stageId.Value, achievedEvaluationIds);
-            bool tutorialChanged = isTutorial && saveData.Tutorial.Complete();
+            bool tutorialChanged = isTutorial && saveData.Tutorial.CompleteBattle();
 
             if (!stageProgressChanged && !tutorialChanged && !isFirstClear)
             {
@@ -58,8 +58,12 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         /// </summary>
         /// <param name="stageId"> クリアしたステージID。 </param>
         /// <param name="reward"> 初回クリア時に付与する報酬。 </param>
+        /// <param name="completesOpeningScenario"> オープニングチュートリアルを完了する場合はtrueです。 </param>
         /// <returns> セーブ内容が変化した場合はtrue。 </returns>
-        public async ValueTask<bool> SaveClearAsync(StageId stageId, StageReward reward)
+        public async ValueTask<bool> SaveClearAsync(
+            StageId stageId,
+            StageReward reward,
+            bool completesOpeningScenario)
         {
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
@@ -68,7 +72,10 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
                 saveData.StageProgress.RecordClear(stageId.Value, Array.Empty<string>());
-            if (!stageProgressChanged)
+            bool tutorialChanged = completesOpeningScenario
+                && saveData.Tutorial.Phase == TutorialPhase.NotStarted
+                && saveData.Tutorial.CompleteOpeningScenario();
+            if (!stageProgressChanged && !tutorialChanged)
             {
                 return false;
             }

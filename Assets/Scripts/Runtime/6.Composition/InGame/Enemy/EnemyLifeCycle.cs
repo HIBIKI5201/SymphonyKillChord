@@ -100,6 +100,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 Debug.LogError($"{nameof(EnemyRaycastDetectView)}の参照がありません。");
             if (_attackPositionSearchView == null)
                 Debug.LogError($"{nameof(NearestAttackPositionSearchView)}の参照がありません。");
+            if (_obstacleSearchView == null)
+                Debug.LogError($"{nameof(NearbyObstacleSearchView)}の参照がありません。");
             if (_targetTransform == null)
             {
                 Debug.LogError("_targetTransformの参照がありません", this);
@@ -124,9 +126,21 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             NearestAttackPositionSearchController attackPositionSearchController = new NearestAttackPositionSearchController(_attackPositionSearchView);
             NearestAttackPositionSearchService attackPositionSearchService = new NearestAttackPositionSearchService(attackPositionSearchController);
 
+            // 障害物探索
+            ObstacleSearchController obstacleSearchController = new ObstacleSearchController(_obstacleSearchView);
+            ObstacleSearchService obstacleSearchService = new ObstacleSearchService(obstacleSearchController);
+
             // Domain生成
             EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_loadedMoveData);
             EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_loadedEncounterMusicData, _loadedBattleMusicData);
+            EnemyPostAttackBehaviorSpec postAttackBehaviorSpec = new EnemyPostAttackBehaviorSpec(
+                _postAttackStayWeight,
+                _postAttackRegroupWeight,
+                _postAttackObstacleWeight,
+                _regroupDistanceMin,
+                _regroupDistanceMax,
+                _obstacleApproachRatio,
+                _overrideArrivalThreshold);
 
             AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
@@ -137,6 +151,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
             EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
+            EnemyPostAttackBehaviorUsecase postAttackBehaviorUsecase = new EnemyPostAttackBehaviorUsecase(postAttackBehaviorSpec);
             _attackReservationUsecase = attackReservationUsecase;
 
 
@@ -148,7 +163,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // Controller
             IEnemyAttackController attackController = _attackControllerGenerator.Generate(attackControllerContext);
-            EnemyAIController aiController = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController);
+            EnemyAIController aiController = new EnemyAIController(useCase, attackReservationUsecase, battleState, _enemyStateFacade, attackController, postAttackBehaviorUsecase, obstacleSearchService, battleAiRegistry);
             _aiController = aiController;
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
@@ -393,6 +408,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField] private EnemyHealthView _healthView;
         [SerializeField] private EnemyRaycastDetectView _raycastView;
         [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
+        [SerializeField, Tooltip("周囲の障害物を検索するViewです。")] private NearbyObstacleSearchView _obstacleSearchView;
         [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
         [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
         [SerializeField] private EnemyStateFacade _enemyStateFacade;
@@ -427,6 +443,22 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
         private Transform _targetTransform;
+
+        [Header("攻撃後行動")]
+        [SerializeField, Min(0f), Tooltip("その場に留まり再攻撃する重み。")]
+        private float _postAttackStayWeight = 0.5f;
+        [SerializeField, Min(0f), Tooltip("近くの味方に合流する重み。")]
+        private float _postAttackRegroupWeight = 0.25f;
+        [SerializeField, Min(0f), Tooltip("近くの障害物に接近する重み。")]
+        private float _postAttackObstacleWeight = 0.25f;
+        [SerializeField, Min(0f), Tooltip("合流時、味方から離れる最小距離(m)。")]
+        private float _regroupDistanceMin = 2f;
+        [SerializeField, Min(0f), Tooltip("合流時、味方から離れる最大距離(m)。")]
+        private float _regroupDistanceMax = 3f;
+        [SerializeField, Range(0f, 1f), Tooltip("障害物へ近づく割合。自身と障害物の距離をこの割合だけ縮める。")]
+        private float _obstacleApproachRatio = 0.3f;
+        [SerializeField, Min(0f), Tooltip("上書き移動先への到達とみなす距離(m)。")]
+        private float _overrideArrivalThreshold = 0.5f;
 
         [Header("砲兵の場合のみ必要")]
         [SerializeField] private ShellSpawner _shellSpawner;
