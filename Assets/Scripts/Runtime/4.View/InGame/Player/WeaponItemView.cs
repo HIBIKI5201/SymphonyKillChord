@@ -1,6 +1,7 @@
 using KillChord.Runtime.View.Persistent.Music;
 using LitMotion;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace KillChord.Runtime.View.InGame.Player
 {
@@ -71,6 +72,9 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃Effect。")]
         private ParticleSystem _attackEffect;
 
+        [SerializeField, Tooltip("攻撃時に点滅させるライト。")]
+        private MuzzleFlashLight _muzzleFlashLight;
+
         [SerializeField, Min(0f), Tooltip("攻撃Effectを再生するまでの遅延時間。")]
         private float _effectDelaySeconds;
 
@@ -128,6 +132,16 @@ namespace KillChord.Runtime.View.InGame.Player
                 .WithOnComplete(() => _attackEffect.Play())
                 .WithOnCancel(() => _attackEffect.Stop(true))
                 .RunWithoutBinding();
+        }
+
+        private void PlayFlashLight()
+        {
+            if (_muzzleFlashLight == null)
+            {
+                return;
+            }
+            
+            _ = _muzzleFlashLight.Flash();
         }
 
         /// <summary>
