@@ -26,8 +26,9 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         {
             _musicPlayer = GetComponent<MusicPlayer>();
             MusicViewModel musicViewModel = new MusicViewModel();
-            _musicPlayer.Bind(musicViewModel);
+            // Bind時に現在のCue名が即時通知されるため、再生コンポーネントを先に初期化します。
             _musicPlayer.Initialize();
+            _musicPlayer.Bind(musicViewModel);
             if (!ServiceLocator.RegisterInstance(_musicPlayer, LocateTypeEnum.Locator))
             {
                 Debug.LogError(
