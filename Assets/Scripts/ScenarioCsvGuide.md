@@ -151,7 +151,7 @@
 10,Fade,1,0,0.5,PortraitLeft,Black
 ```
 
-`FadeTarget` の `Black` は全画面黒オーバーレイ、`FadeMode` の `Black` は立ち絵RGBの黒化です。立ち絵黒化の対象には `PortraitLeft` / `PortraitCenter` / `PortraitRight` だけを指定できます。
+`対象`に指定する `Black` は全画面黒オーバーレイ、`方法`に指定する `Black` は立ち絵RGBの黒化です。立ち絵黒化の対象には `PortraitLeft` / `PortraitCenter` / `PortraitRight` だけを指定できます。
 
 テキスト末尾のTriggerから立ち絵を黒くする場合は、開始値、終了値、秒数の後ろへ対象と方法を追加します。
 
@@ -159,8 +159,6 @@
 20,Text,案内役,この本文の表示完了時に左の立ち絵が黒くなります
 21,Trigger,20,AtTextEnd,,,Fade,0,1,0.5,PortraitLeft,Black
 ```
-
-ヘッダー付きCSVでは通常Fade行に `FadeMode` 列を追加します。Triggerでは `OnTriggerArg4` が対象、`OnTriggerArg5` が方法です。
 
 ## 省略してよい書き方
 
