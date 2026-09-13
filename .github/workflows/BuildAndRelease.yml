@@ -135,7 +135,7 @@ jobs:
   build-and-release:
     needs: check
     if: needs.check.outputs.should_run == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
-    runs-on: self-hosted
+    runs-on: [self-hosted, windows]
     concurrency:
       group: unity-self-hosted-build
       cancel-in-progress: false
@@ -274,7 +274,7 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -343,7 +343,7 @@ jobs:
           }
           $TargetProfiles = $SelectedProfiles -join ","
           "SELECTED_PROFILES=$TargetProfiles" | Add-Content -Path $env:GITHUB_ENV
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -399,7 +399,7 @@ jobs:
           "UNITY_BUILD_OUTPUT_DIR=$ResolvedOutputDir" | Add-Content -Path $env:GITHUB_ENV
 
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -507,7 +507,7 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -609,7 +609,7 @@ jobs:
           Write-Host "設定した aapt2 パス: $($Aapt2.FullName)"
 
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -667,7 +667,7 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -707,7 +707,7 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -756,7 +756,7 @@ jobs:
           }
 
           Write-Host "Unityライセンス: 有効"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -951,7 +951,7 @@ jobs:
           Write-Host ""
           Write-Host "[INFO]: すべてのパッケージがインストールされました。配置された総アセットファイル数: $TotalPlaced"
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -979,7 +979,7 @@ jobs:
           }
           Write-Host "[INFO]: NuGet パッケージが復元されました。"
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -1099,7 +1099,7 @@ jobs:
           # 成果物すらリリースできなくなる。判定はexit_codeを見た後続ステップに委ねるため、
           # ここでは常に0を返す。
           exit 0
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -1167,7 +1167,7 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
         
 # ==================================================================================================
 
@@ -1296,7 +1296,7 @@ jobs:
           "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
           Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
         
 # ==================================================================================================
 
@@ -1322,7 +1322,7 @@ jobs:
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[INFO]: タグ名を生成しました: $TagName"
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
         
 # ==================================================================================================
 
@@ -1385,7 +1385,7 @@ jobs:
             }
           }
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
         
 # ==================================================================================================
 
@@ -1495,7 +1495,7 @@ jobs:
               exit 1
           }
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
         
 # ==================================================================================================
 
@@ -1541,7 +1541,7 @@ jobs:
             Write-Host "::warning::Unity ビルドが正常終了しなかったため（終了コード: $env:UNITY_EXIT_CODE）、ワークフローを失敗として記録します。成功したプロファイルの成果物は既にリリースへアップロード済みです。"
             exit 1
           }
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -1569,7 +1569,7 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
 
 # ==================================================================================================
 
@@ -1661,4 +1661,4 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: ${{ runner.os == 'Windows' && 'powershell' || 'pwsh' }}
+        shell: powershell
