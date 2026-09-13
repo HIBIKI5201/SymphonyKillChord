@@ -12,160 +12,159 @@
 }
 
 .setting-window {
-    width: 94%;
-    height: 88%;
-    min-height: 520px;
-    padding: 20px;
-    background-color: rgb(50, 58, 64);
-    border-left-width: 2px;
-    border-right-width: 2px;
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-    border-left-color: rgb(150, 162, 170);
-    border-right-color: rgb(150, 162, 170);
-    border-top-color: rgb(150, 162, 170);
-    border-bottom-color: rgb(150, 162, 170);
+    width: 572px;
+    height: 1090px;
+    padding: 40px 40px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.setting-window--menu {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OptionMenu_Back.png?fileID=21300000&guid=bc61cc40ebe776f47ad55951da4d527e&type=3#UI_OptionMenu_Back");
+}
+
+.setting-window--audio {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Option_Back.png?fileID=21300000&guid=ae2a34555d2331543a19da0a6aa5a2cb&type=3#UI_Option_Back");
 }
 
 .setting-top-bar {
-    height: 72px;
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.setting-back-button {
-    width: 230px;
-    height: 58px;
-    font-size: 26px;
-    color: white;
-    background-color: rgb(83, 94, 102);
+    margin-bottom: 28px;
 }
 
 .setting-title {
-    flex-grow: 1;
-    margin-right: 230px;
     font-size: 38px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     color: white;
+    margin-bottom: 12px;
 }
 
-.setting-layout {
+.setting-title-divider {
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+.setting-menu {
     flex-grow: 1;
-    flex-direction: row;
     min-height: 0;
 }
 
-.setting-category-list {
-    width: 25%;
-    min-width: 220px;
-    padding-right: 14px;
+.setting-menu-list {
+    flex-shrink: 0;
 }
 
-.setting-category-button {
+.setting-menu-spacer {
+    flex-grow: 1;
+}
+
+.setting-menu-button {
     height: 72px;
-    margin-bottom: 12px;
-    padding-left: 22px;
-    border-left-width: 6px;
-    border-left-color: rgb(150, 162, 170);
+    margin-bottom: 16px;
     font-size: 27px;
     -unity-font-style: bold;
-    -unity-text-align: middle-left;
-    color: rgb(218, 224, 228);
-    background-color: rgb(69, 78, 84);
-}
-
-.setting-category-button--selected {
-    border-left-color: rgb(113, 205, 232);
-    color: white;
-    background-color: rgb(83, 112, 126);
-}
-
-.setting-content-scroll {
-    flex-grow: 1;
-    min-width: 0;
-    background-color: rgb(61, 70, 76);
+    -unity-text-align: middle-center;
+    color: rgb(58, 47, 20);
+    background-color: rgb(253, 246, 224);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(184, 155, 74);
+    border-right-color: rgb(184, 155, 74);
+    border-top-color: rgb(184, 155, 74);
+    border-bottom-color: rgb(184, 155, 74);
 }
 
 .setting-panel {
     flex-grow: 1;
-    padding: 22px 26px;
+    min-height: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.setting-panel-top-bar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.setting-panel-back-button {
+    width: 44px;
+    height: 44px;
+    margin-right: 12px;
+    font-size: 28px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
 }
 
 .setting-panel-title {
-    height: 52px;
-    margin-bottom: 12px;
-    font-size: 32px;
+    font-size: 30px;
     -unity-font-style: bold;
     color: white;
 }
 
 .setting-row {
-    min-height: 138px;
-    margin-bottom: 14px;
-    padding: 14px 18px;
-    background-color: rgb(72, 82, 89);
+    flex-direction: row;
+    align-items: center;
+    min-height: 64px;
+    margin-top: 26px;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
 }
 
 .setting-row-header {
+    width: 90px;
     flex-direction: row;
     align-items: center;
-    margin-bottom: 10px;
 }
 
 .setting-row-label {
-    width: 150px;
-    font-size: 26px;
+    width: 90px;
+    font-size: 24px;
     -unity-font-style: bold;
     color: white;
 }
 
 .setting-control-row {
+    flex-grow: 1;
     flex-direction: row;
     align-items: center;
-    min-height: 54px;
+    min-height: 40px;
 }
 
-
-
 .setting-value-label {
-    width: 48px;
-    margin-right: 10px;
-    font-size: 28px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    color: white;
-    background-color: rgb(42, 48, 52);
+    display: none;
 }
 
 .setting-slider {
     flex-grow: 1;
     min-width: 220px;
-    height: 48px;
+    height: 40px;
 }
 
-.setting-system-description {
-    margin-top: 16px;
-    margin-bottom: 8px;
-    font-size: 26px;
-    color: white;
+.setting-slider .unity-base-slider__tracker {
+    top: 50%;
+    height: 4px;
+    margin-top: -2px;
+    background-color: rgb(253, 246, 224);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
 }
 
-.setting-system-note {
-    margin-bottom: 30px;
-    font-size: 21px;
-    color: rgb(218, 224, 228);
-}
-
-.setting-return-title-button {
-    width: 360px;
-    height: 70px;
-    align-self: flex-end;
-    font-size: 25px;
-    -unity-font-style: bold;
-    color: white;
-    background-color: rgb(145, 70, 70);
+.setting-slider .unity-base-slider__dragger {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: rgb(63, 212, 240);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
 }
 
 .setting-dialog-overlay {
@@ -219,34 +218,4 @@
 .setting-dialog-confirm {
     color: white;
     background-color: rgb(145, 70, 70);
-}
-
-.setting-layout--narrow {
-    flex-direction: column;
-}
-
-.setting-layout--narrow .setting-category-list {
-    width: 100%;
-    min-width: 0;
-    height: 72px;
-    padding-right: 0;
-    flex-direction: row;
-}
-
-.setting-layout--narrow .setting-category-button {
-    flex-grow: 1;
-    height: 62px;
-    margin-right: 8px;
-    border-left-width: 0;
-    border-bottom-width: 6px;
-    border-bottom-color: rgba(0, 0, 0, 0);
-    -unity-text-align: middle-center;
-}
-
-.setting-layout--narrow .setting-category-button--selected {
-    border-bottom-color: rgb(113, 205, 232);
-}
-
-.setting-layout--narrow .setting-content-scroll {
-    width: 100%;
 }

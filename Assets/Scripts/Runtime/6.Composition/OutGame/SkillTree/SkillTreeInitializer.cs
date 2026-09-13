@@ -87,6 +87,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         [Tooltip("スキルプレビュー動画を再生する VideoPlayer です。")]
         private VideoPlayer _videoPlayer;
 
+        [SerializeField]
+        [Tooltip("発動コマンド表示に使う正六角形スプライト（Assets/Arts/UI/UI_hexagon.png）です。")]
+        private Sprite _comboHexIcon;
+
         private VisualElement _rootElement;
         private VisualElement _skillDetailRoot;
         private VisualElement _playerStatusRoot;
@@ -386,7 +390,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             InitializePhaseState();
             BuildVideoClipDict();
 
-            _skillDetailScreenView = new SkillDetailScreenView(_skillDetailRoot, _outGameUIEvent);
+            _skillDetailScreenView = new SkillDetailScreenView(_skillDetailRoot, _outGameUIEvent, _comboHexIcon);
             _skillDetailScreenView.HideImmediately();
             _playerStatusScreenView = new PlayerStatusScreenView(
                 _playerStatusRoot,
@@ -907,6 +911,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillTreeController.OnSkillNodeSelected(nodeId.Id);
             _isSkillDetailOpen = true;
             _skillTreeResetDialogView.SetResetButtonVisible(false);
+            _skillTreeViewportView.FocusOnNode(nodeId.Id);
         }
 
         /// <summary>
@@ -919,6 +924,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillTreeController.OnSkillDetailClosed();
             _skillDetailScreenView.Hide();
             _skillTreeResetDialogView.SetResetButtonVisible(true);
+            _skillTreeViewportView.ClearFocusZoom();
         }
 
         /// <summary>
@@ -983,6 +989,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         {
             _isSkillDetailOpen = false;
             _skillTreeViewportView?.CancelFocus();
+            _skillTreeViewportView?.ClearFocusZoom();
         }
 
         /// <summary>
@@ -1045,6 +1052,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _isSkillDetailOpen = false;
             _skillDetailScreenView?.HideImmediately();
             dialogView.SetResetButtonVisible(true);
+            _skillTreeViewportView?.ClearFocusZoom();
         }
 
         /// <summary>

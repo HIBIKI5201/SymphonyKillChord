@@ -91,6 +91,11 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private const string DETAIL_SCREEN_NAME = "StageDetailContainer";
         /// <summary> 作戦マップ背景画像要素名。 </summary>
         private const string BACKGROUND_IMAGE_NAME = "BackgroundImage";
+        /// <summary>
+        ///     背景画像の拡大率。StageSelect.uxmlの BackgroundImage 要素に設定した scale と一致させること。
+        ///     resolvedStyle.scaleの実行時読み取りは反映タイミングが不安定なため、固定値として持つ。
+        /// </summary>
+        private const float BACKGROUND_ZOOM_SCALE = 1.2f;
         /// <summary> 設定画面ショートカットボタン要素名。 </summary>
         private const string SETTING_SHORTCUT_BUTTON_NAME = "SettingShortcutButton";
         /// <summary> 装備スキルスロットが空であることを表すID。 </summary>
@@ -991,7 +996,11 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                     new Vector2(MAP_LEFT_DRAG_BUFFER, _stageMapScrollView.scrollOffset.y);
             });
 
-            _backgroundImageElement = root.Q<VisualElement>(BACKGROUND_IMAGE_NAME);
+            // rootはOutGame.uxml側の共通ツリー全体であり、"BackgroundImage"という名前は
+            // Home/SkillBuildなど他画面にも同名で存在するため、root.Q(...)では文書順で最初に
+            // ヒットした別画面の要素を誤って取得してしまう。作戦画面自身のScrollViewの親
+            // (StageSelect.uxmlの実体ルート)を起点にクエリし、必ず自画面の要素を取得する。
+            _backgroundImageElement = mapScrollView.parent?.Q<VisualElement>(BACKGROUND_IMAGE_NAME);
             _backgroundParallaxItem?.Pause();
             _backgroundParallaxItem = _stageMapScrollView.schedule
                 .Execute(UpdateBackgroundParallax)
@@ -1007,16 +1016,20 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             if (_backgroundImageElement == null || _stageMapScrollView == null) { return; }
 
-            float lowValue = _stageMapScrollView.horizontalScroller.lowValue;
-            float highValue = _stageMapScrollView.horizontalScroller.highValue;
-            float range = highValue - lowValue;
-            float t = range > 0.0f
-                ? Mathf.Clamp01((_stageMapScrollView.scrollOffset.x - lowValue) / range)
+            // horizontalScroller.lowValue/highValueはhorizontal-scroller-visibility="Hidden"の
+            // 影響でタイミングによって範囲が取得できないことがあるため、
+            // ClampScrollOffsetXと同じ「自前で追跡しているキャンバス幅/表示領域幅」から算出する。
+            float viewportWidth = GetStageMapViewportWidth();
+            float maxScrollX = Mathf.Max(
+                0.0f,
+                _stageMapCanvasWidth + MAP_LEFT_DRAG_BUFFER - viewportWidth);
+            float t = maxScrollX > 0.0f
+                ? Mathf.Clamp01(_stageMapScrollView.scrollOffset.x / maxScrollX)
                 : 0.0f;
 
-            float viewportWidth = GetStageMapViewportWidth();
-            float scaleX = _backgroundImageElement.resolvedStyle.scale.value.x;
-            float extraWidth = viewportWidth * Mathf.Max(0.0f, scaleX - 1.0f);
+            // resolvedStyle.scaleは値の反映タイミングが不安定なため、
+            // USS側のscale: 1.2 1.2と対応する固定値を直接使う。
+            float extraWidth = viewportWidth * (BACKGROUND_ZOOM_SCALE - 1.0f);
 
             _backgroundImageElement.style.translate = new Translate(-t * extraWidth, 0.0f);
         }

@@ -13,8 +13,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
     /// </summary>
     public class SkillDetailScreenView : ScreenViewBase, ISkillDetailShowable, ISkillDetailViewModel, IDisposable
     {
-        public SkillDetailScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent) : base(rootElement, outGameUIEvent)
+        public SkillDetailScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent, Sprite comboHexIcon) : base(rootElement, outGameUIEvent)
         {
+            _comboHexIcon = comboHexIcon;
             _skillName = rootElement.Q<Label>(name: E_NAME_SKILL_NAME_LABEL);
             _skillHeaderGenreIcon = rootElement.Q<Image>(name: E_NAME_SKILL_HEADER_GENRE_ICON);
             _skillCommand = rootElement.Q<Label>(name: E_NAME_SKILL_COMMAND_LABEL);
@@ -53,10 +54,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             ComboHexRowBuilder.Build(
                 _comboRow,
                 dto.HasSkill ? dto.ComboStepColors : Array.Empty<Color>(),
-                COMBO_HEX_CLASS_NAME,
-                COMBO_HEX_CAP_TOP_CLASS_NAME,
-                COMBO_HEX_RECT_CLASS_NAME,
-                COMBO_HEX_CAP_BOTTOM_CLASS_NAME);
+                _comboHexIcon,
+                COMBO_HEX_CLASS_NAME);
             _skillGenre.text = dto.SkillGenre;
             _skillGenreIcon.sprite = dto.SkillGenreIcon;
             _skillGenreIcon.style.display = dto.SkillGenreIcon == null ? DisplayStyle.None : DisplayStyle.Flex;
@@ -99,9 +98,6 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string E_NAME_SKILL_COMMAND_LABEL = "SkillCommandLabel";
         private const string E_NAME_COMBO_ROW = "ComboRow";
         private const string COMBO_HEX_CLASS_NAME = "skilltree-combo-hex";
-        private const string COMBO_HEX_CAP_TOP_CLASS_NAME = "skilltree-combo-hex-cap-top";
-        private const string COMBO_HEX_RECT_CLASS_NAME = "skilltree-combo-hex-rect";
-        private const string COMBO_HEX_CAP_BOTTOM_CLASS_NAME = "skilltree-combo-hex-cap-bottom";
         private const string E_NAME_GENRE_ROW = "GenreRow";
         private const string E_NAME_SKILL_GENRE_LABEL = "SkillGenreLabel";
         private const string E_NAME_SKILL_GENRE_ICON = "SkillGenreIcon";
@@ -121,6 +117,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private Image _skillHeaderGenreIcon;
         private Label _skillCommand;
         private VisualElement _comboRow;
+        private readonly Sprite _comboHexIcon;
         private VisualElement _genreRow;
         private Label _skillGenre;
         private Image _skillGenreIcon;

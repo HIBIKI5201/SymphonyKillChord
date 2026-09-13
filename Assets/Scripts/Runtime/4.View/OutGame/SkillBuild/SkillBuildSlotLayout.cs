@@ -19,14 +19,17 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="rootElement"> 画面ルート要素。 </param>
         /// <param name="skillDataResolver"> スキル ID から表示データを取得する関数。 </param>
         /// <param name="onSlotTapped"> スロットタップ時に、装備解除するスキル ID を通知するコールバック。 </param>
+        /// <param name="comboHexIcon"> 発動コマンド表示に使う六角形スプライト(UI_hexagon)。 </param>
         public SkillBuildSlotLayout(
             VisualElement rootElement,
             Func<int, SkillViewData?> skillDataResolver,
-            Action<int> onSlotTapped)
+            Action<int> onSlotTapped,
+            Sprite comboHexIcon)
         {
             _rootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
             _skillDataResolver = skillDataResolver ?? throw new ArgumentNullException(nameof(skillDataResolver));
             _onSlotTapped = onSlotTapped;
+            _comboHexIcon = comboHexIcon;
 
             _slotElements = _rootElement.Query<VisualElement>(className: SKILL_ELEMENT_SLOT_CLASS_NAME).ToList();
             _slotSkillIds = new int[_slotElements.Count];
@@ -86,15 +89,13 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string SLOT_NAME_LABEL_NAME = "skill-slot-name";
         private const string SLOT_COMBO_ROW_NAME = "ComboRow";
         private const string SLOT_COMBO_HEX_CLASS_NAME = "skillbuild-slot-combo-hex";
-        private const string SLOT_COMBO_HEX_CAP_TOP_CLASS_NAME = "skillbuild-slot-combo-hex-cap-top";
-        private const string SLOT_COMBO_HEX_RECT_CLASS_NAME = "skillbuild-slot-combo-hex-rect";
-        private const string SLOT_COMBO_HEX_CAP_BOTTOM_CLASS_NAME = "skillbuild-slot-combo-hex-cap-bottom";
         private const string SLOT_FILLED_CLASS_NAME = "is-filled";
         private const int EMPTY_SKILL_ID = -1;
 
         private readonly VisualElement _rootElement;
         private readonly Func<int, SkillViewData?> _skillDataResolver;
         private readonly Action<int> _onSlotTapped;
+        private readonly Sprite _comboHexIcon;
         private readonly List<VisualElement> _slotElements;
         private readonly int[] _slotSkillIds;
 
@@ -148,20 +149,14 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         /// <param name="row"> 六角形を並べる行要素。 </param>
         /// <param name="stepColors"> 発動コマンドの入力順に並んだ色一覧。 </param>
-        private static void SetComboSteps(VisualElement row, Color[] stepColors)
+        private void SetComboSteps(VisualElement row, Color[] stepColors)
         {
             if (row == null)
             {
                 return;
             }
 
-            ComboHexRowBuilder.Build(
-                row,
-                stepColors,
-                SLOT_COMBO_HEX_CLASS_NAME,
-                SLOT_COMBO_HEX_CAP_TOP_CLASS_NAME,
-                SLOT_COMBO_HEX_RECT_CLASS_NAME,
-                SLOT_COMBO_HEX_CAP_BOTTOM_CLASS_NAME);
+            ComboHexRowBuilder.Build(row, stepColors, _comboHexIcon, SLOT_COMBO_HEX_CLASS_NAME);
         }
 
         /// <summary>

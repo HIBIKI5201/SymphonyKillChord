@@ -60,106 +60,99 @@
 
 .skilltree-panel-header-bar {
     flex-shrink: 0;
-    background-color: rgb(28, 46, 77);
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Reserch_NameTab.png?fileID=21300000&guid=16997e8e901f4164e9f0abf42a763d2b&type=3#UI_Reserch_NameTab");
+    -unity-background-scale-mode: stretch-to-fill;
     color: rgb(255, 255, 255);
-    font-size: 20px;
+    font-size: 30px;
     -unity-font-style: bold;
     -unity-text-align: middle-left;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    padding: 8px 14px;
+    padding: 14px 20px;
 }
 
 .skilltree-panel-body {
     flex-direction: column;
-    padding: 12px 14px;
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OptionMenu_Back.png?fileID=21300000&guid=bc61cc40ebe776f47ad55951da4d527e&type=3#UI_OptionMenu_Back");
+    -unity-background-scale-mode: stretch-to-fill;
+    padding: 18px 20px;
 }
 
 .skilltree-status-row {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 6px;
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Status_Back.png?fileID=21300000&guid=6ad5873f2bf323c43b7200b9b7fca4d5&type=3#UI_Status_Back");
+    -unity-background-scale-mode: stretch-to-fill;
+    padding: 4px 8px;
+    margin-bottom: 10px;
 }
 
 .skilltree-status-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
+    width: 34px;
+    height: 34px;
+    margin-right: 12px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
 .skilltree-status-label {
     color: rgb(207, 214, 230);
-    font-size: 16px;
+    font-size: 24px;
+    flex-grow: 1;
 }
 
-.skilltree-status-value {
-    flex-grow: 1;
+.skilltree-status-current-value {
     color: rgb(255, 255, 255);
-    font-size: 16px;
+    font-size: 24px;
+    width: 90px;
     -unity-text-align: middle-right;
+}
+
+.skilltree-status-delta-value {
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    width: 130px;
+    margin-left: 6px;
+    margin-right: -10px;
+    -unity-text-align: middle-left;
 }
 
 .skilltree-info-top {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
 }
 
 .skilltree-info-icon {
-    width: 64px;
-    height: 64px;
-    min-width: 64px;
-    min-height: 64px;
+    width: 84px;
+    height: 84px;
+    min-width: 84px;
+    min-height: 84px;
     background-color: rgb(0, 0, 0);
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
     border-bottom-right-radius: 50%;
     border-bottom-left-radius: 50%;
     -unity-background-scale-mode: scale-to-fit;
-    margin-right: 12px;
+    margin-right: 16px;
 }
 
 .skilltree-info-name {
     color: rgb(255, 255, 255);
-    font-size: 22px;
+    font-size: 28px;
     -unity-font-style: bold;
     white-space: normal;
 }
 
 .skilltree-combo-row {
     flex-direction: row;
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
 .skilltree-combo-hex {
-    width: 24px;
-    flex-direction: column;
-    align-items: center;
-    margin-right: 8px;
-}
-
-.skilltree-combo-hex-cap-top,
-.skilltree-combo-hex-cap-bottom {
-    width: 0;
-    height: 0;
-    border-left-width: 12px;
-    border-right-width: 12px;
-    border-left-color: rgba(0, 0, 0, 0);
-    border-right-color: rgba(0, 0, 0, 0);
-}
-
-.skilltree-combo-hex-cap-top {
-    border-bottom-width: 7px;
-}
-
-.skilltree-combo-hex-cap-bottom {
-    border-top-width: 7px;
-}
-
-.skilltree-combo-hex-rect {
-    width: 24px;
-    height: 13px;
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
 }
 
 .skilltree-info-cost-row {
@@ -171,7 +164,7 @@
 
 .skilltree-info-cost-label {
     color: rgb(207, 214, 230);
-    font-size: 16px;
+    font-size: 20px;
 }
 
 .skilltree-info-action-button {
@@ -183,5 +176,5 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
 }

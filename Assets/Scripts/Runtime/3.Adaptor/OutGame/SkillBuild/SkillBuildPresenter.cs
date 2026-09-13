@@ -37,13 +37,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <param name="ownedSkills"> 入手済みスキル一覧。 </param>
         /// <param name="allSkills"> 全スキル一覧(未解放を含む)。 </param>
         /// <param name="ownedPoints"> 所持ポイント。 </param>
+        /// <param name="skillLevels"> 保存記録があるスキルの現在レベル一覧(スキルID→レベル)。記録が無いスキルはテンプレートの基準レベルを使う。 </param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException"></exception>
         public void Push(
             IReadOnlyList<EquippedSkill> equippedSkills,
             IReadOnlyList<SkillTemplate> ownedSkills,
             IReadOnlyCollection<SkillTemplate> allSkills,
-            int ownedPoints)
+            int ownedPoints,
+            IReadOnlyDictionary<int, int> skillLevels)
         {
             if (equippedSkills == null)
             {
@@ -92,7 +94,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 }
 
                 bool isUnlocked = ownedSkillIds.Contains(skillTemplate.Id.Value);
-                SkillViewData viewData = BuildSkillViewData(skillTemplate, isUnlocked);
+                int level = skillLevels != null && skillLevels.TryGetValue(skillTemplate.Id.Value, out int savedLevel)
+                    ? savedLevel
+                    : skillTemplate.Level.Value;
+                SkillViewData viewData = BuildSkillViewData(skillTemplate, isUnlocked, level);
                 (isUnlocked ? unlockedSkills : lockedSkills).Add(viewData);
             }
 
@@ -118,8 +123,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// </summary>
         /// <param name="skillTemplate"> スキルテンプレート。 </param>
         /// <param name="isUnlocked"> 解放済みの場合は true。 </param>
+        /// <param name="level"> 表示する現在レベル。 </param>
         /// <returns> 表示用データ。 </returns>
-        private SkillViewData BuildSkillViewData(SkillTemplate skillTemplate, bool isUnlocked)
+        private SkillViewData BuildSkillViewData(SkillTemplate skillTemplate, bool isUnlocked, int level)
         {
             SkillDisplayText text = GetOrCreateText(skillTemplate);
             return new SkillViewData(
@@ -131,7 +137,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 text.HasEffectDescription,
                 text.EffectDescription,
                 skillTemplate.Tips,
-                skillTemplate.Level.Value,
+                level,
                 isUnlocked,
                 ResolveGenreIcon(skillTemplate),
                 ResolveGenreIds(skillTemplate),

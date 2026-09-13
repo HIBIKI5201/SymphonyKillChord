@@ -9549,6 +9549,7 @@ MonoBehaviour:
   _uiDocument: {fileID: 2119823347}
   _screenRuleDataKey: OutGameScreenRuleData
   _titleSceneName: Title
+  _comboHexIcon: {fileID: 21300000, guid: 75467e8beed827d4da4c0672f7545e88, type: 3}
 --- !u!4 &510963396
 Transform:
   m_ObjectHideFlags: 0
@@ -9598,6 +9599,7 @@ MonoBehaviour:
   _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
   _skillInputProgressUIConfigKey: SkillInputProgressUIConfig
   _videoPlayer: {fileID: 1876322594}
+  _comboHexIcon: {fileID: 21300000, guid: 75467e8beed827d4da4c0672f7545e88, type: 3}
 --- !u!114 &510963399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9617,6 +9619,7 @@ MonoBehaviour:
   _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
   _skillInputProgressUIConfigKey: SkillInputProgressUIConfig
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
+  _comboHexIcon: {fileID: 21300000, guid: 75467e8beed827d4da4c0672f7545e88, type: 3}
 --- !u!114 &510963400
 MonoBehaviour:
   m_ObjectHideFlags: 0

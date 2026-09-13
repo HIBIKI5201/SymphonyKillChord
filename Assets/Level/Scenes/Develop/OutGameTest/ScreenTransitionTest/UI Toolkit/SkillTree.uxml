@@ -8,8 +8,11 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillNodeConn.uss?fileID=7433441132597879392&amp;guid=8a472d3ba336aec4780157542cb10f7b&amp;type=3#SkillNodeConn"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillTreeLayout.uss?fileID=7433441132597879392&amp;guid=26021df5ccc97f84d9802e0b454cd7e2&amp;type=3#SkillTreeLayout"/>
     <ui:VisualElement name="SkillTreeScreenRoot" style="flex-grow: 1; background-color: rgb(55, 164, 164);">
-        <ui:ScrollView mode="Vertical" touch-scroll-type="Elastic" name="SkillTreeContainer" style="flex-grow: 1; align-content: flex-end; width: 100%; height: 100%; position: relative; justify-content: flex-end; align-items: stretch; align-self: auto;">
-            <ui:VisualElement name="SkillTreeRoot" picking-mode="Position" enabled="true" class="skill-tree-canvas" style="flex-grow: 1; position: relative; bottom: auto; top: auto; left: auto; right: auto; overflow: visible; align-self: auto; align-items: stretch; align-content: center; width: 100%; height: 1380px;">
+        <ui:ScrollView mode="VerticalAndHorizontal" touch-scroll-type="Elastic" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" name="SkillTreeContainer" style="flex-grow: 1; align-content: flex-end; width: 100%; height: 100%; position: relative; justify-content: flex-end; align-items: center; align-self: auto;">
+            <ui:VisualElement name="SkillTreeTopSpacer" picking-mode="Ignore" style="height: 600px; min-height: 600px; flex-grow: 0; flex-shrink: 0;"/>
+            <ui:VisualElement name="SkillTreeMiddleRow" picking-mode="Ignore" style="flex-direction: row; flex-grow: 0; flex-shrink: 0; align-items: stretch; width: 2720px; min-width: 2720px; height: 1380px; min-height: 1380px;">
+            <ui:VisualElement name="SkillTreeLeftSpacer" picking-mode="Ignore" style="width: 400px; min-width: 400px; flex-grow: 0; flex-shrink: 0;"/>
+            <ui:VisualElement name="SkillTreeRoot" picking-mode="Position" enabled="true" class="skill-tree-canvas" style="flex-grow: 0; flex-shrink: 0; position: relative; bottom: auto; top: auto; left: auto; right: auto; overflow: visible; align-self: auto; align-items: stretch; align-content: center; width: 1920px; height: 1380px;">
                 <ui:VisualElement name="Phase1Container" focusable="false" enabled="true" picking-mode="Ignore" style="flex-grow: 1; position: absolute; bottom: auto; left: auto; align-self: center; align-content: flex-end; width: 33%; height: 100%;">
                     <ui:Button text="発" name="N1" selectable="false" focusable="false" view-data-key="Node1" class="skill-node ui-se-select skill-node-node skill-node-font" style="position: absolute; top: auto; left: 280px; bottom: 10px; right: auto; border-top-left-radius: 53px; border-top-right-radius: 53px; border-bottom-right-radius: 53px; border-bottom-left-radius: 53px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/SkillIcon/UI_Skill1.png?fileID=2800000&amp;guid=4c65db539275a8f43bac501545e065fd&amp;type=3#UI_Skill1&quot;);"/>
                     <ui:Button text="" name="N101" view-data-key="Path1-1" class="skill-node skill-node-path" style="position: absolute; top: auto; left: 189px; bottom: 73px; right: auto; border-top-left-radius: 53px; border-top-right-radius: 53px; border-bottom-right-radius: 53px; border-bottom-left-radius: 53px; background-image: url(&quot;project://database/Assets/drive-download-20260903T081243Z-1-001/UI_Status_HP.png?fileID=2800000&amp;guid=60c822bcc6532514780c4983c83708e2&amp;type=3#UI_Status_HP&quot;);"/>
@@ -120,6 +123,8 @@
                     <ui:VisualElement name="C7-136" class="skill-node-conn" style="flex-grow: 0; width: 5px; height: 89px; position: absolute; flex-shrink: 0; rotate: -62deg; bottom: 279px; left: 392px;"/>
                     <ui:VisualElement name="C7-137" class="skill-node-conn" style="flex-grow: 0; width: 5px; height: 89px; position: absolute; flex-shrink: 0; rotate: 60deg; bottom: 359px; left: 393px;"/>
                 </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="SkillTreeRightSpacer" picking-mode="Ignore" style="width: 400px; min-width: 400px; flex-grow: 0; flex-shrink: 0;"/>
             </ui:VisualElement>
             <ui:VisualElement name="SkillTreeBottomSpacer" picking-mode="Ignore" style="height: 600px; min-height: 600px; flex-grow: 0; flex-shrink: 0;"/>
         </ui:ScrollView>

@@ -70,6 +70,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         [Tooltip("スキル要素のテンプレート UXML（Skill.uxml）です。")]
         private VisualTreeAsset _skillElementTemplate;
 
+        [SerializeField]
+        [Tooltip("発動コマンド表示に使う正六角形スプライト（Assets/Arts/UI/UI_hexagon.png）です。")]
+        private Sprite _comboHexIcon;
+
         private SkillBuildScreenView _skillBuildScreenView;
         private SkillBuildViewModel _skillBuildViewModel;
         private SkillBuildController _skillBuildController;
@@ -89,6 +93,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillTemplate[] _loadedOwnedSkillTemplates;
         private IReadOnlyCollection<SkillTemplate> _loadedAllSkillTemplates;
         private int _loadedOwnedPoints;
+        private IReadOnlyDictionary<int, int> _loadedSkillLevels;
         private bool _isInitialized;
         private bool _isSubscribed;
 
@@ -160,6 +165,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _loadedOwnedSkillTemplates = BuildOwnedSkills(ownedSkills);
             _loadedAllSkillTemplates = BuildAllSkills();
             _loadedOwnedPoints = await GetOwnedPointsAsync();
+            _loadedSkillLevels = await _loadedSkillBuildRepository.GetSkillLevelsAsync();
 
             return _loadedEquippedSkills != null && _loadedOwnedSkillTemplates != null;
         }
@@ -306,7 +312,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 _skillBuildDefinition.EquippedSkills,
                 _loadedOwnedSkillTemplates,
                 _loadedAllSkillTemplates,
-                _loadedOwnedPoints);
+                _loadedOwnedPoints,
+                _loadedSkillLevels);
 
             _isInitialized = true;
             return true;
@@ -457,6 +464,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
                 IReadOnlyList<EquippedSkill> equippedSkills = await _loadedSkillBuildRepository.LoadSkillBuild();
                 int ownedPoints = await GetOwnedPointsAsync();
+                _loadedSkillLevels = await _loadedSkillBuildRepository.GetSkillLevelsAsync();
                 SkillTemplate[] ownedSkillData = BuildOwnedSkills(ownedSkills);
                 if (_skillBuildDefinition == null || !_isInitialized)
                 {
@@ -472,7 +480,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                     _skillBuildDefinition.EquippedSkills,
                     ownedSkillData,
                     _loadedAllSkillTemplates,
-                    ownedPoints);
+                    ownedPoints,
+                    _loadedSkillLevels);
                 if (resetsDetailToDefault)
                 {
                     _skillBuildViewModel?.ResetDetailToDefault();
@@ -513,7 +522,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return null;
             }
 
-            return new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
+            return new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent, _comboHexIcon);
         }
 
         /// <summary>
@@ -549,6 +558,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 
             _outGameUIEvent.OnOwnedSkillChanged += HandleOwnedSkillChangedHandler;
             _outGameUIEvent.OnShownSkillBuildScreen += HandleShownSkillBuildScreenHandler;
+            _outGameUIEvent.OnSkillLevelUp += HandleSkillLevelUpHandler;
             _isSubscribed = true;
         }
 
@@ -564,6 +574,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 
             _outGameUIEvent.OnOwnedSkillChanged -= HandleOwnedSkillChangedHandler;
             _outGameUIEvent.OnShownSkillBuildScreen -= HandleShownSkillBuildScreenHandler;
+            _outGameUIEvent.OnSkillLevelUp -= HandleSkillLevelUpHandler;
             _isSubscribed = false;
         }
 
@@ -581,6 +592,25 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private void HandleShownSkillBuildScreenHandler()
         {
             RefreshOwnedSkills(true);
+        }
+
+        /// <summary>
+        ///     スキル強化(レベルアップ)イベントを処理します。
+        ///     表示中のスキルを対象に、レベルアップの実処理を実行してから画面を再取得します。
+        /// </summary>
+        private async void HandleSkillLevelUpHandler()
+        {
+            SkillViewData? displayedSkill = _skillBuildViewModel?.DisplayedSkill.CurrentValue;
+            if (displayedSkill == null || _skillBuildController == null)
+            {
+                return;
+            }
+
+            bool succeeded = await _skillBuildController.LevelUpAsync(displayedSkill.Value.SkillId);
+            if (succeeded)
+            {
+                RefreshOwnedSkills(false);
+            }
         }
     }
 }

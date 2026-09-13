@@ -48,7 +48,18 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 _nodeElements.Add(pair.Key, pair.Value);
             }
 
-            _scrollView.RegisterCallback<PointerDownEvent>(HandleScrollViewPointerDown, TrickleDown.TrickleDown);
+            EnforceScrollerHidden();
+        }
+
+        /// <summary>
+        ///     縦横のスクロールバーを常に非表示にする。UXML側の設定だけに頼らずコードからも強制する。
+        /// </summary>
+        private void EnforceScrollerHidden()
+        {
+            _scrollView.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            _scrollView.verticalScroller.style.display = DisplayStyle.None;
+            _scrollView.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            _scrollView.horizontalScroller.style.display = DisplayStyle.None;
         }
 
         /// <summary> 初期フォーカス対象の再取得が必要な時に表示候補IDを通知するイベント。 </summary>
@@ -118,6 +129,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
 
         /// <summary>
         ///     選択したノードへツリー全体をズームイン(拡大+中央寄せ)する。
+        ///     作戦画面(StageSelectInitializer.ZoomMapToNode)と同じ考え方で、
+        ///     呼ぶたびに拡大の基点をそのノードの位置へ設定する。
         /// </summary>
         /// <param name="nodeId"> ズーム対象のノードID。 </param>
         public void FocusOnNode(int nodeId)
@@ -136,22 +149,42 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             }
 
             Vector2 nodeLocalCenter = _skillTreeRoot.WorldToLocal(nodeWorldBound.center);
+
+            // 基点切替(A→B)の瞬間、スケールが掛かったままノードB自身の画面上位置も
+            // Δ=(B-A)×(1-ZOOM_SCALE)だけ瞬時にジャンプする。切替前に読んだworldBoundは
+            // このジャンプ後の位置を反映していないため、ここで予測して補正する。
+            Vector2 predictedCenter = nodeWorldBound.center;
+            if (_isZoomed)
+            {
+                Vector2 delta = (nodeLocalCenter - _focusedNodeLocalCenter) * (1f - ZOOM_SCALE);
+                predictedCenter += delta;
+            }
+
+            EnforceScrollerHidden();
+
             _skillTreeRoot.style.transformOrigin =
                 new TransformOrigin(nodeLocalCenter.x, nodeLocalCenter.y);
+            _skillTreeRoot.AddToClassList(ZOOMED_USS_CLASS);
+            _focusedNodeLocalCenter = nodeLocalCenter;
 
             if (!_isZoomed)
             {
                 _scrollOffsetYBeforeZoom = _scrollView.scrollOffset.y;
+                _scrollOffsetXBeforeZoom = _scrollView.scrollOffset.x;
                 _isZoomed = true;
             }
 
-            _skillTreeRoot.AddToClassList(ZOOMED_USS_CLASS);
-
-            float targetCenterInContent = nodeWorldBound.center.y
+            float targetCenterInContentY = predictedCenter.y
                 - viewportBounds.yMin
                 + _scrollView.scrollOffset.y;
-            float focusY = viewportBounds.height * ZOOM_FOCUS_POSITION_RATIO;
-            AnimateScrollOffsetYTo(ClampScrollOffsetY(targetCenterInContent - focusY));
+            float focusY = viewportBounds.height * 0.5f;
+            float targetCenterInContentX = predictedCenter.x
+                - viewportBounds.xMin
+                + _scrollView.scrollOffset.x;
+            float focusX = viewportBounds.width * 0.5f;
+            AnimateScrollOffsetTo(new Vector2(
+                ClampScrollOffsetX(targetCenterInContentX - focusX),
+                ClampScrollOffsetY(targetCenterInContentY - focusY)));
         }
 
         /// <summary>
@@ -166,7 +199,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
 
             _isZoomed = false;
             _skillTreeRoot.RemoveFromClassList(ZOOMED_USS_CLASS);
-            AnimateScrollOffsetYTo(_scrollOffsetYBeforeZoom);
+            _skillTreeRoot.style.transformOrigin = StyleKeyword.Null;
+            EnforceScrollerHidden();
+            AnimateScrollOffsetTo(new Vector2(_scrollOffsetXBeforeZoom, _scrollOffsetYBeforeZoom));
         }
 
         /// <summary>
@@ -179,7 +214,6 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 return;
             }
 
-            _scrollView.UnregisterCallback<PointerDownEvent>(HandleScrollViewPointerDown, TrickleDown.TrickleDown);
             _zoomScrollAnimationItem?.Pause();
             _skillTreeRoot.RemoveFromClassList(ZOOMED_USS_CLASS);
             CancelPendingLayout();
@@ -194,12 +228,17 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string SKILL_TREE_ROOT_NAME = "SkillTreeRoot";
         private const string POINTS_NAME = "Points";
         private const string ZOOMED_USS_CLASS = "skill-tree-canvas--zoomed";
-        private const float FOCUS_POSITION_RATIO = 0.6f;
-        private const float ZOOM_FOCUS_POSITION_RATIO = 0.5f;
-        private const float ZOOM_ANIMATION_DURATION_SECONDS = 0.35f;
-        private const long ZOOM_ANIMATION_INTERVAL_MS = 16L;
+        private const float FOCUS_POSITION_RATIO_X = 0.5f;
+        private const float FOCUS_POSITION_RATIO_Y = 0.7f;
         private const float POINTS_SAFE_MARGIN = 24.0f;
         private const long LAYOUT_RETRY_DELAY_MILLISECONDS = 16L;
+        private const float ZOOM_ANIMATION_DURATION_SECONDS = 0.35f;
+        private const long ZOOM_ANIMATION_INTERVAL_MS = 16L;
+
+        /// <summary>
+        ///     ズーム時の拡大率。SkillNode.ussの.skill-tree-canvas--zoomedのscale値と一致させること。
+        /// </summary>
+        private const float ZOOM_SCALE = 1.8f;
 
         private readonly VisualElement _screenRoot;
         private readonly ScrollView _scrollView;
@@ -210,6 +249,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private IVisualElementScheduledItem _zoomScrollAnimationItem;
         private int[] _focusTargetNodeIds = Array.Empty<int>();
         private float _scrollOffsetYBeforeZoom;
+        private float _scrollOffsetXBeforeZoom;
+        private Vector2 _focusedNodeLocalCenter;
         private bool _isZoomed;
         private bool _isWaitingForScreenGeometry;
         private bool _isFocusRequested;
@@ -292,41 +333,51 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 return;
             }
 
-            float targetCenterInContent = targetBounds.center.y
+            float targetCenterInContentY = targetBounds.center.y
                 - viewportBounds.yMin
                 + _scrollView.scrollOffset.y;
-            float defaultFocusY = viewportBounds.height * FOCUS_POSITION_RATIO;
+            float defaultFocusY = viewportBounds.height * FOCUS_POSITION_RATIO_Y;
             float pointsTopInViewport = pointsBounds.yMin - viewportBounds.yMin;
             float pointsLimitedFocusY = pointsTopInViewport
                 - targetBounds.height * 0.5f
                 - POINTS_SAFE_MARGIN;
             float focusY = Mathf.Min(defaultFocusY, pointsLimitedFocusY);
-            float scrollOffsetY = targetCenterInContent - focusY;
+            float scrollOffsetY = targetCenterInContentY - focusY;
+
+            float targetCenterInContentX = targetBounds.center.x
+                - viewportBounds.xMin
+                + _scrollView.scrollOffset.x;
+            float focusX = viewportBounds.width * FOCUS_POSITION_RATIO_X;
+            float scrollOffsetX = targetCenterInContentX - focusX;
+
             CompleteFocusRequest();
-            ApplyFocus(scrollOffsetY);
+            ApplyFocus(new Vector2(scrollOffsetX, scrollOffsetY));
         }
 
         /// <summary>
         ///     スクロール位置を現在のスクロール範囲へクランプして適用する。
         /// </summary>
-        /// <param name="scrollOffsetY"> 適用するY方向のスクロール量。 </param>
-        private void ApplyFocus(float scrollOffsetY)
+        /// <param name="scrollOffsetTarget"> 適用するX/Y方向のスクロール量。 </param>
+        private void ApplyFocus(Vector2 scrollOffsetTarget)
         {
             if (_isDisposed || !IsElementVisible(_scrollView))
             {
                 return;
             }
 
-            float lowValue = _scrollView.verticalScroller.lowValue;
-            float highValue = _scrollView.verticalScroller.highValue;
-            if (!IsFinite(lowValue) || !IsFinite(highValue))
+            float lowValueY = _scrollView.verticalScroller.lowValue;
+            float highValueY = _scrollView.verticalScroller.highValue;
+            float lowValueX = _scrollView.horizontalScroller.lowValue;
+            float highValueX = _scrollView.horizontalScroller.highValue;
+            if (!IsFinite(lowValueY) || !IsFinite(highValueY)
+                || !IsFinite(lowValueX) || !IsFinite(highValueX))
             {
                 return;
             }
 
-            Vector2 scrollOffset = _scrollView.scrollOffset;
-            scrollOffset.y = Mathf.Clamp(scrollOffsetY, lowValue, highValue);
-            _scrollView.scrollOffset = scrollOffset;
+            _scrollView.scrollOffset = new Vector2(
+                Mathf.Clamp(scrollOffsetTarget.x, lowValueX, highValueX),
+                Mathf.Clamp(scrollOffsetTarget.y, lowValueY, highValueY));
         }
 
         /// <summary>
@@ -347,36 +398,42 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     ScrollViewのY方向スクロール位置を指定値まで滑らかに移動させる。
+        ///     X方向のスクロールオフセットを現在のスクロール範囲へクランプする。
+        /// </summary>
+        /// <param name="rawScrollOffsetX"> クランプ前のスクロールオフセットX。 </param>
+        /// <returns> クランプ後のスクロールオフセットX。範囲が取得できない場合は入力値をそのまま返す。 </returns>
+        private float ClampScrollOffsetX(float rawScrollOffsetX)
+        {
+            float lowValue = _scrollView.horizontalScroller.lowValue;
+            float highValue = _scrollView.horizontalScroller.highValue;
+            if (!IsFinite(lowValue) || !IsFinite(highValue))
+            {
+                return rawScrollOffsetX;
+            }
+
+            return Mathf.Clamp(rawScrollOffsetX, lowValue, highValue);
+        }
+
+        /// <summary>
+        ///     ScrollViewのスクロール位置を指定値まで滑らかに移動させる。
         ///     scrollOffsetはUSSトランジション非対応のため、スケジューラで手動補間する。
         /// </summary>
-        /// <param name="targetY"> 目標のスクロールオフセットY。 </param>
-        private void AnimateScrollOffsetYTo(float targetY)
+        /// <param name="targetOffset"> 目標のスクロールオフセット。 </param>
+        private void AnimateScrollOffsetTo(Vector2 targetOffset)
         {
             _zoomScrollAnimationItem?.Pause();
 
-            float startY = _scrollView.scrollOffset.y;
+            Vector2 startOffset = _scrollView.scrollOffset;
             float elapsedSeconds = 0.0f;
             _zoomScrollAnimationItem = _scrollView.schedule.Execute(() =>
             {
                 elapsedSeconds += ZOOM_ANIMATION_INTERVAL_MS / 1000.0f;
                 float t = Mathf.Clamp01(elapsedSeconds / ZOOM_ANIMATION_DURATION_SECONDS);
                 float eased = 1.0f - Mathf.Pow(1.0f - t, 3.0f);
-                float y = Mathf.Lerp(startY, targetY, eased);
-                Vector2 offset = _scrollView.scrollOffset;
-                offset.y = y;
-                _scrollView.scrollOffset = offset;
+                _scrollView.scrollOffset = Vector2.Lerp(startOffset, targetOffset, eased);
+                EnforceScrollerHidden();
                 if (t >= 1.0f) { _zoomScrollAnimationItem.Pause(); }
             }).Every(ZOOM_ANIMATION_INTERVAL_MS);
-        }
-
-        /// <summary>
-        ///     ユーザーが手動でツリーへ触れた時に、進行中のズームスクロールアニメーションを止める。
-        /// </summary>
-        /// <param name="evt"> ポインタ押下イベント。 </param>
-        private void HandleScrollViewPointerDown(PointerDownEvent evt)
-        {
-            _zoomScrollAnimationItem?.Pause();
         }
 
         /// <summary>
