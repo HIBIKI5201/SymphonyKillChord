@@ -18,6 +18,7 @@ namespace KillChord.Runtime.View.InGame.Player
             ShowWeapon();
             PlayAttackSound();
             PlayEffect();
+            PlayFlashLight();
         }
 
         /// <summary>
