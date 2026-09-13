@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
@@ -33,14 +34,20 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary>
         /// テキスト表示要求をビューへ通知する。
         /// </summary>
-        public ValueTask ShowTextAsync(string message, CancellationToken ct)
-            => _textOutputPort.ShowTextAsync(message, ct);
+        public ValueTask ShowTextAsync(string speaker, string message, CancellationToken ct)
+            => _textOutputPort.ShowTextAsync(speaker, message, ct);
 
         /// <summary>
         /// フェード演出要求をビューへ通知する。
         /// </summary>
-        public ValueTask FadeAsync(string target, float start, float end, float duration, CancellationToken ct)
-            => _fadeOutputPort.FadeAsync(target, start, end, duration, ct);
+        public ValueTask FadeAsync(
+            FadeTarget target,
+            FadeMode mode,
+            float start,
+            float end,
+            float duration,
+            CancellationToken ct)
+            => _fadeOutputPort.FadeAsync(target, mode, start, end, duration, ct);
 
         /// <summary>
         /// 背景表示要求をビューへ通知する。

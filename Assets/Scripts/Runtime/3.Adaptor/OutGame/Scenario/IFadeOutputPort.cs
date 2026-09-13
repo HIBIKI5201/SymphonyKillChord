@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
@@ -8,6 +9,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface IFadeOutputPort
     {
-        ValueTask FadeAsync(string target, float start, float end, float duration, CancellationToken ct);
+        ValueTask FadeAsync(
+            FadeTarget target,
+            FadeMode mode,
+            float start,
+            float end,
+            float duration,
+            CancellationToken ct);
     }
 }

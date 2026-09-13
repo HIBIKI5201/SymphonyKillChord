@@ -1,27 +1,69 @@
-using System;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
     /// <summary>
     /// シナリオ表示用の通知を集約して View に渡す。
     /// </summary>
-    public class ViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink, IPortraitViewSink, ILayerViewSink
+    public class ScenarioViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink, IPortraitViewSink, ILayerViewSink
         , IScenarioCompletionViewSink
     {
         /// <summary>
         /// テキスト更新通知を購読先へ流す。
         /// </summary>
-        public void SetText(string message)
+        public void SetText(in ScenarioTextViewDTO dto)
         {
-            OnChat?.Invoke(message);
+            Speaker = dto.Speaker;
+            Message = dto.Message;
+            OnTextChanged?.Invoke();
         }
 
         /// <summary>
-        /// フェード更新通知を購読先へ流す。
+        /// 現在の話者名と本文を一括消去する。
         /// </summary>
-        public void SetFade(string target, float start, float end, float duration)
+        public void ClearText()
         {
-            OnFade?.Invoke(target, start, end, duration);
+            Speaker = string.Empty;
+            Message = string.Empty;
+            OnTextChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// 現在の話者名と本文を購読先へ再通知する。
+        /// </summary>
+        public void RefreshText()
+        {
+            OnTextChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// フェード更新を単一の View へ転送し、描画完了まで待機する。
+        /// </summary>
+        public ValueTask SetFadeAsync(in ScenarioFadeViewDTO dto, CancellationToken ct)
+        {
+            ScenarioFadeRequestHandler handler = _fadeRequestHandler;
+            return handler != null ? handler(in dto, ct) : default;
+        }
+
+        /// <summary>
+        /// フェード要求の処理先を設定する。
+        /// </summary>
+        public void BindFadeRequestHandler(ScenarioFadeRequestHandler handler)
+        {
+            _fadeRequestHandler = handler ?? throw new ArgumentNullException(nameof(handler));
+        }
+
+        /// <summary>
+        /// 指定したフェード要求処理先が現在の処理先なら解除する。
+        /// </summary>
+        public void UnbindFadeRequestHandler(ScenarioFadeRequestHandler handler)
+        {
+            if (_fadeRequestHandler == handler)
+            {
+                _fadeRequestHandler = null;
+            }
         }
 
         /// <summary>
@@ -70,10 +112,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             OnScenarioCompleted?.Invoke(skipped);
         }
 
-        /// <summary> OnChat を取得する。 </summary>
-        public event Action<string> OnChat;
-        /// <summary> OnFade を取得する。（target, start, end, duration） </summary>
-        public event Action<string, float, float, float> OnFade;
+        /// <summary> 現在の話者名を取得する。 </summary>
+        public string Speaker { get; private set; } = string.Empty;
+        /// <summary> 現在の本文を取得する。 </summary>
+        public string Message { get; private set; } = string.Empty;
+        /// <summary> 話者名または本文の変更通知を取得する。 </summary>
+        public event Action OnTextChanged;
         /// <summary> OnBackground を取得する。 </summary>
         public event Action<string> OnBackground;
         /// <summary> OnAnimation を取得する。 </summary>
@@ -85,5 +129,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// <summary> OnScenarioCompleted を取得する。 </summary>
         public event Action<bool> OnScenarioCompleted;
 
+        private ScenarioFadeRequestHandler _fadeRequestHandler;
     }
 }
