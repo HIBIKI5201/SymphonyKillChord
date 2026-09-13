@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
-using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
@@ -303,11 +302,8 @@ namespace KillChord.Demo
             _isSaveDataReset = true;
             try
             {
+                // 終了シーンの初期化完了通知は DemoEndSceneInitializer が行う。
                 await SaveStore.DeleteAsync<SaveData>();
-                if (ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
-                {
-                    readiness.Complete(scene.name, true);
-                }
             }
             catch (Exception exception)
             {
