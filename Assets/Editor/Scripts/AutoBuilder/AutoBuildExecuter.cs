@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using KillChord.Editor.SourceDataProvider;
 using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
@@ -464,6 +465,9 @@ namespace KillChord.Editor.AutoBuilder
 
                 Debug.Log($"[{nameof(AutoBuildExecuter)}] Start Build : {profile.name}");
                 ShowBuildProgress(session, $"{profile.name} をビルドしています。");
+
+                // 体験版Profileは、グローバルのシーン一覧に終了シーンを加えた一覧へ揃えてからビルドする。
+                GameDataVariantProfiles.SynchronizeDemoScenes(profile);
 
                 // Profile切替。
                 BuildProfile.SetActiveBuildProfile(profile);
