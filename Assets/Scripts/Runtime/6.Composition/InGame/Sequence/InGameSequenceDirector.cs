@@ -73,11 +73,10 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             // PlayStageStartが完了コールバックを同期的に呼ぶ場合があるため、再生前にHUDを非表示にする。
             _gameHudVisibilityView.Hide();
 
+            _ambienceSoundView.PlayAmbience();
+
             _stageSequenceView.PlayStageStart(HandleTimelineCompleted);
             _stageStartFadeView.PlayFadeOut();
-
-            // ステージ開始演出（タイムライン）の再生開始と同時に環境音を鳴らす。
-            _ambienceSoundView.PlayAmbience();
         }
 
         /// <summary>
