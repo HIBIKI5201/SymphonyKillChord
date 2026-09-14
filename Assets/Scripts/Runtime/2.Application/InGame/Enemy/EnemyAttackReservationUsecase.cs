@@ -116,28 +116,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
 
-            ScheduleLeadNotification(musicSpec, TWO_BEAT_LEAD, Handle2BeatBefore);
-            ScheduleLeadNotification(musicSpec, ONE_BEAT_LEAD, Handle1BeatBefore);
-        }
-
-        /// <summary>
-        ///     攻撃タイミングから指定拍だけ遡った予告を予約する。
-        ///     遡った結果が小節の頭を跨ぐ場合は、小節フラグを繰り下げて前の小節へ割り当てる。
-        /// </summary>
-        /// <param name="musicSpec"> 攻撃本体のタイミング。 </param>
-        /// <param name="leadCount"> 遡る量。拍子と同じ単位で指定する。 </param>
-        /// <param name="handler"> 予告タイミングで実行する処理。 </param>
-        private void ScheduleLeadNotification(in MusicSyncSpec musicSpec, double leadCount, Action handler)
-        {
-            if (!MusicTimingCalculator.TryCreateLeadTiming(musicSpec, leadCount, out MusicSyncSpec leadSpec))
-            {
-                return;
-            }
-
-            _musicActionScheduler.Schedule(
-                leadSpec,
-                handler,
-                _cancellationTokenSource.Token);
+            LeadNotificationScheduler.TrySchedule(_musicActionScheduler, musicSpec, TWO_BEAT_LEAD, Handle2BeatBefore, _cancellationTokenSource.Token);
+            LeadNotificationScheduler.TrySchedule(_musicActionScheduler, musicSpec, ONE_BEAT_LEAD, Handle1BeatBefore, _cancellationTokenSource.Token);
         }
 
         /// <summary>

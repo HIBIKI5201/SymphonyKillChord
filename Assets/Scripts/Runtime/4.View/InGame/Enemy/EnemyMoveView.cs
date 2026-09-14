@@ -502,6 +502,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void On1BeatBefore()
         {
+            if (!_isPlaying) return;
+
             StopMoving();
             StopRotating();
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
@@ -512,6 +514,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void On2BeatBefore()
         {
+            if (!_isPlaying) return;
+
             PlaySound(_attackAlertFirstSoundSource, null);
         }
 

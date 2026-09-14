@@ -377,9 +377,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3de89e5405d9b6c4aa1649b59b3b8281, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.EnemyMoveView
-  _attackSoundSource: {fileID: 0}
-  _attackAlertFirstSoundSource: {fileID: 3093074481513101954}
-  _attackAlertSecondSoundSource: {fileID: 2348698959922616424}
+  _attackSoundSource: {fileID: 1104664672239175430}
+  _attackAlertFirstSoundSource: {fileID: 0}
+  _attackAlertSecondSoundSource: {fileID: 0}
   _attackHitEffectPrefab: {fileID: 131285386190377671, guid: 8241b0826109c274081347d4d711a62d, type: 3}
   _attackReserveEffectPrefab: {fileID: 318648360357674666, guid: 3312f234a758f5148a83e6ef17016861, type: 3}
   _footStepView: {fileID: 1147706061352626451}
