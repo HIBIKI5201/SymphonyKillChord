@@ -31,17 +31,49 @@ namespace KillChord.Editor.Localization
         private static readonly SubtitleDefinition[] SubtitleDefinitions =
         {
             new(
+                "triad.tutorial.01",
+                "戦場で会うのは久しぶりだなSymphony",
+                "Been a while since we met on a battlefield, Symphony."),
+            new(
+                "triad.tutorial.02",
+                "不要だと思うが、基本的なことについて説明させてもらうぞ",
+                "You probably don't need this, but I'll walk you through the basics."),
+            new(
+                "triad.tutorial.03",
+                "そして敵に関してだが...この資料を見てくれ。",
+                "Now, about the enemy... take a look at this intel."),
+            new(
+                "triad.tutorial.04",
+                "いいか？",
+                "Got it?"),
+            new(
+                "triad.tutorial.05",
+                "よし、次に行くぞ。",
+                "Good. Moving on."),
+            new(
                 "triad.tutorial.06",
-                "次に、移動と回避についてだ。戦場の移動や敵の攻撃の回避に使うから、よく覚えておいてくれ。",
-                "Next, let's go over movement and dodging. You'll use them to navigate the battlefield and evade enemy attacks, so make sure you remember them."),
+                "まず移動と回避についてだ。戦場の移動や敵の攻撃の回避に使うから覚えていてくれ。",
+                "First up, movement and dodging. You'll need them to get around the battlefield and slip past enemy fire, so keep them in mind."),
             new(
                 "triad.tutorial.07",
-                "次に、お前が行う攻撃についてだ。攻撃によって特徴が異なるから、しっかり把握しておいてくれ。",
-                "Next, let's go over your attacks. Each attack has different characteristics, so make sure you understand how they work."),
+                "次に、お前が行う攻撃についてだ。攻撃によって特徴が異なるからしっかり把握しておいてくれ。",
+                "Next, your attacks. Each one has its own quirks, so get a solid feel for how they work."),
+            new(
+                "triad.tutorial.08",
+                "最後にお前の特殊能力、キルコードについてだ。フレーズを奏でることで発動する特殊な力、使いこなせるかはお前次第だ！",
+                "Last, your special ability: the Kill Chord. It's a unique power you unleash by playing phrases. Whether you can master it is up to you!"),
             new(
                 "triad.tutorial.09",
-                "さて、実戦だ。教えたことを存分に活用して暴れるんだ。",
-                "Now it's time for real combat. Put everything I've taught you to use and go wild.")
+                "さて実践だ。教えたことを存分に活用して暴れるんだ",
+                "Time for the real thing. Put everything I've taught you to use and cut loose."),
+            new(
+                "triad.tutorial.10",
+                "腕が訛っていないようで安心したよ。",
+                "Good to see you haven't gotten rusty."),
+            new(
+                "triad.tutorial.11",
+                "大丈夫だ、この戦闘中は俺が支援しよう。",
+                "Don't worry. I'll back you up for the rest of this fight.")
         };
 
         /// <summary>
