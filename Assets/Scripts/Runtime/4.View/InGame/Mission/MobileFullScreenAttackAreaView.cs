@@ -39,9 +39,8 @@ namespace KillChord.Runtime.View.InGame.Mission
             rectTransform.SetAsLastSibling();
 
             // 親Canvas内の他UIより手前でレイキャストを受けるため、ネストしたCanvasで描画順を上書きする。
-            Canvas canvas = _areaObject.AddComponent<Canvas>();
-            canvas.overrideSorting = true;
-            canvas.sortingOrder = SORTING_ORDER;
+            // 描画順の上書き自体は、ネストしたCanvasとして有効化される Show で適用する。
+            _canvas = _areaObject.AddComponent<Canvas>();
             _areaObject.AddComponent<GraphicRaycaster>();
 
             Image image = _areaObject.AddComponent<Image>();
@@ -63,6 +62,10 @@ namespace KillChord.Runtime.View.InGame.Mission
             }
 
             _areaObject.SetActive(true);
+
+            // 非アクティブ時はルートCanvas扱いとなりoverrideSortingの設定が保持されないため、有効化後に設定する。
+            _canvas.overrideSorting = true;
+            _canvas.sortingOrder = SORTING_ORDER;
         }
 
         /// <summary>
@@ -97,5 +100,6 @@ namespace KillChord.Runtime.View.InGame.Mission
         private const int SORTING_ORDER = 32000;
 
         private GameObject _areaObject;
+        private Canvas _canvas;
     }
 }
