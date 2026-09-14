@@ -9,64 +9,48 @@ interface Props {
 const { title, code, skills, href } = Astro.props;
 ---
 
-<section id="skill-dossier">
-	<a class="dossier" href={href}>
-		<span class="punch punch-left" aria-hidden="true"></span>
-		<span class="punch punch-right" aria-hidden="true"></span>
-		<span class="approval">稼働中</span>
+<a class="dossier" href={href}>
+	<span class="punch punch-left" aria-hidden="true"></span>
+	<span class="punch punch-right" aria-hidden="true"></span>
+	<span class="approval">稼働中</span>
 
-		<p class="code">{code}</p>
-		<h2 class="title">{title}</h2>
+	<p class="code">{code}</p>
+	<h2 class="title">{title}</h2>
 
-		<dl class="rows">
-			{
-				skills.map((skill) => (
-					<div class="row">
-						<dt>{skill}</dt>
-						<dd>未設定</dd>
-					</div>
-				))
-			}
-		</dl>
-	</a>
-</section>
+	<dl class="rows">
+		{
+			skills.map((skill) => (
+				<div class="row">
+					<dt>{skill}</dt>
+					<dd>未設定</dd>
+				</div>
+			))
+		}
+	</dl>
+</a>
 
 <style>
 	/*
 	 * 技術仕様カード(索引カード)を模した紙質のため、
 	 * キャラファイル・指令書とは別トーンのローカル変数を定義する。
 	 */
-	#skill-dossier {
+	.dossier {
 		--card-bg: #e8e0c8;
 		--card-bg-alt: #ded4b4;
 		--card-ink: #2c2418;
 		--card-ink-muted: #6b5f45;
 		--card-border: #a8996b;
 
-		padding: 56px 24px;
-		text-align: center;
-		background: var(--color-bg);
-		margin: 0 -24px;
-	}
-
-	.dossier {
 		position: relative;
-		display: inline-block;
-		width: min(320px, 84vw);
+		display: block;
+		width: 100%;
+		max-width: 320px;
 		padding: 36px 24px 24px;
 		text-align: left;
 		background: linear-gradient(180deg, var(--card-bg) 0%, var(--card-bg-alt) 100%);
 		border: 1px solid var(--card-border);
 		box-shadow: 0 18px 32px rgba(0, 0, 0, 0.45);
 		text-decoration: none;
-		transition:
-			transform 0.3s ease,
-			box-shadow 0.3s ease;
-	}
-
-	.dossier:hover {
-		transform: translateY(-6px);
-		box-shadow: 0 24px 40px rgba(0, 0, 0, 0.55);
 	}
 
 	.punch {
@@ -157,9 +141,4 @@ const { title, code, skills, href } = Astro.props;
 		color: var(--card-ink-muted);
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.dossier {
-			transition: none;
-		}
-	}
 </style>

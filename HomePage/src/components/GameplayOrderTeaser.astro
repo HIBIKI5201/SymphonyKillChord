@@ -9,46 +9,38 @@ interface Props {
 const { title, orderNumber, items, href } = Astro.props;
 ---
 
-<section id="gameplay-order">
-	<a class="order" href={href}>
-		<span class="tape tape-left" aria-hidden="true"></span>
-		<span class="tape tape-right" aria-hidden="true"></span>
-		<span class="stamp">至急</span>
+<a class="order" href={href}>
+	<span class="tape tape-left" aria-hidden="true"></span>
+	<span class="tape tape-right" aria-hidden="true"></span>
+	<span class="stamp">至急</span>
 
-		<div class="order-header">
-			<span class="order-label">ОПЕРАЦИЯ</span>
-			<span class="order-number">№{orderNumber}</span>
-		</div>
+	<div class="order-header">
+		<span class="order-label">ОПЕРАЦИЯ</span>
+		<span class="order-number">№{orderNumber}</span>
+	</div>
 
-		<h2 class="title">{title}</h2>
+	<h2 class="title">{title}</h2>
 
-		<ul class="items">
-			{items.map((item) => <li>{item}</li>)}
-		</ul>
-	</a>
-</section>
+	<ul class="items">
+		{items.map((item) => <li>{item}</li>)}
+	</ul>
+</a>
 
 <style>
 	/*
 	 * 作戦指令書を模した紙質のため、キャラファイルとは別トーンのローカル変数を定義する。
 	 */
-	#gameplay-order {
+	.order {
 		--order-bg: #4f4d34;
 		--order-bg-alt: #43412b;
 		--order-ink: #e9e4cf;
 		--order-ink-muted: #b3ac8c;
 		--order-border: #6c6947;
 
-		padding: 56px 24px;
-		text-align: center;
-		background: var(--color-bg);
-		margin: 0 -24px;
-	}
-
-	.order {
 		position: relative;
-		display: inline-block;
-		width: min(560px, 88vw);
+		display: block;
+		width: 100%;
+		max-width: 560px;
 		padding: 32px 36px;
 		text-align: left;
 		background:
@@ -58,14 +50,6 @@ const { title, orderNumber, items, href } = Astro.props;
 		border: 1px solid var(--order-border);
 		box-shadow: 0 18px 32px rgba(0, 0, 0, 0.45);
 		text-decoration: none;
-		transition:
-			transform 0.3s ease,
-			box-shadow 0.3s ease;
-	}
-
-	.order:hover {
-		transform: translateY(-6px);
-		box-shadow: 0 24px 40px rgba(0, 0, 0, 0.55);
 	}
 
 	.tape {
@@ -157,12 +141,6 @@ const { title, orderNumber, items, href } = Astro.props;
 		.title,
 		.items {
 			max-width: 100%;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.order {
-			transition: none;
 		}
 	}
 </style>
