@@ -730,6 +730,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="diedEnemy"> 死亡した敵のEntity。</param>
         private void HandleEnemyDied(CharacterEntity diedEnemy)
         {
+            // すでに死亡処理中の場合は、通知とSEの二重発火を防ぐ。
+            if (_isDying)
+            {
+                return;
+            }
+
             // 撃破演出用に、敵の撃破を通知する。
             EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(diedEnemy.Id));
             _defeatSoundSource?.Play();

@@ -16,9 +16,6 @@ namespace KillChord.Runtime.View.InGame.Sequence
             _stageClearSoundSource?.Play();
         }
 
-        [SerializeField, Tooltip("ステージクリア時に再生するSE（SE_Gameclear）用Source。")]
-        private SoundEffectSource _stageClearSoundSource;
-
         /// <summary>
         ///     ゲームオーバー時のSEを再生します。
         /// </summary>
@@ -26,6 +23,9 @@ namespace KillChord.Runtime.View.InGame.Sequence
         {
             _gameOverSoundSource?.Play();
         }
+
+        [SerializeField, Tooltip("ステージクリア時に再生するSE（SE_Gameclear）用Source。")]
+        private SoundEffectSource _stageClearSoundSource;
 
         [SerializeField, Tooltip("ゲームオーバー時に再生するSE（SE_Gameover）用Source。")]
         private SoundEffectSource _gameOverSoundSource;

@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Threading;
+using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Music
 {
@@ -30,6 +31,8 @@ namespace KillChord.Runtime.Application.InGame.Music
         {
             if (!MusicTimingCalculator.TryCreateLeadTiming(musicSpec, leadBeatCount, out MusicSyncSpec leadSpec))
             {
+                // 遺り量が基準タイミングより大きく、予告が静かに発火しなくなることを検知できるようにする。
+                Debug.LogWarning($"[{nameof(LeadNotificationScheduler)}] 予告タイミングの算出に失敗しました。leadBeatCount: {leadBeatCount}");
                 return false;
             }
 

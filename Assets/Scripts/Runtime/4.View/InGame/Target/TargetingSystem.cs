@@ -235,8 +235,9 @@ namespace KillChord.Runtime.View.InGame.Target
         ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
         /// </summary>
         /// <param name="targetId"> 設定対象のターゲットID。 </param>
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。被弾による内部的な再ターゲットではfalseを指定する。 </param>
         /// <returns> 設定に成功した場合は true。 </returns>
-        public bool TrySetCurrentTarget(Guid targetId)
+        public bool TrySetCurrentTarget(Guid targetId, bool notifyLockOn = true)
         {
             foreach (ITargetableViewModel targetable in _targets)
             {
@@ -250,7 +251,7 @@ namespace KillChord.Runtime.View.InGame.Target
                     return false;
                 }
 
-                SetCurrentTarget(targetable);
+                SetCurrentTarget(targetable, notifyLockOn);
                 _currentCandidate = null;
                 return true;
             }
@@ -271,12 +272,13 @@ namespace KillChord.Runtime.View.InGame.Target
         ///     現在のターゲットを更新する。既存のターゲットと異なる敵へ新たにロックオンした場合、捕捉イベントを発火する。
         /// </summary>
         /// <param name="newTarget"> 新たに設定するターゲット。null の場合はロックオン解除として扱う。 </param>
-        private void SetCurrentTarget(ITargetableViewModel newTarget)
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。 </param>
+        private void SetCurrentTarget(ITargetableViewModel newTarget, bool notifyLockOn = true)
         {
             bool isNewLock = newTarget != null && !ReferenceEquals(newTarget, _currentTarget);
             _currentTarget = newTarget;
 
-            if (isNewLock)
+            if (isNewLock && notifyLockOn)
             {
                 EventBus<EOnLockOnAcquired>.Raise(new EOnLockOnAcquired());
             }
