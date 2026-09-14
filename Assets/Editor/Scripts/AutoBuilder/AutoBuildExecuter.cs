@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
-using KillChord.Editor.SourceDataProvider;
+using KillChord.Editor.SourceDataProvider.Core;
 using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
