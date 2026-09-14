@@ -1005,6 +1005,27 @@ jobs:
             Microsoft.PowerShell.Utility\Write-Host $Object
           }
 
+          function Initialize-ProcessExitCodeTracking {
+            param(
+              [Parameter(Mandatory = $true)]
+              [System.Diagnostics.Process]$Process,
+              [Parameter(Mandatory = $true)]
+              [string]$ProcessName
+            )
+
+            if ($env:RUNNER_OS -ne "Windows") {
+              return
+            }
+
+            # Windows PowerShell 5.1では Start-Process -NoNewWindow -PassThru が返す
+            # Process のハンドルを終了前に取得しないと、終了後の ExitCode が null になる。
+            try {
+              $null = $Process.Handle
+            } catch {
+              throw "$ProcessName のハンドルを取得できませんでした: $_"
+            }
+          }
+
           function Get-CompletedProcessExitCode {
             param(
               [Parameter(Mandatory = $true)]
@@ -1013,10 +1034,8 @@ jobs:
               [string]$ProcessName
             )
 
-            # Windows PowerShellではタイムアウト付きWaitForExitの直後に
-            # ExitCodeが未更新の場合があるため、同期完了後に状態を再取得する。
+            # タイムアウト付きWaitForExit後の終了処理を同期完了させる。
             $Process.WaitForExit()
-            $Process.Refresh()
 
             if (-not $Process.HasExited) {
               throw "$ProcessName の終了を確認できませんでした。"
@@ -1068,6 +1087,14 @@ jobs:
             -ArgumentList $DiscoveryArgs `
             -PassThru `
             -NoNewWindow
+
+          try {
+            Initialize-ProcessExitCodeTracking $DiscoveryProcess "プロファイル検出用Unityプロセス"
+          } catch {
+            Write-Host "[ERROR]: プロファイル検出用Unityプロセスの監視を開始できませんでした: $_"
+            Write-Host "::endgroup::"
+            exit 1
+          }
 
           if (-not $DiscoveryProcess.WaitForExit($ProfileTimeoutSec * 1000)) {
             Write-Host "[ERROR]: ビルドプロファイルの検出が $ProfileTimeoutSec 秒後にタイムアウトしました。"
@@ -1178,6 +1205,8 @@ jobs:
                 -ArgumentList $UnityArgs `
                 -PassThru `
                 -NoNewWindow
+
+              Initialize-ProcessExitCodeTracking $UnityProcess "$ProfileName のUnityプロセス"
 
               # ProcessorAffinity は Windows 専用API。macOS/Linux ではスキップする。
               if ($env:RUNNER_OS -eq "Windows") {
