@@ -72,7 +72,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         ///     攻撃対象を保持していて有効化できた場合はtrue。
         ///     対象を失っている場合はfalseを返し、範囲表示(デカール)は有効化しない。
         /// </returns>
-        public bool Activate()
+        public bool TryActivate()
         {
             if (_targetTransform == null)
             {
