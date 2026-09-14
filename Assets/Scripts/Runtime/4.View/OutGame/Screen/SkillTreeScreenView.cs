@@ -1,5 +1,6 @@
 
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.OutGame.SkillTree;
 using System;
 using UnityEngine.UIElements;
 
@@ -18,9 +19,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _backButton = rootElement.Q<Button>(BACKBUTTON_NAME)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(SkillTreeScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
+            _settingShortcutButton = rootElement.Q<Button>(SETTING_SHORTCUT_BUTTON_NAME)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(SkillTreeScreenView)}] {SETTING_SHORTCUT_BUTTON_NAME} が見つかりませんでした。");
 
             // ツリーは下から上へ伸びるため、スクロール位置の初期化に使う。
             _treeScrollView = rootElement.Q<ScrollView>(TREE_SCROLL_VIEW_NAME);
+            if (_treeScrollView != null)
+            {
+                _dragScrollManipulator = new ScrollViewDragManipulator(_treeScrollView);
+            }
 
             RegisterButtonCallback();
         }
@@ -39,6 +47,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             base.Dispose();
             UnregisterButtonCallback();
+
+            if (_dragScrollManipulator != null)
+            {
+                _dragScrollManipulator.target = null;
+                _dragScrollManipulator = null;
+            }
         }
 
         /// <summary>
@@ -75,6 +89,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
+            _settingShortcutButton.RegisterCallback<ClickEvent>(OnSettingShortcutButtonClicked);
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
@@ -86,6 +101,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private void UnregisterButtonCallback()
         {
             _backButtonActivation?.Dispose();
+            _settingShortcutButton.UnregisterCallback<ClickEvent>(OnSettingShortcutButtonClicked);
         }
 
         /// <summary>
@@ -96,7 +112,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
+        /// <summary>
+        ///     設定画面ショートカットボタンがクリックされたときの処理です。
+        /// </summary>
+        private void OnSettingShortcutButtonClicked(ClickEvent evt)
+        {
+            OutGameUIEvent.OnShownSettingScreen?.Invoke();
+        }
+
         private const string BACKBUTTON_NAME = "BackButton";
+        private const string SETTING_SHORTCUT_BUTTON_NAME = "SettingShortcutButton";
 
         /// <inheritdoc />
         protected override VisualElement CancelTargetElement => _backButton;
@@ -110,7 +135,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string TREE_SCROLL_VIEW_NAME = "SkillTreeContainer";
 
         private readonly Button _backButton;
+        private readonly Button _settingShortcutButton;
         private readonly ScrollView _treeScrollView;
         private IDisposable _backButtonActivation;
+        private ScrollViewDragManipulator _dragScrollManipulator;
     }
 }

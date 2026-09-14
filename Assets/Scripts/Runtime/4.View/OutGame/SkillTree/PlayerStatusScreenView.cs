@@ -20,46 +20,16 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             Sprite criticalDamageIcon,
             Sprite areaAttackRangeIcon) : base(root, outGameUIEvent)
         {
-            _healthPreviewLabel = root.Q<Label>(name: E_NAME_HEALTH_PREVIEW_LABEL);
-            if (_healthPreviewLabel == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(PlayerStatusScreenView)}] {E_NAME_HEALTH_PREVIEW_LABEL} が見つかりませんでした。");
-#endif
-                throw new InvalidOperationException($"Required UI element '{E_NAME_HEALTH_PREVIEW_LABEL}' not found.");
-            }
-            _attackPreviewLabel = root.Q<Label>(name: E_NAME_ATTACK_PREVIEW_LABEL);
-            if (_attackPreviewLabel == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(PlayerStatusScreenView)}] {E_NAME_ATTACK_PREVIEW_LABEL} が見つかりませんでした。");
-#endif
-                throw new InvalidOperationException($"Required UI element '{E_NAME_ATTACK_PREVIEW_LABEL}' not found.");
-            }
-            _criticalChancePreviewLabel = root.Q<Label>(name: E_NAME_CRITICAL_CHANCE_PREVIEW_LABEL);
-            if (_criticalChancePreviewLabel == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(PlayerStatusScreenView)}] {E_NAME_CRITICAL_CHANCE_PREVIEW_LABEL} が見つかりませんでした。");
-#endif
-                throw new InvalidOperationException($"Required UI element '{E_NAME_CRITICAL_CHANCE_PREVIEW_LABEL}' not found.");
-            }
-            _criticalDamagePreviewLabel = root.Q<Label>(name: E_NAME_CRITICAL_DAMAGE_PREVIEW_LABEL);
-            if (_criticalDamagePreviewLabel == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(PlayerStatusScreenView)}] {E_NAME_CRITICAL_DAMAGE_PREVIEW_LABEL} が見つかりませんでした。");
-#endif
-                throw new InvalidOperationException($"Required UI element '{E_NAME_CRITICAL_DAMAGE_PREVIEW_LABEL}' not found.");
-            }
-            _areaAttackRangePreviewLabel = root.Q<Label>(name: E_NAME_AREA_ATTACK_RANGE_PREVIEW_LABEL);
-            if (_areaAttackRangePreviewLabel == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(PlayerStatusScreenView)}] {E_NAME_AREA_ATTACK_RANGE_PREVIEW_LABEL} が見つかりませんでした。");
-#endif
-                throw new InvalidOperationException($"Required UI element '{E_NAME_AREA_ATTACK_RANGE_PREVIEW_LABEL}' not found.");
-            }
+            _healthCurrentLabel = RequireLabel(root, E_NAME_HEALTH_CURRENT_LABEL);
+            _healthDeltaLabel = RequireLabel(root, E_NAME_HEALTH_DELTA_LABEL);
+            _attackCurrentLabel = RequireLabel(root, E_NAME_ATTACK_CURRENT_LABEL);
+            _attackDeltaLabel = RequireLabel(root, E_NAME_ATTACK_DELTA_LABEL);
+            _criticalChanceCurrentLabel = RequireLabel(root, E_NAME_CRITICAL_CHANCE_CURRENT_LABEL);
+            _criticalChanceDeltaLabel = RequireLabel(root, E_NAME_CRITICAL_CHANCE_DELTA_LABEL);
+            _criticalDamageCurrentLabel = RequireLabel(root, E_NAME_CRITICAL_DAMAGE_CURRENT_LABEL);
+            _criticalDamageDeltaLabel = RequireLabel(root, E_NAME_CRITICAL_DAMAGE_DELTA_LABEL);
+            _areaAttackRangeCurrentLabel = RequireLabel(root, E_NAME_AREA_ATTACK_RANGE_CURRENT_LABEL);
+            _areaAttackRangeDeltaLabel = RequireLabel(root, E_NAME_AREA_ATTACK_RANGE_DELTA_LABEL);
 
             SetIcon(root.Q<Image>(name: E_NAME_HEALTH_ICON), healthIcon);
             SetIcon(root.Q<Image>(name: E_NAME_ATTACK_ICON), attackIcon);
@@ -74,11 +44,54 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <param name="dto"></param>
         public void Apply(PlayerStatusDTO dto)
         {
-            _healthPreviewLabel.text = FormatTruncated(dto.PlayerHealth);
-            _attackPreviewLabel.text = FormatTruncated(dto.PlayerAttack);
-            _criticalChancePreviewLabel.text = FormatPercentage(dto.CriticalChance);
-            _criticalDamagePreviewLabel.text = FormatPercentage(dto.CriticalDamage);
-            _areaAttackRangePreviewLabel.text = FormatMultiplier(dto.AreaAttackRangeMultiplier);
+            ApplyStat(_healthCurrentLabel, _healthDeltaLabel,
+                dto.PlayerHealth, dto.PreviewPlayerHealth, FormatTruncated);
+            ApplyStat(_attackCurrentLabel, _attackDeltaLabel,
+                dto.PlayerAttack, dto.PreviewPlayerAttack, FormatTruncated);
+            ApplyStat(_criticalChanceCurrentLabel, _criticalChanceDeltaLabel,
+                dto.CriticalChance, dto.PreviewCriticalChance, FormatPercentage);
+            ApplyStat(_criticalDamageCurrentLabel, _criticalDamageDeltaLabel,
+                dto.CriticalDamage, dto.PreviewCriticalDamage, FormatPercentage);
+            ApplyStat(_areaAttackRangeCurrentLabel, _areaAttackRangeDeltaLabel,
+                dto.AreaAttackRangeMultiplier, dto.PreviewAreaAttackRangeMultiplier, FormatMultiplier);
+        }
+
+        /// <summary>
+        ///     現在値ラベルへ現在値を、変化後ラベルへ「→ 変化後の値」を設定する。
+        ///     変化が無い場合は変化後ラベルを空文字列にし、矢印ごと非表示にする。
+        /// </summary>
+        /// <param name="currentLabel"> 現在値を表示するラベル。 </param>
+        /// <param name="deltaLabel"> 変化後の値を表示するラベル。 </param>
+        /// <param name="current"> 現在値。 </param>
+        /// <param name="preview"> 選択中ノードを解放した場合の値。 </param>
+        /// <param name="format"> 数値の表示形式を決めるフォーマッタ。 </param>
+        private static void ApplyStat(
+            Label currentLabel, Label deltaLabel, float current, float preview, Func<float, string> format)
+        {
+            currentLabel.text = format(current);
+            deltaLabel.text = Mathf.Approximately(current, preview)
+                ? string.Empty
+                : $"{PREVIEW_ARROW} {format(preview)}";
+        }
+
+        /// <summary>
+        ///     指定した名前のLabelを取得する。見つからない場合はエラーログを出して例外を投げる。
+        /// </summary>
+        /// <param name="root"> 検索対象のルート要素。 </param>
+        /// <param name="name"> 取得するLabelの要素名。 </param>
+        /// <returns> 取得したLabel。 </returns>
+        private static Label RequireLabel(VisualElement root, string name)
+        {
+            Label label = root.Q<Label>(name: name);
+            if (label == null)
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"[{nameof(PlayerStatusScreenView)}] {name} が見つかりませんでした。");
+#endif
+                throw new InvalidOperationException($"Required UI element '{name}' not found.");
+            }
+
+            return label;
         }
 
         /// <summary>
@@ -127,17 +140,29 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             icon.style.display = sprite == null ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
-        private Label _healthPreviewLabel;
-        private Label _attackPreviewLabel;
-        private Label _criticalChancePreviewLabel;
-        private Label _criticalDamagePreviewLabel;
-        private Label _areaAttackRangePreviewLabel;
+        private const string PREVIEW_ARROW = "→";
 
-        private const string E_NAME_HEALTH_PREVIEW_LABEL = "HealthPreviewLabel";
-        private const string E_NAME_ATTACK_PREVIEW_LABEL = "AttackPreviewLabel";
-        private const string E_NAME_CRITICAL_CHANCE_PREVIEW_LABEL = "CriticalChancePreviewLabel";
-        private const string E_NAME_CRITICAL_DAMAGE_PREVIEW_LABEL = "CriticalDamagePreviewLabel";
-        private const string E_NAME_AREA_ATTACK_RANGE_PREVIEW_LABEL = "AreaAttackRangePreviewLabel";
+        private Label _healthCurrentLabel;
+        private Label _healthDeltaLabel;
+        private Label _attackCurrentLabel;
+        private Label _attackDeltaLabel;
+        private Label _criticalChanceCurrentLabel;
+        private Label _criticalChanceDeltaLabel;
+        private Label _criticalDamageCurrentLabel;
+        private Label _criticalDamageDeltaLabel;
+        private Label _areaAttackRangeCurrentLabel;
+        private Label _areaAttackRangeDeltaLabel;
+
+        private const string E_NAME_HEALTH_CURRENT_LABEL = "HealthCurrentLabel";
+        private const string E_NAME_HEALTH_DELTA_LABEL = "HealthDeltaLabel";
+        private const string E_NAME_ATTACK_CURRENT_LABEL = "AttackCurrentLabel";
+        private const string E_NAME_ATTACK_DELTA_LABEL = "AttackDeltaLabel";
+        private const string E_NAME_CRITICAL_CHANCE_CURRENT_LABEL = "CriticalChanceCurrentLabel";
+        private const string E_NAME_CRITICAL_CHANCE_DELTA_LABEL = "CriticalChanceDeltaLabel";
+        private const string E_NAME_CRITICAL_DAMAGE_CURRENT_LABEL = "CriticalDamageCurrentLabel";
+        private const string E_NAME_CRITICAL_DAMAGE_DELTA_LABEL = "CriticalDamageDeltaLabel";
+        private const string E_NAME_AREA_ATTACK_RANGE_CURRENT_LABEL = "AreaAttackRangeCurrentLabel";
+        private const string E_NAME_AREA_ATTACK_RANGE_DELTA_LABEL = "AreaAttackRangeDeltaLabel";
         private const string E_NAME_HEALTH_ICON = "HealthIcon";
         private const string E_NAME_ATTACK_ICON = "AttackIcon";
         private const string E_NAME_CRITICAL_CHANCE_ICON = "CriticalChanceIcon";

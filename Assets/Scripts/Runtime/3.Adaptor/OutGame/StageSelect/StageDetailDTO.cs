@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.OutGame.StageSelect;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
 {
@@ -12,8 +12,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// </summary>
         /// <param name="stageName"> ステージ名。</param>
         /// <param name="flavorText"> フレーバーテキスト。</param>
-        /// <param name="rewardSkillBuildPoint"> スキル編成・強化に使用するポイント。</param>
-        /// <param name="rewardSkillUnlockPoint"> スキル解放・パラメーター強化に使用するポイント。</param>
+        /// <param name="firstClearRewards"> 初回クリア時にのみ付与される報酬の一覧。</param>
+        /// <param name="clearRewards"> クリアするたびに付与される成功報酬の一覧。</param>
         /// <param name="mainMissionText">
         ///     メインミッションのテキスト。
         ///     シナリオパートの場合は null。
@@ -21,27 +21,29 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         public StageDetailDTO(
             string stageName,
             string flavorText,
-            int rewardSkillBuildPoint,
-            int rewardSkillUnlockPoint,
+            IReadOnlyList<StageRewardViewData> firstClearRewards,
+            IReadOnlyList<StageRewardViewData> clearRewards,
             string mainMissionText,
-            string[] subMissionTexts)
+            string[] subMissionTexts,
+            bool[] subMissionCleared)
         {
             StageName = stageName;
             FlavorText = flavorText;
-            RewardSkillBuildPoint = rewardSkillBuildPoint;
-            RewardSkillUnlockPoint = rewardSkillUnlockPoint;
+            FirstClearRewards = firstClearRewards;
+            ClearRewards = clearRewards;
             MainMissionText = mainMissionText;
             SubMissionTexts = subMissionTexts;
+            SubMissionCleared = subMissionCleared;
         }
 
         /// <summary> ステージ名。 </summary>
         public string StageName { get; }
         /// <summary> フレーバーテキスト。 </summary>
         public string FlavorText { get; }
-        /// <summary> スキル編成・強化に使用するポイント。 </summary>
-        public int RewardSkillBuildPoint { get; }
-        /// <summary> スキル解放・パラメーター強化に使用するポイント。 </summary>
-        public int RewardSkillUnlockPoint { get; }
+        /// <summary> 初回クリア時にのみ付与される報酬の一覧。 </summary>
+        public IReadOnlyList<StageRewardViewData> FirstClearRewards { get; }
+        /// <summary> クリアするたびに付与される成功報酬の一覧。 </summary>
+        public IReadOnlyList<StageRewardViewData> ClearRewards { get; }
         /// <summary>
         ///     メインミッションのテキスト。
         ///     シナリオパートの場合は null。
@@ -52,10 +54,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         ///     シナリオパートの場合は null。
         /// </summary>
         public string[] SubMissionTexts { get; }
+        /// <summary>
+        ///     サブミッションごとの達成状況。SubMissionTextsと同じ並び順。
+        ///     シナリオパートの場合は null。
+        /// </summary>
+        public bool[] SubMissionCleared { get; }
 
         /// <summary> バトルパートかどうか。 </summary>
         public bool IsBattle => MainMissionText != null;
-
-        // TODO: ミッション達成状況を反映するためのプロパティを追加する。
     }
 }

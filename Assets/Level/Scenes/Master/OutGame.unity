@@ -9531,6 +9531,9 @@ MonoBehaviour:
   _stageTreeAssetKey: StageTreeAsset
   _missionDefinitionRepositoryKey: MissionDefinitionRepository
   _enemyWaveDefinitionRepositoryKey: EnemyWaveDefinitionRepository
+  _skillRepositoryKey: OutGameSkillRepository
+  _achievedStarSprite: {fileID: 21300000, guid: 792064cc61458f84c8f80655d6e1595b, type: 3}
+  _unachievedStarSprite: {fileID: 21300000, guid: 436deda8b5d284e438074cedba2e5129, type: 3}
 --- !u!114 &510963395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9546,6 +9549,7 @@ MonoBehaviour:
   _uiDocument: {fileID: 2119823347}
   _screenRuleDataKey: OutGameScreenRuleData
   _titleSceneName: Title
+  _comboHexIcon: {fileID: 21300000, guid: 75467e8beed827d4da4c0672f7545e88, type: 3}
 --- !u!4 &510963396
 Transform:
   m_ObjectHideFlags: 0
@@ -9593,7 +9597,9 @@ MonoBehaviour:
   _statusBonusEffectIconCatalogKey: StatusBonusEffectIconCatalogAsset
   _skillRepositoryKey: OutGameSkillRepository
   _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
+  _skillInputProgressUIConfigKey: SkillInputProgressUIConfig
   _videoPlayer: {fileID: 1876322594}
+  _comboHexIcon: {fileID: 21300000, guid: 75467e8beed827d4da4c0672f7545e88, type: 3}
 --- !u!114 &510963399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9611,7 +9617,9 @@ MonoBehaviour:
   _skillBuildRepositoryKey: SkillBuildRepository
   _skillRepositoryKey: OutGameSkillRepository
   _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
+  _skillInputProgressUIConfigKey: SkillInputProgressUIConfig
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
+  _comboHexIcon: {fileID: 21300000, guid: 75467e8beed827d4da4c0672f7545e88, type: 3}
 --- !u!114 &510963400
 MonoBehaviour:
   m_ObjectHideFlags: 0

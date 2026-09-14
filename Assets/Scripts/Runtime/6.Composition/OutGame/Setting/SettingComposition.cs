@@ -54,7 +54,7 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
             try
             {
                 HierarchicalNavigationScope settingNavigationScope = new(settingRoot);
-                _settingCategoryView = new SettingCategoryView(settingRoot, settingNavigationScope);
+                _settingMenuView = new SettingMenuView(settingRoot, settingNavigationScope);
                 _audioSettingsView = new AudioSettingsView(
                     settingRoot,
                     audioSettingsContainer.ViewModel,
@@ -63,16 +63,16 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
             catch (Exception exception)
             {
                 _audioSettingsView?.Dispose();
-                _settingCategoryView?.Dispose();
+                _settingMenuView?.Dispose();
                 _audioSettingsView = null;
-                _settingCategoryView = null;
+                _settingMenuView = null;
                 Debug.LogError(
                     $"[{nameof(SettingComposition)}] 設定画面のView構築に失敗しました。{exception}",
                     this);
                 return false;
             }
 
-            _outGameUIEvent.OnShownSettingScreen += _settingCategoryView.ShowDefaultCategory;
+            _outGameUIEvent.OnShownSettingScreen += _settingMenuView.ShowMenu;
             return true;
         }
 
@@ -81,21 +81,21 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
         /// </summary>
         public override void Shutdown()
         {
-            if (_outGameUIEvent != null && _settingCategoryView != null)
+            if (_outGameUIEvent != null && _settingMenuView != null)
             {
-                _outGameUIEvent.OnShownSettingScreen -= _settingCategoryView.ShowDefaultCategory;
+                _outGameUIEvent.OnShownSettingScreen -= _settingMenuView.ShowMenu;
             }
 
             _audioSettingsView?.Dispose();
-            _settingCategoryView?.Dispose();
+            _settingMenuView?.Dispose();
             _audioSettingsView = null;
-            _settingCategoryView = null;
+            _settingMenuView = null;
             _outGameUIEvent = null;
         }
 
         private const string SETTING_ROOT_NAME = "SettingContainer";
 
-        private SettingCategoryView _settingCategoryView;
+        private SettingMenuView _settingMenuView;
         private OutGameUIEvent _outGameUIEvent;
     }
 }

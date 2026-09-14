@@ -344,7 +344,8 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
 
             await _stageProgressSaveDataService.SaveClearAsync(
                 stageDefinition.StageId,
-                stageDefinition.Reward,
+                stageDefinition.FirstClearReward,
+                stageDefinition.ClearReward,
                 _selectedScenarioState.IsOpeningTutorialScenario);
             _pendingNodeTransitionState?.MarkCompleted(stageDefinition.StageId);
             _outGameUIEvent?.OnStageCleared?.Invoke(stageDefinition.StageId.Value);

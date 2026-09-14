@@ -38,11 +38,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             Action ownedSkillChanged,
             ISkillRepository skillRepository,
             SkillDisplayTextFormatter skillDisplayTextFormatter,
-            IReadOnlyDictionary<SkillType, Sprite> skillGenreIcons)
+            IReadOnlyDictionary<SkillType, Sprite> skillGenreIcons,
+            IReadOnlyDictionary<int, Color> skillBeatColors)
         {
             _skillRepository = skillRepository;
             _skillDisplayTextFormatter = skillDisplayTextFormatter;
             _skillGenreIcons = skillGenreIcons;
+            _skillBeatColors = skillBeatColors;
             _skillDetailPresenter = presenter;
             _currentPointsLabel = currentPointsLabel;
             _skillDetailView = skillDetailView;
@@ -94,10 +96,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 _costToUnlock,
                 canUnlock,
                 entity.IsUnlocked,
-                hasVideo);
+                hasVideo,
+                ResolveComboStepColors(entity.UnlockSkillIds));
             _skillDetailPresenter.Push(dto);
             _skillDetailView.Show();
             view.SetSelected();
+            _playerStatusPresenter.PushPreview(_nodesOnPath);
         }
 
         /// <summary>
@@ -147,7 +151,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 -1,
                 false,
                 selectedNode.IsUnlocked,
-                hasVideo);
+                hasVideo,
+                ResolveComboStepColors(selectedNode.UnlockSkillIds));
             _skillDetailPresenter.Push(dto);
             _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
             _playerStatusPresenter.Push();
@@ -209,6 +214,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _skillNodeViews[_selectedNodeId].SetUnSelected();
             _nodesOnPath.Clear();
             _selectedNodeId = -1;
+            _playerStatusPresenter.Push();
         }
 
         /// <summary>
@@ -231,6 +237,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private ISkillRepository _skillRepository;
         private SkillDisplayTextFormatter _skillDisplayTextFormatter;
         private IReadOnlyDictionary<SkillType, Sprite> _skillGenreIcons;
+        private IReadOnlyDictionary<int, Color> _skillBeatColors;
         private ISkillDetailShowable _skillDetailView;
         private SkillDetailPresenter _skillDetailPresenter;
         private SkillTreeService _skillTreeService;
@@ -244,9 +251,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private int _selectedNodeId = -1;
         private bool _isResetting;
 
-        private const string CURRENT_POINTS_LABEL_TEXT = "所持ポイント：";
+        private const string CURRENT_POINTS_LABEL_TEXT = "解放P：";
         private const string SKILL_NAME_SEPARATOR = "、";
         private const string COMMAND_SEPARATOR = " → ";
+        private static readonly Color DEFAULT_COMBO_STEP_COLOR = Color.gray;
 
         /// <summary>
         ///     ノードがスキルを解放するかどうかを判定する。
@@ -401,6 +409,40 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             }
 
             return null;
+        }
+
+        /// <summary>
+        ///     ノードが解放するスキルの発動コマンドに対応する色一覧を解決する。
+        ///     複数スキルの場合はコマンド表示と同様に、入力順を保ったまま連結する。
+        /// </summary>
+        /// <param name="skillIds"> 解放対象のスキルID一覧。 </param>
+        /// <returns> 発動コマンドの入力順に並んだ色一覧。解決できない場合は空配列。 </returns>
+        private Color[] ResolveComboStepColors(SkillId[] skillIds)
+        {
+            if (_skillRepository == null || skillIds == null || skillIds.Length == 0)
+            {
+                return Array.Empty<Color>();
+            }
+
+            List<Color> colors = new List<Color>();
+            for (int i = 0; i < skillIds.Length; i++)
+            {
+                if (!_skillRepository.TryGetSkill(skillIds[i], out SkillTemplate skillData)
+                    || skillData.Pattern == null)
+                {
+                    continue;
+                }
+
+                for (int j = 0; j < skillData.Pattern.Length; j++)
+                {
+                    colors.Add(_skillBeatColors != null
+                        && _skillBeatColors.TryGetValue((int)skillData.Pattern[j], out Color color)
+                        ? color
+                        : DEFAULT_COMBO_STEP_COLOR);
+                }
+            }
+
+            return colors.ToArray();
         }
 
         /// <summary>

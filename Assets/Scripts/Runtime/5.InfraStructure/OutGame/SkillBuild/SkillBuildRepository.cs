@@ -1,7 +1,9 @@
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
 using SymphonyFrameWork.System.SaveSystem;
@@ -82,6 +84,80 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
 
             _equippedSkills = new List<EquippedSkill>(equippedSkills);
         }
+
+        /// <summary>
+        ///     保存記録があるスキルの現在レベル一覧を取得する(スキルID→レベル)。
+        /// </summary>
+        public async ValueTask<IReadOnlyDictionary<int, int>> GetSkillLevelsAsync()
+        {
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
+
+            Dictionary<int, int> result = new();
+            foreach (SkillLevelEntry entry in saveData.SkillBuild.SkillLevels)
+            {
+                if (entry != null)
+                {
+                    result[entry.SkillId] = entry.Level;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     指定したスキルのレベルを1上げ、改造Pを1消費する。
+        /// </summary>
+        /// <param name="skillId"> 対象スキルID。 </param>
+        /// <param name="baseLevel"> 保存記録が無い場合の基準レベル(テンプレートの初期レベル)。 </param>
+        /// <returns> 改造Pが不足している等の理由で実行できなかった場合は false。 </returns>
+        public async Task<bool> TryLevelUpSkillAsync(int skillId, int baseLevel)
+        {
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
+
+            int previousPoint = saveData.ResourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint);
+            if (previousPoint < MIN_LEVEL_UP_COST)
+            {
+                return false;
+            }
+
+            int previousLevel = saveData.SkillBuild.GetSkillLevel(skillId, baseLevel);
+            int maxLevel = _skillRepository != null && _skillRepository.TryGetSkill(new SkillId(skillId), out SkillTemplate template)
+                ? template.MaxLevel
+                : DEFAULT_MAX_LEVEL;
+            if (previousLevel >= maxLevel)
+            {
+                return false;
+            }
+
+            saveData.SkillBuild.SetSkillLevel(skillId, previousLevel + 1);
+            if (!saveData.ResourceInventory.TryConsume(GameResourceIds.SkillLevelupPoint, MIN_LEVEL_UP_COST))
+            {
+                saveData.SkillBuild.SetSkillLevel(skillId, previousLevel);
+                return false;
+            }
+
+            try
+            {
+                await SaveStore.SaveAsync<SaveData>();
+            }
+            catch
+            {
+                // SaveStore は同一インスタンスをキャッシュするため、
+                // 書き込み失敗時はキャッシュ上の値も保存前へ戻す。
+                saveData.SkillBuild.SetSkillLevel(skillId, previousLevel);
+                saveData.ResourceInventory.SetAmount(GameResourceIds.SkillLevelupPoint, previousPoint);
+                throw;
+            }
+
+            return true;
+        }
+
+        private const int MIN_LEVEL_UP_COST = 1;
+        private const int DEFAULT_MAX_LEVEL = 10;
 
         [SerializeField, Tooltip("スキル ID から SkillTemplate を取得するリポジトリ。")]
         private SkillRepository _skillRepository;
