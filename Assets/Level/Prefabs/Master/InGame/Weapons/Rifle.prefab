@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1458326081246105074
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 41394903061085134}
+  m_Layer: 0
+  m_Name: CasingEjectPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &41394903061085134
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1458326081246105074}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.03, z: -0.02}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4343469040071278653}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1590850733677617954
 GameObject:
   m_ObjectHideFlags: 0
@@ -191,6 +222,7 @@ MonoBehaviour:
   _attackEffect: {fileID: 7058334645205068217}
   _muzzleFlashLight: {fileID: 6712284992410448918}
   _effectDelaySeconds: 0
+  _casingEjector: {fileID: 478570793099641758}
   _effectRenderers:
   - {fileID: 2241831979732568911}
   - {fileID: 2369268421736666673}
@@ -210,6 +242,7 @@ GameObject:
   - component: {fileID: 4343469040071278653}
   - component: {fileID: 324417235105032535}
   - component: {fileID: 3219758462579346772}
+  - component: {fileID: 478570793099641758}
   m_Layer: 0
   m_Name: Muzzle
   m_TagString: Untagged
@@ -232,6 +265,7 @@ Transform:
   m_Children:
   - {fileID: 8319038386745426990}
   - {fileID: 490429651107130900}
+  - {fileID: 41394903061085134}
   m_Father: {fileID: 8488029380195380290}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &324417235105032535
@@ -279,6 +313,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
+--- !u!114 &478570793099641758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9131651697673835396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ab493d03ab0404c8d5e72aa26b0f65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Player.CasingEjectorView
+  _casingPrefab: {fileID: 269748891200729465, guid: af97533842baee544b4c7e3d954cfafe, type: 3}
+  _ejectPoint: {fileID: 41394903061085134}
+  _minEjectSpeed: 1.5
+  _maxEjectSpeed: 2.5
+  _torqueStrength: 10
+  _lifetimeSeconds: 4
 --- !u!1001 &4472576800892640683
 PrefabInstance:
   m_ObjectHideFlags: 0
