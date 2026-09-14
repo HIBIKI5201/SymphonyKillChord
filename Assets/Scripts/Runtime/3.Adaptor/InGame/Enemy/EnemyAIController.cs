@@ -120,6 +120,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 {
                     Debug.Log("[EnemyAIController] 攻撃範囲を出た");
                     _enemyBattleState.ExitRange();
+                    // 射程外に出た場合、予約中の攻撃(音楽ビート待ち)も合わせてキャンセルする。
+                    // これを行わないと、範囲表示もダメージも伴わない攻撃モーション・SEだけが
+                    // 後から発火してしまう。
+                    CancelAttack();
                 }
             }
             else

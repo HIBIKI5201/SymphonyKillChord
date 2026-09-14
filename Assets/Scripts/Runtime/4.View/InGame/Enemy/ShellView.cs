@@ -68,17 +68,22 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///     有効化処理。
         /// </summary>
-        public void Activate()
+        /// <returns>
+        ///     攻撃対象を保持していて有効化できた場合はtrue。
+        ///     対象を失っている場合はfalseを返し、範囲表示(デカール)は有効化しない。
+        /// </returns>
+        public bool Activate()
         {
             if (_targetTransform == null)
             {
                 Debug.LogError($"[{nameof(ShellView)}] 攻撃対象を失っています。");
-                return;
+                return false;
             }
             // プール再利用時に前回の進捗が残らないようリセットする。
             ResetIndicatorRatio();
             transform.position = _targetTransform.position;
             _indicator.gameObject.SetActive(true);
+            return true;
         }
 
         /// <summary>
