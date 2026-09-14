@@ -76,6 +76,21 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 }
             }
 
+            int dialogueCount = 0;
+            bool hasVoiceAction = false;
+            for (int i = 0; i < actions.Count; i++)
+            {
+                if (actions[i] is PlayDialogueStepEntryAction)
+                {
+                    dialogueCount++;
+                }
+                hasVoiceAction |= actions[i] is PlayVoiceStepEntryAction;
+            }
+            if (dialogueCount > 1 || (dialogueCount > 0 && hasVoiceAction))
+            {
+                throw new InvalidOperationException(
+                    $"会話は一ステップに一つだけ設定し、PlayVoiceとの同時指定は避けてください。GuideMessageText: {_guideMessageText}");
+            }
             return actions;
         }
     }

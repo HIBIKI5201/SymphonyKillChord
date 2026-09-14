@@ -10,9 +10,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <summary>
         ///     ポップアップを表示します。
         /// </summary>
-        /// <param name="message"> 表示するメッセージです。 </param>
-        /// <param name="image"> 表示する画像です。未設定の場合はnullです。 </param>
-        void Show(Sprite image);
+        /// <param name="imageEntryKey"> TutorialPopupImagesテーブルのエントリーキーです。 </param>
+        /// <param name="fallbackImage"> ローカライズ画像を取得できない場合に表示する画像です。未設定の場合はnullです。 </param>
+        void Show(string imageEntryKey, Sprite fallbackImage);
 
         /// <summary>
         ///     ポップアップを非表示にします。
