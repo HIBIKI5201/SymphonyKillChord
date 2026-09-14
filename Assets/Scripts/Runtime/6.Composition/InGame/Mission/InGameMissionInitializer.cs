@@ -21,6 +21,7 @@ using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Combo;
 using KillChord.Runtime.View.InGame.Mission;
 using KillChord.Runtime.View.OutGame.Scenario;
+using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Voice;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -187,7 +188,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _popupController = new MissionStepPopupController(
                     _moduleContainer.MissionRuntimeService,
                     _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
-                    _missionStepPopupView,
+                    CreatePopupView(),
                     playerModuleContainer.InputSuppressionState,
                     _popupInputSuppressionDuration);
             }
@@ -287,6 +288,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         {
             _recorderController?.Dispose();
             _popupController?.Dispose();
+            _mobileAttackAreaView?.Dispose();
+            _mobileAttackAreaView = null;
             _playerBuffController?.Dispose();
             _stepEntryActionController?.Dispose();
             if (_scenarioController != null)
@@ -326,6 +329,28 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             _isModuleRegistered = false;
         }
 
+        /// <summary>
+        ///     説明ポップアップのViewを生成します。
+        ///     スマートフォンでは、表示中に画面全体を攻撃ボタンの判定にするデコレータで包みます。
+        /// </summary>
+        /// <returns> ポップアップ表示に使用するViewです。 </returns>
+        private IMissionStepPopupView CreatePopupView()
+        {
+#if UNITY_ANDROID || UNITY_IOS
+            // スマホ用UIが無効な環境では、従来どおりポップアップのみを表示する。
+            MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
+            Canvas mobileCanvas = mobileInput != null && mobileInput.gameObject.activeInHierarchy
+                ? mobileInput.GetComponentInParent<Canvas>()
+                : null;
+            if (mobileCanvas != null)
+            {
+                _mobileAttackAreaView = new MobileFullScreenAttackAreaView(mobileCanvas.rootCanvas.transform);
+                return new MobileAttackAreaPopupViewDecorator(_missionStepPopupView, _mobileAttackAreaView);
+            }
+#endif
+            return _missionStepPopupView;
+        }
+
         [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
         [SerializeField, Tooltip("目標ステップの説明ポップアップを表示するビュー。未設定の場合はポップアップ機能を使用しない。")] private MissionStepPopupView _missionStepPopupView;
@@ -360,6 +385,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private MissionModuleContainer _moduleContainer;
         private MissionProgressRecorderController _recorderController;
         private MissionStepPopupController _popupController;
+        private MobileFullScreenAttackAreaView _mobileAttackAreaView;
         private MissionPlayerBuffController _playerBuffController;
         private MissionStepEntryActionController _stepEntryActionController;
         private MissionScenarioController _scenarioController;
