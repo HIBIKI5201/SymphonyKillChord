@@ -17,7 +17,13 @@ if [[ ! "$RELEASE_ID" =~ ^[0-9a-f]{40}-[0-9]+-[0-9]+$ ]]; then
   exit 1
 fi
 
-if [[ "$DEPLOY_ROOT" != /opt/* || "$DEPLOY_ROOT" == /opt ]]; then
+deploy_root_parent="$(dirname -- "$DEPLOY_ROOT")"
+deploy_root_name="$(basename -- "$DEPLOY_ROOT")"
+canonical_deploy_root="$(realpath -m -- "$DEPLOY_ROOT")"
+if [[ "$deploy_root_parent" != /opt \
+  || "$deploy_root_name" == . \
+  || "$deploy_root_name" == .. \
+  || "$canonical_deploy_root" != "$DEPLOY_ROOT" ]]; then
   echo "[Deploy] deploy root must be a directory directly below /opt." >&2
   exit 1
 fi
@@ -75,6 +81,7 @@ elif [[ -e "$CURRENT_PATH" ]]; then
   exit 1
 fi
 
+# 指定したリリースへpublishリンクをアトミックに切り替える。
 activate_release() {
   local target="$1"
   local temporary_link="$DEPLOY_ROOT/.publish.next"
@@ -84,25 +91,62 @@ activate_release() {
   mv -Tf "$temporary_link" "$CURRENT_PATH"
 }
 
+# 直前のリリースへ戻し、サービスを再起動する。
 rollback() {
+  trap - ERR
+  local is_rollback_succeeded=true
+
   echo "[Deploy] health check failed; rolling back." >&2
-  sudo systemctl stop "$SERVICE_NAME" || true
-  if [[ -n "$previous_target" && -d "$previous_target" ]]; then
-    activate_release "$previous_target"
-    sudo systemctl start "$SERVICE_NAME"
+  if ! sudo systemctl stop "$SERVICE_NAME"; then
+    echo "[Deploy] failed to stop the service during rollback." >&2
+    is_rollback_succeeded=false
   fi
+
+  if [[ -z "$previous_target" || ! -d "$previous_target" ]]; then
+    echo "[Deploy] previous release is unavailable." >&2
+    is_rollback_succeeded=false
+  elif ! activate_release "$previous_target"; then
+    echo "[Deploy] failed to reactivate the previous release." >&2
+    is_rollback_succeeded=false
+  elif ! sudo systemctl start "$SERVICE_NAME"; then
+    echo "[Deploy] failed to start the previous release." >&2
+    is_rollback_succeeded=false
+  fi
+
+  if [[ "$is_rollback_succeeded" != true ]]; then
+    return 1
+  fi
+
+  return 0
+}
+
+# 準備完了前のエラーを捕捉し、ロールバックして元の終了コードを返す。
+handle_deploy_error() {
+  local exit_code="${1:-1}"
+  trap - ERR
+
+  if ! rollback; then
+    echo "[Deploy] rollback did not complete successfully." >&2
+  fi
+
+  if [[ -n "${deployment_start:-}" ]]; then
+    sudo journalctl --unit "$SERVICE_NAME" --since "$deployment_start" --no-pager >&2 \
+      || echo "[Deploy] failed to read service logs." >&2
+  fi
+
+  exit "$exit_code"
 }
 
 activate_release "$RELEASE_DIRECTORY"
-deployment_start="$(date -u '+%Y-%m-%d %H:%M:%S')"
+trap 'handle_deploy_error $?' ERR
+deployment_start="$(date '+%Y-%m-%d %H:%M:%S')"
 sudo systemctl restart "$SERVICE_NAME"
 
 is_ready=false
 for _ in {1..90}; do
   if ! sudo systemctl is-active --quiet "$SERVICE_NAME"; then
-    rollback
-    sudo journalctl --unit "$SERVICE_NAME" --lines 50 --no-pager >&2
-    exit 1
+    echo "[Deploy] service stopped before becoming ready." >&2
+    handle_deploy_error 1
   fi
 
   registration_logs="$(sudo journalctl --unit "$SERVICE_NAME" --since "$deployment_start" --no-pager)"
@@ -116,10 +160,10 @@ done
 
 if [[ "$is_ready" != true ]]; then
   echo "[Deploy] /branches command registration was not confirmed." >&2
-  rollback
-  printf '%s\n' "$registration_logs" >&2
-  exit 1
+  handle_deploy_error 1
 fi
+
+trap - ERR
 
 rm -f -- "$PACKAGE_PATH"
 

@@ -1,8 +1,8 @@
-# Oracle Cloud Always Free Ampere A1 セットアップ
+# Oracle Cloud x86-64 VM セットアップ
 
 ## 1. VMを用意する
 
-Oracle Cloud InfrastructureでUbuntu 22.04 ARM64のAmpere A1 Computeを作成します。BotはDiscord Gatewayへアウトバウンド接続するだけで、HTTPサーバーなどのインバウンド待受は行いません。Oracle側のセキュリティリスト、NSG、Ubuntuのファイアウォールで追加ポートを開放する必要はありません。
+Oracle Cloud InfrastructureでUbuntu 22.04 x86-64 Computeを作成します。BotはDiscord Gatewayへアウトバウンド接続するだけで、HTTPサーバーなどのインバウンド待受は行いません。Oracle側のセキュリティリスト、NSG、Ubuntuのファイアウォールで追加ポートを開放する必要はありません。
 
 以降の例では配置先を`/opt/sinfonia-specsearch`、サービスユーザーを`sinfonia`とします。
 
@@ -14,14 +14,14 @@ sudo mkdir -p /opt/sinfonia-specsearch
 sudo chown -R sinfonia:sinfonia /opt/sinfonia-specsearch
 ```
 
-## 2. .NET 10 ARM64を導入する
+## 2. .NET 10 x64を導入する
 
-自己完結publishしたBotの実行自体には共有ランタイムは不要ですが、VM上でのビルドと保守用に.NET 10 SDKを導入します。SDKにはARM64ランタイムも含まれます。
+自己完結publishしたBotの実行自体には共有ランタイムは不要ですが、VM上でのビルドと保守用に.NET 10 SDKを導入します。SDKにはx64ランタイムも含まれます。
 
 ```bash
 curl --fail --location https://dot.net/v1/dotnet-install.sh --output /tmp/dotnet-install.sh
 chmod +x /tmp/dotnet-install.sh
-sudo /tmp/dotnet-install.sh --channel 10.0 --architecture arm64 --install-dir /opt/dotnet
+sudo /tmp/dotnet-install.sh --channel 10.0 --architecture x64 --install-dir /opt/dotnet
 sudo ln -s /opt/dotnet/dotnet /usr/local/bin/dotnet
 dotnet --info
 ```
@@ -116,13 +116,13 @@ GitHubの`Sinfonia Operator` Environmentに以下のSecretsを登録してくだ
 | Secret | 内容 |
 |---|---|
 | `ORACLE_HOST` | Oracle VMのホスト名またはIPアドレス。 |
-| `ORACLE_SSH_USER` | 配備先を所有し、対象serviceを`sudo systemctl`で操作できるユーザー。 |
+| `ORACLE_SSH_USER` | 配備先を所有し、対象serviceへの`sudo systemctl restart/stop/start/is-active/status`と`sudo journalctl`をパスワードなし・非対話で実行できるユーザー。 |
 | `ORACLE_SSH_PRIVATE_KEY` | 上記ユーザーのOpenSSH秘密鍵。 |
 | `ORACLE_KNOWN_HOSTS` | `ssh-keyscan`などで事前に検証したOracle VMのhost key行。 |
 
-現在のVMはx86-64なので、Environment Variableの`ORACLE_RUNTIME`には`linux-x64`を設定します。未設定時も`linux-x64`が使われます。Ampere A1へ移行した場合は`linux-arm64`へ変更してください。配備スクリプトも実機とバイナリのCPU形式を照合し、不一致の場合はサービスを止める前に中断します。
+VMはx86-64なので、Environment Variableの`ORACLE_RUNTIME`には`linux-x64`を設定します。未設定時も`linux-x64`が使われます。配備スクリプトも実機とバイナリのCPU形式を照合し、不一致の場合はサービスを止める前に中断します。SSHで`sudo -n systemctl status sinfonia-specsearch.service`と`sudo -n journalctl --unit sinfonia-specsearch.service --lines 1 --no-pager`が成功することを事前に確認してください。
 
-Botが参照する設定ファイルはデプロイ対象に含めません。DiscordやGitHubのトークンはOracle VMにだけ保存します。`/branches`を有効にする場合は、Botへ渡すJSONまたは環境ファイルに以下を設定してください。
+Botが参照する設定ファイルはデプロイ対象に含めません。DiscordやGitHubのトークンはOracle VMにだけ保存します。自動デプロイは`/branches`の登録ログをヘルスチェックに使うため、Botへ渡すJSONまたは環境ファイルに`GITHUB_REPOSITORY`を必ず設定してください。
 
 ```json
 "GITHUB_REPOSITORY": "HIBIKI5201/SymphonyKillChord"
