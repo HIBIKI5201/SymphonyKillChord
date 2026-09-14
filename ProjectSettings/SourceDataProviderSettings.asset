@@ -56,6 +56,7 @@ MonoBehaviour:
   - _addressableKey: StatusBonusEffectIconCatalogAsset
   - _addressableKey: SkillGenreIconCatalogAsset
   - _addressableKey: Assets/Level/Data/Master/OutGame/StageSelect/Stream_StageTreeAsset.asset
+  - _addressableKey: GameResourceDefinitionRepository
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset
@@ -129,6 +130,10 @@ MonoBehaviour:
     _sourceAssetAddressableKey: EnemyDefinitionRepository
     _propertyPath: _enemyDefinitionAssets
     _assetCreationDirectory: Assets/Level/Data/Master/InGame/Enemy/Definitions
+  - _collectionKey: GameResource
+    _sourceAssetAddressableKey: GameResourceDefinitionRepository
+    _propertyPath: _resourceAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/Resource
   _repositoryMappings:
   - _category: StageAsset
     _addressableKey: StageTreeAsset
