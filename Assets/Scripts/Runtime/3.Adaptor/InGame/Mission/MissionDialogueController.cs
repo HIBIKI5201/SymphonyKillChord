@@ -235,7 +235,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 if (_isVoiced && !_voice.TryPlayVoice(_displayedLine.VoiceCueName))
                 {
                     Debug.LogWarning($"[{nameof(MissionDialogueController)}] Cueを再生できません：{_displayedLine.VoiceCueName}");
-                    continue;
+                    _isVoiced = false;
                 }
                 _remainingSeconds = _displayedLine.SilentDuration;
                 _isVisible = true;
