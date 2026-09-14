@@ -17,7 +17,22 @@ MonoBehaviour:
   m_SharedData: {fileID: 11400000, guid: 782f2d04919c12f4aa9b1330e6ced6d8, type: 2}
   m_Metadata:
     m_Items: []
-  m_TableData: []
+  m_TableData:
+  - m_Id: 234861061320704
+    m_Localized: Next, let's go over movement and dodging. You'll use them to navigate
+      the battlefield and evade enemy attacks, so make sure you remember them.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861141012480
+    m_Localized: Next, let's go over your attacks. Each attack has different characteristics,
+      so make sure you understand how they work.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861149401088
+    m_Localized: Now it's time for real combat. Put everything I've taught you to
+      use and go wild.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

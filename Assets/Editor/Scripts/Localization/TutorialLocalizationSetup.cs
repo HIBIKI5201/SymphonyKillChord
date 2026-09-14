@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -5,6 +6,7 @@ using UnityEditor.Localization;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
+using UnityEngine.Localization.Tables;
 
 namespace KillChord.Editor.Localization
 {
@@ -26,6 +28,21 @@ namespace KillChord.Editor.Localization
         private const string POPUP_IMAGES_DIRECTORY = "Assets/Arts/Images/Sprites/TutorialPopupImages/New";
 
         private static readonly string[] LocaleCodes = { "ja", "en" };
+        private static readonly SubtitleDefinition[] SubtitleDefinitions =
+        {
+            new(
+                "triad.tutorial.06",
+                "次に、移動と回避についてだ。戦場の移動や敵の攻撃の回避に使うから、よく覚えておいてくれ。",
+                "Next, let's go over movement and dodging. You'll use them to navigate the battlefield and evade enemy attacks, so make sure you remember them."),
+            new(
+                "triad.tutorial.07",
+                "次に、お前が行う攻撃についてだ。攻撃によって特徴が異なるから、しっかり把握しておいてくれ。",
+                "Next, let's go over your attacks. Each attack has different characteristics, so make sure you understand how they work."),
+            new(
+                "triad.tutorial.09",
+                "さて、実戦だ。教えたことを存分に活用して暴れるんだ。",
+                "Now it's time for real combat. Put everything I've taught you to use and go wild.")
+        };
 
         /// <summary>
         ///     チュートリアル用のLocalization Settings、ロケール、テーブルを作成または更新します。
@@ -40,7 +57,7 @@ namespace KillChord.Editor.Localization
             LocalizationSettings settings = EnsureLocalizationSettings();
             IReadOnlyList<Locale> locales = EnsureLocales();
             EnsureDefaultLocale(settings, locales);
-            EnsureStringTable(locales);
+            int registeredSubtitleCount = EnsureStringTable(locales);
             int registeredImageCount = EnsurePopupImageTable(locales);
 
             EditorUtility.SetDirty(settings);
@@ -49,7 +66,8 @@ namespace KillChord.Editor.Localization
 
             Debug.Log(
                 $"[{nameof(TutorialLocalizationSetup)}] セットアップが完了しました。"
-                + $" ロケール: {string.Join(", ", LocaleCodes)}、ポップアップ画像: {registeredImageCount}件。");
+                + $" ロケール: {string.Join(", ", LocaleCodes)}、字幕: {registeredSubtitleCount}件、"
+                + $"ポップアップ画像: {registeredImageCount}件。");
         }
 
         /// <summary>
@@ -132,20 +150,53 @@ namespace KillChord.Editor.Localization
         }
 
         /// <summary>
-        ///     未実装のチュートリアル字幕用String Table Collectionを作成します。
+        ///     チュートリアル字幕用String Table Collectionを作成または更新します。
         /// </summary>
         /// <param name="locales"> テーブルを作成するロケール一覧です。 </param>
-        private static void EnsureStringTable(IReadOnlyList<Locale> locales)
+        /// <returns> 登録した字幕の件数です。 </returns>
+        private static int EnsureStringTable(IReadOnlyList<Locale> locales)
         {
-            if (LocalizationEditorSettings.GetStringTableCollection(TutorialSubtitlesTableName) != null)
+            StringTableCollection collection = LocalizationEditorSettings.GetStringTableCollection(
+                TutorialSubtitlesTableName);
+            if (collection == null)
             {
-                return;
+                collection = LocalizationEditorSettings.CreateStringTableCollection(
+                    TutorialSubtitlesTableName,
+                    TABLES_DIRECTORY,
+                    locales.ToList());
             }
 
-            LocalizationEditorSettings.CreateStringTableCollection(
-                TutorialSubtitlesTableName,
-                TABLES_DIRECTORY,
-                locales.ToList());
+            foreach (SubtitleDefinition definition in SubtitleDefinitions)
+            {
+                SharedTableData.SharedTableEntry sharedEntry = collection.SharedData.GetEntry(definition.Key)
+                    ?? collection.SharedData.AddKey(definition.Key);
+                foreach (Locale locale in locales)
+                {
+                    StringTable table = collection.StringTables.FirstOrDefault(
+                        candidate => candidate.LocaleIdentifier.Code == locale.Identifier.Code);
+                    if (table == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"字幕テーブルに{locale.Identifier.Code}ロケールがありません。");
+                    }
+
+                    string localizedText = locale.Identifier.Code == "ja"
+                        ? definition.Japanese
+                        : definition.English;
+                    StringTableEntry entry = table.GetEntry(sharedEntry.Id);
+                    if (entry == null || string.IsNullOrWhiteSpace(entry.Value))
+                    {
+                        entry ??= table.AddEntry(sharedEntry.Id, localizedText);
+                        entry.Value = localizedText;
+                        EditorUtility.SetDirty(table);
+                    }
+                }
+            }
+
+            EditorUtility.SetDirty(collection);
+            EditorUtility.SetDirty(collection.SharedData);
+            LocalizationEditorSettings.EditorEvents.RaiseCollectionModified(null, collection);
+            return SubtitleDefinitions.Length;
         }
 
         /// <summary>
@@ -205,6 +256,26 @@ namespace KillChord.Editor.Localization
                 EnsureDirectory(parentDirectory);
                 AssetDatabase.CreateFolder(parentDirectory, directoryName);
             }
+        }
+
+        /// <summary>
+        ///     各ロケールの字幕定義です。
+        /// </summary>
+        private readonly struct SubtitleDefinition
+        {
+            public SubtitleDefinition(string key, string japanese, string english)
+            {
+                Key = key;
+                Japanese = japanese;
+                English = english;
+            }
+
+            /// <summary> テーブルキーです。 </summary>
+            public string Key { get; }
+            /// <summary> 日本語字幕です。 </summary>
+            public string Japanese { get; }
+            /// <summary> 英語字幕です。 </summary>
+            public string English { get; }
         }
     }
 }

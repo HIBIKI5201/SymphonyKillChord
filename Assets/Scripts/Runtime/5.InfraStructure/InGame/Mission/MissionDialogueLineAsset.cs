@@ -15,10 +15,12 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// </summary>
         public MissionDialogueLine Create()
         {
-            return new(_text, _portrait, _voiceCueName, _silentDuration);
+            return new(_textEntryKey, _text, _portrait, _voiceCueName, _silentDuration);
         }
 
-        [SerializeField, TextArea(2, 5), Tooltip("会話テキスト")]
+        [SerializeField, Tooltip("会話テキストのTutorialSubtitlesテーブルキー。空文字列の場合はフォールバックを表示します。")]
+        private string _textEntryKey = string.Empty;
+        [SerializeField, TextArea(2, 5), Tooltip("翻訳未登録時に表示する会話テキスト。")]
         private string _text = "";
         [SerializeField, Tooltip("顔画像。未設定可")]
         private Sprite _portrait;

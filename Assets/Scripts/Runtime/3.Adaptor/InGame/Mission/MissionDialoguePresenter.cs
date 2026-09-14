@@ -18,7 +18,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// </summary>
         public void Present(MissionDialogueLine line, bool isVisible, bool isPaused, int version, bool isImmediate = false)
         {
-            MissionDialogueDTO dto = new(line.Text, line.Portrait, isVisible, isPaused, version, isImmediate);
+            MissionDialogueDTO dto = new(
+                line.TextEntryKey,
+                line.FallbackText,
+                line.Portrait,
+                isVisible,
+                isPaused,
+                version,
+                isImmediate);
             _viewModel.Apply(in dto);
         }
 
