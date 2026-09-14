@@ -17,6 +17,7 @@ namespace KillChord.Runtime.View.InGame.Player
             ShowWeapon();
             PlayAttackSound();
             PlayEffect();
+            EjectCasing();
         }
 
         /// <summary>
@@ -74,6 +75,9 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Min(0f), Tooltip("攻撃Effectを再生するまでの遅延時間。")]
         private float _effectDelaySeconds;
 
+        [SerializeField, Tooltip("攻撃時に薬莢を排出するEjector。未設定の場合は排出しません。")]
+        private CasingEjectorView _casingEjector;
+
         [SerializeField, Tooltip("DitherのMaterialエフェクトを適用するRenderer一覧。")]
         private Renderer[] _effectRenderers;
 
@@ -128,6 +132,18 @@ namespace KillChord.Runtime.View.InGame.Player
                 .WithOnComplete(() => _attackEffect.Play())
                 .WithOnCancel(() => _attackEffect.Stop(true))
                 .RunWithoutBinding();
+        }
+
+        /// <summary>
+        ///     薬莢を排出します。
+        /// </summary>
+        private void EjectCasing()
+        {
+            if (_casingEjector == null)
+            {
+                return;
+            }
+            _casingEjector.Eject();
         }
 
         /// <summary>
