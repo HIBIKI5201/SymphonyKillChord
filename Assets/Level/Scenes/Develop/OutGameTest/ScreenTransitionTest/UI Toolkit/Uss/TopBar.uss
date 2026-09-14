@@ -13,7 +13,7 @@
     width: 187.5px;
     height: 100px;
     background-color: rgba(0, 0, 0, 0);
-    background-image: url("project://database/Assets/Arts/UI/UI_BackPanel.png?fileID=21300000&guid=5642612c39802e743af51d5f29d29b0e&type=3#UI_BackPanel");
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/WIP/BackPanel.png?fileID=21300000&guid=3bbc7964560a56647ad92d08d25c4138&type=3#BackPanel");
     -unity-background-scale-mode: scale-to-fit;
     border-top-width: 0;
     border-right-width: 0;

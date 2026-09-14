@@ -13,7 +13,7 @@
                 <ui:Label name="UnlockPointsLabel" text="解放P：0" class="home-point-label"/>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:Button name="OptionIcon" class="button setting-shortcut-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/UI/UI_btn_square.png?fileID=21300000&amp;guid=007fb3301cfef074a98bd9243797cad4&amp;type=3#UI_btn_square&quot;);">
+        <ui:Button name="OptionIcon" class="button setting-shortcut-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/WIP/UI_btn_square.png?fileID=21300000&amp;guid=37fd6d3204bfe514cb8207d301aa86af&amp;type=3#UI_btn_square&quot;);">
             <ui:Image name="OptionIconGlyph" picking-mode="Ignore" class="home-option-icon-glyph" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_OptionIocn.png?fileID=21300000&amp;guid=bd80c72ceb0921245907a0bb0ceb0cc1&amp;type=3#UI_OptionIocn&quot;);"/>
         </ui:Button>
         <ui:VisualElement name="ButtonRoot" style="position: absolute; top: 0; right: 0; height: 100%; justify-content: flex-start; align-items: flex-end; padding-right: 90px; padding-top: 260px; flex-direction: column; padding-bottom: 0; padding-left: 0;">

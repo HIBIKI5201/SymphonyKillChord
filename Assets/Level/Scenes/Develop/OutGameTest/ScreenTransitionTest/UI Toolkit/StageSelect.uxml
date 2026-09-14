@@ -12,7 +12,7 @@
         </ui:ScrollView>
         <ui:VisualElement name="TopBarBackground" picking-mode="Ignore" style="position: absolute; left: 8px; top: 0; width: 572px; height: 131px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OutGame_SceneTab.png?fileID=2800000&amp;guid=96c8d94dd68b3104fa34a3f388529d63&amp;type=3#UI_OutGame_SceneTab&quot;); -unity-background-scale-mode: scale-to-fit;"/>
         <screen:AlphaHitTestButton name="BackButton" enabled="true" class="button back-button ui-se-cancel"/>
-        <ui:Button name="SettingShortcutButton" class="button setting-shortcut-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/UI/UI_btn_square.png?fileID=21300000&amp;guid=007fb3301cfef074a98bd9243797cad4&amp;type=3#UI_btn_square&quot;);">
+        <ui:Button name="SettingShortcutButton" class="button setting-shortcut-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/WIP/UI_btn_square.png?fileID=21300000&amp;guid=37fd6d3204bfe514cb8207d301aa86af&amp;type=3#UI_btn_square&quot;);">
             <ui:Image name="SettingIconGlyph" picking-mode="Ignore" class="home-option-icon-glyph" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_OptionIocn.png?fileID=21300000&amp;guid=bd80c72ceb0921245907a0bb0ceb0cc1&amp;type=3#UI_OptionIocn&quot;);"/>
         </ui:Button>
     </ui:VisualElement>
