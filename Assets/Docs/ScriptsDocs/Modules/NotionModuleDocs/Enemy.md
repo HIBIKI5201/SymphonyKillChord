@@ -20,6 +20,7 @@
 | **`EnemyWaveDefinition`** / **`EnemyWaveDefinitionId`** / **`EnemyWaveDetail`** | Domain | 1ウェーブ分の構成（敵種類・数・継続時間・演出ID）とその識別子、明細 |
 | **`EnemyWaves`** | Domain | `EnemyWaveDefinition[]`をラップし、ループ設定・次ウェーブ取得・最終ウェーブ判定を提供 |
 | **`EnemyMoveSpec`** / **`EnemyMoveDecision`** | Domain | 移動パラメータと、移動AIが次フレームに取る行動 |
+| **`EnemyPostAttackBehaviorKind`** / **`EnemyPostAttackBehaviorSpec`** | Domain | 攻撃後行動（再攻撃/味方合流/障害物接近）の種類と、抽選に使う重み・距離等の能力値 |
 | **`EnemyAttackMusicSpec`** | Domain | 敵の攻撃に関する音楽同期のタイミング情報 |
 | **`ShellEntity`** / **`ShellAttackSpec`** | Domain | 砲弾のEntityと、砲弾固有の攻撃パラメータ |
 | **`BossAttackKind`** | Domain | ボスの攻撃種別 |
@@ -29,7 +30,9 @@
 | **`BossAttackReservationUsecase`** / **`EnemyTripleShotAttackUsecase`** | Application | ボス専用の攻撃予約と、3方向攻撃 |
 | **`EnemyRaycastDetectService`** | Application | 索敵・壁検知のレイキャスト |
 | **`NearestAttackPositionSearchService`** | Application | プレイヤーへ接近する際の最適な攻撃座標を探索 |
-| **`IEnemyWaveDefinitionRepository`** / **`IEnemyRaycastDetectRepository`** / **`INearestAttackPositionSearchRepository`** | Application | 各種リポジトリ境界 |
+| **`EnemyPostAttackBehaviorUsecase`** | Application | 攻撃後の行動（再攻撃/味方合流/障害物接近）を重み抽選で決定し、合流・接近の場合は上書き移動先を算出する |
+| **`ObstacleSearchService`** | Application | 最も近い障害物の位置検索を`IObstacleSearchRepository`へ委譲する |
+| **`IEnemyWaveDefinitionRepository`** / **`IEnemyRaycastDetectRepository`** / **`INearestAttackPositionSearchRepository`** / **`IObstacleSearchRepository`** | Application | 各種リポジトリ境界 |
 | **`EnemyAIController`** | Adaptor | AIの状態管理と、移動・攻撃予約への仲介 |
 | **`BossAIController`** / **`BossAttackPattern`** | Adaptor | ボスの行動制御と、攻撃パターン1種の束 |
 | **`IEnemySharedFacade`** / **`IEnemyStateFacade`** / **`IEnemyMovementAIFacade`** / **`IEnemyBattleAIFacade`** | Adaptor | BehaviorGraphから敵の情報・状態・移動・戦闘へ触るためのファサード契約 |
@@ -39,12 +42,15 @@
 | **`EnemyBattleState`** | Adaptor | 敵の戦闘中の状態を保持 |
 | **`EnemyWaveSpawnerState`** / **`EnemyWaveSpawnerController`** | Adaptor | 出現フェーズの保持（`OnWaveStarted`を公開）と、次ウェーブの生成指示 |
 | **`EnemyRaycastDetectController`** / **`NearestAttackPositionSearchController`** | Adaptor | 索敵と攻撃位置探索の窓口 |
+| **`ObstacleSearchController`** | Adaptor | `IObstacleSearchRepository`実装。障害物検索を`IObstacleSearchViewModel`（Viewの`NearbyObstacleSearchView`）へ委譲する |
+| **`IObstacleSearchViewModel`** | Adaptor | 障害物検索のAdaptor→View境界の契約 |
 | **`EnemyHealthHudPresenter`** | Adaptor | 敵HPのHUD反映 |
 | **`DamageNumberDTO`** / **`DamageNumberType`** / **`IDamageNumber`** | Adaptor | 被ダメージ数値表示の通知 |
 | **`IEnemySpawner`** / **`IShellSpawner`** / **`IShellLifeCycle`** / **`IShellView`** | Adaptor | 生成とライフサイクルの契約 |
-| **`EnemyBattleAIFacade`** / **`EnemyMovementAIFacade`** / **`EnemyStateFacade`** / **`EnemySharedFacade`** | View | 上記ファサード契約の実装。ボス用も`Boss/AIFacade/`配下に同構成で存在する |
-| **`AttackTargetAction`** / **`MoveToAttackAction`** / **`StopMovingAction`** / **`GetStunnedAction`** | View | BehaviorGraphのActionノード。ボス用も`Boss/BehaviorGraphNode/`配下に存在する |
-| **`IsTargetInAttackRangeCondition`** / **`IsAimSightClearCondition`** / **`IsAttackingCondition`** / **`IsStunnedCondition`** | View | BehaviorGraphのConditionノード |
+| **`EnemyBattleAIFacade`** / **`EnemyMovementAIFacade`** / **`EnemyStateFacade`** / **`EnemySharedFacade`** | View | 上記ファサード契約の実装。ボス用も`Boss/AIFacade/`配下に同構成で存在する。`EnemyStateFacade`は`IsDiscovered`（発見済みか）・`IsPlayerDiscoverable`（視野角・索敵距離・視線を満たし発見可能か）・`LookAround`（未発見時にその場で見回す）・`Discover`を追加公開しており、これらは`IEnemyStateFacade`インターフェースには定義されていない実装限定のメンバーである（BehaviorGraphノードは`BlackboardVariable<EnemyStateFacade>`で具象型を直接参照するため問題にならない） |
+| **`AttackTargetAction`** / **`MoveToAttackAction`** / **`StopMovingAction`** / **`GetStunnedAction`** / **`WaitForDiscoveryAction`** | View | BehaviorGraphのActionノード。`WaitForDiscoveryAction`はプレイヤー発見までの待機・見回しを担う。ボス用も`Boss/BehaviorGraphNode/`配下に存在する |
+| **`IsTargetInAttackRangeCondition`** / **`IsAimSightClearCondition`** / **`IsAttackingCondition`** / **`IsStunnedCondition`** / **`IsDiscoveredCondition`** | View | BehaviorGraphのConditionノード。`IsDiscoveredCondition`は発見済みかどうかを分岐条件として提供する |
+| **`NearbyObstacleSearchView`** | View | `IObstacleSearchViewModel`実装。`Physics.OverlapSphereNonAlloc`で周囲の障害物コライダーを検索し、最も近い1点を返す |
 | **`EnemyMoveView`** / **`BossMoveView`** | View | 実際のTransform移動 |
 | **`EnemyHealthView`** / **`EnemyHealthBillboardView`** | View | 敵HPバーの表示と、常にカメラを向く制御 |
 | **`DamageNumberView`** / **`DamageNumberStyle`** / **`DamageNumberExitType`** | View | ダメージ数値の表示と、その見た目・消え方の設定 |
@@ -176,7 +182,7 @@ AIの状態管理とユースケース連携を担う`EnemyAIController`とボ�
 主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① AI 移動制御フロー（毎フレーム）
-敵がプレイヤーを追尾・接近し、攻撃範囲に入った際に攻撃を予約する処理フローである。
+敵がプレイヤーを追尾・接近し、攻撃範囲に入った際に攻撃を予約する処理フローである。BehaviorGraph上ではこの移動制御に入る前段に「発見前の索敵ゲート」があり、`WaitForDiscoveryAction`が`EnemyStateFacade.IsDiscovered`を毎フレーム確認する。未発見の間は`IsPlayerDiscoverable`（視野角・索敵距離・視線をすべて満たすか）を判定し、満たせば`Discover()`で発見済みにしてSuccessを返し、満たさなければ`LookAround()`でその場の見回しを続けながらRunningを維持する。発見済みになると`IsDiscoveredCondition`がtrueとなり、下記の移動制御フローへ分岐する。
 
 ```mermaid
 sequenceDiagram
@@ -249,4 +255,31 @@ sequenceDiagram
     else 全ウェーブクリア
         EWCont ->> EWTimerView: タイマー停止 (StopTimer)
     end
+```
+
+### ④ 攻撃後行動選択フロー（攻撃実行直後）
+攻撃が終わった直後、次にどう動くかを重み抽選で決め、必要なら移動先を上書きする。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant EAI as EnemyAIController
+    participant PostAttackUC as EnemyPostAttackBehaviorUsecase
+    participant ObstacleUC as ObstacleSearchService
+    participant EBState as EnemyBattleState
+
+    Note over EAI: 攻撃実行後 (ChoosePostAttackBehavior)
+    EAI ->> ObstacleUC: 最寄り障害物の検索 (TryFindNearestObstaclePosition)
+    ObstacleUC -->> EAI: 障害物位置（見つからない場合はなし）
+    EAI ->> PostAttackUC: 行動抽選 (TryDecideOverrideDestination: 自位置/最寄り味方/最寄り障害物)
+    alt 再攻撃（Stay）を抽選
+        PostAttackUC -->> EAI: falseを返却（上書き移動先なし）
+    else 味方合流（RegroupWithAlly）を抽選
+        PostAttackUC -->> EAI: 味方から一定距離離れた合流地点を返却
+        EAI ->> EBState: SetOverrideDestination
+    else 障害物接近（ApproachObstacle）を抽選
+        PostAttackUC -->> EAI: 障害物へ一定割合近づいた地点を返却
+        EAI ->> EBState: SetOverrideDestination
+    end
+    Note over EBState: 上書き移動先が設定されている間は①のAI移動制御フローが優先的にそこへ向かう
 ```
