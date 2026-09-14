@@ -12,5 +12,10 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
         ///     デカールの見た目の変化開始と完全に同じ拍でSEが鳴るようにする。
         /// </summary>
         public const double DETONATE_LEAD_BEAT_COUNT = 2d;
+
+        /// <summary>
+        ///     着弾予告SE（２段階目）を鳴らす、着弾タイミングの何拍前かを表す拍数。
+        /// </summary>
+        public const double AREA_WARNING_SECOND_LEAD_BEAT_COUNT = 1d;
     }
 }

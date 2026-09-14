@@ -85,6 +85,9 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("敵への通常Hit時のSE用Source。")]
         private SoundEffectSource _hitSoundSource;
 
+        [SerializeField, Tooltip("ロックオン成立時のSE用Source。")]
+        private SoundEffectSource _lockOnSoundSource;
+
         [SerializeField, Tooltip("足音演出Viewです。")]
         private FootStepView _footStepView;
 
@@ -163,6 +166,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private void OnDestroy()
         {
             EventBus<EOnTakeDamage>.Unregister(HandleTakeDamage);
+            EventBus<EOnLockOnAcquired>.Unregister(HandleLockOnAcquired);
 
             if (_playerInputView != null)
             {
@@ -204,6 +208,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _healthHudPresenter = healthHudPresenter;
             _healthHudPresenter.OnDamaged += PlayDamageFeedback;
             EventBus<EOnTakeDamage>.Register(HandleTakeDamage);
+            EventBus<EOnLockOnAcquired>.Register(HandleLockOnAcquired);
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
@@ -838,6 +843,15 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 PlaySound(_hitSoundSource, null);
             }
+        }
+
+        /// <summary>
+        ///     ロックオン成立時のSEを再生します。
+        /// </summary>
+        /// <param name="e"> イベント情報です。 </param>
+        private void HandleLockOnAcquired(EOnLockOnAcquired e)
+        {
+            PlaySound(_lockOnSoundSource, null);
         }
 
         /// <summary>

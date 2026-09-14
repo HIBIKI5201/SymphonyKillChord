@@ -32,6 +32,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _entity.Reset(enemyBattleState.CurrentAttack);
             _reservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
             _reservationUsecase.OnAreaWarning += HandleAreaWarning;
+            _reservationUsecase.OnAreaWarningSecond += HandleAreaWarningSecond;
             _reservationUsecase.ReserveDetonate();
         }
 
@@ -43,6 +44,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _reservationUsecase.Cancel();
             _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
             _reservationUsecase.OnAreaWarning -= HandleAreaWarning;
+            _reservationUsecase.OnAreaWarningSecond -= HandleAreaWarningSecond;
             _attacker = null;
             _defender = null;
         }
@@ -52,6 +54,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             // 破棄する前に購読を解除する。
             _reservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
             _reservationUsecase.OnAreaWarning -= HandleAreaWarning;
+            _reservationUsecase.OnAreaWarningSecond -= HandleAreaWarningSecond;
             _reservationUsecase.Dispose();
         }
 
@@ -91,6 +94,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private void HandleAreaWarning()
         {
             _viewModel.PlayAreaWarning();
+        }
+
+        /// <summary>
+        ///     着弾予告SE（２段階目）のタイミングが到達した時の処理。
+        /// </summary>
+        private void HandleAreaWarningSecond()
+        {
+            _viewModel.PlayAreaWarningSecond();
         }
 
 

@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -197,7 +198,7 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <param name="direction"> 選択基準に使用する方向。 </param>
         public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
         {
-            _currentTarget = EvaluateBestTarget(playerPosition, direction);
+            SetCurrentTarget(EvaluateBestTarget(playerPosition, direction));
             _currentCandidate = null;
         }
 
@@ -225,7 +226,7 @@ namespace KillChord.Runtime.View.InGame.Target
                 return false;
             }
 
-            _currentTarget = target;
+            SetCurrentTarget(target);
             _currentCandidate = null;
             return true;
         }
@@ -249,7 +250,7 @@ namespace KillChord.Runtime.View.InGame.Target
                     return false;
                 }
 
-                _currentTarget = targetable;
+                SetCurrentTarget(targetable);
                 _currentCandidate = null;
                 return true;
             }
@@ -264,6 +265,21 @@ namespace KillChord.Runtime.View.InGame.Target
         {
             _currentTarget = null;
             _currentCandidate = null;
+        }
+
+        /// <summary>
+        ///     現在のターゲットを更新する。既存のターゲットと異なる敵へ新たにロックオンした場合、捕捉イベントを発火する。
+        /// </summary>
+        /// <param name="newTarget"> 新たに設定するターゲット。null の場合はロックオン解除として扱う。 </param>
+        private void SetCurrentTarget(ITargetableViewModel newTarget)
+        {
+            bool isNewLock = newTarget != null && !ReferenceEquals(newTarget, _currentTarget);
+            _currentTarget = newTarget;
+
+            if (isNewLock)
+            {
+                EventBus<EOnLockOnAcquired>.Raise(new EOnLockOnAcquired());
+            }
         }
 
         /// <summary> NormalizeDot で使用するゼロ除算回避の下限閾値。 </summary>
