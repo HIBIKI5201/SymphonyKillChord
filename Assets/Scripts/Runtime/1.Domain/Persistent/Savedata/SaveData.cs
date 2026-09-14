@@ -86,13 +86,17 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
                 return;
             }
 
-            _resourceInventory.Add(
-                GameResourceIds.SkillLevelupPoint,
-                Math.Max(0, SkillBuild.SkillLevelupPoint));
-            _resourceInventory.Add(
-                GameResourceIds.ResearchPoint,
-                // 研究ポイントのsetterは負値を拒否しないため、破損したセーブで移行が例外にならないよう0に丸める。
-                Math.Max(0, SkillUnlock.ResearchPoint));
+            // 途中で例外が出ても部分的に反映されないよう、移行後の所持数を先にすべて計算してから書き込む。
+            // 研究ポイントのsetterは負値を拒否しないため、破損したセーブで移行が例外にならないよう0に丸める。
+            int migratedSkillLevelupPoint = checked(
+                _resourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint)
+                + Math.Max(0, SkillBuild.SkillLevelupPoint));
+            int migratedResearchPoint = checked(
+                _resourceInventory.GetAmount(GameResourceIds.ResearchPoint)
+                + Math.Max(0, SkillUnlock.ResearchPoint));
+
+            _resourceInventory.SetAmount(GameResourceIds.SkillLevelupPoint, migratedSkillLevelupPoint);
+            _resourceInventory.SetAmount(GameResourceIds.ResearchPoint, migratedResearchPoint);
             SkillBuild.SetSkillLevelupPoint(0);
             SkillUnlock.SetResearchPoint(0);
             _isLegacyPointMigrated = true;

@@ -40,6 +40,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {REWARD_SKILL_UNLOCK_LABEL} が見つかりませんでした。");
 
+            // 報酬を複数件並べると旧来の1項目表示より長くなるため、はみ出さず折り返すようにする。
+            _rewardSkillBuildLabel.style.whiteSpace = WhiteSpace.Normal;
+            _rewardSkillUnlockLabel.style.whiteSpace = WhiteSpace.Normal;
+
             _subMissionLabel1 = rootElement.Q<Label>(SUB_MISSION_LABEL1)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SUB_MISSION_LABEL1} が見つかりませんでした。");
