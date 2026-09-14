@@ -118,10 +118,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AddDirtAlpha: 0.469
-    - _AddDirtContrast: 6.58
-    - _AddDirtDistance: 0.454
-    - _AddDirtNoiseContrast: 6.84
+    - _AddDirtAlpha: 0.532
+    - _AddDirtContrast: 3.5
+    - _AddDirtDistance: 0.391
+    - _AddDirtNoiseContrast: 7.6
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
@@ -167,10 +167,12 @@ Material:
     m_Colors:
     - _BaseColor: {r: 0.5188679, g: 0.5037417, b: 0.48215556, a: 1}
     - _Color: {r: 0.51886785, g: 0.5037417, b: 0.48215556, a: 1}
-    - _Concrete_Color_01: {r: 1, g: 1, b: 1, a: 1}
+    - _Concrete_Color_01: {r: 0.9245283, g: 0.85624295, b: 0.8242257, a: 1}
     - _Concrete_Color_02: {r: 0.5471698, g: 0.53942686, b: 0.5239409, a: 1}
     - _DirtColor: {r: 0.3490566, g: 0.3113327, b: 0.3013083, a: 1}
-    - _DirtColor2: {r: 0.34901962, g: 0.30980393, b: 0.3019608, a: 1}
+    - _DirtColor2: {r: 0.5566038, g: 0.5375104, b: 0.52247244, a: 1}
+    - _DirtColor_1: {r: 0.25471696, g: 0.20305267, b: 0.20305267, a: 1}
+    - _DirtColor_2: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

@@ -117,6 +117,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// <param name="cueName"> 新しいキュー名。 </param>
         private void ChangeBgm(string cueName)
         {
+            if (_cri == null)
+            {
+                return;
+            }
+
             string currentCueName = _cri.cueName;
 
             if (string.IsNullOrEmpty(cueName))
@@ -144,6 +149,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         private void StopBgm()
         {
+            if (_cri == null)
+            {
+                return;
+            }
+
             _playback.Stop();
             _cri.cueName = string.Empty;
             _isPlaying = false;

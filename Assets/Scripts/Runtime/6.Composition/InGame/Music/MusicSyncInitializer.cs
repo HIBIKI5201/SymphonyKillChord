@@ -62,8 +62,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
             MusicSyncService = new MusicSyncService(
                 new RhythmDefinition(_testBpm, _testBeatOffsetSeconds),
-                _rhythmJudgmentDefinitionAsset.ToDefinition(),
-                RhythmJustService.Instance.TriggerJustHit);
+                _rhythmJudgmentDefinitionAsset.ToDefinition());
             MusicSyncController = new(MusicSyncState, MusicSyncService);
             _musicSyncView.Bind(
                 _musicPlayer,

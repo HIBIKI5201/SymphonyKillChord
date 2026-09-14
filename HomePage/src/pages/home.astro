@@ -18,26 +18,26 @@ import symphonyImage from '../assets/images/characters/symphony立ち絵-ポー�
 	<main>
 		<HeroSection title="Symphony Kill Chord" />
 
-		<GameplayVideoSection src="/movies/DummyData.mp4" />
+		<GameplayVideoSection src={`${import.meta.env.BASE_URL}movies/DummyData.mp4`} />
 
 		<CharacterFileTeaser
 			name={characters[0].name}
 			formalName={characters[0].formalName}
 			catchphrase="彼らの物語を知る"
 			image={symphonyImage}
-			href="/character"
+			href={`${import.meta.env.BASE_URL}character`}
 		/>
 		<GameplayOrderTeaser
 			title="ゲームプレイ"
 			orderNumber="047"
 			items={gameplayFeatures.map((feature) => feature.name)}
-			href="/gameplay"
+			href={`${import.meta.env.BASE_URL}gameplay`}
 		/>
 		<SkillDossierTeaser
 			title="スキル"
 			code="SKILL-DOSSIER"
 			skills={skills.map((skill) => skill.name)}
-			href="/skill"
+			href={`${import.meta.env.BASE_URL}skill`}
 		/>
 	</main>
 

@@ -1,5 +1,6 @@
 using KillChord.Editor.Utility;
 using UnityEditor;
+using UnityEditor.Build.Profile;
 using UnityEngine;
 
 namespace KillChord.Editor.AutoBuilder
@@ -28,43 +29,40 @@ namespace KillChord.Editor.AutoBuilder
 
             EditorGUI.BeginDisabledGroup(isRunning);
 
-            if (!AutoBuilderSettings.IsPathValid(settings.MasterPath))
+            foreach (AutoBuildSlot slot in AutoBuilderSettings.SLOTS)
             {
-                EditorGUILayout.HelpBox("MasterPathが不正です。", MessageType.Error);
-            }
-            else if (!AutoBuilderSettings.IsBuildProfilesValid(settings.MasterBuildProfiles))
-            {
-                EditorGUILayout.HelpBox("MasterBuildProfilesが不正です。", MessageType.Error);
-            }
-            else
-            {
-                if (GUILayout.Button("Master Build"))
-                {
-                    AutoBuildExecuter.Run(
-                        settings.MasterPath,
-                        settings.MasterBuildProfiles);
-                }
-            }
-
-            if (!AutoBuilderSettings.IsPathValid(settings.DevelopPath))
-            {
-                EditorGUILayout.HelpBox("DevelopPathが不正です。", MessageType.Error);
-            }
-            else if (!AutoBuilderSettings.IsBuildProfilesValid(settings.DevelopBuildProfiles))
-            {
-                EditorGUILayout.HelpBox("DevelopBuildProfilesが不正です。", MessageType.Error);
-            }
-            else
-            {
-                if (GUILayout.Button("Develop Build"))
-                {
-                    AutoBuildExecuter.Run(
-                        settings.DevelopPath,
-                        settings.DevelopBuildProfiles);
-                }
+                DrawSlotButton(settings, slot);
             }
 
             EditorGUI.EndDisabledGroup();
+        }
+
+        /// <summary>
+        ///     枠の設定を検証し、有効な場合はビルドボタンを描画します。
+        /// </summary>
+        /// <param name="settings"> 設定インスタンスです。 </param>
+        /// <param name="slot"> 描画する枠です。 </param>
+        private static void DrawSlotButton(AutoBuilderSettings settings, AutoBuildSlot slot)
+        {
+            string path = settings.GetPath(slot);
+            BuildProfile[] profiles = settings.GetProfiles(slot);
+
+            if (!AutoBuilderSettings.IsPathValid(path))
+            {
+                EditorGUILayout.HelpBox($"{slot.PathPropertyName}が不正です。", MessageType.Error);
+                return;
+            }
+
+            if (!AutoBuilderSettings.IsBuildProfilesValid(profiles))
+            {
+                EditorGUILayout.HelpBox($"{slot.ProfilesPropertyName}が不正です。", MessageType.Error);
+                return;
+            }
+
+            if (GUILayout.Button($"{slot.Label} Build"))
+            {
+                AutoBuildExecuter.Run(path, profiles);
+            }
         }
     }
 }
