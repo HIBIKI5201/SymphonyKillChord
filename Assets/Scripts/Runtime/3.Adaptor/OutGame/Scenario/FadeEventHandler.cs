@@ -1,4 +1,6 @@
 using KillChord.Runtime.Application.OutGame.Scenario;
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Domain.OutGame.Scenario;
@@ -21,15 +23,24 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary>
         /// 受け取ったイベントを現在の出力先へ反映する。
         /// </summary>
-        public ValueTask HandleAsync(FadeEvent e, CancellationToken ct)
+        public async ValueTask HandleAsync(FadeEvent e, CancellationToken ct)
         {
-            return _fadeOutputPort.FadeAsync(
+            long startedAt = Stopwatch.GetTimestamp();
+            await _fadeOutputPort.FadeAsync(
                 e.Target,
                 e.Mode,
                 e.Start,
                 e.End,
                 e.DurationSec,
                 ct);
+
+            // View が演出を行えず即時完了した場合も、イベントの指定時間は維持する。
+            double elapsedSec = (Stopwatch.GetTimestamp() - startedAt) / (double)Stopwatch.Frequency;
+            double remainingSec = e.DurationSec - elapsedSec;
+            if (remainingSec > 0d)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(remainingSec), ct);
+            }
         }
 
         private readonly IFadeOutputPort _fadeOutputPort;
