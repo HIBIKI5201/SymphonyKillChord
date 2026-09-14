@@ -25,12 +25,12 @@ namespace KillChord.Runtime.View.InGame.Mission
         }
 
         /// <inheritdoc />
-        public void Show(Sprite image)
+        public void Show(string imageEntryKey, Sprite fallbackImage)
         {
-            _inner.Show(image);
+            _inner.Show(imageEntryKey, fallbackImage);
 
-            // 画像が無いステップでは何も表示されないため、タップ攻撃も有効にしない。
-            if (image != null)
+            // 画像キーもフォールバック画像も無いステップでは何も表示されないため、タップ攻撃も有効にしない。
+            if (!string.IsNullOrWhiteSpace(imageEntryKey) || fallbackImage != null)
             {
                 _tapAttackInput.Activate();
             }

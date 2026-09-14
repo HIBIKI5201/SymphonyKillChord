@@ -129,6 +129,11 @@ namespace KillChord.Editor.AutoBuilder
         private const int MAX_CAPTURED_LOG_COUNT = 50;
 
         /// <summary>
+        ///     プロファイル切替や明示的なアセット更新に伴う再コンパイルの待機上限です。
+        /// </summary>
+        private const int EXTENDED_EDITOR_READY_TIMEOUT_SECONDS = 900;
+
+        /// <summary>
         ///     ドメインリロードによる再試行が同一プロファイルに対して許容される最大回数です。
         ///     超過した場合はそのプロファイルを失敗としてスキップし、次のプロファイルへ進めます。
         /// </summary>
@@ -474,9 +479,9 @@ namespace KillChord.Editor.AutoBuilder
 
                 // プラットフォーム切替（特にAndroid/iOS）はスクリプトの全再コンパイルを
                 // 引き起こすことがあり、Libraryがまっさらな状態では120秒を超えることがある。
-                // ここだけデフォルトより長めに待つ（超過時は例外を投げてこのプロファイルを
-                // スキップする挙動は変えない）。
-                await WaitForEditorReady(timeoutSeconds: 900);
+                // 明示的なアセット更新時と同じく長めに待つ（超過時は例外を投げてこの
+                // プロファイルをスキップする挙動は変えない）。
+                await WaitForEditorReady(timeoutSeconds: EXTENDED_EDITOR_READY_TIMEOUT_SECONDS);
                 LogDebug($"プロファイル切替後のエディタ準備完了: {profile.name}");
 
                 string[] scenes = profile.GetScenesForBuild()
@@ -520,7 +525,9 @@ namespace KillChord.Editor.AutoBuilder
 
                 AssetDatabase.Refresh(ImportAssetOptions.DontDownloadFromCacheServer);
 
-                await WaitForEditorReady();
+                // クリーンなCI環境では、上記Refreshによる初回インポートと再コンパイルが
+                // デフォルトの120秒を超えるため、プロファイル切替時と同じ上限で待機する。
+                await WaitForEditorReady(timeoutSeconds: EXTENDED_EDITOR_READY_TIMEOUT_SECONDS);
                 LogDebug($"プレイヤービルド直前のエディタ準備完了: {profile.name}");
 
                 int executePlayerBuildRetryCount = 0;
