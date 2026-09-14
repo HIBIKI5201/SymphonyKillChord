@@ -813,7 +813,7 @@ namespace KillChord.Editor.AutoBuilder
                 {
                     string entryName = filePath.Substring(sourceRoot.Length)
                         .Replace(Path.DirectorySeparatorChar, '/');
-                    ZipArchiveEntry entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+                    ZipArchiveEntry entry = archive.CreateEntry(entryName, System.IO.Compression.CompressionLevel.Optimal);
 
                     // WindowsのMAX_PATH境界を超えるビルド成果物は、拡張長パスで直接読み込む。
                     using (FileStream sourceStream = new FileStream(
