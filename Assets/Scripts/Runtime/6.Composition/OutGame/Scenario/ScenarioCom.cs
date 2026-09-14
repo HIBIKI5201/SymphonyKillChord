@@ -283,7 +283,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                     }
                     finally
                     {
-                        _scenarioView?.EndPlayback();
+                        if (_scenarioView != null) { _scenarioView.EndPlayback(); }
                     }
 
                     if (!CanContinueRun(runGeneration))
@@ -333,11 +333,6 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                     return;
                 }
 
-                if (!CanContinueRun(runGeneration))
-                {
-                    return;
-                }
-
                 selectedScenarioState.Clear();
             }
             catch (OperationCanceledException)
@@ -375,8 +370,8 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
 
             _isShuttingDown = true;
             _runGeneration++;
-            _usecase?.RequestSkip();
-            _scenarioView?.EndPlayback();
+            if (_usecase != null) { _usecase.RequestSkip(); }
+            if (_scenarioView != null) { _scenarioView.EndPlayback(); }
         }
 
         /// <summary>

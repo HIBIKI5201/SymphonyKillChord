@@ -297,7 +297,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _scenarioController = null;
             }
 
-            _scenarioView?.EndPlayback();
+            if (_scenarioView != null) { _scenarioView.EndPlayback(); }
             SetScenarioDisplayActive(false);
 
             _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
@@ -698,7 +698,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
                 return false;
             }
-            if(_comboHudView == null)
+            if (_comboHudView == null)
             {
                 Debug.LogError(
                     $"[{nameof(InGameMissionInitializer)}] " +
