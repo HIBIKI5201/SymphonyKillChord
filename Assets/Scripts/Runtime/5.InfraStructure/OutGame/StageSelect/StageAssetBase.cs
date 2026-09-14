@@ -83,10 +83,12 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
 
         // 旧形式の初回クリア報酬。既存アセットのシリアライズ値を保持するため残す。
         // 初回クリア報酬が未設定のアセットに限り、既知のリソースIDへ読み替えて使用する。
-        [SerializeField, HideInInspector, Tooltip("旧形式: スキル編成・強化に使用するポイント。")]
+        // 初回クリア報酬を「なし」にしたい場合に0へ戻せるよう、Inspector には表示したままにする。
+        [Header("旧形式の初回クリア報酬（移行用）")]
+        [SerializeField, Min(0), Tooltip("旧形式の改造ポイント。上の「初回クリア報酬」が空のときだけ使われる。初回クリア報酬をなしにする場合は0にすること。")]
         private int _rewardSkillBuildPoint;
 
-        [SerializeField, HideInInspector, Tooltip("旧形式: スキル解放・パラメーター強化に使用するポイント。")]
+        [SerializeField, Min(0), Tooltip("旧形式の研究ポイント。上の「初回クリア報酬」が空のときだけ使われる。初回クリア報酬をなしにする場合は0にすること。")]
         private int _rewardSkillUnlockPoint;
 
         /// <summary>
