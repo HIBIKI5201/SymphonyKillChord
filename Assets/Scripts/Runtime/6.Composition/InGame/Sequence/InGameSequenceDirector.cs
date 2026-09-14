@@ -43,7 +43,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageResultPresenter = resultPresenter ?? throw new ArgumentNullException(nameof(resultPresenter));
             _gameplayControllable = gameplayControllable ?? throw new ArgumentNullException(nameof(gameplayControllable));
             _gameHudVisibilityView = hudVisibilityView ?? throw new ArgumentNullException(nameof(hudVisibilityView));
-            _ambienceSoundView = ambienceSoundView ?? throw new ArgumentNullException(nameof(ambienceSoundView));
+            // 環境音はオプション要素のため、未設定(null)でも許容する。
+            _ambienceSoundView = ambienceSoundView;
         }
 
         /// <summary> 開始演出の再生中かどうか。 </summary>
@@ -73,7 +74,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             // PlayStageStartが完了コールバックを同期的に呼ぶ場合があるため、再生前にHUDを非表示にする。
             _gameHudVisibilityView.Hide();
 
-            _ambienceSoundView.PlayAmbience();
+            _ambienceSoundView?.PlayAmbience();
 
             _stageSequenceView.PlayStageStart(HandleTimelineCompleted);
             _stageStartFadeView.PlayFadeOut();
@@ -96,7 +97,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceMessageView?.Hide();
 
             // 開始演出を中断した場合、環境音が鳴りっぱなしにならないよう停止する。
-            _ambienceSoundView.StopAmbience();
+            _ambienceSoundView?.StopAmbience();
 
             // SourceのAddはModule(Ready)で行う。開始演出を中断したのでここで解放する。
             _stageStartConstraintView.RemoveSource();
@@ -181,7 +182,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceMessageView.Hide();
 
             // インゲームBGMの再生開始と同時に環境音を止める。
-            _ambienceSoundView.StopAmbience();
+            _ambienceSoundView?.StopAmbience();
             _gameplayControllable.StartGameplay();
 
             // SourceのAddはModule(Ready)で行う。開始演出が完了したのでここで解放する。

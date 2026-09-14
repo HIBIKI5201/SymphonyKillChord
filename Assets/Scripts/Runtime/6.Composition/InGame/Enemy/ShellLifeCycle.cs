@@ -57,7 +57,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         /// <param name="releaseCallback"> 砲弾をObject Poolへ戻す際に呼び出すコールバック。 </param>
         /// <param name="shellExplosionEffectView"> 爆発エフェクトを再生するパーティクルView。 </param>
-        public void Initialize(Action<ShellLifeCycle> releaseCallback, ReusableParticleSystemView shellExplosionEffectView)
+        /// <param name="shellExplosionSoundView"> 爆発SEを再生する外部所有のView。 </param>
+        public void Initialize(Action<ShellLifeCycle> releaseCallback, ReusableParticleSystemView shellExplosionEffectView, ReusableSoundEffectView shellExplosionSoundView)
         {
             if (!_musicSyncInitializer) _musicSyncInitializer = FindFirstObjectByType<MusicSyncInitializer>();
             if (!_musicSyncView) _musicSyncView = FindAnyObjectByType<MusicSyncView>();
@@ -100,6 +101,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 shellSpecPresenter,
                 Deactivate,
                 shellExplosionEffectView,
+                shellExplosionSoundView,
                 GetDetonateApproach);
             _releaseCallback = releaseCallback;
         }

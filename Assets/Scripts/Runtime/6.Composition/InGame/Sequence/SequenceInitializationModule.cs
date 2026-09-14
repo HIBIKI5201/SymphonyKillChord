@@ -62,13 +62,20 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 || _stageSequenceMusicView == null
                 || _stageStartConstraintView == null
                 || _playerInputView == null
-                || _musicPlayer == null
-                || _ambienceSoundView == null)
+                || _musicPlayer == null)
             {
                 Debug.LogError(
                     $"[{nameof(SequenceInitializationModule)}] シーケンス関連参照の取得に失敗しました。",
                     this);
                 return false;
+            }
+
+            // 環境音は演出上のオプション要素のため、未設定でもシーケンス全体は起動させる。
+            if (_ambienceSoundView == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SequenceInitializationModule)}] {nameof(_ambienceSoundView)} が未設定です。開始演出中の環境音は再生されません。",
+                    this);
             }
 
             _container = new SequenceModuleContainer();
