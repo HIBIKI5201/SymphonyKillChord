@@ -60,21 +60,27 @@
                     <ui:Label text="編成" class="skillbuild-panel-title" style="width: 228px; height: 61px; font-size: 40px;"/>
                     <ui:VisualElement name="SkillElementContainer" class="skill-element-container skillbuild-slot-row" style="height: 252px;">
                         <ui:VisualElement name="SkillSlot1" class="skill-element-slot skillbuild-slot" style="display: flex; height: 250px; width: 250px;">
-                            <ui:Label name="skill-slot-name" class="skill-slot-name"/>
-                            <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
-                            <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder" style="font-size: 100px;"/>
+                            <ui:VisualElement name="IconArea" class="skillbuild-slot-icon-area">
+                                <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
+                                <ui:Label name="skill-slot-name" class="skill-slot-name"/>
+                                <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder" style="font-size: 100px;"/>
+                            </ui:VisualElement>
                             <ui:VisualElement name="ComboRow" class="skillbuild-slot-combo-row"/>
                         </ui:VisualElement>
                         <ui:VisualElement name="SkillSlot2" class="skill-element-slot skillbuild-slot" style="display: flex; height: 250px; width: 250px;">
-                            <ui:Label name="skill-slot-name" class="skill-slot-name"/>
-                            <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
-                            <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder" style="font-size: 100px;"/>
+                            <ui:VisualElement name="IconArea" class="skillbuild-slot-icon-area">
+                                <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
+                                <ui:Label name="skill-slot-name" class="skill-slot-name"/>
+                                <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder" style="font-size: 100px;"/>
+                            </ui:VisualElement>
                             <ui:VisualElement name="ComboRow" class="skillbuild-slot-combo-row"/>
                         </ui:VisualElement>
                         <ui:VisualElement name="SkillSlot3" class="skill-element-slot skillbuild-slot" style="display: none;">
-                            <ui:Label name="skill-slot-name" class="skill-slot-name"/>
-                            <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
-                            <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder"/>
+                            <ui:VisualElement name="IconArea" class="skillbuild-slot-icon-area">
+                                <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
+                                <ui:Label name="skill-slot-name" class="skill-slot-name"/>
+                                <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder"/>
+                            </ui:VisualElement>
                             <ui:VisualElement name="ComboRow" class="skillbuild-slot-combo-row"/>
                         </ui:VisualElement>
                     </ui:VisualElement>

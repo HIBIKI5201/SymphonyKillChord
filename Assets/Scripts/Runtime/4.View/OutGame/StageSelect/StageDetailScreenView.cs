@@ -109,10 +109,6 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {MISSION}/{MISSION_LIST}/{MISSION_LIST_SUB2}/{MISSION_CHECK} が見つかりませんでした。");
 
-            _backButton = rootElement.Q<Button>(BACK_BUTTON)
-                ?? throw new System.ArgumentNullException(
-                    $"[{nameof(StageDetailScreenView)}] {BACK_BUTTON} が見つかりませんでした。");
-
             _sortieButton = rootElement.Q<Button>(SORTIE_BUTTON)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SORTIE_BUTTON} が見つかりませんでした。");
@@ -125,10 +121,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SKILL_BUILD} が見つかりませんでした。");
 
-            VisualElement equippedSkillRow = skillBuild.Q<VisualElement>(SKILL_SLOT)
+            _equippedSkillRow = skillBuild.Q<VisualElement>(SKILL_SLOT)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SKILL_BUILD}/{SKILL_SLOT} が見つかりませんでした。");
-            _equippedSkillSlots = equippedSkillRow.Query<VisualElement>(className: EQUIPPED_SKILL_SLOT_USS_CLASS).ToList();
+            _equippedSkillSlots = _equippedSkillRow.Query<VisualElement>(className: EQUIPPED_SKILL_SLOT_USS_CLASS).ToList();
             _equippedSkillNames = new List<Label>(_equippedSkillSlots.Count);
             _equippedSkillIcons = new List<Image>(_equippedSkillSlots.Count);
             _equippedSkillCommandRows = new List<VisualElement>(_equippedSkillSlots.Count);
@@ -250,6 +246,9 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ComboHexRowBuilder.Build(
                     _equippedSkillCommandRows[i], steps, hexSprite, EQUIPPED_SKILL_COMMAND_HEX_USS_CLASS);
             }
+
+            // 装備数によらず枠同士の間隔(margin基準)を常に一定にするため、常に中央揃えにする。
+            _equippedSkillRow.style.justifyContent = Justify.Center;
         }
 
         public override void Dispose()
@@ -302,12 +301,9 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// </summary>
         private void RegisterButtonCallback()
         {
-            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
-            _backButton.ExcludeFromNavigation();
             _sortieButton.MakeNavigable();
             _skillBuildShortcutButton.MakeNavigable();
 
-            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
             _sortieButtonActivation = _sortieButton.RegisterActivation(HandleSortieButtonActivationHandler);
             _skillBuildShortcutButtonActivation =
                 _skillBuildShortcutButton.RegisterActivation(HandleSkillBuildShortcutButtonActivationHandler);
@@ -318,18 +314,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// </summary>
         private void UnregisterButtonCallback()
         {
-            _backButtonActivation?.Dispose();
             _sortieButtonActivation?.Dispose();
             _skillBuildShortcutButtonActivation?.Dispose();
-        }
-
-        /// <summary>
-        ///     戻るボタンが作動したときの処理。
-        ///     ステージ詳細画面を閉じるイベントを発火します。
-        /// </summary>
-        private void HandleBackButtonActivationHandler()
-        {
-            OutGameUIEvent.OnStageDetailClosed?.Invoke();
         }
 
         /// <summary>
@@ -368,7 +354,6 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string MISSION_LIST_SUB2 = "Sub2";
         private const string MISSION_CHECK = "MissionCheck";
         private const string MISSION_CHECK_ACHIEVED_USS_CLASS = "mission-check-mission-achieved";
-        private const string BACK_BUTTON = "BackButton";
         private const string SORTIE_BUTTON = "SortieButton";
         private const string SKILL_BUILD_SHORTCUT_BUTTON = "SkillBuildShortcutButton";
         private const string SKILL_BUILD = "SkillBuild";
@@ -408,18 +393,14 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// <remarks> ノードを選択して詳細が開いたら、そのまま出撃できるようにする。 </remarks>
         protected override VisualElement InitialFocusElement => _sortieButton;
 
-        /// <inheritdoc />
-        protected override VisualElement CancelTargetElement => _backButton;
-
-        private readonly Button _backButton;
         private readonly Button _sortieButton;
         private readonly Button _skillBuildShortcutButton;
+        private readonly VisualElement _equippedSkillRow;
         private readonly List<VisualElement> _equippedSkillSlots;
         private readonly List<Label> _equippedSkillNames;
         private readonly List<Image> _equippedSkillIcons;
         private readonly List<VisualElement> _equippedSkillCommandRows;
         private MotionHandle _slideMotionHandle;
-        private IDisposable _backButtonActivation;
         private IDisposable _sortieButtonActivation;
         private IDisposable _skillBuildShortcutButtonActivation;
     }

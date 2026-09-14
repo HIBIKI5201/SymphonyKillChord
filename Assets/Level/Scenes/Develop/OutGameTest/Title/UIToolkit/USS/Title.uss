@@ -19,6 +19,11 @@
     background-color: rgba(0, 0, 0, 0.4);
 }
 
+#OptionButton:hover,
+#OptionButton:focus {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
 .button:active {
     scale: 0.9 0.9;
 }
