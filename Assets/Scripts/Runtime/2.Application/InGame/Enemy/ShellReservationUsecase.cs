@@ -27,6 +27,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         public event Action OnReservedTimingReached;
         /// <summary> 着弾予告（デカールの変化開始）タイミングが到達した時発火するイベント </summary>
         public event Action OnAreaWarning;
+        /// <summary> 着弾予告SE（２段階目）のタイミングが到達した時発火するイベント </summary>
+        public event Action OnAreaWarningSecond;
 
         /// <summary> 予約中の爆発時刻（音源再生時間・秒）。予約が無い場合は無効。 </summary>
         public double DetonateExecutionTime { get; private set; }
@@ -78,6 +80,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             HasDetonateReservation = true;
 
             ScheduleAreaWarning(_entity.MusicSpec, _cancellationTokenSource.Token);
+            ScheduleAreaWarningSecond(_entity.MusicSpec, _cancellationTokenSource.Token);
         }
 
         /// <summary>
@@ -99,6 +102,22 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         }
 
         /// <summary>
+        ///     着弾予告SE（２段階目）のタイミングを予約する。
+        ///     爆発予約から ShellMusicConstants.AREA_WARNING_SECOND_LEAD_BEAT_COUNT 拍だけ遡ったタイミングを使う。
+        /// </summary>
+        /// <param name="musicSpec"> 爆発本体のタイミング。 </param>
+        /// <param name="token"> キャンセルトークン。 </param>
+        private void ScheduleAreaWarningSecond(in MusicSyncSpec musicSpec, CancellationToken token)
+        {
+            if (!MusicTimingCalculator.TryCreateLeadTiming(musicSpec, ShellMusicConstants.AREA_WARNING_SECOND_LEAD_BEAT_COUNT, out MusicSyncSpec leadSpec))
+            {
+                return;
+            }
+
+            _musicActionScheduler.Schedule(leadSpec, HandleAreaWarningSecond, token);
+        }
+
+        /// <summary>
         ///     予約タイミングが到達時の処理。
         /// </summary>
         private void HandleReservedTimingReached()
@@ -115,6 +134,15 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         {
             Debug.Log("着弾予告タイミングに到達しました。");
             OnAreaWarning?.Invoke();
+        }
+
+        /// <summary>
+        ///     着弾予告SE（２段階目）のタイミングが到達時の処理。
+        /// </summary>
+        private void HandleAreaWarningSecond()
+        {
+            Debug.Log("着弾予告タイミング（２段階目）に到達しました。");
+            OnAreaWarningSecond?.Invoke();
         }
 
         private readonly ShellEntity _entity;

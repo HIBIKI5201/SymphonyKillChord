@@ -111,6 +111,13 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _areaWarningSoundSource?.Play();
         }
         /// <summary>
+        ///     着弾予告SE（２段階目）を鳴らす。
+        /// </summary>
+        public void PlayAreaWarningSecond()
+        {
+            _areaWarningSecondSoundSource?.Play();
+        }
+        /// <summary>
         ///     爆発までの接近進捗をデカールのシェーダープロパティへ適用する。
         /// </summary>
         private void LateUpdate()
@@ -143,6 +150,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private SoundEffectSource _explosionSoundSource;
         [SerializeField, Tooltip("着弾予告デカール表示時に再生するSE用Source。")]
         private SoundEffectSource _areaWarningSoundSource;
+        [SerializeField, Tooltip("着弾予告SE（２段階目）用Source。")]
+        private SoundEffectSource _areaWarningSecondSoundSource;
 
         /// <summary>
         ///     デカールの接近進捗を初期値へ戻す。
