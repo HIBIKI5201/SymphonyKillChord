@@ -14,7 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
   m_TableCollectionName: TutorialSubtitles
   m_TableCollectionNameGuidString: 782f2d04919c12f4aa9b1330e6ced6d8
-  m_Entries: []
+  m_Entries:
+  - m_Id: 234861061320704
+    m_Key: triad.tutorial.06
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861141012480
+    m_Key: triad.tutorial.07
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861149401088
+    m_Key: triad.tutorial.09
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

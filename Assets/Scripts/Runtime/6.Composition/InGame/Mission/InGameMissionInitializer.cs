@@ -12,6 +12,7 @@ using KillChord.Runtime.Composition.InGame.Skill;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
+using KillChord.Runtime.Domain.InGame.Mission.StepEntryAction;
 using KillChord.Runtime.Domain.OutGame.Scenario;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
@@ -196,15 +197,21 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
                 playerModuleContainer.PlayerEntity);
 
+            List<IMissionStepEntryActionExecutor> entryActionExecutors = new()
+            {
+                new SetSkillExecutionEnabledStepEntryActionExecutor(playerModuleContainer.PlayerActionRestrictionState),
+                new ToggleEnemyBattleAiStepEntryActionExecutor(ServiceLocator.GetInstance<EnemyModuleContainer>().EnemyBattleAIRegistry),
+                new PlayVoiceStepEntryActionExecutor(_missionVoiceSource)
+            };
+            if (!TryInitializeDialogue(entryActionExecutors))
+            {
+                return false;
+            }
+
             _stepEntryActionController = new MissionStepEntryActionController(
                 _moduleContainer.MissionRuntimeService,
                 _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
-                new IMissionStepEntryActionExecutor[]
-                {
-                    new SetSkillExecutionEnabledStepEntryActionExecutor(playerModuleContainer.PlayerActionRestrictionState),
-                    new ToggleEnemyBattleAiStepEntryActionExecutor(ServiceLocator.GetInstance<EnemyModuleContainer>().EnemyBattleAIRegistry),
-                    new PlayVoiceStepEntryActionExecutor(_missionVoiceSource)
-                });
+                entryActionExecutors);
 
             if (_scenarioUsecase != null
                 && !TryInitializeMissionScenarioController())
@@ -289,6 +296,14 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             _popupController?.Dispose();
             _playerBuffController?.Dispose();
             _stepEntryActionController?.Dispose();
+            _dialogueController?.Dispose();
+            if (_dialogueViewModel != null)
+            {
+                _missionDialogueView?.Shutdown();
+                _dialogueViewModel.Dispose();
+                _dialogueViewModel = null;
+                _dialogueController = null;
+            }
             if (_scenarioController != null)
             {
                 _scenarioController.OnScenarioPlaybackStarted -= HandleScenarioPlaybackStarted;
@@ -337,6 +352,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private string _enemyMissionKeyRepositoryKey;
         [SerializeField, Tooltip("ミッションのステップ開始時にボイス再生用VoiceSourceです。")]
         private VoiceSource _missionVoiceSource;
+        [SerializeField, Tooltip("Ingame会話のViewです。")]
+        private MissionDialogueView _missionDialogueView;
         [SerializeField, Tooltip("シナリオ表示と入力をまとめて有効化するルート。ScenarioViewとScenarioInputViewを子に配置します。")]
         private GameObject _scenarioRoot;
         [SerializeField, Tooltip("インゲームで使用するシナリオ表示View。ScenarioPlaybackClearConditionを使う場合に必須です。")]
@@ -362,6 +379,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private MissionStepPopupController _popupController;
         private MissionPlayerBuffController _playerBuffController;
         private MissionStepEntryActionController _stepEntryActionController;
+        private MissionDialogueController _dialogueController;
+        private MissionDialogueViewModel _dialogueViewModel;
         private MissionScenarioController _scenarioController;
         private ComboHudPresenter _comboHudPresenter;
         private MissionDefinitionRepository _loadedMissionDefinitionRepository;
@@ -383,6 +402,41 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         {
             return _resolvedMissionDefinition != null
                 && _resolvedMissionDefinition.ClearCondition.HasStepWithCondition<ScenarioPlaybackClearCondition>();
+        }
+
+        /// <summary>
+        ///     会話を使用するMissionに限り、既存のポーズとゲーム開始ライフサイクルへ結合します。
+        /// </summary>
+        private bool TryInitializeDialogue(List<IMissionStepEntryActionExecutor> executors)
+        {
+            ObjectiveSequenceClearCondition sequence = _resolvedMissionDefinition.ClearCondition;
+            bool hasDialogue = false;
+            for (int i = 0; i < sequence.StepCount; i++)
+            {
+                foreach (IMissionStepEntryAction action in sequence.GetStep(i).EntryActions)
+                {
+                    hasDialogue |= action is PlayDialogueStepEntryAction;
+                }
+            }
+            if (!hasDialogue)
+            {
+                return true;
+            }
+            InGamePlayDirector playDirector = FindFirstObjectByType<InGamePlayDirector>();
+            if (_missionDialogueView == null || _missionVoiceSource == null || playDirector == null
+                || !ServiceLocator.TryGetInstance(out SequenceModuleContainer sequenceContainer)
+                || sequenceContainer.BattlePauseController == null)
+            {
+                Debug.LogError($"[{nameof(InGameMissionInitializer)}] 会話View、VoiceSource、ゲーム開始またはポーズの参照が不足しています。", this);
+                return false;
+            }
+            _dialogueViewModel = new MissionDialogueViewModel();
+            _dialogueController = new MissionDialogueController(_moduleContainer.MissionRuntimeService,
+                sequenceContainer.BattlePauseController, _missionVoiceSource, new MissionDialoguePresenter(_dialogueViewModel));
+            _missionDialogueView.Initialize(_dialogueViewModel, _dialogueController);
+            playDirector.AddGamePlayControllable(_missionDialogueView);
+            executors.Add(_dialogueController);
+            return true;
         }
 
         /// <summary>
