@@ -288,8 +288,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         {
             _recorderController?.Dispose();
             _popupController?.Dispose();
-            _mobileAttackAreaView?.Dispose();
-            _mobileAttackAreaView = null;
+            _mobileTapAttackInput?.Dispose();
+            _mobileTapAttackInput = null;
             _playerBuffController?.Dispose();
             _stepEntryActionController?.Dispose();
             if (_scenarioController != null)
@@ -331,7 +331,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
         /// <summary>
         ///     説明ポップアップのViewを生成します。
-        ///     スマートフォンでは、表示中に画面全体を攻撃ボタンの判定にするデコレータで包みます。
+        ///     スマートフォンでは、表示中に画面のタップを攻撃入力として扱うデコレータで包みます。
         /// </summary>
         /// <returns> ポップアップ表示に使用するViewです。 </returns>
         private IMissionStepPopupView CreatePopupView()
@@ -339,13 +339,12 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 #if UNITY_ANDROID || UNITY_IOS
             // スマホ用UIが無効な環境では、従来どおりポップアップのみを表示する。
             MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
-            Canvas mobileCanvas = mobileInput != null && mobileInput.gameObject.activeInHierarchy
-                ? mobileInput.GetComponentInParent<Canvas>()
-                : null;
-            if (mobileCanvas != null)
+            if (mobileInput != null
+                && mobileInput.gameObject.activeInHierarchy
+                && ServiceLocator.TryGetInstance(out PlayerInputView playerInputView))
             {
-                _mobileAttackAreaView = new MobileFullScreenAttackAreaView(mobileCanvas.rootCanvas.transform);
-                return new MobileAttackAreaPopupViewDecorator(_missionStepPopupView, _mobileAttackAreaView);
+                _mobileTapAttackInput = MobileTapAttackInput.Create(playerInputView);
+                return new MobileTapAttackPopupViewDecorator(_missionStepPopupView, _mobileTapAttackInput);
             }
 #endif
             return _missionStepPopupView;
@@ -385,7 +384,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private MissionModuleContainer _moduleContainer;
         private MissionProgressRecorderController _recorderController;
         private MissionStepPopupController _popupController;
-        private MobileFullScreenAttackAreaView _mobileAttackAreaView;
+        private MobileTapAttackInput _mobileTapAttackInput;
         private MissionPlayerBuffController _playerBuffController;
         private MissionStepEntryActionController _stepEntryActionController;
         private MissionScenarioController _scenarioController;
