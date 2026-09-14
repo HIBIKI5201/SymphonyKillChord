@@ -116,7 +116,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         private readonly ISkillBuildViewModelWriter _viewModel;
         private readonly SkillDisplayTextFormatter _textFormatter;
         private readonly IReadOnlyDictionary<SkillType, Sprite> _skillGenreIcons;
-        private readonly Dictionary<SkillTemplate, SkillDisplayText> _textCache = new();
+        private readonly Dictionary<(int SkillId, int Level), SkillDisplayText> _textCache = new();
 
         /// <summary>
         ///     スキルテンプレートから表示用データを構築する。
@@ -127,7 +127,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <returns> 表示用データ。 </returns>
         private SkillViewData BuildSkillViewData(SkillTemplate skillTemplate, bool isUnlocked, int level)
         {
-            SkillDisplayText text = GetOrCreateText(skillTemplate);
+            SkillDisplayText text = GetOrCreateText(skillTemplate, level);
             return new SkillViewData(
                 skillTemplate.Id.Value,
                 skillTemplate.DisplayName,
@@ -228,15 +228,16 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// </summary>
         /// <param name="skillTemplate"> スキルテンプレート。 </param>
         /// <returns> 表示文字列。 </returns>
-        private SkillDisplayText GetOrCreateText(SkillTemplate skillTemplate)
+        private SkillDisplayText GetOrCreateText(SkillTemplate skillTemplate, int level)
         {
-            if (_textCache.TryGetValue(skillTemplate, out SkillDisplayText cachedText))
+            (int SkillId, int Level) key = (skillTemplate.Id.Value, level);
+            if (_textCache.TryGetValue(key, out SkillDisplayText cachedText))
             {
                 return cachedText;
             }
 
-            SkillDisplayText text = _textFormatter.Format(skillTemplate);
-            _textCache.Add(skillTemplate, text);
+            SkillDisplayText text = _textFormatter.Format(skillTemplate, level);
+            _textCache.Add(key, text);
             return text;
         }
     }

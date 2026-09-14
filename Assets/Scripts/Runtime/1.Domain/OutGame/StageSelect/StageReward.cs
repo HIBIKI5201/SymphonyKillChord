@@ -8,20 +8,34 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <summary>
         ///     ステージクリア報酬を初期化する。
         /// </summary>
-        /// <param name="skillBuildPoint"> スキル編成・強化に使用するポイント。 </param>
-        /// <param name="skillUnlockPoint"> スキル解放・パラメーター強化に使用するポイント。 </param>
-        public StageReward(int skillBuildPoint, int skillUnlockPoint)
+        /// <param name="firstClearSkillBuildPoint"> 初回クリア時に付与するスキル編成・強化ポイント。 </param>
+        /// <param name="firstClearSkillUnlockPoint"> 初回クリア時に付与するスキル解放・パラメーター強化ポイント。 </param>
+        /// <param name="successSkillBuildPoint"> クリアする度に毎回付与するスキル編成・強化ポイント。 </param>
+        /// <param name="successSkillUnlockPoint"> クリアする度に毎回付与するスキル解放・パラメーター強化ポイント。 </param>
+        public StageReward(
+            int firstClearSkillBuildPoint,
+            int firstClearSkillUnlockPoint,
+            int successSkillBuildPoint,
+            int successSkillUnlockPoint)
         {
-            _skillBuildPoint = skillBuildPoint;
-            _skillUnlockPoint = skillUnlockPoint;
+            _firstClearSkillBuildPoint = firstClearSkillBuildPoint;
+            _firstClearSkillUnlockPoint = firstClearSkillUnlockPoint;
+            _successSkillBuildPoint = successSkillBuildPoint;
+            _successSkillUnlockPoint = successSkillUnlockPoint;
         }
 
-        /// <summary> スキル編成・強化に使用するポイント。 </summary>
-        public int SkillBuildPoint => _skillBuildPoint;
-        /// <summary> スキル解放・パラメーター強化に使用するポイント。 </summary>
-        public int SkillUnlockPoint => _skillUnlockPoint;
+        /// <summary> 初回クリア時に付与するスキル編成・強化ポイント。 </summary>
+        public int FirstClearSkillBuildPoint => _firstClearSkillBuildPoint;
+        /// <summary> 初回クリア時に付与するスキル解放・パラメーター強化ポイント。 </summary>
+        public int FirstClearSkillUnlockPoint => _firstClearSkillUnlockPoint;
+        /// <summary> クリアする度に毎回付与するスキル編成・強化ポイント。 </summary>
+        public int SuccessSkillBuildPoint => _successSkillBuildPoint;
+        /// <summary> クリアする度に毎回付与するスキル解放・パラメーター強化ポイント。 </summary>
+        public int SuccessSkillUnlockPoint => _successSkillUnlockPoint;
 
-        private readonly int _skillBuildPoint;
-        private readonly int _skillUnlockPoint;
+        private readonly int _firstClearSkillBuildPoint;
+        private readonly int _firstClearSkillUnlockPoint;
+        private readonly int _successSkillBuildPoint;
+        private readonly int _successSkillUnlockPoint;
     }
 }

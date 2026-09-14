@@ -1,36 +1,41 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillTreeLayout.uss?fileID=7433441132597879392&amp;guid=26021df5ccc97f84d9802e0b454cd7e2&amp;type=3#SkillTreeLayout"/>
-    <ui:VisualElement name="VisualElement" picking-mode="Ignore" class="skilltree-panel" style="flex-grow: 0; width: 520px; height: auto; align-self: flex-start;">
+    <ui:VisualElement name="PlayerStatusPanelRoot" picking-mode="Ignore" class="skilltree-panel" style="flex-grow: 0; width: 390px; height: auto; align-self: flex-start;">
         <ui:Label text="ステータス" name="TitleLable" class="skilltree-panel-header-bar"/>
         <ui:VisualElement name="StatusContainer" class="skilltree-panel-body">
             <ui:VisualElement name="HealthRow" class="skilltree-status-row">
                 <ui:Image name="HealthIcon" class="skilltree-status-icon"/>
                 <ui:Label text="HP" name="HealthLabel" class="skilltree-status-label"/>
                 <ui:Label text="99" name="HealthCurrentLabel" class="skilltree-status-current-value"/>
+                <ui:Label text="→" name="HealthArrowLabel" class="skilltree-status-arrow"/>
                 <ui:Label text="" name="HealthDeltaLabel" class="skilltree-status-delta-value"/>
             </ui:VisualElement>
             <ui:VisualElement name="AttackRow" class="skilltree-status-row">
                 <ui:Image name="AttackIcon" class="skilltree-status-icon"/>
                 <ui:Label text="攻撃力" name="AttackLabel" class="skilltree-status-label"/>
                 <ui:Label text="10" name="AttackCurrentLabel" class="skilltree-status-current-value"/>
+                <ui:Label text="→" name="AttackArrowLabel" class="skilltree-status-arrow"/>
                 <ui:Label text="" name="AttackDeltaLabel" class="skilltree-status-delta-value"/>
             </ui:VisualElement>
             <ui:VisualElement name="CriticalChanceRow" class="skilltree-status-row">
                 <ui:Image name="CriticalChanceIcon" class="skilltree-status-icon"/>
                 <ui:Label text="会心率" name="CriticalChanceLabel" class="skilltree-status-label"/>
                 <ui:Label text="5%" name="CriticalChanceCurrentLabel" class="skilltree-status-current-value"/>
+                <ui:Label text="→" name="CriticalChanceArrowLabel" class="skilltree-status-arrow"/>
                 <ui:Label text="" name="CriticalChanceDeltaLabel" class="skilltree-status-delta-value"/>
             </ui:VisualElement>
             <ui:VisualElement name="CriticalDamageRow" class="skilltree-status-row">
                 <ui:Image name="CriticalDamageIcon" class="skilltree-status-icon"/>
                 <ui:Label text="会心ダメージ" name="CriticalDamageLabel" class="skilltree-status-label"/>
                 <ui:Label text="50%" name="CriticalDamageCurrentLabel" class="skilltree-status-current-value"/>
+                <ui:Label text="→" name="CriticalDamageArrowLabel" class="skilltree-status-arrow"/>
                 <ui:Label text="" name="CriticalDamageDeltaLabel" class="skilltree-status-delta-value"/>
             </ui:VisualElement>
             <ui:VisualElement name="AreaAttackRangeRow" class="skilltree-status-row" style="margin-bottom: 0;">
                 <ui:Image name="AreaAttackRangeIcon" class="skilltree-status-icon"/>
                 <ui:Label text="射程範囲" name="AreaAttackRangeLabel" class="skilltree-status-label"/>
                 <ui:Label text="1.00倍" name="AreaAttackRangeCurrentLabel" class="skilltree-status-current-value"/>
+                <ui:Label text="→" name="AreaAttackRangeArrowLabel" class="skilltree-status-arrow"/>
                 <ui:Label text="" name="AreaAttackRangeDeltaLabel" class="skilltree-status-delta-value"/>
             </ui:VisualElement>
         </ui:VisualElement>

@@ -3,7 +3,7 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Setting.uss?fileID=7433441132597879392&amp;guid=f378558ec06b41f4da7ec06e1044e9ae&amp;type=3#Setting"/>
     <ui:VisualElement name="Root" picking-mode="Position" class="setting-root">
         <ui:VisualElement name="BackGround" class="setting-window setting-window--menu">
-            <ui:VisualElement class="setting-top-bar">
+            <ui:VisualElement name="SettingTitleBar" class="setting-top-bar">
                 <ui:Label text="設定" name="Title" class="setting-title"/>
                 <ui:VisualElement class="setting-title-divider"/>
             </ui:VisualElement>

@@ -33,13 +33,15 @@
             </ui:VisualElement>
             <screen:AlphaHitTestButton name="BackButton" class="back-button button ui-se-cancel" style="position: absolute;"/>
         </ui:VisualElement>
-        <ui:VisualElement name="DataResetConfirmDialog" style="position: absolute; width: 100%; height: 100%; justify-content: center; background-color: rgba(0, 0, 0, 0.59); display: none;">
-            <ui:VisualElement style="background-color: rgb(128, 128, 128); width: 50%; height: 40%; align-self: center; justify-content: center; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px;">
-                <ui:Label text="セーブデータをリセットしますか？" name="DataResetMessage" style="-unity-text-align: middle-center; width: 100%; height: 50%; font-size: 30px; -unity-font-style: bold; white-space: normal;"/>
-                <ui:VisualElement style="flex-direction: row; justify-content: center;">
-                    <ui:Button text="キャンセル" name="DataResetCancelButton" class="button ui-se-cancel" style="font-size: 24px; width: 160px; background-color: rgb(188, 188, 188); border-top-left-radius: 17px; border-top-right-radius: 17px; border-bottom-right-radius: 17px; border-bottom-left-radius: 17px;"/>
-                    <ui:VisualElement style="width: 10%; max-width: 100px;"/>
-                    <ui:Button text="リセット" name="DataResetConfirmButton" class="button" style="font-size: 24px; width: 160px; background-color: rgb(216, 90, 48); color: rgb(255, 255, 255); border-top-left-radius: 17px; border-top-right-radius: 17px; border-bottom-right-radius: 17px; border-bottom-left-radius: 17px;"/>
+        <ui:VisualElement name="DataResetConfirmDialog" style="position: absolute; width: 100%; height: 100%; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.59); display: none;">
+            <ui:VisualElement style="width: 640px; height: 260px; padding: 32px 40px; justify-content: flex-start; align-items: center; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OutGame_SceneTab.png?fileID=21300000&amp;guid=96c8d94dd68b3104fa34a3f388529d63&amp;type=3#UI_OutGame_SceneTab&quot;); -unity-background-scale-mode: stretch-to-fill;">
+                <ui:Label text="データを消去しますか？" name="DataResetMessage" style="-unity-text-align: middle-center; width: 100%; font-size: 34px; -unity-font-style: bold; color: rgb(255, 255, 255); white-space: normal;"/>
+                <ui:VisualElement style="width: 90%; height: 1px; background-color: rgba(255, 255, 255, 0.4); margin-top: 14px; margin-bottom: 10px;"/>
+                <ui:Label text="※削除するとデータは戻せません。" style="-unity-text-align: middle-center; width: 100%; font-size: 18px; color: rgb(210, 210, 220); white-space: normal; margin-bottom: 24px;"/>
+                <ui:VisualElement style="flex-direction: row; justify-content: center; flex-grow: 1; align-items: center;">
+                    <ui:Button text="消去する" name="DataResetConfirmButton" class="button" style="font-size: 22px; width: 180px; height: 56px; background-color: rgb(253, 253, 224); color: rgb(74, 27, 12); border-left-color: rgb(196, 164, 104); border-right-color: rgb(196, 164, 104); border-top-color: rgb(196, 164, 104); border-bottom-color: rgb(196, 164, 104); border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px;"/>
+                    <ui:VisualElement style="width: 24px;"/>
+                    <ui:Button text="とじる" name="DataResetCancelButton" class="button ui-se-cancel" style="font-size: 22px; width: 180px; height: 56px; background-color: rgb(253, 253, 224); color: rgb(74, 27, 12); border-left-color: rgb(196, 164, 104); border-right-color: rgb(196, 164, 104); border-top-color: rgb(196, 164, 104); border-bottom-color: rgb(196, 164, 104); border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px;"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

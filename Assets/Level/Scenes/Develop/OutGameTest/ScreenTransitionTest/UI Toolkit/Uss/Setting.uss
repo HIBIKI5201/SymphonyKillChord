@@ -2,16 +2,13 @@
     flex-grow: 1;
     width: 100%;
     height: 100%;
-    justify-content: center;
-    align-items: center;
     background-color: rgba(0, 0, 0, 0.55);
-    padding-top: 3%;
-    padding-right: 5%;
-    padding-bottom: 3%;
-    padding-left: 5%;
 }
 
 .setting-window {
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 572px;
     height: 1090px;
     padding: 40px 40px;
@@ -19,7 +16,7 @@
 }
 
 .setting-window--menu {
-    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OptionMenu_Back.png?fileID=21300000&guid=bc61cc40ebe776f47ad55951da4d527e&type=3#UI_OptionMenu_Back");
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Option_Back.png?fileID=21300000&guid=ae2a34555d2331543a19da0a6aa5a2cb&type=3#UI_Option_Back");
 }
 
 .setting-window--audio {
@@ -82,15 +79,18 @@
 }
 
 .setting-panel-top-bar {
-    flex-direction: row;
-    align-items: center;
+    position: relative;
+    height: 44px;
+    justify-content: center;
     margin-bottom: 12px;
 }
 
 .setting-panel-back-button {
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 44px;
     height: 44px;
-    margin-right: 12px;
     font-size: 28px;
     color: white;
     background-color: rgba(0, 0, 0, 0);
@@ -101,8 +101,10 @@
 }
 
 .setting-panel-title {
+    width: 100%;
     font-size: 30px;
     -unity-font-style: bold;
+    -unity-text-align: middle-center;
     color: white;
 }
 

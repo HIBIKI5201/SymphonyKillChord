@@ -16,6 +16,7 @@ using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
@@ -138,6 +139,12 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         [SerializeField, Tooltip("サブミッション未達成を表す星アイコンです。")]
         private Sprite _unachievedStarSprite;
 
+        [SerializeField, Tooltip("装備スキルの発動コマンド表示に使う菱形(六角形)の形状スプライトです。")]
+        private Sprite _hexagonSprite;
+
+        [SerializeField, Tooltip("発動コマンドの配色に使う設定です。インゲームのスキル入力進行UIと同じアセットを指定してください。")]
+        private SkillInputProgressUIConfig _skillBeatVisualConfig;
+
         private OutGameUIEvent _outGameUIEvent;
         private StageTree _stageTree;
         private StageProgressService _progressService;
@@ -163,6 +170,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private SkillRepository _loadedSkillRepository;
         private SaveData _loadedSaveData;
         private SubMissionAchievementResolver _subMissionAchievementResolver;
+        private SkillInputProgressViewSetting _skillBeatVisualSetting;
         private ScrollView _stageMapScrollView;
         private VisualElement _stageMapContent;
         private VisualElement _stageMapCanvas;
@@ -387,30 +395,80 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     セーブデータの装備スキルIDから、ステージ詳細パネルに表示するアイコン一覧を組み立てる。
+        ///     セーブデータの装備スキルIDから、ステージ詳細パネルのアイコン+発動コマンド表示を組み立てて反映する。
         /// </summary>
-        /// <returns> 装備スキルのアイコン一覧。空スロットまたはSkillRepository未解決の場合はnull要素になる。 </returns>
-        private List<Sprite> BuildEquippedSkillIcons()
+        private void UpdateEquippedSkillDisplay()
         {
             IReadOnlyList<int> equipmentSkillIds = _loadedSaveData.SkillBuild.EquipmentSkillIDs;
+            var names = new List<string>(equipmentSkillIds.Count);
             var icons = new List<Sprite>(equipmentSkillIds.Count);
+            var commandColors = new List<Color[]>(equipmentSkillIds.Count);
 
             for (int i = 0; i < equipmentSkillIds.Count; i++)
             {
                 int skillId = equipmentSkillIds[i];
+                string displayName = null;
                 Sprite icon = null;
+                Color[] steps = null;
                 // スキルIDはハッシュ由来で負の値も取り得るため、空スロットの判定は「-1(EMPTY_SKILL_ID)かどうか」で行う。
                 if (skillId != EMPTY_SKILL_ID
                     && _loadedSkillRepository != null
                     && _loadedSkillRepository.TryGetSkill(new SkillId(skillId), out SkillTemplate template))
                 {
+                    displayName = template.DisplayName;
                     icon = template.Icon;
+                    steps = BuildSkillCommandColors(template);
                 }
 
+                names.Add(displayName);
                 icons.Add(icon);
+                commandColors.Add(steps);
             }
 
-            return icons;
+            _detailScreenView.SetEquippedSkillIcons(names, icons, commandColors, _hexagonSprite);
+        }
+
+        /// <summary>
+        ///     発動コマンドの配色設定を構築する。失敗しても発動コマンド表示なしで続行する。
+        /// </summary>
+        /// <returns> 構築した配色設定。未設定または構築失敗時はnull。 </returns>
+        private SkillInputProgressViewSetting TryCreateSkillBeatVisualSetting()
+        {
+            if (_skillBeatVisualConfig == null) { return null; }
+
+            try
+            {
+                return _skillBeatVisualConfig.Create();
+            }
+            catch (System.InvalidOperationException exception)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(StageSelectInitializer)}] 発動コマンドの配色設定の構築に失敗しました。"
+                        + $" 発動コマンド表示なしで続行します。{exception.Message}",
+                    this);
+                return null;
+            }
+        }
+
+        /// <summary>
+        ///     スキルの発動コマンド(入力パターン)を、インゲームのスキル入力進行UIと同じ配色へ変換する。
+        /// </summary>
+        /// <param name="template"> 対象のスキルテンプレート。 </param>
+        /// <returns> 発動コマンドの各歩数に対応する色一覧。発動コマンドが無い、または配色設定が未解決の場合はnull。 </returns>
+        private Color[] BuildSkillCommandColors(SkillTemplate template)
+        {
+            if (template.Pattern == null || template.Pattern.Length == 0 || _skillBeatVisualSetting == null)
+            {
+                return null;
+            }
+
+            var colors = new Color[template.Pattern.Length];
+            for (int i = 0; i < template.Pattern.Length; i++)
+            {
+                colors[i] = _skillBeatVisualSetting.GetSetting((int)template.Pattern[i]).NormalColor;
+            }
+
+            return colors;
         }
 
         /// <summary>
@@ -559,7 +617,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private async void HandleStageSelectScreenCompleted()
         {
             // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
-            _detailScreenView.SetEquippedSkillIcons(BuildEquippedSkillIcons());
+            UpdateEquippedSkillDisplay();
             await ApplyNewlyClearedStagesAsync(_cts.Token);
         }
 
@@ -668,7 +726,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
             _detailScreenView.HideImmediately();
-            _detailScreenView.SetEquippedSkillIcons(BuildEquippedSkillIcons());
+            _skillBeatVisualSetting = TryCreateSkillBeatVisualSetting();
+            UpdateEquippedSkillDisplay();
 
             _rootVisualElement = root;
             _detailScreenRoot = detailRoot;
@@ -790,6 +849,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _loadingScreenController = null;
             _isAutomaticTutorialFlowStarted = false;
             _subMissionAchievementResolver = null;
+            _skillBeatVisualSetting = null;
             _nodeStarRowMap = null;
             _isInitialized = false;
         }
@@ -1477,7 +1537,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             var detailPresenter = new StageDetailPresenter(
                 _detailScreenView,
                 _loadedMissionDefinitionRepository,
-                _subMissionAchievementResolver);
+                _subMissionAchievementResolver,
+                _loadedSaveData);
             _stageSelectController = new StageSelectController(_stageTree, detailPresenter, _detailScreenView);
         }
 

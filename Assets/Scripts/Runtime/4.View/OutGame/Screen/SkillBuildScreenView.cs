@@ -31,8 +31,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _comboHexIcon = comboHexIcon;
             _backButton = rootElement.Q<Button>(BACKBUTTON_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
-            _bottomBackButton = rootElement.Q<Button>(BOTTOM_BACKBUTTON_NAME)
-                ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {BOTTOM_BACKBUTTON_NAME} が見つかりませんでした。");
             _settingShortcutButton = rootElement.Q<Button>(SETTING_SHORTCUT_BUTTON_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SETTING_SHORTCUT_BUTTON_NAME} が見つかりませんでした。");
             _skillElementList = rootElement.Q<VisualElement>(className: SKILL_ELEMENT_LIST_CLASS_NAME)
@@ -183,7 +181,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         protected override VisualElement InitialFocusElement => _skillBuildSaveButton;
 
         private const string BACKBUTTON_NAME = "BackButton";
-        private const string BOTTOM_BACKBUTTON_NAME = "SkillBuildBackButton";
         private const string SETTING_SHORTCUT_BUTTON_NAME = "SettingShortcutButton";
         private const string SKILLBUILD_SAVEBUTTON_NAME = "SkillBuildSaveButton";
         private const string SKILLLEVELUP_BUTTON_NAME = "SkillLevelUpButton";
@@ -201,7 +198,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         protected override VisualElement CancelTargetElement => _backButton;
 
         private readonly Button _backButton;
-        private readonly Button _bottomBackButton;
         private readonly Button _settingShortcutButton;
         private readonly Button _skillBuildSaveButton;
         private readonly Button _skillLevelUpButton;
@@ -243,7 +239,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _bottomBackButton.RegisterCallback<ClickEvent>(HandleBottomBackButtonClickedHandler);
             _settingShortcutButton.RegisterCallback<ClickEvent>(HandleSettingShortcutButtonClickedHandler);
             _unsavedChangesDialogOverlay.RegisterCallback<ClickEvent>(HandleUnsavedDialogBackgroundClickedHandler);
             _dialogPanel.RegisterCallback<ClickEvent>(HandleUnsavedDialogPanelClickedHandler);
@@ -251,7 +246,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
             // オーバーレイとダイアログ本体は背景クリックの判定用であり、フォーカス対象にしない。
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
-            _bottomBackButton.ExcludeFromNavigation();
             _skillBuildSaveButton.MakeNavigable();
             _skillLevelUpButton.MakeNavigable();
             _unsavedSaveAndCloseButton.MakeNavigable();
@@ -278,7 +272,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillLevelUpButtonActivation?.Dispose();
             _unsavedSaveAndCloseButtonActivation?.Dispose();
             _unsavedDiscardAndCloseButtonActivation?.Dispose();
-            _bottomBackButton.UnregisterCallback<ClickEvent>(HandleBottomBackButtonClickedHandler);
             _settingShortcutButton.UnregisterCallback<ClickEvent>(HandleSettingShortcutButtonClickedHandler);
             _unsavedChangesDialogOverlay.UnregisterCallback<ClickEvent>(HandleUnsavedDialogBackgroundClickedHandler);
             _dialogPanel.UnregisterCallback<ClickEvent>(HandleUnsavedDialogPanelClickedHandler);
@@ -509,15 +502,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
             }
 
             OutGameUIEvent.OnScreenClosed?.Invoke();
-        }
-
-        /// <summary>
-        ///     下部の戻るボタンがクリックされたときの処理。
-        /// </summary>
-        /// <param name="evt"> クリックイベント。 </param>
-        private void HandleBottomBackButtonClickedHandler(ClickEvent evt)
-        {
-            HandleBackButtonActivationHandler();
         }
 
         /// <summary>

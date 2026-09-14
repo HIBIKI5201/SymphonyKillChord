@@ -125,9 +125,19 @@ namespace KillChord.Runtime.Domain.Player
                 Type,
                 currentLevel.HasValue ? new SkillLevel(currentLevel.Value) : Level,
                 CooldownBarRatio,
-                BuildScaledEffectSpec(currentLevel),
+                GetEffectSpec(currentLevel),
                 bpm,
                 AnimationKey);
+        }
+
+        /// <summary>
+        ///     現在レベルに応じて成長させた効果定義を取得する。
+        /// </summary>
+        /// <param name="currentLevel"> 反映する現在のスキルレベルです。未指定時はテンプレートの基準レベルのまま変化しません。 </param>
+        /// <returns> 成長後の効果定義です。 </returns>
+        public SkillEffectSpec GetEffectSpec(int? currentLevel = null)
+        {
+            return BuildScaledEffectSpec(currentLevel);
         }
 
         /// <summary> 成長ステップが未設定の場合に適用するレベル上限の既定値です。 </summary>

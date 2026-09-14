@@ -41,6 +41,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         public override int Order => 120;
 
         private const string E_NAME_SKILL_DETAIL = "SkillDetail";
+        private const string E_NAME_UNLOCK_CONFIRM_BOX = "UnlockConfirmBox";
         private const string E_NAME_PLAYER_STATUS = "PlayerStatus";
         private const string E_NAME_PREVIEW_VIDEO_CONTAINER = "PreviewVideoContainer";
         private const string E_NAME_PREVIEW_VIDEO = "PreviewVideo";
@@ -93,6 +94,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
         private VisualElement _rootElement;
         private VisualElement _skillDetailRoot;
+        private VisualElement _unlockConfirmBoxRoot;
+        private bool _isUnlockConfirmOpen;
+        private bool _skipUnlockConfirmation;
         private VisualElement _playerStatusRoot;
         private VisualElement _previewVideoContainerRoot;
         private VisualElement _previewVideoRoot;
@@ -101,6 +105,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private PlayerStatusScreenView _playerStatusScreenView;
         private PreviewVideoScreenView _previewVideoScreenView;
         private SkillTreeResetDialogView _skillTreeResetDialogView;
+        private UnlockConfirmDialogView _unlockConfirmDialogView;
         private SkillTreeViewportView _skillTreeViewportView;
         private SkillTreeController _skillTreeController;
         private SkillTreeService _skillTreeService;
@@ -272,6 +277,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _rootElement.UnregisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
             }
             _isSkillDetailOpen = false;
+            _isUnlockConfirmOpen = false;
+            _skipUnlockConfirmation = false;
             DisposeComponents();
             CancelAndDisposeCts();
 
@@ -360,12 +367,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             _rootElement = _uiDocument.rootVisualElement;
             _skillDetailRoot = _rootElement.Q<VisualElement>(E_NAME_SKILL_DETAIL);
+            _unlockConfirmBoxRoot = _rootElement.Q<VisualElement>(E_NAME_UNLOCK_CONFIRM_BOX);
             _playerStatusRoot = _rootElement.Q<VisualElement>(E_NAME_PLAYER_STATUS);
             _previewVideoContainerRoot = _rootElement.Q<VisualElement>(E_NAME_PREVIEW_VIDEO_CONTAINER);
             _previewVideoRoot = _rootElement.Q<VisualElement>(E_NAME_PREVIEW_VIDEO);
             _currentPointsLabel = _rootElement.Q<Label>(E_NAME_CURRENT_POINTS_LABEL);
 
             if (_skillDetailRoot == null
+                || _unlockConfirmBoxRoot == null
                 || _playerStatusRoot == null
                 || _previewVideoContainerRoot == null
                 || _previewVideoRoot == null
@@ -403,6 +412,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
             _previewVideoScreenView.HideImmediately();
             _skillTreeResetDialogView = new SkillTreeResetDialogView(_rootElement, _outGameUIEvent);
+            _unlockConfirmDialogView = new UnlockConfirmDialogView(_rootElement, _outGameUIEvent);
             _skillTreeViewportView = new SkillTreeViewportView(_rootElement, _skillNodeElements);
 
             SkillTreeStatusEntity skillTreeEntity = new(
@@ -814,6 +824,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillNodeSelected += HandleSkillNodeSelected;
             _outGameUIEvent.OnSkillDetailClosed += HandleSkillDetailClosed;
             _outGameUIEvent.OnSkillUnlocked += HandleSkillUnlocked;
+            _outGameUIEvent.OnSkillUnlockConfirmationRequested += HandleSkillUnlockConfirmationRequested;
+            _outGameUIEvent.OnSkillUnlockConfirmed += HandleSkillUnlockConfirmed;
             _outGameUIEvent.OnSkillTreeResetRequested += HandleSkillTreeResetRequested;
             _outGameUIEvent.OnSkillTreeResetConfirmed += HandleSkillTreeResetConfirmed;
             _outGameUIEvent.OnSkillTreeResetCancelled += HandleSkillTreeResetCancelled;
@@ -838,6 +850,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnSkillNodeSelected -= HandleSkillNodeSelected;
             _outGameUIEvent.OnSkillDetailClosed -= HandleSkillDetailClosed;
             _outGameUIEvent.OnSkillUnlocked -= HandleSkillUnlocked;
+            _outGameUIEvent.OnSkillUnlockConfirmationRequested -= HandleSkillUnlockConfirmationRequested;
+            _outGameUIEvent.OnSkillUnlockConfirmed -= HandleSkillUnlockConfirmed;
             _outGameUIEvent.OnSkillTreeResetRequested -= HandleSkillTreeResetRequested;
             _outGameUIEvent.OnSkillTreeResetConfirmed -= HandleSkillTreeResetConfirmed;
             _outGameUIEvent.OnSkillTreeResetCancelled -= HandleSkillTreeResetCancelled;
@@ -858,6 +872,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _previewVideoScreenView = null;
             _skillTreeResetDialogView?.Dispose();
             _skillTreeResetDialogView = null;
+            _unlockConfirmDialogView?.Dispose();
+            _unlockConfirmDialogView = null;
             _skillDetailScreenView?.Dispose();
             _skillDetailScreenView = null;
             _playerStatusScreenView = null;
@@ -933,14 +949,36 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="evt"> ポインタ押下イベント。 </param>
         private void HandleRootPointerDown(PointerDownEvent evt)
         {
-            if (!_isSkillDetailOpen) { return; }
-
             if (evt.target is not VisualElement target) { return; }
+
+            if (_isUnlockConfirmOpen)
+            {
+                if (!IsSameOrDescendant(_unlockConfirmBoxRoot, target))
+                {
+                    _unlockConfirmDialogView.Hide();
+                    _isUnlockConfirmOpen = false;
+                }
+
+                return;
+            }
+
+            if (!_isSkillDetailOpen) { return; }
 
             if (_skillDetailRoot != null && _skillDetailRoot.Contains(target)) { return; }
             if (IsSkillNodeElement(target)) { return; }
 
             _outGameUIEvent.OnSkillDetailClosed?.Invoke(0);
+        }
+
+        /// <summary>
+        ///     指定要素が祖先要素自身、またはその子孫かどうかを判定する。
+        /// </summary>
+        /// <param name="ancestor"> 判定の基準となる要素。 </param>
+        /// <param name="target"> 判定対象の要素。 </param>
+        /// <returns> targetがancestor自身またはその子孫であればtrue。 </returns>
+        private static bool IsSameOrDescendant(VisualElement ancestor, VisualElement target)
+        {
+            return ancestor != null && (target == ancestor || ancestor.Contains(target));
         }
 
         /// <summary>
@@ -967,6 +1005,36 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     スキル解放の確認ダイアログを表示する時の処理です。
+        /// </summary>
+        private void HandleSkillUnlockConfirmationRequested()
+        {
+            if (_skipUnlockConfirmation)
+            {
+                _skillTreeController.OnSkillUnlocked();
+                return;
+            }
+
+            _unlockConfirmDialogView.Show(_skillTreeController.GetUnlockConfirmation());
+            _isUnlockConfirmOpen = true;
+        }
+
+        /// <summary>
+        ///     解放確認ダイアログで解放が確定された時の処理です。
+        /// </summary>
+        private void HandleSkillUnlockConfirmed()
+        {
+            if (_unlockConfirmDialogView.IsSkipConfirmationChecked)
+            {
+                _skipUnlockConfirmation = true;
+            }
+
+            _skillTreeController.OnSkillUnlocked();
+            _unlockConfirmDialogView.Hide();
+            _isUnlockConfirmOpen = false;
+        }
+
+        /// <summary>
         ///     研究画面が表示された時に初期フォーカス対象を反映する。
         /// </summary>
         private void HandleSkillTreeScreenShownHandler()
@@ -988,6 +1056,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleScreenClosedHandler()
         {
             _isSkillDetailOpen = false;
+            _isUnlockConfirmOpen = false;
+            _unlockConfirmDialogView?.Hide();
             _skillTreeViewportView?.CancelFocus();
             _skillTreeViewportView?.ClearFocusZoom();
         }
@@ -1050,6 +1120,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             dialogView.Hide();
             _isSkillDetailOpen = false;
+            _isUnlockConfirmOpen = false;
+            _unlockConfirmDialogView?.Hide();
             _skillDetailScreenView?.HideImmediately();
             dialogView.SetResetButtonVisible(true);
             _skillTreeViewportView?.ClearFocusZoom();

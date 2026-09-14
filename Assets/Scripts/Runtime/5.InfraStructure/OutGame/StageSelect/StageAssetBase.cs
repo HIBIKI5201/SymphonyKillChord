@@ -33,7 +33,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 new StageId(_stageId.Id),
                 _stageName,
                 _flavorText,
-                new StageReward(_rewardSkillBuildPoint, _rewardSkillUnlockPoint),
+                new StageReward(
+                    _rewardSkillBuildPoint,
+                    _rewardSkillUnlockPoint,
+                    _successRewardSkillBuildPoint,
+                    _successRewardSkillUnlockPoint),
                 _targetSceneName,
                 waveDefinitionRepository);
             StageStatus initialStatus = _isInitiallyUnlocked
@@ -69,11 +73,17 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         private string _targetSceneName = "InGame";
 
         [Header("クリア報酬")]
-        [SerializeField, Tooltip("スキル編成・強化に使用するポイント。")]
+        [SerializeField, Tooltip("初回クリア時に付与する、スキル編成・強化に使用するポイント。")]
         private int _rewardSkillBuildPoint;
 
-        [SerializeField, Tooltip("スキル解放・パラメーター強化に使用するポイント。")]
+        [SerializeField, Tooltip("初回クリア時に付与する、スキル解放・パラメーター強化に使用するポイント。")]
         private int _rewardSkillUnlockPoint;
+
+        [SerializeField, Tooltip("クリアする度に毎回付与する、スキル編成・強化に使用するポイント。")]
+        private int _successRewardSkillBuildPoint;
+
+        [SerializeField, Tooltip("クリアする度に毎回付与する、スキル解放・パラメーター強化に使用するポイント。")]
+        private int _successRewardSkillUnlockPoint;
 
         /// <summary>
         ///     ステージ固有の定義情報を生成する。

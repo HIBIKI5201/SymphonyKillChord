@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,14 +17,17 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// <param name="viewModel"> 反映先の ViewModel。</param>
         /// <param name="missionPreviewProvider"> ミッションテキストプレビューの解決に使うプロバイダー。 </param>
         /// <param name="subMissionAchievementResolver"> サブミッションの達成状況を解決するリゾルバー。 </param>
+        /// <param name="saveData"> 現在のスキル解放/改造ポイント総量を参照するためのセーブデータ。 </param>
         public StageDetailPresenter(
             IStageDetailViewModel viewModel,
             IMissionPreviewProvider missionPreviewProvider,
-            SubMissionAchievementResolver subMissionAchievementResolver)
+            SubMissionAchievementResolver subMissionAchievementResolver,
+            SaveData saveData)
         {
             _viewModel = viewModel ?? throw new System.ArgumentNullException(nameof(viewModel));
             _missionPreviewProvider = missionPreviewProvider;
             _subMissionAchievementResolver = subMissionAchievementResolver;
+            _saveData = saveData;
         }
 
         /// <summary>
@@ -58,11 +62,16 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             var subMissionTexts = evaluationDescriptions?.ToArray();
             var subMissionCleared = _subMissionAchievementResolver?.Resolve(node);
 
+            int currentSkillUnlockPoint = _saveData?.SkillUnlock.ResearchPoint ?? 0;
+            int currentSkillBuildPoint = _saveData?.SkillBuild.SkillLevelupPoint ?? 0;
+
             var dto = new StageDetailDTO(
                 def.StageName,
                 def.FlavorText,
-                def.Reward.SkillBuildPoint,
-                def.Reward.SkillUnlockPoint,
+                currentSkillUnlockPoint,
+                def.Reward.FirstClearSkillUnlockPoint,
+                currentSkillBuildPoint,
+                def.Reward.SuccessSkillBuildPoint,
                 mainMissionText,
                 subMissionTexts,
                 subMissionCleared);
@@ -73,5 +82,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         private readonly IStageDetailViewModel _viewModel;
         private readonly IMissionPreviewProvider _missionPreviewProvider;
         private readonly SubMissionAchievementResolver _subMissionAchievementResolver;
+        private readonly SaveData _saveData;
     }
 }

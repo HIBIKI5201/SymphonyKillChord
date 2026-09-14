@@ -20,9 +20,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _skillHeaderGenreIcon = rootElement.Q<Image>(name: E_NAME_SKILL_HEADER_GENRE_ICON);
             _skillCommand = rootElement.Q<Label>(name: E_NAME_SKILL_COMMAND_LABEL);
             _comboRow = rootElement.Q<VisualElement>(name: E_NAME_COMBO_ROW);
-            _genreRow = rootElement.Q<VisualElement>(name: E_NAME_GENRE_ROW);
             _skillGenre = rootElement.Q<Label>(name: E_NAME_SKILL_GENRE_LABEL);
             _skillGenreIcon = rootElement.Q<Image>(name: E_NAME_SKILL_GENRE_ICON);
+            _skillTypeColumn = rootElement.Q<VisualElement>(name: E_NAME_SKILL_TYPE_COLUMN);
             _effectCaptionLabel = rootElement.Q<Label>(name: E_NAME_EFFECT_CAPTION_LABEL);
             _skillDetailScrollView = rootElement.Q<VisualElement>(name: E_NAME_SKILL_DETAIL_SCROLL_VIEW);
             _skillDetail = rootElement.Q<Label>(name: E_NAME_SKILL_DETAIL_LABEL);
@@ -62,9 +62,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _skillDetail.text = dto.SkillDetail;
 
             DisplayStyle skillOnlyDisplay = dto.HasSkill ? DisplayStyle.Flex : DisplayStyle.None;
-            _genreRow.style.display = skillOnlyDisplay;
             _effectCaptionLabel.style.display = skillOnlyDisplay;
             _previewVideoButton.style.display = skillOnlyDisplay;
+            _skillTypeColumn.style.display = skillOnlyDisplay;
             _dividerTop.style.display = dto.HasSkill ? DisplayStyle.None : DisplayStyle.Flex;
             _dividerBottom.style.display = dto.HasSkill ? DisplayStyle.None : DisplayStyle.Flex;
 
@@ -98,9 +98,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string E_NAME_SKILL_COMMAND_LABEL = "SkillCommandLabel";
         private const string E_NAME_COMBO_ROW = "ComboRow";
         private const string COMBO_HEX_CLASS_NAME = "skilltree-combo-hex";
-        private const string E_NAME_GENRE_ROW = "GenreRow";
         private const string E_NAME_SKILL_GENRE_LABEL = "SkillGenreLabel";
         private const string E_NAME_SKILL_GENRE_ICON = "SkillGenreIcon";
+        private const string E_NAME_SKILL_TYPE_COLUMN = "SkillTypeColumn";
         private const string E_NAME_EFFECT_CAPTION_LABEL = "EffectCaptionLabel";
         private const string E_NAME_SKILL_DETAIL_SCROLL_VIEW = "SkillDetailScrollView";
         private const string E_NAME_SKILL_DETAIL_LABEL = "SkillDetailLabel";
@@ -118,9 +118,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private Label _skillCommand;
         private VisualElement _comboRow;
         private readonly Sprite _comboHexIcon;
-        private VisualElement _genreRow;
         private Label _skillGenre;
         private Image _skillGenreIcon;
+        private VisualElement _skillTypeColumn;
         private Label _effectCaptionLabel;
         private VisualElement _skillDetailScrollView;
         private ScrollViewDragManipulator _skillDetailDragScrollManipulator;
@@ -153,12 +153,12 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     スキル解放ボタン押下時の処理。
+        ///     スキル解放ボタン押下時の処理。解放確認ダイアログを開く。
         /// </summary>
         /// <param name="ctx"></param>
         private void OnUnlockButtonClicked(ClickEvent ctx)
         {
-            _outGameUIEvent.OnSkillUnlocked?.Invoke();
+            _outGameUIEvent.OnSkillUnlockConfirmationRequested?.Invoke();
         }
 
         /// <summary>

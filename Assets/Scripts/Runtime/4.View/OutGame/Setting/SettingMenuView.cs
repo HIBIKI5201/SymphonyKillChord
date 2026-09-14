@@ -17,6 +17,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             rootElement = rootElement
                 ?? throw new ArgumentNullException(nameof(rootElement));
             _backGround = Require<VisualElement>(rootElement, BACKGROUND_NAME);
+            _settingTitleBar = Require<VisualElement>(rootElement, SETTING_TITLE_BAR_NAME);
             _environmentSettingButton = Require<Button>(rootElement, ENVIRONMENT_SETTING_BUTTON_NAME);
             _audioSettingButton = Require<Button>(rootElement, AUDIO_SETTING_BUTTON_NAME);
             _returnToTitleButton = Require<Button>(rootElement, RETURN_TO_TITLE_BUTTON_NAME);
@@ -55,6 +56,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// </summary>
         public void ShowMenu()
         {
+            _settingTitleBar.style.display = DisplayStyle.Flex;
             _settingMenu.style.display = DisplayStyle.Flex;
             _soundPanel.style.display = DisplayStyle.None;
             _backGround.RemoveFromClassList(AUDIO_BACKGROUND_CLASS);
@@ -73,6 +75,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         }
 
         private const string BACKGROUND_NAME = "BackGround";
+        private const string SETTING_TITLE_BAR_NAME = "SettingTitleBar";
         private const string MENU_BACKGROUND_CLASS = "setting-window--menu";
         private const string AUDIO_BACKGROUND_CLASS = "setting-window--audio";
         private const string ENVIRONMENT_SETTING_BUTTON_NAME = "EnvironmentSettingButton";
@@ -87,6 +90,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string VOICE_VOLUME_SLIDER_NAME = "VoiceVolumeSlider";
 
         private readonly VisualElement _backGround;
+        private readonly VisualElement _settingTitleBar;
         private readonly Button _environmentSettingButton;
         private readonly Button _audioSettingButton;
         private readonly Button _returnToTitleButton;
@@ -104,6 +108,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// </summary>
         private void HandleAudioSettingButtonClickedHandler()
         {
+            _settingTitleBar.style.display = DisplayStyle.None;
             _settingMenu.style.display = DisplayStyle.None;
             _soundPanel.style.display = DisplayStyle.Flex;
             _backGround.RemoveFromClassList(MENU_BACKGROUND_CLASS);

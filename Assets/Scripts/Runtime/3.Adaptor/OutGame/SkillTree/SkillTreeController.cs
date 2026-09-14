@@ -105,6 +105,31 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     選択中ノードの解放確認ダイアログに表示するデータを組み立てる。
+        /// </summary>
+        /// <returns> 解放確認ダイアログ用のDTO。 </returns>
+        public UnlockConfirmDTO GetUnlockConfirmation()
+        {
+            SkillNodeEntity selectedNode = _skillNodeEntities[new SkillNodeId(_selectedNodeId)];
+            PlayerStatusDTO statusPreview = _playerStatusPresenter.BuildPreview(_nodesOnPath);
+            return new UnlockConfirmDTO(
+                HasUnlockSkill(selectedNode.UnlockSkillIds),
+                ResolveSkillName(selectedNode.UnlockSkillIds),
+                _skillTreeStatusEntity.CurrentPoints,
+                _costToUnlock,
+                statusPreview.PlayerHealth,
+                statusPreview.PreviewPlayerHealth,
+                statusPreview.PlayerAttack,
+                statusPreview.PreviewPlayerAttack,
+                statusPreview.CriticalChance,
+                statusPreview.PreviewCriticalChance,
+                statusPreview.CriticalDamage,
+                statusPreview.PreviewCriticalDamage,
+                statusPreview.AreaAttackRangeMultiplier,
+                statusPreview.PreviewAreaAttackRangeMultiplier);
+        }
+
+        /// <summary>
         ///     スキルを解放した時の処理。
         /// </summary>
         public void OnSkillUnlocked()
