@@ -319,7 +319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ab493d03ab0404c8d5e72aa26b0f65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Player.CasingEjectorView
-  _casingPrefab: {fileID: 269748891200729465, guid: af97533842baee544b4c7e3d954cfafe, type: 3}
+  _casingPrefab: {fileID: 8789896035771503237, guid: 831dc4e8783cc234db3c4497c08f2163, type: 3}
   _ejectPoint: {fileID: 2888572749033244321}
   _minEjectSpeed: 1.5
   _maxEjectSpeed: 2.5
