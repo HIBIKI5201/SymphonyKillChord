@@ -315,6 +315,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
 
                 string scenarioSceneName = gameObject.scene.name;
                 SelectedScenarioState selectedScenarioState = _selectedScenarioState;
+                int selectionRevision = selectedScenarioState.SelectionRevision;
 
                 if (!CanContinueRun(runGeneration))
                 {
@@ -333,7 +334,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                     return;
                 }
 
-                selectedScenarioState.Clear();
+                selectedScenarioState.TryClear(selectionRevision);
             }
             catch (OperationCanceledException)
             {
