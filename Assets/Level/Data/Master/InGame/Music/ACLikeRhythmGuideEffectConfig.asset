@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Music.ACLikeRhythmGuideEffectConfig
   _justOutlineColor: {r: 1, g: 0.85, b: 0.25, a: 0.9}
   _justOutlineThickness: 2
-  _justOutlineVerticalExtend: 32
+  _justOutlineUpperExtend: 32
+  _justOutlineLowerExtend: 32
   _flashColor: {r: 1, g: 0.9, b: 0.45, a: 1}
   _flashDuration: 0.2
   _flashEase: 5

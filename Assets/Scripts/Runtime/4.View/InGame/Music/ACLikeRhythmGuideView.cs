@@ -644,6 +644,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary>
         ///     1ブロック分の枠線を上下左右の4本で生成する。
         ///     ブロックは左右が隣と密着しているため、左右の線は内側へ描き、上下の線だけ外へ張り出す。
+        ///     上と下の張り出し量は個別に設定できる。
         /// </summary>
         /// <param name="parent"> 枠線を付けるブロック。 </param>
         /// <param name="objectName"> 生成するオブジェクト名の接頭辞。 </param>
@@ -653,32 +654,37 @@ namespace KillChord.Runtime.View.InGame.Music
         private int CreateJustOutline(RectTransform parent, string objectName, int zoneIndex, int writeIndex)
         {
             float thickness = Mathf.Max(MIN_OUTLINE_THICKNESS, _effectConfig.JustOutlineThickness);
-            float extend = Mathf.Max(0f, _effectConfig.JustOutlineVerticalExtend);
+            float upperExtend = Mathf.Max(0f, _effectConfig.JustOutlineUpperExtend);
+            float lowerExtend = Mathf.Max(0f, _effectConfig.JustOutlineLowerExtend);
             Color color = ApplyTargetDim(_effectConfig.JustOutlineColor, zoneIndex);
 
-            // 上辺。ブロック上端からextendだけ外に出した位置へ、横いっぱいの線を引く。
+            // 縦の線は上下の張り出しを足した高さになり、上下で張り出し量が違う分だけ中心がずれる。
+            float verticalLineSizeDelta = upperExtend + lowerExtend;
+            float verticalLineOffset = (upperExtend - lowerExtend) * 0.5f;
+
+            // 上辺。ブロック上端からupperExtendだけ外に出した位置へ、横いっぱいの線を引く。
             Image topLine = CreateJustOutlineLine(
                 parent, $"{objectName}_Top", color,
                 new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, extend), new Vector2(0f, thickness));
+                new Vector2(0f, upperExtend), new Vector2(0f, thickness));
 
-            // 下辺。上辺と上下対称。
+            // 下辺。ブロック下端からlowerExtendだけ外に出した位置へ引く。
             Image bottomLine = CreateJustOutlineLine(
                 parent, $"{objectName}_Bottom", color,
                 new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f),
-                new Vector2(0f, -extend), new Vector2(0f, thickness));
+                new Vector2(0f, -lowerExtend), new Vector2(0f, thickness));
 
-            // 左辺。縦方向はストレッチアンカーで親へ追従させ、上下の張り出し分だけ高さを足す。
+            // 左辺。縦方向はストレッチアンカーで親へ追従させ、上辺と下辺の間をつなぐ高さにする。
             Image leftLine = CreateJustOutlineLine(
                 parent, $"{objectName}_Left", color,
                 new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f),
-                Vector2.zero, new Vector2(thickness, extend * 2f));
+                new Vector2(0f, verticalLineOffset), new Vector2(thickness, verticalLineSizeDelta));
 
             // 右辺。左辺と左右対称。
             Image rightLine = CreateJustOutlineLine(
                 parent, $"{objectName}_Right", color,
                 new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1f, 0.5f),
-                Vector2.zero, new Vector2(thickness, extend * 2f));
+                new Vector2(0f, verticalLineOffset), new Vector2(thickness, verticalLineSizeDelta));
 
             Image[] lines = { topLine, bottomLine, leftLine, rightLine };
             for (int i = 0; i < lines.Length; i++)

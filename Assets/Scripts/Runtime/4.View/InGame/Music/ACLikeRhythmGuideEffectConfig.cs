@@ -17,8 +17,11 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャストタイミング位置を囲む枠線の太さ。 </summary>
         public float JustOutlineThickness => _justOutlineThickness;
 
-        /// <summary> ジャストタイミング位置を囲む枠線が、ブロックの上下へはみ出す量。 </summary>
-        public float JustOutlineVerticalExtend => _justOutlineVerticalExtend;
+        /// <summary> ジャストタイミング位置を囲む枠線が、ブロックの上へはみ出す量。 </summary>
+        public float JustOutlineUpperExtend => _justOutlineUpperExtend;
+
+        /// <summary> ジャストタイミング位置を囲む枠線が、ブロックの下へはみ出す量。 </summary>
+        public float JustOutlineLowerExtend => _justOutlineLowerExtend;
 
         /// <summary> ジャストタイミング成立時のフラッシュ色。 </summary>
         public Color FlashColor => _flashColor;
@@ -72,8 +75,11 @@ namespace KillChord.Runtime.View.InGame.Music
         [SerializeField, Min(0.1f), Tooltip("ジャストタイミング位置を囲む枠線の太さ。左右の枠線はブロックの内側へ描画するため、ブロック幅の半分を超えると枠線同士が重なります。")]
         private float _justOutlineThickness = 2f;
 
-        [SerializeField, Min(0f), Tooltip("枠線がブロックの上下へはみ出す量。ブロックは左右が隣と密着しているため、視認性はこの値で確保します。")]
-        private float _justOutlineVerticalExtend = 32f;
+        [SerializeField, Min(0f), Tooltip("枠線がブロックの上へはみ出す量。ブロックは左右が隣と密着しているため、視認性は上下の張り出しで確保します。")]
+        private float _justOutlineUpperExtend = 32f;
+
+        [SerializeField, Min(0f), Tooltip("枠線がブロックの下へはみ出す量。ガイドの基準線より下を詰めたい場合は上より小さくします。")]
+        private float _justOutlineLowerExtend = 32f;
 
         [Header("判定色")]
         [SerializeField, Tooltip("ジャストタイミング成立時にビートを一瞬変更する色。")]
