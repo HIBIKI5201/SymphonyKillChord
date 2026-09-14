@@ -84,6 +84,15 @@ namespace KillChord.Runtime.View.InGame.Mission
             _controller?.Tick(Time.unscaledDeltaTime);
         }
 
+        private void OnEnable()
+        {
+            // OnDisable でローカライズ購読を解除しているため、再有効化時に表示中の会話で購読し直す。
+            if (_viewModel != null)
+            {
+                RefreshLocalizedText();
+            }
+        }
+
         private void OnDisable()
         {
             _controller?.StopGameplay();
