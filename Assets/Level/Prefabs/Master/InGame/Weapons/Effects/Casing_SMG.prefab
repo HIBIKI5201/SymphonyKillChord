@@ -80,10 +80,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.003871783
-  m_Height: 0.022
+  m_Radius: 0.011615349
+  m_Height: 0.066
   m_Direction: 1
-  m_Center: {x: -2.0986274e-10, y: 0, z: 0}
+  m_Center: {x: -6.295882e-10, y: 0, z: 0}
 --- !u!1 &2934501091364449752
 GameObject:
   m_ObjectHideFlags: 0
@@ -112,7 +112,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2253384, y: 0.2253384, z: 0.2253384}
+  m_LocalScale: {x: 0.6760152, y: 0.6760152, z: 0.6760152}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8337187904515025539}
