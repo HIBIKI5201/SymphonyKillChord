@@ -178,6 +178,7 @@ jobs:
           Write-Host "::group::クローン先プロジェクトフォルダおよびディスク事前クリーンアップ"
           $Workspace = "${{ github.workspace }}"
           $CleanBuild = $env:CLEAN_BUILD -eq 'true'
+          $MinimumBuildFreeSpaceGB = 40
           Write-Host "対象プロジェクトフォルダ: $Workspace"
           Write-Host "[INFO]: clean_build = $CleanBuild"
 
@@ -187,8 +188,18 @@ jobs:
               Write-Host "[INFO]: 既存のリポジトリ環境を検出しました。未追跡ファイルおよび無視されたファイルをクリーンアップします..."
               Push-Location $Workspace
               try {
-                if ($CleanBuild) {
-                  Write-Host "[INFO]: clean_build が有効なため、Library を含めて完全にクリーンアップします。"
+                $WorkspaceDrive = (Get-Item -LiteralPath $Workspace).PSDrive
+                $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+                $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+                $ShouldRemoveLibrary = $CleanBuild -or $FreeSpaceGB -lt $MinimumBuildFreeSpaceGB
+                Write-Host "[INFO]: クリーンアップ前の空き容量: $FreeSpaceGB GB（ビルド開始必要量: $MinimumBuildFreeSpaceGB GB）"
+
+                if ($ShouldRemoveLibrary) {
+                  if ($CleanBuild) {
+                    Write-Host "[INFO]: clean_build が有効なため、Library を含めて完全にクリーンアップします。"
+                  } else {
+                    Write-Host "[WARN]: 空き容量が必要量を下回っているため、前回ビルドの Library を削除します。"
+                  }
                   git -c core.longpaths=true clean -ffdx
                 } else {
                   Write-Host "[INFO]: Library はビルド高速化のため保持します（トラブル時は workflow_dispatch の clean_build を有効にして実行してください）。"
@@ -203,9 +214,18 @@ jobs:
                   throw "git reset --hard が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
                 }
 
+                $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+                $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+                Write-Host "[INFO]: クリーンアップ後の空き容量: $FreeSpaceGB GB"
+                if ($FreeSpaceGB -lt $MinimumBuildFreeSpaceGB) {
+                  Write-Host "[ERROR]: Library 清掃後も必要な空き容量 $MinimumBuildFreeSpaceGB GBを確保できません。"
+                  exit 1
+                }
+
                 Write-Host "[OK]: リポジトリを作業ツリーからクリーンアップしました。"
               } catch {
-                Write-Host "[WARN]: git clean に失敗しました: $_"
+                Write-Host "[ERROR]: 事前クリーンアップに失敗しました: $_"
+                exit 1
               } finally {
                 Pop-Location
               }
@@ -671,9 +691,30 @@ jobs:
           $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
           Write-Host "プロジェクトが配置されているドライブ ($($WorkspaceDrive.Name):) の残り空き容量: $FreeSpaceGB GB"
 
-          $MinRequiredGB = 20
+          $MinRequiredGB = 40
           if ($FreeSpaceGB -lt $MinRequiredGB) {
-            Write-Host "[WARN]: 残り空き容量が推奨値 ($MinRequiredGB GB) を下回っています。ビルド中の容量不足にご注意ください。"
+            $WorkspaceRoot = [System.IO.Path]::GetFullPath("${{ github.workspace }}").TrimEnd(
+              [System.IO.Path]::DirectorySeparatorChar,
+              [System.IO.Path]::AltDirectorySeparatorChar)
+            $WorkspacePrefix = $WorkspaceRoot + [System.IO.Path]::DirectorySeparatorChar
+            $LibraryPath = [System.IO.Path]::GetFullPath((Join-Path $WorkspaceRoot "Library"))
+            if (-not $LibraryPath.StartsWith($WorkspacePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+              Write-Host "[ERROR]: Library の解決先がワークスペース外です: $LibraryPath"
+              exit 1
+            }
+
+            if (Test-Path -LiteralPath $LibraryPath) {
+              Write-Host "[WARN]: Unity 起動前の空き容量が不足しているため Library を削除します: $LibraryPath"
+              Remove-Item -LiteralPath $LibraryPath -Recurse -Force -ErrorAction Stop
+              $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+              $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+              Write-Host "[INFO]: Library 清掃後の空き容量: $FreeSpaceGB GB"
+            }
+          }
+
+          if ($FreeSpaceGB -lt $MinRequiredGB) {
+            Write-Host "[ERROR]: ビルドに必要な空き容量 $MinRequiredGB GBを確保できません。現在の空き容量: $FreeSpaceGB GB"
+            exit 1
           } else {
             Write-Host "[OK]: 十分なディスク空き容量が確保されています。"
           }
@@ -1063,7 +1104,7 @@ jobs:
 
           $ProfileTimeoutSec = [int]$env:UNITY_PROFILE_BUILD_TIMEOUT_SEC
           $AndroidMinimumFreeSpaceGB = 40
-          $DefaultMinimumFreeSpaceGB = 20
+          $DefaultMinimumFreeSpaceGB = 40
           $EmergencyMinimumFreeSpaceGB = 5
           $MaximumLogSizeGB = 1
           $ResourceCheckIntervalMilliseconds = 30000
