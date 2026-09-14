@@ -18,19 +18,48 @@ MonoBehaviour:
   m_Metadata:
     m_Items: []
   m_TableData:
+  - m_Id: 234861153595392
+    m_Localized: "Been a while since we met on a battlefield, Symphony."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861157789696
+    m_Localized: "You probably don't need this, but I'll walk you through the basics."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861161984000
+    m_Localized: "Now, about the enemy... take a look at this intel."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861166178304
+    m_Localized: "Got it?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861170372608
+    m_Localized: "Good. Moving on."
+    m_Metadata:
+      m_Items: []
   - m_Id: 234861061320704
-    m_Localized: Next, let's go over movement and dodging. You'll use them to navigate
-      the battlefield and evade enemy attacks, so make sure you remember them.
+    m_Localized: "First up, movement and dodging. You'll need them to get around the battlefield and slip past enemy fire, so keep them in mind."
     m_Metadata:
       m_Items: []
   - m_Id: 234861141012480
-    m_Localized: Next, let's go over your attacks. Each attack has different characteristics,
-      so make sure you understand how they work.
+    m_Localized: "Next, your attacks. Each one has its own quirks, so get a solid feel for how they work."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861174566912
+    m_Localized: "Last, your special ability: the Kill Chord. It's a unique power you unleash by playing phrases. Whether you can master it is up to you!"
     m_Metadata:
       m_Items: []
   - m_Id: 234861149401088
-    m_Localized: Now it's time for real combat. Put everything I've taught you to
-      use and go wild.
+    m_Localized: "Time for the real thing. Put everything I've taught you to use and cut loose."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861178761216
+    m_Localized: "Good to see you haven't gotten rusty."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 234861182955520
+    m_Localized: "Don't worry. I'll back you up for the rest of this fight."
     m_Metadata:
       m_Items: []
   references:
