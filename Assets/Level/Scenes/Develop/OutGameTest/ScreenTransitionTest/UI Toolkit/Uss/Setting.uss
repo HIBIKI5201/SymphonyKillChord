@@ -23,6 +23,10 @@
     background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Option_Back.png?fileID=21300000&guid=ae2a34555d2331543a19da0a6aa5a2cb&type=3#UI_Option_Back");
 }
 
+.setting-window--environment {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Option_Back.png?fileID=21300000&guid=ae2a34555d2331543a19da0a6aa5a2cb&type=3#UI_Option_Back");
+}
+
 .setting-top-bar {
     margin-bottom: 28px;
 }
@@ -167,6 +171,38 @@
     border-right-width: 0;
     border-top-width: 0;
     border-bottom-width: 0;
+}
+
+.setting-select-row {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 40px;
+}
+
+.setting-select-arrow-button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(58, 47, 20);
+    background-color: rgb(253, 246, 224);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(184, 155, 74);
+    border-right-color: rgb(184, 155, 74);
+    border-top-color: rgb(184, 155, 74);
+    border-bottom-color: rgb(184, 155, 74);
+}
+
+.setting-select-value-label {
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+    font-size: 22px;
+    color: white;
 }
 
 .setting-dialog-overlay {

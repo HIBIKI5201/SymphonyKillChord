@@ -50,6 +50,54 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
+            <ui:VisualElement name="EnvironmentPanel" class="setting-panel" style="display: none;">
+                <ui:VisualElement class="setting-panel-top-bar">
+                    <ui:Button text="&lt;" name="EnvironmentPanelBackButton" class="setting-panel-back-button ui-se-cancel"/>
+                    <ui:Label text="環境設定" class="setting-panel-title"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-title-divider"/>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label text="画面モード" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-select-row">
+                        <ui:Button text="&lt;" name="ScreenModePrevButton" class="setting-select-arrow-button ui-se-select"/>
+                        <ui:Label text="フルスクリーン" name="ScreenModeValueLabel" class="setting-select-value-label"/>
+                        <ui:Button text="&gt;" name="ScreenModeNextButton" class="setting-select-arrow-button ui-se-select"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label text="解像度" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-select-row">
+                        <ui:Button text="&lt;" name="ResolutionPrevButton" class="setting-select-arrow-button ui-se-select"/>
+                        <ui:Label text="1920 x 1080" name="ResolutionValueLabel" class="setting-select-value-label"/>
+                        <ui:Button text="&gt;" name="ResolutionNextButton" class="setting-select-arrow-button ui-se-select"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label text="画質" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-select-row">
+                        <ui:Button text="&lt;" name="QualityLevelPrevButton" class="setting-select-arrow-button ui-se-select"/>
+                        <ui:Label text="High" name="QualityLevelValueLabel" class="setting-select-value-label"/>
+                        <ui:Button text="&gt;" name="QualityLevelNextButton" class="setting-select-arrow-button ui-se-select"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label text="明るさ" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-control-row">
+                        <ui:Label text="5" name="BrightnessValueLabel" class="setting-value-label"/>
+                        <ui:SliderInt name="BrightnessSlider" low-value="0" high-value="10" value="5" show-input-field="false" page-size="1" class="setting-slider"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-menu-spacer"/>
+                <ui:Button text="設定を保存" name="EnvironmentPanelSaveButton" class="setting-menu-button ui-se-select"/>
+            </ui:VisualElement>
             <ui:VisualElement name="ReturnToTitleDialog" picking-mode="Position" class="setting-dialog-overlay" style="display: none;">
                 <ui:VisualElement class="setting-dialog">
                     <ui:Label text="タイトル画面に戻りますか？" class="setting-dialog-message"/>

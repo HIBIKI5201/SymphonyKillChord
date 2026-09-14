@@ -14,8 +14,9 @@
 }
 .button:hover,
 .button:focus {
-    scale: 1.2 1.2;
     color: rgb(140, 140, 140);
+    box-shadow: 0 0 16px 4px rgba(0, 0, 0, 0.6);
+    -unity-background-image-tint-color: rgb(120, 120, 120);
 }
 
 .button:active {

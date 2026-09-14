@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 namespace KillChord.Runtime.View.OutGame.Setting
 {
     /// <summary>
-    ///     Home設定画面のメニュー表示とオーディオ設定パネルの切り替えを管理するView。
+    ///     Home設定画面のメニュー表示と各設定パネルの切り替えを管理するView。
     /// </summary>
     public sealed class SettingMenuView : IDisposable
     {
@@ -28,6 +28,16 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _bgmVolumeSlider = Require<SliderInt>(rootElement, BGM_VOLUME_SLIDER_NAME);
             _soundEffectVolumeSlider = Require<SliderInt>(rootElement, SOUND_EFFECT_VOLUME_SLIDER_NAME);
             _voiceVolumeSlider = Require<SliderInt>(rootElement, VOICE_VOLUME_SLIDER_NAME);
+            _environmentPanel = Require<VisualElement>(rootElement, ENVIRONMENT_PANEL_NAME);
+            _environmentPanelBackButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_BACK_BUTTON_NAME);
+            _screenModePrevButton = Require<Button>(rootElement, SCREEN_MODE_PREV_BUTTON_NAME);
+            _screenModeNextButton = Require<Button>(rootElement, SCREEN_MODE_NEXT_BUTTON_NAME);
+            _resolutionPrevButton = Require<Button>(rootElement, RESOLUTION_PREV_BUTTON_NAME);
+            _resolutionNextButton = Require<Button>(rootElement, RESOLUTION_NEXT_BUTTON_NAME);
+            _qualityLevelPrevButton = Require<Button>(rootElement, QUALITY_LEVEL_PREV_BUTTON_NAME);
+            _qualityLevelNextButton = Require<Button>(rootElement, QUALITY_LEVEL_NEXT_BUTTON_NAME);
+            _brightnessSlider = Require<SliderInt>(rootElement, BRIGHTNESS_SLIDER_NAME);
+            _environmentPanelSaveButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_SAVE_BUTTON_NAME);
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
             {
@@ -46,6 +56,21 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _voiceVolumeSlider,
                 },
                 _bgmVolumeSlider);
+            _navigationScope.AddChildLevel(
+                _environmentSettingButton,
+                new VisualElement[]
+                {
+                    _environmentPanelBackButton,
+                    _screenModePrevButton,
+                    _screenModeNextButton,
+                    _resolutionPrevButton,
+                    _resolutionNextButton,
+                    _qualityLevelPrevButton,
+                    _qualityLevelNextButton,
+                    _brightnessSlider,
+                    _environmentPanelSaveButton,
+                },
+                _screenModePrevButton);
 
             RegisterCallbacks();
             ShowMenu();
@@ -59,7 +84,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _settingTitleBar.style.display = DisplayStyle.Flex;
             _settingMenu.style.display = DisplayStyle.Flex;
             _soundPanel.style.display = DisplayStyle.None;
+            _environmentPanel.style.display = DisplayStyle.None;
             _backGround.RemoveFromClassList(AUDIO_BACKGROUND_CLASS);
+            _backGround.RemoveFromClassList(ENVIRONMENT_BACKGROUND_CLASS);
             _backGround.AddToClassList(MENU_BACKGROUND_CLASS);
             _navigationScope.ResetToRootLevel();
         }
@@ -71,6 +98,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
         {
             _audioSettingButton.clicked -= HandleAudioSettingButtonClickedHandler;
             _soundPanelBackButton.clicked -= HandleSoundPanelBackButtonClickedHandler;
+            _environmentSettingButton.clicked -= HandleEnvironmentSettingButtonClickedHandler;
+            _environmentPanelBackButton.clicked -= HandleEnvironmentPanelBackButtonClickedHandler;
+            _environmentPanelSaveButton.clicked -= HandleEnvironmentPanelBackButtonClickedHandler;
             _navigationScope.Dispose();
         }
 
@@ -78,6 +108,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string SETTING_TITLE_BAR_NAME = "SettingTitleBar";
         private const string MENU_BACKGROUND_CLASS = "setting-window--menu";
         private const string AUDIO_BACKGROUND_CLASS = "setting-window--audio";
+        private const string ENVIRONMENT_BACKGROUND_CLASS = "setting-window--environment";
         private const string ENVIRONMENT_SETTING_BUTTON_NAME = "EnvironmentSettingButton";
         private const string AUDIO_SETTING_BUTTON_NAME = "AudioSettingButton";
         private const string RETURN_TO_TITLE_BUTTON_NAME = "ReturnToTitleButton";
@@ -88,6 +119,16 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string BGM_VOLUME_SLIDER_NAME = "BgmVolumeSlider";
         private const string SOUND_EFFECT_VOLUME_SLIDER_NAME = "SoundEffectVolumeSlider";
         private const string VOICE_VOLUME_SLIDER_NAME = "VoiceVolumeSlider";
+        private const string ENVIRONMENT_PANEL_NAME = "EnvironmentPanel";
+        private const string ENVIRONMENT_PANEL_BACK_BUTTON_NAME = "EnvironmentPanelBackButton";
+        private const string SCREEN_MODE_PREV_BUTTON_NAME = "ScreenModePrevButton";
+        private const string SCREEN_MODE_NEXT_BUTTON_NAME = "ScreenModeNextButton";
+        private const string RESOLUTION_PREV_BUTTON_NAME = "ResolutionPrevButton";
+        private const string RESOLUTION_NEXT_BUTTON_NAME = "ResolutionNextButton";
+        private const string QUALITY_LEVEL_PREV_BUTTON_NAME = "QualityLevelPrevButton";
+        private const string QUALITY_LEVEL_NEXT_BUTTON_NAME = "QualityLevelNextButton";
+        private const string BRIGHTNESS_SLIDER_NAME = "BrightnessSlider";
+        private const string ENVIRONMENT_PANEL_SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
 
         private readonly VisualElement _backGround;
         private readonly VisualElement _settingTitleBar;
@@ -101,6 +142,16 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly SliderInt _bgmVolumeSlider;
         private readonly SliderInt _soundEffectVolumeSlider;
         private readonly SliderInt _voiceVolumeSlider;
+        private readonly VisualElement _environmentPanel;
+        private readonly Button _environmentPanelBackButton;
+        private readonly Button _screenModePrevButton;
+        private readonly Button _screenModeNextButton;
+        private readonly Button _resolutionPrevButton;
+        private readonly Button _resolutionNextButton;
+        private readonly Button _qualityLevelPrevButton;
+        private readonly Button _qualityLevelNextButton;
+        private readonly SliderInt _brightnessSlider;
+        private readonly Button _environmentPanelSaveButton;
         private readonly HierarchicalNavigationScope _navigationScope;
 
         /// <summary>
@@ -125,12 +176,36 @@ namespace KillChord.Runtime.View.OutGame.Setting
         }
 
         /// <summary>
-        ///     メニューとオーディオ設定パネルのコールバックを登録する。
+        ///     環境設定パネルを開き、最初の設定項目へフォーカスを移す。
+        /// </summary>
+        private void HandleEnvironmentSettingButtonClickedHandler()
+        {
+            _settingTitleBar.style.display = DisplayStyle.None;
+            _settingMenu.style.display = DisplayStyle.None;
+            _environmentPanel.style.display = DisplayStyle.Flex;
+            _backGround.RemoveFromClassList(MENU_BACKGROUND_CLASS);
+            _backGround.AddToClassList(ENVIRONMENT_BACKGROUND_CLASS);
+            _navigationScope.EnterLevel(_environmentSettingButton);
+        }
+
+        /// <summary>
+        ///     環境設定パネルを閉じ、メニューへ戻る。
+        /// </summary>
+        private void HandleEnvironmentPanelBackButtonClickedHandler()
+        {
+            ShowMenu();
+        }
+
+        /// <summary>
+        ///     メニューと各設定パネルのコールバックを登録する。
         /// </summary>
         private void RegisterCallbacks()
         {
             _audioSettingButton.clicked += HandleAudioSettingButtonClickedHandler;
             _soundPanelBackButton.clicked += HandleSoundPanelBackButtonClickedHandler;
+            _environmentSettingButton.clicked += HandleEnvironmentSettingButtonClickedHandler;
+            _environmentPanelBackButton.clicked += HandleEnvironmentPanelBackButtonClickedHandler;
+            _environmentPanelSaveButton.clicked += HandleEnvironmentPanelBackButtonClickedHandler;
         }
 
         /// <summary>
