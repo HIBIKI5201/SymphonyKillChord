@@ -51,6 +51,7 @@ permissions: {}
 concurrency:
   group: build-release-${{ github.base_ref || github.run_id }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   check:
@@ -139,6 +140,7 @@ jobs:
     concurrency:
       group: unity-self-hosted-build
       cancel-in-progress: false
+      queue: max
     timeout-minutes: 1440
     environment: 'AutoBuildAndRelease'
     permissions:
