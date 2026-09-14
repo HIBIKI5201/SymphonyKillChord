@@ -13,6 +13,7 @@ using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
+using KillChord.Runtime.InfraStructure.OutGame.Resource;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
@@ -132,6 +133,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         [SerializeField, SourceDataAddress, Tooltip("装備スキルのアイコン解決に使う SkillRepository の Addressables キーです。読み込みに失敗してもアイコンなしで続行します。")]
         private string _skillRepositoryKey = "OutGameSkillRepository";
 
+        [SerializeField, SourceDataAddress, Tooltip("報酬リソースの表示名解決に使うリポジトリの Addressables キーです。読み込みに失敗しても既定名で続行します。")]
+        private string _gameResourceDefinitionRepositoryKey = "GameResourceDefinitionRepository";
+
         [SerializeField, Tooltip("サブミッション達成済みを表す星アイコンです。")]
         private Sprite _achievedStarSprite;
 
@@ -161,6 +165,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private MissionDefinitionRepository _loadedMissionDefinitionRepository;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SkillRepository _loadedSkillRepository;
+        private GameResourceDefinitionRepository _loadedGameResourceDefinitionRepository;
         private SaveData _loadedSaveData;
         private SubMissionAchievementResolver _subMissionAchievementResolver;
         private ScrollView _stageMapScrollView;
@@ -275,6 +280,26 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _loadedSkillRepository = null;
             }
 
+            // 報酬名の補助リソースのため、未作成・未登録でも既知IDの既定名を使って初期化を続ける。
+            try
+            {
+                _loadedGameResourceDefinitionRepository =
+                    await _gameResourceDefinitionRepositoryKey
+                        .LoadAssetAsync<GameResourceDefinitionRepository>(this, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(StageSelectInitializer)}] GameResourceDefinitionRepositoryの読み込みに失敗しました。"
+                        + $"既定のリソース名で続行します。{exception.Message}",
+                    this);
+                _loadedGameResourceDefinitionRepository = null;
+            }
+
             return true;
         }
 
@@ -313,6 +338,11 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             {
                 _skillRepositoryKey.ReleaseLoadedAsset(this);
                 _loadedSkillRepository = null;
+            }
+            if (_loadedGameResourceDefinitionRepository != null)
+            {
+                _gameResourceDefinitionRepositoryKey.ReleaseLoadedAsset(this);
+                _loadedGameResourceDefinitionRepository = null;
             }
             _loadedSaveData = null;
         }
@@ -1477,7 +1507,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             var detailPresenter = new StageDetailPresenter(
                 _detailScreenView,
                 _loadedMissionDefinitionRepository,
-                _subMissionAchievementResolver);
+                _subMissionAchievementResolver,
+                _loadedGameResourceDefinitionRepository);
             _stageSelectController = new StageSelectController(_stageTree, detailPresenter, _detailScreenView);
         }
 

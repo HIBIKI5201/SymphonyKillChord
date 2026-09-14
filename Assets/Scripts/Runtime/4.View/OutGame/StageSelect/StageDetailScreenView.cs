@@ -119,12 +119,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 _flavorTextLabel.text = dto.FlavorText;
             }
 
-            var rewardSkillBuildText = new StringBuilder("改造ポイント: ");
-            rewardSkillBuildText.Append(dto.RewardSkillBuildPoint);
-            _rewardSkillBuildLabel.text = rewardSkillBuildText.ToString();
-            var rewardSkillUnlockText = new StringBuilder("スキル解放ポイント: ");
-            rewardSkillUnlockText.Append(dto.RewardSkillUnlockPoint);
-            _rewardSkillUnlockLabel.text = rewardSkillUnlockText.ToString();
+            _rewardSkillBuildLabel.text = FormatRewards("初回報酬: ", dto.FirstClearRewards);
+            _rewardSkillUnlockLabel.text = FormatRewards("成功報酬: ", dto.ClearRewards);
 
             // バトルパートのみミッションセクションを表示する
             _missionSection.style.visibility = dto.IsBattle ? Visibility.Visible : Visibility.Hidden;
@@ -206,6 +202,36 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 .Bind(this, static (x, state) => state.SetPanelTranslateX(x));
 
             return base.Hide(cancellationToken);
+        }
+
+        /// <summary>
+        ///     報酬一覧を既存の報酬ラベルへ表示する文字列に変換します。
+        /// </summary>
+        /// <param name="prefix"> 報酬種別を示す接頭辞。 </param>
+        /// <param name="rewards"> 表示する報酬一覧。 </param>
+        /// <returns> リソース名と数量を区切って並べた表示文字列。 </returns>
+        private static string FormatRewards(string prefix, IReadOnlyList<StageRewardViewData> rewards)
+        {
+            StringBuilder builder = new StringBuilder(prefix);
+            if (rewards == null || rewards.Count == 0)
+            {
+                builder.Append("なし");
+                return builder.ToString();
+            }
+
+            for (int i = 0; i < rewards.Count; i++)
+            {
+                if (i > 0)
+                {
+                    builder.Append(" / ");
+                }
+
+                builder.Append(rewards[i].DisplayName);
+                builder.Append(" x");
+                builder.Append(rewards[i].Amount);
+            }
+
+            return builder.ToString();
         }
 
         /// <summary>

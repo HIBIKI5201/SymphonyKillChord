@@ -387,7 +387,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
                 await _stageProgressSaveDataService.SaveClearAsync(
                     stageDefinition.StageId,
-                    stageDefinition.Reward,
+                    stageDefinition.FirstClearReward,
+                    stageDefinition.ClearReward,
                     evaluationResult,
                     stageDefinition.IsTutorial);
 

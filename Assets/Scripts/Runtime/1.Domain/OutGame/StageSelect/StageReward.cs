@@ -1,27 +1,45 @@
+using KillChord.Runtime.Domain.OutGame.Resource;
+using System;
+using System.Collections.Generic;
+
 namespace KillChord.Runtime.Domain.OutGame.StageSelect
 {
     /// <summary>
-    ///     ステージクリア報酬を表す値型オブジェクト。
+    ///     ステージクリア時に付与するリソースの一覧を表す値オブジェクト。
     /// </summary>
     public readonly struct StageReward
     {
         /// <summary>
         ///     ステージクリア報酬を初期化する。
         /// </summary>
-        /// <param name="skillBuildPoint"> スキル編成・強化に使用するポイント。 </param>
-        /// <param name="skillUnlockPoint"> スキル解放・パラメーター強化に使用するポイント。 </param>
-        public StageReward(int skillBuildPoint, int skillUnlockPoint)
+        /// <param name="items"> 付与するリソースと数量の一覧。nullの場合は報酬なしとして扱う。 </param>
+        public StageReward(IReadOnlyList<GameResourceAmount> items)
         {
-            _skillBuildPoint = skillBuildPoint;
-            _skillUnlockPoint = skillUnlockPoint;
+            if (items == null || items.Count == 0)
+            {
+                _items = Array.Empty<GameResourceAmount>();
+                return;
+            }
+
+            // 呼び出し元のリストが後から変更されても報酬内容が変わらないよう複製する。
+            GameResourceAmount[] copiedItems = new GameResourceAmount[items.Count];
+            for (int i = 0; i < items.Count; i++)
+            {
+                copiedItems[i] = items[i];
+            }
+
+            _items = copiedItems;
         }
 
-        /// <summary> スキル編成・強化に使用するポイント。 </summary>
-        public int SkillBuildPoint => _skillBuildPoint;
-        /// <summary> スキル解放・パラメーター強化に使用するポイント。 </summary>
-        public int SkillUnlockPoint => _skillUnlockPoint;
+        /// <summary> 報酬なしを表すインスタンス。 </summary>
+        public static StageReward Empty => default;
 
-        private readonly int _skillBuildPoint;
-        private readonly int _skillUnlockPoint;
+        /// <summary> 付与するリソースと数量の一覧。 </summary>
+        public IReadOnlyList<GameResourceAmount> Items => _items ?? Array.Empty<GameResourceAmount>();
+
+        /// <summary> 付与するリソースが無い場合はtrue。 </summary>
+        public bool IsEmpty => Items.Count == 0;
+
+        private readonly IReadOnlyList<GameResourceAmount> _items;
     }
 }
