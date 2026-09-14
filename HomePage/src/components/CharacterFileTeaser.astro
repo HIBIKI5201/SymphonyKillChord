@@ -5,12 +5,11 @@ import { getImage } from 'astro:assets';
 interface Props {
 	name: string;
 	formalName: string;
-	catchphrase: string;
 	image: ImageMetadata;
 	href: string;
 }
 
-const { name, formalName, catchphrase, image, href } = Astro.props;
+const { name, formalName, image, href } = Astro.props;
 
 const photoAvif = await getImage({ src: image, format: 'avif', width: 640, quality: 70 });
 const photoWebp = await getImage({ src: image, format: 'webp', width: 640, quality: 75 });
@@ -41,8 +40,6 @@ const photoWebp = await getImage({ src: image, format: 'webp', width: 640, quali
 			<dd>{name}</dd>
 		</div>
 	</dl>
-
-	<p class="catch">{catchphrase}</p>
 </a>
 
 <style>
@@ -170,13 +167,4 @@ const photoWebp = await getImage({ src: image, format: 'webp', width: 640, quali
 		font-size: 13px;
 		color: var(--paper-ink);
 	}
-
-	.catch {
-		margin: 16px 0 0;
-		font-family: var(--font-display);
-		letter-spacing: var(--tracking-display);
-		font-size: 1rem;
-		color: var(--paper-ink);
-	}
-
 </style>

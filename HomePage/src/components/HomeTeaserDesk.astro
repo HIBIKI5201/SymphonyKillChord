@@ -8,7 +8,6 @@ interface Props {
 	character: {
 		name: string;
 		formalName: string;
-		catchphrase: string;
 		image: ImageMetadata;
 		href: string;
 	};
@@ -35,7 +34,6 @@ const { character, gameplay, skill } = Astro.props;
 			<CharacterFileTeaser
 				name={character.name}
 				formalName={character.formalName}
-				catchphrase={character.catchphrase}
 				image={character.image}
 				href={character.href}
 			/>
