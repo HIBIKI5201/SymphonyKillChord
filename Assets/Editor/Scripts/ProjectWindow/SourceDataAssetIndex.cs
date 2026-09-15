@@ -41,8 +41,10 @@ namespace KillChord.Editor.ProjectWindow
         {
             if (_isDirty)
             {
-                Rebuild();
+                // Rebuild()実行中に発生したInvalidate()呼び出しを取りこぼさないよう、
+                // 実行前にフラグを下ろしてからRebuildする(Rebuild後に下ろすと、その間のInvalidate()が握り潰される)。
                 _isDirty = false;
+                Rebuild();
             }
 
             return !string.IsNullOrEmpty(guid)

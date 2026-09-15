@@ -62,6 +62,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             if (GUILayout.Button("設定を適用"))
             {
                 settings.SaveSettings();
+                // Collectionマッピングの追加/変更はProject Window上のバッジ判定に影響するため、
+                // ProjectSettings配下の設定変更(OnPostprocessAllAssetsでは検知できない)をここで明示的に伝える。
+                KillChord.Editor.ProjectWindow.SourceDataAssetIndex.Invalidate();
             }
         }
 
