@@ -1,5 +1,8 @@
+using Cysharp.Threading.Tasks;
 using KillChord.Runtime.View.Persistent.Music;
 using LitMotion;
+using System;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -145,8 +148,23 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 return;
             }
-            
-            _ = _muzzleFlashLight.Flash();
+
+            FlashAsync(destroyCancellationToken).Forget();
+        }
+
+        /// <summary>
+        ///     破棄によるキャンセルを無視してマズルフラッシュを再生します。
+        /// </summary>
+        private async UniTaskVoid FlashAsync(CancellationToken token)
+        {
+            try
+            {
+                await _muzzleFlashLight.Flash(token);
+            }
+            catch (OperationCanceledException)
+            {
+                // 破棄によるキャンセルは正常系のため無視する。
+            }
         }
 
         /// <summary>
