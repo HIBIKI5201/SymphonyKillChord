@@ -53,7 +53,7 @@ CBUFFER_START(UnityPerMaterial)
     half _SSSTransmissionPower;
 
     half4 _FakeShadowColor;
-    float _FakeShadowDistance;
+    float2 _FakeShadowOffset;
     float _FakeShadowDepthBias;
 
     half _Metallic;
