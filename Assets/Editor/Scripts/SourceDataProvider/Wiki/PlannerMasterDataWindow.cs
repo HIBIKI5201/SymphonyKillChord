@@ -164,25 +164,27 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
 
             _selectedPageIndex = Mathf.Clamp(_selectedPageIndex, 0, pages.Count - 1);
             PlannerMasterDataEditorSettings.PageDefinition page = pages[_selectedPageIndex];
+            List<string> visibleSourceAssetKeys = GetVisibleSourceAssetKeys(page);
             if (_navigationMode == NavigationMode.SourceAssets
-                && page.SourceAssetAddressableKeys.Count == 0
+                && visibleSourceAssetKeys.Count == 0
                 && page.CollectionCategories.Count > 0)
             {
                 _navigationMode = NavigationMode.Collections;
             }
             else if (_navigationMode == NavigationMode.Collections
                 && page.CollectionCategories.Count == 0
-                && page.SourceAssetAddressableKeys.Count > 0)
+                && visibleSourceAssetKeys.Count > 0)
             {
                 _navigationMode = NavigationMode.SourceAssets;
             }
 
             if (_navigationMode == NavigationMode.SourceAssets)
             {
-                if (!Contains(page.SourceAssetAddressableKeys, _selectedSourceAssetKey))
+                if (!Contains(page.SourceAssetAddressableKeys, _selectedSourceAssetKey)
+                    || IsRepositoryOnlySourceAsset(_selectedSourceAssetKey))
                 {
-                    _selectedSourceAssetKey = page.SourceAssetAddressableKeys.Count > 0
-                        ? page.SourceAssetAddressableKeys[0]
+                    _selectedSourceAssetKey = visibleSourceAssetKeys.Count > 0
+                        ? visibleSourceAssetKeys[0]
                         : string.Empty;
                 }
                 _selectedCollectionKey = string.Empty;
@@ -274,15 +276,20 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private void DrawSourceAssetNavigation(PlannerMasterDataEditorSettings.PageDefinition page)
         {
             EditorGUILayout.LabelField("Source Assets", EditorStyles.boldLabel);
-            if (page.SourceAssetAddressableKeys.Count == 0)
+            List<string> visibleKeys = GetVisibleSourceAssetKeys(page);
+            if (visibleKeys.Count == 0)
             {
-                EditorGUILayout.HelpBox("このページにはSourceAssetが設定されていません。", MessageType.None);
+                EditorGUILayout.HelpBox(
+                    page.SourceAssetAddressableKeys.Count == 0
+                        ? "このページにはSourceAssetが設定されていません。"
+                        : "このページのSourceAssetは単一CollectionのRepositoryのみのため、Collectionsタブから参照してください。",
+                    MessageType.None);
                 return;
             }
 
-            for (int i = 0; i < page.SourceAssetAddressableKeys.Count; i++)
+            for (int i = 0; i < visibleKeys.Count; i++)
             {
-                string addressableKey = page.SourceAssetAddressableKeys[i];
+                string addressableKey = visibleKeys[i];
                 string label = BuildSourceAssetLabel(addressableKey);
                 bool isSelected = string.Equals(_selectedSourceAssetKey, addressableKey, StringComparison.Ordinal);
                 if (!GUILayout.Button(label, isSelected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
@@ -430,13 +437,19 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             }
 
             DrawCollectionCommands(mapping, sourceAsset, collectionProperty);
+
+            EditorGUILayout.Space();
+            if (IsRepositoryOnlySourceAsset(mapping.SourceAssetAddressableKey))
+            {
+                DrawRepositoryHeadRow(mapping.SourceAssetAddressableKey, sourceAsset);
+            }
+
             if (collectionProperty.arraySize == 0)
             {
                 EditorGUILayout.HelpBox("Collectionにデータがありません。「データを追加」から作成できます。", MessageType.Info);
                 return;
             }
 
-            EditorGUILayout.Space();
             for (int i = 0; i < collectionProperty.arraySize; i++)
             {
                 SerializedProperty element = collectionProperty.GetArrayElementAtIndex(i);
@@ -648,6 +661,59 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
 
             Selection.activeObject = target;
             EditorGUIUtility.PingObject(target);
+        }
+
+        /// <summary>
+        ///     Collectionの先頭に表示する、Collectionを保持するSourceAsset自体(Repository)の行を描画します。
+        ///     クリックすると実体をSelection/Pingします。値編集はInspector側のCustomEditorへ委ねます。
+        /// </summary>
+        /// <param name="addressableKey"> Repository SourceAssetのAddressableキーです。 </param>
+        /// <param name="sourceAsset"> Repository SourceAsset自体です。 </param>
+        private static void DrawRepositoryHeadRow(string addressableKey, ScriptableObject sourceAsset)
+        {
+            string label = $"📦 {sourceAsset.name} ({sourceAsset.GetType().Name}) [Repository]";
+            if (GUILayout.Button(label, EditorStyles.miniButton))
+            {
+                Selection.activeObject = sourceAsset;
+                EditorGUIUtility.PingObject(sourceAsset);
+            }
+        }
+
+        /// <summary>
+        ///     指定AddressableキーのSourceAssetが、単一のCollectionのみを保持する「Repository」であるか判定します。
+        ///     Repositoryは一覧が冗長になるためSource Assetsタブには表示せず、対応するCollectionの先頭行として表示します。
+        /// </summary>
+        /// <param name="addressableKey"> 判定対象のAddressableキーです。 </param>
+        /// <returns> 単一Collectionのみを保持するRepositoryの場合はtrueです。 </returns>
+        private static bool IsRepositoryOnlySourceAsset(string addressableKey)
+        {
+            if (string.IsNullOrWhiteSpace(addressableKey))
+            {
+                return false;
+            }
+
+            return SourceDataProviderSettings.instance
+                .GetCollectionMappingsByAddressableKey(addressableKey).Count == 1;
+        }
+
+        /// <summary>
+        ///     ページのSourceAssetキーのうち、Repository(単一Collectionのみ保持)ではないものだけを抽出します。
+        /// </summary>
+        /// <param name="page"> 対象ページです。 </param>
+        /// <returns> Source Assetsタブに表示すべきAddressableキー一覧です。 </returns>
+        private static List<string> GetVisibleSourceAssetKeys(PlannerMasterDataEditorSettings.PageDefinition page)
+        {
+            List<string> result = new();
+            for (int i = 0; i < page.SourceAssetAddressableKeys.Count; i++)
+            {
+                string key = page.SourceAssetAddressableKeys[i];
+                if (!IsRepositoryOnlySourceAsset(key))
+                {
+                    result.Add(key);
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
