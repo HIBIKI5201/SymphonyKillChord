@@ -17,6 +17,8 @@ namespace KillChord.Runtime.View.InGame.Music
         public IReadOnlyList<RhythmGuideZoneDto> Zones { get; private set; } = Array.Empty<RhythmGuideZoneDto>();
         /// <summary> ターゲットの有無。 </summary>
         public bool HasTarget { get; private set; }
+        /// <summary> 音楽同期サービスによる現在のジャスト成否。 </summary>
+        public bool IsJustTiming { get; private set; }
 
         /// <summary>
         ///     DTOから状態を適用する。
@@ -28,6 +30,7 @@ namespace KillChord.Runtime.View.InGame.Music
             CurrentBeatType = dto.CurrentBeatCount;
             Zones = dto.Zones ?? Array.Empty<RhythmGuideZoneDto>();
             HasTarget = dto.HasTarget;
+            IsJustTiming = dto.IsJustTiming;
         }
     }
 }

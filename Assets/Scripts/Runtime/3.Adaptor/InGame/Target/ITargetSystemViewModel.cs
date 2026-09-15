@@ -101,8 +101,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
         /// </summary>
         /// <param name="targetId"> 設定対象のターゲットID。 </param>
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。被弾による内部的な再ターゲットではfalseを指定する。 </param>
         /// <returns> 設定に成功した場合は true。 </returns>
-        bool TrySetCurrentTarget(Guid targetId);
+        bool TrySetCurrentTarget(Guid targetId, bool notifyLockOn = true);
 
         /// <summary>
         ///     現在のターゲット選択を解除する。

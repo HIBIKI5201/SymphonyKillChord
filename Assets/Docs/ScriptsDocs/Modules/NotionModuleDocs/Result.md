@@ -15,7 +15,9 @@
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
-| **`StageResultController`** | Adaptor | `CompleteAsync`（OutGameへ帰還）/`RetryAsync`（InGame再読込）のシーン遷移を実行 |
+| **`StageResultController`** | Adaptor | `CompleteAsync`（OutGameへ帰還）/`RetryAsync`（InGame再読込）のシーン遷移を実行。任意の`IStageResultExitPolicy`が登録されている場合、遷移先シーン名をポリシー側の判定結果へ差し替える |
+| **`IStageResultExitPolicy`** | Adaptor | 製品固有の終了条件に応じて、リザルト遷移先シーンを差し替える拡張ポイントの契約 |
+| **`StageResultExitAction`** | Adaptor | リザルト画面から選択された遷移操作を表すenum（`Complete`/`Retry`） |
 | **`StageResultPresenter`** | Adaptor | `PresentVictory(MissionEvaluationResult)`/`PresentDefeat()`で`StageResultDTO`を構築しViewModelへ反映 |
 | **`StageResultDTO`** | Adaptor | 表示用データ一式（ランク・サブミッション一覧・最大コンボ・戦闘時間・Tips等）を保持するreadonly ref struct |
 | **`StageResultMissionItemDTO`** | Adaptor | サブミッション1件分の説明・達成有無を表すreadonly struct |
@@ -109,16 +111,15 @@ graph TD
 ### ⑤ Infrastructure
 当モジュールでは使用していない。
 ### ⑥ Composition
-`StageResultInitializationModule`（Order 400）がPresenter/Controllerを構築し、`StageResultModuleContainer`として公開する。
+`StageResultInitializationModule`（Order 400）がPresenter/Controllerを構築し、`StageResultModuleContainer`として公開する。`Ready`では`ServiceLocator.TryGetInstance<IStageResultExitPolicy>`で拡張ポリシーの有無を確認し、見つかった場合のみ`StageResultController`のコンストラクタへ渡す（見つからない場合は`null`のまま既定の遷移動作になる）。
 
 ## 🔌 拡張ポイント
-
-ポリモーフィックな拡張点（`SubclassSelector`等）はない。
 
 | 拡張したいこと | 実装する場所 | 追加登録の要否 |
 | --- | --- | --- |
 | 表示項目を追加したい | `StageResultDTO`へフィールドを追加し、`StageResultPresenter`で値を設定、`StageResultViewModel`と`StageResultView`へ反映先を足す | 不要 |
 | 演出の時間や有無を変えたい | `StageResultView`のInspectorにある`ResultTextSlideInSetting` / `ResultCountUpSetting` | 不要（コード変更なし） |
+| リザルトからの遷移先を製品固有の条件で差し替えたい | `IStageResultExitPolicy`（Adaptor）を実装し、`ServiceLocator`へインスタンスを登録する | 必要（`ServiceLocator.TryGetInstance<IStageResultExitPolicy>`が`StageResultInitializationModule.Ready`実行時点で解決できるよう、Order 400より前に登録を済ませる必要がある。未登録の場合はサイレントに無視され、`CompleteAsync`は`ReturnSceneName`、`RetryAsync`は`UnloadThenReloadSceneAsync`という既定の遷移にフォールバックする） |
 
 ## 🔄処理フロー
 

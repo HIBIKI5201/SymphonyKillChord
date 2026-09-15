@@ -223,7 +223,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             ShellLifeCycle shell = Instantiate(_shellPrefab);
             shell.CopyLoadedAssetsFrom(_shellPrefab);
-            shell.Initialize(ReleaseShell, _shellExplosionEffectView);
+            shell.Initialize(ReleaseShell, _shellExplosionEffectView, _shellExplosionSoundView);
             return shell;
         }
 
@@ -270,6 +270,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("最大Poolサイズ")] private int _maxShellPoolSize;
         [SerializeField, Tooltip("砲弾着弾時の爆発エフェクトです。")]
         private ReusableParticleSystemView _shellExplosionEffectView;
+        [SerializeField, Tooltip("砲弾着弾時の爆発SEを再生するReusableSoundEffectViewです。")]
+        private ReusableSoundEffectView _shellExplosionSoundView;
 
         [SerializeField, Tooltip("プール事前生成時に、画面外の専用カメラで1回描画してシェーダーコンパイルを" +
             "前払いするかどうかです。レンダーパイプラインの都合で問題が起きる場合はfalseにしてください。")]
