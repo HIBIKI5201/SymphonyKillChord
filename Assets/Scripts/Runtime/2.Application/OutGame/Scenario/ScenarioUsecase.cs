@@ -1,4 +1,4 @@
-﻿using KillChord.Runtime.Domain.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,7 +51,8 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                     IScenarioEvent e = data.Events[i];
                     token.ThrowIfCancellationRequested();
 
-                    await _handlerRepo.HandleAsync(e, token);
+                    await EmitAsync(e, token);
+                    await WaitWhilePausedAsync(token);
                     bool isLastEvent = i == data.Events.Count - 1;
                     bool shouldWaitForAdvance = e.RequirePlayerAdvance
                         && (!isLastEvent || _settingsRepository.WaitForInputOnLastText);
@@ -68,20 +69,21 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             }
             finally
             {
-                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
                 if (ReferenceEquals(_playCts, source))
                 {
                     _playCts = null;
                 }
+                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
             }
         }
 
         /// <summary>
         /// 指定されたイベントを対応するハンドラへ引き渡す。
         /// </summary>
-        public ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct)
+        public async ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct)
         {
-            return _handlerRepo.HandleAsync(scenarioEvent, ct);
+            await WaitWhilePausedAsync(ct);
+            await _handlerRepo.HandleAsync(scenarioEvent, ct);
         }
 
         /// <summary>
@@ -126,6 +128,8 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             IsAutoAdvance = !IsAutoAdvance;
         }
 
+        /// <summary> シナリオが再生中かを示す。 </summary>
+        public bool IsPlaying => _playCts != null;
         /// <summary> IsFastForward を取得する。 </summary>
         public bool IsFastForward { get; private set; }
         /// <summary> IsPaused を取得する。 </summary>
@@ -133,12 +137,29 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         /// <summary> IsAutoAdvance を取得する。 </summary>
         public bool IsAutoAdvance { get; private set; }
 
+        private static readonly TimeSpan MINIMUM_PAUSE_POLL_INTERVAL = TimeSpan.FromMilliseconds(10);
+
         private CancellationTokenSource _playCts;
         private readonly ITextAdvanceWaiter _textAdvanceWaiter;
         private readonly ScenarioHandlerRepo _handlerRepo;
         private readonly IScenarioRepository _scenarioRepo;
         private readonly IScenarioCompletionNotifier _completionNotifier;
         private readonly IScenarioSettingsRepository _settingsRepository;
+
+        /// <summary>
+        ///     一時停止が解除されるまで、キャンセルを受け付けながら待機する。
+        /// </summary>
+        private async ValueTask WaitWhilePausedAsync(CancellationToken ct)
+        {
+            while (IsPaused)
+            {
+                TimeSpan interval = _settingsRepository.PausePollInterval > TimeSpan.Zero
+                    ? _settingsRepository.PausePollInterval
+                    : MINIMUM_PAUSE_POLL_INTERVAL;
+                await Task.Delay(interval, ct);
+            }
+            ct.ThrowIfCancellationRequested();
+        }
 
         /// <summary>
         /// シナリオ再生の進行を待機する。

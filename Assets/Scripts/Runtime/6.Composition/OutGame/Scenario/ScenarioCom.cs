@@ -386,6 +386,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
 
             _isShuttingDown = true;
             _runGeneration++;
+            if (_scenarioInputView != null) { _scenarioInputView.ClearSkipConfirmation(); }
             if (_usecase != null) { _usecase.RequestSkip(); }
             if (_scenarioView != null) { _scenarioView.EndPlayback(); }
         }
