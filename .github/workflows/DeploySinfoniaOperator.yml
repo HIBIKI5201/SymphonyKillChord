@@ -1,0 +1,101 @@
+name: Deploy Sinfonia Operator
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - '.github/workflows/DeploySinfoniaOperator.yml'
+      - 'SinfoniaOperator/SinfoniaOperator/**'
+      - 'SinfoniaOperator/SinfoniaOperator.Core/**'
+      - 'SinfoniaOperator/SinfoniaOperator.SpecSearch/**'
+      - 'SinfoniaOperator/deploy/deploy-release.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sinfonia-operator-production
+  cancel-in-progress: false
+
+env:
+  PROJECT_PATH: './SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj'
+  DEPLOY_RUNTIME: ${{ vars.ORACLE_RUNTIME || 'linux-x64' }}
+  DEPLOY_ROOT: '/opt/sinfonia-specsearch'
+  SERVICE_NAME: 'sinfonia-specsearch.service'
+
+jobs:
+  deploy:
+    name: Oracle VMへデプロイ
+    runs-on: ubuntu-latest
+    environment: 'Sinfonia Operator'
+    timeout-minutes: 20
+
+    steps:
+      - name: ソースを取得
+        uses: actions/checkout@v4
+
+      - name: .NETをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Oracle VM向けに発行
+        run: |
+          dotnet restore "$PROJECT_PATH" --runtime "$DEPLOY_RUNTIME"
+          dotnet publish "$PROJECT_PATH" \
+            --configuration Release \
+            --runtime "$DEPLOY_RUNTIME" \
+            --self-contained true \
+            --no-restore \
+            --output artifacts/publish
+          tar --create --gzip --file artifacts/sinfonia-operator.tar.gz \
+            --directory artifacts/publish .
+
+      - name: SSHを設定
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_SSH_PRIVATE_KEY: ${{ secrets.ORACLE_SSH_PRIVATE_KEY }}
+          ORACLE_KNOWN_HOSTS: ${{ secrets.ORACLE_KNOWN_HOSTS }}
+        run: |
+          : "${ORACLE_HOST:?ORACLE_HOST is required}"
+          : "${ORACLE_SSH_PRIVATE_KEY:?ORACLE_SSH_PRIVATE_KEY is required}"
+          : "${ORACLE_KNOWN_HOSTS:?ORACLE_KNOWN_HOSTS is required}"
+          install --directory --mode 700 ~/.ssh
+          printf '%s\n' "$ORACLE_SSH_PRIVATE_KEY" > ~/.ssh/oracle_deploy_key
+          printf '%s\n' "$ORACLE_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/oracle_deploy_key ~/.ssh/known_hosts
+
+      - name: パッケージを転送
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_SSH_USER: ${{ secrets.ORACLE_SSH_USER }}
+        run: |
+          : "${ORACLE_SSH_USER:?ORACLE_SSH_USER is required}"
+          ssh -o BatchMode=yes -o IdentitiesOnly=yes \
+            -i ~/.ssh/oracle_deploy_key "$ORACLE_SSH_USER@$ORACLE_HOST" \
+            "mkdir -p '$DEPLOY_ROOT/incoming'"
+          scp -o BatchMode=yes -o IdentitiesOnly=yes \
+            -i ~/.ssh/oracle_deploy_key \
+            artifacts/sinfonia-operator.tar.gz \
+            SinfoniaOperator/deploy/deploy-release.sh \
+            "$ORACLE_SSH_USER@$ORACLE_HOST:$DEPLOY_ROOT/incoming/"
+
+      - name: リリースを切り替えて検証
+        env:
+          ORACLE_HOST: ${{ secrets.ORACLE_HOST }}
+          ORACLE_SSH_USER: ${{ secrets.ORACLE_SSH_USER }}
+        run: |
+          DEPLOY_ID="$GITHUB_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          ssh -o BatchMode=yes -o IdentitiesOnly=yes \
+            -i ~/.ssh/oracle_deploy_key "$ORACLE_SSH_USER@$ORACLE_HOST" \
+            "bash '$DEPLOY_ROOT/incoming/deploy-release.sh' \
+              '$DEPLOY_ROOT/incoming/sinfonia-operator.tar.gz' \
+              '$DEPLOY_ID' \
+              '$DEPLOY_ROOT' \
+              '$SERVICE_NAME'"
+
+      - name: SSH鍵を破棄
+        if: always()
+        run: rm -f ~/.ssh/oracle_deploy_key

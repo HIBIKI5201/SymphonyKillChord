@@ -42,7 +42,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
         private const string TITLE_SCREEN_NAME = "TitleContainer";
         private const string MENU_SCREEN_NAME = "MenuContainer";
-        private const string OPTION_SCREEN_NAME = "OptionContainer";
         private const string CREDIT_SCREEN_NAME = "CreditContainer";
 
         [SerializeField, Tooltip("UI Document")]
@@ -78,7 +77,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private SaveData _loadedSaveData;
         private AudioSettingsModuleContainer _audioSettingsContainer;
         private VolumeSettingsTabView _volumeSettingsTabView;
-        private DataResetTabView _dataResetTabView;
 
         private bool _isInitialized;
         private bool _isSubscribed;
@@ -155,7 +153,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             var titleRoot = root.Q<VisualElement>(TITLE_SCREEN_NAME);
             var menuRoot = root.Q<VisualElement>(MENU_SCREEN_NAME);
-            var optionRoot = root.Q<VisualElement>(OPTION_SCREEN_NAME);
             var creditRoot = root.Q<VisualElement>(CREDIT_SCREEN_NAME);
             if (titleRoot == null)
             {
@@ -169,14 +166,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: メニュー画面のルート VisualElement が見つかりません。{MENU_SCREEN_NAME}");
-#endif
-                return false;
-            }
-
-            if (optionRoot == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: オプション画面のルート VisualElement が見つかりません。{OPTION_SCREEN_NAME}");
 #endif
                 return false;
             }
@@ -202,19 +191,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     $"{nameof(TitleSceneInitializer)}: PlayerInputView が ServiceLocator に登録されていません。"
                     + " Optionsボタンでのオプション表示は無効になります。");
             }
-            HierarchicalNavigationScope optionNavgationScope = new(optionRoot);
             HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
 
             MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
-            OptionsScreenView optionsScreenView = new(optionRoot, _outGameUIEvent, optionNavgationScope);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent, creditNavgationScope);
             _volumeSettingsTabView = new VolumeSettingsTabView(
-                optionRoot,
+                menuRoot,
                 _audioSettingsContainer.ViewModel,
                 _audioSettingsContainer.Command);
-            _dataResetTabView = new DataResetTabView(optionRoot, _outGameUIEvent);
 
-            _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, optionsScreenView, creditScreenView);
+            _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, creditScreenView);
 
             BuildMemberList(creditScreenView);
 
@@ -302,8 +288,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedSaveData = null;
             _volumeSettingsTabView?.Dispose();
             _volumeSettingsTabView = null;
-            _dataResetTabView?.Dispose();
-            _dataResetTabView = null;
             _audioSettingsContainer = null;
             _titleScreenViewRegistry?.Dispose();
             _titleScreenViewRegistry = null;
@@ -425,7 +409,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _outGameUIEvent.OnShowTitleScreen += HandleTitleScreenShown;
             _outGameUIEvent.OnShowMenuScreen += HandleMenuScreenShown;
-            _outGameUIEvent.OnShowOptionsScreen += HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen += HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnDataResetButtonClicked += HandleDataResetButtonClicked;
@@ -444,7 +427,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _outGameUIEvent.OnShowTitleScreen -= HandleTitleScreenShown;
             _outGameUIEvent.OnShowMenuScreen -= HandleMenuScreenShown;
-            _outGameUIEvent.OnShowOptionsScreen -= HandleOptionsScreenShown;
             _outGameUIEvent.OnShowCreditScreen -= HandleCreditScreenShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnDataResetButtonClicked -= HandleDataResetButtonClicked;
@@ -467,14 +449,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private void HandleMenuScreenShown()
         {
             _screenController.ShowMenu();
-        }
-
-        /// <summary>
-        ///    オプション画面を表示する処理を行う。
-        /// </summary>
-        private void HandleOptionsScreenShown()
-        {
-            _screenController.ShowOptions();
         }
 
         /// <summary>

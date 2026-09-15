@@ -8,6 +8,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface ITextOutputPort
     {
-        ValueTask ShowTextAsync(string message, CancellationToken ct);
+        ValueTask ShowTextAsync(string speaker, string message, CancellationToken ct);
     }
 }

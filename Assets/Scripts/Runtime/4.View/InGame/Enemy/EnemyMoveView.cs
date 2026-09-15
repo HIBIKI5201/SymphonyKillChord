@@ -205,6 +205,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
+            _enemyAIController.OnAttackCanceled += PlayEffectCanceled;
             _enemyAIController.On1BeatBefore += On1BeatBefore;
             _enemyAIController.On2BeatBefore += On2BeatBefore;
         }
@@ -218,6 +219,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 _enemyAIController.OnAttackReserved -= PlayEffectReserved;
                 _enemyAIController.OnAttack -= PlayEffectHit;
+                _enemyAIController.OnAttackCanceled -= PlayEffectCanceled;
                 _enemyAIController.On1BeatBefore -= On1BeatBefore;
                 _enemyAIController.On2BeatBefore -= On2BeatBefore;
             }
@@ -346,7 +348,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectHit()
         {
             if (!_isPlaying) return;
-            
+
             _weaponItemView?.Play();
             _characterAnimationViewModel?.SetReserving(false);
             PlayAttackEffect(_attackHitEffectInstance);
@@ -354,6 +356,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
             MoveToAttack();
             // 攻撃アニメを再生（構えアニメより優先）
             _characterAnimationSignal?.RequestAttack();
+        }
+        /// <summary>
+        ///     予約中の攻撃がキャンセルされた際に、予約状態と予約エフェクトを解除する。
+        /// </summary>
+        private void PlayEffectCanceled()
+        {
+            _characterAnimationViewModel?.SetReserving(false);
+            if (_attackReserveEffectInstance != null)
+            {
+                _attackReserveEffectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
         /// <summary>
         ///    ターゲットの方向を向く。

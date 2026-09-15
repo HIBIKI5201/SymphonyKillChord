@@ -75,7 +75,39 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             element.MakeNavigable();
             element.RegisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
             element.RegisterCallback<NavigationSubmitEvent>(HandleSkillElementSubmitHandler);
+            element.RegisterCallback<NavigationMoveEvent>(HandleSkillElementNavigationMoveHandler);
             _skillElements.Add(element);
+        }
+
+        /// <summary>
+        ///     一覧の再構築でフォーカスが失われていた場合、選択中スキルへ再フォーカスする。
+        ///     <para>
+        ///         スキル一覧はスロット変更のたびにカード要素ごと作り直されるため、
+        ///         再構築前にカードへフォーカスしていた場合はフォーカス先が破棄されて
+        ///         失われる。そのままだとコントローラーの決定/キャンセル/移動操作が
+        ///         一切反応しなくなるため、呼び出し側(一覧再構築の完了通知)から都度確認する。
+        ///     </para>
+        /// </summary>
+        public void RestoreFocusIfLost()
+        {
+            VisualElement focusedElement =
+                _rootElement.panel?.focusController?.focusedElement as VisualElement;
+            if (focusedElement != null && focusedElement.panel != null)
+            {
+                return;
+            }
+
+            // 選択中スキルに対応するカードが見つかった場合のみ再フォーカスする。
+            // 見つからない場合に一覧先頭などへ適当にフォーカスすると、マウス操作中
+            // (本来どこにもフォーカスが無い状態が正常)にも関わらず毎回同じ要素へ
+            // 強制的にフォーカス・選択させてしまうため、何もしない方が安全。
+            int? selectedSkillId = _skillBuildViewModel.ExplicitlySelectedSkillId.CurrentValue;
+            if (!selectedSkillId.HasValue)
+            {
+                return;
+            }
+
+            FindSkillElement(selectedSkillId.Value)?.FocusDeferred();
         }
 
         /// <summary>
@@ -102,6 +134,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 _skillElements[i].UnregisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
                 _skillElements[i].UnregisterCallback<NavigationSubmitEvent>(HandleSkillElementSubmitHandler);
+                _skillElements[i].UnregisterCallback<NavigationMoveEvent>(HandleSkillElementNavigationMoveHandler);
             }
 
             for (int i = 0; i < _slots.Count; i++)
@@ -167,6 +200,50 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             (sourceSlot ?? FindSlotToFocus())?.FocusDeferred();
             evt.StopPropagation();
+        }
+
+        /// <summary>
+        ///     スキル一覧内の左右移動を、表示順で隣接する(かつ現在ジャンル絞り込みで
+        ///     表示されている)スキル要素への移動として解決する。
+        ///     <para>
+        ///         一覧は横スクロールの1行に多数のカードが並ぶため、UI Toolkit標準の
+        ///         自動ナビゲーションでは一部の要素にしか移動できないことがある。
+        ///         生成順(=表示順)を保持している<see cref="_skillElements"/>を使って自前で解決する。
+        ///     </para>
+        /// </summary>
+        /// <param name="evt"> ナビゲーション移動イベント。 </param>
+        private void HandleSkillElementNavigationMoveHandler(NavigationMoveEvent evt)
+        {
+            if (evt.currentTarget is not VisualElement element)
+            {
+                return;
+            }
+
+            int step = evt.direction switch
+            {
+                NavigationMoveEvent.Direction.Left => -1,
+                NavigationMoveEvent.Direction.Right => 1,
+                _ => 0,
+            };
+
+            if (step == 0)
+            {
+                return;
+            }
+
+            VisualElement next = FindVisibleNeighborSkillElement(element, step);
+            NavigationDebugLog.Log(
+                $"[SkillListNav] from={NavigationDebugLog.Describe(element)} step={step} "
+                + $"index={_skillElements.IndexOf(element)} count={_skillElements.Count} -> {NavigationDebugLog.Describe(next)}");
+
+            if (next == null)
+            {
+                return;
+            }
+
+            next.Focus();
+            evt.StopPropagation();
+            element.panel?.focusController?.IgnoreEvent(evt);
         }
 
         /// <summary>
@@ -251,6 +328,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
                 _skillElements[i].UnregisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
                 _skillElements[i].UnregisterCallback<NavigationSubmitEvent>(HandleSkillElementSubmitHandler);
+                _skillElements[i].UnregisterCallback<NavigationMoveEvent>(HandleSkillElementNavigationMoveHandler);
                 _skillElements.RemoveAt(i);
             }
         }
@@ -335,6 +413,32 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 _skillBuildViewModel.SelectSkill(skillId);
             }
+        }
+
+        /// <summary>
+        ///     表示順で指定要素からstep方向に進み、最初に見つかる表示中のスキル要素を返す。
+        /// </summary>
+        /// <param name="current"> 探索の起点となる要素。 </param>
+        /// <param name="step"> 探索方向(-1または1)。 </param>
+        /// <returns> 見つかった要素。無ければnull。 </returns>
+        private VisualElement FindVisibleNeighborSkillElement(VisualElement current, int step)
+        {
+            int index = _skillElements.IndexOf(current);
+            if (index < 0)
+            {
+                return null;
+            }
+
+            for (int i = index + step; i >= 0 && i < _skillElements.Count; i += step)
+            {
+                VisualElement candidate = _skillElements[i];
+                if (candidate.resolvedStyle.display != DisplayStyle.None)
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

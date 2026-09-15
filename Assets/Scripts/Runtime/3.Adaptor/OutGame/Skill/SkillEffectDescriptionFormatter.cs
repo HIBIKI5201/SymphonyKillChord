@@ -17,6 +17,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
     {
         private const double PERCENT_SCALE = 100d;
         private const int INITIAL_BUILDER_CAPACITY = 256;
+        private const string GROWN_VALUE_OPEN = "（";
+        private const string GROWN_VALUE_CLOSE = "）";
 
         private readonly StringBuilder _builder = new(INITIAL_BUILDER_CAPACITY);
 
@@ -25,11 +27,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         /// </summary>
         /// <param name="template"> 効果説明テンプレートです。 </param>
         /// <param name="parameters"> 効果数値パラメータです。 </param>
+        /// <param name="growths"> レベル成長が適用されているパラメータ一覧です。未指定時は括弧表示を行いません。 </param>
         /// <returns> 表示用の効果説明です。 </returns>
         /// <exception cref="ArgumentNullException"></exception>
         public string Format(
             string template,
-            IReadOnlyList<SkillEffectParameter> parameters)
+            IReadOnlyList<SkillEffectParameter> parameters,
+            IReadOnlyList<SkillEffectParameterGrowth> growths = null)
         {
             if (template == null)
             {
@@ -51,12 +55,40 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
             for (int i = 0; i < parameters.Count; i++)
             {
                 SkillEffectParameter parameter = parameters[i];
-                _builder.Replace(
-                    GetPlaceholder(parameter.Id),
-                    FormatValue(parameter));
+                string formattedValue = FormatValue(parameter);
+                if (IsGrowable(parameter.Id, growths))
+                {
+                    formattedValue = $"{GROWN_VALUE_OPEN}{formattedValue}{GROWN_VALUE_CLOSE}";
+                }
+
+                _builder.Replace(GetPlaceholder(parameter.Id), formattedValue);
             }
 
             return _builder.ToString();
+        }
+
+        /// <summary>
+        ///     指定したパラメータが、現在レベルで実際に成長しているかを判定します。
+        /// </summary>
+        /// <param name="id"> パラメータ識別子です。 </param>
+        /// <param name="growths"> レベル成長が適用されているパラメータ一覧です。 </param>
+        /// <returns> 成長ステップが1件以上設定されている場合はtrue。 </returns>
+        private static bool IsGrowable(SkillEffectParameterId id, IReadOnlyList<SkillEffectParameterGrowth> growths)
+        {
+            if (growths == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < growths.Count; i++)
+            {
+                if (growths[i].ParameterId == id && growths[i].Steps.Count > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -112,7 +144,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
             {
                 SkillEffectValueFormat.Number => FormatNumber(parameter.Value),
                 SkillEffectValueFormat.Integer => Math.Round(parameter.Value).ToString("0", CultureInfo.InvariantCulture),
-                SkillEffectValueFormat.Percent => $"{FormatNumber(parameter.Value * PERCENT_SCALE)}%",
+                SkillEffectValueFormat.Percent =>
+                    $"{Math.Round(parameter.Value * PERCENT_SCALE).ToString("0", CultureInfo.InvariantCulture)}%",
                 SkillEffectValueFormat.Multiplier => $"{FormatNumber(parameter.Value)}倍",
                 SkillEffectValueFormat.Count => $"{Math.Round(parameter.Value).ToString("0", CultureInfo.InvariantCulture)}回",
                 SkillEffectValueFormat.Seconds => $"{FormatNumber(parameter.Value)}秒",

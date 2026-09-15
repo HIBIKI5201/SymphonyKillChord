@@ -47,6 +47,17 @@ namespace KillChord.Runtime.Application.OutGame.SkillBuild
             _skillBuildDefinition.UpdateEquippedSkills(newEquippedSkills);
         }
 
+        /// <summary>
+        ///     指定したスキルのレベルを1上げ、改造Pを1消費する。
+        /// </summary>
+        /// <param name="skillId"> 対象スキルID。 </param>
+        /// <param name="baseLevel"> 保存記録が無い場合の基準レベル(テンプレートの初期レベル)。 </param>
+        /// <returns> 改造Pが不足している等の理由で実行できなかった場合は false。 </returns>
+        public Task<bool> LevelUpSkillAsync(int skillId, int baseLevel)
+        {
+            return _skillBuildRepository.TryLevelUpSkillAsync(skillId, baseLevel);
+        }
+
         private readonly SkillBuildDefinition _skillBuildDefinition;
         private readonly ISkillBuildRepository _skillBuildRepository;
 
