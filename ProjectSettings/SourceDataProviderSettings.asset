@@ -69,7 +69,7 @@ MonoBehaviour:
     _assetCreationDirectory: Assets/Level/Data/Master/Skill/Templates
   - _collectionKey: SkillNode
     _sourceAssetAddressableKey: SkillNodeDataRepo
-    _propertyPath: SkillNodes
+    _propertyPath: _skillNodes
     _assetCreationDirectory: 
   - _collectionKey: SkillNodeBind
     _sourceAssetAddressableKey: SkillNodeBindRepo
