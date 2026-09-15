@@ -2,11 +2,11 @@
 interface Props {
 	title: string;
 	code: string;
-	skills: string[];
+	description: string;
 	href: string;
 }
 
-const { title, code, skills, href } = Astro.props;
+const { title, code, description, href } = Astro.props;
 ---
 
 <a class="dossier" href={href}>
@@ -17,16 +17,7 @@ const { title, code, skills, href } = Astro.props;
 	<p class="code">{code}</p>
 	<h2 class="title">{title}</h2>
 
-	<dl class="rows">
-		{
-			skills.map((skill) => (
-				<div class="row">
-					<dt>{skill}</dt>
-					<dd>未設定</dd>
-				</div>
-			))
-		}
-	</dl>
+	<p class="description">{description}</p>
 </a>
 
 <style>
@@ -110,35 +101,13 @@ const { title, code, skills, href } = Astro.props;
 		color: var(--card-ink);
 	}
 
-	.rows {
-		margin: 20px 0 0;
+	.description {
+		margin: 20px 72px 0 0;
 		padding-top: 12px;
-		padding-right: 72px;
 		border-top: 1px dashed var(--card-border);
-	}
-
-	.row {
-		display: flex;
-		justify-content: space-between;
-		gap: 12px;
-		margin: 0 0 8px;
-	}
-
-	.row:last-child {
-		margin-bottom: 0;
-	}
-
-	.row dt {
 		font-family: var(--font-mono);
 		font-size: 12px;
-		color: var(--card-ink);
-	}
-
-	.row dd {
-		margin: 0;
-		font-family: var(--font-mono);
-		font-size: 12px;
+		line-height: 1.7;
 		color: var(--card-ink-muted);
 	}
-
 </style>

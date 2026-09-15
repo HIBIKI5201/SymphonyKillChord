@@ -20,7 +20,7 @@ interface Props {
 	skill: {
 		title: string;
 		code: string;
-		skills: string[];
+		description: string;
 		href: string;
 	};
 }
@@ -49,7 +49,7 @@ const { character, gameplay, skill } = Astro.props;
 		</div>
 
 		<div class="desk-item desk-item--skill" style="--rotate: -2deg;">
-			<SkillDossierTeaser title={skill.title} code={skill.code} skills={skill.skills} href={skill.href} />
+			<SkillDossierTeaser title={skill.title} code={skill.code} description={skill.description} href={skill.href} />
 		</div>
 	</div>
 </section>
