@@ -1,4 +1,4 @@
-using KillChord.Editor.SourceDataProvider;
+using KillChord.Editor.SourceDataProvider.Core;
 
 namespace KillChord.Editor.AutoBuilder
 {
