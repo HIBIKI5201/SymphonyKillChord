@@ -53,10 +53,11 @@ MonoBehaviour:
   - _addressableKey: EnemyDefinitionRepository
   - _addressableKey: EnemyDirectionIndicatorConfig
   - _addressableKey: UISoundEffectConfig
-  - _addressableKey: LoadingTipsConfig
-  - _addressableKey: BgmSelectorLabelTableAsset
+  - _addressableKey: DemoExperienceConfig
   - _addressableKey: StatusBonusEffectIconCatalogAsset
   - _addressableKey: SkillGenreIconCatalogAsset
+  - _addressableKey: LoadingTipsConfig
+  - _addressableKey: BgmSelectorLabelTableAsset
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset
@@ -133,19 +134,19 @@ MonoBehaviour:
   - _collectionKey: LoadingTip
     _sourceAssetAddressableKey: LoadingTipsConfig
     _propertyPath: tips
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: BgmSelectorLabel
     _sourceAssetAddressableKey: BgmSelectorLabelTableAsset
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: StatusBonusEffectIcon
     _sourceAssetAddressableKey: StatusBonusEffectIconCatalogAsset
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   - _collectionKey: SkillGenreIcon
     _sourceAssetAddressableKey: SkillGenreIconCatalogAsset
     _propertyPath: _entries
-    _assetCreationDirectory:
+    _assetCreationDirectory: 
   _repositoryMappings:
   - _category: StageAsset
     _addressableKey: StageTreeAsset
