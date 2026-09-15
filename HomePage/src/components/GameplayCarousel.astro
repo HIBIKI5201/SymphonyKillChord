@@ -27,13 +27,16 @@ const total = String(slideCount).padStart(2, '0');
 		<div class="viewport">
 			<ul class="track" style={`--slide-count: ${slideCount};`}>
 				{
-					features.map((feature) => (
+					features.map((feature, index) => (
 						<li class="slide-item">
 							<GameplaySlide
 								name={feature.name}
 								description={feature.description}
 								ringLabel={feature.ringLabel}
+								ringWord={feature.ringWord}
 								ringSegments={feature.ringSegments}
+								current={index + 1}
+								total={features.length}
 							/>
 						</li>
 					))

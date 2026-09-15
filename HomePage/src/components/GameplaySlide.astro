@@ -12,14 +12,23 @@ interface Props {
 	description: string;
 	ringLabel: string;
 	ringSegments: Segment[];
+	current: number;
+	total: number;
+	ringWord: string;
 }
 
-const { name, description, ringLabel, ringSegments } = Astro.props;
+const { name, description, ringLabel, ringSegments, current, total, ringWord } = Astro.props;
 ---
 
 <article class="slide">
 	<div class="visual">
-		<GameplayRing label={ringLabel} segments={ringSegments} />
+		<GameplayRing
+			legendTitle={ringLabel}
+			segments={ringSegments}
+			current={current}
+			total={total}
+			centerLabel={ringWord}
+		/>
 	</div>
 
 	<div class="body">
@@ -31,7 +40,7 @@ const { name, description, ringLabel, ringSegments } = Astro.props;
 <style>
 	.slide {
 		display: grid;
-		grid-template-columns: 240px minmax(0, 460px);
+		grid-template-columns: 260px minmax(0, 460px);
 		align-items: center;
 		justify-content: center;
 		gap: 48px;
@@ -61,6 +70,7 @@ const { name, description, ringLabel, ringSegments } = Astro.props;
 		font-size: 0.9375rem;
 		line-height: 1.9;
 		color: var(--color-text-muted);
+		white-space: pre-line;
 	}
 
 	@media (max-width: 767px) {
