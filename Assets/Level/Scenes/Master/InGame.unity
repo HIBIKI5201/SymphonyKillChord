@@ -3753,6 +3753,7 @@ MonoBehaviour:
   _missionDefinitionRepositoryKey: MissionDefinitionRepository
   _enemyMissionKeyRepositoryKey: EnemyMissionKeyRepository
   _missionVoiceSource: {fileID: 820633126}
+  _missionDialogueView: {fileID: 887821557}
   _scenarioRoot: {fileID: 1701706915}
   _scenarioView: {fileID: 1713118610}
   _scenarioInputView: {fileID: 116443662}
@@ -3951,7 +3952,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
-    - {fileID: 1345183333299979680, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+    - {fileID: 0}
     - {fileID: 8007761601716104921, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -3959,6 +3960,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1560420932}
   m_SourcePrefab: {fileID: 100100000, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+--- !u!114 &887821557 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 62752759677366396, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 721b63be5065c124aa3ab5569c012e32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Mission.MissionDialogueView
 --- !u!223 &887821559 stripped
 Canvas:
   m_CorrespondingSourceObject: {fileID: 8359850208577834624, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
@@ -6604,6 +6616,7 @@ MonoBehaviour:
   _defaultShellPoolSize: 20
   _maxShellPoolSize: 40
   _shellExplosionEffectView: {fileID: 1544702107}
+  _renderWarmupEnabled: 1
 --- !u!4 &1599172286
 Transform:
   m_ObjectHideFlags: 0
