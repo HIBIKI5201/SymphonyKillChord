@@ -61,6 +61,16 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// <param name="previewNodes"> 選択中ノードを解放するために追加で解放されるノード一覧(既に解放済みの場合は空)。 </param>
         public void PushPreview(IReadOnlyCollection<SkillNodeEntity> previewNodes)
         {
+            _viewModel.Apply(BuildPreview(previewNodes));
+        }
+
+        /// <summary>
+        ///     選択中ノードを解放した場合の現在値・変化後値を計算する(Viewへの反映は行わない)。
+        /// </summary>
+        /// <param name="previewNodes"> 選択中ノードを解放するために追加で解放されるノード一覧(既に解放済みの場合は空)。 </param>
+        /// <returns> 現在値・変化後値を持つDTO。 </returns>
+        public PlayerStatusDTO BuildPreview(IReadOnlyCollection<SkillNodeEntity> previewNodes)
+        {
             (float health, float attack, float criticalChance, float criticalDamage, float areaAttackRangeMultiplier) current =
                 ComputeStats(_skillTreeStatus.UnlockedNodes);
 
@@ -72,7 +82,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 preview = ComputeStats(previewNodeIds);
             }
 
-            PlayerStatusDTO dto = new PlayerStatusDTO(
+            return new PlayerStatusDTO(
                 current.health,
                 current.attack,
                 current.criticalChance,
@@ -83,7 +93,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 preview.criticalChance,
                 preview.criticalDamage,
                 preview.areaAttackRangeMultiplier);
-            _viewModel.Apply(dto);
         }
 
         /// <summary>

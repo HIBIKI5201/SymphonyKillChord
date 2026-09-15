@@ -65,6 +65,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
         }
 
+        /// <summary> 現在選択中のノードIDを取得する。未選択の場合は-1。 </summary>
+        public int SelectedNodeId => _selectedNodeId;
+
+        /// <summary> 連続解放演出において、ノード1つあたりの演出開始をずらす間隔(ミリ秒)。Composition層のカメラ演出時間算出にも使用する。 </summary>
+        public const long UNLOCK_STAGGER_INTERVAL_MILLISECONDS = 90L;
+
         /// <summary>
         ///     スキルノードが選択された時の処理。
         /// </summary>
@@ -105,6 +111,89 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     選択中ノードの解放確認ダイアログに表示するデータを組み立てる。
+        /// </summary>
+        /// <returns> 解放確認ダイアログ用のDTO。 </returns>
+        public UnlockConfirmDTO GetUnlockConfirmation()
+        {
+            PlayerStatusDTO statusPreview = _playerStatusPresenter.BuildPreview(_nodesOnPath);
+            return new UnlockConfirmDTO(
+                ResolvePathSkillNames(_nodesOnPath),
+                _skillTreeStatusEntity.CurrentPoints,
+                _costToUnlock,
+                statusPreview.PlayerHealth,
+                statusPreview.PreviewPlayerHealth,
+                statusPreview.PlayerAttack,
+                statusPreview.PreviewPlayerAttack,
+                statusPreview.CriticalChance,
+                statusPreview.PreviewCriticalChance,
+                statusPreview.CriticalDamage,
+                statusPreview.PreviewCriticalDamage,
+                statusPreview.AreaAttackRangeMultiplier,
+                statusPreview.PreviewAreaAttackRangeMultiplier);
+        }
+
+        /// <summary>
+        ///     現在解放待ちとなっているノードのID一覧を取得する。
+        ///     連続解放演出のカメラワーク算出などで使用する。
+        /// </summary>
+        /// <returns> 解放待ちノードのID一覧。解放対象が無い場合は空配列。 </returns>
+        public IReadOnlyList<int> GetPendingUnlockNodeIds()
+        {
+            if (_nodesOnPath == null || _nodesOnPath.Count == 0)
+            {
+                return Array.Empty<int>();
+            }
+
+            int[] nodeIds = new int[_nodesOnPath.Count];
+            int index = 0;
+            foreach (SkillNodeEntity node in _nodesOnPath)
+            {
+                nodeIds[index] = node.SkillNodeIdVO.Id;
+                index++;
+            }
+
+            return nodeIds;
+        }
+
+        /// <summary>
+        ///     連続解放のカメラワークで画面に収めるべきノードのID一覧を取得する。
+        ///     解放待ちノードに加えて、それらへ直接つながる解放済みノード(接続元)も含める。
+        /// </summary>
+        /// <returns> フレーミング対象のノードID一覧。解放対象が無い場合は空配列。 </returns>
+        public IReadOnlyList<int> GetUnlockCameraFramingNodeIds()
+        {
+            if (_nodesOnPath == null || _nodesOnPath.Count == 0)
+            {
+                return Array.Empty<int>();
+            }
+
+            HashSet<int> framingNodeIds = new HashSet<int>();
+            foreach (SkillNodeEntity node in _nodesOnPath)
+            {
+                framingNodeIds.Add(node.SkillNodeIdVO.Id);
+                if (node.Parents == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < node.Parents.Length; i++)
+                {
+                    SkillNodeEntity parent = node.Parents[i];
+                    // 経路上に含まれない親は、既に解放済みの直接の接続元。
+                    if (parent != null && !_nodesOnPath.Contains(parent))
+                    {
+                        framingNodeIds.Add(parent.SkillNodeIdVO.Id);
+                    }
+                }
+            }
+
+            int[] result = new int[framingNodeIds.Count];
+            framingNodeIds.CopyTo(result);
+            return result;
+        }
+
+        /// <summary>
         ///     スキルを解放した時の処理。
         /// </summary>
         public void OnSkillUnlocked()
@@ -115,9 +204,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             {
                 Debug.LogError($"[SkillTreeController] 解放対象ノードの取得に失敗しました。");
             }
-            foreach (SkillNodeEntity entity in _nodesOnPath)
+
+            List<SkillNodeEntity> unlockOrder = BuildUnlockOrder(_nodesOnPath);
+            foreach (SkillNodeEntity entity in unlockOrder)
             {
-                int nodeId = entity.SkillNodeIdVO.Id;
                 // TODO 実装待ち：スキル効果をプレイヤーに反映する処理
                 entity.Unlock();
                 if (!_skillTreeStatusEntity.UnlockedNodes.Contains(entity.SkillNodeIdVO))
@@ -125,12 +215,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                     _skillTreeStatusEntity.AddUnlockedNode(entity.SkillNodeIdVO);
                 }
                 _skillTreeStatusEntity.AddUnlockedSkillIds(entity.UnlockSkillIds);
-
-                _skillNodeViews[entity.SkillNodeIdVO.Id].SetUnlocked();
-                UpdateConns(nodeId);
-                UpdateUnlockPhase(nodeId);
             }
             _skillTreeStatusEntity.ModifyPoint(-_costToUnlock);
+
+            PlayUnlockSequence(unlockOrder);
 
             _skillTreeService
                 .SaveSkillUnlockData(_skillTreeStatusEntity.UnlockedNodes, _skillTreeStatusEntity.UnlockedSkillIds, _skillTreeStatusEntity.CurrentPoints)
@@ -227,6 +315,29 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _previewVideoScreenView.PlayPreviewVideo(_selectedNodeId);
         }
 
+        /// <summary>
+        ///     再生中の連続解放演出があれば、すべて即座に完了させる。入力によるスキップで使用する。
+        /// </summary>
+        /// <returns> スキップする演出が存在した場合はtrue。 </returns>
+        public bool SkipUnlockAnimation()
+        {
+            if (_pendingUnlockAnimations.Count == 0)
+            {
+                return false;
+            }
+
+            List<(IVisualElementScheduledItem Item, int NodeId)> remaining =
+                new(_pendingUnlockAnimations);
+            _pendingUnlockAnimations.Clear();
+            for (int i = 0; i < remaining.Count; i++)
+            {
+                remaining[i].Item.Pause();
+                ApplyNodeUnlockVisual(remaining[i].NodeId);
+            }
+
+            return true;
+        }
+
         private Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntities;
         private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
         private HashSet<SkillNodeEntity> _nodesOnPath;
@@ -250,6 +361,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private int _costToUnlock = -1;
         private int _selectedNodeId = -1;
         private bool _isResetting;
+        private readonly List<(IVisualElementScheduledItem Item, int NodeId)> _pendingUnlockAnimations = new();
 
         private const string CURRENT_POINTS_LABEL_TEXT = "解放P：";
         private const string SKILL_NAME_SEPARATOR = "、";
@@ -294,6 +406,38 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             }
 
             return builder.ToString();
+        }
+
+        /// <summary>
+        ///     解放対象ノード群(選択ノード自身を含む)全体で解放されるスキル名を一覧化する。
+        /// </summary>
+        /// <param name="nodesOnPath"> 解放対象ノード群。 </param>
+        /// <returns> 解放されるスキル名一覧。1件も解放しない場合は空配列。 </returns>
+        private string[] ResolvePathSkillNames(HashSet<SkillNodeEntity> nodesOnPath)
+        {
+            if (_skillRepository == null || nodesOnPath == null || nodesOnPath.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            List<string> names = new List<string>();
+            foreach (SkillNodeEntity node in nodesOnPath)
+            {
+                if (node.UnlockSkillIds == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < node.UnlockSkillIds.Length; i++)
+                {
+                    if (_skillRepository.TryGetSkill(node.UnlockSkillIds[i], out SkillTemplate skillData))
+                    {
+                        names.Add(skillData.DisplayName);
+                    }
+                }
+            }
+
+            return names.ToArray();
         }
 
         /// <summary>
@@ -443,6 +587,115 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             }
 
             return colors.ToArray();
+        }
+
+        /// <summary>
+        ///     解放対象ノードを、根本(起点に近い側)から先端へ向かう順序に並び替える。
+        ///     連続解放時の演出を根本から順に再生するために使用する。
+        /// </summary>
+        /// <param name="nodesOnPath"> 解放対象ノード群。 </param>
+        /// <returns> 根本側から順に並んだノード一覧。 </returns>
+        private static List<SkillNodeEntity> BuildUnlockOrder(HashSet<SkillNodeEntity> nodesOnPath)
+        {
+            Dictionary<SkillNodeEntity, int> depthByNode = new(nodesOnPath.Count);
+            foreach (SkillNodeEntity node in nodesOnPath)
+            {
+                ComputeUnlockDepth(node, nodesOnPath, depthByNode);
+            }
+
+            List<SkillNodeEntity> ordered = new(nodesOnPath);
+            ordered.Sort((left, right) =>
+            {
+                int depthCompare = depthByNode[left].CompareTo(depthByNode[right]);
+                return depthCompare != 0
+                    ? depthCompare
+                    : left.SkillNodeIdVO.Id.CompareTo(right.SkillNodeIdVO.Id);
+            });
+            return ordered;
+        }
+
+        /// <summary>
+        ///     解放対象ノード群の中における、根本からの深さを算出する。
+        /// </summary>
+        /// <param name="node"> 深さを算出するノード。 </param>
+        /// <param name="nodesOnPath"> 解放対象ノード群。 </param>
+        /// <param name="depthByNode"> 算出済みの深さのキャッシュ。 </param>
+        /// <returns> 根本からの深さ(根本は0)。 </returns>
+        private static int ComputeUnlockDepth(
+            SkillNodeEntity node,
+            HashSet<SkillNodeEntity> nodesOnPath,
+            Dictionary<SkillNodeEntity, int> depthByNode)
+        {
+            if (depthByNode.TryGetValue(node, out int cachedDepth))
+            {
+                return cachedDepth;
+            }
+
+            int maxParentDepth = -1;
+            if (node.Parents != null)
+            {
+                for (int i = 0; i < node.Parents.Length; i++)
+                {
+                    SkillNodeEntity parent = node.Parents[i];
+                    if (parent != null && nodesOnPath.Contains(parent))
+                    {
+                        int parentDepth = ComputeUnlockDepth(parent, nodesOnPath, depthByNode);
+                        maxParentDepth = Math.Max(maxParentDepth, parentDepth);
+                    }
+                }
+            }
+
+            int depth = maxParentDepth + 1;
+            depthByNode[node] = depth;
+            return depth;
+        }
+
+        /// <summary>
+        ///     解放対象ノードの見た目の演出(ポップ・接続線)を、根本から順に間隔を空けて再生する。
+        /// </summary>
+        /// <param name="unlockOrder"> 根本側から順に並んだ解放対象ノード一覧。 </param>
+        private void PlayUnlockSequence(List<SkillNodeEntity> unlockOrder)
+        {
+            for (int i = 0; i < unlockOrder.Count; i++)
+            {
+                int nodeId = unlockOrder[i].SkillNodeIdVO.Id;
+                long delayMilliseconds = i * UNLOCK_STAGGER_INTERVAL_MILLISECONDS;
+                IVisualElementScheduledItem scheduledItem = null;
+                // 通常発火時は自身を保留リストから取り除き、スキップ時の二重適用を防ぐ。
+                scheduledItem = _currentPointsLabel.schedule.Execute(() =>
+                {
+                    ApplyNodeUnlockVisual(nodeId);
+                    RemovePendingUnlockAnimation(scheduledItem);
+                }).StartingIn(delayMilliseconds);
+                _pendingUnlockAnimations.Add((scheduledItem, nodeId));
+            }
+        }
+
+        /// <summary>
+        ///     ノード1件分の解放演出(ポップ・接続線・解放段階)を即時に適用する。
+        /// </summary>
+        /// <param name="nodeId"> 対象ノードID。 </param>
+        private void ApplyNodeUnlockVisual(int nodeId)
+        {
+            _skillNodeViews[nodeId].SetUnlocked();
+            UpdateConns(nodeId);
+            UpdateUnlockPhase(nodeId);
+        }
+
+        /// <summary>
+        ///     保留中の連続解放演出一覧から、発火済みの項目を取り除く。
+        /// </summary>
+        /// <param name="scheduledItem"> 発火した演出のスケジュール項目。 </param>
+        private void RemovePendingUnlockAnimation(IVisualElementScheduledItem scheduledItem)
+        {
+            for (int i = 0; i < _pendingUnlockAnimations.Count; i++)
+            {
+                if (_pendingUnlockAnimations[i].Item == scheduledItem)
+                {
+                    _pendingUnlockAnimations.RemoveAt(i);
+                    return;
+                }
+            }
         }
 
         /// <summary>

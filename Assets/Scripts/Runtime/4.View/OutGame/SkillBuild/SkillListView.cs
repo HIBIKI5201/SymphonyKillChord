@@ -80,11 +80,13 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
                 if (data.IsUnlocked)
                 {
+                    RemoveLeftMarginIfFirstInGroup(_unlockedGroupContainer, rootElement);
                     _unlockedGroupContainer.Add(rootElement);
                     _onSkillElementCreated?.Invoke(rootElement);
                 }
                 else
                 {
+                    RemoveLeftMarginIfFirstInGroup(_lockedGroupContainer, rootElement);
                     _lockedGroupContainer.Add(rootElement);
                 }
             }
@@ -329,6 +331,20 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             VisualElement container = new();
             container.AddToClassList(GROUP_CONTAINER_CLASS_NAME);
             return container;
+        }
+
+        /// <summary>
+        ///     グループ枠の先頭に追加される要素の場合、draggable クラスが持つ左余白(4%)を
+        ///     打ち消し、グループ枠の左端に隙間なく詰まるようにする。
+        /// </summary>
+        /// <param name="groupContainer"> 追加先のグループ枠。 </param>
+        /// <param name="element"> 追加しようとしている要素。 </param>
+        private static void RemoveLeftMarginIfFirstInGroup(VisualElement groupContainer, VisualElement element)
+        {
+            if (groupContainer.childCount == 0)
+            {
+                element.style.marginLeft = 0;
+            }
         }
 
         /// <summary>

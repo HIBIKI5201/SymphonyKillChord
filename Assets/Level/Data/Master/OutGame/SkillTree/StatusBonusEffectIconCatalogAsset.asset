@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.StatusBonusEffectIconCatalogAsset
   _entries:
   - Kind: 0
-    Icon: {fileID: 21300000, guid: d81263997a6280c468e079a8d6248eea, type: 3}
+    Icon: {fileID: 21300000, guid: c6d4f4ef63c11d145abd1c443b48f4e9, type: 3}
   - Kind: 1
-    Icon: {fileID: 21300000, guid: e227702e0876f4e449e01ddb792e5ada, type: 3}
+    Icon: {fileID: 21300000, guid: c835223d2652e8c4b88e76c63140101a, type: 3}
   - Kind: 2
-    Icon: {fileID: 21300000, guid: f3735de06c43dd04baf4fd931fc2043d, type: 3}
+    Icon: {fileID: 21300000, guid: 920d01358e9f30048a34f9b5d4f16182, type: 3}
   - Kind: 3
-    Icon: {fileID: 21300000, guid: 21b18cb5091362c419a7dd67d9a589b7, type: 3}
+    Icon: {fileID: 21300000, guid: be43136b99239464f8264baba5b23f3f, type: 3}
   - Kind: 4
-    Icon: {fileID: 21300000, guid: a00093768cb06f24289d43e2addc0859, type: 3}
+    Icon: {fileID: 21300000, guid: 09058111691c7e0428ceec4df4c71091, type: 3}

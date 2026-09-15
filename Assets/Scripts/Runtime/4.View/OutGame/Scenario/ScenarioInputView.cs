@@ -18,10 +18,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// <param name="playerInputView"> プレイヤー入力Viewです。 </param>
         public void Initialize(
             ScenarioInputController inputController,
-            PlayerInputView playerInputView)
+            PlayerInputView playerInputView,
+            ScenarioViewModel viewModel)
         {
             _inputController = inputController;
             _playerInputView = playerInputView;
+            _viewModel = viewModel;
 
             if (_scenarioUIRaycastView == null || _scenarioUIHideView == null)
             {
@@ -49,6 +51,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             {
                 _requestShowUI = false;
                 _scenarioUIHideView?.ShowUI();
+                _viewModel?.RefreshText();
             }
 
             if (_requestHideUI)
@@ -56,6 +59,17 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 _requestHideUI = false;
                 _scenarioUIHideView?.HideUI();
             }
+        }
+
+        /// <summary>
+        /// 再生開始前にUIを復元し、最新文字状態を反映する。
+        /// </summary>
+        public void RestoreUIForPlayback()
+        {
+            _requestHideUI = false;
+            _requestShowUI = false;
+            _scenarioUIHideView?.RestoreForPlayback();
+            _viewModel?.RefreshText();
         }
 
         private void OnEnable()
@@ -190,6 +204,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
         private ScenarioInputController _inputController;
         private PlayerInputView _playerInputView;
+        private ScenarioViewModel _viewModel;
         private bool _isSubscribed;
         private bool _requestHideUI;
         private bool _requestShowUI;

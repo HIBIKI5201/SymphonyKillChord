@@ -331,6 +331,14 @@ namespace KillChord.Runtime.InfraStructure.Player
                         this);
                 }
 
+                if (step.GrowthValue == 0)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(SkillTemplateAsset)}] 成長値が0のため、このステップでは値が変化しません。" +
+                        $"ParameterId: {growth.Id}, StepIndex: {i}",
+                        this);
+                }
+
                 if (step.GrowthType == SkillEffectParameterGrowthType.Multiplicative && step.GrowthValue <= 0)
                 {
                     Debug.LogWarning(
@@ -419,7 +427,7 @@ namespace KillChord.Runtime.InfraStructure.Player
         }
 
         [Serializable]
-        private struct SkillEffectParameterGrowthStepSetting
+        public struct SkillEffectParameterGrowthStepSetting
         {
             /// <summary> 成長方式です。 </summary>
             public SkillEffectParameterGrowthType GrowthType => _growthType;

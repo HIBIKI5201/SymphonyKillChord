@@ -1,21 +1,25 @@
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
+using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.Composition.OutGame.Screen
@@ -88,6 +92,22 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 _isLoadingSubscribed = true;
             }
 
+            if (!_isOptionInputSubscribed)
+            {
+                if (ServiceLocator.TryGetInstance(out _playerInputView))
+                {
+                    _playerInputView.OnOptionInput += HandleOptionInputHandler;
+                    _isOptionInputSubscribed = true;
+                }
+                else
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(ScreenInitializer)}] PlayerInputViewを取得できませんでした。"
+                        + "コントローラーのOptionボタンでの設定画面表示は無効になります。",
+                        this);
+                }
+            }
+
             ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
             if (!SaveStore.IsLoaded<SaveData>()
                 || SaveStore.Get<SaveData>().Tutorial.Phase >= TutorialPhase.BattleCompleted)
@@ -103,6 +123,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         public override void Shutdown()
         {
             UnsubscribeLoading();
+            UnsubscribeOptionInput();
             Unsubscribe();
             _isSubscribed = false;
 
@@ -111,6 +132,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             ServiceLocator.UnregisterInstance<HomeScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
+            _screenStateRepository = null;
 
             CancelAndDispose(ref _ctsTransition);
             _screenRuleDataKey.ReleaseLoadedAsset(this);
@@ -162,6 +184,43 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             _isLoadingSubscribed = false;
             _loadingScreenController = null;
+        }
+
+        /// <summary>
+        ///     View破棄より先にコントローラーOption入力の購読を一度だけ解除する。
+        /// </summary>
+        private void UnsubscribeOptionInput()
+        {
+            if (_isOptionInputSubscribed && _playerInputView != null)
+            {
+                _playerInputView.OnOptionInput -= HandleOptionInputHandler;
+            }
+
+            _isOptionInputSubscribed = false;
+            _playerInputView = null;
+        }
+
+        /// <summary>
+        ///     コントローラーのOptionボタン(Xboxの≡/PlayStationのOptions)で設定画面を開く。
+        /// </summary>
+        /// <param name="inputContext"> 入力情報。 </param>
+        private void HandleOptionInputHandler(InputContext<float> inputContext)
+        {
+            // 押した瞬間のみ反応させる。離した際の通知では開かない。
+            if (!_isInitialized || inputContext.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            // 既に設定画面を表示中の場合、連打で遷移履歴に同じ画面が積み重なってしまうため
+            // 何もしない。
+            if (_screenStateRepository != null
+                && _screenStateRepository.TransitionState.CurrentScreenId == ScreenId.Setting)
+            {
+                return;
+            }
+
+            _outGameUIEvent.OnShownSettingScreen?.Invoke();
         }
 
         /// <summary>
@@ -292,6 +351,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             // InfraStructure 層
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
+            _screenStateRepository = screenStateRepository;
             IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedScreenRuleData);
 
             //  Adaptor 層
@@ -609,6 +669,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private bool _isSubscribed;
         private bool _isLoadingSubscribed;
         private LoadingScreenController _loadingScreenController;
+        private bool _isOptionInputSubscribed;
+        private PlayerInputView _playerInputView;
+        private IScreenStateRepository _screenStateRepository;
         private bool _isSceneTransitioning = false;
 
         private CancellationTokenSource _ctsTransition;

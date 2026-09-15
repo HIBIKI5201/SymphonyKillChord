@@ -37,6 +37,29 @@ MonoBehaviour:
   - _id: 19
     _value: 0.05999999865889549
     _displayFormat: 5
+  _effectParameterGrowths:
+  - _id: 0
+    _steps:
+    - _growthType: 1
+      _growthValue: 1.2
+    - _growthType: 1
+      _growthValue: 1.2
+    - _growthType: 1
+      _growthValue: 1.2
+    - _growthType: 1
+      _growthValue: 1.2
+    - _growthType: 1
+      _growthValue: 1.2
+    - _growthType: 1
+      _growthValue: 1.2
+    - _growthType: 1
+      _growthValue: 1.2
+    - _growthType: 1
+      _growthValue: 1.2
+    - _growthType: 1
+      _growthValue: 1.2
+    - _growthType: 1
+      _growthValue: 1.2
   _skillType: 00000000
   _level: 0
   _cooldownNumerator: 1

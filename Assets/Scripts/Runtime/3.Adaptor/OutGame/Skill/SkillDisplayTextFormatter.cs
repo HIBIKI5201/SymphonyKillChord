@@ -32,9 +32,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         ///     スキルテンプレートから共通表示文字列を生成する。
         /// </summary>
         /// <param name="skillTemplate"> スキルテンプレート。 </param>
+        /// <param name="currentLevel"> 反映する現在のスキルレベルです。未指定時は基準レベルのまま表示します。 </param>
         /// <returns> 共通表示文字列。 </returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public SkillDisplayText Format(SkillTemplate skillTemplate)
+        public SkillDisplayText Format(SkillTemplate skillTemplate, int? currentLevel = null)
         {
             if (skillTemplate == null)
             {
@@ -45,10 +46,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
             bool hasFormattedEffect =
                 skillTemplate.EffectDisplayMode == SkillEffectDisplayMode.FullDescription &&
                 !string.IsNullOrWhiteSpace(skillTemplate.SkillDetail);
+            bool isGrown = currentLevel.HasValue && currentLevel.Value > skillTemplate.Level.Value;
             string formattedEffect = hasFormattedEffect
                 ? _descriptionFormatter.Format(
                     skillTemplate.SkillDetail,
-                    skillTemplate.EffectSpec.Parameters)
+                    skillTemplate.GetEffectSpec(currentLevel).Parameters,
+                    isGrown ? skillTemplate.EffectParameterGrowths : null)
                 : string.Empty;
 
             return new SkillDisplayText(

@@ -67,6 +67,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> スキルノードが解放された時のイベント。 </summary>
         public Action OnSkillUnlocked;
 
+        /// <summary> スキルノード解放の確認ダイアログ表示を要求するイベント。 </summary>
+        public Action OnSkillUnlockConfirmationRequested;
+
+        /// <summary> スキルノード解放確認ダイアログで解放を確定するイベント。 </summary>
+        public Action OnSkillUnlockConfirmed;
+
         /// <summary> スキルツリーのリセット確認表示を要求するイベント。 </summary>
         public Action OnSkillTreeResetRequested;
 

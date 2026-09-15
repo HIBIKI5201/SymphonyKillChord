@@ -1,0 +1,101 @@
+---
+import steamIcon from '../assets/icons/platform-steam.svg?raw';
+import googlePlayIcon from '../assets/icons/platform-googleplay.svg?raw';
+
+interface Props {
+	steamHref?: string;
+	googlePlayHref?: string;
+}
+
+const { steamHref, googlePlayHref } = Astro.props;
+
+const platforms = [
+	{ label: 'Steam', href: steamHref, icon: steamIcon },
+	{ label: 'Google Play', href: googlePlayHref, icon: googlePlayIcon },
+];
+---
+
+<section class="platform-links" aria-label="配信プラットフォーム">
+	{
+		platforms.map((platform) => {
+			const isReady = Boolean(platform.href);
+			return (
+				<a class="platform-link" href={platform.href} aria-disabled={!isReady} tabindex={isReady ? undefined : -1}>
+					<span class="icon" set:html={platform.icon} />
+					<span class="label">{platform.label}</span>
+					<span class="status">{isReady ? '' : '準備中'}</span>
+				</a>
+			);
+		})
+	}
+</section>
+
+<style>
+	.platform-links {
+		display: flex;
+		justify-content: center;
+		gap: 24px;
+		flex-wrap: wrap;
+		padding: 40px 24px;
+	}
+
+	.platform-link {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 14px 24px;
+		border: 1px solid var(--color-signal-dim);
+		color: var(--color-signal);
+		text-decoration: none;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		text-transform: uppercase;
+		transition:
+			background-color 0.2s ease,
+			color 0.2s ease;
+	}
+
+	.platform-link:hover {
+		background-color: var(--color-signal);
+		color: var(--color-bg);
+	}
+
+	.platform-link[aria-disabled='true'] {
+		color: var(--color-text-muted);
+		border-color: var(--color-surface-border);
+		cursor: not-allowed;
+	}
+
+	.platform-link[aria-disabled='true']:hover {
+		background-color: transparent;
+		color: var(--color-text-muted);
+	}
+
+	.icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 20px;
+	}
+
+	.icon :global(svg) {
+		width: 100%;
+		height: 100%;
+	}
+
+	.label {
+		/* ブランド名の正式な大文字・小文字表記を保つため、親のuppercaseを打ち消す */
+		text-transform: none;
+	}
+
+	.status {
+		font-size: 11px;
+		color: var(--color-warning);
+	}
+
+	.platform-link[aria-disabled='true'] .status {
+		color: var(--color-text-muted);
+	}
+</style>
