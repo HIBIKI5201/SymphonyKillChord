@@ -11,24 +11,36 @@ namespace KillChord.Runtime.View.InGame.Haptics
     public sealed class GamepadHapticsView : MonoBehaviour, IGamepadHapticsViewModel
     {
         /// <summary>
+        ///     振動の強さと長さの設定を受け取る。
+        /// </summary>
+        /// <param name="config"> ゲームパッド振動の設定。 </param>
+        public void Initialize(GamepadHapticsConfig config)
+        {
+            _config = config;
+        }
+
+        /// <summary>
         ///     ジャスト成立時の振動を一度だけ再生する。
         /// </summary>
         public void PlayJustHitPulse()
         {
+            if (_config == null)
+            {
+                Debug.LogError($"[{nameof(GamepadHapticsView)}] Configが未設定です。", this);
+                return;
+            }
+
             Gamepad gamepad = Gamepad.current;
             if (gamepad == null)
             {
                 return;
             }
 
-            gamepad.SetMotorSpeeds(LOW_FREQUENCY_MOTOR_SPEED, HIGH_FREQUENCY_MOTOR_SPEED);
-            _remainingPulseTime = PULSE_DURATION;
+            gamepad.SetMotorSpeeds(_config.LowFrequencyMotorSpeed, _config.HighFrequencyMotorSpeed);
+            _remainingPulseTime = _config.PulseDuration;
         }
 
-        private const float LOW_FREQUENCY_MOTOR_SPEED = 0.35f;
-        private const float HIGH_FREQUENCY_MOTOR_SPEED = 0.6f;
-        private const float PULSE_DURATION = 0.12f;
-
+        private GamepadHapticsConfig _config;
         private float _remainingPulseTime;
 
         /// <summary>

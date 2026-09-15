@@ -9,10 +9,14 @@ using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Haptics;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.PostEffect;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
@@ -27,6 +31,46 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         /// <summary> 実行順です。 </summary>
         public override int Order => 800;
+
+        /// <summary>
+        ///     ゲームパッド振動のConfigをAddressablesから読み込む。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 読み込みに成功した場合はtrue。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            ReleaseLoadedHapticsConfig();
+
+            try
+            {
+                _loadedHapticsConfig = await _hapticsConfigKey.LoadAssetAsync<GamepadHapticsConfig>(
+                    this,
+                    cancellationToken);
+                if (_loadedHapticsConfig != null)
+                {
+                    return true;
+                }
+
+                Debug.LogError(
+                    $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigを読み込めませんでした。",
+                    this);
+                ReleaseLoadedHapticsConfig();
+                return false;
+            }
+            catch (OperationCanceledException)
+            {
+                ReleaseLoadedHapticsConfig();
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError(
+                    $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfig読み込みに失敗しました: {exception}",
+                    this);
+                ReleaseLoadedHapticsConfig();
+                return false;
+            }
+        }
 
         /// <summary>
         ///     他モジュールへ結合してリズムガイドを初期化する。
@@ -120,6 +164,12 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 _rhythmGuideView,
                 new RhythmGuidePostEffectViewModel(_rhythmGuidePostEffectView, _effectConfig));
 
+            if (_loadedHapticsConfig == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigが未ロードです。", this);
+                return false;
+            }
+
             // ゲームパッド振動はシーン参照を必要としないため、専用シーン配置のInitializerを設けず、
             // 既にIPlayerAttackSignalを解決済みのこのInitializerへ相乗りさせている。
             _gamepadHapticsPresenter?.Dispose();
@@ -128,6 +178,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 _gamepadHapticsView = new GameObject(nameof(GamepadHapticsView)).AddComponent<GamepadHapticsView>();
             }
 
+            _gamepadHapticsView.Initialize(_loadedHapticsConfig);
             _gamepadHapticsPresenter = new GamepadHapticsPresenter(playerAttackSignal, _gamepadHapticsView);
 
             return true;
@@ -142,6 +193,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             _postEffectPresenter = null;
             _gamepadHapticsPresenter?.Dispose();
             _gamepadHapticsPresenter = null;
+            ReleaseLoadedHapticsConfig();
 
             if (_gamepadHapticsView != null)
             {
@@ -158,11 +210,14 @@ namespace KillChord.Runtime.Composition.InGame.UI
         [SerializeField] private RhythmGuidePostEffectView _rhythmGuidePostEffectView;
         [Tooltip("リズムガイドの演出設定。ACLikeRhythmGuideViewに設定した物と同じアセットを指定。")]
         [SerializeField] private ACLikeRhythmGuideEffectConfig _effectConfig;
+        [Tooltip("ゲームパッド振動ConfigのAddressablesキー。")]
+        [SerializeField, SourceDataAddress] private string _hapticsConfigKey;
 
         private bool _isRegisteredToPlayDirector;
         private RhythmGuidePostEffectPresenter _postEffectPresenter;
         private GamepadHapticsPresenter _gamepadHapticsPresenter;
         private GamepadHapticsView _gamepadHapticsView;
+        private GamepadHapticsConfig _loadedHapticsConfig;
 
         /// <summary>
         ///     リズムガイドViewをゲームプレイ開始対象へ登録します。
@@ -184,6 +239,15 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             inGamePlayDirector.AddGamePlayControllable(_rhythmGuideView);
             _isRegisteredToPlayDirector = true;
+        }
+
+        /// <summary>
+        ///     ロード済みのゲームパッド振動ConfigとAddressablesハンドルを解放する。
+        /// </summary>
+        private void ReleaseLoadedHapticsConfig()
+        {
+            _hapticsConfigKey.ReleaseLoadedAsset(this);
+            _loadedHapticsConfig = null;
         }
     }
 }
