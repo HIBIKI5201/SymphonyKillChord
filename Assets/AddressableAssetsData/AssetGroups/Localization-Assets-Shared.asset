@@ -30,7 +30,7 @@ MonoBehaviour:
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4ad8639f3f6dd77489724fd4c71749da
-    m_Address: Assets/Localization/Tables/TutorialPopupImages Shared Data.asset
+    m_Address: TutorialPopupImages Shared Data
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -56,7 +56,7 @@ MonoBehaviour:
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 782f2d04919c12f4aa9b1330e6ced6d8
-    m_Address: Assets/Localization/Tables/TutorialSubtitles Shared Data.asset
+    m_Address: TutorialSubtitles Shared Data
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

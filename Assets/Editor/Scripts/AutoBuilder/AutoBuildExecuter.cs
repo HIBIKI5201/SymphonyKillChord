@@ -734,6 +734,7 @@ namespace KillChord.Editor.AutoBuilder
             }
 
             string zipPath = Path.Combine(outputRoot, profileName + ".zip");
+            string temporaryZipPath = zipPath + ".partial";
 
             try
             {
@@ -743,11 +744,18 @@ namespace KillChord.Editor.AutoBuilder
                     File.Delete(zipPath);
                 }
 
+                if (File.Exists(temporaryZipPath))
+                {
+                    File.Delete(temporaryZipPath);
+                }
+
                 Debug.Log($"[{nameof(AutoBuildExecuter)}] ビルド出力をZIP圧縮しています: {buildDir} -> {zipPath}");
 
-                ZipFile.CreateFromDirectory(buildDir, zipPath, System.IO.Compression.CompressionLevel.Optimal, includeBaseDirectory: false);
+                // 未完成ファイルがリリース対象の*.zip検索に入らないよう、完成後に正式名へ移す。
+                CreateArchiveFromDirectory(buildDir, temporaryZipPath);
+                long zipSizeBytes = new FileInfo(temporaryZipPath).Length;
+                File.Move(temporaryZipPath, zipPath);
 
-                long zipSizeBytes = new FileInfo(zipPath).Length;
                 Debug.Log($"[{nameof(AutoBuildExecuter)}] ZIP圧縮が完了しました: {zipPath} ({zipSizeBytes / 1024.0 / 1024.0:F2} MB)");
             }
             catch (Exception exception)
@@ -755,6 +763,19 @@ namespace KillChord.Editor.AutoBuilder
                 // ZIP化に失敗した場合、この時点の生データも中途半端なZIPも成果物として不完全なため、
                 // 呼び出し元でビルド失敗として扱わせる。生データは復旧の余地を残すため削除しない。
                 Debug.LogError($"[{nameof(AutoBuildExecuter)}] ビルド出力のZIP圧縮に失敗しました。Profile: {profileName}, Path: {buildDir}\n{exception}");
+
+                try
+                {
+                    if (File.Exists(temporaryZipPath))
+                    {
+                        File.Delete(temporaryZipPath);
+                    }
+                }
+                catch (Exception cleanupException)
+                {
+                    Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] 不完全なZIPファイルの削除に失敗しました。Path: {temporaryZipPath}\n{cleanupException}");
+                }
+
                 return false;
             }
 
@@ -770,6 +791,68 @@ namespace KillChord.Editor.AutoBuilder
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     ビルド出力ディレクトリをZIPファイルへ圧縮します。
+        /// </summary>
+        /// <param name="sourceDirectoryPath"> 圧縮対象のディレクトリです。 </param>
+        /// <param name="destinationArchivePath"> 作成するZIPファイルのパスです。 </param>
+        private static void CreateArchiveFromDirectory(string sourceDirectoryPath, string destinationArchivePath)
+        {
+            string sourceRoot = Path.GetFullPath(sourceDirectoryPath).TrimEnd(
+                Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
+            using (ZipArchive archive = ZipFile.Open(destinationArchivePath, ZipArchiveMode.Create))
+            {
+                foreach (string filePath in Directory.EnumerateFiles(
+                             sourceRoot,
+                             "*",
+                             SearchOption.AllDirectories))
+                {
+                    string entryName = filePath.Substring(sourceRoot.Length)
+                        .Replace(Path.DirectorySeparatorChar, '/');
+                    ZipArchiveEntry entry = archive.CreateEntry(entryName, System.IO.Compression.CompressionLevel.Optimal);
+
+                    // WindowsのMAX_PATH境界を超えるビルド成果物は、拡張長パスで直接読み込む。
+                    using (FileStream sourceStream = new FileStream(
+                               GetExtendedLengthPath(filePath),
+                               FileMode.Open,
+                               FileAccess.Read,
+                               FileShare.Read))
+                    using (Stream entryStream = entry.Open())
+                    {
+                        sourceStream.CopyTo(entryStream);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Windowsではファイルシステムパスを拡張長形式へ変換します。
+        /// </summary>
+        /// <param name="path"> 変換するファイルシステムパスです。 </param>
+        /// <returns> Windowsでは拡張長パス、それ以外のOSでは入力パスです。 </returns>
+        private static string GetExtendedLengthPath(string path)
+        {
+            if (Path.DirectorySeparatorChar != '\\')
+            {
+                return path;
+            }
+
+            string fullPath = Path.GetFullPath(path);
+            if (fullPath.StartsWith(@"\\?\", StringComparison.Ordinal))
+            {
+                return fullPath;
+            }
+
+            if (fullPath.StartsWith(@"\\", StringComparison.Ordinal))
+            {
+                return @"\\?\UNC\" + fullPath.Substring(2);
+            }
+
+            return @"\\?\" + fullPath;
         }
 
         /// <summary>
