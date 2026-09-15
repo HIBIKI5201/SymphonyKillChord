@@ -70,6 +70,16 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     「振り直す」ボタンの表示/非表示を切り替える。
+        ///     スキル詳細パネルと画面上の同じ位置を共有しているため、詳細パネル表示中は非表示にする。
+        /// </summary>
+        /// <param name="isVisible"> 表示する場合は true。 </param>
+        public void SetResetButtonVisible(bool isVisible)
+        {
+            _resetButton.style.display = isVisible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        /// <summary>
         ///     登録済みイベントを解除する。
         /// </summary>
         public void Dispose()

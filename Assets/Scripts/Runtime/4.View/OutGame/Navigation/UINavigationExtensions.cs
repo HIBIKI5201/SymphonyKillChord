@@ -26,6 +26,34 @@ namespace KillChord.Runtime.View.OutGame.Navigation
         public const string INITIAL_FOCUS_CLASS_NAME = "initial-focus";
 
         /// <summary>
+        ///     要素のフォーカス状態を親要素のUSSクラスへ同期します。
+        ///     <para>
+        ///         UI Toolkitには`:focus-within`相当の疑似クラスが無く、
+        ///         子要素が`:focus`になっても親要素のスタイルは変化しない。
+        ///         マウスホバー(`:hover`)は親要素にも自然に伝播するため、
+        ///         コントローラー操作時だけ見た目が変化しない差を埋めるために使用する。
+        ///     </para>
+        /// </summary>
+        /// <param name="element"> フォーカス状態を監視する要素です。 </param>
+        /// <param name="className"> フォーカス中に親要素へ付与するUSSクラス名です。 </param>
+        /// <returns> 登録したコールバックを解除するオブジェクトです。 </returns>
+        /// <exception cref="ArgumentNullException"> いずれかがnullの場合にスローされます。 </exception>
+        public static IDisposable SyncFocusClassToParent(this VisualElement element, string className)
+        {
+            if (element == null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            if (string.IsNullOrEmpty(className))
+            {
+                throw new ArgumentNullException(nameof(className));
+            }
+
+            return new FocusClassSyncRegistration(element, className);
+        }
+
+        /// <summary>
         ///     要素の作動要求を1つの処理へ接続します。
         /// </summary>
         /// <param name="element"> 対象の要素です。 </param>
@@ -225,6 +253,68 @@ namespace KillChord.Runtime.View.OutGame.Navigation
 
                 _onActivate();
                 activationEvent.StopPropagation();
+            }
+        }
+
+        /// <summary>
+        ///     フォーカス状態の親要素への同期を所有し、一括解除します。
+        /// </summary>
+        private sealed class FocusClassSyncRegistration : IDisposable
+        {
+            /// <summary>
+            ///     フォーカス/フォーカス解除のコールバックを登録します。
+            /// </summary>
+            /// <param name="element"> 監視対象の要素です。 </param>
+            /// <param name="className"> 親要素へ付与するUSSクラス名です。 </param>
+            public FocusClassSyncRegistration(VisualElement element, string className)
+            {
+                _element = element;
+                _className = className;
+                _focusCallback = HandleFocusHandler;
+                _blurCallback = HandleBlurHandler;
+
+                _element.RegisterCallback(_focusCallback);
+                _element.RegisterCallback(_blurCallback);
+            }
+
+            /// <summary>
+            ///     登録した全コールバックを解除します。
+            /// </summary>
+            public void Dispose()
+            {
+                if (_isDisposed)
+                {
+                    return;
+                }
+
+                _element.UnregisterCallback(_focusCallback);
+                _element.UnregisterCallback(_blurCallback);
+                _element.parent?.RemoveFromClassList(_className);
+                _isDisposed = true;
+            }
+
+            private readonly VisualElement _element;
+            private readonly string _className;
+            private readonly EventCallback<FocusEvent> _focusCallback;
+            private readonly EventCallback<BlurEvent> _blurCallback;
+            private bool _isDisposed;
+
+            /// <summary>
+            ///     フォーカスを得たときに親要素へクラスを付与します。
+            /// </summary>
+            /// <param name="focusEvent"> フォーカスイベントです。 </param>
+            private void HandleFocusHandler(FocusEvent focusEvent)
+            {
+                _element.parent?.AddToClassList(_className);
+            }
+
+            /// <summary>
+            ///     フォーカスを失ったときに親要素からクラスを外します。
+            /// </summary>
+            /// <param name="blurEvent"> フォーカス解除イベントです。 </param>
+            private void HandleBlurHandler(BlurEvent blurEvent)
+            {
+                _element.parent?.RemoveFromClassList(_className);
             }
         }
     }

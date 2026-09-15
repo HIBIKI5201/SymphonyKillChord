@@ -24,10 +24,10 @@
 }
 
 .stage-node {
-    width: 100px;
-    height: 100px;
-    border-radius: 50px;
-    border-width: 12px;
+    width: 125px;
+    height: 125px;
+    border-radius: 62.5px;
+    border-width: 15px;
     border-color: rgb(0, 0, 0);
     background-color: rgb(255, 255, 255);
     align-items: center;
@@ -45,13 +45,56 @@
 }
 
 .stage-node__label {
-    font-size: 20px;
+    position: absolute;
+    top: -40px;
+    left: 0;
+    width: 100%;
+    font-size: 30px;
     color: rgb(0, 0, 0);
     -unity-text-align: middle-center;
-    -unity-font-style: normal;
+    -unity-font-style: bold;
     margin: 0;
     padding: 0;
-    white-space: normal;
+    white-space: nowrap;
+}
+
+.stage-node__icon {
+    /*
+        枠(15px、常に固定)の外側までアイコンを拡張して「ノード全体にぴったり」重ねる。
+        position: absolute + 手動オフセットは基準ボックスの解釈が状態によって不安定になり
+        ズレの原因になったため、負のmarginでコンテンツ領域から自然に広げる方式にしている。
+        枠の太さが今後変化する場合は、この値も合わせて調整すること。
+    */
+    width: 100%;
+    height: 100%;
+    margin: -15px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.stage-node__icon--battle {
+    background-image: url("project://database/Assets/Arts/UI/UI_StageSelect_Battle.png?fileID=21300000&guid=be3fde12e8e5076419eb01b96987facf&type=3#UI_StageSelect_Battle");
+}
+
+.stage-node__icon--scenario {
+    background-image: url("project://database/Assets/Arts/UI/UI_StageSelect_Scenario.png?fileID=21300000&guid=a8a534b40d1551247a726e2cb7b3fb86&type=3#UI_StageSelect_Scenario");
+}
+
+.stage-node__star-row {
+    position: absolute;
+    bottom: -70px;
+    left: 0;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    display: none;
+}
+
+.stage-node__star {
+    width: 48px;
+    height: 48px;
+    margin-left: 6px;
+    margin-right: 6px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .stage-node--cleared {
@@ -69,23 +112,56 @@
     background-image: none;
 }
 
+/*
+    Unity既定のButtonテーマは:hover/:focus/:active時に枠の太さ(border-width)や
+    枠の色(border-color、既定では白系になる)を独自に変えることがある。
+    起点ノード(initial-focusが付き画面表示時に自動でフォーカスされる)は
+    常に:focus状態から始まるため、既定テーマの色が最初から見えてしまっていた。
+    各状態で明示的に基礎の太さ・色へ固定し、既定テーマの上書きを無効化する。
+*/
 .stage-node:hover {
     scale: 1.2 1.2;
+    border-top-width: 15px;
+    border-right-width: 15px;
+    border-bottom-width: 15px;
+    border-left-width: 15px;
+    border-color: rgb(0, 0, 0);
 }
 
 .stage-node:focus,
 .stage-node:focus {
     scale: 1.2 1.2;
+    border-top-width: 15px;
+    border-right-width: 15px;
+    border-bottom-width: 15px;
+    border-left-width: 15px;
+    border-color: rgb(0, 0, 0);
 }
 
 .stage-node:active {
     scale: 0.9 0.9;
+    border-top-width: 15px;
+    border-right-width: 15px;
+    border-bottom-width: 15px;
+    border-left-width: 15px;
+    border-color: rgb(0, 0, 0);
+}
+
+.stage-map-canvas {
+    scale: 1 1;
+    transition-property: scale;
+    transition-duration: 0.35s;
+    transition-timing-function: ease-out-circ;
+}
+
+.stage-map-canvas--zoomed {
+    scale: 1.5 1.5;
 }
 
 .stage-node-focus-frame {
     position: absolute;
-    width: 100px;
-    height: 100px;
+    width: 125px;
+    height: 125px;
     display: none;
     background-image: url("project://database/Assets/Arts/TestUI/UI_StageSelect_Flame.png?fileID=2800000&guid=9e77a7c740b359a4c9ffbfc6142b0821&type=3#UI_StageSelect_Flame");
     -unity-background-scale-mode: scale-to-fit;

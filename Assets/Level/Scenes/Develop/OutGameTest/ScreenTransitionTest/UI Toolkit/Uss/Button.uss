@@ -1,6 +1,35 @@
 :root {
 }
 
+/* ==== ボタンの見た目の実装 ====
+   静的な見た目(off/onスキン切り替え)のみを扱う。スケールやタイミングは含まない。 */
+.btn-skin {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.btn-skin:hover,
+.btn-skin:focus,
+.btn-skin:active {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=21300000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
+}
+
+/* ==== アニメーションの実装 ====
+   スケールの動き・タイミングのみを扱う。画像には触れない。
+   hover/focus中の連続パルスはC#側(ButtonPulseAnimationManipulator)が毎フレームscaleを書き換えて実現する。 */
+.btn-scale-feedback {
+    scale: 1.0 1.0 1.0;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out-circ;
+}
+
+/* クリック中は連続パルスより優先して縮小させる(C#側もpressed中はscaleの書き換えを止める) */
+.btn-scale-feedback:active {
+    scale: 0.9 0.9;
+    transition-duration: 0.05s;
+    transition-timing-function: ease-out-circ;
+}
+
 .button {
     height: 100px;
     width: 200px;
@@ -21,8 +50,42 @@
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    width: 300px;
-    height: 170px;
+}
+
+.home-card-large {
+    width: 800px;
+    height: 420px;
+}
+
+.home-card-small {
+    width: 390px;
+    height: 210px;
+}
+
+.home-button-wrapper {
+    position: relative;
+    margin-top: 10px;
+}
+
+.home-button-wrapper > .button {
+    margin-top: 0;
+}
+
+.home-button-panel {
+    position: absolute;
+    top: 3%;
+    right: 1.5%;
+    bottom: 3%;
+    left: 1.5%;
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    -unity-background-scale-mode: stretch-to-fill;
+    border-radius: 4px;
+    translate: 0 -4px;
+}
+
+.home-button-wrapper:hover > .home-button-panel,
+.home-button-wrapper.is-focused > .home-button-panel {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_ButtonBack_On.png?fileID=21300000&guid=01ab0a13e35f26047a9e0f0fa450c311&type=3#UI_ButtonBack_On");
 }
 
 .button:hover,
@@ -36,6 +99,14 @@
     scale: 0.9 0.9;
     transition-duration: 0.05s;
     transition-timing-function: ease-out-circ;
+}
+
+/* .home-button-wrapper(btn-scale-feedback)がボタン+背景パネルをまとめて拡縮するため、
+   ボタン単体側の拡縮は無効化して二重に拡大しないようにする。 */
+.home-button-wrapper > .button:hover,
+.home-button-wrapper > .button:focus,
+.home-button-wrapper > .button:active {
+    scale: 1.0 1.0;
 }
 
 
