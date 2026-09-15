@@ -31,16 +31,16 @@
         <ui:VisualElement name="ButtonRoot" style="position: absolute; top: 0; right: 0; height: 100%; justify-content: flex-start; align-items: flex-end; padding-right: 90px; padding-top: 260px; flex-direction: column; padding-bottom: 0; padding-left: 0;">
             <ui:VisualElement name="StageSelectWrapper" class="home-button-wrapper home-card-large btn-scale-feedback" style="margin-top: 0; height: 403px;">
                 <ui:VisualElement name="StageSelectPanel" class="home-button-panel" style="right: -4px; top: 5px; bottom: -3px; left: 7px;"/>
-                <ui:Button name="StageSelect" class="button home-image-button ui-se-window home-card-large" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_StageSelect.png?fileID=2800000&amp;guid=37233648607f0f44abf0f98dde48c18c&amp;type=3#UI_SelectionFrame_StageSelect&quot;); height: 402px; -unity-background-scale-mode: stretch-to-fill;"/>
+                <ui:Button name="StageSelect" class="button home-image-button ui-se-window-mission home-card-large" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_StageSelect.png?fileID=2800000&amp;guid=37233648607f0f44abf0f98dde48c18c&amp;type=3#UI_SelectionFrame_StageSelect&quot;); height: 402px; -unity-background-scale-mode: stretch-to-fill;"/>
             </ui:VisualElement>
             <ui:VisualElement name="SmallCardRow" style="flex-direction: row; margin-top: 50px;">
                 <ui:VisualElement name="SkillBuildWrapper" class="home-button-wrapper home-card-small btn-scale-feedback" style="margin-top: 0; margin-right: 20px; height: 200px;">
                     <ui:VisualElement name="SkillBuildPanel" class="home-button-panel" style="right: 3px; top: 12px; bottom: 10px; left: 10px;"/>
-                    <ui:Button name="SkillBuild" text="" class="button home-image-button ui-se-window home-card-small" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_SkillBuild.png?fileID=2800000&amp;guid=d99daf5b923835945ab24447149b51ef&amp;type=3#UI_SelectionFrame_SkillBuild&quot;); -unity-background-scale-mode: stretch-to-fill; height: 192px;"/>
+                    <ui:Button name="SkillBuild" text="" class="button home-image-button ui-se-window-customize home-card-small" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_SkillBuild.png?fileID=2800000&amp;guid=d99daf5b923835945ab24447149b51ef&amp;type=3#UI_SelectionFrame_SkillBuild&quot;); -unity-background-scale-mode: stretch-to-fill; height: 192px;"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="SkillTreeWrapper" class="home-button-wrapper home-card-small btn-scale-feedback" style="margin-top: 0; height: 200px; margin-left: 0;">
                     <ui:VisualElement name="SkillTreePanel" class="home-button-panel" style="right: 2px;"/>
-                    <ui:Button name="SkillTree" class="button home-image-button ui-se-window home-card-small" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_SkillTree.png?fileID=2800000&amp;guid=c91513483b1fc6644bfa4cc9af798ff3&amp;type=3#UI_SelectionFrame_SkillTree&quot;); -unity-background-scale-mode: stretch-to-fill; height: 192px; width: 386px;"/>
+                    <ui:Button name="SkillTree" class="button home-image-button ui-se-window-research home-card-small" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_SkillTree.png?fileID=2800000&amp;guid=c91513483b1fc6644bfa4cc9af798ff3&amp;type=3#UI_SelectionFrame_SkillTree&quot;); -unity-background-scale-mode: stretch-to-fill; height: 192px; width: 386px;"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
