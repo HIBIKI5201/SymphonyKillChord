@@ -22,7 +22,7 @@ struct v2f
 {
     float4 pos : SV_POSITION;
 #ifdef SMEARS_ON
-    float smearsAlpha : TEXCOORD0;
+    half smearsAlpha : TEXCOORD0;
 #endif
 };
 
@@ -61,7 +61,7 @@ v2f vert(appdata v)
     return o;
 }
 
-float4 frag(v2f i) : SV_Target
+half4 frag(v2f i) : SV_Target
 {
 #if defined(FADE_ON) || defined(SMEARS_ON)
     // FADE_OFF時は_FadeAlphaが0でもスメア単体で機能するよう1を基準にする
