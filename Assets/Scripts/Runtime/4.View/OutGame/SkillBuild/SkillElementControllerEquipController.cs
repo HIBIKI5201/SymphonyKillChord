@@ -80,6 +80,37 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
+        ///     一覧の再構築でフォーカスが失われていた場合、選択中スキルへ再フォーカスする。
+        ///     <para>
+        ///         スキル一覧はスロット変更のたびにカード要素ごと作り直されるため、
+        ///         再構築前にカードへフォーカスしていた場合はフォーカス先が破棄されて
+        ///         失われる。そのままだとコントローラーの決定/キャンセル/移動操作が
+        ///         一切反応しなくなるため、呼び出し側(一覧再構築の完了通知)から都度確認する。
+        ///     </para>
+        /// </summary>
+        public void RestoreFocusIfLost()
+        {
+            VisualElement focusedElement =
+                _rootElement.panel?.focusController?.focusedElement as VisualElement;
+            if (focusedElement != null && focusedElement.panel != null)
+            {
+                return;
+            }
+
+            // 選択中スキルに対応するカードが見つかった場合のみ再フォーカスする。
+            // 見つからない場合に一覧先頭などへ適当にフォーカスすると、マウス操作中
+            // (本来どこにもフォーカスが無い状態が正常)にも関わらず毎回同じ要素へ
+            // 強制的にフォーカス・選択させてしまうため、何もしない方が安全。
+            int? selectedSkillId = _skillBuildViewModel.ExplicitlySelectedSkillId.CurrentValue;
+            if (!selectedSkillId.HasValue)
+            {
+                return;
+            }
+
+            FindSkillElement(selectedSkillId.Value)?.FocusDeferred();
+        }
+
+        /// <summary>
         ///     持ち上げ状態を解除する。
         /// </summary>
         public void ClearCarry()

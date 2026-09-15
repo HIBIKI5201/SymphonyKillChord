@@ -173,6 +173,11 @@ namespace KillChord.Runtime.View.OutGame.Title
             _dataResetDialog.RegisterCallback<PointerDownEvent>(OnDataResetDialogPointerDown);
             _dataResetDialog.RegisterCallback<NavigationCancelEvent>(
                 HandleDataResetDialogNavigationCancelHandler, TrickleDown.TrickleDown);
+
+            // ScreenViewBase 側のキャンセル処理(フォーカス依存でバブリングする)より
+            // 先に確実に捕まえるため、画面ルートにもトリクルダウンで購読しておく。
+            RootElement.RegisterCallback<NavigationCancelEvent>(
+                HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -191,6 +196,8 @@ namespace KillChord.Runtime.View.OutGame.Title
             _dataResetDialog.UnregisterCallback<PointerDownEvent>(OnDataResetDialogPointerDown);
             _dataResetDialog.UnregisterCallback<NavigationCancelEvent>(
                 HandleDataResetDialogNavigationCancelHandler, TrickleDown.TrickleDown);
+            RootElement.UnregisterCallback<NavigationCancelEvent>(
+                HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -266,6 +273,33 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void HandleBackButtonActivationHandler()
         {
             OutGameUIEvent.OnScreenClosed?.Invoke();
+        }
+
+        /// <summary>
+        ///     メニュー画面ルートでのキャンセル操作を処理する。
+        ///     <para>
+        ///         <see cref="ScreenViewBase"/> 側のキャンセル処理はフォーカス中の要素から
+        ///         バブリングしたイベントに依存するため、フォーカスが正しく当たっていない
+        ///         場合に反応しないことがある。ここではフォーカス状態によらず確実に
+        ///         画面を閉じられるよう、ルート要素で直接キャンセル操作を受け取る。
+        ///     </para>
+        /// </summary>
+        /// <param name="evt"> ナビゲーションキャンセルイベント。 </param>
+        private void HandleRootNavigationCancelHandler(NavigationCancelEvent evt)
+        {
+            if (RootElement.resolvedStyle.display == DisplayStyle.None)
+            {
+                return;
+            }
+
+            // データリセット確認ダイアログ表示中は、そちら自身のキャンセル処理に任せる。
+            if (_dataResetDialog.resolvedStyle.display != DisplayStyle.None)
+            {
+                return;
+            }
+
+            OutGameUIEvent.OnScreenClosed?.Invoke();
+            evt.StopPropagation();
         }
 
         /// <summary>

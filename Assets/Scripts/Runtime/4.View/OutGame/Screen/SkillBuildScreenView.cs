@@ -68,6 +68,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RegisterButtonCallback();
         }
 
+        /// <summary> スキル一覧がカード要素ごと再構築された時に通知する。 </summary>
+        public event Action OnSkillListRefreshed;
+
         /// <summary>
         ///     スキル一覧表示を初期化する。
         /// </summary>
@@ -175,6 +178,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             _skillGenreFilterBarView.OnGenreFilterSelected -= HandleGenreFilterBarSelectedHandler;
             _skillGenreFilterBarView.Dispose();
+            OnSkillListRefreshed = null;
         }
 
         /// <inheritdoc />
@@ -355,6 +359,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillListView.SetSelectedSkill(_currentSelectedSkillId);
             _skillListView.ApplyGenreFilter(_activeGenreFilter);
             SyncEquippedSkillsToSlots();
+
+            // 一覧を再構築するとカード要素が全て作り直されるため、
+            // 再構築前にカードへフォーカスしていた場合はフォーカスが失われる。
+            // コントローラー操作を継続できるよう、呼び出し側で再フォーカスできるようにする。
+            OnSkillListRefreshed?.Invoke();
         }
 
         /// <summary>

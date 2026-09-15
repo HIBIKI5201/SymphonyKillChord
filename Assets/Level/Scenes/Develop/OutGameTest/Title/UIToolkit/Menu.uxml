@@ -1,6 +1,6 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:screen="KillChord.Runtime.View.OutGame.Screen" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/USS/Menu.uss?fileID=7433441132597879392&amp;guid=d317849855421ec45937a3da5ae38ede&amp;type=3"/>
-    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/USS/Menu.uss?fileID=7433441132597879392&amp;guid=d317849855421ec45937a3da5ae38ede&amp;type=3#Menu"/>
+    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
     <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; -unity-background-image-tint-color: rgb(2, 2, 2);">
         <ui:VisualElement name="Root" style="position: absolute; top: 39px; left: 43px; width: 50%; height: 508px; background-color: rgba(255, 255, 255, 0); background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_MenuPanel.png?fileID=2800000&amp;guid=e93604348792fe147b00edd554ae46a0&amp;type=3#UI_MenuPanel&quot;);">
@@ -31,7 +31,7 @@
                 <ui:VisualElement name="BottomButtonSpace" style="width: 5%;"/>
                 <ui:Button text="クレジット" name="CreditButton" class="title-option-button btn-skin btn-scale-feedback" style="background-color: rgba(188, 188, 188, 0); border-left-color: rgb(1, 0, 26); border-right-color: rgb(1, 0, 26); border-top-color: rgb(1, 0, 26); border-bottom-color: rgb(1, 0, 26); -unity-background-scale-mode: scale-and-crop; aspect-ratio: auto; height: 84px;"/>
             </ui:VisualElement>
-            <screen:AlphaHitTestButton name="BackButton" class="back-button button ui-se-cancel" style="position: absolute; height: 93px; top: 8px; left: 13px; background-color: rgb(0, 0, 0); -unity-background-image-tint-color: rgba(255, 255, 255, 0.78);"/>
+            <screen:AlphaHitTestButton name="BackButton" class="back-button button ui-se-cancel" style="position: absolute; height: 93px; top: 8px; left: 13px; background-color: rgb(0, 0, 0); -unity-background-image-tint-color: rgba(255, 255, 255, 0.78); display: none;"/>
         </ui:VisualElement>
         <ui:VisualElement name="DataResetConfirmDialog" style="position: absolute; width: 100%; height: 100%; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.59); display: none;">
             <ui:VisualElement name="VisualElement" style="width: 640px; height: 260px; padding: 32px 40px; justify-content: flex-start; align-items: center; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OutGame_SceneTab.png?fileID=21300000&amp;guid=96c8d94dd68b3104fa34a3f388529d63&amp;type=3#UI_OutGame_SceneTab&quot;); -unity-background-scale-mode: stretch-to-fill;">

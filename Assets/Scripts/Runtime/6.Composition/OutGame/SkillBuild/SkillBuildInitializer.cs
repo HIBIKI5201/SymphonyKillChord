@@ -308,6 +308,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 SetupSkillElement,
                 soundEffectCommand);
             _skillBuildScreenView.Bind(_skillBuildViewModel);
+            _skillBuildScreenView.OnSkillListRefreshed += HandleSkillListRefreshedHandler;
             _skillBuildPresenter.Push(
                 _skillBuildDefinition.EquippedSkills,
                 _loadedOwnedSkillTemplates,
@@ -534,6 +535,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 
             if (_skillBuildScreenView != null)
             {
+                _skillBuildScreenView.OnSkillListRefreshed -= HandleSkillListRefreshedHandler;
                 _skillBuildScreenView.Unbind();
                 _skillBuildScreenView = null;
             }
@@ -584,6 +586,15 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private void HandleOwnedSkillChangedHandler()
         {
             RefreshOwnedSkills(false);
+        }
+
+        /// <summary>
+        ///     スキル一覧の再構築を処理します。
+        ///     カード要素が作り直されてフォーカスが失われていた場合、選択中スキルへ戻します。
+        /// </summary>
+        private void HandleSkillListRefreshedHandler()
+        {
+            _skillElementControllerEquipController?.RestoreFocusIfLost();
         }
 
         /// <summary>
