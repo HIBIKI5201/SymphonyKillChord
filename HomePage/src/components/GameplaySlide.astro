@@ -1,10 +1,13 @@
 ---
 import GameplayRing from './GameplayRing.astro';
+import RhythmGaugeDemo from './RhythmGaugeDemo.astro';
 
 interface Segment {
 	value: string;
 	caption: string;
 	locked?: boolean;
+	color?: string;
+	ratio?: number;
 }
 
 interface Props {
@@ -15,9 +18,10 @@ interface Props {
 	current: number;
 	total: number;
 	ringWord: string;
+	rhythmSegments?: Segment[];
 }
 
-const { name, description, ringLabel, ringSegments, current, total, ringWord } = Astro.props;
+const { name, description, ringLabel, ringSegments, current, total, ringWord, rhythmSegments } = Astro.props;
 ---
 
 <article class="slide">
@@ -34,6 +38,7 @@ const { name, description, ringLabel, ringSegments, current, total, ringWord } =
 	<div class="body">
 		<h2 class="name">{name}</h2>
 		<p class="description">{description}</p>
+		{rhythmSegments && <RhythmGaugeDemo segments={rhythmSegments as { value: string; caption: string; color: string; ratio?: number }[]} />}
 	</div>
 </article>
 

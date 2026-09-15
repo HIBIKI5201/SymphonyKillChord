@@ -37,6 +37,7 @@ const total = String(slideCount).padStart(2, '0');
 								ringSegments={feature.ringSegments}
 								current={index + 1}
 								total={features.length}
+								rhythmSegments={feature.id === 'pillar-01' ? feature.ringSegments : undefined}
 							/>
 						</li>
 					))
