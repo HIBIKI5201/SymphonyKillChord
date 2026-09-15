@@ -50,11 +50,11 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <summary> 明るさの既定値。 </summary>
         public const int DEFAULT_BRIGHTNESS = 5;
 
-        /// <summary> 解像度の幅の既定値。初回起動時、実際の画面解像度で上書きされるまでの仮値。 </summary>
-        public const int DEFAULT_RESOLUTION_WIDTH = 1280;
+        /// <summary> 解像度の幅の既定値。 </summary>
+        public const int DEFAULT_RESOLUTION_WIDTH = 1920;
 
-        /// <summary> 解像度の高さの既定値。初回起動時、実際の画面解像度で上書きされるまでの仮値。 </summary>
-        public const int DEFAULT_RESOLUTION_HEIGHT = 720;
+        /// <summary> 解像度の高さの既定値。 </summary>
+        public const int DEFAULT_RESOLUTION_HEIGHT = 1080;
 
         /// <summary> フルスクリーンの既定値。 </summary>
         public const bool DEFAULT_IS_FULL_SCREEN = true;

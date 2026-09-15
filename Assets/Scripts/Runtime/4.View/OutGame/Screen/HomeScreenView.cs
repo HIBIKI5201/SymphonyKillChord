@@ -56,8 +56,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <param name="unlockPoints"> 解放ポイント。 </param>
         public void SetPoints(int rebuildPoints, int unlockPoints)
         {
-            _rebuildPointsLabel.text = $"改造P：{rebuildPoints}";
-            _unlockPointsLabel.text = $"解放P：{unlockPoints}";
+            _rebuildPointsLabel.text = rebuildPoints.ToString();
+            _unlockPointsLabel.text = unlockPoints.ToString();
         }
 
         /// <summary>
@@ -179,8 +179,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string SKILL_TREE_BUTTON_NAME = "SkillTree";
         private const string SKILL_BUILD_BUTTON_NAME = "SkillBuild";
         private const string SETTING_BUTTON_NAME = "OptionIcon";
-        private const string REBUILD_POINTS_LABEL_NAME = "RebuildPointsLabel";
-        private const string UNLOCK_POINTS_LABEL_NAME = "UnlockPointsLabel";
+        private const string REBUILD_POINTS_LABEL_NAME = "RebuildPointsValueLabel";
+        private const string UNLOCK_POINTS_LABEL_NAME = "UnlockPointsValueLabel";
         private const string CHARACTER_IMAGE_NAME = "CharacterImage";
         private const string FOCUSED_CLASS_NAME = "is-focused";
 
