@@ -20,15 +20,21 @@ const poster = await getImage({ src: posterImage, format: 'webp', width: 800, qu
 
 	if (video) {
 		const dataSrc = video.dataset.src;
+		let loaded = false;
 
-		// 画面に入るまで読み込みを遅延させ、初回表示時のダウンロード量を抑える
+		// 画面に入るまで読み込みを遅延させ、初回表示時のダウンロード量を抑える。
+		// 読み込み後も監視を続け、画面外に出たら一時停止してバッテリー消費を抑える。
 		const observer = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
-					if (entry.isIntersecting && dataSrc) {
-						video.src = dataSrc;
+					if (entry.isIntersecting) {
+						if (!loaded && dataSrc) {
+							video.src = dataSrc;
+							loaded = true;
+						}
 						video.play().catch(() => {});
-						observer.unobserve(video);
+					} else if (loaded) {
+						video.pause();
 					}
 				});
 			},
