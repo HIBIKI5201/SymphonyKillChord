@@ -13,14 +13,36 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
     public sealed class EnvironmentSettingsRepository : IEnvironmentSettingsRepository
     {
         /// <summary>
-        ///     保存済みの環境設定を読み込む。
+        ///     環境設定リポジトリを初期化する。
+        /// </summary>
+        /// <param name="defaultAsset"> セーブデータが存在しない初回起動時に適用する既定値。未指定の場合はDomainの既定値を使用する。 </param>
+        public EnvironmentSettingsRepository(EnvironmentSettingsDefaultAsset defaultAsset = null)
+        {
+            _defaultAsset = defaultAsset;
+        }
+
+        /// <summary>
+        ///     保存済みの環境設定を読み込む。セーブデータが存在しない場合は既定値アセットの内容で初期化する。
         /// </summary>
         public async ValueTask<EnvironmentSettingsData> LoadAsync(
             CancellationToken cancellationToken = default)
         {
+            bool hasExistingSave = SaveStore.Exists<SaveData>();
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>(cancellationToken);
+
+            if (!hasExistingSave && _defaultAsset != null)
+            {
+                EnvironmentSettingsData defaults = _defaultAsset.ToEnvironmentSettingsData();
+                saveData.EnvironmentSettings.SetResolution(
+                    defaults.ResolutionWidth,
+                    defaults.ResolutionHeight,
+                    defaults.IsFullScreen);
+                saveData.EnvironmentSettings.SetQualityLevel(defaults.QualityLevel);
+                saveData.EnvironmentSettings.SetBrightness(defaults.Brightness);
+            }
+
             return saveData.EnvironmentSettings.Copy();
         }
 
@@ -64,5 +86,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 throw;
             }
         }
+
+        private readonly EnvironmentSettingsDefaultAsset _defaultAsset;
     }
 }

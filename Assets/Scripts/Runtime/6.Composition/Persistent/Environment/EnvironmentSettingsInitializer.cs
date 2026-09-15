@@ -26,7 +26,7 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
         /// </summary>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _environmentSettingsRepository = new EnvironmentSettingsRepository();
+            _environmentSettingsRepository = new EnvironmentSettingsRepository(_defaultAsset);
             _environmentSettingsService = new EnvironmentSettingsService(_environmentSettingsRepository);
             _loadedSettings = await _environmentSettingsService.LoadAsync(cancellationToken);
             return _loadedSettings != null;
@@ -85,6 +85,9 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
             _environmentSettingsRepository = null;
             _loadedSettings = null;
         }
+
+        [SerializeField, Tooltip("セーブデータが存在しない初回起動時に適用する環境設定の既定値")]
+        private EnvironmentSettingsDefaultAsset _defaultAsset;
 
         private IEnvironmentSettingsRepository _environmentSettingsRepository;
         private EnvironmentSettingsService _environmentSettingsService;
