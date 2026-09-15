@@ -22,14 +22,14 @@ CBUFFER_START(UnityPerMaterial)
     half4 _ColorLit;
     half4 _ColorMiddle;
     half4 _ColorShadow;
-    float4 _OutlineColor;
+    half4 _OutlineColor;
     half4 _SSSColor;
 
-    float3 _FaceUp;
-    float _FadeAlpha;
+    half3 _FaceUp;
+    half _FadeAlpha;
 
     float3 _Head;
-    float _Alpha;
+    half _Alpha;
 
     float _PerspectiveRemovalRatio;
     float _PerspectiveRemovalRadius;
