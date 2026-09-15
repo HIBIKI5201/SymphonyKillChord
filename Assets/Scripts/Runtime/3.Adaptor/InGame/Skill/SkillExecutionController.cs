@@ -17,6 +17,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private const SkillExecutionFailurePolicy TARGET_REJECT_POLICY = SkillExecutionFailurePolicy.ResetProgressOnly;
 
         /// <summary>
+        ///     音楽再生位置の巻き戻しとみなす許容誤差（秒）です。
+        ///     MusicSyncServiceの巻き戻し検知と同じ扱いで、入力履歴のTimingが非単調になるのを防ぎます。
+        /// </summary>
+        private const float PLAYBACK_REWIND_TOLERANCE_SECONDS = 0.01f;
+
+        /// <summary>
         ///     コントローラーを初期化します。
         /// </summary>
         public SkillExecutionController(
@@ -54,6 +60,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             {
                 Debug.Log($"[SkillExecutionController] クールダウン中。ID：{_skillDefinition.Id.Value}");
                 return new SkillExecutionResult(SkillExecutionResultType.CooldownBlocked);
+            }
+
+            // 音楽の再生位置が巻き戻った場合、Timingが非単調になり不整合を招くため履歴を破棄する。
+            if (_skillRhythmState.Count > 0
+                && musicTime + PLAYBACK_REWIND_TOLERANCE_SECONDS < _skillRhythmState.LastTiming)
+            {
+                _skillRhythmState.Clear();
             }
 
             _skillRhythmState.Enqueue(beatType, musicTime, battleActionType);
