@@ -28,9 +28,22 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         /// <param name="specification"> 「green:4,Eight:8」形式の攻撃指定。 </param>
         /// <param name="prime"> 最初に基準時刻を作る通常攻撃を行う場合はtrue。 </param>
+        /// <param name="runId"> 再送を識別するUUID。省略時は新規発行する。 </param>
+        /// <param name="timeoutSeconds"> 一時停止を含めた待機期限の秒数。 </param>
         /// <returns> 登録後の状態を表すJSON。 </returns>
-        public static string Enqueue(string specification, bool prime = true)
+        public static string Enqueue(string specification, bool prime = true, string runId = null, double timeoutSeconds = 120d)
         {
+            if (runId != null && !Guid.TryParse(runId, out _))
+            {
+                return CreateErrorJson("runIdにはUUIDを指定してください。");
+            }
+            if (runId != null && runId == _runId) { return GetStatusJson(); }
+            if (_state == QueueState.Waiting) { return CreateErrorJson("別の攻撃キューを実行中です。"); }
+            if (double.IsNaN(timeoutSeconds) || double.IsInfinity(timeoutSeconds)
+                || timeoutSeconds < 1d || timeoutSeconds > MAX_TIMEOUT_SECONDS)
+            {
+                return CreateErrorJson("timeoutSecondsは1〜3600秒で指定してください。");
+            }
             if (!EditorApplication.isPlaying)
             {
                 return CreateErrorJson("Play Modeで実行してください。");
@@ -48,6 +61,9 @@ namespace KillChord.Editor.AIDebugPlay
                 return CreateErrorJson(error);
             }
 
+            _runId = runId ?? Guid.NewGuid().ToString();
+            _deadline = EditorApplication.timeSinceStartup + timeoutSeconds;
+
             while (parsedQueue.Count > 0)
             {
                 _pendingAttacks.Enqueue(parsedQueue.Dequeue());
@@ -61,7 +77,7 @@ namespace KillChord.Editor.AIDebugPlay
                 ? "基準攻撃の実行待ちです。"
                 : "ジャスト攻撃の実行待ちです。";
 
-            _playerModule.PlayerAttackController.OnAttackBeatExecuted += HandleAttackBeatExecuted;
+            _playerModule.PlayerAttackSignal.OnAttackExecuted += HandleAttackBeatExecuted;
             EditorApplication.update += Update;
 
             if (!prime)
@@ -78,31 +94,31 @@ namespace KillChord.Editor.AIDebugPlay
         /// <returns> 攻撃キュー状態を表すJSON。 </returns>
         public static string GetStatusJson()
         {
-            string currentBeatType = _hasCurrentTarget ? $"\"{_currentTarget}\"" : "null";
-            return "{"
-                + $"\"success\":{ToJsonBool(_state != QueueState.Failed)},"
-                + $"\"state\":\"{_state}\","
-                + $"\"requested\":{_requestedCount},"
-                + $"\"completed\":{_completedCount},"
-                + $"\"remaining\":{_pendingAttacks.Count + (_hasCurrentTarget ? 1 : 0)},"
-                + $"\"currentBeatType\":{currentBeatType},"
-                + $"\"priming\":{ToJsonBool(_isPriming)},"
-                + $"\"message\":\"{EscapeJson(_lastMessage)}\""
-                + "}";
+            return AIDebugJson.Serialize(AIDebugJson.Object(
+                ("success", _state != QueueState.Failed), ("runId", _runId), ("state", _state.ToString()),
+                ("requested", _requestedCount), ("completed", _completedCount),
+                ("remaining", _pendingAttacks.Count + (_hasCurrentTarget ? 1 : 0)),
+                ("currentBeatType", _hasCurrentTarget ? _currentTarget.ToString() : null),
+                ("priming", _isPriming), ("message", _lastMessage)));
         }
 
         /// <summary>
         ///     実行中の攻撃キューをキャンセルする。
         /// </summary>
+        /// <param name="runId"> 所有するキューのUUID。省略は従来の手動操作用。 </param>
         /// <returns> キャンセル後の状態を表すJSON。 </returns>
-        public static string Cancel()
+        public static string Cancel(string runId = null)
         {
+            if (runId != null && runId != _runId) { return CreateErrorJson("runIdが現在のキューと一致しません。"); }
             CancelInternal("ユーザー操作によりキャンセルしました。");
             return GetStatusJson();
         }
 
         private const double ATTACK_RESULT_TIMEOUT_SECONDS = 2d;
         private const int MAX_ATTACK_COUNT_PER_ENTRY = 1000;
+        private const int MAX_TOTAL_ATTACK_COUNT = 1000;
+        private const int MAX_SPECIFICATION_LENGTH = 16384;
+        private const double MAX_TIMEOUT_SECONDS = 3600d;
 
         private static readonly Queue<BeatType> _pendingAttacks = new();
 
@@ -122,11 +138,23 @@ namespace KillChord.Editor.AIDebugPlay
         private static bool _isAwaitingAttackResult;
         private static bool _shouldAdvanceAfterRelease;
         private static bool _shouldFinishAfterRelease;
+        private static string _runId;
+        private static double _deadline;
+        private static Mouse _pressedMouse;
 
         /// <summary>
         ///     Editor更新ごとに予約時刻と入力状態を処理する。
         /// </summary>
         private static void Update()
+        {
+            try { Tick(); }
+            catch (Exception exception) { Fail("攻撃キューの実行に失敗しました: " + exception.Message); }
+        }
+
+        /// <summary>
+        ///     所有するキューの期限と、現在のシーンに属するサービスを確認して進める。
+        /// </summary>
+        private static void Tick()
         {
             if (!EditorApplication.isPlaying)
             {
@@ -134,6 +162,19 @@ namespace KillChord.Editor.AIDebugPlay
                 return;
             }
 
+            if (EditorApplication.timeSinceStartup >= _deadline)
+            {
+                Fail("攻撃キュー全体の待機期限を超えました。");
+                return;
+            }
+            if (!ServiceLocator.TryGetInstance<PlayerModuleContainer>(out var currentPlayer)
+                || !ReferenceEquals(currentPlayer, _playerModule)
+                || !ServiceLocator.TryGetInstance<IMusicSyncService>(out var currentMusic)
+                || !ReferenceEquals(currentMusic, _musicSyncService))
+            {
+                Fail("シーン遷移またはサービスの破棄により停止しました。");
+                return;
+            }
             if (EditorApplication.isPaused)
             {
                 return;
@@ -176,7 +217,10 @@ namespace KillChord.Editor.AIDebugPlay
                 if (CanInjectAttack())
                 {
                     InjectAttackInput();
-                    _lastMessage = "基準攻撃を入力しました。";
+                    if (_state == QueueState.Waiting && _isAwaitingAttackResult)
+                    {
+                        _lastMessage = "基準攻撃を入力しました。";
+                    }
                 }
 
                 return;
@@ -208,15 +252,20 @@ namespace KillChord.Editor.AIDebugPlay
             }
 
             InjectAttackInput();
-            _lastMessage = $"{_currentTarget}のジャスト攻撃を入力しました。";
+            if (_state == QueueState.Waiting && _isAwaitingAttackResult)
+            {
+                _lastMessage = $"{_currentTarget}のジャスト攻撃を入力しました。";
+            }
         }
 
         /// <summary>
         ///     攻撃成立通知を受け取り、予約した拍種と照合する。
         /// </summary>
-        /// <param name="actualBeatType"> 実際に成立した拍種。 </param>
-        private static void HandleAttackBeatExecuted(BeatType actualBeatType)
+        /// <param name="beatCount"> 実際に成立した拍種の値。 </param>
+        /// <param name="isJustHit"> 実際の攻撃に適用されたJust判定。 </param>
+        private static void HandleAttackBeatExecuted(int beatCount, bool isJustHit)
         {
+            BeatType actualBeatType = (BeatType)beatCount;
             if (!_isAwaitingAttackResult)
             {
                 return;
@@ -232,9 +281,9 @@ namespace KillChord.Editor.AIDebugPlay
                 return;
             }
 
-            if (!_hasCurrentTarget || actualBeatType != _currentTarget)
+            if (!_hasCurrentTarget || actualBeatType != _currentTarget || !isJustHit)
             {
-                Fail($"成立した拍種が予約と一致しません。expected={_currentTarget}, actual={actualBeatType}");
+                Fail($"成立した判定が予約と一致しません。expected={_currentTarget}, actual={actualBeatType}, just={isJustHit}");
                 return;
             }
 
@@ -308,11 +357,13 @@ namespace KillChord.Editor.AIDebugPlay
                 return;
             }
 
-            QueueMouseButtonState(mouse, true);
             _pressFrame = Time.frameCount;
             _attackRequestedAt = EditorApplication.timeSinceStartup;
             _isPressHeld = true;
             _isAwaitingAttackResult = true;
+            _pressedMouse = mouse;
+            // InputState.Changeから成立通知が同期発火しても受け取れるよう、先に待機状態にする。
+            QueueMouseButtonState(mouse, true);
         }
 
         /// <summary>
@@ -320,14 +371,15 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         private static void ReleaseAttackInput()
         {
-            Mouse mouse = Mouse.current;
-            if (mouse != null)
+            Mouse mouse = _pressedMouse;
+            bool wasHeld = _isPressHeld;
+            _isPressHeld = false;
+            _pressFrame = -1;
+            _pressedMouse = null;
+            if (wasHeld && mouse != null && mouse.added)
             {
                 QueueMouseButtonState(mouse, false);
             }
-
-            _isPressHeld = false;
-            _pressFrame = -1;
         }
 
         /// <summary>
@@ -352,7 +404,7 @@ namespace KillChord.Editor.AIDebugPlay
         private static bool TryResolveDependencies(out string error)
         {
             if (!ServiceLocator.TryGetInstance(out _playerModule)
-                || _playerModule?.PlayerAttackController == null)
+                || _playerModule?.PlayerAttackController == null || _playerModule.PlayerAttackSignal == null)
             {
                 error = "PlayerModuleContainerまたはPlayerAttackControllerが初期化されていません。";
                 return false;
@@ -405,7 +457,7 @@ namespace KillChord.Editor.AIDebugPlay
             out string error)
         {
             queue = new Queue<BeatType>();
-            if (string.IsNullOrWhiteSpace(specification))
+            if (string.IsNullOrWhiteSpace(specification) || specification.Length > MAX_SPECIFICATION_LENGTH)
             {
                 error = "攻撃指定が空です。例: green:4,orange:8";
                 return false;
@@ -419,7 +471,8 @@ namespace KillChord.Editor.AIDebugPlay
                     || !TryParseBeatType(pair[0].Trim(), out BeatType beatType)
                     || !int.TryParse(pair[1].Trim(), out int count)
                     || count <= 0
-                    || count > MAX_ATTACK_COUNT_PER_ENTRY)
+                    || count > MAX_ATTACK_COUNT_PER_ENTRY
+                    || queue.Count + count > MAX_TOTAL_ATTACK_COUNT)
                 {
                     error = $"攻撃指定'{entries[i]}'が不正です。例: green:4,orange:8";
                     queue.Clear();
@@ -541,8 +594,6 @@ namespace KillChord.Editor.AIDebugPlay
             _isAwaitingAttackResult = false;
             _shouldAdvanceAfterRelease = false;
             _shouldFinishAfterRelease = false;
-            _requestedCount = 0;
-            _completedCount = 0;
             _state = QueueState.Cancelled;
             _lastMessage = message;
         }
@@ -553,9 +604,9 @@ namespace KillChord.Editor.AIDebugPlay
         private static void UnsubscribeRuntimeEvents()
         {
             EditorApplication.update -= Update;
-            if (_playerModule?.PlayerAttackController != null)
+            if (_playerModule?.PlayerAttackSignal != null)
             {
-                _playerModule.PlayerAttackController.OnAttackBeatExecuted -= HandleAttackBeatExecuted;
+                _playerModule.PlayerAttackSignal.OnAttackExecuted -= HandleAttackBeatExecuted;
             }
         }
 
@@ -587,31 +638,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// <returns> エラー応答JSON。 </returns>
         private static string CreateErrorJson(string message)
         {
-            return $"{{\"success\":false,\"state\":\"Rejected\",\"message\":\"{EscapeJson(message)}\"}}";
-        }
-
-        /// <summary>
-        ///     bool値をJSONリテラルへ変換する。
-        /// </summary>
-        /// <param name="value"> 変換する値。 </param>
-        /// <returns> JSONのboolリテラル。 </returns>
-        private static string ToJsonBool(bool value)
-        {
-            return value ? "true" : "false";
-        }
-
-        /// <summary>
-        ///     JSON文字列へ埋め込む文字をエスケープする。
-        /// </summary>
-        /// <param name="value"> エスケープ対象。 </param>
-        /// <returns> エスケープ済み文字列。 </returns>
-        private static string EscapeJson(string value)
-        {
-            return (value ?? string.Empty)
-                .Replace("\\", "\\\\")
-                .Replace("\"", "\\\"")
-                .Replace("\r", "\\r")
-                .Replace("\n", "\\n");
+            return AIDebugJson.Serialize(AIDebugJson.Object(("success", false), ("state", "Rejected"), ("message", message)));
         }
 
         private enum QueueState

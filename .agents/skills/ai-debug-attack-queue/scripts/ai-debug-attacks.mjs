@@ -1,58 +1,20 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
+import { randomUUID } from 'node:crypto';
+import { createTransport, csharpString } from './qa-transport.mjs';
+import { parseOptions, numberOption } from './qa-options.mjs';
 
-const [, , command, ...args] = process.argv;
-
-if (!command || !["enqueue", "status", "cancel"].includes(command)) {
-  fail("Usage: ai-debug-attacks.mjs <enqueue|status|cancel> [--queue green:4,orange:8] [--no-prime]");
-}
-
-let code;
-
-if (command === "enqueue") {
-  const queueIndex = args.indexOf("--queue");
-  const specification = queueIndex >= 0 ? args[queueIndex + 1] : undefined;
-  if (!specification) {
-    fail("enqueue requires --queue, for example --queue green:4,orange:8");
-  }
-
-  const prime = !args.includes("--no-prime");
-  const encodedSpecification = Buffer.from(specification, "utf8").toString("base64");
-  code = [
-    "using System;",
-    "using System.Text;",
-    "using KillChord.Editor.AIDebugPlay;",
-    `string specification = Encoding.UTF8.GetString(Convert.FromBase64String(\"${encodedSpecification}\"));`,
-    `return AIDebugAttackQueue.Enqueue(specification, ${prime ? "true" : "false"});`,
-  ].join(" ");
-} else if (command === "status") {
-  code = "using KillChord.Editor.AIDebugPlay; return AIDebugAttackQueue.GetStatusJson();";
-} else {
-  code = "using KillChord.Editor.AIDebugPlay; return AIDebugAttackQueue.Cancel();";
-}
-
-const result = spawnSync("uloop", ["execute-dynamic-code", "--code", code], {
-  cwd: process.cwd(),
-  encoding: "utf8",
-  stdio: ["ignore", "pipe", "pipe"],
-});
-
-if (result.error) {
-  fail(result.error.message);
-}
-
-if (result.stdout) {
-  process.stdout.write(result.stdout);
-}
-
-if (result.stderr) {
-  process.stderr.write(result.stderr);
-}
-
-process.exit(result.status ?? 1);
-
-function fail(message) {
-  process.stderr.write(`${message}\n`);
-  process.exit(1);
-}
+try {
+  const [command, ...args] = process.argv.slice(2);
+  const allowed = { enqueue: ['queue', 'run-id', 'timeout'], status: [], cancel: ['run-id'] };
+  if (!Object.hasOwn(allowed, command)) { throw new Error('Expected enqueue, status or cancel'); }
+  const options = parseOptions(args, allowed[command], command === 'enqueue' ? ['no-prime'] : []);
+  let expression;
+  if (command === 'enqueue' && options.queue) {
+    const timeout = numberOption(options, 'timeout', 120, 1, 3600);
+    expression = `AIDebugAttackQueue.Enqueue(${csharpString(options.queue)}, ${!options['no-prime']}, ${csharpString(options['run-id'] ?? randomUUID())}, ${timeout}d)`;
+  } else if (command === 'status') { expression = 'AIDebugAttackQueue.GetStatusJson()'; }
+  else if (command === 'cancel' && options['run-id']) { expression = `AIDebugAttackQueue.Cancel(${csharpString(options['run-id'])})`; }
+  else { throw new Error('enqueue requires --queue; cancel requires --run-id from status'); }
+  console.log(JSON.stringify(await (await createTransport())(expression)));
+} catch (error) { console.error(error.message); process.exitCode = 1; }

@@ -1,3 +1,3 @@
 interface:
-  display_name: "AI Debug Attack Queue"
-  short_description: "Queue frame-accurate rhythm attacks in Unity"
+  display_name: "Symphony QA Tools"
+  short_description: "Inspect JSON state, record QA evidence and queue rhythm attacks"
