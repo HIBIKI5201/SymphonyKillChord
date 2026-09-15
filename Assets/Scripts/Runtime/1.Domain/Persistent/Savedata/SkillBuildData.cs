@@ -17,7 +17,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         public IReadOnlyList<int> EquipmentSkillIDs => _equipmentSkillIDs;
 
         /// <summary>
-        ///     プレイヤーのスキルレベルアップポイント。
+        ///     旧形式の改造ポイント。ResourceInventory への移行処理専用。
         /// </summary>
         public int SkillLevelupPoint => _skillLevelupPoint;
 
@@ -50,7 +50,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         }
 
         /// <summary>
-        ///    プレイヤーのスキルレベルアップポイントを設定する。
+        ///    旧形式の改造ポイントを設定する。ResourceInventory への移行処理専用。
         /// </summary>
         /// <param name="point"> 設定するスキルレベルアップポイントの値。 </param>
         /// <exception cref="ArgumentOutOfRangeException"> point が 0 未満の場合にスローされます。</exception>

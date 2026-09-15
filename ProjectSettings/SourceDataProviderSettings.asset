@@ -59,6 +59,7 @@ MonoBehaviour:
   - _addressableKey: LoadingTipsConfig
   - _addressableKey: BgmSelectorLabelTableAsset
   - _addressableKey: Assets/Level/Data/Master/OutGame/StageSelect/Stream_StageTreeAsset.asset
+  - _addressableKey: GameResourceDefinitionRepository
   - _addressableKey: GamepadHapticsConfig
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
@@ -133,6 +134,10 @@ MonoBehaviour:
     _sourceAssetAddressableKey: EnemyDefinitionRepository
     _propertyPath: _enemyDefinitionAssets
     _assetCreationDirectory: Assets/Level/Data/Master/InGame/Enemy/Definitions
+  - _collectionKey: GameResource
+    _sourceAssetAddressableKey: GameResourceDefinitionRepository
+    _propertyPath: _resourceAssets
+    _assetCreationDirectory: Assets/Level/Data/Master/OutGame/Resource
   - _collectionKey: LoadingTip
     _sourceAssetAddressableKey: LoadingTipsConfig
     _propertyPath: tips

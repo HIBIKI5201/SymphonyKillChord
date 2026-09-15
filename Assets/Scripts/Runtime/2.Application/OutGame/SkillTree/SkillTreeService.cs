@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using SymphonyFrameWork.System.SaveSystem;
@@ -193,13 +194,13 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 unlockedSkillValues[i] = unlockedSkillIds[i].Value;
             }
 
-            int previousPoints = saveData.SkillUnlock.ResearchPoint;
+            int previousPoints = saveData.ResourceInventory.GetAmount(GameResourceIds.ResearchPoint);
             int[] previousNodeIds = (int[])saveData.SkillUnlock.UnlockedSkillNodeIds.Clone();
             int[] previousSkillIds = (int[])saveData.SkillUnlock.UnlockedSkillIds.Clone();
 
             saveData.SkillUnlock.SetUnlockedSkillNodeIds(unlockedNodeValues);
             saveData.SkillUnlock.SetUnlockedSkillIds(unlockedSkillValues);
-            saveData.SkillUnlock.SetResearchPoint(currentPoints);
+            saveData.ResourceInventory.SetAmount(GameResourceIds.ResearchPoint, currentPoints);
 
             try
             {
@@ -208,7 +209,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             catch
             {
                 // SaveStore が返すキャッシュ参照を、保存試行前の状態へ戻す。
-                saveData.SkillUnlock.SetResearchPoint(previousPoints);
+                saveData.ResourceInventory.SetAmount(GameResourceIds.ResearchPoint, previousPoints);
                 saveData.SkillUnlock.SetUnlockedSkillNodeIds(previousNodeIds);
                 saveData.SkillUnlock.SetUnlockedSkillIds(previousSkillIds);
                 throw;
@@ -312,13 +313,13 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
-            int previousPoints = saveData.SkillUnlock.ResearchPoint;
+            int previousPoints = saveData.ResourceInventory.GetAmount(GameResourceIds.ResearchPoint);
             int[] previousNodeIds = (int[])saveData.SkillUnlock.UnlockedSkillNodeIds.Clone();
             int[] previousSkillIds = (int[])saveData.SkillUnlock.UnlockedSkillIds.Clone();
             List<int> previousEquipmentSkillIds = new List<int>(saveData.SkillBuild.EquipmentSkillIDs);
             try
             {
-                saveData.SkillUnlock.SetResearchPoint(resetPoints);
+                saveData.ResourceInventory.SetAmount(GameResourceIds.ResearchPoint, resetPoints);
                 saveData.SkillUnlock.SetUnlockedSkillNodeIds(ConvertNodeIds(remainingNodes));
                 saveData.SkillUnlock.SetUnlockedSkillIds(ConvertSkillIds(remainingSkills));
                 saveData.SkillBuild.SetEquipmentSkillIDs(FilterEquippedSkillIds(
@@ -329,7 +330,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             catch
             {
                 // SaveStore が返すキャッシュ参照を、保存試行前の状態へ戻す。
-                saveData.SkillUnlock.SetResearchPoint(previousPoints);
+                saveData.ResourceInventory.SetAmount(GameResourceIds.ResearchPoint, previousPoints);
                 saveData.SkillUnlock.SetUnlockedSkillNodeIds(previousNodeIds);
                 saveData.SkillUnlock.SetUnlockedSkillIds(previousSkillIds);
                 saveData.SkillBuild.SetEquipmentSkillIDs(previousEquipmentSkillIds);

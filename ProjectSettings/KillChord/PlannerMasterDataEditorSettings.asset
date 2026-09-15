@@ -89,4 +89,9 @@ MonoBehaviour:
     - ScenarioBackground
     - ScenarioAnimation
     - ScenarioPortrait
+  - _displayName: Resource
+    _sourceAssetAddressableKeys:
+    - GameResourceDefinitionRepository
+    _collectionCategories:
+    - GameResource
   _isInitialized: 1
