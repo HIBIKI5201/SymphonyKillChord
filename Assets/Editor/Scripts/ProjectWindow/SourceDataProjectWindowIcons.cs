@@ -16,7 +16,8 @@ namespace KillChord.Editor.ProjectWindow
 
         private static readonly Color _addressableFallbackColor = new(0.2f, 0.6f, 1f, 0.9f);
         private static readonly Color _collectionItemColor = new(0.85f, 0.55f, 0.15f, 0.9f);
-        private static readonly Texture _addressableIcon = ResolveIcon("AddressableAssetsWindow");
+        private static readonly Texture _addressableIcon = ResolveIcon(
+            EditorGUIUtility.isProSkin ? "d_Linked" : "Linked");
 
         /// <summary>
         ///     Project Windowの描画イベントを購読します。
