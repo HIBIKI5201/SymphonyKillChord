@@ -9,6 +9,7 @@ namespace KillChord.Editor.Inspectors.SourceData
     ///     敵Wave定義アセットの標準項目とWave概要をInspectorへ表示します。
     /// </summary>
     [CustomEditor(typeof(EnemyWaveDefinitionAsset))]
+    [CanEditMultipleObjects]
     internal sealed class EnemyWaveDefinitionAssetEditor : UnityEditor.Editor
     {
         /// <summary>
@@ -22,10 +23,17 @@ namespace KillChord.Editor.Inspectors.SourceData
 
         /// <summary>
         ///     敵Wave定義アセットのInspectorを描画します。
+        ///     Wave概要/マップはserializedObject(単一target)前提のため、単一選択時のみ描画します。
         /// </summary>
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
+
+            if (targets.Length != 1)
+            {
+                return;
+            }
+
             serializedObject.Update();
             EditorGUILayout.Space();
             EditorGUILayout.BeginHorizontal();
