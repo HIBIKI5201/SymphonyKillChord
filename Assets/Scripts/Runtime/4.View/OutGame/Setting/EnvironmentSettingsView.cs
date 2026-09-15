@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.Persistent.Environment;
+using KillChord.Runtime.View.OutGame.Common;
 using R3;
 using System;
 using UnityEngine.UIElements;
@@ -33,7 +34,6 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _qualityLevelValueLabel = Require<Label>(rootElement, QUALITY_LEVEL_VALUE_LABEL_NAME);
             _brightnessSlider = Require<SliderInt>(rootElement, BRIGHTNESS_SLIDER_NAME);
             _brightnessValueLabel = Require<Label>(rootElement, BRIGHTNESS_VALUE_LABEL_NAME);
-            _backButton = Require<Button>(rootElement, BACK_BUTTON_NAME);
             _saveButton = Require<Button>(rootElement, SAVE_BUTTON_NAME);
             _subscriptions = new CompositeDisposable();
 
@@ -46,16 +46,24 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// </summary>
         public void Dispose()
         {
-            _screenModePrevButton.clicked -= HandleScreenModePrevButtonClicked;
-            _screenModeNextButton.clicked -= HandleScreenModeNextButtonClicked;
-            _resolutionPrevButton.clicked -= HandleResolutionPrevButtonClicked;
-            _resolutionNextButton.clicked -= HandleResolutionNextButtonClicked;
-            _qualityLevelPrevButton.clicked -= HandleQualityLevelPrevButtonClicked;
-            _qualityLevelNextButton.clicked -= HandleQualityLevelNextButtonClicked;
+            _screenModePrevButtonPreset.Dispose();
+            _screenModeNextButtonPreset.Dispose();
+            _resolutionPrevButtonPreset.Dispose();
+            _resolutionNextButtonPreset.Dispose();
+            _qualityLevelPrevButtonPreset.Dispose();
+            _qualityLevelNextButtonPreset.Dispose();
             _brightnessSlider.UnregisterValueChangedCallback(HandleBrightnessChanged);
-            _backButton.clicked -= HandleBackButtonClicked;
             _saveButton.clicked -= HandleSaveButtonClicked;
             _subscriptions.Dispose();
+        }
+
+        /// <summary>
+        ///     プレビュー中の変更を破棄する。
+        ///     パネルを保存せずに離れる際(ウィンドウ外クリック/Bボタン)に呼び出される。
+        /// </summary>
+        public void CancelPendingChanges()
+        {
+            _environmentSettingsCommand.CancelChanges();
         }
 
         private const string SCREEN_MODE_PREV_BUTTON_NAME = "ScreenModePrevButton";
@@ -69,7 +77,6 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string QUALITY_LEVEL_VALUE_LABEL_NAME = "QualityLevelValueLabel";
         private const string BRIGHTNESS_SLIDER_NAME = "BrightnessSlider";
         private const string BRIGHTNESS_VALUE_LABEL_NAME = "BrightnessValueLabel";
-        private const string BACK_BUTTON_NAME = "EnvironmentPanelBackButton";
         private const string SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
         private const int CYCLE_PREVIOUS_DIRECTION = -1;
         private const int CYCLE_NEXT_DIRECTION = 1;
@@ -87,23 +94,27 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Label _qualityLevelValueLabel;
         private readonly SliderInt _brightnessSlider;
         private readonly Label _brightnessValueLabel;
-        private readonly Button _backButton;
         private readonly Button _saveButton;
         private readonly CompositeDisposable _subscriptions;
+        private IDisposable _screenModePrevButtonPreset;
+        private IDisposable _screenModeNextButtonPreset;
+        private IDisposable _resolutionPrevButtonPreset;
+        private IDisposable _resolutionNextButtonPreset;
+        private IDisposable _qualityLevelPrevButtonPreset;
+        private IDisposable _qualityLevelNextButtonPreset;
 
         /// <summary>
         ///     UIのコールバックを登録する。
         /// </summary>
         private void RegisterCallbacks()
         {
-            _screenModePrevButton.clicked += HandleScreenModePrevButtonClicked;
-            _screenModeNextButton.clicked += HandleScreenModeNextButtonClicked;
-            _resolutionPrevButton.clicked += HandleResolutionPrevButtonClicked;
-            _resolutionNextButton.clicked += HandleResolutionNextButtonClicked;
-            _qualityLevelPrevButton.clicked += HandleQualityLevelPrevButtonClicked;
-            _qualityLevelNextButton.clicked += HandleQualityLevelNextButtonClicked;
+            _screenModePrevButtonPreset = _screenModePrevButton.ApplyBasicButtonPreset(HandleScreenModePrevButtonClicked);
+            _screenModeNextButtonPreset = _screenModeNextButton.ApplyBasicButtonPreset(HandleScreenModeNextButtonClicked);
+            _resolutionPrevButtonPreset = _resolutionPrevButton.ApplyBasicButtonPreset(HandleResolutionPrevButtonClicked);
+            _resolutionNextButtonPreset = _resolutionNextButton.ApplyBasicButtonPreset(HandleResolutionNextButtonClicked);
+            _qualityLevelPrevButtonPreset = _qualityLevelPrevButton.ApplyBasicButtonPreset(HandleQualityLevelPrevButtonClicked);
+            _qualityLevelNextButtonPreset = _qualityLevelNextButton.ApplyBasicButtonPreset(HandleQualityLevelNextButtonClicked);
             _brightnessSlider.RegisterValueChangedCallback(HandleBrightnessChanged);
-            _backButton.clicked += HandleBackButtonClicked;
             _saveButton.clicked += HandleSaveButtonClicked;
         }
 
@@ -180,14 +191,6 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private void HandleBrightnessChanged(ChangeEvent<int> changeEvent)
         {
             _environmentSettingsCommand.SetBrightness(changeEvent.newValue);
-        }
-
-        /// <summary>
-        ///     プレビュー中の変更を破棄する。
-        /// </summary>
-        private void HandleBackButtonClicked()
-        {
-            _environmentSettingsCommand.CancelChanges();
         }
 
         /// <summary>

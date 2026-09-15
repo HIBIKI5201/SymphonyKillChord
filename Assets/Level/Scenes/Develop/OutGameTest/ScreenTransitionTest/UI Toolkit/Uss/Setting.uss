@@ -64,15 +64,12 @@
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     color: rgb(58, 47, 20);
-    background-color: rgb(253, 246, 224);
-    border-left-width: 2px;
-    border-right-width: 2px;
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-    border-left-color: rgb(184, 155, 74);
-    border-right-color: rgb(184, 155, 74);
-    border-top-color: rgb(184, 155, 74);
-    border-bottom-color: rgb(184, 155, 74);
+}
+
+.setting-menu-button:hover,
+.setting-menu-button:focus,
+.setting-menu-button:active {
+    color: white;
 }
 
 .setting-panel {
@@ -87,21 +84,6 @@
     height: 44px;
     justify-content: center;
     margin-bottom: 12px;
-}
-
-.setting-panel-back-button {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 44px;
-    height: 44px;
-    font-size: 28px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0);
-    border-left-width: 0;
-    border-right-width: 0;
-    border-top-width: 0;
-    border-bottom-width: 0;
 }
 
 .setting-panel-title {
@@ -187,15 +169,12 @@
     font-size: 20px;
     -unity-font-style: bold;
     color: rgb(58, 47, 20);
-    background-color: rgb(253, 246, 224);
-    border-left-width: 2px;
-    border-right-width: 2px;
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-    border-left-color: rgb(184, 155, 74);
-    border-right-color: rgb(184, 155, 74);
-    border-top-color: rgb(184, 155, 74);
-    border-bottom-color: rgb(184, 155, 74);
+}
+
+.setting-select-arrow-button:hover,
+.setting-select-arrow-button:focus,
+.setting-select-arrow-button:active {
+    color: white;
 }
 
 .setting-select-value-label {

@@ -5,6 +5,7 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
@@ -108,6 +109,17 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 }
             }
 
+            if (!ServiceLocator.TryGetInstance(out InputComposition inputComposition))
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] InputCompositionを取得できませんでした。", this);
+                return false;
+            }
+
+            // ホーム画面初回表示時点でOutGame入力マップ(Submit/Cancel)を有効化する。
+            // 出撃/シナリオ復帰時のみ有効化されていたため、それらを経由しない初回起動時は
+            // コントローラー/キーボードのCancel(Bボタン/Esc)が機能しなかった。
+            inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+
             ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
             if (!SaveStore.IsLoaded<SaveData>()
                 || SaveStore.Get<SaveData>().Tutorial.Phase >= TutorialPhase.BattleCompleted)
@@ -130,6 +142,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
             ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
             ServiceLocator.UnregisterInstance<HomeScreenView>();
+            ServiceLocator.UnregisterInstance<SettingScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
             _screenStateRepository = null;
@@ -337,6 +350,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             ServiceLocator.RegisterInstance(battlePreparationScreen);
             // HomeCharacterPreviewInitializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(homeScreenView);
+            // SettingComposition から取得できるように登録する。
+            ServiceLocator.RegisterInstance(settingScreenView);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,

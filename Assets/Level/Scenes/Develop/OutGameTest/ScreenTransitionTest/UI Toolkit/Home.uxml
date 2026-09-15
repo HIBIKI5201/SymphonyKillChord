@@ -7,17 +7,17 @@
         <ui:VisualElement name="CharacterContent" picking-mode="Ignore" style="position: absolute; left: 0; bottom: 0; width: 45%; height: 92%; align-items: flex-start; justify-content: flex-end; -unity-background-scale-mode: scale-and-crop;">
             <ui:Image name="CharacterImage" picking-mode="Ignore" style="width: 100%; height: 100%; -unity-background-scale-mode: scale-to-fit;"/>
         </ui:VisualElement>
-        <ui:VisualElement name="TopBar" picking-mode="Position" class="home-top-bar" style="top: 5px; left: 6px;">
+        <ui:VisualElement name="TopBar" picking-mode="Position" class="home-top-bar" style="top: 5px; left: -1px; width: 732px; -unity-background-scale-mode: stretch-to-fill;">
             <ui:VisualElement name="PointsRow" class="home-points-row">
                 <ui:VisualElement name="RebuildPointBadge" class="home-point-badge" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Label.png?fileID=2800000&amp;guid=14019fcc13d64f041825db46c63bb542&amp;type=3#UI_Label&quot;);">
-                    <ui:VisualElement name="RebuildPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ModificationPoint.PNG?fileID=21300000&amp;guid=4e62359d69f84914fb02f7ceb8910bd0&amp;type=3#UI_ModificationPoint&quot;);"/>
+                    <ui:VisualElement name="RebuildPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ModificationPoint.PNG?fileID=21300000&amp;guid=4e62359d69f84914fb02f7ceb8910bd0&amp;type=3#UI_ModificationPoint&quot;); height: 60px; width: 60px;"/>
                     <ui:VisualElement name="RebuildPointInfo" picking-mode="Ignore" class="home-point-info">
                         <ui:Label text="改造ポイント" picking-mode="Ignore" class="home-point-name-label"/>
                         <ui:Label name="RebuildPointsValueLabel" text="0" picking-mode="Ignore" class="home-point-value-label"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="UnlockPointBadge" class="home-point-badge" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Label.png?fileID=2800000&amp;guid=14019fcc13d64f041825db46c63bb542&amp;type=3#UI_Label&quot;);">
-                    <ui:VisualElement name="UnlockPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ResearchPoint.PNG?fileID=21300000&amp;guid=c74ea33a7791b164c9a7d4735e466052&amp;type=3#UI_ResearchPoint&quot;);"/>
+                    <ui:VisualElement name="UnlockPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ResearchPoint.PNG?fileID=21300000&amp;guid=c74ea33a7791b164c9a7d4735e466052&amp;type=3#UI_ResearchPoint&quot;); height: 60px; width: 60px;"/>
                     <ui:VisualElement name="UnlockPointInfo" picking-mode="Ignore" class="home-point-info">
                         <ui:Label text="解放ポイント" picking-mode="Ignore" class="home-point-name-label"/>
                         <ui:Label name="UnlockPointsValueLabel" text="0" picking-mode="Ignore" class="home-point-value-label"/>
