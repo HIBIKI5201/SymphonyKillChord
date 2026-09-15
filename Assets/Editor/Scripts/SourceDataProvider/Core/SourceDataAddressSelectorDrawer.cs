@@ -1,4 +1,3 @@
-using KillChord.Editor.SourceDataProvider.Wiki;
 using KillChord.Runtime.Utility.Identity;
 using System;
 using System.Collections.Generic;
@@ -90,10 +89,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
                     EditorGUIUtility.PingObject(sourceAsset);
                 }
 
-                if (GUI.Button(jumpRect, JUMP_LABEL, EditorStyles.miniButton)
-                    && PlannerMasterDataWindow.TryGetOrOpenWindow(out PlannerMasterDataWindow window))
+                if (GUI.Button(jumpRect, JUMP_LABEL, EditorStyles.miniButton))
                 {
-                    window.NavigateToSourceAsset(property.stringValue);
+                    PlannerNavigationHub.TryNavigateToSourceAsset(property.stringValue);
                 }
             }
             EditorGUI.EndProperty();
