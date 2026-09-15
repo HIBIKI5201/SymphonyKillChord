@@ -39,7 +39,7 @@ const total = String(slideCount).padStart(2, '0');
 						</li>
 					))
 				}
-				<li class="slide-item">
+				<li class="slide-item" data-slide-id="skill">
 					<SkillShowcaseSlide />
 				</li>
 			</ul>
@@ -84,7 +84,10 @@ const total = String(slideCount).padStart(2, '0');
 		const nextButton = root.querySelector<HTMLButtonElement>('.nav.next');
 		const currentLabel = root.querySelector('.counter .current');
 
-		let index = 0;
+		// URLハッシュ(#skill等)でスライドを指定できるようにし、他ページからの直接誘導に対応する
+		const targetId = location.hash.slice(1);
+		const targetIndex = slides.findIndex((slide) => slide.dataset.slideId === targetId);
+		let index = targetIndex >= 0 ? targetIndex : 0;
 
 		// 最後の次は最初、最初の前は最後に戻るループ方式(負値でも正しく巡回するよう剰余の前に長さを足す)
 		const wrap = (value: number) => (value + slides.length) % slides.length;
@@ -117,7 +120,15 @@ const total = String(slideCount).padStart(2, '0');
 			if (event.key === 'ArrowLeft') goTo(index - 1);
 		});
 
-		render();
+		// ハッシュ指定で開いた直後にスライド送りアニメーションが再生されないよう、初回描画のみtransitionを止める
+		if (track && targetIndex > 0) {
+			track.style.transition = 'none';
+			render();
+			track.offsetHeight;
+			track.style.transition = '';
+		} else {
+			render();
+		}
 	}
 </script>
 
