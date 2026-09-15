@@ -51,7 +51,7 @@ namespace KillChord.Demo.Editor
         public const float CAMERA_TURN_START_SECONDS = 7.0f;
 
         /// <summary> Symphonyを正面に捉える秒数です。 </summary>
-        public const float CAMERA_TURN_END_SECONDS = 9.2f;
+        public const float CAMERA_TURN_END_SECONDS = 7.733333f;
 
         /// <summary> 銃身横カメラへ切り替える秒数です。 </summary>
         public const float SIDE_CAMERA_CUT_SECONDS = 11.3f;
@@ -278,9 +278,9 @@ namespace KillChord.Demo.Editor
                 LOCAL_POSITION_X_PROPERTY,
                 new Keyframe(0.0f, 0.006f),
                 new Keyframe(CAMERA_MOVE_DURATION_SECONDS, 0.006f),
-                new Keyframe(7.55f, 0.481f),
-                new Keyframe(8.1f, 0.73f),
-                new Keyframe(8.65f, 0.544f),
+                new Keyframe(GetCameraTurnTime(0.25f), 0.481f),
+                new Keyframe(GetCameraTurnTime(0.5f), 0.73f),
+                new Keyframe(GetCameraTurnTime(0.75f), 0.544f),
                 new Keyframe(CAMERA_TURN_END_SECONDS, 0.0f),
                 new Keyframe(SIDE_CAMERA_CUT_SECONDS, 0.0f));
             SetTransformCurve(
@@ -291,9 +291,9 @@ namespace KillChord.Demo.Editor
                 new Keyframe(4.016667f, 1.15f),
                 new Keyframe(5.5f, 1.15f),
                 new Keyframe(CAMERA_MOVE_DURATION_SECONDS, 1.267f),
-                new Keyframe(7.55f, 1.29f),
-                new Keyframe(8.1f, 1.33f),
-                new Keyframe(8.65f, 1.35f),
+                new Keyframe(GetCameraTurnTime(0.25f), 1.29f),
+                new Keyframe(GetCameraTurnTime(0.5f), 1.33f),
+                new Keyframe(GetCameraTurnTime(0.75f), 1.35f),
                 new Keyframe(CAMERA_TURN_END_SECONDS, 1.37f),
                 new Keyframe(SIDE_CAMERA_CUT_SECONDS, 1.37f));
             SetTransformCurve(
@@ -301,9 +301,9 @@ namespace KillChord.Demo.Editor
                 LOCAL_POSITION_Z_PROPERTY,
                 new Keyframe(0.0f, -0.007f),
                 new Keyframe(CAMERA_MOVE_DURATION_SECONDS, -0.007f),
-                new Keyframe(7.55f, -0.107f),
-                new Keyframe(8.1f, -0.588f),
-                new Keyframe(8.65f, -1.132f),
+                new Keyframe(GetCameraTurnTime(0.25f), -0.107f),
+                new Keyframe(GetCameraTurnTime(0.5f), -0.588f),
+                new Keyframe(GetCameraTurnTime(0.75f), -1.132f),
                 new Keyframe(CAMERA_TURN_END_SECONDS, -1.388f),
                 new Keyframe(SIDE_CAMERA_CUT_SECONDS, -1.388f));
             EditorUtility.SetDirty(clip);
@@ -507,6 +507,19 @@ namespace KillChord.Demo.Editor
             }
 
             return curve;
+        }
+
+        /// <summary>
+        ///     振り向き区間内の正規化時刻をTimeline時刻へ変換します。
+        /// </summary>
+        /// <param name="normalizedTime"> 振り向き区間内の0から1の時刻です。 </param>
+        /// <returns> Timeline上の時刻です。 </returns>
+        private static float GetCameraTurnTime(float normalizedTime)
+        {
+            return Mathf.Lerp(
+                CAMERA_TURN_START_SECONDS,
+                CAMERA_TURN_END_SECONDS,
+                normalizedTime);
         }
 
         /// <summary>
