@@ -12,8 +12,10 @@ namespace KillChord.Runtime.View.InGame.Mission
     {
         /// <summary> 表示内容変更の通知を担当するReactiveProperty </summary>
         public ReadOnlyReactiveProperty<int> Revision => _revision;
-        /// <summary> 会話テキスト </summary>
-        public string Text { get; private set; }
+        /// <summary> 会話テキストのローカライズキー </summary>
+        public string TextEntryKey { get; private set; }
+        /// <summary> 翻訳未登録時に表示する会話テキスト </summary>
+        public string FallbackText { get; private set; }
         /// <summary> 顔画像 </summary>
         public Sprite Portrait { get; private set; }
         /// <summary> 表示状態 </summary>
@@ -28,7 +30,8 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// <inheritdoc />
         public void Apply(in MissionDialogueDTO dto)
         {
-            Text = dto.Text;
+            TextEntryKey = dto.TextEntryKey;
+            FallbackText = dto.FallbackText;
             Portrait = dto.Portrait;
             IsVisible = dto.IsVisible;
             IsPaused = dto.IsPaused;

@@ -58,6 +58,8 @@ MonoBehaviour:
   - _addressableKey: SkillGenreIconCatalogAsset
   - _addressableKey: LoadingTipsConfig
   - _addressableKey: BgmSelectorLabelTableAsset
+  - _addressableKey: Assets/Level/Data/Master/OutGame/StageSelect/Stream_StageTreeAsset.asset
+  - _addressableKey: GamepadHapticsConfig
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset

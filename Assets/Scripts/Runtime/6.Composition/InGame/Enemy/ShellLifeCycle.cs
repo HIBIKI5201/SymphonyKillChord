@@ -113,8 +113,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public void Activate(EnemyBattleState enemyBattleState)
         {
             gameObject.SetActive(true);
+
+            // Viewの有効化に失敗した(=攻撃対象を失っている)場合、着弾予告SE・爆発予約を
+            // 仕込まずに即座にプールへ戻す。表示・ダメージが伴わないまま音だけが再生される事故を防ぐため。
+            if (!_view.TryActivate())
+            {
+                Deactivate();
+                return;
+            }
+
             _controller.Activate(enemyBattleState);
-            _view.Activate();
         }
 
         /// <summary>

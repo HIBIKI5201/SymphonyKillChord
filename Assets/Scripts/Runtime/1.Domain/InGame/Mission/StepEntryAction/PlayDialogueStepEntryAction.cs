@@ -17,7 +17,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission.StepEntryAction
             List<MissionDialogueLine> copy = new(lines.Count);
             for (int i = 0; i < lines.Count; i++)
             {
-                if (string.IsNullOrWhiteSpace(lines[i].Text))
+                if (string.IsNullOrWhiteSpace(lines[i].TextEntryKey)
+                    && string.IsNullOrWhiteSpace(lines[i].FallbackText))
                 {
                     throw new ArgumentException($"台詞[{i}]が未設定です。", nameof(lines));
                 }

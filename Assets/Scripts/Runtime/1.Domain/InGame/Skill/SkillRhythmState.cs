@@ -27,14 +27,14 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary> 現在の履歴数。 </summary>
         public int Count => _recordBuffer.Count;
 
-        /// <summary> 最後に登録されたタイミング（unscaledTime）を取得する。 </summary>
+        /// <summary> 最後に登録された音源再生タイミングを取得する。 </summary>
         public float LastTiming => Count > 0 ? _recordBuffer.PeekLast().Timing : 0f;
 
         /// <summary>
         ///     計算済みの値をバッファに登録する。
         /// </summary>
         /// <param name="beatType"> 計算済みの拍子。 </param>
-        /// <param name="timing"> 登録時のタイミング。 </param>
+        /// <param name="timing"> 登録時の音源再生タイミング。 </param>
         /// <param name="actionType"> アクションの種類。 </param>
         public void Enqueue(BeatType beatType, float timing, BattleActionType actionType)
         {

@@ -17,6 +17,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private const SkillExecutionFailurePolicy TARGET_REJECT_POLICY = SkillExecutionFailurePolicy.ResetProgressOnly;
 
         /// <summary>
+        ///     音楽再生位置の巻き戻しとみなす許容誤差（秒）です。
+        ///     MusicSyncServiceの巻き戻し検知と同じ扱いで、入力履歴のTimingが非単調になるのを防ぎます。
+        /// </summary>
+        private const float PLAYBACK_REWIND_TOLERANCE_SECONDS = 0.01f;
+
+        /// <summary>
         ///     コントローラーを初期化します。
         /// </summary>
         public SkillExecutionController(
@@ -43,11 +49,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         ///     スキル発動を試す。
         /// </summary>
         /// <param name="beatType"> 現在ビートです。 </param>
-        /// <param name="now"> 現在時刻です。 </param>
+        /// <param name="now"> クールダウンやUI表示に使う、ゲーム側の現在時刻です。 </param>
+        /// <param name="musicTime"> リズム入力履歴に記録する、音楽の再生時間です。 </param>
         /// <param name="battleActionType"> 行動種別です。 </param>
         /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうか。 </param>
         /// <returns> 実行結果です。 </returns>
-        public SkillExecutionResult TryExecuteSkill(BeatType beatType, float now, BattleActionType battleActionType, bool isJustHit)
+        public SkillExecutionResult TryExecuteSkill(BeatType beatType, float now, float musicTime, BattleActionType battleActionType, bool isJustHit)
         {
             if (!_skillCooldownState.IsSkillReady(now))
             {
@@ -55,7 +62,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 return new SkillExecutionResult(SkillExecutionResultType.CooldownBlocked);
             }
 
-            _skillRhythmState.Enqueue(beatType, now, battleActionType);
+            // 音楽の再生位置が巻き戻った場合、Timingが非単調になり不整合を招くため履歴を破棄する。
+            if (_skillRhythmState.Count > 0
+                && musicTime + PLAYBACK_REWIND_TOLERANCE_SECONDS < _skillRhythmState.LastTiming)
+            {
+                _skillRhythmState.Clear();
+            }
+
+            _skillRhythmState.Enqueue(beatType, musicTime, battleActionType);
             ReadOnlySpan<BeatType> inputHistory = _skillRhythmState.GetHistoryBeatType();
             bool isInputMatch = _skillCheckService.CheckInput(_skillDefinition, inputHistory);
 

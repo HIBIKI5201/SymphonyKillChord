@@ -69,6 +69,29 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             }
         }
 
+        /// <summary>
+        ///     指定したスキルのレベルを1上げ、改造Pを1消費する。
+        /// </summary>
+        /// <param name="skillId"> 対象スキルID。 </param>
+        /// <returns> 改造Pが不足している等の理由で実行できなかった場合は false。 </returns>
+        public async Task<bool> LevelUpAsync(int skillId)
+        {
+            try
+            {
+                if (!_skillDataMap.TryGetValue(new SkillId(skillId), out SkillTemplate skillData))
+                {
+                    return false;
+                }
+
+                return await _skillBuildUseCase.LevelUpSkillAsync(skillId, skillData.Level.Value);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"スキルのレベルアップ中にエラーが発生しました: {ex.Message}");
+                return false;
+            }
+        }
+
         private const int EMPTY_SKILL_ID = -1;
 
         private readonly SkillBuildUseCase _skillBuildUseCase;

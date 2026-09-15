@@ -17,16 +17,19 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="onDropAction"> ドロップ時に実行されるアクション。 </param>
         /// <param name="slotContainerName"> スロットコンテナの名前。 </param>
         /// <param name="slotName"> スロットの名前。 </param>
+        /// <param name="onDragStarted"> ドラッグが確定した瞬間(移動量が閾値を超えた瞬間)に実行されるアクション。 </param>
         public SkillElementDragAndDropManipulator(
             VisualElement target,
             Action<VisualElement, VisualElement> onDropAction = null,
             string slotContainerName = "skill-element-container",
-            string slotName = "skill-element-slot")
+            string slotName = "skill-element-slot",
+            Action<VisualElement> onDragStarted = null)
         {
             this.target = target;
             _onDropAction = onDropAction;
             _slotContainerName = slotContainerName;
             _slotName = slotName;
+            _onDragStarted = onDragStarted;
 
             if (target == null)
             {
@@ -70,6 +73,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly string _slotContainerName;
         private readonly string _slotName;
         private readonly Action<VisualElement, VisualElement> _onDropAction;
+        private readonly Action<VisualElement> _onDragStarted;
 
         private const string DRAG_COMPLETED_CLASS_NAME = "drag-just-completed";
         private const string SKILL_BUILD_ROOT_NAME = "SkillBuildRoot";
@@ -292,6 +296,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         {
             _isDragging = true;
             target.style.position = Position.Absolute;
+            _onDragStarted?.Invoke(target);
 
             // キャプチャ中の要素を別の親へ移すと PointerCaptureOutEvent が発生するため、
             // 親変更による通知を無視し、移動後にキャプチャを再取得する。

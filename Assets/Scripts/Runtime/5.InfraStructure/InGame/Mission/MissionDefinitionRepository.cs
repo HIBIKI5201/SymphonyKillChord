@@ -30,17 +30,20 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         public bool TryGetPreview(
             MissionId missionId,
             out string mainMissionText,
-            out IReadOnlyList<string> evaluationDescriptions)
+            out IReadOnlyList<string> evaluationDescriptions,
+            out IReadOnlyList<string> evaluationIds)
         {
             if (TryFind(missionId, out MissionDefinitionAsset asset))
             {
                 mainMissionText = asset.MainMissionText;
                 evaluationDescriptions = asset.GetEvaluationDescriptions();
+                evaluationIds = asset.GetEvaluationIds();
                 return true;
             }
 
             mainMissionText = null;
             evaluationDescriptions = null;
+            evaluationIds = null;
             return false;
         }
 

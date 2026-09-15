@@ -1,4 +1,5 @@
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Composition.Persistent.Music;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -25,6 +26,7 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
         private UIDocument _uiDocument;
 
         private AudioSettingsView _audioSettingsView;
+        private EnvironmentSettingsView _environmentSettingsView;
 
         /// <summary>
         ///     設定画面を初期化します。
@@ -34,6 +36,7 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
         {
             if (_uiDocument == null
                 || !ServiceLocator.TryGetInstance(out AudioSettingsModuleContainer audioSettingsContainer)
+                || !ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
                 || !ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
                 Debug.LogError(
@@ -54,25 +57,31 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
             try
             {
                 HierarchicalNavigationScope settingNavigationScope = new(settingRoot);
-                _settingCategoryView = new SettingCategoryView(settingRoot, settingNavigationScope);
+                _settingMenuView = new SettingMenuView(settingRoot, settingNavigationScope);
                 _audioSettingsView = new AudioSettingsView(
                     settingRoot,
                     audioSettingsContainer.ViewModel,
                     audioSettingsContainer.Command);
+                _environmentSettingsView = new EnvironmentSettingsView(
+                    settingRoot,
+                    environmentSettingsContainer.ViewModel,
+                    environmentSettingsContainer.Command);
             }
             catch (Exception exception)
             {
+                _environmentSettingsView?.Dispose();
                 _audioSettingsView?.Dispose();
-                _settingCategoryView?.Dispose();
+                _settingMenuView?.Dispose();
+                _environmentSettingsView = null;
                 _audioSettingsView = null;
-                _settingCategoryView = null;
+                _settingMenuView = null;
                 Debug.LogError(
                     $"[{nameof(SettingComposition)}] 設定画面のView構築に失敗しました。{exception}",
                     this);
                 return false;
             }
 
-            _outGameUIEvent.OnShownSettingScreen += _settingCategoryView.ShowDefaultCategory;
+            _outGameUIEvent.OnShownSettingScreen += _settingMenuView.ShowMenu;
             return true;
         }
 
@@ -81,21 +90,23 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
         /// </summary>
         public override void Shutdown()
         {
-            if (_outGameUIEvent != null && _settingCategoryView != null)
+            if (_outGameUIEvent != null && _settingMenuView != null)
             {
-                _outGameUIEvent.OnShownSettingScreen -= _settingCategoryView.ShowDefaultCategory;
+                _outGameUIEvent.OnShownSettingScreen -= _settingMenuView.ShowMenu;
             }
 
+            _environmentSettingsView?.Dispose();
             _audioSettingsView?.Dispose();
-            _settingCategoryView?.Dispose();
+            _settingMenuView?.Dispose();
+            _environmentSettingsView = null;
             _audioSettingsView = null;
-            _settingCategoryView = null;
+            _settingMenuView = null;
             _outGameUIEvent = null;
         }
 
         private const string SETTING_ROOT_NAME = "SettingContainer";
 
-        private SettingCategoryView _settingCategoryView;
+        private SettingMenuView _settingMenuView;
         private OutGameUIEvent _outGameUIEvent;
     }
 }

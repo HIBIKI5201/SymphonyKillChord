@@ -13,8 +13,8 @@
     height: 150px;
     width: 150px;
     overflow: hidden;
-    margin-left: 4%;
-    margin-right: 4%;
+    margin-left: 0;
+    margin-right: 0;
     border-left-width: 4px;
     border-right-width: 4px;
     border-top-width: 4px;
@@ -46,6 +46,16 @@
     -unity-font-style: bold;
     font-size: 18px;
     white-space: normal;
+}
+
+/*
+    カード間の見た目の間隔は、判定領域(TemplateContainerである draggable ルート自身)の
+    margin として付ける。ここなら margin は判定領域自体のサイズには影響しない
+    (margin は要素の外側の余白であり、要素自身のヒットテスト範囲には含まれない)。
+*/
+.draggable {
+    margin-left: 4%;
+    margin-right: 4%;
 }
 
 .draggable:hover > .skill-icon {

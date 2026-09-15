@@ -82,6 +82,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public event Action OnAttackReserved;
         /// <summary> 攻撃を実行時に発火するイベント </summary>
         public event Action OnAttack;
+        /// <summary> 予約中の攻撃がキャンセルされた時に発火するイベント </summary>
+        public event Action OnAttackCanceled;
         /// <summary>   攻撃の2拍前に発火するイベント   </summary>
         public event Action On2BeatBefore;
         /// <summary>   攻撃の1拍前に発火するイベント </summary>
@@ -120,6 +122,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 {
                     Debug.Log("[EnemyAIController] 攻撃範囲を出た");
                     _enemyBattleState.ExitRange();
+                    // 射程外に出た場合、予約中の攻撃(音楽ビート待ち)も合わせてキャンセルする。
+                    // これを行わないと、範囲表示もダメージも伴わない攻撃モーション・SEだけが
+                    // 後から発火してしまう。
+                    CancelAttack();
                 }
             }
             else
@@ -177,6 +183,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             if (_enemyAttackReservationUsecase.HasReservation)
             {
                 _enemyAttackReservationUsecase.Cancel();
+                // キャンセルされた予約表示(構えアニメ・予約エフェクト)をView側で解除させる。
+                OnAttackCanceled?.Invoke();
             }
         }
 
