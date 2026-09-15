@@ -1,3 +1,5 @@
+using System;
+
 namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 {
     /// <summary>
@@ -6,8 +8,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     public readonly ref struct UnlockConfirmDTO
     {
         public UnlockConfirmDTO(
-            bool hasSkill,
-            string skillName,
+            string[] skillNames,
             int currentPoints,
             int cost,
             float playerHealth,
@@ -21,8 +22,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             float areaAttackRangeMultiplier,
             float previewAreaAttackRangeMultiplier)
         {
-            HasSkill = hasSkill;
-            SkillName = skillName == null ? "" : skillName;
+            SkillNames = skillNames ?? Array.Empty<string>();
             CurrentPoints = currentPoints;
             Cost = cost;
             PlayerHealth = playerHealth;
@@ -37,10 +37,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             PreviewAreaAttackRangeMultiplier = previewAreaAttackRangeMultiplier;
         }
 
-        /// <summary> ノードがスキルを解放するか(falseの場合はステータス強化のみのノード)。 </summary>
-        public readonly bool HasSkill;
-        /// <summary> ノードが解放するスキルの名前。 </summary>
-        public readonly string SkillName;
+        /// <summary> 解放時に併せて解放される全ノード分のスキル名一覧。スキルを解放するノードが無ければ空配列。 </summary>
+        public readonly string[] SkillNames;
         /// <summary> 解放前の研究ポイント。 </summary>
         public readonly int CurrentPoints;
         /// <summary> 解放に必要な研究ポイント。 </summary>

@@ -77,6 +77,7 @@
 .setting-shortcut-button:hover > .home-option-icon-glyph,
 .setting-shortcut-button:focus > .home-option-icon-glyph {
     -unity-background-image-tint-color: rgb(170, 170, 170);
+    opacity: 0.55;
 }
 
 .home-points-row {

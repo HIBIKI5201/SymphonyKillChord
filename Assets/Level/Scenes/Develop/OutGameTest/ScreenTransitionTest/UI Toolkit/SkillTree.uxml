@@ -183,7 +183,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement name="UnlockConfirmSkillSection">
                     <ui:Label text="解放されるスキル" class="unlock-confirm-section-header"/>
-                    <ui:Label text="" name="UnlockConfirmSkillNameLabel" class="unlock-confirm-plain-row"/>
+                    <ui:VisualElement name="UnlockConfirmSkillNameList" class="unlock-confirm-skill-name-list"/>
                 </ui:VisualElement>
             </ui:ScrollView>
             <ui:VisualElement name="UnlockConfirmSkipRow" class="unlock-confirm-skip-row">

@@ -58,8 +58,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 ?? throw new InvalidOperationException($"{AREA_ATTACK_RANGE_VALUE_LABEL_NAME} が見つかりません。");
             _skillSection = rootElement.Q<VisualElement>(SKILL_SECTION_NAME)
                 ?? throw new InvalidOperationException($"{SKILL_SECTION_NAME} が見つかりません。");
-            _skillNameLabel = rootElement.Q<Label>(SKILL_NAME_LABEL_NAME)
-                ?? throw new InvalidOperationException($"{SKILL_NAME_LABEL_NAME} が見つかりません。");
+            _skillNameList = rootElement.Q<VisualElement>(SKILL_NAME_LIST_NAME)
+                ?? throw new InvalidOperationException($"{SKILL_NAME_LIST_NAME} が見つかりません。");
             _skipRow = rootElement.Q<VisualElement>(SKIP_ROW_NAME)
                 ?? throw new InvalidOperationException($"{SKIP_ROW_NAME} が見つかりません。");
             _skipCheckmark = rootElement.Q<VisualElement>(SKIP_CHECKMARK_NAME)
@@ -94,8 +94,14 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 dto.AreaAttackRangeMultiplier, dto.PreviewAreaAttackRangeMultiplier, SkillTreeStatValueFormatter.FormatMultiplier);
             _statsHeader.style.display = anyStatChanged ? DisplayStyle.Flex : DisplayStyle.None;
 
-            _skillSection.style.display = dto.HasSkill ? DisplayStyle.Flex : DisplayStyle.None;
-            _skillNameLabel.text = dto.SkillName;
+            _skillSection.style.display = dto.SkillNames.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            _skillNameList.Clear();
+            for (int i = 0; i < dto.SkillNames.Length; i++)
+            {
+                Label nameLabel = new Label(dto.SkillNames[i]);
+                nameLabel.AddToClassList(SKILL_NAME_ROW_CLASS);
+                _skillNameList.Add(nameLabel);
+            }
 
             _dialog.style.display = DisplayStyle.Flex;
         }
@@ -142,7 +148,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string AREA_ATTACK_RANGE_ROW_NAME = "UnlockConfirmAreaAttackRangeRow";
         private const string AREA_ATTACK_RANGE_VALUE_LABEL_NAME = "UnlockConfirmAreaAttackRangeValueLabel";
         private const string SKILL_SECTION_NAME = "UnlockConfirmSkillSection";
-        private const string SKILL_NAME_LABEL_NAME = "UnlockConfirmSkillNameLabel";
+        private const string SKILL_NAME_LIST_NAME = "UnlockConfirmSkillNameList";
+        private const string SKILL_NAME_ROW_CLASS = "unlock-confirm-skill-name-row";
         private const string SKIP_ROW_NAME = "UnlockConfirmSkipRow";
         private const string SKIP_CHECKMARK_NAME = "UnlockConfirmSkipCheckmark";
         private const string CONFIRM_BUTTON_NAME = "UnlockConfirmButton";
@@ -164,7 +171,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly VisualElement _areaAttackRangeRow;
         private readonly Label _areaAttackRangeValueLabel;
         private readonly VisualElement _skillSection;
-        private readonly Label _skillNameLabel;
+        private readonly VisualElement _skillNameList;
         private readonly VisualElement _skipRow;
         private readonly VisualElement _skipCheckmark;
         private readonly Button _confirmButton;

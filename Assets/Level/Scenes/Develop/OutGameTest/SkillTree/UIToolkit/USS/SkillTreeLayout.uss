@@ -263,6 +263,19 @@
     margin-bottom: 21px;
 }
 
+.unlock-confirm-skill-name-list {
+    flex-direction: column;
+}
+
+.unlock-confirm-skill-name-row {
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-text-align: middle-center;
+    background-color: rgb(34, 64, 110);
+    padding: 10px 21px;
+    margin-bottom: 8px;
+}
+
 .unlock-confirm-section-header {
     color: rgb(207, 214, 230);
     font-size: 20px;

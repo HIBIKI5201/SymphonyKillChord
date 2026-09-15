@@ -12,6 +12,7 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.OutGame.Skill;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.InfraStructure.Player;
+using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.OutGame;
 using KillChord.Runtime.View.InGame.Skill;
@@ -48,6 +49,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private const string E_NAME_CURRENT_POINTS_LABEL = "Points";
         private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 1f;
         private const float DEFAULT_AREA_ATTACK_RANGE = 1f;
+
+        /// <summary> 連続解放の全体表示演出において、最後のノード演出(ポップ・接続線・不透明度)の再生時間の目安(ミリ秒)。 </summary>
+        private const long UNLOCK_LAST_NODE_ANIMATION_MILLISECONDS = 350L;
+
+        /// <summary> 連続解放の全体表示演出を、最後のノード演出終了後も見せ続ける時間(ミリ秒)。 </summary>
+        private const long UNLOCK_OVERVIEW_DWELL_MILLISECONDS = 500L;
 
         [SerializeField]
         [Tooltip("スキルツリー画面のUIDocumentです。")]
@@ -734,12 +741,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     ノードが持つ代表的なステータスボーナス効果からアイコンを取得します。
+        ///     ノードに表示するアイコンを取得します。スキルを解放するノードは対応スキルのアイコンを優先し、
+        ///     それ以外はステータスボーナス効果のアイコンにフォールバックします。
         /// </summary>
         /// <param name="nodeEntity"> 対象のノードEntity。 </param>
-        /// <returns> 対応するアイコン。効果を持たない、または対応アイコンが無い場合はnull。 </returns>
+        /// <returns> 対応するアイコン。取得できない場合はnull。 </returns>
         private Sprite GetNodeIcon(SkillNodeEntity nodeEntity)
         {
+            Sprite skillIcon = GetUnlockSkillIcon(nodeEntity);
+            if (skillIcon != null)
+            {
+                return skillIcon;
+            }
+
             if (nodeEntity.StatusBonusEffects.Count == 0 || _statusBonusEffectIcons == null)
             {
                 return null;
@@ -747,6 +761,30 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             StatusBonusEffectKind kind = nodeEntity.StatusBonusEffects[0].Kind;
             return _statusBonusEffectIcons.TryGetValue(kind, out Sprite icon) ? icon : null;
+        }
+
+        /// <summary>
+        ///     ノードが解放するスキルに設定されたアイコンを取得します。
+        /// </summary>
+        /// <param name="nodeEntity"> 対象のノードEntity。 </param>
+        /// <returns> 最初に解決できたスキルのアイコン。解決できない場合はnull。 </returns>
+        private Sprite GetUnlockSkillIcon(SkillNodeEntity nodeEntity)
+        {
+            if (_loadedSkillRepository == null || nodeEntity.UnlockSkillIds.Length == 0)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < nodeEntity.UnlockSkillIds.Length; i++)
+            {
+                if (_loadedSkillRepository.TryGetSkill(nodeEntity.UnlockSkillIds[i], out SkillTemplate skillData)
+                    && skillData.Icon != null)
+                {
+                    return skillData.Icon;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -1001,6 +1039,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void HandleSkillUnlocked()
         {
+            PlayUnlockCameraWorkIfNeeded();
             _skillTreeController.OnSkillUnlocked();
         }
 
@@ -1011,6 +1050,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         {
             if (_skipUnlockConfirmation)
             {
+                PlayUnlockCameraWorkIfNeeded();
                 _skillTreeController.OnSkillUnlocked();
                 return;
             }
@@ -1029,9 +1069,42 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skipUnlockConfirmation = true;
             }
 
+            PlayUnlockCameraWorkIfNeeded();
             _skillTreeController.OnSkillUnlocked();
             _unlockConfirmDialogView.Hide();
             _isUnlockConfirmOpen = false;
+        }
+
+        /// <summary>
+        ///     複数ノードを一度に解放する場合、ツリー全体が見えるよう一時的にズームアウトし、
+        ///     演出終了後に自動で元のズーム(選択ノードへのフォーカス)へ戻します。
+        /// </summary>
+        private void PlayUnlockCameraWorkIfNeeded()
+        {
+            int pendingUnlockNodeCount = _skillTreeController.PendingUnlockNodeCount;
+            if (pendingUnlockNodeCount <= 1 || _skillTreeViewportView == null)
+            {
+                return;
+            }
+
+            int selectedNodeId = _skillTreeController.SelectedNodeId;
+            _skillTreeViewportView.ShowWholeTree();
+
+            long overviewHoldMilliseconds =
+                (pendingUnlockNodeCount - 1) * SkillTreeController.UNLOCK_STAGGER_INTERVAL_MILLISECONDS
+                + UNLOCK_LAST_NODE_ANIMATION_MILLISECONDS
+                + UNLOCK_OVERVIEW_DWELL_MILLISECONDS;
+            _rootElement.schedule.Execute(() =>
+            {
+                if (selectedNodeId != -1)
+                {
+                    _skillTreeViewportView.FocusOnNode(selectedNodeId);
+                }
+                else
+                {
+                    _skillTreeViewportView.ClearFocusZoom();
+                }
+            }).StartingIn(overviewHoldMilliseconds);
         }
 
         /// <summary>

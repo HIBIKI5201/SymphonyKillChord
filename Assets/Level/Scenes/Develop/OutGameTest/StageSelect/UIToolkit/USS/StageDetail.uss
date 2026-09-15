@@ -32,7 +32,7 @@
     width: 28px;
     height: 28px;
     min-width: 28px;
-    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_CheckBox.png?fileID=2800000&guid=d242e6e6a86fffe46830aa647b11573e&type=3#UI_CheckBox");
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/WIP/UI_CheckBox.png?fileID=2800000&guid=654ed62c06b95af4892eafb3e16403b5&type=3#UI_CheckBox");
     -unity-background-scale-mode: scale-to-fit;
     background-color: rgba(0, 0, 0, 0);
     margin-right: 3%;
@@ -161,6 +161,7 @@
 }
 
 .sortie-button:hover,
+.sortie-button:focus,
 .sortie-button:active {
     background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=2800000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
 }

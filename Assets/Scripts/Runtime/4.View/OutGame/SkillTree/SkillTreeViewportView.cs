@@ -162,6 +162,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
 
             EnforceScrollerHidden();
 
+            // ShowWholeTreeが設定した固定倍率のインラインscaleを解除し、USSクラス側の倍率へ戻す。
+            _skillTreeRoot.style.scale = StyleKeyword.Null;
             _skillTreeRoot.style.transformOrigin =
                 new TransformOrigin(nodeLocalCenter.x, nodeLocalCenter.y);
             _skillTreeRoot.AddToClassList(ZOOMED_USS_CLASS);
@@ -199,9 +201,72 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
 
             _isZoomed = false;
             _skillTreeRoot.RemoveFromClassList(ZOOMED_USS_CLASS);
+            _skillTreeRoot.style.scale = StyleKeyword.Null;
             _skillTreeRoot.style.transformOrigin = StyleKeyword.Null;
             EnforceScrollerHidden();
             AnimateScrollOffsetTo(new Vector2(_scrollOffsetXBeforeZoom, _scrollOffsetYBeforeZoom));
+        }
+
+        /// <summary>
+        ///     ツリー全体が画面に収まるよう一時的にズームアウトし、中央に表示する。
+        ///     連続解放演出などで使用する。FocusOnNodeまたはClearFocusZoomを呼ぶことで元の表示へ戻る。
+        /// </summary>
+        public void ShowWholeTree()
+        {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            Rect viewportLayout = _scrollView.contentViewport.layout;
+            Rect rootLayout = _skillTreeRoot.layout;
+            Rect rootWorldBound = _skillTreeRoot.worldBound;
+            if (!IsValidLength(viewportLayout.width) || !IsValidLength(viewportLayout.height)
+                || !IsValidLength(rootLayout.width) || !IsValidLength(rootLayout.height)
+                || !IsValidRect(rootWorldBound))
+            {
+                return;
+            }
+
+            EnforceScrollerHidden();
+
+            if (!_isZoomed)
+            {
+                _scrollOffsetXBeforeZoom = _scrollView.scrollOffset.x;
+                _scrollOffsetYBeforeZoom = _scrollView.scrollOffset.y;
+                _isZoomed = true;
+            }
+
+            // ツリー自身の中心を拡大基点にするため、原点切替によるジャンプは発生しない。
+            Vector2 rootLocalCenter = new Vector2(rootLayout.width * 0.5f, rootLayout.height * 0.5f);
+            _skillTreeRoot.style.transformOrigin =
+                new TransformOrigin(rootLocalCenter.x, rootLocalCenter.y);
+            _focusedNodeLocalCenter = rootLocalCenter;
+            _skillTreeRoot.RemoveFromClassList(ZOOMED_USS_CLASS);
+
+            float fitScale = Mathf.Min(
+                viewportLayout.width / rootLayout.width,
+                viewportLayout.height / rootLayout.height) * OVERVIEW_FIT_MARGIN;
+            float overviewScale = Mathf.Max(fitScale, MIN_OVERVIEW_SCALE);
+            _skillTreeRoot.style.scale = new StyleScale(new Scale(new Vector2(overviewScale, overviewScale)));
+
+            Rect viewportWorldBounds = _scrollView.contentViewport.worldBound;
+            if (!IsValidRect(viewportWorldBounds))
+            {
+                return;
+            }
+
+            float targetCenterInContentY = rootWorldBound.center.y
+                - viewportWorldBounds.yMin
+                + _scrollView.scrollOffset.y;
+            float focusY = viewportWorldBounds.height * 0.5f;
+            float targetCenterInContentX = rootWorldBound.center.x
+                - viewportWorldBounds.xMin
+                + _scrollView.scrollOffset.x;
+            float focusX = viewportWorldBounds.width * 0.5f;
+            AnimateScrollOffsetTo(new Vector2(
+                ClampScrollOffsetX(targetCenterInContentX - focusX),
+                ClampScrollOffsetY(targetCenterInContentY - focusY)));
         }
 
         /// <summary>
@@ -239,6 +304,12 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         ///     ズーム時の拡大率。SkillNode.ussの.skill-tree-canvas--zoomedのscale値と一致させること。
         /// </summary>
         private const float ZOOM_SCALE = 1.8f;
+
+        /// <summary> ツリー全体表示時、四辺に余白を残すための縮小マージン。 </summary>
+        private const float OVERVIEW_FIT_MARGIN = 0.92f;
+
+        /// <summary> ツリー全体表示時の最小倍率。極端に縮小しすぎないための下限。 </summary>
+        private const float MIN_OVERVIEW_SCALE = 0.4f;
 
         private readonly VisualElement _screenRoot;
         private readonly ScrollView _scrollView;
