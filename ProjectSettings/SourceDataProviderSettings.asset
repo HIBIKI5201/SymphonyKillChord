@@ -53,8 +53,11 @@ MonoBehaviour:
   - _addressableKey: EnemyDefinitionRepository
   - _addressableKey: EnemyDirectionIndicatorConfig
   - _addressableKey: UISoundEffectConfig
+  - _addressableKey: DemoExperienceConfig
   - _addressableKey: StatusBonusEffectIconCatalogAsset
   - _addressableKey: SkillGenreIconCatalogAsset
+  - _addressableKey: LoadingTipsConfig
+  - _addressableKey: BgmSelectorLabelTableAsset
   - _addressableKey: Assets/Level/Data/Master/OutGame/StageSelect/Stream_StageTreeAsset.asset
   - _addressableKey: GameResourceDefinitionRepository
   - _addressableKey: GamepadHapticsConfig
@@ -69,7 +72,7 @@ MonoBehaviour:
     _assetCreationDirectory: Assets/Level/Data/Master/Skill/Templates
   - _collectionKey: SkillNode
     _sourceAssetAddressableKey: SkillNodeDataRepo
-    _propertyPath: SkillNodes
+    _propertyPath: _skillNodes
     _assetCreationDirectory: 
   - _collectionKey: SkillNodeBind
     _sourceAssetAddressableKey: SkillNodeBindRepo
@@ -135,6 +138,22 @@ MonoBehaviour:
     _sourceAssetAddressableKey: GameResourceDefinitionRepository
     _propertyPath: _resourceAssets
     _assetCreationDirectory: Assets/Level/Data/Master/OutGame/Resource
+  - _collectionKey: LoadingTip
+    _sourceAssetAddressableKey: LoadingTipsConfig
+    _propertyPath: tips
+    _assetCreationDirectory: 
+  - _collectionKey: BgmSelectorLabel
+    _sourceAssetAddressableKey: BgmSelectorLabelTableAsset
+    _propertyPath: _entries
+    _assetCreationDirectory: 
+  - _collectionKey: StatusBonusEffectIcon
+    _sourceAssetAddressableKey: StatusBonusEffectIconCatalogAsset
+    _propertyPath: _entries
+    _assetCreationDirectory: 
+  - _collectionKey: SkillGenreIcon
+    _sourceAssetAddressableKey: SkillGenreIconCatalogAsset
+    _propertyPath: _entries
+    _assetCreationDirectory: 
   _repositoryMappings:
   - _category: StageAsset
     _addressableKey: StageTreeAsset

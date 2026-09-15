@@ -1,4 +1,4 @@
-using KillChord.Editor.SourceDataProvider;
+using KillChord.Editor.SourceDataProvider.Core;
 using KillChord.Editor.Utility;
 using System.Collections.Generic;
 using UnityEditor;
