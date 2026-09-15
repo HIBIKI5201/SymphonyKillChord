@@ -1,0 +1,3 @@
+interface:
+  display_name: "Symphony QA Tools"
+  short_description: "Inspect JSON state, record QA evidence and queue rhythm attacks"

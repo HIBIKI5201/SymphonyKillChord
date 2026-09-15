@@ -40,13 +40,10 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
                 : await SaveStore.LoadAsync<SaveData>();
             SaveDataSnapshot snapshot = new(saveData);
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
-            bool stageProgressChanged =
-                saveData.StageProgress.RecordClear(stageId.Value, achievedEvaluationIds);
-            bool tutorialChanged = isTutorial && saveData.Tutorial.CompleteBattle();
-
-            if (!stageProgressChanged && !tutorialChanged && !isFirstClear)
+            saveData.StageProgress.RecordClear(stageId.Value, achievedEvaluationIds);
+            if (isTutorial)
             {
-                return false;
+                saveData.Tutorial.CompleteBattle();
             }
 
             await SaveAndLogRewardAsync(saveData, snapshot, stageId, reward, isFirstClear);
@@ -70,14 +67,10 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
                 : await SaveStore.LoadAsync<SaveData>();
             SaveDataSnapshot snapshot = new(saveData);
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
-            bool stageProgressChanged =
-                saveData.StageProgress.RecordClear(stageId.Value, Array.Empty<string>());
-            bool tutorialChanged = completesOpeningScenario
-                && saveData.Tutorial.Phase == TutorialPhase.NotStarted
-                && saveData.Tutorial.CompleteOpeningScenario();
-            if (!stageProgressChanged && !tutorialChanged)
+            saveData.StageProgress.RecordClear(stageId.Value, Array.Empty<string>());
+            if (completesOpeningScenario && saveData.Tutorial.Phase == TutorialPhase.NotStarted)
             {
-                return false;
+                saveData.Tutorial.CompleteOpeningScenario();
             }
 
             await SaveAndLogRewardAsync(saveData, snapshot, stageId, reward, isFirstClear);
@@ -133,24 +126,41 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         /// </summary>
         /// <param name="saveData"> 報酬を加算するセーブデータ。</param>
         /// <param name="reward"> 加算するステージ報酬。</param>
-        private static void GrantReward(SaveData saveData, StageReward reward)
+        private static void GrantFirstClearReward(SaveData saveData, StageReward reward)
         {
             int skillLevelupPoint = checked(
-                saveData.SkillBuild.SkillLevelupPoint + reward.SkillBuildPoint);
+                saveData.SkillBuild.SkillLevelupPoint + reward.FirstClearSkillBuildPoint);
             int researchPoint = checked(
-                saveData.SkillUnlock.ResearchPoint + reward.SkillUnlockPoint);
+                saveData.SkillUnlock.ResearchPoint + reward.FirstClearSkillUnlockPoint);
 
             saveData.SkillBuild.SetSkillLevelupPoint(skillLevelupPoint);
             saveData.SkillUnlock.SetResearchPoint(researchPoint);
         }
 
         /// <summary>
-        ///     初回クリア報酬を反映して保存し、結果をログへ出力します。
+        ///     成功報酬をセーブデータへ加算します。クリアする度に毎回呼び出されます。
+        /// </summary>
+        /// <param name="saveData"> 報酬を加算するセーブデータ。</param>
+        /// <param name="reward"> 加算するステージ報酬。</param>
+        private static void GrantSuccessReward(SaveData saveData, StageReward reward)
+        {
+            int skillLevelupPoint = checked(
+                saveData.SkillBuild.SkillLevelupPoint + reward.SuccessSkillBuildPoint);
+            int researchPoint = checked(
+                saveData.SkillUnlock.ResearchPoint + reward.SuccessSkillUnlockPoint);
+
+            saveData.SkillBuild.SetSkillLevelupPoint(skillLevelupPoint);
+            saveData.SkillUnlock.SetResearchPoint(researchPoint);
+        }
+
+        /// <summary>
+        ///     クリア報酬を反映して保存し、結果をログへ出力します。
+        ///     成功報酬はクリアする度に毎回付与し、初回報酬は初回クリア時のみ追加で付与します。
         /// </summary>
         /// <param name="saveData"> 保存するセーブデータ。</param>
         /// <param name="snapshot"> 保存に失敗した場合へ戻すための変更前状態。</param>
         /// <param name="stageId"> クリアしたステージID。</param>
-        /// <param name="reward"> 初回クリア時に付与する報酬。</param>
+        /// <param name="reward"> 付与するステージ報酬。</param>
         /// <param name="isFirstClear"> 初回クリアの場合はtrue。</param>
         private static async ValueTask SaveAndLogRewardAsync(
             SaveData saveData,
@@ -161,22 +171,26 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         {
             try
             {
+                GrantSuccessReward(saveData, reward);
                 if (isFirstClear)
                 {
-                    GrantReward(saveData, reward);
+                    GrantFirstClearReward(saveData, reward);
                 }
 
                 await SaveStore.SaveAsync<SaveData>();
 
-                if (isFirstClear)
-                {
-                    Debug.Log(
-                        $"<color=#FFFF00>[{nameof(StageProgressSaveDataService)}] "
-                        + "ステージクリア報酬の付与に成功しました。"
-                        + $" StageId: {stageId.Value},"
-                        + $" SkillBuildPoint: +{reward.SkillBuildPoint},"
-                        + $" SkillUnlockPoint: +{reward.SkillUnlockPoint}</color>");
-                }
+                Debug.Log(
+                    $"<color=#FFFF00>[{nameof(StageProgressSaveDataService)}] "
+                    + "ステージクリア報酬の付与に成功しました。"
+                    + $" StageId: {stageId.Value},"
+                    + $" IsFirstClear: {isFirstClear},"
+                    + $" SuccessSkillBuildPoint: +{reward.SuccessSkillBuildPoint},"
+                    + $" SuccessSkillUnlockPoint: +{reward.SuccessSkillUnlockPoint},"
+                    + (isFirstClear
+                        ? $" FirstClearSkillBuildPoint: +{reward.FirstClearSkillBuildPoint},"
+                            + $" FirstClearSkillUnlockPoint: +{reward.FirstClearSkillUnlockPoint}"
+                        : string.Empty)
+                    + "</color>");
             }
             catch (Exception exception)
             {

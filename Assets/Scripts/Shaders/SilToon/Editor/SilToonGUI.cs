@@ -91,7 +91,7 @@ namespace DevelopProducts.ToonShader
 
             MaterialProperty fakeShadowOn = Find("_FakeShadowOn", props);
             MaterialProperty fakeShadowColor = Find("_FakeShadowColor", props);
-            MaterialProperty fakeShadowDistance = Find("_FakeShadowDistance", props);
+            MaterialProperty fakeShadowOffset = Find("_FakeShadowOffset", props);
             MaterialProperty fakeShadowDepthBias = Find("_FakeShadowDepthBias", props);
 
             MaterialProperty stencilRef = Find("_StencilRef", props);
@@ -219,7 +219,7 @@ namespace DevelopProducts.ToonShader
                 {
                     EditorGUI.indentLevel++;
                     materialEditor.ShaderProperty(fakeShadowColor, new GUIContent("Color (Multiply)", "顔に乗算する色。暗いほど濃い影になる"));
-                    materialEditor.ShaderProperty(fakeShadowDistance, new GUIContent("Distance", "ライトの進行方向へ頂点をずらす距離"));
+                    materialEditor.ShaderProperty(fakeShadowOffset, new GUIContent("Screen Offset (XY)", "カメラから見て頂点をずらす量。ワールド単位(m)で +X 右 / +Y 上。遠近に応じて縮む。Z/W は未使用"));
                     materialEditor.ShaderProperty(fakeShadowDepthBias, new GUIContent("Depth Bias", "カメラ側への引き戻し量。影が欠ける場合に上げる"));
                     EditorGUI.indentLevel--;
 

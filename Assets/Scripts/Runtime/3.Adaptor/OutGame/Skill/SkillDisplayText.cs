@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Skill
 {
@@ -14,16 +15,19 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         /// <param name="skillTypeLabel"> スキル種類表示。 </param>
         /// <param name="hasEffectDescription"> 効果説明を表示する場合は true。 </param>
         /// <param name="effectDescription"> 効果説明。 </param>
+        /// <param name="comboStepColors"> 発動コマンドの入力順に並んだ、拍子に対応する色一覧。 </param>
         public SkillDisplayText(
             string comboLabel,
             string skillTypeLabel,
             bool hasEffectDescription,
-            string effectDescription)
+            string effectDescription,
+            Color[] comboStepColors)
         {
             ComboLabel = comboLabel ?? string.Empty;
             SkillTypeLabel = skillTypeLabel ?? string.Empty;
             HasEffectDescription = hasEffectDescription;
             EffectDescription = effectDescription ?? string.Empty;
+            ComboStepColors = comboStepColors ?? Array.Empty<Color>();
         }
 
         /// <summary> 発動コンボ表示。 </summary>
@@ -37,6 +41,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
 
         /// <summary> 効果説明。 </summary>
         public string EffectDescription { get; }
+
+        /// <summary> 発動コマンドの入力順に並んだ、拍子に対応する色一覧。 </summary>
+        public Color[] ComboStepColors { get; }
 
         /// <summary>
         ///     等値比較を行う。

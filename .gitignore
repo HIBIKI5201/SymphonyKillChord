@@ -113,3 +113,10 @@ Assets/SceneDependencyCache.meta
 
 # uloop-cli の出力
 .uloop/
+
+# IDE(Unity/Rider)が自動生成するソリューションファイル
+*.slnx
+Docs/AI資料まとめ/仕様更新ドラフト_2026-08-03/19_リボルバー_発注書.md
+Docs/AI資料まとめ/仕様更新ドラフト_2026-08-03/17_コンフィグ_難易度アシスト_今後の課題.md
+Docs/AI資料まとめ/
+Docs/

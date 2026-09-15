@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "postbuild": "node scripts/clean-dist-assets.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

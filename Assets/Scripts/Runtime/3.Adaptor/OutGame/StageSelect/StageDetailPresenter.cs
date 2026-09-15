@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,12 +16,18 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// </summary>
         /// <param name="viewModel"> 反映先の ViewModel。</param>
         /// <param name="missionPreviewProvider"> ミッションテキストプレビューの解決に使うプロバイダー。 </param>
+        /// <param name="subMissionAchievementResolver"> サブミッションの達成状況を解決するリゾルバー。 </param>
+        /// <param name="saveData"> 現在のスキル解放/改造ポイント総量を参照するためのセーブデータ。 </param>
         public StageDetailPresenter(
             IStageDetailViewModel viewModel,
-            IMissionPreviewProvider missionPreviewProvider)
+            IMissionPreviewProvider missionPreviewProvider,
+            SubMissionAchievementResolver subMissionAchievementResolver,
+            SaveData saveData)
         {
             _viewModel = viewModel ?? throw new System.ArgumentNullException(nameof(viewModel));
             _missionPreviewProvider = missionPreviewProvider;
+            _subMissionAchievementResolver = subMissionAchievementResolver;
+            _saveData = saveData;
         }
 
         /// <summary>
@@ -48,25 +55,33 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
                 _missionPreviewProvider.TryGetPreview(
                     battleDefinition.MissionId,
                     out mainMissionText,
-                    out evaluationDescriptions);
+                    out evaluationDescriptions,
+                    out _);
             }
 
             var subMissionTexts = evaluationDescriptions?.ToArray();
+            var subMissionCleared = _subMissionAchievementResolver?.Resolve(node);
 
-            // TODO: セーブデータから、ミッション達成状況を取得して反映する。
+            int currentSkillUnlockPoint = _saveData?.SkillUnlock.ResearchPoint ?? 0;
+            int currentSkillBuildPoint = _saveData?.SkillBuild.SkillLevelupPoint ?? 0;
 
             var dto = new StageDetailDTO(
                 def.StageName,
                 def.FlavorText,
-                def.Reward.SkillBuildPoint,
-                def.Reward.SkillUnlockPoint,
+                currentSkillUnlockPoint,
+                def.Reward.FirstClearSkillUnlockPoint,
+                currentSkillBuildPoint,
+                def.Reward.SuccessSkillBuildPoint,
                 mainMissionText,
-                subMissionTexts);
+                subMissionTexts,
+                subMissionCleared);
 
             _viewModel.Apply(in dto);
         }
 
         private readonly IStageDetailViewModel _viewModel;
         private readonly IMissionPreviewProvider _missionPreviewProvider;
+        private readonly SubMissionAchievementResolver _subMissionAchievementResolver;
+        private readonly SaveData _saveData;
     }
 }

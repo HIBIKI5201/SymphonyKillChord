@@ -279,18 +279,23 @@ graph TD
 
 ---
 
-## Planner Master Dataウィンドウで編集する
+## Planner Master Dataからデータを探してInspectorで編集する
 
-メニューから`Planner Master Data`を開くと、Player / UI / Enemy / Stage Select / Skill Tree / Scenarioの各ページを切り替えて編集できます。
+メニューから`Planner Master Data`を開くと、Player / UI / Enemy / Stage Select / Skill Tree / Scenarioの各ページからデータを探せます。値の編集とプレビューはUnityのInspectorで行います。最初にツールバーの`Variant`でRelease / Demoを確認してください。
 
-- `Source Assets`: 選択したSourceAssetの全シリアライズ項目を編集します。リポジトリ自体の設定もここで変更します。
-- `Collections`: リポジトリやカタログに含まれる個別データを左の一覧から1件選択して編集します。
+- `Source Assets`: 行を選ぶと対象アセットをProjectとInspectorで選択します。Collection配列だけを保持するRepositoryはCollections側の先頭行に表示します。
+- `Collections`: 行を選ぶと実体をInspectorで開きます。カタログ等のインライン要素は、所有アセットのInspector先頭に「Plannerで選択中の項目」として表示します。Inspectorを別アセットにロックしている場合はロックを解除してください。
+- `Search`: アセット名、DataID、Tips本文、BGMラベル、アイコン種別を横断検索します。ページ未割当のアセットも検索から選択できます。
+- `Sort`: 表示順だけを変更します。実データの配列順は変わりません。
 - `データを追加`: ScriptableObject型のCollectionでは新規アセットを作成して自動登録します。インライン型ではSourceAsset内に新規要素を作成します。
-- `Source Assetを開く`: Collectionを保持するSourceAssetのページへ移動します。
+- `Source Assetを開く`: 所有アセットをInspectorで選択します。配列だけのRepositoryの場合は対応Collectionの先頭行に移動します。
+- `Collectionから外す`: 選択行の登録を解除します。参照先アセットファイル自体は削除しません。
 
 ScriptableObjectの生成場所は`Project Settings > KillChord > Source Data Provider`の各Collectionにある`Asset Creation Directory`で指定します。存在する`Assets/`配下のフォルダだけを設定してください。
 
-Stage Selectの`StageAsset` / `StageBind` Collectionでは、現行の`StageTreeAsset`をグラフ表示します。ノードをクリックすると該当ステージを選択でき、緑の線は自動遷移、灰色の線はホーム帰還を表します。EnemyページのキャラクターSourceAssetには、主要ステータスのレーダーグラフを表示します。
+Stage / Bind / StageTreeをInspectorで開くとグラフを表示します。ドラッグで移動し、ノードをクリックしてステージを選べます。緑の線は自動遷移、灰色の線はホーム帰還、選択したBindは強調表示です。BattleStageの「参照Waveのシーンマップ」を展開すると所属ツリーに対応するWaveのマップを確認できます。CharacterのInspectorには主要ステータスのレーダーグラフを表示します。
+
+WaveのInspectorでは概要に続くスライダーでマップを表示するWaveを選び、スポーン候補地を編集できます。シーンを変更した後は`Refresh Map`で更新できます。カタログのインライン要素ではAssetKeyや参照画像も選択項目欄から確認できます。複数アセット選択時は通常項目のみ一括編集でき、単一アセットのプレビューは表示しません。
 
 ---
 

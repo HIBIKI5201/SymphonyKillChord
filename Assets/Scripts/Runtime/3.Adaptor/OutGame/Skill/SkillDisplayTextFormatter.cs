@@ -4,6 +4,7 @@ using KillChord.Runtime.Domain.Player;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Skill
 {
@@ -16,20 +17,25 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         ///     フォーマッターを初期化する。
         /// </summary>
         /// <param name="descriptionFormatter"> 効果説明フォーマッター。 </param>
+        /// <param name="beatColors"> 発動コマンドの拍子(BeatType)と色の対応表。 </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public SkillDisplayTextFormatter(SkillEffectDescriptionFormatter descriptionFormatter)
+        public SkillDisplayTextFormatter(
+            SkillEffectDescriptionFormatter descriptionFormatter,
+            IReadOnlyDictionary<int, Color> beatColors = null)
         {
             _descriptionFormatter = descriptionFormatter ??
                 throw new ArgumentNullException(nameof(descriptionFormatter));
+            _beatColors = beatColors;
         }
 
         /// <summary>
         ///     スキルテンプレートから共通表示文字列を生成する。
         /// </summary>
         /// <param name="skillTemplate"> スキルテンプレート。 </param>
+        /// <param name="currentLevel"> 反映する現在のスキルレベルです。未指定時は基準レベルのまま表示します。 </param>
         /// <returns> 共通表示文字列。 </returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public SkillDisplayText Format(SkillTemplate skillTemplate)
+        public SkillDisplayText Format(SkillTemplate skillTemplate, int? currentLevel = null)
         {
             if (skillTemplate == null)
             {
@@ -40,17 +46,20 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
             bool hasFormattedEffect =
                 skillTemplate.EffectDisplayMode == SkillEffectDisplayMode.FullDescription &&
                 !string.IsNullOrWhiteSpace(skillTemplate.SkillDetail);
+            bool isGrown = currentLevel.HasValue && currentLevel.Value > skillTemplate.Level.Value;
             string formattedEffect = hasFormattedEffect
                 ? _descriptionFormatter.Format(
                     skillTemplate.SkillDetail,
-                    skillTemplate.EffectSpec.Parameters)
+                    skillTemplate.GetEffectSpec(currentLevel).Parameters,
+                    isGrown ? skillTemplate.EffectParameterGrowths : null)
                 : string.Empty;
 
             return new SkillDisplayText(
                 BuildComboLabel(skillTemplate.Pattern),
                 skillTypeLabel,
                 hasFormattedEffect,
-                formattedEffect);
+                formattedEffect,
+                BuildComboStepColors(skillTemplate.Pattern));
         }
 
         private const string EMPTY_COMBO_LABEL = "発動コンボ: —";
@@ -58,8 +67,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         private const string COMBO_SEPARATOR = " → ";
         private const string SKILL_TYPE_SEPARATOR = " / ";
         private const string EMPTY_VALUE_LABEL = "—";
+        private static readonly Color DEFAULT_COMBO_STEP_COLOR = Color.gray;
 
         private readonly SkillEffectDescriptionFormatter _descriptionFormatter;
+        private readonly IReadOnlyDictionary<int, Color> _beatColors;
         private readonly StringBuilder _comboBuilder = new();
         private readonly StringBuilder _skillTypeBuilder = new();
 
@@ -88,6 +99,29 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
             }
 
             return _comboBuilder.ToString();
+        }
+
+        /// <summary>
+        ///     入力パターンから、発動コマンドの入力順に並んだ拍子ごとの色一覧を構築する。
+        /// </summary>
+        /// <param name="pattern"> 入力パターン。 </param>
+        /// <returns> 発動コマンドの入力順に並んだ色一覧。 </returns>
+        private Color[] BuildComboStepColors(IReadOnlyList<BeatType> pattern)
+        {
+            if (pattern == null || pattern.Count == 0)
+            {
+                return Array.Empty<Color>();
+            }
+
+            Color[] result = new Color[pattern.Count];
+            for (int i = 0; i < pattern.Count; i++)
+            {
+                result[i] = _beatColors != null && _beatColors.TryGetValue((int)pattern[i], out Color color)
+                    ? color
+                    : DEFAULT_COMBO_STEP_COLOR;
+            }
+
+            return result;
         }
 
         /// <summary>
