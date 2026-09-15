@@ -26,10 +26,12 @@ const {
 		{ label: 'Gameplay', href: `${import.meta.env.BASE_URL}gameplay`, icon: gameplayIcon },
 		{ label: 'Credit', href: `${import.meta.env.BASE_URL}credit`, icon: creditIcon },
 	],
-	// TODO: 配信サイトのURLが決まるまでリンク先を未設定にし、機能しないボタンとして表示する
+	// 配信サイトのURLが決まるまでは非活性の「準備中」表示にする
 	downloadHref,
 	downloadLabel = 'Download',
 } = Astro.props;
+
+const isDownloadReady = Boolean(downloadHref);
 
 // ビルド出力(directory形式)ではAstro.url.pathnameが末尾スラッシュ付きになるため、
 // 比較前に両者から末尾スラッシュを取り除いて揃える。
@@ -60,10 +62,10 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 		}
 	</nav>
 
-	{/* TODO: 配信サイトの仮リンク。URL確定後にdownloadHrefを差し替える */}
-	<a class="download-cta" href={downloadHref}>
+	{/* 配信サイトのURL確定後にdownloadHrefを差し替えると、自動的に通常のリンクへ切り替わる */}
+	<a class="download-cta" href={downloadHref} aria-disabled={!isDownloadReady} tabindex={isDownloadReady ? undefined : -1}>
 		<span class="nav-icon" set:html={downloadIcon} />
-		<span class="nav-label">{downloadLabel}</span>
+		<span class="nav-label">{isDownloadReady ? downloadLabel : '準備中'}</span>
 	</a>
 
 	<button
@@ -88,10 +90,15 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 				</a>
 			))
 		}
-		{/* TODO: 配信サイトの仮リンク。URL確定後にdownloadHrefを差し替える */}
-		<a class="mobile-nav-link mobile-download-cta" href={downloadHref}>
+		{/* 配信サイトのURL確定後にdownloadHrefを差し替えると、自動的に通常のリンクへ切り替わる */}
+		<a
+			class="mobile-nav-link mobile-download-cta"
+			href={downloadHref}
+			aria-disabled={!isDownloadReady}
+			tabindex={isDownloadReady ? undefined : -1}
+		>
 			<span class="nav-icon" set:html={downloadIcon} />
-			<span class="nav-label">{downloadLabel}</span>
+			<span class="nav-label">{isDownloadReady ? downloadLabel : '準備中'}</span>
 		</a>
 	</nav>
 </header>
@@ -246,6 +253,17 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 		color: var(--color-bg);
 	}
 
+	.download-cta[aria-disabled='true'] {
+		color: var(--color-text-muted);
+		border-color: var(--color-surface-border);
+		cursor: not-allowed;
+	}
+
+	.download-cta[aria-disabled='true']:hover {
+		background-color: transparent;
+		color: var(--color-text-muted);
+	}
+
 	.download-cta .nav-label {
 		opacity: 0;
 		transition: opacity 0.2s ease;
@@ -384,6 +402,11 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 
 		.mobile-download-cta {
 			color: var(--color-signal);
+		}
+
+		.mobile-download-cta[aria-disabled='true'] {
+			color: var(--color-text-muted);
+			cursor: not-allowed;
 		}
 	}
 
