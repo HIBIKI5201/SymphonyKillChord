@@ -20,6 +20,9 @@ namespace KillChord.Demo.Editor
         /// <summary> カメラの表示切り替えトラック名です。 </summary>
         public const string CAMERA_ACTIVATION_TRACK_NAME = "Camera Activation";
 
+        /// <summary> 銃身横カメラの表示切り替えトラック名です。 </summary>
+        public const string SIDE_CAMERA_ACTIVATION_TRACK_NAME = "Side Camera Activation";
+
         /// <summary> Dollyカメラのスプライン進行トラック名です。 </summary>
         public const string DOLLY_POSITION_TRACK_NAME = "Dolly Position";
 
@@ -32,36 +35,58 @@ namespace KillChord.Demo.Editor
         /// <summary> Soldier14のアニメーショントラック名です。 </summary>
         public const string SOLDIER_TRACK_NAME = "Soldier14";
 
+        /// <summary> Symphonyのアニメーショントラック名です。 </summary>
+        public const string SYMPHONY_TRACK_NAME = "Symphony";
+
+        /// <summary> 発砲通知トラック名です。 </summary>
+        public const string GUNSHOT_SIGNAL_TRACK_NAME = "Gunshot Signal";
+
         /// <summary> ムービー全体の長さです。 </summary>
-        public const float MOVIE_DURATION_SECONDS = 9.0f;
+        public const float MOVIE_DURATION_SECONDS = 13.0f;
 
         /// <summary> 戦闘開始演出と同じカメラ移動にかける秒数です。 </summary>
         public const float CAMERA_MOVE_DURATION_SECONDS = 7.0f;
 
+        /// <summary> 14号からSymphonyへカメラを振り始める秒数です。 </summary>
+        public const float CAMERA_TURN_START_SECONDS = 7.0f;
+
+        /// <summary> Symphonyを正面に捉える秒数です。 </summary>
+        public const float CAMERA_TURN_END_SECONDS = 9.2f;
+
+        /// <summary> 銃身横カメラへ切り替える秒数です。 </summary>
+        public const float SIDE_CAMERA_CUT_SECONDS = 11.3f;
+
+        /// <summary> 発砲する秒数です。 </summary>
+        public const float GUNSHOT_SECONDS = 12.0f;
+
         /// <summary>
-        ///     Timelineアセットを生成します。既に存在する場合はそのまま返します。
+        ///     Timelineアセットを生成し、現在の演出構成へ更新します。
         /// </summary>
         /// <returns> 生成または取得したTimelineアセットです。 </returns>
         public static TimelineAsset CreateOrLoad()
         {
             TimelineAsset existingTimeline =
                 AssetDatabase.LoadAssetAtPath<TimelineAsset>(TIMELINE_ASSET_PATH);
-            if (existingTimeline != null)
-            {
-                return existingTimeline;
-            }
-
             EnsureDirectory(TIMELINE_ASSET_PATH);
 
-            TimelineAsset timeline = ScriptableObject.CreateInstance<TimelineAsset>();
-            AssetDatabase.CreateAsset(timeline, TIMELINE_ASSET_PATH);
+            TimelineAsset timeline = existingTimeline;
+            if (timeline == null)
+            {
+                timeline = ScriptableObject.CreateInstance<TimelineAsset>();
+                AssetDatabase.CreateAsset(timeline, TIMELINE_ASSET_PATH);
+            }
+
+            ClearTracks(timeline);
             timeline.editorSettings.frameRate = TIMELINE_FRAME_RATE;
 
             CreateCameraActivationTrack(timeline);
+            CreateSideCameraActivationTrack(timeline);
             CreateDollyPositionTrack(timeline);
             CreateDollyTargetTrack(timeline);
             CreateBlackoutTrack(timeline);
             CreateSoldierTrack(timeline);
+            CreateSymphonyTrack(timeline);
+            CreateGunshotSignalTrack(timeline);
 
             EditorUtility.SetDirty(timeline);
             AssetDatabase.SaveAssets();
@@ -69,6 +94,24 @@ namespace KillChord.Demo.Editor
             // ここで ImportAsset を挟むと生成直後のインスタンスが破棄され、
             // 返した参照が破棄済みオブジェクトになるため再インポートはしない。
             return timeline;
+        }
+
+        /// <summary>
+        ///     発砲通知に使用するSignalAssetを取得します。
+        /// </summary>
+        /// <returns> 発砲通知用SignalAssetです。 </returns>
+        public static SignalAsset LoadGunshotSignal()
+        {
+            return AssetDatabase.LoadAssetAtPath<SignalAsset>(GUNSHOT_SIGNAL_ASSET_PATH);
+        }
+
+        /// <summary>
+        ///     武器表示通知に使用するSignalAssetを取得します。
+        /// </summary>
+        /// <returns> 武器表示通知用SignalAssetです。 </returns>
+        public static SignalAsset LoadWeaponRevealSignal()
+        {
+            return AssetDatabase.LoadAssetAtPath<SignalAsset>(WEAPON_REVEAL_SIGNAL_ASSET_PATH);
         }
 
         /// <summary>
@@ -100,20 +143,59 @@ namespace KillChord.Demo.Editor
         private const string DOLLY_POSITION_CLIP_PATH =
             "Assets/Arts/Animation/Clips/DemoEnd_DollyPosition.anim";
 
-        private const string BLACKOUT_CLIP_PATH =
-            "Assets/Arts/Animation/Clips/DemoEnd_Blackout.anim";
-
         private const string DOLLY_TARGET_CLIP_PATH =
-            "Assets/Arts/Animation/Clips/DollyCam_StageStart.anim";
+            "Assets/Arts/Animation/Clips/DemoEnd_DollyTarget.anim";
+
+        private const string BLACKOUT_IN_CLIP_PATH =
+            "Assets/Arts/Animation/Clips/DemoEnd_Blackout_In.anim";
+
+        private const string BLACKOUT_OUT_CLIP_PATH =
+            "Assets/Arts/Animation/Clips/DemoEnd_Blackout_Out.anim";
+
+        private const string GUNSHOT_SIGNAL_ASSET_PATH =
+            "Assets/Arts/Animation/Timelines/Signals/DemoEndGunshot.signal";
+
+        private const string WEAPON_REVEAL_SIGNAL_ASSET_PATH =
+            "Assets/Arts/Animation/Timelines/Signals/DemoEndWeaponReveal.signal";
 
         private const string SPLINE_POSITION_PROPERTY = "m_SplineSettings.Position";
 
         private const string CANVAS_GROUP_ALPHA_PROPERTY = "m_Alpha";
 
+        private const string LOCAL_POSITION_X_PROPERTY = "m_LocalPosition.x";
+        private const string LOCAL_POSITION_Y_PROPERTY = "m_LocalPosition.y";
+        private const string LOCAL_POSITION_Z_PROPERTY = "m_LocalPosition.z";
+
         private const float DOLLY_TARGET_HEIGHT_OFFSET = -0.09f;
+
+        private const float BLACKOUT_IN_DURATION_SECONDS = 0.6f;
+        private const float BLACKOUT_OUT_START_SECONDS = 11.8f;
+        private const float BLACKOUT_OUT_DURATION_SECONDS = 0.6f;
+
+        private const float SYMPHONY_AIM_START_SECONDS = 8.5f;
+        private const float SYMPHONY_SHOT_START_SECONDS = GUNSHOT_SECONDS;
+        private const int SYMPHONY_SHOT_FRAME_COUNT = 12;
+        private const float SYMPHONY_CLIP_BLEND_SECONDS = 0.2f;
+        private const double SYMPHONY_AIM_TIME_SCALE = 0.01;
 
         private const string SOLDIER_IDLE_CLIP_PATH =
             "Assets/AssetStoreTools/Kevin Iglesias/Human Animations/Animations/Female/Idles/HumanF@MilitaryIdle01.fbx";
+
+        private const string SYMPHONY_AIM_CLIP_PATH =
+            "Assets/Arts/Animation/Clips/Sympnonhy_HGpose_0615_3.fbx";
+
+        /// <summary>
+        ///     Timelineに残っている旧演出トラックを削除します。
+        /// </summary>
+        /// <param name="timeline"> 更新対象のTimelineアセットです。 </param>
+        private static void ClearTracks(TimelineAsset timeline)
+        {
+            TrackAsset[] tracks = timeline.GetRootTracks().ToArray();
+            for (int i = 0; i < tracks.Length; i++)
+            {
+                timeline.DeleteTrack(tracks[i]);
+            }
+        }
 
         /// <summary>
         ///     カメラの表示切り替えトラックを生成します。
@@ -124,12 +206,26 @@ namespace KillChord.Demo.Editor
             ActivationTrack track =
                 timeline.CreateTrack<ActivationTrack>(null, CAMERA_ACTIVATION_TRACK_NAME);
 
-            // 停止後もカメラを残し、暗転中に別のカメラへ切り替わらないようにする。
-            track.postPlaybackState = ActivationTrack.PostPlaybackState.Active;
+            track.postPlaybackState = ActivationTrack.PostPlaybackState.Inactive;
 
             TimelineClip clip = track.CreateDefaultClip();
             clip.start = 0.0;
-            clip.duration = MOVIE_DURATION_SECONDS;
+            clip.duration = SIDE_CAMERA_CUT_SECONDS;
+        }
+
+        /// <summary>
+        ///     発砲直前から銃身を横から映すカメラを有効化するトラックを生成します。
+        /// </summary>
+        /// <param name="timeline"> 追加先のTimelineアセットです。 </param>
+        private static void CreateSideCameraActivationTrack(TimelineAsset timeline)
+        {
+            ActivationTrack track =
+                timeline.CreateTrack<ActivationTrack>(null, SIDE_CAMERA_ACTIVATION_TRACK_NAME);
+            track.postPlaybackState = ActivationTrack.PostPlaybackState.Active;
+
+            TimelineClip clip = track.CreateDefaultClip();
+            clip.start = SIDE_CAMERA_CUT_SECONDS;
+            clip.duration = MOVIE_DURATION_SECONDS - SIDE_CAMERA_CUT_SECONDS;
         }
 
         /// <summary>
@@ -139,12 +235,13 @@ namespace KillChord.Demo.Editor
         private static void CreateDollyPositionTrack(TimelineAsset timeline)
         {
             // StageStart.playable と同じキーで、0から1まで加速しながら進む。
-            AnimationCurve curve = new(
+            AnimationCurve curve = CreateSmoothCurve(
                 new Keyframe(0.0f, 0.0f),
                 new Keyframe(1.0f, 0.0f),
                 new Keyframe(3.5f, 0.56f),
                 new Keyframe(5.5f, 0.79f),
-                new Keyframe(CAMERA_MOVE_DURATION_SECONDS, 1.0f));
+                new Keyframe(CAMERA_MOVE_DURATION_SECONDS, 1.0f),
+                new Keyframe(SIDE_CAMERA_CUT_SECONDS, 1.0f));
 
             AnimationClip clip = CreateOrLoadClip(DOLLY_POSITION_CLIP_PATH);
             EditorCurveBinding binding = EditorCurveBinding.FloatCurve(
@@ -158,7 +255,7 @@ namespace KillChord.Demo.Editor
                 timeline.CreateTrack<AnimationTrack>(null, DOLLY_POSITION_TRACK_NAME);
             TimelineClip timelineClip = track.CreateClip(clip);
             timelineClip.start = 0.0;
-            timelineClip.duration = CAMERA_MOVE_DURATION_SECONDS;
+            timelineClip.duration = SIDE_CAMERA_CUT_SECONDS;
         }
 
         /// <summary>
@@ -175,19 +272,45 @@ namespace KillChord.Demo.Editor
             track.trackOffset = TrackOffset.ApplyTransformOffsets;
             track.position = new Vector3(0.0f, DOLLY_TARGET_HEIGHT_OFFSET, 0.0f);
 
-            AnimationClip clip =
-                AssetDatabase.LoadAssetAtPath<AnimationClip>(DOLLY_TARGET_CLIP_PATH);
-            if (clip == null)
-            {
-                Debug.LogWarning(
-                    $"[{nameof(DemoEndTimelineBuilder)}] " +
-                    $"{DOLLY_TARGET_CLIP_PATH} が見つかりません。トラックは空のまま生成します。");
-                return;
-            }
+            AnimationClip clip = CreateOrLoadClip(DOLLY_TARGET_CLIP_PATH);
+            SetTransformCurve(
+                clip,
+                LOCAL_POSITION_X_PROPERTY,
+                new Keyframe(0.0f, 0.006f),
+                new Keyframe(CAMERA_MOVE_DURATION_SECONDS, 0.006f),
+                new Keyframe(7.55f, 0.481f),
+                new Keyframe(8.1f, 0.73f),
+                new Keyframe(8.65f, 0.544f),
+                new Keyframe(CAMERA_TURN_END_SECONDS, 0.0f),
+                new Keyframe(SIDE_CAMERA_CUT_SECONDS, 0.0f));
+            SetTransformCurve(
+                clip,
+                LOCAL_POSITION_Y_PROPERTY,
+                new Keyframe(0.0f, 0.0f),
+                new Keyframe(1.0f, 0.0f),
+                new Keyframe(4.016667f, 1.15f),
+                new Keyframe(5.5f, 1.15f),
+                new Keyframe(CAMERA_MOVE_DURATION_SECONDS, 1.267f),
+                new Keyframe(7.55f, 1.29f),
+                new Keyframe(8.1f, 1.33f),
+                new Keyframe(8.65f, 1.35f),
+                new Keyframe(CAMERA_TURN_END_SECONDS, 1.37f),
+                new Keyframe(SIDE_CAMERA_CUT_SECONDS, 1.37f));
+            SetTransformCurve(
+                clip,
+                LOCAL_POSITION_Z_PROPERTY,
+                new Keyframe(0.0f, -0.007f),
+                new Keyframe(CAMERA_MOVE_DURATION_SECONDS, -0.007f),
+                new Keyframe(7.55f, -0.107f),
+                new Keyframe(8.1f, -0.588f),
+                new Keyframe(8.65f, -1.132f),
+                new Keyframe(CAMERA_TURN_END_SECONDS, -1.388f),
+                new Keyframe(SIDE_CAMERA_CUT_SECONDS, -1.388f));
+            EditorUtility.SetDirty(clip);
 
             TimelineClip timelineClip = track.CreateClip(clip);
             timelineClip.start = 0.0;
-            timelineClip.duration = CAMERA_MOVE_DURATION_SECONDS;
+            timelineClip.duration = SIDE_CAMERA_CUT_SECONDS;
         }
 
         /// <summary>
@@ -196,28 +319,34 @@ namespace KillChord.Demo.Editor
         /// <param name="timeline"> 追加先のTimelineアセットです。 </param>
         private static void CreateBlackoutTrack(TimelineAsset timeline)
         {
-            // 黒画面から明けた後、カメラ移動の完了に合わせて暗転し直す。
-            AnimationCurve curve = new(
+            AnimationClip blackoutInClip = CreateOrLoadClip(BLACKOUT_IN_CLIP_PATH);
+            AnimationCurve blackoutInCurve = new(
                 new Keyframe(0.0f, 1.0f),
                 new Keyframe(0.2f, 1.0f),
-                new Keyframe(0.6f, 0.0f),
-                new Keyframe(CAMERA_MOVE_DURATION_SECONDS, 0.0f),
-                new Keyframe(8.5f, 1.0f),
-                new Keyframe(MOVIE_DURATION_SECONDS, 1.0f));
-
-            AnimationClip clip = CreateOrLoadClip(BLACKOUT_CLIP_PATH);
-            EditorCurveBinding binding = EditorCurveBinding.FloatCurve(
+                new Keyframe(BLACKOUT_IN_DURATION_SECONDS, 0.0f));
+            EditorCurveBinding alphaBinding = EditorCurveBinding.FloatCurve(
                 string.Empty,
                 typeof(CanvasGroup),
                 CANVAS_GROUP_ALPHA_PROPERTY);
-            AnimationUtility.SetEditorCurve(clip, binding, curve);
-            EditorUtility.SetDirty(clip);
+            AnimationUtility.SetEditorCurve(blackoutInClip, alphaBinding, blackoutInCurve);
+            EditorUtility.SetDirty(blackoutInClip);
+
+            AnimationClip blackoutOutClip = CreateOrLoadClip(BLACKOUT_OUT_CLIP_PATH);
+            AnimationCurve blackoutOutCurve = new(
+                new Keyframe(0.0f, 0.0f),
+                new Keyframe(BLACKOUT_OUT_DURATION_SECONDS, 1.0f));
+            AnimationUtility.SetEditorCurve(blackoutOutClip, alphaBinding, blackoutOutCurve);
+            EditorUtility.SetDirty(blackoutOutClip);
 
             AnimationTrack track =
                 timeline.CreateTrack<AnimationTrack>(null, BLACKOUT_TRACK_NAME);
-            TimelineClip timelineClip = track.CreateClip(clip);
-            timelineClip.start = 0.0;
-            timelineClip.duration = MOVIE_DURATION_SECONDS;
+            TimelineClip blackoutInTimelineClip = track.CreateClip(blackoutInClip);
+            blackoutInTimelineClip.start = 0.0;
+            blackoutInTimelineClip.duration = BLACKOUT_IN_DURATION_SECONDS;
+
+            TimelineClip blackoutOutTimelineClip = track.CreateClip(blackoutOutClip);
+            blackoutOutTimelineClip.start = BLACKOUT_OUT_START_SECONDS;
+            blackoutOutTimelineClip.duration = BLACKOUT_OUT_DURATION_SECONDS;
         }
 
         /// <summary>
@@ -251,6 +380,153 @@ namespace KillChord.Demo.Editor
             {
                 playableAsset.loop = AnimationPlayableAsset.LoopMode.On;
             }
+        }
+
+        /// <summary>
+        ///     Symphonyが14号へ銃を向け、発砲するアニメーショントラックを生成します。
+        /// </summary>
+        /// <param name="timeline"> 追加先のTimelineアセットです。 </param>
+        private static void CreateSymphonyTrack(TimelineAsset timeline)
+        {
+            AnimationTrack track =
+                timeline.CreateTrack<AnimationTrack>(null, SYMPHONY_TRACK_NAME);
+            track.trackOffset = TrackOffset.ApplySceneOffsets;
+
+            AnimationClip idleClip = LoadHumanoidClip(SOLDIER_IDLE_CLIP_PATH);
+            if (idleClip != null)
+            {
+                TimelineClip idleTimelineClip = track.CreateClip(idleClip);
+                idleTimelineClip.start = 0.0;
+                idleTimelineClip.duration = SYMPHONY_AIM_START_SECONDS;
+                if (idleTimelineClip.asset is AnimationPlayableAsset idlePlayableAsset)
+                {
+                    idlePlayableAsset.loop = AnimationPlayableAsset.LoopMode.On;
+                }
+            }
+
+            AnimationClip aimClip = LoadHumanoidClip(SYMPHONY_AIM_CLIP_PATH);
+            if (aimClip != null)
+            {
+                TimelineClip aimTimelineClip = track.CreateClip(aimClip);
+                aimTimelineClip.start = SYMPHONY_AIM_START_SECONDS - SYMPHONY_CLIP_BLEND_SECONDS;
+                aimTimelineClip.duration =
+                    SYMPHONY_SHOT_START_SECONDS - aimTimelineClip.start;
+                aimTimelineClip.easeInDuration = SYMPHONY_CLIP_BLEND_SECONDS;
+                // HGPose冒頭の構えをほぼ静止させ、アイドルからのブレンドで銃を上げる。
+                // 同クリップ冒頭にある反動は、下の発砲クリップで通常速度再生する。
+                aimTimelineClip.timeScale = SYMPHONY_AIM_TIME_SCALE;
+                if (aimTimelineClip.asset is AnimationPlayableAsset aimPlayableAsset)
+                {
+                    aimPlayableAsset.loop = AnimationPlayableAsset.LoopMode.Off;
+                }
+            }
+
+            AnimationClip shotClip = LoadHumanoidClip(SYMPHONY_AIM_CLIP_PATH);
+            if (shotClip == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(DemoEndTimelineBuilder)}] " +
+                    $"{SYMPHONY_AIM_CLIP_PATH} が見つかりません。発砲モーションを生成できませんでした。");
+                return;
+            }
+
+            double shotDuration = SYMPHONY_SHOT_FRAME_COUNT / shotClip.frameRate;
+            double shotBlendDuration = 1.0 / shotClip.frameRate;
+            TimelineClip shotTimelineClip = track.CreateClip(shotClip);
+            // 構えクリップと1フレーム重ね、射撃開始時にウェイトが0となって
+            // Animatorの基準姿勢が露出することを防ぐ。
+            shotTimelineClip.start = SYMPHONY_SHOT_START_SECONDS - shotBlendDuration;
+            shotTimelineClip.duration = shotDuration;
+            shotTimelineClip.clipIn = 0.0;
+            shotTimelineClip.timeScale = 1.0;
+            shotTimelineClip.easeInDuration = shotBlendDuration;
+            if (shotTimelineClip.asset is AnimationPlayableAsset shotPlayableAsset)
+            {
+                shotPlayableAsset.loop = AnimationPlayableAsset.LoopMode.Off;
+            }
+        }
+
+        /// <summary>
+        ///     発砲エフェクトとSEを起動するSignalトラックを生成します。
+        /// </summary>
+        /// <param name="timeline"> 追加先のTimelineアセットです。 </param>
+        private static void CreateGunshotSignalTrack(TimelineAsset timeline)
+        {
+            SignalAsset weaponRevealSignal =
+                CreateOrLoadSignal(WEAPON_REVEAL_SIGNAL_ASSET_PATH);
+            SignalAsset signal = CreateOrLoadSignal(GUNSHOT_SIGNAL_ASSET_PATH);
+            SignalTrack track =
+                timeline.CreateTrack<SignalTrack>(null, GUNSHOT_SIGNAL_TRACK_NAME);
+
+            SignalEmitter revealEmitter =
+                track.CreateMarker<SignalEmitter>(SIDE_CAMERA_CUT_SECONDS);
+            revealEmitter.asset = weaponRevealSignal;
+            revealEmitter.emitOnce = true;
+
+            SignalEmitter emitter = track.CreateMarker<SignalEmitter>(GUNSHOT_SECONDS);
+            emitter.asset = signal;
+            emitter.emitOnce = true;
+        }
+
+        /// <summary>
+        ///     Transformのfloatカーブを設定します。
+        /// </summary>
+        /// <param name="clip"> 設定先のAnimationClipです。 </param>
+        /// <param name="propertyName"> Transformのプロパティ名です。 </param>
+        /// <param name="keyframes"> 設定するキーフレームです。 </param>
+        private static void SetTransformCurve(
+            AnimationClip clip,
+            string propertyName,
+            params Keyframe[] keyframes)
+        {
+            EditorCurveBinding binding = EditorCurveBinding.FloatCurve(
+                string.Empty,
+                typeof(Transform),
+                propertyName);
+            AnimationUtility.SetEditorCurve(clip, binding, CreateSmoothCurve(keyframes));
+        }
+
+        /// <summary>
+        ///     キー間の速度変化が連続する、オーバーシュートを抑えたカーブを生成します。
+        /// </summary>
+        /// <param name="keyframes"> カーブを構成するキーフレームです。 </param>
+        /// <returns> Clamped Auto接線を設定したカーブです。 </returns>
+        private static AnimationCurve CreateSmoothCurve(params Keyframe[] keyframes)
+        {
+            AnimationCurve curve = new(keyframes);
+            for (int i = 0; i < curve.length; i++)
+            {
+                AnimationUtility.SetKeyLeftTangentMode(
+                    curve,
+                    i,
+                    AnimationUtility.TangentMode.ClampedAuto);
+                AnimationUtility.SetKeyRightTangentMode(
+                    curve,
+                    i,
+                    AnimationUtility.TangentMode.ClampedAuto);
+            }
+
+            return curve;
+        }
+
+        /// <summary>
+        ///     SignalAssetを生成または取得します。
+        /// </summary>
+        /// <param name="assetPath"> SignalAssetのパスです。 </param>
+        /// <returns> 生成または取得したSignalAssetです。 </returns>
+        private static SignalAsset CreateOrLoadSignal(string assetPath)
+        {
+            SignalAsset existingSignal = AssetDatabase.LoadAssetAtPath<SignalAsset>(assetPath);
+            if (existingSignal != null)
+            {
+                return existingSignal;
+            }
+
+            EnsureDirectory(assetPath);
+            SignalAsset signal = ScriptableObject.CreateInstance<SignalAsset>();
+            signal.name = Path.GetFileNameWithoutExtension(assetPath);
+            AssetDatabase.CreateAsset(signal, assetPath);
+            return signal;
         }
 
         /// <summary>

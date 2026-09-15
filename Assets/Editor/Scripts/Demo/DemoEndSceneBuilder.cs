@@ -1,11 +1,14 @@
 using KillChord.Demo.End;
+using KillChord.Runtime.View.InGame.Player;
 using System.IO;
 using TMPro;
 using Unity.Cinemachine;
 using Unity.Mathematics;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 using UnityEngine.Splines;
@@ -78,10 +81,13 @@ namespace KillChord.Demo.Editor
         }
 
         private const string SCENE_PATH = "Assets/Level/Scenes/Demo/DemoEnd.unity";
+        private const string DEVELOP_CAMERA_NAME = "Develop Camera";
         private const string CONFIG_ASSET_PATH =
             "Assets/Level/Data/Demo/DemoEndSequenceConfig.asset";
         private const string SOLDIER_MODEL_PATH =
             "Assets/Arts/Models/Soldier14/Soldier14_0808.fbx";
+        private const string PLAYER_PREFAB_PATH =
+            "Assets/Level/Prefabs/Master/InGame/Character/Player.prefab";
         private const string TITLE_LOGO_PATH =
             "Assets/Arts/Images/Sprites/Title/title_logo.png";
         private const string TITLE_BACKGROUND_PATH =
@@ -122,6 +128,12 @@ namespace KillChord.Demo.Editor
         ///     PlayerSpawnPointのある原点は建物の内部で絵にならないため、開けた区画へ寄せています。
         /// </summary>
         private static readonly Vector3 MOVIE_ROOT_POSITION = new(-10.0f, 0.0f, -16.0f);
+
+        /// <summary> Soldier14と対面するSymphonyの位置です。 </summary>
+        private static readonly Vector3 SYMPHONY_LOCAL_POSITION = new(0.0f, 0.0f, -3.0f);
+
+        /// <summary> 発砲直前に銃身を横から捉えるカメラ位置です。 </summary>
+        private static readonly Vector3 SIDE_CAMERA_LOCAL_POSITION = new(1.15f, 1.35f, -2.6f);
 
         /// <summary> 戦闘開始演出のDollyスプラインと同じ制御点です。 </summary>
         private static readonly Vector3[] SPLINE_KNOT_POSITIONS =
@@ -168,6 +180,12 @@ namespace KillChord.Demo.Editor
             GameObject[] rootObjects = scene.GetRootGameObjects();
             for (int i = 0; i < rootObjects.Length; i++)
             {
+                // シーン調整用カメラは制作者が決めた位置・向きを含めて保持する。
+                if (rootObjects[i].name == DEVELOP_CAMERA_NAME)
+                {
+                    continue;
+                }
+
                 Object.DestroyImmediate(rootObjects[i]);
             }
         }
@@ -244,14 +262,22 @@ namespace KillChord.Demo.Editor
             Animator cameraAnimator = cameraObject.AddComponent<Animator>();
 
             Animator soldierAnimator = BuildSoldier(movieRoot.transform);
+            SymphonyRig symphonyRig = BuildSymphony(movieRoot.transform);
+            GameObject sideCameraObject =
+                BuildSideCamera(movieRoot.transform, symphonyRig.Muzzle);
+            SignalReceiver gunshotReceiver =
+                BuildGunshotReceiver(directorObject, symphonyRig.WeaponView);
 
             return new MovieRig(
                 director,
                 movieView,
                 cameraObject,
+                sideCameraObject,
                 cameraAnimator,
                 targetAnimator,
-                soldierAnimator);
+                soldierAnimator,
+                symphonyRig.Animator,
+                gunshotReceiver);
         }
 
         /// <summary>
@@ -305,6 +331,171 @@ namespace KillChord.Demo.Editor
             }
 
             return animator;
+        }
+
+        /// <summary>
+        ///     Soldier14と対面するSymphonyとリボルバーを配置します。
+        /// </summary>
+        /// <param name="parent"> 配置先の親Transformです。 </param>
+        /// <returns> 配置したSymphonyリグの参照一式です。 </returns>
+        private static SymphonyRig BuildSymphony(Transform parent)
+        {
+            GameObject playerPrefab =
+                AssetDatabase.LoadAssetAtPath<GameObject>(PLAYER_PREFAB_PATH);
+            if (playerPrefab == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(DemoEndSceneBuilder)}] {PLAYER_PREFAB_PATH} が見つかりません。" +
+                    "Symphonyの配置をスキップします。");
+                return default;
+            }
+
+            GameObject symphonyInstance =
+                (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab);
+            symphonyInstance.name = "Symphony";
+            symphonyInstance.transform.SetParent(parent, false);
+            symphonyInstance.transform.localPosition = SYMPHONY_LOCAL_POSITION;
+
+            // インゲーム用プレハブの見た目と武器構成だけを利用する。
+            // DemoEndではDIや移動制御を構築しないため、ルートのゲームプレイBehaviourを停止する。
+            MonoBehaviour[] rootBehaviours = symphonyInstance.GetComponents<MonoBehaviour>();
+            for (int i = 0; i < rootBehaviours.Length; i++)
+            {
+                rootBehaviours[i].enabled = false;
+            }
+
+            Rigidbody rigidbody = symphonyInstance.GetComponent<Rigidbody>();
+            if (rigidbody != null)
+            {
+                rigidbody.isKinematic = true;
+            }
+
+            Collider collider = symphonyInstance.GetComponent<Collider>();
+            if (collider != null)
+            {
+                collider.enabled = false;
+            }
+
+            UnityEngine.AI.NavMeshAgent navMeshAgent =
+                symphonyInstance.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (navMeshAgent != null)
+            {
+                navMeshAgent.enabled = false;
+            }
+
+            Animator animator = symphonyInstance.GetComponentInChildren<Animator>(true);
+            WeaponItemView weaponView = FindWeapon(symphonyInstance, "Revolver");
+            Transform muzzle = weaponView == null
+                ? null
+                : FindDescendant(weaponView.transform, "Muzzle");
+
+            // 横カメラへの切り替え時にSignalから表示するため、初期状態では隠す。
+            if (weaponView != null)
+            {
+                weaponView.HideWeaponImmediate();
+            }
+
+            return new SymphonyRig(animator, weaponView, muzzle);
+        }
+
+        /// <summary>
+        ///     プレイヤープレハブ内から指定名の武器Viewを検索します。
+        /// </summary>
+        /// <param name="player"> 検索対象のプレイヤーです。 </param>
+        /// <param name="weaponName"> 武器オブジェクト名です。 </param>
+        /// <returns> 一致した武器Viewです。見つからない場合はnullです。 </returns>
+        private static WeaponItemView FindWeapon(GameObject player, string weaponName)
+        {
+            WeaponItemView[] weaponViews =
+                player.GetComponentsInChildren<WeaponItemView>(true);
+            for (int i = 0; i < weaponViews.Length; i++)
+            {
+                if (weaponViews[i].name == weaponName)
+                {
+                    return weaponViews[i];
+                }
+            }
+
+            Debug.LogWarning(
+                $"[{nameof(DemoEndSceneBuilder)}] Playerプレハブ内に" +
+                $"武器 {weaponName} が見つかりません。");
+            return null;
+        }
+
+        /// <summary>
+        ///     発砲直前に銃身を横から捉えるCinemachineカメラを生成します。
+        /// </summary>
+        /// <param name="parent"> 配置先の親Transformです。 </param>
+        /// <param name="muzzle"> 注視する銃口です。 </param>
+        /// <returns> 生成したカメラのGameObjectです。 </returns>
+        private static GameObject BuildSideCamera(Transform parent, Transform muzzle)
+        {
+            GameObject cameraObject = new("Gun Side CinemachineCamera");
+            cameraObject.transform.SetParent(parent, false);
+            cameraObject.transform.localPosition = SIDE_CAMERA_LOCAL_POSITION;
+
+            CinemachineCamera cinemachineCamera = cameraObject.AddComponent<CinemachineCamera>();
+            cinemachineCamera.Priority = CAMERA_PRIORITY;
+            cinemachineCamera.Target.TrackingTarget = muzzle;
+            cinemachineCamera.Lens.FieldOfView = 40.0f;
+            cinemachineCamera.Lens.NearClipPlane = CAMERA_NEAR_CLIP_PLANE;
+            cameraObject.AddComponent<CinemachineRotationComposer>();
+            return cameraObject;
+        }
+
+        /// <summary>
+        ///     Timeline Signalを受けてリボルバーの表示と発砲演出を再生するReceiverを生成します。
+        /// </summary>
+        /// <param name="directorObject"> PlayableDirectorを持つオブジェクトです。 </param>
+        /// <param name="weaponView"> 発砲させる武器Viewです。 </param>
+        /// <returns> 生成したSignalReceiverです。 </returns>
+        private static SignalReceiver BuildGunshotReceiver(
+            GameObject directorObject,
+            WeaponItemView weaponView)
+        {
+            SignalReceiver receiver = directorObject.AddComponent<SignalReceiver>();
+            SignalAsset revealSignal = DemoEndTimelineBuilder.LoadWeaponRevealSignal();
+            SignalAsset gunshotSignal = DemoEndTimelineBuilder.LoadGunshotSignal();
+            if (revealSignal == null || gunshotSignal == null || weaponView == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(DemoEndSceneBuilder)}] 武器Signalを配線できませんでした。" +
+                    $" revealSignal={(revealSignal == null ? "null" : "ok")}" +
+                    $" gunshotSignal={(gunshotSignal == null ? "null" : "ok")}" +
+                    $" weapon={(weaponView == null ? "null" : "ok")}");
+                return receiver;
+            }
+
+            UnityEvent revealReaction = new();
+            UnityEventTools.AddPersistentListener(revealReaction, weaponView.ShowWeapon);
+            receiver.AddReaction(revealSignal, revealReaction);
+
+            UnityEvent gunshotReaction = new();
+            UnityEventTools.AddPersistentListener(
+                gunshotReaction,
+                weaponView.PlayAttackEffects);
+            receiver.AddReaction(gunshotSignal, gunshotReaction);
+            return receiver;
+        }
+
+        /// <summary>
+        ///     名前が一致する子孫Transformを検索します。
+        /// </summary>
+        /// <param name="root"> 検索を開始するTransformです。 </param>
+        /// <param name="name"> 検索するオブジェクト名です。 </param>
+        /// <returns> 一致したTransformです。見つからない場合はnullです。 </returns>
+        private static Transform FindDescendant(Transform root, string name)
+        {
+            Transform[] transforms = root.GetComponentsInChildren<Transform>(true);
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                if (transforms[i].name == name)
+                {
+                    return transforms[i];
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -556,6 +747,21 @@ namespace KillChord.Demo.Editor
                 timeline,
                 DemoEndTimelineBuilder.SOLDIER_TRACK_NAME,
                 movieRig.SoldierAnimator);
+            BindTrack(
+                movieRig.Director,
+                timeline,
+                DemoEndTimelineBuilder.SIDE_CAMERA_ACTIVATION_TRACK_NAME,
+                movieRig.SideCameraObject);
+            BindTrack(
+                movieRig.Director,
+                timeline,
+                DemoEndTimelineBuilder.SYMPHONY_TRACK_NAME,
+                movieRig.SymphonyAnimator);
+            BindTrack(
+                movieRig.Director,
+                timeline,
+                DemoEndTimelineBuilder.GUNSHOT_SIGNAL_TRACK_NAME,
+                movieRig.GunshotReceiver);
         }
 
         /// <summary>
@@ -641,23 +847,32 @@ namespace KillChord.Demo.Editor
             /// <param name="director"> Timelineを再生するPlayableDirectorです。 </param>
             /// <param name="movieView"> デモムービーViewです。 </param>
             /// <param name="cameraObject"> Dollyカメラのオブジェクトです。 </param>
+            /// <param name="sideCameraObject"> 銃身を横から捉えるカメラです。 </param>
             /// <param name="cameraAnimator"> Dollyカメラのアニメーターです。 </param>
             /// <param name="targetAnimator"> 注視点のアニメーターです。 </param>
             /// <param name="soldierAnimator"> Soldier14のアニメーターです。 </param>
+            /// <param name="symphonyAnimator"> Symphonyのアニメーターです。 </param>
+            /// <param name="gunshotReceiver"> 発砲Signalを受け取るReceiverです。 </param>
             public MovieRig(
                 PlayableDirector director,
                 DemoEndMovieView movieView,
                 GameObject cameraObject,
+                GameObject sideCameraObject,
                 Animator cameraAnimator,
                 Animator targetAnimator,
-                Animator soldierAnimator)
+                Animator soldierAnimator,
+                Animator symphonyAnimator,
+                SignalReceiver gunshotReceiver)
             {
                 Director = director;
                 MovieView = movieView;
                 CameraObject = cameraObject;
+                SideCameraObject = sideCameraObject;
                 CameraAnimator = cameraAnimator;
                 TargetAnimator = targetAnimator;
                 SoldierAnimator = soldierAnimator;
+                SymphonyAnimator = symphonyAnimator;
+                GunshotReceiver = gunshotReceiver;
             }
 
             /// <summary> Timelineを再生するPlayableDirectorです。 </summary>
@@ -669,6 +884,9 @@ namespace KillChord.Demo.Editor
             /// <summary> Dollyカメラのオブジェクトです。 </summary>
             public GameObject CameraObject { get; }
 
+            /// <summary> 銃身を横から捉えるカメラです。 </summary>
+            public GameObject SideCameraObject { get; }
+
             /// <summary> Dollyカメラのアニメーターです。 </summary>
             public Animator CameraAnimator { get; }
 
@@ -677,6 +895,43 @@ namespace KillChord.Demo.Editor
 
             /// <summary> Soldier14のアニメーターです。 </summary>
             public Animator SoldierAnimator { get; }
+
+            /// <summary> Symphonyのアニメーターです。 </summary>
+            public Animator SymphonyAnimator { get; }
+
+            /// <summary> 発砲Signalを受け取るReceiverです。 </summary>
+            public SignalReceiver GunshotReceiver { get; }
+        }
+
+        /// <summary>
+        ///     Symphonyと武器の参照一式です。
+        /// </summary>
+        private readonly struct SymphonyRig
+        {
+            /// <summary>
+            ///     Symphonyリグの参照一式を生成します。
+            /// </summary>
+            /// <param name="animator"> SymphonyのAnimatorです。 </param>
+            /// <param name="weaponView"> リボルバーの武器Viewです。 </param>
+            /// <param name="muzzle"> リボルバーの銃口です。 </param>
+            public SymphonyRig(
+                Animator animator,
+                WeaponItemView weaponView,
+                Transform muzzle)
+            {
+                Animator = animator;
+                WeaponView = weaponView;
+                Muzzle = muzzle;
+            }
+
+            /// <summary> SymphonyのAnimatorです。 </summary>
+            public Animator Animator { get; }
+
+            /// <summary> リボルバーの武器Viewです。 </summary>
+            public WeaponItemView WeaponView { get; }
+
+            /// <summary> リボルバーの銃口です。 </summary>
+            public Transform Muzzle { get; }
         }
     }
 }

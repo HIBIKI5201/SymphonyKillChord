@@ -19,10 +19,42 @@ namespace KillChord.Runtime.View.InGame.Player
         public void Play()
         {
             ShowWeapon();
+            PlayAttackEffects();
+        }
+
+        /// <summary>
+        ///     武器表示を変更せず、攻撃時のSEやEffectだけを再生します。
+        /// </summary>
+        public void PlayAttackEffects()
+        {
+            PlayWeaponFlash();
             PlayAttackSound();
             PlayEffect();
             PlayFlashLight();
             EjectCasing();
+        }
+
+        /// <summary>
+        ///     インゲームと同じシェーダー演出で武器を表示します。
+        /// </summary>
+        public void ShowWeapon()
+        {
+            if (_weaponModel == null)
+            {
+                Debug.LogError($"{nameof(WeaponItemView)}が未設定です。", this);
+                return;
+            }
+
+            _materialPropertyBlock ??= new MaterialPropertyBlock();
+
+            _weaponHandle.TryCancel();
+            _weaponHandle = LSequence.Create()
+                .Join(LMotion.Create(0f, 1f, 0.2f)
+                    .Bind(this, (value, state) => state.ApplyDither(value)))
+                .AppendInterval(2f)
+                .Run(x => x.WithOnComplete(HideWeapon));
+            ApplyDither(0.0f);
+            _weaponModel.SetActive(true);
         }
 
         /// <summary>
@@ -39,6 +71,8 @@ namespace KillChord.Runtime.View.InGame.Player
 
             // 遅延待ちのEffectが非表示後に発火しないよう、Dither開始前に打ち消す。
             _effectHandle.TryCancel();
+            _flashHandle.TryCancel();
+            ApplyFlash(0.0f);
             _weaponHandle.TryCancel();
             _weaponHandle = LMotion.Create(1f, 0f, 0.5f)
                 .WithOnComplete(() => _weaponModel.SetActive(false))
@@ -55,6 +89,8 @@ namespace KillChord.Runtime.View.InGame.Player
             }
             // 遅延待ちのEffectが非表示後に発火しないよう、モデルを消す前に打ち消す。
             _effectHandle.TryCancel();
+            _flashHandle.TryCancel();
+            ApplyFlash(0.0f);
             _weaponHandle.TryCancel();
             _weaponModel.SetActive(false);
         }
@@ -66,6 +102,7 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             _weaponHandle.TryCancel();
             _effectHandle.TryCancel();
+            _flashHandle.TryCancel();
         }
 
         [SerializeField, Tooltip("攻撃中だけ表示する武器モデル。")]
@@ -90,30 +127,6 @@ namespace KillChord.Runtime.View.InGame.Player
         private Renderer[] _effectRenderers;
 
         /// <summary>
-        ///     武器を表示します。
-        /// </summary>
-        private void ShowWeapon()
-        {
-            if (_weaponModel == null)
-            {
-                Debug.LogError($"{nameof(WeaponItemView)}が未設定です。", this);
-                return;
-            }
-
-            _materialPropertyBlock ??= new MaterialPropertyBlock();
-
-            _weaponHandle.TryCancel();
-            _weaponHandle = LSequence.Create()
-                .Join(LMotion.Create(0f, 1f, 0.2f)
-                    .Bind(this, (value, state) => state.ApplyDither(value)))
-                .Join(LMotion.Create(1f, 0f, 0.4f)
-                    .Bind(this, (value, state) => state.ApplyFlash(value)))
-                .AppendInterval(2f)
-                .Run(x => x.WithOnComplete(HideWeapon));
-            _weaponModel.SetActive(true);
-        }
-
-        /// <summary>
         ///     攻撃SEを再生します。
         /// </summary>
         private void PlayAttackSound()
@@ -123,6 +136,22 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
             _attackSoundSource.Play();
+        }
+
+        /// <summary>
+        ///     発砲時だけ武器マテリアルを発光させます。
+        /// </summary>
+        private void PlayWeaponFlash()
+        {
+            if (_weaponModel == null)
+            {
+                return;
+            }
+
+            _materialPropertyBlock ??= new MaterialPropertyBlock();
+            _flashHandle.TryCancel();
+            _flashHandle = LMotion.Create(1f, 0f, 0.4f)
+                .Bind(this, (value, state) => state.ApplyFlash(value));
         }
 
         /// <summary>
@@ -228,6 +257,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private MaterialPropertyBlock _materialPropertyBlock;
         private MotionHandle _weaponHandle;
         private MotionHandle _effectHandle;
+        private MotionHandle _flashHandle;
         private readonly static int DITHER_ID = Shader.PropertyToID("_Ratio");
         private readonly static int FLASH_ID = Shader.PropertyToID("_Flash");
     }
