@@ -51,6 +51,7 @@ permissions: {}
 concurrency:
   group: build-release-${{ github.base_ref || github.run_id }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   check:
@@ -139,6 +140,7 @@ jobs:
     concurrency:
       group: unity-self-hosted-build
       cancel-in-progress: false
+      queue: max
     timeout-minutes: 1440
     environment: 'AutoBuildAndRelease'
     permissions:
@@ -176,6 +178,7 @@ jobs:
           Write-Host "::group::クローン先プロジェクトフォルダおよびディスク事前クリーンアップ"
           $Workspace = "${{ github.workspace }}"
           $CleanBuild = $env:CLEAN_BUILD -eq 'true'
+          $MinimumBuildFreeSpaceGB = 40
           Write-Host "対象プロジェクトフォルダ: $Workspace"
           Write-Host "[INFO]: clean_build = $CleanBuild"
 
@@ -185,8 +188,18 @@ jobs:
               Write-Host "[INFO]: 既存のリポジトリ環境を検出しました。未追跡ファイルおよび無視されたファイルをクリーンアップします..."
               Push-Location $Workspace
               try {
-                if ($CleanBuild) {
-                  Write-Host "[INFO]: clean_build が有効なため、Library を含めて完全にクリーンアップします。"
+                $WorkspaceDrive = (Get-Item -LiteralPath $Workspace).PSDrive
+                $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+                $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+                $ShouldRemoveLibrary = $CleanBuild -or $FreeSpaceGB -lt $MinimumBuildFreeSpaceGB
+                Write-Host "[INFO]: クリーンアップ前の空き容量: $FreeSpaceGB GB（ビルド開始必要量: $MinimumBuildFreeSpaceGB GB）"
+
+                if ($ShouldRemoveLibrary) {
+                  if ($CleanBuild) {
+                    Write-Host "[INFO]: clean_build が有効なため、Library を含めて完全にクリーンアップします。"
+                  } else {
+                    Write-Host "[WARN]: 空き容量が必要量を下回っているため、前回ビルドの Library を削除します。"
+                  }
                   git -c core.longpaths=true clean -ffdx
                 } else {
                   Write-Host "[INFO]: Library はビルド高速化のため保持します（トラブル時は workflow_dispatch の clean_build を有効にして実行してください）。"
@@ -201,9 +214,18 @@ jobs:
                   throw "git reset --hard が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
                 }
 
+                $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+                $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+                Write-Host "[INFO]: クリーンアップ後の空き容量: $FreeSpaceGB GB"
+                if ($FreeSpaceGB -lt $MinimumBuildFreeSpaceGB) {
+                  Write-Host "[ERROR]: Library 清掃後も必要な空き容量 $MinimumBuildFreeSpaceGB GBを確保できません。"
+                  exit 1
+                }
+
                 Write-Host "[OK]: リポジトリを作業ツリーからクリーンアップしました。"
               } catch {
-                Write-Host "[WARN]: git clean に失敗しました: $_"
+                Write-Host "[ERROR]: 事前クリーンアップに失敗しました: $_"
+                exit 1
               } finally {
                 Pop-Location
               }
@@ -669,9 +691,30 @@ jobs:
           $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
           Write-Host "プロジェクトが配置されているドライブ ($($WorkspaceDrive.Name):) の残り空き容量: $FreeSpaceGB GB"
 
-          $MinRequiredGB = 20
+          $MinRequiredGB = 40
           if ($FreeSpaceGB -lt $MinRequiredGB) {
-            Write-Host "[WARN]: 残り空き容量が推奨値 ($MinRequiredGB GB) を下回っています。ビルド中の容量不足にご注意ください。"
+            $WorkspaceRoot = [System.IO.Path]::GetFullPath("${{ github.workspace }}").TrimEnd(
+              [System.IO.Path]::DirectorySeparatorChar,
+              [System.IO.Path]::AltDirectorySeparatorChar)
+            $WorkspacePrefix = $WorkspaceRoot + [System.IO.Path]::DirectorySeparatorChar
+            $LibraryPath = [System.IO.Path]::GetFullPath((Join-Path $WorkspaceRoot "Library"))
+            if (-not $LibraryPath.StartsWith($WorkspacePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+              Write-Host "[ERROR]: Library の解決先がワークスペース外です: $LibraryPath"
+              exit 1
+            }
+
+            if (Test-Path -LiteralPath $LibraryPath) {
+              Write-Host "[WARN]: Unity 起動前の空き容量が不足しているため Library を削除します: $LibraryPath"
+              Remove-Item -LiteralPath $LibraryPath -Recurse -Force -ErrorAction Stop
+              $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+              $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+              Write-Host "[INFO]: Library 清掃後の空き容量: $FreeSpaceGB GB"
+            }
+          }
+
+          if ($FreeSpaceGB -lt $MinRequiredGB) {
+            Write-Host "[ERROR]: ビルドに必要な空き容量 $MinRequiredGB GBを確保できません。現在の空き容量: $FreeSpaceGB GB"
+            exit 1
           } else {
             Write-Host "[OK]: 十分なディスク空き容量が確保されています。"
           }
@@ -1005,6 +1048,27 @@ jobs:
             Microsoft.PowerShell.Utility\Write-Host $Object
           }
 
+          function Initialize-ProcessExitCodeTracking {
+            param(
+              [Parameter(Mandatory = $true)]
+              [System.Diagnostics.Process]$Process,
+              [Parameter(Mandatory = $true)]
+              [string]$ProcessName
+            )
+
+            if ($env:RUNNER_OS -ne "Windows") {
+              return
+            }
+
+            # Windows PowerShell 5.1では Start-Process -NoNewWindow -PassThru が返す
+            # Process のハンドルを終了前に取得しないと、終了後の ExitCode が null になる。
+            try {
+              $null = $Process.Handle
+            } catch {
+              throw "$ProcessName のハンドルを取得できませんでした: $_"
+            }
+          }
+
           function Get-CompletedProcessExitCode {
             param(
               [Parameter(Mandatory = $true)]
@@ -1013,10 +1077,8 @@ jobs:
               [string]$ProcessName
             )
 
-            # Windows PowerShellではタイムアウト付きWaitForExitの直後に
-            # ExitCodeが未更新の場合があるため、同期完了後に状態を再取得する。
+            # タイムアウト付きWaitForExit後の終了処理を同期完了させる。
             $Process.WaitForExit()
-            $Process.Refresh()
 
             if (-not $Process.HasExited) {
               throw "$ProcessName の終了を確認できませんでした。"
@@ -1041,6 +1103,13 @@ jobs:
           }
 
           $ProfileTimeoutSec = [int]$env:UNITY_PROFILE_BUILD_TIMEOUT_SEC
+          $AndroidMinimumFreeSpaceGB = 40
+          $DefaultMinimumFreeSpaceGB = 40
+          $EmergencyMinimumFreeSpaceGB = 5
+          $MaximumLogSizeGB = 1
+          $ResourceCheckIntervalMilliseconds = 30000
+          $WindowsUnityCpuLimit = 4
+          $MaximumAffinityCpuCount = 63
           $RunTimestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
           $LogFilePattern = "unity_build_${RunTimestamp}_*.log"
           "log_file=$LogFilePattern" | Add-Content -Path $env:GITHUB_OUTPUT
@@ -1069,6 +1138,14 @@ jobs:
             -PassThru `
             -NoNewWindow
 
+          try {
+            Initialize-ProcessExitCodeTracking $DiscoveryProcess "プロファイル検出用Unityプロセス"
+          } catch {
+            Write-Host "[ERROR]: プロファイル検出用Unityプロセスの監視を開始できませんでした: $_"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
           if (-not $DiscoveryProcess.WaitForExit($ProfileTimeoutSec * 1000)) {
             Write-Host "[ERROR]: ビルドプロファイルの検出が $ProfileTimeoutSec 秒後にタイムアウトしました。"
             try {
@@ -1096,6 +1173,22 @@ jobs:
           }
 
           $TargetProfiles = @(Get-Content -Path $ProfileListFile | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+
+          # ビルドプロファイルの切替により、Editor拡張も対象プラットフォーム向けのネイティブ実装へ切り替わる。
+          # ホストOSと互換性のないプロファイルは実行対象から除外する。
+          $UnsupportedProfilePattern = switch ($env:RUNNER_OS) {
+            "Windows" { '(?i)(macos|ios)$' }
+            "macOS"   { '(?i)windows$' }
+            "Linux"   { '(?i)(windows|macos|ios)$' }
+            default   { $null }
+          }
+          if ($UnsupportedProfilePattern) {
+            $SkippedHostProfiles = @($TargetProfiles | Where-Object { $_ -match $UnsupportedProfilePattern })
+            $TargetProfiles = @($TargetProfiles | Where-Object { $_ -notmatch $UnsupportedProfilePattern })
+            if ($SkippedHostProfiles.Count -gt 0) {
+              Write-Host "[WARN]: $env:RUNNER_OS ランナーでは実行できないプロファイルを除外しました: $($SkippedHostProfiles -join ', ')"
+            }
+          }
           if ($TargetProfiles.Count -eq 0) {
             Write-Host "[ERROR]: ビルド対象プロファイルが0件です。"
             Write-Host "::endgroup::"
@@ -1114,7 +1207,8 @@ jobs:
 
           # CPUコア数の設定
           $CpuCount = [Environment]::ProcessorCount
-          $UnityCpuCount = [Math]::Min(63, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
+          $UnityCpuLimit = if ($env:RUNNER_OS -eq "Windows") { $WindowsUnityCpuLimit } else { $MaximumAffinityCpuCount }
+          $UnityCpuCount = [Math]::Min($UnityCpuLimit, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
 
           # プロセッサアフィニティビットマスクの生成
           $AffinityMask = ([int64]1 -shl $UnityCpuCount) - 1
@@ -1128,7 +1222,7 @@ jobs:
           $FailedProfiles = @()
           $TimedOutProfiles = @()
 
-          function Remove-TimedOutProfileOutput($ProfileName) {
+          function Remove-IncompleteProfileOutput($ProfileName) {
             $CleanOutputDir = $env:UNITY_BUILD_OUTPUT_DIR.Trim('"').Trim("'")
             $OutputRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
             $OutputRootPrefix = $OutputRoot.TrimEnd(
@@ -1154,14 +1248,73 @@ jobs:
             }
           }
 
+          function Get-WorkspaceFreeSpaceGB {
+            $WorkspaceDrive = (Get-Item -LiteralPath "${{ github.workspace }}").PSDrive
+            $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+            return [Math]::Round($DriveInfo.Free / 1GB, 2)
+          }
+
+          function Clear-UnityLibraryForProfile {
+            param(
+              [Parameter(Mandatory = $true)]
+              [string]$ProfileName,
+              [Parameter(Mandatory = $true)]
+              [double]$MinimumFreeSpaceGB
+            )
+
+            $FreeSpaceGB = Get-WorkspaceFreeSpaceGB
+            Write-Host "[INFO]: $ProfileName の開始前空き容量: $FreeSpaceGB GB（必要量: $MinimumFreeSpaceGB GB）"
+            if ($FreeSpaceGB -ge $MinimumFreeSpaceGB) {
+              return $true
+            }
+
+            $WorkspaceRoot = [System.IO.Path]::GetFullPath("${{ github.workspace }}").TrimEnd(
+              [System.IO.Path]::DirectorySeparatorChar,
+              [System.IO.Path]::AltDirectorySeparatorChar)
+            $WorkspacePrefix = $WorkspaceRoot + [System.IO.Path]::DirectorySeparatorChar
+            $LibraryPath = [System.IO.Path]::GetFullPath((Join-Path $WorkspaceRoot "Library"))
+            if (-not $LibraryPath.StartsWith($WorkspacePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+              throw "Library の解決先がワークスペース外です: $LibraryPath"
+            }
+
+            if (Test-Path -LiteralPath $LibraryPath) {
+              Write-Host "[WARN]: 空き容量確保のためUnity Libraryキャッシュを削除します: $LibraryPath"
+              Remove-Item -LiteralPath $LibraryPath -Recurse -Force -ErrorAction Stop
+            }
+
+            $FreeSpaceGB = Get-WorkspaceFreeSpaceGB
+            Write-Host "[INFO]: Library清掃後の空き容量: $FreeSpaceGB GB"
+            return $FreeSpaceGB -ge $MinimumFreeSpaceGB
+          }
+
           foreach ($ProfileName in $TargetProfiles) {
             $SafeProfileName = $ProfileName -replace '[^A-Za-z0-9._-]', '_'
             $LogFileName = "unity_build_${RunTimestamp}_${SafeProfileName}.log"
             Write-Host "::group::Unityビルド: $ProfileName"
             Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] $ProfileName のビルドを開始します。"
 
+            $MinimumFreeSpaceGB = if ($ProfileName -match '(?i)android$') {
+              $AndroidMinimumFreeSpaceGB
+            } else {
+              $DefaultMinimumFreeSpaceGB
+            }
+            try {
+              $HasBuildCapacity = Clear-UnityLibraryForProfile $ProfileName $MinimumFreeSpaceGB
+            } catch {
+              Write-Host "[ERROR]: $ProfileName の開始前容量確保に失敗しました: $_"
+              $HasBuildCapacity = $false
+            }
+            if (-not $HasBuildCapacity) {
+              Write-Host "[ERROR]: $ProfileName に必要な空き容量 $MinimumFreeSpaceGB GBを確保できないため、このプロファイルをスキップします。"
+              $FailedProfiles += $ProfileName
+              $OverallExitCode = 1
+              Write-Host "::endgroup::"
+              continue
+            }
+
             $UnityArgs = @(
               "-batchmode",
+              "-job-worker-count", "$UnityCpuCount",
               "-projectPath", "${{ github.workspace }}",
               "-executeMethod", "$ExecuteMethod",
               "-buildMode", "$env:BUILD_MODE",
@@ -1179,6 +1332,8 @@ jobs:
                 -PassThru `
                 -NoNewWindow
 
+              Initialize-ProcessExitCodeTracking $UnityProcess "$ProfileName のUnityプロセス"
+
               # ProcessorAffinity は Windows 専用API。macOS/Linux ではスキップする。
               if ($env:RUNNER_OS -eq "Windows") {
                 try {
@@ -1189,20 +1344,61 @@ jobs:
                 }
               }
 
-              if (-not $UnityProcess.WaitForExit($ProfileTimeoutSec * 1000)) {
-                Write-Host "[ERROR]: $ProfileName のビルドが $ProfileTimeoutSec 秒後にタイムアウトしました。"
-                try {
-                  $UnityProcess.Kill()
-                  $UnityProcess.WaitForExit()
-                } catch {
-                  Write-Host "[WARN]: タイムアウトした $ProfileName のUnityプロセス終了処理に失敗しました: $_"
+              $ProfileStartedAt = [DateTime]::UtcNow
+              $StopReason = $null
+              while (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
+                $ElapsedSeconds = ([DateTime]::UtcNow - $ProfileStartedAt).TotalSeconds
+                if ($ElapsedSeconds -ge $ProfileTimeoutSec) {
+                  $StopReason = "Timeout"
+                  break
+                }
+
+                $FreeSpaceGB = Get-WorkspaceFreeSpaceGB
+                if ($FreeSpaceGB -lt $EmergencyMinimumFreeSpaceGB) {
+                  $StopReason = "DiskSpace"
+                  Write-Host "[ERROR]: $ProfileName の実行中に空き容量が $FreeSpaceGB GBまで低下したため、ランナー保護のため停止します。"
+                  break
+                }
+
+                if (Test-Path -LiteralPath $LogFileName) {
+                  $LogSizeGB = [Math]::Round((Get-Item -LiteralPath $LogFileName).Length / 1GB, 2)
+                  if ($LogSizeGB -ge $MaximumLogSizeGB) {
+                    $StopReason = "LogSize"
+                    Write-Host "[ERROR]: $ProfileName のUnityログが $LogSizeGB GBまで肥大化したため、ランナー保護のため停止します。"
+                    break
+                  }
+                }
+              }
+
+              if ($StopReason) {
+                if ($StopReason -eq "Timeout") {
+                  Write-Host "[ERROR]: $ProfileName のビルドが $ProfileTimeoutSec 秒後にタイムアウトしました。"
                 }
                 try {
-                  Remove-TimedOutProfileOutput $ProfileName
+                  if ($env:RUNNER_OS -eq "Windows") {
+                    & taskkill.exe /PID $($UnityProcess.Id) /T /F | Out-Null
+                  } else {
+                    $UnityProcess.Kill()
+                  }
+                  if (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
+                    $UnityProcess.Kill()
+                    if (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
+                      throw "$ProfileName のUnityプロセスを停止できませんでした。"
+                    }
+                  }
                 } catch {
-                  Write-Host "[WARN]: タイムアウトした $ProfileName の不完全な成果物を削除できませんでした: $_"
+                  Write-Host "[WARN]: 中断した $ProfileName のUnityプロセス終了処理に失敗しました: $_"
                 }
-                $TimedOutProfiles += $ProfileName
+                try {
+                  Remove-IncompleteProfileOutput $ProfileName
+                } catch {
+                  Write-Host "[WARN]: 中断した $ProfileName の不完全な成果物を削除できませんでした: $_"
+                }
+                if ($StopReason -eq "Timeout") {
+                  $TimedOutProfiles += $ProfileName
+                } else {
+                  $FailedProfiles += $ProfileName
+                }
                 $OverallExitCode = 1
                 Write-Host "::endgroup::"
                 continue

@@ -1,0 +1,93 @@
+using KillChord.Runtime.Adaptor.InGame.Haptics;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace KillChord.Runtime.View.InGame.Haptics
+{
+    /// <summary>
+    ///     ジャスト成立時にゲームパッドを短く振動させるView。
+    ///     ゲームパッド未接続時（マウス・キーボード・タッチ操作時）は何も行わない。
+    /// </summary>
+    public sealed class GamepadHapticsView : MonoBehaviour, IGamepadHapticsViewModel
+    {
+        /// <summary>
+        ///     振動の強さと長さの設定を受け取る。
+        /// </summary>
+        /// <param name="config"> ゲームパッド振動の設定。 </param>
+        public void Initialize(GamepadHapticsConfig config)
+        {
+            _config = config;
+        }
+
+        /// <summary>
+        ///     ジャスト成立時の振動を一度だけ再生する。
+        /// </summary>
+        public void PlayJustHitPulse()
+        {
+            if (_config == null)
+            {
+                Debug.LogError($"[{nameof(GamepadHapticsView)}] Configが未設定です。", this);
+                return;
+            }
+
+            Gamepad gamepad = Gamepad.current;
+            if (gamepad == null)
+            {
+                return;
+            }
+
+            if (_config.PulseDuration <= 0f)
+            {
+                return;
+            }
+
+            gamepad.SetMotorSpeeds(_config.LowFrequencyMotorSpeed, _config.HighFrequencyMotorSpeed);
+            _pulsingGamepad = gamepad;
+            _remainingPulseTime = _config.PulseDuration;
+        }
+
+        private GamepadHapticsConfig _config;
+        private Gamepad _pulsingGamepad;
+        private float _remainingPulseTime;
+
+        /// <summary>
+        ///     振動の残り時間を減算し、経過後にモーターを停止する。
+        /// </summary>
+        private void Update()
+        {
+            if (_remainingPulseTime <= 0f)
+            {
+                return;
+            }
+
+            _remainingPulseTime -= Time.unscaledDeltaTime;
+            if (_remainingPulseTime <= 0f)
+            {
+                StopHaptics();
+            }
+        }
+
+        /// <summary>
+        ///     破棄時に振動が鳴り続けないよう停止する。
+        /// </summary>
+        private void OnDestroy()
+        {
+            StopHaptics();
+        }
+
+        /// <summary>
+        ///     振動を開始したゲームパッドの振動を停止する。
+        /// </summary>
+        private void StopHaptics()
+        {
+            _remainingPulseTime = 0f;
+
+            if (_pulsingGamepad != null && _pulsingGamepad.added)
+            {
+                _pulsingGamepad.SetMotorSpeeds(0f, 0f);
+            }
+
+            _pulsingGamepad = null;
+        }
+    }
+}

@@ -67,7 +67,7 @@ Varyings vert(Attributes IN)
 half4 frag(Varyings IN) : SV_Target
 {
 #ifdef _NORMALMAP
-    half3 normalWS = (half3) GetNormalCombine(
+    half3 normalWS = GetNormalCombine(
         TEXTURE2D_ARGS(_NormalMap, sampler_NormalMap),
         IN.uv,
         IN.normalWS,
@@ -80,7 +80,7 @@ half4 frag(Varyings IN) : SV_Target
 #endif
 
 #ifdef _ISFORFACE_ON
-    normalWS = (half3) GetFaceNormal(_FaceUp, (float3) normalWS);
+    normalWS = GetFaceNormal(_FaceUp, normalWS);
 #endif
 
     half3 color;
