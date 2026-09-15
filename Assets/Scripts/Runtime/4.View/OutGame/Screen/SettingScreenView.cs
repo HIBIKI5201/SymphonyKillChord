@@ -1,4 +1,5 @@
 using KillChord.Runtime.View.OutGame.Navigation;
+using LitMotion;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,18 +22,19 @@ namespace KillChord.Runtime.View.OutGame.Screen
                     $"[{nameof(SettingScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
 
             _returnToTitleButton = Require<Button>(rootElement, RETURN_TO_TITLE_BUTTON_NAME);
-            _soundCategoryButton = Require<Button>(rootElement, SOUND_CATEGORY_BUTTON_NAME);
+            _environmentSettingButton = Require<Button>(rootElement, ENVIRONMENT_SETTING_BUTTON_NAME);
             _cancelReturnToTitleButton = Require<Button>(rootElement, CANCEL_RETURN_BUTTON_NAME);
             _confirmReturnToTitleButton = Require<Button>(rootElement, CONFIRM_RETURN_BUTTON_NAME);
             _returnToTitleDialog = Require<VisualElement>(rootElement, RETURN_TO_TITLE_DIALOG_NAME);
             _outsideClickArea = Require<VisualElement>(rootElement, OUTSIDE_CLICK_AREA_NAME);
+            _backGround = Require<VisualElement>(rootElement, BACK_GROUND_NAME);
 
             RegisterButtonCallback();
             ResetReturnToTitleDialog();
         }
 
         /// <summary>
-        ///     確認状態を初期化して設定画面を表示する。
+        ///     確認状態を初期化し、ウィンドウを左からスライドインさせつつ設定画面を表示する。
         /// </summary>
         public override ValueTask Show(CancellationToken cancellationToken = default)
         {
@@ -40,6 +42,13 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             // 背面のホーム画面は表示されたままのため、フォーカスを設定画面内へ閉じ込める。
             _screenNavigationScope.Activate(RootElement);
+
+            _slideMotionHandle.TryComplete();
+            SetWindowTranslateX(SLIDE_OFFSET_X);
+            _slideMotionHandle = LMotion.Create(SLIDE_OFFSET_X, 0f, SLIDE_DURATION)
+                .WithEase(SLIDE_EASE)
+                .Bind(this, static (x, state) => state.SetWindowTranslateX(x));
+
             return base.Show(cancellationToken);
         }
 
@@ -50,6 +59,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             _dialogNavigationScope.Deactivate();
             _screenNavigationScope.Deactivate();
+
+            _slideMotionHandle.TryComplete();
+            _slideMotionHandle = LMotion.Create(0f, SLIDE_OFFSET_X, SLIDE_DURATION)
+                .WithEase(SLIDE_EASE)
+                .Bind(this, static (x, state) => state.SetWindowTranslateX(x));
+
             return base.Hide(cancellationToken);
         }
 
@@ -58,6 +73,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public override void Dispose()
         {
+            _slideMotionHandle.TryCancel();
             base.Dispose();
             UnregisterButtonCallback();
         }
@@ -67,8 +83,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
-            _backButton.ExcludeFromNavigation();
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
             _returnToTitleButton.clicked += ShowReturnToTitleDialog;
             _cancelReturnToTitleButton.clicked += HideReturnToTitleDialog;
@@ -103,19 +117,27 @@ namespace KillChord.Runtime.View.OutGame.Screen
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
-        private const string BACKBUTTON_NAME = "BackButton";
-        private const string SOUND_CATEGORY_BUTTON_NAME = "SoundCategoryButton";
+        private const string BACKBUTTON_NAME = "CloseButton";
+        private const string ENVIRONMENT_SETTING_BUTTON_NAME = "EnvironmentSettingButton";
         private const string RETURN_TO_TITLE_BUTTON_NAME = "ReturnToTitleButton";
         private const string CANCEL_RETURN_BUTTON_NAME = "CancelReturnToTitleButton";
         private const string CONFIRM_RETURN_BUTTON_NAME = "ConfirmReturnToTitleButton";
         private const string RETURN_TO_TITLE_DIALOG_NAME = "ReturnToTitleDialog";
         private const string OUTSIDE_CLICK_AREA_NAME = "Root";
+        private const string BACK_GROUND_NAME = "BackGround";
+
+        /// <summary> ウィンドウのスライドインにかかる時間(秒)。 </summary>
+        private const float SLIDE_DURATION = 0.2f;
+        /// <summary> ウィンドウのスライド開始位置(画面左外側へのオフセット、px)。 </summary>
+        private const float SLIDE_OFFSET_X = -190f;
+        /// <summary> ウィンドウのスライドのイージング。 </summary>
+        private const Ease SLIDE_EASE = Ease.OutCirc;
 
         /// <inheritdoc />
         protected override VisualElement CancelTargetElement => _backButton;
 
         /// <inheritdoc />
-        protected override VisualElement InitialFocusElement => _soundCategoryButton;
+        protected override VisualElement InitialFocusElement => _environmentSettingButton;
 
         /// <summary> 設定画面表示中、フォーカスを画面内へ閉じ込める。 </summary>
         private readonly ModalNavigationScope _screenNavigationScope = new();
@@ -123,15 +145,17 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly ModalNavigationScope _dialogNavigationScope = new();
 
         private readonly Button _backButton;
-        private readonly Button _soundCategoryButton;
+        private readonly Button _environmentSettingButton;
         private readonly Button _returnToTitleButton;
         private readonly Button _cancelReturnToTitleButton;
         private readonly Button _confirmReturnToTitleButton;
         private readonly VisualElement _returnToTitleDialog;
         private readonly VisualElement _outsideClickArea;
+        private readonly VisualElement _backGround;
         private IDisposable _backButtonActivation;
         private bool _isReturnToTitleDialogVisible;
         private bool _isReturnToTitleRequested;
+        private MotionHandle _slideMotionHandle;
 
         /// <summary>
         ///     設定ウィンドウ外が押された場合に設定画面を閉じる。
@@ -225,6 +249,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _returnToTitleDialog.style.display = DisplayStyle.None;
             _confirmReturnToTitleButton.SetEnabled(true);
             _cancelReturnToTitleButton.SetEnabled(true);
+        }
+
+        /// <summary>
+        ///     ウィンドウの水平方向の移動量を書き込みます。
+        /// </summary>
+        /// <param name="x"> 右方向への移動量(px)。 </param>
+        private void SetWindowTranslateX(float x)
+        {
+            _backGround.style.translate = new Translate(x, 0);
         }
 
         /// <summary>

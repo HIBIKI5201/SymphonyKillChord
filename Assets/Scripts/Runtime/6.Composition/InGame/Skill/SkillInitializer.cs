@@ -69,20 +69,26 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 _loadedSkillRepository = await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, cancellationToken);
             }
 
-            if (ServiceLocator.TryGetInstance(out SkillBuildDefinition _)
-                || string.IsNullOrWhiteSpace(_skillBuildRepositoryKey))
+            if (string.IsNullOrWhiteSpace(_skillBuildRepositoryKey))
             {
-                // 改造画面経由で既にSkillBuildDefinitionが登録済み、
-                // またはキー未設定の場合はセーブデータの再ロードを行わない。
                 return true;
             }
+
+            bool hasBuildDefinition = ServiceLocator.TryGetInstance(out SkillBuildDefinition _);
 
             try
             {
                 SkillBuildRepository skillBuildRepository =
                     await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, cancellationToken);
-                IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.GetEquippedSkills();
-                _saveDataEquippedSkills = ToSkillTemplates(equippedSkills);
+                _skillLevels = await skillBuildRepository.GetSkillLevelsAsync();
+
+                if (!hasBuildDefinition)
+                {
+                    // 改造画面経由で既にSkillBuildDefinitionが登録済みの場合は、
+                    // 装備スキル一覧の再ロードは行わない(レベル辞書のみ取得する)。
+                    IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.GetEquippedSkills();
+                    _saveDataEquippedSkills = ToSkillTemplates(equippedSkills);
+                }
             }
             catch (Exception exception)
             {
@@ -262,6 +268,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
             _skillRepositoryKey.ReleaseLoadedAsset(this);
             _loadedSkillRepository = null;
+            _skillLevels = null;
 
             if (!_isRegistered)
             {
@@ -379,7 +386,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                     continue;
                 }
 
-                SkillDefinition definition = skillTemplate.ToSkillDefinition(musicSyncState.Bpm);
+                int currentLevel = _skillLevels != null && _skillLevels.TryGetValue(skillTemplate.Id.Value, out int savedLevel)
+                    ? savedLevel
+                    : skillTemplate.Level.Value;
+                // 成長ステップの編集でMaxLevelが下がった場合に備え、セーブ済みレベルを現在の上限内へ収める。
+                currentLevel = Math.Min(currentLevel, skillTemplate.MaxLevel);
+                SkillDefinition definition = skillTemplate.ToSkillDefinition(musicSyncState.Bpm, currentLevel);
                 SkillView view = FindSkillView(skillVisuals, definition.Id.Value);
                 if (view == null)
                 {
@@ -590,5 +602,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private bool _isRegistered;
         private SkillTemplate[] _saveDataEquippedSkills;
         private SkillRepository _loadedSkillRepository;
+        private IReadOnlyDictionary<int, int> _skillLevels;
     }
 }

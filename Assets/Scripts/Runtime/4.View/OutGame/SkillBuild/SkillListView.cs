@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.View.OutGame.SkillTree;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,18 +16,21 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <summary>
         ///     SkillListView を初期化する。
         /// </summary>
-        /// <param name="scrollView"> 表示先。 </param>
+        /// <param name="scrollView"> カード要素を追加する表示先(ScrollView内のコンテンツコンテナ)。 </param>
+        /// <param name="scrollViewControl"> スクロール操作対象の ScrollView 本体。ドラッグスクロール設定に使う。 </param>
         /// <param name="skillElementTemplate"> 各要素のテンプレート。 </param>
         /// <param name="onSkillElementCreated"> 要素生成時のコールバック。 </param>
         /// <param name="soundEffectCommand"> UI操作音の再生コマンド。 </param>
         /// <exception cref="ArgumentNullException"></exception>
         public SkillListView(
             VisualElement scrollView,
+            ScrollView scrollViewControl,
             VisualTreeAsset skillElementTemplate,
             Action<VisualElement> onSkillElementCreated,
             IUISoundEffectCommand soundEffectCommand)
         {
             _scrollView = scrollView ?? throw new ArgumentNullException(nameof(scrollView));
+            _scrollViewControl = scrollViewControl;
             _skillElementTemplate = skillElementTemplate ?? throw new ArgumentNullException(nameof(skillElementTemplate));
             _onSkillElementCreated = onSkillElementCreated;
             _soundEffectCommand = soundEffectCommand;
@@ -76,11 +80,13 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
                 if (data.IsUnlocked)
                 {
+                    RemoveLeftMarginIfFirstInGroup(_unlockedGroupContainer, rootElement);
                     _unlockedGroupContainer.Add(rootElement);
                     _onSkillElementCreated?.Invoke(rootElement);
                 }
                 else
                 {
+                    RemoveLeftMarginIfFirstInGroup(_lockedGroupContainer, rootElement);
                     _lockedGroupContainer.Add(rootElement);
                 }
             }
@@ -201,14 +207,22 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         public void Dispose()
         {
             Clear();
+            if (_dragManipulator != null && _scrollViewControl != null)
+            {
+                _scrollViewControl.RemoveManipulator(_dragManipulator);
+                _dragManipulator = null;
+            }
+
             OnSkillSelected = null;
             OnGenreBadgeSelected = null;
         }
 
         private const string GROUP_DIVIDER_CLASS_NAME = "skill-group-divider";
         private const string GROUP_CONTAINER_CLASS_NAME = "skill-group-container";
+        private const string DRAGGABLE_CLASS_NAME = "draggable";
 
         private readonly VisualElement _scrollView;
+        private readonly ScrollView _scrollViewControl;
         private readonly VisualTreeAsset _skillElementTemplate;
         private readonly Action<VisualElement> _onSkillElementCreated;
         private readonly IUISoundEffectCommand _soundEffectCommand;
@@ -216,18 +230,52 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private VisualElement _unlockedGroupContainer;
         private VisualElement _lockedGroupContainer;
         private VisualElement _groupDivider;
+        private ScrollViewDragManipulator _dragManipulator;
 
         /// <summary>
         ///     ScrollView の基本設定を行う。
         /// </summary>
         private void ConfigureScrollView()
         {
-            if (_scrollView is ScrollView scrollView)
+            if (_scrollViewControl == null)
             {
-                scrollView.mode = ScrollViewMode.Horizontal;
-                scrollView.horizontalScrollerVisibility = ScrollerVisibility.Auto;
-                scrollView.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+                return;
             }
+
+            _scrollViewControl.mode = ScrollViewMode.Horizontal;
+            _scrollViewControl.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+            _scrollViewControl.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+
+            // スクロールバーのつまみをドラッグしなくても一覧をドラッグしてスクロールできるようにする。
+            // ただしスキルカード(装備ドラッグ対象、draggable クラス)上から始まった操作は、
+            // 装備ドラッグと競合しないようスクロールドラッグの対象から除外する。
+            _dragManipulator = new ScrollViewDragManipulator(
+                _scrollViewControl,
+                ScrollDragAxis.Horizontal,
+                shouldIgnorePointerDownTarget: element => HasDraggableAncestor(element, _scrollViewControl));
+        }
+
+        /// <summary>
+        ///     指定要素、またはその祖先(ScrollView 自身は含まない)に
+        ///     装備ドラッグ対象を示す draggable クラスが付与されているか判定する。
+        /// </summary>
+        /// <param name="element"> 判定対象要素。 </param>
+        /// <param name="boundary"> 探索を打ち切る境界要素(この要素自体は含めない)。 </param>
+        /// <returns> 装備ドラッグ対象の子孫である場合は true。 </returns>
+        private static bool HasDraggableAncestor(VisualElement element, VisualElement boundary)
+        {
+            VisualElement current = element;
+            while (current != null && current != boundary)
+            {
+                if (current.ClassListContains(DRAGGABLE_CLASS_NAME))
+                {
+                    return true;
+                }
+
+                current = current.parent;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -283,6 +331,20 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             VisualElement container = new();
             container.AddToClassList(GROUP_CONTAINER_CLASS_NAME);
             return container;
+        }
+
+        /// <summary>
+        ///     グループ枠の先頭に追加される要素の場合、draggable クラスが持つ左余白(4%)を
+        ///     打ち消し、グループ枠の左端に隙間なく詰まるようにする。
+        /// </summary>
+        /// <param name="groupContainer"> 追加先のグループ枠。 </param>
+        /// <param name="element"> 追加しようとしている要素。 </param>
+        private static void RemoveLeftMarginIfFirstInGroup(VisualElement groupContainer, VisualElement element)
+        {
+            if (groupContainer.childCount == 0)
+            {
+                element.style.marginLeft = 0;
+            }
         }
 
         /// <summary>

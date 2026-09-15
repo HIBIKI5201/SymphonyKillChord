@@ -57,6 +57,9 @@ namespace KillChord.Runtime.InfraStructure.Player
             _statusEffectReapplyPolicy,
             _skillNormalAttackDamagePolicy);
 
+        /// <summary> レベルアップ時の効果パラメータ成長設定一覧です。 </summary>
+        public SkillEffectParameterGrowth[] EffectParameterGrowths => BuildEffectParameterGrowths();
+
         /// <summary> アニメーションキーです。 </summary>
         public string AnimationKey => _animationKey;
 
@@ -68,7 +71,7 @@ namespace KillChord.Runtime.InfraStructure.Player
         {
             return new SkillTemplate(
                 Id, _pattern, _skillType, Level, _cooldownNumerator, _cooldownDenomimator,
-                EffectSpec, _animationKey, _displayName, _skillDetail, _tips, _icon, _effectDisplayMode);
+                EffectSpec, EffectParameterGrowths, _animationKey, _displayName, _skillDetail, _tips, _icon, _effectDisplayMode);
         }
 
         private const string EFFECT_PARAMETER_PLACEHOLDER_PATTERN = "\\{([^{}]+)\\}";
@@ -95,6 +98,9 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         [SerializeField, Tooltip("効果処理と説明文で共有する数値パラメータです。")]
         private SkillEffectParameterSetting[] _effectParameters = Array.Empty<SkillEffectParameterSetting>();
+
+        [SerializeField, Tooltip("レベルアップ時に成長させるパラメータのみ設定してください。未設定のパラメータは変化しません。")]
+        private SkillEffectParameterGrowthSetting[] _effectParameterGrowths = Array.Empty<SkillEffectParameterGrowthSetting>();
 
         [SerializeField, Tooltip("スキルの種類です。")]
         private SkillType[] _skillType;
@@ -144,11 +150,32 @@ namespace KillChord.Runtime.InfraStructure.Player
         }
 
         /// <summary>
+        ///     Inspector 設定からドメイン用パラメータ成長設定一覧を構築します。
+        /// </summary>
+        /// <returns> ドメイン用パラメータ成長設定一覧です。 </returns>
+        private SkillEffectParameterGrowth[] BuildEffectParameterGrowths()
+        {
+            if (_effectParameterGrowths == null || _effectParameterGrowths.Length == 0)
+            {
+                return Array.Empty<SkillEffectParameterGrowth>();
+            }
+
+            SkillEffectParameterGrowth[] result = new SkillEffectParameterGrowth[_effectParameterGrowths.Length];
+            for (int i = 0; i < _effectParameterGrowths.Length; i++)
+            {
+                result[i] = _effectParameterGrowths[i].ToDomain();
+            }
+
+            return result;
+        }
+
+        /// <summary>
         ///     Inspector に設定された表示情報を検証します。
         /// </summary>
         private void OnValidate()
         {
             ValidateDisplaySettings();
+            ValidateGrowthSettings();
         }
 
         /// <summary>
@@ -226,6 +253,103 @@ namespace KillChord.Runtime.InfraStructure.Player
 #endif
         }
 
+        /// <summary>
+        ///     効果パラメータ成長設定の整合性を検証します。
+        /// </summary>
+        private void ValidateGrowthSettings()
+        {
+#if UNITY_EDITOR
+            SkillEffectParameterSetting[] parameters = _effectParameters ?? Array.Empty<SkillEffectParameterSetting>();
+            HashSet<SkillEffectParameterId> parameterIds = new();
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                parameterIds.Add(parameters[i].Id);
+            }
+
+            SkillEffectParameterGrowthSetting[] growths =
+                _effectParameterGrowths ?? Array.Empty<SkillEffectParameterGrowthSetting>();
+            HashSet<SkillEffectParameterId> growthIds = new();
+            int expectedStepCount = -1;
+            for (int i = 0; i < growths.Length; i++)
+            {
+                SkillEffectParameterGrowthSetting growth = growths[i];
+                if (!growthIds.Add(growth.Id))
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(SkillTemplateAsset)}] 効果パラメータ成長設定が重複しています。ParameterId: {growth.Id}",
+                        this);
+                }
+
+                if (!parameterIds.Contains(growth.Id))
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(SkillTemplateAsset)}] 効果パラメータに存在しないIDへ成長設定がされています。ParameterId: {growth.Id}",
+                        this);
+                }
+
+                ValidateGrowthSteps(growth);
+
+                int stepCount = growth.Steps?.Length ?? 0;
+                if (stepCount == 0)
+                {
+                    continue;
+                }
+
+                if (expectedStepCount < 0)
+                {
+                    expectedStepCount = stepCount;
+                }
+                else if (stepCount != expectedStepCount)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(SkillTemplateAsset)}] パラメータ間でStep数が一致していません。" +
+                        $"ParameterId: {growth.Id} ({stepCount}件) が他のパラメータ({expectedStepCount}件)と異なります。" +
+                        "Step数は全パラメータで揃えることを推奨します。",
+                        this);
+                }
+            }
+#endif
+        }
+
+        /// <summary>
+        ///     成長パラメータ1件分の成長ステップを検証します。
+        /// </summary>
+        /// <param name="growth"> 検証対象の成長設定です。 </param>
+        private void ValidateGrowthSteps(SkillEffectParameterGrowthSetting growth)
+        {
+#if UNITY_EDITOR
+            SkillEffectParameterGrowthStepSetting[] steps =
+                growth.Steps ?? Array.Empty<SkillEffectParameterGrowthStepSetting>();
+            for (int i = 0; i < steps.Length; i++)
+            {
+                SkillEffectParameterGrowthStepSetting step = steps[i];
+                if (double.IsNaN(step.GrowthValue) || double.IsInfinity(step.GrowthValue))
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(SkillTemplateAsset)}] 成長値には有限値を指定してください。" +
+                        $"ParameterId: {growth.Id}, StepIndex: {i}",
+                        this);
+                }
+
+                if (step.GrowthValue == 0)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(SkillTemplateAsset)}] 成長値が0のため、このステップでは値が変化しません。" +
+                        $"ParameterId: {growth.Id}, StepIndex: {i}",
+                        this);
+                }
+
+                if (step.GrowthType == SkillEffectParameterGrowthType.Multiplicative && step.GrowthValue <= 0)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(SkillTemplateAsset)}] 乗算方式の成長値は0より大きい値を指定してください。" +
+                        $"ParameterId: {growth.Id}, StepIndex: {i}",
+                        this);
+                }
+            }
+#endif
+        }
+
         [Serializable]
         private struct SkillEffectParameterSetting
         {
@@ -255,6 +379,78 @@ namespace KillChord.Runtime.InfraStructure.Player
 
             [SerializeField, Tooltip("アウトゲーム画面での表示形式です。")]
             private SkillEffectValueFormat _displayFormat;
+        }
+
+        [Serializable]
+        private struct SkillEffectParameterGrowthSetting
+        {
+            /// <summary> 成長対象のパラメータ識別子です。 </summary>
+            public SkillEffectParameterId Id => _id;
+
+            /// <summary> レベル遷移ごとの成長ステップ一覧です。 </summary>
+            public SkillEffectParameterGrowthStepSetting[] Steps => _steps;
+
+            /// <summary>
+            ///     ドメイン用パラメータ成長設定へ変換します。
+            /// </summary>
+            /// <returns> ドメイン用パラメータ成長設定です。 </returns>
+            public SkillEffectParameterGrowth ToDomain()
+            {
+                return new SkillEffectParameterGrowth(_id, BuildSteps());
+            }
+
+            [SerializeField, Tooltip("成長対象の効果パラメータの識別子です。")]
+            private SkillEffectParameterId _id;
+
+            [SerializeField, Tooltip("レベル遷移ごとの成長ステップです。未設定の遷移には既定値(乗算×1.1)が適用されます。")]
+            private SkillEffectParameterGrowthStepSetting[] _steps;
+
+            /// <summary>
+            ///     ドメイン用成長ステップ一覧を構築します。
+            /// </summary>
+            /// <returns> ドメイン用成長ステップ一覧です。 </returns>
+            private SkillEffectParameterGrowthStep[] BuildSteps()
+            {
+                if (_steps == null || _steps.Length == 0)
+                {
+                    return Array.Empty<SkillEffectParameterGrowthStep>();
+                }
+
+                SkillEffectParameterGrowthStep[] result = new SkillEffectParameterGrowthStep[_steps.Length];
+                for (int i = 0; i < _steps.Length; i++)
+                {
+                    result[i] = _steps[i].ToDomain();
+                }
+
+                return result;
+            }
+        }
+
+        [Serializable]
+        public struct SkillEffectParameterGrowthStepSetting
+        {
+            /// <summary> 成長方式です。 </summary>
+            public SkillEffectParameterGrowthType GrowthType => _growthType;
+
+            /// <summary> 加算量または乗算倍率です。 </summary>
+            public double GrowthValue => _growthValue;
+
+            /// <summary>
+            ///     ドメイン用成長ステップへ変換します。
+            /// </summary>
+            /// <returns> ドメイン用成長ステップです。 </returns>
+            public SkillEffectParameterGrowthStep ToDomain()
+            {
+                return new SkillEffectParameterGrowthStep(_growthType, _growthValue);
+            }
+
+            [SerializeField, Tooltip("成長方式です(加算/乗算)。")]
+            private SkillEffectParameterGrowthType _growthType;
+
+            [SerializeField, Tooltip(
+                "この1回分のレベルアップでの加算量(加算方式)または乗算倍率(乗算方式)です。" +
+                "新規追加時に既定値が反映されない場合は、乗算なら1.1、加算なら25を目安に設定してください。")]
+            private double _growthValue;
         }
     }
 }
