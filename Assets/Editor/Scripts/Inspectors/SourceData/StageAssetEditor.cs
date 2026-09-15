@@ -38,10 +38,21 @@ namespace KillChord.Editor.Inspectors.SourceData
             }
 
             StageTreeGraphView.Draw(stageTreeAsset, ref _panOffset, focusAsset: (ScriptableObject)target);
+            if (target is BattleStageAsset)
+            {
+                bool showMap = EditorGUILayout.Foldout(_showWaveMap, "参照Waveのシーンマップ", true);
+                if (showMap != _showWaveMap)
+                {
+                    _showWaveMap = showMap;
+                    GUIUtility.ExitGUI();
+                }
+                if (_showWaveMap) { StageWavePreview.Draw((ScriptableObject)target, stageTreeAsset); }
+            }
         }
 
         /// <summary> グラフのPanオフセットです。初回描画時に自分自身のノードへ自動フォーカスします。 </summary>
         private Vector2 _panOffset = StageTreeGraphView.UNINITIALIZED_PAN_OFFSET;
+        private bool _showWaveMap;
 
         private const string STAGE_TREE_ADDRESSABLE_KEY = "StageTreeAsset";
     }

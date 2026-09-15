@@ -209,7 +209,7 @@ namespace KillChord.Editor.Inspectors.SourceData
             Vector2 contentOrigin = -effectivePanOffset;
             DrawGrid(new Rect(Vector2.zero, viewportRect.size));
             DrawEdges(contentOrigin, edges, selectedBindAsset);
-            DrawNodes(contentOrigin, nodes);
+            DrawNodes(contentOrigin, nodes, focusAsset);
             HandlePan(new Rect(Vector2.zero, viewportRect.size), ref panOffset, contentWidth, contentHeight);
 
             GUI.EndGroup();
@@ -642,7 +642,8 @@ namespace KillChord.Editor.Inspectors.SourceData
         /// </summary>
         /// <param name="contentOrigin"> コンテンツ原点(Panオフセット適用後)のグループ内ローカル座標。</param>
         /// <param name="nodes"> ノード一覧。</param>
-        private static void DrawNodes(Vector2 contentOrigin, List<NodeInfo> nodes)
+        /// <param name="focusAsset"> Inspectorで表示中のアセット。ロック中も同じ対象を強調します。</param>
+        private static void DrawNodes(Vector2 contentOrigin, List<NodeInfo> nodes, ScriptableObject focusAsset)
         {
             Color previousBackgroundColor = GUI.backgroundColor;
             for (int i = 0; i < nodes.Count; i++)
@@ -650,7 +651,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 NodeInfo node = nodes[i];
                 Rect nodeRect = node.Rect;
                 nodeRect.position += contentOrigin;
-                GUI.backgroundColor = Selection.activeObject == node.Asset
+                GUI.backgroundColor = (focusAsset != null ? focusAsset : Selection.activeObject) == node.Asset
                     ? SELECTED_NODE_COLOR
                     : node.IsBattle ? BATTLE_NODE_COLOR : SCENARIO_NODE_COLOR;
                 if (GUI.Button(nodeRect, node.Label, EditorStyles.miniButton))

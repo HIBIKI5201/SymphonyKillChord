@@ -15,6 +15,7 @@ MonoBehaviour:
   _pages:
   - _displayName: Stage Select
     _sourceAssetAddressableKeys:
+    - DemoExperienceConfig
     - StageTreeAsset
     - EnemyWaveDefinitionRepository
     - EnemyDefinitionRepository

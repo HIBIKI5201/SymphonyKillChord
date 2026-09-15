@@ -43,7 +43,9 @@ namespace KillChord.Editor.Inspectors.SourceData
                 BattleSceneDataReader.ClearCache();
             }
             EditorGUILayout.EndHorizontal();
-            EnemyWaveSummaryDrawer.DrawWaveSummary(serializedObject, target);
+            EnemyWaveSummaryDrawer.DrawWaveSummary(serializedObject, target, ref _selectedWave);
         }
+
+        private int _selectedWave;
     }
 }

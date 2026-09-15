@@ -1,11 +1,10 @@
 using KillChord.Editor.ProjectWindow;
+using KillChord.Editor.Inspectors.SourceData;
 using KillChord.Editor.SourceDataProvider.Core;
 using KillChord.Editor.Utility;
-using KillChord.Runtime.Utility.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -19,7 +18,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
     {
         /// <summary>
         ///     CoreのPropertyDrawer等がWiki型を直接参照せずジャンプできるよう、
-        ///     <see cref="PlannerNavigationHub"/>へ実処理を登録します(Core→Wikiの単方向依存を保つため)。
+        ///     <see cref="PlannerNavigationHub"/>へ実処理を登録します(WikiからCoreへの依存に限定するため)。
         /// </summary>
         [InitializeOnLoadMethod]
         private static void RegisterNavigationHub()
@@ -94,6 +93,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private Vector2 _itemsScrollPosition;
         private Vector2 _searchScrollPosition;
         private string _lastIndexedSearchQuery;
+        private bool _showCollectionMetadata;
         private readonly List<SearchResult> _searchResults = new();
 
         /// <summary>
@@ -102,7 +102,38 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private void OnEnable()
         {
             SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+            EditorApplication.projectChanged += InvalidateSearch;
+            Undo.undoRedoPerformed += InvalidateSearch;
+            SourceDataProviderSettings.OnChanged += InvalidateSearch;
+            InvalidateSearch();
             EnsureSelection();
+        }
+
+        /// <summary>
+        ///     ウィンドウを閉じるときに変更通知を解除します。
+        /// </summary>
+        private void OnDisable()
+        {
+            EditorApplication.projectChanged -= InvalidateSearch;
+            Undo.undoRedoPerformed -= InvalidateSearch;
+            SourceDataProviderSettings.OnChanged -= InvalidateSearch;
+        }
+
+        /// <summary>
+        ///     Inspectorで編集して戻った際に検索結果を更新します。
+        /// </summary>
+        private void OnFocus()
+        {
+            InvalidateSearch();
+        }
+
+        /// <summary>
+        ///     次のLayoutで検索結果を再構築します。
+        /// </summary>
+        private void InvalidateSearch()
+        {
+            _lastIndexedSearchQuery = null;
+            Repaint();
         }
 
         /// <summary>
@@ -178,6 +209,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
                 _lastIndexedSearchQuery = null;
                 Repaint();
+                GUIUtility.ExitGUI();
             }
 
             if (GUILayout.Button("Page Settings", EditorStyles.toolbarButton, GUILayout.Width(96f)))
@@ -193,10 +225,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         }
 
         /// <summary>
-        ///     検索クエリを更新します。空文字⇔非空文字の切り替え(=OnGUIの描画分岐が変わる変更)を伴う場合は、
-        ///     LayoutイベントとKeyDown/MouseDown等の後続イベントでGUILayoutの構造が食い違わないよう、
-        ///     この場でGUIUtility.ExitGUI()を呼んで現在のイベント処理を打ち切ります。
-        ///     (次のRepaint/Layoutから新しいクエリに基づいた一貫した構造で描画し直されます)
+        ///     検索クエリを更新します。検索結果や表示先の変更でGUILayoutの構造が食い違わないよう、
+        ///     入力イベントを打ち切り、次のLayoutで新しい状態を描画します。
         /// </summary>
         /// <param name="nextQuery"> 更新後の検索クエリです。 </param>
         private void SetSearchQuery(string nextQuery)
@@ -204,7 +234,12 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             bool wasEmpty = string.IsNullOrWhiteSpace(_searchQuery);
             _searchQuery = nextQuery;
             bool isEmptyNow = string.IsNullOrWhiteSpace(_searchQuery);
-            if (wasEmpty != isEmptyNow)
+            if (wasEmpty != isEmptyNow && Event.current != null)
+            {
+                Repaint();
+                GUIUtility.ExitGUI();
+            }
+            if (Event.current != null && Event.current.type != EventType.Layout)
             {
                 Repaint();
                 GUIUtility.ExitGUI();
@@ -222,6 +257,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
             EnsureSelection();
             Repaint();
+            GUIUtility.ExitGUI();
         }
 
         /// <summary>
@@ -259,7 +295,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             if (_navigationMode == NavigationMode.SourceAssets)
             {
                 if (!Contains(page.SourceAssetAddressableKeys, _selectedSourceAssetKey)
-                    || IsRepositoryOnlySourceAsset(_selectedSourceAssetKey))
+                    || !visibleSourceAssetKeys.Contains(_selectedSourceAssetKey))
                 {
                     _selectedSourceAssetKey = visibleSourceAssetKeys.Count > 0
                         ? visibleSourceAssetKeys[0]
@@ -305,6 +341,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     _selectedSourceAssetKey = string.Empty;
                     _selectedCollectionKey = string.Empty;
                     EnsureSelection();
+                    GUIUtility.ExitGUI();
                 }
             }
             EditorGUILayout.EndVertical();
@@ -329,6 +366,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _selectedCollectionKey = string.Empty;
                 _selectedCollectionItemIndex = 0;
                 EnsureSelection();
+                GUIUtility.ExitGUI();
             }
 
             using (EditorGUILayout.ScrollViewScope scope = new(_navigationScrollPosition))
@@ -375,9 +413,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     continue;
                 }
 
-                _selectedSourceAssetKey = addressableKey;
-                _selectedCollectionKey = string.Empty;
-                _selectedCollectionItemIndex = 0;
+                NavigateToSourceAsset(addressableKey);
+                GUIUtility.ExitGUI();
             }
         }
 
@@ -407,6 +444,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _selectedCollectionKey = collectionKey;
                 _selectedSourceAssetKey = string.Empty;
                 _selectedCollectionItemIndex = 0;
+                GUIUtility.ExitGUI();
             }
         }
 
@@ -579,7 +617,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 ShowCollectionCreationMenu(mapping, sourceAsset, elementType);
             }
 
-            using (new EditorGUI.DisabledScope(collectionProperty.arraySize == 0))
+            using (new EditorGUI.DisabledScope(_selectedCollectionItemIndex < 0
+                || _selectedCollectionItemIndex >= collectionProperty.arraySize))
             {
                 if (GUILayout.Button("Collectionから外す", GUILayout.Height(COMMAND_BUTTON_HEIGHT)))
                 {
@@ -660,7 +699,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             _selectedCollectionItemIndex = newIndex;
             EditorGUIUtility.PingObject(createdAsset);
             Selection.activeObject = createdAsset;
-            Repaint();
+            InvalidateSearch();
+            if (Event.current != null) { GUIUtility.ExitGUI(); }
         }
 
         /// <summary>
@@ -689,7 +729,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             }
 
             _selectedCollectionItemIndex = newIndex;
-            Repaint();
+            SourceCollectionItemInspector.Select(sourceAsset, collectionProperty.GetArrayElementAtIndex(newIndex));
+            InvalidateSearch();
+            GUIUtility.ExitGUI();
         }
 
         /// <summary>
@@ -731,6 +773,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             EditorUtility.SetDirty(sourceAsset);
             AssetDatabase.SaveAssetIfDirty(sourceAsset);
             _selectedCollectionItemIndex = Mathf.Max(0, removeIndex - 1);
+            InvalidateSearch();
+            GUIUtility.ExitGUI();
         }
 
         /// <summary>
@@ -741,9 +785,12 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <param name="element"> 対象要素です。 </param>
         private static void SelectAndPingElement(ScriptableObject owningSourceAsset, SerializedProperty element)
         {
-            UnityEngine.Object target = element.propertyType == SerializedPropertyType.ObjectReference
-                ? element.objectReferenceValue
-                : null;
+            if (element.propertyType != SerializedPropertyType.ObjectReference)
+            {
+                SourceCollectionItemInspector.Select(owningSourceAsset, element);
+                return;
+            }
+            UnityEngine.Object target = element.objectReferenceValue;
             target ??= owningSourceAsset;
 
             Selection.activeObject = target;
@@ -756,11 +803,12 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         /// <param name="addressableKey"> Repository SourceAssetのAddressableキーです。 </param>
         /// <param name="sourceAsset"> Repository SourceAsset自体です。 </param>
-        private static void DrawRepositoryHeadRow(string addressableKey, ScriptableObject sourceAsset)
+        private void DrawRepositoryHeadRow(string addressableKey, ScriptableObject sourceAsset)
         {
             string label = $"📦 {sourceAsset.name} ({sourceAsset.GetType().Name}) [Repository]";
             if (GUILayout.Button(label, EditorStyles.miniButton))
             {
+                _selectedCollectionItemIndex = -1;
                 Selection.activeObject = sourceAsset;
                 EditorGUIUtility.PingObject(sourceAsset);
             }
@@ -843,7 +891,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             for (int i = 0; i < page.SourceAssetAddressableKeys.Count; i++)
             {
                 string key = page.SourceAssetAddressableKeys[i];
-                if (!IsRepositoryOnlySourceAsset(key))
+                if (!IsRepositoryOnlySourceAsset(key)
+                    || !Contains(page.CollectionCategories, SourceDataProviderSettings.instance
+                        .GetCollectionMappingsByAddressableKey(key)[0].CollectionKey))
                 {
                     result.Add(key);
                 }
@@ -904,16 +954,29 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             bool pageFound = false;
             for (int i = 0; i < pages.Count; i++)
             {
-                if (!Contains(pages[i].SourceAssetAddressableKeys, addressableKey))
+                int pageIndex = (Mathf.Clamp(_selectedPageIndex, 0, pages.Count - 1) + i) % pages.Count;
+                if (!Contains(pages[pageIndex].SourceAssetAddressableKeys, addressableKey))
                 {
                     continue;
                 }
 
-                _selectedPageIndex = i;
+                _selectedPageIndex = pageIndex;
                 _navigationMode = NavigationMode.SourceAssets;
                 _selectedSourceAssetKey = addressableKey;
                 _selectedCollectionKey = string.Empty;
                 _selectedCollectionItemIndex = 0;
+                if (IsRepositoryOnlySourceAsset(addressableKey))
+                {
+                    string collectionKey = SourceDataProviderSettings.instance
+                        .GetCollectionMappingsByAddressableKey(addressableKey)[0].CollectionKey;
+                    if (Contains(pages[pageIndex].CollectionCategories, collectionKey))
+                    {
+                        _navigationMode = NavigationMode.Collections;
+                        _selectedCollectionKey = collectionKey;
+                        _selectedSourceAssetKey = string.Empty;
+                        _selectedCollectionItemIndex = -1;
+                    }
+                }
                 pageFound = true;
                 break;
             }
@@ -970,19 +1033,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 }
             }
 
-            IReadOnlyList<PlannerMasterDataEditorSettings.PageDefinition> pages =
-                PlannerMasterDataEditorSettings.instance.Pages;
-            int pageIndex = -1;
-            for (int i = 0; i < pages.Count; i++)
-            {
-                if (!Contains(pages[i].CollectionCategories, collectionKey))
-                {
-                    continue;
-                }
-
-                pageIndex = i;
-                break;
-            }
+            int pageIndex = FindCollectionPage(collectionKey);
 
             if (pageIndex >= 0)
             {
@@ -1037,7 +1088,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     && ObjectHasMatchingAuthoringId(element.objectReferenceValue, collectionKey, dataId);
             }
 
-            // 検索結果のDataIdはExtractDataId(下記)で生成しているため、照合も同じロジックを使う。
+            // PropertyDrawerから渡されたIDを表示と同じ規則で照合します。
             return string.Equals(ExtractDataId(element), dataId, StringComparison.Ordinal);
         }
 
@@ -1050,42 +1101,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <returns> 一致する場合はtrueです。 </returns>
         private static bool ObjectHasMatchingAuthoringId(UnityEngine.Object target, string collectionKey, string dataId)
         {
-            const BindingFlags BINDING_FLAGS =
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
-
-            SerializedObject serializedObject = new(target);
-            for (Type current = target.GetType();
-                current != null && current != typeof(ScriptableObject);
-                current = current.BaseType)
-            {
-                FieldInfo[] fields = current.GetFields(BINDING_FLAGS);
-                for (int i = 0; i < fields.Length; i++)
-                {
-                    FieldInfo field = fields[i];
-                    if (field.FieldType != typeof(DataID))
-                    {
-                        continue;
-                    }
-
-                    SourceDataCollectionAttribute attribute =
-                        field.GetCustomAttribute<SourceDataCollectionAttribute>();
-                    if (attribute == null
-                        || !string.Equals(attribute.CollectionKey, collectionKey, StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
-
-                    SerializedProperty dataIdProperty = serializedObject.FindProperty(field.Name);
-                    SerializedProperty idValueProperty =
-                        dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
-                    if (string.Equals(idValueProperty?.stringValue, dataId, StringComparison.Ordinal))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            return string.Equals(SourceCollectionElementDisplay.GetAuthoringId(target, collectionKey), dataId, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -1114,9 +1130,16 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         ///     collection設定の補足情報を描画します。
         /// </summary>
         /// <param name="mapping"> 対象のcollection設定です。 </param>
-        private static void DrawCollectionMetadata(
+        private void DrawCollectionMetadata(
             SourceDataProviderSettings.SourceCollectionMapping mapping)
         {
+            bool expanded = EditorGUILayout.Foldout(_showCollectionMetadata, "Collection設定の詳細", true);
+            if (expanded != _showCollectionMetadata)
+            {
+                _showCollectionMetadata = expanded;
+                GUIUtility.ExitGUI();
+            }
+            if (!_showCollectionMetadata) { return; }
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             using (new EditorGUI.DisabledScope(true))
             {
@@ -1198,77 +1221,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <returns> 個別データ表示名です。 </returns>
         private static string BuildCollectionItemLabel(SerializedProperty element, int index)
         {
-            if (element == null)
-            {
-                return $"Element {index + 1}";
-            }
-
-            if (element.propertyType == SerializedPropertyType.ObjectReference)
-            {
-                UnityEngine.Object referencedAsset = element.objectReferenceValue;
-                return referencedAsset == null ? $"Element {index + 1}" : referencedAsset.name;
-            }
-
-            // LoadingTipのような、要素そのものが文字列本文であるCollection。
-            if (element.propertyType == SerializedPropertyType.String)
-            {
-                return string.IsNullOrWhiteSpace(element.stringValue) ? $"Element {index + 1}" : element.stringValue;
-            }
-
-            SerializedProperty dataIdProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
-                ?? element.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
-            SerializedProperty idValueProperty = dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME)
-                ?? element.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
-            if (!string.IsNullOrWhiteSpace(idValueProperty?.stringValue))
-            {
-                return idValueProperty.stringValue;
-            }
-
-            // Id/_stageId/_id相当のフィールドを持たないインライン構造体(StatusBonusEffectIcon/SkillGenreIcon
-            // のenumキー、BgmSelectorLabelの_selectorLabelなど)向けの汎用フォールバック。
-            // Enumフィールド(種別・ジャンル等の識別キー)を優先し、無ければ最初の非空文字列フィールドを使う。
-            if (TryFindChildPropertyByType(element, SerializedPropertyType.Enum, out SerializedProperty enumProperty))
-            {
-                return enumProperty.enumDisplayNames[Mathf.Clamp(
-                    enumProperty.enumValueIndex, 0, enumProperty.enumDisplayNames.Length - 1)];
-            }
-
-            if (TryFindChildPropertyByType(element, SerializedPropertyType.String, out SerializedProperty stringProperty)
-                && !string.IsNullOrWhiteSpace(stringProperty.stringValue))
-            {
-                return stringProperty.stringValue;
-            }
-
-            return $"Element {index + 1}";
-        }
-
-        /// <summary>
-        ///     指定要素の直下(1階層)の子プロパティから、指定した型の最初の1件を検索します。
-        /// </summary>
-        /// <param name="parent"> 検索対象の親プロパティです。 </param>
-        /// <param name="type"> 検索する型です。 </param>
-        /// <param name="found"> 見つかった子プロパティです。 </param>
-        /// <returns> 見つかった場合はtrueです。 </returns>
-        private static bool TryFindChildPropertyByType(
-            SerializedProperty parent,
-            SerializedPropertyType type,
-            out SerializedProperty found)
-        {
-            SerializedProperty iterator = parent.Copy();
-            SerializedProperty end = parent.GetEndProperty();
-            bool enterChildren = true;
-            while (iterator.NextVisible(enterChildren) && !SerializedProperty.EqualContents(iterator, end))
-            {
-                enterChildren = false;
-                if (iterator.propertyType == type)
-                {
-                    found = iterator.Copy();
-                    return true;
-                }
-            }
-
-            found = null;
-            return false;
+            return SourceCollectionElementDisplay.GetLabel(element, index);
         }
 
         /// <summary>
@@ -1368,29 +1321,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <returns> 取得できた場合はアセット名、それ以外はnullです。 </returns>
         private static string GetElementAssetDisplayName(SerializedProperty element)
         {
-            if (element.propertyType == SerializedPropertyType.ObjectReference)
-            {
-                return element.objectReferenceValue == null ? null : element.objectReferenceValue.name;
-            }
-
-            SerializedProperty assetProperty = element.FindPropertyRelative(COLLECTION_ASSET_PROPERTY_NAME);
-            if (assetProperty != null
-                && assetProperty.propertyType == SerializedPropertyType.ObjectReference
-                && assetProperty.objectReferenceValue != null)
-            {
-                return assetProperty.objectReferenceValue.name;
-            }
-
-            if (TryFindChildPropertyByType(
-                    element,
-                    SerializedPropertyType.ObjectReference,
-                    out SerializedProperty referenceProperty)
-                && referenceProperty.objectReferenceValue != null)
-            {
-                return referenceProperty.objectReferenceValue.name;
-            }
-
-            return null;
+            return SourceCollectionElementDisplay.GetReferences(element).FirstOrDefault()?.name;
         }
 
         /// <summary>
@@ -1424,46 +1355,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <returns> 取得できた場合はtrueです。 </returns>
         private static bool TryGetAuthoringDataIdValue(UnityEngine.Object target, string collectionKey, out string dataId)
         {
-            const BindingFlags BINDING_FLAGS =
-                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
-
-            SerializedObject serializedObject = new(target);
-            for (Type current = target.GetType();
-                current != null && current != typeof(ScriptableObject);
-                current = current.BaseType)
-            {
-                FieldInfo[] fields = current.GetFields(BINDING_FLAGS);
-                for (int i = 0; i < fields.Length; i++)
-                {
-                    FieldInfo field = fields[i];
-                    if (field.FieldType != typeof(DataID))
-                    {
-                        continue;
-                    }
-
-                    SourceDataCollectionAttribute attribute =
-                        field.GetCustomAttribute<SourceDataCollectionAttribute>();
-                    if (attribute == null
-                        || !string.Equals(attribute.CollectionKey, collectionKey, StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
-
-                    SerializedProperty dataIdProperty = serializedObject.FindProperty(field.Name);
-                    SerializedProperty idValueProperty =
-                        dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
-                    if (string.IsNullOrWhiteSpace(idValueProperty?.stringValue))
-                    {
-                        continue;
-                    }
-
-                    dataId = idValueProperty.stringValue;
-                    return true;
-                }
-            }
-
-            dataId = null;
-            return false;
+            dataId = SourceCollectionElementDisplay.GetAuthoringId(target, collectionKey);
+            return !string.IsNullOrWhiteSpace(dataId);
         }
 
         //
@@ -1475,7 +1368,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         private void DrawSearchResults()
         {
-            if (!string.Equals(_lastIndexedSearchQuery, _searchQuery, StringComparison.Ordinal))
+            if (Event.current.type == EventType.Layout
+                && !string.Equals(_lastIndexedSearchQuery, _searchQuery, StringComparison.Ordinal))
             {
                 RebuildSearchResults(_searchQuery);
                 _lastIndexedSearchQuery = _searchQuery;
@@ -1518,11 +1412,60 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                         NavigateToCollectionItem(result.CollectionKey, null);
                         break;
                     case SearchResultKind.CollectionItem:
-                        NavigateToCollectionItem(result.CollectionKey, result.DataId);
+                        NavigateToSearchResult(result);
                         break;
                 }
             }
             EditorGUILayout.EndHorizontal();
+        }
+
+        /// <summary>
+        ///     現在のページを優先してCollectionの表示先を探します。
+        /// </summary>
+        private int FindCollectionPage(string collectionKey)
+        {
+            IReadOnlyList<PlannerMasterDataEditorSettings.PageDefinition> pages = PlannerMasterDataEditorSettings.instance.Pages;
+            for (int i = 0; i < pages.Count; i++)
+            {
+                int index = (Mathf.Clamp(_selectedPageIndex, 0, pages.Count - 1) + i) % pages.Count;
+                if (Contains(pages[index].CollectionCategories, collectionKey)) { return index; }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        ///     IDの重複や空値によらず、検索した所有アセット内の正確な要素を選択します。
+        /// </summary>
+        private void NavigateToSearchResult(SearchResult result)
+        {
+            if (_lastIndexedSearchQuery != _searchQuery
+                || !TryResolveCollection(result.CollectionKey, out _, out ScriptableObject owner, out SerializedProperty collection)
+                || !collection.isArray
+                || owner != result.Owner)
+            {
+                InvalidateSearch();
+                GUIUtility.ExitGUI();
+                return;
+            }
+            for (int i = 0; i < collection.arraySize; i++)
+            {
+                SerializedProperty element = collection.GetArrayElementAtIndex(i);
+                if (element.propertyPath != result.PropertyPath) { continue; }
+                int page = FindCollectionPage(result.CollectionKey);
+                if (page >= 0)
+                {
+                    _selectedPageIndex = page;
+                    _navigationMode = NavigationMode.Collections;
+                    _selectedCollectionKey = result.CollectionKey;
+                    _selectedSourceAssetKey = string.Empty;
+                    _selectedCollectionItemIndex = i;
+                }
+                SelectAndPingElement(owner, element);
+                SetSearchQuery(string.Empty);
+                return;
+            }
+            ShowNotification(new GUIContent("検索対象が変更されています。検索結果を更新します。"));
+            InvalidateSearch();
         }
 
         /// <summary>
@@ -1589,66 +1532,30 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 {
                     SerializedProperty element = property.GetArrayElementAtIndex(elementIndex);
                     string itemLabel = BuildCollectionItemLabel(element, elementIndex);
-                    // ObjectReference要素は参照先アセットが持つ定義側DataIDで検索・ジャンプ照合を行うため、
-                    // ここではExtractDataId(アセット名で代替する簡易抽出)ではなく、ソートで使っているのと同じ
-                    // GetElementDataIdDisplayName(定義側DataIDフィールドの正しい抽出)を用いる。
-                    string dataId = GetElementDataIdDisplayName(element, mapping.CollectionKey);
-                    if (!MatchesQuery(itemLabel, query) && !MatchesQuery(dataId, query))
+                    if (!SourceCollectionElementDisplay.Matches(element, mapping.CollectionKey, query))
                     {
                         continue;
                     }
 
                     _searchResults.Add(SearchResult.ForCollectionItem(
                         mapping.CollectionKey,
-                        dataId,
-                        $"{mapping.CollectionKey} / {itemLabel}"));
+                        element.propertyPath,
+                        $"{mapping.CollectionKey} / {itemLabel}",
+                        sourceAsset));
                 }
             }
         }
 
         /// <summary>
-        ///     Collection要素からDataID文字列を抽出します。ObjectReferenceの場合は参照先アセット名で代替します。
+        ///     インラインCollection要素のDataIDまたは表示用キーを抽出します。
         /// </summary>
         /// <param name="element"> 対象要素です。 </param>
         /// <returns> DataID相当の文字列です。 </returns>
         private static string ExtractDataId(SerializedProperty element)
         {
-            if (element.propertyType == SerializedPropertyType.ObjectReference)
-            {
-                return element.objectReferenceValue == null ? null : element.objectReferenceValue.name;
-            }
-
-            if (element.propertyType == SerializedPropertyType.String)
-            {
-                return string.IsNullOrWhiteSpace(element.stringValue) ? null : element.stringValue;
-            }
-
-            SerializedProperty dataIdProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
-                ?? element.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
-            SerializedProperty idValueProperty = dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME)
-                ?? element.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
-            if (!string.IsNullOrWhiteSpace(idValueProperty?.stringValue))
-            {
-                return idValueProperty.stringValue;
-            }
-
-            // Id/_stageId/_id相当のフィールドを持たないインライン構造体(StatusBonusEffectIcon/SkillGenreIcon
-            // のenumキー、BgmSelectorLabelの_selectorLabelなど)向けの汎用フォールバック。
-            // BuildCollectionItemLabelと同じ優先順位(Enum→最初の非空文字列)にし、ラベル・検索・ジャンプ照合の
-            // 間で一貫したキーを使う。
-            if (TryFindChildPropertyByType(element, SerializedPropertyType.Enum, out SerializedProperty enumProperty))
-            {
-                return enumProperty.enumDisplayNames[Mathf.Clamp(
-                    enumProperty.enumValueIndex, 0, enumProperty.enumDisplayNames.Length - 1)];
-            }
-
-            if (TryFindChildPropertyByType(element, SerializedPropertyType.String, out SerializedProperty stringProperty)
-                && !string.IsNullOrWhiteSpace(stringProperty.stringValue))
-            {
-                return stringProperty.stringValue;
-            }
-
-            return null;
+            return element.propertyType == SerializedPropertyType.ObjectReference
+                ? null
+                : SourceCollectionElementDisplay.GetInlineKey(element);
         }
 
         /// <summary>
@@ -1667,12 +1574,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private const float NAVIGATION_COLUMN_WIDTH = 260f;
         private const float COMMAND_BUTTON_HEIGHT = 28f;
         private const string SEARCH_FIELD_CONTROL_NAME = "PlannerMasterDataWindow.SearchField";
-        private const string COLLECTION_ID_PROPERTY_NAME = "Id";
-        private const string COLLECTION_ASSET_PROPERTY_NAME = "Asset";
-        private const string SOURCE_DATA_ID_PROPERTY_NAME = "_id";
-        private const string STAGE_ID_PROPERTY_NAME = "_stageId";
         private const string SCRIPT_PROPERTY_NAME = "m_Script";
-        private const int REPOSITORY_EXTRA_FIELD_TOLERANCE = 1;
+        private const int REPOSITORY_EXTRA_FIELD_TOLERANCE = 0;
 
         private static readonly string[] NAVIGATION_MODE_LABELS = { "Source Assets", "Collections" };
 
@@ -1717,20 +1620,23 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 SearchResultKind kind,
                 string addressableKey,
                 string collectionKey,
-                string dataId,
-                string displayLabel)
+                string propertyPath,
+                string displayLabel,
+                ScriptableObject owner = null)
             {
                 Kind = kind;
                 AddressableKey = addressableKey;
                 CollectionKey = collectionKey;
-                DataId = dataId;
+                PropertyPath = propertyPath;
                 DisplayLabel = displayLabel;
+                Owner = owner;
             }
 
             public readonly SearchResultKind Kind;
             public readonly string AddressableKey;
             public readonly string CollectionKey;
-            public readonly string DataId;
+            public readonly string PropertyPath;
+            public readonly ScriptableObject Owner;
             public readonly string DisplayLabel;
 
             /// <summary> 種別を表す短いラベルです。 </summary>
@@ -1747,8 +1653,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             public static SearchResult ForCollection(string collectionKey, string label) =>
                 new(SearchResultKind.Collection, null, collectionKey, null, label);
 
-            public static SearchResult ForCollectionItem(string collectionKey, string dataId, string label) =>
-                new(SearchResultKind.CollectionItem, null, collectionKey, dataId, label);
+            public static SearchResult ForCollectionItem(string collectionKey, string propertyPath, string label, ScriptableObject owner) =>
+                new(SearchResultKind.CollectionItem, null, collectionKey, propertyPath, label, owner);
         }
     }
 }

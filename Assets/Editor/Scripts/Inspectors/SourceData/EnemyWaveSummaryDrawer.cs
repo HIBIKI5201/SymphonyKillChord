@@ -15,10 +15,20 @@ namespace KillChord.Editor.Inspectors.SourceData
         /// </summary>
         /// <param name="serializedDefinition"> 描画対象のシリアライズ済みWave定義です。 </param>
         /// <param name="target"> 描画対象のWave定義アセットです。 </param>
-        public static void DrawWaveSummary(SerializedObject serializedDefinition, UnityEngine.Object target)
+        /// <param name="selectedWave"> マップを表示するWaveのindexです。 </param>
+        public static void DrawWaveSummary(SerializedObject serializedDefinition, UnityEngine.Object target, ref int selectedWave)
         {
             SerializedProperty wavesProperty = serializedDefinition.FindProperty(WAVES_PROPERTY_NAME);
-            DrawDefinition(target, serializedDefinition, wavesProperty, PREVIEW_ELEMENT_LIMIT);
+            DrawDefinition(wavesProperty, PREVIEW_ELEMENT_LIMIT);
+            if (wavesProperty == null || !wavesProperty.isArray || wavesProperty.arraySize == 0) { return; }
+            selectedWave = Mathf.Clamp(selectedWave, 0, wavesProperty.arraySize - 1);
+            int nextWave = EditorGUILayout.IntSlider("マップを表示するWave", selectedWave + 1, 1, wavesProperty.arraySize) - 1;
+            if (nextWave != selectedWave)
+            {
+                selectedWave = nextWave;
+                GUIUtility.ExitGUI();
+            }
+            DrawSpawnPointCandidates(target, serializedDefinition, wavesProperty.GetArrayElementAtIndex(selectedWave));
         }
 
         private const int PREVIEW_ELEMENT_LIMIT = 20;
@@ -37,13 +47,9 @@ namespace KillChord.Editor.Inspectors.SourceData
         /// <summary>
         ///     Wave定義の一覧と各Waveの概要を描画します。
         /// </summary>
-        /// <param name="target"> 描画対象のWave定義アセットです。 </param>
-        /// <param name="serializedDefinition"> 描画対象のシリアライズ済みWave定義です。 </param>
         /// <param name="wavesProperty"> Wave配列のプロパティです。 </param>
         /// <param name="elementLimit"> 描画するWave数の上限です。 </param>
         private static void DrawDefinition(
-            UnityEngine.Object target,
-            SerializedObject serializedDefinition,
             SerializedProperty wavesProperty,
             int elementLimit)
         {
@@ -86,14 +92,12 @@ namespace KillChord.Editor.Inspectors.SourceData
                 DrawEnemyDefinitions(detailsProperty);
                 Rect rect = GUILayoutUtility.GetRect(18f, 18f, GUILayout.ExpandWidth(true));
                 EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
-
-                DrawSpawnPointCandidates(target, serializedDefinition, wave);
             }
 
             if (wavesProperty.arraySize > elementLimit)
             {
                 EditorGUILayout.HelpBox(
-                    $"残り {wavesProperty.arraySize - elementLimit} WaveはInspector側で確認してください。",
+                    $"残り {wavesProperty.arraySize - elementLimit} Waveの詳細は上のWaves配列で確認できます。マップは下で選択できます。",
                     MessageType.None);
             }
         }

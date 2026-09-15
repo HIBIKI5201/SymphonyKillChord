@@ -59,6 +59,7 @@ namespace KillChord.Editor.ProjectWindow
         internal static void Invalidate()
         {
             _isDirty = true;
+            EditorApplication.RepaintProjectWindow();
         }
 
         /// <summary>
@@ -164,17 +165,13 @@ namespace KillChord.Editor.ProjectWindow
             for (int elementIndex = 0; elementIndex < collectionProperty.arraySize; elementIndex++)
             {
                 SerializedProperty element = collectionProperty.GetArrayElementAtIndex(elementIndex);
-                if (element.propertyType != SerializedPropertyType.ObjectReference
-                    || element.objectReferenceValue == null
-                    || !AssetDatabase.TryGetGUIDAndLocalFileIdentifier(
-                        element.objectReferenceValue,
-                        out string guid,
-                        out long _))
+                foreach (UnityEngine.Object reference in SourceCollectionElementDisplay.GetReferences(element))
                 {
-                    continue;
+                    if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(reference, out string guid, out long _))
+                    {
+                        AddFlag(cache, guid, SourceDataAssetFlags.CollectionItem);
+                    }
                 }
-
-                AddFlag(cache, guid, SourceDataAssetFlags.CollectionItem);
             }
         }
 
@@ -211,6 +208,8 @@ namespace KillChord.Editor.ProjectWindow
         /// </summary>
         static SourceDataAssetIndexInvalidationTrigger()
         {
+            SourceDataProviderSettings.OnChanged += SourceDataAssetIndex.Invalidate;
+            Undo.undoRedoPerformed += SourceDataAssetIndex.Invalidate;
             AddressableAssetSettings.OnModificationGlobal +=
                 (_, _, _) => SourceDataAssetIndex.Invalidate();
         }

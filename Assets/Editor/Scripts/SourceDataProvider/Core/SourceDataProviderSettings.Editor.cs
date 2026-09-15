@@ -14,6 +14,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
     [FilePath("ProjectSettings/SourceDataProviderSettings.asset", FilePathAttribute.Location.ProjectFolder)]
     internal sealed class SourceDataProviderSettings : ScriptableSingleton<SourceDataProviderSettings>
     {
+        /// <summary> 登録設定が保存されたときに通知します。 </summary>
+        public static event Action OnChanged;
+
         /// <summary> 登録済みのSourceAsset設定一覧です。 </summary>
         public IReadOnlyList<SourceAssetMapping> SourceAssetMappings
         {
@@ -131,6 +134,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
         {
             EnsureInitialized();
             Save(true);
+            OnChanged?.Invoke();
         }
 
         /// <summary>
@@ -147,6 +151,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             if (SynchronizeSourceAssetsFromAddressables())
             {
                 Save(true);
+                OnChanged?.Invoke();
             }
         }
 
@@ -220,6 +225,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 // 新しい既定設定は、既存設定が初期化済みでも不足分だけ永続化する。
                 Save(true);
+                OnChanged?.Invoke();
             }
         }
 
