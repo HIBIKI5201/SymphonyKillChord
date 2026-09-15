@@ -37,7 +37,7 @@ void ApplySmear(
     float3 smearDirectionWS,
     float smearsPower,
     out float3 smearOS,
-    out float alpha)
+    out half alpha)
 {
     float3 smearDirectionOS =  TransformWorldToObjectDir(smearDirectionWS);
 
@@ -49,9 +49,10 @@ void ApplySmear(
 
     smearOS = positionOS + direction * smearsPower;
 
-    alpha = saturate(1 - noise * 2);
+    // ノイズ自体はUV×100の精度が要るためfloatで計算し、0-1に収まったアルファだけhalfに落とす
+    alpha = half(saturate(1 - noise * 2));
     alpha *= alpha * alpha * alpha * alpha * alpha;
-    alpha = max(0.01f, alpha);
+    alpha = max(0.01h, alpha);
 }
 
 #endif

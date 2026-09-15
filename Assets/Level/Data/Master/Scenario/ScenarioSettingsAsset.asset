@@ -19,4 +19,4 @@ MonoBehaviour:
   _autoAdvanceDelaySec: 2
   _skipClosesImmediately: 1
   _waitForInputOnLastText: 0
-  _layerBackToFront: 03000000000000000100000002000000
+  _layerBackToFront: 00000000010000000300000002000000

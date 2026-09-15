@@ -127,22 +127,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1943580154756428260, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 1400
-      objectReference: {fileID: 0}
-    - target: {fileID: 1943580154756428260, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 250
-      objectReference: {fileID: 0}
-    - target: {fileID: 1943580154756428260, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1943580154756428260, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -390
-      objectReference: {fileID: 0}
     - target: {fileID: 4622630976081625900, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -223,53 +207,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5003634764376181167, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_ScreenMatchMode
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6413765400593491140, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
       propertyPath: m_Name
       value: ScenarioView
-      objectReference: {fileID: 0}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_text
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_margin.z
-      value: -1.3625488
-      objectReference: {fileID: 0}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_fontAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: a170c5d55a886334fb2f6dec4c8fd750, type: 2}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_fontColor.b
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_fontColor.g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_fontColor.r
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_sharedMaterial
-      value: 
-      objectReference: {fileID: -8937787660107373588, guid: a170c5d55a886334fb2f6dec4c8fd750, type: 2}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 256
-      objectReference: {fileID: 0}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9077911072766306316, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-      propertyPath: m_hasFontAssetChanged
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -289,7 +229,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.ScenarioView
 --- !u!224 &66726729 stripped
 RectTransform:
-  m_CorrespondingSourceObject: {fileID: 1943580154756428260, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
+  m_CorrespondingSourceObject: {fileID: 4717111084044625247, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
   m_PrefabInstance: {fileID: 66726727}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &124245064
@@ -1524,8 +1464,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33dfe856e84a6bd4c89dc81919d831ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Scenario.ScenarioCom
-  _chatText: {fileID: 5606888421214580279, guid: 8619d8cd1deea9a4db95e729c5707d7c, type: 3}
-  _inputView: {fileID: 8005599849169554150, guid: 7b085a8757de82445ad2ff1d0880260b, type: 3}
   _backgroundCatalogKey: BackgroundCatalogAsset
   _animationCatalogKey: AnimationCatalogAsset
   _portraitCatalogKey: PortraitCatalogAsset
