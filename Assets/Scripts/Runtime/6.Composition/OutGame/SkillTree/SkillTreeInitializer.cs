@@ -47,6 +47,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private const string E_NAME_PREVIEW_VIDEO_CONTAINER = "PreviewVideoContainer";
         private const string E_NAME_PREVIEW_VIDEO = "PreviewVideo";
         private const string E_NAME_CURRENT_POINTS_LABEL = "Points";
+        private const string E_NAME_TOP_BAR_BACKGROUND = "TopBarBackground";
+        private const string E_NAME_BACK_BUTTON = "BackButton";
+        private const string E_NAME_SETTING_SHORTCUT_BUTTON = "SettingShortcutButton";
+        private const string E_NAME_TITLE = "Title";
         private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 1f;
         private const float DEFAULT_AREA_ATTACK_RANGE = 1f;
 
@@ -104,6 +108,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private VisualElement _unlockConfirmBoxRoot;
         private bool _isUnlockConfirmOpen;
         private bool _skipUnlockConfirmation;
+        private IVisualElementScheduledItem _unlockCameraRestoreItem;
+        private VisualElement _topBarBackgroundRoot;
+        private VisualElement _backButtonRoot;
+        private VisualElement _settingShortcutButtonRoot;
+        private VisualElement _titleRoot;
         private VisualElement _playerStatusRoot;
         private VisualElement _previewVideoContainerRoot;
         private VisualElement _previewVideoRoot;
@@ -113,6 +122,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private PreviewVideoScreenView _previewVideoScreenView;
         private SkillTreeResetDialogView _skillTreeResetDialogView;
         private UnlockConfirmDialogView _unlockConfirmDialogView;
+        private readonly ModalNavigationScope _dialogNavigationScope = new();
+        private readonly ModalNavigationScope _skillDetailNavigationScope = new();
         private SkillTreeViewportView _skillTreeViewportView;
         private SkillTreeController _skillTreeController;
         private SkillTreeService _skillTreeService;
@@ -126,6 +137,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntities;
         private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
         private Dictionary<int, VisualElement> _skillNodeElements;
+        private List<VisualElement> _skillNodeElementList;
+        private List<VisualElement> _skillTreeNavigationCandidates;
         private Dictionary<string, ISkillNodeConnViewModel> _skillNodeConnViews;
         private Dictionary<int, string[]> _skillNodeConnBinds;
         private Dictionary<int, VisualElement> _unlockPhases;
@@ -282,6 +295,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             if (_rootElement != null)
             {
                 _rootElement.UnregisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
+                _rootElement.UnregisterCallback<NavigationCancelEvent>(HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
+                _rootElement.UnregisterCallback<NavigationMoveEvent>(HandleSkillNodeNavigationMoveHandler);
             }
             _isSkillDetailOpen = false;
             _isUnlockConfirmOpen = false;
@@ -379,13 +394,21 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _previewVideoContainerRoot = _rootElement.Q<VisualElement>(E_NAME_PREVIEW_VIDEO_CONTAINER);
             _previewVideoRoot = _rootElement.Q<VisualElement>(E_NAME_PREVIEW_VIDEO);
             _currentPointsLabel = _rootElement.Q<Label>(E_NAME_CURRENT_POINTS_LABEL);
+            _topBarBackgroundRoot = _rootElement.Q<VisualElement>(E_NAME_TOP_BAR_BACKGROUND);
+            _backButtonRoot = _rootElement.Q<VisualElement>(E_NAME_BACK_BUTTON);
+            _settingShortcutButtonRoot = _rootElement.Q<VisualElement>(E_NAME_SETTING_SHORTCUT_BUTTON);
+            _titleRoot = _rootElement.Q<VisualElement>(E_NAME_TITLE);
 
             if (_skillDetailRoot == null
                 || _unlockConfirmBoxRoot == null
                 || _playerStatusRoot == null
                 || _previewVideoContainerRoot == null
                 || _previewVideoRoot == null
-                || _currentPointsLabel == null)
+                || _currentPointsLabel == null
+                || _topBarBackgroundRoot == null
+                || _backButtonRoot == null
+                || _settingShortcutButtonRoot == null
+                || _titleRoot == null)
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] スキルツリー用のUI要素が不足しています。", this);
                 return false;
@@ -405,6 +428,15 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             BuildConnBinds();
             InitializePhaseState();
             BuildVideoClipDict();
+
+            // ノード以外にも、トップバーの設定ショートカットボタンなど画面内で
+            // コントローラー操作可能な要素を、ノード間移動と同じ実座標ベースの解決に含める。
+            // 木構造のノード群とは離れた位置にあり、標準の自動ナビゲーションでは
+            // 往復できないことがあるため。
+            _skillTreeNavigationCandidates = new List<VisualElement>(_skillNodeElementList)
+            {
+                _settingShortcutButtonRoot,
+            };
 
             _skillDetailScreenView = new SkillDetailScreenView(_skillDetailRoot, _outGameUIEvent, _comboHexIcon);
             _skillDetailScreenView.HideImmediately();
@@ -466,6 +498,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillBeatColors);
 
             _rootElement.RegisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
+            _rootElement.RegisterCallback<NavigationCancelEvent>(HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
+            _rootElement.RegisterCallback<NavigationMoveEvent>(HandleSkillNodeNavigationMoveHandler);
 
             _isInitialized = true;
             return true;
@@ -587,6 +621,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 entity.SetParent(parents);
             }
 
+            _skillNodeElementList = new List<VisualElement>(_skillNodeElements.Values);
             MarkInitialFocusNode();
         }
 
@@ -872,6 +907,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnShownSkillTreeScreen += HandleSkillTreeScreenShownHandler;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosedHandler;
             _skillTreeViewportView.OnFocusTargetsRequested += HandleFocusTargetsRequestedHandler;
+            _unlockConfirmDialogView.OnCancelled += HandleUnlockConfirmDialogCancelledHandler;
             _isSubscribed = true;
         }
 
@@ -898,6 +934,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _outGameUIEvent.OnShownSkillTreeScreen -= HandleSkillTreeScreenShownHandler;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosedHandler;
             _skillTreeViewportView.OnFocusTargetsRequested -= HandleFocusTargetsRequestedHandler;
+            _unlockConfirmDialogView.OnCancelled -= HandleUnlockConfirmDialogCancelledHandler;
             _isSubscribed = false;
         }
 
@@ -937,6 +974,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeEntities = null;
             _skillNodeViews = null;
             _skillNodeElements = null;
+            _skillNodeElementList = null;
+            _skillTreeNavigationCandidates = null;
             _skillNodeConnViews = null;
             _skillNodeConnBinds = null;
             _unlockPhases = null;
@@ -962,10 +1001,26 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillNodeSelected(string nodeName)
         {
             SkillNodeId nodeId = _loadedSkillNodeBindRepo.FindByName(nodeName).SkillNodeId;
+
+            // マウスクリック等でパネルを閉じずに別ノードへ直接切り替わることがあり、
+            // その場合前回のノード用に閉じ込めたフォーカスが残ったままになる
+            // (Activate() は既に有効な間は何もしないため)。ノード選択のたびに
+            // 一旦解除し、新しいノードの状態に応じて改めて判定し直す。
+            _skillDetailNavigationScope.Deactivate();
+
             _skillTreeController.OnSkillNodeSelected(nodeId.Id);
             _isSkillDetailOpen = true;
             _skillTreeResetDialogView.SetResetButtonVisible(false);
             _skillTreeViewportView.FocusOnNode(nodeId.Id);
+
+            // 解放操作ができるノードの場合のみ、パネル側へフォーカスを移して閉じ込める。
+            // 解放済み等でパネル内に操作できる要素が無い場合にまで閉じ込めると、
+            // コントローラーではフォーカスの行き場が無くなり操作不能になるため、
+            // その場合はノード側にフォーカスを残したままにする。
+            if (_skillDetailScreenView.IsUnlockAvailable)
+            {
+                _skillDetailNavigationScope.Activate(_skillDetailRoot);
+            }
         }
 
         /// <summary>
@@ -979,6 +1034,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillDetailScreenView.Hide();
             _skillTreeResetDialogView.SetResetButtonVisible(true);
             _skillTreeViewportView.ClearFocusZoom();
+            _skillDetailNavigationScope.Deactivate();
         }
 
         /// <summary>
@@ -987,6 +1043,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="evt"> ポインタ押下イベント。 </param>
         private void HandleRootPointerDown(PointerDownEvent evt)
         {
+            if (TrySkipUnlockPerformance())
+            {
+                evt.StopPropagation();
+                return;
+            }
+
             if (evt.target is not VisualElement target) { return; }
 
             if (_isUnlockConfirmOpen)
@@ -995,6 +1057,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 {
                     _unlockConfirmDialogView.Hide();
                     _isUnlockConfirmOpen = false;
+                    _dialogNavigationScope.Deactivate();
                 }
 
                 return;
@@ -1006,6 +1069,77 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             if (IsSkillNodeElement(target)) { return; }
 
             _outGameUIEvent.OnSkillDetailClosed?.Invoke(0);
+        }
+
+        /// <summary>
+        ///     解放済みノードなどパネルへフォーカスを移していない状態でのキャンセル操作を処理する。
+        ///     <para>
+        ///         この場合フォーカスはスキルノード側に残ったままのため、何もしなければ
+        ///         キャンセル操作がそのままスキルツリー画面自体のキャンセル(ホームへ戻る)まで
+        ///         バブリングしてしまう。画面側の処理より先に処理するため、
+        ///         バブリングではなくトリクルダウンで購読する。
+        ///     </para>
+        /// </summary>
+        /// <param name="evt"> ナビゲーションキャンセルイベント。 </param>
+        private void HandleRootNavigationCancelHandler(NavigationCancelEvent evt)
+        {
+            // 解放確認ダイアログを表示中は、そちら自身のキャンセル処理に任せる。
+            if (_isUnlockConfirmOpen || !_isSkillDetailOpen)
+            {
+                return;
+            }
+
+            _outGameUIEvent.OnSkillDetailClosed?.Invoke(0);
+            evt.StopPropagation();
+        }
+
+        /// <summary>
+        ///     スキルノードおよびトップバーの設定ショートカットボタン間のコントローラー移動先を、実座標から解決する。
+        ///     <para>
+        ///         ズーム時のスケール変形、ScrollViewで一部が画面外へはみ出す木構造のレイアウト、
+        ///         そしてノード群から離れた位置にあるトップバーのボタンとの行き来により、
+        ///         UI Toolkit標準の自動ナビゲーションでは正しい移動先を見つけられないことがあるため、
+        ///         画面内に見えている要素の実座標をもとに自前で解決する。
+        ///     </para>
+        /// </summary>
+        /// <param name="evt"> ナビゲーション移動イベント。 </param>
+        private void HandleSkillNodeNavigationMoveHandler(NavigationMoveEvent evt)
+        {
+            if (_skillTreeNavigationCandidates == null
+                || evt.target is not VisualElement target
+                || !IsSkillTreeSpatialNavigationSource(target))
+            {
+                NavigationDebugLog.Log(
+                    $"[SkillTreeNav] skip target={NavigationDebugLog.Describe(evt.target as VisualElement)} "
+                    + $"candidates={_skillTreeNavigationCandidates?.Count}");
+                return;
+            }
+
+            VisualElement next = SpatialNavigationResolver.FindNearestInDirection(
+                target, _skillTreeNavigationCandidates, evt.direction, _skillTreeViewportView?.ViewportWorldBound);
+            NavigationDebugLog.Log(
+                $"[SkillTreeNav] from={NavigationDebugLog.Describe(target)} dir={evt.direction} "
+                + $"candidates={_skillTreeNavigationCandidates.Count} -> {NavigationDebugLog.Describe(next)}");
+
+            if (next == null)
+            {
+                return;
+            }
+
+            next.Focus();
+            evt.StopPropagation();
+        }
+
+        /// <summary>
+        ///     指定要素が、実座標ベースの移動解決の起点として扱う対象(スキルノードまたは
+        ///     設定ショートカットボタン)かどうかを判定する。
+        /// </summary>
+        /// <param name="element"> 判定対象の要素。 </param>
+        /// <returns> 起点として扱う場合はtrue。 </returns>
+        private bool IsSkillTreeSpatialNavigationSource(VisualElement element)
+        {
+            return element.ClassListContains(UssClassNameConstants.USS_CLASS_SKILL_NODE)
+                || ReferenceEquals(element, _settingShortcutButtonRoot);
         }
 
         /// <summary>
@@ -1057,6 +1191,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             _unlockConfirmDialogView.Show(_skillTreeController.GetUnlockConfirmation());
             _isUnlockConfirmOpen = true;
+            _dialogNavigationScope.Activate(_unlockConfirmDialogView.DialogRoot);
         }
 
         /// <summary>
@@ -1073,38 +1208,102 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillTreeController.OnSkillUnlocked();
             _unlockConfirmDialogView.Hide();
             _isUnlockConfirmOpen = false;
+            _dialogNavigationScope.Deactivate();
+
+            // 解放が確定すると解放ボタンが無効化されパネル内に操作できる要素が
+            // 無くなるため、情報パネル自体を閉じてスキルツリー側へフォーカスを戻す。
+            HandleSkillDetailClosed(0);
         }
 
         /// <summary>
-        ///     複数ノードを一度に解放する場合、ツリー全体が見えるよう一時的にズームアウトし、
+        ///     コントローラーのキャンセル操作で解放確認ダイアログが閉じられた時の処理です。
+        /// </summary>
+        private void HandleUnlockConfirmDialogCancelledHandler()
+        {
+            _isUnlockConfirmOpen = false;
+            _dialogNavigationScope.Deactivate();
+        }
+
+        /// <summary>
+        ///     複数ノードを一度に解放する場合、解放パスの最上ノードと、それへ直接つながる
+        ///     解放済みノード(接続元)の最下部が画面の上端・下端に揃うよう一時的にズームし、
         ///     演出終了後に自動で元のズーム(選択ノードへのフォーカス)へ戻します。
         /// </summary>
         private void PlayUnlockCameraWorkIfNeeded()
         {
-            int pendingUnlockNodeCount = _skillTreeController.PendingUnlockNodeCount;
-            if (pendingUnlockNodeCount <= 1 || _skillTreeViewportView == null)
+            IReadOnlyList<int> pendingUnlockNodeIds = _skillTreeController.GetPendingUnlockNodeIds();
+            if (pendingUnlockNodeIds.Count <= 1 || _skillTreeViewportView == null)
             {
                 return;
             }
 
             int selectedNodeId = _skillTreeController.SelectedNodeId;
-            _skillTreeViewportView.ShowWholeTree();
+            IReadOnlyList<int> framingNodeIds = _skillTreeController.GetUnlockCameraFramingNodeIds();
+            _skillTreeViewportView.FocusOnNodeRange(framingNodeIds);
+            SetOtherUiVisibleDuringUnlockCameraWork(false);
 
             long overviewHoldMilliseconds =
-                (pendingUnlockNodeCount - 1) * SkillTreeController.UNLOCK_STAGGER_INTERVAL_MILLISECONDS
+                (pendingUnlockNodeIds.Count - 1) * SkillTreeController.UNLOCK_STAGGER_INTERVAL_MILLISECONDS
                 + UNLOCK_LAST_NODE_ANIMATION_MILLISECONDS
                 + UNLOCK_OVERVIEW_DWELL_MILLISECONDS;
-            _rootElement.schedule.Execute(() =>
+            _unlockCameraRestoreItem?.Pause();
+            _unlockCameraRestoreItem = _rootElement.schedule
+                .Execute(() => RestoreUnlockCameraFocus(selectedNodeId))
+                .StartingIn(overviewHoldMilliseconds);
+        }
+
+        /// <summary>
+        ///     連続解放のカメラワークを終了し、選択ノードへのフォーカス(未選択の場合はズーム解除)へ戻します。
+        /// </summary>
+        /// <param name="selectedNodeId"> 復帰先の選択ノードID。未選択の場合は-1。 </param>
+        private void RestoreUnlockCameraFocus(int selectedNodeId)
+        {
+            _unlockCameraRestoreItem = null;
+            SetOtherUiVisibleDuringUnlockCameraWork(true);
+            if (selectedNodeId != -1)
             {
-                if (selectedNodeId != -1)
-                {
-                    _skillTreeViewportView.FocusOnNode(selectedNodeId);
-                }
-                else
-                {
-                    _skillTreeViewportView.ClearFocusZoom();
-                }
-            }).StartingIn(overviewHoldMilliseconds);
+                _skillTreeViewportView.FocusOnNode(selectedNodeId);
+            }
+            else
+            {
+                _skillTreeViewportView.ClearFocusZoom();
+            }
+        }
+
+        /// <summary>
+        ///     連続解放のカメラワーク中、ツリー以外のUI(トップバー・スキル詳細・
+        ///     プレイヤーステータス)を一時的に非表示、または元に戻します。
+        /// </summary>
+        /// <param name="isVisible"> 表示する場合はtrue。 </param>
+        private void SetOtherUiVisibleDuringUnlockCameraWork(bool isVisible)
+        {
+            DisplayStyle displayStyle = isVisible ? DisplayStyle.Flex : DisplayStyle.None;
+            if (_topBarBackgroundRoot == null) { return; }
+
+            _topBarBackgroundRoot.style.display = displayStyle;
+            _backButtonRoot.style.display = displayStyle;
+            _settingShortcutButtonRoot.style.display = displayStyle;
+            _titleRoot.style.display = displayStyle;
+            _currentPointsLabel.style.display = displayStyle;
+            _skillDetailRoot.style.display = displayStyle;
+            _playerStatusRoot.style.display = displayStyle;
+        }
+
+        /// <summary>
+        ///     連続解放演出の再生中であれば、入力を合図にノード演出とカメラワークを即座に完了させます。
+        /// </summary>
+        /// <returns> 何らかの演出をスキップした場合はtrue。 </returns>
+        private bool TrySkipUnlockPerformance()
+        {
+            bool skippedNodeAnimation = _skillTreeController.SkipUnlockAnimation();
+            bool skippedCameraWork = _unlockCameraRestoreItem != null;
+            if (skippedCameraWork)
+            {
+                _unlockCameraRestoreItem.Pause();
+                RestoreUnlockCameraFocus(_skillTreeController.SelectedNodeId);
+            }
+
+            return skippedNodeAnimation || skippedCameraWork;
         }
 
         /// <summary>
@@ -1121,6 +1320,28 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             _skillTreeViewportView.RequestFocus();
+            DumpSkillNodePositionsForDebug();
+        }
+
+        /// <summary>
+        ///     診断用: 各スキルノードの画面上の実座標を一覧出力する。
+        ///     フェーズコンテナの重なりなど、レイアウト起因の不具合調査に使用する。
+        /// </summary>
+        private void DumpSkillNodePositionsForDebug()
+        {
+            if (_skillNodeElementList == null)
+            {
+                return;
+            }
+
+            _rootElement.schedule.Execute(() =>
+            {
+                for (int i = 0; i < _skillNodeElementList.Count; i++)
+                {
+                    VisualElement node = _skillNodeElementList[i];
+                    NavigationDebugLog.Log($"[SkillTreeNodePos] {node.name} bound={node.worldBound}");
+                }
+            });
         }
 
         /// <summary>
@@ -1131,6 +1352,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _isSkillDetailOpen = false;
             _isUnlockConfirmOpen = false;
             _unlockConfirmDialogView?.Hide();
+            _dialogNavigationScope.Deactivate();
+            _skillDetailNavigationScope.Deactivate();
+            _unlockCameraRestoreItem?.Pause();
+            _unlockCameraRestoreItem = null;
+            SetOtherUiVisibleDuringUnlockCameraWork(true);
             _skillTreeViewportView?.CancelFocus();
             _skillTreeViewportView?.ClearFocusZoom();
         }
@@ -1158,6 +1384,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         {
             int refundPoints = _skillTreeController.GetResetRefundPoints();
             _skillTreeResetDialogView.Show(refundPoints);
+            _dialogNavigationScope.Activate(_skillTreeResetDialogView.DialogRoot);
         }
 
         /// <summary>
@@ -1195,6 +1422,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _isSkillDetailOpen = false;
             _isUnlockConfirmOpen = false;
             _unlockConfirmDialogView?.Hide();
+            _dialogNavigationScope.Deactivate();
+            _skillDetailNavigationScope.Deactivate();
             _skillDetailScreenView?.HideImmediately();
             dialogView.SetResetButtonVisible(true);
             _skillTreeViewportView?.ClearFocusZoom();
@@ -1206,6 +1435,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void HandleSkillTreeResetCancelled()
         {
             _skillTreeResetDialogView.Hide();
+            _dialogNavigationScope.Deactivate();
         }
 
         /// <summary>

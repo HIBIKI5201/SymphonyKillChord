@@ -8,7 +8,7 @@
 画像・色・サイズなど静的な見た目のみを指す。スケールの動きやタイミングは含まない。
 
 - 対象: [Button.uss](../../../../Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss) の `.btn-skin` クラス
-- 内容: 通常時 `UI_Button_off.png`、hover/focus/active時 `UI_Button_on.png` に切り替える背景画像スキン
+- 内容: 通常時 `UI_Button_off.png`、hover/focus/active時 `UI_Button_on.png` に切り替える背景画像スキン。デフォルトサイズ(200×100px)も持つ。個別のボタンで別サイズにしたい場合はUXML側で `style="width: ...; height: ...;"` のようなinline styleを指定すれば、C#を書かずに上書きできる
 
 ## アニメーションの実装
 

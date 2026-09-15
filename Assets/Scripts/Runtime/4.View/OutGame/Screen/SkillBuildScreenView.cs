@@ -229,6 +229,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private int _currentOwnedPoints;
         private bool _isSavingSkillBuild;
         private IDisposable _backButtonActivation;
+        private IDisposable _settingShortcutButtonActivation;
         private IDisposable _skillBuildSaveButtonActivation;
         private IDisposable _skillLevelUpButtonActivation;
         private IDisposable _unsavedSaveAndCloseButtonActivation;
@@ -239,19 +240,23 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _settingShortcutButton.RegisterCallback<ClickEvent>(HandleSettingShortcutButtonClickedHandler);
             _unsavedChangesDialogOverlay.RegisterCallback<ClickEvent>(HandleUnsavedDialogBackgroundClickedHandler);
             _dialogPanel.RegisterCallback<ClickEvent>(HandleUnsavedDialogPanelClickedHandler);
 
             // オーバーレイとダイアログ本体は背景クリックの判定用であり、フォーカス対象にしない。
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
+            _settingShortcutButton.MakeNavigable();
             _skillBuildSaveButton.MakeNavigable();
             _skillLevelUpButton.MakeNavigable();
             _unsavedSaveAndCloseButton.MakeNavigable();
             _unsavedDiscardAndCloseButton.MakeNavigable();
 
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
+            // Button.clicked/ClickEventはコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+            // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+            _settingShortcutButtonActivation =
+                _settingShortcutButton.RegisterActivation(HandleSettingShortcutButtonActivationHandler);
             _skillBuildSaveButtonActivation =
                 _skillBuildSaveButton.RegisterActivation(HandleSkillBuildSaveButtonActivationHandler);
             _skillLevelUpButtonActivation =
@@ -272,7 +277,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillLevelUpButtonActivation?.Dispose();
             _unsavedSaveAndCloseButtonActivation?.Dispose();
             _unsavedDiscardAndCloseButtonActivation?.Dispose();
-            _settingShortcutButton.UnregisterCallback<ClickEvent>(HandleSettingShortcutButtonClickedHandler);
+            _settingShortcutButtonActivation?.Dispose();
             _unsavedChangesDialogOverlay.UnregisterCallback<ClickEvent>(HandleUnsavedDialogBackgroundClickedHandler);
             _dialogPanel.UnregisterCallback<ClickEvent>(HandleUnsavedDialogPanelClickedHandler);
         }
@@ -505,10 +510,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
-        ///     設定画面ショートカットボタンがクリックされたときの処理。
+        ///     設定画面ショートカットボタンが作動したときの処理。
         /// </summary>
-        /// <param name="evt"> クリックイベント。 </param>
-        private void HandleSettingShortcutButtonClickedHandler(ClickEvent evt)
+        private void HandleSettingShortcutButtonActivationHandler()
         {
             OutGameUIEvent.OnShownSettingScreen?.Invoke();
         }

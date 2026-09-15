@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using LitMotion;
@@ -103,6 +104,13 @@ namespace KillChord.Runtime.View.OutGame.Title
 
         private MotionHandle _slideMotionHandle;
 
+        private IDisposable _creditButtonActivation;
+        private IDisposable _dataResetButtonActivation;
+        private IDisposable _dataResetConfirmButtonActivation;
+        private IDisposable _dataResetCancelButtonActivation;
+        private IManipulator _creditButtonPulse;
+        private IManipulator _dataResetButtonPulse;
+
         /// <summary>
         ///     メニュー画面の UI 要素を初期化します。
         /// </summary>
@@ -149,16 +157,22 @@ namespace KillChord.Runtime.View.OutGame.Title
             _dataResetButton.MakeNavigable();
             _dataResetConfirmButton.MakeNavigable();
             _dataResetCancelButton.MakeNavigable();
-            _creditButton.clicked += OnCreditButtonClicked;
-            _dataResetButton.clicked += OnDataResetButtonClicked;
+            _creditButtonActivation = _creditButton.RegisterActivation(OnCreditButtonClicked);
+            _dataResetButtonActivation = _dataResetButton.RegisterActivation(OnDataResetButtonClicked);
+            _creditButtonPulse = _creditButton.EnableButtonPulseAnimation();
+            _dataResetButtonPulse = _dataResetButton.EnableButtonPulseAnimation();
 
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
             _backGround.RegisterCallback<PointerDownEvent>(OnPointDownEvent);
-            _dataResetConfirmButton.clicked += OnDataResetConfirmButtonClicked;
-            _dataResetCancelButton.clicked += OnDataResetCancelButtonClicked;
+            // Button.clicked はコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+            // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+            _dataResetConfirmButtonActivation = _dataResetConfirmButton.RegisterActivation(OnDataResetConfirmButtonClicked);
+            _dataResetCancelButtonActivation = _dataResetCancelButton.RegisterActivation(OnDataResetCancelButtonClicked);
             _dataResetDialog.RegisterCallback<PointerDownEvent>(OnDataResetDialogPointerDown);
+            _dataResetDialog.RegisterCallback<NavigationCancelEvent>(
+                HandleDataResetDialogNavigationCancelHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -166,13 +180,17 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void UnregisterButtonCallbacks()
         {
-            _creditButton.clicked -= OnCreditButtonClicked;
-            _dataResetButton.clicked -= OnDataResetButtonClicked;
+            _creditButtonActivation?.Dispose();
+            _dataResetButtonActivation?.Dispose();
+            _creditButton.RemoveManipulator(_creditButtonPulse);
+            _dataResetButton.RemoveManipulator(_dataResetButtonPulse);
             _backButtonActivation?.Dispose();
             _backGround.UnregisterCallback<PointerDownEvent>(OnPointDownEvent);
-            _dataResetConfirmButton.clicked -= OnDataResetConfirmButtonClicked;
-            _dataResetCancelButton.clicked -= OnDataResetCancelButtonClicked;
+            _dataResetConfirmButtonActivation?.Dispose();
+            _dataResetCancelButtonActivation?.Dispose();
             _dataResetDialog.UnregisterCallback<PointerDownEvent>(OnDataResetDialogPointerDown);
+            _dataResetDialog.UnregisterCallback<NavigationCancelEvent>(
+                HandleDataResetDialogNavigationCancelHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -191,6 +209,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _dataResetDialog.style.display = DisplayStyle.Flex;
             _windowRoot.style.display = DisplayStyle.None;
+            _dataResetCancelButton.FocusDeferred();
         }
 
         /// <summary>
@@ -223,6 +242,22 @@ namespace KillChord.Runtime.View.OutGame.Title
             if (evt.target != evt.currentTarget) { return; }
 
             OnDataResetCancelButtonClicked();
+        }
+
+        /// <summary>
+        ///     コントローラーのキャンセル操作をキャンセルボタンと同じ動作に変換する。
+        ///     画面全体のキャンセル処理(戻る)より先に処理するため、トリクルダウンで購読する。
+        /// </summary>
+        /// <param name="evt"> ナビゲーションキャンセルイベント。 </param>
+        private void HandleDataResetDialogNavigationCancelHandler(NavigationCancelEvent evt)
+        {
+            if (_dataResetDialog.resolvedStyle.display == DisplayStyle.None)
+            {
+                return;
+            }
+
+            OnDataResetCancelButtonClicked();
+            evt.StopPropagation();
         }
 
         /// <summary>

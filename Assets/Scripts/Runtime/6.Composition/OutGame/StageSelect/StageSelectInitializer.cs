@@ -187,6 +187,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private VisualElement _backgroundImageElement;
         private IVisualElementScheduledItem _backgroundParallaxItem;
         private Button _settingShortcutButton;
+        private IDisposable _settingShortcutButtonActivation;
         private Dictionary<StageId, VisualElement> _nodeStarRowMap;
         private StageSelectModuleContainer _moduleContainer;
         private bool _isModuleContainerRegistered;
@@ -472,9 +473,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     設定画面ショートカットボタンがクリックされたときの処理。
+        ///     設定画面ショートカットボタンが作動したときの処理。
         /// </summary>
-        private void HandleSettingShortcutButtonClicked(ClickEvent evt)
+        private void HandleSettingShortcutButtonActivationHandler()
         {
             _outGameUIEvent.OnShownSettingScreen?.Invoke();
         }
@@ -737,7 +738,11 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _settingShortcutButton = root.Q<Button>(SETTING_SHORTCUT_BUTTON_NAME);
             if (_settingShortcutButton != null)
             {
-                _settingShortcutButton.RegisterCallback<ClickEvent>(HandleSettingShortcutButtonClicked);
+                _settingShortcutButton.MakeNavigable();
+                // Button.clicked/ClickEventはコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+                // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+                _settingShortcutButtonActivation =
+                    _settingShortcutButton.RegisterActivation(HandleSettingShortcutButtonActivationHandler);
             }
 
             // --- View 層（接続線・ノード）---
@@ -820,7 +825,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _detailScreenRoot = null;
             if (_settingShortcutButton != null)
             {
-                _settingShortcutButton.UnregisterCallback<ClickEvent>(HandleSettingShortcutButtonClicked);
+                _settingShortcutButtonActivation?.Dispose();
+                _settingShortcutButtonActivation = null;
                 _settingShortcutButton = null;
             }
             _backgroundParallaxItem?.Pause();

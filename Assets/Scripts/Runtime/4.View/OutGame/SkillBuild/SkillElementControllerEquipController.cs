@@ -75,6 +75,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             element.MakeNavigable();
             element.RegisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
             element.RegisterCallback<NavigationSubmitEvent>(HandleSkillElementSubmitHandler);
+            element.RegisterCallback<NavigationMoveEvent>(HandleSkillElementNavigationMoveHandler);
             _skillElements.Add(element);
         }
 
@@ -102,6 +103,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 _skillElements[i].UnregisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
                 _skillElements[i].UnregisterCallback<NavigationSubmitEvent>(HandleSkillElementSubmitHandler);
+                _skillElements[i].UnregisterCallback<NavigationMoveEvent>(HandleSkillElementNavigationMoveHandler);
             }
 
             for (int i = 0; i < _slots.Count; i++)
@@ -166,6 +168,49 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             BeginCarry(skillId, element);
 
             (sourceSlot ?? FindSlotToFocus())?.FocusDeferred();
+            evt.StopPropagation();
+        }
+
+        /// <summary>
+        ///     スキル一覧内の左右移動を、表示順で隣接する(かつ現在ジャンル絞り込みで
+        ///     表示されている)スキル要素への移動として解決する。
+        ///     <para>
+        ///         一覧は横スクロールの1行に多数のカードが並ぶため、UI Toolkit標準の
+        ///         自動ナビゲーションでは一部の要素にしか移動できないことがある。
+        ///         生成順(=表示順)を保持している<see cref="_skillElements"/>を使って自前で解決する。
+        ///     </para>
+        /// </summary>
+        /// <param name="evt"> ナビゲーション移動イベント。 </param>
+        private void HandleSkillElementNavigationMoveHandler(NavigationMoveEvent evt)
+        {
+            if (evt.currentTarget is not VisualElement element)
+            {
+                return;
+            }
+
+            int step = evt.direction switch
+            {
+                NavigationMoveEvent.Direction.Left => -1,
+                NavigationMoveEvent.Direction.Right => 1,
+                _ => 0,
+            };
+
+            if (step == 0)
+            {
+                return;
+            }
+
+            VisualElement next = FindVisibleNeighborSkillElement(element, step);
+            NavigationDebugLog.Log(
+                $"[SkillListNav] from={NavigationDebugLog.Describe(element)} step={step} "
+                + $"index={_skillElements.IndexOf(element)} count={_skillElements.Count} -> {NavigationDebugLog.Describe(next)}");
+
+            if (next == null)
+            {
+                return;
+            }
+
+            next.Focus();
             evt.StopPropagation();
         }
 
@@ -251,6 +296,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
                 _skillElements[i].UnregisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
                 _skillElements[i].UnregisterCallback<NavigationSubmitEvent>(HandleSkillElementSubmitHandler);
+                _skillElements[i].UnregisterCallback<NavigationMoveEvent>(HandleSkillElementNavigationMoveHandler);
                 _skillElements.RemoveAt(i);
             }
         }
@@ -335,6 +381,32 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 _skillBuildViewModel.SelectSkill(skillId);
             }
+        }
+
+        /// <summary>
+        ///     表示順で指定要素からstep方向に進み、最初に見つかる表示中のスキル要素を返す。
+        /// </summary>
+        /// <param name="current"> 探索の起点となる要素。 </param>
+        /// <param name="step"> 探索方向(-1または1)。 </param>
+        /// <returns> 見つかった要素。無ければnull。 </returns>
+        private VisualElement FindVisibleNeighborSkillElement(VisualElement current, int step)
+        {
+            int index = _skillElements.IndexOf(current);
+            if (index < 0)
+            {
+                return null;
+            }
+
+            for (int i = index + step; i >= 0 && i < _skillElements.Count; i += step)
+            {
+                VisualElement candidate = _skillElements[i];
+                if (candidate.resolvedStyle.display != DisplayStyle.None)
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
