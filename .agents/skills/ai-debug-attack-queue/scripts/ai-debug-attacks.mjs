@@ -16,5 +16,11 @@ try {
   } else if (command === 'status') { expression = 'AIDebugAttackQueue.GetStatusJson()'; }
   else if (command === 'cancel' && options['run-id']) { expression = `AIDebugAttackQueue.Cancel(${csharpString(options['run-id'])})`; }
   else { throw new Error('enqueue requires --queue; cancel requires --run-id from status'); }
-  console.log(JSON.stringify(await (await createTransport())(expression)));
-} catch (error) { console.error(error.message); process.exitCode = 1; }
+  const response = await (await createTransport())(expression);
+  console.log(JSON.stringify(response));
+  if (command === 'cancel' && response.cleanupPending) { process.exitCode = 1; }
+} catch (error) {
+  console.error(error.message);
+  if (error.response) { console.error(JSON.stringify(error.response)); }
+  process.exitCode = 1;
+}

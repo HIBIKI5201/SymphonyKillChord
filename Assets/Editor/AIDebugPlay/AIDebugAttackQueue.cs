@@ -39,6 +39,7 @@ namespace KillChord.Editor.AIDebugPlay
             }
             if (runId != null && runId == _runId) { return GetStatusJson(); }
             if (_state == QueueState.Waiting) { return CreateErrorJson("別の攻撃キューを実行中です。"); }
+            if (_isPressHeld) { return CreateErrorJson("前の攻撃入力を解放待ちです。ゲーム用入力更新の再開後に再実行してください。"); }
             if (double.IsNaN(timeoutSeconds) || double.IsInfinity(timeoutSeconds)
                 || timeoutSeconds < 1d || timeoutSeconds > MAX_TIMEOUT_SECONDS)
             {
@@ -71,6 +72,9 @@ namespace KillChord.Editor.AIDebugPlay
 
             _requestedCount = _pendingAttacks.Count;
             _completedCount = 0;
+            _gameInputUpdateCount = 0;
+            _lastInputUpdateType = InputUpdateType.None;
+            _failureDiagnostics = null;
             _isPriming = prime;
             _state = QueueState.Waiting;
             _lastMessage = prime
@@ -79,6 +83,7 @@ namespace KillChord.Editor.AIDebugPlay
 
             _playerModule.PlayerAttackSignal.OnAttackExecuted += HandleAttackBeatExecuted;
             EditorApplication.update += Update;
+            InputSystem.onAfterUpdate += HandleInputUpdate;
 
             if (!prime)
             {
@@ -99,7 +104,9 @@ namespace KillChord.Editor.AIDebugPlay
                 ("requested", _requestedCount), ("completed", _completedCount),
                 ("remaining", _pendingAttacks.Count + (_hasCurrentTarget ? 1 : 0)),
                 ("currentBeatType", _hasCurrentTarget ? _currentTarget.ToString() : null),
-                ("priming", _isPriming), ("message", _lastMessage)));
+                ("priming", _isPriming), ("message", _lastMessage),
+                ("cleanupPending", _releasePending),
+                ("diagnostics", _failureDiagnostics ?? ReadDiagnostics())));
         }
 
         /// <summary>
@@ -129,7 +136,7 @@ namespace KillChord.Editor.AIDebugPlay
         private static QueueState _state = QueueState.Idle;
         private static string _lastMessage = "未実行です。";
         private static double _attackRequestedAt;
-        private static int _pressFrame = -1;
+        private static uint _pressUpdateCount;
         private static int _requestedCount;
         private static int _completedCount;
         private static bool _hasCurrentTarget;
@@ -141,31 +148,59 @@ namespace KillChord.Editor.AIDebugPlay
         private static string _runId;
         private static double _deadline;
         private static Mouse _pressedMouse;
+        private static bool _releasePending;
+        private static bool _isProcessingInputUpdate;
+        private static int _gameInputUpdateCount;
+        private static InputUpdateType _lastInputUpdateType;
+        private static object _failureDiagnostics;
 
         /// <summary>
-        ///     Editor更新ごとに予約時刻と入力状態を処理する。
+        ///     ゲーム入力更新が止まっていてもEditor時刻で期限を監視する。
         /// </summary>
         private static void Update()
         {
-            try { Tick(); }
+            try { CheckExecutionState(); }
             catch (Exception exception) { Fail("攻撃キューの実行に失敗しました: " + exception.Message); }
         }
 
         /// <summary>
-        ///     所有するキューの期限と、現在のシーンに属するサービスを確認して進める。
+        ///     ゲーム用の入力バッファとAction通知が有効な更新内で押下・解放を処理する。
         /// </summary>
-        private static void Tick()
+        private static void HandleInputUpdate()
+        {
+            if (!IsGameInputUpdate() || !EditorApplication.isPlaying || EditorApplication.isPaused) { return; }
+            try
+            {
+                _isProcessingInputUpdate = true;
+                _lastInputUpdateType = InputState.currentUpdateType;
+                _gameInputUpdateCount++;
+                if (_releasePending)
+                {
+                    ReleaseAttackInput();
+                    if (_state != QueueState.Waiting) { UnsubscribeRuntimeEvents(); }
+                    return;
+                }
+                if (_state == QueueState.Waiting && CheckExecutionState()) { Tick(); }
+            }
+            catch (Exception exception) { Fail("攻撃入力更新に失敗しました: " + exception.Message); }
+            finally { _isProcessingInputUpdate = false; }
+        }
+
+        /// <summary>
+        ///     所有するキューの期限と、現在のシーンに属するサービスを確認する。
+        /// </summary>
+        private static bool CheckExecutionState()
         {
             if (!EditorApplication.isPlaying)
             {
                 CancelInternal("Play Modeが終了しました。");
-                return;
+                return false;
             }
 
             if (EditorApplication.timeSinceStartup >= _deadline)
             {
                 Fail("攻撃キュー全体の待機期限を超えました。");
-                return;
+                return false;
             }
             if (!ServiceLocator.TryGetInstance<PlayerModuleContainer>(out var currentPlayer)
                 || !ReferenceEquals(currentPlayer, _playerModule)
@@ -173,14 +208,28 @@ namespace KillChord.Editor.AIDebugPlay
                 || !ReferenceEquals(currentMusic, _musicSyncService))
             {
                 Fail("シーン遷移またはサービスの破棄により停止しました。");
-                return;
+                return false;
             }
             if (EditorApplication.isPaused)
             {
-                return;
+                return false;
             }
 
-            if (_isPressHeld && Time.frameCount > _pressFrame)
+            if (_isAwaitingAttackResult
+                && EditorApplication.timeSinceStartup - _attackRequestedAt > ATTACK_RESULT_TIMEOUT_SECONDS)
+            {
+                Fail("攻撃入力に対する成立通知がタイムアウトしました。diagnosticsで入力更新・入力抑制・フォーカスを確認してください。");
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        ///     入力更新単位で予約時刻と入力状態を進める。
+        /// </summary>
+        private static void Tick()
+        {
+            if (_isPressHeld && InputState.updateCount != _pressUpdateCount)
             {
                 ReleaseAttackInput();
             }
@@ -204,11 +253,6 @@ namespace KillChord.Editor.AIDebugPlay
 
             if (_isAwaitingAttackResult)
             {
-                if (EditorApplication.timeSinceStartup - _attackRequestedAt > ATTACK_RESULT_TIMEOUT_SECONDS)
-                {
-                    Fail("攻撃入力に対する成立通知がタイムアウトしました。入力抑制またはゲームプレイ停止状態を確認してください。");
-                }
-
                 return;
             }
 
@@ -328,7 +372,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// <returns> 入力可能な場合はtrue。 </returns>
         private static bool CanInjectAttack()
         {
-            if (_playerModule?.PlayerAttackController == null
+            if (Time.timeScale <= 0f || _playerModule?.PlayerAttackController == null
                 || _playerModule.PlayerAttackController.IsAttacking
                 || _playerModule.PlayerAttackController.IsAttackCooldown)
             {
@@ -345,9 +389,9 @@ namespace KillChord.Editor.AIDebugPlay
         private static void InjectAttackInput()
         {
             Mouse mouse = Mouse.current;
-            if (mouse == null)
+            if (mouse == null || !mouse.added || !mouse.enabled)
             {
-                Fail("Input SystemにMouseデバイスが存在しません。");
+                Fail("Input Systemに有効なMouseデバイスが存在しません。diagnosticsを確認してください。");
                 return;
             }
 
@@ -357,7 +401,7 @@ namespace KillChord.Editor.AIDebugPlay
                 return;
             }
 
-            _pressFrame = Time.frameCount;
+            _pressUpdateCount = InputState.updateCount;
             _attackRequestedAt = EditorApplication.timeSinceStartup;
             _isPressHeld = true;
             _isAwaitingAttackResult = true;
@@ -369,12 +413,19 @@ namespace KillChord.Editor.AIDebugPlay
         /// <summary>
         ///     Input Systemへマウス左ボタンの解放を登録する。
         /// </summary>
-        private static void ReleaseAttackInput()
+        private static void ReleaseAttackInput(bool endingPlaySession = false)
         {
+            // Editor更新で書き換えるとActionの解放通知も無視されるため、ゲーム入力更新まで待つ。
+            if (_isPressHeld && !endingPlaySession && EditorApplication.isPlaying
+                && (EditorApplication.isPaused || !_isProcessingInputUpdate))
+            {
+                _releasePending = true;
+                return;
+            }
             Mouse mouse = _pressedMouse;
             bool wasHeld = _isPressHeld;
             _isPressHeld = false;
-            _pressFrame = -1;
+            _releasePending = false;
             _pressedMouse = null;
             if (wasHeld && mouse != null && mouse.added)
             {
@@ -383,7 +434,7 @@ namespace KillChord.Editor.AIDebugPlay
         }
 
         /// <summary>
-        ///     現在のポインター状態を維持したまま、左ボタンの状態を入力キューへ登録する。
+        ///     現在のポインター状態を維持したまま、ゲーム入力更新内で左ボタンの状態を反映する。
         /// </summary>
         /// <param name="mouse"> 入力対象のMouseデバイス。 </param>
         /// <param name="pressed"> 押下状態にする場合はtrue。 </param>
@@ -392,8 +443,33 @@ namespace KillChord.Editor.AIDebugPlay
             using (StateEvent.From(mouse, out InputEventPtr eventPtr))
             {
                 mouse.leftButton.WriteValueIntoEvent(pressed ? 1f : 0f, eventPtr);
-                InputState.Change(mouse, eventPtr, InputUpdateType.Dynamic);
+                InputState.Change(mouse, eventPtr, IsGameInputUpdate()
+                    ? InputState.currentUpdateType : InputUpdateType.Dynamic);
             }
+        }
+
+        /// <summary>
+        ///     Editor・描画前更新を除くゲーム用の入力更新か判定する。
+        /// </summary>
+        private static bool IsGameInputUpdate()
+        {
+            return InputState.currentUpdateType == InputUpdateType.Dynamic
+                || InputState.currentUpdateType == InputUpdateType.Fixed
+                || InputState.currentUpdateType == InputUpdateType.Manual;
+        }
+
+        /// <summary>
+        ///     入力配送と成立通知待ちを区別できる診断情報を取得する。
+        /// </summary>
+        private static object ReadDiagnostics()
+        {
+            return AIDebugJson.Object(("gameInputUpdates", _gameInputUpdateCount),
+                ("lastGameInputUpdateType", _lastInputUpdateType.ToString()),
+                ("awaitingAttackResult", _isAwaitingAttackResult),
+                ("attackWaitSeconds", _isAwaitingAttackResult
+                    ? EditorApplication.timeSinceStartup - _attackRequestedAt : 0d),
+                ("pressHeld", _isPressHeld), ("priming", _isPriming),
+                ("environment", AIDebugAttackDiagnostics.Read(_playerModule, _pressedMouse)));
         }
 
         /// <summary>
@@ -565,6 +641,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// <param name="message"> エラー理由。 </param>
         private static void Fail(string message)
         {
+            _failureDiagnostics = ReadDiagnostics();
             ReleaseAttackInput();
             UnsubscribeRuntimeEvents();
             _pendingAttacks.Clear();
@@ -604,6 +681,8 @@ namespace KillChord.Editor.AIDebugPlay
         private static void UnsubscribeRuntimeEvents()
         {
             EditorApplication.update -= Update;
+            // キャンセル時に残った押下は次のゲーム入力更新で解放してから購読を外す。
+            if (!_isPressHeld) { InputSystem.onAfterUpdate -= HandleInputUpdate; }
             if (_playerModule?.PlayerAttackSignal != null)
             {
                 _playerModule.PlayerAttackSignal.OnAttackExecuted -= HandleAttackBeatExecuted;
@@ -619,6 +698,7 @@ namespace KillChord.Editor.AIDebugPlay
             if (state == PlayModeStateChange.ExitingPlayMode
                 || state == PlayModeStateChange.EnteredEditMode)
             {
+                ReleaseAttackInput(endingPlaySession: true);
                 CancelInternal("Play Modeが終了しました。");
             }
         }
@@ -628,6 +708,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         private static void HandleBeforeAssemblyReload()
         {
+            ReleaseAttackInput(endingPlaySession: true);
             CancelInternal("Assembly Reloadによりキャンセルしました。");
         }
 
