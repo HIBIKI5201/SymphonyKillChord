@@ -12202,8 +12202,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.EnemyMoveView
   _attackSoundSource: {fileID: 0}
-  _attackAlertFirstSoundSource: {fileID: 1518621570}
-  _attackAlertSecondSoundSource: {fileID: 2067630417}
   _attackHitEffectPrefab: {fileID: 131285386190377671, guid: 8241b0826109c274081347d4d711a62d, type: 3}
   _attackReserveEffectPrefab: {fileID: 318648360357674666, guid: 3312f234a758f5148a83e6ef17016861, type: 3}
   _footStepView: {fileID: 2141356082}
@@ -12435,7 +12433,6 @@ MonoBehaviour:
   - {fileID: 476494580}
   - {fileID: 1611474733}
   _deathSwampGameObject: {fileID: 1493093370}
-  _defeatSoundSource: {fileID: 0}
   _deathEffectDuration: 1
   _deathSwampSinkDuration: 3
   _targetTransform: {fileID: 867591862}
@@ -57578,6 +57575,7 @@ MonoBehaviour:
   _missionDefinitionRepositoryKey: MissionDefinitionRepository
   _enemyMissionKeyRepositoryKey: EnemyMissionKeyRepository
   _missionVoiceSource: {fileID: 820633126}
+  _missionDialogueView: {fileID: 887821557}
   _scenarioRoot: {fileID: 1701706915}
   _scenarioView: {fileID: 1713118610}
   _scenarioInputView: {fileID: 116443662}
@@ -58615,6 +58613,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1560420932}
   m_SourcePrefab: {fileID: 100100000, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+--- !u!114 &887821557 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 62752759677366396, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+  m_PrefabInstance: {fileID: 887821556}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 721b63be5065c124aa3ab5569c012e32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Mission.MissionDialogueView
 --- !u!223 &887821559 stripped
 Canvas:
   m_CorrespondingSourceObject: {fileID: 8359850208577834624, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
@@ -77108,8 +77117,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.EnemyMoveView
   _attackSoundSource: {fileID: 0}
-  _attackAlertFirstSoundSource: {fileID: 152011972}
-  _attackAlertSecondSoundSource: {fileID: 1257948503}
   _attackHitEffectPrefab: {fileID: 131285386190377671, guid: 8241b0826109c274081347d4d711a62d, type: 3}
   _attackReserveEffectPrefab: {fileID: 318648360357674666, guid: 3312f234a758f5148a83e6ef17016861, type: 3}
   _footStepView: {fileID: 1133515517}
@@ -77341,7 +77348,6 @@ MonoBehaviour:
   - {fileID: 979712438}
   - {fileID: 763829506}
   _deathSwampGameObject: {fileID: 1934523570}
-  _defeatSoundSource: {fileID: 0}
   _deathEffectDuration: 1
   _deathSwampSinkDuration: 3
   _targetTransform: {fileID: 814391214}
@@ -81219,6 +81225,39 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0017437908, y: 0.0025482902, z: -0.0017197125}
     m_Extent: {x: 0.00032853603, y: 0.00048115407, z: 0.00039318}
   m_DirtyAABB: 0
+--- !u!114 &1162636637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1951470452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 1
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 1
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: SE_Enemy_Artillery_Attack
+  _cueSheet: CueSheet_0
 --- !u!1 &1166986284
 GameObject:
   m_ObjectHideFlags: 0
@@ -82157,6 +82196,23 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00013598142, y: 0.0044285874, z: -0.0027002231}
     m_Extent: {x: 0.00038432895, y: 0.0002265703, z: 0.000041199615}
   m_DirtyAABB: 0
+--- !u!1 &1205405732
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1917238283}
+  - component: {fileID: 1915222635}
+  m_Layer: 0
+  m_Name: ArtilleryExplosionSoundPool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1213247583
 GameObject:
   m_ObjectHideFlags: 0
@@ -93690,6 +93746,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.StageSequenceMusicView
   _stageClearCueName: 
+  _gameOverCueName: 
 --- !u!1 &1442007069
 GameObject:
   m_ObjectHideFlags: 0
@@ -94828,6 +94885,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1472969136}
   m_CullTransparentMesh: 1
+--- !u!114 &1473158606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1951470452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
 --- !u!1 &1478155885
 GameObject:
   m_ObjectHideFlags: 0
@@ -109975,7 +110044,6 @@ MonoBehaviour:
   _defaultShellPoolSize: 20
   _maxShellPoolSize: 40
   _shellExplosionEffectView: {fileID: 1544702107}
-  _shellExplosionSoundView: {fileID: 1915222635}
   _renderWarmupEnabled: 1
 --- !u!4 &1599172286
 Transform:
@@ -110012,131 +110080,6 @@ MonoBehaviour:
   _enemyArtillerySpawner: {fileID: 1772279158}
   _enemyWaveTimerView: {fileID: 708479945}
   _damageNumberPoolView: {fileID: 1809620230}
---- !u!1 &1205405732
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1917238283}
-  - component: {fileID: 1915222635}
-  m_Layer: 0
-  m_Name: ArtilleryExplosionSoundPool
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1917238283
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1205405732}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1931593596}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1915222635
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1205405732}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7e705bafbe1d4264872f2fbf8ceebe90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Character.ReusableSoundEffectView
-  _soundEffectSourceTemplate: {fileID: 1473158606}
-  _releaseDelaySeconds: 5
---- !u!1 &1951470452
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1931593596}
-  - component: {fileID: 1162636637}
-  - component: {fileID: 1473158606}
-  m_Layer: 0
-  m_Name: ExplosionSoundTemplate
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1931593596
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1951470452}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1917238283}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1162636637
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1951470452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
-  _playOnStart: 0
-  _regionOnStart: {fileID: 0}
-  _listenerOnStart: {fileID: 0}
-  _use3dPositioning: 1
-  _freezeOrientation: 0
-  _loop: 0
-  _volume: 1
-  _pitch: 0
-  _androidUseLowLatencyVoicePool: 0
-  need_to_player_update_all: 1
-  _use3dRandomization: 0
-  _randomPositionListMaxLength: 0
-  randomize3dConfig:
-    followsOriginalSource: 0
-    calculationType: 0
-    calculationParameters:
-    - 0
-    - 0
-    - 0
-  _cueName: SE_Enemy_Artillery_Attack
-  _cueSheet: CueSheet_0
---- !u!114 &1473158606
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1951470452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
 --- !u!1 &1601678327
 GameObject:
   m_ObjectHideFlags: 0
@@ -131804,6 +131747,20 @@ Transform:
   - {fileID: 1013234589}
   m_Father: {fileID: 1881843245}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1915222635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1205405732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e705bafbe1d4264872f2fbf8ceebe90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Character.ReusableSoundEffectView
+  _soundEffectSourceTemplate: {fileID: 1473158606}
+  _releaseDelaySeconds: 5
 --- !u!1 &1915504492
 GameObject:
   m_ObjectHideFlags: 0
@@ -132026,6 +131983,22 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 177441586}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1917238283
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1205405732}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1931593596}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1918277722
 GameObject:
@@ -132284,6 +132257,21 @@ Transform:
   - {fileID: 589805258}
   - {fileID: 1779571477}
   m_Father: {fileID: 1987142482}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &1931593596
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1951470452}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1917238283}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1934523570
 GameObject:
@@ -133174,6 +133162,24 @@ Transform:
   - {fileID: 1130674708}
   m_Father: {fileID: 1196351375}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1951470452
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1931593596}
+  - component: {fileID: 1162636637}
+  - component: {fileID: 1473158606}
+  m_Layer: 0
+  m_Name: ExplosionSoundTemplate
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1955384194
 GameObject:
   m_ObjectHideFlags: 0
@@ -140956,3 +140962,4 @@ SceneRoots:
   - {fileID: 918606267}
   - {fileID: 1059877459}
   - {fileID: 177441586}
+  - {fileID: 1917238283}
