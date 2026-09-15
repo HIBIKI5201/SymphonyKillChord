@@ -6,16 +6,17 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
     <ui:VisualElement name="VisualElement" style="flex-grow: 1; width: 100%; height: 100%; background-color: rgb(229, 229, 229); overflow: hidden;">
         <ui:VisualElement name="BackgroundImage" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/BackGround_OutdoorsInCity.jpg?fileID=21300000&amp;guid=a31a5f8688e4ad745ad67af8f6caf252&amp;type=3#BackGround_OutdoorsInCity&quot;); -unity-background-scale-mode: scale-and-crop; transform-origin: 0% 100%; scale: 1.2 1.2;"/>
-        <ui:Label text="作戦" name="Title" class="title" style="height: 100px; width: 200px; display: flex; visibility: visible; opacity: 1; -unity-font-style: bold; font-size: 36px; -unity-text-align: middle-center; position: absolute; align-self: center;"/>
+        <ui:Label text="作戦" name="Title" class="title" style="height: 100px; width: 200px; display: flex; visibility: visible; opacity: 1; -unity-font-style: bold; font-size: 36px; -unity-text-align: middle-center; color: rgb(255, 255, 255); position: absolute; left: 310px; top: 16px; translate: 0 0;"/>
         <ui:ScrollView name="StageNodeRoot" picking-mode="Position" mode="Horizontal" horizontal-scroller-visibility="Hidden" class="stage-map">
             <ui:VisualElement name="MainRow" class="stage-map__main-row" style="justify-content: center;"/>
         </ui:ScrollView>
+        <ui:VisualElement name="TopBarBackground" picking-mode="Ignore" style="position: absolute; left: 8px; top: 0; width: 572px; height: 131px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OutGame_SceneTab.png?fileID=2800000&amp;guid=96c8d94dd68b3104fa34a3f388529d63&amp;type=3#UI_OutGame_SceneTab&quot;); -unity-background-scale-mode: scale-to-fit;"/>
         <screen:AlphaHitTestButton name="BackButton" enabled="true" class="button back-button ui-se-cancel"/>
-        <ui:Button name="SettingShortcutButton" class="button setting-shortcut-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/UI/UI_btn_square.png?fileID=21300000&amp;guid=007fb3301cfef074a98bd9243797cad4&amp;type=3#UI_btn_square&quot;);">
+        <ui:Button name="SettingShortcutButton" class="button setting-shortcut-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/WIP/UI_btn_square.png?fileID=21300000&amp;guid=37fd6d3204bfe514cb8207d301aa86af&amp;type=3#UI_btn_square&quot;);">
             <ui:Image name="SettingIconGlyph" picking-mode="Ignore" class="home-option-icon-glyph" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_OptionIocn.png?fileID=21300000&amp;guid=bd80c72ceb0921245907a0bb0ceb0cc1&amp;type=3#UI_OptionIocn&quot;);"/>
         </ui:Button>
     </ui:VisualElement>
     <ui:VisualElement name="Overlay" picking-mode="Ignore" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-        <ui:Instance template="StageDetail" name="StageDetailContainer" style="position: absolute; top: 0; right: 0; width: 500px; height: 100%;"/>
+        <ui:Instance template="StageDetail" name="StageDetailContainer" style="position: absolute; top: 0; right: 0; width: 500px; height: 100%; display: none;"/>
     </ui:VisualElement>
 </ui:UXML>

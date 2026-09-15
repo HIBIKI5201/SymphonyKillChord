@@ -57,6 +57,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _skillController = skillController;
             _targetingSystem = targetingSystem;
             _musicSyncService = musicSyncService;
+            _musicSyncState = musicSyncState;
             _targetAreaQuery = targetAreaQuery;
             _playerTransform = playerTransform;
             _pendingAttackEffectService = pendingAttackEffectService ?? throw new ArgumentNullException(nameof(pendingAttackEffectService));
@@ -102,11 +103,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             }
 
             float now = Time.unscaledTime;
+            float musicTime = (float)_musicSyncState.PlayTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
 
             bool hasTarget = TryUpdateCurrentTarget();
 
-            var normalAttackDamagePolicy = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now, isJustHit, _actionRestrictionState.CanUseSkill);
+            var normalAttackDamagePolicy = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now, musicTime, isJustHit, _actionRestrictionState.CanUseSkill);
 
             IAttackHitEffect[] pendingHitEffects = _pendingAttackEffectService.Consume();
 
@@ -425,6 +427,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly TargetSystemController _targetingSystem;
         private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
         private readonly IMusicSyncService _musicSyncService;
+        private readonly MusicSyncState _musicSyncState;
         private readonly TargetAreaQuery _targetAreaQuery;
         private readonly Transform _playerTransform;
         private readonly PendingAttackEffectService _pendingAttackEffectService;

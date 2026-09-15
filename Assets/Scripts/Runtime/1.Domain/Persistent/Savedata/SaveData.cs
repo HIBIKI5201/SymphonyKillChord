@@ -23,6 +23,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             _tutorial = new();
             _audioSettings = new();
             _resourceInventory = new();
+            _environmentSettings = new();
         }
 
         // 基底クラスにデシリアライズ後フックがないため、各プロパティの公開時に欠損データを補完する。
@@ -55,6 +56,8 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
                 return _resourceInventory;
             }
         }
+        /// <summary> プレイヤーの環境設定を表すプロパティ。 </summary>
+        public EnvironmentSettingsData EnvironmentSettings => _environmentSettings ??= new();
 
         // セーブデータの各種データを保持するメンバー変数
         [SerializeField, Tooltip("プレイヤーのスキル解放情報のセーブデータ")]
@@ -101,5 +104,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             SkillUnlock.SetResearchPoint(0);
             _isLegacyPointMigrated = true;
         }
+        [SerializeField, Tooltip("プレイヤーの環境設定")]
+        private EnvironmentSettingsData _environmentSettings;
     }
 }

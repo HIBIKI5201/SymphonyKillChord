@@ -51,6 +51,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartConstraintView = FindFirstObjectByType<StageStartConstraintView>();
             _playerInputView = FindFirstObjectByType<PlayerInputView>();
             _musicPlayer = FindFirstObjectByType<MusicPlayer>();
+            _ambienceSoundView = FindFirstObjectByType<AmbienceSoundView>();
 
             if (_stageSequenceView == null
                 || _stageSequenceMessageView == null
@@ -67,6 +68,14 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                     $"[{nameof(SequenceInitializationModule)}] シーケンス関連参照の取得に失敗しました。",
                     this);
                 return false;
+            }
+
+            // 環境音は演出上のオプション要素のため、未設定でもシーケンス全体は起動させる。
+            if (_ambienceSoundView == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SequenceInitializationModule)}] {nameof(_ambienceSoundView)} が未設定です。開始演出中の環境音は再生されません。",
+                    this);
             }
 
             _container = new SequenceModuleContainer();
@@ -152,7 +161,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _stageStartConstraintView,
                 stageResultContainer.Presenter,
                 _visibilityView,
-                _inGamePlayDirector);
+                _inGamePlayDirector,
+                _ambienceSoundView);
 
             _missionRuntimeService = missionContainer.MissionRuntimeService;
             if (_missionRuntimeService == null)
@@ -443,6 +453,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private StageSequenceMusicView _stageSequenceMusicView;
         private StageStartConstraintView _stageStartConstraintView;
         private MusicPlayer _musicPlayer;
+        private AmbienceSoundView _ambienceSoundView;
         private PlayerInputView _playerInputView;
         private BattlePauseModule _battlePauseModule;
         private BattlePauseController _battlePauseController;

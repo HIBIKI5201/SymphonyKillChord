@@ -9532,8 +9532,10 @@ MonoBehaviour:
   _missionDefinitionRepositoryKey: MissionDefinitionRepository
   _enemyWaveDefinitionRepositoryKey: EnemyWaveDefinitionRepository
   _skillRepositoryKey: OutGameSkillRepository
-  _achievedStarSprite: {fileID: 21300000, guid: 792064cc61458f84c8f80655d6e1595b, type: 3}
-  _unachievedStarSprite: {fileID: 21300000, guid: 436deda8b5d284e438074cedba2e5129, type: 3}
+  _achievedStarSprite: {fileID: 21300000, guid: 772b52028ca8dab4684e3374f199e1c0, type: 3}
+  _unachievedStarSprite: {fileID: 21300000, guid: 7b4d2b203f0f5324d9c9ea4a0876d67a, type: 3}
+  _hexagonSprite: {fileID: 0}
+  _skillBeatVisualConfig: {fileID: 0}
 --- !u!114 &510963395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9547,9 +9549,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.ScreenInitializer
   _uiDocument: {fileID: 2119823347}
+  _comboHexIcon: {fileID: 21300000, guid: 7843d62702727754996c558d2f414bee, type: 3}
   _screenRuleDataKey: OutGameScreenRuleData
   _titleSceneName: Title
-  _comboHexIcon: {fileID: 21300000, guid: 75467e8beed827d4da4c0672f7545e88, type: 3}
 --- !u!4 &510963396
 Transform:
   m_ObjectHideFlags: 0
@@ -9599,7 +9601,7 @@ MonoBehaviour:
   _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
   _skillInputProgressUIConfigKey: SkillInputProgressUIConfig
   _videoPlayer: {fileID: 1876322594}
-  _comboHexIcon: {fileID: 21300000, guid: 75467e8beed827d4da4c0672f7545e88, type: 3}
+  _comboHexIcon: {fileID: 21300000, guid: 7843d62702727754996c558d2f414bee, type: 3}
 --- !u!114 &510963399
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9619,7 +9621,7 @@ MonoBehaviour:
   _skillGenreIconCatalogKey: SkillGenreIconCatalogAsset
   _skillInputProgressUIConfigKey: SkillInputProgressUIConfig
   _skillElementTemplate: {fileID: 9197481963319205126, guid: f7287427bee880e469a3bc9151ab00b8, type: 3}
-  _comboHexIcon: {fileID: 21300000, guid: 75467e8beed827d4da4c0672f7545e88, type: 3}
+  _comboHexIcon: {fileID: 21300000, guid: 7843d62702727754996c558d2f414bee, type: 3}
 --- !u!114 &510963400
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9642,7 +9644,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 93a35d4deb0110142a1d759b7e9fabc6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Tutorial.OutGameTutorialInitializer
 --- !u!43 &522259195
 Mesh:

@@ -13,10 +13,10 @@ using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
-using KillChord.Runtime.InfraStructure.OutGame.Resource;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
@@ -133,14 +133,17 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         [SerializeField, SourceDataAddress, Tooltip("装備スキルのアイコン解決に使う SkillRepository の Addressables キーです。読み込みに失敗してもアイコンなしで続行します。")]
         private string _skillRepositoryKey = "OutGameSkillRepository";
 
-        [SerializeField, SourceDataAddress, Tooltip("報酬リソースの表示名解決に使うリポジトリの Addressables キーです。読み込みに失敗しても既定名で続行します。")]
-        private string _gameResourceDefinitionRepositoryKey = "GameResourceDefinitionRepository";
-
         [SerializeField, Tooltip("サブミッション達成済みを表す星アイコンです。")]
         private Sprite _achievedStarSprite;
 
         [SerializeField, Tooltip("サブミッション未達成を表す星アイコンです。")]
         private Sprite _unachievedStarSprite;
+
+        [SerializeField, Tooltip("装備スキルの発動コマンド表示に使う菱形(六角形)の形状スプライトです。")]
+        private Sprite _hexagonSprite;
+
+        [SerializeField, Tooltip("発動コマンドの配色に使う設定です。インゲームのスキル入力進行UIと同じアセットを指定してください。")]
+        private SkillInputProgressUIConfig _skillBeatVisualConfig;
 
         private OutGameUIEvent _outGameUIEvent;
         private StageTree _stageTree;
@@ -165,9 +168,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private MissionDefinitionRepository _loadedMissionDefinitionRepository;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SkillRepository _loadedSkillRepository;
-        private GameResourceDefinitionRepository _loadedGameResourceDefinitionRepository;
         private SaveData _loadedSaveData;
         private SubMissionAchievementResolver _subMissionAchievementResolver;
+        private SkillInputProgressViewSetting _skillBeatVisualSetting;
         private ScrollView _stageMapScrollView;
         private VisualElement _stageMapContent;
         private VisualElement _stageMapCanvas;
@@ -178,12 +181,15 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private ScrollViewDragManipulator _stageMapDragManipulator;
         private VisualElement _stageNodeFocusFrame;
         private bool _isFocusFrameLocked;
+        private Dictionary<StageId, VisualElement> _stageNodeElementMap;
+        private Dictionary<StageId, Vector2> _stageNodeCenterMap;
         private bool _isSubscribed;
         private VisualElement _rootVisualElement;
         private VisualElement _detailScreenRoot;
         private VisualElement _backgroundImageElement;
         private IVisualElementScheduledItem _backgroundParallaxItem;
         private Button _settingShortcutButton;
+        private IDisposable _settingShortcutButtonActivation;
         private Dictionary<StageId, VisualElement> _nodeStarRowMap;
         private StageSelectModuleContainer _moduleContainer;
         private bool _isModuleContainerRegistered;
@@ -280,26 +286,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _loadedSkillRepository = null;
             }
 
-            // 報酬名の補助リソースのため、未作成・未登録でも既知IDの既定名を使って初期化を続ける。
-            try
-            {
-                _loadedGameResourceDefinitionRepository =
-                    await _gameResourceDefinitionRepositoryKey
-                        .LoadAssetAsync<GameResourceDefinitionRepository>(this, cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                Debug.LogWarning(
-                    $"[{nameof(StageSelectInitializer)}] GameResourceDefinitionRepositoryの読み込みに失敗しました。"
-                        + $"既定のリソース名で続行します。{exception.Message}",
-                    this);
-                _loadedGameResourceDefinitionRepository = null;
-            }
-
             return true;
         }
 
@@ -339,21 +325,32 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _skillRepositoryKey.ReleaseLoadedAsset(this);
                 _loadedSkillRepository = null;
             }
-            if (_loadedGameResourceDefinitionRepository != null)
-            {
-                _gameResourceDefinitionRepositoryKey.ReleaseLoadedAsset(this);
-                _loadedGameResourceDefinitionRepository = null;
-            }
             _loadedSaveData = null;
         }
 
         /// <summary>
         ///     ステージノードが選択されたときのイベントハンドラ。
+        ///     クリックと決定操作(コントローラーのAボタン)の両方から通知される。
+        ///     クリック時と同じく、選択したノードへフォーカスフレームを固定する。
         /// </summary>
         private void HandleStageNodeSelected(int stageIdValue)
         {
+            StageId stageId = new StageId(stageIdValue);
+            if (_stageNodeElementMap != null
+                && _stageNodeElementMap.TryGetValue(stageId, out VisualElement nodeElement))
+            {
+                AttachFocusFrameTo(nodeElement);
+                _isFocusFrameLocked = true;
+            }
+
+            if (_stageNodeCenterMap != null
+                && _stageNodeCenterMap.TryGetValue(stageId, out Vector2 nodeCenter))
+            {
+                ZoomMapToNode(nodeCenter);
+            }
+
             _stageSelectController.OnStageNodeSelected(stageIdValue);
-            ShowStarRowForSelectedNode(new StageId(stageIdValue));
+            ShowStarRowForSelectedNode(stageId);
         }
 
         /// <summary>
@@ -417,36 +414,86 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     セーブデータの装備スキルIDから、ステージ詳細パネルに表示するアイコン一覧を組み立てる。
+        ///     セーブデータの装備スキルIDから、ステージ詳細パネルのアイコン+発動コマンド表示を組み立てて反映する。
         /// </summary>
-        /// <returns> 装備スキルのアイコン一覧。空スロットまたはSkillRepository未解決の場合はnull要素になる。 </returns>
-        private List<Sprite> BuildEquippedSkillIcons()
+        private void UpdateEquippedSkillDisplay()
         {
             IReadOnlyList<int> equipmentSkillIds = _loadedSaveData.SkillBuild.EquipmentSkillIDs;
+            var names = new List<string>(equipmentSkillIds.Count);
             var icons = new List<Sprite>(equipmentSkillIds.Count);
+            var commandColors = new List<Color[]>(equipmentSkillIds.Count);
 
             for (int i = 0; i < equipmentSkillIds.Count; i++)
             {
                 int skillId = equipmentSkillIds[i];
+                string displayName = null;
                 Sprite icon = null;
+                Color[] steps = null;
                 // スキルIDはハッシュ由来で負の値も取り得るため、空スロットの判定は「-1(EMPTY_SKILL_ID)かどうか」で行う。
                 if (skillId != EMPTY_SKILL_ID
                     && _loadedSkillRepository != null
                     && _loadedSkillRepository.TryGetSkill(new SkillId(skillId), out SkillTemplate template))
                 {
+                    displayName = template.DisplayName;
                     icon = template.Icon;
+                    steps = BuildSkillCommandColors(template);
                 }
 
+                names.Add(displayName);
                 icons.Add(icon);
+                commandColors.Add(steps);
             }
 
-            return icons;
+            _detailScreenView.SetEquippedSkillIcons(names, icons, commandColors, _hexagonSprite);
         }
 
         /// <summary>
-        ///     設定画面ショートカットボタンがクリックされたときの処理。
+        ///     発動コマンドの配色設定を構築する。失敗しても発動コマンド表示なしで続行する。
         /// </summary>
-        private void HandleSettingShortcutButtonClicked(ClickEvent evt)
+        /// <returns> 構築した配色設定。未設定または構築失敗時はnull。 </returns>
+        private SkillInputProgressViewSetting TryCreateSkillBeatVisualSetting()
+        {
+            if (_skillBeatVisualConfig == null) { return null; }
+
+            try
+            {
+                return _skillBeatVisualConfig.Create();
+            }
+            catch (System.InvalidOperationException exception)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(StageSelectInitializer)}] 発動コマンドの配色設定の構築に失敗しました。"
+                        + $" 発動コマンド表示なしで続行します。{exception.Message}",
+                    this);
+                return null;
+            }
+        }
+
+        /// <summary>
+        ///     スキルの発動コマンド(入力パターン)を、インゲームのスキル入力進行UIと同じ配色へ変換する。
+        /// </summary>
+        /// <param name="template"> 対象のスキルテンプレート。 </param>
+        /// <returns> 発動コマンドの各歩数に対応する色一覧。発動コマンドが無い、または配色設定が未解決の場合はnull。 </returns>
+        private Color[] BuildSkillCommandColors(SkillTemplate template)
+        {
+            if (template.Pattern == null || template.Pattern.Length == 0 || _skillBeatVisualSetting == null)
+            {
+                return null;
+            }
+
+            var colors = new Color[template.Pattern.Length];
+            for (int i = 0; i < template.Pattern.Length; i++)
+            {
+                colors[i] = _skillBeatVisualSetting.GetSetting((int)template.Pattern[i]).NormalColor;
+            }
+
+            return colors;
+        }
+
+        /// <summary>
+        ///     設定画面ショートカットボタンが作動したときの処理。
+        /// </summary>
+        private void HandleSettingShortcutButtonActivationHandler()
         {
             _outGameUIEvent.OnShownSettingScreen?.Invoke();
         }
@@ -589,7 +636,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private async void HandleStageSelectScreenCompleted()
         {
             // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
-            _detailScreenView.SetEquippedSkillIcons(BuildEquippedSkillIcons());
+            UpdateEquippedSkillDisplay();
             await ApplyNewlyClearedStagesAsync(_cts.Token);
         }
 
@@ -698,7 +745,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             // --- View 層（詳細画面） ---
             _detailScreenView = new StageDetailScreenView(detailRoot, _outGameUIEvent);
             _detailScreenView.HideImmediately();
-            _detailScreenView.SetEquippedSkillIcons(BuildEquippedSkillIcons());
+            _skillBeatVisualSetting = TryCreateSkillBeatVisualSetting();
+            UpdateEquippedSkillDisplay();
 
             _rootVisualElement = root;
             _detailScreenRoot = detailRoot;
@@ -708,7 +756,11 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _settingShortcutButton = root.Q<Button>(SETTING_SHORTCUT_BUTTON_NAME);
             if (_settingShortcutButton != null)
             {
-                _settingShortcutButton.RegisterCallback<ClickEvent>(HandleSettingShortcutButtonClicked);
+                _settingShortcutButton.MakeNavigable();
+                // Button.clicked/ClickEventはコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+                // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+                _settingShortcutButtonActivation =
+                    _settingShortcutButton.RegisterActivation(HandleSettingShortcutButtonActivationHandler);
             }
 
             // --- View 層（接続線・ノード）---
@@ -742,6 +794,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return false;
             }
 
+            _stageNodeElementMap = nodeElementMap;
             BuildNodeComponents(nodeElementMap, connectionViewMap);
 
             // --- Adaptor 層 ---
@@ -791,7 +844,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _detailScreenRoot = null;
             if (_settingShortcutButton != null)
             {
-                _settingShortcutButton.UnregisterCallback<ClickEvent>(HandleSettingShortcutButtonClicked);
+                _settingShortcutButtonActivation?.Dispose();
+                _settingShortcutButtonActivation = null;
                 _settingShortcutButton = null;
             }
             _backgroundParallaxItem?.Pause();
@@ -816,10 +870,13 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageMapCanvasWidth = 0.0f;
             _stageNodeFocusFrame = null;
             _isFocusFrameLocked = false;
+            _stageNodeElementMap = null;
+            _stageNodeCenterMap = null;
             _battleSortieSelectionService = null;
             _loadingScreenController = null;
             _isAutomaticTutorialFlowStarted = false;
             _subMissionAchievementResolver = null;
+            _skillBeatVisualSetting = null;
             _nodeStarRowMap = null;
             _isInitialized = false;
         }
@@ -1006,6 +1063,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             mapCanvas.style.left = MAP_LEFT_DRAG_BUFFER;
             BuildConnectionElements(mapCanvas, nodeCenters, connectionViewMap);
             BuildNodeElements(mapCanvas, nodeCenters, nodeElementMap);
+            _stageNodeCenterMap = nodeCenters;
 
             _stageMapScrollView = mapScrollView;
             _stageMapContent = mapContent;
@@ -1335,19 +1393,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 nodeElement.style.width = NODE_SIZE;
                 nodeElement.style.height = NODE_SIZE;
 
-                // ホバー中はフレームをそのノードの子へ付け替える。クリック固定中は動かさない。
+                // ホバー中はフレームをそのノードの子へ付け替える。選択固定中は動かさない。
+                // クリックと決定操作(コントローラーのAボタン)によるフレーム固定は、
+                // 両方から通知される HandleStageNodeSelected で行う。
                 VisualElement focusTargetNode = nodeElement;
                 nodeElement.RegisterCallback<PointerEnterEvent>(_ =>
                 {
                     if (_isFocusFrameLocked) { return; }
                     AttachFocusFrameTo(focusTargetNode);
-                });
-                // クリックしたノードへフレームを固定する。詳細画面を閉じるまで解除されない。
-                nodeElement.RegisterCallback<ClickEvent>(_ =>
-                {
-                    AttachFocusFrameTo(focusTargetNode);
-                    _isFocusFrameLocked = true;
-                    ZoomMapToNode(center);
                 });
 
                 var icon = new VisualElement
@@ -1508,7 +1561,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _detailScreenView,
                 _loadedMissionDefinitionRepository,
                 _subMissionAchievementResolver,
-                _loadedGameResourceDefinitionRepository);
+                _loadedSaveData);
             _stageSelectController = new StageSelectController(_stageTree, detailPresenter, _detailScreenView);
         }
 

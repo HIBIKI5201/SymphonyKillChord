@@ -1,54 +1,80 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/StageSelect/UIToolkit/USS/StageDetail.uss?fileID=7433441132597879392&amp;guid=7c5cdb95b8eb69d4eb7e7b58f9c03ff3&amp;type=3#StageDetail"/>
-    <ui:VisualElement style="flex-grow: 1; align-self: flex-end; height: 100%; position: absolute; width: 505px; left: auto; background-color: rgba(0, 0, 0, 0.5);"/>
-    <ui:VisualElement name="VisualElement" style="flex-grow: 1; width: 500px; height: 100%; align-self: flex-end; background-color: rgb(229, 229, 229); -unity-background-image-tint-color: rgb(255, 255, 255);">
-        <ui:Label text="Label" name="StageNameLabel" style="position: relative; -unity-text-align: middle-center; width: 100%; height: 48px; font-size: 30px; -unity-font-style: bold; white-space: nowrap; margin-top: 10px;"/>
-        <ui:Label text="Label" name="FlavorTextLabel" style="position: relative; -unity-text-align: middle-center; width: 100%; height: 48px; font-size: 30px; -unity-font-style: bold; white-space: nowrap; margin-bottom: 10px;"/>
-        <ui:VisualElement name="HeaderDivider" picking-mode="Ignore" style="width: 460px; height: 2px; align-self: center; background-color: rgb(180, 180, 180); margin-bottom: 10px;"/>
-        <ui:VisualElement name="StageRewardRoot" style="flex-grow: 0; background-color: rgb(255, 255, 255); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; margin-top: 0; margin-bottom: 50px; width: 460px; align-self: center;">
-            <ui:Label text="クリア報酬" name="StageReward" style="position: relative; -unity-text-align: middle-left; width: 100%; height: 40px; font-size: 24px; -unity-font-style: normal; background-color: rgb(46, 53, 77); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; left: auto; right: auto; aspect-ratio: auto; margin-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; padding-left: 10px; padding-right: 10px; padding-top: 10px; padding-bottom: 10px; color: rgb(255, 255, 255);"/>
-            <ui:Label text="Label" name="RewardSkillBuildLabel" style="position: relative; -unity-text-align: middle-left; width: 100%; height: 25%; font-size: 22px; -unity-font-style: bold; align-self: flex-start; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;"/>
-            <ui:Label text="Label" name="RewardSkillUnlockLabel" style="position: relative; -unity-text-align: middle-left; width: 100%; height: 25%; font-size: 22px; -unity-font-style: bold; align-self: flex-start; white-space: pre; left: auto; top: auto; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;"/>
-        </ui:VisualElement>
-        <ui:VisualElement name="MissionSection" style="flex-grow: 1; width: 460px; height: 0%; position: relative; align-self: center; background-size: 100% 100%; margin-left: 0; margin-right: 0;">
-            <ui:VisualElement name="SubMission1Root" style="flex-grow: 0; width: 100%; height: 48px; margin-bottom: 24px; background-color: rgb(255, 255, 255); border-top-width: 1px; border-left-width: 1px; border-right-width: 1px; border-top-color: rgb(221, 221, 221); border-left-color: rgb(221, 221, 221); border-right-color: rgb(221, 221, 221); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; border-bottom-width: 3px; border-bottom-color: rgb(130, 130, 130);">
-                <ui:Label text="Label" name="SubMissionLabel1" style="position: relative; -unity-text-align: middle-left; width: 100%; height: 100%; font-size: 22px; -unity-font-style: bold; align-self: flex-start; white-space: pre; left: auto; top: auto; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 46px;"/>
-                <ui:VisualElement name="MissionCheck" class="mission-check" style="flex-grow: 1; position: absolute; background-color: rgb(255, 255, 255);">
-                    <ui:Label text="&#10003;" name="MissionCheckMark" picking-mode="Ignore" class="mission-check-mark"/>
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement name="SubMission2Root" style="flex-grow: 0; width: 100%; height: 48px; margin-bottom: 24px; background-color: rgb(255, 255, 255); border-top-width: 1px; border-left-width: 1px; border-right-width: 1px; border-top-color: rgb(221, 221, 221); border-left-color: rgb(221, 221, 221); border-right-color: rgb(221, 221, 221); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; border-bottom-width: 3px; border-bottom-color: rgb(130, 130, 130);">
-                <ui:Label text="Label" name="SubMissionLabel2" style="position: relative; -unity-text-align: middle-left; width: 100%; height: 100%; font-size: 22px; -unity-font-style: bold; align-self: flex-start; white-space: pre; left: auto; top: auto; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 46px;"/>
-                <ui:VisualElement name="MissionCheck" class="mission-check" style="flex-grow: 1; position: absolute; background-color: rgb(255, 255, 255);">
-                    <ui:Label text="&#10003;" name="MissionCheckMark" picking-mode="Ignore" class="mission-check-mark"/>
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement name="SubMission3Root" style="flex-grow: 0; width: 100%; height: 48px; margin-bottom: 24px; background-color: rgb(255, 255, 255); border-top-width: 1px; border-left-width: 1px; border-right-width: 1px; border-top-color: rgb(221, 221, 221); border-left-color: rgb(221, 221, 221); border-right-color: rgb(221, 221, 221); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; border-bottom-width: 3px; border-bottom-color: rgb(130, 130, 130);">
-                <ui:Label text="Label" name="SubMissionLabel3" style="position: relative; -unity-text-align: middle-left; width: 100%; height: 100%; font-size: 22px; -unity-font-style: bold; align-self: flex-start; white-space: pre; left: auto; top: auto; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 46px;"/>
-                <ui:VisualElement name="MissionCheck" class="mission-check" style="flex-grow: 1; position: absolute; background-color: rgb(255, 255, 255);">
-                    <ui:Label text="&#10003;" name="MissionCheckMark" picking-mode="Ignore" class="mission-check-mark"/>
-                </ui:VisualElement>
+    <ui:VisualElement name="VisualElement" style="flex-grow: 1; width: 729px; height: 100%; align-self: flex-end; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Option_Back.png?fileID=2800000&amp;guid=ae2a34555d2331543a19da0a6aa5a2cb&amp;type=3#UI_Option_Back&quot;); -unity-background-scale-mode: scale-and-crop;">
+        <ui:VisualElement name="TopHeader" picking-mode="Ignore" style="position: relative; width: 569px; height: 129px; align-self: center; margin-top: 10px; justify-content: center; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/OutGame_NameTab.png?fileID=2800000&amp;guid=18615c4bf6c358c419b0f3486d76158e&amp;type=3#OutGame_NameTab&quot;); -unity-background-scale-mode: scale-and-crop; -unity-background-image-tint-color: rgba(255, 255, 255, 0.2); background-color: rgba(0, 0, 0, 0);">
+            <ui:VisualElement picking-mode="Ignore" style="position: relative; flex-direction: column;">
+                <ui:Label text="Label" name="StageNameLabel" picking-mode="Ignore" style="-unity-text-align: middle-center; width: 100%; height: 40px; font-size: 32px; -unity-font-style: bold; white-space: nowrap; color: rgb(255, 255, 255);"/>
+                <ui:Label text="Label" name="FlavorTextLabel" picking-mode="Ignore" style="-unity-text-align: middle-center; width: 100%; height: 32px; font-size: 20px; -unity-font-style: normal; white-space: nowrap; color: rgb(255, 255, 255);"/>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="EquippedSkillRoot" style="flex-grow: 0; width: 460px; height: 70px; align-self: center; flex-direction: row; align-items: center; margin-top: 10px; margin-bottom: 10px; background-color: rgb(255, 255, 255); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; padding-left: 10px; padding-right: 10px;">
-            <ui:VisualElement name="EquippedSkillRow" style="flex-grow: 1; flex-direction: row; align-items: center;">
-                <ui:Image name="EquippedSkillIcon0" class="equipped-skill-icon"/>
-                <ui:Image name="EquippedSkillIcon1" class="equipped-skill-icon"/>
-                <ui:Image name="EquippedSkillIcon2" class="equipped-skill-icon"/>
-                <ui:Image name="EquippedSkillIcon3" class="equipped-skill-icon"/>
-                <ui:Image name="EquippedSkillIcon4" class="equipped-skill-icon"/>
-                <ui:Image name="EquippedSkillIcon5" class="equipped-skill-icon"/>
+        <ui:VisualElement name="Mission" class="mission-card-panel" style="position: relative; width: 568px; align-self: center; margin-bottom: 10px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; margin-top: 27px; height: 264px;">
+            <ui:VisualElement name="Main" picking-mode="Ignore" style="position: relative; width: 100%; height: 50px; justify-content: center; margin-bottom: 10px;">
+                <ui:Label text="Mission" name="Header" picking-mode="Ignore" style="font-size: 20px; -unity-text-align: middle-center; color: rgb(255, 255, 255);"/>
+                <ui:Label text="Label" name="Name" picking-mode="Ignore" style="font-size: 32px; -unity-font-style: bold; -unity-text-align: middle-center; color: rgb(255, 255, 255);"/>
             </ui:VisualElement>
-            <ui:Button text="改造" name="SkillBuildShortcutButton" class="stage-detail-button" style="width: 90px; height: 50px; font-size: 20px; -unity-font-style: bold; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;"/>
+            <ui:VisualElement name="MissionList" picking-mode="Ignore" style="position: relative; flex-direction: column; justify-content: space-between; margin-top: 18px;">
+                <ui:VisualElement name="Main" class="mission-card-panel" style="position: relative; width: 100%; height: 54px; margin-bottom: 10px;">
+                    <ui:Label text="Label" name="SubMissionLabel1" style="position: relative; -unity-text-align: middle-left; width: 100%; height: 100%; font-size: 30px; -unity-font-style: bold; white-space: pre; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 46px; color: rgb(255, 255, 255);"/>
+                    <ui:VisualElement name="MissionCheck" class="mission-check" style="position: absolute;">
+                        <ui:Label text="✓" name="MissionCheckMark" picking-mode="Ignore" class="mission-check-mark"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="Sub1" class="mission-card-panel" style="position: relative; width: 100%; height: 47px; margin-bottom: 10px;">
+                    <ui:Label text="Label" name="SubMissionLabel2" style="position: relative; -unity-text-align: middle-left; width: 100%; height: 100%; font-size: 30px; -unity-font-style: bold; white-space: pre; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 46px; color: rgb(255, 255, 255);"/>
+                    <ui:VisualElement name="MissionCheck" class="mission-check" style="position: absolute;">
+                        <ui:Label text="✓" name="MissionCheckMark" picking-mode="Ignore" class="mission-check-mark"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="Sub2" class="mission-card-panel" style="position: relative; width: 100%; height: 48px;">
+                    <ui:VisualElement name="MissionCheck" class="mission-check" style="position: absolute;">
+                        <ui:Label text="✓" name="MissionCheckMark" picking-mode="Ignore" class="mission-check-mark"/>
+                    </ui:VisualElement>
+                    <ui:Label text="Label" name="SubMissionLabel3" style="position: relative; -unity-text-align: middle-left; width: 100%; height: 100%; font-size: 30px; -unity-font-style: bold; white-space: pre; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 46px; color: rgb(255, 255, 255);"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="Reward" picking-mode="Ignore" style="position: relative; flex-direction: row; justify-content: space-between; width: 508px; align-self: center; padding-top: 14px; padding-bottom: 14px;">
+            <ui:VisualElement name="FirstClear" class="mission-card-panel" style="position: relative; width: 220px; padding-top: 8px; padding-bottom: 8px; align-items: center; -unity-background-image-tint-color: rgba(255, 255, 255, 0.2);">
+                <ui:Label text="初回報酬" picking-mode="Ignore" style="font-size: 20px; -unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold;"/>
+                <ui:Label text="解放P" name="Item" picking-mode="Ignore" style="font-size: 12px; -unity-text-align: middle-center; margin-top: 2px; color: rgb(255, 255, 255);"/>
+                <ui:Label text="Label" name="Point" picking-mode="Ignore" style="font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-center; margin-top: 2px; color: rgb(255, 255, 255);"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="Success" class="mission-card-panel" style="position: relative; width: 220px; padding-top: 8px; padding-bottom: 8px; align-items: center; -unity-background-image-tint-color: rgba(203, 255, 255, 0.2);">
+                <ui:Label text="成功報酬" picking-mode="Ignore" style="font-size: 20px; -unity-text-align: middle-center; color: rgb(255, 255, 255); -unity-font-style: bold;"/>
+                <ui:Label text="改造P" name="Item" picking-mode="Ignore" style="font-size: 12px; -unity-text-align: middle-center; margin-top: 2px; color: rgb(255, 255, 255);"/>
+                <ui:Label text="Label" name="Point" picking-mode="Ignore" style="font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-center; margin-top: 2px; color: rgb(255, 255, 255);"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="SkillBuild" picking-mode="Ignore" class="mission-card-panel" style="position: relative; flex-direction: column; width: 545px; align-self: center; margin-bottom: 10px; padding-top: 4px; height: 213px; margin-top: 10px;">
+            <ui:Button text="編成" name="SkillBuildShortcutButton" icon-image="" class="stage-detail-button mission-card-panel" style="width: 510px; height: 60px; align-self: center; margin-top: 6px; margin-bottom: 6px; font-size: 24px; -unity-font-style: bold; border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px; color: rgb(255, 255, 255); background-color: rgba(255, 255, 255, 0); -unity-background-image-tint-color: rgba(255, 255, 255, 0.59);"/>
+            <ui:VisualElement name="SkillSlot" style="position: relative; flex-direction: row; justify-content: center;">
+                <ui:VisualElement name="1" class="equipped-skill-slot" style="-unity-background-image-tint-color: rgba(255, 255, 255, 0.2);">
+                    <ui:Label name="EquippedSkillName0" class="equipped-skill-name"/>
+                    <ui:Image name="EquippedSkillIcon0" class="equipped-skill-icon"/>
+                    <ui:Label text="＋" name="EquippedSkillPlaceholder0" class="equipped-skill-placeholder"/>
+                    <ui:VisualElement name="EquippedSkillCommandRow0" class="equipped-skill-command-row"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="2" class="equipped-skill-slot" style="-unity-background-image-tint-color: rgba(255, 255, 255, 0.2);">
+                    <ui:Label name="EquippedSkillName1" class="equipped-skill-name"/>
+                    <ui:Image name="EquippedSkillIcon1" class="equipped-skill-icon"/>
+                    <ui:Label text="＋" name="EquippedSkillPlaceholder1" class="equipped-skill-placeholder"/>
+                    <ui:VisualElement name="EquippedSkillCommandRow1" class="equipped-skill-command-row"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="3" class="equipped-skill-slot" style="-unity-background-image-tint-color: rgba(255, 255, 255, 0.2);">
+                    <ui:Label name="EquippedSkillName2" class="equipped-skill-name"/>
+                    <ui:Image name="EquippedSkillIcon2" class="equipped-skill-icon"/>
+                    <ui:Label text="＋" name="EquippedSkillPlaceholder2" class="equipped-skill-placeholder"/>
+                    <ui:VisualElement name="EquippedSkillCommandRow2" class="equipped-skill-command-row"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="RottButtons" style="flex-grow: 1; align-content: flex-end; align-self: auto; justify-content: flex-start; align-items: stretch; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; height: auto;">
-            <ui:Button name="BackButton" class="ui-se-cancel stage-detail-button" style="width: 70px; height: 70px; font-size: 24px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; position: absolute; align-self: flex-end; translate: 0 0; top: auto; left: auto; right: 0; bottom: 0; -unity-font-style: bold; margin-top: 10px; margin-right: 20px; margin-bottom: 40px; margin-left: 5px; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
-                <ui:Image source="project://database/Assets/Arts/Images/GoogleFontIcon/close_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg?fileID=7388822144124034973&amp;guid=2b12a24963eb2714ea0fc87db9b62682&amp;type=3#close_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24" tint-color="rgb(51, 51, 51)" scale-mode="ScaleToFit" style="width: 50%; height: 50%; align-self: center; align-content: center; justify-content: center; align-items: auto; flex-grow: 1; flex-shrink: 0;"/>
-            </ui:Button>
-            <ui:Button name="SortieButton" class="stage-detail-button" style="width: 385px; height: 110px; align-self: flex-start; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; translate: 0 0; position: absolute; top: auto; left: 0; right: auto; bottom: 0; margin-top: 10px; margin-right: 5px; margin-bottom: 40px; margin-left: 20px; background-color: rgb(255, 255, 255); flex-direction: column; justify-content: center; align-items: center; padding-top: 0; padding-bottom: 0;">
-                <ui:Label text="出撃" name="SortieButtonMainLabel" picking-mode="Ignore" style="font-size: 30px; -unity-font-style: bold; color: rgb(51, 51, 51); -unity-text-align: middle-center;"/>
-                <ui:Label text="start" name="SortieButtonSubLabel" picking-mode="Ignore" style="font-size: 14px; -unity-font-style: normal; color: rgb(120, 120, 120); -unity-text-align: middle-center;"/>
+            <ui:Button name="SortieButton" class="stage-detail-button sortie-button" style="width: 426px; height: 214px; align-self: flex-start; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; translate: 0 0; position: absolute; top: auto; left: 135px; right: auto; bottom: -2px; margin-top: 10px; margin-right: 20px; margin-bottom: 40px; margin-left: 20px; flex-direction: column; justify-content: center; align-items: center; padding-top: 0; padding-bottom: 0; font-size: 30px; background-color: rgba(255, 255, 255, 0); -unity-background-scale-mode: scale-and-crop;">
+                <ui:Image name="SortieButtonFrame" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/flame_Botton.png?fileID=2800000&amp;guid=26d3b98bb97d76c4dad1c6cda86f41c1&amp;type=3#flame_Botton&quot;); -unity-background-scale-mode: scale-and-crop;"/>
+                <ui:Label text="出撃" name="SortieButtonMainLabel" picking-mode="Ignore" style="font-size: 48px; -unity-font-style: bold; -unity-text-align: middle-center; color: rgb(51, 51, 51);"/>
+                <ui:Label text="start" name="SortieButtonSubLabel" picking-mode="Ignore" style="font-size: 20px; -unity-font-style: normal; -unity-text-align: middle-center; color: rgb(90, 90, 90);"/>
             </ui:Button>
         </ui:VisualElement>
     </ui:VisualElement>
+    <ui:VisualElement style="flex-grow: 1; align-self: flex-end; height: 100%; position: absolute; width: 727px; left: 1193px; top: -2px;"/>
 </ui:UXML>

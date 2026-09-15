@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.OutGame.Scenario;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Domain.OutGame.Scenario;
@@ -24,13 +25,21 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// </summary>
         public async ValueTask HandleAsync(FadeEvent e, CancellationToken ct)
         {
-            await _fadeOutputPort.FadeAsync(e.Target.ToString(), e.Start, e.End, e.DurationSec, ct);
+            long startedAt = Stopwatch.GetTimestamp();
+            await _fadeOutputPort.FadeAsync(
+                e.Target,
+                e.Mode,
+                e.Start,
+                e.End,
+                e.DurationSec,
+                ct);
 
-            // フェード演出が完了するまで次イベントへ進めない。
-            // これにより連続する Fade が同一フレームで上書きされず、順番に再生される。
-            if (e.DurationSec > 0f)
+            // View が演出を行えず即時完了した場合も、イベントの指定時間は維持する。
+            double elapsedSec = (Stopwatch.GetTimestamp() - startedAt) / (double)Stopwatch.Frequency;
+            double remainingSec = e.DurationSec - elapsedSec;
+            if (remainingSec > 0d)
             {
-                await Task.Delay(TimeSpan.FromSeconds(e.DurationSec), ct);
+                await Task.Delay(TimeSpan.FromSeconds(remainingSec), ct);
             }
         }
 

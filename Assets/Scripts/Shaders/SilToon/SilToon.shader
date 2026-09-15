@@ -61,7 +61,7 @@
         [Header(FakeShadow)]
         [Toggle(_FAKE_SHADOW_ON)] _FakeShadowOn("Fake Shadow On", Float) = 0
         _FakeShadowColor("Color (Multiply)", Color) = (0.6, 0.55, 0.6, 1)
-        _FakeShadowDistance("Distance", Float) = 0.1
+        _FakeShadowOffset("Screen Offset (XY)", Vector) = (0, -0.005, 0, 0)
         _FakeShadowDepthBias("Depth Bias", Float) = 0.01
 
         [Header(RenderState)]

@@ -1,8 +1,11 @@
 ---
 import GameplaySlide from './GameplaySlide.astro';
+import SkillShowcaseSlide from './SkillShowcaseSlide.astro';
 import features from '../data/gameplayFeatures.json';
 
-const total = String(features.length).padStart(2, '0');
+// スキルページ統合により、ゲームプレイ紹介の末尾にスキル紹介スライドを1枚追加する
+const slideCount = features.length + 1;
+const total = String(slideCount).padStart(2, '0');
 ---
 
 <section id="gameplay-carousel" class="carousel" tabindex="0" aria-roledescription="carousel" aria-label="ゲームプレイ紹介">
@@ -22,20 +25,26 @@ const total = String(features.length).padStart(2, '0');
 		</div>
 
 		<div class="viewport">
-			<ul class="track" style={`--slide-count: ${features.length};`}>
+			<ul class="track" style={`--slide-count: ${slideCount};`}>
 				{
-					features.map((feature) => (
+					features.map((feature, index) => (
 						<li class="slide-item">
 							<GameplaySlide
-								code={feature.code}
 								name={feature.name}
 								description={feature.description}
 								ringLabel={feature.ringLabel}
+								ringWord={feature.ringWord}
 								ringSegments={feature.ringSegments}
+								current={index + 1}
+								total={features.length}
+								rhythmSegments={feature.id === 'pillar-01' ? feature.ringSegments : undefined}
 							/>
 						</li>
 					))
 				}
+				<li class="slide-item" data-slide-id="skill">
+					<SkillShowcaseSlide />
+				</li>
 			</ul>
 		</div>
 
@@ -57,6 +66,9 @@ const total = String(features.length).padStart(2, '0');
 						</li>
 					))
 				}
+				<li role="presentation">
+					<button type="button" class="dot" data-index={features.length} role="tab" aria-label="スキルへ" aria-selected="false" />
+				</li>
 			</ul>
 
 			<button type="button" class="nav next" aria-label="次のスライド">›</button>
@@ -69,46 +81,97 @@ const total = String(features.length).padStart(2, '0');
 
 	if (root) {
 		const track = root.querySelector<HTMLElement>('.track');
-		const slides = Array.from(root.querySelectorAll<HTMLElement>('.slide-item'));
+		const realSlides = Array.from(root.querySelectorAll<HTMLElement>('.slide-item'));
 		const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('.dot'));
 		const prevButton = root.querySelector<HTMLButtonElement>('.nav.prev');
 		const nextButton = root.querySelector<HTMLButtonElement>('.nav.next');
 		const currentLabel = root.querySelector('.counter .current');
+		const realCount = realSlides.length;
 
-		let index = 0;
+		if (track && realCount > 0) {
+			// 先頭の前に最後のスライドの複製、末尾に最初のスライドの複製を置き、
+			// 端に到達した瞬間だけtransitionを止めて本物の位置へ跳ばすことで、
+			// 見た目上は途切れなくループしているように見せる。
+			const firstClone = realSlides[0].cloneNode(true) as HTMLElement;
+			const lastClone = realSlides[realCount - 1].cloneNode(true) as HTMLElement;
+			firstClone.setAttribute('aria-hidden', 'true');
+			lastClone.setAttribute('aria-hidden', 'true');
+			track.appendChild(firstClone);
+			track.insertBefore(lastClone, realSlides[0]);
 
-		const clamp = (value: number) => Math.max(0, Math.min(slides.length - 1, value));
+			const slideCount = realCount + 2;
+			track.style.setProperty('--slide-count', String(slideCount));
 
-		function render() {
-			if (track) {
-				track.style.transform = `translateX(-${index * 100}%)`;
+			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+			// URLハッシュ(#skill等)でスライドを指定できるようにし、他ページからの直接誘導に対応する
+			const targetId = location.hash.slice(1);
+			const targetRealIndex = realSlides.findIndex((slide) => slide.dataset.slideId === targetId);
+			// 物理インデックスは複製ぶん+1したものが実スライドの位置になる
+			let index = (targetRealIndex >= 0 ? targetRealIndex : 0) + 1;
+
+			// ドット・カウンター表示用に、複製を含む物理インデックスから実スライドのインデックスへ変換する
+			function toRealIndex(physicalIndex: number) {
+				if (physicalIndex <= 0) return realCount - 1;
+				if (physicalIndex >= slideCount - 1) return 0;
+				return physicalIndex - 1;
 			}
-			dots.forEach((dot, i) => {
-				dot.classList.toggle('is-active', i === index);
-				dot.setAttribute('aria-selected', i === index ? 'true' : 'false');
+
+			function render(withTransition: boolean) {
+				if (!track) return;
+				if (!withTransition) track.style.transition = 'none';
+				// trackの幅はslide数倍(--slide-count)のため、100%はtrack全体を指す。1枚分の移動量に換算する。
+				track.style.transform = `translateX(-${(index * 100) / slideCount}%)`;
+				if (!withTransition) {
+					track.offsetHeight;
+					track.style.transition = '';
+				}
+
+				const realIndex = toRealIndex(index);
+				dots.forEach((dot, i) => {
+					dot.classList.toggle('is-active', i === realIndex);
+					dot.setAttribute('aria-selected', i === realIndex ? 'true' : 'false');
+				});
+				if (currentLabel) {
+					currentLabel.textContent = String(realIndex + 1).padStart(2, '0');
+				}
+			}
+
+			// 複製スライドの位置まで到達したら、アニメーションなしで対応する本物の位置へ跳ばす
+			function correctBoundary() {
+				if (index <= 0) {
+					index = realCount;
+					render(false);
+				} else if (index >= slideCount - 1) {
+					index = 1;
+					render(false);
+				}
+			}
+
+			function goTo(next: number) {
+				index = next;
+				render(true);
+				// prefers-reduced-motionではtransitionが発生せずtransitionendも発火しないため、即座に補正する
+				if (prefersReducedMotion) correctBoundary();
+			}
+
+			track.addEventListener('transitionend', (event) => {
+				if (event.target !== track || event.propertyName !== 'transform') return;
+				correctBoundary();
 			});
-			if (currentLabel) {
-				currentLabel.textContent = String(index + 1).padStart(2, '0');
-			}
-			if (prevButton) prevButton.disabled = index === 0;
-			if (nextButton) nextButton.disabled = index === slides.length - 1;
+
+			prevButton?.addEventListener('click', () => goTo(index - 1));
+			nextButton?.addEventListener('click', () => goTo(index + 1));
+			dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i + 1)));
+
+			root.addEventListener('keydown', (event) => {
+				if (event.key === 'ArrowRight') goTo(index + 1);
+				if (event.key === 'ArrowLeft') goTo(index - 1);
+			});
+
+			// 初回描画はハッシュ指定の位置であっても、送りアニメーションを再生しない
+			render(false);
 		}
-
-		function goTo(next: number) {
-			index = clamp(next);
-			render();
-		}
-
-		prevButton?.addEventListener('click', () => goTo(index - 1));
-		nextButton?.addEventListener('click', () => goTo(index + 1));
-		dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
-
-		root.addEventListener('keydown', (event) => {
-			if (event.key === 'ArrowRight') goTo(index + 1);
-			if (event.key === 'ArrowLeft') goTo(index - 1);
-		});
-
-		render();
 	}
 </script>
 
@@ -203,6 +266,7 @@ const total = String(features.length).padStart(2, '0');
 
 	.track {
 		display: flex;
+		width: calc(var(--slide-count) * 100%);
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -210,7 +274,7 @@ const total = String(features.length).padStart(2, '0');
 	}
 
 	.slide-item {
-		flex: 0 0 100%;
+		flex: 0 0 calc(100% / var(--slide-count));
 		min-width: 0;
 	}
 

@@ -389,6 +389,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 int currentLevel = _skillLevels != null && _skillLevels.TryGetValue(skillTemplate.Id.Value, out int savedLevel)
                     ? savedLevel
                     : skillTemplate.Level.Value;
+                // 成長ステップの編集でMaxLevelが下がった場合に備え、セーブ済みレベルを現在の上限内へ収める。
+                currentLevel = Math.Min(currentLevel, skillTemplate.MaxLevel);
                 SkillDefinition definition = skillTemplate.ToSkillDefinition(musicSyncState.Bpm, currentLevel);
                 SkillView view = FindSkillView(skillVisuals, definition.Id.Value);
                 if (view == null)

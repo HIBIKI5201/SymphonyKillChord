@@ -8,14 +8,20 @@
     top: 4%;
     scale: 1 1;
     color: rgb(255, 255, 255);
+    background-color: rgba(0, 0, 0, 0);
+    --unity-focus-outline-color: rgba(0, 0, 0, 0);
     transition-property: scale, color;
     transition-duration: 0.1s;
     transition-timing-function: ease-out-circ;
 }
 .button:hover,
 .button:focus {
-    scale: 1.2 1.2;
-    color: rgb(140, 140, 140);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+#OptionButton:hover,
+#OptionButton:focus {
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 .button:active {
