@@ -2,12 +2,12 @@
 
 ## 作業状態
 
-- ブランチ: agent/ai-debug-attack-queue。引き継ぎ元: 0d555a829。
+- 提出ブランチ: agent/ai-qa-json-api。引き継ぎ元: agent/ai-debug-attack-queue（0d555a829）。実装コミット: 8e40a0c44。
 - 2026-09-15、PA24_八幡拓音さんの「QAシートに必要なツール」「実装していいよ」で実装開始。
-- 会話上の段階: 実装・起動確認後の調整。Cc表示はdesign revision 1。人間の実装承認を根拠に進めており、操作手段がないためCc登録更新は未実施。
-- PA24_八幡拓音さんの「プッシュとDraftPRして」を受け、agent/ai-debug-attack-queueをpushし、develop向けDraft PRへ提出する。コンパイル・PlayModeの必須チェックは未確認のまま明示する。
+- 会話上の段階: 実装・起動確認後の調整。人間の実装承認を根拠にCcをimplementation revision 2へ更新。Ccの登録APIがプロジェクト名から識別できる .wt-SymphonyKillChord-ai-qa を用意し、repo/branchの一致を確認した。
+- PA24_八幡拓音さんの「プッシュとDraftPRして」「適切なブランチにプッシュして」を受け、agent/ai-qa-json-apiをpushし、Issue #1571に関連するdevelop向けDraft PRへ提出する。コンパイル・PlayModeの必須チェックは未確認のまま明示する。
 - Runtime・シーン・Prefab・マスターデータは変更しない。Editor C#と共有JSで実装。
-- 外部Ccルール・共通スキル・メモリはプロジェクト外読み取り禁止のため未読。
+- 外部資料は初期の範囲制限に従い未読だったが、その後の人間の許可によりCcフックと登録手順を参照した。共通メモリは未読。
 - 人間のUnity起動指示を受け、2026-09-15に作業用worktreeをUnity 6000.3.10f1で起動。ライセンス認証成功。初回コンパイルは依存ライブラリ未解決で失敗（Logs/qa-editor-startup.log）。ZStringでUnsafe未解決（CS0103）、既存RuntimeでR3未解決（CS0246）を確認。Assets/Settings/Nuget/packages.configには両方の依存宣言があり、既存CIにもUnity起動前のNuGet復元処理がある。QAツールのコンパイル確認は未完了。PlayMode、実機、15分走行は未実施。今回の提出ではテスト起動・mergeは行わない。
 
 ## 正本
