@@ -6,9 +6,9 @@ import CreditCategory from '../components/CreditCategory.astro';
 import credits from '../data/credits.json';
 ---
 
-<Layout title="クレジット | Symphony Kill Chord">
+<Layout title="クレジット | Symphony Kill Chord" description="Symphony Kill Chordの制作スタッフ一覧。">
 	<main>
-		<PageHeader eyebrow="Credit" title="クレジット" scanline />
+		<PageHeader eyebrow="Credit" title="クレジット" />
 
 		<section id="credit-list">
 			{credits.map((entry) => <CreditCategory category={entry.category} roles={entry.roles} />)}
@@ -20,6 +20,7 @@ import credits from '../data/credits.json';
 
 <style>
 	main {
+		width: 100%;
 		max-width: 720px;
 		margin: 0 auto;
 		padding: 0 24px 96px;

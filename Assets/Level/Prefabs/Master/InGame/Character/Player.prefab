@@ -65,7 +65,7 @@ MonoBehaviour:
     - 0
     - 0
   _cueName: 
-  _cueSheet: SpecialAttack
+  _cueSheet: CueSheet_0
 --- !u!114 &1111706688092235554
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -317,11 +317,13 @@ Transform:
   - {fileID: 7627857185048522076}
   - {fileID: 4151217744903068334}
   - {fileID: 666767983156385941}
+  - {fileID: 7180335608518525603}
   - {fileID: 8899522971160751031}
   - {fileID: 6123456789012345679}
   - {fileID: 3995544741731007589}
   - {fileID: 5890332583008626860}
   - {fileID: 583479539431759966}
+  - {fileID: 7337323208231403806}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7750579596343814766
@@ -408,6 +410,8 @@ MonoBehaviour:
   _damageSoundSource: {fileID: 7161724074417242993}
   _dodgeSoundSource: {fileID: 5796462889585123171}
   _criticalSoundSource: {fileID: 878234018223885132}
+  _hitSoundSource: {fileID: 6014471449806279146}
+  _lockOnSoundSource: {fileID: 7605837340855897689}
   _footStepView: {fileID: 6123456789012345682}
   _defaultFootstepCueName: SE_Symphony_Footsteps
   _footstepSoundConfigs:
@@ -525,7 +529,7 @@ MonoBehaviour:
     _id: skill_01
     _hashId: -1127918619
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill01
 --- !u!114 &1160853068716909059
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -542,7 +546,7 @@ MonoBehaviour:
     _id: skill_00
     _hashId: -876453005
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill00
 --- !u!114 &1192430313035069498
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -559,7 +563,7 @@ MonoBehaviour:
     _id: skill_02
     _hashId: 634126943
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill02
 --- !u!114 &7852414029176531134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -576,7 +580,7 @@ MonoBehaviour:
     _id: skill_03
     _hashId: 1389048521
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill03
 --- !u!114 &5506872279101588229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -593,7 +597,7 @@ MonoBehaviour:
     _id: skill_04
     _hashId: -860903574
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill04
 --- !u!114 &1895506614210800555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -610,7 +614,7 @@ MonoBehaviour:
     _id: skill_05
     _hashId: -1146578948
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill05
 --- !u!114 &2419661521554112682
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -627,7 +631,7 @@ MonoBehaviour:
     _id: skill_06
     _hashId: 581027398
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill06
 --- !u!114 &4884703560868394754
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -644,7 +648,7 @@ MonoBehaviour:
     _id: skill_07
     _hashId: 1437005520
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill07
 --- !u!114 &2039467621477309313
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -661,7 +665,7 @@ MonoBehaviour:
     _id: skill_08
     _hashId: -988157119
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill08
 --- !u!114 &799139595838947433
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -678,7 +682,7 @@ MonoBehaviour:
     _id: skill_09
     _hashId: -1306600489
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill09
 --- !u!114 &5876856351586136734
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -695,7 +699,7 @@ MonoBehaviour:
     _id: skill_10
     _hashId: -757509582
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill10
 --- !u!114 &5937867430930119671
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -712,7 +716,7 @@ MonoBehaviour:
     _id: skill_13
     _hashId: 1271923592
   _source: {fileID: 1111706688092235554}
-  _cueName: Slash
+  _cueName: SE_Skill13
 --- !u!1 &4539835359949608689
 GameObject:
   m_ObjectHideFlags: 0
@@ -1058,7 +1062,7 @@ MonoBehaviour:
   _use3dPositioning: 1
   _freezeOrientation: 0
   _loop: 0
-  _volume: 0.2
+  _volume: 0.8
   _pitch: 0
   _androidUseLowLatencyVoicePool: 0
   need_to_player_update_all: 1
@@ -1202,7 +1206,85 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
-  m_Name: 
+  m_Name:
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
+--- !u!1 &3303178349903623666
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7180335608518525603}
+  - component: {fileID: 6863466676134270976}
+  - component: {fileID: 6014471449806279146}
+  m_Layer: 7
+  m_Name: NormalHitSound
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7180335608518525603
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3303178349903623666}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4877291778978284914}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6863466676134270976
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3303178349903623666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 0
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 1
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: SE_Hit_Normal
+  _cueSheet: CueSheet_0
+--- !u!114 &6014471449806279146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3303178349903623666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
+  m_Name:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
 --- !u!1 &7381308627360093480
 GameObject:
@@ -4417,3 +4499,81 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6112019564155077068, guid: f40fc05eb1ec8f54f9ecebfeae2afd44, type: 3}
   m_PrefabInstance: {fileID: 9127949577688352571}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5837899595731698066
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7337323208231403806}
+  - component: {fileID: 8464679488173615702}
+  - component: {fileID: 7605837340855897689}
+  m_Layer: 7
+  m_Name: LockOnSound
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7337323208231403806
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5837899595731698066}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4877291778978284914}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8464679488173615702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5837899595731698066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 0
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 2
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: SE_Lockon
+  _cueSheet: CueSheet_0
+--- !u!114 &7605837340855897689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5837899595731698066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
