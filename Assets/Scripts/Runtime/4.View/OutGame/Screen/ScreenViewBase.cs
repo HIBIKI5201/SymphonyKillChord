@@ -28,6 +28,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RootElement.RegisterCallback<FocusInEvent>(HandleFocusInDebugHandler);
             RootElement.RegisterCallback<FocusOutEvent>(HandleFocusOutDebugHandler);
             RootElement.RegisterCallback<NavigationMoveEvent>(HandleNavigationMoveDebugHandler, TrickleDown.TrickleDown);
+            RootElement.RegisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary> この画面内で現在フォーカスされている要素を取得します。 </summary>
@@ -131,6 +132,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RootElement.UnregisterCallback<FocusInEvent>(HandleFocusInDebugHandler);
             RootElement.UnregisterCallback<FocusOutEvent>(HandleFocusOutDebugHandler);
             RootElement.UnregisterCallback<NavigationMoveEvent>(HandleNavigationMoveDebugHandler, TrickleDown.TrickleDown);
+            RootElement.UnregisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -315,6 +317,17 @@ namespace KillChord.Runtime.View.OutGame.Screen
             NavigationDebugLog.Log(
                 $"{GetType().Name} NavigationMove: direction={evt.direction} "
                 + $"target={NavigationDebugLog.Describe(evt.target as VisualElement)}");
+        }
+
+        /// <summary>
+        ///     診断用: 決定操作(NavigationSubmitEvent)の発生をトリクルダウンの時点で記録します。
+        ///     画面固有のハンドラーがイベントを消費する前に、そもそも発生しているかを確認するため。
+        /// </summary>
+        /// <param name="evt"> ナビゲーション決定イベントです。 </param>
+        private void HandleNavigationSubmitDebugHandler(NavigationSubmitEvent evt)
+        {
+            NavigationDebugLog.Log(
+                $"{GetType().Name} NavigationSubmit(trickle): target={NavigationDebugLog.Describe(evt.target as VisualElement)}");
         }
 
         /// <summary>

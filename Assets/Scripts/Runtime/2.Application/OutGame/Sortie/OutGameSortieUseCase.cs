@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
 
         /// <summary>
         ///    ステージタイプに応じた処理を実行する。
-        ///    バトルステージの場合は戦闘準備画面を表示する。
+        ///    バトルステージの場合は戦闘準備画面を挟まずバトルを開始する。
         ///    シナリオステージの場合はシーン遷移を行う。
         /// </summary>
         /// <param name="stageType"> ステージの種類。 </param>
@@ -44,7 +44,7 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         {
             if (stageType == StageType.Battle)
             {
-                _outputPort.ShowBattlePreparationScreen();
+                _outputPort.StartBattle();
                 return true;
             }
 

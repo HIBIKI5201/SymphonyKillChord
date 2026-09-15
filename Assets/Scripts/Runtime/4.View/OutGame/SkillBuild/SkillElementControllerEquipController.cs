@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.View.OutGame.Navigation;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.SkillBuild
@@ -37,6 +38,9 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             VisualElement root = uiDocument.rootVisualElement
                 ?? throw new ArgumentException("UIDocument のルート要素が見つかりません。", nameof(uiDocument));
             _rootElement = root;
+            _skillLevelUpButton = root.Q<VisualElement>(SKILL_LEVEL_UP_BUTTON_NAME);
+            _skillBuildSaveButton = root.Q<VisualElement>(SKILL_BUILD_SAVE_BUTTON_NAME);
+            _skillScrollView = root.Q<ScrollView>(SKILL_SCROLL_VIEW_NAME);
             List<VisualElement> skillElements =
                 root.Query<VisualElement>(className: DRAGGABLE_CLASS_NAME).ToList();
             List<VisualElement> slots =
@@ -69,8 +73,10 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
-            // スキル一覧は再構築されるため、破棄済みの要素を溜め込まないよう先に取り除く。
-            RemoveDetachedSkillElements();
+            // 生成直後はまだ ScrollView へ未接続(.panel == null)のことがあるため、
+            // ここでは破棄済み要素の掃除を行わない。掃除は一覧再構築が完了した後
+            // (RestoreFocusIfLost 経由)にまとめて行う。詳しくは RemoveDetachedSkillElements
+            // のコメントを参照。
 
             element.MakeNavigable();
             element.RegisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
@@ -80,7 +86,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     一覧の再構築でフォーカスが失われていた場合、選択中スキルへ再フォーカスする。
+        ///     一覧の再構築が完了した後に、破棄済み要素の掃除とフォーカス復元を行う。
         ///     <para>
         ///         スキル一覧はスロット変更のたびにカード要素ごと作り直されるため、
         ///         再構築前にカードへフォーカスしていた場合はフォーカス先が破棄されて
@@ -90,6 +96,14 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         public void RestoreFocusIfLost()
         {
+            // 一覧の再構築(カードをまとめてグループ枠へ追加した後、最後にその枠を
+            // まとめて ScrollView へ Add する作り)がここまでに完了しているため、
+            // 前回分の破棄済み要素は確実に .panel == null になっている。
+            // SetupSkillElement 実行中(まだグループ枠が未接続の段階)に掃除すると、
+            // 破棄されていない直前の兄弟カードまで誤って「破棄済み」と判定し、
+            // 登録直後のイベントハンドラーを剥がしてしまうため、ここでのみ行う。
+            RemoveDetachedSkillElements();
+
             VisualElement focusedElement =
                 _rootElement.panel?.focusController?.focusedElement as VisualElement;
             if (focusedElement != null && focusedElement.panel != null)
@@ -116,6 +130,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         public void ClearCarry()
         {
             CarriedSkillId = null;
+            _pendingConfirmSkillElement = null;
             for (int i = 0; i < _skillElements.Count; i++)
             {
                 _skillElements[i].RemoveFromClassList(CARRIED_CLASS_NAME);
@@ -154,13 +169,21 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string DRAGGABLE_CLASS_NAME = "draggable";
         private const string SKILL_ELEMENT_SLOT_CLASS_NAME = "skill-element-slot";
         private const string CARRIED_CLASS_NAME = "is-carried";
+        private const string SKILL_LEVEL_UP_BUTTON_NAME = "SkillLevelUpButton";
+        private const string SKILL_BUILD_SAVE_BUTTON_NAME = "SkillBuildSaveButton";
+        private const string SKILL_SCROLL_VIEW_NAME = "SkillScrollView";
         private const int EMPTY_SKILL_ID = -1;
 
         private readonly VisualElement _rootElement;
+        private readonly VisualElement _skillLevelUpButton;
+        private readonly VisualElement _skillBuildSaveButton;
+        private readonly ScrollView _skillScrollView;
         private readonly ISkillBuildViewModel _skillBuildViewModel;
         private readonly IUISoundEffectCommand _soundEffectCommand;
         private readonly List<VisualElement> _skillElements = new List<VisualElement>();
         private readonly List<VisualElement> _slots = new List<VisualElement>();
+        /// <summary> 1回目の決定で「選択確定」のみ行ったスキル要素。2回目の決定で持ち上げに移る。 </summary>
+        private VisualElement _pendingConfirmSkillElement;
 
         /// <summary>
         ///     コントローラーのフォーカス対象を詳細表示へ反映する。
@@ -168,16 +191,35 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="evt"> フォーカスイベント。 </param>
         private void HandleSkillElementFocusInHandler(FocusInEvent evt)
         {
-            if (!CarriedSkillId.HasValue &&
-                evt.currentTarget is VisualElement element &&
-                element.userData is int skillId)
+            if (evt.currentTarget is not VisualElement focusedElement)
+            {
+                return;
+            }
+
+            if (!ReferenceEquals(_pendingConfirmSkillElement, focusedElement))
+            {
+                // 別要素へフォーカスが移った時点で、1回目の決定による選択確定状態を解除する。
+                _pendingConfirmSkillElement = null;
+            }
+
+            // 一覧の左右移動は自前で解決しており(HandleSkillElementNavigationMoveHandler)、
+            // Unity標準のフォーカス追従スクロールも一緒に無効化されているため、
+            // フォーカスが移るあらゆる経路(左右移動、一覧再構築後の復帰など)をここ1箇所でカバーする。
+            EnsureSkillElementVisible(focusedElement);
+
+            if (!CarriedSkillId.HasValue && focusedElement.userData is int skillId)
             {
                 _skillBuildViewModel.SelectSkill(skillId);
             }
         }
 
         /// <summary>
-        ///     スキル一覧要素の決定操作を持ち上げ状態へ変換する。
+        ///     スキル一覧要素の決定操作を処理する。
+        ///     <para>
+        ///         1回目の決定では選択を確定して詳細表示するだけに留め、
+        ///         同じ要素へもう一度決定操作を行った時に初めて持ち上げ状態へ移る。
+        ///         誤って一覧を見ているだけで持ち上げが始まらないようにするため。
+        ///     </para>
         /// </summary>
         /// <param name="evt"> ナビゲーション決定イベント。 </param>
         private void HandleSkillElementSubmitHandler(NavigationSubmitEvent evt)
@@ -196,6 +238,17 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
+            if (!CarriedSkillId.HasValue && !ReferenceEquals(_pendingConfirmSkillElement, element))
+            {
+                // 1回目の決定: 選択を確定するだけで、まだ持ち上げない。
+                _pendingConfirmSkillElement = element;
+                _skillBuildViewModel.SelectSkill(skillId);
+                evt.StopPropagation();
+                return;
+            }
+
+            // 2回目の決定: ここで初めて持ち上げ状態へ移る。
+            _pendingConfirmSkillElement = null;
             BeginCarry(skillId, element);
 
             (sourceSlot ?? FindSlotToFocus())?.FocusDeferred();
@@ -219,6 +272,15 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
+            // スキル一覧のどのスキルから下入力しても、編成保存ボタンへ移動する。
+            if (evt.direction == NavigationMoveEvent.Direction.Down &&
+                TryFocus(_skillBuildSaveButton))
+            {
+                evt.StopPropagation();
+                element.panel?.focusController?.IgnoreEvent(evt);
+                return;
+            }
+
             int step = evt.direction switch
             {
                 NavigationMoveEvent.Direction.Left => -1,
@@ -238,6 +300,15 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             if (next == null)
             {
+                // 一覧の最左端で左入力した場合、強化ボタンへ移動する。
+                // ボタンがレベルMax等で無効化されている場合はフォーカスできないため、
+                // その場合はイベントを消費せず標準ナビゲーションに委ねる。
+                if (step == -1 && TryFocus(_skillLevelUpButton))
+                {
+                    evt.StopPropagation();
+                    element.panel?.focusController?.IgnoreEvent(evt);
+                }
+
                 return;
             }
 
@@ -315,6 +386,106 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
+        ///     指定したスキル要素がスクロール表示範囲外にある場合、見える位置まで
+        ///     最小限だけスクロール位置を補正する。
+        ///     <para>
+        ///         <see cref="HandleSkillElementNavigationMoveHandler"/> がUnity標準のフォーカス移動処理
+        ///         (これに伴う既定の追従スクロールも含む)を横取りして自前解決しているため、
+        ///         左右移動で選択が画面外に出ても何もしなければ一切追従しない。ここで明示的に補正する。
+        ///     </para>
+        ///     <para>
+        ///         フォーカス直後はまだ「フォーカス枠のボーダー付与」によるレイアウト更新が
+        ///         反映されておらず、その場で worldBound を読むと1手前の位置を参照してしまい、
+        ///         カード1つ分スクロールが足りずにはみ出る。<see cref="UINavigationExtensions.FocusDeferred"/>
+        ///         と同じ理由のため、次のレイアウト確定後まで補正を遅延させる。
+        ///     </para>
+        /// </summary>
+        /// <param name="element"> 可視範囲に収めたい要素。 </param>
+        private void EnsureSkillElementVisible(VisualElement element)
+        {
+            if (element == null || element.panel == null)
+            {
+                return;
+            }
+
+            element.schedule.Execute(() => ApplyEnsureSkillElementVisible(element));
+        }
+
+        /// <summary>
+        ///     <see cref="EnsureSkillElementVisible"/> の実処理。レイアウト確定後に呼ばれる想定。
+        /// </summary>
+        /// <param name="element"> 可視範囲に収めたい要素。 </param>
+        private void ApplyEnsureSkillElementVisible(VisualElement element)
+        {
+            if (_skillScrollView == null || element.panel == null)
+            {
+                return;
+            }
+
+            Rect elementBounds = element.worldBound;
+            Rect viewportBounds = _skillScrollView.contentViewport.worldBound;
+            if (!IsValidRect(elementBounds) || !IsValidRect(viewportBounds))
+            {
+                return;
+            }
+
+            float scrollOffsetX = _skillScrollView.scrollOffset.x;
+            if (elementBounds.xMin < viewportBounds.xMin)
+            {
+                scrollOffsetX -= viewportBounds.xMin - elementBounds.xMin;
+            }
+            else if (elementBounds.xMax > viewportBounds.xMax)
+            {
+                scrollOffsetX += elementBounds.xMax - viewportBounds.xMax;
+            }
+            else
+            {
+                // 既に表示範囲内に収まっている場合は何もしない。
+                return;
+            }
+
+            _skillScrollView.scrollOffset = new Vector2(
+                ClampScrollOffsetX(scrollOffsetX), _skillScrollView.scrollOffset.y);
+        }
+
+        /// <summary>
+        ///     X方向のスクロールオフセットを現在のスクロール範囲へクランプする。
+        /// </summary>
+        /// <param name="rawScrollOffsetX"> クランプ前のスクロールオフセットX。 </param>
+        /// <returns> クランプ後のスクロールオフセットX。範囲が取得できない場合は入力値をそのまま返す。 </returns>
+        private float ClampScrollOffsetX(float rawScrollOffsetX)
+        {
+            float lowValue = _skillScrollView.horizontalScroller.lowValue;
+            float highValue = _skillScrollView.horizontalScroller.highValue;
+            if (!IsFinite(lowValue) || !IsFinite(highValue))
+            {
+                return rawScrollOffsetX;
+            }
+
+            return Mathf.Clamp(rawScrollOffsetX, lowValue, highValue);
+        }
+
+        /// <summary>
+        ///     レイアウト矩形が座標計算に使用可能か判定する。
+        /// </summary>
+        /// <param name="rect"> 判定する矩形。 </param>
+        /// <returns> すべての値が有限の場合は true。 </returns>
+        private static bool IsValidRect(Rect rect)
+        {
+            return IsFinite(rect.x) && IsFinite(rect.y) && IsFinite(rect.width) && IsFinite(rect.height);
+        }
+
+        /// <summary>
+        ///     値が有限(NaN・無限大でない)か判定する。
+        /// </summary>
+        /// <param name="value"> 判定する値。 </param>
+        /// <returns> 有限の場合は true。 </returns>
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
+
+        /// <summary>
         ///     パネルから外れた(破棄された)スキル要素を管理対象から取り除く。
         /// </summary>
         private void RemoveDetachedSkillElements()
@@ -324,6 +495,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 if (_skillElements[i].panel != null)
                 {
                     continue;
+                }
+
+                if (ReferenceEquals(_pendingConfirmSkillElement, _skillElements[i]))
+                {
+                    _pendingConfirmSkillElement = null;
                 }
 
                 _skillElements[i].UnregisterCallback<FocusInEvent>(HandleSkillElementFocusInHandler);
@@ -386,6 +562,30 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             ClearCarry();
             slot.FocusDeferred();
+        }
+
+        /// <summary>
+        ///     要素がフォーカス可能な状態の場合のみフォーカスする。
+        ///     <para>
+        ///         レベルMax等でボタンが無効化されている場合、.Focus() は何もせず
+        ///         静かに失敗する。それに気づかずイベントを消費してしまうと、
+        ///         入力だけ飲み込んで何も起きない状態になるため、事前に判定する。
+        ///     </para>
+        /// </summary>
+        /// <param name="target"> フォーカスさせたい要素。 </param>
+        /// <returns> 実際にフォーカスした場合は true。 </returns>
+        private static bool TryFocus(VisualElement target)
+        {
+            if (target == null ||
+                !target.focusable ||
+                !target.enabledInHierarchy ||
+                target.resolvedStyle.display == DisplayStyle.None)
+            {
+                return false;
+            }
+
+            target.Focus();
+            return true;
         }
 
         /// <summary>

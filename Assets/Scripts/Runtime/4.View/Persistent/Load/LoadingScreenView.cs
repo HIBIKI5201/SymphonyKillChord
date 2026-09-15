@@ -222,6 +222,7 @@ namespace KillChord.Runtime.View.Persistent.Load
         /// </summary>
         private void StartLoadingTextAnimation()
         {
+            StopLoadingTextAnimation();
             PlayLoadingTextWave();
         }
 

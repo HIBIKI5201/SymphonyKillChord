@@ -138,6 +138,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 text.EffectDescription,
                 skillTemplate.Tips,
                 level,
+                skillTemplate.MaxLevel,
                 isUnlocked,
                 ResolveGenreIcon(skillTemplate),
                 ResolveGenreIds(skillTemplate),
