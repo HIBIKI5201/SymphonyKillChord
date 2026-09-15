@@ -8,24 +8,32 @@ namespace KillChord.Runtime.Domain.InGame.Mission
     /// </summary>
     public readonly struct MissionDialogueLine
     {
-        public MissionDialogueLine(string text, Sprite portrait, string voiceCueName, float silentDuration)
+        public MissionDialogueLine(
+            string textEntryKey,
+            string fallbackText,
+            Sprite portrait,
+            string voiceCueName,
+            float silentDuration)
         {
-            if (string.IsNullOrWhiteSpace(text))
+            if (string.IsNullOrWhiteSpace(textEntryKey) && string.IsNullOrWhiteSpace(fallbackText))
             {
-                throw new ArgumentException("会話テキストが未設定です。", nameof(text));
+                throw new ArgumentException("会話テキストとローカライズキーが未設定です。", nameof(fallbackText));
             }
             if (float.IsNaN(silentDuration) || float.IsInfinity(silentDuration) || silentDuration <= 0f)
             {
                 throw new ArgumentOutOfRangeException(nameof(silentDuration));
             }
-            Text = text;
+            TextEntryKey = textEntryKey ?? string.Empty;
+            FallbackText = fallbackText ?? string.Empty;
             Portrait = portrait;
             VoiceCueName = voiceCueName ?? string.Empty;
             SilentDuration = silentDuration;
         }
 
-        /// <summary> 会話テキスト </summary>
-        public string Text { get; }
+        /// <summary> 会話テキストのローカライズキー </summary>
+        public string TextEntryKey { get; }
+        /// <summary> 翻訳未登録時に表示する会話テキスト </summary>
+        public string FallbackText { get; }
         /// <summary> キャラクターアイコン </summary>
         public Sprite Portrait { get; }
         /// <summary> 音声のCue名 </summary>

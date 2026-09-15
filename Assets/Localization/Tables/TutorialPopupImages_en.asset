@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97269afb30aa84742ae3f3342603618a, type: 3}
+  m_Name: TutorialPopupImages_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.AssetTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 4ad8639f3f6dd77489724fd4c71749da, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 8365649920
+    m_Localized: 'dfd7b239bd39c684f9a7c4fea7f8379c[Attack]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8508256256
+    m_Localized: '82159a30925987c428ca1a75ae80cf98[Blue]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8575365120
+    m_Localized: '60a0aaccc0943174eb9f46a9ff645ad9[Green]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8621502464
+    m_Localized: '5b772e762909ca649a705f94d902d060[JustAttack]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8684417024
+    m_Localized: '97a20494e2cd01a469e17266526c4314[KillChord]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8730554368
+    m_Localized: '2d5cf0ea45a2db24a850c3de3a481ce6[Move]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8797663232
+    m_Localized: 'ea767d3cd5ed02242b5813dd479d7a50[Orenge]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8856383488
+    m_Localized: '522fef8c8baffbb4ab62427d6efe15c6[Purple]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8889937920
+    m_Localized: '033637c9ef4ae3f4581a5eea654644cb[Water]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8936075264
+    m_Localized: 'bfb93d915bd6d0d4aa2f29800a24b041[Yellow]'
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

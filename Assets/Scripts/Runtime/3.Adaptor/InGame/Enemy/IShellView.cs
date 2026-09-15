@@ -14,5 +14,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         /// <returns></returns>
         public bool FindDamageTarget();
+        /// <summary>
+        ///     着弾予告デカールの変化開始タイミングで再生するSEを鳴らす。
+        /// </summary>
+        public void PlayAreaWarning();
+        /// <summary>
+        ///     着弾予告SE（２段階目）を鳴らす。
+        /// </summary>
+        public void PlayAreaWarningSecond();
     }
 }

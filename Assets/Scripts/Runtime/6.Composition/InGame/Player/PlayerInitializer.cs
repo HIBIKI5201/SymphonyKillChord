@@ -384,6 +384,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 inputView,
                 healthHudPresenter,
                 _damageEffectView,
+                _playerEntity.Id,
                 inputSuppressionState);
 
             InitializeMobileStickFlickInput(inputView);

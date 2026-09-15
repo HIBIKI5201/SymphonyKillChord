@@ -53,6 +53,7 @@ MonoBehaviour:
   - _addressableKey: EnemyDefinitionRepository
   - _addressableKey: EnemyDirectionIndicatorConfig
   - _addressableKey: UISoundEffectConfig
+  - _addressableKey: GamepadHapticsConfig
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset

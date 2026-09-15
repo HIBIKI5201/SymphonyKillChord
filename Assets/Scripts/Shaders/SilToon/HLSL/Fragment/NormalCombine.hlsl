@@ -3,20 +3,20 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-float3 GetNormalCombine(
+half3 GetNormalCombine(
     TEXTURE2D_PARAM( normalMap, samplerNormalMap),
     float2 uv,
-    float3 normalWS,
-    float3 tangentWS,
-    float3 bitangentWS,
-    float strength)
+    half3 normalWS,
+    half3 tangentWS,
+    half3 bitangentWS,
+    half strength)
 {
-    float4 normalSample = SAMPLE_TEXTURE2D(normalMap, samplerNormalMap, uv);
-    float3 normalTS = UnpackNormal(normalSample);
+    half4 normalSample = SAMPLE_TEXTURE2D(normalMap, samplerNormalMap, uv);
+    half3 normalTS = UnpackNormal(normalSample);
 
     normalTS.xy *= strength;
 
-    float3x3 TBN = float3x3(tangentWS, bitangentWS, normalWS);
+    half3x3 TBN = half3x3(tangentWS, bitangentWS, normalWS);
     return  strength <= 0 ? normalWS : normalize(mul(normalTS, TBN));
 }
 #endif

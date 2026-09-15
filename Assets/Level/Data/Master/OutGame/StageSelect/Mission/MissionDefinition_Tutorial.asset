@@ -370,7 +370,8 @@ MonoBehaviour:
       data:
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
-        - _text: "\u6B21\u306B\u3001\u79FB\u52D5\u3068\u56DE\u907F\u306B\u3064\u3044\u3066\u3060\u3002\u6226\u5834\u306E\u79FB\u52D5\u3084\u6575\u306E\u653B\u6483\u306E\u56DE\u907F\u306B\u4F7F\u3046\u304B\u3089\u3001\u3088\u304F\u899A\u3048\u3066\u304A\u3044\u3066\u304F\u308C\u3002"
+        - _textEntryKey: triad.tutorial.06
+          _text: "\u307E\u305A\u79FB\u52D5\u3068\u56DE\u907F\u306B\u3064\u3044\u3066\u3060\u3002\u6226\u5834\u306E\u79FB\u52D5\u3084\u6575\u306E\u653B\u6483\u306E\u56DE\u907F\u306B\u4F7F\u3046\u304B\u3089\u899A\u3048\u3066\u3044\u3066\u304F\u308C\u3002"
           _portrait: {fileID: 21300014, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
           _voiceCueName: VOICE_Triad_Tutorial6
           _silentDuration: 3
@@ -379,7 +380,8 @@ MonoBehaviour:
       data:
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
-        - _text: "\u6B21\u306B\u3001\u304A\u524D\u304C\u884C\u3046\u653B\u6483\u306B\u3064\u3044\u3066\u3060\u3002\u653B\u6483\u306B\u3088\u3063\u3066\u7279\u5FB4\u304C\u7570\u306A\u308B\u304B\u3089\u3001\u3057\u3063\u304B\u308A\u628A\u63E1\u3057\u3066\u304A\u3044\u3066\u304F\u308C\u3002"
+        - _textEntryKey: triad.tutorial.07
+          _text: "\u6B21\u306B\u3001\u304A\u524D\u304C\u884C\u3046\u653B\u6483\u306B\u3064\u3044\u3066\u3060\u3002\u653B\u6483\u306B\u3088\u3063\u3066\u7279\u5FB4\u304C\u7570\u306A\u308B\u304B\u3089\u3057\u3063\u304B\u308A\u628A\u63E1\u3057\u3066\u304A\u3044\u3066\u304F\u308C\u3002"
           _portrait: {fileID: 21300014, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
           _voiceCueName: VOICE_Triad_Tutorial7
           _silentDuration: 0.1
@@ -388,7 +390,8 @@ MonoBehaviour:
       data:
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
-        - _text: "\u3055\u3066\u3001\u5B9F\u6226\u3060\u3002\u6559\u3048\u305F\u3053\u3068\u3092\u5B58\u5206\u306B\u6D3B\u7528\u3057\u3066\u66B4\u308C\u308B\u3093\u3060\u3002"
+        - _textEntryKey: triad.tutorial.09
+          _text: "\u3055\u3066\u5B9F\u8DF5\u3060\u3002\u6559\u3048\u305F\u3053\u3068\u3092\u5B58\u5206\u306B\u6D3B\u7528\u3057\u3066\u66B4\u308C\u308B\u3093\u3060"
           _portrait: {fileID: 21300014, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
           _voiceCueName: VOICE_Triad_Tutorial9
           _silentDuration: 0.1
