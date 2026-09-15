@@ -43,11 +43,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         ///     スキル発動を試す。
         /// </summary>
         /// <param name="beatType"> 現在ビートです。 </param>
-        /// <param name="now"> 現在時刻です。 </param>
+        /// <param name="now"> クールダウンやUI表示に使う、ゲーム側の現在時刻です。 </param>
+        /// <param name="musicTime"> リズム入力履歴に記録する、音楽の再生時間です。 </param>
         /// <param name="battleActionType"> 行動種別です。 </param>
         /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうか。 </param>
         /// <returns> 実行結果です。 </returns>
-        public SkillExecutionResult TryExecuteSkill(BeatType beatType, float now, BattleActionType battleActionType, bool isJustHit)
+        public SkillExecutionResult TryExecuteSkill(BeatType beatType, float now, float musicTime, BattleActionType battleActionType, bool isJustHit)
         {
             if (!_skillCooldownState.IsSkillReady(now))
             {
@@ -55,7 +56,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 return new SkillExecutionResult(SkillExecutionResultType.CooldownBlocked);
             }
 
-            _skillRhythmState.Enqueue(beatType, now, battleActionType);
+            _skillRhythmState.Enqueue(beatType, musicTime, battleActionType);
             ReadOnlySpan<BeatType> inputHistory = _skillRhythmState.GetHistoryBeatType();
             bool isInputMatch = _skillCheckService.CheckInput(_skillDefinition, inputHistory);
 
