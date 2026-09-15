@@ -37,7 +37,8 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
             if (_uiDocument == null
                 || !ServiceLocator.TryGetInstance(out AudioSettingsModuleContainer audioSettingsContainer)
                 || !ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
-                || !ServiceLocator.TryGetInstance(out _outGameUIEvent))
+                || !ServiceLocator.TryGetInstance(out _outGameUIEvent)
+                || !ServiceLocator.TryGetInstance(out _settingScreenView))
             {
                 Debug.LogError(
                     $"[{nameof(SettingComposition)}] 設定画面の構築に必要な参照を取得できませんでした。",
@@ -82,6 +83,8 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
             }
 
             _outGameUIEvent.OnShownSettingScreen += _settingMenuView.ShowMenu;
+            _settingScreenView.TryNavigateBack = _settingMenuView.TryGoBack;
+            _settingMenuView.OnCancelEnvironmentChanges = _environmentSettingsView.CancelPendingChanges;
             return true;
         }
 
@@ -95,18 +98,30 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
                 _outGameUIEvent.OnShownSettingScreen -= _settingMenuView.ShowMenu;
             }
 
+            if (_settingScreenView != null)
+            {
+                _settingScreenView.TryNavigateBack = null;
+            }
+
+            if (_settingMenuView != null)
+            {
+                _settingMenuView.OnCancelEnvironmentChanges = null;
+            }
+
             _environmentSettingsView?.Dispose();
             _audioSettingsView?.Dispose();
             _settingMenuView?.Dispose();
             _environmentSettingsView = null;
             _audioSettingsView = null;
             _settingMenuView = null;
+            _settingScreenView = null;
             _outGameUIEvent = null;
         }
 
         private const string SETTING_ROOT_NAME = "SettingContainer";
 
         private SettingMenuView _settingMenuView;
+        private SettingScreenView _settingScreenView;
         private OutGameUIEvent _outGameUIEvent;
     }
 }

@@ -9508,6 +9508,7 @@ GameObject:
   - component: {fileID: 510963399}
   - component: {fileID: 510963400}
   - component: {fileID: 510963401}
+  - component: {fileID: 510963402}
   m_Layer: 0
   m_Name: ScreenInitializer
   m_TagString: Untagged
@@ -9646,6 +9647,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93a35d4deb0110142a1d759b7e9fabc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Tutorial.OutGameTutorialInitializer
+--- !u!114 &510963402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 510963393}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5801d2f0ae4e23349b658f4c0228fd8f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.HomeCharacterPreviewInitializer
+  _characterPrefab: {fileID: 919132149155446097, guid: 879c42b54e13edd41a4202d1365d28a7, type: 3}
+  _playIdlePose: 0
+  _idleController: {fileID: 9100000, guid: e7717b306d9972741a4b0ef6a25ae3b8, type: 2}
+  _spawnPosition: {x: 500, y: 0, z: 500}
+  _spawnEulerAngles: {x: 0, y: 0, z: 0}
+  _cameraLocalPosition: {x: 0, y: 1.1, z: 2.2}
+  _cameraLocalEulerAngles: {x: 0, y: 180, z: 0}
+  _fieldOfView: 30
+  _renderTextureWidth: 1024
+  _renderTextureHeight: 2048
 --- !u!43 &522259195
 Mesh:
   m_ObjectHideFlags: 0
@@ -10242,6 +10265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d37b2a4157264d0cb43757df98f3f208, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.OutGameSceneInitializer
+  _titleSceneName: Title
 --- !u!4 &1480631847
 Transform:
   m_ObjectHideFlags: 0

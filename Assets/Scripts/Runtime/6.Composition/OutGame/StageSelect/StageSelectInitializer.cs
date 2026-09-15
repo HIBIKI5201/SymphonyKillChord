@@ -499,7 +499,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     選択中のノードと、その詳細を表示しているウィンドウ以外がクリックされたときに選択を解除する。
+        ///     ステージ詳細ウィンドウ表示中、ウィンドウ外へのポインター入力を無効化する。
+        ///     B(キャンセル)操作以外でウィンドウを閉じたり、外側の要素を操作したりできないようにする。
         /// </summary>
         /// <param name="evt"> ポインタ押下イベント。 </param>
         private void HandleRootPointerDown(PointerDownEvent evt)
@@ -509,24 +510,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             if (evt.target is not VisualElement target) { return; }
 
             if (_detailScreenRoot != null && _detailScreenRoot.Contains(target)) { return; }
-            if (IsStageNodeElement(target)) { return; }
 
-            _outGameUIEvent.OnStageDetailClosed?.Invoke();
-        }
-
-        /// <summary>
-        ///     指定要素がステージノード要素(またはその子孫)かどうかを判定する。
-        /// </summary>
-        /// <param name="element"> 判定対象の要素。 </param>
-        /// <returns> ステージノード要素の内側であればtrue。 </returns>
-        private static bool IsStageNodeElement(VisualElement element)
-        {
-            for (VisualElement current = element; current != null; current = current.parent)
-            {
-                if (current.ClassListContains(NODE_USS_CLASS)) { return true; }
-            }
-
-            return false;
+            evt.StopPropagation();
         }
 
         /// <summary>

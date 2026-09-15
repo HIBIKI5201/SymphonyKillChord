@@ -260,9 +260,12 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
         /// <summary>
         ///     パネルを画面右外からスライドインさせつつ表示します。
+        ///     表示中はB(キャンセル)を押すまでパネル外へフォーカスが移動しないよう封じ込めます。
         /// </summary>
         public override ValueTask Show(CancellationToken cancellationToken = default)
         {
+            _navigationScope.Activate(RootElement);
+
             _slideMotionHandle.TryComplete();
             SetPanelTranslateX(SLIDE_OFFSET_X);
 
@@ -274,10 +277,12 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     パネルを画面右外へスライドアウトさせつつ非表示にします。
+        ///     パネルを画面右外へスライドアウトさせつつ非表示にし、フォーカスの封じ込めを解除します。
         /// </summary>
         public override ValueTask Hide(CancellationToken cancellationToken = default)
         {
+            _navigationScope.Deactivate();
+
             _slideMotionHandle.TryComplete();
 
             _slideMotionHandle = LMotion.Create(0f, SLIDE_OFFSET_X, SLIDE_DURATION)
@@ -285,6 +290,15 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 .Bind(this, static (x, state) => state.SetPanelTranslateX(x));
 
             return base.Hide(cancellationToken);
+        }
+
+        /// <summary>
+        ///     パネルをフェードなしで即座に非表示にし、フォーカスの封じ込めを解除します。
+        /// </summary>
+        public override void HideImmediately()
+        {
+            _navigationScope.Deactivate();
+            base.HideImmediately();
         }
 
         /// <summary>
@@ -307,6 +321,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             _sortieButtonActivation = _sortieButton.RegisterActivation(HandleSortieButtonActivationHandler);
             _skillBuildShortcutButtonActivation =
                 _skillBuildShortcutButton.RegisterActivation(HandleSkillBuildShortcutButtonActivationHandler);
+            // BackButtonが無いため、パネル自体をキャンセル対象(CancelTargetElement)として扱う。
+            _cancelActivation = RootElement.RegisterActivation(HandleCancelActivationHandler);
         }
 
         /// <summary>
@@ -316,6 +332,15 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         {
             _sortieButtonActivation?.Dispose();
             _skillBuildShortcutButtonActivation?.Dispose();
+            _cancelActivation?.Dispose();
+        }
+
+        /// <summary>
+        ///     コントローラー/キーボードのキャンセル操作でパネルを閉じます。
+        /// </summary>
+        private void HandleCancelActivationHandler()
+        {
+            OutGameUIEvent.OnStageDetailClosed?.Invoke();
         }
 
         /// <summary>
@@ -393,6 +418,13 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// <remarks> ノードを選択して詳細が開いたら、そのまま出撃できるようにする。 </remarks>
         protected override VisualElement InitialFocusElement => _sortieButton;
 
+        /// <inheritdoc />
+        /// <remarks>
+        ///     BackButtonが無いため、パネル自体(RootElement)をキャンセル対象にし、
+        ///     コントローラー/キーボードのキャンセル操作でも閉じられるようにする。
+        /// </remarks>
+        protected override VisualElement CancelTargetElement => RootElement;
+
         private readonly Button _sortieButton;
         private readonly Button _skillBuildShortcutButton;
         private readonly VisualElement _equippedSkillRow;
@@ -403,5 +435,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private MotionHandle _slideMotionHandle;
         private IDisposable _sortieButtonActivation;
         private IDisposable _skillBuildShortcutButtonActivation;
+        private IDisposable _cancelActivation;
+        /// <summary> ウィンドウ表示中、フォーカスをウィンドウ内へ閉じ込めます。 </summary>
+        private readonly ModalNavigationScope _navigationScope = new();
     }
 }

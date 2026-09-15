@@ -385,12 +385,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
             if (!skill.HasValue)
             {
                 _skillDetailView.Clear();
+                _skillLevelUpButton.SetEnabled(_skillDetailView.CanLevelUp);
                 return;
             }
 
             SkillViewData data = skill.Value;
             _skillDetailView.Apply(in data);
             _skillDetailView.SetOwnedPoints(_currentOwnedPoints);
+            _skillLevelUpButton.SetEnabled(_skillDetailView.CanLevelUp);
         }
 
         /// <summary>
@@ -402,6 +404,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _currentOwnedPoints = ownedPoints;
             _ownedPointsLabel.text = ownedPoints.ToString();
             _skillDetailView.SetOwnedPoints(_currentOwnedPoints);
+            _skillLevelUpButton.SetEnabled(_skillDetailView.CanLevelUp);
         }
 
         /// <summary>
