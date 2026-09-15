@@ -7,9 +7,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public readonly ref struct MissionDialogueDTO
     {
-        public MissionDialogueDTO(string text, Sprite portrait, bool isVisible, bool isPaused, int version, bool isImmediate)
+        public MissionDialogueDTO(
+            string textEntryKey,
+            string fallbackText,
+            Sprite portrait,
+            bool isVisible,
+            bool isPaused,
+            int version,
+            bool isImmediate)
         {
-            Text = text;
+            TextEntryKey = textEntryKey;
+            FallbackText = fallbackText;
             Portrait = portrait;
             IsVisible = isVisible;
             IsPaused = isPaused;
@@ -17,8 +25,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             IsImmediate = isImmediate;
         }
 
-        /// <summary> 会話テキスト </summary>
-        public string Text { get; }
+        /// <summary> 会話テキストのローカライズキー </summary>
+        public string TextEntryKey { get; }
+        /// <summary> 翻訳未登録時に表示する会話テキスト </summary>
+        public string FallbackText { get; }
         /// <summary> 顔画像 </summary>
         public Sprite Portrait { get; }
         /// <summary> 表示するか </summary>
