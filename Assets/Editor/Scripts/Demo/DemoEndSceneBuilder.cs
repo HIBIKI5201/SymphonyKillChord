@@ -86,6 +86,8 @@ namespace KillChord.Demo.Editor
             "Assets/Arts/Images/Sprites/Title/title_logo.png";
         private const string TITLE_BACKGROUND_PATH =
             "Assets/Arts/Images/Sprites/Title/Title_Background.png";
+        private const string QR_CODE_PATH =
+            "Assets/Arts/Images/Sprites/Demo/KillChored_HomePageQR[0914].png";
         private const string FONT_ASSET_PATH =
             "Assets/Arts/Fonts/KosugiMaru-Regular SDF.asset";
 
@@ -426,11 +428,11 @@ namespace KillChord.Demo.Editor
                 new Vector2(0.72f, 0.20f),
                 new Vector2(0.90f, 0.52f));
 
-            // Spriteは製品版QRコードの差し替え用に未設定のままにする。
             Image image = qrCode.gameObject.AddComponent<Image>();
             image.raycastTarget = false;
             image.preserveAspect = true;
             image.color = Color.white;
+            image.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(QR_CODE_PATH);
 
             CreateText(
                 "QrCaption",
