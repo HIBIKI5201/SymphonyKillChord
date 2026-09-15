@@ -260,67 +260,82 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         /// </summary>
         private async Task RunScenarioAsync(int runGeneration)
         {
+            // 外側ではキャンセルとシーン復帰自体の例外を受け止め、非同期実行を終了する。
             try
             {
-                while (true)
+                // 進行中の例外は内側で記録し、正常完了と同じOutGame復帰処理へ合流させる。
+                try
                 {
-                    if (!CanContinueRun(runGeneration))
+                    while (true)
                     {
-                        return;
-                    }
-
-                    ScenarioStageDefinition completedStageDefinition =
-                        _selectedScenarioState.CurrentStageDefinition;
-                    try
-                    {
-                        _scenarioInputView.RestoreUIForPlayback();
-                        if (!_scenarioView.gameObject.activeSelf)
+                        if (!CanContinueRun(runGeneration))
                         {
-                            _scenarioView.gameObject.SetActive(true);
+                            return;
                         }
-                        _scenarioView.PrepareForPlayback();
-                        await _usecase.PlayScenario(_selectedScenarioState.CurrentScenarioId);
-                    }
-                    finally
-                    {
-                        if (_scenarioView != null) { _scenarioView.EndPlayback(); }
-                    }
 
-                    if (!CanContinueRun(runGeneration))
-                    {
-                        return;
-                    }
+                        ScenarioStageDefinition completedStageDefinition =
+                            _selectedScenarioState.CurrentStageDefinition;
+                        try
+                        {
+                            _scenarioInputView.RestoreUIForPlayback();
+                            if (!_scenarioView.gameObject.activeSelf)
+                            {
+                                _scenarioView.gameObject.SetActive(true);
+                            }
+                            _scenarioView.PrepareForPlayback();
+                            await _usecase.PlayScenario(_selectedScenarioState.CurrentScenarioId);
+                        }
+                        finally
+                        {
+                            if (_scenarioView != null) { _scenarioView.EndPlayback(); }
+                        }
 
-                    await CompleteScenarioStageAsync(completedStageDefinition);
-                    if (!CanContinueRun(runGeneration))
-                    {
-                        return;
-                    }
+                        if (!CanContinueRun(runGeneration))
+                        {
+                            return;
+                        }
 
-                    ScenarioTransitionResult transitionResult = TryExecutePendingNodeTransition();
-                    if (transitionResult == ScenarioTransitionResult.ContinueScenario)
-                    {
-                        continue;
-                    }
+                        await CompleteScenarioStageAsync(completedStageDefinition);
+                        if (!CanContinueRun(runGeneration))
+                        {
+                            return;
+                        }
 
-                    if (transitionResult == ScenarioTransitionResult.ExternalStageStarted)
-                    {
-                        _selectedScenarioState.Clear();
-                        _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
-                        return;
-                    }
+                        ScenarioTransitionResult transitionResult = TryExecutePendingNodeTransition();
+                        if (transitionResult == ScenarioTransitionResult.ContinueScenario)
+                        {
+                            continue;
+                        }
 
-                    break;
+                        if (transitionResult == ScenarioTransitionResult.ExternalStageStarted)
+                        {
+                            _selectedScenarioState.Clear();
+                            _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+                            return;
+                        }
+
+                        break;
+                    }
                 }
-
-                string scenarioSceneName = gameObject.scene.name;
-                SelectedScenarioState selectedScenarioState = _selectedScenarioState;
-                int selectionRevision = selectedScenarioState.SelectionRevision;
+                catch (OperationCanceledException)
+                {
+                    // キャンセル時は復帰処理を開始せず、外側へ渡して終了する。
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception, this);
+                    // 再生・保存の失敗時も、以下の共通復帰処理へ進む。
+                }
 
                 if (!CanContinueRun(runGeneration))
                 {
                     return;
                 }
+
+                string scenarioSceneName = gameObject.scene.name;
+                SelectedScenarioState selectedScenarioState = _selectedScenarioState;
+                int selectionRevision = selectedScenarioState.SelectionRevision;
 
                 bool transitioned = _outGameSortieController != null
                     ? await _outGameSortieController.ReturnFromScenarioAsync(
