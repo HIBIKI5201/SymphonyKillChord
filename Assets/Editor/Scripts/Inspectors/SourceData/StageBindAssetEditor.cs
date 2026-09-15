@@ -37,8 +37,15 @@ namespace KillChord.Editor.Inspectors.SourceData
                 return;
             }
 
-            StageTreeGraphView.Draw(stageTreeAsset, (ScriptableObject)target);
+            StageTreeGraphView.Draw(
+                stageTreeAsset,
+                ref _panOffset,
+                selectedBindAsset: (ScriptableObject)target,
+                focusAsset: (ScriptableObject)target);
         }
+
+        /// <summary> グラフのPanオフセットです。初回描画時に自分自身のEdgeへ自動フォーカスします。 </summary>
+        private Vector2 _panOffset = StageTreeGraphView.UNINITIALIZED_PAN_OFFSET;
 
         private const string STAGE_TREE_ADDRESSABLE_KEY = "StageTreeAsset";
     }

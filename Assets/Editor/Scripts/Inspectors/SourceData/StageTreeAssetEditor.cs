@@ -1,5 +1,6 @@
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using UnityEditor;
+using UnityEngine;
 
 namespace KillChord.Editor.Inspectors.SourceData
 {
@@ -24,7 +25,10 @@ namespace KillChord.Editor.Inspectors.SourceData
             }
 
             EditorGUILayout.Space();
-            StageTreeGraphView.Draw((StageTreeAsset)target);
+            StageTreeGraphView.Draw((StageTreeAsset)target, ref _panOffset);
         }
+
+        /// <summary> グラフのPanオフセットです。ツリー全体表示のため既定は原点(0,0)のままにします。 </summary>
+        private Vector2 _panOffset = StageTreeGraphView.UNINITIALIZED_PAN_OFFSET;
     }
 }
