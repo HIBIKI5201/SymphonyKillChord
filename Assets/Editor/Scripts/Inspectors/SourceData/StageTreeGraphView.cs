@@ -1,3 +1,4 @@
+using KillChord.Editor.SourceDataProvider.Core;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
@@ -11,10 +12,113 @@ namespace KillChord.Editor.Inspectors.SourceData
     internal static class StageTreeGraphView
     {
         /// <summary>
+        ///     指定したStage/Bindアセットを実際に含むStageTreeAssetを、DemoとReleaseの両方から探して解決する。
+        ///     ambientな(EditorPrefsに保存された)variantを無条件に信用すると、Releaseを見ている状態で
+        ///     Demo専用のStage/Bindアセットを開いた場合に、値編集はDemo・下のグラフはReleaseという不整合が
+        ///     起こるため、targetの所属先を明示的に探索する。
+        /// </summary>
+        /// <param name="stageTreeAddressableKey"> StageTreeAssetのAddressableキー。</param>
+        /// <param name="target"> 所属先を調べたいStage/Bindアセット。</param>
+        /// <param name="stageTreeAsset"> 一意に解決できた場合の所属StageTreeAsset。</param>
+        /// <param name="message"> 解決できなかった場合の理由。</param>
+        /// <returns> 所属先を一意に解決できた場合はtrue。</returns>
+        public static bool TryFindContainingStageTree(
+            string stageTreeAddressableKey,
+            ScriptableObject target,
+            out ScriptableObject stageTreeAsset,
+            out string message)
+        {
+            stageTreeAsset = null;
+            if (target == null)
+            {
+                message = "対象アセットがありません。";
+                return false;
+            }
+
+            List<ScriptableObject> containingTrees = new();
+            foreach (GameDataVariant variant in (GameDataVariant[])Enum.GetValues(typeof(GameDataVariant)))
+            {
+                if (!SourceDataProviderRepositoryResolver.TryResolveAsset(
+                        stageTreeAddressableKey,
+                        variant,
+                        out ScriptableObject candidate,
+                        out _,
+                        out _)
+                    || candidate == null
+                    || containingTrees.Contains(candidate))
+                {
+                    continue;
+                }
+
+                if (ContainsAsset(candidate, target))
+                {
+                    containingTrees.Add(candidate);
+                }
+            }
+
+            if (containingTrees.Count == 0)
+            {
+                message = $"対象アセットを含むStageTreeAsset(「{stageTreeAddressableKey}」)が"
+                    + "Demo/Releaseいずれにも見つかりません。";
+                return false;
+            }
+
+            if (containingTrees.Count > 1)
+            {
+                message = "対象アセットを含むStageTreeAssetが複数見つかったため、所属を一意に決定できません。";
+                return false;
+            }
+
+            stageTreeAsset = containingTrees[0];
+            message = null;
+            return true;
+        }
+
+        /// <summary>
+        ///     StageTreeAssetの_stageAssetsまたは_bindAssetsが指定アセットを参照しているか判定する。
+        /// </summary>
+        /// <param name="stageTreeAsset"> 判定対象のStageTreeAsset。</param>
+        /// <param name="target"> 検索するアセット。</param>
+        /// <returns> 含まれている場合はtrue。</returns>
+        private static bool ContainsAsset(ScriptableObject stageTreeAsset, ScriptableObject target)
+        {
+            SerializedObject serializedTree = new(stageTreeAsset);
+            return PropertyContainsReference(serializedTree.FindProperty(STAGE_ASSETS_PROPERTY_NAME), target)
+                || PropertyContainsReference(serializedTree.FindProperty(BIND_ASSETS_PROPERTY_NAME), target);
+        }
+
+        /// <summary>
+        ///     ObjectReference配列が指定アセットを含むか判定する。
+        /// </summary>
+        /// <param name="arrayProperty"> 判定対象の配列プロパティ。</param>
+        /// <param name="target"> 検索するアセット。</param>
+        /// <returns> 含まれている場合はtrue。</returns>
+        private static bool PropertyContainsReference(SerializedProperty arrayProperty, ScriptableObject target)
+        {
+            if (arrayProperty == null || !arrayProperty.isArray)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < arrayProperty.arraySize; i++)
+            {
+                if (arrayProperty.GetArrayElementAtIndex(i).objectReferenceValue == target)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         ///     StageTreeグラフを描画する。
         /// </summary>
         /// <param name="stageTreeAsset"> 描画対象のStageTreeAsset。</param>
-        public static void Draw(ScriptableObject stageTreeAsset)
+        /// <param name="selectedBindAsset">
+        ///     選択中のStageBindAsset。指定した場合、対応するEdgeを強調表示する。
+        /// </param>
+        public static void Draw(ScriptableObject stageTreeAsset, ScriptableObject selectedBindAsset = null)
         {
             EditorGUILayout.LabelField("Stage Tree Graph", EditorStyles.boldLabel);
             if (!TryBuildGraph(
@@ -61,7 +165,7 @@ namespace KillChord.Editor.Inspectors.SourceData
             EditorGUI.DrawRect(graphRect, GRAPH_BACKGROUND_COLOR);
 
             DrawGrid(graphRect);
-            DrawEdges(graphRect, edges);
+            DrawEdges(graphRect, edges, selectedBindAsset);
             DrawNodes(graphRect, nodes);
         }
 
@@ -146,6 +250,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                     From = fromNode,
                     To = toNode,
                     IsAutoAdvance = advanceMode != null && advanceMode.enumValueIndex == AUTO_ADVANCE_ENUM_INDEX,
+                    BindAsset = bindAsset,
                 };
                 edges.Add(edge);
                 fromNode.Outgoing.Add(toNode);
@@ -319,7 +424,8 @@ namespace KillChord.Editor.Inspectors.SourceData
         /// </summary>
         /// <param name="graphRect"> グラフ領域。</param>
         /// <param name="edges"> Edge一覧。</param>
-        private static void DrawEdges(Rect graphRect, List<EdgeInfo> edges)
+        /// <param name="selectedBindAsset"> 選択中のStageBindAsset。強調表示に使用する。</param>
+        private static void DrawEdges(Rect graphRect, List<EdgeInfo> edges, ScriptableObject selectedBindAsset)
         {
             for (int i = 0; i < edges.Count; i++)
             {
@@ -330,7 +436,10 @@ namespace KillChord.Editor.Inspectors.SourceData
                 Vector2 end = graphRect.position + new Vector2(
                     edge.To.Rect.xMin,
                     edge.To.Rect.center.y);
-                Color edgeColor = edge.IsAutoAdvance ? AUTO_EDGE_COLOR : MANUAL_EDGE_COLOR;
+                bool isSelected = selectedBindAsset != null && edge.BindAsset == selectedBindAsset;
+                Color edgeColor = isSelected
+                    ? SELECTED_EDGE_COLOR
+                    : edge.IsAutoAdvance ? AUTO_EDGE_COLOR : MANUAL_EDGE_COLOR;
                 Handles.DrawBezier(
                     start,
                     end,
@@ -338,7 +447,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                     end + Vector2.left * EDGE_TANGENT,
                     edgeColor,
                     null,
-                    EDGE_WIDTH);
+                    isSelected ? EDGE_WIDTH * SELECTED_EDGE_WIDTH_SCALE : EDGE_WIDTH);
 
                 Rect labelRect = new(
                     (start.x + end.x) * 0.5f - EDGE_LABEL_WIDTH * 0.5f,
@@ -393,6 +502,7 @@ namespace KillChord.Editor.Inspectors.SourceData
         private const float GRID_SIZE = 24f;
         private const float EDGE_TANGENT = 54f;
         private const float EDGE_WIDTH = 3f;
+        private const float SELECTED_EDGE_WIDTH_SCALE = 1.6f;
         private const float EDGE_LABEL_WIDTH = 64f;
         private const int AUTO_ADVANCE_ENUM_INDEX = 1;
         private const string STAGE_ASSETS_PROPERTY_NAME = "_stageAssets";
@@ -411,6 +521,7 @@ namespace KillChord.Editor.Inspectors.SourceData
         private static readonly Color SELECTED_NODE_COLOR = new(1f, 0.78f, 0.28f, 1f);
         private static readonly Color AUTO_EDGE_COLOR = new(0.35f, 0.9f, 0.55f, 1f);
         private static readonly Color MANUAL_EDGE_COLOR = new(0.65f, 0.68f, 0.72f, 1f);
+        private static readonly Color SELECTED_EDGE_COLOR = new(1f, 0.78f, 0.28f, 1f);
 
         /// <summary>
         ///     グラフ表示用のステージノード情報。
@@ -435,6 +546,7 @@ namespace KillChord.Editor.Inspectors.SourceData
             public NodeInfo From;
             public NodeInfo To;
             public bool IsAutoAdvance;
+            public ScriptableObject BindAsset;
         }
     }
 }

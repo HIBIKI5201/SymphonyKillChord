@@ -1,3 +1,4 @@
+using KillChord.Editor.ProjectWindow;
 using KillChord.Editor.SourceDataProvider.Core;
 using KillChord.Editor.Utility;
 using KillChord.Runtime.Utility.Identity;
@@ -16,6 +17,36 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
     /// </summary>
     public sealed class PlannerMasterDataWindow : EditorWindow
     {
+        /// <summary>
+        ///     CoreのPropertyDrawer等がWiki型を直接参照せずジャンプできるよう、
+        ///     <see cref="PlannerNavigationHub"/>へ実処理を登録します(Core→Wikiの単方向依存を保つため)。
+        /// </summary>
+        [InitializeOnLoadMethod]
+        private static void RegisterNavigationHub()
+        {
+            PlannerNavigationHub.NavigateToSourceAsset = addressableKey =>
+            {
+                if (!TryGetOrOpenWindow(out PlannerMasterDataWindow window))
+                {
+                    return false;
+                }
+
+                window.NavigateToSourceAsset(addressableKey);
+                return true;
+            };
+
+            PlannerNavigationHub.NavigateToCollectionItem = (collectionKey, dataId) =>
+            {
+                if (!TryGetOrOpenWindow(out PlannerMasterDataWindow window))
+                {
+                    return false;
+                }
+
+                window.NavigateToCollectionItem(collectionKey, dataId);
+                return true;
+            };
+        }
+
         /// <summary>
         ///     ウィンドウを開きます。
         /// </summary>
@@ -111,6 +142,19 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private void DrawToolbar()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            GUILayout.Label("Variant", GUILayout.Width(46f));
+            GameDataVariant currentVariant = GameDataVariantEditorState.SelectedVariant;
+            GameDataVariant nextVariant = (GameDataVariant)EditorGUILayout.EnumPopup(
+                currentVariant,
+                EditorStyles.toolbarPopup,
+                GUILayout.Width(80f));
+            if (nextVariant != currentVariant)
+            {
+                GameDataVariantEditorState.SetSelectedVariant(nextVariant);
+                OnVariantChanged();
+            }
+
+            GUILayout.Space(8f);
             GUILayout.Label("Search", GUILayout.Width(46f));
             GUI.SetNextControlName(SEARCH_FIELD_CONTROL_NAME);
             string nextQuery = EditorGUILayout.TextField(
@@ -119,12 +163,12 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 GUILayout.MinWidth(200f));
             if (nextQuery != _searchQuery)
             {
-                _searchQuery = nextQuery;
+                SetSearchQuery(nextQuery);
             }
 
             if (!string.IsNullOrEmpty(_searchQuery) && GUILayout.Button("×", EditorStyles.toolbarButton, GUILayout.Width(20f)))
             {
-                _searchQuery = string.Empty;
+                SetSearchQuery(string.Empty);
                 GUI.FocusControl(null);
             }
 
@@ -146,6 +190,38 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 SettingsService.OpenProjectSettings("Project/KillChord/Source Data Provider");
             }
             EditorGUILayout.EndHorizontal();
+        }
+
+        /// <summary>
+        ///     検索クエリを更新します。空文字⇔非空文字の切り替え(=OnGUIの描画分岐が変わる変更)を伴う場合は、
+        ///     LayoutイベントとKeyDown/MouseDown等の後続イベントでGUILayoutの構造が食い違わないよう、
+        ///     この場でGUIUtility.ExitGUI()を呼んで現在のイベント処理を打ち切ります。
+        ///     (次のRepaint/Layoutから新しいクエリに基づいた一貫した構造で描画し直されます)
+        /// </summary>
+        /// <param name="nextQuery"> 更新後の検索クエリです。 </param>
+        private void SetSearchQuery(string nextQuery)
+        {
+            bool wasEmpty = string.IsNullOrWhiteSpace(_searchQuery);
+            _searchQuery = nextQuery;
+            bool isEmptyNow = string.IsNullOrWhiteSpace(_searchQuery);
+            if (wasEmpty != isEmptyNow)
+            {
+                Repaint();
+                GUIUtility.ExitGUI();
+            }
+        }
+
+        /// <summary>
+        ///     表示対象のゲームデータ種別(Demo/Release)が切り替わった際、関連キャッシュを破棄し選択状態を補正します。
+        /// </summary>
+        private void OnVariantChanged()
+        {
+            BattleSceneDataReader.ClearCache();
+            SourceDataAssetIndex.Invalidate();
+            _lastIndexedSearchQuery = null;
+            SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+            EnsureSelection();
+            Repaint();
         }
 
         /// <summary>
@@ -395,10 +471,12 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 SourceDataProviderSettings.SourceCollectionMapping mapping = mappings[i];
                 if (GUILayout.Button(BuildCollectionLabel(mapping.CollectionKey), EditorStyles.miniButton))
                 {
-                    _navigationMode = NavigationMode.Collections;
-                    _selectedCollectionKey = mapping.CollectionKey;
-                    _selectedSourceAssetKey = string.Empty;
-                    _selectedCollectionItemIndex = 0;
+                    // 現在のページにこのCollectionKeyが含まれるかを確認せず直接切り替えると、次のOnGUIの
+                    // EnsureSelection()が「現在ページに無いCollection」と判定して無言で別Collectionへ
+                    // 戻してしまう。NavigateToCollectionItemは対応するページへ移動する処理を含むため、
+                    // これを再利用してページ・ナビゲーション状態を一貫させる。
+                    NavigateToCollectionItem(mapping.CollectionKey, null);
+                    GUIUtility.ExitGUI();
                 }
             }
         }
@@ -701,8 +779,57 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return false;
             }
 
-            return SourceDataProviderSettings.instance
-                .GetCollectionMappingsByAddressableKey(addressableKey).Count == 1;
+            IReadOnlyList<SourceDataProviderSettings.SourceCollectionMapping> mappings =
+                SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey);
+            if (mappings.Count != 1)
+            {
+                return false;
+            }
+
+            // 「登録Collectionが1件」だけでは、Player(_attackDifinitionsの1件を持ちつつ体力等の単体設定も
+            // 持つCharacterDefinitionAsset)のような非Repositoryアセットも誤って隠してしまう。
+            // Collection配列自体(とm_Script)以外に実質的なフィールドが無いことも合わせて確認する。
+            if (!SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject sourceAsset))
+            {
+                // 解決できない場合は判定材料が無いため、安全側(Source Assetsタブに表示する)に倒す。
+                return false;
+            }
+
+            return !HasSubstantialFieldsOutsideCollection(sourceAsset, mappings[0].PropertyPath);
+        }
+
+        /// <summary>
+        ///     指定Collectionプロパティ以外に、実質的な(トリビアルでない)トップレベルフィールドを
+        ///     一定数より多く持つか判定します。Repository判定の補助に使用します。
+        /// </summary>
+        /// <param name="sourceAsset"> 判定対象のSourceAssetです。 </param>
+        /// <param name="collectionPropertyPath"> 除外するCollectionプロパティのパスです。 </param>
+        /// <returns> Collection以外に実質的なフィールドが一定数を超えて存在する場合はtrueです。 </returns>
+        private static bool HasSubstantialFieldsOutsideCollection(
+            ScriptableObject sourceAsset,
+            string collectionPropertyPath)
+        {
+            SerializedObject serializedObject = new(sourceAsset);
+            SerializedProperty iterator = serializedObject.GetIterator();
+            bool enterChildren = true;
+            int otherFieldCount = 0;
+            while (iterator.NextVisible(enterChildren))
+            {
+                enterChildren = false;
+                if (string.Equals(iterator.propertyPath, SCRIPT_PROPERTY_NAME, StringComparison.Ordinal)
+                    || string.Equals(iterator.propertyPath, collectionPropertyPath, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                otherFieldCount++;
+                if (otherFieldCount > REPOSITORY_EXTRA_FIELD_TOLERANCE)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -756,13 +883,25 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         }
 
         /// <summary>
-        ///     指定Addressableキーを含むページへ移動し、対象アセットを選択・Pingします。
+        ///     対象SourceAssetの実体をSelect/Pingします。対応するページがあれば、そのページへも移動します。
+        ///     実体の解決・選択は、ページ割当の有無に関わらず常に行います(検索が全登録SourceAssetを
+        ///     対象にしている一方、ページに割り当てられていないSourceAssetも存在するため)。
         /// </summary>
         /// <param name="addressableKey"> 移動先SourceAssetのAddressableキーです。 </param>
         public void NavigateToSourceAsset(string addressableKey)
         {
+            bool resolved = SourceDataProviderRepositoryResolver.TryResolveAsset(
+                addressableKey,
+                out ScriptableObject sourceAsset);
+            if (resolved)
+            {
+                Selection.activeObject = sourceAsset;
+                EditorGUIUtility.PingObject(sourceAsset);
+            }
+
             IReadOnlyList<PlannerMasterDataEditorSettings.PageDefinition> pages =
                 PlannerMasterDataEditorSettings.instance.Pages;
+            bool pageFound = false;
             for (int i = 0; i < pages.Count; i++)
             {
                 if (!Contains(pages[i].SourceAssetAddressableKeys, addressableKey))
@@ -775,30 +914,62 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _selectedSourceAssetKey = addressableKey;
                 _selectedCollectionKey = string.Empty;
                 _selectedCollectionItemIndex = 0;
-                _searchQuery = string.Empty;
-
-                if (SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject sourceAsset))
-                {
-                    Selection.activeObject = sourceAsset;
-                    EditorGUIUtility.PingObject(sourceAsset);
-                }
-
-                Repaint();
-                Focus();
-                return;
+                pageFound = true;
+                break;
             }
 
-            ShowNotification(new GUIContent(
-                $"SourceAsset「{addressableKey}」を表示するページが設定されていません。"));
+            if (!resolved)
+            {
+                ShowNotification(new GUIContent(
+                    $"SourceAsset「{addressableKey}」を解決できません。Addressablesの登録状況を確認してください。"));
+            }
+            else if (!pageFound)
+            {
+                ShowNotification(new GUIContent(
+                    $"SourceAsset「{addressableKey}」を表示するページが設定されていないため、実体のみ選択しました。"));
+            }
+
+            Repaint();
+            Focus();
+            SetSearchQuery(string.Empty);
         }
 
         /// <summary>
-        ///     指定CollectionKeyとDataIDに対応するデータへ移動し、実体を選択・Pingします。
+        ///     指定CollectionKeyとDataIDに対応するデータの実体をSelect/Pingします。対応するページがあれば、
+        ///     そのページへも移動します。実体の解決・選択は、ページ割当の有無に関わらず常に行います。
         /// </summary>
         /// <param name="collectionKey"> 移動先CollectionKeyです。 </param>
         /// <param name="dataId"> 移動先の個別データIDです。 </param>
         public void NavigateToCollectionItem(string collectionKey, string dataId)
         {
+            bool collectionResolved = TryResolveCollection(
+                    collectionKey,
+                    out _,
+                    out ScriptableObject sourceAsset,
+                    out SerializedProperty collectionProperty)
+                && collectionProperty.isArray;
+
+            int itemIndex = 0;
+            bool itemFound = false;
+            if (collectionResolved && !string.IsNullOrWhiteSpace(dataId))
+            {
+                for (int i = 0; i < collectionProperty.arraySize; i++)
+                {
+                    if (!ElementMatchesDataId(
+                        collectionProperty.GetArrayElementAtIndex(i),
+                        dataId,
+                        collectionKey))
+                    {
+                        continue;
+                    }
+
+                    itemIndex = i;
+                    itemFound = true;
+                    SelectAndPingElement(sourceAsset, collectionProperty.GetArrayElementAtIndex(i));
+                    break;
+                }
+            }
+
             IReadOnlyList<PlannerMasterDataEditorSettings.PageDefinition> pages =
                 PlannerMasterDataEditorSettings.instance.Pages;
             int pageIndex = -1;
@@ -813,54 +984,34 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 break;
             }
 
-            if (pageIndex < 0)
+            if (pageIndex >= 0)
+            {
+                _selectedPageIndex = pageIndex;
+                _navigationMode = NavigationMode.Collections;
+                _selectedCollectionKey = collectionKey;
+                _selectedSourceAssetKey = string.Empty;
+                _selectedCollectionItemIndex = itemIndex;
+            }
+
+            if (!collectionResolved)
             {
                 ShowNotification(new GUIContent(
-                    $"Collection「{collectionKey}」を表示するページが設定されていません。"));
-                return;
+                    $"CollectionKey「{collectionKey}」のSourceAssetまたはProperty Pathを解決できません。"));
             }
-
-            int itemIndex = 0;
-            bool found = false;
-            if (!string.IsNullOrWhiteSpace(dataId)
-                && TryResolveCollection(
-                    collectionKey,
-                    out _,
-                    out ScriptableObject sourceAsset,
-                    out SerializedProperty collectionProperty)
-                && collectionProperty.isArray)
+            else if (!string.IsNullOrWhiteSpace(dataId) && !itemFound)
             {
-                for (int i = 0; i < collectionProperty.arraySize; i++)
-                {
-                    if (!ElementMatchesDataId(
-                        collectionProperty.GetArrayElementAtIndex(i),
-                        dataId,
-                        collectionKey))
-                    {
-                        continue;
-                    }
-
-                    itemIndex = i;
-                    found = true;
-                    SelectAndPingElement(sourceAsset, collectionProperty.GetArrayElementAtIndex(i));
-                    break;
-                }
-
-                if (!found)
-                {
-                    ShowNotification(new GUIContent(
-                        $"CollectionKey「{collectionKey}」内にID「{dataId}」のデータが見つかりません。"));
-                }
+                ShowNotification(new GUIContent(
+                    $"CollectionKey「{collectionKey}」内にID「{dataId}」のデータが見つかりません。"));
+            }
+            else if (pageIndex < 0)
+            {
+                ShowNotification(new GUIContent(
+                    $"Collection「{collectionKey}」を表示するページが設定されていないため、実体のみ選択しました。"));
             }
 
-            _selectedPageIndex = pageIndex;
-            _navigationMode = NavigationMode.Collections;
-            _selectedCollectionKey = collectionKey;
-            _selectedSourceAssetKey = string.Empty;
-            _selectedCollectionItemIndex = itemIndex;
-            _searchQuery = string.Empty;
             Repaint();
             Focus();
+            SetSearchQuery(string.Empty);
         }
 
         /// <summary>
@@ -886,11 +1037,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     && ObjectHasMatchingAuthoringId(element.objectReferenceValue, collectionKey, dataId);
             }
 
-            SerializedProperty dataIdProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
-                ?? element.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
-            SerializedProperty idValueProperty = dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME)
-                ?? element.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
-            return string.Equals(idValueProperty?.stringValue, dataId, StringComparison.Ordinal);
+            // 検索結果のDataIdはExtractDataId(下記)で生成しているため、照合も同じロジックを使う。
+            return string.Equals(ExtractDataId(element), dataId, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -1061,6 +1209,12 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return referencedAsset == null ? $"Element {index + 1}" : referencedAsset.name;
             }
 
+            // LoadingTipのような、要素そのものが文字列本文であるCollection。
+            if (element.propertyType == SerializedPropertyType.String)
+            {
+                return string.IsNullOrWhiteSpace(element.stringValue) ? $"Element {index + 1}" : element.stringValue;
+            }
+
             SerializedProperty dataIdProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
                 ?? element.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
             SerializedProperty idValueProperty = dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME)
@@ -1070,7 +1224,51 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return idValueProperty.stringValue;
             }
 
+            // Id/_stageId/_id相当のフィールドを持たないインライン構造体(StatusBonusEffectIcon/SkillGenreIcon
+            // のenumキー、BgmSelectorLabelの_selectorLabelなど)向けの汎用フォールバック。
+            // Enumフィールド(種別・ジャンル等の識別キー)を優先し、無ければ最初の非空文字列フィールドを使う。
+            if (TryFindChildPropertyByType(element, SerializedPropertyType.Enum, out SerializedProperty enumProperty))
+            {
+                return enumProperty.enumDisplayNames[Mathf.Clamp(
+                    enumProperty.enumValueIndex, 0, enumProperty.enumDisplayNames.Length - 1)];
+            }
+
+            if (TryFindChildPropertyByType(element, SerializedPropertyType.String, out SerializedProperty stringProperty)
+                && !string.IsNullOrWhiteSpace(stringProperty.stringValue))
+            {
+                return stringProperty.stringValue;
+            }
+
             return $"Element {index + 1}";
+        }
+
+        /// <summary>
+        ///     指定要素の直下(1階層)の子プロパティから、指定した型の最初の1件を検索します。
+        /// </summary>
+        /// <param name="parent"> 検索対象の親プロパティです。 </param>
+        /// <param name="type"> 検索する型です。 </param>
+        /// <param name="found"> 見つかった子プロパティです。 </param>
+        /// <returns> 見つかった場合はtrueです。 </returns>
+        private static bool TryFindChildPropertyByType(
+            SerializedProperty parent,
+            SerializedPropertyType type,
+            out SerializedProperty found)
+        {
+            SerializedProperty iterator = parent.Copy();
+            SerializedProperty end = parent.GetEndProperty();
+            bool enterChildren = true;
+            while (iterator.NextVisible(enterChildren) && !SerializedProperty.EqualContents(iterator, end))
+            {
+                enterChildren = false;
+                if (iterator.propertyType == type)
+                {
+                    found = iterator.Copy();
+                    return true;
+                }
+            }
+
+            found = null;
+            return false;
         }
 
         /// <summary>
@@ -1162,7 +1360,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
 
         /// <summary>
         ///     Collection要素が参照する実アセットの名前を取得します。ObjectReference要素はその参照先、
-        ///     インライン構造体は"Asset"という名前のObjectReferenceフィールドを探します。
+        ///     インライン構造体は"Asset"という名前のObjectReferenceフィールドを探し、
+        ///     見つからない場合はStatusBonusEffectIcon/SkillGenreIconの"Icon"のような、
+        ///     最初に見つかったObjectReferenceフィールドにフォールバックします。
         /// </summary>
         /// <param name="element"> Collection要素です。 </param>
         /// <returns> 取得できた場合はアセット名、それ以外はnullです。 </returns>
@@ -1179,6 +1379,15 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 && assetProperty.objectReferenceValue != null)
             {
                 return assetProperty.objectReferenceValue.name;
+            }
+
+            if (TryFindChildPropertyByType(
+                    element,
+                    SerializedPropertyType.ObjectReference,
+                    out SerializedProperty referenceProperty)
+                && referenceProperty.objectReferenceValue != null)
+            {
+                return referenceProperty.objectReferenceValue.name;
             }
 
             return null;
@@ -1380,12 +1589,15 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 {
                     SerializedProperty element = property.GetArrayElementAtIndex(elementIndex);
                     string itemLabel = BuildCollectionItemLabel(element, elementIndex);
-                    if (!MatchesQuery(itemLabel, query))
+                    // ObjectReference要素は参照先アセットが持つ定義側DataIDで検索・ジャンプ照合を行うため、
+                    // ここではExtractDataId(アセット名で代替する簡易抽出)ではなく、ソートで使っているのと同じ
+                    // GetElementDataIdDisplayName(定義側DataIDフィールドの正しい抽出)を用いる。
+                    string dataId = GetElementDataIdDisplayName(element, mapping.CollectionKey);
+                    if (!MatchesQuery(itemLabel, query) && !MatchesQuery(dataId, query))
                     {
                         continue;
                     }
 
-                    string dataId = ExtractDataId(element);
                     _searchResults.Add(SearchResult.ForCollectionItem(
                         mapping.CollectionKey,
                         dataId,
@@ -1406,11 +1618,37 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return element.objectReferenceValue == null ? null : element.objectReferenceValue.name;
             }
 
+            if (element.propertyType == SerializedPropertyType.String)
+            {
+                return string.IsNullOrWhiteSpace(element.stringValue) ? null : element.stringValue;
+            }
+
             SerializedProperty dataIdProperty = element.FindPropertyRelative(COLLECTION_ID_PROPERTY_NAME)
                 ?? element.FindPropertyRelative(STAGE_ID_PROPERTY_NAME);
             SerializedProperty idValueProperty = dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME)
                 ?? element.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
-            return idValueProperty?.stringValue;
+            if (!string.IsNullOrWhiteSpace(idValueProperty?.stringValue))
+            {
+                return idValueProperty.stringValue;
+            }
+
+            // Id/_stageId/_id相当のフィールドを持たないインライン構造体(StatusBonusEffectIcon/SkillGenreIcon
+            // のenumキー、BgmSelectorLabelの_selectorLabelなど)向けの汎用フォールバック。
+            // BuildCollectionItemLabelと同じ優先順位(Enum→最初の非空文字列)にし、ラベル・検索・ジャンプ照合の
+            // 間で一貫したキーを使う。
+            if (TryFindChildPropertyByType(element, SerializedPropertyType.Enum, out SerializedProperty enumProperty))
+            {
+                return enumProperty.enumDisplayNames[Mathf.Clamp(
+                    enumProperty.enumValueIndex, 0, enumProperty.enumDisplayNames.Length - 1)];
+            }
+
+            if (TryFindChildPropertyByType(element, SerializedPropertyType.String, out SerializedProperty stringProperty)
+                && !string.IsNullOrWhiteSpace(stringProperty.stringValue))
+            {
+                return stringProperty.stringValue;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -1433,6 +1671,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private const string COLLECTION_ASSET_PROPERTY_NAME = "Asset";
         private const string SOURCE_DATA_ID_PROPERTY_NAME = "_id";
         private const string STAGE_ID_PROPERTY_NAME = "_stageId";
+        private const string SCRIPT_PROPERTY_NAME = "m_Script";
+        private const int REPOSITORY_EXTRA_FIELD_TOLERANCE = 1;
 
         private static readonly string[] NAVIGATION_MODE_LABELS = { "Source Assets", "Collections" };
 

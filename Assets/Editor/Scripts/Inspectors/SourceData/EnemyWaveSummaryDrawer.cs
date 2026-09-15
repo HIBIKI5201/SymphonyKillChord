@@ -1,4 +1,4 @@
-using KillChord.Editor.SourceDataProvider.Wiki;
+using KillChord.Editor.SourceDataProvider.Core;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -174,7 +174,8 @@ namespace KillChord.Editor.Inspectors.SourceData
                 }
             }
 
-            Undo.RecordObject(target, "スポーン候補地を変更");
+            // serializedDefinition.ApplyModifiedProperties()がUndoエントリを自動で積むため、
+            // ここでUndo.RecordObjectを重ねて呼ぶとUndoが2回分登録され、Ctrl+Zを2回要求してしまう。
             if (existingIndex >= 0)
             {
                 candidatesProperty.DeleteArrayElementAtIndex(existingIndex);

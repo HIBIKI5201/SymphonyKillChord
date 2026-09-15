@@ -9,7 +9,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace KillChord.Editor.SourceDataProvider.Wiki
+namespace KillChord.Editor.SourceDataProvider.Core
 {
     /// <summary>
     ///     ステージシーンの.unityファイルを直接パースし、スポーンポイントとNavMeshの情報を取得します。

@@ -1,4 +1,3 @@
-using KillChord.Editor.SourceDataProvider.Wiki;
 using KillChord.Runtime.Utility.Identity;
 using System;
 using System.Collections.Generic;
@@ -97,10 +96,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 || string.IsNullOrWhiteSpace(collectionKey)
                 || string.IsNullOrWhiteSpace(idProperty.stringValue)))
             {
-                if (GUI.Button(jumpRect, JUMP_LABEL, EditorStyles.miniButton)
-                    && PlannerMasterDataWindow.TryGetOrOpenWindow(out PlannerMasterDataWindow window))
+                if (GUI.Button(jumpRect, JUMP_LABEL, EditorStyles.miniButton))
                 {
-                    window.NavigateToCollectionItem(collectionKey, idProperty.stringValue);
+                    PlannerNavigationHub.TryNavigateToCollectionItem(collectionKey, idProperty.stringValue);
                 }
             }
 

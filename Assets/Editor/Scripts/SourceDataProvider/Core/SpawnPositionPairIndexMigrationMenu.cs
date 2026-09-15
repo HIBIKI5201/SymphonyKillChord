@@ -1,4 +1,3 @@
-using KillChord.Editor.SourceDataProvider.Wiki;
 using KillChord.Editor.Utility;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Enemy;
