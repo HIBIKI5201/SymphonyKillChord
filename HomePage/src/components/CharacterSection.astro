@@ -145,9 +145,7 @@ const portraitRatio = image ? `${image.width} / ${image.height}` : undefined;
 		height: 100%;
 		object-fit: contain;
 		/* 暗い背景に立ち絵の暗色部分が沈んで見づらいため、輪郭にうっすら発光を添えて見切りを付ける */
-		filter:
-			drop-shadow(0 0 16px rgba(255, 255, 255, 0.2))
-			drop-shadow(0 0 36px rgba(255, 255, 255, 0.1));
+		filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.22));
 	}
 
 	.no-image {

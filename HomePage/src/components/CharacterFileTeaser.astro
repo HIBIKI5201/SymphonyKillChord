@@ -5,84 +5,64 @@ import { getImage } from 'astro:assets';
 interface Props {
 	name: string;
 	formalName: string;
-	catchphrase: string;
 	image: ImageMetadata;
 	href: string;
 }
 
-const { name, formalName, catchphrase, image, href } = Astro.props;
+const { name, formalName, image, href } = Astro.props;
 
 const photoAvif = await getImage({ src: image, format: 'avif', width: 640, quality: 70 });
 const photoWebp = await getImage({ src: image, format: 'webp', width: 640, quality: 75 });
 ---
 
-<section id="character-file">
-	<a class="folder" href={href}>
-		<span class="stamp">機密</span>
+<a class="folder" href={href}>
+	<span class="stamp">機密</span>
 
-		<div class="photo">
-			<picture>
-				<source srcset={photoAvif.src} type="image/avif" />
-				<source srcset={photoWebp.src} type="image/webp" />
-				<img src={photoWebp.src} alt={name} />
-			</picture>
-			<span class="corner corner-tl"></span>
-			<span class="corner corner-tr"></span>
-			<span class="corner corner-bl"></span>
-			<span class="corner corner-br"></span>
+	<div class="photo">
+		<picture>
+			<source srcset={photoAvif.src} type="image/avif" />
+			<source srcset={photoWebp.src} type="image/webp" />
+			<img src={photoWebp.src} alt={name} />
+		</picture>
+		<span class="corner corner-tl"></span>
+		<span class="corner corner-tr"></span>
+		<span class="corner corner-bl"></span>
+		<span class="corner corner-br"></span>
+	</div>
+
+	<dl class="fields">
+		<div class="field">
+			<dt>ID</dt>
+			<dd>{formalName}</dd>
 		</div>
-
-		<dl class="fields">
-			<div class="field">
-				<dt>ID</dt>
-				<dd>{formalName}</dd>
-			</div>
-			<div class="field">
-				<dt>NAME</dt>
-				<dd>{name}</dd>
-			</div>
-		</dl>
-
-		<p class="catch">{catchphrase}</p>
-	</a>
-</section>
+		<div class="field">
+			<dt>NAME</dt>
+			<dd>{name}</dd>
+		</div>
+	</dl>
+</a>
 
 <style>
 	/*
 	 * ソ連の機密人事ファイル(личное дело)を模した「紙」の質感を出すため、
 	 * ダークテーマのトークン(--color-*)とは別に、このフォルダ専用のローカル変数を定義する。
 	 */
-	#character-file {
+	.folder {
 		--paper-bg: #d9cca4;
 		--paper-bg-alt: #cfc093;
 		--paper-ink: #2c2418;
 		--paper-ink-muted: #6b5f45;
 		--paper-border: #8f7f57;
 
-		padding: 56px 24px;
-		text-align: center;
-		background: var(--color-bg);
-		margin: 0 -24px;
-	}
-
-	.folder {
-		display: inline-block;
-		width: min(320px, 84vw);
+		display: block;
+		width: 100%;
+		max-width: 320px;
 		padding: 28px 24px 32px;
 		background: linear-gradient(180deg, var(--paper-bg) 0%, var(--paper-bg-alt) 100%);
 		border: 1px solid var(--paper-border);
 		box-shadow: 0 18px 32px rgba(0, 0, 0, 0.45);
 		text-decoration: none;
-		transform: rotate(-4deg);
-		transition:
-			transform 0.3s ease,
-			box-shadow 0.3s ease;
 		position: relative;
-	}
-
-	.folder:hover {
-		transform: rotate(0deg) translateY(-6px);
-		box-shadow: 0 24px 40px rgba(0, 0, 0, 0.55);
 	}
 
 	.stamp {
@@ -186,19 +166,5 @@ const photoWebp = await getImage({ src: image, format: 'webp', width: 640, quali
 		font-family: var(--font-mono);
 		font-size: 13px;
 		color: var(--paper-ink);
-	}
-
-	.catch {
-		margin: 16px 0 0;
-		font-family: var(--font-display);
-		letter-spacing: var(--tracking-display);
-		font-size: 1rem;
-		color: var(--paper-ink);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.folder {
-			transition: none;
-		}
 	}
 </style>

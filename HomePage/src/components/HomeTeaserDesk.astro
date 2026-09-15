@@ -1,0 +1,148 @@
+---
+import type { ImageMetadata } from 'astro';
+import CharacterFileTeaser from './CharacterFileTeaser.astro';
+import GameplayOrderTeaser from './GameplayOrderTeaser.astro';
+import SkillDossierTeaser from './SkillDossierTeaser.astro';
+
+interface Props {
+	character: {
+		name: string;
+		formalName: string;
+		image: ImageMetadata;
+		href: string;
+	};
+	gameplay: {
+		title: string;
+		orderNumber: string;
+		items: string[];
+		href: string;
+	};
+	skill: {
+		title: string;
+		code: string;
+		skills: string[];
+		href: string;
+	};
+}
+
+const { character, gameplay, skill } = Astro.props;
+---
+
+<section class="desk" aria-label="キャラクター・ゲームプレイ・スキルへのリンク">
+	<div class="desk-grid">
+		<div class="desk-item desk-item--character" style="--rotate: -4deg;">
+			<CharacterFileTeaser
+				name={character.name}
+				formalName={character.formalName}
+				image={character.image}
+				href={character.href}
+			/>
+		</div>
+
+		<div class="desk-item desk-item--gameplay" style="--rotate: 2deg;">
+			<GameplayOrderTeaser
+				title={gameplay.title}
+				orderNumber={gameplay.orderNumber}
+				items={gameplay.items}
+				href={gameplay.href}
+			/>
+		</div>
+
+		<div class="desk-item desk-item--skill" style="--rotate: -2deg;">
+			<SkillDossierTeaser title={skill.title} code={skill.code} skills={skill.skills} href={skill.href} />
+		</div>
+	</div>
+</section>
+
+<style>
+	.desk {
+		--desk-felt: #182219;
+		--desk-felt-alt: #101a12;
+
+		margin: 0 -24px;
+		padding: 80px 24px;
+		background:
+			repeating-linear-gradient(0deg, var(--color-grid-line) 0, var(--color-grid-line) 1px, transparent 1px, transparent 32px),
+			repeating-linear-gradient(90deg, var(--color-grid-line) 0, var(--color-grid-line) 1px, transparent 1px, transparent 32px),
+			linear-gradient(180deg, var(--desk-felt) 0%, var(--desk-felt-alt) 100%);
+	}
+
+	.desk-grid {
+		display: grid;
+		grid-template-columns: repeat(12, 1fr);
+		column-gap: 24px;
+		max-width: 1080px;
+		margin: 0 auto;
+	}
+
+	.desk-item {
+		transform: rotate(var(--rotate));
+		transition:
+			transform 0.3s ease,
+			filter 0.3s ease;
+	}
+
+	.desk-item :global(a) {
+		display: block;
+		height: 100%;
+	}
+
+	.desk-item--character {
+		grid-column: 1 / 6;
+		grid-row: 1;
+		z-index: 1;
+		align-self: start;
+	}
+
+	.desk-item--gameplay {
+		grid-column: 5 / 13;
+		grid-row: 1;
+		z-index: 2;
+		align-self: start;
+		margin-top: 72px;
+	}
+
+	.desk-item--skill {
+		grid-column: 3 / 9;
+		grid-row: 2;
+		z-index: 3;
+		justify-self: end;
+		margin-top: -48px;
+	}
+
+	.desk-item:hover,
+	.desk-item:focus-within {
+		transform: translateY(-12px) scale(1.03) rotate(0deg);
+		z-index: 10;
+	}
+
+	/* 1枚にカーソルが合っている間、他の書類を暗く沈めてスポットライトのように見せる */
+	.desk-grid:has(.desk-item:hover) .desk-item:not(:hover),
+	.desk-grid:has(.desk-item:focus-within) .desk-item:not(:focus-within) {
+		filter: brightness(0.55);
+	}
+
+	@media (max-width: 767px) {
+		.desk-grid {
+			display: flex;
+			flex-direction: column;
+			gap: 32px;
+		}
+
+		.desk-item {
+			transform: none;
+			margin-top: 0;
+		}
+
+		.desk-item:hover,
+		.desk-item:focus-within {
+			transform: translateY(-6px);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.desk-item {
+			transition: none;
+		}
+	}
+</style>
