@@ -2,11 +2,11 @@
 interface Props {
 	title: string;
 	code: string;
-	skills: string[];
+	description: string;
 	href: string;
 }
 
-const { title, code, skills, href } = Astro.props;
+const { title, code, description, href } = Astro.props;
 ---
 
 <a class="dossier" href={href}>
@@ -17,16 +17,7 @@ const { title, code, skills, href } = Astro.props;
 	<p class="code">{code}</p>
 	<h2 class="title">{title}</h2>
 
-	<dl class="rows">
-		{
-			skills.map((skill) => (
-				<div class="row">
-					<dt>{skill}</dt>
-					<dd>未設定</dd>
-				</div>
-			))
-		}
-	</dl>
+	<p class="description">{description}</p>
 </a>
 
 <style>
@@ -40,6 +31,8 @@ const { title, code, skills, href } = Astro.props;
 		--card-ink: #2c2418;
 		--card-ink-muted: #6b5f45;
 		--card-border: #a8996b;
+		/* 紙色の背景上でもWCAG AA(4.5:1)を満たす濃い緑(承認スタンプ用。opacity:0.85込みで計算) */
+		--card-accent: #1a4d2e;
 
 		position: relative;
 		display: block;
@@ -80,13 +73,13 @@ const { title, code, skills, href } = Astro.props;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		border: 2px solid var(--color-signal-dim);
+		border: 2px solid var(--card-accent);
 		border-radius: 50%;
 		font-family: var(--font-mono);
 		font-size: 10px;
 		font-weight: 700;
 		letter-spacing: var(--tracking-label);
-		color: var(--color-signal-dim);
+		color: var(--card-accent);
 		transform: rotate(-10deg);
 		opacity: 0.85;
 		text-align: center;
@@ -110,35 +103,13 @@ const { title, code, skills, href } = Astro.props;
 		color: var(--card-ink);
 	}
 
-	.rows {
-		margin: 20px 0 0;
+	.description {
+		margin: 20px 72px 0 0;
 		padding-top: 12px;
-		padding-right: 72px;
 		border-top: 1px dashed var(--card-border);
-	}
-
-	.row {
-		display: flex;
-		justify-content: space-between;
-		gap: 12px;
-		margin: 0 0 8px;
-	}
-
-	.row:last-child {
-		margin-bottom: 0;
-	}
-
-	.row dt {
 		font-family: var(--font-mono);
 		font-size: 12px;
-		color: var(--card-ink);
-	}
-
-	.row dd {
-		margin: 0;
-		font-family: var(--font-mono);
-		font-size: 12px;
+		line-height: 1.7;
 		color: var(--card-ink-muted);
 	}
-
 </style>
