@@ -56,6 +56,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private string _selectedCollectionKey = string.Empty;
         [SerializeField, Tooltip("検索ボックスへ入力中の検索クエリです。")]
         private string _searchQuery = string.Empty;
+        [SerializeField, Tooltip("Collection項目一覧の表示ソート順です。")]
+        private CollectionSortMode _collectionSortMode;
         private Vector2 _pageScrollPosition;
         private Vector2 _navigationScrollPosition;
         private Vector2 _itemsScrollPosition;
@@ -422,6 +424,11 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             EditorGUILayout.LabelField($"Collection [{collectionKey}]", EditorStyles.boldLabel);
             GUILayout.FlexibleSpace();
+            GUILayout.Label("Sort", GUILayout.Width(28f));
+            _collectionSortMode = (CollectionSortMode)EditorGUILayout.EnumPopup(
+                _collectionSortMode,
+                EditorStyles.toolbarPopup,
+                GUILayout.Width(110f));
             if (GUILayout.Button("Source Assetを開く", EditorStyles.toolbarButton))
             {
                 NavigateToSourceAsset(mapping.SourceAssetAddressableKey);
@@ -450,10 +457,12 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return;
             }
 
-            for (int i = 0; i < collectionProperty.arraySize; i++)
+            List<int> order = BuildItemDisplayOrder(collectionProperty, collectionKey, _collectionSortMode);
+            for (int position = 0; position < order.Count; position++)
             {
+                int i = order[position];
                 SerializedProperty element = collectionProperty.GetArrayElementAtIndex(i);
-                string label = $"{i + 1}. {BuildCollectionItemLabel(element, i)}";
+                string label = $"{position + 1}. {BuildSortAwareItemLabel(element, i, collectionKey, _collectionSortMode)}";
                 bool isSelected = i == _selectedCollectionItemIndex;
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button(label, isSelected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
@@ -1064,6 +1073,190 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             return $"Element {index + 1}";
         }
 
+        /// <summary>
+        ///     指定ソートモードに従い、Collection項目の表示順(元配列のIndex列)を構築します。
+        ///     実データの並び順は変更しません。
+        /// </summary>
+        /// <param name="collectionProperty"> Collection配列プロパティです。 </param>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <param name="sortMode"> 表示ソートモードです。 </param>
+        /// <returns> 表示順に並んだ元配列Indexの一覧です。 </returns>
+        private static List<int> BuildItemDisplayOrder(
+            SerializedProperty collectionProperty,
+            string collectionKey,
+            CollectionSortMode sortMode)
+        {
+            List<int> order = new(collectionProperty.arraySize);
+            for (int i = 0; i < collectionProperty.arraySize; i++)
+            {
+                order.Add(i);
+            }
+
+            if (sortMode == CollectionSortMode.Default)
+            {
+                return order;
+            }
+
+            List<(int index, string key)> keyed = new(order.Count);
+            for (int i = 0; i < order.Count; i++)
+            {
+                SerializedProperty element = collectionProperty.GetArrayElementAtIndex(order[i]);
+                string key = sortMode == CollectionSortMode.AssetName
+                    ? GetElementAssetDisplayName(element)
+                    : GetElementDataIdDisplayName(element, collectionKey);
+                keyed.Add((order[i], key));
+            }
+
+            keyed.Sort((a, b) =>
+            {
+                bool aHasKey = !string.IsNullOrWhiteSpace(a.key);
+                bool bHasKey = !string.IsNullOrWhiteSpace(b.key);
+                if (aHasKey != bHasKey)
+                {
+                    // キーを取得できない項目は末尾へ集約します。
+                    return aHasKey ? -1 : 1;
+                }
+
+                if (!aHasKey)
+                {
+                    return a.index.CompareTo(b.index);
+                }
+
+                int comparison = string.Compare(a.key, b.key, StringComparison.OrdinalIgnoreCase);
+                return comparison != 0 ? comparison : a.index.CompareTo(b.index);
+            });
+
+            List<int> result = new(keyed.Count);
+            for (int i = 0; i < keyed.Count; i++)
+            {
+                result.Add(keyed[i].index);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///     ソートモードに応じたCollection項目の表示名を生成します。対応するキーを取得できない場合は
+        ///     既定の表示名(<see cref="BuildCollectionItemLabel"/>)へフォールバックします。
+        /// </summary>
+        /// <param name="element"> Collection要素です。 </param>
+        /// <param name="index"> Collection内のインデックスです。 </param>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <param name="sortMode"> 表示ソートモードです。 </param>
+        /// <returns> 表示名です。 </returns>
+        private static string BuildSortAwareItemLabel(
+            SerializedProperty element,
+            int index,
+            string collectionKey,
+            CollectionSortMode sortMode)
+        {
+            string key = sortMode switch
+            {
+                CollectionSortMode.AssetName => GetElementAssetDisplayName(element),
+                CollectionSortMode.DataId => GetElementDataIdDisplayName(element, collectionKey),
+                _ => null,
+            };
+
+            return !string.IsNullOrWhiteSpace(key) ? key : BuildCollectionItemLabel(element, index);
+        }
+
+        /// <summary>
+        ///     Collection要素が参照する実アセットの名前を取得します。ObjectReference要素はその参照先、
+        ///     インライン構造体は"Asset"という名前のObjectReferenceフィールドを探します。
+        /// </summary>
+        /// <param name="element"> Collection要素です。 </param>
+        /// <returns> 取得できた場合はアセット名、それ以外はnullです。 </returns>
+        private static string GetElementAssetDisplayName(SerializedProperty element)
+        {
+            if (element.propertyType == SerializedPropertyType.ObjectReference)
+            {
+                return element.objectReferenceValue == null ? null : element.objectReferenceValue.name;
+            }
+
+            SerializedProperty assetProperty = element.FindPropertyRelative(COLLECTION_ASSET_PROPERTY_NAME);
+            if (assetProperty != null
+                && assetProperty.propertyType == SerializedPropertyType.ObjectReference
+                && assetProperty.objectReferenceValue != null)
+            {
+                return assetProperty.objectReferenceValue.name;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     Collection要素のDataID文字列を取得します。ObjectReference要素は参照先アセットが持つ、
+        ///     このCollectionKeyに紐づく定義側DataIDフィールドを探します。
+        /// </summary>
+        /// <param name="element"> Collection要素です。 </param>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <returns> 取得できた場合はDataID文字列、それ以外はnullです。 </returns>
+        private static string GetElementDataIdDisplayName(SerializedProperty element, string collectionKey)
+        {
+            if (element.propertyType == SerializedPropertyType.ObjectReference)
+            {
+                return element.objectReferenceValue == null
+                    ? null
+                    : TryGetAuthoringDataIdValue(element.objectReferenceValue, collectionKey, out string dataId)
+                        ? dataId
+                        : null;
+            }
+
+            return ExtractDataId(element);
+        }
+
+        /// <summary>
+        ///     対象オブジェクトが持つ直下のDataIDフィールド(参照ではなく定義側)から、指定CollectionKeyに
+        ///     対応するID文字列を取得します。
+        /// </summary>
+        /// <param name="target"> 対象オブジェクトです。 </param>
+        /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
+        /// <param name="dataId"> 取得できたID文字列です。 </param>
+        /// <returns> 取得できた場合はtrueです。 </returns>
+        private static bool TryGetAuthoringDataIdValue(UnityEngine.Object target, string collectionKey, out string dataId)
+        {
+            const BindingFlags BINDING_FLAGS =
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
+            SerializedObject serializedObject = new(target);
+            for (Type current = target.GetType();
+                current != null && current != typeof(ScriptableObject);
+                current = current.BaseType)
+            {
+                FieldInfo[] fields = current.GetFields(BINDING_FLAGS);
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    FieldInfo field = fields[i];
+                    if (field.FieldType != typeof(DataID))
+                    {
+                        continue;
+                    }
+
+                    SourceDataCollectionAttribute attribute =
+                        field.GetCustomAttribute<SourceDataCollectionAttribute>();
+                    if (attribute == null
+                        || !string.Equals(attribute.CollectionKey, collectionKey, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    SerializedProperty dataIdProperty = serializedObject.FindProperty(field.Name);
+                    SerializedProperty idValueProperty =
+                        dataIdProperty?.FindPropertyRelative(SOURCE_DATA_ID_PROPERTY_NAME);
+                    if (string.IsNullOrWhiteSpace(idValueProperty?.stringValue))
+                    {
+                        continue;
+                    }
+
+                    dataId = idValueProperty.stringValue;
+                    return true;
+                }
+            }
+
+            dataId = null;
+            return false;
+        }
+
         //
         // --- 検索 --------------------------------------------------------
         //
@@ -1237,6 +1430,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private const float COMMAND_BUTTON_HEIGHT = 28f;
         private const string SEARCH_FIELD_CONTROL_NAME = "PlannerMasterDataWindow.SearchField";
         private const string COLLECTION_ID_PROPERTY_NAME = "Id";
+        private const string COLLECTION_ASSET_PROPERTY_NAME = "Asset";
         private const string SOURCE_DATA_ID_PROPERTY_NAME = "_id";
         private const string STAGE_ID_PROPERTY_NAME = "_stageId";
 
@@ -1249,6 +1443,19 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         {
             SourceAssets,
             Collections,
+        }
+
+        /// <summary>
+        ///     Collection項目一覧の表示ソート順です。実データの配列順は変更せず、表示のみを並べ替えます。
+        /// </summary>
+        private enum CollectionSortMode
+        {
+            /// <summary> 配列に格納されている順序のままです。 </summary>
+            Default,
+            /// <summary> 参照アセット名(ObjectReferenceの場合は参照先、インライン構造体は"Asset"フィールド)の昇順です。 </summary>
+            AssetName,
+            /// <summary> DataID文字列の昇順です。 </summary>
+            DataId,
         }
 
         /// <summary>
