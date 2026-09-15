@@ -68,9 +68,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// <summary> 現在選択中のノードIDを取得する。未選択の場合は-1。 </summary>
         public int SelectedNodeId => _selectedNodeId;
 
-        /// <summary> 現在解放待ちとなっているノード数を取得する。未選択、または解放不可の場合は0。 </summary>
-        public int PendingUnlockNodeCount => _nodesOnPath?.Count ?? 0;
-
         /// <summary> 連続解放演出において、ノード1つあたりの演出開始をずらす間隔(ミリ秒)。Composition層のカメラ演出時間算出にも使用する。 </summary>
         public const long UNLOCK_STAGGER_INTERVAL_MILLISECONDS = 90L;
 
@@ -134,6 +131,66 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 statusPreview.PreviewCriticalDamage,
                 statusPreview.AreaAttackRangeMultiplier,
                 statusPreview.PreviewAreaAttackRangeMultiplier);
+        }
+
+        /// <summary>
+        ///     現在解放待ちとなっているノードのID一覧を取得する。
+        ///     連続解放演出のカメラワーク算出などで使用する。
+        /// </summary>
+        /// <returns> 解放待ちノードのID一覧。解放対象が無い場合は空配列。 </returns>
+        public IReadOnlyList<int> GetPendingUnlockNodeIds()
+        {
+            if (_nodesOnPath == null || _nodesOnPath.Count == 0)
+            {
+                return Array.Empty<int>();
+            }
+
+            int[] nodeIds = new int[_nodesOnPath.Count];
+            int index = 0;
+            foreach (SkillNodeEntity node in _nodesOnPath)
+            {
+                nodeIds[index] = node.SkillNodeIdVO.Id;
+                index++;
+            }
+
+            return nodeIds;
+        }
+
+        /// <summary>
+        ///     連続解放のカメラワークで画面に収めるべきノードのID一覧を取得する。
+        ///     解放待ちノードに加えて、それらへ直接つながる解放済みノード(接続元)も含める。
+        /// </summary>
+        /// <returns> フレーミング対象のノードID一覧。解放対象が無い場合は空配列。 </returns>
+        public IReadOnlyList<int> GetUnlockCameraFramingNodeIds()
+        {
+            if (_nodesOnPath == null || _nodesOnPath.Count == 0)
+            {
+                return Array.Empty<int>();
+            }
+
+            HashSet<int> framingNodeIds = new HashSet<int>();
+            foreach (SkillNodeEntity node in _nodesOnPath)
+            {
+                framingNodeIds.Add(node.SkillNodeIdVO.Id);
+                if (node.Parents == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < node.Parents.Length; i++)
+                {
+                    SkillNodeEntity parent = node.Parents[i];
+                    // 経路上に含まれない親は、既に解放済みの直接の接続元。
+                    if (parent != null && !_nodesOnPath.Contains(parent))
+                    {
+                        framingNodeIds.Add(parent.SkillNodeIdVO.Id);
+                    }
+                }
+            }
+
+            int[] result = new int[framingNodeIds.Count];
+            framingNodeIds.CopyTo(result);
+            return result;
         }
 
         /// <summary>
@@ -258,6 +315,29 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _previewVideoScreenView.PlayPreviewVideo(_selectedNodeId);
         }
 
+        /// <summary>
+        ///     再生中の連続解放演出があれば、すべて即座に完了させる。入力によるスキップで使用する。
+        /// </summary>
+        /// <returns> スキップする演出が存在した場合はtrue。 </returns>
+        public bool SkipUnlockAnimation()
+        {
+            if (_pendingUnlockAnimations.Count == 0)
+            {
+                return false;
+            }
+
+            List<(IVisualElementScheduledItem Item, int NodeId)> remaining =
+                new(_pendingUnlockAnimations);
+            _pendingUnlockAnimations.Clear();
+            for (int i = 0; i < remaining.Count; i++)
+            {
+                remaining[i].Item.Pause();
+                ApplyNodeUnlockVisual(remaining[i].NodeId);
+            }
+
+            return true;
+        }
+
         private Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntities;
         private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
         private HashSet<SkillNodeEntity> _nodesOnPath;
@@ -281,6 +361,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private int _costToUnlock = -1;
         private int _selectedNodeId = -1;
         private bool _isResetting;
+        private readonly List<(IVisualElementScheduledItem Item, int NodeId)> _pendingUnlockAnimations = new();
 
         private const string CURRENT_POINTS_LABEL_TEXT = "解放P：";
         private const string SKILL_NAME_SEPARATOR = "、";
@@ -579,12 +660,41 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             {
                 int nodeId = unlockOrder[i].SkillNodeIdVO.Id;
                 long delayMilliseconds = i * UNLOCK_STAGGER_INTERVAL_MILLISECONDS;
-                _currentPointsLabel.schedule.Execute(() =>
+                IVisualElementScheduledItem scheduledItem = null;
+                // 通常発火時は自身を保留リストから取り除き、スキップ時の二重適用を防ぐ。
+                scheduledItem = _currentPointsLabel.schedule.Execute(() =>
                 {
-                    _skillNodeViews[nodeId].SetUnlocked();
-                    UpdateConns(nodeId);
-                    UpdateUnlockPhase(nodeId);
+                    ApplyNodeUnlockVisual(nodeId);
+                    RemovePendingUnlockAnimation(scheduledItem);
                 }).StartingIn(delayMilliseconds);
+                _pendingUnlockAnimations.Add((scheduledItem, nodeId));
+            }
+        }
+
+        /// <summary>
+        ///     ノード1件分の解放演出(ポップ・接続線・解放段階)を即時に適用する。
+        /// </summary>
+        /// <param name="nodeId"> 対象ノードID。 </param>
+        private void ApplyNodeUnlockVisual(int nodeId)
+        {
+            _skillNodeViews[nodeId].SetUnlocked();
+            UpdateConns(nodeId);
+            UpdateUnlockPhase(nodeId);
+        }
+
+        /// <summary>
+        ///     保留中の連続解放演出一覧から、発火済みの項目を取り除く。
+        /// </summary>
+        /// <param name="scheduledItem"> 発火した演出のスケジュール項目。 </param>
+        private void RemovePendingUnlockAnimation(IVisualElementScheduledItem scheduledItem)
+        {
+            for (int i = 0; i < _pendingUnlockAnimations.Count; i++)
+            {
+                if (_pendingUnlockAnimations[i].Item == scheduledItem)
+                {
+                    _pendingUnlockAnimations.RemoveAt(i);
+                    return;
+                }
             }
         }
 

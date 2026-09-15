@@ -1,11 +1,10 @@
 :root {
 }
 
-/* ==== ボタンの見た目の実装 ====
-   静的な見た目(off/onスキン切り替え)のみを扱う。スケールやタイミングは含まない。 */
 .btn-skin {
     background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
-    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-scale-mode: scale-and-crop;
+    aspect-ratio: auto;
 }
 
 .btn-skin:hover,
@@ -14,16 +13,12 @@
     background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=21300000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
 }
 
-/* ==== アニメーションの実装 ====
-   スケールの動き・タイミングのみを扱う。画像には触れない。
-   hover/focus中の連続パルスはC#側(ButtonPulseAnimationManipulator)が毎フレームscaleを書き換えて実現する。 */
 .btn-scale-feedback {
-    scale: 1.0 1.0 1.0;
+    scale: 1 1 1;
     transition-duration: 0.15s;
     transition-timing-function: ease-out-circ;
 }
 
-/* クリック中は連続パルスより優先して縮小させる(C#側もpressed中はscaleの書き換えを止める) */
 .btn-scale-feedback:active {
     scale: 0.9 0.9;
     transition-duration: 0.05s;
@@ -38,8 +33,7 @@
     -unity-font-style: bold;
     margin-top: 10px;
     background-color: rgba(188, 188, 188, 0);
-    
-    scale: 1.0 1.0 1.0;
+    scale: 1 1 1;
     transition-duration: 0.1s;
     transition-timing-function: ease-out-circ;
 }
@@ -77,7 +71,7 @@
     right: 1.5%;
     bottom: 3%;
     left: 1.5%;
-    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_ButtonBack_Off.png?fileID=21300000&guid=ba45671328ad1f148b9ebc71318d74b4&type=3#UI_ButtonBack_Off");
     -unity-background-scale-mode: stretch-to-fill;
     border-radius: 4px;
     translate: 0 -4px;
@@ -101,12 +95,8 @@
     transition-timing-function: ease-out-circ;
 }
 
-/* .home-button-wrapper(btn-scale-feedback)がボタン+背景パネルをまとめて拡縮するため、
-   ボタン単体側の拡縮は無効化して二重に拡大しないようにする。 */
 .home-button-wrapper > .button:hover,
 .home-button-wrapper > .button:focus,
 .home-button-wrapper > .button:active {
-    scale: 1.0 1.0;
+    scale: 1 1;
 }
-
-

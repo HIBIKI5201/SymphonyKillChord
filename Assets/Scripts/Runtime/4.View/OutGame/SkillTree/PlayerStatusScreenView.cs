@@ -68,8 +68,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     現在値ラベルへ現在値を、変化後ラベルへ変化後の値を設定する。
-        ///     変化が無い場合は矢印・変化後ラベルを空文字列にする。
+        ///     現在値ラベルへ現在値を、矢印・変化後ラベルへ変化後の値を設定する。
+        ///     変化が無い場合は矢印・変化後ラベルを空文字列にする(列の幅自体は
+        ///     SetDeltaColumnVisibleが行全体で揃えるため、ここでは文字列のみを制御する)。
         /// </summary>
         /// <param name="currentLabel"> 現在値を表示するラベル。 </param>
         /// <param name="arrowLabel"> 矢印を表示するラベル。 </param>
@@ -84,22 +85,28 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         {
             currentLabel.text = format(current);
             bool changed = !Mathf.Approximately(current, preview);
+            arrowLabel.text = changed ? PREVIEW_ARROW : string.Empty;
             deltaLabel.text = changed ? format(preview) : string.Empty;
-            arrowLabel.style.display = changed ? DisplayStyle.Flex : DisplayStyle.None;
             return changed;
         }
 
         /// <summary>
-        ///     全項目とも変化が無い場合は変化後の値の列自体を非表示にし、パネル幅を縮める。
+        ///     全項目とも変化が無い場合は矢印・変化後の値の列自体を非表示にし、パネル幅を縮める。
+        ///     変化がある項目が1つでもあれば、行ごとの差異が出ないよう全行分の列幅を揃えて表示する。
         /// </summary>
-        /// <param name="visible"> 変化後の値の列を表示する場合はtrue。 </param>
+        /// <param name="visible"> 矢印・変化後の値の列を表示する場合はtrue。 </param>
         private void SetDeltaColumnVisible(bool visible)
         {
             DisplayStyle display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            _healthArrowLabel.style.display = display;
             _healthDeltaLabel.style.display = display;
+            _attackArrowLabel.style.display = display;
             _attackDeltaLabel.style.display = display;
+            _criticalChanceArrowLabel.style.display = display;
             _criticalChanceDeltaLabel.style.display = display;
+            _criticalDamageArrowLabel.style.display = display;
             _criticalDamageDeltaLabel.style.display = display;
+            _areaAttackRangeArrowLabel.style.display = display;
             _areaAttackRangeDeltaLabel.style.display = display;
         }
 
@@ -139,6 +146,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             icon.style.display = sprite == null ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
+        private const string PREVIEW_ARROW = "→";
         private const float NARROW_PANEL_WIDTH = 390f;
         private const float WIDE_PANEL_WIDTH = 520f;
 

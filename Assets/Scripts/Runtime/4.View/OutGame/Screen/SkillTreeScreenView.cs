@@ -94,7 +94,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _settingShortcutButton.RegisterCallback<ClickEvent>(OnSettingShortcutButtonClicked);
+            _settingShortcutButton.MakeNavigable();
+            // Button.clicked/ClickEventはコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+            // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+            _settingShortcutButtonActivation =
+                _settingShortcutButton.RegisterActivation(HandleSettingShortcutButtonActivationHandler);
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
@@ -106,7 +110,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private void UnregisterButtonCallback()
         {
             _backButtonActivation?.Dispose();
-            _settingShortcutButton.UnregisterCallback<ClickEvent>(OnSettingShortcutButtonClicked);
+            _settingShortcutButtonActivation?.Dispose();
         }
 
         /// <summary>
@@ -118,9 +122,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
-        ///     設定画面ショートカットボタンがクリックされたときの処理です。
+        ///     設定画面ショートカットボタンが作動したときの処理です。
         /// </summary>
-        private void OnSettingShortcutButtonClicked(ClickEvent evt)
+        private void HandleSettingShortcutButtonActivationHandler()
         {
             OutGameUIEvent.OnShownSettingScreen?.Invoke();
         }
@@ -143,6 +147,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly Button _settingShortcutButton;
         private readonly ScrollView _treeScrollView;
         private IDisposable _backButtonActivation;
+        private IDisposable _settingShortcutButtonActivation;
         private ScrollViewDragManipulator _dragScrollManipulator;
     }
 }

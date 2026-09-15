@@ -248,9 +248,15 @@ namespace KillChord.Runtime.View.OutGame.Navigation
             {
                 if (_isDisposed || !_element.enabledInHierarchy)
                 {
+                    NavigationDebugLog.Log(
+                        $"Activation ignored on {NavigationDebugLog.Describe(_element)} via "
+                        + $"{activationEvent.GetType().Name} (disposed={_isDisposed}, "
+                        + $"enabled={_element.enabledInHierarchy})");
                     return;
                 }
 
+                NavigationDebugLog.Log(
+                    $"Activation on {NavigationDebugLog.Describe(_element)} via {activationEvent.GetType().Name}");
                 _onActivate();
                 activationEvent.StopPropagation();
             }

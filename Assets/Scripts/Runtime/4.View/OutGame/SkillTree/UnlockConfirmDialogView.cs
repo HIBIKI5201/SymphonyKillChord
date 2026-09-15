@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.View.OutGame.Common;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using UnityEngine.UIElements;
@@ -67,10 +68,19 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _confirmButton = rootElement.Q<Button>(CONFIRM_BUTTON_NAME)
                 ?? throw new InvalidOperationException($"{CONFIRM_BUTTON_NAME} が見つかりません。");
 
-            _skipRow.RegisterCallback<ClickEvent>(HandleSkipRowClickedHandler);
-            _confirmButton.clicked += HandleConfirmButtonClickedHandler;
+            _skipRow.MakeNavigable();
+            _skipRowActivation = _skipRow.RegisterActivation(HandleSkipRowActivatedHandler);
+            // Button.clicked はコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+            // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+            _confirmButton.MakeNavigable();
+            _confirmButtonActivation = _confirmButton.RegisterActivation(HandleConfirmButtonClickedHandler);
+            _dialog.RegisterCallback<NavigationCancelEvent>(
+                HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
             Hide();
         }
+
+        /// <summary> コントローラーのキャンセル操作でダイアログが閉じられた時に通知する。 </summary>
+        public event Action OnCancelled;
 
         /// <summary>
         ///     解放確認内容を表示してダイアログを開く。
@@ -119,13 +129,19 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _dialog.style.display = DisplayStyle.None;
         }
 
+        /// <summary> ダイアログのルート要素。モーダルのフォーカス閉じ込めに使用する。 </summary>
+        public VisualElement DialogRoot => _dialog;
+
         /// <summary>
         ///     登録済みイベントを解除する。
         /// </summary>
         public void Dispose()
         {
-            _skipRow.UnregisterCallback<ClickEvent>(HandleSkipRowClickedHandler);
-            _confirmButton.clicked -= HandleConfirmButtonClickedHandler;
+            _skipRowActivation?.Dispose();
+            _confirmButtonActivation?.Dispose();
+            _dialog.UnregisterCallback<NavigationCancelEvent>(
+                HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
+            OnCancelled = null;
             if (_scrollDragManipulator != null)
             {
                 _scrollDragManipulator.target = null;
@@ -175,6 +191,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly VisualElement _skipRow;
         private readonly VisualElement _skipCheckmark;
         private readonly Button _confirmButton;
+        private IDisposable _skipRowActivation;
+        private IDisposable _confirmButtonActivation;
 
         /// <summary>
         ///     変化がある場合のみ行を表示し、「現在値　→　変化後の値」を設定する。
@@ -201,8 +219,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <summary>
         ///     「このウィンドウを表示しない」チェックボックスの選択状態を切り替える。
         /// </summary>
-        /// <param name="evt"> クリックイベント。 </param>
-        private void HandleSkipRowClickedHandler(ClickEvent evt)
+        private void HandleSkipRowActivatedHandler()
         {
             IsSkipConfirmationChecked = !IsSkipConfirmationChecked;
             _skipCheckmark.style.display = IsSkipConfirmationChecked ? DisplayStyle.Flex : DisplayStyle.None;
@@ -214,6 +231,23 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private void HandleConfirmButtonClickedHandler()
         {
             _outGameUIEvent.OnSkillUnlockConfirmed?.Invoke();
+        }
+
+        /// <summary>
+        ///     コントローラーのキャンセル操作をダイアログ外クリックと同じ「閉じる」動作に変換する。
+        ///     画面全体のキャンセル処理(戻る)より先に処理するため、トリクルダウンで購読する。
+        /// </summary>
+        /// <param name="evt"> ナビゲーションキャンセルイベント。 </param>
+        private void HandleDialogNavigationCancelHandler(NavigationCancelEvent evt)
+        {
+            if (_dialog.resolvedStyle.display == DisplayStyle.None)
+            {
+                return;
+            }
+
+            Hide();
+            OnCancelled?.Invoke();
+            evt.StopPropagation();
         }
     }
 }

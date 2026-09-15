@@ -66,6 +66,12 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         public event Action<IReadOnlyList<int>> OnFocusTargetsRequested;
 
         /// <summary>
+        ///     現在表示されているスクロール領域の画面上の矩形を取得します。
+        ///     ノード間のコントローラー移動先を、画面内に見えている範囲だけに絞り込むために使用します。
+        /// </summary>
+        public Rect ViewportWorldBound => _scrollView.contentViewport.worldBound;
+
+        /// <summary>
         ///     現在の表示状態から初期フォーカス処理を要求する。
         /// </summary>
         public void RequestFocus()
@@ -151,23 +157,26 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             Vector2 nodeLocalCenter = _skillTreeRoot.WorldToLocal(nodeWorldBound.center);
 
             // 基点切替(A→B)の瞬間、スケールが掛かったままノードB自身の画面上位置も
-            // Δ=(B-A)×(1-ZOOM_SCALE)だけ瞬時にジャンプする。切替前に読んだworldBoundは
+            // Δ=(B-A)×(1-旧倍率)だけ瞬時にジャンプする。切替前に読んだworldBoundは
             // このジャンプ後の位置を反映していないため、ここで予測して補正する。
-            Vector2 predictedCenter = nodeWorldBound.center;
-            if (_isZoomed)
-            {
-                Vector2 delta = (nodeLocalCenter - _focusedNodeLocalCenter) * (1f - ZOOM_SCALE);
-                predictedCenter += delta;
-            }
+            // 未ズーム状態からの初回フォーカスも、基準倍率(BASE_SCALE)かつ
+            // 中央(USSのtransform-origin: 50% 50%)を旧基点として同じジャンプが起きるため、
+            // 常に補正する。
+            Vector2 oldFocusLocalCenter = _isZoomed
+                ? _focusedNodeLocalCenter
+                : _skillTreeRoot.WorldToLocal(_skillTreeRoot.worldBound.center);
+            Vector2 delta = (nodeLocalCenter - oldFocusLocalCenter) * (1f - _currentScale);
+            Vector2 predictedCenter = nodeWorldBound.center + delta;
 
             EnforceScrollerHidden();
 
-            // ShowWholeTreeが設定した固定倍率のインラインscaleを解除し、USSクラス側の倍率へ戻す。
+            // FocusOnNodeRangeが設定した動的なインラインscaleを解除し、USSクラス側の倍率へ戻す。
             _skillTreeRoot.style.scale = StyleKeyword.Null;
             _skillTreeRoot.style.transformOrigin =
                 new TransformOrigin(nodeLocalCenter.x, nodeLocalCenter.y);
             _skillTreeRoot.AddToClassList(ZOOMED_USS_CLASS);
             _focusedNodeLocalCenter = nodeLocalCenter;
+            _currentScale = ZOOM_SCALE;
 
             if (!_isZoomed)
             {
@@ -190,6 +199,63 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     指定要素が現在のビューポート外(または余白未満)にある場合のみ、
+        ///     それが見える位置まで最小限スクロールする。ズームや倍率、基点は変更しない。
+        ///     <para>
+        ///         コントローラーでのノード間移動時、接続先ノードが画面外にあっても
+        ///         フォーカス自体は移せるようにしているため、その移動に追従して
+        ///         画面を自動でスクロールさせる用途に使う。
+        ///     </para>
+        /// </summary>
+        /// <param name="element"> 可視範囲に収めたい要素。スキルツリー外の要素は無視される。 </param>
+        public void EnsureVisible(VisualElement element)
+        {
+            if (_isDisposed || element == null)
+            {
+                return;
+            }
+
+            Rect elementBounds = element.worldBound;
+            Rect viewportBounds = _scrollView.contentViewport.worldBound;
+            if (!IsValidRect(elementBounds) || !IsValidRect(viewportBounds))
+            {
+                return;
+            }
+
+            float scrollOffsetX = _scrollView.scrollOffset.x;
+            float scrollOffsetY = _scrollView.scrollOffset.y;
+
+            if (elementBounds.yMin < viewportBounds.yMin + ENSURE_VISIBLE_MARGIN)
+            {
+                scrollOffsetY -= (viewportBounds.yMin + ENSURE_VISIBLE_MARGIN) - elementBounds.yMin;
+            }
+            else if (elementBounds.yMax > viewportBounds.yMax - ENSURE_VISIBLE_MARGIN)
+            {
+                scrollOffsetY += elementBounds.yMax - (viewportBounds.yMax - ENSURE_VISIBLE_MARGIN);
+            }
+
+            if (elementBounds.xMin < viewportBounds.xMin + ENSURE_VISIBLE_MARGIN)
+            {
+                scrollOffsetX -= (viewportBounds.xMin + ENSURE_VISIBLE_MARGIN) - elementBounds.xMin;
+            }
+            else if (elementBounds.xMax > viewportBounds.xMax - ENSURE_VISIBLE_MARGIN)
+            {
+                scrollOffsetX += elementBounds.xMax - (viewportBounds.xMax - ENSURE_VISIBLE_MARGIN);
+            }
+
+            Vector2 targetOffset = new Vector2(
+                ClampScrollOffsetX(scrollOffsetX),
+                ClampScrollOffsetY(scrollOffsetY));
+            if ((targetOffset - _scrollView.scrollOffset).sqrMagnitude <= 1f)
+            {
+                return;
+            }
+
+            EnforceScrollerHidden();
+            AnimateScrollOffsetTo(targetOffset);
+        }
+
+        /// <summary>
         ///     ノードへのズームインを解除し、ズーム前の拡大率とスクロール位置へ戻す。
         /// </summary>
         public void ClearFocusZoom()
@@ -203,27 +269,53 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _skillTreeRoot.RemoveFromClassList(ZOOMED_USS_CLASS);
             _skillTreeRoot.style.scale = StyleKeyword.Null;
             _skillTreeRoot.style.transformOrigin = StyleKeyword.Null;
+            _currentScale = BASE_SCALE;
             EnforceScrollerHidden();
             AnimateScrollOffsetTo(new Vector2(_scrollOffsetXBeforeZoom, _scrollOffsetYBeforeZoom));
         }
 
         /// <summary>
-        ///     ツリー全体が画面に収まるよう一時的にズームアウトし、中央に表示する。
-        ///     連続解放演出などで使用する。FocusOnNodeまたはClearFocusZoomを呼ぶことで元の表示へ戻る。
+        ///     指定ノード群の外接矩形が画面に収まるようズームし、中央に表示する。
+        ///     連続解放演出などで、解放パスの最下ノードと最上ノードを画面の下端・上端に
+        ///     揃えるために使用する。縦横のフィット倍率のうち小さい方を採用するため、
+        ///     幅が広いパスでは横方向が優先され、縦方向には余白ができる。
+        ///     FocusOnNodeまたはClearFocusZoomを呼ぶことで元の表示へ戻る。
         /// </summary>
-        public void ShowWholeTree()
+        /// <param name="nodeIds"> フレーミング対象のノードID群。 </param>
+        public void FocusOnNodeRange(IReadOnlyList<int> nodeIds)
         {
-            if (_isDisposed)
+            if (_isDisposed || nodeIds == null || nodeIds.Count == 0)
+            {
+                return;
+            }
+
+            if (!TryGetNodesLocalBounds(nodeIds, out Rect localBounds))
             {
                 return;
             }
 
             Rect viewportLayout = _scrollView.contentViewport.layout;
-            Rect rootLayout = _skillTreeRoot.layout;
-            Rect rootWorldBound = _skillTreeRoot.worldBound;
             if (!IsValidLength(viewportLayout.width) || !IsValidLength(viewportLayout.height)
-                || !IsValidLength(rootLayout.width) || !IsValidLength(rootLayout.height)
-                || !IsValidRect(rootWorldBound))
+                || !IsValidLength(localBounds.width) || !IsValidLength(localBounds.height))
+            {
+                return;
+            }
+
+            Vector2 localCenter = localBounds.center;
+            Vector2 worldCenterBeforeChange = _skillTreeRoot.LocalToWorld(localCenter);
+
+            // 基点切替(旧基点→パス中心)の瞬間、旧倍率が掛かったままパス中心自身の
+            // 画面上位置もΔ=(新基点-旧基点)×(1-旧倍率)だけ瞬時にジャンプする。
+            // 切替前に読んだ位置はこのジャンプ後を反映していないため、ここで予測して補正する。
+            Vector2 predictedCenter = worldCenterBeforeChange;
+            if (_isZoomed)
+            {
+                Vector2 delta = (localCenter - _focusedNodeLocalCenter) * (1f - _currentScale);
+                predictedCenter += delta;
+            }
+
+            Rect viewportWorldBounds = _scrollView.contentViewport.worldBound;
+            if (!IsValidRect(viewportWorldBounds))
             {
                 return;
             }
@@ -237,30 +329,28 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 _isZoomed = true;
             }
 
-            // ツリー自身の中心を拡大基点にするため、原点切替によるジャンプは発生しない。
-            Vector2 rootLocalCenter = new Vector2(rootLayout.width * 0.5f, rootLayout.height * 0.5f);
-            _skillTreeRoot.style.transformOrigin =
-                new TransformOrigin(rootLocalCenter.x, rootLocalCenter.y);
-            _focusedNodeLocalCenter = rootLocalCenter;
+            _skillTreeRoot.style.transformOrigin = new TransformOrigin(localCenter.x, localCenter.y);
+            _focusedNodeLocalCenter = localCenter;
             _skillTreeRoot.RemoveFromClassList(ZOOMED_USS_CLASS);
 
-            float fitScale = Mathf.Min(
-                viewportLayout.width / rootLayout.width,
-                viewportLayout.height / rootLayout.height) * OVERVIEW_FIT_MARGIN;
-            float overviewScale = Mathf.Max(fitScale, MIN_OVERVIEW_SCALE);
-            _skillTreeRoot.style.scale = new StyleScale(new Scale(new Vector2(overviewScale, overviewScale)));
+            // 外接矩形はノード中心基準のため、そのまま画面幅いっぱいに合わせると
+            // 端のノード自身の半径分が画面外へはみ出す。RANGE_FOCUS_MARGIN分だけ
+            // 内側に余白を確保してから倍率を計算する。
+            float availableHeight = Mathf.Max(1f, viewportLayout.height - RANGE_FOCUS_MARGIN * 2f);
+            float availableWidth = Mathf.Max(1f, viewportLayout.width - RANGE_FOCUS_MARGIN * 2f);
+            float fitScaleY = availableHeight / localBounds.height;
+            float fitScaleX = availableWidth / localBounds.width;
+            // 下限は設けない。縮小を制限すると縦横どちらかの端がフレーム外へ切れてしまうため、
+            // パス全体を収めるために必要な倍率までそのまま縮小させる。
+            float rangeScale = Mathf.Min(fitScaleX, fitScaleY, ZOOM_SCALE);
+            _skillTreeRoot.style.scale = new StyleScale(new Scale(new Vector2(rangeScale, rangeScale)));
+            _currentScale = rangeScale;
 
-            Rect viewportWorldBounds = _scrollView.contentViewport.worldBound;
-            if (!IsValidRect(viewportWorldBounds))
-            {
-                return;
-            }
-
-            float targetCenterInContentY = rootWorldBound.center.y
+            float targetCenterInContentY = predictedCenter.y
                 - viewportWorldBounds.yMin
                 + _scrollView.scrollOffset.y;
             float focusY = viewportWorldBounds.height * 0.5f;
-            float targetCenterInContentX = rootWorldBound.center.x
+            float targetCenterInContentX = predictedCenter.x
                 - viewportWorldBounds.xMin
                 + _scrollView.scrollOffset.x;
             float focusX = viewportWorldBounds.width * 0.5f;
@@ -305,11 +395,19 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// </summary>
         private const float ZOOM_SCALE = 1.8f;
 
-        /// <summary> ツリー全体表示時、四辺に余白を残すための縮小マージン。 </summary>
-        private const float OVERVIEW_FIT_MARGIN = 0.92f;
+        /// <summary>
+        ///     未ズーム時の基準倍率。SkillNode.ussの.skill-tree-canvasのscale値と一致させること。
+        /// </summary>
+        private const float BASE_SCALE = 1.3f;
 
-        /// <summary> ツリー全体表示時の最小倍率。極端に縮小しすぎないための下限。 </summary>
-        private const float MIN_OVERVIEW_SCALE = 0.4f;
+        /// <summary>
+        ///     範囲フレーミング時、外接矩形(ノード中心基準)の周囲に確保する画面上の余白(ピクセル)。
+        ///     ノード自身の半径分を吸収し、端のノードが画面外へはみ出さないようにする。
+        /// </summary>
+        private const float RANGE_FOCUS_MARGIN = 70f;
+
+        /// <summary> <see cref="EnsureVisible"/>でノードの周囲に確保する画面端からの最小余白(ピクセル)。 </summary>
+        private const float ENSURE_VISIBLE_MARGIN = 60f;
 
         private readonly VisualElement _screenRoot;
         private readonly ScrollView _scrollView;
@@ -322,6 +420,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private float _scrollOffsetYBeforeZoom;
         private float _scrollOffsetXBeforeZoom;
         private Vector2 _focusedNodeLocalCenter;
+        private float _currentScale = BASE_SCALE;
         private bool _isZoomed;
         private bool _isWaitingForScreenGeometry;
         private bool _isFocusRequested;
@@ -550,6 +649,46 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             }
 
             return hasTarget && !isLayoutPending;
+        }
+
+        /// <summary>
+        ///     指定ノード群の、SkillTreeRoot基準ローカル座標での外接矩形を取得する。
+        /// </summary>
+        /// <param name="nodeIds"> 対象ノードID群。 </param>
+        /// <param name="localBounds"> 算出したローカル座標の外接矩形。 </param>
+        /// <returns> 1件以上のノードが解決できた場合はtrue。 </returns>
+        private bool TryGetNodesLocalBounds(IReadOnlyList<int> nodeIds, out Rect localBounds)
+        {
+            localBounds = default;
+            bool hasBounds = false;
+            for (int i = 0; i < nodeIds.Count; i++)
+            {
+                if (!_nodeElements.TryGetValue(nodeIds[i], out VisualElement nodeElement))
+                {
+                    continue;
+                }
+
+                Rect nodeWorldBound = nodeElement.worldBound;
+                if (!IsValidRect(nodeWorldBound))
+                {
+                    continue;
+                }
+
+                Vector2 nodeLocalCenter = _skillTreeRoot.WorldToLocal(nodeWorldBound.center);
+                if (!hasBounds)
+                {
+                    localBounds = new Rect(nodeLocalCenter, Vector2.zero);
+                    hasBounds = true;
+                    continue;
+                }
+
+                localBounds.xMin = Mathf.Min(localBounds.xMin, nodeLocalCenter.x);
+                localBounds.xMax = Mathf.Max(localBounds.xMax, nodeLocalCenter.x);
+                localBounds.yMin = Mathf.Min(localBounds.yMin, nodeLocalCenter.y);
+                localBounds.yMax = Mathf.Max(localBounds.yMax, nodeLocalCenter.y);
+            }
+
+            return hasBounds;
         }
 
         /// <summary>
