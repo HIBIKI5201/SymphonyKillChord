@@ -1,8 +1,11 @@
 ---
 import GameplaySlide from './GameplaySlide.astro';
+import SkillShowcaseSlide from './SkillShowcaseSlide.astro';
 import features from '../data/gameplayFeatures.json';
 
-const total = String(features.length).padStart(2, '0');
+// スキルページ統合により、ゲームプレイ紹介の末尾にスキル紹介スライドを1枚追加する
+const slideCount = features.length + 1;
+const total = String(slideCount).padStart(2, '0');
 ---
 
 <section id="gameplay-carousel" class="carousel" tabindex="0" aria-roledescription="carousel" aria-label="ゲームプレイ紹介">
@@ -22,7 +25,7 @@ const total = String(features.length).padStart(2, '0');
 		</div>
 
 		<div class="viewport">
-			<ul class="track" style={`--slide-count: ${features.length};`}>
+			<ul class="track" style={`--slide-count: ${slideCount};`}>
 				{
 					features.map((feature) => (
 						<li class="slide-item">
@@ -36,6 +39,9 @@ const total = String(features.length).padStart(2, '0');
 						</li>
 					))
 				}
+				<li class="slide-item">
+					<SkillShowcaseSlide />
+				</li>
 			</ul>
 		</div>
 
@@ -57,6 +63,9 @@ const total = String(features.length).padStart(2, '0');
 						</li>
 					))
 				}
+				<li role="presentation">
+					<button type="button" class="dot" data-index={features.length} role="tab" aria-label="スキルへ" aria-selected="false" />
+				</li>
 			</ul>
 
 			<button type="button" class="nav next" aria-label="次のスライド">›</button>
