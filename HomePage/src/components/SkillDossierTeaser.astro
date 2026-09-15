@@ -31,6 +31,8 @@ const { title, code, description, href } = Astro.props;
 		--card-ink: #2c2418;
 		--card-ink-muted: #6b5f45;
 		--card-border: #a8996b;
+		/* 紙色の背景上でもWCAG AA(4.5:1)を満たす濃い緑(承認スタンプ用。opacity:0.85込みで計算) */
+		--card-accent: #1a4d2e;
 
 		position: relative;
 		display: block;
@@ -71,13 +73,13 @@ const { title, code, description, href } = Astro.props;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		border: 2px solid var(--color-signal-dim);
+		border: 2px solid var(--card-accent);
 		border-radius: 50%;
 		font-family: var(--font-mono);
 		font-size: 10px;
 		font-weight: 700;
 		letter-spacing: var(--tracking-label);
-		color: var(--color-signal-dim);
+		color: var(--card-accent);
 		transform: rotate(-10deg);
 		opacity: 0.85;
 		text-align: center;
