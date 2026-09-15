@@ -6,30 +6,34 @@ interface Segment {
 }
 
 interface Props {
-	label: string;
+	legendTitle: string;
 	segments: Segment[];
+	current: number;
+	total: number;
+	centerLabel: string;
 }
 
-const { label, segments } = Astro.props;
+const { legendTitle, segments, current, total, centerLabel } = Astro.props;
 
-// SVG円弧をsegments数で等分し、各弧の間に一定のギャップを空けるための計算。
+// SVG円弧を、リング付きページ数(total)で等分し、各弧の間に一定のギャップを空ける。
+// 現在のページ(current)に対応する弧だけを明るく表示し、他は暗く沈める。
 // 12時位置から時計回りに開始するよう、svg要素側で-90degだけ回転させている。
 const radius = 68;
 const circumference = 2 * Math.PI * radius;
 const gap = 10;
-const arcLength = circumference / segments.length - gap;
+const arcLength = circumference / total - gap;
 ---
 
 <div class="ring">
 	<div class="ring-visual">
 		<svg viewBox="0 0 160 160" width="160" height="160" aria-hidden="true">
-			<circle class="ring-track" cx="80" cy="80" r={radius} />
 			{
-				segments.map((segment, index) => {
-					const offset = (circumference / segments.length) * index;
+				Array.from({ length: total }).map((_, index) => {
+					const offset = (circumference / total) * index;
+					const isActive = index < current;
 					return (
 						<circle
-							class:list={['ring-arc', segment.locked && 'is-locked']}
+							class:list={['ring-arc', !isActive && 'is-dim']}
 							cx="80"
 							cy="80"
 							r={radius}
@@ -40,19 +44,21 @@ const arcLength = circumference / segments.length - gap;
 				})
 			}
 		</svg>
-		<p class="ring-label">{label}</p>
+		<p class="ring-label">{centerLabel}</p>
 	</div>
 
-	<ul class="ring-legend">
-		{
-			segments.map((segment) => (
-				<li class:list={[segment.locked && 'is-locked']}>
-					<span class="value">{segment.value}</span>
-					<span class="caption">{segment.caption}</span>
-				</li>
-			))
-		}
-	</ul>
+	<div class="ring-legend-wrap">
+		<ul class="ring-legend">
+			{
+				segments.map((segment) => (
+					<li class:list={[segment.locked && 'is-locked']}>
+						<span class="value">{segment.value}</span>
+						<span class="caption">{segment.caption}</span>
+					</li>
+				))
+			}
+		</ul>
+	</div>
 </div>
 
 <style>
@@ -75,12 +81,6 @@ const arcLength = circumference / segments.length - gap;
 		transform: rotate(-90deg);
 	}
 
-	.ring-track {
-		fill: none;
-		stroke: var(--color-grid-line);
-		stroke-width: 3;
-	}
-
 	.ring-arc {
 		fill: none;
 		stroke: var(--color-signal);
@@ -88,7 +88,7 @@ const arcLength = circumference / segments.length - gap;
 		stroke-linecap: butt;
 	}
 
-	.ring-arc.is-locked {
+	.ring-arc.is-dim {
 		stroke: var(--color-surface-border);
 	}
 
@@ -100,11 +100,19 @@ const arcLength = circumference / segments.length - gap;
 		margin: 0;
 		width: 88px;
 		text-align: center;
+		white-space: nowrap;
 		font-family: var(--font-mono);
-		letter-spacing: var(--tracking-label);
-		font-size: 11px;
-		color: var(--color-text-muted);
-		text-transform: uppercase;
+		letter-spacing: 0.02em;
+		font-size: 15px;
+		font-weight: 700;
+		color: var(--color-signal);
+	}
+
+	.ring-legend-wrap {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
 	}
 
 	.ring-legend {
@@ -117,7 +125,7 @@ const arcLength = circumference / segments.length - gap;
 		gap: 8px;
 	}
 
-	.ring-legend li {
+.ring-legend li {
 		display: flex;
 		align-items: baseline;
 		gap: 6px;
