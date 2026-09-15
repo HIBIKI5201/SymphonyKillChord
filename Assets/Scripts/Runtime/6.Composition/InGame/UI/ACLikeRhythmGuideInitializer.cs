@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Haptics;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Adaptor.InGame.Target;
@@ -8,6 +9,7 @@ using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.View.InGame.Haptics;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.PostEffect;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -118,6 +120,16 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 _rhythmGuideView,
                 new RhythmGuidePostEffectViewModel(_rhythmGuidePostEffectView, _effectConfig));
 
+            // ゲームパッド振動はシーン参照を必要としないため、専用シーン配置のInitializerを設けず、
+            // 既にIPlayerAttackSignalを解決済みのこのInitializerへ相乗りさせている。
+            _gamepadHapticsPresenter?.Dispose();
+            if (_gamepadHapticsView == null)
+            {
+                _gamepadHapticsView = new GameObject(nameof(GamepadHapticsView)).AddComponent<GamepadHapticsView>();
+            }
+
+            _gamepadHapticsPresenter = new GamepadHapticsPresenter(playerAttackSignal, _gamepadHapticsView);
+
             return true;
         }
 
@@ -128,6 +140,15 @@ namespace KillChord.Runtime.Composition.InGame.UI
         {
             _postEffectPresenter?.Dispose();
             _postEffectPresenter = null;
+            _gamepadHapticsPresenter?.Dispose();
+            _gamepadHapticsPresenter = null;
+
+            if (_gamepadHapticsView != null)
+            {
+                Destroy(_gamepadHapticsView.gameObject);
+                _gamepadHapticsView = null;
+            }
+
             _isRegisteredToPlayDirector = false;
         }
 
@@ -140,6 +161,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         private bool _isRegisteredToPlayDirector;
         private RhythmGuidePostEffectPresenter _postEffectPresenter;
+        private GamepadHapticsPresenter _gamepadHapticsPresenter;
+        private GamepadHapticsView _gamepadHapticsView;
 
         /// <summary>
         ///     リズムガイドViewをゲームプレイ開始対象へ登録します。
