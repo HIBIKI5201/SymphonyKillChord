@@ -36,11 +36,18 @@ namespace KillChord.Runtime.View.InGame.Haptics
                 return;
             }
 
+            if (_config.PulseDuration <= 0f)
+            {
+                return;
+            }
+
             gamepad.SetMotorSpeeds(_config.LowFrequencyMotorSpeed, _config.HighFrequencyMotorSpeed);
+            _pulsingGamepad = gamepad;
             _remainingPulseTime = _config.PulseDuration;
         }
 
         private GamepadHapticsConfig _config;
+        private Gamepad _pulsingGamepad;
         private float _remainingPulseTime;
 
         /// <summary>
@@ -69,12 +76,18 @@ namespace KillChord.Runtime.View.InGame.Haptics
         }
 
         /// <summary>
-        ///     接続中のゲームパッドの振動を停止する。
+        ///     振動を開始したゲームパッドの振動を停止する。
         /// </summary>
         private void StopHaptics()
         {
             _remainingPulseTime = 0f;
-            Gamepad.current?.SetMotorSpeeds(0f, 0f);
+
+            if (_pulsingGamepad != null && _pulsingGamepad.added)
+            {
+                _pulsingGamepad.SetMotorSpeeds(0f, 0f);
+            }
+
+            _pulsingGamepad = null;
         }
     }
 }

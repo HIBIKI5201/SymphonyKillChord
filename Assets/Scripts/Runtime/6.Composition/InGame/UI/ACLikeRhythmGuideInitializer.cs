@@ -34,9 +34,10 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         /// <summary>
         ///     ゲームパッド振動のConfigをAddressablesから読み込む。
+        ///     振動は演出用途のためoptional扱いとし、読み込みに失敗してもモジュール自体は成功として扱う。
         /// </summary>
         /// <param name="cancellationToken"> キャンセルトークンです。 </param>
-        /// <returns> 読み込みに成功した場合はtrue。 </returns>
+        /// <returns> 常にtrue（キャンセル時を除く）。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
             ReleaseLoadedHapticsConfig();
@@ -46,16 +47,14 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 _loadedHapticsConfig = await _hapticsConfigKey.LoadAssetAsync<GamepadHapticsConfig>(
                     this,
                     cancellationToken);
-                if (_loadedHapticsConfig != null)
+                if (_loadedHapticsConfig == null)
                 {
-                    return true;
+                    Debug.LogWarning(
+                        $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigを読み込めませんでした。振動機能なしで続行します。",
+                        this);
                 }
 
-                Debug.LogError(
-                    $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigを読み込めませんでした。",
-                    this);
-                ReleaseLoadedHapticsConfig();
-                return false;
+                return true;
             }
             catch (OperationCanceledException)
             {
@@ -64,11 +63,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
             catch (Exception exception)
             {
-                Debug.LogError(
-                    $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfig読み込みに失敗しました: {exception}",
+                Debug.LogWarning(
+                    $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfig読み込みに失敗しました。振動機能なしで続行します: {exception}",
                     this);
                 ReleaseLoadedHapticsConfig();
-                return false;
+                return true;
             }
         }
 
@@ -164,10 +163,12 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 _rhythmGuideView,
                 new RhythmGuidePostEffectViewModel(_rhythmGuidePostEffectView, _effectConfig));
 
+            // ゲームパッド振動は演出用途のoptional機能のため、Configが未ロードでもモジュール自体は成功させ、
+            // 振動関連の生成のみスキップする。
             if (_loadedHapticsConfig == null)
             {
-                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigが未ロードです。", this);
-                return false;
+                Debug.LogWarning($"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigが未ロードのため、振動機能なしで続行します。", this);
+                return true;
             }
 
             // ゲームパッド振動はシーン参照を必要としないため、専用シーン配置のInitializerを設けず、
