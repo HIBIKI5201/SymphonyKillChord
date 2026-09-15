@@ -20,7 +20,7 @@ MonoBehaviour:
     ExitBlendFrameCount: 0
   - ClipType: 1
     Key: 
-    Clip: {fileID: 7400000, guid: a42e873e9c55e754aa634fff2446b2d1, type: 2}
+    Clip: {fileID: 7400000, guid: 9785a2c3720f7bd49bf7221facacfc0e, type: 2}
     EnterBlendFrameCount: 0
     ExitBlendFrameCount: 0
   - ClipType: 2
@@ -31,8 +31,8 @@ MonoBehaviour:
   - ClipType: 3
     Key: 
     Clip: {fileID: 7400000, guid: ad99f450f4f323b46b8d98a222b706d2, type: 2}
-    EnterBlendFrameCount: 0
-    ExitBlendFrameCount: 0
+    EnterBlendFrameCount: 3
+    ExitBlendFrameCount: 12
   - ClipType: 3
     Key: Skill_Right
     Clip: {fileID: 7400000, guid: f76ac7876d6fc0f49ae39bb52a4e0c49, type: 2}

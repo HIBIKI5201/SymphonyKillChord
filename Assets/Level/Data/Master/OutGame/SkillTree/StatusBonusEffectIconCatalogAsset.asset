@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc66b7d16e3753e439845f56c36a0c6d, type: 3}
+  m_Name: StatusBonusEffectIconCatalogAsset
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.SkillTree.StatusBonusEffectIconCatalogAsset
+  _entries:
+  - Kind: 0
+    Icon: {fileID: 21300000, guid: d81263997a6280c468e079a8d6248eea, type: 3}
+  - Kind: 1
+    Icon: {fileID: 21300000, guid: e227702e0876f4e449e01ddb792e5ada, type: 3}
+  - Kind: 2
+    Icon: {fileID: 21300000, guid: f3735de06c43dd04baf4fd931fc2043d, type: 3}
+  - Kind: 3
+    Icon: {fileID: 21300000, guid: 21b18cb5091362c419a7dd67d9a589b7, type: 3}
+  - Kind: 4
+    Icon: {fileID: 21300000, guid: a00093768cb06f24289d43e2addc0859, type: 3}

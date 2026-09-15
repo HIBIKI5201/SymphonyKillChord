@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dae99f30a27f7a45889615497dfa6d0, type: 3}
+  m_Name: Stream_StageTreeAsset
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageTreeAsset
+  _stageAssets:
+  - {fileID: 11400000, guid: 2281367c68cb6634081461dfd81c61ec, type: 2}
+  - {fileID: 11400000, guid: 8bcaedbcd4538f54e9e9b48b68c502c8, type: 2}
+  - {fileID: 11400000, guid: 7a03d8563d09fd645a259be8eba33242, type: 2}
+  - {fileID: 11400000, guid: ea08d7edb63239a408a52d8548ca75a5, type: 2}
+  _bindAssets:
+  - {fileID: 11400000, guid: 31446bf5935071f4a8e0c62eb0821f02, type: 2}
+  - {fileID: 11400000, guid: 032025c753082b844889a7c2cc68f033, type: 2}
+  - {fileID: 11400000, guid: c35c9459573bd5d4a901ea9e041bbe7c, type: 2}

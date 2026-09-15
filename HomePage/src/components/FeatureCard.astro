@@ -1,0 +1,57 @@
+---
+interface Props {
+	name: string;
+	description: string;
+}
+
+const { name, description } = Astro.props;
+---
+
+<article class="feature-card">
+	<div class="visual">
+		<span class="no-image">NO IMAGE</span>
+	</div>
+	<h2 class="name">{name}</h2>
+	<p class="description">{description}</p>
+</article>
+
+<style>
+	.feature-card {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.visual {
+		aspect-ratio: 1 / 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px dashed var(--color-surface-border);
+		background: var(--color-surface);
+	}
+
+	.no-image {
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		color: var(--color-text-muted);
+		text-transform: uppercase;
+	}
+
+	.name {
+		margin: 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: 1.25rem;
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+
+	.description {
+		margin: 0;
+		font-size: 0.9375rem;
+		line-height: 1.8;
+		color: var(--color-text-muted);
+	}
+</style>

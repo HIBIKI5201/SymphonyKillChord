@@ -4,9 +4,9 @@
         <ui:VisualElement style="background-color: rgb(128, 128, 128); width: 50%; height: 50%; align-self: center; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px;">
             <ui:Label text="装備中スキルの変更が保存されていません。保存しますか？" name="Message" style="-unity-text-align: middle-center; width: 100%; height: 50%; font-size: 30px; -unity-font-style: bold;"/>
             <ui:VisualElement name="Buttons" style="flex-direction: row; justify-content: center; align-items: stretch;">
-                <ui:Button text="破棄して戻る" name="DiscardAndCloseButton" class="button" style="font-size: 24px;"/>
+                <ui:Button text="破棄して戻る" name="DiscardAndCloseButton" class="button ui-se-cancel" style="font-size: 24px;"/>
                 <ui:VisualElement name="Space" style="width: 10%; max-width: 100px;"/>
-                <ui:Button text="保存して戻る" name="SaveAndCloseButton" class="button" style="font-size: 24px;"/>
+                <ui:Button text="保存して戻る" name="SaveAndCloseButton" class="button ui-se-select" style="font-size: 24px;"/>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

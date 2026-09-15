@@ -128,11 +128,46 @@ namespace KillChord.Editor.SourceDataProvider
             }
 
             EnsureSelection();
+            DrawDataVariantToolbar();
 
             EditorGUILayout.BeginHorizontal();
             DrawPageSidebar(pages);
             DrawPageContent(pages[_selectedPageIndex]);
             EditorGUILayout.EndHorizontal();
+        }
+
+        /// <summary>
+        ///     表示・編集対象のゲームデータ種別を切り替えるToolbarを描画します。
+        /// </summary>
+        private void DrawDataVariantToolbar()
+        {
+            GameDataVariant currentVariant = GameDataVariantEditorState.SelectedVariant;
+            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            GUILayout.Label("Data Variant", GUILayout.Width(82f));
+            GameDataVariant nextVariant = (GameDataVariant)EditorGUILayout.EnumPopup(
+                currentVariant,
+                EditorStyles.toolbarPopup,
+                GUILayout.Width(96f));
+            GUILayout.Space(8f);
+            GUILayout.Label(
+                $"Viewing: {GameDataVariantEditorState.GetGroupName(currentVariant)} + "
+                + GameDataVariantEditorState.SHARED_GROUP_NAME,
+                EditorStyles.miniLabel);
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            if (nextVariant == currentVariant)
+            {
+                return;
+            }
+
+            GUI.FocusControl(null);
+            GameDataVariantEditorState.SetSelectedVariant(nextVariant);
+            _selectedCollectionItemIndex = 0;
+            BattleSceneDataReader.ClearCache();
+            ClearCachedEditor();
+            EnsureSelection();
+            Repaint();
         }
 
         /// <summary>
@@ -480,15 +515,21 @@ namespace KillChord.Editor.SourceDataProvider
         /// <param name="addressableKey"> 対象のAddressableキーです。 </param>
         private void DrawSourceAssetDetail(string addressableKey)
         {
-            if (!SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject sourceAsset))
+            if (!SourceDataProviderRepositoryResolver.TryResolveAsset(
+                    addressableKey,
+                    GameDataVariantEditorState.SelectedVariant,
+                    out ScriptableObject sourceAsset,
+                    out string groupName,
+                    out string errorMessage))
             {
                 EditorGUILayout.HelpBox(
-                    $"Addressableキー「{addressableKey}」からSourceAssetを解決できません。",
+                    errorMessage,
                     MessageType.Error);
                 return;
             }
 
             DrawObjectHeader("Source Asset", addressableKey, sourceAsset);
+            DrawDataVariantMetadata(groupName, sourceAsset);
             DrawInspector(sourceAsset);
             EditorGUILayout.Space();
             DrawSourceAssetPreview(addressableKey, sourceAsset);
@@ -1060,6 +1101,23 @@ namespace KillChord.Editor.SourceDataProvider
                 EditorGUIUtility.PingObject(target);
                 Selection.activeObject = target;
             }
+        }
+
+        /// <summary>
+        ///     現在編集中のvariantとAsset配置情報を描画します。
+        /// </summary>
+        /// <param name="groupName"> 解決元のAddressables Group名です。 </param>
+        /// <param name="target"> 対象Assetです。 </param>
+        private static void DrawDataVariantMetadata(string groupName, UnityEngine.Object target)
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.EnumPopup("Variant", GameDataVariantEditorState.SelectedVariant);
+                EditorGUILayout.TextField("Addressables Group", groupName);
+                EditorGUILayout.TextField("Asset Path", AssetDatabase.GetAssetPath(target));
+            }
+            EditorGUILayout.EndVertical();
         }
 
         /// <summary>

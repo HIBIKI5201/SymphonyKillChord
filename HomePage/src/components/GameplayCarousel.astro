@@ -1,0 +1,284 @@
+---
+import GameplaySlide from './GameplaySlide.astro';
+import features from '../data/gameplayFeatures.json';
+
+const total = String(features.length).padStart(2, '0');
+---
+
+<section id="gameplay-carousel" class="carousel" tabindex="0" aria-roledescription="carousel" aria-label="ゲームプレイ紹介">
+	<div class="frame">
+		<span class="corner corner-tl" aria-hidden="true"></span>
+		<span class="corner corner-tr" aria-hidden="true"></span>
+		<span class="corner corner-bl" aria-hidden="true"></span>
+		<span class="corner corner-br" aria-hidden="true"></span>
+
+		<div class="carousel-header">
+			<p class="log">REC ● GAMEPLAY LOG</p>
+			<div class="counter">
+				<span class="current">01</span>
+				<span class="divider">/</span>
+				<span class="total">{total}</span>
+			</div>
+		</div>
+
+		<div class="viewport">
+			<ul class="track" style={`--slide-count: ${features.length};`}>
+				{
+					features.map((feature) => (
+						<li class="slide-item">
+							<GameplaySlide
+								code={feature.code}
+								name={feature.name}
+								description={feature.description}
+								ringLabel={feature.ringLabel}
+								ringSegments={feature.ringSegments}
+							/>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+
+		<div class="controls">
+			<button type="button" class="nav prev" aria-label="前のスライド">‹</button>
+
+			<ul class="dots" role="tablist">
+				{
+					features.map((feature, index) => (
+						<li role="presentation">
+							<button
+								type="button"
+								class="dot"
+								data-index={index}
+								role="tab"
+								aria-label={`${feature.name}へ`}
+								aria-selected={index === 0 ? 'true' : 'false'}
+							/>
+						</li>
+					))
+				}
+			</ul>
+
+			<button type="button" class="nav next" aria-label="次のスライド">›</button>
+		</div>
+	</div>
+</section>
+
+<script>
+	const root = document.getElementById('gameplay-carousel');
+
+	if (root) {
+		const track = root.querySelector<HTMLElement>('.track');
+		const slides = Array.from(root.querySelectorAll<HTMLElement>('.slide-item'));
+		const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('.dot'));
+		const prevButton = root.querySelector<HTMLButtonElement>('.nav.prev');
+		const nextButton = root.querySelector<HTMLButtonElement>('.nav.next');
+		const currentLabel = root.querySelector('.counter .current');
+
+		let index = 0;
+
+		const clamp = (value: number) => Math.max(0, Math.min(slides.length - 1, value));
+
+		function render() {
+			if (track) {
+				track.style.transform = `translateX(-${index * 100}%)`;
+			}
+			dots.forEach((dot, i) => {
+				dot.classList.toggle('is-active', i === index);
+				dot.setAttribute('aria-selected', i === index ? 'true' : 'false');
+			});
+			if (currentLabel) {
+				currentLabel.textContent = String(index + 1).padStart(2, '0');
+			}
+			if (prevButton) prevButton.disabled = index === 0;
+			if (nextButton) nextButton.disabled = index === slides.length - 1;
+		}
+
+		function goTo(next: number) {
+			index = clamp(next);
+			render();
+		}
+
+		prevButton?.addEventListener('click', () => goTo(index - 1));
+		nextButton?.addEventListener('click', () => goTo(index + 1));
+		dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+		root.addEventListener('keydown', (event) => {
+			if (event.key === 'ArrowRight') goTo(index + 1);
+			if (event.key === 'ArrowLeft') goTo(index - 1);
+		});
+
+		render();
+	}
+</script>
+
+<style>
+	.carousel {
+		position: relative;
+		outline: none;
+	}
+
+	.carousel:focus-visible .frame {
+		outline: 2px solid var(--color-signal);
+		outline-offset: 4px;
+	}
+
+	.frame {
+		position: relative;
+		padding: 32px clamp(16px, 4vw, 48px) 24px;
+		background:
+			repeating-linear-gradient(0deg, var(--color-grid-line) 0, var(--color-grid-line) 1px, transparent 1px, transparent 32px),
+			repeating-linear-gradient(90deg, var(--color-grid-line) 0, var(--color-grid-line) 1px, transparent 1px, transparent 32px),
+			linear-gradient(180deg, var(--color-surface) 0%, var(--color-bg-alt) 100%);
+		border: 1px solid var(--color-surface-border);
+	}
+
+	.corner {
+		position: absolute;
+		width: 24px;
+		height: 24px;
+		border: 2px solid var(--color-signal-dim);
+	}
+
+	.corner-tl {
+		top: -1px;
+		left: -1px;
+		border-right: none;
+		border-bottom: none;
+	}
+
+	.corner-tr {
+		top: -1px;
+		right: -1px;
+		border-left: none;
+		border-bottom: none;
+	}
+
+	.corner-bl {
+		bottom: -1px;
+		left: -1px;
+		border-right: none;
+		border-top: none;
+	}
+
+	.corner-br {
+		bottom: -1px;
+		right: -1px;
+		border-left: none;
+		border-top: none;
+	}
+
+	.carousel-header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+	}
+
+	.log {
+		margin: 0;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--color-warning);
+		text-transform: uppercase;
+	}
+
+	.counter {
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		color: var(--color-text-muted);
+	}
+
+	.counter .current {
+		color: var(--color-signal);
+		font-weight: 700;
+	}
+
+	.viewport {
+		overflow: hidden;
+		margin-top: 8px;
+	}
+
+	.track {
+		display: flex;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		transition: transform 0.5s ease;
+	}
+
+	.slide-item {
+		flex: 0 0 100%;
+		min-width: 0;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.track {
+			transition: none;
+		}
+	}
+
+	.controls {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 24px;
+		margin-top: 8px;
+	}
+
+	.nav {
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		border: 1px solid var(--color-surface-border);
+		background: var(--color-surface);
+		color: var(--color-text-primary);
+		font-size: 20px;
+		line-height: 1;
+		cursor: pointer;
+		transition:
+			border-color 0.2s ease,
+			color 0.2s ease,
+			background-color 0.2s ease;
+	}
+
+	.nav:hover:not(:disabled) {
+		border-color: var(--color-signal);
+		color: var(--color-bg);
+		background: var(--color-signal);
+	}
+
+	.nav:disabled {
+		opacity: 0.3;
+		cursor: default;
+	}
+
+	.dots {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.dot {
+		width: 10px;
+		height: 10px;
+		padding: 0;
+		border: 1px solid var(--color-surface-border);
+		border-radius: 50%;
+		background: transparent;
+		cursor: pointer;
+		transition:
+			background-color 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.dot.is-active {
+		background: var(--color-signal);
+		border-color: var(--color-signal);
+	}
+</style>

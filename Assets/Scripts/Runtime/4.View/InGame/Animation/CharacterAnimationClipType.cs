@@ -9,5 +9,6 @@ namespace KillChord.Runtime.View
         Walk = 1,
         Dodge = 2,
         Attack = 3,
+        Reserved = 4,
     }
 }

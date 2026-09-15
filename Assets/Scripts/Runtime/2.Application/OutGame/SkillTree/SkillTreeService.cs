@@ -47,8 +47,9 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 Debug.LogWarning($"[SkillTreeService] ノードID {nodeId} が見つかりません。");
                 return -1;
             }
-            // 解放済み、或いは親ノードがない場合、探索終了する
-            if (node.IsUnlocked || node.Parents == null || node.Parents.Length <= 0)
+            // 解放済みの場合は支払うコストがないため探索終了する。
+            // 親ノードを持たない起点ノードは、自身のコストのみで解放できるため探索を続行する。
+            if (node.IsUnlocked)
             {
                 return -1;
             }
@@ -61,6 +62,97 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 unlockCost += nodeOnPath.UnlockCost.Cost;
             }
             return unlockCost;
+        }
+
+        /// <summary>
+        ///     指定候補のうち、スタート地点から最も近い未解放ノードIDを取得する。
+        ///     指定候補が全て解放済みの場合は、最も遠い解放済みノードIDを取得する。
+        /// </summary>
+        /// <param name="candidateNodeIds"> 初期フォーカス対象になり得るノードID。 </param>
+        /// <param name="nodeIds"> 初期フォーカス対象のノードID。 </param>
+        /// <returns> 親参照の距離を算出できた場合はtrue。 </returns>
+        public bool TryGetNearestLockedNodeIdsFromStart(
+            IReadOnlyCollection<SkillNodeId> candidateNodeIds,
+            out IReadOnlyList<SkillNodeId> nodeIds)
+        {
+            if (candidateNodeIds == null)
+            {
+                throw new ArgumentNullException(nameof(candidateNodeIds));
+            }
+
+            nodeIds = Array.Empty<SkillNodeId>();
+            HashSet<SkillNodeEntity> candidateNodes = new HashSet<SkillNodeEntity>();
+            foreach (SkillNodeId candidateNodeId in candidateNodeIds)
+            {
+                if (_skillNodeEntityDict.TryGetValue(
+                        candidateNodeId,
+                        out SkillNodeEntity candidateNode))
+                {
+                    candidateNodes.Add(candidateNode);
+                }
+            }
+
+            if (candidateNodes.Count == 0)
+            {
+                return true;
+            }
+
+            Dictionary<SkillNodeEntity, int> distanceByNode =
+                new Dictionary<SkillNodeEntity, int>(candidateNodes.Count);
+            foreach (SkillNodeEntity node in candidateNodes)
+            {
+                if (!TryGetDistanceFromStart(
+                        node,
+                        distanceByNode))
+                {
+                    return false;
+                }
+            }
+
+            List<SkillNodeId> targetNodeIds = new List<SkillNodeId>();
+            int targetDistance = int.MaxValue;
+            foreach (SkillNodeEntity node in candidateNodes)
+            {
+                if (node.IsUnlocked)
+                {
+                    continue;
+                }
+
+                int distance = distanceByNode[node];
+                if (distance < targetDistance)
+                {
+                    targetDistance = distance;
+                    targetNodeIds.Clear();
+                }
+
+                if (distance == targetDistance)
+                {
+                    targetNodeIds.Add(node.SkillNodeIdVO);
+                }
+            }
+
+            if (targetNodeIds.Count == 0)
+            {
+                targetDistance = int.MinValue;
+                foreach (SkillNodeEntity node in candidateNodes)
+                {
+                    int distance = distanceByNode[node];
+                    if (distance > targetDistance)
+                    {
+                        targetDistance = distance;
+                        targetNodeIds.Clear();
+                    }
+
+                    if (distance == targetDistance)
+                    {
+                        targetNodeIds.Add(node.SkillNodeIdVO);
+                    }
+                }
+            }
+
+            targetNodeIds.Sort((left, right) => left.Id.CompareTo(right.Id));
+            nodeIds = targetNodeIds;
+            return true;
         }
 
         /// <summary>
@@ -258,7 +350,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <param name="nodesOnPath"></param>
         private void FindNodesOnPath(SkillNodeEntity node, HashSet<SkillNodeEntity> nodesOnPath)
         {
-            if(node == null || _visitedNodes.Contains(node)) return;
+            if (node == null || _visitedNodes.Contains(node)) return;
             if (!node.IsUnlocked)
             {
                 _visitedNodes.Add(node);
@@ -271,6 +363,89 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                     }
                 }
             }
+        }
+
+        /// <summary>
+        ///     親参照を辿り、スタート地点から指定ノードまでの最短距離を取得する。
+        /// </summary>
+        /// <param name="startNode"> 距離を取得する起点ノード。 </param>
+        /// <param name="distanceByNode"> 計算済み距離のキャッシュ。複数回の呼び出し間で共有可能。 </param>
+        /// <returns> 循環せず距離を算出できた場合はtrue。 </returns>
+        private bool TryGetDistanceFromStart(
+            SkillNodeEntity startNode,
+            Dictionary<SkillNodeEntity, int> distanceByNode)
+        {
+            if (startNode == null)
+            {
+                return false;
+            }
+
+            if (distanceByNode.ContainsKey(startNode))
+            {
+                return true;
+            }
+
+            // フィールドを使い回すため、呼び出しの都度クリアしてから利用する。
+            Stack<(SkillNodeEntity Node, int ParentIndex, int MinParentDistance)> workStack = _distanceWorkStack;
+            HashSet<SkillNodeEntity> nodesOnStack = _distanceNodesOnStack;
+            workStack.Clear();
+            nodesOnStack.Clear();
+
+            workStack.Push((startNode, 0, int.MaxValue));
+            nodesOnStack.Add(startNode);
+
+            while (workStack.Count > 0)
+            {
+                (SkillNodeEntity node, int parentIndex, int minParentDistance) = workStack.Pop();
+
+                SkillNodeEntity[] parents = node.Parents;
+                if (parents == null || parents.Length == 0)
+                {
+                    distanceByNode[node] = 0;
+                    nodesOnStack.Remove(node);
+                    continue;
+                }
+
+                bool suspended = false;
+                for (int i = parentIndex; i < parents.Length; i++)
+                {
+                    SkillNodeEntity parent = parents[i];
+                    if (parent == null)
+                    {
+                        workStack.Clear();
+                        nodesOnStack.Clear();
+                        return false;
+                    }
+
+                    if (distanceByNode.TryGetValue(parent, out int parentDistance))
+                    {
+                        minParentDistance = Math.Min(minParentDistance, parentDistance);
+                        continue;
+                    }
+
+                    // 現在の探索経路上に既に存在する場合は循環参照。
+                    if (!nodesOnStack.Add(parent))
+                    {
+                        workStack.Clear();
+                        nodesOnStack.Clear();
+                        return false;
+                    }
+
+                    // 未計算の親を先に処理するため、自身を中断状態で積み直してから親を積む。
+                    workStack.Push((node, i, minParentDistance));
+                    workStack.Push((parent, 0, int.MaxValue));
+                    suspended = true;
+                    break;
+                }
+
+                if (!suspended)
+                {
+                    distanceByNode[node] = minParentDistance == int.MaxValue ? 0 : minParentDistance + 1;
+                    nodesOnStack.Remove(node);
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -346,5 +521,9 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
 
         private readonly Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntityDict;
         private readonly HashSet<SkillNodeEntity> _visitedNodes;
+
+        // TryGetDistanceFromStart で使い回すための作業用フィールド。
+        private readonly Stack<(SkillNodeEntity Node, int ParentIndex, int MinParentDistance)> _distanceWorkStack = new();
+        private readonly HashSet<SkillNodeEntity> _distanceNodesOnStack = new();
     }
 }

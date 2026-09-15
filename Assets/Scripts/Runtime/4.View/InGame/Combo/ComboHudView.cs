@@ -1,7 +1,10 @@
+using LitMotion;
+using LitMotion.Extensions;
 using R3;
 using System;
 using TMPro;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace KillChord.Runtime.View.InGame.Combo
 {
@@ -37,19 +40,30 @@ namespace KillChord.Runtime.View.InGame.Combo
                       }
                       else
                       {
-                          _comboText.SetText("{0}コンボ", comboCount);
+                          _comboText.SetText("{0}", comboCount);
                       }
+                      _handle.TryComplete();
+                      _handle = LSequence.Create()
+                        .Join(LMotion.Punch.Create(0f, 5f, 0.1f)
+                            .WithFrequency(Random.Range(2, 5))
+                            .BindToAnchoredPositionX(_comboText.rectTransform))
+                        .Join(LMotion.Punch.Create(0f, 5f, 0.1f)
+                            .WithFrequency(Random.Range(2, 5))
+                            .BindToAnchoredPositionY(_comboText.rectTransform))
+                        .Run();
                   });
         }
 
         [SerializeField] private TextMeshProUGUI _comboText;
         private ComboHudViewModel _comboHudViewModel;
         private IDisposable _comboDisposable;
+        private MotionHandle _handle;
         /// <summary>
         ///    ビューが破棄される際に購読を解除します。
         /// </summary>
         private void OnDestroy()
         {
+            _handle.TryCancel();
             _comboDisposable?.Dispose();
         }
     }

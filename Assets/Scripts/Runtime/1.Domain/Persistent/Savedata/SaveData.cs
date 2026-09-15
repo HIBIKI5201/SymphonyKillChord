@@ -20,6 +20,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             _skillBuild = new();
             _stageProgress = new();
             _tutorial = new();
+            _audioSettings = new();
         }
 
         // 基底クラスにデシリアライズ後フックがないため、各プロパティの公開時に欠損データを補完する。
@@ -36,6 +37,9 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <summary> プレイヤーのチュートリアル進行状況のセーブデータを表すプロパティ。 </summary>
         public TutorialData Tutorial => _tutorial ??= new();
 
+        /// <summary> プレイヤーの音量設定を表すプロパティ。 </summary>
+        public AudioSettingsData AudioSettings => _audioSettings ??= new();
+
         // セーブデータの各種データを保持するメンバー変数
         [SerializeField, Tooltip("プレイヤーのスキル解放情報のセーブデータ")]
         private SkillUnlockData _skillUnlock;
@@ -45,5 +49,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         private StageProgressData _stageProgress;
         [SerializeField, Tooltip("プレイヤーのチュートリアル進行状況のセーブデータ")]
         private TutorialData _tutorial;
+        [SerializeField, Tooltip("プレイヤーの音量設定")]
+        private AudioSettingsData _audioSettings;
     }
 }

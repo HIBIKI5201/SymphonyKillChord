@@ -39,6 +39,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary> シナリオが選択されているかどうかを取得します。 </summary>
         public bool HasSelectedScenario => _currentStageDefinition != null;
 
+        /// <summary> タイトルから開始したオープニングチュートリアルの場合はtrueです。 </summary>
+        public bool IsOpeningTutorialScenario { get; private set; }
+
         /// <summary>
         ///     シナリオを選択します。
         /// </summary>
@@ -51,6 +54,17 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             }
 
             _currentStageDefinition = stageDefinition;
+            IsOpeningTutorialScenario = false;
+        }
+
+        /// <summary>
+        ///     タイトルから開始するオープニングチュートリアルシナリオを選択します。
+        /// </summary>
+        /// <param name="stageDefinition"> 選択するシナリオステージ定義。 </param>
+        public void SelectOpeningTutorialScenario(ScenarioStageDefinition stageDefinition)
+        {
+            SelectScenario(stageDefinition);
+            IsOpeningTutorialScenario = true;
         }
 
         /// <summary>
@@ -59,6 +73,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         public void Clear()
         {
             _currentStageDefinition = null;
+            IsOpeningTutorialScenario = false;
         }
 
         private ScenarioStageDefinition _currentStageDefinition;

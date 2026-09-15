@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
+import GameplayCarousel from '../components/GameplayCarousel.astro';
+---
+
+<Layout title="ゲームプレイ | Symphony Kill Chord">
+	<main>
+		<PageHeader eyebrow="Gameplay" title="ゲームプレイ" />
+
+		<GameplayCarousel />
+	</main>
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		max-width: 1080px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+</style>

@@ -1,13 +1,13 @@
 # 概要
 > 💡 **モジュール概要**
-> ステージクリア／ゲームオーバー時のリザルト画面表示と、そこからOutGameへの帰還・InGameの再挑戦（リトライ）を司るモジュールです。Sequenceモジュールから呼び出され、Mission・StageSelectの情報を集約して表示します。
+> ステージクリア／ゲームオーバー時のリザルト画面表示と、そこからOutGameへの帰還・InGameの再挑戦（リトライ）を司るモジュールである。Sequenceモジュールから呼び出され、Mission・StageSelectの情報を集約して表示する。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Result |
 | **カテゴリ** | InGame |
-| **ステータス** | 実装済み（既知の課題を参照） |
-| **最終更新日** | 2026-07-15 |
+| **ステータス** | 実装済み |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -15,7 +15,9 @@
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
-| **`StageResultController`** | Adaptor | `CompleteAsync`（OutGameへ帰還）/`RetryAsync`（InGame再読込）のシーン遷移を実行 |
+| **`StageResultController`** | Adaptor | `CompleteAsync`（OutGameへ帰還）/`RetryAsync`（InGame再読込）のシーン遷移を実行。任意の`IStageResultExitPolicy`が登録されている場合、遷移先シーン名をポリシー側の判定結果へ差し替える |
+| **`IStageResultExitPolicy`** | Adaptor | 製品固有の終了条件に応じて、リザルト遷移先シーンを差し替える拡張ポイントの契約 |
+| **`StageResultExitAction`** | Adaptor | リザルト画面から選択された遷移操作を表すenum（`Complete`/`Retry`） |
 | **`StageResultPresenter`** | Adaptor | `PresentVictory(MissionEvaluationResult)`/`PresentDefeat()`で`StageResultDTO`を構築しViewModelへ反映 |
 | **`StageResultDTO`** | Adaptor | 表示用データ一式（ランク・サブミッション一覧・最大コンボ・戦闘時間・Tips等）を保持するreadonly ref struct |
 | **`StageResultMissionItemDTO`** | Adaptor | サブミッション1件分の説明・達成有無を表すreadonly struct |
@@ -24,6 +26,9 @@
 | **`StageResultView`** | View | ボタン押下ハンドリング、勝敗UIの出し分け、サブミッション行の生成を行うMonoBehaviour |
 | **`StageResultViewModel`** | View | `IStageResultViewModel`実装。R3の`ReactiveProperty`で各表示項目を保持 |
 | **`StageResultMissionItemView` / `StageResultMissionItemViewModel`** | View | サブミッション1行分の表示 |
+| **`ResultTextSlideIn`** | View | UI要素を左から右へスライドインさせる共通演出。LitMotionで位置を動かし、`UseFade`が有効な場合はalphaも動かす静的クラス |
+| **`ResultTextSlideInSetting`** | View | スライドイン演出の設定（有効・遅延・時間など）を持つSerializableクラス |
+| **`ResultCountUpSetting`** | View | 数値のカウントアップ演出の設定を持つSerializableクラス |
 | **`StageResultInitializationModule`** | Composition | Presenter/Controllerの構築とView初期化 |
 | **`StageResultModuleContainer`** | Composition | `View`/`Presenter`/`Controller`をServiceLocatorへ公開するContainer。Sequenceモジュールが参照する |
 
@@ -75,19 +80,19 @@ graph TD
 
 * **`Mission`**
   * *依存箇所*: `MissionRuntimeService`（`MissionModuleContainer`経由）, `MissionEvaluationResult`, `StageRankCalculator`
-  * *詳細*: `MaxComboText`/`BattleTimeText`は`MissionRuntimeService.MissionProgress`から、ランクは`StageRankCalculator.Calculate(evaluationResult.AchievedCount)`から算出します。
+  * *詳細*: `MaxComboText`/`BattleTimeText`は`MissionRuntimeService.MissionProgress`から、ランクは`StageRankCalculator.Calculate(evaluationResult.AchievedCount)`から算出す
 * **`StageSelect`**
   * *依存箇所*: `SelectedBattleStageState`, `SelectedMissionState`
-  * *詳細*: ステージ名・遷移先シーン名の取得、および`CompleteAsync`成功時の選択状態クリアに使用します。
+  * *詳細*: ステージ名・遷移先シーン名の取得、および`CompleteAsync`成功時の選択状態クリアに使用する
 * **`Persistent/SceneManagement`**
   * *依存箇所*: `SceneTransitionUsecase`
-  * *詳細*: `CompleteAsync`は`UnloadThenChangeSceneAsync`、`RetryAsync`は`UnloadThenReloadSceneAsync`を呼びます。
+  * *詳細*: `CompleteAsync`は`UnloadThenChangeSceneAsync`、`RetryAsync`は`UnloadThenReloadSceneAsync`を呼ぶ
 
 ### 📤 依存されているもの
 
 * **`Sequence`**
   * *参照箇所*: `StageResultModuleContainer.Presenter`, 自らFindする`StageResultView`
-  * *詳細*: `InGameSequenceDirector`がクリア/ゲームオーバー演出の最後に`PresentVictory`/`PresentDefeat`を呼び、`StageResultView.Show()`でリザルト画面へ切り替えます。ResultのOrder(400)はSequence(1000)より確実に早く完了します。
+  * *詳細*: `InGameSequenceDirector`がクリア/ゲームオーバー演出の最後に`PresentVictory`/`PresentDefeat`を呼び、`StageResultView.Show()`でリザルト画面へ切り替える。ResultのOrder(400)はSequence(1000)より確実に早く完了する
 
 ---
 
@@ -96,25 +101,29 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-当モジュールでは使用していません（`MissionEvaluationResult`等はMissionモジュールのDomain型を利用します）。
+当モジュールでは使用していない（`MissionEvaluationResult`等はMissionモジュールのDomain型を利用する）。
 ### ② Application
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ③ Adaptor
-`StageResultController`がシーン遷移を、`StageResultPresenter`が評価結果からDTOへの変換を担当します。
+`StageResultController`がシーン遷移を、`StageResultPresenter`が評価結果からDTOへの変換を担当する。
 ### ④ View
-`StageResultView`が勝敗UIの出し分け・ボタン処理・サブミッション行生成を行い、`StageResultViewModel`がリアクティブなデータバインドを担います。
+`StageResultView`が勝敗UIの出し分け・ボタン処理・サブミッション行生成を行い、`StageResultViewModel`がリアクティブなデータバインドを担う。表示演出は`ResultTextSlideIn`とその設定クラス群へ切り出され、Inspectorから有効・無効と時間を調整できる。
 ### ⑤ Infrastructure
-当モジュールでは使用していません。
+当モジュールでは使用していない。
 ### ⑥ Composition
-`StageResultInitializationModule`（Order 400）がPresenter/Controllerを構築し、`StageResultModuleContainer`として公開します。
+`StageResultInitializationModule`（Order 400）がPresenter/Controllerを構築し、`StageResultModuleContainer`として公開する。`Ready`では`ServiceLocator.TryGetInstance<IStageResultExitPolicy>`で拡張ポリシーの有無を確認し、見つかった場合のみ`StageResultController`のコンストラクタへ渡す（見つからない場合は`null`のまま既定の遷移動作になる）。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）はありません。表示項目を追加する場合は`StageResultDTO`へのフィールド追加と`StageResultPresenter`での値設定という形になります。
+| 拡張したいこと | 実装する場所 | 追加登録の要否 |
+| --- | --- | --- |
+| 表示項目を追加したい | `StageResultDTO`へフィールドを追加し、`StageResultPresenter`で値を設定、`StageResultViewModel`と`StageResultView`へ反映先を足す | 不要 |
+| 演出の時間や有無を変えたい | `StageResultView`のInspectorにある`ResultTextSlideInSetting` / `ResultCountUpSetting` | 不要（コード変更なし） |
+| リザルトからの遷移先を製品固有の条件で差し替えたい | `IStageResultExitPolicy`（Adaptor）を実装し、`ServiceLocator`へインスタンスを登録する | 必要（`ServiceLocator.TryGetInstance<IStageResultExitPolicy>`が`StageResultInitializationModule.Ready`実行時点で解決できるよう、Order 400より前に登録を済ませる必要がある。未登録の場合はサイレントに無視され、`CompleteAsync`は`ReturnSceneName`、`RetryAsync`は`UnloadThenReloadSceneAsync`という既定の遷移にフォールバックする） |
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① クリア → 完了ボタン → OutGame帰還フロー
 

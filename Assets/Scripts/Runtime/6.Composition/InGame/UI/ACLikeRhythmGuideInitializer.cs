@@ -8,7 +8,6 @@ using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
-using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.PostEffect;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -33,7 +32,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
-            if (_rhythmJudgmentDefinitionAsset == null || _rhythmGuideView == null)
+            if (_rhythmGuideView == null)
             {
                 Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] リズムガイド参照が不足しています。", this);
                 return false;
@@ -61,7 +60,6 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 初期化に成功した場合はtrueです。 </returns>
         public bool Initialize()
         {
-            Debug.Assert(_rhythmJudgmentDefinitionAsset != null, "RhythmJudgmentDefinitionAsset の参照が未設定です。RhythmJudgmentDefinitionAsset を設定してください。");
             Debug.Assert(_rhythmGuideView != null, "RhythmGuideView の参照が未設定です。RhythmGuideView を設定してください。");
 
             IMusicSyncService musicSyncService = ServiceLocator.GetInstance<MusicSyncModuleContainer>()?.MusicSyncService;
@@ -80,11 +78,20 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            // ガイド表示と判定は、音楽同期とターゲット状態の双方を参照するためPresenterへ集約する。
+            ServiceLocator.TryGetInstance(out KillChord.Runtime.Adaptor.InGame.StageSelect.SelectedBattleStageState selectedBattleStageState);
+
+            // MissionModuleContainer自体がミッション切り替えのたびに再生成・再登録される可能性があるため、
+            // Container参照ではなくServiceLocatorへの問い合わせそのものをデリゲート化し、呼び出しの都度最新状態を取得する。
+            System.Func<KillChord.Runtime.Application.InGame.Mission.MissionRuntimeService> missionRuntimeServiceProvider =
+                () => ServiceLocator.GetInstance<KillChord.Runtime.Composition.InGame.Mission.MissionModuleContainer>()?.MissionRuntimeService;
+
+            // ガイド表示と判定は、音楽同期・ターゲット状態・ミッション進行状況を参照するためPresenterへ集約する。
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
-                new RhythmGuideUsecase(_rhythmJudgmentDefinitionAsset.ToDefinition()),
-                targetingSystem
+                new RhythmGuideUsecase(),
+                targetingSystem,
+                missionRuntimeServiceProvider,
+                selectedBattleStageState
             );
 
             new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
@@ -95,18 +102,19 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            PlayerAttackController playerAttackController =
-                ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerAttackController;
+            IPlayerAttackSignal playerAttackSignal =
+                ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerAttackSignal;
 
-            if (playerAttackController == null)
+            if (playerAttackSignal == null)
             {
-                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(PlayerAttackController)} が見つかりません。PlayerInitializer が先に初期化されているか確認してください。", this);
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(IPlayerAttackSignal)} が見つかりません。PlayerInitializer が先に初期化されているか確認してください。", this);
                 return false;
             }
 
-            // 攻撃入力の購読とジャスト判定はPresenterが持ち、ViewModelは設定に基づく表示反映のみを担う。
+            // 攻撃PresenterからSignalへ渡された判定を購読し、演出設定に基づいて表示する。
+            _postEffectPresenter?.Dispose();
             _postEffectPresenter = new RhythmGuidePostEffectPresenter(
-                playerAttackController,
+                playerAttackSignal,
                 _rhythmGuideView,
                 new RhythmGuidePostEffectViewModel(_rhythmGuidePostEffectView, _effectConfig));
 
@@ -123,8 +131,6 @@ namespace KillChord.Runtime.Composition.InGame.UI
             _isRegisteredToPlayDirector = false;
         }
 
-        [Tooltip("リズム判定定義アセット。")]
-        [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
         [Tooltip("リズムガイドView。")]
         [SerializeField] private ACLikeRhythmGuideView _rhythmGuideView;
         [Tooltip("リズムガイドのフルスクリーン演出View。")]

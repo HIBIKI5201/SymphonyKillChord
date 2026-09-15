@@ -1,13 +1,13 @@
 # 概要
 > 💡 **モジュール概要**
-> CSVで定義された線形の会話・カットシーン（テキスト・背景・立ち絵・アニメーション・フェード・レイヤー順）を再生するモジュールです。プレイヤーの選択による分岐はなく、テキスト表示中に文字位置・キーワードで副次イベントを差し込む「タイミングトリガー」のみを持ちます。
+> CSVで定義された線形の会話・カットシーン（テキスト・背景・立ち絵・アニメーション・フェード・レイヤー順）を再生するモジュールである。プレイヤーの選択による分岐はなく、テキスト表示中に文字位置・キーワードで副次イベントを差し込む「タイミングトリガー」のみを持つ。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Scenario |
 | **カテゴリ** | OutGame |
-| **ステータス** | 実装済み（パフォーマンス上の既知の課題あり） |
-| **最終更新日** | 2026-07-15 |
+| **ステータス** | 実装済み |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -20,6 +20,8 @@
 | **`TextTimingTrigger`** | Domain | テキスト表示中の文字位置/キーワード/接尾辞で副次イベントを発火する仕組み |
 | **`LayerTarget` / `PortraitSlot` / `TextTriggerKind`** | Domain | レイヤー種別・立ち絵スロット・トリガー種別を表すenum |
 | **`PortraitDefinition` / `BackgroundDefinition` / `AnimationDefinition`** | Domain | ID→アセットキーの対応を表す構造体 |
+| **`PortraitId` / `BackgroundId` / `AnimationId`** | Domain | 立ち絵・背景・アニメーションを一意に識別する値型ID |
+| **`ScenarioLayer` / `FadeTarget`** | Domain | 表示レイヤーとフェード対象の指定 |
 | **`ScenarioDefinition`** | Domain | `IScenarioEvent`の順序付きリスト。1シナリオ分の全体定義 |
 | **`ScenarioUsecase`** | Application | 再生エンジン本体。`IScenarioEventEmitter`/`IScenarioPlaybackControl`/`IScenarioPlaybackState`を実装 |
 | **`ScenarioHandlerRepo`** | Application | イベント種別→ハンドラの振り分け辞書 |
@@ -28,15 +30,21 @@
 | **`ITextAdvanceWaiter`** | Application | プレイヤーの「次へ」入力待機の抽象 |
 | **`*EventHandler`（Text/Background/Animation/Fade/Layer/Portrait）** | Adaptor | イベント種別ごとの実処理。`*Presenter`経由でViewへ通知 |
 | **`ScenarioPresenterFacade`** | Adaptor | 全出力ポートを束ねるFacade（`IScenarioCompletionNotifier`も実装） |
+| **`I*ViewSink`（Text/Portrait/Background/Animation/Fade/Layer/ScenarioCompletion）** | Adaptor | 表示反映の契約。`I*OutputPort`が「何を出すか」、ViewSinkが「どう反映するか」を分ける |
+| **`IOutPutPort`** | Adaptor | 旧名の出力ポート。`[Obsolete]`が付いており`IOutputPort`へ移行中 |
 | **`ScenarioAdvanceGate`** | Adaptor | ロック＋`TaskCompletionSource`によるプレイヤー入力待機ゲート |
 | **`ScenarioInputController`** | Adaptor | 入力を再生制御コマンドへ変換 |
 | **`SelectedScenarioState`** | Adaptor | OutGameシーンで選択したシナリオIDを保持するクロスシーン状態 |
 | **`ScenarioView`** | View | 実際のUnity描画（TextMeshPro、背景Image、Animationコンポーネント、立ち絵スロット、CanvasGroupフェード） |
 | **`ScenarioInputView`** | View | `PlayerInputView`を購読し、進行/早送り/一時停止/スキップ/オート/UI非表示を`ScenarioInputController`へ伝達 |
-| **`ScenarioCsvUtility`** | Infrastructure | CSVパースの内部ユーティリティ（既知の課題を参照） |
+| **`ViewModel`** | View | 全`I*ViewSink`を実装し、表示通知を集約して`ScenarioView`へ渡す |
+| **`ScenarioUIHideView` / `ScenarioUIRaycastView` / `CommandBarToggleView`** | View | UIの一時非表示、レイキャスト制御、コマンドバーの開閉 |
+| **`ScenarioCsvUtility`** | Infrastructure | CSVパースの内部ユーティリティ |
 | **`ScenarioRepository`** | Infrastructure | `IScenarioRepository`実装。CSVファイル/URLからシナリオを読み込みパースする |
 | **`InMemoryScenarioRepository`** | Infrastructure | 開発用のハードコードされたテストシナリオ |
 | **`AnimationRepository` / `BackgroundRepository` / `PortraitRepository`** | Infrastructure | 各種カタログAssetを背景としたリポジトリ実装 |
+| **`CatalogRepositoryBase<TId, TDefinition, TEntry>`** | Infrastructure | 上記3リポジトリの共通基底。カタログAssetを辞書参照可能にする |
+| **`ScenarioSettingsRepository`** | Infrastructure | 再生設定の取得（`IScenarioSettingsRepository`実装） |
 | **`ScenarioSettingsAsset`** | Infrastructure | 再生タイミング等の設定値ScriptableObject |
 | **`ScenarioCom`** | Composition | シナリオシーンの主要な構成ルート |
 | **`OutGameScenarioInitializer`** | Composition | OutGameシーンで`SelectedScenarioState`を登録 |
@@ -87,16 +95,16 @@ graph TD
 
 * **`StageSelect`**
   * *依存箇所*: `SelectedScenarioState`
-  * *詳細*: シナリオ種別ステージの出撃時に選択されたシナリオIDを、シナリオシーン側の`ScenarioCom.Ready()`が読み取ります。
+  * *詳細*: シナリオ種別ステージの出撃時に選択されたシナリオIDを、シナリオシーン側の`ScenarioCom.Ready()`が読み取る
 * **`Persistent/Input`**
   * *依存箇所*: `PlayerInputView`
-  * *詳細*: `ScenarioInputView`が進行・早送り・一時停止・スキップ・オート・UI非表示の各入力を購読します。
+  * *詳細*: `ScenarioInputView`が進行・早送り・一時停止・スキップ・オート・UI非表示の各入力を購読する
 
 ### 📤 依存されているもの
 
 * **`Screen`**
   * *参照箇所*: `ResetToHomeScreenUseCase`（`OutGameUIEvent.OnShownHomeScreen`経由）
-  * *詳細*: シナリオ再生完了後、OutGameシーンへ戻りHome画面を表示するよう間接的に要求します。
+  * *詳細*: シナリオ再生完了後、OutGameシーンへ戻りHome画面を表示するよう間接的に要求する
 
 ---
 
@@ -105,17 +113,17 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-`IScenarioEvent`とその6種の具象（テキスト・立ち絵・背景・アニメーション・フェード・レイヤー順）、およびテキスト表示中に副次イベントを差し込む`TextTimingTrigger`を保持します。
+`IScenarioEvent`とその6種の具象（テキスト・立ち絵・背景・アニメーション・フェード・レイヤー順）、およびテキスト表示中に副次イベントを差し込む`TextTimingTrigger`を保持する。
 ### ② Application
-`ScenarioUsecase`を中心に、シナリオの取得・順次再生・イベントディスパッチ（`ScenarioHandlerRepo`）を実装します。
+`ScenarioUsecase`を中心に、シナリオの取得・順次再生・イベントディスパッチ（`ScenarioHandlerRepo`）を実装する。
 ### ③ Adaptor
-イベント種別ごとの`*EventHandler`/`*Presenter`、それらを束ねる`ScenarioPresenterFacade`、プレイヤー入力待機の`ScenarioAdvanceGate`を定義します。
+イベント種別ごとの`*EventHandler`/`*Presenter`、それらを束ねる`ScenarioPresenterFacade`、プレイヤー入力待機の`ScenarioAdvanceGate`を定義する。
 ### ④ View
-`ScenarioView`（MonoBehaviour）がTextMeshPro・背景Image・Animationコンポーネント・立ち絵スロット・CanvasGroupフェードといった実際のUnity描画を担当し、`ScenarioInputView`が入力購読を担当します。
+`ScenarioView`（MonoBehaviour）がTextMeshPro・背景Image・Animationコンポーネント・立ち絵スロット・CanvasGroupフェードといった実際のUnity描画を担当し、`ScenarioInputView`が入力購読を担当する。
 ### ⑤ Infrastructure
-`ScenarioRepository`がCSVファイルを読み込みパースし、`AnimationRepository`/`BackgroundRepository`/`PortraitRepository`が各種カタログAssetからアセットキーを解決します。
+`ScenarioRepository`がCSVファイルを読み込みパースし、`AnimationRepository`/`BackgroundRepository`/`PortraitRepository`が各種カタログAssetからアセットキーを解決する。
 ### ⑥ Composition
-`ScenarioCom`がシナリオシーン内の全スタックを手動DIで構築し、`OutGameScenarioInitializer`がOutGameシーン側で`SelectedScenarioState`を登録します。
+`ScenarioCom`がシナリオシーン内の全スタックを手動DIで構築し、`OutGameScenarioInitializer`がOutGameシーン側で`SelectedScenarioState`を登録する。
 
 ## 🔌 拡張ポイント
 
@@ -125,10 +133,10 @@ graph TD
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けている。
 
 ### ① シナリオ読み込み〜再生フロー
-シナリオシーンに遷移してから、CSVを読み込みイベントを順次再生する流れです。
+シナリオシーンに遷移してから、CSVを読み込みイベントを順次再生する流れである。
 
 ```mermaid
 sequenceDiagram

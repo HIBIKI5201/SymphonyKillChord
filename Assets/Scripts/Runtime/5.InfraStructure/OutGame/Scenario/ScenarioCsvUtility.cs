@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
+using KillChord.Runtime.InfraStructure.Csv;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 {
@@ -134,59 +134,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// </summary>
         public static List<string> ParseCsvLine(string line)
         {
-            var fields = new List<string>();
-            if (line == null)
-            {
-                fields.Add(string.Empty);
-                return fields;
-            }
-
-            var current = new StringBuilder(line.Length);
-            bool inQuote = false;
-
-            for (int i = 0; i < line.Length; i++)
-            {
-                char c = line[i];
-                if (inQuote)
-                {
-                    if (c == '"')
-                    {
-                        bool escapedQuote = i + 1 < line.Length && line[i + 1] == '"';
-                        if (escapedQuote)
-                        {
-                            current.Append('"');
-                            i++;
-                        }
-                        else
-                        {
-                            inQuote = false;
-                        }
-                    }
-                    else
-                    {
-                        current.Append(c);
-                    }
-                }
-                else
-                {
-                    if (c == ',')
-                    {
-                        fields.Add(current.ToString());
-                        current.Clear();
-                    }
-                    else if (c == '"')
-                    {
-                        inQuote = true;
-                    }
-                    else
-                    {
-                        current.Append(c);
-                    }
-                }
-            }
-
-            fields.Add(current.ToString());
-            return fields;
+            return CsvLineParser.ParseLine(line);
         }
     }
 }

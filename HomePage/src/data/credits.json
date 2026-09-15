@@ -1,0 +1,125 @@
+[
+	{
+		"category": "ディレクター",
+		"roles": [
+			{
+				"role": "ディレクター",
+				"names": [
+					{ "name": "未定" }
+				]
+			}
+		]
+	},
+	{
+		"category": "プログラム",
+		"roles": [
+			{
+				"role": "クライアント部門エンジニア",
+				"names": [
+					{ "name": "未定", "lead": true },
+					{ "name": "未定", "lead": true },
+					{ "name": "未定" }
+				]
+			},
+			{
+				"role": "開発部門エンジニア",
+				"names": [
+					{ "name": "未定", "lead": true },
+					{ "name": "未定", "lead": true },
+					{ "name": "未定" }
+				]
+			}
+		]
+	},
+	{
+		"category": "プランニング",
+		"roles": [
+			{
+				"role": "ゲームデザイナー",
+				"names": [
+					{ "name": "未定", "lead": true },
+					{ "name": "未定" }
+				]
+			}
+		]
+	},
+	{
+		"category": "デザイン",
+		"roles": [
+			{
+				"role": "UIデザイナー",
+				"names": [
+					{ "name": "未定" },
+					{ "name": "未定" },
+					{ "name": "未定" }
+				]
+			},
+			{
+				"role": "3Dモデラー",
+				"names": [
+					{ "name": "未定" }
+				]
+			},
+			{
+				"role": "エフェクトデザイナー",
+				"names": [
+					{ "name": "未定" }
+				]
+			},
+			{
+				"role": "モーションデザイナー",
+				"names": [
+					{ "name": "未定" }
+				]
+			},
+			{
+				"role": "イラストレイター",
+				"names": [
+					{ "name": "未定", "lead": true },
+					{ "name": "未定" }
+				]
+			}
+		]
+	},
+	{
+		"category": "サウンド",
+		"roles": [
+			{
+				"role": "サウンドクリエイター",
+				"names": [
+					{ "name": "未定", "lead": true },
+					{ "name": "未定" }
+				]
+			}
+		]
+	},
+	{
+		"category": "シナリオ",
+		"roles": [
+			{
+				"role": "シナリオプランナー",
+				"names": [
+					{ "name": "未定" }
+				]
+			},
+			{
+				"role": "シナリオライター",
+				"names": [
+					{ "name": "未定" },
+					{ "name": "未定" }
+				]
+			}
+		]
+	},
+	{
+		"category": "キャスト",
+		"roles": [
+			{
+				"role": "声優",
+				"names": [
+					{ "name": "未定" }
+				]
+			}
+		]
+	}
+]

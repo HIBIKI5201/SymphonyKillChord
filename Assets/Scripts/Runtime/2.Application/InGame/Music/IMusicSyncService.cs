@@ -10,6 +10,9 @@ namespace KillChord.Runtime.Application.InGame.Music
     /// </summary>
     public interface IMusicSyncService
     {
+        /// <summary> ロジックとガイドが共有するリズム判定定義。 </summary>
+        RhythmJudgmentDefinition RhythmJudgmentDefinition { get; }
+
         /// <summary>
         ///     更新処理を行い、予約されたアクションを実行する。
         /// </summary>
@@ -27,6 +30,13 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// </summary>
         /// <returns> 0〜1の進捗。 </returns>
         float GetBarProgress();
+
+        /// <summary>
+        ///     直前のアクション入力からの経過を小節長で正規化した進捗を、上限なしで取得する。
+        ///     1小節を超えた超過分を表示に使いたい場合に使用する。
+        /// </summary>
+        /// <returns> 0以上の進捗。1で1小節経過。 </returns>
+        float GetBarProgressUnclamped();
 
         /// <summary>
         ///     拍の種類履歴を取得する。
@@ -61,10 +71,11 @@ namespace KillChord.Runtime.Application.InGame.Music
             CancellationToken ct);
 
         /// <summary>
-        ///     現在の拍の種類を取得する。
+        ///     現在の拍種とジャスト成否を、副作用なく取得する。
         /// </summary>
+        /// <param name="isJustHit"> ジャスト範囲内の場合はtrue。 </param>
         /// <returns> 拍の種類。 </returns>
-        BeatType GetCurrentBeatType();
+        BeatType GetCurrentBeatType(out bool isJustHit);
 
         /// <summary>
         ///     アクション履歴を登録する。

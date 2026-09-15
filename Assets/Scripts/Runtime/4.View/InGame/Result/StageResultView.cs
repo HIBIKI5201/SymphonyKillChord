@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Result
@@ -49,6 +50,7 @@ namespace KillChord.Runtime.View.InGame.Result
             _isUiSlided = false;
 
             SetInteractionEnabled(true);
+            SelectButton(_completeButton);
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -71,6 +73,7 @@ namespace KillChord.Runtime.View.InGame.Result
             }
 
             SetInteractionEnabled(false);
+            ClearSelection();
         }
 
         /// <summary>
@@ -94,12 +97,12 @@ namespace KillChord.Runtime.View.InGame.Result
 
                 if (!success)
                 {
-                    RestoreInteraction();
+                    RestoreInteraction(_completeButton);
                 }
             }
             catch (Exception exception)
             {
-                RestoreInteraction();
+                RestoreInteraction(_completeButton);
 
                 Debug.LogException(exception, this);
             }
@@ -126,12 +129,12 @@ namespace KillChord.Runtime.View.InGame.Result
 
                 if (!success)
                 {
-                    RestoreInteraction();
+                    RestoreInteraction(_retryButton);
                 }
             }
             catch (Exception exception)
             {
-                RestoreInteraction();
+                RestoreInteraction(_retryButton);
 
                 Debug.LogException(exception, this);
             }
@@ -160,6 +163,13 @@ namespace KillChord.Runtime.View.InGame.Result
 
         [SerializeField, Tooltip("インゲームのCanvas。")]
         private Canvas[] _inGameCanvas;
+
+        [Header("Button")]
+        [SerializeField, Tooltip("ホームへ戻る完了ボタン。")]
+        private Button _completeButton;
+
+        [SerializeField, Tooltip("同じステージへ再出撃するボタン。")]
+        private Button _retryButton;
 
         [Header("Text")]
         [SerializeField, Tooltip("リザルトタイトルを表示するText。")]
@@ -579,11 +589,48 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <summary>
         ///     シーン遷移失敗後にリザルト画面の操作を復帰する。
         /// </summary>
-        private void RestoreInteraction()
+        /// <param name="focusTarget"> フォーカスを戻すボタン。 </param>
+        private void RestoreInteraction(Button focusTarget)
         {
             _isTransitioning = false;
 
             SetInteractionEnabled(true);
+            SelectButton(focusTarget);
+        }
+
+        /// <summary>
+        ///     指定したボタンへEventSystemのフォーカスを移す。
+        /// </summary>
+        /// <param name="button"> フォーカス対象のボタン。 </param>
+        private static void SelectButton(Button button)
+        {
+            EventSystem eventSystem = EventSystem.current;
+
+            if (eventSystem == null || button == null || !button.IsActive() || !button.IsInteractable())
+            {
+                return;
+            }
+
+            eventSystem.SetSelectedGameObject(null);
+            eventSystem.SetSelectedGameObject(button.gameObject);
+        }
+
+        /// <summary>
+        ///     リザルト画面内に残っているEventSystemの選択を解除する。
+        /// </summary>
+        private void ClearSelection()
+        {
+            EventSystem eventSystem = EventSystem.current;
+            GameObject selectedObject = eventSystem != null
+                ? eventSystem.currentSelectedGameObject
+                : null;
+
+            if (selectedObject == null || !selectedObject.transform.IsChildOf(transform))
+            {
+                return;
+            }
+
+            eventSystem.SetSelectedGameObject(null);
         }
 
         /// <summary>

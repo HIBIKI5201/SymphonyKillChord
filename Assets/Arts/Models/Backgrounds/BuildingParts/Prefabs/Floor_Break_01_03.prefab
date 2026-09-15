@@ -48,6 +48,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5311322294723087748, guid: 49b65ba2f18ae4c4c8131d31c053994a, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 49b65ba2f18ae4c4c8131d31c053994a, type: 3}
       propertyPath: m_Name
       value: Floor_Break_01_03

@@ -254,24 +254,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ResetPosition"",
-                    ""type"": ""Button"",
-                    ""id"": ""a1e6c2d4-3f5b-4c7a-9d8e-1b2c3d4e5f60"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""ReturnToTitle"",
-                    ""type"": ""Button"",
-                    ""id"": ""b2f7d3e5-4a6c-4d8b-8e9f-2c3d4e5f6a71"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": ""Hold(duration=1)"",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -365,8 +347,8 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
-                    ""id"": ""94b7b630-617a-4b5b-9e5e-38886dbdc3a8"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""id"": ""3c663c8d-d467-4846-bf4f-f38ecfe431ec"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -398,8 +380,8 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
-                    ""id"": ""3c663c8d-d467-4846-bf4f-f38ecfe431ec"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""id"": ""94b7b630-617a-4b5b-9e5e-38886dbdc3a8"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -516,28 +498,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""action"": ""LockOnSelect"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""c3a8e4f6-5b7d-4e9c-9f0a-3d4e5f6a7b82"",
-                    ""path"": ""<Keyboard>/p"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ResetPosition"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""d4b9f5a7-6c8e-4f0d-8a1b-4e5f6a7b8c93"",
-                    ""path"": ""<Keyboard>/escape"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ReturnToTitle"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -558,7 +518,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""name"": ""Submit"",
                     ""type"": ""Button"",
                     ""id"": ""cd0a1233-ef04-436b-8287-f26be44c1326"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -567,7 +527,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""name"": ""Cancel"",
                     ""type"": ""Button"",
                     ""id"": ""cb338819-3c25-4b86-93b5-36153d73deef"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -1225,8 +1185,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         m_InGame_Look = m_InGame.FindAction("Look", throwIfNotFound: true);
         m_InGame_LockOn = m_InGame.FindAction("LockOn", throwIfNotFound: true);
         m_InGame_LockOnSelect = m_InGame.FindAction("LockOnSelect", throwIfNotFound: true);
-        m_InGame_ResetPosition = m_InGame.FindAction("ResetPosition", throwIfNotFound: true);
-        m_InGame_ReturnToTitle = m_InGame.FindAction("ReturnToTitle", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1540,8 +1498,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
     private readonly InputAction m_InGame_Look;
     private readonly InputAction m_InGame_LockOn;
     private readonly InputAction m_InGame_LockOnSelect;
-    private readonly InputAction m_InGame_ResetPosition;
-    private readonly InputAction m_InGame_ReturnToTitle;
     /// <summary>
     /// Provides access to input actions defined in input action map "InGame".
     /// </summary>
@@ -1577,14 +1533,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// Provides access to the underlying input action "InGame/LockOnSelect".
         /// </summary>
         public InputAction @LockOnSelect => m_Wrapper.m_InGame_LockOnSelect;
-        /// <summary>
-        /// Provides access to the underlying input action "InGame/ResetPosition".
-        /// </summary>
-        public InputAction @ResetPosition => m_Wrapper.m_InGame_ResetPosition;
-        /// <summary>
-        /// Provides access to the underlying input action "InGame/ReturnToTitle".
-        /// </summary>
-        public InputAction @ReturnToTitle => m_Wrapper.m_InGame_ReturnToTitle;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1629,12 +1577,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @LockOnSelect.started += instance.OnLockOnSelect;
             @LockOnSelect.performed += instance.OnLockOnSelect;
             @LockOnSelect.canceled += instance.OnLockOnSelect;
-            @ResetPosition.started += instance.OnResetPosition;
-            @ResetPosition.performed += instance.OnResetPosition;
-            @ResetPosition.canceled += instance.OnResetPosition;
-            @ReturnToTitle.started += instance.OnReturnToTitle;
-            @ReturnToTitle.performed += instance.OnReturnToTitle;
-            @ReturnToTitle.canceled += instance.OnReturnToTitle;
         }
 
         /// <summary>
@@ -1664,12 +1606,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @LockOnSelect.started -= instance.OnLockOnSelect;
             @LockOnSelect.performed -= instance.OnLockOnSelect;
             @LockOnSelect.canceled -= instance.OnLockOnSelect;
-            @ResetPosition.started -= instance.OnResetPosition;
-            @ResetPosition.performed -= instance.OnResetPosition;
-            @ResetPosition.canceled -= instance.OnResetPosition;
-            @ReturnToTitle.started -= instance.OnReturnToTitle;
-            @ReturnToTitle.performed -= instance.OnReturnToTitle;
-            @ReturnToTitle.canceled -= instance.OnReturnToTitle;
         }
 
         /// <summary>
@@ -2148,20 +2084,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnLockOnSelect(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "ResetPosition" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnResetPosition(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "ReturnToTitle" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnReturnToTitle(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

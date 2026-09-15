@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using UnityEngine.UIElements;
@@ -23,7 +24,9 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             _nodeId = nodeIndex;
             _outGameUIEvent = outGameUIEvent;
 
-            _root.RegisterCallback<ClickEvent>(OnNodeClicked);
+            _root.AddToClassList(CLASS_SELECT_SOUND);
+            _root.MakeNavigable();
+            _activationRegistration = _root.RegisterActivation(HandleActivationHandler);
         }
 
         /// <summary>
@@ -59,13 +62,16 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// </summary>
         public void Dispose()
         {
-            _root.UnregisterCallback<ClickEvent>(OnNodeClicked);
+            _activationRegistration.Dispose();
         }
 
+        /// <summary> このノードの要素を取得します。初期フォーカスの設定に使用します。 </summary>
+        public VisualElement RootElement => _root;
+
         /// <summary>
-        ///     ノードがクリックされたときの処理。
+        ///     ノードが作動したときの処理。
         /// </summary>
-        private void OnNodeClicked(ClickEvent evt)
+        private void HandleActivationHandler()
         {
             _outGameUIEvent.OnStageNodeSelected?.Invoke(_nodeId);
         }
@@ -73,9 +79,11 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string CLASS_LOCKED = "stage-node--locked";
         private const string CLASS_UNLOCKED = "stage-node--unlocked";
         private const string CLASS_CLEARED = "stage-node--cleared";
+        private const string CLASS_SELECT_SOUND = "ui-se-select";
 
         private readonly VisualElement _root;
         private readonly int _nodeId;
         private readonly OutGameUIEvent _outGameUIEvent;
+        private readonly IDisposable _activationRegistration;
     }
 }

@@ -16,18 +16,18 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// </summary>
         /// <param name="rhythmDefinition"> リズムの定義。 </param>
         /// <param name="rhythmJudgmentDefinition"> リズム判定の定義。 </param>
-        /// <param name="onJustHit"> ジャストヒット時のアクション。 </param>
         public MusicSyncService(
             RhythmDefinition rhythmDefinition,
-            RhythmJudgmentDefinition rhythmJudgmentDefinition,
-            Action onJustHit = null)
+            RhythmJudgmentDefinition rhythmJudgmentDefinition)
         {
             _rhythmState = new(BUFFER_SIZE);
             _rhythmDefinition = rhythmDefinition;
             _rhythmJudgmentDefinition = rhythmJudgmentDefinition;
             _scheduledActions = new PriorityQueue<ScheduledAction, double>();
-            _onJustHit = onJustHit;
         }
+
+        /// <summary> ロジックとガイドが共有するリズム判定定義。 </summary>
+        public RhythmJudgmentDefinition RhythmJudgmentDefinition => _rhythmJudgmentDefinition;
 
         /// <summary>
         ///     毎フレームの更新処理を行い、予約されたアクションを実行する。
@@ -76,25 +76,29 @@ namespace KillChord.Runtime.Application.InGame.Music
         }
 
         /// <summary>
-        ///     現在のタイミングにおける拍の種類を取得する。
+        ///     現在の入力タイミングにおける拍種とジャスト成否を、副作用なく取得する。
         /// </summary>
+        /// <param name="isJustHit"> ジャスト範囲内の場合はtrue。 </param>
         /// <returns> 拍の種類。 </returns>
-        public BeatType GetCurrentBeatType()
+        public BeatType GetCurrentBeatType(out bool isJustHit)
         {
+            isJustHit = false;
             if (_rhythmState.Count == 0
                 || _currentPlayTime < _rhythmDefinition.BeatOffsetSeconds)
             {
                 return BeatType.One;
             }
 
-            float normalizedBarProgress = GetBarProgress();
-            if (_rhythmJudgmentDefinition.TryResolveBeatType(normalizedBarProgress, out BeatType beatType))
+            // 小節末尾へクランプすると1拍のジャストが永続するため、実際の経過を使う。
+            if (_rhythmJudgmentDefinition.TryResolveJustBeatType(GetBarProgressUnclamped(), out BeatType beatType))
             {
-                _onJustHit?.Invoke();
+                isJustHit = true;
                 return beatType;
             }
 
-            return BeatType.One;
+            return _rhythmJudgmentDefinition.TryResolveBeatType(GetBarProgress(), out beatType)
+                ? beatType
+                : BeatType.One;
         }
 
         /// <summary>
@@ -168,9 +172,27 @@ namespace KillChord.Runtime.Application.InGame.Music
             return _rhythmDefinition.CalculateNormalizedBarProgress(elapsedSeconds);
         }
 
+        /// <summary>
+        ///     直前のアクション入力からの経過を小節長で正規化した進捗を、上限なしで取得する。
+        ///     1小節を超えた超過分を表示に使いたい場合に使用する。
+        /// </summary>
+        /// <returns> 0以上の進捗。1で1小節経過。 </returns>
+        public float GetBarProgressUnclamped()
+        {
+            if (_rhythmState.Count == 0)
+            {
+                return 0f;
+            }
+
+            double elapsedSeconds = _currentPlayTime - _rhythmState.LastTiming;
+            double elapsedBarCount = _rhythmDefinition.CalculateElapsedBarCount(elapsedSeconds);
+
+            // 再生位置の巻き戻し等で負値になった場合は小節頭として扱う。
+            return elapsedBarCount > 0d ? (float)elapsedBarCount : 0f;
+        }
+
         private const int BUFFER_SIZE = 64;
         private const double PLAYBACK_REWIND_TOLERANCE_SECONDS = 0.01d;
-        private readonly Action _onJustHit;
         private readonly RhythmState _rhythmState;
         private readonly RhythmDefinition _rhythmDefinition;
         private readonly RhythmJudgmentDefinition _rhythmJudgmentDefinition;

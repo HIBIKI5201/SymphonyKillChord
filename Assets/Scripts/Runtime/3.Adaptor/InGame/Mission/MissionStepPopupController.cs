@@ -68,7 +68,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 return;
             }
 
-            _popupView.Show(step.GuideMessageText, popupCondition.PopupImage);
+            _popupView.Show(popupCondition.PopupImage);
             _inputSuppressionState?.Suppress(_inputSuppressionDuration);
         }
     }

@@ -23,6 +23,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <param name="resultPresenter"> ステージリザルトのPresenter。 </param>
         /// <param name="stageStartConstraintView"> ステージ開始時の制約を表示するビュー。 </param>
         /// <param name="gameplayControllable"> ゲームプレイの開始と終了を制御するオブジェクト。 </param>
+        /// <param name="ambienceSoundView"> ステージ開始演出中の環境音を再生するビュー。 </param>
         public InGameSequenceDirector(
             StageSequenceView stageSequenceView,
             StageSequenceMessageView stageSequenceMessageView,
@@ -30,7 +31,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             StageResultView resultView,
             StageStartConstraintView stageStartConstraintView,
             StageResultPresenter resultPresenter,
-            IGameplayControllable gameplayControllable)
+            InGameHudVisibilityView hudVisibilityView,
+            IGameplayControllable gameplayControllable,
+            AmbienceSoundView ambienceSoundView)
         {
             _stageSequenceView = stageSequenceView ?? throw new ArgumentNullException(nameof(stageSequenceView));
             _stageSequenceMessageView = stageSequenceMessageView ?? throw new ArgumentNullException(nameof(stageSequenceMessageView));
@@ -39,8 +42,15 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageResultView = resultView ?? throw new ArgumentNullException(nameof(resultView));
             _stageResultPresenter = resultPresenter ?? throw new ArgumentNullException(nameof(resultPresenter));
             _gameplayControllable = gameplayControllable ?? throw new ArgumentNullException(nameof(gameplayControllable));
+            _gameHudVisibilityView = hudVisibilityView ?? throw new ArgumentNullException(nameof(hudVisibilityView));
+            // 環境音はオプション要素のため、未設定(null)でも許容する。
+            _ambienceSoundView = ambienceSoundView;
         }
 
+        /// <summary> 開始演出の再生中かどうか。 </summary>
+        public bool IsStartSequencePlaying => _isStartPlaying;
+        /// <summary> 結果表示中かどうか。 </summary>
+        public bool IsResultActive => _isResultActive;
         /// <summary>
         ///    ゲームプレイの開始演出を開始する。
         /// </summary>
@@ -60,6 +70,11 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceMessageView?.SetStageStartMessage();
             _stageStartFadeView.ShowBlackImmediate();
 
+
+            // PlayStageStartが完了コールバックを同期的に呼ぶ場合があるため、再生前にHUDを非表示にする。
+            _gameHudVisibilityView.Hide();
+
+            _ambienceSoundView?.PlayAmbience();
 
             _stageSequenceView.PlayStageStart(HandleTimelineCompleted);
             _stageStartFadeView.PlayFadeOut();
@@ -81,6 +96,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceView.CancelStageStart();
             _stageSequenceMessageView?.Hide();
 
+            // 開始演出を中断した場合、環境音が鳴りっぱなしにならないよう停止する。
+            _ambienceSoundView?.StopAmbience();
+
             // SourceのAddはModule(Ready)で行う。開始演出を中断したのでここで解放する。
             _stageStartConstraintView.RemoveSource();
         }
@@ -96,6 +114,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             CancellationToken cancellationToken)
         {
             Cancel();
+            _isResultActive = true;
 
             _gameplayControllable.StopGameplay();
             _stageSequenceMessageView?.ShowClear();
@@ -117,6 +136,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         public async Awaitable GameOverAsync(CancellationToken cancellationToken)
         {
             Cancel();
+            _isResultActive = true;
 
             _gameplayControllable.StopGameplay();
             _stageSequenceMessageView?.ShowGameOver();
@@ -138,9 +158,12 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private readonly StageResultPresenter _stageResultPresenter;
         private readonly StageStartConstraintView _stageStartConstraintView;
         private readonly IGameplayControllable _gameplayControllable;
+        private readonly InGameHudVisibilityView _gameHudVisibilityView;
+        private readonly AmbienceSoundView _ambienceSoundView;
 
         private bool _isStartPlaying;
         private bool _isTimelineCompleted;
+        private bool _isResultActive;
 
         /// <summary>
         ///     ゲームプレイ開始演出の完了条件を確認し、すべての条件が満たされていればゲームプレイを開始します。
@@ -157,10 +180,14 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _stageStartFadeView.HideImmediate();
             _stageSequenceMessageView.Hide();
+
+            // インゲームBGMの再生開始と同時に環境音を止める。
+            _ambienceSoundView?.StopAmbience();
             _gameplayControllable.StartGameplay();
 
             // SourceのAddはModule(Ready)で行う。開始演出が完了したのでここで解放する。
             _stageStartConstraintView.RemoveSource();
+            _gameHudVisibilityView.Show();
         }
 
         /// <summary>
