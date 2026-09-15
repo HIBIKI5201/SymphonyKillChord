@@ -71,7 +71,7 @@
     right: 1.5%;
     bottom: 3%;
     left: 1.5%;
-    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_ButtonBack_Off.png?fileID=21300000&guid=ba45671328ad1f148b9ebc71318d74b4&type=3#UI_ButtonBack_Off");
     -unity-background-scale-mode: stretch-to-fill;
     border-radius: 4px;
     translate: 0 -4px;

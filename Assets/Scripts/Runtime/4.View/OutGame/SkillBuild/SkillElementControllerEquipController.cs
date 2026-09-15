@@ -212,6 +212,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             next.Focus();
             evt.StopPropagation();
+            element.panel?.focusController?.IgnoreEvent(evt);
         }
 
         /// <summary>

@@ -199,6 +199,63 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     指定要素が現在のビューポート外(または余白未満)にある場合のみ、
+        ///     それが見える位置まで最小限スクロールする。ズームや倍率、基点は変更しない。
+        ///     <para>
+        ///         コントローラーでのノード間移動時、接続先ノードが画面外にあっても
+        ///         フォーカス自体は移せるようにしているため、その移動に追従して
+        ///         画面を自動でスクロールさせる用途に使う。
+        ///     </para>
+        /// </summary>
+        /// <param name="element"> 可視範囲に収めたい要素。スキルツリー外の要素は無視される。 </param>
+        public void EnsureVisible(VisualElement element)
+        {
+            if (_isDisposed || element == null)
+            {
+                return;
+            }
+
+            Rect elementBounds = element.worldBound;
+            Rect viewportBounds = _scrollView.contentViewport.worldBound;
+            if (!IsValidRect(elementBounds) || !IsValidRect(viewportBounds))
+            {
+                return;
+            }
+
+            float scrollOffsetX = _scrollView.scrollOffset.x;
+            float scrollOffsetY = _scrollView.scrollOffset.y;
+
+            if (elementBounds.yMin < viewportBounds.yMin + ENSURE_VISIBLE_MARGIN)
+            {
+                scrollOffsetY -= (viewportBounds.yMin + ENSURE_VISIBLE_MARGIN) - elementBounds.yMin;
+            }
+            else if (elementBounds.yMax > viewportBounds.yMax - ENSURE_VISIBLE_MARGIN)
+            {
+                scrollOffsetY += elementBounds.yMax - (viewportBounds.yMax - ENSURE_VISIBLE_MARGIN);
+            }
+
+            if (elementBounds.xMin < viewportBounds.xMin + ENSURE_VISIBLE_MARGIN)
+            {
+                scrollOffsetX -= (viewportBounds.xMin + ENSURE_VISIBLE_MARGIN) - elementBounds.xMin;
+            }
+            else if (elementBounds.xMax > viewportBounds.xMax - ENSURE_VISIBLE_MARGIN)
+            {
+                scrollOffsetX += elementBounds.xMax - (viewportBounds.xMax - ENSURE_VISIBLE_MARGIN);
+            }
+
+            Vector2 targetOffset = new Vector2(
+                ClampScrollOffsetX(scrollOffsetX),
+                ClampScrollOffsetY(scrollOffsetY));
+            if ((targetOffset - _scrollView.scrollOffset).sqrMagnitude <= 1f)
+            {
+                return;
+            }
+
+            EnforceScrollerHidden();
+            AnimateScrollOffsetTo(targetOffset);
+        }
+
+        /// <summary>
         ///     ノードへのズームインを解除し、ズーム前の拡大率とスクロール位置へ戻す。
         /// </summary>
         public void ClearFocusZoom()
@@ -348,6 +405,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         ///     ノード自身の半径分を吸収し、端のノードが画面外へはみ出さないようにする。
         /// </summary>
         private const float RANGE_FOCUS_MARGIN = 70f;
+
+        /// <summary> <see cref="EnsureVisible"/>でノードの周囲に確保する画面端からの最小余白(ピクセル)。 </summary>
+        private const float ENSURE_VISIBLE_MARGIN = 60f;
 
         private readonly VisualElement _screenRoot;
         private readonly ScrollView _scrollView;

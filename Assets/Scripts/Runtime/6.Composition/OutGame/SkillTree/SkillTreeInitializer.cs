@@ -139,6 +139,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private Dictionary<int, VisualElement> _skillNodeElements;
         private List<VisualElement> _skillNodeElementList;
         private List<VisualElement> _skillTreeNavigationCandidates;
+        private Dictionary<VisualElement, List<VisualElement>> _skillNodeAdjacency;
         private Dictionary<string, ISkillNodeConnViewModel> _skillNodeConnViews;
         private Dictionary<int, string[]> _skillNodeConnBinds;
         private Dictionary<int, VisualElement> _unlockPhases;
@@ -622,7 +623,38 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             _skillNodeElementList = new List<VisualElement>(_skillNodeElements.Values);
+            BuildSkillNodeAdjacency();
             MarkInitialFocusNode();
+        }
+
+        /// <summary>
+        ///     各ノードの親子接続関係(<see cref="SkillNodeEntity.Parents"/>)から、
+        ///     コントローラー移動先の候補となる隣接ノード要素の一覧を双方向で構築する。
+        ///     要素自身をキーにすることで、移動判定時にノードIDへ逆引きする必要をなくす。
+        /// </summary>
+        private void BuildSkillNodeAdjacency()
+        {
+            _skillNodeAdjacency = new Dictionary<VisualElement, List<VisualElement>>();
+            foreach (VisualElement element in _skillNodeElements.Values)
+            {
+                _skillNodeAdjacency[element] = new List<VisualElement>();
+            }
+
+            foreach (SkillNodeEntity entity in _skillNodeEntities.Values)
+            {
+                VisualElement nodeElement = _skillNodeElements[entity.SkillNodeIdVO.Id];
+                if (entity.Parents == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < entity.Parents.Length; i++)
+                {
+                    VisualElement parentElement = _skillNodeElements[entity.Parents[i].SkillNodeIdVO.Id];
+                    _skillNodeAdjacency[nodeElement].Add(parentElement);
+                    _skillNodeAdjacency[parentElement].Add(nodeElement);
+                }
+            }
         }
 
         /// <summary>
@@ -976,6 +1008,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeElements = null;
             _skillNodeElementList = null;
             _skillTreeNavigationCandidates = null;
+            _skillNodeAdjacency = null;
             _skillNodeConnViews = null;
             _skillNodeConnBinds = null;
             _unlockPhases = null;
@@ -1094,12 +1127,16 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     スキルノードおよびトップバーの設定ショートカットボタン間のコントローラー移動先を、実座標から解決する。
+        ///     スキルノードおよびトップバーの設定ショートカットボタン間のコントローラー移動先を解決する。
         ///     <para>
-        ///         ズーム時のスケール変形、ScrollViewで一部が画面外へはみ出す木構造のレイアウト、
-        ///         そしてノード群から離れた位置にあるトップバーのボタンとの行き来により、
-        ///         UI Toolkit標準の自動ナビゲーションでは正しい移動先を見つけられないことがあるため、
-        ///         画面内に見えている要素の実座標をもとに自前で解決する。
+        ///         スキルノードが起点の場合は、実際に接続されているノード(親子関係)だけを候補にし、
+        ///         そのうちどれが押した方向に一致するかを実座標で判定する。木構造上つながっていない
+        ///         ノードへ移動してしまうことがないようにするため。設定ボタンへは、木構造の候補に
+        ///         含めて上方向で到達できるようにする。
+        ///     </para>
+        ///     <para>
+        ///         設定ボタンが起点の場合は接続関係を持たないため、画面内の全ノードから
+        ///         実座標で一番近いものへ戻る(木構造への再進入)。
         ///     </para>
         /// </summary>
         /// <param name="evt"> ナビゲーション移動イベント。 </param>
@@ -1115,11 +1152,17 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 return;
             }
 
+            IReadOnlyList<VisualElement> candidates = ResolveSkillTreeNavigationCandidates(
+                target, out bool isGraphBased);
+            // 接続グラフに基づく候補では、実際につながっているノードへは画面外でも
+            // 移動できるようにするため、画面内かどうかの絞り込みは行わない。
+            // その代わり移動後にEnsureVisibleで画面をノードへ追従させる。
+            Rect? viewportFilter = isGraphBased ? null : _skillTreeViewportView?.ViewportWorldBound;
             VisualElement next = SpatialNavigationResolver.FindNearestInDirection(
-                target, _skillTreeNavigationCandidates, evt.direction, _skillTreeViewportView?.ViewportWorldBound);
+                target, candidates, evt.direction, viewportFilter);
             NavigationDebugLog.Log(
                 $"[SkillTreeNav] from={NavigationDebugLog.Describe(target)} dir={evt.direction} "
-                + $"candidates={_skillTreeNavigationCandidates.Count} -> {NavigationDebugLog.Describe(next)}");
+                + $"candidates={candidates.Count} graphBased={isGraphBased} -> {NavigationDebugLog.Describe(next)}");
 
             if (next == null)
             {
@@ -1128,6 +1171,41 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             next.Focus();
             evt.StopPropagation();
+            target.panel?.focusController?.IgnoreEvent(evt);
+
+            if (isGraphBased)
+            {
+                _skillTreeViewportView?.EnsureVisible(next);
+            }
+        }
+
+        /// <summary>
+        ///     移動先解決に使う候補一覧を選ぶ。スキルノードが起点なら実際に接続されている
+        ///     隣接ノード+設定ボタンのみに絞り、設定ボタンが起点なら木構造への再進入のため
+        ///     全ノードを候補にする。
+        /// </summary>
+        /// <param name="source"> 移動元の要素。 </param>
+        /// <param name="isGraphBased"> 接続グラフに基づく候補を返した場合はtrue。 </param>
+        /// <returns> 移動先候補の一覧。 </returns>
+        private IReadOnlyList<VisualElement> ResolveSkillTreeNavigationCandidates(
+            VisualElement source, out bool isGraphBased)
+        {
+            if (_skillNodeAdjacency != null
+                && _skillNodeAdjacency.TryGetValue(source, out List<VisualElement> adjacentNodes))
+            {
+                isGraphBased = true;
+                List<VisualElement> candidates = new List<VisualElement>(adjacentNodes.Count + 1);
+                candidates.AddRange(adjacentNodes);
+                if (_settingShortcutButtonRoot != null)
+                {
+                    candidates.Add(_settingShortcutButtonRoot);
+                }
+
+                return candidates;
+            }
+
+            isGraphBased = false;
+            return _skillTreeNavigationCandidates;
         }
 
         /// <summary>

@@ -181,6 +181,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private ScrollViewDragManipulator _stageMapDragManipulator;
         private VisualElement _stageNodeFocusFrame;
         private bool _isFocusFrameLocked;
+        private Dictionary<StageId, VisualElement> _stageNodeElementMap;
+        private Dictionary<StageId, Vector2> _stageNodeCenterMap;
         private bool _isSubscribed;
         private VisualElement _rootVisualElement;
         private VisualElement _detailScreenRoot;
@@ -328,11 +330,27 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
         /// <summary>
         ///     ステージノードが選択されたときのイベントハンドラ。
+        ///     クリックと決定操作(コントローラーのAボタン)の両方から通知される。
+        ///     クリック時と同じく、選択したノードへフォーカスフレームを固定する。
         /// </summary>
         private void HandleStageNodeSelected(int stageIdValue)
         {
+            StageId stageId = new StageId(stageIdValue);
+            if (_stageNodeElementMap != null
+                && _stageNodeElementMap.TryGetValue(stageId, out VisualElement nodeElement))
+            {
+                AttachFocusFrameTo(nodeElement);
+                _isFocusFrameLocked = true;
+            }
+
+            if (_stageNodeCenterMap != null
+                && _stageNodeCenterMap.TryGetValue(stageId, out Vector2 nodeCenter))
+            {
+                ZoomMapToNode(nodeCenter);
+            }
+
             _stageSelectController.OnStageNodeSelected(stageIdValue);
-            ShowStarRowForSelectedNode(new StageId(stageIdValue));
+            ShowStarRowForSelectedNode(stageId);
         }
 
         /// <summary>
@@ -776,6 +794,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return false;
             }
 
+            _stageNodeElementMap = nodeElementMap;
             BuildNodeComponents(nodeElementMap, connectionViewMap);
 
             // --- Adaptor 層 ---
@@ -851,6 +870,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageMapCanvasWidth = 0.0f;
             _stageNodeFocusFrame = null;
             _isFocusFrameLocked = false;
+            _stageNodeElementMap = null;
+            _stageNodeCenterMap = null;
             _battleSortieSelectionService = null;
             _loadingScreenController = null;
             _isAutomaticTutorialFlowStarted = false;
@@ -1042,6 +1063,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             mapCanvas.style.left = MAP_LEFT_DRAG_BUFFER;
             BuildConnectionElements(mapCanvas, nodeCenters, connectionViewMap);
             BuildNodeElements(mapCanvas, nodeCenters, nodeElementMap);
+            _stageNodeCenterMap = nodeCenters;
 
             _stageMapScrollView = mapScrollView;
             _stageMapContent = mapContent;
@@ -1371,19 +1393,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 nodeElement.style.width = NODE_SIZE;
                 nodeElement.style.height = NODE_SIZE;
 
-                // ホバー中はフレームをそのノードの子へ付け替える。クリック固定中は動かさない。
+                // ホバー中はフレームをそのノードの子へ付け替える。選択固定中は動かさない。
+                // クリックと決定操作(コントローラーのAボタン)によるフレーム固定は、
+                // 両方から通知される HandleStageNodeSelected で行う。
                 VisualElement focusTargetNode = nodeElement;
                 nodeElement.RegisterCallback<PointerEnterEvent>(_ =>
                 {
                     if (_isFocusFrameLocked) { return; }
                     AttachFocusFrameTo(focusTargetNode);
-                });
-                // クリックしたノードへフレームを固定する。詳細画面を閉じるまで解除されない。
-                nodeElement.RegisterCallback<ClickEvent>(_ =>
-                {
-                    AttachFocusFrameTo(focusTargetNode);
-                    _isFocusFrameLocked = true;
-                    ZoomMapToNode(center);
                 });
 
                 var icon = new VisualElement
