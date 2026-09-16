@@ -1,4 +1,5 @@
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageSelectScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
 
+            Label titleLabel = rootElement.Q<Label>("Title");
+            _titleLocalizedText = new LocalizedElementText(
+                "UICommon", "ui.stage_select.title", text => titleLabel.text = text, "作戦");
             RegisterButtonCallback();
         }
 
@@ -57,6 +61,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             base.Dispose();
             UnregisterButtonCallback();
+            _titleLocalizedText.Dispose();
         }
 
         /// <summary>
@@ -98,6 +103,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RootElement.Q<VisualElement>(className: UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME)
             ?? _backButton;
 
+        private readonly LocalizedElementText _titleLocalizedText;
         private readonly Button _backButton;
         private IDisposable _backButtonActivation;
         private bool _isForcedSortieMode;

@@ -1,5 +1,6 @@
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -46,6 +47,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 ?? throw new System.InvalidOperationException(
                     $"{CHARACTER_IMAGE_NAME} が見つかりません。");
 
+            Label rebuildPointsName = RootElement.Q<Label>("RebuildPointsNameLabel");
+            Label unlockPointsName = RootElement.Q<Label>("UnlockPointsNameLabel");
+            _localizedTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.home.mod_points", text => rebuildPointsName.text = text, "改造ポイント"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.home.unlock_points", text => unlockPointsName.text = text, "解放ポイント"),
+            };
             RegisterButtonCallbacks();
         }
 
@@ -89,6 +99,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             base.Dispose();
             UnregisterButtonCallbacks();
+            foreach (LocalizedElementText localizedText in _localizedTexts)
+            {
+                localizedText.Dispose();
+            }
         }
 
         /// <summary>
@@ -261,7 +275,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string UNLOCK_POINTS_LABEL_NAME = "UnlockPointsValueLabel";
         private const string CHARACTER_IMAGE_NAME = "CharacterImage";
         private const string FOCUSED_CLASS_NAME = "is-focused";
+        private const string UI_COMMON_TABLE = "UICommon";
 
+        private readonly LocalizedElementText[] _localizedTexts;
         private readonly Button _stageSelectButton;
         private readonly Button _skillTreeButton;
         private readonly Button _skillBuildButton;

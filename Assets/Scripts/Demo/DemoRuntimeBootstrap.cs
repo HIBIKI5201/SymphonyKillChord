@@ -317,15 +317,31 @@ namespace KillChord.Demo
                 return;
             }
 
+            // 満了状態を保留として維持し、ロード後の最新の解放状態から選び直す。
+            if (ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+                && loadingScreenController.IsLoading)
+            {
+                return;
+            }
+
             if (!DemoStageResultExitPolicy.TryGetLatestAvailableBattleStage(
                     stageSelectContainer.StageTree,
-                    out BattleStageDefinition battleStageDefinition)
-                || !stageSelectContainer.TryForceBattleSortie(battleStageDefinition.StageId))
+                    out BattleStageDefinition battleStageDefinition))
             {
-                Debug.LogError(
-                    $"[{nameof(DemoRuntimeBootstrap)}] " +
-                    "解放済みの最新バトルステージを強制出撃先に設定できませんでした。",
-                    this);
+                if (!_hasLoggedMissingForcedSortieStage)
+                {
+                    _hasLoggedMissingForcedSortieStage = true;
+                    Debug.LogError(
+                        $"[{nameof(DemoRuntimeBootstrap)}] " +
+                        "強制出撃先となる解放済みのバトルステージがありません。ステージツリーの定義と解放状態を確認してください。",
+                        this);
+                }
+                return;
+            }
+
+            // UIの準備中や出撃処理中は、次のフレームで対象の取得から再試行する。
+            if (!stageSelectContainer.TryForceBattleSortie(battleStageDefinition.StageId))
+            {
                 return;
             }
 
@@ -367,6 +383,7 @@ namespace KillChord.Demo
             {
                 _sessionState.ResetHomeTimer();
                 _isForcedSortiePrepared = false;
+                _hasLoggedMissingForcedSortieStage = false;
             }
 
             _wasOutGameActive = isOutGameActive;
@@ -392,6 +409,7 @@ namespace KillChord.Demo
             _isTransitioningToEndScene = false;
             _isFinalStageConfigured = false;
             _isForcedSortiePrepared = false;
+            _hasLoggedMissingForcedSortieStage = false;
             _wasOutGameActive = false;
             _isSaveDataReset = false;
         }
@@ -574,6 +592,7 @@ namespace KillChord.Demo
         private bool _isTransitioningToEndScene;
         private bool _isFinalStageConfigured;
         private bool _isForcedSortiePrepared;
+        private bool _hasLoggedMissingForcedSortieStage;
         private bool _wasOutGameActive;
         private bool _isSaveDataReset;
         private bool _ownsPrefabAssetHandle;

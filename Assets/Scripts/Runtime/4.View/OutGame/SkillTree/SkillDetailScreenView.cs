@@ -43,6 +43,19 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 UI_COMMON_TABLE, "ui.skill_detail.preview", text => _previewVideoButton.text = text);
             _backButtonLocalizedText = new LocalizedElementText(
                 UI_COMMON_TABLE, "ui.skill_detail.back", text => _backButton.text = text);
+            Label localizedInfoHeaderLabel = rootElement.Q<Label>("InfoHeaderLabel");
+            Label localizedSkillTypeHeading = rootElement.Q<Label>("SkillTypeHeading");
+            Label localizedActivationComboHeading = rootElement.Q<Label>("ActivationComboHeading");
+            Label localizedSkillGenreHeading = rootElement.Q<Label>("SkillGenreHeading");
+            Label localizedEffectCaptionLabel = rootElement.Q<Label>("EffectCaptionLabel");
+            _headingLocalizedTexts = new[]
+            {
+                new LocalizedElementText("UICommon", "ui.skill_detail.info", text => localizedInfoHeaderLabel.text = text, localizedInfoHeaderLabel.text),
+                new LocalizedElementText("UICommon", "ui.skill.type", text => localizedSkillTypeHeading.text = text, localizedSkillTypeHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill_detail.activation_combo", text => localizedActivationComboHeading.text = text, localizedActivationComboHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill_detail.genre", text => localizedSkillGenreHeading.text = text, localizedSkillGenreHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill_detail.effect", text => localizedEffectCaptionLabel.text = text, localizedEffectCaptionLabel.text)
+            };
         }
 
         /// <summary>
@@ -95,6 +108,10 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
 
         public override void Dispose()
         {
+            foreach (LocalizedElementText localizedText in _headingLocalizedTexts)
+            {
+                localizedText.Dispose();
+            }
             base.Dispose();
             _unlockButtonActivation?.Dispose();
             _backButtonActivation?.Dispose();
@@ -108,6 +125,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 _skillDetailDragScrollManipulator = null;
             }
         }
+
+        private readonly LocalizedElementText[] _headingLocalizedTexts;
 
         private const string E_NAME_SKILL_NAME_LABEL = "SkillNameLabel";
         private const string E_NAME_SKILL_HEADER_GENRE_ICON = "SkillHeaderGenreIcon";

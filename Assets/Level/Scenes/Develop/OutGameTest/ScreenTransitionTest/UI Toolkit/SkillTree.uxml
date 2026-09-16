@@ -157,32 +157,32 @@
     </ui:VisualElement>
     <ui:VisualElement name="UnlockConfirmDialog" class="unlock-confirm-dialog" style="display: none;">
         <ui:VisualElement name="UnlockConfirmBox" class="unlock-confirm-box">
-            <ui:Label text="解放しますか？" class="unlock-confirm-title"/>
+            <ui:Label name="UnlockConfirmTitle" text="解放しますか？" class="unlock-confirm-title"/>
             <ui:Label text="" name="UnlockConfirmPointsLabel" class="unlock-confirm-plain-row"/>
             <ui:ScrollView name="UnlockConfirmScrollView" mode="Vertical" vertical-scroller-visibility="Hidden" class="unlock-confirm-scroll-view">
                 <ui:Label text="上昇するパラメータ" name="UnlockConfirmStatsHeader" class="unlock-confirm-section-header"/>
                 <ui:VisualElement name="UnlockConfirmHealthRow" class="unlock-confirm-stat-row">
-                    <ui:Label text="HP" class="unlock-confirm-stat-label"/>
+                    <ui:Label name="UnlockConfirmHealthLabel" text="HP" class="unlock-confirm-stat-label"/>
                     <ui:Label text="" name="UnlockConfirmHealthValueLabel" class="unlock-confirm-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="UnlockConfirmAttackRow" class="unlock-confirm-stat-row">
-                    <ui:Label text="攻撃力" class="unlock-confirm-stat-label"/>
+                    <ui:Label name="UnlockConfirmAttackLabel" text="攻撃力" class="unlock-confirm-stat-label"/>
                     <ui:Label text="" name="UnlockConfirmAttackValueLabel" class="unlock-confirm-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="UnlockConfirmCriticalChanceRow" class="unlock-confirm-stat-row">
-                    <ui:Label text="会心率" class="unlock-confirm-stat-label"/>
+                    <ui:Label name="UnlockConfirmCriticalChanceLabel" text="会心率" class="unlock-confirm-stat-label"/>
                     <ui:Label text="" name="UnlockConfirmCriticalChanceValueLabel" class="unlock-confirm-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="UnlockConfirmCriticalDamageRow" class="unlock-confirm-stat-row">
-                    <ui:Label text="会心ダメージ" class="unlock-confirm-stat-label"/>
+                    <ui:Label name="UnlockConfirmCriticalDamageLabel" text="会心ダメージ" class="unlock-confirm-stat-label"/>
                     <ui:Label text="" name="UnlockConfirmCriticalDamageValueLabel" class="unlock-confirm-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="UnlockConfirmAreaAttackRangeRow" class="unlock-confirm-stat-row">
-                    <ui:Label text="射程範囲" class="unlock-confirm-stat-label"/>
+                    <ui:Label name="UnlockConfirmRangeLabel" text="射程範囲" class="unlock-confirm-stat-label"/>
                     <ui:Label text="" name="UnlockConfirmAreaAttackRangeValueLabel" class="unlock-confirm-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="UnlockConfirmSkillSection">
-                    <ui:Label text="解放されるスキル" class="unlock-confirm-section-header"/>
+                    <ui:Label name="UnlockConfirmSkillsHeading" text="解放されるスキル" class="unlock-confirm-section-header"/>
                     <ui:VisualElement name="UnlockConfirmSkillNameList" class="unlock-confirm-skill-name-list"/>
                 </ui:VisualElement>
             </ui:ScrollView>
