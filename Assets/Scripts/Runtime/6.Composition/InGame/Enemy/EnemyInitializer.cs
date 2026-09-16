@@ -306,6 +306,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public override void Shutdown()
         {
+            _enemyInfantrySpawner?.Shutdown();
+            _enemyArtillerySpawner?.Shutdown();
+
             _missionWaveController?.Dispose();
             _missionWaveController = null;
 
