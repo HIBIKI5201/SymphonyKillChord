@@ -1,5 +1,6 @@
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using UnityEngine.UIElements;
 
@@ -79,6 +80,11 @@ namespace KillChord.Runtime.View.OutGame.Setting
 
             RegisterCallbacks();
             ShowMenu();
+
+            _audioSettingLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.setting.audio", text => _audioSettingButton.text = text);
+            _environmentPanelSaveLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.setting.environment_save", text => _environmentPanelSaveButton.text = text);
         }
 
         /// <summary>
@@ -131,6 +137,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _audioSettingButtonPreset.Dispose();
             _environmentSettingButtonPreset.Dispose();
             _environmentPanelSaveButtonPreset.Dispose();
+            _audioSettingLocalizedText.Dispose();
+            _environmentPanelSaveLocalizedText.Dispose();
             _navigationScope.Dispose();
         }
 
@@ -161,6 +169,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string VIBRATION_PREV_BUTTON_NAME = "VibrationPrevButton";
         private const string VIBRATION_NEXT_BUTTON_NAME = "VibrationNextButton";
         private const string ENVIRONMENT_PANEL_SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         private readonly VisualElement _backGround;
         private readonly VisualElement _settingTitleBar;
@@ -190,6 +199,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private IDisposable _audioSettingButtonPreset;
         private IDisposable _environmentSettingButtonPreset;
         private IDisposable _environmentPanelSaveButtonPreset;
+        private LocalizedElementText _audioSettingLocalizedText;
+        private LocalizedElementText _environmentPanelSaveLocalizedText;
         private PanelState _currentState;
 
         /// <summary>

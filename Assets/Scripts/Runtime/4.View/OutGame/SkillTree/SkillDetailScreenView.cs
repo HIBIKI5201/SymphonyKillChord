@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -38,6 +39,10 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _outGameUIEvent = outGameUIEvent;
 
             RegisterEvents();
+            _previewButtonLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_detail.preview", text => _previewVideoButton.text = text);
+            _backButtonLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_detail.back", text => _backButton.text = text);
         }
 
         /// <summary>
@@ -74,8 +79,15 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _skillDetail.style.unityTextAlign = textAlign;
 
             bool unlockButtonEnable = !dto.Unlocked && dto.CanUnlock;
-            _unlockButton.text = dto.Unlocked ? STRING_UNLOCK_BUTTON_TEXT_ALREADY_UNLOCKED
-                : STRING_UNLOCK_BUTTON_TEXT_UNLOCK_COST + dto.UnlockCost.ToString();
+            _unlockButtonLocalizedText?.Dispose();
+            _unlockButtonLocalizedText = dto.Unlocked
+                ? new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill_detail.unlocked", text => _unlockButton.text = text)
+                : new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.skill_detail.unlock_cost_format",
+                    text => _unlockButton.text = text,
+                    arguments: new object[] { dto.UnlockCost });
             _unlockButton.SetEnabled(unlockButtonEnable);
             _previewVideoButton.SetEnabled(dto.HasPreviewVideo);
             IsUnlockAvailable = unlockButtonEnable;
@@ -86,6 +98,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             base.Dispose();
             _unlockButtonActivation?.Dispose();
             _backButtonActivation?.Dispose();
+            _previewButtonLocalizedText?.Dispose();
+            _backButtonLocalizedText?.Dispose();
+            _unlockButtonLocalizedText?.Dispose();
 
             if (_skillDetailDragScrollManipulator != null)
             {
@@ -110,9 +125,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string E_NAME_PREVIEW_BUTTON = "PreviewButton";
         private const string E_NAME_UNLOCK_BUTTON = "UnlockButton";
         private const string E_NAME_BACK_BUTTON = "BackButton";
-        private const string STRING_UNLOCK_BUTTON_TEXT_UNLOCK_COST = "解放する　必要ポイント：";
-        private const string STRING_UNLOCK_BUTTON_TEXT_ALREADY_UNLOCKED = "解放済み";
         private const string STRING_STATUS_BOOST_TITLE = "ステータス強化";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         private Label _skillName;
         private Image _skillHeaderGenreIcon;
@@ -130,6 +144,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private VisualElement _dividerBottom;
         private Button _previewVideoButton;
         private Button _unlockButton;
+        private LocalizedElementText _previewButtonLocalizedText;
+        private LocalizedElementText _backButtonLocalizedText;
+        private LocalizedElementText _unlockButtonLocalizedText;
 
         /// <inheritdoc />
         /// <remarks>

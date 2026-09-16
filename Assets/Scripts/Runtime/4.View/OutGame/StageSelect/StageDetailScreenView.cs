@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
 using System;
 using System.Collections.Generic;
@@ -113,6 +114,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SORTIE_BUTTON} が見つかりませんでした。");
 
+            _sortieButtonMainLabel = rootElement.Q<Label>(SORTIE_BUTTON_MAIN_LABEL)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(StageDetailScreenView)}] {SORTIE_BUTTON_MAIN_LABEL} が見つかりませんでした。");
+
             _skillBuildShortcutButton = rootElement.Q<Button>(SKILL_BUILD_SHORTCUT_BUTTON)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SKILL_BUILD_SHORTCUT_BUTTON} が見つかりませんでした。");
@@ -137,6 +142,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             }
 
             RegisterButtonCallback();
+            _sortieButtonLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.stage_select.sortie", text => _sortieButtonMainLabel.text = text);
         }
 
         /// <summary>
@@ -270,6 +277,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             _slideMotionHandle.TryCancel();
             base.Dispose();
             UnregisterButtonCallback();
+            _sortieButtonLocalizedText?.Dispose();
         }
 
         /// <summary>
@@ -398,6 +406,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string MISSION_CHECK = "MissionCheck";
         private const string MISSION_CHECK_ACHIEVED_USS_CLASS = "mission-check-mission-achieved";
         private const string SORTIE_BUTTON = "SortieButton";
+        private const string SORTIE_BUTTON_MAIN_LABEL = "SortieButtonMainLabel";
+        private const string UI_COMMON_TABLE = "UICommon";
         private const string SKILL_BUILD_SHORTCUT_BUTTON = "SkillBuildShortcutButton";
         private const string SKILL_BUILD = "SkillBuild";
         private const string SKILL_SLOT = "SkillSlot";
@@ -444,6 +454,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         protected override VisualElement CancelTargetElement => RootElement;
 
         private readonly Button _sortieButton;
+        private readonly Label _sortieButtonMainLabel;
+        private LocalizedElementText _sortieButtonLocalizedText;
         private readonly Button _skillBuildShortcutButton;
         private readonly VisualElement _equippedSkillRow;
         private readonly List<VisualElement> _equippedSkillSlots;
