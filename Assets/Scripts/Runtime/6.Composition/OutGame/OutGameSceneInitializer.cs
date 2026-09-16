@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -217,6 +218,7 @@ namespace KillChord.Runtime.Composition.OutGame
                 }
             }
 
+            if (_failureView != null) { return; }
             _failureView = gameObject.AddComponent<OutGameInitializationFailureView>();
             _failureView.Initialize(gameObject.scene.name == _titleSceneName ? "もう一度読み込む" : "タイトルへ戻る");
             _failureView.OnRecoveryRequested += RecoveryRequestedHandler;
@@ -232,6 +234,10 @@ namespace KillChord.Runtime.Composition.OutGame
                 return;
             }
 
+            // 常駐側の専用失敗処理から Title の既存画面へ委ねるまでは、独自復帰を開始しません。
+            if (ServiceLocator.TryGetInstance(out SceneTransitionController owner)
+                && owner.HasScenarioBattleSortie) { return; }
+
             // 初期化失敗を受け取った元のロード処理が終了するまでは、次のロードを開始しません。
             if (ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var executor)
                 && executor.IsSessionActive)
@@ -239,11 +245,14 @@ namespace KillChord.Runtime.Composition.OutGame
                 return;
             }
 
+            CancellationToken lifetime = ServiceLocator.TryGetInstance(out SceneTransitionController lifetimeOwner)
+                ? lifetimeOwner.PersistentLifetimeToken : default;
+            if (lifetime.IsCancellationRequested) { return; }
             _isRecovering = true;
             _failureView.SetBusy(true);
             try
             {
-                if (!ServiceLocator.TryGetInstance<SceneTransitionUsecase>(out var transition))
+                if (!ServiceLocator.TryGetInstance<SceneTransitionController>(out var transition))
                 {
                     Debug.LogError($"[{nameof(OutGameSceneInitializer)}] シーン遷移サービスが取得できませんでした。", this);
                     _failureView.ShowRecoveryFailed();
@@ -253,13 +262,16 @@ namespace KillChord.Runtime.Composition.OutGame
                 string currentSceneName = gameObject.scene.name;
                 // 復帰元の破棄後も、遷移先の初期化とロード画面の終了まで継続します。
                 bool success = currentSceneName == _titleSceneName
-                    ? await transition.ReloadSceneAsync(currentSceneName, CancellationToken.None)
-                    : await transition.ChangeSceneAsync(currentSceneName, _titleSceneName, CancellationToken.None);
+                    ? await transition.ReloadSceneWithPersistentLifetimeAsync(currentSceneName)
+                    : await transition.ChangeSceneWithPersistentLifetimeAsync(currentSceneName, _titleSceneName);
 
                 if (!success && this != null)
                 {
                     _failureView.ShowRecoveryFailed();
                 }
+            }
+            catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
+            {
             }
             catch (Exception exception)
             {
@@ -271,7 +283,7 @@ namespace KillChord.Runtime.Composition.OutGame
             }
             finally
             {
-                if (this != null)
+                if (this != null && !lifetime.IsCancellationRequested)
                 {
                     _isRecovering = false;
                     _failureView.SetBusy(false);
