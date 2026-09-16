@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
@@ -163,6 +164,7 @@ namespace KillChord.Demo
             }
 
             TrySubscribeHomeTutorialStarted(isOutGameActive);
+            TryStartSessionFromOpeningScenario();
             TryStartSessionFromTutorialBattle();
             TryStartHomeTimer(isOutGameActive);
             bool isHomeTimerActive = isOutGameActive && _isHomeTimerStarted;
@@ -217,7 +219,26 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     チュートリアル戦闘のロード完了後に全体タイマーを開始します。
+        ///     冒頭シナリオのロード完了後に全体タイマーを開始します。
+        /// </summary>
+        private void TryStartSessionFromOpeningScenario()
+        {
+            if (_sessionState.IsStarted
+                || !ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState)
+                || !selectedScenarioState.HasSelectedScenario
+                || !selectedScenarioState.IsOpeningTutorialScenario
+                || !IsSceneLoaded(selectedScenarioState.CurrentStageDefinition.TargetSceneName)
+                || !ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+                || loadingScreenController.IsLoading)
+            {
+                return;
+            }
+
+            _sessionState.Start();
+        }
+
+        /// <summary>
+        ///     チュートリアル戦闘からの途中再開時は、ロード完了後に全体タイマーを開始します。
         /// </summary>
         private void TryStartSessionFromTutorialBattle()
         {
