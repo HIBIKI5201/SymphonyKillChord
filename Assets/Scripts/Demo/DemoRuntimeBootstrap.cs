@@ -2,8 +2,11 @@ using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
+using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
+using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
@@ -177,6 +180,7 @@ namespace KillChord.Demo
             TryStartHomeTimer(isOutGameActive);
             bool isHomeTimerActive = isOutGameActive && _isHomeTimerStarted;
             _sessionState.Tick(Time.unscaledDeltaTime, isHomeTimerActive);
+            UpdateTimerPosition(isOutGameActive);
             _timerView?.Refresh(isHomeTimerActive);
 
             if (_sessionState.IsStarted && _sessionState.IsOverallTimeExpired)
@@ -190,6 +194,27 @@ namespace KillChord.Demo
                 RequestHomeTutorialForceCompleteIfRunning();
                 ApplyForcedSortie(stageSelectContainer);
             }
+        }
+
+        /// <summary>
+        ///     既存の画面状態を参照し、計時や表示条件を変えずにタイマー位置を更新します。
+        /// </summary>
+        /// <param name="isOutGameActive"> OutGame内にいる場合はtrueです。 </param>
+        private void UpdateTimerPosition(bool isOutGameActive)
+        {
+            ScreenId? screenId = ServiceLocator.TryGetInstance(
+                out IScreenStateRepository screenStateRepository)
+                ? screenStateRepository.TransitionState.CurrentScreenId
+                : null;
+            bool isResultActive = ServiceLocator.TryGetInstance(
+                out SequenceModuleContainer sequenceContainer)
+                && sequenceContainer.SequenceDirector != null
+                && sequenceContainer.SequenceDirector.IsResultActive;
+            bool isScenarioActive = ServiceLocator.TryGetInstance(
+                out SelectedScenarioState selectedScenarioState)
+                && selectedScenarioState.HasSelectedScenario
+                && IsSceneLoaded(selectedScenarioState.CurrentStageDefinition.TargetSceneName);
+            _timerView?.UpdatePosition(screenId, isOutGameActive, isResultActive, isScenarioActive);
         }
 
         private void OnDestroy()
