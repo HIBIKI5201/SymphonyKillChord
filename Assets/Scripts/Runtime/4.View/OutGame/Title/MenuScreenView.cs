@@ -80,6 +80,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         protected override VisualElement CancelTargetElement => _backButton;
 
         private const string BGM_VOLUME_SLIDER_NAME = "BGMVolumeSlider";
+        private const string SOUND_EFFECT_VOLUME_SLIDER_NAME = "SEVolumeSlider";
         private const string CREDIT_BUTTON_NAME = "CreditButton";
         private const string DATA_RESET_BUTTON_NAME = "DataResetButton";
         private const string BACK_BUTTON_NAME = "BackButton";
@@ -99,6 +100,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const Ease SLIDE_EASE = Ease.OutCirc;
 
         private SliderInt _bgmVolumeSlider;
+        private SliderInt _soundEffectVolumeSlider;
         private Button _creditButton;
         private Button _dataResetButton;
 
@@ -140,6 +142,8 @@ namespace KillChord.Runtime.View.OutGame.Title
 
             _bgmVolumeSlider = rootElement.Q<SliderInt>(BGM_VOLUME_SLIDER_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {BGM_VOLUME_SLIDER_NAME}が見つかりません。");
+            _soundEffectVolumeSlider = rootElement.Q<SliderInt>(SOUND_EFFECT_VOLUME_SLIDER_NAME)
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {SOUND_EFFECT_VOLUME_SLIDER_NAME}が見つかりません。");
             _creditButton = rootElement.Q<Button>(CREDIT_BUTTON_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {CREDIT_BUTTON_NAME}が見つかりません。");
             _dataResetButton = rootElement.Q<Button>(DATA_RESET_BUTTON_NAME)
@@ -166,6 +170,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void RegisterButtonCallbacks()
         {
             _bgmVolumeSlider.MakeNavigable();
+            _soundEffectVolumeSlider.MakeNavigable();
             _creditButton.MakeNavigable();
             _dataResetButton.MakeNavigable();
             _dataResetConfirmButton.MakeNavigable();
