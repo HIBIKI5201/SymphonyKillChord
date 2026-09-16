@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -46,6 +47,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             RegisterButtonCallback();
             ResetReturnToTitleDialog();
+            RegisterLocalizedButtonTexts();
         }
 
         /// <summary>
@@ -99,6 +101,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _slideMotionHandle.TryCancel();
             base.Dispose();
             UnregisterButtonCallback();
+            foreach (LocalizedElementText localizedText in _localizedButtonTexts)
+            {
+                localizedText.Dispose();
+            }
         }
 
         /// <summary>
@@ -195,6 +201,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string OUTSIDE_CLICK_AREA_NAME = "Root";
         private const string BACK_GROUND_NAME = "BackGround";
         private const string CANCEL_TARGET_NAME = "CancelTarget";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         /// <summary> ウィンドウのスライドインにかかる時間(秒)。 </summary>
         private const float SLIDE_DURATION = 0.2f;
@@ -237,6 +244,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private bool _isReturnToTitleRequested;
         private bool _isActive;
         private MotionHandle _slideMotionHandle;
+        private LocalizedElementText[] _localizedButtonTexts = Array.Empty<LocalizedElementText>();
 
         /// <summary>
         ///     設定ウィンドウ外が押された場合に設定画面を閉じる。
@@ -360,6 +368,30 @@ namespace KillChord.Runtime.View.OutGame.Screen
             return rootElement.Q<T>(elementName)
                 ?? throw new System.InvalidOperationException(
                     $"[{nameof(SettingScreenView)}] {elementName} が見つかりませんでした。");
+        }
+
+        /// <summary>
+        ///     静的なボタンテキストをUICommonテーブルへ連携する。
+        /// </summary>
+        private void RegisterLocalizedButtonTexts()
+        {
+            _localizedButtonTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.close", text => _backButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.environment", text => _environmentSettingButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.return_to_title", text => _returnToTitleButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.setting.cancel_return_to_title",
+                    text => _cancelReturnToTitleButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.setting.confirm_return_to_title",
+                    text => _confirmReturnToTitleButton.text = text),
+            };
         }
     }
 }

@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using UnityEngine.UIElements;
 
@@ -76,6 +77,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _confirmButtonActivation = _confirmButton.RegisterActivation(HandleConfirmButtonClickedHandler);
             _dialog.RegisterCallback<NavigationCancelEvent>(
                 HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
+            _confirmButtonLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_tree.unlock_confirm", text => _confirmButton.text = text);
             Hide();
         }
 
@@ -142,6 +145,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _dialog.UnregisterCallback<NavigationCancelEvent>(
                 HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
             OnCancelled = null;
+            _confirmButtonLocalizedText.Dispose();
             if (_scrollDragManipulator != null)
             {
                 _scrollDragManipulator.target = null;
@@ -170,6 +174,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string SKIP_CHECKMARK_NAME = "UnlockConfirmSkipCheckmark";
         private const string CONFIRM_BUTTON_NAME = "UnlockConfirmButton";
         private const string POINTS_LABEL_TEXT = "研究P：";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         private readonly OutGameUIEvent _outGameUIEvent;
         private readonly VisualElement _dialog;
@@ -191,6 +196,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly VisualElement _skipRow;
         private readonly VisualElement _skipCheckmark;
         private readonly Button _confirmButton;
+        private readonly LocalizedElementText _confirmButtonLocalizedText;
         private IDisposable _skipRowActivation;
         private IDisposable _confirmButtonActivation;
 
