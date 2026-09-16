@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Result
@@ -51,6 +53,8 @@ namespace KillChord.Runtime.View.InGame.Result
 
             SetInteractionEnabled(true);
             SelectButton(_completeButton);
+            _isShown = true;
+            RefreshButtonHints();
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -64,6 +68,8 @@ namespace KillChord.Runtime.View.InGame.Result
         /// </summary>
         public void Hide()
         {
+            _isShown = false;
+            SetButtonHints(string.Empty);
             StopTextSlideIn();
             StopCountUps(true);
 
@@ -171,6 +177,12 @@ namespace KillChord.Runtime.View.InGame.Result
         [SerializeField, Tooltip("同じステージへ再出撃するボタン。")]
         private Button _retryButton;
 
+        [SerializeField, Tooltip("完了ボタンの文言と決定キーを表示するText。")]
+        private TMP_Text _completeButtonLabel;
+
+        [SerializeField, Tooltip("リトライボタンの文言と決定キーを表示するText。")]
+        private TMP_Text _retryButtonLabel;
+
         [Header("Text")]
         [SerializeField, Tooltip("リザルトタイトルを表示するText。")]
         private TMP_Text _titleText;
@@ -227,6 +239,10 @@ namespace KillChord.Runtime.View.InGame.Result
         private StageResultController _controller;
         private bool _isTransitioning;
         private bool _isUiSlided;
+        private bool _isShown;
+        private string _completeButtonText;
+        private string _retryButtonText;
+        private string _submitButtonHint;
         private IDisposable _stageNameDisposable;
         private IDisposable _mainMissionDisposable;
         private IDisposable _mainMissionStateDisposable;
@@ -242,9 +258,30 @@ namespace KillChord.Runtime.View.InGame.Result
         private readonly List<TMP_Text> _slideInTextBuffer = new();
         private readonly List<RectTransform> _releasedSlideInTargets = new();
 
+        /// <summary>
+        ///     シーンに設定されたボタン文言を保存し、リザルトを非表示にします。
+        /// </summary>
         private void Awake()
         {
+            if (_completeButtonLabel == null || _retryButtonLabel == null)
+            {
+                Debug.LogError($"[{nameof(StageResultView)}] 決定キー表示用のボタンTextが未設定です。", this);
+            }
+
+            _completeButtonText = _completeButtonLabel != null ? _completeButtonLabel.text : string.Empty;
+            _retryButtonText = _retryButtonLabel != null ? _retryButtonLabel.text : string.Empty;
             Hide();
+        }
+
+        /// <summary>
+        ///     表示中だけ、接続デバイスや決定キーの変更をボタンへ反映します。
+        /// </summary>
+        private void Update()
+        {
+            if (_isShown)
+            {
+                RefreshButtonHints();
+            }
         }
 
         private void OnDestroy()
@@ -596,6 +633,59 @@ namespace KillChord.Runtime.View.InGame.Result
 
             SetInteractionEnabled(true);
             SelectButton(focusTarget);
+        }
+
+        /// <summary>
+        ///     UIの実際の決定入力に割り当てられたキー名を表示します。
+        /// </summary>
+        private void RefreshButtonHints()
+        {
+            InputSystemUIInputModule inputModule = EventSystem.current?.currentInputModule as InputSystemUIInputModule;
+            InputAction submitAction = inputModule?.submit?.action;
+            InputControl keyboardControl = null;
+            if (submitAction != null)
+            {
+                foreach (InputControl control in submitAction.controls)
+                {
+                    if (control.device == Gamepad.current)
+                    {
+                        SetButtonHints(GetControlLabel(control));
+                        return;
+                    }
+
+                    if (keyboardControl == null && control.device == Keyboard.current)
+                    {
+                        keyboardControl = control;
+                    }
+                }
+            }
+
+            // コントローラー未接続時は、実際に割り当てられたキーボード入力を案内します。
+            SetButtonHints(keyboardControl != null ? GetControlLabel(keyboardControl) : string.Empty);
+        }
+
+        /// <summary>
+        ///     デバイスに設定された短いキー名を優先して取得します。
+        /// </summary>
+        private static string GetControlLabel(InputControl control)
+        {
+            return string.IsNullOrEmpty(control.shortDisplayName) ? control.displayName : control.shortDisplayName;
+        }
+
+        /// <summary>
+        ///     元のボタン文言から表示を組み立て、キー名の重複追加を防ぎます。
+        /// </summary>
+        private void SetButtonHints(string hint)
+        {
+            if (_submitButtonHint == hint)
+            {
+                return;
+            }
+
+            _submitButtonHint = hint;
+            string suffix = string.IsNullOrEmpty(hint) ? string.Empty : $" <size=50%>[{hint}]</size>";
+            SetText(_completeButtonLabel, _completeButtonText + suffix);
+            SetText(_retryButtonLabel, _retryButtonText + suffix);
         }
 
         /// <summary>
