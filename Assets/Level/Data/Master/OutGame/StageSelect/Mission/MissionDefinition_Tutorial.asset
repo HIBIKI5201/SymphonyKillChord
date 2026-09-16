@@ -127,6 +127,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420578705146122
+        _popupImageEntryKey: Move
         _popupImage: {fileID: 21300000, guid: 2d5cf0ea45a2db24a850c3de3a481ce6, type: 3}
     - rid: 4420578705146122
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
@@ -146,6 +147,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420578705146126
+        _popupImageEntryKey: Attack
         _popupImage: {fileID: 21300000, guid: dfd7b239bd39c684f9a7c4fea7f8379c, type: 3}
     - rid: 4420578705146126
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
@@ -195,6 +197,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420578705146134
+        _popupImageEntryKey: KillChord
         _popupImage: {fileID: 21300000, guid: 97a20494e2cd01a469e17266526c4314, type: 3}
     - rid: 4420578705146134
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
@@ -246,6 +249,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420609062207895
+        _popupImageEntryKey: JustAttack
         _popupImage: {fileID: 21300000, guid: 5b772e762909ca649a705f94d902d060, type: 3}
     - rid: 4420609062207895
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
@@ -281,6 +285,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420609062208101
+        _popupImageEntryKey: Green
         _popupImage: {fileID: 21300000, guid: 60a0aaccc0943174eb9f46a9ff645ad9, type: 3}
     - rid: 4420609062208002
       type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
@@ -288,6 +293,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420609062208102
+        _popupImageEntryKey: Orenge
         _popupImage: {fileID: 21300000, guid: ea767d3cd5ed02242b5813dd479d7a50, type: 3}
     - rid: 4420609062208003
       type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
@@ -295,6 +301,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420609062208103
+        _popupImageEntryKey: Blue
         _popupImage: {fileID: 21300000, guid: 82159a30925987c428ca1a75ae80cf98, type: 3}
     - rid: 4420609062208004
       type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
@@ -302,6 +309,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420609062208104
+        _popupImageEntryKey: Purple
         _popupImage: {fileID: 21300000, guid: 522fef8c8baffbb4ab62427d6efe15c6, type: 3}
     - rid: 4420609062208005
       type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
@@ -309,6 +317,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420609062208105
+        _popupImageEntryKey: Water
         _popupImage: {fileID: 21300000, guid: 033637c9ef4ae3f4581a5eea654644cb, type: 3}
     - rid: 4420609062208006
       type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
@@ -316,6 +325,7 @@ MonoBehaviour:
         _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
         _innerCondition:
           rid: 4420609062208106
+        _popupImageEntryKey: Yellow
         _popupImage: {fileID: 21300000, guid: bfb93d915bd6d0d4aa2f29800a24b041, type: 3}
     - rid: 4420609062208101
       type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
