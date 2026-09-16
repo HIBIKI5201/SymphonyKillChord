@@ -44,7 +44,7 @@ namespace KillChord.Demo
             _isConfigured = true;
         }
 
-        /// <summary> 初回ホーム到達時にタイマーを開始します。 </summary>
+        /// <summary> チュートリアル戦闘開始時、またはホームからの再開時に全体タイマーを開始します。 </summary>
         public void Start()
         {
             if (!_isConfigured)

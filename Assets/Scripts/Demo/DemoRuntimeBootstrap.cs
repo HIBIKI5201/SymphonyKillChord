@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
@@ -162,9 +163,11 @@ namespace KillChord.Demo
             }
 
             TrySubscribeHomeTutorialStarted(isOutGameActive);
-            TryStartSession(isOutGameActive);
-            _sessionState.Tick(Time.unscaledDeltaTime, isOutGameActive);
-            _timerView?.Refresh(isOutGameActive);
+            TryStartSessionFromTutorialBattle();
+            TryStartHomeTimer(isOutGameActive);
+            bool isHomeTimerActive = isOutGameActive && _isHomeTimerStarted;
+            _sessionState.Tick(Time.unscaledDeltaTime, isHomeTimerActive);
+            _timerView?.Refresh(isHomeTimerActive);
 
             if (_sessionState.IsStarted && _sessionState.IsOverallTimeExpired)
             {
@@ -214,16 +217,35 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     Homeチュートリアル開始状態が保存された後、初めてOutGameが有効になった時点でタイマーを開始します。
+        ///     チュートリアル戦闘のロード完了後に全体タイマーを開始します。
         /// </summary>
-        private async void TryStartSession(bool isOutGameActive)
+        private void TryStartSessionFromTutorialBattle()
         {
-            if (_sessionState.IsStarted || _isStartingSession || !isOutGameActive)
+            if (_sessionState.IsStarted
+                || !ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
+                || !selectedBattleStageState.HasSelectedBattleStage
+                || !selectedBattleStageState.CurrentStageDefinition.IsTutorial
+                || !TryGetLoadedBattleScenes(out _, out _)
+                || !ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+                || loadingScreenController.IsLoading)
             {
                 return;
             }
 
-            _isStartingSession = true;
+            _sessionState.Start();
+        }
+
+        /// <summary>
+        ///     Homeチュートリアル開始状態の保存後にホームタイマーを有効にし、ホームからの再開時は全体タイマーも開始します。
+        /// </summary>
+        private async void TryStartHomeTimer(bool isOutGameActive)
+        {
+            if (_isHomeTimerStarted || _isStartingHomeTimer || !isOutGameActive)
+            {
+                return;
+            }
+
+            _isStartingHomeTimer = true;
             try
             {
                 SaveData saveData = SaveStore.IsLoaded<SaveData>()
@@ -237,6 +259,7 @@ namespace KillChord.Demo
                     return;
                 }
 
+                _isHomeTimerStarted = true;
                 _sessionState.Start();
             }
             catch (OperationCanceledException)
@@ -248,7 +271,7 @@ namespace KillChord.Demo
             }
             finally
             {
-                _isStartingSession = false;
+                _isStartingHomeTimer = false;
             }
         }
 
@@ -341,6 +364,7 @@ namespace KillChord.Demo
             _outGameUIEvent = null;
             _isOutGameUiEventSubscribed = false;
             _isHomeTutorialStartedNotified = false;
+            _isHomeTimerStarted = false;
             _isTransitioningToEndScene = false;
             _isFinalStageConfigured = false;
             _isForcedSortiePrepared = false;
@@ -521,7 +545,8 @@ namespace KillChord.Demo
         private bool _isSceneLoadedSubscribed;
         private bool _isOutGameUiEventSubscribed;
         private bool _isHomeTutorialStartedNotified;
-        private bool _isStartingSession;
+        private bool _isHomeTimerStarted;
+        private bool _isStartingHomeTimer;
         private bool _isTransitioningToEndScene;
         private bool _isFinalStageConfigured;
         private bool _isForcedSortiePrepared;
