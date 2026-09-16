@@ -142,6 +142,27 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         }
 
         /// <summary>
+        ///     リズム判定オフセットの段階を設定する。プレビュー適用のみ行い、保存はしない。
+        /// </summary>
+        public void SetRhythmOffsetStep(int step)
+        {
+            int clampedStep = System.Math.Clamp(
+                step,
+                EnvironmentSettingsData.MIN_RHYTHM_OFFSET_STEP,
+                EnvironmentSettingsData.MAX_RHYTHM_OFFSET_STEP);
+            double rhythmOffsetSeconds = clampedStep * EnvironmentSettingsData.RHYTHM_OFFSET_STEP_SECONDS;
+
+            double previousRhythmOffsetSeconds = _workingSettings.RhythmOffsetSeconds;
+            _workingSettings.SetRhythmOffsetSeconds(rhythmOffsetSeconds);
+            if (previousRhythmOffsetSeconds == _workingSettings.RhythmOffsetSeconds)
+            {
+                return;
+            }
+
+            _environmentSettingsPresenter.Push(_workingSettings);
+        }
+
+        /// <summary>
         ///     すべての環境設定を既定値へ戻す。プレビュー適用のみ行い、保存はしない。
         /// </summary>
         public void ResetToDefaults()
@@ -154,6 +175,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _workingSettings.SetBrightness(EnvironmentSettingsData.DEFAULT_BRIGHTNESS);
             _workingSettings.SetLanguage(EnvironmentSettingsData.DEFAULT_LANGUAGE);
             _workingSettings.SetVibrationStrength(EnvironmentSettingsData.DEFAULT_VIBRATION_STRENGTH);
+            _workingSettings.SetRhythmOffsetSeconds(EnvironmentSettingsData.DEFAULT_RHYTHM_OFFSET_SECONDS);
             ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }
@@ -171,6 +193,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _committedSettings.SetBrightness(_workingSettings.Brightness);
             _committedSettings.SetLanguage(_workingSettings.Language);
             _committedSettings.SetVibrationStrength(_workingSettings.VibrationStrength);
+            _committedSettings.SetRhythmOffsetSeconds(_workingSettings.RhythmOffsetSeconds);
             _environmentSettingsService.QueueSave(_committedSettings);
         }
 
@@ -187,6 +210,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _workingSettings.SetBrightness(_committedSettings.Brightness);
             _workingSettings.SetLanguage(_committedSettings.Language);
             _workingSettings.SetVibrationStrength(_committedSettings.VibrationStrength);
+            _workingSettings.SetRhythmOffsetSeconds(_committedSettings.RhythmOffsetSeconds);
             ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }

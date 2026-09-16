@@ -1,0 +1,163 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UICommon_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 7a59d4ca1f8156b4284e1adab333880e, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 1669890048
+    m_Localized: Reset Data
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416000
+    m_Localized: Credits
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416001
+    m_Localized: Delete all data?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416002
+    m_Localized: Delete
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416003
+    m_Localized: Battle Preparation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416004
+    m_Localized: Sortie
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416005
+    m_Localized: Customize
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416006
+    m_Localized: Environment Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416007
+    m_Localized: Audio Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416008
+    m_Localized: Return to Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416009
+    m_Localized: Close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416010
+    m_Localized: Save Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416011
+    m_Localized: Return to Title Screen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416012
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416013
+    m_Localized: Japanese
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416014
+    m_Localized: English
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416015
+    m_Localized: Fullscreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416016
+    m_Localized: Windowed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416017
+    m_Localized: Strong
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416018
+    m_Localized: Weak
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416019
+    m_Localized: Off
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416020
+    m_Localized: Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416021
+    m_Localized: Close Video
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416022
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416023
+    m_Localized: Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416024
+    m_Localized: Unlock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416025
+    m_Localized: 'Unlock (Required Points: {0})'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416026
+    m_Localized: Unlocked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416027
+    m_Localized: Show Skill Video
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416028
+    m_Localized: Back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416029
+    m_Localized: Discard and Return
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416030
+    m_Localized: Save and Return
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416031
+    m_Localized: Sortie
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416032
+    m_Localized: First Clear Reward
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416033
+    m_Localized: Clear Reward
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []
