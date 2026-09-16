@@ -26,10 +26,12 @@ function colorAtPercent(pct: number) {
 }
 
 // 各色帯の中央位置(%)。ここに「Justの目安」を示す黄色い縦線を固定表示する。
+// 見た目調整用に、色帯ごとの微調整オフセット(%)を個別に指定できるようにしている。
+const markerOffsets = [5, 0, 0];
 const markerCenters = (() => {
 	let cumulative = 0;
-	return ratios.map((ratio) => {
-		const center = cumulative + ratio / 2;
+	return ratios.map((ratio, index) => {
+		const center = cumulative + ratio / 2 + (markerOffsets[index] ?? 0);
 		cumulative += ratio;
 		return center;
 	});
