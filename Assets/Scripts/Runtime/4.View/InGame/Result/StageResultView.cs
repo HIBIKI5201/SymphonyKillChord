@@ -69,7 +69,7 @@ namespace KillChord.Runtime.View.InGame.Result
         public void Hide()
         {
             _isShown = false;
-            SetButtonHints(string.Empty);
+            SetButtonHintSprite(string.Empty);
             StopTextSlideIn();
             StopCountUps(true);
 
@@ -147,6 +147,7 @@ namespace KillChord.Runtime.View.InGame.Result
         }
 
         private const int SECOND_PER_MINUTE = 60;
+        private const int BUTTON_HINT_SPRITE_SIZE_PERCENT = 70;
 
         [Header("Root")]
         [SerializeField, Tooltip("リザルト画面全体を制御するCanvasGroup。")]
@@ -242,7 +243,7 @@ namespace KillChord.Runtime.View.InGame.Result
         private bool _isShown;
         private string _completeButtonText;
         private string _retryButtonText;
-        private string _submitButtonHint;
+        private string _submitButtonSpriteName;
         private IDisposable _stageNameDisposable;
         private IDisposable _mainMissionDisposable;
         private IDisposable _mainMissionStateDisposable;
@@ -636,7 +637,7 @@ namespace KillChord.Runtime.View.InGame.Result
         }
 
         /// <summary>
-        ///     UIの実際の決定入力に割り当てられたキー名を表示します。
+        ///     UIの実際の決定入力に割り当てられた入力アイコンを表示します。
         /// </summary>
         private void RefreshButtonHints()
         {
@@ -649,7 +650,7 @@ namespace KillChord.Runtime.View.InGame.Result
                 {
                     if (control.device == Gamepad.current)
                     {
-                        SetButtonHints(GetControlLabel(control));
+                        SetButtonHintSprite(GetControlSpriteName(control));
                         return;
                     }
 
@@ -661,29 +662,145 @@ namespace KillChord.Runtime.View.InGame.Result
             }
 
             // コントローラー未接続時は、実際に割り当てられたキーボード入力を案内します。
-            SetButtonHints(keyboardControl != null ? GetControlLabel(keyboardControl) : string.Empty);
+            SetButtonHintSprite(
+                keyboardControl != null
+                    ? GetControlSpriteName(keyboardControl)
+                    : string.Empty);
         }
 
         /// <summary>
-        ///     デバイスに設定された短いキー名を優先して取得します。
+        ///     入力Controlに対応するSprite名を取得します。
         /// </summary>
-        private static string GetControlLabel(InputControl control)
+        /// <param name="control"> 表示対象の入力Controlです。 </param>
+        /// <returns> TMP Sprite Asset内のSprite名です。 </returns>
+        private static string GetControlSpriteName(InputControl control)
         {
-            return string.IsNullOrEmpty(control.shortDisplayName) ? control.displayName : control.shortDisplayName;
+            if (control?.device is Gamepad gamepad)
+            {
+                return GetGamepadControlSpriteName(gamepad, control);
+            }
+
+            if (control?.device == Keyboard.current)
+            {
+                if (control == Keyboard.current.enterKey
+                    || control == Keyboard.current.numpadEnterKey)
+                {
+                    return "enter";
+                }
+
+                if (control == Keyboard.current.spaceKey)
+                {
+                    return "space";
+                }
+            }
+
+            return string.Empty;
         }
 
         /// <summary>
-        ///     元のボタン文言から表示を組み立て、キー名の重複追加を防ぎます。
+        ///     Gamepadの種類と物理配置に対応するSprite名を取得します。
         /// </summary>
-        private void SetButtonHints(string hint)
+        /// <param name="gamepad"> 使用中のGamepadです。 </param>
+        /// <param name="control"> 表示対象の入力Controlです。 </param>
+        /// <returns> TMP Sprite Asset内のSprite名です。 </returns>
+        private static string GetGamepadControlSpriteName(Gamepad gamepad, InputControl control)
         {
-            if (_submitButtonHint == hint)
+            GamepadIconSet iconSet = ResolveGamepadIconSet(gamepad);
+            if (control == gamepad.buttonSouth)
+            {
+                return iconSet switch
+                {
+                    GamepadIconSet.PlayStation => "px",
+                    GamepadIconSet.Nintendo => "nb",
+                    _ => "xa"
+                };
+            }
+
+            if (control == gamepad.buttonEast)
+            {
+                return iconSet switch
+                {
+                    GamepadIconSet.PlayStation => "po",
+                    GamepadIconSet.Nintendo => "na",
+                    _ => "xb"
+                };
+            }
+
+            if (control == gamepad.buttonWest)
+            {
+                return iconSet switch
+                {
+                    GamepadIconSet.PlayStation => "ps",
+                    GamepadIconSet.Nintendo => "ny",
+                    _ => "xx"
+                };
+            }
+
+            if (control == gamepad.buttonNorth)
+            {
+                return iconSet switch
+                {
+                    GamepadIconSet.PlayStation => "pt",
+                    GamepadIconSet.Nintendo => "nx",
+                    _ => "xy"
+                };
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        ///     Gamepadの製品情報から使用するアイコンセットを判定します。
+        /// </summary>
+        /// <param name="gamepad"> 判定対象のGamepadです。 </param>
+        /// <returns> 使用するGamepadアイコンセットです。 </returns>
+        private static GamepadIconSet ResolveGamepadIconSet(Gamepad gamepad)
+        {
+            string deviceName = $"{gamepad.layout} {gamepad.displayName} "
+                + $"{gamepad.description.manufacturer} {gamepad.description.product}";
+            if (ContainsIgnoreCase(deviceName, "DualShock")
+                || ContainsIgnoreCase(deviceName, "DualSense")
+                || ContainsIgnoreCase(deviceName, "PlayStation")
+                || ContainsIgnoreCase(deviceName, "Sony"))
+            {
+                return GamepadIconSet.PlayStation;
+            }
+
+            if (ContainsIgnoreCase(deviceName, "Switch")
+                || ContainsIgnoreCase(deviceName, "Nintendo"))
+            {
+                return GamepadIconSet.Nintendo;
+            }
+
+            return GamepadIconSet.Xbox;
+        }
+
+        /// <summary>
+        ///     大文字小文字を区別せず文字列が含まれるか判定します。
+        /// </summary>
+        /// <param name="source"> 検索対象です。 </param>
+        /// <param name="value"> 検索する文字列です。 </param>
+        /// <returns> 文字列が含まれる場合はtrueです。 </returns>
+        private static bool ContainsIgnoreCase(string source, string value)
+        {
+            return source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        ///     元のボタン文言から表示を組み立て、入力Spriteの重複追加を防ぎます。
+        /// </summary>
+        /// <param name="spriteName"> TMP Sprite Asset内のSprite名です。 </param>
+        private void SetButtonHintSprite(string spriteName)
+        {
+            if (_submitButtonSpriteName == spriteName)
             {
                 return;
             }
 
-            _submitButtonHint = hint;
-            string suffix = string.IsNullOrEmpty(hint) ? string.Empty : $" <size=50%>[{hint}]</size>";
+            _submitButtonSpriteName = spriteName;
+            string suffix = string.IsNullOrEmpty(spriteName)
+                ? string.Empty
+                : $" <size={BUTTON_HINT_SPRITE_SIZE_PERCENT}%><sprite name=\"{spriteName}\"></size>";
             SetText(_completeButtonLabel, _completeButtonText + suffix);
             SetText(_retryButtonLabel, _retryButtonText + suffix);
         }
@@ -916,6 +1033,13 @@ namespace KillChord.Runtime.View.InGame.Result
             }
 
             _pendingCountUpValues.Clear();
+        }
+
+        private enum GamepadIconSet
+        {
+            Xbox,
+            PlayStation,
+            Nintendo
         }
     }
 }
