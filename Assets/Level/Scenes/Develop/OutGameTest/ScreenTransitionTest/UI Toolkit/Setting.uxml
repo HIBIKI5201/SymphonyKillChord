@@ -20,6 +20,7 @@
             <ui:VisualElement name="SoundPanel" class="setting-panel" style="display: none;">
                 <ui:VisualElement class="setting-panel-top-bar">
                     <ui:Label name="AudioPanelTitle" text="オーディオ設定" class="setting-panel-title"/>
+                    <ui:Button text="&lt;" name="SoundPanelBackButton" class="setting-panel-back-button ui-se-cancel"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-title-divider"/>
                 <ui:VisualElement class="setting-row">
@@ -53,6 +54,7 @@
             <ui:VisualElement name="EnvironmentPanel" class="setting-panel" style="display: none;">
                 <ui:VisualElement class="setting-panel-top-bar">
                     <ui:Label name="EnvironmentPanelTitle" text="環境設定" class="setting-panel-title"/>
+                    <ui:Button text="&lt;" name="EnvironmentPanelBackButton" class="setting-panel-back-button ui-se-cancel"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-title-divider"/>
                 <ui:VisualElement class="setting-row">

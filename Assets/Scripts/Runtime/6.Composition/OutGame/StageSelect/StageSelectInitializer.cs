@@ -586,8 +586,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     ステージ詳細ウィンドウ表示中、ウィンドウ外へのポインター入力を無効化する。
-        ///     B(キャンセル)操作以外でウィンドウを閉じたり、外側の要素を操作したりできないようにする。
+        ///     詳細の外側クリックで選択を解除し、別ノードへの選択変更を許可する。
+        ///     強制出撃中は外側への入力を遮断する。
         /// </summary>
         /// <param name="evt"> ポインタ押下イベント。 </param>
         private void HandleRootPointerDown(PointerDownEvent evt)
@@ -598,7 +598,18 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             if (_detailScreenRoot != null && _detailScreenRoot.Contains(target)) { return; }
 
-            evt.StopPropagation();
+            if (_isForcedSortieMode)
+            {
+                evt.StopPropagation();
+                return;
+            }
+
+            for (VisualElement current = target; current != null; current = current.parent)
+            {
+                if (current.ClassListContains(NODE_USS_CLASS)) { return; }
+            }
+
+            _outGameUIEvent.OnStageDetailClosed?.Invoke();
         }
 
         /// <summary>

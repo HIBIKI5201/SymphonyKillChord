@@ -164,6 +164,14 @@ namespace KillChord.Demo
             }
 
             TrySubscribeHomeTutorialStarted(isOutGameActive);
+            // TitleとOutGameが同時にロードされている間も、開始通知の購読だけは維持する。
+            if (IsSceneLoaded(_config.TitleSceneName))
+            {
+                _sessionState.End();
+                _timerView?.Refresh(false);
+                return;
+            }
+
             TryStartSessionFromOpeningScenario();
             TryStartSessionFromTutorialBattle();
             TryStartHomeTimer(isOutGameActive);
@@ -270,12 +278,16 @@ namespace KillChord.Demo
             }
 
             _isStartingHomeTimer = true;
+            int sessionRevision = _sessionRevision;
             try
             {
                 SaveData saveData = SaveStore.IsLoaded<SaveData>()
                     ? SaveStore.Get<SaveData>()
                     : await SaveStore.LoadAsync<SaveData>(destroyCancellationToken);
-                if (saveData == null
+                // Titleへ戻る前に始まった読み込み結果で、次のセッションを開始しない。
+                if (sessionRevision != _sessionRevision
+                    || IsSceneLoaded(_config.TitleSceneName)
+                    || saveData == null
                     || saveData.Tutorial.Phase < TutorialPhase.HomeStarted
                     || (saveData.Tutorial.Phase == TutorialPhase.HomeStarted
                         && !_isHomeTutorialStartedNotified))
@@ -394,6 +406,7 @@ namespace KillChord.Demo
         /// </summary>
         private void ResetSessionOnTitleEntry()
         {
+            _sessionRevision++;
             _sessionState.Reset();
             _timerView?.Refresh(false);
 
@@ -589,6 +602,7 @@ namespace KillChord.Demo
         private bool _isHomeTutorialStartedNotified;
         private bool _isHomeTimerStarted;
         private bool _isStartingHomeTimer;
+        private int _sessionRevision;
         private bool _isTransitioningToEndScene;
         private bool _isFinalStageConfigured;
         private bool _isForcedSortiePrepared;

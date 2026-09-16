@@ -17,7 +17,7 @@ MonoBehaviour:
     _hashId: -2048347455
   _characterName: Player
   _attackInterval: 0.2
-  _maxHealth: 100
+  _maxHealth: 1000
   _attackDifinitions:
   - {fileID: 11400000, guid: e83374468c0f57d41987b9e4aa77e0b3, type: 2}
   - {fileID: 11400000, guid: 953829d31e5c7ab4f96aba11c7bb5c84, type: 2}

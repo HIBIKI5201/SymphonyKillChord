@@ -42,10 +42,15 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
             if (_raycastDetector.CanRaycastHitTarget)
             {
-                AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender,false,_baseDamage);
+                AttackResult result = AttackExecutor.Execute(
+                    attackDefinition, attacker, defender, false, _baseDamage,
+                    damageUnitMultiplier: PLAYER_HEALTH_UNIT_MULTIPLIER);
                 Debug.Log($"[EnemyAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
             }
         }
+        // プレイヤーHPの桁変更に合わせ、既存の攻撃計算後に適用する。
+        private const float PLAYER_HEALTH_UNIT_MULTIPLIER = 10f;
+
         private Damage _baseDamage = new Damage(10); // TODO敵の基礎攻撃力があるはずなので、それを使用するようにする。
         private readonly EnemyRaycastDetectService _raycastDetector;
     }

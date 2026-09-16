@@ -169,7 +169,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
-        ///     ホームの主要ボタンと設定ボタンの間を左右入力で移動します。
+        ///     ホームのボタン配置に合わせて左右入力で移動します。
         /// </summary>
         private void HandleNavigationMoveHandler(NavigationMoveEvent navigationEvent)
         {
@@ -183,7 +183,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             if (navigationEvent.direction == NavigationMoveEvent.Direction.Left
                 && (source == _stageSelectButton || source == _skillTreeButton || source == _skillBuildButton))
             {
-                destination = _settingButton;
+                destination = source == _skillTreeButton ? _skillBuildButton : _settingButton;
             }
             else if (navigationEvent.direction == NavigationMoveEvent.Direction.Right && source == _settingButton)
             {

@@ -26,6 +26,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _closeButton = Require<Button>(rootElement, CLOSE_BUTTON_NAME);
             _settingMenu = Require<VisualElement>(rootElement, SETTING_MENU_NAME);
             _soundPanel = Require<VisualElement>(rootElement, SOUND_PANEL_NAME);
+            _soundPanelBackButton = Require<Button>(rootElement, SOUND_PANEL_BACK_BUTTON_NAME);
+            _environmentPanelBackButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_BACK_BUTTON_NAME);
             _bgmVolumeSlider = Require<SliderInt>(rootElement, BGM_VOLUME_SLIDER_NAME);
             _soundEffectVolumeSlider = Require<SliderInt>(rootElement, SOUND_EFFECT_VOLUME_SLIDER_NAME);
             _voiceVolumeSlider = Require<SliderInt>(rootElement, VOICE_VOLUME_SLIDER_NAME);
@@ -56,6 +58,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 new VisualElement[]
                 {
                     _bgmVolumeSlider,
+                    _soundPanelBackButton,
                     _soundEffectVolumeSlider,
                     _voiceVolumeSlider,
                 },
@@ -77,6 +80,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _vibrationNextButton,
                     _rhythmOffsetSlider,
                     _environmentPanelSaveButton,
+                    _environmentPanelBackButton,
                 },
                 _screenModePrevButton);
 
@@ -137,6 +141,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
         public void Dispose()
         {
             _audioSettingButtonPreset.Dispose();
+            _soundPanelBackButtonPreset.Dispose();
+            _environmentPanelBackButtonPreset.Dispose();
             _environmentSettingButtonPreset.Dispose();
             _environmentPanelSaveButtonPreset.Dispose();
             _audioSettingLocalizedText.Dispose();
@@ -155,6 +161,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string CLOSE_BUTTON_NAME = "CloseButton";
         private const string SETTING_MENU_NAME = "SettingMenu";
         private const string SOUND_PANEL_NAME = "SoundPanel";
+        private const string SOUND_PANEL_BACK_BUTTON_NAME = "SoundPanelBackButton";
+        private const string ENVIRONMENT_PANEL_BACK_BUTTON_NAME = "EnvironmentPanelBackButton";
         private const string BGM_VOLUME_SLIDER_NAME = "BgmVolumeSlider";
         private const string SOUND_EFFECT_VOLUME_SLIDER_NAME = "SoundEffectVolumeSlider";
         private const string VOICE_VOLUME_SLIDER_NAME = "VoiceVolumeSlider";
@@ -182,6 +190,10 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _closeButton;
         private readonly VisualElement _settingMenu;
         private readonly VisualElement _soundPanel;
+        private readonly Button _soundPanelBackButton;
+        private readonly Button _environmentPanelBackButton;
+        private IDisposable _soundPanelBackButtonPreset;
+        private IDisposable _environmentPanelBackButtonPreset;
         private readonly SliderInt _bgmVolumeSlider;
         private readonly SliderInt _soundEffectVolumeSlider;
         private readonly SliderInt _voiceVolumeSlider;
@@ -248,9 +260,19 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// </summary>
         private void RegisterCallbacks()
         {
+            _soundPanelBackButtonPreset = _soundPanelBackButton.ApplyBasicButtonPreset(HandlePanelBackButtonClickedHandler);
+            _environmentPanelBackButtonPreset = _environmentPanelBackButton.ApplyBasicButtonPreset(HandlePanelBackButtonClickedHandler);
             _audioSettingButtonPreset = _audioSettingButton.ApplyBasicButtonPreset(HandleAudioSettingButtonClickedHandler);
             _environmentSettingButtonPreset = _environmentSettingButton.ApplyBasicButtonPreset(HandleEnvironmentSettingButtonClickedHandler);
             _environmentPanelSaveButtonPreset = _environmentPanelSaveButton.ApplyBasicButtonPreset(HandleEnvironmentPanelSaveButtonClickedHandler);
+        }
+
+        /// <summary>
+        ///     サブパネルから戻り、未保存の環境設定を取り消す。
+        /// </summary>
+        private void HandlePanelBackButtonClickedHandler()
+        {
+            TryGoBack();
         }
 
         /// <summary>
