@@ -28,7 +28,7 @@ namespace KillChord.Demo
         private float _homeTimeLimitSeconds = 90.0f;
 
         [SerializeField, Min(0.0f), Tooltip("冒頭シナリオのロード完了から体験終了までの秒数です。ホームや戦闘中も進みます。")]
-        private float _overallTimeLimitSeconds = 480.0f;
+        private float _overallTimeLimitSeconds = 300.0f;
 
         [SerializeField, SceneNameSelector, Tooltip("演出と案内を表示する体験版終了専用シーンです。")]
         private string _endSceneName = "DemoEnd";

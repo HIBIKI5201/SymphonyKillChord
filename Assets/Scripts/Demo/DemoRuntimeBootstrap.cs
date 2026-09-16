@@ -164,7 +164,7 @@ namespace KillChord.Demo
             }
 
             TrySubscribeHomeTutorialStarted(isOutGameActive);
-            TryStartSessionFromOpeningScenario();
+//            TryStartSessionFromOpeningScenario();
             TryStartSessionFromTutorialBattle();
             TryStartHomeTimer(isOutGameActive);
             bool isHomeTimerActive = isOutGameActive && _isHomeTimerStarted;
