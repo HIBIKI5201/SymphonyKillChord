@@ -41,6 +41,12 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         void CycleVibrationStrength(int direction);
 
         /// <summary>
+        ///     リズム判定オフセットの段階を設定する（0.05秒刻み、-6～6）。
+        /// </summary>
+        /// <param name="step"> 設定する段階。 </param>
+        void SetRhythmOffsetStep(int step);
+
+        /// <summary>
         ///     すべての環境設定を既定値へ戻す。
         /// </summary>
         void ResetToDefaults();

@@ -21,6 +21,9 @@ namespace KillChord.Runtime.View.Persistent.Environment
             _languageLabel = new ReactiveProperty<string>(string.Empty);
             _vibrationStrengthLabel = new ReactiveProperty<string>(string.Empty);
             _vibrationScale = new ReactiveProperty<float>();
+            _rhythmOffsetStep = new ReactiveProperty<int>();
+            _rhythmOffsetLabel = new ReactiveProperty<string>(string.Empty);
+            _rhythmOffsetSeconds = new ReactiveProperty<float>();
         }
 
         /// <summary> 解像度の表示ラベル。 </summary>
@@ -44,6 +47,15 @@ namespace KillChord.Runtime.View.Persistent.Environment
         /// <summary> ゲームパッド振動へ適用する強さの倍率。 </summary>
         public ReadOnlyReactiveProperty<float> VibrationScale => _vibrationScale;
 
+        /// <summary> リズム判定オフセットの段階（0.05秒刻み、-6～6）。 </summary>
+        public ReadOnlyReactiveProperty<int> RhythmOffsetStep => _rhythmOffsetStep;
+
+        /// <summary> リズム判定オフセットの表示ラベル。 </summary>
+        public ReadOnlyReactiveProperty<string> RhythmOffsetLabel => _rhythmOffsetLabel;
+
+        /// <summary> リズム判定タイミングへ加算するオフセット秒数。 </summary>
+        public ReadOnlyReactiveProperty<float> RhythmOffsetSeconds => _rhythmOffsetSeconds;
+
         /// <summary>
         ///     表示用DTOを環境設定へ反映する。
         /// </summary>
@@ -56,6 +68,9 @@ namespace KillChord.Runtime.View.Persistent.Environment
             _languageLabel.Value = dto.LanguageLabel;
             _vibrationStrengthLabel.Value = dto.VibrationStrengthLabel;
             _vibrationScale.Value = dto.VibrationScale;
+            _rhythmOffsetStep.Value = dto.RhythmOffsetStep;
+            _rhythmOffsetLabel.Value = dto.RhythmOffsetLabel;
+            _rhythmOffsetSeconds.Value = dto.RhythmOffsetSeconds;
         }
 
         /// <summary>
@@ -70,6 +85,9 @@ namespace KillChord.Runtime.View.Persistent.Environment
             _languageLabel.Dispose();
             _vibrationStrengthLabel.Dispose();
             _vibrationScale.Dispose();
+            _rhythmOffsetStep.Dispose();
+            _rhythmOffsetLabel.Dispose();
+            _rhythmOffsetSeconds.Dispose();
         }
 
         private readonly ReactiveProperty<string> _resolutionLabel;
@@ -79,5 +97,8 @@ namespace KillChord.Runtime.View.Persistent.Environment
         private readonly ReactiveProperty<string> _languageLabel;
         private readonly ReactiveProperty<string> _vibrationStrengthLabel;
         private readonly ReactiveProperty<float> _vibrationScale;
+        private readonly ReactiveProperty<int> _rhythmOffsetStep;
+        private readonly ReactiveProperty<string> _rhythmOffsetLabel;
+        private readonly ReactiveProperty<float> _rhythmOffsetSeconds;
     }
 }

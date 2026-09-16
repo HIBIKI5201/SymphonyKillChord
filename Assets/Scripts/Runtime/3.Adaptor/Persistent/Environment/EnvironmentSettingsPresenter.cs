@@ -38,7 +38,10 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 environmentSettings.Brightness,
                 GetLanguageLabel(environmentSettings.Language),
                 GetVibrationStrengthLabel(environmentSettings.VibrationStrength),
-                GetVibrationScale(environmentSettings.VibrationStrength));
+                GetVibrationScale(environmentSettings.VibrationStrength),
+                GetRhythmOffsetStep(environmentSettings.RhythmOffsetSeconds),
+                GetRhythmOffsetLabel(environmentSettings.RhythmOffsetSeconds),
+                (float)environmentSettings.RhythmOffsetSeconds);
             _environmentSettingsViewModel.Apply(in dto);
         }
 
@@ -52,6 +55,8 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         private const float VIBRATION_STRONG_SCALE = 1f;
         private const float VIBRATION_WEAK_SCALE = 0.5f;
         private const float VIBRATION_OFF_SCALE = 0f;
+        private const string RHYTHM_OFFSET_LABEL_FORMAT = "+0.00;-0.00;0.00";
+        private const string RHYTHM_OFFSET_LABEL_SUFFIX = "秒";
 
         private readonly IEnvironmentSettingsViewModel _environmentSettingsViewModel;
         private readonly IQualityApplier _qualityApplier;
@@ -98,6 +103,22 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 VibrationStrength.Off => VIBRATION_OFF_SCALE,
                 _ => VIBRATION_STRONG_SCALE,
             };
+        }
+
+        /// <summary>
+        ///     リズム判定オフセットの秒数を、0.05秒刻みのスライダー段階へ変換する。
+        /// </summary>
+        private static int GetRhythmOffsetStep(double rhythmOffsetSeconds)
+        {
+            return (int)System.Math.Round(rhythmOffsetSeconds / EnvironmentSettingsData.RHYTHM_OFFSET_STEP_SECONDS);
+        }
+
+        /// <summary>
+        ///     リズム判定オフセットの表示ラベルを組み立てる。
+        /// </summary>
+        private static string GetRhythmOffsetLabel(double rhythmOffsetSeconds)
+        {
+            return rhythmOffsetSeconds.ToString(RHYTHM_OFFSET_LABEL_FORMAT) + RHYTHM_OFFSET_LABEL_SUFFIX;
         }
     }
 }
