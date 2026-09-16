@@ -9,13 +9,13 @@
 
 half3 _SSSWrappedDiffuse(half NdotL, half sssWrap, half3 lightColor, half shadowAtten)
 {
-    half wrappedNdotL = saturate((NdotL + sssWrap) / (1.0h + sssWrap));
+    half wrappedNdotL = saturate((NdotL + sssWrap) * rcp(1.0h + sssWrap));
     return wrappedNdotL * shadowAtten * lightColor;
 }
 
 half3 _SSSScatter(half NdotL, half sssWrap, half3 sssColor, half3 lightColor, half shadowAtten, half sssIntensity)
 {
-    half wrappedNdotL = saturate((NdotL + sssWrap) / (1.0h + sssWrap));
+    half wrappedNdotL = saturate((NdotL + sssWrap) * rcp(1.0h + sssWrap));
     half sssTerm = wrappedNdotL - saturate(NdotL);
     return sssTerm * shadowAtten * sssColor * lightColor * sssIntensity;
 }

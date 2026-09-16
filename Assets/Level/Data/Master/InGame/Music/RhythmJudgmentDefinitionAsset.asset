@@ -16,18 +16,30 @@ MonoBehaviour:
   - BeatType: 8
     StartNormalized: 0
     EndNormalized: 0.148
+    JustStartNormalized: 0.125
+    JustEndNormalized: 0.15
   - BeatType: 6
     StartNormalized: 0.1458
     EndNormalized: 0.2083
+    JustStartNormalized: 0.15
+    JustEndNormalized: 0.175
   - BeatType: 4
     StartNormalized: 0.2083
     EndNormalized: 0.3
+    JustStartNormalized: 0.25
+    JustEndNormalized: 0.275
   - BeatType: 3
     StartNormalized: 0.3
     EndNormalized: 0.4167
+    JustStartNormalized: 0.325
+    JustEndNormalized: 0.35
   - BeatType: 2
     StartNormalized: 0.4167
     EndNormalized: 0.75
+    JustStartNormalized: 0.5
+    JustEndNormalized: 0.525
   - BeatType: 1
     StartNormalized: 0.75
     EndNormalized: 1
+    JustStartNormalized: 1
+    JustEndNormalized: 1.025

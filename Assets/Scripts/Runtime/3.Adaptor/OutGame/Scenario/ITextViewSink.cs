@@ -5,6 +5,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface ITextViewSink
     {
-        void SetText(string message);
+        void SetText(in ScenarioTextViewDTO dto);
     }
 }

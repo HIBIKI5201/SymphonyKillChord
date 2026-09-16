@@ -12,18 +12,18 @@ namespace KillChord.Runtime.View.Persistent.Load
         /// <summary>
         ///     ランダムにTipsを取得する
         /// </summary>
-        /// <returns> ランダムに選ばれたTipsの文字列 </returns>
-        public string GetRandomTip()
+        /// <returns> ランダムに選ばれたTips。Tipsが1件も存在しない場合はデフォルト値。 </returns>
+        public LoadingTip GetRandomTip()
         {
             if (tips == null || tips.Length == 0)
             {
-                return string.Empty;
+                return default;
             }
 
             return tips[Random.Range(0, tips.Length)];
         }
 
-        [SerializeField, TextArea(1, 4), Tooltip("ロード画面にランダムに表示されるTips")]
-        private string[] tips;
+        [SerializeField, Tooltip("ロード画面にランダムに表示されるTips")]
+        private LoadingTip[] tips;
     }
 }

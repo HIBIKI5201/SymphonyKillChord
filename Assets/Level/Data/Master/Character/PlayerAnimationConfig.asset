@@ -20,7 +20,7 @@ MonoBehaviour:
     ExitBlendFrameCount: 0
   - ClipType: 1
     Key: 
-    Clip: {fileID: 7400000, guid: 9785a2c3720f7bd49bf7221facacfc0e, type: 2}
+    Clip: {fileID: -623603649343465320, guid: f3028569e3b354a488e9a8968598c5c7, type: 3}
     EnterBlendFrameCount: 0
     ExitBlendFrameCount: 0
   - ClipType: 2

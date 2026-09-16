@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Input;
+using LitMotion;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -49,10 +50,13 @@ namespace KillChord.Runtime.View.OutGame.Title
                 ?? throw new NullReferenceException($"{nameof(TitleSceneView)}: {TOUCH_AREA_NAME}の取得に失敗しました。");
             _optionButton = rootElement.Q<Button>(OPTION_BUTTON_NAME)
                 ?? throw new NullReferenceException($"{nameof(TitleSceneView)}: {OPTION_BUTTON_NAME}の取得に失敗しました。");
+            _instructionLabel = rootElement.Q<Label>(INSTRUCTION_LABEL_NAME)
+                ?? throw new NullReferenceException($"{nameof(TitleSceneView)}: {INSTRUCTION_LABEL_NAME}の取得に失敗しました。");
 
             _cancellationTokenSource = new CancellationTokenSource();
 
             RegisterCallbacks();
+            StartInstructionBreathing();
         }
 
         /// <summary>
@@ -67,6 +71,7 @@ namespace KillChord.Runtime.View.OutGame.Title
 
             _isDisposed = true;
             UnRegisterCallbacks();
+            _instructionMotionHandle.TryCancel();
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
@@ -111,6 +116,8 @@ namespace KillChord.Runtime.View.OutGame.Title
 
         private const string TOUCH_AREA_NAME = "TouchArea";
         private const string OPTION_BUTTON_NAME = "OptionButton";
+        private const string INSTRUCTION_LABEL_NAME = "Instruction";
+        private const float INSTRUCTION_FADE_DURATION = 1.8f;
 
         private string _currentSceneName;
         private string _targetSceneName;
@@ -118,6 +125,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// <summary> タッチエリアの VisualElement。 </summary>
         private VisualElement _touchArea;
         private Button _optionButton;
+        private Label _instructionLabel;
+        private MotionHandle _instructionMotionHandle;
 
         private TitleStartController _titleStartController;
         private PlayerInputView _playerInputView;
@@ -168,6 +177,17 @@ namespace KillChord.Runtime.View.OutGame.Title
             _touchArea.UnregisterCallback<NavigationSubmitEvent>(OnNavigationSubmit);
             _optionButton.clicked -= OnClickOptionButton;
             UnbindOptionInput();
+        }
+
+        /// <summary>
+        ///     「- Tap to Start -」ラベルを繰り返しフェードイン/アウトさせる。
+        /// </summary>
+        private void StartInstructionBreathing()
+        {
+            _instructionMotionHandle = LMotion.Create(1f, 0f, INSTRUCTION_FADE_DURATION)
+                .WithEase(Ease.InOutSine)
+                .WithLoops(-1, LoopType.Yoyo)
+                .Bind(_instructionLabel, static (opacity, label) => label.style.opacity = opacity);
         }
 
         /// <summary>

@@ -111,6 +111,8 @@
 番号,Text,話者名,セリフ
 ```
 
+話者名を空欄にすると地の文になります。話者名欄だけが隠れ、セリフは表示されます。
+
 ### 5. フェードを入れる
 
 ```csv
@@ -120,13 +122,43 @@
 書き方:
 
 ```csv
-番号,Fade,開始値,終了値,秒数
+番号,Fade,開始値,終了値,秒数,対象,方法
 ```
 
-例:
+`対象` と `方法` は省略できます。省略時は `Screen,Alpha` です。
 
-- `0,1,0.5` で 0.5 秒かけて暗くなる
-- `1,0,0.5` で 0.5 秒かけて明るくなる
+`Alpha` の値は `0` が透明、`1` が不透明です。既定の `Screen,Alpha` では会話枠を残して背景と立ち絵の透明度を変えます。
+
+画面を黒く暗転・明転させる場合は、`Black,Alpha` を指定します。
+
+```csv
+8,Fade,0,1,0.5,Black,Alpha
+9,Fade,1,0,0.5,Black,Alpha
+```
+
+透明度を変える対象:
+
+- `Screen`: 画面全体（会話枠を除く）
+- `Background`: 背景
+- `PortraitLeft` / `PortraitCenter` / `PortraitRight`: 各立ち絵
+- `Text`: 会話枠、話者名、本文
+- `Black`: 全画面黒オーバーレイ
+
+立ち絵を輪郭と透明度を維持したまま黒くする場合は、対象の後ろへ `Black` を指定します。
+
+```csv
+9,Fade,0,1,0.5,PortraitLeft,Black
+10,Fade,1,0,0.5,PortraitLeft,Black
+```
+
+`対象`に指定する `Black` は全画面黒オーバーレイ、`方法`に指定する `Black` は立ち絵RGBの黒化です。立ち絵黒化の対象には `PortraitLeft` / `PortraitCenter` / `PortraitRight` だけを指定できます。
+
+テキスト末尾のTriggerから立ち絵を黒くする場合は、開始値、終了値、秒数の後ろへ対象と方法を追加します。
+
+```csv
+20,Text,案内役,この本文の表示完了時に左の立ち絵が黒くなります
+21,Trigger,20,AtTextEnd,,,Fade,0,1,0.5,PortraitLeft,Black
+```
 
 ## 省略してよい書き方
 
@@ -160,7 +192,7 @@
 ## よくあるミス
 
 - 行番号が重複している
-- `Text` なのに話者名かセリフが空
+- `Text` のセリフが空
 - `Portrait` の位置が `Left` `Center` `Right` 以外になっている
 - 数字を書く場所に文字を書いている
 
@@ -174,6 +206,13 @@
 5,Portrait,Right,friend
 6,Text,Friend,やあ
 ```
+
+## 表示拡張の確認用CSV
+
+固定会話枠、話者名と本文の分離、地の文、立ち絵の黒化などをまとめて確認する専用データです。
+
+- `Assets/StreamingAssets/ScenarioAuthoring/ScenarioDisplayExtensionTest.events.csv`
+- 再生時のシナリオID: `ScenarioDisplayExtensionTest`
 
 ## もっとやりたいとき
 

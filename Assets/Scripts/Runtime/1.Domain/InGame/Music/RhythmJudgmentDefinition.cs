@@ -26,6 +26,28 @@ namespace KillChord.Runtime.Domain.InGame.Music
         public IReadOnlyList<RhythmJudgmentRange> JudgmentRanges => _judgmentRanges;
 
         /// <summary>
+        ///     クランプ前の小節進捗からジャスト範囲と対応する拍種を解決する。
+        /// </summary>
+        /// <param name="barProgress"> 直前の入力からの小節進捗。 </param>
+        /// <param name="beatType"> ジャストが成立した拍種。 </param>
+        /// <returns> ジャスト範囲内の場合はtrue。 </returns>
+        public bool TryResolveJustBeatType(float barProgress, out BeatType beatType)
+        {
+            for (int i = 0; i < _judgmentRanges.Count; i++)
+            {
+                RhythmJudgmentRange range = _judgmentRanges[i];
+                if (range.ContainsJustTiming(barProgress))
+                {
+                    beatType = range.BeatType;
+                    return true;
+                }
+            }
+
+            beatType = default;
+            return false;
+        }
+
+        /// <summary>
         ///     正規化された小節進捗から拍の種類を解決する。
         /// </summary>
         /// <param name="normalizedBarProgress"> 0〜1に正規化された小節進捗。 </param>

@@ -46,12 +46,23 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         public void Apply(in SkillBuildViewDTO dto)
         {
             SkillViewData[] skills = dto.Skills.ToArray();
+            IReadOnlyList<SkillBuildSlotState> previousSlots = _slots.Value;
             SkillBuildSlotState[] slots = new SkillBuildSlotState[dto.Slots.Length];
 
             for (int i = 0; i < dto.Slots.Length; i++)
             {
                 SkillBuildSlotData slot = dto.Slots[i];
-                slots[i] = new SkillBuildSlotState(slot.SlotIndex, slot.SkillId, slot.SkillId);
+                int currentSkillId = slot.SkillId;
+
+                if (TryFindSlot(previousSlots, slot.SlotIndex, out SkillBuildSlotState previousSlot) &&
+                    previousSlot.HasUnsavedChanges)
+                {
+                    // 未保存の編集中スロットは、再適用による保存データ由来の値で
+                    // 上書きせず維持する(例: 強化操作後の一覧再読込)。
+                    currentSkillId = previousSlot.CurrentSkillId;
+                }
+
+                slots[i] = new SkillBuildSlotState(slot.SlotIndex, slot.SkillId, currentSkillId);
             }
 
             _skills.Value = skills;
@@ -289,7 +300,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
-            if (TryFindSlot(DEFAULT_DETAIL_SLOT_INDEX, out SkillBuildSlotState defaultSlot) &&
+            if (TryFindSlot(_slots.Value, DEFAULT_DETAIL_SLOT_INDEX, out SkillBuildSlotState defaultSlot) &&
                 defaultSlot.CurrentSkillId != EMPTY_SKILL_ID &&
                 TryFindSkill(defaultSlot.CurrentSkillId, out SkillViewData defaultSkill))
             {
@@ -325,12 +336,12 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <summary>
         ///     スロット番号に対応する状態を検索する。
         /// </summary>
+        /// <param name="slots"> 検索対象。 </param>
         /// <param name="slotIndex"> スロット番号。 </param>
         /// <param name="slot"> 見つかった状態。 </param>
         /// <returns> 見つかった場合は true。 </returns>
-        private bool TryFindSlot(int slotIndex, out SkillBuildSlotState slot)
+        private bool TryFindSlot(IReadOnlyList<SkillBuildSlotState> slots, int slotIndex, out SkillBuildSlotState slot)
         {
-            IReadOnlyList<SkillBuildSlotState> slots = _slots.Value;
             for (int i = 0; i < slots.Count; i++)
             {
                 if (slots[i].SlotIndex == slotIndex)

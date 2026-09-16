@@ -18,7 +18,7 @@ MonoBehaviour:
     _hashId: 1711044682
   _isInitiallyUnlocked: 1
   _stageName: "\u7B2C2\u8A71\u300C\u5FA9\u8B90\u300D "
-  _flavorText: "\u30B7\u30CA\u30EA\u30AA2"
+  _flavorText: "\u6F5C\u5165\u30E1\u30F3\u30D0\u30FC\u306E\u65BD\u7B56\u4E2D\u3001\u524D\u7DDA\u62E0\u70B9\u306B\u73FE\u308C\u305F\u9023\u90A6\u8ECD\u3092\u6BB2\u6EC5\u305B\u3088\u3002"
   _targetSceneName: Scenario
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2

@@ -20,9 +20,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <param name="effectDescription"> 効果説明。 </param>
         /// <param name="tips"> 改造画面に表示するスキルTips。 </param>
         /// <param name="level"> レベル。 </param>
+        /// <param name="maxLevel"> 最大レベル。 </param>
         /// <param name="isUnlocked"> 解放済みの場合は true。 </param>
         /// <param name="genreIcon"> ジャンルバッジアイコン。 </param>
         /// <param name="genreIds"> スキルが属するジャンル ID 一覧(絞り込み判定用、Domain 非依存)。 </param>
+        /// <param name="comboStepColors"> 発動コマンドの入力順に並んだ、拍子に対応する色一覧。 </param>
         public SkillViewData(
             int skillId,
             string displayName,
@@ -33,9 +35,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             string effectDescription,
             string tips,
             int level,
+            int maxLevel,
             bool isUnlocked,
             Sprite genreIcon,
-            int[] genreIds)
+            int[] genreIds,
+            Color[] comboStepColors)
         {
             SkillId = skillId;
             DisplayName = displayName ?? string.Empty;
@@ -46,9 +50,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             EffectDescription = effectDescription ?? string.Empty;
             Tips = tips ?? string.Empty;
             Level = level;
+            MaxLevel = maxLevel;
             IsUnlocked = isUnlocked;
             GenreIcon = genreIcon;
             GenreIds = genreIds ?? Array.Empty<int>();
+            ComboStepColors = comboStepColors ?? Array.Empty<Color>();
         }
 
         /// <summary> スキル ID。 </summary>
@@ -78,6 +84,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <summary> レベル。 </summary>
         public int Level { get; }
 
+        /// <summary> 最大レベル。 </summary>
+        public int MaxLevel { get; }
+
         /// <summary> 解放済みの場合は true。 </summary>
         public bool IsUnlocked { get; }
 
@@ -86,6 +95,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
 
         /// <summary> スキルが属するジャンル ID 一覧(絞り込み判定用、Domain 非依存)。 </summary>
         public int[] GenreIds { get; }
+
+        /// <summary> 発動コマンドの入力順に並んだ、拍子に対応する色一覧。 </summary>
+        public Color[] ComboStepColors { get; }
 
         /// <summary>
         ///     等値比較を行う。

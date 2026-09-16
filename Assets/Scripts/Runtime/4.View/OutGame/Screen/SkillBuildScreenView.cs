@@ -23,14 +23,20 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         /// <param name="rootElement"> 画面ルート要素。 </param>
         /// <param name="outGameUIEvent"> 画面イベント。 </param>
+        /// <param name="comboHexIcon"> 発動コマンド表示に使う六角形スプライト(UI_hexagon)。 </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public SkillBuildScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
+        public SkillBuildScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent, Sprite comboHexIcon)
             : base(rootElement, outGameUIEvent)
         {
+            _comboHexIcon = comboHexIcon;
             _backButton = rootElement.Q<Button>(BACKBUTTON_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
+            _settingShortcutButton = rootElement.Q<Button>(SETTING_SHORTCUT_BUTTON_NAME)
+                ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SETTING_SHORTCUT_BUTTON_NAME} が見つかりませんでした。");
             _skillElementList = rootElement.Q<VisualElement>(className: SKILL_ELEMENT_LIST_CLASS_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] class={SKILL_ELEMENT_LIST_CLASS_NAME} が見つかりませんでした。");
+            _skillScrollView = rootElement.Q<ScrollView>(SKILL_SCROLL_VIEW_NAME)
+                ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILL_SCROLL_VIEW_NAME} が見つかりませんでした。");
             _skillBuildSaveButton = rootElement.Q<Button>(SKILLBUILD_SAVEBUTTON_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILLBUILD_SAVEBUTTON_NAME} が見つかりませんでした。");
             _skillLevelUpButton = rootElement.Q<Button>(SKILLLEVELUP_BUTTON_NAME)
@@ -40,7 +46,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             VisualElement skillDetailRoot = rootElement.Q<VisualElement>(SKILL_DETAIL_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILL_DETAIL_NAME} が見つかりませんでした。");
-            _skillDetailView = new SkillDetailView(skillDetailRoot);
+            _skillDetailView = new SkillDetailView(skillDetailRoot, _comboHexIcon);
             _skillDetailView.Clear();
 
             VisualElement skillGenreFilterBarRoot = rootElement.Q<VisualElement>(SKILL_GENRE_FILTER_BAR_NAME)
@@ -62,6 +68,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RegisterButtonCallback();
         }
 
+        /// <summary> スキル一覧がカード要素ごと再構築された時に通知する。 </summary>
+        public event Action OnSkillListRefreshed;
+
         /// <summary>
         ///     スキル一覧表示を初期化する。
         /// </summary>
@@ -80,13 +89,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             _skillListView = new SkillListView(
                 _skillElementList,
+                _skillScrollView,
                 skillElementTemplate,
                 onSkillElementCreated,
                 soundEffectCommand);
             _skillBuildSlotLayout = new SkillBuildSlotLayout(
                 RootElement,
                 ResolveSkillData,
-                HandleSlotTappedHandler);
+                HandleSlotTappedHandler,
+                _comboHexIcon);
             _skillListView.OnSkillSelected += HandleSkillSelectedHandler;
             _skillListView.OnGenreBadgeSelected += HandleGenreBadgeSelectedHandler;
         }
@@ -167,17 +178,20 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             _skillGenreFilterBarView.OnGenreFilterSelected -= HandleGenreFilterBarSelectedHandler;
             _skillGenreFilterBarView.Dispose();
+            OnSkillListRefreshed = null;
         }
 
         /// <inheritdoc />
         protected override VisualElement InitialFocusElement => _skillBuildSaveButton;
 
         private const string BACKBUTTON_NAME = "BackButton";
+        private const string SETTING_SHORTCUT_BUTTON_NAME = "SettingShortcutButton";
         private const string SKILLBUILD_SAVEBUTTON_NAME = "SkillBuildSaveButton";
         private const string SKILLLEVELUP_BUTTON_NAME = "SkillLevelUpButton";
         private const string SKILL_DETAIL_NAME = "SkillDetail";
         private const string SKILL_GENRE_FILTER_BAR_NAME = "SkillGenreFilterBar";
         private const string SKILL_ELEMENT_LIST_CLASS_NAME = "skill-element-list";
+        private const string SKILL_SCROLL_VIEW_NAME = "SkillScrollView";
         private const string SKILLBUILD_DIALOG_NAME = "SkillBuildDialog";
         private const string DIALOG_BACKGROUND_NAME = "BackGround";
         private const string DISCARD_AND_CLOSE_BUTTON_NAME = "DiscardAndCloseButton";
@@ -188,11 +202,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         protected override VisualElement CancelTargetElement => _backButton;
 
         private readonly Button _backButton;
+        private readonly Button _settingShortcutButton;
         private readonly Button _skillBuildSaveButton;
         private readonly Button _skillLevelUpButton;
         private readonly Label _ownedPointsLabel;
         private readonly VisualElement _skillElementList;
+        private readonly ScrollView _skillScrollView;
         private readonly SkillDetailView _skillDetailView;
+        private readonly Sprite _comboHexIcon;
         private readonly SkillGenreFilterBarView _skillGenreFilterBarView;
         private readonly VisualElement _skillBuildDialog;
         private readonly VisualElement _dialogPanel;
@@ -213,8 +230,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             Array.Empty<SkillViewData>();
         private int? _currentSelectedSkillId;
         private int? _activeGenreFilter;
+        private int _currentOwnedPoints;
         private bool _isSavingSkillBuild;
         private IDisposable _backButtonActivation;
+        private IDisposable _settingShortcutButtonActivation;
         private IDisposable _skillBuildSaveButtonActivation;
         private IDisposable _skillLevelUpButtonActivation;
         private IDisposable _unsavedSaveAndCloseButtonActivation;
@@ -231,12 +250,17 @@ namespace KillChord.Runtime.View.OutGame.Screen
             // オーバーレイとダイアログ本体は背景クリックの判定用であり、フォーカス対象にしない。
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
+            _settingShortcutButton.MakeNavigable();
             _skillBuildSaveButton.MakeNavigable();
             _skillLevelUpButton.MakeNavigable();
             _unsavedSaveAndCloseButton.MakeNavigable();
             _unsavedDiscardAndCloseButton.MakeNavigable();
 
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
+            // Button.clicked/ClickEventはコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+            // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+            _settingShortcutButtonActivation =
+                _settingShortcutButton.RegisterActivation(HandleSettingShortcutButtonActivationHandler);
             _skillBuildSaveButtonActivation =
                 _skillBuildSaveButton.RegisterActivation(HandleSkillBuildSaveButtonActivationHandler);
             _skillLevelUpButtonActivation =
@@ -257,6 +281,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillLevelUpButtonActivation?.Dispose();
             _unsavedSaveAndCloseButtonActivation?.Dispose();
             _unsavedDiscardAndCloseButtonActivation?.Dispose();
+            _settingShortcutButtonActivation?.Dispose();
             _unsavedChangesDialogOverlay.UnregisterCallback<ClickEvent>(HandleUnsavedDialogBackgroundClickedHandler);
             _dialogPanel.UnregisterCallback<ClickEvent>(HandleUnsavedDialogPanelClickedHandler);
         }
@@ -334,6 +359,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillListView.SetSelectedSkill(_currentSelectedSkillId);
             _skillListView.ApplyGenreFilter(_activeGenreFilter);
             SyncEquippedSkillsToSlots();
+
+            // 一覧を再構築するとカード要素が全て作り直されるため、
+            // 再構築前にカードへフォーカスしていた場合はフォーカスが失われる。
+            // コントローラー操作を継続できるよう、呼び出し側で再フォーカスできるようにする。
+            OnSkillListRefreshed?.Invoke();
         }
 
         /// <summary>
@@ -355,11 +385,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
             if (!skill.HasValue)
             {
                 _skillDetailView.Clear();
+                _skillLevelUpButton.SetEnabled(_skillDetailView.CanLevelUp);
                 return;
             }
 
             SkillViewData data = skill.Value;
             _skillDetailView.Apply(in data);
+            _skillDetailView.SetOwnedPoints(_currentOwnedPoints);
+            _skillLevelUpButton.SetEnabled(_skillDetailView.CanLevelUp);
         }
 
         /// <summary>
@@ -368,7 +401,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <param name="ownedPoints"> 所持ポイント。 </param>
         private void HandleOwnedPointsChangedHandler(int ownedPoints)
         {
+            _currentOwnedPoints = ownedPoints;
             _ownedPointsLabel.text = ownedPoints.ToString();
+            _skillDetailView.SetOwnedPoints(_currentOwnedPoints);
+            _skillLevelUpButton.SetEnabled(_skillDetailView.CanLevelUp);
         }
 
         /// <summary>
@@ -483,6 +519,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
             }
 
             OutGameUIEvent.OnScreenClosed?.Invoke();
+        }
+
+        /// <summary>
+        ///     設定画面ショートカットボタンが作動したときの処理。
+        /// </summary>
+        private void HandleSettingShortcutButtonActivationHandler()
+        {
+            OutGameUIEvent.OnShownSettingScreen?.Invoke();
         }
 
         /// <summary>

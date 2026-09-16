@@ -205,6 +205,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
+            _enemyAIController.OnAttackCanceled += PlayEffectCanceled;
             _enemyAIController.On1BeatBefore += On1BeatBefore;
             _enemyAIController.On2BeatBefore += On2BeatBefore;
         }
@@ -218,6 +219,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 _enemyAIController.OnAttackReserved -= PlayEffectReserved;
                 _enemyAIController.OnAttack -= PlayEffectHit;
+                _enemyAIController.OnAttackCanceled -= PlayEffectCanceled;
                 _enemyAIController.On1BeatBefore -= On1BeatBefore;
                 _enemyAIController.On2BeatBefore -= On2BeatBefore;
             }
@@ -227,6 +229,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         [SerializeField, Tooltip("敵攻撃SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
         private SoundEffectSource _attackSoundSource;
+
+        [SerializeField, Tooltip("攻撃予測1回目（2拍前）SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
+        private SoundEffectSource _attackAlertFirstSoundSource;
+
+        [SerializeField, Tooltip("攻撃予測2回目（1拍前）SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
+        private SoundEffectSource _attackAlertSecondSoundSource;
 
         [SerializeField, Tooltip("攻撃ヒット時に再生するエフェクトPrefab。")]
         private ParticleSystem _attackHitEffectPrefab;
@@ -340,7 +348,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectHit()
         {
             if (!_isPlaying) return;
-            
+
             _weaponItemView?.Play();
             _characterAnimationViewModel?.SetReserving(false);
             PlayAttackEffect(_attackHitEffectInstance);
@@ -348,6 +356,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
             MoveToAttack();
             // 攻撃アニメを再生（構えアニメより優先）
             _characterAnimationSignal?.RequestAttack();
+        }
+        /// <summary>
+        ///     予約中の攻撃がキャンセルされた際に、予約状態と予約エフェクトを解除する。
+        /// </summary>
+        private void PlayEffectCanceled()
+        {
+            _characterAnimationViewModel?.SetReserving(false);
+            if (_attackReserveEffectInstance != null)
+            {
+                _attackReserveEffectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
         /// <summary>
         ///    ターゲットの方向を向く。
@@ -496,16 +515,21 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void On1BeatBefore()
         {
+            if (!_isPlaying) return;
+
             StopMoving();
             StopRotating();
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            PlaySound(_attackAlertSecondSoundSource, null);
         }
         /// <summary>
         ///     攻撃の2拍前に呼び出される処理。
         /// </summary>
         private void On2BeatBefore()
         {
+            if (!_isPlaying) return;
 
+            PlaySound(_attackAlertFirstSoundSource, null);
         }
 
         /// <summary>

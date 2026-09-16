@@ -1,3 +1,27 @@
+/*
+ * box-sizingのグローバルリセット。
+ * これが無いとwidth+paddingを持つ要素の実際の占有幅が
+ * 「width+padding分」まで膨らみ、横スクロールの原因になる。
+ */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+/* サイト全体でテキストのドラッグ選択を禁止する */
+* {
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+/* フォーム入力欄は選択・編集操作が必要なため対象外にする */
+input,
+textarea {
+	-webkit-user-select: text;
+	user-select: text;
+}
+
 /* レトロ×SF、1998年設定・技術偏重社会をイメージした配色/タイポグラフィのトークン定義 */
 :root {
 	/* 背景: 電源の入っていないブラウン管モニタのような、沈んだ暗緑がかった黒 */
@@ -15,6 +39,9 @@
 	/* アクセント: 端末の稼働ランプ(フォスファーグリーン)と、警告表示(赤)の2系統 */
 	--color-signal: #4fe37a;
 	--color-signal-dim: #2a7a48;
+	/* 暗い背景上の小さなラベル文字用。signal-dimは装飾(罫線・枠線)専用とし、
+	   文字色にはWCAG AA(4.5:1)を満たすこちらを使う。 */
+	--color-label-muted: #4bbd76;
 	--color-warning: #d1452c;
 
 	/* 罫線/グリッド: 図面や計器盤のような細い線 */

@@ -62,6 +62,7 @@ Material:
     - _ColorMiddle: {r: 0.9, g: 0.76829267, b: 0.7902439, a: 1}
     - _ColorShadow: {r: 0.85, g: 0.7023305, b: 0.7167373, a: 1}
     - _FakeShadowColor: {r: 0.8, g: 0.72, b: 0.72, a: 1}
+    - _FakeShadowOffset: {r: -0.002, g: -0.005, b: 0, a: 0}
     - _OutlineColor: {r: 0.5, g: 0.25, b: 0.27459013, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

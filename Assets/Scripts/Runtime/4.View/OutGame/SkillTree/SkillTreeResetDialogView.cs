@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
 using UnityEngine.UIElements;
@@ -33,9 +34,17 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _cancelButton = _dialog.Q<Button>(RESET_CANCEL_BUTTON_NAME)
                 ?? throw new InvalidOperationException($"{RESET_CANCEL_BUTTON_NAME} が見つかりません。");
 
-            _resetButton.clicked += HandleResetButtonClickedHandler;
-            _confirmButton.clicked += HandleConfirmButtonClickedHandler;
-            _cancelButton.clicked += HandleCancelButtonClickedHandler;
+            // Button.clicked はコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+            // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+            _resetButton.MakeNavigable();
+            _confirmButton.MakeNavigable();
+            _cancelButton.MakeNavigable();
+
+            _resetButtonActivation = _resetButton.RegisterActivation(HandleResetButtonClickedHandler);
+            _confirmButtonActivation = _confirmButton.RegisterActivation(HandleConfirmButtonClickedHandler);
+            _cancelButtonActivation = _cancelButton.RegisterActivation(HandleCancelButtonClickedHandler);
+            _dialog.RegisterCallback<NavigationCancelEvent>(
+                HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
             Hide();
         }
 
@@ -70,13 +79,31 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     「振り直す」ボタンの表示/非表示を切り替える。
+        ///     スキル詳細パネルと画面上の同じ位置を共有しているため、詳細パネル表示中は非表示にする。
+        /// </summary>
+        /// <param name="isVisible"> 表示する場合は true。 </param>
+        public void SetResetButtonVisible(bool isVisible)
+        {
+            _resetButton.style.display = isVisible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        /// <summary> ダイアログのルート要素。モーダルのフォーカス閉じ込めに使用する。 </summary>
+        public VisualElement DialogRoot => _dialog;
+
+        /// <summary> 「振り直す」ボタンの要素。コントローラーのフォーカス移動候補に加えるために使用する。 </summary>
+        public VisualElement ResetButtonElement => _resetButton;
+
+        /// <summary>
         ///     登録済みイベントを解除する。
         /// </summary>
         public void Dispose()
         {
-            _resetButton.clicked -= HandleResetButtonClickedHandler;
-            _confirmButton.clicked -= HandleConfirmButtonClickedHandler;
-            _cancelButton.clicked -= HandleCancelButtonClickedHandler;
+            _resetButtonActivation?.Dispose();
+            _confirmButtonActivation?.Dispose();
+            _cancelButtonActivation?.Dispose();
+            _dialog.UnregisterCallback<NavigationCancelEvent>(
+                HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
         }
 
         private const string RESET_BUTTON_NAME = "ResetButton";
@@ -91,6 +118,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly Label _messageLabel;
         private readonly Button _confirmButton;
         private readonly Button _cancelButton;
+        private IDisposable _resetButtonActivation;
+        private IDisposable _confirmButtonActivation;
+        private IDisposable _cancelButtonActivation;
 
         /// <summary>
         ///     リセットボタン押下を通知する。
@@ -114,6 +144,22 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private void HandleCancelButtonClickedHandler()
         {
             _outGameUIEvent.OnSkillTreeResetCancelled?.Invoke();
+        }
+
+        /// <summary>
+        ///     コントローラーのキャンセル操作をキャンセルボタンと同じ動作に変換する。
+        ///     画面全体のキャンセル処理(戻る)より先に処理するため、トリクルダウンで購読する。
+        /// </summary>
+        /// <param name="evt"> ナビゲーションキャンセルイベント。 </param>
+        private void HandleDialogNavigationCancelHandler(NavigationCancelEvent evt)
+        {
+            if (_dialog.resolvedStyle.display == DisplayStyle.None)
+            {
+                return;
+            }
+
+            HandleCancelButtonClickedHandler();
+            evt.StopPropagation();
         }
     }
 }

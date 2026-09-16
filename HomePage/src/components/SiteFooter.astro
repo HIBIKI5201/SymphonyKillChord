@@ -10,8 +10,8 @@ interface Props {
 }
 
 const {
-	links = [{ label: 'プライバシーポリシー', href: '/policy' }],
-	copyright = '&copy; Symphony Kill Chord',
+	links = [{ label: 'プライバシーポリシー', href: `${import.meta.env.BASE_URL}policy` }],
+	copyright = '&copy; Sinfonia Studio',
 } = Astro.props;
 ---
 
