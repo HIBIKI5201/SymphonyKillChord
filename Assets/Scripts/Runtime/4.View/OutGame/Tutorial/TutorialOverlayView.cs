@@ -247,6 +247,15 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
         }
 
         /// <summary>
+        ///     現在のステップを決定入力があった場合と同様に完了させます。
+        ///     タイマー満了などでチュートリアルを強制的に終了させたい場合に使用します。
+        /// </summary>
+        public void ForceCompleteCurrentStep()
+        {
+            CompleteCurrentStep();
+        }
+
+        /// <summary>
         ///     現在のステップの待機を完了します。
         /// </summary>
         private void CompleteCurrentStep()
