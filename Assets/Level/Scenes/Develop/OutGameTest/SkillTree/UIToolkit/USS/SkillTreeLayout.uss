@@ -13,6 +13,9 @@
     bottom: 16px;
     width: 220px;
     height: 56px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
     background-color: rgba(0, 0, 0, 0);
     background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
     -unity-background-scale-mode: stretch-to-fill;
@@ -28,6 +31,20 @@
 .skilltree-reset-button:hover,
 .skilltree-reset-button:focus {
     background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=21300000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
+}
+
+.skilltree-reset-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    margin-right: 8px;
+    background-image: url("project://database/Assets/Arts/UI/UI_Research_Reset.png?fileID=21300000&guid=c6d42185820a5b84fbe085a9d831f668&type=3#UI_Research_Reset");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.skilltree-reset-label {
+    margin: 0;
+    white-space: nowrap;
 }
 
 .skilltree-panel {
