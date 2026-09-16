@@ -219,11 +219,12 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     冒頭シナリオのロード完了後に全体タイマーを開始します。
+        ///     シナリオ開始を選択している場合、冒頭シナリオのロード完了後に全体タイマーを開始します。
         /// </summary>
         private void TryStartSessionFromOpeningScenario()
         {
             if (_sessionState.IsStarted
+                || _config.OverallTimerStartPoint != DemoTimerStartPoint.OpeningScenario
                 || !ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState)
                 || !selectedScenarioState.HasSelectedScenario
                 || !selectedScenarioState.IsOpeningTutorialScenario
@@ -238,11 +239,13 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     チュートリアル戦闘からの途中再開時は、ロード完了後に全体タイマーを開始します。
+        ///     シナリオまたはチュートリアル開始を選択している場合、戦闘のロード完了後に全体タイマーを開始します。
         /// </summary>
         private void TryStartSessionFromTutorialBattle()
         {
             if (_sessionState.IsStarted
+                || (_config.OverallTimerStartPoint != DemoTimerStartPoint.OpeningScenario
+                    && _config.OverallTimerStartPoint != DemoTimerStartPoint.TutorialBattle)
                 || !ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage
                 || !selectedBattleStageState.CurrentStageDefinition.IsTutorial
