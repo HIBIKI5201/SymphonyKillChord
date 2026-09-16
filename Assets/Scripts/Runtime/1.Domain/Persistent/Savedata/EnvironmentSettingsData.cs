@@ -19,6 +19,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <param name="brightness"> 画面の明るさ。 </param>
         /// <param name="language"> 表示言語。 </param>
         /// <param name="vibrationStrength"> ゲームパッド振動の強さ。 </param>
+        /// <param name="rhythmOffsetSeconds"> リズム判定タイミングへ加算するオフセット秒数。 </param>
         public EnvironmentSettingsData(
             int resolutionWidth = DEFAULT_RESOLUTION_WIDTH,
             int resolutionHeight = DEFAULT_RESOLUTION_HEIGHT,
@@ -26,13 +27,15 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             int qualityLevel = DEFAULT_QUALITY_LEVEL,
             int brightness = DEFAULT_BRIGHTNESS,
             GameLanguage language = DEFAULT_LANGUAGE,
-            VibrationStrength vibrationStrength = DEFAULT_VIBRATION_STRENGTH)
+            VibrationStrength vibrationStrength = DEFAULT_VIBRATION_STRENGTH,
+            double rhythmOffsetSeconds = DEFAULT_RHYTHM_OFFSET_SECONDS)
         {
             SetResolution(resolutionWidth, resolutionHeight, isFullScreen);
             SetQualityLevel(qualityLevel);
             SetBrightness(brightness);
             SetLanguage(language);
             SetVibrationStrength(vibrationStrength);
+            SetRhythmOffsetSeconds(rhythmOffsetSeconds);
         }
 
         /// <summary> 解像度の幅。 </summary>
@@ -56,8 +59,29 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <summary> ゲームパッド振動の強さ。 </summary>
         public VibrationStrength VibrationStrength => _vibrationStrength;
 
+        /// <summary> リズム判定タイミングへ加算するオフセット秒数。 </summary>
+        public double RhythmOffsetSeconds => _rhythmOffsetSeconds;
+
         public const int MIN_BRIGHTNESS = 0;
         public const int MAX_BRIGHTNESS = 10;
+
+        /// <summary> リズム判定オフセットの最小値（秒）。 </summary>
+        public const double MIN_RHYTHM_OFFSET_SECONDS = -0.30d;
+
+        /// <summary> リズム判定オフセットの最大値（秒）。 </summary>
+        public const double MAX_RHYTHM_OFFSET_SECONDS = 0.30d;
+
+        /// <summary> リズム判定オフセットの刻み幅（秒）。 </summary>
+        public const double RHYTHM_OFFSET_STEP_SECONDS = 0.05d;
+
+        /// <summary> リズム判定オフセットの既定値（秒）。 </summary>
+        public const double DEFAULT_RHYTHM_OFFSET_SECONDS = 0d;
+
+        /// <summary> リズム判定オフセットの最小段階（0.05秒刻み）。 </summary>
+        public const int MIN_RHYTHM_OFFSET_STEP = -6;
+
+        /// <summary> リズム判定オフセットの最大段階（0.05秒刻み）。 </summary>
+        public const int MAX_RHYTHM_OFFSET_STEP = 6;
 
         /// <summary> 明るさの既定値。 </summary>
         public const int DEFAULT_BRIGHTNESS = 5;
@@ -127,6 +151,15 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         }
 
         /// <summary>
+        ///     リズム判定タイミングへ加算するオフセット秒数を設定する。
+        ///     範囲外の値は最小・最大値へ丸め、0.05秒刻みへスナップする。
+        /// </summary>
+        public void SetRhythmOffsetSeconds(double rhythmOffsetSeconds)
+        {
+            _rhythmOffsetSeconds = ClampRhythmOffsetSeconds(rhythmOffsetSeconds);
+        }
+
+        /// <summary>
         ///     現在値の複製を作成する。
         /// </summary>
         public EnvironmentSettingsData Copy()
@@ -138,7 +171,8 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
                 QualityLevel,
                 Brightness,
                 Language,
-                VibrationStrength);
+                VibrationStrength,
+                RhythmOffsetSeconds);
         }
 
         [SerializeField, Tooltip("解像度の幅")]
@@ -162,12 +196,36 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         [SerializeField, Tooltip("ゲームパッド振動の強さ")]
         private VibrationStrength _vibrationStrength = DEFAULT_VIBRATION_STRENGTH;
 
+        [SerializeField, Tooltip("リズム判定タイミングへ加算するオフセット秒数（±0.30秒、0.05秒刻み）")]
+        private double _rhythmOffsetSeconds = DEFAULT_RHYTHM_OFFSET_SECONDS;
+
         /// <summary>
         ///     明るさを有効範囲へ制限する。
         /// </summary>
         private static int Clamp(int brightness)
         {
             return Mathf.Clamp(brightness, MIN_BRIGHTNESS, MAX_BRIGHTNESS);
+        }
+
+        /// <summary>
+        ///     リズム判定オフセットを有効範囲へ制限し、0.05秒刻みへスナップする。
+        /// </summary>
+        private static double ClampRhythmOffsetSeconds(double rhythmOffsetSeconds)
+        {
+            if (double.IsNaN(rhythmOffsetSeconds) || double.IsInfinity(rhythmOffsetSeconds))
+            {
+                return DEFAULT_RHYTHM_OFFSET_SECONDS;
+            }
+
+            double clamped = System.Math.Clamp(
+                rhythmOffsetSeconds,
+                MIN_RHYTHM_OFFSET_SECONDS,
+                MAX_RHYTHM_OFFSET_SECONDS);
+            double snappedSteps = System.Math.Round(clamped / RHYTHM_OFFSET_STEP_SECONDS);
+            return System.Math.Clamp(
+                snappedSteps * RHYTHM_OFFSET_STEP_SECONDS,
+                MIN_RHYTHM_OFFSET_SECONDS,
+                MAX_RHYTHM_OFFSET_SECONDS);
         }
     }
 }

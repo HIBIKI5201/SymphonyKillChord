@@ -114,6 +114,15 @@
                         <ui:Button text="&gt;" name="VibrationNextButton" class="setting-select-arrow-button ui-se-select"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label text="リズム判定タイミング" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-control-row">
+                        <ui:Label text="±0.00秒" name="RhythmOffsetValueLabel" class="setting-value-label"/>
+                        <ui:SliderInt name="RhythmOffsetSlider" low-value="-6" high-value="6" value="0" show-input-field="false" page-size="1" class="setting-slider"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 <ui:VisualElement class="setting-menu-spacer"/>
                 <ui:Button text="設定を保存" name="EnvironmentPanelSaveButton" class="setting-menu-button ui-se-select"/>
             </ui:VisualElement>
