@@ -174,6 +174,7 @@ namespace KillChord.Demo
 
             if (_sessionState.IsHomeTimeExpired && isOutGameActive)
             {
+                RequestHomeTutorialForceCompleteIfRunning();
                 ApplyForcedSortie(stageSelectContainer);
             }
         }
@@ -252,16 +253,18 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     強制対象ステージを準備し、すでに表示中の場合も含めて操作制限を反映します。
+        ///     ホームチュートリアルが進行中であれば、完了扱いでの終了を要求します。
+        /// </summary>
+        private void RequestHomeTutorialForceCompleteIfRunning()
+        {
+            _outGameUIEvent?.OnHomeTutorialForceCompleteRequested?.Invoke();
+        }
+
+        /// <summary>
+        ///     作戦画面で強制対象ステージを選択し、出撃以外の操作を制限します。
         /// </summary>
         private void ApplyForcedSortie(StageSelectModuleContainer stageSelectContainer)
         {
-            if (!ServiceLocator.TryGetInstance(out BattlePreparationScreen preparationScreen))
-            {
-                return;
-            }
-
-            preparationScreen.SetForcedSortieMode(true);
             if (_isForcedSortiePrepared)
             {
                 return;
@@ -270,9 +273,7 @@ namespace KillChord.Demo
             if (!DemoStageResultExitPolicy.TryGetLatestAvailableBattleStage(
                     stageSelectContainer.StageTree,
                     out BattleStageDefinition battleStageDefinition)
-                || !stageSelectContainer.SelectionService.TryPrepareBattleSortie(
-                    battleStageDefinition,
-                    stageSelectContainer.ReturnSceneName))
+                || !stageSelectContainer.TryForceBattleSortie(battleStageDefinition.StageId))
             {
                 Debug.LogError(
                     $"[{nameof(DemoRuntimeBootstrap)}] " +
@@ -282,10 +283,6 @@ namespace KillChord.Demo
             }
 
             _isForcedSortiePrepared = true;
-            if (ServiceLocator.TryGetInstance(out OutGameUIEvent outGameUIEvent))
-            {
-                outGameUIEvent.OnShownBattlePreparationScreen?.Invoke();
-            }
         }
 
         /// <summary>

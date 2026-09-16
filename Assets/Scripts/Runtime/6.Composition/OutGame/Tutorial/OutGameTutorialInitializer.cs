@@ -43,11 +43,13 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
 
         private OutGameUIEvent _outGameUIEvent;
         private LoadingScreenController _loadingScreenController;
+        private TutorialOverlayView _activeOverlayView;
         /// <summary> ホーム画面の表示要素を提供するViewです。 </summary>
         private HomeScreenView _homeScreenView;
         private SaveData _loadedSaveData;
         private bool _isWaitingForLoadingCompleted;
         private bool _isTutorialRunning;
+        private bool _isForceCompleteRequested;
         private bool _isInitialized;
 
         /// <summary>
@@ -79,6 +81,8 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                 return false;
             }
 
+            _outGameUIEvent.OnHomeTutorialForceCompleteRequested +=
+                HandleHomeTutorialForceCompleteRequested;
             ServiceLocator.TryGetInstance(out _loadingScreenController);
             ServiceLocator.TryGetInstance(out HomeScreenView homeScreenView);
             _homeScreenView = homeScreenView;
@@ -107,11 +111,19 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
         public override void Shutdown()
         {
             UnsubscribeLoadingCompleted();
+            if (_outGameUIEvent != null)
+            {
+                _outGameUIEvent.OnHomeTutorialForceCompleteRequested -=
+                    HandleHomeTutorialForceCompleteRequested;
+            }
+
             _outGameUIEvent = null;
             _loadingScreenController = null;
+            _activeOverlayView = null;
             _homeScreenView = null;
             _loadedSaveData = null;
             _isTutorialRunning = false;
+            _isForceCompleteRequested = false;
             _isInitialized = false;
         }
 
@@ -126,6 +138,20 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             {
                 StartHomeTutorial();
             }
+        }
+
+        /// <summary>
+        ///     体験版のタイマー満了などにより、進行中のホームチュートリアルを完了扱いで終了させる要求を処理します。
+        /// </summary>
+        private void HandleHomeTutorialForceCompleteRequested()
+        {
+            if (!_isTutorialRunning || _isForceCompleteRequested)
+            {
+                return;
+            }
+
+            _isForceCompleteRequested = true;
+            _activeOverlayView?.ForceCompleteCurrentStep();
         }
 
         /// <summary>
@@ -164,6 +190,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                 return;
             }
 
+            _isForceCompleteRequested = false;
             _isTutorialRunning = true;
             try
             {
@@ -208,10 +235,16 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             }
 
             TutorialOverlayView overlayView = new TutorialOverlayView(_homeScreenView.OutGameRootElement);
+            _activeOverlayView = overlayView;
             try
             {
                 foreach (HomeTutorialStep step in HOME_TUTORIAL_STEPS)
                 {
+                    if (_isForceCompleteRequested)
+                    {
+                        break;
+                    }
+
                     VisualElement target = _homeScreenView.FindTutorialTarget(step.TargetElementName);
                     if (target == null)
                     {
@@ -223,12 +256,18 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                     }
 
                     await overlayView.ShowStepAsync(target, step.Message, cancellationToken);
+
+                    if (_isForceCompleteRequested)
+                    {
+                        break;
+                    }
                 }
 
                 await overlayView.HideAsync(cancellationToken);
             }
             finally
             {
+                _activeOverlayView = null;
                 overlayView.Dispose();
             }
         }
