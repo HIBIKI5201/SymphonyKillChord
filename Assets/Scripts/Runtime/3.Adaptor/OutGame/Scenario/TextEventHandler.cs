@@ -26,39 +26,83 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             _playbackState = playbackState;
             _settingsRepository = settingsRepository;
         }
+
+        /// <summary>
+        /// 進行中の文字送りを完了し、現在のテキストを全文表示する。
+        /// </summary>
+        /// <returns> 文字送り中の完了要求を受理した場合はtrue。 </returns>
+        public bool TryCompleteCurrentText()
+        {
+            lock (_textRevealSync)
+            {
+                if (_textRevealCompletionSource == null)
+                {
+                    return false;
+                }
+
+                _textRevealCompletionSource.TrySetResult(true);
+                return true;
+            }
+        }
+
         /// <summary>
         /// 受け取ったイベントを現在の出力先へ反映する。
         /// </summary>
         public async ValueTask HandleAsync(TextEvent e, CancellationToken ct)
         {
+            TaskCompletionSource<bool> completionSource = BeginTextReveal();
             var fired = new HashSet<TextTimingTrigger>();
-            await TryFireTriggersAsync(e.Triggers, fired, 0, string.Empty, ct);
-
-            // 話者名が空（ナレーション）の場合は "話者: " の接頭辞を付けない。
-            string speakerPrefix = string.IsNullOrEmpty(e.Speaker) ? string.Empty : $"{e.Speaker}: ";
-
-            for (int i = 1; i <= e.Text.Length; i++)
+            try
             {
-                while (_playbackState.IsPaused)
+                await TryFireTriggersAsync(e.Triggers, fired, 0, string.Empty, ct);
+
+                // 話者名が空（ナレーション）の場合は "話者: " の接頭辞を付けない。
+                string speakerPrefix = string.IsNullOrEmpty(e.Speaker) ? string.Empty : $"{e.Speaker}: ";
+
+                for (int i = 1; i <= e.Text.Length; i++)
                 {
-                    TimeSpan pauseDelay = _settingsRepository.PausePollInterval < TimeSpan.FromMilliseconds(10)
-                        ? TimeSpan.FromMilliseconds(10)
-                        : _settingsRepository.PausePollInterval;
-                    await Task.Delay(pauseDelay, ct);
+                    if (completionSource.Task.IsCompleted)
+                    {
+                        await CompleteTextAsync(e, speakerPrefix, fired, i - 1, ct);
+                        break;
+                    }
+
+                    while (_playbackState.IsPaused)
+                    {
+                        TimeSpan pauseDelay = _settingsRepository.PausePollInterval < TimeSpan.FromMilliseconds(10)
+                            ? TimeSpan.FromMilliseconds(10)
+                            : _settingsRepository.PausePollInterval;
+                        if (await WaitForCompletionAsync(completionSource.Task, pauseDelay, ct))
+                        {
+                            await CompleteTextAsync(e, speakerPrefix, fired, i - 1, ct);
+                            return;
+                        }
+                    }
+
+                    await _textOutputPort.ShowTextAsync($"{speakerPrefix}{e.Text[..i]}", ct);
+                    string visibleText = e.Text[..i];
+
+                    await TryFireTriggersAsync(e.Triggers, fired, i, visibleText, ct);
+
+                    if (i >= e.Text.Length)
+                    {
+                        continue;
+                    }
+
+                    TimeSpan delay = _playbackState.IsFastForward
+                        ? _settingsRepository.FastForwardTextCharInterval
+                        : _settingsRepository.NormalTextCharInterval;
+                    if (delay > TimeSpan.Zero
+                        && await WaitForCompletionAsync(completionSource.Task, delay, ct))
+                    {
+                        await CompleteTextAsync(e, speakerPrefix, fired, i, ct);
+                        break;
+                    }
                 }
-
-                await _textOutputPort.ShowTextAsync($"{speakerPrefix}{e.Text[..i]}", ct);
-                string visibleText = e.Text[..i];
-
-                await TryFireTriggersAsync(e.Triggers, fired, i, visibleText, ct);
-
-                TimeSpan delay = _playbackState.IsFastForward
-                    ? _settingsRepository.FastForwardTextCharInterval
-                    : _settingsRepository.NormalTextCharInterval;
-                if (delay > TimeSpan.Zero)
-                {
-                    await Task.Delay(delay, ct);
-                }
+            }
+            finally
+            {
+                EndTextReveal(completionSource);
             }
         }
 
@@ -82,10 +126,81 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        /// 現在のテキストを全文表示し、未発火のタイミングトリガーを処理する。
+        /// </summary>
+        private async ValueTask CompleteTextAsync(
+            TextEvent e,
+            string speakerPrefix,
+            HashSet<TextTimingTrigger> fired,
+            int visibleCharCount,
+            CancellationToken ct)
+        {
+            await _textOutputPort.ShowTextAsync($"{speakerPrefix}{e.Text}", ct);
+            for (int i = visibleCharCount + 1; i <= e.Text.Length; i++)
+            {
+                await TryFireTriggersAsync(e.Triggers, fired, i, e.Text[..i], ct);
+            }
+        }
+
+        /// <summary>
+        /// 文字送りの完了要求を受け付ける状態を開始する。
+        /// </summary>
+        private TaskCompletionSource<bool> BeginTextReveal()
+        {
+            lock (_textRevealSync)
+            {
+                if (_textRevealCompletionSource != null)
+                {
+                    throw new InvalidOperationException("文字送りは既に開始されています。");
+                }
+
+                _textRevealCompletionSource = new TaskCompletionSource<bool>(
+                    TaskCreationOptions.RunContinuationsAsynchronously);
+                return _textRevealCompletionSource;
+            }
+        }
+
+        /// <summary>
+        /// 文字送りの完了要求受付を終了する。
+        /// </summary>
+        private void EndTextReveal(TaskCompletionSource<bool> completionSource)
+        {
+            lock (_textRevealSync)
+            {
+                if (ReferenceEquals(_textRevealCompletionSource, completionSource))
+                {
+                    _textRevealCompletionSource = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 指定時間の経過または文字送り完了要求を待機する。
+        /// </summary>
+        /// <returns> 文字送り完了要求を受け取った場合はtrue。 </returns>
+        private static async ValueTask<bool> WaitForCompletionAsync(
+            Task completionTask,
+            TimeSpan delay,
+            CancellationToken ct)
+        {
+            Task delayTask = Task.Delay(delay, ct);
+            Task completedTask = await Task.WhenAny(delayTask, completionTask);
+            if (ReferenceEquals(completedTask, completionTask))
+            {
+                ct.ThrowIfCancellationRequested();
+                return true;
+            }
+
+            await delayTask;
+            return false;
+        }
+
         private readonly ITextOutputPort _textOutputPort;
         private readonly IScenarioEventEmitter _eventEmitter;
         private readonly IScenarioPlaybackState _playbackState;
         private readonly IScenarioSettingsRepository _settingsRepository;
-
+        private readonly object _textRevealSync = new();
+        private TaskCompletionSource<bool> _textRevealCompletionSource;
     }
 }
