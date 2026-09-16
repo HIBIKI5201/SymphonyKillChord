@@ -20,6 +20,8 @@ MonoBehaviour:
   _stageName: "\u7B2C1\u8A71\u300CZeroDivide\u300D"
   _flavorText: "\u30B7\u30CA\u30EA\u30AA1\n"
   _targetSceneName: Scenario
+  _firstClearRewards: []
+  _clearRewards: []
   _rewardSkillBuildPoint: 2
   _rewardSkillUnlockPoint: 2
-  _scenarioId: Episode_1
+  _scenarioId: Episode_1_first
