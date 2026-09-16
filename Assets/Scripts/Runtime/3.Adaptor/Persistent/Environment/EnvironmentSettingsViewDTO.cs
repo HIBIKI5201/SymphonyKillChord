@@ -12,12 +12,18 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             string resolutionLabel,
             string screenModeLabel,
             string qualityLevelLabel,
-            int brightness)
+            int brightness,
+            string languageLabel,
+            string vibrationStrengthLabel,
+            float vibrationScale)
         {
             ResolutionLabel = resolutionLabel;
             ScreenModeLabel = screenModeLabel;
             QualityLevelLabel = qualityLevelLabel;
             Brightness = brightness;
+            LanguageLabel = languageLabel;
+            VibrationStrengthLabel = vibrationStrengthLabel;
+            VibrationScale = vibrationScale;
         }
 
         /// <summary> 解像度の表示ラベル。 </summary>
@@ -31,5 +37,14 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
 
         /// <summary> 画面の明るさ。 </summary>
         public int Brightness { get; }
+
+        /// <summary> 表示言語の表示ラベル。 </summary>
+        public string LanguageLabel { get; }
+
+        /// <summary> ゲームパッド振動の強さの表示ラベル。 </summary>
+        public string VibrationStrengthLabel { get; }
+
+        /// <summary> ゲームパッド振動へ適用する強さの倍率。 </summary>
+        public float VibrationScale { get; }
     }
 }

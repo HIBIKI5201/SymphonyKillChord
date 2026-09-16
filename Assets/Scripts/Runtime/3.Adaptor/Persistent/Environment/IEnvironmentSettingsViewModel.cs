@@ -19,6 +19,15 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         /// <summary> 画面の明るさ。 </summary>
         ReadOnlyReactiveProperty<int> Brightness { get; }
 
+        /// <summary> 表示言語の表示ラベル。 </summary>
+        ReadOnlyReactiveProperty<string> LanguageLabel { get; }
+
+        /// <summary> ゲームパッド振動の強さの表示ラベル。 </summary>
+        ReadOnlyReactiveProperty<string> VibrationStrengthLabel { get; }
+
+        /// <summary> ゲームパッド振動へ適用する強さの倍率。 </summary>
+        ReadOnlyReactiveProperty<float> VibrationScale { get; }
+
         /// <summary>
         ///     表示用DTOを環境設定へ反映する。
         /// </summary>
