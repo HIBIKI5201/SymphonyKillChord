@@ -1240,7 +1240,11 @@ jobs:
           }
 
           # プロセッサアフィニティビットマスクの生成
-          $AffinityMask = ([int64]1 -shl $UnityCpuCount) - 1
+          $AffinityMask = if ($UnityCpuCount -eq $MaximumAffinityCpuCount) {
+            [Int64]::MaxValue
+          } else {
+            ([int64]1 -shl $UnityCpuCount) - 1
+          }
 
           Write-Host "検出された論理 CPU 数: $CpuCount"
           Write-Host "CPU割り当てモード: $CpuAllocationMode"
