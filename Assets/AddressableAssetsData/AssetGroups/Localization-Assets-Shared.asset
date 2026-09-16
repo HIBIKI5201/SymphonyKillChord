@@ -22,7 +22,7 @@ MonoBehaviour:
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2d5cf0ea45a2db24a850c3de3a481ce6
-    m_Address: Move
+    m_Address: Douge_jp
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-ja
@@ -85,7 +85,7 @@ MonoBehaviour:
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ea767d3cd5ed02242b5813dd479d7a50
-    m_Address: Orenge
+    m_Address: OrangeAttack_jp
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-ja
