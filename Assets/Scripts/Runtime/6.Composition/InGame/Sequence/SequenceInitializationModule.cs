@@ -156,6 +156,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _container.SequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
+                _stageSequenceVoiceView,
                 _stageSequenceMessageView,
                 _stageStartFadeView,
                 _stageResultView,

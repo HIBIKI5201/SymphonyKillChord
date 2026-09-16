@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         ///    コンストラクタ。
         /// </summary>
         /// <param name="stageSequenceView"> ステージのシーケンスを表示するビュー。 </param>
+        /// <param name="stageSequenceVoiceView"> ステージシーケンスのVoiceを再生するビュー。 </param>
         /// <param name="stageSequenceMessageView"> ステージの結果を表示するビュー。 </param>
         /// <param name="stageStartFadeView"> ステージ開始時のフェードを表示するビュー。 </param>
         /// <param name="resultView"> ステージリザルトを表示するビュー。 </param>
@@ -26,6 +27,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <param name="ambienceSoundView"> ステージ開始演出中の環境音を再生するビュー。 </param>
         public InGameSequenceDirector(
             StageSequenceView stageSequenceView,
+            StageSequenceVoiceView stageSequenceVoiceView,
             StageSequenceMessageView stageSequenceMessageView,
             StageStartFadeView stageStartFadeView,
             StageResultView resultView,
@@ -36,6 +38,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             AmbienceSoundView ambienceSoundView)
         {
             _stageSequenceView = stageSequenceView ?? throw new ArgumentNullException(nameof(stageSequenceView));
+            _stageSequenceVoiceView = stageSequenceVoiceView ?? throw new ArgumentNullException(nameof(stageSequenceVoiceView));
             _stageSequenceMessageView = stageSequenceMessageView ?? throw new ArgumentNullException(nameof(stageSequenceMessageView));
             _stageStartFadeView = stageStartFadeView ?? throw new ArgumentNullException(nameof(stageStartFadeView));
             _stageStartConstraintView = stageStartConstraintView ?? throw new ArgumentNullException(nameof(stageStartConstraintView));
@@ -124,6 +127,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 await _stageSequenceView.PlayStageClearAsync(cancellationToken);
             }
 
+            _stageSequenceVoiceView.PlayStageClearVoice(
+                evaluationResult.AchievedCount,
+                evaluationResult.TotalCount);
             _stageSequenceMessageView?.Hide();
             _stageResultPresenter.PresentVictory(evaluationResult);
             _stageResultView?.Show();
@@ -152,6 +158,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         }
 
         private readonly StageSequenceView _stageSequenceView;
+        /// <summary> ステージシーケンスのVoiceを再生するビュー。 </summary>
+        private readonly StageSequenceVoiceView _stageSequenceVoiceView;
         private readonly StageSequenceMessageView _stageSequenceMessageView;
         private readonly StageStartFadeView _stageStartFadeView;
         private readonly StageResultView _stageResultView;
