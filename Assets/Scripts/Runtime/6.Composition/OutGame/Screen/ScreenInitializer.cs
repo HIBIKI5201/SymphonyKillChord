@@ -147,6 +147,13 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             ServiceLocator.UnregisterInstance<SettingScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
+            if (_registeredScreenStateRepository != null
+                && ServiceLocator.TryGetInstance(out IScreenStateRepository registeredRepository)
+                && ReferenceEquals(registeredRepository, _registeredScreenStateRepository))
+            {
+                ServiceLocator.UnregisterInstance<IScreenStateRepository>();
+            }
+            _registeredScreenStateRepository = null;
             _screenStateRepository = null;
 
             _screenRuleDataKey.ReleaseLoadedAsset(this);
@@ -394,6 +401,20 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 showScreenUseCase,
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
+
+            if (!ServiceLocator.TryGetInstance(out IScreenStateRepository registeredRepository))
+            {
+                if (ServiceLocator.RegisterInstance<IScreenStateRepository>(screenStateRepository))
+                {
+                    _registeredScreenStateRepository = screenStateRepository;
+                }
+            }
+            else if (!ReferenceEquals(registeredRepository, screenStateRepository))
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ScreenInitializer)}] 画面状態は登録済みのため、既存の登録を維持します。",
+                    this);
+            }
 
             _isInitialized = true;
             _isSceneTransitioning = false;
@@ -705,6 +726,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private bool _isOptionInputSubscribed;
         private PlayerInputView _playerInputView;
         private IScreenStateRepository _screenStateRepository;
+        private IScreenStateRepository _registeredScreenStateRepository;
         private bool _isSceneTransitioning = false;
 
     }
