@@ -347,6 +347,18 @@ MonoBehaviour:
     m_Key: ui.skill.empty_slot_symbol
     m_Metadata:
       m_Items: []
+  - m_Id: 1724416082
+    m_Key: ui.skill.max_level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416083
+    m_Key: ui.skill_detail.status_boost
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416084
+    m_Key: ui.setting.rhythm_offset_seconds_format
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

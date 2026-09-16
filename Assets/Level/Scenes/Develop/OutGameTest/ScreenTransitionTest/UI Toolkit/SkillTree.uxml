@@ -128,14 +128,32 @@
             </ui:VisualElement>
             <ui:VisualElement name="SkillTreeBottomSpacer" picking-mode="Ignore" style="height: 600px; min-height: 600px; flex-grow: 0; flex-shrink: 0;"/>
         </ui:ScrollView>
-        <ui:VisualElement name="TopBarBackground" picking-mode="Ignore" style="position: absolute; left: 8px; top: 0; width: 572px; height: 131px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OutGame_SceneTab.png?fileID=21300000&amp;guid=96c8d94dd68b3104fa34a3f388529d63&amp;type=3#UI_OutGame_SceneTab&quot;); -unity-background-scale-mode: scale-to-fit;"/>
-        <screen:AlphaHitTestButton name="BackButton" tabindex="-1" class="button back-button ui-se-cancel"/>
-        <ui:Button name="SettingShortcutButton" class="button setting-shortcut-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/WIP/UI_btn_square.png?fileID=21300000&amp;guid=37fd6d3204bfe514cb8207d301aa86af&amp;type=3#UI_btn_square&quot;);">
-            <ui:Image name="SettingIconGlyph" picking-mode="Ignore" class="home-option-icon-glyph" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_OptionIocn.png?fileID=21300000&amp;guid=bd80c72ceb0921245907a0bb0ceb0cc1&amp;type=3#UI_OptionIocn&quot;);"/>
+        <ui:VisualElement name="TopBarBackground" picking-mode="Position" class="home-top-bar" style="top: 5px; left: -1px; width: 732px; -unity-background-scale-mode: stretch-to-fill;">
+            <ui:VisualElement name="PointsRow" class="home-points-row">
+                <ui:VisualElement name="RebuildPointBadge" class="home-point-badge" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Label.png?fileID=2800000&amp;guid=14019fcc13d64f041825db46c63bb542&amp;type=3#UI_Label&quot;);">
+                    <ui:VisualElement name="RebuildPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ModificationPoint.PNG?fileID=21300000&amp;guid=4e62359d69f84914fb02f7ceb8910bd0&amp;type=3#UI_ModificationPoint&quot;); height: 60px; width: 60px;"/>
+                    <ui:VisualElement name="RebuildPointInfo" picking-mode="Ignore" class="home-point-info">
+                        <ui:Label name="RebuildPointsNameLabel" text="改造ポイント" picking-mode="Ignore" class="home-point-name-label"/>
+                        <ui:Label name="RebuildPointsValueLabel" text="0" picking-mode="Ignore" class="home-point-value-label"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="UnlockPointBadge" class="home-point-badge" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Label.png?fileID=2800000&amp;guid=14019fcc13d64f041825db46c63bb542&amp;type=3#UI_Label&quot;);">
+                    <ui:VisualElement name="UnlockPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ResearchPoint.PNG?fileID=21300000&amp;guid=c74ea33a7791b164c9a7d4735e466052&amp;type=3#UI_ResearchPoint&quot;); height: 60px; width: 60px;"/>
+                    <ui:VisualElement name="UnlockPointInfo" picking-mode="Ignore" class="home-point-info">
+                        <ui:Label name="UnlockPointsNameLabel" text="解放ポイント" picking-mode="Ignore" class="home-point-name-label"/>
+                        <ui:Label name="Points" text="0" picking-mode="Ignore" class="home-point-value-label"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <screen:AlphaHitTestButton name="BackButton" tabindex="-1" class="button back-button ui-se-cancel" style="top: -1px;"/>
+            <ui:Button name="SettingShortcutButton" class="button setting-shortcut-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/WIP/UI_btn_square.png?fileID=21300000&amp;guid=37fd6d3204bfe514cb8207d301aa86af&amp;type=3#UI_btn_square&quot;); height: 106px; top: -1px;">
+                <ui:Image name="SettingIconGlyph" picking-mode="Ignore" class="home-option-icon-glyph" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_OptionIocn.png?fileID=21300000&amp;guid=bd80c72ceb0921245907a0bb0ceb0cc1&amp;type=3#UI_OptionIocn&quot;);"/>
+            </ui:Button>
+        </ui:VisualElement>
+        <ui:Button name="ResetButton" class="skilltree-reset-button" style="-unity-font-definition: url(&quot;project://database/Assets/Arts/Fonts/IBMPlexSerif-Medium.ttf?fileID=12800000&amp;guid=2f034d4a58f80824f891e864b13f4daa&amp;type=3#IBMPlexSerif-Medium&quot;);">
+            <ui:Image name="ResetButtonIcon" picking-mode="Ignore" class="skilltree-reset-icon"/>
+            <ui:Label text="振り直す" name="ResetButtonLabel" picking-mode="Ignore" class="skilltree-reset-label"/>
         </ui:Button>
-        <ui:Label text="研究" name="Title" selectable="false" focusable="false" class="title" style="height: 50px; width: 130px; -unity-font-style: bold; font-size: 30px; -unity-text-align: middle-left; color: rgb(255, 255, 255); position: absolute; left: 300px; top: 40px; translate: 0 0;"/>
-        <ui:Label text="解放P：XXXX" name="Points" selectable="false" focusable="false" class="skilltree-top-bar-points" style="position: absolute; left: 430px; top: 46px;"/>
-        <ui:Button text="振り直す" name="ResetButton" class="skilltree-reset-button" style="-unity-font-definition: url(&quot;project://database/Assets/Arts/Fonts/IBMPlexSerif-Medium.ttf?fileID=12800000&amp;guid=2f034d4a58f80824f891e864b13f4daa&amp;type=3#IBMPlexSerif-Medium&quot;);"/>
     </ui:VisualElement>
     <ui:VisualElement name="Overlay" enabled="true" picking-mode="Ignore" style="flex-grow: 1; position: absolute; top: 0; left: 0; right: auto; bottom: auto; display: flex; visibility: visible; opacity: 1; background-color: rgba(255, 255, 255, 0); -unity-background-image-tint-color: rgba(255, 255, 255, 0); width: 100%; height: 100%;">
         <ui:Instance template="SkillDetail" name="SkillDetail" enabled="true" style="position: absolute; top: 130px; right: 16px; left: auto; bottom: auto; display: flex; align-self: flex-end; width: 520px; height: auto;"/>
@@ -146,9 +164,9 @@
         </ui:VisualElement>
     </ui:VisualElement>
     <ui:VisualElement name="SkillTreeResetDialog" style="position: absolute; width: 100%; height: 100%; justify-content: center; background-color: rgba(0, 0, 0, 0.59); display: none;">
-        <ui:VisualElement style="background-color: rgb(128, 128, 128); width: 50%; height: 40%; align-self: center; justify-content: center; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px;">
-            <ui:Label text="スキルツリーをリセットしますか？" name="ResetMessage" style="-unity-text-align: middle-center; width: 100%; height: 50%; font-size: 30px; -unity-font-style: bold; white-space: normal;"/>
-            <ui:VisualElement style="flex-direction: row; justify-content: center;">
+        <ui:VisualElement style="background-color: rgba(128, 128, 128, 0); width: 50%; height: 40%; align-self: center; justify-content: center; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_MenuPanel.png?fileID=2800000&amp;guid=e93604348792fe147b00edd554ae46a0&amp;type=3#UI_MenuPanel&quot;);">
+            <ui:Label text="スキルツリーをリセットしますか？" name="ResetMessage" style="-unity-text-align: middle-center; width: 100%; height: 50%; font-size: 30px; -unity-font-style: bold; white-space: normal; background-color: rgba(255, 255, 255, 0); -unity-font-definition: url(&quot;project://database/Assets/Arts/Fonts/IBMPlexSerif-Medium.ttf?fileID=12800000&amp;guid=2f034d4a58f80824f891e864b13f4daa&amp;type=3#IBMPlexSerif-Medium&quot;); color: rgb(255, 255, 255);"/>
+            <ui:VisualElement style="flex-direction: row-reverse; justify-content: center; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_MenuPanel.png?fileID=2800000&amp;guid=e93604348792fe147b00edd554ae46a0&amp;type=3#UI_MenuPanel&quot;);">
                 <ui:Button text="キャンセル" name="ResetCancelButton" class="button ui-se-cancel skilltree-dialog-button" style="font-size: 24px;"/>
                 <ui:VisualElement style="width: 10%; max-width: 100px;"/>
                 <ui:Button text="リセット" name="ResetConfirmButton" class="button skilltree-dialog-button" style="font-size: 24px;"/>

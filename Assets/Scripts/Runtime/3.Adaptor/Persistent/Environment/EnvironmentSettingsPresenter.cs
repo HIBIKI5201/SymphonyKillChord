@@ -57,7 +57,6 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         private const float VIBRATION_WEAK_SCALE = 0.5f;
         private const float VIBRATION_OFF_SCALE = 0f;
         private const string RHYTHM_OFFSET_LABEL_FORMAT = "+0.00;-0.00;0.00";
-        private const string RHYTHM_OFFSET_LABEL_SUFFIX = "秒";
 
         private readonly IEnvironmentSettingsViewModel _environmentSettingsViewModel;
         private readonly IQualityApplier _qualityApplier;
@@ -115,11 +114,11 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         }
 
         /// <summary>
-        ///     リズム判定オフセットの表示ラベルを組み立てる。
+        ///     リズム判定オフセットの数値ラベルを組み立てる。単位はViewでローカライズする。
         /// </summary>
         private static string GetRhythmOffsetLabel(double rhythmOffsetSeconds)
         {
-            return rhythmOffsetSeconds.ToString(RHYTHM_OFFSET_LABEL_FORMAT) + RHYTHM_OFFSET_LABEL_SUFFIX;
+            return rhythmOffsetSeconds.ToString(RHYTHM_OFFSET_LABEL_FORMAT);
         }
     }
 }

@@ -52,7 +52,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private const string E_NAME_TOP_BAR_BACKGROUND = "TopBarBackground";
         private const string E_NAME_BACK_BUTTON = "BackButton";
         private const string E_NAME_SETTING_SHORTCUT_BUTTON = "SettingShortcutButton";
-        private const string E_NAME_TITLE = "Title";
+        private const string E_NAME_POINTS_ROW = "PointsRow";
         private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 1f;
         private const float DEFAULT_AREA_ATTACK_RANGE = 1f;
 
@@ -119,7 +119,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
         /// <summary> 「振り直す」ボタンの要素。SkillTreeResetDialogView から受け取る。 </summary>
         private VisualElement _resetButtonRoot;
-        private VisualElement _titleRoot;
+        private VisualElement _pointsRowRoot;
         private VisualElement _playerStatusRoot;
         private VisualElement _previewVideoContainerRoot;
         private VisualElement _previewVideoRoot;
@@ -406,7 +406,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             _rootElement = _uiDocument.rootVisualElement;
-            // SettingShortcutButton・BackButton・Title・TopBarBackgroundは他のアウトゲーム画面にも
+            // SettingShortcutButton・BackButton・PointsRow・TopBarBackgroundは他のアウトゲーム画面にも
             // 同名で存在し、ドキュメントルートからQ()すると階層順で先に見つかった
             // 別画面の要素を掴んでしまう。研究画面のサブツリーに限定して検索すること。
             VisualElement skillTreeScreenRoot =
@@ -429,7 +429,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _topBarBackgroundRoot = _screenScope.Q<VisualElement>(E_NAME_TOP_BAR_BACKGROUND);
             _backButtonRoot = _screenScope.Q<VisualElement>(E_NAME_BACK_BUTTON);
             _settingShortcutButtonRoot = _screenScope.Q<VisualElement>(E_NAME_SETTING_SHORTCUT_BUTTON);
-            _titleRoot = _screenScope.Q<VisualElement>(E_NAME_TITLE);
+            _pointsRowRoot = _screenScope.Q<VisualElement>(E_NAME_POINTS_ROW);
 
             if (_skillDetailRoot == null
                 || _unlockConfirmBoxRoot == null
@@ -440,7 +440,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 || _topBarBackgroundRoot == null
                 || _backButtonRoot == null
                 || _settingShortcutButtonRoot == null
-                || _titleRoot == null)
+                || _pointsRowRoot == null)
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] スキルツリー用のUI要素が不足しています。", this);
                 return false;
@@ -1522,7 +1522,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _topBarBackgroundRoot.style.display = displayStyle;
             _backButtonRoot.style.display = displayStyle;
             _settingShortcutButtonRoot.style.display = displayStyle;
-            _titleRoot.style.display = displayStyle;
+            _pointsRowRoot.style.display = displayStyle;
             _currentPointsLabel.style.display = displayStyle;
             _skillDetailRoot.style.display = displayStyle;
             _playerStatusRoot.style.display = displayStyle;

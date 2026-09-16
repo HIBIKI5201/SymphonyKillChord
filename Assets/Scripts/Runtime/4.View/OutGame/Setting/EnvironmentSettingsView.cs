@@ -71,6 +71,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _screenModeLocalizedText?.Dispose();
             _languageLocalizedText?.Dispose();
             _vibrationLocalizedText?.Dispose();
+            _rhythmOffsetLocalizedText?.Dispose();
             _subscriptions.Dispose();
         }
 
@@ -143,6 +144,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private LocalizedElementText _screenModeLocalizedText;
         private LocalizedElementText _languageLocalizedText;
         private LocalizedElementText _vibrationLocalizedText;
+        private LocalizedElementText _rhythmOffsetLocalizedText;
 
         /// <summary>
         ///     UIのコールバックを登録する。
@@ -376,7 +378,13 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// </summary>
         private void HandleRhythmOffsetLabelPublished(string label)
         {
-            _rhythmOffsetValueLabel.text = label;
+            _rhythmOffsetLocalizedText?.Dispose();
+            _rhythmOffsetLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                "ui.setting.rhythm_offset_seconds_format",
+                text => _rhythmOffsetValueLabel.text = text,
+                fallback: label + "秒",
+                arguments: new object[] { label });
         }
 
         /// <summary>

@@ -350,6 +350,18 @@ MonoBehaviour:
     m_Localized: "+"
     m_Metadata:
       m_Items: []
+  - m_Id: 1724416082
+    m_Localized: "Max Level"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416083
+    m_Localized: "Stat Boost"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416084
+    m_Localized: "{0}s"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

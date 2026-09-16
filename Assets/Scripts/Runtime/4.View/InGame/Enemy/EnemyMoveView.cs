@@ -93,6 +93,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return false;
             }
 
+            // 戦闘ポーズ中の停止時間を入場期限へ含めない。
+            float arrivalDeadline = Time.time + ENTRANCE_TIMEOUT_SECONDS;
             _navMeshAgent.speed = 3f * _speedVarianceMultiplier;
             _navMeshAgent.isStopped = false;
             _navMeshAgent.updateRotation = true;
@@ -104,12 +106,18 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             while (CanUseNavMeshAgent() && _navMeshAgent.pathPending)
             {
+                if (Time.time >= arrivalDeadline)
+                {
+                    _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+                    return false;
+                }
+
                 await Awaitable.NextFrameAsync(ct);
             }
 
             ct.ThrowIfCancellationRequested();
 
-            if (!CanUseNavMeshAgent() || _navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
+            if (!CanUseNavMeshAgent() || _navMeshAgent.pathStatus != NavMeshPathStatus.PathComplete)
             {
                 _characterAnimationViewModel?.SetVelocity(Vector2.zero);
                 return false;
@@ -118,6 +126,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
             while (CanUseNavMeshAgent())
             {
                 ct.ThrowIfCancellationRequested();
+                if (Time.time >= arrivalDeadline
+                    || (!_navMeshAgent.pathPending && _navMeshAgent.pathStatus != NavMeshPathStatus.PathComplete))
+                {
+                    break;
+                }
 
                 Vector3 velocity = _navMeshAgent.desiredVelocity;
                 _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
@@ -364,6 +377,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("移動速度の個体差(倍率)の上限。1体ごとに初期化時抽選されます。")]
         private float _speedVarianceMax = 1.1f;
 
+        private const float ENTRANCE_TIMEOUT_SECONDS = 30f;
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         /// <summary> 通常移動速度に対する横歩き速度の比率。 </summary>
         private const float STRAFE_SPEED_RATIO = 0.5f;

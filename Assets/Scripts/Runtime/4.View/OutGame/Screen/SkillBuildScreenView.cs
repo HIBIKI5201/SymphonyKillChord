@@ -44,6 +44,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILLLEVELUP_BUTTON_NAME} が見つかりませんでした。");
             _ownedPointsLabel = rootElement.Q<Label>(OWNED_POINTS_LABEL_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {OWNED_POINTS_LABEL_NAME} が見つかりませんでした。");
+            _unlockPointsLabel = rootElement.Q<Label>("UnlockPointsValueLabel")
+                ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] UnlockPointsValueLabel が見つかりませんでした。");
 
             VisualElement skillDetailRoot = rootElement.Q<VisualElement>(SKILL_DETAIL_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILL_DETAIL_NAME} が見つかりませんでした。");
@@ -82,8 +84,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _slotSymbolLocalizedText = new LocalizedElementText(
                 UI_COMMON_TABLE, "ui.skill.empty_slot_symbol", text =>
                     rootElement.Query<Label>("skill-slot-placeholder").ForEach(label => label.text = text), "＋");
-            Label localizedTitle = rootElement.Q<Label>("Title");
-            Label localizedPointsHeading = rootElement.Q<Label>("PointsHeading");
+            Label localizedRebuildPointsHeading = rootElement.Q<Label>("RebuildPointsNameLabel");
+            Label localizedUnlockPointsHeading = rootElement.Q<Label>("UnlockPointsNameLabel");
             Label localizedDetailsHeading = rootElement.Q<Label>("DetailsHeading");
             Label localizedSkillTypeHeading = rootElement.Q<Label>("SkillTypeHeading");
             Label localizedSkillEffectHeading = rootElement.Q<Label>("SkillEffectHeading");
@@ -92,8 +94,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
             Label localizedFormationHeading = rootElement.Q<Label>("FormationHeading");
             _headingLocalizedTexts = new[]
             {
-                new LocalizedElementText("UICommon", "ui.battle_preparation.skill_build", text => localizedTitle.text = text, localizedTitle.text),
-                new LocalizedElementText("UICommon", "ui.skill_build.points_heading", text => localizedPointsHeading.text = text, localizedPointsHeading.text),
+                new LocalizedElementText("UICommon", "ui.home.mod_points", text => localizedRebuildPointsHeading.text = text, localizedRebuildPointsHeading.text),
+                new LocalizedElementText("UICommon", "ui.home.unlock_points", text => localizedUnlockPointsHeading.text = text, localizedUnlockPointsHeading.text),
                 new LocalizedElementText("UICommon", "ui.skill_build.details", text => localizedDetailsHeading.text = text, localizedDetailsHeading.text),
                 new LocalizedElementText("UICommon", "ui.skill.type", text => localizedSkillTypeHeading.text = text, localizedSkillTypeHeading.text),
                 new LocalizedElementText("UICommon", "ui.skill.effect", text => localizedSkillEffectHeading.text = text, localizedSkillEffectHeading.text),
@@ -105,6 +107,13 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> スキル一覧がカード要素ごと再構築された時に通知する。 </summary>
         public event Action OnSkillListRefreshed;
+
+        /// <summary> ヘッダーに現在の解放ポイントを表示する。 </summary>
+        /// <param name="unlockPoints"> 現在の解放ポイント。 </param>
+        public void SetUnlockPoints(int unlockPoints)
+        {
+            _unlockPointsLabel.text = unlockPoints.ToString();
+        }
 
         /// <summary>
         ///     スキル一覧表示を初期化する。
@@ -253,6 +262,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly Button _skillBuildSaveButton;
         private readonly Button _skillLevelUpButton;
         private readonly Label _ownedPointsLabel;
+        private readonly Label _unlockPointsLabel;
         private readonly VisualElement _skillElementList;
         private readonly ScrollView _skillScrollView;
         private readonly SkillDetailView _skillDetailView;

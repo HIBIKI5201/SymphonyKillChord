@@ -126,6 +126,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 ResolveSkillCommand(entity.UnlockSkillIds),
                 ResolveSkillGenre(entity.UnlockSkillIds),
                 ResolveSkillGenreIcon(entity.UnlockSkillIds),
+                ResolveSkillIcon(entity.UnlockSkillIds),
                 entity.SkillDetail,
                 _costToUnlock,
                 canUnlock,
@@ -262,6 +263,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 ResolveSkillCommand(selectedNode.UnlockSkillIds),
                 ResolveSkillGenre(selectedNode.UnlockSkillIds),
                 ResolveSkillGenreIcon(selectedNode.UnlockSkillIds),
+                ResolveSkillIcon(selectedNode.UnlockSkillIds),
                 selectedNode.SkillDetail,
                 -1,
                 false,
@@ -577,6 +579,29 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 }
 
                 return _skillGenreIcons.TryGetValue(skillData.Type[0], out Sprite icon) ? icon : null;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     ノードが解放する最初のスキル固有のアイコンを解決する。
+        /// </summary>
+        /// <param name="skillIds"> 解放対象のスキルID一覧。 </param>
+        /// <returns> スキル固有のアイコン。解決できない場合はnull。 </returns>
+        private Sprite ResolveSkillIcon(SkillId[] skillIds)
+        {
+            if (_skillRepository == null || skillIds == null)
+            {
+                return null;
+            }
+
+            foreach (SkillId skillId in skillIds)
+            {
+                if (_skillRepository.TryGetSkill(skillId, out SkillTemplate skillData))
+                {
+                    return skillData.Icon;
+                }
             }
 
             return null;

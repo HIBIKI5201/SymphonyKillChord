@@ -56,6 +56,12 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                         _nameLabel.text = text;
                     }
                 }, EMPTY_SELECTION_LABEL);
+            _maxLevelLocalizedText = new LocalizedElementText(
+                "UICommon", "ui.skill.max_level", text =>
+                {
+                    _maxLevelText = text;
+                    RefreshLevelDisplay();
+                }, MAX_LEVEL_LABEL);
         }
 
         /// <summary>
@@ -121,11 +127,12 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     未選択表示のローカライズ通知を解除する。
+        ///     詳細表示のローカライズ通知を解除する。
         /// </summary>
         public void Dispose()
         {
             _emptySelectionLocalizedText.Dispose();
+            _maxLevelLocalizedText.Dispose();
         }
 
         private const string ICON_NAME = "skill-detail-icon";
@@ -157,6 +164,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly Label _levelLabel;
         private readonly Label _levelupPointLabel;
         private readonly LocalizedElementText _emptySelectionLocalizedText;
+        private readonly LocalizedElementText _maxLevelLocalizedText;
+        private string _maxLevelText = MAX_LEVEL_LABEL;
         private string _emptySelectionText = EMPTY_SELECTION_LABEL;
         private bool _hasSkill;
         private int _lastOwnedPoints;
@@ -181,7 +190,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             if (isMaxLevel)
             {
                 CanLevelUp = false;
-                _levelLabel.text = MAX_LEVEL_LABEL;
+                _levelLabel.text = _maxLevelText;
                 _levelupPointLabel.text = NO_LEVELUP_COST_LABEL;
                 return;
             }
