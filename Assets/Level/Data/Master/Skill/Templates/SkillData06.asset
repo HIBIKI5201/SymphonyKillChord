@@ -23,10 +23,10 @@ MonoBehaviour:
   _effectDisplayMode: 0
   _effectParameters:
   - _id: 7
-    _value: 0.1
+    _value: 1
     _displayFormat: 2
   - _id: 8
-    _value: 5
+    _value: 50
     _displayFormat: 0
   - _id: 6
     _value: 5

@@ -26,6 +26,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _closeButton = Require<Button>(rootElement, CLOSE_BUTTON_NAME);
             _settingMenu = Require<VisualElement>(rootElement, SETTING_MENU_NAME);
             _soundPanel = Require<VisualElement>(rootElement, SOUND_PANEL_NAME);
+            _soundPanelBackButton = Require<Button>(rootElement, SOUND_PANEL_BACK_BUTTON_NAME);
+            _environmentPanelBackButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_BACK_BUTTON_NAME);
             _bgmVolumeSlider = Require<SliderInt>(rootElement, BGM_VOLUME_SLIDER_NAME);
             _soundEffectVolumeSlider = Require<SliderInt>(rootElement, SOUND_EFFECT_VOLUME_SLIDER_NAME);
             _voiceVolumeSlider = Require<SliderInt>(rootElement, VOICE_VOLUME_SLIDER_NAME);
@@ -41,6 +43,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _languageNextButton = Require<Button>(rootElement, LANGUAGE_NEXT_BUTTON_NAME);
             _vibrationPrevButton = Require<Button>(rootElement, VIBRATION_PREV_BUTTON_NAME);
             _vibrationNextButton = Require<Button>(rootElement, VIBRATION_NEXT_BUTTON_NAME);
+            _rhythmOffsetSlider = Require<SliderInt>(rootElement, RHYTHM_OFFSET_SLIDER_NAME);
             _environmentPanelSaveButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_SAVE_BUTTON_NAME);
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
@@ -55,6 +58,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 new VisualElement[]
                 {
                     _bgmVolumeSlider,
+                    _soundPanelBackButton,
                     _soundEffectVolumeSlider,
                     _voiceVolumeSlider,
                 },
@@ -74,7 +78,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _languageNextButton,
                     _vibrationPrevButton,
                     _vibrationNextButton,
+                    _rhythmOffsetSlider,
                     _environmentPanelSaveButton,
+                    _environmentPanelBackButton,
                 },
                 _screenModePrevButton);
 
@@ -135,6 +141,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
         public void Dispose()
         {
             _audioSettingButtonPreset.Dispose();
+            _soundPanelBackButtonPreset.Dispose();
+            _environmentPanelBackButtonPreset.Dispose();
             _environmentSettingButtonPreset.Dispose();
             _environmentPanelSaveButtonPreset.Dispose();
             _audioSettingLocalizedText.Dispose();
@@ -153,6 +161,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string CLOSE_BUTTON_NAME = "CloseButton";
         private const string SETTING_MENU_NAME = "SettingMenu";
         private const string SOUND_PANEL_NAME = "SoundPanel";
+        private const string SOUND_PANEL_BACK_BUTTON_NAME = "SoundPanelBackButton";
+        private const string ENVIRONMENT_PANEL_BACK_BUTTON_NAME = "EnvironmentPanelBackButton";
         private const string BGM_VOLUME_SLIDER_NAME = "BgmVolumeSlider";
         private const string SOUND_EFFECT_VOLUME_SLIDER_NAME = "SoundEffectVolumeSlider";
         private const string VOICE_VOLUME_SLIDER_NAME = "VoiceVolumeSlider";
@@ -168,6 +178,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string LANGUAGE_NEXT_BUTTON_NAME = "LanguageNextButton";
         private const string VIBRATION_PREV_BUTTON_NAME = "VibrationPrevButton";
         private const string VIBRATION_NEXT_BUTTON_NAME = "VibrationNextButton";
+        private const string RHYTHM_OFFSET_SLIDER_NAME = "RhythmOffsetSlider";
         private const string ENVIRONMENT_PANEL_SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
         private const string UI_COMMON_TABLE = "UICommon";
 
@@ -179,6 +190,10 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _closeButton;
         private readonly VisualElement _settingMenu;
         private readonly VisualElement _soundPanel;
+        private readonly Button _soundPanelBackButton;
+        private readonly Button _environmentPanelBackButton;
+        private IDisposable _soundPanelBackButtonPreset;
+        private IDisposable _environmentPanelBackButtonPreset;
         private readonly SliderInt _bgmVolumeSlider;
         private readonly SliderInt _soundEffectVolumeSlider;
         private readonly SliderInt _voiceVolumeSlider;
@@ -194,6 +209,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _languageNextButton;
         private readonly Button _vibrationPrevButton;
         private readonly Button _vibrationNextButton;
+        private readonly SliderInt _rhythmOffsetSlider;
         private readonly Button _environmentPanelSaveButton;
         private readonly HierarchicalNavigationScope _navigationScope;
         private IDisposable _audioSettingButtonPreset;
@@ -244,9 +260,19 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// </summary>
         private void RegisterCallbacks()
         {
+            _soundPanelBackButtonPreset = _soundPanelBackButton.ApplyBasicButtonPreset(HandlePanelBackButtonClickedHandler);
+            _environmentPanelBackButtonPreset = _environmentPanelBackButton.ApplyBasicButtonPreset(HandlePanelBackButtonClickedHandler);
             _audioSettingButtonPreset = _audioSettingButton.ApplyBasicButtonPreset(HandleAudioSettingButtonClickedHandler);
             _environmentSettingButtonPreset = _environmentSettingButton.ApplyBasicButtonPreset(HandleEnvironmentSettingButtonClickedHandler);
             _environmentPanelSaveButtonPreset = _environmentPanelSaveButton.ApplyBasicButtonPreset(HandleEnvironmentPanelSaveButtonClickedHandler);
+        }
+
+        /// <summary>
+        ///     サブパネルから戻り、未保存の環境設定を取り消す。
+        /// </summary>
+        private void HandlePanelBackButtonClickedHandler()
+        {
+            TryGoBack();
         }
 
         /// <summary>

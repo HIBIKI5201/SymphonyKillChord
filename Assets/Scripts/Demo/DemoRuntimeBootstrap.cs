@@ -1,5 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
@@ -162,9 +164,20 @@ namespace KillChord.Demo
             }
 
             TrySubscribeHomeTutorialStarted(isOutGameActive);
-            TryStartSession(isOutGameActive);
-            _sessionState.Tick(Time.unscaledDeltaTime, isOutGameActive);
-            _timerView?.Refresh(isOutGameActive);
+            // TitleとOutGameが同時にロードされている間も、開始通知の購読だけは維持する。
+            if (IsSceneLoaded(_config.TitleSceneName))
+            {
+                _sessionState.End();
+                _timerView?.Refresh(false);
+                return;
+            }
+
+            TryStartSessionFromOpeningScenario();
+            TryStartSessionFromTutorialBattle();
+            TryStartHomeTimer(isOutGameActive);
+            bool isHomeTimerActive = isOutGameActive && _isHomeTimerStarted;
+            _sessionState.Tick(Time.unscaledDeltaTime, isHomeTimerActive);
+            _timerView?.Refresh(isHomeTimerActive);
 
             if (_sessionState.IsStarted && _sessionState.IsOverallTimeExpired)
             {
@@ -174,6 +187,7 @@ namespace KillChord.Demo
 
             if (_sessionState.IsHomeTimeExpired && isOutGameActive)
             {
+                RequestHomeTutorialForceCompleteIfRunning();
                 ApplyForcedSortie(stageSelectContainer);
             }
         }
@@ -213,22 +227,67 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     Homeチュートリアル開始状態が保存された後、初めてOutGameが有効になった時点でタイマーを開始します。
+        ///     シナリオ開始を選択している場合、冒頭シナリオのロード完了後に全体タイマーを開始します。
         /// </summary>
-        private async void TryStartSession(bool isOutGameActive)
+        private void TryStartSessionFromOpeningScenario()
         {
-            if (_sessionState.IsStarted || _isStartingSession || !isOutGameActive)
+            if (_sessionState.IsStarted
+                || _config.OverallTimerStartPoint != DemoTimerStartPoint.OpeningScenario
+                || !ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState)
+                || !selectedScenarioState.HasSelectedScenario
+                || !selectedScenarioState.IsOpeningTutorialScenario
+                || !IsSceneLoaded(selectedScenarioState.CurrentStageDefinition.TargetSceneName)
+                || !ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+                || loadingScreenController.IsLoading)
             {
                 return;
             }
 
-            _isStartingSession = true;
+            _sessionState.Start();
+        }
+
+        /// <summary>
+        ///     シナリオまたはチュートリアル開始を選択している場合、戦闘のロード完了後に全体タイマーを開始します。
+        /// </summary>
+        private void TryStartSessionFromTutorialBattle()
+        {
+            if (_sessionState.IsStarted
+                || (_config.OverallTimerStartPoint != DemoTimerStartPoint.OpeningScenario
+                    && _config.OverallTimerStartPoint != DemoTimerStartPoint.TutorialBattle)
+                || !ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
+                || !selectedBattleStageState.HasSelectedBattleStage
+                || !selectedBattleStageState.CurrentStageDefinition.IsTutorial
+                || !TryGetLoadedBattleScenes(out _, out _)
+                || !ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+                || loadingScreenController.IsLoading)
+            {
+                return;
+            }
+
+            _sessionState.Start();
+        }
+
+        /// <summary>
+        ///     Homeチュートリアル開始状態の保存後にホームタイマーを有効にし、ホームからの再開時は全体タイマーも開始します。
+        /// </summary>
+        private async void TryStartHomeTimer(bool isOutGameActive)
+        {
+            if (_isHomeTimerStarted || _isStartingHomeTimer || !isOutGameActive)
+            {
+                return;
+            }
+
+            _isStartingHomeTimer = true;
+            int sessionRevision = _sessionRevision;
             try
             {
                 SaveData saveData = SaveStore.IsLoaded<SaveData>()
                     ? SaveStore.Get<SaveData>()
                     : await SaveStore.LoadAsync<SaveData>(destroyCancellationToken);
-                if (saveData == null
+                // Titleへ戻る前に始まった読み込み結果で、次のセッションを開始しない。
+                if (sessionRevision != _sessionRevision
+                    || IsSceneLoaded(_config.TitleSceneName)
+                    || saveData == null
                     || saveData.Tutorial.Phase < TutorialPhase.HomeStarted
                     || (saveData.Tutorial.Phase == TutorialPhase.HomeStarted
                         && !_isHomeTutorialStartedNotified))
@@ -236,6 +295,7 @@ namespace KillChord.Demo
                     return;
                 }
 
+                _isHomeTimerStarted = true;
                 _sessionState.Start();
             }
             catch (OperationCanceledException)
@@ -247,45 +307,57 @@ namespace KillChord.Demo
             }
             finally
             {
-                _isStartingSession = false;
+                _isStartingHomeTimer = false;
             }
         }
 
         /// <summary>
-        ///     強制対象ステージを準備し、すでに表示中の場合も含めて操作制限を反映します。
+        ///     ホームチュートリアルが進行中であれば、完了扱いでの終了を要求します。
+        /// </summary>
+        private void RequestHomeTutorialForceCompleteIfRunning()
+        {
+            _outGameUIEvent?.OnHomeTutorialForceCompleteRequested?.Invoke();
+        }
+
+        /// <summary>
+        ///     作戦画面で強制対象ステージを選択し、出撃以外の操作を制限します。
         /// </summary>
         private void ApplyForcedSortie(StageSelectModuleContainer stageSelectContainer)
         {
-            if (!ServiceLocator.TryGetInstance(out BattlePreparationScreen preparationScreen))
+            if (_isForcedSortiePrepared)
             {
                 return;
             }
 
-            preparationScreen.SetForcedSortieMode(true);
-            if (_isForcedSortiePrepared)
+            // 満了状態を保留として維持し、ロード後の最新の解放状態から選び直す。
+            if (ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+                && loadingScreenController.IsLoading)
             {
                 return;
             }
 
             if (!DemoStageResultExitPolicy.TryGetLatestAvailableBattleStage(
                     stageSelectContainer.StageTree,
-                    out BattleStageDefinition battleStageDefinition)
-                || !stageSelectContainer.SelectionService.TryPrepareBattleSortie(
-                    battleStageDefinition,
-                    stageSelectContainer.ReturnSceneName))
+                    out BattleStageDefinition battleStageDefinition))
             {
-                Debug.LogError(
-                    $"[{nameof(DemoRuntimeBootstrap)}] " +
-                    "解放済みの最新バトルステージを強制出撃先に設定できませんでした。",
-                    this);
+                if (!_hasLoggedMissingForcedSortieStage)
+                {
+                    _hasLoggedMissingForcedSortieStage = true;
+                    Debug.LogError(
+                        $"[{nameof(DemoRuntimeBootstrap)}] " +
+                        "強制出撃先となる解放済みのバトルステージがありません。ステージツリーの定義と解放状態を確認してください。",
+                        this);
+                }
+                return;
+            }
+
+            // UIの準備中や出撃処理中は、次のフレームで対象の取得から再試行する。
+            if (!stageSelectContainer.TryForceBattleSortie(battleStageDefinition.StageId))
+            {
                 return;
             }
 
             _isForcedSortiePrepared = true;
-            if (ServiceLocator.TryGetInstance(out OutGameUIEvent outGameUIEvent))
-            {
-                outGameUIEvent.OnShownBattlePreparationScreen?.Invoke();
-            }
         }
 
         /// <summary>
@@ -323,6 +395,7 @@ namespace KillChord.Demo
             {
                 _sessionState.ResetHomeTimer();
                 _isForcedSortiePrepared = false;
+                _hasLoggedMissingForcedSortieStage = false;
             }
 
             _wasOutGameActive = isOutGameActive;
@@ -333,6 +406,7 @@ namespace KillChord.Demo
         /// </summary>
         private void ResetSessionOnTitleEntry()
         {
+            _sessionRevision++;
             _sessionState.Reset();
             _timerView?.Refresh(false);
 
@@ -344,9 +418,11 @@ namespace KillChord.Demo
             _outGameUIEvent = null;
             _isOutGameUiEventSubscribed = false;
             _isHomeTutorialStartedNotified = false;
+            _isHomeTimerStarted = false;
             _isTransitioningToEndScene = false;
             _isFinalStageConfigured = false;
             _isForcedSortiePrepared = false;
+            _hasLoggedMissingForcedSortieStage = false;
             _wasOutGameActive = false;
             _isSaveDataReset = false;
         }
@@ -524,10 +600,13 @@ namespace KillChord.Demo
         private bool _isSceneLoadedSubscribed;
         private bool _isOutGameUiEventSubscribed;
         private bool _isHomeTutorialStartedNotified;
-        private bool _isStartingSession;
+        private bool _isHomeTimerStarted;
+        private bool _isStartingHomeTimer;
+        private int _sessionRevision;
         private bool _isTransitioningToEndScene;
         private bool _isFinalStageConfigured;
         private bool _isForcedSortiePrepared;
+        private bool _hasLoggedMissingForcedSortieStage;
         private bool _wasOutGameActive;
         private bool _isSaveDataReset;
         private bool _ownsPrefabAssetHandle;

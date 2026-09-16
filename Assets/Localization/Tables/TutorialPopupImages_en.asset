@@ -19,43 +19,43 @@ MonoBehaviour:
     m_Items: []
   m_TableData:
   - m_Id: 8365649920
-    m_Localized: 'dfd7b239bd39c684f9a7c4fea7f8379c[Attack]'
+    m_Localized: 'eab5bd65cd5447b7aa94a049c346265e[Attack_en]'
     m_Metadata:
       m_Items: []
   - m_Id: 8508256256
-    m_Localized: '82159a30925987c428ca1a75ae80cf98[Blue]'
+    m_Localized: 'd90459cab32e4dbfaec285629002dc41[BlueAttack_en]'
     m_Metadata:
       m_Items: []
   - m_Id: 8575365120
-    m_Localized: '60a0aaccc0943174eb9f46a9ff645ad9[Green]'
+    m_Localized: '0b43b166f46d4e768de1c4423ae19bdb[GreenAttack_en]'
     m_Metadata:
       m_Items: []
   - m_Id: 8621502464
-    m_Localized: '5b772e762909ca649a705f94d902d060[JustAttack]'
+    m_Localized: '8d1320e468c64efc8f2e6b7b6453ddbd[JustAttack_en]'
     m_Metadata:
       m_Items: []
   - m_Id: 8684417024
-    m_Localized: '97a20494e2cd01a469e17266526c4314[KillChord]'
+    m_Localized: '39c0dea233484c48a43a4db45d8b11c3[KillChord_en]'
     m_Metadata:
       m_Items: []
   - m_Id: 8730554368
-    m_Localized: '2d5cf0ea45a2db24a850c3de3a481ce6[Move]'
+    m_Localized: 'aea9a5602c2844ffb25711d17fa9148d[Douge_en]'
     m_Metadata:
       m_Items: []
   - m_Id: 8797663232
-    m_Localized: 'ea767d3cd5ed02242b5813dd479d7a50[Orenge]'
+    m_Localized: 'd68fff5880f54f0b903d629476ac4ee4[OrangeAttack_en]'
     m_Metadata:
       m_Items: []
   - m_Id: 8856383488
-    m_Localized: '522fef8c8baffbb4ab62427d6efe15c6[Purple]'
+    m_Localized: 'f437b516aa0c4c48a2a1015a875e31a0[PurpleAttack_en]'
     m_Metadata:
       m_Items: []
   - m_Id: 8889937920
-    m_Localized: '033637c9ef4ae3f4581a5eea654644cb[Water]'
+    m_Localized: '1668b38083eb4cfab0419f83a1bfb83a[WaterAttack_en]'
     m_Metadata:
       m_Items: []
   - m_Id: 8936075264
-    m_Localized: 'bfb93d915bd6d0d4aa2f29800a24b041[Yellow]'
+    m_Localized: '442945e9140b4ef2ba5957690e373598[YellowAttack_en]'
     m_Metadata:
       m_Items: []
   references:

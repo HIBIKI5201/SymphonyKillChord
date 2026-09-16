@@ -10,9 +10,9 @@
         </ui:VisualElement>
         <ui:VisualElement name="PreparationContent" class="battle-preparation-content">
             <ui:VisualElement name="PreparationPanel" class="battle-preparation-panel">
-                <ui:Label text="装備中のスキル" class="battle-preparation-section-title"/>
+                <ui:Label name="EquippedSkillsHeading" text="装備中のスキル" class="battle-preparation-section-title"/>
                 <ui:VisualElement name="EquippedSkillStrip" class="battle-preparation-skill-strip"/>
-                <ui:Label text="装備スキル詳細" class="battle-preparation-section-title"/>
+                <ui:Label name="EquippedSkillDetailsHeading" text="装備スキル詳細" class="battle-preparation-section-title"/>
                 <ui:ScrollView name="EquippedSkillEffectScrollView" mode="Vertical" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" class="battle-preparation-effect-scroll">
                     <ui:VisualElement name="EquippedSkillEffectList" class="battle-preparation-effect-list"/>
                 </ui:ScrollView>

@@ -142,8 +142,29 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             }
 
             RegisterButtonCallback();
-            _sortieButtonLocalizedText = new LocalizedElementText(
-                UI_COMMON_TABLE, "ui.stage_select.sortie", text => _sortieButtonMainLabel.text = text);
+            Label firstClearHeading = firstClearReward.Q<Label>("FirstClearRewardHeading");
+            Label successHeading = successReward.Q<Label>("SuccessRewardHeading");
+            Label unlockPointsHeading = firstClearReward.Q<Label>("Item");
+            Label modPointsHeading = successReward.Q<Label>("Item");
+            _localizedTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.stage_select.sortie", text => _sortieButtonMainLabel.text = text, "出撃"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.stage_select.first_reward", text => firstClearHeading.text = text, "初回報酬"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.stage_select.success_reward", text => successHeading.text = text, "成功報酬"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.points.unlock", text => unlockPointsHeading.text = text, "解放P"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.points.mod", text => modPointsHeading.text = text, "改造P"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill.formation", text => _skillBuildShortcutButton.text = text, "編成"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill.empty_slot_symbol",
+                    text => skillBuild.Query<Label>(className: "equipped-skill-placeholder")
+                        .ForEach(label => label.text = text), "＋"),
+            };
         }
 
         /// <summary>
@@ -277,7 +298,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             _slideMotionHandle.TryCancel();
             base.Dispose();
             UnregisterButtonCallback();
-            _sortieButtonLocalizedText?.Dispose();
+            foreach (LocalizedElementText localizedText in _localizedTexts)
+            {
+                localizedText.Dispose();
+            }
         }
 
         /// <summary>
@@ -455,7 +479,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
         private readonly Button _sortieButton;
         private readonly Label _sortieButtonMainLabel;
-        private LocalizedElementText _sortieButtonLocalizedText;
+        private readonly LocalizedElementText[] _localizedTexts;
         private readonly Button _skillBuildShortcutButton;
         private readonly VisualElement _equippedSkillRow;
         private readonly List<VisualElement> _equippedSkillSlots;

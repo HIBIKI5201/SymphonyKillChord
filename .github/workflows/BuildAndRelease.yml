@@ -45,6 +45,16 @@ on:
         description: 'クリーンビルド（Libraryを含め完全に作り直す。通常は不要、トラブル時のみON）'
         type: boolean
         default: false
+      cpu_usage_percent:
+        description: 'Unity使用コア数割合（手動実行時は既存の安全制限を一時的に無効化）'
+        required: true
+        type: choice
+        default: '25%'
+        options:
+          - '25%'
+          - '50%'
+          - '75%'
+          - '100%'
 
 permissions: {}
 
@@ -155,6 +165,8 @@ jobs:
       UNITY_EXE_PATH: ${{ vars.UNITY_EXE_PATH }}
       UNITY_BUILD_EXECUTE_METHOD: ${{ vars.UNITY_BUILD_EXECUTE_METHOD }}
       UNITY_PROFILE_BUILD_TIMEOUT_SEC: 7200
+      IS_MANUAL_BUILD: ${{ github.event_name == 'workflow_dispatch' }}
+      UNITY_CPU_USAGE_PERCENT: ${{ inputs.cpu_usage_percent }}
       AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
       BUILD_MODE: ''
       BUILD_VARIANT: ''
@@ -750,6 +762,7 @@ jobs:
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
           Write-Host "Unity実行メソッド: $(if ($env:UNITY_BUILD_EXECUTE_METHOD) { $env:UNITY_BUILD_EXECUTE_METHOD } else { '未設定 (デフォルト使用)' })"
           Write-Host "プロファイルごとのUnityビルドタイムアウト: $env:UNITY_PROFILE_BUILD_TIMEOUT_SEC 秒"
+          Write-Host "Unity使用コア数割合: $(if ($env:IS_MANUAL_BUILD -eq 'true') { $env:UNITY_CPU_USAGE_PERCENT } else { '自動設定（安全制限あり）' })"
           Write-Host "対象プロファイル: $(if ($env:SELECTED_PROFILES) { $env:SELECTED_PROFILES } else { '指定なし（全件）' })"
           Write-Host ""
 
@@ -1112,6 +1125,7 @@ jobs:
           $ResourceCheckIntervalMilliseconds = 30000
           $WindowsUnityCpuLimit = 4
           $MaximumAffinityCpuCount = 63
+          $AllowedCpuUsagePercentages = @("25%", "50%", "75%", "100%")
           $RunTimestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
           $LogFilePattern = "unity_build_${RunTimestamp}_*.log"
           "log_file=$LogFilePattern" | Add-Content -Path $env:GITHUB_OUTPUT
@@ -1209,13 +1223,34 @@ jobs:
 
           # CPUコア数の設定
           $CpuCount = [Environment]::ProcessorCount
-          $UnityCpuLimit = if ($env:RUNNER_OS -eq "Windows") { $WindowsUnityCpuLimit } else { $MaximumAffinityCpuCount }
-          $UnityCpuCount = [Math]::Min($UnityCpuLimit, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
+          $IsManualBuild = $env:IS_MANUAL_BUILD -eq "true"
+          if ($IsManualBuild) {
+            if ($env:UNITY_CPU_USAGE_PERCENT -notin $AllowedCpuUsagePercentages) {
+              Write-Host "[ERROR]: Unity使用コア数割合には $($AllowedCpuUsagePercentages -join ', ') のいずれかを指定してください。現在値: '$env:UNITY_CPU_USAGE_PERCENT'"
+              exit 1
+            }
+            $UnityCpuUsagePercent = [int]([string]$env:UNITY_CPU_USAGE_PERCENT).TrimEnd('%')
+            $UnityCpuCapacity = [Math]::Min($MaximumAffinityCpuCount, $CpuCount)
+            $UnityCpuCount = [int][Math]::Max(1, [Math]::Floor($UnityCpuCapacity * $UnityCpuUsagePercent / 100))
+            $CpuAllocationMode = "手動指定（既存の安全制限を一時的に無効化）"
+          } else {
+            $UnityCpuLimit = if ($env:RUNNER_OS -eq "Windows") { $WindowsUnityCpuLimit } else { $MaximumAffinityCpuCount }
+            $UnityCpuCount = [int][Math]::Min($UnityCpuLimit, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
+            $CpuAllocationMode = "自動設定（既存の安全制限を適用）"
+          }
 
           # プロセッサアフィニティビットマスクの生成
-          $AffinityMask = ([int64]1 -shl $UnityCpuCount) - 1
+          $AffinityMask = if ($UnityCpuCount -eq $MaximumAffinityCpuCount) {
+            [Int64]::MaxValue
+          } else {
+            ([int64]1 -shl $UnityCpuCount) - 1
+          }
 
           Write-Host "検出された論理 CPU 数: $CpuCount"
+          Write-Host "CPU割り当てモード: $CpuAllocationMode"
+          if ($IsManualBuild) {
+            Write-Host "Unity使用コア数割合: $UnityCpuUsagePercent%"
+          }
           Write-Host "Unity 割り当て CPU 数: $UnityCpuCount"
           Write-Host "Unity CPU アフィニティマスク: 0x$('{0:X}' -f $AffinityMask)"
           Write-Host ""

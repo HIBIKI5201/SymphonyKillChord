@@ -124,6 +124,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private VisualElement _previewVideoContainerRoot;
         private VisualElement _previewVideoRoot;
         private Label _currentPointsLabel;
+        private SkillTreeScreenView _skillTreeScreenView;
         private SkillDetailScreenView _skillDetailScreenView;
         private PlayerStatusScreenView _playerStatusScreenView;
         private PreviewVideoScreenView _previewVideoScreenView;
@@ -301,6 +302,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         public override void Shutdown()
         {
             Unsubscribe();
+            ServiceLocator.UnregisterInstance<SkillTreeStatusEntity>();
             if (_rootElement != null)
             {
                 _rootElement.UnregisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
@@ -397,6 +399,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out _skillTreeScreenView))
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] SkillTreeScreenView が取得できませんでした。", this);
+                return false;
+            }
+
             _rootElement = _uiDocument.rootVisualElement;
             // SettingShortcutButton・BackButton・Title・TopBarBackgroundは他のアウトゲーム画面にも
             // 同名で存在し、ドキュメントルートからQ()すると階層順で先に見つかった
@@ -476,6 +484,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             _skillTreeService = new SkillTreeService(_skillNodeEntities);
+            skillTreeEntity.SetSkillSlotBonus(
+                _skillTreeService.CalculateSkillSlotBonus(skillTreeEntity.UnlockedNodes));
+            ServiceLocator.RegisterInstance(skillTreeEntity);
             PlayerStatusBonusCalculator playerStatusBonusCalculator =
                 new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 
@@ -512,7 +523,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _loadedSkillRepository,
                 new SkillDisplayTextFormatter(new SkillEffectDescriptionFormatter()),
                 _skillGenreIcons,
-                _skillBeatColors);
+                _skillBeatColors,
+                _skillTreeScreenView.SetPoints,
+                () => _skillTreeScreenView.ListSeparator);
+            _skillTreeScreenView.OnListSeparatorChanged += _skillTreeController.RefreshSelectedText;
 
             _rootElement.RegisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
             _rootElement.RegisterCallback<NavigationCancelEvent>(HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
@@ -995,6 +1009,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void DisposeComponents()
         {
+            if (_skillTreeScreenView != null && _skillTreeController != null)
+            {
+                _skillTreeScreenView.OnListSeparatorChanged -= _skillTreeController.RefreshSelectedText;
+            }
+            _skillTreeScreenView = null;
             _previewVideoScreenView?.Dispose();
             _previewVideoScreenView = null;
             _skillTreeResetDialogView?.Dispose();
@@ -1005,6 +1024,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _unlockConfirmDialogView = null;
             _skillDetailScreenView?.Dispose();
             _skillDetailScreenView = null;
+            _playerStatusScreenView?.Dispose();
             _playerStatusScreenView = null;
             _skillTreeViewportView?.Dispose();
             _skillTreeViewportView = null;

@@ -244,6 +244,33 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     解放済みノードのうち、スキル編成枠を増やすノードの件数を算出する。
+        /// </summary>
+        /// <param name="unlockedNodes"> 現在解放されているノード。 </param>
+        /// <returns> 編成枠のボーナス件数。 </returns>
+        public int CalculateSkillSlotBonus(IReadOnlyCollection<SkillNodeId> unlockedNodes)
+        {
+            if (unlockedNodes == null)
+            {
+                throw new ArgumentNullException(nameof(unlockedNodes));
+            }
+
+            int bonus = 0;
+            HashSet<SkillNodeId> processedNodeIds = new HashSet<SkillNodeId>();
+            foreach (SkillNodeId nodeId in unlockedNodes)
+            {
+                if (processedNodeIds.Add(nodeId)
+                    && _skillNodeEntityDict.TryGetValue(nodeId, out SkillNodeEntity node)
+                    && node.HasSkillSlotBonus)
+                {
+                    bonus++;
+                }
+            }
+
+            return bonus;
+        }
+
+        /// <summary>
         ///     スキルツリーを初期状態へ戻し、関連する装備データと共に保存する。
         /// </summary>
         /// <param name="unlockedNodes"> 現在解放されているノード。 </param>
