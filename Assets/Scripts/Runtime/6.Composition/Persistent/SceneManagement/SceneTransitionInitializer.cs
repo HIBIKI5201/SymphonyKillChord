@@ -7,11 +7,13 @@ using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.Persistent.SceneManagement;
 using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFrameWork.System.SaveSystem;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,7 +55,13 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 if (Array.IndexOf(ownedScenes, document.gameObject.scene.name) >= 0) { document.enabled = false; }
             }
             _recoveryView = gameObject.AddComponent<OutGameInitializationFailureView>();
-            _recoveryView.Initialize("タイトルへ戻る");
+            bool isEnglish = SaveStore.IsLoaded<SaveData>()
+                && SaveStore.Get<SaveData>().EnvironmentSettings.Language == GameLanguage.English;
+            _recoveryView.Initialize(
+                isEnglish ? "Return to Title" : "タイトルへ戻る",
+                isEnglish ? "Failed to load the screen." : "画面の読み込みに失敗しました。",
+                isEnglish ? "Failed to load the screen. Please try again." : "画面を読み込めませんでした。もう一度お試しください。",
+                isEnglish ? "Loading…" : "読み込み中…");
             _recoveryView.OnRecoveryRequested += RecoveryRequestedHandler;
         }
 

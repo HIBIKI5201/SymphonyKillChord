@@ -76,6 +76,31 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 UI_COMMON_TABLE,
                 "ui.skill_build_dialog.save_and_close",
                 text => _unsavedSaveAndCloseButton.text = text);
+            Label messageLabel = _skillBuildDialog.Q<Label>("Message");
+            _messageLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_build_dialog.message", text => messageLabel.text = text, messageLabel.text);
+            _slotSymbolLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill.empty_slot_symbol", text =>
+                    rootElement.Query<Label>("skill-slot-placeholder").ForEach(label => label.text = text), "＋");
+            Label localizedTitle = rootElement.Q<Label>("Title");
+            Label localizedPointsHeading = rootElement.Q<Label>("PointsHeading");
+            Label localizedDetailsHeading = rootElement.Q<Label>("DetailsHeading");
+            Label localizedSkillTypeHeading = rootElement.Q<Label>("SkillTypeHeading");
+            Label localizedSkillEffectHeading = rootElement.Q<Label>("SkillEffectHeading");
+            Label localizedLevelHeading = rootElement.Q<Label>("LevelHeading");
+            Label localizedModPointsHeading = rootElement.Q<Label>("ModPointsHeading");
+            Label localizedFormationHeading = rootElement.Q<Label>("FormationHeading");
+            _headingLocalizedTexts = new[]
+            {
+                new LocalizedElementText("UICommon", "ui.battle_preparation.skill_build", text => localizedTitle.text = text, localizedTitle.text),
+                new LocalizedElementText("UICommon", "ui.skill_build.points_heading", text => localizedPointsHeading.text = text, localizedPointsHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill_build.details", text => localizedDetailsHeading.text = text, localizedDetailsHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill.type", text => localizedSkillTypeHeading.text = text, localizedSkillTypeHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill.effect", text => localizedSkillEffectHeading.text = text, localizedSkillEffectHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill.level", text => localizedLevelHeading.text = text, localizedLevelHeading.text),
+                new LocalizedElementText("UICommon", "ui.points.mod", text => localizedModPointsHeading.text = text, localizedModPointsHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill.formation", text => localizedFormationHeading.text = text, localizedFormationHeading.text)
+            };
         }
 
         /// <summary> スキル一覧がカード要素ごと再構築された時に通知する。 </summary>
@@ -171,6 +196,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public override void Dispose()
         {
+            foreach (LocalizedElementText localizedText in _headingLocalizedTexts)
+            {
+                localizedText.Dispose();
+            }
             base.Dispose();
             Unbind();
             UnregisterButtonCallback();
@@ -191,10 +220,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
             OnSkillListRefreshed = null;
             _discardAndCloseLocalizedText?.Dispose();
             _saveAndCloseLocalizedText?.Dispose();
+            _messageLocalizedText.Dispose();
+            _slotSymbolLocalizedText.Dispose();
+            _skillDetailView.Dispose();
         }
 
         /// <inheritdoc />
         protected override VisualElement InitialFocusElement => _skillBuildSaveButton;
+
+        private readonly LocalizedElementText[] _headingLocalizedTexts;
 
         private const string BACKBUTTON_NAME = "BackButton";
         private const string SETTING_SHORTCUT_BUTTON_NAME = "SettingShortcutButton";
@@ -231,6 +265,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly VisualElement _unsavedChangesDialogOverlay;
         private LocalizedElementText _discardAndCloseLocalizedText;
         private LocalizedElementText _saveAndCloseLocalizedText;
+        private readonly LocalizedElementText _messageLocalizedText;
+        private readonly LocalizedElementText _slotSymbolLocalizedText;
 
         /// <summary> 未保存確認ダイアログ表示中、フォーカスを内側へ閉じ込める。 </summary>
         private readonly ModalNavigationScope _dialogNavigationScope = new();

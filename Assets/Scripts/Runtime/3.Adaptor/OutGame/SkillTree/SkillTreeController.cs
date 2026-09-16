@@ -39,7 +39,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             ISkillRepository skillRepository,
             SkillDisplayTextFormatter skillDisplayTextFormatter,
             IReadOnlyDictionary<SkillType, Sprite> skillGenreIcons,
-            IReadOnlyDictionary<int, Color> skillBeatColors)
+            IReadOnlyDictionary<int, Color> skillBeatColors,
+            Action<int> showCurrentPoints,
+            Func<string> getListSeparator)
         {
             _skillRepository = skillRepository;
             _skillDisplayTextFormatter = skillDisplayTextFormatter;
@@ -47,6 +49,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _skillBeatColors = skillBeatColors;
             _skillDetailPresenter = presenter;
             _currentPointsLabel = currentPointsLabel;
+            _showCurrentPoints = showCurrentPoints;
+            _getListSeparator = getListSeparator;
             _skillDetailView = skillDetailView;
             _skillTreeService = skillTreeService;
             _playerStatusPresenter = playerStatusPresenter;
@@ -62,7 +66,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _ownedSkillChanged = ownedSkillChanged;
             _nodesOnPath = new();
 
-            _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
+            _showCurrentPoints(_skillTreeStatusEntity.CurrentPoints);
         }
 
         /// <summary> 現在選択中のノードIDを取得する。未選択の場合は-1。 </summary>
@@ -83,12 +87,29 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             }
             _selectedNodeId = nodeId;
             SkillNodeId selectedNodeId = new SkillNodeId(nodeId);
-            SkillNodeEntity entity = _skillNodeEntities[selectedNodeId];
             ISkillNodeViewModel view = _skillNodeViews[nodeId];
-            int currentPoints = _skillTreeStatusEntity.CurrentPoints;
             _nodesOnPath.Clear();
             _costToUnlock = _skillTreeService.TryGetTotalCost(selectedNodeId, _nodesOnPath);
 
+            RefreshSelectedText();
+            _skillDetailView.Show();
+            view.SetSelected();
+            _playerStatusPresenter.PushPreview(_nodesOnPath);
+        }
+
+        /// <summary>
+        ///     選択状態や表示画面を変えず、選択中ノードの翻訳に依存する表示を更新する。
+        /// </summary>
+        public void RefreshSelectedText()
+        {
+            if (_selectedNodeId < 0)
+            {
+                return;
+            }
+
+            int nodeId = _selectedNodeId;
+            SkillNodeEntity entity = _skillNodeEntities[new SkillNodeId(nodeId)];
+            int currentPoints = _skillTreeStatusEntity.CurrentPoints;
             bool canUnlock = _costToUnlock >= 0 && currentPoints >= _costToUnlock && !entity.IsUnlocked;
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(nodeId);
             SkillDetailDTO dto = new SkillDetailDTO(
@@ -105,9 +126,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 hasVideo,
                 ResolveComboStepColors(entity.UnlockSkillIds));
             _skillDetailPresenter.Push(dto);
-            _skillDetailView.Show();
-            view.SetSelected();
-            _playerStatusPresenter.PushPreview(_nodesOnPath);
         }
 
         /// <summary>
@@ -242,7 +260,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 hasVideo,
                 ResolveComboStepColors(selectedNode.UnlockSkillIds));
             _skillDetailPresenter.Push(dto);
-            _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
+            _showCurrentPoints(_skillTreeStatusEntity.CurrentPoints);
             _playerStatusPresenter.Push();
             _ownedSkillChanged?.Invoke();
         }
@@ -354,6 +372,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private SkillTreeService _skillTreeService;
         private PlayerStatusPresenter _playerStatusPresenter;
         private Label _currentPointsLabel;
+        private readonly Action<int> _showCurrentPoints;
+        private readonly Func<string> _getListSeparator;
         private SkillTreeStatusEntity _skillTreeStatusEntity;
         private IPreviewVideoScreenViewModel _previewVideoScreenView;
         private IPreviewVideoScreenViewShowable _previewVideoScreenViewShowable;
@@ -363,8 +383,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private bool _isResetting;
         private readonly List<(IVisualElementScheduledItem Item, int NodeId)> _pendingUnlockAnimations = new();
 
-        private const string CURRENT_POINTS_LABEL_TEXT = "解放P：";
-        private const string SKILL_NAME_SEPARATOR = "、";
         private const string COMMAND_SEPARATOR = " → ";
         private static readonly Color DEFAULT_COMBO_STEP_COLOR = Color.gray;
 
@@ -400,7 +418,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
                 if (builder.Length > 0)
                 {
-                    builder.Append(SKILL_NAME_SEPARATOR);
+                    builder.Append(_getListSeparator());
                 }
                 builder.Append(skillData.DisplayName);
             }
@@ -462,7 +480,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
                 if (builder.Length > 0)
                 {
-                    builder.Append(SKILL_NAME_SEPARATOR);
+                    builder.Append(_getListSeparator());
                 }
                 builder.Append(BuildCommandLabel(skillData.Pattern));
             }
@@ -517,7 +535,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
                 if (builder.Length > 0)
                 {
-                    builder.Append(SKILL_NAME_SEPARATOR);
+                    builder.Append(_getListSeparator());
                 }
                 builder.Append(_skillDisplayTextFormatter.Format(skillData).SkillTypeLabel);
             }
@@ -774,7 +792,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _nodesOnPath.Clear();
             _selectedNodeId = -1;
             _costToUnlock = -1;
-            _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + result.CurrentPoints.ToString();
+            _showCurrentPoints(result.CurrentPoints);
             _playerStatusPresenter.Push();
             _ownedSkillChanged?.Invoke();
         }

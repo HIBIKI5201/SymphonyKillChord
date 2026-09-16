@@ -64,7 +64,11 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <param name="refundPoints"> 返却予定の研究ポイント。 </param>
         public void Show(int refundPoints)
         {
-            _messageLabel.text = $"スキルツリーをリセットしますか？\n返却される研究ポイント：{refundPoints}";
+            _messageLocalizedText?.Dispose();
+            _messageLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_tree.reset_message_format", text => _messageLabel.text = text,
+                $"スキルツリーをリセットしますか？\n返却される研究ポイント：{refundPoints}",
+                new object[] { refundPoints });
             _confirmButton.SetEnabled(refundPoints > 0);
             _dialog.style.display = DisplayStyle.Flex;
         }
@@ -109,6 +113,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// </summary>
         public void Dispose()
         {
+            _messageLocalizedText?.Dispose();
             _resetButtonActivation?.Dispose();
             _confirmButtonActivation?.Dispose();
             _cancelButtonActivation?.Dispose();
@@ -134,6 +139,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly Button _confirmButton;
         private readonly Button _cancelButton;
         private readonly LocalizedElementText[] _localizedTexts;
+        private LocalizedElementText _messageLocalizedText;
         private IDisposable _resetButtonActivation;
         private IDisposable _confirmButtonActivation;
         private IDisposable _cancelButtonActivation;

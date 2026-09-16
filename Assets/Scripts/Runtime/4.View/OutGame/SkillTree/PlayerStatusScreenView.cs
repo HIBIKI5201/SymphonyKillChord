@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.Persistent.Localization;
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.View.OutGame.Screen;
 using System;
@@ -43,6 +44,21 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             SetIcon(root.Q<Image>(name: E_NAME_CRITICAL_CHANCE_ICON), criticalChanceIcon);
             SetIcon(root.Q<Image>(name: E_NAME_CRITICAL_DAMAGE_ICON), criticalDamageIcon);
             SetIcon(root.Q<Image>(name: E_NAME_AREA_ATTACK_RANGE_ICON), areaAttackRangeIcon);
+            Label localizedTitleLable = root.Q<Label>("TitleLable");
+            Label localizedHealthLabel = root.Q<Label>("HealthLabel");
+            Label localizedAttackLabel = root.Q<Label>("AttackLabel");
+            Label localizedCriticalChanceLabel = root.Q<Label>("CriticalChanceLabel");
+            Label localizedCriticalDamageLabel = root.Q<Label>("CriticalDamageLabel");
+            Label localizedAreaAttackRangeLabel = root.Q<Label>("AreaAttackRangeLabel");
+            _headingLocalizedTexts = new[]
+            {
+                new LocalizedElementText("UICommon", "ui.player_status.title", text => localizedTitleLable.text = text, localizedTitleLable.text),
+                new LocalizedElementText("UICommon", "ui.player_status.health", text => localizedHealthLabel.text = text, localizedHealthLabel.text),
+                new LocalizedElementText("UICommon", "ui.player_status.attack", text => localizedAttackLabel.text = text, localizedAttackLabel.text),
+                new LocalizedElementText("UICommon", "ui.player_status.critical_chance", text => localizedCriticalChanceLabel.text = text, localizedCriticalChanceLabel.text),
+                new LocalizedElementText("UICommon", "ui.player_status.critical_damage", text => localizedCriticalDamageLabel.text = text, localizedCriticalDamageLabel.text),
+                new LocalizedElementText("UICommon", "ui.player_status.range", text => localizedAreaAttackRangeLabel.text = text, localizedAreaAttackRangeLabel.text)
+            };
         }
 
         /// <summary>
@@ -145,6 +161,18 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             icon.sprite = sprite;
             icon.style.display = sprite == null ? DisplayStyle.None : DisplayStyle.Flex;
         }
+
+        /// <summary> 固定見出しのローカライズ通知を解除する。 </summary>
+        public override void Dispose()
+        {
+            base.Dispose();
+            foreach (LocalizedElementText localizedText in _headingLocalizedTexts)
+            {
+                localizedText.Dispose();
+            }
+        }
+
+        private readonly LocalizedElementText[] _headingLocalizedTexts;
 
         private const string PREVIEW_ARROW = "→";
         private const float NARROW_PANEL_WIDTH = 390f;
