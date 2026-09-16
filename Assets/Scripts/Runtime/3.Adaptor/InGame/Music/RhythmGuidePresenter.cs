@@ -104,7 +104,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             int currentStepIndex = missionRuntimeService.MissionProgress.ObjectiveStepIndex;
             var currentStep = sequence.GetStep(currentStepIndex);
 
-            if (currentStep?.Condition is not ActionRepeatCountClearCondition actionCondition)
+            var actionCondition = ClearConditionChain.Find<ActionRepeatCountClearCondition>(currentStep?.Condition);
+            if (actionCondition == null)
             {
                 return null;
             }
