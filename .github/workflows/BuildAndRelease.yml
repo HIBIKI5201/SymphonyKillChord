@@ -304,6 +304,8 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+          # Library の削除可否は直前の事前クリーンアップで判断するため、checkout では削除しない。
+          clean: false
 
 # ==================================================================================================
 
