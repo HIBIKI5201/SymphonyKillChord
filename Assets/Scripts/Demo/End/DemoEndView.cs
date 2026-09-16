@@ -11,9 +11,6 @@ namespace KillChord.Demo.End
     /// </summary>
     public sealed class DemoEndView : MonoBehaviour
     {
-        /// <summary> Timelineがアニメートする暗転用CanvasGroupです。 </summary>
-        public CanvasGroup BlackoutCanvasGroup => _blackoutCanvasGroup;
-
         /// <summary>
         ///     暗転を即時に完全な黒へ切り替えます。
         /// </summary>
@@ -50,19 +47,14 @@ namespace KillChord.Demo.End
 
             CancelEndUiFade();
 
-            bool isCompleted = false;
             _endUiFadeHandle = LMotion.Create(0.0f, 1.0f, duration)
                 .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
-                .WithOnComplete(() => isCompleted = true)
                 .BindToAlpha(_endUiCanvasGroup)
                 .AddTo(gameObject);
 
             try
             {
-                while (!isCompleted)
-                {
-                    await Awaitable.NextFrameAsync(cancellationToken);
-                }
+                await _endUiFadeHandle.ToValueTask(cancellationToken);
             }
             catch (OperationCanceledException)
             {

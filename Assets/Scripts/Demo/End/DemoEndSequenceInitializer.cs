@@ -85,7 +85,11 @@ namespace KillChord.Demo.End
         {
             // 案内が出るまでは操作を受け付けない。
             _inputComposition.GetInputMapController.EnableOnly(InputMapNames.Common);
-            _ = RunSequenceAsync();
+            _sequenceCancellationTokenSource?.Cancel();
+            _sequenceCancellationTokenSource?.Dispose();
+            _sequenceCancellationTokenSource =
+                CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            _ = RunSequenceAsync(_sequenceCancellationTokenSource.Token);
             return true;
         }
 
@@ -94,8 +98,13 @@ namespace KillChord.Demo.End
         /// </summary>
         public override void Shutdown()
         {
+            _sequenceCancellationTokenSource?.Cancel();
+            _sequenceCancellationTokenSource?.Dispose();
+            _sequenceCancellationTokenSource = null;
             UnsubscribeAttackInput();
             _movieView?.Stop();
+            _bgmView?.StopAndRestoreVolume();
+            _isTransitioning = false;
         }
 
         private const int MAX_LOADING_WAIT_FRAME_COUNT = 1800;
@@ -116,6 +125,7 @@ namespace KillChord.Demo.End
         private PlayerInputView _playerInputView;
         private InputComposition _inputComposition;
         private LoadingScreenController _loadingScreenController;
+        private CancellationTokenSource _sequenceCancellationTokenSource;
         private bool _isAttackSubscribed;
         private bool _isAttackRequested;
         private bool _isTransitioning;
@@ -145,10 +155,9 @@ namespace KillChord.Demo.End
         /// <summary>
         ///     ムービー再生から案内表示、タイトル復帰までを順に実行します。
         /// </summary>
-        private async Awaitable RunSequenceAsync()
+        /// <param name="cancellationToken"> 演出を中断するためのトークンです。 </param>
+        private async Awaitable RunSequenceAsync(CancellationToken cancellationToken)
         {
-            CancellationToken cancellationToken = destroyCancellationToken;
-
             try
             {
                 // ロード画面の裏でムービーが進行しないよう、閉じるまで待つ。
@@ -169,8 +178,14 @@ namespace KillChord.Demo.End
                 // BGMのフェードアウトと入力受付は並行して進める。
                 _ = FadeOutBgmAsync(cancellationToken);
 
-                await WaitForAttackInputAsync(cancellationToken);
-                await ReturnToTitleAsync();
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    await WaitForAttackInputAsync(cancellationToken);
+                    if (await ReturnToTitleAsync(cancellationToken))
+                    {
+                        return;
+                    }
+                }
             }
             catch (OperationCanceledException)
             {
@@ -260,11 +275,13 @@ namespace KillChord.Demo.End
         /// <summary>
         ///     BGMを停止して背景シーンを外し、タイトルシーンへ遷移します。
         /// </summary>
-        private async Awaitable ReturnToTitleAsync()
+        /// <param name="cancellationToken"> 遷移を中断するためのトークンです。 </param>
+        /// <returns> タイトルシーンへ遷移できた場合はtrueです。 </returns>
+        private async Awaitable<bool> ReturnToTitleAsync(CancellationToken cancellationToken)
         {
             if (_isTransitioning)
             {
-                return;
+                return false;
             }
 
             _isTransitioning = true;
@@ -276,15 +293,18 @@ namespace KillChord.Demo.End
                 _config.BackgroundSceneName,
                 gameObject.scene.name,
                 _config.TitleSceneName,
-                CancellationToken.None);
+                cancellationToken);
 
-            if (!isSuccess)
+            if (isSuccess)
             {
-                Debug.LogError(
-                    $"[{nameof(DemoEndSequenceInitializer)}] タイトルシーンへの遷移に失敗しました。",
-                    this);
-                _isTransitioning = false;
+                return true;
             }
+
+            Debug.LogError(
+                $"[{nameof(DemoEndSequenceInitializer)}] タイトルシーンへの遷移に失敗しました。",
+                this);
+            _isTransitioning = false;
+            return false;
         }
 
         /// <summary>

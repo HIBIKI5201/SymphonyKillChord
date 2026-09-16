@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using SymphonyFrameWork.System.SaveSystem;
+using System;
 using System.Collections.Generic;
 
 namespace KillChord.Demo
@@ -82,6 +83,7 @@ namespace KillChord.Demo
             }
 
             Dictionary<StageId, int> unlockDepths = new();
+            HashSet<StageId> visitingStageIds = new();
             int latestUnlockDepth = -1;
 
             IReadOnlyList<StageNode> nodes = stageTree.Nodes;
@@ -94,7 +96,16 @@ namespace KillChord.Demo
                     continue;
                 }
 
-                int unlockDepth = ResolveUnlockDepth(stageTree, node.Id, unlockDepths);
+                if (!TryResolveUnlockDepth(
+                        stageTree,
+                        node.Id,
+                        unlockDepths,
+                        visitingStageIds,
+                        out int unlockDepth))
+                {
+                    continue;
+                }
+
                 if (unlockDepth <= latestUnlockDepth)
                 {
                     continue;
@@ -138,27 +149,46 @@ namespace KillChord.Demo
         /// <summary>
         ///     前提接続をたどり、対象ステージが解放されるまでの最長距離を取得します。
         /// </summary>
-        private static int ResolveUnlockDepth(
+        private static bool TryResolveUnlockDepth(
             StageTree stageTree,
             StageId stageId,
-            Dictionary<StageId, int> cachedDepths)
+            Dictionary<StageId, int> cachedDepths,
+            HashSet<StageId> visitingStageIds,
+            out int unlockDepth)
         {
-            if (cachedDepths.TryGetValue(stageId, out int cachedDepth))
+            if (cachedDepths.TryGetValue(stageId, out unlockDepth))
             {
-                return cachedDepth;
+                return true;
+            }
+
+            if (!visitingStageIds.Add(stageId))
+            {
+                unlockDepth = 0;
+                return false;
             }
 
             IReadOnlyList<StageId> previousIds = stageTree.GetPreviousIds(stageId);
-            int unlockDepth = 0;
+            unlockDepth = 0;
             for (int i = 0; i < previousIds.Count; i++)
             {
-                unlockDepth = System.Math.Max(
-                    unlockDepth,
-                    ResolveUnlockDepth(stageTree, previousIds[i], cachedDepths) + 1);
+                if (!TryResolveUnlockDepth(
+                        stageTree,
+                        previousIds[i],
+                        cachedDepths,
+                        visitingStageIds,
+                        out int previousUnlockDepth))
+                {
+                    visitingStageIds.Remove(stageId);
+                    unlockDepth = 0;
+                    return false;
+                }
+
+                unlockDepth = Math.Max(unlockDepth, previousUnlockDepth + 1);
             }
 
+            visitingStageIds.Remove(stageId);
             cachedDepths.Add(stageId, unlockDepth);
-            return unlockDepth;
+            return true;
         }
 
         private readonly DemoSessionState _sessionState;

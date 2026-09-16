@@ -14,7 +14,10 @@ namespace KillChord.Demo.End
         /// <summary> 背景として重ねるステージシーン名です。 </summary>
         public string BackgroundSceneName => _backgroundSceneName;
 
-        /// <summary> 演出終了後に戻るタイトルシーン名です。 </summary>
+        /// <summary>
+        ///     演出終了後に戻るタイトルシーン名です。
+        ///     DemoExperienceConfigのセッションリセット対象と同じシーンを設定します。
+        /// </summary>
         public string TitleSceneName => _titleSceneName;
 
         /// <summary> 演出中に再生する戦闘BGMのCue名です。 </summary>
@@ -36,7 +39,7 @@ namespace KillChord.Demo.End
         [SerializeField, SceneNameSelector, Tooltip("背景として重ねるステージシーン名です。")]
         private string _backgroundSceneName = "Stage_02";
 
-        [SerializeField, SceneNameSelector, Tooltip("演出終了後に戻るタイトルシーン名です。")]
+        [SerializeField, SceneNameSelector, Tooltip("演出終了後に戻るタイトルシーン名です。DemoExperienceConfigと同じシーンを設定します。")]
         private string _titleSceneName = "Title";
 
         [Header("BGM")]
