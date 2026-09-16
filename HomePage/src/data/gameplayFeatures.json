@@ -6,9 +6,9 @@
 		"ringLabel": "拍 → 武器",
 		"ringWord": "リズム",
 		"ringSegments": [
-			{ "value": "2", "caption": "ショットガン", "color": "#4f9fe3", "ratio": 30 },
+			{ "value": "8", "caption": "サブマシンガン", "color": "#e3a14f", "ratio": 20 },
 			{ "value": "4", "caption": "アサルトライフル", "color": "#4fe37a", "ratio": 50 },
-			{ "value": "8", "caption": "サブマシンガン", "color": "#e3a14f", "ratio": 20 }
+			{ "value": "2", "caption": "ショットガン", "color": "#4f9fe3", "ratio": 30 }
 		]
 	},
 	{

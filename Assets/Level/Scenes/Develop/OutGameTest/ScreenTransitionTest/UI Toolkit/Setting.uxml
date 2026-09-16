@@ -102,8 +102,8 @@
             <ui:VisualElement class="setting-dialog">
                 <ui:Label text="タイトル画面に戻りますか？" class="setting-dialog-message"/>
                 <ui:VisualElement class="setting-dialog-buttons">
-                    <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button ui-se-cancel"/>
                     <ui:Button text="タイトル画面に戻る" name="ConfirmReturnToTitleButton" class="setting-dialog-button setting-dialog-confirm"/>
+                    <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button ui-se-cancel"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

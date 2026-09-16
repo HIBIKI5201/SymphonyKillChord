@@ -126,12 +126,12 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 gate,
                 presenterFacade,
                 scenarioSettingsRepository);
-            _inputController = new ScenarioInputController(gate, _usecase, _usecase);
             TextEventHandler textHandle = new TextEventHandler(
                 presenterFacade,
                 _usecase,
                 _usecase,
                 scenarioSettingsRepository);
+            _inputController = new ScenarioInputController(gate, textHandle, _usecase, _usecase);
             FadeEventHandler fadeEventHandle = new FadeEventHandler(presenterFacade);
             BackgroundEventHandler backgroundEventHandle = new BackgroundEventHandler(presenterFacade, backgroundRepository);
             AnimationEventHandler animationEventHandle = new AnimationEventHandler(presenterFacade, animationRepository);
@@ -393,6 +393,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
 
             _isShuttingDown = true;
             _runGeneration++;
+            if (_scenarioInputView != null) { _scenarioInputView.ClearSkipConfirmation(); }
             if (_usecase != null) { _usecase.RequestSkip(); }
             if (_scenarioView != null) { _scenarioView.EndPlayback(); }
         }

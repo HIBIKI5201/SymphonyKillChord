@@ -140,6 +140,20 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     強制出撃中の装備変更と詳細パネルのキャンセルを禁止します。
+        /// </summary>
+        /// <param name="isForced"> 強制出撃中の場合はtrueです。 </param>
+        public void SetForcedSortieMode(bool isForced)
+        {
+            _isForcedSortieMode = isForced;
+            _skillBuildShortcutButton.SetEnabled(!isForced);
+            if (isForced)
+            {
+                SetInitialFocusElement(_sortieButton);
+            }
+        }
+
+        /// <summary>
         ///     ステージ詳細 DTO を UI に反映します。
         /// </summary>
         public void Apply(in StageDetailDTO dto)
@@ -340,6 +354,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// </summary>
         private void HandleCancelActivationHandler()
         {
+            if (_isForcedSortieMode) { return; }
+
             OutGameUIEvent.OnStageDetailClosed?.Invoke();
         }
 
@@ -358,6 +374,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// </summary>
         private void HandleSkillBuildShortcutButtonActivationHandler()
         {
+            if (_isForcedSortieMode) { return; }
+
             OutGameUIEvent.OnShownSkillBuildScreen?.Invoke();
         }
 
@@ -436,6 +454,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private IDisposable _sortieButtonActivation;
         private IDisposable _skillBuildShortcutButtonActivation;
         private IDisposable _cancelActivation;
+        private bool _isForcedSortieMode;
         /// <summary> ウィンドウ表示中、フォーカスをウィンドウ内へ閉じ込めます。 </summary>
         private readonly ModalNavigationScope _navigationScope = new();
     }
