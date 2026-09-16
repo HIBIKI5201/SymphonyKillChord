@@ -71,6 +71,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private const int NODE_STAR_MAX_COUNT = 3;
         /// <summary> クリックしたノードに残すフレームのUSSクラス名。 </summary>
         private const string FOCUS_FRAME_USS_CLASS = "stage-node-focus-frame";
+        /// <summary> 牙フレームを表示しているノードのUSSクラス名。 </summary>
+        private const string FOCUS_FRAME_NODE_USS_CLASS = "stage-node--focus-frame";
         /// <summary> フレーム要素名。 </summary>
         private const string FOCUS_FRAME_NAME = "StageNodeFocusFrame";
         /// <summary> 作戦マップScrollView要素名。 </summary>
@@ -394,6 +396,20 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     コントローラーのフォーカス移動先へ、マウス操作と同じ牙フレームを表示します。
+        /// </summary>
+        private void HandleStageNodeFocusInHandler(FocusInEvent focusEvent)
+        {
+            if (_isFocusFrameLocked || focusEvent.target is not VisualElement node
+                || !node.ClassListContains(NODE_USS_CLASS) || !node.enabledInHierarchy)
+            {
+                return;
+            }
+
+            AttachFocusFrameTo(node);
+        }
+
+        /// <summary>
         ///     ステージノードが選択されたときのイベントハンドラ。
         ///     クリックと決定操作(コントローラーのAボタン)の両方から通知される。
         ///     クリック時と同じく、選択したノードへフォーカスフレームを固定する。
@@ -593,6 +609,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             if (_isForcedSortieMode) { return; }
 
             _isFocusFrameLocked = false;
+            DetachFocusFrame();
             ResetMapZoom();
             _detailScreenView.Hide();
             HideAllStarRows();
@@ -843,6 +860,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _detailScreenRoot = detailRoot;
             _rootVisualElement.RegisterCallback<PointerDownEvent>(
                 HandleRootPointerDown, TrickleDown.TrickleDown);
+            _rootVisualElement.RegisterCallback<FocusInEvent>(HandleStageNodeFocusInHandler);
 
             _settingShortcutButton = root.Q<Button>(SETTING_SHORTCUT_BUTTON_NAME);
             if (_settingShortcutButton != null)
@@ -935,6 +953,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             {
                 _rootVisualElement.UnregisterCallback<PointerDownEvent>(
                     HandleRootPointerDown, TrickleDown.TrickleDown);
+                _rootVisualElement.UnregisterCallback<FocusInEvent>(HandleStageNodeFocusInHandler);
                 _rootVisualElement = null;
             }
             _detailScreenRoot = null;
@@ -964,6 +983,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageMapCanvas = null;
             _stageMapCanvasHeight = 0.0f;
             _stageMapCanvasWidth = 0.0f;
+            DetachFocusFrame();
             _stageNodeFocusFrame = null;
             _isFocusFrameLocked = false;
             _stageNodeElementMap = null;
@@ -1459,6 +1479,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             Dictionary<StageId, Vector2> nodeCenters,
             Dictionary<StageId, VisualElement> nodeElementMap)
         {
+            DetachFocusFrame();
             _stageNodeFocusFrame = new VisualElement
             {
                 name = FOCUS_FRAME_NAME,
@@ -1550,8 +1571,22 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             if (_stageNodeFocusFrame == null || node == null) { return; }
 
+            DetachFocusFrame();
             node.Insert(0, _stageNodeFocusFrame);
+            node.AddToClassList(FOCUS_FRAME_NODE_USS_CLASS);
             _stageNodeFocusFrame.style.display = DisplayStyle.Flex;
+        }
+
+        /// <summary>
+        ///     牙フレームと選択表示を外し、元のノードのクリア状態に応じた円へ戻します。
+        /// </summary>
+        private void DetachFocusFrame()
+        {
+            if (_stageNodeFocusFrame == null) { return; }
+
+            _stageNodeFocusFrame.parent?.RemoveFromClassList(FOCUS_FRAME_NODE_USS_CLASS);
+            _stageNodeFocusFrame.RemoveFromHierarchy();
+            _stageNodeFocusFrame.style.display = DisplayStyle.None;
         }
 
         /// <summary>
