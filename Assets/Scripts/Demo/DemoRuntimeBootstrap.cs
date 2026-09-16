@@ -155,7 +155,7 @@ namespace KillChord.Demo
             TrySubscribeHomeTutorialStarted(isOutGameActive);
             TryStartSession(isOutGameActive);
             _sessionState.Tick(Time.unscaledDeltaTime, isOutGameActive);
-            _timerView?.Refresh();
+            _timerView?.Refresh(isOutGameActive);
 
             if (_sessionState.IsHomeTimeExpired && isOutGameActive)
             {
@@ -241,8 +241,18 @@ namespace KillChord.Demo
         /// </summary>
         private void ApplyForcedSortie(StageSelectModuleContainer stageSelectContainer)
         {
-            StageId forcedStageId = new(_config.ForcedStageId);
-            stageSelectContainer.TryForceBattleSortie(forcedStageId);
+            if (!DemoStageResultExitPolicy.TryGetLatestAvailableBattleStage(
+                    stageSelectContainer.StageTree,
+                    out BattleStageDefinition battleStageDefinition))
+            {
+                Debug.LogError(
+                    $"[{nameof(DemoRuntimeBootstrap)}] " +
+                    "解放済みの最新バトルステージを強制出撃先に設定できませんでした。",
+                    this);
+                return;
+            }
+
+            stageSelectContainer.TryForceBattleSortie(battleStageDefinition.StageId);
         }
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)

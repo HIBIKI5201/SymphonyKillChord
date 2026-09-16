@@ -518,9 +518,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 96.645
       objectReference: {fileID: 0}
+    - target: {fileID: 3439058958192483208, guid: e16b635750bb37942ac76e9cf5de7f25, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3874639297045314633, guid: e16b635750bb37942ac76e9cf5de7f25, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500987224094835497, guid: e16b635750bb37942ac76e9cf5de7f25, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6505049340889190208, guid: e16b635750bb37942ac76e9cf5de7f25, type: 3}
       propertyPath: m_Name
       value: Firing_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 7827132467249099166, guid: e16b635750bb37942ac76e9cf5de7f25, type: 3}
+      propertyPath: playOnAwake
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

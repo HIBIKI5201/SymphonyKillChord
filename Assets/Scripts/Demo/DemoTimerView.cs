@@ -16,13 +16,14 @@ namespace KillChord.Demo
         public void Initialize(IDemoSession session)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
-            Refresh();
+            Refresh(false);
         }
 
         /// <summary>
         ///     現在のタイマー状態を画面へ反映します。
         /// </summary>
-        public void Refresh()
+        /// <param name="isHomeActive"> ホームにいる場合はtrueです。 </param>
+        public void Refresh(bool isHomeActive)
         {
             bool isVisible = _session != null && _session.IsStarted;
             if (_canvas != null)
@@ -43,6 +44,7 @@ namespace KillChord.Demo
 
             if (_homeTimerText != null)
             {
+                _homeTimerText.gameObject.SetActive(isHomeActive);
                 _homeTimerText.text =
                     $"ホーム  {FormatTime(_session.HomeRemainingSeconds)}";
             }
