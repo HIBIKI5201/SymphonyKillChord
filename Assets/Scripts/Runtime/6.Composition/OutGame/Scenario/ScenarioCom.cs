@@ -125,12 +125,12 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 gate,
                 presenterFacade,
                 scenarioSettingsRepository);
-            _inputController = new ScenarioInputController(gate, _usecase, _usecase);
             TextEventHandler textHandle = new TextEventHandler(
                 presenterFacade,
                 _usecase,
                 _usecase,
                 scenarioSettingsRepository);
+            _inputController = new ScenarioInputController(gate, textHandle, _usecase, _usecase);
             FadeEventHandler fadeEventHandle = new FadeEventHandler(presenterFacade);
             BackgroundEventHandler backgroundEventHandle = new BackgroundEventHandler(presenterFacade, backgroundRepository);
             AnimationEventHandler animationEventHandle = new AnimationEventHandler(presenterFacade, animationRepository);

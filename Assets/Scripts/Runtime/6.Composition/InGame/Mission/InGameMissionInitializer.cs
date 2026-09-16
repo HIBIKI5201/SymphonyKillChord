@@ -511,16 +511,16 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 advanceGate,
                 presenterFacade,
                 scenarioSettingsRepository);
-            _scenarioInputController = new ScenarioInputController(
-                advanceGate,
-                _scenarioUsecase,
-                _scenarioUsecase);
-
             TextEventHandler textEventHandler = new(
                 presenterFacade,
                 _scenarioUsecase,
                 _scenarioUsecase,
                 scenarioSettingsRepository);
+            _scenarioInputController = new ScenarioInputController(
+                advanceGate,
+                textEventHandler,
+                _scenarioUsecase,
+                _scenarioUsecase);
             FadeEventHandler fadeEventHandler = new(presenterFacade);
             BackgroundEventHandler backgroundEventHandler = new(presenterFacade, backgroundRepository);
             AnimationEventHandler animationEventHandler = new(presenterFacade, animationRepository);
