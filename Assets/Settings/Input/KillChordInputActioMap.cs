@@ -1054,7 +1054,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""id"": ""e42980b2-3302-4ca4-8046-82d1cb9f2920"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": ""Hold"",
+                    ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
