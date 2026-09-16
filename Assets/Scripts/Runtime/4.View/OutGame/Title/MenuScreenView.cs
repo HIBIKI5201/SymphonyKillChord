@@ -346,8 +346,17 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void RegisterLocalizedTexts()
         {
+            Label soundEffectHeading = RootElement.Q<Label>("SoundEffectHeading");
+            Label languageHeading = RootElement.Q<Label>("LanguageHeading");
+            Label dataResetWarning = RootElement.Q<Label>("DataResetWarning");
             _localizedTexts = new[]
             {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.sound_effect", text => soundEffectHeading.text = text, "効果音"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.language", text => languageHeading.text = text, "言語"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.data_reset_warning", text => dataResetWarning.text = text, "※削除するとデータは戻せません。"),
                 new LocalizedElementText(
                     UI_COMMON_TABLE, "ui.title.menu.data_reset", text => _dataResetButton.text = text),
                 new LocalizedElementText(

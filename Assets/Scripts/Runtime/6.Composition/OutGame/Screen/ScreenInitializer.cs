@@ -140,6 +140,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _isSubscribed = false;
 
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
+            ServiceLocator.UnregisterInstance<SkillTreeScreenView>();
             ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
             ServiceLocator.UnregisterInstance<StageSelectScreenView>();
             ServiceLocator.UnregisterInstance<HomeScreenView>();
@@ -340,13 +341,13 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _getHomePointsUseCase = new GetHomePointsUseCase();
             StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
-            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent, null, null, null, null, null);
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent, _comboHexIcon);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
+            ServiceLocator.RegisterInstance(skillTreeScreenView);
             ServiceLocator.RegisterInstance(battlePreparationScreen);
             // StageSelectモジュールから強制出撃中の戻る操作を制限する。
             ServiceLocator.RegisterInstance(stageSelectScreenView);

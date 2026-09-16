@@ -15,9 +15,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
         ///     復帰操作の表示名を設定します。
         /// </summary>
         /// <param name="actionLabel"> ボタンに表示する文言です。 </param>
-        public void Initialize(string actionLabel)
+        /// <param name="message"> 初期化失敗時の文言です。 </param>
+        /// <param name="recoveryFailedMessage"> 復帰失敗時の文言です。 </param>
+        /// <param name="loadingLabel"> 復帰処理中の文言です。 </param>
+        public void Initialize(string actionLabel, string message, string recoveryFailedMessage, string loadingLabel)
         {
             _actionLabel = actionLabel;
+            _message = message;
+            _recoveryFailedMessage = recoveryFailedMessage;
+            _loadingLabel = loadingLabel;
         }
 
         /// <summary>
@@ -34,7 +40,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public void ShowRecoveryFailed()
         {
-            _message = "画面を読み込めませんでした。もう一度お試しください。";
+            _message = _recoveryFailedMessage;
             _isBusy = false;
         }
 
@@ -47,6 +53,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         private string _message = "画面の読み込みに失敗しました。";
         private string _actionLabel = "タイトルへ戻る";
+        private string _recoveryFailedMessage = "画面を読み込めませんでした。もう一度お試しください。";
+        private string _loadingLabel = "読み込み中…";
         private bool _isBusy;
 
         /// <summary>
@@ -82,7 +90,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 GUILayout.Space(CONTENT_SPACING);
                 GUI.enabled = !_isBusy;
                 bool requested = GUILayout.Button(
-                    _isBusy ? "読み込み中…" : _actionLabel,
+                    _isBusy ? _loadingLabel : _actionLabel,
                     GUILayout.Height(BUTTON_HEIGHT));
                 GUILayout.EndArea();
 
