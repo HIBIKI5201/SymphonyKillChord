@@ -106,9 +106,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         [SerializeField, Tooltip("プレビューカメラが描画するレイヤーです。シーンのキャラクターが属するレイヤーを指定します。")]
         private LayerMask _cullingMask;
         [SerializeField, Tooltip("プレビューカメラのキャラクターからの相対位置です。")]
-        private Vector3 _cameraLocalPosition = new(0f, 1.1f, 2.2f);
-        [SerializeField, Tooltip("プレビューカメラの回転です。")]
-        private Vector3 _cameraLocalEulerAngles = new(0f, 180f, 0f);
+        private Vector3 _cameraLocalPosition = new(1.1f, 1.1f, 1.9052559f);
+        [SerializeField, Tooltip("プレビューカメラの回転です。キャラクターから見て右30度の位置から見る向きです。")]
+        private Vector3 _cameraLocalEulerAngles = new(0f, 210f, 0f);
         [SerializeField, Tooltip("プレビューカメラの画角です。")]
         private float _fieldOfView = 30f;
         [SerializeField, Tooltip("レンダーテクスチャの幅です。")]
