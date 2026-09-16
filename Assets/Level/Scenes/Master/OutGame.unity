@@ -937,11 +937,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5801d2f0ae4e23349b658f4c0228fd8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.Screen.HomeCharacterPreviewInitializer
-  _characterPrefab: {fileID: 919132149155446097, guid: 879c42b54e13edd41a4202d1365d28a7, type: 3}
-  _playIdlePose: 0
-  _idleController: {fileID: 9100000, guid: e7717b306d9972741a4b0ef6a25ae3b8, type: 2}
-  _spawnPosition: {x: 500, y: 0, z: 500}
-  _spawnEulerAngles: {x: 0, y: 0, z: 0}
+  _sceneCharacterTransform: {fileID: 1331111604}
+  _cullingMask:
+    serializedVersion: 2
+    m_Bits: 0
   _cameraLocalPosition: {x: 0, y: 1.1, z: 2.2}
   _cameraLocalEulerAngles: {x: 0, y: 180, z: 0}
   _fieldOfView: 30
@@ -1335,6 +1334,11 @@ Transform:
 --- !u!95 &1331111600 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 7554209699097654958, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
+  m_PrefabInstance: {fileID: 1331111598}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1331111604 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4482732434491403476, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
   m_PrefabInstance: {fileID: 1331111598}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1480631845

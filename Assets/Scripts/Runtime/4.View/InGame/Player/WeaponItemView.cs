@@ -87,6 +87,9 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 return;
             }
+
+            _materialPropertyBlock ??= new MaterialPropertyBlock();
+
             // 遅延待ちのEffectが非表示後に発火しないよう、モデルを消す前に打ち消す。
             _effectHandle.TryCancel();
             _flashHandle.TryCancel();
