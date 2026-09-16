@@ -20,7 +20,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="BodyRow" class="skillbuild-body-row" style="justify-content: flex-end; margin-right: 75px;">
             <ui:VisualElement name="SkillDetail" class="skillbuild-panel" style="width: 770px; justify-content: flex-start; align-items: stretch; height: 826px; margin-right: 5px;">
-                <ui:Label name="DetailsHeading" text="詳細" class="skillbuild-panel-title" style="height: 58px; width: 220px; font-size: 40px;"/>
+                <ui:Label name="DetailsHeading" text="詳細" class="skillbuild-panel-title" style="height: 58px; width: 220px; font-size: 40px; -unity-text-align: middle-left;"/>
                 <ui:VisualElement name="DetailContent" class="skillbuild-detail-content">
                     <ui:VisualElement name="Top" class="skill-detail-top">
                         <ui:Image name="skill-detail-icon" class="skill-detail-icon"/>
@@ -29,9 +29,9 @@
                             <ui:Label name="skill-combo-label" class="skill-combo-label" style="display: none;"/>
                             <ui:VisualElement name="ComboRow" class="skillbuild-combo-row" style="height: 26px;"/>
                         </ui:VisualElement>
-                        <ui:VisualElement name="SkillTypeBox" class="skillbuild-type-box" style="height: 184px; width: 179px; background-color: rgba(173, 173, 173, 0.2);">
+                        <ui:VisualElement name="SkillTypeBox" class="skillbuild-type-box" style="height: 184px; width: 179px; background-color: rgba(255, 255, 255, 0.51); background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_BackText.png?fileID=2800000&amp;guid=1e2171f726e7bf349bbc11f8a2d4d53a&amp;type=3#UI_BackText&quot;); -unity-background-image-tint-color: rgb(255, 255, 255);">
                             <ui:Image name="skill-type-icon" class="skillbuild-type-icon"/>
-                            <ui:Label name="SkillTypeHeading" text="スキルタイプ" class="skillbuild-type-caption" style="font-size: 24px;"/>
+                            <ui:Label name="SkillTypeHeading" text="スキルタイプ" class="skillbuild-type-caption" style="font-size: 24px; color: rgb(0, 0, 0);"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:ScrollView name="SkillDescription" vertical-scroller-visibility="Hidden" class="skill-description" style="height: 222px;">
@@ -42,11 +42,11 @@
                     </ui:ScrollView>
                     <ui:VisualElement name="LevelPointRow" class="skillbuild-level-point-row" style="height: 75px;">
                         <ui:VisualElement name="LevelRow" class="skillbuild-info-row skillbuild-info-row-half skillbuild-info-row-left" style="height: 84px;">
-                            <ui:Label name="LevelHeading" text="レベル" class="skillbuild-info-row-heading" style="font-size: 30px;"/>
+                            <ui:Label name="LevelHeading" text="レベル" class="skillbuild-info-row-heading" style="font-size: 30px; -unity-text-align: middle-left;"/>
                             <ui:Label text="" name="skill-level-label" class="skillbuild-info-row-value" style="font-size: 30px;"/>
                         </ui:VisualElement>
                         <ui:VisualElement name="PointRow" class="skillbuild-info-row skillbuild-info-row-half" style="height: 84px;">
-                            <ui:Label name="ModPointsHeading" text="改造P" class="skillbuild-info-row-heading" style="font-size: 30px;"/>
+                            <ui:Label name="ModPointsHeading" text="改造P" class="skillbuild-info-row-heading" style="font-size: 30px; -unity-text-align: middle-left;"/>
                             <ui:Label text="" name="skill-levelup-point-label" class="skillbuild-info-row-value" style="font-size: 30px;"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -57,7 +57,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="FormationColumn" class="skillbuild-formation-column" style="height: 827px; margin-left: 5px;">
                 <ui:VisualElement name="Formation" class="skillbuild-panel skillbuild-panel-nested" style="height: 508px; align-items: stretch; margin-bottom: 5px;">
-                    <ui:Label name="FormationHeading" text="編成" class="skillbuild-panel-title" style="width: 228px; height: 61px; font-size: 40px;"/>
+                    <ui:Label name="FormationHeading" text="編成" class="skillbuild-panel-title" style="width: 228px; height: 61px; font-size: 40px; -unity-text-align: middle-left;"/>
                     <ui:VisualElement name="SkillElementContainer" class="skill-element-container skillbuild-slot-row" style="height: 252px;">
                         <ui:VisualElement name="SkillSlot1" class="skill-element-slot skillbuild-slot" style="display: flex; height: 250px; width: 250px;">
                             <ui:VisualElement name="IconArea" class="skillbuild-slot-icon-area">
