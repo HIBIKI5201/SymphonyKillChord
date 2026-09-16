@@ -155,6 +155,11 @@
     border-color: rgba(0, 0, 0, 0);
 }
 
+/* 選択中のステージ名は隣のステージ名と重ならないよう、通常位置より上へ離す。 */
+.stage-node.stage-node--focus-frame > .stage-node__label {
+    top: -90px;
+}
+
 .stage-map-canvas {
     scale: 1 1;
     transition-property: scale;
