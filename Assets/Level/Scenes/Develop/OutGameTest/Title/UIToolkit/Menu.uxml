@@ -29,9 +29,9 @@
                             <ui:Label text="言語" style="font-size: 25px; -unity-font-style: bold; color: white;"/>
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row; align-items: center; flex-grow: 1; justify-content: space-between;">
-                            <ui:Button text="&lt;" name="LanguagePrevButton" class="btn-skin btn-scale-feedback" style="width: 45px; height: 45px; font-size: 20px; -unity-font-style: bold; color: white; background-color: rgba(188, 188, 188, 0);"/>
+                            <ui:Button text="&lt;" name="LanguagePrevButton" class="btn-skin btn-scale-feedback setting-select-arrow-button" style="width: 45px; height: 45px; font-size: 20px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0);"/>
                             <ui:Label text="日本語" name="LanguageValueLabel" style="font-size: 25px; -unity-font-style: bold; color: white; -unity-text-align: middle-center; flex-grow: 1;"/>
-                            <ui:Button text="&gt;" name="LanguageNextButton" class="btn-skin btn-scale-feedback" style="width: 45px; height: 45px; font-size: 20px; -unity-font-style: bold; color: white; background-color: rgba(188, 188, 188, 0);"/>
+                            <ui:Button text="&gt;" name="LanguageNextButton" class="btn-skin btn-scale-feedback setting-select-arrow-button" style="width: 45px; height: 45px; font-size: 20px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0);"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
