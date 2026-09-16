@@ -7,6 +7,7 @@ using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
@@ -264,17 +265,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 }
             }
 
+            int baseSlotCount = SkillBuildDefinition.INITIAL_SLOT_COUNT + ResolveSkillSlotBonus();
             if (!ServiceLocator.TryGetInstance(out _skillBuildDefinition))
             {
                 _skillBuildDefinition = new SkillBuildDefinition(ToArray(_loadedEquippedSkills));
+                _skillBuildDefinition.EnsureSlotCount(baseSlotCount);
                 ServiceLocator.RegisterInstance(_skillBuildDefinition);
             }
             else
             {
                 _skillBuildDefinition.EnsureSlotCount(
-                    _loadedEquippedSkills.Count > SkillBuildDefinition.INITIAL_SLOT_COUNT
+                    _loadedEquippedSkills.Count > baseSlotCount
                         ? _loadedEquippedSkills.Count
-                        : SkillBuildDefinition.INITIAL_SLOT_COUNT);
+                        : baseSlotCount);
             }
 
             SkillBuildUseCase skillBuildUseCase =
@@ -585,6 +588,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private void HandleOwnedSkillChangedHandler()
         {
+            _skillBuildDefinition?.EnsureSlotCount(
+                SkillBuildDefinition.INITIAL_SLOT_COUNT + ResolveSkillSlotBonus());
             RefreshOwnedSkills(false);
         }
 
@@ -622,6 +627,17 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             {
                 RefreshOwnedSkills(false);
             }
+        }
+
+        /// <summary>
+        ///     スキルツリーで解放済みの「編成枠を増やすノード」の件数を取得します。
+        /// </summary>
+        /// <returns> 未登録の場合は0。 </returns>
+        private int ResolveSkillSlotBonus()
+        {
+            return ServiceLocator.TryGetInstance(out SkillTreeStatusEntity skillTreeStatus)
+                ? skillTreeStatus.SkillSlotBonus
+                : 0;
         }
     }
 }

@@ -217,6 +217,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 _skillTreeStatusEntity.AddUnlockedSkillIds(entity.UnlockSkillIds);
             }
             _skillTreeStatusEntity.ModifyPoint(-_costToUnlock);
+            _skillTreeStatusEntity.SetSkillSlotBonus(
+                _skillTreeService.CalculateSkillSlotBonus(_skillTreeStatusEntity.UnlockedNodes));
 
             PlayUnlockSequence(unlockOrder);
 
@@ -771,6 +773,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 result.CurrentPoints,
                 result.UnlockedNodeIds,
                 result.UnlockedSkillIds);
+            _skillTreeStatusEntity.SetSkillSlotBonus(
+                _skillTreeService.CalculateSkillSlotBonus(_skillTreeStatusEntity.UnlockedNodes));
             _nodesOnPath.Clear();
             _selectedNodeId = -1;
             _costToUnlock = -1;

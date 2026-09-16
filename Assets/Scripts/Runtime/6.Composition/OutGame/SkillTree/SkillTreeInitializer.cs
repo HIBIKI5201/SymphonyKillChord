@@ -293,6 +293,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         public override void Shutdown()
         {
             Unsubscribe();
+            ServiceLocator.UnregisterInstance<SkillTreeStatusEntity>();
             if (_rootElement != null)
             {
                 _rootElement.UnregisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
@@ -460,6 +461,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             _skillTreeService = new SkillTreeService(_skillNodeEntities);
+            skillTreeEntity.SetSkillSlotBonus(
+                _skillTreeService.CalculateSkillSlotBonus(skillTreeEntity.UnlockedNodes));
+            ServiceLocator.RegisterInstance(skillTreeEntity);
             PlayerStatusBonusCalculator playerStatusBonusCalculator =
                 new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 
