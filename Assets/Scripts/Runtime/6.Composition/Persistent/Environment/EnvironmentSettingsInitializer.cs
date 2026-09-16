@@ -39,7 +39,8 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
         {
             if (!ServiceLocator.TryGetInstance(out ResolutionApplier resolutionApplier)
                 || !ServiceLocator.TryGetInstance(out QualityApplier qualityApplier)
-                || !ServiceLocator.TryGetInstance(out BrightnessApplier brightnessApplier))
+                || !ServiceLocator.TryGetInstance(out BrightnessApplier brightnessApplier)
+                || !ServiceLocator.TryGetInstance(out LanguageApplier languageApplier))
             {
                 Debug.LogError(
                     $"[{nameof(EnvironmentSettingsInitializer)}] 環境設定の適用先を取得できませんでした。",
@@ -55,7 +56,8 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
                 _environmentSettingsPresenter,
                 resolutionApplier,
                 qualityApplier,
-                brightnessApplier);
+                brightnessApplier,
+                languageApplier);
             _environmentSettingsPresenter.Push(_loadedSettings);
             _moduleContainer = new EnvironmentSettingsModuleContainer(
                 _environmentSettingsViewModel,

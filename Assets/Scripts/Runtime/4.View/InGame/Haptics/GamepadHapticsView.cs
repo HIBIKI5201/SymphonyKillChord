@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Haptics;
+using KillChord.Runtime.Adaptor.Persistent.Environment;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,9 +15,13 @@ namespace KillChord.Runtime.View.InGame.Haptics
         ///     振動の強さと長さの設定を受け取る。
         /// </summary>
         /// <param name="config"> ゲームパッド振動の設定。 </param>
-        public void Initialize(GamepadHapticsConfig config)
+        /// <param name="environmentSettingsViewModel"> 保存済みの振動強度を公開するViewModel。 </param>
+        public void Initialize(
+            GamepadHapticsConfig config,
+            IEnvironmentSettingsViewModel environmentSettingsViewModel)
         {
             _config = config;
+            _environmentSettingsViewModel = environmentSettingsViewModel;
         }
 
         /// <summary>
@@ -24,9 +29,9 @@ namespace KillChord.Runtime.View.InGame.Haptics
         /// </summary>
         public void PlayJustHitPulse()
         {
-            if (_config == null)
+            if (_config == null || _environmentSettingsViewModel == null)
             {
-                Debug.LogError($"[{nameof(GamepadHapticsView)}] Configが未設定です。", this);
+                Debug.LogError($"[{nameof(GamepadHapticsView)}] 振動再生に必要な設定が未設定です。", this);
                 return;
             }
 
@@ -36,17 +41,21 @@ namespace KillChord.Runtime.View.InGame.Haptics
                 return;
             }
 
-            if (_config.PulseDuration <= 0f)
+            float vibrationScale = Mathf.Clamp01(_environmentSettingsViewModel.VibrationScale.CurrentValue);
+            if (_config.PulseDuration <= 0f || vibrationScale <= 0f)
             {
                 return;
             }
 
-            gamepad.SetMotorSpeeds(_config.LowFrequencyMotorSpeed, _config.HighFrequencyMotorSpeed);
+            gamepad.SetMotorSpeeds(
+                _config.LowFrequencyMotorSpeed * vibrationScale,
+                _config.HighFrequencyMotorSpeed * vibrationScale);
             _pulsingGamepad = gamepad;
             _remainingPulseTime = _config.PulseDuration;
         }
 
         private GamepadHapticsConfig _config;
+        private IEnvironmentSettingsViewModel _environmentSettingsViewModel;
         private Gamepad _pulsingGamepad;
         private float _remainingPulseTime;
 

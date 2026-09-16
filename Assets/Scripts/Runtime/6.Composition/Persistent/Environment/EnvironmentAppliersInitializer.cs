@@ -6,7 +6,7 @@ using UnityEngine;
 namespace KillChord.Runtime.Composition.Persistent.Environment
 {
     /// <summary>
-    ///     解像度・画質・明るさをデバイスへ適用するAdaptorの初期化をする。
+    ///     解像度・画質・明るさ・表示言語をデバイスへ適用するAdaptorの初期化をする。
     /// </summary>
     public sealed class EnvironmentAppliersInitializer : PersistentInitializationModuleBase
     {
@@ -25,10 +25,12 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
             _resolutionApplier = new ResolutionApplier();
             _qualityApplier = new QualityApplier();
             _brightnessApplier = new BrightnessApplier(transform);
+            _languageApplier = new LanguageApplier();
 
             if (!ServiceLocator.RegisterInstance(_resolutionApplier)
                 || !ServiceLocator.RegisterInstance(_qualityApplier)
-                || !ServiceLocator.RegisterInstance(_brightnessApplier))
+                || !ServiceLocator.RegisterInstance(_brightnessApplier)
+                || !ServiceLocator.RegisterInstance(_languageApplier))
             {
                 Debug.LogError(
                     $"[{nameof(EnvironmentAppliersInitializer)}] 環境設定の適用先を登録できませんでした。",
@@ -62,13 +64,21 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
                 ServiceLocator.UnregisterInstance<BrightnessApplier>();
             }
 
+            if (ServiceLocator.TryGetInstance(out LanguageApplier registeredLanguageApplier)
+                && ReferenceEquals(registeredLanguageApplier, _languageApplier))
+            {
+                ServiceLocator.UnregisterInstance<LanguageApplier>();
+            }
+
             _resolutionApplier = null;
             _qualityApplier = null;
             _brightnessApplier = null;
+            _languageApplier = null;
         }
 
         private ResolutionApplier _resolutionApplier;
         private QualityApplier _qualityApplier;
         private BrightnessApplier _brightnessApplier;
+        private LanguageApplier _languageApplier;
     }
 }
