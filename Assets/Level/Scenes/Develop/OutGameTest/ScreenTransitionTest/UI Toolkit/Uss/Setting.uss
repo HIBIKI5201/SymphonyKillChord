@@ -182,19 +182,13 @@
 }
 
 .setting-dialog {
-    width: 560px;
-    min-height: 250px;
-    padding: 28px;
+    width: 640px;
+    min-height: 260px;
+    padding: 32px 40px;
     justify-content: center;
-    background-color: rgb(58, 66, 72);
-    border-left-width: 2px;
-    border-right-width: 2px;
-    border-top-width: 2px;
-    border-bottom-width: 2px;
-    border-left-color: rgb(180, 188, 194);
-    border-right-color: rgb(180, 188, 194);
-    border-top-color: rgb(180, 188, 194);
-    border-bottom-color: rgb(180, 188, 194);
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OutGame_SceneTab.png?fileID=21300000&guid=96c8d94dd68b3104fa34a3f388529d63&type=3#UI_OutGame_SceneTab");
+    -unity-background-scale-mode: stretch-to-fill;
 }
 
 .setting-dialog-message {
@@ -203,6 +197,7 @@
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     color: white;
+    white-space: normal;
 }
 
 .setting-dialog-buttons {
@@ -211,14 +206,20 @@
 }
 
 .setting-dialog-button {
-    width: 220px;
-    height: 62px;
+    width: 260px;
+    height: 72px;
     margin-left: 8px;
     margin-right: 8px;
     font-size: 22px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    color: rgb(58, 47, 20);
+    background-color: rgba(0, 0, 0, 0);
 }
 
-.setting-dialog-confirm {
+.setting-dialog-button:hover,
+.setting-dialog-button:focus,
+.setting-dialog-button:active {
     color: white;
-    background-color: rgb(145, 70, 70);
 }
