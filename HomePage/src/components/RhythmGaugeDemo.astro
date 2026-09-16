@@ -106,17 +106,29 @@ const trailBars = Array.from({ length: trailBarCount }, (_, index) => {
 			}
 		}
 
+		// バー位置(%)は固定なので毎フレーム計算せず、あらかじめ配列化しておく
+		const barPcts = trailBars.map((_, index) => (index + 0.5) / trailBars.length);
+		// 直前に描画した値を覚えておき、変化がないバーへの書き込みを毎フレーム省略する
+		const lastIntensities = new Float32Array(trailBars.length).fill(-1);
+
 		function renderTrail(progress: number) {
-			trailBars.forEach((bar, index) => {
-				const barPct = (index + 0.5) / trailBars.length;
+			for (let index = 0; index < trailBars.length; index++) {
+				const barPct = barPcts[index];
 				let intensity = 0;
 				if (barPct <= progress) {
 					const sinceMs = (progress - barPct) * sweepMs;
 					intensity = Math.max(0, 1 - sinceMs / decayMs);
 				}
+				// ほぼ変化がないバーはstyle書き込み自体をスキップし、レイアウト/再描画コストを抑える
+				if (Math.abs(intensity - lastIntensities[index]) < 0.01) continue;
+				lastIntensities[index] = intensity;
+
+				const bar = trailBars[index];
 				bar.style.opacity = String(0.12 + 0.88 * intensity);
-				bar.style.height = `calc(10% + (var(--bar-peak) - 10%) * ${intensity})`;
-			});
+				// heightではなくtransform(scaleY)で表現することで、レイアウト計算を発生させず
+				// コンポジタ側の処理だけで軌跡の伸縮を描画できるようにする
+				bar.style.transform = `scaleY(${0.1 + 0.9 * intensity})`;
+			}
 		}
 
 		if (prefersReducedMotion) {
@@ -193,9 +205,11 @@ const trailBars = Array.from({ length: trailBarCount }, (_, index) => {
 
 	.trail-bar {
 		flex: 1;
-		height: 10%;
+		height: var(--bar-peak);
 		background: var(--bar-color);
 		opacity: 0.12;
+		transform: scaleY(0.1);
+		transform-origin: center;
 	}
 
 	.judge-line {
