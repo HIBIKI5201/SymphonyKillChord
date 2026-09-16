@@ -156,6 +156,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 _slots[i].UnregisterCallback<FocusInEvent>(HandleSlotFocusInHandler);
                 _slots[i].UnregisterCallback<NavigationSubmitEvent>(HandleSlotSubmitHandler);
+                _slots[i].UnregisterCallback<NavigationMoveEvent>(HandleLeftNavigationMoveHandler);
             }
 
             ClearCarry();
@@ -256,8 +257,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     スキル一覧内の左右移動を、表示順で隣接する(かつ現在ジャンル絞り込みで
-        ///     表示されている)スキル要素への移動として解決する。
+        ///     左入力を強化ボタンへの移動、右入力を表示順で次のスキルへの移動として解決する。
         ///     <para>
         ///         一覧は横スクロールの1行に多数のカードが並ぶため、UI Toolkit標準の
         ///         自動ナビゲーションでは一部の要素にしか移動できないことがある。
@@ -272,6 +272,18 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
+            if (evt.direction == NavigationMoveEvent.Direction.Left)
+            {
+                if (TryFocusVisibleNeighborSkillElement(element, -1, evt))
+                {
+                    return;
+                }
+
+                // 一番左の要素で左入力した場合のみ、強化ボタンへフォーカスする。
+                HandleLeftNavigationMoveHandler(evt);
+                return;
+            }
+
             // スキル一覧のどのスキルから下入力しても、編成保存ボタンへ移動する。
             if (evt.direction == NavigationMoveEvent.Direction.Down &&
                 TryFocus(_skillBuildSaveButton))
@@ -281,18 +293,31 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
-            int step = evt.direction switch
-            {
-                NavigationMoveEvent.Direction.Left => -1,
-                NavigationMoveEvent.Direction.Right => 1,
-                _ => 0,
-            };
-
-            if (step == 0)
+            if (evt.direction != NavigationMoveEvent.Direction.Right)
             {
                 return;
             }
 
+            if (!TryFocusVisibleNeighborSkillElement(element, 1, evt))
+            {
+                // 移動先がない場合も入力を消費し、スクロール領域へフォーカスを渡さない。
+                evt.StopPropagation();
+                element.panel?.focusController?.IgnoreEvent(evt);
+            }
+        }
+
+        /// <summary>
+        ///     表示順で隣接するスキル要素へフォーカスを移動する。
+        /// </summary>
+        /// <param name="element"> 移動元の要素。 </param>
+        /// <param name="step"> 探索方向。+1で右隣、-1で左隣を探す。 </param>
+        /// <param name="evt"> ナビゲーション移動イベント。 </param>
+        /// <returns> 隣接するスキル要素へ移動できた場合はtrue。 </returns>
+        private bool TryFocusVisibleNeighborSkillElement(
+            VisualElement element,
+            int step,
+            NavigationMoveEvent evt)
+        {
             VisualElement next = FindVisibleNeighborSkillElement(element, step);
             NavigationDebugLog.Log(
                 $"[SkillListNav] from={NavigationDebugLog.Describe(element)} step={step} "
@@ -300,19 +325,29 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             if (next == null)
             {
-                // 一覧の最左端で左入力した場合、強化ボタンへ移動する。
-                // ボタンがレベルMax等で無効化されている場合はフォーカスできないため、
-                // その場合はイベントを消費せず標準ナビゲーションに委ねる。
-                if (step == -1 && TryFocus(_skillLevelUpButton))
-                {
-                    evt.StopPropagation();
-                    element.panel?.focusController?.IgnoreEvent(evt);
-                }
-
-                return;
+                return false;
             }
 
             next.Focus();
+            evt.StopPropagation();
+            element.panel?.focusController?.IgnoreEvent(evt);
+            return true;
+        }
+
+        /// <summary>
+        ///     装備スロットとスキル要素で、左隣に要素が無い場合の左入力で強化ボタンへフォーカスする。
+        /// </summary>
+        /// <param name="evt"> ナビゲーション移動イベント。 </param>
+        private void HandleLeftNavigationMoveHandler(NavigationMoveEvent evt)
+        {
+            if (evt.direction != NavigationMoveEvent.Direction.Left ||
+                evt.currentTarget is not VisualElement element)
+            {
+                return;
+            }
+
+            // 強化できない場合は現在の要素に留める。
+            TryFocus(_skillLevelUpButton);
             evt.StopPropagation();
             element.panel?.focusController?.IgnoreEvent(evt);
         }
@@ -518,6 +553,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             slot.MakeNavigable();
             slot.RegisterCallback<FocusInEvent>(HandleSlotFocusInHandler);
             slot.RegisterCallback<NavigationSubmitEvent>(HandleSlotSubmitHandler);
+            slot.RegisterCallback<NavigationMoveEvent>(HandleLeftNavigationMoveHandler);
             _slots.Add(slot);
         }
 

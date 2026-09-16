@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.Persistent.Localization;
 
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.SkillTree;
@@ -31,6 +32,18 @@ namespace KillChord.Runtime.View.OutGame.Screen
             }
 
             RegisterButtonCallback();
+            _pointsLabel = rootElement.Q<Label>("Points");
+            _listSeparatorLocalizedText = new LocalizedElementText(
+                "UICommon", "ui.skill_tree.list_separator", text =>
+                {
+                    ListSeparator = text;
+                    OnListSeparatorChanged?.Invoke();
+                }, "、");
+            Label localizedTitle = rootElement.Q<Label>("Title");
+            _headingLocalizedTexts = new[]
+            {
+                new LocalizedElementText("UICommon", "ui.skill_tree.title", text => localizedTitle.text = text, localizedTitle.text)
+            };
         }
 
         /// <summary>
@@ -46,6 +59,13 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         public override void Dispose()
         {
+            _pointsLocalizedText?.Dispose();
+            _listSeparatorLocalizedText.Dispose();
+            OnListSeparatorChanged = null;
+            foreach (LocalizedElementText localizedText in _headingLocalizedTexts)
+            {
+                localizedText.Dispose();
+            }
             base.Dispose();
             UnregisterButtonCallback();
 
@@ -99,8 +119,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
             _settingShortcutButtonActivation =
                 _settingShortcutButton.RegisterActivation(HandleSettingShortcutButtonActivationHandler);
-            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
-            _backButton.ExcludeFromNavigation();
+            // 画面左端のフォーカス移動チェーン(ツリー→設定→戻る)の終端として使うため、
+            // キャンセル操作で戻れる画面だがフォーカス移動の対象に含める。
+            _backButton.MakeNavigable();
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
         }
 
@@ -128,6 +149,27 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             OutGameUIEvent.OnShownSettingScreen?.Invoke();
         }
+
+        /// <summary> スキル名一覧の区切り文字が変更された時に通知する。 </summary>
+        public event Action OnListSeparatorChanged;
+
+        /// <summary> 選択中言語のスキル名一覧の区切り文字。 </summary>
+        public string ListSeparator { get; private set; } = "、";
+
+        /// <summary> 現在の解放ポイントを選択中の言語で表示する。 </summary>
+        /// <param name="points"> 現在の解放ポイント。 </param>
+        public void SetPoints(int points)
+        {
+            _pointsLocalizedText?.Dispose();
+            _pointsLocalizedText = new LocalizedElementText(
+                "UICommon", "ui.skill_tree.points_format", text => _pointsLabel.text = text,
+                $"解放P：{points}", new object[] { points });
+        }
+
+        private readonly Label _pointsLabel;
+        private LocalizedElementText _pointsLocalizedText;
+        private readonly LocalizedElementText _listSeparatorLocalizedText;
+        private readonly LocalizedElementText[] _headingLocalizedTexts;
 
         private const string BACKBUTTON_NAME = "BackButton";
         private const string SETTING_SHORTCUT_BUTTON_NAME = "SettingShortcutButton";

@@ -6,6 +6,7 @@ using KillChord.Runtime.Composition.OutGame.Audio;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
@@ -454,7 +455,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
-            return saveData.SkillBuild.SkillLevelupPoint;
+            return saveData.ResourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint);
         }
 
         /// <summary>

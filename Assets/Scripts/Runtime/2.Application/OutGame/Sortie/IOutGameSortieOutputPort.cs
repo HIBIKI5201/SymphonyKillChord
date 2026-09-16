@@ -1,3 +1,6 @@
+using KillChord.Runtime.Domain.OutGame.StageSelect;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Application.OutGame.Sortie
 {
     /// <summary>
@@ -14,6 +17,16 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         ///     戦闘準備画面を介さずにバトル開始を要求します。
         /// </summary>
         void StartBattle();
+
+        /// <summary>
+        ///     受付確定後に予約を消費し、シナリオと旧OutGameを終了して出撃します。
+        /// </summary>
+        Task<ScenarioBattleSortieResult> StartBattleFromScenarioAsync(
+            string scenarioSceneName,
+            string outGameSceneName,
+            BattleStageDefinition battleStageDefinition,
+            int scenarioSelectionRevision,
+            bool isInputValid);
 
         /// <summary>
         ///     ホーム画面の表示を要求します。

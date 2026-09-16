@@ -26,6 +26,15 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
         /// <summary> 初回起動時に適用する画面の明るさ。 </summary>
         public int Brightness => _brightness;
 
+        /// <summary> 初回起動時に適用する表示言語。 </summary>
+        public GameLanguage Language => _language;
+
+        /// <summary> 初回起動時に適用するゲームパッド振動の強さ。 </summary>
+        public VibrationStrength VibrationStrength => _vibrationStrength;
+
+        /// <summary> 初回起動時に適用するリズム判定オフセット秒数。 </summary>
+        public double RhythmOffsetSeconds => _rhythmOffsetSeconds;
+
         /// <summary>
         ///     初回起動時に適用する環境設定のDomainデータへ変換する。
         /// </summary>
@@ -36,7 +45,10 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 _resolutionHeight,
                 _isFullScreen,
                 _qualityLevel,
-                _brightness);
+                _brightness,
+                _language,
+                _vibrationStrength,
+                _rhythmOffsetSeconds);
         }
 
         [SerializeField, Tooltip("初回起動時に適用する解像度の幅")]
@@ -53,5 +65,14 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
 
         [SerializeField, Tooltip("初回起動時に適用する画面の明るさ（0～10）")]
         private int _brightness = EnvironmentSettingsData.DEFAULT_BRIGHTNESS;
+
+        [SerializeField, Tooltip("初回起動時に適用する表示言語")]
+        private GameLanguage _language = EnvironmentSettingsData.DEFAULT_LANGUAGE;
+
+        [SerializeField, Tooltip("初回起動時に適用するゲームパッド振動の強さ")]
+        private VibrationStrength _vibrationStrength = EnvironmentSettingsData.DEFAULT_VIBRATION_STRENGTH;
+
+        [SerializeField, Tooltip("初回起動時に適用するリズム判定オフセット秒数（±0.30秒、0.05秒刻み）")]
+        private double _rhythmOffsetSeconds = EnvironmentSettingsData.DEFAULT_RHYTHM_OFFSET_SECONDS;
     }
 }

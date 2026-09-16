@@ -29,7 +29,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
         public async Task<bool> StartGameAsync(string currentSceneName, string targetSceneName, CancellationToken token)
         {
             // 多重呼び出しを防ぐため、すでに遷移中の場合は false を返す。
-            if (_isActivate)
+            if (_isActivate || _sceneTransitionController.HasScenarioBattleSortie)
             {
                 return false;
             }

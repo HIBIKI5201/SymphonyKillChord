@@ -1,0 +1,355 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UICommon_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 7a59d4ca1f8156b4284e1adab333880e, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 1669890048
+    m_Localized: Reset Data
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416000
+    m_Localized: Credits
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416001
+    m_Localized: "Erase all data?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416002
+    m_Localized: "Erase"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416003
+    m_Localized: Battle Preparation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416004
+    m_Localized: Sortie
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416005
+    m_Localized: Customize
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416006
+    m_Localized: "Display Settings"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416007
+    m_Localized: Audio Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416008
+    m_Localized: Return to Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416009
+    m_Localized: Close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416010
+    m_Localized: Save Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416011
+    m_Localized: "Return to Title"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416012
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416013
+    m_Localized: "\u65E5\u672C\u8A9E"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416014
+    m_Localized: English
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416015
+    m_Localized: Fullscreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416016
+    m_Localized: Windowed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416017
+    m_Localized: Strong
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416018
+    m_Localized: Weak
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416019
+    m_Localized: Off
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416020
+    m_Localized: Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416021
+    m_Localized: Close Video
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416022
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416023
+    m_Localized: Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416024
+    m_Localized: Unlock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416025
+    m_Localized: "Unlock Skill (Required Points: {0})"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416026
+    m_Localized: Unlocked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416027
+    m_Localized: Show Skill Video
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416028
+    m_Localized: Back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416029
+    m_Localized: "Discard & Back"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416030
+    m_Localized: "Save & Back"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416031
+    m_Localized: Sortie
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416032
+    m_Localized: First Clear Reward
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416033
+    m_Localized: "Success Reward"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416034
+    m_Localized: "Mod Points:"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416035
+    m_Localized: "Details"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416036
+    m_Localized: "Please select a skill"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416037
+    m_Localized: "Skill Type"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416038
+    m_Localized: "Skill Effect"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416039
+    m_Localized: "Level"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416040
+    m_Localized: "Mod Points"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416041
+    m_Localized: "Formation"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416042
+    m_Localized: "Your equipped skill changes haven't been saved. Save them?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416043
+    m_Localized: "Locked"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416044
+    m_Localized: "Status"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416045
+    m_Localized: "HP"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416046
+    m_Localized: "Attack"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416047
+    m_Localized: "Crit Rate"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416048
+    m_Localized: "Crit Damage"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416049
+    m_Localized: "Range"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416050
+    m_Localized: "Info"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416051
+    m_Localized: "Activation Combo"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416052
+    m_Localized: "Skill Genre:"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416053
+    m_Localized: " Skill Effect"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416054
+    m_Localized: "Research"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416055
+    m_Localized: "Unlock this skill?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416056
+    m_Localized: "Stats to Increase"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416057
+    m_Localized: "Skills to Unlock"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416058
+    m_Localized: "Don't show this again"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416059
+    m_Localized: ", "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416060
+    m_Localized: "Equipped Skills"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416061
+    m_Localized: "Equipped Skill Details"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416062
+    m_Localized: "Operations"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416063
+    m_Localized: "Mod Points"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416064
+    m_Localized: "Unlock Points"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416065
+    m_Localized: "Settings"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416066
+    m_Localized: "Screen Mode"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416067
+    m_Localized: "Resolution"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416068
+    m_Localized: "Quality"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416069
+    m_Localized: "Brightness"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416070
+    m_Localized: "Return to the title screen?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416071
+    m_Localized: "SE"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416072
+    m_Localized: "* Deleted data cannot be restored."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416073
+    m_Localized: "Unlock Points"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416074
+    m_Localized: "Skill Type: "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416075
+    m_Localized: "Unlock Points: {0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416076
+    m_Localized: "Reset the skill tree?\n返却される研究ポイント：{0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416077
+    m_Localized: "研究P：{0} → {1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416078
+    m_Localized: "言語"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416079
+    m_Localized: "振動"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416080
+    m_Localized: "リズム判定タイミング"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416081
+    m_Localized: "+"
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

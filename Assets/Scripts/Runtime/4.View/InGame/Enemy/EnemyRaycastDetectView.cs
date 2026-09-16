@@ -54,6 +54,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// 現在の敵位置からの攻撃レイがターゲットに届くかを返します。
         /// </summary>
         public bool CanRaycastHitTarget => CheckCurrentAttackRaycastHitTarget();
+        /// <summary> 攻撃インジケーターのデカールが実際に表示中か。 </summary>
+        public bool IsWarningVisible => _warningDisplayState != WarningDisplayState.Hidden
+            && _attackWarningDecal != null && _attackWarningDecal.isActiveAndEnabled;
 
         /// <summary>
         /// 指定位置からの自由なレイがターゲットに届くかを返します。

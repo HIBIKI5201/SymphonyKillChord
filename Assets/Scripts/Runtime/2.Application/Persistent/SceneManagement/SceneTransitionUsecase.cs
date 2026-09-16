@@ -378,6 +378,46 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 cancellationToken);
         }
 
+        /// <summary>
+        ///     常駐シーンを基盤に両旧シーンを終了し、InGame の初期化まで待ちます。
+        /// </summary>
+        public Task<bool> UnloadSourcesThenLoadSceneKeepLoadingAsync(
+            string scenarioSceneName, string outGameSceneName, string persistentSceneName,
+            string inGameSceneName, CancellationToken cancellationToken)
+        {
+            return _executor.ExecuteAsync(
+                async progress =>
+                {
+                    if (!await _service.UnloadAndSetActiveAsync(
+                            scenarioSceneName, persistentSceneName,
+                            new LoadingProgressRange(progress, 0f,
+                                LoadingConstants.SCENARIO_SORTIE_UNLOAD_END_PROGRESS),
+                            cancellationToken)) { return false; }
+                    _sceneInitializationReadiness.Clear(scenarioSceneName);
+
+                    if (!await _service.UnloadAndSetActiveAsync(
+                            outGameSceneName, persistentSceneName,
+                            new LoadingProgressRange(progress,
+                                LoadingConstants.SCENARIO_SORTIE_UNLOAD_END_PROGRESS,
+                                LoadingConstants.SCENARIO_SORTIE_SOURCES_UNLOAD_END_PROGRESS),
+                            cancellationToken)) { return false; }
+                    _sceneInitializationReadiness.Clear(outGameSceneName);
+
+                    // InGame の Start より先に両旧シーンを終了し、専用の開始待ちを不要にします。
+                    _sceneInitializationReadiness.Clear(inGameSceneName);
+                    return await LoadSceneAndWaitForReadyAsync(
+                        inGameSceneName,
+                        () => _service.LoadAdditiveAsync(
+                            inGameSceneName,
+                            new LoadingProgressRange(progress,
+                                LoadingConstants.SCENARIO_SORTIE_SOURCES_UNLOAD_END_PROGRESS, 1f),
+                            cancellationToken),
+                        null, cancellationToken);
+                },
+                LoadingExecutionOptions.KeepOpen(0f, LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS),
+                cancellationToken);
+        }
+
         private readonly ISceneTransitionService _service;
         private readonly ILoadingOperationExecutor _executor;
         private readonly ISceneInitializationReadiness _sceneInitializationReadiness;

@@ -337,6 +337,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: 'Firing_03 '
       objectReference: {fileID: 0}
+    - target: {fileID: 2234077110433347175, guid: 6ee58613bec46474f902e01f500ab696, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2617950793516580014, guid: 6ee58613bec46474f902e01f500ab696, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4568194025923095551, guid: 6ee58613bec46474f902e01f500ab696, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5393332020553136036, guid: 6ee58613bec46474f902e01f500ab696, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -388,6 +400,14 @@ PrefabInstance:
     - target: {fileID: 5393332020553136036, guid: 6ee58613bec46474f902e01f500ab696, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 96.278
+      objectReference: {fileID: 0}
+    - target: {fileID: 8148667216785819358, guid: 6ee58613bec46474f902e01f500ab696, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8572050363542004863, guid: 6ee58613bec46474f902e01f500ab696, type: 3}
+      propertyPath: playOnAwake
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -13,17 +13,19 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="stageId"> ステージのID。 </param>
         /// <param name="stageName"> ステージの名前。 </param>
         /// <param name="flavorText"> ステージのフレーバーテキスト。 </param>
-        /// <param name="reward"> ステージの報酬情報。 </param>
+        /// <param name="firstClearReward"> 初回クリア時にのみ付与する報酬。 </param>
+        /// <param name="clearReward"> クリアするたびに付与する成功報酬。 </param>
         /// <param name="targetSceneName"> ステージのターゲットシーン名。 </param>
         /// <param name="scenarioId"> 再生するシナリオID。 </param>
         public ScenarioStageDefinition(
             StageId stageId,
             string stageName,
             string flavorText,
-            StageReward reward,
+            StageReward firstClearReward,
+            StageReward clearReward,
             string targetSceneName,
             string scenarioId)
-            : base(stageId, stageName, flavorText, reward, targetSceneName)
+            : base(stageId, stageName, flavorText, firstClearReward, clearReward, targetSceneName)
         {
             if (string.IsNullOrWhiteSpace(scenarioId))
             {

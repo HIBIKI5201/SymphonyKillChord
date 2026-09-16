@@ -3,12 +3,14 @@ using KillChord.Runtime.Adaptor.InGame.Haptics;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Adaptor.Persistent.Environment;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Haptics;
@@ -171,6 +173,16 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return true;
             }
 
+            IEnvironmentSettingsViewModel environmentSettingsViewModel =
+                ServiceLocator.GetInstance<EnvironmentSettingsModuleContainer>()?.ViewModel;
+            if (environmentSettingsViewModel == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ACLikeRhythmGuideInitializer)}] 環境設定を取得できないため、振動機能なしで続行します。",
+                    this);
+                return true;
+            }
+
             // ゲームパッド振動はシーン参照を必要としないため、専用シーン配置のInitializerを設けず、
             // 既にIPlayerAttackSignalを解決済みのこのInitializerへ相乗りさせている。
             _gamepadHapticsPresenter?.Dispose();
@@ -179,7 +191,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 _gamepadHapticsView = new GameObject(nameof(GamepadHapticsView)).AddComponent<GamepadHapticsView>();
             }
 
-            _gamepadHapticsView.Initialize(_loadedHapticsConfig);
+            _gamepadHapticsView.Initialize(_loadedHapticsConfig, environmentSettingsViewModel);
             _gamepadHapticsPresenter = new GamepadHapticsPresenter(playerAttackSignal, _gamepadHapticsView);
 
             return true;

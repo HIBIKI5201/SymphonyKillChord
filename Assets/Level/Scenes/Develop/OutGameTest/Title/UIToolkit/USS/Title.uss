@@ -1,6 +1,14 @@
 :root {
 }
 
+/* 全画面の開始領域は決定操作のフォーカスを維持し、選択枠だけを表示しない。 */
+#TouchArea.navigable:focus {
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+}
+
 .button {
     width: 8%;
     aspect-ratio: 1;

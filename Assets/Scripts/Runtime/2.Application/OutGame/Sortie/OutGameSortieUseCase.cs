@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -56,7 +57,8 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
                     targetSceneName,
                     cancellationToken);
 
-                if (!success)
+                if (!success && !cancellationToken.IsCancellationRequested
+                    && !_scenarioTransitionCancellationToken.IsCancellationRequested)
                 {
                     _outputPort.SetOutGameActiveForScenario(true);
                 }
@@ -65,7 +67,12 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
             }
             catch
             {
-                _outputPort.SetOutGameActiveForScenario(true);
+                // シーン終了によるキャンセル後は、常駐入力や旧UIを復元しません。
+                if (!cancellationToken.IsCancellationRequested
+                    && !_scenarioTransitionCancellationToken.IsCancellationRequested)
+                {
+                    _outputPort.SetOutGameActiveForScenario(true);
+                }
                 throw;
             }
         }
@@ -102,6 +109,25 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
             }
 
             return success;
+        }
+
+        /// <summary>
+        ///     シナリオ終了後のバトル出撃を、予約を所有する出力ポートへ要求します。
+        /// </summary>
+        public Task<ScenarioBattleSortieResult> RequestBattleSortieFromScenarioAsync(
+            string scenarioSceneName, string returnSceneName,
+            BattleStageDefinition battleStageDefinition, int scenarioSelectionRevision)
+        {
+            bool isInputValid = battleStageDefinition != null
+                && battleStageDefinition.MissionId.Value != 0
+                && !string.IsNullOrWhiteSpace(scenarioSceneName)
+                && !string.IsNullOrWhiteSpace(returnSceneName)
+                && !string.IsNullOrWhiteSpace(battleStageDefinition.TargetSceneName)
+                && !string.IsNullOrWhiteSpace(battleStageDefinition.BattleSceneName)
+                && !string.Equals(scenarioSceneName, returnSceneName, StringComparison.Ordinal);
+            return _outputPort.StartBattleFromScenarioAsync(
+                scenarioSceneName, returnSceneName, battleStageDefinition,
+                scenarioSelectionRevision, isInputValid);
         }
 
         private readonly SceneTransitionUsecase _usecase;

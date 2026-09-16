@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.BattlePreparation;
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.Persistent.Localization;
 using R3;
 using System;
 using System.Collections.Generic;
@@ -42,7 +43,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 ?? throw new ArgumentNullException(
                     $"[{nameof(BattlePreparationScreen)}] {EFFECT_LIST_NAME} が見つかりませんでした。");
 
+            _titleLabel = rootElement.Q<Label>(TITLE_LABEL_NAME)
+                ?? throw new ArgumentNullException(
+                    $"[{nameof(BattlePreparationScreen)}] {TITLE_LABEL_NAME} が見つかりませんでした。");
+
             RegisterButtonCallback();
+            RegisterLocalizedTexts();
         }
 
         /// <summary>
@@ -103,6 +109,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             Unbind();
             base.Dispose();
             UnregisterButtonCallback();
+            foreach (LocalizedElementText localizedText in _localizedTexts)
+            {
+                localizedText.Dispose();
+            }
         }
 
         /// <summary>
@@ -128,6 +138,34 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _backButtonActivation?.Dispose();
             _startButtonActivation?.Dispose();
             _skillBuildButtonActivation?.Dispose();
+        }
+
+        /// <summary>
+        ///     静的なボタン・ラベルのテキストをUICommonテーブルへ連携する。
+        /// </summary>
+        private void RegisterLocalizedTexts()
+        {
+            Label equippedSkillsHeading = RootElement.Q<Label>("EquippedSkillsHeading");
+            Label equippedSkillDetailsHeading = RootElement.Q<Label>("EquippedSkillDetailsHeading");
+            _localizedTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.battle_preparation.equipped_skills", text => equippedSkillsHeading.text = text, "装備中のスキル"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.battle_preparation.equipped_skill_details", text => equippedSkillDetailsHeading.text = text, "装備スキル詳細"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.battle_preparation.skill_type_heading",
+                    HandleSkillTypeHeadingChangedHandler, SKILL_TYPE_HEADING),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill.effect",
+                    HandleSkillEffectHeadingChangedHandler, SKILL_EFFECT_HEADING),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.battle_preparation.title", text => _titleLabel.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.battle_preparation.start", text => _startButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.battle_preparation.skill_build", text => _skillBuildButton.text = text),
+            };
         }
 
         /// <summary>
@@ -162,6 +200,26 @@ namespace KillChord.Runtime.View.OutGame.Screen
             }
 
             OutGameUIEvent.OnShownSkillBuildScreen?.Invoke();
+        }
+
+        /// <summary>
+        ///     言語変更時に種類の見出しを更新し、新しいカードにも同じ文言を使います。
+        /// </summary>
+        private void HandleSkillTypeHeadingChangedHandler(string text)
+        {
+            _skillTypeHeadingText = text;
+            _effectList.Query<Label>(className: "battle-preparation-skill-item__type-heading")
+                .ForEach(label => label.text = text);
+        }
+
+        /// <summary>
+        ///     言語変更時に効果の見出しを更新し、スキル固有の説明を維持します。
+        /// </summary>
+        private void HandleSkillEffectHeadingChangedHandler(string text)
+        {
+            _skillEffectHeadingText = text;
+            _effectList.Query<Label>(className: "battle-preparation-skill-item__effect-heading")
+                .ForEach(label => label.text = text);
         }
 
         /// <summary>
@@ -264,7 +322,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             VisualElement skillTypeRow = new();
             skillTypeRow.AddToClassList("battle-preparation-skill-item__type-row");
-            Label skillTypeHeading = new(SKILL_TYPE_HEADING);
+            Label skillTypeHeading = new(_skillTypeHeadingText);
             skillTypeHeading.AddToClassList("battle-preparation-skill-item__type-heading");
             Label skillTypeLabel = new(skill.SkillTypeLabel);
             skillTypeLabel.AddToClassList("battle-preparation-skill-item__type");
@@ -272,7 +330,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             skillTypeRow.Add(skillTypeLabel);
             item.Add(skillTypeRow);
 
-            Label effectHeading = new(SKILL_EFFECT_HEADING);
+            Label effectHeading = new(_skillEffectHeadingText);
             effectHeading.AddToClassList("battle-preparation-skill-item__effect-heading");
             item.Add(effectHeading);
 
@@ -292,9 +350,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string EQUIPPED_SKILL_STRIP_NAME = "EquippedSkillStrip";
         private const string EFFECT_SCROLL_VIEW_NAME = "EquippedSkillEffectScrollView";
         private const string EFFECT_LIST_NAME = "EquippedSkillEffectList";
+        private const string TITLE_LABEL_NAME = "Title";
         private const string EMPTY_SLOT_SYMBOL = "—";
         private const string SKILL_TYPE_HEADING = "スキルの種類　：";
         private const string SKILL_EFFECT_HEADING = "スキル効果";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         /// <inheritdoc />
         protected override VisualElement InitialFocusElement => _startButton;
@@ -308,10 +368,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly VisualElement _equippedSkillStrip;
         private readonly ScrollView _effectScrollView;
         private readonly VisualElement _effectList;
+        private readonly Label _titleLabel;
         private IDisposable _backButtonActivation;
         private IDisposable _startButtonActivation;
         private IDisposable _skillBuildButtonActivation;
+        private LocalizedElementText[] _localizedTexts = Array.Empty<LocalizedElementText>();
 
+        private string _skillTypeHeadingText = SKILL_TYPE_HEADING;
+        private string _skillEffectHeadingText = SKILL_EFFECT_HEADING;
         private IBattlePreparationSkillViewModel _viewModel;
         private CompositeDisposable _subscriptions;
         private bool _isForcedSortieMode;

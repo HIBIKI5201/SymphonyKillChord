@@ -1,0 +1,360 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: UICommon Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: UICommon
+  m_TableCollectionNameGuidString: 7a59d4ca1f8156b4284e1adab333880e
+  m_Entries:
+  - m_Id: 1669890048
+    m_Key: ui.title.menu.data_reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416000
+    m_Key: ui.title.menu.credit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416001
+    m_Key: ui.title.menu.data_reset_confirm_message
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416002
+    m_Key: ui.title.menu.data_reset_confirm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416003
+    m_Key: ui.battle_preparation.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416004
+    m_Key: ui.battle_preparation.start
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416005
+    m_Key: ui.battle_preparation.skill_build
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416006
+    m_Key: ui.setting.environment
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416007
+    m_Key: ui.setting.audio
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416008
+    m_Key: ui.setting.return_to_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416009
+    m_Key: ui.setting.close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416010
+    m_Key: ui.setting.environment_save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416011
+    m_Key: ui.setting.confirm_return_to_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416012
+    m_Key: ui.setting.cancel_return_to_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416013
+    m_Key: ui.setting.language_japanese
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416014
+    m_Key: ui.setting.language_english
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416015
+    m_Key: ui.setting.screen_mode_fullscreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416016
+    m_Key: ui.setting.screen_mode_windowed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416017
+    m_Key: ui.setting.vibration_strong
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416018
+    m_Key: ui.setting.vibration_weak
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416019
+    m_Key: ui.setting.vibration_off
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416020
+    m_Key: ui.skill_tree.reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416021
+    m_Key: ui.skill_tree.close_preview
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416022
+    m_Key: ui.skill_tree.reset_cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416023
+    m_Key: ui.skill_tree.reset_confirm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416024
+    m_Key: ui.skill_tree.unlock_confirm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416025
+    m_Key: ui.skill_detail.unlock_cost_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416026
+    m_Key: ui.skill_detail.unlocked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416027
+    m_Key: ui.skill_detail.preview
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416028
+    m_Key: ui.skill_detail.back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416029
+    m_Key: ui.skill_build_dialog.discard_and_close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416030
+    m_Key: ui.skill_build_dialog.save_and_close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416031
+    m_Key: ui.stage_select.sortie
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416032
+    m_Key: ui.stage_select.first_reward
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416033
+    m_Key: ui.stage_select.success_reward
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416034
+    m_Key: ui.skill_build.points_heading
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416035
+    m_Key: ui.skill_build.details
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416036
+    m_Key: ui.skill_build.empty_selection
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416037
+    m_Key: ui.skill.type
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416038
+    m_Key: ui.skill.effect
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416039
+    m_Key: ui.skill.level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416040
+    m_Key: ui.points.mod
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416041
+    m_Key: ui.skill.formation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416042
+    m_Key: ui.skill_build_dialog.message
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416043
+    m_Key: ui.skill.locked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416044
+    m_Key: ui.player_status.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416045
+    m_Key: ui.player_status.health
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416046
+    m_Key: ui.player_status.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416047
+    m_Key: ui.player_status.critical_chance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416048
+    m_Key: ui.player_status.critical_damage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416049
+    m_Key: ui.player_status.range
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416050
+    m_Key: ui.skill_detail.info
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416051
+    m_Key: ui.skill_detail.activation_combo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416052
+    m_Key: ui.skill_detail.genre
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416053
+    m_Key: ui.skill_detail.effect
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416054
+    m_Key: ui.skill_tree.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416055
+    m_Key: ui.skill_tree.unlock_title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416056
+    m_Key: ui.skill_tree.stats_to_increase
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416057
+    m_Key: ui.skill_tree.skills_to_unlock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416058
+    m_Key: ui.skill_tree.hide_confirmation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416059
+    m_Key: ui.skill_tree.list_separator
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416060
+    m_Key: ui.battle_preparation.equipped_skills
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416061
+    m_Key: ui.battle_preparation.equipped_skill_details
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416062
+    m_Key: ui.stage_select.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416063
+    m_Key: ui.home.mod_points
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416064
+    m_Key: ui.home.unlock_points
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416065
+    m_Key: ui.setting.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416066
+    m_Key: ui.setting.screen_mode
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416067
+    m_Key: ui.setting.resolution
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416068
+    m_Key: ui.setting.quality
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416069
+    m_Key: ui.setting.brightness
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416070
+    m_Key: ui.setting.return_to_title_message
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416071
+    m_Key: ui.title.menu.sound_effect
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416072
+    m_Key: ui.title.menu.data_reset_warning
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416073
+    m_Key: ui.points.unlock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416074
+    m_Key: ui.battle_preparation.skill_type_heading
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416075
+    m_Key: ui.skill_tree.points_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416076
+    m_Key: ui.skill_tree.reset_message_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416077
+    m_Key: ui.skill_tree.unlock_points_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416078
+    m_Key: ui.setting.language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416079
+    m_Key: ui.setting.vibration
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416080
+    m_Key: ui.setting.rhythm_offset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416081
+    m_Key: ui.skill.empty_slot_symbol
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 7215909368349065376
+  references:
+    version: 2
+    RefIds:
+    - rid: 7215909368349065376
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1789559410706

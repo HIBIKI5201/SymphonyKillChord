@@ -97,13 +97,6 @@
     -unity-background-scale-mode: scale-to-fit;
 }
 
-.stage-node--cleared {
-    border-left-color: rgba(0, 255, 127, 0);
-    border-right-color: rgba(0, 255, 127, 0);
-    border-top-color: rgba(0, 255, 127, 0);
-    border-bottom-color: rgba(0, 255, 127, 0);
-}
-
 .stage-node {
     scale: 1 1;
     transition-property: scale;
@@ -128,7 +121,6 @@
     border-color: rgb(0, 0, 0);
 }
 
-.stage-node:focus,
 .stage-node:focus {
     scale: 1.2 1.2;
     border-top-width: 15px;
@@ -145,6 +137,22 @@
     border-bottom-width: 15px;
     border-left-width: 15px;
     border-color: rgb(0, 0, 0);
+}
+
+/* 未選択のクリア済みノードは、標準の入力状態による黒枠より緑の円を優先する。 */
+.stage-node.stage-node--cleared,
+.stage-node.stage-node--cleared:hover,
+.stage-node.stage-node--cleared:focus,
+.stage-node.stage-node--cleared:active {
+    border-color: rgb(0, 255, 127);
+}
+
+/* 牙フレームの所有ノードだけ円を隠す。枠幅はアイコンの配置に使うため維持する。 */
+.stage-node.stage-node--focus-frame,
+.stage-node.stage-node--focus-frame:hover,
+.stage-node.stage-node--focus-frame:focus,
+.stage-node.stage-node--focus-frame:active {
+    border-color: rgba(0, 0, 0, 0);
 }
 
 .stage-map-canvas {

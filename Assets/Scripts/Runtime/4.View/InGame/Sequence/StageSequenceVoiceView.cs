@@ -29,11 +29,13 @@ namespace KillChord.Runtime.View.InGame.Sequence
         }
 
         /// <summary>
-        ///     ステージクリア時のPlayer Voiceを再生します。
+        ///     評価項目の達成度に応じたステージクリア時のPlayer Voiceを再生します。
         /// </summary>
-        public void PlayStageClearVoice()
+        /// <param name="achievedCount"> 達成した評価項目数です。 </param>
+        /// <param name="totalCount"> 評価項目の合計数です。 </param>
+        public void PlayStageClearVoice(int achievedCount, int totalCount)
         {
-            _playerView?.PlayStageClearVoice();
+            _playerView?.PlayStageClearVoice(achievedCount, totalCount);
         }
 
         /// <summary>

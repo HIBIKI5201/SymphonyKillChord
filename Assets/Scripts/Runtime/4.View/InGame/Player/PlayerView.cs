@@ -63,8 +63,17 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("ステージ開始時VoiceのCueName。空の場合は再生しない。")]
         private string _stageStartVoiceCueName;
 
-        [SerializeField, Tooltip("ステージクリア時VoiceのCueName。空の場合は再生しない。")]
-        private string _stageClearVoiceCueName;
+        /// <summary> 全評価項目達成時のステージクリアVoiceのCueName。 </summary>
+        [SerializeField, Tooltip("全評価項目達成時のステージクリアVoiceのCueName。空の場合は再生しない。")]
+        private string _stageClearVoiceCueNamePerfect;
+
+        /// <summary> 一部評価項目達成時のステージクリアVoiceのCueName。 </summary>
+        [SerializeField, Tooltip("一部評価項目達成時のステージクリアVoiceのCueName。空の場合は再生しない。")]
+        private string _stageClearVoiceCueNameGood;
+
+        /// <summary> 評価項目未達成時のステージクリアVoiceのCueName。 </summary>
+        [SerializeField, Tooltip("評価項目未達成時のステージクリアVoiceのCueName。空の場合は再生しない。")]
+        private string _stageClearVoiceCueNameBad;
 
         [SerializeField, Tooltip("ゲームオーバー時VoiceのCueName。空の場合は再生しない。")]
         private string _gameOverVoiceCueName;
@@ -352,11 +361,27 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
-        ///     ステージクリア時のPlayer Voiceを再生します。
+        ///     評価項目の達成度に応じたステージクリア時のPlayer Voiceを再生します。
         /// </summary>
-        public void PlayStageClearVoice()
+        /// <param name="achievedCount"> 達成した評価項目数です。 </param>
+        /// <param name="totalCount"> 評価項目の合計数です。 </param>
+        public void PlayStageClearVoice(int achievedCount, int totalCount)
         {
-            PlayPriorityVoice(_stageClearVoiceCueName);
+            string cueName;
+            if (totalCount == 0 || achievedCount == totalCount)
+            {
+                cueName = _stageClearVoiceCueNamePerfect;
+            }
+            else if (achievedCount > 0 && achievedCount < totalCount)
+            {
+                cueName = _stageClearVoiceCueNameGood;
+            }
+            else
+            {
+                cueName = _stageClearVoiceCueNameBad;
+            }
+
+            PlayPriorityVoice(cueName);
         }
 
         /// <summary>

@@ -7,6 +7,12 @@ namespace KillChord.Runtime.Utility.Constant
     /// </summary>
     public static class LoadingConstants
     {
+        /// <summary> 専用出撃におけるScenario終了の進捗配分です。 </summary>
+        public const float SCENARIO_SORTIE_UNLOAD_END_PROGRESS = 0.2f;
+
+        /// <summary> 専用出撃における両旧シーン終了の進捗配分です。 </summary>
+        public const float SCENARIO_SORTIE_SOURCES_UNLOAD_END_PROGRESS = 0.4f;
+
         /// <summary>
         ///     パーセント表示へ変換する倍率。
         /// </summary>

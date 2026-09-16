@@ -7,6 +7,7 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Composition.Persistent.Music;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
@@ -76,7 +77,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
         private AudioSettingsModuleContainer _audioSettingsContainer;
+        private EnvironmentSettingsModuleContainer _environmentSettingsContainer;
         private VolumeSettingsTabView _volumeSettingsTabView;
+        private LanguageSettingsTabView _languageSettingsTabView;
 
         private bool _isInitialized;
         private bool _isSubscribed;
@@ -141,7 +144,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             SceneTransitionController sceneTransitionController;
             if (!TryGetServiceLocatorInstances(
                     out sceneTransitionController,
-                    out _audioSettingsContainer))
+                    out _audioSettingsContainer,
+                    out _environmentSettingsContainer))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
@@ -199,6 +203,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 menuRoot,
                 _audioSettingsContainer.ViewModel,
                 _audioSettingsContainer.Command);
+            _languageSettingsTabView = new LanguageSettingsTabView(
+                menuRoot,
+                _environmentSettingsContainer.ViewModel,
+                _environmentSettingsContainer.Command);
 
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, creditScreenView);
 
@@ -288,7 +296,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedSaveData = null;
             _volumeSettingsTabView?.Dispose();
             _volumeSettingsTabView = null;
+            _languageSettingsTabView?.Dispose();
+            _languageSettingsTabView = null;
             _audioSettingsContainer = null;
+            _environmentSettingsContainer = null;
             _titleScreenViewRegistry?.Dispose();
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
@@ -350,13 +361,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         /// <param name="sceneTransitionController"></param>
         /// <param name="audioSettingsContainer"></param>
+        /// <param name="environmentSettingsContainer"></param>
         /// <returns></returns>
         private bool TryGetServiceLocatorInstances(
             out SceneTransitionController sceneTransitionController,
-            out AudioSettingsModuleContainer audioSettingsContainer)
+            out AudioSettingsModuleContainer audioSettingsContainer,
+            out EnvironmentSettingsModuleContainer environmentSettingsContainer)
         {
             sceneTransitionController = null;
             audioSettingsContainer = null;
+            environmentSettingsContainer = null;
 
             if (!ServiceLocator.TryGetInstance(out sceneTransitionController))
             {
@@ -370,6 +384,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: AudioSettingsModuleContainer が ServiceLocator に登録されていません。");
+#endif
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out environmentSettingsContainer))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: EnvironmentSettingsModuleContainer が ServiceLocator に登録されていません。");
 #endif
                 return false;
             }

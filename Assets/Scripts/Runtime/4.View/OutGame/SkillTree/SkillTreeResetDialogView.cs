@@ -1,5 +1,6 @@
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using UnityEngine.UIElements;
 
@@ -45,6 +46,15 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _cancelButtonActivation = _cancelButton.RegisterActivation(HandleCancelButtonClickedHandler);
             _dialog.RegisterCallback<NavigationCancelEvent>(
                 HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
+            _localizedTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill_tree.reset", text => _resetButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill_tree.reset_confirm", text => _confirmButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill_tree.reset_cancel", text => _cancelButton.text = text),
+            };
             Hide();
         }
 
@@ -54,7 +64,11 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <param name="refundPoints"> 返却予定の研究ポイント。 </param>
         public void Show(int refundPoints)
         {
-            _messageLabel.text = $"スキルツリーをリセットしますか？\n返却される研究ポイント：{refundPoints}";
+            _messageLocalizedText?.Dispose();
+            _messageLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_tree.reset_message_format", text => _messageLabel.text = text,
+                $"スキルツリーをリセットしますか？\n返却される研究ポイント：{refundPoints}",
+                new object[] { refundPoints });
             _confirmButton.SetEnabled(refundPoints > 0);
             _dialog.style.display = DisplayStyle.Flex;
         }
@@ -91,16 +105,24 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <summary> ダイアログのルート要素。モーダルのフォーカス閉じ込めに使用する。 </summary>
         public VisualElement DialogRoot => _dialog;
 
+        /// <summary> 「振り直す」ボタンの要素。コントローラーのフォーカス移動候補に加えるために使用する。 </summary>
+        public VisualElement ResetButtonElement => _resetButton;
+
         /// <summary>
         ///     登録済みイベントを解除する。
         /// </summary>
         public void Dispose()
         {
+            _messageLocalizedText?.Dispose();
             _resetButtonActivation?.Dispose();
             _confirmButtonActivation?.Dispose();
             _cancelButtonActivation?.Dispose();
             _dialog.UnregisterCallback<NavigationCancelEvent>(
                 HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
+            foreach (LocalizedElementText localizedText in _localizedTexts)
+            {
+                localizedText.Dispose();
+            }
         }
 
         private const string RESET_BUTTON_NAME = "ResetButton";
@@ -108,6 +130,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string RESET_MESSAGE_NAME = "ResetMessage";
         private const string RESET_CONFIRM_BUTTON_NAME = "ResetConfirmButton";
         private const string RESET_CANCEL_BUTTON_NAME = "ResetCancelButton";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         private readonly OutGameUIEvent _outGameUIEvent;
         private readonly Button _resetButton;
@@ -115,6 +138,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly Label _messageLabel;
         private readonly Button _confirmButton;
         private readonly Button _cancelButton;
+        private readonly LocalizedElementText[] _localizedTexts;
+        private LocalizedElementText _messageLocalizedText;
         private IDisposable _resetButtonActivation;
         private IDisposable _confirmButtonActivation;
         private IDisposable _cancelButtonActivation;

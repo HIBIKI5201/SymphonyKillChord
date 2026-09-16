@@ -50,6 +50,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                     defaults.IsFullScreen);
                 saveData.EnvironmentSettings.SetQualityLevel(defaults.QualityLevel);
                 saveData.EnvironmentSettings.SetBrightness(defaults.Brightness);
+                saveData.EnvironmentSettings.SetLanguage(defaults.Language);
+                saveData.EnvironmentSettings.SetVibrationStrength(defaults.VibrationStrength);
+                saveData.EnvironmentSettings.SetRhythmOffsetSeconds(defaults.RhythmOffsetSeconds);
             }
 
             return saveData.EnvironmentSettings.Copy();
@@ -79,6 +82,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 environmentSettings.IsFullScreen);
             saveData.EnvironmentSettings.SetQualityLevel(environmentSettings.QualityLevel);
             saveData.EnvironmentSettings.SetBrightness(environmentSettings.Brightness);
+            saveData.EnvironmentSettings.SetLanguage(environmentSettings.Language);
+            saveData.EnvironmentSettings.SetVibrationStrength(environmentSettings.VibrationStrength);
+            saveData.EnvironmentSettings.SetRhythmOffsetSeconds(environmentSettings.RhythmOffsetSeconds);
 
             try
             {
@@ -92,6 +98,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                     previousSettings.IsFullScreen);
                 saveData.EnvironmentSettings.SetQualityLevel(previousSettings.QualityLevel);
                 saveData.EnvironmentSettings.SetBrightness(previousSettings.Brightness);
+                saveData.EnvironmentSettings.SetLanguage(previousSettings.Language);
+                saveData.EnvironmentSettings.SetVibrationStrength(previousSettings.VibrationStrength);
+                saveData.EnvironmentSettings.SetRhythmOffsetSeconds(previousSettings.RhythmOffsetSeconds);
                 throw;
             }
         }

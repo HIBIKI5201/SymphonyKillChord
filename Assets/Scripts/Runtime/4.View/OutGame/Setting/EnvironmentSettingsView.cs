@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.Persistent.Environment;
 using KillChord.Runtime.View.OutGame.Common;
+using KillChord.Runtime.View.Persistent.Localization;
 using R3;
 using System;
 using UnityEngine.UIElements;
@@ -34,6 +35,14 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _qualityLevelValueLabel = Require<Label>(rootElement, QUALITY_LEVEL_VALUE_LABEL_NAME);
             _brightnessSlider = Require<SliderInt>(rootElement, BRIGHTNESS_SLIDER_NAME);
             _brightnessValueLabel = Require<Label>(rootElement, BRIGHTNESS_VALUE_LABEL_NAME);
+            _rhythmOffsetSlider = Require<SliderInt>(rootElement, RHYTHM_OFFSET_SLIDER_NAME);
+            _rhythmOffsetValueLabel = Require<Label>(rootElement, RHYTHM_OFFSET_VALUE_LABEL_NAME);
+            _languagePrevButton = Require<Button>(rootElement, LANGUAGE_PREV_BUTTON_NAME);
+            _languageNextButton = Require<Button>(rootElement, LANGUAGE_NEXT_BUTTON_NAME);
+            _languageValueLabel = Require<Label>(rootElement, LANGUAGE_VALUE_LABEL_NAME);
+            _vibrationPrevButton = Require<Button>(rootElement, VIBRATION_PREV_BUTTON_NAME);
+            _vibrationNextButton = Require<Button>(rootElement, VIBRATION_NEXT_BUTTON_NAME);
+            _vibrationValueLabel = Require<Label>(rootElement, VIBRATION_VALUE_LABEL_NAME);
             _saveButton = Require<Button>(rootElement, SAVE_BUTTON_NAME);
             _subscriptions = new CompositeDisposable();
 
@@ -52,8 +61,16 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _resolutionNextButtonPreset.Dispose();
             _qualityLevelPrevButtonPreset.Dispose();
             _qualityLevelNextButtonPreset.Dispose();
+            _languagePrevButtonPreset.Dispose();
+            _languageNextButtonPreset.Dispose();
+            _vibrationPrevButtonPreset.Dispose();
+            _vibrationNextButtonPreset.Dispose();
             _brightnessSlider.UnregisterValueChangedCallback(HandleBrightnessChanged);
+            _rhythmOffsetSlider.UnregisterValueChangedCallback(HandleRhythmOffsetChanged);
             _saveButton.clicked -= HandleSaveButtonClicked;
+            _screenModeLocalizedText?.Dispose();
+            _languageLocalizedText?.Dispose();
+            _vibrationLocalizedText?.Dispose();
             _subscriptions.Dispose();
         }
 
@@ -77,7 +94,16 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string QUALITY_LEVEL_VALUE_LABEL_NAME = "QualityLevelValueLabel";
         private const string BRIGHTNESS_SLIDER_NAME = "BrightnessSlider";
         private const string BRIGHTNESS_VALUE_LABEL_NAME = "BrightnessValueLabel";
+        private const string RHYTHM_OFFSET_SLIDER_NAME = "RhythmOffsetSlider";
+        private const string RHYTHM_OFFSET_VALUE_LABEL_NAME = "RhythmOffsetValueLabel";
+        private const string LANGUAGE_PREV_BUTTON_NAME = "LanguagePrevButton";
+        private const string LANGUAGE_NEXT_BUTTON_NAME = "LanguageNextButton";
+        private const string LANGUAGE_VALUE_LABEL_NAME = "LanguageValueLabel";
+        private const string VIBRATION_PREV_BUTTON_NAME = "VibrationPrevButton";
+        private const string VIBRATION_NEXT_BUTTON_NAME = "VibrationNextButton";
+        private const string VIBRATION_VALUE_LABEL_NAME = "VibrationValueLabel";
         private const string SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
+        private const string UI_COMMON_TABLE = "UICommon";
         private const int CYCLE_PREVIOUS_DIRECTION = -1;
         private const int CYCLE_NEXT_DIRECTION = 1;
 
@@ -94,6 +120,14 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Label _qualityLevelValueLabel;
         private readonly SliderInt _brightnessSlider;
         private readonly Label _brightnessValueLabel;
+        private readonly SliderInt _rhythmOffsetSlider;
+        private readonly Label _rhythmOffsetValueLabel;
+        private readonly Button _languagePrevButton;
+        private readonly Button _languageNextButton;
+        private readonly Label _languageValueLabel;
+        private readonly Button _vibrationPrevButton;
+        private readonly Button _vibrationNextButton;
+        private readonly Label _vibrationValueLabel;
         private readonly Button _saveButton;
         private readonly CompositeDisposable _subscriptions;
         private IDisposable _screenModePrevButtonPreset;
@@ -102,6 +136,13 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private IDisposable _resolutionNextButtonPreset;
         private IDisposable _qualityLevelPrevButtonPreset;
         private IDisposable _qualityLevelNextButtonPreset;
+        private IDisposable _languagePrevButtonPreset;
+        private IDisposable _languageNextButtonPreset;
+        private IDisposable _vibrationPrevButtonPreset;
+        private IDisposable _vibrationNextButtonPreset;
+        private LocalizedElementText _screenModeLocalizedText;
+        private LocalizedElementText _languageLocalizedText;
+        private LocalizedElementText _vibrationLocalizedText;
 
         /// <summary>
         ///     UIのコールバックを登録する。
@@ -114,7 +155,12 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _resolutionNextButtonPreset = _resolutionNextButton.ApplyBasicButtonPreset(HandleResolutionNextButtonClicked);
             _qualityLevelPrevButtonPreset = _qualityLevelPrevButton.ApplyBasicButtonPreset(HandleQualityLevelPrevButtonClicked);
             _qualityLevelNextButtonPreset = _qualityLevelNextButton.ApplyBasicButtonPreset(HandleQualityLevelNextButtonClicked);
+            _languagePrevButtonPreset = _languagePrevButton.ApplyBasicButtonPreset(HandleLanguagePrevButtonClicked);
+            _languageNextButtonPreset = _languageNextButton.ApplyBasicButtonPreset(HandleLanguageNextButtonClicked);
+            _vibrationPrevButtonPreset = _vibrationPrevButton.ApplyBasicButtonPreset(HandleVibrationPrevButtonClicked);
+            _vibrationNextButtonPreset = _vibrationNextButton.ApplyBasicButtonPreset(HandleVibrationNextButtonClicked);
             _brightnessSlider.RegisterValueChangedCallback(HandleBrightnessChanged);
+            _rhythmOffsetSlider.RegisterValueChangedCallback(HandleRhythmOffsetChanged);
             _saveButton.clicked += HandleSaveButtonClicked;
         }
 
@@ -134,6 +180,18 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 .AddTo(_subscriptions);
             _environmentSettingsViewModel.Brightness
                 .Subscribe(HandleBrightnessPublished)
+                .AddTo(_subscriptions);
+            _environmentSettingsViewModel.LanguageLabel
+                .Subscribe(HandleLanguageLabelPublished)
+                .AddTo(_subscriptions);
+            _environmentSettingsViewModel.VibrationStrengthLabel
+                .Subscribe(HandleVibrationStrengthLabelPublished)
+                .AddTo(_subscriptions);
+            _environmentSettingsViewModel.RhythmOffsetStep
+                .Subscribe(HandleRhythmOffsetStepPublished)
+                .AddTo(_subscriptions);
+            _environmentSettingsViewModel.RhythmOffsetLabel
+                .Subscribe(HandleRhythmOffsetLabelPublished)
                 .AddTo(_subscriptions);
         }
 
@@ -194,6 +252,46 @@ namespace KillChord.Runtime.View.OutGame.Setting
         }
 
         /// <summary>
+        ///     リズム判定オフセットゲージの変更を環境設定へ渡す。
+        /// </summary>
+        private void HandleRhythmOffsetChanged(ChangeEvent<int> changeEvent)
+        {
+            _environmentSettingsCommand.SetRhythmOffsetStep(changeEvent.newValue);
+        }
+
+        /// <summary>
+        ///     表示言語を前へ切り替える。
+        /// </summary>
+        private void HandleLanguagePrevButtonClicked()
+        {
+            _environmentSettingsCommand.CycleLanguage(CYCLE_PREVIOUS_DIRECTION);
+        }
+
+        /// <summary>
+        ///     表示言語を次へ切り替える。
+        /// </summary>
+        private void HandleLanguageNextButtonClicked()
+        {
+            _environmentSettingsCommand.CycleLanguage(CYCLE_NEXT_DIRECTION);
+        }
+
+        /// <summary>
+        ///     ゲームパッド振動の強さを前へ切り替える。
+        /// </summary>
+        private void HandleVibrationPrevButtonClicked()
+        {
+            _environmentSettingsCommand.CycleVibrationStrength(CYCLE_PREVIOUS_DIRECTION);
+        }
+
+        /// <summary>
+        ///     ゲームパッド振動の強さを次へ切り替える。
+        /// </summary>
+        private void HandleVibrationNextButtonClicked()
+        {
+            _environmentSettingsCommand.CycleVibrationStrength(CYCLE_NEXT_DIRECTION);
+        }
+
+        /// <summary>
         ///     プレビュー中の変更を保存として確定する。
         /// </summary>
         private void HandleSaveButtonClicked()
@@ -204,9 +302,14 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// <summary>
         ///     画面モードを表示へ反映する。
         /// </summary>
-        private void HandleScreenModeLabelPublished(string label)
+        /// <param name="labelKey"> UICommonテーブルのローカライズキーです。 </param>
+        private void HandleScreenModeLabelPublished(string labelKey)
         {
-            _screenModeValueLabel.text = label;
+            _screenModeLocalizedText?.Dispose();
+            _screenModeLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                labelKey,
+                text => _screenModeValueLabel.text = text);
         }
 
         /// <summary>
@@ -232,6 +335,48 @@ namespace KillChord.Runtime.View.OutGame.Setting
         {
             _brightnessSlider.SetValueWithoutNotify(brightness);
             _brightnessValueLabel.text = brightness.ToString();
+        }
+
+        /// <summary>
+        ///     表示言語を表示へ反映する。
+        /// </summary>
+        /// <param name="labelKey"> UICommonテーブルのローカライズキーです。 </param>
+        private void HandleLanguageLabelPublished(string labelKey)
+        {
+            _languageLocalizedText?.Dispose();
+            _languageLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                labelKey,
+                text => _languageValueLabel.text = text);
+        }
+
+        /// <summary>
+        ///     ゲームパッド振動の強さを表示へ反映する。
+        /// </summary>
+        /// <param name="labelKey"> UICommonテーブルのローカライズキーです。 </param>
+        private void HandleVibrationStrengthLabelPublished(string labelKey)
+        {
+            _vibrationLocalizedText?.Dispose();
+            _vibrationLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                labelKey,
+                text => _vibrationValueLabel.text = text);
+        }
+
+        /// <summary>
+        ///     リズム判定オフセットの段階をゲージへ反映する。
+        /// </summary>
+        private void HandleRhythmOffsetStepPublished(int step)
+        {
+            _rhythmOffsetSlider.SetValueWithoutNotify(step);
+        }
+
+        /// <summary>
+        ///     リズム判定オフセットの表示ラベルを反映する。
+        /// </summary>
+        private void HandleRhythmOffsetLabelPublished(string label)
+        {
+            _rhythmOffsetValueLabel.text = label;
         }
 
         /// <summary>

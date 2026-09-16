@@ -1,6 +1,7 @@
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
 using System;
 using System.Threading;
@@ -25,6 +26,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             Initialize(rootElement);
             RegisterButtonCallbacks();
+            RegisterLocalizedTexts();
         }
 
         /// <summary>
@@ -34,6 +36,11 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _slideMotionHandle.TryCancel();
             UnregisterButtonCallbacks();
+            foreach (LocalizedElementText localizedText in _localizedTexts)
+            {
+                localizedText.Dispose();
+            }
+
             base.Dispose();
         }
 
@@ -73,6 +80,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         protected override VisualElement CancelTargetElement => _backButton;
 
         private const string BGM_VOLUME_SLIDER_NAME = "BGMVolumeSlider";
+        private const string SOUND_EFFECT_VOLUME_SLIDER_NAME = "SEVolumeSlider";
         private const string CREDIT_BUTTON_NAME = "CreditButton";
         private const string DATA_RESET_BUTTON_NAME = "DataResetButton";
         private const string BACK_BUTTON_NAME = "BackButton";
@@ -81,6 +89,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const string DATA_RESET_CONFIRM_BUTTON_NAME = "DataResetConfirmButton";
         private const string DATA_RESET_CANCEL_BUTTON_NAME = "DataResetCancelButton";
         private const string WINDOW_ROOT_NAME = "Root";
+        private const string DATA_RESET_MESSAGE_NAME = "DataResetMessage";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         /// <summary> ウィンドウのスライドインにかかる時間(秒)。 </summary>
         private const float SLIDE_DURATION = 0.2f;
@@ -90,6 +100,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const Ease SLIDE_EASE = Ease.OutCirc;
 
         private SliderInt _bgmVolumeSlider;
+        private SliderInt _soundEffectVolumeSlider;
         private Button _creditButton;
         private Button _dataResetButton;
 
@@ -99,10 +110,12 @@ namespace KillChord.Runtime.View.OutGame.Title
         private VisualElement _windowRoot;
 
         private VisualElement _dataResetDialog;
+        private Label _dataResetMessageLabel;
         private Button _dataResetConfirmButton;
         private Button _dataResetCancelButton;
 
         private MotionHandle _slideMotionHandle;
+        private LocalizedElementText[] _localizedTexts = Array.Empty<LocalizedElementText>();
 
         private IDisposable _creditButtonActivation;
         private IDisposable _dataResetButtonActivation;
@@ -129,6 +142,8 @@ namespace KillChord.Runtime.View.OutGame.Title
 
             _bgmVolumeSlider = rootElement.Q<SliderInt>(BGM_VOLUME_SLIDER_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {BGM_VOLUME_SLIDER_NAME}が見つかりません。");
+            _soundEffectVolumeSlider = rootElement.Q<SliderInt>(SOUND_EFFECT_VOLUME_SLIDER_NAME)
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {SOUND_EFFECT_VOLUME_SLIDER_NAME}が見つかりません。");
             _creditButton = rootElement.Q<Button>(CREDIT_BUTTON_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {CREDIT_BUTTON_NAME}が見つかりません。");
             _dataResetButton = rootElement.Q<Button>(DATA_RESET_BUTTON_NAME)
@@ -141,6 +156,8 @@ namespace KillChord.Runtime.View.OutGame.Title
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {WINDOW_ROOT_NAME}が見つかりません。");
             _dataResetDialog = rootElement.Q<VisualElement>(DATA_RESET_DIALOG_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {DATA_RESET_DIALOG_NAME}が見つかりません。");
+            _dataResetMessageLabel = rootElement.Q<Label>(DATA_RESET_MESSAGE_NAME)
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {DATA_RESET_MESSAGE_NAME}が見つかりません。");
             _dataResetConfirmButton = rootElement.Q<Button>(DATA_RESET_CONFIRM_BUTTON_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {DATA_RESET_CONFIRM_BUTTON_NAME}が見つかりません。");
             _dataResetCancelButton = rootElement.Q<Button>(DATA_RESET_CANCEL_BUTTON_NAME)
@@ -153,6 +170,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void RegisterButtonCallbacks()
         {
             _bgmVolumeSlider.MakeNavigable();
+            _soundEffectVolumeSlider.MakeNavigable();
             _creditButton.MakeNavigable();
             _dataResetButton.MakeNavigable();
             _dataResetConfirmButton.MakeNavigable();
@@ -321,6 +339,39 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void SetWindowTranslateX(float x)
         {
             _windowRoot.style.translate = new Translate(x, 0);
+        }
+
+        /// <summary>
+        ///     静的なボタン・ラベルのテキストをUICommonテーブルへ連携する。
+        /// </summary>
+        private void RegisterLocalizedTexts()
+        {
+            Label soundEffectHeading = RootElement.Q<Label>("SoundEffectHeading");
+            Label languageHeading = RootElement.Q<Label>("LanguageHeading");
+            Label dataResetWarning = RootElement.Q<Label>("DataResetWarning");
+            _localizedTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.sound_effect", text => soundEffectHeading.text = text, "効果音"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.language", text => languageHeading.text = text, "言語"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.data_reset_warning", text => dataResetWarning.text = text, "※削除するとデータは戻せません。"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.data_reset", text => _dataResetButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.credit", text => _creditButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.title.menu.data_reset_confirm_message",
+                    text => _dataResetMessageLabel.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.title.menu.data_reset_confirm",
+                    text => _dataResetConfirmButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.close", text => _dataResetCancelButton.text = text),
+            };
         }
     }
 }

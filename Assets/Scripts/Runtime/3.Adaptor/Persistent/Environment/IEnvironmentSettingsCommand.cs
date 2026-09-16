@@ -29,6 +29,24 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         void SetBrightness(int brightness);
 
         /// <summary>
+        ///     表示言語を前後に切り替える。
+        /// </summary>
+        /// <param name="direction"> 1なら次、-1なら前へ切り替える。 </param>
+        void CycleLanguage(int direction);
+
+        /// <summary>
+        ///     ゲームパッド振動の強さを前後に切り替える。
+        /// </summary>
+        /// <param name="direction"> 1なら次、-1なら前へ切り替える。 </param>
+        void CycleVibrationStrength(int direction);
+
+        /// <summary>
+        ///     リズム判定オフセットの段階を設定する（0.05秒刻み、-6～6）。
+        /// </summary>
+        /// <param name="step"> 設定する段階。 </param>
+        void SetRhythmOffsetStep(int step);
+
+        /// <summary>
         ///     すべての環境設定を既定値へ戻す。
         /// </summary>
         void ResetToDefaults();

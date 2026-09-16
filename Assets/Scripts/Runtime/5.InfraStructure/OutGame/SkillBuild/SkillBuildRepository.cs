@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Domain.Player;
@@ -117,7 +118,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
 
-            int previousPoint = saveData.SkillBuild.SkillLevelupPoint;
+            int previousPoint = saveData.ResourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint);
             if (previousPoint < MIN_LEVEL_UP_COST)
             {
                 return false;
@@ -133,7 +134,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             }
 
             saveData.SkillBuild.SetSkillLevel(skillId, previousLevel + 1);
-            saveData.SkillBuild.SetSkillLevelupPoint(previousPoint - MIN_LEVEL_UP_COST);
+            if (!saveData.ResourceInventory.TryConsume(GameResourceIds.SkillLevelupPoint, MIN_LEVEL_UP_COST))
+            {
+                saveData.SkillBuild.SetSkillLevel(skillId, previousLevel);
+                return false;
+            }
 
             try
             {
@@ -144,7 +149,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
                 // SaveStore は同一インスタンスをキャッシュするため、
                 // 書き込み失敗時はキャッシュ上の値も保存前へ戻す。
                 saveData.SkillBuild.SetSkillLevel(skillId, previousLevel);
-                saveData.SkillBuild.SetSkillLevelupPoint(previousPoint);
+                saveData.ResourceInventory.SetAmount(GameResourceIds.SkillLevelupPoint, previousPoint);
                 throw;
             }
 

@@ -1,5 +1,6 @@
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using UnityEngine.UIElements;
 
@@ -36,6 +37,11 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _qualityLevelPrevButton = Require<Button>(rootElement, QUALITY_LEVEL_PREV_BUTTON_NAME);
             _qualityLevelNextButton = Require<Button>(rootElement, QUALITY_LEVEL_NEXT_BUTTON_NAME);
             _brightnessSlider = Require<SliderInt>(rootElement, BRIGHTNESS_SLIDER_NAME);
+            _languagePrevButton = Require<Button>(rootElement, LANGUAGE_PREV_BUTTON_NAME);
+            _languageNextButton = Require<Button>(rootElement, LANGUAGE_NEXT_BUTTON_NAME);
+            _vibrationPrevButton = Require<Button>(rootElement, VIBRATION_PREV_BUTTON_NAME);
+            _vibrationNextButton = Require<Button>(rootElement, VIBRATION_NEXT_BUTTON_NAME);
+            _rhythmOffsetSlider = Require<SliderInt>(rootElement, RHYTHM_OFFSET_SLIDER_NAME);
             _environmentPanelSaveButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_SAVE_BUTTON_NAME);
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
@@ -65,12 +71,22 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _qualityLevelPrevButton,
                     _qualityLevelNextButton,
                     _brightnessSlider,
+                    _languagePrevButton,
+                    _languageNextButton,
+                    _vibrationPrevButton,
+                    _vibrationNextButton,
+                    _rhythmOffsetSlider,
                     _environmentPanelSaveButton,
                 },
                 _screenModePrevButton);
 
             RegisterCallbacks();
             ShowMenu();
+
+            _audioSettingLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.setting.audio", text => _audioSettingButton.text = text);
+            _environmentPanelSaveLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.setting.environment_save", text => _environmentPanelSaveButton.text = text);
         }
 
         /// <summary>
@@ -123,6 +139,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _audioSettingButtonPreset.Dispose();
             _environmentSettingButtonPreset.Dispose();
             _environmentPanelSaveButtonPreset.Dispose();
+            _audioSettingLocalizedText.Dispose();
+            _environmentPanelSaveLocalizedText.Dispose();
             _navigationScope.Dispose();
         }
 
@@ -148,7 +166,13 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string QUALITY_LEVEL_PREV_BUTTON_NAME = "QualityLevelPrevButton";
         private const string QUALITY_LEVEL_NEXT_BUTTON_NAME = "QualityLevelNextButton";
         private const string BRIGHTNESS_SLIDER_NAME = "BrightnessSlider";
+        private const string LANGUAGE_PREV_BUTTON_NAME = "LanguagePrevButton";
+        private const string LANGUAGE_NEXT_BUTTON_NAME = "LanguageNextButton";
+        private const string VIBRATION_PREV_BUTTON_NAME = "VibrationPrevButton";
+        private const string VIBRATION_NEXT_BUTTON_NAME = "VibrationNextButton";
+        private const string RHYTHM_OFFSET_SLIDER_NAME = "RhythmOffsetSlider";
         private const string ENVIRONMENT_PANEL_SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         private readonly VisualElement _backGround;
         private readonly VisualElement _settingTitleBar;
@@ -169,11 +193,18 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _qualityLevelPrevButton;
         private readonly Button _qualityLevelNextButton;
         private readonly SliderInt _brightnessSlider;
+        private readonly Button _languagePrevButton;
+        private readonly Button _languageNextButton;
+        private readonly Button _vibrationPrevButton;
+        private readonly Button _vibrationNextButton;
+        private readonly SliderInt _rhythmOffsetSlider;
         private readonly Button _environmentPanelSaveButton;
         private readonly HierarchicalNavigationScope _navigationScope;
         private IDisposable _audioSettingButtonPreset;
         private IDisposable _environmentSettingButtonPreset;
         private IDisposable _environmentPanelSaveButtonPreset;
+        private LocalizedElementText _audioSettingLocalizedText;
+        private LocalizedElementText _environmentPanelSaveLocalizedText;
         private PanelState _currentState;
 
         /// <summary>
