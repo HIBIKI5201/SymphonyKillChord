@@ -55,6 +55,7 @@ namespace KillChord.Runtime.View.InGame.Result
             SelectButton(_completeButton);
             _isShown = true;
             RefreshButtonHints();
+            RefreshButtonFocus();
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -148,6 +149,7 @@ namespace KillChord.Runtime.View.InGame.Result
 
         private const int SECOND_PER_MINUTE = 60;
         private const int BUTTON_HINT_SPRITE_SIZE_PERCENT = 70;
+        private const float FOCUSED_BUTTON_SCALE = 1.1f;
 
         [Header("Root")]
         [SerializeField, Tooltip("リザルト画面全体を制御するCanvasGroup。")]
@@ -244,6 +246,10 @@ namespace KillChord.Runtime.View.InGame.Result
         private string _completeButtonText;
         private string _retryButtonText;
         private string _submitButtonSpriteName;
+        private Vector3 _completeButtonOriginalScale;
+        private Vector3 _retryButtonOriginalScale;
+        private Color _completeButtonOriginalColor;
+        private Color _retryButtonOriginalColor;
         private IDisposable _stageNameDisposable;
         private IDisposable _mainMissionDisposable;
         private IDisposable _mainMissionStateDisposable;
@@ -260,7 +266,7 @@ namespace KillChord.Runtime.View.InGame.Result
         private readonly List<RectTransform> _releasedSlideInTargets = new();
 
         /// <summary>
-        ///     シーンに設定されたボタン文言を保存し、リザルトを非表示にします。
+        ///     シーンに設定されたボタン文言と見た目を保存し、リザルトを非表示にします。
         /// </summary>
         private void Awake()
         {
@@ -271,18 +277,31 @@ namespace KillChord.Runtime.View.InGame.Result
 
             _completeButtonText = _completeButtonLabel != null ? _completeButtonLabel.text : string.Empty;
             _retryButtonText = _retryButtonLabel != null ? _retryButtonLabel.text : string.Empty;
+            _completeButtonOriginalScale = _completeButton != null ? _completeButton.transform.localScale : Vector3.one;
+            _retryButtonOriginalScale = _retryButton != null ? _retryButton.transform.localScale : Vector3.one;
+            _completeButtonOriginalColor = _completeButtonLabel != null ? _completeButtonLabel.color : Color.white;
+            _retryButtonOriginalColor = _retryButtonLabel != null ? _retryButtonLabel.color : Color.white;
             Hide();
         }
 
         /// <summary>
-        ///     表示中だけ、接続デバイスや決定キーの変更をボタンへ反映します。
+        ///     表示中だけ、接続デバイスや決定キー、フォーカスの変更をボタンへ反映します。
         /// </summary>
         private void Update()
         {
             if (_isShown)
             {
                 RefreshButtonHints();
+                RefreshButtonFocus();
             }
+        }
+
+        /// <summary>
+        ///     無効化されたリザルトのボタンを元の見た目へ戻します。
+        /// </summary>
+        private void OnDisable()
+        {
+            RefreshButtonFocus();
         }
 
         private void OnDestroy()
@@ -634,6 +653,48 @@ namespace KillChord.Runtime.View.InGame.Result
 
             SetInteractionEnabled(true);
             SelectButton(focusTarget);
+            RefreshButtonFocus();
+        }
+
+        /// <summary>
+        ///     操作可能な選択中のボタンだけを拡大し、文言を水色にします。
+        /// </summary>
+        private void RefreshButtonFocus()
+        {
+            GameObject selectedObject = _isShown && !_isTransitioning && isActiveAndEnabled
+                ? EventSystem.current?.currentSelectedGameObject
+                : null;
+            ApplyButtonFocus(_completeButton, _completeButtonLabel,
+                _completeButtonOriginalScale, _completeButtonOriginalColor, selectedObject);
+            ApplyButtonFocus(_retryButton, _retryButtonLabel,
+                _retryButtonOriginalScale, _retryButtonOriginalColor, selectedObject);
+        }
+
+        /// <summary>
+        ///     ボタンの選択状態が変わった場合だけ、保存した見た目を基準に更新します。
+        /// </summary>
+        /// <param name="button"> 表示対象のボタンです。 </param>
+        /// <param name="label"> ボタンの文言です。 </param>
+        /// <param name="originalScale"> シーンに設定された拡大率です。 </param>
+        /// <param name="originalColor"> シーンに設定された文言の色です。 </param>
+        /// <param name="selectedObject"> 現在操作可能な選択対象です。 </param>
+        private static void ApplyButtonFocus(
+            Button button, TMP_Text label, Vector3 originalScale, Color originalColor, GameObject selectedObject)
+        {
+            bool isFocused = button != null && selectedObject == button.gameObject
+                && button.IsActive() && button.IsInteractable();
+            Vector3 scale = originalScale * (isFocused ? FOCUSED_BUTTON_SCALE : 1f);
+            if (button != null && button.transform.localScale != scale)
+            {
+                button.transform.localScale = scale;
+            }
+
+            Color color = isFocused ? Color.cyan : originalColor;
+            color.a = originalColor.a;
+            if (label != null && label.color != color)
+            {
+                label.color = color;
+            }
         }
 
         /// <summary>
@@ -869,6 +930,11 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <param name="isEnabled"> 操作可能にする場合はtrue。 </param>
         private void SetInteractionEnabled(bool isEnabled)
         {
+            if (!isEnabled)
+            {
+                RefreshButtonFocus();
+            }
+
             if (_canvasGroup == null)
             {
                 return;
