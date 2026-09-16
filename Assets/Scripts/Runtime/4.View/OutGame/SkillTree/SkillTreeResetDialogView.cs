@@ -91,6 +91,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <summary> ダイアログのルート要素。モーダルのフォーカス閉じ込めに使用する。 </summary>
         public VisualElement DialogRoot => _dialog;
 
+        /// <summary> 「振り直す」ボタンの要素。コントローラーのフォーカス移動候補に加えるために使用する。 </summary>
+        public VisualElement ResetButtonElement => _resetButton;
+
         /// <summary>
         ///     登録済みイベントを解除する。
         /// </summary>

@@ -99,8 +99,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
             _settingShortcutButtonActivation =
                 _settingShortcutButton.RegisterActivation(HandleSettingShortcutButtonActivationHandler);
-            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
-            _backButton.ExcludeFromNavigation();
+            // 画面左端のフォーカス移動チェーン(ツリー→設定→戻る)の終端として使うため、
+            // キャンセル操作で戻れる画面だがフォーカス移動の対象に含める。
+            _backButton.MakeNavigable();
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
         }
 
