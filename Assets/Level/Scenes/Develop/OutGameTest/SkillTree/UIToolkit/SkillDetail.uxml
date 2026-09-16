@@ -11,7 +11,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement name="SkillTypeColumn" class="skilltree-info-type-column" style="height: 122px; width: 100px; margin-right: 8px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Back_Text.png?fileID=2800000&amp;guid=522fda19571fbc24db0d164d903c2ea9&amp;type=3#UI_Back_Text&quot;); background-color: rgba(88, 171, 239, 0.04);">
                     <ui:Label name="SkillTypeHeading" text="スキルタイプ" class="skilltree-info-type-caption" style="height: 22px; margin-top: 5px; margin-right: 0; margin-bottom: 0; margin-left: 0;"/>
-                    <ui:VisualElement name="SkillTypeBox" class="skilltree-info-type-box" style="height: 78px; width: 83px; justify-content: center; align-items: center; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Back_Text.png?fileID=2800000&amp;guid=522fda19571fbc24db0d164d903c2ea9&amp;type=3#UI_Back_Text&quot;); background-color: rgba(88, 171, 239, 0.04); margin-top: 7px;">
+                    <ui:VisualElement name="SkillTypeBox" class="skilltree-info-type-box" style="height: 78px; width: 83px; justify-content: center; align-items: center; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Back_Text.png?fileID=2800000&amp;guid=522fda19571fbc24db0d164d903c2ea9&amp;type=3#UI_Back_Text&quot;); background-color: rgba(255, 255, 255, 0.59); margin-top: 7px;">
                         <ui:Image name="SkillGenreIcon" class="skilltree-info-type-icon" style="height: 65px; width: 70px;"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
