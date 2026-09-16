@@ -19,10 +19,12 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _comboHexIcon = comboHexIcon;
             _skillName = rootElement.Q<Label>(name: E_NAME_SKILL_NAME_LABEL);
             _skillHeaderGenreIcon = rootElement.Q<Image>(name: E_NAME_SKILL_HEADER_GENRE_ICON);
+            _skillHeaderGenreIcon.scaleMode = ScaleMode.ScaleToFit;
             _skillCommand = rootElement.Q<Label>(name: E_NAME_SKILL_COMMAND_LABEL);
             _comboRow = rootElement.Q<VisualElement>(name: E_NAME_COMBO_ROW);
             _skillGenre = rootElement.Q<Label>(name: E_NAME_SKILL_GENRE_LABEL);
             _skillGenreIcon = rootElement.Q<Image>(name: E_NAME_SKILL_GENRE_ICON);
+            _skillGenreIcon.scaleMode = ScaleMode.ScaleToFit;
             _skillTypeColumn = rootElement.Q<VisualElement>(name: E_NAME_SKILL_TYPE_COLUMN);
             _effectCaptionLabel = rootElement.Q<Label>(name: E_NAME_EFFECT_CAPTION_LABEL);
             _skillDetailScrollView = rootElement.Q<VisualElement>(name: E_NAME_SKILL_DETAIL_SCROLL_VIEW);
@@ -39,6 +41,15 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _outGameUIEvent = outGameUIEvent;
 
             RegisterEvents();
+            _statusBoostLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_detail.status_boost", text =>
+                {
+                    _statusBoostTitle = text;
+                    if (!_hasSkill)
+                    {
+                        _skillName.text = text;
+                    }
+                }, STRING_STATUS_BOOST_TITLE);
             _previewButtonLocalizedText = new LocalizedElementText(
                 UI_COMMON_TABLE, "ui.skill_detail.preview", text => _previewVideoButton.text = text);
             _backButtonLocalizedText = new LocalizedElementText(
@@ -65,9 +76,10 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         public void Apply(SkillDetailDTO dto)
         {
             _currentNodeId = dto.SkillNodeId;
-            _skillName.text = dto.HasSkill ? dto.SkillName : STRING_STATUS_BOOST_TITLE;
-            _skillHeaderGenreIcon.sprite = dto.SkillGenreIcon;
-            _skillHeaderGenreIcon.style.display = dto.SkillGenreIcon == null ? DisplayStyle.None : DisplayStyle.Flex;
+            _hasSkill = dto.HasSkill;
+            _skillName.text = dto.HasSkill ? dto.SkillName : _statusBoostTitle;
+            _skillHeaderGenreIcon.sprite = dto.HasSkill ? dto.SkillIcon : null;
+            _skillHeaderGenreIcon.style.display = _skillHeaderGenreIcon.sprite == null ? DisplayStyle.None : DisplayStyle.Flex;
             _skillCommand.text = dto.SkillCommand;
             ComboHexRowBuilder.Build(
                 _comboRow,
@@ -113,6 +125,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 localizedText.Dispose();
             }
             base.Dispose();
+            _statusBoostLocalizedText.Dispose();
             _unlockButtonActivation?.Dispose();
             _backButtonActivation?.Dispose();
             _previewButtonLocalizedText?.Dispose();
@@ -127,6 +140,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         }
 
         private readonly LocalizedElementText[] _headingLocalizedTexts;
+        private readonly LocalizedElementText _statusBoostLocalizedText;
+        private string _statusBoostTitle = STRING_STATUS_BOOST_TITLE;
+        private bool _hasSkill;
 
         private const string E_NAME_SKILL_NAME_LABEL = "SkillNameLabel";
         private const string E_NAME_SKILL_HEADER_GENRE_ICON = "SkillHeaderGenreIcon";

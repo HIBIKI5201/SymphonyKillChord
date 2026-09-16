@@ -226,7 +226,7 @@ namespace KillChord.Runtime.Composition.OutGame
             bool isEnglish = SaveStore.IsLoaded<SaveData>()
                 && SaveStore.Get<SaveData>().EnvironmentSettings.Language == GameLanguage.English;
             string actionLabel = gameObject.scene.name == _titleSceneName
-                ? "もう一度読み込む"
+                ? isEnglish ? "Reload" : "もう一度読み込む"
                 : isEnglish ? "Return to Title" : "タイトルへ戻る";
             _failureView.Initialize(
                 actionLabel,
