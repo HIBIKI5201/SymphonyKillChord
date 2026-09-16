@@ -94,6 +94,26 @@
                         <ui:SliderInt name="BrightnessSlider" low-value="0" high-value="10" value="5" show-input-field="false" page-size="1" class="setting-slider"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label text="言語" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-select-row">
+                        <ui:Button text="&lt;" name="LanguagePrevButton" class="setting-select-arrow-button ui-se-select"/>
+                        <ui:Label text="日本語" name="LanguageValueLabel" class="setting-select-value-label"/>
+                        <ui:Button text="&gt;" name="LanguageNextButton" class="setting-select-arrow-button ui-se-select"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label text="振動" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-select-row">
+                        <ui:Button text="&lt;" name="VibrationPrevButton" class="setting-select-arrow-button ui-se-select"/>
+                        <ui:Label text="強い" name="VibrationValueLabel" class="setting-select-value-label"/>
+                        <ui:Button text="&gt;" name="VibrationNextButton" class="setting-select-arrow-button ui-se-select"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 <ui:VisualElement class="setting-menu-spacer"/>
                 <ui:Button text="設定を保存" name="EnvironmentPanelSaveButton" class="setting-menu-button ui-se-select"/>
             </ui:VisualElement>

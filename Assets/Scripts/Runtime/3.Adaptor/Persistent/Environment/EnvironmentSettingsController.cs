@@ -21,7 +21,8 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             EnvironmentSettingsPresenter environmentSettingsPresenter,
             IResolutionApplier resolutionApplier,
             IQualityApplier qualityApplier,
-            IBrightnessApplier brightnessApplier)
+            IBrightnessApplier brightnessApplier,
+            ILanguageApplier languageApplier)
         {
             if (initialSettings == null)
             {
@@ -40,6 +41,8 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 ?? throw new ArgumentNullException(nameof(qualityApplier));
             _brightnessApplier = brightnessApplier
                 ?? throw new ArgumentNullException(nameof(brightnessApplier));
+            _languageApplier = languageApplier
+                ?? throw new ArgumentNullException(nameof(languageApplier));
 
             _availableResolutions = _resolutionApplier.GetAvailableResolutions();
             _availableQualityLevels = _qualityApplier.GetAvailableQualityLevels();
@@ -118,6 +121,27 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         }
 
         /// <summary>
+        ///     表示言語を前後に切り替える。プレビュー適用のみ行い、保存はしない。
+        /// </summary>
+        public void CycleLanguage(int direction)
+        {
+            int nextIndex = Wrap((int)_workingSettings.Language, direction, LANGUAGE_OPTION_COUNT);
+            _workingSettings.SetLanguage((GameLanguage)nextIndex);
+            _languageApplier.Apply(GetLocaleCode(_workingSettings.Language));
+            _environmentSettingsPresenter.Push(_workingSettings);
+        }
+
+        /// <summary>
+        ///     ゲームパッド振動の強さを前後に切り替える。プレビュー適用のみ行い、保存はしない。
+        /// </summary>
+        public void CycleVibrationStrength(int direction)
+        {
+            int nextIndex = Wrap((int)_workingSettings.VibrationStrength, direction, VIBRATION_OPTION_COUNT);
+            _workingSettings.SetVibrationStrength((VibrationStrength)nextIndex);
+            _environmentSettingsPresenter.Push(_workingSettings);
+        }
+
+        /// <summary>
         ///     すべての環境設定を既定値へ戻す。プレビュー適用のみ行い、保存はしない。
         /// </summary>
         public void ResetToDefaults()
@@ -128,6 +152,8 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 EnvironmentSettingsData.DEFAULT_IS_FULL_SCREEN);
             _workingSettings.SetQualityLevel(EnvironmentSettingsData.DEFAULT_QUALITY_LEVEL);
             _workingSettings.SetBrightness(EnvironmentSettingsData.DEFAULT_BRIGHTNESS);
+            _workingSettings.SetLanguage(EnvironmentSettingsData.DEFAULT_LANGUAGE);
+            _workingSettings.SetVibrationStrength(EnvironmentSettingsData.DEFAULT_VIBRATION_STRENGTH);
             ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }
@@ -143,6 +169,8 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 _workingSettings.IsFullScreen);
             _committedSettings.SetQualityLevel(_workingSettings.QualityLevel);
             _committedSettings.SetBrightness(_workingSettings.Brightness);
+            _committedSettings.SetLanguage(_workingSettings.Language);
+            _committedSettings.SetVibrationStrength(_workingSettings.VibrationStrength);
             _environmentSettingsService.QueueSave(_committedSettings);
         }
 
@@ -157,11 +185,17 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 _committedSettings.IsFullScreen);
             _workingSettings.SetQualityLevel(_committedSettings.QualityLevel);
             _workingSettings.SetBrightness(_committedSettings.Brightness);
+            _workingSettings.SetLanguage(_committedSettings.Language);
+            _workingSettings.SetVibrationStrength(_committedSettings.VibrationStrength);
             ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }
 
         private const float NORMALIZED_BRIGHTNESS_SCALE = 0.1f;
+        private const int LANGUAGE_OPTION_COUNT = 2;
+        private const int VIBRATION_OPTION_COUNT = 3;
+        private const string JAPANESE_LOCALE_CODE = "ja";
+        private const string ENGLISH_LOCALE_CODE = "en";
 
         private readonly EnvironmentSettingsData _committedSettings;
         private readonly EnvironmentSettingsData _workingSettings;
@@ -170,6 +204,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         private readonly IResolutionApplier _resolutionApplier;
         private readonly IQualityApplier _qualityApplier;
         private readonly IBrightnessApplier _brightnessApplier;
+        private readonly ILanguageApplier _languageApplier;
         private readonly IReadOnlyList<ResolutionOption> _availableResolutions;
         private readonly IReadOnlyList<QualityLevelOption> _availableQualityLevels;
 
@@ -181,6 +216,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _resolutionApplier.Apply(settings.ResolutionWidth, settings.ResolutionHeight, settings.IsFullScreen);
             _qualityApplier.Apply(settings.QualityLevel);
             _brightnessApplier.SetBrightness(ToNormalizedBrightness(settings.Brightness));
+            _languageApplier.Apply(GetLocaleCode(settings.Language));
         }
 
         /// <summary>
@@ -230,6 +266,16 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         {
             return Mathf.Clamp(brightness, EnvironmentSettingsData.MIN_BRIGHTNESS, EnvironmentSettingsData.MAX_BRIGHTNESS)
                 * NORMALIZED_BRIGHTNESS_SCALE;
+        }
+
+        /// <summary>
+        ///     表示言語に対応するLocaleコードを取得する。
+        /// </summary>
+        private static string GetLocaleCode(GameLanguage language)
+        {
+            return language == GameLanguage.English
+                ? ENGLISH_LOCALE_CODE
+                : JAPANESE_LOCALE_CODE;
         }
     }
 }
