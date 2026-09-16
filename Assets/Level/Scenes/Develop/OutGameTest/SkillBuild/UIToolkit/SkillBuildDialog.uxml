@@ -1,12 +1,12 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
     <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; justify-content: center; background-color: rgba(0, 0, 0, 0.59);">
-        <ui:VisualElement style="background-color: rgba(128, 128, 128, 0); width: 50%; height: 50%; align-self: center; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_MenuPanel.png?fileID=2800000&amp;guid=e93604348792fe147b00edd554ae46a0&amp;type=3#UI_MenuPanel&quot;); -unity-background-image-tint-color: rgba(255, 255, 255, 0.78);">
-            <ui:Label text="装備中スキルの変更が保存されていません。保存しますか？" name="Message" style="-unity-text-align: middle-center; width: 100%; height: 50%; font-size: 30px; -unity-font-style: bold;"/>
+        <ui:VisualElement style="background-color: rgba(128, 128, 128, 0); width: 50%; height: 50%; align-self: center; border-top-left-radius: 25px; border-top-right-radius: 25px; border-bottom-right-radius: 25px; border-bottom-left-radius: 25px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_MenuPanel.png?fileID=2800000&amp;guid=e93604348792fe147b00edd554ae46a0&amp;type=3#UI_MenuPanel&quot;); -unity-background-image-tint-color: rgb(255, 255, 255);">
+            <ui:Label text="装備中スキルの変更が保存されていません。&#10;&#10;保存しますか？" name="Message" style="-unity-text-align: middle-center; width: 100%; height: 50%; font-size: 30px; -unity-font-style: bold; background-color: rgba(255, 255, 255, 0); color: rgb(255, 255, 255);"/>
             <ui:VisualElement name="Buttons" style="flex-direction: row; justify-content: center; align-items: stretch;">
-                <ui:Button text="破棄して戻る" name="DiscardAndCloseButton" class="button ui-se-cancel" style="font-size: 24px; color: rgb(255, 255, 255);"/>
+                <ui:Button text="保存して戻る" name="SaveAndCloseButton" class="btn-skin ui-se-select" style="width: 200px; height: 100px; font-size: 24px; color: rgb(0, 0, 0); -unity-text-align: middle-center; -unity-font-style: bold;"/>
                 <ui:VisualElement name="Space" style="width: 10%; max-width: 100px;"/>
-                <ui:Button text="保存して戻る" name="SaveAndCloseButton" class="button ui-se-select" style="font-size: 24px; color: rgb(255, 255, 255);"/>
+                <ui:Button text="破棄して戻る" name="DiscardAndCloseButton" class="btn-skin ui-se-cancel" style="width: 200px; height: 100px; font-size: 24px; color: rgb(0, 0, 0); -unity-text-align: middle-center; -unity-font-style: bold;"/>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
