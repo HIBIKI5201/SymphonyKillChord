@@ -75,7 +75,7 @@
                             </ui:VisualElement>
                             <ui:VisualElement name="ComboRow" class="skillbuild-slot-combo-row"/>
                         </ui:VisualElement>
-                        <ui:VisualElement name="SkillSlot3" class="skill-element-slot skillbuild-slot" style="display: none;">
+                        <ui:VisualElement name="SkillSlot3" class="skill-element-slot skillbuild-slot" style="display: none; height: 250px; width: 250px;">
                             <ui:VisualElement name="IconArea" class="skillbuild-slot-icon-area">
                                 <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
                                 <ui:Label name="skill-slot-name" class="skill-slot-name"/>
