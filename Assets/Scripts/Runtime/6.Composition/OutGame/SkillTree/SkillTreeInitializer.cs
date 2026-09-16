@@ -4,6 +4,7 @@ using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
@@ -131,6 +132,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private PlayerStatusPresenter _playerStatusPresenter;
         private SkillTreeFocusPresenter _skillTreeFocusPresenter;
         private SkillUnlockData _skillUnlockData;
+        private int _researchPoint;
         private OutGameUIEvent _outGameUIEvent;
         private CancellationTokenSource _cts;
         private RenderTexture _renderTexture;
@@ -259,6 +261,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             _skillUnlockData = saveData.SkillUnlock;
+            _researchPoint = saveData.ResourceInventory.GetAmount(GameResourceIds.ResearchPoint);
             return _skillUnlockData != null;
         }
 
@@ -456,7 +459,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillTreeViewportView = new SkillTreeViewportView(_rootElement, _skillNodeElements);
 
             SkillTreeStatusEntity skillTreeEntity = new(
-                _skillUnlockData.ResearchPoint,
+                _researchPoint,
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             _skillTreeService = new SkillTreeService(_skillNodeEntities);

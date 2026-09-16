@@ -68,8 +68,9 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _tipsHeadingLabel.style.display = tipsDisplay;
             _tipsLabel.style.display = tipsDisplay;
             _hasSkill = true;
-            _levelLabel.text = $"{data.Level} → {data.Level + 1}";
-            RefreshLevelupPointLabel();
+            _currentLevel = data.Level;
+            _maxLevel = data.MaxLevel;
+            RefreshLevelDisplay();
         }
 
         /// <summary>
@@ -80,8 +81,14 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         public void SetOwnedPoints(int ownedPoints)
         {
             _lastOwnedPoints = ownedPoints;
-            RefreshLevelupPointLabel();
+            RefreshLevelDisplay();
         }
+
+        /// <summary>
+        ///     現在表示中のスキルがレベルアップ可能かどうか。
+        ///     所持ポイントが不足している、または既に最大レベルの場合は false。
+        /// </summary>
+        public bool CanLevelUp { get; private set; }
 
         /// <summary>
         ///     未選択表示へ戻す。
@@ -98,8 +105,9 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _tipsHeadingLabel.style.display = DisplayStyle.None;
             _tipsLabel.style.display = DisplayStyle.None;
             _hasSkill = false;
-            _levelLabel.text = string.Empty;
-            _levelupPointLabel.text = string.Empty;
+            _currentLevel = 0;
+            _maxLevel = 0;
+            RefreshLevelDisplay();
         }
 
         private const string ICON_NAME = "skill-detail-icon";
@@ -115,6 +123,9 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string LEVELUP_POINT_LABEL_NAME = "skill-levelup-point-label";
         private const string EMPTY_SELECTION_LABEL = "スキルを選択してください";
         private const string EMPTY_VALUE_LABEL = "—";
+        private const string MAX_LEVEL_LABEL = "レベルMax";
+        private const string NO_LEVELUP_COST_LABEL = "ー";
+        private const int MIN_LEVEL_UP_COST = 1;
 
         private readonly Image _icon;
         private readonly Label _nameLabel;
@@ -129,15 +140,39 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly Label _levelupPointLabel;
         private bool _hasSkill;
         private int _lastOwnedPoints;
+        private int _currentLevel;
+        private int _maxLevel;
 
         /// <summary>
-        ///     現在の表示状態(スキル選択有無・所持ポイント)から、強化後の改造P推移表示を更新する。
+        ///     現在の表示状態(スキル選択有無・所持ポイント・レベル)から、
+        ///     レベル表示と強化後の改造P推移表示、レベルアップ可否をまとめて更新する。
         /// </summary>
-        private void RefreshLevelupPointLabel()
+        private void RefreshLevelDisplay()
         {
-            _levelupPointLabel.text = _hasSkill
+            if (!_hasSkill)
+            {
+                CanLevelUp = false;
+                _levelLabel.text = string.Empty;
+                _levelupPointLabel.text = string.Empty;
+                return;
+            }
+
+            bool isMaxLevel = _currentLevel >= _maxLevel;
+            if (isMaxLevel)
+            {
+                CanLevelUp = false;
+                _levelLabel.text = MAX_LEVEL_LABEL;
+                _levelupPointLabel.text = NO_LEVELUP_COST_LABEL;
+                return;
+            }
+
+            CanLevelUp = _lastOwnedPoints >= MIN_LEVEL_UP_COST;
+            _levelLabel.text = CanLevelUp
+                ? $"{_currentLevel} → {_currentLevel + 1}"
+                : $"{_currentLevel}";
+            _levelupPointLabel.text = CanLevelUp
                 ? $"{_lastOwnedPoints} → {_lastOwnedPoints - 1}"
-                : string.Empty;
+                : $"{_lastOwnedPoints}";
         }
 
         /// <summary>
