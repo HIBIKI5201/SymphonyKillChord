@@ -1872,7 +1872,7 @@ MonoBehaviour:
   _medalRotationDuration: 0.6
   _medalRotationDelay: 0.2
   _medalRotationEase: 6
-  _loadingText: {fileID: 0}
+  _loadingText: {fileID: 322689489}
   _loadingTextJumpHeight: 8
   _loadingTextJumpDuration: 0.25
   _loadingTextStaggerInterval: 0.05
