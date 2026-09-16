@@ -90,6 +90,22 @@ namespace KillChord.Runtime.Application.InGame.Mission
         }
 
         /// <summary>
+        ///     最終Waveまでの敵の撃破完了を記録し、クリア条件を評価します。
+        /// </summary>
+        public void OnEnemyWavesCleared()
+        {
+            if (_missionProgress.IsFinished)
+            {
+                return;
+            }
+
+            _missionProgress.RecordAllEnemyWavesCleared();
+            CheckObjectiveStepChanged();
+            _missionRuleRunner.Evaluate(_missionProgress);
+            CheckMissionFinished();
+        }
+
+        /// <summary>
         ///     プレイヤー行動が発動した際の処理を行います。
         /// </summary>
         /// <param name="actionKind">発動した行動の種別。</param>
