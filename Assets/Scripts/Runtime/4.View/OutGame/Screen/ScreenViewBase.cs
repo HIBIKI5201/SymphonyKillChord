@@ -25,6 +25,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _currentOpacity = RootElement.resolvedStyle.opacity;
 
             RootElement.RegisterCallback<NavigationCancelEvent>(HandleNavigationCancelHandler);
+            RootElement.RegisterCallback<FocusInEvent>(HandleFocusInDebugHandler);
+            RootElement.RegisterCallback<FocusOutEvent>(HandleFocusOutDebugHandler);
+            RootElement.RegisterCallback<NavigationMoveEvent>(HandleNavigationMoveDebugHandler, TrickleDown.TrickleDown);
+            RootElement.RegisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary> この画面内で現在フォーカスされている要素を取得します。 </summary>
@@ -46,7 +50,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public virtual ValueTask Show(CancellationToken cancellationToken = default)
         {
+            if (_isDisposed)
+            {
+                return default;
+            }
+
             _opacityMotionHandle.TryComplete();
+            _focusRequestGeneration++;
+            _isShowing = true;
+            _isShowCompleted = false;
+            _isFocusRestorePending = true;
 
             RootElement.style.display = DisplayStyle.Flex;
             RootElement.BringToFront();
@@ -74,6 +87,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public virtual ValueTask Hide(CancellationToken cancellationToken = default)
         {
             _opacityMotionHandle.TryComplete();
+            InvalidateFocusRestore();
 
             // フェード中は入力を受け付けないようブロッカーを最前面に配置する。
             RootElement.Add(_brocker);
@@ -93,6 +107,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public virtual void HideImmediately()
         {
             _opacityMotionHandle.TryComplete();
+            InvalidateFocusRestore();
 
             SetOpacity(0f);
             RootElement.style.display = DisplayStyle.None;
@@ -104,9 +119,20 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public virtual void Dispose()
         {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isDisposed = true;
+            InvalidateFocusRestore();
             _opacityMotionHandle.TryCancel();
             _brocker.RemoveFromHierarchy();
             RootElement.UnregisterCallback<NavigationCancelEvent>(HandleNavigationCancelHandler);
+            RootElement.UnregisterCallback<FocusInEvent>(HandleFocusInDebugHandler);
+            RootElement.UnregisterCallback<FocusOutEvent>(HandleFocusOutDebugHandler);
+            RootElement.UnregisterCallback<NavigationMoveEvent>(HandleNavigationMoveDebugHandler, TrickleDown.TrickleDown);
+            RootElement.UnregisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -123,6 +149,78 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
+        ///     画面の外部入力許可を切り替え、禁止時はフォーカス候補を保存して予約を失効させる。
+        /// </summary>
+        public void SetInteractionEnabled(bool isEnabled)
+        {
+            if (_isDisposed || _isInteractionEnabled == isEnabled)
+            {
+                return;
+            }
+
+            if (!isEnabled)
+            {
+                VisualElement focusedElement = FocusedElement;
+                if (IsAvailableFocusElement(focusedElement))
+                {
+                    _focusBeforeSuppression = focusedElement;
+                }
+
+                _focusRequestGeneration++;
+                _isFocusRestorePending = _isShowing;
+                _isInteractionEnabled = false;
+                focusedElement?.Blur();
+            }
+            else
+            {
+                _isInteractionEnabled = true;
+            }
+
+            RootElement.SetEnabled(isEnabled);
+        }
+
+        /// <summary>
+        ///     現在画面のフォーカス復元を予約する。入力禁止中とフェード中は表示完了まで保留する。
+        /// </summary>
+        public void RestoreFocus()
+        {
+            if (_isDisposed || !_isShowing)
+            {
+                return;
+            }
+
+            _isFocusRestorePending = true;
+            if (!_isInteractionEnabled || !_isShowCompleted)
+            {
+                return;
+            }
+
+            int generation = ++_focusRequestGeneration;
+            RootElement.schedule.Execute(() =>
+            {
+                if (generation != _focusRequestGeneration || _isDisposed
+                    || !_isInteractionEnabled || !_isShowCompleted || !_isFocusRestorePending)
+                {
+                    NavigationDebugLog.Log($"{GetType().Name} RestoreFocus aborted (stale request or screen unavailable)");
+                    return;
+                }
+
+                VisualElement focusElement = GetAvailableFocusElement();
+                if (focusElement == null)
+                {
+                    NavigationDebugLog.Log($"{GetType().Name} RestoreFocus found no available focus element");
+                    return;
+                }
+
+                NavigationDebugLog.Log($"{GetType().Name} RestoreFocus -> {NavigationDebugLog.Describe(focusElement)}");
+                _isFocusRestorePending = false;
+                _focusBeforeSuppression = null;
+                _explicitInitialFocusElement = null;
+                focusElement.Focus();
+            });
+        }
+
+        /// <summary>
         ///     コントローラー操作の起点となる要素を返します。
         ///     <para>
         ///         画面の表示完了時にこの要素へフォーカスが移ります。
@@ -135,7 +233,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         ///     コントローラーのキャンセル操作で作動させる要素を返します。
         ///     <para>
         ///         通常は「戻る」ボタンを返します。キャンセル操作を受けると、
-        ///         その要素をクリックしたときと同じ経路を通ります。
+        ///         その要素へ明示的な作動要求を送ります。
         ///         nullを返した場合はキャンセル操作を処理しません。
         ///     </para>
         /// </summary>
@@ -146,10 +244,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void HandleShowCompleted()
         {
+            _isShowCompleted = true;
             RemoveBrocker();
-            VisualElement focusElement = _explicitInitialFocusElement ?? InitialFocusElement;
-            _explicitInitialFocusElement = null;
-            focusElement?.FocusDeferred();
+            RestoreFocus();
         }
 
         /// <summary>
@@ -158,23 +255,134 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <param name="navigationEvent"> ナビゲーションキャンセルイベントです。 </param>
         private void HandleNavigationCancelHandler(NavigationCancelEvent navigationEvent)
         {
+            if (_isDisposed || !_isInteractionEnabled || !_isShowCompleted)
+            {
+                NavigationDebugLog.Log(
+                    $"{GetType().Name} Cancel ignored (disposed={_isDisposed}, "
+                    + $"interactionEnabled={_isInteractionEnabled}, showCompleted={_isShowCompleted})");
+                return;
+            }
+
             VisualElement cancelTarget = CancelTargetElement;
 
             // 処理しない画面ではイベントを消費せず、親側の処理に委ねる。
             if (cancelTarget == null || !cancelTarget.enabledInHierarchy)
             {
+                NavigationDebugLog.Log(
+                    $"{GetType().Name} Cancel not handled (cancelTarget={NavigationDebugLog.Describe(cancelTarget)})");
                 return;
             }
 
             if (cancelTarget.resolvedStyle.display == DisplayStyle.None)
             {
+                NavigationDebugLog.Log(
+                    $"{GetType().Name} Cancel target hidden: {NavigationDebugLog.Describe(cancelTarget)}");
                 return;
             }
 
-            using ClickEvent clickEvent = ClickEvent.GetPooled();
-            clickEvent.target = cancelTarget;
-            cancelTarget.SendEvent(clickEvent);
+            NavigationDebugLog.Log($"{GetType().Name} Cancel -> activating {NavigationDebugLog.Describe(cancelTarget)}");
+            using UIActivationEvent activationEvent = UIActivationEvent.GetPooled();
+            activationEvent.target = cancelTarget;
+            cancelTarget.SendEvent(activationEvent);
             navigationEvent.StopPropagation();
+        }
+
+        /// <summary>
+        ///     診断用: この画面内でフォーカスを得た要素を記録します。
+        /// </summary>
+        /// <param name="evt"> フォーカス取得イベントです。 </param>
+        private void HandleFocusInDebugHandler(FocusInEvent evt)
+        {
+            NavigationDebugLog.Log(
+                $"{GetType().Name} FocusIn: {NavigationDebugLog.Describe(evt.target as VisualElement)}");
+        }
+
+        /// <summary>
+        ///     診断用: この画面内でフォーカスを失った要素を記録します。
+        /// </summary>
+        /// <param name="evt"> フォーカス喪失イベントです。 </param>
+        private void HandleFocusOutDebugHandler(FocusOutEvent evt)
+        {
+            NavigationDebugLog.Log(
+                $"{GetType().Name} FocusOut: {NavigationDebugLog.Describe(evt.target as VisualElement)}"
+                + $" -> relatedTarget: {NavigationDebugLog.Describe(evt.relatedTarget as VisualElement)}");
+        }
+
+        /// <summary>
+        ///     診断用: 十字キー/スティックの移動操作の発生を記録します。
+        /// </summary>
+        /// <param name="evt"> ナビゲーション移動イベントです。 </param>
+        private void HandleNavigationMoveDebugHandler(NavigationMoveEvent evt)
+        {
+            NavigationDebugLog.Log(
+                $"{GetType().Name} NavigationMove: direction={evt.direction} "
+                + $"target={NavigationDebugLog.Describe(evt.target as VisualElement)}");
+        }
+
+        /// <summary>
+        ///     診断用: 決定操作(NavigationSubmitEvent)の発生をトリクルダウンの時点で記録します。
+        ///     画面固有のハンドラーがイベントを消費する前に、そもそも発生しているかを確認するため。
+        /// </summary>
+        /// <param name="evt"> ナビゲーション決定イベントです。 </param>
+        private void HandleNavigationSubmitDebugHandler(NavigationSubmitEvent evt)
+        {
+            NavigationDebugLog.Log(
+                $"{GetType().Name} NavigationSubmit(trickle): target={NavigationDebugLog.Describe(evt.target as VisualElement)}");
+        }
+
+        /// <summary>
+        ///     ロック直前、画面履歴、画面既定の順で復元可能なフォーカス候補を選ぶ。
+        /// </summary>
+        private VisualElement GetAvailableFocusElement()
+        {
+            if (IsAvailableFocusElement(_focusBeforeSuppression))
+            {
+                return _focusBeforeSuppression;
+            }
+
+            if (IsAvailableFocusElement(_explicitInitialFocusElement))
+            {
+                return _explicitInitialFocusElement;
+            }
+
+            VisualElement initialFocusElement = InitialFocusElement;
+            return IsAvailableFocusElement(initialFocusElement) ? initialFocusElement : null;
+        }
+
+        /// <summary>
+        ///     同じ画面とパネルに属し、祖先を含めて表示中かつ入力可能なフォーカス先か判定する。
+        /// </summary>
+        private bool IsAvailableFocusElement(VisualElement element)
+        {
+            if (element == null || RootElement.panel == null || element.panel != RootElement.panel
+                || (element != RootElement && !RootElement.Contains(element))
+                || !element.focusable || !element.enabledInHierarchy)
+            {
+                return false;
+            }
+
+            for (VisualElement ancestor = element; ancestor != null; ancestor = ancestor.parent)
+            {
+                if (ancestor.resolvedStyle.display == DisplayStyle.None
+                    || ancestor.resolvedStyle.visibility != Visibility.Visible)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     非表示と破棄に伴い、遅延予約とロック直前のフォーカス候補を破棄する。
+        /// </summary>
+        private void InvalidateFocusRestore()
+        {
+            _focusRequestGeneration++;
+            _isShowing = false;
+            _isShowCompleted = false;
+            _isFocusRestorePending = false;
+            _focusBeforeSuppression = null;
         }
 
         /// <summary>
@@ -248,6 +456,13 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 外部から指定された初期フォーカス先。未指定の場合はnull。 </summary>
         private VisualElement _explicitInitialFocusElement;
 
+        private bool _isInteractionEnabled = true;
+        private bool _isShowing;
+        private bool _isShowCompleted;
+        private bool _isFocusRestorePending;
+        private bool _isDisposed;
+        private int _focusRequestGeneration;
+        private VisualElement _focusBeforeSuppression;
         private MotionHandle _opacityMotionHandle;
         /// <summary> 直近に書き込んだ opacity。フェード再開時の始点として使用します。 </summary>
         private float _currentOpacity;

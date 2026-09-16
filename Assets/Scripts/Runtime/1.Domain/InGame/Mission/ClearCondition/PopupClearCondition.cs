@@ -13,14 +13,22 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         ///     PopupClearCondition クラスの新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="innerCondition"> ポップアップが閉じる判定を委譲する内側の条件です。 </param>
-        /// <param name="popupImage"> ポップアップに表示する画像です。不要な場合はnullです。 </param>
-        public PopupClearCondition(IMissionClearCondition innerCondition, Sprite popupImage)
+        /// <param name="popupImageEntryKey"> ポップアップ画像テーブルのエントリーキーです。 </param>
+        /// <param name="popupImage"> ローカライズ画像を取得できない場合に表示する画像です。不要な場合はnullです。 </param>
+        public PopupClearCondition(
+            IMissionClearCondition innerCondition,
+            string popupImageEntryKey,
+            Sprite popupImage)
         {
             _innerCondition = innerCondition ?? throw new ArgumentNullException(nameof(innerCondition));
+            PopupImageEntryKey = popupImageEntryKey ?? string.Empty;
             PopupImage = popupImage;
         }
 
-        /// <summary> ポップアップに表示する画像です。未設定の場合はnullです。 </summary>
+        /// <summary> ポップアップ画像テーブルのエントリーキーです。 </summary>
+        public string PopupImageEntryKey { get; }
+
+        /// <summary> ローカライズ画像を取得できない場合に表示する画像です。未設定の場合はnullです。 </summary>
         public Sprite PopupImage { get; }
 
         /// <inheritdoc />

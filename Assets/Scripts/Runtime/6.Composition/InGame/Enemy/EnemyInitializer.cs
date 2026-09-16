@@ -184,6 +184,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
+            PrewarmEnemyPools();
+
             _enemySpawnPositionSearcher.Initialize(_playerView.transform);
             _enemyInfantrySpawner.Initialize();
             _enemyArtillerySpawner.Initialize();
@@ -389,6 +391,29 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             objectiveSequence = sequence;
             return true;
+        }
+
+        /// <summary>
+        ///     今回のステージの全Waveに登場する敵定義を対象に、敵プールを事前生成します。
+        /// </summary>
+        private void PrewarmEnemyPools()
+        {
+            if (_loadedEnemyWaves == null || _loadedEnemyDefinitionRepository == null)
+            {
+                return;
+            }
+
+            IReadOnlyList<EnemyDefinitionId> enemyDefinitionIds = _loadedEnemyWaves.GetAllEnemyDefinitionIds();
+            for (int i = 0; i < enemyDefinitionIds.Count; i++)
+            {
+                EnemyDefinitionId id = enemyDefinitionIds[i];
+                if (!_loadedEnemyDefinitionRepository.TryGetDefinition(id, out EnemyDefinitionAsset definition))
+                {
+                    continue;
+                }
+
+                _enemyPools.PrewarmEnemy(id, definition.DefaultPoolSize);
+            }
         }
 
         /// <summary>

@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
@@ -5,6 +8,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface IFadeViewSink
     {
-        void SetFade(string target, float start, float end, float duration);
+        ValueTask SetFadeAsync(in ScenarioFadeViewDTO dto, CancellationToken ct);
     }
 }

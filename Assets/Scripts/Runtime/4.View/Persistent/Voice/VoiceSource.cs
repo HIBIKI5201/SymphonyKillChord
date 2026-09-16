@@ -9,8 +9,56 @@ namespace KillChord.Runtime.View.Persistent.Voice
     ///     Voice再生用のCRI Atom SourceをVoice音量管理へ登録するView。
     /// </summary>
     [RequireComponent(typeof(CriAtomSource))]
-    public sealed class VoiceSource : MonoBehaviour, IPlayableAudioSource, IVolumeApplicable
+    public sealed class VoiceSource : MonoBehaviour, IPlayableAudioSource, IVolumeApplicable, IControllableVoiceSource
     {
+        /// <inheritdoc />
+        public bool IsVoiceActive => _hasTrackedVoice && _trackedVoice.GetStatus() != CriAtomExPlayback.Status.Removed;
+
+        /// <inheritdoc />
+        public bool HasVoiceError => _hasTrackedVoice && _source.status == CriAtomSourceBase.Status.Error;
+
+        /// <inheritdoc />
+        public bool TryPlayVoice(string cueName)
+        {
+            StopVoice();
+            if (string.IsNullOrWhiteSpace(cueName))
+            {
+                return false;
+            }
+            _trackedVoice = _source.Play(cueName);
+            _hasTrackedVoice = _trackedVoice.id != CriAtomExPlayback.invalidId;
+            return _hasTrackedVoice;
+        }
+
+        /// <inheritdoc />
+        public void StopVoice()
+        {
+            if (!_hasTrackedVoice)
+            {
+                return;
+            }
+            
+            _trackedVoice.Stop(true);
+            _hasTrackedVoice = false;
+        }
+
+        /// <inheritdoc />
+        public void SetVoicePaused(bool isPaused)
+        {
+            if (!IsVoiceActive)
+            {
+                return;
+            }
+            if (isPaused)
+            {
+                _trackedVoice.Pause();
+            }
+            else
+            {
+                _trackedVoice.Resume(CriAtomEx.ResumeMode.PausedPlayback);
+            }
+        }
+
         /// <summary>
         ///     CriAtomSourceに設定されているVoice Cueを再生する。
         /// </summary>
@@ -40,24 +88,30 @@ namespace KillChord.Runtime.View.Persistent.Voice
         /// </summary>
         public void Stop()
         {
+            StopVoice();
             _source.Stop();
         }
 
         /// <summary>
-        ///     Voice音量を適用します。
+        ///     Voice全体音量の比率を適用します。
         /// </summary>
-        /// <param name="volume"> 音量。 </param> 
-        public void ApplyVolume(float volume)
+        /// <param name="volumeRatio"> 0から1の音量比率。 </param>
+        public void ApplyVolume(float volumeRatio)
         {
-            _source.volume = volume;
+            _source.volume = _baseVolume * volumeRatio;
         }
 
         private CriAtomSource _source;
+        private CriAtomExPlayback _trackedVoice;
+        private bool _hasTrackedVoice;
         private PersistentAudioVolumeRegistryView _volumeRegistryView;
+        private float _baseVolume = 1f;
+        private bool _baseVolumeCaptured;
 
         private void Awake()
         {
             _source = GetComponent<CriAtomSource>();
+            CaptureBaseVolume();
         }
 
         private void OnEnable()
@@ -68,7 +122,22 @@ namespace KillChord.Runtime.View.Persistent.Voice
 
         private void OnDisable()
         {
+            StopVoice();
             _volumeRegistryView?.UnregisterVoiceSource(this);
+        }
+
+        /// <summary>
+        ///     CriAtomSourceに設定されている元の音量を保持します。
+        /// </summary>
+        private void CaptureBaseVolume()
+        {
+            if (_baseVolumeCaptured)
+            {
+                return;
+            }
+
+            _baseVolume = _source.volume;
+            _baseVolumeCaptured = true;
         }
     }
 }

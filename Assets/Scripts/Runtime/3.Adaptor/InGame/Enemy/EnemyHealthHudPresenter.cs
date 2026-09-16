@@ -95,7 +95,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
             DamageNumberType type = GetDamageNumberType(damageEvent);
 
-            _damageNumberView.ShowDamage(new DamageNumberDTO(damageEvent.Damage, type));
+            _damageNumberView.ShowDamage(new DamageNumberDTO(damageEvent.Damage, type, damageEvent.Critical));
         }
 
         /// <summary>
@@ -106,15 +106,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private static DamageNumberType GetDamageNumberType(
             EOnTakeDamage eventData)
         {
-            if (eventData.Critical)
+            if (eventData.IsJustHit)
             {
-                return DamageNumberType.Critical;
-            }
-
-            if (eventData.AttackType == DamageAttackType.Skill ||
-                eventData.AttackType == DamageAttackType.Infection)
-            {
-                return DamageNumberType.Skill;
+                return DamageNumberType.JustHit;
             }
 
             return DamageNumberType.Normal;

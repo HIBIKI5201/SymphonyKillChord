@@ -41,6 +41,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _characterAnimationSignal = animationContext.Signal;
             _musicSyncState = musicSyncState;
             _isPlaying = false;
+            _speedVarianceMultiplier = Random.Range(_speedVarianceMin, _speedVarianceMax);
             SyncFootstepTiming();
         }
 
@@ -88,7 +89,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return false;
             }
 
-            _navMeshAgent.speed = 3f;
+            _navMeshAgent.speed = 3f * _speedVarianceMultiplier;
             _navMeshAgent.isStopped = false;
             _navMeshAgent.updateRotation = true;
             if (!_navMeshAgent.SetDestination(target))
@@ -146,7 +147,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
             if (intruction.ShouldMove)
             {
-                _navMeshAgent.speed = intruction.MoveSpeed;
+                _navMeshAgent.speed = intruction.MoveSpeed * _speedVarianceMultiplier;
                 _navMeshAgent.isStopped = false;
                 _navMeshAgent.updateRotation = true;
                 _navMeshAgent.SetDestination(intruction.Destination);
@@ -204,6 +205,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
+            _enemyAIController.OnAttackCanceled += PlayEffectCanceled;
             _enemyAIController.On1BeatBefore += On1BeatBefore;
             _enemyAIController.On2BeatBefore += On2BeatBefore;
         }
@@ -217,6 +219,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 _enemyAIController.OnAttackReserved -= PlayEffectReserved;
                 _enemyAIController.OnAttack -= PlayEffectHit;
+                _enemyAIController.OnAttackCanceled -= PlayEffectCanceled;
                 _enemyAIController.On1BeatBefore -= On1BeatBefore;
                 _enemyAIController.On2BeatBefore -= On2BeatBefore;
             }
@@ -226,6 +229,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         [SerializeField, Tooltip("敵攻撃SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
         private SoundEffectSource _attackSoundSource;
+
+        [SerializeField, Tooltip("攻撃予測1回目（2拍前）SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
+        private SoundEffectSource _attackAlertFirstSoundSource;
+
+        [SerializeField, Tooltip("攻撃予測2回目（1拍前）SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
+        private SoundEffectSource _attackAlertSecondSoundSource;
 
         [SerializeField, Tooltip("攻撃ヒット時に再生するエフェクトPrefab。")]
         private ParticleSystem _attackHitEffectPrefab;
@@ -261,9 +270,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField,Tooltip("攻撃ヒット時に再生するエフェクトのTransformです。")]
         private Transform _damageEffectTransform;
 
+        [Header("人間味調整")]
+        [SerializeField, Tooltip("移動速度の個体差(倍率)の下限。1体ごとに初期化時抽選されます。")]
+        private float _speedVarianceMin = 0.9f;
+        [SerializeField, Tooltip("移動速度の個体差(倍率)の上限。1体ごとに初期化時抽選されます。")]
+        private float _speedVarianceMax = 1.1f;
+
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
+        private float _speedVarianceMultiplier = 1f;
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
@@ -332,7 +348,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectHit()
         {
             if (!_isPlaying) return;
-            
+
             _weaponItemView?.Play();
             _characterAnimationViewModel?.SetReserving(false);
             PlayAttackEffect(_attackHitEffectInstance);
@@ -340,6 +356,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
             MoveToAttack();
             // 攻撃アニメを再生（構えアニメより優先）
             _characterAnimationSignal?.RequestAttack();
+        }
+        /// <summary>
+        ///     予約中の攻撃がキャンセルされた際に、予約状態と予約エフェクトを解除する。
+        /// </summary>
+        private void PlayEffectCanceled()
+        {
+            _characterAnimationViewModel?.SetReserving(false);
+            if (_attackReserveEffectInstance != null)
+            {
+                _attackReserveEffectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
         /// <summary>
         ///    ターゲットの方向を向く。
@@ -488,16 +515,21 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void On1BeatBefore()
         {
+            if (!_isPlaying) return;
+
             StopMoving();
             StopRotating();
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            PlaySound(_attackAlertSecondSoundSource, null);
         }
         /// <summary>
         ///     攻撃の2拍前に呼び出される処理。
         /// </summary>
         private void On2BeatBefore()
         {
+            if (!_isPlaying) return;
 
+            PlaySound(_attackAlertFirstSoundSource, null);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Haptics;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Adaptor.InGame.Target;
@@ -8,10 +9,14 @@ using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
-using KillChord.Runtime.InfraStructure.InGame.Music;
+using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Haptics;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.PostEffect;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
@@ -28,12 +33,51 @@ namespace KillChord.Runtime.Composition.InGame.UI
         public override int Order => 800;
 
         /// <summary>
+        ///     ゲームパッド振動のConfigをAddressablesから読み込む。
+        ///     振動は演出用途のためoptional扱いとし、読み込みに失敗してもモジュール自体は成功として扱う。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 常にtrue（キャンセル時を除く）。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            ReleaseLoadedHapticsConfig();
+
+            try
+            {
+                _loadedHapticsConfig = await _hapticsConfigKey.LoadAssetAsync<GamepadHapticsConfig>(
+                    this,
+                    cancellationToken);
+                if (_loadedHapticsConfig == null)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigを読み込めませんでした。振動機能なしで続行します。",
+                        this);
+                }
+
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                ReleaseLoadedHapticsConfig();
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfig読み込みに失敗しました。振動機能なしで続行します: {exception}",
+                    this);
+                ReleaseLoadedHapticsConfig();
+                return true;
+            }
+        }
+
+        /// <summary>
         ///     他モジュールへ結合してリズムガイドを初期化する。
         /// </summary>
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
-            if (_rhythmJudgmentDefinitionAsset == null || _rhythmGuideView == null)
+            if (_rhythmGuideView == null)
             {
                 Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] リズムガイド参照が不足しています。", this);
                 return false;
@@ -61,7 +105,6 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 初期化に成功した場合はtrueです。 </returns>
         public bool Initialize()
         {
-            Debug.Assert(_rhythmJudgmentDefinitionAsset != null, "RhythmJudgmentDefinitionAsset の参照が未設定です。RhythmJudgmentDefinitionAsset を設定してください。");
             Debug.Assert(_rhythmGuideView != null, "RhythmGuideView の参照が未設定です。RhythmGuideView を設定してください。");
 
             IMusicSyncService musicSyncService = ServiceLocator.GetInstance<MusicSyncModuleContainer>()?.MusicSyncService;
@@ -90,7 +133,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             // ガイド表示と判定は、音楽同期・ターゲット状態・ミッション進行状況を参照するためPresenterへ集約する。
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
-                new RhythmGuideUsecase(_rhythmJudgmentDefinitionAsset.ToDefinition()),
+                new RhythmGuideUsecase(),
                 targetingSystem,
                 missionRuntimeServiceProvider,
                 selectedBattleStageState
@@ -104,20 +147,40 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            PlayerAttackController playerAttackController =
-                ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerAttackController;
+            IPlayerAttackSignal playerAttackSignal =
+                ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerAttackSignal;
 
-            if (playerAttackController == null)
+            if (playerAttackSignal == null)
             {
-                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(PlayerAttackController)} が見つかりません。PlayerInitializer が先に初期化されているか確認してください。", this);
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(IPlayerAttackSignal)} が見つかりません。PlayerInitializer が先に初期化されているか確認してください。", this);
                 return false;
             }
 
-            // 攻撃入力の購読とジャスト判定はPresenterが持ち、ViewModelは設定に基づく表示反映のみを担う。
+            // 攻撃PresenterからSignalへ渡された判定を購読し、演出設定に基づいて表示する。
+            _postEffectPresenter?.Dispose();
             _postEffectPresenter = new RhythmGuidePostEffectPresenter(
-                playerAttackController,
+                playerAttackSignal,
                 _rhythmGuideView,
                 new RhythmGuidePostEffectViewModel(_rhythmGuidePostEffectView, _effectConfig));
+
+            // ゲームパッド振動は演出用途のoptional機能のため、Configが未ロードでもモジュール自体は成功させ、
+            // 振動関連の生成のみスキップする。
+            if (_loadedHapticsConfig == null)
+            {
+                Debug.LogWarning($"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigが未ロードのため、振動機能なしで続行します。", this);
+                return true;
+            }
+
+            // ゲームパッド振動はシーン参照を必要としないため、専用シーン配置のInitializerを設けず、
+            // 既にIPlayerAttackSignalを解決済みのこのInitializerへ相乗りさせている。
+            _gamepadHapticsPresenter?.Dispose();
+            if (_gamepadHapticsView == null)
+            {
+                _gamepadHapticsView = new GameObject(nameof(GamepadHapticsView)).AddComponent<GamepadHapticsView>();
+            }
+
+            _gamepadHapticsView.Initialize(_loadedHapticsConfig);
+            _gamepadHapticsPresenter = new GamepadHapticsPresenter(playerAttackSignal, _gamepadHapticsView);
 
             return true;
         }
@@ -129,20 +192,33 @@ namespace KillChord.Runtime.Composition.InGame.UI
         {
             _postEffectPresenter?.Dispose();
             _postEffectPresenter = null;
+            _gamepadHapticsPresenter?.Dispose();
+            _gamepadHapticsPresenter = null;
+            ReleaseLoadedHapticsConfig();
+
+            if (_gamepadHapticsView != null)
+            {
+                Destroy(_gamepadHapticsView.gameObject);
+                _gamepadHapticsView = null;
+            }
+
             _isRegisteredToPlayDirector = false;
         }
 
-        [Tooltip("リズム判定定義アセット。")]
-        [SerializeField] private RhythmJudgmentDefinitionAsset _rhythmJudgmentDefinitionAsset;
         [Tooltip("リズムガイドView。")]
         [SerializeField] private ACLikeRhythmGuideView _rhythmGuideView;
         [Tooltip("リズムガイドのフルスクリーン演出View。")]
         [SerializeField] private RhythmGuidePostEffectView _rhythmGuidePostEffectView;
         [Tooltip("リズムガイドの演出設定。ACLikeRhythmGuideViewに設定した物と同じアセットを指定。")]
         [SerializeField] private ACLikeRhythmGuideEffectConfig _effectConfig;
+        [Tooltip("ゲームパッド振動ConfigのAddressablesキー。")]
+        [SerializeField, SourceDataAddress] private string _hapticsConfigKey;
 
         private bool _isRegisteredToPlayDirector;
         private RhythmGuidePostEffectPresenter _postEffectPresenter;
+        private GamepadHapticsPresenter _gamepadHapticsPresenter;
+        private GamepadHapticsView _gamepadHapticsView;
+        private GamepadHapticsConfig _loadedHapticsConfig;
 
         /// <summary>
         ///     リズムガイドViewをゲームプレイ開始対象へ登録します。
@@ -164,6 +240,15 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             inGamePlayDirector.AddGamePlayControllable(_rhythmGuideView);
             _isRegisteredToPlayDirector = true;
+        }
+
+        /// <summary>
+        ///     ロード済みのゲームパッド振動ConfigとAddressablesハンドルを解放する。
+        /// </summary>
+        private void ReleaseLoadedHapticsConfig()
+        {
+            _hapticsConfigKey.ReleaseLoadedAsset(this);
+            _loadedHapticsConfig = null;
         }
     }
 }

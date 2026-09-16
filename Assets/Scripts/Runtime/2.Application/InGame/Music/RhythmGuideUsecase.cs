@@ -1,24 +1,10 @@
-using KillChord.Runtime.Domain.InGame.Music;
-
 namespace KillChord.Runtime.Application.InGame.Music
 {
     /// <summary>
-        ///     リズムガイドの計算ロジックを担当するユースケースクラス。
+    ///     リズムガイドの表示位置を計算するユースケースクラス。
     /// </summary>
     public class RhythmGuideUsecase
     {
-        /// <summary>
-        ///     新しいユースケースを生成する。
-        /// </summary>
-        /// <param name="rhythmJudgmentDefinition"> リズム判定の定義。 </param>
-        public RhythmGuideUsecase(RhythmJudgmentDefinition rhythmJudgmentDefinition)
-        {
-            _rhythmJudgmentDefinition = rhythmJudgmentDefinition;
-        }
-
-        /// <summary> リズム判定の定義。 </summary>
-        public RhythmJudgmentDefinition RhythmJudgmentDefinition => _rhythmJudgmentDefinition;
-
         /// <summary> インジケーターがジャストタイミングを超えて進む量（小節基準の正規化値）。 </summary>
         public const float INDICATOR_OVERRUN_NORMALIZED = 0.2f;
 
@@ -47,22 +33,5 @@ namespace KillChord.Runtime.Application.InGame.Music
 
             return barProgress;
         }
-
-        /// <summary>
-        ///     指定された拍における拍の種類を計算する。
-        /// </summary>
-        /// <param name="normalizedBarProgress"> 小節内の正規化進捗。 </param>
-        /// <returns> 拍の種類。範囲外の場合は null。 </returns>
-        public BeatType? CalculateCurrentBeatType(float normalizedBarProgress)
-        {
-            if (_rhythmJudgmentDefinition.TryResolveBeatType(normalizedBarProgress, out BeatType beatType))
-            {
-                return beatType;
-            }
-
-            return null;
-        }
-
-        private readonly RhythmJudgmentDefinition _rhythmJudgmentDefinition;
     }
 }

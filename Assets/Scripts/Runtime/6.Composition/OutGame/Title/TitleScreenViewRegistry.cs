@@ -18,19 +18,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         /// <param name="titleScreenView"></param>
         /// <param name="menuScreenView"></param>
-        /// <param name="optionsScreenView"></param>
         /// <param name="creditScreenView"></param>
         public TitleScreenViewRegistry(
             ScreenViewBase titleScreenView,
             ScreenViewBase menuScreenView,
-            ScreenViewBase optionsScreenView,
             ScreenViewBase creditScreenView)
         {
             _views = new Dictionary<ScreenId, ScreenViewBase>
             {
                 { ScreenId.Title, titleScreenView },
                 { ScreenId.Menu, menuScreenView },
-                { ScreenId.Options, optionsScreenView },
                 { ScreenId.Credit, creditScreenView },
             };
         }
@@ -127,6 +124,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         public void Dispose()
         {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isDisposed = true;
             foreach (IDisposable disposable in _views.Values)
             {
                 disposable?.Dispose();
@@ -135,6 +138,31 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             ResetFocusHistory();
         }
 
+        /// <summary>
+        ///     登録画面の入力許可を切り替え、再開時は現在画面だけへフォーカス復元を要求する。
+        /// </summary>
+        public void SetInteractionEnabled(bool isEnabled)
+        {
+            if (_isDisposed || _isInteractionEnabled == isEnabled)
+            {
+                return;
+            }
+
+            _isInteractionEnabled = isEnabled;
+            foreach (ScreenViewBase view in _views.Values)
+            {
+                view.SetInteractionEnabled(isEnabled);
+            }
+
+            if (isEnabled && _currentScreenId.HasValue
+                && _views.TryGetValue(_currentScreenId.Value, out ScreenViewBase currentView))
+            {
+                currentView.RestoreFocus();
+            }
+        }
+
+        private bool _isInteractionEnabled = true;
+        private bool _isDisposed;
         private readonly Dictionary<ScreenId, ScreenViewBase> _views;
         private readonly Stack<VisualElement> _focusHistory = new();
         private ScreenId? _currentScreenId;

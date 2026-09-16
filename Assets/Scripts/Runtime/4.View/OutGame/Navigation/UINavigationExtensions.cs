@@ -26,13 +26,41 @@ namespace KillChord.Runtime.View.OutGame.Navigation
         public const string INITIAL_FOCUS_CLASS_NAME = "initial-focus";
 
         /// <summary>
-        ///     要素をクリックとコントローラーの決定操作の両方で作動するようにします。
+        ///     要素のフォーカス状態を親要素のUSSクラスへ同期します。
+        ///     <para>
+        ///         UI Toolkitには`:focus-within`相当の疑似クラスが無く、
+        ///         子要素が`:focus`になっても親要素のスタイルは変化しない。
+        ///         マウスホバー(`:hover`)は親要素にも自然に伝播するため、
+        ///         コントローラー操作時だけ見た目が変化しない差を埋めるために使用する。
+        ///     </para>
+        /// </summary>
+        /// <param name="element"> フォーカス状態を監視する要素です。 </param>
+        /// <param name="className"> フォーカス中に親要素へ付与するUSSクラス名です。 </param>
+        /// <returns> 登録したコールバックを解除するオブジェクトです。 </returns>
+        /// <exception cref="ArgumentNullException"> いずれかがnullの場合にスローされます。 </exception>
+        public static IDisposable SyncFocusClassToParent(this VisualElement element, string className)
+        {
+            if (element == null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+
+            if (string.IsNullOrEmpty(className))
+            {
+                throw new ArgumentNullException(nameof(className));
+            }
+
+            return new FocusClassSyncRegistration(element, className);
+        }
+
+        /// <summary>
+        ///     要素の作動要求を1つの処理へ接続します。
         /// </summary>
         /// <param name="element"> 対象の要素です。 </param>
-        /// <param name="onActivate"> クリックまたは決定操作で呼び出す処理です。 </param>
-        /// <returns> 呼び出しを連結できるよう、対象の要素をそのまま返します。 </returns>
+        /// <param name="onActivate"> 作動時に呼び出す処理です。 </param>
+        /// <returns> 登録したコールバックを解除するオブジェクトです。 </returns>
         /// <exception cref="ArgumentNullException"> いずれかがnullの場合にスローされます。 </exception>
-        public static VisualElement RegisterActivation(this VisualElement element, Action onActivate)
+        public static IDisposable RegisterActivation(this VisualElement element, Action onActivate)
         {
             if (element == null)
             {
@@ -44,57 +72,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
                 throw new ArgumentNullException(nameof(onActivate));
             }
 
-            element.MakeNavigable();
-            element.RegisterCallback<ClickEvent>(_ => onActivate());
-            element.RegisterCallback<NavigationSubmitEvent>(navigationEvent =>
-            {
-                onActivate();
-                navigationEvent.StopPropagation();
-            });
-
-            return element;
-        }
-
-        /// <summary>
-        ///     要素をフォーカス可能にし、コントローラーの決定操作をクリックとして扱えるようにします。
-        ///     <para>
-        ///         既存の <see cref="ClickEvent"/> ハンドラをそのまま利用したい要素に使用します。
-        ///         決定操作を受けると自身へ <see cref="ClickEvent"/> を送出するため、
-        ///         マウスで押した場合と同じ経路を通ります。
-        ///     </para>
-        ///     <para>
-        ///         Buttonは決定操作を標準でクリックへ変換するため、
-        ///         Buttonが渡された場合はフォーカス可能化だけを行い、イベントを追加しません。
-        ///     </para>
-        /// </summary>
-        /// <param name="element"> 対象の要素です。 </param>
-        /// <returns> 呼び出しを連結できるよう、対象の要素をそのまま返します。 </returns>
-        /// <exception cref="ArgumentNullException"> elementがnullの場合にスローされます。 </exception>
-        public static VisualElement EnableSubmitAsClick(this VisualElement element)
-        {
-            if (element == null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
-
-            element.MakeNavigable();
-
-            // Buttonは標準処理でNavigationSubmitEventをクリックへ変換するため、
-            // 追加のClickEventを送ると同じ操作が二重に実行される。
-            if (element is Button)
-            {
-                return element;
-            }
-
-            element.RegisterCallback<NavigationSubmitEvent>(navigationEvent =>
-            {
-                using ClickEvent clickEvent = ClickEvent.GetPooled();
-                clickEvent.target = element;
-                element.SendEvent(clickEvent);
-                navigationEvent.StopPropagation();
-            });
-
-            return element;
+            return new ActivationRegistration(element, onActivate);
         }
 
         /// <summary>
@@ -187,6 +165,163 @@ namespace KillChord.Runtime.View.OutGame.Navigation
 
                 element.Focus();
             });
+        }
+
+        /// <summary>
+        ///     要素の作動コールバックを所有し、一括解除します。
+        /// </summary>
+        private sealed class ActivationRegistration : IDisposable
+        {
+            /// <summary>
+            ///     作動コールバックを登録します。
+            /// </summary>
+            /// <param name="element"> 登録対象の要素です。 </param>
+            /// <param name="onActivate"> 作動時に呼び出す処理です。 </param>
+            public ActivationRegistration(VisualElement element, Action onActivate)
+            {
+                _element = element;
+                _onActivate = onActivate;
+                _clickCallback = HandleClickHandler;
+                _submitCallback = HandleSubmitHandler;
+                _activationCallback = HandleActivationHandler;
+
+                _element.RegisterCallback(_clickCallback);
+                _element.RegisterCallback(_submitCallback);
+                _element.RegisterCallback(_activationCallback);
+            }
+
+            /// <summary>
+            ///     登録した全コールバックを解除します。
+            /// </summary>
+            public void Dispose()
+            {
+                if (_isDisposed)
+                {
+                    return;
+                }
+
+                _element.UnregisterCallback(_clickCallback);
+                _element.UnregisterCallback(_submitCallback);
+                _element.UnregisterCallback(_activationCallback);
+                _isDisposed = true;
+            }
+
+            private readonly VisualElement _element;
+            private readonly Action _onActivate;
+            private readonly EventCallback<ClickEvent> _clickCallback;
+            private readonly EventCallback<NavigationSubmitEvent> _submitCallback;
+            private readonly EventCallback<UIActivationEvent> _activationCallback;
+            private bool _isDisposed;
+
+            /// <summary>
+            ///     ポインタークリックによる作動要求を処理します。
+            /// </summary>
+            /// <param name="clickEvent"> クリックイベントです。 </param>
+            private void HandleClickHandler(ClickEvent clickEvent)
+            {
+                Activate(clickEvent);
+            }
+
+            /// <summary>
+            ///     ナビゲーション決定による作動要求を処理します。
+            /// </summary>
+            /// <param name="submitEvent"> ナビゲーション決定イベントです。 </param>
+            private void HandleSubmitHandler(NavigationSubmitEvent submitEvent)
+            {
+                Activate(submitEvent);
+            }
+
+            /// <summary>
+            ///     明示的な作動要求を処理します。
+            /// </summary>
+            /// <param name="activationEvent"> 明示的な作動イベントです。 </param>
+            private void HandleActivationHandler(UIActivationEvent activationEvent)
+            {
+                Activate(activationEvent);
+            }
+
+            /// <summary>
+            ///     有効な要素の作動処理を1回実行します。
+            /// </summary>
+            /// <param name="activationEvent"> 処理対象のイベントです。 </param>
+            private void Activate(EventBase activationEvent)
+            {
+                if (_isDisposed || !_element.enabledInHierarchy)
+                {
+                    NavigationDebugLog.Log(
+                        $"Activation ignored on {NavigationDebugLog.Describe(_element)} via "
+                        + $"{activationEvent.GetType().Name} (disposed={_isDisposed}, "
+                        + $"enabled={_element.enabledInHierarchy})");
+                    return;
+                }
+
+                NavigationDebugLog.Log(
+                    $"Activation on {NavigationDebugLog.Describe(_element)} via {activationEvent.GetType().Name}");
+                _onActivate();
+                activationEvent.StopPropagation();
+            }
+        }
+
+        /// <summary>
+        ///     フォーカス状態の親要素への同期を所有し、一括解除します。
+        /// </summary>
+        private sealed class FocusClassSyncRegistration : IDisposable
+        {
+            /// <summary>
+            ///     フォーカス/フォーカス解除のコールバックを登録します。
+            /// </summary>
+            /// <param name="element"> 監視対象の要素です。 </param>
+            /// <param name="className"> 親要素へ付与するUSSクラス名です。 </param>
+            public FocusClassSyncRegistration(VisualElement element, string className)
+            {
+                _element = element;
+                _className = className;
+                _focusCallback = HandleFocusHandler;
+                _blurCallback = HandleBlurHandler;
+
+                _element.RegisterCallback(_focusCallback);
+                _element.RegisterCallback(_blurCallback);
+            }
+
+            /// <summary>
+            ///     登録した全コールバックを解除します。
+            /// </summary>
+            public void Dispose()
+            {
+                if (_isDisposed)
+                {
+                    return;
+                }
+
+                _element.UnregisterCallback(_focusCallback);
+                _element.UnregisterCallback(_blurCallback);
+                _element.parent?.RemoveFromClassList(_className);
+                _isDisposed = true;
+            }
+
+            private readonly VisualElement _element;
+            private readonly string _className;
+            private readonly EventCallback<FocusEvent> _focusCallback;
+            private readonly EventCallback<BlurEvent> _blurCallback;
+            private bool _isDisposed;
+
+            /// <summary>
+            ///     フォーカスを得たときに親要素へクラスを付与します。
+            /// </summary>
+            /// <param name="focusEvent"> フォーカスイベントです。 </param>
+            private void HandleFocusHandler(FocusEvent focusEvent)
+            {
+                _element.parent?.AddToClassList(_className);
+            }
+
+            /// <summary>
+            ///     フォーカスを失ったときに親要素からクラスを外します。
+            /// </summary>
+            /// <param name="blurEvent"> フォーカス解除イベントです。 </param>
+            private void HandleBlurHandler(BlurEvent blurEvent)
+            {
+                _element.parent?.RemoveFromClassList(_className);
+            }
         }
     }
 }

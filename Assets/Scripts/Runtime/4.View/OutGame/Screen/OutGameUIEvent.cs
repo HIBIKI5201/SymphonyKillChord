@@ -13,9 +13,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> メニュー画面を表示するイベント。 </summary>
         public Action OnShowMenuScreen;
 
-        /// <summary> オプション画面を表示するイベント。 </summary>
-        public Action OnShowOptionsScreen;
-
         /// <summary> クレジット画面を表示するイベント。 </summary>
         public Action OnShowCreditScreen;
 
@@ -24,6 +21,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> ホーム画面を表示するイベント。 </summary>
         public Action OnShownHomeScreen;
+
+        /// <summary> ホームチュートリアルを開始または再開するイベント。 </summary>
+        public Action OnHomeTutorialStarted;
+
+        /// <summary> ホームチュートリアルの完了を通知するイベント。 </summary>
+        public Action OnHomeTutorialCompleted;
 
         /// <summary> 作戦画面を表示するイベント。 </summary>
         public Action OnShownStageSelectionScreen;
@@ -63,6 +66,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> スキルノードが解放された時のイベント。 </summary>
         public Action OnSkillUnlocked;
+
+        /// <summary> スキルノード解放の確認ダイアログ表示を要求するイベント。 </summary>
+        public Action OnSkillUnlockConfirmationRequested;
+
+        /// <summary> スキルノード解放確認ダイアログで解放を確定するイベント。 </summary>
+        public Action OnSkillUnlockConfirmed;
 
         /// <summary> スキルツリーのリセット確認表示を要求するイベント。 </summary>
         public Action OnSkillTreeResetRequested;

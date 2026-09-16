@@ -1,0 +1,280 @@
+---
+interface Segment {
+	value: string;
+	caption: string;
+	color: string;
+	ratio?: number;
+}
+
+interface Props {
+	segments: Segment[];
+}
+
+const { segments } = Astro.props;
+
+// ratio未指定の場合は等分にフォールバックする
+const fallbackRatio = 100 / segments.length;
+const ratios = segments.map((segment) => segment.ratio ?? fallbackRatio);
+
+function colorAtPercent(pct: number) {
+	let cumulative = 0;
+	for (let i = 0; i < segments.length; i++) {
+		cumulative += ratios[i];
+		if (pct < cumulative || i === segments.length - 1) return segments[i].color;
+	}
+	return segments[segments.length - 1].color;
+}
+
+// 各色帯の中央位置(%)。ここに「Justの目安」を示す黄色い縦線を固定表示する。
+// 見た目調整用に、色帯ごとの微調整オフセット(%)を個別に指定できるようにしている。
+const markerOffsets = [5, 0, 0];
+const markerCenters = (() => {
+	let cumulative = 0;
+	return ratios.map((ratio, index) => {
+		const center = cumulative + ratio / 2 + (markerOffsets[index] ?? 0);
+		cumulative += ratio;
+		return center;
+	});
+})();
+
+// スペクトラムアナライザ風の軌跡表現用に、帯を細かいバーへ分割しておく。
+// 各バーの色は判定線が通過する位置の色に合わせ、高さはランダムにばらけさせて音楽的な見た目にする。
+const trailBarCount = 40;
+const trailBars = Array.from({ length: trailBarCount }, (_, index) => {
+	const pct = ((index + 0.5) / trailBarCount) * 100;
+	return {
+		color: colorAtPercent(pct),
+		peakHeight: 35 + Math.random() * 65,
+	};
+});
+---
+
+<div class="rhythm-demo">
+	<div class="track-outer">
+		<div class="track-wrap">
+			<div class="bands">
+				{segments.map((segment, index) => <div class="band" style={`background-color: ${segment.color}; width: ${ratios[index]}%;`} />)}
+			</div>
+			<div class="trail">
+				{trailBars.map((bar) => <span class="trail-bar" style={`--bar-color: ${bar.color}; --bar-peak: ${bar.peakHeight}%;`} />)}
+			</div>
+		</div>
+		{markerCenters.map((pct) => <span class="just-marker" style={`left: ${pct}%;`} data-pct={pct} aria-hidden="true" />)}
+		<span class="judge-line" aria-hidden="true" />
+	</div>
+
+	<div class="boxes">
+		{
+			segments.map((segment, index) => (
+				<div class="box" style={`--box-color: ${segment.color};`} data-ratio={ratios[index]}>
+					<span class="value">{segment.value}</span>
+					<span class="caption">{segment.caption}</span>
+				</div>
+			))
+		}
+	</div>
+</div>
+
+<script>
+	// 判定線が左端から最大時間(sweepMs)をかけて右へ流れ、到達したら自動で攻撃判定を行い、
+	// 位置を左端に戻して再び流れ始める(手動クリックは行わない完全自動のデモ)。
+	// 通過した位置には、スペクトラムアナライザ風にバーを光らせて軌跡を残す。
+	const demos = document.querySelectorAll<HTMLElement>('.rhythm-demo');
+
+	demos.forEach((demo) => {
+		const line = demo.querySelector<HTMLElement>('.judge-line');
+		const boxes = Array.from(demo.querySelectorAll<HTMLElement>('.box'));
+		const trailBars = Array.from(demo.querySelectorAll<HTMLElement>('.trail-bar'));
+		const markers = Array.from(demo.querySelectorAll<HTMLElement>('.just-marker'));
+		if (!line || boxes.length === 0) return;
+
+		const ratios = boxes.map((box) => Number(box.dataset.ratio) || 0);
+		const sweepMs = 4000;
+		const decayMs = 500;
+		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		function attackAt(progress: number) {
+			const pct = progress * 100;
+			let cumulative = 0;
+			for (let i = 0; i < boxes.length; i++) {
+				cumulative += ratios[i];
+				if (pct < cumulative || i === boxes.length - 1) {
+					const box = boxes[i];
+					box.classList.remove('is-hit');
+					void box.offsetWidth;
+					box.classList.add('is-hit');
+					break;
+				}
+			}
+		}
+
+		// バー位置(%)は固定なので毎フレーム計算せず、あらかじめ配列化しておく
+		const barPcts = trailBars.map((_, index) => (index + 0.5) / trailBars.length);
+		// 直前に描画した値を覚えておき、変化がないバーへの書き込みを毎フレーム省略する
+		const lastIntensities = new Float32Array(trailBars.length).fill(-1);
+
+		function renderTrail(progress: number) {
+			for (let index = 0; index < trailBars.length; index++) {
+				const barPct = barPcts[index];
+				let intensity = 0;
+				if (barPct <= progress) {
+					const sinceMs = (progress - barPct) * sweepMs;
+					intensity = Math.max(0, 1 - sinceMs / decayMs);
+				}
+				// ほぼ変化がないバーはstyle書き込み自体をスキップし、レイアウト/再描画コストを抑える
+				if (Math.abs(intensity - lastIntensities[index]) < 0.01) continue;
+				lastIntensities[index] = intensity;
+
+				const bar = trailBars[index];
+				bar.style.opacity = String(0.12 + 0.88 * intensity);
+				// heightではなくtransform(scaleY)で表現することで、レイアウト計算を発生させず
+				// コンポジタ側の処理だけで軌跡の伸縮を描画できるようにする
+				bar.style.transform = `scaleY(${0.1 + 0.9 * intensity})`;
+			}
+		}
+
+		if (prefersReducedMotion) {
+			line.style.left = '0%';
+			renderTrail(0);
+			return;
+		}
+
+		// 攻撃(自動クリック)は、ゲージ上のランダムな位置ではなく、
+		// 黄色い縦線(Just目安・各色帯の中央)の位置でのみランダムに発生させる。
+		// 黄色い線自体は静的表示のままで、アニメーションはBOX側にのみ発生する。
+		const markerPcts = markers.map((marker) => Number(marker.dataset.pct));
+		function pickAttackMs() {
+			const pct = markerPcts[Math.floor(Math.random() * markerPcts.length)];
+			return (pct / 100) * sweepMs;
+		}
+
+		let start = performance.now();
+		let attackAtMs = pickAttackMs();
+
+		function tick(now: number) {
+			const elapsed = now - start;
+			if (elapsed >= attackAtMs) {
+				attackAt(attackAtMs / sweepMs);
+				start = now;
+				attackAtMs = pickAttackMs();
+				line.style.left = '0%';
+				renderTrail(0);
+			} else {
+				const progress = elapsed / sweepMs;
+				line.style.left = `${progress * 100}%`;
+				renderTrail(progress);
+			}
+			requestAnimationFrame(tick);
+		}
+
+		requestAnimationFrame(tick);
+	});
+</script>
+
+<style>
+	.rhythm-demo {
+		margin-top: 28px;
+		display: flex;
+		flex-direction: column;
+		gap: 28px;
+	}
+
+	.track-outer {
+		position: relative;
+	}
+
+	.track-wrap {
+		position: relative;
+		height: 18px;
+		border: 1px solid var(--color-surface-border);
+		background: var(--color-bg-alt);
+		overflow: hidden;
+	}
+
+	.bands {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		opacity: 0.35;
+	}
+
+	.trail {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+	}
+
+	.trail-bar {
+		flex: 1;
+		height: var(--bar-peak);
+		background: var(--bar-color);
+		opacity: 0.12;
+		transform: scaleY(0.1);
+		transform-origin: center;
+	}
+
+	.judge-line {
+		position: absolute;
+		top: 50%;
+		left: 0%;
+		z-index: 1;
+		width: 2px;
+		height: 48px;
+		background: var(--color-text-primary);
+		box-shadow: 0 0 6px var(--color-text-primary);
+		transform: translate(-50%, -50%);
+	}
+
+	.just-marker {
+		position: absolute;
+		top: 50%;
+		z-index: 1;
+		width: 6px;
+		height: 30px;
+		background: #f2d94e;
+		transform: translate(-50%, -50%);
+	}
+
+	.boxes {
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 12px;
+	}
+
+	.box {
+		display: flex;
+		align-items: baseline;
+		gap: 6px;
+		padding: 6px 12px;
+		border: 1px solid var(--box-color);
+		color: var(--box-color);
+	}
+
+	.box.is-hit {
+		animation: box-jump 0.4s ease-out;
+	}
+
+	.box .value {
+		font-family: var(--font-mono);
+		font-weight: 700;
+	}
+
+	.box .caption {
+		font-size: 12px;
+		color: var(--color-text-muted);
+	}
+
+	@keyframes box-jump {
+		0% {
+			transform: translateY(0);
+		}
+		35% {
+			transform: translateY(-10px);
+		}
+		100% {
+			transform: translateY(0);
+		}
+	}
+</style>

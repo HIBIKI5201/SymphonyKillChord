@@ -55,7 +55,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 element,
                 OnSkillElementDrop,
                 slotContainerName: SKILL_ELEMENT_CONTAINER_CLASSNAME,
-                slotName: SKILL_ELEMENT_SLOT_CLASSNAME);
+                slotName: SKILL_ELEMENT_SLOT_CLASSNAME,
+                onDragStarted: OnSkillElementDragStarted);
 
             element.AddManipulator(manipulator);
         }
@@ -73,6 +74,20 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 SetupDraggable(draggables[i]);
             }
+        }
+
+        /// <summary>
+        ///     スキル要素のドラッグが確定したときに、そのスキルを詳細パネルの表示対象として選択する。
+        /// </summary>
+        /// <param name="skill"> ドラッグ中のスキル要素の VisualElement。 </param>
+        private void OnSkillElementDragStarted(VisualElement skill)
+        {
+            if (skill?.userData is not int skillId)
+            {
+                return;
+            }
+
+            _skillBuildViewModel.SelectSkill(skillId);
         }
 
         /// <summary>

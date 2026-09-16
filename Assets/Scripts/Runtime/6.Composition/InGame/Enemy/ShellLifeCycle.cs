@@ -57,7 +57,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         /// <param name="releaseCallback"> 砲弾をObject Poolへ戻す際に呼び出すコールバック。 </param>
         /// <param name="shellExplosionEffectView"> 爆発エフェクトを再生するパーティクルView。 </param>
-        public void Initialize(Action<ShellLifeCycle> releaseCallback, ReusableParticleSystemView shellExplosionEffectView)
+        /// <param name="shellExplosionSoundView"> 爆発SEを再生する外部所有のView。 </param>
+        public void Initialize(Action<ShellLifeCycle> releaseCallback, ReusableParticleSystemView shellExplosionEffectView, ReusableSoundEffectView shellExplosionSoundView)
         {
             if (!_musicSyncInitializer) _musicSyncInitializer = FindFirstObjectByType<MusicSyncInitializer>();
             if (!_musicSyncView) _musicSyncView = FindAnyObjectByType<MusicSyncView>();
@@ -100,6 +101,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 shellSpecPresenter,
                 Deactivate,
                 shellExplosionEffectView,
+                shellExplosionSoundView,
                 GetDetonateApproach);
             _releaseCallback = releaseCallback;
         }
@@ -111,8 +113,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public void Activate(EnemyBattleState enemyBattleState)
         {
             gameObject.SetActive(true);
+
+            // Viewの有効化に失敗した(=攻撃対象を失っている)場合、着弾予告SE・爆発予約を
+            // 仕込まずに即座にプールへ戻す。表示・ダメージが伴わないまま音だけが再生される事故を防ぐため。
+            if (!_view.TryActivate())
+            {
+                Deactivate();
+                return;
+            }
+
             _controller.Activate(enemyBattleState);
-            _view.Activate();
         }
 
         /// <summary>
@@ -139,11 +149,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private ShellReservationUsecase _reservationUsecase;
         private ShellAttackSpecAsset _loadedAttackData;
         private EnemyMusicSpecAsset _loadedMusicData;
-        /// <summary> 爆発予告デカールの進捗を0から1へ変化させる区間の長さ（拍）。 </summary>
-        private const double DETONATE_LEAD_BEAT_COUNT = 2d;
 
         /// <summary>
         ///     予約済みの爆発時刻までの残り時間から、0〜1の接近進捗を算出します。
+        ///     区間の長さ（拍）はShellMusicConstants.DETONATE_LEAD_BEAT_COUNTを使用し、
+        ///     着弾予告SEの再生タイミング（ShellReservationUsecase側）と同じ値で揃える。
         /// </summary>
         /// <returns> 0〜1の進捗。予約が無い場合や算出できない場合は0。 </returns>
         private float GetDetonateApproach()
@@ -161,7 +171,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             return musicSyncState.GetNormalizedApproach(
                 _reservationUsecase.DetonateExecutionTime,
-                DETONATE_LEAD_BEAT_COUNT);
+                ShellMusicConstants.DETONATE_LEAD_BEAT_COUNT);
         }
 
         /// <summary>

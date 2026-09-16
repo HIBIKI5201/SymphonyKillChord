@@ -553,7 +553,7 @@ ParticleSystem:
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
-  autoRandomSeed: 1
+  autoRandomSeed: 0
   startDelay:
     serializedVersion: 2
     minMaxState: 0
@@ -610,7 +610,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 0
+  randomSeed: 1981
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -6207,7 +6207,7 @@ ParticleSystem:
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
-  autoRandomSeed: 1
+  autoRandomSeed: 0
   startDelay:
     serializedVersion: 2
     minMaxState: 0
@@ -6264,7 +6264,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 0
+  randomSeed: 6196
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -11271,7 +11271,7 @@ ParticleSystem:
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
-  autoRandomSeed: 1
+  autoRandomSeed: 0
   startDelay:
     serializedVersion: 2
     minMaxState: 0
@@ -11328,7 +11328,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 0
+  randomSeed: 2664
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -21003,6 +21003,7 @@ Transform:
   - {fileID: 2173626744381838248}
   - {fileID: 2429863346342483821}
   - {fileID: 7340984041057737035}
+  - {fileID: 1299290218968635397}
   m_Father: {fileID: 8139216509917105061}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!320 &470562603088812245
@@ -21019,7 +21020,9 @@ PlayableDirector:
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
-  m_SceneBindings: []
+  m_SceneBindings:
+  - key: {fileID: -7296426864104298219, guid: dd253598063d52b47b0712290135ab21, type: 2}
+    value: {fileID: 413518142080897679}
   m_ExposedReferences:
     m_References:
     - 580bcc4d-e010-4069-b491-ed2061be5bbf: {fileID: 6173059869743663468}
@@ -21313,7 +21316,7 @@ ParticleSystem:
   prewarm: 0
   playOnAwake: 1
   useUnscaledTime: 0
-  autoRandomSeed: 1
+  autoRandomSeed: 0
   startDelay:
     serializedVersion: 2
     minMaxState: 0
@@ -21370,7 +21373,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: 0
+  randomSeed: 4280
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -26155,6 +26158,116 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!1 &8440977040110372559
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1299290218968635397}
+  - component: {fileID: 7381336088798382605}
+  - component: {fileID: 830555527962563912}
+  - component: {fileID: 413518142080897679}
+  m_Layer: 0
+  m_Name: Skill13ShotSound
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1299290218968635397
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8440977040110372559}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5343406950704899154}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7381336088798382605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8440977040110372559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
+  _playOnStart: 0
+  _regionOnStart: {fileID: 0}
+  _listenerOnStart: {fileID: 0}
+  _use3dPositioning: 1
+  _freezeOrientation: 0
+  _loop: 0
+  _volume: 1
+  _pitch: 0
+  _androidUseLowLatencyVoicePool: 0
+  need_to_player_update_all: 1
+  _use3dRandomization: 0
+  _randomPositionListMaxLength: 0
+  randomize3dConfig:
+    followsOriginalSource: 0
+    calculationType: 0
+    calculationParameters:
+    - 0
+    - 0
+    - 0
+  _cueName: SE_Gunshot8
+  _cueSheet: CueSheet_0
+--- !u!114 &830555527962563912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8440977040110372559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
+--- !u!114 &413518142080897679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8440977040110372559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e52de21a22b6dd44c9cc19f810c65059, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.SignalReceiver
+  m_Events:
+    m_Signals:
+    - {fileID: 11400000, guid: fd0f51ac33ed16d4f85e60efbf1c7fc1, type: 2}
+    m_Events:
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 830555527962563912}
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.Persistent.Music.SoundEffectSource,
+            KillChord.View
+          m_MethodName: Play
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1001 &119786875704219129
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26321,6 +26434,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5343406950704899154}
     m_Modifications:
+    - target: {fileID: 233080665038533513, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 1981
+      objectReference: {fileID: 0}
+    - target: {fileID: 233080665038533513, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 496040514894061766, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -26341,10 +26462,42 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 4d0bf3980be077c47a0df4bb79fb2c5a, type: 2}
+    - target: {fileID: 1609653857710446175, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 1981
+      objectReference: {fileID: 0}
+    - target: {fileID: 1609653857710446175, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2041957302198256223, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 1981
+      objectReference: {fileID: 0}
+    - target: {fileID: 2041957302198256223, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2270457478171558755, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 4d0bf3980be077c47a0df4bb79fb2c5a, type: 2}
+    - target: {fileID: 4931195971254365017, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 1981
+      objectReference: {fileID: 0}
+    - target: {fileID: 4931195971254365017, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598694350273535329, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 1981
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598694350273535329, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6463771768763691494, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -26645,6 +26798,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5343406950704899154}
     m_Modifications:
+    - target: {fileID: 233080665038533513, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 4280
+      objectReference: {fileID: 0}
+    - target: {fileID: 233080665038533513, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 496040514894061766, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -26665,10 +26826,42 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 4d0bf3980be077c47a0df4bb79fb2c5a, type: 2}
+    - target: {fileID: 1609653857710446175, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 4280
+      objectReference: {fileID: 0}
+    - target: {fileID: 1609653857710446175, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2041957302198256223, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 4280
+      objectReference: {fileID: 0}
+    - target: {fileID: 2041957302198256223, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2270457478171558755, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 4d0bf3980be077c47a0df4bb79fb2c5a, type: 2}
+    - target: {fileID: 4931195971254365017, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 4280
+      objectReference: {fileID: 0}
+    - target: {fileID: 4931195971254365017, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598694350273535329, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 4280
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598694350273535329, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6463771768763691494, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -26969,6 +27162,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5343406950704899154}
     m_Modifications:
+    - target: {fileID: 233080665038533513, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 2664
+      objectReference: {fileID: 0}
+    - target: {fileID: 233080665038533513, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 496040514894061766, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -26989,10 +27190,42 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 4d0bf3980be077c47a0df4bb79fb2c5a, type: 2}
+    - target: {fileID: 1609653857710446175, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 2664
+      objectReference: {fileID: 0}
+    - target: {fileID: 1609653857710446175, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2041957302198256223, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 2664
+      objectReference: {fileID: 0}
+    - target: {fileID: 2041957302198256223, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2270457478171558755, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 4d0bf3980be077c47a0df4bb79fb2c5a, type: 2}
+    - target: {fileID: 4931195971254365017, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 2664
+      objectReference: {fileID: 0}
+    - target: {fileID: 4931195971254365017, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598694350273535329, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 2664
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598694350273535329, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6463771768763691494, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -27372,6 +27605,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5343406950704899154}
     m_Modifications:
+    - target: {fileID: 233080665038533513, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 6196
+      objectReference: {fileID: 0}
+    - target: {fileID: 233080665038533513, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 496040514894061766, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -27392,10 +27633,42 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 4d0bf3980be077c47a0df4bb79fb2c5a, type: 2}
+    - target: {fileID: 1609653857710446175, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 6196
+      objectReference: {fileID: 0}
+    - target: {fileID: 1609653857710446175, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2041957302198256223, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 6196
+      objectReference: {fileID: 0}
+    - target: {fileID: 2041957302198256223, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2270457478171558755, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 4d0bf3980be077c47a0df4bb79fb2c5a, type: 2}
+    - target: {fileID: 4931195971254365017, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 6196
+      objectReference: {fileID: 0}
+    - target: {fileID: 4931195971254365017, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598694350273535329, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: randomSeed
+      value: 6196
+      objectReference: {fileID: 0}
+    - target: {fileID: 5598694350273535329, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: autoRandomSeed
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6463771768763691494, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 

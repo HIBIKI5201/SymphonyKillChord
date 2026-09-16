@@ -54,16 +54,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             var fired = new HashSet<TextTimingTrigger>();
             try
             {
+                await _textOutputPort.ShowTextAsync(e.Speaker, string.Empty, ct);
                 await TryFireTriggersAsync(e.Triggers, fired, 0, string.Empty, ct);
-
-                // 話者名が空（ナレーション）の場合は "話者: " の接頭辞を付けない。
-                string speakerPrefix = string.IsNullOrEmpty(e.Speaker) ? string.Empty : $"{e.Speaker}: ";
 
                 for (int i = 1; i <= e.Text.Length; i++)
                 {
                     if (completionSource.Task.IsCompleted)
                     {
-                        await CompleteTextAsync(e, speakerPrefix, fired, i - 1, ct);
+                        await CompleteTextAsync(e, fired, i - 1, ct);
                         break;
                     }
 
@@ -74,12 +72,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
                             : _settingsRepository.PausePollInterval;
                         if (await WaitForCompletionAsync(completionSource.Task, pauseDelay, ct))
                         {
-                            await CompleteTextAsync(e, speakerPrefix, fired, i - 1, ct);
+                            await CompleteTextAsync(e, fired, i - 1, ct);
                             return;
                         }
                     }
 
-                    await _textOutputPort.ShowTextAsync($"{speakerPrefix}{e.Text[..i]}", ct);
+                    await _textOutputPort.ShowTextAsync(e.Speaker, e.Text[..i], ct);
                     string visibleText = e.Text[..i];
 
                     await TryFireTriggersAsync(e.Triggers, fired, i, visibleText, ct);
@@ -95,7 +93,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
                     if (delay > TimeSpan.Zero
                         && await WaitForCompletionAsync(completionSource.Task, delay, ct))
                     {
-                        await CompleteTextAsync(e, speakerPrefix, fired, i, ct);
+                        await CompleteTextAsync(e, fired, i, ct);
                         break;
                     }
                 }
@@ -131,12 +129,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// </summary>
         private async ValueTask CompleteTextAsync(
             TextEvent e,
-            string speakerPrefix,
             HashSet<TextTimingTrigger> fired,
             int visibleCharCount,
             CancellationToken ct)
         {
-            await _textOutputPort.ShowTextAsync($"{speakerPrefix}{e.Text}", ct);
+            await _textOutputPort.ShowTextAsync(e.Speaker, e.Text, ct);
             for (int i = visibleCharCount + 1; i <= e.Text.Length; i++)
             {
                 await TryFireTriggersAsync(e.Triggers, fired, i, e.Text[..i], ct);

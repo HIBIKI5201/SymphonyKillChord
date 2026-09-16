@@ -23,6 +23,19 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RegisterButtonCallback();
         }
 
+        /// <summary> 強制出撃中の場合はtrueです。 </summary>
+        public bool IsForcedSortieMode => _isForcedSortieMode;
+
+        /// <summary>
+        ///     強制出撃中の戻る操作を禁止します。
+        /// </summary>
+        /// <param name="isForced"> 強制出撃中の場合はtrueです。 </param>
+        public void SetForcedSortieMode(bool isForced)
+        {
+            _isForcedSortieMode = isForced;
+            _backButton.SetEnabled(!isForced);
+        }
+
         /// <summary>
         ///     画面を表示状態にします。フェード完了後に OnStageSelectScreenCompleted を発火します。
         /// </summary>
@@ -51,9 +64,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
         }
 
         /// <summary>
@@ -61,14 +74,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallback()
         {
-            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
+            _backButtonActivation?.Dispose();
         }
 
         /// <summary>
-        ///     画面を閉じるボタンがクリックされたときの処理です。
+        ///     画面を閉じるボタンが作動したときの処理です。
         /// </summary>
-        private void OnBackButtonClicked(ClickEvent evt)
+        private void HandleBackButtonActivationHandler()
         {
+            if (_isForcedSortieMode) { return; }
+
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
@@ -84,5 +99,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             ?? _backButton;
 
         private readonly Button _backButton;
+        private IDisposable _backButtonActivation;
+        private bool _isForcedSortieMode;
     }
 }

@@ -1,18 +1,26 @@
+using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.Domain.OutGame.Screen;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
+using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.Attribute;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.Composition.OutGame.Screen
@@ -72,7 +80,52 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return false;
             }
 
-            _screenController.ShowHome();
+            if (!ServiceLocator.TryGetInstance(out _loadingScreenController))
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] LoadingScreenControllerを取得できませんでした。", this);
+                return false;
+            }
+
+            if (!_isLoadingSubscribed)
+            {
+                _loadingScreenController.LoadingStarted += HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted += HandleLoadingCompleted;
+                _isLoadingSubscribed = true;
+            }
+
+            if (!_isOptionInputSubscribed)
+            {
+                if (ServiceLocator.TryGetInstance(out _playerInputView))
+                {
+                    _playerInputView.OnOptionInput += HandleOptionInputHandler;
+                    _isOptionInputSubscribed = true;
+                }
+                else
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(ScreenInitializer)}] PlayerInputViewを取得できませんでした。"
+                        + "コントローラーのOptionボタンでの設定画面表示は無効になります。",
+                        this);
+                }
+            }
+
+            if (!ServiceLocator.TryGetInstance(out InputComposition inputComposition))
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] InputCompositionを取得できませんでした。", this);
+                return false;
+            }
+
+            // ホーム画面初回表示時点でOutGame入力マップ(Submit/Cancel)を有効化する。
+            // 出撃/シナリオ復帰時のみ有効化されていたため、それらを経由しない初回起動時は
+            // コントローラー/キーボードのCancel(Bボタン/Esc)が機能しなかった。
+            inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+
+            ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
+            if (!SaveStore.IsLoaded<SaveData>()
+                || SaveStore.Get<SaveData>().Tutorial.Phase >= TutorialPhase.BattleCompleted)
+            {
+                _screenController.ShowHome();
+            }
             return true;
         }
 
@@ -81,18 +134,107 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public override void Shutdown()
         {
+            UnsubscribeLoading();
+            UnsubscribeOptionInput();
             Unsubscribe();
             _isSubscribed = false;
 
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
             ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
+            ServiceLocator.UnregisterInstance<StageSelectScreenView>();
+            ServiceLocator.UnregisterInstance<HomeScreenView>();
+            ServiceLocator.UnregisterInstance<SettingScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
+            _screenStateRepository = null;
 
             CancelAndDispose(ref _ctsTransition);
             _screenRuleDataKey.ReleaseLoadedAsset(this);
             _loadedScreenRuleData = null;
             _isInitialized = false;
+        }
+
+        /// <summary>
+        ///     ロード開始時に登録画面の操作を禁止する。
+        /// </summary>
+        private void HandleLoadingStarted()
+        {
+            ApplyInteractionEnabled(false);
+        }
+
+        /// <summary>
+        ///     ロード終了時は成否にかかわらず画面操作と現在画面のフォーカスを復元する。
+        /// </summary>
+        private void HandleLoadingCompleted(bool success)
+        {
+            ApplyInteractionEnabled(true);
+        }
+
+        /// <summary>
+        ///     取得済みRegistryへ入力許可を適用し、例外で他のロード購読者の通知を中断させない。
+        /// </summary>
+        private void ApplyInteractionEnabled(bool isEnabled)
+        {
+            try
+            {
+                _screenViewRegistry?.SetInteractionEnabled(isEnabled);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     View破棄より先にロード通知の購読を一度だけ解除する。
+        /// </summary>
+        private void UnsubscribeLoading()
+        {
+            if (_isLoadingSubscribed && _loadingScreenController != null)
+            {
+                _loadingScreenController.LoadingStarted -= HandleLoadingStarted;
+                _loadingScreenController.LoadingCompleted -= HandleLoadingCompleted;
+            }
+
+            _isLoadingSubscribed = false;
+            _loadingScreenController = null;
+        }
+
+        /// <summary>
+        ///     View破棄より先にコントローラーOption入力の購読を一度だけ解除する。
+        /// </summary>
+        private void UnsubscribeOptionInput()
+        {
+            if (_isOptionInputSubscribed && _playerInputView != null)
+            {
+                _playerInputView.OnOptionInput -= HandleOptionInputHandler;
+            }
+
+            _isOptionInputSubscribed = false;
+            _playerInputView = null;
+        }
+
+        /// <summary>
+        ///     コントローラーのOptionボタン(Xboxの≡/PlayStationのOptions)で設定画面を開く。
+        /// </summary>
+        /// <param name="inputContext"> 入力情報。 </param>
+        private void HandleOptionInputHandler(InputContext<float> inputContext)
+        {
+            // 押した瞬間のみ反応させる。離した際の通知では開かない。
+            if (!_isInitialized || inputContext.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            // 既に設定画面を表示中の場合、連打で遷移履歴に同じ画面が積み重なってしまうため
+            // 何もしない。
+            if (_screenStateRepository != null
+                && _screenStateRepository.TransitionState.CurrentScreenId == ScreenId.Setting)
+            {
+                return;
+            }
+
+            _outGameUIEvent.OnShownSettingScreen?.Invoke();
         }
 
         /// <summary>
@@ -195,16 +337,24 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             HomeScreenView homeScreenView = new HomeScreenView(homeRoot, _outGameUIEvent);
+            _homeScreenView = homeScreenView;
+            _getHomePointsUseCase = new GetHomePointsUseCase();
             StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
-            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent);
-            SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
+            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent, null, null, null, null, null);
+            SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent, _comboHexIcon);
             BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
             ServiceLocator.RegisterInstance(battlePreparationScreen);
+            // StageSelectモジュールから強制出撃中の戻る操作を制限する。
+            ServiceLocator.RegisterInstance(stageSelectScreenView);
+            // HomeCharacterPreviewInitializer から取得できるように登録する。
+            ServiceLocator.RegisterInstance(homeScreenView);
+            // SettingComposition から取得できるように登録する。
+            ServiceLocator.RegisterInstance(settingScreenView);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,
@@ -219,6 +369,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             // InfraStructure 層
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
+            _screenStateRepository = screenStateRepository;
             IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedScreenRuleData);
 
             //  Adaptor 層
@@ -294,6 +445,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleHomeScreenShown()
         {
+            if (IsForcedSortieMode)
+            {
+                _screenController.ShowStageSelect();
+                return;
+            }
+
             VisualElement rootElement = _uiDocument?.rootVisualElement;
             if (rootElement != null
                 && rootElement.resolvedStyle.display == DisplayStyle.None)
@@ -303,6 +460,16 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             _screenController.ShowHome();
+            RefreshHomePointsAsync();
+        }
+
+        /// <summary>
+        ///     ホーム画面のトップバーに表示するポイントを最新の状態へ更新します。
+        /// </summary>
+        private async void RefreshHomePointsAsync()
+        {
+            HomePoints points = await _getHomePointsUseCase.ExecuteAsync();
+            _homeScreenView?.SetPoints(points.RebuildPoints, points.UnlockPoints);
         }
 
         /// <summary>
@@ -321,6 +488,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleSkillTreeScreenShown()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.ShowSkillTree();
         }
 
@@ -329,6 +498,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleSkillBuildScreenShown()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.ShowSkillBuild();
         }
 
@@ -337,6 +508,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleSettingsShown()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.ShowSetting();
         }
 
@@ -345,6 +518,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleBattlePreparationScreenShown()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.ShowBattlePreparation();
         }
 
@@ -353,6 +528,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleScreenClosed()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.CloseCurrent();
         }
 
@@ -495,6 +672,11 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             cts = null;
         }
 
+        /// <summary> 作戦画面が強制出撃の操作制限中の場合はtrueです。 </summary>
+        private bool IsForcedSortieMode =>
+            ServiceLocator.TryGetInstance(out StageSelectScreenView screenView)
+            && screenView.IsForcedSortieMode;
+
         private const string HOMESCREEN_NAME = "HomeContainer";
         private const string STAGESELECTSCREEN_NAME = "StageSelectContainer";
         private const string SKILLTREESCREEN_NAME = "SkillTreeContainer";
@@ -506,6 +688,10 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         [SerializeField]
         [Tooltip("画面表示に使用する UIDocument です。")]
         private UIDocument _uiDocument;
+
+        [SerializeField]
+        [Tooltip("発動コマンド表示に使う正六角形スプライト（Assets/Arts/UI/UI_hexagon.png）です。")]
+        private Sprite _comboHexIcon;
         [SerializeField, SourceDataAddress, Tooltip("画面遷移ルールデータの Addressables キーです。")]
         private string _screenRuleDataKey;
         [SerializeField, SceneNameSelector, Tooltip("設定画面から戻るタイトルシーン名です。")]
@@ -516,8 +702,15 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private ScreenViewRegistry _screenViewRegistry;
         private SceneTransitionController _sceneTransitionController;
         private ScreenRuleData _loadedScreenRuleData;
+        private HomeScreenView _homeScreenView;
+        private GetHomePointsUseCase _getHomePointsUseCase;
         private bool _isInitialized = false;
         private bool _isSubscribed;
+        private bool _isLoadingSubscribed;
+        private LoadingScreenController _loadingScreenController;
+        private bool _isOptionInputSubscribed;
+        private PlayerInputView _playerInputView;
+        private IScreenStateRepository _screenStateRepository;
         private bool _isSceneTransitioning = false;
 
         private CancellationTokenSource _ctsTransition;
