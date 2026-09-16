@@ -69,8 +69,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _showCurrentPoints(_skillTreeStatusEntity.CurrentPoints);
         }
 
-        /// <summary> 現在選択中のノードIDを取得する。未選択の場合は-1。 </summary>
+        /// <summary> 現在選択中のノードIDを取得する。未選択の場合は<see cref="NO_SELECTION"/>。 </summary>
         public int SelectedNodeId => _selectedNodeId;
+
+        /// <summary>
+        ///     ノード未選択を表すセンチネル値。
+        ///     ノードIDは<see cref="KillChord.Runtime.Utility.Identity.DataID"/>のハッシュ値であり負値も取り得るため、
+        ///     未選択判定は必ずこの値との一致で行うこと。範囲比較(&lt; 0)にすると負IDのノードを未選択と誤判定する。
+        /// </summary>
+        private const int NO_SELECTION = -1;
 
         /// <summary> 連続解放演出において、ノード1つあたりの演出開始をずらす間隔(ミリ秒)。Composition層のカメラ演出時間算出にも使用する。 </summary>
         public const long UNLOCK_STAGGER_INTERVAL_MILLISECONDS = 90L;
@@ -81,7 +88,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// <param name="nodeId"></param>
         public void OnSkillNodeSelected(int nodeId)
         {
-            if (_selectedNodeId != -1)
+            if (_selectedNodeId != NO_SELECTION)
             {
                 _skillNodeViews[_selectedNodeId].SetUnSelected();
             }
@@ -102,7 +109,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// </summary>
         public void RefreshSelectedText()
         {
-            if (_selectedNodeId < 0)
+            if (_selectedNodeId == NO_SELECTION)
             {
                 return;
             }
@@ -216,7 +223,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// </summary>
         public void OnSkillUnlocked()
         {
-            if (_selectedNodeId == -1 || _costToUnlock < 0) return;
+            if (_selectedNodeId == NO_SELECTION || _costToUnlock < 0) return;
             if (_skillTreeStatusEntity.CurrentPoints < _costToUnlock) return;
             if (_nodesOnPath == null || _nodesOnPath.Count == 0)
             {
@@ -318,10 +325,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// </summary>
         public void OnSkillDetailClosed()
         {
-            if (_selectedNodeId == -1) return;
+            if (_selectedNodeId == NO_SELECTION) return;
             _skillNodeViews[_selectedNodeId].SetUnSelected();
             _nodesOnPath.Clear();
-            _selectedNodeId = -1;
+            _selectedNodeId = NO_SELECTION;
             _playerStatusPresenter.Push();
         }
 
@@ -330,7 +337,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// </summary>
         public void OnPreviewButtonClicked()
         {
-            if (_selectedNodeId == -1) return;
+            if (_selectedNodeId == NO_SELECTION) return;
             _previewVideoScreenViewShowable.Show();
             _previewVideoScreenView.PlayPreviewVideo(_selectedNodeId);
         }
@@ -381,7 +388,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private IPreviewVideoScreenViewShowable _previewVideoScreenViewShowable;
         private Action _ownedSkillChanged;
         private int _costToUnlock = -1;
-        private int _selectedNodeId = -1;
+        private int _selectedNodeId = NO_SELECTION;
         private bool _isResetting;
         private readonly List<(IVisualElementScheduledItem Item, int NodeId)> _pendingUnlockAnimations = new();
 
@@ -794,7 +801,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _skillTreeStatusEntity.SetSkillSlotBonus(
                 _skillTreeService.CalculateSkillSlotBonus(_skillTreeStatusEntity.UnlockedNodes));
             _nodesOnPath.Clear();
-            _selectedNodeId = -1;
+            _selectedNodeId = NO_SELECTION;
             _costToUnlock = -1;
             _showCurrentPoints(result.CurrentPoints);
             _playerStatusPresenter.Push();
