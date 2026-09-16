@@ -200,6 +200,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private bool _isAutomaticTutorialFlowStarted;
         private bool _isForcedSortieMode;
         private StageId _forcedStageId;
+        private bool _hasForcedSortiePreparationFailed;
+        private StageId _failedForcedSortieStageId;
 
         /// <summary>
         ///     単体で実行できる初期化を行います。
@@ -320,8 +322,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <returns> 要求を受け付けた場合はtrueです。 </returns>
         private bool TryForceBattleSortie(StageId stageId)
         {
-            if (!_isInitialized || !_isSubscribed
-                || (_loadingScreenController != null && _loadingScreenController.IsLoading)
+            if (IsSortieBlocked() || !_isSubscribed
                 || !ServiceLocator.TryGetInstance(out StageSelectScreenView screenView))
             {
                 return false;
@@ -333,12 +334,31 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return _forcedStageId.Equals(stageId);
             }
 
-            if (!_stageTree.TryGetNode(stageId, out StageNode node)
-                || node.Definition is not BattleStageDefinition battleStage
-                || !TryPrepareBattleSortie(battleStage))
+            // 同じ定義不備で準備とログを繰り返さず、新たな解放ステージは再評価する。
+            if (_hasForcedSortiePreparationFailed && _failedForcedSortieStageId.Equals(stageId))
             {
+                return false;
+            }
+
+            if (!_stageTree.TryGetNode(stageId, out StageNode node)
+                || node.Definition is not BattleStageDefinition battleStage)
+            {
+                _hasForcedSortiePreparationFailed = true;
+                _failedForcedSortieStageId = stageId;
                 Debug.LogError(
-                    $"[{nameof(StageSelectInitializer)}] 強制出撃ステージを準備できませんでした。 StageId: {stageId.Value}",
+                    $"[{nameof(StageSelectInitializer)}] 強制出撃対象のバトルステージ定義がありません。 StageId: {stageId.Value}",
+                    this);
+                return false;
+            }
+
+            if (!TryPrepareBattleSortie(battleStage))
+            {
+                _hasForcedSortiePreparationFailed = true;
+                _failedForcedSortieStageId = stageId;
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] 強制出撃のミッションまたはシーン設定が不正です。 " +
+                    $"StageId: {stageId.Value}, MissionId: {battleStage.MissionId.Value}, " +
+                    $"BattleSceneName: {battleStage.BattleSceneName}, ReturnSceneName: {_currentSceneName}",
                     this);
                 return false;
             }
@@ -909,6 +929,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _isModuleContainerRegistered = false;
             _isForcedSortieMode = false;
             _forcedStageId = default;
+            _hasForcedSortiePreparationFailed = false;
+            _failedForcedSortieStageId = default;
             if (_rootVisualElement != null)
             {
                 _rootVisualElement.UnregisterCallback<PointerDownEvent>(

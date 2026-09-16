@@ -41,6 +41,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _languageNextButton = Require<Button>(rootElement, LANGUAGE_NEXT_BUTTON_NAME);
             _vibrationPrevButton = Require<Button>(rootElement, VIBRATION_PREV_BUTTON_NAME);
             _vibrationNextButton = Require<Button>(rootElement, VIBRATION_NEXT_BUTTON_NAME);
+            _rhythmOffsetSlider = Require<SliderInt>(rootElement, RHYTHM_OFFSET_SLIDER_NAME);
             _environmentPanelSaveButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_SAVE_BUTTON_NAME);
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
@@ -74,6 +75,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _languageNextButton,
                     _vibrationPrevButton,
                     _vibrationNextButton,
+                    _rhythmOffsetSlider,
                     _environmentPanelSaveButton,
                 },
                 _screenModePrevButton);
@@ -168,6 +170,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string LANGUAGE_NEXT_BUTTON_NAME = "LanguageNextButton";
         private const string VIBRATION_PREV_BUTTON_NAME = "VibrationPrevButton";
         private const string VIBRATION_NEXT_BUTTON_NAME = "VibrationNextButton";
+        private const string RHYTHM_OFFSET_SLIDER_NAME = "RhythmOffsetSlider";
         private const string ENVIRONMENT_PANEL_SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
         private const string UI_COMMON_TABLE = "UICommon";
 
@@ -194,6 +197,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _languageNextButton;
         private readonly Button _vibrationPrevButton;
         private readonly Button _vibrationNextButton;
+        private readonly SliderInt _rhythmOffsetSlider;
         private readonly Button _environmentPanelSaveButton;
         private readonly HierarchicalNavigationScope _navigationScope;
         private IDisposable _audioSettingButtonPreset;

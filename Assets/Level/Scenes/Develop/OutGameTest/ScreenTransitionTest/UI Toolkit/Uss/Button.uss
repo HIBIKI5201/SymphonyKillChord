@@ -13,6 +13,20 @@
     background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=21300000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
 }
 
+.setting-select-arrow-button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(58, 47, 20);
+}
+
+.setting-select-arrow-button:hover,
+.setting-select-arrow-button:focus,
+.setting-select-arrow-button:active {
+    color: white;
+}
+
 .btn-scale-feedback {
     scale: 1 1 1;
     transition-duration: 0.15s;
