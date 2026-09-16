@@ -160,20 +160,22 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
         private const Ease FADE_EASE = Ease.OutCirc;
         /// <summary> 暗幕の不透明度です。 </summary>
         private const float CURTAIN_ALPHA = 0.75f;
+        /// <summary> 説明パネルと案内矢印の表示倍率です。 </summary>
+        private const float GUIDE_SCALE = 1.5f;
         /// <summary> 矢印の棒の幅です。 </summary>
-        private const float ARROW_BAR_WIDTH = 6f;
+        private const float ARROW_BAR_WIDTH = 6f * GUIDE_SCALE;
         /// <summary> 矢印の棒の長さです。 </summary>
-        private const float ARROW_BAR_LENGTH = 64f;
+        private const float ARROW_BAR_LENGTH = 64f * GUIDE_SCALE;
         /// <summary> 矢印の先端の直径です。 </summary>
-        private const float ARROW_TIP_DIAMETER = 24f;
-        /// <summary> 説明パネルの最大幅です。 </summary>
+        private const float ARROW_TIP_DIAMETER = 24f * GUIDE_SCALE;
+        /// <summary> 拡大前の説明パネルの最大幅です。 </summary>
         private const float MESSAGE_BOX_MAX_WIDTH = 320f;
         /// <summary> 説明パネルの内側余白です。 </summary>
         private const float MESSAGE_BOX_PADDING = 16f;
         /// <summary> 説明パネルの角丸半径です。 </summary>
         private const float MESSAGE_BOX_RADIUS = 12f;
         /// <summary> 説明パネルと矢印の間隔です。 </summary>
-        private const float MESSAGE_BOX_GAP = 8f;
+        private const float MESSAGE_BOX_GAP = 8f * GUIDE_SCALE;
         /// <summary> 画面端と説明パネルの間隔です。 </summary>
         private const float SCREEN_MARGIN = 16f;
         /// <summary> 説明パネルの背景色の明度です。 </summary>
@@ -434,7 +436,7 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
 
             _messageBox.style.width = Mathf.Min(
                 MESSAGE_BOX_MAX_WIDTH,
-                overlayWidth - SCREEN_MARGIN * 2f);
+                Mathf.Max(0f, overlayWidth - SCREEN_MARGIN * 2f) / GUIDE_SCALE);
             _messageBox.schedule.Execute(() => UpdateMessageBoxPosition(
                 targetCenterX,
                 arrowTipTop,
@@ -462,8 +464,9 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
 
             float overlayWidth = _root.resolvedStyle.width;
             float overlayHeight = _root.resolvedStyle.height;
-            float messageWidth = _messageBox.resolvedStyle.width;
-            float messageHeight = _messageBox.resolvedStyle.height;
+            // scaleはレイアウト寸法に反映されないため、拡大後の表示寸法で画面内に収める。
+            float messageWidth = _messageBox.resolvedStyle.width * GUIDE_SCALE;
+            float messageHeight = _messageBox.resolvedStyle.height * GUIDE_SCALE;
             float messageLeft = Mathf.Clamp(
                 targetCenterX - messageWidth * 0.5f,
                 SCREEN_MARGIN,
@@ -618,6 +621,8 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
                 {
                     position = Position.Absolute,
                     maxWidth = MESSAGE_BOX_MAX_WIDTH,
+                    transformOrigin = new TransformOrigin(0f, 0f),
+                    scale = new Scale(new Vector2(GUIDE_SCALE, GUIDE_SCALE)),
                     paddingTop = MESSAGE_BOX_PADDING,
                     paddingRight = MESSAGE_BOX_PADDING,
                     paddingBottom = MESSAGE_BOX_PADDING,
