@@ -7,7 +7,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 {
     /// <summary>
     ///     ホーム画面に表示する3Dキャラクタープレビューの依存を解決するクラス。
-    ///     専用カメラでキャラクターをレンダーテクスチャへ描画し、HomeScreenViewへ反映します。
+    ///     シーンに既に存在するキャラクターを専用カメラでレンダーテクスチャへ描画し、HomeScreenViewへ反映します。
     /// </summary>
     public sealed class HomeCharacterPreviewInitializer : OutGameInitializationModuleBase
     {
@@ -18,55 +18,35 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         public override int Order => 110;
 
         /// <summary>
-        ///     キャラクターインスタンス・プレビューカメラ・レンダーテクスチャを生成します。
+        ///     プレビューカメラ・レンダーテクスチャを生成し、シーン上のキャラクターに追従させます。
         /// </summary>
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
-            if (_characterPrefab == null)
+            if (_sceneCharacterTransform == null)
             {
 #if UNITY_EDITOR
-                Debug.LogError($"[{nameof(HomeCharacterPreviewInitializer)}] キャラクタープレハブが設定されていません。", this);
+                Debug.LogError($"[{nameof(HomeCharacterPreviewInitializer)}] シーン上のキャラクターが設定されていません。", this);
 #endif
                 return false;
             }
 
-            int previewLayer = LayerMask.NameToLayer(PREVIEW_LAYER_NAME);
-            if (previewLayer < 0)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(HomeCharacterPreviewInitializer)}] レイヤー {PREVIEW_LAYER_NAME} が見つかりません。", this);
-#endif
-                return false;
-            }
-
-            _characterInstance = Instantiate(_characterPrefab, _spawnPosition, Quaternion.Euler(_spawnEulerAngles));
-            SetLayerRecursively(_characterInstance, previewLayer);
-
-            Animator animator = _characterInstance.GetComponentInChildren<Animator>(true);
-            if (animator != null)
-            {
-                if (_playIdlePose && _idleController != null)
-                {
-                    animator.runtimeAnimatorController = _idleController;
-                }
-                else
-                {
-                    // ポーズを適用せず、モデル本来のバインドポーズ(Tポーズ)のまま表示する。
-                    animator.enabled = false;
-                }
-            }
-
+            // 既存のシーンオブジェクト(Timeline等で制御される)を子として追従させるため、
+            // レイヤーやAnimatorには一切手を加えない。
             GameObject cameraObject = new(PREVIEW_CAMERA_NAME);
-            cameraObject.transform.SetParent(_characterInstance.transform, false);
+            cameraObject.transform.SetParent(_sceneCharacterTransform, false);
             cameraObject.transform.localPosition = _cameraLocalPosition;
             cameraObject.transform.localEulerAngles = _cameraLocalEulerAngles;
-            cameraObject.layer = previewLayer;
+
+            // Inspectorで未設定(0)の場合は、キャラクター自身のレイヤーを自動的に使用する。
+            int cullingMask = _cullingMask.value != 0
+                ? _cullingMask.value
+                : 1 << _sceneCharacterTransform.gameObject.layer;
 
             _previewCamera = cameraObject.AddComponent<Camera>();
             _previewCamera.clearFlags = CameraClearFlags.SolidColor;
             _previewCamera.backgroundColor = new Color(0f, 0f, 0f, 0f);
-            _previewCamera.cullingMask = 1 << previewLayer;
+            _previewCamera.cullingMask = cullingMask;
             _previewCamera.fieldOfView = _fieldOfView;
             _previewCamera.nearClipPlane = 0.05f;
             _previewCamera.farClipPlane = 20f;
@@ -100,19 +80,15 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         }
 
         /// <summary>
-        ///     生成したオブジェクト・リソースを破棄します。
+        ///     生成したカメラ・レンダーテクスチャを破棄します。シーン上のキャラクターは破棄しません。
         /// </summary>
         public override void Shutdown()
         {
             if (_previewCamera != null)
             {
                 _previewCamera.targetTexture = null;
-            }
-
-            if (_characterInstance != null)
-            {
-                Destroy(_characterInstance);
-                _characterInstance = null;
+                Destroy(_previewCamera.gameObject);
+                _previewCamera = null;
             }
 
             if (_renderTexture != null)
@@ -123,31 +99,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
         }
 
-        /// <summary>
-        ///     対象とその子孫すべてのレイヤーを再帰的に設定します。
-        /// </summary>
-        private static void SetLayerRecursively(GameObject target, int layer)
-        {
-            target.layer = layer;
-            foreach (Transform child in target.transform)
-            {
-                SetLayerRecursively(child.gameObject, layer);
-            }
-        }
-
-        private const string PREVIEW_LAYER_NAME = "HomeCharacterPreview";
         private const string PREVIEW_CAMERA_NAME = "HomeCharacterPreviewCamera";
 
-        [SerializeField, Tooltip("ホーム画面に表示する3Dキャラクターのプレハブです。")]
-        private GameObject _characterPrefab;
-        [SerializeField, Tooltip("trueの場合、待機ポーズのAnimatorControllerを再生します。falseの場合はバインドポーズ(Tポーズ)のまま表示します。")]
-        private bool _playIdlePose = false;
-        [SerializeField, Tooltip("待機ポーズ用のAnimatorControllerです。")]
-        private RuntimeAnimatorController _idleController;
-        [SerializeField, Tooltip("他のカメラに映り込まないよう配置する孤立座標です。")]
-        private Vector3 _spawnPosition = new(500f, 0f, 500f);
-        [SerializeField, Tooltip("インスタンス生成時の回転です。")]
-        private Vector3 _spawnEulerAngles = Vector3.zero;
+        [SerializeField, Tooltip("ホーム画面に表示する、シーンに既に配置されているキャラクターです。Timeline等で制御される既存オブジェクトを指定します。")]
+        private Transform _sceneCharacterTransform;
+        [SerializeField, Tooltip("プレビューカメラが描画するレイヤーです。シーンのキャラクターが属するレイヤーを指定します。")]
+        private LayerMask _cullingMask;
         [SerializeField, Tooltip("プレビューカメラのキャラクターからの相対位置です。")]
         private Vector3 _cameraLocalPosition = new(0f, 1.1f, 2.2f);
         [SerializeField, Tooltip("プレビューカメラの回転です。")]
@@ -159,7 +116,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         [SerializeField, Tooltip("レンダーテクスチャの高さです。")]
         private int _renderTextureHeight = 2048;
 
-        private GameObject _characterInstance;
         private Camera _previewCamera;
         private RenderTexture _renderTexture;
     }
