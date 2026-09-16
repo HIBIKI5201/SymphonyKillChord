@@ -196,6 +196,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private LoadingScreenController _loadingScreenController;
         private bool _isWaitingForLoadingCompleted;
         private bool _isAutomaticTutorialFlowStarted;
+        private bool _isForcedSortieMode;
+        private StageId _forcedStageId;
 
         /// <summary>
         ///     単体で実行できる初期化を行います。
@@ -310,6 +312,47 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     対象ステージを検証し、作戦画面を強制出撃状態で開きます。
+        /// </summary>
+        /// <param name="stageId"> 強制選択するバトルステージです。 </param>
+        /// <returns> 要求を受け付けた場合はtrueです。 </returns>
+        private bool TryForceBattleSortie(StageId stageId)
+        {
+            if (!_isInitialized || !_isSubscribed
+                || (_loadingScreenController != null && _loadingScreenController.IsLoading)
+                || !ServiceLocator.TryGetInstance(out StageSelectScreenView screenView))
+            {
+                return false;
+            }
+
+            // Demoから毎フレーム要求されても表示アニメーションを再開しない。
+            if (_isForcedSortieMode)
+            {
+                return _forcedStageId.Equals(stageId);
+            }
+
+            if (!_stageTree.TryGetNode(stageId, out StageNode node)
+                || node.Definition is not BattleStageDefinition battleStage
+                || !TryPrepareBattleSortie(battleStage))
+            {
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] 強制出撃ステージを準備できませんでした。 StageId: {stageId.Value}",
+                    this);
+                return false;
+            }
+
+            _forcedStageId = stageId;
+            _isForcedSortieMode = true;
+            screenView.SetForcedSortieMode(true);
+            _detailScreenView.SetForcedSortieMode(true);
+            _detailScreenView.HideImmediately();
+            _settingShortcutButton?.SetEnabled(false);
+            _stageMapScrollView.SetEnabled(false);
+            _outGameUIEvent.OnShownStageSelectionScreen?.Invoke();
+            return true;
+        }
+
+        /// <summary>
         ///     ロード済みのAddressablesハンドルを解放します。
         /// </summary>
         private void ReleaseLoadedResources()
@@ -336,6 +379,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private void HandleStageNodeSelected(int stageIdValue)
         {
             StageId stageId = new StageId(stageIdValue);
+            if (_isForcedSortieMode && !stageId.Equals(_forcedStageId)) { return; }
+
             if (_stageNodeElementMap != null
                 && _stageNodeElementMap.TryGetValue(stageId, out VisualElement nodeElement))
             {
@@ -407,6 +452,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleStageDetailClosed()
         {
+            if (_isForcedSortieMode) { return; }
+
             _isFocusFrameLocked = false;
             ResetMapZoom();
             _detailScreenView.Hide();
@@ -495,6 +542,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleSettingShortcutButtonActivationHandler()
         {
+            if (_isForcedSortieMode) { return; }
+
             _outGameUIEvent.OnShownSettingScreen?.Invoke();
         }
 
@@ -519,6 +568,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleScreenClosed()
         {
+            if (_isForcedSortieMode) { return; }
+
             _isFocusFrameLocked = false;
             ResetMapZoom();
             _detailScreenView.Hide();
@@ -535,11 +586,17 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
         /// <summary>
         ///     出撃ボタンが押されたときの処理。
-        ///     ステージタイプに応じて戦闘準備画面表示またはシナリオ直接遷移イベントを発火します。
+        ///     ステージタイプに応じてバトル開始またはシナリオ遷移を要求します。
         /// </summary>
         private async void HandleSortieRequested()
         {
             if (!_stageSelectController.TryGetSortieInfo(out StageDefinition stageDefinition))
+            {
+                return;
+            }
+
+            // 表示切替中に残っている以前の選択からは出撃させない。
+            if (_isForcedSortieMode && !stageDefinition.StageId.Equals(_forcedStageId))
             {
                 return;
             }
@@ -622,6 +679,12 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
             UpdateEquippedSkillDisplay();
+            if (_isForcedSortieMode)
+            {
+                // 作戦画面のフェードとフォーカス復元が済んでから詳細を開く。
+                HandleStageNodeSelected(_forcedStageId.Value);
+            }
+
             await ApplyNewlyClearedStagesAsync(_cts.Token);
         }
 
@@ -788,7 +851,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _moduleContainer = new StageSelectModuleContainer(
                 _stageTree,
                 _battleSortieSelectionService,
-                _currentSceneName);
+                _currentSceneName,
+                TryForceBattleSortie);
             _isModuleContainerRegistered = ServiceLocator.RegisterInstance(_moduleContainer);
             if (!_isModuleContainerRegistered)
             {
@@ -820,6 +884,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             _moduleContainer = null;
             _isModuleContainerRegistered = false;
+            _isForcedSortieMode = false;
+            _forcedStageId = default;
             if (_rootVisualElement != null)
             {
                 _rootVisualElement.UnregisterCallback<PointerDownEvent>(
