@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DemoExperienceConfig
   m_EditorClassIdentifier: KillChord.Demo::KillChord.Demo.DemoExperienceConfig
   _homeTimeLimitSeconds: 90
-  _overallTimeLimitSeconds: 480
+  _overallTimeLimitSeconds: 420
   _overallTimerStartPoint: 1
   _endSceneName: DemoEnd
   _titleSceneName: Title
