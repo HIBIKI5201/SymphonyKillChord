@@ -163,20 +163,6 @@
     min-height: 40px;
 }
 
-.setting-select-arrow-button {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    -unity-font-style: bold;
-    color: rgb(58, 47, 20);
-}
-
-.setting-select-arrow-button:hover,
-.setting-select-arrow-button:focus,
-.setting-select-arrow-button:active {
-    color: white;
-}
-
 .setting-select-value-label {
     flex-grow: 1;
     -unity-text-align: middle-center;
