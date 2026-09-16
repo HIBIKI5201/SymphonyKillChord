@@ -36,6 +36,11 @@ namespace KillChord.Demo
                 return;
             }
 
+            if (_timerPanel != null)
+            {
+                _timerPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, isHomeActive ? 116.0f : 66.0f);
+            }
+
             if (_overallTimerText != null)
             {
                 _overallTimerText.text =
@@ -60,6 +65,9 @@ namespace KillChord.Demo
 
         [SerializeField, Tooltip("タイマー表示用Canvasです。")]
         private Canvas _canvas;
+
+        [SerializeField, Tooltip("タイマー表示の背景パネルです。")]
+        private RectTransform _timerPanel;
 
         [SerializeField, Tooltip("全体タイマーの残り時間表示です。")]
         private TMP_Text _overallTimerText;

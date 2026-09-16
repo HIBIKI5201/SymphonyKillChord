@@ -235,6 +235,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: KillChord.Demo::KillChord.Demo.DemoTimerView
   _canvas: {fileID: 1585415303932845410}
+  _timerPanel: {fileID: 3381711414202058484}
   _overallTimerText: {fileID: 1652753423874893787}
   _homeTimerText: {fileID: 3027065558303096100}
 --- !u!1 &6798342286561242208
@@ -457,7 +458,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -24, y: -24}
-  m_SizeDelta: {x: 360, y: 116}
+  m_SizeDelta: {x: 240, y: 116}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &8513210932280838983
 CanvasRenderer:
