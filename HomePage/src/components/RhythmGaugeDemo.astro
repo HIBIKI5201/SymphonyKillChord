@@ -25,6 +25,18 @@ function colorAtPercent(pct: number) {
 	return segments[segments.length - 1].color;
 }
 
+// 各色帯の中央位置(%)。ここに「Justの目安」を示す黄色い縦線を固定表示する。
+// 見た目調整用に、色帯ごとの微調整オフセット(%)を個別に指定できるようにしている。
+const markerOffsets = [5, 0, 0];
+const markerCenters = (() => {
+	let cumulative = 0;
+	return ratios.map((ratio, index) => {
+		const center = cumulative + ratio / 2 + (markerOffsets[index] ?? 0);
+		cumulative += ratio;
+		return center;
+	});
+})();
+
 // スペクトラムアナライザ風の軌跡表現用に、帯を細かいバーへ分割しておく。
 // 各バーの色は判定線が通過する位置の色に合わせ、高さはランダムにばらけさせて音楽的な見た目にする。
 const trailBarCount = 40;
@@ -47,6 +59,7 @@ const trailBars = Array.from({ length: trailBarCount }, (_, index) => {
 				{trailBars.map((bar) => <span class="trail-bar" style={`--bar-color: ${bar.color}; --bar-peak: ${bar.peakHeight}%;`} />)}
 			</div>
 		</div>
+		{markerCenters.map((pct) => <span class="just-marker" style={`left: ${pct}%;`} data-pct={pct} aria-hidden="true" />)}
 		<span class="judge-line" aria-hidden="true" />
 	</div>
 
@@ -72,6 +85,7 @@ const trailBars = Array.from({ length: trailBarCount }, (_, index) => {
 		const line = demo.querySelector<HTMLElement>('.judge-line');
 		const boxes = Array.from(demo.querySelectorAll<HTMLElement>('.box'));
 		const trailBars = Array.from(demo.querySelectorAll<HTMLElement>('.trail-bar'));
+		const markers = Array.from(demo.querySelectorAll<HTMLElement>('.just-marker'));
 		if (!line || boxes.length === 0) return;
 
 		const ratios = boxes.map((box) => Number(box.dataset.ratio) || 0);
@@ -94,17 +108,29 @@ const trailBars = Array.from({ length: trailBarCount }, (_, index) => {
 			}
 		}
 
+		// バー位置(%)は固定なので毎フレーム計算せず、あらかじめ配列化しておく
+		const barPcts = trailBars.map((_, index) => (index + 0.5) / trailBars.length);
+		// 直前に描画した値を覚えておき、変化がないバーへの書き込みを毎フレーム省略する
+		const lastIntensities = new Float32Array(trailBars.length).fill(-1);
+
 		function renderTrail(progress: number) {
-			trailBars.forEach((bar, index) => {
-				const barPct = (index + 0.5) / trailBars.length;
+			for (let index = 0; index < trailBars.length; index++) {
+				const barPct = barPcts[index];
 				let intensity = 0;
 				if (barPct <= progress) {
 					const sinceMs = (progress - barPct) * sweepMs;
 					intensity = Math.max(0, 1 - sinceMs / decayMs);
 				}
+				// ほぼ変化がないバーはstyle書き込み自体をスキップし、レイアウト/再描画コストを抑える
+				if (Math.abs(intensity - lastIntensities[index]) < 0.01) continue;
+				lastIntensities[index] = intensity;
+
+				const bar = trailBars[index];
 				bar.style.opacity = String(0.12 + 0.88 * intensity);
-				bar.style.height = `calc(10% + (var(--bar-peak) - 10%) * ${intensity})`;
-			});
+				// heightではなくtransform(scaleY)で表現することで、レイアウト計算を発生させず
+				// コンポジタ側の処理だけで軌跡の伸縮を描画できるようにする
+				bar.style.transform = `scaleY(${0.1 + 0.9 * intensity})`;
+			}
 		}
 
 		if (prefersReducedMotion) {
@@ -113,10 +139,13 @@ const trailBars = Array.from({ length: trailBarCount }, (_, index) => {
 			return;
 		}
 
-		// 攻撃(自動クリック)のタイミングは毎周期ランダム。最短0.5秒、最長は端に到達するまで(sweepMs)。
-		const minAttackMs = 500;
+		// 攻撃(自動クリック)は、ゲージ上のランダムな位置ではなく、
+		// 黄色い縦線(Just目安・各色帯の中央)の位置でのみランダムに発生させる。
+		// 黄色い線自体は静的表示のままで、アニメーションはBOX側にのみ発生する。
+		const markerPcts = markers.map((marker) => Number(marker.dataset.pct));
 		function pickAttackMs() {
-			return minAttackMs + Math.random() * (sweepMs - minAttackMs);
+			const pct = markerPcts[Math.floor(Math.random() * markerPcts.length)];
+			return (pct / 100) * sweepMs;
 		}
 
 		let start = performance.now();
@@ -178,9 +207,11 @@ const trailBars = Array.from({ length: trailBarCount }, (_, index) => {
 
 	.trail-bar {
 		flex: 1;
-		height: 10%;
+		height: var(--bar-peak);
 		background: var(--bar-color);
 		opacity: 0.12;
+		transform: scaleY(0.1);
+		transform-origin: center;
 	}
 
 	.judge-line {
@@ -192,6 +223,16 @@ const trailBars = Array.from({ length: trailBarCount }, (_, index) => {
 		height: 48px;
 		background: var(--color-text-primary);
 		box-shadow: 0 0 6px var(--color-text-primary);
+		transform: translate(-50%, -50%);
+	}
+
+	.just-marker {
+		position: absolute;
+		top: 50%;
+		z-index: 1;
+		width: 6px;
+		height: 30px;
+		background: #f2d94e;
 		transform: translate(-50%, -50%);
 	}
 
