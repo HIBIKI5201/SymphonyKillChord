@@ -37,7 +37,10 @@ namespace KillChord.Runtime.View.Persistent.Localization
 
             _applyText = applyText ?? throw new ArgumentNullException(nameof(applyText));
             _fallback = fallback ?? string.Empty;
-            _applyText(_fallback);
+            if (fallback != null)
+            {
+                _applyText(_fallback);
+            }
 
             _localizedString = new LocalizedString(table, entry);
             if (arguments != null)

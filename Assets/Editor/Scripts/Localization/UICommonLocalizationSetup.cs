@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -133,8 +132,7 @@ namespace KillChord.Editor.Localization
                         candidate => candidate.LocaleIdentifier.Code == locale.Identifier.Code);
                     if (table == null)
                     {
-                        throw new InvalidOperationException(
-                            $"UI共通テキストテーブルに{locale.Identifier.Code}ロケールがありません。");
+                        table = collection.AddNewTable(locale.Identifier) as StringTable;
                     }
 
                     string localizedText = locale.Identifier.Code == "ja"
