@@ -61,6 +61,14 @@ MonoBehaviour:
   - _addressableKey: Assets/Level/Data/Master/OutGame/StageSelect/Stream_StageTreeAsset.asset
   - _addressableKey: GameResourceDefinitionRepository
   - _addressableKey: GamepadHapticsConfig
+  - _addressableKey: TutorialSubtitles_en
+  - _addressableKey: English
+  - _addressableKey: Japanese
+  - _addressableKey: TutorialPopupImages_ja
+  - _addressableKey: TutorialPopupImages_en
+  - _addressableKey: TutorialSubtitles_ja
+  - _addressableKey: TutorialPopupImages Shared Data
+  - _addressableKey: TutorialSubtitles Shared Data
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset

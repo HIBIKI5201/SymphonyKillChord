@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
@@ -132,7 +133,7 @@ namespace KillChord.Demo
                 _isExitPolicyOwner = ServiceLocator.RegisterInstance<IStageResultExitPolicy>(_exitPolicy);
                 SceneManager.sceneLoaded += HandleSceneLoaded;
                 _isSceneLoadedSubscribed = true;
-                TryResetSaveDataOnEndScene(SceneManager.GetActiveScene());
+                HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
             }
             catch (OperationCanceledException)
             {
@@ -152,10 +153,24 @@ namespace KillChord.Demo
 
             bool isOutGameActive = ServiceLocator.TryGetInstance(
                 out StageSelectModuleContainer stageSelectContainer);
+            ResetHomeTimerOnEntry(isOutGameActive);
+
+            if (isOutGameActive && !_isFinalStageConfigured)
+            {
+                _isFinalStageConfigured =
+                    _exitPolicy.TryConfigureFinalStage(stageSelectContainer.StageTree);
+            }
+
             TrySubscribeHomeTutorialStarted(isOutGameActive);
             TryStartSession(isOutGameActive);
             _sessionState.Tick(Time.unscaledDeltaTime, isOutGameActive);
-            _timerView?.Refresh();
+            _timerView?.Refresh(isOutGameActive);
+
+            if (_sessionState.IsStarted && _sessionState.IsOverallTimeExpired)
+            {
+                TryTransitionToEndScene();
+                return;
+            }
 
             if (_sessionState.IsHomeTimeExpired && isOutGameActive)
             {
@@ -198,7 +213,7 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     Homeチュートリアル開始状態が保存された後、初めてOutGameが有効になった時点で両タイマーを開始します。
+        ///     Homeチュートリアル開始状態が保存された後、初めてOutGameが有効になった時点でタイマーを開始します。
         /// </summary>
         private async void TryStartSession(bool isOutGameActive)
         {
@@ -252,18 +267,16 @@ namespace KillChord.Demo
                 return;
             }
 
-            StageId forcedStageId = new(_config.ForcedStageId);
-            if (!stageSelectContainer.StageTree.TryGetDefinition(
-                    forcedStageId,
-                    out StageDefinition stageDefinition)
-                || stageDefinition is not BattleStageDefinition battleStageDefinition
+            if (!DemoStageResultExitPolicy.TryGetLatestAvailableBattleStage(
+                    stageSelectContainer.StageTree,
+                    out BattleStageDefinition battleStageDefinition)
                 || !stageSelectContainer.SelectionService.TryPrepareBattleSortie(
                     battleStageDefinition,
                     stageSelectContainer.ReturnSceneName))
             {
                 Debug.LogError(
-                    $"[{nameof(DemoRuntimeBootstrap)}] 強制出撃ステージを準備できませんでした。"
-                    + $" StageId: {_config.ForcedStageId}",
+                    $"[{nameof(DemoRuntimeBootstrap)}] " +
+                    "解放済みの最新バトルステージを強制出撃先に設定できませんでした。",
                     this);
                 return;
             }
@@ -275,9 +288,164 @@ namespace KillChord.Demo
             }
         }
 
+        /// <summary>
+        ///     シーンロード時に体験版セッションと終了処理を更新します。
+        /// </summary>
+        /// <param name="scene"> ロードされたシーンです。 </param>
+        /// <param name="loadSceneMode"> シーンのロード方式です。 </param>
         private void HandleSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
         {
-            TryResetSaveDataOnEndScene(scene);
+            if (_config == null)
+            {
+                return;
+            }
+
+            if (string.Equals(scene.name, _config.EndSceneName, StringComparison.Ordinal))
+            {
+                _sessionState.End();
+                _timerView?.Refresh(false);
+                TryResetSaveDataOnEndScene(scene);
+                return;
+            }
+
+            if (string.Equals(scene.name, _config.TitleSceneName, StringComparison.Ordinal))
+            {
+                ResetSessionOnTitleEntry();
+            }
+        }
+
+        /// <summary>
+        ///     OutGameへ入り直した時点でホームタイマーと強制出撃状態を初期化します。
+        /// </summary>
+        private void ResetHomeTimerOnEntry(bool isOutGameActive)
+        {
+            if (isOutGameActive && !_wasOutGameActive)
+            {
+                _sessionState.ResetHomeTimer();
+                _isForcedSortiePrepared = false;
+            }
+
+            _wasOutGameActive = isOutGameActive;
+        }
+
+        /// <summary>
+        ///     タイトルへ戻った時点で、次のプレイに持ち越してはいけない体験版状態を初期化します。
+        /// </summary>
+        private void ResetSessionOnTitleEntry()
+        {
+            _sessionState.Reset();
+            _timerView?.Refresh(false);
+
+            if (_isOutGameUiEventSubscribed && _outGameUIEvent != null)
+            {
+                _outGameUIEvent.OnHomeTutorialStarted -= HandleHomeTutorialStarted;
+            }
+
+            _outGameUIEvent = null;
+            _isOutGameUiEventSubscribed = false;
+            _isHomeTutorialStartedNotified = false;
+            _isTransitioningToEndScene = false;
+            _isFinalStageConfigured = false;
+            _isForcedSortiePrepared = false;
+            _wasOutGameActive = false;
+            _isSaveDataReset = false;
+        }
+
+        /// <summary>
+        ///     全体制限時間切れを検知し、現在のゲームシーンから体験版終了シーンへ遷移します。
+        /// </summary>
+        private async void TryTransitionToEndScene()
+        {
+            if (_isTransitioningToEndScene || _config == null)
+            {
+                return;
+            }
+
+            Scene currentScene = SceneManager.GetActiveScene();
+            if (string.Equals(currentScene.name, _config.EndSceneName, StringComparison.Ordinal))
+            {
+                _sessionState.End();
+                _timerView?.Refresh(false);
+                return;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out SceneTransitionUsecase sceneTransitionUsecase))
+            {
+                Debug.LogError(
+                    $"[{nameof(DemoRuntimeBootstrap)}] " +
+                    $"{nameof(SceneTransitionUsecase)} が取得できません。",
+                    this);
+                return;
+            }
+
+            _isTransitioningToEndScene = true;
+            try
+            {
+                bool isSuccess;
+                if (TryGetLoadedBattleScenes(
+                        out string battleSceneName,
+                        out string inGameSceneName))
+                {
+                    isSuccess = await sceneTransitionUsecase.UnloadThenChangeSceneAsync(
+                        battleSceneName,
+                        inGameSceneName,
+                        _config.EndSceneName,
+                        destroyCancellationToken);
+                }
+                else
+                {
+                    isSuccess = await sceneTransitionUsecase.ChangeSceneAsync(
+                        currentScene.name,
+                        _config.EndSceneName,
+                        destroyCancellationToken);
+                }
+
+                if (!isSuccess)
+                {
+                    Debug.LogError(
+                        $"[{nameof(DemoRuntimeBootstrap)}] " +
+                        "全体制限時間切れ後の体験版終了シーン遷移に失敗しました。",
+                        this);
+                    _isTransitioningToEndScene = false;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                _isTransitioningToEndScene = false;
+            }
+            catch (Exception exception)
+            {
+                _isTransitioningToEndScene = false;
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     現在ロード中の戦闘ステージとインゲーム基盤シーンを取得します。
+        /// </summary>
+        private static bool TryGetLoadedBattleScenes(
+            out string battleSceneName,
+            out string inGameSceneName)
+        {
+            battleSceneName = string.Empty;
+            inGameSceneName = string.Empty;
+
+            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
+                || !selectedBattleStageState.HasSelectedBattleStage)
+            {
+                return false;
+            }
+
+            battleSceneName = selectedBattleStageState.BattleSceneName;
+            inGameSceneName = selectedBattleStageState.InGameSceneName;
+            return IsSceneLoaded(battleSceneName) && IsSceneLoaded(inGameSceneName);
+        }
+
+        /// <summary> 指定したシーンがロード済みの場合はtrueを返します。 </summary>
+        private static bool IsSceneLoaded(string sceneName)
+        {
+            Scene scene = SceneManager.GetSceneByName(sceneName);
+            return scene.IsValid() && scene.isLoaded;
         }
 
         /// <summary>
@@ -303,11 +471,8 @@ namespace KillChord.Demo
             _isSaveDataReset = true;
             try
             {
+                // 終了シーンの初期化完了通知は DemoEndSceneInitializer が行う。
                 await SaveStore.DeleteAsync<SaveData>();
-                if (ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
-                {
-                    readiness.Complete(scene.name, true);
-                }
             }
             catch (Exception exception)
             {
@@ -360,7 +525,10 @@ namespace KillChord.Demo
         private bool _isOutGameUiEventSubscribed;
         private bool _isHomeTutorialStartedNotified;
         private bool _isStartingSession;
+        private bool _isTransitioningToEndScene;
+        private bool _isFinalStageConfigured;
         private bool _isForcedSortiePrepared;
+        private bool _wasOutGameActive;
         private bool _isSaveDataReset;
         private bool _ownsPrefabAssetHandle;
 

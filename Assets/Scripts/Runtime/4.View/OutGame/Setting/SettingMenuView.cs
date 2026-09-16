@@ -36,6 +36,10 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _qualityLevelPrevButton = Require<Button>(rootElement, QUALITY_LEVEL_PREV_BUTTON_NAME);
             _qualityLevelNextButton = Require<Button>(rootElement, QUALITY_LEVEL_NEXT_BUTTON_NAME);
             _brightnessSlider = Require<SliderInt>(rootElement, BRIGHTNESS_SLIDER_NAME);
+            _languagePrevButton = Require<Button>(rootElement, LANGUAGE_PREV_BUTTON_NAME);
+            _languageNextButton = Require<Button>(rootElement, LANGUAGE_NEXT_BUTTON_NAME);
+            _vibrationPrevButton = Require<Button>(rootElement, VIBRATION_PREV_BUTTON_NAME);
+            _vibrationNextButton = Require<Button>(rootElement, VIBRATION_NEXT_BUTTON_NAME);
             _environmentPanelSaveButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_SAVE_BUTTON_NAME);
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
@@ -65,6 +69,10 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _qualityLevelPrevButton,
                     _qualityLevelNextButton,
                     _brightnessSlider,
+                    _languagePrevButton,
+                    _languageNextButton,
+                    _vibrationPrevButton,
+                    _vibrationNextButton,
                     _environmentPanelSaveButton,
                 },
                 _screenModePrevButton);
@@ -148,6 +156,10 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string QUALITY_LEVEL_PREV_BUTTON_NAME = "QualityLevelPrevButton";
         private const string QUALITY_LEVEL_NEXT_BUTTON_NAME = "QualityLevelNextButton";
         private const string BRIGHTNESS_SLIDER_NAME = "BrightnessSlider";
+        private const string LANGUAGE_PREV_BUTTON_NAME = "LanguagePrevButton";
+        private const string LANGUAGE_NEXT_BUTTON_NAME = "LanguageNextButton";
+        private const string VIBRATION_PREV_BUTTON_NAME = "VibrationPrevButton";
+        private const string VIBRATION_NEXT_BUTTON_NAME = "VibrationNextButton";
         private const string ENVIRONMENT_PANEL_SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
 
         private readonly VisualElement _backGround;
@@ -169,6 +181,10 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _qualityLevelPrevButton;
         private readonly Button _qualityLevelNextButton;
         private readonly SliderInt _brightnessSlider;
+        private readonly Button _languagePrevButton;
+        private readonly Button _languageNextButton;
+        private readonly Button _vibrationPrevButton;
+        private readonly Button _vibrationNextButton;
         private readonly Button _environmentPanelSaveButton;
         private readonly HierarchicalNavigationScope _navigationScope;
         private IDisposable _audioSettingButtonPreset;

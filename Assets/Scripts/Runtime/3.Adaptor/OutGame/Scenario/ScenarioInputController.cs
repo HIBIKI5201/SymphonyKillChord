@@ -10,9 +10,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary>
         /// 入力操作を再生制御へ変換する依存関係を受け取る。
         /// </summary>
-        public ScenarioInputController(ScenarioAdvanceGate gate, IScenarioPlaybackControl playbackControl, IScenarioPlaybackState state)
+        public ScenarioInputController(
+            ScenarioAdvanceGate gate,
+            TextEventHandler textEventHandler,
+            IScenarioPlaybackControl playbackControl,
+            IScenarioPlaybackState state)
         {
             _gate = gate;
+            _textEventHandler = textEventHandler;
             _playbackControl = playbackControl;
             _state = state;
         }
@@ -26,6 +31,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         public void MouseClick()
         {
             if (IsSkipConfirmationOpen || !_state.IsPlaying) { return; }
+
+            if (_textEventHandler.TryCompleteCurrentText())
+            {
+                return;
+            }
+
             _gate.NotifyNext();
         }
 
@@ -100,6 +111,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         }
 
         private readonly ScenarioAdvanceGate _gate;
+        private readonly TextEventHandler _textEventHandler;
         private readonly IScenarioPlaybackControl _playbackControl;
         private readonly IScenarioPlaybackState _state;
         private bool _wasPausedBeforeConfirmation;
