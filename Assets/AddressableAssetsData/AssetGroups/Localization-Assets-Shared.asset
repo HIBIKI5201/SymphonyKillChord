@@ -61,7 +61,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7a59d4ca1f8156b4284e1adab333880e
-    m_Address: Assets/Localization/Tables/UICommon Shared Data.asset
+    m_Address: UICommon Shared Data
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
