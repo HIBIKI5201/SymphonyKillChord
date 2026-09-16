@@ -110044,6 +110044,7 @@ MonoBehaviour:
   _defaultShellPoolSize: 20
   _maxShellPoolSize: 40
   _shellExplosionEffectView: {fileID: 1544702107}
+  _shellExplosionSoundView: {fileID: 1915222635}
   _renderWarmupEnabled: 1
 --- !u!4 &1599172286
 Transform:
