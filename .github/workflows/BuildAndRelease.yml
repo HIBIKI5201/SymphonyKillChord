@@ -1023,6 +1023,10 @@ jobs:
 
 # ==================================================================================================
 
+      - name: Git管理のUIアセットを復元
+        run: ./.github/scripts/RestoreTrackedUiAssets.ps1
+        shell: powershell
+
       - name: NuGetパッケージの復元
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
