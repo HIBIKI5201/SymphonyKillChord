@@ -941,8 +941,8 @@ MonoBehaviour:
   _cullingMask:
     serializedVersion: 2
     m_Bits: 0
-  _cameraLocalPosition: {x: 0, y: 1.1, z: 2.2}
-  _cameraLocalEulerAngles: {x: 0, y: 180, z: 0}
+  _cameraLocalPosition: {x: 1.1, y: 1.1, z: 1.9052559}
+  _cameraLocalEulerAngles: {x: 0, y: 210, z: 0}
   _fieldOfView: 30
   _renderTextureWidth: 1024
   _renderTextureHeight: 2048
