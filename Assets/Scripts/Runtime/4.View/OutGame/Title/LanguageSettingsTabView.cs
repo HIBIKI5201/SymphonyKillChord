@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.Persistent.Environment;
 using KillChord.Runtime.View.OutGame.Common;
+using KillChord.Runtime.View.Persistent.Localization;
 using R3;
 using System;
 using UnityEngine.UIElements;
@@ -46,12 +47,14 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _languagePrevButtonPreset.Dispose();
             _languageNextButtonPreset.Dispose();
+            _languageLocalizedText?.Dispose();
             _subscriptions.Dispose();
         }
 
         private const string LANGUAGE_PREV_BUTTON_NAME = "LanguagePrevButton";
         private const string LANGUAGE_NEXT_BUTTON_NAME = "LanguageNextButton";
         private const string LANGUAGE_VALUE_LABEL_NAME = "LanguageValueLabel";
+        private const string UI_COMMON_TABLE = "UICommon";
         private const int CYCLE_PREVIOUS_DIRECTION = -1;
         private const int CYCLE_NEXT_DIRECTION = 1;
 
@@ -62,6 +65,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private readonly CompositeDisposable _subscriptions;
         private readonly IDisposable _languagePrevButtonPreset;
         private readonly IDisposable _languageNextButtonPreset;
+        private LocalizedElementText _languageLocalizedText;
 
         /// <summary>
         ///     表示言語を前へ切り替える。
@@ -86,9 +90,14 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// <summary>
         ///     表示言語を表示へ反映する。
         /// </summary>
-        private void HandleLanguageLabelPublished(string label)
+        /// <param name="labelKey"> UICommonテーブルのローカライズキーです。 </param>
+        private void HandleLanguageLabelPublished(string labelKey)
         {
-            _languageValueLabel.text = label;
+            _languageLocalizedText?.Dispose();
+            _languageLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                labelKey,
+                text => _languageValueLabel.text = text);
         }
 
         /// <summary>
