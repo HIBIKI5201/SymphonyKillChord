@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.SkillBuild;
+using KillChord.Runtime.View.Persistent.Localization;
 using R3;
 using System;
 using System.Collections.Generic;
@@ -66,6 +67,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _dialogPanel = GetDialogPanel(_unsavedChangesDialogOverlay);
             HideUnsavedChangesDialog();
             RegisterButtonCallback();
+
+            _discardAndCloseLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                "ui.skill_build_dialog.discard_and_close",
+                text => _unsavedDiscardAndCloseButton.text = text);
+            _saveAndCloseLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                "ui.skill_build_dialog.save_and_close",
+                text => _unsavedSaveAndCloseButton.text = text);
         }
 
         /// <summary> スキル一覧がカード要素ごと再構築された時に通知する。 </summary>
@@ -179,6 +189,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillGenreFilterBarView.OnGenreFilterSelected -= HandleGenreFilterBarSelectedHandler;
             _skillGenreFilterBarView.Dispose();
             OnSkillListRefreshed = null;
+            _discardAndCloseLocalizedText?.Dispose();
+            _saveAndCloseLocalizedText?.Dispose();
         }
 
         /// <inheritdoc />
@@ -197,6 +209,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string DISCARD_AND_CLOSE_BUTTON_NAME = "DiscardAndCloseButton";
         private const string SAVE_AND_CLOSE_BUTTON_NAME = "SaveAndCloseButton";
         private const string OWNED_POINTS_LABEL_NAME = "OwnedPointsLabel";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         /// <inheritdoc />
         protected override VisualElement CancelTargetElement => _backButton;
@@ -216,6 +229,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly Button _unsavedSaveAndCloseButton;
         private readonly Button _unsavedDiscardAndCloseButton;
         private readonly VisualElement _unsavedChangesDialogOverlay;
+        private LocalizedElementText _discardAndCloseLocalizedText;
+        private LocalizedElementText _saveAndCloseLocalizedText;
 
         /// <summary> 未保存確認ダイアログ表示中、フォーカスを内側へ閉じ込める。 </summary>
         private readonly ModalNavigationScope _dialogNavigationScope = new();

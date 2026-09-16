@@ -33,22 +33,23 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
 
             EnvironmentSettingsViewDTO dto = new EnvironmentSettingsViewDTO(
                 FormatResolutionLabel(environmentSettings.ResolutionWidth, environmentSettings.ResolutionHeight),
-                environmentSettings.IsFullScreen ? SCREEN_MODE_FULL_SCREEN_LABEL : SCREEN_MODE_WINDOWED_LABEL,
+                environmentSettings.IsFullScreen ? SCREEN_MODE_FULL_SCREEN_KEY : SCREEN_MODE_WINDOWED_KEY,
                 _qualityApplier.GetQualityLevelName(environmentSettings.QualityLevel),
                 environmentSettings.Brightness,
-                GetLanguageLabel(environmentSettings.Language),
-                GetVibrationStrengthLabel(environmentSettings.VibrationStrength),
+                GetLanguageLabelKey(environmentSettings.Language),
+                GetVibrationStrengthLabelKey(environmentSettings.VibrationStrength),
                 GetVibrationScale(environmentSettings.VibrationStrength));
             _environmentSettingsViewModel.Apply(in dto);
         }
 
-        private const string SCREEN_MODE_FULL_SCREEN_LABEL = "フルスクリーン";
-        private const string SCREEN_MODE_WINDOWED_LABEL = "ウィンドウ";
-        private const string LANGUAGE_JAPANESE_LABEL = "日本語";
-        private const string LANGUAGE_ENGLISH_LABEL = "英語";
-        private const string VIBRATION_STRONG_LABEL = "強い";
-        private const string VIBRATION_WEAK_LABEL = "弱い";
-        private const string VIBRATION_OFF_LABEL = "オフ";
+        // UI共通テキストのString Table Collection「UICommon」のキー。View層でLocalizedElementTextにより解決される。
+        private const string SCREEN_MODE_FULL_SCREEN_KEY = "ui.setting.screen_mode_fullscreen";
+        private const string SCREEN_MODE_WINDOWED_KEY = "ui.setting.screen_mode_windowed";
+        private const string LANGUAGE_JAPANESE_KEY = "ui.setting.language_japanese";
+        private const string LANGUAGE_ENGLISH_KEY = "ui.setting.language_english";
+        private const string VIBRATION_STRONG_KEY = "ui.setting.vibration_strong";
+        private const string VIBRATION_WEAK_KEY = "ui.setting.vibration_weak";
+        private const string VIBRATION_OFF_KEY = "ui.setting.vibration_off";
         private const float VIBRATION_STRONG_SCALE = 1f;
         private const float VIBRATION_WEAK_SCALE = 0.5f;
         private const float VIBRATION_OFF_SCALE = 0f;
@@ -65,25 +66,25 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         }
 
         /// <summary>
-        ///     表示言語のラベルを取得する。
+        ///     表示言語のローカライズキーを取得する。
         /// </summary>
-        private static string GetLanguageLabel(GameLanguage language)
+        private static string GetLanguageLabelKey(GameLanguage language)
         {
             return language == GameLanguage.English
-                ? LANGUAGE_ENGLISH_LABEL
-                : LANGUAGE_JAPANESE_LABEL;
+                ? LANGUAGE_ENGLISH_KEY
+                : LANGUAGE_JAPANESE_KEY;
         }
 
         /// <summary>
-        ///     ゲームパッド振動の強さのラベルを取得する。
+        ///     ゲームパッド振動の強さのローカライズキーを取得する。
         /// </summary>
-        private static string GetVibrationStrengthLabel(VibrationStrength vibrationStrength)
+        private static string GetVibrationStrengthLabelKey(VibrationStrength vibrationStrength)
         {
             return vibrationStrength switch
             {
-                VibrationStrength.Weak => VIBRATION_WEAK_LABEL,
-                VibrationStrength.Off => VIBRATION_OFF_LABEL,
-                _ => VIBRATION_STRONG_LABEL,
+                VibrationStrength.Weak => VIBRATION_WEAK_KEY,
+                VibrationStrength.Off => VIBRATION_OFF_KEY,
+                _ => VIBRATION_STRONG_KEY,
             };
         }
 
