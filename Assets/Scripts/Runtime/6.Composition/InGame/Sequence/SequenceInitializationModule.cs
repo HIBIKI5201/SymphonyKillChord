@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
@@ -282,6 +283,14 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             // 不完全なステージ画面を表示しないように、
             // OutGameへの遷移が完了するまで黒画面を維持する。
             _stageStartFadeView.ShowBlackImmediate();
+
+            // 専用出撃の失敗はPersistentが所有し、Sequenceから別の帰還を開始しません。
+            if (ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+                && transition.HasScenarioBattleSortie)
+            {
+                transition.StopScenarioBattleInitialization();
+                return;
+            }
 
             Debug.LogError(
                 $"[{nameof(SequenceInitializationModule)}] "

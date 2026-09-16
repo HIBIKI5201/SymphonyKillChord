@@ -147,7 +147,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _screenViewRegistry = null;
             _screenStateRepository = null;
 
-            CancelAndDispose(ref _ctsTransition);
             _screenRuleDataKey.ReleaseLoadedAsset(this);
             _loadedScreenRuleData = null;
             _isInitialized = false;
@@ -392,8 +391,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
-            _ctsTransition = new();
-
             _isInitialized = true;
             _isSceneTransitioning = false;
             return true;
@@ -520,7 +517,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private async void HandleStartGame()
         {
             // 一度ゲーム開始処理が走った後は、二重に処理が走らないようにします。
-            if (_isSceneTransitioning) { return; }
+            if (_isSceneTransitioning || _sceneTransitionController.HasScenarioBattleSortie
+                || _sceneTransitionController.PersistentLifetimeToken.IsCancellationRequested) { return; }
 
             if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage
@@ -534,21 +532,21 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             string targetSceneName = selectedBattleStageState.InGameSceneName;
             _isSceneTransitioning = true;
-            var currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            string currentSceneName = gameObject.scene.name;
             try
             {
                 bool success =
                     await _sceneTransitionController
-                        .ChangeSceneKeepingLoadingAsync(
+                        .ChangeSceneKeepingLoadingWithPersistentLifetimeAsync(
                             currentSceneName,
-                            targetSceneName,
-                            _ctsTransition.Token);
+                            targetSceneName);
 
                 if (success)
                 {
                     return;
                 }
 
+                if (this == null || _sceneTransitionController.PersistentLifetimeToken.IsCancellationRequested) { return; }
                 _isSceneTransitioning = false;
 
                 Debug.LogError(
@@ -559,12 +557,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
             catch (OperationCanceledException)
             {
-                _isSceneTransitioning = false;
+                if (this != null) { _isSceneTransitioning = false; }
             }
             catch (Exception exception)
             {
-                _isSceneTransitioning = false;
-                Debug.LogException(exception, this);
+                if (this != null) { _isSceneTransitioning = false; }
+                Debug.LogException(exception);
             }
         }
 
@@ -573,7 +571,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private async void HandleReturnToTitleRequested()
         {
-            if (_isSceneTransitioning)
+            if (_isSceneTransitioning || _sceneTransitionController.HasScenarioBattleSortie
+                || _sceneTransitionController.PersistentLifetimeToken.IsCancellationRequested)
             {
                 _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(false);
                 return;
@@ -589,35 +588,40 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             _isSceneTransitioning = true;
-            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            string currentSceneName = gameObject.scene.name;
+            string titleSceneName = _titleSceneName;
+            OutGameUIEvent uiEvent = _outGameUIEvent;
+            SceneTransitionController transition = _sceneTransitionController;
 
             try
             {
-                bool success = await _sceneTransitionController.ChangeSceneAsync(
-                    currentSceneName,
-                    _titleSceneName,
-                    _ctsTransition.Token);
+                bool success = await transition.ChangeSceneWithPersistentLifetimeAsync(
+                    currentSceneName, titleSceneName);
                 if (success)
                 {
-                    _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(true);
+                    if (!transition.PersistentLifetimeToken.IsCancellationRequested)
+                    {
+                        uiEvent.OnReturnToTitleRequestCompleted?.Invoke(true);
+                    }
                     return;
                 }
 
                 Debug.LogError(
                     $"[{nameof(ScreenInitializer)}] タイトル画面への遷移に失敗しました。"
-                    + $" SceneName: {_titleSceneName}",
-                    this);
+                    + $" SceneName: {titleSceneName}");
             }
             catch (OperationCanceledException)
             {
+                return;
             }
             catch (Exception exception)
             {
-                Debug.LogException(exception, this);
+                Debug.LogException(exception);
             }
 
+            if (this == null || transition.PersistentLifetimeToken.IsCancellationRequested) { return; }
             _isSceneTransitioning = false;
-            _outGameUIEvent.OnReturnToTitleRequestCompleted?.Invoke(false);
+            uiEvent.OnReturnToTitleRequestCompleted?.Invoke(false);
         }
 
         /// <summary>
@@ -640,17 +644,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             rootElement.style.display = isVisible
                 ? DisplayStyle.Flex
                 : DisplayStyle.None;
-        }
-
-        /// <summary>
-        ///     CancellationTokenSource をキャンセルし、破棄します。
-        ///     さらに、参照を null に設定します。
-        /// </summary>
-        private void CancelAndDispose(ref CancellationTokenSource cts)
-        {
-            cts?.Cancel();
-            cts?.Dispose();
-            cts = null;
         }
 
         private const string HOMESCREEN_NAME = "HomeContainer";
@@ -689,6 +682,5 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private IScreenStateRepository _screenStateRepository;
         private bool _isSceneTransitioning = false;
 
-        private CancellationTokenSource _ctsTransition;
     }
 }
