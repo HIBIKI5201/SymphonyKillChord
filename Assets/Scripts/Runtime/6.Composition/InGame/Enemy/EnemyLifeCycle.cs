@@ -182,7 +182,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             ICharacterAnimationViewContext animationContext =
                 animationComposition.Init(_characterAnimationView, _characterAnimationConfig, musicSyncState);
             _characterAnimationContext = animationContext;
-            _view.Initialize(aiController, target, animationContext, musicSyncState, damageEffectView);
+            _view.Initialize(aiController, target, animationContext, musicSyncState, damageEffectView,
+                () => _raycastView.IsWarningVisible || _battleState.HasActiveShellIndicators);
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter, damageNumberPoolView);
             // 警告デカールへ、攻撃タイミングまでの進捗を0〜1で供給する。
@@ -197,6 +198,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
                 _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
                 _aiController.OnAttack += _raycastView.HideWarning;
+                _aiController.OnAttackCanceled += _raycastView.HideWarning;
             }
             _aiController.OnAttack += HandleEnemyAttackExecuted;
             _attackPositionSearchView.Initialize();
@@ -367,6 +369,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void StopGameplay()
         {
+            _raycastView?.HideWarning();
             _attackReservationUsecase?.Deactivate();
             _aiController?.CancelAttack();
 
