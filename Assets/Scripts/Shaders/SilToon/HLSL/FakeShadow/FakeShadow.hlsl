@@ -24,19 +24,23 @@ v2f vert(appdata v)
 
 #ifdef _FAKE_SHADOW_ON
     float3 positionVS = TransformWorldToView(TransformObjectToWorld(v.positionOS.xyz));
-
-    // _FakeShadowOffset はカメラの右(+x)・上(+y)方向へのワールド単位の移動量。
-    // ビュー空間で一定量ずらすため、投影で顔と同じく遠近に応じて縮む。
-    // xyのみ動かすので、深度は元の髪のまま保たれる。
+    
     positionVS.xy += _FakeShadowOffset;
-
-    // ZTest LEqual で顔より奥の髪を弾いているが、顔の輪郭際で少し奥にある髪まで
-    // 削れてしまうため、カメラ側へ引き戻して調整できるようにする。
-    // 視線に沿って動かすので画面上の位置は変わらない。
-    float3 towardCameraVS = IsPerspectiveProjection() ? -normalize(positionVS) : float3(0.0, 0.0, 1.0);
-    positionVS += towardCameraVS * _FakeShadowDepthBias;
-
+    
     o.pos = TransformWViewToHClip(positionVS);
+    
+    float3 towardCameraVS =  -normalize(positionVS);
+    float depthBias = _FakeShadowDepthBias;
+        float distToNear = length(positionVS) * saturate(1.0 - _ProjectionParams.y * rcp(max(-positionVS.z, 1e-5)));
+        depthBias = min(depthBias, distToNear * 0.5);
+    float4 biasedCS = TransformWViewToHClip(positionVS + towardCameraVS * depthBias);
+    o.pos.z = biasedCS.z * rcp(biasedCS.w) * o.pos.w;
+    
+#if UNITY_REVERSED_Z
+    o.pos.z = min(o.pos.z, o.pos.w);
+#else
+    o.pos.z = max(o.pos.z, -o.pos.w);
+#endif
 #else
     // パス自体はSilToonの全マテリアルに存在するため、無効時は縮退させて破棄する
     o.pos = (float4)0;
