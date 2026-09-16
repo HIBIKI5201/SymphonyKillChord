@@ -105,7 +105,10 @@ namespace KillChord.Editor.Localization
             new("ui.setting.language", "言語", "言語"),
             new("ui.setting.vibration", "振動", "振動"),
             new("ui.setting.rhythm_offset", "リズム判定タイミング", "リズム判定タイミング"),
-            new("ui.skill.empty_slot_symbol", "＋", "+")
+            new("ui.skill.empty_slot_symbol", "＋", "+"),
+            new("ui.skill.max_level", "レベルMax", "Max Level"),
+            new("ui.skill_detail.status_boost", "ステータス強化", "Stat Boost"),
+            new("ui.setting.rhythm_offset_seconds_format", "{0}秒", "{0}s")
         };
 
         /// <summary>
