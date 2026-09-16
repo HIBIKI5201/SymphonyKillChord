@@ -301,14 +301,14 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             if (next == null)
             {
                 // 一覧の最左端で左入力した場合、強化ボタンへ移動する。
-                // ボタンがレベルMax等で無効化されている場合はフォーカスできないため、
-                // その場合はイベントを消費せず標準ナビゲーションに委ねる。
-                if (step == -1 && TryFocus(_skillLevelUpButton))
+                // 移動先がない場合も入力を消費し、スクロール領域へフォーカスを渡さない。
+                if (step == -1)
                 {
-                    evt.StopPropagation();
-                    element.panel?.focusController?.IgnoreEvent(evt);
+                    TryFocus(_skillLevelUpButton);
                 }
 
+                evt.StopPropagation();
+                element.panel?.focusController?.IgnoreEvent(evt);
                 return;
             }
 

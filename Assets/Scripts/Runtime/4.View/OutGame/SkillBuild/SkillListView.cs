@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using System;
 using System.Collections.Generic;
@@ -246,6 +247,14 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _scrollViewControl.horizontalScrollerVisibility = ScrollerVisibility.Auto;
             _scrollViewControl.verticalScrollerVisibility = ScrollerVisibility.Hidden;
 
+            // 一覧のフォーカスはスキル要素で受け、スクロール操作部品へ移動させない。
+            _scrollView.ExcludeFromNavigation();
+            _scrollViewControl.ExcludeFromNavigation();
+            _scrollViewControl.contentViewport.ExcludeFromNavigation();
+            _scrollViewControl.contentContainer.ExcludeFromNavigation();
+            ExcludeScrollerFromNavigation(_scrollViewControl.horizontalScroller);
+            ExcludeScrollerFromNavigation(_scrollViewControl.verticalScroller);
+
             // スクロールバーのつまみをドラッグしなくても一覧をドラッグしてスクロールできるようにする。
             // ただしスキルカード(装備ドラッグ対象、draggable クラス)上から始まった操作は、
             // 装備ドラッグと競合しないようスクロールドラッグの対象から除外する。
@@ -253,6 +262,16 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 _scrollViewControl,
                 ScrollDragAxis.Horizontal,
                 shouldIgnorePointerDownTarget: element => HasDraggableAncestor(element, _scrollViewControl));
+        }
+
+        /// <summary>
+        ///     スクロールバーと内部のスライダー・ボタンをフォーカス移動から除外する。
+        /// </summary>
+        /// <param name="scroller"> 対象のスクロールバー。 </param>
+        private static void ExcludeScrollerFromNavigation(Scroller scroller)
+        {
+            scroller.ExcludeFromNavigation();
+            scroller.Query<VisualElement>().ForEach(element => element.ExcludeFromNavigation());
         }
 
         /// <summary>
