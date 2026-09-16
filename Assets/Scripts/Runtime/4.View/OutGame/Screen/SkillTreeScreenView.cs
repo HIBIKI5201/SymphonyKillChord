@@ -33,16 +33,20 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             RegisterButtonCallback();
             _pointsLabel = rootElement.Q<Label>("Points");
+            _rebuildPointsLabel = rootElement.Q<Label>("RebuildPointsValueLabel")
+                ?? throw new ArgumentNullException($"[{nameof(SkillTreeScreenView)}] RebuildPointsValueLabel が見つかりませんでした。");
             _listSeparatorLocalizedText = new LocalizedElementText(
                 "UICommon", "ui.skill_tree.list_separator", text =>
                 {
                     ListSeparator = text;
                     OnListSeparatorChanged?.Invoke();
                 }, "、");
-            Label localizedTitle = rootElement.Q<Label>("Title");
+            Label localizedRebuildPointsHeading = rootElement.Q<Label>("RebuildPointsNameLabel");
+            Label localizedUnlockPointsHeading = rootElement.Q<Label>("UnlockPointsNameLabel");
             _headingLocalizedTexts = new[]
             {
-                new LocalizedElementText("UICommon", "ui.skill_tree.title", text => localizedTitle.text = text, localizedTitle.text)
+                new LocalizedElementText("UICommon", "ui.home.mod_points", text => localizedRebuildPointsHeading.text = text, localizedRebuildPointsHeading.text),
+                new LocalizedElementText("UICommon", "ui.home.unlock_points", text => localizedUnlockPointsHeading.text = text, localizedUnlockPointsHeading.text)
             };
         }
 
@@ -59,7 +63,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         public override void Dispose()
         {
-            _pointsLocalizedText?.Dispose();
             _listSeparatorLocalizedText.Dispose();
             OnListSeparatorChanged = null;
             foreach (LocalizedElementText localizedText in _headingLocalizedTexts)
@@ -156,18 +159,22 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> 選択中言語のスキル名一覧の区切り文字。 </summary>
         public string ListSeparator { get; private set; } = "、";
 
-        /// <summary> 現在の解放ポイントを選択中の言語で表示する。 </summary>
+        /// <summary> ヘッダーに現在の解放ポイントを表示する。 </summary>
         /// <param name="points"> 現在の解放ポイント。 </param>
         public void SetPoints(int points)
         {
-            _pointsLocalizedText?.Dispose();
-            _pointsLocalizedText = new LocalizedElementText(
-                "UICommon", "ui.skill_tree.points_format", text => _pointsLabel.text = text,
-                $"解放P：{points}", new object[] { points });
+            _pointsLabel.text = points.ToString();
+        }
+
+        /// <summary> ヘッダーに現在の改造ポイントを表示する。 </summary>
+        /// <param name="rebuildPoints"> 現在の改造ポイント。 </param>
+        public void SetRebuildPoints(int rebuildPoints)
+        {
+            _rebuildPointsLabel.text = rebuildPoints.ToString();
         }
 
         private readonly Label _pointsLabel;
-        private LocalizedElementText _pointsLocalizedText;
+        private readonly Label _rebuildPointsLabel;
         private readonly LocalizedElementText _listSeparatorLocalizedText;
         private readonly LocalizedElementText[] _headingLocalizedTexts;
 
