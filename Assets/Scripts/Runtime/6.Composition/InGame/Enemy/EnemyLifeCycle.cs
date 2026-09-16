@@ -236,8 +236,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             SetDyingCollidersEnabled(true);
             _view.Activate();
             _attackPositionSearchView.enabled = true;
-            _navMeshAgent.enabled = true;
-            _navMeshAgent.Warp(position);
+            EnableNavMeshAgentAt(position);
             _behaviorGraphAgent.enabled = true;
             _behaviorGraphAgent.Restart();
             gameObject.SetActive(true);
@@ -260,7 +259,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 ct.ThrowIfCancellationRequested();
 
-                PrepareEntrance(positionPair.SpawnPosition.position);
+                if (!PrepareEntrance(positionPair.SpawnPosition.position))
+                {
+                    CancelEntrance();
+                    return false;
+                }
+
                 hasPreparedEntrance = true;
 
                 bool hasArrived =
@@ -269,14 +273,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                         ct);
 
                 ct.ThrowIfCancellationRequested();
-                positionPair.SetInUse(false);
                 if (!hasArrived || this == null)
                 {
                     if (this != null)
                     {
                         CancelEntrance();
                     }
-                    positionPair.SetInUse(false);
                     return false;
                 }
 
@@ -300,6 +302,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 }
 
                 throw;
+            }
+            finally
+            {
+                // 例外・キャンセルで抜けた場合も使用中フラグを残すと、
+                // 以降その生成位置が永久に選ばれなくなる。
+                positionPair.SetInUse(false);
             }
         }
 
@@ -492,7 +500,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         ///     入場移動に必要な表示とNavMeshAgentのみ有効化する。
         /// </summary>
         /// <param name="position">入場開始地点。</param>
-        private void PrepareEntrance(Vector3 position)
+        /// <returns>入場開始地点へ配置できた場合はtrue。</returns>
+        private bool PrepareEntrance(Vector3 position)
         {
             if (_behaviorGraphAgent != null)
             {
@@ -506,12 +515,46 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             gameObject.SetActive(true);
 
-            if (_navMeshAgent != null)
+            if (!EnableNavMeshAgentAt(position))
             {
-                _navMeshAgent.enabled = true;
-                _navMeshAgent.Warp(position);
-                _navMeshAgent.isStopped = false;
+                return false;
             }
+
+            _navMeshAgent.isStopped = false;
+            return true;
+        }
+
+        /// <summary>
+        ///     NavMeshAgentを指定位置へ配置した上で有効化する。
+        /// </summary>
+        /// <param name="position">配置先のNavMesh上の位置。</param>
+        /// <returns>NavMesh上へ配置できた場合はtrue。</returns>
+        private bool EnableNavMeshAgentAt(Vector3 position)
+        {
+            if (_navMeshAgent == null)
+            {
+                return false;
+            }
+
+            // NavMeshAgentは有効化した瞬間のTransform位置でNavMeshへの接地を試み、
+            // 離れているとエージェント生成に失敗して以降のWarpも効かなくなる。
+            // 有効化より先にTransformを移す順序を崩さないこと。
+            transform.position = position;
+            _navMeshAgent.enabled = true;
+
+            if (_navMeshAgent.isOnNavMesh)
+            {
+                return true;
+            }
+
+            if (_navMeshAgent.Warp(position))
+            {
+                return true;
+            }
+
+            Debug.LogWarning(
+                $"[EnemyLifeCycle] NavMesh上に配置できなかったため入場を中止します。 位置: {position}", this);
+            return false;
         }
 
         /// <summary>
