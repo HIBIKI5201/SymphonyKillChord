@@ -55,6 +55,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 272347576266abe4eb24d993098e0063
+    m_Address: GamepadHapticsConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2d1972e01a7a86243aac0caff66ff428
     m_Address: ExampleBattleMusicData
     m_ReadOnly: 0
@@ -130,6 +135,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a36ca6c773f6de34e86125d65d331ee7
+    m_Address: LoadingTipsConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b11f6152160bbfc42b59af15ef998adc
     m_Address: InitialSkillLoadout
     m_ReadOnly: 0
@@ -180,8 +190,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f103effd9371c7447b0f40c9abb5130e
+    m_Address: GameResourceDefinitionRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f14fa8fb60db62e4cb2b1be4f9ed86f7
     m_Address: PortraitCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f4b5344a42c4ffd4893bcdb0152a3bda
+    m_Address: BgmSelectorLabelTableAsset
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -23,6 +23,7 @@ using KillChord.Runtime.View.InGame.Enemy.AIFacade;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
+using KillChord.Runtime.View.Persistent.Music;
 using LitMotion;
 using LitMotion.Extensions;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -432,6 +433,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("死亡演出用の沼のGameObjectです。")]
         private GameObject _deathSwampGameObject;
 
+        [SerializeField, Tooltip("撃破時にSE_Defeatを再生するSE用Source。")]
+        private SoundEffectSource _defeatSoundSource;
+
         /// <summary>
         ///     死亡演出で変化させるMaterialのfloatプロパティID（仮に"_DeathEffectAmount"）です。
         /// </summary>
@@ -726,8 +730,15 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="diedEnemy"> 死亡した敵のEntity。</param>
         private void HandleEnemyDied(CharacterEntity diedEnemy)
         {
+            // すでに死亡処理中の場合は、通知とSEの二重発火を防ぐ。
+            if (_isDying)
+            {
+                return;
+            }
+
             // 撃破演出用に、敵の撃破を通知する。
             EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(diedEnemy.Id));
+            _defeatSoundSource?.Play();
 
             DieAsync();
         }

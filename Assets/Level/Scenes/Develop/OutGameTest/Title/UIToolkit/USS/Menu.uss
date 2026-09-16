@@ -2,10 +2,10 @@
 }
 
 .title-option-button {
-    width: 15%;
+    width: 22%;
     align-self: center;
     -unity-font-style: bold;
-    font-size: 36px;
+    font-size: 34px;
     aspect-ratio: 2;
     scale: 1 1;
     transition-property: scale;
@@ -31,5 +31,23 @@
 
 .title-option-button:active {
     scale: 0.9 0.9;
+}
+
+.bottom-button-root {
+    position: absolute;
+    bottom: 5%;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.volume-slider .unity-base-slider__tracker {
+    height: 18px;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+    border-bottom-left-radius: 9px;
 }
 

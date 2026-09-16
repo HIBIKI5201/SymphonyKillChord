@@ -96,7 +96,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 damageToHealth = barrierHolder.AbsorbBarrier(result.FinalDamage, out barrierDamage);
             }
 
-            NotifySkillDamage(defender, result, attackType, notifyNormalDamage);
             Damage appliedDamage = default;
 
             // 防御者がダメージを受けることができる場合、またはダメージが0より大きい場合にのみ、ダメージを適用する
@@ -110,6 +109,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
             result = result
                 .WithBarrierDamage(barrierDamage)
                 .WithAppliedDamage(appliedDamage);
+
+            NotifySkillDamage(defender, result, attackType, notifyNormalDamage);
 
             // 攻撃者と防御者のステータス効果システムにダメージを通知する
             defender.StatusEffectSystem.NotifyDamageTaken(
@@ -159,7 +160,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
 
             EventBus<EOnTakeDamage>.Raise(
                 new EOnTakeDamage(
-                    attackResult.FinalDamage.Value,
+                    attackResult.AppliedDamage.Value,
                     attackResult.IsCritical,
                     attackResult.IsJustHit,
                     character.Id,

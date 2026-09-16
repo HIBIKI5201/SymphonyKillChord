@@ -12,6 +12,7 @@ using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
 using LitMotion;
 using LitMotion.Extensions;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -82,6 +83,12 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("Critical SE用Source。")]
         private SoundEffectSource _criticalSoundSource;
 
+        [SerializeField, Tooltip("敵への通常Hit時のSE用Source。")]
+        private SoundEffectSource _hitSoundSource;
+
+        [SerializeField, Tooltip("ロックオン成立時のSE用Source。")]
+        private SoundEffectSource _lockOnSoundSource;
+
         [SerializeField, Tooltip("足音演出Viewです。")]
         private FootStepView _footStepView;
 
@@ -129,6 +136,8 @@ namespace KillChord.Runtime.View.InGame.Player
         private MotionHandle _damageEffectHandle;
         private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
         private ReusableParticleSystemView _damageEffectView;
+        private Guid _playerId;
+        private int _lastHitSoundFrame = int.MinValue;
 
         private float _attackFacingRemaining = 0f;
         private Quaternion _attackFacingRotation;
@@ -160,6 +169,7 @@ namespace KillChord.Runtime.View.InGame.Player
         private void OnDestroy()
         {
             EventBus<EOnTakeDamage>.Unregister(HandleTakeDamage);
+            EventBus<EOnLockOnAcquired>.Unregister(HandleLockOnAcquired);
 
             if (_playerInputView != null)
             {
@@ -186,10 +196,18 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter,
             ReusableParticleSystemView damageEffectView,
+            Guid playerId,
             PlayerInputSuppressionState inputSuppressionState = null)
         {
+            // 再初期化を防ぐ。ガードがないとEventBus登録が二重になりSEが多重発火する。
+            if (_isInitialized)
+            {
+                return;
+            }
+
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
+            _playerId = playerId;
             _inputSuppressionState = inputSuppressionState;
             _damageEffectView = damageEffectView;
             _characterAnimationViewModel = animationContext.ViewModel;
@@ -201,6 +219,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _healthHudPresenter = healthHudPresenter;
             _healthHudPresenter.OnDamaged += PlayDamageFeedback;
             EventBus<EOnTakeDamage>.Register(HandleTakeDamage);
+            EventBus<EOnLockOnAcquired>.Register(HandleLockOnAcquired);
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
@@ -815,15 +834,48 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
-        ///     敵への攻撃で被弾した際に、Criticalヒット時のSEを再生します。
+        ///     プレイヤーの攻撃が敵に命中した際のHit SEを再生します。
+        ///     Criticalヒットの場合はCritical用SE、それ以外は通常Hit用SEを再生します。
+        ///     射程外ヒットなどダメージが0の場合は「当たったが効いていない」表示のみのため再生しません。
+        ///     EOnTakeDamageは被弾者を問わず発火するため、プレイヤー自身が被弾した通知は無視する。
+        ///     また、AoEや継続ダメージで同一フレーム内に複数回発火しても、Hit SEは1フレームにつき1回だけ再生する。
         /// </summary>
         /// <param name="e"> イベント情報です。 </param>
         private void HandleTakeDamage(EOnTakeDamage e)
         {
-            if (e.Critical && e.Damage > 0)
+            if (e.DefenderId == _playerId)
+            {
+                return;
+            }
+
+            if (e.Damage <= 0)
+            {
+                return;
+            }
+
+            if (_lastHitSoundFrame == Time.frameCount)
+            {
+                return;
+            }
+            _lastHitSoundFrame = Time.frameCount;
+
+            if (e.Critical)
             {
                 PlaySound(_criticalSoundSource, null);
             }
+            else
+            {
+                PlaySound(_hitSoundSource, null);
+            }
+        }
+
+        /// <summary>
+        ///     ロックオン成立時のSEを再生します。
+        /// </summary>
+        /// <param name="e"> イベント情報です。 </param>
+        private void HandleLockOnAcquired(EOnLockOnAcquired e)
+        {
+            PlaySound(_lockOnSoundSource, null);
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Character;
+using KillChord.Runtime.View.Persistent.Music;
 using System;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -18,6 +19,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="shellSpecPresenter"> 爆発半径などの砲弾仕様を参照するPresenter。 </param>
         /// <param name="dedonateCallback"> 爆発時に呼び出すコールバック。 </param>
         /// <param name="systemView"> 爆発エフェクトを再生するパーティクルView。 </param>
+        /// <param name="explosionSoundView"> 爆発SEを再生する外部所有のView。 </param>
         /// <param name="justOffsetProvider"> 爆発までの接近進捗（0〜1）を返す関数。デカールの進捗表示に使用する。 </param>
         /// <exception cref="ArgumentNullException"> 引数のいずれかがNULLの場合。 </exception>
         /// <exception cref="InvalidOperationException"> DecalProjectorまたはそのマテリアルが未アサインの場合。 </exception>
@@ -26,11 +28,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
             ShellSpecPresenter shellSpecPresenter,
             Action dedonateCallback,
             ReusableParticleSystemView systemView,
+            ReusableSoundEffectView explosionSoundView,
             Func<float> justOffsetProvider)
         {
             if (systemView == null)
             {
                 throw new ArgumentNullException(nameof(systemView), "ReusableParticleSystemViewがNULLです。");
+            }
+
+            if (explosionSoundView == null)
+            {
+                throw new ArgumentNullException(nameof(explosionSoundView), "ReusableSoundEffectViewがNULLです。");
             }
 
             if (_indicator == null)
@@ -47,6 +55,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _shellSpecPresenter = shellSpecPresenter ?? throw new ArgumentNullException(nameof(shellSpecPresenter), "ShellSpecPresenterがNULLです。");
             _dedonateCallback = dedonateCallback ?? throw new ArgumentNullException(nameof(dedonateCallback), "DedonateCallbackがNULLです。");
             _systemView = systemView;
+            _explosionSoundView = explosionSoundView;
             _justOffsetProvider = justOffsetProvider ?? throw new ArgumentNullException(nameof(justOffsetProvider), "JustOffsetProviderがNULLです。");
             _overlapResults = new Collider[1];
             _material = new Material(_indicator.material);
@@ -59,17 +68,22 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         ///     有効化処理。
         /// </summary>
-        public void Activate()
+        /// <returns>
+        ///     攻撃対象を保持していて有効化できた場合はtrue。
+        ///     対象を失っている場合はfalseを返し、範囲表示(デカール)は有効化しない。
+        /// </returns>
+        public bool TryActivate()
         {
             if (_targetTransform == null)
             {
                 Debug.LogError($"[{nameof(ShellView)}] 攻撃対象を失っています。");
-                return;
+                return false;
             }
             // プール再利用時に前回の進捗が残らないようリセットする。
             ResetIndicatorRatio();
             transform.position = _targetTransform.position;
             _indicator.gameObject.SetActive(true);
+            return true;
         }
 
         /// <summary>
@@ -88,6 +102,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             // TODO 爆発エフェクトなど
             _systemView?.PlayAt(transform.position);
+            _explosionSoundView?.PlayAt(transform.position);
             _dedonateCallback?.Invoke();
         }
 
@@ -99,6 +114,21 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             int hits = Physics.OverlapSphereNonAlloc(transform.position, _shellSpecPresenter.ExplosionRadius, _overlapResults, _damageLayer);
             return hits > 0;
+        }
+
+        /// <summary>
+        ///     着弾予告デカールの変化開始タイミングで再生するSEを鳴らす。
+        /// </summary>
+        public void PlayAreaWarning()
+        {
+            _areaWarningSoundSource?.Play();
+        }
+        /// <summary>
+        ///     着弾予告SE（２段階目）を鳴らす。
+        /// </summary>
+        public void PlayAreaWarningSecond()
+        {
+            _areaWarningSecondSoundSource?.Play();
         }
         /// <summary>
         ///     爆発までの接近進捗をデカールのシェーダープロパティへ適用する。
@@ -129,6 +159,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private LayerMask _damageLayer;
         [SerializeField, Tooltip("爆発範囲表示用")]
         private DecalProjector _indicator;
+        [SerializeField, Tooltip("着弾予告デカール表示時に再生するSE用Source。")]
+        private SoundEffectSource _areaWarningSoundSource;
+        [SerializeField, Tooltip("着弾予告SE（２段階目）用Source。")]
+        private SoundEffectSource _areaWarningSecondSoundSource;
 
         /// <summary>
         ///     デカールの接近進捗を初期値へ戻す。
@@ -149,6 +183,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private Collider[] _overlapResults;
         private ShellSpecPresenter _shellSpecPresenter;
         private ReusableParticleSystemView _systemView;
+        private ReusableSoundEffectView _explosionSoundView;
         private Action _dedonateCallback;
         private Func<float> _justOffsetProvider;
 

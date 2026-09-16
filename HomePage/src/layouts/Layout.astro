@@ -1,6 +1,8 @@
 ---
+import { getImage } from 'astro:assets';
 import '../styles/tokens.css';
 import SiteHeader from '../components/SiteHeader.astro';
+import ogImageSrc from '../assets/images/hero/KeyVisual_PC.png';
 
 interface Props {
 	title?: string;
@@ -11,6 +13,10 @@ const {
 	title = 'Symphony Kill Chord',
 	description = 'リズムに乗せて「キルコード」を紡ぎ、戦況を切り開くリズムアクションゲーム。',
 } = Astro.props;
+
+const ogImage = await getImage({ src: ogImageSrc, format: 'jpg', width: 1200, quality: 80 });
+const ogImageUrl = new URL(ogImage.src, Astro.site).href;
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
 <!doctype html>
@@ -18,11 +24,24 @@ const {
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
-		<link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
+		<link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} sizes="any" />
+		<link rel="icon" type="image/png" href={`${import.meta.env.BASE_URL}favicon-32x32.png`} sizes="32x32" />
+		<link rel="apple-touch-icon" href={`${import.meta.env.BASE_URL}apple-touch-icon.png`} />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
+		<link rel="canonical" href={pageUrl} />
 		<title>{title}</title>
+
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Symphony Kill Chord" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={pageUrl} />
+		<meta property="og:image" content={ogImageUrl} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImageUrl} />
 	</head>
 	<body>
 		<SiteHeader />
@@ -48,10 +67,22 @@ const {
 		flex-direction: column;
 		min-height: 100svh;
 		padding-left: var(--side-nav-width);
+		/*
+		 * iOS SafariにはSafari独自のバグ「mix-blend-modeを持つ要素と同居する
+		 * position:fixed要素(ヘッダー等)がレンダリングされない」不具合があるため、
+		 * mix-blend-modeの合成範囲をbody内に明示的に分離する。
+		 */
+		isolation: isolate;
 	}
 
 	body :global(main) {
 		flex: 1 0 auto;
+		/*
+		 * flexアイテムのデフォルトmin-width:autoにより、内部のvideo要素等の
+		 * 固有サイズがmainの最小幅として伝播し、横スクロールを引き起こしていたため、
+		 * 明示的にリセットする。
+		 */
+		min-width: 0;
 	}
 
 	@media (max-width: 767px) {

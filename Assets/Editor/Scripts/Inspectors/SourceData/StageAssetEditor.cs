@@ -1,0 +1,59 @@
+using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
+using UnityEditor;
+using UnityEngine;
+
+namespace KillChord.Editor.Inspectors.SourceData
+{
+    /// <summary>
+    ///     StageAssetBase派生アセットの既定項目に加えて、所属するStageTreeAssetのグラフを
+    ///     選択中ステージがハイライトされた状態で表示する。
+    /// </summary>
+    [CustomEditor(typeof(StageAssetBase), true)]
+    [CanEditMultipleObjects]
+    internal sealed class StageAssetEditor : UnityEditor.Editor
+    {
+        /// <summary>
+        ///     StageAssetBase派生アセットのInspectorを描画する。
+        ///     グラフプレビューはtarget/SerializedObjectの単数系idiomに依存するため、単一選択時のみ描画する。
+        /// </summary>
+        public override void OnInspectorGUI()
+        {
+            DrawDefaultInspector();
+
+            if (targets.Length != 1)
+            {
+                return;
+            }
+
+            EditorGUILayout.Space();
+
+            if (!StageTreeGraphView.TryFindContainingStageTree(
+                    STAGE_TREE_ADDRESSABLE_KEY,
+                    (ScriptableObject)target,
+                    out ScriptableObject stageTreeAsset,
+                    out string message))
+            {
+                EditorGUILayout.HelpBox(message, MessageType.None);
+                return;
+            }
+
+            StageTreeGraphView.Draw(stageTreeAsset, ref _panOffset, focusAsset: (ScriptableObject)target);
+            if (target is BattleStageAsset)
+            {
+                bool showMap = EditorGUILayout.Foldout(_showWaveMap, "参照Waveのシーンマップ", true);
+                if (showMap != _showWaveMap)
+                {
+                    _showWaveMap = showMap;
+                    GUIUtility.ExitGUI();
+                }
+                if (_showWaveMap) { StageWavePreview.Draw((ScriptableObject)target, stageTreeAsset); }
+            }
+        }
+
+        /// <summary> グラフのPanオフセットです。初回描画時に自分自身のノードへ自動フォーカスします。 </summary>
+        private Vector2 _panOffset = StageTreeGraphView.UNINITIALIZED_PAN_OFFSET;
+        private bool _showWaveMap;
+
+        private const string STAGE_TREE_ADDRESSABLE_KEY = "StageTreeAsset";
+    }
+}

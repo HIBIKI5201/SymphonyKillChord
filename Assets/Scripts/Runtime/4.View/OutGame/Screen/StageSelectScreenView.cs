@@ -23,6 +23,19 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RegisterButtonCallback();
         }
 
+        /// <summary> 強制出撃中の場合はtrueです。 </summary>
+        public bool IsForcedSortieMode => _isForcedSortieMode;
+
+        /// <summary>
+        ///     強制出撃中の戻る操作を禁止します。
+        /// </summary>
+        /// <param name="isForced"> 強制出撃中の場合はtrueです。 </param>
+        public void SetForcedSortieMode(bool isForced)
+        {
+            _isForcedSortieMode = isForced;
+            _backButton.SetEnabled(!isForced);
+        }
+
         /// <summary>
         ///     画面を表示状態にします。フェード完了後に OnStageSelectScreenCompleted を発火します。
         /// </summary>
@@ -69,6 +82,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void HandleBackButtonActivationHandler()
         {
+            if (_isForcedSortieMode) { return; }
+
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
@@ -85,5 +100,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         private readonly Button _backButton;
         private IDisposable _backButtonActivation;
+        private bool _isForcedSortieMode;
     }
 }
