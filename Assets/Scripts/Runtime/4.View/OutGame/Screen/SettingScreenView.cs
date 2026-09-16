@@ -1,8 +1,13 @@
+using KillChord.Runtime.Adaptor.Persistent.Input;
+using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.Persistent.Input;
 using LitMotion;
+using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -28,16 +33,33 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _returnToTitleDialog = Require<VisualElement>(rootElement, RETURN_TO_TITLE_DIALOG_NAME);
             _outsideClickArea = Require<VisualElement>(rootElement, OUTSIDE_CLICK_AREA_NAME);
             _backGround = Require<VisualElement>(rootElement, BACK_GROUND_NAME);
+            _cancelTarget = Require<VisualElement>(rootElement, CANCEL_TARGET_NAME);
+
+            // UI Toolkit の NavigationCancelEvent はフォーカス状態に依存し不安定なため、
+            // OnOptionInput と同様に PlayerInputView の Cancel アクションを直接購読する。
+            if (!ServiceLocator.TryGetInstance(out _playerInputView))
+            {
+                UnityEngine.Debug.LogWarning(
+                    $"[{nameof(SettingScreenView)}] PlayerInputViewを取得できませんでした。"
+                    + "コントローラー/キーボードのCancel入力での設定画面操作は無効になります。");
+            }
 
             RegisterButtonCallback();
             ResetReturnToTitleDialog();
         }
 
         /// <summary>
+        ///     サブパネル表示中のキャンセル操作を横取りする処理です。
+        ///     trueを返した場合、設定画面は閉じずにこの処理の結果に委ねます。
+        /// </summary>
+        public Func<bool> TryNavigateBack { get; set; }
+
+        /// <summary>
         ///     確認状態を初期化し、ウィンドウを左からスライドインさせつつ設定画面を表示する。
         /// </summary>
         public override ValueTask Show(CancellationToken cancellationToken = default)
         {
+            _isActive = true;
             ResetReturnToTitleDialog();
 
             // 背面のホーム画面は表示されたままのため、フォーカスを設定画面内へ閉じ込める。
@@ -57,6 +79,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public override ValueTask Hide(CancellationToken cancellationToken = default)
         {
+            _isActive = false;
             _dialogNavigationScope.Deactivate();
             _screenNavigationScope.Deactivate();
 
@@ -83,12 +106,26 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
-            _returnToTitleButton.clicked += ShowReturnToTitleDialog;
-            _cancelReturnToTitleButton.clicked += HideReturnToTitleDialog;
-            _confirmReturnToTitleButton.clicked += RequestReturnToTitle;
+            _backButtonPreset = _backButton.ApplyBasicButtonPreset(HandleBackButtonActivationHandler);
+            _cancelTargetActivation = _cancelTarget.RegisterActivation(HandleBackButtonActivationHandler);
+            _returnToTitleButtonPreset = _returnToTitleButton.ApplyBasicButtonPreset(ShowReturnToTitleDialog);
+
+            // MakeNavigable() で navigable クラスを付与し、他UIと同じ黄色のフォーカス枠を出す。
+            // Button.clicked はコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+            // RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+            _cancelReturnToTitleButton.MakeNavigable();
+            _confirmReturnToTitleButton.MakeNavigable();
+            _cancelReturnToTitleButtonActivation =
+                _cancelReturnToTitleButton.RegisterActivation(HideReturnToTitleDialog);
+            _confirmReturnToTitleButtonActivation =
+                _confirmReturnToTitleButton.RegisterActivation(RequestReturnToTitle);
             OutGameUIEvent.OnReturnToTitleRequestCompleted += HandleReturnToTitleRequestCompleted;
             _outsideClickArea.RegisterCallback<PointerDownEvent>(HandleOutsidePointerDown);
+
+            if (_playerInputView != null)
+            {
+                _playerInputView.OnCancelInput += HandleCancelInputHandler;
+            }
         }
 
         /// <summary>
@@ -96,12 +133,18 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallback()
         {
-            _backButtonActivation?.Dispose();
-            _returnToTitleButton.clicked -= ShowReturnToTitleDialog;
-            _cancelReturnToTitleButton.clicked -= HideReturnToTitleDialog;
-            _confirmReturnToTitleButton.clicked -= RequestReturnToTitle;
+            _backButtonPreset?.Dispose();
+            _cancelTargetActivation?.Dispose();
+            _returnToTitleButtonPreset?.Dispose();
+            _cancelReturnToTitleButtonActivation?.Dispose();
+            _confirmReturnToTitleButtonActivation?.Dispose();
             OutGameUIEvent.OnReturnToTitleRequestCompleted -= HandleReturnToTitleRequestCompleted;
             _outsideClickArea.UnregisterCallback<PointerDownEvent>(HandleOutsidePointerDown);
+
+            if (_playerInputView != null)
+            {
+                _playerInputView.OnCancelInput -= HandleCancelInputHandler;
+            }
         }
 
         /// <summary>
@@ -114,7 +157,33 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 return;
             }
 
+            // サブパネル表示中はメニューへ戻すだけに留める。
+            if (TryNavigateBack?.Invoke() == true)
+            {
+                return;
+            }
+
             OutGameUIEvent.OnScreenClosed?.Invoke();
+        }
+
+        /// <summary>
+        ///     コントローラー/キーボードのCancel入力を処理します。
+        /// </summary>
+        private void HandleCancelInputHandler(InputContext<float> inputContext)
+        {
+            if (!_isActive || inputContext.Phase != InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            // 確認ダイアログ表示中のキャンセル操作は、ダイアログを閉じる動作に割り当てる。
+            if (_isReturnToTitleDialogVisible)
+            {
+                HideReturnToTitleDialog();
+                return;
+            }
+
+            HandleBackButtonActivationHandler();
         }
 
         private const string BACKBUTTON_NAME = "CloseButton";
@@ -125,6 +194,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string RETURN_TO_TITLE_DIALOG_NAME = "ReturnToTitleDialog";
         private const string OUTSIDE_CLICK_AREA_NAME = "Root";
         private const string BACK_GROUND_NAME = "BackGround";
+        private const string CANCEL_TARGET_NAME = "CancelTarget";
 
         /// <summary> ウィンドウのスライドインにかかる時間(秒)。 </summary>
         private const float SLIDE_DURATION = 0.2f;
@@ -134,7 +204,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const Ease SLIDE_EASE = Ease.OutCirc;
 
         /// <inheritdoc />
-        protected override VisualElement CancelTargetElement => _backButton;
+        /// <remarks>
+        ///     Cancel入力はPlayerInputView.OnCancelInputの直接購読で処理するため、
+        ///     基底クラスのNavigationCancelEvent経路は使わず二重処理を避ける。
+        /// </remarks>
+        protected override VisualElement CancelTargetElement => null;
 
         /// <inheritdoc />
         protected override VisualElement InitialFocusElement => _environmentSettingButton;
@@ -152,9 +226,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly VisualElement _returnToTitleDialog;
         private readonly VisualElement _outsideClickArea;
         private readonly VisualElement _backGround;
-        private IDisposable _backButtonActivation;
+        private readonly VisualElement _cancelTarget;
+        private readonly PlayerInputView _playerInputView;
+        private IDisposable _backButtonPreset;
+        private IDisposable _returnToTitleButtonPreset;
+        private IDisposable _cancelTargetActivation;
+        private IDisposable _cancelReturnToTitleButtonActivation;
+        private IDisposable _confirmReturnToTitleButtonActivation;
         private bool _isReturnToTitleDialogVisible;
         private bool _isReturnToTitleRequested;
+        private bool _isActive;
         private MotionHandle _slideMotionHandle;
 
         /// <summary>
@@ -165,6 +246,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
             if (!ReferenceEquals(pointerEvent.target, _outsideClickArea)
                 || _isReturnToTitleDialogVisible
                 || _isReturnToTitleRequested)
+            {
+                return;
+            }
+
+            // サブパネル表示中はメニューへ戻すだけに留める。
+            if (TryNavigateBack?.Invoke() == true)
             {
                 return;
             }
@@ -188,7 +275,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             // 背面の設定項目へフォーカスが抜けないようにする。
             _dialogNavigationScope.Activate(_returnToTitleDialog);
-            _cancelReturnToTitleButton.Focus();
+
+            // Activate() はダイアログ内で最初に見つかった要素へ遅延フォーカスするため、
+            // 並び順の先頭にある確定ボタンが既定になってしまう。誤操作でタイトルへ戻らないよう、
+            // 後から予約して必ずキャンセルボタンを既定のフォーカス先にする。
+            _cancelReturnToTitleButton.FocusDeferred();
         }
 
         /// <summary>

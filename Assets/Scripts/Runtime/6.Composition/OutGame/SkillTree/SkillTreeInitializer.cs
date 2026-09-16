@@ -4,6 +4,7 @@ using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
@@ -41,6 +42,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <summary> 実行順です。 </summary>
         public override int Order => 120;
 
+        private const string E_NAME_SKILL_TREE_SCREEN_ROOT = "SkillTreeScreenRoot";
         private const string E_NAME_SKILL_DETAIL = "SkillDetail";
         private const string E_NAME_UNLOCK_CONFIRM_BOX = "UnlockConfirmBox";
         private const string E_NAME_PLAYER_STATUS = "PlayerStatus";
@@ -111,7 +113,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private IVisualElementScheduledItem _unlockCameraRestoreItem;
         private VisualElement _topBarBackgroundRoot;
         private VisualElement _backButtonRoot;
+        /// <summary> 研究画面のサブツリー。同名要素を持つ他画面との取り違えを防ぐ検索起点。 </summary>
+        private VisualElement _screenScope;
         private VisualElement _settingShortcutButtonRoot;
+
+        /// <summary> 「振り直す」ボタンの要素。SkillTreeResetDialogView から受け取る。 </summary>
+        private VisualElement _resetButtonRoot;
         private VisualElement _titleRoot;
         private VisualElement _playerStatusRoot;
         private VisualElement _previewVideoContainerRoot;
@@ -131,6 +138,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private PlayerStatusPresenter _playerStatusPresenter;
         private SkillTreeFocusPresenter _skillTreeFocusPresenter;
         private SkillUnlockData _skillUnlockData;
+        private int _researchPoint;
         private OutGameUIEvent _outGameUIEvent;
         private CancellationTokenSource _cts;
         private RenderTexture _renderTexture;
@@ -138,7 +146,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
         private Dictionary<int, VisualElement> _skillNodeElements;
         private List<VisualElement> _skillNodeElementList;
-        private List<VisualElement> _skillTreeNavigationCandidates;
         private Dictionary<VisualElement, List<VisualElement>> _skillNodeAdjacency;
         private Dictionary<string, ISkillNodeConnViewModel> _skillNodeConnViews;
         private Dictionary<int, string[]> _skillNodeConnBinds;
@@ -259,6 +266,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             _skillUnlockData = saveData.SkillUnlock;
+            _researchPoint = saveData.ResourceInventory.GetAmount(GameResourceIds.ResearchPoint);
             return _skillUnlockData != null;
         }
 
@@ -297,7 +305,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             {
                 _rootElement.UnregisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
                 _rootElement.UnregisterCallback<NavigationCancelEvent>(HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
-                _rootElement.UnregisterCallback<NavigationMoveEvent>(HandleSkillNodeNavigationMoveHandler);
+                _rootElement.UnregisterCallback<NavigationMoveEvent>(
+                    HandleSkillNodeNavigationMoveHandler, TrickleDown.TrickleDown);
             }
             _isSkillDetailOpen = false;
             _isUnlockConfirmOpen = false;
@@ -389,16 +398,30 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             _rootElement = _uiDocument.rootVisualElement;
-            _skillDetailRoot = _rootElement.Q<VisualElement>(E_NAME_SKILL_DETAIL);
-            _unlockConfirmBoxRoot = _rootElement.Q<VisualElement>(E_NAME_UNLOCK_CONFIRM_BOX);
-            _playerStatusRoot = _rootElement.Q<VisualElement>(E_NAME_PLAYER_STATUS);
-            _previewVideoContainerRoot = _rootElement.Q<VisualElement>(E_NAME_PREVIEW_VIDEO_CONTAINER);
-            _previewVideoRoot = _rootElement.Q<VisualElement>(E_NAME_PREVIEW_VIDEO);
-            _currentPointsLabel = _rootElement.Q<Label>(E_NAME_CURRENT_POINTS_LABEL);
-            _topBarBackgroundRoot = _rootElement.Q<VisualElement>(E_NAME_TOP_BAR_BACKGROUND);
-            _backButtonRoot = _rootElement.Q<VisualElement>(E_NAME_BACK_BUTTON);
-            _settingShortcutButtonRoot = _rootElement.Q<VisualElement>(E_NAME_SETTING_SHORTCUT_BUTTON);
-            _titleRoot = _rootElement.Q<VisualElement>(E_NAME_TITLE);
+            // SettingShortcutButton・BackButton・Title・TopBarBackgroundは他のアウトゲーム画面にも
+            // 同名で存在し、ドキュメントルートからQ()すると階層順で先に見つかった
+            // 別画面の要素を掴んでしまう。研究画面のサブツリーに限定して検索すること。
+            VisualElement skillTreeScreenRoot =
+                _rootElement.Q<VisualElement>(E_NAME_SKILL_TREE_SCREEN_ROOT);
+            _screenScope = skillTreeScreenRoot?.parent;
+            if (_screenScope == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(SkillTreeInitializer)}] {E_NAME_SKILL_TREE_SCREEN_ROOT} が見つかりませんでした。",
+                    this);
+                return false;
+            }
+
+            _skillDetailRoot = _screenScope.Q<VisualElement>(E_NAME_SKILL_DETAIL);
+            _unlockConfirmBoxRoot = _screenScope.Q<VisualElement>(E_NAME_UNLOCK_CONFIRM_BOX);
+            _playerStatusRoot = _screenScope.Q<VisualElement>(E_NAME_PLAYER_STATUS);
+            _previewVideoContainerRoot = _screenScope.Q<VisualElement>(E_NAME_PREVIEW_VIDEO_CONTAINER);
+            _previewVideoRoot = _screenScope.Q<VisualElement>(E_NAME_PREVIEW_VIDEO);
+            _currentPointsLabel = _screenScope.Q<Label>(E_NAME_CURRENT_POINTS_LABEL);
+            _topBarBackgroundRoot = _screenScope.Q<VisualElement>(E_NAME_TOP_BAR_BACKGROUND);
+            _backButtonRoot = _screenScope.Q<VisualElement>(E_NAME_BACK_BUTTON);
+            _settingShortcutButtonRoot = _screenScope.Q<VisualElement>(E_NAME_SETTING_SHORTCUT_BUTTON);
+            _titleRoot = _screenScope.Q<VisualElement>(E_NAME_TITLE);
 
             if (_skillDetailRoot == null
                 || _unlockConfirmBoxRoot == null
@@ -430,15 +453,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             InitializePhaseState();
             BuildVideoClipDict();
 
-            // ノード以外にも、トップバーの設定ショートカットボタンなど画面内で
-            // コントローラー操作可能な要素を、ノード間移動と同じ実座標ベースの解決に含める。
-            // 木構造のノード群とは離れた位置にあり、標準の自動ナビゲーションでは
-            // 往復できないことがあるため。
-            _skillTreeNavigationCandidates = new List<VisualElement>(_skillNodeElementList)
-            {
-                _settingShortcutButtonRoot,
-            };
-
             _skillDetailScreenView = new SkillDetailScreenView(_skillDetailRoot, _outGameUIEvent, _comboHexIcon);
             _skillDetailScreenView.HideImmediately();
             _playerStatusScreenView = new PlayerStatusScreenView(
@@ -451,12 +465,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 GetStatusIcon(StatusBonusEffectKind.AreaAttackRange));
             _previewVideoScreenView = new PreviewVideoScreenView(_previewVideoContainerRoot, _outGameUIEvent, _videoPlayer, _skillPreviewVideos);
             _previewVideoScreenView.HideImmediately();
-            _skillTreeResetDialogView = new SkillTreeResetDialogView(_rootElement, _outGameUIEvent);
-            _unlockConfirmDialogView = new UnlockConfirmDialogView(_rootElement, _outGameUIEvent);
-            _skillTreeViewportView = new SkillTreeViewportView(_rootElement, _skillNodeElements);
+            _skillTreeResetDialogView = new SkillTreeResetDialogView(_screenScope, _outGameUIEvent);
+            _resetButtonRoot = _skillTreeResetDialogView.ResetButtonElement;
+
+            _unlockConfirmDialogView = new UnlockConfirmDialogView(_screenScope, _outGameUIEvent);
+            _skillTreeViewportView = new SkillTreeViewportView(_screenScope, _skillNodeElements);
 
             SkillTreeStatusEntity skillTreeEntity = new(
-                _skillUnlockData.ResearchPoint,
+                _researchPoint,
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             _skillTreeService = new SkillTreeService(_skillNodeEntities);
@@ -500,7 +516,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             _rootElement.RegisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
             _rootElement.RegisterCallback<NavigationCancelEvent>(HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
-            _rootElement.RegisterCallback<NavigationMoveEvent>(HandleSkillNodeNavigationMoveHandler);
+            // UI Toolkit標準のフォーカス移動はターゲット要素の既定処理として実行されるため、
+            // バブリングで購読すると移動後にしか介入できない。既定処理より先に自前の解決で
+            // 置き換えるため、キャンセル処理と同様にトリクルダウンで購読する。
+            _rootElement.RegisterCallback<NavigationMoveEvent>(
+                HandleSkillNodeNavigationMoveHandler, TrickleDown.TrickleDown);
 
             _isInitialized = true;
             return true;
@@ -979,6 +999,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _previewVideoScreenView = null;
             _skillTreeResetDialogView?.Dispose();
             _skillTreeResetDialogView = null;
+            _resetButtonRoot = null;
+            _screenScope = null;
             _unlockConfirmDialogView?.Dispose();
             _unlockConfirmDialogView = null;
             _skillDetailScreenView?.Dispose();
@@ -1007,7 +1029,6 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeViews = null;
             _skillNodeElements = null;
             _skillNodeElementList = null;
-            _skillTreeNavigationCandidates = null;
             _skillNodeAdjacency = null;
             _skillNodeConnViews = null;
             _skillNodeConnBinds = null;
@@ -1127,42 +1148,42 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
-        ///     スキルノードおよびトップバーの設定ショートカットボタン間のコントローラー移動先を解決する。
+        ///     スキルノード、トップバーの設定ショートカットボタン、「振り直す」ボタン、
+        ///     戻るボタン間のコントローラー移動先を解決する。
         ///     <para>
         ///         スキルノードが起点の場合は、実際に接続されているノード(親子関係)だけを候補にし、
         ///         そのうちどれが押した方向に一致するかを実座標で判定する。木構造上つながっていない
-        ///         ノードへ移動してしまうことがないようにするため。設定ボタンへは、木構造の候補に
-        ///         含めて上方向で到達できるようにする。
+        ///         ノードへ移動してしまうことがないようにするため。
         ///     </para>
         ///     <para>
-        ///         設定ボタンが起点の場合は接続関係を持たないため、画面内の全ノードから
-        ///         実座標で一番近いものへ戻る(木構造への再進入)。
+        ///         ツリーの端(その方向に接続ノードが無い位置)と画面端のボタン群の間は、
+        ///         実座標ではなく <see cref="ResolveEdgeChainTarget"/> の対応表で移動先を決める。
+        ///         左端のボタンはノードのほぼ真上に位置し、実座標ベースの判定では
+        ///         進行方向から外れた候補として除外されてしまうため。
         ///     </para>
         /// </summary>
         /// <param name="evt"> ナビゲーション移動イベント。 </param>
         private void HandleSkillNodeNavigationMoveHandler(NavigationMoveEvent evt)
         {
-            if (_skillTreeNavigationCandidates == null
-                || evt.target is not VisualElement target
+            if (evt.target is not VisualElement target
                 || !IsSkillTreeSpatialNavigationSource(target))
             {
                 NavigationDebugLog.Log(
-                    $"[SkillTreeNav] skip target={NavigationDebugLog.Describe(evt.target as VisualElement)} "
-                    + $"candidates={_skillTreeNavigationCandidates?.Count}");
+                    $"[SkillTreeNav] skip target={NavigationDebugLog.Describe(evt.target as VisualElement)}");
                 return;
             }
 
-            IReadOnlyList<VisualElement> candidates = ResolveSkillTreeNavigationCandidates(
-                target, out bool isGraphBased);
-            // 接続グラフに基づく候補では、実際につながっているノードへは画面外でも
-            // 移動できるようにするため、画面内かどうかの絞り込みは行わない。
-            // その代わり移動後にEnsureVisibleで画面をノードへ追従させる。
-            Rect? viewportFilter = isGraphBased ? null : _skillTreeViewportView?.ViewportWorldBound;
-            VisualElement next = SpatialNavigationResolver.FindNearestInDirection(
-                target, candidates, evt.direction, viewportFilter);
+            VisualElement next = ResolveNavigationTarget(
+                target, evt.direction, out bool shouldEnsureVisible);
             NavigationDebugLog.Log(
                 $"[SkillTreeNav] from={NavigationDebugLog.Describe(target)} dir={evt.direction} "
-                + $"candidates={candidates.Count} graphBased={isGraphBased} -> {NavigationDebugLog.Describe(next)}");
+                + $"-> {NavigationDebugLog.Describe(next)}");
+
+            // 移動先が無い場合もイベントを消費する。消費しないとUI Toolkit標準の自動
+            // ナビゲーションが働き、画面外の要素へフォーカスが飛んで行方不明になるため。
+            // この消費が画面端での「それ以上進まない」挙動も担保している。
+            evt.StopPropagation();
+            target.panel?.focusController?.IgnoreEvent(evt);
 
             if (next == null)
             {
@@ -1170,54 +1191,174 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             next.Focus();
-            evt.StopPropagation();
-            target.panel?.focusController?.IgnoreEvent(evt);
 
-            if (isGraphBased)
+            if (shouldEnsureVisible)
             {
                 _skillTreeViewportView?.EnsureVisible(next);
             }
         }
 
         /// <summary>
-        ///     移動先解決に使う候補一覧を選ぶ。スキルノードが起点なら実際に接続されている
-        ///     隣接ノード+設定ボタンのみに絞り、設定ボタンが起点なら木構造への再進入のため
-        ///     全ノードを候補にする。
+        ///     起点の種類に応じて移動先を解決する。
         /// </summary>
         /// <param name="source"> 移動元の要素。 </param>
-        /// <param name="isGraphBased"> 接続グラフに基づく候補を返した場合はtrue。 </param>
-        /// <returns> 移動先候補の一覧。 </returns>
-        private IReadOnlyList<VisualElement> ResolveSkillTreeNavigationCandidates(
-            VisualElement source, out bool isGraphBased)
+        /// <param name="direction"> 押された方向。 </param>
+        /// <param name="shouldEnsureVisible"> 移動後に画面を追従させる必要がある場合はtrue。 </param>
+        /// <returns> 移動先の要素。移動しない場合はnull。 </returns>
+        private VisualElement ResolveNavigationTarget(
+            VisualElement source,
+            NavigationMoveEvent.Direction direction,
+            out bool shouldEnsureVisible)
         {
+            shouldEnsureVisible = false;
+
             if (_skillNodeAdjacency != null
                 && _skillNodeAdjacency.TryGetValue(source, out List<VisualElement> adjacentNodes))
             {
-                isGraphBased = true;
-                List<VisualElement> candidates = new List<VisualElement>(adjacentNodes.Count + 1);
-                candidates.AddRange(adjacentNodes);
-                if (_settingShortcutButtonRoot != null)
+                // 接続ノードへは画面外でも移動できるようにするため、画面内かどうかの
+                // 絞り込みは行わない。その代わり移動後にEnsureVisibleで画面を追従させる。
+                VisualElement adjacent = SpatialNavigationResolver.FindNearestInDirection(
+                    source, adjacentNodes, direction, null);
+                if (adjacent != null)
                 {
-                    candidates.Add(_settingShortcutButtonRoot);
+                    shouldEnsureVisible = true;
+                    return adjacent;
                 }
 
-                return candidates;
+                return ResolveEdgeChainTarget(direction);
             }
 
-            isGraphBased = false;
-            return _skillTreeNavigationCandidates;
+            if (ReferenceEquals(source, _backButtonRoot))
+            {
+                // 左端の終端。右でのみ設定ボタンへ戻る。
+                return direction == NavigationMoveEvent.Direction.Right
+                    ? _settingShortcutButtonRoot
+                    : null;
+            }
+
+            if (ReferenceEquals(source, _settingShortcutButtonRoot))
+            {
+                return direction == NavigationMoveEvent.Direction.Left
+                    ? _backButtonRoot
+                    : FindNearestNodeInDirection(source, direction);
+            }
+
+            if (ReferenceEquals(source, _resetButtonRoot))
+            {
+                // 右端の終端。左でのみツリーへ戻る。
+                return direction == NavigationMoveEvent.Direction.Left
+                    ? FindNearestNodeInDirection(source, direction)
+                    : null;
+            }
+
+            return null;
         }
 
         /// <summary>
-        ///     指定要素が、実座標ベースの移動解決の起点として扱う対象(スキルノードまたは
-        ///     設定ショートカットボタン)かどうかを判定する。
+        ///     ツリーの端から画面端のボタンへ抜ける移動先を返す。
+        /// </summary>
+        /// <param name="direction"> 押された方向。 </param>
+        /// <returns> 移動先のボタン。対応が無い場合はnull。 </returns>
+        private VisualElement ResolveEdgeChainTarget(NavigationMoveEvent.Direction direction)
+        {
+            switch (direction)
+            {
+                case NavigationMoveEvent.Direction.Left:
+                    return IsNavigationTargetAvailable(_settingShortcutButtonRoot)
+                        ? _settingShortcutButtonRoot
+                        : null;
+                case NavigationMoveEvent.Direction.Right:
+                    // スキル詳細パネル表示中は「振り直す」ボタンが隠れている。
+                    return IsNavigationTargetAvailable(_resetButtonRoot) ? _resetButtonRoot : null;
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        ///     画面内に見えているノードのうち、指定方向で最も近いものを返す。
+        ///     方向が一致するノードが無い場合は、木構造へ戻れなくなることを避けるため
+        ///     方向を問わず最も近いノードを返す。
+        /// </summary>
+        /// <param name="source"> 移動元の要素。 </param>
+        /// <param name="direction"> 押された方向。 </param>
+        /// <returns> 移動先のノード。候補が無い場合はnull。 </returns>
+        private VisualElement FindNearestNodeInDirection(
+            VisualElement source, NavigationMoveEvent.Direction direction)
+        {
+            if (_skillNodeElementList == null)
+            {
+                return null;
+            }
+
+            Rect? viewportFilter = _skillTreeViewportView?.ViewportWorldBound;
+            VisualElement next = SpatialNavigationResolver.FindNearestInDirection(
+                source, _skillNodeElementList, direction, viewportFilter);
+            return next ?? FindNearestVisibleNode(source);
+        }
+
+        /// <summary>
+        ///     画面内に見えているノードのうち、方向を問わず最も近いものを返す。
+        /// </summary>
+        /// <param name="source"> 移動元の要素。 </param>
+        /// <returns> 移動先のノード。候補が無い場合はnull。 </returns>
+        private VisualElement FindNearestVisibleNode(VisualElement source)
+        {
+            Rect? viewportBound = _skillTreeViewportView?.ViewportWorldBound;
+            Vector2 sourceCenter = source.worldBound.center;
+            VisualElement nearest = null;
+            float nearestSqrDistance = float.MaxValue;
+
+            for (int i = 0; i < _skillNodeElementList.Count; i++)
+            {
+                VisualElement node = _skillNodeElementList[i];
+                if (!IsNavigationTargetAvailable(node))
+                {
+                    continue;
+                }
+
+                if (viewportBound.HasValue && !viewportBound.Value.Overlaps(node.worldBound))
+                {
+                    continue;
+                }
+
+                float sqrDistance = (node.worldBound.center - sourceCenter).sqrMagnitude;
+                if (sqrDistance < nearestSqrDistance)
+                {
+                    nearestSqrDistance = sqrDistance;
+                    nearest = node;
+                }
+            }
+
+            return nearest;
+        }
+
+        /// <summary>
+        ///     要素が今フォーカス移動先として使えるかどうかを判定する。
+        /// </summary>
+        /// <param name="element"> 判定対象の要素。 </param>
+        /// <returns> 移動先として使える場合はtrue。 </returns>
+        private static bool IsNavigationTargetAvailable(VisualElement element)
+        {
+            return element != null
+                && element.focusable
+                && element.enabledInHierarchy
+                && element.resolvedStyle.display != DisplayStyle.None
+                && element.resolvedStyle.visibility == Visibility.Visible;
+        }
+
+        /// <summary>
+        ///     指定要素が、実座標ベースの移動解決の起点として扱う対象(スキルノード、
+        ///     設定ショートカットボタン、「振り直す」ボタン、戻るボタン)かどうかを判定する。
         /// </summary>
         /// <param name="element"> 判定対象の要素。 </param>
         /// <returns> 起点として扱う場合はtrue。 </returns>
         private bool IsSkillTreeSpatialNavigationSource(VisualElement element)
         {
             return element.ClassListContains(UssClassNameConstants.USS_CLASS_SKILL_NODE)
-                || ReferenceEquals(element, _settingShortcutButtonRoot);
+                || ReferenceEquals(element, _settingShortcutButtonRoot)
+                || ReferenceEquals(element, _resetButtonRoot)
+                || ReferenceEquals(element, _backButtonRoot);
         }
 
         /// <summary>

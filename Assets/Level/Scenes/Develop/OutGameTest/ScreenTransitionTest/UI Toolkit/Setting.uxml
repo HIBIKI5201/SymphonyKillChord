@@ -2,6 +2,7 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Setting.uss?fileID=7433441132597879392&amp;guid=f378558ec06b41f4da7ec06e1044e9ae&amp;type=3#Setting"/>
     <ui:VisualElement name="Root" picking-mode="Position" class="setting-root">
+        <ui:VisualElement name="CancelTarget" picking-mode="Ignore" focusable="false" style="width: 0; height: 0;"/>
         <ui:VisualElement name="BackGround" class="setting-window setting-window--menu">
             <ui:VisualElement name="SettingTitleBar" class="setting-top-bar">
                 <ui:Label text="設定" name="Title" class="setting-title"/>
@@ -18,7 +19,6 @@
             </ui:VisualElement>
             <ui:VisualElement name="SoundPanel" class="setting-panel" style="display: none;">
                 <ui:VisualElement class="setting-panel-top-bar">
-                    <ui:Button text="&lt;" name="SoundPanelBackButton" class="setting-panel-back-button ui-se-cancel"/>
                     <ui:Label text="オーディオ設定" class="setting-panel-title"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-title-divider"/>
@@ -52,7 +52,6 @@
             </ui:VisualElement>
             <ui:VisualElement name="EnvironmentPanel" class="setting-panel" style="display: none;">
                 <ui:VisualElement class="setting-panel-top-bar">
-                    <ui:Button text="&lt;" name="EnvironmentPanelBackButton" class="setting-panel-back-button ui-se-cancel"/>
                     <ui:Label text="環境設定" class="setting-panel-title"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-title-divider"/>
@@ -98,13 +97,13 @@
                 <ui:VisualElement class="setting-menu-spacer"/>
                 <ui:Button text="設定を保存" name="EnvironmentPanelSaveButton" class="setting-menu-button ui-se-select"/>
             </ui:VisualElement>
-            <ui:VisualElement name="ReturnToTitleDialog" picking-mode="Position" class="setting-dialog-overlay" style="display: none;">
-                <ui:VisualElement class="setting-dialog">
-                    <ui:Label text="タイトル画面に戻りますか？" class="setting-dialog-message"/>
-                    <ui:VisualElement class="setting-dialog-buttons">
-                        <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button ui-se-cancel"/>
-                        <ui:Button text="タイトル画面に戻る" name="ConfirmReturnToTitleButton" class="setting-dialog-button setting-dialog-confirm"/>
-                    </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ReturnToTitleDialog" picking-mode="Position" class="setting-dialog-overlay" style="display: none;">
+            <ui:VisualElement class="setting-dialog">
+                <ui:Label text="タイトル画面に戻りますか？" class="setting-dialog-message"/>
+                <ui:VisualElement class="setting-dialog-buttons">
+                    <ui:Button text="タイトル画面に戻る" name="ConfirmReturnToTitleButton" class="setting-dialog-button setting-dialog-confirm"/>
+                    <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button ui-se-cancel"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

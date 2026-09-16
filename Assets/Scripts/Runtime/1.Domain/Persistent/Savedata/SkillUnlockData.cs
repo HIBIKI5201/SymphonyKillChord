@@ -19,7 +19,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             _unlockedSkillIds = new int[0];
         }
 
-        /// <summary> 研究ポイント </summary>
+        /// <summary> 旧形式の研究ポイント。ResourceInventory への移行処理専用。 </summary>
         public int ResearchPoint => _researchPoint;
         /// <summary> 解放済みのノードID </summary>
         public int[] UnlockedSkillNodeIds => _unlockedSkillNodeIds;
@@ -27,7 +27,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         public int[] UnlockedSkillIds => _unlockedSkillIds;
 
         /// <summary>
-        ///     研究ポイントの値を設定する。
+        ///     旧形式の研究ポイントを設定する。ResourceInventory への移行処理専用。
         /// </summary>
         /// <param name="value"></param>
         public void SetResearchPoint(int value)

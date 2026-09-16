@@ -13,13 +13,15 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="stageId"> ステージのID。 </param>
         /// <param name="stageName"> ステージの名前。 </param>
         /// <param name="flavorText"> ステージのフレーバーテキスト。 </param>
-        /// <param name="reward"> ステージの報酬情報。 </param>
+        /// <param name="firstClearReward"> 初回クリア時にのみ付与する報酬。 </param>
+        /// <param name="clearReward"> クリアするたびに付与する成功報酬。 </param>
         /// <param name="targetSceneName"> ステージのターゲットシーン名。 </param>
         protected StageDefinition(
             StageId stageId,
             string stageName,
             string flavorText,
-            StageReward reward,
+            StageReward firstClearReward,
+            StageReward clearReward,
             string targetSceneName)
         {
             if (stageId.Value == 0)
@@ -35,7 +37,8 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             _stageId = stageId;
             _stageName = stageName ?? string.Empty;
             _flavorText = flavorText ?? string.Empty;
-            _reward = reward;
+            _firstClearReward = firstClearReward;
+            _clearReward = clearReward;
             _targetSceneName = targetSceneName;
         }
 
@@ -47,8 +50,10 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         public string StageName => _stageName;
         /// <summary> ステージのフレーバーテキスト。 </summary>
         public string FlavorText => _flavorText;
-        /// <summary> ステージの報酬情報。 </summary>
-        public StageReward Reward => _reward;
+        /// <summary> 初回クリア時にのみ付与する報酬。 </summary>
+        public StageReward FirstClearReward => _firstClearReward;
+        /// <summary> クリアするたびに付与する成功報酬。 </summary>
+        public StageReward ClearReward => _clearReward;
         /// <summary> ステージのターゲットシーン名。 </summary>
         public string TargetSceneName => _targetSceneName;
         /// <summary> チュートリアルステージの場合はtrue。 </summary>
@@ -57,7 +62,8 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         private readonly StageId _stageId;
         private readonly string _stageName;
         private readonly string _flavorText;
-        private readonly StageReward _reward;
+        private readonly StageReward _firstClearReward;
+        private readonly StageReward _clearReward;
         private readonly string _targetSceneName;
     }
 }

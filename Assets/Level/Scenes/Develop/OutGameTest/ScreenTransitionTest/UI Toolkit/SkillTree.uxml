@@ -135,7 +135,7 @@
         </ui:Button>
         <ui:Label text="研究" name="Title" selectable="false" focusable="false" class="title" style="height: 50px; width: 130px; -unity-font-style: bold; font-size: 30px; -unity-text-align: middle-left; color: rgb(255, 255, 255); position: absolute; left: 300px; top: 40px; translate: 0 0;"/>
         <ui:Label text="解放P：XXXX" name="Points" selectable="false" focusable="false" class="skilltree-top-bar-points" style="position: absolute; left: 430px; top: 46px;"/>
-        <ui:Button text="振り直す" name="ResetButton" class="skilltree-reset-button"/>
+        <ui:Button text="振り直す" name="ResetButton" class="skilltree-reset-button" style="-unity-font-definition: url(&quot;project://database/Assets/Arts/Fonts/IBMPlexSerif-Medium.ttf?fileID=12800000&amp;guid=2f034d4a58f80824f891e864b13f4daa&amp;type=3#IBMPlexSerif-Medium&quot;);"/>
     </ui:VisualElement>
     <ui:VisualElement name="Overlay" enabled="true" picking-mode="Ignore" style="flex-grow: 1; position: absolute; top: 0; left: 0; right: auto; bottom: auto; display: flex; visibility: visible; opacity: 1; background-color: rgba(255, 255, 255, 0); -unity-background-image-tint-color: rgba(255, 255, 255, 0); width: 100%; height: 100%;">
         <ui:Instance template="SkillDetail" name="SkillDetail" enabled="true" style="position: absolute; top: 130px; right: 16px; left: auto; bottom: auto; display: flex; align-self: flex-end; width: 520px; height: auto;"/>

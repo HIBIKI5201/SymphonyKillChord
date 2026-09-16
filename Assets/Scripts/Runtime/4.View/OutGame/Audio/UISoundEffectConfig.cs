@@ -54,6 +54,9 @@ namespace KillChord.Runtime.View.OutGame.Audio
             new(SELECT_USS_CLASS_NAME, "SE_Select"),
             new("ui-se-cancel", "SE_Cancel"),
             new("ui-se-window", "SE_Window"),
+            new("ui-se-window-mission", "SE_Window_Mission"),
+            new("ui-se-window-customize", "SE_Window_Customize"),
+            new("ui-se-window-research", "SE_Window_Research"),
             new("ui-se-sortie", "SE_Sortie"),
             new(SKILL_SET_USS_CLASS_NAME, "SE_SkillSet")
         };

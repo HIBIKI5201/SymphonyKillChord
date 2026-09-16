@@ -46,6 +46,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _dialogue = dialogue;
             _stepIndex = _mission.MissionProgress.ObjectiveStepIndex;
             _lineIndex = -1;
+            _isQueuedUntilGameplayStarts = !_isGameplayActive;
             if (_isVisible)
             {
                 BeginHide();
@@ -77,6 +78,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             if (_isGameplayActive || _mission.MissionProgress.IsFinished || _isDisposed)
             {
                 _dialogue = null;
+                _isQueuedUntilGameplayStarts = false;
             }
             _isGameplayActive = false;
             _voice.StopVoice();
@@ -159,6 +161,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private bool _isVisible;
         private bool _isClosing;
         private bool _isGameplayActive;
+        private bool _isQueuedUntilGameplayStarts;
         private bool _isPaused;
         private bool _isDisposed;
 
@@ -168,6 +171,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private void ObjectiveStepChangedHandler(int stepIndex)
         {
             if (_stepIndex == stepIndex)
+            {
+                return;
+            }
+            if (_isQueuedUntilGameplayStarts)
             {
                 return;
             }
@@ -214,10 +221,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private void TryStartDialogue()
         {
             if (_isDisposed || !_isGameplayActive || _isPaused || _isClosing || _isVisible || _dialogue == null
-                || _mission.MissionProgress.IsFinished || _stepIndex != _mission.MissionProgress.ObjectiveStepIndex)
+                || _mission.MissionProgress.IsFinished
+                || (!_isQueuedUntilGameplayStarts && _stepIndex != _mission.MissionProgress.ObjectiveStepIndex))
             {
                 return;
             }
+            _isQueuedUntilGameplayStarts = false;
             _version++;
             PlayNextLine();
         }

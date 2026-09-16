@@ -190,6 +190,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f103effd9371c7447b0f40c9abb5130e
+    m_Address: GameResourceDefinitionRepository
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f14fa8fb60db62e4cb2b1be4f9ed86f7
     m_Address: PortraitCatalogAsset
     m_ReadOnly: 0

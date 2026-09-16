@@ -1,4 +1,5 @@
 using KillChord.Runtime.Application.InGame.Mission;
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         /// <param name="viewModel"> 反映先の ViewModel。</param>
         /// <param name="missionPreviewProvider"> ミッションテキストプレビューの解決に使うプロバイダー。 </param>
         /// <param name="subMissionAchievementResolver"> サブミッションの達成状況を解決するリゾルバー。 </param>
-        /// <param name="saveData"> 現在のスキル解放/改造ポイント総量を参照するためのセーブデータ。 </param>
+        /// <param name="saveData"> 現在の研究ポイント/改造ポイントの所持数を参照するためのセーブデータ。 </param>
         public StageDetailPresenter(
             IStageDetailViewModel viewModel,
             IMissionPreviewProvider missionPreviewProvider,
@@ -62,16 +63,18 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             var subMissionTexts = evaluationDescriptions?.ToArray();
             var subMissionCleared = _subMissionAchievementResolver?.Resolve(node);
 
-            int currentSkillUnlockPoint = _saveData?.SkillUnlock.ResearchPoint ?? 0;
-            int currentSkillBuildPoint = _saveData?.SkillBuild.SkillLevelupPoint ?? 0;
+            ResourceInventoryData inventory = _saveData?.ResourceInventory;
+            int currentSkillUnlockPoint = inventory?.GetAmount(GameResourceIds.ResearchPoint) ?? 0;
+            int currentSkillBuildPoint = inventory?.GetAmount(GameResourceIds.SkillLevelupPoint) ?? 0;
 
+            // 詳細画面のUIは、初回報酬ボックスに研究ポイント、成功報酬ボックスに改造ポイントを表示する。
             var dto = new StageDetailDTO(
                 def.StageName,
                 def.FlavorText,
                 currentSkillUnlockPoint,
-                def.Reward.FirstClearSkillUnlockPoint,
+                SumAmount(def.FirstClearReward, GameResourceIds.ResearchPoint),
                 currentSkillBuildPoint,
-                def.Reward.SuccessSkillBuildPoint,
+                SumAmount(def.ClearReward, GameResourceIds.SkillLevelupPoint),
                 mainMissionText,
                 subMissionTexts,
                 subMissionCleared);
@@ -83,5 +86,26 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         private readonly IMissionPreviewProvider _missionPreviewProvider;
         private readonly SubMissionAchievementResolver _subMissionAchievementResolver;
         private readonly SaveData _saveData;
+
+        /// <summary>
+        ///     報酬に含まれる指定リソースの数量を合計します。
+        /// </summary>
+        /// <param name="reward"> 集計する報酬。</param>
+        /// <param name="resourceId"> 集計対象のリソースID。</param>
+        /// <returns> 指定リソースの数量の合計。</returns>
+        private static int SumAmount(StageReward reward, GameResourceId resourceId)
+        {
+            int total = 0;
+            IReadOnlyList<GameResourceAmount> items = reward.Items;
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].ResourceId.Equals(resourceId))
+                {
+                    total = checked(total + items[i].Amount);
+                }
+            }
+
+            return total;
+        }
     }
 }

@@ -165,7 +165,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""121aea04-ccbe-45cf-8244-446ed9a58d9d"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -176,7 +176,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""dc43d5ec-931e-4127-9deb-aec512029fc6"",
-                    ""path"": ""<Keyboard>/shift"",
+                    ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -187,7 +187,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""3b51fea5-0d69-4bac-8295-35d8e787622b"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -1054,7 +1054,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""id"": ""e42980b2-3302-4ca4-8046-82d1cb9f2920"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": ""Hold"",
+                    ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {

@@ -5,6 +5,7 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
@@ -108,6 +109,17 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 }
             }
 
+            if (!ServiceLocator.TryGetInstance(out InputComposition inputComposition))
+            {
+                Debug.LogError($"[{nameof(ScreenInitializer)}] InputCompositionを取得できませんでした。", this);
+                return false;
+            }
+
+            // ホーム画面初回表示時点でOutGame入力マップ(Submit/Cancel)を有効化する。
+            // 出撃/シナリオ復帰時のみ有効化されていたため、それらを経由しない初回起動時は
+            // コントローラー/キーボードのCancel(Bボタン/Esc)が機能しなかった。
+            inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
+
             ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
             if (!SaveStore.IsLoaded<SaveData>()
                 || SaveStore.Get<SaveData>().Tutorial.Phase >= TutorialPhase.BattleCompleted)
@@ -129,7 +141,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
             ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
+            ServiceLocator.UnregisterInstance<StageSelectScreenView>();
             ServiceLocator.UnregisterInstance<HomeScreenView>();
+            ServiceLocator.UnregisterInstance<SettingScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
             _screenStateRepository = null;
@@ -335,8 +349,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
             ServiceLocator.RegisterInstance(battlePreparationScreen);
+            // StageSelectモジュールから強制出撃中の戻る操作を制限する。
+            ServiceLocator.RegisterInstance(stageSelectScreenView);
             // HomeCharacterPreviewInitializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(homeScreenView);
+            // SettingComposition から取得できるように登録する。
+            ServiceLocator.RegisterInstance(settingScreenView);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,
@@ -427,6 +445,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleHomeScreenShown()
         {
+            if (IsForcedSortieMode)
+            {
+                _screenController.ShowStageSelect();
+                return;
+            }
+
             VisualElement rootElement = _uiDocument?.rootVisualElement;
             if (rootElement != null
                 && rootElement.resolvedStyle.display == DisplayStyle.None)
@@ -464,6 +488,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleSkillTreeScreenShown()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.ShowSkillTree();
         }
 
@@ -472,6 +498,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleSkillBuildScreenShown()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.ShowSkillBuild();
         }
 
@@ -480,6 +508,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleSettingsShown()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.ShowSetting();
         }
 
@@ -488,6 +518,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleBattlePreparationScreenShown()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.ShowBattlePreparation();
         }
 
@@ -496,6 +528,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private void HandleScreenClosed()
         {
+            if (IsForcedSortieMode) { return; }
+
             _screenController.CloseCurrent();
         }
 
@@ -637,6 +671,11 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             cts?.Dispose();
             cts = null;
         }
+
+        /// <summary> 作戦画面が強制出撃の操作制限中の場合はtrueです。 </summary>
+        private bool IsForcedSortieMode =>
+            ServiceLocator.TryGetInstance(out StageSelectScreenView screenView)
+            && screenView.IsForcedSortieMode;
 
         private const string HOMESCREEN_NAME = "HomeContainer";
         private const string STAGESELECTSCREEN_NAME = "StageSelectContainer";
