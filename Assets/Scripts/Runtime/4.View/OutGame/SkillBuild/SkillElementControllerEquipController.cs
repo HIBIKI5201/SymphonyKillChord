@@ -274,6 +274,12 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             if (evt.direction == NavigationMoveEvent.Direction.Left)
             {
+                if (TryFocusVisibleNeighborSkillElement(element, -1, evt))
+                {
+                    return;
+                }
+
+                // 一番左の要素で左入力した場合のみ、強化ボタンへフォーカスする。
                 HandleLeftNavigationMoveHandler(evt);
                 return;
             }
@@ -292,26 +298,44 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
-            VisualElement next = FindVisibleNeighborSkillElement(element, 1);
-            NavigationDebugLog.Log(
-                $"[SkillListNav] from={NavigationDebugLog.Describe(element)} step=1 "
-                + $"index={_skillElements.IndexOf(element)} count={_skillElements.Count} -> {NavigationDebugLog.Describe(next)}");
-
-            if (next == null)
+            if (!TryFocusVisibleNeighborSkillElement(element, 1, evt))
             {
                 // 移動先がない場合も入力を消費し、スクロール領域へフォーカスを渡さない。
                 evt.StopPropagation();
                 element.panel?.focusController?.IgnoreEvent(evt);
-                return;
+            }
+        }
+
+        /// <summary>
+        ///     表示順で隣接するスキル要素へフォーカスを移動する。
+        /// </summary>
+        /// <param name="element"> 移動元の要素。 </param>
+        /// <param name="step"> 探索方向。+1で右隣、-1で左隣を探す。 </param>
+        /// <param name="evt"> ナビゲーション移動イベント。 </param>
+        /// <returns> 隣接するスキル要素へ移動できた場合はtrue。 </returns>
+        private bool TryFocusVisibleNeighborSkillElement(
+            VisualElement element,
+            int step,
+            NavigationMoveEvent evt)
+        {
+            VisualElement next = FindVisibleNeighborSkillElement(element, step);
+            NavigationDebugLog.Log(
+                $"[SkillListNav] from={NavigationDebugLog.Describe(element)} step={step} "
+                + $"index={_skillElements.IndexOf(element)} count={_skillElements.Count} -> {NavigationDebugLog.Describe(next)}");
+
+            if (next == null)
+            {
+                return false;
             }
 
             next.Focus();
             evt.StopPropagation();
             element.panel?.focusController?.IgnoreEvent(evt);
+            return true;
         }
 
         /// <summary>
-        ///     装備スロットとスキル要素からの左入力で強化ボタンへフォーカスする。
+        ///     装備スロットとスキル要素で、左隣に要素が無い場合の左入力で強化ボタンへフォーカスする。
         /// </summary>
         /// <param name="evt"> ナビゲーション移動イベント。 </param>
         private void HandleLeftNavigationMoveHandler(NavigationMoveEvent evt)
