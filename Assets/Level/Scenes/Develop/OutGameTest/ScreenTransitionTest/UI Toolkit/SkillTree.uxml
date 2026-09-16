@@ -150,7 +150,10 @@
                 <ui:Image name="SettingIconGlyph" picking-mode="Ignore" class="home-option-icon-glyph" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_OptionIocn.png?fileID=21300000&amp;guid=bd80c72ceb0921245907a0bb0ceb0cc1&amp;type=3#UI_OptionIocn&quot;);"/>
             </ui:Button>
         </ui:VisualElement>
-        <ui:Button text="振り直す" name="ResetButton" class="skilltree-reset-button" style="-unity-font-definition: url(&quot;project://database/Assets/Arts/Fonts/IBMPlexSerif-Medium.ttf?fileID=12800000&amp;guid=2f034d4a58f80824f891e864b13f4daa&amp;type=3#IBMPlexSerif-Medium&quot;);"/>
+        <ui:Button name="ResetButton" class="skilltree-reset-button" style="-unity-font-definition: url(&quot;project://database/Assets/Arts/Fonts/IBMPlexSerif-Medium.ttf?fileID=12800000&amp;guid=2f034d4a58f80824f891e864b13f4daa&amp;type=3#IBMPlexSerif-Medium&quot;);">
+            <ui:Image name="ResetButtonIcon" picking-mode="Ignore" class="skilltree-reset-icon"/>
+            <ui:Label text="振り直す" name="ResetButtonLabel" picking-mode="Ignore" class="skilltree-reset-label"/>
+        </ui:Button>
     </ui:VisualElement>
     <ui:VisualElement name="Overlay" enabled="true" picking-mode="Ignore" style="flex-grow: 1; position: absolute; top: 0; left: 0; right: auto; bottom: auto; display: flex; visibility: visible; opacity: 1; background-color: rgba(255, 255, 255, 0); -unity-background-image-tint-color: rgba(255, 255, 255, 0); width: 100%; height: 100%;">
         <ui:Instance template="SkillDetail" name="SkillDetail" enabled="true" style="position: absolute; top: 130px; right: 16px; left: auto; bottom: auto; display: flex; align-self: flex-end; width: 520px; height: auto;"/>
