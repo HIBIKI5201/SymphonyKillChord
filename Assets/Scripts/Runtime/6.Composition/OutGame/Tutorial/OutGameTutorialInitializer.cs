@@ -2,12 +2,14 @@ using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.OutGame.Tutorial;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.Composition.OutGame.Tutorial
 {
@@ -22,8 +24,27 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
         /// <summary> 実行順です。 </summary>
         public override int Order => 150;
 
+        /// <summary> ホーム画面で順番に案内するチュートリアル手順です。 </summary>
+        private static readonly HomeTutorialStep[] HOME_TUTORIAL_STEPS =
+        {
+            new HomeTutorialStep(
+                "StageSelect",
+                "ここから出撃するステージを選んで戦闘に挑みます。"),
+            new HomeTutorialStep(
+                "SkillTree",
+                "研究を進めて新しいスキルや強化を解放できます。"),
+            new HomeTutorialStep(
+                "SkillBuild",
+                "解放したスキルを組み合わせて武装を改造します。"),
+            new HomeTutorialStep(
+                "OptionIcon",
+                "音量や操作方法などの各種設定を変更できます。"),
+        };
+
         private OutGameUIEvent _outGameUIEvent;
         private LoadingScreenController _loadingScreenController;
+        /// <summary> ホーム画面の表示要素を提供するViewです。 </summary>
+        private HomeScreenView _homeScreenView;
         private SaveData _loadedSaveData;
         private bool _isWaitingForLoadingCompleted;
         private bool _isTutorialRunning;
@@ -59,6 +80,8 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             }
 
             ServiceLocator.TryGetInstance(out _loadingScreenController);
+            ServiceLocator.TryGetInstance(out HomeScreenView homeScreenView);
+            _homeScreenView = homeScreenView;
             _isInitialized = true;
             return true;
         }
@@ -86,6 +109,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             UnsubscribeLoadingCompleted();
             _outGameUIEvent = null;
             _loadingScreenController = null;
+            _homeScreenView = null;
             _loadedSaveData = null;
             _isTutorialRunning = false;
             _isInitialized = false;
@@ -149,7 +173,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                 }
 
                 _outGameUIEvent.OnHomeTutorialStarted?.Invoke();
-                await RunHomeTutorialAsync();
+                await RunHomeTutorialAsync(destroyCancellationToken);
 
                 if (_loadedSaveData.Tutorial.Complete())
                 {
@@ -173,11 +197,40 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
 
         /// <summary>
         ///     ホームチュートリアル本体を実行します。
-        ///     現在は未実装のため即座に完了します。
+        ///     Home画面のボタンを順番にハイライトし、決定入力ごとに次へ進みます。
         /// </summary>
-        private static Task RunHomeTutorialAsync()
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        private async Task RunHomeTutorialAsync(CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
+            if (_homeScreenView == null)
+            {
+                return;
+            }
+
+            TutorialOverlayView overlayView = new TutorialOverlayView(_homeScreenView.OutGameRootElement);
+            try
+            {
+                foreach (HomeTutorialStep step in HOME_TUTORIAL_STEPS)
+                {
+                    VisualElement target = _homeScreenView.FindTutorialTarget(step.TargetElementName);
+                    if (target == null)
+                    {
+                        Debug.LogWarning(
+                            $"[{nameof(OutGameTutorialInitializer)}] "
+                            + $"チュートリアル対象 {step.TargetElementName} が見つかりませんでした。",
+                            this);
+                        continue;
+                    }
+
+                    await overlayView.ShowStepAsync(target, step.Message, cancellationToken);
+                }
+
+                await overlayView.HideAsync(cancellationToken);
+            }
+            finally
+            {
+                overlayView.Dispose();
+            }
         }
 
         /// <summary>
@@ -192,6 +245,29 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
 
             _loadingScreenController.LoadingCompleted -= HandleLoadingCompleted;
             _isWaitingForLoadingCompleted = false;
+        }
+
+        /// <summary>
+        ///     ホームチュートリアルの1手順を表します。
+        /// </summary>
+        private readonly struct HomeTutorialStep
+        {
+            /// <summary>
+            ///     ホームチュートリアルの1手順を初期化します。
+            /// </summary>
+            /// <param name="targetElementName"> 対象要素の名前です。 </param>
+            /// <param name="message"> 表示する説明文です。 </param>
+            public HomeTutorialStep(string targetElementName, string message)
+            {
+                TargetElementName = targetElementName;
+                Message = message;
+            }
+
+            /// <summary> 対象要素の名前を取得します。 </summary>
+            public string TargetElementName { get; }
+
+            /// <summary> 表示する説明文を取得します。 </summary>
+            public string Message { get; }
         }
     }
 }

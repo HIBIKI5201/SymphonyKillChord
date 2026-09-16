@@ -49,6 +49,19 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RegisterButtonCallbacks();
         }
 
+        /// <summary> チュートリアルのオーバーレイを配置する、OutGame全体のルート要素を取得します。 </summary>
+        public VisualElement OutGameRootElement => RootElement.panel?.visualTree ?? RootElement.parent;
+
+        /// <summary>
+        ///     チュートリアルのハイライト対象要素を名前で検索します。
+        /// </summary>
+        /// <param name="elementName"> 検索する要素の名前です。 </param>
+        /// <returns> 見つかった要素。見つからない場合はnullです。 </returns>
+        public VisualElement FindTutorialTarget(string elementName)
+        {
+            return RootElement.Q<VisualElement>(elementName);
+        }
+
         /// <summary>
         ///     トップバーに表示するポイントを更新します。
         /// </summary>
