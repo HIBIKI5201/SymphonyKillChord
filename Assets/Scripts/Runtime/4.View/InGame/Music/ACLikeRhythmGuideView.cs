@@ -332,6 +332,9 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ゲージ全長が表す小節数。共通判定定義の小節進捗を描画位置へ換算する。 </summary>
         private const float GUIDE_LENGTH_IN_BARS = 1.5f;
 
+        /// <summary> ジャストタイミング位置を示す帯の横幅倍率。 </summary>
+        private const float JUST_TIMING_MARKER_WIDTH_SCALE = 2f / 3f;
+
         [Space]
 
         [SerializeField, Tooltip("ジャストタイミング演出の設定。")]
@@ -571,7 +574,7 @@ namespace KillChord.Runtime.View.InGame.Music
             for (int i = 0; i < _zoneBeatCounts.Length; i++)
             {
                 float horizontalPosition = (_justStarts[i] + _justEnds[i]) * 0.5f * barWidth;
-                float width = (_justEnds[i] - _justStarts[i]) * barWidth;
+                float width = (_justEnds[i] - _justStarts[i]) * barWidth * JUST_TIMING_MARKER_WIDTH_SCALE;
                 _justTimingMarkers[i * 2] = CreateJustTimingMarker(
                     $"JustTimingMarker_Left_{i}",
                     Vector2.left * horizontalPosition, width);
