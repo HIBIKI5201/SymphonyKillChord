@@ -237,42 +237,12 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     強制対象ステージを準備し、すでに表示中の場合も含めて操作制限を反映します。
+        ///     作戦画面で強制対象ステージを選択し、出撃以外の操作を制限します。
         /// </summary>
         private void ApplyForcedSortie(StageSelectModuleContainer stageSelectContainer)
         {
-            if (!ServiceLocator.TryGetInstance(out BattlePreparationScreen preparationScreen))
-            {
-                return;
-            }
-
-            preparationScreen.SetForcedSortieMode(true);
-            if (_isForcedSortiePrepared)
-            {
-                return;
-            }
-
             StageId forcedStageId = new(_config.ForcedStageId);
-            if (!stageSelectContainer.StageTree.TryGetDefinition(
-                    forcedStageId,
-                    out StageDefinition stageDefinition)
-                || stageDefinition is not BattleStageDefinition battleStageDefinition
-                || !stageSelectContainer.SelectionService.TryPrepareBattleSortie(
-                    battleStageDefinition,
-                    stageSelectContainer.ReturnSceneName))
-            {
-                Debug.LogError(
-                    $"[{nameof(DemoRuntimeBootstrap)}] 強制出撃ステージを準備できませんでした。"
-                    + $" StageId: {_config.ForcedStageId}",
-                    this);
-                return;
-            }
-
-            _isForcedSortiePrepared = true;
-            if (ServiceLocator.TryGetInstance(out OutGameUIEvent outGameUIEvent))
-            {
-                outGameUIEvent.OnShownBattlePreparationScreen?.Invoke();
-            }
+            stageSelectContainer.TryForceBattleSortie(forcedStageId);
         }
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
@@ -360,7 +330,6 @@ namespace KillChord.Demo
         private bool _isOutGameUiEventSubscribed;
         private bool _isHomeTutorialStartedNotified;
         private bool _isStartingSession;
-        private bool _isForcedSortiePrepared;
         private bool _isSaveDataReset;
         private bool _ownsPrefabAssetHandle;
 
