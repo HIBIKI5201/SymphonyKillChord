@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.Persistent.Music;
 using LitMotion;
+using LitMotion.Extensions;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -78,20 +79,15 @@ namespace KillChord.Demo.End
 
             CancelFade();
 
-            bool isCompleted = false;
             IVolumeManager volumeManager = _volumeManager;
             _fadeHandle = LMotion.Create(_baseVolumeRatio, SILENT_VOLUME_RATIO, duration)
                 .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
-                .WithOnComplete(() => isCompleted = true)
-                .Bind(volume => volumeManager.SetVolume(volume))
+                .Bind(volumeManager, static (volume, manager) => manager.SetVolume(volume))
                 .AddTo(gameObject);
 
             try
             {
-                while (!isCompleted)
-                {
-                    await Awaitable.NextFrameAsync(cancellationToken);
-                }
+                await _fadeHandle.ToValueTask(cancellationToken);
             }
             catch (OperationCanceledException)
             {
