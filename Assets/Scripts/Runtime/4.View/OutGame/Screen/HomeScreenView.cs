@@ -101,6 +101,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillBuildButton.MakeNavigable();
             _settingButton.MakeNavigable();
 
+            RootElement.RegisterCallback<NavigationMoveEvent>(
+                HandleNavigationMoveHandler, TrickleDown.TrickleDown);
+
             _stageSelectActivation = _stageSelectButton.RegisterActivation(HandleStageSelectActivationHandler);
             _skillTreeActivation = _skillTreeButton.RegisterActivation(HandleSkillTreeActivationHandler);
             _skillBuildActivation = _skillBuildButton.RegisterActivation(HandleSkillBuildActivationHandler);
@@ -123,6 +126,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallbacks()
         {
+            RootElement.UnregisterCallback<NavigationMoveEvent>(
+                HandleNavigationMoveHandler, TrickleDown.TrickleDown);
+
             _stageSelectActivation?.Dispose();
             _skillTreeActivation?.Dispose();
             _skillBuildActivation?.Dispose();
@@ -146,6 +152,65 @@ namespace KillChord.Runtime.View.OutGame.Screen
             {
                 _skillBuildButton.parent.RemoveManipulator(_skillBuildPulse);
             }
+        }
+
+        /// <summary>
+        ///     ホームの主要ボタンと設定ボタンの間を左右入力で移動します。
+        /// </summary>
+        private void HandleNavigationMoveHandler(NavigationMoveEvent navigationEvent)
+        {
+            VisualElement source = navigationEvent.target as VisualElement;
+            if (!IsNavigationTargetAvailable(source))
+            {
+                return;
+            }
+
+            VisualElement destination;
+            if (navigationEvent.direction == NavigationMoveEvent.Direction.Left
+                && (source == _stageSelectButton || source == _skillTreeButton || source == _skillBuildButton))
+            {
+                destination = _settingButton;
+            }
+            else if (navigationEvent.direction == NavigationMoveEvent.Direction.Right && source == _settingButton)
+            {
+                destination = _stageSelectButton;
+            }
+            else
+            {
+                return;
+            }
+
+            // 明示した経路では標準の位置ベースの移動を抑え、二重のフォーカス移動を防ぐ。
+            navigationEvent.StopPropagation();
+            source.panel.focusController?.IgnoreEvent(navigationEvent);
+
+            if (IsNavigationTargetAvailable(destination))
+            {
+                destination.Focus();
+            }
+        }
+
+        /// <summary>
+        ///     モーダルや入力制限を尊重し、表示中のホーム内で移動可能な要素か判定します。
+        /// </summary>
+        private bool IsNavigationTargetAvailable(VisualElement element)
+        {
+            if (element == null || RootElement.panel == null || element.panel != RootElement.panel
+                || !RootElement.Contains(element) || !element.focusable || !element.enabledInHierarchy)
+            {
+                return false;
+            }
+
+            for (VisualElement ancestor = element; ancestor != null; ancestor = ancestor.parent)
+            {
+                if (ancestor.resolvedStyle.display == DisplayStyle.None
+                    || ancestor.resolvedStyle.visibility != Visibility.Visible)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
