@@ -2,13 +2,14 @@
 20,Fade,1,0,0,BackGround,,
 30,Background,OutdoorsInCity,,,,,
 40,Fade,0,1,1,BackGround,,
-50,Portrait,Left,Prelude,0,-90,1,TRUE
-60,Portrait,Center,Symphony,0,-90,1,TRUE
-70,Portrait,Right,TextBox,0,0,2.75,TRUE
-80,Fade,1,0,0,Text,,
-90,Fade,1,0,0,PortraitCenter,,
-100,Fade,1,0,0,PortraitLeft,,
-110,Fade,1,0,0,PortraitRight,,
+50,Fade,1,0,1,Black,,
+60,Portrait,Left,Prelude,0,-90,1,TRUE
+70,Portrait,Center,Symphony,0,-90,1,TRUE
+80,Portrait,Right,TextBox,0,0,2.75,TRUE
+90,Fade,1,0,0,Text,,
+100,Fade,1,0,0,PortraitCenter,,
+110,Fade,1,0,0,PortraitLeft,,
+120,Fade,1,0,0,PortraitRight,,
 130,Fade,0,1,1,Text,,
 140,Fade,0,0.8,1,PortraitRight,,
 150,Text,,〇中東国境地帯 廃市街,,,,
