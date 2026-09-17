@@ -1,6 +1,8 @@
+using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
 using System;
@@ -35,6 +37,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         public override void Dispose()
         {
             _slideMotionHandle.TryCancel();
+            UnbindOptionInput();
             UnregisterButtonCallbacks();
             foreach (LocalizedElementText localizedText in _localizedTexts)
             {
@@ -42,6 +45,23 @@ namespace KillChord.Runtime.View.OutGame.Title
             }
 
             base.Dispose();
+        }
+
+        /// <summary>
+        ///     コントローラーのOptionsボタンでメニュー画面を閉じられるようにします。
+        /// </summary>
+        /// <param name="playerInputView"> 入力Viewです。nullの場合は購読しません。 </param>
+        public void BindOptionInput(PlayerInputView playerInputView)
+        {
+            UnbindOptionInput();
+
+            if (playerInputView == null)
+            {
+                return;
+            }
+
+            _playerInputView = playerInputView;
+            _playerInputView.OnOptionInput += OnOptionInput;
         }
 
         /// <summary>
@@ -116,6 +136,7 @@ namespace KillChord.Runtime.View.OutGame.Title
 
         private MotionHandle _slideMotionHandle;
         private LocalizedElementText[] _localizedTexts = Array.Empty<LocalizedElementText>();
+        private PlayerInputView _playerInputView;
 
         private IDisposable _creditButtonActivation;
         private IDisposable _dataResetButtonActivation;
@@ -216,6 +237,48 @@ namespace KillChord.Runtime.View.OutGame.Title
                 HandleDataResetDialogNavigationCancelHandler, TrickleDown.TrickleDown);
             RootElement.UnregisterCallback<NavigationCancelEvent>(
                 HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
+        }
+
+        /// <summary>
+        ///     Optionsボタンの購読を解除します。
+        /// </summary>
+        private void UnbindOptionInput()
+        {
+            if (_playerInputView == null)
+            {
+                return;
+            }
+
+            _playerInputView.OnOptionInput -= OnOptionInput;
+            _playerInputView = null;
+        }
+
+        /// <summary>
+        ///     コントローラーのOptionsボタンでメニュー画面を閉じる。
+        ///     <para>
+        ///         メニュー画面表示中はタイトル画面側の操作が禁止されるため、
+        ///         開く操作と閉じる操作をそれぞれの画面で受け持つことで
+        ///         Optionsボタンの開閉トグルを成立させる。
+        ///     </para>
+        /// </summary>
+        /// <param name="inputContext"> 入力情報。 </param>
+        private void OnOptionInput(InputContext<float> inputContext)
+        {
+            // 押した瞬間のみ反応させる。離した際の通知では閉じない。
+            // フェードイン中は同一入力で開いた直後の可能性があるため、表示完了まで受け付けない。
+            if (!IsShowCompleted || !_backButton.enabledInHierarchy
+                || inputContext.Phase != UnityEngine.InputSystem.InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            // データリセット確認ダイアログ表示中は、そちらの操作を優先する。
+            if (_dataResetDialog.resolvedStyle.display != DisplayStyle.None)
+            {
+                return;
+            }
+
+            OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
         /// <summary>

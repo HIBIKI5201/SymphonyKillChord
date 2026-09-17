@@ -221,6 +221,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
+        ///     フェードインを終えて操作を受け付けられる状態かどうかを取得します。
+        ///     <para>
+        ///         表示直後のフェード中は入力ブロッカーが最前面にあり、UI 側の操作は届きません。
+        ///         画面外から届く入力(コントローラーのOptionsボタンなど)も同じ扱いにするため、
+        ///         派生クラスはこの値をガード条件として参照します。
+        ///     </para>
+        /// </summary>
+        protected bool IsShowCompleted => _isShowCompleted;
+
+        /// <summary>
         ///     コントローラー操作の起点となる要素を返します。
         ///     <para>
         ///         画面の表示完了時にこの要素へフォーカスが移ります。
