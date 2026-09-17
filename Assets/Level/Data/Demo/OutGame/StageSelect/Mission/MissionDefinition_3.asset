@@ -47,20 +47,20 @@ MonoBehaviour:
       type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _evaluationId: Damege_50
-        _displayText: "\u53D7\u3051\u305F\u30C0\u30E1\u30FC\u30B8\u304C500\u30C0\u30E1\u30FC\u30B8\u4EE5\u4E0B"
-        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C500\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
-        _maximumDamage: 500
+        _displayText: "\u53D7\u3051\u305F\u30C0\u30E1\u30FC\u30B8\u304C50\u30C0\u30E1\u30FC\u30B8\u4EE5\u4E0B"
+        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C50\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _maximumDamage: 50
     - rid: 4309480244433387712
       type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _evaluationId: Damege_25
-        _displayText: "\u53D7\u3051\u305F\u30C0\u30E1\u30FC\u30B8\u304C750\u30C0\u30E1\u30FC\u30B8\u4EE5\u4E0B"
-        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C750\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
-        _maximumDamage: 750
+        _displayText: "\u53D7\u3051\u305F\u30C0\u30E1\u30FC\u30B8\u304C75\u30C0\u30E1\u30FC\u30B8\u4EE5\u4E0B"
+        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C75\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _maximumDamage: 75
     - rid: 4309480244433387713
       type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _evaluationId: Damege_75
-        _displayText: "\u53D7\u3051\u305F\u30C0\u30E1\u30FC\u30B8\u304C250\u30C0\u30E1\u30FC\u30B8\u4EE5\u4E0B"
-        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C250\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
-        _maximumDamage: 250
+        _displayText: "\u53D7\u3051\u305F\u30C0\u30E1\u30FC\u30B8\u304C25\u30C0\u30E1\u30FC\u30B8\u4EE5\u4E0B"
+        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C25\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _maximumDamage: 25
