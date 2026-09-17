@@ -70,11 +70,8 @@ namespace KillChord.Runtime.View.InGame.Sequence
             catch
             {
                 if (_stageClearCamera != null) { _stageClearCamera.Release(); }
-                throw;
-            }
-            finally
-            {
                 if (_letterBox != null) { _letterBox.DeactiveAspectImmediate(); }
+                throw;
             }
         }
 

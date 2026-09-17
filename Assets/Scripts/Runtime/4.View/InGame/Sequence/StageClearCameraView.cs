@@ -35,7 +35,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
             }
 
             _endPosition = _player.position + _player.forward * _distance + Vector3.up * _height;
-            _endRotation = Quaternion.LookRotation(_player.position + Vector3.up * _lookAtHeight - _endPosition);
+            _endRotation = CalculateFramingRotation(mainCamera);
             _duration = Mathf.Max(0f, duration);
             _elapsed = 0f;
             ApplyCamera();
@@ -70,6 +70,9 @@ namespace KillChord.Runtime.View.InGame.Sequence
 
         [SerializeField, Tooltip("プレイヤー上の注視点の高さ。")]
         private float _lookAtHeight = 1.25f;
+
+        [SerializeField, Range(0f, 1f), Tooltip("画面内でプレイヤーを配置する水平位置。0が左端、1が右端です。")]
+        private float _screenPositionX = 0.25f;
 
         private Transform _player;
         private Vector3 _startPosition;
@@ -110,6 +113,23 @@ namespace KillChord.Runtime.View.InGame.Sequence
             _virtualCamera.SetPositionAndRotation(
                 Vector3.Lerp(_startPosition, _endPosition, progress),
                 Quaternion.Slerp(_startRotation, _endRotation, progress));
+        }
+
+        /// <summary>
+        ///     プレイヤーが指定した画面内の水平位置に収まるカメラ回転を算出します。
+        /// </summary>
+        /// <param name="camera"> 画角とアスペクト比を参照するメインカメラ。 </param>
+        /// <returns> クリア演出の最終カメラ回転。 </returns>
+        private Quaternion CalculateFramingRotation(UnityEngine.Camera camera)
+        {
+            Vector3 lookAtPosition = _player.position + Vector3.up * _lookAtHeight;
+            Quaternion centeredRotation = Quaternion.LookRotation(lookAtPosition - _endPosition, Vector3.up);
+            float normalizedScreenOffset = _screenPositionX * 2f - 1f;
+            float verticalHalfFieldOfView = camera.fieldOfView * 0.5f * Mathf.Deg2Rad;
+            float horizontalOffsetAngle = Mathf.Atan(
+                normalizedScreenOffset * Mathf.Tan(verticalHalfFieldOfView) * camera.aspect) * Mathf.Rad2Deg;
+
+            return centeredRotation * Quaternion.Euler(0f, -horizontalOffsetAngle, 0f);
         }
     }
 }

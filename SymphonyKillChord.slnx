@@ -15,7 +15,6 @@
   <Project Path="DevelopProducts-SaveSystem.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="SingularityGroup.HotReload.Editor.csproj" />
-  <Project Path="KillChord.Demo.csproj" />
   <Project Path="KillChord.Application.csproj" />
   <Project Path="UniHumanoid.csproj" />
   <Project Path="SingularityGroup.HotReload.Runtime.csproj" />
