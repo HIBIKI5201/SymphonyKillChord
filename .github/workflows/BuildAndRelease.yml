@@ -1749,9 +1749,10 @@ jobs:
 # ==================================================================================================
 
       - name: リリース作成とアセットのアップロード
-        id: create_release
+        id: release_attempt_1
+        continue-on-error: true
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
-        with:
+        with: &release_upload_options
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' || steps.determine_mode.outputs.build_variant == 'demo' }}
@@ -1777,9 +1778,74 @@ jobs:
 
             **ビルド対象プロファイル:**
             - ビルドプロファイル枠: ${{ steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release' }}${{ steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master' }}BuildProfiles
-          files: "*.zip"
+          files: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          fail_on_unmatched_files: true
+          overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # アセット保存だけが失敗した場合、Unityビルドからやり直さず新しいストリームで再送する。
+      # 同名の未完了アセットはactionのoverwrite_filesで置き換える。
+      - name: リリースアップロードの再試行待機
+        if: ${{ !cancelled() && steps.release_attempt_1.outcome == 'failure' }}
+        run: Start-Sleep -Seconds 20
+
+      - name: リリース作成とアセットのアップロード（2回目）
+        id: release_attempt_2
+        if: ${{ !cancelled() && steps.release_attempt_1.outcome == 'failure' }}
+        continue-on-error: true
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        with: *release_upload_options
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: リリースアップロードの最終再試行待機
+        if: ${{ !cancelled() && steps.release_attempt_2.outcome == 'failure' }}
+        run: Start-Sleep -Seconds 40
+
+      - name: リリース作成とアセットのアップロード（3回目）
+        id: release_attempt_3
+        if: ${{ !cancelled() && steps.release_attempt_2.outcome == 'failure' }}
+        continue-on-error: true
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        with: *release_upload_options
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 公開確認を従来のcreate_release成功ゲートとし、失敗を成功扱いして版数を進めない。
+      - name: リリースアセットの公開確認
+        id: create_release
+        if: ${{ !cancelled() && (steps.release_attempt_1.outcome == 'success' || steps.release_attempt_1.outcome == 'failure') }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.tag_gen.outputs.TAG_NAME }}
+          UPLOAD_SUCCEEDED: ${{ steps.release_attempt_1.outcome == 'success' || steps.release_attempt_2.outcome == 'success' || steps.release_attempt_3.outcome == 'success' }}
+        run: |
+          if ($env:UPLOAD_SUCCEEDED -ne 'true') {
+            throw 'Release upload failed after three attempts. The build ZIPs will be retained as an artifact.'
+          }
+          $ExpectedFiles = @(Get-ChildItem -LiteralPath $env:GITHUB_WORKSPACE -File |
+            Where-Object { $_.Name.EndsWith("-$($env:RELEASE_TAG).zip", [StringComparison]::Ordinal) })
+          if ($ExpectedFiles.Count -eq 0) { throw 'No release ZIPs were found for verification.' }
+          $Headers = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
+          $Tag = [Uri]::EscapeDataString($env:RELEASE_TAG)
+          $Release = Invoke-RestMethod -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/releases/tags/$Tag" -Headers $Headers -TimeoutSec 60
+          $Assets = @(Invoke-RestMethod -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/releases/$($Release.id)/assets?per_page=100" -Headers $Headers -TimeoutSec 60)
+          foreach ($File in $ExpectedFiles) {
+            $MatchingAssets = @($Assets | Where-Object { $_.name -ceq $File.Name -and $_.state -eq 'uploaded' -and $_.size -eq $File.Length })
+            if ($MatchingAssets.Count -ne 1) { throw "Release asset missing, incomplete or wrong size: $($File.Name) ($($File.Length) bytes)" }
+            Write-Host "Verified release asset: $($File.Name) ($($File.Length) bytes)"
+          }
+
+      - name: 公開失敗時のビルドZIP退避
+        if: ${{ !cancelled() && steps.create_release.outcome == 'failure' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: unreleased-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
 
 # ==================================================================================================
 
