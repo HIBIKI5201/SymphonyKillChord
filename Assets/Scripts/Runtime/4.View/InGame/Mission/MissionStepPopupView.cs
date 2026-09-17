@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.View.Persistent.Localization;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.UI;
@@ -22,9 +23,11 @@ namespace KillChord.Runtime.View.InGame.Mission
 
             if (!string.IsNullOrWhiteSpace(imageEntryKey))
             {
-                _localizedPopupImage = new LocalizedSprite();
-                _localizedPopupImage.SetReference(TUTORIAL_POPUP_IMAGE_TABLE, imageEntryKey);
-                _localizedPopupImage.AssetChanged += HandlePopupImageChanged;
+                // Localizationの初期化前に購読するとSelectedLocaleが未設定で例外になるため、初期化完了を待つ。
+                _requestedImageEntryKey = imageEntryKey;
+                _isLocalizedImagePending = true;
+                LocalizationInitializer.RunWhenInitialized(
+                    hasSelectedLocale => HandleLocalizationInitialized(imageEntryKey, hasSelectedLocale));
             }
 
             if (_canvasGroup != null)
@@ -52,6 +55,9 @@ namespace KillChord.Runtime.View.InGame.Mission
 
         private LocalizedSprite _localizedPopupImage;
         private Sprite _fallbackImage;
+        private string _requestedImageEntryKey;
+        private bool _isLocalizedImagePending;
+        private bool _isLocalizedImageApplied;
 
         private void Awake()
         {
@@ -72,11 +78,41 @@ namespace KillChord.Runtime.View.InGame.Mission
         }
 
         /// <summary>
+        ///     Localizationの初期化完了後にローカライズ画像を購読します。
+        /// </summary>
+        /// <param name="imageEntryKey"> 購読を要求したエントリキーです。 </param>
+        /// <param name="hasSelectedLocale"> Localeが設定済みかどうかです。 </param>
+        private void HandleLocalizationInitialized(string imageEntryKey, bool hasSelectedLocale)
+        {
+            // 初期化待機中に非表示や別ステップへ切り替わった場合は購読しない。
+            if (this == null || !_isLocalizedImagePending || _requestedImageEntryKey != imageEntryKey)
+            {
+                return;
+            }
+
+            _isLocalizedImagePending = false;
+
+            if (!hasSelectedLocale)
+            {
+                // Localeを取得できない場合はフォールバック画像の表示を維持する。
+                Debug.LogWarning(
+                    $"[{nameof(MissionStepPopupView)}] SelectedLocaleが未設定のため、フォールバック画像を表示します。Entry={imageEntryKey}",
+                    this);
+                return;
+            }
+
+            _localizedPopupImage = new LocalizedSprite();
+            _localizedPopupImage.SetReference(TUTORIAL_POPUP_IMAGE_TABLE, imageEntryKey);
+            _localizedPopupImage.AssetChanged += HandlePopupImageChanged;
+        }
+
+        /// <summary>
         ///     ローカライズ済みのポップアップ画像を反映します。
         /// </summary>
         /// <param name="image"> 選択中ロケールに対応する画像です。 </param>
         private void HandlePopupImageChanged(Sprite image)
         {
+            _isLocalizedImageApplied = image != null;
             SetPopupImage(image != null ? image : _fallbackImage);
         }
 
@@ -100,6 +136,9 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// </summary>
         private void ReleaseLocalizedImage()
         {
+            _requestedImageEntryKey = null;
+            _isLocalizedImagePending = false;
+
             if (_localizedPopupImage == null)
             {
                 return;
@@ -107,6 +146,13 @@ namespace KillChord.Runtime.View.InGame.Mission
 
             _localizedPopupImage.AssetChanged -= HandlePopupImageChanged;
             _localizedPopupImage = null;
+
+            // 解放済みの画像を参照し続けると表示が乱れるため、フォールバック画像へ戻す。
+            if (_isLocalizedImageApplied)
+            {
+                _isLocalizedImageApplied = false;
+                SetPopupImage(_fallbackImage);
+            }
         }
     }
 }
