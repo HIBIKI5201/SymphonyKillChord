@@ -31,19 +31,18 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 context.PlayerEntity.MaxHealth.Value * healthCostRatio);
 
             // プレイヤーの体力を消費して、スキルのダメージを計算する
-            Health consumedHealth = context.PlayerEntity.ConsumeHealth(
-                requestHealthCost, PLAYER_HEALTH_UNIT_MULTIPLIER);
+            Health consumedHealth = context.PlayerEntity.ConsumeHealth(requestHealthCost);
 
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec
                 .GetAttackDefinitionByBeatType(context.CurrentBeatType);
 
-            // プレイヤーHPだけが10倍になっているため、攻撃計算前に敵のHP単位へ戻す。
+            // 敵の体力とプレイヤー攻撃力の桁に合わせ、消費HPを攻撃ダメージの単位へ換算する。
             var result = AttackCalculator.Calculate(
                 attackDefinition,
                 context.PlayerEntity,
                 context.TargetEntity,
                 context.IsJustHit,
-                new Damage(consumedHealth.Value / PLAYER_HEALTH_UNIT_MULTIPLIER),
+                new Damage(consumedHealth.Value * PLAYER_DAMAGE_UNIT_MULTIPLIER),
                 applyAttackerModifiers: false,
                 applyWeaponDamageMultiplier: false);
             result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
@@ -59,7 +58,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 $"AppliedDamage:{result.AppliedDamage.Value:0.##}");
         }
 
-        private const float PLAYER_HEALTH_UNIT_MULTIPLIER = 10f;
+        private const float PLAYER_DAMAGE_UNIT_MULTIPLIER = 10f;
 
         /// <summary>
         ///     スキルパラメータを検証します。

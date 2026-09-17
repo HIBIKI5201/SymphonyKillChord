@@ -19,7 +19,6 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attacker"></param>
         /// <param name="defender"></param>
         /// <param name="damageAttackType"> ダメージの攻撃タイプ。 </param>
-        /// <param name="damageUnitMultiplier"> 攻撃計算後に防御側のHP単位へ換算する倍率。 </param>
         /// <returns> 攻撃結果。 </returns>
         public static AttackResult Execute(
             AttackDefinition attackDefinition,
@@ -30,8 +29,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             bool isOutOfRange = false,
             IReadOnlyList<IAttackHitEffect> hitEffects = null,
             DamageAttackType damageAttackType = DamageAttackType.Normal,
-            bool notifyNormalDamage = false,
-            float damageUnitMultiplier = 1f
+            bool notifyNormalDamage = false
                )
         {
             if (attackDefinition == null)
@@ -49,14 +47,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 throw new ArgumentNullException(nameof(defender));
             }
 
-            if (!float.IsFinite(damageUnitMultiplier) || damageUnitMultiplier <= 0f)
-            {
-                throw new ArgumentOutOfRangeException(nameof(damageUnitMultiplier));
-            }
-
-            // 攻撃力補正と確定ダメージの計算後にHP単位へ換算し、バリアや被弾通知にも同じ単位を渡す。
+            // 攻撃力補正と確定ダメージを計算し、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit, baseDamage, isOutOfRange);
-            result = result.WithFinalDamage(result.FinalDamage * damageUnitMultiplier);
 
             result = DamageExecutor.Execute(attacker, defender, result, damageAttackType, notifyNormalDamage);
 
