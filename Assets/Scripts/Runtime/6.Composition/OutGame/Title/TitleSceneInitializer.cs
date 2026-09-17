@@ -24,6 +24,7 @@ using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -104,6 +105,13 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedSaveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!await ApplyInitialSkillLoadoutAsync())
+            {
+                return false;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
             return _loadedRuleData != null
                 && _loadedStageTreeAsset != null
                 && _loadedEnemyWaveDefinitionRepository != null
@@ -523,8 +531,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     return;
                 }
 
-                await ApplyInitialSkillLoadoutAsync();
-                await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
+                if (!await ApplyInitialSkillLoadoutAsync())
+                {
+                    return;
+                }
 
                 canResumeInteraction = ApplyStartDestination();
                 if (!canResumeInteraction)
@@ -545,6 +555,11 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     canResumeInteraction = await TryRecoverStartDestinationAsync();
                 }
 
+                if (canResumeInteraction)
+                {
+                    await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
+                }
+
                 ApplyInteractionEnabled(canResumeInteraction);
                 _isResettingSaveData = false;
             }
@@ -557,7 +572,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private async ValueTask<bool> TryRecoverStartDestinationAsync()
         {
             _loadedSaveData = await LoadSaveData();
-            if (_loadedSaveData != null && ApplyStartDestination())
+            if (_loadedSaveData != null
+                && await ApplyInitialSkillLoadoutAsync()
+                && ApplyStartDestination())
             {
                 return true;
             }
@@ -644,17 +661,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///     リセット直後のセーブデータへ初期解放・初期装備スキルを補完して保存する。
+        ///     タイトルで読み込んだセーブデータへ初期解放・初期装備スキルを補完して保存する。
         ///     <para>
         ///         補完処理は常駐シーンの起動時にしか走らないため、起動後のリセットでは
-        ///         ここで明示的に呼び直す必要がある。
+        ///         タイトルのリセット操作だけでなく、体験版終了後の再入場でも呼び直す。
         ///     </para>
         /// </summary>
-        private async ValueTask ApplyInitialSkillLoadoutAsync()
+        /// <returns> 補完が不要、または補完内容を保存できた場合はtrueです。 </returns>
+        private async ValueTask<bool> ApplyInitialSkillLoadoutAsync()
         {
             if (_loadedSaveData == null)
             {
-                return;
+                return false;
             }
 
             if (!ServiceLocator.TryGetInstance(out InitialSkillLoadoutService initialSkillLoadoutService))
@@ -662,23 +680,30 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 Debug.LogError(
                     $"[{nameof(TitleSceneInitializer)}] {nameof(InitialSkillLoadoutService)} が取得できませんでした。",
                     this);
-                return;
+                return false;
             }
 
+            int[] previousUnlockedSkillIds = (int[])_loadedSaveData.SkillUnlock.UnlockedSkillIds.Clone();
+            List<int> previousEquipmentSkillIds = new(_loadedSaveData.SkillBuild.EquipmentSkillIDs);
             if (!initialSkillLoadoutService.TryApply(_loadedSaveData))
             {
-                return;
+                return true;
             }
 
             try
             {
                 await SaveStore.SaveAsync<SaveData>();
+                return true;
             }
             catch (Exception ex)
             {
+                // 保存に失敗した補完結果をキャッシュへ残さず、次の復旧で再保存する。
+                _loadedSaveData.SkillUnlock.SetUnlockedSkillIds(previousUnlockedSkillIds);
+                _loadedSaveData.SkillBuild.SetEquipmentSkillIDs(previousEquipmentSkillIds);
                 Debug.LogError(
                     $"[{nameof(TitleSceneInitializer)}] 初期スキルの保存中にエラーが発生しました。{ex.Message}",
                     this);
+                return false;
             }
         }
 
