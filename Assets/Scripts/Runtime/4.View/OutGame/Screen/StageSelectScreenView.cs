@@ -98,7 +98,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         protected override VisualElement CancelTargetElement => _backButton;
 
         /// <inheritdoc />
-        /// <remarks> 起点ノード(マップ最左)が無い場合は戻るボタンへフォールバックします。 </remarks>
+        /// <remarks> 解放済みの最も先のノードが無い場合は戻るボタンへフォールバックします。 </remarks>
         protected override VisualElement InitialFocusElement =>
             RootElement.Q<VisualElement>(className: UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME)
             ?? _backButton;
