@@ -14001,6 +14001,9 @@ MonoBehaviour:
   _stageStartDirector: {fileID: 1133198437}
   _stageClearDirector: {fileID: 1049257178}
   _gameOverDirector: {fileID: 1146523376}
+  _clearFadeBackground: {fileID: 150927063}
+  _stageClearCamera: {fileID: 179700110}
+  _letterBox: {fileID: 203025890}
 --- !u!95 &191554240
 Animator:
   serializedVersion: 7
@@ -93801,6 +93804,7 @@ GameObject:
   - component: {fileID: 1435826637}
   - component: {fileID: 827911324}
   - component: {fileID: 726190438}
+  - component: {fileID: 179700110}
   m_Layer: 0
   m_Name: StageSequenceRoot
   m_TagString: Untagged
@@ -93821,6 +93825,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 179700102}
   - {fileID: 1133198436}
   - {fileID: 1049257177}
   - {fileID: 1146523375}
@@ -93860,6 +93865,9 @@ MonoBehaviour:
     - {fileID: 11400000, guid: fe3b0c5d3757fe84b81b2d717ec63b09, type: 2}
     - {fileID: 11400000, guid: 3220138c2e71b924a859460fb3871d50, type: 2}
     - {fileID: 11400000, guid: b88f676f5d04b3b4c9e96b9a8c46d9ca, type: 2}
+    - {fileID: 11400000, guid: fe701797000000000000000000000001, type: 2}
+    - {fileID: 11400000, guid: fe701797000000000000000000000002, type: 2}
+    - {fileID: 11400000, guid: fe701797000000000000000000000003, type: 2}
     m_Events:
     - m_PersistentCalls:
         m_Calls:
@@ -93973,6 +93981,48 @@ MonoBehaviour:
             m_IntArgument: 0
             m_FloatArgument: 1
             m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 203025890}
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.UI.LetterBoxAnimationGUI, KillChord.View
+          m_MethodName: ActiveAspect
+          m_Mode: 4
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0.3
+            m_StringArgument:
+            m_BoolArgument: 0
+          m_CallState: 2
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 179700110}
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.Sequence.StageClearCameraView, KillChord.View
+          m_MethodName: Play
+          m_Mode: 4
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 1
+            m_StringArgument:
+            m_BoolArgument: 0
+          m_CallState: 2
+    - m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 203025890}
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.UI.LetterBoxAnimationGUI, KillChord.View
+          m_MethodName: DeactiveAspect
+          m_Mode: 4
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0.3
+            m_StringArgument:
             m_BoolArgument: 0
           m_CallState: 2
 --- !u!114 &1435826637
@@ -131958,6 +132008,8 @@ GameObject:
   - component: {fileID: 1906079130}
   - component: {fileID: 1906079132}
   - component: {fileID: 1906079131}
+  - component: {fileID: 179700201}
+  - component: {fileID: 179700202}
   m_Layer: 5
   m_Name: StageResultRoot
   m_TagString: Untagged
@@ -132038,6 +132090,8 @@ MonoBehaviour:
     _isEnabled: 1
     _duration: 1
     _ease: 8
+  _revealTimeline: {fileID: 179700201}
+  _revealProgress: 0
 --- !u!225 &1906079132
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -141437,3 +141491,135 @@ SceneRoots:
   - {fileID: 1059877459}
   - {fileID: 177441586}
   - {fileID: 1917238283}
+--- !u!1 &179700101
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 179700102}
+  - component: {fileID: 179700103}
+  m_Layer: 0
+  m_Name: StageClear CinemachineCamera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &179700102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 179700101}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1435826634}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &179700103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 179700101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
+  Priority:
+    Enabled: 1
+    m_Value: 100
+  OutputChannel: 1
+  StandbyUpdate: 2
+  m_StreamingVersion: 20241001
+  m_LegacyPriority: 0
+  Target:
+    TrackingTarget: {fileID: 0}
+    LookAtTarget: {fileID: 0}
+    CustomLookAtTarget: 0
+  Lens:
+    FieldOfView: 60.000004
+    OrthographicSize: 5
+    NearClipPlane: 0.01
+    FarClipPlane: 1000
+    Dutch: 0
+    ModeOverride: 0
+    PhysicalProperties:
+      GateFit: 2
+      SensorSize: {x: 21.946, y: 16.002}
+      LensShift: {x: 0, y: 0}
+      FocusDistance: 10
+      Iso: 200
+      ShutterSpeed: 0.005
+      Aperture: 16
+      BladeCount: 5
+      Curvature: {x: 2, y: 11}
+      BarrelClipping: 0.25
+      Anamorphism: 0
+  BlendHint: 0
+--- !u!114 &179700110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1435826633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba14aace3b624a0997cab218b4c18f10, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.StageClearCameraView
+  _virtualCamera: {fileID: 179700102}
+  _distance: 3
+  _height: 1.5
+  _lookAtHeight: 1.25
+--- !u!320 &179700201
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1906079129}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 11400000, guid: 1154ae80868142e2b9c23bb5bb07633a, type: 2}
+  m_InitialState: 0
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 2
+  m_InitialTime: 0
+  m_SceneBindings:
+  - key: {fileID: -1226373577233523608, guid: 1154ae80868142e2b9c23bb5bb07633a, type: 2}
+    value: {fileID: 179700202}
+  m_ExposedReferences:
+    m_References: []
+--- !u!95 &179700202
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1906079129}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage:
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

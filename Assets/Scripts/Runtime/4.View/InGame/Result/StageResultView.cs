@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Playables;
 using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Result
@@ -230,6 +231,12 @@ namespace KillChord.Runtime.View.InGame.Result
         [SerializeField, Tooltip("数値をカウントアップ表示させる演出の設定。")]
         private ResultCountUpSetting _countUpSetting = new();
 
+        [SerializeField, Tooltip("勝利時の文字表示順を編集するTimeline。進捗カーブを0から1へ動かします。")]
+        private PlayableDirector _revealTimeline;
+
+        [SerializeField, Range(0f, 1f), Tooltip("Timelineで操作する上から下への文字表示進捗。")]
+        private float _revealProgress;
+
         private readonly Dictionary<TMP_Text, (float Value, Func<float, string> Formatter)> _pendingCountUpValues = new();
         private readonly Dictionary<TMP_Text, (MotionHandle Handle, float Value, Func<float, string> Formatter)> _countUpHandles = new();
         private readonly List<TMP_Text> _countUpKeysBuffer = new();
@@ -252,10 +259,12 @@ namespace KillChord.Runtime.View.InGame.Result
         private IDisposable _resultTypeDisposable;
         private readonly List<StageResultMissionItemView> _spawnedSubMissionItems = new();
         private readonly List<MotionHandle> _slideInHandles = new();
-        private readonly Dictionary<RectTransform, Vector2> _slideInOriginalPositions = new();
+        private readonly List<ResultTextSlideIn> _textPresentations = new();
         private readonly List<TMP_Text> _slideInTexts = new();
         private readonly List<TMP_Text> _slideInTextBuffer = new();
-        private readonly List<RectTransform> _releasedSlideInTargets = new();
+        private int _nextRevealIndex;
+        private int _remainingSlideIns;
+        private bool _isRevealTimelinePlaying;
 
         /// <summary>
         ///     シーンに設定された文言の見た目を保存し、左右の選択移動を設定します。
@@ -283,6 +292,10 @@ namespace KillChord.Runtime.View.InGame.Result
             if (_isShown)
             {
                 RefreshButtonFocus();
+                if (_isRevealTimelinePlaying)
+                {
+                    RevealThroughProgress();
+                }
             }
         }
 
@@ -291,6 +304,8 @@ namespace KillChord.Runtime.View.InGame.Result
         /// </summary>
         private void OnDisable()
         {
+            StopTextSlideIn();
+            StopCountUps(false);
             RefreshButtonFocus();
         }
 
@@ -298,7 +313,7 @@ namespace KillChord.Runtime.View.InGame.Result
         {
             UnsubscribeViewModel();
 
-            ResultTextSlideIn.Stop(_slideInHandles);
+            StopTextSlideIn();
             StopCountUps(false);
         }
 
@@ -307,6 +322,17 @@ namespace KillChord.Runtime.View.InGame.Result
         /// </summary>
         private void PlayTextSlideIn()
         {
+            if (_viewModel == null)
+            {
+                throw new InvalidOperationException("リザルト表示前にInitializeを実行してください。");
+            }
+
+            bool isVictory = _viewModel.ResultType.Value == StageResultType.Victory;
+            if (isVictory && (_revealTimeline == null || _revealTimeline.playableAsset == null))
+            {
+                throw new InvalidOperationException("勝利リザルトの文字表示Timelineが未設定です。");
+            }
+
             StopTextSlideIn();
             StopCountUps(true);
             _isUiSlided = false;
@@ -317,68 +343,102 @@ namespace KillChord.Runtime.View.InGame.Result
                 return;
             }
 
+            Canvas.ForceUpdateCanvases();
             CollectSlideInTexts();
-
-            if (_slideInTexts.Count == 0)
+            _remainingSlideIns = _slideInTexts.Count;
+            if (_remainingSlideIns == 0)
             {
                 OnTextSlideInCompleted();
                 return;
             }
 
-            // 全テキストのスライドインが完了した時点でカウントアップを開始する。
-            int remainingSlideIns = _slideInTexts.Count;
-
-            for (int i = 0; i < _slideInTexts.Count; i++)
+            foreach (TMP_Text text in _slideInTexts)
             {
-                RectTransform rectTransform = _slideInTexts[i].rectTransform;
+                _textPresentations.Add(new ResultTextSlideIn(text, _textSlideIn));
+            }
 
-                ResultTextSlideIn.Play(
-                    rectTransform,
-                    GetSlideInOriginalPosition(rectTransform),
-                    _textSlideIn,
-                    i * _textSlideIn.Interval,
-                    _slideInHandles,
-                    () =>
-                    {
-                        remainingSlideIns--;
+            if (isVictory)
+            {
+                _nextRevealIndex = 0;
+                _revealProgress = 0f;
+                _isRevealTimelinePlaying = true;
+                _revealTimeline.stopped += HandleRevealTimelineStopped;
+                _revealTimeline.time = 0d;
+                _revealTimeline.Evaluate();
+                _revealTimeline.Play();
+                RevealThroughProgress();
+                return;
+            }
 
-                        if (remainingSlideIns <= 0)
-                        {
-                            OnTextSlideInCompleted();
-                        }
-                    });
+            // 敗北時の順序と間隔は従来の設定を維持する。
+            for (int i = 0; i < _textPresentations.Count; i++)
+            {
+                _textPresentations[i].Play(_slideInHandles, HandleTextSlideCompleted, i * _textSlideIn.Interval);
             }
         }
 
         /// <summary>
-        ///     再生中のスライドインを停止し、本来の表示状態へ戻す。
+        ///     Timelineの進捗カーブに合わせ、画面上から文字を表示します。
+        /// </summary>
+        private void RevealThroughProgress()
+        {
+            int count = _textPresentations.Count;
+            int visibleCount = Mathf.Clamp(Mathf.FloorToInt(Mathf.Clamp01(_revealProgress) * (count - 1)) + 1, 0, count);
+            while (_nextRevealIndex < visibleCount)
+            {
+                _textPresentations[_nextRevealIndex++].Play(_slideInHandles, HandleTextSlideCompleted);
+            }
+        }
+
+        /// <summary>
+        ///     Timelineの最終フレームで残った文字も表示し、短縮編集にも対応します。
+        /// </summary>
+        private void HandleRevealTimelineStopped(PlayableDirector director)
+        {
+            director.stopped -= HandleRevealTimelineStopped;
+            if (_isRevealTimelinePlaying)
+            {
+                _revealProgress = 1f;
+                RevealThroughProgress();
+                _isRevealTimelinePlaying = false;
+            }
+        }
+
+        /// <summary>
+        ///     全ての文字が表示された後、既存のカウントアップを開始します。
+        /// </summary>
+        private void HandleTextSlideCompleted()
+        {
+            _remainingSlideIns--;
+            if (_remainingSlideIns == 0)
+            {
+                OnTextSlideInCompleted();
+            }
+        }
+
+        /// <summary>
+        ///     Timelineと描画フックを解放し、途中終了でも元の表示を復元します。
         /// </summary>
         private void StopTextSlideIn()
         {
-            ResultTextSlideIn.Stop(_slideInHandles);
-
-            _releasedSlideInTargets.Clear();
-
-            foreach (KeyValuePair<RectTransform, Vector2> entry in _slideInOriginalPositions)
+            _isRevealTimelinePlaying = false;
+            if (_revealTimeline != null)
             {
-                // サブミッション項目は作り直されるため、破棄済みの対象を溜め込まない。
-                if (entry.Key == null)
-                {
-                    _releasedSlideInTargets.Add(entry.Key);
-                    continue;
-                }
-
-                entry.Key.TryGetComponent(out CanvasGroup canvasGroup);
-
-                ResultTextSlideIn.ApplyEndState(entry.Key, entry.Value, canvasGroup);
+                _revealTimeline.stopped -= HandleRevealTimelineStopped;
+                _revealTimeline.Stop();
             }
 
-            for (int i = 0; i < _releasedSlideInTargets.Count; i++)
+            foreach (MotionHandle handle in _slideInHandles)
             {
-                _slideInOriginalPositions.Remove(_releasedSlideInTargets[i]);
+                handle.TryCancel();
             }
+            _slideInHandles.Clear();
 
-            _releasedSlideInTargets.Clear();
+            foreach (ResultTextSlideIn presentation in _textPresentations)
+            {
+                presentation.Dispose();
+            }
+            _textPresentations.Clear();
         }
 
         /// <summary>
@@ -403,11 +463,6 @@ namespace KillChord.Runtime.View.InGame.Result
                 }
 
                 if (IsExcludedFromSlideIn(text.transform))
-                {
-                    continue;
-                }
-
-                if (IsLayoutControlled(text.rectTransform))
                 {
                     continue;
                 }
@@ -450,18 +505,6 @@ namespace KillChord.Runtime.View.InGame.Result
         }
 
         /// <summary>
-        ///     親のLayoutGroupにanchoredPositionを制御されるかを判定する。
-        ///     制御される要素を動かすとレイアウト更新と競合するため、演出対象から外す。
-        /// </summary>
-        /// <param name="rectTransform"> 判定対象のRectTransform。 </param>
-        /// <returns> レイアウト制御下ならtrue。 </returns>
-        private static bool IsLayoutControlled(RectTransform rectTransform)
-        {
-            return rectTransform.parent != null
-                   && rectTransform.parent.TryGetComponent(out LayoutGroup _);
-        }
-
-        /// <summary>
         ///     画面上側のTextが先に来るように比較する。
         /// </summary>
         /// <param name="left"> 比較元のText。 </param>
@@ -472,25 +515,6 @@ namespace KillChord.Runtime.View.InGame.Result
             return right.rectTransform.position.y.CompareTo(
                 left.rectTransform.position.y);
         }
-
-        /// <summary>
-        ///     スライドインの終点となる本来のanchoredPositionを取得する。
-        ///     演出で位置を書き換えるため、初回の値をそのまま保持し続ける。
-        /// </summary>
-        /// <param name="rectTransform"> 対象のRectTransform。 </param>
-        /// <returns> 本来のanchoredPosition。 </returns>
-        private Vector2 GetSlideInOriginalPosition(RectTransform rectTransform)
-        {
-            if (!_slideInOriginalPositions.TryGetValue(rectTransform, out Vector2 original))
-            {
-                original = rectTransform.anchoredPosition;
-
-                _slideInOriginalPositions[rectTransform] = original;
-            }
-
-            return original;
-        }
-
 
         /// <summary>
         ///     ViewModelが保持する表示値を購読する。
