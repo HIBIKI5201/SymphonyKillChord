@@ -327,10 +327,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _view.Deactivate();
 
             _enemyEntity.OnDied -= HandleEnemyDied;
-            if (_missionEventController != null && _loadedMissionKeyAsset != null)
-            {
-                _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
-            }
             _targetingSystem?.UnregisterTarget(_targetable);
             _battleAIRegistry?.Unregister(_aiController);
 
@@ -785,6 +781,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // 撃破演出用に、敵の撃破を通知する。
             EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(diedEnemy.Id));
             _defeatSoundSource?.Play();
+
+            // ミッションへの撃破通知は、死亡演出の完了を待たずに体力が尽きた瞬間に行う。
+            if (_missionEventController != null && _loadedMissionKeyAsset != null)
+            {
+                _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
+            }
 
             DieAsync();
         }
