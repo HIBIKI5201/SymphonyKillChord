@@ -184,10 +184,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
 
-            // コントローラーのOptionsボタンからオプション画面を開けるようにする。
+            HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
+
+            MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
+
+            // コントローラーのOptionsボタンでオプション画面を開閉できるようにする。
+            // 表示中の画面だけが入力を受け付けるため、開く側と閉じる側を別々の View が担当する。
             if (ServiceLocator.TryGetInstance(out PlayerInputView playerInputView))
             {
                 _titleSceneView.BindOptionInput(playerInputView);
+                menuScreenView.BindOptionInput(playerInputView);
             }
             else
             {
@@ -195,9 +201,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     $"{nameof(TitleSceneInitializer)}: PlayerInputView が ServiceLocator に登録されていません。"
                     + " Optionsボタンでのオプション表示は無効になります。");
             }
-            HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
 
-            MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent, creditNavgationScope);
             _volumeSettingsTabView = new VolumeSettingsTabView(
                 menuRoot,

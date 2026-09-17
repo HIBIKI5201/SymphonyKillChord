@@ -304,7 +304,9 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void OnOptionInput(InputContext<float> inputContext)
         {
             // 押した瞬間のみ反応させる。離した際の通知では開かない。
-            if (_isDisposed || _isStarting || !_optionButton.enabledInHierarchy
+            // フェードイン中は画面が操作可能になっていないため、オプション画面を閉じた直後の
+            // 同一入力で再度開いてしまわないよう表示完了も条件に加える。
+            if (_isDisposed || _isStarting || !IsShowCompleted || !_optionButton.enabledInHierarchy
                 || inputContext.Phase != UnityEngine.InputSystem.InputActionPhase.Performed)
             {
                 return;
