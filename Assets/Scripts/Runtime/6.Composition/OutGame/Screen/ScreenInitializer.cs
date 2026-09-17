@@ -237,6 +237,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return;
             }
 
+            // Cancelが先に通知された場合も、同じEsc入力で閉じた設定を開き直さない。
+            if (_settingClosedFrame == Time.frameCount)
+            {
+                return;
+            }
+
             // 既に設定画面を表示中の場合、連打で遷移履歴に同じ画面が積み重なってしまうため
             // 何もしない。
             if (_screenStateRepository != null
@@ -572,6 +578,11 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         {
             if (IsForcedSortieMode) { return; }
 
+            if (_screenStateRepository.TransitionState.CurrentScreenId == ScreenId.Setting)
+            {
+                _settingClosedFrame = Time.frameCount;
+            }
+
             _screenController.CloseCurrent();
             RefreshHeaderPointsAsync();
         }
@@ -750,6 +761,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private bool _isLoadingSubscribed;
         private LoadingScreenController _loadingScreenController;
         private bool _isOptionInputSubscribed;
+        private int _settingClosedFrame = -1;
         private PlayerInputView _playerInputView;
         private IScreenStateRepository _screenStateRepository;
         private IScreenStateRepository _registeredScreenStateRepository;
