@@ -186,6 +186,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private VisualElement _stageNodeFocusFrame;
         private bool _isFocusFrameLocked;
         private Dictionary<StageId, VisualElement> _stageNodeElementMap;
+        private VisualElement _initialStageFocusElement;
         private Dictionary<StageId, Vector2> _stageNodeCenterMap;
         private bool _isSubscribed;
         private VisualElement _rootVisualElement;
@@ -407,6 +408,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             }
 
             AttachFocusFrameTo(node);
+            _stageMapScrollView?.ScrollTo(node);
         }
 
         /// <summary>
@@ -748,6 +750,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageSelectScreenCompleted()
         {
+            VisualElement initialFocusBefore = _initialStageFocusElement;
+            ServiceLocator.TryGetInstance(out StageSelectScreenView screenView);
+            VisualElement focusedBefore = screenView?.FocusedElement;
+
             // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
             UpdateEquippedSkillDisplay();
             if (_isForcedSortieMode)
@@ -757,6 +763,16 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             }
 
             await ApplyNewlyClearedStagesAsync(_cts.Token);
+
+            // 解放演出中に移動・決定したフォーカスや、他画面からの復元は上書きしない。
+            if (_isInitialized && !_isForcedSortieMode && !_isFocusFrameLocked
+                && screenView != null && _initialStageFocusElement != initialFocusBefore
+                && (focusedBefore == null || focusedBefore == initialFocusBefore)
+                && (screenView.FocusedElement == focusedBefore
+                    || screenView.FocusedElement == initialFocusBefore))
+            {
+                screenView.RestoreFocus();
+            }
         }
 
         /// <summary>
@@ -998,6 +1014,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageNodeFocusFrame = null;
             _isFocusFrameLocked = false;
             _stageNodeElementMap = null;
+            _initialStageFocusElement = null;
             _stageNodeCenterMap = null;
             _battleSortieSelectionService = null;
             _loadingScreenController = null;
@@ -1346,12 +1363,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 VisualElement nodeElement = nodeElementMap[stageId];
                 var nodeView = new StageNodeView(nodeElement, stageId.Value, _outGameUIEvent);
 
-                // 親を持たない起点ステージ(マップ最左)を初期フォーカス先として印を付ける。
-                if (_stageTree.GetPreviousIds(stageId).Count == 0)
-                {
-                    nodeElement.AddToClassList(UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME);
-                }
-
                 // このノードへの接続線View一覧を取得する（存在しない場合はnull）。
                 connectionViewMap.TryGetValue(stageId, out List<IStageConnectionViewModel> incomingConnectionViews);
 
@@ -1366,6 +1377,44 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 // ID で引けるようにマップへも登録する
                 _nodePresenterMap.Add(stageId, nodePresenter);
             }
+
+            UpdateInitialStageFocus();
+        }
+
+        /// <summary>
+        ///     接続関係から配置した進行列が最も先の、解放済みノードを初期フォーカスにします。
+        ///     同じ列では既存のノード順を維持し、クリア済みの最終ステージも候補に含めます。
+        /// </summary>
+        private void UpdateInitialStageFocus()
+        {
+            // 解放演出の待機中にシーンが破棄された場合は、解放済みUIへ触らない。
+            if (_stageNodeElementMap == null || _stageNodeCenterMap == null)
+            {
+                return;
+            }
+
+            VisualElement latestNodeElement = null;
+            float latestColumnX = float.NegativeInfinity;
+            foreach (StageNode node in _stageTree.Nodes)
+            {
+                if (node.Status == StageStatus.Locked
+                    || !_stageNodeElementMap.TryGetValue(node.Id, out VisualElement element)
+                    || !element.enabledSelf
+                    || element.style.display.value == DisplayStyle.None
+                    || element.style.visibility.value == Visibility.Hidden
+                    || !_stageNodeCenterMap.TryGetValue(node.Id, out Vector2 center)
+                    || center.x <= latestColumnX)
+                {
+                    continue;
+                }
+
+                latestNodeElement = element;
+                latestColumnX = center.x;
+            }
+
+            _initialStageFocusElement?.RemoveFromClassList(UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME);
+            _initialStageFocusElement = latestNodeElement;
+            _initialStageFocusElement?.AddToClassList(UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME);
         }
 
         /// <summary>
@@ -1886,6 +1935,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 if (!_nodePresenterMap.TryGetValue(nextIds[i], out var presenter)) { continue; }
                 await presenter.TransitionTask;
             }
+
+            UpdateInitialStageFocus();
         }
 
         /// <summary>
