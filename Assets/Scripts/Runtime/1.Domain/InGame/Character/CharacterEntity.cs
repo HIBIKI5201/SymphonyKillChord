@@ -142,23 +142,20 @@ namespace KillChord.Runtime.Domain.InGame.Character
         }
 
         /// <summary>
-        ///     HPを消費する処理。死亡しないように指定した最低HPを残す。
+        ///     HPを消費する処理。死亡しないように最低HPを1に設定する。
         ///     バリア等を考慮せず、直接HPを消費する。
         /// </summary>
-        /// <param name="healthCost"> 消費するHPの量。 </param>
-        /// <param name="minimumHealth"> 消費後に残す最低HP。省略時は1。 </param>
-        /// <returns> 実際に消費されたHPの量。 </returns>
-        public Health ConsumeHealth(Health healthCost, float minimumHealth = 1f)
+        /// <param name="healthCost"> 消費するHPの量 </param>
+        /// <returns> 実際に消費されたHPの量 s</returns>
+        public Health ConsumeHealth(Health healthCost)
         {
-            if (!float.IsFinite(minimumHealth) || minimumHealth <= 0f)
-            {
-                throw new ArgumentOutOfRangeException(nameof(minimumHealth));
-            }
-
             if (IsDead || healthCost.Value <= 0f)
             {
                 return default;
             }
+
+            // 最低HPを1に設定することで、キャラクターが死亡しないようにする
+            const float minimumHealth = 1f;
 
             // 消費可能なHPを計算する
             float maxConsumableHealth = Math.Max(CurrentHealth.Value - minimumHealth, 0f);
