@@ -39,7 +39,7 @@ namespace KillChord.Runtime.View.InGame.UI
         [SerializeField, Tooltip("下側のAボタンの操作説明です。")]
         private TMP_Text _southButtonText;
 
-        [SerializeField, Tooltip("対象切り替え条件と代替ボタンの補足です。")]
+        [SerializeField, Tooltip("代替ボタンの任意の補足です。未設定なら表示しません。")]
         private TMP_Text _noteText;
 
         private readonly List<LocalizedElementText> _localizedTexts = new();
@@ -68,8 +68,18 @@ namespace KillChord.Runtime.View.InGame.UI
                 BindLabel(_menuText, "pause", "xmenu");
                 BindLabel(_eastButtonText, "attack", "xb");
                 BindLabel(_southButtonText, "dodge", "xa");
-                _localizedTexts.Add(new LocalizedElementText(
-                    "UICommon", "ui.ingame.controller_guide.note", text => _noteText.text = text, _noteText.text));
+                TMP_Text note = _noteText;
+                if (note != null)
+                {
+                    _localizedTexts.Add(new LocalizedElementText(
+                        "UICommon", "ui.ingame.controller_guide.note", text =>
+                        {
+                            if (note != null)
+                            {
+                                note.text = text;
+                            }
+                        }, note.text));
+                }
             });
         }
 
@@ -92,11 +102,23 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <param name="spriteName"> 素材のSprite Assetに登録されたXboxアイコン名です。 </param>
         private void BindLabel(TMP_Text label, string entry, string spriteName)
         {
+            // シーン側で非表示のために削除されたラベルは、他の説明の購読を妨げない。
+            if (label == null)
+            {
+                return;
+            }
+
             // 初期化失敗時もPrefabの説明を維持し、再有効化時は装飾を重ねない。
             string fallback = label.text.Substring(label.text.IndexOf('\n') + 1);
             _localizedTexts.Add(new LocalizedElementText(
                 "UICommon", "ui.ingame.controller_guide." + entry,
-                text => label.text = $"<size={ICON_FONT_SIZE}><sprite name=\"{spriteName}\"></size>\n{text}", fallback));
+                text =>
+                {
+                    if (label != null)
+                    {
+                        label.text = $"<size={ICON_FONT_SIZE}><sprite name=\"{spriteName}\"></size>\n{text}";
+                    }
+                }, fallback));
         }
     }
 }
