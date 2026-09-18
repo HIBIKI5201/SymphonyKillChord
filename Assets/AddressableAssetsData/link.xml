@@ -1,0 +1,266 @@
+<linker>
+  <assembly fullname="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="CFX_AutoDestructShuriken" preserve="all" />
+  </assembly>
+  <assembly fullname="CriMw.CriWare.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="CriWare.CriAtomSource" preserve="all" />
+    <type fullname="CriWare.CriAtomEx/Randomize3dConfig" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="KillChord.Composition, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="KillChord.Runtime.Composition.InGame.Enemy.EnemyLifeCycle" preserve="all" />
+  </assembly>
+  <assembly fullname="KillChord.Demo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="KillChord.Demo.DemoExperienceConfig" preserve="all" />
+    <type fullname="KillChord.Demo.DemoRuntimeBootstrap" preserve="all" />
+    <type fullname="KillChord.Demo.DemoTimerView" preserve="all" />
+  </assembly>
+  <assembly fullname="KillChord.Develop, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillTreeTestInputData" preserve="all" />
+  </assembly>
+  <assembly fullname="KillChord.Structure, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Battle.AttackDefinitionAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Battle.AttackPipelineAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Battle.AttackSpecAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Character.CharacterDefinitionAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Character.CharacterDefinitionRepository" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.BossAttackEntryAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.BossAttackEntryRepo" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyDefinitionAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyDefinitionRepository" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyMoveSpecAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyMusicSpecAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyWaveDefinitionAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyWaveDefinitionRepository" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.ShellAttackSpecAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.EnemyMissionKeyAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.EnemyMissionKeyRepository" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.MissionDefinitionAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.MissionDefinitionRepository" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Music.BgmSelectorLabelTableAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Music.RhythmJudgmentDefinitionAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Player.PlayerMoveSpecAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Resource.GameResourceDefinitionAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Resource.GameResourceDefinitionRepository" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Scenario.AnimationCatalogAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Scenario.BackgroundCatalogAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Scenario.PortraitCatalogAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Scenario.ScenarioSettingsAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Screen.ScreenRuleData" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Skill.SkillGenreIconCatalogAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillBuild.InitialSkillLoadoutAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillBuild.SkillBuildRepository" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeBindData" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeBindRepo" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeData" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodeDataRepo" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodePhaseBindData" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillTree.SkillNodePhaseBindDataRepo" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillTree.StatusBonusEffectIconCatalogAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.StageSelect.BattleStageAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.StageSelect.ScenarioStageAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageBindAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.StageSelect.StageTreeAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.OwnedSkillRepository" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.Player.SkillRepository" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.Player.SkillTemplateAsset" preserve="all" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Buff.AttackPowerMultiplierBuffAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Buff.DamageReductionBuffAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.ActionRepeatCountClearConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.AllEnemyWavesClearConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.AndClearConditionGroupAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.ClearTimeEvaluationConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.DamageTakenEvaluationConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.ElapsedTimeClearConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.EnemyKillCountClearConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.ObjectiveSequenceStepAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.PlayDialogueStepEntryActionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.PlayerBuffClearConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.PlayerDeadFailConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.PopupClearConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.SetSkillExecutionEnabledStepEntryActionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.ToggleEnemyBattleAiStepEntryActionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Mission.WaveStartClearConditionAsset" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyWaveDefinitionAsset/SingleWaveDefinition" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyWaveDefinitionAsset/WaveDetailDefinition" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Music.BgmSelectorLabelTableAsset/Entry" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.InGame.Music.RhythmJudgmentDefinitionAsset/RhythmJudgmentRangeData" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Scenario.BackgroundCatalogEntry" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Scenario.PortraitCatalogEntry" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Screen.ScreenRuleData/ScreenRuleEntry" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.Skill.SkillGenreIconCatalogEntry" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.OutGame.SkillTree.StatusBonusEffectIconCatalogEntry" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.Player.SkillTemplateAsset/SkillEffectParameterGrowthSetting" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.Player.SkillTemplateAsset/SkillEffectParameterGrowthStepSetting" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.InfraStructure.Player.SkillTemplateAsset/SkillEffectParameterSetting" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="KillChord.Runtime.View.CharacterAnimationCatalogConfig" preserve="all" />
+    <type fullname="KillChord.Runtime.View.CharacterAnimationView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Camera.CameraConfig" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Character.FootStepView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyBattleAIFacade" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyMovementAIFacade" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.AIFacade.EnemyStateFacade" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.EnemyHealthBillboardView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.EnemyHealthView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.EnemyMoveView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.EnemyRaycastDetectView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.NearbyObstacleSearchView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.NearestAttackPositionSearchView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.ShellSpawner" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Haptics.GamepadHapticsConfig" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Player.WeaponItemView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.Skill.SkillInputProgressUIConfig" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.UI.EnemyDirectionIndicatorConfig" preserve="all" />
+    <type fullname="KillChord.Runtime.View.InGame.UI.HealthHudView" preserve="all" />
+    <type fullname="KillChord.Runtime.View.OutGame.Audio.UISoundEffectConfig" preserve="all" />
+    <type fullname="KillChord.Runtime.View.Persistent.Input.MobileStickFlickInputConfig" preserve="all" />
+    <type fullname="KillChord.Runtime.View.Persistent.Load.LoadingTipsConfig" preserve="all" />
+    <type fullname="KillChord.Runtime.View.Persistent.Music.SoundEffectSource" preserve="all" />
+    <type fullname="KillChord.Runtime.View.CharacterAnimationCatalogEntry" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Character.SoundEffectOneShotVisualEffect" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action.AttackTargetAction" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action.GetStunnedAction" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action.MoveToAttackAction" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action.StopMovingAction" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action.WaitForDiscoveryAction" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition.IsAimSightClearCondition" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition.IsAttackingCondition" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition.IsDiscoveredCondition" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition.IsStunnedCondition" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition.IsTargetInAttackRangeCondition" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Enemy.FootstepSoundConfig" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.InGame.Skill.SkillBeatVisualSettingConfig" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.OutGame.Audio.UISoundEffectConfig/SoundMapping" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.View.Persistent.Load.LoadingTip" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Unity.Addressables, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.AddressableAssets.Addressables" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.Behavior, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Unity.Behavior.BehaviorGraph" preserve="all" />
+    <type fullname="Unity.Behavior.BehaviorGraphAgent" preserve="all" />
+    <type fullname="Unity.Behavior.BehaviorGraphDebugInfo" preserve="all" />
+    <type fullname="Unity.Behavior.RuntimeBlackboardAsset" preserve="all" />
+    <type fullname="Unity.Behavior.BehaviorGraphModule" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.Blackboard" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.BlackboardReference" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.BlackboardVariable`1" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.ConditionalGuardModifier" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.ObserverAbortModifier" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.RepeatUntilFailModifier" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.SelectorComposite" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.SequenceComposite" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.SharedBlackboardVariable`1" preserve="nothing" serialized="true" />
+    <type fullname="Unity.Behavior.Start" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Unity.Localization, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Localization.Locale" preserve="all" />
+    <type fullname="UnityEngine.Localization.Tables.AssetTable" preserve="all" />
+    <type fullname="UnityEngine.Localization.Tables.SharedTableData" preserve="all" />
+    <type fullname="UnityEngine.Localization.Tables.StringTable" preserve="all" />
+    <type fullname="UnityEngine.Localization.LocaleIdentifier" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Localization.Metadata.MetadataCollection" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Localization.Tables.TableEntryData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Localization.Metadata.AssetTypeMetadata" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Localization.Tables.DistributedUIDGenerator" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Localization.Tables.SharedTableData/SharedTableEntry" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Rendering.Universal.DecalProjector" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.AssetBundleProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.BundledAssetProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.InstanceProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.SceneProvider" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="TMPro.TextMeshProUGUI" preserve="all" />
+    <type fullname="TMPro.TMP_FontAsset" preserve="all" />
+    <type fullname="TMPro.FaceInfo_Legacy" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.FontAssetCreationSettings" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.KerningTable" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.LigatureSubstitutionRecord" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_Character" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_FontFeatureTable" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.TMP_FontWeightPair" preserve="nothing" serialized="true" />
+    <type fullname="TMPro.VertexGradient" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.AIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.AI.NavMeshAgent" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.AnimationClip" preserve="all" />
+    <type fullname="UnityEngine.Animator" preserve="all" />
+    <type fullname="UnityEngine.Avatar" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.GameObject" preserve="all" />
+    <type fullname="UnityEngine.Material" preserve="all" />
+    <type fullname="UnityEngine.Mesh" preserve="all" />
+    <type fullname="UnityEngine.MeshFilter" preserve="all" />
+    <type fullname="UnityEngine.MeshRenderer" preserve="all" />
+    <type fullname="UnityEngine.MonoBehaviour" preserve="all" />
+    <type fullname="UnityEngine.Object" preserve="all" />
+    <type fullname="UnityEngine.RectTransform" preserve="all" />
+    <type fullname="UnityEngine.Shader" preserve="all" />
+    <type fullname="UnityEngine.SkinnedMeshRenderer" preserve="all" />
+    <type fullname="UnityEngine.Sprite" preserve="all" />
+    <type fullname="UnityEngine.Texture2D" preserve="all" />
+    <type fullname="UnityEngine.Transform" preserve="all" />
+    <type fullname="UnityEngine.Events.PersistentCallGroup" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.RenderingLayerMask" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.ParticleSystem" preserve="all" />
+    <type fullname="UnityEngine.ParticleSystemRenderer" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.CapsuleCollider" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Font" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.UI.CanvasScaler" preserve="all" />
+    <type fullname="UnityEngine.UI.GraphicRaycaster" preserve="all" />
+    <type fullname="UnityEngine.UI.Image" preserve="all" />
+    <type fullname="UnityEngine.UI.MaskableGraphic/CullStateChangedEvent" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Canvas" preserve="all" />
+    <type fullname="UnityEngine.CanvasRenderer" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.VideoModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Video.VideoClip" preserve="all" />
+  </assembly>
+  <assembly fullname="KillChord.Application">
+    <type fullname="KillChord.Runtime.Application.InGame.Battle.ConfirmedDamage" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.Application.InGame.Battle.CriticalStep" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.Application.InGame.Battle.OutOfRangeDamageStep" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.Application.InGame.Battle.WeaponDamageStep" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="KillChord.Domain">
+    <type fullname="KillChord.Runtime.Domain.OutGame.SkillTree.AreaAttackRangeAdditionEffect" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.Domain.OutGame.SkillTree.AttackPowerMultiplierEffect" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.Domain.OutGame.SkillTree.CriticalChanceAdditionEffect" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.Domain.OutGame.SkillTree.CriticalDamageMultiplierAdditionEffect" preserve="nothing" serialized="true" />
+    <type fullname="KillChord.Runtime.Domain.OutGame.SkillTree.MaxHealthMultiplierEffect" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="KillChord.Utility">
+    <type fullname="KillChord.Runtime.Utility.Identity.DataID" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Unity.Behavior.SerializableGUID">
+    <type fullname="Unity.Behavior.GraphFramework.SerializableGUID" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.TextCoreFontEngineModule">
+    <type fullname="UnityEngine.TextCore.FaceInfo" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.Glyph" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.GlyphMetrics" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.GlyphRect" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.LowLevel.GlyphAdjustmentRecord" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.LowLevel.GlyphPairAdjustmentRecord" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.TextCore.LowLevel.GlyphValueRecord" preserve="nothing" serialized="true" />
+  </assembly>
+</linker>
