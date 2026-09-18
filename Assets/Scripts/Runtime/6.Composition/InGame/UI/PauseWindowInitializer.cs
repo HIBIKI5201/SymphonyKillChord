@@ -6,11 +6,14 @@ using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Result;
 using KillChord.Runtime.Composition.InGame.Sequence;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.View.InGame.UI;
+using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem.UI;
 
 namespace KillChord.Runtime.Composition.InGame.UI
 {
@@ -31,6 +34,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
+            if (_isSubscribed)
+            {
+                return true;
+            }
+
             if (_pauseWindowView == null)
             {
                 Debug.LogError($"[{nameof(PauseWindowInitializer)}] {nameof(PauseWindowView)} が設定されていません。", this);
@@ -76,9 +84,30 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             _battlePauseController.OnPaused += HandlePaused;
             _battlePauseController.OnResumed += HandleResumed;
+            _battlePauseController.OnScenarioPauseEnded += HandleScenarioPauseEnded;
             _pauseWindowView.OnRestartRequested += HandleRestartRequested;
             _pauseWindowView.OnReturnToTitleRequested += HandleReturnToTitleRequested;
+            _pauseWindowView.OnCancelRequested += HandleCancelRequested;
             _isSubscribed = true;
+
+            _inputMapController = ServiceLocator.TryGetInstance(out InputComposition inputComposition)
+                ? inputComposition.GetInputMapController
+                : null;
+            if (_inputMapController == null)
+            {
+                Debug.LogWarning($"[{nameof(PauseWindowInitializer)}] シナリオ終了後のポーズ入力復元先を取得できませんでした。", this);
+            }
+
+            InputSystemUIInputModule inputModule = null;
+            if (ServiceLocator.TryGetInstance(out PlayerInputView inputView))
+            {
+                inputModule = inputView.GetComponent<InputSystemUIInputModule>();
+            }
+            _pauseWindowView.BindCancelInput(inputModule);
+            if (inputModule == null || inputModule.cancel == null || inputModule.cancel.action == null)
+            {
+                Debug.LogWarning($"[{nameof(PauseWindowInitializer)}] UI取消入力を取得できないため、既存のポーズ操作を使用します。", this);
+            }
 
             return true;
         }
@@ -98,6 +127,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private PauseWindowView _pauseWindowView;
 
         private BattlePauseController _battlePauseController;
+        private UnityInputMapController _inputMapController;
         private StageResultController _stageResultController;
         private ReturnToTitleController _returnToTitleController;
         private bool _isSubscribed;
@@ -130,6 +160,28 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private void HandleResumed()
         {
             _pauseWindowView.Hide();
+        }
+
+        /// <summary>
+        ///     シナリオ終了後も手動ポーズが継続する場合は、戦闘入力を再び停止します。
+        /// </summary>
+        private void HandleScenarioPauseEnded()
+        {
+            if (_battlePauseController.IsPaused)
+            {
+                _inputMapController?.EnableOnly(InputMapNames.Common);
+            }
+        }
+
+        /// <summary>
+        ///     遷移中でないポーズ画面の取消要求で、戦闘を再開します。
+        /// </summary>
+        private void HandleCancelRequested()
+        {
+            if (!_isTransitioning && _battlePauseController.IsPaused)
+            {
+                _battlePauseController.Resume();
+            }
         }
 
         /// <summary>
@@ -222,8 +274,12 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             _battlePauseController.OnPaused -= HandlePaused;
             _battlePauseController.OnResumed -= HandleResumed;
+            _battlePauseController.OnScenarioPauseEnded -= HandleScenarioPauseEnded;
             _pauseWindowView.OnRestartRequested -= HandleRestartRequested;
             _pauseWindowView.OnReturnToTitleRequested -= HandleReturnToTitleRequested;
+            _pauseWindowView.OnCancelRequested -= HandleCancelRequested;
+            _pauseWindowView.UnbindCancelInput();
+            _inputMapController = null;
             _isSubscribed = false;
         }
     }

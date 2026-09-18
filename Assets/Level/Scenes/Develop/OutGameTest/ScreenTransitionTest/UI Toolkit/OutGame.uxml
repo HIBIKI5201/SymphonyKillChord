@@ -20,11 +20,11 @@
         </ui:VisualElement>
         <ui:VisualElement name="InputGuide" picking-mode="Ignore" class="input-guide">
             <ui:VisualElement name="SubmitGuide" picking-mode="Ignore" class="input-guide-item">
-                <ui:Label text="A" picking-mode="Ignore" class="input-guide-badge input-guide-badge--submit"/>
+                <ui:Label text="B" picking-mode="Ignore" class="input-guide-badge input-guide-badge--submit"/>
                 <ui:Label text="決定" picking-mode="Ignore" class="input-guide-label"/>
             </ui:VisualElement>
             <ui:VisualElement name="CancelGuide" picking-mode="Ignore" class="input-guide-item">
-                <ui:Label text="B" picking-mode="Ignore" class="input-guide-badge input-guide-badge--cancel"/>
+                <ui:Label text="A" picking-mode="Ignore" class="input-guide-badge input-guide-badge--cancel"/>
                 <ui:Label text="戻る" picking-mode="Ignore" class="input-guide-label"/>
             </ui:VisualElement>
         </ui:VisualElement>

@@ -43,3 +43,36 @@
     -unity-text-align: middle-left;
     color: rgb(253, 253, 253);
 }
+
+/* 操作案内の文字とボタン画像を一緒に点滅させる。入力は背面のTouchAreaへ通す。 */
+.title-start-instruction {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    font-size: 72px;
+    color: rgb(255, 255, 255);
+}
+
+.title-controller-instruction {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.title-start-text {
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+.title-start-button-icon {
+    width: 72px;
+    height: 72px;
+    margin-left: 18px;
+    margin-right: 18px;
+    flex-shrink: 0;
+}
