@@ -7,6 +7,7 @@ using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Skill;
@@ -161,15 +162,18 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 ServiceLocator.GetInstance<PlayerModuleContainer>();
             SkillModuleContainer skillModuleContainer =
                 ServiceLocator.GetInstance<SkillModuleContainer>();
+            MusicSyncModuleContainer musicSyncModuleContainer =
+                ServiceLocator.GetInstance<MusicSyncModuleContainer>();
             if (playerModuleContainer == null
                 || playerModuleContainer.PlayerEntity == null
                 || playerModuleContainer.PlayerController == null
                 || playerModuleContainer.PlayerAttackController == null
                 || skillModuleContainer?.SkillController == null
+                || musicSyncModuleContainer?.MusicSyncService == null
                 || !ServiceLocator.TryGetInstance(out TargetSystemController targetSystemController))
             {
                 Debug.LogError(
-                    $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールを取得できませんでした。",
+                    $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールまたは音楽同期サービスを取得できませんでした。",
                     this);
                 return false;
             }
@@ -184,7 +188,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 playerModuleContainer.PlayerController,
                 playerModuleContainer.PlayerAttackController,
                 skillModuleContainer.SkillController,
-                targetSystemController);
+                targetSystemController,
+                musicSyncModuleContainer.MusicSyncService);
             _recorderController = recorderController;
 
             if (_missionStepPopupView != null)
@@ -441,7 +446,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         [SerializeField, SourceDataAddress, Tooltip("シナリオ設定の Addressables キーです。")]
         private string _scenarioSettingsKey = "ScenarioSettingsAsset";
         [SerializeField, Min(0), Tooltip("コンボ数が表示される最小値。")]
-        private int _comboVisibleCount = 1;
+        private int _comboVisibleCount = 4;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;

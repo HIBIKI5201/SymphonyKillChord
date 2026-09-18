@@ -26,6 +26,9 @@ namespace KillChord.Runtime.Application.InGame.Music
             _scheduledActions = new PriorityQueue<ScheduledAction, double>();
         }
 
+        /// <summary> 入力履歴がリズムタイムアウトで破棄されたときに通知します。 </summary>
+        public event Action OnRhythmTimedOut;
+
         /// <summary> ロジックとガイドが共有するリズム判定定義。 </summary>
         public RhythmJudgmentDefinition RhythmJudgmentDefinition => _rhythmJudgmentDefinition;
 
@@ -46,6 +49,16 @@ namespace KillChord.Runtime.Application.InGame.Music
             }
 
             _currentPlayTime = nextPlayTime;
+
+            // 入力が途絶えた時点で履歴を破棄し、次の入力を待たずに購読側へ通知する。
+            // 空の履歴には再通知しないため、各入力系列につきタイムアウトは一度だけ発生する。
+            if (_rhythmState.Count > 0
+                && _currentPlayTime - _rhythmState.LastTiming
+                    >= _rhythmDefinition.BarLength * RHYTHM_TIMEOUT_BAR_COUNT)
+            {
+                _rhythmState.Clear();
+                OnRhythmTimedOut?.Invoke();
+            }
 
             while (_scheduledActions.TryPeek(out var actionData, out double executeTime))
             {
@@ -192,6 +205,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         }
 
         private const int BUFFER_SIZE = 64;
+        private const double RHYTHM_TIMEOUT_BAR_COUNT = 1.5d;
         private const double PLAYBACK_REWIND_TOLERANCE_SECONDS = 0.01d;
         private readonly RhythmState _rhythmState;
         private readonly RhythmDefinition _rhythmDefinition;

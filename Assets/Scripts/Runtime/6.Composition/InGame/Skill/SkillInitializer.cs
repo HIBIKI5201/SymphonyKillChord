@@ -212,7 +212,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 targetSystemContainer.TargetSystemViewModel,
                 playbackSpeed);
 
-            _skillController = new SkillController(musicSyncContainer.MusicSyncService);
+            _skillController = new SkillController(musicSyncContainer.MusicSyncService, () => Time.unscaledTime);
             _skillController.Initialize(BuildSkillExecutionControllers(
                 equippedSkills,
                 skillVisuals,
@@ -284,6 +284,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             _skillHitScheduler = null;
             _skillHitController = null;
             _boundPlayerView = null;
+            _skillController?.Dispose();
             _skillController = null;
             _saveDataEquippedSkills = null;
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);

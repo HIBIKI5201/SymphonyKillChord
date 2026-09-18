@@ -107,6 +107,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         }
 
         /// <summary>
+        ///     再使用可能時刻を変えずに入力履歴と進捗表示をリセットします。
+        /// </summary>
+        /// <param name="now"> 進捗表示に使うゲーム側の現在時刻です。 </param>
+        public void ResetInputProgress(float now)
+        {
+            _skillRhythmState.Clear();
+            _progressController.ResetProgress(now, _skillCooldownState.SkillReadyTimestamp);
+        }
+
+        /// <summary>
         ///     このスキルで構える武器を決めるBeatTypeを求めます。
         /// </summary>
         /// <returns> 入力パターンの最後のBeatTypeです。 </returns>
