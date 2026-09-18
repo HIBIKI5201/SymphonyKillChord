@@ -50,7 +50,7 @@ namespace KillChord.Editor.Build
         private static readonly string[] OUT_GAME_CONTAINERS =
         {
             "HomeContainer", "StageSelectContainer", "SkillTreeContainer", "SkillBuildContainer",
-            "BattlePreparationContainer", "SettingContainer"
+            "SettingContainer"
         };
 
         /// <summary>

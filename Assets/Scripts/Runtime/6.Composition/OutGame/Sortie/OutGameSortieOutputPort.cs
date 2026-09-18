@@ -44,14 +44,6 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         }
 
         /// <summary>
-        ///     戦闘準備画面の表示を要求します。
-        /// </summary>
-        public void ShowBattlePreparationScreen()
-        {
-            _outGameUIEvent.OnShownBattlePreparationScreen?.Invoke();
-        }
-
-        /// <summary>
         ///     バトル開始イベントを通知します。
         /// </summary>
         public void StartBattle()
