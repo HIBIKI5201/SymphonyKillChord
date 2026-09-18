@@ -356,6 +356,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                         musicPlayer.SetPresentationVolume(gain);
                     }
                 },
+                () => musicPlayer != null ? musicPlayer.GetVolume() : 0f,
                 Path.Combine(UnityEngine.Application.streamingAssetsPath, "Title", "GamePV.mp4"));
             if (!initialized)
             {
