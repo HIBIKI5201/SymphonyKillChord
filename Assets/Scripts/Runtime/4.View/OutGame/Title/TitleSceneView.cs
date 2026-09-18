@@ -36,6 +36,10 @@ namespace KillChord.Runtime.View.OutGame.Title
             _targetSceneName = targetSceneName;
         }
 
+        /// <summary> タイトルの操作待ち背景演出を再生できる状態です。 </summary>
+        public bool IsIdleVideoAllowed => !_isDisposed && !_isStarting && IsShowCompleted
+            && _touchArea != null && _touchArea.enabledInHierarchy;
+
         /// <summary>
         ///    タイトルシーンの View を初期化する。
         /// </summary>
