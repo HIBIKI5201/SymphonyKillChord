@@ -151,6 +151,7 @@ MonoBehaviour:
   _muzzleFlashLight: {fileID: 8305881373705010263}
   _effectDelaySeconds: 0
   _casingEjector: {fileID: 166092537893792064}
+  _dissolveShader: {fileID: -6465566751694194690, guid: 058c417a90245cc46b5e68311b16d129, type: 3}
   _effectRenderers:
   - {fileID: 0}
   - {fileID: 0}
@@ -278,7 +279,7 @@ Light:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8102349699265094226}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 12
   m_Type: 2
   m_Color: {r: 0.93492365, g: 1, b: 0.6771944, a: 1}

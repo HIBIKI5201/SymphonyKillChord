@@ -32,11 +32,11 @@
 }
 
 .input-guide-badge--submit {
-    background-color: rgb(92, 184, 92);
+    background-color: rgb(206, 74, 68);
 }
 
 .input-guide-badge--cancel {
-    background-color: rgb(206, 74, 68);
+    background-color: rgb(92, 184, 92);
 }
 
 .input-guide-label {

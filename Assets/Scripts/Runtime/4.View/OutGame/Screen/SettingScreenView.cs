@@ -62,6 +62,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public override ValueTask Show(CancellationToken cancellationToken = default)
         {
             _isActive = true;
+            _shownFrame = UnityEngine.Time.frameCount;
             ResetReturnToTitleDialog();
 
             // 背面のホーム画面は表示されたままのため、フォーカスを設定画面内へ閉じ込める。
@@ -182,6 +183,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 return;
             }
 
+            // EscはOptionとCancelの両方に割り当てられているため、開いた入力で即座に閉じない。
+            if (_shownFrame == UnityEngine.Time.frameCount)
+            {
+                return;
+            }
+
             // 確認ダイアログ表示中のキャンセル操作は、ダイアログを閉じる動作に割り当てる。
             if (_isReturnToTitleDialogVisible)
             {
@@ -243,6 +250,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private bool _isReturnToTitleDialogVisible;
         private bool _isReturnToTitleRequested;
         private bool _isActive;
+        private int _shownFrame = -1;
         private MotionHandle _slideMotionHandle;
         private LocalizedElementText[] _localizedButtonTexts = Array.Empty<LocalizedElementText>();
 

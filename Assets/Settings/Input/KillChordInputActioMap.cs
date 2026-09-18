@@ -165,7 +165,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""121aea04-ccbe-45cf-8244-446ed9a58d9d"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -187,7 +187,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""3b51fea5-0d69-4bac-8295-35d8e787622b"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -243,7 +243,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""id"": ""abf716bd-9998-4c38-b53c-2ea866cc4f6a"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press(behavior=0)"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -360,17 +360,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""name"": """",
                     ""id"": ""c5e0cf61-a294-4283-b901-09e388dcf2db"",
                     ""path"": ""<Keyboard>/space"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Dodge"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""391a9ec2-30a8-428e-a5b9-e9f1393f0190"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -864,7 +853,40 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""623fff9d-c251-4327-bd2b-a0ec384f12ef"",
-                    ""path"": ""*/{Submit}"",
+                    ""path"": ""<Keyboard>/{Submit}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""941d4c4a-0a80-40e4-b59a-61f48c5dc0bd"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9557694b-32de-4dcf-91a3-f2199655632f"",
+                    ""path"": ""<Joystick>/{Submit}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""27dd1113-de07-4efb-aa32-56a4dcc861c3"",
+                    ""path"": ""<XRController>/{Submit}"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
@@ -875,7 +897,40 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""7e227cc2-8573-4bdb-9854-7073372a2fb7"",
-                    ""path"": ""*/{Cancel}"",
+                    ""path"": ""<Keyboard>/{Cancel}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""47ab66f2-c2ba-4391-b1d0-c1e23edb991c"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f3ad5224-774c-48fd-8286-294bd2399af0"",
+                    ""path"": ""<Joystick>/{Cancel}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e1f097ad-5277-4273-bbe8-69ef12666567"",
+                    ""path"": ""<XRController>/{Cancel}"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
@@ -1091,7 +1146,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""409f023c-88e4-487e-b0c4-f5d338c30a69"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -1201,7 +1256,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""28b30f1a-f203-4562-a3ba-dbe3e89c819b"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

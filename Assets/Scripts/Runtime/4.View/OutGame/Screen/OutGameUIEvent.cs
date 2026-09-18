@@ -43,9 +43,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> OutGame UIの表示状態を切り替えるイベント。 </summary>
         public Action<bool> OnOutGameUiVisibilityChanged;
 
-        /// <summary> 戦闘準備画面を表示するイベントです。 </summary>
-        public Action OnShownBattlePreparationScreen;
-
         /// <summary> 設定画面を表示するイベント。 </summary>
         public Action OnShownSettingScreen;
 

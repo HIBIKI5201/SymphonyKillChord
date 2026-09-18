@@ -21,7 +21,7 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     左下を基準に、現在画面のUIを避ける高さへタイマーを移動します。
+        ///     左下を基準に、現在画面のUIと操作案内を避けてタイマーを移動します。
         /// </summary>
         /// <param name="screenId"> 現在のOutGame画面IDです。未確定の場合はnullです。 </param>
         /// <param name="isOutGameActive"> OutGame内にいる場合はtrueです。 </param>
@@ -38,6 +38,8 @@ namespace KillChord.Demo
                 return;
             }
 
+            _isSkillBuildActive = !isResultActive && !isScenarioActive && isOutGameActive
+                && screenId == ScreenId.SkillBuild;
             float bottom = isResultActive
                 ? _resultBottom
                 : isScenarioActive
@@ -46,6 +48,7 @@ namespace KillChord.Demo
                         ? GetOutGameBottom(screenId)
                         : _battleBottom;
             Vector2 position = _timerPanel.anchoredPosition;
+            position.x = _isSkillBuildActive ? _skillBuildLeft : _defaultLeft;
             position.y = bottom;
             _timerPanel.anchoredPosition = position;
         }
@@ -85,7 +88,12 @@ namespace KillChord.Demo
 
             if (_timerPanel != null)
             {
-                _timerPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, isHomeActive ? 116.0f : 66.0f);
+                // 改造画面の下部は2段分の高さがないため、両タイマーを同じ文字サイズで横に並べる。
+                bool isHorizontal = _isSkillBuildActive && isHomeActive;
+                _timerPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, isHorizontal ? 480f : 240f);
+                _timerPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, isHomeActive && !isHorizontal ? 116f : 66f);
+                SetTextLayout(_overallTimerText, 0f, isHorizontal ? 0.5f : 1f, -8f);
+                SetTextLayout(_homeTimerText, isHorizontal ? 0.5f : 0f, 1f, isHorizontal ? -8f : -58f);
             }
 
             if (_overallTimerText != null)
@@ -100,6 +108,26 @@ namespace KillChord.Demo
                 _homeTimerText.text =
                     $"ホーム  {FormatTime(_session.HomeRemainingSeconds)}";
             }
+        }
+
+        /// <summary> タイマーを左右の列または元の上下2段へ配置します。 </summary>
+        /// <param name="text"> 配置するテキストです。 </param>
+        /// <param name="leftAnchor"> 左側のアンカーです。 </param>
+        /// <param name="rightAnchor"> 右側のアンカーです。 </param>
+        /// <param name="topOffset"> 上端からの位置です。 </param>
+        private static void SetTextLayout(TMP_Text text, float leftAnchor, float rightAnchor, float topOffset)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            RectTransform rect = text.rectTransform;
+            rect.anchorMin = new Vector2(leftAnchor, 1f);
+            rect.anchorMax = new Vector2(rightAnchor, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = new Vector2(0f, topOffset);
+            rect.sizeDelta = new Vector2(-32f, 50f);
         }
 
         private static string FormatTime(float remainingSeconds)
@@ -129,10 +157,16 @@ namespace KillChord.Demo
         private float _stageSelectBottom = 80f;
 
         [SerializeField, Tooltip("研究画面でのタイマー下端座標です。")]
-        private float _skillTreeBottom = 416f;
+        private float _skillTreeBottom = 448f;
 
         [SerializeField, Tooltip("改造画面でのタイマー下端座標です。")]
-        private float _skillBuildBottom = 80f;
+        private float _skillBuildBottom = 8f;
+
+        [SerializeField, Tooltip("改造画面以外のタイマー左端座標です。")]
+        private float _defaultLeft = 24f;
+
+        [SerializeField, Tooltip("改造画面の操作案内を避けるタイマー左端座標です。")]
+        private float _skillBuildLeft = 320f;
 
         [SerializeField, Tooltip("設定画面でのタイマー下端座標です。")]
         private float _settingBottom = 160f;
@@ -144,11 +178,12 @@ namespace KillChord.Demo
         private float _battleBottom = 24f;
 
         [SerializeField, Tooltip("リザルト画面でのタイマー下端座標です。")]
-        private float _resultBottom = 400f;
+        private float _resultBottom = 24f;
 
         [SerializeField, Tooltip("シナリオ画面でのタイマー下端座標です。")]
         private float _scenarioBottom = 400f;
 
         private IDemoSession _session;
+        private bool _isSkillBuildActive;
     }
 }

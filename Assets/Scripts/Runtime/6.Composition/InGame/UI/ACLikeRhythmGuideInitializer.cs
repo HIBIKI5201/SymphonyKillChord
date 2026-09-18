@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Haptics;
+using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Adaptor.InGame.Target;
@@ -192,7 +193,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             _gamepadHapticsView.Initialize(_loadedHapticsConfig, environmentSettingsViewModel);
-            _gamepadHapticsPresenter = new GamepadHapticsPresenter(playerAttackSignal, _gamepadHapticsView);
+            _gamepadHapticsPresenter = new GamepadHapticsPresenter(
+                playerAttackSignal,
+                _gamepadHapticsView,
+                () => TutorialAttackTargetQuery.GetTargetBeatCount(
+                    selectedBattleStageState, missionRuntimeServiceProvider.Invoke()));
 
             return true;
         }

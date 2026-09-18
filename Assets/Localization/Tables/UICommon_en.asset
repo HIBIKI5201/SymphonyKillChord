@@ -362,6 +362,58 @@ MonoBehaviour:
     m_Localized: "{0}s"
     m_Metadata:
       m_Items: []
+  - m_Id: 1830000001
+    m_Localized: "Controls (Xbox)\nLeft stick: Move    Right stick: Look\nRT or B: Attack\nA: Dodge\nLT: Lock / unlock\nLB: Switch lock-on left, RB: Switch lock-on right\nMenu: Pause"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000100
+    m_Localized: "Lock / unlock"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000101
+    m_Localized: "Attack"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000102
+    m_Localized: "Switch lock-on\nLeft"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000103
+    m_Localized: "Switch lock-on\nRight"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000104
+    m_Localized: "Move"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000105
+    m_Localized: "Look"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000106
+    m_Localized: "Pause"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000107
+    m_Localized: "Dodge"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000108
+    m_Localized: "Attack: RT or B"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000001
+    m_Localized: "Time is up. The demo will now end."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000002
+    m_Localized: "The home timer has expired. Moving to the mission."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000003
+    m_Localized: "Save data has been reset."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

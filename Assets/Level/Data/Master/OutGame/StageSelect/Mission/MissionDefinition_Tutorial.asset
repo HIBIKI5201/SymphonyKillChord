@@ -676,12 +676,22 @@ MonoBehaviour:
         _reapplyPolicy: 4
         _reductionRate: 1
     - rid: 900173000000000001
-      type: {class: PlayVoiceStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "ボイスを再生する：VOICE_Triad_Tutorial4"
-        _voiceCueName: VOICE_Triad_Tutorial4
+        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
+        _lines:
+        - _textEntryKey: triad.tutorial.04
+          _text: "\u3044\u3044\u304B\uFF1F"
+          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
+          _voiceCueName: VOICE_Triad_Tutorial4
+          _silentDuration: 3
     - rid: 900173000000000002
-      type: {class: PlayVoiceStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "ボイスを再生する：VOICE_Triad_Tutorial5"
-        _voiceCueName: VOICE_Triad_Tutorial5
+        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
+        _lines:
+        - _textEntryKey: triad.tutorial.05
+          _text: "\u3088\u3057\u3001\u6B21\u306B\u884C\u304F\u305E\u3002"
+          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
+          _voiceCueName: VOICE_Triad_Tutorial5
+          _silentDuration: 3

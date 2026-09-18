@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Application.InGame.Mission;
@@ -154,6 +155,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// <returns> 結合に成功した場合はtrueです。 </returns>
         public override bool Ready()
         {
+            DisposeTutorialFeedback();
+
             PlayerModuleContainer playerModuleContainer =
                 ServiceLocator.GetInstance<PlayerModuleContainer>();
             SkillModuleContainer skillModuleContainer =
@@ -220,6 +223,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
+            InitializeTutorialFeedback(playerModuleContainer);
             return true;
         }
 
@@ -293,6 +297,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// </summary>
         public override void Shutdown()
         {
+            DisposeTutorialFeedback();
             _recorderController?.Dispose();
             _popupController?.Dispose();
             _mobileTapAttackInput?.Dispose();
@@ -346,6 +351,46 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         }
 
         /// <summary>
+        ///     色指定攻撃とスキル課題の表示を成立通知へ結合します。表示参照不足は進行を妨げません。
+        /// </summary>
+        /// <param name="playerModuleContainer"> 攻撃Signalを保持するプレイヤーContainerです。 </param>
+        private void InitializeTutorialFeedback(PlayerModuleContainer playerModuleContainer)
+        {
+            if (_tutorialAttackFeedbackView == null
+                || playerModuleContainer.PlayerAttackSignal == null
+                || !ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            {
+                Debug.LogWarning($"[{nameof(InGameMissionInitializer)}] 色指定攻撃の表示参照を取得できないため、フィードバック表示を省略します。", this);
+                return;
+            }
+
+            _tutorialAttackFeedbackPresenter = new TutorialAttackFeedbackPresenter(
+                playerModuleContainer.PlayerAttackSignal,
+                () => ServiceLocator.TryGetInstance(out MissionRuntimeService mission) ? mission : null,
+                selectedBattleStageState,
+                _tutorialAttackFeedbackView);
+            _tutorialSkillFeedbackPresenter = new TutorialSkillFeedbackPresenter(
+                () => ServiceLocator.TryGetInstance(out MissionRuntimeService mission) ? mission : null,
+                selectedBattleStageState,
+                _tutorialAttackFeedbackView);
+        }
+
+        /// <summary>
+        ///     再初期化・終了・破棄時に攻撃・スキル購読と表示中のフィードバックを解放します。
+        /// </summary>
+        private void DisposeTutorialFeedback()
+        {
+            _tutorialSkillFeedbackPresenter?.Dispose();
+            _tutorialSkillFeedbackPresenter = null;
+            _tutorialAttackFeedbackPresenter?.Dispose();
+            _tutorialAttackFeedbackPresenter = null;
+            if (_tutorialAttackFeedbackView != null)
+            {
+                _tutorialAttackFeedbackView.ClearFeedback();
+            }
+        }
+
+        /// <summary>
         ///     説明ポップアップのViewを生成します。
         ///     スマートフォンでは、表示中に画面のタップを攻撃入力として扱うデコレータで包みます。
         /// </summary>
@@ -370,6 +415,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
         [SerializeField, Tooltip("目標ステップの説明ポップアップを表示するビュー。未設定の場合はポップアップ機能を使用しない。")] private MissionStepPopupView _missionStepPopupView;
         [SerializeField, Tooltip("現在のコンボ数を表示するビュー。")] private ComboHudView _comboHudView;
+        [SerializeField, Tooltip("チュートリアルの色指定攻撃の成功・失敗を表示します。未設定でもミッション進行は継続します。")]
+        private TutorialAttackFeedbackView _tutorialAttackFeedbackView;
         [SerializeField, Min(0f), Tooltip("説明ポップアップ表示直後にプレイヤー入力を無効化する秒数。")] private float _popupInputSuppressionDuration = MissionStepPopupController.DefaultInputSuppressionDuration;
         [SerializeField, SourceDataAddress, Tooltip("ミッション定義リポジトリの Addressables キーです。")]
         private string _missionDefinitionRepositoryKey;
@@ -401,6 +448,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private bool _isModuleRegistered;
         private MissionModuleContainer _moduleContainer;
         private MissionProgressRecorderController _recorderController;
+        private TutorialAttackFeedbackPresenter _tutorialAttackFeedbackPresenter;
+        private TutorialSkillFeedbackPresenter _tutorialSkillFeedbackPresenter;
         private MissionStepPopupController _popupController;
         private MobileTapAttackInput _mobileTapAttackInput;
         private MissionPlayerBuffController _playerBuffController;
@@ -739,6 +788,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
         private void OnDestroy()
         {
+            DisposeTutorialFeedback();
             if (_registeredMissionRuntimeService)
             {
                 ServiceLocator.UnregisterInstance<MissionRuntimeService>();

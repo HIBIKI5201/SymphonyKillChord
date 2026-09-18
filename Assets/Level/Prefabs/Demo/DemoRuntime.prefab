@@ -240,12 +240,14 @@ MonoBehaviour:
   _homeTimerText: {fileID: 3027065558303096100}
   _homeBottom: 80
   _stageSelectBottom: 80
-  _skillTreeBottom: 416
-  _skillBuildBottom: 80
+  _skillTreeBottom: 448
+  _skillBuildBottom: 8
+  _defaultLeft: 24
+  _skillBuildLeft: 320
   _settingBottom: 160
   _battlePreparationBottom: 80
   _battleBottom: 24
-  _resultBottom: 400
+  _resultBottom: 24
   _scenarioBottom: 400
 --- !u!1 &6798342286561242208
 GameObject:
