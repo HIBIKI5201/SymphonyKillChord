@@ -376,7 +376,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1830000103
-    m_Key: ui.ingame.controller_guide.dodge_target_right
+    m_Key: ui.ingame.controller_guide.target_right
     m_Metadata:
       m_Items: []
   - m_Id: 1830000104

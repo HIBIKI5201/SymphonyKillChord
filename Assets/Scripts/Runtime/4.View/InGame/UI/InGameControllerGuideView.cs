@@ -62,7 +62,7 @@ namespace KillChord.Runtime.View.InGame.UI
                 BindLabel(_leftTriggerText, "lock_on", "lt");
                 BindLabel(_rightTriggerText, "attack", "rt");
                 BindLabel(_leftShoulderText, "target_left", "lb");
-                BindLabel(_rightShoulderText, "dodge_target_right", "rb");
+                BindLabel(_rightShoulderText, "target_right", "rb");
                 BindLabel(_leftStickText, "move", "jl");
                 BindLabel(_rightStickText, "look", "jr");
                 BindLabel(_menuText, "pause", "xmenu");
@@ -93,7 +93,7 @@ namespace KillChord.Runtime.View.InGame.UI
         private void BindLabel(TMP_Text label, string entry, string spriteName)
         {
             // 初期化失敗時もPrefabの説明を維持し、再有効化時は装飾を重ねない。
-            string fallback = label.text.Substring(label.text.LastIndexOf('\n') + 1);
+            string fallback = label.text.Substring(label.text.IndexOf('\n') + 1);
             _localizedTexts.Add(new LocalizedElementText(
                 "UICommon", "ui.ingame.controller_guide." + entry,
                 text => label.text = $"<size={ICON_FONT_SIZE}><sprite name=\"{spriteName}\"></size>\n{text}", fallback));

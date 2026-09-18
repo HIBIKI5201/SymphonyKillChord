@@ -363,11 +363,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1830000001
-    m_Localized: "Controls (Xbox / PlayStation)\nLeft stick: Move    Right stick: Look\nRT/R2 or B/Circle: Attack\nRB/R1 or A/Cross: Dodge\nLT/L2: Toggle lock-on\nWhile locked: LB/L1 left, RB/R1 right (also dodges)\nMenu/Options: Pause"
+    m_Localized: "Controls (Xbox)\nLeft stick: Move    Right stick: Look\nRT or B: Attack\nA: Dodge\nLT: Lock / unlock\nLB: Switch lock-on left, RB: Switch lock-on right\nMenu: Pause"
     m_Metadata:
       m_Items: []
   - m_Id: 1830000100
-    m_Localized: "Lock-on"
+    m_Localized: "Lock / unlock"
     m_Metadata:
       m_Items: []
   - m_Id: 1830000101
@@ -375,11 +375,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1830000102
-    m_Localized: "Target left*"
+    m_Localized: "Switch lock-on\nLeft"
     m_Metadata:
       m_Items: []
   - m_Id: 1830000103
-    m_Localized: "Dodge + right*"
+    m_Localized: "Switch lock-on\nRight"
     m_Metadata:
       m_Items: []
   - m_Id: 1830000104
@@ -399,7 +399,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1830000108
-    m_Localized: "* Target: locked on\nSame action: either button"
+    m_Localized: "Attack: RT or B"
     m_Metadata:
       m_Items: []
   references:
