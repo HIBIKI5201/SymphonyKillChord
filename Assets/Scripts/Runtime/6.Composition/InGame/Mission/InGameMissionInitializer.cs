@@ -552,12 +552,14 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 animationPresenter,
                 portraitPresenter,
                 layerPresenter,
+                _scenarioViewModel,
                 _scenarioViewModel);
 
             _scenarioUsecase = new ScenarioUsecase(
                 scenarioRepository,
                 handlerRepo,
                 advanceGate,
+                presenterFacade,
                 presenterFacade,
                 scenarioSettingsRepository);
             TextEventHandler textEventHandler = new(

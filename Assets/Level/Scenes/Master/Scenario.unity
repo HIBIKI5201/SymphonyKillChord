@@ -1437,6 +1437,7 @@ MonoBehaviour:
   _returnSceneName: OutGame
   _scenarioView: {fileID: 66726728}
   _scenarioInputView: {fileID: 1267567894}
+  _scenarioAutoButtonView: {fileID: 1700515008}
 --- !u!4 &1230537158
 Transform:
   m_ObjectHideFlags: 0
@@ -1666,6 +1667,7 @@ GameObject:
   - component: {fileID: 1700515005}
   - component: {fileID: 1700515004}
   - component: {fileID: 1700515007}
+  - component: {fileID: 1700515008}
   m_Layer: 5
   m_Name: AutoButton
   m_TagString: ScenarioIgnore
@@ -1694,6 +1696,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1700515008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1700515002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d6d76aa268f4a38b4236a24ea4629c7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGame.Scenario.ScenarioAutoButtonView
+  _enabledColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!114 &1700515004
 MonoBehaviour:
   m_ObjectHideFlags: 0

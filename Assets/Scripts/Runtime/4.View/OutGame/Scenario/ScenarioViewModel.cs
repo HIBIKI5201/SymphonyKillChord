@@ -8,8 +8,24 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// シナリオ表示用の通知を集約して View に渡す。
     /// </summary>
     public class ScenarioViewModel : ITextViewSink, IFadeViewSink, IBackgroundViewSink, IAnimationViewSink, IPortraitViewSink, ILayerViewSink
-        , IScenarioCompletionViewSink
+        , IScenarioCompletionViewSink, IScenarioAutoAdvanceViewSink
     {
+        /// <summary> 表示用の自動送り状態の変更を通知する。 </summary>
+        public event Action OnAutoAdvanceChanged;
+
+        /// <summary> 自動送りが有効かを示す。 </summary>
+        public bool IsAutoAdvance => _isAutoAdvance;
+
+        /// <summary>
+        ///     自動送り状態を保存し、変更時に表示へ通知する。
+        /// </summary>
+        public void SetAutoAdvance(bool isAutoAdvance)
+        {
+            if (_isAutoAdvance == isAutoAdvance) { return; }
+            _isAutoAdvance = isAutoAdvance;
+            OnAutoAdvanceChanged?.Invoke();
+        }
+
         /// <summary>
         /// テキスト更新通知を購読先へ流す。
         /// </summary>
@@ -130,5 +146,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         public event Action<bool> OnScenarioCompleted;
 
         private ScenarioFadeRequestHandler _fadeRequestHandler;
+        private bool _isAutoAdvance;
     }
 }
