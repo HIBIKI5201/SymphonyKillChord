@@ -66,6 +66,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 // 現在ビートの表示色は次のブロック遷移まで更新されないため、ここで即座に反映する。
                 UpdateCurrentBeatColor();
                 UpdateJustTimingMarkerColors();
+                UpdateBeatRangeLineColors();
                 RebuildTargetBeatFrames();
             }
         }
@@ -289,20 +290,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <returns> 取得できた場合はtrue。 </returns>
         public bool TryGetJustTimingXPosition(int beatType, out float xPosition)
         {
-            return TryGetJustTimingRange(beatType, out xPosition, out _);
-        }
-
-        /// <summary>
-        ///     指定した拍子に対応するジャストタイミング区間の中心X座標と幅を取得する。
-        /// </summary>
-        /// <param name="beatType"> 対象の拍子（BeatTypeの整数値）。 </param>
-        /// <param name="xPosition"> 中心からの距離（絶対値）。取得できない場合は0。 </param>
-        /// <param name="width"> 入力を受け付ける区間の表示幅。取得できない場合は0。 </param>
-        /// <returns> 取得できた場合はtrue。 </returns>
-        public bool TryGetJustTimingRange(int beatType, out float xPosition, out float width)
-        {
             xPosition = 0f;
-            width = 0f;
 
             if (_totalBeatBoxCount <= 0)
             {
@@ -319,7 +307,6 @@ namespace KillChord.Runtime.View.InGame.Music
                 float center = (_justStarts[i] + _justEnds[i]) * 0.5f;
                 float barWidth = _totalBeatBoxCount * _beatWidth / GUIDE_LENGTH_IN_BARS;
                 xPosition = center * barWidth;
-                width = (_zoneEnds[i] - _zoneStarts[i]) * barWidth;
                 return true;
             }
 
@@ -427,6 +414,12 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャストタイミング位置を示す帯の横幅倍率。 </summary>
         private const float JUST_TIMING_MARKER_WIDTH_SCALE = 1f / 3f;
 
+        /// <summary> 全判定区間の色帯の高さ。 </summary>
+        private const float BEAT_RANGE_LINE_HEIGHT = 4f;
+
+        /// <summary> 既存スキル入力線と同じ位置へ配置する、ガイド基準からの高さ。 </summary>
+        private const float BEAT_RANGE_LINE_VERTICAL_OFFSET = 10f;
+
         /// <summary> チュートリアル対象枠の線幅。 </summary>
         private const float TARGET_BEAT_FRAME_THICKNESS = 2f;
 
@@ -449,6 +442,9 @@ namespace KillChord.Runtime.View.InGame.Music
 
         [SerializeField, Tooltip("ジャストタイミング演出の設定。")]
         private ACLikeRhythmGuideEffectConfig _effectConfig;
+
+        [SerializeField, Tooltip("全判定区間の枠上に表示する色帯のSprite。")]
+        private Sprite _beatRangeLineSprite;
 
         [Tooltip("ビートの色。判定ゾーンの順番に対応します。")]
         [SerializeField] private Color[] _beatColor;
@@ -503,6 +499,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private RectTransform[] _rightBeatRectTransforms;
         private Image[] _rightBeatImages;
         private RectTransform[] _justTimingMarkers;
+        private BeatRangeLine[] _beatRangeLines = Array.Empty<BeatRangeLine>();
         private MotionHandle[] _handles;
         private RectTransform[] _targetBeatFrames = Array.Empty<RectTransform>();
         private MotionHandle _targetBeatFrameMotion;
@@ -575,6 +572,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 out _handles);
 
             CreateJustTimingMarkers();
+            CreateBeatRangeLines();
             RebuildTargetBeatFrames();
             _currentOpenIndex = -1;
         }
@@ -585,6 +583,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private void ClearGeneratedBeatObjects()
         {
             ClearTargetBeatFrames();
+            ClearBeatRangeLines();
             if (_handles != null)
             {
                 for (int i = 0; i < _handles.Length; i++)
@@ -738,6 +737,94 @@ namespace KillChord.Runtime.View.InGame.Music
             markerImage.color = GetJustTimingMarkerColor(zoneIndex);
             markerImage.raycastTarget = false;
             return markerRectTransform;
+        }
+
+        /// <summary>
+        ///     全判定区間の枠上へ、スキル入力状態に依存しない左右の色帯を生成する。
+        /// </summary>
+        private void CreateBeatRangeLines()
+        {
+            var lines = new List<BeatRangeLine>();
+            for (int blockIndex = 0; blockIndex < _totalBeatBoxCount; blockIndex++)
+            {
+                if (!TryGetZoneColor(blockIndex, out Color color, out int zoneIndex))
+                {
+                    continue;
+                }
+
+                // 実際のブロック境界に揃え、最終ゾーンの小節末尾からゲージ末端まで含める。
+                int firstBlockIndex = blockIndex;
+                while (blockIndex + 1 < _totalBeatBoxCount &&
+                    GetBeatSectionIndex(blockIndex + 1) == zoneIndex)
+                {
+                    blockIndex++;
+                }
+
+                float start = firstBlockIndex * _beatWidth;
+                float end = (blockIndex + 1) * _beatWidth;
+                float center = (start + end) * 0.5f;
+                float width = end - start;
+                color = ApplyTargetDim(color, zoneIndex);
+                lines.Add(new BeatRangeLine(CreateBeatRangeLine(
+                    $"BeatRangeLine_Left_{firstBlockIndex}", -center, width, color), zoneIndex));
+                lines.Add(new BeatRangeLine(CreateBeatRangeLine(
+                    $"BeatRangeLine_Right_{firstBlockIndex}", center, width, color), zoneIndex));
+            }
+
+            _beatRangeLines = lines.ToArray();
+        }
+
+        /// <summary>
+        ///     既存の白黒枠より前、チュートリアル赤枠より後ろへ色帯を作成する。
+        /// </summary>
+        private Image CreateBeatRangeLine(string objectName, float center, float width, Color color)
+        {
+            GameObject lineObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
+            lineObject.layer = gameObject.layer;
+            lineObject.transform.SetParent(transform, false);
+            lineObject.transform.SetAsLastSibling();
+
+            RectTransform lineRectTransform = lineObject.GetComponent<RectTransform>();
+            lineRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            lineRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            lineRectTransform.pivot = new Vector2(0.5f, 0.5f);
+            lineRectTransform.anchoredPosition = new Vector2(center, BEAT_RANGE_LINE_VERTICAL_OFFSET);
+            lineRectTransform.sizeDelta = new Vector2(width, BEAT_RANGE_LINE_HEIGHT);
+
+            Image lineImage = lineObject.GetComponent<Image>();
+            lineImage.sprite = _beatRangeLineSprite;
+            lineImage.color = color;
+            lineImage.raycastTarget = false;
+            return lineImage;
+        }
+
+        /// <summary>
+        ///     色帯へチュートリアルの対象外減光を反映する。
+        /// </summary>
+        private void UpdateBeatRangeLineColors()
+        {
+            for (int i = 0; i < _beatRangeLines.Length; i++)
+            {
+                BeatRangeLine line = _beatRangeLines[i];
+                line.Image.color = ApplyTargetDim(_beatColor[line.ZoneIndex], line.ZoneIndex);
+            }
+        }
+
+        /// <summary>
+        ///     生成済みの色帯を即座に非表示にし、再構築時の重複を防いで破棄する。
+        /// </summary>
+        private void ClearBeatRangeLines()
+        {
+            for (int i = 0; i < _beatRangeLines.Length; i++)
+            {
+                if (_beatRangeLines[i].Image != null)
+                {
+                    _beatRangeLines[i].Image.gameObject.SetActive(false);
+                    Destroy(_beatRangeLines[i].Image.gameObject);
+                }
+            }
+
+            _beatRangeLines = Array.Empty<BeatRangeLine>();
         }
 
         /// <summary>
@@ -1073,6 +1160,27 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             return _zoneStarts.Length - 1;
+        }
+
+        /// <summary>
+        ///     生成した色帯と、減光の判断に使用する判定ゾーンの対応を保持する。
+        /// </summary>
+        private readonly struct BeatRangeLine
+        {
+            /// <summary>
+            ///     色帯と対応する判定ゾーンを記録する。
+            /// </summary>
+            public BeatRangeLine(Image image, int zoneIndex)
+            {
+                Image = image;
+                ZoneIndex = zoneIndex;
+            }
+
+            /// <summary> 枠上に表示する色帯。 </summary>
+            public Image Image { get; }
+
+            /// <summary> 色と対象外減光の参照先となる判定ゾーン。 </summary>
+            public int ZoneIndex { get; }
         }
     }
 }
