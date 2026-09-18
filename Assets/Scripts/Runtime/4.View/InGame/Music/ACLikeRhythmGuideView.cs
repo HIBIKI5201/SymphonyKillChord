@@ -376,7 +376,7 @@ namespace KillChord.Runtime.View.InGame.Music
 
         [Tooltip("チュートリアル中、ミッション対象外ビートの透明度倍率。")]
         [Range(0f, 1f)]
-        [SerializeField] private float _dimAlpha = 0.3f;
+        [SerializeField] private float _dimAlpha = 0.75f;
 
         [Space]
         [Tooltip("ジャストタイミング内にあるビートのSizeDelta")]
