@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.UI;
-using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
@@ -29,11 +28,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController = inputController;
             _playerInputView = playerInputView;
             _viewModel = viewModel;
-            if (_autoButton != null)
-            {
-                _autoButtonDefaultColors = _autoButton.colors;
-                UpdateAutoButtonColor();
-            }
 
             if (_scenarioUIRaycastView == null || _scenarioUIHideView == null)
             {
@@ -247,7 +241,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
             _inputController?.ToggleAutoAdvance();
-            UpdateAutoButtonColor();
         }
 
         private void HandleHideUIInput(InputContext<float> context)
@@ -312,26 +305,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             return false;
         }
 
-        /// <summary>
-        ///     自動送りの有効状態をAutoボタンの色へ反映する。
-        /// </summary>
-        private void UpdateAutoButtonColor()
-        {
-            if (_autoButton == null)
-            {
-                return;
-            }
-
-            ColorBlock colors = _autoButtonDefaultColors;
-            if (_inputController != null && _inputController.IsAutoAdvance)
-            {
-                colors.normalColor = _autoEnabledColor;
-                colors.highlightedColor = _autoEnabledColor;
-                colors.selectedColor = _autoEnabledColor;
-            }
-            _autoButton.colors = colors;
-        }
-
         [SerializeField, Tooltip("シナリオの非表示やフェードから独立したスキップ確認画面。")]
         private ScenarioSkipConfirmationView _skipConfirmationView;
 
@@ -340,12 +313,6 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
         [SerializeField]
         private ScenarioUIHideView _scenarioUIHideView;
-
-        [SerializeField, Tooltip("自動送りの有効状態を色で示すAutoボタン。Auto UIがあるシーンのみ指定します。")]
-        private Button _autoButton;
-
-        [SerializeField, Tooltip("自動送りが有効な時のAutoボタン色。")]
-        private Color _autoEnabledColor = Color.cyan;
 
         private ScenarioInputController _inputController;
         private PlayerInputView _playerInputView;
@@ -356,6 +323,5 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private int _blockedInputFrame = -1;
         private InputAction _skipAction;
         private bool _ignoreSkipUntilRelease;
-        private ColorBlock _autoButtonDefaultColors;
     }
 }

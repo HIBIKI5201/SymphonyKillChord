@@ -25,9 +25,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary> スキップ確認中かを示す。 </summary>
         public bool IsSkipConfirmationOpen { get; private set; }
 
-        /// <summary> 自動送りが有効かを示す。 </summary>
-        public bool IsAutoAdvance => _state.IsAutoAdvance;
-
         /// <summary>
         /// クリック入力を次送り操作として通知する。
         /// </summary>
