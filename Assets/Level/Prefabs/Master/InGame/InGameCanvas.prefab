@@ -5059,7 +5059,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003csize=22\u003e\u003csprite name=\"lt\"\u003e\u003c/size\u003e\nロックオン"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"lt\"\u003e\u003c/size\u003e\nロック/解除"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5303,7 +5303,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 4, y: -54}
-  m_SizeDelta: {x: 136, y: 48}
+  m_SizeDelta: {x: 136, y: 64}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300033
 CanvasRenderer:
@@ -5333,7 +5333,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003csize=22\u003e\u003csprite name=\"lb\"\u003e\u003c/size\u003e\n対象←※"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"lb\"\u003e\u003c/size\u003e\nロックオン切り替え\n左"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5360,8 +5360,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 16
-  m_fontSizeBase: 16
+  m_fontSize: 14
+  m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 16
@@ -5440,7 +5440,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 250, y: -54}
-  m_SizeDelta: {x: 146, y: 48}
+  m_SizeDelta: {x: 146, y: 64}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300043
 CanvasRenderer:
@@ -5470,7 +5470,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003csize=22\u003e\u003csprite name=\"rb\"\u003e\u003c/size\u003e\n回避＋対象→※"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"rb\"\u003e\u003c/size\u003e\nロックオン切り替え\n右"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5497,8 +5497,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 16
-  m_fontSizeBase: 16
+  m_fontSize: 14
+  m_fontSizeBase: 14
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 16
@@ -5576,7 +5576,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 24, y: -109}
+  m_AnchoredPosition: {x: 24, y: -124}
   m_SizeDelta: {x: 104, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300053
@@ -5713,7 +5713,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -153}
+  m_AnchoredPosition: {x: 176, y: -124}
   m_SizeDelta: {x: 76, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300063
@@ -5850,7 +5850,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 148, y: -91}
+  m_AnchoredPosition: {x: 148, y: -54}
   m_SizeDelta: {x: 96, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300073
@@ -5987,8 +5987,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 316, y: -109}
-  m_SizeDelta: {x: 76, y: 48}
+  m_AnchoredPosition: {x: 332, y: -120}
+  m_SizeDelta: {x: 64, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300083
 CanvasRenderer:
@@ -6124,7 +6124,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 286, y: -157}
+  m_AnchoredPosition: {x: 254, y: -160}
   m_SizeDelta: {x: 72, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300093
@@ -6292,7 +6292,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "※対象切替はロックオン中\n同じ操作はどちらかのボタン"
+  m_text: "攻撃は RT または B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}

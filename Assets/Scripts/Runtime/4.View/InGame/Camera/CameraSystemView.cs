@@ -328,7 +328,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     モバイルのロックオン対象切り替え入力を受け取り、手動ロックオン対象の切り替えを試みる。
+        ///     モバイルのロックオン対象切り替え入力を受け取り、自動・手動ロックオン対象の切り替えを試みる。
         /// </summary>
         /// <param name="direction"> 左右方向を表す入力値。 </param>
         private void LockOnSelectHandlerMobile(float direction)
@@ -351,7 +351,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     ロックオン対象切り替え入力を受け取り、手動ロックオン対象の切り替えを試みる。
+        ///     ロックオン対象切り替え入力を受け取り、自動・手動ロックオン対象の切り替えを試みる。
         /// </summary>
         /// <param name="context"> ロックオン対象切り替えの入力コンテキスト。</param>
         private void LockOnSelectHandler(InputContext<float> context)
@@ -375,12 +375,12 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     ロックオン入力を受け取り、マニュアルロックオン状態をトグルする。
+        ///     押下が確定したロックオン入力だけを受け取り、ロック状態をトグルする。
         /// </summary>
         /// <param name="context"> ロックオン操作の入力コンテキスト。</param>
         private void LockOnHandler(InputContext<float> context)
         {
-            if (context.Phase == InputActionPhase.Started)
+            if (context.Phase == InputActionPhase.Performed)
             {
                 ToggleLockOnState(_playerT.position, GetCurrentForward());
             }
@@ -573,7 +573,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     マニュアルロックオン状態をトグルする。
+        ///     未ロックなら手動でロックし、自動・手動のロック中なら解除する。
         /// </summary>
         /// <param name="currentPosition"> プレイヤーの現在位置。</param>
         /// <param name="direction"> 現在のカメラ前方方向。</param>
@@ -688,7 +688,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="direction"> 左右方向を表す入力値。 </param>
         private void TrySelectAdjacentTarget(float direction)
         {
-            if (_lockOnState != CameraLockOnState.LockOnManual
+            if (!IsLockOn()
                 || _trySwitchTargetFunc == null
                 || _playerT == null
                 || _cameraT == null)
@@ -696,11 +696,12 @@ namespace KillChord.Runtime.View.InGame.Camera
                 return;
             }
 
-            float selectDirection = Mathf.Sign(direction);
-            if (Mathf.Approximately(selectDirection, 0f))
+            if (Mathf.Approximately(direction, 0f))
             {
                 return;
             }
+
+            float selectDirection = Mathf.Sign(direction);
 
             Vector3 candidateDirection = GetCurrentForward() + (_cameraT.right * selectDirection);
             if (candidateDirection.sqrMagnitude <= float.Epsilon)
@@ -708,7 +709,13 @@ namespace KillChord.Runtime.View.InGame.Camera
                 return;
             }
 
-            _trySwitchTargetFunc.Invoke(_playerT.position, candidateDirection.normalized);
+            if (_trySwitchTargetFunc.Invoke(_playerT.position, candidateDirection.normalized)
+                && _lockOnState == CameraLockOnState.LockOnAuto)
+            {
+                // 視野外の対象へ切り替えた直後も追従できるよう、既存の猶予だけを更新する。
+                // 自動ロックの非命中タイマーと、手動ロックの継続条件は変えない。
+                _autoLockOnViewportGraceTimer = _viewSettings.AutoLockOnViewportGraceDuration;
+            }
         }
 
         /// <summary>

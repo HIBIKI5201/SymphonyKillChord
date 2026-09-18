@@ -243,7 +243,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""id"": ""abf716bd-9998-4c38-b53c-2ea866cc4f6a"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press(behavior=0)"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -360,17 +360,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""name"": """",
                     ""id"": ""c5e0cf61-a294-4283-b901-09e388dcf2db"",
                     ""path"": ""<Keyboard>/space"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Dodge"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""391a9ec2-30a8-428e-a5b9-e9f1393f0190"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
