@@ -81,7 +81,7 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             _targetBeatFrameMotion.TryCancel();
-            LSequence sequence = LSequence.Create();
+            MotionSequenceBuilder sequence = LSequence.Create();
             Vector3 scaleStrength = Vector3.one * (TARGET_BEAT_FRAME_SCALE_MULTIPLIER - 1f);
             for (int i = 0; i < _targetBeatFrames.Length; i++)
             {
