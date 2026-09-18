@@ -362,6 +362,10 @@ MonoBehaviour:
     m_Localized: "{0}s"
     m_Metadata:
       m_Items: []
+  - m_Id: 1830000001
+    m_Localized: "Controls (Xbox / PlayStation)\nLeft stick: Move    Right stick: Look\nRT/R2 or B/Circle: Attack\nRB/R1 or A/Cross: Dodge\nLT/L2: Toggle lock-on\nWhile locked: LB/L1 left, RB/R1 right (also dodges)\nMenu/Options: Pause"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
