@@ -366,6 +366,42 @@ MonoBehaviour:
     m_Localized: "操作 (Xbox / PlayStation)\n左スティック: 移動    右スティック: 視点\nRT/R2 または B/○: 攻撃\nRB/R1 または A/×: 回避\nLT/L2: ロックオン\nロックオン中 LB/L1: 左、RB/R1: 右 (回避も)\nMenu/Options: ポーズ"
     m_Metadata:
       m_Items: []
+  - m_Id: 1830000100
+    m_Localized: "ロックオン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000101
+    m_Localized: "攻撃"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000102
+    m_Localized: "対象←※"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000103
+    m_Localized: "回避＋対象→※"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000104
+    m_Localized: "移動"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000105
+    m_Localized: "視点"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000106
+    m_Localized: "ポーズ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000107
+    m_Localized: "回避"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000108
+    m_Localized: "※対象切替はロックオン中\n同じ操作はどちらかのボタン"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

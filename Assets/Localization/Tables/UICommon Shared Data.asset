@@ -363,6 +363,42 @@ MonoBehaviour:
     m_Key: ui.ingame.controller_guide
     m_Metadata:
       m_Items: []
+  - m_Id: 1830000100
+    m_Key: ui.ingame.controller_guide.lock_on
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000101
+    m_Key: ui.ingame.controller_guide.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000102
+    m_Key: ui.ingame.controller_guide.target_left
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000103
+    m_Key: ui.ingame.controller_guide.dodge_target_right
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000104
+    m_Key: ui.ingame.controller_guide.move
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000105
+    m_Key: ui.ingame.controller_guide.look
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000106
+    m_Key: ui.ingame.controller_guide.pause
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000107
+    m_Key: ui.ingame.controller_guide.dodge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000108
+    m_Key: ui.ingame.controller_guide.note
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
