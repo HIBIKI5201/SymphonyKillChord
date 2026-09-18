@@ -148,7 +148,7 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時に点滅させるライト。")]
         private MuzzleFlashLight _muzzleFlashLight;
 
-        [SerializeField, Min(0f), Tooltip("攻撃Effectを再生するまでの遅延時間。")]
+        [SerializeField, Min(0f), Tooltip("攻撃の粒子とライトを、現在の銃口位置で再生するまでの遅延時間。SEは遅延しません。")]
         private float _effectDelaySeconds;
 
         [SerializeField, Tooltip("攻撃時に薬莢を排出するEjector。未設定の場合は排出しません。")]
