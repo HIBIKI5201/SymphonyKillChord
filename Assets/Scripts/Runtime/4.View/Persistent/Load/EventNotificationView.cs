@@ -87,7 +87,7 @@ namespace KillChord.Runtime.View.Persistent.Load
             _activeCancellation?.Cancel();
         }
 
-        private const float HOLD_SECONDS = 1f;
+        private const float HOLD_SECONDS = 3f;
         private const float FADE_SECONDS = 0.5f;
 
         [SerializeField, Tooltip("中央通知の背景と文字をまとめてフェードするパネルです。")]
@@ -120,7 +120,7 @@ namespace KillChord.Runtime.View.Persistent.Load
                     : "お時間になりました。体験版を終了します。",
                 "ui.notification.home_expired" => isEnglish
                     ? "The home timer has expired. Moving to the mission."
-                    : "ホームタイマーが終了しました。ミッションに移動します。",
+                    : "ホームタイマーが終了しました。\nミッションに移動します。",
                 "ui.notification.save_reset" => isEnglish
                     ? "Save data has been reset."
                     : "セーブデータをリセットしました。",

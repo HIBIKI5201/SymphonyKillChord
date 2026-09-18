@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
@@ -42,12 +43,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <param name="attackController"> プレイヤー攻撃Controllerです。 </param>
         /// <param name="skillController"> スキルControllerです。 </param>
         /// <param name="targetSystemController"> ターゲット選択Controllerです。 </param>
+        /// <param name="musicSyncService"> リズムタイムアウトを通知するサービスです。 </param>
         public void Bind(
             CharacterEntity playerEntity,
             PlayerController playerController,
             PlayerAttackController attackController,
             SkillController skillController,
-            TargetSystemController targetSystemController)
+            TargetSystemController targetSystemController,
+            IMusicSyncService musicSyncService)
         {
             Unbind();
 
@@ -61,6 +64,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 ?? throw new ArgumentNullException(nameof(playerController));
             _targetSystemController = targetSystemController
                 ?? throw new ArgumentNullException(nameof(targetSystemController));
+            _musicSyncService = musicSyncService
+                ?? throw new ArgumentNullException(nameof(musicSyncService));
 
             _playerEntity.OnHealthChanged += HandleHealthChanged;
             _playerController.OnMoved += HandleMoved;
@@ -69,6 +74,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _attackController.OnAttackBeatExecuted += HandleAttackBeatExecuted;
             _skillController.OnSkillAnimationRequested += HandleSkillAnimationRequested;
             _targetSystemController.OnTargetLocked += HandleTargetLocked;
+            _musicSyncService.OnRhythmTimedOut += HandleRhythmTimedOutHandler;
         }
 
         /// <summary>
@@ -105,11 +111,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 _targetSystemController.OnTargetLocked -= HandleTargetLocked;
             }
 
+            if (_musicSyncService != null)
+            {
+                _musicSyncService.OnRhythmTimedOut -= HandleRhythmTimedOutHandler;
+            }
+
             _playerEntity = null;
             _attackController = null;
             _skillController = null;
             _playerController = null;
             _targetSystemController = null;
+            _musicSyncService = null;
         }
 
         /// <summary>
@@ -127,10 +139,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private SkillController _skillController;
         private PlayerController _playerController;
         private TargetSystemController _targetSystemController;
+        private IMusicSyncService _musicSyncService;
         private ComboHudPresenter _comboHudPresenter;
         /// <summary> <see cref="HandleAttackExecuted"/>と一緒に通知する、保留中の拍子攻撃です。 </summary>
         private MissionActionKind? _pendingAttackBeatKind;
         private readonly List<MissionActionKind> _attackActionBuffer = new();
+
+        /// <summary>
+        ///     リズム入力が途絶えたとき、コンボを破棄してHUDへ反映します。
+        /// </summary>
+        private void HandleRhythmTimedOutHandler()
+        {
+            _missionProgress.ResetCombo();
+            _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
+        }
 
         /// <summary>
         ///     回避の実行をミッションへ通知します。敵の攻撃を実際に避けられたかどうかは問いません。

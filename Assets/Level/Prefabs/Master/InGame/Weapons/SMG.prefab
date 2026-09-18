@@ -324,14 +324,6 @@ MonoBehaviour:
   _effectDelaySeconds: 0
   _casingEjector: {fileID: 111873470733936604}
   _dissolveShader: {fileID: -6465566751694194690, guid: 058c417a90245cc46b5e68311b16d129, type: 3}
-  _effectRenderers:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!1001 &245596551596765294
 PrefabInstance:
   m_ObjectHideFlags: 0
