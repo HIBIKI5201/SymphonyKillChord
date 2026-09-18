@@ -13219,9 +13219,9 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.StageClearCameraView
   _virtualCamera: {fileID: 179700102}
-  _distance: 3
-  _height: 1.5
-  _lookAtHeight: 1.25
+  _distance: 2.5
+  _height: 1.23
+  _lookAtHeight: 0.93
   _screenPositionX: 0.25
 --- !u!320 &179700201
 PlayableDirector:
