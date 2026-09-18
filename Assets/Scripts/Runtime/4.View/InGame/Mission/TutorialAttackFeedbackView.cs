@@ -13,14 +13,13 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// <inheritdoc />
         public void ShowFeedback(bool isSuccess)
         {
-            if (this == null || !isActiveAndEnabled || _items == null)
-            {
-                return;
-            }
+            ShowPopup(isSuccess ? "Success" : "Miss", isSuccess ? SUCCESS_GLOW_COLOR : MISS_GLOW_COLOR);
+        }
 
-            // 全枠が使用中でも新しい攻撃を捨てず、最も古い枠から再利用する。
-            _items[_nextItemIndex].Show(isSuccess);
-            _nextItemIndex = (_nextItemIndex + 1) % _items.Length;
+        /// <inheritdoc />
+        public void ShowPerfectFeedback()
+        {
+            ShowPopup("Perfect", PERFECT_GLOW_COLOR);
         }
 
         /// <summary>
@@ -46,6 +45,7 @@ namespace KillChord.Runtime.View.InGame.Mission
         private const float FADE_OUT_SECONDS = 0.5f;
         private static readonly Color SUCCESS_GLOW_COLOR = new Color(0.2f, 1f, 0.3f, 1f);
         private static readonly Color MISS_GLOW_COLOR = new Color(1f, 0.2f, 0.2f, 1f);
+        private static readonly Color PERFECT_GLOW_COLOR = new Color(1f, 0.95f, 0.6f, 1f);
 
         [SerializeField, Tooltip("CanvasGroup、結果テキスト、背面の光Imageを持つ表示テンプレートです。")]
         private RectTransform _popupTemplate;
@@ -121,6 +121,23 @@ namespace KillChord.Runtime.View.InGame.Mission
         }
 
         /// <summary>
+        ///     判定に対応する文字と背景色を、既存の表示枠で再生します。
+        /// </summary>
+        /// <param name="text"> 表示する判定文字です。 </param>
+        /// <param name="glowColor"> 背面の光の色です。 </param>
+        private void ShowPopup(string text, Color glowColor)
+        {
+            if (this == null || !isActiveAndEnabled || _items == null)
+            {
+                return;
+            }
+
+            // 全枠が使用中でも新しい攻撃を捨てず、最も古い枠から再利用する。
+            _items[_nextItemIndex].Show(text, glowColor);
+            _nextItemIndex = (_nextItemIndex + 1) % _items.Length;
+        }
+
+        /// <summary>
         ///     一回の攻撃結果の表示要素と進行時間を保持します。
         /// </summary>
         private sealed class PopupItem
@@ -144,18 +161,19 @@ namespace KillChord.Runtime.View.InGame.Mission
             }
 
             /// <summary>
-            ///     成功・失敗に応じて表示を初期化します。
+            ///     指定された判定文字と背景色で表示を初期化します。
             /// </summary>
-            /// <param name="isSuccess"> 指定された色の攻撃ならtrueです。 </param>
-            public void Show(bool isSuccess)
+            /// <param name="text"> 表示する判定文字です。 </param>
+            /// <param name="glowColor"> 背面の光の色です。 </param>
+            public void Show(string text, Color glowColor)
             {
                 _elapsed = 0f;
                 _riseHeight = Mathf.Max(0f, _root.rect.height);
                 _root.anchoredPosition = _origin;
                 _group.alpha = 0f;
-                _text.text = isSuccess ? "Success" : "Miss";
+                _text.text = text;
                 _text.color = Color.white;
-                _glow.color = isSuccess ? SUCCESS_GLOW_COLOR : MISS_GLOW_COLOR;
+                _glow.color = glowColor;
                 _root.gameObject.SetActive(true);
                 _isPlaying = true;
             }

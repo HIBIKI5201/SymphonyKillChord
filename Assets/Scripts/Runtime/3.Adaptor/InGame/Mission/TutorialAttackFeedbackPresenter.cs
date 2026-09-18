@@ -1,7 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Application.InGame.Mission;
-using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Mission
@@ -57,37 +56,25 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         ///     ミッション進行前の色指定と攻撃拍種を比較し、攻撃1回につき1回だけ表示します。
         /// </summary>
         /// <param name="beatCount"> 成立した攻撃の拍種です。 </param>
-        /// <param name="isJustHit"> ジャスト判定。色課題では使用しません。 </param>
+        /// <param name="isJustHit"> 指定色でのジャスト成功をPerfectとして表示します。 </param>
         private void HandleAttackExecutedHandler(int beatCount, bool isJustHit)
         {
-            if (!_selectedBattleStageState.HasSelectedBattleStage
-                || !_selectedBattleStageState.CurrentStageDefinition.IsTutorial)
-            {
-                return;
-            }
-
-            MissionRuntimeService mission = _missionRuntimeServiceProvider.Invoke();
-            if (mission == null || mission.MissionProgress.IsFinished)
-            {
-                return;
-            }
-
-            ObjectiveSequenceStep step = mission.MissionDefinition.ClearCondition
-                .GetStep(mission.MissionProgress.ObjectiveStepIndex);
-            if (step == null || ClearConditionChain.Contains<PopupClearCondition>(step.Condition))
-            {
-                return;
-            }
-
-            ActionRepeatCountClearCondition condition =
-                ClearConditionChain.Find<ActionRepeatCountClearCondition>(step.Condition);
-            if (condition == null || !condition.TargetBeatType.HasValue)
+            int? targetBeatCount = TutorialAttackTargetQuery.GetTargetBeatCount(
+                _selectedBattleStageState, _missionRuntimeServiceProvider.Invoke());
+            if (!targetBeatCount.HasValue)
             {
                 return;
             }
 
             // 後続のミッション記録で最終成功が次ステップへ進む前に、表示する結果を確定する。
-            _view.ShowFeedback(beatCount == (int)condition.TargetBeatType.Value);
+            bool isSuccess = beatCount == targetBeatCount.Value;
+            if (isSuccess && isJustHit)
+            {
+                _view.ShowPerfectFeedback();
+                return;
+            }
+
+            _view.ShowFeedback(isSuccess);
         }
     }
 }

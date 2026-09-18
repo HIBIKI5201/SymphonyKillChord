@@ -10,5 +10,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// </summary>
         /// <param name="isSuccess"> 指定色と一致した場合はtrueです。 </param>
         void ShowFeedback(bool isSuccess);
+
+        /// <summary>
+        ///     指定色でジャスト攻撃が成立したことをPerfectとして表示します。
+        /// </summary>
+        void ShowPerfectFeedback();
     }
 }
