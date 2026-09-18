@@ -1168,7 +1168,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""58ae7c8f-5a84-42e6-818b-f68d737b3f7c"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -1256,7 +1256,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""28b30f1a-f203-4562-a3ba-dbe3e89c819b"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
