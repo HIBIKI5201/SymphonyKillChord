@@ -242,7 +242,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 float center = (_justStarts[i] + _justEnds[i]) * 0.5f;
                 float barWidth = _totalBeatBoxCount * _beatWidth / GUIDE_LENGTH_IN_BARS;
                 xPosition = center * barWidth;
-                width = (_justEnds[i] - _justStarts[i]) * barWidth;
+                width = (_zoneEnds[i] - _zoneStarts[i]) * barWidth;
                 return true;
             }
 
