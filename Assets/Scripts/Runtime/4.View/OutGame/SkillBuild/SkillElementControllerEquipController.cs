@@ -168,6 +168,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         public int? CarriedSkillId { get; private set; }
 
         private const string DRAGGABLE_CLASS_NAME = "draggable";
+        private const string LOCKED_CLASS_NAME = "is-locked";
         private const string SKILL_ELEMENT_SLOT_CLASS_NAME = "skill-element-slot";
         private const string CARRIED_CLASS_NAME = "is-carried";
         private const string SKILL_LEVEL_UP_BUTTON_NAME = "SkillLevelUpButton";
@@ -228,6 +229,15 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             if (evt.currentTarget is not VisualElement element ||
                 element.userData is not int skillId)
             {
+                return;
+            }
+
+            // 未解放カードは詳細閲覧のみ許可し、決定を繰り返しても装備候補にしない。
+            if (element.ClassListContains(LOCKED_CLASS_NAME))
+            {
+                _pendingConfirmSkillElement = null;
+                _skillBuildViewModel.SelectSkill(skillId);
+                evt.StopPropagation();
                 return;
             }
 
