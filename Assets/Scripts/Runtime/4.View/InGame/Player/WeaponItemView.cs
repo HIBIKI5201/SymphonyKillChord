@@ -44,11 +44,23 @@ namespace KillChord.Runtime.View.InGame.Player
             _materialPropertyBlock ??= new MaterialPropertyBlock();
 
             _weaponHandle.TryCancel();
+            if (_weaponModel.activeSelf)
+            {
+                // 出現・収納の途中でも表示中なら、再出現させず全表示へ戻す。
+                ApplyDither(1f);
+                RestoreOriginalMaterials();
+                // 初回と同じく、最後の発射から出現時間を含む2秒後に収納する。
+                _weaponHandle = LSequence.Create()
+                    .AppendInterval(AUTO_HIDE_DELAY_SECONDS)
+                    .Run(x => x.WithOnComplete(HideWeapon));
+                return;
+            }
+
             _dissolveMaterials?.Begin();
             _weaponHandle = LSequence.Create()
-                .Join(LMotion.Create(0f, 1f, 0.2f)
+                .Join(LMotion.Create(0f, 1f, SHOW_DURATION_SECONDS)
                     .Bind(this, (value, state) => state.ApplyShowDither(value)))
-                .AppendInterval(2f)
+                .AppendInterval(AUTO_HIDE_DELAY_SECONDS)
                 .Run(x => x.WithOnComplete(HideWeapon));
             ApplyDither(0.0f);
             _weaponModel.SetActive(true);
@@ -147,6 +159,9 @@ namespace KillChord.Runtime.View.InGame.Player
             _attackEffects = gameObject.AddComponent<StationaryWeaponEffectsView>();
             _attackEffects.Initialize(_attackSoundSource, _attackEffect, _muzzleFlashLight);
         }
+
+        private const float SHOW_DURATION_SECONDS = 0.2f;
+        private const float AUTO_HIDE_DELAY_SECONDS = 2f;
 
         [SerializeField, Tooltip("攻撃中だけ表示する武器モデル。")]
         private GameObject _weaponModel;
