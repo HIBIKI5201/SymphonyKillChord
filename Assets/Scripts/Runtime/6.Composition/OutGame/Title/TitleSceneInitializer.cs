@@ -20,11 +20,13 @@ using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -71,6 +73,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private TitleSceneView _titleSceneView;
+        private TitleIdleVideoView _idleVideoView;
         private TitleStartController _titleStartController;
         private ScreenController _screenController;
         private ScreenRuleData _loadedRuleData;
@@ -191,6 +194,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
+            InitializeIdleVideo(titleRoot);
 
             HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
 
@@ -293,6 +297,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         public override void Shutdown()
         {
+            if (_idleVideoView != null)
+            {
+                _idleVideoView.Shutdown();
+                Destroy(_idleVideoView.gameObject);
+                _idleVideoView = null;
+            }
             UnsubscribeLoading();
             if (_outGameUIEvent != null && _isSubscribed)
             {
@@ -320,6 +330,40 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
+        }
+
+        /// <summary>
+        ///     タイトル背景のPV演出を生成し、BGMの演出倍率だけを接続します。
+        /// </summary>
+        private void InitializeIdleVideo(VisualElement titleRoot)
+        {
+            if (!ServiceLocator.TryGetInstance(out MusicPlayer musicPlayer))
+            {
+                Debug.LogWarning($"[{nameof(TitleSceneInitializer)}] BGMが取得できないためPV演出を無効にします。", this);
+                return;
+            }
+
+            GameObject host = new("TitleIdleVideo");
+            host.transform.SetParent(transform, false);
+            _idleVideoView = host.AddComponent<TitleIdleVideoView>();
+            bool initialized = _idleVideoView.Initialize(
+                titleRoot,
+                () => _titleSceneView != null && _titleSceneView.IsIdleVideoAllowed,
+                gain =>
+                {
+                    if (musicPlayer != null)
+                    {
+                        musicPlayer.SetPresentationVolume(gain);
+                    }
+                },
+                () => musicPlayer != null ? musicPlayer.GetVolume() : 0f,
+                Path.Combine(UnityEngine.Application.streamingAssetsPath, "Title", "GamePV.mp4"));
+            if (!initialized)
+            {
+                _idleVideoView.Shutdown();
+                Destroy(host);
+                _idleVideoView = null;
+            }
         }
 
         /// <summary>
