@@ -284,7 +284,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             }
 
             if (destination == null || !destination.enabledInHierarchy
-                || !destination.focusable || destination.panel != RootElement.panel
+                || !destination.canGrabFocus || destination.panel != RootElement.panel
                 || destination.resolvedStyle.display == DisplayStyle.None
                 || destination.resolvedStyle.visibility != Visibility.Visible)
             {
@@ -419,6 +419,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _dataResetDialog.style.display = DisplayStyle.None;
             _windowRoot.style.display = DisplayStyle.Flex;
+            SetInitialFocusElement(_dataResetButton);
+            RestoreFocus();
             OutGameUIEvent.OnDataResetButtonClicked?.Invoke();
         }
 
@@ -429,6 +431,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _dataResetDialog.style.display = DisplayStyle.None;
             _windowRoot.style.display = DisplayStyle.Flex;
+            SetInitialFocusElement(_dataResetButton);
+            RestoreFocus();
         }
 
         /// <summary>
