@@ -129,7 +129,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private bool TryGetZoneColor(int blockIndex, out Color color, out int zoneIndex)
         {
             color = default;
-            zoneIndex = GetBeatSectionIndex(blockIndex, _scale, _beatWidth);
+            zoneIndex = GetBeatSectionIndex(blockIndex);
 
             // 判定ゾーン未構築時はGetBeatSectionIndexが-1を返すため、色を解決できない状態として扱う。
             if (zoneIndex < 0 || zoneIndex >= _beatColor.Length)
@@ -570,6 +570,14 @@ namespace KillChord.Runtime.View.InGame.Music
         private void ClearGeneratedBeatObjects()
         {
             ClearTargetBeatFrames();
+            if (_handles != null)
+            {
+                for (int i = 0; i < _handles.Length; i++)
+                {
+                    _handles[i].TryCancel();
+                }
+            }
+
             if (_justTimingMarkers != null)
             {
                 for (int i = 0; i < _justTimingMarkers.Length; i++)
@@ -718,7 +726,8 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     現在のチュートリアル対象拍に対応する左右の赤枠を再構築する。
+        ///     対象拍と同色の連続ブロックを囲み、中央で接する左右の範囲は一つの赤枠にする。
+        ///     描画済みブロックと同じ境界を使い、小節末尾より先の表示範囲も含める。
         /// </summary>
         private void RebuildTargetBeatFrames()
         {
@@ -729,22 +738,43 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             var frames = new List<RectTransform>();
-            float barWidth = _totalBeatBoxCount * _beatWidth / GUIDE_LENGTH_IN_BARS;
-            for (int zoneIndex = 0; zoneIndex < _zoneBeatCounts.Length; zoneIndex++)
+            for (int blockIndex = 0; blockIndex < _totalBeatBoxCount; blockIndex++)
             {
-                if (_zoneBeatCounts[zoneIndex] != _targetBeatCount.Value)
+                if (!TryGetZoneColor(blockIndex, out Color color, out int zoneIndex) ||
+                    _zoneBeatCounts[zoneIndex] != _targetBeatCount.Value)
                 {
                     continue;
                 }
 
-                float horizontalPosition = (_zoneStarts[zoneIndex] + _zoneEnds[zoneIndex]) * 0.5f * barWidth;
-                float width = (_zoneEnds[zoneIndex] - _zoneStarts[zoneIndex]) * barWidth;
+                // ゾーン境界を別計算せず、色付けと同じ解決方法で連続区間をまとめる。
+                int firstBlockIndex = blockIndex;
+                while (blockIndex + 1 < _totalBeatBoxCount &&
+                    TryGetZoneColor(blockIndex + 1, out Color nextColor, out int nextZoneIndex) &&
+                    _zoneBeatCounts[nextZoneIndex] == _targetBeatCount.Value &&
+                    nextColor == color)
+                {
+                    blockIndex++;
+                }
+
+                float start = firstBlockIndex * _beatWidth;
+                float end = (blockIndex + 1) * _beatWidth;
+                if (firstBlockIndex == 0)
+                {
+                    frames.Add(CreateTargetBeatFrame(
+                        "TargetBeatFrame_Center",
+                        Vector2.zero,
+                        end * 2f));
+                    continue;
+                }
+
+                float horizontalPosition = (start + end) * 0.5f;
+                float width = end - start;
                 frames.Add(CreateTargetBeatFrame(
-                    $"TargetBeatFrame_Left_{zoneIndex}",
+                    $"TargetBeatFrame_Left_{firstBlockIndex}",
                     Vector2.left * horizontalPosition,
                     width));
                 frames.Add(CreateTargetBeatFrame(
-                    $"TargetBeatFrame_Right_{zoneIndex}",
+                    $"TargetBeatFrame_Right_{firstBlockIndex}",
                     Vector2.right * horizontalPosition,
                     width));
             }
@@ -1009,19 +1039,17 @@ namespace KillChord.Runtime.View.InGame.Music
         ///     ブロックインデックスがどの判定ゾーンに属するかを返す。
         /// </summary>
         /// <param name="blockIndex"> ブロックのインデックス。 </param>
-        /// <param name="scale"> ビートのスケール。 </param>
-        /// <param name="beatWidth"> 1ブロックの幅。 </param>
         /// <returns> 属する判定ゾーンのインデックス。 </returns>
-        private int GetBeatSectionIndex(int blockIndex, float scale, float beatWidth)
+        private int GetBeatSectionIndex(int blockIndex)
         {
-            float position = (blockIndex * beatWidth) / scale;
+            float position = (float)blockIndex / _totalBeatBoxCount * GUIDE_LENGTH_IN_BARS;
 
-            // _zoneStarts/_zoneEndsは1小節基準（0～1）の正規化値のため、
-            // GUIDE_LENGTH_IN_BARS小節分を表すゲージ全長へ変換してから比較する。
+            // ブロック数の切り捨て後の実描画全長を使い、進捗・Just位置と同じ小節単位で比較する。
+            // 最終ゾーンは、1小節を超えるゲージ末端まで表示する。
             for (int i = 0; i < _zoneStarts.Length; i++)
             {
-                float start = (_zoneStarts[i] / GUIDE_LENGTH_IN_BARS) * _displayLength;
-                float end = (_zoneEnds[i] / GUIDE_LENGTH_IN_BARS) * _displayLength;
+                float start = _zoneStarts[i];
+                float end = _zoneEnds[i];
 
                 if (position >= start && position < end)
                 {
