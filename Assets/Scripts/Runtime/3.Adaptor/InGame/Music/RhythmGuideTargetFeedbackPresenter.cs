@@ -46,16 +46,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         private IPlayerAttackSignal _attackSignal;
 
         /// <summary>
-        ///     現在の対象拍と一致するジャスト攻撃が成立した場合だけ成功演出を再生する。
+        ///     現在の対象拍と一致する攻撃が成立した場合に成功演出を再生する。
         /// </summary>
         /// <param name="beatCount"> 入力時に確定した攻撃の拍種。 </param>
-        /// <param name="isJustHit"> 攻撃に適用されたジャスト成否。 </param>
-        private void AttackExecutedHandler(int beatCount, bool isJustHit)
+        /// <param name="_"> 攻撃に適用されたジャスト成否。この演出では使用しない。 </param>
+        private void AttackExecutedHandler(int beatCount, bool _)
         {
-            if (!isJustHit)
-            {
-                return;
-            }
             int? targetBeatCount = _targetBeatCountProvider.Invoke();
             if (!targetBeatCount.HasValue || beatCount != targetBeatCount.Value)
             {
