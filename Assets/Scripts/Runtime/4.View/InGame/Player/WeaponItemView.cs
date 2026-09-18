@@ -1,8 +1,5 @@
-using Cysharp.Threading.Tasks;
 using KillChord.Runtime.View.Persistent.Music;
 using LitMotion;
-using System;
-using System.Threading;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -28,9 +25,8 @@ namespace KillChord.Runtime.View.InGame.Player
         public void PlayAttackEffects()
         {
             PlayWeaponFlash();
-            PlayAttackSound();
-            PlayEffect();
-            PlayFlashLight();
+            EnsureAttackEffects();
+            _attackEffects.Play(_effectDelaySeconds);
             EjectCasing();
         }
 
@@ -70,7 +66,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _materialPropertyBlock ??= new MaterialPropertyBlock();
 
             // 遅延待ちのEffectが非表示後に発火しないよう、Dither開始前に打ち消す。
-            _effectHandle.TryCancel();
+            _attackEffects?.CancelPendingEffect();
             _flashHandle.TryCancel();
             ApplyFlash(0.0f);
             _weaponHandle.TryCancel();
@@ -91,7 +87,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _materialPropertyBlock ??= new MaterialPropertyBlock();
 
             // 遅延待ちのEffectが非表示後に発火しないよう、モデルを消す前に打ち消す。
-            _effectHandle.TryCancel();
+            _attackEffects?.CancelPendingEffect();
             _flashHandle.TryCancel();
             ApplyFlash(0.0f);
             _weaponHandle.TryCancel();
@@ -104,8 +100,40 @@ namespace KillChord.Runtime.View.InGame.Player
         private void OnDestroy()
         {
             _weaponHandle.TryCancel();
-            _effectHandle.TryCancel();
+            if (_attackEffects != null)
+            {
+                Destroy(_attackEffects);
+            }
             _flashHandle.TryCancel();
+        }
+
+        /// <summary>
+        ///     元の粒子の自動再生を止め、発射演出の所有者を初期化します。
+        /// </summary>
+        private void Awake()
+        {
+            EnsureAttackEffects();
+        }
+
+        /// <summary>
+        ///     武器Viewの無効化時にワールドへ分離した演出を停止します。
+        /// </summary>
+        private void OnDisable()
+        {
+            _attackEffects?.StopAll();
+        }
+
+        /// <summary>
+        ///     発射演出の所有者を必要時に生成します。
+        /// </summary>
+        private void EnsureAttackEffects()
+        {
+            if (_attackEffects != null)
+            {
+                return;
+            }
+            _attackEffects = gameObject.AddComponent<StationaryWeaponEffectsView>();
+            _attackEffects.Initialize(_attackSoundSource, _attackEffect, _muzzleFlashLight);
         }
 
         [SerializeField, Tooltip("攻撃中だけ表示する武器モデル。")]
@@ -130,18 +158,6 @@ namespace KillChord.Runtime.View.InGame.Player
         private Renderer[] _effectRenderers;
 
         /// <summary>
-        ///     攻撃SEを再生します。
-        /// </summary>
-        private void PlayAttackSound()
-        {
-            if (_attackSoundSource == null)
-            {
-                return;
-            }
-            _attackSoundSource.Play();
-        }
-
-        /// <summary>
         ///     発砲時だけ武器マテリアルを発光させます。
         /// </summary>
         private void PlayWeaponFlash()
@@ -155,48 +171,6 @@ namespace KillChord.Runtime.View.InGame.Player
             _flashHandle.TryCancel();
             _flashHandle = LMotion.Create(1f, 0f, 0.4f)
                 .Bind(this, (value, state) => state.ApplyFlash(value));
-        }
-
-        /// <summary>
-        ///     遅延後に攻撃Effectを再生します。
-        /// </summary>
-        private void PlayEffect()
-        {
-            if (_attackEffect == null)
-            {
-                return;
-            }
-            _effectHandle.TryCancel();
-            // 値を使わないMotionを遅延タイマーとして扱い、完了コールバックでEffectを再生する。
-            _effectHandle = LMotion.Create(0, 0, _effectDelaySeconds)
-                .WithOnComplete(() => _attackEffect.Play())
-                .WithOnCancel(() => _attackEffect.Stop(true))
-                .RunWithoutBinding();
-        }
-
-        private void PlayFlashLight()
-        {
-            if (_muzzleFlashLight == null)
-            {
-                return;
-            }
-
-            FlashAsync(destroyCancellationToken).Forget();
-        }
-
-        /// <summary>
-        ///     破棄によるキャンセルを無視してマズルフラッシュを再生します。
-        /// </summary>
-        private async UniTaskVoid FlashAsync(CancellationToken token)
-        {
-            try
-            {
-                await _muzzleFlashLight.Flash(token);
-            }
-            catch (OperationCanceledException)
-            {
-                // 破棄によるキャンセルは正常系のため無視する。
-            }
         }
 
         /// <summary>
@@ -259,7 +233,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
         private MaterialPropertyBlock _materialPropertyBlock;
         private MotionHandle _weaponHandle;
-        private MotionHandle _effectHandle;
+        private StationaryWeaponEffectsView _attackEffects;
         private MotionHandle _flashHandle;
         private readonly static int DITHER_ID = Shader.PropertyToID("_Ratio");
         private readonly static int FLASH_ID = Shader.PropertyToID("_Flash");
