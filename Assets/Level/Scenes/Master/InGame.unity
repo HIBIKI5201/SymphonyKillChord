@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 923cd2a80a06dce4294461ea06650d2c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Music.SoundEffectSource
 --- !u!1 &-5292831997925396704
 GameObject:
@@ -55,7 +55,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1e631c3b9947b54c823c6853a05529c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtomSource
   _playOnStart: 0
   _regionOnStart: {fileID: 0}
@@ -13173,7 +13173,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineCamera
   Priority:
     Enabled: 1
@@ -13216,7 +13216,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba14aace3b624a0997cab218b4c18f10, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.StageClearCameraView
   _virtualCamera: {fileID: 179700102}
   _distance: 2.5
@@ -13259,7 +13259,7 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage:
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -58753,6 +58753,7 @@ PrefabInstance:
     m_RemovedGameObjects:
     - {fileID: 1345183333299979680, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
     - {fileID: 8007761601716104921, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
+    - {fileID: 918300101, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4011713318222993239, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
@@ -94119,7 +94120,8 @@ MonoBehaviour:
     - m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 203025890}
-          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.UI.LetterBoxAnimationGUI, KillChord.View
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.UI.LetterBoxAnimationGUI,
+            KillChord.View
           m_MethodName: ActiveAspect
           m_Mode: 4
           m_Arguments:
@@ -94127,13 +94129,14 @@ MonoBehaviour:
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
             m_IntArgument: 0
             m_FloatArgument: 0.3
-            m_StringArgument:
+            m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
     - m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 179700110}
-          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.Sequence.StageClearCameraView, KillChord.View
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.Sequence.StageClearCameraView,
+            KillChord.View
           m_MethodName: Play
           m_Mode: 4
           m_Arguments:
@@ -94141,13 +94144,14 @@ MonoBehaviour:
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
             m_IntArgument: 0
             m_FloatArgument: 1
-            m_StringArgument:
+            m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
     - m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 203025890}
-          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.UI.LetterBoxAnimationGUI, KillChord.View
+          m_TargetAssemblyTypeName: KillChord.Runtime.View.InGame.UI.LetterBoxAnimationGUI,
+            KillChord.View
           m_MethodName: DeactiveAspect
           m_Mode: 4
           m_Arguments:
@@ -94155,7 +94159,7 @@ MonoBehaviour:
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
             m_IntArgument: 0
             m_FloatArgument: 0.3
-            m_StringArgument:
+            m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
 --- !u!114 &1435826637
