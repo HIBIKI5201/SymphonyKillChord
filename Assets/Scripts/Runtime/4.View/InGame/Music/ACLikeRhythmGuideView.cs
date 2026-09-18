@@ -65,6 +65,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 UpdateBeatColors();
                 // 現在ビートの表示色は次のブロック遷移まで更新されないため、ここで即座に反映する。
                 UpdateCurrentBeatColor();
+                UpdateJustTimingMarkerColors();
             }
         }
 
@@ -149,6 +150,54 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             return ApplyTargetDim(color, zoneIndex);
+        }
+
+        /// <summary>
+        ///     ジャストタイミング表示用の帯を現在の対象BeatCountに応じた透明度へ更新する。
+        /// </summary>
+        private void UpdateJustTimingMarkerColors()
+        {
+            if (_justTimingMarkers == null || _effectConfig == null)
+            {
+                return;
+            }
+
+            for (int zoneIndex = 0; zoneIndex < _zoneBeatCounts.Length; zoneIndex++)
+            {
+                Color color = GetJustTimingMarkerColor(zoneIndex);
+                for (int sideIndex = 0; sideIndex < 2; sideIndex++)
+                {
+                    int markerIndex = zoneIndex * 2 + sideIndex;
+                    if (markerIndex < _justTimingMarkers.Length &&
+                        _justTimingMarkers[markerIndex] != null &&
+                        _justTimingMarkers[markerIndex].TryGetComponent(out Image markerImage))
+                    {
+                        markerImage.color = color;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     指定ゾーンのジャストタイミング表示用の帯色を取得する。
+        /// </summary>
+        /// <param name="zoneIndex"> 対象の判定ゾーンのインデックス。 </param>
+        /// <returns> 対象外の場合はゲージ色と同じ透明度を適用した帯色。 </returns>
+        private Color GetJustTimingMarkerColor(int zoneIndex)
+        {
+            Color markerColor = _effectConfig.MarkerColor;
+            if (_beatColor == null ||
+                !_targetBeatCount.HasValue ||
+                zoneIndex < 0 ||
+                zoneIndex >= _zoneBeatCounts.Length ||
+                zoneIndex >= _beatColor.Length ||
+                _zoneBeatCounts[zoneIndex] == _targetBeatCount.Value)
+            {
+                return markerColor;
+            }
+
+            markerColor.a = ApplyTargetDim(_beatColor[zoneIndex], zoneIndex).a;
+            return markerColor;
         }
 
         /// <summary>
@@ -577,10 +626,10 @@ namespace KillChord.Runtime.View.InGame.Music
                 float width = (_justEnds[i] - _justStarts[i]) * barWidth * JUST_TIMING_MARKER_WIDTH_SCALE;
                 _justTimingMarkers[i * 2] = CreateJustTimingMarker(
                     $"JustTimingMarker_Left_{i}",
-                    Vector2.left * horizontalPosition, width);
+                    Vector2.left * horizontalPosition, width, i);
                 _justTimingMarkers[i * 2 + 1] = CreateJustTimingMarker(
                     $"JustTimingMarker_Right_{i}",
-                    Vector2.right * horizontalPosition, width);
+                    Vector2.right * horizontalPosition, width, i);
             }
         }
 
@@ -590,8 +639,9 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="objectName"> 生成するオブジェクト名。 </param>
         /// <param name="anchoredPosition"> 生成位置。 </param>
         /// <param name="width"> 共通ジャスト範囲から換算した帯の幅。 </param>
+        /// <param name="zoneIndex"> 対応する判定ゾーンのインデックス。 </param>
         /// <returns> 生成した帯のRectTransform。 </returns>
-        private RectTransform CreateJustTimingMarker(string objectName, Vector2 anchoredPosition, float width)
+        private RectTransform CreateJustTimingMarker(string objectName, Vector2 anchoredPosition, float width, int zoneIndex)
         {
             GameObject markerObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
             markerObject.layer = gameObject.layer;
@@ -611,7 +661,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 Mathf.Max(0.1f, _effectConfig.MarkerHeight));
 
             Image markerImage = markerObject.GetComponent<Image>();
-            markerImage.color = _effectConfig.MarkerColor;
+            markerImage.color = GetJustTimingMarkerColor(zoneIndex);
             markerImage.raycastTarget = false;
             return markerRectTransform;
         }
