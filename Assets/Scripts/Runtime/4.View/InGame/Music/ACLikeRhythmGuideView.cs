@@ -410,7 +410,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private const float GUIDE_LENGTH_IN_BARS = 1.5f;
 
         /// <summary> ジャストタイミング位置を示す帯の横幅倍率。 </summary>
-        private const float JUST_TIMING_MARKER_WIDTH_SCALE = 2f / 3f;
+        private const float JUST_TIMING_MARKER_WIDTH_SCALE = 1f / 3f;
 
         /// <summary> チュートリアル対象枠の線幅。 </summary>
         private const float TARGET_BEAT_FRAME_THICKNESS = 2f;
@@ -784,7 +784,7 @@ namespace KillChord.Runtime.View.InGame.Music
         {
             GameObject frameObject = new GameObject(objectName, typeof(RectTransform));
             frameObject.layer = gameObject.layer;
-            frameObject.transform.SetParent(_canvasGroup.transform, false);
+            frameObject.transform.SetParent(transform, false);
             frameObject.transform.SetAsLastSibling();
 
             RectTransform frameRectTransform = frameObject.GetComponent<RectTransform>();
