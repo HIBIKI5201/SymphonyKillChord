@@ -25,7 +25,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void PlayAttackEffects()
         {
-            PlayAttackEffects(true);
+            PlayAttackEffects(false);
         }
 
         /// <summary>
