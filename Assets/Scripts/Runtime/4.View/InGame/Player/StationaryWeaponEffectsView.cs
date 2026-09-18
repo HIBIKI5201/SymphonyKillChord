@@ -45,9 +45,9 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
-        ///     空きスロットだけを発射時点の位置と姿勢へ移動し、SE、粒子、ライトを再生します。
+        ///     SEを拍に合わせて再生し、粒子とライトは武器ごとの遅延後に現在の銃口位置で再生します。
         /// </summary>
-        /// <param name="effectDelaySeconds"> 粒子再生までの遅延秒数です。 </param>
+        /// <param name="effectDelaySeconds"> 粒子とライトの再生までの遅延秒数です。 </param>
         public void Play(float effectDelaySeconds)
         {
             if (!isActiveAndEnabled || !_isInitialized
@@ -79,10 +79,8 @@ namespace KillChord.Runtime.View.InGame.Player
             shot.StartTime = Time.time;
             shot.StartFrame = Time.frameCount;
             shot.EffectTime = shot.StartTime + Mathf.Max(0f, effectDelaySeconds);
-            shot.IsEffectPending = shot.Particle != null;
+            shot.IsEffectPending = shot.Particle != null || shot.Flash != null;
             CopyPose(_soundTemplate, shot.Sound);
-            CopyPose(_particleTemplate, shot.Particle);
-            CopyPose(_flashTemplate, shot.Flash);
             _lastShot = shot;
 
             if (shot.Sound != null)
@@ -90,14 +88,10 @@ namespace KillChord.Runtime.View.InGame.Player
                 ResetAudioPosition(shot.Audio);
                 shot.Sound.Play();
             }
-            if (shot.Flash != null)
-            {
-                shot.Flash.Play();
-            }
         }
 
         /// <summary>
-        ///     最新の発射でまだ開始していない粒子再生を取り消します。
+        ///     最新の発射でまだ開始していない粒子とライトの再生を取り消します。
         /// </summary>
         public void CancelPendingEffect()
         {
@@ -134,9 +128,9 @@ namespace KillChord.Runtime.View.InGame.Player
         private bool _hasReportedPlaybackTimeout;
 
         /// <summary>
-        ///     遅延再生と演出終了を監視し、終了した実体を回収します。
+        ///     アニメーション評価後の銃口で遅延演出を開始し、終了した実体を回収します。
         /// </summary>
-        private void Update()
+        private void LateUpdate()
         {
             for (int i = 0; i < _shots.Length; i++)
             {
@@ -149,7 +143,12 @@ namespace KillChord.Runtime.View.InGame.Player
                 if (shot.IsEffectPending && Time.time >= shot.EffectTime)
                 {
                     shot.IsEffectPending = false;
-                    shot.Particle.Play(true);
+                    // 攻撃要求時の姿勢ではなく、遅延とアニメーション評価を終えた姿勢を一度だけ写す。
+                    // 再生開始後は銃に追従させず、発射地点に残す。
+                    CopyPose(_particleTemplate, shot.Particle);
+                    CopyPose(_flashTemplate, shot.Flash);
+                    shot.Particle?.Play(true);
+                    shot.Flash?.Play();
                 }
 
                 // CRIの再生開始要求が処理される前に、停止中と判断して返却しない。
