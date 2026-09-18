@@ -1,8 +1,8 @@
+using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Collections.Generic;
@@ -86,35 +86,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <returns> 対象が存在しない、またはチュートリアル中でない場合はnull。 </returns>
         private int? GetTutorialTargetBeatCount()
         {
-            if (_selectedBattleStageState == null
-                || !_selectedBattleStageState.HasSelectedBattleStage
-                || !_selectedBattleStageState.CurrentStageDefinition.IsTutorial)
-            {
-                return null;
-            }
-
             // ミッション遷移でインスタンスが差し替わるため、都度最新のサービスを取得する。
-            MissionRuntimeService missionRuntimeService = _missionRuntimeServiceProvider?.Invoke();
-
-            if (missionRuntimeService?.MissionDefinition?.ClearCondition is not ObjectiveSequenceClearCondition sequence)
-            {
-                return null;
-            }
-
-            int currentStepIndex = missionRuntimeService.MissionProgress.ObjectiveStepIndex;
-            var currentStep = sequence.GetStep(currentStepIndex);
-
-            var actionCondition = ClearConditionChain.Find<ActionRepeatCountClearCondition>(currentStep?.Condition);
-            if (actionCondition == null)
-            {
-                return null;
-            }
-
-            int? result = actionCondition.TargetBeatType.HasValue
-                ? (int)actionCondition.TargetBeatType.Value
-                : null;
-
-            return result;
+            return TutorialAttackTargetQuery.GetTargetBeatCount(
+                _selectedBattleStageState, _missionRuntimeServiceProvider?.Invoke());
         }
 
         private readonly IMusicSyncService _musicSyncService;

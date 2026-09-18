@@ -5,17 +5,11 @@ namespace KillChord.Runtime.Application.InGame.Music
     /// </summary>
     public class RhythmGuideUsecase
     {
-        /// <summary> インジケーターがジャストタイミングを超えて進む量（小節基準の正規化値）。 </summary>
-        public const float INDICATOR_OVERRUN_NORMALIZED = 0.2f;
-
-        /// <summary> インジケーター位置の上限（小節基準の正規化値）。 </summary>
-        public const float MAX_INDICATOR_NORMALIZED = 1f + INDICATOR_OVERRUN_NORMALIZED;
-
         /// <summary>
         ///     インジケーターの正規化された位置を計算する。
         /// </summary>
         /// <param name="barProgress"> 小節内の進捗。1を超える超過分も受け取る。 </param>
-        /// <returns> 0〜MAX_INDICATOR_NORMALIZEDに収めた正規化位置。 </returns>
+        /// <returns> 1を1小節とする0以上の進捗。表示上限はViewのゲージ全長で決める。 </returns>
         public float CalculateIndicatorNormalized(float barProgress)
         {
             if (barProgress <= 0f)
@@ -23,14 +17,8 @@ namespace KillChord.Runtime.Application.InGame.Music
                 return 0f;
             }
 
-            // 1拍ゾーンのジャストタイミングは「1小節地点」と一致するため、1でクランプすると
-            // インジケーターがジャスト位置で止まり通過して見えない。
-            // 表示上ジャストを通過させるためINDICATOR_OVERRUN_NORMALIZED分だけ超過を許容する。
-            if (barProgress >= MAX_INDICATOR_NORMALIZED)
-            {
-                return MAX_INDICATOR_NORMALIZED;
-            }
-
+            // Viewが持つゲージ全長と異なる上限で進捗を切り捨てると、最端へ到達できない。
+            // 1小節を超えた経過も渡し、描画位置のクランプはViewへ集約する。
             return barProgress;
         }
     }
