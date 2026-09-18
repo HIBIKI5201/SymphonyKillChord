@@ -1,26 +1,33 @@
 using CriWare;
-using Cysharp.Threading.Tasks;
 using KillChord.Runtime.View.Persistent.Music;
-using System;
-using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Player
 {
     /// <summary>
-    ///     発射ごとの演出実体をワールド位置に保持し、再生終了後に回収します。
+    ///     事前生成した発射演出をワールド位置で再生し、終了した実体を再利用します。
     /// </summary>
     public sealed class StationaryWeaponEffectsView : MonoBehaviour
     {
         /// <summary>
-        ///     武器が保持する演出の複製元を設定します。
+        ///     武器の演出を複製元とし、発射前に全スロットの粒子・音源・ライトを初期化します。
         /// </summary>
         public void Initialize(SoundEffectSource sound, ParticleSystem particle, MuzzleFlashLight flash)
         {
+            if (_isInitialized)
+            {
+                return;
+            }
+
+            _isInitialized = true;
             _soundTemplate = sound;
             _particleTemplate = particle;
             _flashTemplate = flash;
+            if (_soundTemplate == null && _particleTemplate == null && _flashTemplate == null)
+            {
+                return;
+            }
+
             if (_particleTemplate != null)
             {
                 _particleTemplate.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -30,40 +37,62 @@ namespace KillChord.Runtime.View.InGame.Player
                     main.playOnAwake = false;
                 }
             }
+
+            for (int i = 0; i < _shots.Length; i++)
+            {
+                _shots[i] = CreateShot();
+            }
         }
 
         /// <summary>
-        ///     発射時点の位置と姿勢でSE、粒子、ライトを再生します。
+        ///     空きスロットだけを発射時点の位置と姿勢へ移動し、SE、粒子、ライトを再生します。
         /// </summary>
         /// <param name="effectDelaySeconds"> 粒子再生までの遅延秒数です。 </param>
         public void Play(float effectDelaySeconds)
         {
-            if (!isActiveAndEnabled || (_soundTemplate == null && _particleTemplate == null && _flashTemplate == null))
+            if (!isActiveAndEnabled || !_isInitialized
+                || (_soundTemplate == null && _particleTemplate == null && _flashTemplate == null))
             {
                 return;
             }
+
+            Shot shot = FindAvailableShot();
+            if (shot == null)
+            {
+                if (!_hasReportedPoolExhaustion)
+                {
+                    _hasReportedPoolExhaustion = true;
+                    Debug.LogWarning(
+                        $"[{nameof(StationaryWeaponEffectsView)}] 発射演出の全スロットを使用中のため、今回の演出を省略します。", this);
+                }
+                return;
+            }
+
             CancelPendingEffect();
-            Shot shot = _pool.Count > 0 ? _pool.Pop() : CreateShot();
-            shot.Generation++;
-            shot.Cancellation = new CancellationTokenSource();
+            if (shot.Root.transform.parent != null)
+            {
+                // 初回発射まではPlayerのシーン移動に同伴し、以後はワールドに固定する。
+                // local identityを維持して切り離し、CopyPoseで拡縮を二重適用しない。
+                shot.Root.transform.SetParent(null, false);
+            }
+            shot.IsActive = true;
             shot.StartTime = Time.time;
+            shot.StartFrame = Time.frameCount;
             shot.EffectTime = shot.StartTime + Mathf.Max(0f, effectDelaySeconds);
             shot.IsEffectPending = shot.Particle != null;
             CopyPose(_soundTemplate, shot.Sound);
             CopyPose(_particleTemplate, shot.Particle);
             CopyPose(_flashTemplate, shot.Flash);
-            shot.Root.SetActive(true);
-            _active.Add(shot);
             _lastShot = shot;
 
             if (shot.Sound != null)
             {
+                ResetAudioPosition(shot.Audio);
                 shot.Sound.Play();
             }
             if (shot.Flash != null)
             {
-                shot.IsFlashing = true;
-                FlashAsync(shot, shot.Generation, shot.Cancellation.Token).Forget();
+                shot.Flash.Play();
             }
         }
 
@@ -72,60 +101,78 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void CancelPendingEffect()
         {
-            if (_lastShot == null)
+            if (_lastShot != null)
             {
-                return;
+                _lastShot.IsEffectPending = false;
             }
-
-            _lastShot.IsEffectPending = false;
         }
 
         /// <summary>
-        ///     全発射を取り消し、停止処理中の実体を再利用せず破棄します。
+        ///     全発射を停止し、実体は破棄せず音源の停止完了後に再利用します。
         /// </summary>
         public void StopAll()
         {
-            for (int i = _active.Count - 1; i >= 0; i--)
+            for (int i = 0; i < _shots.Length; i++)
             {
-                ReleaseShot(i, false);
+                Shot shot = _shots[i];
+                if (shot != null && shot.IsActive)
+                {
+                    ReleaseShot(shot);
+                }
             }
         }
 
-        private const int MAX_POOL_SIZE = 16;
+        private const int POOL_SIZE = 16;
         private const float MAX_PLAYBACK_SECONDS = 30f;
         private SoundEffectSource _soundTemplate;
         private ParticleSystem _particleTemplate;
         private MuzzleFlashLight _flashTemplate;
-        private readonly Stack<Shot> _pool = new();
-        private readonly List<Shot> _active = new();
+        private readonly Shot[] _shots = new Shot[POOL_SIZE];
         private Shot _lastShot;
+        private bool _isInitialized;
+        private bool _hasReportedPoolExhaustion;
+        private bool _hasReportedPlaybackTimeout;
 
         /// <summary>
         ///     遅延再生と演出終了を監視し、終了した実体を回収します。
         /// </summary>
         private void Update()
         {
-            for (int i = _active.Count - 1; i >= 0; i--)
+            for (int i = 0; i < _shots.Length; i++)
             {
-                Shot shot = _active[i];
+                Shot shot = _shots[i];
+                if (shot == null || !shot.IsActive)
+                {
+                    continue;
+                }
+
                 if (shot.IsEffectPending && Time.time >= shot.EffectTime)
                 {
                     shot.IsEffectPending = false;
                     shot.Particle.Play(true);
                 }
 
-                bool isSoundPlaying = shot.Audio != null &&
-                    (shot.Audio.status == CriAtomSourceBase.Status.Prep || shot.Audio.status == CriAtomSourceBase.Status.Playing);
-                bool isParticlePlaying = shot.Particle != null && shot.Particle.IsAlive(true);
-                if (!shot.IsEffectPending && !shot.IsFlashing && !isSoundPlaying && !isParticlePlaying)
+                // CRIの再生開始要求が処理される前に、停止中と判断して返却しない。
+                if (shot.StartFrame == Time.frameCount)
                 {
-                    ReleaseShot(i);
+                    continue;
+                }
+
+                bool isParticlePlaying = shot.Particle != null && shot.Particle.IsAlive(true);
+                bool isFlashing = shot.Flash != null && shot.Flash.IsFlashing;
+                if (!shot.IsEffectPending && !isFlashing && !IsSoundPlaying(shot.Audio) && !isParticlePlaying)
+                {
+                    ReleaseShot(shot);
                 }
                 else if (Time.time - shot.StartTime >= MAX_PLAYBACK_SECONDS)
                 {
-                    // ループCueや無限粒子を設定しても発射実体を蓄積させない。
-                    Debug.LogWarning($"[{nameof(StationaryWeaponEffectsView)}] 発射演出が制限時間内に終了しないため停止します。", this);
-                    ReleaseShot(i, false);
+                    if (!_hasReportedPlaybackTimeout)
+                    {
+                        _hasReportedPlaybackTimeout = true;
+                        Debug.LogWarning(
+                            $"[{nameof(StationaryWeaponEffectsView)}] 発射演出が制限時間内に終了しないため停止します。", this);
+                    }
+                    ReleaseShot(shot);
                 }
             }
         }
@@ -139,24 +186,28 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
-        ///     ワールドに分離した待機実体も所有者と一緒に破棄します。
+        ///     ワールドに分離した全スロットを所有者と一緒に破棄します。
         /// </summary>
         private void OnDestroy()
         {
             StopAll();
-            while (_pool.Count > 0)
+            for (int i = 0; i < _shots.Length; i++)
             {
-                Destroy(_pool.Pop().Root);
+                if (_shots[i]?.Root != null)
+                {
+                    Destroy(_shots[i].Root);
+                }
             }
         }
 
         /// <summary>
-        ///     発射用の非アクティブな演出実体を生成します。
+        ///     発射用の実体を初期化時だけ生成し、音量登録とCRIの実体を待機中も維持します。
         /// </summary>
         private Shot CreateShot()
         {
             Shot shot = new() { Root = new GameObject("StationaryWeaponEffects") };
             shot.Root.SetActive(false);
+            shot.Root.transform.SetParent(transform, false);
             if (_soundTemplate != null)
             {
                 shot.Sound = Instantiate(_soundTemplate, shot.Root.transform);
@@ -169,6 +220,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 shot.Sound.gameObject.SetActive(true);
                 shot.Sound.CopyBaseVolumeFrom(_soundTemplate);
                 shot.Audio = shot.Sound.GetComponent<CriAtomSource>();
+                shot.Audio.playOnStart = false;
             }
             if (_particleTemplate != null)
             {
@@ -187,28 +239,63 @@ namespace KillChord.Runtime.View.InGame.Player
                 shot.Flash = Instantiate(_flashTemplate, shot.Root.transform);
                 shot.Flash.gameObject.SetActive(true);
             }
+
+            // 全実体のAwake/音量登録/CRI登録を済ませ、初回発射までは所有者と同じシーンに保つ。
+            shot.Root.SetActive(true);
             return shot;
         }
 
         /// <summary>
-        ///     ライト演出の終了を待ち、同じ発射世代だけへ結果を反映します。
+        ///     再生中と停止要求の処理待ちを除外し、事前生成した空きスロットを返します。
         /// </summary>
-        private async UniTaskVoid FlashAsync(Shot shot, int generation, CancellationToken token)
+        private Shot FindAvailableShot()
         {
-            try
+            for (int i = 0; i < _shots.Length; i++)
             {
-                await shot.Flash.Flash(token);
-            }
-            catch (OperationCanceledException)
-            {
-                // 武器の無効化・破棄による取消は正常な終了。
-            }
-            finally
-            {
-                if (shot.Generation == generation)
+                Shot shot = _shots[i];
+                if (shot != null && shot.Root != null && !shot.IsActive && !IsSoundPlaying(shot.Audio))
                 {
-                    shot.IsFlashing = false;
+                    return shot;
                 }
+            }
+            return null;
+        }
+
+        /// <summary>
+        ///     CRIの準備中と再生中は、停止要求後もスロットを再利用しません。
+        /// </summary>
+        private static bool IsSoundPlaying(CriAtomSource source)
+        {
+            if (source == null)
+            {
+                return false;
+            }
+
+            CriAtomSourceBase.Status status = source.status;
+            return status == CriAtomSourceBase.Status.Prep || status == CriAtomSourceBase.Status.Playing;
+        }
+
+        /// <summary>
+        ///     CRIの前回座標を再初期化し、発射地点への瞬間移動を速度として扱わせません。
+        /// </summary>
+        private static void ResetAudioPosition(CriAtomSource source)
+        {
+            if (source == null)
+            {
+                return;
+            }
+
+            // 音量登録を持つSoundEffectSourceとrootは有効なまま、CRIの座標履歴だけ初期化する。
+            source.enabled = false;
+            source.enabled = true;
+            if (source.source != null)
+            {
+                source.source.SetVelocity(0f, 0f, 0f);
+                if (!source.freezeOrientation)
+                {
+                    source.source.SetOrientation(source.transform.forward, source.transform.up);
+                }
+                source.source.Update();
             }
         }
 
@@ -226,21 +313,15 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
-        ///     再生、遅延処理、音量登録を止めて実体を待機プールへ戻します。
+        ///     再生と遅延処理だけを止め、音量登録と生成済み実体を保持したまま返却します。
         /// </summary>
-        private void ReleaseShot(int index, bool returnToPool = true)
+        private void ReleaseShot(Shot shot)
         {
-            Shot shot = _active[index];
-            _active.RemoveAt(index);
             if (_lastShot == shot)
             {
                 _lastShot = null;
             }
-            shot.Generation++;
-            shot.Cancellation.Cancel();
-            shot.Cancellation.Dispose();
-            shot.Cancellation = null;
-            shot.IsFlashing = false;
+            shot.IsActive = false;
             shot.IsEffectPending = false;
             if (shot.Sound != null)
             {
@@ -250,18 +331,9 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 shot.Particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             }
-            if (shot.Root == null)
+            if (shot.Flash != null)
             {
-                return;
-            }
-            shot.Root.SetActive(false);
-            if (returnToPool && _pool.Count < MAX_POOL_SIZE)
-            {
-                _pool.Push(shot);
-            }
-            else
-            {
-                Destroy(shot.Root);
+                shot.Flash.Stop();
             }
         }
 
@@ -275,12 +347,11 @@ namespace KillChord.Runtime.View.InGame.Player
             public CriAtomSource Audio;
             public ParticleSystem Particle;
             public MuzzleFlashLight Flash;
-            public CancellationTokenSource Cancellation;
-            public int Generation;
             public float StartTime;
             public float EffectTime;
+            public int StartFrame;
             public bool IsEffectPending;
-            public bool IsFlashing;
+            public bool IsActive;
         }
     }
 }
