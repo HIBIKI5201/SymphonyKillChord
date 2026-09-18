@@ -147,8 +147,14 @@ namespace KillChord.Runtime.View.InGame.Player
                     // 再生開始後は銃に追従させず、発射地点に残す。
                     CopyPose(_particleTemplate, shot.Particle);
                     CopyPose(_flashTemplate, shot.Flash);
-                    shot.Particle?.Play(true);
-                    shot.Flash?.Play();
+                    if (shot.Particle != null)
+                    {
+                        shot.Particle.Play(true);
+                    }
+                    if (shot.Flash != null)
+                    {
+                        shot.Flash.Play();
+                    }
                 }
 
                 // CRIの再生開始要求が処理される前に、停止中と判断して返却しない。
