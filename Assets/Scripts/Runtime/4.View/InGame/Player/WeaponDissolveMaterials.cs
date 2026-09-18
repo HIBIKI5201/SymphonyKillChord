@@ -117,6 +117,7 @@ namespace KillChord.Runtime.View.InGame.Player
             _isDisposed = true;
         }
 
+        private static readonly Color DISSOLVE_EFFECT_COLOR = new(1.25f, 0.02f, 0.01f, 0f);
         private static readonly int RATIO_ID = Shader.PropertyToID("_Ratio");
         private readonly Dictionary<Material, Material> _generatedMaterials = new();
         private readonly RendererMaterials[] _bindings;
@@ -141,7 +142,7 @@ namespace KillChord.Runtime.View.InGame.Player
             Color color = original.HasProperty("_BaseColor") ? original.GetColor("_BaseColor")
                 : original.HasProperty("_Color") ? original.GetColor("_Color") : Color.white;
             material.SetColor("_Color", color);
-            material.SetColor("_EffectColor", color);
+            material.SetColor("_EffectColor", DISSOLVE_EFFECT_COLOR);
             material.SetFloat("_Flash", 0f);
             material.SetFloat(RATIO_ID, 1f);
             if (original.HasProperty("_Smoothness"))
