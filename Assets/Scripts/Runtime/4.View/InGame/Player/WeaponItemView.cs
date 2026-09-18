@@ -15,8 +15,9 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void Play()
         {
+            bool shouldPlayWeaponFlash = _weaponModel != null && !_weaponModel.activeSelf;
             ShowWeapon();
-            PlayAttackEffects();
+            PlayAttackEffects(shouldPlayWeaponFlash);
         }
 
         /// <summary>
@@ -24,10 +25,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void PlayAttackEffects()
         {
-            PlayWeaponFlash();
-            EnsureAttackEffects();
-            _attackEffects.Play(_effectDelaySeconds);
-            EjectCasing();
+            PlayAttackEffects(true);
         }
 
         /// <summary>
@@ -45,8 +43,7 @@ namespace KillChord.Runtime.View.InGame.Player
             if (_weaponModel.activeSelf)
             {
                 // 出現・収納の途中でも表示中なら、再出現させず全表示へ戻す。
-                ApplyDither(1f);
-                RestoreOriginalMaterials();
+                CancelWholeWeaponEffects();
                 // 初回と同じく、最後の発射から出現時間を含む2秒後に収納する。
                 _weaponHandle = LSequence.Create()
                     .AppendInterval(AUTO_HIDE_DELAY_SECONDS)
@@ -122,13 +119,13 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void Awake()
         {
-            if (_weaponModel != null && _dissolveShader != null)
+            if (_weaponModel == null)
+            {
+                Debug.LogError($"[{nameof(WeaponItemView)}] 武器モデルが未設定です。", this);
+            }
+            else if (_dissolveShader != null)
             {
                 _dissolveMaterials = new WeaponDissolveMaterials(_weaponModel, _dissolveShader);
-            }
-            else
-            {
-                Debug.LogError($"[{nameof(WeaponItemView)}] 武器モデルまたはディゾルブ用Shaderが未設定です。", this);
             }
             EnsureAttackEffects();
         }
@@ -183,6 +180,21 @@ namespace KillChord.Runtime.View.InGame.Player
         private Shader _dissolveShader;
 
         /// <summary>
+        ///     攻撃時のSE・銃口演出・薬莢を再生し、必要な場合だけ武器全体を発光させます。
+        /// </summary>
+        /// <param name="shouldPlayWeaponFlash"> 武器全体の発光を再生する場合はtrueです。 </param>
+        private void PlayAttackEffects(bool shouldPlayWeaponFlash)
+        {
+            if (shouldPlayWeaponFlash)
+            {
+                PlayWeaponFlash();
+            }
+            EnsureAttackEffects();
+            _attackEffects.Play(_effectDelaySeconds);
+            EjectCasing();
+        }
+
+        /// <summary>
         ///     出現完了または演出中断後に、通常時の材質へ復元します。
         /// </summary>
         private void RestoreOriginalMaterials()
@@ -207,7 +219,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void PlayWeaponFlash()
         {
-            if (_weaponModel == null)
+            if (_weaponModel == null || _dissolveMaterials == null)
             {
                 return;
             }
@@ -215,6 +227,17 @@ namespace KillChord.Runtime.View.InGame.Player
             _flashHandle.TryCancel();
             _flashHandle = LMotion.Create(1f, 0f, 0.4f)
                 .Bind(this, (value, state) => state.ApplyFlash(value));
+        }
+
+        /// <summary>
+        ///     表示済み武器のディゾルブと全体発光を止め、通常材質へ戻します。
+        /// </summary>
+        private void CancelWholeWeaponEffects()
+        {
+            _flashHandle.TryCancel();
+            ApplyDither(1f);
+            ApplyFlash(0f);
+            RestoreOriginalMaterials();
         }
 
         /// <summary>
