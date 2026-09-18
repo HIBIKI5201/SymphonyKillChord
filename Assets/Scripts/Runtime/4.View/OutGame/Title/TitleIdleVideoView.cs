@@ -2,15 +2,13 @@ using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Controls;
 using UnityEngine.UIElements;
 using UnityEngine.Video;
 
 namespace KillChord.Runtime.View.OutGame.Title
 {
     /// <summary>
-    ///     タイトルの操作待ち中に背景だけをPVへ切り替える演出を所有します。
+    ///     タイトル表示中に一定間隔で背景だけをPVへ切り替える演出を所有します。
     /// </summary>
     public sealed class TitleIdleVideoView : MonoBehaviour
     {
@@ -64,7 +62,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             _player.loopPointReached += PlaybackEndedHandler;
             _player.errorReceived += PlaybackErrorHandler;
             _player.frameReady += FrameReadyHandler;
-            _lastInputTime = Time.unscaledTime;
+            _intervalStartedTime = Time.unscaledTime;
             _isInitialized = true;
             return true;
         }
@@ -100,7 +98,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         private const string VIDEO_OVERLAY_CLASS = "title-idle-video-playing";
-        private const float IDLE_SECONDS = 90f;
+        private const float PLAYBACK_INTERVAL_SECONDS = 90f;
         private const float FADE_SECONDS = 2f;
         private const float PREPARE_TIMEOUT_SECONDS = 30f;
         private const int VIDEO_WIDTH = 1920;
@@ -121,7 +119,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private RenderTexture _renderTexture;
         private CancellationTokenSource _cycleCancellation;
         private int _generation;
-        private float _lastInputTime;
+        private float _intervalStartedTime;
         private float _videoAudioGain;
         private string _playbackError;
         private bool _hasPlaybackEnded;
@@ -132,7 +130,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private bool _isDisposed;
 
         /// <summary>
-        ///     操作可能なタイトルだけで無操作時間を数え、入力は既存UIへそのまま渡します。
+        ///     操作可能なタイトルの表示時間を数え、一定間隔でPVを再生します。
         /// </summary>
         private void Update()
         {
@@ -140,13 +138,14 @@ namespace KillChord.Runtime.View.OutGame.Title
             {
                 return;
             }
-            if (!UnityEngine.Application.isFocused || !_canPlay() || HasInput())
+            if (!UnityEngine.Application.isFocused || !_canPlay())
             {
-                _lastInputTime = Time.unscaledTime;
+                _intervalStartedTime = Time.unscaledTime;
                 CancelCycle();
                 return;
             }
-            if (_cycleCancellation == null && Time.unscaledTime - _lastInputTime >= IDLE_SECONDS)
+            if (_cycleCancellation == null
+                && Time.unscaledTime - _intervalStartedTime >= PLAYBACK_INTERVAL_SECONDS)
             {
                 _cycleCancellation = new CancellationTokenSource();
                 PlayCycleAsync(++_generation, _cycleCancellation.Token).Forget();
@@ -155,11 +154,11 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         /// <summary>
-        ///     フォーカスを失った時間を無操作時間へ含めません。
+        ///     フォーカスを失った時間を再生間隔へ含めません。
         /// </summary>
         private void OnApplicationFocus(bool hasFocus)
         {
-            _lastInputTime = Time.unscaledTime;
+            _intervalStartedTime = Time.unscaledTime;
             if (!hasFocus)
             {
                 CancelCycle();
@@ -172,7 +171,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void OnDisable()
         {
             CancelCycle();
-            _lastInputTime = Time.unscaledTime;
+            _intervalStartedTime = Time.unscaledTime;
         }
 
         /// <summary>
@@ -313,7 +312,7 @@ namespace KillChord.Runtime.View.OutGame.Title
                     _cycleCancellation?.Dispose();
                     _cycleCancellation = null;
                     RestoreBackground();
-                    _lastInputTime = Time.unscaledTime;
+                    _intervalStartedTime = Time.unscaledTime;
                 }
             }
         }
@@ -450,40 +449,6 @@ namespace KillChord.Runtime.View.OutGame.Title
             {
                 throw new InvalidOperationException(_playbackError);
             }
-        }
-
-        /// <summary>
-        ///     キー、ポインター、タッチ、ゲームパッドの有効入力を調べます。
-        /// </summary>
-        private static bool HasInput()
-        {
-            if (Keyboard.current?.anyKey.isPressed == true || Touchscreen.current?.primaryTouch.press.isPressed == true)
-            {
-                return true;
-            }
-            Mouse mouse = Mouse.current;
-            if (mouse != null && (mouse.delta.ReadValue().sqrMagnitude > 0f || mouse.scroll.ReadValue().sqrMagnitude > 0f
-                || mouse.leftButton.isPressed || mouse.rightButton.isPressed || mouse.middleButton.isPressed))
-            {
-                return true;
-            }
-            float deadzone = InputSystem.settings.defaultDeadzoneMin;
-            foreach (Gamepad gamepad in Gamepad.all)
-            {
-                if (gamepad.leftStick.ReadUnprocessedValue().sqrMagnitude > deadzone * deadzone
-                    || gamepad.rightStick.ReadUnprocessedValue().sqrMagnitude > deadzone * deadzone)
-                {
-                    return true;
-                }
-                foreach (InputControl control in gamepad.allControls)
-                {
-                    if (control is ButtonControl button && button.isPressed)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         /// <summary>
