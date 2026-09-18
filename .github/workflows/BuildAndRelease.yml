@@ -1756,6 +1756,7 @@ jobs:
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' || steps.determine_mode.outputs.build_variant == 'demo' }}
+          make_latest: ${{ steps.determine_mode.outputs.build_mode == 'Master' && steps.determine_mode.outputs.build_variant == 'release' }}
           body: |
             Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
 
