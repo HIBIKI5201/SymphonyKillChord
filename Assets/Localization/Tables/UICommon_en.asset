@@ -379,7 +379,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1830000103
-    m_Localized: "Dodge + target right*"
+    m_Localized: "Dodge + right*"
     m_Metadata:
       m_Items: []
   - m_Id: 1830000104
@@ -399,7 +399,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1830000108
-    m_Localized: "*: Target switch while locked\nSame action: either button"
+    m_Localized: "* Target: locked on\nSame action: either button"
     m_Metadata:
       m_Items: []
   references:

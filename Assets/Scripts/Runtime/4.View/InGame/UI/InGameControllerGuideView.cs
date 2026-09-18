@@ -10,6 +10,8 @@ namespace KillChord.Runtime.View.InGame.UI
     /// </summary>
     public sealed class InGameControllerGuideView : MonoBehaviour
     {
+        private const int ICON_FONT_SIZE = 22;
+
         [SerializeField, Tooltip("左トリガーの操作説明です。")]
         private TMP_Text _leftTriggerText;
 
@@ -28,13 +30,13 @@ namespace KillChord.Runtime.View.InGame.UI
         [SerializeField, Tooltip("右スティックの操作説明です。")]
         private TMP_Text _rightStickText;
 
-        [SerializeField, Tooltip("Menu/Optionsボタンの操作説明です。")]
+        [SerializeField, Tooltip("Menuボタンの操作説明です。")]
         private TMP_Text _menuText;
 
-        [SerializeField, Tooltip("右側のB/○ボタンの操作説明です。")]
+        [SerializeField, Tooltip("右側のBボタンの操作説明です。")]
         private TMP_Text _eastButtonText;
 
-        [SerializeField, Tooltip("下側のA/×ボタンの操作説明です。")]
+        [SerializeField, Tooltip("下側のAボタンの操作説明です。")]
         private TMP_Text _southButtonText;
 
         [SerializeField, Tooltip("対象切り替え条件と代替ボタンの補足です。")]
@@ -57,15 +59,15 @@ namespace KillChord.Runtime.View.InGame.UI
                     return;
                 }
 
-                BindLabel(_leftTriggerText, "lock_on", "LT / L2", "#40516FCC");
-                BindLabel(_rightTriggerText, "attack", "RT / R2", "#40516FCC");
-                BindLabel(_leftShoulderText, "target_left", "LB / L1", "#40516FCC");
-                BindLabel(_rightShoulderText, "dodge_target_right", "RB / R1", "#40516FCC");
-                BindLabel(_leftStickText, "move", "L Stick", "#40516FCC");
-                BindLabel(_rightStickText, "look", "R Stick", "#40516FCC");
-                BindLabel(_menuText, "pause", "Menu / Options", "#40516FCC");
-                BindLabel(_eastButtonText, "attack", "B / ○", "#943C46CC");
-                BindLabel(_southButtonText, "dodge", "A / ×", "#366749CC");
+                BindLabel(_leftTriggerText, "lock_on", "lt");
+                BindLabel(_rightTriggerText, "attack", "rt");
+                BindLabel(_leftShoulderText, "target_left", "lb");
+                BindLabel(_rightShoulderText, "dodge_target_right", "rb");
+                BindLabel(_leftStickText, "move", "jl");
+                BindLabel(_rightStickText, "look", "jr");
+                BindLabel(_menuText, "pause", "xmenu");
+                BindLabel(_eastButtonText, "attack", "xb");
+                BindLabel(_southButtonText, "dodge", "xa");
                 _localizedTexts.Add(new LocalizedElementText(
                     "UICommon", "ui.ingame.controller_guide.note", text => _noteText.text = text, _noteText.text));
             });
@@ -84,18 +86,17 @@ namespace KillChord.Runtime.View.InGame.UI
             _localizedTexts.Clear();
         }
 
-        /// <summary> ボタン名のバッジを残して機能名だけを現在言語へ切り替えます。 </summary>
+        /// <summary> Xboxの素材アイコンを残して機能名だけを現在言語へ切り替えます。 </summary>
         /// <param name="label"> 表示先です。 </param>
         /// <param name="entry"> 操作説明の翻訳キー末尾です。 </param>
-        /// <param name="button"> Xbox/PlayStationのボタン名です。 </param>
-        /// <param name="badgeColor"> ボタン名の背景色です。 </param>
-        private void BindLabel(TMP_Text label, string entry, string button, string badgeColor)
+        /// <param name="spriteName"> 素材のSprite Assetに登録されたXboxアイコン名です。 </param>
+        private void BindLabel(TMP_Text label, string entry, string spriteName)
         {
             // 初期化失敗時もPrefabの説明を維持し、再有効化時は装飾を重ねない。
             string fallback = label.text.Substring(label.text.LastIndexOf('\n') + 1);
             _localizedTexts.Add(new LocalizedElementText(
                 "UICommon", "ui.ingame.controller_guide." + entry,
-                text => label.text = $"<mark={badgeColor}> {button} </mark>\n{text}", fallback));
+                text => label.text = $"<size={ICON_FONT_SIZE}><sprite name=\"{spriteName}\"></size>\n{text}", fallback));
         }
     }
 }
