@@ -223,6 +223,7 @@ MonoBehaviour:
   _muzzleFlashLight: {fileID: 6712284992410448918}
   _effectDelaySeconds: 0
   _casingEjector: {fileID: 478570793099641758}
+  _dissolveShader: {fileID: -6465566751694194690, guid: 058c417a90245cc46b5e68311b16d129, type: 3}
   _effectRenderers:
   - {fileID: 0}
   - {fileID: 0}
