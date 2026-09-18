@@ -4,6 +4,7 @@ using KillChord.Runtime.Application.Persistent.Input;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
@@ -42,6 +43,8 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         private InputTimestampProvider _timestampProvider;
         private UnityInputMapController _inputMapController;
         private LoadingScreenController _loadingScreenController;
+        private EventNotificationView _notificationView;
+        private bool _isNotificationSubscribed;
         private bool _isLoadingSubscribed;
         private bool _isViewBound;
 
@@ -68,7 +71,8 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         {
             if (_playerInputView == null || !_playerInputView.HasUIInputModule
                 || _inputMapController == null
-                || !ServiceLocator.TryGetInstance(out _loadingScreenController))
+                || !ServiceLocator.TryGetInstance(out _loadingScreenController)
+                || !ServiceLocator.TryGetInstance(out _notificationView))
             {
                 Debug.LogError($"[{nameof(InputComposition)}] ロード中の入力制御に必要な依存を取得できませんでした。", this);
                 return false;
@@ -81,7 +85,13 @@ namespace KillChord.Runtime.Composition.Persistent.Input
                 _isLoadingSubscribed = true;
             }
 
-            ApplyInputSuppression(_loadingScreenController.IsLoading);
+            if (!_isNotificationSubscribed)
+            {
+                _notificationView.OnVisibilityChanged += HandleNotificationVisibilityChanged;
+                _isNotificationSubscribed = true;
+            }
+
+            RefreshInputSuppression();
             return true;
         }
 
@@ -98,6 +108,12 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         /// </summary>
         public override void Shutdown()
         {
+            if (_isNotificationSubscribed && _notificationView != null)
+            {
+                _notificationView.OnVisibilityChanged -= HandleNotificationVisibilityChanged;
+            }
+            _isNotificationSubscribed = false;
+            _notificationView = null;
             UnsubscribeLoading();
             UnbindViewAdaptor();
 
@@ -127,7 +143,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         /// </summary>
         private void HandleLoadingStarted()
         {
-            ApplyInputSuppression(true);
+            RefreshInputSuppression();
         }
 
         /// <summary>
@@ -135,7 +151,24 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         /// </summary>
         private void HandleLoadingCompleted(bool success)
         {
-            ApplyInputSuppression(false);
+            RefreshInputSuppression();
+        }
+
+        /// <summary>
+        ///     通知表示の変更時にロード状態と入力抑止を合成します。
+        /// </summary>
+        private void HandleNotificationVisibilityChanged(bool isVisible)
+        {
+            RefreshInputSuppression();
+        }
+
+        /// <summary>
+        ///     一方の完了で他方の入力抑止を解除しないよう状態を同期します。
+        /// </summary>
+        private void RefreshInputSuppression()
+        {
+            ApplyInputSuppression((_loadingScreenController != null && _loadingScreenController.IsLoading)
+                || (_notificationView != null && _notificationView.IsVisible));
         }
 
         /// <summary>

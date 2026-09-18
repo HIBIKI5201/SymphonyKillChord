@@ -399,6 +399,18 @@ MonoBehaviour:
     m_Key: ui.ingame.controller_guide.note
     m_Metadata:
       m_Items: []
+  - m_Id: 1870000001
+    m_Key: ui.notification.demo_expired
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000002
+    m_Key: ui.notification.home_expired
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000003
+    m_Key: ui.notification.save_reset
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

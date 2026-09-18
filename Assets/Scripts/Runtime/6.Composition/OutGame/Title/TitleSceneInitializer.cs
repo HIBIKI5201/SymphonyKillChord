@@ -20,6 +20,7 @@ using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
@@ -27,6 +28,7 @@ using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -90,6 +92,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private bool _isLoadingSubscribed;
         private bool _isResettingSaveData;
         private LoadingScreenController _loadingScreenController;
+        private EventNotificationView _eventNotificationView;
+        private CancellationTokenSource _resetCancellation;
 
         /// <summary>
         ///     タイトル画面に必要なアセットをロードします。
@@ -161,6 +165,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
 #endif
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out _eventNotificationView))
+            {
+                Debug.LogError($"[{nameof(TitleSceneInitializer)}] 常駐通知Viewを取得できませんでした。", this);
                 return false;
             }
 
@@ -297,6 +307,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         public override void Shutdown()
         {
+            _resetCancellation?.Cancel();
             if (_idleVideoView != null)
             {
                 _idleVideoView.Shutdown();
@@ -379,7 +390,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void HandleLoadingCompleted(bool success)
         {
-            ApplyInteractionEnabled(true);
+            ApplyInteractionEnabled(!_isResettingSaveData);
         }
 
         /// <summary>
@@ -560,13 +571,19 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             // リセット前の音量設定を保持する。
             AudioSettingsData preservedAudioSettings = GetPreservedAudioSettings();
             bool canResumeInteraction = false;
+            bool resetSucceeded = false;
+            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            _resetCancellation = cancellation;
+            CancellationToken lifetimeToken = cancellation.Token;
 
             try
             {
                 await SaveStore.DeleteAsync<SaveData>();
+                lifetimeToken.ThrowIfCancellationRequested();
 
                 // セーブデータをロードして、初期状態に戻す。
                 _loadedSaveData = await LoadSaveData();
+                lifetimeToken.ThrowIfCancellationRequested();
                 if (_loadedSaveData == null)
                 {
                     Debug.LogError(
@@ -575,12 +592,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     return;
                 }
 
-                if (!await ApplyInitialSkillLoadoutAsync())
-                {
-                    return;
-                }
+                bool initialSkillLoadoutApplied = await ApplyInitialSkillLoadoutAsync();
+                lifetimeToken.ThrowIfCancellationRequested();
+                if (!initialSkillLoadoutApplied) { return; }
 
                 canResumeInteraction = ApplyStartDestination();
+                resetSucceeded = canResumeInteraction;
                 if (!canResumeInteraction)
                 {
                     Debug.LogError(
@@ -588,24 +605,51 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                         this);
                 }
             }
+            catch (OperationCanceledException) when (lifetimeToken.IsCancellationRequested)
+            {
+                // タイトル終了後は初期データの表示反映や成功通知へ進みません。
+            }
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
             }
             finally
             {
-                if (!canResumeInteraction)
+                try
                 {
-                    canResumeInteraction = await TryRecoverStartDestinationAsync();
+                    lifetimeToken.ThrowIfCancellationRequested();
+                    if (!canResumeInteraction)
+                    {
+                        canResumeInteraction = await TryRecoverStartDestinationAsync();
+                    }
+                    if (canResumeInteraction)
+                    {
+                        await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
+                    }
+                    lifetimeToken.ThrowIfCancellationRequested();
+                    if (resetSucceeded)
+                    {
+                        await _eventNotificationView.ShowAsync("ui.notification.save_reset", lifetimeToken);
+                    }
                 }
-
-                if (canResumeInteraction)
+                catch (OperationCanceledException) when (lifetimeToken.IsCancellationRequested)
                 {
-                    await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
+                    // タイトル終了による取消しでは通知後の操作再開を行いません。
                 }
-
-                ApplyInteractionEnabled(canResumeInteraction);
-                _isResettingSaveData = false;
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception, this);
+                }
+                finally
+                {
+                    _resetCancellation = null;
+                    _isResettingSaveData = false;
+                    if (this != null && _isInitialized && !lifetimeToken.IsCancellationRequested)
+                    {
+                        ApplyInteractionEnabled(canResumeInteraction
+                            && (_loadingScreenController == null || !_loadingScreenController.IsLoading));
+                    }
+                }
             }
         }
 
