@@ -161,6 +161,8 @@ namespace KillChord.Runtime.View.InGame.Skill
 
             SetAnchoredX(_leftIconImage.rectTransform, -xPosition);
             SetAnchoredX(_rightIconImage.rectTransform, xPosition);
+            UpdateProgressLine(_leftProgressLineImage, -xPosition, setting.BeatType);
+            UpdateProgressLine(_rightProgressLineImage, xPosition, setting.BeatType);
 
             if (!_isPositioned)
             {
@@ -177,6 +179,16 @@ namespace KillChord.Runtime.View.InGame.Skill
             bool visible = _isPositioned && _isDisplayAllowed;
             _leftIconImage.enabled = visible;
             _rightIconImage.enabled = visible;
+
+            if (_leftProgressLineImage != null)
+            {
+                _leftProgressLineImage.enabled = visible;
+            }
+
+            if (_rightProgressLineImage != null)
+            {
+                _rightProgressLineImage.enabled = visible;
+            }
 
             if (_cooldownBackgroundImage == null)
             {
@@ -207,6 +219,26 @@ namespace KillChord.Runtime.View.InGame.Skill
             Vector2 anchoredPosition = rectTransform.anchoredPosition;
             anchoredPosition.x = x;
             rectTransform.anchoredPosition = anchoredPosition;
+        }
+
+        /// <summary>
+        ///     Updates a line that connects a skill icon to its corresponding beat.
+        /// </summary>
+        /// <param name="progressLineImage"> The line image to update. </param>
+        /// <param name="xPosition"> The horizontal position of the line. </param>
+        /// <param name="beatType"> The beat type used to color the line. </param>
+        private void UpdateProgressLine(Image progressLineImage, float xPosition, int beatType)
+        {
+            if (progressLineImage == null)
+            {
+                return;
+            }
+
+            SetAnchoredX(progressLineImage.rectTransform, xPosition);
+            if (_rhythmGuideView.TryGetBeatColor(beatType, out Color beatColor))
+            {
+                progressLineImage.color = beatColor;
+            }
         }
 
         /// <summary>
@@ -320,6 +352,10 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Image _leftIconImage;
         [SerializeField, Tooltip("右側に表示する拍子アイコンのImage。")]
         private Image _rightIconImage;
+        [SerializeField, Tooltip("Line connecting the left skill icon to its beat.")]
+        private Image _leftProgressLineImage;
+        [SerializeField, Tooltip("Line connecting the right skill icon to its beat.")]
+        private Image _rightProgressLineImage;
         [SerializeField, Tooltip("クールダウンを表現するための背景。未設定の場合はクールダウン表示なし。")]
         private Image[] _cooldownBackgroundImage;
 
