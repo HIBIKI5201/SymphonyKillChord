@@ -402,6 +402,18 @@ MonoBehaviour:
     m_Localized: "Attack: RT or B"
     m_Metadata:
       m_Items: []
+  - m_Id: 1870000001
+    m_Localized: "Time is up. The demo will now end."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000002
+    m_Localized: "The home timer has expired. Moving to the mission."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000003
+    m_Localized: "Save data has been reset."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
