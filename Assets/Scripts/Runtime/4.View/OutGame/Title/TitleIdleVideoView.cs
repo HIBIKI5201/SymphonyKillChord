@@ -15,7 +15,7 @@ namespace KillChord.Runtime.View.OutGame.Title
     public sealed class TitleIdleVideoView : MonoBehaviour
     {
         /// <summary>
-        ///     前面UIに触れず、背景の動画表示とBGM演出の接続を初期化します。
+        ///     背景動画とBGM演出、動画中のタイトルロゴ・開始案内の表示切り替えを初期化します。
         /// </summary>
         public bool Initialize(VisualElement titleRoot, Func<bool> canPlay, Action<float> setBgmGain,
             Func<float> getBgmVolume, string movieUrl)
@@ -27,6 +27,8 @@ namespace KillChord.Runtime.View.OutGame.Title
                 return false;
             }
 
+            _background = background;
+            _titleLogo = background.Q<VisualElement>("TitleLogo");
             _canPlay = canPlay;
             _setBgmGain = setBgmGain;
             _getBgmVolume = getBgmVolume;
@@ -97,6 +99,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             _getBgmVolume = null;
         }
 
+        private const string VIDEO_OVERLAY_CLASS = "title-idle-video-playing";
         private const float IDLE_SECONDS = 90f;
         private const float FADE_SECONDS = 2f;
         private const float PREPARE_TIMEOUT_SECONDS = 30f;
@@ -106,6 +109,10 @@ namespace KillChord.Runtime.View.OutGame.Title
         private Func<bool> _canPlay;
         private Action<float> _setBgmGain;
         private Func<float> _getBgmVolume;
+        private VisualElement _background;
+        private VisualElement _titleLogo;
+        private StyleEnum<DisplayStyle> _originalLogoDisplay;
+        private bool _isVideoOverlayActive;
         private VisualElement _layer;
         private Image _videoMatte;
         private Image _videoSurface;
@@ -267,6 +274,7 @@ namespace KillChord.Runtime.View.OutGame.Title
                 }
                 _videoMatte.style.display = DisplayStyle.Flex;
                 _videoSurface.style.display = DisplayStyle.Flex;
+                SetVideoOverlay(true);
                 if (_canControlVideoAudio)
                 {
                     ApplyVideoAudioVolume();
@@ -287,6 +295,7 @@ namespace KillChord.Runtime.View.OutGame.Title
                 StopVideo();
                 _videoSurface.style.display = DisplayStyle.None;
                 _videoMatte.style.display = DisplayStyle.None;
+                SetVideoOverlay(false);
                 await FadeAsync(1f, 0f, 0f, 1f, token);
             }
             catch (OperationCanceledException)
@@ -357,6 +366,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void RestoreBackground()
         {
             StopVideo();
+            SetVideoOverlay(false);
             if (_layer != null)
             {
                 _layer.style.display = DisplayStyle.None;
@@ -366,6 +376,34 @@ namespace KillChord.Runtime.View.OutGame.Title
                 _setBgmGain?.Invoke(1f);
                 _hasBgmOverride = false;
             }
+        }
+
+        /// <summary>
+        ///     動画中だけゲームロゴを隠し、開始案内の背景を切り替えます。CRIロゴは変更しません。
+        /// </summary>
+        /// <param name="isPlaying"> 動画を表示している場合はtrueです。 </param>
+        private void SetVideoOverlay(bool isPlaying)
+        {
+            if (_isVideoOverlayActive == isPlaying)
+            {
+                return;
+            }
+
+            if (_titleLogo != null)
+            {
+                if (isPlaying)
+                {
+                    // UXMLのinline display指定を保存し、終了時には同じ値へ戻す。
+                    _originalLogoDisplay = _titleLogo.style.display;
+                    _titleLogo.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    _titleLogo.style.display = _originalLogoDisplay;
+                }
+            }
+            _background?.EnableInClassList(VIDEO_OVERLAY_CLASS, isPlaying);
+            _isVideoOverlayActive = isPlaying;
         }
 
         /// <summary>
