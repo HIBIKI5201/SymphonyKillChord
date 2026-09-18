@@ -29,15 +29,11 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController = inputController;
             _playerInputView = playerInputView;
             _viewModel = viewModel;
-            if (_autoButton == null)
+            if (_autoButton != null)
             {
-                Debug.LogError($"[{nameof(ScenarioInputView)}] AutoButton が未設定です。", this);
-                enabled = false;
-                return;
+                _autoButtonDefaultColors = _autoButton.colors;
+                UpdateAutoButtonColor();
             }
-            _autoButtonDefaultColors = _autoButton.colors;
-            UpdateAutoButtonColor();
-
 
             if (_scenarioUIRaycastView == null || _scenarioUIHideView == null)
             {
@@ -345,7 +341,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         [SerializeField]
         private ScenarioUIHideView _scenarioUIHideView;
 
-        [SerializeField, Tooltip("自動送りの有効状態を色で示すAutoボタン。")]
+        [SerializeField, Tooltip("自動送りの有効状態を色で示すAutoボタン。Auto UIがあるシーンのみ指定します。")]
         private Button _autoButton;
 
         [SerializeField, Tooltip("自動送りが有効な時のAutoボタン色。")]
