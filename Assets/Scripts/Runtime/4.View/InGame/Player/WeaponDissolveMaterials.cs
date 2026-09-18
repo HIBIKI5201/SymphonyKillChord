@@ -50,7 +50,71 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void Begin()
         {
-            if (_isDisposed || _isApplied)
+            if (_isDisposed)
+            {
+                return;
+            }
+            _isDissolving = true;
+            ApplyTransitions();
+            ApplyEffectiveFlash();
+        }
+
+        /// <summary>
+        ///     出現演出を終了し、発砲発光も終わっていれば通常材質へ戻します。
+        /// </summary>
+        public void EndDissolve()
+        {
+            if (_isDisposed)
+            {
+                return;
+            }
+            _isDissolving = false;
+            ApplyEffectiveFlash();
+            RestoreIfIdle();
+        }
+
+        /// <summary>
+        ///     発砲発光を演出材質へ適用します。
+        /// </summary>
+        /// <param name="value"> 発光の強さです。 </param>
+        public void SetFlash(float value)
+        {
+            if (_isDisposed)
+            {
+                return;
+            }
+            _attackFlash = value;
+            if (value > 0f)
+            {
+                ApplyTransitions();
+                if (!_isDissolving)
+                {
+                    SetRatio(1f);
+                }
+            }
+            ApplyEffectiveFlash();
+            RestoreIfIdle();
+        }
+
+        /// <summary>
+        ///     出現・収納中の控えめな発光と発砲発光の強い方を適用します。
+        /// </summary>
+        private void ApplyEffectiveFlash()
+        {
+            float dissolveFlash = _isDissolving ? DISSOLVE_FLASH : 0f;
+            float effectiveFlash = Mathf.Max(_attackFlash, dissolveFlash);
+            foreach (Material material in _generatedMaterials.Values)
+            {
+                material.SetFloat(FLASH_ID, effectiveFlash);
+            }
+        }
+
+        /// <summary>
+        ///     生成済みの演出材質へ切り替えます。
+        /// </summary>
+        private void ApplyTransitions()
+        {
+            if (_isApplied)
             {
                 return;
             }
@@ -85,7 +149,33 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void Restore()
         {
-            if (_isDisposed || !_isApplied)
+            if (_isDisposed)
+            {
+                return;
+            }
+            _isDissolving = false;
+            _attackFlash = 0f;
+            ApplyEffectiveFlash();
+            RestoreOriginals();
+        }
+
+        /// <summary>
+        ///     出現演出と発砲発光が両方終わった場合だけ通常材質へ戻します。
+        /// </summary>
+        private void RestoreIfIdle()
+        {
+            if (!_isDissolving && _attackFlash <= 0f)
+            {
+                RestoreOriginals();
+            }
+        }
+
+        /// <summary>
+        ///     通常時に使っていた材質配列へ戻します。
+        /// </summary>
+        private void RestoreOriginals()
+        {
+            if (!_isApplied)
             {
                 return;
             }
@@ -117,11 +207,15 @@ namespace KillChord.Runtime.View.InGame.Player
             _isDisposed = true;
         }
 
+        private const float DISSOLVE_FLASH = 0.35f;
         private static readonly Color DISSOLVE_EFFECT_COLOR = new(1.25f, 0.02f, 0.01f, 0f);
         private static readonly int RATIO_ID = Shader.PropertyToID("_Ratio");
+        private static readonly int FLASH_ID = Shader.PropertyToID("_Flash");
         private readonly Dictionary<Material, Material> _generatedMaterials = new();
         private readonly RendererMaterials[] _bindings;
+        private float _attackFlash;
         private bool _isApplied;
+        private bool _isDissolving;
         private bool _isDisposed;
 
         /// <summary>

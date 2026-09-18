@@ -41,8 +41,6 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            _materialPropertyBlock ??= new MaterialPropertyBlock();
-
             _weaponHandle.TryCancel();
             if (_weaponModel.activeSelf)
             {
@@ -76,8 +74,6 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            _materialPropertyBlock ??= new MaterialPropertyBlock();
-
             // 遅延待ちのEffectが非表示後に発火しないよう、Dither開始前に打ち消す。
             _attackEffects?.CancelPendingEffect();
             _flashHandle.TryCancel();
@@ -97,8 +93,6 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 return;
             }
-
-            _materialPropertyBlock ??= new MaterialPropertyBlock();
 
             // 遅延待ちのEffectが非表示後に発火しないよう、モデルを消す前に打ち消す。
             _attackEffects?.CancelPendingEffect();
@@ -131,6 +125,10 @@ namespace KillChord.Runtime.View.InGame.Player
             if (_weaponModel != null && _dissolveShader != null)
             {
                 _dissolveMaterials = new WeaponDissolveMaterials(_weaponModel, _dissolveShader);
+            }
+            else
+            {
+                Debug.LogError($"[{nameof(WeaponItemView)}] 武器モデルまたはディゾルブ用Shaderが未設定です。", this);
             }
             EnsureAttackEffects();
         }
@@ -181,9 +179,6 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時に薬莢を排出するEjector。未設定の場合は排出しません。")]
         private CasingEjectorView _casingEjector;
 
-        [SerializeField, Tooltip("DitherのMaterialエフェクトを適用するRenderer一覧。")]
-        private Renderer[] _effectRenderers;
-
         [SerializeField, Tooltip("出現・収納時だけ使うシェーダー。通常表示は元材質を保持し、未指定なら従来のRenderer設定を使います。")]
         private Shader _dissolveShader;
 
@@ -217,7 +212,6 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            _materialPropertyBlock ??= new MaterialPropertyBlock();
             _flashHandle.TryCancel();
             _flashHandle = LMotion.Create(1f, 0f, 0.4f)
                 .Bind(this, (value, state) => state.ApplyFlash(value));
@@ -244,7 +238,7 @@ namespace KillChord.Runtime.View.InGame.Player
             ApplyDither(value);
             if (value >= 1f)
             {
-                RestoreOriginalMaterials();
+                _dissolveMaterials?.EndDissolve();
             }
         }
 
@@ -254,26 +248,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="value"> 適用するDither値。 </param>
         private void ApplyDither(float value)
         {
-            if (_dissolveMaterials != null)
-            {
-                _dissolveMaterials.SetRatio(value);
-                return;
-            }
-            if (_effectRenderers == null)
-            {
-                return;
-            }
-            foreach (Renderer renderer in _effectRenderers)
-            {
-                if (renderer == null)
-                {
-                    continue;
-                }
-
-                renderer.GetPropertyBlock(_materialPropertyBlock);
-                _materialPropertyBlock.SetFloat(DITHER_ID, value);
-                renderer.SetPropertyBlock(_materialPropertyBlock);
-            }
+            _dissolveMaterials?.SetRatio(value);
         }
 
         /// <summary>
@@ -282,29 +257,13 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="value"> 適用するFlash値。 </param>
         private void ApplyFlash(float value)
         {
-            if (_effectRenderers == null)
-            {
-                return;
-            }
-            foreach (Renderer renderer in _effectRenderers)
-            {
-                if (renderer == null)
-                {
-                    continue;
-                }
-                renderer.GetPropertyBlock(_materialPropertyBlock);
-                _materialPropertyBlock.SetFloat(FLASH_ID, value);
-                renderer.SetPropertyBlock(_materialPropertyBlock);
-            }
+            _dissolveMaterials?.SetFlash(value);
         }
 
 
-        private MaterialPropertyBlock _materialPropertyBlock;
         private WeaponDissolveMaterials _dissolveMaterials;
         private MotionHandle _weaponHandle;
         private StationaryWeaponEffectsView _attackEffects;
         private MotionHandle _flashHandle;
-        private readonly static int DITHER_ID = Shader.PropertyToID("_Ratio");
-        private readonly static int FLASH_ID = Shader.PropertyToID("_Flash");
     }
 }
