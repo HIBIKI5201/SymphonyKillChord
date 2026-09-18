@@ -212,7 +212,20 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <returns> 取得できた場合はtrue。 </returns>
         public bool TryGetJustTimingXPosition(int beatType, out float xPosition)
         {
+            return TryGetJustTimingRange(beatType, out xPosition, out _);
+        }
+
+        /// <summary>
+        ///     指定した拍子に対応するジャストタイミング区間の中心X座標と幅を取得する。
+        /// </summary>
+        /// <param name="beatType"> 対象の拍子（BeatTypeの整数値）。 </param>
+        /// <param name="xPosition"> 中心からの距離（絶対値）。取得できない場合は0。 </param>
+        /// <param name="width"> 入力を受け付ける区間の表示幅。取得できない場合は0。 </param>
+        /// <returns> 取得できた場合はtrue。 </returns>
+        public bool TryGetJustTimingRange(int beatType, out float xPosition, out float width)
+        {
             xPosition = 0f;
+            width = 0f;
 
             if (_totalBeatBoxCount <= 0)
             {
@@ -227,7 +240,9 @@ namespace KillChord.Runtime.View.InGame.Music
                 }
 
                 float center = (_justStarts[i] + _justEnds[i]) * 0.5f;
-                xPosition = center / GUIDE_LENGTH_IN_BARS * _totalBeatBoxCount * _beatWidth;
+                float barWidth = _totalBeatBoxCount * _beatWidth / GUIDE_LENGTH_IN_BARS;
+                xPosition = center * barWidth;
+                width = (_justEnds[i] - _justStarts[i]) * barWidth;
                 return true;
             }
 
