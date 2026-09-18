@@ -57755,7 +57755,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Combo.ComboHudView
   _comboText: {fileID: 1191764216}
-  _comboRoot: {fileID: 1191764217}
 --- !u!1 &867591861
 GameObject:
   m_ObjectHideFlags: 0
@@ -82329,11 +82328,6 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0009798793, y: 0.0019677617, z: 0.002390455}
     m_Extent: {x: 0.00061491353, y: 0.0012563127, z: 0.00053995475}
   m_DirtyAABB: 0
---- !u!1 &1191764217 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2684692264725159173, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
-  m_PrefabInstance: {fileID: 887821556}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1191764216 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 4422698194585001953, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}

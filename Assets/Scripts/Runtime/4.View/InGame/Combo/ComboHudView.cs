@@ -20,9 +20,16 @@ namespace KillChord.Runtime.View.InGame.Combo
         /// <param name="comboVisibleCount"> コンボ表示を開始する最小コンボ数です。 </param>
         public void Initialize(ComboHudViewModel viewModel, int comboVisibleCount)
         {
-            if (_comboText == null || _comboRoot == null)
+            if (_comboText == null)
             {
-                Debug.LogError($"[{nameof(ComboHudView)}] {nameof(_comboText)} または {nameof(_comboRoot)} が未設定です。", this);
+                Debug.LogError($"[{nameof(ComboHudView)}] {nameof(_comboText)}が未設定です。", this);
+                return;
+            }
+
+            _comboRoot = _comboText.rectTransform.parent?.gameObject;
+            if (_comboRoot == null)
+            {
+                Debug.LogError($"[{nameof(ComboHudView)}] コンボ表示ルートを取得できません。", this);
                 return;
             }
 
@@ -57,7 +64,6 @@ namespace KillChord.Runtime.View.InGame.Combo
 
         [SerializeField, Tooltip("コンボ数を表示するテキストです。")]
         private TextMeshProUGUI _comboText;
-        [SerializeField, Tooltip("数値とCOMBOラベルをまとめて表示切替するルートです。")]
         private GameObject _comboRoot;
         private ComboHudViewModel _comboHudViewModel;
         private IDisposable _comboDisposable;
