@@ -4932,7 +4932,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 24, y: 154}
-  m_SizeDelta: {x: 600, y: 210}
+  m_SizeDelta: {x: 400, y: 210}
   m_Pivot: {x: 0, y: 0}
 --- !u!222 &918300003
 CanvasRenderer:
@@ -5028,8 +5028,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 16, y: -12}
-  m_SizeDelta: {x: 180, y: 44}
+  m_AnchoredPosition: {x: 12, y: -6}
+  m_SizeDelta: {x: 112, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300013
 CanvasRenderer:
@@ -5059,7 +5059,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003cmark=#40516FCC\u003e LT / L2 \u003c/mark\u003e\nロックオン"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"lt\"\u003e\u003c/size\u003e\nロックオン"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5078,7 +5078,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -5165,8 +5165,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 404, y: -12}
-  m_SizeDelta: {x: 180, y: 44}
+  m_AnchoredPosition: {x: 276, y: -6}
+  m_SizeDelta: {x: 112, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300023
 CanvasRenderer:
@@ -5196,7 +5196,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003cmark=#40516FCC\u003e RT / R2 \u003c/mark\u003e\n攻撃"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"rt\"\u003e\u003c/size\u003e\n攻撃"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5215,7 +5215,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -5302,8 +5302,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 16, y: -62}
-  m_SizeDelta: {x: 200, y: 44}
+  m_AnchoredPosition: {x: 4, y: -54}
+  m_SizeDelta: {x: 136, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300033
 CanvasRenderer:
@@ -5333,7 +5333,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003cmark=#40516FCC\u003e LB / L1 \u003c/mark\u003e\n対象←※"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"lb\"\u003e\u003c/size\u003e\n対象←※"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5352,7 +5352,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -5439,8 +5439,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 384, y: -62}
-  m_SizeDelta: {x: 200, y: 44}
+  m_AnchoredPosition: {x: 250, y: -54}
+  m_SizeDelta: {x: 146, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300043
 CanvasRenderer:
@@ -5470,7 +5470,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003cmark=#40516FCC\u003e RB / R1 \u003c/mark\u003e\n回避＋対象→※"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"rb\"\u003e\u003c/size\u003e\n回避＋対象→※"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5489,7 +5489,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -5576,8 +5576,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 42, y: -120}
-  m_SizeDelta: {x: 164, y: 44}
+  m_AnchoredPosition: {x: 24, y: -109}
+  m_SizeDelta: {x: 104, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300053
 CanvasRenderer:
@@ -5607,7 +5607,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003cmark=#40516FCC\u003e L Stick \u003c/mark\u003e\n移動"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"jl\"\u003e\u003c/size\u003e\n移動"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5626,7 +5626,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -5713,8 +5713,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 280, y: -154}
-  m_SizeDelta: {x: 110, y: 44}
+  m_AnchoredPosition: {x: 200, y: -153}
+  m_SizeDelta: {x: 76, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300063
 CanvasRenderer:
@@ -5744,7 +5744,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003cmark=#40516FCC\u003e R Stick \u003c/mark\u003e\n視点"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"jr\"\u003e\u003c/size\u003e\n視点"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5763,7 +5763,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -5850,8 +5850,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 224, y: -90}
-  m_SizeDelta: {x: 152, y: 44}
+  m_AnchoredPosition: {x: 148, y: -91}
+  m_SizeDelta: {x: 96, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300073
 CanvasRenderer:
@@ -5881,7 +5881,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003cmark=#40516FCC\u003e Menu / Options \u003c/mark\u003e\nポーズ"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"xmenu\"\u003e\u003c/size\u003e\nポーズ"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -5900,7 +5900,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -5987,8 +5987,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 484, y: -116}
-  m_SizeDelta: {x: 100, y: 44}
+  m_AnchoredPosition: {x: 316, y: -109}
+  m_SizeDelta: {x: 76, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300083
 CanvasRenderer:
@@ -6018,7 +6018,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003cmark=#943C46CC\u003e B / ○ \u003c/mark\u003e\n攻撃"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"xb\"\u003e\u003c/size\u003e\n攻撃"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -6037,7 +6037,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -6124,8 +6124,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 410, y: -160}
-  m_SizeDelta: {x: 104, y: 44}
+  m_AnchoredPosition: {x: 286, y: -157}
+  m_SizeDelta: {x: 72, y: 48}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300093
 CanvasRenderer:
@@ -6155,7 +6155,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u003cmark=#366749CC\u003e A / × \u003c/mark\u003e\n回避"
+  m_text: "\u003csize=22\u003e\u003csprite name=\"xa\"\u003e\u003c/size\u003e\n回避"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
   m_sharedMaterial: {fileID: 3581401360608087148, guid: d94f1d362e130354d931fbc7ee58c978, type: 2}
@@ -6174,7 +6174,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -6261,8 +6261,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 14, y: -176}
-  m_SizeDelta: {x: 240, y: 30}
+  m_AnchoredPosition: {x: 8, y: -174}
+  m_SizeDelta: {x: 188, y: 30}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &918300103
 CanvasRenderer:
