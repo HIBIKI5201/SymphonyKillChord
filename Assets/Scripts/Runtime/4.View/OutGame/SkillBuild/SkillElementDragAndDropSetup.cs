@@ -37,6 +37,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly IUISoundEffectCommand _soundEffectCommand;
 
         private const string DRAGGABLE_CLASSNAME = "draggable";
+        private const string LOCKED_CLASSNAME = "is-locked";
         private const string SKILL_ELEMENT_CONTAINER_CLASSNAME = "skill-element-container";
         private const string SKILL_ELEMENT_SLOT_CLASSNAME = "skill-element-slot";
         /// <summary>
@@ -46,7 +47,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="element"> セットアップ対象の VisualElement。 </param>
         public void SetupDraggable(VisualElement element)
         {
-            if (element == null)
+            // 未解放カードにも選択操作は登録されるが、ドラッグによる装備は許可しない。
+            if (element == null || element.ClassListContains(LOCKED_CLASSNAME))
             {
                 return;
             }
