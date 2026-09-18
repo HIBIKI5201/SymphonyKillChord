@@ -144,7 +144,7 @@ namespace KillChord.Demo
         private float _battleBottom = 24f;
 
         [SerializeField, Tooltip("リザルト画面でのタイマー下端座標です。")]
-        private float _resultBottom = 400f;
+        private float _resultBottom = 24f;
 
         [SerializeField, Tooltip("シナリオ画面でのタイマー下端座標です。")]
         private float _scenarioBottom = 400f;
