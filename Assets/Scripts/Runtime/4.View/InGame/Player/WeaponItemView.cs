@@ -44,9 +44,10 @@ namespace KillChord.Runtime.View.InGame.Player
             _materialPropertyBlock ??= new MaterialPropertyBlock();
 
             _weaponHandle.TryCancel();
+            _dissolveMaterials?.Begin();
             _weaponHandle = LSequence.Create()
                 .Join(LMotion.Create(0f, 1f, 0.2f)
-                    .Bind(this, (value, state) => state.ApplyDither(value)))
+                    .Bind(this, (value, state) => state.ApplyShowDither(value)))
                 .AppendInterval(2f)
                 .Run(x => x.WithOnComplete(HideWeapon));
             ApplyDither(0.0f);
@@ -70,8 +71,9 @@ namespace KillChord.Runtime.View.InGame.Player
             _flashHandle.TryCancel();
             ApplyFlash(0.0f);
             _weaponHandle.TryCancel();
+            _dissolveMaterials?.Begin();
             _weaponHandle = LMotion.Create(1f, 0f, 0.5f)
-                .WithOnComplete(() => _weaponModel.SetActive(false))
+                .WithOnComplete(CompleteHide)
                 .Bind(this, (value, state) => state.ApplyDither(value));
         }
         /// <summary>
@@ -92,6 +94,7 @@ namespace KillChord.Runtime.View.InGame.Player
             ApplyFlash(0.0f);
             _weaponHandle.TryCancel();
             _weaponModel.SetActive(false);
+            RestoreOriginalMaterials();
         }
 
         /// <summary>
@@ -105,6 +108,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 Destroy(_attackEffects);
             }
             _flashHandle.TryCancel();
+            _dissolveMaterials?.Dispose();
         }
 
         /// <summary>
@@ -112,6 +116,10 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void Awake()
         {
+            if (_weaponModel != null && _dissolveShader != null)
+            {
+                _dissolveMaterials = new WeaponDissolveMaterials(_weaponModel, _dissolveShader);
+            }
             EnsureAttackEffects();
         }
 
@@ -120,6 +128,10 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void OnDisable()
         {
+            if (_dissolveMaterials != null)
+            {
+                HideWeaponImmediate();
+            }
             _attackEffects?.StopAll();
         }
 
@@ -157,6 +169,29 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("DitherのMaterialエフェクトを適用するRenderer一覧。")]
         private Renderer[] _effectRenderers;
 
+        [SerializeField, Tooltip("出現・収納時だけ使うシェーダー。通常表示は元材質を保持し、未指定なら従来のRenderer設定を使います。")]
+        private Shader _dissolveShader;
+
+        /// <summary>
+        ///     出現完了または演出中断後に、通常時の材質へ復元します。
+        /// </summary>
+        private void RestoreOriginalMaterials()
+        {
+            _dissolveMaterials?.Restore();
+        }
+
+        /// <summary>
+        ///     収納演出が完了したモデルを非表示にし、次の表示へ向けて材質を復元します。
+        /// </summary>
+        private void CompleteHide()
+        {
+            if (_weaponModel != null)
+            {
+                _weaponModel.SetActive(false);
+            }
+            RestoreOriginalMaterials();
+        }
+
         /// <summary>
         ///     発砲時だけ武器マテリアルを発光させます。
         /// </summary>
@@ -186,11 +221,29 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
+        ///     出現の表示率を適用し、全表示へ到達した時点で通常材質へ戻します。
+        /// </summary>
+        /// <param name="value"> 出現中の表示率です。 </param>
+        private void ApplyShowDither(float value)
+        {
+            ApplyDither(value);
+            if (value >= 1f)
+            {
+                RestoreOriginalMaterials();
+            }
+        }
+
+        /// <summary>
         ///     全Rendererに現在のDither値を適用します。
         /// </summary>
         /// <param name="value"> 適用するDither値。 </param>
         private void ApplyDither(float value)
         {
+            if (_dissolveMaterials != null)
+            {
+                _dissolveMaterials.SetRatio(value);
+                return;
+            }
             if (_effectRenderers == null)
             {
                 return;
@@ -232,6 +285,7 @@ namespace KillChord.Runtime.View.InGame.Player
 
 
         private MaterialPropertyBlock _materialPropertyBlock;
+        private WeaponDissolveMaterials _dissolveMaterials;
         private MotionHandle _weaponHandle;
         private StationaryWeaponEffectsView _attackEffects;
         private MotionHandle _flashHandle;
