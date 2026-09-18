@@ -359,6 +359,10 @@ MonoBehaviour:
     m_Key: ui.setting.rhythm_offset_seconds_format
     m_Metadata:
       m_Items: []
+  - m_Id: 1830000001
+    m_Key: ui.ingame.controller_guide
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

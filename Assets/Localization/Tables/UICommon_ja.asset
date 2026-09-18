@@ -362,6 +362,10 @@ MonoBehaviour:
     m_Localized: "{0}秒"
     m_Metadata:
       m_Items: []
+  - m_Id: 1830000001
+    m_Localized: "操作 (Xbox / PlayStation)\n左スティック: 移動    右スティック: 視点\nRT/R2 または B/○: 攻撃\nRB/R1 または A/×: 回避\nLT/L2: ロックオン\nロックオン中 LB/L1: 左、RB/R1: 右 (回避も)\nMenu/Options: ポーズ"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
