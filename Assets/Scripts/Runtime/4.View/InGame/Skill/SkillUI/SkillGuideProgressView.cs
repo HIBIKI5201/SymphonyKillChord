@@ -32,6 +32,10 @@ namespace KillChord.Runtime.View.InGame.Skill
             _stepSettings = stepSettings ?? throw new ArgumentNullException(nameof(stepSettings));
             _animationSetting = animationSetting ?? throw new ArgumentNullException(nameof(animationSetting));
             _rhythmGuideView = rhythmGuideView;
+            if (_rhythmGuideView != null)
+            {
+                _rhythmGuideView.OnLayoutChanged += HandleLayoutChangedHandler;
+            }
             _baseLocalScale = _leftIconImage.rectTransform.localScale;
             _baseLocalEulerAngleZ = _leftIconImage.rectTransform.localEulerAngles.z;
 
@@ -95,7 +99,7 @@ namespace KillChord.Runtime.View.InGame.Skill
             {
                 return;
             }
-            RefreshIconPosition(_patternMatchCount);
+            RefreshIconPosition(_displayedStepIndex);
         }
 
         private void FixedUpdate()
@@ -127,8 +131,20 @@ namespace KillChord.Runtime.View.InGame.Skill
 
         private void OnDestroy()
         {
+            if (_rhythmGuideView != null)
+            {
+                _rhythmGuideView.OnLayoutChanged -= HandleLayoutChangedHandler;
+            }
             _appearMotion.TryCancel();
             _resetShakeMotion.TryCancel();
+        }
+
+        /// <summary>
+        ///     画面幅やゲージ全長の変更後も、現在の入力対象アイコンを追従させる。
+        /// </summary>
+        private void HandleLayoutChangedHandler()
+        {
+            RefreshIconPosition(_displayedStepIndex);
         }
 
         /// <summary>
@@ -138,6 +154,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// <param name="index"> 表示するSignaturesのインデックス。 </param>
         private void ApplyStep(int index)
         {
+            _displayedStepIndex = index;
             RefreshIconPosition(index);
         }
 
@@ -334,6 +351,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         private bool _isPositioned;
         private bool _isDisplayAllowed = true;
         private int _patternMatchCount;
+        private int _displayedStepIndex;
         private float _skillTriggeredTimestamp;
         private float _skillReadyTimestamp;
     }

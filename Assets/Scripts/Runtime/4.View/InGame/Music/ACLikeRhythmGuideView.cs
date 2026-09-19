@@ -24,6 +24,9 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ゲームプレイ停止を通知します。 </summary>
         public event Action OnStopGameplay;
 
+        /// <summary> ゲージ座標の変更をスキル表示へ通知する。 </summary>
+        public event Action OnLayoutChanged;
+
         /// <summary> 音楽同期サービスから受け取った現在のジャスト成否。 </summary>
         public bool IsOnJustTiming { get; private set; }
 
@@ -233,13 +236,18 @@ namespace KillChord.Runtime.View.InGame.Music
         ///     判定ゾーン定義に応じてビートGUIを再構築する。
         /// </summary>
         /// <param name="zones"> 判定ゾーンの一覧。 </param>
-        public void ConfigureZones(IReadOnlyList<RhythmGuideZoneDto> zones)
+        /// <param name="guideLengthInBars"> 判定側と共有するタイムアウト小節数。 </param>
+        public void ConfigureZones(IReadOnlyList<RhythmGuideZoneDto> zones, float guideLengthInBars)
         {
-            if (!NeedsRebuild(zones))
+            float halfWidth = CalculateHalfWidth();
+            bool layoutChanged = !Mathf.Approximately(_layout.HalfWidth, halfWidth)
+                || !Mathf.Approximately(_layout.LengthInBars, guideLengthInBars);
+            if (!layoutChanged && !NeedsRebuild(zones))
             {
                 return;
             }
 
+            _layout = new RhythmGuideLayout(halfWidth, _beatWidth, guideLengthInBars, zones);
             CacheZones(zones);
             RebuildBeatRectTransforms();
         }
@@ -249,8 +257,11 @@ namespace KillChord.Runtime.View.InGame.Music
         /// </summary>
         /// <param name="normalizeOffset"> ビートの位置(1が1小節。ジャスト通過分として1を超える値も受け取る)</param>
         /// <param name="isJustTiming"> 音楽同期サービスで確定したジャスト成否。 </param>
-        public void SetBeatsOffset(float normalizeOffset, bool isJustTiming)
+        /// <param name="currentBeatCount"> 判定側で確定した現在の攻撃拍。 </param>
+        public void SetBeatsOffset(float normalizeOffset, bool isJustTiming, int? currentBeatCount)
         {
+            bool beatChanged = _currentBeatCount != currentBeatCount;
+            _currentBeatCount = currentBeatCount;
             bool wasJustTiming = IsOnJustTiming;
             IsOnJustTiming = isJustTiming;
             if (_beatPositionImages == null || _beatPositionImages.Length == 0 || _totalBeatBoxCount <= 0)
@@ -258,22 +269,16 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            // normalizeOffsetは1小節基準の進捗。ゲージ全長はGUIDE_LENGTH_IN_BARS小節分のため、
-            // ゾーン・Just位置と同じ基準に揃えるためゲージ全長に対する位置へ変換する。
-            // 1を超える超過分も同じ換算で扱うことでゾーンとのズレを生まずにJust位置を通過させ、
-            // ゲージ全長(=1)で頭打ちにする。
-            float gaugeNormalized = Mathf.Clamp01(Mathf.Max(0f, normalizeOffset) / GUIDE_LENGTH_IN_BARS);
+            // 進捗、Just、色帯とアイコンは同じ実描画幅を使う。
+            float gaugeNormalized = _layout.GetNormalizedProgress(normalizeOffset);
 
             for (int i = 0; i < _beatPositionImages.Length; i++)
             {
                 _beatPositionImages[i].fillAmount = gaugeNormalized;
             }
 
-            int activeIndex = Mathf.Clamp(
-                                (int)(_totalBeatBoxCount * gaugeNormalized),
-                                0,
-                                _totalBeatBoxCount - 1);
-            if (activeIndex == _currentOpenIndex && wasJustTiming == isJustTiming)
+            int activeIndex = _layout.GetBlockIndex(normalizeOffset);
+            if (activeIndex == _currentOpenIndex && wasJustTiming == isJustTiming && !beatChanged)
             {
                 return;
             }
@@ -305,8 +310,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 }
 
                 float center = (_justStarts[i] + _justEnds[i]) * 0.5f;
-                float barWidth = _totalBeatBoxCount * _beatWidth / GUIDE_LENGTH_IN_BARS;
-                xPosition = center * barWidth;
+                xPosition = _layout.GetPosition(center);
                 return true;
             }
 
@@ -386,15 +390,15 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            int beatIndex = Mathf.Max(0, _currentOpenIndex);
-
-            // 現在ビートの表示はガイドUIの一部のため、対象外ビートの減光を適用する。
-            if (!TryGetZoneColor(beatIndex, out Color color, out int zoneIndex))
+            // 境界上や初回入力の色も判定側の値を使い、ブロックの丸めで変えない。
+            int zoneIndex = _currentBeatCount.HasValue
+                ? Array.IndexOf(_zoneBeatCounts, _currentBeatCount.Value) : -1;
+            if (zoneIndex < 0 || _beatColor == null || zoneIndex >= _beatColor.Length)
             {
                 return;
             }
 
-            color = ApplyTargetDim(color, zoneIndex);
+            Color color = ApplyTargetDim(_beatColor[zoneIndex], zoneIndex);
 
             for (int i = 0; i < _currentBeatColorImages.Length; i++)
             {
@@ -404,12 +408,6 @@ namespace KillChord.Runtime.View.InGame.Music
                 }
             }
         }
-
-        /// <summary> ビート描画の基準全長の既定値。 </summary>
-        private const float DEFAULT_DISPLAY_LENGTH = 120f;
-
-        /// <summary> ゲージ全長が表す小節数。共通判定定義の小節進捗を描画位置へ換算する。 </summary>
-        private const float GUIDE_LENGTH_IN_BARS = 1.5f;
 
         /// <summary> ジャストタイミング位置を示す帯の横幅倍率。 </summary>
         private const float JUST_TIMING_MARKER_WIDTH_SCALE = 1f / 3f;
@@ -452,16 +450,12 @@ namespace KillChord.Runtime.View.InGame.Music
         [Tooltip("ビートの幅")]
         [SerializeField] private float _beatWidth;
 
-        [Tooltip("ビート描画全長に掛けるスケールです。")]
-        [SerializeField] private float _scale;
-        [Tooltip("ビート描画の基準全長です。")]
-        [SerializeField] private float _displayLength = DEFAULT_DISPLAY_LENGTH;
+        [SerializeField, Min(0f), Tooltip("基準解像度で安全領域の左右に確保する余白。")]
+        private float _screenEdgeMargin = 100f;
 
         [Space]
         [Tooltip("ビート位置を表示するImage")]
         [SerializeField] private Image[] _beatPositionImages;
-        [Tooltip("ビート位置を表示するRectTransform")]
-        [SerializeField] private RectTransform[] _beatPositionRectTransforms;
         
         [Space]
         [Tooltip("現在のビート色を表示するImage")]
@@ -511,12 +505,17 @@ namespace KillChord.Runtime.View.InGame.Music
         private float[] _justEnds = Array.Empty<float>();
         private int[] _zoneBeatCounts = Array.Empty<int>();
         private int? _targetBeatCount;
+        private int? _currentBeatCount;
+        private RhythmGuideLayout _layout;
+        private Canvas _rootCanvas;
 
         /// <summary>
         ///     演出設定の設定漏れを検知し、ビートGUIを構築する。
         /// </summary>
         private void Awake()
         {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            _rootCanvas = canvas != null ? canvas.rootCanvas : null;
             if (_effectConfig == null)
             {
                 Debug.LogWarning($"[{nameof(ACLikeRhythmGuideView)}] ジャストタイミング演出設定が未設定です。", this);
@@ -541,6 +540,7 @@ namespace KillChord.Runtime.View.InGame.Music
             OnUpdate = null;
             OnStartGameplay = null;
             OnStopGameplay = null;
+            OnLayoutChanged = null;
 
             _targetBeatFrameMotion.TryCancel();
             if (_handles != null)
@@ -561,9 +561,7 @@ namespace KillChord.Runtime.View.InGame.Music
             ClearGeneratedBeatObjects();
             InitBeatGUI(
                 _canvasGroup.gameObject,
-                _beatWidth,
                 _outTimingSizeDelta,
-                _scale,
                 out _totalBeatBoxCount,
                 out _leftBeatImages,
                 out _rightBeatImages,
@@ -575,6 +573,50 @@ namespace KillChord.Runtime.View.InGame.Music
             CreateBeatRangeLines();
             RebuildTargetBeatFrames();
             _currentOpenIndex = -1;
+            SynchronizeProgressImageWidths();
+            OnLayoutChanged?.Invoke();
+        }
+
+        /// <summary>
+        ///     画面安全領域から左右対称に確保できる描画幅を、ゲージのローカル座標へ変換する。
+        /// </summary>
+        private float CalculateHalfWidth()
+        {
+            RectTransform guideRect = (RectTransform)transform;
+            Camera canvasCamera = _rootCanvas != null && _rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? _rootCanvas.worldCamera : null;
+            float scaleFactor = _rootCanvas != null ? _rootCanvas.scaleFactor : 1f;
+            Rect safeArea = Screen.safeArea;
+            float margin = _screenEdgeMargin * scaleFactor;
+            Vector2 center = RectTransformUtility.WorldToScreenPoint(canvasCamera, guideRect.position);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                guideRect, new Vector2(safeArea.xMin + margin, center.y), canvasCamera, out Vector2 left);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                guideRect, new Vector2(safeArea.xMax - margin, center.y), canvasCamera, out Vector2 right);
+            return Mathf.Max(0f, Mathf.Min(-left.x, right.x));
+        }
+
+        /// <summary>
+        ///     白枠・黒枠・現在色の進捗Imageをブロックと同じ中心と実幅へ揃える。
+        /// </summary>
+        private void SynchronizeProgressImageWidths()
+        {
+            if (_beatPositionImages == null)
+            {
+                return;
+            }
+            foreach (Image progressImage in _beatPositionImages)
+            {
+                if (progressImage == null)
+                {
+                    continue;
+                }
+                RectTransform progressRect = progressImage.rectTransform;
+                Vector2 position = progressRect.anchoredPosition;
+                position.x = 0f;
+                progressRect.anchoredPosition = position;
+                progressRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, _layout.HalfWidth);
+            }
         }
 
         /// <summary>
@@ -598,6 +640,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 {
                     if (_justTimingMarkers[i] != null)
                     {
+                        _justTimingMarkers[i].gameObject.SetActive(false);
                         Destroy(_justTimingMarkers[i].gameObject);
                     }
                 }
@@ -609,6 +652,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 {
                     if (_leftBeatRectTransforms[i] != null)
                     {
+                        _leftBeatRectTransforms[i].gameObject.SetActive(false);
                         Destroy(_leftBeatRectTransforms[i].gameObject);
                     }
                 }
@@ -620,6 +664,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 {
                     if (_rightBeatRectTransforms[i] != null)
                     {
+                        _rightBeatRectTransforms[i].gameObject.SetActive(false);
                         Destroy(_rightBeatRectTransforms[i].gameObject);
                     }
                 }
@@ -692,11 +737,11 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             _justTimingMarkers = new RectTransform[_zoneBeatCounts.Length * 2];
-            float barWidth = _totalBeatBoxCount * _beatWidth / GUIDE_LENGTH_IN_BARS;
             for (int i = 0; i < _zoneBeatCounts.Length; i++)
             {
-                float horizontalPosition = (_justStarts[i] + _justEnds[i]) * 0.5f * barWidth;
-                float width = (_justEnds[i] - _justStarts[i]) * barWidth * JUST_TIMING_MARKER_WIDTH_SCALE;
+                float horizontalPosition = _layout.GetPosition((_justStarts[i] + _justEnds[i]) * 0.5f);
+                float width = (_layout.GetPosition(_justEnds[i]) - _layout.GetPosition(_justStarts[i]))
+                    * JUST_TIMING_MARKER_WIDTH_SCALE;
                 _justTimingMarkers[i * 2] = CreateJustTimingMarker(
                     $"JustTimingMarker_Left_{i}",
                     Vector2.left * horizontalPosition, width, i);
@@ -760,8 +805,8 @@ namespace KillChord.Runtime.View.InGame.Music
                     blockIndex++;
                 }
 
-                float start = firstBlockIndex * _beatWidth;
-                float end = (blockIndex + 1) * _beatWidth;
+                float start = _layout.GetBlockBoundary(firstBlockIndex);
+                float end = _layout.GetBlockBoundary(blockIndex + 1);
                 float center = (start + end) * 0.5f;
                 float width = end - start;
                 color = ApplyTargetDim(color, zoneIndex);
@@ -858,8 +903,8 @@ namespace KillChord.Runtime.View.InGame.Music
                     blockIndex++;
                 }
 
-                float start = firstBlockIndex * _beatWidth;
-                float end = (blockIndex + 1) * _beatWidth;
+                float start = _layout.GetBlockBoundary(firstBlockIndex);
+                float end = _layout.GetBlockBoundary(blockIndex + 1);
                 if (firstBlockIndex == 0)
                 {
                     frames.Add(CreateTargetBeatFrame(
@@ -1055,9 +1100,7 @@ namespace KillChord.Runtime.View.InGame.Music
         ///     生成した表示オブジェクトを出力する。
         /// </summary>
         /// <param name="parent"> 生成したブロックの親オブジェクト。 </param>
-        /// <param name="beatWidth"> 1ブロックの幅。 </param>
         /// <param name="beatHeight"> 1ブロックの初期高さ。 </param>
-        /// <param name="scale"> ビート描画全長に掛けるスケール。 </param>
         /// <param name="totalBeatBoxCount"> 生成したブロック総数。生成できない場合は0。 </param>
         /// <param name="leftBeatImages"> 左側ブロックのImage。 </param>
         /// <param name="rightBeatImages"> 右側ブロックのImage。 </param>
@@ -1066,9 +1109,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="handles"> ブロックごとのモーションハンドル。 </param>
         private void InitBeatGUI(
             in GameObject parent,
-            float beatWidth,
             float beatHeight,
-            float scale,
             out int totalBeatBoxCount,
             out Image[] leftBeatImages,
             out Image[] rightBeatImages,
@@ -1097,8 +1138,7 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             //スペクトラム風ビートのブロック数を計算
-            float guiLength = _displayLength * scale;
-            int beatBlockCount = Mathf.Max(1, Mathf.FloorToInt(guiLength / beatWidth));
+            int beatBlockCount = _layout.BlockCount;
             totalBeatBoxCount = beatBlockCount;
 
             //Out配列の初期化
@@ -1111,6 +1151,8 @@ namespace KillChord.Runtime.View.InGame.Music
             //スペクトラム風ビートのブロックを生成
             for (int i = 0; i < beatBlockCount; i++)
             {
+                float start = _layout.GetBlockBoundary(i);
+                float beatWidth = _layout.GetBlockBoundary(i + 1) - start;
                 Color color = GetTargetColorForIndex(i);
 
                 GameObject leftBeat = new GameObject($"LeftBeat_{i}", typeof(RectTransform), typeof(Image));
@@ -1118,7 +1160,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 RectTransform leftRT = leftBeat.GetComponent<RectTransform>();
                 Image leftImage = leftBeat.GetComponent<Image>();
                 leftImage.color = color; //ビートの色を設定
-                leftRT.anchoredPosition = Vector2.left * (i * beatWidth);
+                leftRT.anchoredPosition = Vector2.left * start;
                 leftRT.sizeDelta = new Vector2(beatWidth, beatHeight);
                 leftRT.pivot = new Vector2(1f, 0.5f);
                 leftBeatImages[i] = leftImage;
@@ -1129,7 +1171,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 RectTransform rightRT = rightBeat.GetComponent<RectTransform>();
                 Image rightImage = rightBeat.GetComponent<Image>();
                 rightImage.color = color; //ビートの色を設定
-                rightRT.anchoredPosition = Vector2.right * (i * beatWidth);
+                rightRT.anchoredPosition = Vector2.right * start;
                 rightRT.sizeDelta = new Vector2(beatWidth, beatHeight);
                 rightRT.pivot = new Vector2(0f, 0.5f);
                 rightBeatImages[i] = rightImage;
@@ -1144,16 +1186,24 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <returns> 属する判定ゾーンのインデックス。 </returns>
         private int GetBeatSectionIndex(int blockIndex)
         {
-            float position = (float)blockIndex / _totalBeatBoxCount * GUIDE_LENGTH_IN_BARS;
+            float position = _layout.GetBlockBarProgress(blockIndex);
 
-            // ブロック数の切り捨て後の実描画全長を使い、進捗・Just位置と同じ小節単位で比較する。
-            // 最終ゾーンは、1小節を超えるゲージ末端まで表示する。
+            // 判定側と同じくJustを先に解決する。全境界で分割済みなのでブロック内の拍は一定。
+            for (int i = 0; i < _justStarts.Length; i++)
+            {
+                if (position >= _justStarts[i] && position < _justEnds[i])
+                {
+                    return i;
+                }
+            }
+            // 通常判定は1小節末尾へクランプし、最後の色をタイムアウト端まで延長する。
+            position = Mathf.Clamp01(position);
             for (int i = 0; i < _zoneStarts.Length; i++)
             {
                 float start = _zoneStarts[i];
                 float end = _zoneEnds[i];
 
-                if (position >= start && position < end)
+                if (position >= start && position <= end)
                 {
                     return i;
                 }

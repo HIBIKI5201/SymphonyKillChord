@@ -99,6 +99,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         /// </summary>
         public override void Shutdown()
         {
+            _musicSyncView?.SetGameplayActive(false);
             if (!_isModuleRegistered)
             {
                 return;
@@ -120,6 +121,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             }
 
             _musicPlayer.MusicVM.UpdateMusicCue(_testCue);
+            _musicSyncView.SetGameplayActive(true);
         }
 
         /// <summary>
@@ -127,6 +129,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         /// </summary>
         public void StopGameplay()
         {
+            _musicSyncView?.SetGameplayActive(false);
             if (_musicPlayer == null)
             {
                 return;
