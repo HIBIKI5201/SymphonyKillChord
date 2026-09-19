@@ -1035,19 +1035,37 @@ jobs:
             Microsoft.PowerShell.Utility\Write-Host $Object
           }
           Write-Host "::group::NuGetForUnity.Cli による NuGet パッケージの復元"
-          dotnet tool install --global NuGetForUnity.Cli 2>&1 | Out-String | Write-Host
-          $ToolsPath = Join-Path (Join-Path $HOME ".dotnet") "tools"
-          if (Test-Path $ToolsPath) {
-            $env:PATH = $ToolsPath + [System.IO.Path]::PathSeparator + $env:PATH
-          }
-          & nugetforunity restore "${{ github.workspace }}"
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "[ERROR]: NuGet パッケージの復元に失敗しました (終了コード $LASTEXITCODE)。"
+          try {
+            # 常駐ランナーに導入済みの CLI を再利用し、不要な再インストールを避ける。
+            $ToolList = @(& dotnet tool list --global)
+            $ToolListExitCode = $LASTEXITCODE
+            foreach ($Line in $ToolList) { Write-Host $Line }
+            if ($ToolListExitCode -ne 0) {
+              throw "NuGet CLI のインストール状態を取得できませんでした (終了コード $ToolListExitCode)。"
+            }
+            $HasNuGetCli = @($ToolList | Where-Object { $_ -match '^\s*nugetforunity\.cli\s+' }).Count -gt 0
+            if (-not $HasNuGetCli) {
+              # PowerShell 5.1 の stderr リダイレクトによる例外化と、パイプ経由のログ欠落を防ぐ。
+              & dotnet tool install --global NuGetForUnity.Cli
+              $InstallExitCode = $LASTEXITCODE
+              if ($InstallExitCode -ne 0) {
+                throw "NuGetForUnity.Cli のインストールに失敗しました (終了コード $InstallExitCode)。"
+              }
+            }
+            $ToolsPath = Join-Path (Join-Path $HOME ".dotnet") "tools"
+            if (Test-Path $ToolsPath) {
+              $env:PATH = $ToolsPath + [System.IO.Path]::PathSeparator + $env:PATH
+            }
+            $NuGetCli = Get-Command nugetforunity -CommandType Application -ErrorAction Stop
+            & $NuGetCli.Source restore "${{ github.workspace }}"
+            $RestoreExitCode = $LASTEXITCODE
+            if ($RestoreExitCode -ne 0) {
+              throw "NuGet パッケージの復元に失敗しました (終了コード $RestoreExitCode)。"
+            }
+            Write-Host "[INFO]: NuGet パッケージが復元されました。"
+          } finally {
             Write-Host "::endgroup::"
-            exit 1
           }
-          Write-Host "[INFO]: NuGet パッケージが復元されました。"
-          Write-Host "::endgroup::"
 
 # ==================================================================================================
 
