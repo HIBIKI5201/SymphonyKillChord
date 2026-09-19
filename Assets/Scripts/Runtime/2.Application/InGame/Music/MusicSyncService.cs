@@ -38,26 +38,33 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <param name="playTime"> 現在の再生時間。 </param>
         public void Update(double playTime)
         {
-            double nextPlayTime = double.IsNaN(playTime) || double.IsInfinity(playTime)
-                ? 0d
-                : Math.Max(0d, playTime);
+            if (double.IsNaN(playTime) || double.IsInfinity(playTime))
+            {
+                ResetPlayback();
+                return;
+            }
+
+            // 負の判定オフセットは曲の先頭で0へ留め、予約まで破棄しない。
+            double nextPlayTime = Math.Max(0d, playTime);
 
             if (nextPlayTime + PLAYBACK_REWIND_TOLERANCE_SECONDS < _currentPlayTime)
             {
-                _rhythmState.Clear();
-                _scheduledActions.Clear();
+                ResetPlayback();
             }
 
             _currentPlayTime = nextPlayTime;
 
-            // 入力が途絶えた時点で履歴を破棄し、次の入力を待たずに購読側へ通知する。
-            // 空の履歴には再通知しないため、各入力系列につきタイムアウトは一度だけ発生する。
-            if (_rhythmState.Count > 0
-                && _currentPlayTime - _rhythmState.LastTiming
-                    >= _rhythmDefinition.BarLength * RHYTHM_TIMEOUT_BAR_COUNT)
+            // 履歴の消去後も音楽時間を基準に周回する。成立フレームでは必ず中心へ戻す。
+            if (_gaugeStartPlayTime.HasValue
+                && _currentPlayTime - _gaugeStartPlayTime.Value
+                    >= _rhythmDefinition.BarLength * _rhythmJudgmentDefinition.TimeoutBarCount)
             {
-                _rhythmState.Clear();
-                OnRhythmTimedOut?.Invoke();
+                _gaugeStartPlayTime = _currentPlayTime;
+                if (_rhythmState.Count > 0)
+                {
+                    _rhythmState.Clear();
+                    OnRhythmTimedOut?.Invoke();
+                }
             }
 
             while (_scheduledActions.TryPeek(out var actionData, out double executeTime))
@@ -80,6 +87,17 @@ namespace KillChord.Runtime.Application.InGame.Music
         }
 
         /// <summary>
+        ///     再生終了・巻き戻し時に履歴、予約とゲージ基準を通知なしで破棄する。
+        /// </summary>
+        public void ResetPlayback()
+        {
+            _rhythmState.Clear();
+            _scheduledActions.Clear();
+            _gaugeStartPlayTime = null;
+            _currentPlayTime = 0d;
+        }
+
+        /// <summary>
         ///     履歴の長さを取得する。
         /// </summary>
         /// <returns> 履歴の数。 </returns>
@@ -96,7 +114,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         public BeatType GetCurrentBeatType(out bool isJustHit)
         {
             isJustHit = false;
-            if (_rhythmState.Count == 0
+            if (!_gaugeStartPlayTime.HasValue
                 || _currentPlayTime < _rhythmDefinition.BeatOffsetSeconds)
             {
                 return BeatType.One;
@@ -168,36 +186,31 @@ namespace KillChord.Runtime.Application.InGame.Music
         public void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType)
         {
             _rhythmState.Enqueue(beatType, (float)_currentPlayTime, actionType);
+            _gaugeStartPlayTime = _currentPlayTime;
         }
 
         /// <summary>
-        ///     直前のアクション入力から次の小節までの進捗を取得する。
+        ///     入力または無入力周回の基準から、1小節までの進捗を取得する。
         /// </summary>
         /// <returns> 0〜1の進捗。 </returns>
         public float GetBarProgress()
         {
-            if (_rhythmState.Count == 0)
-            {
-                return 0f;
-            }
-
-            double elapsedSeconds = _currentPlayTime - _rhythmState.LastTiming;
-            return _rhythmDefinition.CalculateNormalizedBarProgress(elapsedSeconds);
+            return Math.Min(1f, GetBarProgressUnclamped());
         }
 
         /// <summary>
-        ///     直前のアクション入力からの経過を小節長で正規化した進捗を、上限なしで取得する。
-        ///     1小節を超えた超過分を表示に使いたい場合に使用する。
+        ///     入力または無入力周回の基準からの経過を小節数として取得する。
+        ///     ゲージのタイムアウト位置まで表示するため、1小節で打ち切らない。
         /// </summary>
         /// <returns> 0以上の進捗。1で1小節経過。 </returns>
         public float GetBarProgressUnclamped()
         {
-            if (_rhythmState.Count == 0)
+            if (!_gaugeStartPlayTime.HasValue)
             {
                 return 0f;
             }
 
-            double elapsedSeconds = _currentPlayTime - _rhythmState.LastTiming;
+            double elapsedSeconds = _currentPlayTime - _gaugeStartPlayTime.Value;
             double elapsedBarCount = _rhythmDefinition.CalculateElapsedBarCount(elapsedSeconds);
 
             // 再生位置の巻き戻し等で負値になった場合は小節頭として扱う。
@@ -205,13 +218,13 @@ namespace KillChord.Runtime.Application.InGame.Music
         }
 
         private const int BUFFER_SIZE = 64;
-        private const double RHYTHM_TIMEOUT_BAR_COUNT = 1.5d;
         private const double PLAYBACK_REWIND_TOLERANCE_SECONDS = 0.01d;
         private readonly RhythmState _rhythmState;
         private readonly RhythmDefinition _rhythmDefinition;
         private readonly RhythmJudgmentDefinition _rhythmJudgmentDefinition;
         private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();
         private double _currentPlayTime;
+        private double? _gaugeStartPlayTime;
 
     }
 }

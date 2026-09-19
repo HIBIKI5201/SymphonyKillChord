@@ -27,11 +27,15 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                     lines.Add(_lines[i].Create());
                 }
             }
-            return new PlayDialogueStepEntryAction(lines);
+            return new PlayDialogueStepEntryAction(lines, !_continueAfterStepChange);
         }
 
         [SerializeField, Tooltip("再生する会話のリスト")]
         private List<MissionDialogueLineAsset> _lines = new() { new MissionDialogueLineAsset() };
+
+        // 未設定の既存アセットはfalseとなり、従来のステップ変更時キャンセルを維持する。
+        [SerializeField, Tooltip("ステップが変わっても会話全体を最後まで続けます。次の会話やゲームプレイ終了時は停止します。")]
+        private bool _continueAfterStepChange;
 
         /// <inheritdoc />
         protected override string BuildSummary()

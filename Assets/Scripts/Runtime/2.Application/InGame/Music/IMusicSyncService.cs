@@ -23,6 +23,11 @@ namespace KillChord.Runtime.Application.InGame.Music
         void Update(double playTime);
 
         /// <summary>
+        ///     再生終了・巻き戻し時に履歴、予約とゲージ基準を通知なしで破棄する。
+        /// </summary>
+        void ResetPlayback();
+
+        /// <summary>
         ///     履歴の長さを取得する。
         /// </summary>
         /// <returns> 履歴の数。 </returns>

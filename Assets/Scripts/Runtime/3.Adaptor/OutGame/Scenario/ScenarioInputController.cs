@@ -55,15 +55,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         public void ToggleAutoAdvance()
         {
             if (IsSkipConfirmationOpen) { return; }
-            bool wasAutoAdvance = _state.IsAutoAdvance;
-
             _playbackControl.ToggleAutoAdvance();
-
-            if (!wasAutoAdvance && _state.IsAutoAdvance)
-            {
-                // 手動送り待機中にAutoへ切り替えた場合、現在の待機を解除する。
-                _gate.NotifyNext();
-            }
         }
 
         /// <summary>
@@ -104,7 +96,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         {
             if (!IsSkipConfirmationOpen) { return; }
             IsSkipConfirmationOpen = false;
-            if (_state.IsPaused != _wasPausedBeforeConfirmation)
+            if (_state.IsPlaying && _state.IsPaused != _wasPausedBeforeConfirmation)
             {
                 _playbackControl.TogglePause();
             }
