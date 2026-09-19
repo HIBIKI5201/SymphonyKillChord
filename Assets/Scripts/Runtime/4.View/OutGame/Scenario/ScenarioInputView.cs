@@ -52,7 +52,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _skipConfirmationView.Initialize(
                 _playerInputView.GetComponent<PlayerInput>(),
                 _playerInputView.GetComponent<InputSystemUIInputModule>());
-            _skipAction = _playerInputView.GetComponent<PlayerInput>().actions.FindAction("Scenario/Skip", true);
+            InputActionAsset actions = _playerInputView.GetComponent<PlayerInput>().actions;
+            _skipAction = actions.FindAction("Scenario/Skip", true);
+            _advanceAction = actions.FindAction("Scenario/Advance", true);
 
             if (isActiveAndEnabled)
             {
@@ -65,6 +67,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             if (_requestShowUI)
             {
                 _requestShowUI = false;
+                _requestHideUI = false;
+                _blockedInputFrame = Time.frameCount;
                 _scenarioUIHideView?.ShowUI();
                 _viewModel?.RefreshText();
             }
@@ -170,17 +174,23 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
 
-            if (_scenarioUIRaycastView != null && _scenarioUIRaycastView.IsPointerOverScenarioUI())
-            {
-                return;
-            }
-
-            if (_scenarioUIHideView != null && _scenarioUIHideView.IsHidden)
+            if (_requestShowUI || (_scenarioUIHideView != null && _scenarioUIHideView.IsHidden))
             {
                 _requestShowUI = true;
+                _requestHideUI = false;
+                _blockedInputFrame = Time.frameCount;
                 return;
             }
 
+            // ポインター上の操作UIはマウス・タッチ入力だけを抑止する。
+            // マウスをAutoボタン上に残したままでもキーボード・パッドでは送れる。
+            if (_advanceAction?.activeControl?.device is Pointer
+                && _scenarioUIRaycastView != null && _scenarioUIRaycastView.IsPointerOverScenarioUI())
+            {
+                return;
+            }
+
+            _blockedInputFrame = Time.frameCount;
             _inputController?.MouseClick();
         }
 
@@ -278,6 +288,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private void HandleScenarioCompletedHandler(bool skipped)
         {
             ClearSkipConfirmation();
+            _requestHideUI = false;
+            _requestShowUI = false;
+            _scenarioUIHideView?.RestoreForPlayback();
         }
 
         /// <summary>
@@ -322,6 +335,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private bool _requestShowUI;
         private int _blockedInputFrame = -1;
         private InputAction _skipAction;
+        private InputAction _advanceAction;
         private bool _ignoreSkipUntilRelease;
     }
 }
