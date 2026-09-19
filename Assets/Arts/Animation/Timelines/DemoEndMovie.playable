@@ -345,7 +345,7 @@ MonoBehaviour:
     m_EaseInDuration: 0
     m_EaseOutDuration: 0
     m_BlendInDuration: -1
-    m_BlendOutDuration: 0.2
+    m_BlendOutDuration: 0.20000000000000018
     m_MixInCurve:
       serializedVersion: 2
       m_Curve:
@@ -390,13 +390,13 @@ MonoBehaviour:
     m_Start: 5.8
     m_ClipIn: 0
     m_Asset: {fileID: -2376368554816009364}
-    m_Duration: 2.7
+    m_Duration: 2.666666666666667
     m_TimeScale: 0.01
     m_ParentTrack: {fileID: -5852744218606507515}
     m_EaseInDuration: 0.20000000298023224
     m_EaseOutDuration: 0
-    m_BlendInDuration: 0.2
-    m_BlendOutDuration: 0.033333333333333215
+    m_BlendInDuration: 0.20000000000000018
+    m_BlendOutDuration: -1
     m_MixInCurve:
       serializedVersion: 2
       m_Curve: []
@@ -405,7 +405,25 @@ MonoBehaviour:
       m_RotationOrder: 4
     m_MixOutCurve:
       serializedVersion: 2
-      m_Curve: []
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -428,11 +446,29 @@ MonoBehaviour:
     m_ParentTrack: {fileID: -5852744218606507515}
     m_EaseInDuration: 0.03333333333333333
     m_EaseOutDuration: 0
-    m_BlendInDuration: 0.033333333333333215
+    m_BlendInDuration: -1
     m_BlendOutDuration: -1
     m_MixInCurve:
       serializedVersion: 2
-      m_Curve: []
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
@@ -534,10 +570,10 @@ MonoBehaviour:
   m_Children: []
   m_Clips:
   - m_Version: 1
-    m_Start: 8.5
+    m_Start: 7.483333333333333
     m_ClipIn: 0
     m_Asset: {fileID: 4506739950664712727}
-    m_Duration: 1
+    m_Duration: 2.0166666666666666
     m_TimeScale: 1
     m_ParentTrack: {fileID: -5443010317054589294}
     m_EaseInDuration: 0
@@ -894,6 +930,34 @@ MonoBehaviour:
     - {fileID: 171400000000000001}
     - {fileID: 171400000000000002}
     - {fileID: 171400000000000003}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfda56da833e2384a9677cd3c976a436, type: 3}
+  m_Name: DemoEndMovie
+  m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.TimelineAsset
+  m_Version: 0
+  m_Tracks:
+  - {fileID: 7795398283161565504}
+  - {fileID: -5443010317054589294}
+  - {fileID: -6138734045003456441}
+  - {fileID: -8883389817776235782}
+  - {fileID: -2143957713570040062}
+  - {fileID: 2223972896599992507}
+  - {fileID: -5852744218606507515}
+  - {fileID: -2079690098903347237}
+  m_FixedDuration: 0
+  m_EditorSettings:
+    m_Framerate: 60
+    m_ScenePreview: 1
+  m_DurationMode: 0
+  m_MarkerTrack: {fileID: 0}
 --- !u!114 &171400000000000001
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -942,34 +1006,6 @@ MonoBehaviour:
   m_Retroactive: 0
   m_EmitOnce: 0
   m_Asset: {fileID: 11400000, guid: b88f676f5d04b3b4c9e96b9a8c46d9ca, type: 2}
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bfda56da833e2384a9677cd3c976a436, type: 3}
-  m_Name: DemoEndMovie
-  m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.TimelineAsset
-  m_Version: 0
-  m_Tracks:
-  - {fileID: 7795398283161565504}
-  - {fileID: -5443010317054589294}
-  - {fileID: -6138734045003456441}
-  - {fileID: -8883389817776235782}
-  - {fileID: -2143957713570040062}
-  - {fileID: 2223972896599992507}
-  - {fileID: -5852744218606507515}
-  - {fileID: -2079690098903347237}
-  m_FixedDuration: 0
-  m_EditorSettings:
-    m_Framerate: 60
-    m_ScenePreview: 1
-  m_DurationMode: 0
-  m_MarkerTrack: {fileID: 0}
 --- !u!114 &374270328179917275
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1187,7 +1223,7 @@ MonoBehaviour:
     m_Start: 0
     m_ClipIn: 0
     m_Asset: {fileID: -7575928720108675565}
-    m_Duration: 8.5
+    m_Duration: 7.483333333333333
     m_TimeScale: 1
     m_ParentTrack: {fileID: 7795398283161565504}
     m_EaseInDuration: 0
