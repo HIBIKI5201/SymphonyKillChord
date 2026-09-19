@@ -493,6 +493,9 @@ namespace KillChord.Runtime.View.InGame.Music
         [Tooltip("ビートのAlphaを決めるためのCanvasGroup")]
         [SerializeField] private CanvasGroup _canvasGroup;
 
+        [SerializeField, Tooltip("スキル強調より前面に赤枠を描画する、リズムガイドと同じ座標基準の親。")]
+        private RectTransform _targetBeatFrameRoot;
+
         [Tooltip("ターゲット時の透明度。")]
         [Range(0f, 1f)]
         [SerializeField] private float _targetAlpha;
@@ -541,6 +544,10 @@ namespace KillChord.Runtime.View.InGame.Music
         {
             Canvas canvas = GetComponentInParent<Canvas>();
             _rootCanvas = canvas != null ? canvas.rootCanvas : null;
+            if (_targetBeatFrameRoot == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideView)}] チュートリアル対象枠の描画先が未設定です。", this);
+            }
             if (_effectConfig == null)
             {
                 Debug.LogWarning($"[{nameof(ACLikeRhythmGuideView)}] ジャストタイミング演出設定が未設定です。", this);
@@ -567,7 +574,7 @@ namespace KillChord.Runtime.View.InGame.Music
             OnStopGameplay = null;
             OnLayoutChanged = null;
 
-            _targetBeatFrameMotion.TryCancel();
+            ClearTargetBeatFrames();
             if (_handles != null)
             {
                 for (int i = 0; i < _handles.Length; i++)
@@ -814,7 +821,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private void RebuildTargetBeatFrames()
         {
             ClearTargetBeatFrames();
-            if (!_targetBeatCount.HasValue || _totalBeatBoxCount <= 0 || _canvasGroup == null)
+            if (!_targetBeatCount.HasValue || _totalBeatBoxCount <= 0 || _canvasGroup == null || _targetBeatFrameRoot == null)
             {
                 return;
             }
@@ -886,7 +893,7 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     指定ゾーンを囲う赤枠を生成し、既存ゲージと白黒枠より前面へ配置する。
+        ///     指定ゾーンを囲う赤枠を生成し、既存ゲージとスキル強調より前面へ配置する。
         /// </summary>
         /// <param name="objectName"> 生成するオブジェクト名。 </param>
         /// <param name="anchoredPosition"> 対象ゾーン中央の位置。 </param>
@@ -896,7 +903,7 @@ namespace KillChord.Runtime.View.InGame.Music
         {
             GameObject frameObject = new GameObject(objectName, typeof(RectTransform));
             frameObject.layer = gameObject.layer;
-            frameObject.transform.SetParent(transform, false);
+            frameObject.transform.SetParent(_targetBeatFrameRoot, false);
             frameObject.transform.SetAsLastSibling();
 
             RectTransform frameRectTransform = frameObject.GetComponent<RectTransform>();
