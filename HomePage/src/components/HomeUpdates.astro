@@ -20,9 +20,17 @@ const newsHref = `${import.meta.env.BASE_URL}news`;
 		</div>
 		<div class="sns-links">
 			<a href="https://www.youtube.com/@SinfoniaStudioOfficial" target="_blank" rel="noopener noreferrer">
+				<svg class="sns-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+					<rect x="2" y="5" width="20" height="14" rx="4" stroke="currentColor" stroke-width="1.8" />
+					<path d="m10 8.5 5.5 3.5-5.5 3.5v-7Z" fill="currentColor" />
+				</svg>
 				YouTube <span aria-hidden="true">↗</span>
 			</a>
 			<a href="https://x.com/Sinfonia_Studio" target="_blank" rel="noopener noreferrer">
+				<svg class="sns-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+					<path d="M4 3h4l12 18h-4L4 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+					<path d="M20 3 4 21" stroke="currentColor" stroke-width="1.8" />
+				</svg>
 				X (Twitter) <span aria-hidden="true">↗</span>
 			</a>
 		</div>
@@ -86,6 +94,13 @@ const newsHref = `${import.meta.env.BASE_URL}news`;
 		padding: 14px 18px;
 		font-family: var(--font-mono);
 		border: 1px solid var(--color-signal-dim);
+	}
+
+	.sns-icon {
+		flex: none;
+		width: 22px;
+		height: 22px;
+		color: inherit;
 	}
 
 	@media (max-width: 600px) {
