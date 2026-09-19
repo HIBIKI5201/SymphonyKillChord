@@ -17,7 +17,7 @@ MonoBehaviour:
     _hashId: 980508342
   _characterName: Boss
   _attackInterval: 0.5
-  _maxHealth: 5000
+  _maxHealth: 2500
   _attackDifinitions:
   - {fileID: 11400000, guid: 1119c366324871145b5c08ecd5b9ebaa, type: 2}
   _baseDamage: 0
