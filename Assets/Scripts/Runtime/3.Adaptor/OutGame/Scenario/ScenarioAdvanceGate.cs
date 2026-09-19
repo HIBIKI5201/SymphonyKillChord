@@ -13,26 +13,33 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary>
         /// 次送り入力が来るまで待機する。
         /// </summary>
-        public ValueTask WaitNextAsync(CancellationToken ct)
+        public async ValueTask WaitNextAsync(CancellationToken ct)
         {
-            Task waitTask;
+            ct.ThrowIfCancellationRequested();
+            var source = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             lock (_sync)
             {
-                if (_pending)
+                if (_currentWait != null && !_currentWait.Task.IsCompleted)
                 {
-                    _pending = false;
-                    return default;
+                    throw new InvalidOperationException("次送り待機は既に開始されています。");
                 }
-
-                waitTask = _tcs.Task;
+                _currentWait = source;
             }
 
-            if (ct.IsCancellationRequested)
+            // 現在のテキストに対する一入力だけ受け付け、次のテキストへ持ち越さない。
+            using CancellationTokenRegistration registration = ct.Register(() => source.TrySetCanceled(ct));
+            try
             {
-                return new ValueTask(Task.FromCanceled(ct));
+                await source.Task;
+                ct.ThrowIfCancellationRequested();
             }
-
-            return new ValueTask(waitTask.WaitAsync(Timeout.InfiniteTimeSpan, TimeProvider.System, ct));
+            finally
+            {
+                lock (_sync)
+                {
+                    if (ReferenceEquals(_currentWait, source)) { _currentWait = null; }
+                }
+            }
         }
 
         /// <summary>
@@ -42,20 +49,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         {
             lock (_sync)
             {
-                bool accepted = _tcs.TrySetResult(true);
-                if (!accepted)
-                {
-                    _pending = true;
-                }
-
-                _tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                _currentWait?.TrySetResult(true);
             }
         }
 
-        private TaskCompletionSource<bool> _tcs =
-            new(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        private bool _pending;
+        private TaskCompletionSource<bool> _currentWait;
         private readonly object _sync = new();
     }
 }
