@@ -25,6 +25,12 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <summary> 判定範囲のリスト。 </summary>
         public IReadOnlyList<RhythmJudgmentRange> JudgmentRanges => _judgmentRanges;
 
+        /// <summary> 入力タイムアウトとゲージ全長の小節数。 </summary>
+        public float TimeoutBarCount => TIMEOUT_BAR_COUNT;
+
+        /// <summary> 入力タイムアウトとゲージ全長が共有する小節数。 </summary>
+        public const float TIMEOUT_BAR_COUNT = 2f;
+
         /// <summary>
         ///     クランプ前の小節進捗からジャスト範囲と対応する拍種を解決する。
         /// </summary>

@@ -76,6 +76,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
                 _zones,
                 hasTarget,
                 isJustHit,
+                _musicSyncService.RhythmJudgmentDefinition.TimeoutBarCount,
                 targetBeatCount
             );
         }
