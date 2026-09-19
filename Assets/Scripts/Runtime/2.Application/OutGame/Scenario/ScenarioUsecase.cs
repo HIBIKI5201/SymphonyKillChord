@@ -18,13 +18,16 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             ScenarioHandlerRepo handlerRepo,
             ITextAdvanceWaiter textAdvanceWaiter,
             IScenarioCompletionNotifier completionNotifier,
+            IScenarioAutoAdvanceNotifier autoAdvanceNotifier,
             IScenarioSettingsRepository settingsRepository)
         {
             _scenarioRepo = repo;
             _handlerRepo = handlerRepo;
             _textAdvanceWaiter = textAdvanceWaiter;
             _completionNotifier = completionNotifier;
+            _autoAdvanceNotifier = autoAdvanceNotifier;
             _settingsRepository = settingsRepository;
+            _autoAdvanceNotifier.NotifyAutoAdvanceChanged(IsAutoAdvance);
         }
 
         /// <summary>
@@ -126,6 +129,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         public void ToggleAutoAdvance()
         {
             IsAutoAdvance = !IsAutoAdvance;
+            _autoAdvanceNotifier.NotifyAutoAdvanceChanged(IsAutoAdvance);
         }
 
         /// <summary> シナリオが再生中かを示す。 </summary>
@@ -144,6 +148,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         private readonly ScenarioHandlerRepo _handlerRepo;
         private readonly IScenarioRepository _scenarioRepo;
         private readonly IScenarioCompletionNotifier _completionNotifier;
+        private readonly IScenarioAutoAdvanceNotifier _autoAdvanceNotifier;
         private readonly IScenarioSettingsRepository _settingsRepository;
 
         /// <summary>

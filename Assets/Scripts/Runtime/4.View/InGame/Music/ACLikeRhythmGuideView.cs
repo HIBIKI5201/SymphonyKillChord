@@ -13,7 +13,7 @@ namespace KillChord.Runtime.View.InGame.Music
     /// <summary>
     ///     AC風リズムガイドのビート表示と判定ゾーンを描画するViewです。
     /// </summary>
-    public sealed class ACLikeRhythmGuideView : MonoBehaviour, IGameplayControllable, IRhythmGuideBeatViewModel
+    public sealed class ACLikeRhythmGuideView : MonoBehaviour, IGameplayControllable, IRhythmGuideBeatViewModel, IRhythmGuideTargetFeedbackViewModel
     {
         /// <summary> ガイド表示の更新タイミングを通知します。 </summary>
         public event Action OnUpdate;
@@ -65,7 +65,36 @@ namespace KillChord.Runtime.View.InGame.Music
                 UpdateBeatColors();
                 // 現在ビートの表示色は次のブロック遷移まで更新されないため、ここで即座に反映する。
                 UpdateCurrentBeatColor();
+                UpdateJustTimingMarkerColors();
+                RebuildTargetBeatFrames();
             }
+        }
+
+        /// <summary>
+        ///     チュートリアル対象拍の攻撃成功時に赤枠の拡縮演出を再生する。
+        /// </summary>
+        public void PlayTargetBeatSuccessFeedback()
+        {
+            if (_targetBeatFrames == null || _targetBeatFrames.Length == 0)
+            {
+                return;
+            }
+
+            _targetBeatFrameMotion.TryCancel();
+            MotionSequenceBuilder sequence = LSequence.Create();
+            Vector3 scaleStrength = Vector3.one * (TARGET_BEAT_FRAME_SCALE_MULTIPLIER - 1f);
+            for (int i = 0; i < _targetBeatFrames.Length; i++)
+            {
+                RectTransform frame = _targetBeatFrames[i];
+                frame.localScale = Vector3.one;
+                sequence.Join(LMotion.Punch.Create(Vector3.one, scaleStrength, TARGET_BEAT_FRAME_MOTION_DURATION)
+                    .WithEase(Ease.OutQuad)
+                    .WithFrequency(1)
+                    .BindToLocalScale(frame));
+            }
+
+            _targetBeatFrameMotion = sequence.Run(
+                motion => motion.WithScheduler(MotionScheduler.UpdateIgnoreTimeScale));
         }
 
         /// <summary>
@@ -100,7 +129,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private bool TryGetZoneColor(int blockIndex, out Color color, out int zoneIndex)
         {
             color = default;
-            zoneIndex = GetBeatSectionIndex(blockIndex, _scale, _beatWidth);
+            zoneIndex = GetBeatSectionIndex(blockIndex);
 
             // 判定ゾーン未構築時はGetBeatSectionIndexが-1を返すため、色を解決できない状態として扱う。
             if (zoneIndex < 0 || zoneIndex >= _beatColor.Length)
@@ -149,6 +178,54 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             return ApplyTargetDim(color, zoneIndex);
+        }
+
+        /// <summary>
+        ///     ジャストタイミング表示用の帯を現在の対象BeatCountに応じた透明度へ更新する。
+        /// </summary>
+        private void UpdateJustTimingMarkerColors()
+        {
+            if (_justTimingMarkers == null || _effectConfig == null)
+            {
+                return;
+            }
+
+            for (int zoneIndex = 0; zoneIndex < _zoneBeatCounts.Length; zoneIndex++)
+            {
+                Color color = GetJustTimingMarkerColor(zoneIndex);
+                for (int sideIndex = 0; sideIndex < 2; sideIndex++)
+                {
+                    int markerIndex = zoneIndex * 2 + sideIndex;
+                    if (markerIndex < _justTimingMarkers.Length &&
+                        _justTimingMarkers[markerIndex] != null &&
+                        _justTimingMarkers[markerIndex].TryGetComponent(out Image markerImage))
+                    {
+                        markerImage.color = color;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     指定ゾーンのジャストタイミング表示用の帯色を取得する。
+        /// </summary>
+        /// <param name="zoneIndex"> 対象の判定ゾーンのインデックス。 </param>
+        /// <returns> 対象外の場合はゲージ色と同じ透明度を適用した帯色。 </returns>
+        private Color GetJustTimingMarkerColor(int zoneIndex)
+        {
+            Color markerColor = _effectConfig.MarkerColor;
+            if (_beatColor == null ||
+                !_targetBeatCount.HasValue ||
+                zoneIndex < 0 ||
+                zoneIndex >= _zoneBeatCounts.Length ||
+                zoneIndex >= _beatColor.Length ||
+                _zoneBeatCounts[zoneIndex] == _targetBeatCount.Value)
+            {
+                return markerColor;
+            }
+
+            markerColor.a = ApplyTargetDim(_beatColor[zoneIndex], zoneIndex).a;
+            return markerColor;
         }
 
         /// <summary>
@@ -212,7 +289,20 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <returns> 取得できた場合はtrue。 </returns>
         public bool TryGetJustTimingXPosition(int beatType, out float xPosition)
         {
+            return TryGetJustTimingRange(beatType, out xPosition, out _);
+        }
+
+        /// <summary>
+        ///     指定した拍子に対応するジャストタイミング区間の中心X座標と幅を取得する。
+        /// </summary>
+        /// <param name="beatType"> 対象の拍子（BeatTypeの整数値）。 </param>
+        /// <param name="xPosition"> 中心からの距離（絶対値）。取得できない場合は0。 </param>
+        /// <param name="width"> 入力を受け付ける区間の表示幅。取得できない場合は0。 </param>
+        /// <returns> 取得できた場合はtrue。 </returns>
+        public bool TryGetJustTimingRange(int beatType, out float xPosition, out float width)
+        {
             xPosition = 0f;
+            width = 0f;
 
             if (_totalBeatBoxCount <= 0)
             {
@@ -227,7 +317,9 @@ namespace KillChord.Runtime.View.InGame.Music
                 }
 
                 float center = (_justStarts[i] + _justEnds[i]) * 0.5f;
-                xPosition = center / GUIDE_LENGTH_IN_BARS * _totalBeatBoxCount * _beatWidth;
+                float barWidth = _totalBeatBoxCount * _beatWidth / GUIDE_LENGTH_IN_BARS;
+                xPosition = center * barWidth;
+                width = (_zoneEnds[i] - _zoneStarts[i]) * barWidth;
                 return true;
             }
 
@@ -333,7 +425,25 @@ namespace KillChord.Runtime.View.InGame.Music
         private const float GUIDE_LENGTH_IN_BARS = 1.5f;
 
         /// <summary> ジャストタイミング位置を示す帯の横幅倍率。 </summary>
-        private const float JUST_TIMING_MARKER_WIDTH_SCALE = 2f / 3f;
+        private const float JUST_TIMING_MARKER_WIDTH_SCALE = 1f / 3f;
+
+        /// <summary> チュートリアル対象枠の線幅。 </summary>
+        private const float TARGET_BEAT_FRAME_THICKNESS = 2f;
+
+        /// <summary> チュートリアル対象枠の水平方向余白。 </summary>
+        private const float TARGET_BEAT_FRAME_HORIZONTAL_PADDING = 2f;
+
+        /// <summary> チュートリアル対象枠の垂直方向余白。 </summary>
+        private const float TARGET_BEAT_FRAME_VERTICAL_PADDING = 8f;
+
+        /// <summary> 対象拍成功時の枠拡大倍率。 </summary>
+        private const float TARGET_BEAT_FRAME_SCALE_MULTIPLIER = 1.3f;
+
+        /// <summary> 対象拍成功時の枠拡縮時間。 </summary>
+        private const float TARGET_BEAT_FRAME_MOTION_DURATION = 0.2f;
+
+        /// <summary> チュートリアル対象枠の色。 </summary>
+        private static readonly Color TARGET_BEAT_FRAME_COLOR = Color.red;
 
         [Space]
 
@@ -394,6 +504,8 @@ namespace KillChord.Runtime.View.InGame.Music
         private Image[] _rightBeatImages;
         private RectTransform[] _justTimingMarkers;
         private MotionHandle[] _handles;
+        private RectTransform[] _targetBeatFrames = Array.Empty<RectTransform>();
+        private MotionHandle _targetBeatFrameMotion;
         private int _totalBeatBoxCount;
         private int _currentOpenIndex = -1;
         private float[] _zoneStarts = Array.Empty<float>();
@@ -433,6 +545,7 @@ namespace KillChord.Runtime.View.InGame.Music
             OnStartGameplay = null;
             OnStopGameplay = null;
 
+            _targetBeatFrameMotion.TryCancel();
             if (_handles != null)
             {
                 for (int i = 0; i < _handles.Length; i++)
@@ -462,6 +575,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 out _handles);
 
             CreateJustTimingMarkers();
+            RebuildTargetBeatFrames();
             _currentOpenIndex = -1;
         }
 
@@ -470,6 +584,15 @@ namespace KillChord.Runtime.View.InGame.Music
         /// </summary>
         private void ClearGeneratedBeatObjects()
         {
+            ClearTargetBeatFrames();
+            if (_handles != null)
+            {
+                for (int i = 0; i < _handles.Length; i++)
+                {
+                    _handles[i].TryCancel();
+                }
+            }
+
             if (_justTimingMarkers != null)
             {
                 for (int i = 0; i < _justTimingMarkers.Length; i++)
@@ -577,10 +700,10 @@ namespace KillChord.Runtime.View.InGame.Music
                 float width = (_justEnds[i] - _justStarts[i]) * barWidth * JUST_TIMING_MARKER_WIDTH_SCALE;
                 _justTimingMarkers[i * 2] = CreateJustTimingMarker(
                     $"JustTimingMarker_Left_{i}",
-                    Vector2.left * horizontalPosition, width);
+                    Vector2.left * horizontalPosition, width, i);
                 _justTimingMarkers[i * 2 + 1] = CreateJustTimingMarker(
                     $"JustTimingMarker_Right_{i}",
-                    Vector2.right * horizontalPosition, width);
+                    Vector2.right * horizontalPosition, width, i);
             }
         }
 
@@ -590,8 +713,9 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="objectName"> 生成するオブジェクト名。 </param>
         /// <param name="anchoredPosition"> 生成位置。 </param>
         /// <param name="width"> 共通ジャスト範囲から換算した帯の幅。 </param>
+        /// <param name="zoneIndex"> 対応する判定ゾーンのインデックス。 </param>
         /// <returns> 生成した帯のRectTransform。 </returns>
-        private RectTransform CreateJustTimingMarker(string objectName, Vector2 anchoredPosition, float width)
+        private RectTransform CreateJustTimingMarker(string objectName, Vector2 anchoredPosition, float width, int zoneIndex)
         {
             GameObject markerObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
             markerObject.layer = gameObject.layer;
@@ -611,9 +735,168 @@ namespace KillChord.Runtime.View.InGame.Music
                 Mathf.Max(0.1f, _effectConfig.MarkerHeight));
 
             Image markerImage = markerObject.GetComponent<Image>();
-            markerImage.color = _effectConfig.MarkerColor;
+            markerImage.color = GetJustTimingMarkerColor(zoneIndex);
             markerImage.raycastTarget = false;
             return markerRectTransform;
+        }
+
+        /// <summary>
+        ///     対象拍と同色の連続ブロックを囲み、中央で接する左右の範囲は一つの赤枠にする。
+        ///     描画済みブロックと同じ境界を使い、小節末尾より先の表示範囲も含める。
+        /// </summary>
+        private void RebuildTargetBeatFrames()
+        {
+            ClearTargetBeatFrames();
+            if (!_targetBeatCount.HasValue || _totalBeatBoxCount <= 0 || _canvasGroup == null)
+            {
+                return;
+            }
+
+            var frames = new List<RectTransform>();
+            for (int blockIndex = 0; blockIndex < _totalBeatBoxCount; blockIndex++)
+            {
+                if (!TryGetZoneColor(blockIndex, out Color color, out int zoneIndex) ||
+                    _zoneBeatCounts[zoneIndex] != _targetBeatCount.Value)
+                {
+                    continue;
+                }
+
+                // ゾーン境界を別計算せず、色付けと同じ解決方法で連続区間をまとめる。
+                int firstBlockIndex = blockIndex;
+                while (blockIndex + 1 < _totalBeatBoxCount &&
+                    TryGetZoneColor(blockIndex + 1, out Color nextColor, out int nextZoneIndex) &&
+                    _zoneBeatCounts[nextZoneIndex] == _targetBeatCount.Value &&
+                    nextColor == color)
+                {
+                    blockIndex++;
+                }
+
+                float start = firstBlockIndex * _beatWidth;
+                float end = (blockIndex + 1) * _beatWidth;
+                if (firstBlockIndex == 0)
+                {
+                    frames.Add(CreateTargetBeatFrame(
+                        "TargetBeatFrame_Center",
+                        Vector2.zero,
+                        end * 2f));
+                    continue;
+                }
+
+                float horizontalPosition = (start + end) * 0.5f;
+                float width = end - start;
+                frames.Add(CreateTargetBeatFrame(
+                    $"TargetBeatFrame_Left_{firstBlockIndex}",
+                    Vector2.left * horizontalPosition,
+                    width));
+                frames.Add(CreateTargetBeatFrame(
+                    $"TargetBeatFrame_Right_{firstBlockIndex}",
+                    Vector2.right * horizontalPosition,
+                    width));
+            }
+
+            _targetBeatFrames = frames.ToArray();
+        }
+
+        /// <summary>
+        ///     生成済みのチュートリアル対象枠と再生中の拡縮演出を破棄する。
+        /// </summary>
+        private void ClearTargetBeatFrames()
+        {
+            _targetBeatFrameMotion.TryCancel();
+            if (_targetBeatFrames != null)
+            {
+                for (int i = 0; i < _targetBeatFrames.Length; i++)
+                {
+                    if (_targetBeatFrames[i] != null)
+                    {
+                        _targetBeatFrames[i].gameObject.SetActive(false);
+                        Destroy(_targetBeatFrames[i].gameObject);
+                    }
+                }
+            }
+
+            _targetBeatFrames = Array.Empty<RectTransform>();
+        }
+
+        /// <summary>
+        ///     指定ゾーンを囲う赤枠を生成し、既存ゲージと白黒枠より前面へ配置する。
+        /// </summary>
+        /// <param name="objectName"> 生成するオブジェクト名。 </param>
+        /// <param name="anchoredPosition"> 対象ゾーン中央の位置。 </param>
+        /// <param name="width"> 対象ゾーンの幅。 </param>
+        /// <returns> 生成した赤枠のRectTransform。 </returns>
+        private RectTransform CreateTargetBeatFrame(string objectName, Vector2 anchoredPosition, float width)
+        {
+            GameObject frameObject = new GameObject(objectName, typeof(RectTransform));
+            frameObject.layer = gameObject.layer;
+            frameObject.transform.SetParent(transform, false);
+            frameObject.transform.SetAsLastSibling();
+
+            RectTransform frameRectTransform = frameObject.GetComponent<RectTransform>();
+            frameRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            frameRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            frameRectTransform.pivot = new Vector2(0.5f, 0.5f);
+            frameRectTransform.anchoredPosition = anchoredPosition;
+            float frameWidth = Mathf.Max(
+                TARGET_BEAT_FRAME_THICKNESS,
+                width + TARGET_BEAT_FRAME_HORIZONTAL_PADDING * 2f);
+            float frameHeight = Mathf.Max(
+                TARGET_BEAT_FRAME_THICKNESS,
+                _outTimingSizeDelta + TARGET_BEAT_FRAME_VERTICAL_PADDING * 2f);
+            frameRectTransform.sizeDelta = new Vector2(frameWidth, frameHeight);
+
+            float horizontalEdgeY = (frameHeight - TARGET_BEAT_FRAME_THICKNESS) * 0.5f;
+            float verticalEdgeX = (frameWidth - TARGET_BEAT_FRAME_THICKNESS) * 0.5f;
+            CreateTargetBeatFrameEdge(
+                frameRectTransform,
+                "Top",
+                Vector2.up * horizontalEdgeY,
+                new Vector2(frameWidth, TARGET_BEAT_FRAME_THICKNESS));
+            CreateTargetBeatFrameEdge(
+                frameRectTransform,
+                "Bottom",
+                Vector2.down * horizontalEdgeY,
+                new Vector2(frameWidth, TARGET_BEAT_FRAME_THICKNESS));
+            CreateTargetBeatFrameEdge(
+                frameRectTransform,
+                "Left",
+                Vector2.left * verticalEdgeX,
+                new Vector2(TARGET_BEAT_FRAME_THICKNESS, frameHeight));
+            CreateTargetBeatFrameEdge(
+                frameRectTransform,
+                "Right",
+                Vector2.right * verticalEdgeX,
+                new Vector2(TARGET_BEAT_FRAME_THICKNESS, frameHeight));
+            return frameRectTransform;
+        }
+
+        /// <summary>
+        ///     チュートリアル対象枠を構成する一辺を生成する。
+        /// </summary>
+        /// <param name="parent"> 枠の親RectTransform。 </param>
+        /// <param name="edgeName"> 辺を識別する名前。 </param>
+        /// <param name="anchoredPosition"> 辺の位置。 </param>
+        /// <param name="sizeDelta"> 辺の大きさ。 </param>
+        private void CreateTargetBeatFrameEdge(
+            RectTransform parent,
+            string edgeName,
+            Vector2 anchoredPosition,
+            Vector2 sizeDelta)
+        {
+            GameObject edgeObject = new GameObject(edgeName, typeof(RectTransform), typeof(Image));
+            edgeObject.layer = gameObject.layer;
+            edgeObject.transform.SetParent(parent, false);
+
+            RectTransform edgeRectTransform = edgeObject.GetComponent<RectTransform>();
+            edgeRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            edgeRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            edgeRectTransform.pivot = new Vector2(0.5f, 0.5f);
+            edgeRectTransform.anchoredPosition = anchoredPosition;
+            edgeRectTransform.sizeDelta = sizeDelta;
+
+            Image edgeImage = edgeObject.GetComponent<Image>();
+            edgeImage.color = TARGET_BEAT_FRAME_COLOR;
+            edgeImage.raycastTarget = false;
         }
 
         /// <summary>
@@ -771,19 +1054,17 @@ namespace KillChord.Runtime.View.InGame.Music
         ///     ブロックインデックスがどの判定ゾーンに属するかを返す。
         /// </summary>
         /// <param name="blockIndex"> ブロックのインデックス。 </param>
-        /// <param name="scale"> ビートのスケール。 </param>
-        /// <param name="beatWidth"> 1ブロックの幅。 </param>
         /// <returns> 属する判定ゾーンのインデックス。 </returns>
-        private int GetBeatSectionIndex(int blockIndex, float scale, float beatWidth)
+        private int GetBeatSectionIndex(int blockIndex)
         {
-            float position = (blockIndex * beatWidth) / scale;
+            float position = (float)blockIndex / _totalBeatBoxCount * GUIDE_LENGTH_IN_BARS;
 
-            // _zoneStarts/_zoneEndsは1小節基準（0～1）の正規化値のため、
-            // GUIDE_LENGTH_IN_BARS小節分を表すゲージ全長へ変換してから比較する。
+            // ブロック数の切り捨て後の実描画全長を使い、進捗・Just位置と同じ小節単位で比較する。
+            // 最終ゾーンは、1小節を超えるゲージ末端まで表示する。
             for (int i = 0; i < _zoneStarts.Length; i++)
             {
-                float start = (_zoneStarts[i] / GUIDE_LENGTH_IN_BARS) * _displayLength;
-                float end = (_zoneEnds[i] / GUIDE_LENGTH_IN_BARS) * _displayLength;
+                float start = _zoneStarts[i];
+                float end = _zoneEnds[i];
 
                 if (position >= start && position < end)
                 {

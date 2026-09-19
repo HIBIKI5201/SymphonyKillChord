@@ -13,6 +13,9 @@ const poster = await getImage({ src: posterImage, format: 'webp', width: 800, qu
 
 <section id="gameplay-video">
 	<video data-src={src} poster={poster.src} loop muted playsinline preload="none"></video>
+	<a class="pv-link" href="https://www.youtube.com/watch?v=rsvlj48X8PY" target="_blank" rel="noopener noreferrer">
+		PVをYouTubeで見る <span aria-hidden="true">↗</span>
+	</a>
 </section>
 
 <script>
@@ -56,10 +59,30 @@ const poster = await getImage({ src: posterImage, format: 'webp', width: 800, qu
 	}
 
 	video {
+		display: block;
 		width: 100%;
 		max-width: 800px;
+		margin: 0 auto;
 		aspect-ratio: 16 / 9;
 		object-fit: cover;
 		border: 1px solid var(--color-surface-border);
+	}
+
+	.pv-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 12px;
+		margin-top: 20px;
+		padding: 12px 20px;
+		font-family: var(--font-mono);
+		color: var(--color-signal);
+		text-decoration: none;
+		border: 1px solid var(--color-signal-dim);
+	}
+
+	.pv-link:hover,
+	.pv-link:focus-visible {
+		background: var(--color-signal);
+		color: var(--color-bg);
 	}
 </style>

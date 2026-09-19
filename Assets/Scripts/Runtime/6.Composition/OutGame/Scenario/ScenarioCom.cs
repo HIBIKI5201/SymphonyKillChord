@@ -51,6 +51,8 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private ScenarioView _scenarioView;
         [SerializeField, Tooltip("シナリオ入力View。Scenarioシーンに事前配置したものを指定します。")]
         private ScenarioInputView _scenarioInputView;
+        [SerializeField, Tooltip("Autoボタンがあるシーンのみ設定する状態表示View。")]
+        private ScenarioAutoButtonView _scenarioAutoButtonView;
         private ScenarioUsecase _usecase;
         private ScenarioInputController _inputController;
         private ScenarioViewModel _viewModel;
@@ -118,12 +120,14 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 animationPresenter,
                 portraitPresenter,
                 layerPresenter,
+                _viewModel,
                 _viewModel);
 
             _usecase = new ScenarioUsecase(
                 repository,
                 handlerRepo,
                 gate,
+                presenterFacade,
                 presenterFacade,
                 scenarioSettingsRepository);
             TextEventHandler textHandle = new TextEventHandler(
@@ -168,6 +172,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 animationMap,
                 portraitMap,
                 layerOrder);
+            if (_scenarioAutoButtonView != null) { _scenarioAutoButtonView.Initialize(_viewModel); }
             _isInitialized = true;
             return true;
         }

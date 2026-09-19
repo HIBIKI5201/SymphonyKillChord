@@ -15,8 +15,9 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void Play()
         {
+            bool shouldPlayWeaponFlash = _weaponModel != null && !_weaponModel.activeSelf;
             ShowWeapon();
-            PlayAttackEffects();
+            PlayAttackEffects(shouldPlayWeaponFlash);
         }
 
         /// <summary>
@@ -24,10 +25,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void PlayAttackEffects()
         {
-            PlayWeaponFlash();
-            EnsureAttackEffects();
-            _attackEffects.Play(_effectDelaySeconds);
-            EjectCasing();
+            PlayAttackEffects(false);
         }
 
         /// <summary>
@@ -41,14 +39,23 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            _materialPropertyBlock ??= new MaterialPropertyBlock();
-
             _weaponHandle.TryCancel();
+            if (_weaponModel.activeSelf)
+            {
+                // 出現・収納の途中でも表示中なら、再出現させず全表示へ戻す。
+                CancelWholeWeaponEffects();
+                // 初回と同じく、最後の発射から出現時間を含む2秒後に収納する。
+                _weaponHandle = LSequence.Create()
+                    .AppendInterval(AUTO_HIDE_DELAY_SECONDS)
+                    .Run(x => x.WithOnComplete(HideWeapon));
+                return;
+            }
+
             _dissolveMaterials?.Begin();
             _weaponHandle = LSequence.Create()
-                .Join(LMotion.Create(0f, 1f, 0.2f)
+                .Join(LMotion.Create(0f, 1f, SHOW_DURATION_SECONDS)
                     .Bind(this, (value, state) => state.ApplyShowDither(value)))
-                .AppendInterval(2f)
+                .AppendInterval(AUTO_HIDE_DELAY_SECONDS)
                 .Run(x => x.WithOnComplete(HideWeapon));
             ApplyDither(0.0f);
             _weaponModel.SetActive(true);
@@ -63,8 +70,6 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 return;
             }
-
-            _materialPropertyBlock ??= new MaterialPropertyBlock();
 
             // 遅延待ちのEffectが非表示後に発火しないよう、Dither開始前に打ち消す。
             _attackEffects?.CancelPendingEffect();
@@ -85,8 +90,6 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 return;
             }
-
-            _materialPropertyBlock ??= new MaterialPropertyBlock();
 
             // 遅延待ちのEffectが非表示後に発火しないよう、モデルを消す前に打ち消す。
             _attackEffects?.CancelPendingEffect();
@@ -116,7 +119,11 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void Awake()
         {
-            if (_weaponModel != null && _dissolveShader != null)
+            if (_weaponModel == null)
+            {
+                Debug.LogError($"[{nameof(WeaponItemView)}] 武器モデルが未設定です。", this);
+            }
+            else if (_dissolveShader != null)
             {
                 _dissolveMaterials = new WeaponDissolveMaterials(_weaponModel, _dissolveShader);
             }
@@ -148,6 +155,9 @@ namespace KillChord.Runtime.View.InGame.Player
             _attackEffects.Initialize(_attackSoundSource, _attackEffect, _muzzleFlashLight);
         }
 
+        private const float SHOW_DURATION_SECONDS = 0.2f;
+        private const float AUTO_HIDE_DELAY_SECONDS = 2f;
+
         [SerializeField, Tooltip("攻撃中だけ表示する武器モデル。")]
         private GameObject _weaponModel;
 
@@ -166,11 +176,23 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時に薬莢を排出するEjector。未設定の場合は排出しません。")]
         private CasingEjectorView _casingEjector;
 
-        [SerializeField, Tooltip("DitherのMaterialエフェクトを適用するRenderer一覧。")]
-        private Renderer[] _effectRenderers;
-
         [SerializeField, Tooltip("出現・収納時だけ使うシェーダー。通常表示は元材質を保持し、未指定なら従来のRenderer設定を使います。")]
         private Shader _dissolveShader;
+
+        /// <summary>
+        ///     攻撃時のSE・銃口演出・薬莢を再生し、必要な場合だけ武器全体を発光させます。
+        /// </summary>
+        /// <param name="shouldPlayWeaponFlash"> 武器全体の発光を再生する場合はtrueです。 </param>
+        private void PlayAttackEffects(bool shouldPlayWeaponFlash)
+        {
+            if (shouldPlayWeaponFlash)
+            {
+                PlayWeaponFlash();
+            }
+            EnsureAttackEffects();
+            _attackEffects.Play(_effectDelaySeconds);
+            EjectCasing();
+        }
 
         /// <summary>
         ///     出現完了または演出中断後に、通常時の材質へ復元します。
@@ -197,15 +219,25 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void PlayWeaponFlash()
         {
-            if (_weaponModel == null)
+            if (_weaponModel == null || _dissolveMaterials == null)
             {
                 return;
             }
 
-            _materialPropertyBlock ??= new MaterialPropertyBlock();
             _flashHandle.TryCancel();
             _flashHandle = LMotion.Create(1f, 0f, 0.4f)
                 .Bind(this, (value, state) => state.ApplyFlash(value));
+        }
+
+        /// <summary>
+        ///     表示済み武器のディゾルブと全体発光を止め、通常材質へ戻します。
+        /// </summary>
+        private void CancelWholeWeaponEffects()
+        {
+            _flashHandle.TryCancel();
+            ApplyDither(1f);
+            ApplyFlash(0f);
+            RestoreOriginalMaterials();
         }
 
         /// <summary>
@@ -229,7 +261,7 @@ namespace KillChord.Runtime.View.InGame.Player
             ApplyDither(value);
             if (value >= 1f)
             {
-                RestoreOriginalMaterials();
+                _dissolveMaterials?.EndDissolve();
             }
         }
 
@@ -239,26 +271,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="value"> 適用するDither値。 </param>
         private void ApplyDither(float value)
         {
-            if (_dissolveMaterials != null)
-            {
-                _dissolveMaterials.SetRatio(value);
-                return;
-            }
-            if (_effectRenderers == null)
-            {
-                return;
-            }
-            foreach (Renderer renderer in _effectRenderers)
-            {
-                if (renderer == null)
-                {
-                    continue;
-                }
-
-                renderer.GetPropertyBlock(_materialPropertyBlock);
-                _materialPropertyBlock.SetFloat(DITHER_ID, value);
-                renderer.SetPropertyBlock(_materialPropertyBlock);
-            }
+            _dissolveMaterials?.SetRatio(value);
         }
 
         /// <summary>
@@ -267,29 +280,13 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="value"> 適用するFlash値。 </param>
         private void ApplyFlash(float value)
         {
-            if (_effectRenderers == null)
-            {
-                return;
-            }
-            foreach (Renderer renderer in _effectRenderers)
-            {
-                if (renderer == null)
-                {
-                    continue;
-                }
-                renderer.GetPropertyBlock(_materialPropertyBlock);
-                _materialPropertyBlock.SetFloat(FLASH_ID, value);
-                renderer.SetPropertyBlock(_materialPropertyBlock);
-            }
+            _dissolveMaterials?.SetFlash(value);
         }
 
 
-        private MaterialPropertyBlock _materialPropertyBlock;
         private WeaponDissolveMaterials _dissolveMaterials;
         private MotionHandle _weaponHandle;
         private StationaryWeaponEffectsView _attackEffects;
         private MotionHandle _flashHandle;
-        private readonly static int DITHER_ID = Shader.PropertyToID("_Ratio");
-        private readonly static int FLASH_ID = Shader.PropertyToID("_Flash");
     }
 }
