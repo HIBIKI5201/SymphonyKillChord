@@ -2,9 +2,11 @@ using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
@@ -49,9 +51,10 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 enabled = false;
                 return;
             }
+            _uiInputModule = _playerInputView.GetComponent<InputSystemUIInputModule>();
             _skipConfirmationView.Initialize(
                 _playerInputView.GetComponent<PlayerInput>(),
-                _playerInputView.GetComponent<InputSystemUIInputModule>());
+                _uiInputModule);
             InputActionAsset actions = _playerInputView.GetComponent<PlayerInput>().actions;
             _skipAction = actions.FindAction("Scenario/Skip", true);
             _advanceAction = actions.FindAction("Scenario/Advance", true);
@@ -182,6 +185,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
 
+            // UIの決定キーを共有する場合、選択ボタンの操作とテキスト送りを同時実行しない。
+            if (IsAdvanceUsedBySelectedUI())
+            {
+                return;
+            }
+
             // ポインター上の操作UIはマウス・タッチ入力だけを抑止する。
             // マウスをAutoボタン上に残したままでもキーボード・パッドでは送れる。
             if (_advanceAction?.activeControl?.device is Pointer
@@ -303,6 +312,34 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
+        ///     現在の送り入力を選択中UIの決定操作が使用するか確認する。
+        /// </summary>
+        private bool IsAdvanceUsedBySelectedUI()
+        {
+            if (_uiInputModule == null || !_uiInputModule.isActiveAndEnabled)
+            {
+                return false;
+            }
+            InputAction submitAction = _uiInputModule.submit?.action;
+            InputControl advanceControl = _advanceAction?.activeControl;
+            GameObject selected = EventSystem.current != null
+                ? EventSystem.current.currentSelectedGameObject : null;
+            if (submitAction == null || !submitAction.enabled || advanceControl == null
+                || selected == null || !selected.activeInHierarchy
+                || !selected.TryGetComponent(out Selectable selectable)
+                || !selectable.IsActive() || !selectable.IsInteractable()
+                || selected.GetComponent<ISubmitHandler>() == null)
+            {
+                return false;
+            }
+            foreach (InputControl control in submitAction.controls)
+            {
+                if (ReferenceEquals(control, advanceControl)) { return true; }
+            }
+            return false;
+        }
+
+        /// <summary>
         ///     Action通知の順序に依存せず、スキップに割り当てられたボタンの押下を確認する。
         /// </summary>
         private bool IsSkipControlPressed()
@@ -329,6 +366,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
         private ScenarioInputController _inputController;
         private PlayerInputView _playerInputView;
+        private InputSystemUIInputModule _uiInputModule;
         private ScenarioViewModel _viewModel;
         private bool _isSubscribed;
         private bool _requestHideUI;
