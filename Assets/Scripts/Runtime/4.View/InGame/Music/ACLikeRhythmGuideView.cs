@@ -607,7 +607,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private float CalculateHalfWidth()
         {
             RectTransform guideRect = (RectTransform)transform;
-            Camera canvasCamera = _rootCanvas != null && _rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+            UnityEngine.Camera canvasCamera = _rootCanvas != null && _rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay
                 ? _rootCanvas.worldCamera : null;
             float scaleFactor = _rootCanvas != null ? _rootCanvas.scaleFactor : 1f;
             Rect safeArea = Screen.safeArea;
