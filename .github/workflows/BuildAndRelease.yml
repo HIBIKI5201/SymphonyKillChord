@@ -1063,6 +1063,9 @@ jobs:
               throw "NuGet パッケージの復元に失敗しました (終了コード $RestoreExitCode)。"
             }
             Write-Host "[INFO]: NuGet パッケージが復元されました。"
+          } catch {
+            Write-Host "[ERROR]: $($_.Exception.Message)"
+            throw
           } finally {
             Write-Host "::endgroup::"
           }
