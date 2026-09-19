@@ -382,6 +382,7 @@ MonoBehaviour:
     - rid: 1841141540767924224
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.09
@@ -392,6 +393,7 @@ MonoBehaviour:
     - rid: 4309480265444753537
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.06
@@ -402,6 +404,7 @@ MonoBehaviour:
     - rid: 4309480265444753539
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.07
@@ -432,6 +435,7 @@ MonoBehaviour:
     - rid: 7260318751720735100
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.08
@@ -689,6 +693,7 @@ MonoBehaviour:
     - rid: 900173000000000001
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.04
@@ -699,6 +704,7 @@ MonoBehaviour:
     - rid: 900173000000000002
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.05

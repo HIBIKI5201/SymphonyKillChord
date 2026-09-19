@@ -381,6 +381,7 @@ MonoBehaviour:
     - rid: 1911588046792557211
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.06
@@ -391,6 +392,7 @@ MonoBehaviour:
     - rid: 1911588046792557212
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.07
@@ -401,6 +403,7 @@ MonoBehaviour:
     - rid: 1911588046792557216
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.09
@@ -678,6 +681,7 @@ MonoBehaviour:
     - rid: 900173000000000001
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.04
@@ -688,6 +692,7 @@ MonoBehaviour:
     - rid: 900173000000000002
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
+        _continueAfterStepChange: 1
         _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.05
