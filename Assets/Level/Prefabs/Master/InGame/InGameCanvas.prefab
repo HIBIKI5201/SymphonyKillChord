@@ -1783,7 +1783,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Music.ACLikeRhythmGuideView
   _effectConfig: {fileID: 11400000, guid: b7d4a821f0c54e33a97b6c8d1e2f3045, type: 2}
-  _beatRangeLineSprite: {fileID: 7482667652216324306, guid: 2b245e209f01af347bd055120d0d3c37, type: 3}
   _beatColor:
   - {r: 1, g: 0.6117647, b: 0, a: 1}
   - {r: 0.99215686, g: 1, b: 0, a: 1}
