@@ -69,7 +69,6 @@ namespace KillChord.Runtime.View.InGame.Music
                 // 現在ビートの表示色は次のブロック遷移まで更新されないため、ここで即座に反映する。
                 UpdateCurrentBeatColor();
                 UpdateJustTimingMarkerColors();
-                UpdateBeatRangeLineColors();
                 RebuildTargetBeatFrames();
             }
         }
@@ -296,25 +295,61 @@ namespace KillChord.Runtime.View.InGame.Music
         public bool TryGetJustTimingXPosition(int beatType, out float xPosition)
         {
             xPosition = 0f;
-
             if (_totalBeatBoxCount <= 0)
             {
                 return false;
             }
-
             for (int i = 0; i < _zoneBeatCounts.Length; i++)
             {
-                if (_zoneBeatCounts[i] != beatType)
+                if (_zoneBeatCounts[i] == beatType)
                 {
-                    continue;
+                    xPosition = _layout.GetPosition((_justStarts[i] + _justEnds[i]) * 0.5f);
+                    return true;
                 }
+            }
+            return false;
+        }
 
-                float center = (_justStarts[i] + _justEnds[i]) * 0.5f;
-                xPosition = _layout.GetPosition(center);
-                return true;
+        /// <summary>
+        ///     指定拍のJust位置を含む同色ブロック区間の中心と幅を取得する。
+        ///     アイコンのJust中心と色帯の区間中心を分け、帯が隣の拍へはみ出すのを防ぐ。
+        /// </summary>
+        /// <param name="beatType"> 対象拍の整数値。 </param>
+        /// <param name="xPosition"> 区間中心の、ゲージ中心からの距離。 </param>
+        /// <param name="width"> 同色区間の実描画幅。 </param>
+        /// <returns> 対応する区間を取得できた場合はtrue。 </returns>
+        public bool TryGetBeatRange(int beatType, out float xPosition, out float width)
+        {
+            xPosition = 0f;
+            width = 0f;
+            int zoneIndex = Array.IndexOf(_zoneBeatCounts, beatType);
+            if (zoneIndex < 0 || _totalBeatBoxCount <= 0)
+            {
+                return false;
             }
 
-            return false;
+            float justCenter = (_justStarts[zoneIndex] + _justEnds[zoneIndex]) * 0.5f;
+            int firstBlock = _layout.GetBlockIndex(justCenter);
+            if (firstBlock < 0 || GetBeatSectionIndex(firstBlock) != zoneIndex)
+            {
+                return false;
+            }
+
+            int lastBlock = firstBlock;
+            while (firstBlock > 0 && GetBeatSectionIndex(firstBlock - 1) == zoneIndex)
+            {
+                firstBlock--;
+            }
+            while (lastBlock + 1 < _totalBeatBoxCount && GetBeatSectionIndex(lastBlock + 1) == zoneIndex)
+            {
+                lastBlock++;
+            }
+
+            float start = _layout.GetBlockBoundary(firstBlock);
+            float end = _layout.GetBlockBoundary(lastBlock + 1);
+            xPosition = (start + end) * 0.5f;
+            width = end - start;
+            return true;
         }
 
         /// <summary>
@@ -412,12 +447,6 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャストタイミング位置を示す帯の横幅倍率。 </summary>
         private const float JUST_TIMING_MARKER_WIDTH_SCALE = 1f / 3f;
 
-        /// <summary> 全判定区間の色帯の高さ。 </summary>
-        private const float BEAT_RANGE_LINE_HEIGHT = 4f;
-
-        /// <summary> 既存スキル入力線と同じ位置へ配置する、ガイド基準からの高さ。 </summary>
-        private const float BEAT_RANGE_LINE_VERTICAL_OFFSET = 10f;
-
         /// <summary> チュートリアル対象枠の線幅。 </summary>
         private const float TARGET_BEAT_FRAME_THICKNESS = 2f;
 
@@ -440,9 +469,6 @@ namespace KillChord.Runtime.View.InGame.Music
 
         [SerializeField, Tooltip("ジャストタイミング演出の設定。")]
         private ACLikeRhythmGuideEffectConfig _effectConfig;
-
-        [SerializeField, Tooltip("全判定区間の枠上に表示する色帯のSprite。")]
-        private Sprite _beatRangeLineSprite;
 
         [Tooltip("ビートの色。判定ゾーンの順番に対応します。")]
         [SerializeField] private Color[] _beatColor;
@@ -493,7 +519,6 @@ namespace KillChord.Runtime.View.InGame.Music
         private RectTransform[] _rightBeatRectTransforms;
         private Image[] _rightBeatImages;
         private RectTransform[] _justTimingMarkers;
-        private BeatRangeLine[] _beatRangeLines = Array.Empty<BeatRangeLine>();
         private MotionHandle[] _handles;
         private RectTransform[] _targetBeatFrames = Array.Empty<RectTransform>();
         private MotionHandle _targetBeatFrameMotion;
@@ -570,7 +595,6 @@ namespace KillChord.Runtime.View.InGame.Music
                 out _handles);
 
             CreateJustTimingMarkers();
-            CreateBeatRangeLines();
             RebuildTargetBeatFrames();
             _currentOpenIndex = -1;
             SynchronizeProgressImageWidths();
@@ -625,7 +649,6 @@ namespace KillChord.Runtime.View.InGame.Music
         private void ClearGeneratedBeatObjects()
         {
             ClearTargetBeatFrames();
-            ClearBeatRangeLines();
             if (_handles != null)
             {
                 for (int i = 0; i < _handles.Length; i++)
@@ -782,94 +805,6 @@ namespace KillChord.Runtime.View.InGame.Music
             markerImage.color = GetJustTimingMarkerColor(zoneIndex);
             markerImage.raycastTarget = false;
             return markerRectTransform;
-        }
-
-        /// <summary>
-        ///     全判定区間の枠上へ、スキル入力状態に依存しない左右の色帯を生成する。
-        /// </summary>
-        private void CreateBeatRangeLines()
-        {
-            var lines = new List<BeatRangeLine>();
-            for (int blockIndex = 0; blockIndex < _totalBeatBoxCount; blockIndex++)
-            {
-                if (!TryGetZoneColor(blockIndex, out Color color, out int zoneIndex))
-                {
-                    continue;
-                }
-
-                // 実際のブロック境界に揃え、最終ゾーンの小節末尾からゲージ末端まで含める。
-                int firstBlockIndex = blockIndex;
-                while (blockIndex + 1 < _totalBeatBoxCount &&
-                    GetBeatSectionIndex(blockIndex + 1) == zoneIndex)
-                {
-                    blockIndex++;
-                }
-
-                float start = _layout.GetBlockBoundary(firstBlockIndex);
-                float end = _layout.GetBlockBoundary(blockIndex + 1);
-                float center = (start + end) * 0.5f;
-                float width = end - start;
-                color = ApplyTargetDim(color, zoneIndex);
-                lines.Add(new BeatRangeLine(CreateBeatRangeLine(
-                    $"BeatRangeLine_Left_{firstBlockIndex}", -center, width, color), zoneIndex));
-                lines.Add(new BeatRangeLine(CreateBeatRangeLine(
-                    $"BeatRangeLine_Right_{firstBlockIndex}", center, width, color), zoneIndex));
-            }
-
-            _beatRangeLines = lines.ToArray();
-        }
-
-        /// <summary>
-        ///     既存の白黒枠より前、チュートリアル赤枠より後ろへ色帯を作成する。
-        /// </summary>
-        private Image CreateBeatRangeLine(string objectName, float center, float width, Color color)
-        {
-            GameObject lineObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
-            lineObject.layer = gameObject.layer;
-            lineObject.transform.SetParent(transform, false);
-            lineObject.transform.SetAsLastSibling();
-
-            RectTransform lineRectTransform = lineObject.GetComponent<RectTransform>();
-            lineRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-            lineRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            lineRectTransform.pivot = new Vector2(0.5f, 0.5f);
-            lineRectTransform.anchoredPosition = new Vector2(center, BEAT_RANGE_LINE_VERTICAL_OFFSET);
-            lineRectTransform.sizeDelta = new Vector2(width, BEAT_RANGE_LINE_HEIGHT);
-
-            Image lineImage = lineObject.GetComponent<Image>();
-            lineImage.sprite = _beatRangeLineSprite;
-            lineImage.color = color;
-            lineImage.raycastTarget = false;
-            return lineImage;
-        }
-
-        /// <summary>
-        ///     色帯へチュートリアルの対象外減光を反映する。
-        /// </summary>
-        private void UpdateBeatRangeLineColors()
-        {
-            for (int i = 0; i < _beatRangeLines.Length; i++)
-            {
-                BeatRangeLine line = _beatRangeLines[i];
-                line.Image.color = ApplyTargetDim(_beatColor[line.ZoneIndex], line.ZoneIndex);
-            }
-        }
-
-        /// <summary>
-        ///     生成済みの色帯を即座に非表示にし、再構築時の重複を防いで破棄する。
-        /// </summary>
-        private void ClearBeatRangeLines()
-        {
-            for (int i = 0; i < _beatRangeLines.Length; i++)
-            {
-                if (_beatRangeLines[i].Image != null)
-                {
-                    _beatRangeLines[i].Image.gameObject.SetActive(false);
-                    Destroy(_beatRangeLines[i].Image.gameObject);
-                }
-            }
-
-            _beatRangeLines = Array.Empty<BeatRangeLine>();
         }
 
         /// <summary>
@@ -1210,27 +1145,6 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             return _zoneStarts.Length - 1;
-        }
-
-        /// <summary>
-        ///     生成した色帯と、減光の判断に使用する判定ゾーンの対応を保持する。
-        /// </summary>
-        private readonly struct BeatRangeLine
-        {
-            /// <summary>
-            ///     色帯と対応する判定ゾーンを記録する。
-            /// </summary>
-            public BeatRangeLine(Image image, int zoneIndex)
-            {
-                Image = image;
-                ZoneIndex = zoneIndex;
-            }
-
-            /// <summary> 枠上に表示する色帯。 </summary>
-            public Image Image { get; }
-
-            /// <summary> 色と対象外減光の参照先となる判定ゾーン。 </summary>
-            public int ZoneIndex { get; }
         }
     }
 }
