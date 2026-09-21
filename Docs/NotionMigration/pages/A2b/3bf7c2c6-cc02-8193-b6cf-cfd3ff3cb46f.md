@@ -11,6 +11,8 @@
 
 - 信頼性: 一部古い — 図の参加者 `EnemyView (MonoBehaviour)` は存在しない（毎フレーム `GetMoveInstruction` を呼ぶのは `EnemyMoveView`、`Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyMoveView.cs:173`）。`GetMoveInstruction` の中で攻撃を予約する記述も実装と違う。予約は BehaviorGraph の `AttackTargetAction` が `EnemyBattleAIFacade.StartAttack` 経由で行う（`BehaviorGraphNode/Action/AttackTargetAction.cs:33-34`、`AIFacade/EnemyBattleAIFacade.cs`）。攻撃範囲を出たときの予約取り消し（PR #1592）、攻撃後の上書き移動先の優先（`EnemyAIController.cs` の `GetMoveInstruction` 冒頭）、横歩き（PR #1740）、戦闘 AI の一括停止（PR #1393）が入っていない
 - 整合性: 親ページ 3957c2c6-cc02-80cd-94c0-f412b11ffcf7 のクラス表と合わせた。仕様概要 / 敵 / 敵の行動アルゴリズム 33a7c2c6-cc02-8055-bd1c-ed5ce324bd7b（A1 担当）の「射程外に出ても攻撃する」旧記述とは逆で、実装は取り消す
+- 決定（2026-09-22 八幡）: No.16 攻撃の予兆表示が出た後は、プレイヤーが射程外に出ても攻撃を実行する。予兆の前に射程外になった場合は攻撃しない。図の「プレイヤーとの距離 > 攻撃範囲」の分岐に、現状（取り消す）と本来の仕様を併記した
+- 実装の修正が必要: No.16 予兆表示（`On2BeatBefore`）の後は射程外に出ても予約を取り消さない（根拠 `Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIController.cs:132-140`、PR #1592）
 - 変更点:
   - 冒頭の説明文: 既存の索敵ゲートの説明は残し、戦闘 AI の有効判定（`IsBattleAiActivatedCondition`）、攻撃予約の起点、横歩きを追記した
   - 図: 旧: 参加者 `EnemyView (MonoBehaviour)` → 新: `EnemyMoveView`。旧: 「攻撃範囲内 → `ReserveAttack`（攻撃を予約）」 → 新: `GetMoveInstruction` は範囲の出入りを記録するだけで、範囲外へ出たら `CancelAttack` する。予約は BehaviorGraph 側（`AttackTargetAction` → `EnemyBattleAIFacade.StartAttack` → `ReserveAttack`）に分けた。上書き移動先の分岐を追加した
@@ -43,7 +45,7 @@ sequenceDiagram
         EMoveUC -->> EAI: EnemyMoveDecision を返却
         alt プレイヤーとの距離 > 攻撃範囲
             EAI ->> EBState: ExitRange（攻撃範囲外をマーク）
-            EAI ->> EAI: CancelAttack（予約中の攻撃を取り消す）
+            EAI ->> EAI: CancelAttack（予約中の攻撃を取り消す。現状は予兆の後でも取り消す。本来の仕様は予兆の前だけ取り消し、予兆の後は攻撃を実行する）
         else プレイヤーが攻撃範囲内
             EAI ->> EBState: EnterRange（攻撃範囲内をマーク）
         end

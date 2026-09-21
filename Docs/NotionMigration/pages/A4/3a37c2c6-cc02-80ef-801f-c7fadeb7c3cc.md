@@ -19,11 +19,12 @@
 - 織り込んだ反映項目: OG-110（用語側の反映）
 - 出典: 実装 `SkillBuildDefinition.cs:30`、`Runtime/2.Application/OutGame/SkillTree/SkillTreeService.cs:251-270`、マスターデータ `SkillNodeData-N7.asset`（`UnlockCost: 20`、`_hasSkillSlotBonus` なし）
 - 要確認: N7 解放で編成枠が増えるか（実機確認。増えなければデータ修正タスクにする）
+- 決定（2026-09-22 八幡）: No.1 ※注記の「スキル編成枠」を「キルコードの編成枠」に直した（出典のファイル名「スキル.md」は変えない）
 
 ## 適用する本文
 
 英名: SkillSlotExpansion
 キルコード編成可能数を2→3個に増やす、研究画面上の特別なノード解放要素。初期の編成枠は2で、スロット拡張ノード（N7、必要ポイント20）を解放すると1枠増える。
-※現行データの N7 には拡張の指定（スキル編成枠を1つ増やすフラグ）が入っていない。【要確認: N7 解放で実際に枠が増えるか（実機）】
+※現行データの N7 には拡張の指定（キルコードの編成枠を1つ増やすフラグ）が入っていない。【要確認: N7 解放で実際に枠が増えるか（実機）】
 出典: 仕様概要/仕様リスト/スキル.md、研究画面.md、データ Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeData/SkillNodeData-N7.asset
 ---

@@ -18,6 +18,7 @@
 - 変更点:
   - 新規ページ。子ページのテンプレート（仕様概要 / 関連ページ / 関連用語 / 仕様意図 / 詳細説明）に揃えた
   - 「詳細説明」に戦闘中の操作表（PC・ゲームパッド・スマホ）、アウトゲーム・UI の決定／キャンセル、スマホの画面操作、キーコンフィグの状況、戦闘 HUD の操作案内を書いた
+- 決定（2026-09-22 八幡）: No.34 キーコンフィグは仕様に残し「未実装」と明記した（「キーコンフィグ」節。実装するかの【要確認】を外した）
 - 織り込んだ反映項目: BT-16, BT-17
 - 出典:
   - 実装: `Assets/Settings/Input/KillChordInputActioMap.inputactions`（InGame / Common / OutGame / UI マップ）、`Assets/Level/Prefabs/Master/InGame/SmartphoneCanvas.prefab:301`（スマホの攻撃ボタン = `<Gamepad>/buttonEast`）、`Assets/Scripts/Runtime/4.View/Persistent/Input/MobileInput.cs`（視点ドラッグ・横フリックでロックオン対象の切り替え）、`Assets/Scripts/Runtime/4.View/Persistent/Input/MobileStickFlickInput.cs`、`Assets/Level/Data/Master/Persistent/Input/MobileStickFlickInputConfig.asset`、`Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerInitializer.cs:147`（フリック回避の設定は Android とエディタだけ）、`Assets/Scripts/Runtime/4.View/InGame/UI/InGameControllerGuideView.cs`
@@ -26,7 +27,6 @@
   - フォーラム: 「プレイヤーの操作の用語」（32d7c2c6-cc02-8037-9e21-ce04aa7fe966、適用済）
 - 要確認:
   - 仕様意図（議事録・フォーラムに根拠なし。企画に）
-  - キーコンフィグを製品版で実装するか（企画）
   - スマホでのロックオン（LockOn）とオプション（一時停止）の操作方法（実機確認）
   - スマホのロックオン対象切り替えのフリック閾値（コードの既定値 0.15 秒・80px。プレハブで上書きしているかは未確認）
   - iOS 版でフリック回避に対応するか（企画・実機確認）
@@ -94,8 +94,8 @@ PC（キーボード・マウス）、ゲームパッド、スマホの操作を
 【要確認: ロックオン対象切り替えのフリック閾値（コードの既定値は 0.15 秒以内・80px 以上）が実機で上書きされていないかを実機で】
 
 ### キーコンフィグ
-- キー・ボタンの割り当てを変更する機能は未実装である（体験版対象外）
-【要確認: キーコンフィグを製品版で実装するかを企画に】
+- キー・ボタンの割り当ては、コンフィグで変更できるようにする（[[回避アクション]] の既存の仕様）
+- 未実装である（体験版対象外）
 
 ### 操作案内の表示
 - 戦闘 HUD に、日本語・英語のコントローラー操作案内を表示する（詳細は [[インゲームHUD]] の戦闘UI）

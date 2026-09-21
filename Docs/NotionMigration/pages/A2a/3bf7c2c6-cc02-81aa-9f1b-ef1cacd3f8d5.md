@@ -21,12 +21,14 @@
   - シーケンス図: 旧: `Player ->> Ctrl (SkillExecutionController)` → 新: `PlayerAttackController ->> SkillController`。旧: クールダウン中 → `SkillExecutionFailurePolicy` に従い失敗を通知 → 新: `CooldownBlocked` を返す。照合前のクールダウン確認、`SkillRhythmState` への記録、対象なしの空撃ち、発動後の処理を追加
 - 織り込んだ反映項目: BT-19（スキル側の記述）
 - 出典: 実装 `PlayerAttackController.cs:111`、`SkillController.cs`、`SkillExecutionController.cs`、`SkillUseCase.cs`、`SkillCheckService.cs`、`SkillDefinition.cs:60-72`
+- 決定（2026-09-22 八幡）: No.1 冒頭の説明文とシーケンス図のラベルの説明語「スキル」を「キルコード」に直した（ページ名・クラス名・メソッド名は変えていない）
+- 決定（2026-09-22 八幡）: No.19 回避はリズムを刻まない（実装どおり）。冒頭の説明文に、回避は起点にならない旨を追記した
 - 要確認:
   - 【要確認: プログラム担当】対象がいないときの空撃ち（クールダウンを消費し効果なし）を仕様とするか
 
 ## 適用する本文
 
-拍に合わせた入力列がスキルのパターンと一致したとき、クールダウンとターゲットを確認して効果を実行する。入力の起点は攻撃入力で、`PlayerAttackController`が攻撃のたびに`SkillController.TryExecuteSkill`を呼ぶ。照合は入力履歴の末尾がパターンと一致するかで判定する。対象がいない場合は効果を実行せずに発動扱い（空撃ち）にし、クールダウンも始まる。装備スキルを順に判定するため、1回の入力で複数のスキルが発動することがある。
+拍に合わせた入力列がキルコードのパターンと一致したとき、クールダウンとターゲットを確認して効果を実行する。入力の起点は攻撃入力で、`PlayerAttackController`が攻撃のたびに`SkillController.TryExecuteSkill`を呼ぶ。回避はリズムを刻まないため、起点にならない。照合は入力履歴の末尾がパターンと一致するかで判定する。対象がいない場合は効果を実行せずに発動扱い（空撃ち）にし、クールダウンも始まる。装備キルコードを順に判定するため、1回の入力で複数のキルコードが発動することがある。
 
 ```mermaid
 sequenceDiagram
@@ -34,26 +36,26 @@ sequenceDiagram
     participant PAC as PlayerAttackController (Character&Battle)
     participant SC as SkillController
     participant Music as IMusicSyncService (Music)
-    participant Ctrl as SkillExecutionController（装備スキルごと）
+    participant Ctrl as SkillExecutionController（装備キルコードごと）
     participant Cooldown as SkillCooldownState
     participant Check as SkillCheckService
     participant UseCase as SkillUsecase
     participant Resolver as SkillEffectExecutorResolver
     participant Executor as ISkillEffectExecutor
 
-    PAC ->> SC: TryExecuteSkill(Attack, 拍種, ジャスト成否, スキル使用可否)
+    PAC ->> SC: TryExecuteSkill(Attack, 拍種, ジャスト成否, キルコード使用可否)
     SC ->> Music: 入力履歴を登録 (RegisterBattleActionHistory)
-    alt スキルが制限中（チュートリアル等）
+    alt キルコードが制限中（チュートリアル等）
         SC -->> PAC: 通常攻撃のダメージを適用（判定しない）
     end
-    loop 装備スキルごと
+    loop 装備キルコードごと
         SC ->> Ctrl: TryExecuteSkill
         Ctrl ->> Cooldown: 発動可能か判定
         alt クールダウン中
             Ctrl -->> SC: CooldownBlocked（入力は記録しない）
         else 発動可能
             Ctrl ->> Ctrl: SkillRhythmState へ拍を記録
-            Ctrl ->> Check: 入力履歴とスキルパターンの照合（末尾一致）
+            Ctrl ->> Check: 入力履歴とキルコードパターンの照合（末尾一致）
             alt 一致しない
                 Ctrl ->> Ctrl: 入力進捗の表示を更新
                 Ctrl -->> SC: InputProgressed
