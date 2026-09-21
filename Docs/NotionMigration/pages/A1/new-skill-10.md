@@ -21,6 +21,7 @@
 - 織り込んだ反映項目: BT-33, BT-35, BT-36
 - 出典: `SkillData10.asset`（`_pattern`・`_skillType`・`_effectParameters`・`_effectParameterGrowths`・`_statusEffectReapplyPolicy`・`_skillNormalAttackDamagePolicy`・`_animationKey`・`_skillDetail`）、`Skill_10.cs`、`Assets/Level/Data/Master/InGame/Skill/Effect/SkillEffectCatalogConfig.asset`、反映項目 BT-33 の実値表
 - 決定（2026-09-22 八幡）: No.1 本文の説明語「スキル」を「キルコード」にした（「キルコードの効果」節〔旧見出し「スキル効果」〕、「キルコードの効果意図」節〔旧見出し「スキル効果意図」〕、「モチーフ」節、「実装済みの演出」節）。DB プロパティと同名の「スキルジャンル」、ページ名「10スキル」、アニメーションキー、アセット名は変えていない
+- 決定（2026-09-22 八幡）: R11 キルコードの効果の値はマスターデータに置き、仕様には効果の説明だけを書く。「キルコードの効果」節から数値（威力・割合・効果時間・回数・範囲・レベルごとの倍率）と数値の表を外し、値の名前（`_effectParameters` の識別子）と「値はマスターデータを正とする」を書いた。現在値は A3b の新規ページ「敵・ボスのステータス」の「キルコードの効果」に移した
 - 要確認:
   - キルコードの効果意図（企画）
   - 演出の流れと演出プレハブの中身（企画・実機確認。BT-35 は要実機確認）
@@ -39,17 +40,13 @@
 - バフ
 
 #### キルコードの効果
-3回まで30％のダメージを軽減するバフを自身に与える。（重複不可）
+一定回数（DamageReductionHitCount）まで、ダメージを一定割合（DamageReductionRate）軽減するバフを自身に与える。（重複不可）
 - 効果中にもう一度発動した場合は、新しい効果に置き換える（重ねがけはしない）
 - コマンドの最後の入力（2拍子のショットガン）の通常攻撃がそのまま出て、ダメージも出る
-- レベルが 1 上がるごとに軽減率が 1.2 倍になる（上限 Lv10）
+- レベルが上がるごとに軽減率が上がる
 - クールダウンは 1 小節である
-- 正本: `Assets/Level/Data/Master/Skill/Templates/SkillData10.asset`
-
-| 名前 | 現在値（Lv0） | 単位 | 正本 |
-| --- | --- | --- | --- |
-| 軽減する回数 | 3 | 回 | `SkillData10.asset` の DamageReductionHitCount |
-| 軽減率 | 30 | % | `SkillData10.asset` の DamageReductionRate |
+- 値（Lv0 の現在値とレベルによる成長）はマスターデータ（[[敵・ボスのステータス]] の「キルコードの効果」）を正とする。仕様には効果の説明だけを書く
+- 正本: `Assets/Level/Data/Master/Skill/Templates/SkillData10.asset` の `_effectParameters`
 
 #### キルコードの効果意図
 【要確認: キルコードの効果意図を企画に】

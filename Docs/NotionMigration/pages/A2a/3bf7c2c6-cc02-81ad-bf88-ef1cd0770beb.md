@@ -15,11 +15,14 @@
   - シーケンス図: `PlayerInputView` と `PlayerView` を追加。`GetCurrentBeatType`・`TryExecuteSkill`・`PlayerAttackPresenter.Push`・`OnAttackExecuted(攻撃名, 命中したか)`・攻撃アニメーション要求・武器表示・向き直りを追加
 - 織り込んだ反映項目: BT-09（判定結果の通知経路）
 - 出典: 実装 `Runtime/4.View/InGame/Player/PlayerView.cs:546-594,685-700`、`Runtime/3.Adaptor/InGame/Battle/PlayerAttackController.cs:96-179`
+- 決定（2026-09-22 八幡）: R30 ロックオン対象がいなければ正面へ直線で撃つ。冒頭の説明文に仕様と現状（弾が真っすぐ飛ばない）を書いた
+- 実装の修正が必要: R30 対象がいないときに正面へ直線で撃つ（Issue #2055、根拠 `Assets/Scripts/Runtime/3.Adaptor/InGame/Battle/PlayerAttackController.cs:134-139`）
 - 要確認: なし
 
 ## 適用する本文
 
 攻撃入力を受け、ターゲット解決からダメージ適用・イベント通知までを実行する。`PlayerView`は、押した瞬間の入力で、入力抑止中・回避中・攻撃中・攻撃クールダウン中のいずれでもないときだけ攻撃を実行する。ダメージ計算の詳細は「キャラ&バトル」の①を参照する。
+ロックオン対象も候補もいないときは、正面へ直線で撃つ（敵にはHitしない）。現状は攻撃の成立を通知して終わり、弾が真っすぐ飛ばない（修正が必要。Issue #2055）。
 
 ```mermaid
 sequenceDiagram

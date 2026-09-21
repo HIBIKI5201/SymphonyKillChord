@@ -19,6 +19,8 @@
   - 新規ページ。子ページのテンプレート（仕様概要 / 関連ページ / 関連用語 / 仕様意図 / 詳細説明）に揃えた
   - 「詳細説明」に戦闘中の操作表（PC・ゲームパッド・スマホ）、アウトゲーム・UI の決定／キャンセル、スマホの画面操作、キーコンフィグの状況、戦闘 HUD の操作案内を書いた
 - 決定（2026-09-22 八幡）: No.34 キーコンフィグは仕様に残し「未実装」と明記した（「キーコンフィグ」節。実装するかの【要確認】を外した）
+- 決定（2026-09-22 八幡）: R29 スマホの視点操作は画面右半分のスワイプが基本で、コントローラーを繋げばスティックでも操作できる。「戦闘中の操作」表の視点の行と「スマホの操作の詳細」節を直した（カメラワーク 3257c2c6-cc02-80ee-8950-e36ec0a324d5 と揃えた）
+- 実装の修正が必要: スマホの視点操作の領域が画面全体（スティックと攻撃ボタン以外）になっている。画面右半分に限る（Issue 未作成。根拠 `Assets/Level/Prefabs/Master/InGame/SmartphoneCanvas.prefab:445-463` の `TouchArea` が全画面、`Assets/Scripts/Runtime/4.View/Persistent/Input/MobileInput.cs:151-165` は画面の左右を判定していない）。スティックでの視点操作は `Assets/Settings/Input/KillChordInputActioMap.inputactions:309` `<Gamepad>/rightStick` で実装済み
 - 織り込んだ反映項目: BT-16, BT-17
 - 出典:
   - 実装: `Assets/Settings/Input/KillChordInputActioMap.inputactions`（InGame / Common / OutGame / UI マップ）、`Assets/Level/Prefabs/Master/InGame/SmartphoneCanvas.prefab:301`（スマホの攻撃ボタン = `<Gamepad>/buttonEast`）、`Assets/Scripts/Runtime/4.View/Persistent/Input/MobileInput.cs`（視点ドラッグ・横フリックでロックオン対象の切り替え）、`Assets/Scripts/Runtime/4.View/Persistent/Input/MobileStickFlickInput.cs`、`Assets/Level/Data/Master/Persistent/Input/MobileStickFlickInputConfig.asset`、`Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerInitializer.cs:147`（フリック回避の設定は Android とエディタだけ）、`Assets/Scripts/Runtime/4.View/InGame/UI/InGameControllerGuideView.cs`
@@ -65,7 +67,7 @@ PC（キーボード・マウス）、ゲームパッド、スマホの操作を
 | 移動 | Move | W / A / S / D | 左スティック | 移動スティックを傾ける |
 | 攻撃 | Attack | マウス左ボタン | RT / B（East） | 攻撃ボタン |
 | 回避 | Dodge | Space | A（South） | 移動スティックをフリック |
-| 視点 | Look | マウス移動 | 右スティック | 画面の視点操作エリアをドラッグ |
+| 視点 | Look | マウス移動 | 右スティック | 画面右半分をスワイプ（コントローラーを繋げば右スティックでも操作できる） |
 | ロックオン | LockOn | マウス中ボタン | LT | 【要確認】 |
 | ロックオン対象の切り替え | LockOnSelect | Q / R | LB / RB | 画面の視点操作エリアを横にフリック |
 | オプション（一時停止） | Option | Esc | Start（Menu） | 【要確認】 |
@@ -89,7 +91,9 @@ PC（キーボード・マウス）、ゲームパッド、スマホの操作を
   - 正本: `Assets/Level/Data/Master/Persistent/Input/MobileStickFlickInputConfig.asset`
 - フリック回避の設定を読み込むのは Android 版だけである
 【要確認: iOS 版でフリック回避に対応するかを企画に】
-- 画面の視点操作エリアをドラッグすると視点が動く
+- 画面右半分（視点操作エリア）をスワイプすると視点が動く
+  - 現状の実装は、移動スティックと攻撃ボタン以外の画面全体で受け付けている（実装の修正が必要）
+- コントローラーを繋いだときは、右スティックでも視点を操作できる
 - 視点操作エリアで短く横にフリックすると、ロックオン対象を左右に切り替える
 【要確認: ロックオン対象切り替えのフリック閾値（コードの既定値は 0.15 秒以内・80px 以上）が実機で上書きされていないかを実機で】
 
