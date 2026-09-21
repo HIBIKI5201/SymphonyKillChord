@@ -14,9 +14,11 @@
 | 書き込み許可範囲 | NotionMarkdownWriter の許可範囲の拡張は後日行う |
 | **キャッシュの置き場** | **`Library/` 配下に置き、git では管理しない。** 今は `Docs/NotionSpecifications/` に置かれているので、`Library/` へ移す |
 | **キャッシュの更新** | **各自が手動で実行する。加えて、スキルから AI が実行する。**（CI での定期実行はしない） |
-| **ログ** | **`Docs/` に `agent` ディレクトリを作り、そこで管理する** |
+| **取り直しの判断** | **定期的には取り直さない**（API の制限にすぐ掛かるため）。必要なときに関連ページの更新日時だけを先に取り、更新があったページだけを取り直す。どのページが関連するかは AI がその場で判断する |
+| **ログ** | **`Docs/` に `agent` ディレクトリを作り、そこで管理する。`Docs/` は gitignore のままでよい** |
+| **不具合ログ** | **リポジトリの GitHub Issue に送る** |
 
-この決定で [90_未決事項.md](90_未決事項.md) の D-01〜D-03・D-05・D-11〜D-14 が決着した。
+この決定で [90_未決事項.md](90_未決事項.md) の D-01〜D-03・D-05・D-11〜D-14・D-16・D-17 が決着した。
 本書は、決定を実現するための**キャッシュの仕組みの設計案**と、**Notion 側の記述規約案**である。
 パス名など細部はまだ案であり、実装（§2.6 の T-1〜T-7）のときに確定させる。
 
@@ -45,7 +47,7 @@ Notion からリポジトリへ落とす仕組みは既に 1 つある。`Sinfon
 | 全体ミラー | `Library/NotionSpecifications/` | 仕様書の全ページ（現在の `Docs/NotionSpecifications/` を移す） | 管理しない（`/[Ll]ibrary/` は既に `.gitignore` の対象） |
 | ツール用キャッシュ | `Library/NotionCache/` | スキル・AI 指示が固定パスで読むページだけ | 管理しない |
 | キャッシュマップ | `SinfoniaOperator/notion-cache-map.json` | page id と `Library/NotionCache/` 内のパスの対応表 | **管理する**（全員で同じ対応表を使うため） |
-| エージェントのログ | `Docs/agent/` | 不具合ログ・差分レポートなど（§2.5） | D-16 で決める |
+| エージェントのログ | `Docs/agent/` | 差分レポート・QA の証跡など（§2.5）。不具合ログは GitHub Issue | 管理しない（`Docs/` は gitignore のまま） |
 
 `Library/` を選ぶ利点と、気をつける点:
 
@@ -83,43 +85,66 @@ source: https://www.notion.so/<page id>
 page_id: <page id>
 last_edited: 2026-09-22T08:00:00Z   (Notion 側の最終更新)
 fetched: 2026-09-22T10:00:00Z       (取得日時)
-update: ./SinfoniaOperator/NotionMarkdownExporter.exe --cache-map SinfoniaOperator/notion-cache-map.json
+update: ./SinfoniaOperator/NotionMarkdownExporter.exe --check --pages <page id>  (更新があれば --pages <page id>)
 -->
 ```
 
-### 2.4 更新の方法
+### 2.4 更新の方法: 必要なときに、変わったページだけ取る
 
-決定どおり、**各自の手動実行**と、**スキルからの AI 実行**の 2 経路とする。CI での定期実行はしない。
+決定（D-13・D-17）: キャッシュは**各自の手動実行**と**スキルからの AI 実行**で更新する。**定期的には取り直さない。**
+AI は、必要になったときに、**関連するページの更新日時だけを先に取得し、更新があったページだけを取り直す**。どのページが関連するかは、AI がその場で判断する。
 
-| 経路 | いつ | コマンド（案） |
+#### 定期的に取り直さない理由
+
+Notion API にはリクエスト数の制限がある（平均で毎秒 3 回程度）。
+現在のエクスポーターは差分更新のときも、ページごとにメタデータを 1 回ずつ取得してから、変わったかどうかを判断する（`NotionExporter.cs:185`）。
+そのため、変更が 1 件も無くても、全体ミラーの更新には**約 2,000 回のリクエスト**がかかる。
+スキルを動かすたびにこれを行うと、すぐ制限に掛かる。
+
+#### AI の手順（各スキルに共通で書く）
+
+1. **関連ページを決める。** 作業に必要なページを、その場で選ぶ。
+   - ツール用キャッシュなら、キャッシュマップの `readers` にそのスキルが載っているページ。
+   - 仕様を調べるなら、全体ミラーのページ一覧から、作業内容に関係するページを選ぶ（例: スキル効果を直すなら「仕様概要 / スキル」「システムリスト / スキル効果」「用語 / Just判定」）。
+   - 目安は 1 回の作業で数件〜十数件とし、全ページを対象にしない。
+2. **更新日時だけを取る。** 選んだページについて、Notion 側の `last_edited_time` だけを取得する（1 ページにつき 1 回。本文は取らない）。
+3. **比べる。** 手元のキャッシュのヘッダにある `last_edited` と比べる。
+4. **変わったページだけ本文を取る。** キャッシュが無いページも取る。変わっていないページは手元のキャッシュをそのまま使う。
+5. **取れなかったときは続ける。** `NOTION_TOKEN` が無い、ネットワークが無い、制限に掛かった（HTTP 429）などの場合は、手元のキャッシュで作業を続ける。そのとき、**使ったキャッシュの取得日時と、確認できなかったことをユーザーに伝える**。キャッシュも無ければ作業を止め、トークンの設定をユーザーに頼む。
+
+この手順に要るツールの機能は T-2 にまとめた（`--check` と `--pages`）。
+
+#### 手動の実行
+
+| 目的 | コマンド（案） | リクエスト数の目安 |
 | --- | --- | --- |
-| 手動 | 仕様書を読む・直す前、規約が変わったと聞いたとき | 全体ミラー: `./SinfoniaOperator/NotionMarkdownExporter.exe`（出力先は `Library/NotionSpecifications`）<br>ツール用キャッシュ: `./SinfoniaOperator/NotionMarkdownExporter.exe --cache-map SinfoniaOperator/notion-cache-map.json` |
-| スキル（AI） | スキルがキャッシュを読む直前 | 同上のツール用キャッシュのコマンド |
+| 特定のページだけ確認・更新する | `NotionMarkdownExporter.exe --check --pages <id,id,...>` / `--pages <id,id,...>` | ページ数 × 1〜数回 |
+| ツール用キャッシュを確認・更新する | `NotionMarkdownExporter.exe --check --cache-map SinfoniaOperator/notion-cache-map.json` / `--cache-map ...` | 十数ページ分 |
+| 全体ミラーを作り直す | `NotionMarkdownExporter.exe`（出力先は `Library/NotionSpecifications`） | 約 2,000 回以上。初回と、全体を読み直したいときだけ使う |
 
-スキルがキャッシュを読むときの手順（各スキルに共通で書く）:
-
-1. キャッシュファイルが**無ければ**、ツール用キャッシュのコマンドを実行する。
-2. **有っても**ヘッダの `fetched` が古ければ（目安 24 時間。D-17）、同じコマンドを実行する。エクスポーターは Notion の `last_edited` を比べて変わったページだけを取り直すので、変更が無ければすぐ終わる。
-3. 実行に失敗したとき（`NOTION_TOKEN` が無い、ネットワークが無いなど）は、手元のキャッシュで続ける。その場合、**キャッシュの取得日時と、失敗したことをユーザーに伝える**。キャッシュも無ければ作業を止め、トークンの設定をユーザーに頼む。
-
-この方式の代償:
+#### この方式の代償
 
 - **各自のマシンに `NOTION_TOKEN` が要る**（`SinfoniaOperator/sinfonia-operator.secrets.json`）。トークンを持たないメンバーの AI はキャッシュを作れない。
+- **関連ページの選び方は AI の判断になる。** 選び漏れたページは古いまま読まれる。そのため、スキルは読んだページとその取得日時を作業報告に書く。
 - **GitHub 上で動くツールはキャッシュを読めない。** CodeRabbit（`.coderabbit.yaml`）、GitHub Actions、クラウドで動く AI セッションが該当する。これらには Notion の URL を示すか、読む対象から外す（T-6）。
 - 仕様検索 Bot（Oracle VM）は `Docs/NotionSpecifications` を前提にしている（`SinfoniaOperator.SpecSearch/MarkdownChunker.cs:69`）。VM 側でエクスポーターを動かす構成に合わせて直す（T-5）。
 
-### 2.5 エージェントのログ（`Docs/agent/`）
+### 2.5 エージェントのログ（`Docs/agent/`）と不具合ログ
 
-AI エージェントやスキルが書き出す記録は、`Docs/agent/` にまとめる（決定）。構成案:
+決定（D-14・D-16）:
 
-| ディレクトリ（案） | 中身 | 現在の書き先 |
+- AI エージェントやスキルが書き出す記録は `Docs/agent/` に置く。**`Docs/` は今のまま gitignore の対象とし、git では共有しない**（各自のローカル記録）。
+- **不具合ログは GitHub の Issue に送る。** リポジトリ内のファイルには残さない。
+
+| 記録 | 置き場 | 現在の書き先 |
 | --- | --- | --- |
-| `Docs/agent/problem-logs/` | 不具合ログ（record-problem-log スキル） | `spec/plan/problem_logs/` |
-| `Docs/agent/spec-diff/` | 仕様書と実装の差分レポート（notion-spec-diff-check スキル） | `Docs/` 直下 |
-| `Docs/agent/qa-evidence/` | AI QA ツールの観測記録・証跡 | 未定（要確認） |
-| `Docs/agent/sessions/` | セッションの作業ログ（必要な場合） | — |
+| 不具合ログ（record-problem-log スキル） | **GitHub Issue**（ラベル案: `problem-log`） | `spec/plan/problem_logs/`（既存 2 件は Issue へ移す） |
+| 仕様書と実装の差分レポート（notion-spec-diff-check スキル） | `Docs/agent/spec-diff/` | `Docs/` 直下 |
+| AI QA ツールの観測記録・証跡 | `Docs/agent/qa-evidence/` | 未定（要確認） |
+| セッションの作業ログ（必要な場合） | `Docs/agent/sessions/` | — |
 
-`Docs/` は `.gitignore:122` で丸ごと除外されている。**ログを git で共有するかどうかは未決（D-16）** である。共有するなら `.gitignore` に `!Docs/agent/` を足す。共有しないなら各自のローカル記録になる。
+不具合ログの Issue には、既存の `spec/plan/problem_logs/*.md` と同じ項目（現象・再現手順・原因・対処・再発防止）を本文に書く。
+コード品質の監査結果（`Docs/RuntimeAudit/`、未解消のもの）も同じく Issue にする（D-06）。
 
 ログは記録であって仕様ではない。仕様に関わる結論が出たら Notion へ書く。ログに書いたままにしない。
 
@@ -128,12 +153,12 @@ AI エージェントやスキルが書き出す記録は、`Docs/agent/` にま
 | # | 内容 | 備考 |
 | --- | --- | --- |
 | T-1 | 全体ミラーの出力先を `Library/NotionSpecifications` に変える | 変更箇所: `sinfonia-operator.env.json` の `NOTION_EXPORT_OUTPUT`、`NotionMarkdownExporter/ExporterOptions.cs:190,290`（既定値とヘルプ）、`NotionMarkdownWriter/WriterEnvironment.cs:110`、`SinfoniaOperator/SinfoniaOperator.cs:504,514`、両ツールの README、`.gitignore:96`（不要になる）。**受入条件: Unity を起動・再インポートしても `Library/NotionSpecifications` が残ること** |
-| T-2 | NotionMarkdownExporter に、キャッシュマップに載ったページだけを取得し、固定パスへヘッダ付きで書き出すモードを足す（`--cache-map <path>`） | Enhanced Markdown API による変換はそのまま使う。子ページへのリンクは Notion の URL のまま残す |
+| T-2 | NotionMarkdownExporter に次のモードを足す。<br>・`--pages <id,...>`: 指定したページだけを取得する。<br>・`--cache-map <path>`: キャッシュマップに載ったページだけを、固定パスへヘッダ付きで書き出す。<br>・`--check`: 本文を取らずに、各ページの Notion 側の `last_edited_time` と手元のキャッシュの `last_edited` を並べて表示する（変わったページの一覧を AI が読める形で出す）。<br>`--pages` / `--cache-map` の本文取得は、`last_edited` が変わったページか、キャッシュが無いページに限る | Enhanced Markdown API による変換はそのまま使う。子ページへのリンクは Notion の URL のまま残す。429 を受けたら `Retry-After` に従い、既存の `RequestRateLimiter` を使う |
 | T-3 | キャッシュマップ `SinfoniaOperator/notion-cache-map.json` を作る | §3 の表から作る |
 | T-4 | スキル・AI 指示の参照先をキャッシュパスへ書き換え、§2.4 の「読む前の手順」を入れる | 対象: `AGENTS.md`、code-guideline-check、codex-implement、notion-spec-diff-check、notion-spec-write、sinfonia-importers、ai-debug-qa、`.codex` のレビュースキル（`source-routing.md`）。全体ミラーを指している箇所も `Library/NotionSpecifications` に直す |
 | T-5 | 仕様検索 Bot の参照パスを直す | `SinfoniaOperator.SpecSearch/MarkdownChunker.cs:69`、`deploy/oracle-vm-setup.md`（sparse-checkout 前提の手順は既に壊れている。D-09） |
 | T-6 | GitHub 上で動くツールの扱いを決めて直す | `.coderabbit.yaml:7`（今も存在しない `Assets/Docs/AGENTS.md` を指している）には Notion の URL を書くか、参照を外す |
-| T-7 | 書き先を `Docs/agent/` に変える | record-problem-log（LUDIARS 共通スキルなので、プロジェクト側で書き先を上書きできるか要確認）、notion-spec-diff-check の出力先 |
+| T-7 | 書き先を変える。<br>・record-problem-log: GitHub Issue へ送る（`gh issue create`、ラベル `problem-log`）。LUDIARS 共通スキルなので、プロジェクト側で上書きできるか要確認。<br>・既存の `spec/plan/problem_logs/*.md`（2 件）を Issue に移す。<br>・notion-spec-diff-check: 出力先を `Docs/agent/spec-diff/` にする | |
 | T-8 | `scripts/notion/sync_module.py`・`split_module_doc.py` を廃止し、`notion-spec-write/references/module-docs.md` を「Notion を直接編集する」運用へ書き換える | repo → Notion の一方向同期を止める（D-01） |
 
 ---
@@ -169,7 +194,7 @@ AI エージェントやスキルが書き出す記録は、`Docs/agent/` にま
 ```markdown
 コード規約: `Library/NotionCache/rules/code-guidelines.md`
 （Notion「システム概要 / コード規定」のキャッシュ。git 管理外。
- 無い・古い場合は `./SinfoniaOperator/NotionMarkdownExporter.exe --cache-map SinfoniaOperator/notion-cache-map.json` を実行してから読む）
+ 読む前に §2.4 の手順で更新日時を確かめ、変わっていれば取り直す）
 ```
 
 - スキルの判定基準を、スキル本文の中に書き写さない。書き写すと、正本・キャッシュ・スキルの 3 か所に同じ内容ができる。
