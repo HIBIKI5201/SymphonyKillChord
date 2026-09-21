@@ -57,7 +57,7 @@
 | 3d67c2c6-cc02-8169-9132-fa007a0af707 | SourceDataProvider | 可 | 一部古い | 本文置き換え | [原稿](3d67c2c6-cc02-8169-9132-fa007a0af707.md) | 削除済みの Planner*Preview 4 クラスと Preprocessor を消し、Inspectors / Profiles / BuildProcessor / バッジを追加。Variant の正本は Build Profile。CollectionKey 一覧を新設。IF-07〜IF-11 |
 | 3d67c2c6-cc02-8140-9293-d9da999c8519 | ① 新しいマスターデータ種別を登録する手順 | 可 | 最新 | 変更不要 | — | 手順図は実装どおり |
 | 3d67c2c6-cc02-8160-ad80-da71dd5416cf | ② DataID採番とハッシュ衝突検出 | 可 | 最新 | 追記のみ | [原稿](3d67c2c6-cc02-8160-ad80-da71dd5416cf.md) | 末尾に「ID 統一の対象と除外」（対象・除外・セーブへの影響）を移植。IF-13 |
-| 3d67c2c6-cc02-81c5-bdd1-fad0d552e2d2 | ③ GameDataVariant切替でRelease/Demoのデータを出し分ける仕組み | 可 | 陳腐化 | 本文置き換え | [原稿](3d67c2c6-cc02-81c5-bdd1-fad0d552e2d2.md) | 図を Build Profile → ApplyActiveProfile → PrepareForBuild の検証とビルド停止に描き直し。EditorPrefs は表示と生成先だけに効く。IF-07/DM-09 |
+| 3d67c2c6-cc02-81c5-bdd1-fad0d552e2d2 | ③ GameDataVariant切替でRelease/Demoのデータを出し分ける仕組み | 可 | 陳腐化 | 本文置き換え | [原稿](3d67c2c6-cc02-81c5-bdd1-fad0d552e2d2.md) | 図を Build Profile → ApplyActiveProfile → PrepareForBuild の検証とビルド停止に描き直し。EditorPrefs は表示と生成先だけに効く。体験版は Windows のみ（決定 2026-09-22 で確定）。IF-07/DM-09 |
 | 3bf7c2c6-cc02-81fc-afe1-dbe0d028cda1 | 初期化ライフサイクル | 可 | 一部古い | 本文置き換え | [原稿](3bf7c2c6-cc02-81fc-afe1-dbe0d028cda1.md) | Order 全 51 モジュールの表、エントリポイント 3 つ、失敗時の挙動・進捗・Shutdown 順・OutGame 復帰画面を追加。Order が効くのは同じフェーズ内だけと明記。IF-01〜IF-03 |
 | 3bf7c2c6-cc02-81a8-809e-cf1c618042fd | ① シーン初期化のフェーズ実行フロー | 可 | 一部古い | 本文置き換え | [原稿](3bf7c2c6-cc02-81a8-809e-cf1c618042fd.md) | Complete を呼ぶのはエントリポイント。失敗で止まる分岐を追加 |
 | 3bf7c2c6-cc02-81e1-836b-d675aecbfd17 | ② Order によるモジュール間の依存解決 | 可 | 一部古い | 本文置き換え | [原稿](3bf7c2c6-cc02-81e1-836b-d675aecbfd17.md) | 「Order を逆にすると失敗」は誤り（Build と Ready は別フェーズ）。同じフェーズ内の例を追加 |
@@ -123,7 +123,7 @@
 | 3577c2c6-cc02-8023-9dcd-e6f9b3bb0e01 | 音楽同期　2026-05-05 | 可 | 陳腐化 | アーカイブ推奨 | [原稿](3577c2c6-cc02-8023-9dcd-e6f9b3bb0e01.md) | 改修 5 件は実装済み。設計判断の要点だけ残す。現行は「音楽」（BT-41） |
 | 35a7c2c6-cc02-8036-ba68-d37a2865cc6c | 敵関連　2026-05-08 | 可 | 陳腐化 | アーカイブ推奨 | [原稿](35a7c2c6-cc02-8036-ba68-d37a2865cc6c.md) | 改修内容は反映済み。DebugInitializer は EnemyLifeCycle と Generator に置き換わった（EN-33） |
 | 35a7c2c6-cc02-80c1-98a8-d73e88fe0b05 | プレイヤー　2026-05-08 | 可 | 陳腐化 | アーカイブ推奨 | [原稿](35a7c2c6-cc02-80c1-98a8-d73e88fe0b05.md) | Dodge*VO と PlayerMoveParameter は現存しない（PlayerMoveSpec に統合）（BT-41） |
-| 35b7c2c6-cc02-80b1-bbac-edb37872d24f | カメラ　2026-05-09 | 可 | 陳腐化 | アーカイブ推奨 | [原稿](35b7c2c6-cc02-80b1-bbac-edb37872d24f.md) | GitHub リンクはすべて切れている。解除方式の改善案が現行方針と逆（CM-23） |
+| 35b7c2c6-cc02-80b1-bbac-edb37872d24f | カメラ　2026-05-09 | 可 | 陳腐化 | アーカイブ推奨 | [原稿](35b7c2c6-cc02-80b1-bbac-edb37872d24f.md) | GitHub リンクはすべて切れている。解除方式の改善案（移動で解除）は仕様書と一致、実装と違う。実装のミスとして扱うか【要確認】（CM-02, CM-23） |
 | 35b7c2c6-cc02-8038-ad3e-fb1914ecee56 | スキル　2026-05-09 | 可 | 陳腐化 | アーカイブ推奨 | [原稿](35b7c2c6-cc02-8038-ad3e-fb1914ecee56.md) | SkillData は SkillTemplate / SkillTemplateAsset に変わった（BT-41） |
 | 35b7c2c6-cc02-80ea-8ffc-c26aa5de1ba9 | 攻撃パイプライン・キャラクタデータ 2026-05-09 | 可 | 陳腐化 | アーカイブ推奨 | [原稿](35b7c2c6-cc02-80ea-8ffc-c26aa5de1ba9.md) | 改修内容は実装と一致。「対応内容」2 件の貼り間違いを注記（BT-41） |
 | 3847c2c6-cc02-8027-908e-f2db8ea6cbf7 | 7月 リファクタリング | 可 | 陳腐化 | アーカイブ推奨 | [原稿](3847c2c6-cc02-8027-908e-f2db8ea6cbf7.md) | 本文は 1 行だけで、計画は実施済み。削除でもよい（RL-14） |
