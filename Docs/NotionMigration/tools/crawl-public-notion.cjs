@@ -1,5 +1,5 @@
 // Notion 公開ページ クローラ (認証不要)。loadPageChunk / syncRecordValuesMain / queryCollection を使う。
-// 使い方: node crawl-public-notion.js [出力ディレクトリ(既定: ./notion-snapshot)]
+// 使い方: node crawl-public-notion.cjs [出力ディレクトリ(既定: ./notion-snapshot)]
 // 出力: <出力>/NNNN-<タイトル>-<id末尾>.md (1ページ1ファイル), <出力>/_INDEX.tsv, <出力>/notion-index.json
 // タスクリスト・時間割・休暇日・スプリント DB の行ページは辿らない。
 // 注意: Notion 非公式 API のため仕様変更で動かなくなることがある。NOTION_TOKEN があるなら NotionMarkdownExporter を優先する。
