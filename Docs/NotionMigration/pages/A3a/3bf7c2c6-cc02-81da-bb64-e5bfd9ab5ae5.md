@@ -17,11 +17,12 @@
   - シーケンス図: 旧ID移行と保存を追加
 - 織り込んだ反映項目: OG-014
 - 出典: 実装（上記ファイル）、commit c8f1cea47（30_ OG-014 の記載）
+- 決定（2026-09-22 八幡）: R42 セーブのローダーはフレームワーク側を正とし、自前のものを消す（#2061）。冒頭の説明のローダーの文に追記
 - 要確認: 実行時の保存先ファイル（フレームワークのソースがリポジトリに無い）→ 要実機確認。どちらのローダーを正とするか → プログラム担当に確認
 
 ## 適用する本文
 
-セーブデータは常駐シーンの`SavedataSystemInitializer`（Order 10）が起動時に1回だけ読み込み、以降の呼び出し元（Title・各機能モジュール）は`SaveStore`のキャッシュを受け取る。読み書きに使うローダーは`Assets/Resources/SymphonyFrameWork/SaveDataConfig.asset`で指定し、現在はSymphonyFrameWorkの`JsonUtilitySaveDataLoaderStrategy`である。
+セーブデータは常駐シーンの`SavedataSystemInitializer`（Order 10）が起動時に1回だけ読み込み、以降の呼び出し元（Title・各機能モジュール）は`SaveStore`のキャッシュを受け取る。読み書きに使うローダーは`Assets/Resources/SymphonyFrameWork/SaveDataConfig.asset`で指定し、現在はSymphonyFrameWorkの`JsonUtilitySaveDataLoaderStrategy`である。フレームワーク側のローダーを正とし、自前の`PersistentFileSaveDataLoaderStrategy`は削除する（#2061）。
 ```Mermaid
 sequenceDiagram
     autonumber

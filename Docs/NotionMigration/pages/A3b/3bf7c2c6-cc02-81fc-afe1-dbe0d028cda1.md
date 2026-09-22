@@ -22,11 +22,11 @@
   - 🔗 モジュール結合: 旧: 「Coordinator → ISceneInitializationReadiness（初期化完了を通知）」 → 新: 通知するのはエントリポイント（`Complete` を呼ぶのは `IngameComposition` / `OutGameSceneInitializer` / `PersistentEntryPoint`）。エントリポイントの箱に 3 クラスを並べた
   - 🔌 拡張ポイント: 「シーン上に配置されていれば Coordinator が拾う」に、有効なものだけ・同じシーンのものだけの条件を足した
   - ⚠️ 失敗時の挙動と進捗報告（新しい節、末尾）: フェーズの戻り値、例外とキャンセル、進捗、Shutdown の順序、OutGame の復帰画面を追加した
+- 決定（2026-09-22 八幡）: R77 同じ Order で問題ないモジュールは許容する（禁止しない）。「🔁 初期化フェーズ」の【要確認】を外し、「同じ Order で問題ないものは同じ値のままでよい。順序に依存するものは Order を分ける」に置き換えた
+- 決定（2026-09-22 八幡）: R54 全表示を日英に対応させる（#2067）。「⚠️ 失敗時の挙動と進捗報告」の復帰画面の文言の【要確認】を外した。旧: 「コードに直書き。ローカライズ対象外」 → 新: 「言語設定が English なら英語の文言を出す（日英ともコードに直書き）」。実装は既に日英に対応している（`OutGameSceneInitializer.cs:225-235`。シーンマネージャーの原稿と同じ）
 - 織り込んだ反映項目: IF-01, IF-02, IF-03
 - 出典: `InitializationCoordinator.cs`（`InitializeAsync`、`RunSynchronousPhase`、`LogPhaseFailure`）、`IngameComposition.cs:140-163,192-206,213-219`、`PersistentEntryPoint.cs:26,39-65,106-118,160-187`、`OutGameSceneInitializer.cs:100-125,160-206,242-295`、`OutGameInitializationFailureView.cs:48-57`、`6.Composition/**` の `override int Order`（51 モジュール）、`ServiceLocator.RegisterInstance` を呼ぶフェーズ（`ScenarioCom.cs:184-217` だけが Ready で登録。Screen / StageSelect / SkillTree / SkillBuild / Title / InGameMission は Build から呼ぶ `Initialize` 系で登録）、PR #1529
 - 要確認:
-  - 「同じ Order のモジュール同士は、同じフェーズの中で互いに登録・取得してはならない」を規約にするか（企画・リード、IF-02）
-  - 復帰画面の文言をローカライズ対象にするか、英語表示が要るか（企画、IF-03）
   - 復帰画面の実機での表示（#1529 本文で未実施、実機確認）
 
 ## 適用する本文
@@ -67,7 +67,7 @@
 | `**Shutdown**` | 破棄処理 |
 `Order`はモジュール間の依存の向きを表す。取得したい相手より大きい値を持たせる。
 全モジュールの`Build`が終わってから`Ready`が始まるため、`Build`で登録したものを`Ready`で取得する場合は`Order`の大小に関係なく取得できる。`Order`が効くのは、同じフェーズの中で登録と取得をする場合である（`Build`の中で他モジュールを取得する、`Ready`の中で登録したものを他モジュールが`Ready`で取得する、など）。現状、`Ready`の中で登録するのは`ScenarioCom`（`PendingNodeTransitionState`が未登録のときだけ）で、ほとんどのモジュールは`Build`で登録して`Ready`で取得している。
-同じ`Order`のモジュール同士の実行順は保証されない（収集は`FindObjectsSortMode.None`で、インゲームと常駐は`OrderBy`、アウトゲームは`List.Sort`で並べるため）。【要確認: 「同じOrderのモジュール同士は、同じフェーズの中で互いに登録・取得してはならない」を規約にするかをリードに】
+同じ`Order`のモジュール同士の実行順は保証されない（収集は`FindObjectsSortMode.None`で、インゲームと常駐は`OrderBy`、アウトゲームは`List.Sort`で並べるため）。同じ`Order`で問題ないモジュールは同じ値のままでよい。順序に依存するものは`Order`を分ける。
 現在の`Order`は次のとおりである（コードの`override int Order`。種別は継承する基底クラスで、Persistent / OutGame / InGame の順に並べた）。
 | 基底の種別 | Order | モジュール |
 |---|---|---|
@@ -197,7 +197,7 @@ graph TD
 - 結果は`ISceneInitializationReadiness.Complete(シーン名, 成否)`で通知する。
 - シーンの破棄時は、`Order`と逆の順番で各モジュールの`Shutdown`を呼ぶ。アウトゲームは1つのモジュールの`Shutdown`で例外が出ても、残りの`Shutdown`を続ける。
 - アウトゲームの初期化に失敗すると、シーン内のUIDocumentを無効にし、通常のUIとAddressablesに依存しない復帰画面（`OutGameInitializationFailureView`、560×180px、文字20pt）を出す。
-  - 文言: 「画面の読み込みに失敗しました。」「タイトルへ戻る」、復帰に失敗したとき「画面を読み込めませんでした。もう一度お試しください。」、処理中「読み込み中…」（コードに直書き。ローカライズ対象外）【要確認: ローカライズ対象にするか、英語表示が要るかを企画に】
+  - 文言: 「画面の読み込みに失敗しました。」「タイトルへ戻る」、復帰に失敗したとき「画面を読み込めませんでした。もう一度お試しください。」、処理中「読み込み中…」。ロード済みの言語設定がEnglishなら英語の文言を出す（日英ともコードに直書きで、Localizationのテーブルは使わない。Localization自体の初期化に失敗しても表示できるようにするため）
   - マウスまたはEnterでタイトルへ戻る。処理中は操作を受け付けない。
   - タイトル自身の初期化に失敗したときは、タイトルを読み込み直す。
   - シナリオ戦闘への出撃中や、常駐の寿命トークンがキャンセル済みのときは、復帰を始めない。

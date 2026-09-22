@@ -20,6 +20,11 @@
   - 節: 仕様書の参照先 / 規約・QA の参照先 / スクリプト / 壊れている参照 / リポジトリに残すもの
   - 「## ブランチ名」（新しい節。既存の節の後ろ）: 決定 No.6 のブランチ命名と、AI エージェントのブランチ名、CI の条件を足した
   - 表の「今後」の列は 02 の案（`Library/NotionCache/` のパスなど）であり、T-1〜T-4 の実装で確定する。本文にも「予定（案）」と書いた
+  - 決定 R75（2026-09-22 八幡）: 「## 規約・QAの参照先」の表の後ろに「リファクタリング資料と `Architecture.txt` の AI 監査用のプロンプトは、スキルに組み込む（#2080）」を追記
+  - 決定 R76（2026-09-22 八幡）: 「## リポジトリに残すもの」: 【要確認: `spec/`（解析結果）と`Docs/G-Lab/`を残すか】→ 生成物・AI 分析の出力は移動する（#2081）と書き、移動先だけを【要確認】にした
+  - 決定 R83（2026-09-22 八幡）: 「## ブランチ名」の不具合の修正: 旧「`hotfix/…`は今のまま使う。TGSのIssueを直すときは`hotfix/tgs-<Issue番号>`とする」→ 新「`hotfix/<Issue番号>`として続ける」（今の例 `hotfix/tgs-1892-rhythm-timeout-combo-hud` を添えた）
+  - 決定 R87（2026-09-22 八幡）: 「## ブランチ名」にデザイナーのブランチ `feature/[段階]/[プロダクト名]/designer` を追記し、【要確認】を `develop/…` だけにした
+  - 決定 R84（2026-09-22 八幡）: 「## ブランチ名」の CI の説明の後ろに「`develop`から`main`へのPRは、ディレクターが節目のタイミングで出す」を追記
 - 織り込んだ反映項目: TL-24, RL-01, RL-02（スクリプトの扱いのみ）, RL-03, RL-17（リポジトリに残すもの）
 - 出典:
   - 実装: `AGENTS.md:1-5`、`.claude/skills/code-guideline-check/SKILL.md:3,10-11,19,36`、`.claude/skills/codex-implement/SKILL.md:11,19,30-31,53-65,129-136`、`.claude/skills/notion-spec-diff-check/SKILL.md:3,9,11,27,39,76,123`、`.claude/skills/notion-spec-write/SKILL.md:8,49`、`.claude/skills/notion-spec-write/references/module-docs.md:6-40`、`references/writing-rules.md:4,17-30`、`.claude/skills/sinfonia-importers/SKILL.md:14,32`、`.claude/skills/ai-debug-qa/SKILL.md:7`、`.codex/skills/ai-debug-qa/SKILL.md:7`、`.codex/skills/symphony-kill-chord-code-review/SKILL.md:14-15`、`references/source-routing.md:5-7,13-14,20-21`、`.agents/skills/ai-debug-attack-queue/references/qa-coverage.md:3`、`.coderabbit.yaml:5-7`、`Assets/Docs/ScriptsDocs/CodingConventions.txt:112`、`Assets/Docs/README.md`（0 バイト）
@@ -28,13 +33,13 @@
 - 決定（2026-09-22 八幡）: No.6 ブランチ名から「レイヤー」をなくし、feature ブランチは `feature/[段階]/[プロダクト名]/[個人名]`（統合先 `feature/[段階]/[プロダクト名]/master`）とする。`agent` はルートに使わず個人名の位置に入れる（`feature/demo/<プロダクト名>/agent`）。今の `agent/…` は旧運用。`hotfix/…` は残す。「## ブランチ名」の節を新しく足した。CI の条件は `.github/workflows/AutoCreateMasterBranch.yml:24-47`・`ValidateFeaturePRTarget.yml:14,25-32`・`AutoCreateDevelopPullRequest.yml:7,11` を読んで書いた
 - 実装の修正が必要: `AGENTS.md:8` の「指定がない場合のみ `agent/○○` とする (例: `agent/cbt-qa-sheet`)」を削除し、`feature/[段階]/[プロダクト名]/agent` に統一する（`AGENTS.md:7-8` の例はすでに新しい形式）
 - 要確認:
-  - designer/… と develop/…（`feature/designer/master` のような designer 系を含む）の扱い（八幡さんへ。決定 No.6 で未決）
+  - `develop/…` の扱い（八幡さんへ。designer は決定 R87 で `feature/[段階]/[プロダクト名]/designer` に決まった）
   - `hotfix/tgs-<Issue 番号>` の統合先（develop へ直接 PR するか）。`AGENTS.md:11` の「`feature/` で始まらない作業ブランチは develop へ PR」から develop と読めるが、hotfix 専用の記述は無い（プログラマーへ）
   - 「今後」の列のキャッシュパス（`Library/NotionCache/rules/code-guidelines.md` など）は案である。T-3 のキャッシュマップで確定したら直す
   - `scripts/notion/sync_module.py`・`split_module_doc.py` を廃止する時期（T-8。RL-02 は要企画確認）。廃止までは今の手順で使ってよいか
   - `apply_writing_rules.py` は Notion 正本になっても使い道がある（手元の原稿の口調を揃える）。残すかどうか（要プログラマー確認）
   - CodeRabbit のレビュー規約に何を指定するか（Notion の URL を書くか、参照を外すか。T-6）
-  - `spec/`（Anatomia / Augur の分析結果）と `Docs/G-Lab/` を残すか（RL-17、要企画確認）
+  - 生成物・AI 分析の出力（`Docs/G-Lab/` など）の移動先（決定 R76 で移動は決定、移動先は未定。#2081）。`spec/`（Anatomia / Augur の分析結果）も移すか（RL-17）
 
 ## 適用する本文
 
@@ -76,6 +81,7 @@ AIは、Notionの仕様書をリポジトリに書き出した写しを読む。
 - 今後の参照先のパスは案である。キャッシュの対応表（`SinfoniaOperator/notion-cache-map.json`、予定）で確定する
 - CodeRabbit・GitHub Actions・クラウドで動くAIセッションは、各自のマシンのキャッシュを読めない
 - Editorのツール（C#）とCIは、リポジトリ内の`.md`・`.txt`の文書を読んでいない
+- リファクタリング資料と`Assets/Docs/ScriptsDocs/Architecture.txt`にあるAI監査用のプロンプトは、スキルに組み込む（#2080）
 
 ## スクリプト
 リポジトリの`scripts/`にある、AIの作業用のスクリプトである。Pythonで動く。
@@ -129,7 +135,7 @@ python scripts/notion/apply_writing_rules.py <対象.md> [<対象.md> ...]
 - キャッシュの対応表（`SinfoniaOperator/notion-cache-map.json`、予定）
 - `scripts/`のスクリプト（廃止するものを除く）
 - `README.md`、`third-party-notices.md`、フォントの`OFL.txt`、PRテンプレート、ゲームが読むCSV、Apps Scriptのコード、ツールのREADME
-【要確認: `spec/`（解析結果）と`Docs/G-Lab/`を残すかを企画に確認】
+- 生成物とAI分析の出力（`Docs/G-Lab/`など）は、今の場所から移す（#2081）【要確認: 移動先と、`spec/`（解析結果）も移すかを企画に確認】
 
 ## ブランチ名
 AIエージェントも人と同じ命名でブランチを作る。ブランチ名に「レイヤー」は入れない。
@@ -137,11 +143,14 @@ AIエージェントも人と同じ命名でブランチを作る。ブランチ
 - 統合先: 同じ階層の`feature/[段階]/[プロダクト名]/master`
 - AIエージェントの作業ブランチ: 個人名の位置に`agent`を入れる（例：`feature/demo/<プロダクト名>/agent`）。`agent`をブランチの先頭には使わない
 - 今の`agent/…`形式（例：`agent/cbt-qa-sheet`）は旧運用である。`AGENTS.md`の記述も新しい形式に直す
-- 不具合の修正: `hotfix/…`は今のまま使う。TGSのIssueを直すときは`hotfix/tgs-<Issue番号>`とする
-- `designer/…`と`develop/…`の扱いは未定である【要確認: designer/… と develop/… の扱いを八幡さんに】
+- デザイナーの作業ブランチ: `feature/[段階]/[プロダクト名]/designer`
+- 不具合の修正: `hotfix/<Issue番号>`として続ける（例：`hotfix/tgs-1892-rhythm-timeout-combo-hud`）
+- `develop/…`の扱いは未定である【要確認: develop/… の扱いを八幡さんに】
 - 過去のブランチの記録（例：`feature/research/boss/miyamoto`）の名前は変えない
 
 CIは次のように動く。`…/agent`もfeatureブランチと同じ扱いになる。
 - `feature/`で始まり、4階層以上で、末尾が`master`でないブランチを作ると、同じ階層の`master`ブランチを自動で作る（`AutoCreateMasterBranch.yml`）
 - 同じ条件のブランチからのPRは、作成先が同じ階層の`master`かを検査する（`ValidateFeaturePRTarget.yml`）
 - `feature/**/master`へのPRがマージされると、`master`から`develop`へのドラフトPRを自動で作る（`AutoCreateDevelopPullRequest.yml`）
+
+`develop`から`main`へのPRは、ディレクターが節目のタイミングで出す。

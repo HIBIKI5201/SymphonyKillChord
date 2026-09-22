@@ -14,13 +14,14 @@
 - 変更点:
   - 冒頭の説明文: 既存の文は残し、シナリオ用アセットの読み込み条件、ポーズ失敗時の扱い、1 ステップにつき 1 回だけ再生することを追記した
   - 図: 旧: 入力復帰 → 戦闘再開 → `CompletePlayback` → 新: `CompletePlayback` → 入力復帰 → 戦闘再開。`BeginScenarioPause` の失敗分岐と、シナリオ表示の有効・無効を追加した。参加者 `ScenarioUsecase` を、契約名 `IScenarioPlaybackService`（実装は `ScenarioUsecase`）に直した
+- 決定（2026-09-22 八幡）: R57 シナリオ中の BGM はシナリオ用の BGM に切り替える仕組みにし、今は同じ曲を使う。冒頭の説明文に書いた（未実装、#2069。Scenario モジュールに BGM を扱うコードは無い）
 - 織り込んだ反映項目: EN-24（古い記述の修正）
 - 出典: 実装（上記ファイル、`3.Adaptor/InGame/Sequence/BattlePauseController.cs:8`、`6.Composition/InGame/Mission/InGameMissionInitializer.cs` の `RequiresScenarioPlayback` / `TryBuildScenarioPlayback` / `TryInitializeMissionScenarioController`、`InGameScenarioInputModeController.cs`）
 - 要確認: なし
 
 ## 適用する本文
 
-`ScenarioPlaybackClearCondition`を持つステップでは、戦闘を止めてシナリオを再生し、再生完了をもってステップを達成させる。シナリオ再生そのものはScenarioモジュールの実装を流用し、Mission側は起動と復帰だけを担う。シナリオ表示に必要な背景・アニメーション・立ち絵・シナリオ設定のカタログは、この条件を持つミッションのときだけ読み込む。同じステップで再生するのは1回だけで、再生済みの条件は再生しない。戦闘のポーズに失敗した場合はシナリオを始めない。
+`ScenarioPlaybackClearCondition`を持つステップでは、戦闘を止めてシナリオを再生し、再生完了をもってステップを達成させる。シナリオ再生そのものはScenarioモジュールの実装を流用し、Mission側は起動と復帰だけを担う。シナリオ表示に必要な背景・アニメーション・立ち絵・シナリオ設定のカタログは、この条件を持つミッションのときだけ読み込む。同じステップで再生するのは1回だけで、再生済みの条件は再生しない。戦闘のポーズに失敗した場合はシナリオを始めない。シナリオ中のBGMは、シナリオ用のBGMに切り替える仕組みにする（未実装、#2069）。今は戦闘と同じ曲を使う。
 
 ```mermaid
 sequenceDiagram
