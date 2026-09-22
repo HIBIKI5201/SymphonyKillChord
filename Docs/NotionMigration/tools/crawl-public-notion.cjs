@@ -1,5 +1,5 @@
 // Notion 公開ページ クローラ (認証不要)。loadPageChunk / syncRecordValuesMain / queryCollection を使う。
-// 使い方: node crawl-public-notion.cjs [出力ディレクトリ(既定: ./notion-snapshot)]
+// 使い方: node crawl-public-notion.cjs [出力ディレクトリ(既定: OS の一時ディレクトリ/notion-snapshot-<日付>)]
 // 出力: <出力>/NNNN-<タイトル>-<id末尾>.md (1ページ1ファイル), <出力>/_INDEX.tsv, <出力>/notion-index.json
 // タスクリスト・時間割・休暇日・スプリント DB の行ページは辿らない。
 // 注意: Notion 非公式 API のため仕様変更で動かなくなることがある。NOTION_TOKEN があるなら NotionMarkdownExporter を優先する。
@@ -7,7 +7,9 @@ const fs = require('fs');
 const path = require('path');
 const SITE = 'https://lying-foxglove-81a.notion.site/api/v3';
 const ROOT = '27d7c2c6-cc02-801d-9648-fbe2769f1971';
-const OUT = path.resolve(process.argv[2] || 'notion-snapshot');
+// 出力先の既定値は OS の一時ディレクトリにする（リポジトリの中に書き出して誤ってコミットしないため）。
+const OUT = path.resolve(process.argv[2] || path.join(require('os').tmpdir(), 'notion-snapshot-' + new Date().toISOString().slice(0, 10)));
+console.log('出力先: ' + OUT);
 const SKIP_DB = new Set(); // 行を辿らない DB の id (名前による除外は下の正規表現)
 fs.mkdirSync(OUT, { recursive: true });
 
