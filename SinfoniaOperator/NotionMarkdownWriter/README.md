@@ -91,9 +91,12 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 ./NotionMarkdownWriter.exe append "<親のURL|ID>" --text "本文 <mention-page url=\"...\">表示名</mention-page>" --confirm
 ```
 
-`append`は常に**末尾**に追加されます。Notion APIには「指定ブロックの直後へ挿入」や「ブロックの並び替え」の
-手段が無いため（`PATCH /blocks/{id}/children`は`after`パラメータを拒否し、`/blocks/{id}/move`のような
-エンドポイントも存在しない）、途中の位置へ移したい場合は追加後に`pull`→編集→`push`で行を移動してください。
+`append`コマンド自体は常に**末尾**に追加しますが、classic Blocks API（`PATCH /blocks/{id}/children`）自体は
+`after`パラメータ（直前に置くブロックのID）を受け付けることを確認済みです（`children`と同じリクエストに
+`"after": "<block-id>"`を含める）。ただし`/blocks/{id}/move`のような**既存ブロックの並び替え**エンドポイントは
+存在しません。巨大ページ（Markdown APIで本文取得不可）へ途中位置に挿入する場合は、一時ページでMarkdownを
+ブロックへ変換したのち、対象ページの挿入位置の直前ブロックIDを`after`に指定して`children.append`する方法が
+使えます（現状は生API呼び出しでのみ対応。`append`コマンドへの`--after`オプション追加は未実装）。
 
 ## 実装メモ
 
