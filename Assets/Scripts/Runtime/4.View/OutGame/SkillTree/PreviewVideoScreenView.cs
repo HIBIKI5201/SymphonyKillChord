@@ -51,7 +51,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         public override void Dispose()
         {
             base.Dispose();
-            _closeButton.UnregisterCallback<ClickEvent>(HandleCloseButtonClicked);
+            _closeButtonActivation?.Dispose();
         }
 
         private Dictionary<int, VideoClip> _videoClips;
@@ -62,21 +62,21 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
 
         private VisualElement _closeButton;
         private OutGameUIEvent _outGameUIEvent;
+        private IDisposable _closeButtonActivation;
 
         private const string ELEMENT_NAME_CLOSE_BUTTON = "ClosePreviewButton";
 
         private void RegisterEvents()
         {
-            _closeButton.RegisterCallback<ClickEvent>(HandleCloseButtonClicked);
             // キャンセル操作で閉じられるため、フォーカス移動の対象からは外す。
             _closeButton.ExcludeFromNavigation();
+            _closeButtonActivation = _closeButton.RegisterActivation(HandleCloseButtonActivationHandler);
         }
 
         /// <summary>
         ///     動画の閉じるボタンを押下時の処理。
         /// </summary>
-        /// <param name="ctx"></param>
-        private void HandleCloseButtonClicked(ClickEvent ctx)
+        private void HandleCloseButtonActivationHandler()
         {
             StopPreviewVideo();
             _outGameUIEvent.OnSkillPreviewCloseButtonClicked?.Invoke();

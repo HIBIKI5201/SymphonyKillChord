@@ -2,6 +2,9 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillBuild/UIToolkit/USS/SkillIcon.uss?fileID=7433441132597879392&amp;guid=1d17646a40a8a0f4b8aff5e72afa5bd4&amp;type=3#SkillIcon"/>
     <ui:VisualElement name="skill-icon-template" class="skill-icon">
         <ui:Image name="skill-icon" class="skill-icon-image"/>
+        <ui:Label name="skill-locked-label" text="未開放" class="skill-locked-label"/>
         <ui:Label name="skill-name" class="skill-name"/>
+        <ui:Image name="skill-genre-badge" class="skill-genre-badge"/>
+        <ui:VisualElement name="skill-equipped-badge" class="skill-equipped-badge"/>
     </ui:VisualElement>
 </ui:UXML>

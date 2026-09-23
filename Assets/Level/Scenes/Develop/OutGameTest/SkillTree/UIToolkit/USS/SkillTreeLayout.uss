@@ -1,0 +1,187 @@
+:root {
+}
+
+.skilltree-top-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(18, 33, 61);
+    border-bottom-right-radius: 0;
+    padding: 14px 32px 14px 20px;
+}
+
+.skilltree-top-bar-title {
+    color: rgb(255, 255, 255);
+    font-size: 30px;
+    -unity-font-style: bold;
+    margin-right: 20px;
+}
+
+.skilltree-top-bar-points {
+    color: rgb(207, 214, 230);
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.skilltree-reset-button {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: 220px;
+    height: 56px;
+    background-color: rgb(238, 240, 228);
+    color: rgb(26, 26, 26);
+    font-size: 22px;
+    -unity-font-style: bold;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.skilltree-panel {
+    flex-direction: column;
+    background-color: rgb(17, 29, 51);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(58, 84, 135);
+    border-right-color: rgb(58, 84, 135);
+    border-top-color: rgb(58, 84, 135);
+    border-bottom-color: rgb(58, 84, 135);
+}
+
+.skilltree-panel-header-bar {
+    flex-shrink: 0;
+    background-color: rgb(28, 46, 77);
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    padding: 8px 14px;
+}
+
+.skilltree-panel-body {
+    flex-direction: column;
+    padding: 12px 14px;
+}
+
+.skilltree-status-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.skilltree-status-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.skilltree-status-label {
+    color: rgb(207, 214, 230);
+    font-size: 16px;
+}
+
+.skilltree-status-value {
+    flex-grow: 1;
+    color: rgb(255, 255, 255);
+    font-size: 16px;
+    -unity-text-align: middle-right;
+}
+
+.skilltree-info-top {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.skilltree-info-icon {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    min-height: 64px;
+    background-color: rgb(0, 0, 0);
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: 12px;
+}
+
+.skilltree-info-name {
+    color: rgb(255, 255, 255);
+    font-size: 22px;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.skilltree-combo-row {
+    flex-direction: row;
+    margin-top: 4px;
+}
+
+.skilltree-combo-hex {
+    width: 24px;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 8px;
+}
+
+.skilltree-combo-hex-cap-top,
+.skilltree-combo-hex-cap-bottom {
+    width: 0;
+    height: 0;
+    border-left-width: 12px;
+    border-right-width: 12px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+}
+
+.skilltree-combo-hex-cap-top {
+    border-bottom-width: 7px;
+}
+
+.skilltree-combo-hex-cap-bottom {
+    border-top-width: 7px;
+}
+
+.skilltree-combo-hex-rect {
+    width: 24px;
+    height: 13px;
+}
+
+.skilltree-info-cost-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.skilltree-info-cost-label {
+    color: rgb(207, 214, 230);
+    font-size: 16px;
+}
+
+.skilltree-info-action-button {
+    background-color: rgb(238, 240, 228);
+    color: rgb(26, 26, 26);
+    font-size: 20px;
+    -unity-font-style: bold;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-bottom: 6px;
+}

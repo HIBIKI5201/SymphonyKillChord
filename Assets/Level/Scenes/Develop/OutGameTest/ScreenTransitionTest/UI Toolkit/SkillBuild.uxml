@@ -23,9 +23,21 @@
                     </ui:VisualElement>
                     <ui:VisualElement name="SkillSlotes" style="flex-grow: 0; width: 100%; height: 65%; align-self: center;">
                         <ui:VisualElement name="SkillElementContainer" class="skill-element-container" style="flex-grow: 0; flex-direction: row; align-self: center; width: 100%; height: 100%; justify-content: center;">
-                            <ui:VisualElement name="SkillSlot1" class="skill-element-slot" style="flex-grow: 0; width: 100px; height: 100px; background-color: rgb(77, 77, 77); min-width: 150px; min-height: 150px; align-self: center; border-top-left-radius: 50%; border-top-right-radius: 50%; border-bottom-right-radius: 50%; border-bottom-left-radius: 50%; margin-top: 0%; margin-right: 3%; margin-bottom: 0%; margin-left: 3%; display: flex;"/>
-                            <ui:VisualElement name="SkillSlot2" class="skill-element-slot" style="flex-grow: 0; width: 100px; height: 100px; background-color: rgb(77, 77, 77); min-width: 150px; min-height: 150px; align-self: center; border-top-left-radius: 50%; border-top-right-radius: 50%; border-bottom-right-radius: 50%; border-bottom-left-radius: 50%; margin-top: 0%; margin-right: 3%; margin-bottom: 0%; margin-left: 3%; display: flex;"/>
-                            <ui:VisualElement name="SkillSlot3" class="skill-element-slot" style="flex-grow: 0; width: 100px; height: 100px; background-color: rgb(77, 77, 77); min-width: 150px; min-height: 150px; align-self: center; border-top-left-radius: 50%; border-top-right-radius: 50%; border-bottom-right-radius: 50%; border-bottom-left-radius: 50%; margin-top: 0%; margin-right: 3%; margin-bottom: 0%; margin-left: 3%; display: none;"/>
+                            <ui:VisualElement name="SkillSlot1" class="skill-element-slot" style="flex-grow: 0; width: 100px; height: 100px; background-color: rgb(77, 77, 77); min-width: 150px; min-height: 150px; align-self: center; border-top-left-radius: 50%; border-top-right-radius: 50%; border-bottom-right-radius: 50%; border-bottom-left-radius: 50%; margin-top: 0%; margin-right: 3%; margin-bottom: 0%; margin-left: 3%; display: flex;">
+                                <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
+                                <ui:Label name="skill-slot-name" class="skill-slot-name"/>
+                                <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="SkillSlot2" class="skill-element-slot" style="flex-grow: 0; width: 100px; height: 100px; background-color: rgb(77, 77, 77); min-width: 150px; min-height: 150px; align-self: center; border-top-left-radius: 50%; border-top-right-radius: 50%; border-bottom-right-radius: 50%; border-bottom-left-radius: 50%; margin-top: 0%; margin-right: 3%; margin-bottom: 0%; margin-left: 3%; display: flex;">
+                                <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
+                                <ui:Label name="skill-slot-name" class="skill-slot-name"/>
+                                <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="SkillSlot3" class="skill-element-slot" style="flex-grow: 0; width: 100px; height: 100px; background-color: rgb(77, 77, 77); min-width: 150px; min-height: 150px; align-self: center; border-top-left-radius: 50%; border-top-right-radius: 50%; border-bottom-right-radius: 50%; border-bottom-left-radius: 50%; margin-top: 0%; margin-right: 3%; margin-bottom: 0%; margin-left: 3%; display: none;">
+                                <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
+                                <ui:Label name="skill-slot-name" class="skill-slot-name"/>
+                                <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder"/>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-grow: 0; width: 100%; height: 20%; justify-content: center; top: 5%;">
@@ -60,7 +72,7 @@
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:TabView name="SkillCollectionTab" style="height: 8%; width: 30%; background-color: rgb(255, 87, 87);"/>
+        <ui:VisualElement name="SkillGenreFilterBar" class="skill-genre-filter-bar" style="height: 12%; width: 30%;"/>
         <ui:VisualElement name="BottomSection" style="flex-grow: 1; background-color: rgb(232, 234, 236); width: 100%;">
             <ui:ScrollView name="SkillScrollView" mode="Horizontal" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic" horizontal-scroller-visibility="Hidden" style="background-color: rgb(232, 234, 236); justify-content: center; flex-direction: row; flex-grow: 1;">
                 <ui:VisualElement class="skill-element-list" style="flex-grow: 1; flex-direction: row; height: auto; justify-content: flex-start; align-self: center; margin-left: 3%;"/>

@@ -9,5 +9,6 @@ namespace KillChord.Runtime.View.Persistent.Input
         public const string InGame = "InGame";
         public const string OutGame = "OutGame";
         public const string Scenario = "Scenario";
+        public const string UI = "UI";
     }
 }

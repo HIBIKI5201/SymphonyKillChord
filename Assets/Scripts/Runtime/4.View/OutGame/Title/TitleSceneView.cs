@@ -1,8 +1,8 @@
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Navigation;
-using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Input;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -13,7 +13,7 @@ namespace KillChord.Runtime.View.OutGame.Title
     /// <summary>
     ///     タイトルシーンの View クラス。
     /// </summary>
-    public class TitleSceneView :  ScreenViewBase
+    public class TitleSceneView : ScreenViewBase
     {
         /// <summary>
         ///    タイトルシーンの View を初期化する。
@@ -24,7 +24,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// <param name="currentSceneName"></param>
         /// <param name="targetSceneName"></param>
         public TitleSceneView(
-            VisualElement rootElement, 
+            VisualElement rootElement,
             OutGameUIEvent outGameUIEvent,
             TitleStartController titleStartController,
             string currentSceneName,
@@ -60,6 +60,12 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         public override void Dispose()
         {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isDisposed = true;
             UnRegisterCallbacks();
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
@@ -118,6 +124,7 @@ namespace KillChord.Runtime.View.OutGame.Title
 
         private CancellationTokenSource _cancellationTokenSource;
         private bool _isStarting;
+        private bool _isDisposed;
 
         /// <summary>
         ///     タッチエリアのクリックイベントを登録する。
@@ -178,12 +185,14 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private async void StartGame()
         {
-            if (_isStarting)
+            if (_isDisposed || _isStarting || !_touchArea.enabledInHierarchy)
             {
                 return;
             }
 
             _isStarting = true;
+            _touchArea.SetEnabled(false);
+            _optionButton.SetEnabled(false);
             bool isSuccess = false;
 
             try
@@ -191,19 +200,19 @@ namespace KillChord.Runtime.View.OutGame.Title
                 isSuccess =
                     await _titleStartController.StartGameAsync(_currentSceneName, _targetSceneName, _cancellationTokenSource.Token);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException operationCanceledException)
             {
 #if UNITY_EDITOR
                 Debug.LogWarning(
                     $"[{nameof(TitleSceneView)}] "
-                    + $"{_currentSceneName} -> {_targetSceneName} への遷移がキャンセルされました。");
+                    + $"{_currentSceneName} -> {_targetSceneName} への遷移がキャンセルされました。 {operationCanceledException}");
 #endif
-                _isStarting = false;
+                RestoreStartInteraction();
                 return;
             }
             catch (Exception exception)
             {
-                _isStarting = false;
+                RestoreStartInteraction();
                 Debug.LogException(exception);
                 return;
             }
@@ -218,13 +227,30 @@ namespace KillChord.Runtime.View.OutGame.Title
             }
             else
             {
-                _isStarting = false;
+                RestoreStartInteraction();
 #if UNITY_EDITOR
                 Debug.LogError(
                     $"[{nameof(TitleSceneView)}] "
                     + $"{_currentSceneName} -> {_targetSceneName} への遷移に失敗しました。");
 #endif
             }
+        }
+
+        /// <summary>
+        ///     失敗とキャンセル時は生存中のViewだけを再操作可能にし、開始領域のフォーカスを復元する。
+        /// </summary>
+        private void RestoreStartInteraction()
+        {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isStarting = false;
+            _touchArea.SetEnabled(true);
+            _optionButton.SetEnabled(true);
+            SetInitialFocusElement(_touchArea);
+            RestoreFocus();
         }
 
         /// <summary>
@@ -258,7 +284,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void OnOptionInput(InputContext<float> inputContext)
         {
             // 押した瞬間のみ反応させる。離した際の通知では開かない。
-            if (inputContext.Phase != UnityEngine.InputSystem.InputActionPhase.Performed)
+            if (_isDisposed || _isStarting || !_optionButton.enabledInHierarchy
+                || inputContext.Phase != UnityEngine.InputSystem.InputActionPhase.Performed)
             {
                 return;
             }
@@ -271,6 +298,11 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void OnClickOptionButton()
         {
+            if (_isDisposed || _isStarting || !_optionButton.enabledInHierarchy)
+            {
+                return;
+            }
+
             OutGameUIEvent?.OnShowMenuScreen?.Invoke();
         }
     }

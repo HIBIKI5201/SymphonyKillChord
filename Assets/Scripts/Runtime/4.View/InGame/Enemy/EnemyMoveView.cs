@@ -41,6 +41,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _characterAnimationSignal = animationContext.Signal;
             _musicSyncState = musicSyncState;
             _isPlaying = false;
+            _speedVarianceMultiplier = Random.Range(_speedVarianceMin, _speedVarianceMax);
             SyncFootstepTiming();
         }
 
@@ -88,7 +89,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return false;
             }
 
-            _navMeshAgent.speed = 3f;
+            _navMeshAgent.speed = 3f * _speedVarianceMultiplier;
             _navMeshAgent.isStopped = false;
             _navMeshAgent.updateRotation = true;
             if (!_navMeshAgent.SetDestination(target))
@@ -146,7 +147,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
             if (intruction.ShouldMove)
             {
-                _navMeshAgent.speed = intruction.MoveSpeed;
+                _navMeshAgent.speed = intruction.MoveSpeed * _speedVarianceMultiplier;
                 _navMeshAgent.isStopped = false;
                 _navMeshAgent.updateRotation = true;
                 _navMeshAgent.SetDestination(intruction.Destination);
@@ -261,9 +262,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField,Tooltip("攻撃ヒット時に再生するエフェクトのTransformです。")]
         private Transform _damageEffectTransform;
 
+        [Header("人間味調整")]
+        [SerializeField, Tooltip("移動速度の個体差(倍率)の下限。1体ごとに初期化時抽選されます。")]
+        private float _speedVarianceMin = 0.9f;
+        [SerializeField, Tooltip("移動速度の個体差(倍率)の上限。1体ごとに初期化時抽選されます。")]
+        private float _speedVarianceMax = 1.1f;
+
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
+        private float _speedVarianceMultiplier = 1f;
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;

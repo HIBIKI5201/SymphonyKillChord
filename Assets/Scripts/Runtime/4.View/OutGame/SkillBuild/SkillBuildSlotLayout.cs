@@ -1,270 +1,155 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.SkillBuild
 {
     /// <summary>
-    ///     スキル装備スロットの状態を UI 配置へ反映する View。
+    ///     スキル装備スロットの表示をスキルデータへバインドする View。
+    ///     カード要素自体は一覧に残したまま、スロット側は小さなアイコン・名前表示のみを持つ。
     /// </summary>
     public sealed class SkillBuildSlotLayout
     {
         /// <summary>
-        ///     スロットレイアウトを初期化する。
+        ///     SkillBuildSlotLayout を初期化する。
         /// </summary>
-        /// <param name="rootElement"> 改造画面ルート。 </param>
-        /// <param name="skillListElement"> スキル一覧要素。 </param>
-        /// <param name="skillElementResolver"> スキル ID に対応する要素の取得処理。 </param>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="rootElement"> 画面ルート要素。 </param>
+        /// <param name="skillDataResolver"> スキル ID から表示データを取得する関数。 </param>
+        /// <param name="onSlotTapped"> スロットタップ時に、装備解除するスキル ID を通知するコールバック。 </param>
         public SkillBuildSlotLayout(
             VisualElement rootElement,
-            VisualElement skillListElement,
-            Func<int, VisualElement> skillElementResolver)
+            Func<int, SkillViewData?> skillDataResolver,
+            Action<int> onSlotTapped)
         {
             _rootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
-            _skillListElement = skillListElement ?? throw new ArgumentNullException(nameof(skillListElement));
-            _skillElementResolver = skillElementResolver ?? throw new ArgumentNullException(nameof(skillElementResolver));
+            _skillDataResolver = skillDataResolver ?? throw new ArgumentNullException(nameof(skillDataResolver));
+            _onSlotTapped = onSlotTapped;
+
+            _slotElements = _rootElement.Query<VisualElement>(className: SKILL_ELEMENT_SLOT_CLASS_NAME).ToList();
+            _slotSkillIds = new int[_slotElements.Count];
+            for (int i = 0; i < _slotElements.Count; i++)
+            {
+                _slotSkillIds[i] = EMPTY_SKILL_ID;
+                _slotElements[i].RegisterCallback<ClickEvent>(HandleSlotClickHandler);
+            }
         }
 
         /// <summary>
-        ///     装備済みスキルを対応スロットへ移動する。
+        ///     スロット状態を表示へ反映する。
         /// </summary>
-        /// <param name="slots"> スロット状態。 </param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public void ApplyAll(IReadOnlyList<SkillBuildSlotState> slots)
+        /// <param name="slots"> スロット状態一覧。 </param>
+        public void Apply(IReadOnlyList<SkillBuildSlotState> slots)
         {
             if (slots == null)
             {
                 throw new ArgumentNullException(nameof(slots));
             }
 
-            List<VisualElement> slotElements = GetSlotElements();
-            ClearSlotSkillElements(slotElements);
+            for (int i = 0; i < _slotElements.Count; i++)
+            {
+                _slotSkillIds[i] = EMPTY_SKILL_ID;
+            }
 
             for (int i = 0; i < slots.Count; i++)
             {
                 SkillBuildSlotState slot = slots[i];
-                if (slot.CurrentSkillId == EMPTY_SKILL_ID ||
-                    slot.SlotIndex < 0 ||
-                    slot.SlotIndex >= slotElements.Count)
+                if (slot.SlotIndex < 0 || slot.SlotIndex >= _slotElements.Count)
                 {
                     continue;
                 }
 
-                VisualElement skillElement = _skillElementResolver(slot.CurrentSkillId);
-                if (skillElement != null)
-                {
-                    MoveSkillToSlot(skillElement, slotElements[slot.SlotIndex]);
-                }
+                _slotSkillIds[slot.SlotIndex] = slot.CurrentSkillId;
+            }
+
+            for (int i = 0; i < _slotElements.Count; i++)
+            {
+                BindSlot(_slotElements[i], _slotSkillIds[i]);
             }
         }
 
         /// <summary>
-        ///     新旧スロット状態を比較し、変更されたスロットだけ表示へ反映する。
+        ///     登録したイベント購読を解除する。
         /// </summary>
-        /// <param name="previousSlots"> 変更前のスロット状態。 </param>
-        /// <param name="currentSlots"> 変更後のスロット状態。 </param>
-        /// <exception cref="ArgumentNullException"></exception>
-        public void ApplyChanges(
-            IReadOnlyList<SkillBuildSlotState> previousSlots,
-            IReadOnlyList<SkillBuildSlotState> currentSlots)
+        public void Dispose()
         {
-            if (previousSlots == null)
+            for (int i = 0; i < _slotElements.Count; i++)
             {
-                throw new ArgumentNullException(nameof(previousSlots));
-            }
-
-            if (currentSlots == null)
-            {
-                throw new ArgumentNullException(nameof(currentSlots));
-            }
-
-            List<VisualElement> slotElements = GetSlotElements();
-            bool[] changedSlots = BuildChangedSlotMap(
-                previousSlots,
-                currentSlots,
-                slotElements.Count);
-
-            // 先に変更対象を空けることで、スロット間交換でも移動順に依存しない。
-            for (int slotIndex = 0; slotIndex < changedSlots.Length; slotIndex++)
-            {
-                if (changedSlots[slotIndex])
-                {
-                    MoveSlotSkillToList(slotElements[slotIndex]);
-                }
-            }
-
-            for (int i = 0; i < currentSlots.Count; i++)
-            {
-                SkillBuildSlotState slot = currentSlots[i];
-                if (slot.SlotIndex < 0 ||
-                    slot.SlotIndex >= changedSlots.Length ||
-                    !changedSlots[slot.SlotIndex] ||
-                    slot.CurrentSkillId == EMPTY_SKILL_ID)
-                {
-                    continue;
-                }
-
-                VisualElement skillElement = _skillElementResolver(slot.CurrentSkillId);
-                if (skillElement != null)
-                {
-                    MoveSkillToSlot(skillElement, slotElements[slot.SlotIndex]);
-                }
+                _slotElements[i].UnregisterCallback<ClickEvent>(HandleSlotClickHandler);
             }
         }
 
         private const string SKILL_ELEMENT_SLOT_CLASS_NAME = "skill-element-slot";
-        private const string DRAGGABLE_CLASS_NAME = "draggable";
+        private const string SLOT_ICON_NAME = "skill-slot-icon";
+        private const string SLOT_NAME_LABEL_NAME = "skill-slot-name";
+        private const string SLOT_FILLED_CLASS_NAME = "is-filled";
         private const int EMPTY_SKILL_ID = -1;
 
         private readonly VisualElement _rootElement;
-        private readonly VisualElement _skillListElement;
-        private readonly Func<int, VisualElement> _skillElementResolver;
+        private readonly Func<int, SkillViewData?> _skillDataResolver;
+        private readonly Action<int> _onSlotTapped;
+        private readonly List<VisualElement> _slotElements;
+        private readonly int[] _slotSkillIds;
 
         /// <summary>
-        ///     スロット要素一覧を取得する。
+        ///     1つのスロットへスキル情報をバインドする。
         /// </summary>
-        /// <returns> スロット要素一覧。 </returns>
-        private List<VisualElement> GetSlotElements()
+        /// <param name="slotElement"> スロット要素。 </param>
+        /// <param name="skillId"> 装備中スキル ID。空の場合は EMPTY_SKILL_ID。 </param>
+        private void BindSlot(VisualElement slotElement, int skillId)
         {
-            return _rootElement
-                .Query<VisualElement>(className: SKILL_ELEMENT_SLOT_CLASS_NAME)
-                .ToList();
-        }
+            Image icon = slotElement.Q<Image>(SLOT_ICON_NAME);
+            Label nameLabel = slotElement.Q<Label>(SLOT_NAME_LABEL_NAME);
 
-        /// <summary>
-        ///     全スロット内のスキル要素を一覧へ戻す。
-        /// </summary>
-        /// <param name="slotElements"> スロット要素。 </param>
-        private void ClearSlotSkillElements(IReadOnlyList<VisualElement> slotElements)
-        {
-            for (int i = 0; i < slotElements.Count; i++)
+            if (skillId == EMPTY_SKILL_ID)
             {
-                MoveSlotSkillToList(slotElements[i]);
+                slotElement.RemoveFromClassList(SLOT_FILLED_CLASS_NAME);
+                if (icon != null)
+                {
+                    icon.style.display = DisplayStyle.None;
+                    icon.sprite = null;
+                }
+
+                if (nameLabel != null)
+                {
+                    nameLabel.text = string.Empty;
+                }
+
+                return;
+            }
+
+            SkillViewData? data = _skillDataResolver(skillId);
+            slotElement.AddToClassList(SLOT_FILLED_CLASS_NAME);
+            if (icon != null)
+            {
+                icon.style.display = DisplayStyle.Flex;
+                icon.sprite = data?.Icon;
+            }
+
+            if (nameLabel != null)
+            {
+                nameLabel.text = data?.DisplayName ?? string.Empty;
             }
         }
 
         /// <summary>
-        ///     スロット内のスキル要素を一覧へ戻す。
+        ///     スロットタップによる装備解除を処理する。
         /// </summary>
-        /// <param name="slotElement"> 対象スロット。 </param>
-        private void MoveSlotSkillToList(VisualElement slotElement)
+        /// <param name="evt"> クリックイベント。 </param>
+        private void HandleSlotClickHandler(ClickEvent evt)
         {
-            VisualElement existingSkill =
-                slotElement.Q<VisualElement>(className: DRAGGABLE_CLASS_NAME);
-            if (existingSkill == null)
+            if (evt.currentTarget is not VisualElement slotElement)
             {
                 return;
             }
 
-            _skillListElement.Add(existingSkill);
-            ResetListStyle(existingSkill);
-        }
-
-        /// <summary>
-        ///     新旧状態から変更されたスロット番号のマップを構築する。
-        /// </summary>
-        /// <param name="previousSlots"> 変更前のスロット状態。 </param>
-        /// <param name="currentSlots"> 変更後のスロット状態。 </param>
-        /// <param name="slotElementCount"> スロット要素数。 </param>
-        /// <returns> 変更されたスロット番号のマップ。 </returns>
-        private bool[] BuildChangedSlotMap(
-            IReadOnlyList<SkillBuildSlotState> previousSlots,
-            IReadOnlyList<SkillBuildSlotState> currentSlots,
-            int slotElementCount)
-        {
-            bool[] result = new bool[slotElementCount];
-
-            for (int i = 0; i < previousSlots.Count; i++)
+            int slotIndex = _slotElements.IndexOf(slotElement);
+            if (slotIndex < 0 || _slotSkillIds[slotIndex] == EMPTY_SKILL_ID)
             {
-                SkillBuildSlotState previous = previousSlots[i];
-                if (previous.SlotIndex < 0 || previous.SlotIndex >= result.Length)
-                {
-                    continue;
-                }
-
-                if (!TryFindSlot(currentSlots, previous.SlotIndex, out SkillBuildSlotState current) ||
-                    previous.CurrentSkillId != current.CurrentSkillId)
-                {
-                    result[previous.SlotIndex] = true;
-                }
+                return;
             }
 
-            for (int i = 0; i < currentSlots.Count; i++)
-            {
-                SkillBuildSlotState current = currentSlots[i];
-                if (current.SlotIndex < 0 || current.SlotIndex >= result.Length)
-                {
-                    continue;
-                }
-
-                if (!TryFindSlot(previousSlots, current.SlotIndex, out SkillBuildSlotState previous) ||
-                    previous.CurrentSkillId != current.CurrentSkillId)
-                {
-                    result[current.SlotIndex] = true;
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        ///     指定番号のスロット状態を検索する。
-        /// </summary>
-        /// <param name="slots"> 検索対象。 </param>
-        /// <param name="slotIndex"> スロット番号。 </param>
-        /// <param name="slot"> 見つかった状態。 </param>
-        /// <returns> 見つかった場合は true。 </returns>
-        private bool TryFindSlot(
-            IReadOnlyList<SkillBuildSlotState> slots,
-            int slotIndex,
-            out SkillBuildSlotState slot)
-        {
-            for (int i = 0; i < slots.Count; i++)
-            {
-                if (slots[i].SlotIndex == slotIndex)
-                {
-                    slot = slots[i];
-                    return true;
-                }
-            }
-
-            slot = default;
-            return false;
-        }
-
-        /// <summary>
-        ///     スキル要素を指定スロットへ移動する。
-        /// </summary>
-        /// <param name="skillElement"> スキル要素。 </param>
-        /// <param name="slotElement"> スロット要素。 </param>
-        private void MoveSkillToSlot(VisualElement skillElement, VisualElement slotElement)
-        {
-            slotElement.Add(skillElement);
-            skillElement.style.position = Position.Absolute;
-            skillElement.schedule.Execute(() =>
-            {
-                Vector2 size = new(
-                    skillElement.resolvedStyle.width,
-                    skillElement.resolvedStyle.height);
-                Vector2 desiredWorld = slotElement.worldBound.center - (size * 0.5f);
-                Vector2 desiredLocal = slotElement.WorldToLocal(desiredWorld);
-                skillElement.style.left = desiredLocal.x;
-                skillElement.style.top = desiredLocal.y;
-            });
-        }
-
-        /// <summary>
-        ///     一覧配置用のスタイルへ戻す。
-        /// </summary>
-        /// <param name="skillElement"> スキル要素。 </param>
-        private void ResetListStyle(VisualElement skillElement)
-        {
-            skillElement.style.position = Position.Relative;
-            skillElement.style.left = StyleKeyword.Null;
-            skillElement.style.top = StyleKeyword.Null;
+            _onSlotTapped?.Invoke(_slotSkillIds[slotIndex]);
         }
     }
 }

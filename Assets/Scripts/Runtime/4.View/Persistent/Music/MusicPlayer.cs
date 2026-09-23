@@ -35,6 +35,7 @@ namespace KillChord.Runtime.View.Persistent.Music
         {
             _cri = GetComponent<CriAtomSource>();
             _cri.player?.SetVoicePriority(255);
+            CaptureBaseVolume();
         }
 
         /// <summary>
@@ -46,14 +47,19 @@ namespace KillChord.Runtime.View.Persistent.Music
             _musicVm?.UpdateMusicCue(cueName);
         }
 
-        public void SetVolume(float volume)
+        /// <summary>
+        ///     BGM全体音量の比率を適用する。
+        /// </summary>
+        /// <param name="volumeRatio"> 0から1の音量比率。 </param>
+        public void SetVolume(float volumeRatio)
         {
-            _cri.volume = volume;
+            _volumeRatio = volumeRatio;
+            _cri.volume = _baseVolume * volumeRatio;
         }
 
         public float GetVolume()
         {
-            return _cri.volume;
+            return _volumeRatio;
         }
 
         /// <summary>
@@ -101,6 +107,9 @@ namespace KillChord.Runtime.View.Persistent.Music
         private CriAtomExPlayback _playback;
         private MusicViewModel _musicVm;
         private bool _isPlaying;
+        private float _baseVolume = 1f;
+        private float _volumeRatio = 1f;
+        private bool _baseVolumeCaptured;
 
         /// <summary>
         ///     BGMを変更して再生する。
@@ -140,5 +149,18 @@ namespace KillChord.Runtime.View.Persistent.Music
             _isPlaying = false;
         }
 
+        /// <summary>
+        ///     CriAtomSourceに設定されている元の音量を保持します。
+        /// </summary>
+        private void CaptureBaseVolume()
+        {
+            if (_baseVolumeCaptured)
+            {
+                return;
+            }
+
+            _baseVolume = _cri.volume;
+            _baseVolumeCaptured = true;
+        }
     }
 }

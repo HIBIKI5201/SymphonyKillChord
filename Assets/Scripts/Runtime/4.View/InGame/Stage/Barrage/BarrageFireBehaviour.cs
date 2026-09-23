@@ -44,7 +44,7 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
         private void SendCommand(BarrageCommandKind kind)
         {
             // エディタでのスクラブ中はEntity Worldへ副作用を出さない。
-            if (!Application.isPlaying) { return; }
+            if (!UnityEngine.Application.isPlaying) { return; }
 
             World world = World.DefaultGameObjectInjectionWorld;
             if (world == null || !world.IsCreated) { return; }

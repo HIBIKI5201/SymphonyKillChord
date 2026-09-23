@@ -1,0 +1,18 @@
+1,Background,Outdoor
+2,Portrait,Left,face,-460,-120,1,true
+3,Portrait,Center,body,0,-120,1,true
+4,Portrait,Right,face,460,-120,1,true
+5,Text,Test,新機能テストです。クリックで進みます。
+6,Text,,① テキストだけをフェードアウト→フェードインします。
+7,Fade,1,0,1,Text
+8,Fade,0,1,1,Text
+9,Text,,テキストが一瞬消えて戻りましたか？
+10,Text,,② 演出用の黒フェードで暗転→明転します。
+11,Fade,0,1,1,Black
+12,Fade,1,0,1,Black
+13,Text,,暗転から戻りました。背景・立ち絵は健在ですか？
+14,Text,,③ 背景だけフェード（テキスト・立ち絵は残る）。
+15,Fade,1,0,1.5,Background
+16,Text,,背景だけ消えましたか？
+17,Fade,0,1,1.5,Background
+18,Text,Name,テスト完了。

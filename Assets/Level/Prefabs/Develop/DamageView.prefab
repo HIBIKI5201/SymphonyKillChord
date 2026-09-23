@@ -155,13 +155,16 @@ MonoBehaviour:
   _backGroundImage: {fileID: 213787996095829483}
   _styles:
   - _type: 0
-    _textColor: {r: 1, g: 0, b: 0, a: 1}
+    _textColor: {r: 0, g: 0, b: 0, a: 1}
+    _fontMaterial: {fileID: 2140474, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
     _backGroundSprite: {fileID: 0}
   - _type: 1
-    _textColor: {r: 0, g: 0.8182993, b: 1, a: 1}
+    _textColor: {r: 0.17987192, g: 1, b: 0, a: 1}
+    _fontMaterial: {fileID: 2140474, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
     _backGroundSprite: {fileID: 0}
-  - _type: 2
-    _textColor: {r: 0.94525504, g: 1, b: 0, a: 1}
+  - _type: 3
+    _textColor: {r: 0.5698112, g: 0, b: 0.048491035, a: 1}
+    _fontMaterial: {fileID: 2100000, guid: 36c5fe8750bc4c545898f06eaed11b00, type: 2}
     _backGroundSprite: {fileID: 0}
   _exitType: 2
   _duration: 1.5

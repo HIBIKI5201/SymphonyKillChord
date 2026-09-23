@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Domain.InGame.Enemy
 {
@@ -50,6 +51,30 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     全Waveに登場する敵定義IDを重複なく取得します。
+        /// </summary>
+        /// <returns> 敵定義IDの一覧です。 </returns>
+        public IReadOnlyList<EnemyDefinitionId> GetAllEnemyDefinitionIds()
+        {
+            List<EnemyDefinitionId> ids = new();
+            HashSet<EnemyDefinitionId> seen = new();
+            for (int i = 0; i < _waves.Length; i++)
+            {
+                EnemyWaveDetail[] details = _waves[i].Details;
+                for (int j = 0; j < details.Length; j++)
+                {
+                    EnemyDefinitionId id = details[j].EnemyDefinitionId;
+                    if (seen.Add(id))
+                    {
+                        ids.Add(id);
+                    }
+                }
+            }
+
+            return ids;
         }
 
         private readonly EnemyWaveDefinition[] _waves;

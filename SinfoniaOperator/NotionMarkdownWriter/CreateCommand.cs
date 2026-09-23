@@ -168,13 +168,14 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             NotionPageInfo parentPage = await client.GetPageAsync(parentPageId);
             string allowedRootId = await guard.AuthorizeCreateAsync(parentPage.Id, parentPage.Parent);
             string title = ReadTitle(markdown, markdownFilePath);
+            string body = RemoveTitleHeading(markdown);
 
             Console.WriteLine($"作成先: {parentPage.Title}");
             Console.WriteLine($"URL: {parentPage.Url}");
             Console.WriteLine($"許可ルート: {allowedRootId}");
             Console.WriteLine($"新規ページ名: {title}");
             Console.WriteLine("本文:");
-            WritePreview(markdown);
+            WritePreview(body);
 
             if (!isConfirmed)
             {
@@ -183,10 +184,16 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 return 0;
             }
 
+            // 子ページのタイトルはプロパティで渡さないと未設定のままになる。
+            Dictionary<string, object> titleProperty = new()
+            {
+                ["title"] = new Dictionary<string, object> { ["title"] = CreateTextRuns(title) }
+            };
+
             NotionPageInfo createdPage = await client.CreatePageAsync(
                 new Dictionary<string, string> { ["page_id"] = parentPageId },
-                markdown,
-                null);
+                body,
+                titleProperty);
             WriteCreated(createdPage);
             return 0;
         }
@@ -302,6 +309,23 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     ["text"] = new Dictionary<string, string> { ["content"] = value }
                 }
             };
+        }
+
+        /// <summary>
+        ///     タイトルとして使った先頭の見出し行を本文から取り除く。
+        /// </summary>
+        /// <param name="markdown">本文のMarkdown。</param>
+        /// <returns>見出し行を除いた本文。</returns>
+        private static string RemoveTitleHeading(string markdown)
+        {
+            string[] lines = markdown.Split('\n');
+            int index = Array.FindIndex(lines, line => !string.IsNullOrWhiteSpace(line));
+            if (index < 0)
+            {
+                return markdown;
+            }
+
+            return string.Join('\n', lines.Skip(index + 1)).TrimStart('\n');
         }
 
         /// <summary>

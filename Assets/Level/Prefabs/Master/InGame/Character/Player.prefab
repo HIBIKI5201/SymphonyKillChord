@@ -4262,6 +4262,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7320354379020320506}
     m_Modifications:
+    - target: {fileID: 496040514894061766, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3205495777168081237, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5678458512312214034, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+      propertyPath: _weaponModel
+      value: 
+      objectReference: {fileID: 6221172650163674703}
     - target: {fileID: 7919298601048255703, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
       propertyPath: m_Name
       value: SMG
@@ -4327,6 +4339,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69d7e793e292b9d4a8b341ddbb0e12a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Player.WeaponItemView
+--- !u!1 &6221172650163674703 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3205495777168081237, guid: ff265e3a523a7334ea3b2bb2b6d2d276, type: 3}
+  m_PrefabInstance: {fileID: 8802917679817023258}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &9127949577688352571
 PrefabInstance:
   m_ObjectHideFlags: 0

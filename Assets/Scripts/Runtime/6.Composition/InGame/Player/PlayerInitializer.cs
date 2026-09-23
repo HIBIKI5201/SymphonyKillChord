@@ -299,7 +299,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             // 位置リセット入力を購読する。
             _playerInputView = inputView;
-            _playerInputView.OnResetPositionInput += HandleResetPositionInput;
 
             TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
             if (targetSystemContainer == null || targetSystemContainer.TargetSystemController == null)
@@ -392,30 +391,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 .SetPlayerMoveSpec(parameter);
 #endif
         }
-
-        /// <summary>
-        ///     プレイヤーをステージのスタート地点へ戻します。
-        /// </summary>
-        public void ResetPlayerToSpawn()
-        {
-            if (_player == null)
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(PlayerView)} が存在しないため位置リセットできません。", this);
-                return;
-            }
-
-            if (!TryResolvePlayerSpawnPointTransform(out Transform spawnPointTransform))
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] スタート地点が見つからないため位置リセットできません。", this);
-                return;
-            }
-
-            _player.ResetToSpawn(spawnPointTransform.position, spawnPointTransform.rotation);
-
-            // カメラの向きもスタート時の前方へ戻す。
-            ResetCameraOrientation(spawnPointTransform.forward);
-        }
-
         /// <summary>
         ///     カメラの向きを指定した前方へ戻します。
         /// </summary>
@@ -434,21 +409,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             _cameraSystemView.ResetOrientation(forward);
-        }
-
-        /// <summary>
-        ///     位置リセット入力を受け取ってプレイヤーをスタート地点へ戻します。
-        /// </summary>
-        /// <param name="input"> 位置リセット入力です。 </param>
-        private void HandleResetPositionInput(InputContext<float> input)
-        {
-            // 押下開始時のみ実行する。
-            if (input.Phase != InputActionPhase.Started)
-            {
-                return;
-            }
-
-            ResetPlayerToSpawn();
         }
 
         /// <summary>
@@ -496,7 +456,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             if (_playerInputView != null)
             {
-                _playerInputView.OnResetPositionInput -= HandleResetPositionInput;
                 _playerInputView = null;
             }
 

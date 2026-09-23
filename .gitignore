@@ -10,6 +10,10 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
+# ビルドログなどの診断ログ (ルート直下に出力されることがあり、巨大かつ
+# 各自の絶対パスを含むため共有しない)
+*.log
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/

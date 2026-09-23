@@ -1,4 +1,6 @@
+
 using KillChord.Runtime.View.OutGame.Navigation;
+using System;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Screen
@@ -73,9 +75,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
         }
 
         /// <summary>
@@ -83,13 +85,13 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallback()
         {
-            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
+            _backButtonActivation?.Dispose();
         }
 
         /// <summary>
-        ///     画面を閉じるボタンがクリックされたときの処理です。
+        ///     画面を閉じるボタンが作動したときの処理です。
         /// </summary>
-        private void OnBackButtonClicked(ClickEvent evt)
+        private void HandleBackButtonActivationHandler()
         {
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
@@ -109,5 +111,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         private readonly Button _backButton;
         private readonly ScrollView _treeScrollView;
+        private IDisposable _backButtonActivation;
     }
 }

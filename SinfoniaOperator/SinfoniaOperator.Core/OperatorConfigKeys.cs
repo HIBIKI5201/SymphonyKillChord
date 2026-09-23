@@ -11,6 +11,27 @@
         public const string DISCORD_TASK_ALERT_CHANNEL_ID = "DISCORD_TASK_ALERT_CHANNEL_ID";
         public const string DISCORD_SPRINT_CHANNEL_ID = "DISCORD_SPRINT_CHANNEL_ID";
 
+        /// <summary> 仕様検索インデックスの保存先パス。 </summary>
+        public const string SPEC_SEARCH_INDEX_PATH = "SPEC_SEARCH_INDEX_PATH";
+
+        /// <summary> 仕様検索用ONNX埋め込みモデルのパス。 </summary>
+        public const string SPEC_SEARCH_EMBEDDING_MODEL_PATH = "SPEC_SEARCH_EMBEDDING_MODEL_PATH";
+
+        /// <summary> 仕様検索コマンドを登録する任意のDiscord Guild ID。 </summary>
+        public const string SPEC_SEARCH_DISCORD_GUILD_ID = "SPEC_SEARCH_DISCORD_GUILD_ID";
+
+        /// <summary> 仕様検索で返す最大件数。 </summary>
+        public const string SPEC_SEARCH_TOP_K = "SPEC_SEARCH_TOP_K";
+
+        /// <summary> 仕様検索の優先度ルールJSONファイルの任意のパス。 </summary>
+        public const string SPEC_SEARCH_PRIORITY_PATH = "SPEC_SEARCH_PRIORITY_PATH";
+
+        /// <summary> Gemini APIキー。秘匿情報であり、未設定の場合はAI要約を無効化する。 </summary>
+        public const string GEMINI_API_KEY = "GEMINI_API_KEY";
+
+        /// <summary> AI要約に使用するGeminiモデル名。 </summary>
+        public const string GEMINI_MODEL = "GEMINI_MODEL";
+
         /// <summary> Unityエディタの作業ログ機能が送信先とするチャンネルID。 </summary>
         public const string DISCORD_WORK_LOG_CHANNEL_ID = "DISCORD_WORK_LOG_CHANNEL_ID";
 

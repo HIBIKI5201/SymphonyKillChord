@@ -17,6 +17,18 @@
     scale: 1.2 1.2;
 }
 
+.title-option-button.navigable:focus {
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(255, 220, 90);
+    border-right-color: rgb(255, 220, 90);
+    border-top-color: rgb(255, 220, 90);
+    border-bottom-color: rgb(255, 220, 90);
+    --unity-focus-outline-color: rgba(0, 0, 0, 0);
+}
+
 .title-option-button:active {
     scale: 0.9 0.9;
 }
