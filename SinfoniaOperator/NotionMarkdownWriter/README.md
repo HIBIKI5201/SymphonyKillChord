@@ -77,7 +77,29 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 `push`はNotionを更新しますが、`Docs/NotionSpecifications/`のエクスポート結果は更新しません。
 ミラーを最新化するには`NotionMarkdownExporter`を実行してください（全ページの再取得になります）。
 
+## ブロックIDで直接編集する
+
+`push`はMarkdown全文の文字列一致（`old_str`/`new_str`）で動くため、巨大な画像ブロックに挟まれた短文や、
+同名のトグルの見出しなど、**周囲の文脈だけで一意に特定できない箇所は安全に編集できません**。
+その場合はブロックID（Notion上で対象を右クリック→「リンクをコピー」した末尾の`#<block-id>`）を直接指定します。
+
+```powershell
+# 既存ブロックのリッチテキストを書き換える（段落・見出し・トグル・リスト項目など）
+./NotionMarkdownWriter.exe edit-block "https://www.notion.so/xxx#3437c2c6cc028025a43ed3f019c3806e" --text "イメージ図（旧案：円形）" --confirm
+
+# 親（ページ・トグルなど）の子要素の末尾に段落を1件追加する
+./NotionMarkdownWriter.exe append "<親のURL|ID>" --text "本文 <mention-page url=\"...\">表示名</mention-page>" --confirm
+```
+
+`append`は常に**末尾**に追加されます。Notion APIには「指定ブロックの直後へ挿入」や「ブロックの並び替え」の
+手段が無いため（`PATCH /blocks/{id}/children`は`after`パラメータを拒否し、`/blocks/{id}/move`のような
+エンドポイントも存在しない）、途中の位置へ移したい場合は追加後に`pull`→編集→`push`で行を移動してください。
+
 ## 実装メモ
 
 - `NotionIdentifier`・`RequestRateLimiter`・`NotionApiException`は`NotionMarkdownExporter`とソースを共有しています（csprojのリンク参照）。
 - 設定ファイルとリポジトリルートの探索は、エクスポーターの`ExporterOptions`と同じ規則を`WriterEnvironment`へ実装しています。
+- ページの移動（`move`）は`PATCH /pages/{id}`ではなく`POST /pages/{id}/move`でしか効かない（前者は200を返すが親を変更しない）。
+  `MoveCommand`は送信後に親を再取得し、実際に変わったか検証してから成功と報告する。
+- `edit-block`・`append`は`GET/PATCH /blocks/{id}`・`PATCH /blocks/{id}/children`（classic Blocks API）を使う。
+  Markdown Content API（`update_content`）と併用できる。
