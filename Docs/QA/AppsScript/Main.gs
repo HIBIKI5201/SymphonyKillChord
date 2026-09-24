@@ -20,6 +20,9 @@ const FORM_URL_SHEET_NAME = 'フォームURL一覧';
 /** PC用の回答スプレッドシートのタブ名。Android用と同じシートを汚さないよう別タブにする。 */
 const PC_FORM_URL_SHEET_NAME = 'フォームURL一覧 (PC)';
 
+/** 回答の集約先スプレッドシートIDを入れるスクリプト プロパティの名前。 */
+const DESTINATION_SPREADSHEET_ID_PROPERTY_KEY = 'DESTINATION_SPREADSHEET_ID';
+
 /**
  * エントリポイント (Android/CBT)。5つのフォームを作り、URL一覧をログに出す。
  */
@@ -114,7 +117,7 @@ function assertNotAlreadyCreated_(propertyKey, sheetName) {
  * 新規作成は CREATE_SPREADSHEET_IF_MISSING で明示的に選んだときだけ行う。
  */
 function resolveDestinationSpreadsheetId_() {
-  const configured = (CONFIG.DESTINATION_SPREADSHEET_ID || '').trim();
+  const configured = readDestinationSpreadsheetId_();
   if (configured) {
     assertSpreadsheetAccessible_(configured);
     return configured;
@@ -122,8 +125,9 @@ function resolveDestinationSpreadsheetId_() {
 
   if (!CONFIG.CREATE_SPREADSHEET_IF_MISSING) {
     throw new Error(
-      'Config.gs の DESTINATION_SPREADSHEET_ID が空です。' +
-        '回答をまとめるスプレッドシートを作ってIDを設定するか、' +
+      'DESTINATION_SPREADSHEET_ID が設定されていません。' +
+        '回答をまとめるスプレッドシートを作り、プロジェクトの設定の「スクリプト プロパティ」に ' +
+        'DESTINATION_SPREADSHEET_ID としてIDを追加するか、' +
         'CREATE_SPREADSHEET_IF_MISSING を true にして新規作成を選んでください。'
     );
   }
@@ -131,6 +135,17 @@ function resolveDestinationSpreadsheetId_() {
   const created = SpreadsheetApp.create(CONFIG.NEW_SPREADSHEET_NAME);
   Logger.log('回答スプレッドシートを新規作成しました: ' + created.getUrl());
   return created.getId();
+}
+
+/**
+ * 集約先スプレッドシートIDを読む。スクリプト プロパティを優先し、無ければ Config.gs の値を使う。
+ * IDをリポジトリに書かずに済むよう、スクリプト プロパティを正の置き場とする。
+ */
+function readDestinationSpreadsheetId_() {
+  const fromProperties = PropertiesService.getScriptProperties().getProperty(
+    DESTINATION_SPREADSHEET_ID_PROPERTY_KEY
+  );
+  return ((fromProperties || CONFIG.DESTINATION_SPREADSHEET_ID) || '').trim();
 }
 
 /** 設定されたIDが実在し、開ける権限があるかを入口で確かめる。 */
