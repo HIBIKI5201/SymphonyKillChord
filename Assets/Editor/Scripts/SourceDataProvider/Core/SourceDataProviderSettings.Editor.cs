@@ -9,7 +9,7 @@ using UnityEngine.Serialization;
 namespace KillChord.Editor.SourceDataProvider.Core
 {
     /// <summary>
-    ///     SourceDataProviderで参照するSourceAsset設定とcollection設定を保持します。
+    ///     SourceDataProviderで参照するDataAsset設定とcollection設定を保持します。
     /// </summary>
     [FilePath("ProjectSettings/SourceDataProviderSettings.asset", FilePathAttribute.Location.ProjectFolder)]
     internal sealed class SourceDataProviderSettings : ScriptableSingleton<SourceDataProviderSettings>
@@ -17,13 +17,13 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <summary> 登録設定が保存されたときに通知します。 </summary>
         public static event Action OnChanged;
 
-        /// <summary> 登録済みのSourceAsset設定一覧です。 </summary>
-        public IReadOnlyList<SourceAssetMapping> SourceAssetMappings
+        /// <summary> 登録済みのDataAsset設定一覧です。 </summary>
+        public IReadOnlyList<DataAssetMapping> DataAssetMappings
         {
             get
             {
                 EnsureInitialized();
-                return _sourceAssetMappings;
+                return _dataAssetMappings;
             }
         }
 
@@ -82,17 +82,17 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         /// <summary>
-        ///     指定AddressableキーのSourceAsset設定を取得します。
+        ///     指定AddressableキーのDataAsset設定を取得します。
         /// </summary>
         /// <param name="addressableKey"> 取得するAddressableキーです。 </param>
         /// <param name="mapping"> 見つかった設定です。 </param>
         /// <returns> 対応が存在する場合はtrueです。 </returns>
-        public bool TryGetSourceAssetMapping(string addressableKey, out SourceAssetMapping mapping)
+        public bool TryGetDataAssetMapping(string addressableKey, out DataAssetMapping mapping)
         {
             EnsureInitialized();
-            for (int i = 0; i < _sourceAssetMappings.Count; i++)
+            for (int i = 0; i < _dataAssetMappings.Count; i++)
             {
-                SourceAssetMapping candidate = _sourceAssetMappings[i];
+                DataAssetMapping candidate = _dataAssetMappings[i];
                 if (candidate != null
                     && string.Equals(candidate.AddressableKey, addressableKey, StringComparison.Ordinal))
                 {
@@ -118,7 +118,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 SourceCollectionMapping candidate = _sourceCollectionMappings[i];
                 if (candidate != null
-                    && string.Equals(candidate.SourceAssetAddressableKey, addressableKey, StringComparison.Ordinal))
+                    && string.Equals(candidate.DataAssetAddressableKey, addressableKey, StringComparison.Ordinal))
                 {
                     results.Add(candidate);
                 }
@@ -140,7 +140,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <summary>
         ///     Addressablesへ登録済みのScriptableObject一覧を明示的に同期します。
         /// </summary>
-        public void RefreshSourceAssetsFromAddressables()
+        public void RefreshDataAssetsFromAddressables()
         {
             if (!_isInitialized)
             {
@@ -148,17 +148,18 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return;
             }
 
-            if (SynchronizeSourceAssetsFromAddressables())
+            if (SynchronizeDataAssetsFromAddressables())
             {
                 Save(true);
                 OnChanged?.Invoke();
             }
         }
 
+        [FormerlySerializedAs("_sourceAssetMappings")]
         [SerializeField, Tooltip("Addressable ScriptableObject設定一覧です。")]
-        private List<SourceAssetMapping> _sourceAssetMappings = new();
+        private List<DataAssetMapping> _dataAssetMappings = new();
 
-        [SerializeField, Tooltip("SourceAsset内のcollection設定一覧です。")]
+        [SerializeField, Tooltip("データアセット内のcollection設定一覧です。")]
         private List<SourceCollectionMapping> _sourceCollectionMappings = new();
 
         [SerializeField, HideInInspector]
@@ -172,14 +173,14 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// </summary>
         private void EnsureInitialized()
         {
-            _sourceAssetMappings ??= new List<SourceAssetMapping>();
+            _dataAssetMappings ??= new List<DataAssetMapping>();
             _sourceCollectionMappings ??= new List<SourceCollectionMapping>();
             _repositoryMappings ??= new List<RepositoryMapping>();
 
             bool changed = false;
             if (!_isInitialized)
             {
-                if (_sourceAssetMappings.Count == 0)
+                if (_dataAssetMappings.Count == 0)
                 {
                     for (int i = 0; i < _repositoryMappings.Count; i++)
                     {
@@ -189,7 +190,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                             continue;
                         }
 
-                        AppendSourceAssetMapping(legacy.AddressableKey);
+                        AppendDataAssetMapping(legacy.AddressableKey);
                         changed = true;
                     }
                 }
@@ -216,7 +217,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 }
 
                 _isInitialized = true;
-                changed = SynchronizeSourceAssetsFromAddressables() || changed;
+                changed = SynchronizeDataAssetsFromAddressables() || changed;
                 changed = true;
             }
 
@@ -235,7 +236,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <returns> 設定を追加した場合はtrueです。 </returns>
         private bool EnsureDefaultMappings()
         {
-            _sourceAssetMappings ??= new List<SourceAssetMapping>();
+            _dataAssetMappings ??= new List<DataAssetMapping>();
             _sourceCollectionMappings ??= new List<SourceCollectionMapping>();
             _repositoryMappings ??= new List<RepositoryMapping>();
 
@@ -250,9 +251,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
                     changed = true;
                 }
 
-                if (!ContainsSourceAssetAddress(mapping.AddressableKey))
+                if (!ContainsDataAssetAddress(mapping.AddressableKey))
                 {
-                    _sourceAssetMappings.Add(new SourceAssetMapping(mapping.AddressableKey));
+                    _dataAssetMappings.Add(new DataAssetMapping(mapping.AddressableKey));
                     changed = true;
                 }
 
@@ -271,10 +272,10 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         /// <summary>
-        ///     Addressablesへ登録済みのScriptableObjectをSourceAsset一覧へ補完します。
+        ///     Addressablesへ登録済みのScriptableObjectをDataAsset一覧へ補完します。
         /// </summary>
-        /// <returns> SourceAsset設定を追加した場合はtrueです。 </returns>
-        private bool SynchronizeSourceAssetsFromAddressables()
+        /// <returns> DataAsset設定を追加した場合はtrueです。 </returns>
+        private bool SynchronizeDataAssetsFromAddressables()
         {
             AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null)
@@ -304,7 +305,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                         continue;
                     }
 
-                    changed = AppendSourceAssetMapping(entry.address) || changed;
+                    changed = AppendDataAssetMapping(entry.address) || changed;
                 }
             }
 
@@ -312,31 +313,31 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         /// <summary>
-        ///     SourceAsset設定を未登録の場合のみ追加します。
+        ///     DataAsset設定を未登録の場合のみ追加します。
         /// </summary>
         /// <param name="addressableKey"> 追加対象のAddressableキーです。 </param>
-        /// <returns> SourceAsset設定を追加した場合はtrueです。 </returns>
-        private bool AppendSourceAssetMapping(string addressableKey)
+        /// <returns> DataAsset設定を追加した場合はtrueです。 </returns>
+        private bool AppendDataAssetMapping(string addressableKey)
         {
-            if (string.IsNullOrWhiteSpace(addressableKey) || ContainsSourceAssetAddress(addressableKey))
+            if (string.IsNullOrWhiteSpace(addressableKey) || ContainsDataAssetAddress(addressableKey))
             {
                 return false;
             }
 
-            _sourceAssetMappings.Add(new SourceAssetMapping(addressableKey));
+            _dataAssetMappings.Add(new DataAssetMapping(addressableKey));
             return true;
         }
 
         /// <summary>
-        ///     既に同じAddressableキーのSourceAssetが存在するか判定します。
+        ///     既に同じAddressableキーのDataAssetが存在するか判定します。
         /// </summary>
         /// <param name="addressableKey"> 確認するAddressableキーです。 </param>
         /// <returns> 存在する場合はtrueです。 </returns>
-        private bool ContainsSourceAssetAddress(string addressableKey)
+        private bool ContainsDataAssetAddress(string addressableKey)
         {
-            for (int i = 0; i < _sourceAssetMappings.Count; i++)
+            for (int i = 0; i < _dataAssetMappings.Count; i++)
             {
-                SourceAssetMapping mapping = _sourceAssetMappings[i];
+                DataAssetMapping mapping = _dataAssetMappings[i];
                 if (mapping != null
                     && string.Equals(mapping.AddressableKey, addressableKey, StringComparison.Ordinal))
                 {
@@ -443,13 +444,13 @@ namespace KillChord.Editor.SourceDataProvider.Core
         ///     Addressable ScriptableObject設定を保持します。
         /// </summary>
         [Serializable]
-        internal sealed class SourceAssetMapping
+        internal sealed class DataAssetMapping
         {
             /// <summary>
             ///     設定情報を初期化します。
             /// </summary>
             /// <param name="addressableKey"> Addressableキーです。 </param>
-            public SourceAssetMapping(string addressableKey)
+            public DataAssetMapping(string addressableKey)
             {
                 _addressableKey = addressableKey;
             }
@@ -457,12 +458,12 @@ namespace KillChord.Editor.SourceDataProvider.Core
             /// <summary> Addressableキーです。 </summary>
             public string AddressableKey => _addressableKey;
 
-            [SerializeField, Tooltip("SourceAssetのAddressableキーです。")]
+            [SerializeField, Tooltip("データアセットのAddressableキーです。")]
             private string _addressableKey;
         }
 
         /// <summary>
-        ///     SourceAsset内のcollection設定を保持します。
+        ///     DataAsset内のcollection設定を保持します。
         /// </summary>
         [Serializable]
         internal sealed class SourceCollectionMapping
@@ -471,17 +472,17 @@ namespace KillChord.Editor.SourceDataProvider.Core
             ///     設定情報を初期化します。
             /// </summary>
             /// <param name="collectionKey"> CollectionKeyです。 </param>
-            /// <param name="sourceAssetAddressableKey"> SourceAssetのAddressableキーです。 </param>
+            /// <param name="dataAssetAddressableKey"> DataAssetのAddressableキーです。 </param>
             /// <param name="propertyPath"> collectionのプロパティパスです。 </param>
             /// <param name="assetCreationDirectory"> 新規アセットの生成先ディレクトリです。 </param>
             public SourceCollectionMapping(
                 string collectionKey,
-                string sourceAssetAddressableKey,
+                string dataAssetAddressableKey,
                 string propertyPath,
                 string assetCreationDirectory = "")
             {
                 _collectionKey = collectionKey;
-                _sourceAssetAddressableKey = sourceAssetAddressableKey;
+                _dataAssetAddressableKey = dataAssetAddressableKey;
                 _propertyPath = propertyPath;
                 _assetCreationDirectory = assetCreationDirectory;
             }
@@ -489,8 +490,8 @@ namespace KillChord.Editor.SourceDataProvider.Core
             /// <summary> CollectionKeyです。 </summary>
             public string CollectionKey => _collectionKey;
 
-            /// <summary> SourceAssetのAddressableキーです。 </summary>
-            public string SourceAssetAddressableKey => _sourceAssetAddressableKey;
+            /// <summary> DataAssetのAddressableキーです。 </summary>
+            public string DataAssetAddressableKey => _dataAssetAddressableKey;
 
             /// <summary> collectionのプロパティパスです。 </summary>
             public string PropertyPath => _propertyPath;
@@ -502,8 +503,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             [SerializeField, Tooltip("DataIDフィールドへ指定するCollectionKeyです。")]
             private string _collectionKey;
 
-            [SerializeField, Tooltip("collectionを持つSourceAssetのAddressableキーです。")]
-            private string _sourceAssetAddressableKey;
+            [FormerlySerializedAs("_sourceAssetAddressableKey")]
+            [SerializeField, Tooltip("collectionを持つデータアセットのAddressableキーです。")]
+            private string _dataAssetAddressableKey;
 
             [SerializeField, Tooltip("collectionとして扱う配列またはListのSerializedPropertyパスです。")]
             private string _propertyPath;
