@@ -289,6 +289,18 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     {
                         ["date"] = new Dictionary<string, string> { ["start"] = value }
                     };
+                case "relation":
+                    // 値はカンマ区切りのMarkdownパス・URL・IDを受け付ける（タイトルからの検索はしない）。
+                    return new Dictionary<string, object>
+                    {
+                        ["relation"] = value
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(item => new Dictionary<string, string>
+                            {
+                                ["id"] = LocalPageLocator.ResolvePageId(item.Trim(), out _)
+                            })
+                            .ToList()
+                    };
                 default:
                     throw new WriterException($"このツールが未対応のプロパティ型です: {name}（{type}）");
             }

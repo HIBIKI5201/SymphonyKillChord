@@ -16,6 +16,16 @@
 | Mermaid | ` ```mermaid ` のコードブロック | 下記の制限あり |
 | 子ページ | `<page url="...">タイトル</page>` | 既存の子ページへの参照。この記法で新規作成はできない |
 
+## 文脈だけで一意にできない箇所は edit-block / append を使う
+
+`push`は文字列一致（`old_str`/`new_str`）で動くため、巨大な画像ブロックに挟まれた短文や、同名のトグルの
+見出しなど、**周囲の文脈だけで一意にできない箇所は安全に編集できない**（無理に広げると、画像ブロックなど
+無関係な巨大ブロックまで送信対象に含めてしまう）。この場合はNotionMarkdownWriterの`edit-block`（ブロック
+IDを直接指定してリッチテキストを書き換える）・`append`（親の子要素の末尾に段落を1件追加する）を使う。
+詳細は[SinfoniaOperator/NotionMarkdownWriter/README.md](../../../../SinfoniaOperator/NotionMarkdownWriter/README.md)の
+「ブロックIDで直接編集する」を参照。`append`は常に末尾に追加されるため、途中の位置へ移すには追加後に
+`pull`→編集→`push`で行を動かす（Notion APIに位置指定の挿入・並び替え手段が無いため）。
+
 ## できないこと
 
 - **Mermaidの表示モード（Code / Preview / Split）はAPIから設定できない。**
