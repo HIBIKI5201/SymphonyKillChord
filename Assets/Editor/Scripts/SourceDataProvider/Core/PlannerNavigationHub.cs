@@ -16,12 +16,6 @@ namespace KillChord.Editor.SourceDataProvider.Core
         public static Func<string, bool> NavigateToSourceAsset { get; set; }
 
         /// <summary>
-        ///     指定CollectionKey/DataIDへジャンプする処理です。Wiki側が登録します。
-        ///     戻り値はジャンプに成功したかどうかです。
-        /// </summary>
-        public static Func<string, string, bool> NavigateToCollectionItem { get; set; }
-
-        /// <summary>
         ///     登録済みの場合は指定SourceAssetへジャンプします。未登録(Wiki側が未ロード等)の場合は何もしません。
         /// </summary>
         /// <param name="addressableKey"> 移動先SourceAssetのAddressableキーです。 </param>
@@ -29,17 +23,6 @@ namespace KillChord.Editor.SourceDataProvider.Core
         public static bool TryNavigateToSourceAsset(string addressableKey)
         {
             return NavigateToSourceAsset?.Invoke(addressableKey) ?? false;
-        }
-
-        /// <summary>
-        ///     登録済みの場合は指定Collection項目へジャンプします。未登録(Wiki側が未ロード等)の場合は何もしません。
-        /// </summary>
-        /// <param name="collectionKey"> 移動先CollectionKeyです。 </param>
-        /// <param name="dataId"> 移動先の個別データIDです。 </param>
-        /// <returns> ジャンプ処理を実行できた場合はtrueです。 </returns>
-        public static bool TryNavigateToCollectionItem(string collectionKey, string dataId)
-        {
-            return NavigateToCollectionItem?.Invoke(collectionKey, dataId) ?? false;
         }
     }
 }

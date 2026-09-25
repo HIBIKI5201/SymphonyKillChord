@@ -33,17 +33,6 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 window.NavigateToSourceAsset(addressableKey);
                 return true;
             };
-
-            PlannerNavigationHub.NavigateToCollectionItem = (collectionKey, dataId) =>
-            {
-                if (!TryGetOrOpenWindow(out PlannerMasterDataWindow window))
-                {
-                    return false;
-                }
-
-                window.NavigateToCollectionItem(collectionKey, dataId);
-                return true;
-            };
         }
 
         /// <summary>

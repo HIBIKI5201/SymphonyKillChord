@@ -59,4 +59,4 @@ Duplicate/colliding IDs within one CollectionKey are flagged by `DataIDCollision
 
 ## Navigating programmatically
 
-`PlannerMasterDataWindow.NavigateToSourceAsset(addressableKey)` and `NavigateToCollectionItem(collectionKey, dataId)` jump the window to a specific asset/item — these are what the "Planner" jump buttons in `DataIDPropertyDrawer`/`SourceDataAddressSelectorDrawer` call. Reuse them rather than reimplementing navigation if building new tooling.
+`PlannerMasterDataWindow.NavigateToSourceAsset(addressableKey)` and `NavigateToCollectionItem(collectionKey, dataId)` jump the window to a specific asset/item — `NavigateToSourceAsset` is what the "Planner" jump button in `SourceDataAddressSelectorDrawer` calls (via `PlannerNavigationHub`). `DataIDPropertyDrawer` has a "Ping" button instead, which pings the asset/object that defines the selected ID (`SourceDataIDOption.Source`) without opening the window. Reuse them rather than reimplementing navigation if building new tooling.
