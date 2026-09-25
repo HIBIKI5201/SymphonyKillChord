@@ -411,6 +411,42 @@ MonoBehaviour:
     m_Key: ui.notification.save_reset
     m_Metadata:
       m_Items: []
+  - m_Id: 2059000100
+    m_Key: ui.input.glyph.move
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2059000101
+    m_Key: ui.input.glyph.look
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2059000102
+    m_Key: ui.input.glyph.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2059000103
+    m_Key: ui.input.glyph.attack_alt
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2059000104
+    m_Key: ui.input.glyph.dodge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2059000105
+    m_Key: ui.input.glyph.lock_on
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2059000106
+    m_Key: ui.input.glyph.target_left
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2059000107
+    m_Key: ui.input.glyph.target_right
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2059000108
+    m_Key: ui.input.glyph.pause
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

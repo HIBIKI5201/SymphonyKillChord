@@ -11,6 +11,10 @@ namespace KillChord.Runtime.View.InGame.UI
     public sealed class InGameControllerGuideView : MonoBehaviour
     {
         private const int ICON_FONT_SIZE = 22;
+        private const string GLYPH_ENTRY_PREFIX = "ui.input.glyph.";
+
+        /// <summary> その入力機器に割り当てがない操作を表す、入力アイコンの翻訳値です。 </summary>
+        private const string NO_GLYPH = "-";
 
         [SerializeField, Tooltip("左トリガーの操作説明です。")]
         private TMP_Text _leftTriggerText;
@@ -59,15 +63,15 @@ namespace KillChord.Runtime.View.InGame.UI
                     return;
                 }
 
-                BindLabel(_leftTriggerText, "lock_on", "lt");
-                BindLabel(_rightTriggerText, "attack", "rt");
-                BindLabel(_leftShoulderText, "target_left", "lb");
-                BindLabel(_rightShoulderText, "target_right", "rb");
-                BindLabel(_leftStickText, "move", "jl");
-                BindLabel(_rightStickText, "look", "jr");
-                BindLabel(_menuText, "pause", "xmenu");
-                BindLabel(_eastButtonText, "attack", "xb");
-                BindLabel(_southButtonText, "dodge", "xa");
+                BindLabel(_leftTriggerText, "lock_on", "lock_on", "lt");
+                BindLabel(_rightTriggerText, "attack", "attack", "rt");
+                BindLabel(_leftShoulderText, "target_left", "target_left", "lb");
+                BindLabel(_rightShoulderText, "target_right", "target_right", "rb");
+                BindLabel(_leftStickText, "move", "move", "jl");
+                BindLabel(_rightStickText, "look", "look", "jr");
+                BindLabel(_menuText, "pause", "pause", "xmenu");
+                BindLabel(_eastButtonText, "attack", "attack_alt", "xb");
+                BindLabel(_southButtonText, "dodge", "dodge", "xa");
                 TMP_Text note = _noteText;
                 if (note != null)
                 {
@@ -96,11 +100,15 @@ namespace KillChord.Runtime.View.InGame.UI
             _localizedTexts.Clear();
         }
 
-        /// <summary> Xboxの素材アイコンを残して機能名だけを現在言語へ切り替えます。 </summary>
+        /// <summary>
+        ///     入力機器に応じたアイコンと、現在言語の機能名を表示します。
+        ///     割り当てがない機器では、その操作がないためラベルを隠します。
+        /// </summary>
         /// <param name="label"> 表示先です。 </param>
         /// <param name="entry"> 操作説明の翻訳キー末尾です。 </param>
-        /// <param name="spriteName"> 素材のSprite Assetに登録されたXboxアイコン名です。 </param>
-        private void BindLabel(TMP_Text label, string entry, string spriteName)
+        /// <param name="glyphEntry"> 入力アイコンの翻訳キー末尾です。 </param>
+        /// <param name="fallbackSpriteName"> 翻訳を取得できない場合に使うXboxアイコン名です。 </param>
+        private void BindLabel(TMP_Text label, string entry, string glyphEntry, string fallbackSpriteName)
         {
             // シーン側で非表示のために削除されたラベルは、他の説明の購読を妨げない。
             if (label == null)
@@ -109,16 +117,35 @@ namespace KillChord.Runtime.View.InGame.UI
             }
 
             // 初期化失敗時もPrefabの説明を維持し、再有効化時は装飾を重ねない。
-            string fallback = label.text.Substring(label.text.IndexOf('\n') + 1);
+            string actionName = label.text.Substring(label.text.IndexOf('\n') + 1);
+            string glyph = $"<sprite name=\"{fallbackSpriteName}\">";
+
+            // アイコンと機能名は別々に変わるため、どちらの通知でも両方を組み立て直す。
+            void Apply()
+            {
+                if (label == null)
+                {
+                    return;
+                }
+
+                label.enabled = glyph != NO_GLYPH;
+                label.text = $"<size={ICON_FONT_SIZE}>{glyph}</size>\n{actionName}";
+            }
+
+            _localizedTexts.Add(new LocalizedElementText(
+                "UICommon", GLYPH_ENTRY_PREFIX + glyphEntry,
+                text =>
+                {
+                    glyph = text;
+                    Apply();
+                }, glyph));
             _localizedTexts.Add(new LocalizedElementText(
                 "UICommon", "ui.ingame.controller_guide." + entry,
                 text =>
                 {
-                    if (label != null)
-                    {
-                        label.text = $"<size={ICON_FONT_SIZE}><sprite name=\"{spriteName}\"></size>\n{text}";
-                    }
-                }, fallback));
+                    actionName = text;
+                    Apply();
+                }, actionName));
         }
     }
 }
