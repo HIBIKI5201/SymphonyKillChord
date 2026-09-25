@@ -145,7 +145,7 @@ function readDestinationSpreadsheetId_() {
   const fromProperties = PropertiesService.getScriptProperties().getProperty(
     DESTINATION_SPREADSHEET_ID_PROPERTY_KEY
   );
-  return ((fromProperties || CONFIG.DESTINATION_SPREADSHEET_ID) || '').trim();
+  return (fromProperties || '').trim() || (CONFIG.DESTINATION_SPREADSHEET_ID || '').trim();
 }
 
 /** 設定されたIDが実在し、開ける権限があるかを入口で確かめる。 */
