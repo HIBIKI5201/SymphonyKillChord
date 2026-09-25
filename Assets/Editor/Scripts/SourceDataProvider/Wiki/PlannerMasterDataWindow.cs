@@ -1171,9 +1171,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         {
             if (SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject dataAsset))
             {
-                int collectionCount =
-                    SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey).Count;
-                return $"{dataAsset.name} ({dataAsset.GetType().Name}) [{collectionCount}]";
+                return $"{dataAsset.name} ({dataAsset.GetType().Name})";
             }
 
             return addressableKey;
