@@ -65,11 +65,10 @@ namespace KillChord.Editor.ProjectWindow
             if ((flags & SourceDataAssetFlags.CollectionItem) != 0)
             {
                 EditorGUI.DrawRect(badgeRect, _collectionItemColor);
-                badgeRect.x -= badgeSize + BADGE_GAP;
             }
-
-            if ((flags & SourceDataAssetFlags.BuildDependency) != 0)
+            else if ((flags & SourceDataAssetFlags.BuildDependency) != 0)
             {
+                // collection要素はほぼ全てビルドに含まれるため、重複表示を避けてcollection要素の表示を優先する。
                 EditorGUI.DrawRect(badgeRect, _buildDependencyColor);
             }
         }
