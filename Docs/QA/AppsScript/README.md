@@ -48,7 +48,8 @@ Android用・PC用それぞれ**同じスプレッドシート**に回答が集�
 
 1. [Google スプレッドシート](https://sheets.google.com) で空のファイルを作る
 2. 名前を `Symphony Kill Chord CBT QA 回答` などにする
-3. URL からIDをコピーする
+3. 共有設定が「制限付き」になっていることを確かめる (IDを知っているだけの人が開けないようにする)
+4. URL からIDをコピーする
 
 ```
 https://docs.google.com/spreadsheets/d/【この部分がID】/edit
@@ -77,13 +78,15 @@ https://docs.google.com/spreadsheets/d/【この部分がID】/edit
 > 最初からある `コード.gs` は使いません。削除して構いません。
 > ファイル名に `.gs` は付けなくて構いません (自動で付きます)。
 
-### 5. 設定を書き換える
+### 5. スプレッドシートのIDを設定する
 
-`Config` を開いて、手順2でコピーしたIDを貼ります。
+IDは `Config.gs` に書かず、プロジェクトの「スクリプト プロパティ」に設定します。`Config.gs` はリポジトリに公開されるためです。
 
-```js
-DESTINATION_SPREADSHEET_ID: '1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789',
-```
+1. エディタ左の歯車 (プロジェクトの設定) を開く
+2. いちばん下の「スクリプト プロパティ」で「スクリプト プロパティを追加」を押す
+3. プロパティに `DESTINATION_SPREADSHEET_ID`、値に手順2でコピーしたIDを入れて保存する
+
+`Config.gs` の `DESTINATION_SPREADSHEET_ID` は空のままにします。スクリプト プロパティが無いときだけ、こちらの値を使います。
 
 ### 6. 実行する
 
@@ -174,7 +177,7 @@ CBT開始後は、フォームの編集画面で直接直すほうが安全で�
 
 | エラー / 症状 | 原因と対処 |
 |---|---|
-| `DESTINATION_SPREADSHEET_ID が空です` | 手順5をやっていません。IDを貼ってください |
+| `DESTINATION_SPREADSHEET_ID が設定されていません` | 手順5をやっていません。スクリプト プロパティにIDを追加してください |
 | `スプレッドシートを開けません` | IDが違うか、そのアカウントに編集権限がありません |
 | `フォームは既に作成済みです` | 二重実行の防止です。上の「二重実行の防止」を読んでください |
 | `未知の設問型です` | `FormDefinitions.gs` の `type` の綴りが違います |
