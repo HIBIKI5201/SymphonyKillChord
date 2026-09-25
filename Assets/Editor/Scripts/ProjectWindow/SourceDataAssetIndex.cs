@@ -22,6 +22,9 @@ namespace KillChord.Editor.ProjectWindow
 
         /// <summary> SourceDataProviderのcollection要素として登録されています。 </summary>
         CollectionItem = 1 << 1,
+
+        /// <summary> Addressables未登録だが、参照経由でゲームのビルドに含まれます。 </summary>
+        BuildDependency = 1 << 2,
     }
 
     /// <summary>
@@ -70,6 +73,7 @@ namespace KillChord.Editor.ProjectWindow
             Dictionary<string, SourceDataAssetFlags> cache = new();
             AddAddressableFlags(cache);
             AddCollectionItemFlags(cache);
+            AddBuildDependencyFlags(cache);
             _cache = cache;
         }
 
@@ -100,6 +104,18 @@ namespace KillChord.Editor.ProjectWindow
                         AddFlag(cache, entry.guid, SourceDataAssetFlags.Addressable);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        ///     参照経由でビルドに含まれるAddressables未登録アセットをインデックスへ追加します。
+        /// </summary>
+        /// <param name="cache"> 構築中のインデックスです。 </param>
+        private static void AddBuildDependencyFlags(Dictionary<string, SourceDataAssetFlags> cache)
+        {
+            foreach (string guid in BuildDependencyAssetIndex.Guids)
+            {
+                AddFlag(cache, guid, SourceDataAssetFlags.BuildDependency);
             }
         }
 
@@ -210,8 +226,12 @@ namespace KillChord.Editor.ProjectWindow
         {
             SourceDataProviderSettings.OnChanged += SourceDataAssetIndex.Invalidate;
             Undo.undoRedoPerformed += SourceDataAssetIndex.Invalidate;
-            AddressableAssetSettings.OnModificationGlobal +=
-                (_, _, _) => SourceDataAssetIndex.Invalidate();
+            AddressableAssetSettings.OnModificationGlobal += (_, _, _) =>
+            {
+                SourceDataAssetIndex.Invalidate();
+                BuildDependencyAssetIndex.ScheduleRebuild();
+            };
+            EditorBuildSettings.sceneListChanged += BuildDependencyAssetIndex.ScheduleRebuild;
         }
     }
 }
