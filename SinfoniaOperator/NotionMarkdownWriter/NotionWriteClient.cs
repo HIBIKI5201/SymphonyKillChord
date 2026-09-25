@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -90,18 +91,24 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         /// <param name="id">ブロックID。</param>
         /// <param name="type">ブロック型。</param>
         /// <param name="plainText">リッチテキストのプレーンテキスト。無い型では空文字。</param>
+        /// <param name="hasFormatting">メンション・リンク・装飾（太字・色など）を含むかどうか。</param>
         /// <param name="parent">親への参照。</param>
-        internal NotionBlockInfo(string id, string type, string plainText, NotionParentReference parent)
+        internal NotionBlockInfo(string id, string type, string plainText, bool hasFormatting, NotionParentReference parent)
         {
             Id = id;
             Type = type;
             PlainText = plainText;
+            HasFormatting = hasFormatting;
             Parent = parent;
         }
 
         internal string Id { get; }
         internal string Type { get; }
         internal string PlainText { get; }
+
+        /// <summary> プレーンテキストでは表せない要素（メンション・リンク・装飾）を含むかどうか。 </summary>
+        internal bool HasFormatting { get; }
+
         internal NotionParentReference Parent { get; }
     }
 
@@ -444,23 +451,16 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         /// </summary>
         /// <param name="blockId">ブロックID。</param>
         /// <param name="blockType">ブロック型（"paragraph"・"toggle"など）。</param>
-        /// <param name="text">新しいプレーンテキスト。</param>
+        /// <param name="richText">新しいリッチテキスト（テキストとページメンションの混在）。既存のリッチテキストは全体が置き換わる。</param>
         /// <returns>更新後のブロック情報。</returns>
-        internal async Task<NotionBlockInfo> UpdateBlockRichTextAsync(string blockId, string blockType, string text)
+        internal async Task<NotionBlockInfo> UpdateBlockRichTextAsync(
+            string blockId,
+            string blockType,
+            IReadOnlyList<Dictionary<string, object>> richText)
         {
             Dictionary<string, object> requestBody = new()
             {
-                [blockType] = new Dictionary<string, object>
-                {
-                    ["rich_text"] = new List<Dictionary<string, object>>
-                    {
-                        new()
-                        {
-                            ["type"] = "text",
-                            ["text"] = new Dictionary<string, string> { ["content"] = text }
-                        }
-                    }
-                }
+                [blockType] = new Dictionary<string, object> { ["rich_text"] = richText }
             };
             string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
             string responseBody = await SendAsync(
@@ -473,15 +473,17 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         }
 
         /// <summary>
-        ///     指定ブロック（またはページ）の子ブロックの末尾へ、新しいブロックを追加する。
-        ///     Notion APIに位置指定（特定ブロックの直後へ挿入）の手段が無いため、常に末尾になる。
+        ///     指定ブロック（またはページ）の子ブロックへ、新しい段落を追加する。
+        ///     afterBlockIdを指定するとそのブロックの直後へ、指定しなければ末尾へ追加する。
         /// </summary>
         /// <param name="parentBlockOrPageId">追加先の親ブロックまたはページのID。</param>
         /// <param name="richText">追加する段落のリッチテキスト（テキストとページメンションの混在）。</param>
+        /// <param name="afterBlockId">直後に追加する兄弟ブロックのID。nullなら末尾。</param>
         /// <returns>作成されたブロックのID一覧。</returns>
         internal async Task<IReadOnlyList<string>> AppendParagraphAsync(
             string parentBlockOrPageId,
-            IReadOnlyList<Dictionary<string, object>> richText)
+            IReadOnlyList<Dictionary<string, object>> richText,
+            string? afterBlockId = null)
         {
             Dictionary<string, object> requestBody = new()
             {
@@ -494,6 +496,16 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     }
                 }
             };
+            if (!string.IsNullOrEmpty(afterBlockId))
+            {
+                // Notion-Version 2026-03-11では、旧来のafterは拒否され、positionで指定する（動作確認済み）。
+                requestBody["position"] = new Dictionary<string, object>
+                {
+                    ["type"] = "after_block",
+                    ["after_block"] = new Dictionary<string, string> { ["id"] = afterBlockId }
+                };
+            }
+
             string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
             string responseBody = await SendAsync(
                 HttpMethod.Patch,
@@ -501,11 +513,13 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 json,
                 false);
             using JsonDocument document = JsonDocument.Parse(responseBody);
+            // 位置を指定すると、resultsには追加したブロックに続けて、後ろの既存ブロックも返る。
+            // 追加したのは1件なので、先頭の1件だけを返す。
             List<string> createdIds = new();
             if (document.RootElement.TryGetProperty("results", out JsonElement results) &&
                 results.ValueKind == JsonValueKind.Array)
             {
-                foreach (JsonElement result in results.EnumerateArray())
+                foreach (JsonElement result in results.EnumerateArray().Take(1))
                 {
                     if (result.TryGetProperty("id", out JsonElement idElement))
                     {
@@ -527,6 +541,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             string id = root.TryGetProperty("id", out JsonElement idElement) ? idElement.GetString() ?? string.Empty : string.Empty;
             string type = root.TryGetProperty("type", out JsonElement typeElement) ? typeElement.GetString() ?? string.Empty : string.Empty;
             string plainText = string.Empty;
+            bool hasFormatting = false;
             if (!string.IsNullOrEmpty(type) &&
                 root.TryGetProperty(type, out JsonElement typedBody) &&
                 typedBody.ValueKind == JsonValueKind.Object &&
@@ -540,12 +555,40 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     {
                         builder.Append(plain.GetString());
                     }
+
+                    hasFormatting |= HasFormatting(run);
                 }
 
                 plainText = builder.ToString();
             }
 
-            return new NotionBlockInfo(id, type, plainText, ParseParent(root));
+            return new NotionBlockInfo(id, type, plainText, hasFormatting, ParseParent(root));
+        }
+
+        /// <summary>
+        ///     リッチテキストの1ランが、プレーンテキストでは表せない要素を持つかを判定する。
+        ///     メンション・数式などのテキスト以外のラン、リンク、既定値以外の装飾が該当する。
+        /// </summary>
+        /// <param name="run">リッチテキストの1ラン。</param>
+        /// <returns>該当すればtrue。</returns>
+        private static bool HasFormatting(JsonElement run)
+        {
+            if (run.TryGetProperty("type", out JsonElement runType) && runType.GetString() != "text") { return true; }
+
+            if (run.TryGetProperty("href", out JsonElement href) && href.ValueKind == JsonValueKind.String) { return true; }
+
+            if (run.TryGetProperty("annotations", out JsonElement annotations) &&
+                annotations.ValueKind == JsonValueKind.Object)
+            {
+                foreach (JsonProperty annotation in annotations.EnumerateObject())
+                {
+                    if (annotation.Value.ValueKind == JsonValueKind.True) { return true; }
+
+                    if (annotation.Name == "color" && annotation.Value.GetString() != "default") { return true; }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

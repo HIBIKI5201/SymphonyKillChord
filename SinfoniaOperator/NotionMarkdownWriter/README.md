@@ -89,14 +89,18 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 
 # 親（ページ・トグルなど）の子要素の末尾に段落を1件追加する
 ./NotionMarkdownWriter.exe append "<親のURL|ID>" --text "本文 <mention-page url=\"...\">表示名</mention-page>" --confirm
+
+# 指定したブロックの直後に段落を1件追加する
+./NotionMarkdownWriter.exe append "<親のURL|ID>" --after "<直前のブロックのURL|ID>" --text "本文" --confirm
 ```
 
-`append`コマンド自体は常に**末尾**に追加しますが、classic Blocks API（`PATCH /blocks/{id}/children`）自体は
-`after`パラメータ（直前に置くブロックのID）を受け付けることを確認済みです（`children`と同じリクエストに
-`"after": "<block-id>"`を含める）。ただし`/blocks/{id}/move`のような**既存ブロックの並び替え**エンドポイントは
-存在しません。巨大ページ（Markdown APIで本文取得不可）へ途中位置に挿入する場合は、一時ページでMarkdownを
-ブロックへ変換したのち、対象ページの挿入位置の直前ブロックIDを`after`に指定して`children.append`する方法が
-使えます（現状は生API呼び出しでのみ対応。`append`コマンドへの`--after`オプション追加は未実装）。
+`edit-block`はリッチテキストの全体を置き換えます。`--text`には`<mention-page url="...">表示名</mention-page>`で
+ページメンションを書けます。変更前のブロックにメンション・リンク・装飾（太字・色など）があると、それらが消えるため
+止まります。消えてよい場合だけ`--discard-formatting`を付けてください。
+
+`append`の`--after`は、Notion-Version 2026-03-11の`position`（`{"type": "after_block", "after_block": {"id": "<block-id>"}}`）
+で送ります。このバージョンでは旧来の`after`パラメータは拒否されます（2022-06-28では`after`が使えます）。
+`/blocks/{id}/move`のような**既存ブロックの並び替え**エンドポイントはありません。
 
 ## 実装メモ
 
