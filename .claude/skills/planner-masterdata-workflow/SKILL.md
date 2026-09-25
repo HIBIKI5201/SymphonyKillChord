@@ -8,18 +8,18 @@ description: "Add, edit, or troubleshoot planner-facing master data via the Sour
 This project lets non-programmer planners edit master data (ScriptableObjects) through a
 custom EditorWindow instead of the raw Inspector. The system has three moving parts:
 
-1. **SourceDataProviderSettings** (`Assets/Editor/Scripts/SourceDataProvider/SourceDataProviderSettings.Editor.cs`) — the registry: which Addressable ScriptableObjects ("SourceAssets") exist, and which array/List fields on them ("collections") are planner-editable.
-2. **PlannerMasterDataEditorSettings** (`.../PlannerMasterDataEditorSettings.cs`) — groups SourceAssets/collections into sidebar "Pages" for the window.
+1. **SourceDataProviderSettings** (`Assets/Editor/Scripts/SourceDataProvider/SourceDataProviderSettings.Editor.cs`) — the registry: which Addressable ScriptableObjects ("DataAssets") exist, and which array/List fields on them ("collections") are planner-editable.
+2. **PlannerMasterDataEditorSettings** (`.../PlannerMasterDataEditorSettings.cs`) — groups DataAssets/collections into sidebar "Pages" for the window.
 3. **PlannerMasterDataWindow** (`.../PlannerMasterDataWindow.cs`) — the actual EditorWindow UI, opened via the `EditorWindowPathConst.PLANNER_MASTER_DATA_WINDOW_PATH` menu item.
 
 Read the four files above before making changes — this doc summarizes the wiring, but the source is the ground truth.
 
 ## Core concepts
 
-- **SourceAsset**: an Addressable-registered `ScriptableObject` (e.g. `Player`, `StageTreeAsset`, `CharacterDefinitionRepository`). Identified by its **Addressable key** (the address string in Addressables Groups).
-- **Collection**: a `List<T>`/array field inside a SourceAsset that holds individually-addable/removable items (e.g. `StageAsset` items inside `StageTreeAsset._stageAssets`). Identified by a **CollectionKey** string, mapped to `(SourceAssetAddressableKey, PropertyPath, AssetCreationDirectory)` via `SourceDataProviderSettings.SourceCollectionMapping`.
+- **DataAsset**: an Addressable-registered `ScriptableObject` (e.g. `Player`, `StageTreeAsset`, `CharacterDefinitionRepository`). Identified by its **Addressable key** (the address string in Addressables Groups).
+- **Collection**: a `List<T>`/array field inside a DataAsset that holds individually-addable/removable items (e.g. `StageAsset` items inside `StageTreeAsset._stageAssets`). Identified by a **CollectionKey** string, mapped to `(DataAssetAddressableKey, PropertyPath, AssetCreationDirectory)` via `SourceDataProviderSettings.SourceCollectionMapping`.
 - **DataID** (`Assets/Scripts/Runtime/0.Utility/Identity/DataID.cs`): the value type used on individual data entries. Holds a human-readable string `_id` plus a baked-in int hash (`DataIDHasher.Compute(collectionKey, id)`), rendered via `DataIDPropertyDrawer`. A field of type `DataID` marked with `[SourceDataCollection(CollectionKey)]` is either an *authoring* field (defines a new ID inside its own collection) or a *reference* field (picks an existing ID from another collection) — the drawer tells them apart via `SourceDataProviderRepositoryResolver.IsAuthoringProperty`.
-- **SourceDataAddressAttribute**: put on a `string` field to get a dropdown of registered SourceAsset Addressable keys instead of typing the address by hand (rendered by `SourceDataAddressSelectorDrawer`).
+- **SourceDataAddressAttribute**: put on a `string` field to get a dropdown of registered DataAsset Addressable keys instead of typing the address by hand (rendered by `SourceDataAddressSelectorDrawer`).
 
 ## Task: add a new item to an existing collection
 
@@ -35,15 +35,15 @@ This is the common case — planner wants a new Stage, Skill, Character, etc.
 
 To remove an item from a collection (not delete the underlying asset), use **"Collectionから外す"** — it only unlinks it from the array via `Undo.RecordObject` + `DeleteArrayElementAtIndex`, it does not delete the asset file.
 
-## Task: register a brand-new SourceAsset/collection type
+## Task: register a brand-new DataAsset/collection type
 
 When a new master data ScriptableObject type is introduced and needs to appear in the planner window:
 
-1. Make sure the ScriptableObject asset is registered in Addressables with a stable address (see `Assets/AddressableAssetsData`). `SourceDataProviderSettings.RefreshSourceAssetsFromAddressables()` (called on window `OnEnable` and via the window's "Refresh" button) auto-discovers any Addressable entry whose main asset type is a `ScriptableObject` and appends it as a `SourceAssetMapping` — so simply Addressable-registering the asset already makes it show up as a SourceAsset.
-2. If the asset has a `List<T>`/array field planners should manage as a collection, register it explicitly: open **Project Settings → KillChord → Source Data Provider** (`SettingsService.OpenProjectSettings("Project/KillChord/Source Data Provider")`, backed by `SourceDataProviderSettingsProvider.cs`) and add a `SourceCollectionMapping` entry with the CollectionKey, the SourceAsset's Addressable key, the field's SerializedProperty path, and (if the element type is a ScriptableObject) an `AssetCreationDirectory`.
-3. Add the new SourceAsset key and/or CollectionKey to a `PageDefinition` so it's reachable from the sidebar: **Project Settings → KillChord → Planner Master Data** (`SettingsService.OpenProjectSettings("Project/KillChord/Planner Master Data")`, backed by `PlannerMasterDataEditorSettingsProvider.cs`, data model in `PlannerMasterDataEditorSettings.cs`). Either add to an existing `PageDefinition`'s `SourceAssetAddressableKeys`/`CollectionCategories`, or create a new page.
+1. Make sure the ScriptableObject asset is registered in Addressables with a stable address (see `Assets/AddressableAssetsData`). `SourceDataProviderSettings.RefreshDataAssetsFromAddressables()` (called on window `OnEnable` and via the window's "Refresh" button) auto-discovers any Addressable entry whose main asset type is a `ScriptableObject` and appends it as a `DataAssetMapping` — so simply Addressable-registering the asset already makes it show up as a DataAsset.
+2. If the asset has a `List<T>`/array field planners should manage as a collection, register it explicitly: open **Project Settings → KillChord → Source Data Provider** (`SettingsService.OpenProjectSettings("Project/KillChord/Source Data Provider")`, backed by `SourceDataProviderSettingsProvider.cs`) and add a `SourceCollectionMapping` entry with the CollectionKey, the DataAsset's Addressable key, the field's SerializedProperty path, and (if the element type is a ScriptableObject) an `AssetCreationDirectory`.
+3. Add the new DataAsset key and/or CollectionKey to a `PageDefinition` so it's reachable from the sidebar: **Project Settings → KillChord → Planner Master Data** (`SettingsService.OpenProjectSettings("Project/KillChord/Planner Master Data")`, backed by `PlannerMasterDataEditorSettingsProvider.cs`, data model in `PlannerMasterDataEditorSettings.cs`). Either add to an existing `PageDefinition`'s `DataAssetAddressableKeys`/`CollectionCategories`, or create a new page.
 4. On the data class itself, mark the ID field with `[SourceDataCollection("YourCollectionKey")]` (namespace `KillChord.Runtime.Utility.Identity`) so `DataIDPropertyDrawer` and `SourceDataAddressSelectorDrawer` know how to resolve it.
-5. If you need a custom preview panel in the detail pane (like `PlannerEnemyStatusPreview`/`PlannerEnemyWavePreview`/`PlannerStageTreeGraphRenderer`), follow those existing previewer classes as a pattern and wire them into `DrawSourceAssetPreview`/`DrawCollectionPreview` in `PlannerMasterDataWindow.cs` — but this is source-code work, confirm with the user before editing `PlannerMasterDataWindow.cs` itself since it's a shared, sizeable file.
+5. If you need a custom preview panel in the detail pane (like `PlannerEnemyStatusPreview`/`PlannerEnemyWavePreview`/`PlannerStageTreeGraphRenderer`), follow those existing previewer classes as a pattern and wire them into `DrawDataAssetPreview`/`DrawCollectionPreview` in `PlannerMasterDataWindow.cs` — but this is source-code work, confirm with the user before editing `PlannerMasterDataWindow.cs` itself since it's a shared, sizeable file.
 
 No Addressables build/rebuild step is required just to make new entries visible in the planner window — the window reads directly from the Addressable Groups asset via `AddressableAssetSettingsDefaultObject.Settings`. An Addressables build is only needed when shipping (see the `unity-autobuilder` skill / CI).
 
@@ -59,4 +59,4 @@ Duplicate/colliding IDs within one CollectionKey are flagged by `DataIDCollision
 
 ## Navigating programmatically
 
-`PlannerMasterDataWindow.NavigateToSourceAsset(addressableKey)` and `NavigateToCollectionItem(collectionKey, dataId)` jump the window to a specific asset/item — `NavigateToSourceAsset` is what the "Planner" jump button in `SourceDataAddressSelectorDrawer` calls (via `PlannerNavigationHub`). `DataIDPropertyDrawer` has a "Ping" button instead, which pings the asset/object that defines the selected ID (`SourceDataIDOption.Source`) without opening the window. Reuse them rather than reimplementing navigation if building new tooling.
+`PlannerMasterDataWindow.NavigateToDataAsset(addressableKey)` and `NavigateToCollectionItem(collectionKey, dataId)` jump the window to a specific asset/item — `NavigateToDataAsset` is what the "Planner" jump button in `SourceDataAddressSelectorDrawer` calls (via `PlannerNavigationHub`). `DataIDPropertyDrawer` has a "Ping" button instead, which pings the asset/object that defines the selected ID (`SourceDataIDOption.Source`) without opening the window. Reuse them rather than reimplementing navigation if building new tooling.

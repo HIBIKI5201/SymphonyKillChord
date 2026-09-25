@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a949360001a4214bfa831c73dad4889, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Editor::KillChord.Editor.SourceDataProvider.SourceDataProviderSettings
-  _sourceAssetMappings:
+  _dataAssetMappings:
   - _addressableKey: StageTreeAsset
   - _addressableKey: OutGameSkillRepository
   - _addressableKey: SkillNodeDataRepo
@@ -73,97 +73,108 @@ MonoBehaviour:
   - _addressableKey: UICommon_ja
   - _addressableKey: Assets/Localization/Tables/UICommon Shared Data.asset
   - _addressableKey: UICommon Shared Data
+  - _addressableKey: EnemyDefeatedShakeConfig
+  - _addressableKey: PlayerAttackAnimationConfig
+  - _addressableKey: PlayerDamageShakeConfig
+  - _addressableKey: PlayerAnimationConfig
+  - _addressableKey: SkillEffectCatalogConfig
+  - _addressableKey: PlayerAttackShakeConfig
+  - _addressableKey: StageStartSequenceConfig
+  - _addressableKey: SkillPostEffectOverlayConfig
+  - _addressableKey: ACLikeRhythmGuideEffectConfig
+  - _addressableKey: DemoEndSequenceConfig
+  - _addressableKey: SkillExecutedShakeConfig
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
-    _sourceAssetAddressableKey: StageTreeAsset
+    _dataAssetAddressableKey: StageTreeAsset
     _propertyPath: _stageAssets
     _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Stages
   - _collectionKey: Skill
-    _sourceAssetAddressableKey: OutGameSkillRepository
+    _dataAssetAddressableKey: OutGameSkillRepository
     _propertyPath: _skillDataAssets
     _assetCreationDirectory: Assets/Level/Data/Master/Skill/Templates
   - _collectionKey: SkillNode
-    _sourceAssetAddressableKey: SkillNodeDataRepo
+    _dataAssetAddressableKey: SkillNodeDataRepo
     _propertyPath: _skillNodes
     _assetCreationDirectory: 
   - _collectionKey: SkillNodeBind
-    _sourceAssetAddressableKey: SkillNodeBindRepo
+    _dataAssetAddressableKey: SkillNodeBindRepo
     _propertyPath: SkillNodeBinds
     _assetCreationDirectory: 
   - _collectionKey: ScenarioAnimation
-    _sourceAssetAddressableKey: AnimationCatalogAsset
+    _dataAssetAddressableKey: AnimationCatalogAsset
     _propertyPath: _entries
     _assetCreationDirectory: 
   - _collectionKey: ScenarioPortrait
-    _sourceAssetAddressableKey: PortraitCatalogAsset
+    _dataAssetAddressableKey: PortraitCatalogAsset
     _propertyPath: _entries
     _assetCreationDirectory: 
   - _collectionKey: ScenarioBackground
-    _sourceAssetAddressableKey: BackgroundCatalogAsset
+    _dataAssetAddressableKey: BackgroundCatalogAsset
     _propertyPath: _entries
     _assetCreationDirectory: 
   - _collectionKey: Wave
-    _sourceAssetAddressableKey: EnemyWaveDefinitionRepository
+    _dataAssetAddressableKey: EnemyWaveDefinitionRepository
     _propertyPath: _waveDefinitionAssets
     _assetCreationDirectory: Assets/Level/Data/Master/InGame/Enemy
   - _collectionKey: StageBind
-    _sourceAssetAddressableKey: StageTreeAsset
+    _dataAssetAddressableKey: StageTreeAsset
     _propertyPath: _bindAssets
     _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/StageBinds
   - _collectionKey: BossAttackEntry
-    _sourceAssetAddressableKey: BossAttackEntryRepo
+    _dataAssetAddressableKey: BossAttackEntryRepo
     _propertyPath: _attackEntries
     _assetCreationDirectory: Assets/Level/Data/Develop/Boss
   - _collectionKey: PlayerAttack
-    _sourceAssetAddressableKey: Player
+    _dataAssetAddressableKey: Player
     _propertyPath: _attackDifinitions
     _assetCreationDirectory: Assets/Level/Data/Master/InGame/Battle
   - _collectionKey: EnemyMissionKey
-    _sourceAssetAddressableKey: EnemyMissionKeyRepository
+    _dataAssetAddressableKey: EnemyMissionKeyRepository
     _propertyPath: _missionKeyAssets
     _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Mission
   - _collectionKey: Character
-    _sourceAssetAddressableKey: CharacterDefinitionRepository
+    _dataAssetAddressableKey: CharacterDefinitionRepository
     _propertyPath: _characterAssets
     _assetCreationDirectory: Assets/Level/Data/Master/Character
   - _collectionKey: TitleScreenRule
-    _sourceAssetAddressableKey: TitleScreenRuleData
+    _dataAssetAddressableKey: TitleScreenRuleData
     _propertyPath: _entries
     _assetCreationDirectory: 
   - _collectionKey: OutGameScreenRule
-    _sourceAssetAddressableKey: OutGameScreenRuleData
+    _dataAssetAddressableKey: OutGameScreenRuleData
     _propertyPath: _entries
     _assetCreationDirectory: 
   - _collectionKey: SkillNodePhaseBind
-    _sourceAssetAddressableKey: SkillNodePhaseBindDataRepo
+    _dataAssetAddressableKey: SkillNodePhaseBindDataRepo
     _propertyPath: PhaseBindData
     _assetCreationDirectory: 
   - _collectionKey: Mission
-    _sourceAssetAddressableKey: MissionDefinitionRepository
+    _dataAssetAddressableKey: MissionDefinitionRepository
     _propertyPath: _missionDefinitionAssets
     _assetCreationDirectory: Assets/Level/Data/Master/OutGame/StageSelect/Mission
   - _collectionKey: EnemyData
-    _sourceAssetAddressableKey: EnemyDefinitionRepository
+    _dataAssetAddressableKey: EnemyDefinitionRepository
     _propertyPath: _enemyDefinitionAssets
     _assetCreationDirectory: Assets/Level/Data/Master/InGame/Enemy/Definitions
   - _collectionKey: GameResource
-    _sourceAssetAddressableKey: GameResourceDefinitionRepository
+    _dataAssetAddressableKey: GameResourceDefinitionRepository
     _propertyPath: _resourceAssets
     _assetCreationDirectory: Assets/Level/Data/Master/OutGame/Resource
   - _collectionKey: LoadingTip
-    _sourceAssetAddressableKey: LoadingTipsConfig
+    _dataAssetAddressableKey: LoadingTipsConfig
     _propertyPath: tips
     _assetCreationDirectory: 
   - _collectionKey: BgmSelectorLabel
-    _sourceAssetAddressableKey: BgmSelectorLabelTableAsset
+    _dataAssetAddressableKey: BgmSelectorLabelTableAsset
     _propertyPath: _entries
     _assetCreationDirectory: 
   - _collectionKey: StatusBonusEffectIcon
-    _sourceAssetAddressableKey: StatusBonusEffectIconCatalogAsset
+    _dataAssetAddressableKey: StatusBonusEffectIconCatalogAsset
     _propertyPath: _entries
     _assetCreationDirectory: 
   - _collectionKey: SkillGenreIcon
-    _sourceAssetAddressableKey: SkillGenreIconCatalogAsset
+    _dataAssetAddressableKey: SkillGenreIconCatalogAsset
     _propertyPath: _entries
     _assetCreationDirectory: 
   _repositoryMappings:
