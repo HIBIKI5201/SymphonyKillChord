@@ -488,6 +488,12 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 7215909566452859023
+  - m_Id: 2059000109
+    m_Localized: '{input.device:choose(keyboard|xbox|playstation|switch):<sprite
+      name="ml">|<sprite name="xb">|<sprite name="po">|<sprite name="na">}'
+    m_Metadata:
+      m_Items:
+      - rid: 7215909566452859023
   references:
     version: 2
     RefIds:
@@ -505,3 +511,4 @@ MonoBehaviour:
         - id: 2059000106
         - id: 2059000107
         - id: 2059000108
+        - id: 2059000109

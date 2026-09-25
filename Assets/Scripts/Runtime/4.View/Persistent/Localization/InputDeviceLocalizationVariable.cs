@@ -10,6 +10,7 @@ namespace KillChord.Runtime.View.Persistent.Localization
     /// <summary>
     ///     入力機器の種類をLocalizationのグローバル変数へ反映します。
     ///     Smart Stringから <c>{input.device:choose(keyboard|xbox|playstation|switch):...}</c> で参照します。
+    ///     String Tableを通らない表示文の <c>{input.attack}</c> などは <see cref="InputGlyphTextFormatter"/> が展開します。
     /// </summary>
     public sealed class InputDeviceLocalizationVariable : IDisposable
     {
@@ -23,6 +24,28 @@ namespace KillChord.Runtime.View.Persistent.Localization
             _observer = observer ?? throw new ArgumentNullException(nameof(observer));
             _observer.OnKindChanged += HandleKindChanged;
             LocalizationInitializer.RunWhenInitialized(HandleLocalizationInitialized);
+        }
+
+        /// <summary>
+        ///     Localization設定に登録された入力機器の種類のグローバル変数を取得します。
+        ///     Localizationの初期化後に呼び出してください。
+        /// </summary>
+        /// <param name="variable"> 取得した変数です。 </param>
+        /// <returns> 取得できた場合はtrueです。 </returns>
+        public static bool TryFindDeviceVariable(out StringVariable variable)
+        {
+            variable = null;
+            PersistentVariablesSource source =
+                LocalizationSettings.StringDatabase.SmartFormatter.GetSourceExtension<PersistentVariablesSource>();
+            if (source == null
+                || !source.TryGetValue(GROUP_NAME, out VariablesGroupAsset group)
+                || !group.TryGetValue(VARIABLE_NAME, out IVariable found))
+            {
+                return false;
+            }
+
+            variable = found as StringVariable;
+            return variable != null;
         }
 
         /// <summary>
@@ -58,7 +81,7 @@ namespace KillChord.Runtime.View.Persistent.Localization
                 return;
             }
 
-            if (!TryFindVariable(out _variable))
+            if (!TryFindDeviceVariable(out _variable))
             {
                 Debug.LogError($"[{nameof(InputDeviceLocalizationVariable)}] グローバル変数 {GROUP_NAME}.{VARIABLE_NAME} が見つかりませんでした。");
                 return;
@@ -92,27 +115,6 @@ namespace KillChord.Runtime.View.Persistent.Localization
             {
                 _variable.Value = value;
             }
-        }
-
-        /// <summary>
-        ///     Localization設定に登録されたグローバル変数を取得します。
-        /// </summary>
-        /// <param name="variable"> 取得した変数です。 </param>
-        /// <returns> 取得できた場合はtrueです。 </returns>
-        private static bool TryFindVariable(out StringVariable variable)
-        {
-            variable = null;
-            PersistentVariablesSource source =
-                LocalizationSettings.StringDatabase.SmartFormatter.GetSourceExtension<PersistentVariablesSource>();
-            if (source == null
-                || !source.TryGetValue(GROUP_NAME, out VariablesGroupAsset group)
-                || !group.TryGetValue(VARIABLE_NAME, out IVariable found))
-            {
-                return false;
-            }
-
-            variable = found as StringVariable;
-            return variable != null;
         }
 
         /// <summary>

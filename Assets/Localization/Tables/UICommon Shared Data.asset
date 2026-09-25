@@ -447,6 +447,10 @@ MonoBehaviour:
     m_Key: ui.input.glyph.pause
     m_Metadata:
       m_Items: []
+  - m_Id: 2059000109
+    m_Key: ui.input.glyph.attack_button
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
