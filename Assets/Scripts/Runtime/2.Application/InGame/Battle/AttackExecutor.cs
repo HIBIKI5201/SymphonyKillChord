@@ -50,7 +50,13 @@ namespace KillChord.Runtime.Application.InGame.Battle
             // 攻撃力補正と確定ダメージを計算し、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit, baseDamage, isOutOfRange);
 
-            result = DamageExecutor.Execute(attacker, defender, result, damageAttackType, notifyNormalDamage);
+            result = DamageExecutor.Execute(
+                attacker,
+                defender,
+                result,
+                damageAttackType,
+                notifyNormalDamage,
+                attackDefinition.AttackSpec.ConfirmedDamage);
 
             ApplyHitEffects(attacker, defender, result, hitEffects);
 

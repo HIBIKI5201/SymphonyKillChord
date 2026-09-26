@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.AttackParameterSetData
   _criticalChance: 0.1
   _criticalDamageMultiplier: 2
-  _confirmedDamage: 5
+  _confirmedDamage: 0
