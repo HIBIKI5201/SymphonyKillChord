@@ -454,6 +454,18 @@ MonoBehaviour:
     m_Localized: "Off"
     m_Metadata:
       m_Items: []
+  - m_Id: 1880000011
+    m_Localized: "Confirm / Cancel Buttons"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000012
+    m_Localized: "Confirm: Bottom / Cancel: Right"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000013
+    m_Localized: "Confirm: Right / Cancel: Bottom"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

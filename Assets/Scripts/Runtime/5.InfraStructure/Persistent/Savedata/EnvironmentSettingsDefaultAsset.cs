@@ -47,6 +47,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
         /// <summary> 初回起動時にオートロックオンを使うかどうか。 </summary>
         public bool IsAutoLockOnEnabled => _isAutoLockOnEnabled;
 
+        /// <summary> 初回起動時にゲームパッドの決定・キャンセルを日本式にするかどうか。 </summary>
+        public bool IsJapaneseButtonLayout => _isJapaneseButtonLayout;
+
         /// <summary>
         ///     初回起動時に適用する環境設定のDomainデータへ変換する。
         /// </summary>
@@ -63,7 +66,8 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 _rhythmOffsetSeconds,
                 _cameraSensitivity,
                 _cameraInvertMode,
-                _isAutoLockOnEnabled);
+                _isAutoLockOnEnabled,
+                _isJapaneseButtonLayout);
         }
 
         [SerializeField, Tooltip("初回起動時に適用する解像度の幅")]
@@ -98,5 +102,8 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
 
         [SerializeField, Tooltip("初回起動時にオートロックオンを使うかどうか")]
         private bool _isAutoLockOnEnabled = EnvironmentSettingsData.DEFAULT_IS_AUTO_LOCK_ON_ENABLED;
+
+        [SerializeField, Tooltip("初回起動時にゲームパッドの決定・キャンセルを日本式（決定=右ボタン）にするかどうか")]
+        private bool _isJapaneseButtonLayout = EnvironmentSettingsData.DEFAULT_IS_JAPANESE_BUTTON_LAYOUT;
     }
 }
