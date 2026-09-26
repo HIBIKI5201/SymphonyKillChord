@@ -102,7 +102,7 @@ sudo systemctl stop sinfonia-specsearch.service
 
 ## 7. GitHub Actionsから自動デプロイする
 
-`Deploy Sinfonia Operator`ワークフローは、`develop`のSinfoniaOperator関連ファイルが更新されたとき、または手動実行されたときに次の処理を行います。
+`[CI/CD] Deploy Sinfonia Operator`ワークフローは、`develop`のSinfoniaOperator関連ファイルが更新されたとき、または手動実行されたときに次の処理を行います。
 
 1. Oracle VMのCPUに合う自己完結バイナリを発行する。
 2. Oracle VMへ成果物を転送する。
