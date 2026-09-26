@@ -31,7 +31,7 @@ namespace KillChord.Demo
         private float _homeTimeLimitSeconds = 90.0f;
 
         [SerializeField, Min(0.0f), Tooltip("選択した開始地点から体験終了までの秒数です。ホームや戦闘中も進みます。")]
-        private float _overallTimeLimitSeconds = 480.0f;
+        private float _overallTimeLimitSeconds = 300.0f;
 
         [SerializeField, Tooltip("全体タイマーを開始する地点です。選択した地点より後から再開する場合は、再開地点で開始します。")]
         private DemoTimerStartPoint _overallTimerStartPoint = DemoTimerStartPoint.TutorialBattle;
