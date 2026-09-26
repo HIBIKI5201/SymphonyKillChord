@@ -20,6 +20,14 @@ MonoBehaviour:
   _stageName: "\u7B2C3\u8A71\u300C\u5F37\u653B\u300D "
   _flavorText: "\u30AB\u30DA\u30EA\u30E1\u30A4\u30B9\u30C6\u30EB\u306E\u5168\u8C8C\u3092\u66B4\u304F\u305F\u3081\u3001\u6575\u3092\u6483\u6EC5\u305B\u3088\u3002"
   _targetSceneName: Scenario
-  _rewardSkillBuildPoint: 2
-  _rewardSkillUnlockPoint: 2
+  _firstClearRewards:
+  - _resourceId:
+      _id: SkillLevelupPoint
+      _hashId: 1374829010
+    _amount: 2
+  - _resourceId:
+      _id: ResearchPoint
+      _hashId: -806205115
+    _amount: 2
+  _clearRewards: []
   _scenarioId: Episode_3
