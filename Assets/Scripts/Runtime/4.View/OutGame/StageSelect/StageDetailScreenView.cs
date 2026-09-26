@@ -51,13 +51,21 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_SUCCESS} が見つかりませんでした。");
 
-            _rewardSkillUnlockLabel = firstClearReward.Q<Label>(REWARD_POINT)
+            _firstClearResearchPointLabel = firstClearReward.Q<Label>(REWARD_RESEARCH_POINT)
                 ?? throw new System.ArgumentNullException(
-                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_FIRST_CLEAR}/{REWARD_POINT} が見つかりませんでした。");
+                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_FIRST_CLEAR}/{REWARD_RESEARCH_POINT} が見つかりませんでした。");
 
-            _rewardSkillBuildLabel = successReward.Q<Label>(REWARD_POINT)
+            _firstClearSkillLevelupPointLabel = firstClearReward.Q<Label>(REWARD_SKILL_LEVELUP_POINT)
                 ?? throw new System.ArgumentNullException(
-                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_SUCCESS}/{REWARD_POINT} が見つかりませんでした。");
+                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_FIRST_CLEAR}/{REWARD_SKILL_LEVELUP_POINT} が見つかりませんでした。");
+
+            _successResearchPointLabel = successReward.Q<Label>(REWARD_RESEARCH_POINT)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_SUCCESS}/{REWARD_RESEARCH_POINT} が見つかりませんでした。");
+
+            _successSkillLevelupPointLabel = successReward.Q<Label>(REWARD_SKILL_LEVELUP_POINT)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_SUCCESS}/{REWARD_SKILL_LEVELUP_POINT} が見つかりませんでした。");
 
             _missionSection = rootElement.Q<VisualElement>(MISSION)
                 ?? throw new System.ArgumentNullException(
@@ -147,8 +155,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             RegisterButtonCallback();
             Label firstClearHeading = firstClearReward.Q<Label>("FirstClearRewardHeading");
             Label successHeading = successReward.Q<Label>("SuccessRewardHeading");
-            VisualElement unlockPointsIcon = firstClearReward.Q<VisualElement>("Item");
-            VisualElement modPointsIcon = successReward.Q<VisualElement>("Item");
+            VisualElement firstClearUnlockPointsIcon = firstClearReward.Q<VisualElement>(REWARD_RESEARCH_POINT_ICON);
+            VisualElement firstClearModPointsIcon = firstClearReward.Q<VisualElement>(REWARD_SKILL_LEVELUP_POINT_ICON);
+            VisualElement successUnlockPointsIcon = successReward.Q<VisualElement>(REWARD_RESEARCH_POINT_ICON);
+            VisualElement successModPointsIcon = successReward.Q<VisualElement>(REWARD_SKILL_LEVELUP_POINT_ICON);
             _localizedTexts = new[]
             {
                 new LocalizedElementText(
@@ -158,9 +168,17 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 new LocalizedElementText(
                     UI_COMMON_TABLE, "ui.stage_select.success_reward", text => successHeading.text = text, "成功報酬"),
                 new LocalizedElementText(
-                    UI_COMMON_TABLE, "ui.points.unlock", text => unlockPointsIcon.tooltip = text, "解放P"),
+                    UI_COMMON_TABLE, "ui.points.unlock", text =>
+                    {
+                        firstClearUnlockPointsIcon.tooltip = text;
+                        successUnlockPointsIcon.tooltip = text;
+                    }, "解放P"),
                 new LocalizedElementText(
-                    UI_COMMON_TABLE, "ui.points.mod", text => modPointsIcon.tooltip = text, "改造P"),
+                    UI_COMMON_TABLE, "ui.points.mod", text =>
+                    {
+                        firstClearModPointsIcon.tooltip = text;
+                        successModPointsIcon.tooltip = text;
+                    }, "改造P"),
                 new LocalizedElementText(
                     UI_COMMON_TABLE, "ui.skill.formation", text => _skillBuildShortcutButton.text = text, "編成"),
                 new LocalizedElementText(
@@ -203,9 +221,11 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 _flavorTextLabel.text = dto.FlavorText;
             }
 
-            // 報酬アイコンの隣には、ステージ定義の獲得量を表示する。
-            _rewardSkillUnlockLabel.text = dto.FirstClearRewardSkillUnlockPoint.ToString();
-            _rewardSkillBuildLabel.text = dto.SuccessRewardSkillBuildPoint.ToString();
+            // 報酬アイコンの隣には、ステージ定義の獲得量を初回報酬・成功報酬ごとに全リソース分表示する。
+            _firstClearResearchPointLabel.text = dto.FirstClearRewardSkillUnlockPoint.ToString();
+            _firstClearSkillLevelupPointLabel.text = dto.FirstClearRewardSkillBuildPoint.ToString();
+            _successResearchPointLabel.text = dto.SuccessRewardSkillUnlockPoint.ToString();
+            _successSkillLevelupPointLabel.text = dto.SuccessRewardSkillBuildPoint.ToString();
 
             // バトルパートのみミッション見出し・ミッションセクションを表示する
             _missionHeadingRoot.style.display = dto.IsBattle ? DisplayStyle.Flex : DisplayStyle.None;
@@ -410,7 +430,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string REWARD = "Reward";
         private const string REWARD_FIRST_CLEAR = "FirstClear";
         private const string REWARD_SUCCESS = "Success";
-        private const string REWARD_POINT = "Point";
+        private const string REWARD_RESEARCH_POINT = "ResearchPoint";
+        private const string REWARD_SKILL_LEVELUP_POINT = "SkillLevelupPoint";
+        private const string REWARD_RESEARCH_POINT_ICON = "ResearchPointIcon";
+        private const string REWARD_SKILL_LEVELUP_POINT_ICON = "SkillLevelupPointIcon";
         private const string SUB_MISSION_LABEL1 = "SubMissionLabel1";
         private const string SUB_MISSION_LABEL2 = "SubMissionLabel2";
         private const string SUB_MISSION_LABEL3 = "SubMissionLabel3";
@@ -443,8 +466,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
         private readonly Label _stageNameLabel;
         private readonly Label _flavorTextLabel;
-        private readonly Label _rewardSkillBuildLabel;
-        private readonly Label _rewardSkillUnlockLabel;
+        private readonly Label _firstClearResearchPointLabel;
+        private readonly Label _firstClearSkillLevelupPointLabel;
+        private readonly Label _successResearchPointLabel;
+        private readonly Label _successSkillLevelupPointLabel;
         private readonly Label _subMissionLabel1;
         private readonly Label _subMissionLabel2;
         private readonly Label _subMissionLabel3;
