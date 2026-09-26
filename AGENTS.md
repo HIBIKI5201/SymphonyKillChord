@@ -5,7 +5,8 @@
 - Docs/NotionSpecifications
 # 自律AIエージェントのブランチ・PR運用
 - 編集・修正・コミットは必ず自分に指定された作業ブランチ（例: `feature/demo/just-judgement/agent`）で行う。レビュー対応も同じ作業ブランチで行う。
-- ブランチ命名規則は `feature/○○/○○/agent` とする (例: `feature/demo/home-tutorial/agent`)。指定がない場合のみ `agent/○○` とする (例: `agent/cbt-qa-sheet`)。
+- ブランチ命名規則は `feature/[段階]/[プロダクト名]/agent` とする (例: `feature/demo/home-tutorial/agent`)。`agent` はルートに使わず、個人名の位置に入れる。`agent/○○` の形は使わない。
+  - 段階は `demo`・`release`・`tools` など、作業の対象に合わせて選ぶ。ブランチ名の指定がない場合も、この形で作業名を付ける。
 - ブランチを作成したら、編集・コミットの前に空のままプッシュ (`git push -u origin <ブランチ名>`) してリモートにブランチを作成し、その後で作業を開始する。
   - 先にプッシュしておくと、`AutoCreateMasterBranch.yml` が作業前の内容で `master` を生成する。これにより、下記の「作業ブランチと `master` が同一コミットになる」例外ケースを避けられる。
 - 同階層の `master` で直接編集・コミットしない。`master` の更新は作業ブランチからのセルフマージのみで行う。
