@@ -53,6 +53,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _loadedEnemyData = definition.CharacterDefinition;
             _loadedMoveData = definition.MoveSpec;
+            _loadedPostAttackBehaviorData = definition.PostAttackBehaviorSpec;
             _loadedEncounterMusicData = definition.EncounterMusicSpec;
             _loadedBattleMusicData = definition.BattleMusicSpec;
             _loadedMissionKeyAsset = definition.MissionKey;
@@ -132,14 +133,17 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // Domain生成
             EnemyMoveSpec spec = EnemyFactory.CreateEnemyMoveSpec(_loadedMoveData);
             EnemyAttackMusicSpec attackMusicSpec = EnemyFactory.CreateEnemyAttackMusicSpec(_loadedEncounterMusicData, _loadedBattleMusicData);
-            EnemyPostAttackBehaviorSpec postAttackBehaviorSpec = new EnemyPostAttackBehaviorSpec(
-                _postAttackStayWeight,
-                _postAttackRegroupWeight,
-                _postAttackObstacleWeight,
-                _regroupDistanceMin,
-                _regroupDistanceMax,
-                _obstacleApproachRatio,
-                _overrideArrivalThreshold);
+            // 攻撃後行動はマスターデータを優先し、未設定の場合はプレハブの値を使う。
+            EnemyPostAttackBehaviorSpec postAttackBehaviorSpec = _loadedPostAttackBehaviorData != null
+                ? _loadedPostAttackBehaviorData.ToSpec()
+                : new EnemyPostAttackBehaviorSpec(
+                    _postAttackStayWeight,
+                    _postAttackRegroupWeight,
+                    _postAttackObstacleWeight,
+                    _regroupDistanceMin,
+                    _regroupDistanceMax,
+                    _obstacleApproachRatio,
+                    _overrideArrivalThreshold);
 
             AttackDefinition attackDefinition = _enemyEntity.CombatSpec.GetAttackDifinition(_attackIndex);
 
@@ -442,7 +446,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
         private Transform _targetTransform;
 
-        [Header("攻撃後行動")]
+        [Header("攻撃後行動（敵定義に攻撃後行動の仕様が無い場合に使う）")]
         [SerializeField, Min(0f), Tooltip("その場に留まり再攻撃する重み。")]
         private float _postAttackStayWeight = 0.5f;
         [SerializeField, Min(0f), Tooltip("近くの味方に合流する重み。")]
@@ -478,6 +482,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         private CharacterDefinitionAsset _loadedEnemyData;
         private EnemyMoveSpecAsset _loadedMoveData;
+        private EnemyPostAttackBehaviorSpecAsset _loadedPostAttackBehaviorData;
         private EnemyMusicSpecAsset _loadedEncounterMusicData;
         private EnemyMusicSpecAsset _loadedBattleMusicData;
         private EnemyMissionKeyAsset _loadedMissionKeyAsset;
@@ -778,6 +783,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetable?.Dispose();
             _loadedEnemyData = null;
             _loadedMoveData = null;
+            _loadedPostAttackBehaviorData = null;
             _loadedEncounterMusicData = null;
             _loadedBattleMusicData = null;
             _loadedMissionKeyAsset = null;
