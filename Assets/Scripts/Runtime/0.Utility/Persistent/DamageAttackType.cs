@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace KillChord.Runtime.Utility.Persistent
 {
     /// <summary>
@@ -10,6 +8,8 @@ namespace KillChord.Runtime.Utility.Persistent
         /// <summary> 通常攻撃 </summary>
         Normal,
         /// <summary> スキル攻撃 </summary>
-        Skill
+        Skill,
+        /// <summary> 伝染攻撃 </summary>
+        Infection,
     }
 }

@@ -17,11 +17,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <summary>
         ///     HPバーHUDの初期化。
         /// </summary>
-        /// <param name="entity">表示対象のEntity</param>
-        /// <param name="healthHudView">表示対象のHP HUD View</param>
+        /// <param name="healthHudViewModel">バインドするHP HUDのViewModel</param>
         public void InitializePlayerHpHud(IHealthHudViewModel healthHudViewModel)
         {
-            _playerHealthHudView.Bind(healthHudViewModel);
+            _playerHealthTextView.Bind(healthHudViewModel);
+            _playerHealthBarView.Bind(healthHudViewModel);
         }
         public override bool Build()
         {
@@ -33,6 +33,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             ServiceLocator.UnregisterInstance<InGameHudInitializer>(this);
         }
 
-        [SerializeField] private HealthHudView _playerHealthHudView;
+        [SerializeField, Tooltip("プレイヤーのHPテキスト表示のView")] private HealthTextView _playerHealthTextView;
+        [SerializeField, Tooltip("プレイヤーのHPバーのView")] private HealthBarView _playerHealthBarView;
     }
 }

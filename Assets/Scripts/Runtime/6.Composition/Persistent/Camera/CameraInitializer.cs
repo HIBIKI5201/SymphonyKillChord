@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.Persistent.PostEffect;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -29,6 +30,15 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
         public override bool Build()
         {
             ServiceLocator.RegisterInstance<ICameraTransform>(this, LocateTypeEnum.Locator);
+
+            // ポストプロセスの適用は、同じカメラ上のコンポーネントが担う。
+            _postEffectOverlayCamera = GetComponent<PostEffectOverlayCamera>();
+            if (_postEffectOverlayCamera != null)
+            {
+                ServiceLocator.RegisterInstance<IPostEffectOverlayPlayer>(
+                    _postEffectOverlayCamera, LocateTypeEnum.Locator);
+            }
+
             return true;
         }
 
@@ -42,6 +52,14 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
             {
                 ServiceLocator.UnregisterInstance<ICameraTransform>();
             }
+
+            if (_postEffectOverlayCamera != null)
+            {
+                ServiceLocator.UnregisterInstance<IPostEffectOverlayPlayer>();
+                _postEffectOverlayCamera = null;
+            }
         }
+
+        private PostEffectOverlayCamera _postEffectOverlayCamera;
     }
 }

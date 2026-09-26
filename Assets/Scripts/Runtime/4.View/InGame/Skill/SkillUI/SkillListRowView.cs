@@ -18,10 +18,11 @@ namespace KillChord.Runtime.View.InGame.Skill
         public Transform StepRoot => _stepRoot;
 
         /// <summary>
-        ///     行全体のアニメーション設定を初期化する。
+        ///     行全体のアニメーション設定とスキルアイコンを初期化する。
         /// </summary>
         /// <param name="animationSetting"> アニメーション設定。 </param>
-        public void Initialize(SkillInputProgressAnimationSetting animationSetting)
+        /// <param name="skillIcon"> この行が担当するスキルのアイコン。未設定の場合はnull。 </param>
+        public void Initialize(SkillInputProgressAnimationSetting animationSetting, Sprite skillIcon)
         {
             _animationSetting = animationSetting ?? throw new ArgumentNullException(nameof(animationSetting));
             _stepRootRectTransform = _stepRoot as RectTransform;
@@ -32,6 +33,10 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
 
             _stepRootBaseAnchoredPositionX = _stepRootRectTransform.anchoredPosition.x;
+
+            // スキルアイコンは入力進捗によらず不変のため、初期化時に一度だけ適用する。
+            ApplySkillIcon(skillIcon);
+            SetCooldownFillAmount(1);
         }
 
         /// <summary>
@@ -80,10 +85,6 @@ namespace KillChord.Runtime.View.InGame.Skill
             {
                 PlayProgressResetAnimation();
             }
-            else if (dto.PatternMatchCount > _patternMatchCount)
-            {
-                PlayFlareStep();
-            }
 
             _patternMatchCount = dto.PatternMatchCount;
         }
@@ -125,12 +126,12 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Transform _stepRoot;
         [SerializeField, Tooltip("クールダウンを表現するための背景。未設定の場合はクールダウン表示なし。")]
         private Image _cooldownBackgroundImage;
+        [SerializeField, Tooltip("この行が担当するスキル自体のアイコンを表示するImage。未設定の場合はスキルアイコン表示なし。")]
+        private Image _skillIconImage;
         [SerializeField]
         private Material _material;
         [SerializeField]
         private Image _rhythmResetFlareImage;
-        [SerializeField]
-        private Image _rhythmStepFlareImage;
         [SerializeField]
         private Image _rhythmTriggerdFlareImage;
 
@@ -147,7 +148,6 @@ namespace KillChord.Runtime.View.InGame.Skill
 
         private void Awake()
         {
-            _rhythmStepFlareImage.enabled = false;
             _rhythmResetFlareImage.enabled = false;
             _rhythmTriggerdFlareImage.enabled = false;
         }
@@ -191,7 +191,22 @@ namespace KillChord.Runtime.View.InGame.Skill
             {
                 return;
             }
-            _cooldownBackgroundImage.fillAmount = fillAmount;
+            _cooldownBackgroundImage.fillAmount = 1f - fillAmount;
+        }
+
+        /// <summary>
+        ///     この行が担当するスキルのアイコンを適用する。
+        ///     アイコン用Imageを持たないPrefab構成でも動作するよう、未設定時は何もしない。
+        /// </summary>
+        /// <param name="skillIcon"> 適用するスキルアイコン。未設定の場合はnull。 </param>
+        private void ApplySkillIcon(Sprite skillIcon)
+        {
+            if (_skillIconImage == null)
+            {
+                return;
+            }
+
+            _skillIconImage.sprite = skillIcon;
         }
 
         /// <summary>
@@ -215,23 +230,11 @@ namespace KillChord.Runtime.View.InGame.Skill
                     .BindToAnchoredPositionX(_stepRootRectTransform);
             PlayFlareReset();
         }
-
-
-        private void PlayFlareStep()
-        {
-            _progressFlareHandle.TryComplete();
-            _progressFlareHandle = LMotion.Create(1f, 0f, 0.2f)
-                    .WithEase(Ease.InQuad)
-                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
-                    .WithOnComplete(() => _rhythmStepFlareImage.enabled = false)
-                    .BindToColorA(_rhythmStepFlareImage);
-            _rhythmStepFlareImage.enabled = true;
-        }
         private void PlayFlareTriggered()
         {
             _progressFlareHandle.TryComplete();
-            _progressFlareHandle = LMotion.Create(1f, 0f, 0.4f)
-                    .WithEase(Ease.InQuad)
+            _progressFlareHandle = LMotion.Create(1f, 0f, 0.05f)
+                    .WithLoops(8)
                     .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
                     .WithOnComplete(() => _rhythmTriggerdFlareImage.enabled = false)
                     .BindToColorA(_rhythmTriggerdFlareImage);
@@ -240,8 +243,8 @@ namespace KillChord.Runtime.View.InGame.Skill
         private void PlayFlareReset()
         {
             _progressFlareHandle.TryComplete();
-            _progressFlareHandle = LMotion.Create(1f, 0f, 0.2f)
-                    .WithEase(Ease.InQuad)
+            _progressFlareHandle = LMotion.Create(1f, 0f, 0.05f)
+                    .WithLoops(4)
                     .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
                     .WithOnComplete(() => _rhythmResetFlareImage.enabled = false)
                     .BindToColorA(_rhythmResetFlareImage);

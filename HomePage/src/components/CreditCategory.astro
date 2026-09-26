@@ -1,0 +1,58 @@
+---
+import CreditRole from './CreditRole.astro';
+
+interface NameEntry {
+	name: string;
+	lead?: boolean;
+}
+
+interface RoleEntry {
+	role: string;
+	names: NameEntry[];
+}
+
+interface Props {
+	category: string;
+	roles: RoleEntry[];
+}
+
+const { category, roles } = Astro.props;
+---
+
+<section class="credit-category">
+	<h2 class="category-title">{category}</h2>
+	<div class="roles">
+		{roles.map((entry) => <CreditRole role={entry.role} names={entry.names} />)}
+	</div>
+</section>
+
+<style>
+	.credit-category {
+		padding: 32px 0 8px;
+		border-top: 2px solid var(--color-signal-dim);
+	}
+
+	.credit-category:first-child {
+		border-top: none;
+		padding-top: 0;
+	}
+
+	.category-title {
+		margin: 0 0 4px;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: 1.125rem;
+		font-weight: 800;
+		color: var(--color-signal);
+	}
+
+	.roles {
+		display: flex;
+		flex-wrap: wrap;
+		column-gap: 40px;
+	}
+
+	.roles > :global(.credit-role:first-child) {
+		border-top: none;
+	}
+</style>

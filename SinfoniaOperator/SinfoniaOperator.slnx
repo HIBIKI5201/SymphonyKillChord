@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="SinfoniaOperator.Core/SinfoniaOperator.Core.csproj" />
+  <Project Path="SinfoniaOperator.SpecSearch/SinfoniaOperator.SpecSearch.csproj" />
+  <Project Path="SinfoniaOperator/SinfoniaOperator.csproj" />
+</Solution>

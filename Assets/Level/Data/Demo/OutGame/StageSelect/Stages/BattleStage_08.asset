@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85625acbabd549f080e9b621c889f688, type: 3}
+  m_Name: BattleStage_08
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.BattleStageAsset
+  _plannerMemo: 
+  _stageId:
+    _id: stage_08
+    _hashId: 132791384
+  _isInitiallyUnlocked: 0
+  _stageName: 
+  _flavorText: 
+  _targetSceneName: InGame
+  _rewardSkillBuildPoint: 0
+  _rewardSkillUnlockPoint: 0
+  _isTutorial: 0
+  _enemyWaveDefinitionId:
+    _id: enemy_wave_default
+    _hashId: -1074717099
+  _missionDefinitionId:
+    _id: Test
+    _hashId: 418143992

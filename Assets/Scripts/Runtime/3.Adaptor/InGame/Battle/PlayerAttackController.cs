@@ -6,6 +6,7 @@ using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -23,15 +24,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// </summary>
         /// <param name="attackIntervalEvaluator"></param>
         /// <param name="presenter"></param>
+        /// <param name="attackPresenter"> 攻撃成立の判定結果を表示側へ渡すPresenter。 </param>
         /// <param name="battleState"></param>
         /// <param name="skillController"></param>
         /// <param name="targetingSystem"></param>
         /// <param name="musicSyncService"></param>
         /// <param name="targetAreaQuery"> 扇形範囲クエリです。 </param>
         /// <param name="playerTransform"> 判定の原点となるプレイヤーTransformです。 </param>
+        /// <param name="pendingAttackEffectService"> 攻撃の多段ヒットを管理するサービスです。 </param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
+            PlayerAttackPresenter attackPresenter,
             PlayerBattleState battleState,
+            PlayerActionRestrictionState actionRestrictionState,
             SkillController skillController,
             TargetSystemController targetingSystem,
             AttackIntervalEvaluator attackIntervalEvaluator,
@@ -39,18 +44,23 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             MusicSyncState musicSyncState,
             TargetAreaQuery targetAreaQuery,
             Transform playerTransform,
+            PendingAttackEffectService pendingAttackEffectService,
             float attackRotationSpeed,
             float attackCooldown
         )
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
             _presenter = presenter;
+            _attackPresenter = attackPresenter ?? throw new ArgumentNullException(nameof(attackPresenter));
             _battleState = battleState;
+            _actionRestrictionState = actionRestrictionState;
             _skillController = skillController;
             _targetingSystem = targetingSystem;
             _musicSyncService = musicSyncService;
+            _musicSyncState = musicSyncState;
             _targetAreaQuery = targetAreaQuery;
             _playerTransform = playerTransform;
+            _pendingAttackEffectService = pendingAttackEffectService ?? throw new ArgumentNullException(nameof(pendingAttackEffectService));
             AttackRotationSpeed = attackRotationSpeed;
 
             _attackCooldown = attackCooldown * (60d / musicSyncState.Bpm);
@@ -60,7 +70,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary> プレイヤーが攻撃を実行したときに発火します。入力1回につき1回だけ発火します。 </summary>
         public event Action<string, bool> OnAttackExecuted;
 
-        /// <summary> プレイヤーが指定拍子の攻撃を実行したときに発火します。 </summary>
+        /// <summary> ミッション記録向けに成立した攻撃の拍種を通知します。 </summary>
         public event Action<BeatType> OnAttackBeatExecuted;
 
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
@@ -93,10 +103,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             }
 
             float now = Time.unscaledTime;
-            BeatType beatType = _musicSyncService.GetCurrentBeatType();
+            float musicTime = (float)_musicSyncState.PlayTime;
+            BeatType beatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
 
             bool hasTarget = TryUpdateCurrentTarget();
-            _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now);
+
+            var normalAttackDamagePolicy = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now, musicTime, isJustHit, _actionRestrictionState.CanUseSkill);
+
+            IAttackHitEffect[] pendingHitEffects = _pendingAttackEffectService.Consume();
 
             AttackDefinition attackDefinition = GetDifinitionByBeatType(beatType);   //攻撃定義未発見時にnullが返る
 
@@ -108,7 +122,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             StartAttackInterval();
             StartAttackCooldown();
             OnAttackBeatExecuted?.Invoke(beatType);
+            _attackPresenter.Push(beatType, isJustHit);
             resultBeatType = (int)beatType;
+
+            // 攻撃演出用に、攻撃が成立したことを通知する。命中の有無は問わない。
+            EventBus<EOnPlayerAttackExecuted>.Raise(new EOnPlayerAttackExecuted());
 
             // 前回の多段ヒットが残っている場合は破棄する。ヒット間隔が攻撃硬直より長い設定になっている。
             DiscardPendingHits(attackDefinition);
@@ -126,15 +144,25 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return true;
             }
 
-            bool hasHit = ApplyHit(attackDefinition);
+            if (normalAttackDamagePolicy == SkillNormalAttackDamagePolicy.Skip)
+            {
+                Debug.Log("[PlayerAttackController] 通常攻撃のダメージ適用をスキップします。");
+
+                OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
+                return true;
+            }
+
+            bool hasHit = ApplyHit(attackDefinition, pendingHitEffects, isJustHit);
 
             // 2発目以降は毎フレーム更新で消化する。
             int remainingHits = attackDefinition.HitCount - 1;
             if (remainingHits > 0)
             {
                 _pendingAttackDefinition = attackDefinition;
+                _pendingHitEffects = pendingHitEffects;
                 _pendingHitCount = remainingHits;
                 _pendingHitTimer = attackDefinition.HitInterval;
+                _pendingIsJustHit = isJustHit;
             }
 
             OnAttackExecuted?.Invoke(attackDefinition.AttackName, hasHit);
@@ -180,6 +208,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _pendingHitCount = 0;
             _pendingHitTimer = 0d;
             _pendingAttackDefinition = null;
+            _pendingHitEffects = Array.Empty<IAttackHitEffect>();
+            _pendingIsJustHit = false;
         }
 
         /// <summary>
@@ -203,7 +233,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _pendingHitCount--;
             _pendingHitTimer += definition.HitInterval;
 
-            ApplyHit(definition);
+            ApplyHit(definition, _pendingHitEffects, _pendingIsJustHit);
 
             if (_pendingHitCount <= 0)
             {
@@ -249,10 +279,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         ///     単体攻撃の場合は生存している最も近い1体のみを対象とする。
         /// </summary>
         /// <param name="attackDefinition"> 攻撃定義。 </param>
+        /// <param name="pendingHitEffects"> 保留中の多段ヒットのエフェクト。 </param>
+        /// <param name="isJustHit"> ジャスト入力による攻撃かどうかを示すフラグ。 </param>
         /// <returns> 1体以上に命中した場合はtrue。 </returns>
-        private bool ApplyHit(AttackDefinition attackDefinition)
+        private bool ApplyHit(
+            AttackDefinition attackDefinition,
+            IReadOnlyList<IAttackHitEffect> pendingHitEffects,
+            bool isJustHit)
         {
-            _hitDefenders.Clear();
             _attackTargets.Clear();
 
             // 一覧は水平距離の昇順。多段ヒットの途中で対象が倒れた場合は次に近い対象へ移る。
@@ -265,7 +299,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 }
 
                 bool isOutOfRange = hit.Distance > attackDefinition.Range;
-                _hitDefenders.Add(hit.Entity);
                 _attackTargets.Add(new AttackTarget(hit.Entity, isOutOfRange));
 
                 if (!attackDefinition.IsMultiTarget)
@@ -283,17 +316,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 attackDefinition,
                 _battleState.Attacker,
                 _attackTargets,
-                false,
+                isJustHit,
                 _battleState.Attacker.BaseDamage,
-                _hitResults);
+                _hitResults,
+                pendingHitEffects,
+                notifyNormalDamage: true);
 
             for (int i = 0; i < _hitResults.Count; i++)
             {
                 AttackResult result = _hitResults[i];
-                EventBus<EOnTakeDamage>.Raise(
-                    new EOnTakeDamage(result.FinalDamage.Value, result.IsCritical, _hitDefenders[i].Id, DamageAttackType.Normal));
-
-                _battleState.Attacker.SetDamage(result.FinalDamage);
                 _presenter.Push(result);
             }
 
@@ -389,21 +420,26 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         }
 
         private readonly AttackResultPresenter _presenter;
+        private readonly PlayerAttackPresenter _attackPresenter;
         private readonly PlayerBattleState _battleState;
+        private readonly PlayerActionRestrictionState _actionRestrictionState;
         private readonly SkillController _skillController;
         private readonly TargetSystemController _targetingSystem;
         private readonly AttackIntervalEvaluator _attackIntervalEvaluator;
         private readonly IMusicSyncService _musicSyncService;
+        private readonly MusicSyncState _musicSyncState;
         private readonly TargetAreaQuery _targetAreaQuery;
         private readonly Transform _playerTransform;
+        private readonly PendingAttackEffectService _pendingAttackEffectService;
         private readonly List<TargetAreaHit> _hitTargets = new List<TargetAreaHit>();
-        private readonly List<CharacterEntity> _hitDefenders = new List<CharacterEntity>();
         private readonly List<AttackTarget> _attackTargets = new List<AttackTarget>();
         private readonly List<AttackResult> _hitResults = new List<AttackResult>();
+        private IReadOnlyList<IAttackHitEffect> _pendingHitEffects = Array.Empty<IAttackHitEffect>();
         private double _attackCooldownRemainig;
         private double _attackCooldown;
         private AttackDefinition _pendingAttackDefinition;
         private int _pendingHitCount;
         private double _pendingHitTimer;
+        private bool _pendingIsJustHit;
     }
 }

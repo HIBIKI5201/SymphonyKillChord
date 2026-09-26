@@ -1,7 +1,10 @@
+using LitMotion;
+using LitMotion.Extensions;
 using R3;
 using System;
 using TMPro;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace KillChord.Runtime.View.InGame.Combo
 {
@@ -19,7 +22,14 @@ namespace KillChord.Runtime.View.InGame.Combo
         {
             if (_comboText == null)
             {
-                Debug.LogError($"[{nameof(ComboHudView)}] {nameof(_comboText)}がNullです。", this);
+                Debug.LogError($"[{nameof(ComboHudView)}] {nameof(_comboText)}が未設定です。", this);
+                return;
+            }
+
+            _comboRoot = _comboText.rectTransform.parent?.gameObject;
+            if (_comboRoot == null)
+            {
+                Debug.LogError($"[{nameof(ComboHudView)}] コンボ表示ルートを取得できません。", this);
                 return;
             }
 
@@ -29,27 +39,41 @@ namespace KillChord.Runtime.View.InGame.Combo
             _comboDisposable = _comboHudViewModel.ComboCount
                 .Subscribe(comboCount =>
                   {
-                      if (_comboText == null) { return; }
+                      if (_comboText == null || _comboRoot == null) { return; }
 
-                      if (comboCount < comboVisibleCount)
+                      _handle.TryComplete();
+                      bool isVisible = comboCount >= comboVisibleCount;
+                      _comboRoot.SetActive(isVisible);
+                      if (!isVisible)
                       {
                           _comboText.SetText(string.Empty);
+                          return;
                       }
-                      else
-                      {
-                          _comboText.SetText("{0}コンボ", comboCount);
-                      }
+
+                      _comboText.SetText("{0}", comboCount);
+                      _handle = LSequence.Create()
+                        .Join(LMotion.Punch.Create(0f, 5f, 0.1f)
+                            .WithFrequency(Random.Range(2, 5))
+                            .BindToAnchoredPositionX(_comboText.rectTransform))
+                        .Join(LMotion.Punch.Create(0f, 5f, 0.1f)
+                            .WithFrequency(Random.Range(2, 5))
+                            .BindToAnchoredPositionY(_comboText.rectTransform))
+                        .Run();
                   });
         }
 
-        [SerializeField] private TextMeshProUGUI _comboText;
+        [SerializeField, Tooltip("コンボ数を表示するテキストです。")]
+        private TextMeshProUGUI _comboText;
+        private GameObject _comboRoot;
         private ComboHudViewModel _comboHudViewModel;
         private IDisposable _comboDisposable;
+        private MotionHandle _handle;
         /// <summary>
         ///    ビューが破棄される際に購読を解除します。
         /// </summary>
         private void OnDestroy()
         {
+            _handle.TryCancel();
             _comboDisposable?.Dispose();
         }
     }

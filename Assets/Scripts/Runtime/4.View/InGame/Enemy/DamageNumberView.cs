@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using LitMotion;
 using LitMotion.Extensions;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,22 +17,34 @@ namespace KillChord.Runtime.View.InGame.Enemy
         ///     ダメージ数値の表示を開始する。
         /// </summary>
         /// <param name="dTO">ダメージ数値DTO</param>
-        public void Play(in DamageNumberDTO dTO)
+        /// <param name="completed">表示完了時のコールバック</param>
+        public void Play(in DamageNumberDTO dTO, Action<DamageNumberView> completed)
         {
+            ResetMotion();
+            _completed = completed;
+
             if (_damageText == null)
             {
                 Debug.LogError("[DamageNumberView] TMP_Text が未設定です。", this);
+                Complete();
                 return;
             }
 
             _damageText.SetText("{0}", Mathf.CeilToInt(dTO.Damage));
 
-            ApplyRandomPosition();
-            ApplyStyle(dTO.Type);
+            ApplyStyle(dTO.Type, dTO.IsCritical);
             PlayMovement();
             PlayFade();
         }
 
+        /// <summary>
+        ///     プールに戻すために初期化する。
+        /// </summary>
+        public void ResetView()
+        {
+            ResetMotion();
+            _completed = null;
+        }
 
         [SerializeField, Tooltip("ダメージ数値のテキスト")]
         private TMP_Text _damageText;
@@ -51,34 +64,26 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("ダメージ数値の移動距離")]
         private float _moveDistance;
 
-        [SerializeField, Tooltip("ダメージ数値のランダム表示位置の最小値")]
-        private Vector2 _randomPositionMin;
-
-        [SerializeField, Tooltip("ダメージ数値のランダム表示位置の最大値")]
-        private Vector2 _randomPositionMax;
-
         [SerializeField, Tooltip("イージングタイプ")]
         private Ease _easeType = Ease.OutQuad;
 
-        /// <summary>
-        ///     ダメージ数値の表示位置をランダムにずらす。
-        /// </summary>
-        private void ApplyRandomPosition()
-        {
-            float randomX = Random.Range(_randomPositionMin.x, _randomPositionMax.x);
-            float randomY = Random.Range(_randomPositionMin.y, _randomPositionMax.y);
+        private Action<DamageNumberView> _completed;
+        private MotionHandle _movementHandle;
+        private MotionHandle _fadeHandle;
+        private MotionHandle _backgroundFadeHandle;
 
-            Vector3 position = transform.localPosition;
-            position.x += randomX;
-            position.y += randomY;
-            transform.localPosition = position;
+        private void OnDestroy()
+        {
+            ResetMotion();
+            _completed = null;
         }
 
         /// <summary>
         ///     ダメージ種類に応じた表示スタイルを適用する。
         /// </summary>
         /// <param name="type">ダメージ種類</param>
-        private void ApplyStyle(DamageNumberType type)
+        /// <param name="isCritical">クリティカルかどうか</param>
+        private void ApplyStyle(DamageNumberType type, bool isCritical)
         {
             DamageNumberStyle style = FindStyle(type);
 
@@ -89,6 +94,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
+            Debug.Log($"[DamageNumberView] Type:{type} Color:{style.TextColor} Material:{style.FontMaterial?.name}", this);
+
+            if (style.FontMaterial != null)
+            {
+                // これで用意済みのTMP Material Assetを切り替える。
+                _damageText.fontSharedMaterial = style.FontMaterial;
+            }
+
             _damageText.color = style.TextColor;
 
             if (_backGroundImage == null)
@@ -96,13 +109,30 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
-            Sprite backgroundSprite = style.BackGroundSprite;
 
-            // 通常時等表示しない場合は背景画像を非表示にする。
-            bool hasBackground = backgroundSprite != null;
+            // ダメージ数値の背景画像はクリティカル時のみ表示する。
+            if (!isCritical)
+            {
+                HideBackground();
+                return;
+            }
 
+            DamageNumberStyle criticalStyle = FindStyle(DamageNumberType.Critical);
+
+            if (criticalStyle == null || criticalStyle.BackGroundSprite == null)
+            {
+                HideBackground();
+                return;
+            }
+
+            Sprite backgroundSprite = criticalStyle.BackGroundSprite;
             _backGroundImage.sprite = backgroundSprite;
-            _backGroundImage.enabled = hasBackground;
+            _backGroundImage.enabled = true;
+
+
+            Color color = _backGroundImage.color;
+            color.a = 1f;
+            _backGroundImage.color = color;
         }
 
         /// <summary>
@@ -176,7 +206,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             float startY = transform.localPosition.y;
             float endY = startY + distance;
 
-            LMotion.Create(startY, endY, _duration)
+            _movementHandle = LMotion.Create(startY, endY, _duration)
                 .WithEase(_easeType)
                 .Bind(value =>
                 {
@@ -191,9 +221,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void PlayFade()
         {
-            LMotion.Create(_damageText.color.a, 0f, _duration)
+            _fadeHandle = LMotion.Create(_damageText.color.a, 0f, _duration)
                 .WithEase(_easeType)
-                .WithOnComplete(() => Destroy(gameObject))
+                .WithOnComplete(Complete)
                 .BindToColorA(_damageText);
 
             if (_backGroundImage == null || !_backGroundImage.enabled)
@@ -202,9 +232,30 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             // 背景画像のフェードアウト演出
-            LMotion.Create(_backGroundImage.color.a, 0f, _duration)
+            _backgroundFadeHandle = LMotion.Create(_backGroundImage.color.a, 0f, _duration)
                 .WithEase(_easeType)
                 .BindToColorA(_backGroundImage);
+        }
+
+        /// <summary>
+        ///     ダメージ数値の演出をリセットする。
+        /// </summary>
+        private void ResetMotion()
+        {
+            _movementHandle.TryCancel();
+            _fadeHandle.TryCancel();
+            _backgroundFadeHandle.TryCancel();
+        }
+
+        /// <summary>
+        ///     ダメージ数値の演出が完了したことを通知する。
+        /// </summary>
+        private void Complete()
+        {
+            Action<DamageNumberView> completed = _completed;
+            _completed = null;
+
+            completed?.Invoke(this);
         }
     }
 }

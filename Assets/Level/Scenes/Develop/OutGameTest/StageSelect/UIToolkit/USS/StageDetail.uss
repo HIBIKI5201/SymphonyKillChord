@@ -1,20 +1,167 @@
 :root {
 }
 
-.mission-check {
-    width: 5%;
-    min-width: 5%;
-    border-width: 2px;
-    border-color: rgb(255, 255, 255);
-    border-radius: 20%;
-    margin-right: 3%;
-    flex-shrink: 0;
-    border-top-width: 15px;
-    border-right-width: 15px;
-    border-bottom-width: 15px;
-    border-left-width: 15px;
+/* パネル背景(紺グラデーション)に馴染ませる共通カード配色。 */
+.stage-detail-card {
+    background-color: rgb(16, 28, 77);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-color: rgb(90, 100, 170);
+    border-right-color: rgb(90, 100, 170);
+    border-bottom-color: rgb(90, 100, 170);
+    border-left-color: rgb(90, 100, 170);
 }
 
-.mission-check-mission-achieved {
-    background-color: rgb(255, 227, 93);
+/*
+    Mission見出し・サブミッション行・報酬ボックス共通の紺カード素材(半透明、下地は透明にしてパネル背景を透かす)。
+    scale-and-cropで縦横比を保ったまま切り抜いて敷き詰める。
+*/
+.mission-card-panel {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Mission_Back.png?fileID=2800000&guid=043ab32fbb3244c4391b735312eb8cf8&type=3#UI_Mission_Back");
+    -unity-background-scale-mode: scale-and-crop;
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.2);
+}
+
+.mission-check {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/WIP/UI_CheckBox.png?fileID=2800000&guid=654ed62c06b95af4892eafb3e16403b5&type=3#UI_CheckBox");
+    -unity-background-scale-mode: scale-to-fit;
+    background-color: rgba(0, 0, 0, 0);
+    margin-right: 3%;
+    flex-shrink: 0;
+    top: 50%;
+    left: 10px;
+    translate: 0 -50%;
+}
+
+/* 達成時のチェックマーク。未達成時は非表示にしておき、達成時のみ表示する。 */
+.mission-check-mark {
+    display: none;
+    width: 100%;
+    height: 100%;
+    -unity-text-align: middle-center;
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.mission-check-mission-achieved .mission-check-mark {
+    display: flex;
+}
+
+/*
+    装備中スキル1枠(名前+円形アイコン+空欄「＋」+発動コマンド行)。
+    改造画面の編成スロット(.skillbuild-slot、SkillBuildScreen.uss)と同じ構成・同じ背景素材を、
+    6枠を横一列に収めるため縮小したサイズで再現する。
+*/
+.equipped-skill-slot {
+    width: 130px;
+    height: 130px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    margin-right: 8px;
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Mission_Back.png?fileID=2800000&guid=043ab32fbb3244c4391b735312eb8cf8&type=3#UI_Mission_Back");
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.5);
+}
+
+.equipped-skill-name {
+    width: 100%;
+    margin-bottom: 6px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    font-size: 13px;
+    white-space: nowrap;
+    display: none;
+}
+
+.equipped-skill-slot.is-filled .equipped-skill-name {
+    display: flex;
+}
+
+.equipped-skill-icon {
+    width: 64px;
+    height: 64px;
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+    border-bottom-right-radius: 32px;
+    border-bottom-left-radius: 32px;
+    -unity-background-scale-mode: scale-to-fit;
+    display: none;
+}
+
+.equipped-skill-slot.is-filled .equipped-skill-icon {
+    display: flex;
+}
+
+.equipped-skill-placeholder {
+    font-size: 30px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.equipped-skill-slot.is-filled .equipped-skill-placeholder {
+    display: none;
+}
+
+/* 発動コマンドの菱形(六角形素材で代用)を並べる行。 */
+.equipped-skill-command-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 8px;
+}
+
+.equipped-skill-command-hex {
+    width: 14px;
+    height: 14px;
+    margin-left: 1px;
+    margin-right: 1px;
+}
+
+/*
+    出撃 / 閉じるボタン。
+    枠線色は UXML のインライン指定から移設した。
+    インラインスタイルは USS より優先されるため、そのままでは
+    OutGameNavigation.uss のフォーカスリングが上書きされて見えなかった。
+*/
+.stage-detail-button {
+    border-left-color: rgba(149, 149, 149, 0);
+    border-right-color: rgba(149, 149, 149, 0);
+    border-top-color: rgba(149, 149, 149, 0);
+    border-bottom-color: rgba(149, 149, 149, 0);
+    scale: 1 1;
+    transition-property: scale, border-color;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
+}
+
+.stage-detail-button:hover,
+.stage-detail-button:focus {
+    scale: 1.2 1.2;
+}
+
+.stage-detail-button:active {
+    scale: 0.9 0.9;
+}
+
+/* 「任務開始」ボタン。通常時/押下時でスプライトを差し替える。 */
+.sortie-button {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=2800000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.sortie-button:hover,
+.sortie-button:focus,
+.sortie-button:active {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=2800000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
 }

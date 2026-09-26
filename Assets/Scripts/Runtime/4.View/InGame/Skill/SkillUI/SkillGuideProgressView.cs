@@ -22,22 +22,33 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// <param name="stepSettings"> スキルパターンの各拍子に対応する表示設定（Signatures順）。 </param>
         /// <param name="animationSetting"> アニメーション設定。 </param>
         /// <param name="rhythmGuideView"> ジャストタイミング位置の参照元となるリズムガイドView。未設定の場合はX座標を更新しない。 </param>
+        /// <param name="skillIcon"> この行が担当するスキルのアイコン。未設定の場合はnull。 </param>
         public void Initialize(
             SkillBeatVisualSetting[] stepSettings,
             SkillInputProgressAnimationSetting animationSetting,
-            ACLikeRhythmGuideView rhythmGuideView)
+            ACLikeRhythmGuideView rhythmGuideView,
+            Sprite skillIcon)
         {
             _stepSettings = stepSettings ?? throw new ArgumentNullException(nameof(stepSettings));
             _animationSetting = animationSetting ?? throw new ArgumentNullException(nameof(animationSetting));
             _rhythmGuideView = rhythmGuideView;
+            if (_rhythmGuideView != null)
+            {
+                _rhythmGuideView.OnLayoutChanged += HandleLayoutChangedHandler;
+            }
             _baseLocalScale = _leftIconImage.rectTransform.localScale;
             _baseLocalEulerAngleZ = _leftIconImage.rectTransform.localEulerAngles.z;
+
+            // スキルアイコンは入力進捗によらず不変のため、初期化時に一度だけ適用する。
+            ApplySkillIcon(skillIcon);
 
             // ジャストタイミング位置が確定するまでは、誤った位置が見えてしまわないようアイコン・背景ごと隠す。
             // リズムガイド未設定（X座標追従を使わない構成）の場合は待たずにそのまま表示する。
             _isPositioned = _rhythmGuideView == null;
             ApplyVisibility();
             ApplyStep(0);
+
+            SetCooldownFillAmount(1f);
         }
 
         /// <inheritdoc />
@@ -88,7 +99,7 @@ namespace KillChord.Runtime.View.InGame.Skill
             {
                 return;
             }
-            RefreshIconPosition(_patternMatchCount);
+            RefreshIconPosition(_displayedStepIndex);
         }
 
         private void FixedUpdate()
@@ -120,22 +131,30 @@ namespace KillChord.Runtime.View.InGame.Skill
 
         private void OnDestroy()
         {
+            if (_rhythmGuideView != null)
+            {
+                _rhythmGuideView.OnLayoutChanged -= HandleLayoutChangedHandler;
+            }
             _appearMotion.TryCancel();
             _resetShakeMotion.TryCancel();
         }
 
         /// <summary>
-        ///     指定インデックスの拍子アイコンを、左右対称のジャストタイミング位置に表示する。
+        ///     画面幅やゲージ全長の変更後も、現在の入力対象アイコンを追従させる。
+        /// </summary>
+        private void HandleLayoutChangedHandler()
+        {
+            RefreshIconPosition(_displayedStepIndex);
+        }
+
+        /// <summary>
+        ///     指定インデックスの拍に合わせて、左右のアイコンを対称なジャストタイミング位置へ移動する。
+        ///     表示するSprite自体はスキルアイコンで固定のため、ここでは位置のみを更新する。
         /// </summary>
         /// <param name="index"> 表示するSignaturesのインデックス。 </param>
         private void ApplyStep(int index)
         {
-            SkillBeatVisualSetting setting = _stepSettings[index];
-            _leftIconImage.sprite = setting.Icon;
-            _leftIconImage.color = setting.ActiveColor;
-            _rightIconImage.sprite = setting.Icon;
-            _rightIconImage.color = setting.ActiveColor;
-
+            _displayedStepIndex = index;
             RefreshIconPosition(index);
         }
 
@@ -152,13 +171,19 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
 
             SkillBeatVisualSetting setting = _stepSettings[index];
-            if (!_rhythmGuideView.TryGetJustTimingXPosition(setting.BeatType, out float xPosition))
+            if (!_rhythmGuideView.TryGetJustTimingXPosition(setting.BeatType, out float xPosition)
+                || !_rhythmGuideView.TryGetBeatRange(
+                    setting.BeatType,
+                    out float rangeCenter,
+                    out float inputRangeWidth))
             {
                 return;
             }
 
             SetAnchoredX(_leftIconImage.rectTransform, -xPosition);
             SetAnchoredX(_rightIconImage.rectTransform, xPosition);
+            UpdateInputRange(_leftInputRangeImage, -rangeCenter, inputRangeWidth, setting.BeatType);
+            UpdateInputRange(_rightInputRangeImage, rangeCenter, inputRangeWidth, setting.BeatType);
 
             if (!_isPositioned)
             {
@@ -175,6 +200,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             bool visible = _isPositioned && _isDisplayAllowed;
             _leftIconImage.enabled = visible;
             _rightIconImage.enabled = visible;
+            _leftInputRangeImage.enabled = visible;
+            _rightInputRangeImage.enabled = visible;
+
             if (_cooldownBackgroundImage == null)
             {
                 return;
@@ -186,6 +214,17 @@ namespace KillChord.Runtime.View.InGame.Skill
         }
 
         /// <summary>
+        ///     この行が担当するスキルのアイコンを適用する。
+        ///     アイコン用Imageを持たないPrefab構成でも動作するよう、未設定時は何もしない。
+        /// </summary>
+        /// <param name="skillIcon"> 適用するスキルアイコン。未設定の場合はnull。 </param>
+        private void ApplySkillIcon(Sprite skillIcon)
+        {
+            _leftIconImage.sprite = skillIcon;
+            _rightIconImage.sprite = skillIcon;
+        }
+
+        /// <summary>
         ///     RectTransformのX座標のみを設定する。
         /// </summary>
         private static void SetAnchoredX(RectTransform rectTransform, float x)
@@ -193,6 +232,24 @@ namespace KillChord.Runtime.View.InGame.Skill
             Vector2 anchoredPosition = rectTransform.anchoredPosition;
             anchoredPosition.x = x;
             rectTransform.anchoredPosition = anchoredPosition;
+        }
+
+        /// <summary>
+        ///     スキル入力受付範囲を示す横帯の位置・幅・拍色を更新する。
+        /// </summary>
+        /// <param name="inputRangeImage"> 更新対象の横帯。 </param>
+        /// <param name="xPosition"> 横帯の中心X座標。 </param>
+        /// <param name="width"> 入力受付範囲の表示幅。 </param>
+        /// <param name="beatType"> 横帯へ適用する拍種。 </param>
+        private void UpdateInputRange(Image inputRangeImage, float xPosition, float width, int beatType)
+        {
+            SetAnchoredX(inputRangeImage.rectTransform, xPosition);
+            inputRangeImage.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+
+            if (_rhythmGuideView.TryGetBeatColor(beatType, out Color beatColor))
+            {
+                inputRangeImage.color = beatColor;
+            }
         }
 
         /// <summary>
@@ -298,7 +355,7 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
             for (int i = 0; i < _cooldownBackgroundImage.Length; i++)
             {
-                _cooldownBackgroundImage[i].fillAmount = fillAmount;
+                _cooldownBackgroundImage[i].fillAmount = 1f - fillAmount;
             }
         }
 
@@ -306,6 +363,10 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Image _leftIconImage;
         [SerializeField, Tooltip("右側に表示する拍子アイコンのImage。")]
         private Image _rightIconImage;
+        [SerializeField, Tooltip("左側に表示するスキル入力受付範囲の横帯。")]
+        private Image _leftInputRangeImage;
+        [SerializeField, Tooltip("右側に表示するスキル入力受付範囲の横帯。")]
+        private Image _rightInputRangeImage;
         [SerializeField, Tooltip("クールダウンを表現するための背景。未設定の場合はクールダウン表示なし。")]
         private Image[] _cooldownBackgroundImage;
 
@@ -320,6 +381,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         private bool _isPositioned;
         private bool _isDisplayAllowed = true;
         private int _patternMatchCount;
+        private int _displayedStepIndex;
         private float _skillTriggeredTimestamp;
         private float _skillReadyTimestamp;
     }

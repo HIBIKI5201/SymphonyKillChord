@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Mission;
@@ -26,9 +27,11 @@ using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Battle;
 using KillChord.Runtime.View.InGame.Camera;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
@@ -72,6 +75,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         [SerializeField, SourceDataAddress, Tooltip("モバイルスティックのフリック判定設定の Addressables キーです。")]
         private string _mobileStickFlickInputConfigKey;
+        [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
+        private ReusableParticleSystemView _damageEffectView;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -87,7 +92,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private MobileStickFlickInputConfig _loadedMobileStickFlickInputConfig;
 
         private Action _onDodgeEndedHandler;
-        private ICharacterAnimationSignal _characterAnimationSignal;
+        private IPlayerCharacterAnimationSignal _characterAnimationSignal;
+        private PlayerAttackSignal _playerAttackSignal;
         private CharacterEntity _playerEntity;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
@@ -187,15 +193,19 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 playerStatusBonusContainer.PlayerStatusBonus.CriticalChanceAddition,
                 playerStatusBonusContainer.PlayerStatusBonus.CriticalMultiplierAddition);
             _playerEntity.OnDamageAvoided += HandleDamageAvoided;
+            _playerEntity.OnHealthChanged += HandlePlayerHealthChanged;
 
             _player.transform.SetPositionAndRotation(
                 spawnPointTransform.position,
                 spawnPointTransform.rotation);
+            _playerAttackSignal = new PlayerAttackSignal();
             _moduleContainer = new PlayerModuleContainer(
                 this,
                 _player,
                 _playerEntity,
-                playerStatusBonusContainer.PlayerStatusBonus);
+                playerStatusBonusContainer.PlayerStatusBonus,
+                _damageEffectView,
+                _playerAttackSignal);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;
@@ -215,13 +225,18 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             SkillModuleContainer skillModuleContainer = ServiceLocator.GetInstance<SkillModuleContainer>();
-            if (skillModuleContainer == null || skillModuleContainer.SkillController == null)
+            if (skillModuleContainer == null ||
+                skillModuleContainer.SkillController == null ||
+                skillModuleContainer.PendingAttackEffectService == null)
             {
                 Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(SkillModuleContainer)} が見つかりません。", this);
                 return false;
             }
 
-            Initialize(sceneDependencyContainer.InputComposition, skillModuleContainer.SkillController);
+            Initialize(
+                sceneDependencyContainer.InputComposition,
+                skillModuleContainer.SkillController,
+                skillModuleContainer.PendingAttackEffectService);
 
             InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
             if (inGamePlayDirector != null && _player != null)
@@ -237,7 +252,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         /// <param name="inputComposition"> 入力Compositionです。 </param>
         /// <param name="skillController"> スキルControllerです。 </param>
-        public void Initialize(InputComposition inputComposition, SkillController skillController)
+        /// <param name="pendingAttackEffectService"> スキル攻撃の演出を管理するサービスです。 </param>
+        public void Initialize(
+            InputComposition inputComposition,
+            SkillController skillController,
+            PendingAttackEffectService pendingAttackEffectService)
         {
             if (_player == null)
             {
@@ -283,7 +302,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             // 位置リセット入力を購読する。
             _playerInputView = inputView;
-            _playerInputView.OnResetPositionInput += HandleResetPositionInput;
 
             TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
             if (targetSystemContainer == null || targetSystemContainer.TargetSystemController == null)
@@ -301,11 +319,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
+            PlayerAttackPresenter playerAttackPresenter = new PlayerAttackPresenter(_playerAttackSignal);
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
+            PlayerActionRestrictionState actionRestrictionState = new PlayerActionRestrictionState();
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
             PlayerAttackController playerAttackController = new PlayerAttackController(
                 attackResultPresenter,
+                playerAttackPresenter,
                 playerBattleState,
+                actionRestrictionState,
                 skillController,
                 targetSystemContainer.TargetSystemController,
                 attackIntervalEvaluator,
@@ -313,15 +335,17 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 musicSyncState,
                 targetSystemContainer.TargetAreaQuery,
                 _player.transform,
+                pendingAttackEffectService,
                 (float)parameter.AttackRotationSpeed,
                 (float)parameter.AttackCooldown.Value);
+            _moduleContainer.SetActionRestrictionState(actionRestrictionState);
             _moduleContainer.SetPlayerAttackController(playerAttackController);
 
             IHealthHudViewModel healthHudViewModel = new HealthHudViewModel(_playerEntity.CurrentHealth.Value, _playerEntity.MaxHealth.Value);
             PlayerHealthHudPresenter healthHudPresenter = new PlayerHealthHudPresenter(_playerEntity, healthHudViewModel);
 
             AnimationComposition animationComposition = new AnimationComposition();
-            ICharacterAnimationViewContext animationContext = animationComposition.Init(
+            ICharacterAnimationViewContext animationContext = animationComposition.InitForPlayer(
                 _characterAnimationView,
                 _characterAnimationConfig,
                 musicSyncState,
@@ -340,7 +364,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             };
 
             _onDodgeEndedHandler = () => playerAttackController.StartAttackCooldown();
-            _characterAnimationSignal = animationContext.Signal;
+            _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
             _characterAnimationSignal.OnDodgeEnded += _onDodgeEndedHandler;
 
             PlayerMovementApplication move = new PlayerMovementApplication(parameter);
@@ -359,6 +383,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 cameraTransform.Transform,
                 inputView,
                 healthHudPresenter,
+                _damageEffectView,
+                _playerEntity.Id,
                 inputSuppressionState);
 
             InitializeMobileStickFlickInput(inputView);
@@ -371,30 +397,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 .SetPlayerMoveSpec(parameter);
 #endif
         }
-
-        /// <summary>
-        ///     プレイヤーをステージのスタート地点へ戻します。
-        /// </summary>
-        public void ResetPlayerToSpawn()
-        {
-            if (_player == null)
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(PlayerView)} が存在しないため位置リセットできません。", this);
-                return;
-            }
-
-            if (!TryResolvePlayerSpawnPointTransform(out Transform spawnPointTransform))
-            {
-                Debug.LogError($"[{nameof(PlayerInitializer)}] スタート地点が見つからないため位置リセットできません。", this);
-                return;
-            }
-
-            _player.ResetToSpawn(spawnPointTransform.position, spawnPointTransform.rotation);
-
-            // カメラの向きもスタート時の前方へ戻す。
-            ResetCameraOrientation(spawnPointTransform.forward);
-        }
-
         /// <summary>
         ///     カメラの向きを指定した前方へ戻します。
         /// </summary>
@@ -416,21 +418,6 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
-        ///     位置リセット入力を受け取ってプレイヤーをスタート地点へ戻します。
-        /// </summary>
-        /// <param name="input"> 位置リセット入力です。 </param>
-        private void HandleResetPositionInput(InputContext<float> input)
-        {
-            // 押下開始時のみ実行する。
-            if (input.Phase != InputActionPhase.Started)
-            {
-                return;
-            }
-
-            ResetPlayerToSpawn();
-        }
-
-        /// <summary>
         ///     回避成功時の演出を再生します。
         /// </summary>
         /// <param name="damage"> 回避したダメージです。 </param>
@@ -449,15 +436,34 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
+        ///     プレイヤーのHP変化を受け取り、被弾時のみ演出用イベントを通知します。
+        /// </summary>
+        /// <param name="currentHealth"> 変化後の現在HPです。 </param>
+        /// <param name="maxHealth"> 最大HPです。 </param>
+        /// <param name="amountChanged"> HPの変化量です。ダメージは負、回復は正になります。 </param>
+        private void HandlePlayerHealthChanged(float currentHealth, float maxHealth, float amountChanged)
+        {
+            // 回復では演出を出さないため、減少時のみ通知する。
+            if (amountChanged >= 0f)
+            {
+                return;
+            }
+
+            // 被弾演出用に、プレイヤーの被弾を正の値へ直して通知する。
+            EventBus<EOnPlayerTakeDamage>.Raise(new EOnPlayerTakeDamage(-amountChanged));
+        }
+
+        /// <summary>
         ///     破棄時の購読解除を行います。
         /// </summary>
         private void OnDestroy()
         {
+            _playerAttackSignal?.Dispose();
+            _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();
 
             if (_playerInputView != null)
             {
-                _playerInputView.OnResetPositionInput -= HandleResetPositionInput;
                 _playerInputView = null;
             }
 
@@ -480,6 +486,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             {
                 _playerEntity.OnDied -= HandlePlayerDied;
                 _playerEntity.OnDamageAvoided -= HandleDamageAvoided;
+                _playerEntity.OnHealthChanged -= HandlePlayerHealthChanged;
             }
         }
 
@@ -488,6 +495,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         public override void Shutdown()
         {
+            _playerAttackSignal?.Dispose();
+            _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();
 #if UNITY_ANDROID || UNITY_EDITOR
             _mobileStickFlickInputConfigKey.ReleaseLoadedAsset(this);
@@ -573,7 +582,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 || _playerViewPrefab == null
                 || _loadedPlayerData == null
                 || _characterAnimationConfig == null
-                || _playerAttackAnimationConfig == null)
+                || _playerAttackAnimationConfig == null
+                || _damageEffectView == null)
             {
                 Debug.LogError($"[{nameof(PlayerInitializer)}] プレイヤー初期化参照が不足しています。", this);
                 return false;

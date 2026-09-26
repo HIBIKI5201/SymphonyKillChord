@@ -2,10 +2,12 @@ using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
+using System.Collections.Generic;
 
 namespace KillChord.Runtime.Adaptor.InGame.Mission
 {
@@ -41,12 +43,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <param name="attackController"> プレイヤー攻撃Controllerです。 </param>
         /// <param name="skillController"> スキルControllerです。 </param>
         /// <param name="targetSystemController"> ターゲット選択Controllerです。 </param>
+        /// <param name="musicSyncService"> リズムタイムアウトを通知するサービスです。 </param>
         public void Bind(
             CharacterEntity playerEntity,
             PlayerController playerController,
             PlayerAttackController attackController,
             SkillController skillController,
-            TargetSystemController targetSystemController)
+            TargetSystemController targetSystemController,
+            IMusicSyncService musicSyncService)
         {
             Unbind();
 
@@ -60,6 +64,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 ?? throw new ArgumentNullException(nameof(playerController));
             _targetSystemController = targetSystemController
                 ?? throw new ArgumentNullException(nameof(targetSystemController));
+            _musicSyncService = musicSyncService
+                ?? throw new ArgumentNullException(nameof(musicSyncService));
 
             _playerEntity.OnHealthChanged += HandleHealthChanged;
             _playerController.OnMoved += HandleMoved;
@@ -68,6 +74,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _attackController.OnAttackBeatExecuted += HandleAttackBeatExecuted;
             _skillController.OnSkillAnimationRequested += HandleSkillAnimationRequested;
             _targetSystemController.OnTargetLocked += HandleTargetLocked;
+            _musicSyncService.OnRhythmTimedOut += HandleRhythmTimedOutHandler;
         }
 
         /// <summary>
@@ -75,6 +82,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// </summary>
         public void Unbind()
         {
+            _pendingAttackBeatKind = null;
+
             if (_playerEntity != null)
             {
                 _playerEntity.OnHealthChanged -= HandleHealthChanged;
@@ -102,11 +111,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 _targetSystemController.OnTargetLocked -= HandleTargetLocked;
             }
 
+            if (_musicSyncService != null)
+            {
+                _musicSyncService.OnRhythmTimedOut -= HandleRhythmTimedOutHandler;
+            }
+
             _playerEntity = null;
             _attackController = null;
             _skillController = null;
             _playerController = null;
             _targetSystemController = null;
+            _musicSyncService = null;
         }
 
         /// <summary>
@@ -124,7 +139,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private SkillController _skillController;
         private PlayerController _playerController;
         private TargetSystemController _targetSystemController;
+        private IMusicSyncService _musicSyncService;
         private ComboHudPresenter _comboHudPresenter;
+        /// <summary> <see cref="HandleAttackExecuted"/>と一緒に通知する、保留中の拍子攻撃です。 </summary>
+        private MissionActionKind? _pendingAttackBeatKind;
+        private readonly List<MissionActionKind> _attackActionBuffer = new();
+
+        /// <summary>
+        ///     リズム入力が途絶えたとき、コンボを破棄してHUDへ反映します。
+        /// </summary>
+        private void HandleRhythmTimedOutHandler()
+        {
+            _missionProgress.ResetCombo();
+            _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
+        }
 
         /// <summary>
         ///     回避の実行をミッションへ通知します。敵の攻撃を実際に避けられたかどうかは問いません。
@@ -147,12 +175,18 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         }
 
         /// <summary>
-        ///     攻撃拍子をMissionへ通知します。
+        ///     攻撃拍子を保留します。
+        ///     <para>
+        ///         1回の攻撃では拍子付きの行動が先に、汎用の<see cref="MissionActionKind.Attack"/>が後に発火します。
+        ///         個別に通知すると、拍子側でミッションのステップが進んだ場合に
+        ///         Attack側が次のステップへ計上されてしまうため、
+        ///         ここでは通知せず<see cref="HandleAttackExecuted"/>でまとめて通知します。
+        ///     </para>
         /// </summary>
         /// <param name="beatType"> 実行した攻撃の拍子です。 </param>
         private void HandleAttackBeatExecuted(BeatType beatType)
         {
-            MissionActionKind actionKind = beatType switch
+            _pendingAttackBeatKind = beatType switch
             {
                 BeatType.One => MissionActionKind.AttackOneBeat,
                 BeatType.Two => MissionActionKind.AttackTwoBeat,
@@ -162,7 +196,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 BeatType.Eight => MissionActionKind.AttackEightBeat,
                 _ => MissionActionKind.Attack,
             };
-            _missionEventController.NotifyActionPerformed(actionKind);
         }
 
         /// <summary>
@@ -194,7 +227,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private void HandleAttackExecuted(string weaponId, bool hasHit)
         {
             _missionProgress.RecordWeaponUse(weaponId);
-            _missionEventController.NotifyActionPerformed(MissionActionKind.Attack);
+            NotifyAttackActions();
 
             if (!hasHit)
             {
@@ -204,6 +237,24 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             }
             _missionProgress.IncrementCombo();
             _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
+        }
+
+        /// <summary>
+        ///     1回の攻撃で発生した行動を、まとめてMissionへ通知します。
+        /// </summary>
+        private void NotifyAttackActions()
+        {
+            _attackActionBuffer.Clear();
+
+            if (_pendingAttackBeatKind.HasValue
+                && _pendingAttackBeatKind.Value != MissionActionKind.Attack)
+            {
+                _attackActionBuffer.Add(_pendingAttackBeatKind.Value);
+            }
+
+            _pendingAttackBeatKind = null;
+            _attackActionBuffer.Add(MissionActionKind.Attack);
+            _missionEventController.NotifyActionsPerformed(_attackActionBuffer);
         }
 
         /// <summary>

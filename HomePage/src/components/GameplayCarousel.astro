@@ -1,0 +1,348 @@
+---
+import GameplaySlide from './GameplaySlide.astro';
+import SkillShowcaseSlide from './SkillShowcaseSlide.astro';
+import features from '../data/gameplayFeatures.json';
+
+// スキルページ統合により、ゲームプレイ紹介の末尾にスキル紹介スライドを1枚追加する
+const slideCount = features.length + 1;
+const total = String(slideCount).padStart(2, '0');
+---
+
+<section id="gameplay-carousel" class="carousel" tabindex="0" aria-roledescription="carousel" aria-label="ゲームプレイ紹介">
+	<div class="frame">
+		<span class="corner corner-tl" aria-hidden="true"></span>
+		<span class="corner corner-tr" aria-hidden="true"></span>
+		<span class="corner corner-bl" aria-hidden="true"></span>
+		<span class="corner corner-br" aria-hidden="true"></span>
+
+		<div class="carousel-header">
+			<p class="log">REC ● GAMEPLAY LOG</p>
+			<div class="counter">
+				<span class="current">01</span>
+				<span class="divider">/</span>
+				<span class="total">{total}</span>
+			</div>
+		</div>
+
+		<div class="viewport">
+			<ul class="track" style={`--slide-count: ${slideCount};`}>
+				{
+					features.map((feature, index) => (
+						<li class="slide-item">
+							<GameplaySlide
+								name={feature.name}
+								description={feature.description}
+								ringLabel={feature.ringLabel}
+								ringWord={feature.ringWord}
+								ringSegments={feature.ringSegments}
+								current={index + 1}
+								total={features.length}
+								rhythmSegments={feature.id === 'pillar-01' ? feature.ringSegments : undefined}
+							/>
+						</li>
+					))
+				}
+				<li class="slide-item" data-slide-id="skill">
+					<SkillShowcaseSlide />
+				</li>
+			</ul>
+		</div>
+
+		<div class="controls">
+			<button type="button" class="nav prev" aria-label="前のスライド">‹</button>
+
+			<ul class="dots" role="tablist">
+				{
+					features.map((feature, index) => (
+						<li role="presentation">
+							<button
+								type="button"
+								class="dot"
+								data-index={index}
+								role="tab"
+								aria-label={`${feature.name}へ`}
+								aria-selected={index === 0 ? 'true' : 'false'}
+							/>
+						</li>
+					))
+				}
+				<li role="presentation">
+					<button type="button" class="dot" data-index={features.length} role="tab" aria-label="スキルへ" aria-selected="false" />
+				</li>
+			</ul>
+
+			<button type="button" class="nav next" aria-label="次のスライド">›</button>
+		</div>
+	</div>
+</section>
+
+<script>
+	const root = document.getElementById('gameplay-carousel');
+
+	if (root) {
+		const track = root.querySelector<HTMLElement>('.track');
+		const realSlides = Array.from(root.querySelectorAll<HTMLElement>('.slide-item'));
+		const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('.dot'));
+		const prevButton = root.querySelector<HTMLButtonElement>('.nav.prev');
+		const nextButton = root.querySelector<HTMLButtonElement>('.nav.next');
+		const currentLabel = root.querySelector('.counter .current');
+		const realCount = realSlides.length;
+
+		if (track && realCount > 0) {
+			// 先頭の前に最後のスライドの複製、末尾に最初のスライドの複製を置き、
+			// 端に到達した瞬間だけtransitionを止めて本物の位置へ跳ばすことで、
+			// 見た目上は途切れなくループしているように見せる。
+			const firstClone = realSlides[0].cloneNode(true) as HTMLElement;
+			const lastClone = realSlides[realCount - 1].cloneNode(true) as HTMLElement;
+			firstClone.setAttribute('aria-hidden', 'true');
+			lastClone.setAttribute('aria-hidden', 'true');
+			track.appendChild(firstClone);
+			track.insertBefore(lastClone, realSlides[0]);
+
+			const slideCount = realCount + 2;
+			track.style.setProperty('--slide-count', String(slideCount));
+
+			const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+			// URLハッシュ(#skill等)でスライドを指定できるようにし、他ページからの直接誘導に対応する
+			const targetId = location.hash.slice(1);
+			const targetRealIndex = realSlides.findIndex((slide) => slide.dataset.slideId === targetId);
+			// 物理インデックスは複製ぶん+1したものが実スライドの位置になる
+			let index = (targetRealIndex >= 0 ? targetRealIndex : 0) + 1;
+
+			// ドット・カウンター表示用に、複製を含む物理インデックスから実スライドのインデックスへ変換する
+			function toRealIndex(physicalIndex: number) {
+				if (physicalIndex <= 0) return realCount - 1;
+				if (physicalIndex >= slideCount - 1) return 0;
+				return physicalIndex - 1;
+			}
+
+			function render(withTransition: boolean) {
+				if (!track) return;
+				if (!withTransition) track.style.transition = 'none';
+				// trackの幅はslide数倍(--slide-count)のため、100%はtrack全体を指す。1枚分の移動量に換算する。
+				track.style.transform = `translateX(-${(index * 100) / slideCount}%)`;
+				if (!withTransition) {
+					track.offsetHeight;
+					track.style.transition = '';
+				}
+
+				const realIndex = toRealIndex(index);
+				dots.forEach((dot, i) => {
+					dot.classList.toggle('is-active', i === realIndex);
+					dot.setAttribute('aria-selected', i === realIndex ? 'true' : 'false');
+				});
+				if (currentLabel) {
+					currentLabel.textContent = String(realIndex + 1).padStart(2, '0');
+				}
+			}
+
+			// 複製スライドの位置まで到達したら、アニメーションなしで対応する本物の位置へ跳ばす
+			function correctBoundary() {
+				if (index <= 0) {
+					index = realCount;
+					render(false);
+				} else if (index >= slideCount - 1) {
+					index = 1;
+					render(false);
+				}
+			}
+
+			function goTo(next: number) {
+				index = next;
+				render(true);
+				// prefers-reduced-motionではtransitionが発生せずtransitionendも発火しないため、即座に補正する
+				if (prefersReducedMotion) correctBoundary();
+			}
+
+			track.addEventListener('transitionend', (event) => {
+				if (event.target !== track || event.propertyName !== 'transform') return;
+				correctBoundary();
+			});
+
+			prevButton?.addEventListener('click', () => goTo(index - 1));
+			nextButton?.addEventListener('click', () => goTo(index + 1));
+			dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i + 1)));
+
+			root.addEventListener('keydown', (event) => {
+				if (event.key === 'ArrowRight') goTo(index + 1);
+				if (event.key === 'ArrowLeft') goTo(index - 1);
+			});
+
+			// 初回描画はハッシュ指定の位置であっても、送りアニメーションを再生しない
+			render(false);
+		}
+	}
+</script>
+
+<style>
+	.carousel {
+		position: relative;
+		outline: none;
+	}
+
+	.carousel:focus-visible .frame {
+		outline: 2px solid var(--color-signal);
+		outline-offset: 4px;
+	}
+
+	.frame {
+		position: relative;
+		padding: 32px clamp(16px, 4vw, 48px) 24px;
+		background:
+			repeating-linear-gradient(0deg, var(--color-grid-line) 0, var(--color-grid-line) 1px, transparent 1px, transparent 32px),
+			repeating-linear-gradient(90deg, var(--color-grid-line) 0, var(--color-grid-line) 1px, transparent 1px, transparent 32px),
+			linear-gradient(180deg, var(--color-surface) 0%, var(--color-bg-alt) 100%);
+		border: 1px solid var(--color-surface-border);
+	}
+
+	.corner {
+		position: absolute;
+		width: 24px;
+		height: 24px;
+		border: 2px solid var(--color-signal-dim);
+	}
+
+	.corner-tl {
+		top: -1px;
+		left: -1px;
+		border-right: none;
+		border-bottom: none;
+	}
+
+	.corner-tr {
+		top: -1px;
+		right: -1px;
+		border-left: none;
+		border-bottom: none;
+	}
+
+	.corner-bl {
+		bottom: -1px;
+		left: -1px;
+		border-right: none;
+		border-top: none;
+	}
+
+	.corner-br {
+		bottom: -1px;
+		right: -1px;
+		border-left: none;
+		border-top: none;
+	}
+
+	.carousel-header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+	}
+
+	.log {
+		margin: 0;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--color-warning);
+		text-transform: uppercase;
+	}
+
+	.counter {
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 13px;
+		color: var(--color-text-muted);
+	}
+
+	.counter .current {
+		color: var(--color-signal);
+		font-weight: 700;
+	}
+
+	.viewport {
+		overflow: hidden;
+		margin-top: 8px;
+	}
+
+	.track {
+		display: flex;
+		width: calc(var(--slide-count) * 100%);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		transition: transform 0.5s ease;
+	}
+
+	.slide-item {
+		flex: 0 0 calc(100% / var(--slide-count));
+		min-width: 0;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.track {
+			transition: none;
+		}
+	}
+
+	.controls {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 24px;
+		margin-top: 8px;
+	}
+
+	.nav {
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		border: 1px solid var(--color-surface-border);
+		background: var(--color-surface);
+		color: var(--color-text-primary);
+		font-size: 20px;
+		line-height: 1;
+		cursor: pointer;
+		transition:
+			border-color 0.2s ease,
+			color 0.2s ease,
+			background-color 0.2s ease;
+	}
+
+	.nav:hover:not(:disabled) {
+		border-color: var(--color-signal);
+		color: var(--color-bg);
+		background: var(--color-signal);
+	}
+
+	.nav:disabled {
+		opacity: 0.3;
+		cursor: default;
+	}
+
+	.dots {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.dot {
+		width: 10px;
+		height: 10px;
+		padding: 0;
+		border: 1px solid var(--color-surface-border);
+		border-radius: 50%;
+		background: transparent;
+		cursor: pointer;
+		transition:
+			background-color 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.dot.is-active {
+		background: var(--color-signal);
+		border-color: var(--color-signal);
+	}
+</style>

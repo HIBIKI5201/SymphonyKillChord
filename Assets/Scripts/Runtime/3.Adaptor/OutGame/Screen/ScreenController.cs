@@ -38,14 +38,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         }
 
         /// <summary>
-        ///     オプション画面を表示します。
-        /// </summary>
-        public void ShowOptions()
-        {
-            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.Options));
-        }
-
-        /// <summary>
         ///    クレジット画面を表示します。
         /// </summary>
         public void ShowCredit()
@@ -83,14 +75,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         public void ShowSkillBuild()
         {
             _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.SkillBuild));
-        }
-
-        /// <summary>
-        ///     戦闘準備画面を表示します。
-        /// </summary>
-        public void ShowBattlePreparation()
-        {
-            _showScreenUseCase.Execute(new ShowScreenCommand(ScreenId.BattlePreparation));
         }
 
         /// <summary>

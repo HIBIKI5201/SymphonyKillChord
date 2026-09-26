@@ -1,52 +1,25 @@
-using KillChord.Runtime.Domain.InGame.Music;
-
 namespace KillChord.Runtime.Application.InGame.Music
 {
     /// <summary>
-        ///     リズムガイドの計算ロジックを担当するユースケースクラス。
+    ///     リズムガイドの表示位置を計算するユースケースクラス。
     /// </summary>
     public class RhythmGuideUsecase
     {
         /// <summary>
-        ///     新しいユースケースを生成する。
-        /// </summary>
-        /// <param name="rhythmJudgmentDefinition"> リズム判定の定義。 </param>
-        public RhythmGuideUsecase(RhythmJudgmentDefinition rhythmJudgmentDefinition)
-        {
-            _rhythmJudgmentDefinition = rhythmJudgmentDefinition;
-        }
-
-        /// <summary> リズム判定の定義。 </summary>
-        public RhythmJudgmentDefinition RhythmJudgmentDefinition => _rhythmJudgmentDefinition;
-
-        /// <summary>
         ///     インジケーターの正規化された位置を計算する。
         /// </summary>
-        /// <param name="barProgress"> 小節内の進捗。 </param>
-        /// <returns> 正規化された位置。 </returns>
+        /// <param name="barProgress"> 小節内の進捗。1を超える超過分も受け取る。 </param>
+        /// <returns> 1を1小節とする0以上の進捗。表示上限はViewのゲージ全長で決める。 </returns>
         public float CalculateIndicatorNormalized(float barProgress)
         {
-            if (barProgress <= 0f) return 0f;
-            if (barProgress >= 1f) return 1f;
-
-            return barProgress;
-        }
-
-        /// <summary>
-        ///     指定された拍における拍の種類を計算する。
-        /// </summary>
-        /// <param name="normalizedBarProgress"> 小節内の正規化進捗。 </param>
-        /// <returns> 拍の種類。範囲外の場合は null。 </returns>
-        public BeatType? CalculateCurrentBeatType(float normalizedBarProgress)
-        {
-            if (_rhythmJudgmentDefinition.TryResolveBeatType(normalizedBarProgress, out BeatType beatType))
+            if (barProgress <= 0f)
             {
-                return beatType;
+                return 0f;
             }
 
-            return null;
+            // Viewが持つゲージ全長と異なる上限で進捗を切り捨てると、最端へ到達できない。
+            // 1小節を超えた経過も渡し、描画位置のクランプはViewへ集約する。
+            return barProgress;
         }
-
-        private readonly RhythmJudgmentDefinition _rhythmJudgmentDefinition;
     }
 }

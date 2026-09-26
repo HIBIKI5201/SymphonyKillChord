@@ -1,0 +1,419 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UICommon_ja
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: ja
+  m_SharedData: {fileID: 11400000, guid: 7a59d4ca1f8156b4284e1adab333880e, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 1669890048
+    m_Localized: "\u30C7\u30FC\u30BF\u30EA\u30BB\u30C3\u30C8"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416000
+    m_Localized: "\u30AF\u30EC\u30B8\u30C3\u30C8"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416001
+    m_Localized: "データを消去しますか？"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416002
+    m_Localized: "消去する"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416003
+    m_Localized: "\u6226\u95D8\u6E96\u5099"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416004
+    m_Localized: "\u51FA\u6483"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416005
+    m_Localized: "\u6539\u9020"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416006
+    m_Localized: "環境設定"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416007
+    m_Localized: "\u30AA\u30FC\u30C7\u30A3\u30AA\u8A2D\u5B9A"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416008
+    m_Localized: "\u30BF\u30A4\u30C8\u30EB\u3078\u623B\u308B"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416009
+    m_Localized: "\u3068\u3058\u308B"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416010
+    m_Localized: "\u8A2D\u5B9A\u3092\u4FDD\u5B58"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416011
+    m_Localized: "タイトル画面に戻る"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416012
+    m_Localized: "\u30AD\u30E3\u30F3\u30BB\u30EB"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416013
+    m_Localized: "\u65E5\u672C\u8A9E"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416014
+    m_Localized: English
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416015
+    m_Localized: "\u30D5\u30EB\u30B9\u30AF\u30EA\u30FC\u30F3"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416016
+    m_Localized: "\u30A6\u30A3\u30F3\u30C9\u30A6"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416017
+    m_Localized: "\u5F37\u3044"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416018
+    m_Localized: "\u5F31\u3044"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416019
+    m_Localized: "\u30AA\u30D5"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416020
+    m_Localized: "\u632F\u308A\u76F4\u3059"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416021
+    m_Localized: "\u52D5\u753B\u3092\u9589\u3058\u308B"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416022
+    m_Localized: "\u30AD\u30E3\u30F3\u30BB\u30EB"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416023
+    m_Localized: "\u30EA\u30BB\u30C3\u30C8"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416024
+    m_Localized: "\u89E3\u653E\u3059\u308B"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416025
+    m_Localized: "スキルを解放する　必要ポイント：{0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416026
+    m_Localized: "\u89E3\u653E\u6E08\u307F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416027
+    m_Localized: "\u30B9\u30AD\u30EB\u52D5\u753B\u3092\u8868\u793A\u3059\u308B"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416028
+    m_Localized: "\u623B\u308B"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416029
+    m_Localized: "破棄して戻る"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416030
+    m_Localized: "保存して戻る"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416031
+    m_Localized: "\u51FA\u6483"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416032
+    m_Localized: "\u521D\u56DE\u5831\u916C"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416033
+    m_Localized: "成功報酬"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416034
+    m_Localized: "改造P："
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416035
+    m_Localized: "詳細"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416036
+    m_Localized: "スキルを選択してください"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416037
+    m_Localized: "スキルタイプ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416038
+    m_Localized: "スキル効果"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416039
+    m_Localized: "レベル"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416040
+    m_Localized: "改造P"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416041
+    m_Localized: "編成"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416042
+    m_Localized: "装備中スキルの変更が保存されていません。保存しますか？"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416043
+    m_Localized: "未開放"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416044
+    m_Localized: "ステータス"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416045
+    m_Localized: "HP"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416046
+    m_Localized: "攻撃力"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416047
+    m_Localized: "会心率"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416048
+    m_Localized: "会心ダメージ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416049
+    m_Localized: "射程範囲"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416050
+    m_Localized: "情報"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416051
+    m_Localized: "発動コンボ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416052
+    m_Localized: "スキルジャンル："
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416053
+    m_Localized: " スキル効果"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416054
+    m_Localized: "研究"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416055
+    m_Localized: "解放しますか？"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416056
+    m_Localized: "上昇するパラメータ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416057
+    m_Localized: "解放されるスキル"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416058
+    m_Localized: "このウィンドウを表示しない"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416059
+    m_Localized: "、"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416060
+    m_Localized: "装備中のスキル"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416061
+    m_Localized: "装備スキル詳細"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416062
+    m_Localized: "作戦"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416063
+    m_Localized: "改造ポイント"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416064
+    m_Localized: "解放ポイント"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416065
+    m_Localized: "設定"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416066
+    m_Localized: "画面モード"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416067
+    m_Localized: "解像度"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416068
+    m_Localized: "画質"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416069
+    m_Localized: "明るさ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416070
+    m_Localized: "タイトル画面に戻りますか？"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416071
+    m_Localized: "効果音"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416072
+    m_Localized: "※削除するとデータは戻せません。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416073
+    m_Localized: "解放P"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416074
+    m_Localized: "スキルの種類　："
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416075
+    m_Localized: "解放P：{0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416076
+    m_Localized: "スキルツリーをリセットしますか？\n返却される研究ポイント：{0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416077
+    m_Localized: "研究P：{0} → {1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416078
+    m_Localized: "言語"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416079
+    m_Localized: "振動"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416080
+    m_Localized: "リズム判定タイミング"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416081
+    m_Localized: "＋"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416082
+    m_Localized: "レベルMax"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416083
+    m_Localized: "ステータス強化"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416084
+    m_Localized: "{0}秒"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000001
+    m_Localized: "操作 (Xbox)\n左スティック: 移動    右スティック: 視点\nRT または B: 攻撃\nA: 回避\nLT: ロック/解除\nLB: ロックオン切り替え 左、RB: ロックオン切り替え 右\nMenu: ポーズ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000100
+    m_Localized: "ロック/解除"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000101
+    m_Localized: "攻撃"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000102
+    m_Localized: "ロックオン切り替え\n左"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000103
+    m_Localized: "ロックオン切り替え\n右"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000104
+    m_Localized: "移動"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000105
+    m_Localized: "視点"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000106
+    m_Localized: "ポーズ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000107
+    m_Localized: "回避"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1830000108
+    m_Localized: "攻撃は RT または B"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000001
+    m_Localized: "\u304a\u6642\u9593\u306b\u306a\u308a\u307e\u3057\u305f\u3002\u4f53\u9a13\u7248\u3092\u7d42\u4e86\u3057\u307e\u3059\u3002"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000002
+    m_Localized: "\u30db\u30fc\u30e0\u30bf\u30a4\u30de\u30fc\u304c\u7d42\u4e86\u3057\u307e\u3057\u305f\u3002\u30df\u30c3\u30b7\u30e7\u30f3\u306b\u79fb\u52d5\u3057\u307e\u3059\u3002"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000003
+    m_Localized: "\u30bb\u30fc\u30d6\u30c7\u30fc\u30bf\u3092\u30ea\u30bb\u30c3\u30c8\u3057\u307e\u3057\u305f\u3002"
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

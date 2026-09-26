@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Player
@@ -5,28 +6,32 @@ namespace KillChord.Runtime.View.InGame.Player
     /// <summary>
     ///     攻撃BeatTypeに応じた武器モデル表示と攻撃SE再生を担当するViewクラス。
     /// </summary>
-    public sealed class PlayerAttackWeaponView : MonoBehaviour
+    public sealed class PlayerAttackWeaponView : MonoBehaviour, ISkillEffectWeaponSource
     {
+        /// <summary> 現在構えている武器のTransformです。武器が無い場合はnull。 </summary>
+        public Transform WeaponTransform => _currentWeaponView != null ? _currentWeaponView.transform : null;
+
         /// <summary>
         ///     拍子に応じた演出を再生します。
         /// </summary>
         /// <param name="beatType"> 拍子。 </param>
         public void Play(int beatType)
         {
-            HideAllWeaponsImmediate();
-
             if (!TryGetDefinition(beatType, out PlayerAttackWeaponConfig definition))
             {
+                HideAllWeaponsImmediate();
                 Debug.LogError($"BeatType {beatType} に対応する武器設定が見つかりませんでした。", this);
                 return;
             }
 
             if (definition.WeaponItem == null)
             {
+                HideAllWeaponsImmediate();
                 Debug.LogError($"BeatType {beatType} の武器Viewが未設定です。", this);
                 return;
             }
 
+            HideWeaponsImmediateExcept(definition.WeaponItem);
             _currentWeaponView = definition.WeaponItem;
             _currentWeaponView.Play();
         }
@@ -70,20 +75,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void HideAllWeaponsImmediate()
         {
-            if (_definitions == null)
-            {
-                _currentWeaponView = null;
-                return;
-            }
-            for (int i = 0; i < _definitions.Length; i++)
-            {
-                if (_definitions[i].WeaponItem == null)
-                {
-                    continue;
-                }
-                _definitions[i].WeaponItem?.HideWeaponImmediate();
-            }
-            _currentWeaponView = null;
+            HideWeaponsImmediateExcept(null);
         }
 
         [SerializeField, Tooltip("BeatTypeごとの武器表示と攻撃SE設定。")]
@@ -105,6 +97,28 @@ namespace KillChord.Runtime.View.InGame.Player
         private void OnDisable()
         {
             HideAllWeaponsImmediate();
+        }
+
+        /// <summary>
+        ///     選択した武器の表示状態を保ち、ほかの武器を即座に非表示にします。
+        /// </summary>
+        /// <param name="visibleWeapon"> 表示を保持する武器。nullなら全武器を非表示にします。 </param>
+        private void HideWeaponsImmediateExcept(WeaponItemView visibleWeapon)
+        {
+            if (_definitions == null)
+            {
+                _currentWeaponView = null;
+                return;
+            }
+            for (int i = 0; i < _definitions.Length; i++)
+            {
+                if (_definitions[i].WeaponItem == null || _definitions[i].WeaponItem == visibleWeapon)
+                {
+                    continue;
+                }
+                _definitions[i].WeaponItem.HideWeaponImmediate();
+            }
+            _currentWeaponView = null;
         }
 
         /// <summary>

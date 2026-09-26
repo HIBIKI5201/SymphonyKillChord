@@ -1,0 +1,18 @@
+{
+    "name": "DevelopProducts-SilToon.Editor",
+    "rootNamespace": "DevelopProducts.ToonShader",
+    "references": [
+        "GUID:81b39e8aaf87448d94af03614b1ddfb1"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

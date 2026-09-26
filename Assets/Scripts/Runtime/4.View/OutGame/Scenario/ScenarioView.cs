@@ -1,4 +1,9 @@
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using LitMotion;
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +20,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// 依存先を受け取りシナリオ表示を初期化する。
         /// </summary>
         public void Initialize(
-            ViewModel viewModel,
+            ScenarioViewModel viewModel,
             IReadOnlyDictionary<string, Sprite> backgroundByKey,
             IReadOnlyDictionary<string, AnimationClip> animationByKey,
             IReadOnlyDictionary<string, Sprite> portraitByKey,
@@ -29,7 +34,37 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             SubscribeToViewModel();
             BuildCatalogMaps(backgroundByKey, animationByKey, portraitByKey);
             EnsurePortraitSlots();
-            ResetFadeState();
+            CaptureDefaultDisplayState();
+            CapturePortraitBaseColors();
+            ResetDisplayState();
+        }
+
+        /// <summary>
+        /// 新しいシナリオ再生に必要な表示状態を準備する。
+        /// </summary>
+        public void PrepareForPlayback()
+        {
+            TryAutoAssignReferences();
+            EnsureNonFadingUi();
+            EnsurePortraitSlots();
+            CapturePortraitBaseColors();
+            CancelAllFadeMotions();
+            ResetDisplayState();
+
+            _viewModel?.ClearText();
+        }
+
+        /// <summary>
+        /// 進行中の表示処理を有限に終端し、シナリオ表示を無効化する。
+        /// </summary>
+        public void EndPlayback()
+        {
+            CancelAllFadeMotions();
+            _viewModel?.ClearText();
+            if (gameObject.activeSelf)
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         // CanvasGroup.alpha が 0 だと配下がカリングされ、ignoreParentGroups の
@@ -43,14 +78,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private const string PortraitObjectLeft = "PortraitLeft";
         private const string PortraitObjectCenter = "PortraitCenter";
         private const string PortraitObjectRight = "PortraitRight";
-        private const string TargetScreen = "Screen";
         private const string TargetCanvas = "Canvas";
         private const string TargetBackground = "Background";
         private const string TargetPortraitLeft = "PortraitLeft";
         private const string TargetPortraitCenter = "PortraitCenter";
         private const string TargetPortraitRight = "PortraitRight";
         private const string TargetText = "Text";
-        private const string TargetBlack = "Black";
         private const string BlackOverlayObject = "BlackOverlay";
         private const string LayerPortrait = "Portrait";
         private const string LayerEffect = "Effect";
@@ -60,13 +93,23 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         {
             TargetBackground,
             LayerPortrait,
-            TargetText,
             LayerEffect,
+            TargetText,
         };
+
+        private static readonly Vector2 PORTRAIT_LEFT_DEFAULT_POSITION = new(-420f, -120f);
+        private static readonly Vector2 PORTRAIT_CENTER_DEFAULT_POSITION = new(0f, -120f);
+        private static readonly Vector2 PORTRAIT_RIGHT_DEFAULT_POSITION = new(420f, -120f);
 
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField, Tooltip("フェード対象から除外するUI（テキストボックス等）。指定したCanvasGroupはフェードの影響を受けません。未設定ならテキストへ自動付与します。")]
         private CanvasGroup _nonFadingUi;
+        [SerializeField, Tooltip("会話枠、話者名、本文をまとめて制御するルート。")]
+        private RectTransform _dialogueRoot;
+        [SerializeField, Tooltip("テキストボックスの背景・枠を表示するImage。")]
+        private UnityEngine.UI.Image _textBoxImage;
+        [SerializeField, Tooltip("話者名を表示するTextMeshProUGUI。")]
+        private TMP_Text _speakerNameText;
         [SerializeField] private TMP_Text _chat;
         [SerializeField] private Image _backgroundImage;
         [SerializeField] private Animation _animationPlayer;
@@ -74,17 +117,20 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         [SerializeField] private RectTransform _portraitRoot;
         [SerializeField] private Vector2 _portraitSize = new(700f, 1000f);
 
-        // 対象ごとに独立してフェードできるよう、進行中フェードを対象キーで保持する。
-        private readonly Dictionary<string, FadeState> _activeFades = new(System.StringComparer.OrdinalIgnoreCase);
-        private readonly List<string> _completedFadeKeys = new();
+        // 対象と表示チャネルごとに独立した補間を所有する。
+        private readonly Dictionary<FadeChannelKey, FadeState> _fadeStates = new();
+        private readonly Dictionary<ScenarioFadeTarget, Color> _portraitBaseColors = new();
 
         private readonly Dictionary<string, Sprite> _backgroundByKey = new(System.StringComparer.Ordinal);
         private readonly Dictionary<string, AnimationClip> _animationByKey = new(System.StringComparer.Ordinal);
         private readonly Dictionary<string, Sprite> _portraitByKey = new(System.StringComparer.Ordinal);
         private readonly Dictionary<string, Image> _portraitBySlot = new(System.StringComparer.OrdinalIgnoreCase);
-        private ViewModel _viewModel;
+        private ScenarioViewModel _viewModel;
         private IReadOnlyList<string> _layerBackToFront;
         private Image _blackOverlay;
+        private Sprite _defaultBackgroundSprite;
+        private Sprite _defaultTextBoxSprite;
+        private bool _hasCapturedDefaultDisplayState;
 
         /// <summary>
         /// 表示に必要な参照を初期化する。
@@ -94,6 +140,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             TryAutoAssignReferences();
             EnsureNonFadingUi();
             EnsurePortraitSlots();
+            CaptureDefaultDisplayState();
         }
 
         /// <summary>
@@ -106,11 +153,11 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// 毎フレームの入力監視または演出更新を行う。
+        /// 再有効化時に ViewModel の最新文字状態を反映する。
         /// </summary>
-        private void Update()
+        private void OnEnable()
         {
-            Fade();
+            ApplyCurrentText();
         }
 
         /// <summary>
@@ -118,59 +165,123 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void OnDestroy()
         {
+            CancelAllFadeMotions();
             UnsubscribeFromViewModel();
         }
 
         /// <summary>
         /// 受け取ったテキストを表示へ反映する。
         /// </summary>
-        private void OnTextReceived(string chat)
+        private void OnTextChanged()
         {
-            if (_chat == null)
+            ApplyCurrentText();
+        }
+
+        /// <summary>
+        /// ViewModel の現在値から話者名と本文を同一フレームで更新する。
+        /// </summary>
+        private void ApplyCurrentText()
+        {
+            if (_viewModel == null)
             {
-                Debug.LogWarning("ScenarioView: _chat is not assigned.");
                 return;
             }
 
-            _chat.text = chat;
+            if (_speakerNameText != null)
+            {
+                bool hasSpeaker = !string.IsNullOrEmpty(_viewModel.Speaker);
+                _speakerNameText.text = _viewModel.Speaker;
+                _speakerNameText.gameObject.SetActive(hasSpeaker);
+            }
+
+            if (_chat != null)
+            {
+                _chat.text = _viewModel.Message;
+                return;
+            }
+
+            Debug.LogWarning($"[{nameof(ScenarioView)}] {nameof(_chat)} が設定されていません。", this);
         }
 
         /// <summary>
         /// フェード要求を受け取りアニメーション状態を更新する。
         /// </summary>
-        private void OnFadeReceived(string target, float start, float end, float duration)
+        private ValueTask OnFadeRequested(in ScenarioFadeViewDTO dto, CancellationToken cancellationToken)
         {
-            // フェード直前に、テキストを除外するCanvasGroup設定を確実に適用する。
+            var request = new FadeRequest(dto.Target, dto.Mode, dto.Start, dto.End, dto.Duration);
+            return RunFadeAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// LitMotionを所有し、終了値と終了処理の適用まで待機する。
+        /// </summary>
+        private async ValueTask RunFadeAsync(FadeRequest request, CancellationToken cancellationToken)
+        {
             EnsureNonFadingUi();
-
-            CanvasGroup group = ResolveFadeTarget(target, out bool floorAlpha);
-            if (group == null)
+            if (!TryGetFadeState(request.Target, request.Mode, out FadeState state))
             {
-                Debug.LogWarning($"ScenarioView: fade target '{target}' が見つかりません。");
+                Debug.LogWarning(
+                    $"[{nameof(ScenarioView)}] Fade対象が見つかりません。Target={request.Target}, Mode={request.Mode}",
+                    this);
                 return;
             }
 
-            string key = string.IsNullOrWhiteSpace(target) ? TargetScreen : target.Trim();
+            state.Handle.TryCancel();
+            state.Handle = default;
+            state.Apply(request.Start);
 
-            if (duration <= 0f)
+            if (request.Duration <= 0f)
             {
-                // 即時反映。進行中フェードがあれば打ち切る。
-                ApplyFadeAlpha(group, end, floorAlpha);
-                _activeFades.Remove(key);
+                state.Apply(request.End);
+                ApplyFadeCompletion(request);
                 return;
             }
 
-            _activeFades[key] = new FadeState
+            MotionHandle handle = LMotion.Create(request.Start, request.End, request.Duration)
+                .WithEase(Ease.Linear)
+                .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                .Bind(state, static (value, target) => target.Apply(value));
+            state.Handle = handle;
+
+            try
             {
-                Group = group,
-                Time = 0f,
-                Start = start,
-                End = end,
-                Duration = duration,
-                FloorAlpha = floorAlpha,
-            };
-            // 開始値を即時反映する。
-            ApplyFadeAlpha(group, start, floorAlpha);
+                await handle.ToValueTask(cancellationToken);
+                if (!state.Handle.Equals(handle))
+                {
+                    return;
+                }
+
+                state.Apply(request.End);
+                ApplyFadeCompletion(request);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw new OperationCanceledException(cancellationToken);
+            }
+            catch (OperationCanceledException) when (!state.Handle.Equals(handle))
+            {
+                // 同一チャネルの後続要求、Prepare、Endによる置換は正常な所有権移行として扱う。
+            }
+            finally
+            {
+                if (state.Handle.Equals(handle))
+                {
+                    state.Handle = default;
+                }
+            }
+        }
+
+        /// <summary>
+        /// フェード完了に伴う共通終了処理を反映する。
+        /// </summary>
+        private void ApplyFadeCompletion(FadeRequest request)
+        {
+            if (request.Target == ScenarioFadeTarget.Black
+                && request.Mode == ScenarioFadeMode.Alpha
+                && request.End >= FullyOpaqueThreshold)
+            {
+                _viewModel?.ClearText();
+            }
         }
 
         /// <summary>
@@ -241,7 +352,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         {
             if (string.Equals(target, TargetCanvas, System.StringComparison.OrdinalIgnoreCase))
             {
-                Canvas canvas =   GetComponent<Canvas>();
+                Canvas canvas = GetComponent<Canvas>();
                 if (canvas == null)
                 {
                     return;
@@ -281,7 +392,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             Debug.Log(skipped
                 ? "シナリオ再生完了: スキップ終了。"
                 : "シナリオ再生完了: 全テキスト表示終了。");
-            gameObject.SetActive(false);
+            EndPlayback();
         }
 
         /// <summary>
@@ -294,8 +405,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
 
-            _viewModel.OnChat += OnTextReceived;
-            _viewModel.OnFade += OnFadeReceived;
+            _viewModel.OnTextChanged += OnTextChanged;
+            _viewModel.BindFadeRequestHandler(OnFadeRequested);
             _viewModel.OnBackground += InputBackground;
             _viewModel.OnAnimation += InputAnimation;
             _viewModel.OnPortrait += InputPortrait;
@@ -313,8 +424,8 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
 
-            _viewModel.OnChat -= OnTextReceived;
-            _viewModel.OnFade -= OnFadeReceived;
+            _viewModel.OnTextChanged -= OnTextChanged;
+            _viewModel.UnbindFadeRequestHandler(OnFadeRequested);
             _viewModel.OnBackground -= InputBackground;
             _viewModel.OnAnimation -= InputAnimation;
             _viewModel.OnPortrait -= InputPortrait;
@@ -324,56 +435,13 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// 進行中の各対象フェードを 1 フレーム分更新する。
-        /// </summary>
-        private void Fade()
-        {
-            if (_activeFades.Count == 0)
-            {
-                return;
-            }
-
-            _completedFadeKeys.Clear();
-            foreach (KeyValuePair<string, FadeState> entry in _activeFades)
-            {
-                FadeState fade = entry.Value;
-                if (fade.Group == null)
-                {
-                    _completedFadeKeys.Add(entry.Key);
-                    continue;
-                }
-
-                fade.Time += Time.deltaTime;
-                float t = fade.Duration <= 0f ? 1f : Mathf.Clamp01(fade.Time / fade.Duration);
-                ApplyFadeAlpha(fade.Group, Mathf.Lerp(fade.Start, fade.End, t), fade.FloorAlpha);
-                if (t >= 1f)
-                {
-                    _completedFadeKeys.Add(entry.Key);
-                    // 黒フェードで完全に暗転したら、下のテキストを消しておく。
-                    // 明転時に前のテキストが残って見えるのを防ぐ。
-                    if (string.Equals(entry.Key, TargetBlack, System.StringComparison.OrdinalIgnoreCase)
-                        && fade.End >= FullyOpaqueThreshold
-                        && _chat != null)
-                    {
-                        _chat.text = string.Empty;
-                    }
-                }
-            }
-
-            for (int i = 0; i < _completedFadeKeys.Count; i++)
-            {
-                _activeFades.Remove(_completedFadeKeys[i]);
-            }
-        }
-
-        /// <summary>
         /// フェードの alpha を対象の CanvasGroup へ反映する。
         /// 画面全体（Screen）フェードでは alpha がちょうど 0 になると配下の
         /// CanvasRenderer がカリングされ、ignoreParentGroups で除外したテキストまで
         /// 消えてしまうため、僅かな最小値でクランプして完全な 0 にはしない。
         /// 個別対象（背景・立ち絵）はテキストを含まないので 0 まで許容する。
         /// </summary>
-        private void ApplyFadeAlpha(CanvasGroup group, float alpha, bool floorAlpha)
+        private static void ApplyFadeAlpha(CanvasGroup group, float alpha, bool floorAlpha)
         {
             if (group == null)
             {
@@ -384,57 +452,113 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// 対象文字列から、フェードを適用する CanvasGroup を解決する。
-        /// テキストは対象に含めない（常にフェードしない）。
+        /// 対象と表示チャネルに対応するフェード状態を取得する。
         /// </summary>
-        /// <param name="target"> 対象名（Screen/Background/PortraitLeft/…）。 </param>
-        /// <param name="floorAlpha"> 画面全体フェードで alpha を 0 にしないか。 </param>
-        private CanvasGroup ResolveFadeTarget(string target, out bool floorAlpha)
+        private bool TryGetFadeState(
+            ScenarioFadeTarget target,
+            ScenarioFadeMode mode,
+            out FadeState state)
+        {
+            var key = new FadeChannelKey(target, mode);
+            if (_fadeStates.TryGetValue(key, out state))
+            {
+                if (state.IsValid)
+                {
+                    return true;
+                }
+
+                state.Handle.TryCancel();
+                state.Handle = default;
+                _fadeStates.Remove(key);
+            }
+
+            if (mode == ScenarioFadeMode.Black)
+            {
+                Image portraitImage = ResolvePortraitImage(target);
+                if (portraitImage == null)
+                {
+                    return false;
+                }
+
+                CapturePortraitBaseColor(target, portraitImage);
+                state = FadeState.ForPortraitBlack(portraitImage, _portraitBaseColors[target]);
+                _fadeStates.Add(key, state);
+                return true;
+            }
+
+            CanvasGroup group = ResolveAlphaFadeTarget(target, out bool floorAlpha);
+            if (group == null)
+            {
+                return false;
+            }
+
+            state = FadeState.ForAlpha(group, floorAlpha);
+            _fadeStates.Add(key, state);
+            return true;
+        }
+
+        /// <summary>
+        /// 型付き対象から透明度を適用する CanvasGroup を解決する。
+        /// </summary>
+        private CanvasGroup ResolveAlphaFadeTarget(ScenarioFadeTarget target, out bool floorAlpha)
         {
             floorAlpha = false;
 
-            // 未指定・Screen・Canvas は画面全体（ルート CanvasGroup）。
-            if (string.IsNullOrWhiteSpace(target)
-                || target.Equals(TargetScreen, System.StringComparison.OrdinalIgnoreCase)
-                || target.Equals(TargetCanvas, System.StringComparison.OrdinalIgnoreCase))
+            if (target == ScenarioFadeTarget.Screen)
             {
                 floorAlpha = true;
                 return _canvasGroup;
             }
 
-            if (target.Equals(TargetBackground, System.StringComparison.OrdinalIgnoreCase))
+            if (target == ScenarioFadeTarget.Background)
             {
                 return _backgroundImage != null ? EnsureCanvasGroup(_backgroundImage.gameObject) : null;
             }
 
-            if (target.Equals(TargetPortraitLeft, System.StringComparison.OrdinalIgnoreCase))
+            if (target == ScenarioFadeTarget.PortraitLeft)
             {
                 return EnsurePortraitCanvasGroup(SlotLeft);
             }
 
-            if (target.Equals(TargetPortraitCenter, System.StringComparison.OrdinalIgnoreCase))
+            if (target == ScenarioFadeTarget.PortraitCenter)
             {
                 return EnsurePortraitCanvasGroup(SlotCenter);
             }
 
-            if (target.Equals(TargetPortraitRight, System.StringComparison.OrdinalIgnoreCase))
+            if (target == ScenarioFadeTarget.PortraitRight)
             {
                 return EnsurePortraitCanvasGroup(SlotRight);
             }
 
-            if (target.Equals(TargetText, System.StringComparison.OrdinalIgnoreCase))
+            if (target == ScenarioFadeTarget.Text)
             {
-                // テキスト自身の CanvasGroup を明示的にフェードする。
                 EnsureNonFadingUi();
                 return _nonFadingUi;
             }
 
-            if (target.Equals(TargetBlack, System.StringComparison.OrdinalIgnoreCase))
+            if (target == ScenarioFadeTarget.Black)
             {
                 return EnsureBlackOverlay();
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// 型付き対象に対応する立ち絵Imageを取得する。
+        /// </summary>
+        private Image ResolvePortraitImage(ScenarioFadeTarget target)
+        {
+            EnsurePortraitSlots();
+            string slot = target switch
+            {
+                ScenarioFadeTarget.PortraitLeft => SlotLeft,
+                ScenarioFadeTarget.PortraitCenter => SlotCenter,
+                ScenarioFadeTarget.PortraitRight => SlotRight,
+                _ => null,
+            };
+
+            return slot != null && _portraitBySlot.TryGetValue(slot, out Image image) ? image : null;
         }
 
         /// <summary>
@@ -463,35 +587,142 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// フェード演出の内部状態を初期化する。
+        /// 再生開始時の表示内容、透明度、立ち絵色を初期状態へ戻す。
         /// </summary>
-        private void ResetFadeState()
+        private void ResetDisplayState()
         {
-            _activeFades.Clear();
-            _completedFadeKeys.Clear();
+            ApplyAlphaValue(ScenarioFadeTarget.Screen, 1f);
+            ApplyAlphaValue(ScenarioFadeTarget.Background, 1f);
+            ApplyAlphaValue(ScenarioFadeTarget.Text, 1f);
+            ApplyAlphaValue(ScenarioFadeTarget.PortraitLeft, 1f);
+            ApplyAlphaValue(ScenarioFadeTarget.PortraitCenter, 1f);
+            ApplyAlphaValue(ScenarioFadeTarget.PortraitRight, 1f);
+            ApplyAlphaValue(ScenarioFadeTarget.Black, 0f);
 
-            // 各要素を既定の可視状態へ戻す（次のシナリオを綺麗な状態で開始する）。
-            if (_canvasGroup != null)
+            ApplyPortraitBlackValue(ScenarioFadeTarget.PortraitLeft, 0f);
+            ApplyPortraitBlackValue(ScenarioFadeTarget.PortraitCenter, 0f);
+            ApplyPortraitBlackValue(ScenarioFadeTarget.PortraitRight, 0f);
+
+            if (_backgroundImage != null)
             {
-                _canvasGroup.alpha = 1f;
+                _backgroundImage.sprite = _defaultBackgroundSprite;
             }
 
-            if (_nonFadingUi != null)
+            if (_textBoxImage != null)
             {
-                _nonFadingUi.alpha = 1f;
+                _textBoxImage.sprite = _defaultTextBoxSprite;
             }
 
-            foreach (Image portraitImage in _portraitBySlot.Values)
+            ResetPortraitSlot(SlotLeft, PORTRAIT_LEFT_DEFAULT_POSITION);
+            ResetPortraitSlot(SlotCenter, PORTRAIT_CENTER_DEFAULT_POSITION);
+            ResetPortraitSlot(SlotRight, PORTRAIT_RIGHT_DEFAULT_POSITION);
+        }
+
+        /// <summary>
+        /// Prefabまたはシーンに設定された初期表示を一度だけ記録する。
+        /// </summary>
+        private void CaptureDefaultDisplayState()
+        {
+            if (_hasCapturedDefaultDisplayState)
             {
-                if (portraitImage != null && portraitImage.TryGetComponent(out CanvasGroup portraitGroup))
-                {
-                    portraitGroup.alpha = 1f;
-                }
+                return;
             }
 
-            if (_blackOverlay != null && _blackOverlay.TryGetComponent(out CanvasGroup overlayGroup))
+            _defaultBackgroundSprite = _backgroundImage != null ? _backgroundImage.sprite : null;
+            _defaultTextBoxSprite = _textBoxImage != null ? _textBoxImage.sprite : null;
+            _hasCapturedDefaultDisplayState = true;
+        }
+
+        /// <summary>
+        /// 立ち絵スロットの表示内容とTransformを初期状態へ戻す。
+        /// </summary>
+        /// <param name="slot">初期化する立ち絵スロット。</param>
+        /// <param name="defaultPosition">スロットの初期座標。</param>
+        private void ResetPortraitSlot(string slot, Vector2 defaultPosition)
+        {
+            if (!_portraitBySlot.TryGetValue(slot, out Image portraitImage) || portraitImage == null)
             {
-                overlayGroup.alpha = 0f;
+                return;
+            }
+
+            portraitImage.sprite = null;
+            portraitImage.enabled = false;
+            portraitImage.rectTransform.anchoredPosition = defaultPosition;
+            portraitImage.rectTransform.localScale = Vector3.one;
+        }
+
+        /// <summary>
+        /// 対象の透明度を即時反映する。
+        /// </summary>
+        private void ApplyAlphaValue(ScenarioFadeTarget target, float value)
+        {
+            CanvasGroup group = ResolveAlphaFadeTarget(target, out bool floorAlpha);
+            ApplyFadeAlpha(group, value, floorAlpha);
+        }
+
+        /// <summary>
+        /// 立ち絵の基準色を維持したまま黒さを即時反映する。
+        /// </summary>
+        private void ApplyPortraitBlackValue(ScenarioFadeTarget target, float value)
+        {
+            Image image = ResolvePortraitImage(target);
+            if (image == null)
+            {
+                return;
+            }
+
+            CapturePortraitBaseColor(target, image);
+            ApplyPortraitBlack(image, _portraitBaseColors[target], value);
+        }
+
+        /// <summary>
+        /// 初回確保時の立ち絵Tintを基準色として記録する。
+        /// </summary>
+        private void CapturePortraitBaseColors()
+        {
+            CapturePortraitBaseColor(ScenarioFadeTarget.PortraitLeft, ResolvePortraitImage(ScenarioFadeTarget.PortraitLeft));
+            CapturePortraitBaseColor(ScenarioFadeTarget.PortraitCenter, ResolvePortraitImage(ScenarioFadeTarget.PortraitCenter));
+            CapturePortraitBaseColor(ScenarioFadeTarget.PortraitRight, ResolvePortraitImage(ScenarioFadeTarget.PortraitRight));
+        }
+
+        /// <summary>
+        /// 未記録の立ち絵Tintだけを基準色として保存する。
+        /// </summary>
+        private void CapturePortraitBaseColor(ScenarioFadeTarget target, Image image)
+        {
+            if (image != null && !_portraitBaseColors.ContainsKey(target))
+            {
+                _portraitBaseColors.Add(target, image.color);
+            }
+        }
+
+        /// <summary>
+        /// 立ち絵のalphaを変えずにRGBだけを黒へ補間する。
+        /// </summary>
+        private static void ApplyPortraitBlack(Image image, Color baseColor, float blackness)
+        {
+            if (image == null)
+            {
+                return;
+            }
+
+            float colorScale = 1f - Mathf.Clamp01(blackness);
+            image.color = new Color(
+                baseColor.r * colorScale,
+                baseColor.g * colorScale,
+                baseColor.b * colorScale,
+                baseColor.a);
+        }
+
+        /// <summary>
+        /// 所有する全ての補間をキャンセルする。
+        /// </summary>
+        private void CancelAllFadeMotions()
+        {
+            foreach (FadeState state in _fadeStates.Values)
+            {
+                state.Handle.TryCancel();
+                state.Handle = default;
             }
         }
 
@@ -502,14 +733,14 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void EnsureNonFadingUi()
         {
-            if (_nonFadingUi == null && _chat != null)
+            if (_nonFadingUi == null && _dialogueRoot != null)
             {
-                // 明示指定が無い場合はテキスト自身に CanvasGroup を用意する。
-                _nonFadingUi = _chat.GetComponent<CanvasGroup>();
-                if (_nonFadingUi == null)
-                {
-                    _nonFadingUi = _chat.gameObject.AddComponent<CanvasGroup>();
-                }
+                _nonFadingUi = EnsureCanvasGroup(_dialogueRoot.gameObject);
+            }
+            else if (_nonFadingUi == null && _chat != null)
+            {
+                // 移行前Prefabでも表示を失わないための互換フォールバック。
+                _nonFadingUi = EnsureCanvasGroup(_chat.gameObject);
             }
 
             if (_nonFadingUi != null)
@@ -602,9 +833,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
             else if (string.Equals(layer, TargetText, System.StringComparison.OrdinalIgnoreCase))
             {
-                if (_chat != null)
+                if (_dialogueRoot != null)
                 {
-                    _chat.transform.SetAsLastSibling();
+                    _dialogueRoot.SetAsLastSibling();
                 }
             }
             else if (string.Equals(layer, LayerEffect, System.StringComparison.OrdinalIgnoreCase))
@@ -632,9 +863,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void EnsurePortraitSlots()
         {
-            EnsurePortraitSlot(SlotLeft, PortraitObjectLeft, new Vector2(-420f, -120f));
-            EnsurePortraitSlot(SlotCenter, PortraitObjectCenter, new Vector2(0f, -120f));
-            EnsurePortraitSlot(SlotRight, PortraitObjectRight, new Vector2(420f, -120f));
+            EnsurePortraitSlot(SlotLeft, PortraitObjectLeft, PORTRAIT_LEFT_DEFAULT_POSITION);
+            EnsurePortraitSlot(SlotCenter, PortraitObjectCenter, PORTRAIT_CENTER_DEFAULT_POSITION);
+            EnsurePortraitSlot(SlotRight, PortraitObjectRight, PORTRAIT_RIGHT_DEFAULT_POSITION);
             ApplyPortraitSizeToExistingSlots();
             // 立ち絵生成で重なり順が変わるため、優先度順へ並べ直す。
             ApplyLayerOrder();
@@ -645,9 +876,22 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void EnsurePortraitSlot(string slot, string objectName, Vector2 defaultPosition)
         {
-            if (_portraitBySlot.ContainsKey(slot))
+            if (_portraitBySlot.TryGetValue(slot, out Image existingImage) && existingImage != null)
             {
                 return;
+            }
+
+            _portraitBySlot.Remove(slot);
+            ScenarioFadeTarget? target = slot switch
+            {
+                SlotLeft => ScenarioFadeTarget.PortraitLeft,
+                SlotCenter => ScenarioFadeTarget.PortraitCenter,
+                SlotRight => ScenarioFadeTarget.PortraitRight,
+                _ => null,
+            };
+            if (target.HasValue)
+            {
+                _portraitBaseColors.Remove(target.Value);
             }
 
             RectTransform root = _portraitRoot != null ? _portraitRoot : transform as RectTransform;
@@ -743,7 +987,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
 
             if (string.Equals(target, TargetText, System.StringComparison.OrdinalIgnoreCase))
             {
-                return _chat != null ? _chat.rectTransform : null;
+                return _dialogueRoot != null ? _dialogueRoot : _chat != null ? _chat.rectTransform : null;
             }
 
             return null;
@@ -802,6 +1046,29 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 }
             }
 
+            if (_dialogueRoot == null)
+            {
+                _dialogueRoot = transform.Find("DialogueRoot") as RectTransform;
+            }
+
+            if (_textBoxImage == null && _dialogueRoot != null)
+            {
+                Transform textBox = _dialogueRoot.Find("TextBoxBackground");
+                _textBoxImage = textBox != null ? textBox.GetComponent<Image>() : null;
+            }
+
+            if (_speakerNameText == null && _dialogueRoot != null)
+            {
+                Transform speakerName = _dialogueRoot.Find("SpeakerName");
+                _speakerNameText = speakerName != null ? speakerName.GetComponent<TMP_Text>() : null;
+            }
+
+            if (_chat == null && _dialogueRoot != null)
+            {
+                Transform bodyText = _dialogueRoot.Find("BodyText");
+                _chat = bodyText != null ? bodyText.GetComponent<TMP_Text>() : null;
+            }
+
             if (_chat == null)
             {
                 _chat = GetComponentInChildren<TMP_Text>(true);
@@ -825,16 +1092,106 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         }
 
         /// <summary>
-        /// 1 つの対象に対する進行中フェードの状態。
+        /// async境界へ持ち越せる通常のフェード要求値。
+        /// </summary>
+        private readonly struct FadeRequest
+        {
+            public FadeRequest(
+                ScenarioFadeTarget target,
+                ScenarioFadeMode mode,
+                float start,
+                float end,
+                float duration)
+            {
+                Target = target;
+                Mode = mode;
+                Start = start;
+                End = end;
+                Duration = duration;
+            }
+
+            public ScenarioFadeTarget Target { get; }
+            public ScenarioFadeMode Mode { get; }
+            public float Start { get; }
+            public float End { get; }
+            public float Duration { get; }
+        }
+
+        /// <summary>
+        /// フェード対象と表示チャネルの組を表す辞書キー。
+        /// </summary>
+        private readonly struct FadeChannelKey : IEquatable<FadeChannelKey>
+        {
+            public FadeChannelKey(ScenarioFadeTarget target, ScenarioFadeMode mode)
+            {
+                Target = target;
+                Mode = mode;
+            }
+
+            public ScenarioFadeTarget Target { get; }
+            public ScenarioFadeMode Mode { get; }
+
+            public bool Equals(FadeChannelKey other)
+            {
+                return Target == other.Target && Mode == other.Mode;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is FadeChannelKey other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                return HashCode.Combine((int)Target, (int)Mode);
+            }
+        }
+
+        /// <summary>
+        /// 1つの対象・表示チャネルに対するLitMotion所有状態。
         /// </summary>
         private sealed class FadeState
         {
-            public CanvasGroup Group;
-            public float Time;
-            public float Start;
-            public float End;
-            public float Duration;
-            public bool FloorAlpha;
+            private FadeState(
+                CanvasGroup group,
+                bool floorAlpha,
+                Image portraitImage,
+                Color portraitBaseColor)
+            {
+                _group = group;
+                _floorAlpha = floorAlpha;
+                _portraitImage = portraitImage;
+                _portraitBaseColor = portraitBaseColor;
+            }
+
+            public static FadeState ForAlpha(CanvasGroup group, bool floorAlpha)
+            {
+                return new FadeState(group, floorAlpha, null, default);
+            }
+
+            public static FadeState ForPortraitBlack(Image image, Color baseColor)
+            {
+                return new FadeState(null, false, image, baseColor);
+            }
+
+            public bool IsValid => _group != null || _portraitImage != null;
+            public MotionHandle Handle { get; set; }
+
+            public void Apply(float value)
+            {
+                if (_group != null)
+                {
+                    ApplyFadeAlpha(_group, value, _floorAlpha);
+                    return;
+                }
+
+                ApplyPortraitBlack(_portraitImage, _portraitBaseColor, value);
+            }
+
+            private readonly CanvasGroup _group;
+            private readonly bool _floorAlpha;
+            private readonly Image _portraitImage;
+            private readonly Color _portraitBaseColor;
         }
     }
 }

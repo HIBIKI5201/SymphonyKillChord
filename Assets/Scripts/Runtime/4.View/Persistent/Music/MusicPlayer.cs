@@ -10,7 +10,7 @@ namespace KillChord.Runtime.View.Persistent.Music
     ///     音楽再生の実装を行うViewクラス。
     /// </summary>
     [RequireComponent(typeof(CriAtomSource)), DefaultExecutionOrder(-1000)]
-    public class MusicPlayer : MonoBehaviour, IVolumeManager, IBgmSelectorPlayer
+    public class MusicPlayer : MonoBehaviour, IVolumeManager, IBgmCuePlayer, IBgmSelectorPlayer
     {
         /// <summary> 音楽用ビューモデル。 </summary>
         public MusicViewModel MusicVM => _musicVm;
@@ -34,16 +34,42 @@ namespace KillChord.Runtime.View.Persistent.Music
         public void Initialize()
         {
             _cri = GetComponent<CriAtomSource>();
+            _cri.player?.SetVoicePriority(255);
+            CaptureBaseVolume();
         }
 
-        public void SetVolume(float volume)
+        /// <summary>
+        ///     再生するBGM CueをViewModelへ設定する。
+        /// </summary>
+        /// <param name="cueName"> 再生するCue名。空の場合は停止する。 </param>
+        public void SetCue(string cueName)
         {
-            _cri.volume = volume;
+            _musicVm?.UpdateMusicCue(cueName);
+        }
+
+        /// <summary>
+        ///     BGM全体音量の比率を適用する。
+        /// </summary>
+        /// <param name="volumeRatio"> 0から1の音量比率。 </param>
+        public void SetVolume(float volumeRatio)
+        {
+            _volumeRatio = volumeRatio;
+            ApplyVolume();
+        }
+
+        /// <summary>
+        ///     保存済み音量とは独立したBGM演出用の音量倍率を設定します。
+        /// </summary>
+        /// <param name="volumeRatio"> 演出用の0から1の音量倍率です。 </param>
+        public void SetPresentationVolume(float volumeRatio)
+        {
+            _presentationVolumeRatio = Mathf.Clamp01(volumeRatio);
+            ApplyVolume();
         }
 
         public float GetVolume()
         {
-            return _cri.volume;
+            return _volumeRatio;
         }
 
         /// <summary>
@@ -69,12 +95,43 @@ namespace KillChord.Runtime.View.Persistent.Music
             }
         }
 
+        /// <summary>
+        ///     BGM再生、及び再生時間を一時停止する。
+        /// </summary>
+        public void PauseBGM()
+        {
+            _cri.Pause(true);
+        }
+
+        /// <summary>
+        ///     BGM再生、及び再生時間の進行を再開する。
+        /// </summary>
+        public void ResumeBGM()
+        {
+            _cri.Pause(false);
+        }
+
         private const double MILLISECONDS_PER_SECOND = 1000d;
 
         private CriAtomSource _cri;
         private CriAtomExPlayback _playback;
         private MusicViewModel _musicVm;
         private bool _isPlaying;
+        private float _baseVolume = 1f;
+        private float _volumeRatio = 1f;
+        private float _presentationVolumeRatio = 1f;
+        private bool _baseVolumeCaptured;
+
+        /// <summary>
+        ///     最新の音量設定に演出用倍率を掛けてBGMへ反映します。
+        /// </summary>
+        private void ApplyVolume()
+        {
+            if (_cri != null)
+            {
+                _cri.volume = _baseVolume * _volumeRatio * _presentationVolumeRatio;
+            }
+        }
 
         /// <summary>
         ///     BGMを変更して再生する。
@@ -82,6 +139,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// <param name="cueName"> 新しいキュー名。 </param>
         private void ChangeBgm(string cueName)
         {
+            if (_cri == null)
+            {
+                return;
+            }
+
             string currentCueName = _cri.cueName;
 
             if (string.IsNullOrEmpty(cueName))
@@ -109,10 +171,28 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         private void StopBgm()
         {
+            if (_cri == null)
+            {
+                return;
+            }
+
             _playback.Stop();
             _cri.cueName = string.Empty;
             _isPlaying = false;
         }
 
+        /// <summary>
+        ///     CriAtomSourceに設定されている元の音量を保持します。
+        /// </summary>
+        private void CaptureBaseVolume()
+        {
+            if (_baseVolumeCaptured)
+            {
+                return;
+            }
+
+            _baseVolume = _cri.volume;
+            _baseVolumeCaptured = true;
+        }
     }
 }

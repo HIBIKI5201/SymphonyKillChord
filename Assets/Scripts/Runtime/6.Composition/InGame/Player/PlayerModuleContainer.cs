@@ -1,7 +1,9 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Player;
 
 namespace KillChord.Runtime.Composition.InGame.Player
@@ -18,16 +20,22 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <param name="playerView"> プレイヤーViewです。 </param>
         /// <param name="playerEntity"> プレイヤーEntityです。 </param>
         /// <param name="playerStatusBonus"> プレイヤーステータスボーナスです。 </param>
+        /// <param name="damageEffectView"> 被弾エフェクトViewです。 </param>
+        /// <param name="playerAttackSignal"> 攻撃成立を表示側へ伝えるSignalです。 </param>
         public PlayerModuleContainer(
             PlayerInitializer playerInitializer,
             PlayerView playerView,
             CharacterEntity playerEntity,
-            PlayerStatusBonus playerStatusBonus)
+            PlayerStatusBonus playerStatusBonus,
+            ReusableParticleSystemView damageEffectView,
+            IPlayerAttackSignal playerAttackSignal)
         {
             PlayerInitializer = playerInitializer;
             PlayerView = playerView;
             PlayerEntity = playerEntity;
             PlayerStatusBonus = playerStatusBonus;
+            DamageEffectView = damageEffectView;
+            PlayerAttackSignal = playerAttackSignal;
         }
 
         /// <summary> プレイヤー初期化クラスです。 </summary>
@@ -39,11 +47,20 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <summary> プレイヤーEntityです。 </summary>
         public CharacterEntity PlayerEntity { get; }
 
+        /// <summary> キャラクター共通の被弾エフェクトViewです。 </summary>
+        public ReusableParticleSystemView DamageEffectView { get; }
+
         /// <summary> プレイヤーステータスボーナスです。 </summary>
         public PlayerStatusBonus PlayerStatusBonus { get; }
 
+        /// <summary> プレイヤー行動制限状態です。 </summary>
+        public PlayerActionRestrictionState PlayerActionRestrictionState { get; private set; }
+
         /// <summary> プレイヤー攻撃Controllerです。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
+
+        /// <summary> 攻撃成立を表示側へ伝えるSignalです。 </summary>
+        public IPlayerAttackSignal PlayerAttackSignal { get; }
 
         /// <summary> プレイヤー移動Controllerです。 </summary>
         public PlayerController PlayerController { get; private set; }
@@ -76,6 +93,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         public void SetInputSuppressionState(PlayerInputSuppressionState inputSuppressionState)
         {
             InputSuppressionState = inputSuppressionState;
+        }
+
+        public void SetActionRestrictionState(PlayerActionRestrictionState actionRestrictionState)
+        {
+            PlayerActionRestrictionState = actionRestrictionState;
         }
     }
 }

@@ -1,6 +1,44 @@
 :root {
 }
 
+.btn-skin {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    -unity-background-scale-mode: scale-and-crop;
+    aspect-ratio: auto;
+}
+
+.btn-skin:hover,
+.btn-skin:focus,
+.btn-skin:active {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=21300000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
+}
+
+.setting-select-arrow-button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(58, 47, 20);
+}
+
+.setting-select-arrow-button:hover,
+.setting-select-arrow-button:focus,
+.setting-select-arrow-button:active {
+    color: white;
+}
+
+.btn-scale-feedback {
+    scale: 1 1 1;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out-circ;
+}
+
+.btn-scale-feedback:active {
+    scale: 0.9 0.9;
+    transition-duration: 0.05s;
+    transition-timing-function: ease-out-circ;
+}
+
 .button {
     height: 100px;
     width: 200px;
@@ -9,17 +47,70 @@
     -unity-font-style: bold;
     margin-top: 10px;
     background-color: rgba(188, 188, 188, 0);
-    
-    scale: 1.0 1.0 1.0;
+    scale: 1 1 1;
     transition-duration: 0.1s;
     transition-timing-function: ease-out-circ;
-
 }
 
-.button:hover {
-    scale: 1.2 1.2 1.2;
+.home-image-button {
+    -unity-background-scale-mode: scale-and-crop;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+.home-card-large {
+    width: 800px;
+    height: 420px;
+}
+
+.home-card-small {
+    width: 390px;
+    height: 210px;
+}
+
+.home-button-wrapper {
+    position: relative;
+    margin-top: 10px;
+}
+
+.home-button-wrapper > .button {
+    margin-top: 0;
+}
+
+.home-button-panel {
+    position: absolute;
+    top: 3%;
+    right: 1.5%;
+    bottom: 3%;
+    left: 1.5%;
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_ButtonBack_Off.png?fileID=21300000&guid=ba45671328ad1f148b9ebc71318d74b4&type=3#UI_ButtonBack_Off");
+    -unity-background-scale-mode: stretch-to-fill;
+    border-radius: 4px;
+    translate: 0 -4px;
+}
+
+.home-button-wrapper:hover > .home-button-panel,
+.home-button-wrapper.is-focused > .home-button-panel {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_ButtonBack_On.png?fileID=21300000&guid=01ab0a13e35f26047a9e0f0fa450c311&type=3#UI_ButtonBack_On");
+}
+
+.button:hover,
+.button:focus {
+    scale: 1.2 1.2;
     transition-duration: 0.05s;
     transition-timing-function: ease-out-circ;
 }
 
+.button:active {
+    scale: 0.9 0.9;
+    transition-duration: 0.05s;
+    transition-timing-function: ease-out-circ;
+}
 
+.home-button-wrapper > .button:hover,
+.home-button-wrapper > .button:focus,
+.home-button-wrapper > .button:active {
+    scale: 1 1;
+}

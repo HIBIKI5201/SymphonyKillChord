@@ -1,0 +1,155 @@
+---
+interface Segment {
+	value: string;
+	caption: string;
+	locked?: boolean;
+}
+
+interface Props {
+	legendTitle: string;
+	segments: Segment[];
+	current: number;
+	total: number;
+	centerLabel: string;
+}
+
+const { legendTitle, segments, current, total, centerLabel } = Astro.props;
+
+// SVG円弧を、リング付きページ数(total)で等分し、各弧の間に一定のギャップを空ける。
+// 現在のページ(current)に対応する弧だけを明るく表示し、他は暗く沈める。
+// 12時位置から時計回りに開始するよう、svg要素側で-90degだけ回転させている。
+const radius = 68;
+const circumference = 2 * Math.PI * radius;
+const gap = 10;
+const arcLength = circumference / total - gap;
+---
+
+<div class="ring">
+	<div class="ring-visual">
+		<svg viewBox="0 0 160 160" width="160" height="160" aria-hidden="true">
+			{
+				Array.from({ length: total }).map((_, index) => {
+					const offset = (circumference / total) * index;
+					const isActive = index < current;
+					return (
+						<circle
+							class:list={['ring-arc', !isActive && 'is-dim']}
+							cx="80"
+							cy="80"
+							r={radius}
+							stroke-dasharray={`${arcLength} ${circumference - arcLength}`}
+							stroke-dashoffset={-offset}
+						/>
+					);
+				})
+			}
+		</svg>
+		<p class="ring-label">{centerLabel}</p>
+	</div>
+
+	<div class="ring-legend-wrap">
+		<ul class="ring-legend">
+			{
+				segments.map((segment) => (
+					<li class:list={[segment.locked && 'is-locked']}>
+						<span class="value">{segment.value}</span>
+						<span class="caption">{segment.caption}</span>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</div>
+
+<style>
+	.ring {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 16px;
+	}
+
+	.ring-visual {
+		position: relative;
+		width: 160px;
+		height: 160px;
+	}
+
+	svg {
+		position: absolute;
+		inset: 0;
+		transform: rotate(-90deg);
+	}
+
+	.ring-arc {
+		fill: none;
+		stroke: var(--color-signal);
+		stroke-width: 3;
+		stroke-linecap: butt;
+	}
+
+	.ring-arc.is-dim {
+		stroke: var(--color-surface-border);
+	}
+
+	.ring-label {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		margin: 0;
+		width: 88px;
+		text-align: center;
+		white-space: nowrap;
+		font-family: var(--font-mono);
+		letter-spacing: 0.02em;
+		font-size: 15px;
+		font-weight: 700;
+		color: var(--color-signal);
+	}
+
+	.ring-legend-wrap {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.ring-legend {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 8px;
+	}
+
+.ring-legend li {
+		display: flex;
+		align-items: baseline;
+		gap: 6px;
+		padding: 4px 10px;
+		border: 1px solid var(--color-surface-border);
+	}
+
+	.ring-legend li.is-locked {
+		opacity: 0.5;
+	}
+
+	.ring-legend .value {
+		font-family: var(--font-mono);
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--color-signal);
+	}
+
+	.ring-legend li.is-locked .value {
+		color: var(--color-text-muted);
+	}
+
+	.ring-legend .caption {
+		font-size: 12px;
+		color: var(--color-text-muted);
+	}
+</style>

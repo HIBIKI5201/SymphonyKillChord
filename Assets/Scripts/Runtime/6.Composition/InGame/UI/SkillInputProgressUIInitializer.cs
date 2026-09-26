@@ -49,9 +49,10 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <summary>
         ///     スキル定義データを指定し、画面に表示する入力進捗UIを生成する。
         /// </summary>
-        /// <param name="definition"></param>
-        /// <returns></returns>
-        public ISkillInputProgressRowView CreateInputProgressRow(SkillDefinition definition)
+        /// <param name="definition"> 表示対象のスキル定義です。 </param>
+        /// <param name="skillIcon"> 表示対象のスキルアイコンです。未設定の場合はnull。 </param>
+        /// <returns> 生成した入力進捗UIの行Viewです。 </returns>
+        public ISkillInputProgressRowView CreateInputProgressRow(SkillDefinition definition, Sprite skillIcon)
         {
             SkillGuideProgressView view = Instantiate(_viewPrefab, _viewRoot);
             SkillBeatVisualSetting[] stepSettings = new SkillBeatVisualSetting[definition.SkillPattern.Signatures.Length];
@@ -60,7 +61,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 BeatType beatType = definition.SkillPattern.Signatures[i];
                 stepSettings[i] = _inputProgressViewSetting.GetSetting((int)beatType);
             }
-            view.Initialize(stepSettings, _inputProgressViewSetting.AnimationSetting, _rhythmGuideView);
+            view.Initialize(stepSettings, _inputProgressViewSetting.AnimationSetting, _rhythmGuideView, skillIcon);
             _guideProgressController.Register(view);
             return view;
         }

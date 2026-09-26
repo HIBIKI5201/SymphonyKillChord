@@ -18,7 +18,12 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <returns> 倍率を適用した攻撃処理の文脈。 </returns>
         public AttackStepContext Execute(in AttackStepContext context)
         {
-            float resultDamage = context.Damage.Value * context.AttackDefinition.WeaponDamageMultiplier;
+            float resultDamage = context.Damage.Value;
+
+            if (context.ApplyWeaponDamageMultiplier)
+            {
+                resultDamage *= context.AttackDefinition.WeaponDamageMultiplier;
+            }
 
             if (context.IsJustHit)
             {

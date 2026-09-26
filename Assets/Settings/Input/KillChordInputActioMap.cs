@@ -176,7 +176,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""dc43d5ec-931e-4127-9deb-aec512029fc6"",
-                    ""path"": ""<Keyboard>/shift"",
+                    ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -243,7 +243,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""id"": ""abf716bd-9998-4c38-b53c-2ea866cc4f6a"",
                     ""expectedControlType"": """",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press(behavior=0)"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -254,24 +254,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
-                },
-                {
-                    ""name"": ""ResetPosition"",
-                    ""type"": ""Button"",
-                    ""id"": ""a1e6c2d4-3f5b-4c7a-9d8e-1b2c3d4e5f60"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""ReturnToTitle"",
-                    ""type"": ""Button"",
-                    ""id"": ""b2f7d3e5-4a6c-4d8b-8e9f-2c3d4e5f6a71"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": ""Hold(duration=1)"",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -365,8 +347,8 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
-                    ""id"": ""94b7b630-617a-4b5b-9e5e-38886dbdc3a8"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""id"": ""3c663c8d-d467-4846-bf4f-f38ecfe431ec"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -387,19 +369,8 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
-                    ""id"": ""391a9ec2-30a8-428e-a5b9-e9f1393f0190"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Dodge"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""3c663c8d-d467-4846-bf4f-f38ecfe431ec"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""id"": ""94b7b630-617a-4b5b-9e5e-38886dbdc3a8"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -516,28 +487,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""action"": ""LockOnSelect"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""c3a8e4f6-5b7d-4e9c-9f0a-3d4e5f6a7b82"",
-                    ""path"": ""<Keyboard>/p"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ResetPosition"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""d4b9f5a7-6c8e-4f0d-8a1b-4e5f6a7b8c93"",
-                    ""path"": ""<Keyboard>/escape"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ReturnToTitle"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -558,7 +507,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""name"": ""Submit"",
                     ""type"": ""Button"",
                     ""id"": ""cd0a1233-ef04-436b-8287-f26be44c1326"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -567,7 +516,7 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                     ""name"": ""Cancel"",
                     ""type"": ""Button"",
                     ""id"": ""cb338819-3c25-4b86-93b5-36153d73deef"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -904,7 +853,40 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""623fff9d-c251-4327-bd2b-a0ec384f12ef"",
-                    ""path"": ""*/{Submit}"",
+                    ""path"": ""<Keyboard>/{Submit}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""941d4c4a-0a80-40e4-b59a-61f48c5dc0bd"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9557694b-32de-4dcf-91a3-f2199655632f"",
+                    ""path"": ""<Joystick>/{Submit}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""27dd1113-de07-4efb-aa32-56a4dcc861c3"",
+                    ""path"": ""<XRController>/{Submit}"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
@@ -915,7 +897,40 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 {
                     ""name"": """",
                     ""id"": ""7e227cc2-8573-4bdb-9854-7073372a2fb7"",
-                    ""path"": ""*/{Cancel}"",
+                    ""path"": ""<Keyboard>/{Cancel}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""47ab66f2-c2ba-4391-b1d0-c1e23edb991c"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f3ad5224-774c-48fd-8286-294bd2399af0"",
+                    ""path"": ""<Joystick>/{Cancel}"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e1f097ad-5277-4273-bbe8-69ef12666567"",
+                    ""path"": ""<XRController>/{Cancel}"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
@@ -1130,8 +1145,41 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
+                    ""id"": ""409f023c-88e4-487e-b0c4-f5d338c30a69"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Advance"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""96cdbe1c-f413-413e-b4bc-72345957ac18"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Advance"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""310065c3-1858-407b-9075-5644d99ffb2b"",
                     ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FastForward"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""58ae7c8f-5a84-42e6-818b-f68d737b3f7c"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -1152,8 +1200,30 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
+                    ""id"": ""3a2b278b-e8c6-4169-b98a-596733390ceb"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""7df0081f-926a-4a55-bf43-91bf7a706cdd"",
                     ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Skip"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a462b8b1-eade-405a-a647-06cd5ba31d2c"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -1174,8 +1244,30 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
                 },
                 {
                     ""name"": """",
+                    ""id"": ""bdfdd7ad-19af-4410-b569-035dd103a6da"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Auto"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""0a63a5e0-b8c4-482b-b6ed-b1cb0d634667"",
                     ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HideUI"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""28b30f1a-f203-4562-a3ba-dbe3e89c819b"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -1225,8 +1317,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         m_InGame_Look = m_InGame.FindAction("Look", throwIfNotFound: true);
         m_InGame_LockOn = m_InGame.FindAction("LockOn", throwIfNotFound: true);
         m_InGame_LockOnSelect = m_InGame.FindAction("LockOnSelect", throwIfNotFound: true);
-        m_InGame_ResetPosition = m_InGame.FindAction("ResetPosition", throwIfNotFound: true);
-        m_InGame_ReturnToTitle = m_InGame.FindAction("ReturnToTitle", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1540,8 +1630,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
     private readonly InputAction m_InGame_Look;
     private readonly InputAction m_InGame_LockOn;
     private readonly InputAction m_InGame_LockOnSelect;
-    private readonly InputAction m_InGame_ResetPosition;
-    private readonly InputAction m_InGame_ReturnToTitle;
     /// <summary>
     /// Provides access to input actions defined in input action map "InGame".
     /// </summary>
@@ -1577,14 +1665,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// Provides access to the underlying input action "InGame/LockOnSelect".
         /// </summary>
         public InputAction @LockOnSelect => m_Wrapper.m_InGame_LockOnSelect;
-        /// <summary>
-        /// Provides access to the underlying input action "InGame/ResetPosition".
-        /// </summary>
-        public InputAction @ResetPosition => m_Wrapper.m_InGame_ResetPosition;
-        /// <summary>
-        /// Provides access to the underlying input action "InGame/ReturnToTitle".
-        /// </summary>
-        public InputAction @ReturnToTitle => m_Wrapper.m_InGame_ReturnToTitle;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1629,12 +1709,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @LockOnSelect.started += instance.OnLockOnSelect;
             @LockOnSelect.performed += instance.OnLockOnSelect;
             @LockOnSelect.canceled += instance.OnLockOnSelect;
-            @ResetPosition.started += instance.OnResetPosition;
-            @ResetPosition.performed += instance.OnResetPosition;
-            @ResetPosition.canceled += instance.OnResetPosition;
-            @ReturnToTitle.started += instance.OnReturnToTitle;
-            @ReturnToTitle.performed += instance.OnReturnToTitle;
-            @ReturnToTitle.canceled += instance.OnReturnToTitle;
         }
 
         /// <summary>
@@ -1664,12 +1738,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
             @LockOnSelect.started -= instance.OnLockOnSelect;
             @LockOnSelect.performed -= instance.OnLockOnSelect;
             @LockOnSelect.canceled -= instance.OnLockOnSelect;
-            @ResetPosition.started -= instance.OnResetPosition;
-            @ResetPosition.performed -= instance.OnResetPosition;
-            @ResetPosition.canceled -= instance.OnResetPosition;
-            @ReturnToTitle.started -= instance.OnReturnToTitle;
-            @ReturnToTitle.performed -= instance.OnReturnToTitle;
-            @ReturnToTitle.canceled -= instance.OnReturnToTitle;
         }
 
         /// <summary>
@@ -2148,20 +2216,6 @@ public partial class @KillChordInputActioMap: IInputActionCollection2, IDisposab
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnLockOnSelect(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "ResetPosition" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnResetPosition(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "ReturnToTitle" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnReturnToTitle(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

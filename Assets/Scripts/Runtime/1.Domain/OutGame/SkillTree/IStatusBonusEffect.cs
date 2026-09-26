@@ -5,6 +5,9 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
     /// </summary>
     public interface IStatusBonusEffect
     {
+        /// <summary> この効果の種別。 </summary>
+        public StatusBonusEffectKind Kind { get; }
+
         /// <summary>
         ///     プレイヤーステータスのボーナスへ効果を適用する。
         /// </summary>

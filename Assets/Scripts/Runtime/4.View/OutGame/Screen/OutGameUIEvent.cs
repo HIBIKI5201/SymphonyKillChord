@@ -13,9 +13,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> メニュー画面を表示するイベント。 </summary>
         public Action OnShowMenuScreen;
 
-        /// <summary> オプション画面を表示するイベント。 </summary>
-        public Action OnShowOptionsScreen;
-
         /// <summary> クレジット画面を表示するイベント。 </summary>
         public Action OnShowCreditScreen;
 
@@ -24,6 +21,15 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> ホーム画面を表示するイベント。 </summary>
         public Action OnShownHomeScreen;
+
+        /// <summary> ホームチュートリアルを開始または再開するイベント。 </summary>
+        public Action OnHomeTutorialStarted;
+
+        /// <summary> ホームチュートリアルの完了を通知するイベント。 </summary>
+        public Action OnHomeTutorialCompleted;
+
+        /// <summary> ホームチュートリアルの強制完了を要求するイベント。 </summary>
+        public Action OnHomeTutorialForceCompleteRequested;
 
         /// <summary> 作戦画面を表示するイベント。 </summary>
         public Action OnShownStageSelectionScreen;
@@ -37,11 +43,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> OutGame UIの表示状態を切り替えるイベント。 </summary>
         public Action<bool> OnOutGameUiVisibilityChanged;
 
-        /// <summary> 戦闘準備画面を表示するイベントです。 </summary>
-        public Action OnShownBattlePreparationScreen;
-
         /// <summary> 設定画面を表示するイベント。 </summary>
         public Action OnShownSettingScreen;
+
+        /// <summary> タイトル画面への復帰を要求するイベント。 </summary>
+        public Action OnReturnToTitleRequested;
+
+        /// <summary> タイトル画面への復帰要求が完了したことを通知するイベント。 </summary>
+        public Action<bool> OnReturnToTitleRequestCompleted;
 
         /// <summary> 画面を閉じるイベント。 </summary>
         public Action OnScreenClosed;
@@ -57,6 +66,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> スキルノードが解放された時のイベント。 </summary>
         public Action OnSkillUnlocked;
+
+        /// <summary> スキルノード解放の確認ダイアログ表示を要求するイベント。 </summary>
+        public Action OnSkillUnlockConfirmationRequested;
+
+        /// <summary> スキルノード解放確認ダイアログで解放を確定するイベント。 </summary>
+        public Action OnSkillUnlockConfirmed;
 
         /// <summary> スキルツリーのリセット確認表示を要求するイベント。 </summary>
         public Action OnSkillTreeResetRequested;

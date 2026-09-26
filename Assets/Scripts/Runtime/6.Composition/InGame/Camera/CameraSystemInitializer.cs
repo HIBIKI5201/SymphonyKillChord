@@ -83,6 +83,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             CameraFollowCalculator followCalculator = new(_config);
             CameraLockOnRangeChecker lockOnRangeChecker = new(_config);
             CameraLockOnBreakTracker lockOnBreakTracker = new(_config);
+            CameraShakeCalculator shakeCalculator = new();
 
             PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
             if (playerModuleContainer == null || playerModuleContainer.PlayerView == null)
@@ -101,10 +102,11 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 },
                 (playerPosition, direction) => targetingSystem.UpdateCandidate(playerPosition, direction),
                 (playerPosition, direction) => targetingSystem.TrySwitchTarget(playerPosition, direction),
-                targetId => targetingSystem.TrySetCurrentTarget(targetId),
+                // 被弾による自動再ターゲットはロックオン成立イベントを発火させない（AoE/継続ダメージでのロックオンSE多重発火防止）。
+                targetId => targetingSystem.TrySetCurrentTarget(targetId, notifyLockOn: false),
                 followCalculator, lockOnRotationCalculator,
                 freeLookRotationCalculator, lookAtRotationCalculator, lockOnRangeChecker, lockOnBreakTracker,
-                _config, playerModuleContainer.PlayerView.transform,
+                shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
         }
 

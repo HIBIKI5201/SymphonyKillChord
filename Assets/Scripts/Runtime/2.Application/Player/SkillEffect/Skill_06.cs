@@ -1,4 +1,5 @@
-using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Application.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
@@ -9,20 +10,25 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     public class Skill_06 : SkillBase
     {
         /// <summary>
-        ///     スキル効果を初期化します。
-        /// </summary>
-        /// <param name="buff"> 付与バフです。 </param>
-        public Skill_06(IBuff buff) : base(buff)
-        {
-        }
-
-        /// <summary>
         ///     スキル効果を実行します。
         /// </summary>
         /// <param name="context"> 実行コンテキストです。 </param>
         public override void Execute(in SkillEffectContext context)
         {
-            context.PlayerEntity.BuffSystem.Add(_buff);
+            float healRate =
+                (float)context.EffectSpec.GetRequiredValue(SkillEffectParameterId.LifeStealRate);
+            float maxHealPerHit =
+                (float)context.EffectSpec.GetRequiredValue(SkillEffectParameterId.HealPerHitCap);
+            float durationSeconds =
+                (float)context.EffectSpec.GetRequiredValue(SkillEffectParameterId.DurationSeconds);
+
+            context.PlayerEntity.StatusEffectSystem.Add(
+                new LifeStealBuff(
+                    context.PlayerEntity,
+                    healRate,
+                    maxHealPerHit,
+                    durationSeconds,
+                    context.EffectSpec.ReapplyPolicy));
         }
     }
 }
