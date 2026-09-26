@@ -11,6 +11,9 @@
         public const string DISCORD_TASK_ALERT_CHANNEL_ID = "DISCORD_TASK_ALERT_CHANNEL_ID";
         public const string DISCORD_SPRINT_CHANNEL_ID = "DISCORD_SPRINT_CHANNEL_ID";
 
+        /// <summary> 資料と節の重み、ハイブリッド検索の条件を保持するJSONオブジェクト。 </summary>
+        public const string SPEC_SEARCH = "SPEC_SEARCH";
+
         /// <summary> 仕様検索インデックスの保存先パス。 </summary>
         public const string SPEC_SEARCH_INDEX_PATH = "SPEC_SEARCH_INDEX_PATH";
 
@@ -22,9 +25,6 @@
 
         /// <summary> 仕様検索で返す最大件数。 </summary>
         public const string SPEC_SEARCH_TOP_K = "SPEC_SEARCH_TOP_K";
-
-        /// <summary> 仕様検索の優先度ルールJSONファイルの任意のパス。 </summary>
-        public const string SPEC_SEARCH_PRIORITY_PATH = "SPEC_SEARCH_PRIORITY_PATH";
 
         /// <summary> Gemini APIキー。秘匿情報であり、未設定の場合はAI要約を無効化する。 </summary>
         public const string GEMINI_API_KEY = "GEMINI_API_KEY";
@@ -40,6 +40,15 @@
 
         /// <summary> Discordログの取得対象にするチャンネルID配列。 </summary>
         public const string DISCORD_LOG_CHANNEL_IDS = "DISCORD_LOG_CHANNEL_IDS";
+
+        /// <summary> GitHub APIのアクセストークン。秘匿情報。未設定の場合は匿名アクセスとなりレート制限が厳しくなる。 </summary>
+        public const string GITHUB_TOKEN = "GITHUB_TOKEN";
+
+        /// <summary> ブランチ調査の対象とする "owner/name" 形式のリポジトリ。 </summary>
+        public const string GITHUB_REPOSITORY = "GITHUB_REPOSITORY";
+
+        /// <summary> ブランチ調査コマンドを登録する任意のDiscord Guild ID。 </summary>
+        public const string BRANCH_CLEANUP_DISCORD_GUILD_ID = "BRANCH_CLEANUP_DISCORD_GUILD_ID";
 
         public const string NOTION_TOKEN = "NOTION_TOKEN";
         public const string NOTION_TASK_DATABASE_ID = "NOTION_TASK_DATABASE_ID";

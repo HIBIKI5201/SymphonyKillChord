@@ -29,6 +29,7 @@ namespace KillChord.Runtime.View.Persistent.Load
                 ApplyRandomTip();
                 SetVisible(true);
                 StartMedalRotation();
+                StartLoadingTextAnimation();
             }
             else
             {
@@ -43,6 +44,14 @@ namespace KillChord.Runtime.View.Persistent.Load
             _handle.TryCancel();
             _medalHandle.TryCancel();
             _visibilityHandle.TryCancel();
+
+            if (_loadingTextHandles != null)
+            {
+                foreach (MotionHandle handle in _loadingTextHandles)
+                {
+                    handle.TryCancel();
+                }
+            }
         }
 
         /// <summary>
@@ -98,6 +107,7 @@ namespace KillChord.Runtime.View.Persistent.Load
             ApplyRandomTip();
             SetVisible(true);
             StartMedalRotation();
+            StartLoadingTextAnimation();
         }
 
         /// <summary>
@@ -121,6 +131,7 @@ namespace KillChord.Runtime.View.Persistent.Load
             }
 
             StopMedalRotation();
+            StopLoadingTextAnimation();
             HideWithFade();
         }
 
@@ -129,14 +140,18 @@ namespace KillChord.Runtime.View.Persistent.Load
         /// </summary>
         private void ApplyRandomTip()
         {
-            if (_tipsText == null)
+            // Tips設定が存在する場合はランダムにTipsを取得し、存在しない場合はデフォルト値（空文字列）を設定する。
+            LoadingTip tip = _tipsConfig != null ? _tipsConfig.GetRandomTip() : default;
+
+            if (_tipsTitleText != null)
             {
-                return;
+                _tipsTitleText.SetText(tip.Title);
             }
 
-            // Tips設定が存在する場合はランダムにTipsを取得し、存在しない場合は空文字列を設定する。
-            string tip = _tipsConfig != null ? _tipsConfig.GetRandomTip() : string.Empty;
-            _tipsText.SetText(tip);
+            if (_tipsText != null)
+            {
+                _tipsText.SetText(tip.Body);
+            }
         }
 
         /// <summary>
@@ -204,6 +219,66 @@ namespace KillChord.Runtime.View.Persistent.Load
             }
 
             _medalTransform.localEulerAngles = _medalInitialEulerAngles;
+        }
+
+        /// <summary>
+        ///     ロードテキストの文字ジャンプアニメーションを開始する。
+        /// </summary>
+        private void StartLoadingTextAnimation()
+        {
+            StopLoadingTextAnimation();
+            PlayLoadingTextWave();
+        }
+
+        /// <summary>
+        ///     ロードテキストを先頭の文字から末尾の文字まで順番にジャンプさせる。
+        ///     末尾の文字のジャンプが完了すると再度呼び出され、波が繰り返される。
+        /// </summary>
+        private void PlayLoadingTextWave()
+        {
+            if (!_isVisible || _loadingText == null)
+            {
+                return;
+            }
+
+            _loadingText.ForceMeshUpdate();
+            int characterCount = _loadingText.textInfo.characterCount;
+            _loadingTextHandles = new MotionHandle[characterCount];
+
+            for (int i = 0; i < characterCount; i++)
+            {
+                int charIndex = i;
+                var builder = LMotion.Create(0f, _loadingTextJumpHeight, _loadingTextJumpDuration)
+                    .WithEase(_loadingTextJumpEase)
+                    .WithLoops(JUMP_LOOP_COUNT, LoopType.Yoyo)
+                    .WithDelay(charIndex * _loadingTextStaggerInterval);
+
+                // 末尾の文字だけジャンプ完了時に波を再生し直し、先頭から繰り返す。
+                _loadingTextHandles[i] = charIndex == characterCount - 1
+                    ? builder.WithOnComplete(PlayLoadingTextWave).BindToTMPCharPositionY(_loadingText, charIndex)
+                    : builder.BindToTMPCharPositionY(_loadingText, charIndex);
+            }
+        }
+
+        /// <summary>
+        ///     ロードテキストの文字ジャンプアニメーションを停止する。
+        /// </summary>
+        private void StopLoadingTextAnimation()
+        {
+            if (_loadingTextHandles != null)
+            {
+                foreach (MotionHandle handle in _loadingTextHandles)
+                {
+                    handle.TryCancel();
+                }
+
+                _loadingTextHandles = null;
+            }
+
+            if (_loadingText != null)
+            {
+                _loadingText.ForceMeshUpdate();
+            }
         }
 
         /// <summary>
@@ -282,6 +357,11 @@ namespace KillChord.Runtime.View.Persistent.Load
                 .BindToAlpha(_canvasGroup);
         }
 
+        /// <summary>
+        ///     文字ジャンプ1回分（往路・復路）を表すループ回数。
+        /// </summary>
+        private const int JUMP_LOOP_COUNT = 2;
+
         [SerializeField, Tooltip("ロード画面のCanvasGroup")]
         private CanvasGroup _canvasGroup;
 
@@ -305,7 +385,10 @@ namespace KillChord.Runtime.View.Persistent.Load
         [SerializeField, Tooltip("ロード画面に表示するTipsの設定")]
         private LoadingTipsConfig _tipsConfig;
 
-        [SerializeField, Tooltip("ロード画面に表示するTipsのText")]
+        [SerializeField, Tooltip("ロード画面に表示するTipsのタイトルText")]
+        private TMP_Text _tipsTitleText;
+
+        [SerializeField, Tooltip("ロード画面に表示するTipsの本文Text")]
         private TMP_Text _tipsText;
 
         [Header("勲章回転設定")]
@@ -321,6 +404,22 @@ namespace KillChord.Runtime.View.Persistent.Load
         [SerializeField, Tooltip("勲章の回転に使用するイージング")]
         private Ease _medalRotationEase;
 
+        [Header("ロードテキスト演出設定")]
+        [SerializeField, Tooltip("文字ごとにジャンプさせるロードテキスト")]
+        private TMP_Text _loadingText;
+
+        [SerializeField, Min(0f), Tooltip("文字がジャンプする高さ")]
+        private float _loadingTextJumpHeight = 8f;
+
+        [SerializeField, Min(0.01f), Tooltip("1文字がジャンプ（片道）にかかる時間（秒）")]
+        private float _loadingTextJumpDuration = 0.25f;
+
+        [SerializeField, Min(0f), Tooltip("隣接する文字間のジャンプ開始遅延（秒）")]
+        private float _loadingTextStaggerInterval = 0.05f;
+
+        [SerializeField, Tooltip("文字ジャンプのイージング")]
+        private Ease _loadingTextJumpEase = Ease.OutQuad;
+
         private LoadingScreenController _controller;
         private bool _isSubscribed;
         private bool _isVisible;
@@ -328,5 +427,6 @@ namespace KillChord.Runtime.View.Persistent.Load
         private MotionHandle _handle;
         private MotionHandle _medalHandle;
         private MotionHandle _visibilityHandle;
+        private MotionHandle[] _loadingTextHandles;
     }
 }

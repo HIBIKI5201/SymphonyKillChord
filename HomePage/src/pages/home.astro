@@ -4,12 +4,11 @@ import ScanlineOverlay from '../components/ScanlineOverlay.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import HeroSection from '../components/HeroSection.astro';
 import GameplayVideoSection from '../components/GameplayVideoSection.astro';
-import CharacterFileTeaser from '../components/CharacterFileTeaser.astro';
-import GameplayOrderTeaser from '../components/GameplayOrderTeaser.astro';
-import SkillDossierTeaser from '../components/SkillDossierTeaser.astro';
+import HomeTeaserDesk from '../components/HomeTeaserDesk.astro';
+import HomeUpdates from '../components/HomeUpdates.astro';
+import PlatformLinks from '../components/PlatformLinks.astro';
 import characters from '../data/characters.json';
 import gameplayFeatures from '../data/gameplayFeatures.json';
-import skills from '../data/skills.json';
 import symphonyImage from '../assets/images/characters/symphony立ち絵-ポーズ差分.png';
 ---
 
@@ -18,27 +17,33 @@ import symphonyImage from '../assets/images/characters/symphony立ち絵-ポー�
 	<main>
 		<HeroSection title="Symphony Kill Chord" />
 
-		<GameplayVideoSection src={`${import.meta.env.BASE_URL}movies/DummyData.mp4`} />
+		<PlatformLinks />
 
-		<CharacterFileTeaser
-			name={characters[0].name}
-			formalName={characters[0].formalName}
-			catchphrase="彼らの物語を知る"
-			image={symphonyImage}
-			href={`${import.meta.env.BASE_URL}character`}
+		<GameplayVideoSection src={`${import.meta.env.BASE_URL}movies/GamePV.mp4`} />
+
+		<HomeTeaserDesk
+			character={{
+				name: characters[0].name,
+				formalName: characters[0].formalName,
+				image: symphonyImage,
+				href: `${import.meta.env.BASE_URL}character`,
+			}}
+			gameplay={{
+				title: 'ゲームプレイ',
+				orderNumber: '047',
+				items: gameplayFeatures.map((feature) => feature.name),
+				href: `${import.meta.env.BASE_URL}gameplay`,
+			}}
+			skill={{
+				title: 'スキル',
+				code: 'SKILL-DOSSIER',
+				description:
+					'拍とアクションの組み合わせで発動する、攻撃・バフ・デバフのスキル。スキルツリーで解放・強化していく。',
+				href: `${import.meta.env.BASE_URL}gameplay#skill`,
+			}}
 		/>
-		<GameplayOrderTeaser
-			title="ゲームプレイ"
-			orderNumber="047"
-			items={gameplayFeatures.map((feature) => feature.name)}
-			href={`${import.meta.env.BASE_URL}gameplay`}
-		/>
-		<SkillDossierTeaser
-			title="スキル"
-			code="SKILL-DOSSIER"
-			skills={skills.map((skill) => skill.name)}
-			href={`${import.meta.env.BASE_URL}skill`}
-		/>
+
+		<HomeUpdates />
 	</main>
 
 	<SiteFooter />
@@ -46,6 +51,7 @@ import symphonyImage from '../assets/images/characters/symphony立ち絵-ポー�
 
 <style>
 	main {
+		width: 100%;
 		max-width: 960px;
 		margin: 0 auto;
 		padding: 0 24px;

@@ -102,7 +102,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         {
             Button button = new();
             button.AddToClassList(className);
-            button.EnableSubmitAsClick();
+            button.MakeNavigable();
             return button;
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -30,6 +31,12 @@ namespace SinfoniaStudio.SinfoniaOperator
             if (args.Length > 0 && string.Equals(args[0], "serve", StringComparison.OrdinalIgnoreCase))
             {
                 await RunServeCommandAsync(args[1..]);
+                return;
+            }
+
+            if (args.Length > 0 && string.Equals(args[0], "branches", StringComparison.OrdinalIgnoreCase))
+            {
+                await RunBranchesCommandAsync(args[1..]);
                 return;
             }
 
@@ -267,7 +274,8 @@ namespace SinfoniaStudio.SinfoniaOperator
                 string modelPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_EMBEDDING_MODEL_PATH);
                 string tokenizerPath = GetTokenizerPath(modelPath);
                 string repositoryRoot = FindRepositoryRoot();
-                MarkdownChunker chunker = new(repositoryRoot);
+                string sourcePath = OperatorConfig.GetValue(OperatorConfigKeys.NOTION_EXPORT_OUTPUT);
+                MarkdownChunker chunker = new(repositoryRoot, specificationRootPath: string.IsNullOrWhiteSpace(sourcePath) ? null : sourcePath);
                 using OnnxEmbeddingModel embeddingModel = new(modelPath, tokenizerPath);
                 SpecIndexBuilder indexBuilder = new(chunker, embeddingModel);
                 SpecIndex index = await indexBuilder.BuildAndSaveAsync(indexPath);
@@ -294,22 +302,50 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             try
             {
+                // 配備済みの検索設定・索引・モデルは同一リリースの組を優先する。
+                OperatorConfig.LoadJsonFile(
+                    Path.Combine(AppContext.BaseDirectory, "spec-search.release.json"),
+                    OperatorConfigKeys.SPEC_SEARCH,
+                    OperatorConfigKeys.SPEC_SEARCH_INDEX_PATH,
+                    OperatorConfigKeys.SPEC_SEARCH_EMBEDDING_MODEL_PATH);
                 string discordBotToken = GetRequiredConfigValue(OperatorConfigKeys.DISCORD_BOT_TOKEN);
                 string indexPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_INDEX_PATH);
                 string modelPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_EMBEDDING_MODEL_PATH);
                 string tokenizerPath = GetTokenizerPath(modelPath);
                 ulong? guildId = ParseOptionalGuildId(OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_DISCORD_GUILD_ID));
                 int topK = ParseTopK(OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_TOP_K));
-                string priorityPath = OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_PRIORITY_PATH);
-                SpecPriorityTable? priorityTable = string.IsNullOrWhiteSpace(priorityPath)
-                    ? null
-                    : SpecPriorityTable.Load(priorityPath);
+                string searchJson = OperatorConfig.GetJsonValue(OperatorConfigKeys.SPEC_SEARCH);
+                if (string.IsNullOrWhiteSpace(searchJson))
+                {
+                    throw new InvalidOperationException("公開envのSPEC_SEARCHに資料・節の重みを設定してください。旧SPEC_SEARCH_PRIORITY_PATHは使用しません。");
+                }
+                SpecSearchSettings searchSettings = SpecSearchSettings.Parse(searchJson);
+                if (topK > searchSettings.CandidateCount)
+                {
+                    throw new InvalidOperationException("SPEC_SEARCH_TOP_KはSPEC_SEARCH.CandidateCount以下にしてください。");
+                }
                 string geminiApiKey = OperatorConfig.GetValue(OperatorConfigKeys.GEMINI_API_KEY);
                 SpecIndex index = SpecIndex.Load(indexPath);
                 using OnnxEmbeddingModel embeddingModel = new(modelPath, tokenizerPath);
                 using GeminiSummarizer? summarizer = CreateGeminiSummarizer(geminiApiKey);
                 await using DiscordBotManager discordBot = new(discordBotToken);
-                discordBot.ConfigureSpecSearch(index, embeddingModel, guildId, topK, priorityTable, summarizer);
+                discordBot.ConfigureSpecSearch(index, embeddingModel, guildId, topK, searchSettings, summarizer);
+
+                // GITHUB_REPOSITORYが設定されている場合のみ、ブランチ整理コマンドを有効にする。
+                string gitHubRepository = OperatorConfig.GetValue(OperatorConfigKeys.GITHUB_REPOSITORY);
+                if (!string.IsNullOrWhiteSpace(gitHubRepository))
+                {
+                    ulong? branchCleanupGuildId = ParseOptionalGuildId(
+                        OperatorConfig.GetValue(OperatorConfigKeys.BRANCH_CLEANUP_DISCORD_GUILD_ID)) ?? guildId;
+                    discordBot.ConfigureBranchCleanup(
+                        gitHubRepository,
+                        OperatorConfig.GetValue(OperatorConfigKeys.GITHUB_TOKEN),
+                        branchCleanupGuildId);
+                }
+                else
+                {
+                    Console.WriteLine($"[SpecSearch] {OperatorConfigKeys.GITHUB_REPOSITORY} が未設定のため、/branchesは登録しません。");
+                }
 
                 TaskCompletionSource shutdownSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
                 using PosixSignalRegistration interruptRegistration = PosixSignalRegistration.Create(
@@ -335,6 +371,106 @@ namespace SinfoniaStudio.SinfoniaOperator
             catch (Exception ex)
             {
                 Console.WriteLine($"[SpecSearch] Botの実行に失敗しました: {ex.Message}");
+                Environment.ExitCode = 1;
+            }
+        }
+
+        /// <summary>
+        ///     ベースブランチへマージ済みで削除できるリモートブランチを一覧表示する。
+        ///     使用法: branches [--remote &lt;名前&gt;] [--base &lt;名前&gt;] [--keep &lt;名前&gt;]... [--no-fetch] [--github]
+        ///     --github を指定すると、ローカルのクローンではなくGitHub APIを参照し、
+        ///     squashマージやrebaseマージされたブランチも検出する。
+        /// </summary>
+        /// <param name="args">"branches"を除いた残りの引数。</param>
+        private static async Task RunBranchesCommandAsync(string[] args)
+        {
+            string remoteName = GitRemoteBranchInspector.DEFAULT_REMOTE_NAME;
+            string baseBranch = GitRemoteBranchInspector.DEFAULT_BASE_BRANCH;
+            List<string> protectedBranches = new(GitRemoteBranchInspector.DEFAULT_PROTECTED_BRANCHES);
+            bool shouldFetch = true;
+            bool useGitHubApi = false;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i])
+                {
+                    case "--remote" when i + 1 < args.Length:
+                        remoteName = args[++i];
+                        break;
+                    case "--base" when i + 1 < args.Length:
+                        baseBranch = args[++i];
+                        break;
+                    case "--keep" when i + 1 < args.Length:
+                        protectedBranches.Add(args[++i]);
+                        break;
+                    case "--no-fetch":
+                        shouldFetch = false;
+                        break;
+                    case "--github":
+                        useGitHubApi = true;
+                        break;
+                    default:
+                        Console.WriteLine($"[Branches] 不明な引数です: {args[i]}");
+                        Console.WriteLine("[Branches] 使用法: branches [--remote <名前>] [--base <名前>] [--keep <名前>]... [--no-fetch] [--github]");
+                        Environment.ExitCode = 1;
+                        return;
+                }
+            }
+
+            try
+            {
+                IReadOnlyList<RemoteBranchInfo> branches;
+                string baseLabel;
+                if (useGitHubApi)
+                {
+                    LoadConfigFromDefaultLocations();
+                    string repository = GetRequiredConfigValue(OperatorConfigKeys.GITHUB_REPOSITORY);
+                    baseLabel = $"{repository} の {baseBranch}";
+                    Console.WriteLine($"[Branches] GitHub APIで {repository} を調べています...");
+                    using GitHubBranchInspector gitHubInspector = new(
+                        repository,
+                        OperatorConfig.GetValue(OperatorConfigKeys.GITHUB_TOKEN));
+                    branches = await gitHubInspector.GetDeletableBranchesAsync(baseBranch, protectedBranches);
+                }
+                else
+                {
+                    baseLabel = $"{remoteName}/{baseBranch}";
+                    GitRemoteBranchInspector inspector = new(FindRepositoryRoot());
+
+                    if (shouldFetch)
+                    {
+                        Console.WriteLine($"[Branches] {remoteName} を fetch --prune しています...");
+                        inspector.FetchAndPrune(remoteName);
+                    }
+
+                    branches = inspector.GetDeletableBranches(remoteName, baseBranch, protectedBranches);
+                }
+
+                if (branches.Count == 0)
+                {
+                    Console.WriteLine($"[Branches] {baseLabel} へマージ済みで削除可能なブランチはありません。");
+                    return;
+                }
+
+                Console.WriteLine($"[Branches] {baseLabel} へマージ済みで削除可能なブランチ: {branches.Count} 件（最終コミットが古い順）");
+                Console.WriteLine($"[Branches] 保護対象: {string.Join(", ", protectedBranches)}");
+                Console.WriteLine();
+
+                foreach (RemoteBranchInfo branch in branches)
+                {
+                    Console.WriteLine($"  {branch.LastCommitDate.ToLocalTime():yyyy-MM-dd}  {branch.Name}  ({branch.AuthorName}) - {branch.Reason}");
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("[Branches] 削除するには以下を実行します。");
+                foreach (RemoteBranchInfo branch in branches)
+                {
+                    Console.WriteLine($"  git push {remoteName} --delete {branch.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Branches] ブランチの調査に失敗しました: {ex.Message}");
                 Environment.ExitCode = 1;
             }
         }
@@ -379,7 +515,10 @@ namespace SinfoniaStudio.SinfoniaOperator
                 while (directory != null)
                 {
                     string specificationPath = Path.Combine(directory.FullName, "Docs", "NotionSpecifications");
-                    if (Directory.Exists(specificationPath))
+                    if (Directory.Exists(Path.Combine(directory.FullName, ".git"))
+                        || File.Exists(Path.Combine(directory.FullName, ".git"))
+                        || Directory.Exists(specificationPath)
+                        || Directory.Exists(Path.Combine(directory.FullName, "Library", "NotionSpecifications")))
                     {
                         return directory.FullName;
                     }
@@ -388,7 +527,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 }
             }
 
-            throw new DirectoryNotFoundException("Docs/NotionSpecificationsを含むリポジトリルートが見つかりません。");
+            throw new DirectoryNotFoundException("仕様書キャッシュまたは.gitを含むリポジトリルートが見つかりません。");
         }
 
         /// <summary>

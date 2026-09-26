@@ -1,39 +1,51 @@
 ---
 import GameplayRing from './GameplayRing.astro';
+import RhythmGaugeDemo from './RhythmGaugeDemo.astro';
 
 interface Segment {
 	value: string;
 	caption: string;
 	locked?: boolean;
+	color?: string;
+	ratio?: number;
 }
 
 interface Props {
-	code: string;
 	name: string;
 	description: string;
 	ringLabel: string;
 	ringSegments: Segment[];
+	current: number;
+	total: number;
+	ringWord: string;
+	rhythmSegments?: Segment[];
 }
 
-const { code, name, description, ringLabel, ringSegments } = Astro.props;
+const { name, description, ringLabel, ringSegments, current, total, ringWord, rhythmSegments } = Astro.props;
 ---
 
 <article class="slide">
 	<div class="visual">
-		<GameplayRing label={ringLabel} segments={ringSegments} />
+		<GameplayRing
+			legendTitle={ringLabel}
+			segments={ringSegments}
+			current={current}
+			total={total}
+			centerLabel={ringWord}
+		/>
 	</div>
 
 	<div class="body">
-		<p class="code">{code}</p>
 		<h2 class="name">{name}</h2>
 		<p class="description">{description}</p>
+		{rhythmSegments && <RhythmGaugeDemo segments={rhythmSegments as { value: string; caption: string; color: string; ratio?: number }[]} />}
 	</div>
 </article>
 
 <style>
 	.slide {
 		display: grid;
-		grid-template-columns: 240px minmax(0, 460px);
+		grid-template-columns: 260px minmax(0, 460px);
 		align-items: center;
 		justify-content: center;
 		gap: 48px;
@@ -48,17 +60,8 @@ const { code, name, description, ringLabel, ringSegments } = Astro.props;
 		justify-content: center;
 	}
 
-	.code {
-		margin: 0;
-		font-family: var(--font-mono);
-		letter-spacing: var(--tracking-label);
-		font-size: 12px;
-		color: var(--color-signal-dim);
-		text-transform: uppercase;
-	}
-
 	.name {
-		margin: 8px 0 0;
+		margin: 0;
 		font-family: var(--font-display);
 		letter-spacing: var(--tracking-display);
 		font-size: clamp(1.375rem, 3vw, 1.75rem);
@@ -72,6 +75,7 @@ const { code, name, description, ringLabel, ringSegments } = Astro.props;
 		font-size: 0.9375rem;
 		line-height: 1.9;
 		color: var(--color-text-muted);
+		white-space: pre-line;
 	}
 
 	@media (max-width: 767px) {

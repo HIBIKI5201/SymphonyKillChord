@@ -39,6 +39,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <summary> シナリオが選択されているかどうかを取得します。 </summary>
         public bool HasSelectedScenario => _currentStageDefinition != null;
 
+        /// <summary> 選択状態が更新された回数を取得します。 </summary>
+        public int SelectionRevision => _selectionRevision;
+
         /// <summary> タイトルから開始したオープニングチュートリアルの場合はtrueです。 </summary>
         public bool IsOpeningTutorialScenario { get; private set; }
 
@@ -55,6 +58,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 
             _currentStageDefinition = stageDefinition;
             IsOpeningTutorialScenario = false;
+            _selectionRevision++;
         }
 
         /// <summary>
@@ -74,8 +78,26 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         {
             _currentStageDefinition = null;
             IsOpeningTutorialScenario = false;
+            _selectionRevision++;
+        }
+
+        /// <summary>
+        ///     取得時から選択状態が更新されていない場合だけ初期化します。
+        /// </summary>
+        /// <param name="expectedRevision"> 取得済みの選択状態改訂番号。</param>
+        /// <returns> 選択状態を初期化した場合はtrue。</returns>
+        public bool TryClear(int expectedRevision)
+        {
+            if (_selectionRevision != expectedRevision)
+            {
+                return false;
+            }
+
+            Clear();
+            return true;
         }
 
         private ScenarioStageDefinition _currentStageDefinition;
+        private int _selectionRevision;
     }
 }

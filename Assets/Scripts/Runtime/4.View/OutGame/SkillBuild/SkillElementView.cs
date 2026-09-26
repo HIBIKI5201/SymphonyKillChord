@@ -1,6 +1,8 @@
 using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.SkillBuild
@@ -41,6 +43,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             RootElement.AddToClassList(DRAGGABLE_CLASS_NAME);
             RootElement.RegisterCallback<ClickEvent>(HandleClickHandler);
             _genreBadge.RegisterCallback<ClickEvent>(HandleGenreBadgeClickHandler);
+            _lockedLocalizedText = new LocalizedElementText(
+                "UICommon", "ui.skill.locked", text => _lockedLabel.text = text, _lockedLabel.text);
         }
 
         /// <summary> スキルが選択された時にスキル ID を通知する。 </summary>
@@ -78,6 +82,15 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         public void SetSelected(bool isSelected)
         {
             RootElement.EnableInClassList(SELECTED_CLASS_NAME, isSelected);
+
+            if (isSelected)
+            {
+                StartFloatingAnimation();
+            }
+            else
+            {
+                StopFloatingAnimation();
+            }
         }
 
         /// <summary>
@@ -94,6 +107,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         public void Dispose()
         {
+            _lockedLocalizedText.Dispose();
+            StopFloatingAnimation();
             RootElement.UnregisterCallback<ClickEvent>(HandleClickHandler);
             _genreBadge.UnregisterCallback<ClickEvent>(HandleGenreBadgeClickHandler);
             OnSelected = null;
@@ -112,13 +127,19 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string EQUIPPED_BADGE_NAME = "skill-equipped-badge";
         private const string LOCKED_LABEL_NAME = "skill-locked-label";
         private const string SKILL_ELEMENT_NAME_PREFIX = "skill-element-";
+        private const float FLOAT_AMPLITUDE = 6f;
+        private const float FLOAT_PHASE_STEP = 0.065f;
+        private const long FLOAT_INTERVAL_MS = 16;
 
         private readonly Image _icon;
         private readonly Label _nameLabel;
         private readonly Image _genreBadge;
         private readonly VisualElement _equippedBadge;
         private readonly Label _lockedLabel;
+        private readonly LocalizedElementText _lockedLocalizedText;
         private readonly IUISoundEffectCommand _soundEffectCommand;
+        private IVisualElementScheduledItem _floatSchedule;
+        private float _floatPhase;
 
         /// <summary>
         ///     クリックを選択通知へ変換する。
@@ -152,6 +173,35 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             }
 
             OnGenreBadgeSelected?.Invoke(CurrentData.Value.GenreIds[0]);
+        }
+
+        /// <summary>
+        ///     選択中のスキルカードを、上下にゆっくり浮遊させるアニメーションを開始する。
+        /// </summary>
+        private void StartFloatingAnimation()
+        {
+            if (_floatSchedule != null)
+            {
+                return;
+            }
+
+            _floatPhase = 0f;
+            _floatSchedule = RootElement.schedule.Execute(() =>
+            {
+                _floatPhase += FLOAT_PHASE_STEP;
+                float offsetY = Mathf.Sin(_floatPhase) * FLOAT_AMPLITUDE;
+                RootElement.style.translate = new Translate(0, offsetY);
+            }).Every(FLOAT_INTERVAL_MS);
+        }
+
+        /// <summary>
+        ///     浮遊アニメーションを停止し、位置を元に戻す。
+        /// </summary>
+        private void StopFloatingAnimation()
+        {
+            _floatSchedule?.Pause();
+            _floatSchedule = null;
+            RootElement.style.translate = new Translate(0, 0);
         }
     }
 }

@@ -1,8 +1,8 @@
+using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Music;
-using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Collections.Generic;
@@ -46,27 +46,24 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <returns> リズムガイドDTO。 </returns>
         public RhythmGuideDto CreateDto()
         {
-            float barProgress = _musicSyncService.GetBarProgress();
-
             // インジケーターはジャスト位置を通過させるため1小節を超えた進捗を使用する。
-            // 拍種の解決は0〜1の判定範囲を前提とするため、クランプ済みの進捗をそのまま使う。
             float indicatorBarProgress = _musicSyncService.GetBarProgressUnclamped();
 
             float indicatorNormalized = _rhythmGuideUsecase.CalculateIndicatorNormalized(indicatorBarProgress);
 
-            BeatType? currentBeatType = _rhythmGuideUsecase.CalculateCurrentBeatType(barProgress);
-
-            int? currentBeatCount = currentBeatType.HasValue
-                ? (int?)currentBeatType.Value : null;
+            BeatType currentBeatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
+            int currentBeatCount = (int)currentBeatType;
 
             _zones.Clear();
 
-            foreach (RhythmJudgmentRange range in _rhythmGuideUsecase.RhythmJudgmentDefinition.JudgmentRanges)
+            foreach (RhythmJudgmentRange range in _musicSyncService.RhythmJudgmentDefinition.JudgmentRanges)
             {
                 _zones.Add(new RhythmGuideZoneDto(
                     (int)range.BeatType,
                     range.StartNormalized,
-                    range.EndNormalized
+                    range.EndNormalized,
+                    range.JustStartNormalized,
+                    range.JustEndNormalized
                 ));
             }
 
@@ -78,6 +75,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
                 currentBeatCount,
                 _zones,
                 hasTarget,
+                isJustHit,
+                _musicSyncService.RhythmJudgmentDefinition.TimeoutBarCount,
                 targetBeatCount
             );
         }
@@ -88,34 +87,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <returns> 対象が存在しない、またはチュートリアル中でない場合はnull。 </returns>
         private int? GetTutorialTargetBeatCount()
         {
-            if (_selectedBattleStageState == null
-                || !_selectedBattleStageState.HasSelectedBattleStage
-                || !_selectedBattleStageState.CurrentStageDefinition.IsTutorial)
-            {
-                return null;
-            }
-
             // ミッション遷移でインスタンスが差し替わるため、都度最新のサービスを取得する。
-            MissionRuntimeService missionRuntimeService = _missionRuntimeServiceProvider?.Invoke();
-
-            if (missionRuntimeService?.MissionDefinition?.ClearCondition is not ObjectiveSequenceClearCondition sequence)
-            {
-                return null;
-            }
-
-            int currentStepIndex = missionRuntimeService.MissionProgress.ObjectiveStepIndex;
-            var currentStep = sequence.GetStep(currentStepIndex);
-
-            if (currentStep?.Condition is not ActionRepeatCountClearCondition actionCondition)
-            {
-                return null;
-            }
-
-            int? result = actionCondition.TargetBeatType.HasValue
-                ? (int)actionCondition.TargetBeatType.Value
-                : null;
-
-            return result;
+            return TutorialAttackTargetQuery.GetTargetBeatCount(
+                _selectedBattleStageState, _missionRuntimeServiceProvider?.Invoke());
         }
 
         private readonly IMusicSyncService _musicSyncService;

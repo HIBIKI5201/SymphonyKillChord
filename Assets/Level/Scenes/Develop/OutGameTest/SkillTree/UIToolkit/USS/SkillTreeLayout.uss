@@ -1,24 +1,6 @@
 :root {
 }
 
-.skilltree-top-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    flex-direction: row;
-    align-items: center;
-    background-color: rgb(18, 33, 61);
-    border-bottom-right-radius: 0;
-    padding: 14px 32px 14px 20px;
-}
-
-.skilltree-top-bar-title {
-    color: rgb(255, 255, 255);
-    font-size: 30px;
-    -unity-font-style: bold;
-    margin-right: 20px;
-}
-
 .skilltree-top-bar-points {
     color: rgb(207, 214, 230);
     font-size: 20px;
@@ -31,7 +13,12 @@
     bottom: 16px;
     width: 220px;
     height: 56px;
-    background-color: rgb(238, 240, 228);
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    -unity-background-scale-mode: stretch-to-fill;
     color: rgb(26, 26, 26);
     font-size: 22px;
     -unity-font-style: bold;
@@ -39,6 +26,25 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
+}
+
+.skilltree-reset-button:hover,
+.skilltree-reset-button:focus {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=21300000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
+}
+
+.skilltree-reset-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    margin-right: 8px;
+    background-image: url("project://database/Assets/Arts/UI/UI_Research_Reset.png?fileID=21300000&guid=c6d42185820a5b84fbe085a9d831f668&type=3#UI_Research_Reset");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.skilltree-reset-label {
+    margin: 0;
+    white-space: nowrap;
 }
 
 .skilltree-panel {
@@ -60,106 +66,136 @@
 
 .skilltree-panel-header-bar {
     flex-shrink: 0;
-    background-color: rgb(28, 46, 77);
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_NameTab.png?fileID=21300000&guid=16997e8e901f4164e9f0abf42a763d2b&type=3#UI_NameTab");
+    -unity-background-scale-mode: stretch-to-fill;
     color: rgb(255, 255, 255);
-    font-size: 20px;
+    font-size: 30px;
     -unity-font-style: bold;
     -unity-text-align: middle-left;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    padding: 8px 14px;
+    padding: 14px 20px;
 }
 
 .skilltree-panel-body {
     flex-direction: column;
-    padding: 12px 14px;
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Build_Panel.png?fileID=21300000&guid=a54aaa7603081784687325749f91661e&type=3#UI_Build_Panel");
+    -unity-background-scale-mode: stretch-to-fill;
+    padding: 18px 20px;
 }
 
 .skilltree-status-row {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 6px;
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Status_Back.png?fileID=21300000&guid=6ad5873f2bf323c43b7200b9b7fca4d5&type=3#UI_Status_Back");
+    -unity-background-scale-mode: stretch-to-fill;
+    padding: 4px 8px;
+    margin-bottom: 10px;
 }
 
 .skilltree-status-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
+    width: 34px;
+    height: 34px;
+    margin-right: 12px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
 .skilltree-status-label {
     color: rgb(207, 214, 230);
-    font-size: 16px;
+    font-size: 24px;
+    flex-grow: 1;
 }
 
-.skilltree-status-value {
-    flex-grow: 1;
+.skilltree-status-current-value {
     color: rgb(255, 255, 255);
-    font-size: 16px;
+    font-size: 24px;
+    width: 90px;
+    -unity-text-align: middle-right;
+}
+
+.skilltree-status-arrow {
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    width: 30px;
+    margin-left: 6px;
+    margin-right: 6px;
+    -unity-text-align: middle-center;
+}
+
+.skilltree-status-delta-value {
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    width: 100px;
+    margin-right: 4px;
     -unity-text-align: middle-right;
 }
 
 .skilltree-info-top {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
 }
 
 .skilltree-info-icon {
-    width: 64px;
-    height: 64px;
-    min-width: 64px;
-    min-height: 64px;
+    width: 84px;
+    height: 84px;
+    min-width: 84px;
+    min-height: 84px;
     background-color: rgb(0, 0, 0);
     border-top-left-radius: 50%;
     border-top-right-radius: 50%;
     border-bottom-right-radius: 50%;
     border-bottom-left-radius: 50%;
     -unity-background-scale-mode: scale-to-fit;
-    margin-right: 12px;
+    margin-right: 16px;
 }
 
 .skilltree-info-name {
     color: rgb(255, 255, 255);
-    font-size: 22px;
+    font-size: 28px;
     -unity-font-style: bold;
     white-space: normal;
 }
 
+.skilltree-info-type-column {
+    flex-grow: 0;
+    flex-shrink: 0;
+    align-items: center;
+    margin-left: 8px;
+}
+
+.skilltree-info-type-caption {
+    color: rgb(207, 214, 230);
+    font-size: 13px;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
+    white-space: normal;
+}
+
+.skilltree-info-type-box {
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(52, 78, 122);
+}
+
+.skilltree-info-type-icon {
+    width: 32px;
+    height: 32px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
 .skilltree-combo-row {
     flex-direction: row;
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
 .skilltree-combo-hex {
-    width: 24px;
-    flex-direction: column;
-    align-items: center;
-    margin-right: 8px;
-}
-
-.skilltree-combo-hex-cap-top,
-.skilltree-combo-hex-cap-bottom {
-    width: 0;
-    height: 0;
-    border-left-width: 12px;
-    border-right-width: 12px;
-    border-left-color: rgba(0, 0, 0, 0);
-    border-right-color: rgba(0, 0, 0, 0);
-}
-
-.skilltree-combo-hex-cap-top {
-    border-bottom-width: 7px;
-}
-
-.skilltree-combo-hex-cap-bottom {
-    border-top-width: 7px;
-}
-
-.skilltree-combo-hex-rect {
-    width: 24px;
-    height: 13px;
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
 }
 
 .skilltree-info-cost-row {
@@ -171,11 +207,13 @@
 
 .skilltree-info-cost-label {
     color: rgb(207, 214, 230);
-    font-size: 16px;
+    font-size: 20px;
 }
 
 .skilltree-info-action-button {
-    background-color: rgb(238, 240, 228);
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    -unity-background-scale-mode: stretch-to-fill;
     color: rgb(26, 26, 26);
     font-size: 20px;
     -unity-font-style: bold;
@@ -183,5 +221,166 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
+}
+
+.skilltree-info-action-button:hover,
+.skilltree-info-action-button:focus {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=21300000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
+}
+
+.unlock-confirm-dialog {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.59);
+}
+
+.unlock-confirm-box {
+    width: 624px;
+    background-color: rgb(18, 33, 61);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(5, 9, 20);
+    border-right-color: rgb(5, 9, 20);
+    border-top-color: rgb(5, 9, 20);
+    border-bottom-color: rgb(5, 9, 20);
+    padding: 26px 31px;
+}
+
+.unlock-confirm-title {
+    color: rgb(255, 255, 255);
+    font-size: 42px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 21px;
+}
+
+.unlock-confirm-scroll-view {
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-height: 0;
+    max-height: 364px;
+    margin-bottom: 21px;
+}
+
+.unlock-confirm-plain-row {
+    color: rgb(255, 255, 255);
+    font-size: 23px;
+    -unity-text-align: middle-center;
+    background-color: rgb(34, 64, 110);
+    padding: 13px 21px;
+    margin-bottom: 21px;
+}
+
+.unlock-confirm-skill-name-list {
+    flex-direction: column;
+}
+
+.unlock-confirm-skill-name-row {
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    -unity-text-align: middle-center;
+    background-color: rgb(34, 64, 110);
+    padding: 10px 21px;
+    margin-bottom: 8px;
+}
+
+.unlock-confirm-section-header {
+    color: rgb(207, 214, 230);
+    font-size: 20px;
+    -unity-text-align: middle-center;
+    margin-bottom: 10px;
+}
+
+.unlock-confirm-stat-row {
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: rgb(34, 64, 110);
+    padding: 8px 21px;
+    margin-bottom: 8px;
+}
+
+.unlock-confirm-stat-label,
+.unlock-confirm-stat-value {
+    color: rgb(255, 255, 255);
+    font-size: 21px;
+}
+
+.unlock-confirm-skip-row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.unlock-confirm-skip-box {
+    flex-grow: 0;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    width: 22px;
+    height: 22px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(207, 214, 230);
+    border-right-color: rgb(207, 214, 230);
+    border-top-color: rgb(207, 214, 230);
+    border-bottom-color: rgb(207, 214, 230);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.unlock-confirm-skip-checkmark {
+    width: 16px;
+    height: 16px;
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_CheckBox.png?fileID=21300000&guid=d242e6e6a86fffe46830aa647b11573e&type=3#UI_CheckBox");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.unlock-confirm-skip-label {
+    color: rgb(207, 214, 230);
+    font-size: 16px;
+    margin-left: 8px;
+}
+
+.unlock-confirm-button {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    -unity-background-scale-mode: stretch-to-fill;
+    color: rgb(26, 26, 26);
+    font-size: 26px;
+    -unity-font-style: bold;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    padding: 16px;
+    margin-top: 5px;
+}
+
+.unlock-confirm-button:hover,
+.unlock-confirm-button:focus {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=21300000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
+}
+
+.skilltree-dialog-button {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_off.png?fileID=21300000&guid=04c54678165f5884ca0aafa6162a76c7&type=3#UI_Button_off");
+    -unity-background-scale-mode: stretch-to-fill;
+    color: rgb(26, 26, 26);
+}
+
+.skilltree-dialog-button:hover,
+.skilltree-dialog-button:focus {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Button_on.png?fileID=21300000&guid=a3d799ea7baff734da915b8d2043795b&type=3#UI_Button_on");
 }

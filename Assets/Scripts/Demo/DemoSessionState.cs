@@ -1,7 +1,7 @@
 namespace KillChord.Demo
 {
     /// <summary>
-    ///     初回ホーム到達からの体験版タイマー状態を保持します。
+    ///     体験版全体とホーム滞在ごとのタイマー状態を保持します。
     /// </summary>
     public sealed class DemoSessionState : IDemoSession
     {
@@ -44,7 +44,7 @@ namespace KillChord.Demo
             _isConfigured = true;
         }
 
-        /// <summary> 初回ホーム到達時に両タイマーを開始します。 </summary>
+        /// <summary> 設定された開始地点への到達時、またはその地点以降からの再開時に全体タイマーを開始します。 </summary>
         public void Start()
         {
             if (!_isConfigured)
@@ -53,6 +53,29 @@ namespace KillChord.Demo
             }
 
             IsStarted = true;
+        }
+
+        /// <summary> 体験版セッションを終了してタイマーを停止します。 </summary>
+        public void End()
+        {
+            IsStarted = false;
+        }
+
+        /// <summary> 新しい体験版セッションを開始できる初期状態へ戻します。 </summary>
+        public void Reset()
+        {
+            IsStarted = false;
+            IsHomeTimeExpired = false;
+            IsOverallTimeExpired = false;
+            HomeElapsedSeconds = 0.0f;
+            OverallElapsedSeconds = 0.0f;
+        }
+
+        /// <summary> ホームタイマーを初期状態へ戻します。 </summary>
+        public void ResetHomeTimer()
+        {
+            HomeElapsedSeconds = 0.0f;
+            IsHomeTimeExpired = false;
         }
 
         /// <summary>

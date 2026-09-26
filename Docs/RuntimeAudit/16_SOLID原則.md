@@ -303,4 +303,4 @@ _positionPairs = GameObject.FindObjectsByType<SpawnPositionPair>(FindObjectsSort
 | [2.Application/Persistent/SceneManagement/ISceneTransitionService.cs](../../Assets/Scripts/Runtime/2.Application/Persistent/SceneManagement/ISceneTransitionService.cs) | シーン遷移の一連の操作 |
 | [3.Adaptor/OutGame/Screen/IScreenController.cs](../../Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/IScreenController.cs) | 画面表示操作。ただし1行委譲は[13. DRY](13_DRY原則.md)参照 |
 | [6.Composition/Bootstrap/IInitializationModule.cs](../../Assets/Scripts/Runtime/6.Composition/Bootstrap/IInitializationModule.cs) | 初期化フェーズ契約 |
-| [3.Adaptor/InGame/Animaiton/ICharacterAnimationSignal.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Animaiton/ICharacterAnimationSignal.cs) | アニメ通知。※フォルダ名綴り誤り([18](18_命名一貫性と可読性.md)) |
+| [3.Adaptor/InGame/Animation/ICharacterAnimationSignal.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Animation/ICharacterAnimationSignal.cs) | アニメ通知 |

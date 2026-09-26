@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,6 +24,10 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _videoClips = videoClips;
 
             RegisterEvents();
+            _closeButtonLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                "ui.skill_tree.close_preview",
+                text => ((Button)_closeButton).text = text);
         }
 
         /// <summary>
@@ -52,6 +57,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         {
             base.Dispose();
             _closeButtonActivation?.Dispose();
+            _closeButtonLocalizedText?.Dispose();
         }
 
         private Dictionary<int, VideoClip> _videoClips;
@@ -63,8 +69,10 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private VisualElement _closeButton;
         private OutGameUIEvent _outGameUIEvent;
         private IDisposable _closeButtonActivation;
+        private LocalizedElementText _closeButtonLocalizedText;
 
         private const string ELEMENT_NAME_CLOSE_BUTTON = "ClosePreviewButton";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         private void RegisterEvents()
         {

@@ -3,8 +3,8 @@
 
 .tab-root {
     background-color: rgb(123, 123, 123);
-    width: 60%;
-    height: 60%;
+    width: 70%;
+    height: 70%;
     align-self: center;
 }
 
@@ -31,21 +31,27 @@
 
 .unity-tab-view__header-container {
     align-items: stretch;
-    justify-content: space-between;
-    width: 11%;
+    justify-content: flex-end;
+    width: 100%;
     height: 100%;
 }
 
 .unity-tab__header {
-    width: 200px;
+    width: auto;
+    min-width: 0;
     height: 80px;
-    margin-right: 6px;
+    padding-left: 24px;
+    padding-right: 24px;
+    margin-left: 6px;
     border-top-width: 4px;
     border-right-width: 4px;
     border-bottom-width: 4px;
     border-left-width: 4px;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Panel_tab_off.png?fileID=21300000&guid=c27ffb2c61799194fbed912bd417a179&type=3#UI_Panel_tab_off");
+    -unity-background-scale-mode: stretch-to-fill;
 }
 
 .unity-tab__header-label {
@@ -54,9 +60,11 @@
     -unity-font-style: bold;
     font-size: 22px;
     -unity-text-align: middle-center;
+    color: rgb(255, 255, 255);
 }
 
 .unity-tab__header:checked {
+    background-image: url("project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Panel_tab.png?fileID=21300000&guid=2634097f27d94f04cab60440a40fcb28&type=3#UI_Panel_tab");
     border-left-color: rgb(120, 20, 34);
     border-right-color: rgb(120, 20, 34);
     border-top-color: rgb(120, 20, 34);
@@ -95,11 +103,13 @@
     flex-grow: 1;
     width: 100%;
     height: 100%;
+    background-color: rgba(0, 0, 0, 0);
 }
 
 .unity-tab-view__content-container {
     width: 100%;
     height: 100%;
+    background-color: rgba(0, 0, 0, 0);
 }
 
 .audio-volume-slider {

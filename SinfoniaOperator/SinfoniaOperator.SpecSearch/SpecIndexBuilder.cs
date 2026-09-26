@@ -30,6 +30,10 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
             SpecChunkRecord[] chunks = _chunker.ChunkAll();
+            if (chunks.Length == 0)
+            {
+                throw new InvalidOperationException("仕様キャッシュに検索対象の本文がありません。索引を更新しません。");
+            }
             SpecChunkRecord[] embeddedChunks = new SpecChunkRecord[chunks.Length];
             for (int index = 0; index < chunks.Length; index++)
             {
@@ -42,7 +46,8 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
                     chunk.HeadingBreadcrumb,
                     chunk.NotionUrl,
                     chunk.Text,
-                    vector);
+                    vector,
+                    chunk.Metadata);
             }
 
             SpecIndex specIndex = new(embeddedChunks);

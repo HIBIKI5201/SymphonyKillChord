@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using SymphonyFrameWork.System.SaveSystem;
 using System.Threading.Tasks;
@@ -19,8 +20,8 @@ namespace KillChord.Runtime.Application.OutGame.Screen
                 : await SaveStore.LoadAsync<SaveData>();
 
             return new HomePoints(
-                saveData.SkillBuild.SkillLevelupPoint,
-                saveData.SkillUnlock.ResearchPoint);
+                saveData.ResourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint),
+                saveData.ResourceInventory.GetAmount(GameResourceIds.ResearchPoint));
         }
     }
 

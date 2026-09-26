@@ -54,21 +54,22 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <param name="embeddingModel">クエリ用の埋め込みモデル。</param>
         /// <param name="guildId">コマンドを限定登録する任意のGuild ID。</param>
         /// <param name="topK">返却する検索結果の件数。</param>
-        /// <param name="priorityTable">ソースファイルごとの任意の検索優先度テーブル。</param>
+        /// <param name="searchSettings">envに定義した検索条件と資料の重み。</param>
         /// <param name="summarizer">検索結果を要約する任意のGemini要約器。</param>
         public void ConfigureSpecSearch(
             SpecIndex specIndex,
             IEmbeddingModel embeddingModel,
             ulong? guildId,
             int topK,
-            SpecPriorityTable? priorityTable = null,
+            SpecSearchSettings searchSettings,
             GeminiSummarizer? summarizer = null)
         {
             _specIndex = specIndex ?? throw new ArgumentNullException(nameof(specIndex));
             _embeddingModel = embeddingModel ?? throw new ArgumentNullException(nameof(embeddingModel));
             _specSearchGuildId = guildId;
             _specSearchTopK = topK;
-            _specSearchPriorityTable = priorityTable;
+            _specSearchEngine = new SpecSearchEngine(specIndex, searchSettings);
+            Console.WriteLine($"[SpecSearch] 検索設定を読み込みました。資料ルール: {searchSettings.SourceRules.Count} 件、未分類: {_specSearchEngine.UnclassifiedCount} チャンク");
             _geminiSummarizer = summarizer;
         }
 
@@ -142,12 +143,13 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         private const int MAX_MESSAGE_LENGTH = 2000;
-        private const int EXCERPT_LENGTH = 400;
-        private const int MAX_FIELD_NAME_LENGTH = 256;
+        private const int EXCERPT_LENGTH = 250;
+        private const int MAX_FIELD_NAME_LENGTH = 160;
         private const int MAX_EMBED_DESCRIPTION_LENGTH = 4096;
         private const int MAX_QUERY_DISPLAY_LENGTH = 500;
         private const string SPEC_COMMAND_NAME = "spec";
         private const string QUERY_OPTION_NAME = "query";
+        private const string HISTORY_OPTION_NAME = "history";
         private const string QUERY_PREFIX = "query: ";
         private const string OMITTED_MARK = "…";
 
@@ -161,7 +163,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         private IEmbeddingModel? _embeddingModel;
         private ulong? _specSearchGuildId;
         private int _specSearchTopK;
-        private SpecPriorityTable? _specSearchPriorityTable;
+        private SpecSearchEngine? _specSearchEngine;
         private GeminiSummarizer? _geminiSummarizer;
         private bool _isSpecCommandRegistered;
 
@@ -179,12 +181,18 @@ namespace SinfoniaStudio.SinfoniaOperator
                     _isSpecCommandRegistered = true;
                 }
 
+                if (_gitHubRepository != null && !_isBranchesCommandRegistered)
+                {
+                    await RegisterBranchesCommandAsync();
+                    _isBranchesCommandRegistered = true;
+                }
+
                 _readySource.TrySetResult();
             }
             catch (Exception ex)
             {
                 _readySource.TrySetException(ex);
-                Console.WriteLine($"[DiscordBot] 仕様検索コマンドの登録に失敗しました: {ex.Message}");
+                Console.WriteLine($"[DiscordBot] スラッシュコマンドの登録に失敗しました: {ex.Message}");
             }
         }
 
@@ -199,13 +207,20 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     Discord Interactionを仕様検索処理へ振り分ける。
+        ///     Discord Interactionを各スラッシュコマンドの処理へ振り分ける。
         /// </summary>
         /// <param name="interaction">受信したInteraction。</param>
         private async Task InteractionCreatedHandler(SocketInteraction interaction)
         {
-            if (interaction is not SocketSlashCommand command ||
-                !string.Equals(command.Data.Name, SPEC_COMMAND_NAME, StringComparison.Ordinal))
+            if (interaction is not SocketSlashCommand command) { return; }
+
+            if (string.Equals(command.Data.Name, BRANCHES_COMMAND_NAME, StringComparison.Ordinal))
+            {
+                await HandleBranchesCommandAsync(command);
+                return;
+            }
+
+            if (!string.Equals(command.Data.Name, SPEC_COMMAND_NAME, StringComparison.Ordinal))
             {
                 return;
             }
@@ -222,12 +237,13 @@ namespace SinfoniaStudio.SinfoniaOperator
                     return;
                 }
 
-                SpecIndex index = _specIndex ?? throw new InvalidOperationException("仕様検索インデックスが設定されていません。");
+                SpecSearchEngine search = _specSearchEngine ?? throw new InvalidOperationException("仕様検索が設定されていません。");
+                bool includeHistory = command.Data.Options.FirstOrDefault(option => option.Name == HISTORY_OPTION_NAME)?.Value is true;
                 IEmbeddingModel embeddingModel = _embeddingModel ?? throw new InvalidOperationException("埋め込みモデルが設定されていません。");
                 float[] queryVector = await embeddingModel.EmbedAsync(QUERY_PREFIX + query);
-                SpecChunkRecord[] records = index.TopK(queryVector, _specSearchTopK, _specSearchPriorityTable);
+                SpecChunkRecord[] records = search.Search(query, queryVector, _specSearchTopK, includeHistory);
                 EmbedBuilder embedBuilder;
-                if (_geminiSummarizer == null)
+                if (_geminiSummarizer == null || records.Length == 0)
                 {
                     embedBuilder = BuildSearchResultEmbed(query, records);
                 }
@@ -235,16 +251,18 @@ namespace SinfoniaStudio.SinfoniaOperator
                 {
                     try
                     {
-                        string summary = await _geminiSummarizer.SummarizeAsync(query, records);
+                        SpecSearchAnswer summary = await _geminiSummarizer.SummarizeAsync(query, records, includeHistory);
                         embedBuilder = BuildSummarizedResultEmbed(query, summary, records);
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"[DiscordBot] AI要約の生成に失敗しました: {ex.Message}");
-                        embedBuilder = BuildSummarizedResultEmbed(query, "AI要約の生成に失敗しました。", records);
+                        embedBuilder = BuildSearchResultEmbed(query, records);
+                        embedBuilder.WithDescription($"検索: {Truncate(query, MAX_QUERY_DISPLAY_LENGTH)}\n回答の生成・引用検証に失敗しました。以下は検索候補です。");
                     }
                 }
 
+                if (includeHistory) { embedBuilder.WithFooter("履歴を含む検索です。過去の案・経緯を現行仕様と区別してください。"); }
                 await command.FollowupAsync(embeds: [embedBuilder.Build()]);
             }
             catch (Exception ex)
@@ -266,7 +284,8 @@ namespace SinfoniaStudio.SinfoniaOperator
                     QUERY_OPTION_NAME,
                     ApplicationCommandOptionType.String,
                     "検索する語句や質問",
-                    isRequired: true);
+                    isRequired: true)
+                .AddOption(HISTORY_OPTION_NAME, ApplicationCommandOptionType.Boolean, "過去の経緯・検討資料も含める", isRequired: false);
 
             ApplicationCommandProperties command = commandBuilder.Build();
             if (_specSearchGuildId.HasValue)
@@ -296,7 +315,7 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             if (records.Length == 0)
             {
-                builder.WithDescription($"検索: {Truncate(query, MAX_QUERY_DISPLAY_LENGTH)}\n該当する仕様が見つかりませんでした。");
+                builder.WithDescription($"検索: {Truncate(query, MAX_QUERY_DISPLAY_LENGTH)}\n回答の根拠にできる仕様が見つかりませんでした。");
                 return builder;
             }
 
@@ -304,9 +323,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 string fieldName = Truncate(SanitizeHeadingBreadcrumb(record.HeadingBreadcrumb), MAX_FIELD_NAME_LENGTH);
                 string excerpt = Truncate(record.Text, EXCERPT_LENGTH);
-                string notionLink = string.IsNullOrWhiteSpace(record.NotionUrl)
-                    ? "Notionリンクなし"
-                    : $"[Notionで開く]({record.NotionUrl})";
+                string notionLink = BuildNotionLink(record);
                 builder.AddField(fieldName, $"{excerpt}\n\n{notionLink}");
             }
 
@@ -320,24 +337,32 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// <param name="summary">AIが生成した要約文または生成失敗メッセージ。</param>
         /// <param name="records">要約の根拠にした仕様書チャンク。</param>
         /// <returns>AI要約結果のEmbed構築器。</returns>
-        private static EmbedBuilder BuildSummarizedResultEmbed(string query, string summary, SpecChunkRecord[] records)
+        private static EmbedBuilder BuildSummarizedResultEmbed(string query, SpecSearchAnswer summary, SpecChunkRecord[] records)
         {
-            string description = $"検索: {Truncate(query, MAX_QUERY_DISPLAY_LENGTH)}\n\n{summary}";
+            string description = $"検索: {Truncate(query, MAX_QUERY_DISPLAY_LENGTH)}\n\n{summary.Text}";
             EmbedBuilder builder = new EmbedBuilder()
                 .WithTitle("仕様検索結果")
                 .WithDescription(Truncate(description, MAX_EMBED_DESCRIPTION_LENGTH))
                 .WithColor(Color.Blue);
 
-            foreach (SpecChunkRecord record in records)
+            foreach (int sourceNumber in summary.SourceNumbers)
             {
-                string fieldName = Truncate(SanitizeHeadingBreadcrumb(record.HeadingBreadcrumb), MAX_FIELD_NAME_LENGTH);
-                string notionLink = string.IsNullOrWhiteSpace(record.NotionUrl)
-                    ? "Notionリンクなし"
-                    : $"[Notionで開く]({record.NotionUrl})";
-                builder.AddField(fieldName, notionLink);
+                SpecChunkRecord record = records[sourceNumber - 1];
+                string fieldName = Truncate($"[{sourceNumber}] {SanitizeHeadingBreadcrumb(record.HeadingBreadcrumb)}", MAX_FIELD_NAME_LENGTH);
+                builder.AddField(fieldName, BuildNotionLink(record));
             }
 
             return builder;
+        }
+
+        /// <summary>
+        ///     検証済みのページIDから短い正本リンクを生成する。
+        /// </summary>
+        private static string BuildNotionLink(SpecChunkRecord record)
+        {
+            return record.Metadata.PageId.Length == 0
+                ? "Notionリンクなし"
+                : $"[Notionで開く](https://www.notion.so/{record.Metadata.PageId})";
         }
 
         /// <summary>

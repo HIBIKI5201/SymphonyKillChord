@@ -1,14 +1,52 @@
 ---
+import { getImage } from 'astro:assets';
+import posterImage from '../assets/images/gameplay/GamePV_poster.jpg';
+
 interface Props {
 	src: string;
 }
 
 const { src } = Astro.props;
+
+const poster = await getImage({ src: posterImage, format: 'webp', width: 800, quality: 75 });
 ---
 
 <section id="gameplay-video">
-	<video src={src} autoplay loop muted playsinline></video>
+	<video data-src={src} poster={poster.src} loop muted playsinline preload="none"></video>
+	<a class="pv-link" href="https://www.youtube.com/watch?v=rsvlj48X8PY" target="_blank" rel="noopener noreferrer">
+		PVをYouTubeで見る <span aria-hidden="true">↗</span>
+	</a>
 </section>
+
+<script>
+	const video = document.querySelector<HTMLVideoElement>('#gameplay-video video');
+
+	if (video) {
+		const dataSrc = video.dataset.src;
+		let loaded = false;
+
+		// 画面に入るまで読み込みを遅延させ、初回表示時のダウンロード量を抑える。
+		// 読み込み後も監視を続け、画面外に出たら一時停止してバッテリー消費を抑える。
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						if (!loaded && dataSrc) {
+							video.src = dataSrc;
+							loaded = true;
+						}
+						video.play().catch(() => {});
+					} else if (loaded) {
+						video.pause();
+					}
+				});
+			},
+			{ rootMargin: '200px' },
+		);
+
+		observer.observe(video);
+	}
+</script>
 
 <style>
 	#gameplay-video {
@@ -21,10 +59,30 @@ const { src } = Astro.props;
 	}
 
 	video {
+		display: block;
 		width: 100%;
 		max-width: 800px;
+		margin: 0 auto;
 		aspect-ratio: 16 / 9;
 		object-fit: cover;
 		border: 1px solid var(--color-surface-border);
+	}
+
+	.pv-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 12px;
+		margin-top: 20px;
+		padding: 12px 20px;
+		font-family: var(--font-mono);
+		color: var(--color-signal);
+		text-decoration: none;
+		border: 1px solid var(--color-signal-dim);
+	}
+
+	.pv-link:hover,
+	.pv-link:focus-visible {
+		background: var(--color-signal);
+		color: var(--color-bg);
 	}
 </style>

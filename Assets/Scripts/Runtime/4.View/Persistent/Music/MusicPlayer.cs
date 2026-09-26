@@ -54,7 +54,17 @@ namespace KillChord.Runtime.View.Persistent.Music
         public void SetVolume(float volumeRatio)
         {
             _volumeRatio = volumeRatio;
-            _cri.volume = _baseVolume * volumeRatio;
+            ApplyVolume();
+        }
+
+        /// <summary>
+        ///     保存済み音量とは独立したBGM演出用の音量倍率を設定します。
+        /// </summary>
+        /// <param name="volumeRatio"> 演出用の0から1の音量倍率です。 </param>
+        public void SetPresentationVolume(float volumeRatio)
+        {
+            _presentationVolumeRatio = Mathf.Clamp01(volumeRatio);
+            ApplyVolume();
         }
 
         public float GetVolume()
@@ -109,7 +119,19 @@ namespace KillChord.Runtime.View.Persistent.Music
         private bool _isPlaying;
         private float _baseVolume = 1f;
         private float _volumeRatio = 1f;
+        private float _presentationVolumeRatio = 1f;
         private bool _baseVolumeCaptured;
+
+        /// <summary>
+        ///     最新の音量設定に演出用倍率を掛けてBGMへ反映します。
+        /// </summary>
+        private void ApplyVolume()
+        {
+            if (_cri != null)
+            {
+                _cri.volume = _baseVolume * _volumeRatio * _presentationVolumeRatio;
+            }
+        }
 
         /// <summary>
         ///     BGMを変更して再生する。
@@ -117,6 +139,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// <param name="cueName"> 新しいキュー名。 </param>
         private void ChangeBgm(string cueName)
         {
+            if (_cri == null)
+            {
+                return;
+            }
+
             string currentCueName = _cri.cueName;
 
             if (string.IsNullOrEmpty(cueName))
@@ -144,6 +171,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         private void StopBgm()
         {
+            if (_cri == null)
+            {
+                return;
+            }
+
             _playback.Stop();
             _cri.cueName = string.Empty;
             _isPlaying = false;

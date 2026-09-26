@@ -46,6 +46,19 @@ namespace KillChord.Runtime.View.Persistent.Music
         }
 
         /// <summary>
+        ///     再生中のCueを停止する。ループ再生するSE（環境音など）を明示的に止める用途に使用する。
+        /// </summary>
+        public void Stop()
+        {
+            if (!TryEnsureSource())
+            {
+                return;
+            }
+
+            _source.Stop();
+        }
+
+        /// <summary>
         ///     SE全体音量の比率を適用する。
         /// </summary>
         /// <param name="volumeRatio"> 0から1の音量比率。 </param>
@@ -57,6 +70,22 @@ namespace KillChord.Runtime.View.Persistent.Music
             }
 
             _source.volume = _baseVolume * volumeRatio;
+        }
+
+        /// <summary>
+        ///     非アクティブな再生用複製へ、音量設定適用前の基準音量を引き継ぎます。
+        /// </summary>
+        /// <param name="template"> 複製元のSE Sourceです。 </param>
+        public void CopyBaseVolumeFrom(SoundEffectSource template)
+        {
+            if (template == null || !template.TryEnsureSource() || !TryEnsureSource())
+            {
+                return;
+            }
+
+            _baseVolume = template._baseVolume;
+            _baseVolumeCaptured = true;
+            _source.volume = template._source.volume;
         }
 
         private CriAtomSource _source;

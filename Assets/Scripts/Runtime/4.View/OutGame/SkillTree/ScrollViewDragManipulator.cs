@@ -28,11 +28,20 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// </summary>
         /// <param name="scrollView"> ドラッグスクロール対象の ScrollView。 </param>
         /// <param name="axis"> ドラッグスクロールの対象方向。既定は縦方向。 </param>
+        /// <param name="shouldIgnorePointerDownTarget">
+        ///     ポインタダウン位置の要素(またはその祖先)を見て、ドラッグスクロールの開始を
+        ///     抑制すべきか判定するコールバック。他のドラッグ操作(装備ドラッグ等)と競合する
+        ///     要素上からの操作を除外したい場合に指定する。未指定の場合はすべて対象にする。
+        /// </param>
         /// <exception cref="ArgumentNullException"></exception>
-        public ScrollViewDragManipulator(ScrollView scrollView, ScrollDragAxis axis = ScrollDragAxis.Vertical)
+        public ScrollViewDragManipulator(
+            ScrollView scrollView,
+            ScrollDragAxis axis = ScrollDragAxis.Vertical,
+            Func<VisualElement, bool> shouldIgnorePointerDownTarget = null)
         {
             _scrollView = scrollView ?? throw new ArgumentNullException(nameof(scrollView));
             _axis = axis;
+            _shouldIgnorePointerDownTarget = shouldIgnorePointerDownTarget;
             target = scrollView;
         }
 
@@ -68,6 +77,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
 
         private readonly ScrollView _scrollView;
         private readonly ScrollDragAxis _axis;
+        private readonly Func<VisualElement, bool> _shouldIgnorePointerDownTarget;
 
         private bool _isPointerDown;
         private bool _isDragging;
@@ -86,6 +96,13 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private void OnPointerDown(PointerDownEvent evt)
         {
             if (evt.pointerType == PointerType.mouse && evt.button != 0)
+            {
+                return;
+            }
+
+            if (_shouldIgnorePointerDownTarget != null &&
+                evt.target is VisualElement targetElement &&
+                _shouldIgnorePointerDownTarget(targetElement))
             {
                 return;
             }

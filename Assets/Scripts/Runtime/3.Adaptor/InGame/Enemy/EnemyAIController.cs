@@ -82,6 +82,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public event Action OnAttackReserved;
         /// <summary> 攻撃を実行時に発火するイベント </summary>
         public event Action OnAttack;
+        /// <summary> 予約中の攻撃がキャンセルされた時に発火するイベント </summary>
+        public event Action OnAttackCanceled;
         /// <summary>   攻撃の2拍前に発火するイベント   </summary>
         public event Action On2BeatBefore;
         /// <summary>   攻撃の1拍前に発火するイベント </summary>
@@ -91,6 +93,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public bool IsAttacking => _enemyAttackReservationUsecase.HasReservation;
         /// <summary> 直近に取得した自身の位置。 </summary>
         public Vector3 CurrentPosition => _lastKnownPosition;
+        /// <summary> 敵の基本移動速度。 </summary>
+        public float MoveSpeed => _enemyMoveUsecase.MoveSpeed;
+
+        /// <summary>
+        ///     攻撃予約や移動先を変更せず、横移動中の現在位置を記録する。
+        /// </summary>
+        /// <param name="position"> 現在の自身の位置。 </param>
+        public void RecordPosition(Vector3 position)
+        {
+            _lastKnownPosition = position;
+        }
 
         /// <summary>
         ///     位置情報より行動意思を取得する。
@@ -120,6 +133,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 {
                     Debug.Log("[EnemyAIController] 攻撃範囲を出た");
                     _enemyBattleState.ExitRange();
+                    // 射程外に出た場合、予約中の攻撃(音楽ビート待ち)も合わせてキャンセルする。
+                    // これを行わないと、範囲表示もダメージも伴わない攻撃モーション・SEだけが
+                    // 後から発火してしまう。
+                    CancelAttack();
                 }
             }
             else
@@ -177,6 +194,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             if (_enemyAttackReservationUsecase.HasReservation)
             {
                 _enemyAttackReservationUsecase.Cancel();
+                // キャンセルされた予約表示(構えアニメ・予約エフェクト)をView側で解除させる。
+                OnAttackCanceled?.Invoke();
             }
         }
 

@@ -14,11 +14,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             string skillCommand,
             string skillGenre,
             Sprite skillGenreIcon,
+            Sprite skillIcon,
             string skillDetail,
             int unlockCost,
             bool canUnlock,
             bool unlocked,
-            bool hasPreviewVideo)
+            bool hasPreviewVideo,
+            Color[] comboStepColors)
         {
             SkillNodeId = skillnodeId;
             HasSkill = hasSkill;
@@ -26,11 +28,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             SkillCommand = skillCommand == null ? "" : skillCommand;
             SkillGenre = skillGenre == null ? "" : skillGenre;
             SkillGenreIcon = skillGenreIcon;
+            SkillIcon = skillIcon;
             SkillDetail = skillDetail == null ? "" : skillDetail;
             UnlockCost = unlockCost;
             CanUnlock = canUnlock;
             Unlocked = unlocked;
             HasPreviewVideo = hasPreviewVideo;
+            ComboStepColors = comboStepColors;
         }
         /// <summary> スキルノードのID </summary>
         public readonly int SkillNodeId;
@@ -44,6 +48,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         public readonly string SkillGenre;
         /// <summary> ノードが解放するスキルのジャンルアイコン </summary>
         public readonly Sprite SkillGenreIcon;
+        /// <summary> ノードが解放するスキル固有のアイコン </summary>
+        public readonly Sprite SkillIcon;
         /// <summary> スキルの詳細文 </summary>
         public readonly string SkillDetail;
         /// <summary> 解放するための必要ポイント </summary>
@@ -54,5 +60,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         public readonly bool Unlocked;
         /// <summary> プレビュー動画があるか </summary>
         public readonly bool HasPreviewVideo;
+        /// <summary> 発動コマンドの入力順に並んだ、拍子に対応する色一覧 </summary>
+        public readonly Color[] ComboStepColors;
     }
 }

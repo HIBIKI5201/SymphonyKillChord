@@ -5,8 +5,8 @@ namespace KillChord.Runtime.View.OutGame.Common
 {
     /// <summary>
     ///     発動コマンドの拍子を、色分けした六角形アイコンの行として構築する共通処理。
-    ///     UI Toolkit には多角形の直接指定がないため、上下の三角形(枠線トリック)+中央の矩形の
-    ///     3要素を同色で組み合わせて六角形を表現する。
+    ///     正六角形の形状は正六角形スプライト(UI_hexagon)の画像を使い、色は
+    ///     Image.tintColor で塗り分ける。
     /// </summary>
     public static class ComboHexRowBuilder
     {
@@ -15,17 +15,13 @@ namespace KillChord.Runtime.View.OutGame.Common
         /// </summary>
         /// <param name="row"> 六角形を並べる行要素。 </param>
         /// <param name="stepColors"> 発動コマンドの入力順に並んだ色一覧。 </param>
-        /// <param name="hexClassName"> 六角形コンテナのUSSクラス名。 </param>
-        /// <param name="capTopClassName"> 上部キャップのUSSクラス名。 </param>
-        /// <param name="rectClassName"> 中央矩形のUSSクラス名。 </param>
-        /// <param name="capBottomClassName"> 下部キャップのUSSクラス名。 </param>
+        /// <param name="hexSprite"> 六角形の形状スプライト(UI_hexagon)。 </param>
+        /// <param name="hexClassName"> 六角形要素のUSSクラス名。 </param>
         public static void Build(
             VisualElement row,
             Color[] stepColors,
-            string hexClassName,
-            string capTopClassName,
-            string rectClassName,
-            string capBottomClassName)
+            Sprite hexSprite,
+            string hexClassName)
         {
             row.Clear();
             if (stepColors == null)
@@ -35,38 +31,22 @@ namespace KillChord.Runtime.View.OutGame.Common
 
             for (int i = 0; i < stepColors.Length; i++)
             {
-                row.Add(CreateHex(stepColors[i], hexClassName, capTopClassName, rectClassName, capBottomClassName));
+                row.Add(CreateHex(stepColors[i], hexSprite, hexClassName));
             }
         }
 
         /// <summary>
         ///     六角形アイコンを1つ生成する。
         /// </summary>
-        private static VisualElement CreateHex(
-            Color color,
-            string hexClassName,
-            string capTopClassName,
-            string rectClassName,
-            string capBottomClassName)
+        private static VisualElement CreateHex(Color color, Sprite hexSprite, string hexClassName)
         {
-            VisualElement hex = new();
+            Image hex = new()
+            {
+                sprite = hexSprite,
+                tintColor = color,
+                scaleMode = ScaleMode.ScaleToFit,
+            };
             hex.AddToClassList(hexClassName);
-
-            VisualElement capTop = new();
-            capTop.AddToClassList(capTopClassName);
-            capTop.style.borderBottomColor = color;
-
-            VisualElement rect = new();
-            rect.AddToClassList(rectClassName);
-            rect.style.backgroundColor = color;
-
-            VisualElement capBottom = new();
-            capBottom.AddToClassList(capBottomClassName);
-            capBottom.style.borderTopColor = color;
-
-            hex.Add(capTop);
-            hex.Add(rect);
-            hex.Add(capBottom);
             return hex;
         }
     }

@@ -8,159 +8,181 @@ using System.Text.RegularExpressions;
 namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
 {
     /// <summary>
-    ///     Markdown仕様書を見出し単位で分割する。
+    ///     キャッシュを見出し・トグルの境界で分け、本文へページ属性を継承する。
     /// </summary>
     public sealed partial class MarkdownChunker
     {
         /// <summary>
-        ///     指定したリポジトリを読み取るチャンク生成器を初期化する。
+        ///     対象キャッシュの場所とチャンク長を設定する。
         /// </summary>
-        /// <param name="repositoryRootPath">リポジトリルートのパス。</param>
-        /// <param name="chunkLength">チャンクの目標文字数。</param>
-        /// <param name="overlapLength">隣接チャンク間の重複文字数。</param>
         public MarkdownChunker(
-            string repositoryRootPath,
-            int chunkLength = DEFAULT_CHUNK_LENGTH,
-            int overlapLength = DEFAULT_OVERLAP_LENGTH)
+            string repositoryRootPath, int chunkLength = DEFAULT_CHUNK_LENGTH,
+            int overlapLength = DEFAULT_OVERLAP_LENGTH, string? specificationRootPath = null)
         {
-            if (string.IsNullOrWhiteSpace(repositoryRootPath))
-            {
-                throw new ArgumentException("リポジトリルートを指定してください。", nameof(repositoryRootPath));
-            }
-
-            if (chunkLength <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(chunkLength));
-            }
-
-            if (overlapLength < 0 || overlapLength >= chunkLength)
-            {
-                throw new ArgumentOutOfRangeException(nameof(overlapLength));
-            }
-
+            ArgumentException.ThrowIfNullOrWhiteSpace(repositoryRootPath);
+            if (chunkLength <= 0) { throw new ArgumentOutOfRangeException(nameof(chunkLength)); }
+            if (overlapLength < 0 || overlapLength >= chunkLength) { throw new ArgumentOutOfRangeException(nameof(overlapLength)); }
             _repositoryRootPath = Path.GetFullPath(repositoryRootPath);
-            _specificationRootPath = Path.Combine(_repositoryRootPath, SPECIFICATION_RELATIVE_PATH);
+            _specificationRootPath = Path.GetFullPath(specificationRootPath ?? ResolveDefaultRoot(_repositoryRootPath), _repositoryRootPath);
             _chunkLength = chunkLength;
             _overlapLength = overlapLength;
         }
 
         /// <summary>
-        ///     対象ディレクトリのMarkdown仕様書をすべてチャンクへ変換する。
+        ///     指定キャッシュ内のMarkdownだけを索引化する。
         /// </summary>
-        /// <returns>ベクトルが未設定の仕様書チャンク。</returns>
         public SpecChunkRecord[] ChunkAll()
         {
             if (!Directory.Exists(_specificationRootPath))
             {
-                throw new DirectoryNotFoundException($"仕様書ディレクトリが見つかりません: {_specificationRootPath}");
+                throw new DirectoryNotFoundException($"仕様書キャッシュが見つかりません: {_specificationRootPath}");
             }
-
-            return Directory
-                .EnumerateFiles(_specificationRootPath, MARKDOWN_PATTERN, SearchOption.AllDirectories)
-                .Where(IsSearchTarget)
-                .OrderBy(path => path, StringComparer.Ordinal)
-                .SelectMany(ChunkFile)
-                .ToArray();
+            EnumerationOptions options = new()
+            {
+                RecurseSubdirectories = true,
+                AttributesToSkip = FileAttributes.ReparsePoint,
+                IgnoreInaccessible = false
+            };
+            return Directory.EnumerateFiles(_specificationRootPath, "*.md", options)
+                .Where(IsSearchTarget).OrderBy(path => path, StringComparer.Ordinal)
+                .SelectMany(ChunkFile).ToArray();
         }
 
         private const int DEFAULT_CHUNK_LENGTH = 800;
         private const int DEFAULT_OVERLAP_LENGTH = 100;
-        private const int NOTION_LINK_SEARCH_LENGTH = 4096;
-        private const string SPECIFICATION_RELATIVE_PATH = "Docs/NotionSpecifications";
-        private const string MARKDOWN_PATTERN = "*.md";
-        private const string DATABASE_FILE_NAME = "_database.md";
-        private const string ASSETS_DIRECTORY_NAME = "assets";
+        private const int MAX_HEADING_LEVEL = 6;
         private const string BREADCRUMB_SEPARATOR = " > ";
-        private const int MAX_HEADING_LEVEL = 3;
-
         private readonly string _repositoryRootPath;
         private readonly string _specificationRootPath;
         private readonly int _chunkLength;
         private readonly int _overlapLength;
 
         /// <summary>
-        ///     指定したファイルが検索対象であるか判定する。
+        ///     新キャッシュを優先し、移行前だけ旧パスを利用する。
         /// </summary>
-        /// <param name="path">判定するファイルのパス。</param>
-        /// <returns>検索対象の場合はtrue。</returns>
-        private bool IsSearchTarget(string path)
+        private static string ResolveDefaultRoot(string root)
         {
-            if (string.Equals(Path.GetFileName(path), DATABASE_FILE_NAME, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            string relativePath = Path.GetRelativePath(_specificationRootPath, path);
-            return !relativePath
-                .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                .Any(segment => string.Equals(segment, ASSETS_DIRECTORY_NAME, StringComparison.OrdinalIgnoreCase));
+            string migrated = Path.Combine(root, "Library", "NotionSpecifications");
+            return Directory.Exists(migrated) ? migrated : Path.Combine(root, "Docs", "NotionSpecifications");
         }
 
         /// <summary>
-        ///     1つのMarkdownファイルを見出し単位のチャンクへ変換する。
+        ///     DB索引・添付・移行原稿・ログを検索本文に含めない。
         /// </summary>
-        /// <param name="path">Markdownファイルのパス。</param>
-        /// <returns>生成した仕様書チャンク。</returns>
+        private bool IsSearchTarget(string path)
+        {
+            string name = Path.GetFileName(path);
+            if (name.StartsWith("_", StringComparison.Ordinal)) { return false; }
+            string[] parts = Path.GetRelativePath(_specificationRootPath, path).Replace('\\', '/').Split('/');
+            return !parts.Any(part => part.Equals("assets", StringComparison.OrdinalIgnoreCase)
+                || part.Equals("NotionMigration", StringComparison.OrdinalIgnoreCase)
+                || part.Equals("agent", StringComparison.OrdinalIgnoreCase)
+                || part.Equals(".git", StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        ///     コード内の見出しを無視し、トグルの開始・終了でも必ず本文を区切る。
+        /// </summary>
         private IEnumerable<SpecChunkRecord> ChunkFile(string path)
         {
-            string markdown = File.ReadAllText(path, Encoding.UTF8);
-            string notionUrl = ExtractNotionUrl(markdown);
-            string sourceFile = Path.GetRelativePath(_repositoryRootPath, path).Replace(Path.DirectorySeparatorChar, '/');
-            string fallbackHeading = Path.GetFileNameWithoutExtension(path);
+            string markdown = File.ReadAllText(path, Encoding.UTF8).Replace("\r\n", "\n", StringComparison.Ordinal);
+            string notionUrl = SpecPageMetadataReader.ReadNotionUrl(markdown);
+            SpecPageMetadata metadata = SpecPageMetadataReader.Read(markdown, notionUrl);
+            string sourceFile = Path.GetRelativePath(_repositoryRootPath, path).Replace('\\', '/');
+            string title = Path.GetFileNameWithoutExtension(path);
             string[] headings = new string[MAX_HEADING_LEVEL];
+            List<(string Title, string[] Headings)> details = new();
             StringBuilder section = new();
-            string breadcrumb = fallbackHeading;
+            string breadcrumb = title;
+            char fenceCharacter = '\0';
+            int fenceLength = 0;
+            bool hasTitle = false;
 
-            foreach (string line in markdown.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n'))
+            foreach (string line in SpecPageMetadataReader.RemoveMetadata(markdown).Split('\n'))
             {
-                Match headingMatch = HeadingRegex().Match(line);
-                if (headingMatch.Success)
+                string trimmed = line.TrimStart();
+                Match fence = FenceRegex().Match(trimmed);
+                if (fenceCharacter != '\0')
                 {
-                    foreach (SpecChunkRecord chunk in CreateSectionChunks(sourceFile, breadcrumb, notionUrl, section.ToString()))
+                    section.AppendLine(line);
+                    if (fence.Success && fence.Groups["marks"].Value[0] == fenceCharacter
+                        && fence.Groups["marks"].Length >= fenceLength
+                        && string.IsNullOrWhiteSpace(trimmed[fence.Groups["marks"].Length..]))
                     {
-                        yield return chunk;
+                        fenceCharacter = '\0';
                     }
-
-                    section.Clear();
-                    int level = headingMatch.Groups["marks"].Value.Length;
-                    headings[level - 1] = StripHeadingAttributes(headingMatch.Groups["text"].Value);
-                    Array.Clear(headings, level, headings.Length - level);
-                    breadcrumb = string.Join(BREADCRUMB_SEPARATOR, headings.Where(value => !string.IsNullOrWhiteSpace(value)));
+                    continue;
+                }
+                if (fence.Success)
+                {
+                    fenceCharacter = fence.Groups["marks"].Value[0];
+                    fenceLength = fence.Groups["marks"].Length;
+                    section.AppendLine(line);
                     continue;
                 }
 
-                if (!NotionLinkRegex().IsMatch(line))
+                Match heading = HeadingRegex().Match(trimmed);
+                Match summary = SummaryRegex().Match(trimmed);
+                bool opensDetails = trimmed.StartsWith("<details", StringComparison.OrdinalIgnoreCase);
+                bool closesDetails = trimmed.StartsWith("</details>", StringComparison.OrdinalIgnoreCase);
+                if (heading.Success || summary.Success || opensDetails || closesDetails)
                 {
-                    section.AppendLine(line);
+                    foreach (SpecChunkRecord chunk in CreateSectionChunks(sourceFile, breadcrumb, notionUrl, section.ToString(), metadata))
+                    {
+                        yield return chunk;
+                    }
+                    section.Clear();
+
+                    if (opensDetails) { details.Add(("補足", headings.ToArray())); }
+                    else if (closesDetails && details.Count > 0)
+                    {
+                        headings = details[^1].Headings;
+                        details.RemoveAt(details.Count - 1);
+                    }
+                    else if (summary.Success && details.Count > 0)
+                    {
+                        details[^1] = (CleanHeading(summary.Groups["text"].Value), details[^1].Headings);
+                    }
+                    else if (heading.Success)
+                    {
+                        int level = heading.Groups["marks"].Length;
+                        string headingText = CleanHeading(heading.Groups["text"].Value);
+                        if (!hasTitle)
+                        {
+                            title = headingText;
+                            hasTitle = true;
+                        }
+                        headings[level - 1] = headingText;
+                        Array.Clear(headings, level, headings.Length - level);
+                    }
+                    breadcrumb = string.Join(BREADCRUMB_SEPARATOR,
+                        new[] { title }.Concat(headings.Where(value => !string.IsNullOrWhiteSpace(value)))
+                            .Concat(details.Select(detail => detail.Title)).Distinct(StringComparer.Ordinal));
+                    continue;
                 }
+
+                if (trimmed.Length == 0 || trimmed == "---" || trimmed.StartsWith("<table_of_contents", StringComparison.Ordinal)
+                    || trimmed.StartsWith("<empty-block", StringComparison.Ordinal))
+                {
+                    section.AppendLine();
+                    continue;
+                }
+                section.AppendLine(line);
             }
 
-            foreach (SpecChunkRecord chunk in CreateSectionChunks(sourceFile, breadcrumb, notionUrl, section.ToString()))
+            foreach (SpecChunkRecord chunk in CreateSectionChunks(sourceFile, breadcrumb, notionUrl, section.ToString(), metadata))
             {
                 yield return chunk;
             }
         }
 
         /// <summary>
-        ///     セクション本文を指定文字数の重複付きチャンクへ変換する。
+        ///     1つの節だけを分割し、重複部分が別の意味を持つ節へ跨がないようにする。
         /// </summary>
-        /// <param name="sourceFile">リポジトリルートからの相対パス。</param>
-        /// <param name="breadcrumb">見出しのパンくず。</param>
-        /// <param name="notionUrl">対応するNotionページのURL。</param>
-        /// <param name="sectionText">セクション本文。</param>
-        /// <returns>生成した仕様書チャンク。</returns>
         private IEnumerable<SpecChunkRecord> CreateSectionChunks(
-            string sourceFile,
-            string breadcrumb,
-            string notionUrl,
-            string sectionText)
+            string sourceFile, string breadcrumb, string notionUrl, string sectionText, SpecPageMetadata metadata)
         {
             string text = sectionText.Trim();
-            if (text.Length == 0)
-            {
-                yield break;
-            }
-
             int stepLength = _chunkLength - _overlapLength;
             for (int startIndex = 0; startIndex < text.Length; startIndex += stepLength)
             {
@@ -168,57 +190,43 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
                 string chunkText = text.Substring(startIndex, length).Trim();
                 if (chunkText.Length > 0)
                 {
-                    yield return new SpecChunkRecord(sourceFile, breadcrumb, notionUrl, chunkText, Array.Empty<float>());
+                    yield return new SpecChunkRecord(sourceFile, breadcrumb, notionUrl, chunkText, Array.Empty<float>(), metadata);
                 }
-
-                if (startIndex + length >= text.Length)
-                {
-                    yield break;
-                }
+                if (startIndex + length >= text.Length) { yield break; }
             }
         }
 
         /// <summary>
-        ///     Markdown冒頭からNotionページのURLを抽出する。
+        ///     見出しの装飾を除き、節ルールと一致する表記へ揃える。
         /// </summary>
-        /// <param name="markdown">Markdown本文。</param>
-        /// <returns>見つかったURL。見つからない場合は空文字。</returns>
-        private static string ExtractNotionUrl(string markdown)
+        private static string CleanHeading(string text)
         {
-            string beginning = markdown[..Math.Min(markdown.Length, NOTION_LINK_SEARCH_LENGTH)];
-            Match match = NotionLinkRegex().Match(beginning);
-            return match.Success ? match.Groups["url"].Value : string.Empty;
+            return HeadingAttributesRegex().Replace(text, string.Empty).Replace("**", string.Empty, StringComparison.Ordinal)
+                .Replace("__", string.Empty, StringComparison.Ordinal).Trim();
         }
 
         /// <summary>
-        ///     見出し末尾のNotionブロック属性記法を取り除く。
+        ///     Markdownの全見出し段を認識する。
         /// </summary>
-        /// <param name="headingText">属性記法を含む可能性がある見出し。</param>
-        /// <returns>属性記法を取り除いた見出し。</returns>
-        private static string StripHeadingAttributes(string headingText)
-        {
-            return HeadingAttributesRegex().Replace(headingText, string.Empty).Trim();
-        }
-
-        /// <summary>
-        ///     対象見出しを抽出する正規表現を生成する。
-        /// </summary>
-        /// <returns>コンパイル済みの正規表現。</returns>
-        [GeneratedRegex(@"^(?<marks>#{1,3})\s+(?<text>.+?)\s*$", RegexOptions.CultureInvariant)]
+        [GeneratedRegex(@"^(?<marks>#{1,6})\s+(?<text>.+?)\s*$")]
         private static partial Regex HeadingRegex();
 
         /// <summary>
-        ///     見出し末尾のNotionブロック属性記法を抽出する正規表現を生成する。
+        ///     キャッシュのトグル名を見出しとして認識する。
         /// </summary>
-        /// <returns>コンパイル済みの正規表現。</returns>
-        [GeneratedRegex(@"\s*\{[^{}]*\}\s*$", RegexOptions.CultureInvariant)]
-        private static partial Regex HeadingAttributesRegex();
+        [GeneratedRegex(@"^<summary[^>]*>(?<text>.*?)</summary>\s*$", RegexOptions.IgnoreCase)]
+        private static partial Regex SummaryRegex();
 
         /// <summary>
-        ///     Notionリンクを抽出する正規表現を生成する。
+        ///     コードフェンスの開始・終了を認識する。
         /// </summary>
-        /// <returns>コンパイル済みの正規表現。</returns>
-        [GeneratedRegex(@"\[Notionで開く\]\((?<url>https://[^)\s]+)\)", RegexOptions.CultureInvariant)]
-        private static partial Regex NotionLinkRegex();
+        [GeneratedRegex(@"^(?<marks>```+|~~~+)")]
+        private static partial Regex FenceRegex();
+
+        /// <summary>
+        ///     Notionの見出し装飾属性を取り除く。
+        /// </summary>
+        [GeneratedRegex(@"\s*\{[^{}]*\}\s*$")]
+        private static partial Regex HeadingAttributesRegex();
     }
 }

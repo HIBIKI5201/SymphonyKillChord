@@ -51,29 +51,29 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         [Tooltip("テスト用の装備スキルID一覧です。未設定時はPlayer側設定を流用します。")]
         private DataID[] _equippedSkills;
         [SerializeField, SourceDataAddress]
-        [Tooltip("改造画面を経由していない場合に、セーブデータから装備スキルを解決するためのリポジトリの Addressables キーです。")]
+        [Tooltip("戦闘開始ごとにセーブデータから装備スキルを読み直すリポジトリの Addressables キーです。")]
         private string _skillBuildRepositoryKey;
         [SerializeField, SourceDataAddress]
         [Tooltip("テスト用装備スキルIDの解決に使うスキルリポジトリの Addressables キーです。")]
         private string _skillRepositoryKey;
 
         /// <summary>
-        ///     改造画面を経由せずシーンへ入った場合に備え、セーブデータ由来の装備スキルを非同期で解決します。
+        ///     戦闘開始ごとに現在のセーブデータから装備とレベルを読み直し、共有する装備定義を更新します。
         /// </summary>
         /// <param name="cancellationToken"> キャンセルトークンです。 </param>
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            _saveDataEquippedSkills = null;
+            _skillLevels = null;
+
             if (!string.IsNullOrWhiteSpace(_skillRepositoryKey))
             {
                 _loadedSkillRepository = await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, cancellationToken);
             }
 
-            if (ServiceLocator.TryGetInstance(out SkillBuildDefinition _)
-                || string.IsNullOrWhiteSpace(_skillBuildRepositoryKey))
+            if (string.IsNullOrWhiteSpace(_skillBuildRepositoryKey))
             {
-                // 改造画面経由で既にSkillBuildDefinitionが登録済み、
-                // またはキー未設定の場合はセーブデータの再ロードを行わない。
                 return true;
             }
 
@@ -81,12 +81,39 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             {
                 SkillBuildRepository skillBuildRepository =
                     await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, cancellationToken);
-                IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.GetEquippedSkills();
-                _saveDataEquippedSkills = ToSkillTemplates(equippedSkills);
+                // リセット前のScriptableObjectキャッシュを使わず、SaveStoreの現在の装備から再構築する。
+                IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.LoadSkillBuild();
+                _skillLevels = await skillBuildRepository.GetSkillLevelsAsync();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                EquippedSkill[] currentEquipment = new EquippedSkill[equippedSkills.Count];
+                for (int i = 0; i < equippedSkills.Count; i++)
+                {
+                    currentEquipment[i] = equippedSkills[i];
+                }
+
+                // 全ResourceLoadの後にBGM等のBuildが走るため、同じ最新構成を先に公開する。
+                // 装備定義はOutGameと同様にシーン間で保持し、次の戦闘開始時にも再同期する。
+                if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition))
+                {
+                    buildDefinition.UpdateEquippedSkills(currentEquipment);
+                }
+                else if (!ServiceLocator.RegisterInstance(new SkillBuildDefinition(currentEquipment)))
+                {
+                    Debug.LogError($"[{nameof(SkillInitializer)}] 装備スキル定義を登録できませんでした。", this);
+                    return false;
+                }
+
+                _saveDataEquippedSkills = ToSkillTemplates(currentEquipment);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception exception)
             {
                 Debug.LogError($"[{nameof(SkillInitializer)}] セーブデータ由来の装備スキル解決に失敗しました: {exception}", this);
+                return false;
             }
 
             return true;
@@ -185,7 +212,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 targetSystemContainer.TargetSystemViewModel,
                 playbackSpeed);
 
-            _skillController = new SkillController(musicSyncContainer.MusicSyncService);
+            _skillController = new SkillController(musicSyncContainer.MusicSyncService, () => Time.unscaledTime);
             _skillController.Initialize(BuildSkillExecutionControllers(
                 equippedSkills,
                 skillVisuals,
@@ -257,11 +284,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             _skillHitScheduler = null;
             _skillHitController = null;
             _boundPlayerView = null;
+            _skillController?.Dispose();
             _skillController = null;
             _saveDataEquippedSkills = null;
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
             _skillRepositoryKey.ReleaseLoadedAsset(this);
             _loadedSkillRepository = null;
+            _skillLevels = null;
 
             if (!_isRegistered)
             {
@@ -379,7 +408,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                     continue;
                 }
 
-                SkillDefinition definition = skillTemplate.ToSkillDefinition(musicSyncState.Bpm);
+                int currentLevel = _skillLevels != null && _skillLevels.TryGetValue(skillTemplate.Id.Value, out int savedLevel)
+                    ? savedLevel
+                    : skillTemplate.Level.Value;
+                // 成長ステップの編集でMaxLevelが下がった場合に備え、セーブ済みレベルを現在の上限内へ収める。
+                currentLevel = Math.Min(currentLevel, skillTemplate.MaxLevel);
+                SkillDefinition definition = skillTemplate.ToSkillDefinition(musicSyncState.Bpm, currentLevel);
                 SkillView view = FindSkillView(skillVisuals, definition.Id.Value);
                 if (view == null)
                 {
@@ -441,6 +475,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// </summary>
         private SkillTemplate[] ResolveEquippedSkills(PlayerInitializer playerInitializer)
         {
+            // 空配列も正常な保存済み構成として扱い、以前の装備やテスト用設定へ戻さない。
+            if (_saveDataEquippedSkills != null)
+            {
+                return _saveDataEquippedSkills;
+            }
+
             if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition) &&
                 buildDefinition.EquippedSkills != null &&
                 buildDefinition.EquippedSkills.Count > 0)
@@ -461,11 +501,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 {
                     return buildSkills.ToArray();
                 }
-            }
-
-            if (_saveDataEquippedSkills != null && _saveDataEquippedSkills.Length > 0)
-            {
-                return _saveDataEquippedSkills;
             }
 
             SkillId[] fallbackIds = ConvertToSkillIds(_equippedSkills);
@@ -590,5 +625,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private bool _isRegistered;
         private SkillTemplate[] _saveDataEquippedSkills;
         private SkillRepository _loadedSkillRepository;
+        private IReadOnlyDictionary<int, int> _skillLevels;
     }
 }

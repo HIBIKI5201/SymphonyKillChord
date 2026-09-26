@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
@@ -29,15 +30,19 @@ namespace KillChord.Runtime.View.InGame.Enemy
         ///     敵の生成位置をランダムで１つ選定する。
         /// </summary>
         /// <param name="candidateSpawnPointHashes"> 候補とするスポーンポイントIDです。null/空の場合は全スポーンポイントが対象です。 </param>
+        /// <param name="cancellationToken">生成終了・再初期化時のキャンセルトークンです。</param>
         /// <returns> 使用する生成位置です。 </returns>
         public async ValueTask<SpawnPositionPair> GetRandomSpawnPositionAsync(
-            IReadOnlyList<int> candidateSpawnPointHashes = null)
+            IReadOnlyList<int> candidateSpawnPointHashes = null,
+            CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             SpawnPositionPair[] candidates = ResolveCandidates(candidateSpawnPointHashes);
 
             int loopCnt = 0;
             while (loopCnt < _maxSearchLoop)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 ShuffulePositionPairs(candidates);
                 for (int i = 0; i < candidates.Length; i++)
                 {
@@ -47,7 +52,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                     }
                 }
                 // 使える生成位置がない場合、一定時間待って再探索する
-                await Task.Delay(_searchDelay);
+                await Task.Delay(_searchDelay, cancellationToken);
                 loopCnt++;
             }
             // 一定回数探索しても生成位置が見つからない場合、候補内かつ距離条件を満たす既定位置に限り使用する

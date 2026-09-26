@@ -1,0 +1,29 @@
+{
+    "name": "KillChord.Editor.AIDebugPlay",
+    "rootNamespace": "KillChord.Editor.AIDebugPlay",
+    "references": [
+        "KillChord.Domain",
+        "KillChord.Utility",
+        "KillChord.Application",
+        "KillChord.Adaptor",
+        "KillChord.Composition",
+        "KillChord.View",
+        "SymphonyFrameWork",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

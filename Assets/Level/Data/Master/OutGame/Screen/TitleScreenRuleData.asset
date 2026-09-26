@@ -19,9 +19,6 @@ MonoBehaviour:
   - _screenId: 7
     _transitionType: 1
     _isAddToHistory: 1
-  - _screenId: 8
-    _transitionType: 1
-    _isAddToHistory: 1
   - _screenId: 9
-    _transitionType: 1
+    _transitionType: 0
     _isAddToHistory: 1

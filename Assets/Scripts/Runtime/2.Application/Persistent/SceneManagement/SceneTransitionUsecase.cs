@@ -61,6 +61,27 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         }
 
         /// <summary>
+        ///     初期化状態を破棄してシーンを再読み込みし、初期化完了後にロード画面を閉じます。
+        /// </summary>
+        /// <param name="sceneName"> 再読み込みするシーン名です。 </param>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 再読み込みと初期化に成功した場合はtrueです。 </returns>
+        public Task<bool> ReloadSceneAsync(string sceneName, CancellationToken cancellationToken)
+        {
+            return _executor.ExecuteAsync(
+                progress =>
+                {
+                    _sceneInitializationReadiness.Clear(sceneName);
+                    return LoadSceneAndWaitForReadyAsync(
+                        sceneName,
+                        () => _service.ReloadSceneAsync(sceneName, progress, cancellationToken),
+                        null,
+                        cancellationToken);
+                },
+                cancellationToken);
+        }
+
+        /// <summary>
         ///    シーン遷移を行うが、ロード画面を閉じずに進捗を保持する。
         ///    既にアクティブなロードセッションが存在する場合（例: シーン初期化中に続けて次のシーンへ
         ///    遷移する場合）は、新規セッションを開始せずそのセッションを引き継いで完了させる。
@@ -354,6 +375,46 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
 
             return await _sceneInitializationReadiness.WaitForReadyAsync(
                 sceneName,
+                cancellationToken);
+        }
+
+        /// <summary>
+        ///     常駐シーンを基盤に両旧シーンを終了し、InGame の初期化まで待ちます。
+        /// </summary>
+        public Task<bool> UnloadSourcesThenLoadSceneKeepLoadingAsync(
+            string scenarioSceneName, string outGameSceneName, string persistentSceneName,
+            string inGameSceneName, CancellationToken cancellationToken)
+        {
+            return _executor.ExecuteAsync(
+                async progress =>
+                {
+                    if (!await _service.UnloadAndSetActiveAsync(
+                            scenarioSceneName, persistentSceneName,
+                            new LoadingProgressRange(progress, 0f,
+                                LoadingConstants.SCENARIO_SORTIE_UNLOAD_END_PROGRESS),
+                            cancellationToken)) { return false; }
+                    _sceneInitializationReadiness.Clear(scenarioSceneName);
+
+                    if (!await _service.UnloadAndSetActiveAsync(
+                            outGameSceneName, persistentSceneName,
+                            new LoadingProgressRange(progress,
+                                LoadingConstants.SCENARIO_SORTIE_UNLOAD_END_PROGRESS,
+                                LoadingConstants.SCENARIO_SORTIE_SOURCES_UNLOAD_END_PROGRESS),
+                            cancellationToken)) { return false; }
+                    _sceneInitializationReadiness.Clear(outGameSceneName);
+
+                    // InGame の Start より先に両旧シーンを終了し、専用の開始待ちを不要にします。
+                    _sceneInitializationReadiness.Clear(inGameSceneName);
+                    return await LoadSceneAndWaitForReadyAsync(
+                        inGameSceneName,
+                        () => _service.LoadAdditiveAsync(
+                            inGameSceneName,
+                            new LoadingProgressRange(progress,
+                                LoadingConstants.SCENARIO_SORTIE_SOURCES_UNLOAD_END_PROGRESS, 1f),
+                            cancellationToken),
+                        null, cancellationToken);
+                },
+                LoadingExecutionOptions.KeepOpen(0f, LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS),
                 cancellationToken);
         }
 

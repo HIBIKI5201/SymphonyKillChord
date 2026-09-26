@@ -25,6 +25,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _currentOpacity = RootElement.resolvedStyle.opacity;
 
             RootElement.RegisterCallback<NavigationCancelEvent>(HandleNavigationCancelHandler);
+            RootElement.RegisterCallback<FocusInEvent>(HandleFocusInDebugHandler);
+            RootElement.RegisterCallback<FocusOutEvent>(HandleFocusOutDebugHandler);
+            RootElement.RegisterCallback<NavigationMoveEvent>(HandleNavigationMoveDebugHandler, TrickleDown.TrickleDown);
+            RootElement.RegisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary> この画面内で現在フォーカスされている要素を取得します。 </summary>
@@ -125,6 +129,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _opacityMotionHandle.TryCancel();
             _brocker.RemoveFromHierarchy();
             RootElement.UnregisterCallback<NavigationCancelEvent>(HandleNavigationCancelHandler);
+            RootElement.UnregisterCallback<FocusInEvent>(HandleFocusInDebugHandler);
+            RootElement.UnregisterCallback<FocusOutEvent>(HandleFocusOutDebugHandler);
+            RootElement.UnregisterCallback<NavigationMoveEvent>(HandleNavigationMoveDebugHandler, TrickleDown.TrickleDown);
+            RootElement.UnregisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
         }
 
         /// <summary>
@@ -193,21 +201,34 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 if (generation != _focusRequestGeneration || _isDisposed
                     || !_isInteractionEnabled || !_isShowCompleted || !_isFocusRestorePending)
                 {
+                    NavigationDebugLog.Log($"{GetType().Name} RestoreFocus aborted (stale request or screen unavailable)");
                     return;
                 }
 
                 VisualElement focusElement = GetAvailableFocusElement();
                 if (focusElement == null)
                 {
+                    NavigationDebugLog.Log($"{GetType().Name} RestoreFocus found no available focus element");
                     return;
                 }
 
+                NavigationDebugLog.Log($"{GetType().Name} RestoreFocus -> {NavigationDebugLog.Describe(focusElement)}");
                 _isFocusRestorePending = false;
                 _focusBeforeSuppression = null;
                 _explicitInitialFocusElement = null;
                 focusElement.Focus();
             });
         }
+
+        /// <summary>
+        ///     フェードインを終えて操作を受け付けられる状態かどうかを取得します。
+        ///     <para>
+        ///         表示直後のフェード中は入力ブロッカーが最前面にあり、UI 側の操作は届きません。
+        ///         画面外から届く入力(コントローラーのOptionsボタンなど)も同じ扱いにするため、
+        ///         派生クラスはこの値をガード条件として参照します。
+        ///     </para>
+        /// </summary>
+        protected bool IsShowCompleted => _isShowCompleted;
 
         /// <summary>
         ///     コントローラー操作の起点となる要素を返します。
@@ -246,6 +267,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             if (_isDisposed || !_isInteractionEnabled || !_isShowCompleted)
             {
+                NavigationDebugLog.Log(
+                    $"{GetType().Name} Cancel ignored (disposed={_isDisposed}, "
+                    + $"interactionEnabled={_isInteractionEnabled}, showCompleted={_isShowCompleted})");
                 return;
             }
 
@@ -254,18 +278,66 @@ namespace KillChord.Runtime.View.OutGame.Screen
             // 処理しない画面ではイベントを消費せず、親側の処理に委ねる。
             if (cancelTarget == null || !cancelTarget.enabledInHierarchy)
             {
+                NavigationDebugLog.Log(
+                    $"{GetType().Name} Cancel not handled (cancelTarget={NavigationDebugLog.Describe(cancelTarget)})");
                 return;
             }
 
             if (cancelTarget.resolvedStyle.display == DisplayStyle.None)
             {
+                NavigationDebugLog.Log(
+                    $"{GetType().Name} Cancel target hidden: {NavigationDebugLog.Describe(cancelTarget)}");
                 return;
             }
 
+            NavigationDebugLog.Log($"{GetType().Name} Cancel -> activating {NavigationDebugLog.Describe(cancelTarget)}");
             using UIActivationEvent activationEvent = UIActivationEvent.GetPooled();
             activationEvent.target = cancelTarget;
             cancelTarget.SendEvent(activationEvent);
             navigationEvent.StopPropagation();
+        }
+
+        /// <summary>
+        ///     診断用: この画面内でフォーカスを得た要素を記録します。
+        /// </summary>
+        /// <param name="evt"> フォーカス取得イベントです。 </param>
+        private void HandleFocusInDebugHandler(FocusInEvent evt)
+        {
+            NavigationDebugLog.Log(
+                $"{GetType().Name} FocusIn: {NavigationDebugLog.Describe(evt.target as VisualElement)}");
+        }
+
+        /// <summary>
+        ///     診断用: この画面内でフォーカスを失った要素を記録します。
+        /// </summary>
+        /// <param name="evt"> フォーカス喪失イベントです。 </param>
+        private void HandleFocusOutDebugHandler(FocusOutEvent evt)
+        {
+            NavigationDebugLog.Log(
+                $"{GetType().Name} FocusOut: {NavigationDebugLog.Describe(evt.target as VisualElement)}"
+                + $" -> relatedTarget: {NavigationDebugLog.Describe(evt.relatedTarget as VisualElement)}");
+        }
+
+        /// <summary>
+        ///     診断用: 十字キー/スティックの移動操作の発生を記録します。
+        /// </summary>
+        /// <param name="evt"> ナビゲーション移動イベントです。 </param>
+        private void HandleNavigationMoveDebugHandler(NavigationMoveEvent evt)
+        {
+            NavigationDebugLog.Log(
+                $"{GetType().Name} NavigationMove: direction={evt.direction} "
+                + $"target={NavigationDebugLog.Describe(evt.target as VisualElement)}");
+        }
+
+        /// <summary>
+        ///     診断用: 決定操作(NavigationSubmitEvent)の発生をトリクルダウンの時点で記録します。
+        ///     画面固有のハンドラーがイベントを消費する前に、そもそも発生しているかを確認するため。
+        /// </summary>
+        /// <param name="evt"> ナビゲーション決定イベントです。 </param>
+        private void HandleNavigationSubmitDebugHandler(NavigationSubmitEvent evt)
+        {
+            NavigationDebugLog.Log(
+                $"{GetType().Name} NavigationSubmit(trickle): target={NavigationDebugLog.Describe(evt.target as VisualElement)}");
         }
 
         /// <summary>
