@@ -12,6 +12,7 @@
                 <ui:VisualElement class="setting-menu-list">
                     <ui:Button text="環境設定" name="EnvironmentSettingButton" class="setting-menu-button ui-se-select"/>
                     <ui:Button text="オーディオ設定" name="AudioSettingButton" class="setting-menu-button ui-se-select"/>
+                    <ui:Button text="操作設定" name="ControlSettingButton" class="setting-menu-button ui-se-select"/>
                     <ui:Button text="タイトルへ戻る" name="ReturnToTitleButton" class="setting-menu-button ui-se-select"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-menu-spacer"/>
@@ -127,6 +128,44 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-menu-spacer"/>
                 <ui:Button text="設定を保存" name="EnvironmentPanelSaveButton" class="setting-menu-button ui-se-select"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="ControlPanel" class="setting-panel" style="display: none;">
+                <ui:VisualElement class="setting-panel-top-bar">
+                    <ui:Label name="ControlPanelTitle" text="操作設定" class="setting-panel-title"/>
+                    <ui:Button text="&lt;" name="ControlPanelBackButton" class="setting-panel-back-button ui-se-cancel"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-title-divider"/>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label name="CameraSensitivityHeading" text="カメラ感度" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-control-row">
+                        <ui:Label text="5" name="CameraSensitivityValueLabel" class="setting-value-label"/>
+                        <ui:SliderInt name="CameraSensitivitySlider" low-value="1" high-value="10" value="5" show-input-field="false" page-size="1" class="setting-slider"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label name="CameraInvertHeading" text="カメラ反転" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-select-row">
+                        <ui:Button text="&lt;" name="CameraInvertPrevButton" class="setting-select-arrow-button ui-se-select"/>
+                        <ui:Label text="なし" name="CameraInvertValueLabel" class="setting-select-value-label"/>
+                        <ui:Button text="&gt;" name="CameraInvertNextButton" class="setting-select-arrow-button ui-se-select"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label name="AutoLockOnHeading" text="オートロックオン" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-select-row">
+                        <ui:Button text="&lt;" name="AutoLockOnPrevButton" class="setting-select-arrow-button ui-se-select"/>
+                        <ui:Label text="オン" name="AutoLockOnValueLabel" class="setting-select-value-label"/>
+                        <ui:Button text="&gt;" name="AutoLockOnNextButton" class="setting-select-arrow-button ui-se-select"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-menu-spacer"/>
+                <ui:Button text="設定を保存" name="ControlPanelSaveButton" class="setting-menu-button ui-se-select"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="ReturnToTitleDialog" picking-mode="Position" class="setting-dialog-overlay" style="display: none;">

@@ -41,7 +41,16 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 GetVibrationScale(environmentSettings.VibrationStrength),
                 GetRhythmOffsetStep(environmentSettings.RhythmOffsetSeconds),
                 GetRhythmOffsetLabel(environmentSettings.RhythmOffsetSeconds),
-                (float)environmentSettings.RhythmOffsetSeconds);
+                (float)environmentSettings.RhythmOffsetSeconds,
+                environmentSettings.CameraSensitivity,
+                GetCameraSensitivityScale(environmentSettings.CameraSensitivity),
+                GetCameraInvertModeLabelKey(environmentSettings.CameraInvertMode),
+                environmentSettings.CameraInvertMode == CameraInvertMode.Vertical
+                    || environmentSettings.CameraInvertMode == CameraInvertMode.Both,
+                environmentSettings.CameraInvertMode == CameraInvertMode.Horizontal
+                    || environmentSettings.CameraInvertMode == CameraInvertMode.Both,
+                environmentSettings.IsAutoLockOnEnabled ? AUTO_LOCK_ON_ON_KEY : AUTO_LOCK_ON_OFF_KEY,
+                environmentSettings.IsAutoLockOnEnabled);
             _environmentSettingsViewModel.Apply(in dto);
         }
 
@@ -57,6 +66,12 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         private const float VIBRATION_WEAK_SCALE = 0.5f;
         private const float VIBRATION_OFF_SCALE = 0f;
         private const string RHYTHM_OFFSET_LABEL_FORMAT = "+0.00;-0.00;0.00";
+        private const string CAMERA_INVERT_NONE_KEY = "ui.setting.camera_invert_none";
+        private const string CAMERA_INVERT_VERTICAL_KEY = "ui.setting.camera_invert_vertical";
+        private const string CAMERA_INVERT_HORIZONTAL_KEY = "ui.setting.camera_invert_horizontal";
+        private const string CAMERA_INVERT_BOTH_KEY = "ui.setting.camera_invert_both";
+        private const string AUTO_LOCK_ON_ON_KEY = "ui.setting.auto_lock_on_on";
+        private const string AUTO_LOCK_ON_OFF_KEY = "ui.setting.auto_lock_on_off";
 
         private readonly IEnvironmentSettingsViewModel _environmentSettingsViewModel;
         private readonly IQualityApplier _qualityApplier;
@@ -102,6 +117,28 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 VibrationStrength.Weak => VIBRATION_WEAK_SCALE,
                 VibrationStrength.Off => VIBRATION_OFF_SCALE,
                 _ => VIBRATION_STRONG_SCALE,
+            };
+        }
+
+        /// <summary>
+        ///     カメラ感度（1～10）を入力へ掛ける倍率へ変換する。既定値で1倍になる。
+        /// </summary>
+        private static float GetCameraSensitivityScale(int cameraSensitivity)
+        {
+            return (float)cameraSensitivity / EnvironmentSettingsData.DEFAULT_CAMERA_SENSITIVITY;
+        }
+
+        /// <summary>
+        ///     カメラ操作の反転方向のローカライズキーを取得する。
+        /// </summary>
+        private static string GetCameraInvertModeLabelKey(CameraInvertMode cameraInvertMode)
+        {
+            return cameraInvertMode switch
+            {
+                CameraInvertMode.Vertical => CAMERA_INVERT_VERTICAL_KEY,
+                CameraInvertMode.Horizontal => CAMERA_INVERT_HORIZONTAL_KEY,
+                CameraInvertMode.Both => CAMERA_INVERT_BOTH_KEY,
+                _ => CAMERA_INVERT_NONE_KEY,
             };
         }
 

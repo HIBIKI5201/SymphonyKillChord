@@ -414,6 +414,46 @@ MonoBehaviour:
     m_Localized: "Save data has been reset."
     m_Metadata:
       m_Items: []
+  - m_Id: 1880000001
+    m_Localized: "Controls"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000002
+    m_Localized: "Camera Sensitivity"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000003
+    m_Localized: "Invert Camera"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000004
+    m_Localized: "Off"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000005
+    m_Localized: "Vertical"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000006
+    m_Localized: "Horizontal"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000007
+    m_Localized: "Both"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000008
+    m_Localized: "Auto Lock-On"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000009
+    m_Localized: "On"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000010
+    m_Localized: "Off"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
