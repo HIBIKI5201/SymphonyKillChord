@@ -13,20 +13,23 @@ MonoBehaviour:
   m_Name: UISoundEffectConfig
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.OutGame.Audio.UiSoundEffectConfig
   _defaultButtonActivationCue: SE_Click
-  _activationMappings:
+  _clickMappings:
   - _ussClassName: ui-se-select
     _cueName: SE_Select
   - _ussClassName: ui-se-cancel
     _cueName: SE_Cancel
   - _ussClassName: ui-se-window
     _cueName: SE_Window
+  - _ussClassName: ui-se-window-mission
+    _cueName: SE_Window_Mission
+  - _ussClassName: ui-se-window-customize
+    _cueName: SE_Window_Customize
+  - _ussClassName: ui-se-window-research
+    _cueName: SE_Window_Research
   - _ussClassName: ui-se-sortie
     _cueName: SE_Sortie
-  _pointerDownActivationMappings:
+  - _ussClassName: ui-se-skill-set
+    _cueName: SE_SkillSet
+  _pointerDownMappings:
   - _ussClassName: ui-se-title-start
     _cueName: SE_Gamestart
-  _explicitCueMappings:
-  - _kind: 0
-    _cueName: SE_Select
-  - _kind: 1
-    _cueName: SE_SkillSet
