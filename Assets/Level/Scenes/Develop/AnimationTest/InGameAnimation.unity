@@ -372,7 +372,6 @@ MonoBehaviour:
   _enemyArtilleryTestSpawner: {fileID: 1772279158}
   _inGameMissionInitializer: {fileID: 866643817}
   _mobileInput: {fileID: 887821559}
-  _rhythmGuideInitializer: {fileID: 678096161}
   _backgroundSceneName: Stage_01
   _enemyPools: {fileID: 0}
   _enemyInitializer: {fileID: 0}
@@ -520,53 +519,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f975f23e67a3ea544a3bff6e3c90e7e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.TestCameraInitializer
---- !u!1 &678096160
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 678096162}
-  - component: {fileID: 678096161}
-  m_Layer: 0
-  m_Name: Rhythm
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &678096161
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 678096160}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e17c8f2e10d1bb54488505b31b452916, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.InGame.Music.RhythmGuideInitializer
-  _rhythmJudgmentDefinitionAsset: {fileID: 11400000, guid: 6ee731abf1f9c8243aa52e0b51d5c9a5, type: 2}
-  _rhythmGuideView: {fileID: 887821558}
-  _rhythmGuideUpdateView: {fileID: 887821557}
---- !u!4 &678096162
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 678096160}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &866643814
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,28 +697,6 @@ PrefabInstance:
       addedObject: {fileID: 1493948679}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
---- !u!114 &887821557 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7740924343983719544, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
-  m_PrefabInstance: {fileID: 887821556}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 888acde840dd7e646b3d3f83c4cebe36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.RhythmGuideUpdeteView
---- !u!114 &887821558 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6013868925677270723, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
-  m_PrefabInstance: {fileID: 887821556}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffbe35183663de548aa63606bd7d19ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.RhythmGuideView
 --- !u!114 &887821559 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1709846766432741349, guid: 9ca6e05b5f008424f9c1a510f77026b0, type: 3}
@@ -1241,4 +1171,3 @@ SceneRoots:
   - {fileID: 866643818}
   - {fileID: 219233515}
   - {fileID: 887821556}
-  - {fileID: 678096162}
