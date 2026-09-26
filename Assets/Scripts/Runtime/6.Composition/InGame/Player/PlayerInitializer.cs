@@ -325,7 +325,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             PlayerAttackPresenter playerAttackPresenter = new PlayerAttackPresenter(_playerAttackSignal);
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
             PlayerActionRestrictionState actionRestrictionState = new PlayerActionRestrictionState();
-            AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
+            AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity, destroyCancellationToken);
             PlayerAttackController playerAttackController = new PlayerAttackController(
                 attackResultPresenter,
                 playerAttackPresenter,
