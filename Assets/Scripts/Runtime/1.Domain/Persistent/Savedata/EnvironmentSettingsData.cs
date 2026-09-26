@@ -4,7 +4,7 @@ using UnityEngine;
 namespace KillChord.Runtime.Domain.Persistent.Savedata
 {
     /// <summary>
-    ///     解像度、画面モード、画質プリセット、明るさ、言語、振動の環境設定を保持するセーブデータ。
+    ///     解像度、画面モード、画質プリセット、明るさ、言語、振動、カメラ操作の環境設定を保持するセーブデータ。
     /// </summary>
     [Serializable]
     public sealed class EnvironmentSettingsData
@@ -20,6 +20,9 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <param name="language"> 表示言語。 </param>
         /// <param name="vibrationStrength"> ゲームパッド振動の強さ。 </param>
         /// <param name="rhythmOffsetSeconds"> リズム判定タイミングへ加算するオフセット秒数。 </param>
+        /// <param name="cameraSensitivity"> カメラ感度（1～10）。 </param>
+        /// <param name="cameraInvertMode"> カメラ操作の反転方向。 </param>
+        /// <param name="isAutoLockOnEnabled"> 攻撃時のオートロックオンを使うかどうか。 </param>
         public EnvironmentSettingsData(
             int resolutionWidth = DEFAULT_RESOLUTION_WIDTH,
             int resolutionHeight = DEFAULT_RESOLUTION_HEIGHT,
@@ -28,7 +31,10 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             int brightness = DEFAULT_BRIGHTNESS,
             GameLanguage language = DEFAULT_LANGUAGE,
             VibrationStrength vibrationStrength = DEFAULT_VIBRATION_STRENGTH,
-            double rhythmOffsetSeconds = DEFAULT_RHYTHM_OFFSET_SECONDS)
+            double rhythmOffsetSeconds = DEFAULT_RHYTHM_OFFSET_SECONDS,
+            int cameraSensitivity = DEFAULT_CAMERA_SENSITIVITY,
+            CameraInvertMode cameraInvertMode = DEFAULT_CAMERA_INVERT_MODE,
+            bool isAutoLockOnEnabled = DEFAULT_IS_AUTO_LOCK_ON_ENABLED)
         {
             SetResolution(resolutionWidth, resolutionHeight, isFullScreen);
             SetQualityLevel(qualityLevel);
@@ -36,6 +42,9 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             SetLanguage(language);
             SetVibrationStrength(vibrationStrength);
             SetRhythmOffsetSeconds(rhythmOffsetSeconds);
+            SetCameraSensitivity(cameraSensitivity);
+            SetCameraInvertMode(cameraInvertMode);
+            SetAutoLockOnEnabled(isAutoLockOnEnabled);
         }
 
         /// <summary> 解像度の幅。 </summary>
@@ -62,6 +71,20 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <summary> リズム判定タイミングへ加算するオフセット秒数。 </summary>
         public double RhythmOffsetSeconds => _rhythmOffsetSeconds;
 
+        /// <summary>
+        ///     カメラ感度（1～10）。
+        ///     項目追加前のセーブデータでは0になるため、その場合は既定値として扱う。
+        /// </summary>
+        public int CameraSensitivity => _cameraSensitivity <= 0
+            ? DEFAULT_CAMERA_SENSITIVITY
+            : Mathf.Clamp(_cameraSensitivity, MIN_CAMERA_SENSITIVITY, MAX_CAMERA_SENSITIVITY);
+
+        /// <summary> カメラ操作の反転方向。 </summary>
+        public CameraInvertMode CameraInvertMode => _cameraInvertMode;
+
+        /// <summary> 攻撃時のオートロックオンを使うかどうか。 </summary>
+        public bool IsAutoLockOnEnabled => !_isAutoLockOnDisabled;
+
         public const int MIN_BRIGHTNESS = 0;
         public const int MAX_BRIGHTNESS = 10;
 
@@ -82,6 +105,21 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
 
         /// <summary> リズム判定オフセットの最大段階（0.05秒刻み）。 </summary>
         public const int MAX_RHYTHM_OFFSET_STEP = 6;
+
+        /// <summary> カメラ感度の最小値。 </summary>
+        public const int MIN_CAMERA_SENSITIVITY = 1;
+
+        /// <summary> カメラ感度の最大値。 </summary>
+        public const int MAX_CAMERA_SENSITIVITY = 10;
+
+        /// <summary> カメラ感度の既定値。この値で倍率1倍になる。 </summary>
+        public const int DEFAULT_CAMERA_SENSITIVITY = 5;
+
+        /// <summary> カメラ操作の反転方向の既定値。 </summary>
+        public const CameraInvertMode DEFAULT_CAMERA_INVERT_MODE = CameraInvertMode.None;
+
+        /// <summary> オートロックオンの既定値。 </summary>
+        public const bool DEFAULT_IS_AUTO_LOCK_ON_ENABLED = true;
 
         /// <summary> 明るさの既定値。 </summary>
         public const int DEFAULT_BRIGHTNESS = 5;
@@ -160,6 +198,32 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         }
 
         /// <summary>
+        ///     カメラ感度を設定する。範囲外の値は最小・最大値へ丸める。
+        /// </summary>
+        public void SetCameraSensitivity(int cameraSensitivity)
+        {
+            _cameraSensitivity = Mathf.Clamp(cameraSensitivity, MIN_CAMERA_SENSITIVITY, MAX_CAMERA_SENSITIVITY);
+        }
+
+        /// <summary>
+        ///     カメラ操作の反転方向を設定する。
+        /// </summary>
+        public void SetCameraInvertMode(CameraInvertMode cameraInvertMode)
+        {
+            _cameraInvertMode = Enum.IsDefined(typeof(CameraInvertMode), cameraInvertMode)
+                ? cameraInvertMode
+                : DEFAULT_CAMERA_INVERT_MODE;
+        }
+
+        /// <summary>
+        ///     攻撃時のオートロックオンを使うかどうかを設定する。
+        /// </summary>
+        public void SetAutoLockOnEnabled(bool isAutoLockOnEnabled)
+        {
+            _isAutoLockOnDisabled = !isAutoLockOnEnabled;
+        }
+
+        /// <summary>
         ///     現在値の複製を作成する。
         /// </summary>
         public EnvironmentSettingsData Copy()
@@ -172,7 +236,10 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
                 Brightness,
                 Language,
                 VibrationStrength,
-                RhythmOffsetSeconds);
+                RhythmOffsetSeconds,
+                CameraSensitivity,
+                CameraInvertMode,
+                IsAutoLockOnEnabled);
         }
 
         [SerializeField, Tooltip("解像度の幅")]
@@ -198,6 +265,16 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
 
         [SerializeField, Tooltip("リズム判定タイミングへ加算するオフセット秒数（±0.30秒、0.05秒刻み）")]
         private double _rhythmOffsetSeconds = DEFAULT_RHYTHM_OFFSET_SECONDS;
+
+        [SerializeField, Tooltip("カメラ感度（1～10）。0は項目追加前のセーブデータで、既定値として扱う")]
+        private int _cameraSensitivity = DEFAULT_CAMERA_SENSITIVITY;
+
+        [SerializeField, Tooltip("カメラ操作の反転方向")]
+        private CameraInvertMode _cameraInvertMode = DEFAULT_CAMERA_INVERT_MODE;
+
+        // 項目追加前のセーブデータでもオンになるよう、無効側をbool値で保持する。
+        [SerializeField, Tooltip("攻撃時のオートロックオンを使わないかどうか")]
+        private bool _isAutoLockOnDisabled = !DEFAULT_IS_AUTO_LOCK_ON_ENABLED;
 
         /// <summary>
         ///     明るさを有効範囲へ制限する。
