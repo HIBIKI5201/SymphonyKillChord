@@ -84,8 +84,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 ownedSkillIds.Add(skillTemplate.Id.Value);
             }
 
+            // 改造画面の一覧には、取得済みのキルコードだけを表示する（未取得のものは出さない）。
             List<SkillViewData> unlockedSkills = new();
-            List<SkillViewData> lockedSkills = new();
             foreach (SkillTemplate skillTemplate in allSkills)
             {
                 if (skillTemplate == null)
@@ -93,20 +93,22 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                     continue;
                 }
 
-                bool isUnlocked = ownedSkillIds.Contains(skillTemplate.Id.Value);
+                if (!ownedSkillIds.Contains(skillTemplate.Id.Value))
+                {
+                    continue;
+                }
+
                 int level = skillLevels != null && skillLevels.TryGetValue(skillTemplate.Id.Value, out int savedLevel)
                     ? savedLevel
                     : skillTemplate.Level.Value;
-                SkillViewData viewData = BuildSkillViewData(skillTemplate, isUnlocked, level);
-                (isUnlocked ? unlockedSkills : lockedSkills).Add(viewData);
+                SkillViewData viewData = BuildSkillViewData(skillTemplate, true, level);
+                unlockedSkills.Add(viewData);
             }
 
 
             // SkillId は文字列IDから焼き込まれたハッシュ値のため番号順にならない。
             // 表示名末尾の数字を「スキル番号」として抽出し、昇順に並び替える。
             unlockedSkills.Sort(CompareBySkillNumber);
-            lockedSkills.Sort(CompareBySkillNumber);
-            unlockedSkills.AddRange(lockedSkills);
             SkillBuildViewDTO dto = new(slots, unlockedSkills.ToArray(), ownedPoints);
             _viewModel.Apply(in dto);
         }
