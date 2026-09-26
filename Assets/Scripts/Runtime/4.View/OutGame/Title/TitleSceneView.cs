@@ -3,9 +3,11 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
 using System;
 using System.Threading;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -76,6 +78,8 @@ namespace KillChord.Runtime.View.OutGame.Title
 
             _isDisposed = true;
             UnRegisterCallbacks();
+            _startButtonGlyph?.Dispose();
+            _startButtonGlyph = null;
             _instructionMotionHandle.TryCancel();
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource?.Dispose();
@@ -116,6 +120,25 @@ namespace KillChord.Runtime.View.OutGame.Title
             _playerInputView.OnOptionInput += OnOptionInput;
         }
 
+        /// <summary>
+        ///     開始案内の決定ボタンの画像を、現在の入力機器のアイコンへ切り替えます。
+        /// </summary>
+        /// <param name="spriteAsset"> 入力アイコンを収めたSprite Assetです。nullの場合はUXMLの画像のままにします。 </param>
+        public void BindStartButtonGlyph(TMP_SpriteAsset spriteAsset)
+        {
+            _startButtonGlyph?.Dispose();
+            _startButtonGlyph = null;
+
+            if (spriteAsset == null)
+            {
+                return;
+            }
+
+            Image icon = _instructionElement.Q<Image>(START_BUTTON_ICON_NAME)
+                ?? throw new NullReferenceException($"{nameof(TitleSceneView)}: {START_BUTTON_ICON_NAME}の取得に失敗しました。");
+            _startButtonGlyph = new InputGlyphImage(icon, spriteAsset, START_BUTTON_GLYPH_KEY);
+        }
+
         /// <inheritdoc />
         protected override VisualElement InitialFocusElement => _touchArea;
 
@@ -124,6 +147,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const string INSTRUCTION_ELEMENT_NAME = "Instruction";
         private const string MOBILE_INSTRUCTION_NAME = "MobileInstruction";
         private const string CONTROLLER_INSTRUCTION_NAME = "ControllerInstruction";
+        private const string START_BUTTON_ICON_NAME = "ConfirmButtonIcon";
+        private const string START_BUTTON_GLYPH_KEY = "submit";
         private const float INSTRUCTION_FADE_DURATION = 1.8f;
 
         private string _currentSceneName;
@@ -134,6 +159,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private Button _optionButton;
         private VisualElement _instructionElement;
         private MotionHandle _instructionMotionHandle;
+        private InputGlyphImage _startButtonGlyph;
 
         private TitleStartController _titleStartController;
         private PlayerInputView _playerInputView;

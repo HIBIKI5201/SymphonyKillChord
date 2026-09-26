@@ -5,6 +5,7 @@ using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Load;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
@@ -42,6 +43,8 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         private PlayerInputView _playerInputView;
         private InputTimestampProvider _timestampProvider;
         private UnityInputMapController _inputMapController;
+        private InputDeviceKindObserver _deviceKindObserver;
+        private InputDeviceLocalizationVariable _deviceLocalizationVariable;
         private LoadingScreenController _loadingScreenController;
         private EventNotificationView _notificationView;
         private bool _isNotificationSubscribed;
@@ -59,6 +62,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             InitializePureObjects();
             InitializeInputMaps();
             BindViewToAdaptor();
+            InitializeDeviceKind();
             ServiceLocator.RegisterInstance(_playerInputView);
             ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             return true;
@@ -116,6 +120,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             _notificationView = null;
             UnsubscribeLoading();
             UnbindViewAdaptor();
+            DisposeDeviceKind();
 
             if (ServiceLocator.TryGetInstance(out PlayerInputView registeredInputView)
                 && ReferenceEquals(registeredInputView, _playerInputView))
@@ -221,6 +226,31 @@ namespace KillChord.Runtime.Composition.Persistent.Input
 
             _timestampProvider = new InputTimestampProvider();
             _playerInputView.Initialize(_timestampProvider);
+        }
+
+        /// <summary>
+        ///     入力機器の種類の監視を開始し、操作案内のローカライズ変数へ反映する。
+        /// </summary>
+        private void InitializeDeviceKind()
+        {
+            if (_deviceKindObserver != null)
+            {
+                return;
+            }
+
+            _deviceKindObserver = new InputDeviceKindObserver();
+            _deviceLocalizationVariable = new InputDeviceLocalizationVariable(_deviceKindObserver);
+        }
+
+        /// <summary>
+        ///     入力機器の種類の監視を終了する。
+        /// </summary>
+        private void DisposeDeviceKind()
+        {
+            _deviceLocalizationVariable?.Dispose();
+            _deviceLocalizationVariable = null;
+            _deviceKindObserver?.Dispose();
+            _deviceKindObserver = null;
         }
 
         /// <summary>
