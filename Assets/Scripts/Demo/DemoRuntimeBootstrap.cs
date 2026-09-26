@@ -685,6 +685,7 @@ namespace KillChord.Demo
 
         /// <summary>
         ///     専用終了画面が表示された時点でセーブデータを削除します。
+        ///     言語と音量は次のプレイヤーへ引き継ぐため、削除後のセーブデータへ戻して保存します。
         /// </summary>
         private async void TryResetSaveDataOnEndScene(Scene scene)
         {
@@ -698,8 +699,33 @@ namespace KillChord.Demo
             _isSaveDataReset = true;
             try
             {
+                // 削除の前に、引き継ぐ言語と音量を控える。
+                bool hasPreservedSettings = SaveStore.IsLoaded<SaveData>();
+                AudioSettingsData preservedAudioSettings = null;
+                GameLanguage preservedLanguage = EnvironmentSettingsData.DEFAULT_LANGUAGE;
+                if (hasPreservedSettings)
+                {
+                    SaveData currentSaveData = SaveStore.Get<SaveData>();
+                    preservedAudioSettings = new AudioSettingsData(
+                        currentSaveData.AudioSettings.BgmVolume,
+                        currentSaveData.AudioSettings.SoundEffectVolume,
+                        currentSaveData.AudioSettings.VoiceVolume);
+                    preservedLanguage = currentSaveData.EnvironmentSettings.Language;
+                }
+
                 // 終了シーンの初期化完了通知は DemoEndSceneInitializer が行う。
                 await SaveStore.DeleteAsync<SaveData>();
+
+                if (hasPreservedSettings)
+                {
+                    SaveData resetSaveData = await SaveStore.LoadAsync<SaveData>(destroyCancellationToken);
+                    resetSaveData.AudioSettings.SetVolumes(
+                        preservedAudioSettings.BgmVolume,
+                        preservedAudioSettings.SoundEffectVolume,
+                        preservedAudioSettings.VoiceVolume);
+                    resetSaveData.EnvironmentSettings.SetLanguage(preservedLanguage);
+                    await SaveStore.SaveAsync<SaveData>();
+                }
             }
             catch (Exception exception)
             {
