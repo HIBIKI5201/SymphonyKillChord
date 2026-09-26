@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.Persistent.Music;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,13 +16,12 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// <param name="source"> SESource。 </param>
         public void Register(SoundEffectSource source)
         {
-            if (source == null || _sources.Contains(source))
+            if (source == null || !_sources.Add(source))
             {
                 return;
             }
 
             source.ApplyVolume(_volume);
-            _sources.Add(source);
         }
 
         /// <summary>
@@ -46,15 +46,10 @@ namespace KillChord.Runtime.View.Persistent.Music
         {
             _volume = Mathf.Clamp01(volume);
 
-            for (int i = _sources.Count - 1; i >= 0; i--)
+            // 破棄済みの Source を除いてから、残りへ音量を適用する。
+            _sources.RemoveWhere(IS_DESTROYED);
+            foreach (SoundEffectSource source in _sources)
             {
-                SoundEffectSource source = _sources[i];
-                if (source == null)
-                {
-                    _sources.RemoveAt(i);
-                    continue;
-                }
-
                 source.ApplyVolume(_volume);
             }
         }
@@ -67,7 +62,10 @@ namespace KillChord.Runtime.View.Persistent.Music
             return _volume;
         }
 
-        private readonly List<SoundEffectSource> _sources = new();
+        /// <summary> 破棄済みの Source かを判定する。呼び出しごとにデリゲートを生成しないよう保持する。 </summary>
+        private static readonly Predicate<SoundEffectSource> IS_DESTROYED = source => source == null;
+
+        private readonly HashSet<SoundEffectSource> _sources = new();
         /// <summary> 音量設定の読み込み前に登録されたSourceへ適用する暫定音量です。 </summary>
         private float _volume = 0.4f;
     }
