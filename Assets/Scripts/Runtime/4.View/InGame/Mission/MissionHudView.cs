@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Pool;
 
 namespace KillChord.Runtime.View.InGame.Mission
 {
@@ -52,6 +53,8 @@ namespace KillChord.Runtime.View.InGame.Mission
         [SerializeField, Tooltip("評価項目の親となるRectTransform。")] private RectTransform _evaluationRoot;
         [SerializeField, Tooltip("評価項目のプレハブ。")] private MissionEvaluationItemView _evaluationItemPrefab;
         [SerializeField, Tooltip("評価項目の垂直方向の間隔。")] private float _evaluationItemSpacing;
+        [SerializeField, Min(1), Tooltip("評価項目プールの初期生成数。")] private int _evaluationItemPoolDefaultCapacity = 4;
+        [SerializeField, Min(1), Tooltip("評価項目プールの最大保持数。")] private int _evaluationItemPoolMaxSize = 16;
 
         /// <summary> ビューモデル。 </summary>
         private MissionHudViewModel _viewModel;
@@ -59,8 +62,10 @@ namespace KillChord.Runtime.View.InGame.Mission
         private IDisposable _mainMissionDisposable;
         /// <summary> 結果テキスト購読解除用。 </summary>
         private IDisposable _resultDisposable;
-        /// <summary> 生成された評価項目のリスト。 </summary>
+        /// <summary> 表示中の評価項目のリスト。 </summary>
         private readonly List<MissionEvaluationItemView> _spawnedEvaluationItems = new();
+        /// <summary> 評価項目のオブジェクトプール。 </summary>
+        private IObjectPool<MissionEvaluationItemView> _evaluationItemPool;
 
         /// <summary>
         ///     破棄時の処理を行います。
@@ -74,6 +79,8 @@ namespace KillChord.Runtime.View.InGame.Mission
             {
                 _viewModel.OnEvaluationItemsUpdated -= ReBuildEvaluationItems;
             }
+
+            _evaluationItemPool?.Clear();
         }
 
         /// <summary>
@@ -82,16 +89,18 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// <param name="items">評価項目のリスト。</param>
         private void ReBuildEvaluationItems(IReadOnlyList<MissionEvaluationItemViewModel> items)
         {
-            ClearEvaluationItems();
+            ReleaseEvaluationItems();
 
             if (items == null || _evaluationRoot == null || _evaluationItemPrefab == null)
             {
                 return;
             }
 
+            EnsureEvaluationItemPoolInitialized();
+
             for (int i = 0; i < items.Count; i++)
             {
-                MissionEvaluationItemView view = Instantiate(_evaluationItemPrefab, _evaluationRoot);
+                MissionEvaluationItemView view = _evaluationItemPool.Get();
 
                 RectTransform rectTransform = view.GetComponent<RectTransform>();
                 if (rectTransform != null)
@@ -105,19 +114,90 @@ namespace KillChord.Runtime.View.InGame.Mission
         }
 
         /// <summary>
-        ///     表示中の評価項目をクリアします。
+        ///     表示中の評価項目をすべてプールへ戻します。
         /// </summary>
-        private void ClearEvaluationItems()
+        private void ReleaseEvaluationItems()
         {
-            foreach (var item in _spawnedEvaluationItems)
+            foreach (MissionEvaluationItemView item in _spawnedEvaluationItems)
             {
-                if (item != null)
+                if (item != null && _evaluationItemPool != null)
                 {
-                    Destroy(item.gameObject);
+                    _evaluationItemPool.Release(item);
                 }
             }
 
             _spawnedEvaluationItems.Clear();
+        }
+
+        /// <summary>
+        ///     評価項目プールを必要時に初期化します。
+        /// </summary>
+        private void EnsureEvaluationItemPoolInitialized()
+        {
+            if (_evaluationItemPool != null)
+            {
+                return;
+            }
+
+            _evaluationItemPool = new ObjectPool<MissionEvaluationItemView>(
+                CreateEvaluationItem,
+                OnGetEvaluationItem,
+                OnReleaseEvaluationItem,
+                OnDestroyEvaluationItem,
+                true,
+                _evaluationItemPoolDefaultCapacity,
+                _evaluationItemPoolMaxSize);
+        }
+
+        /// <summary>
+        ///     新しい評価項目を生成します。
+        /// </summary>
+        /// <returns> 生成した評価項目のビュー。 </returns>
+        private MissionEvaluationItemView CreateEvaluationItem()
+        {
+            return Instantiate(_evaluationItemPrefab, _evaluationRoot);
+        }
+
+        /// <summary>
+        ///     プールから取り出した評価項目を有効化します。
+        /// </summary>
+        /// <param name="view"> 対象の評価項目ビュー。 </param>
+        private void OnGetEvaluationItem(MissionEvaluationItemView view)
+        {
+            if (view == null)
+            {
+                return;
+            }
+
+            view.gameObject.SetActive(true);
+        }
+
+        /// <summary>
+        ///     プールへ戻す評価項目を非表示にします。
+        /// </summary>
+        /// <param name="view"> 対象の評価項目ビュー。 </param>
+        private void OnReleaseEvaluationItem(MissionEvaluationItemView view)
+        {
+            if (view == null)
+            {
+                return;
+            }
+
+            view.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        ///     プール上限を超えた評価項目を破棄します。
+        /// </summary>
+        /// <param name="view"> 対象の評価項目ビュー。 </param>
+        private void OnDestroyEvaluationItem(MissionEvaluationItemView view)
+        {
+            if (view == null)
+            {
+                return;
+            }
+
+            Destroy(view.gameObject);
         }
     }
 }

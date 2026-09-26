@@ -15,14 +15,17 @@ MonoBehaviour:
   _pages:
   - _displayName: Stage Select
     _sourceAssetAddressableKeys:
+    - DemoExperienceConfig
     - StageTreeAsset
     - EnemyWaveDefinitionRepository
+    - EnemyDefinitionRepository
     - EnemyMissionKeyRepository
     - MissionDefinitionRepository
     _collectionCategories:
     - StageAsset
     - StageBind
     - Wave
+    - EnemyData
     - EnemyMissionKey
     - Mission
   - _displayName: Player
@@ -30,9 +33,11 @@ MonoBehaviour:
     - Player
     - PlayerConfig
     - OutGameSkillRepository
+    - SkillGenreIconCatalogAsset
     _collectionCategories:
     - PlayerAttack
     - Skill
+    - SkillGenreIcon
   - _displayName: UI
     _sourceAssetAddressableKeys:
     - CameraConfig
@@ -40,32 +45,40 @@ MonoBehaviour:
     - RhythmJudgmentDefinitionAsset
     - TitleScreenRuleData
     - OutGameScreenRuleData
+    - LoadingTipsConfig
     _collectionCategories:
     - TitleScreenRule
     - OutGameScreenRule
+    - LoadingTip
   - _displayName: Enemy
     _sourceAssetAddressableKeys:
     - ExampleEnemyMoveData
     - ShellAttackData
     - BossAttackEntryRepo
+    - EnemyDefinitionRepository
     - CharacterDefinitionRepository
     - ExampleBattleMusicData
     - ExampleEncountMusicData
     - ShellMusicData
+    - BgmSelectorLabelTableAsset
     _collectionCategories:
     - BossAttackEntry
+    - EnemyData
     - Character
+    - BgmSelectorLabel
   - _displayName: Skill Tree
     _sourceAssetAddressableKeys:
     - SkillNodeDataRepo
     - SkillNodeBindRepo
     - OutGameSkillRepository
     - SkillNodePhaseBindDataRepo
+    - StatusBonusEffectIconCatalogAsset
     _collectionCategories:
     - SkillNode
     - SkillNodeBind
     - Skill
     - SkillNodePhaseBind
+    - StatusBonusEffectIcon
   - _displayName: Scenario
     _sourceAssetAddressableKeys:
     - BackgroundCatalogAsset
@@ -76,4 +89,9 @@ MonoBehaviour:
     - ScenarioBackground
     - ScenarioAnimation
     - ScenarioPortrait
+  - _displayName: Resource
+    _sourceAssetAddressableKeys:
+    - GameResourceDefinitionRepository
+    _collectionCategories:
+    - GameResource
   _isInitialized: 1

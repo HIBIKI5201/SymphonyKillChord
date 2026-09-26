@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Target
@@ -69,6 +70,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         ITargetableViewModel[] GetRegisteredTargetsSnapshot();
 
         /// <summary>
+        ///     現在登録されているターゲットを呼び出し側の再利用リストへコピーする。
+        /// </summary>
+        /// <param name="destination"> コピー先のリスト。既存要素は消去される。 </param>
+        void CopyRegisteredTargetsTo(List<ITargetableViewModel> destination);
+
+        /// <summary>
         ///     プレイヤー位置と方向をもとに最適なターゲットへ切り替える。
         /// </summary>
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
@@ -94,8 +101,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
         /// </summary>
         /// <param name="targetId"> 設定対象のターゲットID。 </param>
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。被弾による内部的な再ターゲットではfalseを指定する。 </param>
         /// <returns> 設定に成功した場合は true。 </returns>
-        bool TrySetCurrentTarget(Guid targetId);
+        bool TrySetCurrentTarget(Guid targetId, bool notifyLockOn = true);
 
         /// <summary>
         ///     現在のターゲット選択を解除する。

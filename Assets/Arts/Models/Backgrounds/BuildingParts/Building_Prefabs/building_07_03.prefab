@@ -199,7 +199,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
+  m_StaticShadowCaster: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -376,7 +376,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
+  m_StaticShadowCaster: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -520,7 +520,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
+  m_StaticShadowCaster: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -725,7 +725,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
+  m_StaticShadowCaster: 1
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -873,6 +873,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7473728332026456616, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_01 (2)
@@ -939,6 +943,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Floor_Break_01_04
       objectReference: {fileID: 0}
+    - target: {fileID: 8764955423561151976, guid: 992be4cfe94f58c489e5fe27f1933d13, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -996,6 +1004,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -2034711948156804434, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_Name
@@ -1121,6 +1133,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2034711948156804434, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_02 (3)
@@ -1182,6 +1198,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 4407f53b1658b5b46b2b616b9a1fb4d6, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7425081943705881888, guid: 4407f53b1658b5b46b2b616b9a1fb4d6, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 4407f53b1658b5b46b2b616b9a1fb4d6, type: 3}
       propertyPath: m_Name
@@ -1439,6 +1459,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4808167505053282034, guid: 72415d3dec7ad1d4ead3266c72023c65, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 72415d3dec7ad1d4ead3266c72023c65, type: 3}
       propertyPath: m_Name
       value: wall_1window_02_Broken_01
@@ -1567,6 +1591,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wall_door_02_Broken_01 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5504685175390342007, guid: 09ee2a17507954748a963ebd64c39134, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1624,6 +1652,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7473728332026456616, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_Name
@@ -1686,6 +1718,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 27180085ccff97a47a414d5a01f67d18, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 27180085ccff97a47a414d5a01f67d18, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 27180085ccff97a47a414d5a01f67d18, type: 3}
       propertyPath: m_Name
@@ -2121,6 +2157,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5222111046379411978, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_Name
       value: wall_Full_01_Broken_mid_01
@@ -2369,6 +2409,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7473728332026456616, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_01
@@ -2394,6 +2438,10 @@ PrefabInstance:
     - target: {fileID: 748272080392217354, guid: 6e0320c23719e7141b5181444e2febff, type: 3}
       propertyPath: m_Name
       value: BrokenFloor_05
+      objectReference: {fileID: 0}
+    - target: {fileID: 1998816725668580932, guid: 6e0320c23719e7141b5181444e2febff, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5862204334431223700, guid: 6e0320c23719e7141b5181444e2febff, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2496,6 +2544,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 6c88eeba96e864645b84111b2fc61761, type: 3}
       propertyPath: m_Name
       value: wall_2window_01_Broken_03 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5916256742954783992, guid: 6c88eeba96e864645b84111b2fc61761, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2740,6 +2792,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7473728332026456616, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_Name
@@ -2989,6 +3045,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5222111046379411978, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_Name
       value: wall_Full_01_Broken_mid_01 (4)
@@ -3050,6 +3110,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5222111046379411978, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_Name
@@ -3236,6 +3300,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7473728332026456616, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_Name
@@ -3485,6 +3553,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5920101527152803323, guid: 926d387aebbfd664d9d85c9e79c3cff1, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 926d387aebbfd664d9d85c9e79c3cff1, type: 3}
       propertyPath: m_Name
       value: wall_Full_Broken_01 (2)
@@ -3671,6 +3743,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4024613589408820474, guid: e332270744dedae41b53ba414d69bcb0, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e332270744dedae41b53ba414d69bcb0, type: 3}
       propertyPath: m_Name
       value: Floor_Break_01_05
@@ -3732,6 +3808,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 926d387aebbfd664d9d85c9e79c3cff1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5920101527152803323, guid: 926d387aebbfd664d9d85c9e79c3cff1, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 926d387aebbfd664d9d85c9e79c3cff1, type: 3}
       propertyPath: m_Name
@@ -3857,6 +3937,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4848969003067969459, guid: 359d845bf7fe443418e08531d6b67218, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 359d845bf7fe443418e08531d6b67218, type: 3}
       propertyPath: m_Name
       value: wall_3window_01_Broken_02
@@ -3981,6 +4065,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2034711948156804434, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_02
@@ -4042,6 +4130,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -11202841114687429, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
       propertyPath: m_Name
@@ -4485,6 +4577,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -5222111046379411978, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_Name
       value: wall_Full_01_Broken_mid_01 (3)
@@ -4671,6 +4767,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7473728332026456616, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_01
@@ -4803,6 +4903,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2034711948156804434, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_02 (1)
@@ -4864,6 +4968,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7473728332026456616, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_Name
@@ -5175,6 +5283,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 27180085ccff97a47a414d5a01f67d18, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 27180085ccff97a47a414d5a01f67d18, type: 3}
       propertyPath: m_Name
       value: wall_2window_01_Broken_02 (1)
@@ -5236,6 +5348,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: cf17fcd40368cec468986318d9855550, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1538839624801916482, guid: cf17fcd40368cec468986318d9855550, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: cf17fcd40368cec468986318d9855550, type: 3}
       propertyPath: m_Name
@@ -5361,6 +5477,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7473728332026456616, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_01 (3)
@@ -5422,6 +5542,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: cf17fcd40368cec468986318d9855550, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1538839624801916482, guid: cf17fcd40368cec468986318d9855550, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: cf17fcd40368cec468986318d9855550, type: 3}
       propertyPath: m_Name
@@ -5488,6 +5612,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 992be4cfe94f58c489e5fe27f1933d13, type: 3}
       propertyPath: m_Name
       value: Floor_Break_01_04
+      objectReference: {fileID: 0}
+    - target: {fileID: 8764955423561151976, guid: 992be4cfe94f58c489e5fe27f1933d13, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5609,6 +5737,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7425081943705881888, guid: 4407f53b1658b5b46b2b616b9a1fb4d6, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 4407f53b1658b5b46b2b616b9a1fb4d6, type: 3}
       propertyPath: m_Name
       value: wall_1window_01_Broken_03 (1)
@@ -5670,6 +5802,10 @@ PrefabInstance:
     - target: {fileID: 2596790824307016209, guid: 75f9ef2aee4db24489c7cad70270a172, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5460408051654416274, guid: 75f9ef2aee4db24489c7cad70270a172, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8566051149471120264, guid: 75f9ef2aee4db24489c7cad70270a172, type: 3}
       propertyPath: m_Name
@@ -5794,6 +5930,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7473728332026456616, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b99b4e6bd3ed2ed4aba8f7bf1c02c633, type: 3}
       propertyPath: m_Name
@@ -6249,6 +6389,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wall_Full_01_Broken_mid_03
       objectReference: {fileID: 0}
+    - target: {fileID: 2258103772792330973, guid: ae79e4606895d864d9598fff4fcfc18c, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6555,6 +6699,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4858154821898741431, guid: 4b46f82e302652741a14492b3fbd819c, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 4b46f82e302652741a14492b3fbd819c, type: 3}
       propertyPath: m_Name
       value: Floor_Break_01_07
@@ -6679,6 +6827,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2034711948156804434, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_02 (2)
@@ -6740,6 +6892,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -11202841114687429, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ee37080cc5ceb2e45827d11c1665e6b7, type: 3}
       propertyPath: m_Name
@@ -6806,6 +6962,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 09ee2a17507954748a963ebd64c39134, type: 3}
       propertyPath: m_Name
       value: wall_door_02_Broken_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 5504685175390342007, guid: 09ee2a17507954748a963ebd64c39134, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -7058,6 +7218,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: bb297bbcc78eea64b94c86a20eb00d78, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5818706208074360890, guid: bb297bbcc78eea64b94c86a20eb00d78, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: bb297bbcc78eea64b94c86a20eb00d78, type: 3}
       propertyPath: m_Name
@@ -7341,6 +7505,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BrokenFloor_08
       objectReference: {fileID: 0}
+    - target: {fileID: 6705601772561070802, guid: b3a3bd1bb4b8d194c8b999c6eb9c9183, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6796398816378271724, guid: b3a3bd1bb4b8d194c8b999c6eb9c9183, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -7501,6 +7669,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -2034711948156804434, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 86e2537dc75944746b62f5e8a87aaa02, type: 3}
       propertyPath: m_Name
       value: wall_Full_1m_Broken_02 (1)
@@ -7567,6 +7739,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4899796353290049549, guid: 660cb5ff158a60344a6d95f464d327ec, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7624,6 +7800,10 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5222111046379411978, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: ffcc84d664d95c34a8485c18d68d5fef, type: 3}
       propertyPath: m_Name
@@ -7691,6 +7871,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: wall_door_02_Broken_02
       objectReference: {fileID: 0}
+    - target: {fileID: 5632392195437883330, guid: d8fce47a78f055f4b8b0ea8cedcc1965, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7752,6 +7936,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: e2253bfc84bfeca48892349029ea0e08, type: 3}
       propertyPath: m_Name
       value: wall_1window_01_Broken_04
+      objectReference: {fileID: 0}
+    - target: {fileID: 8612459549233552635, guid: e2253bfc84bfeca48892349029ea0e08, type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

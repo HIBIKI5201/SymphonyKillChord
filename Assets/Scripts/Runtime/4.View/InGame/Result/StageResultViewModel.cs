@@ -23,11 +23,11 @@ namespace KillChord.Runtime.View
         public ReactiveProperty<string> MainMissionText { get; }
             = new(string.Empty);
 
-        public ReactiveProperty<string> BattleTimeText { get; }
-            = new(string.Empty);
+        public ReactiveProperty<float> BattleTimeSeconds { get; }
+            = new(0f);
 
-        public ReactiveProperty<string> MaxComboText { get; }
-            = new(string.Empty);
+        public ReactiveProperty<int> MaxCombo { get; }
+            = new(0);
 
         public ReactiveProperty<string> RankText { get; }
             = new(string.Empty);
@@ -42,8 +42,8 @@ namespace KillChord.Runtime.View
             StageNameText.Value = dto.StageNameText;
             MainMissionText.Value = dto.MainMissionText;
             MainMissionStateText.Value = dto.MainMissionStateText;
-            BattleTimeText.Value = dto.BattleTimeText;
-            MaxComboText.Value = dto.MaxComboText;
+            BattleTimeSeconds.Value = dto.BattleTimeSeconds;
+            MaxCombo.Value = dto.MaxCombo;
             RankText.Value = dto.RankText;
             TipsText.Value = dto.TipsText;
 

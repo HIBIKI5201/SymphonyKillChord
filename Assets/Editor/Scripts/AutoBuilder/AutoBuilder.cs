@@ -1,9 +1,9 @@
+using KillChord.Editor.SourceDataProvider.Core;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEditor.Build.Profile;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 namespace KillChord.Editor.AutoBuilder
@@ -16,11 +16,72 @@ namespace KillChord.Editor.AutoBuilder
         /// <summary>
         /// 【GitHub Actions 用エントリポイント】
         /// Unity -batchMode -executeMethod KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli
+        ///     -gameDataVariant release|demo [-buildMode Development|Master] [-selectedProfiles Windows,Android]
         /// </summary>
         public static void RunFromCli()
         {
             string buildMode = GetCliArg("-buildMode");
-            PerformMultipleBuilds(isBatchMode: true, buildMode: buildMode);
+            string gameDataVariant = GetCliArg("-gameDataVariant");
+            string selectedProfiles = GetCliArg("-selectedProfiles");
+
+            PerformMultipleBuilds(
+                isBatchMode: true,
+                gameDataVariant: gameDataVariant,
+                buildMode: buildMode,
+                selectedProfiles: selectedProfiles);
+        }
+
+        /// <summary>
+        ///     GitHub Actions がプロファイルごとにUnityプロセスを分離できるよう、
+        ///     指定されたゲームデータ種別とビルドモードに登録されたプロファイル名をファイルへ出力します。
+        /// </summary>
+        public static void ExportProfileNamesFromCli()
+        {
+            string buildMode = GetCliArg("-buildMode");
+            string gameDataVariant = GetCliArg("-gameDataVariant");
+            string selectedProfiles = GetCliArg("-selectedProfiles");
+            string outputPath = GetCliArg("-profileListFile");
+            AutoBuilderSettings settings = AutoBuilderSettings.instance;
+
+            if (settings == null
+                || string.IsNullOrWhiteSpace(outputPath)
+                || !TryParseVariant(gameDataVariant, out GameDataVariant variant)
+                || !TryResolveModes(buildMode, out AutoBuildMode[] modes))
+            {
+                Debug.LogError(
+                    $"[{nameof(AutoBuilder)}] Failed to export build profiles. " +
+                    $"Variant: '{gameDataVariant}', BuildMode: '{buildMode}', OutputPath: '{outputPath}'");
+                AutoBuildExecuter.ExitIfBatchMode(forceBatchMode: true, exitCode: 1);
+                return;
+            }
+
+            BuildProfile[] profiles = CollectProfiles(settings, variant, modes);
+            if (profiles.Length == 0 || !ValidateProfileVariants(profiles, variant))
+            {
+                Debug.LogError(
+                    $"[{nameof(AutoBuilder)}] No valid build profiles found for variant '{variant}' / buildMode '{buildMode}'");
+                AutoBuildExecuter.ExitIfBatchMode(forceBatchMode: true, exitCode: 1);
+                return;
+            }
+
+            profiles = FilterProfiles(profiles, selectedProfiles, variant, buildMode);
+            if (profiles.Length == 0)
+            {
+                Debug.LogError($"[{nameof(AutoBuilder)}] selectedProfiles matched no profiles: {selectedProfiles}");
+                AutoBuildExecuter.ExitIfBatchMode(forceBatchMode: true, exitCode: 1);
+                return;
+            }
+
+            string[] profileNames = profiles
+                .Where(profile => profile != null)
+                .Select(profile => profile.name)
+                .ToArray();
+
+            string fullOutputPath = Path.GetFullPath(outputPath);
+            Directory.CreateDirectory(Path.GetDirectoryName(fullOutputPath) ?? Directory.GetCurrentDirectory());
+            File.WriteAllLines(fullOutputPath, profileNames);
+            Debug.Log($"[{nameof(AutoBuilder)}] Exported {profileNames.Length} build profile names to: {fullOutputPath}");
+            AutoBuildExecuter.ExitIfBatchMode(forceBatchMode: true, exitCode: 0);
         }
 
         /// <summary>
@@ -40,136 +101,69 @@ namespace KillChord.Editor.AutoBuilder
             }
             return null;
         }
-        
+
         /// <summary>
-        ///     複数のビルドプロファイルに基づいてビルドを実行する。
+        ///     種別とモードで決まる枠のビルドプロファイルを順番にビルドする。
         /// </summary>
-        /// <param name="isBatchMode"> true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。false の場合は手動実行扱い。 </param>
-        /// <param name="buildMode"> "Development" または "Master" を指定した場合、該当プロファイルのみビルドする。null または未指定時は両方をビルドする。 </param>
-        public static void PerformMultipleBuilds(bool isBatchMode = false, string buildMode = null)
+        /// <param name="isBatchMode"> true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。 </param>
+        /// <param name="gameDataVariant"> release または demo。必須です。 </param>
+        /// <param name="buildMode"> "Development" または "Master"。null または空文字時は指定種別の両モードをビルドする。 </param>
+        /// <param name="selectedProfiles"> カンマ区切りのプロファイル名。指定時は該当名のみへさらに絞り込む。 </param>
+        private static void PerformMultipleBuilds(
+            bool isBatchMode,
+            string gameDataVariant,
+            string buildMode,
+            string selectedProfiles)
         {
-            Debug.Log($"[{nameof(AutoBuilder)}] Starting multiple builds process via BuildProfile. BuildMode: {buildMode ?? "All"}");
+            Debug.Log(
+                $"[{nameof(AutoBuilder)}] Starting multiple builds process via BuildProfile. " +
+                $"Variant: {gameDataVariant ?? "(none)"}, BuildMode: {buildMode ?? "All"}");
 
             AutoBuilderSettings settings = AutoBuilderSettings.instance;
             if (settings == null)
             {
                 Debug.LogError($"[{nameof(AutoBuilder)}] AutoBuilderSettings not found.");
-                ExitIfBatchMode(isBatchMode, exitCode: 1);
+                AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
                 return;
             }
 
-            BuildProfile[] profiles;
-            switch (buildMode)
+            if (!TryParseVariant(gameDataVariant, out GameDataVariant variant)
+                || !TryResolveModes(buildMode, out AutoBuildMode[] modes))
             {
-                case "Development":
-                    profiles = settings.DevelopBuildProfiles;
-                    break;
-                case "Master":
-                    profiles = settings.MasterBuildProfiles;
-                    break;
-                case null:
-                case "":
-                    profiles = (settings.DevelopBuildProfiles ?? Array.Empty<BuildProfile>())
-                        .Concat(settings.MasterBuildProfiles ?? Array.Empty<BuildProfile>())
-                        .ToArray();
-                    break;
-                default:
-                    Debug.LogError($"[{nameof(AutoBuilder)}] Unknown buildMode: {buildMode}");
-                    ExitIfBatchMode(isBatchMode, exitCode: 1);
-                    return;
-            }
-
-            if (profiles == null || profiles.Length == 0)
-            {
-                Debug.LogError($"[{nameof(AutoBuilder)}] No build profiles found for buildMode: {buildMode ?? "All"}");
-                ExitIfBatchMode(isBatchMode, exitCode: 1);
+                AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
                 return;
             }
 
-            BuildProfile originalProfile = BuildProfile.GetActiveBuildProfile();
-            bool allSuccess = true;
-
-            try
+            BuildProfile[] profiles = CollectProfiles(settings, variant, modes);
+            if (profiles.Length == 0)
             {
-                for (int i = 0; i < profiles.Length; i++)
-                {
-                    BuildProfile profile = profiles[i];
-                    if (profile == null)
-                    {
-                        Debug.LogError($"[{nameof(AutoBuilder)}] BuildProfile is null. Index: {i}");
-                        allSuccess = false;
-                        continue;
-                    }
-
-                    ShowProgress(isBatchMode, profile.name, i, profiles.Length);
-                    Debug.Log($"[{nameof(AutoBuilder)}] Building profile: {profile.name}");
-
-                    if (!ExecuteBuildForProfile(profile))
-                    {
-                        allSuccess = false;
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception);
-                allSuccess = false;
-            }
-            finally
-            {
-                if (!Application.isBatchMode && !isBatchMode)
-                {
-                    EditorUtility.ClearProgressBar();
-                }
-
-                if (!TryRestoreBuildProfile(originalProfile))
-                {
-                    allSuccess = false;
-                }
+                Debug.LogError(
+                    $"[{nameof(AutoBuilder)}] No build profiles found for variant '{variant}' / buildMode '{buildMode ?? "All"}'");
+                AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
+                return;
             }
 
-            if (allSuccess)
+            if (!ValidateProfileVariants(profiles, variant))
             {
-                Debug.Log($"[{nameof(AutoBuilder)}] All builds completed successfully.");
-                ExitIfBatchMode(isBatchMode, exitCode: 0);
+                AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
+                return;
             }
-            else
-            {
-                Debug.LogError($"[{nameof(AutoBuilder)}] One or more builds failed.");
-                ExitIfBatchMode(isBatchMode, exitCode: 1);
-            }
-        }
 
-        /// <summary>
-        ///     バッチモード、または isBatchMode が true の場合のみ、エディタプロセスを指定されたコードで終了する。
-        ///     これにより、手動での CI/CD トリガー時のエディタ強制終了を回避できる。
-        /// </summary>
-        /// <param name="isBatchMode">強制的にバッチモード判定を行うかどうか（通常は Application.isBatchMode と組み合わせる）</param>
-        /// <param name="exitCode">終了コード（0: 成功、1: 失敗）</param>
-        private static void ExitIfBatchMode(bool isBatchMode, int exitCode)
-        {
-            bool shouldExit = Application.isBatchMode || isBatchMode;
-            if (shouldExit)
+            profiles = FilterProfiles(profiles, selectedProfiles, variant, buildMode);
+            if (profiles.Length == 0)
             {
-                Debug.Log($"Exiting Unity editor with code {exitCode} (Batch Mode)");
-                EditorApplication.Exit(exitCode);
+                Debug.LogError($"[{nameof(AutoBuilder)}] selectedProfiles matched no profiles: {selectedProfiles}");
+                AutoBuildExecuter.ExitIfBatchMode(isBatchMode, exitCode: 1);
+                return;
             }
-        }
 
-        /// <summary>
-        /// 指定されたビルドプロファイルに基づいてビルドを実行し、結果を返す。
-        /// </summary>
-        /// <param name="profile">ビルドプロファイル</param>
-        /// <returns>ビルド成功時は true、失敗時は false</returns>
-        private static bool ExecuteBuildForProfile(BuildProfile profile)
-        {
             // 環境変数 UNITY_BUILD_OUTPUT_DIR が指定されていれば優先して使用する
             string envDir = Environment.GetEnvironmentVariable("UNITY_BUILD_OUTPUT_DIR");
             string baseOutputDir;
             if (!string.IsNullOrEmpty(envDir))
             {
                 baseOutputDir = envDir;
-                Debug.Log($"[AutoBuilder] Using UNITY_BUILD_OUTPUT_DIR from environment: {baseOutputDir}");
+                Debug.Log($"[{nameof(AutoBuilder)}] Using UNITY_BUILD_OUTPUT_DIR from environment: {baseOutputDir}");
             }
             else
             {
@@ -182,80 +176,192 @@ namespace KillChord.Editor.AutoBuilder
                 baseOutputDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), baseOutputDir));
             }
 
-            string outputDir = Path.Combine(baseOutputDir, profile.name);
-            if (Directory.Exists(outputDir))
+            // 実行プロセスをAutoBuildExecuterへ委譲する。
+            AutoBuildExecuter.Run(baseOutputDir, profiles, isBatchMode);
+        }
+
+        /// <summary>
+        ///     コマンドライン引数のゲームデータ種別を解釈します。
+        /// </summary>
+        /// <param name="gameDataVariant"> release または demo です。 </param>
+        /// <param name="variant"> 解釈したゲームデータ種別です。 </param>
+        /// <returns> 解釈できた場合は true です。 </returns>
+        private static bool TryParseVariant(string gameDataVariant, out GameDataVariant variant)
+        {
+            if (Enum.TryParse(gameDataVariant, ignoreCase: true, out variant)
+                && Enum.IsDefined(typeof(GameDataVariant), variant))
             {
-                Directory.Delete(outputDir, true);
-            }
-            
-            Directory.CreateDirectory(outputDir);
-
-            BuildPlayerOptions options = AutoBuildExecuter.CreateBuildPlayerOptions(profile);
-
-            // 拡張子等はターゲットプラットフォームに応じてプロファイル側で設定されている前提
-            string extension = AutoBuildExecuter.GetExtension(options.target);
-            options.locationPathName = Path.Combine(outputDir, $"{profile.name}{extension}");
-
-
-            // ビルドの実行
-            BuildReport report = BuildPipeline.BuildPlayer(options);
-            BuildSummary summary = report.summary;
-
-            if (summary.result == BuildResult.Succeeded)
-            {
-                Debug.Log($"[Success] {profile.name} : {summary.totalSize} bytes");
                 return true;
             }
 
-            Debug.LogError($"[Failed] {profile.name} : {summary.result}");
+            Debug.LogError(
+                $"[{nameof(AutoBuilder)}] Build requires -gameDataVariant release or demo. Value: '{gameDataVariant ?? string.Empty}'");
             return false;
         }
 
         /// <summary>
-        ///     エディタ実行時に現在の自動ビルド進捗を表示します。
+        ///     コマンドライン引数のビルドモードを解釈します。未指定時は両モードを対象にします。
         /// </summary>
-        /// <param name="isBatchMode"> バッチモード実行の場合はtrueです。 </param>
-        /// <param name="profileName"> ビルド対象プロファイル名です。 </param>
-        /// <param name="currentIndex"> 現在のプロファイル位置です。 </param>
-        /// <param name="profileCount"> 全プロファイル数です。 </param>
-        private static void ShowProgress(bool isBatchMode, string profileName, int currentIndex, int profileCount)
+        /// <param name="buildMode"> Development または Master です。 </param>
+        /// <param name="modes"> 対象のビルドモード一覧です。 </param>
+        /// <returns> 解釈できた場合は true です。 </returns>
+        private static bool TryResolveModes(string buildMode, out AutoBuildMode[] modes)
         {
-            if (Application.isBatchMode || isBatchMode)
+            if (string.IsNullOrEmpty(buildMode))
             {
-                return;
+                modes = new[] { AutoBuildMode.Development, AutoBuildMode.Master };
+                return true;
             }
 
-            float progress = profileCount > 0
-                ? (float)currentIndex / profileCount
-                : 0f;
-            EditorUtility.DisplayProgressBar(
-                "AutoBuilder",
-                $"自動ビルドを実行中です。 ({currentIndex + 1}/{profileCount})\n{profileName}",
-                progress);
+            if (Enum.TryParse(buildMode, ignoreCase: true, out AutoBuildMode mode)
+                && Enum.IsDefined(typeof(AutoBuildMode), mode))
+            {
+                modes = new[] { mode };
+                return true;
+            }
+
+            Debug.LogError($"[{nameof(AutoBuilder)}] Unknown buildMode: {buildMode}");
+            modes = Array.Empty<AutoBuildMode>();
+            return false;
         }
 
         /// <summary>
-        ///     自動ビルド開始前のビルドプロファイルへ戻します。
+        ///     種別とモードに対応する枠からビルドプロファイルを集めます。
         /// </summary>
-        /// <param name="originalProfile"> 自動ビルド開始前のプロファイルです。 </param>
-        /// <returns> 復元できた場合はtrueです。 </returns>
-        private static bool TryRestoreBuildProfile(BuildProfile originalProfile)
+        /// <param name="settings"> オートビルダー設定です。 </param>
+        /// <param name="variant"> ゲームデータ種別です。 </param>
+        /// <param name="modes"> 対象のビルドモード一覧です。 </param>
+        /// <returns> 集めたビルドプロファイルです。 </returns>
+        private static BuildProfile[] CollectProfiles(
+            AutoBuilderSettings settings,
+            GameDataVariant variant,
+            IEnumerable<AutoBuildMode> modes)
         {
-            try
+            List<BuildProfile> profiles = new();
+            foreach (AutoBuildMode mode in modes)
             {
-                if (BuildProfile.GetActiveBuildProfile() != originalProfile)
+                if (!AutoBuilderSettings.TryGetSlot(variant, mode, out AutoBuildSlot slot))
                 {
-                    BuildProfile.SetActiveBuildProfile(originalProfile);
+                    continue;
                 }
 
-                Debug.Log($"[{nameof(AutoBuilder)}] Restored the original build profile.");
+                profiles.AddRange((settings.GetProfiles(slot) ?? Array.Empty<BuildProfile>())
+                    .Where(profile => profile != null));
+            }
+
+            return profiles.ToArray();
+        }
+
+        /// <summary>
+        ///     指定された名前に一致するビルドプロファイルへ絞り込みます。
+        /// </summary>
+        /// <param name="profiles"> 絞り込み対象のビルドプロファイルです。 </param>
+        /// <param name="selectedProfiles"> カンマ区切りのプロファイル名です。空の場合は絞り込みません。 </param>
+        /// <param name="variant"> 対象のゲームデータ種別です。 </param>
+        /// <param name="buildMode"> 対象のビルドモードです。 </param>
+        /// <returns> 名前に一致したビルドプロファイルです。 </returns>
+        private static BuildProfile[] FilterProfiles(
+            BuildProfile[] profiles,
+            string selectedProfiles,
+            GameDataVariant variant,
+            string buildMode)
+        {
+            if (string.IsNullOrWhiteSpace(selectedProfiles))
+            {
+                return profiles;
+            }
+
+            string[] requestedNames = selectedProfiles
+                .Split(',')
+                .Select(name => name.Trim())
+                .Where(name => !string.IsNullOrEmpty(name))
+                .ToArray();
+
+            foreach (string requestedName in requestedNames)
+            {
+                bool isMatched = profiles.Any(profile => IsProfileMatch(profile.name, requestedName));
+                if (!isMatched)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(AutoBuilder)}] Requested profile not found in variant '{variant}' / " +
+                        $"buildMode '{buildMode ?? "All"}': {requestedName}");
+                }
+            }
+
+            return profiles
+                .Where(profile => requestedNames.Any(requested => IsProfileMatch(profile.name, requested)))
+                .ToArray();
+        }
+
+        /// <summary>
+        ///     枠へ登録されたプロファイルのシンボルが、枠の種別と一致しているか確認します。
+        /// </summary>
+        /// <param name="profiles"> 確認するビルドプロファイルです。 </param>
+        /// <param name="variant"> 枠のゲームデータ種別です。 </param>
+        /// <returns> すべて一致する場合は true です。 </returns>
+        private static bool ValidateProfileVariants(IEnumerable<BuildProfile> profiles, GameDataVariant variant)
+        {
+            bool isValid = true;
+            foreach (BuildProfile profile in profiles)
+            {
+                GameDataVariant profileVariant = GameDataVariantProfiles.GetVariant(profile);
+                if (profileVariant == variant)
+                {
+                    continue;
+                }
+
+                Debug.LogError(
+                    $"[{nameof(AutoBuilder)}] {profile.name} is registered in the {variant} slot, " +
+                    $"but its scripting defines indicate {profileVariant}.");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        /// <summary>
+        ///     文字列から英数字のみを抽出し、小文字に変換した正規化文字列を返します。
+        /// </summary>
+        /// <param name="input">対象文字列</param>
+        /// <returns>英数字のみの小文字文字列。</returns>
+        private static string NormalizeProfileName(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+
+            char[] chars = input
+                .Where(char.IsLetterOrDigit)
+                .Select(char.ToLowerInvariant)
+                .ToArray();
+
+            return new string(chars);
+        }
+
+        /// <summary>
+        ///     プロファイル名と要求された名前が一致するかどうかを判定します。
+        ///     大文字小文字の違い、記号の有無、プレフィックスや部分一致を考慮して柔軟に照合します。
+        /// </summary>
+        /// <param name="profileName">プロファイル名</param>
+        /// <param name="requestedName">要求されたプロファイル名</param>
+        /// <returns>一致する場合は true、それ以外は false。</returns>
+        private static bool IsProfileMatch(string profileName, string requestedName)
+        {
+            if (string.Equals(profileName, requestedName, StringComparison.OrdinalIgnoreCase))
+            {
                 return true;
             }
-            catch (Exception exception)
+
+            string normProfile = NormalizeProfileName(profileName);
+            string normRequested = NormalizeProfileName(requestedName);
+
+            if (string.IsNullOrEmpty(normProfile) || string.IsNullOrEmpty(normRequested))
             {
-                Debug.LogError($"[{nameof(AutoBuilder)}] Failed to restore the original build profile. {exception}");
                 return false;
             }
+
+            return normProfile.Contains(normRequested) || normRequested.Contains(normProfile);
         }
     }
 }

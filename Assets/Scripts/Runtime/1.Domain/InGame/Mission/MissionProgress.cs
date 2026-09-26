@@ -17,7 +17,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             _enemyKillRecord = new EnemyKillRecord();
             _actionRecord = new MissionActionRecord();
             _damageTaken = new MissionDamageTaken(0f);
-            _maxCombo = new MissionCombo(0);
+            _maxCombo = new MissionMaxCombo(0);
             _usedWeaponIds = new HashSet<string>(System.StringComparer.Ordinal);
             _endReason = MissionEndReason.None;
         }
@@ -33,14 +33,25 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         /// <summary> 使用した武器種類数を取得します。 </summary>
         public MissionWeaponVariety WeaponVariety => new(_usedWeaponIds.Count);
         /// <summary> 最大コンボ数を取得します。 </summary>
-        public MissionCombo MaxCombo => _maxCombo;
-
+        public MissionMaxCombo MaxCombo => _maxCombo;
+        /// <summary> コンボ数を取得します。 </summary>
+        public ComboCount ComboCount => _comboCount;
         /// <summary> プレイヤーが死亡したかどうかを取得します。 </summary>
         public bool IsPlayerDead => _isPlayerDead;
         /// <summary> ミッションが終了したかどうかを取得します。 </summary>
         public bool IsFinished => _endReason != MissionEndReason.None;
         /// <summary> ミッションの終了理由を取得します。 </summary>
         public MissionEndReason EndReason => _endReason;
+        /// <summary> 最終Waveまでのすべての敵を撃破したかどうかを取得します。 </summary>
+        public bool HasClearedAllEnemyWaves => _hasClearedAllEnemyWaves;
+
+        /// <summary>
+        ///     すべての敵Waveの撃破完了を記録します。
+        /// </summary>
+        public void RecordAllEnemyWavesCleared()
+        {
+            _hasClearedAllEnemyWaves = true;
+        }
 
         /// <summary>
         ///     経過時間を進めます。
@@ -91,20 +102,25 @@ namespace KillChord.Runtime.Domain.InGame.Mission
             _actionRecord.RecordAction(actionKind);
         }
 
-        /// <summary>
-        ///     現在コンボ数から最大コンボを更新します。
+        /// <summary> 
+        ///     現在コンボ数を1増やし、最大コンボを必要に応じて更新します。 
         /// </summary>
-        /// <param name="combo"> 現在コンボ数です。 </param>
-        public void RecordCombo(int combo)
+        public void IncrementCombo()
         {
-            if (combo <= _maxCombo.Value)
+            _comboCount = new ComboCount(_comboCount.Value + 1);
+            if (_comboCount.Value > _maxCombo.Value)
             {
-                return;
+                _maxCombo = new MissionMaxCombo(_comboCount.Value);
             }
-
-            _maxCombo = new MissionCombo(combo);
         }
 
+        /// <summary> 
+        ///     現在コンボ数を0にリセットします。 
+        /// </summary>
+        public void ResetCombo()
+        {
+            _comboCount = new ComboCount(0);
+        }
         /// <summary>
         ///     ミッションを終了させます。
         /// </summary>
@@ -138,10 +154,13 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         private readonly MissionActionRecord _actionRecord;
         private readonly HashSet<string> _usedWeaponIds;
         private MissionDamageTaken _damageTaken;
-        private MissionCombo _maxCombo;
+        private MissionMaxCombo _maxCombo;
+        private ComboCount _comboCount;
 
         /// <summary> プレイヤー死亡フラグ。 </summary>
         private bool _isPlayerDead;
+        /// <summary> 最終Waveまでの敵の撃破完了状態。 </summary>
+        private bool _hasClearedAllEnemyWaves;
         /// <summary> 終了理由。 </summary>
         private MissionEndReason _endReason;
         /// <summary> 目標シーケンスの現在ステップIndex。 </summary>

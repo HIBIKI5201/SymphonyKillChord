@@ -41,7 +41,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
             if (_raycastDetector.CanRaycastHitTarget)
             {
-                AttackResult result = AttackExecutor.Execute(attackDefinition, attacker, defender, false, _baseDamage);
+                AttackResult result = AttackExecutor.Execute(
+                    attackDefinition, attacker, defender, false, _baseDamage);
                 Debug.Log($"[EnemyTripleShotAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
             }
         }

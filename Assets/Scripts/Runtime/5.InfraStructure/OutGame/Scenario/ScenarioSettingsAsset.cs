@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using KillChord.Runtime.Domain.OutGame.Scenario;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
@@ -36,8 +36,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         {
             ScenarioLayer.Background,
             ScenarioLayer.Portrait,
-            ScenarioLayer.Text,
             ScenarioLayer.Effect,
+            ScenarioLayer.Text,
         };
 
         [Header("Timing")]
@@ -71,8 +71,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         {
             ScenarioLayer.Background,
             ScenarioLayer.Portrait,
-            ScenarioLayer.Text,
             ScenarioLayer.Effect,
+            ScenarioLayer.Text,
         };
     }
 }

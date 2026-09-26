@@ -1,4 +1,3 @@
-using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Target;
@@ -8,6 +7,7 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
 {
+    using Camera = UnityEngine.Camera;
     /// <summary>
     ///     ロックオン中の敵HP HUDに関するクラスの生成と依存関係の解決を行う初期化クラス。
     /// </summary>
@@ -38,25 +38,23 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            Initialize(targetSystemModuleContainer.TargetSystemController);
-            return true;
-        }
-
-        /// <summary>
-        ///     敵HP HUDを構成する各クラスを生成し、依存関係を解決して初期化する。
-        /// </summary>
-        /// <param name="targetingSystem"> 現在のターゲット情報を解決するシステム。</param>
-        public void Initialize(TargetSystemController targetingSystem)
-        {
             if (_view == null)
             {
                 Debug.LogError($"{nameof(_view)} がアサインされていません。");
-                return;
+                return false;
+            }
+
+            if (Camera.main == null)
+            {
+                Debug.LogError($"[{nameof(HUDEnemyHealthInitializer)}] {nameof(Camera)}.main が見つかりません。", this);
+                return false;
             }
 
             _viewModel = new HUDEnemyHealthViewModel(_view);
-            _presenter = new HUDEnemyHealthPresenter(targetingSystem, _viewModel);
+            _presenter = new HUDEnemyHealthPresenter(targetSystemModuleContainer.TargetSystemController, _viewModel);
             _view.OnUpdate += _presenter.Update;
+
+            return true;
         }
 
         [SerializeField, Tooltip("ロックオン中の敵HPを表示する View コンポーネント。")]
@@ -67,6 +65,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         private void OnDestroy()
         {
+            if (_view != null && _presenter != null)
+            {
+                _view.OnUpdate -= _presenter.Update;
+            }
+
             _viewModel?.Dispose();
             _viewModel = null;
             _presenter = null;

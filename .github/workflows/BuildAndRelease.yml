@@ -17,35 +17,76 @@ on:
         options:
           - Development
           - Master
+      build_variant:
+        description: 'ゲームデータ種別'
+        required: true
+        default: 'demo'
+        type: choice
+        options:
+          - demo
+          - release
+      profile_android:
+        description: 'Android'
+        type: boolean
+        default: true
+      profile_windows:
+        description: 'Windows'
+        type: boolean
+        default: true
+      profile_macos:
+        description: 'MacOS'
+        type: boolean
+        default: true
+      profile_ios:
+        description: 'iOS'
+        type: boolean
+        default: true
+      clean_build:
+        description: 'クリーンビルド（Libraryを含め完全に作り直す。通常は不要、トラブル時のみON）'
+        type: boolean
+        default: false
+      cpu_usage_percent:
+        description: 'Unity使用コア数割合（手動実行時は既存の安全制限を一時的に無効化）'
+        required: true
+        type: choice
+        default: '25%'
+        options:
+          - '25%'
+          - '50%'
+          - '75%'
+          - '100%'
 
 permissions: {}
 
 concurrency:
   group: build-release-${{ github.base_ref || github.run_id }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   check:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.release_age.outputs.should_run }}
-      days: ${{ steps.release_age.outputs.days }}
+      hours: ${{ steps.release_age.outputs.hours }}
+    env:
+      RELEASE_THRESHOLD_HOURS: ${{ vars.RELEASE_THRESHOLD_HOURS }}
 
     steps:
-      - name: 最終リリースからの経過日数をチェック
+      - name: 最終リリースからの経過時間をチェック
         id: release_age
         run: |
           set -e
-          echo "========== リリース経過日数チェック =========="
-          echo "リリース経過日数の検証を開始します..."
+          echo "========== リリース経過時間チェック =========="
+          echo "リリース経過時間の検証を開始します..."
           echo "トリガーイベント: ${GITHUB_EVENT_NAME}"
           echo "リポジトリ: ${{ github.repository }}"
           echo "==========================================="
 
-          # 不要なAPIコールを避けるため、手動実行時（workflow_dispatch）はリリース経過日数のチェックをスキップします。
+          # 不要なAPIコールを避けるため、手動実行時（workflow_dispatch）はリリース経過時間のチェックをスキップします。
           if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
-            echo "[Skip]: 手動実行を検出しました。リリース経過日数のチェックをスキップします。"
-            echo "days=0" >> $GITHUB_OUTPUT
+            echo "[Skip]: 手動実行を検出しました。リリース経過時間のチェックをスキップします。"
+            echo "hours=0" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "[Decision]: should_run=true (手動実行)"
             exit 0
@@ -72,7 +113,7 @@ jobs:
           RELEASE_DATE=$(echo "$RESPONSE" | jq -r --arg prefix "${TAG_PREFIX}-" '[.[] | select(.tag_name != null and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .published_at // empty')
           if [ -z "$RELEASE_DATE" ]; then
             echo "[INFO]: ${TAG_PREFIX}- の条件に合致するリリースが検出されませんでした。"
-            echo "days=999" >> $GITHUB_OUTPUT
+            echo "hours=9999" >> $GITHUB_OUTPUT
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "[Decision]: should_run=true (${TAG_PREFIX} の条件に合致するリリースが未検出)"
             exit 0
@@ -81,43 +122,207 @@ jobs:
           echo "[INFO]: 最新リリースの公開日時: $RELEASE_DATE"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
-          DAYS=$(( (NOW_TS - RELEASE_TS) / 86400 ))
+          HOURS=$(( (NOW_TS - RELEASE_TS) / 3600 ))
+
+          if [ -z "${RELEASE_THRESHOLD_HOURS}" ]; then
+            RELEASE_THRESHOLD_HOURS=72
+            echo "[WARN]: リポジトリ変数 'RELEASE_THRESHOLD_HOURS' が未設定です。デフォルト値 (72時間) を使用します。"
+          else
+            echo "[INFO]: リポジトリ変数 'RELEASE_THRESHOLD_HOURS' を使用します: ${RELEASE_THRESHOLD_HOURS} hours"
+          fi
           
-          echo "[INFO]: 最終リリースからの経過日数: $DAYS days"
-          echo "[INFO]: Threshold: 3 days (3days以内のリリースはスキップされます)"
+          echo "[INFO]: 最終リリースからの経過時間: $HOURS hours"
+          echo "[INFO]: Threshold: ${RELEASE_THRESHOLD_HOURS} hours (${RELEASE_THRESHOLD_HOURS}hours以内のリリースはスキップされます)"
           
-          echo "days=$DAYS" >> $GITHUB_OUTPUT
-          if [ "$DAYS" -le 3 ]; then
+          echo "hours=$HOURS" >> $GITHUB_OUTPUT
+          if [ "$HOURS" -le "${RELEASE_THRESHOLD_HOURS}" ]; then
             echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "[Decision]: should_run=false (最終リリースが $DAYS days前のため、Threshold3days以下に該当)"
+            echo "[Decision]: should_run=false (最終リリースが $HOURS hours前のため、Threshold ${RELEASE_THRESHOLD_HOURS}hours以下に該当)"
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "[Decision]: should_run=true (最終リリースが $DAYS days前の分、Threshold3days 超過)"
+            echo "[Decision]: should_run=true (最終リリースが $HOURS hours前の分、Threshold ${RELEASE_THRESHOLD_HOURS}hours 超過)"
           fi
 
   build-and-release:
     needs: check
     if: needs.check.outputs.should_run == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
-    runs-on: self-hosted
+    runs-on: [self-hosted, windows]
+    defaults:
+      run:
+        # PowerShell 5.1 は BOM なしの run 本文を ANSI として解析するため、解析前に UTF-8 で読み込む。
+        # powershell を維持し、runner が付与するエラー停止・終了コード伝播も引き続き適用する。
+        shell: >-
+          powershell -NoLogo -NoProfile -NonInteractive -Command ". ([scriptblock]::Create([System.IO.File]::ReadAllText('{0}', [System.Text.Encoding]::UTF8)))"
     concurrency:
       group: unity-self-hosted-build
       cancel-in-progress: false
-    timeout-minutes: 120
+      queue: max
+    timeout-minutes: 1440
     environment: 'AutoBuildAndRelease'
     permissions:
       contents: write
     env:
       GOOGLE_DRIVE_API_KEY: ${{ secrets.GOOGLE_DRIVE_API_KEY }}
       GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-      UNITY_BUILD_OUTPUT_DIR: ${{ secrets.UNITY_BUILD_OUTPUT_DIR || 'Builds' }}
-      UNITY_EXE_PATH: ${{ secrets.UNITY_EXE_PATH }}
+      GDRIVE_ASSET_SEARCH_QUERY: ${{ vars.GDRIVE_ASSET_SEARCH_QUERY }}
+      UNITY_BUILD_OUTPUT_DIR: ''
+      # Unityのパスは秘匿情報ではないためリポジトリ変数を使う。
+      # 未設定の場合は .github/unity-paths.json から OS 別に自動解決される。
+      UNITY_EXE_PATH: ${{ vars.UNITY_EXE_PATH }}
+      UNITY_BUILD_EXECUTE_METHOD: ${{ vars.UNITY_BUILD_EXECUTE_METHOD }}
+      UNITY_PROFILE_BUILD_TIMEOUT_SEC: 7200
+      IS_MANUAL_BUILD: ${{ github.event_name == 'workflow_dispatch' }}
+      UNITY_CPU_USAGE_PERCENT: ${{ inputs.cpu_usage_percent }}
+      AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
       BUILD_MODE: ''
+      BUILD_VARIANT: ''
 
     steps:
+      - name: クローン先プロジェクトフォルダおよびディスク事前クリーンアップ
+        env:
+          CLEAN_BUILD: ${{ github.event.inputs.clean_build }}
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          Remove-Item (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Force -ErrorAction SilentlyContinue
+
+          Write-Host "::group::クローン先プロジェクトフォルダおよびディスク事前クリーンアップ"
+          $Workspace = "${{ github.workspace }}"
+          $CleanBuild = $env:CLEAN_BUILD -eq 'true'
+          $MinimumBuildFreeSpaceGB = 40
+          Write-Host "対象プロジェクトフォルダ: $Workspace"
+          Write-Host "[INFO]: clean_build = $CleanBuild"
+
+          # 1. プロジェクトフォルダが存在する場合、未追跡ファイルや残渣を整理
+          if (Test-Path $Workspace) {
+            if (Test-Path (Join-Path $Workspace ".git")) {
+              Write-Host "[INFO]: 既存のリポジトリ環境を検出しました。未追跡ファイルおよび無視されたファイルをクリーンアップします..."
+              Push-Location $Workspace
+              try {
+                $WorkspaceDrive = (Get-Item -LiteralPath $Workspace).PSDrive
+                $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+                $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+                $ShouldRemoveLibrary = $CleanBuild -or $FreeSpaceGB -lt $MinimumBuildFreeSpaceGB
+                Write-Host "[INFO]: クリーンアップ前の空き容量: $FreeSpaceGB GB（ビルド開始必要量: $MinimumBuildFreeSpaceGB GB）"
+
+                if ($ShouldRemoveLibrary) {
+                  if ($CleanBuild) {
+                    Write-Host "[INFO]: clean_build が有効なため、Library を含めて完全にクリーンアップします。"
+                  } else {
+                    Write-Host "[WARN]: 空き容量が必要量を下回っているため、前回ビルドの Library を削除します。"
+                  }
+                  git -c core.longpaths=true clean -ffdx
+                } else {
+                  Write-Host "[INFO]: Library はビルド高速化のため保持します（トラブル時は workflow_dispatch の clean_build を有効にして実行してください）。"
+                  git -c core.longpaths=true clean -ffdx -e Library/
+                }
+                if ($LASTEXITCODE -ne 0) {
+                  throw "git clean が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
+                }
+
+                git -c core.longpaths=true reset --hard
+                if ($LASTEXITCODE -ne 0) {
+                  throw "git reset --hard が非ゼロの終了コード ($LASTEXITCODE) で終了しました。"
+                }
+
+                $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+                $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+                Write-Host "[INFO]: クリーンアップ後の空き容量: $FreeSpaceGB GB"
+                if ($FreeSpaceGB -lt $MinimumBuildFreeSpaceGB) {
+                  Write-Host "[ERROR]: Library 清掃後も必要な空き容量 $MinimumBuildFreeSpaceGB GBを確保できません。"
+                  exit 1
+                }
+
+                Write-Host "[OK]: リポジトリを作業ツリーからクリーンアップしました。"
+              } catch {
+                Write-Host "[ERROR]: 事前クリーンアップに失敗しました: $_"
+                exit 1
+              } finally {
+                Pop-Location
+              }
+            }
+          }
+
+          # 2. 一時フォルダ (TEMP) の過去ビルド残渣削除による容量確保
+          $TempZip = Join-Path $env:RUNNER_TEMP "src_assets.zip"
+          $ExtractDir = Join-Path $env:RUNNER_TEMP "UnityPackages"
+          if (Test-Path $TempZip) {
+            Remove-Item -Path $TempZip -Force -ErrorAction SilentlyContinue
+            Write-Host "[INFO]: 過去の一時ZIP ($TempZip) を削除しました。"
+          }
+          if (Test-Path $ExtractDir) {
+            Remove-Item -Path $ExtractDir -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Host "[INFO]: 過去の展開用一時フォルダ ($ExtractDir) を削除しました。"
+          }
+          Get-ChildItem -Path $env:RUNNER_TEMP -Filter "pkg_*" -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Host "[INFO]: 一時パッケージディレクトリ ($($_.Name)) を削除しました。"
+          }
+
+          # 3. Gradle キャッシュ全体を削除する
+          $GradleCachesPath = Join-Path (Join-Path $HOME ".gradle") "caches"
+
+          if (Test-Path $GradleCachesPath) {
+            $SizeBytes = (Get-ChildItem -Path $GradleCachesPath -Recurse -File -ErrorAction SilentlyContinue |
+                          Measure-Object -Property Length -Sum).Sum
+            $SizeGB = [Math]::Round($SizeBytes / 1GB, 2)
+
+            Remove-Item -Path $GradleCachesPath -Recurse -Force -ErrorAction SilentlyContinue
+
+            if (Test-Path $GradleCachesPath) {
+              Write-Host "::error::Gradle キャッシュの削除に失敗しました: $GradleCachesPath"
+              exit 1
+            }
+
+            Write-Host "[INFO]: Gradle キャッシュ全体 ($SizeGB GB) を削除しました: $GradleCachesPath"
+          } else {
+            Write-Host "[INFO]: Gradle キャッシュは存在しないためスキップします。"
+          }
+
+          # NuGet キャッシュは保持する（毎回再ダウンロードしない）
+          Write-Host "[INFO]: NuGet キャッシュは保持します。"
+
+          # 4. ランナー本体の _diag ログをローテーションする（自動削除されず蓄積し続けるため）
+          $RunnerRoot = Split-Path (Split-Path $env:RUNNER_WORKSPACE -Parent) -Parent
+          $DiagDir = Join-Path $RunnerRoot "_diag"
+          if (Test-Path $DiagDir) {
+            $OldLogs = Get-ChildItem -Path $DiagDir -Filter "*.log" -File -ErrorAction SilentlyContinue |
+                       Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-1) }
+            $FreedBytes = ($OldLogs | Measure-Object -Property Length -Sum).Sum
+            $OldLogs | Remove-Item -Force -ErrorAction SilentlyContinue
+            Write-Host "[INFO]: _diag の1日以上前のログ $($OldLogs.Count)件 ($([Math]::Round($FreedBytes / 1MB, 2)) MB) を削除しました。"
+          } else {
+            Write-Host "[INFO]: _diag フォルダが見つからないためスキップします。"
+          }
+
+          # 5. Android SDK のキャッシュを削除する（SDK本体・AVD・署名鍵は対象外）
+          foreach ($SubDir in @("cache", "build-cache")) {
+            $AndroidCachePath = Join-Path (Join-Path $HOME ".android") $SubDir
+            if (Test-Path $AndroidCachePath) {
+              $SizeBytes = (Get-ChildItem -Path $AndroidCachePath -Recurse -File -ErrorAction SilentlyContinue |
+                            Measure-Object -Property Length -Sum).Sum
+              Remove-Item -Path $AndroidCachePath -Recurse -Force -ErrorAction SilentlyContinue
+              Write-Host "[INFO]: Android $SubDir キャッシュ ($([Math]::Round($SizeBytes / 1MB, 2)) MB) を削除しました。"
+            }
+          }
+
+          Write-Host "::endgroup::"
+
+# ==================================================================================================
+
       - name: リポジトリをチェックアウト
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
+          # Library の削除可否は直前の事前クリーンアップで判断するため、checkout では削除しない。
+          clean: false
 
 # ==================================================================================================
 
@@ -125,7 +330,13 @@ jobs:
         id: determine_mode
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           $BaseRef = "${{ github.base_ref }}"
           if (-not $BaseRef) {
@@ -142,47 +353,196 @@ jobs:
              Write-Host "[ERROR]: サポートされていないベースブランチです: $BaseRef"
              exit 1
           }
- 
-          Write-Host "ベースブランチ: $BaseRef -> ビルドモード: $BuildMode, タグの接頭辞: $TagPrefix"
-          "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
-          "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
-          "UNITY_BUILD_OUTPUT_DIR=$env:UNITY_BUILD_OUTPUT_DIR/$BuildMode" | Add-Content -Path $env:GITHUB_ENV
-          "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
-          "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
-        shell: pwsh
 
-# ==================================================================================================
-
-      - name: 環境情報の表示
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
-
-          Write-Host "::group::ビルドワークフロー環境情報"
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローを開始しました。"
-          Write-Host "実行環境: ${{ runner.os }} (アーキテクチャ: ${{ runner.arch }})"
-          Write-Host "プロジェクトパス: ${{ github.workspace }}"
-          Write-Host ""
-          Write-Host "Google Drive APIキー設定状況: $(if ($env:GOOGLE_DRIVE_API_KEY) { '設定済み' } else { '未設定' })"
-          Write-Host "Google Drive フォルダID設定状況: $(if ($env:GOOGLE_DRIVE_FOLDER_ID) { '設定済み' } else { '未設定' })"
-          Write-Host "ビルド出力ディレクトリ: $env:UNITY_BUILD_OUTPUT_DIR"
-          Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
-          Write-Host "::endgroup::"
-        shell: pwsh
-
-# ==================================================================================================
-
-      - name: Unityのインストール検証
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
-
-          Write-Host "::group::Unityのインストール検証"
-          if (-not $env:UNITY_EXE_PATH) {
-            Write-Host "[ERROR]: UNITY_EXE_PATH が設定されていません。"
-            Write-Host "::endgroup::"
+          $BuildVariant = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            "${{ inputs.build_variant }}"
+          } else {
+            $env:AUTO_BUILD_VARIANT
+          }
+          $BuildVariant = ([string]$BuildVariant).Trim().ToLowerInvariant()
+          if ($BuildVariant -notin @("demo", "release")) {
+            Write-Host "[ERROR]: ゲームデータ種別には demo または release を指定してください。現在値: '$BuildVariant'"
             exit 1
           }
+ 
+          Write-Host "ベースブランチ: $BaseRef, ビルド種別: $BuildVariant, タグの接頭辞: $TagPrefix"
+          "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
+          "BUILD_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
+          "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
+          "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
+          "build_variant=$BuildVariant" | Add-Content -Path $env:GITHUB_OUTPUT
+          "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
+
+          # workflow_dispatch以外（PRマージ起動時）はこの入力自体が存在せず空文字になり、
+          # 後続でのプロファイル絞り込みは行われず全件ビルドの従来動作を維持する。
+          $SelectedProfiles = @()
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            if ("${{ inputs.profile_android }}" -eq "true") { $SelectedProfiles += "Android" }
+            if ("${{ inputs.profile_windows }}" -eq "true") { $SelectedProfiles += "Windows" }
+            if ("${{ inputs.profile_macos }}" -eq "true")   { $SelectedProfiles += "MacOS" }
+            if ("${{ inputs.profile_ios }}" -eq "true")     { $SelectedProfiles += "iOS" }
+          }
+          $TargetProfiles = $SelectedProfiles -join ","
+          "SELECTED_PROFILES=$TargetProfiles" | Add-Content -Path $env:GITHUB_ENV
+
+# ==================================================================================================
+
+      - name: ビルド出力先パスの取得
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          Write-Host "::group::ビルド出力先パスの取得"
+
+          $SettingsPath = Join-Path $env:GITHUB_WORKSPACE "ProjectSettings/KillChord/AutoBuilderSettings.asset"
+          if (-not (Test-Path $SettingsPath)) {
+            Write-Host "::error::AutoBuilderSettings.asset が見つかりません: $SettingsPath"
+            exit 1
+          }
+
+          # AutoBuilderSettings はゲームデータ種別×ビルドモードごとに出力先パスを持つ（例: DemoMasterPath）。
+          switch ($env:BUILD_VARIANT) {
+            "demo"    { $VariantKey = "Demo" }
+            "release" { $VariantKey = "Release" }
+            default {
+              Write-Host "::error::未知の BUILD_VARIANT です: $env:BUILD_VARIANT"
+              exit 1
+            }
+          }
+
+          switch ($env:BUILD_MODE) {
+            "Master"      { $TargetKey = "${VariantKey}MasterPath" }
+            "Development" { $TargetKey = "${VariantKey}DevelopPath" }
+            default {
+              Write-Host "::error::未知の BUILD_MODE です: $env:BUILD_MODE"
+              exit 1
+            }
+          }
+          Write-Host "対象キー: $TargetKey"
+
+          $AssetContent = Get-Content -Path $SettingsPath -Raw
+          $Pattern = "(?m)^\s*$TargetKey`:\s*(.+)\s*$"
+          $Match = [regex]::Match($AssetContent, $Pattern)
+
+          if (-not $Match.Success) {
+            Write-Host "::error::AutoBuilderSettings.asset 内に $TargetKey が見つかりません。"
+            exit 1
+          }
+
+          $RelativePath = $Match.Groups[1].Value.Trim().Trim('"').Trim("'")
+          if ([string]::IsNullOrWhiteSpace($RelativePath)) {
+            Write-Host "::error::$TargetKey の値が空です。"
+            exit 1
+          }
+
+          $ResolvedOutputDir = [System.IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE $RelativePath))
+
+          Write-Host "取得した相対パス: $RelativePath"
+          Write-Host "解決された絶対パス: $ResolvedOutputDir"
+
+          "UNITY_BUILD_OUTPUT_DIR=$ResolvedOutputDir" | Add-Content -Path $env:GITHUB_ENV
+
+          Write-Host "::endgroup::"
+
+# ==================================================================================================
+
+      - name: Unity実行ファイルの解決と検証
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          Write-Host "::group::Unity実行ファイルの解決と検証"
+
+          # リポジトリ変数 UNITY_EXE_PATH があればそれを優先し、なければ
+          # .github/unity-paths.json と ProjectVersion.txt から OS 別に解決する。
+          # 値の前後の空白は取り除く。コピー時に混入した空白や改行があると
+          # Test-Path が偽を返し、原因の分かりにくい失敗になるため。
+          $Override = if ($env:UNITY_EXE_PATH) { $env:UNITY_EXE_PATH.Trim() } else { '' }
+
+          if ($Override -and -not (Test-Path $Override)) {
+            Write-Host "[WARN]: リポジトリ変数 UNITY_EXE_PATH のパスがこのランナーに存在しません: $Override"
+            Write-Host "        このランナーのOSは '${{ runner.os }}' です。UNITY_EXE_PATH は全OSで同じ値が使われるため、"
+            Write-Host "        複数OSのランナーを運用する場合は変数を削除し、unity-paths.json による自動解決に任せてください。"
+            Write-Host "        今回は自動解決にフォールバックします。"
+            $Override = ''
+          }
+
+          if ($Override) {
+            $env:UNITY_EXE_PATH = $Override
+            Write-Host "[INFO]: リポジトリ変数 UNITY_EXE_PATH が指定されているため、自動解決をスキップします。"
+          } else {
+            $OsKey      = "${{ runner.os }}"
+            $ConfigPath = Join-Path "${{ github.workspace }}" ".github/unity-paths.json"
+            if (-not (Test-Path $ConfigPath)) {
+              Write-Host "[ERROR]: Unityパス定義が見つかりません: $ConfigPath"
+              Write-Host "::endgroup::"
+              exit 1
+            }
+
+            $OsConfig = (Get-Content $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json).$OsKey
+            if (-not $OsConfig) {
+              Write-Host "[ERROR]: unity-paths.json に '$OsKey' の定義がありません。"
+              Write-Host "::endgroup::"
+              exit 1
+            }
+
+            $VersionFile  = Join-Path "${{ github.workspace }}" "ProjectSettings/ProjectVersion.txt"
+            $VersionMatch = Select-String -Path $VersionFile -Pattern '^m_EditorVersion:\s*(\S+)'
+            if (-not $VersionMatch) {
+              Write-Host "[ERROR]: ProjectVersion.txt から m_EditorVersion を読み取れませんでした: $VersionFile"
+              Write-Host "::endgroup::"
+              exit 1
+            }
+            $EditorVersion = $VersionMatch.Matches[0].Groups[1].Value
+            Write-Host "プロジェクトが要求するUnityバージョン: $EditorVersion"
+            Write-Host "実行環境: $OsKey"
+
+            $Found     = $null
+            $Installed = @()
+            foreach ($Root in $OsConfig.editorRoots) {
+              $ExpandedRoot = $Root -replace '^~', $HOME
+              if (-not (Test-Path $ExpandedRoot)) { continue }
+
+              $Installed += (Get-ChildItem -Path $ExpandedRoot -Directory -ErrorAction SilentlyContinue |
+                             ForEach-Object { "$($_.Name) ($ExpandedRoot)" })
+
+              $Candidate = Join-Path (Join-Path $ExpandedRoot $EditorVersion) $OsConfig.executableSuffix
+              if (Test-Path $Candidate) {
+                $Found = $Candidate
+                break
+              }
+            }
+
+            if (-not $Found) {
+              Write-Host "[ERROR]: Unity $EditorVersion がこのランナーに見つかりません。"
+              Write-Host "         探索したルート: $($OsConfig.editorRoots -join ', ')"
+              if ($Installed.Count -gt 0) {
+                Write-Host "         インストール済みのバージョン:"
+                $Installed | ForEach-Object { Write-Host "           - $_" }
+              } else {
+                Write-Host "         インストール済みのUnityが1つも見つかりません。"
+              }
+              Write-Host "         Unity Hub で $EditorVersion を導入するか、unity-paths.json の editorRoots を見直してください。"
+              Write-Host "::endgroup::"
+              exit 1
+            }
+
+            $env:UNITY_EXE_PATH = $Found
+            "UNITY_EXE_PATH=$Found" | Add-Content -Path $env:GITHUB_ENV
+          }
+
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
           
           if (Test-Path $env:UNITY_EXE_PATH) {
@@ -196,38 +556,286 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: pwsh
 
 # ==================================================================================================
 
-      - name: .NET SDK / dotnet CLI の可用性チェック
+      - name: AAPT2 override の設定
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
-          Write-Host "::group::.NET SDK の可用性チェック"
+          Write-Host "::group::AAPT2 override の設定"
 
-          $DotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
-          if ($DotnetCmd) {
-            Write-Host "[OK]: dotnet コマンドが見つかりました: $($DotnetCmd.Source)"
-            & dotnet --version
-            Write-Host ""
-            Write-Host "インストール済み SDK:"
-            & dotnet --list-sdks
+          if (-not $env:UNITY_EXE_PATH) {
+            Write-Host "::error::UNITY_EXE_PATH が設定されていません。"
+            exit 1
+          }
+          if (-not (Test-Path $env:UNITY_EXE_PATH)) {
+            Write-Host "::error::UNITY_EXE_PATH が指すファイルが存在しません: $env:UNITY_EXE_PATH"
+            exit 1
+          }
+
+          $Aapt2Name = if ($env:RUNNER_OS -eq "Windows") { "aapt2.exe" } else { "aapt2" }
+          $Aapt2 = $null
+
+          # UNITY_EXE_PATH からバンドルを遡り、Unity.app の親ディレクトリ（バージョンルート）を特定する
+          # 例: .../6000.3.10f1/Unity.app/Contents/MacOS/Unity → バージョンルートは .../6000.3.10f1
+          $CurrentPath = Split-Path $env:UNITY_EXE_PATH -Parent
+          $AppBundlePath = $null
+          while ($CurrentPath) {
+            if ($CurrentPath -match '\.app$') {
+              $AppBundlePath = $CurrentPath
+              break
+            }
+            $Parent = Split-Path $CurrentPath -Parent
+            if ($Parent -eq $CurrentPath) { break }
+            $CurrentPath = $Parent
+          }
+
+          if ($AppBundlePath) {
+            # macOS: Unity.app の親ディレクトリがバージョンルート
+            $VersionRoot = Split-Path $AppBundlePath -Parent
           } else {
-            Write-Host "[WARN]: PATH 上に dotnet コマンドが見つかりません。"
-            Write-Host "         .NET SDK をインストールしない場合、NuGetForUnity.Cli (dotnet tool) は使用できません。"
+            # Windows: Editor 実行ファイルの1階層上がバージョンルート (Editor/Unity.exe → バージョンルート)
+            $VersionRoot = Split-Path (Split-Path $env:UNITY_EXE_PATH -Parent) -Parent
+          }
+
+          Write-Host "算出したバージョンルート: $VersionRoot"
+
+          $Aapt2Name = if ($env:RUNNER_OS -eq "Windows") { "aapt2.exe" } else { "aapt2" }
+
+          # VersionRoot 全体（全プラットフォームの PlaybackEngines を含む）を再帰検索すると、
+          # 外部/低速ストレージに配置されたEditorではファイル数が膨大なため極端に遅くなることがある。
+          # aapt2 は Android SDK の build-tools 配下にしか存在しないため、まずそこだけを検索し、
+          # 見つからない場合のみ VersionRoot 全体にフォールバックする。
+          $AndroidSdkSearchRoot = Join-Path $VersionRoot "PlaybackEngines/AndroidPlayer/SDK/build-tools"
+          $Aapt2 = $null
+          if (Test-Path $AndroidSdkSearchRoot) {
+            $Aapt2 = Get-ChildItem $AndroidSdkSearchRoot -Recurse -Filter $Aapt2Name -Force -ErrorAction SilentlyContinue |
+                      Select-Object -First 1
+          }
+
+          if (-not $Aapt2) {
+            Write-Host "[WARN]: $AndroidSdkSearchRoot 配下で $Aapt2Name が見つからなかったため、VersionRoot全体を検索します（時間がかかる場合があります）: $VersionRoot"
+            $Aapt2 = Get-ChildItem $VersionRoot -Recurse -Filter $Aapt2Name -Force -ErrorAction SilentlyContinue |
+                      Select-Object -First 1
+          }
+          if (-not $Aapt2) {
+            Write-Host "::error::$Aapt2Name が見つかりません: $VersionRoot"
+            exit 1
+          }
+
+          Write-Host "見つかった aapt2 パス: $($Aapt2.FullName)"
+
+          $GradleTemplatePath = Join-Path $env:GITHUB_WORKSPACE "Assets/Plugins/Android/gradleTemplate.properties"
+          if (-not (Test-Path $GradleTemplatePath)) {
+            Write-Host "::error::gradleTemplate.properties が見つかりません: $GradleTemplatePath"
+            exit 1
+          }
+
+          $NormalizedPath = $Aapt2.FullName -replace '\\', '/'
+          $OverrideLine = "android.aapt2FromMavenOverride=$NormalizedPath"
+
+          $Content = Get-Content -Path $GradleTemplatePath
+          if ($Content -match '^android\.aapt2FromMavenOverride=') {
+            $Content = $Content -replace '^android\.aapt2FromMavenOverride=.*$', $OverrideLine
+          } else {
+            $Content += $OverrideLine
+          }
+          [System.IO.File]::WriteAllLines(
+            $GradleTemplatePath,
+            [string[]]$Content,
+            [System.Text.UTF8Encoding]::new($false)
+          )
+
+          Write-Host "設定した aapt2 パス: $($Aapt2.FullName)"
+
+          Write-Host "::endgroup::"
+
+# ==================================================================================================
+
+      - name: ビルド出力先の空確認とディスク残り容量の検証
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          Write-Host "::group::ビルド出力先の空確認とディスク残り容量の検証"
+
+          # 1. ビルド出力ディレクトリのクリア・空確認
+          $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
+          if ($RawOutputDir) {
+            $CleanOutputDir = $RawOutputDir.Trim('"').Trim("'")
+            $ResolvedOutputDir = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
+            Write-Host "ビルド出力先ディレクトリ: $ResolvedOutputDir"
+
+            if (Test-Path $ResolvedOutputDir) {
+              Write-Host "[INFO]: 既存のビルド出力ディレクトリが存在します。配下の全コンテンツを削除し、空にします..."
+              Remove-Item -Path "$ResolvedOutputDir\*" -Recurse -Force -ErrorAction SilentlyContinue
+            } else {
+              Write-Host "[INFO]: ビルド出力ディレクトリが存在しないため、新規作成します..."
+              New-Item -ItemType Directory -Path $ResolvedOutputDir -Force | Out-Null
+            }
+
+            # 空確認の検証
+            $ChildItems = Get-ChildItem -Path $ResolvedOutputDir -ErrorAction SilentlyContinue
+            if ($ChildItems.Count -eq 0 -or $null -eq $ChildItems) {
+              Write-Host "[OK]: ビルド出力先ディレクトリが空であることを確認しました。"
+            } else {
+              Write-Host "[ERROR]: ビルド出力先ディレクトリを空にできませんでした。"
+              exit 1
+            }
+          } else {
+            Write-Host "[WARN]: UNITY_BUILD_OUTPUT_DIR が設定されていません。"
+          }
+
+          # 2. ディスク残り容量のチェック
+          $WorkspaceDrive = (Get-Item "${{ github.workspace }}").PSDrive
+          $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+          $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+          Write-Host "プロジェクトが配置されているドライブ ($($WorkspaceDrive.Name):) の残り空き容量: $FreeSpaceGB GB"
+
+          $MinRequiredGB = 40
+          if ($FreeSpaceGB -lt $MinRequiredGB) {
+            $WorkspaceRoot = [System.IO.Path]::GetFullPath("${{ github.workspace }}").TrimEnd(
+              [System.IO.Path]::DirectorySeparatorChar,
+              [System.IO.Path]::AltDirectorySeparatorChar)
+            $WorkspacePrefix = $WorkspaceRoot + [System.IO.Path]::DirectorySeparatorChar
+            $LibraryPath = [System.IO.Path]::GetFullPath((Join-Path $WorkspaceRoot "Library"))
+            if (-not $LibraryPath.StartsWith($WorkspacePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+              Write-Host "[ERROR]: Library の解決先がワークスペース外です: $LibraryPath"
+              exit 1
+            }
+
+            if (Test-Path -LiteralPath $LibraryPath) {
+              Write-Host "[WARN]: Unity 起動前の空き容量が不足しているため Library を削除します: $LibraryPath"
+              Remove-Item -LiteralPath $LibraryPath -Recurse -Force -ErrorAction Stop
+              $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+              $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
+              Write-Host "[INFO]: Library 清掃後の空き容量: $FreeSpaceGB GB"
+            }
+          }
+
+          if ($FreeSpaceGB -lt $MinRequiredGB) {
+            Write-Host "[ERROR]: ビルドに必要な空き容量 $MinRequiredGB GBを確保できません。現在の空き容量: $FreeSpaceGB GB"
+            exit 1
+          } else {
+            Write-Host "[OK]: 十分なディスク空き容量が確保されています。"
           }
 
           Write-Host "::endgroup::"
-        shell: pwsh
+
+# ==================================================================================================
+
+      - name: 環境情報の表示
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          Write-Host "::group::ビルドワークフロー環境情報"
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローを開始しました。"
+          Write-Host "実行環境: ${{ runner.os }} (アーキテクチャ: ${{ runner.arch }})"
+          Write-Host "プロジェクトパス: ${{ github.workspace }}"
+          Write-Host "ビルドモード: $env:BUILD_MODE"
+          Write-Host ""
+          Write-Host "Google Drive APIキー設定状況: $(if ($env:GOOGLE_DRIVE_API_KEY) { '設定済み' } else { '未設定' })"
+          Write-Host "Google Drive フォルダID設定状況: $(if ($env:GOOGLE_DRIVE_FOLDER_ID) { '設定済み' } else { '未設定' })"
+          Write-Host "アセット検索クエリ: $(if ($env:GDRIVE_ASSET_SEARCH_QUERY) { $env:GDRIVE_ASSET_SEARCH_QUERY } else { '未設定 (デフォルト使用)' })"
+          Write-Host "ビルド出力ディレクトリ: $env:UNITY_BUILD_OUTPUT_DIR"
+          Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
+          Write-Host "Unity実行メソッド: $(if ($env:UNITY_BUILD_EXECUTE_METHOD) { $env:UNITY_BUILD_EXECUTE_METHOD } else { '未設定 (デフォルト使用)' })"
+          Write-Host "プロファイルごとのUnityビルドタイムアウト: $env:UNITY_PROFILE_BUILD_TIMEOUT_SEC 秒"
+          Write-Host "Unity使用コア数割合: $(if ($env:IS_MANUAL_BUILD -eq 'true') { $env:UNITY_CPU_USAGE_PERCENT } else { '自動設定（安全制限あり）' })"
+          Write-Host "対象プロファイル: $(if ($env:SELECTED_PROFILES) { $env:SELECTED_PROFILES } else { '指定なし（全件）' })"
+          Write-Host ""
+
+          # NuGetForUnity.Cli (dotnet tool) の実行可否に関わるため、ここで併せて確認する。
+          $DotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
+          if ($DotnetCmd) {
+            Write-Host "dotnet: $($DotnetCmd.Source) (バージョン: $(& dotnet --version))"
+          } else {
+            Write-Host "dotnet: 見つかりません（NuGetForUnity.Cli は使用不可）"
+          }
+
+          Write-Host "::endgroup::"
+
+# ==================================================================================================
+
+      - name: Unityライセンス状態の事前確認
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          $LogPath = "unity_license_check.log"
+          if (Test-Path $LogPath) { Remove-Item $LogPath -Force }
+
+          $Process = Start-Process -FilePath "$env:UNITY_EXE_PATH" `
+            -ArgumentList @(
+              "-batchmode",
+              "-quit",
+              "-nographics",
+              "-projectPath", $env:GITHUB_WORKSPACE,
+              "-ignorecompilererrors",
+              "-logFile", $LogPath
+            ) `
+            -PassThru -Wait -NoNewWindow
+
+          Write-Host "Unity終了コード: $($Process.ExitCode)"
+
+          if (-not (Test-Path $LogPath)) {
+            Write-Host "::error::ログファイルが生成されていません。Unityが起動自体に失敗している可能性があります。"
+            exit 1
+          }
+
+          # ライセンス検証は非同期のバックグラウンドスレッドで完了するため、
+          # ログファイルへの書き込み完了を待ってから判定する
+          Start-Sleep -Seconds 5
+
+          $LogContent = Get-Content -Path $LogPath -Raw
+          $HasLicenseError = $LogContent -match "No valid Unity Editor license found"
+
+          if ($HasLicenseError -or $Process.ExitCode -ne 0) {
+            Write-Host "::error::Unityライセンスが無効です。終了コード: $($Process.ExitCode)、ランナー機でUnity Hubから再ログインしてください。"
+            exit 1
+          }
+
+          Write-Host "Unityライセンス: 有効"
 
 # ==================================================================================================
 
       - name: パッケージのダウンロードとインポート
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           # ==========================================
           # 1. 準備 および Google Drive からの ZIP ダウンロード
@@ -236,14 +844,21 @@ jobs:
 
           $ApiKey      = $env:GOOGLE_DRIVE_API_KEY
           $FolderId    = $env:GOOGLE_DRIVE_FOLDER_ID
-          $TempZipPath = "$env:TEMP\src_assets.zip"
-          $ExtractDir  = "$env:TEMP\UnityPackages"
+          $TempZipPath = Join-Path $env:RUNNER_TEMP "src_assets.zip"
+          $ExtractDir  = Join-Path $env:RUNNER_TEMP "UnityPackages"
 
           if (Test-Path $ExtractDir) { Remove-Item $ExtractDir -Recurse -Force }
           New-Item -ItemType Directory -Path $ExtractDir -Force | Out-Null
 
-          # （name contains '.zip' / trashed = false / modifiedTime desc / pageSize=1）
-          $RawQuery       = "name contains '.zip' and trashed = false and '$FolderId' in parents"
+          # （GDRIVE_ASSET_SEARCH_QUERY / modifiedTime desc / pageSize=1）
+          if ($env:GDRIVE_ASSET_SEARCH_QUERY) {
+            $BaseQuery = $env:GDRIVE_ASSET_SEARCH_QUERY
+            Write-Host "[INFO]: リポジトリ変数 'GDRIVE_ASSET_SEARCH_QUERY' の値を使用します: $BaseQuery"
+          } else {
+            $BaseQuery = "name contains '.zip' and trashed = false"
+            Write-Host "[WARN]: リポジトリ変数 'GDRIVE_ASSET_SEARCH_QUERY' が未設定です。デフォルト値 '$BaseQuery' を使用します。"
+          }
+          $RawQuery       = "$BaseQuery and '$FolderId' in parents"
           $EncodedQuery   = [Uri]::EscapeDataString($RawQuery)
           $EncodedOrderBy = [Uri]::EscapeDataString("modifiedTime desc")
           $EncodedFields  = [Uri]::EscapeDataString("files(id,name)")
@@ -313,9 +928,10 @@ jobs:
           # ==========================================
           Write-Host "::group::tar 直接展開によるパッケージのインストール"
 
-          $ProjectRoot    = "${{ github.workspace }}"
-          $LongProjectRoot = "\\?\" + $ProjectRoot.TrimEnd("\")
-          $ResolvedRoot   = $LongProjectRoot + "\"
+          $ProjectRoot = "${{ github.workspace }}"
+          $Sep         = [System.IO.Path]::DirectorySeparatorChar
+          # Windows の 260 文字制限を回避する接頭辞。他OSでは不要。
+          $LongProjectRoot = if ($env:RUNNER_OS -eq "Windows") { "\\?\" + $ProjectRoot.TrimEnd('\') } else { $ProjectRoot.TrimEnd('/') }
           $Packages       = Get-ChildItem -Path $ExtractDir -Filter "*.unitypackage"
           $TotalPlaced    = 0
           $FailedPackages = @()
@@ -326,7 +942,7 @@ jobs:
             Write-Host "--------------------------------------------------"
             Write-Host "処理中: $($Package.Name)"
 
-            $PkgWorkDir = Join-Path $env:TEMP "pkg_$([System.IO.Path]::GetRandomFileName())"
+            $PkgWorkDir = Join-Path $env:RUNNER_TEMP "pkg_$([System.IO.Path]::GetRandomFileName())"
             New-Item -ItemType Directory -Path $PkgWorkDir -Force | Out-Null
 
             $TarOutput = & tar -xzf "$($Package.FullName)" -C "$PkgWorkDir" 2>&1
@@ -348,14 +964,14 @@ jobs:
               $DestRelPath = (Get-Content $PathnameFi -Raw -Encoding UTF8).Trim()
               if ([string]::IsNullOrEmpty($DestRelPath)) { continue }
 
-              $DestRelNorm = $DestRelPath.Replace('/', '\').TrimStart('\')
+              $DestRelNorm = $DestRelPath.Replace('/', $Sep).Replace('\', $Sep).TrimStart($Sep)
 
               if ($DestRelNorm -match '\.\.') {
                 Write-Host "[WARN]: パストラバーサルを検出したためスキップします: $DestRelPath"
                 continue
               }
 
-              $DestAbs = $LongProjectRoot + "\" + $DestRelNorm
+              $DestAbs = $LongProjectRoot + $Sep + $DestRelNorm
 
               $AssetSrc = Join-Path $GuidDir.FullName "asset"
               $MetaSrc  = Join-Path $GuidDir.FullName "asset.meta"
@@ -401,163 +1017,499 @@ jobs:
           Write-Host ""
           Write-Host "[INFO]: すべてのパッケージがインストールされました。配置された総アセットファイル数: $TotalPlaced"
           Write-Host "::endgroup::"
-        shell: pwsh
 
 # ==================================================================================================
+
+      - name: Git管理のUIアセットを復元
+        run: ./.github/scripts/RestoreTrackedUiAssets.ps1
+        shell: powershell
 
       - name: NuGetパッケージの復元
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
-
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
           Write-Host "::group::NuGetForUnity.Cli による NuGet パッケージの復元"
-
-          if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-            Write-Host "dotnet が見つかりません。.NET SDK をインストール中..."
-            Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "$env:TEMP\dotnet-install.ps1"
-            & "$env:TEMP\dotnet-install.ps1" -Channel LTS -InstallDir "$env:USERPROFILE\.dotnet"
-            $env:PATH = "$env:USERPROFILE\.dotnet;$env:PATH"
-          }
-
-          dotnet tool install --global NuGetForUnity.Cli 2>&1 | Out-String | Write-Host
-
-          $ToolsPath = "$env:USERPROFILE\.dotnet\tools"
-          if (Test-Path $ToolsPath) {
-            $env:PATH = "$ToolsPath;$env:PATH"
-          }
-
-          & nugetforunity restore "${{ github.workspace }}"
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "[ERROR]: NuGet パッケージの復元に失敗しました (終了コード $LASTEXITCODE)。"
+          try {
+            # 常駐ランナーに導入済みの CLI を再利用し、不要な再インストールを避ける。
+            $ToolList = @(& dotnet tool list --global)
+            $ToolListExitCode = $LASTEXITCODE
+            foreach ($Line in $ToolList) { Write-Host $Line }
+            if ($ToolListExitCode -ne 0) {
+              throw "NuGet CLI のインストール状態を取得できませんでした (終了コード $ToolListExitCode)。"
+            }
+            $HasNuGetCli = @($ToolList | Where-Object { $_ -match '^\s*nugetforunity\.cli\s+' }).Count -gt 0
+            if (-not $HasNuGetCli) {
+              # PowerShell 5.1 の stderr リダイレクトによる例外化と、パイプ経由のログ欠落を防ぐ。
+              & dotnet tool install --global NuGetForUnity.Cli
+              $InstallExitCode = $LASTEXITCODE
+              if ($InstallExitCode -ne 0) {
+                throw "NuGetForUnity.Cli のインストールに失敗しました (終了コード $InstallExitCode)。"
+              }
+            }
+            $ToolsPath = Join-Path (Join-Path $HOME ".dotnet") "tools"
+            if (Test-Path $ToolsPath) {
+              $env:PATH = $ToolsPath + [System.IO.Path]::PathSeparator + $env:PATH
+            }
+            $NuGetCli = Get-Command nugetforunity -CommandType Application -ErrorAction Stop
+            & $NuGetCli.Source restore "${{ github.workspace }}"
+            $RestoreExitCode = $LASTEXITCODE
+            if ($RestoreExitCode -ne 0) {
+              throw "NuGet パッケージの復元に失敗しました (終了コード $RestoreExitCode)。"
+            }
+            Write-Host "[INFO]: NuGet パッケージが復元されました。"
+          } catch {
+            Write-Host "[ERROR]: $($_.Exception.Message)"
+            throw
+          } finally {
             Write-Host "::endgroup::"
-            exit 1
           }
-
-          Write-Host "[INFO]: NuGet パッケージが復元されました。"
-          Write-Host "::endgroup::"
-        shell: pwsh
 
 # ==================================================================================================
 
       - name: Unityビルドの実行
+        id: unity_build
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
-          Write-Host "::group::Unity ビルドプロセスの開始"
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ビルドのため Unity を起動中..."
-          Write-Host "実行メソッド: KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli"
-          Write-Host "ログ出力先: unity_build.log"
-          Write-Host ""
+          function Initialize-ProcessExitCodeTracking {
+            param(
+              [Parameter(Mandatory = $true)]
+              [System.Diagnostics.Process]$Process,
+              [Parameter(Mandatory = $true)]
+              [string]$ProcessName
+            )
 
-          $TimeoutSec = 5400
-          Write-Host "タイムアウト: $TimeoutSec 秒 ($($TimeoutSec / 60) 分)"
-          Write-Host ""
+            if ($env:RUNNER_OS -ne "Windows") {
+              return
+            }
 
-          # CPUコア数の設定
-          $CpuCount = [Environment]::ProcessorCount
-          $UnityCpuCount = [Math]::Min(63, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
+            # Windows PowerShell 5.1では Start-Process -NoNewWindow -PassThru が返す
+            # Process のハンドルを終了前に取得しないと、終了後の ExitCode が null になる。
+            try {
+              $null = $Process.Handle
+            } catch {
+              throw "$ProcessName のハンドルを取得できませんでした: $_"
+            }
+          }
 
-          # プロセッサアフィニティビットマスクの生成
-          $AffinityMask = ([int64]1 -shl $UnityCpuCount) - 1
+          function Get-CompletedProcessExitCode {
+            param(
+              [Parameter(Mandatory = $true)]
+              [System.Diagnostics.Process]$Process,
+              [Parameter(Mandatory = $true)]
+              [string]$ProcessName
+            )
 
-          Write-Host "検出された論理 CPU 数: $CpuCount"
-          Write-Host "Unity 割り当て CPU 数: $UnityCpuCount"
-          Write-Host "Unity CPU アフィニティマスク: 0x$('{0:X}' -f $AffinityMask)"
-          Write-Host ""
+            # タイムアウト付きWaitForExit後の終了処理を同期完了させる。
+            $Process.WaitForExit()
 
-          $UnityArgs = @(
+            if (-not $Process.HasExited) {
+              throw "$ProcessName の終了を確認できませんでした。"
+            }
+
+            $ExitCode = $Process.ExitCode
+            if ($null -eq $ExitCode) {
+              throw "$ProcessName の終了コードを取得できませんでした。"
+            }
+
+            return [int]$ExitCode
+          }
+
+          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] プロファイル単位のUnityビルドを開始します。"
+
+          if ($env:UNITY_BUILD_EXECUTE_METHOD) {
+            $ExecuteMethod = $env:UNITY_BUILD_EXECUTE_METHOD
+            Write-Host "[INFO]: リポジトリ変数 'UNITY_BUILD_EXECUTE_METHOD' の値を使用します: $ExecuteMethod"
+          } else {
+            $ExecuteMethod = "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli"
+            Write-Host "[WARN]: リポジトリ変数 'UNITY_BUILD_EXECUTE_METHOD' が未設定です。デフォルト値 '$ExecuteMethod' を使用します。"
+          }
+
+          $ProfileTimeoutSec = [int]$env:UNITY_PROFILE_BUILD_TIMEOUT_SEC
+          $AndroidMinimumFreeSpaceGB = 40
+          $DefaultMinimumFreeSpaceGB = 40
+          $EmergencyMinimumFreeSpaceGB = 5
+          $MaximumLogSizeGB = 1
+          $ResourceCheckIntervalMilliseconds = 30000
+          $WindowsUnityCpuLimit = 4
+          $MaximumAffinityCpuCount = 63
+          $AllowedCpuUsagePercentages = @("25%", "50%", "75%", "100%")
+          $RunTimestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+          $LogFilePattern = "unity_build_${RunTimestamp}_*.log"
+          "log_file=$LogFilePattern" | Add-Content -Path $env:GITHUB_OUTPUT
+          "exit_code=1" | Add-Content -Path $env:GITHUB_OUTPUT
+          "timed_out_profiles=" | Add-Content -Path $env:GITHUB_OUTPUT
+
+          $ProfileListFile = Join-Path $env:RUNNER_TEMP "unity_build_profiles_$RunTimestamp.txt"
+          $DiscoveryLogFile = "unity_build_${RunTimestamp}_profile-discovery.log"
+          $DiscoveryArgs = @(
             "-batchmode",
             "-projectPath", "${{ github.workspace }}",
-            "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli",
+            "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.ExportProfileNamesFromCli",
             "-buildMode", "$env:BUILD_MODE",
-            "-logFile", "unity_build.log"
+            "-gameDataVariant", "$env:BUILD_VARIANT",
+            "-profileListFile", "$ProfileListFile",
+            "-logFile", "$DiscoveryLogFile"
           )
+          if ($env:SELECTED_PROFILES) {
+            $DiscoveryArgs += @("-selectedProfiles", "$env:SELECTED_PROFILES")
+          }
 
-          $UnityProcess = Start-Process `
+          Write-Host "::group::ビルドプロファイルの自動検出"
+          $DiscoveryProcess = Start-Process `
             -FilePath "$env:UNITY_EXE_PATH" `
-            -ArgumentList $UnityArgs `
+            -ArgumentList $DiscoveryArgs `
             -PassThru `
             -NoNewWindow
 
           try {
-            $UnityProcess.ProcessorAffinity = $AffinityMask
-            Write-Host "[INFO]: Unity プロセッサアフィニティを設定しました。"
+            Initialize-ProcessExitCodeTracking $DiscoveryProcess "プロファイル検出用Unityプロセス"
           } catch {
-            Write-Host "[ERROR]: Unity プロセッサアフィニティの設定に失敗しました: $_"
-            $UnityProcess.Kill()
+            Write-Host "[ERROR]: プロファイル検出用Unityプロセスの監視を開始できませんでした: $_"
             Write-Host "::endgroup::"
             exit 1
           }
 
-          if (-not $UnityProcess.WaitForExit($TimeoutSec * 1000)) {
-            Write-Host ""
-            Write-Host "[ERROR]: Unity ビルドが $TimeoutSec 秒後にタイムアウトしました。"
-            $UnityProcess.Kill()
+          if (-not $DiscoveryProcess.WaitForExit($ProfileTimeoutSec * 1000)) {
+            Write-Host "[ERROR]: ビルドプロファイルの検出が $ProfileTimeoutSec 秒後にタイムアウトしました。"
+            try {
+              $DiscoveryProcess.Kill()
+              $DiscoveryProcess.WaitForExit()
+            } catch {
+              Write-Host "[WARN]: プロファイル検出用Unityプロセスの終了処理に失敗しました: $_"
+            }
             Write-Host "::endgroup::"
-            exit 124
+            exit 1
           }
 
-          $UnityExitCode = $UnityProcess.ExitCode
+          try {
+            $DiscoveryExitCode = Get-CompletedProcessExitCode $DiscoveryProcess "プロファイル検出用Unityプロセス"
+          } catch {
+            Write-Host "[ERROR]: プロファイル検出用Unityプロセスの終了状態を取得できませんでした: $_"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          if ($DiscoveryExitCode -ne 0 -or -not (Test-Path $ProfileListFile)) {
+            Write-Host "[ERROR]: ビルドプロファイルを検出できませんでした（Unity終了コード: $DiscoveryExitCode）。"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          $TargetProfiles = @(Get-Content -Path $ProfileListFile | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+
+          # ビルドプロファイルの切替により、Editor拡張も対象プラットフォーム向けのネイティブ実装へ切り替わる。
+          # ホストOSと互換性のないプロファイルは実行対象から除外する。
+          $UnsupportedProfilePattern = switch ($env:RUNNER_OS) {
+            "Windows" { '(?i)(macos|ios)$' }
+            "macOS"   { '(?i)windows$' }
+            "Linux"   { '(?i)(windows|macos|ios)$' }
+            default   { $null }
+          }
+          if ($UnsupportedProfilePattern) {
+            $SkippedHostProfiles = @($TargetProfiles | Where-Object { $_ -match $UnsupportedProfilePattern })
+            $TargetProfiles = @($TargetProfiles | Where-Object { $_ -notmatch $UnsupportedProfilePattern })
+            if ($SkippedHostProfiles.Count -gt 0) {
+              Write-Host "[WARN]: $env:RUNNER_OS ランナーでは実行できないプロファイルを除外しました: $($SkippedHostProfiles -join ', ')"
+            }
+          }
+          if ($TargetProfiles.Count -eq 0) {
+            Write-Host "[ERROR]: ビルド対象プロファイルが0件です。"
+            Write-Host "::endgroup::"
+            exit 1
+          }
+
+          Write-Host "[INFO]: $($TargetProfiles.Count)件のビルドプロファイルを検出しました: $($TargetProfiles -join ', ')"
+          Write-Host "::endgroup::"
+
+          Write-Host "実行メソッド: $ExecuteMethod"
+          Write-Host "対象プロファイル: $($TargetProfiles -join ', ')"
+          Write-Host "ログ出力先: $LogFilePattern"
           Write-Host ""
-          Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] Unity ビルドプロセスがコード $UnityExitCode で終了しました。"
-          
-          if ($UnityExitCode -eq 0) {
-            Write-Host "成功: Unity ビルドが正常に完了しました。"
+          Write-Host "プロファイルごとのタイムアウト: $ProfileTimeoutSec 秒 ($([Math]::Round($ProfileTimeoutSec / 60, 1)) 分)"
+          Write-Host ""
+
+          # CPUコア数の設定
+          $CpuCount = [Environment]::ProcessorCount
+          $IsManualBuild = $env:IS_MANUAL_BUILD -eq "true"
+          if ($IsManualBuild) {
+            if ($env:UNITY_CPU_USAGE_PERCENT -notin $AllowedCpuUsagePercentages) {
+              Write-Host "[ERROR]: Unity使用コア数割合には $($AllowedCpuUsagePercentages -join ', ') のいずれかを指定してください。現在値: '$env:UNITY_CPU_USAGE_PERCENT'"
+              exit 1
+            }
+            $UnityCpuUsagePercent = [int]([string]$env:UNITY_CPU_USAGE_PERCENT).TrimEnd('%')
+            $UnityCpuCapacity = [Math]::Min($MaximumAffinityCpuCount, $CpuCount)
+            $UnityCpuCount = [int][Math]::Max(1, [Math]::Floor($UnityCpuCapacity * $UnityCpuUsagePercent / 100))
+            $CpuAllocationMode = "手動指定（既存の安全制限を一時的に無効化）"
           } else {
-            Write-Host "警告: Unity ビルドプロセスがゼロ以外の終了コード ($UnityExitCode) を返しました。"
-            Write-Host "          詳細は unity_build.log を参照してください。"
+            $UnityCpuLimit = if ($env:RUNNER_OS -eq "Windows") { $WindowsUnityCpuLimit } else { $MaximumAffinityCpuCount }
+            $UnityCpuCount = [int][Math]::Min($UnityCpuLimit, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
+            $CpuAllocationMode = "自動設定（既存の安全制限を適用）"
           }
 
-          Write-Host "::endgroup::"
-          exit $UnityExitCode
-        shell: pwsh
-
-# ==================================================================================================
-
-      - name: Unityビルドログの要約
-        if: always()
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
-
-          Write-Host "::group::Unity ビルドログ要約"
-          if (Test-Path "unity_build.log") {
-            Write-Host "[INFO]: unity_build.log から主要情報を抽出中..."
-            Write-Host ""
-          
-            # Count errors and warnings
-            $Errors = Select-String -Path "unity_build.log" -Pattern "error|failed" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
-            $Warnings = Select-String -Path "unity_build.log" -Pattern "warning" -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
-          
-            Write-Host "検出されたエラー数: $Errors"
-            Write-Host "検出された警告数: $Warnings"
-            Write-Host ""
-          
-            # Output the last 50 lines (final status)
-            Write-Host "[unity_build.log の末尾50行:]"
-            Get-Content -Path "unity_build.log" -Tail 50 | ForEach-Object { Write-Host $_ }
+          # プロセッサアフィニティビットマスクの生成
+          $AffinityMask = if ($UnityCpuCount -eq $MaximumAffinityCpuCount) {
+            [Int64]::MaxValue
           } else {
-            Write-Host "[WARN]: unity_build.log が見つかりませんでした。"
+            ([int64]1 -shl $UnityCpuCount) - 1
           }
-          Write-Host "::endgroup::"
-        shell: pwsh
+
+          Write-Host "検出された論理 CPU 数: $CpuCount"
+          Write-Host "CPU割り当てモード: $CpuAllocationMode"
+          if ($IsManualBuild) {
+            Write-Host "Unity使用コア数割合: $UnityCpuUsagePercent%"
+          }
+          Write-Host "Unity 割り当て CPU 数: $UnityCpuCount"
+          Write-Host "Unity CPU アフィニティマスク: 0x$('{0:X}' -f $AffinityMask)"
+          Write-Host ""
+
+          $OverallExitCode = 0
+          $FailedProfiles = @()
+          $TimedOutProfiles = @()
+
+          function Remove-IncompleteProfileOutput($ProfileName) {
+            $CleanOutputDir = $env:UNITY_BUILD_OUTPUT_DIR.Trim('"').Trim("'")
+            $OutputRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
+            $OutputRootPrefix = $OutputRoot.TrimEnd(
+              [System.IO.Path]::DirectorySeparatorChar,
+              [System.IO.Path]::AltDirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+
+            $Targets = @(
+              (Join-Path $OutputRoot $ProfileName),
+              (Join-Path $OutputRoot "$ProfileName.zip")
+            )
+
+            foreach ($Target in $Targets) {
+              $ResolvedTarget = [System.IO.Path]::GetFullPath($Target)
+              if (-not $ResolvedTarget.StartsWith($OutputRootPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+                Write-Host "[WARN]: 出力ルート外を指すためタイムアウト成果物の削除をスキップします: $ResolvedTarget"
+                continue
+              }
+
+              if (Test-Path -LiteralPath $ResolvedTarget) {
+                Remove-Item -LiteralPath $ResolvedTarget -Recurse -Force -ErrorAction Stop
+                Write-Host "[INFO]: タイムアウトしたプロファイルの不完全な成果物を削除しました: $ResolvedTarget"
+              }
+            }
+          }
+
+          function Get-WorkspaceFreeSpaceGB {
+            $WorkspaceDrive = (Get-Item -LiteralPath "${{ github.workspace }}").PSDrive
+            $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
+            return [Math]::Round($DriveInfo.Free / 1GB, 2)
+          }
+
+          function Clear-UnityLibraryForProfile {
+            param(
+              [Parameter(Mandatory = $true)]
+              [string]$ProfileName,
+              [Parameter(Mandatory = $true)]
+              [double]$MinimumFreeSpaceGB
+            )
+
+            $FreeSpaceGB = Get-WorkspaceFreeSpaceGB
+            Write-Host "[INFO]: $ProfileName の開始前空き容量: $FreeSpaceGB GB（必要量: $MinimumFreeSpaceGB GB）"
+            if ($FreeSpaceGB -ge $MinimumFreeSpaceGB) {
+              return $true
+            }
+
+            $WorkspaceRoot = [System.IO.Path]::GetFullPath("${{ github.workspace }}").TrimEnd(
+              [System.IO.Path]::DirectorySeparatorChar,
+              [System.IO.Path]::AltDirectorySeparatorChar)
+            $WorkspacePrefix = $WorkspaceRoot + [System.IO.Path]::DirectorySeparatorChar
+            $LibraryPath = [System.IO.Path]::GetFullPath((Join-Path $WorkspaceRoot "Library"))
+            if (-not $LibraryPath.StartsWith($WorkspacePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+              throw "Library の解決先がワークスペース外です: $LibraryPath"
+            }
+
+            if (Test-Path -LiteralPath $LibraryPath) {
+              Write-Host "[WARN]: 空き容量確保のためUnity Libraryキャッシュを削除します: $LibraryPath"
+              Remove-Item -LiteralPath $LibraryPath -Recurse -Force -ErrorAction Stop
+            }
+
+            $FreeSpaceGB = Get-WorkspaceFreeSpaceGB
+            Write-Host "[INFO]: Library清掃後の空き容量: $FreeSpaceGB GB"
+            return $FreeSpaceGB -ge $MinimumFreeSpaceGB
+          }
+
+          foreach ($ProfileName in $TargetProfiles) {
+            $SafeProfileName = $ProfileName -replace '[^A-Za-z0-9._-]', '_'
+            $LogFileName = "unity_build_${RunTimestamp}_${SafeProfileName}.log"
+            Write-Host "::group::Unityビルド: $ProfileName"
+            Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] $ProfileName のビルドを開始します。"
+
+            $MinimumFreeSpaceGB = if ($ProfileName -match '(?i)android$') {
+              $AndroidMinimumFreeSpaceGB
+            } else {
+              $DefaultMinimumFreeSpaceGB
+            }
+            try {
+              $HasBuildCapacity = Clear-UnityLibraryForProfile $ProfileName $MinimumFreeSpaceGB
+            } catch {
+              Write-Host "[ERROR]: $ProfileName の開始前容量確保に失敗しました: $_"
+              $HasBuildCapacity = $false
+            }
+            if (-not $HasBuildCapacity) {
+              Write-Host "[ERROR]: $ProfileName に必要な空き容量 $MinimumFreeSpaceGB GBを確保できないため、このプロファイルをスキップします。"
+              $FailedProfiles += $ProfileName
+              $OverallExitCode = 1
+              Write-Host "::endgroup::"
+              continue
+            }
+
+            $UnityArgs = @(
+              "-batchmode",
+              "-job-worker-count", "$UnityCpuCount",
+              "-projectPath", "${{ github.workspace }}",
+              "-executeMethod", "$ExecuteMethod",
+              "-buildMode", "$env:BUILD_MODE",
+              "-selectedProfiles", "$ProfileName",
+              "-logFile", "$LogFileName"
+            )
+            if ($env:BUILD_VARIANT) {
+              $UnityArgs += @("-gameDataVariant", "$env:BUILD_VARIANT")
+            }
+
+            try {
+              $UnityProcess = Start-Process `
+                -FilePath "$env:UNITY_EXE_PATH" `
+                -ArgumentList $UnityArgs `
+                -PassThru `
+                -NoNewWindow
+
+              Initialize-ProcessExitCodeTracking $UnityProcess "$ProfileName のUnityプロセス"
+
+              # ProcessorAffinity は Windows 専用API。macOS/Linux ではスキップする。
+              if ($env:RUNNER_OS -eq "Windows") {
+                try {
+                  $UnityProcess.ProcessorAffinity = $AffinityMask
+                  Write-Host "[INFO]: Unity プロセッサアフィニティを設定しました。"
+                } catch {
+                  Write-Host "[WARN]: Unity プロセッサアフィニティの設定に失敗しました。ビルドは続行します: $_"
+                }
+              }
+
+              $ProfileStartedAt = [DateTime]::UtcNow
+              $StopReason = $null
+              while (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
+                $ElapsedSeconds = ([DateTime]::UtcNow - $ProfileStartedAt).TotalSeconds
+                if ($ElapsedSeconds -ge $ProfileTimeoutSec) {
+                  $StopReason = "Timeout"
+                  break
+                }
+
+                $FreeSpaceGB = Get-WorkspaceFreeSpaceGB
+                if ($FreeSpaceGB -lt $EmergencyMinimumFreeSpaceGB) {
+                  $StopReason = "DiskSpace"
+                  Write-Host "[ERROR]: $ProfileName の実行中に空き容量が $FreeSpaceGB GBまで低下したため、ランナー保護のため停止します。"
+                  break
+                }
+
+                if (Test-Path -LiteralPath $LogFileName) {
+                  $LogSizeGB = [Math]::Round((Get-Item -LiteralPath $LogFileName).Length / 1GB, 2)
+                  if ($LogSizeGB -ge $MaximumLogSizeGB) {
+                    $StopReason = "LogSize"
+                    Write-Host "[ERROR]: $ProfileName のUnityログが $LogSizeGB GBまで肥大化したため、ランナー保護のため停止します。"
+                    break
+                  }
+                }
+              }
+
+              if ($StopReason) {
+                if ($StopReason -eq "Timeout") {
+                  Write-Host "[ERROR]: $ProfileName のビルドが $ProfileTimeoutSec 秒後にタイムアウトしました。"
+                }
+                try {
+                  if ($env:RUNNER_OS -eq "Windows") {
+                    & taskkill.exe /PID $($UnityProcess.Id) /T /F | Out-Null
+                  } else {
+                    $UnityProcess.Kill()
+                  }
+                  if (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
+                    $UnityProcess.Kill()
+                    if (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
+                      throw "$ProfileName のUnityプロセスを停止できませんでした。"
+                    }
+                  }
+                } catch {
+                  Write-Host "[WARN]: 中断した $ProfileName のUnityプロセス終了処理に失敗しました: $_"
+                }
+                try {
+                  Remove-IncompleteProfileOutput $ProfileName
+                } catch {
+                  Write-Host "[WARN]: 中断した $ProfileName の不完全な成果物を削除できませんでした: $_"
+                }
+                if ($StopReason -eq "Timeout") {
+                  $TimedOutProfiles += $ProfileName
+                } else {
+                  $FailedProfiles += $ProfileName
+                }
+                $OverallExitCode = 1
+                Write-Host "::endgroup::"
+                continue
+              }
+
+              $UnityExitCode = Get-CompletedProcessExitCode $UnityProcess "$ProfileName のUnityプロセス"
+              Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] $ProfileName のUnityプロセスがコード $UnityExitCode で終了しました。"
+              if ($UnityExitCode -ne 0) {
+                $FailedProfiles += $ProfileName
+                $OverallExitCode = 1
+              }
+            } catch {
+              Write-Host "[ERROR]: $ProfileName のUnityプロセス実行に失敗しました: $_"
+              $FailedProfiles += $ProfileName
+              $OverallExitCode = 1
+            }
+
+            Write-Host "::endgroup::"
+          }
+
+          Write-Host "全プロファイルの実行が完了しました。"
+          Write-Host "失敗: $(if ($FailedProfiles.Count -gt 0) { $FailedProfiles -join ', ' } else { 'なし' })"
+          Write-Host "タイムアウト: $(if ($TimedOutProfiles.Count -gt 0) { $TimedOutProfiles -join ', ' } else { 'なし' })"
+
+          "exit_code=$OverallExitCode" | Add-Content -Path $env:GITHUB_OUTPUT
+          "timed_out_profiles=$($TimedOutProfiles -join ',')" | Add-Content -Path $env:GITHUB_OUTPUT
+
+          # このステップ自体を失敗させると後続ステップがスキップされ、成功したプロファイルの
+          # 成果物すらリリースできなくなる。判定はexit_codeを見た後続ステップに委ねるため、
+          # ここでは常に0を返す。
+          exit 0
 
 # ==================================================================================================
 
       - name: Unityログのアップロード
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
+        if: always() && steps.unity_build.outputs.log_file != ''
         with:
           name: unity-build-log
-          path: unity_build.log
+          path: ${{ steps.unity_build.outputs.log_file }}
 
 # ==================================================================================================
 
       - name: ビルド成果物のチェック
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::ビルド成果物の検証"
           $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
@@ -602,31 +1554,65 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: pwsh
         
 # ==================================================================================================
 
       - name: 現行ビルドバージョンの解決
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
+          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::現行ビルドバージョンの解決"
 
           # VERSION_BASE_{BuildMode} にバージョン文字列全体（例: v1.0.X）を格納する。
           # 未設定時は v1.0.X として扱い、BUILD_VERSION_{BuildMode} のパッチ番号を末尾に適用する。
           $VarName = "VERSION_BASE_$env:BUILD_MODE"
-          $Headers = @{
+          $script:Headers = @{
               "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
+          $script:UsingFallbackToken = $false
+
+          function Invoke-GitHubApi {
+              param([string]$Uri, [string]$Method, $Body = $null)
+
+              $Parameters = @{ Uri = $Uri; Method = $Method; Headers = $script:Headers }
+              if ($null -ne $Body) {
+                  $Parameters.Body = $Body
+                  $Parameters.ContentType = "application/json"
+              }
+
+              try {
+                  return Invoke-RestMethod @Parameters
+              } catch {
+                  $StatusCode = if ($_.Exception.Response) { $_.Exception.Response.StatusCode.value__ } else { 0 }
+                  if ($script:UsingFallbackToken -or $StatusCode -ne 401) { throw }
+                  if ([string]::IsNullOrWhiteSpace($env:VAR_UPDATE_TOKEN_FALLBACK)) {
+                      throw "VAR_UPDATE_TOKEN_FALLBACK が設定されていません。"
+                  }
+
+                  Write-Host "[WARN]: 通常トークンによるGitHub REST API認証に失敗しました。フォールバックトークンで再試行します。"
+                  $script:Headers.Authorization = "Bearer $env:VAR_UPDATE_TOKEN_FALLBACK"
+                  $script:UsingFallbackToken = $true
+                  return Invoke-RestMethod @Parameters
+              }
+          }
+
+          Write-Host "[INFO]: Repository Variables API には通常トークンを使用します。"
           $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
 
           try {
-              $VarResponse = Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers
+              $VarResponse = Invoke-GitHubApi -Uri $GetUrl -Method GET
               $VersionString = $VarResponse.value
           } catch {
               if ($_.Exception.Response.StatusCode.value__ -eq 404) {
@@ -634,7 +1620,7 @@ jobs:
                   $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
                   $Body = @{ "name" = $VarName; "value" = "v1.0.X" } | ConvertTo-Json
                   try {
-                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      Invoke-GitHubApi -Uri $CreateUrl -Method POST -Body $Body | Out-Null
                       $VersionString = "v1.0.X"
                       Write-Host "[INFO]: '$VarName' がデフォルト値 'v1.0.X' で作成されました。"
                   } catch {
@@ -653,7 +1639,7 @@ jobs:
           $PatchVarName = "BUILD_VERSION_$env:BUILD_MODE"
           $PatchGetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$PatchVarName"
           try {
-              $PatchVarResponse = Invoke-RestMethod -Uri $PatchGetUrl -Method GET -Headers $Headers
+              $PatchVarResponse = Invoke-GitHubApi -Uri $PatchGetUrl -Method GET
               $PatchNumber = $PatchVarResponse.value
           } catch {
               if ($_.Exception.Response.StatusCode.value__ -eq 404) {
@@ -661,7 +1647,7 @@ jobs:
                   $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
                   $Body = @{ "name" = $PatchVarName; "value" = "0" } | ConvertTo-Json
                   try {
-                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      Invoke-GitHubApi -Uri $CreateUrl -Method POST -Body $Body | Out-Null
                       $PatchNumber = "0"
                       Write-Host "[INFO]: '$PatchVarName' がデフォルト値 '0' で作成されました。"
                   } catch {
@@ -695,7 +1681,6 @@ jobs:
           "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
           Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
           Write-Host "::endgroup::"
-        shell: pwsh
         
 # ==================================================================================================
 
@@ -703,7 +1688,13 @@ jobs:
         id: tag_gen
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::リリースタグの生成"
           
@@ -714,75 +1705,79 @@ jobs:
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[INFO]: タグ名を生成しました: $TagName"
           Write-Host "::endgroup::"
-        shell: pwsh
         
 # ==================================================================================================
 
-      - name: ビルド成果物のZIP圧縮
+      - name: ビルド成果物ZIPへのタグ付与と配置
         env:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
-          Write-Host "::group::ビルド成果物のアーカイブ (ZIP)"
+          Write-Host "::group::ビルド成果物ZIPへのタグ付与と配置"
+
+          # 各プロファイルのZIP圧縮は、Unity側 (AutoBuildExecuter.cs) が
+          # プロファイルのビルド完了直後に都度実行済み（元の生データも都度削除済み）。
+          # ここではタグ名がビルド完了後にしか確定しないため、
+          # 再圧縮は行わずファイル名へのタグ付与とリリース用配置場所への移動のみを行う。
+          # （再圧縮するとディスクのピーク使用量が再び増えるため、Move-Itemに留める）
           $RawOutputDir = $env:UNITY_BUILD_OUTPUT_DIR
           $CleanOutputDir = $RawOutputDir.Trim('"').Trim("'")
           $ResolvedOutputDir = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($PWD, $CleanOutputDir))
-          
+
           if (-not (Test-Path $ResolvedOutputDir)) {
             Write-Host "[ERROR]: ビルド出力ディレクトリが見つかりません: $ResolvedOutputDir"
             Write-Host "::endgroup::"
             exit 1
           }
-          
+
           $TagName = $env:TAG_NAME
-          $PlatformDirs = Get-ChildItem -Path $ResolvedOutputDir -Directory
-          if ($PlatformDirs.Count -eq 0) {
-            Write-Host "[ERROR]: $ResolvedOutputDir 配下にプラットフォームのビルド出力が見つかりません"
+          $ZipFiles = Get-ChildItem -Path $ResolvedOutputDir -Filter "*.zip" -File
+          if ($ZipFiles.Count -eq 0) {
+            Write-Host "[ERROR]: $ResolvedOutputDir 配下にプロファイル別のビルドZIPが見つかりません"
             Write-Host "::endgroup::"
             exit 1
           }
 
-          foreach ($PlatformDir in $PlatformDirs) {
-            $ZipName = "$($PlatformDir.Name)-$TagName.zip"
-            $ZipPath = Join-Path -Path $PWD -ChildPath $ZipName
+          foreach ($ZipFile in $ZipFiles) {
+            $ProfileName = [System.IO.Path]::GetFileNameWithoutExtension($ZipFile.Name)
+            $DestName = "$ProfileName-$TagName.zip"
+            $DestPath = Join-Path -Path $PWD -ChildPath $DestName
 
             try {
-              Write-Host "$($PlatformDir.Name) のアーカイブを作成中"
-              Write-Host "  ソース:      $($PlatformDir.FullName)"
-              Write-Host "  出力先:      $ZipPath"
+              Write-Host "$ProfileName にタグを付与して配置中"
+              Write-Host "  ソース:      $($ZipFile.FullName)"
+              Write-Host "  出力先:      $DestPath"
 
-              Compress-Archive `
-                -Path "$($PlatformDir.FullName)\*" `
-                -DestinationPath $ZipPath `
-                -ErrorAction Stop
+              Move-Item -Path $ZipFile.FullName -Destination $DestPath -Force -ErrorAction Stop
 
-              if (-not (Test-Path $ZipPath)) {
-                throw "ZIP file was not created: $ZipPath"
-              }
-
-              $ZipSize = (Get-Item $ZipPath).Length
-
-              Write-Host "[INFO]: アーカイブ ($ZipName) が正常に作成されました。ファイルサイズ: $([Math]::Round($ZipSize / 1MB, 2)) MB"
+              $ZipSize = (Get-Item $DestPath).Length
+              Write-Host "[INFO]: 配置が完了しました ($DestName)。ファイルサイズ: $([Math]::Round($ZipSize / 1MB, 2)) MB"
             } catch {
-              Write-Host "[ERROR]: $($PlatformDir.Name) のアーカイブ作成に失敗しました: $_"
-              Write-Host "::endgroup::"
-              exit 1
+              Write-Host "[WARN]: $ProfileName の配置に失敗しました: $_"
+              continue
             }
           }
           Write-Host "::endgroup::"
-        shell: pwsh
         
 # ==================================================================================================
 
       - name: リリース作成とアセットのアップロード
-        id: create_release
+        id: release_attempt_1
+        continue-on-error: true
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
-        with:
+        with: &release_upload_options
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: ${{ steps.tag_gen.outputs.TAG_NAME }}
-          prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' }}
+          prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' || steps.determine_mode.outputs.build_variant == 'demo' }}
+          make_latest: ${{ steps.determine_mode.outputs.build_mode == 'Master' && steps.determine_mode.outputs.build_variant == 'release' }}
           body: |
             Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
 
@@ -791,28 +1786,105 @@ jobs:
             **ワークフロー実行詳細:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
             **ビルドモード:** ${{ steps.determine_mode.outputs.build_mode }}
+            **ビルド種別:** ${{ steps.determine_mode.outputs.build_variant || 'development' }}
+
+            **ビルド結果:** ${{ steps.unity_build.outputs.exit_code == '0' && '全プロファイル成功' || format('一部のプロファイルが失敗しました（Unity終了コード: {0}）。本リリースには成功したプロファイルの成果物のみ含まれます。詳細はワークフロー実行のログを確認してください。', steps.unity_build.outputs.exit_code) }}
+            **タイムアウトしたプロファイル:** ${{ steps.unity_build.outputs.timed_out_profiles || 'なし' }}
 
             **実行プロセス:**
             1. **環境・Unity インストールの検証**: ランナー環境の確認と、Unity エディタの存在検証。
             2. **.NET SDK 環境の確認**: 必要に応じて .NET SDK のインストール・パス確認を実施。
             3. **アセットパッケージのダウンロード・インポート**: Google Drive から ZIP をダウンロードし、各 .unitypackage からファイルを展開して適切なパスに直接配置。
             4. **NuGet パッケージ復元**: `NuGetForUnity.Cli` を用いた Unity 起動前のパッケージ復元処理。
-            5. **Unity ビルド処理**: ${{ steps.determine_mode.outputs.build_mode }} ビルドプロファイルに基づき、Unity バッチモードによるビルドを実行。
+            5. **Unity ビルド処理**: ${{ steps.determine_mode.outputs.build_mode }} ビルドプロファイルをプロファイルごとに別の Unity バッチプロセスで実行（各プロファイルのタイムアウトは2時間）。
 
             **ビルド対象プロファイル:**
-            ${{ steps.determine_mode.outputs.build_mode == 'Development' && '- Develop ビルドプロファイル (DevelopBuildProfiles)' || '- Master ビルドプロファイル (MasterBuildProfiles)' }}
-          files: "*.zip"
+            - ビルドプロファイル枠: ${{ steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release' }}${{ steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master' }}BuildProfiles
+          files: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          fail_on_unmatched_files: true
+          overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # アセット保存だけが失敗した場合、Unityビルドからやり直さず新しいストリームで再送する。
+      # 同名の未完了アセットはactionのoverwrite_filesで置き換える。
+      - name: リリースアップロードの再試行待機
+        if: ${{ !cancelled() && steps.release_attempt_1.outcome == 'failure' }}
+        run: Start-Sleep -Seconds 20
+
+      - name: リリース作成とアセットのアップロード（2回目）
+        id: release_attempt_2
+        if: ${{ !cancelled() && steps.release_attempt_1.outcome == 'failure' }}
+        continue-on-error: true
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        with: *release_upload_options
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: リリースアップロードの最終再試行待機
+        if: ${{ !cancelled() && steps.release_attempt_2.outcome == 'failure' }}
+        run: Start-Sleep -Seconds 40
+
+      - name: リリース作成とアセットのアップロード（3回目）
+        id: release_attempt_3
+        if: ${{ !cancelled() && steps.release_attempt_2.outcome == 'failure' }}
+        continue-on-error: true
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        with: *release_upload_options
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 公開確認を従来のcreate_release成功ゲートとし、失敗を成功扱いして版数を進めない。
+      - name: リリースアセットの公開確認
+        id: create_release
+        if: ${{ !cancelled() && (steps.release_attempt_1.outcome == 'success' || steps.release_attempt_1.outcome == 'failure') }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.tag_gen.outputs.TAG_NAME }}
+          UPLOAD_SUCCEEDED: ${{ steps.release_attempt_1.outcome == 'success' || steps.release_attempt_2.outcome == 'success' || steps.release_attempt_3.outcome == 'success' }}
+        run: |
+          if ($env:UPLOAD_SUCCEEDED -ne 'true') {
+            throw 'Release upload failed after three attempts. The build ZIPs will be retained as an artifact.'
+          }
+          $ExpectedFiles = @(Get-ChildItem -LiteralPath $env:GITHUB_WORKSPACE -File |
+            Where-Object { $_.Name.EndsWith("-$($env:RELEASE_TAG).zip", [StringComparison]::Ordinal) })
+          if ($ExpectedFiles.Count -eq 0) { throw 'No release ZIPs were found for verification.' }
+          $Headers = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
+          $Tag = [Uri]::EscapeDataString($env:RELEASE_TAG)
+          $Release = Invoke-RestMethod -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/releases/tags/$Tag" -Headers $Headers -TimeoutSec 60
+          $Assets = @(Invoke-RestMethod -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/releases/$($Release.id)/assets?per_page=100" -Headers $Headers -TimeoutSec 60)
+          foreach ($File in $ExpectedFiles) {
+            $MatchingAssets = @($Assets | Where-Object { $_.name -ceq $File.Name -and $_.state -eq 'uploaded' -and $_.size -eq $File.Length })
+            if ($MatchingAssets.Count -ne 1) { throw "Release asset missing, incomplete or wrong size: $($File.Name) ($($File.Length) bytes)" }
+            Write-Host "Verified release asset: $($File.Name) ($($File.Length) bytes)"
+          }
+
+      - name: 公開失敗時のビルドZIP退避
+        if: ${{ !cancelled() && steps.create_release.outcome == 'failure' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: unreleased-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
 
 # ==================================================================================================
 
       - name: リリースのパッチ番号のインクリメント
+        if: steps.create_release.outcome == 'success'
         env:
           VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
+          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::リリースパッチ番号のインクリメント"
           $VarName      = $env:PATCH_NUMBER_VAR_NAME
@@ -824,17 +1896,45 @@ jobs:
           Write-Host "次のパッチ番号: $NextPatchNumber"
           
           # Update repository variable using GitHub API
-          $Headers = @{
+          $script:Headers = @{
               "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
+          $script:UsingFallbackToken = $false
+
+          function Invoke-GitHubApi {
+              param([string]$Uri, [string]$Method, $Body = $null)
+
+              $Parameters = @{ Uri = $Uri; Method = $Method; Headers = $script:Headers }
+              if ($null -ne $Body) {
+                  $Parameters.Body = $Body
+                  $Parameters.ContentType = "application/json"
+              }
+
+              try {
+                  return Invoke-RestMethod @Parameters
+              } catch {
+                  $StatusCode = if ($_.Exception.Response) { $_.Exception.Response.StatusCode.value__ } else { 0 }
+                  if ($script:UsingFallbackToken -or $StatusCode -ne 401) { throw }
+                  if ([string]::IsNullOrWhiteSpace($env:VAR_UPDATE_TOKEN_FALLBACK)) {
+                      throw "VAR_UPDATE_TOKEN_FALLBACK が設定されていません。"
+                  }
+
+                  Write-Host "[WARN]: 通常トークンによるGitHub REST API認証に失敗しました。フォールバックトークンで再試行します。"
+                  $script:Headers.Authorization = "Bearer $env:VAR_UPDATE_TOKEN_FALLBACK"
+                  $script:UsingFallbackToken = $true
+                  return Invoke-RestMethod @Parameters
+              }
+          }
+
+          Write-Host "[INFO]: Repository Variables API には通常トークンを使用します。"
 
           $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
           $Body = @{ "name" = $VarName; "value" = "$NextPatchNumber" } | ConvertTo-Json
 
           try {
-              Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+              Invoke-GitHubApi -Uri $Url -Method PATCH -Body $Body | Out-Null
               Write-Host "[INFO]: $VarName を $NextPatchNumber に更新しました。"
           } catch {
               Write-Host "[ERROR]: $VarName の更新に失敗しました: $_"
@@ -842,7 +1942,6 @@ jobs:
               exit 1
           }
           Write-Host "::endgroup::"
-        shell: pwsh
         
 # ==================================================================================================
 
@@ -850,19 +1949,161 @@ jobs:
         if: always()
         env:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
+          UNITY_EXIT_CODE: ${{ steps.unity_build.outputs.exit_code }}
+          UNITY_LOG_FILE: ${{ steps.unity_build.outputs.log_file }}
+          TIMED_OUT_PROFILES: ${{ steps.unity_build.outputs.timed_out_profiles }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
 
           Write-Host "::group::ワークフロー実行サマリー"
           Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')] ワークフローが完了しました。"
-          
+          Write-Host "Unity ビルドの終了コード: $env:UNITY_EXIT_CODE"
+          Write-Host "タイムアウトしたプロファイル: $(if ($env:TIMED_OUT_PROFILES) { $env:TIMED_OUT_PROFILES } else { 'なし' })"
+
           if ("${{ steps.create_release.outcome }}" -eq "success") {
-            Write-Host "[INFO]: リリースが正常に作成されました。"
-            Write-Host "     タグ: $env:TAG_NAME"
-            Write-Host "     成果物: すべてのビルドがアップロードされました。"
+            if ($env:UNITY_EXIT_CODE -eq "0") {
+              Write-Host "[INFO]: リリースが正常に作成されました。"
+              Write-Host "     タグ: $env:TAG_NAME"
+              Write-Host "     成果物: すべてのビルドがアップロードされました。"
+            } else {
+              Write-Host "[WARN]: 一部のビルドプロファイルが失敗しましたが、成功したプロファイルのみでリリースを作成しました。"
+              Write-Host "     タグ: $env:TAG_NAME"
+              Write-Host "     詳細は $env:UNITY_LOG_FILE およびUnityビルドの実行ステップのログを確認してください。"
+            }
           } else {
             Write-Host "[WARN]: リリースの作成が完了しませんでした（失敗またはスキップ）。"
           }
           Write-Host "::endgroup::"
-        shell: pwsh
+
+          # 成功したプロファイルの成果物は既にアップロード済みだが、Unityビルド自体に
+          # 失敗またはプロファイル単位のタイムアウトがあった事実はワークフローのステータスとして
+          # 可視化しておく必要があるため、ここで改めてジョブを失敗として終了させる。
+          if ($env:UNITY_EXIT_CODE -ne "0") {
+            Write-Host "::warning::Unity ビルドが正常終了しなかったため（終了コード: $env:UNITY_EXIT_CODE）、ワークフローを失敗として記録します。成功したプロファイルの成果物は既にリリースへアップロード済みです。"
+            exit 1
+          }
+
+# ==================================================================================================
+
+      - name: トラブルシューティング用ログの集約
+        if: always()
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+
+          Write-Host "::group::トラブルシューティング用ログの集約"
+          Write-Host "問題が発生した場合の切り分け用に、各ステップのWARN/ERRORをここへ集約表示します。"
+          Write-Host ""
+
+          # 各ステップがWrite-Hostで出したWARN/ERROR/annotationは、各ステップ側の
+          # オーバーライドによりworkflow_issues.logへも同時記録している。
+          $IssuesLogPath = Join-Path $env:RUNNER_TEMP 'workflow_issues.log'
+          if (Test-Path $IssuesLogPath) {
+            Write-Host "---- 全ステップのWARN/ERROR一覧 ----"
+            Get-Content -Path $IssuesLogPath | ForEach-Object { Write-Host $_ }
+            Write-Host "-------------------------------------"
+          } else {
+            Write-Host "[INFO]: WARN/ERRORは記録されていません。"
+          }
+
+          Write-Host "::endgroup::"
+
+# ==================================================================================================
+
+      - name: ビルド後のディスククリーンアップ
+        if: always()
+        env:
+          CLEAN_BUILD: ${{ github.event.inputs.clean_build }}
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          Write-Host "::group::ビルド後のディスククリーンアップ"
+
+          # 事前クリーンアップはジョブ開始時にしか走らないため、ジョブが失敗して
+          # 終わると次回まで数十GBを抱えたままになる。成否にかかわらず、
+          # 再生成可能なものをここで片付ける。
+          $Workspace = "${{ github.workspace }}"
+          $CleanBuild = $env:CLEAN_BUILD -eq 'true'
+
+          function Get-PathSizeMB([string]$Path) {
+            if (-not (Test-Path $Path)) { return $null }
+            $Item = Get-Item $Path -ErrorAction SilentlyContinue
+            if ($Item -and -not $Item.PSIsContainer) { return [Math]::Round($Item.Length / 1MB, 2) }
+            $Sum = (Get-ChildItem -Path $Path -Recurse -File -ErrorAction SilentlyContinue |
+                    Measure-Object -Property Length -Sum).Sum
+            return [Math]::Round($Sum / 1MB, 2)
+          }
+
+          # Library は .gitignore 対象で毎回作り直される。Bee (IL2CPP) だけで
+          # 数十GBに達するため、ここでの削除が最も効く。
+          # ただし clean_build が無効な通常運用時は、次回ビルドを高速化するために
+          # あえて残しておく（事前クリーンアップ側も同じ方針で Library を保持している）。
+          $Targets = @(
+            (Join-Path $Workspace "Builds"),
+            (Join-Path $env:RUNNER_TEMP "src_assets.zip"),
+            (Join-Path $env:RUNNER_TEMP "UnityPackages")
+          )
+
+          if ($CleanBuild) {
+            Write-Host "[INFO]: clean_build が有効なため Library も削除します。"
+            $Targets += (Join-Path $Workspace "Library")
+          } else {
+            Write-Host "[INFO]: Library は次回ビルド高速化のため保持します。"
+          }
+
+          # ZIP はリリースへアップロード済みのため保持不要。
+          $Targets += (Get-ChildItem -Path $Workspace -Filter "*.zip" -File -ErrorAction SilentlyContinue |
+                       ForEach-Object { $_.FullName })
+
+          # パッケージ展開用の一時ディレクトリ。
+          $Targets += (Get-ChildItem -Path $env:RUNNER_TEMP -Filter "pkg_*" -Directory -ErrorAction SilentlyContinue |
+                       ForEach-Object { $_.FullName })
+
+          $TotalMB = 0
+          foreach ($Target in $Targets) {
+            $SizeMB = Get-PathSizeMB $Target
+            if ($null -eq $SizeMB) {
+              Write-Host "[INFO]: 存在しないためスキップ: $Target"
+              continue
+            }
+            Remove-Item -Path $Target -Recurse -Force -ErrorAction SilentlyContinue
+            if (Test-Path $Target) {
+              Write-Host "[WARN]: 削除しきれませんでした: $Target"
+            } else {
+              $TotalMB += $SizeMB
+              Write-Host "[INFO]: 削除しました ($([Math]::Round($SizeMB / 1024, 2)) GB): $Target"
+            }
+          }
+
+          Write-Host ""
+          Write-Host "[INFO]: 合計 $([Math]::Round($TotalMB / 1024, 2)) GB を解放しました。"
+
+          # 残り容量を記録しておくと、次回枯渇した際の切り分けが早くなる。
+          try {
+            if ($env:RUNNER_OS -eq "Windows") {
+              $Drive = (Get-Item $Workspace).PSDrive
+              Write-Host "[INFO]: ドライブ $($Drive.Name): 残り $([Math]::Round($Drive.Free / 1GB, 2)) GB"
+            } else {
+              & df -h $Workspace | ForEach-Object { Write-Host $_ }
+            }
+          } catch {
+            Write-Host "[WARN]: 残り容量を取得できませんでした: $_"
+          }
+
+          Write-Host "::endgroup::"

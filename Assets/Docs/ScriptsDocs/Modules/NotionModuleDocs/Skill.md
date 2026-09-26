@@ -1,13 +1,13 @@
 # 概要
 > 💡 **モジュール概要**
-> 装備スキルの編成（改造画面）、スキルツリーの解放（進行管理）、および戦闘中でのスキル発動メカニズム・リズムコマンドの入力判定を司る、アウトゲームとインゲームを繋ぐモジュールです。
+> 戦闘中のスキル発動を司るモジュールである。リズムコマンドの入力判定、クールダウン管理、効果の実行、発動状況のUI表示までを担当する。装備スキルの編成（SkillBuild）とスキルツリーの解放（SkillTree）は、別モジュールへ分離されました。
 
 | 項目 | 内容 |
 | --- | --- |
 | **モジュール名** | Skill |
-| **カテゴリ** | OutGame / InGame |
-| **ステータス** | 実装済み（既知の課題を参照） |
-| **最終更新日** | 2026-07-15 |
+| **カテゴリ** | InGame |
+| **ステータス** | 実装済み |
+| **最終更新日** | 2026-08-17 |
 
 ---
 
@@ -15,32 +15,44 @@
 
 | クラス名 | レイヤー | 役割・機能 |
 | --- | --- | --- |
-| **`SkillBuildDefinition`** | Domain | 装備しているスキルの状態を管理するドメインモデル（可変Entity） |
-| **`SkillRhythmState`** | Domain | スキル発動時のリズム入力コマンドシーケンス |
-| **`SkillNodeEntity`** | Domain | スキルツリー上の各ノード情報 |
-| **`PlayerStatusEntity`** | Domain | ツリー解放による永続的なステータスアップEntity |
-| **`SkillTemplate`** | Domain | プレイヤーが扱えるスキルの定義データ |
-| **`ISkillEffectExecutor`** | Application | プレイヤーが実行できるスキルの振る舞いの抽象（`SkillBase`が実装） |
-| **`SkillBuildUseCase`** | Application | スキルの装備・スロット操作、セーブ・ロード処理 |
-| **`SkillTreeService`** | Application | スキルツリー解放ロジック |
-| **`SkillCheckService`** | Application | インゲーム中のリズムコマンド入力の正誤判定サービス |
-| **`ISkillBuildRepository`** | Application | セーブデータからのスキル取得を抽象化するリポジトリ契約（実装は`SkillBuildRepository`、Infrastructure層） |
-| **`SkillBuildPresenter`** | Adaptor | 編成状態をView用のref struct DTOに変換して伝達 |
-| **`SkillBuildController`** | Adaptor | ViewModelの保存要求を受け取り、UseCaseに伝える |
-| **`SkillBuildViewDTO` / `SkillBuildSlotDTO`** | Adaptor | ViewModelへ送るDTO群 |
-| **`SkillTargetResolver`** | Adaptor | スキル発動時のターゲット解決（Targetモジュールを利用） |
-| **`SkillBuildViewModel`** | View | UI表示状態の保持、イベントバインド |
-| **`SkillBuildScreenView`** | View | 改造画面のUI Elements/UI表示実体 |
-| **`SkillBuildInitializer`** | Composition | 装備スキルリポジトリ等をAddressables経由でロードし依存を解決 |
-| **`SkillTreeInitializer`** | Composition | スキルツリー画面の初期化 |
+| **`SkillDefinition`** | Domain | スキルの定義（発動条件・効果・演出）を保持するドメインクラス |
+| **`SkillId`** / **`SkillType`** / **`SkillLevel`** | Domain | スキルの識別子・種別・レベル |
+| **`SkillPattern`** | Domain | 発動に必要な入力パターン |
+| **`SkillRhythmState`** | Domain | プレイヤーのリズム入力履歴 |
+| **`SkillEffectSpec`** / **`SkillEffectType`** / **`SkillEffectParameter`** / **`SkillEffectParameterId`** | Domain | スキル効果の定義データと、そのパラメータ |
+| **`SkillTargetingType`** | Domain | 対象の取り方（単体・範囲など） |
+| **`SkillCooldownTime`** | Domain | クールダウン時間 |
+| **`SkillEffectDisplayMode`** / **`SkillEffectValueFormat`** | Domain | 効果値の表示方法 |
+| **`SkillNormalAttackDamagePolicy`** | Domain | 通常攻撃ダメージの扱いを決めるポリシー |
+| **`SkillUseCase`** | Application | スキル発動の判定と実行を扱うユースケース |
+| **`SkillCheckService`** | Application | リズムコマンド入力の正誤判定 |
+| **`ISkillEffectExecutor`** / **`ISkillEffectExecutorResolver`** / **`SkillEffectExecutorResolver`** | Application | 効果の実行器と、効果種別から実行器を引く解決テーブル |
+| **`ISkillTargetResolver`** / **`SkillTargetResolveResult`** | Application | ターゲット解決の抽象と結果 |
+| **`ISkillRepository`** | Application | スキル定義の取得抽象 |
+| **`SkillExecutionController`** | Adaptor | スキルの発動を管理するコントローラー |
+| **`SkillController`** | Adaptor | 表示と入力チェックを仲介 |
+| **`SkillAttackController`** | Adaptor | スキル専用の攻撃実行アダプター |
+| **`SkillCooldownState`** | Adaptor | スキルごとのクールダウン完了時刻を管理し発動可否を判定 |
+| **`SkillExecutionResult`** / **`SkillExecutionResultType`** / **`SkillExecutionFailurePolicy`** | Adaptor | 発動結果と、失敗時の扱い |
+| **`SkillTargetResolver`** | Adaptor | スキル発動時のターゲット解決（Targetモジュールの`TargetAreaQuery`を利用） |
+| **`SkillResultPresenter`** / **`SkillResultDTO`** / **`ISkillResultViewModel`** | Adaptor | 発動結果をViewModel用DTOへ変換して通知 |
+| **`SkillInputProgressController`** / **`SkillInputProgressPresenter`** / **`SkillInputProgressState`** | Adaptor (SkillUI) | コマンド入力進捗の管理・表示データ生成 |
+| **`SkillCrosshairProgressController`** / **`SkillGuideProgressController`** | Adaptor (SkillUI) | クロスヘア上の進捗表示とガイド表示の制御 |
+| **`SkillView`** / **`SkillResultView`** / **`SkillResultViewModel`** | View | スキル発動結果の表示 |
+| **`SkillCrosshairProgressView`** / **`SkillCrosshairStepView`** / **`SkillGuideProgressView`** | View (SkillUI) | クロスヘア進捗・ガイドの描画 |
+| **`SkillListRowView`** / **`SkillListStepView`** | View (SkillUI) | 装備スキル一覧の行と拍ステップ表示 |
+| **`SkillBeatVisualSetting`** / **`SkillInputProgressUIConfig`** ほか設定クラス | View (SkillUI) | 拍アイコンの見た目・アニメーションの設定 |
+| **`SkillDisplayTextFormatter`** / **`SkillEffectDescriptionFormatter`** / **`SkillDisplayText`** | Adaptor (OutGame) | スキル説明文の整形。アウトゲームの一覧表示で使用 |
+| **`SkillInitializer`** / **`SkillModuleContainer`** | Composition | Skillモジュールの構築とServiceLocatorへの公開（Order 450） |
+
 
 ### 🧩 Composition初期化情報
 
 | 項目 | 内容 |
 | --- | --- |
-| **Initializerクラス** | `SkillBuildInitializer` / `SkillTreeInitializer` |
-| **Order** | `SkillBuildInitializer` = 130 / `SkillTreeInitializer` = 120（いずれもOutGame初期化ライフサイクル） |
-| **公開する ModuleContainer / ServiceLocator登録型** | 現状専用の`ModuleContainer`は無く、`SkillBuildDefinition`等を個別に`ServiceLocator`へ登録している |
+| **Initializerクラス** | `SkillInitializer` |
+| **Order** | 450（InGame初期化ライフサイクル。Player(500)より前） |
+| **公開する ModuleContainer / ServiceLocator登録型** | `SkillModuleContainer` |
 
 ---
 
@@ -50,48 +62,72 @@
 graph TD
     %% 定義 (接続のないレイヤーは省略)
     subgraph SkillModule [Skill モジュール]
-        S_App["Application<br>SkillBuildUseCase, SkillTreeService"]
-        S_Adaptor["Adaptor<br>SkillBuildController, SkillTargetResolver"]
-        S_Composition["Composition<br>SkillBuildInitializer, SkillTreeInitializer"]
-        S_App --> S_Adaptor
-        S_Adaptor --> S_Composition
+        S_App["Application<br>SkillUseCase, SkillCheckService"]
+        S_Adaptor["Adaptor<br>SkillExecutionController, SkillTargetResolver"]
+        S_Composition["Composition<br>SkillInitializer, SkillModuleContainer"]
+        S_Adaptor --> S_App
+        S_Composition --> S_Adaptor
     end
 
-    subgraph SavedataModule [Persistent/Savedata モジュール]
-        SD_Utility["Utility<br>SavedataSystem"]
-    end
-
-    subgraph PlayerModule [Player モジュール]
-        P_Composition["Composition<br>PlayerInitializer"]
+    subgraph MusicModule [Music モジュール]
+        M_Composition["Composition<br>MusicSyncModuleContainer"]
     end
 
     subgraph TargetModule [Target モジュール]
-        T_Adaptor["Adaptor<br>TargetSystemController"]
+        T_Composition["Composition<br>TargetSystemModuleContainer"]
+    end
+
+    subgraph PlayerModule [Player モジュール]
+        P_Composition["Composition<br>PlayerModuleContainer"]
+    end
+
+    subgraph SkillBuildModule [SkillBuild モジュール]
+        SB_Domain["Domain<br>SkillBuildDefinition"]
+    end
+
+    subgraph UIModule [UI モジュール]
+        UI_Composition["Composition<br>SkillInputProgressUIInitializer ほか"]
+    end
+
+    subgraph MissionModule [Mission モジュール]
+        MS_Composition["Composition<br>InGameMissionInitializer"]
     end
 
     %% 依存関係
-    S_Composition -->|"具象を直接コンストラクタ注入（DIP違反）"| SD_Utility
-    P_Composition -->|"SkillBuildDefinitionを参照"| S_App
-    S_Adaptor -->|"ターゲット解決"| T_Adaptor
+    S_Composition -->|"拍タイミングの取得"| M_Composition
+    S_Composition -->|"ターゲット解決・範囲判定"| T_Composition
+    S_Composition -->|"攻撃実行・プレイヤー参照"| P_Composition
+    S_Composition -->|"装備中スキル構成の取得"| SB_Domain
+    S_Composition -->|"入力進捗UIの生成"| UI_Composition
+    MS_Composition -->|"スキル発動の購読"| S_Composition
 ```
 
 ### 📥 依存しているもの
 
-* **`Persistent/Savedata`**
-  * *依存箇所*: `SaveData`, `SavedataSystem`
-  * *詳細*: プレイヤーが解放したスキルや装備中のスキルスロットをJSONデータへ永続化・ロードするため、セーブシステムに依存します。`SkillBuildUseCase`（Application）のコンストラクタは抽象（`ISkillBuildRepository`）ではなく`SavedataSystem`の具象クラスをそのまま受け取ります。`SkillBuildInitializer`（Composition）が`ServiceLocator.TryGetInstance<SavedataSystem>()`で取得した具象インスタンスをそのままコンストラクタ注入しているため、抽象を挟まない依存になっています（DIP違反、既知の課題を参照）。
-* **`InGame/Player`**
-  * *依存箇所*: `SkillTemplate`, `SkillRepository`
-  * *詳細*: プレイヤーキャラクターが扱えるスキルのアセット（ScriptableObject）や、現在入手済みのスキルデータを参照します。
+* **`Music`**
+  * *依存箇所*: `MusicSyncModuleContainer`
+  * *詳細*: リズムコマンドの判定に拍タイミングを使用する
 * **`Target`**
-  * *依存箇所*: `TargetSystemController`
-  * *詳細*: `SkillTargetResolver`がスキル発動時のターゲット解決に使用します。
+  * *依存箇所*: `TargetSystemModuleContainer`（`TargetAreaQuery`を含む）
+  * *詳細*: `SkillTargetResolver`が単体・範囲スキルの対象を解決する
+* **`Player`**
+  * *依存箇所*: `PlayerModuleContainer`
+  * *詳細*: `SkillAttackController`がスキル由来の攻撃を実行する
+* **`SkillBuild`**
+  * *依存箇所*: `SkillBuildDefinition`
+  * *詳細*: 装備中のスキル構成を取得し、インゲームで発動可能なスキルを決める
+* **`UI`**
+  * *依存箇所*: `SkillInputProgressUIInitializer`, `SkillCrosshairProgressUIInitializer`, `SkillListUIInitializer`
+  * *詳細*: コマンド入力の進捗表示UIを生成する
 
 ### 📤 依存されているもの
 
-* **`InGame/Player`**
-  * *参照箇所*: `SkillBuildDefinition`
-  * *詳細*: プレイヤーは戦闘開始時に、セーブデータから取得して本モジュールに格納されている「装備中スキル一覧」を参照して、対応するインゲーム用スキルのインスタンスをセットアップします。
+* **`Mission`**
+  * *参照箇所*: `SkillModuleContainer`
+  * *詳細*: `InGameMissionInitializer`がスキル発動を購読し、ミッション条件の達成判定に使用する
+* **`Player`**
+  * *参照箇所*: `SkillModuleContainer`
+  * *詳細*: `PlayerInitializer`がスキル発動と通常攻撃の結線に使用する
 
 ---
 
@@ -100,61 +136,73 @@ graph TD
 ## 🧅レイヤー情報
 
 ### ① Domain
-装備スキル構成（`SkillBuildDefinition`）、リズムコマンドシーケンス（`SkillRhythmState`）、スキルツリーノード（`SkillNodeEntity`）、永続ステータス（`PlayerStatusEntity`）といったドメインモデルを保持します。
+スキル定義（`SkillDefinition`）、発動に必要な入力パターン（`SkillPattern`）、入力履歴（`SkillRhythmState`）、効果の定義（`SkillEffectSpec`）とクールダウン時間を保持する。
 ### ② Application
-スキルの装備・保存（`SkillBuildUseCase`）、ツリー解放（`SkillTreeService`）、リズムコマンド判定（`SkillCheckService`）、スキル効果実行の抽象（`ISkillEffectExecutor`）を実装します。
+リズムコマンドの正誤判定（`SkillCheckService`）、発動判定と実行（`SkillUseCase`）、効果種別から実行器を引く解決テーブル（`SkillEffectExecutorResolver`）を実装する。
 ### ③ Adaptor
-編成状態をViewへ変換する`SkillBuildPresenter`、保存要求を仲介する`SkillBuildController`、ターゲット解決を行う`SkillTargetResolver`を定義します。
+発動制御（`SkillExecutionController`）、クールダウン管理（`SkillCooldownState`）、ターゲット解決（`SkillTargetResolver`）、結果通知（`SkillResultPresenter`）を担当する。`SkillUI/`配下に入力進捗の表示制御がまとまっている。
 ### ④ View
-改造画面のUI表示（`SkillBuildScreenView`）とその状態保持（`SkillBuildViewModel`）を担当します。
+発動結果の表示（`SkillResultView`）と、コマンド入力の進捗表示（クロスヘア進捗・ガイド・装備スキル一覧）を担当する。拍アイコンの見た目は設定クラスでInspectorから調整できる。
 ### ⑤ Infrastructure
-`SkillBuildRepository`（`ISkillBuildRepository`実装）がAddressables経由でロードされますが、後述の通り`SkillBuildUseCase`へは渡されていません。
+当モジュールでは使用していない。スキル定義のアセットはマスターデータ側から供給される。
 ### ⑥ Composition
-`SkillBuildInitializer`（Order 130）と`SkillTreeInitializer`（Order 120）が、それぞれ改造画面・スキルツリー画面の依存解決を行います。
+`SkillInitializer`（Order 450）がスキル発動まわりを構築し、`SkillModuleContainer`として公開する。
 
 ## 🔌 拡張ポイント
 
-> 現状、ポリモーフィックな拡張ポイント（`SubclassSelector`等）は確認できていません。新しいスキル効果を追加する場合は`ISkillEffectExecutor`の実装クラスを追加する形になりますが、登録方法（自動検出か手動登録か）は要調査です。
+| 拡張したいこと | 実装する場所 | 追加登録の要否 |
+| --- | --- | --- |
+| 新しいスキル効果を追加したい | `ISkillEffectExecutor`（Application）を実装したクラスを`Player/SkillEffect`へ追加する | 必要。`SkillEffectType`へ値を足し、`SkillEffectExecutorFactory`へ`resolver.Register(...)`を追記する。自動検出ではないため、登録を忘れると該当スキルが発動しても効果だけ起きない |
+| コマンド入力の見た目を変えたい | `SkillInputProgressUIConfig` / `SkillBeatVisualSettingConfig` などの設定アセット | 不要（コード変更なし） |
 
 ## 🔄処理フロー
 
-主要な処理フローごとに分けて記述します。
+主要な処理フローは、それぞれ子ページに分けている。
 
-### ① スキル装備・保存フロー（改造画面）
-プレイヤーが改造画面でスキルスロットを変更し、保存する流れです。
+### ① スキル発動フロー（リズムコマンド入力）
+
+拍に合わせた入力列がスキルのパターンと一致したとき、クールダウンとターゲットを確認して効果を実行する。
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Player as プレイヤー
-    participant View as SkillBuildScreenView
-    participant VM as SkillBuildViewModel
-    participant Controller as SkillBuildController
-    participant UseCase as SkillBuildUseCase
-    participant SaveSys as SavedataSystem
+    participant Ctrl as SkillExecutionController
+    participant Check as SkillCheckService
+    participant Cooldown as SkillCooldownState
+    participant UseCase as SkillUseCase
+    participant Resolver as SkillEffectExecutorResolver
+    participant Executor as ISkillEffectExecutor
 
-    Player ->> View: スロット変更操作
-    View ->> VM: 表示状態を更新
-    VM ->> Controller: 保存要求
-    Controller ->> UseCase: SetEquipmentSkillIDs等
-    UseCase ->> SaveSys: セーブデータへ反映（具象を直接参照）
+    Player ->> Ctrl: 拍に合わせた入力
+    Ctrl ->> Check: 入力履歴とスキルパターンの照合
+    Check -->> Ctrl: 一致したスキル
+    Ctrl ->> Cooldown: 発動可能か判定
+    alt クールダウン中
+        Ctrl -->> Player: 失敗を通知（SkillExecutionFailurePolicyに従う）
+    else 発動可能
+        Ctrl ->> UseCase: 発動要求
+        UseCase ->> Resolver: 効果種別から実行器を解決
+        Resolver -->> UseCase: ISkillEffectExecutor
+        UseCase ->> Executor: 効果の実行
+    end
 ```
 
-### ② スキルツリー解放フロー
-研究ポイントを消費してスキルツリーのノードを解放する流れです。
+### ② 入力進捗の表示フロー
+
+入力途中の状態を、クロスヘア・ガイド・装備スキル一覧の3か所へ同時に反映する。
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Player as プレイヤー
-    participant Controller as スキルツリー画面Controller
-    participant Service as SkillTreeService
-    participant Node as SkillNodeEntity
+    participant Ctrl as SkillController
+    participant State as SkillInputProgressState
+    participant Presenter as SkillInputProgressPresenter
+    participant Crosshair as SkillCrosshairProgressView
+    participant List as SkillListRowView
 
-    Player ->> Controller: ノード解放操作
-    Controller ->> Service: 解放要求（ノードID）
-    Service ->> Node: 解放条件（研究ポイント等）を検証
-    alt 条件を満たす
-        Service ->> Node: 解放状態に更新
-    end
+    Ctrl ->> State: 1拍分の入力を反映
+    State ->> Presenter: 進捗の更新を通知
+    Presenter ->> Crosshair: 拍アイコンの点灯/消灯
+    Presenter ->> List: 装備スキル一覧の該当行を更新
 ```

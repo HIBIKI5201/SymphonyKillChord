@@ -13,6 +13,9 @@ namespace KillChord.Runtime.View.Persistent.Input
     [RequireComponent(typeof(PlayerInput), typeof(EventSystem), typeof(InputSystemUIInputModule))]
     public class PlayerInputView : MonoBehaviour
     {
+        /// <summary>
+        ///     入力通知に使用する時刻の取得元を設定する。
+        /// </summary>
         public void Initialize(InputTimestampProvider timestampProvider)
         {
             _timestampProvider = timestampProvider;
@@ -35,10 +38,6 @@ namespace KillChord.Runtime.View.Persistent.Input
         public event Action<InputContext<float>> OnLockOnInput;
         /// <summary> ロックオン対象切り替え入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnLockOnSelectInput;
-        /// <summary> プレイヤーをスタート地点へ戻す入力を通知するイベント。 </summary>
-        public event Action<InputContext<float>> OnResetPositionInput;
-        /// <summary> タイトルへ戻る入力を通知するイベント。 </summary>
-        public event Action<InputContext<float>> OnReturnToTitleInput;
         public event Action<InputContext<Vector2>> OnMobileLookInput;
 
         /// <summary> モバイルのロックオン対象切り替え入力を通知するイベント。 </summary>
@@ -53,6 +52,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnOption(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.Option, context, time);
@@ -61,6 +65,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnSubmit(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.Submit, context, time);
@@ -69,6 +78,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnCancel(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.Cancel, context, time);
@@ -77,6 +91,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnDodge(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.Dodge, context, time);
@@ -85,6 +104,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnAttack(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.Attack, context, time);
@@ -93,6 +117,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnMove(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Move, context, time);
@@ -101,6 +130,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnLook(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Look, context, time);
@@ -117,6 +151,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnLockOn(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
 
             InputContext<float> inputContext = new InputContext<float>(
@@ -130,38 +169,24 @@ namespace KillChord.Runtime.View.Persistent.Input
         /// <param name="context"> Input System のコールバックコンテキスト。 </param>
         public void OnLockOnSelect(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.LockOnSelect, context, time);
             OnLockOnSelectInput?.Invoke(inputContext);
         }
 
-        /// <summary>
-        ///     プレイヤーをスタート地点へ戻す入力を通知する。
-        /// </summary>
-        /// <param name="context"> Input System のコールバックコンテキスト。 </param>
-        public void OnResetPosition(InputAction.CallbackContext context)
-        {
-            float time = _timestampProvider.GetCurrentTimestamp();
-            InputContext<float> inputContext = new InputContext<float>(
-                InputActionKind.ResetPosition, context, time);
-            OnResetPositionInput?.Invoke(inputContext);
-        }
-
-        /// <summary>
-        ///     タイトルへ戻る入力を通知する。
-        /// </summary>
-        /// <param name="context"> Input System のコールバックコンテキスト。 </param>
-        public void OnReturnToTitle(InputAction.CallbackContext context)
-        {
-            float time = _timestampProvider.GetCurrentTimestamp();
-            InputContext<float> inputContext = new InputContext<float>(
-                InputActionKind.ReturnToTitle, context, time);
-            OnReturnToTitleInput?.Invoke(inputContext);
-        }
-
         public void OnScenarioAdvance(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.ScenarioAdvance, context, time);
@@ -170,6 +195,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnScenarioFastForward(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.ScenarioFastForward, context, time);
@@ -178,6 +208,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnScenarioPause(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.ScenarioPause, context, time);
@@ -186,6 +221,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnScenarioSkip(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.ScenarioSkip, context, time);
@@ -194,6 +234,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnScenarioAuto(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.ScenarioAuto, context, time);
@@ -202,6 +247,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnScenarioHideUI(InputAction.CallbackContext context)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<float> inputContext = new InputContext<float>(
                 InputActionKind.ScenarioHideUI, context, time);
@@ -210,6 +260,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnMobileButton(InputActionKind actionId, InputActionPhase phase, float value)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             Action<InputContext<float>> action = actionId switch
             {
                 InputActionKind.Option => OnOptionInput,
@@ -234,6 +289,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnMobileMove(InputActionPhase phase, Vector2 value)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Move, value, phase, time);
@@ -242,6 +302,11 @@ namespace KillChord.Runtime.View.Persistent.Input
 
         public void OnMobileLook(InputActionPhase phase, Vector2 value)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Look, value, phase, time);
@@ -254,6 +319,11 @@ namespace KillChord.Runtime.View.Persistent.Input
         /// <param name="direction"> 仮想スティック上のフリック方向。 </param>
         public void OnMobileDodgeFlick(in Vector2 direction)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             float time = _timestampProvider.GetCurrentTimestamp();
             InputContext<Vector2> inputContext = new InputContext<Vector2>(
                 InputActionKind.Dodge,
@@ -269,7 +339,34 @@ namespace KillChord.Runtime.View.Persistent.Input
         /// <param name="direction"> 左右方向を表す入力値。 </param>
         public void OnMobileLockOnSelect(float direction)
         {
+            if (!_isInputEnabled)
+            {
+                return;
+            }
+
             OnMobileLockOnSelectInput?.Invoke(direction);
+        }
+
+        /// <summary> 設定済みのUI入力モジュールを利用できるかどうか。 </summary>
+        public bool HasUIInputModule => _uiInputModule != null;
+
+        /// <summary>
+        ///     通知を先に禁止してUI入力を停止し、再開時はUI入力を有効にしてから通知を許可する。
+        /// </summary>
+        public void SetInputEnabled(bool isEnabled)
+        {
+            if (_isInputEnabled == isEnabled)
+            {
+                return;
+            }
+
+            _isInputEnabled = false;
+            if (_uiInputModule != null)
+            {
+                _uiInputModule.enabled = isEnabled;
+            }
+
+            _isInputEnabled = isEnabled;
         }
 
         private const string OPTION_ACTION_NAME = "Option";
@@ -281,8 +378,6 @@ namespace KillChord.Runtime.View.Persistent.Input
         private const string LOOK_ACTION_NAME = "Look";
         private const string LOCK_ON_ACTION_NAME = "LockOn";
         private const string LOCK_ON_SELECT_ACTION_NAME = "LockOnSelect";
-        private const string RESET_POSITION_ACTION_NAME = "ResetPosition";
-        private const string RETURN_TO_TITLE_ACTION_NAME = "ReturnToTitle";
         private const string SCENARIO_ADVANCE_ACTION_NAME = "Advance";
         private const string SCENARIO_FAST_FORWARD_ACTION_NAME = "FastForward";
         private const string SCENARIO_PAUSE_ACTION_NAME = "Pause";
@@ -290,6 +385,8 @@ namespace KillChord.Runtime.View.Persistent.Input
         private const string SCENARIO_AUTO_ACTION_NAME = "Auto";
         private const string SCENARIO_HIDE_UI_ACTION_NAME = "HideUI";
 
+        private bool _isInputEnabled = true;
+        private InputSystemUIInputModule _uiInputModule;
         private PlayerInput _playerInput;
         private InputTimestampProvider _timestampProvider;
 
@@ -304,8 +401,6 @@ namespace KillChord.Runtime.View.Persistent.Input
         private InputAction _lookAction;
         private InputAction _lockOnAction;
         private InputAction _lockOnSelectAction;
-        private InputAction _resetPositionAction;
-        private InputAction _returnToTitleAction;
 
         private InputAction _scenarioAdvanceAction;
         private InputAction _scenarioFastForwardAction;
@@ -314,6 +409,9 @@ namespace KillChord.Runtime.View.Persistent.Input
         private InputAction _scenarioAutoAction;
         private InputAction _scenarioHideUIAction;
 
+        /// <summary>
+        ///     入力とUI入力モジュール、および通知対象アクションを取得する。
+        /// </summary>
         private void Awake()
         {
             if (TryGetComponent(out _playerInput))
@@ -330,6 +428,7 @@ namespace KillChord.Runtime.View.Persistent.Input
                 return;
             }
 
+            _uiInputModule = _playerInput.uiInputModule;
             CacheActions();
         }
 
@@ -344,8 +443,6 @@ namespace KillChord.Runtime.View.Persistent.Input
             RegisterAction(_lookAction, OnLook);
             RegisterAction(_lockOnAction, OnLockOn);
             RegisterAction(_lockOnSelectAction, OnLockOnSelect);
-            RegisterAction(_resetPositionAction, OnResetPosition);
-            RegisterAction(_returnToTitleAction, OnReturnToTitle);
             RegisterAction(_scenarioAdvanceAction, OnScenarioAdvance);
             RegisterAction(_scenarioFastForwardAction, OnScenarioFastForward);
             RegisterAction(_scenarioPauseAction, OnScenarioPause);
@@ -365,8 +462,6 @@ namespace KillChord.Runtime.View.Persistent.Input
             UnregisterAction(_lookAction, OnLook);
             UnregisterAction(_lockOnAction, OnLockOn);
             UnregisterAction(_lockOnSelectAction, OnLockOnSelect);
-            UnregisterAction(_resetPositionAction, OnResetPosition);
-            UnregisterAction(_returnToTitleAction, OnReturnToTitle);
             UnregisterAction(_scenarioAdvanceAction, OnScenarioAdvance);
             UnregisterAction(_scenarioFastForwardAction, OnScenarioFastForward);
             UnregisterAction(_scenarioPauseAction, OnScenarioPause);
@@ -391,8 +486,6 @@ namespace KillChord.Runtime.View.Persistent.Input
             _lookAction = actions.FindAction($"{InputMapNames.InGame}/{LOOK_ACTION_NAME}", true);
             _lockOnAction = actions.FindAction($"{InputMapNames.InGame}/{LOCK_ON_ACTION_NAME}", true);
             _lockOnSelectAction = actions.FindAction($"{InputMapNames.InGame}/{LOCK_ON_SELECT_ACTION_NAME}", true);
-            _resetPositionAction = actions.FindAction($"{InputMapNames.InGame}/{RESET_POSITION_ACTION_NAME}", true);
-            _returnToTitleAction = actions.FindAction($"{InputMapNames.InGame}/{RETURN_TO_TITLE_ACTION_NAME}", true);
             _scenarioAdvanceAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_ADVANCE_ACTION_NAME}", true);
             _scenarioFastForwardAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_FAST_FORWARD_ACTION_NAME}", true);
             _scenarioPauseAction = actions.FindAction($"{InputMapNames.Scenario}/{SCENARIO_PAUSE_ACTION_NAME}", true);

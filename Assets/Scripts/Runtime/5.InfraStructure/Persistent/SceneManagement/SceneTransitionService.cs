@@ -38,7 +38,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     0f,
                     LoadingConstants.SCENE_LOAD_END_PROGRESS);
 
-                bool loadSuccess = await SceneLoader.LoadScene(toSceneName,
+                bool loadSuccess = await SceneLoader.LoadSceneAsync(toSceneName,
                     CreateProgressCallback(loadProgress),
                     LoadSceneMode.Additive,
                     ScenePriorityResolver.Resolve(toSceneName),
@@ -62,7 +62,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     LoadingConstants.SCENE_LOAD_END_PROGRESS,
                     1f);
 
-                bool unloadSuccess = await SceneLoader.UnloadScene(
+                bool unloadSuccess = await SceneLoader.UnloadSceneAsync(
                     fromSceneName,
                     CreateProgressCallback(unloadProgress),
                     token: cancellationToken);
@@ -96,7 +96,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return true;
             }
 
-            bool loadSuccess = await SceneLoader.LoadScene(
+            bool loadSuccess = await SceneLoader.LoadSceneAsync(
                 sceneName,
                 CreateProgressCallback(progress),
                 LoadSceneMode.Additive,
@@ -135,7 +135,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return true;
             }
 
-            bool unloadSuccess = await SceneLoader.UnloadScene(
+            bool unloadSuccess = await SceneLoader.UnloadSceneAsync(
                    sceneName,
                    CreateProgressCallback(progress),
                    cancellationToken);
@@ -181,7 +181,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     LoadingConstants.ACTIVE_SCENE_PROGRESS,
                     1f);
 
-                bool unloadSuccess = await SceneLoader.UnloadScene(
+                bool unloadSuccess = await SceneLoader.UnloadSceneAsync(
                     unloadSceneName,
                     CreateProgressCallback(unloadProgress),
                     token: cancellationToken);
@@ -246,7 +246,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     CreateProgressRange(progress, 0f, LoadingConstants.SCENE_RELOAD_UNLOAD_END_PROGRESS);
 
                 bool unloadSuccess =
-                    await SceneLoader.UnloadScene(
+                    await SceneLoader.UnloadSceneAsync(
                         sceneName,
                         CreateProgressCallback(unloadProgress),
                         cancellationToken);
@@ -286,7 +286,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     1f);
 
             bool loadSuccess =
-                await SceneLoader.LoadScene(
+                await SceneLoader.LoadSceneAsync(
                     sceneName,
                     CreateProgressCallback(loadProgress),
                     LoadSceneMode.Additive,

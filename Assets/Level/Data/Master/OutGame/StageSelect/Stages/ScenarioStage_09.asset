@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4898e6c6d341436cb4bcadd8f43a50c1, type: 3}
+  m_Name: ScenarioStage_09
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.OutGame.StageSelect.ScenarioStageAsset
+  _plannerMemo: 
+  _stageId:
+    _id: scenario_stage_09
+    _hashId: -231824958
+  _isInitiallyUnlocked: 1
+  _stageName: "\u7B2C9\u8A71\u300C\u6B8B\u97FF\u300D "
+  _flavorText: "\u6575\u306E\u9283\u5F3E\u3092\u907F\u3051\u3001\u8972\u3044\u6765\u308B\u9023\u90A6\u5175\u306B\u5F37\u884C\u305B\u3088\u3002"
+  _targetSceneName: Scenario
+  _rewardSkillBuildPoint: 2
+  _rewardSkillUnlockPoint: 2
+  _scenarioId: Episode_9

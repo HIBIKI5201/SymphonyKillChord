@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Skill
@@ -9,6 +10,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     /// </summary>
     public sealed class SkillCrosshairProgressView : MonoBehaviour, ISkillCrosshairProgressView
     {
+        public event Action OnUpdate;
         /// <summary> StepViewを並べる親Transform。 </summary>
         public Transform StepRoot => _stepRoot;
 
@@ -51,10 +53,18 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// <inheritdoc />
         public void SetVisible(bool visible)
         {
-            if (gameObject.activeSelf != visible)
+            if (_stepRoot.gameObject.activeSelf != visible)
             {
-                gameObject.SetActive(visible);
+                _stepRoot.gameObject.SetActive(visible);
             }
+        }
+        private void Update()
+        {
+            OnUpdate?.Invoke();
+        }
+        private void OnDestroy()
+        {
+            OnUpdate = null;
         }
 
         [SerializeField, Tooltip("StepViewを並べる親Transform。")]

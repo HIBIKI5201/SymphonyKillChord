@@ -1,9 +1,8 @@
-﻿using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
-using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Enemy;
@@ -49,6 +48,7 @@ namespace DevelopProducts.Boss
             TargetSystemController targetSystemController,
             IEnemyAttackControllerGenerator attackControllerGenerator,
             IShellPool shellPool,
+            DamageNumberPoolView damageNumberPoolView,
             Action<BossLifeCycle> releaseCallback
             )
         {
@@ -128,7 +128,7 @@ namespace DevelopProducts.Boss
 
             IHealthHudViewModel viewModel = new HealthHudViewModel(_enemyEntity.CurrentHealth.Value, _enemyEntity.MaxHealth.Value);
             // HP Presenter
-            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, viewModel, _healthView);
+            IHealthHudPresenter healthHudPresenter = new EnemyHealthHudPresenter(_enemyEntity, _enemyEntity.Id, viewModel, _healthView);
             _healthHudPresenter = healthHudPresenter;
 
             _targetable = new TransformTargetable(_enemyEntity.Id, transform);
@@ -136,7 +136,7 @@ namespace DevelopProducts.Boss
             // View接続
             _view.Initialize(aiController, target);
             _healthView.Bind(viewModel);
-            _healthView.Initialize(healthHudPresenter);
+            _healthView.Initialize(healthHudPresenter, damageNumberPoolView);
             _raycastView.Initialize(target, spec.AttackRangeMax.Value);
             _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
             _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;

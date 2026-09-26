@@ -35,9 +35,10 @@ namespace KillChord.Runtime.View.InGame.Music
 
             RhythmGuideDto dto = _presenter.CreateDto();
 
-            _view.ConfigureZones(dto.Zones);
+            _view.SetTargetBeatCount(dto.TargetBeatCount);
+            _view.ConfigureZones(dto.Zones, dto.GuideLengthInBars);
             _view.SetAlpha(dto.HasTarget);
-            _view.SetBeatsOffset(dto.IndicatorNormalized);
+            _view.SetBeatsOffset(dto.IndicatorNormalized, dto.IsJustTiming, dto.CurrentBeatCount);
         }
 
         private bool _isPlaying;

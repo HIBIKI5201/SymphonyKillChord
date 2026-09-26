@@ -36,7 +36,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         /// <param name="stageId"> ステージID。</param>
         /// <param name="stageName"> ステージ名。</param>
         /// <param name="flavorText"> フレーバーテキスト。</param>
-        /// <param name="reward"> クリア報酬。</param>
+        /// <param name="firstClearReward"> 初回クリア報酬。</param>
+        /// <param name="clearReward"> 毎回の成功報酬。</param>
         /// <param name="targetSceneName"> 遷移先シーン名。</param>
         /// <param name="waveDefinitionRepository"> バトルシーン名の解決に使う敵Wave定義リポジトリ。</param>
         /// <returns> 生成したバトルステージ定義。</returns>
@@ -44,7 +45,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             StageId stageId,
             string stageName,
             string flavorText,
-            StageReward reward,
+            StageReward firstClearReward,
+            StageReward clearReward,
             string targetSceneName,
             IEnemyWaveDefinitionRepository waveDefinitionRepository)
         {
@@ -74,7 +76,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 stageId,
                 stageName,
                 flavorText,
-                reward,
+                firstClearReward,
+                clearReward,
                 targetSceneName,
                 battleSceneName,
                 new MissionId(_missionDefinitionId.Id),

@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Music;
@@ -11,24 +12,35 @@ namespace KillChord.Runtime.Composition.InGame.Skill
     /// <summary>
     ///     リズムGUI下部のスキル入力進行UIを初期化するクラス。
     /// </summary>
-    public class SkillInputProgressUIInitializer : MonoBehaviour
+    public class SkillInputProgressUIInitializer : InGameInitializationModuleBase
     {
         /// <summary> 全スキルのコマンド表示を横断的に制御するコントローラー。 </summary>
         public SkillGuideProgressController GuideProgressController => _guideProgressController;
 
-        private void Awake()
+        public override string ModuleName => nameof(SkillInputProgressUIInitializer);
+
+        public override int Order => 442;
+
+        public override bool Build()
         {
             if (_skillInputProgressUIConfig == null)
             {
-                Debug.LogError("スキル入力進行UIの表示設定が未設定です。");
-                return;
+                Debug.LogError($"[{nameof(SkillInputProgressUIInitializer)}] スキル入力進行UIの表示設定が未設定です。", this);
+                return false;
             }
-            _inputProgressViewSetting = _skillInputProgressUIConfig.Create();
-            ServiceLocator.RegisterInstance(this, LocateType.Locator);
-            _isRegistered = true;
-        }
+            if (_viewPrefab == null || _viewRoot == null || _rhythmGuideView == null)
+            {
+                Debug.LogError($"[{nameof(SkillInputProgressUIInitializer)}] View Prefab・親Transform・リズムガイドViewのいずれかが未設定です。", this);
+                return false;
+            }
 
-        private void OnDestroy()
+            _inputProgressViewSetting = _skillInputProgressUIConfig.Create();
+            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
+            _isRegistered = true;
+
+            return true;
+        }
+        public override void Shutdown()
         {
             if (_isRegistered)
                 ServiceLocator.UnregisterInstance(this);
@@ -37,9 +49,10 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <summary>
         ///     スキル定義データを指定し、画面に表示する入力進捗UIを生成する。
         /// </summary>
-        /// <param name="definition"></param>
-        /// <returns></returns>
-        public ISkillInputProgressRowView CreateInputProgressRow(SkillDefinition definition)
+        /// <param name="definition"> 表示対象のスキル定義です。 </param>
+        /// <param name="skillIcon"> 表示対象のスキルアイコンです。未設定の場合はnull。 </param>
+        /// <returns> 生成した入力進捗UIの行Viewです。 </returns>
+        public ISkillInputProgressRowView CreateInputProgressRow(SkillDefinition definition, Sprite skillIcon)
         {
             SkillGuideProgressView view = Instantiate(_viewPrefab, _viewRoot);
             SkillBeatVisualSetting[] stepSettings = new SkillBeatVisualSetting[definition.SkillPattern.Signatures.Length];
@@ -48,7 +61,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 BeatType beatType = definition.SkillPattern.Signatures[i];
                 stepSettings[i] = _inputProgressViewSetting.GetSetting((int)beatType);
             }
-            view.Initialize(stepSettings, _inputProgressViewSetting.AnimationSetting, _rhythmGuideView);
+            view.Initialize(stepSettings, _inputProgressViewSetting.AnimationSetting, _rhythmGuideView, skillIcon);
             _guideProgressController.Register(view);
             return view;
         }

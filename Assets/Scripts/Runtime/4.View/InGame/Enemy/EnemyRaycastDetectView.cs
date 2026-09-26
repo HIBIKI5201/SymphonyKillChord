@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using System;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -13,11 +14,21 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary>
         /// レイキャスト対象と警告ラインの初期設定を行います。
         /// </summary>
-        public void Initialize(Transform targetTransform, float attackRange)
+        /// <param name="targetTransform"> レイキャスト対象です。 </param>
+        /// <param name="attackRange"> 攻撃の射程です。 </param>
+        /// <param name="justOffsetProvider">
+        /// 攻撃タイミングとなるターゲット拍への接近進捗(0〜1)を返す供給元です。
+        /// nullの場合は警告デカールへ拍情報を渡しません。
+        /// </param>
+        public void Initialize(
+            Transform targetTransform,
+            float attackRange,
+            Func<float> justOffsetProvider = null)
         {
             _hitResults = new RaycastHit[_resultArraySize];
             _targetTransform = targetTransform;
             _attackRange = attackRange;
+            _justOffsetProvider = justOffsetProvider;
 
             if (targetTransform == null)
             {
@@ -43,6 +54,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// 現在の敵位置からの攻撃レイがターゲットに届くかを返します。
         /// </summary>
         public bool CanRaycastHitTarget => CheckCurrentAttackRaycastHitTarget();
+        /// <summary> 攻撃インジケーターのデカールが実際に表示中か。 </summary>
+        public bool IsWarningVisible => _warningDisplayState != WarningDisplayState.Hidden
+            && _attackWarningDecal != null && _attackWarningDecal.isActiveAndEnabled;
 
         /// <summary>
         /// 指定位置からの自由なレイがターゲットに届くかを返します。
@@ -50,7 +64,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public bool CheckCanRaycastHitTarget(Vector3 sourcePosition)
         {
-            return CheckRaycastHitTarget(sourcePosition);
+            return CheckRaycastHitTarget(sourcePosition, _attackRange);
+        }
+
+        /// <summary>
+        /// 指定位置から指定距離までの自由なレイがターゲットに届くかを返します。
+        /// 索敵など、攻撃射程と異なる距離での視線判定に使用します。
+        /// </summary>
+        public bool CheckCanRaycastHitTargetAtRange(Vector3 sourcePosition, float maxDistance)
+        {
+            return CheckRaycastHitTarget(sourcePosition, maxDistance);
         }
 
         /// <summary>
@@ -91,6 +114,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             HideWarningInternal();
         }
 
+
         [SerializeField, Tooltip("Maximum number of raycast hits stored per query.")]
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
@@ -106,6 +130,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private WarningDisplayState _warningDisplayState;
         private Vector3 _lockedRayDirection;
         private Color _currentLineColor;
+        private Func<float> _justOffsetProvider;
+        private static readonly int DECAL_RATIO = Shader.PropertyToID("_Ratio");
+        private static readonly int DECAL_COLOR = Shader.PropertyToID("_BaseColor");
+        private static readonly int DECAL_EMISSION = Shader.PropertyToID("_BaseEmission");
 
 #if UNITY_EDITOR
         private bool _initializedFlg;
@@ -116,20 +144,20 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private bool CheckCurrentAttackRaycastHitTarget()
         {
-            return CheckRaycastHitTarget(transform.position);
+            return CheckRaycastHitTarget(transform.position, _attackRange);
         }
 
         /// <summary>
-        /// 指定位置から飛ばしたレイが最初にターゲットへ到達するかを判定します。
+        /// 指定位置から飛ばしたレイが、指定距離以内で最初にターゲットへ到達するかを判定します。
         /// </summary>
-        private bool CheckRaycastHitTarget(Vector3 sourcePosition)
+        private bool CheckRaycastHitTarget(Vector3 sourcePosition, float maxDistance)
         {
             if (!IsReadyForRaycast())
             {
                 return false;
             }
 
-            int hitCount = CastAndGetHitCount(sourcePosition);
+            int hitCount = CastAndGetHitCount(sourcePosition, maxDistance);
             if (hitCount <= 0)
             {
                 return false;
@@ -140,9 +168,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 指定位置からレイを飛ばし、記録されたヒット数を返します。
+        /// 指定位置から指定距離までレイを飛ばし、記録されたヒット数を返します。
         /// </summary>
-        private int CastAndGetHitCount(Vector3 sourcePosition)
+        private int CastAndGetHitCount(Vector3 sourcePosition, float maxDistance)
         {
             Ray ray = CreateRay(sourcePosition);
             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
@@ -150,7 +178,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return 0;
             }
 
-            return Physics.RaycastNonAlloc(ray, _hitResults, _attackRange, _hitLayers);
+            return Physics.RaycastNonAlloc(ray, _hitResults, maxDistance, _hitLayers);
         }
 
         /// <summary>
@@ -180,14 +208,21 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// ターゲット追従中は毎フレーム警告ラインを更新します。
+        /// ターゲット追従中は毎フレーム警告ラインを更新し、
+        /// 方向固定中も拍への接近進捗だけを更新し続けます。
         /// </summary>
         private void LateUpdate()
         {
-            if (_warningDisplayState != WarningDisplayState.Tracking) return;
+            if (_warningDisplayState == WarningDisplayState.Hidden) return;
             if (!IsReadyForLineUpdate()) return;
 
-            UpdateWarningLine();
+            if (_warningDisplayState == WarningDisplayState.Tracking)
+            {
+                UpdateWarningLine();
+                return;
+            }
+
+            ApplyWarningDecalJustOffset();
         }
         private void OnDestroy()
         {
@@ -245,6 +280,25 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _attackWarningDecal.transform.rotation = Quaternion.Euler(90, Quaternion.LookRotation(ray.direction, Vector3.up).eulerAngles.y, 0);
             _attackWarningDecal.size = size;
             _attackWarningDecal.pivot = new Vector3(0, _attackRange * 0.5f, 0);
+            ApplyWarningDecalJustOffset();
+        }
+
+        /// <summary>
+        ///     ターゲット拍への接近進捗を警告デカールのシェーダープロパティへ適用します。
+        /// </summary>
+        private void ApplyWarningDecalJustOffset()
+        {
+            if (_decalMaterial == null || _justOffsetProvider == null)
+            {
+                return;
+            }
+
+            if (!_decalMaterial.HasProperty(DECAL_RATIO))
+            {
+                return;
+            }
+
+            _decalMaterial.SetFloat(DECAL_RATIO, _justOffsetProvider.Invoke());
         }
 
         /// <summary>
@@ -324,16 +378,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 appliedColor.a = 1f;
             }
-
-            if (_decalMaterial.HasProperty("_BaseColor"))
-            {
-                _decalMaterial.SetColor("_BaseColor", appliedColor);
-            }
-
-            if (_decalMaterial.HasProperty("_Color"))
-            {
-                _decalMaterial.SetColor("_Color", appliedColor);
-            }
+            _decalMaterial.SetColor(DECAL_COLOR, appliedColor);
+            _decalMaterial.SetColor(DECAL_EMISSION, appliedColor);
         }
 
         /// <summary>

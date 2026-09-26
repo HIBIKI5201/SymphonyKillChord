@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Music.ACLikeRhythmGuideEffectConfig
   _markerColor: {r: 1, g: 0.85, b: 0.25, a: 0.45}
   _markerWidth: 3
-  _markerHeight: 192
+  _markerHeight: 96
+  _markerVerticalOffset: -20
   _flashColor: {r: 1, g: 0.9, b: 0.45, a: 1}
   _flashDuration: 0.2
   _flashEase: 5
@@ -25,9 +26,8 @@ MonoBehaviour:
   _justOvershootEase: 26
   _justReturnEase: 20
   _isVignetteEnabled: 1
-  _vignetteIntensity: 0.22
-  _vignetteDuration: 0.28
-  _vignetteSmoothness: 0.45
+  _vignetteIntensity: 1
+  _normalVignetteIntensity: 0.3
+  _vignetteDuration: 0.4
+  _normalVignetteDuration: 0.2
   _vignetteEase: 5
-  _vignettePriority: 100
-  _vignetteMinimumInterval: 0.08

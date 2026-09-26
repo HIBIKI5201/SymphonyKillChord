@@ -1,0 +1,108 @@
+# Notion Markdown Writer
+
+Notionの仕様書ページへMarkdownで書き込むWindows向けツールです。
+`NotionMarkdownExporter`が読み取り専用なのに対して、こちらは作成と部分更新を担当します。
+
+Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSONを組み立てる必要はありません。
+
+## 安全のための制限
+
+- **書き込めるのは許可ページとその配下だけ**です。`sinfonia-operator.env.json`の
+  `NOTION_WRITE_ALLOWED_ROOTS`に列挙したページID自身か、その子孫以外は、送信前に拒否します。
+- **更新は部分置換（`update_content`）だけ**です。全文置換（`replace_content`）と
+  子ページ削除（`allow_deleting_content`）は実装していません。
+- `--confirm`を付けるまで**何も送信しません**。既定は差分表示のみです。
+- pull以降にNotion側が更新されていた場合、`last_edited_time`の比較で中断します。
+- APIが本文を分割して返す巨大ページは、原文が欠けた状態で差分を作らないよう編集を拒否します。
+- 書き込み系リクエスト（POST・PATCH）はサーバーエラーで再試行しません。二重適用を避けるためです。
+
+## 初期設定
+
+1. Notionの内部インテグレーションに、コンテンツの**挿入・更新権限**を付与します
+   （読み取りだけではページ作成・更新が403になります）。
+2. 書き込みを許可するページのIDを`sinfonia-operator.env.json`へ列挙します。
+
+```json
+{
+  "NOTION_WRITE_ALLOWED_ROOTS": [
+    "27d7c2c6-cc02-818d-95ec-c1dc9a3c6761",
+    "27d7c2c6-cc02-819a-9547-f211f355dfec"
+  ]
+}
+```
+
+`NOTION_TOKEN`は`sinfonia-operator.secrets.json`または環境変数から読み取ります。
+この公開設定はGitで共有されるため、許可ページの追加はレビュー対象になります。
+
+## 使い方
+
+エクスポート済みのMarkdownはリンク変換や装飾マーカーの削除を経ており、Notionの原文とは一致しません。
+そのため編集は、`pull`で取得した**原文**に対して行います。
+
+```powershell
+# 1. 編集の基準になる原文を取得する（ローカルの.mdパス、URL、IDのいずれでも指定できる）
+./NotionMarkdownWriter.exe pull "Docs/NotionSpecifications/Symphony Kill Chord/システム概要/システムリスト/Bossシステム.md"
+
+# 2. 表示された作業ファイルを普通に編集する
+
+# 3. 差分を確認する（送信しない）
+./NotionMarkdownWriter.exe push "SinfoniaOperator/.notion-work/xxxxxxxx-Bossシステム.md"
+
+# 4. 送信する
+./NotionMarkdownWriter.exe push "SinfoniaOperator/.notion-work/xxxxxxxx-Bossシステム.md" --confirm
+```
+
+子ページの作成:
+
+```powershell
+./NotionMarkdownWriter.exe create draft.md --parent "Docs/NotionSpecifications/Symphony Kill Chord/システム概要.md" --confirm
+```
+
+本文の最初の行は`# ページ名`にしてください。この見出しがページタイトルになり、本文からは取り除かれます。
+
+## 作業ファイル
+
+`pull`は作業ファイルと、同じ場所に`<ファイル名>.notion-pull.json`（pull時点の原文・ページID・最終更新日時）を出力します。
+既定の出力先は`SinfoniaOperator/.notion-work/`で、Gitの除外対象です。
+`push`の成功後は反映後の本文で作業ファイルとサイドカーを上書きし、送信内容どおりに反映されたかを確認します。
+
+## 差分の作り方
+
+`push`は作業ファイルとpull時点の原文を行単位で比較し、変更区間を`old_str`/`new_str`へ変換します。
+`old_str`はページ内で一意でなければならないため、一意になるまで前後の行を文脈として自動的に足します。
+繰り返しの多い文面などで一意にできない場合は、送信せずエラーになります。
+
+## ローカルミラーとの関係
+
+`push`はNotionを更新しますが、`Docs/NotionSpecifications/`のエクスポート結果は更新しません。
+ミラーを最新化するには`NotionMarkdownExporter`を実行してください（全ページの再取得になります）。
+
+## ブロックIDで直接編集する
+
+`push`はMarkdown全文の文字列一致（`old_str`/`new_str`）で動くため、巨大な画像ブロックに挟まれた短文や、
+同名のトグルの見出しなど、**周囲の文脈だけで一意に特定できない箇所は安全に編集できません**。
+その場合はブロックID（Notion上で対象を右クリック→「リンクをコピー」した末尾の`#<block-id>`）を直接指定します。
+
+```powershell
+# 既存ブロックのリッチテキストを書き換える（段落・見出し・トグル・リスト項目など）
+./NotionMarkdownWriter.exe edit-block "https://www.notion.so/xxx#3437c2c6cc028025a43ed3f019c3806e" --text "イメージ図（旧案：円形）" --confirm
+
+# 親（ページ・トグルなど）の子要素の末尾に段落を1件追加する
+./NotionMarkdownWriter.exe append "<親のURL|ID>" --text "本文 <mention-page url=\"...\">表示名</mention-page>" --confirm
+```
+
+`append`コマンド自体は常に**末尾**に追加しますが、classic Blocks API（`PATCH /blocks/{id}/children`）自体は
+`after`パラメータ（直前に置くブロックのID）を受け付けることを確認済みです（`children`と同じリクエストに
+`"after": "<block-id>"`を含める）。ただし`/blocks/{id}/move`のような**既存ブロックの並び替え**エンドポイントは
+存在しません。巨大ページ（Markdown APIで本文取得不可）へ途中位置に挿入する場合は、一時ページでMarkdownを
+ブロックへ変換したのち、対象ページの挿入位置の直前ブロックIDを`after`に指定して`children.append`する方法が
+使えます（現状は生API呼び出しでのみ対応。`append`コマンドへの`--after`オプション追加は未実装）。
+
+## 実装メモ
+
+- `NotionIdentifier`・`RequestRateLimiter`・`NotionApiException`は`NotionMarkdownExporter`とソースを共有しています（csprojのリンク参照）。
+- 設定ファイルとリポジトリルートの探索は、エクスポーターの`ExporterOptions`と同じ規則を`WriterEnvironment`へ実装しています。
+- ページの移動（`move`）は`PATCH /pages/{id}`ではなく`POST /pages/{id}/move`でしか効かない（前者は200を返すが親を変更しない）。
+  `MoveCommand`は送信後に親を再取得し、実際に変わったか検証してから成功と報告する。
+- `edit-block`・`append`は`GET/PATCH /blocks/{id}`・`PATCH /blocks/{id}/children`（classic Blocks API）を使う。
+  Markdown Content API（`update_content`）と併用できる。

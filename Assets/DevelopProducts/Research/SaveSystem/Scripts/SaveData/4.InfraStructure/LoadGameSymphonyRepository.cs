@@ -11,6 +11,11 @@ namespace Research.SaveSystem
     public class LoadGameSymphonyRepository<TSaveType> : ILoadRepository<TSaveType>
         where TSaveType : SaveDataBase, new()
     {
+        /// <summary>
+        ///     ロード先のEntityとマイグレーション処理を受け取る。
+        /// </summary>
+        /// <param name="saveDataEntity">ロード結果を格納するEntity。</param>
+        /// <param name="saveDataMigration">ロード後に適用するマイグレーション。</param>
         public LoadGameSymphonyRepository(SaveDataEntity saveDataEntity, SaveDataMigration<TSaveType> saveDataMigration)
         {
             _saveDataEntity = saveDataEntity;
@@ -22,7 +27,8 @@ namespace Research.SaveSystem
         /// <returns></returns>
         public async Awaitable Load()
         {
-            TSaveType saveData = await SaveSystem<TSaveType, NugetDataLoader<TSaveType>>.Get();
+            // SaveStore.Getは暗黙ロードを行わないため、LoadAsyncで実体を取得する。
+            TSaveType saveData = await SaveStore.LoadAsync<TSaveType>();
             await _saveDataMigration.DoMigration(saveData);
             _saveDataEntity.AssignData(saveData);
         }

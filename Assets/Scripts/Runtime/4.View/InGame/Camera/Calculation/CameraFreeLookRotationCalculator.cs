@@ -37,19 +37,10 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 yaw += context.Input.x * _parameter.FollowRotationSpeed * context.DeltaTime;
             }
-            else if (context.MoveInput.sqrMagnitude > float.Epsilon)
+            else
             {
-                Vector3 playerForward = context.PlayerForward;
-                playerForward.y = 0f;
-                if (playerForward.sqrMagnitude > float.Epsilon)
-                {
-                    float targetYaw = Quaternion.LookRotation(playerForward.normalized, Vector3.up).eulerAngles.y;
-                    float angleDifference = Mathf.Abs(Mathf.DeltaAngle(yaw, targetYaw));
-                    if (angleDifference > _parameter.MoveFollowAngleDeadZone)
-                    {
-                        yaw = Mathf.MoveTowardsAngle(yaw, targetYaw, _parameter.MoveFollowRotationSpeed * context.DeltaTime);
-                    }
-                }
+                float turnInput = Mathf.Clamp(context.MoveInput.x, -1f, 1f);
+                yaw += turnInput * _parameter.MoveFollowRotationSpeed * context.DeltaTime;
             }
 
             // ピッチ角の制限

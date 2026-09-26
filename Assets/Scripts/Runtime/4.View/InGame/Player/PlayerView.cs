@@ -4,12 +4,15 @@ using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Utility.Collections;
+using KillChord.Runtime.Utility.Persistent;
 using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
 using LitMotion;
+using LitMotion.Extensions;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -28,9 +31,6 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
         private PlayerAttackWeaponView _attackWeaponView;
 
-        [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
-        private ReusableParticleSystemView _damageEffectView;
-
         [SerializeField, Tooltip("被弾時のエフェクトを再生する位置です。")]
         private Transform _damageEffectPoint;
 
@@ -42,6 +42,15 @@ namespace KillChord.Runtime.View.InGame.Player
 
         [SerializeField, Tooltip("回避中に到達させるSmearsPowerの最大値。")]
         private float _dodgeSmearsPower = 1f;
+
+        [SerializeField, Tooltip("被弾時のポストエフェクトのfrom値。")]
+        private float _damageEffectFrom = 50f;
+
+        [SerializeField, Tooltip("被弾時のポストエフェクト再生間隔。")]
+        private float _damageEffectInterval = 0.1f;
+        [SerializeField, Tooltip("被弾時のポストエフェクトMaterial。")]
+        private Material _damageEffectMaterial;
+
         [Space]
 
         [Header("Voice")]
@@ -54,8 +63,17 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("ステージ開始時VoiceのCueName。空の場合は再生しない。")]
         private string _stageStartVoiceCueName;
 
-        [SerializeField, Tooltip("ステージクリア時VoiceのCueName。空の場合は再生しない。")]
-        private string _stageClearVoiceCueName;
+        /// <summary> 全評価項目達成時のステージクリアVoiceのCueName。 </summary>
+        [SerializeField, Tooltip("全評価項目達成時のステージクリアVoiceのCueName。空の場合は再生しない。")]
+        private string _stageClearVoiceCueNamePerfect;
+
+        /// <summary> 一部評価項目達成時のステージクリアVoiceのCueName。 </summary>
+        [SerializeField, Tooltip("一部評価項目達成時のステージクリアVoiceのCueName。空の場合は再生しない。")]
+        private string _stageClearVoiceCueNameGood;
+
+        /// <summary> 評価項目未達成時のステージクリアVoiceのCueName。 </summary>
+        [SerializeField, Tooltip("評価項目未達成時のステージクリアVoiceのCueName。空の場合は再生しない。")]
+        private string _stageClearVoiceCueNameBad;
 
         [SerializeField, Tooltip("ゲームオーバー時VoiceのCueName。空の場合は再生しない。")]
         private string _gameOverVoiceCueName;
@@ -70,6 +88,15 @@ namespace KillChord.Runtime.View.InGame.Player
 
         [SerializeField, Tooltip("回避SE用Source。")]
         private SoundEffectSource _dodgeSoundSource;
+
+        [SerializeField, Tooltip("Critical SE用Source。")]
+        private SoundEffectSource _criticalSoundSource;
+
+        [SerializeField, Tooltip("敵への通常Hit時のSE用Source。")]
+        private SoundEffectSource _hitSoundSource;
+
+        [SerializeField, Tooltip("ロックオン成立時のSE用Source。")]
+        private SoundEffectSource _lockOnSoundSource;
 
         [SerializeField, Tooltip("足音演出Viewです。")]
         private FootStepView _footStepView;
@@ -92,9 +119,10 @@ namespace KillChord.Runtime.View.InGame.Player
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
         private const float ATTACK_CANCEL_INPUT_THRESHOLD_SQR = 0.0225f;
         private const string SMEARS_ON_KEYWORD = "SMEARS_ON";
-        private static readonly int SmearsOnPropertyId = Shader.PropertyToID("_SmearsOn");
-        private static readonly int SmearsPowerPropertyId = Shader.PropertyToID("_SmearsPower");
-        private static readonly int SmearsDirectionPropertyId = Shader.PropertyToID("_SmearsDirection");
+        private static readonly int SMEARS_ON_PROPERTY_ID = Shader.PropertyToID("_SmearsOn");
+        private static readonly int SMEARS_POWER_PROPERTY_ID = Shader.PropertyToID("_SmearsPower");
+        private static readonly int SMEARS_DIRECTION_PROPERTY_ID = Shader.PropertyToID("_SmearsDirection");
+        private static readonly int DAMAGED_EFFECT_PROPERTY_ID = Shader.PropertyToID("_Pixel");
         private bool _isInitialized;
         private bool _isPlaying;
         private bool _isDodge;
@@ -107,15 +135,21 @@ namespace KillChord.Runtime.View.InGame.Player
         private Transform _cameraTransform;
         private IPlayerController _controller;
         private ICharacterAnimationViewModel _characterAnimationViewModel;
-        private ICharacterAnimationSignal _characterAnimationSignal;
+        private IPlayerCharacterAnimationSignal _characterAnimationSignal;
         private PlayerInputView _playerInputView;
         private PlayerHealthHudPresenter _healthHudPresenter;
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
         private MusicSyncState _musicSyncState;
         private MotionHandle _dodgeMaterialEffectHandle;
+        private MotionHandle _damageEffectHandle;
         private MaterialPropertyBlock _dodgeMaterialPropertyBlock;
-        private MotionHandle _attackRotateHandle;
+        private ReusableParticleSystemView _damageEffectView;
+        private Guid _playerId;
+        private int _lastHitSoundFrame = int.MinValue;
+
+        private float _attackFacingRemaining = 0f;
+        private Quaternion _attackFacingRotation;
 
         /// <summary> プレイヤー攻撃コントローラー。 </summary>
         public PlayerAttackController PlayerAttackController { get; private set; }
@@ -143,6 +177,9 @@ namespace KillChord.Runtime.View.InGame.Player
 
         private void OnDestroy()
         {
+            EventBus<EOnTakeDamage>.Unregister(HandleTakeDamage);
+            EventBus<EOnLockOnAcquired>.Unregister(HandleLockOnAcquired);
+
             if (_playerInputView != null)
             {
                 UnRegisterActions();
@@ -155,7 +192,7 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _dodgeMaterialEffectHandle.TryCancel();
-            _attackRotateHandle.TryCancel();
+            _damageEffectHandle.TryCancel();
         }
 
         /// <summary> 依存コンポーネントを初期化する。 </summary>
@@ -167,19 +204,31 @@ namespace KillChord.Runtime.View.InGame.Player
             Transform cameraTransform,
             PlayerInputView playerInputView,
             PlayerHealthHudPresenter healthHudPresenter,
+            ReusableParticleSystemView damageEffectView,
+            Guid playerId,
             PlayerInputSuppressionState inputSuppressionState = null)
         {
+            // 再初期化を防ぐ。ガードがないとEventBus登録が二重になりSEが多重発火する。
+            if (_isInitialized)
+            {
+                return;
+            }
+
             _controller = playerMovementController;
             PlayerAttackController = playerAttackController;
+            _playerId = playerId;
             _inputSuppressionState = inputSuppressionState;
+            _damageEffectView = damageEffectView;
             _characterAnimationViewModel = animationContext.ViewModel;
-            _characterAnimationSignal = animationContext.Signal;
+            _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
             _musicSyncState = musicSyncState;
             _cameraTransform = cameraTransform;
             _playerInputView = playerInputView;
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
             _healthHudPresenter.OnDamaged += PlayDamageFeedback;
+            EventBus<EOnTakeDamage>.Register(HandleTakeDamage);
+            EventBus<EOnLockOnAcquired>.Register(HandleLockOnAcquired);
 
             Debug.Assert(_rb != null, $"{nameof(_rb)} is null", this);
             Debug.Assert(_animator != null, $"{nameof(_animator)} is null", this);
@@ -199,7 +248,7 @@ namespace KillChord.Runtime.View.InGame.Player
             RegisterActions();
             SyncFootstepTiming();
             _isPlaying = true;
-            _cacheRotation = _cacheTransform.rotation;
+            _cacheRotation = _rb != null ? _rb.rotation : _cacheTransform.rotation;
             _cacheVelocity = Vector3.zero;
         }
 
@@ -212,6 +261,9 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             UnRegisterActions();
+
+            // 多段ヒットの残りを持ち越さない。プレイ再開時に前回の攻撃が飛ぶのを防ぐ。
+            PlayerAttackController?.ClearPendingHits();
 
             _moveVector = Vector2.zero;
             _dodgeVector = Vector2.zero;
@@ -238,8 +290,10 @@ namespace KillChord.Runtime.View.InGame.Player
         {
             // 回避関連の状態と演出をリセットする。
             _dodgeMaterialEffectHandle.TryCancel();
-            _attackRotateHandle.TryCancel();
             ResetDodgeMaterialEffect();
+
+            // 被弾ポストエフェクトの再生途中の値を持ち越さない。
+            _damageEffectHandle.TryCancel();
 
             // 位置と回転をスタート地点へ戻す。
             if (_cacheTransform != null)
@@ -260,6 +314,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 _rb.angularVelocity = Vector3.zero;
             }
 
+            _cacheRotation = rotation;
+            _cacheVelocity = Vector3.zero;
+            _attackFacingRemaining = 0f;
+            _attackFacingRotation = rotation;
+
             // 入力由来の移動・回避要求をクリアする。
             _moveVector = Vector2.zero;
             _dodgeVector = Vector2.zero;
@@ -277,16 +336,20 @@ namespace KillChord.Runtime.View.InGame.Player
             PlaySound(_damageSoundSource, null);
             PlayVoice(_voiceSource, _damageVoiceCueName);
 
-            if (_damageEffectView == null)
+            // パーティクル演出はViewが設定されている場合のみ再生する。
+            if (_damageEffectView != null)
             {
-                return;
+                Vector3 effectPosition = _damageEffectPoint != null
+                    ? _damageEffectPoint.position
+                    : transform.position;
+
+                _damageEffectView.PlayAt(effectPosition);
             }
 
-            Vector3 effectPosition = _damageEffectPoint != null
-                ? _damageEffectPoint.position
-                : transform.position;
-
-            _damageEffectView.PlayAt(effectPosition);
+            // ポストエフェクトはパーティクル演出の有無に関わらず再生する。
+            _damageEffectHandle.TryCancel();
+            _damageEffectHandle = LMotion.Create(_damageEffectFrom, 0f, _damageEffectInterval)
+                .BindToMaterialFloat(_damageEffectMaterial, DAMAGED_EFFECT_PROPERTY_ID);
         }
 
         /// <summary>
@@ -298,11 +361,27 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
-        ///     ステージクリア時のPlayer Voiceを再生します。
+        ///     評価項目の達成度に応じたステージクリア時のPlayer Voiceを再生します。
         /// </summary>
-        public void PlayStageClearVoice()
+        /// <param name="achievedCount"> 達成した評価項目数です。 </param>
+        /// <param name="totalCount"> 評価項目の合計数です。 </param>
+        public void PlayStageClearVoice(int achievedCount, int totalCount)
         {
-            PlayPriorityVoice(_stageClearVoiceCueName);
+            string cueName;
+            if (totalCount == 0 || achievedCount == totalCount)
+            {
+                cueName = _stageClearVoiceCueNamePerfect;
+            }
+            else if (achievedCount > 0 && achievedCount < totalCount)
+            {
+                cueName = _stageClearVoiceCueNameGood;
+            }
+            else
+            {
+                cueName = _stageClearVoiceCueNameBad;
+            }
+
+            PlayPriorityVoice(cueName);
         }
 
         /// <summary>
@@ -352,8 +431,6 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="direction"> 回避方向(ワールド空間)です。 </param>
         public void PlayDodgeMaterialEffect(float duration, in Vector3 direction)
         {
-            direction.Normalize();
-
             if (_dodgeEffectRenderers == null || _dodgeEffectRenderers.Length == 0)
             {
                 return;
@@ -372,8 +449,9 @@ namespace KillChord.Runtime.View.InGame.Player
                 renderer.material.EnableKeyword(SMEARS_ON_KEYWORD);
 
                 renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
-                _dodgeMaterialPropertyBlock.SetFloat(SmearsOnPropertyId, 0f);
-                _dodgeMaterialPropertyBlock.SetVector(SmearsDirectionPropertyId, -direction);
+                _dodgeMaterialPropertyBlock.SetFloat(SMEARS_ON_PROPERTY_ID, 0f);
+                _dodgeMaterialPropertyBlock.SetFloat(SMEARS_POWER_PROPERTY_ID, _dodgeSmearsPower);
+                _dodgeMaterialPropertyBlock.SetVector(SMEARS_DIRECTION_PROPERTY_ID, -direction.normalized);
                 renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
             }
 
@@ -397,7 +475,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 }
 
                 renderer.GetPropertyBlock(_dodgeMaterialPropertyBlock);
-                _dodgeMaterialPropertyBlock.SetFloat(SmearsPowerPropertyId, value);
+                _dodgeMaterialPropertyBlock.SetFloat(SMEARS_POWER_PROPERTY_ID, value);
                 renderer.SetPropertyBlock(_dodgeMaterialPropertyBlock);
             }
         }
@@ -506,7 +584,7 @@ namespace KillChord.Runtime.View.InGame.Player
                         : _characterAnimationSignal.RequestAttack(animationKey);
                 }
 
-                _attackWeaponView?.Play(resultBeatType, attackAnimationLength);
+                _attackWeaponView?.Play(resultBeatType);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
                 {
@@ -553,7 +631,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 // 移動入力がない場合は、前方を回避方向とする
                 if (dodgeDir.sqrMagnitude <= float.Epsilon)
                 {
-                    var fwd = _cacheTransform.forward;
+                    Vector3 fwd = _cacheRotation * Vector3.forward;
                     dodgeDir.x = fwd.x;
                     dodgeDir.y = fwd.z;
                 }
@@ -570,12 +648,18 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
 
-            Quaternion rotation = _cacheTransform.rotation;
+            Quaternion rotation = _cacheRotation;
 
             _controller.Update(ref rotation, dir, Time.time, out Vector3 velocity);
-            _cacheTransform.rotation = rotation;
             _cacheVelocity = velocity;
             _cacheRotation = rotation;
+
+            // 攻撃向きロック：0.1秒間は移動入力による回転を上書きして敵方向を維持する
+            if (_attackFacingRemaining > 0f)
+            {
+                _attackFacingRemaining -= Time.deltaTime;
+                _cacheRotation = _attackFacingRotation;
+            }
             _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
             PlayFootstepSound(velocity);
         }
@@ -599,17 +683,22 @@ namespace KillChord.Runtime.View.InGame.Player
             _isDodge = true;
         }
 
-        /// <summary> 攻撃時にターゲット方向への回転補間を開始する。 </summary>
+        /// <summary> 攻撃時にターゲット方向への要求回転を更新する。 </summary>
         private void StartAttackRotate()
         {
             Vector3 dir = PlayerAttackController.CurrentLockOnTargetPosition - _cacheTransform.position;
             dir.y = 0;
-            Quaternion rotation = Quaternion.LookRotation(dir, Vector3.up);
 
-            _attackRotateHandle.TryCancel();
-            _attackRotateHandle = LMotion.Create(rotation, rotation, 0.1f)
-                .WithScheduler(MotionScheduler.PreLateUpdate)
-                .Bind(this, (value, state) => state._cacheTransform.rotation = value);
+            if (dir.sqrMagnitude <= float.Epsilon)
+            {
+                _attackFacingRotation = _cacheRotation;
+                _attackFacingRemaining = 0f;
+                return;
+            }
+
+            _attackFacingRotation = Quaternion.LookRotation(dir, Vector3.up);
+            _attackFacingRemaining = 0.1f;
+            _cacheRotation = _attackFacingRotation;
         }
 
         /// <summary>
@@ -767,6 +856,51 @@ namespace KillChord.Runtime.View.InGame.Player
             }
 
             _lastFootstepTime = Time.time;
+        }
+
+        /// <summary>
+        ///     プレイヤーの攻撃が敵に命中した際のHit SEを再生します。
+        ///     Criticalヒットの場合はCritical用SE、それ以外は通常Hit用SEを再生します。
+        ///     射程外ヒットなどダメージが0の場合は「当たったが効いていない」表示のみのため再生しません。
+        ///     EOnTakeDamageは被弾者を問わず発火するため、プレイヤー自身が被弾した通知は無視する。
+        ///     また、AoEや継続ダメージで同一フレーム内に複数回発火しても、Hit SEは1フレームにつき1回だけ再生する。
+        /// </summary>
+        /// <param name="e"> イベント情報です。 </param>
+        private void HandleTakeDamage(EOnTakeDamage e)
+        {
+            if (e.DefenderId == _playerId)
+            {
+                return;
+            }
+
+            if (e.Damage <= 0)
+            {
+                return;
+            }
+
+            if (_lastHitSoundFrame == Time.frameCount)
+            {
+                return;
+            }
+            _lastHitSoundFrame = Time.frameCount;
+
+            if (e.Critical)
+            {
+                PlaySound(_criticalSoundSource, null);
+            }
+            else
+            {
+                PlaySound(_hitSoundSource, null);
+            }
+        }
+
+        /// <summary>
+        ///     ロックオン成立時のSEを再生します。
+        /// </summary>
+        /// <param name="e"> イベント情報です。 </param>
+        private void HandleLockOnAcquired(EOnLockOnAcquired e)
+        {
+            PlaySound(_lockOnSoundSource, null);
         }
 
         /// <summary>

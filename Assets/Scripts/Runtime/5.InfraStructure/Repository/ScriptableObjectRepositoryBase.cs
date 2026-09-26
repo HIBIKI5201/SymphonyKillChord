@@ -25,6 +25,23 @@ namespace KillChord.Runtime.InfraStructure.Repository
         }
 
         /// <summary>
+        ///     検索用辞書を破棄します。
+        /// </summary>
+        protected void InvalidateCache()
+        {
+            _map = null;
+        }
+
+        /// <summary>
+        ///     登録済みの全ての値を返します。
+        /// </summary>
+        protected IReadOnlyCollection<TValue> GetAllValues()
+        {
+            EnsureMap();
+            return _map.Values;
+        }
+
+        /// <summary>
         ///     シリアライズされたエントリの一覧を返します。
         /// </summary>
         protected abstract IReadOnlyList<TEntry> GetEntries();
@@ -43,7 +60,7 @@ namespace KillChord.Runtime.InfraStructure.Repository
         /// </summary>
         private void OnValidate()
         {
-            _map = null;
+            InvalidateCache();
         }
 
         /// <summary>

@@ -28,10 +28,81 @@
     border-color: rgb(227, 212, 0);
 }
 
+/* 解放時にopacityを滑らかに変化させる。 */
+.skill-node-node,
+.skill-node-path {
+    transition-property: scale, opacity;
+    transition-duration: 0.1s, 0.35s;
+    transition-timing-function: ease-out-circ, ease-out-sine;
+}
+
+/* 解放演出：解放の瞬間に一度だけポップさせる。SkillNodeViewからコードで付け外しする。 */
+.skill-node-unlock-pop {
+    scale: 1.35 1.35;
+    transition-property: scale, opacity;
+    transition-duration: 0.18s, 0.35s;
+    transition-timing-function: ease-out-back, ease-out-sine;
+}
+
+/* 選択中の淡いパルスグロー。SkillNodeViewが一定間隔でON/OFFを切り替える。 */
+.skill-node-selected-glow {
+    transition-property: box-shadow;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-in-out-sine;
+    box-shadow: 0 0 2px 0px rgba(227, 212, 0, 0.2);
+}
+
+.skill-node-selected-glow-peak {
+    box-shadow: 0 0 14px 4px rgba(227, 212, 0, 0.75);
+}
+
 .skill-node-not-selected {
     border-color: rgb(64, 64, 64);
 }
 
 .skill-node-font {
     -unity-font-style: bold;
+}
+
+.skill-node-icon {
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 選択中は拡大し、押している間は縮める。 */
+.skill-node-node,
+.skill-node-path {
+    scale: 1 1;
+    transition-property: scale;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
+}
+.skill-node-node:hover,
+.skill-node-node:focus {
+    scale: 1.2 1.2;
+}
+
+.skill-node-node:active {
+    scale: 0.9 0.9;
+}
+
+.skill-node-path:hover,
+.skill-node-path:focus {
+    scale: 1.2 1.2;
+}
+
+.skill-node-path:active {
+    scale: 0.9 0.9;
+}
+
+/* ノード選択時、ツリー全体をそのノード中心へズームインする。 */
+.skill-tree-canvas {
+    scale: 1.3 1.3;
+    transform-origin: 50% 50%;
+    transition-property: scale;
+    transition-duration: 0.35s;
+    transition-timing-function: ease-out-circ;
+}
+
+.skill-tree-canvas--zoomed {
+    scale: 1.8 1.8;
 }

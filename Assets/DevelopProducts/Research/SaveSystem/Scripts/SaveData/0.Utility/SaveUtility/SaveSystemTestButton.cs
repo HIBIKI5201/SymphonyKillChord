@@ -27,7 +27,7 @@ namespace DevelopProducts.SaveSystem
 
         public void SceneLoad(string sceneName)
         {
-            SceneLoader.LoadScene(sceneName);
+            SceneLoader.LoadSceneAsync(sceneName);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace DevelopProducts.Persistent.Adaptor
 
             if (!SceneLoader.GetExistScene(toSceneName, out _))
             {
-                bool loadSuccess = await SceneLoader.LoadScene(toSceneName,
+                bool loadSuccess = await SceneLoader.LoadSceneAsync(toSceneName,
                     null,
                     LoadSceneMode.Additive,
                     token: cancellationToken);
@@ -39,7 +39,7 @@ namespace DevelopProducts.Persistent.Adaptor
 
             if (!string.IsNullOrEmpty(fromSceneName) && SceneLoader.GetExistScene(fromSceneName, out _))
             {
-                bool unloadSuccess = await SceneLoader.UnloadScene(fromSceneName,
+                bool unloadSuccess = await SceneLoader.UnloadSceneAsync(fromSceneName,
                     null,
                     cancellationToken);
                 if (!unloadSuccess)

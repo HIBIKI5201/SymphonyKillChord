@@ -1,5 +1,6 @@
-using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.StatusEffect;
 using System;
+using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Buff
 {
@@ -10,9 +11,17 @@ namespace KillChord.Runtime.InfraStructure.InGame.Buff
     public abstract class PlayerBuffDefinitionAssetBase
     {
         /// <summary>
-        ///     バフを生成します。
+        ///     状態効果を生成する。
         /// </summary>
-        /// <returns>バフ。</returns>
-        public abstract IBuff Create();
+        /// <returns> 生成された状態効果。 </returns>
+        public abstract IStatusEffect Create();
+
+        /// <summary>
+        ///     同じ状態効果が再適用されたときの挙動を取得します。
+        /// </summary>
+        protected StatusEffectReapplyPolicy ReapplyPolicy => _reapplyPolicy;
+
+        [SerializeField, Tooltip("同じ状態効果が再適用されたときの挙動")]
+        private StatusEffectReapplyPolicy _reapplyPolicy = StatusEffectReapplyPolicy.Ignore;
     }
 }

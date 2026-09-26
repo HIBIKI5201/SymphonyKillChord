@@ -1,7 +1,7 @@
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using KillChord.Runtime.Utility.OutGame.Savedata;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Utility.Identity;
+using SymphonyFrameWork.System.SaveSystem;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -10,6 +10,10 @@ namespace KillChord.Develop.Composition.OutGame
 {
     /// <summary>
     ///     開発用に追加解放スキルをセーブデータへ補完する初期化モジュールです。
+    ///     <para>
+    ///         解放するスキルはInspectorから設定します。空の場合は何もしません。
+    ///         リリース時はスキルツリー経由でのみ解放させるため、空のままにしてください。
+    ///     </para>
     /// </summary>
     public sealed class DevelopSkillUnlockInitializer : OutGameInitializationModuleBase
     {
@@ -19,17 +23,6 @@ namespace KillChord.Develop.Composition.OutGame
         /// <summary> 実行順です。 </summary>
         public override int Order => 110;
 
-        private const int SKILL_01_ID = -1127918619;
-        private const int SKILL_02_ID = 634126943;
-        private const int SKILL_03_ID = 1389048521;
-
-        private static readonly int[] DEVELOP_UNLOCKED_SKILL_IDS =
-        {
-            SKILL_01_ID,
-            SKILL_02_ID,
-            SKILL_03_ID
-        };
-
         /// <summary>
         ///     開発用の追加解放スキルをセーブデータへ補完します。
         /// </summary>
@@ -37,14 +30,16 @@ namespace KillChord.Develop.Composition.OutGame
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (_developUnlockedSkills == null || _developUnlockedSkills.Length == 0)
             {
-                Debug.LogError($"[{nameof(DevelopSkillUnlockInitializer)}] SavedataSystem が取得できませんでした。", this);
-                return false;
+                return true;
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-            SaveData saveData = await savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
             if (saveData == null)
@@ -58,24 +53,29 @@ namespace KillChord.Develop.Composition.OutGame
                 return true;
             }
 
-            await savedataSystem.SaveAsync(saveData);
+            await SaveStore.SaveAsync<SaveData>();
             return true;
         }
+
+        [SerializeField]
+        [SourceDataCollection("Skill")]
+        [Tooltip("開発用に追加で解放するスキル。空の場合は何もしません。リリース時は空にしてください。")]
+        private DataID[] _developUnlockedSkills;
 
         /// <summary>
         ///     開発用の追加解放スキルを未所持の場合のみ追加します。
         /// </summary>
         /// <param name="saveData"> 対象のセーブデータです。 </param>
         /// <returns> 更新した場合はtrue。 </returns>
-        private static bool TryApplyDevelopSkillUnlocks(SaveData saveData)
+        private bool TryApplyDevelopSkillUnlocks(SaveData saveData)
         {
             List<int> unlockedSkillIds = new(saveData.SkillUnlock.UnlockedSkillIds);
             bool isChanged = false;
 
-            for (int i = 0; i < DEVELOP_UNLOCKED_SKILL_IDS.Length; i++)
+            for (int i = 0; i < _developUnlockedSkills.Length; i++)
             {
-                int skillId = DEVELOP_UNLOCKED_SKILL_IDS[i];
-                if (unlockedSkillIds.Contains(skillId))
+                int skillId = _developUnlockedSkills[i].Id;
+                if (skillId == 0 || unlockedSkillIds.Contains(skillId))
                 {
                     continue;
                 }

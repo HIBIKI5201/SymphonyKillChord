@@ -1,22 +1,29 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
+using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Application.Player.SkillEffect;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.Composition.InGame.Skill.Effect;
 using KillChord.Runtime.Composition.InGame.UI;
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
+using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
+using KillChord.Runtime.View.InGame.Skill.Effect;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
@@ -44,35 +51,29 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         [Tooltip("テスト用の装備スキルID一覧です。未設定時はPlayer側設定を流用します。")]
         private DataID[] _equippedSkills;
         [SerializeField, SourceDataAddress]
-        [Tooltip("改造画面を経由していない場合に、セーブデータから装備スキルを解決するためのリポジトリの Addressables キーです。")]
+        [Tooltip("戦闘開始ごとにセーブデータから装備スキルを読み直すリポジトリの Addressables キーです。")]
         private string _skillBuildRepositoryKey;
         [SerializeField, SourceDataAddress]
         [Tooltip("テスト用装備スキルIDの解決に使うスキルリポジトリの Addressables キーです。")]
         private string _skillRepositoryKey;
 
         /// <summary>
-        ///     改造画面を経由せずシーンへ入った場合に備え、セーブデータ由来の装備スキルを非同期で解決します。
+        ///     戦闘開始ごとに現在のセーブデータから装備とレベルを読み直し、共有する装備定義を更新します。
         /// </summary>
         /// <param name="cancellationToken"> キャンセルトークンです。 </param>
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            _saveDataEquippedSkills = null;
+            _skillLevels = null;
+
             if (!string.IsNullOrWhiteSpace(_skillRepositoryKey))
             {
                 _loadedSkillRepository = await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, cancellationToken);
             }
 
-            if (ServiceLocator.TryGetInstance(out SkillBuildDefinition _)
-                || string.IsNullOrWhiteSpace(_skillBuildRepositoryKey))
+            if (string.IsNullOrWhiteSpace(_skillBuildRepositoryKey))
             {
-                // 改造画面経由で既にSkillBuildDefinitionが登録済み、
-                // またはキー未設定の場合はセーブデータの再ロードを行わない。
-                return true;
-            }
-
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(SkillInitializer)}] {nameof(SavedataSystem)} が取得できませんでした。", this);
                 return true;
             }
 
@@ -80,13 +81,39 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             {
                 SkillBuildRepository skillBuildRepository =
                     await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, cancellationToken);
-                skillBuildRepository.Initialize(savedataSystem);
-                IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.GetEquippedSkills();
-                _saveDataEquippedSkills = ToSkillTemplates(equippedSkills);
+                // リセット前のScriptableObjectキャッシュを使わず、SaveStoreの現在の装備から再構築する。
+                IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.LoadSkillBuild();
+                _skillLevels = await skillBuildRepository.GetSkillLevelsAsync();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                EquippedSkill[] currentEquipment = new EquippedSkill[equippedSkills.Count];
+                for (int i = 0; i < equippedSkills.Count; i++)
+                {
+                    currentEquipment[i] = equippedSkills[i];
+                }
+
+                // 全ResourceLoadの後にBGM等のBuildが走るため、同じ最新構成を先に公開する。
+                // 装備定義はOutGameと同様にシーン間で保持し、次の戦闘開始時にも再同期する。
+                if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition))
+                {
+                    buildDefinition.UpdateEquippedSkills(currentEquipment);
+                }
+                else if (!ServiceLocator.RegisterInstance(new SkillBuildDefinition(currentEquipment)))
+                {
+                    Debug.LogError($"[{nameof(SkillInitializer)}] 装備スキル定義を登録できませんでした。", this);
+                    return false;
+                }
+
+                _saveDataEquippedSkills = ToSkillTemplates(currentEquipment);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception exception)
             {
                 Debug.LogError($"[{nameof(SkillInitializer)}] セーブデータ由来の装備スキル解決に失敗しました: {exception}", this);
+                return false;
             }
 
             return true;
@@ -151,25 +178,87 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             SkillTargetResolver targetResolver = new SkillTargetResolver(
                 targetSystemContainer.TargetSystemViewModel,
                 targetSystemContainer.TargetEntityRegistry,
+                targetSystemContainer.TargetAreaQuery,
                 playerModuleContainer.PlayerView.transform,
                 playerModuleContainer.PlayerStatusBonus.AreaAttackRangeAddition);
+            PlayerTargetRangeQuery targetRangeQuery = new PlayerTargetRangeQuery(
+                targetSystemContainer.TargetSystemViewModel,
+                playerModuleContainer.PlayerView.transform);
+            TargetRadiusQuery targetRadiusQuery = new TargetRadiusQuery(
+                targetSystemContainer.TargetSystemViewModel,
+                targetSystemContainer.TargetEntityRegistry);
             SkillAttackController skillAttackController = new SkillAttackController(playerModuleContainer.PlayerEntity, targetResolver);
+            PendingAttackEffectService pendingAttackEffectService = new PendingAttackEffectService();
+            _skillHitScheduler = new SkillHitScheduler();
+
+            // 演出とダメージの双方へ、BPMに応じた同じ再生速度倍率を適用する。
+            float playbackSpeed = MusicConstants.GetPlaybackSpeed(musicSyncContainer.MusicSyncState.Bpm);
+            _skillHitScheduler.SetPlaybackSpeed(playbackSpeed);
             SkillEffectExecutorResolver effectExecutorResolver = new SkillEffectExecutorResolver();
-            SkillEffectExecutorFactory.RegisterDefaults(effectExecutorResolver, skillAttackController);
+            SkillEffectExecutorFactory.RegisterDefaults(
+                effectExecutorResolver,
+                skillAttackController,
+                pendingAttackEffectService,
+                targetRangeQuery,
+                targetRadiusQuery,
+                _skillHitScheduler);
             SkillUsecase skillUsecase = new SkillUsecase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
 
-            _skillController = new SkillController(musicSyncContainer.MusicSyncService);
+            SkillView[] skillVisuals = ResolveSkillVisuals(playerModuleContainer.PlayerInitializer);
+            InitializeSkillVisuals(
+                skillVisuals,
+                ToSkillIds(equippedSkills),
+                playerModuleContainer.PlayerView.transform,
+                targetSystemContainer.TargetSystemViewModel,
+                playbackSpeed);
+
+            _skillController = new SkillController(musicSyncContainer.MusicSyncService, () => Time.unscaledTime);
             _skillController.Initialize(BuildSkillExecutionControllers(
                 equippedSkills,
-                ResolveSkillVisuals(playerModuleContainer.PlayerInitializer),
+                skillVisuals,
                 musicSyncContainer.MusicSyncState,
                 skillResultPresenter,
                 skillCheckService,
                 skillUsecase));
             _skillController.OnSkillAnimationRequested += playerModuleContainer.PlayerView.PlaySkillAnimation;
+
+            // スキル発動中も、その拍に対応した武器を構えさせる。
+            _attackWeaponView = FindAnyObjectByType<PlayerAttackWeaponView>();
+            if (_attackWeaponView != null)
+            {
+                _skillController.OnSkillWeaponRequested += HandleSkillWeaponRequestedHandler;
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(SkillInitializer)}] {nameof(PlayerAttackWeaponView)} が見つからないため、スキル中の武器を表示できません。", this);
+            }
             _skillController.OnSkillVoiceRequested += playerModuleContainer.PlayerView.PlaySkillVoice;
             _boundPlayerView = playerModuleContainer.PlayerView;
+            // 連撃の適用を毎フレーム進めるループを接続する。
+            _skillHitController = new SkillHitController(_skillHitScheduler);
+            SkillHitLoopView skillHitLoopView = FindAnyObjectByType<SkillHitLoopView>();
+            if (skillHitLoopView != null)
+            {
+                skillHitLoopView.Initialize(_skillHitController);
+
+                // ゲームプレイ開始通知を受けないと更新が回らないため、Directorへ登録する。
+                InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
+                if (inGamePlayDirector != null)
+                {
+                    inGamePlayDirector.AddGamePlayControllable(skillHitLoopView);
+                }
+                else
+                {
+                    Debug.LogError($"[{nameof(SkillInitializer)}] {nameof(InGamePlayDirector)} が見つかりません。", this);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(SkillInitializer)}] {nameof(SkillHitLoopView)} が見つからないため、連撃が進行しません。", this);
+            }
+
             _moduleContainer.SetSkillController(_skillController);
+            _moduleContainer.SetPendingAttackEffectService(pendingAttackEffectService);
             return true;
         }
 
@@ -178,18 +267,30 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// </summary>
         public override void Shutdown()
         {
+            if (_skillController != null && _attackWeaponView != null)
+            {
+                _skillController.OnSkillWeaponRequested -= HandleSkillWeaponRequestedHandler;
+            }
+
+            _attackWeaponView = null;
+
             if (_skillController != null && _boundPlayerView != null)
             {
                 _skillController.OnSkillAnimationRequested -= _boundPlayerView.PlaySkillAnimation;
                 _skillController.OnSkillVoiceRequested -= _boundPlayerView.PlaySkillVoice;
             }
 
+            _skillHitScheduler?.Clear();
+            _skillHitScheduler = null;
+            _skillHitController = null;
             _boundPlayerView = null;
+            _skillController?.Dispose();
             _skillController = null;
             _saveDataEquippedSkills = null;
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
             _skillRepositoryKey.ReleaseLoadedAsset(this);
             _loadedSkillRepository = null;
+            _skillLevels = null;
 
             if (!_isRegistered)
             {
@@ -199,6 +300,87 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             ServiceLocator.UnregisterInstance<SkillModuleContainer>();
             _moduleContainer = null;
             _isRegistered = false;
+        }
+
+        /// <summary>
+        ///     スキルで構える武器を表示します。
+        /// </summary>
+        /// <param name="beatType"> 構える武器を決めるBeatTypeです。 </param>
+        private void HandleSkillWeaponRequestedHandler(BeatType beatType)
+        {
+            _attackWeaponView.Play((int)beatType);
+        }
+
+        /// <summary>
+        ///     スキル演出Viewへエフェクト再生の依存を注入します。
+        /// </summary>
+        /// <param name="skillVisuals"> 対象のスキル演出View一覧です。 </param>
+        /// <param name="skillIds"> 解決済みの装備スキルID一覧です。 </param>
+        /// <param name="playerTransform"> プレイヤーのTransformです。 </param>
+        /// <param name="targetSystemViewModel"> ターゲットシステムのViewModelです。 </param>
+        /// <param name="playbackSpeed"> BPMに応じた再生速度倍率です。 </param>
+        private void InitializeSkillVisuals(
+            IReadOnlyList<SkillView> skillVisuals,
+            IReadOnlyList<int> skillIds,
+            Transform playerTransform,
+            ITargetSystemViewModel targetSystemViewModel,
+            float playbackSpeed)
+        {
+            if (skillVisuals == null || skillVisuals.Count == 0)
+            {
+                return;
+            }
+
+            // エフェクトモジュールは任意のため、未登録のシーンでもスキル自体は成立させる。
+            SkillEffectModuleContainer skillEffectContainer = ServiceLocator.GetInstance<SkillEffectModuleContainer>();
+            if (skillEffectContainer == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SkillInitializer)}] {nameof(SkillEffectModuleContainer)} が見つからないため、スキルエフェクトを再生しません。",
+                    this);
+                return;
+            }
+
+            // 実行するスキルとプールの対象がずれないよう、解決済みの装備スキルで作り直す。
+            skillEffectContainer.Prewarm(skillIds);
+
+            // 武器へエフェクトを取り付けられるよう、プレイヤーの武器表示Viewを供給元にする。
+            ISkillEffectWeaponSource weaponSource = FindAnyObjectByType<PlayerAttackWeaponView>();
+            SkillEffectContextFactory contextFactory = new SkillEffectContextFactory(
+                playerTransform,
+                targetSystemViewModel,
+                playbackSpeed,
+                weaponSource);
+            for (int i = 0; i < skillVisuals.Count; i++)
+            {
+                skillVisuals[i]?.Initialize(skillEffectContainer.SkillEffectPlayer, contextFactory);
+            }
+        }
+
+        /// <summary>
+        ///     装備中スキル一覧から数値IDの配列を作ります。
+        /// </summary>
+        /// <param name="equippedSkills"> 解決済みの装備スキル一覧です。 </param>
+        /// <returns> 装備スキルのID一覧です。 </returns>
+        private static int[] ToSkillIds(IReadOnlyList<SkillTemplate> equippedSkills)
+        {
+            if (equippedSkills == null || equippedSkills.Count == 0)
+            {
+                return Array.Empty<int>();
+            }
+
+            List<int> skillIds = new List<int>(equippedSkills.Count);
+            for (int i = 0; i < equippedSkills.Count; i++)
+            {
+                if (equippedSkills[i] == null)
+                {
+                    continue;
+                }
+
+                skillIds.Add(equippedSkills[i].Id.Value);
+            }
+
+            return skillIds.ToArray();
         }
 
         /// <summary>
@@ -226,7 +408,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                     continue;
                 }
 
-                SkillDefinition definition = skillTemplate.ToSkillDefinition(musicSyncState.Bpm);
+                int currentLevel = _skillLevels != null && _skillLevels.TryGetValue(skillTemplate.Id.Value, out int savedLevel)
+                    ? savedLevel
+                    : skillTemplate.Level.Value;
+                // 成長ステップの編集でMaxLevelが下がった場合に備え、セーブ済みレベルを現在の上限内へ収める。
+                currentLevel = Math.Min(currentLevel, skillTemplate.MaxLevel);
+                SkillDefinition definition = skillTemplate.ToSkillDefinition(musicSyncState.Bpm, currentLevel);
                 SkillView view = FindSkillView(skillVisuals, definition.Id.Value);
                 if (view == null)
                 {
@@ -235,7 +422,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
 
                 SkillCooldownState cooldownState = new SkillCooldownState(definition);
                 SkillRhythmState rhythmState = new SkillRhythmState(definition.SkillPattern.Signatures.Length * 2);
-                SkillInputProgressController progressController = BuildSkillProgressModules(definition);
+                SkillInputProgressController progressController = BuildSkillProgressModules(definition, skillTemplate.Icon);
                 SkillExecutionController executionController = new SkillExecutionController(
                     skillResultPresenter,
                     progressController,
@@ -254,9 +441,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <summary>
         ///     装備中1スキル分の入力進捗UIモジュール一式を構築する。
         /// </summary>
-        private SkillInputProgressController BuildSkillProgressModules(SkillDefinition definition)
+        /// <param name="definition"> 対象のスキル定義です。 </param>
+        /// <param name="skillIcon"> 対象のスキルアイコンです。未設定の場合はnull。 </param>
+        /// <returns> 構築した入力進捗Controllerです。 </returns>
+        private SkillInputProgressController BuildSkillProgressModules(SkillDefinition definition, Sprite skillIcon)
         {
-            ISkillInputProgressRowView rowView = _skillInputProgressUIInitializer.CreateInputProgressRow(definition);
+            ISkillInputProgressRowView rowView = _skillInputProgressUIInitializer.CreateInputProgressRow(definition, skillIcon);
 
             ISkillCrosshairProgressView crosshairView = null;
             SkillCrosshairProgressController crosshairController = null;
@@ -267,7 +457,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
 
             ISkillInputProgressRowView listRowView = _skillListUIInitializer != null
-                ? _skillListUIInitializer.CreateSkillListRow(definition)
+                ? _skillListUIInitializer.CreateSkillListRow(definition, skillIcon)
                 : null;
 
             SkillInputProgressPresenter presenter = new SkillInputProgressPresenter(
@@ -285,6 +475,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// </summary>
         private SkillTemplate[] ResolveEquippedSkills(PlayerInitializer playerInitializer)
         {
+            // 空配列も正常な保存済み構成として扱い、以前の装備やテスト用設定へ戻さない。
+            if (_saveDataEquippedSkills != null)
+            {
+                return _saveDataEquippedSkills;
+            }
+
             if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition) &&
                 buildDefinition.EquippedSkills != null &&
                 buildDefinition.EquippedSkills.Count > 0)
@@ -305,11 +501,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 {
                     return buildSkills.ToArray();
                 }
-            }
-
-            if (_saveDataEquippedSkills != null && _saveDataEquippedSkills.Length > 0)
-            {
-                return _saveDataEquippedSkills;
             }
 
             SkillId[] fallbackIds = ConvertToSkillIds(_equippedSkills);
@@ -424,6 +615,9 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private SkillInputProgressUIInitializer _skillInputProgressUIInitializer;
         private SkillCrosshairProgressUIInitializer _skillCrosshairProgressUIInitializer;
         private SkillListUIInitializer _skillListUIInitializer;
+        private PlayerAttackWeaponView _attackWeaponView;
+        private SkillHitScheduler _skillHitScheduler;
+        private SkillHitController _skillHitController;
         private SkillController _skillController;
         private SkillResultViewModel _skillResultViewModel;
         private SkillModuleContainer _moduleContainer;
@@ -431,5 +625,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private bool _isRegistered;
         private SkillTemplate[] _saveDataEquippedSkills;
         private SkillRepository _loadedSkillRepository;
+        private IReadOnlyDictionary<int, int> _skillLevels;
     }
 }

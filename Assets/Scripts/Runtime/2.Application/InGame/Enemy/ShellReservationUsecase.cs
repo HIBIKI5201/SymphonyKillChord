@@ -4,7 +4,6 @@ using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Threading;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Enemy
 {
@@ -25,14 +24,15 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
         /// <summary> 予約タイミングが到達した時発火するイベント </summary>
         public event Action OnReservedTimingReached;
-        /// <summary>
-        ///   予約タイミングの2拍前に発火するイベント
-        /// </summary>
-        public event Action On2BeatBefore;
-        /// <summary>
-        /// 予約タイミングの1拍前に発火するイベント
-        /// </summary>
-        public event Action On1BeatBefore;
+        /// <summary> 着弾予告（デカールの変化開始）タイミングが到達した時発火するイベント </summary>
+        public event Action OnAreaWarning;
+        /// <summary> 着弾予告SE（２段階目）のタイミングが到達した時発火するイベント </summary>
+        public event Action OnAreaWarningSecond;
+
+        /// <summary> 予約中の爆発時刻（音源再生時間・秒）。予約が無い場合は無効。 </summary>
+        public double DetonateExecutionTime { get; private set; }
+        /// <summary> 爆発予約が有効かどうか。 </summary>
+        public bool HasDetonateReservation { get; private set; }
 
         public void Dispose()
         {
@@ -42,6 +42,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 _cancellationTokenSource.Dispose();
                 _cancellationTokenSource = null;
             }
+
+            HasDetonateReservation = false;
         }
         /// <summary>
         ///     予約をキャンセルする。
@@ -50,13 +52,13 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         {
             if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested)
             {
-                Debug.Log("予約が存在しないか、すでにキャンセルされています。");
                 return;
             }
 
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
             _cancellationTokenSource = null;
+            HasDetonateReservation = false;
         }
         /// <summary>
         ///     爆発タイミングを予約する。
@@ -68,18 +70,40 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
             _cancellationTokenSource = new CancellationTokenSource();
 
-            _musicActionScheduler.Schedule(
+            // 爆発の絶対時刻を保持し、演出側が残り時間から進捗を算出できるようにする。
+            DetonateExecutionTime = _musicActionScheduler.Schedule(
                 _entity.MusicSpec,
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
-                _musicActionScheduler.Schedule(
-                new MusicSyncSpec(_entity.MusicSpec.BarFlag, _entity.MusicSpec.TimeSignature, _entity.MusicSpec.TargetBeat - 2),// 2拍前
-                Handle2BeatBefore,
-                _cancellationTokenSource.Token);
-                _musicActionScheduler.Schedule(
-                new MusicSyncSpec(_entity.MusicSpec.BarFlag, _entity.MusicSpec.TimeSignature, _entity.MusicSpec.TargetBeat - 1),// 1拍前
-                Handle1BeatBefore,
-                _cancellationTokenSource.Token);
+            HasDetonateReservation = true;
+
+            ScheduleAreaWarning(_entity.MusicSpec, _cancellationTokenSource.Token);
+            ScheduleAreaWarningSecond(_entity.MusicSpec, _cancellationTokenSource.Token);
+        }
+
+        /// <summary>
+        ///     着弾予告（デカールの変化開始）タイミングを予約する。
+        ///     デカール側の進捗演出（ShellLifeCycle.GetDetonateApproach）が0から動き出す瞬間と
+        ///     完全に同じ拍になるよう、爆発予約と同じ拍数（ShellMusicConstants.DETONATE_LEAD_BEAT_COUNT）
+        ///     だけ遡ったタイミングを使う。スケジューリング処理自体はEnemyAttackReservationUsecaseと
+        ///     共通のLeadNotificationSchedulerに委譲する。
+        /// </summary>
+        /// <param name="musicSpec"> 爆発本体のタイミング。 </param>
+        /// <param name="token"> キャンセルトークン。 </param>
+        private void ScheduleAreaWarning(in MusicSyncSpec musicSpec, CancellationToken token)
+        {
+            LeadNotificationScheduler.TrySchedule(_musicActionScheduler, musicSpec, ShellMusicConstants.DETONATE_LEAD_BEAT_COUNT, HandleAreaWarning, token);
+        }
+
+        /// <summary>
+        ///     着弾予告SE（２段階目）のタイミングを予約する。
+        ///     爆発予約から ShellMusicConstants.AREA_WARNING_SECOND_LEAD_BEAT_COUNT 拍だけ遡ったタイミングを使う。
+        /// </summary>
+        /// <param name="musicSpec"> 爆発本体のタイミング。 </param>
+        /// <param name="token"> キャンセルトークン。 </param>
+        private void ScheduleAreaWarningSecond(in MusicSyncSpec musicSpec, CancellationToken token)
+        {
+            LeadNotificationScheduler.TrySchedule(_musicActionScheduler, musicSpec, ShellMusicConstants.AREA_WARNING_SECOND_LEAD_BEAT_COUNT, HandleAreaWarningSecond, token);
         }
 
         /// <summary>
@@ -87,28 +111,25 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         private void HandleReservedTimingReached()
         {
-            Debug.Log("予約されたタイミングに到達しました。");
+            HasDetonateReservation = false;
             OnReservedTimingReached?.Invoke();
         }
 
         /// <summary>
-        ///    予約タイミングが到達の2拍前の処理。
+        ///     着弾予告（デカールの変化開始）タイミングが到達時の処理。
         /// </summary>
-        private void Handle2BeatBefore()
+        private void HandleAreaWarning()
         {
-            Debug.Log("[ShellReservationUsecase] 爆発の2拍前");
-            On2BeatBefore?.Invoke();
+            OnAreaWarning?.Invoke();
         }
 
         /// <summary>
-        ///    予約タイミングが到達の1拍前の処理。
+        ///     着弾予告SE（２段階目）のタイミングが到達時の処理。
         /// </summary>
-        private void Handle1BeatBefore()
+        private void HandleAreaWarningSecond()
         {
-            Debug.Log("[ShellReservationUsecase] 爆発の1拍前");
-            On1BeatBefore?.Invoke();
+            OnAreaWarningSecond?.Invoke();
         }
-
 
         private readonly ShellEntity _entity;
         private readonly IMusicActionScheduler _musicActionScheduler;

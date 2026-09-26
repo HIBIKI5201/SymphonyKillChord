@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Constant;
 using R3;
 using System;
@@ -89,6 +90,25 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
             // ReactivePropertyは同値を弾くため、拍が変わったフレームだけ購読者へ通知される。
             _currentBeat.Value = (int)Math.Floor(AccurateBeat);
+        }
+
+        /// <summary>
+        ///     予約済みの実行時刻へ向かう進捗を取得する。
+        ///     区間に入る前は0で、実行時刻に向かって1へ近づく。
+        /// </summary>
+        /// <param name="executionTime"> 対象の実行時刻（音源再生時間・秒）。 </param>
+        /// <param name="leadBeatCount"> 0から1へ変化させる区間の長さ。拍数で指定する。 </param>
+        /// <returns> 0〜1の値。BPM未設定の場合は0。 </returns>
+        public float GetNormalizedApproach(double executionTime, double leadBeatCount)
+        {
+            if (BeatLength <= 0d)
+            {
+                return 0f;
+            }
+
+            return MusicTimingCalculator.CalculateNormalizedApproach(
+                executionTime - PlayTime,
+                BeatLength * leadBeatCount);
         }
 
         /// <summary>

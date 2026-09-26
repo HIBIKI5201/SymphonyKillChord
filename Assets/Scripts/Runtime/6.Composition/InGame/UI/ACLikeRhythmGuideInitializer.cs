@@ -1,0 +1,281 @@
+using KillChord.Runtime.Adaptor.InGame.Battle;
+using KillChord.Runtime.Adaptor.InGame.Haptics;
+using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.Adaptor.InGame.PostEffect;
+using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Adaptor.Persistent.Environment;
+using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Music;
+using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Sequence;
+using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.Composition.Persistent.Environment;
+using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Haptics;
+using KillChord.Runtime.View.InGame.Music;
+using KillChord.Runtime.View.InGame.PostEffect;
+using SymphonyFrameWork.System.ServiceLocate;
+using System;
+using System.Threading;
+using UnityEngine;
+
+namespace KillChord.Runtime.Composition.InGame.UI
+{
+    /// <summary>
+    ///     AC風リズムガイドを初期化するモジュールです。
+    /// </summary>
+    public sealed class ACLikeRhythmGuideInitializer : InGameInitializationModuleBase
+    {
+        /// <summary> モジュール名です。 </summary>
+        public override string ModuleName => nameof(ACLikeRhythmGuideInitializer);
+
+        /// <summary> 実行順です。 </summary>
+        public override int Order => 800;
+
+        /// <summary>
+        ///     ゲームパッド振動のConfigをAddressablesから読み込む。
+        ///     振動は演出用途のためoptional扱いとし、読み込みに失敗してもモジュール自体は成功として扱う。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 常にtrue（キャンセル時を除く）。 </returns>
+        public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
+        {
+            ReleaseLoadedHapticsConfig();
+
+            try
+            {
+                _loadedHapticsConfig = await _hapticsConfigKey.LoadAssetAsync<GamepadHapticsConfig>(
+                    this,
+                    cancellationToken);
+                if (_loadedHapticsConfig == null)
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigを読み込めませんでした。振動機能なしで続行します。",
+                        this);
+                }
+
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                ReleaseLoadedHapticsConfig();
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfig読み込みに失敗しました。振動機能なしで続行します: {exception}",
+                    this);
+                ReleaseLoadedHapticsConfig();
+                return true;
+            }
+        }
+
+        /// <summary>
+        ///     他モジュールへ結合してリズムガイドを初期化する。
+        /// </summary>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Ready()
+        {
+            if (_rhythmGuideView == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] リズムガイド参照が不足しています。", this);
+                return false;
+            }
+
+            if (ServiceLocator.GetInstance<MusicSyncModuleContainer>() == null
+                || ServiceLocator.GetInstance<TargetSystemModuleContainer>() == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] 必要なContainerが見つかりません。", this);
+                return false;
+            }
+
+            if (!Initialize())
+            {
+                return false;
+            }
+
+            RegisterGameplayControllable();
+            return true;
+        }
+
+        /// <summary>
+        ///     リズムガイド機能を初期化する。
+        /// </summary>
+        /// <returns> 初期化に成功した場合はtrueです。 </returns>
+        public bool Initialize()
+        {
+            Debug.Assert(_rhythmGuideView != null, "RhythmGuideView の参照が未設定です。RhythmGuideView を設定してください。");
+
+            IMusicSyncService musicSyncService = ServiceLocator.GetInstance<MusicSyncModuleContainer>()?.MusicSyncService;
+
+            if (musicSyncService == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(IMusicSyncService)} が見つかりません。MusicSyncInitializer が先に初期化されているか確認してください。", this);
+                return false;
+            }
+
+            TargetSystemController targetingSystem = ServiceLocator.GetInstance<TargetSystemModuleContainer>()?.TargetSystemController;
+
+            if (targetingSystem == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(TargetSystemController)} が見つかりません。TargetSystemController が登録されているか確認してください。", this);
+                return false;
+            }
+
+            ServiceLocator.TryGetInstance(out KillChord.Runtime.Adaptor.InGame.StageSelect.SelectedBattleStageState selectedBattleStageState);
+
+            // MissionModuleContainer自体がミッション切り替えのたびに再生成・再登録される可能性があるため、
+            // Container参照ではなくServiceLocatorへの問い合わせそのものをデリゲート化し、呼び出しの都度最新状態を取得する。
+            System.Func<KillChord.Runtime.Application.InGame.Mission.MissionRuntimeService> missionRuntimeServiceProvider =
+                () => ServiceLocator.GetInstance<KillChord.Runtime.Composition.InGame.Mission.MissionModuleContainer>()?.MissionRuntimeService;
+
+            // ガイド表示と判定は、音楽同期・ターゲット状態・ミッション進行状況を参照するためPresenterへ集約する。
+            RhythmGuidePresenter presenter = new RhythmGuidePresenter(
+                musicSyncService,
+                new RhythmGuideUsecase(),
+                targetingSystem,
+                missionRuntimeServiceProvider,
+                selectedBattleStageState
+            );
+
+            new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
+
+            if (_rhythmGuidePostEffectView == null || _effectConfig == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] 全画面演出Viewまたは演出設定が未設定です。", this);
+                return false;
+            }
+
+            IPlayerAttackSignal playerAttackSignal =
+                ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerAttackSignal;
+
+            if (playerAttackSignal == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(IPlayerAttackSignal)} が見つかりません。PlayerInitializer が先に初期化されているか確認してください。", this);
+                return false;
+            }
+
+            // 攻撃PresenterからSignalへ渡された判定を購読し、演出設定に基づいて表示する。
+            _postEffectPresenter?.Dispose();
+            _postEffectPresenter = new RhythmGuidePostEffectPresenter(
+                playerAttackSignal,
+                _rhythmGuideView,
+                new RhythmGuidePostEffectViewModel(_rhythmGuidePostEffectView, _effectConfig));
+
+            _targetFeedbackPresenter?.Dispose();
+            _targetFeedbackPresenter = new RhythmGuideTargetFeedbackPresenter(
+                playerAttackSignal,
+                () => TutorialAttackTargetQuery.GetTargetBeatCount(
+                    selectedBattleStageState, missionRuntimeServiceProvider.Invoke()),
+                _rhythmGuideView);
+
+            // ゲームパッド振動は演出用途のoptional機能のため、Configが未ロードでもモジュール自体は成功させ、
+            // 振動関連の生成のみスキップする。
+            if (_loadedHapticsConfig == null)
+            {
+                Debug.LogWarning($"[{nameof(ACLikeRhythmGuideInitializer)}] ゲームパッド振動のConfigが未ロードのため、振動機能なしで続行します。", this);
+                return true;
+            }
+
+            IEnvironmentSettingsViewModel environmentSettingsViewModel =
+                ServiceLocator.GetInstance<EnvironmentSettingsModuleContainer>()?.ViewModel;
+            if (environmentSettingsViewModel == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ACLikeRhythmGuideInitializer)}] 環境設定を取得できないため、振動機能なしで続行します。",
+                    this);
+                return true;
+            }
+
+            // ゲームパッド振動はシーン参照を必要としないため、専用シーン配置のInitializerを設けず、
+            // 既にIPlayerAttackSignalを解決済みのこのInitializerへ相乗りさせている。
+            _gamepadHapticsPresenter?.Dispose();
+            if (_gamepadHapticsView == null)
+            {
+                _gamepadHapticsView = new GameObject(nameof(GamepadHapticsView)).AddComponent<GamepadHapticsView>();
+            }
+
+            _gamepadHapticsView.Initialize(_loadedHapticsConfig, environmentSettingsViewModel);
+            _gamepadHapticsPresenter = new GamepadHapticsPresenter(
+                playerAttackSignal,
+                _gamepadHapticsView,
+                () => TutorialAttackTargetQuery.GetTargetBeatCount(
+                    selectedBattleStageState, missionRuntimeServiceProvider.Invoke()));
+
+            return true;
+        }
+
+        /// <summary>
+        ///     全画面Vignette用Presenterを破棄する。
+        /// </summary>
+        public override void Shutdown()
+        {
+            _postEffectPresenter?.Dispose();
+            _postEffectPresenter = null;
+            _targetFeedbackPresenter?.Dispose();
+            _targetFeedbackPresenter = null;
+            _gamepadHapticsPresenter?.Dispose();
+            _gamepadHapticsPresenter = null;
+            ReleaseLoadedHapticsConfig();
+
+            if (_gamepadHapticsView != null)
+            {
+                Destroy(_gamepadHapticsView.gameObject);
+                _gamepadHapticsView = null;
+            }
+
+            _isRegisteredToPlayDirector = false;
+        }
+
+        [Tooltip("リズムガイドView。")]
+        [SerializeField] private ACLikeRhythmGuideView _rhythmGuideView;
+        [Tooltip("リズムガイドのフルスクリーン演出View。")]
+        [SerializeField] private RhythmGuidePostEffectView _rhythmGuidePostEffectView;
+        [Tooltip("リズムガイドの演出設定。ACLikeRhythmGuideViewに設定した物と同じアセットを指定。")]
+        [SerializeField] private ACLikeRhythmGuideEffectConfig _effectConfig;
+        [Tooltip("ゲームパッド振動ConfigのAddressablesキー。")]
+        [SerializeField, SourceDataAddress] private string _hapticsConfigKey;
+
+        private bool _isRegisteredToPlayDirector;
+        private RhythmGuidePostEffectPresenter _postEffectPresenter;
+        private RhythmGuideTargetFeedbackPresenter _targetFeedbackPresenter;
+        private GamepadHapticsPresenter _gamepadHapticsPresenter;
+        private GamepadHapticsView _gamepadHapticsView;
+        private GamepadHapticsConfig _loadedHapticsConfig;
+
+        /// <summary>
+        ///     リズムガイドViewをゲームプレイ開始対象へ登録します。
+        /// </summary>
+        private void RegisterGameplayControllable()
+        {
+            // 再初期化で多重登録されないようにする。
+            if (_isRegisteredToPlayDirector)
+            {
+                return;
+            }
+
+            InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
+            if (inGamePlayDirector == null)
+            {
+                Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] {nameof(InGamePlayDirector)} が見つかりません。", this);
+                return;
+            }
+
+            inGamePlayDirector.AddGamePlayControllable(_rhythmGuideView);
+            _isRegisteredToPlayDirector = true;
+        }
+
+        /// <summary>
+        ///     ロード済みのゲームパッド振動ConfigとAddressablesハンドルを解放する。
+        /// </summary>
+        private void ReleaseLoadedHapticsConfig()
+        {
+            _hapticsConfigKey.ReleaseLoadedAsset(this);
+            _loadedHapticsConfig = null;
+        }
+    }
+}

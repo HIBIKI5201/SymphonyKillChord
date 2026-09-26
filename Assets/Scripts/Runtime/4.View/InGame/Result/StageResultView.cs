@@ -1,9 +1,13 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
+using LitMotion;
 using R3;
 using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Playables;
+using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Result
 {
@@ -28,6 +32,7 @@ namespace KillChord.Runtime.View.InGame.Result
 
             SubscribeViewModel();
             _isTransitioning = false;
+            _isUiSlided = false;
         }
 
         /// <summary>
@@ -43,11 +48,18 @@ namespace KillChord.Runtime.View.InGame.Result
             }
 
             _isTransitioning = false;
+            _isUiSlided = false;
 
             SetInteractionEnabled(true);
+            SelectButton(_completeButton);
+            _isShown = true;
+            RefreshButtonFocus();
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+
+
+            PlayTextSlideIn();
         }
 
         /// <summary>
@@ -55,12 +67,17 @@ namespace KillChord.Runtime.View.InGame.Result
         /// </summary>
         public void Hide()
         {
+            _isShown = false;
+            StopTextSlideIn();
+            StopCountUps(true);
+
             if (_canvasGroup != null)
             {
                 _canvasGroup.alpha = 0f;
             }
 
             SetInteractionEnabled(false);
+            ClearSelection();
         }
 
         /// <summary>
@@ -84,12 +101,12 @@ namespace KillChord.Runtime.View.InGame.Result
 
                 if (!success)
                 {
-                    RestoreInteraction();
+                    RestoreInteraction(_completeButton);
                 }
             }
             catch (Exception exception)
             {
-                RestoreInteraction();
+                RestoreInteraction(_completeButton);
 
                 Debug.LogException(exception, this);
             }
@@ -116,16 +133,19 @@ namespace KillChord.Runtime.View.InGame.Result
 
                 if (!success)
                 {
-                    RestoreInteraction();
+                    RestoreInteraction(_retryButton);
                 }
             }
             catch (Exception exception)
             {
-                RestoreInteraction();
+                RestoreInteraction(_retryButton);
 
                 Debug.LogException(exception, this);
             }
         }
+
+        private const int SECOND_PER_MINUTE = 60;
+        private const float FOCUSED_BUTTON_SCALE = 1.1f;
 
         [Header("Root")]
         [SerializeField, Tooltip("リザルト画面全体を制御するCanvasGroup。")]
@@ -148,6 +168,19 @@ namespace KillChord.Runtime.View.InGame.Result
 
         [SerializeField, Tooltip("インゲームのCanvas。")]
         private Canvas[] _inGameCanvas;
+
+        [Header("Button")]
+        [SerializeField, Tooltip("ホームへ戻る完了ボタン。")]
+        private Button _completeButton;
+
+        [SerializeField, Tooltip("同じステージへ再出撃するボタン。")]
+        private Button _retryButton;
+
+        [SerializeField, Tooltip("完了ボタンの文言を表示するText。")]
+        private TMP_Text _completeButtonLabel;
+
+        [SerializeField, Tooltip("リトライボタンの文言を表示するText。")]
+        private TMP_Text _retryButtonLabel;
 
         [Header("Text")]
         [SerializeField, Tooltip("リザルトタイトルを表示するText。")]
@@ -188,9 +221,34 @@ namespace KillChord.Runtime.View.InGame.Result
         [SerializeField, Tooltip("敗北時に表示するリザルトタイトル。")]
         private string _defeatTitle = "Mission Failed";
 
+        [Header("Animation")]
+        [SerializeField, Tooltip("テキストを左から右方向へスライドインさせる演出の設定。")]
+        private ResultTextSlideInSetting _textSlideIn = new();
+
+        [SerializeField, Tooltip("スライドイン演出から除外するUI。指定した対象と、その配下のTextをまとめて除外する。")]
+        private Transform[] _textSlideInExcludes;
+
+        [SerializeField, Tooltip("数値をカウントアップ表示させる演出の設定。")]
+        private ResultCountUpSetting _countUpSetting = new();
+
+        [SerializeField, Tooltip("勝利時の文字表示順を編集するTimeline。進捗カーブを0から1へ動かします。")]
+        private PlayableDirector _revealTimeline;
+
+        [SerializeField, Range(0f, 1f), Tooltip("Timelineで操作する上から下への文字表示進捗。")]
+        private float _revealProgress;
+
+        private readonly Dictionary<TMP_Text, (float Value, Func<float, string> Formatter)> _pendingCountUpValues = new();
+        private readonly Dictionary<TMP_Text, (MotionHandle Handle, float Value, Func<float, string> Formatter)> _countUpHandles = new();
+        private readonly List<TMP_Text> _countUpKeysBuffer = new();
         private StageResultViewModel _viewModel;
         private StageResultController _controller;
         private bool _isTransitioning;
+        private bool _isUiSlided;
+        private bool _isShown;
+        private Vector3 _completeButtonOriginalScale;
+        private Vector3 _retryButtonOriginalScale;
+        private Color _completeButtonOriginalColor;
+        private Color _retryButtonOriginalColor;
         private IDisposable _stageNameDisposable;
         private IDisposable _mainMissionDisposable;
         private IDisposable _mainMissionStateDisposable;
@@ -200,17 +258,263 @@ namespace KillChord.Runtime.View.InGame.Result
         private IDisposable _tipsDisposable;
         private IDisposable _resultTypeDisposable;
         private readonly List<StageResultMissionItemView> _spawnedSubMissionItems = new();
+        private readonly List<MotionHandle> _slideInHandles = new();
+        private readonly List<ResultTextSlideIn> _textPresentations = new();
+        private readonly List<TMP_Text> _slideInTexts = new();
+        private readonly List<TMP_Text> _slideInTextBuffer = new();
+        private int _nextRevealIndex;
+        private int _remainingSlideIns;
+        private bool _isRevealTimelinePlaying;
 
+        /// <summary>
+        ///     シーンに設定された文言の見た目を保存し、左右の選択移動を設定します。
+        /// </summary>
         private void Awake()
         {
+            if (_completeButtonLabel == null || _retryButtonLabel == null)
+            {
+                Debug.LogError($"[{nameof(StageResultView)}] ボタンの文言用Textが未設定です。", this);
+            }
+
+            _completeButtonOriginalScale = _completeButtonLabel != null ? _completeButtonLabel.transform.localScale : Vector3.one;
+            _retryButtonOriginalScale = _retryButtonLabel != null ? _retryButtonLabel.transform.localScale : Vector3.one;
+            _completeButtonOriginalColor = _completeButtonLabel != null ? _completeButtonLabel.color : Color.white;
+            _retryButtonOriginalColor = _retryButtonLabel != null ? _retryButtonLabel.color : Color.white;
+            ConfigureButtonNavigation();
             Hide();
+        }
+
+        /// <summary>
+        ///     表示中だけ、フォーカスの変更をボタンの文言へ反映します。
+        /// </summary>
+        private void Update()
+        {
+            if (_isShown)
+            {
+                RefreshButtonFocus();
+                if (_isRevealTimelinePlaying)
+                {
+                    RevealThroughProgress();
+                }
+            }
+        }
+
+        /// <summary>
+        ///     無効化されたリザルトのボタンを元の見た目へ戻します。
+        /// </summary>
+        private void OnDisable()
+        {
+            StopTextSlideIn();
+            StopCountUps(false);
+            RefreshButtonFocus();
         }
 
         private void OnDestroy()
         {
             UnsubscribeViewModel();
+
+            StopTextSlideIn();
+            StopCountUps(false);
         }
 
+        /// <summary>
+        ///     表示中のテキストを左から右方向へスライドインさせる。
+        /// </summary>
+        private void PlayTextSlideIn()
+        {
+            if (_viewModel == null)
+            {
+                throw new InvalidOperationException("リザルト表示前にInitializeを実行してください。");
+            }
+
+            bool isVictory = _viewModel.ResultType.Value == StageResultType.Victory;
+            if (isVictory && (_revealTimeline == null || _revealTimeline.playableAsset == null))
+            {
+                throw new InvalidOperationException("勝利リザルトの文字表示Timelineが未設定です。");
+            }
+
+            StopTextSlideIn();
+            StopCountUps(true);
+            _isUiSlided = false;
+
+            if (_textSlideIn == null || !_textSlideIn.IsEnabled)
+            {
+                OnTextSlideInCompleted();
+                return;
+            }
+
+            Canvas.ForceUpdateCanvases();
+            CollectSlideInTexts();
+            _remainingSlideIns = _slideInTexts.Count;
+            if (_remainingSlideIns == 0)
+            {
+                OnTextSlideInCompleted();
+                return;
+            }
+
+            foreach (TMP_Text text in _slideInTexts)
+            {
+                _textPresentations.Add(new ResultTextSlideIn(text, _textSlideIn));
+            }
+
+            if (isVictory)
+            {
+                _nextRevealIndex = 0;
+                _revealProgress = 0f;
+                _isRevealTimelinePlaying = true;
+                _revealTimeline.stopped += HandleRevealTimelineStopped;
+                _revealTimeline.time = 0d;
+                _revealTimeline.Evaluate();
+                _revealTimeline.Play();
+                RevealThroughProgress();
+                return;
+            }
+
+            // 敗北時の順序と間隔は従来の設定を維持する。
+            for (int i = 0; i < _textPresentations.Count; i++)
+            {
+                _textPresentations[i].Play(_slideInHandles, HandleTextSlideCompleted, i * _textSlideIn.Interval);
+            }
+        }
+
+        /// <summary>
+        ///     Timelineの進捗カーブに合わせ、画面上から文字を表示します。
+        /// </summary>
+        private void RevealThroughProgress()
+        {
+            int count = _textPresentations.Count;
+            int visibleCount = Mathf.Clamp(Mathf.FloorToInt(Mathf.Clamp01(_revealProgress) * (count - 1)) + 1, 0, count);
+            while (_nextRevealIndex < visibleCount)
+            {
+                _textPresentations[_nextRevealIndex++].Play(_slideInHandles, HandleTextSlideCompleted);
+            }
+        }
+
+        /// <summary>
+        ///     Timelineの最終フレームで残った文字も表示し、短縮編集にも対応します。
+        /// </summary>
+        private void HandleRevealTimelineStopped(PlayableDirector director)
+        {
+            director.stopped -= HandleRevealTimelineStopped;
+            if (_isRevealTimelinePlaying)
+            {
+                _revealProgress = 1f;
+                RevealThroughProgress();
+                _isRevealTimelinePlaying = false;
+            }
+        }
+
+        /// <summary>
+        ///     全ての文字が表示された後、既存のカウントアップを開始します。
+        /// </summary>
+        private void HandleTextSlideCompleted()
+        {
+            _remainingSlideIns--;
+            if (_remainingSlideIns == 0)
+            {
+                OnTextSlideInCompleted();
+            }
+        }
+
+        /// <summary>
+        ///     Timelineと描画フックを解放し、途中終了でも元の表示を復元します。
+        /// </summary>
+        private void StopTextSlideIn()
+        {
+            _isRevealTimelinePlaying = false;
+            if (_revealTimeline != null)
+            {
+                _revealTimeline.stopped -= HandleRevealTimelineStopped;
+                _revealTimeline.Stop();
+            }
+
+            foreach (MotionHandle handle in _slideInHandles)
+            {
+                handle.TryCancel();
+            }
+            _slideInHandles.Clear();
+
+            foreach (ResultTextSlideIn presentation in _textPresentations)
+            {
+                presentation.Dispose();
+            }
+            _textPresentations.Clear();
+        }
+
+        /// <summary>
+        ///     リザルト画面配下の表示中のTextを、画面上側から順に集める。
+        /// </summary>
+        private void CollectSlideInTexts()
+        {
+            _slideInTexts.Clear();
+
+            Transform root = _canvasGroup != null ? _canvasGroup.transform : transform;
+
+            root.GetComponentsInChildren(true, _slideInTextBuffer);
+
+            for (int i = 0; i < _slideInTextBuffer.Count; i++)
+            {
+                TMP_Text text = _slideInTextBuffer[i];
+
+                // 勝敗で片方のルートが非表示になるため、表示中のTextだけ動かす。
+                if (text == null || !text.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                if (IsExcludedFromSlideIn(text.transform))
+                {
+                    continue;
+                }
+
+                _slideInTexts.Add(text);
+            }
+
+            // ヒエラルキー順は見た目の並びと一致しないため、画面上側から順に流す。
+            _slideInTexts.Sort(CompareByScreenTopToBottom);
+        }
+
+        /// <summary>
+        ///     スライドイン演出の除外指定に含まれるかを判定する。
+        /// </summary>
+        /// <param name="target"> 判定対象のTransform。 </param>
+        /// <returns> 除外対象ならtrue。 </returns>
+        private bool IsExcludedFromSlideIn(Transform target)
+        {
+            if (_textSlideInExcludes == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _textSlideInExcludes.Length; i++)
+            {
+                Transform exclude = _textSlideInExcludes[i];
+
+                if (exclude == null)
+                {
+                    continue;
+                }
+
+                if (target.IsChildOf(exclude))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     画面上側のTextが先に来るように比較する。
+        /// </summary>
+        /// <param name="left"> 比較元のText。 </param>
+        /// <param name="right"> 比較先のText。 </param>
+        /// <returns> 並び順の比較結果。 </returns>
+        private static int CompareByScreenTopToBottom(TMP_Text left, TMP_Text right)
+        {
+            return right.rectTransform.position.y.CompareTo(
+                left.rectTransform.position.y);
+        }
 
         /// <summary>
         ///     ViewModelが保持する表示値を購読する。
@@ -230,12 +534,12 @@ namespace KillChord.Runtime.View.InGame.Result
                     value => SetText(_mainMissionStateText, value));
 
             _battleTimeDisposable =
-                _viewModel.BattleTimeText.Subscribe(
-                    value => SetText(_battleTimeText, value));
+                _viewModel.BattleTimeSeconds.Subscribe(
+                    value => SetCountUp(_battleTimeText, value, FormatBattleTime));
 
             _maxComboDisposable =
-                _viewModel.MaxComboText.Subscribe(
-                    value => SetText(_maxComboText, value));
+                _viewModel.MaxCombo.Subscribe(
+                    value => SetCountUp(_maxComboText, value, FormatMaxCombo));
 
             _rankDisposable =
                 _viewModel.RankText.Subscribe(
@@ -325,6 +629,12 @@ namespace KillChord.Runtime.View.InGame.Result
 
                 _spawnedSubMissionItems.Add(itemView);
             }
+
+            // 表示後に一覧が差し替わった場合も、生成し直した項目を演出へ乗せる。
+            if (_canvasGroup != null && _canvasGroup.alpha > 0f)
+            {
+                PlayTextSlideIn();
+            }
         }
 
         /// <summary>
@@ -350,11 +660,114 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <summary>
         ///     シーン遷移失敗後にリザルト画面の操作を復帰する。
         /// </summary>
-        private void RestoreInteraction()
+        /// <param name="focusTarget"> フォーカスを戻すボタン。 </param>
+        private void RestoreInteraction(Button focusTarget)
         {
             _isTransitioning = false;
 
             SetInteractionEnabled(true);
+            SelectButton(focusTarget);
+            RefreshButtonFocus();
+        }
+
+        /// <summary>
+        ///     操作可能な選択中のボタンの文言だけを拡大し、水色にします。
+        /// </summary>
+        private void RefreshButtonFocus()
+        {
+            GameObject selectedObject = _isShown && !_isTransitioning && isActiveAndEnabled
+                ? EventSystem.current?.currentSelectedGameObject
+                : null;
+            ApplyButtonFocus(_completeButton, _completeButtonLabel,
+                _completeButtonOriginalScale, _completeButtonOriginalColor, selectedObject);
+            ApplyButtonFocus(_retryButton, _retryButtonLabel,
+                _retryButtonOriginalScale, _retryButtonOriginalColor, selectedObject);
+        }
+
+        /// <summary>
+        ///     ボタンの選択状態が変わった場合だけ、保存した見た目を基準に更新します。
+        /// </summary>
+        /// <param name="button"> 表示対象のボタンです。 </param>
+        /// <param name="label"> ボタンの文言です。 </param>
+        /// <param name="originalScale"> シーンに設定された拡大率です。 </param>
+        /// <param name="originalColor"> シーンに設定された文言の色です。 </param>
+        /// <param name="selectedObject"> 現在操作可能な選択対象です。 </param>
+        private static void ApplyButtonFocus(
+            Button button, TMP_Text label, Vector3 originalScale, Color originalColor, GameObject selectedObject)
+        {
+            bool isFocused = button != null && selectedObject == button.gameObject
+                && button.IsActive() && button.IsInteractable();
+            Vector3 scale = originalScale * (isFocused ? FOCUSED_BUTTON_SCALE : 1f);
+            if (label != null && label.transform.localScale != scale)
+            {
+                label.transform.localScale = scale;
+            }
+
+            Color color = isFocused ? Color.cyan : originalColor;
+            color.a = originalColor.a;
+            if (label != null && label.color != color)
+            {
+                label.color = color;
+            }
+        }
+
+        /// <summary>
+        ///     完了から左でリトライ、リトライから右で完了にだけ移動できるようにします。
+        /// </summary>
+        private void ConfigureButtonNavigation()
+        {
+            if (_completeButton != null)
+            {
+                _completeButton.navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnLeft = _retryButton
+                };
+            }
+
+            if (_retryButton != null)
+            {
+                _retryButton.navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnRight = _completeButton
+                };
+            }
+        }
+
+        /// <summary>
+        ///     指定したボタンへEventSystemのフォーカスを移す。
+        /// </summary>
+        /// <param name="button"> フォーカス対象のボタン。 </param>
+        private static void SelectButton(Button button)
+        {
+            EventSystem eventSystem = EventSystem.current;
+
+            if (eventSystem == null || button == null || !button.IsActive() || !button.IsInteractable())
+            {
+                return;
+            }
+
+            eventSystem.SetSelectedGameObject(null);
+            eventSystem.SetSelectedGameObject(button.gameObject);
+        }
+
+        /// <summary>
+        ///     リザルト画面内に残っているEventSystemの選択を解除する。
+        /// </summary>
+        private void ClearSelection()
+        {
+            EventSystem eventSystem = EventSystem.current;
+            GameObject selectedObject = eventSystem != null
+                ? eventSystem.currentSelectedGameObject
+                : null;
+
+            if (selectedObject == null || !selectedObject.transform.IsChildOf(transform))
+            {
+                return;
+            }
+
+            eventSystem.SetSelectedGameObject(null);
         }
 
         /// <summary>
@@ -386,6 +799,11 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <param name="isEnabled"> 操作可能にする場合はtrue。 </param>
         private void SetInteractionEnabled(bool isEnabled)
         {
+            if (!isEnabled)
+            {
+                RefreshButtonFocus();
+            }
+
             if (_canvasGroup == null)
             {
                 return;
@@ -409,5 +827,148 @@ namespace KillChord.Runtime.View.InGame.Result
 
             text.text = value ?? string.Empty;
         }
+
+        /// <summary>
+        ///     数値をカウントアップ表示する。スライドイン演出が完了するまでは値を保留する。
+        /// </summary>
+        /// <param name="text"> 設定対象のText。 </param>
+        /// <param name="value"> 表示する最終値。 </param>
+        /// <param name="formatter"> 値を表示文字列へ変換する関数。 </param>
+        private void SetCountUp(TMP_Text text, float value, Func<float, string> formatter)
+        {
+            if (text == null || formatter == null)
+            {
+                return;
+            }
+
+            if (!_isUiSlided)
+            {
+                _pendingCountUpValues[text] = (value, formatter);
+                return;
+            }
+
+            PlayCountUp(text, value, formatter);
+        }
+
+        /// <summary>
+        ///     0から目標値までカウントアップさせる。同じTextに対する再生中の演出は打ち切って上書きする。
+        /// </summary>
+        /// <param name="text"> 設定対象のText。 </param>
+        /// <param name="targetValue"> カウントアップの最終値。 </param>
+        /// <param name="formatter"> 値を表示文字列へ変換する関数。 </param>
+        private void PlayCountUp(TMP_Text text, float targetValue, Func<float, string> formatter)
+        {
+            CancelCountUp(text, false);
+
+            if (_countUpSetting == null || !_countUpSetting.IsEnabled || _countUpSetting.Duration <= 0f)
+            {
+                text.text = formatter(targetValue);
+                return;
+            }
+
+            text.text = formatter(0f);
+
+            MotionHandle handle = LMotion.Create(0f, targetValue, _countUpSetting.Duration)
+                .WithEase(_countUpSetting.Ease)
+                .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                .WithOnComplete(() => _countUpHandles.Remove(text))
+                .Bind(currentValue => text.text = formatter(currentValue))
+                .AddTo(text.gameObject);
+
+            _countUpHandles[text] = (handle, targetValue, formatter);
+        }
+
+        /// <summary>
+        ///     指定Textのカウントアップ演出を打ち切る。
+        /// </summary>
+        /// <param name="text"> 対象のText。 </param>
+        /// <param name="snapToFinal"> 打ち切り時に最終値を表示へ反映するか。 </param>
+        private void CancelCountUp(TMP_Text text, bool snapToFinal)
+        {
+            if (text == null || !_countUpHandles.TryGetValue(text, out var entry))
+            {
+                return;
+            }
+
+            entry.Handle.TryCancel();
+            _countUpHandles.Remove(text);
+
+            if (snapToFinal)
+            {
+                text.text = entry.Formatter(entry.Value);
+            }
+        }
+
+        /// <summary>
+        ///     再生中の全カウントアップ演出を打ち切る。
+        /// </summary>
+        /// <param name="snapToFinal"> 打ち切り時に各Textへ最終値を反映するか。 </param>
+        private void StopCountUps(bool snapToFinal)
+        {
+            if (_countUpHandles.Count == 0)
+            {
+                return;
+            }
+
+            _countUpKeysBuffer.Clear();
+            _countUpKeysBuffer.AddRange(_countUpHandles.Keys);
+
+            for (int i = 0; i < _countUpKeysBuffer.Count; i++)
+            {
+                CancelCountUp(_countUpKeysBuffer[i], snapToFinal);
+            }
+
+            _countUpKeysBuffer.Clear();
+        }
+
+        /// <summary>
+        ///     経過時間を「mm:ss」形式の文字列へ変換する。
+        /// </summary>
+        /// <param name="elapsedSeconds"> 経過時間（秒）。 </param>
+        /// <returns> 「mm:ss」形式の文字列。 </returns>
+        private static string FormatBattleTime(float elapsedSeconds)
+        {
+            // 経過時間は繰り上げずに切り捨てる。
+            int totalSeconds = Mathf.Max(0, Mathf.FloorToInt(elapsedSeconds));
+
+            int minutes = totalSeconds / SECOND_PER_MINUTE;
+            int seconds = totalSeconds % SECOND_PER_MINUTE;
+
+            return $"{minutes:00}:{seconds:00}";
+        }
+
+        /// <summary>
+        ///     最大コンボ数を表示文字列へ変換する。
+        /// </summary>
+        /// <param name="value"> コンボ数。 </param>
+        /// <returns> 表示文字列。 </returns>
+        private static string FormatMaxCombo(float value)
+        {
+            return Mathf.Max(0, Mathf.RoundToInt(value)).ToString();
+        }
+
+        /// <summary>
+        ///     スライドイン演出の完了を受けて、保留していたカウントアップを開始する。
+        /// </summary>
+        private void OnTextSlideInCompleted()
+        {
+            if (_isUiSlided)
+            {
+                return;
+            }
+
+            _isUiSlided = true;
+
+            foreach (KeyValuePair<TMP_Text, (float Value, Func<float, string> Formatter)> pair in _pendingCountUpValues)
+            {
+                if (pair.Key != null)
+                {
+                    PlayCountUp(pair.Key, pair.Value.Value, pair.Value.Formatter);
+                }
+            }
+
+            _pendingCountUpValues.Clear();
+        }
+
     }
 }

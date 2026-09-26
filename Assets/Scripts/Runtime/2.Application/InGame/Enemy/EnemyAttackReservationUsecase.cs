@@ -1,10 +1,8 @@
-using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Music;
 using System;
 using System.Threading;
-using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Enemy
 {
@@ -30,6 +28,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <summary> 予約が存在するかどうかを示すプロパティ。 </summary>
         public bool HasReservation => _hasReservation;
 
+        /// <summary> 予約中の攻撃時刻（音源再生時間・秒）。予約が無い場合は無効。 </summary>
+        public double AttackExecutionTime { get; private set; }
+
         /// <summary> 予約タイミングが到達時に発火するイベント </summary>
         public event Action OnReservedTimingReached;
         public event Action On2BeatBefore;
@@ -40,7 +41,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         public void ReserveEncounter()
         {
-            Debug.Log("[EnemyAttackReservationUsecase] ReserveEncounter 呼び出し");
             Reserve(_enemyAttackMusicSpec.EncounterTiming);
         }
 
@@ -59,7 +59,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         {
             if (_cancellationTokenSource == null || _cancellationTokenSource.IsCancellationRequested)
             {
-                Debug.Log("予約が存在しないか、すでにキャンセルされています。");
                 return;
             }
 
@@ -101,32 +100,20 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <param name="musicSpec"></param>
         private void Reserve(in MusicSyncSpec musicSpec)
         {
-            Debug.Log("[EnemyAttackReservationUsecase] Reserve 開始");
             // 既存の予約をキャンセルしてから新しい予約を設定する。
             Cancel();
 
             _cancellationTokenSource = new CancellationTokenSource();
             _hasReservation = true;
 
-            _musicActionScheduler.Schedule(
+            // 攻撃の絶対時刻を保持し、演出側が残り時間から進捗を算出できるようにする。
+            AttackExecutionTime = _musicActionScheduler.Schedule(
                 musicSpec,
                 HandleReservedTimingReached,
                 _cancellationTokenSource.Token);
 
-            if(musicSpec.TargetBeat >= 3) // 指定ビートが3以上の場合のみ、2拍前と1拍前のイベントもスケジュールする
-            {
-            
-            _musicActionScheduler.Schedule(
-                new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 2),
-                Handle2BeatBefore,
-                _cancellationTokenSource.Token);
-
-            _musicActionScheduler.Schedule(
-                new MusicSyncSpec(musicSpec.BarFlag, musicSpec.TimeSignature, musicSpec.TargetBeat - 1),
-                Handle1BeatBefore,
-                _cancellationTokenSource.Token);
-            }
-           
+            LeadNotificationScheduler.TrySchedule(_musicActionScheduler, musicSpec, TWO_BEAT_LEAD, Handle2BeatBefore, _cancellationTokenSource.Token);
+            LeadNotificationScheduler.TrySchedule(_musicActionScheduler, musicSpec, ONE_BEAT_LEAD, Handle1BeatBefore, _cancellationTokenSource.Token);
         }
 
         /// <summary>
@@ -134,7 +121,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         private void HandleReservedTimingReached()
         {
-            Debug.Log("予約されたタイミングに到達しました。");
             _hasReservation = false;
             OnReservedTimingReached?.Invoke();
         }
@@ -144,7 +130,6 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         private void Handle2BeatBefore()
         {
-            Debug.Log("攻撃の2拍前に到達しました。");
             On2BeatBefore?.Invoke();
         }
         /// <summary>
@@ -152,10 +137,14 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         private void Handle1BeatBefore()
         {
-            Debug.Log("攻撃の1拍前に到達しました。");
             On1BeatBefore?.Invoke();
         }
-        
+
+
+        /// <summary> 2拍前の予告に使う遡り量。 </summary>
+        private const double TWO_BEAT_LEAD = 2d;
+        /// <summary> 1拍前の予告に使う遡り量。 </summary>
+        private const double ONE_BEAT_LEAD = 1d;
 
         private readonly EnemyAttackMusicSpec _enemyAttackMusicSpec;
         private readonly IMusicActionScheduler _musicActionScheduler;

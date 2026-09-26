@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 992a3cc89961d554cb13e7d6ba345d99, type: 3}
+  m_Name: PlayerAttack_Beat1_AntiMaterialRifle
+  m_EditorClassIdentifier: 
+  _attackName: 対物ライフル
+  _attackParameterSetData: {fileID: 11400000, guid: ef0831d36d26b8b4d9e5ec4bb719f18c, type: 2}
+  _attackPipelineAsset: {fileID: 11400000, guid: d4c8e287e8c321e4b980ea8a618c2146, type: 2}
+  _justDamageMultiplier: 1
+  _useBeatType: 1
+  _beatType: 1
+  _weaponDamageMultiplier: 2
+  _range: 37.5
+  _halfAngleDegrees: 1
+  _isMultiTarget: 1
+  _hitCount: 1
+  _hitInterval: 0.05
+  _criticalDamageMultiplier: 1.5
+  _outOfRangeDamageMultiplier: 0.5

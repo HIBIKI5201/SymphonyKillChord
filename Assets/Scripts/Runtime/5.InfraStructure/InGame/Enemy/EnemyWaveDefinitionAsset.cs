@@ -7,6 +7,7 @@ using SymphonyFrameWork.Attribute;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 {
@@ -36,7 +37,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
                 EnemyWaveDetail[] details = new EnemyWaveDetail[sourceDetails.Length];
                 for (int j = 0; j < sourceDetails.Length; j++)
                 {
-                    EnemyWaveDetail detail = new EnemyWaveDetail(sourceDetails[j].EnemyType, sourceDetails[j].EnemyAmount);
+                    EnemyWaveDetail detail = new EnemyWaveDetail(
+                        new EnemyDefinitionId(sourceDetails[j].EnemyDefinitionId.Id),
+                        sourceDetails[j].EnemyAmount);
                     details[j] = detail;
                 }
 
@@ -127,17 +130,23 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         [Serializable]
         private class WaveDetailDefinition
         {
-            /// <summary> 敵種類 </summary>
-            [Tooltip("敵種類")] public EnemyType EnemyType;
+            /// <summary> 生成する個別の敵定義IDです。 </summary>
+            [SourceDataCollection("EnemyData"), Tooltip("生成する個別の敵データです。")]
+            public DataID EnemyDefinitionId;
             /// <summary> 敵の数 </summary>
             [Tooltip("敵の生成数"), Range(0, 20)] public int EnemyAmount;
+
+            [FormerlySerializedAs("EnemyType")]
+            [SerializeField, HideInInspector]
+            private EnemyType _legacyEnemyType;
         }
 
         [Serializable]
         private class SingleWaveDefinition
         {
-            /// <summary> 敵種類ごとの詳細 </summary>
-            [Tooltip("敵種類ごとの定義")] public WaveDetailDefinition[] Details;
+            /// <summary> 個別の敵データごとの詳細です。 </summary>
+            [Tooltip("個別の敵データごとの定義です。")]
+            public WaveDetailDefinition[] Details;
             /// <summary> 次Waveまでの時間 </summary>
             [Tooltip("Waveの継続時間(秒)"), Range(0, 1800)] public float WaveDuration;
             /// <summary> Wave開始時に予約するステージ演出です。 </summary>

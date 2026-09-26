@@ -10,6 +10,10 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
+# ビルドログなどの診断ログ (ルート直下に出力されることがあり、巨大かつ
+# 各自の絶対パスを含むため共有しない)
+*.log
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
@@ -82,6 +86,9 @@ ExportedPackages/
 
 /SinfoniaOperator/sinfonia-operator.secrets.json
 
+# NotionMarkdownWriter が pull した編集用の作業ファイル。
+/SinfoniaOperator/.notion-work/
+
 # CRI Atom Craft 作曲プロジェクト実体 (バックアップ/セッション等を含み肥大化するため除外。
 # ランタイムは Assets/StreamingAssets の .acb/.acf のみ使用する)
 /[Aa]ssets/SymphonyKillChord/
@@ -93,3 +100,23 @@ Docs/DiscordLog/
 # Python (scripts/)
 __pycache__/
 *.py[cod]
+
+# Claude Code のローカル設定（各自の環境依存のため共有しない）
+.claude/settings.local.json
+
+# Hot Reload (有償アセット。各自でインストールするためリポジトリでは共有しない)
+Packages/com.singularitygroup.hotreload/
+
+# Entities のSubSceneベイクで生成されるキャッシュ
+Assets/SceneDependencyCache/
+Assets/SceneDependencyCache.meta
+
+# uloop-cli の出力
+.uloop/
+
+# IDE(Unity/Rider)が自動生成するソリューションファイル
+*.slnx
+Docs/AI資料まとめ/仕様更新ドラフト_2026-08-03/19_リボルバー_発注書.md
+Docs/AI資料まとめ/仕様更新ドラフト_2026-08-03/17_コンフィグ_難易度アシスト_今後の課題.md
+Docs/AI資料まとめ/
+Docs/

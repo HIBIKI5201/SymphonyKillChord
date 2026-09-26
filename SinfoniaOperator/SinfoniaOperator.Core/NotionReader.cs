@@ -221,17 +221,38 @@ namespace SinfoniaStudio.SinfoniaOperator
             if (page?.Properties == null) return DEFAULT_NAME;
 
             if (page.Properties.TryGetValue(namePropertyName, out PropertyValue? titlePropValue) &&
-                titlePropValue is TitlePropertyValue titleProperty &&
-                titleProperty.Title != null)
+                titlePropValue is TitlePropertyValue titleProperty)
             {
-                string name = string.Join("", titleProperty.Title
-                    .Where(t => t != null && t.PlainText != null)
-                    .Select(t => t.PlainText));
+                string configuredPropertyName = GetTitleText(titleProperty);
+                if (!string.IsNullOrWhiteSpace(configuredPropertyName))
+                {
+                    return configuredPropertyName;
+                }
+            }
 
-                return string.IsNullOrWhiteSpace(name) ? DEFAULT_NAME : name;
+            foreach (PropertyValue propertyValue in page.Properties.Values)
+            {
+                if (propertyValue is not TitlePropertyValue fallbackTitleProperty) { continue; }
+
+                string title = GetTitleText(fallbackTitleProperty);
+                if (!string.IsNullOrWhiteSpace(title)) { return title; }
             }
 
             return DEFAULT_NAME;
+        }
+
+        /// <summary>
+        ///     Notionのタイトルプロパティからプレーンテキストを取得する。
+        /// </summary>
+        /// <param name="titleProperty">タイトルプロパティ。</param>
+        /// <returns>タイトル文字列。空の場合は空文字列。</returns>
+        private static string GetTitleText(TitlePropertyValue titleProperty)
+        {
+            if (titleProperty.Title == null) { return string.Empty; }
+
+            return string.Join("", titleProperty.Title
+                .Where(title => title != null && title.PlainText != null)
+                .Select(title => title.PlainText));
         }
 
         private readonly string? _notionToken;

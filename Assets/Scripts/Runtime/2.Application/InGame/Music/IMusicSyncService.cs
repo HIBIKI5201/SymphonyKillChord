@@ -10,11 +10,22 @@ namespace KillChord.Runtime.Application.InGame.Music
     /// </summary>
     public interface IMusicSyncService
     {
+        /// <summary> 入力履歴がリズムタイムアウトで破棄されたときに通知します。 </summary>
+        event Action OnRhythmTimedOut;
+
+        /// <summary> ロジックとガイドが共有するリズム判定定義。 </summary>
+        RhythmJudgmentDefinition RhythmJudgmentDefinition { get; }
+
         /// <summary>
         ///     更新処理を行い、予約されたアクションを実行する。
         /// </summary>
         /// <param name="playTime"> 再生時間。 </param>
         void Update(double playTime);
+
+        /// <summary>
+        ///     再生終了・巻き戻し時に履歴、予約とゲージ基準を通知なしで破棄する。
+        /// </summary>
+        void ResetPlayback();
 
         /// <summary>
         ///     履歴の長さを取得する。
@@ -27,6 +38,13 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// </summary>
         /// <returns> 0〜1の進捗。 </returns>
         float GetBarProgress();
+
+        /// <summary>
+        ///     直前のアクション入力からの経過を小節長で正規化した進捗を、上限なしで取得する。
+        ///     1小節を超えた超過分を表示に使いたい場合に使用する。
+        /// </summary>
+        /// <returns> 0以上の進捗。1で1小節経過。 </returns>
+        float GetBarProgressUnclamped();
 
         /// <summary>
         ///     拍の種類履歴を取得する。
@@ -53,17 +71,19 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <param name="timing"> 実行タイミング。 </param>
         /// <param name="action"> 実行アクション。 </param>
         /// <param name="ct"> キャンセルトークン。 </param>
-        void RegisterAction(
+        /// <returns> 実行される音源再生時間（秒）。 </returns>
+        double RegisterAction(
             double accurateBeat,
             ExecuteRequestTiming timing,
             Action action,
             CancellationToken ct);
 
         /// <summary>
-        ///     現在の拍の種類を取得する。
+        ///     現在の拍種とジャスト成否を、副作用なく取得する。
         /// </summary>
+        /// <param name="isJustHit"> ジャスト範囲内の場合はtrue。 </param>
         /// <returns> 拍の種類。 </returns>
-        BeatType GetCurrentBeatType();
+        BeatType GetCurrentBeatType(out bool isJustHit);
 
         /// <summary>
         ///     アクション履歴を登録する。

@@ -1,18 +1,24 @@
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.View.OutGame.Screen;
 using SymphonyFrameWork.System.SceneLoad;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.Composition.OutGame
 {
     /// <summary>
-     ///     アウトゲーム共通 Signal を生成して公開するクラスです。
+    ///     アウトゲーム共通 Signal を生成して公開するクラスです。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
     public sealed class OutGameSceneInitializer : OutGameInitializationModuleBase
@@ -65,7 +71,14 @@ namespace KillChord.Runtime.Composition.OutGame
             }
             finally
             {
-                CompleteSceneInitialization(isSuccess);
+                if (this != null)
+                {
+                    CompleteSceneInitialization(isSuccess);
+                    if (!isSuccess && !destroyCancellationToken.IsCancellationRequested)
+                    {
+                        ShowInitializationFailure();
+                    }
+                }
             }
         }
 
@@ -80,7 +93,7 @@ namespace KillChord.Runtime.Composition.OutGame
             }
 
             _outGameUiEvent = new OutGameUIEvent();
-            _isOwner = ServiceLocator.RegisterInstance(_outGameUiEvent, LocateType.Locator);
+            _isOwner = ServiceLocator.RegisterInstance(_outGameUiEvent, LocateTypeEnum.Locator);
             return _isOwner;
         }
 
@@ -89,11 +102,27 @@ namespace KillChord.Runtime.Composition.OutGame
         /// </summary>
         private void OnDestroy()
         {
+            if (_failureView != null)
+            {
+                _failureView.OnRecoveryRequested -= RecoveryRequestedHandler;
+            }
+
             if (_modules != null)
             {
                 for (int i = _modules.Count - 1; i >= 0; i--)
                 {
-                    _modules[i]?.Shutdown();
+                    try
+                    {
+                        _modules[i]?.Shutdown();
+                    }
+                    catch (Exception exception)
+                    {
+                        // 初期化途中のモジュールが失敗しても、残りの登録解除を続けます。
+                        Debug.LogError(
+                            $"[{nameof(OutGameSceneInitializer)}] {_modules[i]?.ModuleName} の終了処理に失敗しました。",
+                            this);
+                        Debug.LogException(exception, this);
+                    }
                 }
 
                 _modules = null;
@@ -177,9 +206,111 @@ namespace KillChord.Runtime.Composition.OutGame
             readiness.Complete(gameObject.scene.name, isSuccess);
         }
 
+        /// <summary>
+        ///     不完全な通常UIを無効にし、アセット不要の復帰画面を表示します。
+        /// </summary>
+        private void ShowInitializationFailure()
+        {
+            UIDocument[] documents = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            foreach (UIDocument document in documents)
+            {
+                if (document.gameObject.scene == gameObject.scene)
+                {
+                    document.enabled = false;
+                }
+            }
+
+            if (_failureView != null) { return; }
+            _failureView = gameObject.AddComponent<OutGameInitializationFailureView>();
+            // Localization自体の初期化失敗でも復帰できるよう、ロード済みの言語設定だけを参照する。
+            bool isEnglish = SaveStore.IsLoaded<SaveData>()
+                && SaveStore.Get<SaveData>().EnvironmentSettings.Language == GameLanguage.English;
+            string actionLabel = gameObject.scene.name == _titleSceneName
+                ? isEnglish ? "Reload" : "もう一度読み込む"
+                : isEnglish ? "Return to Title" : "タイトルへ戻る";
+            _failureView.Initialize(
+                actionLabel,
+                isEnglish ? "Failed to load the screen." : "画面の読み込みに失敗しました。",
+                isEnglish ? "Failed to load the screen. Please try again." : "画面を読み込めませんでした。もう一度お試しください。",
+                isEnglish ? "Loading…" : "読み込み中…");
+            _failureView.OnRecoveryRequested += RecoveryRequestedHandler;
+        }
+
+        /// <summary>
+        ///     初期化に失敗したシーンからタイトルへ復帰します。タイトル自身の失敗時は再読み込みします。
+        /// </summary>
+        private async void RecoveryRequestedHandler()
+        {
+            if (_isRecovering)
+            {
+                return;
+            }
+
+            // 常駐側の専用失敗処理から Title の既存画面へ委ねるまでは、独自復帰を開始しません。
+            if (ServiceLocator.TryGetInstance(out SceneTransitionController owner)
+                && owner.HasScenarioBattleSortie) { return; }
+
+            // 初期化失敗を受け取った元のロード処理が終了するまでは、次のロードを開始しません。
+            if (ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var executor)
+                && executor.IsSessionActive)
+            {
+                return;
+            }
+
+            CancellationToken lifetime = ServiceLocator.TryGetInstance(out SceneTransitionController lifetimeOwner)
+                ? lifetimeOwner.PersistentLifetimeToken : default;
+            if (lifetime.IsCancellationRequested) { return; }
+            _isRecovering = true;
+            _failureView.SetBusy(true);
+            try
+            {
+                if (!ServiceLocator.TryGetInstance<SceneTransitionController>(out var transition))
+                {
+                    Debug.LogError($"[{nameof(OutGameSceneInitializer)}] シーン遷移サービスが取得できませんでした。", this);
+                    _failureView.ShowRecoveryFailed();
+                    return;
+                }
+
+                string currentSceneName = gameObject.scene.name;
+                // 復帰元の破棄後も、遷移先の初期化とロード画面の終了まで継続します。
+                bool success = currentSceneName == _titleSceneName
+                    ? await transition.ReloadSceneWithPersistentLifetimeAsync(currentSceneName)
+                    : await transition.ChangeSceneWithPersistentLifetimeAsync(currentSceneName, _titleSceneName);
+
+                if (!success && this != null)
+                {
+                    _failureView.ShowRecoveryFailed();
+                }
+            }
+            catch (OperationCanceledException) when (lifetime.IsCancellationRequested)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+                if (this != null)
+                {
+                    _failureView.ShowRecoveryFailed();
+                }
+            }
+            finally
+            {
+                if (this != null && !lifetime.IsCancellationRequested)
+                {
+                    _isRecovering = false;
+                    _failureView.SetBusy(false);
+                }
+            }
+        }
+
+        [SerializeField, Tooltip("初期化失敗時の復帰先となるタイトルシーン名です。")]
+        private string _titleSceneName = "Title";
+
         private readonly OutGameInitializationCoordinator _initializationCoordinator = new();
         private List<IOutGameInitializationModule> _modules;
         private OutGameUIEvent _outGameUiEvent;
         private bool _isOwner;
+        private OutGameInitializationFailureView _failureView;
+        private bool _isRecovering;
     }
 }

@@ -1,18 +1,21 @@
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.View.InGame.Camera;
 using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using KillChord.Runtime.View.InGame.Camera;
 
 namespace KillChord.Runtime.Composition.InGame.Bootstrap
 {
@@ -25,13 +28,46 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         /// <summary>
         ///     シーンロードと初期化フェーズを開始します。
         /// </summary>
-        private async void Start()
+        private void Start()
         {
+            string sceneName = gameObject.scene.name;
+            ServiceLocator.TryGetInstance(out SceneTransitionController transition);
+            bool isDedicated = transition != null
+                && transition.TryGetScenarioBattleInitialization(sceneName, out _);
+            CancellationToken initializationToken = destroyCancellationToken;
+            if (isDedicated)
+            {
+                transition.TryGetScenarioBattleInitialization(sceneName, out initializationToken);
+            }
+
+            Task initialization = InitializeAsync(sceneName, transition, isDedicated, initializationToken);
+            if (isDedicated)
+            {
+                transition.RegisterScenarioBattleInitialization(sceneName, initialization);
+            }
+        }
+
+        /// <summary>
+        ///     手動復帰前に初期化の終了を確認できるよう、Task を公開します。
+        /// </summary>
+        private async Task InitializeAsync(string sceneName, SceneTransitionController transition,
+            bool isDedicated, CancellationToken initializationToken)
+        {
+            if (!IsBootedThroughPersistentFlow)
+            {
+                Debug.Log(
+                    $"[{nameof(IngameComposition)}] " +
+                    $"常駐シーンが未起動のため、インゲーム初期化を行いません。{gameObject.scene.name}");
+                return;
+            }
+
             bool isSuccess = false;
 
             try
             {
                 RegisterCurrentScenePriority();
+
+                initializationToken.ThrowIfCancellationRequested();
 
                 if (!TryResolveBootDependencies(
                     out SelectedBattleStageState selectedBattleStageState,
@@ -64,7 +100,9 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                         bool loadSuccess = await sceneTransitionService.LoadAdditiveAsync(
                             selectedBattleStageState.BattleSceneName,
                             stageLoadProgress,
-                            destroyCancellationToken);
+                            isDedicated ? transition.PersistentLifetimeToken : initializationToken);
+                        // 開始済みUnityロードの終了後に停止を確認し、後続フェーズを開始しません。
+                        initializationToken.ThrowIfCancellationRequested();
                         if (!loadSuccess)
                         {
                             Debug.LogError($"[{nameof(IngameComposition)}] バトルシーンの読み込みに失敗しました。", this);
@@ -73,7 +111,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
                         if (!await WaitForStageSceneReadyAsync(
                                 selectedBattleStageState.BattleSceneName,
-                                destroyCancellationToken))
+                                initializationToken))
                         {
                             Debug.LogError($"[{nameof(IngameComposition)}] バトルシーンの初期化待機に失敗しました。", this);
                             return false;
@@ -94,10 +132,10 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                         return await _initializationCoordinator.InitializeAsync(
                             _modules,
                             initializeProgress,
-                            destroyCancellationToken);
+                            initializationToken);
                     },
                     options,
-                    destroyCancellationToken);
+                    initializationToken);
 
                 if (!isSuccess)
                 {
@@ -115,9 +153,26 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             }
             finally
             {
-                CompleteSceneInitialization(isSuccess);
+                if (isDedicated && initializationToken.IsCancellationRequested)
+                {
+                    isSuccess = false;
+                    FailActiveLoadingSession();
+                }
+                if (ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+                {
+                    readiness.Complete(sceneName, isSuccess);
+                }
             }
         }
+
+        /// <summary>
+        ///     常駐シーンの初期化を経てこのシーンが起動されたかを示します。
+        ///     falseの場合、このシーンはインゲームシーンを直接開いて再生した場合などの
+        ///     フローに乗っていないシーンであり、起動時のシーン整理でアンロードされます。
+        ///     前提となる常駐サービスは登録されないため、待機しても解決しません。
+        /// </summary>
+        private static bool IsBootedThroughPersistentFlow =>
+            ServiceLocator.IsExistInstance<ISceneInitializationReadiness>();
 
         /// <summary>
         ///     現在のインゲームシーン優先度を登録します。
@@ -212,24 +267,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             }
 
             loadingScreenController.FailActiveSession();
-        }
-
-        /// <summary>
-        ///     インゲームシーンの初期化結果を通知します。
-        /// </summary>
-        /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
-        private void CompleteSceneInitialization(bool isSuccess)
-        {
-            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
-            {
-                Debug.LogError(
-                    $"[{nameof(IngameComposition)}] " +
-                    $"{nameof(ISceneInitializationReadiness)}が取得できません。",
-                    this);
-                return;
-            }
-
-            readiness.Complete(gameObject.scene.name, isSuccess);
         }
 
         /// <summary>

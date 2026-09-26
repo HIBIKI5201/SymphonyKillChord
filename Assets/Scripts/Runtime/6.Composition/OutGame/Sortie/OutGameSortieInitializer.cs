@@ -1,8 +1,13 @@
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Sortie;
+using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.Composition.Persistent.SceneManagement;
 using KillChord.Runtime.View.OutGame.Screen;
 using SymphonyFrameWork.System.ServiceLocate;
 using UnityEngine;
@@ -53,12 +58,22 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                 return false;
             }
 
-            IOutGameSortieOutputPort outputPort =
-                new OutGameSortieOutputPort(
-                    outGameUIEvent,
-                    inputComposition);
+            if (!ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+                || !ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var executor)
+                || !ServiceLocator.TryGetInstance(out SceneTransitionInitializer transitionInitializer))
+            {
+                Debug.LogError($"[{nameof(OutGameSortieInitializer)}] 常駐出撃サービスを取得できませんでした。", this);
+                return false;
+            }
+
+            _outputPort = new OutGameSortieOutputPort(
+                outGameUIEvent, inputComposition, transition, executor, transitionInitializer);
+            IOutGameSortieOutputPort outputPort = _outputPort;
             OutGameSortieUseCase useCase =
-                new OutGameSortieUseCase(sceneTransitionUseCase, outputPort);
+                new OutGameSortieUseCase(
+                    sceneTransitionUseCase,
+                    outputPort,
+                    destroyCancellationToken);
 
             OutGameSortieController controller = new OutGameSortieController(useCase);
 
@@ -67,11 +82,30 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         }
 
         /// <summary>
+        ///     全Build終了後にStageSelectが公開したStateと選択準備を接続します。
+        /// </summary>
+        public override bool Ready()
+        {
+            if (_outputPort == null
+                || !ServiceLocator.TryGetInstance(out PendingNodeTransitionState pendingState)
+                || !ServiceLocator.TryGetInstance(out SelectedScenarioState selectedState))
+            {
+                Debug.LogError($"[{nameof(OutGameSortieInitializer)}] 専用出撃のStateを取得できませんでした。", this);
+                return false;
+            }
+            _outputPort.ConnectScenarioBattleSortie(pendingState, selectedState, new BattleSortieSelectionService());
+            return true;
+        }
+
+        /// <summary>
         ///     登録したコントローラーをServiceLocatorから登録解除します。
         /// </summary>
         public override void Shutdown()
         {
             ServiceLocator.UnregisterInstance<OutGameSortieController>();
+            _outputPort = null;
         }
+
+        private OutGameSortieOutputPort _outputPort;
     }
 }

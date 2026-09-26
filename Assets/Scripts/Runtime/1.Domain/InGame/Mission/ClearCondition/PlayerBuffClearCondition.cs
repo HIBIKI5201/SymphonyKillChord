@@ -1,4 +1,4 @@
-using KillChord.Runtime.Domain.InGame.Buff;
+using KillChord.Runtime.Domain.InGame.StatusEffect;
 using System;
 using System.Collections.Generic;
 
@@ -14,15 +14,15 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         ///     PlayerBuffClearCondition クラスの新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="innerCondition"> 達成判定を委譲する内側の条件です。 </param>
-        /// <param name="buffs"> このステップの間だけプレイヤーへ付与するバフ・デバフです。 </param>
-        public PlayerBuffClearCondition(IMissionClearCondition innerCondition, IReadOnlyList<IBuff> buffs)
+        /// <param name="statusEffects"> このステップの間だけプレイヤーへ付与するバフ・デバフです。 </param>
+        public PlayerBuffClearCondition(IMissionClearCondition innerCondition, IReadOnlyList<IStatusEffect> statusEffects)
         {
             _innerCondition = innerCondition ?? throw new ArgumentNullException(nameof(innerCondition));
-            Buffs = buffs ?? Array.Empty<IBuff>();
+            StatusEffects = statusEffects ?? Array.Empty<IStatusEffect>();
         }
 
-        /// <summary> このステップの間だけプレイヤーへ付与するバフ・デバフです。 </summary>
-        public IReadOnlyList<IBuff> Buffs { get; }
+        /// <summary> このステップの間だけプレイヤーへ付与する状態効果です。 </summary>
+        public IReadOnlyList<IStatusEffect> StatusEffects { get; }
 
         /// <inheritdoc />
         public IMissionClearCondition InnerCondition => _innerCondition;

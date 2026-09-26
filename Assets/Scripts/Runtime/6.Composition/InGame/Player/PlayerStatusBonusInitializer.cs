@@ -4,7 +4,6 @@ using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.OutGame.Savedata;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
@@ -55,19 +54,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                     return false;
                 }
 
-                if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-                {
-#if UNITY_EDITOR
-                    Debug.LogError(
-                        $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(SavedataSystem)} が見つかりません。",
-                        this);
-#endif
-                    ReleaseLoadedSkillNodeDataRepo();
-                    return false;
-                }
-
                 SavedataSkillUnlockRepository savedataSkillUnlockRepository =
-                    new SavedataSkillUnlockRepository(savedataSystem);
+                    new SavedataSkillUnlockRepository();
                 PlayerStatusBonusCalculator calculator =
                     new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 

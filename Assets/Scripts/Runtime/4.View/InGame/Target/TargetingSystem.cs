@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -173,13 +174,31 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
+        ///     現在登録されているターゲットを呼び出し側の再利用リストへコピーする。
+        /// </summary>
+        /// <param name="destination"> コピー先のリスト。既存要素は消去される。 </param>
+        public void CopyRegisteredTargetsTo(List<ITargetableViewModel> destination)
+        {
+            if (destination == null)
+            {
+                throw new ArgumentNullException(nameof(destination));
+            }
+
+            destination.Clear();
+            foreach (ITargetableViewModel target in _targets)
+            {
+                destination.Add(target);
+            }
+        }
+
+        /// <summary>
         ///     プレイヤー位置と方向をもとに最適なターゲットへ切り替える。
         /// </summary>
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
         /// <param name="direction"> 選択基準に使用する方向。 </param>
         public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
         {
-            _currentTarget = EvaluateBestTarget(playerPosition, direction);
+            SetCurrentTarget(EvaluateBestTarget(playerPosition, direction));
             _currentCandidate = null;
         }
 
@@ -207,7 +226,7 @@ namespace KillChord.Runtime.View.InGame.Target
                 return false;
             }
 
-            _currentTarget = target;
+            SetCurrentTarget(target);
             _currentCandidate = null;
             return true;
         }
@@ -216,8 +235,9 @@ namespace KillChord.Runtime.View.InGame.Target
         ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
         /// </summary>
         /// <param name="targetId"> 設定対象のターゲットID。 </param>
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。被弾による内部的な再ターゲットではfalseを指定する。 </param>
         /// <returns> 設定に成功した場合は true。 </returns>
-        public bool TrySetCurrentTarget(Guid targetId)
+        public bool TrySetCurrentTarget(Guid targetId, bool notifyLockOn = true)
         {
             foreach (ITargetableViewModel targetable in _targets)
             {
@@ -231,7 +251,7 @@ namespace KillChord.Runtime.View.InGame.Target
                     return false;
                 }
 
-                _currentTarget = targetable;
+                SetCurrentTarget(targetable, notifyLockOn);
                 _currentCandidate = null;
                 return true;
             }
@@ -246,6 +266,22 @@ namespace KillChord.Runtime.View.InGame.Target
         {
             _currentTarget = null;
             _currentCandidate = null;
+        }
+
+        /// <summary>
+        ///     現在のターゲットを更新する。既存のターゲットと異なる敵へ新たにロックオンした場合、捕捉イベントを発火する。
+        /// </summary>
+        /// <param name="newTarget"> 新たに設定するターゲット。null の場合はロックオン解除として扱う。 </param>
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。 </param>
+        private void SetCurrentTarget(ITargetableViewModel newTarget, bool notifyLockOn = true)
+        {
+            bool isNewLock = newTarget != null && !ReferenceEquals(newTarget, _currentTarget);
+            _currentTarget = newTarget;
+
+            if (isNewLock && notifyLockOn)
+            {
+                EventBus<EOnLockOnAcquired>.Raise(new EOnLockOnAcquired());
+            }
         }
 
         /// <summary> NormalizeDot で使用するゼロ除算回避の下限閾値。 </summary>

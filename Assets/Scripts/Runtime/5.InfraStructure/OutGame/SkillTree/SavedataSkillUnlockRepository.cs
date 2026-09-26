@@ -1,7 +1,7 @@
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using KillChord.Runtime.Utility.OutGame.Savedata;
+using SymphonyFrameWork.System.SaveSystem;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -15,15 +15,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     public sealed class SavedataSkillUnlockRepository : ISkillUnlockRepository
     {
         /// <summary>
-        ///     Repositoryを生成します。
-        /// </summary>
-        /// <param name="savedataSystem"> セーブデータシステムです。 </param>
-        public SavedataSkillUnlockRepository(SavedataSystem savedataSystem)
-        {
-            _savedataSystem = savedataSystem ?? throw new ArgumentNullException(nameof(savedataSystem));
-        }
-
-        /// <summary>
         ///     解放済みスキルノードIDを読み込みます。
         /// </summary>
         /// <param name="cancellationToken"> キャンセルトークンです。 </param>
@@ -32,7 +23,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            SaveData saveData = await _savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
             if (saveData?.SkillUnlock == null)
@@ -54,7 +47,5 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
 
             return result;
         }
-
-        private readonly SavedataSystem _savedataSystem;
     }
 }

@@ -14,12 +14,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.PortraitCatalogAsset
   _entries:
   - Id:
-      _id: hello
-      _hashId: -389343696
+      _id: Symphony
+      _hashId: -781534937
     AssetKey: 
-    Asset: {fileID: 9140383256632175445, guid: a443f1123728b064bafea62b78616430, type: 3}
+    Asset: {fileID: 21300000, guid: cc3b7e27fbe8578488bac0957c9fccba, type: 3}
   - Id:
-      _id: good
-      _hashId: 212483455
+      _id: Prelude
+      _hashId: -805511389
     AssetKey: 
-    Asset: {fileID: 6641412011175210450, guid: baee454b10f31c34191a253e6e84e8e5, type: 3}
+    Asset: {fileID: 21300000, guid: 3fb96121fa7cc4140bf889f2ab4613b7, type: 3}
+  - Id:
+      _id: Triad
+      _hashId: 1701005759
+    AssetKey: 
+    Asset: {fileID: 21300000, guid: d3df8e1398f3c664dbb9cfaf633d32f9, type: 3}
+  - Id:
+      _id: TextBox
+      _hashId: -1989434537
+    AssetKey: 
+    Asset: {fileID: 21300000, guid: 5e38d19866aede84798c71eae931de50, type: 3}
+  - Id:
+      _id: Enemy
+      _hashId: -460995301
+    AssetKey: 
+    Asset: {fileID: 21300000, guid: 4eb8c94a18b2f5e4c8e7f0f1556986b4, type: 3}
+  - Id:
+      _id: "\u4F9D\u983C\u4EBA"
+      _hashId: -1074963629
+    AssetKey: 
+    Asset: {fileID: 21300000, guid: 81724ed5f79d8494abf8160883e2b262, type: 3}

@@ -1,18 +1,37 @@
+using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Mission;
-using KillChord.Runtime.Application.InGame.Mission;
-using KillChord.Runtime.Composition.InGame.Bootstrap;
-using KillChord.Runtime.Composition.InGame.Player;
-using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Application.InGame.Mission;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Music;
+using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.InGame.Sequence;
+using KillChord.Runtime.Composition.InGame.Skill;
+using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
+using KillChord.Runtime.Domain.InGame.Mission.StepEntryAction;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
+using KillChord.Runtime.InfraStructure.OutGame.Scenario;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View;
+using KillChord.Runtime.View.InGame.Combo;
 using KillChord.Runtime.View.InGame.Mission;
+using KillChord.Runtime.View.OutGame.Scenario;
+using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Voice;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using AnimationEventData = KillChord.Runtime.Domain.OutGame.Scenario.AnimationEvent;
 
 namespace KillChord.Runtime.Composition.InGame.Mission
 {
@@ -67,6 +86,38 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
+            if (!RequiresScenarioPlayback())
+            {
+                return true;
+            }
+
+            try
+            {
+                _loadedBackgroundCatalog =
+                    await _backgroundCatalogKey.LoadAssetAsync<BackgroundCatalogAsset>(this, cancellationToken);
+                _loadedAnimationCatalog =
+                    await _animationCatalogKey.LoadAssetAsync<AnimationCatalogAsset>(this, cancellationToken);
+                _loadedPortraitCatalog =
+                    await _portraitCatalogKey.LoadAssetAsync<PortraitCatalogAsset>(this, cancellationToken);
+                _loadedScenarioSettings =
+                    await _scenarioSettingsKey.LoadAssetAsync<ScenarioSettingsAsset>(this, cancellationToken);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+                return false;
+            }
+
+            if (_loadedBackgroundCatalog == null
+                || _loadedAnimationCatalog == null
+                || _loadedPortraitCatalog == null
+                || _loadedScenarioSettings == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] シナリオ再生に必要なアセットのロードに失敗しました。", this);
+                return false;
+            }
+
             return true;
         }
 
@@ -76,6 +127,11 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
+            if (!TryBuildScenarioPlayback())
+            {
+                return false;
+            }
+
             if (!TryInitialize(out MissionRuntimeService missionRuntimeService))
             {
                 return false;
@@ -100,19 +156,24 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// <returns> 結合に成功した場合はtrueです。 </returns>
         public override bool Ready()
         {
+            DisposeTutorialFeedback();
+
             PlayerModuleContainer playerModuleContainer =
                 ServiceLocator.GetInstance<PlayerModuleContainer>();
             SkillModuleContainer skillModuleContainer =
                 ServiceLocator.GetInstance<SkillModuleContainer>();
+            MusicSyncModuleContainer musicSyncModuleContainer =
+                ServiceLocator.GetInstance<MusicSyncModuleContainer>();
             if (playerModuleContainer == null
                 || playerModuleContainer.PlayerEntity == null
                 || playerModuleContainer.PlayerController == null
                 || playerModuleContainer.PlayerAttackController == null
                 || skillModuleContainer?.SkillController == null
+                || musicSyncModuleContainer?.MusicSyncService == null
                 || !ServiceLocator.TryGetInstance(out TargetSystemController targetSystemController))
             {
                 Debug.LogError(
-                    $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールを取得できませんでした。",
+                    $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールまたは音楽同期サービスを取得できませんでした。",
                     this);
                 return false;
             }
@@ -120,13 +181,15 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             MissionProgressRecorderController recorderController =
                 new MissionProgressRecorderController(
                     _moduleContainer.MissionRuntimeService.MissionProgress,
-                    _moduleContainer.MissionEventController);
+                    _moduleContainer.MissionEventController,
+                    _comboHudPresenter);
             recorderController.Bind(
                 playerModuleContainer.PlayerEntity,
                 playerModuleContainer.PlayerController,
                 playerModuleContainer.PlayerAttackController,
                 skillModuleContainer.SkillController,
-                targetSystemController);
+                targetSystemController,
+                musicSyncModuleContainer.MusicSyncService);
             _recorderController = recorderController;
 
             if (_missionStepPopupView != null)
@@ -134,22 +197,46 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _popupController = new MissionStepPopupController(
                     _moduleContainer.MissionRuntimeService,
                     _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
-                    _missionStepPopupView,
+                    CreatePopupView(),
                     playerModuleContainer.InputSuppressionState,
                     _popupInputSuppressionDuration);
             }
-
             _playerBuffController = new MissionPlayerBuffController(
                 _moduleContainer.MissionRuntimeService,
                 _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
                 playerModuleContainer.PlayerEntity);
 
+            List<IMissionStepEntryActionExecutor> entryActionExecutors = new()
+            {
+                new SetSkillExecutionEnabledStepEntryActionExecutor(playerModuleContainer.PlayerActionRestrictionState),
+                new ToggleEnemyBattleAiStepEntryActionExecutor(ServiceLocator.GetInstance<EnemyModuleContainer>().EnemyBattleAIRegistry),
+                new PlayVoiceStepEntryActionExecutor(_missionVoiceSource)
+            };
+            if (!TryInitializeDialogue(entryActionExecutors))
+            {
+                return false;
+            }
+
+            _stepEntryActionController = new MissionStepEntryActionController(
+                _moduleContainer.MissionRuntimeService,
+                _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
+                entryActionExecutors);
+
+            if (_scenarioUsecase != null
+                && !TryInitializeMissionScenarioController())
+            {
+                return false;
+            }
+
+            InitializeTutorialFeedback(playerModuleContainer);
             return true;
         }
 
         /// <summary>
         ///     初期化処理を行います。
         /// </summary>
+        /// <param name="missionRuntimeService"> 構築したミッション実行サービスです。 </param>
+        /// <returns> 初期化に成功した場合はtrue。 </returns>
         public bool TryInitialize(out MissionRuntimeService missionRuntimeService)
         {
             missionRuntimeService = null;
@@ -192,8 +279,12 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 missionRuntimeService,
                 missionHudPresenter);
 
+            ComboHudViewModel comboHudViewModel = new ComboHudViewModel();
+            _comboHudPresenter = new ComboHudPresenter(comboHudViewModel);
+
             _missionHudView.Initialize(missionHudViewModel);
             _missionLoopView.Initialize(missionEventController);
+            _comboHudView.Initialize(comboHudViewModel, _comboVisibleCount);
 
             missionHudPresenter.Present();
 
@@ -211,15 +302,48 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// </summary>
         public override void Shutdown()
         {
+            DisposeTutorialFeedback();
             _recorderController?.Dispose();
             _popupController?.Dispose();
+            _mobileTapAttackInput?.Dispose();
+            _mobileTapAttackInput = null;
             _playerBuffController?.Dispose();
+            _stepEntryActionController?.Dispose();
+            _dialogueController?.Dispose();
+            if (_dialogueViewModel != null)
+            {
+                _missionDialogueView?.Shutdown();
+                _dialogueViewModel.Dispose();
+                _dialogueViewModel = null;
+                _dialogueController = null;
+            }
+            if (_scenarioController != null)
+            {
+                _scenarioController.OnScenarioPlaybackStarted -= HandleScenarioPlaybackStarted;
+                _scenarioController.OnScenarioPlaybackEnded -= HandleScenarioPlaybackEnded;
+                _scenarioController.Dispose();
+                _scenarioController = null;
+            }
+
+            if (_scenarioView != null) { _scenarioView.EndPlayback(); }
+            SetScenarioDisplayActive(false);
 
             _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _enemyMissionKeyRepositoryKey.ReleaseLoadedAsset(this);
+            _backgroundCatalogKey.ReleaseLoadedAsset(this);
+            _animationCatalogKey.ReleaseLoadedAsset(this);
+            _portraitCatalogKey.ReleaseLoadedAsset(this);
+            _scenarioSettingsKey.ReleaseLoadedAsset(this);
             _loadedMissionDefinitionRepository = null;
             _loadedEnemyMissionKeyRepository = null;
             _resolvedMissionDefinition = null;
+            _loadedBackgroundCatalog = null;
+            _loadedAnimationCatalog = null;
+            _loadedPortraitCatalog = null;
+            _loadedScenarioSettings = null;
+            _scenarioUsecase = null;
+            _scenarioInputController = null;
+            _scenarioViewModel = null;
 
             if (!_isModuleRegistered)
             {
@@ -231,28 +355,447 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             _isModuleRegistered = false;
         }
 
+        /// <summary>
+        ///     色指定攻撃とスキル課題の表示を成立通知へ結合します。表示参照不足は進行を妨げません。
+        /// </summary>
+        /// <param name="playerModuleContainer"> 攻撃Signalを保持するプレイヤーContainerです。 </param>
+        private void InitializeTutorialFeedback(PlayerModuleContainer playerModuleContainer)
+        {
+            if (_tutorialAttackFeedbackView == null
+                || playerModuleContainer.PlayerAttackSignal == null
+                || !ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            {
+                Debug.LogWarning($"[{nameof(InGameMissionInitializer)}] 色指定攻撃の表示参照を取得できないため、フィードバック表示を省略します。", this);
+                return;
+            }
+
+            _tutorialAttackFeedbackPresenter = new TutorialAttackFeedbackPresenter(
+                playerModuleContainer.PlayerAttackSignal,
+                () => ServiceLocator.TryGetInstance(out MissionRuntimeService mission) ? mission : null,
+                selectedBattleStageState,
+                _tutorialAttackFeedbackView);
+            _tutorialSkillFeedbackPresenter = new TutorialSkillFeedbackPresenter(
+                () => ServiceLocator.TryGetInstance(out MissionRuntimeService mission) ? mission : null,
+                selectedBattleStageState,
+                _tutorialAttackFeedbackView);
+        }
+
+        /// <summary>
+        ///     再初期化・終了・破棄時に攻撃・スキル購読と表示中のフィードバックを解放します。
+        /// </summary>
+        private void DisposeTutorialFeedback()
+        {
+            _tutorialSkillFeedbackPresenter?.Dispose();
+            _tutorialSkillFeedbackPresenter = null;
+            _tutorialAttackFeedbackPresenter?.Dispose();
+            _tutorialAttackFeedbackPresenter = null;
+            if (_tutorialAttackFeedbackView != null)
+            {
+                _tutorialAttackFeedbackView.ClearFeedback();
+            }
+        }
+
+        /// <summary>
+        ///     説明ポップアップのViewを生成します。
+        ///     スマートフォンでは、表示中に画面のタップを攻撃入力として扱うデコレータで包みます。
+        /// </summary>
+        /// <returns> ポップアップ表示に使用するViewです。 </returns>
+        private IMissionStepPopupView CreatePopupView()
+        {
+#if UNITY_ANDROID || UNITY_IOS
+            // スマホ用UIが無効な環境では、従来どおりポップアップのみを表示する。
+            MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
+            if (mobileInput != null
+                && mobileInput.gameObject.activeInHierarchy
+                && ServiceLocator.TryGetInstance(out PlayerInputView playerInputView))
+            {
+                _mobileTapAttackInput = MobileTapAttackInput.Create(playerInputView);
+                return new MobileTapAttackPopupViewDecorator(_missionStepPopupView, _mobileTapAttackInput);
+            }
+#endif
+            return _missionStepPopupView;
+        }
+
         [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
         [SerializeField, Tooltip("目標ステップの説明ポップアップを表示するビュー。未設定の場合はポップアップ機能を使用しない。")] private MissionStepPopupView _missionStepPopupView;
+        [SerializeField, Tooltip("現在のコンボ数を表示するビュー。")] private ComboHudView _comboHudView;
+        [SerializeField, Tooltip("チュートリアルの色指定攻撃の成功・失敗を表示します。未設定でもミッション進行は継続します。")]
+        private TutorialAttackFeedbackView _tutorialAttackFeedbackView;
         [SerializeField, Min(0f), Tooltip("説明ポップアップ表示直後にプレイヤー入力を無効化する秒数。")] private float _popupInputSuppressionDuration = MissionStepPopupController.DefaultInputSuppressionDuration;
         [SerializeField, SourceDataAddress, Tooltip("ミッション定義リポジトリの Addressables キーです。")]
         private string _missionDefinitionRepositoryKey;
         [SerializeField, SourceDataAddress, Tooltip("敵ミッションキーリポジトリの Addressables キーです。")]
         private string _enemyMissionKeyRepositoryKey;
+        [SerializeField, Tooltip("ミッションのステップ開始時にボイス再生用VoiceSourceです。")]
+        private VoiceSource _missionVoiceSource;
+        [SerializeField, Tooltip("Ingame会話のViewです。")]
+        private MissionDialogueView _missionDialogueView;
+        [SerializeField, Tooltip("シナリオ表示と入力をまとめて有効化するルート。ScenarioViewとScenarioInputViewを子に配置します。")]
+        private GameObject _scenarioRoot;
+        [SerializeField, Tooltip("インゲームで使用するシナリオ表示View。ScenarioPlaybackClearConditionを使う場合に必須です。")]
+        private ScenarioView _scenarioView;
+        [SerializeField, Tooltip("インゲームで使用するシナリオ入力View。ScenarioPlaybackClearConditionを使う場合に必須です。")]
+        private ScenarioInputView _scenarioInputView;
+        [SerializeField, SourceDataAddress, Tooltip("背景カタログの Addressables キーです。")]
+        private string _backgroundCatalogKey = "BackgroundCatalogAsset";
+        [SerializeField, SourceDataAddress, Tooltip("アニメーションカタログの Addressables キーです。")]
+        private string _animationCatalogKey = "AnimationCatalogAsset";
+        [SerializeField, SourceDataAddress, Tooltip("立ち絵カタログの Addressables キーです。")]
+        private string _portraitCatalogKey = "PortraitCatalogAsset";
+        [SerializeField, SourceDataAddress, Tooltip("シナリオ設定の Addressables キーです。")]
+        private string _scenarioSettingsKey = "ScenarioSettingsAsset";
+        [SerializeField, Min(0), Tooltip("コンボ数が表示される最小値。")]
+        private int _comboVisibleCount = 4;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;
         private bool _isModuleRegistered;
         private MissionModuleContainer _moduleContainer;
         private MissionProgressRecorderController _recorderController;
+        private TutorialAttackFeedbackPresenter _tutorialAttackFeedbackPresenter;
+        private TutorialSkillFeedbackPresenter _tutorialSkillFeedbackPresenter;
         private MissionStepPopupController _popupController;
+        private MobileTapAttackInput _mobileTapAttackInput;
         private MissionPlayerBuffController _playerBuffController;
+        private MissionStepEntryActionController _stepEntryActionController;
+        private MissionDialogueController _dialogueController;
+        private MissionDialogueViewModel _dialogueViewModel;
+        private MissionScenarioController _scenarioController;
+        private ComboHudPresenter _comboHudPresenter;
         private MissionDefinitionRepository _loadedMissionDefinitionRepository;
         private EnemyMissionKeyRepository _loadedEnemyMissionKeyRepository;
         private MissionDefinition _resolvedMissionDefinition;
+        private BackgroundCatalogAsset _loadedBackgroundCatalog;
+        private AnimationCatalogAsset _loadedAnimationCatalog;
+        private PortraitCatalogAsset _loadedPortraitCatalog;
+        private ScenarioSettingsAsset _loadedScenarioSettings;
+        private ScenarioUsecase _scenarioUsecase;
+        private ScenarioInputController _scenarioInputController;
+        private ScenarioViewModel _scenarioViewModel;
+
+        /// <summary>
+        ///     Mission定義にシナリオ再生ステップがあるか確認します。
+        /// </summary>
+        /// <returns>シナリオ再生ステップがある場合はtrue</returns>
+        private bool RequiresScenarioPlayback()
+        {
+            return _resolvedMissionDefinition != null
+                && _resolvedMissionDefinition.ClearCondition.HasStepWithCondition<ScenarioPlaybackClearCondition>();
+        }
+
+        /// <summary>
+        ///     会話を使用するMissionに限り、既存のポーズとゲーム開始ライフサイクルへ結合します。
+        /// </summary>
+        private bool TryInitializeDialogue(List<IMissionStepEntryActionExecutor> executors)
+        {
+            ObjectiveSequenceClearCondition sequence = _resolvedMissionDefinition.ClearCondition;
+            bool hasDialogue = false;
+            for (int i = 0; i < sequence.StepCount; i++)
+            {
+                foreach (IMissionStepEntryAction action in sequence.GetStep(i).EntryActions)
+                {
+                    hasDialogue |= action is PlayDialogueStepEntryAction;
+                }
+            }
+            if (!hasDialogue)
+            {
+                return true;
+            }
+            InGamePlayDirector playDirector = FindFirstObjectByType<InGamePlayDirector>();
+            if (_missionDialogueView == null || _missionVoiceSource == null || playDirector == null
+                || !ServiceLocator.TryGetInstance(out SequenceModuleContainer sequenceContainer)
+                || sequenceContainer.BattlePauseController == null)
+            {
+                Debug.LogError($"[{nameof(InGameMissionInitializer)}] 会話View、VoiceSource、ゲーム開始またはポーズの参照が不足しています。", this);
+                return false;
+            }
+            _dialogueViewModel = new MissionDialogueViewModel();
+            _dialogueController = new MissionDialogueController(_moduleContainer.MissionRuntimeService,
+                sequenceContainer.BattlePauseController, _missionVoiceSource, new MissionDialoguePresenter(_dialogueViewModel));
+            _missionDialogueView.Initialize(_dialogueViewModel, _dialogueController);
+            playDirector.AddGamePlayControllable(_missionDialogueView);
+            executors.Add(_dialogueController);
+            return true;
+        }
+
+        /// <summary>
+        ///     Scenarioモジュールの既存実装を使い、インゲーム用の再生スタックを構築します。
+        /// </summary>
+        /// <returns>構築に成功した場合はtrue</returns>
+        private bool TryBuildScenarioPlayback()
+        {
+            if (!RequiresScenarioPlayback())
+            {
+                return true;
+            }
+
+            if (!ValidateScenarioPlaybackReferences())
+            {
+                return false;
+            }
+
+            ScenarioAdvanceGate advanceGate = new();
+            _scenarioViewModel = new ScenarioViewModel();
+            ScenarioHandlerRepo handlerRepo = new();
+            IScenarioRepository scenarioRepository = new ScenarioRepository();
+            IBackgroundRepository backgroundRepository = new BackgroundRepository(_loadedBackgroundCatalog);
+            IAnimationRepository animationRepository = new AnimationRepository(_loadedAnimationCatalog);
+            IPortraitRepository portraitRepository = new PortraitRepository(_loadedPortraitCatalog);
+            IScenarioSettingsRepository scenarioSettingsRepository = new ScenarioSettingsRepository(_loadedScenarioSettings);
+
+            TextPresenter textPresenter = new(_scenarioViewModel);
+            FadePresenter fadePresenter = new(_scenarioViewModel);
+            BackgroundPresenter backgroundPresenter = new(_scenarioViewModel);
+            AnimationPresenter animationPresenter = new(_scenarioViewModel);
+            PortraitPresenter portraitPresenter = new(_scenarioViewModel);
+            LayerPresenter layerPresenter = new(_scenarioViewModel);
+            ScenarioPresenterFacade presenterFacade = new(
+                textPresenter,
+                fadePresenter,
+                backgroundPresenter,
+                animationPresenter,
+                portraitPresenter,
+                layerPresenter,
+                _scenarioViewModel,
+                _scenarioViewModel);
+
+            _scenarioUsecase = new ScenarioUsecase(
+                scenarioRepository,
+                handlerRepo,
+                advanceGate,
+                presenterFacade,
+                presenterFacade,
+                scenarioSettingsRepository);
+            TextEventHandler textEventHandler = new(
+                presenterFacade,
+                _scenarioUsecase,
+                _scenarioUsecase,
+                scenarioSettingsRepository);
+            _scenarioInputController = new ScenarioInputController(
+                advanceGate,
+                textEventHandler,
+                _scenarioUsecase,
+                _scenarioUsecase);
+            FadeEventHandler fadeEventHandler = new(presenterFacade);
+            BackgroundEventHandler backgroundEventHandler = new(presenterFacade, backgroundRepository);
+            AnimationEventHandler animationEventHandler = new(presenterFacade, animationRepository);
+            PortraitEventHandler portraitEventHandler = new(presenterFacade, portraitRepository);
+            LayerEventHandler layerEventHandler = new(presenterFacade);
+            handlerRepo.Register<TextEvent>(textEventHandler.HandleAsync);
+            handlerRepo.Register<FadeEvent>(fadeEventHandler.HandleAsync);
+            handlerRepo.Register<BackgroundEvent>(backgroundEventHandler.HandleAsync);
+            handlerRepo.Register<AnimationEventData>(animationEventHandler.HandleAsync);
+            handlerRepo.Register<PortraitEvent>(portraitEventHandler.HandleAsync);
+            handlerRepo.Register<LayerEvent>(layerEventHandler.HandleAsync);
+
+            List<string> layerOrder = new(_loadedScenarioSettings.LayerBackToFront.Count);
+            for (int i = 0; i < _loadedScenarioSettings.LayerBackToFront.Count; i++)
+            {
+                layerOrder.Add(_loadedScenarioSettings.LayerBackToFront[i].ToString());
+            }
+
+            _scenarioView.Initialize(
+                _scenarioViewModel,
+                BuildBackgroundMap(_loadedBackgroundCatalog),
+                BuildAnimationMap(_loadedAnimationCatalog),
+                BuildPortraitMap(_loadedPortraitCatalog),
+                layerOrder);
+            SetScenarioDisplayActive(false);
+            return true;
+        }
+
+        /// <summary>
+        ///     Missionとシナリオ再生を結合します。
+        /// </summary>
+        /// <returns>結合に成功した場合はtrueです。</returns>
+        private bool TryInitializeMissionScenarioController()
+        {
+            if (!ServiceLocator.TryGetInstance(out InputComposition inputComposition)
+                || inputComposition.GetInputView == null
+                || inputComposition.GetInputMapController == null
+                || !ServiceLocator.TryGetInstance(out SequenceModuleContainer sequenceModuleContainer)
+                || sequenceModuleContainer.BattlePauseController == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] シナリオ再生に必要な入力または戦闘ポーズのモジュールを取得できませんでした。", this);
+                return false;
+            }
+
+            _scenarioInputView.Initialize(
+                _scenarioInputController,
+                inputComposition.GetInputView,
+                _scenarioViewModel);
+            _scenarioController = new MissionScenarioController(
+                _moduleContainer.MissionRuntimeService,
+                _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
+                _scenarioUsecase,
+                sequenceModuleContainer.BattlePauseController,
+                new InGameScenarioInputModeController(inputComposition.GetInputMapController));
+            _scenarioController.OnScenarioPlaybackStarted += HandleScenarioPlaybackStarted;
+            _scenarioController.OnScenarioPlaybackEnded += HandleScenarioPlaybackEnded;
+            _scenarioController.Start();
+            return true;
+        }
+
+        /// <summary>
+        ///     シナリオ再生開始時に表示を有効化します。
+        /// </summary>
+        private void HandleScenarioPlaybackStarted()
+        {
+            SetScenarioDisplayActive(true);
+            _scenarioInputView.RestoreUIForPlayback();
+            _scenarioView.PrepareForPlayback();
+        }
+
+        /// <summary>
+        ///     シナリオ再生終了時に表示を無効化します。
+        /// </summary>
+        private void HandleScenarioPlaybackEnded()
+        {
+            _scenarioView.EndPlayback();
+            SetScenarioDisplayActive(false);
+        }
+
+        /// <summary>
+        ///     シナリオ表示用のルートを有効または無効にします。
+        /// </summary>
+        /// <param name="isActive">有効にする場合はtrueです。</param>
+        private void SetScenarioDisplayActive(bool isActive)
+        {
+            if (isActive)
+            {
+                if (_scenarioRoot != null && !_scenarioRoot.activeSelf)
+                {
+                    _scenarioRoot.SetActive(true);
+                }
+
+                if (_scenarioView != null && !_scenarioView.gameObject.activeSelf)
+                {
+                    _scenarioView.gameObject.SetActive(true);
+                }
+                return;
+            }
+
+            if (_scenarioView != null && _scenarioView.gameObject.activeSelf)
+            {
+                _scenarioView.gameObject.SetActive(false);
+            }
+
+            if (_scenarioRoot != null && _scenarioRoot.activeSelf)
+            {
+                _scenarioRoot.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        ///     シナリオ再生で使用するInspector参照を検証します。
+        /// </summary>
+        /// <returns>参照が有効な場合はtrueです。</returns>
+        private bool ValidateScenarioPlaybackReferences()
+        {
+            if (_scenarioRoot == gameObject
+                || _scenarioRoot == null
+                || _scenarioView == null
+                || _scenarioInputView == null
+                || string.IsNullOrWhiteSpace(_backgroundCatalogKey)
+                || string.IsNullOrWhiteSpace(_animationCatalogKey)
+                || string.IsNullOrWhiteSpace(_portraitCatalogKey)
+                || string.IsNullOrWhiteSpace(_scenarioSettingsKey))
+            {
+                Debug.LogError($"[{nameof(InGameMissionInitializer)}] シナリオ表示関連の参照か、Addressablesキーの設定が不足です。", this);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        ///     背景アセット参照用の辞書を構築します。
+        /// </summary>
+        /// <param name="catalog">背景カタログです。</param>
+        /// <returns>アセットキーをキーにした背景一覧です。</returns>
+        private static IReadOnlyDictionary<string, Sprite> BuildBackgroundMap(BackgroundCatalogAsset catalog)
+        {
+            Dictionary<string, Sprite> map = new(StringComparer.Ordinal);
+            if (catalog == null)
+            {
+                return map;
+            }
+
+            for (int i = 0; i < catalog.Entries.Count; i++)
+            {
+                BackgroundCatalogEntry entry = catalog.Entries[i];
+                if (entry.Id.Id == 0 || entry.Asset == null)
+                {
+                    continue;
+                }
+
+                string key = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
+                map[key] = entry.Asset;
+            }
+
+            return map;
+        }
+
+        /// <summary>
+        ///     アニメーションアセット参照用の辞書を構築します。
+        /// </summary>
+        /// <param name="catalog">アニメーションカタログです。</param>
+        /// <returns>アセットキーをキーにしたアニメーション一覧です。</returns>
+        private static IReadOnlyDictionary<string, AnimationClip> BuildAnimationMap(AnimationCatalogAsset catalog)
+        {
+            Dictionary<string, AnimationClip> map = new(StringComparer.Ordinal);
+            if (catalog == null)
+            {
+                return map;
+            }
+
+            for (int i = 0; i < catalog.Entries.Count; i++)
+            {
+                AnimationCatalogEntry entry = catalog.Entries[i];
+                if (entry.Id.Id == 0 || entry.Asset == null)
+                {
+                    continue;
+                }
+
+                string key = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
+                map[key] = entry.Asset;
+            }
+
+            return map;
+        }
+
+        /// <summary>
+        ///     立ち絵アセット参照用の辞書を構築します。
+        /// </summary>
+        /// <param name="catalog">立ち絵カタログです。</param>
+        /// <returns>アセットキーをキーにした立ち絵一覧です。</returns>
+        private static IReadOnlyDictionary<string, Sprite> BuildPortraitMap(PortraitCatalogAsset catalog)
+        {
+            Dictionary<string, Sprite> map = new(StringComparer.Ordinal);
+            if (catalog == null)
+            {
+                return map;
+            }
+
+            for (int i = 0; i < catalog.Entries.Count; i++)
+            {
+                PortraitCatalogEntry entry = catalog.Entries[i];
+                if (entry.Id.Id == 0 || entry.Asset == null)
+                {
+                    continue;
+                }
+
+                string key = string.IsNullOrWhiteSpace(entry.AssetKey) ? entry.Asset.name : entry.AssetKey;
+                map[key] = entry.Asset;
+            }
+
+            return map;
+        }
 
         private void OnDestroy()
         {
+            DisposeTutorialFeedback();
             if (_registeredMissionRuntimeService)
             {
                 ServiceLocator.UnregisterInstance<MissionRuntimeService>();
@@ -287,6 +830,15 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 Debug.LogError(
                     $"[{nameof(InGameMissionInitializer)}] " +
                     $"{nameof(_missionLoopView)}が設定されていません。",
+                    this);
+
+                return false;
+            }
+            if (_comboHudView == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(InGameMissionInitializer)}] " +
+                    $"{nameof(_comboHudView)}が設定されていません。",
                     this);
 
                 return false;

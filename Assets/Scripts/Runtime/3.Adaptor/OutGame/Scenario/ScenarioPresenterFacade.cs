@@ -1,13 +1,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
 
 namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 {
     /// <summary>
     /// 各種プレゼンターを束ねてシナリオ出力窓口を提供する。
     /// </summary>
-    public sealed class ScenarioPresenterFacade : IOutputPort, IScenarioCompletionNotifier
+    public sealed class ScenarioPresenterFacade : IOutputPort, IScenarioCompletionNotifier, IScenarioAutoAdvanceNotifier
     {
         /// <summary>
         /// 各出力ポートと完了通知先をまとめて受け取る。
@@ -19,7 +20,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             IAnimationOutputPort animationOutputPort,
             IPortraitOutputPort portraitOutputPort,
             ILayerOutputPort layerOutputPort,
-            IScenarioCompletionViewSink scenarioCompletionViewSink)
+            IScenarioCompletionViewSink scenarioCompletionViewSink,
+            IScenarioAutoAdvanceViewSink autoAdvanceViewSink)
         {
             _textOutputPort = textOutputPort;
             _fadeOutputPort = fadeOutputPort;
@@ -28,19 +30,26 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             _portraitOutputPort = portraitOutputPort;
             _layerOutputPort = layerOutputPort;
             _scenarioCompletionViewSink = scenarioCompletionViewSink;
+            _autoAdvanceViewSink = autoAdvanceViewSink;
         }
 
         /// <summary>
         /// テキスト表示要求をビューへ通知する。
         /// </summary>
-        public ValueTask ShowTextAsync(string message, CancellationToken ct)
-            => _textOutputPort.ShowTextAsync(message, ct);
+        public ValueTask ShowTextAsync(string speaker, string message, CancellationToken ct)
+            => _textOutputPort.ShowTextAsync(speaker, message, ct);
 
         /// <summary>
         /// フェード演出要求をビューへ通知する。
         /// </summary>
-        public ValueTask FadeAsync(string target, float start, float end, float duration, CancellationToken ct)
-            => _fadeOutputPort.FadeAsync(target, start, end, duration, ct);
+        public ValueTask FadeAsync(
+            FadeTarget target,
+            FadeMode mode,
+            float start,
+            float end,
+            float duration,
+            CancellationToken ct)
+            => _fadeOutputPort.FadeAsync(target, mode, start, end, duration, ct);
 
         /// <summary>
         /// 背景表示要求をビューへ通知する。
@@ -82,6 +91,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             return default;
         }
 
+        /// <summary>
+        ///     自動送り状態の変更を表示モデルへ通知する。
+        /// </summary>
+        public void NotifyAutoAdvanceChanged(bool isAutoAdvance)
+        {
+            _autoAdvanceViewSink.SetAutoAdvance(isAutoAdvance);
+        }
+
         private readonly ITextOutputPort _textOutputPort;
         private readonly IFadeOutputPort _fadeOutputPort;
         private readonly IBackgroundOutputPort _backgroundOutputPort;
@@ -89,5 +106,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         private readonly IPortraitOutputPort _portraitOutputPort;
         private readonly ILayerOutputPort _layerOutputPort;
         private readonly IScenarioCompletionViewSink _scenarioCompletionViewSink;
+        private readonly IScenarioAutoAdvanceViewSink _autoAdvanceViewSink;
     }
 }

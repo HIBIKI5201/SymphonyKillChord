@@ -49,6 +49,35 @@ namespace KillChord.Runtime.Adaptor.OutGame.Sortie
             return _useCase.RequestImmediateBattleSortie();
         }
 
+        /// <summary>
+        ///     シナリオシーンを終了してOutGameのホーム画面へ復帰します。
+        /// </summary>
+        /// <param name="scenarioSceneName"> 終了するシナリオシーン名。 </param>
+        /// <param name="returnSceneName"> 復帰先のOutGameシーン名。 </param>
+        /// <returns> シーン復帰に成功した場合はtrue。 </returns>
+        public Task<bool> ReturnFromScenarioAsync(
+            string scenarioSceneName,
+            string returnSceneName)
+        {
+            return _useCase.ReturnFromScenarioAsync(
+                scenarioSceneName,
+                returnSceneName);
+        }
+
+        /// <summary>
+        ///     シナリオ終了後の専用バトル出撃を要求し、明示的な終端結果を返します。
+        /// </summary>
+        public Task<ScenarioBattleSortieResult> RequestBattleSortieFromScenarioAsync(
+            string scenarioSceneName,
+            string returnSceneName,
+            BattleStageDefinition battleStageDefinition,
+            int scenarioSelectionRevision)
+        {
+            return _useCase.RequestBattleSortieFromScenarioAsync(
+                scenarioSceneName, returnSceneName, battleStageDefinition,
+                scenarioSelectionRevision);
+        }
+
         private readonly OutGameSortieUseCase _useCase;
     }
 }

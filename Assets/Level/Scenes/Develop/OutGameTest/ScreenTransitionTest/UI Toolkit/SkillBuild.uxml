@@ -1,73 +1,116 @@
-<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:screen="KillChord.Runtime.View.OutGame.Screen" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:Template name="SkillBuildDialog" src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillBuild/UIToolkit/SkillBuildDialog.uxml?fileID=9197481963319205126&amp;guid=00db7cb3a885b6d49b5fb1be611db438&amp;type=3#SkillBuildDialog"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/OutGameScreen.uss?fileID=7433441132597879392&amp;guid=2873ded5d140af5419fca59e2bf1d22c&amp;type=3#OutGameScreen"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillBuild/UIToolkit/USS/SkillBuildScreen.uss?fileID=7433441132597879392&amp;guid=331b07cb4bd6d6e4ca7e207e4b09fa7c&amp;type=3#SkillBuildScreen"/>
-    <ui:VisualElement name="SkillBuildRoot" style="background-color: rgb(77, 77, 77); width: 100%; height: 100%;">
-        <ui:VisualElement name="HeadLine" style="flex-grow: 0; height: 12%; width: 100%; min-height: 0;">
-            <ui:Label text="改造" name="Title" enable-rich-text="true" class="title" style="width: 200px; height: 100px; -unity-text-align: middle-center; -unity-font-style: bold; font-size: 36px; display: none;"/>
-            <ui:VisualElement class="owned-points" style="top: 20px; right: 20px;">
-                <ui:Label text="所持ポイント：" class="owned-points-heading" style="-unity-font-style: normal;"/>
-                <ui:Label text="0" name="OwnedPointsLabel" class="owned-points-value" style="-unity-font-style: normal;"/>
-            </ui:VisualElement>
-            <ui:Button name="BackButton" class="button back-button" style="color: rgb(0, 0, 0); font-size: 36px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0); margin-right: 20px; left: auto; right: auto; margin-top: 20px; margin-bottom: 20px; margin-left: 20px; top: auto; padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px; width: 100px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
-                <ui:Image source="project://database/Assets/Arts/Images/GoogleFontIcon/arrow_back_ios_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24.svg?fileID=7388822144124034973&amp;guid=b432e787401be4640a96edf4ec1dca3a&amp;type=3#arrow_back_ios_24dp_FFFFFF_FILL0_wght400_GRAD0_opsz24" tint-color="rgb(229, 229, 229)"/>
-            </ui:Button>
-        </ui:VisualElement>
-        <ui:VisualElement name="MiddleSection" style="flex-grow: 0; width: 100%; height: 55%; flex-direction: row; top: auto;">
-            <ui:VisualElement name="SkillSlot" style="flex-grow: 0; flex-shrink: 1; width: 50%; height: 80%; border-left-color: rgba(0, 0, 0, 0); border-right-color: rgba(0, 0, 0, 0); border-top-color: rgba(0, 0, 0, 0); border-bottom-color: rgba(0, 0, 0, 0); border-top-width: 10px; border-right-width: 10px; border-bottom-width: 10px; border-left-width: 10px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; left: auto; background-color: rgb(229, 229, 229); padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 20px; margin-right: 10px; margin-bottom: 20px; margin-left: 20px; -unity-material: url(&quot;project://database/Assets/Scripts/Shaders/Graph/Shader%20Graphs_Repeat.mat?fileID=2100000&amp;guid=9c8aad91530261b49b9d3f1cddf88c75&amp;type=2#Shader Graphs_Repeat&quot;);">
-                <ui:VisualElement name="VisualElement" style="flex-grow: 0; position: relative; flex-shrink: 0; width: 90%; height: 85%; align-self: center; -unity-material: url(&quot;&quot;);">
-                    <ui:VisualElement name="SkillSlotHeadLine" style="flex-grow: 0; width: 80%; height: 20%; align-self: center; justify-content: center; margin-top: 3%;">
-                        <ui:VisualElement name="" style="flex-grow: 0; background-color: rgb(77, 77, 77); width: 80%; align-self: center; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; height: 95%; justify-content: center; color: rgb(255, 255, 255);">
-                            <ui:Label text="ドラッグでパーティに編成または解除可能" name="SkillSlotHeadLineLabel" style="width: auto; height: auto; border-top-left-radius: 40px; border-top-right-radius: 40px; border-bottom-right-radius: 40px; border-bottom-left-radius: 40px; background-color: rgba(0, 0, 0, 0); -unity-text-align: middle-center; font-size: 24px; -unity-font-style: normal; align-self: center;"/>
+    <ui:VisualElement name="SkillBuildRoot" class="skillbuild-root" style="width: 100%; height: 100%; align-items: stretch; align-content: auto; justify-content: flex-start;">
+        <ui:VisualElement name="BackgroundImage" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/BackGround_Home_Blur.png?fileID=21300000&amp;guid=dc434a71b6c90494e80f63bac4fd68b5&amp;type=3#BackGround_Home_Blur&quot;); -unity-background-scale-mode: scale-and-crop;"/>
+        <ui:VisualElement name="TopBarAnchor" picking-mode="Ignore" style="position: relative; width: 0; height: 0; margin-left: -16px; margin-top: -16px;">
+            <ui:VisualElement name="TopBarBackground" picking-mode="Position" class="home-top-bar" style="top: 5px; left: -1px; width: 732px; -unity-background-scale-mode: stretch-to-fill;">
+                <ui:VisualElement name="PointsRow" class="home-points-row">
+                    <ui:VisualElement name="RebuildPointBadge" class="home-point-badge" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Label.png?fileID=2800000&amp;guid=14019fcc13d64f041825db46c63bb542&amp;type=3#UI_Label&quot;);">
+                        <ui:VisualElement name="RebuildPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ModificationPoint.PNG?fileID=21300000&amp;guid=4e62359d69f84914fb02f7ceb8910bd0&amp;type=3#UI_ModificationPoint&quot;); height: 60px; width: 60px;"/>
+                        <ui:VisualElement name="RebuildPointInfo" picking-mode="Ignore" class="home-point-info">
+                            <ui:Label name="RebuildPointsNameLabel" text="改造ポイント" picking-mode="Ignore" class="home-point-name-label"/>
+                            <ui:Label name="OwnedPointsLabel" text="0" picking-mode="Ignore" class="home-point-value-label"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement name="SkillSlotes" style="flex-grow: 0; width: 100%; height: 65%; align-self: center;">
-                        <ui:VisualElement name="SkillElementContainer" class="skill-element-container" style="flex-grow: 0; flex-direction: row; align-self: center; width: 100%; height: 100%; justify-content: center;">
-                            <ui:VisualElement name="SkillSlot1" class="skill-element-slot" style="flex-grow: 0; width: 100px; height: 100px; background-color: rgb(204, 204, 204); min-width: 150px; min-height: 150px; align-self: center; border-top-left-radius: 50%; border-top-right-radius: 50%; border-bottom-right-radius: 50%; border-bottom-left-radius: 50%; margin-top: 0%; margin-right: 3%; margin-bottom: 0%; margin-left: 3%; display: flex;"/>
-                            <ui:VisualElement name="SkillSlot2" class="skill-element-slot" style="flex-grow: 0; width: 100px; height: 100px; background-color: rgb(204, 204, 204); min-width: 150px; min-height: 150px; align-self: center; border-top-left-radius: 50%; border-top-right-radius: 50%; border-bottom-right-radius: 50%; border-bottom-left-radius: 50%; margin-top: 0%; margin-right: 3%; margin-bottom: 0%; margin-left: 3%; display: flex;"/>
-                            <ui:VisualElement name="SkillSlot3" class="skill-element-slot" style="flex-grow: 0; width: 100px; height: 100px; background-color: rgb(77, 77, 77); min-width: 150px; min-height: 150px; align-self: center; border-top-left-radius: 50%; border-top-right-radius: 50%; border-bottom-right-radius: 50%; border-bottom-left-radius: 50%; margin-top: 0%; margin-right: 3%; margin-bottom: 0%; margin-left: 3%; display: none;"/>
+                    <ui:VisualElement name="UnlockPointBadge" class="home-point-badge" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Label.png?fileID=2800000&amp;guid=14019fcc13d64f041825db46c63bb542&amp;type=3#UI_Label&quot;);">
+                        <ui:VisualElement name="UnlockPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ResearchPoint.PNG?fileID=21300000&amp;guid=c74ea33a7791b164c9a7d4735e466052&amp;type=3#UI_ResearchPoint&quot;); height: 60px; width: 60px;"/>
+                        <ui:VisualElement name="UnlockPointInfo" picking-mode="Ignore" class="home-point-info">
+                            <ui:Label name="UnlockPointsNameLabel" text="解放ポイント" picking-mode="Ignore" class="home-point-name-label"/>
+                            <ui:Label name="UnlockPointsValueLabel" text="0" picking-mode="Ignore" class="home-point-value-label"/>
                         </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement style="flex-grow: 0; width: 100%; height: 20%; justify-content: center; top: 5%;">
-                        <ui:Button text="保存" name="SkillBuildSaveButton" style="position: relative; flex-shrink: 1; flex-grow: 0; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; width: 40%; height: 100%; align-self: center; font-size: 24px; -unity-font-style: normal; min-height: 100px; border-left-color: rgb(255, 128, 128); border-right-color: rgb(255, 128, 128); border-top-color: rgb(255, 128, 128); border-bottom-color: rgb(255, 128, 128); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px;"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <screen:AlphaHitTestButton name="BackButton" class="button back-button ui-se-cancel" style="top: -1px;"/>
+                <ui:Button name="SettingShortcutButton" class="button setting-shortcut-button ui-se-window" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/WIP/UI_btn_square.png?fileID=21300000&amp;guid=37fd6d3204bfe514cb8207d301aa86af&amp;type=3#UI_btn_square&quot;); height: 106px; top: -1px;">
+                    <ui:Image name="SettingIconGlyph" picking-mode="Ignore" class="home-option-icon-glyph" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_OptionIocn.png?fileID=21300000&amp;guid=bd80c72ceb0921245907a0bb0ceb0cc1&amp;type=3#UI_OptionIocn&quot;);"/>
+                </ui:Button>
             </ui:VisualElement>
-            <ui:VisualElement name="SkillDetail" style="flex-grow: 0; width: 50%; height: 100%; flex-shrink: 0; left: auto; right: auto; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 20px; margin-right: 20px; margin-bottom: 20px; margin-left: 10px;">
-                <ui:VisualElement name="VisualElement" style="flex-grow: 0; width: 100%; height: 100%; border-left-color: rgba(0, 0, 0, 0); border-right-color: rgba(0, 0, 0, 0); border-top-color: rgba(0, 0, 0, 0); border-bottom-color: rgba(0, 0, 0, 0); border-top-width: 10px; border-right-width: 10px; border-bottom-width: 10px; border-left-width: 10px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; background-color: rgb(229, 229, 229); left: auto; right: auto; -unity-material: url(&quot;project://database/Assets/Scripts/Shaders/Graph/Shader%20Graphs_Repeat.mat?fileID=2100000&amp;guid=9c8aad91530261b49b9d3f1cddf88c75&amp;type=2#Shader Graphs_Repeat&quot;) prop(&quot;_Texture2D&quot; url(&quot;&quot;));">
-                    <ui:VisualElement name="Top" class="skill-detail-top" style="-unity-material: url(&quot;&quot;);">
+        </ui:VisualElement>
+        <ui:VisualElement name="BodyRow" class="skillbuild-body-row" style="justify-content: flex-end; margin-right: 75px;">
+            <ui:VisualElement name="SkillDetail" class="skillbuild-panel" style="width: 770px; justify-content: flex-start; align-items: stretch; height: 826px; margin-right: 5px;">
+                <ui:Label name="DetailsHeading" text="詳細" class="skillbuild-panel-title" style="height: 58px; width: 220px; font-size: 40px; -unity-text-align: middle-left;"/>
+                <ui:VisualElement name="DetailContent" class="skillbuild-detail-content">
+                    <ui:VisualElement name="Top" class="skill-detail-top">
                         <ui:Image name="skill-detail-icon" class="skill-detail-icon"/>
                         <ui:VisualElement class="skill-detail-heading">
-                            <ui:Label name="skill-name-label" text="スキルを選択してください" class="skill-name-label" style="color: rgb(255, 255, 255); -unity-font-style: normal;"/>
-                            <ui:Label name="skill-combo-label" class="skill-combo-label" style="color: rgb(229, 229, 229);"/>
+                            <ui:Label name="skill-name-label" text="スキルを選択してください" class="skill-name-label" style="width: 254px; font-size: 45px;"/>
+                            <ui:Label name="skill-combo-label" class="skill-combo-label" style="display: none;"/>
+                            <ui:VisualElement name="ComboRow" class="skillbuild-combo-row" style="height: 26px;"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="SkillTypeBox" class="skillbuild-type-box" style="height: 184px; width: 179px; background-color: rgba(255, 255, 255, 0.51); background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_BackText.png?fileID=2800000&amp;guid=1e2171f726e7bf349bbc11f8a2d4d53a&amp;type=3#UI_BackText&quot;); -unity-background-image-tint-color: rgb(255, 255, 255);">
+                            <ui:Image name="skill-type-icon" class="skillbuild-type-icon"/>
+                            <ui:Label name="SkillTypeHeading" text="スキルタイプ" class="skillbuild-type-caption" style="font-size: 24px; color: rgb(0, 0, 0);"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:ScrollView name="SkillDescription" class="skill-description" style="border-top-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-bottom-left-radius: 0; border-left-color: rgba(255, 255, 255, 0); border-right-color: rgba(255, 255, 255, 0); border-top-color: rgba(128, 128, 128, 0.5); border-bottom-color: rgba(128, 128, 128, 0.5); background-color: rgba(255, 255, 255, 0); -unity-material: url(&quot;&quot;); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px;">
-                        <ui:VisualElement class="skill-type-row">
-                            <ui:Label text="スキルの種類　：" class="skill-type-heading" style="color: rgb(229, 229, 229); -unity-font-style: normal;"/>
-                            <ui:Label name="skill-type-label" class="skill-type-label" style="color: rgb(229, 229, 229); -unity-font-style: normal;"/>
-                        </ui:VisualElement>
-                        <ui:Label text="スキル効果" class="skill-effect-heading" style="color: rgb(229, 229, 229); -unity-font-style: normal;"/>
-                        <ui:Label name="skill-description-label" class="skill-description-label" style="color: rgb(204, 204, 204); -unity-font-style: normal;"/>
-                        <ui:Label name="skill-tips-heading" text="Tips" class="skill-tips-heading"/>
-                        <ui:Label name="skill-tips-label" class="skill-tips-label"/>
+                    <ui:ScrollView name="SkillDescription" vertical-scroller-visibility="Hidden" class="skill-description" style="height: 222px;">
+                        <ui:Label name="SkillEffectHeading" text="スキル効果" class="skill-effect-heading" style="font-size: 30px;"/>
+                        <ui:Label name="skill-description-label" class="skill-description-label" style="height: 119px; font-size: 24px;"/>
+                        <ui:Label name="skill-tips-heading" text="Tips" class="skill-tips-heading" style="font-size: 30px;"/>
+                        <ui:Label name="skill-tips-label" class="skill-tips-label" style="font-size: 24px;"/>
                     </ui:ScrollView>
-                    <ui:VisualElement name="SkillLevel" style="flex-grow: 1; width: 100%; flex-direction: row; -unity-material: url(&quot;&quot;);">
-                        <ui:Label text="" name="skill-level-label" style="background-color: rgb(217, 217, 217); border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; width: 35%; height: 55%; min-width: 200px; min-height: 100px; -unity-text-align: middle-center; -unity-font-style: normal; font-size: 24px; align-self: center; left: 2%;"/>
-                        <ui:VisualElement style="flex-grow: 0; width: 15%; height: 55%; flex-shrink: 0;"/>
-                        <ui:Button text="レベルアップ" name="SkillLevelUpButton" style="width: 45%; height: 55%; align-self: center; min-width: 200px; min-height: 100px; border-top-left-radius: 5px; border-top-right-radius: 5px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px; font-size: 24px; -unity-font-style: normal; border-left-color: rgb(255, 128, 128); border-right-color: rgb(255, 128, 128); border-top-color: rgb(255, 128, 128); border-bottom-color: rgb(255, 128, 128); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px;"/>
+                    <ui:VisualElement name="LevelPointRow" class="skillbuild-level-point-row" style="height: 75px;">
+                        <ui:VisualElement name="LevelRow" class="skillbuild-info-row skillbuild-info-row-half skillbuild-info-row-left" style="height: 84px;">
+                            <ui:Label name="LevelHeading" text="レベル" class="skillbuild-info-row-heading" style="font-size: 30px; -unity-text-align: middle-left;"/>
+                            <ui:Label text="" name="skill-level-label" class="skillbuild-info-row-value" style="font-size: 30px;"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="PointRow" class="skillbuild-info-row skillbuild-info-row-half" style="height: 84px;">
+                            <ui:Label name="ModPointsHeading" text="改造P" class="skillbuild-info-row-heading" style="font-size: 30px; -unity-text-align: middle-left;"/>
+                            <ui:Label text="" name="skill-levelup-point-label" class="skillbuild-info-row-value" style="font-size: 30px;"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="skillbuild-panel-button-row" style="align-self: auto; justify-content: center; align-items: stretch; align-content: auto; margin-bottom: 14px;">
+                        <ui:Button text="Level UP" name="SkillLevelUpButton" class="button ui-se-select skillbuild-action-button skillbuild-reinforce-button" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_SkillUpgrade_Button.png?fileID=21300000&amp;guid=0d9c8ebcd7d2a8c4183f0bba71ba1efe&amp;type=3#UI_SkillUpgrade_Button&quot;); width: 432px; -unity-background-scale-mode: scale-to-fit; height: 166px; color: rgb(255, 255, 255); font-size: 40px; -unity-text-align: middle-left; word-spacing: 40px; padding-left: 82px;"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
+            <ui:VisualElement name="FormationColumn" class="skillbuild-formation-column" style="height: 827px; margin-left: 5px;">
+                <ui:VisualElement name="Formation" class="skillbuild-panel skillbuild-panel-nested" style="height: 508px; align-items: stretch; margin-bottom: 5px;">
+                    <ui:Label name="FormationHeading" text="編成" class="skillbuild-panel-title" style="width: 228px; height: 61px; font-size: 40px; -unity-text-align: middle-left;"/>
+                    <ui:VisualElement name="SkillElementContainer" class="skill-element-container skillbuild-slot-row" style="height: 252px;">
+                        <ui:VisualElement name="SkillSlot1" class="skill-element-slot skillbuild-slot" style="display: flex; height: 250px; width: 250px;">
+                            <ui:VisualElement name="IconArea" class="skillbuild-slot-icon-area">
+                                <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
+                                <ui:Label name="skill-slot-name" class="skill-slot-name"/>
+                                <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder" style="font-size: 100px;"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="ComboRow" class="skillbuild-slot-combo-row"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="SkillSlot2" class="skill-element-slot skillbuild-slot" style="display: flex; height: 250px; width: 250px;">
+                            <ui:VisualElement name="IconArea" class="skillbuild-slot-icon-area">
+                                <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
+                                <ui:Label name="skill-slot-name" class="skill-slot-name"/>
+                                <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder" style="font-size: 100px;"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="ComboRow" class="skillbuild-slot-combo-row"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="SkillSlot3" class="skill-element-slot skillbuild-slot" style="display: none; height: 250px; width: 250px;">
+                            <ui:VisualElement name="IconArea" class="skillbuild-slot-icon-area">
+                                <ui:Image name="skill-slot-icon" class="skill-slot-icon" style="display: none;"/>
+                                <ui:Label name="skill-slot-name" class="skill-slot-name"/>
+                                <ui:Label text="＋" name="skill-slot-placeholder" class="skill-slot-placeholder"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="ComboRow" class="skillbuild-slot-combo-row"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Button text="Save" name="SkillBuildSaveButton" emoji-fallback-support="true" class="button ui-se-select skillbuild-action-button" style="height: 85px; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Save_Button.png?fileID=2800000&amp;guid=e7bc8f7e357917341903e0cafdd4a155&amp;type=3#UI_Save_Button&quot;); background-color: rgba(255, 255, 255, 0); width: 434px; -unity-background-scale-mode: scale-to-fit; background-position-x: center; margin-left: 200px; margin-right: 200px; font-size: 50px; color: rgb(255, 255, 255); -unity-text-align: middle-left; padding-left: 138px; -unity-font-style: bold; letter-spacing: 5px;"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="ListActionsSection" class="skillbuild-list-actions-section" style="margin-top: 5px;">
+                    <ui:VisualElement name="SkillListPanel" class="skillbuild-panel skillbuild-panel-nested skillbuild-list-panel">
+                        <ui:VisualElement name="SkillGenreFilterBar" class="skill-genre-filter-bar"/>
+                        <ui:VisualElement name="BottomSection" class="skillbuild-list-section">
+                            <ui:ScrollView name="SkillScrollView" mode="Horizontal" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic" horizontal-scroller-visibility="Hidden" class="skillbuild-list-scrollview">
+                                <ui:VisualElement class="skill-element-list" style="flex-grow: 0; flex-direction: row; height: auto; justify-content: flex-start; align-self: center; margin-left: 0;"/>
+                            </ui:ScrollView>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="BottomRow" class="skillbuild-bottom-row" style="width: 700px; justify-content: space-evenly; align-self: flex-start; margin-left: 77px; margin-top: 0;"/>
+            </ui:VisualElement>
         </ui:VisualElement>
-        <ui:TabView name="SkillCollectionTab" style="height: 8%; width: 30%; background-color: rgb(255, 87, 87); border-top-right-radius: 5px; -unity-material: url(&quot;project://database/Assets/Scripts/Shaders/Graph/Shader%20Graphs_Repeat.mat?fileID=2100000&amp;guid=9c8aad91530261b49b9d3f1cddf88c75&amp;type=2#Shader Graphs_Repeat&quot;);"/>
-        <ui:VisualElement name="BottomSection" style="flex-grow: 1; background-color: rgb(232, 234, 236); width: 100%; -unity-material: url(&quot;project://database/Assets/Scripts/Shaders/Graph/Shader%20Graphs_Repeat.mat?fileID=2100000&amp;guid=9c8aad91530261b49b9d3f1cddf88c75&amp;type=2#Shader Graphs_Repeat&quot;);">
-            <ui:ScrollView name="SkillScrollView" mode="Horizontal" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic" horizontal-scroller-visibility="Hidden" style="background-color: rgba(232, 234, 236, 0); justify-content: center; flex-direction: row; flex-grow: 1; -unity-material: url(&quot;&quot;);">
-                <ui:VisualElement class="skill-element-list" style="flex-grow: 1; flex-direction: row; height: auto; justify-content: flex-start; align-self: center; margin-left: 3%;"/>
-            </ui:ScrollView>
-        </ui:VisualElement>
-        <ui:Instance template="SkillBuildDialog" name="SkillBuildDialog" enabled="true" style="position: absolute; width: 100%; height: 100%; display: none;"/>
+        <ui:Instance template="SkillBuildDialog" name="SkillBuildDialog" style="position: absolute; width: 100%; height: 100%; display: none;"/>
     </ui:VisualElement>
 </ui:UXML>

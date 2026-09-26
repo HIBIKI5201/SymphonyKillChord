@@ -8,7 +8,7 @@ namespace Research.SaveSystem
     /// <typeparam name="TSaveType"></typeparam>
     /// <typeparam name="TDtoType"></typeparam>
     public class SaveGameSymphonyRepository<TSaveType, TDtoType> : ISaveRepository<TSaveType, TDtoType>
-        where TSaveType : class, new()
+        where TSaveType : SaveDataContent, new()
         where TDtoType : class, new()
     {
         /// <summary>
@@ -16,9 +16,13 @@ namespace Research.SaveSystem
         /// </summary>
         public async Awaitable Save(TDtoType dto)
         {
-            TSaveType saveData = await SaveSystem<TSaveType, NugetDataLoader<TSaveType>>.Get();
+            // SaveStore.Getは暗黙ロードを行わないため、未読み込みのときだけLoadAsyncを呼ぶ。
+            // LoadAsyncは常に保存先を読み直すため、無条件に呼ぶと未保存のキャッシュを捨ててしまう。
+            TSaveType saveData = SaveStore.IsLoaded<TSaveType>()
+                ? SaveStore.Get<TSaveType>()
+                : await SaveStore.LoadAsync<TSaveType>();
             PropertyCopyUtil.CopyFields(saveData, dto);
-            await SaveSystem<TSaveType, NugetDataLoader<TSaveType>>.Save();
+            await SaveStore.SaveAsync<TSaveType>();
         }
     }
 }

@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
 
@@ -14,6 +15,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     {
         /// <summary> 対象不成立時のポリシーです。 </summary>
         private const SkillExecutionFailurePolicy TARGET_REJECT_POLICY = SkillExecutionFailurePolicy.ResetProgressOnly;
+
+        /// <summary>
+        ///     音楽再生位置の巻き戻しとみなす許容誤差（秒）です。
+        ///     MusicSyncServiceの巻き戻し検知と同じ扱いで、入力履歴のTimingが非単調になるのを防ぎます。
+        /// </summary>
+        private const float PLAYBACK_REWIND_TOLERANCE_SECONDS = 0.01f;
 
         /// <summary>
         ///     コントローラーを初期化します。
@@ -42,10 +49,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         ///     スキル発動を試す。
         /// </summary>
         /// <param name="beatType"> 現在ビートです。 </param>
-        /// <param name="now"> 現在時刻です。 </param>
+        /// <param name="now"> クールダウンやUI表示に使う、ゲーム側の現在時刻です。 </param>
+        /// <param name="musicTime"> リズム入力履歴に記録する、音楽の再生時間です。 </param>
         /// <param name="battleActionType"> 行動種別です。 </param>
+        /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうか。 </param>
         /// <returns> 実行結果です。 </returns>
-        public SkillExecutionResult TryExecuteSkill(BeatType beatType, float now, BattleActionType battleActionType)
+        public SkillExecutionResult TryExecuteSkill(BeatType beatType, float now, float musicTime, BattleActionType battleActionType, bool isJustHit)
         {
             if (!_skillCooldownState.IsSkillReady(now))
             {
@@ -53,7 +62,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 return new SkillExecutionResult(SkillExecutionResultType.CooldownBlocked);
             }
 
-            _skillRhythmState.Enqueue(beatType, now, battleActionType);
+            // 音楽の再生位置が巻き戻った場合、Timingが非単調になり不整合を招くため履歴を破棄する。
+            if (_skillRhythmState.Count > 0
+                && musicTime + PLAYBACK_REWIND_TOLERANCE_SECONDS < _skillRhythmState.LastTiming)
+            {
+                _skillRhythmState.Clear();
+            }
+
+            _skillRhythmState.Enqueue(beatType, musicTime, battleActionType);
             ReadOnlySpan<BeatType> inputHistory = _skillRhythmState.GetHistoryBeatType();
             bool isInputMatch = _skillCheckService.CheckInput(_skillDefinition, inputHistory);
 
@@ -63,15 +79,23 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 return new SkillExecutionResult(SkillExecutionResultType.InputProgressed);
             }
 
-            bool canExecute = _skillUseCase.TryExecuteSkill(_skillDefinition, beatType);
+            bool canExecute = _skillUseCase.TryExecuteSkill(_skillDefinition, beatType, isJustHit);
             if (canExecute)
             {
                 ExecuteVisual();
+
+                // カメラシェイクなどの演出用に、スキルが発動したことを通知する。対象の有無は問わない。
+                EventBus<EOnSkillExecuted>.Raise(new EOnSkillExecuted(_skillDefinition.Id.Value));
+
                 _presenter.Push(_skillDefinition);
                 _skillRhythmState.Clear();
                 _skillCooldownState.SetSkillCooldown(now);
                 _progressController.SkillTriggered(now, _skillCooldownState.SkillReadyTimestamp);
-                return new SkillExecutionResult(SkillExecutionResultType.Executed, _skillDefinition.AnimationKey);
+                return new SkillExecutionResult(
+                    SkillExecutionResultType.Executed,
+                    _skillDefinition.AnimationKey,
+                    _skillDefinition.EffectSpec.SkillNormalAttackDamagePolicy,
+                    ResolveWeaponBeatType());
             }
 
             ApplyFailurePolicy(now);
@@ -80,6 +104,27 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 $"対象を解決できないためスキルを実行しませんでした。ID: {_skillDefinition.Id.Value}, " +
                 $"TargetingType: {_skillDefinition.EffectSpec.TargetingType}");
             return new SkillExecutionResult(SkillExecutionResultType.RejectedByTargetPolicy);
+        }
+
+        /// <summary>
+        ///     再使用可能時刻を変えずに入力履歴と進捗表示をリセットします。
+        /// </summary>
+        /// <param name="now"> 進捗表示に使うゲーム側の現在時刻です。 </param>
+        public void ResetInputProgress(float now)
+        {
+            _skillRhythmState.Clear();
+            _progressController.ResetProgress(now, _skillCooldownState.SkillReadyTimestamp);
+        }
+
+        /// <summary>
+        ///     このスキルで構える武器を決めるBeatTypeを求めます。
+        /// </summary>
+        /// <returns> 入力パターンの最後のBeatTypeです。 </returns>
+        private BeatType ResolveWeaponBeatType()
+        {
+            // 決め手となる最後の拍の武器を構える。
+            System.ReadOnlySpan<BeatType> signatures = _skillDefinition.SkillPattern.Signatures;
+            return signatures.Length > 0 ? signatures[signatures.Length - 1] : default;
         }
 
         /// <summary>

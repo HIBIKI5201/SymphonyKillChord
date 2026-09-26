@@ -1,9 +1,10 @@
+using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.Utility.Identity;
-using KillChord.Runtime.Utility.OutGame.Savedata;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
 using System.Threading;
@@ -31,6 +32,8 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
         private string _initialSkillLoadoutKey;
 
         private InitialSkillLoadoutAsset _loadedInitialSkillLoadout;
+        private InitialSkillLoadoutService _initialSkillLoadoutService;
+        private bool _isServiceRegistered;
 
         /// <summary>
         ///     セーブデータが未設定の場合に、初期解放・初期装備スキルを補完する。
@@ -41,55 +44,62 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
         {
             _loadedInitialSkillLoadout = await _initialSkillLoadoutKey.LoadAssetAsync<InitialSkillLoadoutAsset>(this, cancellationToken);
 
-            if (!ServiceLocator.TryGetInstance(out SavedataSystem savedataSystem))
-            {
-                Debug.LogError($"[{nameof(InitialSkillLoadoutInitializer)}] {nameof(SavedataSystem)} が取得できませんでした。", this);
-                return false;
-            }
+            _initialSkillLoadoutService = new InitialSkillLoadoutService(
+                _loadedInitialSkillLoadout.GetUnlockedSkillIds(),
+                _loadedInitialSkillLoadout.GetEquippedSkillIds());
 
             cancellationToken.ThrowIfCancellationRequested();
-            SaveData saveData = await savedataSystem.LoadAsync<SaveData>();
+            SaveData saveData = SaveStore.IsLoaded<SaveData>()
+                ? SaveStore.Get<SaveData>()
+                : await SaveStore.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (TryApplyInitialSkillLoadout(saveData))
+            int[] previousUnlockedSkillIds = (int[])saveData.SkillUnlock.UnlockedSkillIds.Clone();
+            List<int> previousEquipmentSkillIds = new(saveData.SkillBuild.EquipmentSkillIDs);
+
+            if (_initialSkillLoadoutService.TryApply(saveData))
             {
-                await savedataSystem.SaveAsync(saveData);
+                try
+                {
+                    await SaveStore.SaveAsync<SaveData>();
+                }
+                catch
+                {
+                    // SaveStore が返すキャッシュ参照を、補完前の状態へ戻す。
+                    saveData.SkillUnlock.SetUnlockedSkillIds(previousUnlockedSkillIds);
+                    saveData.SkillBuild.SetEquipmentSkillIDs(previousEquipmentSkillIds);
+                    throw;
+                }
             }
 
             return true;
         }
 
         /// <summary>
-        ///     ロード済みアセットを解放します。
+        ///     初期スキル補完サービスを登録します。
+        ///     セーブデータリセット後の再補完で使用するため、起動後も参照できるようにする。
         /// </summary>
-        public override void Shutdown()
+        /// <returns> 成功した場合はtrue。 </returns>
+        public override bool Build()
         {
-            _loadedInitialSkillLoadout = null;
-            _initialSkillLoadoutKey.ReleaseLoadedAsset(this);
+            _isServiceRegistered = ServiceLocator.RegisterInstance(_initialSkillLoadoutService);
+            return true;
         }
 
         /// <summary>
-        ///     未設定の解放・装備スキルにのみ初期値を補完する。
+        ///     ロード済みアセットを解放し、登録済みサービスを解除します。
         /// </summary>
-        /// <param name="saveData"> 対象のセーブデータです。 </param>
-        /// <returns> 更新した場合はtrue。 </returns>
-        private bool TryApplyInitialSkillLoadout(SaveData saveData)
+        public override void Shutdown()
         {
-            bool isChanged = false;
-
-            if (saveData.SkillUnlock.UnlockedSkillIds.Length == 0)
+            if (_isServiceRegistered)
             {
-                saveData.SkillUnlock.SetUnlockedSkillIds(_loadedInitialSkillLoadout.GetUnlockedSkillIds());
-                isChanged = true;
+                ServiceLocator.UnregisterInstance<InitialSkillLoadoutService>();
+                _isServiceRegistered = false;
             }
 
-            if (saveData.SkillBuild.EquipmentSkillIDs.Count == 0)
-            {
-                saveData.SkillBuild.SetEquipmentSkillIDs(new List<int>(_loadedInitialSkillLoadout.GetEquippedSkillIds()));
-                isChanged = true;
-            }
-
-            return isChanged;
+            _initialSkillLoadoutService = null;
+            _loadedInitialSkillLoadout = null;
+            _initialSkillLoadoutKey.ReleaseLoadedAsset(this);
         }
     }
 }

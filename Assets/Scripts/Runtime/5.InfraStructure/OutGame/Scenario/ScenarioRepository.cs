@@ -1,13 +1,13 @@
-﻿using System;
+using KillChord.Runtime.Application.OutGame.Scenario;
+using KillChord.Runtime.Domain.OutGame.Scenario;
+using KillChord.Runtime.Utility.Identity;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using KillChord.Runtime.Application.OutGame.Scenario;
-using KillChord.Runtime.Domain.OutGame.Scenario;
-using KillChord.Runtime.Utility.Identity;
 using UnityEngine.Networking;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
@@ -30,7 +30,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             string root = UnityEngine.Application.streamingAssetsPath;
             bool isUrlPath = root.Contains("://", StringComparison.Ordinal);
             string authoringPath = isUrlPath
-                ? $"{root.TrimEnd('/')}/ScenarioAuthoring/{id}.events.csv"
+                            ? $"{root.TrimEnd('/')}/ScenarioAuthoring/{id}.events.csv"
                 : Path.Combine(root, "ScenarioAuthoring", $"{id}.events.csv");
             string scenarioPath = isUrlPath
                 ? $"{root.TrimEnd('/')}/Scenario/{id}.csv"
@@ -48,13 +48,57 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 return new ScenarioDefinition(Array.Empty<IScenarioEvent>());
             }
 
-            if (firstDataLine.TrimStart().StartsWith("Type,", StringComparison.OrdinalIgnoreCase))
+            if (firstDataLine.TrimStart().StartsWith($"{TYPE_COLUMN},", StringComparison.OrdinalIgnoreCase))
             {
                 return ParseNormalizedCsv(lines);
             }
 
             return ParseAuthoringCsv(lines);
         }
+
+        private const string TYPE_COLUMN = "Type";
+        private const string STEP_COLUMN = "Step";
+        private const string PARENT_STEP_COLUMN = "ParentStep";
+        private const string SPEAKER_COLUMN = "Speaker";
+        private const string TEXT_COLUMN = "Text";
+        private const string BACKGROUND_ID_COLUMN = "BackgroundId";
+        private const string ANIMATION_ID_COLUMN = "AnimationId";
+        private const string FADE_START_COLUMN = "FadeStart";
+        private const string FADE_END_COLUMN = "FadeEnd";
+        private const string FADE_DURATION_COLUMN = "FadeDuration";
+        private const string FADE_TARGET_COLUMN = "FadeTarget";
+        private const string FADE_MODE_COLUMN = "FadeMode";
+        private const string PORTRAIT_SLOT_COLUMN = "PortraitSlot";
+        private const string PORTRAIT_ID_COLUMN = "PortraitId";
+        private const string PORTRAIT_POS_X_COLUMN = "PortraitPosX";
+        private const string PORTRAIT_POS_Y_COLUMN = "PortraitPosY";
+        private const string PORTRAIT_SCALE_COLUMN = "PortraitScale";
+        private const string PORTRAIT_VISIBLE_COLUMN = "PortraitVisible";
+        private const string LAYER_TARGET_COLUMN = "LayerTarget";
+        private const string LAYER_ORDER_COLUMN = "LayerOrder";
+        private const string TRIGGER_TYPE_COLUMN = "TriggerType";
+        private const string TRIGGER_INDEX_COLUMN = "TriggerIndex";
+        private const string TRIGGER_KEYWORD_COLUMN = "TriggerKeyword";
+        private const string ON_TRIGGER_TYPE_COLUMN = "OnTriggerType";
+        private const string ON_TRIGGER_ARG_1_COLUMN = "OnTriggerArg1";
+        private const string ON_TRIGGER_ARG_2_COLUMN = "OnTriggerArg2";
+        private const string ON_TRIGGER_ARG_3_COLUMN = "OnTriggerArg3";
+        private const string ON_TRIGGER_ARG_4_COLUMN = "OnTriggerArg4";
+        private const string ON_TRIGGER_ARG_5_COLUMN = "OnTriggerArg5";
+
+        private const string TEXT_EVENT_TYPE = "text";
+        private const string BACKGROUND_EVENT_TYPE = "background";
+        private const string ANIMATION_EVENT_TYPE = "animation";
+        private const string FADE_EVENT_TYPE = "fade";
+        private const string PORTRAIT_EVENT_TYPE = "portrait";
+        private const string LAYER_EVENT_TYPE = "layer";
+        private const string TRIGGER_EVENT_TYPE = "trigger";
+
+        private const string NONE_TRIGGER_TYPE = "none";
+        private const string AT_CHAR_INDEX_TRIGGER_TYPE = "atcharindex";
+        private const string AT_KEYWORD_TRIGGER_TYPE = "atkeyword";
+        private const string AT_SUFFIX_TRIGGER_TYPE = "atsuffix";
+        private const string AT_TEXT_END_TRIGGER_TYPE = "attextend";
 
         /// <summary>
         /// 正規化済み CSV をシナリオデータへ変換する。
@@ -79,23 +123,26 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 if (raw.TrimStart().StartsWith("#", StringComparison.Ordinal)) continue;
 
                 List<string> values = ParseCsvLine(raw);
-                string type = GetValue(values, headerIndex, "Type")?.Trim();
+                string type = GetValue(values, headerIndex, TYPE_COLUMN)?.Trim();
                 if (string.IsNullOrWhiteSpace(type))
                 {
                     continue;
                 }
 
-                if (type.Equals("Trigger", StringComparison.OrdinalIgnoreCase))
+                if (type.Equals(TRIGGER_EVENT_TYPE, StringComparison.OrdinalIgnoreCase))
                 {
-                    int parentStep = ParseRequiredInt(GetValue(values, headerIndex, "ParentStep"), "ParentStep", lineNo);
+                    int parentStep = ParseRequiredInt(
+                        GetValue(values, headerIndex, PARENT_STEP_COLUMN),
+                        PARENT_STEP_COLUMN,
+                        lineNo);
                     triggerRows.Add(new TriggerRow(lineNo, parentStep, values));
                     continue;
                 }
 
                 int step = ParseOptionalInt(
-                    GetValue(values, headerIndex, "Step"),
+                    GetValue(values, headerIndex, STEP_COLUMN),
                     autoStep,
-                    "Step",
+                    STEP_COLUMN,
                     lineNo);
                 autoStep = Math.Max(autoStep + 1, step + 1);
                 eventRows.Add(new EventRow(lineNo, step, type, values));
@@ -108,7 +155,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             {
                 if (definitions.ContainsKey(row.Step))
                 {
-                    throw new FormatException($"line {row.LineNo}: duplicated Step '{row.Step}'.");
+                    throw new FormatException($"line {row.LineNo}: duplicated {STEP_COLUMN} '{row.Step}'.");
                 }
 
                 EventDefinition definition = CreateEventDefinition(row, headerIndex);
@@ -120,11 +167,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             {
                 if (!definitions.TryGetValue(row.ParentStep, out EventDefinition parent))
                 {
-                    throw new FormatException($"line {row.LineNo}: ParentStep '{row.ParentStep}' was not found.");
+                    throw new FormatException(
+                        $"line {row.LineNo}: {PARENT_STEP_COLUMN} '{row.ParentStep}' was not found.");
                 }
                 if (parent is not TextEventDefinition textParent)
                 {
-                    throw new FormatException($"line {row.LineNo}: ParentStep '{row.ParentStep}' must point Text event.");
+                    throw new FormatException(
+                        $"line {row.LineNo}: {PARENT_STEP_COLUMN} '{row.ParentStep}' must point Text event.");
                 }
 
                 TextTimingTrigger trigger = CreateTrigger(row.Values, headerIndex, row.LineNo, textParent.Text);
@@ -158,17 +207,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 List<string> fields = ParseCsvLine(raw);
                 if (fields.Count < 2)
                 {
-                    throw new FormatException($"line {lineNo}: authoring csv requires at least Step and Type.");
+                    throw new FormatException(
+                        $"line {lineNo}: authoring csv requires at least {STEP_COLUMN} and {TYPE_COLUMN}.");
                 }
 
-                int step = ParseRequiredInt(fields[0], "Step", lineNo);
+                int step = ParseRequiredInt(fields[0], STEP_COLUMN, lineNo);
                 string type = fields[1]?.Trim();
                 if (string.IsNullOrWhiteSpace(type))
                 {
-                    throw new FormatException($"line {lineNo}: Type is required.");
+                    throw new FormatException($"line {lineNo}: {TYPE_COLUMN} is required.");
                 }
 
-                if (type.Equals("Trigger", StringComparison.OrdinalIgnoreCase))
+                if (type.Equals(TRIGGER_EVENT_TYPE, StringComparison.OrdinalIgnoreCase))
                 {
                     pendingTriggers.Add(new AuthoringTriggerRow(lineNo, fields));
                     continue;
@@ -176,7 +226,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 
                 if (definitions.ContainsKey(step))
                 {
-                    throw new FormatException($"line {lineNo}: duplicated Step '{step}'.");
+                    throw new FormatException($"line {lineNo}: duplicated {STEP_COLUMN} '{step}'.");
                 }
 
                 EventDefinition definition = CreateAuthoringEventDefinition(step, type, fields, lineNo);
@@ -186,14 +236,19 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 
             foreach (AuthoringTriggerRow triggerRow in pendingTriggers)
             {
-                int parentStep = ParseRequiredInt(GetAuthoringField(triggerRow.Fields, 2), "ParentStep", triggerRow.LineNo);
+                int parentStep = ParseRequiredInt(
+                    GetAuthoringField(triggerRow.Fields, 2),
+                    PARENT_STEP_COLUMN,
+                    triggerRow.LineNo);
                 if (!definitions.TryGetValue(parentStep, out EventDefinition parent))
                 {
-                    throw new FormatException($"line {triggerRow.LineNo}: ParentStep '{parentStep}' was not found.");
+                    throw new FormatException(
+                        $"line {triggerRow.LineNo}: {PARENT_STEP_COLUMN} '{parentStep}' was not found.");
                 }
                 if (parent is not TextEventDefinition textParent)
                 {
-                    throw new FormatException($"line {triggerRow.LineNo}: ParentStep '{parentStep}' must point Text event.");
+                    throw new FormatException(
+                        $"line {triggerRow.LineNo}: {PARENT_STEP_COLUMN} '{parentStep}' must point Text event.");
                 }
 
                 TextTimingTrigger trigger = CreateAuthoringTrigger(triggerRow.Fields, triggerRow.LineNo, textParent.Text);
@@ -216,63 +271,70 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         {
             switch (type.Trim().ToLowerInvariant())
             {
-                case "text":
+                case TEXT_EVENT_TYPE:
                     {
                         string speaker = GetAuthoringField(fields, 2);
                         string text = GetAuthoringField(fields, 3);
                         return new TextEventDefinition(step, speaker ?? string.Empty, text ?? string.Empty);
                     }
-                case "background":
+                case BACKGROUND_EVENT_TYPE:
                     {
                         string backgroundId = GetAuthoringField(fields, 2);
                         if (string.IsNullOrWhiteSpace(backgroundId))
                         {
-                            throw new FormatException($"line {lineNo}: BackgroundId is required.");
+                            throw new FormatException($"line {lineNo}: {BACKGROUND_ID_COLUMN} is required.");
                         }
                         return new PlainEventDefinition(step, new BackgroundEvent(CreateBackgroundId(backgroundId)));
                     }
-                case "animation":
+                case ANIMATION_EVENT_TYPE:
                     {
                         string animationId = GetAuthoringField(fields, 2);
                         if (string.IsNullOrWhiteSpace(animationId))
                         {
-                            throw new FormatException($"line {lineNo}: AnimationId is required.");
+                            throw new FormatException($"line {lineNo}: {ANIMATION_ID_COLUMN} is required.");
                         }
                         return new PlainEventDefinition(step, new AnimationEvent(CreateAnimationId(animationId)));
                     }
-                case "fade":
+                case FADE_EVENT_TYPE:
                     {
-                        float start = ParseRequiredFloat(GetAuthoringField(fields, 2), "FadeStart", lineNo);
-                        float end = ParseRequiredFloat(GetAuthoringField(fields, 3), "FadeEnd", lineNo);
-                        float duration = ParseRequiredFloat(GetAuthoringField(fields, 4), "FadeDuration", lineNo);
-                        // 対象は省略可能。省略時は画面全体（Screen）。
-                        FadeTarget target = ParseFadeTarget(GetAuthoringField(fields, 5), lineNo);
-                        return new PlainEventDefinition(step, new FadeEvent(start, end, duration, target));
+                        FadeEvent fadeEvent = CreateFadeEvent(
+                            GetAuthoringField(fields, 2),
+                            GetAuthoringField(fields, 3),
+                            GetAuthoringField(fields, 4),
+                            GetAuthoringField(fields, 5),
+                            GetAuthoringField(fields, 6),
+                            FADE_START_COLUMN,
+                            FADE_END_COLUMN,
+                            FADE_DURATION_COLUMN,
+                            FADE_TARGET_COLUMN,
+                            FADE_MODE_COLUMN,
+                            lineNo);
+                        return new PlainEventDefinition(step, fadeEvent);
                     }
-                case "portrait":
+                case PORTRAIT_EVENT_TYPE:
                     {
-                        PortraitSlot slot = ParsePortraitSlot(GetAuthoringField(fields, 2), "PortraitSlot", lineNo);
+                        PortraitSlot slot = ParsePortraitSlot(GetAuthoringField(fields, 2), PORTRAIT_SLOT_COLUMN, lineNo);
                         string portraitId = GetAuthoringField(fields, 3);
                         if (string.IsNullOrWhiteSpace(portraitId))
                         {
-                            throw new FormatException($"line {lineNo}: PortraitId is required.");
+                            throw new FormatException($"line {lineNo}: {PORTRAIT_ID_COLUMN} is required.");
                         }
 
-                        float posX = ParseOptionalFloat(GetAuthoringField(fields, 4), 0f, "PortraitPosX", lineNo);
-                        float posY = ParseOptionalFloat(GetAuthoringField(fields, 5), 0f, "PortraitPosY", lineNo);
-                        float scale = ParseOptionalFloat(GetAuthoringField(fields, 6), 1f, "PortraitScale", lineNo);
-                        bool visible = ParseOptionalBool(GetAuthoringField(fields, 7), true, "PortraitVisible", lineNo);
+                        float posX = ParseOptionalFloat(GetAuthoringField(fields, 4), 0f, PORTRAIT_POS_X_COLUMN, lineNo);
+                        float posY = ParseOptionalFloat(GetAuthoringField(fields, 5), 0f, PORTRAIT_POS_Y_COLUMN, lineNo);
+                        float scale = ParseOptionalFloat(GetAuthoringField(fields, 6), 1f, PORTRAIT_SCALE_COLUMN, lineNo);
+                        bool visible = ParseOptionalBool(GetAuthoringField(fields, 7), true, PORTRAIT_VISIBLE_COLUMN, lineNo);
 
                         return new PlainEventDefinition(step, new PortraitEvent(slot, CreatePortraitId(portraitId), posX, posY, scale, visible));
                     }
-                case "layer":
+                case LAYER_EVENT_TYPE:
                     {
-                        LayerTarget target = ParseLayerTarget(GetAuthoringField(fields, 2), "LayerTarget", lineNo);
-                        int order = ParseRequiredInt(GetAuthoringField(fields, 3), "LayerOrder", lineNo);
+                        LayerTarget target = ParseLayerTarget(GetAuthoringField(fields, 2), LAYER_TARGET_COLUMN, lineNo);
+                        int order = ParseRequiredInt(GetAuthoringField(fields, 3), LAYER_ORDER_COLUMN, lineNo);
                         return new PlainEventDefinition(step, new LayerEvent(target, order));
                     }
                 default:
-                    throw new FormatException($"line {lineNo}: unknown Type '{type}'.");
+                    throw new FormatException($"line {lineNo}: unknown {TYPE_COLUMN} '{type}'.");
             }
         }
 
@@ -285,49 +347,49 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             string triggerType = triggerTypeRaw?.Trim();
             if (string.IsNullOrWhiteSpace(triggerType))
             {
-                throw new FormatException($"line {lineNo}: TriggerType is required.");
+                throw new FormatException($"line {lineNo}: {TRIGGER_TYPE_COLUMN} is required.");
             }
 
             string onTriggerTypeRaw = GetAuthoringField(fields, 6);
             string onTriggerType = onTriggerTypeRaw?.Trim();
             if (string.IsNullOrWhiteSpace(onTriggerType))
             {
-                throw new FormatException($"line {lineNo}: OnTriggerType is required.");
+                throw new FormatException($"line {lineNo}: {ON_TRIGGER_TYPE_COLUMN} is required.");
             }
 
             IScenarioEvent fireEvent = CreateAuthoringTriggerEvent(fields, lineNo, onTriggerType);
             switch (triggerType.ToLowerInvariant())
             {
-                case "atcharindex":
+                case AT_CHAR_INDEX_TRIGGER_TYPE:
                     {
-                        int charIndex = ParseRequiredInt(GetAuthoringField(fields, 4), "TriggerIndex", lineNo);
-                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                        int charIndex = ParseRequiredInt(GetAuthoringField(fields, 4), TRIGGER_INDEX_COLUMN, lineNo);
+                        return TextTimingTrigger.CreateAtCharIndex(charIndex, fireEvent);
                     }
-                case "atkeyword":
+                case AT_KEYWORD_TRIGGER_TYPE:
                     {
                         string keyword = GetAuthoringField(fields, 5);
                         if (string.IsNullOrWhiteSpace(keyword))
                         {
-                            throw new FormatException($"line {lineNo}: TriggerKeyword is required.");
+                            throw new FormatException($"line {lineNo}: {TRIGGER_KEYWORD_COLUMN} is required.");
                         }
-                        return TextTimingTrigger.AtKeyword(keyword, fireEvent);
+                        return TextTimingTrigger.CreateAtKeyword(keyword, fireEvent);
                     }
-                case "atsuffix":
+                case AT_SUFFIX_TRIGGER_TYPE:
                     {
                         string suffix = GetAuthoringField(fields, 5);
                         if (string.IsNullOrWhiteSpace(suffix))
                         {
-                            throw new FormatException($"line {lineNo}: TriggerKeyword is required.");
+                            throw new FormatException($"line {lineNo}: {TRIGGER_KEYWORD_COLUMN} is required.");
                         }
-                        return TextTimingTrigger.AtSuffix(suffix, fireEvent);
+                        return TextTimingTrigger.CreateAtSuffix(suffix, fireEvent);
                     }
-                case "attextend":
+                case AT_TEXT_END_TRIGGER_TYPE:
                     {
                         int charIndex = string.IsNullOrEmpty(text) ? 0 : text.Length;
-                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                        return TextTimingTrigger.CreateAtCharIndex(charIndex, fireEvent);
                     }
                 default:
-                    throw new FormatException($"line {lineNo}: unknown TriggerType '{triggerTypeRaw}'.");
+                    throw new FormatException($"line {lineNo}: unknown {TRIGGER_TYPE_COLUMN} '{triggerTypeRaw}'.");
             }
         }
 
@@ -338,50 +400,58 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         {
             switch (onTriggerType.ToLowerInvariant())
             {
-                case "fade":
+                case FADE_EVENT_TYPE:
                     {
-                        float start = ParseRequiredFloat(GetAuthoringField(fields, 7), "OnTriggerArg1", lineNo);
-                        float end = ParseRequiredFloat(GetAuthoringField(fields, 8), "OnTriggerArg2", lineNo);
-                        float duration = ParseRequiredFloat(GetAuthoringField(fields, 9), "OnTriggerArg3", lineNo);
-                        return new FadeEvent(start, end, duration);
+                        return CreateFadeEvent(
+                            GetAuthoringField(fields, 7),
+                            GetAuthoringField(fields, 8),
+                            GetAuthoringField(fields, 9),
+                            GetAuthoringField(fields, 10),
+                            GetAuthoringField(fields, 11),
+                            ON_TRIGGER_ARG_1_COLUMN,
+                            ON_TRIGGER_ARG_2_COLUMN,
+                            ON_TRIGGER_ARG_3_COLUMN,
+                            ON_TRIGGER_ARG_4_COLUMN,
+                            ON_TRIGGER_ARG_5_COLUMN,
+                            lineNo);
                     }
-                case "background":
+                case BACKGROUND_EVENT_TYPE:
                     {
                         string backgroundId = GetAuthoringField(fields, 7);
                         if (string.IsNullOrWhiteSpace(backgroundId))
                         {
-                            throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for Background.");
+                            throw new FormatException($"line {lineNo}: {ON_TRIGGER_ARG_1_COLUMN} is required for Background.");
                         }
                         return new BackgroundEvent(CreateBackgroundId(backgroundId));
                     }
-                case "animation":
+                case ANIMATION_EVENT_TYPE:
                     {
                         string animationId = GetAuthoringField(fields, 7);
                         if (string.IsNullOrWhiteSpace(animationId))
                         {
-                            throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for Animation.");
+                            throw new FormatException($"line {lineNo}: {ON_TRIGGER_ARG_1_COLUMN} is required for Animation.");
                         }
                         return new AnimationEvent(CreateAnimationId(animationId));
                     }
-                case "portrait":
+                case PORTRAIT_EVENT_TYPE:
                     {
-                        PortraitSlot slot = ParsePortraitSlot(GetAuthoringField(fields, 7), "OnTriggerArg1", lineNo);
+                        PortraitSlot slot = ParsePortraitSlot(GetAuthoringField(fields, 7), ON_TRIGGER_ARG_1_COLUMN, lineNo);
                         string portraitId = GetAuthoringField(fields, 8);
                         if (string.IsNullOrWhiteSpace(portraitId))
                         {
-                            throw new FormatException($"line {lineNo}: OnTriggerArg2 is required for Portrait.");
+                            throw new FormatException($"line {lineNo}: {ON_TRIGGER_ARG_2_COLUMN} is required for Portrait.");
                         }
-                        float posX = ParseOptionalFloat(GetAuthoringField(fields, 9), 0f, "OnTriggerArg3", lineNo);
+                        float posX = ParseOptionalFloat(GetAuthoringField(fields, 9), 0f, ON_TRIGGER_ARG_3_COLUMN, lineNo);
                         return new PortraitEvent(slot, CreatePortraitId(portraitId), posX, 0f, 1f, true);
                     }
-                case "layer":
+                case LAYER_EVENT_TYPE:
                     {
-                        LayerTarget target = ParseLayerTarget(GetAuthoringField(fields, 7), "OnTriggerArg1", lineNo);
-                        int order = ParseRequiredInt(GetAuthoringField(fields, 8), "OnTriggerArg2", lineNo);
+                        LayerTarget target = ParseLayerTarget(GetAuthoringField(fields, 7), ON_TRIGGER_ARG_1_COLUMN, lineNo);
+                        int order = ParseRequiredInt(GetAuthoringField(fields, 8), ON_TRIGGER_ARG_2_COLUMN, lineNo);
                         return new LayerEvent(target, order);
                     }
                 default:
-                    throw new FormatException($"line {lineNo}: unknown OnTriggerType '{onTriggerType}'.");
+                    throw new FormatException($"line {lineNo}: unknown {ON_TRIGGER_TYPE_COLUMN} '{onTriggerType}'.");
             }
         }
 
@@ -484,10 +554,10 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             IReadOnlyList<string> values = row.Values;
             switch (row.Type.Trim().ToLowerInvariant())
             {
-                case "text":
+                case TEXT_EVENT_TYPE:
                     {
-                        string speaker = GetValue(values, headerIndex, "Speaker");
-                        string text = GetValue(values, headerIndex, "Text");
+                        string speaker = GetValue(values, headerIndex, SPEAKER_COLUMN);
+                        string text = GetValue(values, headerIndex, TEXT_COLUMN);
                         var def = new TextEventDefinition(row.Step, speaker ?? string.Empty, text ?? string.Empty);
 
                         // 後方互換: Event 行にもトリガー情報を直接持てるようにしている
@@ -499,63 +569,77 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
 
                         return def;
                     }
-                case "background":
+                case BACKGROUND_EVENT_TYPE:
                     {
-                        string backgroundId = GetValue(values, headerIndex, "BackgroundId");
+                        string backgroundId = GetValue(values, headerIndex, BACKGROUND_ID_COLUMN);
                         if (string.IsNullOrWhiteSpace(backgroundId))
                         {
-                            throw new FormatException($"line {row.LineNo}: BackgroundId is required for Background event.");
+                            throw new FormatException(
+                                $"line {row.LineNo}: {BACKGROUND_ID_COLUMN} is required for Background event.");
                         }
                         return new PlainEventDefinition(row.Step, new BackgroundEvent(CreateBackgroundId(backgroundId)));
                     }
-                case "animation":
+                case ANIMATION_EVENT_TYPE:
                     {
-                        string animationId = GetValue(values, headerIndex, "AnimationId");
+                        string animationId = GetValue(values, headerIndex, ANIMATION_ID_COLUMN);
                         if (string.IsNullOrWhiteSpace(animationId))
                         {
-                            throw new FormatException($"line {row.LineNo}: AnimationId is required for Animation event.");
+                            throw new FormatException(
+                                $"line {row.LineNo}: {ANIMATION_ID_COLUMN} is required for Animation event.");
                         }
                         return new PlainEventDefinition(row.Step, new AnimationEvent(CreateAnimationId(animationId)));
                     }
-                case "fade":
+                case FADE_EVENT_TYPE:
                     {
-                        float start = ParseRequiredFloat(GetValue(values, headerIndex, "FadeStart"), "FadeStart", row.LineNo);
-                        float end = ParseRequiredFloat(GetValue(values, headerIndex, "FadeEnd"), "FadeEnd", row.LineNo);
-                        float duration = ParseRequiredFloat(GetValue(values, headerIndex, "FadeDuration"), "FadeDuration", row.LineNo);
-                        FadeTarget target = ParseFadeTarget(GetValue(values, headerIndex, "FadeTarget"), row.LineNo);
-                        return new PlainEventDefinition(row.Step, new FadeEvent(start, end, duration, target));
+                        FadeEvent fadeEvent = CreateFadeEvent(
+                            GetValue(values, headerIndex, FADE_START_COLUMN),
+                            GetValue(values, headerIndex, FADE_END_COLUMN),
+                            GetValue(values, headerIndex, FADE_DURATION_COLUMN),
+                            GetValue(values, headerIndex, FADE_TARGET_COLUMN),
+                            GetValue(values, headerIndex, FADE_MODE_COLUMN),
+                            FADE_START_COLUMN,
+                            FADE_END_COLUMN,
+                            FADE_DURATION_COLUMN,
+                            FADE_TARGET_COLUMN,
+                            FADE_MODE_COLUMN,
+                            row.LineNo);
+                        return new PlainEventDefinition(row.Step, fadeEvent);
                     }
-                case "portrait":
+                case PORTRAIT_EVENT_TYPE:
                     {
                         PortraitSlot slot = ParsePortraitSlot(
-                            GetValue(values, headerIndex, "PortraitSlot"),
-                            "PortraitSlot",
+                            GetValue(values, headerIndex, PORTRAIT_SLOT_COLUMN),
+                            PORTRAIT_SLOT_COLUMN,
                             row.LineNo);
-                        string portraitId = GetValue(values, headerIndex, "PortraitId");
+                        string portraitId = GetValue(values, headerIndex, PORTRAIT_ID_COLUMN);
                         if (string.IsNullOrWhiteSpace(portraitId))
                         {
-                            throw new FormatException($"line {row.LineNo}: PortraitId is required for Portrait event.");
+                            throw new FormatException(
+                                $"line {row.LineNo}: {PORTRAIT_ID_COLUMN} is required for Portrait event.");
                         }
-                        float posX = ParseOptionalFloat(GetValue(values, headerIndex, "PortraitPosX"), 0f, "PortraitPosX", row.LineNo);
-                        float posY = ParseOptionalFloat(GetValue(values, headerIndex, "PortraitPosY"), 0f, "PortraitPosY", row.LineNo);
-                        float scale = ParseOptionalFloat(GetValue(values, headerIndex, "PortraitScale"), 1f, "PortraitScale", row.LineNo);
-                        bool visible = ParseOptionalBool(GetValue(values, headerIndex, "PortraitVisible"), true, "PortraitVisible", row.LineNo);
+                        float posX = ParseOptionalFloat(GetValue(values, headerIndex, PORTRAIT_POS_X_COLUMN), 0f, PORTRAIT_POS_X_COLUMN, row.LineNo);
+                        float posY = ParseOptionalFloat(GetValue(values, headerIndex, PORTRAIT_POS_Y_COLUMN), 0f, PORTRAIT_POS_Y_COLUMN, row.LineNo);
+                        float scale = ParseOptionalFloat(GetValue(values, headerIndex, PORTRAIT_SCALE_COLUMN), 1f, PORTRAIT_SCALE_COLUMN, row.LineNo);
+                        bool visible = ParseOptionalBool(GetValue(values, headerIndex, PORTRAIT_VISIBLE_COLUMN), true, PORTRAIT_VISIBLE_COLUMN, row.LineNo);
 
                         return new PlainEventDefinition(
                             row.Step,
                             new PortraitEvent(slot, CreatePortraitId(portraitId), posX, posY, scale, visible));
                     }
-                case "layer":
+                case LAYER_EVENT_TYPE:
                     {
                         LayerTarget target = ParseLayerTarget(
-                            GetValue(values, headerIndex, "LayerTarget"),
-                            "LayerTarget",
+                            GetValue(values, headerIndex, LAYER_TARGET_COLUMN),
+                            LAYER_TARGET_COLUMN,
                             row.LineNo);
-                        int order = ParseRequiredInt(GetValue(values, headerIndex, "LayerOrder"), "LayerOrder", row.LineNo);
+                        int order = ParseRequiredInt(
+                            GetValue(values, headerIndex, LAYER_ORDER_COLUMN),
+                            LAYER_ORDER_COLUMN,
+                            row.LineNo);
                         return new PlainEventDefinition(row.Step, new LayerEvent(target, order));
                     }
                 default:
-                    throw new FormatException($"line {row.LineNo}: unknown Type '{row.Type}'.");
+                    throw new FormatException($"line {row.LineNo}: unknown {TYPE_COLUMN} '{row.Type}'.");
             }
         }
 
@@ -568,10 +652,10 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             int lineNo,
             string text)
         {
-            string triggerTypeRaw = GetValue(values, headerIndex, "TriggerType");
+            string triggerTypeRaw = GetValue(values, headerIndex, TRIGGER_TYPE_COLUMN);
             string triggerType = triggerTypeRaw?.Trim();
             if (string.IsNullOrWhiteSpace(triggerType) ||
-                triggerType.Equals("None", StringComparison.OrdinalIgnoreCase))
+                triggerType.Equals(NONE_TRIGGER_TYPE, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
@@ -588,53 +672,57 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             int lineNo,
             string text)
         {
-            string onTriggerTypeRaw = GetValue(values, headerIndex, "OnTriggerType");
+            string onTriggerTypeRaw = GetValue(values, headerIndex, ON_TRIGGER_TYPE_COLUMN);
             string onTriggerType = onTriggerTypeRaw?.Trim();
             if (string.IsNullOrWhiteSpace(onTriggerType))
             {
-                throw new FormatException($"line {lineNo}: OnTriggerType is required when TriggerType is set.");
+                throw new FormatException(
+                    $"line {lineNo}: {ON_TRIGGER_TYPE_COLUMN} is required when {TRIGGER_TYPE_COLUMN} is set.");
             }
 
             IScenarioEvent fireEvent = CreateTriggerEvent(values, headerIndex, lineNo, onTriggerType);
-            string triggerTypeRaw = GetValue(values, headerIndex, "TriggerType");
+            string triggerTypeRaw = GetValue(values, headerIndex, TRIGGER_TYPE_COLUMN);
             string triggerType = triggerTypeRaw?.Trim();
 
             switch (triggerType.ToLowerInvariant())
             {
-                case "atcharindex":
+                case AT_CHAR_INDEX_TRIGGER_TYPE:
                     {
-                        string indexRaw = GetValue(values, headerIndex, "TriggerIndex");
+                        string indexRaw = GetValue(values, headerIndex, TRIGGER_INDEX_COLUMN);
                         if (!int.TryParse(indexRaw, NumberStyles.Integer, CultureInfo.InvariantCulture, out int charIndex))
                         {
-                            throw new FormatException($"line {lineNo}: TriggerIndex must be int for AtCharIndex.");
+                            throw new FormatException(
+                                $"line {lineNo}: {TRIGGER_INDEX_COLUMN} must be int for AtCharIndex.");
                         }
-                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                        return TextTimingTrigger.CreateAtCharIndex(charIndex, fireEvent);
                     }
-                case "atkeyword":
+                case AT_KEYWORD_TRIGGER_TYPE:
                     {
-                        string keyword = GetValue(values, headerIndex, "TriggerKeyword");
+                        string keyword = GetValue(values, headerIndex, TRIGGER_KEYWORD_COLUMN);
                         if (string.IsNullOrWhiteSpace(keyword))
                         {
-                            throw new FormatException($"line {lineNo}: TriggerKeyword is required for AtKeyword.");
+                            throw new FormatException(
+                                $"line {lineNo}: {TRIGGER_KEYWORD_COLUMN} is required for AtKeyword.");
                         }
-                        return TextTimingTrigger.AtKeyword(keyword, fireEvent);
+                        return TextTimingTrigger.CreateAtKeyword(keyword, fireEvent);
                     }
-                case "atsuffix":
+                case AT_SUFFIX_TRIGGER_TYPE:
                     {
-                        string suffix = GetValue(values, headerIndex, "TriggerKeyword");
+                        string suffix = GetValue(values, headerIndex, TRIGGER_KEYWORD_COLUMN);
                         if (string.IsNullOrWhiteSpace(suffix))
                         {
-                            throw new FormatException($"line {lineNo}: TriggerKeyword is required for AtSuffix.");
+                            throw new FormatException(
+                                $"line {lineNo}: {TRIGGER_KEYWORD_COLUMN} is required for AtSuffix.");
                         }
-                        return TextTimingTrigger.AtSuffix(suffix, fireEvent);
+                        return TextTimingTrigger.CreateAtSuffix(suffix, fireEvent);
                     }
-                case "attextend":
+                case AT_TEXT_END_TRIGGER_TYPE:
                     {
                         int charIndex = string.IsNullOrEmpty(text) ? 0 : text.Length;
-                        return TextTimingTrigger.AtCharIndex(charIndex, fireEvent);
+                        return TextTimingTrigger.CreateAtCharIndex(charIndex, fireEvent);
                     }
                 default:
-                    throw new FormatException($"line {lineNo}: unknown TriggerType '{triggerTypeRaw}'.");
+                    throw new FormatException($"line {lineNo}: unknown {TRIGGER_TYPE_COLUMN} '{triggerTypeRaw}'.");
             }
         }
 
@@ -649,50 +737,77 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         {
             switch (onTriggerType.ToLowerInvariant())
             {
-                case "fade":
+                case FADE_EVENT_TYPE:
                     {
-                        float start = ParseRequiredFloat(GetValue(values, headerIndex, "OnTriggerArg1"), "OnTriggerArg1", lineNo);
-                        float end = ParseRequiredFloat(GetValue(values, headerIndex, "OnTriggerArg2"), "OnTriggerArg2", lineNo);
-                        float duration = ParseRequiredFloat(GetValue(values, headerIndex, "OnTriggerArg3"), "OnTriggerArg3", lineNo);
-                        return new FadeEvent(start, end, duration);
+                        return CreateFadeEvent(
+                            GetValue(values, headerIndex, ON_TRIGGER_ARG_1_COLUMN),
+                            GetValue(values, headerIndex, ON_TRIGGER_ARG_2_COLUMN),
+                            GetValue(values, headerIndex, ON_TRIGGER_ARG_3_COLUMN),
+                            GetValue(values, headerIndex, ON_TRIGGER_ARG_4_COLUMN),
+                            GetValue(values, headerIndex, ON_TRIGGER_ARG_5_COLUMN),
+                            ON_TRIGGER_ARG_1_COLUMN,
+                            ON_TRIGGER_ARG_2_COLUMN,
+                            ON_TRIGGER_ARG_3_COLUMN,
+                            ON_TRIGGER_ARG_4_COLUMN,
+                            ON_TRIGGER_ARG_5_COLUMN,
+                            lineNo);
                     }
-                case "background":
+                case BACKGROUND_EVENT_TYPE:
                     {
-                        string backgroundId = GetValue(values, headerIndex, "OnTriggerArg1");
+                        string backgroundId = GetValue(values, headerIndex, ON_TRIGGER_ARG_1_COLUMN);
                         if (string.IsNullOrWhiteSpace(backgroundId))
                         {
-                            throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Background.");
+                            throw new FormatException(
+                                $"line {lineNo}: {ON_TRIGGER_ARG_1_COLUMN} is required "
+                                + $"for {ON_TRIGGER_TYPE_COLUMN}=Background.");
                         }
                         return new BackgroundEvent(CreateBackgroundId(backgroundId));
                     }
-                case "animation":
+                case ANIMATION_EVENT_TYPE:
                     {
-                        string animationId = GetValue(values, headerIndex, "OnTriggerArg1");
+                        string animationId = GetValue(values, headerIndex, ON_TRIGGER_ARG_1_COLUMN);
                         if (string.IsNullOrWhiteSpace(animationId))
                         {
-                            throw new FormatException($"line {lineNo}: OnTriggerArg1 is required for OnTriggerType=Animation.");
+                            throw new FormatException(
+                                $"line {lineNo}: {ON_TRIGGER_ARG_1_COLUMN} is required "
+                                + $"for {ON_TRIGGER_TYPE_COLUMN}=Animation.");
                         }
                         return new AnimationEvent(CreateAnimationId(animationId));
                     }
-                case "portrait":
+                case PORTRAIT_EVENT_TYPE:
                     {
-                        PortraitSlot slot = ParsePortraitSlot(GetValue(values, headerIndex, "OnTriggerArg1"), "OnTriggerArg1", lineNo);
-                        string portraitId = GetValue(values, headerIndex, "OnTriggerArg2");
+                        PortraitSlot slot = ParsePortraitSlot(
+                            GetValue(values, headerIndex, ON_TRIGGER_ARG_1_COLUMN),
+                            ON_TRIGGER_ARG_1_COLUMN,
+                            lineNo);
+                        string portraitId = GetValue(values, headerIndex, ON_TRIGGER_ARG_2_COLUMN);
                         if (string.IsNullOrWhiteSpace(portraitId))
                         {
-                            throw new FormatException($"line {lineNo}: OnTriggerArg2 is required for OnTriggerType=Portrait.");
+                            throw new FormatException(
+                                $"line {lineNo}: {ON_TRIGGER_ARG_2_COLUMN} is required "
+                                + $"for {ON_TRIGGER_TYPE_COLUMN}=Portrait.");
                         }
-                        float posX = ParseOptionalFloat(GetValue(values, headerIndex, "OnTriggerArg3"), 0f, "OnTriggerArg3", lineNo);
+                        float posX = ParseOptionalFloat(
+                            GetValue(values, headerIndex, ON_TRIGGER_ARG_3_COLUMN),
+                            0f,
+                            ON_TRIGGER_ARG_3_COLUMN,
+                            lineNo);
                         return new PortraitEvent(slot, CreatePortraitId(portraitId), posX, 0f, 1f, true);
                     }
-                case "layer":
+                case LAYER_EVENT_TYPE:
                     {
-                        LayerTarget target = ParseLayerTarget(GetValue(values, headerIndex, "OnTriggerArg1"), "OnTriggerArg1", lineNo);
-                        int order = ParseRequiredInt(GetValue(values, headerIndex, "OnTriggerArg2"), "OnTriggerArg2", lineNo);
+                        LayerTarget target = ParseLayerTarget(
+                            GetValue(values, headerIndex, ON_TRIGGER_ARG_1_COLUMN),
+                            ON_TRIGGER_ARG_1_COLUMN,
+                            lineNo);
+                        int order = ParseRequiredInt(
+                            GetValue(values, headerIndex, ON_TRIGGER_ARG_2_COLUMN),
+                            ON_TRIGGER_ARG_2_COLUMN,
+                            lineNo);
                         return new LayerEvent(target, order);
                     }
                 default:
-                    throw new FormatException($"line {lineNo}: unknown OnTriggerType '{onTriggerType}'.");
+                    throw new FormatException($"line {lineNo}: unknown {ON_TRIGGER_TYPE_COLUMN} '{onTriggerType}'.");
             }
         }
 
@@ -814,9 +929,57 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         }
 
         /// <summary>
+        /// CSV の各列から検証済みのフェードイベントを生成する。
+        /// </summary>
+        private static FadeEvent CreateFadeEvent(
+            string startRaw,
+            string endRaw,
+            string durationRaw,
+            string targetRaw,
+            string modeRaw,
+            string startColumn,
+            string endColumn,
+            string durationColumn,
+            string targetColumn,
+            string modeColumn,
+            int lineNo)
+        {
+            float start = ParseRequiredFiniteFloat(startRaw, startColumn, lineNo);
+            float end = ParseRequiredFiniteFloat(endRaw, endColumn, lineNo);
+            float duration = ParseRequiredFiniteFloat(durationRaw, durationColumn, lineNo);
+            FadeTarget target = ParseFadeTarget(targetRaw, targetColumn, lineNo);
+            FadeMode mode = ParseFadeMode(modeRaw, modeColumn, lineNo);
+
+            try
+            {
+                return new FadeEvent(start, end, duration, target, mode);
+            }
+            catch (ArgumentException exception)
+            {
+                throw new FormatException(
+                    $"line {lineNo}: invalid {modeColumn} '{modeRaw}' for {targetColumn} '{targetRaw}'.",
+                    exception);
+            }
+        }
+
+        /// <summary>
+        /// フェードに使用する有限小数を解析する。
+        /// </summary>
+        private static float ParseRequiredFiniteFloat(string raw, string columnName, int lineNo)
+        {
+            float value = ParseRequiredFloat(raw, columnName, lineNo);
+            if (!float.IsFinite(value))
+            {
+                throw new FormatException($"line {lineNo}: invalid {columnName} '{raw}'.");
+            }
+
+            return value;
+        }
+
+        /// <summary>
         /// 文字列からフェード対象を解析する。省略時は画面全体（Screen）。
         /// </summary>
-        private static FadeTarget ParseFadeTarget(string raw, int lineNo)
+        private static FadeTarget ParseFadeTarget(string raw, string columnName, int lineNo)
         {
             if (string.IsNullOrWhiteSpace(raw))
             {
@@ -831,12 +994,32 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 return FadeTarget.Screen;
             }
 
-            if (!Enum.TryParse(value, true, out FadeTarget target))
+            if (!Enum.TryParse(value, true, out FadeTarget target)
+                || !Enum.IsDefined(typeof(FadeTarget), target))
             {
-                throw new FormatException($"line {lineNo}: unknown FadeTarget '{raw}'.");
+                throw new FormatException($"line {lineNo}: unknown {columnName} '{raw}'.");
             }
 
             return target;
+        }
+
+        /// <summary>
+        /// 文字列からフェード方法を解析する。省略時は透明度（Alpha）。
+        /// </summary>
+        private static FadeMode ParseFadeMode(string raw, string columnName, int lineNo)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return FadeMode.Alpha;
+            }
+
+            if (!Enum.TryParse(raw.Trim(), true, out FadeMode mode)
+                || !Enum.IsDefined(typeof(FadeMode), mode))
+            {
+                throw new FormatException($"line {lineNo}: unknown {columnName} '{raw}'.");
+            }
+
+            return mode;
         }
 
         /// <summary>
