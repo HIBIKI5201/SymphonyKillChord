@@ -69,6 +69,10 @@ MonoBehaviour:
   - _addressableKey: TutorialSubtitles_ja
   - _addressableKey: TutorialPopupImages Shared Data
   - _addressableKey: TutorialSubtitles Shared Data
+  - _addressableKey: UICommon_en
+  - _addressableKey: UICommon_ja
+  - _addressableKey: Assets/Localization/Tables/UICommon Shared Data.asset
+  - _addressableKey: UICommon Shared Data
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _sourceAssetAddressableKey: StageTreeAsset

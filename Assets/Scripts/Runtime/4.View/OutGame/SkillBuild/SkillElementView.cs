@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -42,6 +43,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             RootElement.AddToClassList(DRAGGABLE_CLASS_NAME);
             RootElement.RegisterCallback<ClickEvent>(HandleClickHandler);
             _genreBadge.RegisterCallback<ClickEvent>(HandleGenreBadgeClickHandler);
+            _lockedLocalizedText = new LocalizedElementText(
+                "UICommon", "ui.skill.locked", text => _lockedLabel.text = text, _lockedLabel.text);
         }
 
         /// <summary> スキルが選択された時にスキル ID を通知する。 </summary>
@@ -104,6 +107,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         public void Dispose()
         {
+            _lockedLocalizedText.Dispose();
             StopFloatingAnimation();
             RootElement.UnregisterCallback<ClickEvent>(HandleClickHandler);
             _genreBadge.UnregisterCallback<ClickEvent>(HandleGenreBadgeClickHandler);
@@ -132,6 +136,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly Image _genreBadge;
         private readonly VisualElement _equippedBadge;
         private readonly Label _lockedLabel;
+        private readonly LocalizedElementText _lockedLocalizedText;
         private readonly IUISoundEffectCommand _soundEffectCommand;
         private IVisualElementScheduledItem _floatSchedule;
         private float _floatPhase;

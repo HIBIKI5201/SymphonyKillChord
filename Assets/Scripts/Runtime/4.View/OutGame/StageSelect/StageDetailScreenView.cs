@@ -142,8 +142,29 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             }
 
             RegisterButtonCallback();
-            _sortieButtonLocalizedText = new LocalizedElementText(
-                UI_COMMON_TABLE, "ui.stage_select.sortie", text => _sortieButtonMainLabel.text = text);
+            Label firstClearHeading = firstClearReward.Q<Label>("FirstClearRewardHeading");
+            Label successHeading = successReward.Q<Label>("SuccessRewardHeading");
+            VisualElement unlockPointsIcon = firstClearReward.Q<VisualElement>("Item");
+            VisualElement modPointsIcon = successReward.Q<VisualElement>("Item");
+            _localizedTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.stage_select.sortie", text => _sortieButtonMainLabel.text = text, "出撃"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.stage_select.first_reward", text => firstClearHeading.text = text, "初回報酬"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.stage_select.success_reward", text => successHeading.text = text, "成功報酬"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.points.unlock", text => unlockPointsIcon.tooltip = text, "解放P"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.points.mod", text => modPointsIcon.tooltip = text, "改造P"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill.formation", text => _skillBuildShortcutButton.text = text, "編成"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill.empty_slot_symbol",
+                    text => skillBuild.Query<Label>(className: "equipped-skill-placeholder")
+                        .ForEach(label => label.text = text), "＋"),
+            };
         }
 
         /// <summary>
@@ -179,11 +200,9 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 _flavorTextLabel.text = dto.FlavorText;
             }
 
-            // 初回報酬ボックス: 解放P「現在値 → 加算後」、成功報酬ボックス: 改造P「現在値 → 加算後」。
-            _rewardSkillUnlockLabel.text = BuildRewardArrowText(
-                dto.CurrentSkillUnlockPoint, dto.FirstClearRewardSkillUnlockPoint);
-            _rewardSkillBuildLabel.text = BuildRewardArrowText(
-                dto.CurrentSkillBuildPoint, dto.SuccessRewardSkillBuildPoint);
+            // 報酬アイコンの隣には、ステージ定義の獲得量を表示する。
+            _rewardSkillUnlockLabel.text = dto.FirstClearRewardSkillUnlockPoint.ToString();
+            _rewardSkillBuildLabel.text = dto.SuccessRewardSkillBuildPoint.ToString();
 
             // バトルパートのみミッション見出し・ミッションセクションを表示する
             _missionHeadingRoot.style.display = dto.IsBattle ? DisplayStyle.Flex : DisplayStyle.None;
@@ -217,17 +236,6 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                     MISSION_CHECK_ACHIEVED_USS_CLASS,
                     subMissionCleared != null && subMissionCleared.Length > 2 && subMissionCleared[2]);
             }
-        }
-
-        /// <summary>
-        ///     「現在値 → 現在値+加算量」形式の報酬表示テキストを組み立てます。
-        /// </summary>
-        /// <param name="currentPoint"> 現在のポイント。 </param>
-        /// <param name="rewardPoint"> 加算されるポイント。 </param>
-        /// <returns> 「現在値 → 加算後の値」形式の文字列。 </returns>
-        private static string BuildRewardArrowText(int currentPoint, int rewardPoint)
-        {
-            return $"{currentPoint} {REWARD_ARROW} {currentPoint + rewardPoint}";
         }
 
         /// <summary>
@@ -277,7 +285,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             _slideMotionHandle.TryCancel();
             base.Dispose();
             UnregisterButtonCallback();
-            _sortieButtonLocalizedText?.Dispose();
+            foreach (LocalizedElementText localizedText in _localizedTexts)
+            {
+                localizedText.Dispose();
+            }
         }
 
         /// <summary>
@@ -417,8 +428,6 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string EQUIPPED_SKILL_ICON_USS_CLASS = "equipped-skill-icon";
         private const string EQUIPPED_SKILL_COMMAND_ROW_USS_CLASS = "equipped-skill-command-row";
         private const string EQUIPPED_SKILL_COMMAND_HEX_USS_CLASS = "equipped-skill-command-hex";
-        /// <summary> 報酬表示の矢印記号。 </summary>
-        private const string REWARD_ARROW = "→";
         /// <summary> パネルのスライドインにかかる時間(秒)。 </summary>
         private const float SLIDE_DURATION = 0.25f;
         /// <summary> パネルのスライド開始位置(画面右外側へのオフセット、px)。パネル幅(500px)ぶん逃がす。 </summary>
@@ -455,7 +464,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
         private readonly Button _sortieButton;
         private readonly Label _sortieButtonMainLabel;
-        private LocalizedElementText _sortieButtonLocalizedText;
+        private readonly LocalizedElementText[] _localizedTexts;
         private readonly Button _skillBuildShortcutButton;
         private readonly VisualElement _equippedSkillRow;
         private readonly List<VisualElement> _equippedSkillSlots;

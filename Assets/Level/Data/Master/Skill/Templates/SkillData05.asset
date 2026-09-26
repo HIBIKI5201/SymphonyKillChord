@@ -18,7 +18,7 @@ MonoBehaviour:
   _displayName: スキル5
   _pattern: 04000000020000000800000008000000
   _icon: {fileID: 21300000, guid: 8f70f906fbd3f9343968b7bd0dd79116, type: 3}
-  _skillDetail: "\u81EA\u8EAB\u306E\u4F53\u529B\u3092{HealthCostRatio}\u6D88\u8CBB\u3059\u308B\u3002\u305D\u306E\u5F8C\u3001\u6D88\u8CBB\u3057\u305F\u4F53\u529B\xD7\u653B\u6483\u529B{DamageMultiplier}\u306E\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3002"
+  _skillDetail: "\u81EA\u8EAB\u306E\u4F53\u529B\u3092{HealthCostRatio}\u6D88\u8CBB\u3059\u308B\u3002\u305D\u306E\u5F8C\u3001\uFF08\u6D88\u8CBB\u3057\u305F\u4F53\u529B\xD710\uFF09\xD7{DamageMultiplier}\u306E\u30C0\u30E1\u30FC\u30B8\u3092\u4E0E\u3048\u308B\u3002"
   _tips:
   _effectDisplayMode: 0
   _effectParameters:

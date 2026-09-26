@@ -93,6 +93,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public bool IsAttacking => _enemyAttackReservationUsecase.HasReservation;
         /// <summary> 直近に取得した自身の位置。 </summary>
         public Vector3 CurrentPosition => _lastKnownPosition;
+        /// <summary> 敵の基本移動速度。 </summary>
+        public float MoveSpeed => _enemyMoveUsecase.MoveSpeed;
+
+        /// <summary>
+        ///     攻撃予約や移動先を変更せず、横移動中の現在位置を記録する。
+        /// </summary>
+        /// <param name="position"> 現在の自身の位置。 </param>
+        public void RecordPosition(Vector3 position)
+        {
+            _lastKnownPosition = position;
+        }
 
         /// <summary>
         ///     位置情報より行動意思を取得する。

@@ -9,7 +9,8 @@ on:
       - 'SinfoniaOperator/SinfoniaOperator/**'
       - 'SinfoniaOperator/SinfoniaOperator.Core/**'
       - 'SinfoniaOperator/SinfoniaOperator.SpecSearch/**'
-      - 'SinfoniaOperator/deploy/deploy-release.sh'
+      - 'SinfoniaOperator/deploy/**'
+      - 'SinfoniaOperator/sinfonia-operator.env.json'
   workflow_dispatch:
 
 permissions:
@@ -30,7 +31,7 @@ jobs:
     name: Oracle VMへデプロイ
     runs-on: ubuntu-latest
     environment: 'Sinfonia Operator'
-    timeout-minutes: 20
+    timeout-minutes: 45
 
     steps:
       - name: ソースを取得
@@ -50,6 +51,14 @@ jobs:
             --self-contained true \
             --no-restore \
             --output artifacts/publish
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          public = json.loads(Path('SinfoniaOperator/sinfonia-operator.env.json').read_text(encoding='utf-8-sig'))
+          Path('artifacts/publish/spec-search.release.json').write_text(
+              json.dumps({'SPEC_SEARCH': public['SPEC_SEARCH']}, ensure_ascii=False, indent=2), encoding='utf-8')
+          PY
+          cp SinfoniaOperator/deploy/prepare-spec-index.sh artifacts/publish/
           tar --create --gzip --file artifacts/sinfonia-operator.tar.gz \
             --directory artifacts/publish .
 

@@ -62,6 +62,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public override ValueTask Show(CancellationToken cancellationToken = default)
         {
             _isActive = true;
+            _shownFrame = UnityEngine.Time.frameCount;
             ResetReturnToTitleDialog();
 
             // 背面のホーム画面は表示されたままのため、フォーカスを設定画面内へ閉じ込める。
@@ -182,6 +183,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 return;
             }
 
+            // EscはOptionとCancelの両方に割り当てられているため、開いた入力で即座に閉じない。
+            if (_shownFrame == UnityEngine.Time.frameCount)
+            {
+                return;
+            }
+
             // 確認ダイアログ表示中のキャンセル操作は、ダイアログを閉じる動作に割り当てる。
             if (_isReturnToTitleDialogVisible)
             {
@@ -243,6 +250,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private bool _isReturnToTitleDialogVisible;
         private bool _isReturnToTitleRequested;
         private bool _isActive;
+        private int _shownFrame = -1;
         private MotionHandle _slideMotionHandle;
         private LocalizedElementText[] _localizedButtonTexts = Array.Empty<LocalizedElementText>();
 
@@ -371,12 +379,45 @@ namespace KillChord.Runtime.View.OutGame.Screen
         }
 
         /// <summary>
-        ///     静的なボタンテキストをUICommonテーブルへ連携する。
+        ///     静的なボタン・見出し・確認文をUICommonテーブルへ連携する。
         /// </summary>
         private void RegisterLocalizedButtonTexts()
         {
+            Label titleLabel = Require<Label>(RootElement, "Title");
+            Label audioPanelTitle = Require<Label>(RootElement, "AudioPanelTitle");
+            Label environmentPanelTitle = Require<Label>(RootElement, "EnvironmentPanelTitle");
+            Label screenModeHeading = Require<Label>(RootElement, "ScreenModeHeading");
+            Label resolutionHeading = Require<Label>(RootElement, "ResolutionHeading");
+            Label qualityHeading = Require<Label>(RootElement, "QualityHeading");
+            Label brightnessHeading = Require<Label>(RootElement, "BrightnessHeading");
+            Label returnToTitleMessage = Require<Label>(RootElement, "ReturnToTitleMessage");
+            Label languageHeading = Require<Label>(RootElement, "LanguageHeading");
+            Label vibrationHeading = Require<Label>(RootElement, "VibrationHeading");
+            Label rhythmOffsetHeading = Require<Label>(RootElement, "RhythmOffsetHeading");
             _localizedButtonTexts = new[]
             {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.title", text => titleLabel.text = text, "設定"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.audio", text => audioPanelTitle.text = text, "オーディオ設定"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.environment", text => environmentPanelTitle.text = text, "環境設定"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.screen_mode", text => screenModeHeading.text = text, "画面モード"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.resolution", text => resolutionHeading.text = text, "解像度"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.quality", text => qualityHeading.text = text, "画質"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.brightness", text => brightnessHeading.text = text, "明るさ"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.return_to_title_message", text => returnToTitleMessage.text = text, "タイトル画面に戻りますか？"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.language", text => languageHeading.text = text, "言語"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.vibration", text => vibrationHeading.text = text, "振動"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.rhythm_offset", text => rhythmOffsetHeading.text = text, "リズム判定タイミング"),
                 new LocalizedElementText(
                     UI_COMMON_TABLE, "ui.setting.close", text => _backButton.text = text),
                 new LocalizedElementText(

@@ -289,9 +289,9 @@ ViewModel / ViewSink 系。Adaptor は View を参照できないため必須。
 | --- | --- | --- |
 | 26 | `IAttackResultViewModel` | [3.Adaptor/InGame/Battle/IAttackResultViewModel.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Battle/IAttackResultViewModel.cs) |
 | 27 | `IDamageable` | [3.Adaptor/InGame/Battle/IDamageable.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Battle/IDamageable.cs) |
-| 28 | `ICharacterAnimationSignal` | [3.Adaptor/InGame/Animaiton/ICharacterAnimationSignal.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Animaiton/ICharacterAnimationSignal.cs) |
-| 29 | `ICharacterAnimationViewContext` | [3.Adaptor/InGame/Animaiton/ICharacterAnimationViewContext.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Animaiton/ICharacterAnimationViewContext.cs) |
-| 30 | `ICharacterAnimationViewModel` | [3.Adaptor/InGame/Animaiton/ICharacterAnimationViewModel.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Animaiton/ICharacterAnimationViewModel.cs) |
+| 28 | `ICharacterAnimationSignal` | [3.Adaptor/InGame/Animation/ICharacterAnimationSignal.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Animation/ICharacterAnimationSignal.cs) |
+| 29 | `ICharacterAnimationViewContext` | [3.Adaptor/InGame/Animation/ICharacterAnimationViewContext.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Animation/ICharacterAnimationViewContext.cs) |
+| 30 | `ICharacterAnimationViewModel` | [3.Adaptor/InGame/Animation/ICharacterAnimationViewModel.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Animation/ICharacterAnimationViewModel.cs) |
 | 31 | `IDamageNumber` | [3.Adaptor/InGame/Enemy/IDamageNumber.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/IDamageNumber.cs) |
 | 32 | `IEnemyWaveTimerView` | [3.Adaptor/InGame/Enemy/IEnemyWaveTimerView.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/IEnemyWaveTimerView.cs) |
 | 33 | `INearestAttackPositionSearchViewModel` | [3.Adaptor/InGame/Enemy/INearestAttackPositionSearchViewModel.cs](../../Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/INearestAttackPositionSearchViewModel.cs) |

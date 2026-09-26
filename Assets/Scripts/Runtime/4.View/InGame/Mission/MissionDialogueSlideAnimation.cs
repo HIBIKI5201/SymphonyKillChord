@@ -13,8 +13,13 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// <inheritdoc />
         public override void HideImmediate()
         {
-            Initialize();
             _motion.TryCancel();
+            if (_isInitialized && (_panel == null || _canvasGroup == null))
+            {
+                return;
+            }
+
+            Initialize();
             _panel.anchoredPosition = GetHiddenPosition();
             _canvasGroup.alpha = 0f;
         }

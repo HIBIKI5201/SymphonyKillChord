@@ -19,14 +19,12 @@ MonoBehaviour:
     m_Address: Water
     m_ReadOnly: 1
     m_SerializedLabels:
-    - Locale-en
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2d5cf0ea45a2db24a850c3de3a481ce6
-    m_Address: Move
+    m_Address: Douge_jp
     m_ReadOnly: 1
     m_SerializedLabels:
-    - Locale-en
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4ad8639f3f6dd77489724fd4c71749da
@@ -38,21 +36,18 @@ MonoBehaviour:
     m_Address: Purple
     m_ReadOnly: 1
     m_SerializedLabels:
-    - Locale-en
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5b772e762909ca649a705f94d902d060
     m_Address: JustAttack
     m_ReadOnly: 1
     m_SerializedLabels:
-    - Locale-en
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 60a0aaccc0943174eb9f46a9ff645ad9
     m_Address: Green
     m_ReadOnly: 1
     m_SerializedLabels:
-    - Locale-en
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 782f2d04919c12f4aa9b1330e6ced6d8
@@ -69,36 +64,91 @@ MonoBehaviour:
     m_Address: Blue
     m_ReadOnly: 1
     m_SerializedLabels:
-    - Locale-en
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 97a20494e2cd01a469e17266526c4314
     m_Address: KillChord
     m_ReadOnly: 1
     m_SerializedLabels:
-    - Locale-en
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bfb93d915bd6d0d4aa2f29800a24b041
     m_Address: Yellow
     m_ReadOnly: 1
     m_SerializedLabels:
-    - Locale-en
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dfd7b239bd39c684f9a7c4fea7f8379c
     m_Address: Attack
     m_ReadOnly: 1
     m_SerializedLabels:
-    - Locale-en
     - Locale-ja
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ea767d3cd5ed02242b5813dd479d7a50
-    m_Address: Orenge
+    m_Address: OrangeAttack_jp
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-ja
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eab5bd65cd5447b7aa94a049c346265e
+    m_Address: Attack_en
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-en
-    - Locale-ja
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d90459cab32e4dbfaec285629002dc41
+    m_Address: BlueAttack_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0b43b166f46d4e768de1c4423ae19bdb
+    m_Address: GreenAttack_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8d1320e468c64efc8f2e6b7b6453ddbd
+    m_Address: JustAttack_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 39c0dea233484c48a43a4db45d8b11c3
+    m_Address: KillChord_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aea9a5602c2844ffb25711d17fa9148d
+    m_Address: Douge_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d68fff5880f54f0b903d629476ac4ee4
+    m_Address: OrangeAttack_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f437b516aa0c4c48a2a1015a875e31a0
+    m_Address: PurpleAttack_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1668b38083eb4cfab0419f83a1bfb83a
+    m_Address: WaterAttack_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 442945e9140b4ef2ba5957690e373598
+    m_Address: YellowAttack_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 1
   m_Settings: {fileID: 11400000, guid: d50a7120a39130c4f981d12c9d268c81, type: 2}

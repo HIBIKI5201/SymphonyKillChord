@@ -79,6 +79,27 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
             _confirmButtonLocalizedText = new LocalizedElementText(
                 UI_COMMON_TABLE, "ui.skill_tree.unlock_confirm", text => _confirmButton.text = text);
+            Label localizedUnlockConfirmTitle = rootElement.Q<Label>("UnlockConfirmTitle");
+            Label localizedUnlockConfirmStatsHeader = rootElement.Q<Label>("UnlockConfirmStatsHeader");
+            Label localizedUnlockConfirmHealthLabel = rootElement.Q<Label>("UnlockConfirmHealthLabel");
+            Label localizedUnlockConfirmAttackLabel = rootElement.Q<Label>("UnlockConfirmAttackLabel");
+            Label localizedUnlockConfirmCriticalChanceLabel = rootElement.Q<Label>("UnlockConfirmCriticalChanceLabel");
+            Label localizedUnlockConfirmCriticalDamageLabel = rootElement.Q<Label>("UnlockConfirmCriticalDamageLabel");
+            Label localizedUnlockConfirmRangeLabel = rootElement.Q<Label>("UnlockConfirmRangeLabel");
+            Label localizedUnlockConfirmSkillsHeading = rootElement.Q<Label>("UnlockConfirmSkillsHeading");
+            Label localizedUnlockConfirmSkipLabel = rootElement.Q<Label>("UnlockConfirmSkipLabel");
+            _headingLocalizedTexts = new[]
+            {
+                new LocalizedElementText("UICommon", "ui.skill_tree.unlock_title", text => localizedUnlockConfirmTitle.text = text, localizedUnlockConfirmTitle.text),
+                new LocalizedElementText("UICommon", "ui.skill_tree.stats_to_increase", text => localizedUnlockConfirmStatsHeader.text = text, localizedUnlockConfirmStatsHeader.text),
+                new LocalizedElementText("UICommon", "ui.player_status.health", text => localizedUnlockConfirmHealthLabel.text = text, localizedUnlockConfirmHealthLabel.text),
+                new LocalizedElementText("UICommon", "ui.player_status.attack", text => localizedUnlockConfirmAttackLabel.text = text, localizedUnlockConfirmAttackLabel.text),
+                new LocalizedElementText("UICommon", "ui.player_status.critical_chance", text => localizedUnlockConfirmCriticalChanceLabel.text = text, localizedUnlockConfirmCriticalChanceLabel.text),
+                new LocalizedElementText("UICommon", "ui.player_status.critical_damage", text => localizedUnlockConfirmCriticalDamageLabel.text = text, localizedUnlockConfirmCriticalDamageLabel.text),
+                new LocalizedElementText("UICommon", "ui.player_status.range", text => localizedUnlockConfirmRangeLabel.text = text, localizedUnlockConfirmRangeLabel.text),
+                new LocalizedElementText("UICommon", "ui.skill_tree.skills_to_unlock", text => localizedUnlockConfirmSkillsHeading.text = text, localizedUnlockConfirmSkillsHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill_tree.hide_confirmation", text => localizedUnlockConfirmSkipLabel.text = text, localizedUnlockConfirmSkipLabel.text)
+            };
             Hide();
         }
 
@@ -92,7 +113,11 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         public void Show(UnlockConfirmDTO dto)
         {
             int pointsAfter = dto.CurrentPoints - dto.Cost;
-            _pointsLabel.text = $"{POINTS_LABEL_TEXT}{dto.CurrentPoints}　→　{pointsAfter}";
+            _pointsLocalizedText?.Dispose();
+            _pointsLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_tree.unlock_points_format", text => _pointsLabel.text = text,
+                $"{POINTS_LABEL_TEXT}{dto.CurrentPoints}　→　{pointsAfter}",
+                new object[] { dto.CurrentPoints, pointsAfter });
 
             bool anyStatChanged = false;
             anyStatChanged |= ApplyStatRow(_healthRow, _healthValueLabel,
@@ -140,18 +165,25 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// </summary>
         public void Dispose()
         {
+            foreach (LocalizedElementText localizedText in _headingLocalizedTexts)
+            {
+                localizedText.Dispose();
+            }
             _skipRowActivation?.Dispose();
             _confirmButtonActivation?.Dispose();
             _dialog.UnregisterCallback<NavigationCancelEvent>(
                 HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
             OnCancelled = null;
             _confirmButtonLocalizedText.Dispose();
+            _pointsLocalizedText?.Dispose();
             if (_scrollDragManipulator != null)
             {
                 _scrollDragManipulator.target = null;
                 _scrollDragManipulator = null;
             }
         }
+
+        private readonly LocalizedElementText[] _headingLocalizedTexts;
 
         private const string DIALOG_NAME = "UnlockConfirmDialog";
         private const string POINTS_LABEL_NAME = "UnlockConfirmPointsLabel";
@@ -197,6 +229,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly VisualElement _skipCheckmark;
         private readonly Button _confirmButton;
         private readonly LocalizedElementText _confirmButtonLocalizedText;
+        private LocalizedElementText _pointsLocalizedText;
         private IDisposable _skipRowActivation;
         private IDisposable _confirmButtonActivation;
 

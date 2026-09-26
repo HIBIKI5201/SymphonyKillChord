@@ -41,6 +41,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             _musicSyncService.Update(adjustedPlayTime);
         }
 
+        /// <summary>
+        ///     音源の停止・切り替えに合わせて入力とゲージ基準を破棄する。
+        /// </summary>
+        public void ResetPlayback()
+        {
+            _musicSyncService.ResetPlayback();
+        }
+
         private readonly MusicSyncState _musicSyncState;
         private readonly IMusicSyncService _musicSyncService;
         private readonly IEnvironmentSettingsViewModel _environmentSettingsViewModel;

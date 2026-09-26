@@ -61,6 +61,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _currentScreenId = screenId;
+            ApplyCurrentScreenInteraction();
             view.Show();
         }
 
@@ -76,6 +77,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return;
             }
 
+            view.SetInteractionEnabled(false);
             view.Hide();
 
             if (_currentScreenId != screenId)
@@ -149,10 +151,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _isInteractionEnabled = isEnabled;
-            foreach (ScreenViewBase view in _views.Values)
-            {
-                view.SetInteractionEnabled(isEnabled);
-            }
+            ApplyCurrentScreenInteraction();
 
             if (isEnabled && _currentScreenId.HasValue
                 && _views.TryGetValue(_currentScreenId.Value, out ScreenViewBase currentView))
@@ -167,6 +166,17 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private readonly Stack<VisualElement> _focusHistory = new();
         private ScreenId? _currentScreenId;
         private VisualElement _focusToRestore;
+
+        /// <summary>
+        ///     全体の入力許可と現在画面を照合し、重ねて表示された背面画面への操作を停止する。
+        /// </summary>
+        private void ApplyCurrentScreenInteraction()
+        {
+            foreach (KeyValuePair<ScreenId, ScreenViewBase> entry in _views)
+            {
+                entry.Value.SetInteractionEnabled(_isInteractionEnabled && _currentScreenId == entry.Key);
+            }
+        }
 
         /// <summary>
         ///     履歴から、現在もパネルに存在するフォーカス先を取り出す。

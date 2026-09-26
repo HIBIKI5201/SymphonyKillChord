@@ -83,13 +83,15 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 {
                     RemoveLeftMarginIfFirstInGroup(_unlockedGroupContainer, rootElement);
                     _unlockedGroupContainer.Add(rootElement);
-                    _onSkillElementCreated?.Invoke(rootElement);
                 }
                 else
                 {
                     RemoveLeftMarginIfFirstInGroup(_lockedGroupContainer, rootElement);
                     _lockedGroupContainer.Add(rootElement);
                 }
+
+                // 未解放カードもコントローラーで選択し、詳細を確認できるようにする。
+                _onSkillElementCreated?.Invoke(rootElement);
             }
 
             bool hasUnlockedSkill = _unlockedGroupContainer.childCount > 0;

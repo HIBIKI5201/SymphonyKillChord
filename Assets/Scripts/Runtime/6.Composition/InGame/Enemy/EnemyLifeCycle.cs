@@ -182,7 +182,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             ICharacterAnimationViewContext animationContext =
                 animationComposition.Init(_characterAnimationView, _characterAnimationConfig, musicSyncState);
             _characterAnimationContext = animationContext;
-            _view.Initialize(aiController, target, animationContext, musicSyncState, damageEffectView);
+            _view.Initialize(aiController, target, animationContext, musicSyncState, damageEffectView,
+                () => _raycastView.IsWarningVisible || _battleState.HasActiveShellIndicators);
             _healthView.Bind(viewModel);
             _healthView.Initialize(healthHudPresenter, damageNumberPoolView);
             // 警告デカールへ、攻撃タイミングまでの進捗を0〜1で供給する。
@@ -197,6 +198,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _aiController.On1BeatBefore += _raycastView.LockWarningDirection;
                 _aiController.On2BeatBefore += _raycastView.StartTrackingWarning;
                 _aiController.OnAttack += _raycastView.HideWarning;
+                _aiController.OnAttackCanceled += _raycastView.HideWarning;
             }
             _aiController.OnAttack += HandleEnemyAttackExecuted;
             _attackPositionSearchView.Initialize();
@@ -325,10 +327,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _view.Deactivate();
 
             _enemyEntity.OnDied -= HandleEnemyDied;
-            if (_missionEventController != null && _loadedMissionKeyAsset != null)
-            {
-                _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
-            }
             _targetingSystem?.UnregisterTarget(_targetable);
             _battleAIRegistry?.Unregister(_aiController);
 
@@ -367,6 +365,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void StopGameplay()
         {
+            _raycastView?.HideWarning();
             _attackReservationUsecase?.Deactivate();
             _aiController?.CancelAttack();
 
@@ -782,6 +781,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // 撃破演出用に、敵の撃破を通知する。
             EventBus<EOnEnemyDefeated>.Raise(new EOnEnemyDefeated(diedEnemy.Id));
             _defeatSoundSource?.Play();
+
+            // ミッションへの撃破通知は、死亡演出の完了を待たずに体力が尽きた瞬間に行う。
+            if (_missionEventController != null && _loadedMissionKeyAsset != null)
+            {
+                _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
+            }
 
             DieAsync();
         }

@@ -9,11 +9,6 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
     public interface IOutGameSortieOutputPort
     {
         /// <summary>
-        ///     戦闘準備画面の表示を要求する。
-        /// </summary>
-        void ShowBattlePreparationScreen();
-
-        /// <summary>
         ///     戦闘準備画面を介さずにバトル開始を要求します。
         /// </summary>
         void StartBattle();

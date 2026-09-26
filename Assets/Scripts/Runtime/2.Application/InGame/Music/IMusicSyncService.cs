@@ -10,6 +10,9 @@ namespace KillChord.Runtime.Application.InGame.Music
     /// </summary>
     public interface IMusicSyncService
     {
+        /// <summary> 入力履歴がリズムタイムアウトで破棄されたときに通知します。 </summary>
+        event Action OnRhythmTimedOut;
+
         /// <summary> ロジックとガイドが共有するリズム判定定義。 </summary>
         RhythmJudgmentDefinition RhythmJudgmentDefinition { get; }
 
@@ -18,6 +21,11 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// </summary>
         /// <param name="playTime"> 再生時間。 </param>
         void Update(double playTime);
+
+        /// <summary>
+        ///     再生終了・巻き戻し時に履歴、予約とゲージ基準を通知なしで破棄する。
+        /// </summary>
+        void ResetPlayback();
 
         /// <summary>
         ///     履歴の長さを取得する。

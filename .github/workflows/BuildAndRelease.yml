@@ -147,6 +147,12 @@ jobs:
     needs: check
     if: needs.check.outputs.should_run == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
     runs-on: [self-hosted, windows]
+    defaults:
+      run:
+        # PowerShell 5.1 は BOM なしの run 本文を ANSI として解析するため、解析前に UTF-8 で読み込む。
+        # powershell を維持し、runner が付与するエラー停止・終了コード伝播も引き続き適用する。
+        shell: >-
+          powershell -NoLogo -NoProfile -NonInteractive -Command ". ([scriptblock]::Create([System.IO.File]::ReadAllText('{0}', [System.Text.Encoding]::UTF8)))"
     concurrency:
       group: unity-self-hosted-build
       cancel-in-progress: false
@@ -308,7 +314,6 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: powershell
 
 # ==================================================================================================
 
@@ -379,7 +384,6 @@ jobs:
           }
           $TargetProfiles = $SelectedProfiles -join ","
           "SELECTED_PROFILES=$TargetProfiles" | Add-Content -Path $env:GITHUB_ENV
-        shell: powershell
 
 # ==================================================================================================
 
@@ -445,7 +449,6 @@ jobs:
           "UNITY_BUILD_OUTPUT_DIR=$ResolvedOutputDir" | Add-Content -Path $env:GITHUB_ENV
 
           Write-Host "::endgroup::"
-        shell: powershell
 
 # ==================================================================================================
 
@@ -553,7 +556,6 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: powershell
 
 # ==================================================================================================
 
@@ -655,7 +657,6 @@ jobs:
           Write-Host "設定した aapt2 パス: $($Aapt2.FullName)"
 
           Write-Host "::endgroup::"
-        shell: powershell
 
 # ==================================================================================================
 
@@ -734,7 +735,6 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: powershell
 
 # ==================================================================================================
 
@@ -775,7 +775,6 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: powershell
 
 # ==================================================================================================
 
@@ -824,7 +823,6 @@ jobs:
           }
 
           Write-Host "Unityライセンス: 有効"
-        shell: powershell
 
 # ==================================================================================================
 
@@ -1019,9 +1017,12 @@ jobs:
           Write-Host ""
           Write-Host "[INFO]: すべてのパッケージがインストールされました。配置された総アセットファイル数: $TotalPlaced"
           Write-Host "::endgroup::"
-        shell: powershell
 
 # ==================================================================================================
+
+      - name: Git管理のUIアセットを復元
+        run: ./.github/scripts/RestoreTrackedUiAssets.ps1
+        shell: powershell
 
       - name: NuGetパッケージの復元
         run: |
@@ -1034,20 +1035,40 @@ jobs:
             Microsoft.PowerShell.Utility\Write-Host $Object
           }
           Write-Host "::group::NuGetForUnity.Cli による NuGet パッケージの復元"
-          dotnet tool install --global NuGetForUnity.Cli 2>&1 | Out-String | Write-Host
-          $ToolsPath = Join-Path (Join-Path $HOME ".dotnet") "tools"
-          if (Test-Path $ToolsPath) {
-            $env:PATH = $ToolsPath + [System.IO.Path]::PathSeparator + $env:PATH
-          }
-          & nugetforunity restore "${{ github.workspace }}"
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "[ERROR]: NuGet パッケージの復元に失敗しました (終了コード $LASTEXITCODE)。"
+          try {
+            # 常駐ランナーに導入済みの CLI を再利用し、不要な再インストールを避ける。
+            $ToolList = @(& dotnet tool list --global)
+            $ToolListExitCode = $LASTEXITCODE
+            foreach ($Line in $ToolList) { Write-Host $Line }
+            if ($ToolListExitCode -ne 0) {
+              throw "NuGet CLI のインストール状態を取得できませんでした (終了コード $ToolListExitCode)。"
+            }
+            $HasNuGetCli = @($ToolList | Where-Object { $_ -match '^\s*nugetforunity\.cli\s+' }).Count -gt 0
+            if (-not $HasNuGetCli) {
+              # PowerShell 5.1 の stderr リダイレクトによる例外化と、パイプ経由のログ欠落を防ぐ。
+              & dotnet tool install --global NuGetForUnity.Cli
+              $InstallExitCode = $LASTEXITCODE
+              if ($InstallExitCode -ne 0) {
+                throw "NuGetForUnity.Cli のインストールに失敗しました (終了コード $InstallExitCode)。"
+              }
+            }
+            $ToolsPath = Join-Path (Join-Path $HOME ".dotnet") "tools"
+            if (Test-Path $ToolsPath) {
+              $env:PATH = $ToolsPath + [System.IO.Path]::PathSeparator + $env:PATH
+            }
+            $NuGetCli = Get-Command nugetforunity -CommandType Application -ErrorAction Stop
+            & $NuGetCli.Source restore "${{ github.workspace }}"
+            $RestoreExitCode = $LASTEXITCODE
+            if ($RestoreExitCode -ne 0) {
+              throw "NuGet パッケージの復元に失敗しました (終了コード $RestoreExitCode)。"
+            }
+            Write-Host "[INFO]: NuGet パッケージが復元されました。"
+          } catch {
+            Write-Host "[ERROR]: $($_.Exception.Message)"
+            throw
+          } finally {
             Write-Host "::endgroup::"
-            exit 1
           }
-          Write-Host "[INFO]: NuGet パッケージが復元されました。"
-          Write-Host "::endgroup::"
-        shell: powershell
 
 # ==================================================================================================
 
@@ -1467,13 +1488,12 @@ jobs:
           # 成果物すらリリースできなくなる。判定はexit_codeを見た後続ステップに委ねるため、
           # ここでは常に0を返す。
           exit 0
-        shell: powershell
 
 # ==================================================================================================
 
       - name: Unityログのアップロード
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
+        if: always() && steps.unity_build.outputs.log_file != ''
         with:
           name: unity-build-log
           path: ${{ steps.unity_build.outputs.log_file }}
@@ -1534,7 +1554,6 @@ jobs:
             exit 1
           }
           Write-Host "::endgroup::"
-        shell: powershell
         
 # ==================================================================================================
 
@@ -1662,7 +1681,6 @@ jobs:
           "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
           Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
           Write-Host "::endgroup::"
-        shell: powershell
         
 # ==================================================================================================
 
@@ -1687,7 +1705,6 @@ jobs:
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[INFO]: タグ名を生成しました: $TagName"
           Write-Host "::endgroup::"
-        shell: powershell
         
 # ==================================================================================================
 
@@ -1749,17 +1766,18 @@ jobs:
             }
           }
           Write-Host "::endgroup::"
-        shell: powershell
         
 # ==================================================================================================
 
       - name: リリース作成とアセットのアップロード
-        id: create_release
+        id: release_attempt_1
+        continue-on-error: true
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
-        with:
+        with: &release_upload_options
           tag_name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           name: ${{ steps.tag_gen.outputs.TAG_NAME }}
           prerelease: ${{ steps.determine_mode.outputs.build_mode == 'Development' || steps.determine_mode.outputs.build_variant == 'demo' }}
+          make_latest: ${{ steps.determine_mode.outputs.build_mode == 'Master' && steps.determine_mode.outputs.build_variant == 'release' }}
           body: |
             Workflow Run #${{ github.run_id }} から自動生成されたビルド成果物（Artifact）です。
 
@@ -1782,9 +1800,74 @@ jobs:
 
             **ビルド対象プロファイル:**
             - ビルドプロファイル枠: ${{ steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release' }}${{ steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master' }}BuildProfiles
-          files: "*.zip"
+          files: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          fail_on_unmatched_files: true
+          overwrite_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # アセット保存だけが失敗した場合、Unityビルドからやり直さず新しいストリームで再送する。
+      # 同名の未完了アセットはactionのoverwrite_filesで置き換える。
+      - name: リリースアップロードの再試行待機
+        if: ${{ !cancelled() && steps.release_attempt_1.outcome == 'failure' }}
+        run: Start-Sleep -Seconds 20
+
+      - name: リリース作成とアセットのアップロード（2回目）
+        id: release_attempt_2
+        if: ${{ !cancelled() && steps.release_attempt_1.outcome == 'failure' }}
+        continue-on-error: true
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        with: *release_upload_options
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: リリースアップロードの最終再試行待機
+        if: ${{ !cancelled() && steps.release_attempt_2.outcome == 'failure' }}
+        run: Start-Sleep -Seconds 40
+
+      - name: リリース作成とアセットのアップロード（3回目）
+        id: release_attempt_3
+        if: ${{ !cancelled() && steps.release_attempt_2.outcome == 'failure' }}
+        continue-on-error: true
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        with: *release_upload_options
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 公開確認を従来のcreate_release成功ゲートとし、失敗を成功扱いして版数を進めない。
+      - name: リリースアセットの公開確認
+        id: create_release
+        if: ${{ !cancelled() && (steps.release_attempt_1.outcome == 'success' || steps.release_attempt_1.outcome == 'failure') }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.tag_gen.outputs.TAG_NAME }}
+          UPLOAD_SUCCEEDED: ${{ steps.release_attempt_1.outcome == 'success' || steps.release_attempt_2.outcome == 'success' || steps.release_attempt_3.outcome == 'success' }}
+        run: |
+          if ($env:UPLOAD_SUCCEEDED -ne 'true') {
+            throw 'Release upload failed after three attempts. The build ZIPs will be retained as an artifact.'
+          }
+          $ExpectedFiles = @(Get-ChildItem -LiteralPath $env:GITHUB_WORKSPACE -File |
+            Where-Object { $_.Name.EndsWith("-$($env:RELEASE_TAG).zip", [StringComparison]::Ordinal) })
+          if ($ExpectedFiles.Count -eq 0) { throw 'No release ZIPs were found for verification.' }
+          $Headers = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
+          $Tag = [Uri]::EscapeDataString($env:RELEASE_TAG)
+          $Release = Invoke-RestMethod -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/releases/tags/$Tag" -Headers $Headers -TimeoutSec 60
+          $Assets = @(Invoke-RestMethod -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/releases/$($Release.id)/assets?per_page=100" -Headers $Headers -TimeoutSec 60)
+          foreach ($File in $ExpectedFiles) {
+            $MatchingAssets = @($Assets | Where-Object { $_.name -ceq $File.Name -and $_.state -eq 'uploaded' -and $_.size -eq $File.Length })
+            if ($MatchingAssets.Count -ne 1) { throw "Release asset missing, incomplete or wrong size: $($File.Name) ($($File.Length) bytes)" }
+            Write-Host "Verified release asset: $($File.Name) ($($File.Length) bytes)"
+          }
+
+      - name: 公開失敗時のビルドZIP退避
+        if: ${{ !cancelled() && steps.create_release.outcome == 'failure' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: unreleased-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
 
 # ==================================================================================================
 
@@ -1859,7 +1942,6 @@ jobs:
               exit 1
           }
           Write-Host "::endgroup::"
-        shell: powershell
         
 # ==================================================================================================
 
@@ -1907,7 +1989,6 @@ jobs:
             Write-Host "::warning::Unity ビルドが正常終了しなかったため（終了コード: $env:UNITY_EXIT_CODE）、ワークフローを失敗として記録します。成功したプロファイルの成果物は既にリリースへアップロード済みです。"
             exit 1
           }
-        shell: powershell
 
 # ==================================================================================================
 
@@ -1935,7 +2016,6 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: powershell
 
 # ==================================================================================================
 
@@ -2027,4 +2107,3 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-        shell: powershell

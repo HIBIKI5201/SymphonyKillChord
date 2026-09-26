@@ -8,7 +8,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// <summary>
     /// 各種プレゼンターを束ねてシナリオ出力窓口を提供する。
     /// </summary>
-    public sealed class ScenarioPresenterFacade : IOutputPort, IScenarioCompletionNotifier
+    public sealed class ScenarioPresenterFacade : IOutputPort, IScenarioCompletionNotifier, IScenarioAutoAdvanceNotifier
     {
         /// <summary>
         /// 各出力ポートと完了通知先をまとめて受け取る。
@@ -20,7 +20,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             IAnimationOutputPort animationOutputPort,
             IPortraitOutputPort portraitOutputPort,
             ILayerOutputPort layerOutputPort,
-            IScenarioCompletionViewSink scenarioCompletionViewSink)
+            IScenarioCompletionViewSink scenarioCompletionViewSink,
+            IScenarioAutoAdvanceViewSink autoAdvanceViewSink)
         {
             _textOutputPort = textOutputPort;
             _fadeOutputPort = fadeOutputPort;
@@ -29,6 +30,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             _portraitOutputPort = portraitOutputPort;
             _layerOutputPort = layerOutputPort;
             _scenarioCompletionViewSink = scenarioCompletionViewSink;
+            _autoAdvanceViewSink = autoAdvanceViewSink;
         }
 
         /// <summary>
@@ -89,6 +91,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             return default;
         }
 
+        /// <summary>
+        ///     自動送り状態の変更を表示モデルへ通知する。
+        /// </summary>
+        public void NotifyAutoAdvanceChanged(bool isAutoAdvance)
+        {
+            _autoAdvanceViewSink.SetAutoAdvance(isAutoAdvance);
+        }
+
         private readonly ITextOutputPort _textOutputPort;
         private readonly IFadeOutputPort _fadeOutputPort;
         private readonly IBackgroundOutputPort _backgroundOutputPort;
@@ -96,5 +106,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         private readonly IPortraitOutputPort _portraitOutputPort;
         private readonly ILayerOutputPort _layerOutputPort;
         private readonly IScenarioCompletionViewSink _scenarioCompletionViewSink;
+        private readonly IScenarioAutoAdvanceViewSink _autoAdvanceViewSink;
     }
 }

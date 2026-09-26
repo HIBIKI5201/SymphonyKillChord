@@ -74,6 +74,7 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
             _stepCancellationRegistration = cancellationToken.Register(
                 () => completionSource.TrySetCanceled(cancellationToken));
 
+            ApplyGuideStyles();
             _messageLabel.text = message;
             int layoutGeneration = ++_layoutGeneration;
             CancelLayoutWait();
@@ -160,20 +161,24 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
         private const Ease FADE_EASE = Ease.OutCirc;
         /// <summary> 暗幕の不透明度です。 </summary>
         private const float CURTAIN_ALPHA = 0.75f;
+        /// <summary> 説明パネルと案内矢印の表示倍率です。 </summary>
+        private const float GUIDE_SCALE = 2.25f;
         /// <summary> 矢印の棒の幅です。 </summary>
-        private const float ARROW_BAR_WIDTH = 6f;
+        private const float ARROW_BAR_WIDTH = 6f * GUIDE_SCALE;
         /// <summary> 矢印の棒の長さです。 </summary>
-        private const float ARROW_BAR_LENGTH = 64f;
+        private const float ARROW_BAR_LENGTH = 64f * GUIDE_SCALE;
         /// <summary> 矢印の先端の直径です。 </summary>
-        private const float ARROW_TIP_DIAMETER = 24f;
+        private const float ARROW_TIP_DIAMETER = 24f * GUIDE_SCALE;
+        /// <summary> 説明文のフォントサイズです。 </summary>
+        private const float MESSAGE_FONT_SIZE = 36f;
         /// <summary> 説明パネルの最大幅です。 </summary>
-        private const float MESSAGE_BOX_MAX_WIDTH = 320f;
+        private const float MESSAGE_BOX_MAX_WIDTH = 320f * GUIDE_SCALE;
         /// <summary> 説明パネルの内側余白です。 </summary>
-        private const float MESSAGE_BOX_PADDING = 16f;
+        private const float MESSAGE_BOX_PADDING = 16f * GUIDE_SCALE;
         /// <summary> 説明パネルの角丸半径です。 </summary>
-        private const float MESSAGE_BOX_RADIUS = 12f;
+        private const float MESSAGE_BOX_RADIUS = 12f * GUIDE_SCALE;
         /// <summary> 説明パネルと矢印の間隔です。 </summary>
-        private const float MESSAGE_BOX_GAP = 8f;
+        private const float MESSAGE_BOX_GAP = 8f * GUIDE_SCALE;
         /// <summary> 画面端と説明パネルの間隔です。 </summary>
         private const float SCREEN_MARGIN = 16f;
         /// <summary> 説明パネルの背景色の明度です。 </summary>
@@ -379,6 +384,31 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
         }
 
         /// <summary>
+        ///     表示のたびに文字とパネルの実寸を設定し、生成済みの要素にも変更を反映します。
+        /// </summary>
+        private void ApplyGuideStyles()
+        {
+            _messageLabel.style.fontSize = MESSAGE_FONT_SIZE;
+            // 以前の表示倍率が残っていても、レイアウトの実寸と描画寸法を一致させます。
+            _messageBox.style.scale = new Scale(Vector2.one);
+            _messageBox.style.maxWidth = MESSAGE_BOX_MAX_WIDTH;
+            _messageBox.style.paddingTop = MESSAGE_BOX_PADDING;
+            _messageBox.style.paddingRight = MESSAGE_BOX_PADDING;
+            _messageBox.style.paddingBottom = MESSAGE_BOX_PADDING;
+            _messageBox.style.paddingLeft = MESSAGE_BOX_PADDING;
+            _messageBox.style.borderTopLeftRadius = MESSAGE_BOX_RADIUS;
+            _messageBox.style.borderTopRightRadius = MESSAGE_BOX_RADIUS;
+            _messageBox.style.borderBottomLeftRadius = MESSAGE_BOX_RADIUS;
+            _messageBox.style.borderBottomRightRadius = MESSAGE_BOX_RADIUS;
+
+            float arrowRadius = ARROW_TIP_DIAMETER * 0.5f;
+            _arrowTip.style.borderTopLeftRadius = arrowRadius;
+            _arrowTip.style.borderTopRightRadius = arrowRadius;
+            _arrowTip.style.borderBottomLeftRadius = arrowRadius;
+            _arrowTip.style.borderBottomRightRadius = arrowRadius;
+        }
+
+        /// <summary>
         ///     対象要素を基準に暗幕、矢印、説明パネルを配置します。
         /// </summary>
         /// <param name="targetElement"> ハイライトする要素です。 </param>
@@ -434,7 +464,7 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
 
             _messageBox.style.width = Mathf.Min(
                 MESSAGE_BOX_MAX_WIDTH,
-                overlayWidth - SCREEN_MARGIN * 2f);
+                Mathf.Max(0f, overlayWidth - SCREEN_MARGIN * 2f));
             _messageBox.schedule.Execute(() => UpdateMessageBoxPosition(
                 targetCenterX,
                 arrowTipTop,
@@ -572,17 +602,12 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
         /// <returns> 生成した矢印の先端です。 </returns>
         private static VisualElement CreateArrowTip()
         {
-            float radius = ARROW_TIP_DIAMETER * 0.5f;
             return new VisualElement
             {
                 style =
                 {
                     position = Position.Absolute,
                     backgroundColor = Color.white,
-                    borderTopLeftRadius = radius,
-                    borderTopRightRadius = radius,
-                    borderBottomLeftRadius = radius,
-                    borderBottomRightRadius = radius,
                 },
                 pickingMode = PickingMode.Ignore,
             };
@@ -617,20 +642,11 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
                 style =
                 {
                     position = Position.Absolute,
-                    maxWidth = MESSAGE_BOX_MAX_WIDTH,
-                    paddingTop = MESSAGE_BOX_PADDING,
-                    paddingRight = MESSAGE_BOX_PADDING,
-                    paddingBottom = MESSAGE_BOX_PADDING,
-                    paddingLeft = MESSAGE_BOX_PADDING,
                     backgroundColor = new Color(
                         MESSAGE_BOX_BACKGROUND_BRIGHTNESS,
                         MESSAGE_BOX_BACKGROUND_BRIGHTNESS,
                         MESSAGE_BOX_BACKGROUND_BRIGHTNESS,
                         MESSAGE_BOX_BACKGROUND_ALPHA),
-                    borderTopLeftRadius = MESSAGE_BOX_RADIUS,
-                    borderTopRightRadius = MESSAGE_BOX_RADIUS,
-                    borderBottomLeftRadius = MESSAGE_BOX_RADIUS,
-                    borderBottomRightRadius = MESSAGE_BOX_RADIUS,
                 },
                 pickingMode = PickingMode.Ignore,
             };

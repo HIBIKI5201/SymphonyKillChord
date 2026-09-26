@@ -80,6 +80,32 @@ namespace SinfoniaStudio.NotionMarkdownWriter
     }
 
     /// <summary>
+    ///     編集対象ブロックの識別情報を保持するクラス。
+    /// </summary>
+    internal sealed class NotionBlockInfo
+    {
+        /// <summary>
+        ///     ブロック情報を生成する。
+        /// </summary>
+        /// <param name="id">ブロックID。</param>
+        /// <param name="type">ブロック型。</param>
+        /// <param name="plainText">リッチテキストのプレーンテキスト。無い型では空文字。</param>
+        /// <param name="parent">親への参照。</param>
+        internal NotionBlockInfo(string id, string type, string plainText, NotionParentReference parent)
+        {
+            Id = id;
+            Type = type;
+            PlainText = plainText;
+            Parent = parent;
+        }
+
+        internal string Id { get; }
+        internal string Type { get; }
+        internal string PlainText { get; }
+        internal NotionParentReference Parent { get; }
+    }
+
+    /// <summary>
     ///     データベースのスキーマと識別情報を保持するクラス。
     /// </summary>
     internal sealed class NotionDatabaseInfo
@@ -363,6 +389,163 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 false);
             using JsonDocument document = JsonDocument.Parse(responseBody);
             return ParsePageInfo(document.RootElement);
+        }
+
+        /// <summary>
+        ///     既存ページの親を変更する（子ページ→データベース行への移動など）。本文とプロパティには触れない。
+        ///     ページIDは移動後も変わらないため、既存のページメンション・キャッシュマップはそのまま使える。
+        /// </summary>
+        /// <param name="pageId">対象ページID。</param>
+        /// <param name="dataSourceId">移動先データベースのデータソースID。</param>
+        /// <returns>更新後のページ情報。</returns>
+        internal async Task<NotionPageInfo> UpdateParentAsync(string pageId, string dataSourceId)
+        {
+            // PATCH /pages/{id} はparentの変更を200のまま無視する（実害はないが無効）。
+            // 実際に親を変えられるのは専用のPOST /pages/{id}/moveだけだった（動作確認済み）。
+            Dictionary<string, object> requestBody = new()
+            {
+                ["parent"] = new Dictionary<string, string>
+                {
+                    ["type"] = "data_source_id",
+                    ["data_source_id"] = dataSourceId
+                }
+            };
+            string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
+            string responseBody = await SendAsync(
+                HttpMethod.Post,
+                $"{API_BASE_URL}/pages/{Uri.EscapeDataString(pageId)}/move",
+                json,
+                false);
+            using JsonDocument document = JsonDocument.Parse(responseBody);
+            return ParsePageInfo(document.RootElement);
+        }
+
+        /// <summary>
+        ///     ブロックのメタデータとリッチテキストを取得する。
+        ///     Markdown Content APIでは文字列一致でしか編集できない箇所（巨大な画像ブロックに挟まれた短文、
+        ///     同名のトグルなど）を、ブロックIDで直接特定して編集するために使う。
+        /// </summary>
+        /// <param name="blockId">ブロックID。</param>
+        /// <returns>ブロック情報。</returns>
+        internal async Task<NotionBlockInfo> GetBlockAsync(string blockId)
+        {
+            string responseBody = await SendAsync(
+                HttpMethod.Get,
+                $"{API_BASE_URL}/blocks/{Uri.EscapeDataString(blockId)}",
+                null,
+                true);
+            using JsonDocument document = JsonDocument.Parse(responseBody);
+            return ParseBlockInfo(document.RootElement);
+        }
+
+        /// <summary>
+        ///     ブロックのリッチテキストを書き換える。段落・見出し・トグル・リスト項目など、
+        ///     riche_textを持つブロック型だけに対応する。
+        /// </summary>
+        /// <param name="blockId">ブロックID。</param>
+        /// <param name="blockType">ブロック型（"paragraph"・"toggle"など）。</param>
+        /// <param name="text">新しいプレーンテキスト。</param>
+        /// <returns>更新後のブロック情報。</returns>
+        internal async Task<NotionBlockInfo> UpdateBlockRichTextAsync(string blockId, string blockType, string text)
+        {
+            Dictionary<string, object> requestBody = new()
+            {
+                [blockType] = new Dictionary<string, object>
+                {
+                    ["rich_text"] = new List<Dictionary<string, object>>
+                    {
+                        new()
+                        {
+                            ["type"] = "text",
+                            ["text"] = new Dictionary<string, string> { ["content"] = text }
+                        }
+                    }
+                }
+            };
+            string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
+            string responseBody = await SendAsync(
+                HttpMethod.Patch,
+                $"{API_BASE_URL}/blocks/{Uri.EscapeDataString(blockId)}",
+                json,
+                false);
+            using JsonDocument document = JsonDocument.Parse(responseBody);
+            return ParseBlockInfo(document.RootElement);
+        }
+
+        /// <summary>
+        ///     指定ブロック（またはページ）の子ブロックの末尾へ、新しいブロックを追加する。
+        ///     Notion APIに位置指定（特定ブロックの直後へ挿入）の手段が無いため、常に末尾になる。
+        /// </summary>
+        /// <param name="parentBlockOrPageId">追加先の親ブロックまたはページのID。</param>
+        /// <param name="richText">追加する段落のリッチテキスト（テキストとページメンションの混在）。</param>
+        /// <returns>作成されたブロックのID一覧。</returns>
+        internal async Task<IReadOnlyList<string>> AppendParagraphAsync(
+            string parentBlockOrPageId,
+            IReadOnlyList<Dictionary<string, object>> richText)
+        {
+            Dictionary<string, object> requestBody = new()
+            {
+                ["children"] = new List<Dictionary<string, object>>
+                {
+                    new()
+                    {
+                        ["type"] = "paragraph",
+                        ["paragraph"] = new Dictionary<string, object> { ["rich_text"] = richText }
+                    }
+                }
+            };
+            string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
+            string responseBody = await SendAsync(
+                HttpMethod.Patch,
+                $"{API_BASE_URL}/blocks/{Uri.EscapeDataString(parentBlockOrPageId)}/children",
+                json,
+                false);
+            using JsonDocument document = JsonDocument.Parse(responseBody);
+            List<string> createdIds = new();
+            if (document.RootElement.TryGetProperty("results", out JsonElement results) &&
+                results.ValueKind == JsonValueKind.Array)
+            {
+                foreach (JsonElement result in results.EnumerateArray())
+                {
+                    if (result.TryGetProperty("id", out JsonElement idElement))
+                    {
+                        createdIds.Add(idElement.GetString() ?? string.Empty);
+                    }
+                }
+            }
+
+            return createdIds;
+        }
+
+        /// <summary>
+        ///     ブロックJSONからメタデータとプレーンテキストを取り出す。
+        /// </summary>
+        /// <param name="root">ブロックオブジェクトのJSON。</param>
+        /// <returns>ブロック情報。</returns>
+        private static NotionBlockInfo ParseBlockInfo(JsonElement root)
+        {
+            string id = root.TryGetProperty("id", out JsonElement idElement) ? idElement.GetString() ?? string.Empty : string.Empty;
+            string type = root.TryGetProperty("type", out JsonElement typeElement) ? typeElement.GetString() ?? string.Empty : string.Empty;
+            string plainText = string.Empty;
+            if (!string.IsNullOrEmpty(type) &&
+                root.TryGetProperty(type, out JsonElement typedBody) &&
+                typedBody.ValueKind == JsonValueKind.Object &&
+                typedBody.TryGetProperty("rich_text", out JsonElement richText) &&
+                richText.ValueKind == JsonValueKind.Array)
+            {
+                StringBuilder builder = new();
+                foreach (JsonElement run in richText.EnumerateArray())
+                {
+                    if (run.TryGetProperty("plain_text", out JsonElement plain))
+                    {
+                        builder.Append(plain.GetString());
+                    }
+                }
+
+                plainText = builder.ToString();
+            }
+
+            return new NotionBlockInfo(id, type, plainText, ParseParent(root));
         }
 
         /// <summary>

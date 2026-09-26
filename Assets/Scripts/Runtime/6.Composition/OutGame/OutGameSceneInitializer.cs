@@ -2,10 +2,12 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.View.OutGame.Screen;
 using SymphonyFrameWork.System.SceneLoad;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
@@ -220,7 +222,17 @@ namespace KillChord.Runtime.Composition.OutGame
 
             if (_failureView != null) { return; }
             _failureView = gameObject.AddComponent<OutGameInitializationFailureView>();
-            _failureView.Initialize(gameObject.scene.name == _titleSceneName ? "もう一度読み込む" : "タイトルへ戻る");
+            // Localization自体の初期化失敗でも復帰できるよう、ロード済みの言語設定だけを参照する。
+            bool isEnglish = SaveStore.IsLoaded<SaveData>()
+                && SaveStore.Get<SaveData>().EnvironmentSettings.Language == GameLanguage.English;
+            string actionLabel = gameObject.scene.name == _titleSceneName
+                ? isEnglish ? "Reload" : "もう一度読み込む"
+                : isEnglish ? "Return to Title" : "タイトルへ戻る";
+            _failureView.Initialize(
+                actionLabel,
+                isEnglish ? "Failed to load the screen." : "画面の読み込みに失敗しました。",
+                isEnglish ? "Failed to load the screen. Please try again." : "画面を読み込めませんでした。もう一度お試しください。",
+                isEnglish ? "Loading…" : "読み込み中…");
             _failureView.OnRecoveryRequested += RecoveryRequestedHandler;
         }
 

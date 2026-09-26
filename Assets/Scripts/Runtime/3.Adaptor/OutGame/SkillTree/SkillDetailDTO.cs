@@ -14,6 +14,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             string skillCommand,
             string skillGenre,
             Sprite skillGenreIcon,
+            Sprite skillIcon,
             string skillDetail,
             int unlockCost,
             bool canUnlock,
@@ -27,6 +28,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             SkillCommand = skillCommand == null ? "" : skillCommand;
             SkillGenre = skillGenre == null ? "" : skillGenre;
             SkillGenreIcon = skillGenreIcon;
+            SkillIcon = skillIcon;
             SkillDetail = skillDetail == null ? "" : skillDetail;
             UnlockCost = unlockCost;
             CanUnlock = canUnlock;
@@ -46,6 +48,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         public readonly string SkillGenre;
         /// <summary> ノードが解放するスキルのジャンルアイコン </summary>
         public readonly Sprite SkillGenreIcon;
+        /// <summary> ノードが解放するスキル固有のアイコン </summary>
+        public readonly Sprite SkillIcon;
         /// <summary> スキルの詳細文 </summary>
         public readonly string SkillDetail;
         /// <summary> 解放するための必要ポイント </summary>

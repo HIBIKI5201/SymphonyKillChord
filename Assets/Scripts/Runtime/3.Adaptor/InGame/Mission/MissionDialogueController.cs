@@ -174,7 +174,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             {
                 return;
             }
-            if (_isQueuedUntilGameplayStarts)
+            if (_isQueuedUntilGameplayStarts
+                || (_dialogue != null && !_dialogue.IsStepChangeCancellationEnabled))
             {
                 return;
             }
@@ -222,7 +223,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         {
             if (_isDisposed || !_isGameplayActive || _isPaused || _isClosing || _isVisible || _dialogue == null
                 || _mission.MissionProgress.IsFinished
-                || (!_isQueuedUntilGameplayStarts && _stepIndex != _mission.MissionProgress.ObjectiveStepIndex))
+                || (_dialogue.IsStepChangeCancellationEnabled && !_isQueuedUntilGameplayStarts
+                    && _stepIndex != _mission.MissionProgress.ObjectiveStepIndex))
             {
                 return;
             }

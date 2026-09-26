@@ -2,16 +2,22 @@ using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
+using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
+using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -164,11 +170,20 @@ namespace KillChord.Demo
             }
 
             TrySubscribeHomeTutorialStarted(isOutGameActive);
-//            TryStartSessionFromOpeningScenario();
+            // TitleとOutGameが同時にロードされている間も、開始通知の購読だけは維持する。
+            if (IsSceneLoaded(_config.TitleSceneName))
+            {
+                _sessionState.End();
+                _timerView?.Refresh(false);
+                return;
+            }
+
+            TryStartSessionFromOpeningScenario();
             TryStartSessionFromTutorialBattle();
             TryStartHomeTimer(isOutGameActive);
             bool isHomeTimerActive = isOutGameActive && _isHomeTimerStarted;
             _sessionState.Tick(Time.unscaledDeltaTime, isHomeTimerActive);
+            UpdateTimerPosition(isOutGameActive);
             _timerView?.Refresh(isHomeTimerActive);
 
             if (_sessionState.IsStarted && _sessionState.IsOverallTimeExpired)
@@ -179,13 +194,34 @@ namespace KillChord.Demo
 
             if (_sessionState.IsHomeTimeExpired && isOutGameActive)
             {
-                RequestHomeTutorialForceCompleteIfRunning();
-                ApplyForcedSortie(stageSelectContainer);
+                TryHandleHomeExpiry(stageSelectContainer);
             }
+        }
+
+        /// <summary>
+        ///     既存の画面状態を参照し、計時や表示条件を変えずにタイマー位置を更新します。
+        /// </summary>
+        /// <param name="isOutGameActive"> OutGame内にいる場合はtrueです。 </param>
+        private void UpdateTimerPosition(bool isOutGameActive)
+        {
+            ScreenId? screenId = ServiceLocator.TryGetInstance(
+                out IScreenStateRepository screenStateRepository)
+                ? screenStateRepository.TransitionState.CurrentScreenId
+                : null;
+            bool isResultActive = ServiceLocator.TryGetInstance(
+                out SequenceModuleContainer sequenceContainer)
+                && sequenceContainer.SequenceDirector != null
+                && sequenceContainer.SequenceDirector.IsResultActive;
+            bool isScenarioActive = ServiceLocator.TryGetInstance(
+                out SelectedScenarioState selectedScenarioState)
+                && selectedScenarioState.HasSelectedScenario
+                && IsSceneLoaded(selectedScenarioState.CurrentStageDefinition.TargetSceneName);
+            _timerView?.UpdatePosition(screenId, isOutGameActive, isResultActive, isScenarioActive);
         }
 
         private void OnDestroy()
         {
+            _expiryNotificationCancellation?.Cancel();
             if (_isSceneLoadedSubscribed)
             {
                 SceneManager.sceneLoaded -= HandleSceneLoaded;
@@ -219,11 +255,12 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     冒頭シナリオのロード完了後に全体タイマーを開始します。
+        ///     シナリオ開始を選択している場合、冒頭シナリオのロード完了後に全体タイマーを開始します。
         /// </summary>
         private void TryStartSessionFromOpeningScenario()
         {
             if (_sessionState.IsStarted
+                || _config.OverallTimerStartPoint != DemoTimerStartPoint.OpeningScenario
                 || !ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState)
                 || !selectedScenarioState.HasSelectedScenario
                 || !selectedScenarioState.IsOpeningTutorialScenario
@@ -238,11 +275,13 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     チュートリアル戦闘からの途中再開時は、ロード完了後に全体タイマーを開始します。
+        ///     シナリオまたはチュートリアル開始を選択している場合、戦闘のロード完了後に全体タイマーを開始します。
         /// </summary>
         private void TryStartSessionFromTutorialBattle()
         {
             if (_sessionState.IsStarted
+                || (_config.OverallTimerStartPoint != DemoTimerStartPoint.OpeningScenario
+                    && _config.OverallTimerStartPoint != DemoTimerStartPoint.TutorialBattle)
                 || !ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage
                 || !selectedBattleStageState.CurrentStageDefinition.IsTutorial
@@ -267,12 +306,16 @@ namespace KillChord.Demo
             }
 
             _isStartingHomeTimer = true;
+            int sessionRevision = _sessionRevision;
             try
             {
                 SaveData saveData = SaveStore.IsLoaded<SaveData>()
                     ? SaveStore.Get<SaveData>()
                     : await SaveStore.LoadAsync<SaveData>(destroyCancellationToken);
-                if (saveData == null
+                // Titleへ戻る前に始まった読み込み結果で、次のセッションを開始しない。
+                if (sessionRevision != _sessionRevision
+                    || IsSceneLoaded(_config.TitleSceneName)
+                    || saveData == null
                     || saveData.Tutorial.Phase < TutorialPhase.HomeStarted
                     || (saveData.Tutorial.Phase == TutorialPhase.HomeStarted
                         && !_isHomeTutorialStartedNotified))
@@ -314,15 +357,31 @@ namespace KillChord.Demo
                 return;
             }
 
+            // 満了状態を保留として維持し、ロード後の最新の解放状態から選び直す。
+            if (ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+                && loadingScreenController.IsLoading)
+            {
+                return;
+            }
+
             if (!DemoStageResultExitPolicy.TryGetLatestAvailableBattleStage(
                     stageSelectContainer.StageTree,
-                    out BattleStageDefinition battleStageDefinition)
-                || !stageSelectContainer.TryForceBattleSortie(battleStageDefinition.StageId))
+                    out BattleStageDefinition battleStageDefinition))
             {
-                Debug.LogError(
-                    $"[{nameof(DemoRuntimeBootstrap)}] " +
-                    "解放済みの最新バトルステージを強制出撃先に設定できませんでした。",
-                    this);
+                if (!_hasLoggedMissingForcedSortieStage)
+                {
+                    _hasLoggedMissingForcedSortieStage = true;
+                    Debug.LogError(
+                        $"[{nameof(DemoRuntimeBootstrap)}] " +
+                        "強制出撃先となる解放済みのバトルステージがありません。ステージツリーの定義と解放状態を確認してください。",
+                        this);
+                }
+                return;
+            }
+
+            // UIの準備中や出撃処理中は、次のフレームで対象の取得から再試行する。
+            if (!stageSelectContainer.TryForceBattleSortie(battleStageDefinition.StageId))
+            {
                 return;
             }
 
@@ -343,6 +402,7 @@ namespace KillChord.Demo
 
             if (string.Equals(scene.name, _config.EndSceneName, StringComparison.Ordinal))
             {
+                _expiryNotificationCancellation?.Cancel();
                 _sessionState.End();
                 _timerView?.Refresh(false);
                 TryResetSaveDataOnEndScene(scene);
@@ -360,10 +420,17 @@ namespace KillChord.Demo
         /// </summary>
         private void ResetHomeTimerOnEntry(bool isOutGameActive)
         {
+            if (isOutGameActive != _wasOutGameActive)
+            {
+                _homeTimerRevision++;
+                _homeExpiryNotificationShown = false;
+                if (_isShowingHomeNotification) { _expiryNotificationCancellation?.Cancel(); }
+            }
             if (isOutGameActive && !_wasOutGameActive)
             {
                 _sessionState.ResetHomeTimer();
                 _isForcedSortiePrepared = false;
+                _hasLoggedMissingForcedSortieStage = false;
             }
 
             _wasOutGameActive = isOutGameActive;
@@ -374,6 +441,10 @@ namespace KillChord.Demo
         /// </summary>
         private void ResetSessionOnTitleEntry()
         {
+            _sessionRevision++;
+            _expiryNotificationCancellation?.Cancel();
+            _overallExpiryNotificationShown = false;
+            _homeExpiryNotificationShown = false;
             _sessionState.Reset();
             _timerView?.Refresh(false);
 
@@ -389,6 +460,7 @@ namespace KillChord.Demo
             _isTransitioningToEndScene = false;
             _isFinalStageConfigured = false;
             _isForcedSortiePrepared = false;
+            _hasLoggedMissingForcedSortieStage = false;
             _wasOutGameActive = false;
             _isSaveDataReset = false;
         }
@@ -398,7 +470,15 @@ namespace KillChord.Demo
         /// </summary>
         private async void TryTransitionToEndScene()
         {
-            if (_isTransitioningToEndScene || _config == null)
+            // 全体期限を優先し、ホーム通知の完了後に強制出撃しないよう取り消します。
+            if (_isShowingHomeNotification)
+            {
+                _expiryNotificationCancellation?.Cancel();
+                return;
+            }
+            if (_isTransitioningToEndScene || _config == null || IsSceneTransitionBusy()
+                || !TryGetNotificationView(out EventNotificationView notification)
+                || notification.IsVisible)
             {
                 return;
             }
@@ -410,56 +490,161 @@ namespace KillChord.Demo
                 _timerView?.Refresh(false);
                 return;
             }
-
             if (!ServiceLocator.TryGetInstance(out SceneTransitionUsecase sceneTransitionUsecase))
             {
                 Debug.LogError(
-                    $"[{nameof(DemoRuntimeBootstrap)}] " +
-                    $"{nameof(SceneTransitionUsecase)} が取得できません。",
+                    $"[{nameof(DemoRuntimeBootstrap)}] {nameof(SceneTransitionUsecase)} が取得できません。",
                     this);
                 return;
             }
 
             _isTransitioningToEndScene = true;
+            int revision = _sessionRevision;
+            bool isSuccess = false;
             try
             {
-                bool isSuccess;
-                if (TryGetLoadedBattleScenes(
-                        out string battleSceneName,
-                        out string inGameSceneName))
+                if (!_overallExpiryNotificationShown)
+                {
+                    await ShowExpiryNotificationAsync(notification, "ui.notification.demo_expired");
+                    if (revision != _sessionRevision || !_sessionState.IsStarted) { return; }
+                    _overallExpiryNotificationShown = true;
+                }
+
+                // 通知中に別の遷移が始まった場合は、その終了を待って最新シーンから再試行します。
+                if (revision != _sessionRevision || !_sessionState.IsStarted
+                    || IsSceneLoaded(_config.TitleSceneName) || IsSceneTransitionBusy())
+                {
+                    return;
+                }
+                currentScene = SceneManager.GetActiveScene();
+                if (TryGetLoadedBattleScenes(out string battleSceneName, out string inGameSceneName))
                 {
                     isSuccess = await sceneTransitionUsecase.UnloadThenChangeSceneAsync(
-                        battleSceneName,
-                        inGameSceneName,
-                        _config.EndSceneName,
-                        destroyCancellationToken);
+                        battleSceneName, inGameSceneName, _config.EndSceneName, destroyCancellationToken);
                 }
                 else
                 {
                     isSuccess = await sceneTransitionUsecase.ChangeSceneAsync(
-                        currentScene.name,
-                        _config.EndSceneName,
-                        destroyCancellationToken);
+                        currentScene.name, _config.EndSceneName, destroyCancellationToken);
                 }
-
                 if (!isSuccess)
                 {
-                    Debug.LogError(
-                        $"[{nameof(DemoRuntimeBootstrap)}] " +
-                        "全体制限時間切れ後の体験版終了シーン遷移に失敗しました。",
-                        this);
-                    _isTransitioningToEndScene = false;
+                    Debug.LogError($"[{nameof(DemoRuntimeBootstrap)}] 全体制限時間切れ後の体験版終了シーン遷移に失敗しました。", this);
                 }
             }
             catch (OperationCanceledException)
             {
-                _isTransitioningToEndScene = false;
+                // タイトル復帰・全体期限の優先・破棄による正常な取消しでは後続を実行しません。
             }
             catch (Exception exception)
             {
-                _isTransitioningToEndScene = false;
                 Debug.LogException(exception, this);
             }
+            finally
+            {
+                if (revision == _sessionRevision) { _isTransitioningToEndScene = isSuccess; }
+            }
+        }
+
+        /// <summary>
+        ///     ホーム期限の通知完了後、既存の作戦画面と出撃確認へ進めます。
+        /// </summary>
+        private async void TryHandleHomeExpiry(StageSelectModuleContainer container)
+        {
+            if (_isShowingHomeNotification || _isForcedSortiePrepared || _isTransitioningToEndScene
+                || IsSceneTransitionBusy()
+                || !TryGetNotificationView(out EventNotificationView notification)
+                || notification.IsVisible)
+            {
+                return;
+            }
+
+            _isShowingHomeNotification = true;
+            int revision = _sessionRevision;
+            int homeRevision = _homeTimerRevision;
+            try
+            {
+                if (!_homeExpiryNotificationShown)
+                {
+                    await ShowExpiryNotificationAsync(notification, "ui.notification.home_expired");
+                }
+
+                // 別のホーム滞在、タイトル復帰、全体満了へ古い通知の結果を持ち越しません。
+                if (revision != _sessionRevision || homeRevision != _homeTimerRevision
+                    || !_sessionState.IsStarted || _sessionState.IsOverallTimeExpired
+                    || IsSceneLoaded(_config.TitleSceneName)
+                    || !ServiceLocator.TryGetInstance(out StageSelectModuleContainer current)
+                    || !ReferenceEquals(current, container))
+                {
+                    return;
+                }
+                _homeExpiryNotificationShown = true;
+                if (IsSceneTransitionBusy()) { return; }
+                RequestHomeTutorialForceCompleteIfRunning();
+                ApplyForcedSortie(current);
+            }
+            catch (OperationCanceledException)
+            {
+                // タイトル復帰・全体期限の優先・破棄による正常な取消しでは後続を実行しません。
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+            finally
+            {
+                _isShowingHomeNotification = false;
+            }
+        }
+
+        /// <summary>
+        ///     セッションリセットから取り消せる通知だけを所有し、待機終了で解放します。
+        /// </summary>
+        private async Task ShowExpiryNotificationAsync(EventNotificationView notification, string entry)
+        {
+            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            _expiryNotificationCancellation = cancellation;
+            try
+            {
+                await notification.ShowAsync(entry, cancellation.Token);
+            }
+            finally
+            {
+                if (ReferenceEquals(_expiryNotificationCancellation, cancellation))
+                {
+                    _expiryNotificationCancellation = null;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     計時開始後の必須通知欠落を一度だけ記録し、表示前の遷移を防ぎます。
+        /// </summary>
+        private bool TryGetNotificationView(out EventNotificationView notification)
+        {
+            if (ServiceLocator.TryGetInstance(out notification) && notification != null)
+            {
+                _hasLoggedMissingNotificationView = false;
+                return true;
+            }
+            if (!_hasLoggedMissingNotificationView)
+            {
+                _hasLoggedMissingNotificationView = true;
+                Debug.LogError(
+                    $"[{nameof(DemoRuntimeBootstrap)}] 常駐通知Viewがありません。Persistentの初期化設定を確認してください。",
+                    this);
+            }
+            return false;
+        }
+
+        /// <summary>
+        ///     ロード中とシナリオ専用出撃中は期限の後続処理を保留します。
+        /// </summary>
+        private static bool IsSceneTransitionBusy()
+        {
+            return (ServiceLocator.TryGetInstance(out LoadingScreenController loading) && loading.IsLoading)
+                || (ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+                    && transition.HasScenarioBattleSortie);
         }
 
         /// <summary>
@@ -568,9 +753,17 @@ namespace KillChord.Demo
         private bool _isHomeTutorialStartedNotified;
         private bool _isHomeTimerStarted;
         private bool _isStartingHomeTimer;
+        private int _sessionRevision;
+        private CancellationTokenSource _expiryNotificationCancellation;
+        private int _homeTimerRevision;
+        private bool _isShowingHomeNotification;
+        private bool _hasLoggedMissingNotificationView;
+        private bool _homeExpiryNotificationShown;
+        private bool _overallExpiryNotificationShown;
         private bool _isTransitioningToEndScene;
         private bool _isFinalStageConfigured;
         private bool _isForcedSortiePrepared;
+        private bool _hasLoggedMissingForcedSortieStage;
         private bool _wasOutGameActive;
         private bool _isSaveDataReset;
         private bool _ownsPrefabAssetHandle;

@@ -14,9 +14,6 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         private static readonly string[] _valueOptions = Array.Empty<string>();
         private static readonly string[] _flagOptions = { "confirm", "quiet", "whole" };
 
-        /// <summary> 差分表示で1件あたりに出力する最大行数。 </summary>
-        private const int MAX_PREVIEW_LINE_COUNT = 40;
-
         /// <summary>
         ///     pushコマンドを実行する。
         /// </summary>
@@ -113,21 +110,15 @@ namespace SinfoniaStudio.NotionMarkdownWriter
 
         /// <summary>
         ///     置換前後の内容を差分形式で表示する。
+        ///     承認の判断材料になるため、省略せず全行を出す。
         /// </summary>
         /// <param name="text">表示するテキスト。</param>
         /// <param name="marker">行頭に付ける記号。</param>
         private static void WriteDiffLines(string text, char marker)
         {
-            string[] lines = text.Split('\n');
-            int printedCount = Math.Min(lines.Length, MAX_PREVIEW_LINE_COUNT);
-            for (int index = 0; index < printedCount; index++)
+            foreach (string line in text.Split('\n'))
             {
-                Console.WriteLine($"{marker}{lines[index]}");
-            }
-
-            if (lines.Length > printedCount)
-            {
-                Console.WriteLine($"{marker}... 他{lines.Length - printedCount}行");
+                Console.WriteLine($"{marker}{line}");
             }
         }
 
@@ -161,10 +152,46 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 return;
             }
 
-            // Notionはブロックへ変換した結果を返すため、書式の正規化で差が出ることがある。
+            string intendedFilePath = workFilePath + ".notion-push-intended.md";
+            if (IsEquivalentIgnoringWhitespace(current, expected))
+            {
+                if (!isQuiet)
+                {
+                    Console.WriteLine(
+                        "反映後の本文は、空白・改行の違いだけで編集内容と一致しています" +
+                        "（Notion側の書式正規化）。作業ファイルは最新の本文で更新済みです。");
+                }
+
+                return;
+            }
+
+            // Notionはブロックへ変換した結果を返すため、書式の正規化を超える差が出ることがある。
+            // 作業ファイルは実際の反映結果で上書きするため、送ろうとした内容を別ファイルへ残す。
+            await File.WriteAllTextAsync(intendedFilePath, expected, new UTF8Encoding(false));
             Console.WriteLine(
-                "反映後の本文が編集内容と完全には一致しません（Notion側の書式正規化の可能性があります）。" +
-                "作業ファイルは最新の本文で更新済みです。差分を確認してください。");
+                "反映後の本文が編集内容と完全には一致しません（Notion側の書式正規化を超える差の可能性があります）。" +
+                $"作業ファイルは最新の本文で更新済みです。送ろうとした内容は {intendedFilePath} に残しています。差分を確認してください。");
+        }
+
+        /// <summary>
+        ///     行末・空行の違いだけかを判定する。
+        ///     Notionの書式正規化（末尾空白の除去など）を、内容の不一致と誤検知しないようにする。
+        /// </summary>
+        /// <param name="left">比較対象。</param>
+        /// <param name="right">比較対象。</param>
+        /// <returns>行ごとの空白差以外に違いが無ければtrue。</returns>
+        private static bool IsEquivalentIgnoringWhitespace(string left, string right)
+        {
+            string[] leftLines = left.Split('\n');
+            string[] rightLines = right.Split('\n');
+            if (leftLines.Length != rightLines.Length) { return false; }
+
+            for (int index = 0; index < leftLines.Length; index++)
+            {
+                if (leftLines[index].TrimEnd() != rightLines[index].TrimEnd()) { return false; }
+            }
+
+            return true;
         }
     }
 }

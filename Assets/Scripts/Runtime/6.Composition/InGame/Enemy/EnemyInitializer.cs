@@ -190,9 +190,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyInfantrySpawner.Initialize();
             _enemyArtillerySpawner.Initialize();
 
-            bool isMissionControlledWave = TryResolveMissionControlledWaveSequence(
+            bool hasMissionWaveSequence = TryResolveMissionWaveSequence(
                 out MissionRuntimeService missionRuntimeService,
                 out ObjectiveSequenceClearCondition objectiveSequence);
+            bool isMissionControlledWave = hasMissionWaveSequence
+                && objectiveSequence.HasStepWithCondition<WaveStartClearCondition>();
 
             _moduleContainer.StageEffectCatalog = _loadedStageEffectCatalog;
             EnemySpawnerRouter enemySpawner = new EnemySpawnerRouter(
@@ -207,12 +209,13 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 !isMissionControlledWave);
             _enemyWaveTimerView.Initialize(_moduleContainer.EnemyWaveSpawnerController);
 
-            if (isMissionControlledWave)
+            if (hasMissionWaveSequence)
             {
                 _missionWaveController = new MissionWaveController(
                     missionRuntimeService,
                     objectiveSequence,
                     _moduleContainer.EnemyWaveSpawnerController,
+                    _moduleContainer.EnemyWaveSpawnerState,
                     _enemyWaveTimerView);
             }
 
@@ -303,6 +306,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public override void Shutdown()
         {
+            _enemyInfantrySpawner?.Shutdown();
+            _enemyArtillerySpawner?.Shutdown();
+
             _missionWaveController?.Dispose();
             _missionWaveController = null;
 
@@ -370,12 +376,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private ReusableParticleSystemView _damageEffectView;
 
         /// <summary>
-        ///     MissionがWave開始を制御する目標シーケンスを取得します。
+        ///     敵Waveの開始・全滅通知を結合するMissionの目標シーケンスを取得します。
         /// </summary>
         /// <param name="missionRuntimeService"> Missionのランタイムサービスです。 </param>
-        /// <param name="objectiveSequence"> Waveステップを含む目標シーケンスです。 </param>
-        /// <returns> Waveステップを含む目標シーケンスを取得できた場合はtrueです。 </returns>
-        private bool TryResolveMissionControlledWaveSequence(
+        /// <param name="objectiveSequence"> Missionの目標シーケンスです。 </param>
+        /// <returns> Missionの目標シーケンスを取得できた場合はtrueです。 </returns>
+        private bool TryResolveMissionWaveSequence(
             out MissionRuntimeService missionRuntimeService,
             out ObjectiveSequenceClearCondition objectiveSequence)
         {
@@ -383,7 +389,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 ServiceLocator.GetInstance<MissionModuleContainer>();
             missionRuntimeService = missionModuleContainer?.MissionRuntimeService;
             ObjectiveSequenceClearCondition sequence = missionRuntimeService?.MissionDefinition.ClearCondition;
-            if (sequence == null || !sequence.HasStepWithCondition<WaveStartClearCondition>())
+            if (sequence == null)
             {
                 objectiveSequence = null;
                 return false;
