@@ -1,4 +1,5 @@
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +21,23 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageSelectScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
 
+            Label titleLabel = rootElement.Q<Label>("Title");
+            _titleLocalizedText = new LocalizedElementText(
+                "UICommon", "ui.stage_select.title", text => titleLabel.text = text, "作戦");
             RegisterButtonCallback();
+        }
+
+        /// <summary> 強制出撃中の場合はtrueです。 </summary>
+        public bool IsForcedSortieMode => _isForcedSortieMode;
+
+        /// <summary>
+        ///     強制出撃中の戻る操作を禁止します。
+        /// </summary>
+        /// <param name="isForced"> 強制出撃中の場合はtrueです。 </param>
+        public void SetForcedSortieMode(bool isForced)
+        {
+            _isForcedSortieMode = isForced;
+            _backButton.SetEnabled(!isForced);
         }
 
         /// <summary>
@@ -44,6 +61,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             base.Dispose();
             UnregisterButtonCallback();
+            _titleLocalizedText.Dispose();
         }
 
         /// <summary>
@@ -51,9 +69,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterButtonCallback()
         {
-            _backButton.RegisterCallback<ClickEvent>(OnBackButtonClicked);
             // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
             _backButton.ExcludeFromNavigation();
+            _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
         }
 
         /// <summary>
@@ -61,14 +79,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void UnregisterButtonCallback()
         {
-            _backButton.UnregisterCallback<ClickEvent>(OnBackButtonClicked);
+            _backButtonActivation?.Dispose();
         }
 
         /// <summary>
-        ///     画面を閉じるボタンがクリックされたときの処理です。
+        ///     画面を閉じるボタンが作動したときの処理です。
         /// </summary>
-        private void OnBackButtonClicked(ClickEvent evt)
+        private void HandleBackButtonActivationHandler()
         {
+            if (_isForcedSortieMode) { return; }
+
             OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
@@ -78,11 +98,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         protected override VisualElement CancelTargetElement => _backButton;
 
         /// <inheritdoc />
-        /// <remarks> 起点ノード(マップ最左)が無い場合は戻るボタンへフォールバックします。 </remarks>
+        /// <remarks> 解放済みの最も先のノードが無い場合は戻るボタンへフォールバックします。 </remarks>
         protected override VisualElement InitialFocusElement =>
             RootElement.Q<VisualElement>(className: UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME)
             ?? _backButton;
 
+        private readonly LocalizedElementText _titleLocalizedText;
         private readonly Button _backButton;
+        private IDisposable _backButtonActivation;
+        private bool _isForcedSortieMode;
     }
 }

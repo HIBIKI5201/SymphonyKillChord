@@ -35,6 +35,7 @@ namespace KillChord.Runtime.View.Persistent.Music
         {
             _cri = GetComponent<CriAtomSource>();
             _cri.player?.SetVoicePriority(255);
+            CaptureBaseVolume();
         }
 
         /// <summary>
@@ -46,14 +47,29 @@ namespace KillChord.Runtime.View.Persistent.Music
             _musicVm?.UpdateMusicCue(cueName);
         }
 
-        public void SetVolume(float volume)
+        /// <summary>
+        ///     BGM全体音量の比率を適用する。
+        /// </summary>
+        /// <param name="volumeRatio"> 0から1の音量比率。 </param>
+        public void SetVolume(float volumeRatio)
         {
-            _cri.volume = volume;
+            _volumeRatio = volumeRatio;
+            ApplyVolume();
+        }
+
+        /// <summary>
+        ///     保存済み音量とは独立したBGM演出用の音量倍率を設定します。
+        /// </summary>
+        /// <param name="volumeRatio"> 演出用の0から1の音量倍率です。 </param>
+        public void SetPresentationVolume(float volumeRatio)
+        {
+            _presentationVolumeRatio = Mathf.Clamp01(volumeRatio);
+            ApplyVolume();
         }
 
         public float GetVolume()
         {
-            return _cri.volume;
+            return _volumeRatio;
         }
 
         /// <summary>
@@ -101,6 +117,21 @@ namespace KillChord.Runtime.View.Persistent.Music
         private CriAtomExPlayback _playback;
         private MusicViewModel _musicVm;
         private bool _isPlaying;
+        private float _baseVolume = 1f;
+        private float _volumeRatio = 1f;
+        private float _presentationVolumeRatio = 1f;
+        private bool _baseVolumeCaptured;
+
+        /// <summary>
+        ///     最新の音量設定に演出用倍率を掛けてBGMへ反映します。
+        /// </summary>
+        private void ApplyVolume()
+        {
+            if (_cri != null)
+            {
+                _cri.volume = _baseVolume * _volumeRatio * _presentationVolumeRatio;
+            }
+        }
 
         /// <summary>
         ///     BGMを変更して再生する。
@@ -108,6 +139,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// <param name="cueName"> 新しいキュー名。 </param>
         private void ChangeBgm(string cueName)
         {
+            if (_cri == null)
+            {
+                return;
+            }
+
             string currentCueName = _cri.cueName;
 
             if (string.IsNullOrEmpty(cueName))
@@ -135,10 +171,28 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         private void StopBgm()
         {
+            if (_cri == null)
+            {
+                return;
+            }
+
             _playback.Stop();
             _cri.cueName = string.Empty;
             _isPlaying = false;
         }
 
+        /// <summary>
+        ///     CriAtomSourceに設定されている元の音量を保持します。
+        /// </summary>
+        private void CaptureBaseVolume()
+        {
+            if (_baseVolumeCaptured)
+            {
+                return;
+            }
+
+            _baseVolume = _cri.volume;
+            _baseVolumeCaptured = true;
+        }
     }
 }

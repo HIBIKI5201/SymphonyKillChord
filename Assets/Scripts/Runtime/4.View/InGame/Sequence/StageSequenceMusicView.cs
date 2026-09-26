@@ -26,19 +26,8 @@ namespace KillChord.Runtime.View.InGame.Sequence
             PlayBgm(_stageClearCueName);
         }
 
-        /// <summary>
-        ///     ゲームオーバー時のBGMを再生します。
-        /// </summary>
-        public void PlayGameOverBgm()
-        {
-            PlayBgm(_gameOverCueName);
-        }
-
         [SerializeField, Tooltip("ステージクリア時に再生するBGMのCueName。")]
         private string _stageClearCueName;
-
-        [SerializeField, Tooltip("ゲームオーバー時に再生するBGMのCueName。")]
-        private string _gameOverCueName;
 
         private IBgmCuePlayer _bgmCuePlayer;
 

@@ -34,28 +34,28 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         /// <summary>
         /// 指定文字位置で発火するトリガーを生成する。
         /// </summary>
-        public static TextTimingTrigger AtCharIndex(int charIndex, IScenarioEvent fireEvent)
+        public static TextTimingTrigger CreateAtCharIndex(int charIndex, IScenarioEvent fireEvent)
         {
-            if (charIndex < 0) throw new ArgumentOutOfRangeException(nameof(charIndex));
+            if (charIndex < 0) { throw new ArgumentOutOfRangeException(nameof(charIndex)); }
             return new TextTimingTrigger(TextTriggerKind.CharIndex, charIndex, string.Empty, fireEvent);
         }
 
         /// <summary>
         /// 指定キーワード到達で発火するトリガーを生成する。
         /// </summary>
-        public static TextTimingTrigger AtKeyword(string keyword, IScenarioEvent fireEvent)
+        public static TextTimingTrigger CreateAtKeyword(string keyword, IScenarioEvent fireEvent)
         {
-            if (string.IsNullOrWhiteSpace(keyword)) throw new ArgumentException("keyword is empty.", nameof(keyword));
-            return new TextTimingTrigger(TextTriggerKind.Keyword, -1, keyword, fireEvent);
+            if (string.IsNullOrWhiteSpace(keyword)) { throw new ArgumentException("keyword is empty.", nameof(keyword)); }
+            return new TextTimingTrigger(TextTriggerKind.Keyword, NO_CHAR_INDEX, keyword, fireEvent);
         }
 
         /// <summary>
         /// 指定接尾辞の表示完了で発火するトリガーを生成する。
         /// </summary>
-        public static TextTimingTrigger AtSuffix(string suffix, IScenarioEvent fireEvent)
+        public static TextTimingTrigger CreateAtSuffix(string suffix, IScenarioEvent fireEvent)
         {
-            if (string.IsNullOrWhiteSpace(suffix)) throw new ArgumentException("suffix is empty.", nameof(suffix));
-            return new TextTimingTrigger(TextTriggerKind.Suffix, -1, suffix, fireEvent);
+            if (string.IsNullOrWhiteSpace(suffix)) { throw new ArgumentException("suffix is empty.", nameof(suffix)); }
+            return new TextTimingTrigger(TextTriggerKind.Suffix, NO_CHAR_INDEX, suffix, fireEvent);
         }
 
         /// <summary>
@@ -63,7 +63,10 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
         /// </summary>
         public static bool ShouldFire(TextTimingTrigger trigger, int visibleCharCount, string visibleText)
         {
-            if (trigger == null) return false;
+            if (trigger == null)
+            {
+                return false;
+            }
             return trigger.Kind switch
             {
                 TextTriggerKind.CharIndex => trigger.CharIndex == visibleCharCount,
@@ -76,5 +79,7 @@ namespace KillChord.Runtime.Domain.OutGame.Scenario
                 _ => false
             };
         }
+
+        private const int NO_CHAR_INDEX = -1;
     }
 }

@@ -37,6 +37,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private readonly IUISoundEffectCommand _soundEffectCommand;
 
         private const string DRAGGABLE_CLASSNAME = "draggable";
+        private const string LOCKED_CLASSNAME = "is-locked";
         private const string SKILL_ELEMENT_CONTAINER_CLASSNAME = "skill-element-container";
         private const string SKILL_ELEMENT_SLOT_CLASSNAME = "skill-element-slot";
         /// <summary>
@@ -46,7 +47,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="element"> セットアップ対象の VisualElement。 </param>
         public void SetupDraggable(VisualElement element)
         {
-            if (element == null)
+            // 未解放カードにも選択操作は登録されるが、ドラッグによる装備は許可しない。
+            if (element == null || element.ClassListContains(LOCKED_CLASSNAME))
             {
                 return;
             }
@@ -55,7 +57,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 element,
                 OnSkillElementDrop,
                 slotContainerName: SKILL_ELEMENT_CONTAINER_CLASSNAME,
-                slotName: SKILL_ELEMENT_SLOT_CLASSNAME);
+                slotName: SKILL_ELEMENT_SLOT_CLASSNAME,
+                onDragStarted: OnSkillElementDragStarted);
 
             element.AddManipulator(manipulator);
         }
@@ -73,6 +76,20 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 SetupDraggable(draggables[i]);
             }
+        }
+
+        /// <summary>
+        ///     スキル要素のドラッグが確定したときに、そのスキルを詳細パネルの表示対象として選択する。
+        /// </summary>
+        /// <param name="skill"> ドラッグ中のスキル要素の VisualElement。 </param>
+        private void OnSkillElementDragStarted(VisualElement skill)
+        {
+            if (skill?.userData is not int skillId)
+            {
+                return;
+            }
+
+            _skillBuildViewModel.SelectSkill(skillId);
         }
 
         /// <summary>

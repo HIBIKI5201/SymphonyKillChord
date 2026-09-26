@@ -1,5 +1,5 @@
 {
-  "dir": "E:\\Document\\Ars\\SymphonyKillChord\\spec\\domains",
+  "dir": ".",
   "domains": [
     {
       "name": "Combat State and Effect Resolution",

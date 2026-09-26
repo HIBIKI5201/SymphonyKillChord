@@ -15,7 +15,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
     public sealed class UISoundEffectConfig : ScriptableObject
     {
         /// <summary> Buttonに使用する既定のClick Cue。 </summary>
-        public string DefaultButtonClickCue => _defaultButtonClickCue;
+        public string DefaultButtonActivationCue => _defaultButtonActivationCue;
 
         /// <summary>
         ///     UI操作の意味に対応するCueを取得する。
@@ -46,7 +46,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
             (UISoundEffectKind[])Enum.GetValues(typeof(UISoundEffectKind));
 
         [SerializeField, Tooltip("明示的な音用USSクラスがないButtonに使用するClick Cue。")]
-        private string _defaultButtonClickCue = "SE_Click";
+        private string _defaultButtonActivationCue = "SE_Click";
 
         [SerializeField, Tooltip("ClickEvent用のUSSクラスとCue名の対応。")]
         private List<SoundMapping> _clickMappings = new()
@@ -54,6 +54,9 @@ namespace KillChord.Runtime.View.OutGame.Audio
             new(SELECT_USS_CLASS_NAME, "SE_Select"),
             new("ui-se-cancel", "SE_Cancel"),
             new("ui-se-window", "SE_Window"),
+            new("ui-se-window-mission", "SE_Window_Mission"),
+            new("ui-se-window-customize", "SE_Window_Customize"),
+            new("ui-se-window-research", "SE_Window_Research"),
             new("ui-se-sortie", "SE_Sortie"),
             new(SKILL_SET_USS_CLASS_NAME, "SE_SkillSet")
         };
@@ -71,7 +74,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
         /// <returns> 設定が有効な場合はtrue。 </returns>
         public bool Validate(out string errorMessage)
         {
-            if (string.IsNullOrWhiteSpace(_defaultButtonClickCue))
+            if (string.IsNullOrWhiteSpace(_defaultButtonActivationCue))
             {
                 errorMessage = "Buttonの既定Click Cueが設定されていません。";
                 return false;
@@ -102,7 +105,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
         /// <param name="cueName"> 解決したCue名。 </param>
         /// <param name="hasMultipleMatches"> 同じ要素に複数の音用クラスがある場合はtrue。 </param>
         /// <returns> Cueを1つ解決できた場合はtrue。 </returns>
-        public bool TryResolveClickCue(
+        public bool TryResolveActivationCue(
             VisualElement element,
             out string cueName,
             out bool hasMultipleMatches)
@@ -117,7 +120,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
         /// <param name="cueName"> 解決したCue名。 </param>
         /// <param name="hasMultipleMatches"> 同じ要素に複数の音用クラスがある場合はtrue。 </param>
         /// <returns> Cueを1つ解決できた場合はtrue。 </returns>
-        public bool TryResolvePointerDownCue(
+        public bool TryResolvePointerDownActivationCue(
             VisualElement element,
             out string cueName,
             out bool hasMultipleMatches)

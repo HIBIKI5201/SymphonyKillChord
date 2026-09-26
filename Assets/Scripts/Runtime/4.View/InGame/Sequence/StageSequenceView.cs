@@ -17,6 +17,8 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// <param name="onCompleted"> 演出の再生が完了した際に呼び出されるコールバック。 </param>
         public void PlayStageStart(Action onCompleted)
         {
+            if (_stageClearCamera != null) { _stageClearCamera.Release(); }
+            if (_clearFadeBackground != null) { _clearFadeBackground.SetActive(true); }
             CancelStageStart();
 
             if (_stageStartDirector == null)
@@ -60,7 +62,29 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// <returns> 演出の再生が完了するまで待機するAwaitable。 </returns>
         public async Awaitable PlayStageClearAsync(CancellationToken cancellationToken)
         {
-            await PlayAsync(_stageClearDirector, cancellationToken);
+            if (_clearFadeBackground != null) { _clearFadeBackground.SetActive(false); }
+            try
+            {
+                await PlayAsync(_stageClearDirector, cancellationToken);
+            }
+            catch
+            {
+                if (_stageClearCamera != null) { _stageClearCamera.Release(); }
+                if (_letterBox != null) { _letterBox.DeactiveAspectImmediate(); }
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     クリア演出で注視するプレイヤーを設定します。
+        /// </summary>
+        public void InitializeClearCamera(Transform player)
+        {
+            if (_stageClearCamera == null || _clearFadeBackground == null || _letterBox == null)
+            {
+                throw new InvalidOperationException("クリア演出のカメラ・背景・黒帯を設定してください。");
+            }
+            _stageClearCamera.Initialize(player);
         }
 
         /// <summary>
@@ -70,6 +94,8 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// <returns> 演出の再生が完了するまで待機するAwaitable。 </returns>
         public async Awaitable PlayGameOverAsync(CancellationToken cancellationToken)
         {
+            if (_stageClearCamera != null) { _stageClearCamera.Release(); }
+            if (_clearFadeBackground != null) { _clearFadeBackground.SetActive(true); }
             await PlayAsync(_gameOverDirector, cancellationToken);
         }
 
@@ -81,6 +107,15 @@ namespace KillChord.Runtime.View.InGame.Sequence
 
         [SerializeField, Tooltip("ゲームオーバー時のPlayableDirector")]
         private PlayableDirector _gameOverDirector;
+
+        [SerializeField, Tooltip("勝利演出中だけ非表示にする暗転背景。")]
+        private GameObject _clearFadeBackground;
+
+        [SerializeField, Tooltip("クリアTimelineから制御する正面カメラ。")]
+        private StageClearCameraView _stageClearCamera;
+
+        [SerializeField, Tooltip("イントロと共用する上下の黒帯。")]
+        private UI.LetterBoxAnimationGUI _letterBox;
 
         private Action _onStageStartCompleted;
 

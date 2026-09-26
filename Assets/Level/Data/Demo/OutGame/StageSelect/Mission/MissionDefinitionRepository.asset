@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 217f378083742024bbabad30aefedf60, type: 3}
+  m_Name: MissionDefinitionRepository
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Mission.MissionDefinitionRepository
+  _missionDefinitionAssets:
+  - {fileID: 11400000, guid: 0bac89fb258ea0d4c9a2bb88e7534e4c, type: 2}
+  - {fileID: 11400000, guid: df132cbbb91d8784cb81d9f44b7cd5e0, type: 2}
+  - {fileID: 11400000, guid: ee7f557caf6526d439c2d8d8ac327ba2, type: 2}
+  - {fileID: 11400000, guid: f19b2df2604674948a5ee1ed21e20312, type: 2}

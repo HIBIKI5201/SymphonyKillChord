@@ -1,6 +1,8 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.Adaptor.Persistent.Environment;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
@@ -62,9 +64,22 @@ namespace KillChord.Runtime.Composition.InGame.Music
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
             MusicSyncService = new MusicSyncService(
                 new RhythmDefinition(_testBpm, _testBeatOffsetSeconds),
-                _rhythmJudgmentDefinitionAsset.ToDefinition(),
-                RhythmJustService.Instance.TriggerJustHit);
-            MusicSyncController = new(MusicSyncState, MusicSyncService);
+                _rhythmJudgmentDefinitionAsset.ToDefinition());
+
+            // 環境設定（リズム判定オフセット）は未ロードでも同期機能自体は成立させるため、
+            // 取得できない場合はnull（オフセット0秒）のままコントローラーへ渡す。
+            IEnvironmentSettingsViewModel environmentSettingsViewModel =
+                ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
+                    ? environmentSettingsContainer.ViewModel
+                    : null;
+            if (environmentSettingsViewModel == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(MusicSyncInitializer)}] 環境設定を取得できないため、リズム判定オフセットなしで続行します。",
+                    this);
+            }
+
+            MusicSyncController = new(MusicSyncState, MusicSyncService, environmentSettingsViewModel);
             _musicSyncView.Bind(
                 _musicPlayer,
                 MusicSyncState,
@@ -84,6 +99,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         /// </summary>
         public override void Shutdown()
         {
+            _musicSyncView?.SetGameplayActive(false);
             if (!_isModuleRegistered)
             {
                 return;
@@ -105,6 +121,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             }
 
             _musicPlayer.MusicVM.UpdateMusicCue(_testCue);
+            _musicSyncView.SetGameplayActive(true);
         }
 
         /// <summary>
@@ -112,6 +129,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         /// </summary>
         public void StopGameplay()
         {
+            _musicSyncView?.SetGameplayActive(false);
             if (_musicPlayer == null)
             {
                 return;

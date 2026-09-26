@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using SymphonyFrameWork.System.SaveSystem;
@@ -193,13 +194,13 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 unlockedSkillValues[i] = unlockedSkillIds[i].Value;
             }
 
-            int previousPoints = saveData.SkillUnlock.ResearchPoint;
+            int previousPoints = saveData.ResourceInventory.GetAmount(GameResourceIds.ResearchPoint);
             int[] previousNodeIds = (int[])saveData.SkillUnlock.UnlockedSkillNodeIds.Clone();
             int[] previousSkillIds = (int[])saveData.SkillUnlock.UnlockedSkillIds.Clone();
 
             saveData.SkillUnlock.SetUnlockedSkillNodeIds(unlockedNodeValues);
             saveData.SkillUnlock.SetUnlockedSkillIds(unlockedSkillValues);
-            saveData.SkillUnlock.SetResearchPoint(currentPoints);
+            saveData.ResourceInventory.SetAmount(GameResourceIds.ResearchPoint, currentPoints);
 
             try
             {
@@ -208,7 +209,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             catch
             {
                 // SaveStore が返すキャッシュ参照を、保存試行前の状態へ戻す。
-                saveData.SkillUnlock.SetResearchPoint(previousPoints);
+                saveData.ResourceInventory.SetAmount(GameResourceIds.ResearchPoint, previousPoints);
                 saveData.SkillUnlock.SetUnlockedSkillNodeIds(previousNodeIds);
                 saveData.SkillUnlock.SetUnlockedSkillIds(previousSkillIds);
                 throw;
@@ -240,6 +241,33 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             }
 
             return refundPoints;
+        }
+
+        /// <summary>
+        ///     解放済みノードのうち、スキル編成枠を増やすノードの件数を算出する。
+        /// </summary>
+        /// <param name="unlockedNodes"> 現在解放されているノード。 </param>
+        /// <returns> 編成枠のボーナス件数。 </returns>
+        public int CalculateSkillSlotBonus(IReadOnlyCollection<SkillNodeId> unlockedNodes)
+        {
+            if (unlockedNodes == null)
+            {
+                throw new ArgumentNullException(nameof(unlockedNodes));
+            }
+
+            int bonus = 0;
+            HashSet<SkillNodeId> processedNodeIds = new HashSet<SkillNodeId>();
+            foreach (SkillNodeId nodeId in unlockedNodes)
+            {
+                if (processedNodeIds.Add(nodeId)
+                    && _skillNodeEntityDict.TryGetValue(nodeId, out SkillNodeEntity node)
+                    && node.HasSkillSlotBonus)
+                {
+                    bonus++;
+                }
+            }
+
+            return bonus;
         }
 
         /// <summary>
@@ -312,13 +340,13 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
-            int previousPoints = saveData.SkillUnlock.ResearchPoint;
+            int previousPoints = saveData.ResourceInventory.GetAmount(GameResourceIds.ResearchPoint);
             int[] previousNodeIds = (int[])saveData.SkillUnlock.UnlockedSkillNodeIds.Clone();
             int[] previousSkillIds = (int[])saveData.SkillUnlock.UnlockedSkillIds.Clone();
             List<int> previousEquipmentSkillIds = new List<int>(saveData.SkillBuild.EquipmentSkillIDs);
             try
             {
-                saveData.SkillUnlock.SetResearchPoint(resetPoints);
+                saveData.ResourceInventory.SetAmount(GameResourceIds.ResearchPoint, resetPoints);
                 saveData.SkillUnlock.SetUnlockedSkillNodeIds(ConvertNodeIds(remainingNodes));
                 saveData.SkillUnlock.SetUnlockedSkillIds(ConvertSkillIds(remainingSkills));
                 saveData.SkillBuild.SetEquipmentSkillIDs(FilterEquippedSkillIds(
@@ -329,7 +357,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             catch
             {
                 // SaveStore が返すキャッシュ参照を、保存試行前の状態へ戻す。
-                saveData.SkillUnlock.SetResearchPoint(previousPoints);
+                saveData.ResourceInventory.SetAmount(GameResourceIds.ResearchPoint, previousPoints);
                 saveData.SkillUnlock.SetUnlockedSkillNodeIds(previousNodeIds);
                 saveData.SkillUnlock.SetUnlockedSkillIds(previousSkillIds);
                 saveData.SkillBuild.SetEquipmentSkillIDs(previousEquipmentSkillIds);

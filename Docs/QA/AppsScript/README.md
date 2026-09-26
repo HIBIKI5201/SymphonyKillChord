@@ -1,14 +1,17 @@
-# CBT QAフォーム生成スクリプト
+# QAフォーム生成スクリプト
 
 [`CBT_QA回答方式_2026-09-06.md`](../CBT_QA回答方式_2026-09-06.md) で定義した
-**5つの Google フォームを自動生成する** Apps Script です。
+Android (CBT) 用の5フォームと、[`PC版_QAシート_2026-09-07.md`](../PC版_QAシート_2026-09-07.md)
+に対応する PC (Steam/配信用) 用の4フォームを**自動生成する** Apps Script です。
 
-手作業でグリッド13問・116行を入力すると数時間かかり、打ち間違いも入ります。
+手作業でグリッドを1問ずつ入力すると数時間かかり、打ち間違いも入ります。
 このスクリプトなら数分で、定義どおりのフォームができます。
 
 ---
 
 ## 生成されるもの
+
+### Android (CBT) 用 — `createQaForms`
 
 | ID | フォーム | 頻度 |
 |---|---|---|
@@ -18,8 +21,18 @@
 | F4 | ④品質チェック | 週1 |
 | F5 | 不具合報告 | 見つけた時に1件ずつ |
 
-5つとも**同じスプレッドシート**に回答が集まり、フォームごとにタブが分かれます。
-配布用URLの一覧は「フォームURL一覧」タブに書き出されます。
+### PC (Steam/配信用) 用 — `createPcQaForms`
+
+| ID | フォーム | 頻度 |
+|---|---|---|
+| P1 | ①起動・ウィンドウ・入力チェック | 週1 |
+| P2 | ②ゲームパッド・音声・性能チェック | 週1 |
+| P3 | ③中断・セーブ・UI・Steamチェック | 週1 |
+| P4 | 不具合報告 (PC版) | 見つけた時に1件ずつ |
+
+Android用・PC用それぞれ**同じスプレッドシート**に回答が集まり、フォームごとにタブが分かれます。
+配布用URLの一覧は、Androidは「フォームURL一覧」タブ、PCは「フォームURL一覧 (PC)」タブに書き出されます。
+二重実行の記録もAndroid/PCで別々なので、片方だけ作り直すこともできます。
 
 ---
 
@@ -35,7 +48,8 @@
 
 1. [Google スプレッドシート](https://sheets.google.com) で空のファイルを作る
 2. 名前を `Symphony Kill Chord CBT QA 回答` などにする
-3. URL からIDをコピーする
+3. 共有設定が「制限付き」になっていることを確かめる (IDを知っているだけの人が開けないようにする)
+4. URL からIDをコピーする
 
 ```
 https://docs.google.com/spreadsheets/d/【この部分がID】/edit
@@ -56,31 +70,36 @@ https://docs.google.com/spreadsheets/d/【この部分がID】/edit
 |---|---|---|
 | 1 | `Config` | `Config.gs` |
 | 2 | `FormDefinitions` | `FormDefinitions.gs` |
-| 3 | `FormItemBuilder` | `FormItemBuilder.gs` |
-| 4 | `FormFactory` | `FormFactory.gs` |
-| 5 | `Main` | `Main.gs` |
+| 3 | `PcFormDefinitions` | `PcFormDefinitions.gs` |
+| 4 | `FormItemBuilder` | `FormItemBuilder.gs` |
+| 5 | `FormFactory` | `FormFactory.gs` |
+| 6 | `Main` | `Main.gs` |
 
 > 最初からある `コード.gs` は使いません。削除して構いません。
 > ファイル名に `.gs` は付けなくて構いません (自動で付きます)。
 
-### 5. 設定を書き換える
+### 5. スプレッドシートのIDを設定する
 
-`Config` を開いて、手順2でコピーしたIDを貼ります。
+IDは `Config.gs` に書かず、プロジェクトの「スクリプト プロパティ」に設定します。`Config.gs` はリポジトリに公開されるためです。
 
-```js
-DESTINATION_SPREADSHEET_ID: '1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789',
-```
+1. エディタ左の歯車 (プロジェクトの設定) を開く
+2. いちばん下の「スクリプト プロパティ」で「スクリプト プロパティを追加」を押す
+3. プロパティに `DESTINATION_SPREADSHEET_ID`、値に手順2でコピーしたIDを入れて保存する
+
+`Config.gs` の `DESTINATION_SPREADSHEET_ID` は空のままにします。スクリプト プロパティが無いときだけ、こちらの値を使います。
 
 ### 6. 実行する
 
-1. 上部のプルダウンで **`createQaForms`** を選ぶ
+1. 上部のプルダウンで **`createQaForms`** (Android/CBT用) を選ぶ
 2. 「実行」を押す
 3. 初回は権限の確認が出ます。「詳細」→「(プロジェクト名) に移動」→「許可」と進みます
 4. 実行ログに5つのフォームのURLが出れば完了です
+5. PC (Steam/配信用) のフォームも作る場合は、プルダウンで **`createPcQaForms`** を選んで同様に実行します
 
 ### 7. 配布する
 
-回答スプレッドシートの「フォームURL一覧」タブを開き、
+回答スプレッドシートの「フォームURL一覧」タブ (Android用) または
+「フォームURL一覧 (PC)」タブ (PC用) を開き、
 **配布用URL** の列をQAメンバーに渡します。編集用URLは渡さないでください。
 
 ---
@@ -109,12 +128,15 @@ DESTINATION_SPREADSHEET_ID: '1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789',
 ## 二重実行の防止
 
 一度実行すると、生成済みであることがスクリプトに記録されます。
-もう一度 `createQaForms` を実行すると、フォームが重複しないようにエラーで止まります。
+もう一度 `createQaForms` (または `createPcQaForms`) を実行すると、
+フォームが重複しないようにエラーで止まります。Android用とPC用の記録は別々なので、
+片方だけ作り直すこともできます。
 
 作り直したい場合は、どちらかを行ってください。
 
 - `Config` の `ALLOW_RECREATE` を `true` にして実行する (終わったら `false` に戻す)
-- `resetCreatedFormsRecord` を実行してから `createQaForms` を実行する
+- Android用: `resetCreatedFormsRecord` を実行してから `createQaForms` を実行する
+- PC用: `resetCreatedPcFormsRecord` を実行してから `createPcQaForms` を実行する
 
 **古いフォームは自動では消えません。** 作り直したら、古いフォームは Google ドライブから
 手動で削除し、配布済みのURLを差し替えてください。
@@ -123,8 +145,14 @@ DESTINATION_SPREADSHEET_ID: '1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789',
 
 ## 設問を直したいとき
 
+Android (CBT) 用:
 1. [`CBT_QA回答方式_2026-09-06.md`](../CBT_QA回答方式_2026-09-06.md) を直す (こちらが原本)
 2. `FormDefinitions.gs` の該当箇所を同じ内容に直す
+3. 作り直すか、フォームの編集画面で直接直す
+
+PC (Steam/配信用) 用:
+1. [`PC版_QAシート_2026-09-07.md`](../PC版_QAシート_2026-09-07.md) を直す (こちらが原本)
+2. `PcFormDefinitions.gs` の該当箇所を同じ内容に直す
 3. 作り直すか、フォームの編集画面で直接直す
 
 **回答が集まり始めた後にフォームを作り直すと、回答が2つのタブに分かれます。**
@@ -137,7 +165,8 @@ CBT開始後は、フォームの編集画面で直接直すほうが安全で�
 | ファイル | 責務 |
 |---|---|
 | `Config.gs` | 実行前に人が書き換える設定値だけを持つ |
-| `FormDefinitions.gs` | 設問の内容を宣言的に持つ。Forms API は呼ばない |
+| `FormDefinitions.gs` | Android (CBT) 用の設問の内容を宣言的に持つ。Forms API は呼ばない |
+| `PcFormDefinitions.gs` | PC (Steam/配信用) 用の設問の内容を宣言的に持つ。Forms API は呼ばない |
 | `FormItemBuilder.gs` | 定義1件を Form のアイテム1件へ変換する |
 | `FormFactory.gs` | 定義1件からフォームを1つ作り、回答方針と出力先を設定する |
 | `Main.gs` | 前提条件の検証、順次実行、結果の出力 |
@@ -148,7 +177,7 @@ CBT開始後は、フォームの編集画面で直接直すほうが安全で�
 
 | エラー / 症状 | 原因と対処 |
 |---|---|
-| `DESTINATION_SPREADSHEET_ID が空です` | 手順5をやっていません。IDを貼ってください |
+| `DESTINATION_SPREADSHEET_ID が設定されていません` | 手順5をやっていません。スクリプト プロパティにIDを追加してください |
 | `スプレッドシートを開けません` | IDが違うか、そのアカウントに編集権限がありません |
 | `フォームは既に作成済みです` | 二重実行の防止です。上の「二重実行の防止」を読んでください |
 | `未知の設問型です` | `FormDefinitions.gs` の `type` の綴りが違います |

@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
@@ -51,6 +52,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartConstraintView = FindFirstObjectByType<StageStartConstraintView>();
             _playerInputView = FindFirstObjectByType<PlayerInputView>();
             _musicPlayer = FindFirstObjectByType<MusicPlayer>();
+            _ambienceSoundView = FindFirstObjectByType<AmbienceSoundView>();
 
             if (_stageSequenceView == null
                 || _stageSequenceMessageView == null
@@ -67,6 +69,14 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                     $"[{nameof(SequenceInitializationModule)}] シーケンス関連参照の取得に失敗しました。",
                     this);
                 return false;
+            }
+
+            // 環境音は演出上のオプション要素のため、未設定でもシーケンス全体は起動させる。
+            if (_ambienceSoundView == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(SequenceInitializationModule)}] {nameof(_ambienceSoundView)} が未設定です。開始演出中の環境音は再生されません。",
+                    this);
             }
 
             _container = new SequenceModuleContainer();
@@ -135,6 +145,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceVoiceView.Initialize(
                 playerContainer.PlayerView);
 
+            _stageSequenceView.InitializeClearCamera(playerContainer.PlayerView.transform);
+
             _stageSequenceMusicView.Initialize(
                 _musicPlayer);
 
@@ -146,13 +158,15 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _container.SequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
+                _stageSequenceVoiceView,
                 _stageSequenceMessageView,
                 _stageStartFadeView,
                 _stageResultView,
                 _stageStartConstraintView,
                 stageResultContainer.Presenter,
                 _visibilityView,
-                _inGamePlayDirector);
+                _inGamePlayDirector,
+                _ambienceSoundView);
 
             _missionRuntimeService = missionContainer.MissionRuntimeService;
             if (_missionRuntimeService == null)
@@ -178,7 +192,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             ServiceLocator.TryGetInstance(out _pendingNodeTransitionState);
 
-            _playerInputView.OnBattlePauseInput += HandlePauseInput;
+            _playerInputView.OnOptionInput += HandlePauseInput;
             _missionRuntimeService.OnMissionFinished += HandleMissionFinished;
             _inGamePlayDirector.StopGameplay();
 
@@ -191,7 +205,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// </summary>
         public override void Shutdown()
         {
-            _playerInputView.OnBattlePauseInput -= HandlePauseInput;
+            _playerInputView.OnOptionInput -= HandlePauseInput;
 
             UnsubscribeLoadingCompleted();
 
@@ -272,6 +286,14 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             // 不完全なステージ画面を表示しないように、
             // OutGameへの遷移が完了するまで黒画面を維持する。
             _stageStartFadeView.ShowBlackImmediate();
+
+            // 専用出撃の失敗はPersistentが所有し、Sequenceから別の帰還を開始しません。
+            if (ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+                && transition.HasScenarioBattleSortie)
+            {
+                transition.StopScenarioBattleInitialization();
+                return;
+            }
 
             Debug.LogError(
                 $"[{nameof(SequenceInitializationModule)}] "
@@ -387,7 +409,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
                 await _stageProgressSaveDataService.SaveClearAsync(
                     stageDefinition.StageId,
-                    stageDefinition.Reward,
+                    stageDefinition.FirstClearReward,
+                    stageDefinition.ClearReward,
                     evaluationResult,
                     stageDefinition.IsTutorial);
 
@@ -401,15 +424,28 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         }
 
         /// <summary>
-        ///     ポーズ入力時の処理。
+        ///     オプション入力を受け取り、戦闘ポーズを切り替える。
         /// </summary>
-        /// <param name="input">ポーズ入力</param>
+        /// <param name="input"> オプション入力。 </param>
         private void HandlePauseInput(InputContext<float> input)
         {
             if (input.Phase != InputActionPhase.Started)
             {
                 return;
             }
+
+            // 開始演出(Timeline)の再生中は、プレイヤーがまだ操作を始めていないためポーズを受け付けない。
+            if (_container?.SequenceDirector?.IsStartSequencePlaying ?? false)
+            {
+                return;
+            }
+
+            // 戦闘終了後～リザルト表示中もポーズ不可
+            if (_container?.SequenceDirector?.IsResultActive ?? false)
+            {
+                return;
+            }
+
             _battlePauseController?.Toggle();
         }
 
@@ -429,6 +465,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private StageSequenceMusicView _stageSequenceMusicView;
         private StageStartConstraintView _stageStartConstraintView;
         private MusicPlayer _musicPlayer;
+        private AmbienceSoundView _ambienceSoundView;
         private PlayerInputView _playerInputView;
         private BattlePauseModule _battlePauseModule;
         private BattlePauseController _battlePauseController;

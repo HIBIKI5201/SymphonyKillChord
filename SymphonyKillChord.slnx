@@ -1,9 +1,10 @@
 ﻿<Solution>
+  <Project Path="KillChord.View.csproj" />
   <Project Path="UniGLTF.csproj" />
   <Project Path="CriMw.CriWare.Runtime.csproj" />
+  <Project Path="KillChord.Editor.csproj" />
   <Project Path="MusicBattle_Mock.csproj" />
   <Project Path="KillChord.Adaptor.csproj" />
-  <Project Path="KillChord.View.csproj" />
   <Project Path="MagicaClothV2.csproj" />
   <Project Path="KillChord.Composition.csproj" />
   <Project Path="DevelopProducts-Boss.csproj" />
@@ -14,6 +15,7 @@
   <Project Path="DevelopProducts-SaveSystem.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="SingularityGroup.HotReload.Editor.csproj" />
+  <Project Path="KillChord.Demo.csproj" />
   <Project Path="KillChord.Application.csproj" />
   <Project Path="UniHumanoid.csproj" />
   <Project Path="SingularityGroup.HotReload.Runtime.csproj" />
@@ -22,7 +24,6 @@
   <Project Path="VRM10.MToon10.Editor.csproj" />
   <Project Path="CharacterControl_Mock.csproj" />
   <Project Path="DevelopProducts-Achievement.csproj" />
-  <Project Path="KillChord.Editor.csproj" />
   <Project Path="VRM10.MToon10.csproj" />
   <Project Path="UniGLTF.Utils.csproj" />
   <Project Path="UniHumanoid.Editor.csproj" />
@@ -39,6 +40,7 @@
   <Project Path="DevelopProducts-SkillTree.csproj" />
   <Project Path="MagicaCloth2Example.csproj" />
   <Project Path="CriMw.CriWare.Editor.csproj" />
+  <Project Path="KillChord.Editor.AIDebugPlay.csproj" />
   <Project Path="UniGLTF.Tests.csproj" />
   <Project Path="SingularityGroup.HotReload.Runtime.Public.csproj" />
   <Project Path="DevelopProducts-SilToon.Editor.csproj" />

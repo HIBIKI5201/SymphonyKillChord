@@ -64,6 +64,20 @@ namespace KillChord.Runtime.Adaptor.OutGame.Sortie
                 returnSceneName);
         }
 
+        /// <summary>
+        ///     シナリオ終了後の専用バトル出撃を要求し、明示的な終端結果を返します。
+        /// </summary>
+        public Task<ScenarioBattleSortieResult> RequestBattleSortieFromScenarioAsync(
+            string scenarioSceneName,
+            string returnSceneName,
+            BattleStageDefinition battleStageDefinition,
+            int scenarioSelectionRevision)
+        {
+            return _useCase.RequestBattleSortieFromScenarioAsync(
+                scenarioSceneName, returnSceneName, battleStageDefinition,
+                scenarioSelectionRevision);
+        }
+
         private readonly OutGameSortieUseCase _useCase;
     }
 }

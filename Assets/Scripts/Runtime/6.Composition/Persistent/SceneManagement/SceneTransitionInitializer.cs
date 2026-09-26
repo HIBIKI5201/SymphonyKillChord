@@ -1,13 +1,25 @@
+using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
+using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.Persistent.SceneManagement;
 using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFrameWork.System.SaveSystem;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.Composition.Persistent.SceneManagement
 {
@@ -22,20 +34,36 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
         /// <summary> 実行順です。 </summary>
         public override int Order => 0;
 
-        private const int DEFAULT_SCENE_INITIALIZATION_TIMEOUT_FRAME_COUNT = 3600;
+        /// <summary> 回復の基盤として使用する常駐シーン名です。 </summary>
+        public string PersistentSceneName => gameObject.scene.name;
 
-        [SerializeField, Tooltip("シーン遷移中に表示するロード画面")]
-        private LoadingScreenView _loadingScreenView;
-
-        [SerializeField, Tooltip("シーン遷移確認用のデバッグView")]
-        private SceneTransitionView _debugView;
-
-        [SerializeField, Min(1), Tooltip("シーン初期化完了を待機する最大フレーム数")]
-        private int _sceneInitializationTimeoutFrameCount =
-            DEFAULT_SCENE_INITIALIZATION_TIMEOUT_FRAME_COUNT;
-
-        [SerializeField, Min(0f), Tooltip("ロード画面の最低表示時間")]
-        private float _minimumLoadingScreenDisplayTime = 0.8f;
+        /// <summary>
+        ///     専用出撃の失敗時、常駐シーンで一つだけ手動復帰画面を所有します。
+        /// </summary>
+        public void ShowScenarioBattleRecovery(string inGameSceneName, params string[] ownedScenes)
+        {
+            _sceneTransitionController.PersistentLifetimeToken.ThrowIfCancellationRequested();
+            if (_recoveryView != null) { return; }
+            _recoveryInGameSceneName = inGameSceneName;
+            _recoveryScenes = ownedScenes;
+            if (ServiceLocator.TryGetInstance(out InputComposition input))
+            {
+                input.GetInputMapController.DisableAll();
+            }
+            foreach (UIDocument document in FindObjectsByType<UIDocument>(FindObjectsSortMode.None))
+            {
+                if (Array.IndexOf(ownedScenes, document.gameObject.scene.name) >= 0) { document.enabled = false; }
+            }
+            _recoveryView = gameObject.AddComponent<OutGameInitializationFailureView>();
+            bool isEnglish = SaveStore.IsLoaded<SaveData>()
+                && SaveStore.Get<SaveData>().EnvironmentSettings.Language == GameLanguage.English;
+            _recoveryView.Initialize(
+                isEnglish ? "Return to Title" : "タイトルへ戻る",
+                isEnglish ? "Failed to load the screen." : "画面の読み込みに失敗しました。",
+                isEnglish ? "Failed to load the screen. Please try again." : "画面を読み込めませんでした。もう一度お試しください。",
+                isEnglish ? "Loading…" : "読み込み中…");
+            _recoveryView.OnRecoveryRequested += RecoveryRequestedHandler;
+        }
 
         /// <summary>
         ///     シーン遷移システムを構築して登録する。
@@ -63,6 +91,8 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 }
 
                 _sceneInitializationReadiness = existingReadiness;
+                _sceneTransitionController = existingController;
+                ServiceLocator.RegisterInstance(this);
 
                 if (_loadingScreenView != null)
                 {
@@ -85,7 +115,10 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 _sceneTransitionService,
                 _loadingOperationExecutor,
                 _sceneInitializationReadiness);
-            _sceneTransitionController = new SceneTransitionController(_sceneTransitionUsecase);
+            _persistentLifetimeCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            _sceneTransitionController = new SceneTransitionController(
+                _sceneTransitionUsecase,
+                _persistentLifetimeCancellation.Token, _sceneInitializationTimeoutFrameCount);
 
             ServiceLocator.RegisterInstance(_loadingScreenController);
             ServiceLocator.RegisterInstance<ILoadingSessionFactory>(_loadingScreenController);
@@ -94,6 +127,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
             ServiceLocator.RegisterInstance<ISceneInitializationReadiness>(_sceneInitializationReadiness);
             ServiceLocator.RegisterInstance(_sceneTransitionUsecase);
             ServiceLocator.RegisterInstance(_sceneTransitionController);
+            ServiceLocator.RegisterInstance(this);
             _ownsRegistrations = true;
 
             if (_loadingScreenView == null)
@@ -118,9 +152,27 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
         /// </summary>
         public override void Shutdown()
         {
+            _persistentLifetimeCancellation?.Cancel();
+            if (_ownsRegistrations) { _sceneTransitionController?.EndScenarioBattleSortie(); }
+            ClearRecoveryView();
+            if (ServiceLocator.TryGetInstance(out SceneTransitionInitializer registeredInitializer)
+                && ReferenceEquals(registeredInitializer, this))
+            {
+                ServiceLocator.UnregisterInstance<SceneTransitionInitializer>();
+            }
             if (!_ownsRegistrations)
             {
                 return;
+            }
+
+            if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState pending))
+            {
+                pending.Clear();
+                if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState current)
+                    && ReferenceEquals(current, pending))
+                {
+                    ServiceLocator.UnregisterInstance<PendingNodeTransitionState>();
+                }
             }
 
             if (ServiceLocator.TryGetInstance(out SceneTransitionController registeredController)
@@ -172,7 +224,38 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
             _sceneTransitionUsecase = null;
             _sceneTransitionController = null;
             _ownsRegistrations = false;
+            _persistentLifetimeCancellation?.Dispose();
+            _persistentLifetimeCancellation = null;
         }
+
+        private const int DEFAULT_SCENE_INITIALIZATION_TIMEOUT_FRAME_COUNT = 3600;
+        private const string RECOVERY_TITLE_SCENE_NAME = "Title";
+
+        [SerializeField, Tooltip("シーン遷移中に表示するロード画面")]
+        private LoadingScreenView _loadingScreenView;
+
+        [SerializeField, Tooltip("シーン遷移確認用のデバッグView")]
+        private SceneTransitionView _debugView;
+
+        [SerializeField, Min(1), Tooltip("シーン初期化完了を待機する最大フレーム数")]
+        private int _sceneInitializationTimeoutFrameCount =
+            DEFAULT_SCENE_INITIALIZATION_TIMEOUT_FRAME_COUNT;
+
+        [SerializeField, Min(0f), Tooltip("ロード画面の最低表示時間")]
+        private float _minimumLoadingScreenDisplayTime = 0.8f;
+
+        private OutGameInitializationFailureView _recoveryView;
+        private string _recoveryInGameSceneName;
+        private string[] _recoveryScenes;
+        private bool _isRecovering;
+        private LoadingScreenController _loadingScreenController;
+        private ILoadingOperationExecutor _loadingOperationExecutor;
+        private ISceneTransitionService _sceneTransitionService;
+        private ISceneInitializationReadiness _sceneInitializationReadiness;
+        private SceneTransitionUsecase _sceneTransitionUsecase;
+        private SceneTransitionController _sceneTransitionController;
+        private bool _ownsRegistrations;
+        private CancellationTokenSource _persistentLifetimeCancellation;
 
         /// <summary>
         ///     シーン遷移を使用するViewを初期化する。
@@ -189,12 +272,111 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
             }
         }
 
-        private LoadingScreenController _loadingScreenController;
-        private ILoadingOperationExecutor _loadingOperationExecutor;
-        private ISceneTransitionService _sceneTransitionService;
-        private ISceneInitializationReadiness _sceneInitializationReadiness;
-        private SceneTransitionUsecase _sceneTransitionUsecase;
-        private SceneTransitionController _sceneTransitionController;
-        private bool _ownsRegistrations;
+        /// <summary>
+        ///     手動復帰の二重操作を拒否し、失敗時は同じ画面で再操作を受け付けます。
+        /// </summary>
+        private async void RecoveryRequestedHandler()
+        {
+            if (_isRecovering || _recoveryView == null) { return; }
+            SceneTransitionController transition = _sceneTransitionController;
+            if (transition.PersistentLifetimeToken.IsCancellationRequested) { return; }
+            _isRecovering = true;
+            _recoveryView.SetBusy(true);
+            try
+            {
+                if (!await RecoverScenarioBattleToTitleAsync()
+                    && this != null && _recoveryView != null)
+                {
+                    _recoveryView.ShowRecoveryFailed();
+                }
+            }
+            catch (OperationCanceledException) when (transition.PersistentLifetimeToken.IsCancellationRequested)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+                if (this != null && _recoveryView != null) { _recoveryView.ShowRecoveryFailed(); }
+            }
+            finally
+            {
+                if (this != null && !transition.PersistentLifetimeToken.IsCancellationRequested)
+                {
+                    _isRecovering = false;
+                    if (_recoveryView != null) { _recoveryView.SetBusy(false); }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     初期化終了を確認し、残存シーンを整理して既存の Title 導線へ戻します。
+        /// </summary>
+        private async Task<bool> RecoverScenarioBattleToTitleAsync()
+        {
+            SceneTransitionController transition = _sceneTransitionController;
+            if (!await transition.SettleScenarioBattleInitializationAsync(
+                    true, SceneManager.GetSceneByName(_recoveryInGameSceneName).isLoaded)) { return false; }
+
+            string anchor = PersistentSceneName;
+            foreach (string sceneName in _recoveryScenes)
+            {
+                if (string.IsNullOrWhiteSpace(sceneName) || !SceneManager.GetSceneByName(sceneName).isLoaded) { continue; }
+                if (!await transition.UnloadAndSetActiveWithPersistentLifetimeAsync(sceneName, anchor)
+                    || SceneManager.GetSceneByName(sceneName).isLoaded) { return false; }
+            }
+            // 専用受付を保持したまま失敗選択を整理し、Title の新しい選択を消しません。
+            if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState pending)) { pending.Clear(); }
+            if (ServiceLocator.TryGetInstance(out SelectedBattleStageState battle)) { battle.Clear(); }
+            if (ServiceLocator.TryGetInstance(out SelectedMissionState mission)) { mission.Clear(); }
+
+            bool success = SceneManager.GetSceneByName(RECOVERY_TITLE_SCENE_NAME).isLoaded
+                ? await transition.ReloadSceneWithPersistentLifetimeAsync(RECOVERY_TITLE_SCENE_NAME)
+                : await transition.ChangeSceneWithPersistentLifetimeAsync(null, RECOVERY_TITLE_SCENE_NAME);
+            transition.PersistentLifetimeToken.ThrowIfCancellationRequested();
+            bool hasTitleFailureView = false;
+            if (!success && SceneManager.GetSceneByName(RECOVERY_TITLE_SCENE_NAME).isLoaded)
+            {
+                // 初期化結果待機後も、既存の失敗画面が接続されるまでは専用受付を保持します。
+                await _sceneInitializationReadiness.WaitForReadyAsync(
+                    RECOVERY_TITLE_SCENE_NAME, transition.PersistentLifetimeToken);
+                for (int frame = 0; frame < _sceneInitializationTimeoutFrameCount; frame++)
+                {
+                    transition.PersistentLifetimeToken.ThrowIfCancellationRequested();
+                    foreach (OutGameInitializationFailureView view in FindObjectsByType<OutGameInitializationFailureView>(FindObjectsSortMode.None))
+                    {
+                        if (view.isActiveAndEnabled && view.gameObject.scene.name == RECOVERY_TITLE_SCENE_NAME)
+                        {
+                            hasTitleFailureView = true;
+                            break;
+                        }
+                    }
+                    if (hasTitleFailureView) { break; }
+                    await Awaitable.NextFrameAsync(transition.PersistentLifetimeToken);
+                }
+            }
+            if (success || hasTitleFailureView)
+            {
+                transition.EndScenarioBattleSortie();
+                ClearRecoveryView();
+            }
+            return success;
+        }
+
+        /// <summary>
+        ///     専用失敗の終端または常駐終了で画面と購読を解除します。
+        /// </summary>
+        private void ClearRecoveryView()
+        {
+            if (_recoveryView != null)
+            {
+                _recoveryView.OnRecoveryRequested -= RecoveryRequestedHandler;
+                _recoveryView.enabled = false;
+                Destroy(_recoveryView);
+                _recoveryView = null;
+            }
+            _recoveryScenes = null;
+            _recoveryInGameSceneName = null;
+        }
+
     }
 }

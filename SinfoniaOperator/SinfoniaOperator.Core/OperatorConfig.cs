@@ -51,7 +51,14 @@ namespace SinfoniaStudio.SinfoniaOperator
             {
                 if (includedKeySet != null && !includedKeySet.Contains(prop.Name)) { continue; }
 
-                if (prop.Value.Type == JTokenType.Object) { continue; }
+                _jsonOverrides[prop.Name] = prop.Value.ToString(Newtonsoft.Json.Formatting.None);
+                if (prop.Value.Type == JTokenType.Object)
+                {
+                    _overrides.Remove(prop.Name);
+                    _arrayOverrides.Remove(prop.Name);
+                    count++;
+                    continue;
+                }
                 if (prop.Value.Type == JTokenType.Array)
                 {
                     string[] values = prop.Value
@@ -81,6 +88,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             _overrides.Clear();
             _arrayOverrides.Clear();
+            _jsonOverrides.Clear();
         }
 
         /// <summary>
@@ -137,6 +145,18 @@ namespace SinfoniaStudio.SinfoniaOperator
                 .ToArray();
         }
 
+        /// <summary>
+        ///     構造を保ったJSON設定を取得する。オブジェクト配列も欠落させない。
+        ///     ファイル内の明示的なnullも上書きとして扱い、環境変数へ戻さない。
+        /// </summary>
+        public static string GetJsonValue(string key)
+        {
+            return _jsonOverrides.TryGetValue(key, out string? value)
+                ? value
+                : Environment.GetEnvironmentVariable(key) ?? string.Empty;
+        }
+
+        private static readonly Dictionary<string, string> _jsonOverrides = new();
         private static readonly Dictionary<string, string> _overrides = new();
         private static readonly Dictionary<string, string[]> _arrayOverrides = new();
     }

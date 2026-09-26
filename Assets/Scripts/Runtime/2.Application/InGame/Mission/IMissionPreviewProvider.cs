@@ -14,10 +14,12 @@ namespace KillChord.Runtime.Application.InGame.Mission
         /// <param name="missionId"> 対象のミッションIDです。 </param>
         /// <param name="mainMissionText"> ミッションHUDに表示される説明文です。 </param>
         /// <param name="evaluationDescriptions"> 評価条件の説明文一覧です。 </param>
+        /// <param name="evaluationIds"> 評価条件のEvaluationId一覧です。evaluationDescriptionsと同じ並び順です。 </param>
         /// <returns> IDに対応するミッション定義が存在する場合はtrueです。 </returns>
         bool TryGetPreview(
             MissionId missionId,
             out string mainMissionText,
-            out IReadOnlyList<string> evaluationDescriptions);
+            out IReadOnlyList<string> evaluationDescriptions,
+            out IReadOnlyList<string> evaluationIds);
     }
 }

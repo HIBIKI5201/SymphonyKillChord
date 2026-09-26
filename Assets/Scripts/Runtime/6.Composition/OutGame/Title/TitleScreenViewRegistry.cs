@@ -18,19 +18,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         /// <param name="titleScreenView"></param>
         /// <param name="menuScreenView"></param>
-        /// <param name="optionsScreenView"></param>
         /// <param name="creditScreenView"></param>
         public TitleScreenViewRegistry(
             ScreenViewBase titleScreenView,
             ScreenViewBase menuScreenView,
-            ScreenViewBase optionsScreenView,
             ScreenViewBase creditScreenView)
         {
             _views = new Dictionary<ScreenId, ScreenViewBase>
             {
                 { ScreenId.Title, titleScreenView },
                 { ScreenId.Menu, menuScreenView },
-                { ScreenId.Options, optionsScreenView },
                 { ScreenId.Credit, creditScreenView },
             };
         }
@@ -64,6 +61,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _currentScreenId = screenId;
+            ApplyCurrentScreenInteraction();
             view.Show();
         }
 
@@ -79,6 +77,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return;
             }
 
+            view.SetInteractionEnabled(false);
             view.Hide();
 
             if (_currentScreenId != screenId)
@@ -127,6 +126,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         public void Dispose()
         {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isDisposed = true;
             foreach (IDisposable disposable in _views.Values)
             {
                 disposable?.Dispose();
@@ -135,10 +140,43 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             ResetFocusHistory();
         }
 
+        /// <summary>
+        ///     登録画面の入力許可を切り替え、再開時は現在画面だけへフォーカス復元を要求する。
+        /// </summary>
+        public void SetInteractionEnabled(bool isEnabled)
+        {
+            if (_isDisposed || _isInteractionEnabled == isEnabled)
+            {
+                return;
+            }
+
+            _isInteractionEnabled = isEnabled;
+            ApplyCurrentScreenInteraction();
+
+            if (isEnabled && _currentScreenId.HasValue
+                && _views.TryGetValue(_currentScreenId.Value, out ScreenViewBase currentView))
+            {
+                currentView.RestoreFocus();
+            }
+        }
+
+        private bool _isInteractionEnabled = true;
+        private bool _isDisposed;
         private readonly Dictionary<ScreenId, ScreenViewBase> _views;
         private readonly Stack<VisualElement> _focusHistory = new();
         private ScreenId? _currentScreenId;
         private VisualElement _focusToRestore;
+
+        /// <summary>
+        ///     全体の入力許可と現在画面を照合し、重ねて表示された背面画面への操作を停止する。
+        /// </summary>
+        private void ApplyCurrentScreenInteraction()
+        {
+            foreach (KeyValuePair<ScreenId, ScreenViewBase> entry in _views)
+            {
+                entry.Value.SetInteractionEnabled(_isInteractionEnabled && _currentScreenId == entry.Key);
+            }
+        }
 
         /// <summary>
         ///     履歴から、現在もパネルに存在するフォーカス先を取り出す。

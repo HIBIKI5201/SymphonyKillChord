@@ -19,7 +19,7 @@
     "*"
   ],
   "specRefs": [
-    "spec/feature/game-spec.md#gs-04-music-and-encounter-synchronization"
+    "spec/feature/game-spec.md#gs-04-音楽と遭遇の同期"
   ],
   "rationale": "コード起点 rhythm-music のうち音楽時計・同期予約・BGM編成を所有し、入力判定は Rhythm Input へ分離する。"
 }

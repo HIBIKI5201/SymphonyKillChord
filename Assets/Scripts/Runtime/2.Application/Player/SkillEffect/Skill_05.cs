@@ -14,6 +14,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_05 : SkillBase
     {
+        /// <summary>
+        ///     HPを消費し、敵のHP単位に換算したダメージを与える。
+        /// </summary>
         public override void Execute(in SkillEffectContext context)
         {
             float healthCostRatio = (float)context.EffectSpec.GetRequiredValue(
@@ -33,13 +36,13 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec
                 .GetAttackDefinitionByBeatType(context.CurrentBeatType);
 
-            // スキルのダメージをターゲットに適用する
+            // 敵の体力とプレイヤー攻撃力の桁に合わせ、消費HPを攻撃ダメージの単位へ換算する。
             var result = AttackCalculator.Calculate(
                 attackDefinition,
                 context.PlayerEntity,
                 context.TargetEntity,
                 context.IsJustHit,
-                new Damage(consumedHealth.Value),
+                new Damage(consumedHealth.Value * PLAYER_DAMAGE_UNIT_MULTIPLIER),
                 applyAttackerModifiers: false,
                 applyWeaponDamageMultiplier: false);
             result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
@@ -54,6 +57,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 $"FinalDamage:{result.FinalDamage.Value:0.##}, " +
                 $"AppliedDamage:{result.AppliedDamage.Value:0.##}");
         }
+
+        private const float PLAYER_DAMAGE_UNIT_MULTIPLIER = 10f;
 
         /// <summary>
         ///     スキルパラメータを検証します。

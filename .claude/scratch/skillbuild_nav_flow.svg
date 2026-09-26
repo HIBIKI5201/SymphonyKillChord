@@ -1,0 +1,61 @@
+<svg width="100%" viewBox="0 0 680 356" role="img">
+<title>改造画面のコントローラー操作フロー</title>
+<desc>スキルカードをA連打で選択→持ち上げ→装備する3段階の流れと、一覧の左端で左入力すると強化ボタンへ、一覧のどこからでも下入力すると編成保存ボタンへ移動する2つのショートカットを示す図。</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+
+<g class="c-gray">
+<rect x="50" y="60" width="130" height="56" rx="8" stroke-width="0.5"/>
+<text class="th" x="115" y="80" text-anchor="middle" dominant-baseline="central">スキル選択</text>
+<text class="ts" x="115" y="98" text-anchor="middle" dominant-baseline="central">スティック移動</text>
+</g>
+
+<g class="c-gray">
+<rect x="200" y="60" width="130" height="56" rx="8" stroke-width="0.5"/>
+<text class="th" x="265" y="80" text-anchor="middle" dominant-baseline="central">A: 詳細表示</text>
+<text class="ts" x="265" y="98" text-anchor="middle" dominant-baseline="central">1回目の決定</text>
+</g>
+
+<g class="c-coral">
+<rect x="350" y="60" width="130" height="56" rx="8" stroke-width="0.5"/>
+<text class="th" x="415" y="80" text-anchor="middle" dominant-baseline="central">A: 持ち上げ</text>
+<text class="ts" x="415" y="98" text-anchor="middle" dominant-baseline="central">2回目の決定</text>
+</g>
+
+<g class="c-teal">
+<rect x="500" y="60" width="130" height="56" rx="8" stroke-width="0.5"/>
+<text class="th" x="565" y="80" text-anchor="middle" dominant-baseline="central">スロットでA</text>
+<text class="ts" x="565" y="98" text-anchor="middle" dominant-baseline="central">装備確定</text>
+</g>
+
+<line class="arr" x1="180" y1="88" x2="200" y2="88" marker-end="url(#arrow)"/>
+<line class="arr" x1="330" y1="88" x2="350" y2="88" marker-end="url(#arrow)"/>
+<line class="arr" x1="480" y1="88" x2="500" y2="88" marker-end="url(#arrow)"/>
+
+<g class="c-gray">
+<rect x="50" y="180" width="200" height="56" rx="8" stroke-width="0.5"/>
+<text class="th" x="150" y="200" text-anchor="middle" dominant-baseline="central">一覧の左端で</text>
+<text class="ts" x="150" y="218" text-anchor="middle" dominant-baseline="central">←を入力</text>
+</g>
+
+<g class="c-teal">
+<rect x="430" y="180" width="200" height="56" rx="8" stroke-width="0.5"/>
+<text class="th" x="530" y="200" text-anchor="middle" dominant-baseline="central">強化ボタンへ</text>
+<text class="ts" x="530" y="218" text-anchor="middle" dominant-baseline="central">自動フォーカス</text>
+</g>
+
+<line class="arr" x1="250" y1="208" x2="430" y2="208" marker-end="url(#arrow)"/>
+
+<g class="c-gray">
+<rect x="50" y="260" width="200" height="56" rx="8" stroke-width="0.5"/>
+<text class="th" x="150" y="280" text-anchor="middle" dominant-baseline="central">一覧のどこでも</text>
+<text class="ts" x="150" y="298" text-anchor="middle" dominant-baseline="central">↓を入力</text>
+</g>
+
+<g class="c-teal">
+<rect x="430" y="260" width="200" height="56" rx="8" stroke-width="0.5"/>
+<text class="th" x="530" y="280" text-anchor="middle" dominant-baseline="central">編成保存へ</text>
+<text class="ts" x="530" y="298" text-anchor="middle" dominant-baseline="central">自動フォーカス</text>
+</g>
+
+<line class="arr" x1="250" y1="288" x2="430" y2="288" marker-end="url(#arrow)"/>
+</svg>

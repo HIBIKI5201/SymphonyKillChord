@@ -19,7 +19,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             ScreenViewBase stageSelectScreenView,
             ScreenViewBase skillTreeScreenView,
             ScreenViewBase skillBuildScreenView,
-            ScreenViewBase battlePreparationScreenView,
             ScreenViewBase settingScreenView)
         {
             _views = new Dictionary<ScreenId, ScreenViewBase>
@@ -28,7 +27,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 { ScreenId.StageSelect, stageSelectScreenView },
                 { ScreenId.SkillTree, skillTreeScreenView },
                 { ScreenId.SkillBuild, skillBuildScreenView },
-                { ScreenId.BattlePreparation, battlePreparationScreenView },
                 { ScreenId.Setting, settingScreenView },
             };
         }
@@ -115,6 +113,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public void Dispose()
         {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            _isDisposed = true;
             foreach (IDisposable disposable in _views.Values)
             {
                 disposable.Dispose();
@@ -123,6 +127,31 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             ResetFocusHistory();
         }
 
+        /// <summary>
+        ///     登録画面の入力許可を切り替え、再開時は現在画面だけへフォーカス復元を要求する。
+        /// </summary>
+        public void SetInteractionEnabled(bool isEnabled)
+        {
+            if (_isDisposed || _isInteractionEnabled == isEnabled)
+            {
+                return;
+            }
+
+            _isInteractionEnabled = isEnabled;
+            foreach (ScreenViewBase view in _views.Values)
+            {
+                view.SetInteractionEnabled(isEnabled);
+            }
+
+            if (isEnabled && _currentScreenId.HasValue
+                && _views.TryGetValue(_currentScreenId.Value, out ScreenViewBase currentView))
+            {
+                currentView.RestoreFocus();
+            }
+        }
+
+        private bool _isInteractionEnabled = true;
+        private bool _isDisposed;
         private readonly IReadOnlyDictionary<ScreenId, ScreenViewBase> _views;
         private readonly List<(ScreenId ScreenId, VisualElement FocusElement)> _focusHistory = new();
         private ScreenId? _currentScreenId;

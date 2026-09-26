@@ -12,6 +12,19 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
         public bool HasPending => _pendingNodeTransitions.Count > 0;
 
         /// <summary>
+        ///     完了済みの先頭予約を変更せずに確認します。
+        /// </summary>
+        public bool TryPeekCompleted(out PendingNodeTransition transition)
+        {
+            transition = null;
+            if (_pendingNodeTransitions.Count == 0) { return false; }
+            PendingNodeTransition candidate = _pendingNodeTransitions.Peek();
+            if (!_completedStageIds.Contains(candidate.TriggerStageId)) { return false; }
+            transition = candidate;
+            return true;
+        }
+
+        /// <summary>
         ///     後続処理を末尾へ予約する。
         /// </summary>
         /// <param name="pendingNodeTransition"> 予約する遷移情報。</param>
