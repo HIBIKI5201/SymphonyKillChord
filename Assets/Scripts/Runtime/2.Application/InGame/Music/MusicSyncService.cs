@@ -59,12 +59,7 @@ namespace KillChord.Runtime.Application.InGame.Music
                 && _currentPlayTime - _gaugeStartPlayTime.Value
                     >= _rhythmDefinition.BarLength * _rhythmJudgmentDefinition.TimeoutBarCount)
             {
-                _gaugeStartPlayTime = _currentPlayTime;
-                if (_rhythmState.Count > 0)
-                {
-                    _rhythmState.Clear();
-                    OnRhythmTimedOut?.Invoke();
-                }
+                TimeOutRhythm();
             }
 
             while (_scheduledActions.TryPeek(out var actionData, out double executeTime))
@@ -87,6 +82,20 @@ namespace KillChord.Runtime.Application.InGame.Music
         }
 
         /// <summary>
+        ///     被弾など拍を判定できない状況になったとき、リズムタイムアウトと同じ扱いで入力履歴を破棄する。
+        ///     まだ入力が無い場合は何もしない。
+        /// </summary>
+        public void ForceRhythmTimeout()
+        {
+            if (!_gaugeStartPlayTime.HasValue)
+            {
+                return;
+            }
+
+            TimeOutRhythm();
+        }
+
+        /// <summary>
         ///     再生終了・巻き戻し時に履歴、予約とゲージ基準を通知なしで破棄する。
         /// </summary>
         public void ResetPlayback()
@@ -95,6 +104,19 @@ namespace KillChord.Runtime.Application.InGame.Music
             _scheduledActions.Clear();
             _gaugeStartPlayTime = null;
             _currentPlayTime = 0d;
+        }
+
+        /// <summary>
+        ///     ゲージ基準を現在時刻へ戻し、履歴があれば破棄してタイムアウトを通知する。
+        /// </summary>
+        private void TimeOutRhythm()
+        {
+            _gaugeStartPlayTime = _currentPlayTime;
+            if (_rhythmState.Count > 0)
+            {
+                _rhythmState.Clear();
+                OnRhythmTimedOut?.Invoke();
+            }
         }
 
         /// <summary>
