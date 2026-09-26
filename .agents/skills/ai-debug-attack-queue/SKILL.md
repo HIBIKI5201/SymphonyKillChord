@@ -60,6 +60,12 @@ This dispatches Button.onClick. Poll a new snapshot to verify completion. It doe
 
 The default primer attack establishes a fresh rhythm reference before the requested sequence. Pass `--no-prime` only when an extra attack would invalidate the scenario and a recent attack already provides the intended reference.
 
+After enqueue, the Editor sends the primer at the first eligible gameplay input update; no additional LLM call or manual primer click is needed. Press/release runs within Input System gameplay updates, while Editor updates only monitor deadlines. Do not inject individual clicks between queue entries.
+
+On failure, inspect `diagnostics`: gameplay input update count/type, whether a press was sent and awaited, player input suppression/cooldown, mouse availability, focus, pause and time scale. Failure diagnostics preserve the state before cleanup; `cleanupPending` reports current release status separately. If cancellation occurs outside a gameplay input update, the owned press is released at the next such update. Resume paused gameplay before retrying; a new queue is rejected until release completes. PlayMode exit or assembly reload clears owned input during teardown.
+
+The attack CLI preserves rejected/failed API responses as JSON on stderr. `cancel` prints its status on stdout and exits nonzero while release is pending. The aging runner records a follow-up status after pending cleanup and reports unconfirmed release in `cleanupErrors`.
+
 Accepted names are `purple/One/1`, `blue/Two/2`, `cyan/Three/3`, `green/Four/4`, `yellow/Six/6`, and `orange/Eight/8`; Japanese color names are also accepted.
 
 enqueue also accepts --run-id UUID for idempotent retries and --timeout 120 (1–3600 seconds). Maximum total queue size is 1000. Active queues are rejected rather than replaced. After an unknown transport outcome, query status and reuse the same ID; never blindly resend with a new ID.

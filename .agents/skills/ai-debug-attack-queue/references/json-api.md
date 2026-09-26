@@ -44,6 +44,10 @@ AIDebugQaMonitor.Start(runId, durationSeconds)、GetStatusJson()、Stop(runId)�
 
 ## 操作と結果
 
+攻撃キューの状態には`cleanupPending`と`diagnostics`を含む。`diagnostics`はゲーム用入力更新数/種別、成立待ち時間、押下状態、基準攻撃かどうか、`environment`内の入力抑制/クールダウン/Mouse/フォーカス/停止状態を返す。失敗後は失敗直前のコピーを保持する。`mouseButtonPressedAtCapture`は取得時に有効な入力バッファの値であり、Editor更新から取得した場合はゲーム側の状態を証明しない。
+
+`cleanupPending:true`は、キャンセルまたは失敗時の押下を次のゲーム用入力更新で解放する必要がある状態。新規キューは解放完了まで拒否する。PlayMode終了・Reload時は終了処理で残った押下を解放する。操作成功だけで入力解放済みとせず、最新の状態を確認する。背景: [基準攻撃の通知待ち不具合](known-issues.md)。
+
 buttonはButton.onClickの発行。completionVerifiedとinputDeviceVerifiedはfalse。操作後の状態を別途読む。状態取得APIに操作を混ぜない。
 
 runは標準出力にJSON、診断を標準エラーへ出す。通信/API拒否・観測失敗・キャンセル・後始末失敗では非ゼロ終了。終了コード0もQA合格ではない。summary.jsonのqaVerdictは常にUnverified。
