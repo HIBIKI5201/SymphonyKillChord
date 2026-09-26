@@ -809,7 +809,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 ServiceLocator.RegisterInstance(_pendingNodeTransitionState);
             }
 
-            _battleSortieSelectionService = new BattleSortieSelectionService();
+            _battleSortieSelectionService = BattleSortieSelectionStateResolver.CreateSelectionService();
             _missionSelectController = new OutGameMissionSelectController(_selectedMissionState);
 
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
