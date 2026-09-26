@@ -58,6 +58,12 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         /// <summary> 攻撃時のオートロックオンを使うかどうか。 </summary>
         ReadOnlyReactiveProperty<bool> IsAutoLockOnEnabled { get; }
 
+        /// <summary> ゲームパッドの決定・キャンセルの配置の表示ラベル。 </summary>
+        ReadOnlyReactiveProperty<string> ButtonLayoutLabel { get; }
+
+        /// <summary> ゲームパッドの決定・キャンセルが日本式（決定=右ボタン）かどうか。 </summary>
+        ReadOnlyReactiveProperty<bool> IsJapaneseButtonLayout { get; }
+
         /// <summary>
         ///     表示用DTOを環境設定へ反映する。
         /// </summary>

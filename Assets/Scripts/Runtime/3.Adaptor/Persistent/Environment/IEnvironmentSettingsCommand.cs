@@ -64,6 +64,11 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         void ToggleAutoLockOn();
 
         /// <summary>
+        ///     ゲームパッドの決定・キャンセルの配置を海外式と日本式で切り替える。
+        /// </summary>
+        void ToggleButtonLayout();
+
+        /// <summary>
         ///     すべての環境設定を既定値へ戻す。
         /// </summary>
         void ResetToDefaults();

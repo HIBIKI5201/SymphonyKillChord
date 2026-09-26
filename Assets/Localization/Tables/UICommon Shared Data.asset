@@ -451,6 +451,18 @@ MonoBehaviour:
     m_Key: ui.setting.auto_lock_on_off
     m_Metadata:
       m_Items: []
+  - m_Id: 1880000011
+    m_Key: ui.setting.button_layout
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000012
+    m_Key: ui.setting.button_layout_western
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000013
+    m_Key: ui.setting.button_layout_japanese
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
