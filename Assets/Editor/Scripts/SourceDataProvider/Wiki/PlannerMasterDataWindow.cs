@@ -23,25 +23,14 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         [InitializeOnLoadMethod]
         private static void RegisterNavigationHub()
         {
-            PlannerNavigationHub.NavigateToSourceAsset = addressableKey =>
+            PlannerNavigationHub.NavigateToDataAsset = addressableKey =>
             {
                 if (!TryGetOrOpenWindow(out PlannerMasterDataWindow window))
                 {
                     return false;
                 }
 
-                window.NavigateToSourceAsset(addressableKey);
-                return true;
-            };
-
-            PlannerNavigationHub.NavigateToCollectionItem = (collectionKey, dataId) =>
-            {
-                if (!TryGetOrOpenWindow(out PlannerMasterDataWindow window))
-                {
-                    return false;
-                }
-
-                window.NavigateToCollectionItem(collectionKey, dataId);
+                window.NavigateToDataAsset(addressableKey);
                 return true;
             };
         }
@@ -78,10 +67,10 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private int _selectedPageIndex;
         [SerializeField, Tooltip("Collection内で選択中の要素Indexです。ドメインリロード間で表示状態を保持するために使用します。")]
         private int _selectedCollectionItemIndex;
-        [SerializeField, Tooltip("ナビゲーション列に表示する階層(SourceAssets/Collections)です。")]
+        [SerializeField, Tooltip("ナビゲーション列に表示する階層(DataAssets/Collections)です。")]
         private NavigationMode _navigationMode;
-        [SerializeField, Tooltip("選択中SourceAssetのAddressableキーです。")]
-        private string _selectedSourceAssetKey = string.Empty;
+        [SerializeField, Tooltip("選択中データアセットのAddressableキーです。")]
+        private string _selectedDataAssetKey = string.Empty;
         [SerializeField, Tooltip("選択中CollectionKeyです。")]
         private string _selectedCollectionKey = string.Empty;
         [SerializeField, Tooltip("検索ボックスへ入力中の検索クエリです。")]
@@ -101,7 +90,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         private void OnEnable()
         {
-            SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+            SourceDataProviderSettings.instance.RefreshDataAssetsFromAddressables();
             EditorApplication.projectChanged += InvalidateSearch;
             Undo.undoRedoPerformed += InvalidateSearch;
             SourceDataProviderSettings.OnChanged += InvalidateSearch;
@@ -206,7 +195,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(72f)))
             {
-                SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+                SourceDataProviderSettings.instance.RefreshDataAssetsFromAddressables();
                 _lastIndexedSearchQuery = null;
                 Repaint();
                 GUIUtility.ExitGUI();
@@ -254,7 +243,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             BattleSceneDataReader.ClearCache();
             SourceDataAssetIndex.Invalidate();
             _lastIndexedSearchQuery = null;
-            SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+            SourceDataProviderSettings.instance.RefreshDataAssetsFromAddressables();
             EnsureSelection();
             Repaint();
             GUIUtility.ExitGUI();
@@ -271,34 +260,34 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             {
                 _selectedPageIndex = 0;
                 _selectedCollectionItemIndex = 0;
-                _selectedSourceAssetKey = string.Empty;
+                _selectedDataAssetKey = string.Empty;
                 _selectedCollectionKey = string.Empty;
                 return;
             }
 
             _selectedPageIndex = Mathf.Clamp(_selectedPageIndex, 0, pages.Count - 1);
             PlannerMasterDataEditorSettings.PageDefinition page = pages[_selectedPageIndex];
-            List<string> visibleSourceAssetKeys = GetVisibleSourceAssetKeys(page);
-            if (_navigationMode == NavigationMode.SourceAssets
-                && visibleSourceAssetKeys.Count == 0
+            List<string> visibleDataAssetKeys = GetVisibleDataAssetKeys(page);
+            if (_navigationMode == NavigationMode.DataAssets
+                && visibleDataAssetKeys.Count == 0
                 && page.CollectionCategories.Count > 0)
             {
                 _navigationMode = NavigationMode.Collections;
             }
             else if (_navigationMode == NavigationMode.Collections
                 && page.CollectionCategories.Count == 0
-                && visibleSourceAssetKeys.Count > 0)
+                && visibleDataAssetKeys.Count > 0)
             {
-                _navigationMode = NavigationMode.SourceAssets;
+                _navigationMode = NavigationMode.DataAssets;
             }
 
-            if (_navigationMode == NavigationMode.SourceAssets)
+            if (_navigationMode == NavigationMode.DataAssets)
             {
-                if (!Contains(page.SourceAssetAddressableKeys, _selectedSourceAssetKey)
-                    || !visibleSourceAssetKeys.Contains(_selectedSourceAssetKey))
+                if (!Contains(page.DataAssetAddressableKeys, _selectedDataAssetKey)
+                    || !visibleDataAssetKeys.Contains(_selectedDataAssetKey))
                 {
-                    _selectedSourceAssetKey = visibleSourceAssetKeys.Count > 0
-                        ? visibleSourceAssetKeys[0]
+                    _selectedDataAssetKey = visibleDataAssetKeys.Count > 0
+                        ? visibleDataAssetKeys[0]
                         : string.Empty;
                 }
                 _selectedCollectionKey = string.Empty;
@@ -312,7 +301,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     : string.Empty;
                 _selectedCollectionItemIndex = 0;
             }
-            _selectedSourceAssetKey = string.Empty;
+            _selectedDataAssetKey = string.Empty;
         }
 
         /// <summary>
@@ -338,7 +327,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
 
                     _selectedPageIndex = i;
                     _selectedCollectionItemIndex = 0;
-                    _selectedSourceAssetKey = string.Empty;
+                    _selectedDataAssetKey = string.Empty;
                     _selectedCollectionKey = string.Empty;
                     EnsureSelection();
                     GUIUtility.ExitGUI();
@@ -349,7 +338,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         }
 
         /// <summary>
-        ///     SourceAsset / collection のナビゲーション列を描画します(閲覧一覧: (a))。
+        ///     DataAsset / collection のナビゲーション列を描画します(閲覧一覧: (a))。
         /// </summary>
         /// <param name="page"> 選択中ページです。 </param>
         private void DrawNavigationColumn(PlannerMasterDataEditorSettings.PageDefinition page)
@@ -362,7 +351,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             if (nextMode != _navigationMode)
             {
                 _navigationMode = nextMode;
-                _selectedSourceAssetKey = string.Empty;
+                _selectedDataAssetKey = string.Empty;
                 _selectedCollectionKey = string.Empty;
                 _selectedCollectionItemIndex = 0;
                 EnsureSelection();
@@ -372,9 +361,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             using (EditorGUILayout.ScrollViewScope scope = new(_navigationScrollPosition))
             {
                 _navigationScrollPosition = scope.scrollPosition;
-                if (_navigationMode == NavigationMode.SourceAssets)
+                if (_navigationMode == NavigationMode.DataAssets)
                 {
-                    DrawSourceAssetNavigation(page);
+                    DrawDataAssetNavigation(page);
                 }
                 else
                 {
@@ -386,19 +375,19 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         }
 
         /// <summary>
-        ///     SourceAsset一覧を描画します。
+        ///     DataAsset一覧を描画します。
         /// </summary>
         /// <param name="page"> 選択中ページです。 </param>
-        private void DrawSourceAssetNavigation(PlannerMasterDataEditorSettings.PageDefinition page)
+        private void DrawDataAssetNavigation(PlannerMasterDataEditorSettings.PageDefinition page)
         {
-            EditorGUILayout.LabelField("Source Assets", EditorStyles.boldLabel);
-            List<string> visibleKeys = GetVisibleSourceAssetKeys(page);
+            EditorGUILayout.LabelField("Data Assets", EditorStyles.boldLabel);
+            List<string> visibleKeys = GetVisibleDataAssetKeys(page);
             if (visibleKeys.Count == 0)
             {
                 EditorGUILayout.HelpBox(
-                    page.SourceAssetAddressableKeys.Count == 0
-                        ? "このページにはSourceAssetが設定されていません。"
-                        : "このページのSourceAssetは単一CollectionのRepositoryのみのため、Collectionsタブから参照してください。",
+                    page.DataAssetAddressableKeys.Count == 0
+                        ? "このページにはデータアセットが設定されていません。"
+                        : "このページのデータアセットは単一CollectionのRepositoryのみのため、Collectionsタブから参照してください。",
                     MessageType.None);
                 return;
             }
@@ -406,14 +395,14 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             for (int i = 0; i < visibleKeys.Count; i++)
             {
                 string addressableKey = visibleKeys[i];
-                string label = BuildSourceAssetLabel(addressableKey);
-                bool isSelected = string.Equals(_selectedSourceAssetKey, addressableKey, StringComparison.Ordinal);
+                string label = BuildDataAssetLabel(addressableKey);
+                bool isSelected = string.Equals(_selectedDataAssetKey, addressableKey, StringComparison.Ordinal);
                 if (!GUILayout.Button(label, isSelected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
                 {
                     continue;
                 }
 
-                NavigateToSourceAsset(addressableKey);
+                NavigateToDataAsset(addressableKey);
                 GUIUtility.ExitGUI();
             }
         }
@@ -442,14 +431,14 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 }
 
                 _selectedCollectionKey = collectionKey;
-                _selectedSourceAssetKey = string.Empty;
+                _selectedDataAssetKey = string.Empty;
                 _selectedCollectionItemIndex = 0;
                 GUIUtility.ExitGUI();
             }
         }
 
         /// <summary>
-        ///     選択中のSourceAssetまたはCollectionが持つデータ項目一覧を描画します(閲覧詳細: (b))。
+        ///     選択中のDataAssetまたはCollectionが持つデータ項目一覧を描画します(閲覧詳細: (b))。
         ///     行をクリックすると実体を選択・Pingして、実際の編集はInspector側へ委ねます。
         /// </summary>
         private void DrawItemsColumn()
@@ -463,10 +452,10 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 {
                     DrawCollectionItems(_selectedCollectionKey);
                 }
-                else if (_navigationMode == NavigationMode.SourceAssets
-                    && !string.IsNullOrWhiteSpace(_selectedSourceAssetKey))
+                else if (_navigationMode == NavigationMode.DataAssets
+                    && !string.IsNullOrWhiteSpace(_selectedDataAssetKey))
                 {
-                    DrawSourceAssetItems(_selectedSourceAssetKey);
+                    DrawDataAssetItems(_selectedDataAssetKey);
                 }
                 else
                 {
@@ -477,28 +466,28 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         }
 
         /// <summary>
-        ///     SourceAssetの概要と、そのSourceAssetが持つCollection一覧を描画します。
+        ///     DataAssetの概要と、そのDataAssetが持つCollection一覧を描画します。
         /// </summary>
         /// <param name="addressableKey"> 対象のAddressableキーです。 </param>
-        private void DrawSourceAssetItems(string addressableKey)
+        private void DrawDataAssetItems(string addressableKey)
         {
             if (!SourceDataProviderRepositoryResolver.TryResolveAsset(
                     addressableKey,
-                    out ScriptableObject sourceAsset))
+                    out ScriptableObject dataAsset))
             {
                 EditorGUILayout.HelpBox(
-                    $"SourceAsset「{addressableKey}」を解決できません。Addressablesの登録状況を確認してください。",
+                    $"データアセット「{addressableKey}」を解決できません。Addressablesの登録状況を確認してください。",
                     MessageType.Error);
                 return;
             }
 
-            DrawObjectHeaderRow(addressableKey, sourceAsset.GetType().Name, sourceAsset);
+            DrawObjectHeaderRow(addressableKey, dataAsset.GetType().Name, dataAsset);
 
             IReadOnlyList<SourceDataProviderSettings.SourceCollectionMapping> mappings =
                 SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey);
+            // Collectionを持たないデータアセット(Config等)が通常のため、その場合は何も案内しない。
             if (mappings.Count == 0)
             {
-                EditorGUILayout.HelpBox("このSourceAssetにはCollectionが登録されていません。", MessageType.None);
                 return;
             }
 
@@ -528,11 +517,11 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             if (!TryResolveCollection(
                     collectionKey,
                     out SourceDataProviderSettings.SourceCollectionMapping mapping,
-                    out ScriptableObject sourceAsset,
+                    out ScriptableObject dataAsset,
                     out SerializedProperty collectionProperty))
             {
                 EditorGUILayout.HelpBox(
-                    $"CollectionKey「{collectionKey}」のSourceAssetまたはProperty Pathを解決できません。",
+                    $"CollectionKey「{collectionKey}」のデータアセットまたはProperty Pathを解決できません。",
                     MessageType.Error);
                 return;
             }
@@ -545,9 +534,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _collectionSortMode,
                 EditorStyles.toolbarPopup,
                 GUILayout.Width(110f));
-            if (GUILayout.Button("Source Assetを開く", EditorStyles.toolbarButton))
+            if (GUILayout.Button("データアセットを開く", EditorStyles.toolbarButton))
             {
-                NavigateToSourceAsset(mapping.SourceAssetAddressableKey);
+                NavigateToDataAsset(mapping.DataAssetAddressableKey);
             }
             EditorGUILayout.EndHorizontal();
 
@@ -559,12 +548,12 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return;
             }
 
-            DrawCollectionCommands(mapping, sourceAsset, collectionProperty);
+            DrawCollectionCommands(mapping, dataAsset, collectionProperty);
 
             EditorGUILayout.Space();
-            if (IsRepositoryOnlySourceAsset(mapping.SourceAssetAddressableKey))
+            if (IsRepositoryOnlyDataAsset(mapping.DataAssetAddressableKey))
             {
-                DrawRepositoryHeadRow(mapping.SourceAssetAddressableKey, sourceAsset);
+                DrawRepositoryHeadRow(mapping.DataAssetAddressableKey, dataAsset);
             }
 
             if (collectionProperty.arraySize == 0)
@@ -584,7 +573,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 if (GUILayout.Button(label, isSelected ? EditorStyles.miniButtonMid : EditorStyles.miniButton))
                 {
                     _selectedCollectionItemIndex = i;
-                    SelectAndPingElement(sourceAsset, element);
+                    SelectAndPingElement(dataAsset, element);
                 }
                 EditorGUILayout.EndHorizontal();
             }
@@ -595,15 +584,15 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         ///     個別データの値編集ではないため(値編集はInspector側のCustomEditorが担う)、wiki側に残しています。
         /// </summary>
         /// <param name="mapping"> Collection設定です。 </param>
-        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="dataAsset"> Collectionを保持するDataAssetです。 </param>
         /// <param name="collectionProperty"> Collectionプロパティです。 </param>
         private void DrawCollectionCommands(
             SourceDataProviderSettings.SourceCollectionMapping mapping,
-            ScriptableObject sourceAsset,
+            ScriptableObject dataAsset,
             SerializedProperty collectionProperty)
         {
             if (!SourceDataProviderRepositoryResolver.TryGetCollectionElementType(
-                    sourceAsset,
+                    dataAsset,
                     mapping.PropertyPath,
                     out Type elementType))
             {
@@ -614,7 +603,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("データを追加", GUILayout.Height(COMMAND_BUTTON_HEIGHT)))
             {
-                ShowCollectionCreationMenu(mapping, sourceAsset, elementType);
+                ShowCollectionCreationMenu(mapping, dataAsset, elementType);
             }
 
             using (new EditorGUI.DisabledScope(_selectedCollectionItemIndex < 0
@@ -622,7 +611,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             {
                 if (GUILayout.Button("Collectionから外す", GUILayout.Height(COMMAND_BUTTON_HEIGHT)))
                 {
-                    RemoveSelectedCollectionItem(sourceAsset, mapping);
+                    RemoveSelectedCollectionItem(dataAsset, mapping);
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -640,23 +629,23 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         ///     Collection要素型に応じた作成メニューを表示します。
         /// </summary>
         /// <param name="mapping"> Collection設定です。 </param>
-        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="dataAsset"> Collectionを保持するDataAssetです。 </param>
         /// <param name="elementType"> Collectionの要素型です。 </param>
         private void ShowCollectionCreationMenu(
             SourceDataProviderSettings.SourceCollectionMapping mapping,
-            ScriptableObject sourceAsset,
+            ScriptableObject dataAsset,
             Type elementType)
         {
             IReadOnlyList<Type> assetTypes = PlannerCollectionItemCreator.GetCreatableAssetTypes(elementType);
             if (assetTypes.Count == 0)
             {
-                AddInlineCollectionItem(mapping, sourceAsset, elementType);
+                AddInlineCollectionItem(mapping, dataAsset, elementType);
                 return;
             }
 
             if (assetTypes.Count == 1)
             {
-                CreateCollectionAsset(mapping, sourceAsset, assetTypes[0]);
+                CreateCollectionAsset(mapping, dataAsset, assetTypes[0]);
                 return;
             }
 
@@ -664,7 +653,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             for (int i = 0; i < assetTypes.Count; i++)
             {
                 Type assetType = assetTypes[i];
-                menu.AddItem(new GUIContent(assetType.Name), false, () => CreateCollectionAsset(mapping, sourceAsset, assetType));
+                menu.AddItem(new GUIContent(assetType.Name), false, () => CreateCollectionAsset(mapping, dataAsset, assetType));
             }
             menu.ShowAsContext();
         }
@@ -673,18 +662,18 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         ///     指定型のScriptableObjectを生成してCollectionへ追加します。
         /// </summary>
         /// <param name="mapping"> Collection設定です。 </param>
-        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="dataAsset"> Collectionを保持するDataAssetです。 </param>
         /// <param name="assetType"> 生成する型です。 </param>
         private void CreateCollectionAsset(
             SourceDataProviderSettings.SourceCollectionMapping mapping,
-            ScriptableObject sourceAsset,
+            ScriptableObject dataAsset,
             Type assetType)
         {
-            SerializedObject serializedObject = new(sourceAsset);
+            SerializedObject serializedObject = new(dataAsset);
             SerializedProperty collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
             int newIndex = collectionProperty?.arraySize ?? 0;
             if (!PlannerCollectionItemCreator.TryCreateAsset(
-                    sourceAsset,
+                    dataAsset,
                     mapping,
                     serializedObject,
                     collectionProperty,
@@ -707,18 +696,18 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         ///     インラインCollectionへ新規要素を追加します。
         /// </summary>
         /// <param name="mapping"> Collection設定です。 </param>
-        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="dataAsset"> Collectionを保持するDataAssetです。 </param>
         /// <param name="elementType"> Collectionの要素型です。 </param>
         private void AddInlineCollectionItem(
             SourceDataProviderSettings.SourceCollectionMapping mapping,
-            ScriptableObject sourceAsset,
+            ScriptableObject dataAsset,
             Type elementType)
         {
-            SerializedObject serializedObject = new(sourceAsset);
+            SerializedObject serializedObject = new(dataAsset);
             SerializedProperty collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
             int newIndex = collectionProperty?.arraySize ?? 0;
             if (!PlannerCollectionItemCreator.TryAddInlineItem(
-                    sourceAsset,
+                    dataAsset,
                     serializedObject,
                     collectionProperty,
                     elementType,
@@ -729,7 +718,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             }
 
             _selectedCollectionItemIndex = newIndex;
-            SourceCollectionItemInspector.Select(sourceAsset, collectionProperty.GetArrayElementAtIndex(newIndex));
+            SourceCollectionItemInspector.Select(dataAsset, collectionProperty.GetArrayElementAtIndex(newIndex));
             InvalidateSearch();
             GUIUtility.ExitGUI();
         }
@@ -737,10 +726,10 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <summary>
         ///     選択中要素をCollectionから登録解除します。参照先アセットファイル自体は削除しません。
         /// </summary>
-        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="dataAsset"> Collectionを保持するDataAssetです。 </param>
         /// <param name="mapping"> Collection設定です。 </param>
         private void RemoveSelectedCollectionItem(
-            ScriptableObject sourceAsset,
+            ScriptableObject dataAsset,
             SourceDataProviderSettings.SourceCollectionMapping mapping)
         {
             if (!EditorUtility.DisplayDialog(
@@ -752,7 +741,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return;
             }
 
-            SerializedObject serializedObject = new(sourceAsset);
+            SerializedObject serializedObject = new(dataAsset);
             SerializedProperty collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
             if (collectionProperty == null || !collectionProperty.isArray || collectionProperty.arraySize == 0)
             {
@@ -760,7 +749,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             }
 
             int removeIndex = Mathf.Clamp(_selectedCollectionItemIndex, 0, collectionProperty.arraySize - 1);
-            Undo.RecordObject(sourceAsset, "Collectionからデータを外す");
+            Undo.RecordObject(dataAsset, "Collectionからデータを外す");
             int previousSize = collectionProperty.arraySize;
             collectionProperty.DeleteArrayElementAtIndex(removeIndex);
             if (collectionProperty.arraySize == previousSize)
@@ -770,8 +759,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 collectionProperty.DeleteArrayElementAtIndex(removeIndex);
             }
             serializedObject.ApplyModifiedProperties();
-            EditorUtility.SetDirty(sourceAsset);
-            AssetDatabase.SaveAssetIfDirty(sourceAsset);
+            EditorUtility.SetDirty(dataAsset);
+            AssetDatabase.SaveAssetIfDirty(dataAsset);
             _selectedCollectionItemIndex = Mathf.Max(0, removeIndex - 1);
             InvalidateSearch();
             GUIUtility.ExitGUI();
@@ -779,48 +768,48 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
 
         /// <summary>
         ///     Collection要素を実体としてSelection/Pingします。ObjectReferenceならその参照先を、
-        ///     インライン構造体(参照アセットを持たない値)ならCollectionを保持するSourceAsset自体を対象にします。
+        ///     インライン構造体(参照アセットを持たない値)ならCollectionを保持するDataAsset自体を対象にします。
         /// </summary>
-        /// <param name="owningSourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="owningDataAsset"> Collectionを保持するDataAssetです。 </param>
         /// <param name="element"> 対象要素です。 </param>
-        private static void SelectAndPingElement(ScriptableObject owningSourceAsset, SerializedProperty element)
+        private static void SelectAndPingElement(ScriptableObject owningDataAsset, SerializedProperty element)
         {
             if (element.propertyType != SerializedPropertyType.ObjectReference)
             {
-                SourceCollectionItemInspector.Select(owningSourceAsset, element);
+                SourceCollectionItemInspector.Select(owningDataAsset, element);
                 return;
             }
             UnityEngine.Object target = element.objectReferenceValue;
-            target ??= owningSourceAsset;
+            target ??= owningDataAsset;
 
             Selection.activeObject = target;
             EditorGUIUtility.PingObject(target);
         }
 
         /// <summary>
-        ///     Collectionの先頭に表示する、Collectionを保持するSourceAsset自体(Repository)の行を描画します。
+        ///     Collectionの先頭に表示する、Collectionを保持するDataAsset自体(Repository)の行を描画します。
         ///     クリックすると実体をSelection/Pingします。値編集はInspector側のCustomEditorへ委ねます。
         /// </summary>
-        /// <param name="addressableKey"> Repository SourceAssetのAddressableキーです。 </param>
-        /// <param name="sourceAsset"> Repository SourceAsset自体です。 </param>
-        private void DrawRepositoryHeadRow(string addressableKey, ScriptableObject sourceAsset)
+        /// <param name="addressableKey"> Repository DataAssetのAddressableキーです。 </param>
+        /// <param name="dataAsset"> Repository DataAsset自体です。 </param>
+        private void DrawRepositoryHeadRow(string addressableKey, ScriptableObject dataAsset)
         {
-            string label = $"📦 {sourceAsset.name} ({sourceAsset.GetType().Name}) [Repository]";
+            string label = $"📦 {dataAsset.name} ({dataAsset.GetType().Name}) [Repository]";
             if (GUILayout.Button(label, EditorStyles.miniButton))
             {
                 _selectedCollectionItemIndex = -1;
-                Selection.activeObject = sourceAsset;
-                EditorGUIUtility.PingObject(sourceAsset);
+                Selection.activeObject = dataAsset;
+                EditorGUIUtility.PingObject(dataAsset);
             }
         }
 
         /// <summary>
-        ///     指定AddressableキーのSourceAssetが、単一のCollectionのみを保持する「Repository」であるか判定します。
-        ///     Repositoryは一覧が冗長になるためSource Assetsタブには表示せず、対応するCollectionの先頭行として表示します。
+        ///     指定AddressableキーのDataAssetが、単一のCollectionのみを保持する「Repository」であるか判定します。
+        ///     Repositoryは一覧が冗長になるためData Assetsタブには表示せず、対応するCollectionの先頭行として表示します。
         /// </summary>
         /// <param name="addressableKey"> 判定対象のAddressableキーです。 </param>
         /// <returns> 単一Collectionのみを保持するRepositoryの場合はtrueです。 </returns>
-        private static bool IsRepositoryOnlySourceAsset(string addressableKey)
+        private static bool IsRepositoryOnlyDataAsset(string addressableKey)
         {
             if (string.IsNullOrWhiteSpace(addressableKey))
             {
@@ -837,27 +826,27 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             // 「登録Collectionが1件」だけでは、Player(_attackDifinitionsの1件を持ちつつ体力等の単体設定も
             // 持つCharacterDefinitionAsset)のような非Repositoryアセットも誤って隠してしまう。
             // Collection配列自体(とm_Script)以外に実質的なフィールドが無いことも合わせて確認する。
-            if (!SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject sourceAsset))
+            if (!SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject dataAsset))
             {
-                // 解決できない場合は判定材料が無いため、安全側(Source Assetsタブに表示する)に倒す。
+                // 解決できない場合は判定材料が無いため、安全側(Data Assetsタブに表示する)に倒す。
                 return false;
             }
 
-            return !HasSubstantialFieldsOutsideCollection(sourceAsset, mappings[0].PropertyPath);
+            return !HasSubstantialFieldsOutsideCollection(dataAsset, mappings[0].PropertyPath);
         }
 
         /// <summary>
         ///     指定Collectionプロパティ以外に、実質的な(トリビアルでない)トップレベルフィールドを
         ///     一定数より多く持つか判定します。Repository判定の補助に使用します。
         /// </summary>
-        /// <param name="sourceAsset"> 判定対象のSourceAssetです。 </param>
+        /// <param name="dataAsset"> 判定対象のDataAssetです。 </param>
         /// <param name="collectionPropertyPath"> 除外するCollectionプロパティのパスです。 </param>
         /// <returns> Collection以外に実質的なフィールドが一定数を超えて存在する場合はtrueです。 </returns>
         private static bool HasSubstantialFieldsOutsideCollection(
-            ScriptableObject sourceAsset,
+            ScriptableObject dataAsset,
             string collectionPropertyPath)
         {
-            SerializedObject serializedObject = new(sourceAsset);
+            SerializedObject serializedObject = new(dataAsset);
             SerializedProperty iterator = serializedObject.GetIterator();
             bool enterChildren = true;
             int otherFieldCount = 0;
@@ -881,17 +870,17 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         }
 
         /// <summary>
-        ///     ページのSourceAssetキーのうち、Repository(単一Collectionのみ保持)ではないものだけを抽出します。
+        ///     ページのDataAssetキーのうち、Repository(単一Collectionのみ保持)ではないものだけを抽出します。
         /// </summary>
         /// <param name="page"> 対象ページです。 </param>
-        /// <returns> Source Assetsタブに表示すべきAddressableキー一覧です。 </returns>
-        private static List<string> GetVisibleSourceAssetKeys(PlannerMasterDataEditorSettings.PageDefinition page)
+        /// <returns> Data Assetsタブに表示すべきAddressableキー一覧です。 </returns>
+        private static List<string> GetVisibleDataAssetKeys(PlannerMasterDataEditorSettings.PageDefinition page)
         {
             List<string> result = new();
-            for (int i = 0; i < page.SourceAssetAddressableKeys.Count; i++)
+            for (int i = 0; i < page.DataAssetAddressableKeys.Count; i++)
             {
-                string key = page.SourceAssetAddressableKeys[i];
-                if (!IsRepositoryOnlySourceAsset(key)
+                string key = page.DataAssetAddressableKeys[i];
+                if (!IsRepositoryOnlyDataAsset(key)
                     || !Contains(page.CollectionCategories, SourceDataProviderSettings.instance
                         .GetCollectionMappingsByAddressableKey(key)[0].CollectionKey))
                 {
@@ -907,46 +896,46 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         /// <param name="collectionKey"> CollectionKeyです。 </param>
         /// <param name="mapping"> Collection設定です。 </param>
-        /// <param name="sourceAsset"> SourceAssetです。 </param>
+        /// <param name="dataAsset"> DataAssetです。 </param>
         /// <param name="collectionProperty"> Collectionプロパティです。 </param>
         /// <returns> 全て解決できた場合はtrueです。 </returns>
         private static bool TryResolveCollection(
             string collectionKey,
             out SourceDataProviderSettings.SourceCollectionMapping mapping,
-            out ScriptableObject sourceAsset,
+            out ScriptableObject dataAsset,
             out SerializedProperty collectionProperty)
         {
             mapping = null;
-            sourceAsset = null;
+            dataAsset = null;
             collectionProperty = null;
             if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out mapping)
                 || !SourceDataProviderRepositoryResolver.TryResolveAsset(
-                    mapping.SourceAssetAddressableKey,
-                    out sourceAsset))
+                    mapping.DataAssetAddressableKey,
+                    out dataAsset))
             {
                 return false;
             }
 
-            SerializedObject serializedObject = new(sourceAsset);
+            SerializedObject serializedObject = new(dataAsset);
             collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
             return collectionProperty != null;
         }
 
         /// <summary>
-        ///     対象SourceAssetの実体をSelect/Pingします。対応するページがあれば、そのページへも移動します。
-        ///     実体の解決・選択は、ページ割当の有無に関わらず常に行います(検索が全登録SourceAssetを
-        ///     対象にしている一方、ページに割り当てられていないSourceAssetも存在するため)。
+        ///     対象DataAssetの実体をSelect/Pingします。対応するページがあれば、そのページへも移動します。
+        ///     実体の解決・選択は、ページ割当の有無に関わらず常に行います(検索が全登録DataAssetを
+        ///     対象にしている一方、ページに割り当てられていないDataAssetも存在するため)。
         /// </summary>
-        /// <param name="addressableKey"> 移動先SourceAssetのAddressableキーです。 </param>
-        public void NavigateToSourceAsset(string addressableKey)
+        /// <param name="addressableKey"> 移動先DataAssetのAddressableキーです。 </param>
+        public void NavigateToDataAsset(string addressableKey)
         {
             bool resolved = SourceDataProviderRepositoryResolver.TryResolveAsset(
                 addressableKey,
-                out ScriptableObject sourceAsset);
+                out ScriptableObject dataAsset);
             if (resolved)
             {
-                Selection.activeObject = sourceAsset;
-                EditorGUIUtility.PingObject(sourceAsset);
+                Selection.activeObject = dataAsset;
+                EditorGUIUtility.PingObject(dataAsset);
             }
 
             IReadOnlyList<PlannerMasterDataEditorSettings.PageDefinition> pages =
@@ -955,17 +944,17 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             for (int i = 0; i < pages.Count; i++)
             {
                 int pageIndex = (Mathf.Clamp(_selectedPageIndex, 0, pages.Count - 1) + i) % pages.Count;
-                if (!Contains(pages[pageIndex].SourceAssetAddressableKeys, addressableKey))
+                if (!Contains(pages[pageIndex].DataAssetAddressableKeys, addressableKey))
                 {
                     continue;
                 }
 
                 _selectedPageIndex = pageIndex;
-                _navigationMode = NavigationMode.SourceAssets;
-                _selectedSourceAssetKey = addressableKey;
+                _navigationMode = NavigationMode.DataAssets;
+                _selectedDataAssetKey = addressableKey;
                 _selectedCollectionKey = string.Empty;
                 _selectedCollectionItemIndex = 0;
-                if (IsRepositoryOnlySourceAsset(addressableKey))
+                if (IsRepositoryOnlyDataAsset(addressableKey))
                 {
                     string collectionKey = SourceDataProviderSettings.instance
                         .GetCollectionMappingsByAddressableKey(addressableKey)[0].CollectionKey;
@@ -973,7 +962,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     {
                         _navigationMode = NavigationMode.Collections;
                         _selectedCollectionKey = collectionKey;
-                        _selectedSourceAssetKey = string.Empty;
+                        _selectedDataAssetKey = string.Empty;
                         _selectedCollectionItemIndex = -1;
                     }
                 }
@@ -984,12 +973,12 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             if (!resolved)
             {
                 ShowNotification(new GUIContent(
-                    $"SourceAsset「{addressableKey}」を解決できません。Addressablesの登録状況を確認してください。"));
+                    $"データアセット「{addressableKey}」を解決できません。Addressablesの登録状況を確認してください。"));
             }
             else if (!pageFound)
             {
                 ShowNotification(new GUIContent(
-                    $"SourceAsset「{addressableKey}」を表示するページが設定されていないため、実体のみ選択しました。"));
+                    $"データアセット「{addressableKey}」を表示するページが設定されていないため、実体のみ選択しました。"));
             }
 
             Repaint();
@@ -1008,7 +997,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             bool collectionResolved = TryResolveCollection(
                     collectionKey,
                     out _,
-                    out ScriptableObject sourceAsset,
+                    out ScriptableObject dataAsset,
                     out SerializedProperty collectionProperty)
                 && collectionProperty.isArray;
 
@@ -1028,7 +1017,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
 
                     itemIndex = i;
                     itemFound = true;
-                    SelectAndPingElement(sourceAsset, collectionProperty.GetArrayElementAtIndex(i));
+                    SelectAndPingElement(dataAsset, collectionProperty.GetArrayElementAtIndex(i));
                     break;
                 }
             }
@@ -1040,14 +1029,14 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _selectedPageIndex = pageIndex;
                 _navigationMode = NavigationMode.Collections;
                 _selectedCollectionKey = collectionKey;
-                _selectedSourceAssetKey = string.Empty;
+                _selectedDataAssetKey = string.Empty;
                 _selectedCollectionItemIndex = itemIndex;
             }
 
             if (!collectionResolved)
             {
                 ShowNotification(new GUIContent(
-                    $"CollectionKey「{collectionKey}」のSourceAssetまたはProperty Pathを解決できません。"));
+                    $"CollectionKey「{collectionKey}」のデータアセットまたはProperty Pathを解決できません。"));
             }
             else if (!string.IsNullOrWhiteSpace(dataId) && !itemFound)
             {
@@ -1174,17 +1163,17 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         }
 
         /// <summary>
-        ///     SourceAssetナビゲーション用ラベルを生成します。
+        ///     DataAssetナビゲーション用ラベルを生成します。
         /// </summary>
         /// <param name="addressableKey"> Addressableキーです。 </param>
         /// <returns> 表示ラベルです。 </returns>
-        private static string BuildSourceAssetLabel(string addressableKey)
+        private static string BuildDataAssetLabel(string addressableKey)
         {
-            if (SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject sourceAsset))
+            if (SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject dataAsset))
             {
                 int collectionCount =
                     SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey).Count;
-                return $"{sourceAsset.name} ({sourceAsset.GetType().Name}) [{collectionCount}]";
+                return $"{dataAsset.name} ({dataAsset.GetType().Name}) [{collectionCount}]";
             }
 
             return addressableKey;
@@ -1201,13 +1190,13 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 collectionKey,
                 out SourceDataProviderSettings.SourceCollectionMapping mapping)
                 || !SourceDataProviderRepositoryResolver.TryResolveAsset(
-                    mapping.SourceAssetAddressableKey,
-                    out ScriptableObject sourceAsset))
+                    mapping.DataAssetAddressableKey,
+                    out ScriptableObject dataAsset))
             {
                 return collectionKey;
             }
 
-            SerializedObject serializedObject = new(sourceAsset);
+            SerializedObject serializedObject = new(dataAsset);
             SerializedProperty property = serializedObject.FindProperty(mapping.PropertyPath);
             int count = property != null && property.isArray ? property.arraySize : 0;
             return $"{collectionKey} ({count})";
@@ -1364,7 +1353,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         //
 
         /// <summary>
-        ///     検索結果一覧を描画します。SourceAsset・CollectionKey・個別データを横断して検索します。
+        ///     検索結果一覧を描画します。DataAsset・CollectionKey・個別データを横断して検索します。
         /// </summary>
         private void DrawSearchResults()
         {
@@ -1381,7 +1370,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _searchScrollPosition = scope.scrollPosition;
                 if (_searchResults.Count == 0)
                 {
-                    EditorGUILayout.HelpBox("一致するSourceAsset・Collection・データが見つかりません。", MessageType.None);
+                    EditorGUILayout.HelpBox("一致するデータアセット・Collection・データが見つかりません。", MessageType.None);
                     return;
                 }
 
@@ -1405,8 +1394,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             {
                 switch (result.Kind)
                 {
-                    case SearchResultKind.SourceAsset:
-                        NavigateToSourceAsset(result.AddressableKey);
+                    case SearchResultKind.DataAsset:
+                        NavigateToDataAsset(result.AddressableKey);
                         break;
                     case SearchResultKind.Collection:
                         NavigateToCollectionItem(result.CollectionKey, null);
@@ -1457,7 +1446,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     _selectedPageIndex = page;
                     _navigationMode = NavigationMode.Collections;
                     _selectedCollectionKey = result.CollectionKey;
-                    _selectedSourceAssetKey = string.Empty;
+                    _selectedDataAssetKey = string.Empty;
                     _selectedCollectionItemIndex = i;
                 }
                 SelectAndPingElement(owner, element);
@@ -1469,7 +1458,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         }
 
         /// <summary>
-        ///     検索クエリに応じて登録済みSourceAsset・Collection・個別データを走査し、検索結果を再構築します。
+        ///     検索クエリに応じて登録済みDataAsset・Collection・個別データを走査し、検索結果を再構築します。
         /// </summary>
         /// <param name="query"> 検索クエリです。 </param>
         private void RebuildSearchResults(string query)
@@ -1480,20 +1469,20 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return;
             }
 
-            IReadOnlyList<SourceDataProviderSettings.SourceAssetMapping> sourceAssetMappings =
-                SourceDataProviderSettings.instance.SourceAssetMappings;
-            for (int i = 0; i < sourceAssetMappings.Count; i++)
+            IReadOnlyList<SourceDataProviderSettings.DataAssetMapping> dataAssetMappings =
+                SourceDataProviderSettings.instance.DataAssetMappings;
+            for (int i = 0; i < dataAssetMappings.Count; i++)
             {
-                string addressableKey = sourceAssetMappings[i]?.AddressableKey;
+                string addressableKey = dataAssetMappings[i]?.AddressableKey;
                 if (string.IsNullOrWhiteSpace(addressableKey))
                 {
                     continue;
                 }
 
-                string label = BuildSourceAssetLabel(addressableKey);
+                string label = BuildDataAssetLabel(addressableKey);
                 if (MatchesQuery(label, query) || MatchesQuery(addressableKey, query))
                 {
-                    _searchResults.Add(SearchResult.ForSourceAsset(addressableKey, label));
+                    _searchResults.Add(SearchResult.ForDataAsset(addressableKey, label));
                 }
             }
 
@@ -1515,13 +1504,13 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 }
 
                 if (!SourceDataProviderRepositoryResolver.TryResolveAsset(
-                        mapping.SourceAssetAddressableKey,
-                        out ScriptableObject sourceAsset))
+                        mapping.DataAssetAddressableKey,
+                        out ScriptableObject dataAsset))
                 {
                     continue;
                 }
 
-                SerializedObject serializedObject = new(sourceAsset);
+                SerializedObject serializedObject = new(dataAsset);
                 SerializedProperty property = serializedObject.FindProperty(mapping.PropertyPath);
                 if (property == null || !property.isArray)
                 {
@@ -1541,7 +1530,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                         mapping.CollectionKey,
                         element.propertyPath,
                         $"{mapping.CollectionKey} / {itemLabel}",
-                        sourceAsset));
+                        dataAsset));
                 }
             }
         }
@@ -1577,14 +1566,14 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private const string SCRIPT_PROPERTY_NAME = "m_Script";
         private const int REPOSITORY_EXTRA_FIELD_TOLERANCE = 0;
 
-        private static readonly string[] NAVIGATION_MODE_LABELS = { "Source Assets", "Collections" };
+        private static readonly string[] NAVIGATION_MODE_LABELS = { "Data Assets", "Collections" };
 
         /// <summary>
         ///     ナビゲーション列へ表示するデータ階層です。
         /// </summary>
         private enum NavigationMode
         {
-            SourceAssets,
+            DataAssets,
             Collections,
         }
 
@@ -1606,7 +1595,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         private enum SearchResultKind
         {
-            SourceAsset,
+            DataAsset,
             Collection,
             CollectionItem,
         }
@@ -1642,13 +1631,13 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             /// <summary> 種別を表す短いラベルです。 </summary>
             public string KindLabel => Kind switch
             {
-                SearchResultKind.SourceAsset => "SourceAsset",
+                SearchResultKind.DataAsset => "DataAsset",
                 SearchResultKind.Collection => "Collection",
                 _ => "Item",
             };
 
-            public static SearchResult ForSourceAsset(string addressableKey, string label) =>
-                new(SearchResultKind.SourceAsset, addressableKey, null, null, label);
+            public static SearchResult ForDataAsset(string addressableKey, string label) =>
+                new(SearchResultKind.DataAsset, addressableKey, null, null, label);
 
             public static SearchResult ForCollection(string collectionKey, string label) =>
                 new(SearchResultKind.Collection, null, collectionKey, null, label);

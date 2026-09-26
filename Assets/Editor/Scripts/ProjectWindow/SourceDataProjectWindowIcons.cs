@@ -16,6 +16,7 @@ namespace KillChord.Editor.ProjectWindow
 
         private static readonly Color _addressableFallbackColor = new(0.2f, 0.6f, 1f, 0.9f);
         private static readonly Color _collectionItemColor = new(0.85f, 0.55f, 0.15f, 0.9f);
+        private static readonly Color _buildDependencyColor = new(0.3f, 0.8f, 0.4f, 0.9f);
         private static readonly Texture _addressableIcon = ResolveIcon(
             EditorGUIUtility.isProSkin ? "d_Linked" : "Linked");
 
@@ -65,6 +66,11 @@ namespace KillChord.Editor.ProjectWindow
             {
                 EditorGUI.DrawRect(badgeRect, _collectionItemColor);
             }
+            else if ((flags & SourceDataAssetFlags.BuildDependency) != 0)
+            {
+                // collection要素はほぼ全てビルドに含まれるため、重複表示を避けてcollection要素の表示を優先する。
+                EditorGUI.DrawRect(badgeRect, _buildDependencyColor);
+            }
         }
 
         /// <summary>
@@ -111,6 +117,10 @@ namespace KillChord.Editor.ProjectWindow
             string[] movedAssets,
             string[] movedFromAssetPaths)
         {
+            BuildDependencyAssetIndex.ScheduleRebuildIfRelevant(importedAssets);
+            BuildDependencyAssetIndex.ScheduleRebuildIfRelevant(deletedAssets);
+            BuildDependencyAssetIndex.ScheduleRebuildIfRelevant(movedAssets);
+
             if (importedAssets.Length > 0
                 || deletedAssets.Length > 0
                 || movedAssets.Length > 0
