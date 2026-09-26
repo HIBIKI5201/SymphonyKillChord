@@ -3,6 +3,7 @@
 **ステータス: 仕様側は 296ページ版で再照合済み。コード側は Anatomia の記号検索で確認できた範囲のみ更新。**
 
 - 仕様の母集団: 公開Notion 仕様本体 **296ページ / 6910ブロック** (`spec/notion/spec-2026-09-06/`)
+  ※ `spec/notion/spec-2026-09-06/` は当時の取得物で、git では追跡していない（リポジトリには無い）。
 - 仕様の整理結果: `spec/feature/game-spec.md` (GS-01〜GS-15)
 - コード観測: Anatomia `project analyze symphonykillchord` (1704 files / 5470 functions / 入口 1253)
 - 旧版 (35ページ / 7-18 時点): `07-spec-gaps.prev-2026-07-18.md`
