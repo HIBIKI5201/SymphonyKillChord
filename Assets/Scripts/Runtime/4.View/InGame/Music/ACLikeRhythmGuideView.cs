@@ -519,6 +519,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private Image[] _leftBeatImages;
         private RectTransform[] _rightBeatRectTransforms;
         private Image[] _rightBeatImages;
+        private int[] _blockSectionIndices = Array.Empty<int>();
         private Image[] _justOutlineImages = Array.Empty<Image>();
         private int[] _justOutlineZoneIndices = Array.Empty<int>();
         private MotionHandle[] _handles;
@@ -590,6 +591,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private void RebuildBeatRectTransforms()
         {
             ClearGeneratedBeatObjects();
+            RebuildBlockSectionIndices();
             InitBeatGUI(
                 _canvasGroup.gameObject,
                 _outTimingSizeDelta,
@@ -1203,10 +1205,44 @@ namespace KillChord.Runtime.View.InGame.Music
 
         /// <summary>
         ///     ブロックインデックスがどの判定ゾーンに属するかを返す。
+        ///     ブロックを作り直した時に作る索引を引き、索引の範囲外だけ計算で求める。
         /// </summary>
         /// <param name="blockIndex"> ブロックのインデックス。 </param>
         /// <returns> 属する判定ゾーンのインデックス。 </returns>
         private int GetBeatSectionIndex(int blockIndex)
+        {
+            if (blockIndex >= 0 && blockIndex < _blockSectionIndices.Length)
+            {
+                return _blockSectionIndices[blockIndex];
+            }
+
+            return ResolveBeatSectionIndex(blockIndex);
+        }
+
+        /// <summary>
+        ///     全ブロックの判定ゾーンを求め、索引として保持する。
+        ///     レイアウトと判定ゾーンを更新した後、ブロックを生成する前に呼ぶ。
+        /// </summary>
+        private void RebuildBlockSectionIndices()
+        {
+            int blockCount = Mathf.Max(0, _layout.BlockCount);
+            if (_blockSectionIndices.Length != blockCount)
+            {
+                _blockSectionIndices = blockCount > 0 ? new int[blockCount] : Array.Empty<int>();
+            }
+
+            for (int i = 0; i < blockCount; i++)
+            {
+                _blockSectionIndices[i] = ResolveBeatSectionIndex(i);
+            }
+        }
+
+        /// <summary>
+        ///     ブロックインデックスがどの判定ゾーンに属するかを、判定ゾーンを探索して求める。
+        /// </summary>
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <returns> 属する判定ゾーンのインデックス。 </returns>
+        private int ResolveBeatSectionIndex(int blockIndex)
         {
             float position = _layout.GetBlockBarProgress(blockIndex);
 
