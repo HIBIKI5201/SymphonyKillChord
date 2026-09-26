@@ -1,0 +1,4 @@
+[submodule "Assets/AssetStoreTools"]
+	path = Assets/AssetStoreTools
+	url = ../SymphonyKillChord_AssetStoreTools.git
+	branch = main
