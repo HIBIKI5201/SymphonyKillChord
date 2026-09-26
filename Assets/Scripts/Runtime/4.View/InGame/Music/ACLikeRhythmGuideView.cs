@@ -57,7 +57,7 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     チュートリアル等で対象となっているBeatCountを設定し、対象外ビートの表示を暗くする。
+        ///     チュートリアル等で対象となっているBeatCountを設定し、対象外ビートの表示を薄くする。
         /// </summary>
         /// <param name="targetBeatCount"> 対象のBeatCount。対象がない場合はnull。 </param>
         public void SetTargetBeatCount(int? targetBeatCount)
@@ -146,7 +146,7 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ガイド表示用に、対象BeatCountと一致しない判定ゾーンの色を暗くする。
+        ///     ガイド表示用に、対象BeatCountと一致しない判定ゾーンの色を薄くする。
         /// </summary>
         /// <param name="color"> 減光前の色。 </param>
         /// <param name="zoneIndex"> 対象の判定ゾーンのインデックス。 </param>
@@ -158,7 +158,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 return color;
             }
 
-            // 対象外ビートを暗くする。
+            // 対象外ビートを薄くする。
             if (_zoneBeatCounts[zoneIndex] != _targetBeatCount.Value)
             {
                 color.a *= _dimAlpha;
@@ -168,7 +168,7 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ガイド表示に適用するブロックの色を取得する。対象BeatCountと一致しない場合は暗くする。
+        ///     ガイド表示に適用するブロックの色を取得する。対象BeatCountと一致しない場合は薄くする。
         ///     判定ゾーンを解決できない場合は既定値を返す。
         /// </summary>
         /// <param name="blockIndex"> ブロックのインデックス。 </param>
