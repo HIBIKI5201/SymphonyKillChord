@@ -34,7 +34,7 @@ MonoBehaviour:
   _collisionRadius: 0.2
   _collisionMask:
     serializedVersion: 2
-    m_Bits: 51
+    m_Bits: 115
   _pitchRange: {x: -45, y: 75}
   _invertVertical: 0
   _invertHorizontal: 0
