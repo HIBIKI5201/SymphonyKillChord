@@ -109,4 +109,3 @@ public bool Complete()
 ## 関連ドキュメント
 
 * `Architecture.txt`: レイヤー構成・責務・DIの方針、Composition層のモジュールライフサイクル契約、`ServiceLocator` / `*ModuleContainer` によるモジュール間公開パターン、`[SerializeReference, SubclassSelector]` によるポリモーフィック拡張パターンなど。
-* `ArchitectureValidationReport.txt`: 設計思想と実装のズレを検証した過去のレポート。
