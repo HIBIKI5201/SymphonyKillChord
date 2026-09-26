@@ -407,6 +407,10 @@ MonoBehaviour:
     m_Key: ui.notification.home_expired
     m_Metadata:
       m_Items: []
+  - m_Id: 1870000004
+    m_Key: ui.notification.save_failed
+    m_Metadata:
+      m_Items: []
   - m_Id: 1870000003
     m_Key: ui.notification.save_reset
     m_Metadata:

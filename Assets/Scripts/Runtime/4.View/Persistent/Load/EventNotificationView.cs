@@ -128,6 +128,9 @@ namespace KillChord.Runtime.View.Persistent.Load
                 "ui.notification.save_reset" => isEnglish
                     ? "Save data has been reset."
                     : "セーブデータをリセットしました。",
+                "ui.notification.save_failed" => isEnglish
+                    ? "Failed to save data."
+                    : "データの保存に失敗しました。",
                 _ => throw new ArgumentOutOfRangeException(nameof(entry), entry, "未定義の通知です。"),
             };
         }

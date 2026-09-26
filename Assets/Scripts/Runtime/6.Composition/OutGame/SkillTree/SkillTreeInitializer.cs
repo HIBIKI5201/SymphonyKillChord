@@ -20,6 +20,7 @@ using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
+using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System.Collections.Generic;
@@ -530,6 +531,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillTreeScreenView.SetPoints,
                 () => _skillTreeScreenView.ListSeparator);
             _skillTreeScreenView.OnListSeparatorChanged += _skillTreeController.RefreshSelectedText;
+            _skillTreeController.OnUnlockSaveFailed += HandleUnlockSaveFailed;
 
             _rootElement.RegisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
             _rootElement.RegisterCallback<NavigationCancelEvent>(HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
@@ -1011,6 +1013,36 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     スキル解放データの保存に失敗したことを、中央の通知でプレイヤーへ伝えます。
+        /// </summary>
+        private async void HandleUnlockSaveFailed()
+        {
+            // 通知を表示できない場合は、コントローラー側のログだけに任せる。
+            if (!ServiceLocator.TryGetInstance(out EventNotificationView notificationView)
+                || notificationView == null
+                || notificationView.IsVisible
+                || !notificationView.isActiveAndEnabled)
+            {
+                return;
+            }
+
+            try
+            {
+                await notificationView.ShowAsync(SAVE_FAILED_NOTIFICATION_ENTRY, destroyCancellationToken);
+            }
+            catch (System.OperationCanceledException)
+            {
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary> 保存失敗を伝える通知のUICommonエントリです。 </summary>
+        private const string SAVE_FAILED_NOTIFICATION_ENTRY = "ui.notification.save_failed";
+
+        /// <summary>
         ///     生成したコンポーネントを解放します。
         /// </summary>
         private void DisposeComponents()
@@ -1019,6 +1051,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             if (_skillTreeScreenView != null && _skillTreeController != null)
             {
                 _skillTreeScreenView.OnListSeparatorChanged -= _skillTreeController.RefreshSelectedText;
+            }
+            if (_skillTreeController != null)
+            {
+                _skillTreeController.OnUnlockSaveFailed -= HandleUnlockSaveFailed;
             }
             _skillTreeScreenView = null;
             _previewVideoScreenView?.Dispose();

@@ -228,6 +228,31 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     スキル解放データの保存に失敗したときに発火するイベント。
+        ///     画面上は解放済みのままのため、保存されていないことをプレイヤーへ伝えるために使う。
+        /// </summary>
+        public event Action OnUnlockSaveFailed;
+
+        /// <summary>
+        ///     スキル解放データを保存し、失敗した場合はログを出して <see cref="OnUnlockSaveFailed"/> で通知する。
+        /// </summary>
+        private async Task SaveUnlockDataAsync()
+        {
+            try
+            {
+                await _skillTreeService.SaveSkillUnlockData(
+                    _skillTreeStatusEntity.UnlockedNodes,
+                    _skillTreeStatusEntity.UnlockedSkillIds,
+                    _skillTreeStatusEntity.CurrentPoints);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[SkillTreeController] スキル解放データ保存失敗: {exception}");
+                OnUnlockSaveFailed?.Invoke();
+            }
+        }
+
+        /// <summary>
         ///     スキルを解放した時の処理。
         /// </summary>
         public void OnSkillUnlocked()
@@ -256,11 +281,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
             PlayUnlockSequence(unlockOrder);
 
-            _skillTreeService
-                .SaveSkillUnlockData(_skillTreeStatusEntity.UnlockedNodes, _skillTreeStatusEntity.UnlockedSkillIds, _skillTreeStatusEntity.CurrentPoints)
-                .ContinueWith(
-                    t => Debug.LogError($"[SkillTreeController] スキル解放データ保存失敗: {t.Exception}"),
-                    TaskContinuationOptions.OnlyOnFaulted);
+            _ = SaveUnlockDataAsync();
 
             SkillNodeEntity selectedNode = _skillNodeEntities[new SkillNodeId(_selectedNodeId)];
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(_selectedNodeId);
