@@ -119,6 +119,9 @@ namespace KillChord.Runtime.View.InGame.Sequence
 
         private Action _onStageStartCompleted;
 
+        /// <summary>
+        ///     ステージ開始の処理をキャンセルする。
+        /// </summary>
         private void OnDestroy()
         {
             CancelStageStart();

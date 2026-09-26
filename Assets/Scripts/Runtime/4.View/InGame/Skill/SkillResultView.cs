@@ -21,8 +21,8 @@ namespace KillChord.Runtime.View.InGame.Skill
             _viewModel.OnChanged += HandleChanged;
         }
 
-        [SerializeField] private TMP_Text _skillIdText;
-        [SerializeField] private TMP_Text _skillPatternText;
+        [SerializeField, Tooltip("発動したスキルの ID を表示するテキスト。")] private TMP_Text _skillIdText;
+        [SerializeField, Tooltip("発動したスキルのパターンを表示するテキスト。")] private TMP_Text _skillPatternText;
 
         private SkillResultViewModel _viewModel;
 
@@ -35,6 +35,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             _skillPatternText.text = $"Pattern: {string.Join(", ", skillPattern.ToArray())}";
         }
 
+        /// <summary>
+        ///     テキストの参照を確認し、未設定の場合はコンポーネントを無効にする。
+        /// </summary>
         private void Awake()
         {
             if (_skillIdText == null || _skillPatternText == null)
@@ -44,6 +47,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
         }
 
+        /// <summary>
+        ///     ViewModel の変更イベントの購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             if (_viewModel != null)
@@ -51,6 +57,9 @@ namespace KillChord.Runtime.View.InGame.Skill
 
         }
 
+        /// <summary>
+        ///     テキストを未発動の表示で初期化する。
+        /// </summary>
         private void Start()
         {
             _skillIdText.text = "Skill ID: N/A";

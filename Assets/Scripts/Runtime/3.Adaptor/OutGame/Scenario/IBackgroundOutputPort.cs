@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface IBackgroundOutputPort
     {
+        /// <summary>
+        ///     背景を表示する。
+        /// </summary>
         ValueTask ShowBackgroundAsync(string assetKey, CancellationToken ct);
     }
 }

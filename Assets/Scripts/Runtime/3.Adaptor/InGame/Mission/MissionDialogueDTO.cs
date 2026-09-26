@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public readonly ref struct MissionDialogueDTO
     {
+        /// <summary>
+        ///     台詞表示の内容と状態を指定して生成する。
+        /// </summary>
         public MissionDialogueDTO(
             string textEntryKey,
             string fallbackText,

@@ -13,6 +13,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public sealed class MissionScenarioController : IDisposable
     {
+        /// <summary>
+        ///     ミッション進行・シナリオ再生・バトルのポーズ・入力モードの制御を指定して生成する。
+        /// </summary>
         public MissionScenarioController(
             MissionRuntimeService missionRuntimeService,
             ObjectiveSequenceClearCondition objectiveSequence,
@@ -53,6 +56,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             HandleObjectiveStepChanged(_missionRuntimeService.MissionProgress.ObjectiveStepIndex);
         }
 
+        /// <summary>
+        ///     購読を解除して破棄する。二重に呼ばれても一度だけ処理する。
+        /// </summary>
         public void Dispose()
         {
             if (_isDisposed)

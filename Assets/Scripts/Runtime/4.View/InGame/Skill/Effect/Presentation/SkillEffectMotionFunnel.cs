@@ -6,11 +6,14 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     エフェクトを螺旋状に回しながら到達点へ移動させるスキル演出。
+    /// </summary>
     public class SkillEffectMotionFunnel : MotionSkillEffectPresentationBase
     {
         [SerializeField, Tooltip("到達点の高さです。エフェクト原点からのローカル値で固定されます。")]
         private float _ringHeight = 1f;
-        [SerializeField]
+        [SerializeField, Tooltip("螺旋の回転角に足すオフセット（度）。")]
         private float _rotOffset;
 
         [SerializeField, Tooltip("移動させる対象のTransformです。未設定時は自身を使用します。")]
@@ -20,6 +23,9 @@ namespace KillChord.Runtime.View
         private float _gunGoalRotX;
         private float _gunGoalRotY;
         private MotionHandle _handle;
+        /// <summary>
+        ///     エフェクトを螺旋状に移動させるモーションを生成する。
+        /// </summary>
         protected override MotionHandle CreateMotion(in SkillEffectContext context)
         {
             _handle.TryComplete();
@@ -83,6 +89,10 @@ namespace KillChord.Runtime.View
                 .Run();
             return _handle;
         }
+
+        /// <summary>
+        ///     再生中のモーションを止める。
+        /// </summary>
         private void OnDestroy()
         {
             _handle.TryCancel();

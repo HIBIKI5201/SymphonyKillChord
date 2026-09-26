@@ -5,6 +5,9 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
     /// </summary>
     public readonly struct HealthHudDTO
     {
+        /// <summary>
+        ///     現在 HP と最大 HP を指定して生成する。
+        /// </summary>
         public HealthHudDTO(float currentHealth, float maxHealth)
         {
             CurrentHealth = currentHealth;

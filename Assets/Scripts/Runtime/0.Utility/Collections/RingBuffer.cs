@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Utility.Collections
     /// <typeparam name="T"></typeparam>
     public class RingBuffer<T> where T : unmanaged
     {
+        /// <summary>
+        ///     指定容量のリングバッファを生成する。
+        /// </summary>
         public RingBuffer(int capacity)
         {
             _buffer = new T[capacity];
@@ -77,6 +80,9 @@ namespace KillChord.Runtime.Utility.Collections
             return _buffer[bufferIndex];
         }
 
+        /// <summary>
+        ///     古い順に並べたバッファ内容を読み取り専用の Span として取得する。
+        /// </summary>
         public ReadOnlySpan<T> AsReadonlySpan()
         {
             if (_head != 0)

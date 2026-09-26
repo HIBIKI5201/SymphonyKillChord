@@ -17,6 +17,9 @@ namespace KillChord.Editor.AIDebugPlay
     [InitializeOnLoad]
     public static class AIDebugAttackQueue
     {
+        /// <summary>
+        ///     PlayMode 変更とアセンブリリロードのイベントを購読する。
+        /// </summary>
         static AIDebugAttackQueue()
         {
             EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
@@ -641,6 +644,9 @@ namespace KillChord.Editor.AIDebugPlay
             return AIDebugJson.Serialize(AIDebugJson.Object(("success", false), ("state", "Rejected"), ("message", message)));
         }
 
+        /// <summary>
+        ///     攻撃キューの処理状態。
+        /// </summary>
         private enum QueueState
         {
             Idle,

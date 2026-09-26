@@ -336,6 +336,9 @@ namespace KillChord.Runtime.View.InGame.Camera
             TrySelectAdjacentTarget(direction);
         }
 #else
+        /// <summary>
+        ///     マウスの移動量に感度を掛けて視点入力として保持する。
+        /// </summary>
         private void LookHandlerMouse(InputContext<Vector2> context)
         {
             _input = context.Value * _mouseLookSensitivity;

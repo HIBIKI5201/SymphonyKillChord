@@ -275,6 +275,9 @@ namespace KillChord.Runtime.Composition.Bootstrap
             progress?.Report((float)completedStepCount / totalStepCount);
         }
 
+        /// <summary>
+        ///     初期化処理の段階。
+        /// </summary>
         private enum InitializationPhase
         {
             Init = 0,

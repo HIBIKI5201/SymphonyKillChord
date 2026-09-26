@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Utility.Constant
 {
+    /// <summary>
+    ///     音楽のタイミング計算で使う定数。
+    /// </summary>
     public static class MusicConstants
     {
         /// <summary> 1分の秒数。 </summary>

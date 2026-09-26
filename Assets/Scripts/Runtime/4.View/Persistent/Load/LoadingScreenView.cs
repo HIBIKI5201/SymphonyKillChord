@@ -38,6 +38,9 @@ namespace KillChord.Runtime.View.Persistent.Load
             }
         }
 
+        /// <summary>
+        ///     購読を解除し、再生中のモーションを止める。
+        /// </summary>
         private void OnDestroy()
         {
             Unsubscribe();
@@ -375,10 +378,10 @@ namespace KillChord.Runtime.View.Persistent.Load
         [SerializeField, Tooltip("伸縮するロードゲージのImage（FillAmountに使う）")]
         private Image _progressImage;
 
-        [SerializeField]
+        [SerializeField, Tooltip("ロードの進捗を表示するテキスト。")]
         private TMP_Text _progressText;
 
-        [SerializeField]
+        [SerializeField, Tooltip("画面のフェードに使う Image。")]
         private Image _fadeImage;
 
         [Header("Tips表示設定")]

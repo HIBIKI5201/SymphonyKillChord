@@ -18,6 +18,9 @@ namespace KillChord.Editor.SinfoniaOperator
     /// </summary>
     public sealed class SinfoniaOperatorWindow : EditorWindow
     {
+        /// <summary>
+        ///     Sinfonia Operator ウィンドウを開く。
+        /// </summary>
         [MenuItem(EditorWindowPathConst.SINFONIA_OPERATOR_PATH)]
         private static void Open()
         {
@@ -37,6 +40,9 @@ namespace KillChord.Editor.SinfoniaOperator
         private TextField _workLogField;
         private Label _statusLabel;
 
+        /// <summary>
+        ///     ヘッダーと一覧を含むウィンドウの UI を構築する。
+        /// </summary>
         private void CreateGUI()
         {
             rootVisualElement.Clear();

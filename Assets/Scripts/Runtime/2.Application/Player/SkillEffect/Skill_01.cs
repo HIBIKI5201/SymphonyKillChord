@@ -12,6 +12,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_01 : SkillBase
     {
+        /// <summary>
+        ///     対象に、必ず会心になる倍率付きのスキルダメージを与える。
+        /// </summary>
         public override void Execute(in SkillEffectContext context)
         {
             float damageMultiplier =

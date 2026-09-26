@@ -11,6 +11,9 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
     /// </summary>
     public class DamageTakenIncreaseOnHitEffect : IAttackHitEffect
     {
+        /// <summary>
+        ///     被ダメージの増加率・持続時間・再付与時の扱いを指定して生成する。
+        /// </summary>
         public DamageTakenIncreaseOnHitEffect(float increaseRate, float durationSeconds, StatusEffectReapplyPolicy reapplyPolicy)
         {
             _increaseRate = increaseRate;

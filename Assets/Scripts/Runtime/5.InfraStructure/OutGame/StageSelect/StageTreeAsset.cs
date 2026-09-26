@@ -12,6 +12,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
     [CreateAssetMenu(
         fileName = nameof(StageTreeAsset),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "StageSelect/" + nameof(StageTreeAsset))]
+    /// <summary>
+    ///     ステージのつながりをまとめたツリーのデータ。
+    /// </summary>
     public sealed class StageTreeAsset : ScriptableObject
     {
         /// <summary>

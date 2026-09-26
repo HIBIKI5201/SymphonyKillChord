@@ -58,6 +58,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             Debug.Log("MobileInput Initialize");
         }
 
+        /// <summary>
+        ///     タッチ入力を追跡し、視点操作の入力として通知する。
+        /// </summary>
         private void Update()
         {
             if (!_initialized) return;
@@ -114,6 +117,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             }
         }
 
+        /// <summary>
+        ///     タッチ開始時に視点操作を開始し、開始位置と時刻を記録する。
+        /// </summary>
         private void OnTrackedTouchBegan(Vector2 screenPos)
         {
             _playerInputView.OnMobileLook(InputActionPhase.Started, Vector2.zero);
@@ -122,6 +128,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             _touchStartTime = Time.unscaledTime;
         }
 
+        /// <summary>
+        ///     タッチの移動量を視点操作の入力として通知する。
+        /// </summary>
         private void OnTrackedTouchMoved(Vector2 screenPos)
         {
             Vector2 delta = screenPos - _legacyPosition;
@@ -130,6 +139,10 @@ namespace KillChord.Runtime.View.Persistent.Input
             _legacyPosition = screenPos;
         }
 
+        /// <summary>
+        ///     タッチ終了時に視点操作を終える。
+        ///     短時間で一定距離以上動いた場合はフリックとみなし、ロックオン対象を切り替える。
+        /// </summary>
         private void OnTrackedTouchCanceled(Vector2 screenPos)
         {
             _playerInputView.OnMobileLook(InputActionPhase.Canceled, Vector2.zero);
@@ -164,6 +177,9 @@ namespace KillChord.Runtime.View.Persistent.Input
                    _raycastResults[0].gameObject.CompareTag(TAG_NAME);
         }
 
+        /// <summary>
+        ///     拡張タッチ機能を無効にする。
+        /// </summary>
         private void OnDestroy()
         {
             EnhancedTouchSupport.Disable();

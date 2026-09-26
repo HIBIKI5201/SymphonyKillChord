@@ -25,8 +25,8 @@ namespace KillChord.Runtime.View.InGame.Battle
             _viewModel.OnChanged += HandleChanged;
         }
 
-        [SerializeField] private TMP_Text _damageText;
-        [SerializeField] private TMP_Text _criticalText;
+        [SerializeField, Tooltip("ダメージ量を表示するテキスト。")] private TMP_Text _damageText;
+        [SerializeField, Tooltip("会心かどうかを表示するテキスト。")] private TMP_Text _criticalText;
 
         private AttackResultViewModel _viewModel;
 
@@ -41,6 +41,9 @@ namespace KillChord.Runtime.View.InGame.Battle
             _criticalText.text = isCritical ? "Critical!" : "";
         }
 
+        /// <summary>
+        ///     テキストの参照を確認し、未設定の場合はコンポーネントを無効にする。
+        /// </summary>
         private void Awake()
         {
             if (_damageText == null || _criticalText == null)
@@ -50,6 +53,9 @@ namespace KillChord.Runtime.View.InGame.Battle
             }
         }
 
+        /// <summary>
+        ///     ViewModel の変更イベントの購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             if (_viewModel != null)

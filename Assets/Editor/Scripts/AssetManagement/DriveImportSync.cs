@@ -12,6 +12,9 @@ using UnityEngine;
 
 namespace KillChord.Editor.AssetManagement
 {
+    /// <summary>
+    ///     Google Drive 上のアセットをプロジェクトへ取り込む同期処理。
+    /// </summary>
     internal static class DriveImportSync
     {
         private static bool isRunning;
@@ -28,6 +31,10 @@ namespace KillChord.Editor.AssetManagement
             }
         }
 
+        /// <summary>
+        ///     Drive との同期を開始する。
+        ///     実行中の場合はダイアログを出して何もしない。
+        /// </summary>
         [MenuItem(ToolConst.TOOLS_PATH + "/" + nameof(DriveImportSync) + "/Sync Now")]
         public static async void SyncNow()
         {

@@ -7,6 +7,9 @@ namespace KillChord.Runtime.View.Persistent.Input
         menuName = PathConst.CREATE_ASSET_MENU_PATH
         + "Input/"
         + nameof(MobileStickFlickInputConfig))]
+    /// <summary>
+    ///     仮想スティックのフリック判定のしきい値を設定するデータ。
+    /// </summary>
     public sealed class MobileStickFlickInputConfig : ScriptableObject
     {
         /// <summary> フリックとして扱う最小距離をスティック可動範囲に対する割合で取得する。 </summary>

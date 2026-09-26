@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     /// </summary>
     public readonly ref struct SkillDetailDTO
     {
+        /// <summary>
+        ///     表示するスキル詳細を指定して生成する。
+        /// </summary>
         public SkillDetailDTO(
             int skillnodeId,
             bool hasSkill,

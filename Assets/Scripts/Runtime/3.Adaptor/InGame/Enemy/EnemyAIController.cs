@@ -12,6 +12,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyAIController : IDisposable
     {
+        /// <summary>
+        ///     敵 AI が使うユースケースと状態を指定して生成する。
+        /// </summary>
         public EnemyAIController(
             EnemyMoveUsecase enemyMoveUsecase,
             EnemyAttackReservationUsecase enemyAttackReservationUsecase,
@@ -199,6 +202,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             }
         }
 
+        /// <summary>
+        ///     イベントの購読を解除し、攻撃予約を破棄する。
+        /// </summary>
         public void Dispose()
         {
             _enemyAttackReservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
@@ -222,6 +228,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         ///     攻撃の2拍前に到達した時に実行される処理。
         /// </summary>
 
+        /// <summary>
+        ///     攻撃の2拍前になったことを通知する。
+        /// </summary>
         private void Handle2BeatBefore()
         {
             Debug.Log("[EnemyAIController] 攻撃の2拍前");

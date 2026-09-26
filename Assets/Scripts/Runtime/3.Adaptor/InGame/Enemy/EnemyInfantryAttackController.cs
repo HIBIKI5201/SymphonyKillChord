@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyInfantryAttackController : IEnemyAttackController
     {
+        /// <summary>
+        ///     攻撃のユースケースと戦闘状態を指定して生成する。
+        /// </summary>
         public EnemyInfantryAttackController(EnemyAttackUsecase enemyAttackUsecase, EnemyBattleState enemyBattleState)
         {
             _enemyAttackUsecase = enemyAttackUsecase;

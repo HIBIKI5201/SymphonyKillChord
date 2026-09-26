@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
+    /// <summary>
+    ///     敵の死亡演出を再生するビュー。
+    /// </summary>
     public sealed class EnemyDestroyEffectView : MonoBehaviour
     {
         /// <summary>
@@ -95,6 +98,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Min(0f), Tooltip("死亡時パンチシェイク時間（秒）")]
         private float _punchDuration = 0.5f;
 
+        /// <summary>
+        ///     死亡演出に使う Renderer が設定されているかを確認する。
+        /// </summary>
         private void Awake()
         {
             if (_deathEffectRenderers == null || _deathEffectRenderers.Length == 0)
@@ -106,6 +112,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 Debug.LogError($"{nameof(EnemyDestroyEffectView)}: _deathSwampGameObjectが未アタッチです. 死亡エフェクトが再生できません", this);
             }
         }
+
+        /// <summary>
+        ///     再生中の死亡演出のモーションを止める。
+        /// </summary>
         private void OnDestroy()
         {
             _handle.TryCancel();

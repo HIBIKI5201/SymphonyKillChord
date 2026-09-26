@@ -15,6 +15,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
     [CreateAssetMenu(
         fileName = nameof(BattleStageAsset),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "StageSelect/" + nameof(BattleStageAsset))]
+    /// <summary>
+    ///     バトルステージの定義データ。
+    /// </summary>
     public sealed class BattleStageAsset : StageAssetBase
     {
         /// <summary> チュートリアルステージとして設定されている場合はtrue。 </summary>

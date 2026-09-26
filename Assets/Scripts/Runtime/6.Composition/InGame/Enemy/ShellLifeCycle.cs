@@ -141,7 +141,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
 
-        [SerializeField] private ShellView _view;
+        [SerializeField, Tooltip("砲弾の見た目を扱うビュー。")] private ShellView _view;
         [SerializeField, SourceDataAddress, Tooltip("砲弾攻撃仕様の Addressables キーです。")] private string _attackDataKey;
         [SerializeField, SourceDataAddress, Tooltip("砲弾音楽仕様の Addressables キーです。")] private string _musicDataKey;
 

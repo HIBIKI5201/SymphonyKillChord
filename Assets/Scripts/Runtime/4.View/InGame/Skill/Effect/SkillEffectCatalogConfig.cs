@@ -12,6 +12,9 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
     [CreateAssetMenu(
         fileName = "SkillEffectCatalogConfig",
         menuName = "KillChord/View/Skill/Skill Effect Catalog")]
+    /// <summary>
+    ///     スキルごとのエフェクトプレハブを登録するデータ。
+    /// </summary>
     public sealed class SkillEffectCatalogConfig : ScriptableObject
     {
         /// <summary>

@@ -8,6 +8,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     /// </summary>
     [CreateAssetMenu(fileName = nameof(EnemyMusicSpecAsset),
     menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(EnemyMusicSpecAsset))]
+    /// <summary>
+    ///     敵の攻撃タイミングを決める音楽同期の設定データ。
+    /// </summary>
     public class EnemyMusicSpecAsset : ScriptableObject
     {
         /// <summary> 小節フラグ。0は現在小節、1は次の小節 </summary>

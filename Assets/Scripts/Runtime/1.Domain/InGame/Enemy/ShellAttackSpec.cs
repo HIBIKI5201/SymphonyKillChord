@@ -7,6 +7,10 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct ShellAttackSpec
     {
+        /// <summary>
+        ///     爆発半径を指定して生成する。
+        ///     負の値は例外を投げる。
+        /// </summary>
         public ShellAttackSpec(float explosionRadius)
         {
             if (explosionRadius < 0f)

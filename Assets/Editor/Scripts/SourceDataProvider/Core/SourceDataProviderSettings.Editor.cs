@@ -540,13 +540,13 @@ namespace KillChord.Editor.SourceDataProvider.Core
             /// <summary> 個別データ配列のプロパティパスです。 </summary>
             public string ArrayPropertyPath => _arrayPropertyPath;
 
-            [SerializeField]
+            [SerializeField, Tooltip("データのカテゴリ名。")]
             private string _category;
 
-            [SerializeField]
+            [SerializeField, Tooltip("対象アセットの Addressables キー。")]
             private string _addressableKey;
 
-            [SerializeField]
+            [SerializeField, Tooltip("コレクション配列の SerializedProperty パス。")]
             private string _arrayPropertyPath;
         }
     }

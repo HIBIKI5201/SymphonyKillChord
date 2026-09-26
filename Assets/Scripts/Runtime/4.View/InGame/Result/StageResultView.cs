@@ -309,6 +309,9 @@ namespace KillChord.Runtime.View.InGame.Result
             RefreshButtonFocus();
         }
 
+        /// <summary>
+        ///     ViewModel の購読を解除し、再生中の演出を止める。
+        /// </summary>
         private void OnDestroy()
         {
             UnsubscribeViewModel();

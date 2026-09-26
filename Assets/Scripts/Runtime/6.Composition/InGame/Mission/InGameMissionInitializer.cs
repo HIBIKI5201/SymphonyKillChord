@@ -793,6 +793,9 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             return map;
         }
 
+        /// <summary>
+        ///     チュートリアルのフィードバックを破棄し、登録したサービスを解除する。
+        /// </summary>
         private void OnDestroy()
         {
             DisposeTutorialFeedback();

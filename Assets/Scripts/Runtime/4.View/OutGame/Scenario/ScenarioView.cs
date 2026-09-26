@@ -101,7 +101,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private static readonly Vector2 PORTRAIT_CENTER_DEFAULT_POSITION = new(0f, -120f);
         private static readonly Vector2 PORTRAIT_RIGHT_DEFAULT_POSITION = new(420f, -120f);
 
-        [SerializeField] private CanvasGroup _canvasGroup;
+        [SerializeField, Tooltip("シナリオ画面全体をフェードさせる CanvasGroup。")] private CanvasGroup _canvasGroup;
         [SerializeField, Tooltip("フェード対象から除外するUI（テキストボックス等）。指定したCanvasGroupはフェードの影響を受けません。未設定ならテキストへ自動付与します。")]
         private CanvasGroup _nonFadingUi;
         [SerializeField, Tooltip("会話枠、話者名、本文をまとめて制御するルート。")]
@@ -110,12 +110,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private UnityEngine.UI.Image _textBoxImage;
         [SerializeField, Tooltip("話者名を表示するTextMeshProUGUI。")]
         private TMP_Text _speakerNameText;
-        [SerializeField] private TMP_Text _chat;
-        [SerializeField] private Image _backgroundImage;
-        [SerializeField] private Animation _animationPlayer;
-        [SerializeField] private GameObject _fadeObj;
-        [SerializeField] private RectTransform _portraitRoot;
-        [SerializeField] private Vector2 _portraitSize = new(700f, 1000f);
+        [SerializeField, Tooltip("本文を表示するテキスト。")] private TMP_Text _chat;
+        [SerializeField, Tooltip("背景を表示する Image。")] private Image _backgroundImage;
+        [SerializeField, Tooltip("演出アニメーションを再生する Animation。")] private Animation _animationPlayer;
+        [SerializeField, Tooltip("フェード用の GameObject。現在はコードから参照されていない。")] private GameObject _fadeObj;
+        [SerializeField, Tooltip("立ち絵を配置する親の RectTransform。")] private RectTransform _portraitRoot;
+        [SerializeField, Tooltip("立ち絵の表示サイズ。")] private Vector2 _portraitSize = new(700f, 1000f);
 
         // 対象と表示チャネルごとに独立した補間を所有する。
         private readonly Dictionary<FadeChannelKey, FadeState> _fadeStates = new();
@@ -1096,6 +1096,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private readonly struct FadeRequest
         {
+            /// <summary>
+            ///     フェードの要求内容を生成する。
+            /// </summary>
             public FadeRequest(
                 ScenarioFadeTarget target,
                 ScenarioFadeMode mode,
@@ -1110,10 +1113,15 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 Duration = duration;
             }
 
+            /// <summary> フェードの対象。 </summary>
             public ScenarioFadeTarget Target { get; }
+            /// <summary> フェードの種類。 </summary>
             public ScenarioFadeMode Mode { get; }
+            /// <summary> 開始時の値。 </summary>
             public float Start { get; }
+            /// <summary> 終了時の値。 </summary>
             public float End { get; }
+            /// <summary> フェードにかける秒数。 </summary>
             public float Duration { get; }
         }
 
@@ -1122,25 +1130,39 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private readonly struct FadeChannelKey : IEquatable<FadeChannelKey>
         {
+            /// <summary>
+            ///     対象と種類を指定して生成する。
+            /// </summary>
             public FadeChannelKey(ScenarioFadeTarget target, ScenarioFadeMode mode)
             {
                 Target = target;
                 Mode = mode;
             }
 
+            /// <summary> フェードの対象。 </summary>
             public ScenarioFadeTarget Target { get; }
+            /// <summary> フェードの種類。 </summary>
             public ScenarioFadeMode Mode { get; }
 
+            /// <summary>
+            ///     対象と種類が一致するかを判定する。
+            /// </summary>
             public bool Equals(FadeChannelKey other)
             {
                 return Target == other.Target && Mode == other.Mode;
             }
 
+            /// <summary>
+            ///     他のオブジェクトと値が等しいかを判定する。
+            /// </summary>
             public override bool Equals(object obj)
             {
                 return obj is FadeChannelKey other && Equals(other);
             }
 
+            /// <summary>
+            ///     対象と種類から算出したハッシュコードを返す。
+            /// </summary>
             public override int GetHashCode()
             {
                 return HashCode.Combine((int)Target, (int)Mode);
@@ -1152,6 +1174,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private sealed class FadeState
         {
+            /// <summary>
+            ///     フェード先の CanvasGroup または立ち絵の Image を指定して生成する。
+            /// </summary>
             private FadeState(
                 CanvasGroup group,
                 bool floorAlpha,
@@ -1164,19 +1189,30 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 _portraitBaseColor = portraitBaseColor;
             }
 
+            /// <summary>
+            ///     CanvasGroup の透明度をフェードさせる状態を生成する。
+            /// </summary>
             public static FadeState ForAlpha(CanvasGroup group, bool floorAlpha)
             {
                 return new FadeState(group, floorAlpha, null, default);
             }
 
+            /// <summary>
+            ///     立ち絵を黒くフェードさせる状態を生成する。
+            /// </summary>
             public static FadeState ForPortraitBlack(Image image, Color baseColor)
             {
                 return new FadeState(null, false, image, baseColor);
             }
 
+            /// <summary> フェードの対象が設定されているか。 </summary>
             public bool IsValid => _group != null || _portraitImage != null;
+            /// <summary> 再生中のフェードのモーション。 </summary>
             public MotionHandle Handle { get; set; }
 
+            /// <summary>
+            ///     フェードの値を対象に反映する。
+            /// </summary>
             public void Apply(float value)
             {
                 if (_group != null)

@@ -11,17 +11,26 @@ namespace KillChord.Editor.SinfoniaOperator
     /// </summary>
     public class SinfoniaOperatorSettingsProvider : SettingsProvider
     {
+        /// <summary>
+        ///     SinfoniaOperator の設定プロバイダーを生成する。
+        /// </summary>
         private SinfoniaOperatorSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) :
             base(path, scopes, keywords)
         {
         }
 
+        /// <summary>
+        ///     Project Settings に SinfoniaOperator の設定ページを登録する。
+        /// </summary>
         [SettingsProvider]
         public static SettingsProvider CreateSettingsProvider()
         {
             return new SinfoniaOperatorSettingsProvider(SETTINGS_PATH, SettingsScope.Project);
         }
 
+        /// <summary>
+        ///     設定ページを開いたときに、設定アセットを編集できる状態にしてインスペクターを生成する。
+        /// </summary>
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
             var settings = SinfoniaOperatorSettings.instance;
@@ -29,6 +38,9 @@ namespace KillChord.Editor.SinfoniaOperator
             UnityEditor.Editor.CreateCachedEditor(settings, null, ref _editor);
         }
 
+        /// <summary>
+        ///     設定のインスペクターを描画し、変更があれば保存する。
+        /// </summary>
         public override void OnGUI(string searchContext)
         {
             EditorGUI.BeginChangeCheck();

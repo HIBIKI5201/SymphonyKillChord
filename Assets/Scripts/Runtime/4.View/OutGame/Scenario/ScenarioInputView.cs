@@ -63,6 +63,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        ///     フレームの最後に、要求された UI の表示・非表示を反映する。
+        /// </summary>
         private void LateUpdate()
         {
             if (_requestShowUI)
@@ -104,23 +107,35 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController?.CancelSkipConfirmation();
         }
 
+        /// <summary>
+        ///     入力イベントを購読する。
+        /// </summary>
         private void OnEnable()
         {
             Subscribe();
         }
 
+        /// <summary>
+        ///     スキップ確認を解除し、入力イベントの購読を解除する。
+        /// </summary>
         private void OnDisable()
         {
             ClearSkipConfirmation();
             Unsubscribe();
         }
 
+        /// <summary>
+        ///     スキップ確認を解除し、入力イベントの購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             ClearSkipConfirmation();
             Unsubscribe();
         }
 
+        /// <summary>
+        ///     シナリオ操作の入力イベントを購読する。購読済みの場合は何もしない。
+        /// </summary>
         private void Subscribe()
         {
             if (_playerInputView == null || _isSubscribed)
@@ -144,6 +159,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _isSubscribed = true;
         }
 
+        /// <summary>
+        ///     シナリオ操作の入力イベントの購読を解除する。
+        /// </summary>
         private void Unsubscribe()
         {
             if (_playerInputView == null || !_isSubscribed)
@@ -167,6 +185,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _isSubscribed = false;
         }
 
+        /// <summary>
+        ///     テキスト送りの入力を処理する。
+        /// </summary>
         private void HandleAdvanceInput(InputContext<float> context)
         {
             if (IsScenarioInputBlocked()) { return; }
@@ -202,6 +223,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController?.MouseClick();
         }
 
+        /// <summary>
+        ///     早送りの入力を処理する。押している間だけ早送りにする。
+        /// </summary>
         private void HandleFastForwardInput(InputContext<float> context)
         {
             if (context.Phase != InputActionPhase.Canceled && IsScenarioInputBlocked()) { return; }
@@ -218,6 +242,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        ///     一時停止の入力を処理する。
+        /// </summary>
         private void HandlePauseInput(InputContext<float> context)
         {
             if (IsScenarioInputBlocked()) { return; }
@@ -229,6 +256,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController?.TogglePause();
         }
 
+        /// <summary>
+        ///     スキップの入力を処理する。
+        /// </summary>
         private void HandleSkipInput(InputContext<float> context)
         {
             if (context.Phase == InputActionPhase.Canceled)
@@ -251,6 +281,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        ///     オート送りの入力を処理する。
+        /// </summary>
         private void HandleAutoAdvanceInput(InputContext<float> context)
         {
             if (IsScenarioInputBlocked()) { return; }
@@ -261,6 +294,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController?.ToggleAutoAdvance();
         }
 
+        /// <summary>
+        ///     UI 非表示の入力を処理する。
+        /// </summary>
         private void HandleHideUIInput(InputContext<float> context)
         {
             if (IsScenarioInputBlocked()) { return; }
@@ -329,10 +365,10 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         [SerializeField, Tooltip("シナリオの非表示やフェードから独立したスキップ確認画面。")]
         private ScenarioSkipConfirmationView _skipConfirmationView;
 
-        [SerializeField]
+        [SerializeField, Tooltip("ポインターがシナリオ UI の上にあるかを判定するビュー。")]
         private ScenarioUIRaycastView _scenarioUIRaycastView;
 
-        [SerializeField]
+        [SerializeField, Tooltip("シナリオ UI の表示・非表示を切り替えるビュー。")]
         private ScenarioUIHideView _scenarioUIHideView;
 
         private ScenarioInputController _inputController;

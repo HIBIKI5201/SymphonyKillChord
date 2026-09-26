@@ -230,6 +230,9 @@ namespace KillChord.Editor.Localization
         /// </summary>
         private readonly struct UIEntryDefinition
         {
+            /// <summary>
+            ///     UI 文言の定義を生成する。
+            /// </summary>
             public UIEntryDefinition(string key, string japanese, string english)
             {
                 Key = key;

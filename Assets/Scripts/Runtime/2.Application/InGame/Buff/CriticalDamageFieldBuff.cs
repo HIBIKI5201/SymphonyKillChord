@@ -13,6 +13,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     /// </summary>
     public class CriticalDamageFieldBuff : StatusEffectBase, ICriticalDamageMultiplierModifier
     {
+        /// <summary>
+        ///     範囲判定・効果範囲・会心ダメージ倍率・持続時間・再付与時の扱いを指定して生成する。
+        /// </summary>
         public CriticalDamageFieldBuff(
             IPlayerTargetRangeQuery rangeQuery,
             float range,
@@ -44,6 +47,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
             _criticalDamageMultiplier = criticalDamageMultiplier;
         }
 
+        /// <summary>
+        ///     防御者が効果範囲内にいる場合、会心ダメージ倍率を上書きする。
+        /// </summary>
         /// </inheritdoc/>
         public float ModifyCriticalDamageMultiplier(IAttacker attacker, IDefender defender, float criticalDamageMultiplier)
         {

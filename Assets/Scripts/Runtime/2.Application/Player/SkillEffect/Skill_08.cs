@@ -15,6 +15,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_08 : SkillBase
     {
+        /// <summary>
+        ///     次の攻撃への効果予約サービスと範囲判定を指定して生成する。
+        /// </summary>
         public Skill_08(
             PendingAttackEffectService pendingAttackEffectService,
             ITargetRadiusQuery targetRadiusQuery)
@@ -23,6 +26,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             _targetRadiusQuery = targetRadiusQuery ?? throw new System.ArgumentNullException(nameof(targetRadiusQuery));
         }
 
+        /// <summary>
+        ///     次の攻撃が当たったときに感染を広げる効果を予約する。
+        /// </summary>
         public override void Execute(in SkillEffectContext context)
         {
             float infectionRange =

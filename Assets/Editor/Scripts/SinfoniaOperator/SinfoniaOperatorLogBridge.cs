@@ -10,6 +10,9 @@ namespace KillChord.Editor.SinfoniaOperator
     [InitializeOnLoad]
     internal static class SinfoniaOperatorLogBridge
     {
+        /// <summary>
+        ///     SinfoniaOperator のログ出力先を Unity のコンソールへ接続する。
+        /// </summary>
         static SinfoniaOperatorLogBridge()
         {
             OperatorLog.SetWriter(static message => Debug.Log($"[SinfoniaOperator] {message}"));

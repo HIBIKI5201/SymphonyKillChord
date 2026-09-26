@@ -91,6 +91,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             _patternMatchCount = dto.PatternMatchCount;
         }
 
+        /// <summary>
+        ///     リズムガイドの位置が取れるまで、表示位置の設定を毎フレーム再試行する。
+        /// </summary>
         private void Update()
         {
             // ACLikeRhythmGuideViewのゾーンデータは実プレイ開始後まで構築されないため、
@@ -102,6 +105,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             RefreshIconPosition(_displayedStepIndex);
         }
 
+        /// <summary>
+        ///     クールダウン中であれば、クールダウン表示を更新する。
+        /// </summary>
         private void FixedUpdate()
         {
             if (!_isSkillCoolingDown)
@@ -129,6 +135,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
         }
 
+        /// <summary>
+        ///     リズムガイドのレイアウト変更イベントの購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             if (_rhythmGuideView != null)

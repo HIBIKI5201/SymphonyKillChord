@@ -14,6 +14,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
     /// </summary>
     public class SkillDetailScreenView : ScreenViewBase, ISkillDetailShowable, ISkillDetailViewModel, IDisposable
     {
+        /// <summary>
+        ///     スキル詳細のルート要素とアイコンを指定して生成する。
+        /// </summary>
         public SkillDetailScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent, Sprite comboHexIcon) : base(rootElement, outGameUIEvent)
         {
             _comboHexIcon = comboHexIcon;
@@ -118,6 +121,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             IsUnlockAvailable = unlockButtonEnable;
         }
 
+        /// <summary>
+        ///     ローカライズ文言の購読を解除する。
+        /// </summary>
         public override void Dispose()
         {
             foreach (LocalizedElementText localizedText in _headingLocalizedTexts)

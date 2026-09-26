@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     /// </summary>
     public readonly ref struct UnlockConfirmDTO
     {
+        /// <summary>
+        ///     スキル解放の確認表示に使う内容を指定して生成する。
+        /// </summary>
         public UnlockConfirmDTO(
             string[] skillNames,
             int currentPoints,

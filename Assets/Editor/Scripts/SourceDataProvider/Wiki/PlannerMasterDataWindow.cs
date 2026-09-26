@@ -1616,6 +1616,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         private readonly struct SearchResult
         {
+            /// <summary>
+            ///     検索結果を生成する。
+            /// </summary>
             private SearchResult(
                 SearchResultKind kind,
                 string addressableKey,
@@ -1647,12 +1650,21 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _ => "Item",
             };
 
+            /// <summary>
+            ///     ソースアセットの検索結果を生成する。
+            /// </summary>
             public static SearchResult ForSourceAsset(string addressableKey, string label) =>
                 new(SearchResultKind.SourceAsset, addressableKey, null, null, label);
 
+            /// <summary>
+            ///     コレクションの検索結果を生成する。
+            /// </summary>
             public static SearchResult ForCollection(string collectionKey, string label) =>
                 new(SearchResultKind.Collection, null, collectionKey, null, label);
 
+            /// <summary>
+            ///     コレクション要素の検索結果を生成する。
+            /// </summary>
             public static SearchResult ForCollectionItem(string collectionKey, string propertyPath, string label, ScriptableObject owner) =>
                 new(SearchResultKind.CollectionItem, null, collectionKey, propertyPath, label, owner);
         }

@@ -10,6 +10,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
     [CreateAssetMenu(
         fileName = nameof(AttackPipelineAsset),
         menuName = "KillChord/Attack/" + nameof(AttackPipelineAsset))]
+    /// <summary>
+    ///     攻撃処理のステップ構成を設定するデータ。
+    /// </summary>
     public sealed class AttackPipelineAsset : ScriptableObject
     {
         /// <summary>

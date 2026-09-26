@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class ObstacleSearchController : IObstacleSearchRepository
     {
+        /// <summary>
+        ///     障害物探索の ViewModel を指定して生成する。
+        /// </summary>
         public ObstacleSearchController(IObstacleSearchViewModel viewModel)
         {
             _viewModel = viewModel;

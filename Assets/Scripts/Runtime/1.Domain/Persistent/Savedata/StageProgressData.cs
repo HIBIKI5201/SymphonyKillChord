@@ -138,6 +138,6 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             return null;
         }
 
-        [SerializeField] private List<StageClearData> _clearDatas = new();
+        [SerializeField, Tooltip("ステージごとのクリアデータ。")] private List<StageClearData> _clearDatas = new();
     }
 }

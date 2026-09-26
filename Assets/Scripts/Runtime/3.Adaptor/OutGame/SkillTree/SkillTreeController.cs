@@ -21,6 +21,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     /// </summary>
     public class SkillTreeController
     {
+        /// <summary>
+        ///     スキルツリー画面の表示・サービス・プレゼンターを指定して生成する。
+        /// </summary>
         public SkillTreeController(ISkillDetailShowable skillDetailView,
             SkillDetailPresenter presenter,
             Label currentPointsLabel,

@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public sealed class MissionDialoguePresenter
     {
+        /// <summary>
+        ///     台詞表示の ViewModel を指定して生成する。
+        /// </summary>
         public MissionDialoguePresenter(IMissionDialogueViewModel viewModel)
         {
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));

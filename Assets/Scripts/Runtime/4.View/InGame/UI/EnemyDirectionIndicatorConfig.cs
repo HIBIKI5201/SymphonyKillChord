@@ -9,6 +9,9 @@ namespace KillChord.Runtime.View.InGame.UI
     [CreateAssetMenu(
         fileName = nameof(EnemyDirectionIndicatorConfig),
         menuName = "KillChord/InGame/UI/Enemy Direction Indicator Config")]
+    /// <summary>
+    ///     画面外の敵の方向を示すインジケーターの表示を設定するデータ。
+    /// </summary>
     public sealed class EnemyDirectionIndicatorConfig : ScriptableObject
     {
         /// <summary> 最大表示数。 </summary>

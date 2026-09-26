@@ -16,6 +16,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
     /// </summary>
     public class SceneTransitionService : ISceneTransitionService
     {
+        /// <summary>
+        ///     遷移元のシーンを破棄して遷移先のシーンを読み込む。
+        /// </summary>
         public async Task<bool> ChangeSceneAsync(
             string fromSceneName,
             string toSceneName,
@@ -77,6 +80,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             return true;
         }
 
+        /// <summary>
+        ///     シーンを追加で読み込む。
+        /// </summary>
         public async Task<bool> LoadAdditiveAsync(
             string sceneName,
             IProgress<float> progress,
@@ -114,6 +120,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         }
 
 
+        /// <summary>
+        ///     指定したシーンを破棄する。
+        /// </summary>
         public async Task<bool> UnloadAsync(
             string sceneName,
             IProgress<float> progress,
@@ -154,6 +163,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             return true;
         }
 
+        /// <summary>
+        ///     指定したシーンを破棄し、別のシーンをアクティブにする。
+        /// </summary>
         public async Task<bool> UnloadAndSetActiveAsync(
             string unloadSceneName,
             string activeSceneName,
@@ -198,6 +210,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         }
 
 
+        /// <summary>
+        ///     指定したシーンを読み込み直す。
+        /// </summary>
         public async Task<bool> ReloadSceneAsync(
             string sceneName,
             IProgress<float> progress,

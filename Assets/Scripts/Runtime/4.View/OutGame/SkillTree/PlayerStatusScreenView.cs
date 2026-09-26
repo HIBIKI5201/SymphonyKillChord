@@ -12,6 +12,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
     /// </summary>
     public class PlayerStatusScreenView : ScreenViewBase, IPlayerStatusShowable, IPlayerStatusViewModel
     {
+        /// <summary>
+        ///     ステータス表示のルート要素とアイコンを指定して生成する。
+        /// </summary>
         public PlayerStatusScreenView(
             VisualElement root,
             OutGameUIEvent outGameUIEvent,

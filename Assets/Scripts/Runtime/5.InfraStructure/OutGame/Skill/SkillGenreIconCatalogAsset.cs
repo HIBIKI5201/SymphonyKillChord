@@ -15,7 +15,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Skill
         /// <summary> Entries を取得する。 </summary>
         public IReadOnlyList<SkillGenreIconCatalogEntry> Entries => _entries;
 
-        [SerializeField]
+        [SerializeField, Tooltip("スキルのジャンルごとのアイコンの登録一覧。")]
         private SkillGenreIconCatalogEntry[] _entries = Array.Empty<SkillGenreIconCatalogEntry>();
     }
 }

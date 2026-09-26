@@ -3,14 +3,20 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     設定画面の項目の基底クラス。
+    /// </summary>
     public abstract partial class SettingBase : MonoBehaviour
     {
-        [SerializeField]
+        [SerializeField, Tooltip("項目の見た目となる UXML。")]
         protected VisualTreeAsset _visualPrefab;
         protected string _pageName;
         protected string _categoryName;
         protected VisualElement _baseInstance;
         protected UIDocument _uiRoot;
+        /// <summary>
+        ///     指定カテゴリのページに項目を生成する。
+        /// </summary>
         public void Create(UIDocument uiDocument, Category category, string title)
         {
             Initialize(category);
@@ -30,6 +36,9 @@ namespace KillChord.Runtime.View
             page.Add(_baseInstance);
         }
 
+        /// <summary>
+        ///     カテゴリからカテゴリ名とページ名を決める。
+        /// </summary>
         private void Initialize(Category category)
         {
             _categoryName = $"{category}Category";

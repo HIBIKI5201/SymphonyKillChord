@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct EnemyMoveSpec
     {
+        /// <summary>
+        ///     移動速度と攻撃射程の範囲を指定して生成する。
+        /// </summary>
         public EnemyMoveSpec(MoveSpeed moveSpeed, AttackRangeMin attackRangeMin, AttackRangeMax attackRangeMax)
         {
             MoveSpeed = moveSpeed;

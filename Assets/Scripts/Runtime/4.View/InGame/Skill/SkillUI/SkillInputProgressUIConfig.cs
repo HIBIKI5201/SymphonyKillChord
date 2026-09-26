@@ -10,6 +10,9 @@ namespace KillChord.Runtime.View.InGame.Skill
     [CreateAssetMenu(
         fileName = nameof(SkillInputProgressUIConfig),
         menuName = "KillChord/InGame/Skill/SkillInputProgressUIConfig")]
+    /// <summary>
+    ///     スキル入力の進捗表示の見た目を設定するデータ。
+    /// </summary>
     public class SkillInputProgressUIConfig : ScriptableObject
     {
         /// <summary>

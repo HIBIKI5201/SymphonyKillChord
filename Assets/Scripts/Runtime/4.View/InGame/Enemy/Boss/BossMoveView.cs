@@ -70,12 +70,18 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _navMeshAgent.isStopped = true;
         }
 
+        /// <summary>
+        ///     NavMeshAgent による自動回転を止める。
+        /// </summary>
         public void StopRotating()
         {
             if (_navMeshAgent == null || !_navMeshAgent.enabled) return;
             _navMeshAgent.updateRotation = false;
         }
 
+        /// <summary>
+        ///     被弾時のエフェクトを再生する。
+        /// </summary>
         public void PlayDamageFeedback()
         {
             if (_damageEffectView == null)
@@ -160,6 +166,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
         }
 
+        /// <summary>
+        ///     NavMeshAgent が有効で NavMesh 上にいるかを判定する。
+        /// </summary>
         private bool CanUseNavMeshAgent()
         {
             return _navMeshAgent != null
@@ -167,6 +176,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 && _navMeshAgent.isOnNavMesh;
         }
 
+        /// <summary>
+        ///     再生中であれば、攻撃予告のエフェクトを再生する。
+        /// </summary>
         private void PlayEffectReserved()
         {
             if (!_isPlaying) return;

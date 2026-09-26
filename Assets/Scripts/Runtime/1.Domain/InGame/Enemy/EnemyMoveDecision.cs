@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct EnemyMoveDecision
     {
+        /// <summary>
+        ///     移動するか、移動先、移動速度を指定して生成する。
+        /// </summary>
         public EnemyMoveDecision(bool shouldMove, Vector3 destination, float speed)
         {
             ShouldMove = shouldMove;

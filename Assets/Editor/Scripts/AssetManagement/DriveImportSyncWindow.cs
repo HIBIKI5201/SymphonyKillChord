@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace KillChord.Editor.AssetManagement
 {
+    /// <summary>
+    ///     Drive 同期の進捗とログを表示するウィンドウ。
+    /// </summary>
     internal sealed class DriveImportSyncWindow : EditorWindow
     {
         /// <summary> 進捗表示ウィンドウ。 </summary>
@@ -149,6 +152,9 @@ namespace KillChord.Editor.AssetManagement
             }
         }
 
+        /// <summary>
+        ///     同期状態・進捗バー・ログを描画する。
+        /// </summary>
         private void OnGUI()
         {
             EditorGUILayout.LabelField("状態", EditorStyles.boldLabel);
@@ -213,6 +219,9 @@ namespace KillChord.Editor.AssetManagement
             EditorGUILayout.EndHorizontal();
         }
 
+        /// <summary>
+        ///     ウィンドウ破棄時に保持している自身の参照を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             if (window == this)
@@ -244,6 +253,9 @@ namespace KillChord.Editor.AssetManagement
             /// <summary> ログメッセージ。 </summary>
             public readonly string Message;
 
+            /// <summary>
+            ///     ログ1件を生成する。
+            /// </summary>
             public LogEntry(LogType type, string message)
             {
                 Type = type;

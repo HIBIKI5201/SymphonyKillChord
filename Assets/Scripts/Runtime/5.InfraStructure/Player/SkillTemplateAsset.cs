@@ -350,6 +350,9 @@ namespace KillChord.Runtime.InfraStructure.Player
 #endif
         }
 
+        /// <summary>
+        ///     スキル効果のパラメーター1件の設定。
+        /// </summary>
         [Serializable]
         private struct SkillEffectParameterSetting
         {
@@ -381,6 +384,9 @@ namespace KillChord.Runtime.InfraStructure.Player
             private SkillEffectValueFormat _displayFormat;
         }
 
+        /// <summary>
+        ///     スキルレベルに応じたパラメーターの成長設定。
+        /// </summary>
         [Serializable]
         private struct SkillEffectParameterGrowthSetting
         {
@@ -426,6 +432,9 @@ namespace KillChord.Runtime.InfraStructure.Player
             }
         }
 
+        /// <summary>
+        ///     パラメーターの成長1段階分の設定。
+        /// </summary>
         [Serializable]
         public struct SkillEffectParameterGrowthStepSetting
         {

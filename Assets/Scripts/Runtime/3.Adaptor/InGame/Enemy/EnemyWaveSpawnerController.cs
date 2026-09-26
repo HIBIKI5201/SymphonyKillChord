@@ -92,6 +92,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             }
         }
 
+        /// <summary>
+        ///     自動進行時に購読したウェーブクリアイベントを解除する。
+        /// </summary>
         public void Dispose()
         {
             if (_autoAdvanceWaves)
@@ -126,6 +129,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 AddStateEnemyCount);
         }
 
+        /// <summary>
+        ///     生存中の敵の数を1増やす。
+        /// </summary>
         private void AddStateEnemyCount()
         {
             _state.AddEnemyCount(1);

@@ -280,6 +280,9 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             _equippedSkillRow.style.justifyContent = Justify.Center;
         }
 
+        /// <summary>
+        ///     スライドのモーションを止め、コールバックとローカライズ文言の購読を解除する。
+        /// </summary>
         public override void Dispose()
         {
             _slideMotionHandle.TryCancel();

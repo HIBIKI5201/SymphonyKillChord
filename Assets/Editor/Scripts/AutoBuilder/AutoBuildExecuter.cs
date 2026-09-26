@@ -19,6 +19,9 @@ namespace KillChord.Editor.AutoBuilder
     {
         /// <summary> 自動ビルドセッションが実行中の場合はtrueです。 </summary>
         public static bool IsRunning => BuildSession.LoadSession().Running;
+        /// <summary>
+        ///     実行中のビルド1回分の情報。
+        /// </summary>
         [Serializable]
         private struct BuildSession
         {

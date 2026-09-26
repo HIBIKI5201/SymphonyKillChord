@@ -7,6 +7,10 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct EnemyPostAttackBehaviorSpec
     {
+        /// <summary>
+        ///     攻撃後の行動選択の重みと距離を指定して生成する。
+        ///     重みや距離が不正な場合は例外を投げる。
+        /// </summary>
         public EnemyPostAttackBehaviorSpec(
             float stayWeight,
             float regroupWeight,

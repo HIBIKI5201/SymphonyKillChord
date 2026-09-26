@@ -233,7 +233,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _isEnding = false;
         }
 
-        [SerializeField] private InGameHudVisibilityView _visibilityView;
+        [SerializeField, Tooltip("インゲーム HUD の表示・非表示を切り替えるビュー。")] private InGameHudVisibilityView _visibilityView;
 
         /// <summary>
         ///     ロード画面の終了後にステージ開始シーケンスを開始します。

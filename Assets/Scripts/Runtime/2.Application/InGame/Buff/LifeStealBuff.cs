@@ -13,6 +13,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     /// </summary>
     public class LifeStealBuff : StatusEffectBase, IDamageDealtHandler
     {
+        /// <summary>
+        ///     所有者・吸収率・1ヒットあたりの回復上限・持続時間・再付与時の扱いを指定して生成する。
+        /// </summary>
         public LifeStealBuff(
             CharacterEntity owner,
             float lifeStealRate,

@@ -12,6 +12,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
     [FilePath(
         ProviderConst.PROJECT_SETTINGS_PATH + "PlannerMasterDataEditorSettings.asset",
         FilePathAttribute.Location.ProjectFolder)]
+    /// <summary>
+    ///     Planner Master Data ウィンドウのページ定義を保持するエディタ設定。
+    /// </summary>
     internal sealed class PlannerMasterDataEditorSettings : ScriptableSingleton<PlannerMasterDataEditorSettings>
     {
         /// <summary> 登録済みのページ一覧です。 </summary>

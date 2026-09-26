@@ -11,6 +11,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
     [CreateAssetMenu(
         fileName = nameof(CharacterDefinitionRepository),
         menuName = "KillChord/Character/" + nameof(CharacterDefinitionRepository))]
+    /// <summary>
+    ///     キャラクター定義を ID で検索するリポジトリ。
+    /// </summary>
     public sealed class CharacterDefinitionRepository
         : ScriptableObjectRepositoryBase<CharacterDefinitionId, CharacterDefinitionAsset, CharacterDefinitionAsset>
     {
@@ -28,8 +31,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         [SerializeField, Tooltip("IDで取得可能にするキャラクター定義アセットの一覧です。")]
         private CharacterDefinitionAsset[] _characterAssets;
 
+        /// <inheritdoc/>
         protected override IReadOnlyList<CharacterDefinitionAsset> GetEntries() => _characterAssets;
 
+        /// <inheritdoc/>
         protected override bool TryBuild(
             CharacterDefinitionAsset entry,
             out CharacterDefinitionId id,

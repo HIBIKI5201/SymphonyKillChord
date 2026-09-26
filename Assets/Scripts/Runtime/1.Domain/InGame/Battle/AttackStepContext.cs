@@ -63,6 +63,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         /// <summary> 攻撃定義を取得する。 </summary>
         public AttackDefinition AttackDefinition => _attackDefinition;
 
+        /// <summary> 攻撃力補正前の基礎ダメージ。 </summary>
         public Damage BaseDamage => _baseDamage;
 
         /// <summary> ダメージ量を取得する。 </summary>

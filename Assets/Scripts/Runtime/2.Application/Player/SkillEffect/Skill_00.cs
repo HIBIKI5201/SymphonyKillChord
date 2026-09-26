@@ -12,6 +12,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_00 : SkillBase
     {
+        /// <summary>
+        ///     対象に、倍率を掛けたスキルダメージを与える。
+        /// </summary>
         public override void Execute(in SkillEffectContext context)
         {
             float multiplier = (float)context.EffectSpec.GetRequiredValue(

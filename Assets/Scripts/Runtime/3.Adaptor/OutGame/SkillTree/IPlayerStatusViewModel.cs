@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     /// </summary>
     public interface IPlayerStatusViewModel
     {
+        /// <summary>
+        ///     プレイヤーのステータス表示を更新する。
+        /// </summary>
         public void Apply(PlayerStatusDTO dto);
     }
 }

@@ -17,6 +17,9 @@ namespace KillChord.Runtime.Utility.Collections
     [DebuggerDisplay("Count = {Count}")]
     public class PriorityQueue<TElement, TPriority>
     {
+        /// <summary>
+        ///     d-ary ヒープの分岐数と、その対数の定数が矛盾しないかを検証する。
+        /// </summary>
         static PriorityQueue()
         {
             Debug.Assert(LOG_2_ARITY > 0 && Math.Pow(2, LOG_2_ARITY) == ARITY);
@@ -31,28 +34,48 @@ namespace KillChord.Runtime.Utility.Collections
         private int _size;
         private int _version;
 
+        /// <summary>
+        ///     既定の比較子を使う空のキューを生成する。
+        /// </summary>
         public PriorityQueue()
         {
             _nodes = Array.Empty<(TElement, TPriority)>();
             _comparer = InitializeComparer(null);
         }
+
+        /// <summary>
+        ///     初期容量を指定して、既定の比較子を使う空のキューを生成する。
+        /// </summary>
         public PriorityQueue(int initialCapacity) : this(initialCapacity, comparer: null) { }
 
+        /// <summary>
+        ///     比較子を指定して空のキューを生成する。
+        /// </summary>
         public PriorityQueue(IComparer<TPriority> comparer)
         {
             _nodes = Array.Empty<(TElement, TPriority)>();
             _comparer = InitializeComparer(comparer);
         }
+
+        /// <summary>
+        ///     初期容量と比較子を指定して空のキューを生成する。
+        /// </summary>
         public PriorityQueue(int initialCapacity, IComparer<TPriority> comparer)
         {
             _nodes = new (TElement, TPriority)[initialCapacity];
             _comparer = InitializeComparer(comparer);
         }
 
+        /// <summary> キューに入っている要素数。 </summary>
         public int Count => _size;
+        /// <summary> 内部配列の現在の容量。 </summary>
         public int Capacity => _nodes.Length;
+        /// <summary> 優先度の比較に使う比較子。 </summary>
         public IComparer<TPriority> Comparer => _comparer ?? Comparer<TPriority>.Default;
 
+        /// <summary>
+        ///     要素を優先度付きでキューに追加する。
+        /// </summary>
         public void Enqueue(TElement element, TPriority priority)
         {
             int currentSize = _size;
@@ -75,6 +98,10 @@ namespace KillChord.Runtime.Utility.Collections
             }
         }
 
+        /// <summary>
+        ///     最も優先度の高い要素を取り出さずに返す。
+        ///     キューが空の場合は例外を投げる。
+        /// </summary>
         public TElement Peek()
         {
             if (_size == 0)
@@ -85,6 +112,10 @@ namespace KillChord.Runtime.Utility.Collections
             return _nodes[0].Element;
         }
 
+        /// <summary>
+        ///     最も優先度の高い要素を取り出して返す。
+        ///     キューが空の場合は例外を投げる。
+        /// </summary>
         public TElement Dequeue()
         {
             if (_size == 0)
@@ -97,6 +128,10 @@ namespace KillChord.Runtime.Utility.Collections
             return element;
         }
 
+        /// <summary>
+        ///     最も優先度の高い要素を取り出してから、新しい要素を追加する。
+        ///     キューが空の場合は例外を投げる。
+        /// </summary>
         public TElement DequeueEnqueue(TElement element, TPriority priority)
         {
             if (_size == 0)
@@ -133,6 +168,10 @@ namespace KillChord.Runtime.Utility.Collections
             return root.Element;
         }
 
+        /// <summary>
+        ///     最も優先度の高い要素と優先度を取り出す。
+        ///     キューが空の場合は false を返す。
+        /// </summary>
         public bool TryDequeue([MaybeNullWhen(false)] out TElement element, [MaybeNullWhen(false)] out TPriority priority)
         {
             if (_size != 0)
@@ -147,6 +186,10 @@ namespace KillChord.Runtime.Utility.Collections
             return false;
         }
 
+        /// <summary>
+        ///     最も優先度の高い要素と優先度を取り出さずに取得する。
+        ///     キューが空の場合は false を返す。
+        /// </summary>
         public bool TryPeek([MaybeNullWhen(false)] out TElement element, [MaybeNullWhen(false)] out TPriority priority)
         {
             if (_size != 0)
@@ -160,6 +203,10 @@ namespace KillChord.Runtime.Utility.Collections
             return false;
         }
 
+        /// <summary>
+        ///     新しい要素を追加してから、最も優先度の高い要素を取り出す。
+        ///     追加した要素が最優先の場合は、ヒープを変更せずにそのまま返す。
+        /// </summary>
         public TElement EnqueueDequeue(TElement element, TPriority priority)
         {
             if (_size != 0)
@@ -189,6 +236,9 @@ namespace KillChord.Runtime.Utility.Collections
             return element;
         }
 
+        /// <summary>
+        ///     要素と優先度の組をまとめてキューに追加する。
+        /// </summary>
         public void EnqueueRange(IEnumerable<(TElement Element, TPriority Priority)> items)
         {
             int count = 0;
@@ -241,6 +291,9 @@ namespace KillChord.Runtime.Utility.Collections
             }
         }
 
+        /// <summary>
+        ///     複数の要素を同じ優先度でまとめてキューに追加する。
+        /// </summary>
         public void EnqueueRange(IEnumerable<TElement> elements, TPriority priority)
         {
             int count;
@@ -277,6 +330,10 @@ namespace KillChord.Runtime.Utility.Collections
             }
         }
 
+        /// <summary>
+        ///     指定した要素をキューから削除する。
+        ///     見つからない場合は false を返す。
+        /// </summary>
         public bool Remove(
             TElement element,
             [MaybeNullWhen(false)] out TElement removedElement,
@@ -328,6 +385,9 @@ namespace KillChord.Runtime.Utility.Collections
             return true;
         }
 
+        /// <summary>
+        ///     キューを空にする。
+        /// </summary>
         public void Clear()
         {
             if (RuntimeHelpers.IsReferenceOrContainsReferences<(TElement, TPriority)>())
@@ -338,6 +398,9 @@ namespace KillChord.Runtime.Utility.Collections
             _version++;
         }
 
+        /// <summary>
+        ///     容量が指定値以上になるよう内部配列を拡張し、拡張後の容量を返す。
+        /// </summary>
         public int EnsureCapacity(int capacity)
         {
             if (_nodes.Length < capacity)
@@ -349,6 +412,9 @@ namespace KillChord.Runtime.Utility.Collections
             return _nodes.Length;
         }
 
+        /// <summary>
+        ///     要素数が容量の 90% 未満の場合、内部配列を要素数まで縮める。
+        /// </summary>
         public void TrimExcess()
         {
             int threshold = (int)(_nodes.Length * 0.9);
@@ -359,6 +425,9 @@ namespace KillChord.Runtime.Utility.Collections
             }
         }
 
+        /// <summary>
+        ///     指定容量以上になるよう内部配列を拡張する。
+        /// </summary>
         private void Grow(int minCapacity)
         {
             Debug.Assert(_nodes.Length < minCapacity);
@@ -377,6 +446,9 @@ namespace KillChord.Runtime.Utility.Collections
             Array.Resize(ref _nodes, newcapacity);
         }
 
+        /// <summary>
+        ///     ルートノードを削除し、末尾ノードを降ろしてヒープを保つ。
+        /// </summary>
         private void RemoveRootNode()
         {
             int lastNodeIndex = --_size;
@@ -401,10 +473,19 @@ namespace KillChord.Runtime.Utility.Collections
             }
         }
 
+        /// <summary>
+        ///     親ノードのインデックスを求める。
+        /// </summary>
         private static int GetParentIndex(int index) => (index - 1) >> LOG_2_ARITY;
 
+        /// <summary>
+        ///     最初の子ノードのインデックスを求める。
+        /// </summary>
         private static int GetFirstChildIndex(int index) => (index << LOG_2_ARITY) + 1;
 
+        /// <summary>
+        ///     内部配列全体をヒープ条件を満たすように並べ替える。
+        /// </summary>
         private void Heapify()
         {
             (TElement Element, TPriority Priority)[] nodes = _nodes;
@@ -426,6 +507,9 @@ namespace KillChord.Runtime.Utility.Collections
             }
         }
 
+        /// <summary>
+        ///     既定の比較子を使い、ノードを親方向へ移動してヒープ条件を満たす位置に置く。
+        /// </summary>
         private void MoveUpDefaultComparer((TElement Element, TPriority Priority) node, int nodeIndex)
         {
             Debug.Assert(_comparer is null);
@@ -452,6 +536,9 @@ namespace KillChord.Runtime.Utility.Collections
             nodes[nodeIndex] = node;
         }
 
+        /// <summary>
+        ///     指定の比較子を使い、ノードを親方向へ移動してヒープ条件を満たす位置に置く。
+        /// </summary>
         private void MoveUpCustomComparer((TElement Element, TPriority Priority) node, int nodeIndex)
         {
             Debug.Assert(_comparer is not null);
@@ -479,6 +566,9 @@ namespace KillChord.Runtime.Utility.Collections
             nodes[nodeIndex] = node;
         }
 
+        /// <summary>
+        ///     既定の比較子を使い、ノードを子方向へ移動してヒープ条件を満たす位置に置く。
+        /// </summary>
         private void MoveDownDefaultComparer((TElement Element, TPriority Priority) node, int nodeIndex)
         {
             Debug.Assert(_comparer is null);
@@ -516,6 +606,9 @@ namespace KillChord.Runtime.Utility.Collections
             nodes[nodeIndex] = node;
         }
 
+        /// <summary>
+        ///     指定の比較子を使い、ノードを子方向へ移動してヒープ条件を満たす位置に置く。
+        /// </summary>
         private void MoveDownCustomComparer((TElement Element, TPriority Priority) node, int nodeIndex)
         {
 
@@ -555,6 +648,9 @@ namespace KillChord.Runtime.Utility.Collections
             nodes[nodeIndex] = node;
         }
 
+        /// <summary>
+        ///     指定した要素のインデックスを探す。見つからない場合は -1 を返す。
+        /// </summary>
         private int FindIndex(TElement element, IEqualityComparer<TElement> equalityComparer)
         {
             equalityComparer ??= EqualityComparer<TElement>.Default;
@@ -584,6 +680,10 @@ namespace KillChord.Runtime.Utility.Collections
             return -1;
         }
 
+        /// <summary>
+        ///     比較子を初期化する。
+        ///     値型で既定の比較子の場合は null を返し、高速な既定比較の経路を使う。
+        /// </summary>
         private static IComparer<TPriority> InitializeComparer(IComparer<TPriority> comparer)
         {
             if (typeof(TPriority).IsValueType)
@@ -601,26 +701,42 @@ namespace KillChord.Runtime.Utility.Collections
             }
         }
 
+        /// <summary>
+        ///     キュー内の要素を順不同で列挙するコレクション。
+        /// </summary>
         sealed class UnorderedItemsCollection :
             IReadOnlyCollection<(TElement Element, TPriority Priority)>
         {
             internal readonly PriorityQueue<TElement, TPriority> _queue;
 
+            /// <summary>
+            ///     対象のキューを指定して生成する。
+            /// </summary>
             internal UnorderedItemsCollection(PriorityQueue<TElement, TPriority> queue)
             {
                 _queue = queue;
             }
 
+            /// <summary> キューに入っている要素数。 </summary>
             public int Count => _queue._size;
 
+            /// <summary>
+            ///     要素を列挙する列挙子を取得する。
+            /// </summary>
             public Enumerator GetEnumerator() => new Enumerator(_queue);
 
             IEnumerator<(TElement Element, TPriority Priority)>
                 IEnumerable<(TElement Element, TPriority Priority)>.GetEnumerator()
                 => GetEnumerator();
 
+            /// <summary>
+            ///     要素を列挙する列挙子を取得する。
+            /// </summary>
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+            /// <summary>
+            ///     キュー内の要素を内部配列の順に列挙する列挙子。
+            /// </summary>
             public struct Enumerator : IEnumerator<(TElement Element, TPriority Priority)>
             {
                 private readonly PriorityQueue<TElement, TPriority> _queue;
@@ -628,6 +744,9 @@ namespace KillChord.Runtime.Utility.Collections
                 private int _index;
                 private (TElement Element, TPriority Priority) _current;
 
+                /// <summary>
+                ///     対象のキューを指定して生成する。
+                /// </summary>
                 internal Enumerator(PriorityQueue<TElement, TPriority> queue)
                 {
                     _queue = queue;
@@ -636,10 +755,15 @@ namespace KillChord.Runtime.Utility.Collections
                     _current = default;
                 }
 
+                /// <summary> 現在の要素と優先度の組。 </summary>
                 public (TElement Element, TPriority Priority) Current => _current;
 
                 object IEnumerator.Current => _current;
 
+                /// <summary>
+                ///     次の要素へ進む。
+                ///     列挙中にキューが変更された場合は例外を投げる。
+                /// </summary>
                 public bool MoveNext()
                 {
                     if (_version != _queue._version)
@@ -657,6 +781,9 @@ namespace KillChord.Runtime.Utility.Collections
                     return false;
                 }
 
+                /// <summary>
+                ///     列挙位置を先頭に戻す。
+                /// </summary>
                 public void Reset()
                 {
                     if (_version != _queue._version)
@@ -666,6 +793,9 @@ namespace KillChord.Runtime.Utility.Collections
                     _current = default;
                 }
 
+                /// <summary>
+                ///     破棄時の処理。解放するリソースは無い。
+                /// </summary>
                 public void Dispose() { }
             }
         }

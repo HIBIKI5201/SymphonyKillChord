@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
 {
+    /// <summary>
+    ///     敵の硬直中に待機させ、解除後に少し間を置いてから終了する Behavior Graph のアクションノード。
+    /// </summary>
     [Serializable, GeneratePropertyBag]
     [NodeDescription(name: "GetStunned", story: "スタン状態を開始する [State] [Battle]", category: "Action", id: "459e141cce9d40aaaebad1a7c2283299")]
     public partial class GetStunnedAction : Unity.Behavior.Action
@@ -22,6 +25,9 @@ namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
         private float _recoveryTimer;
         private float _recoveryDuration;
 
+        /// <summary>
+        ///     予約中の攻撃をキャンセルして硬直状態にする。参照が無い場合は失敗を返す。
+        /// </summary>
         protected override Unity.Behavior.Node.Status OnStart()
         {
             if (State?.Value?.gameObject == null || Battle?.Value == null)
@@ -38,6 +44,9 @@ namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
             return Unity.Behavior.Node.Status.Running;
         }
 
+        /// <summary>
+        ///     硬直中は実行中を返し、解除後は立て直しの時間を待ってから成功を返す。
+        /// </summary>
         protected override Unity.Behavior.Node.Status OnUpdate()
         {
             if (State.Value.IsStunned) return Unity.Behavior.Node.Status.Running;
@@ -57,6 +66,9 @@ namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
             return Unity.Behavior.Node.Status.Success;
         }
 
+        /// <summary>
+        ///     ノード終了時の処理。現在は何もしない。
+        /// </summary>
         protected override void OnEnd()
         {
         }

@@ -60,6 +60,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         {
             IsPlaybackCompleted = true;
         }
+
+        /// <inheritdoc/>
         public int CurrentCount(MissionProgress progress)
         {
             return _innerCondition is IObjectiveProgressReporter reporter ? reporter.CurrentCount(progress) : 0;

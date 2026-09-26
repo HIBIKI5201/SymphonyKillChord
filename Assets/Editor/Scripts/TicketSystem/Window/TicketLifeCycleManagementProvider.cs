@@ -7,8 +7,14 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Editor.TicketSystem
 {
+    /// <summary>
+    ///     Project Settings にチケットの作成・削除などを行う管理ページを提供する。
+    /// </summary>
     public class TicketLifeCycleManagementProvider : SettingsProvider
     {
+        /// <summary>
+        ///     チケット管理の設定プロバイダーを生成する。
+        /// </summary>
         public TicketLifeCycleManagementProvider(string path, SettingsScope scopes,
             IEnumerable<string> keywords = null)
             :
@@ -16,18 +22,27 @@ namespace KillChord.Editor.TicketSystem
         {
         }
 
+        /// <summary>
+        ///     Project Settings にチケット管理ページを登録する。
+        /// </summary>
         [SettingsProvider]
         public static SettingsProvider CreateSettingsProvider()
         {
             return new TicketLifeCycleManagementProvider(SETTINGS_PATH, SettingsScope.Project);
         }
 
+        /// <summary>
+        ///     ページを開いたときに現在の利用者名を取得する。
+        /// </summary>
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
             _currentUserName = TicketSystemSettings.instance.UserName;
             base.OnActivate(searchContext, rootElement);
         }
 
+        /// <summary>
+        ///     チケットの発行・破棄タブを切り替えて描画する。
+        /// </summary>
         public override void OnGUI(string searchContext)
         {
             if (_isLoading)

@@ -15,18 +15,27 @@ namespace KillChord.Editor
     /// </summary>
     public sealed class CsvImporter : EditorWindow
     {
+        /// <summary>
+        ///     CSV Importer ウィンドウを開く。
+        /// </summary>
         [MenuItem("Tools/Import CSV")]
         private static void Open()
         {
             GetWindow<CsvImporter>("CSV Importer");
         }
 
+        /// <summary>
+        ///     EditorPrefs から API キーとフォルダ ID を読み込む。
+        /// </summary>
         private void OnEnable()
         {
             _apiKey = EditorPrefs.GetString(API_KEY_PREFS_KEY, string.Empty);
             _folderId = EditorPrefs.GetString(FOLDER_ID_PREFS_KEY, DEFAULT_FOLDER_ID);
         }
 
+        /// <summary>
+        ///     API キーとフォルダ ID の入力欄と取得ボタンを描画する。
+        /// </summary>
         private void OnGUI()
         {
             EditorGUILayout.HelpBox(
@@ -368,6 +377,9 @@ namespace KillChord.Editor
         /// </summary>
         private readonly struct HttpResponse
         {
+            /// <summary>
+            ///     HTTP 通信の結果を生成する。
+            /// </summary>
             public HttpResponse(bool isSuccess, byte[] data, string error)
             {
                 IsSuccess = isSuccess;
@@ -396,6 +408,9 @@ namespace KillChord.Editor
         /// </summary>
         private readonly struct DownloadedCsv
         {
+            /// <summary>
+            ///     ダウンロードした CSV を生成する。
+            /// </summary>
             public DownloadedCsv(string fileName, byte[] data)
             {
                 FileName = fileName;

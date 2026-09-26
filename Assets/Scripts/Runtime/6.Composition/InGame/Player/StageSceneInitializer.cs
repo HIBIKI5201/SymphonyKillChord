@@ -21,6 +21,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
             ServiceLocator.RegisterInstance<IStageSceneInstance>(this, LocateTypeEnum.Locator);
         }
 
+        /// <summary>
+        ///     サービスロケーターから自身の登録を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             ServiceLocator.UnregisterInstance<IStageSceneInstance>(this);

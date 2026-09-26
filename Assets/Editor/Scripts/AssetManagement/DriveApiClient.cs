@@ -35,6 +35,9 @@ namespace KillChord.Editor.AssetManagement
         private const int STATUS_RESUME_INCOMPLETE = 308;
         private const int STATUS_SERVER_ERROR_MIN = 500;
 
+        /// <summary>
+        ///     Drive API の files リソース1件分のレスポンス。
+        /// </summary>
         [Serializable]
         private class FileEntry
         {
@@ -48,6 +51,9 @@ namespace KillChord.Editor.AssetManagement
             public string modifiedTime;
         }
 
+        /// <summary>
+        ///     Drive API のファイル一覧取得レスポンス。
+        /// </summary>
         [Serializable]
         private class ListResponse
         {

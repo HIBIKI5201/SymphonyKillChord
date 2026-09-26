@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
     /// <typeparam name="T"></typeparam>
     public readonly struct InputContext<T> where T : unmanaged
     {
+        /// <summary>
+        ///     入力の種類・値・フェーズ・時刻を指定して生成する。
+        /// </summary>
         public InputContext(InputActionKind actionId, T value, InputActionPhase phase, float timestamp)
         {
             ActionKind = actionId;
@@ -17,6 +20,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
             Phase = phase;
         }
 
+        /// <summary>
+        ///     Input System のコールバックから値とフェーズを読み取って生成する。
+        /// </summary>
         public InputContext(InputActionKind actionId, InputAction.CallbackContext context, float timestamp)
         {
             ActionKind = actionId;
@@ -25,9 +31,13 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
             Phase = context.phase;
         }
 
+        /// <summary> 入力アクションの種類。 </summary>
         public InputActionKind ActionKind { get; }
+        /// <summary> 入力値。 </summary>
         public T Value { get; }
+        /// <summary> 入力された時刻。 </summary>
         public float Timestamp { get; }
+        /// <summary> 入力のフェーズ。 </summary>
         public InputActionPhase Phase { get; }
     }
 }

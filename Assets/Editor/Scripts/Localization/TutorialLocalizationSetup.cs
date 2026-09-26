@@ -310,6 +310,9 @@ namespace KillChord.Editor.Localization
         /// </summary>
         private readonly struct SubtitleDefinition
         {
+            /// <summary>
+            ///     字幕の定義を生成する。
+            /// </summary>
             public SubtitleDefinition(string key, string japanese, string english)
             {
                 Key = key;
