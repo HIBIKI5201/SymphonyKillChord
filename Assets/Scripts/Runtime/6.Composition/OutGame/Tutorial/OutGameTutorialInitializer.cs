@@ -275,6 +275,10 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             {
                 _activeOverlayView = null;
                 overlayView.Dispose();
+
+                // オーバーレイは開始時のフォーカスへ戻すが、開始がホーム画面の初期フォーカスより
+                // 先になると戻り先が無いか別のボタンになるため、ホーム画面の既定のフォーカスを取り直す。
+                _homeScreenView.RestoreFocus();
             }
         }
 
