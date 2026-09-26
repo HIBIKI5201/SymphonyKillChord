@@ -9,7 +9,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
     /// <summary>
     ///     ロード画面を伴うシーン遷移を管理するUsecase。
     /// </summary>
-    public class SceneTransitionUsecase
+    public class SceneTransitionUseCase
     {
         /// <summary>
         ///     必要な依存関係を指定して生成する。
@@ -17,7 +17,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         /// <param name="sceneTransitionService"> シーン遷移サービス。 </param>
         /// <param name="loadingOperationExecutor"> ロード画面付き処理の実行機能。 </param>
         /// <param name="sceneInitializationReadiness"> シーン初期化の完了待機機能。 </param>
-        public SceneTransitionUsecase
+        public SceneTransitionUseCase
             (ISceneTransitionService sceneTransitionService,
             ILoadingOperationExecutor loadingOperationExecutor,
             ISceneInitializationReadiness sceneInitializationReadiness)

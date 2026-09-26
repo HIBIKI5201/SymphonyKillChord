@@ -16,12 +16,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         ///     敵 AI が使うユースケースと状態を指定して生成する。
         /// </summary>
         public EnemyAIController(
-            EnemyMoveUsecase enemyMoveUsecase,
-            EnemyAttackReservationUsecase enemyAttackReservationUsecase,
+            EnemyMoveUseCase enemyMoveUsecase,
+            EnemyAttackReservationUseCase enemyAttackReservationUsecase,
             EnemyBattleState enemyBattleState,
             IEnemyStateFacade stateFacade,
             IEnemyAttackController attackController,
-            EnemyPostAttackBehaviorUsecase postAttackBehaviorUsecase,
+            EnemyPostAttackBehaviorUseCase postAttackBehaviorUsecase,
             ObstacleSearchService obstacleSearchService,
             EnemyAIControllerRegistry registry
             )
@@ -280,11 +280,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             }
         }
 
-        private readonly EnemyMoveUsecase _enemyMoveUsecase;
-        private readonly EnemyAttackReservationUsecase _enemyAttackReservationUsecase;
+        private readonly EnemyMoveUseCase _enemyMoveUsecase;
+        private readonly EnemyAttackReservationUseCase _enemyAttackReservationUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
-        private readonly EnemyPostAttackBehaviorUsecase _postAttackBehaviorUsecase;
+        private readonly EnemyPostAttackBehaviorUseCase _postAttackBehaviorUsecase;
         private readonly ObstacleSearchService _obstacleSearchService;
         private readonly EnemyAIControllerRegistry _registry;
         private IEnemyAttackController _attackController;

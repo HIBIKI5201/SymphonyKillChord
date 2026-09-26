@@ -27,7 +27,7 @@
 | **`RhythmJustService`** | Application | ジャストタイミング発生の通知と判定状態の管理を行うシングルトンサービス（`IDisposable` を実装） |
 | **`MusicSyncService`** | Application | `IMusicSyncService`実装。音楽同期とアクション実行予約を管理 |
 | **`EquipmentBgmService`** | Application | 装備スキル構成から組んだシーケンスを保持し、小節の進行に応じてBGMを切り替える |
-| **`RhythmGuideUsecase`** | Application | リズムガイドの計算ロジック |
+| **`RhythmGuideUseCase`** | Application | リズムガイドの計算ロジック |
 | **`MusicSyncController`** | Adaptor | 毎フレーム `MusicSyncState.UpdatePlayTime` と `IMusicSyncService.Update` を呼び出すコントローラー |
 | **`MusicSyncState`** | Adaptor | 現在の BPM・再生時間・次の拍までのカウントなどのリズム状態を保持するクラス |
 | **`MusicSchedulerAdaptor`** | Adaptor | `IMusicActionScheduler` の実装。`EnemyMusicSpec` を `ExecuteRequestTiming` に変換し `IMusicSyncService.RegisterAction` を呼ぶ。Enemy/Stageモジュールから利用される |
@@ -71,7 +71,7 @@ graph TD
     end
 
     subgraph EnemyModule [Enemy モジュール]
-        E_App["Application\n(EnemyAttackReservationUsecase)"]
+        E_App["Application\n(EnemyAttackReservationUseCase)"]
         E_Domain["Domain\n(EnemyMusicSpec)"]
     end
 
@@ -206,7 +206,7 @@ Enemy などの外部モジュールが `IMusicActionScheduler` を使って、�
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Caller as 呼び出し元 (EnemyAttackReservationUsecase 等)
+    participant Caller as 呼び出し元 (EnemyAttackReservationUseCase 等)
     participant Scheduler as IMusicActionScheduler
     participant MSService as IMusicSyncService
 

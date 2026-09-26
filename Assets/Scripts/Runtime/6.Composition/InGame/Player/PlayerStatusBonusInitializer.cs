@@ -26,7 +26,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Tooltip("スキルノード定義リポジトリの Addressables キーです。")]
         private string _skillNodeDataRepoKey;
 
-        private SkillNodeDataRepo _loadedSkillNodeDataRepo;
+        private SkillNodeDataRepository _loadedSkillNodeDataRepo;
         private PlayerStatusBonus _playerStatusBonus = PlayerStatusBonus.None;
         private PlayerStatusBonusModuleContainer _moduleContainer;
 
@@ -44,12 +44,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
             {
                 // スキルノードのデータを読み込む。
                 _loadedSkillNodeDataRepo =
-                    await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepo>(this, cancellationToken);
+                    await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepository>(this, cancellationToken);
                 if (_loadedSkillNodeDataRepo == null)
                 {
 #if UNITY_EDITOR
                     Debug.LogError(
-                        $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(SkillNodeDataRepo)} の読み込み結果が null です。",
+                        $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(SkillNodeDataRepository)} の読み込み結果が null です。",
                         this);
 #endif
                     ReleaseLoadedSkillNodeDataRepo();
@@ -97,7 +97,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             {
 #if UNITY_EDITOR
                 Debug.LogError(
-                    $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(SkillNodeDataRepo)} が読み込まれていません。",
+                    $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(SkillNodeDataRepository)} が読み込まれていません。",
                     this);
 #endif
                 return false;

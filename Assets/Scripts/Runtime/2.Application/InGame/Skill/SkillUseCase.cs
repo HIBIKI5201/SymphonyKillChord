@@ -9,12 +9,12 @@ namespace KillChord.Runtime.Application.InGame.Skill
     /// <summary>
     ///     スキル発動の判定と実行を扱うユースケースクラス。
     /// </summary>
-    public class SkillUsecase
+    public class SkillUseCase
     {
         /// <summary>
         ///     コンストラクタ。必要なサービスを注入する。
         /// </summary>
-        public SkillUsecase(
+        public SkillUseCase(
             ISkillTargetResolver targetResolver,
             ISkillEffectExecutorResolver effectExecutorResolver,
             CharacterEntity playerEntity)

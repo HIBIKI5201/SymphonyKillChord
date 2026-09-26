@@ -136,7 +136,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             // ガイド表示と判定は、音楽同期・ターゲット状態・ミッション進行状況を参照するためPresenterへ集約する。
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,
-                new RhythmGuideUsecase(),
+                new RhythmGuideUseCase(),
                 targetingSystem,
                 missionRuntimeServiceProvider,
                 selectedBattleStageState

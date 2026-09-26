@@ -13,7 +13,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary>
         ///     砲弾の制御に必要なエンティティ・表示・予約・攻撃者などを指定して生成する。
         /// </summary>
-        public ShellController(ShellEntity entity, IShellView viewModel, ShellReservationUsecase reservationUsecase, IAttacker attacker, IDefender defender, ShellAttackUsecase attackUsecase)
+        public ShellController(ShellEntity entity, IShellView viewModel, ShellReservationUseCase reservationUsecase, IAttacker attacker, IDefender defender, ShellAttackUseCase attackUsecase)
         {
             _entity = entity;
             _viewModel = viewModel;
@@ -112,10 +112,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
 
         private readonly ShellEntity _entity;
-        private readonly ShellReservationUsecase _reservationUsecase;
+        private readonly ShellReservationUseCase _reservationUsecase;
         private readonly IShellView _viewModel;
         private IAttacker _attacker;
         private IDefender _defender;
-        private readonly ShellAttackUsecase _attackUsecase;
+        private readonly ShellAttackUseCase _attackUsecase;
     }
 }

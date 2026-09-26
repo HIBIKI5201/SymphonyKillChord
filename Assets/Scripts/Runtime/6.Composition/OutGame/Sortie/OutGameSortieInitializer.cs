@@ -47,12 +47,12 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionUsecase sceneTransitionUseCase))
+            if (!ServiceLocator.TryGetInstance(out SceneTransitionUseCase sceneTransitionUseCase))
             {
 #if UNITY_EDITOR
                 Debug.LogError(
                     $"[{nameof(OutGameSortieInitializer)}] " +
-                    $"{nameof(SceneTransitionUsecase)}が取得できませんでした。",
+                    $"{nameof(SceneTransitionUseCase)}が取得できませんでした。",
                     this);
 #endif
                 return false;

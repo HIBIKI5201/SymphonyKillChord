@@ -213,7 +213,7 @@ collection を持つ ScriptableObject に対して、個別データ列挙のた
 
 例:
 
-- `SkillNodeDataRepo` は `SkillNodes` を列挙対象に持つ。
+- `SkillNodeDataRepository` は `SkillNodes` を列挙対象に持つ。
 - `OutGameSkillRepository` は `_skillDataAssets` を列挙対象に持つ。
 - `BackgroundCatalogAsset` は `_entries` を列挙対象に持つ。
 
@@ -368,7 +368,7 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
   - 例: `ScenarioSettingsAsset`
   - 右ペインに状態・Validation・関連リンクを出す。
 - collection アセット
-  - 例: `SkillNodeDataRepo`
+  - 例: `SkillNodeDataRepository`
   - 個別要素一覧、登録状況、ID 候補列挙を出す。
 
 同じ SourceAsset に複数 collection がある場合は、Planner 側では collection 単位でタブまたはサブセクションを分ける。
@@ -418,9 +418,9 @@ EditorWindow 自体は、独自に Addressables から非同期ロードする�
 
 対象:
 
-- `SkillNodeDataRepo`
-- `SkillNodeBindRepo`
-- `SkillNodePhaseBindDataRepo`
+- `SkillNodeDataRepository`
+- `SkillNodeBindRepository`
+- `SkillNodePhaseBindDataRepository`
 
 提供したいもの:
 

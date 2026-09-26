@@ -53,7 +53,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private ScenarioInputView _scenarioInputView;
         [SerializeField, Tooltip("Autoボタンがあるシーンのみ設定する状態表示View。")]
         private ScenarioAutoButtonView _scenarioAutoButtonView;
-        private ScenarioUsecase _usecase;
+        private ScenarioUseCase _usecase;
         private ScenarioInputController _inputController;
         private ScenarioViewModel _viewModel;
         private InputComposition _inputComposition;
@@ -100,7 +100,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         {
             ScenarioAdvanceGate gate = new ScenarioAdvanceGate();
             _viewModel = new ScenarioViewModel();
-            ScenarioHandlerRepo handlerRepo = new ScenarioHandlerRepo();
+            ScenarioHandlerRepository handlerRepo = new ScenarioHandlerRepository();
             IScenarioRepository repository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_loadedBackgroundCatalog);
             IAnimationRepository animationRepository = new AnimationRepository(_loadedAnimationCatalog);
@@ -123,7 +123,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 _viewModel,
                 _viewModel);
 
-            _usecase = new ScenarioUsecase(
+            _usecase = new ScenarioUseCase(
                 repository,
                 handlerRepo,
                 gate,

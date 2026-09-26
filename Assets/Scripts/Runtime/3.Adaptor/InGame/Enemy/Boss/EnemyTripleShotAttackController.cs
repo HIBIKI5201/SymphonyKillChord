@@ -11,7 +11,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         ///     3連射攻撃のユースケースと戦闘状態を指定して生成する。
         /// </summary>
         public EnemyTripleShotAttackController(
-            EnemyTripleShotAttackUsecase enemyAttackUsecase,
+            EnemyTripleShotAttackUseCase enemyAttackUsecase,
             EnemyBattleState enemyBattleState)
         {
             _enemyAttackUsecase = enemyAttackUsecase;
@@ -29,7 +29,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 _enemyBattleState.Target);
         }
 
-        private readonly EnemyTripleShotAttackUsecase _enemyAttackUsecase;
+        private readonly EnemyTripleShotAttackUseCase _enemyAttackUsecase;
         private readonly EnemyBattleState _enemyBattleState;
     }
 }

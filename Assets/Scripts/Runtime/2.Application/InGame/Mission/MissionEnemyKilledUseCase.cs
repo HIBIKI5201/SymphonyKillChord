@@ -3,21 +3,22 @@ using KillChord.Runtime.Domain.InGame.Mission;
 namespace KillChord.Runtime.Application.InGame.Mission
 {
     /// <summary>
-    ///     プレイヤーの死亡イベントを処理するユースケース。
+    ///     敵撃破を記録するユースケース。
     /// </summary>
-    public class MissionPlayerDeadUsecase
+    public class MissionEnemyKilledUseCase
     {
         /// <summary>
         ///     ユースケースを実行します。
         /// </summary>
         /// <param name="progress">進行状況。</param>
-        public void Execute(MissionProgress progress)
+        /// <param name="enemyKey">敵のキー。</param>
+        public void Execute(MissionProgress progress, EnemyMissionKey enemyKey)
         {
             if (progress.IsFinished)
             {
                 return;
             }
-            progress.MarkPlayerDead();
+            progress.EnemyKillRecord.RecordKill(enemyKey);
         }
     }
 }

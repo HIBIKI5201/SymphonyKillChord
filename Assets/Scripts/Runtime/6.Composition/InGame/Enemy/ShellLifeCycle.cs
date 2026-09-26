@@ -85,9 +85,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             ShellEntity entity = new ShellEntity(attackSpec, musicSpec, null);
 
             // 着弾の予約・攻撃・表示を行うユースケースとコントローラーを作る。
-            ShellReservationUsecase reservationUsecase = new ShellReservationUsecase(entity, musicActionScheduler);
+            ShellReservationUseCase reservationUsecase = new ShellReservationUseCase(entity, musicActionScheduler);
             _reservationUsecase = reservationUsecase;
-            ShellAttackUsecase attackUsecase = new ShellAttackUsecase();
+            ShellAttackUseCase attackUsecase = new ShellAttackUseCase();
 
             ShellSpecPresenter shellSpecPresenter = new ShellSpecPresenter(entity);
             ShellController controller = new ShellController(
@@ -154,7 +154,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private MusicSyncView _musicSyncView;
         private Action<ShellLifeCycle> _releaseCallback;
         private ShellController _controller;
-        private ShellReservationUsecase _reservationUsecase;
+        private ShellReservationUseCase _reservationUsecase;
         private ShellAttackSpecAsset _loadedAttackData;
         private EnemyMusicSpecAsset _loadedMusicData;
         private EnemyBattleState _indicatorOwner;
@@ -182,7 +182,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <summary>
         ///     予約済みの爆発時刻までの残り時間から、0〜1の接近進捗を算出します。
         ///     区間の長さ（拍）はShellMusicConstants.DETONATE_LEAD_BEAT_COUNTを使用し、
-        ///     着弾予告SEの再生タイミング（ShellReservationUsecase側）と同じ値で揃える。
+        ///     着弾予告SEの再生タイミング（ShellReservationUseCase側）と同じ値で揃える。
         /// </summary>
         /// <returns> 0〜1の進捗。予約が無い場合や算出できない場合は0。 </returns>
         private float GetDetonateApproach()

@@ -273,10 +273,10 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             missionRuntimeService = new MissionRuntimeService(
                 definition,
                 progress,
-                new MissionTimeAdvanceUsecase(),
-                new MissionEnemyKilledUsecase(),
-                new MissionActionPerformedUsecase(),
-                new MissionPlayerDeadUsecase(),
+                new MissionTimeAdvanceUseCase(),
+                new MissionEnemyKilledUseCase(),
+                new MissionActionPerformedUseCase(),
+                new MissionPlayerDeadUseCase(),
                 new MissionRuleRunner(definition),
                 new MissionEvaluationRunner());
 
@@ -486,7 +486,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private AnimationCatalogAsset _loadedAnimationCatalog;
         private PortraitCatalogAsset _loadedPortraitCatalog;
         private ScenarioSettingsAsset _loadedScenarioSettings;
-        private ScenarioUsecase _scenarioUsecase;
+        private ScenarioUseCase _scenarioUsecase;
         private ScenarioInputController _scenarioInputController;
         private ScenarioViewModel _scenarioViewModel;
 
@@ -558,7 +558,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             // シナリオの読み込み・表示・進行に必要なリポジトリとプレゼンターを作る。
             ScenarioAdvanceGate advanceGate = new();
             _scenarioViewModel = new ScenarioViewModel();
-            ScenarioHandlerRepo handlerRepo = new();
+            ScenarioHandlerRepository handlerRepo = new();
             IScenarioRepository scenarioRepository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_loadedBackgroundCatalog);
             IAnimationRepository animationRepository = new AnimationRepository(_loadedAnimationCatalog);
@@ -582,7 +582,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _scenarioViewModel);
 
             // シナリオの進行を管理するユースケースと、入力の制御を作る。
-            _scenarioUsecase = new ScenarioUsecase(
+            _scenarioUsecase = new ScenarioUseCase(
                 scenarioRepository,
                 handlerRepo,
                 advanceGate,

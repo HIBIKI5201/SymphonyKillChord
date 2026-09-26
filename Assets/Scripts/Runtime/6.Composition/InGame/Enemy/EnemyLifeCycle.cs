@@ -147,10 +147,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncState, musicSyncService);
 
             // UseCase
-            EnemyMoveUsecase useCase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
-            EnemyAttackReservationUsecase attackReservationUsecase = new EnemyAttackReservationUsecase(attackMusicSpec, musicActionScheduler);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
-            EnemyPostAttackBehaviorUsecase postAttackBehaviorUsecase = new EnemyPostAttackBehaviorUsecase(postAttackBehaviorSpec);
+            EnemyMoveUseCase useCase = new EnemyMoveUseCase(spec, raycastDetectService, attackPositionSearchService);
+            EnemyAttackReservationUseCase attackReservationUsecase = new EnemyAttackReservationUseCase(attackMusicSpec, musicActionScheduler);
+            EnemyAttackUseCase attackUsecase = new EnemyAttackUseCase(raycastDetectService);
+            EnemyPostAttackBehaviorUseCase postAttackBehaviorUsecase = new EnemyPostAttackBehaviorUseCase(postAttackBehaviorSpec);
             _attackReservationUsecase = attackReservationUsecase;
 
 
@@ -467,7 +467,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private CharacterEntity _enemyEntity;
         private IEnemyAttackControllerGenerator _attackControllerGenerator;
         private EnemyAIController _aiController;
-        private EnemyAttackReservationUsecase _attackReservationUsecase;
+        private EnemyAttackReservationUseCase _attackReservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyHealthHudPresenter _enemyHealthHudPresenter;
         private EnemyBattleState _battleState;
