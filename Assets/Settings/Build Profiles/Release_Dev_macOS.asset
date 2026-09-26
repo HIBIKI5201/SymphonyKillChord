@@ -18,8 +18,26 @@ MonoBehaviour:
   m_PlatformId: 0d2129357eac403d8b359c2dcbf82502
   m_PlatformBuildProfile:
     rid: 2187373443248029698
-  m_OverrideGlobalSceneList: 0
-  m_Scenes: []
+  m_OverrideGlobalSceneList: 1
+  m_Scenes:
+  - m_enabled: 1
+    m_path: Assets/Level/Scenes/Master/Persistent.unity
+  - m_enabled: 1
+    m_path: Assets/Level/Scenes/Master/Title.unity
+  - m_enabled: 1
+    m_path: Assets/Level/Scenes/Master/OutGame.unity
+  - m_enabled: 1
+    m_path: Assets/Level/Scenes/Master/InGame.unity
+  - m_enabled: 1
+    m_path: Assets/Level/Scenes/Master/Scenario.unity
+  - m_enabled: 1
+    m_path: Assets/Level/Scenes/Master/Stages/Stage_01.unity
+  - m_enabled: 1
+    m_path: Assets/Level/Scenes/Master/Stages/Stage_02.unity
+  - m_enabled: 0
+    m_path: Assets/Level/Scenes/Develop/Dodge/InGameDodgeTest.unity
+  - m_enabled: 1
+    m_path: Assets/Level/Scenes/Demo/DemoEnd.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:

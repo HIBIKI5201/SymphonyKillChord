@@ -15,7 +15,10 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             int brightness,
             string languageLabel,
             string vibrationStrengthLabel,
-            float vibrationScale)
+            float vibrationScale,
+            int rhythmOffsetStep,
+            string rhythmOffsetLabel,
+            float rhythmOffsetSeconds)
         {
             ResolutionLabel = resolutionLabel;
             ScreenModeLabel = screenModeLabel;
@@ -24,6 +27,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             LanguageLabel = languageLabel;
             VibrationStrengthLabel = vibrationStrengthLabel;
             VibrationScale = vibrationScale;
+            RhythmOffsetStep = rhythmOffsetStep;
+            RhythmOffsetLabel = rhythmOffsetLabel;
+            RhythmOffsetSeconds = rhythmOffsetSeconds;
         }
 
         /// <summary> 解像度の表示ラベル。 </summary>
@@ -46,5 +52,14 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
 
         /// <summary> ゲームパッド振動へ適用する強さの倍率。 </summary>
         public float VibrationScale { get; }
+
+        /// <summary> リズム判定オフセットの段階（0.05秒刻み、-6～6）。 </summary>
+        public int RhythmOffsetStep { get; }
+
+        /// <summary> リズム判定オフセットの表示ラベル。 </summary>
+        public string RhythmOffsetLabel { get; }
+
+        /// <summary> リズム判定タイミングへ加算するオフセット秒数。 </summary>
+        public float RhythmOffsetSeconds { get; }
     }
 }

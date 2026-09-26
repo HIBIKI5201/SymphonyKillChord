@@ -3,7 +3,7 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/Button.uss?fileID=7433441132597879392&amp;guid=1e78d0c0c6f33384896221d772a80442&amp;type=3#Button"/>
     <ui:VisualElement name="BackGround" style="width: 100%; height: 100%; -unity-background-image-tint-color: rgb(2, 2, 2);">
-        <ui:VisualElement name="Root" style="position: absolute; top: 39px; left: 43px; width: 50%; height: 508px; background-color: rgba(255, 255, 255, 0); background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_MenuPanel.png?fileID=2800000&amp;guid=e93604348792fe147b00edd554ae46a0&amp;type=3#UI_MenuPanel&quot;);">
+        <ui:VisualElement name="Root" style="position: absolute; top: 39px; left: 43px; scale: 0.8 0.8; transform-origin: 0% 0%; width: 50%; height: 508px; background-color: rgba(255, 255, 255, 0); background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_MenuPanel.png?fileID=2800000&amp;guid=e93604348792fe147b00edd554ae46a0&amp;type=3#UI_MenuPanel&quot;);">
             <ui:VisualElement name="ButtonRoot" style="align-self: center; width: 100%; height: 100%; justify-content: center; background-color: rgba(1, 10, 48, 0);">
                 <ui:VisualElement name="VolumeSettingsRoot" style="width: 80%; align-self: center; margin-top: -40px;">
                     <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; padding: 14px; margin-bottom: 16px; margin-top: 11px;">
@@ -17,12 +17,22 @@
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; padding: 14px; margin-top: 14px;">
                         <ui:VisualElement style="background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 11px;">
-                            <ui:Label text="効果音" style="font-size: 25px; -unity-font-style: bold; color: white;"/>
+                            <ui:Label name="SoundEffectHeading" text="効果音" style="font-size: 25px; -unity-font-style: bold; color: white;"/>
                         </ui:VisualElement>
                         <ui:VisualElement style="background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 14px;">
                             <ui:Label text="5" name="SEVolumeValue" style="font-size: 25px; -unity-font-style: bold; color: white; -unity-text-align: middle-center;"/>
                         </ui:VisualElement>
                         <ui:SliderInt name="SEVolumeSlider" low-value="0" high-value="10" value="5" page-size="1" class="volume-slider" style="flex-grow: 1; height: 45px;"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; padding: 14px; margin-top: 14px;">
+                        <ui:VisualElement style="background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 11px;">
+                            <ui:Label name="LanguageHeading" text="言語" style="font-size: 25px; -unity-font-style: bold; color: white;"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement style="flex-direction: row; align-items: center; flex-grow: 1; justify-content: space-between;">
+                            <ui:Button text="&lt;" name="LanguagePrevButton" class="btn-skin btn-scale-feedback setting-select-arrow-button" style="width: 45px; height: 45px; font-size: 20px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0);"/>
+                            <ui:Label text="日本語" name="LanguageValueLabel" style="font-size: 25px; -unity-font-style: bold; color: white; -unity-text-align: middle-center; flex-grow: 1;"/>
+                            <ui:Button text="&gt;" name="LanguageNextButton" class="btn-skin btn-scale-feedback setting-select-arrow-button" style="width: 45px; height: 45px; font-size: 20px; -unity-font-style: bold; background-color: rgba(188, 188, 188, 0);"/>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -37,7 +47,7 @@
             <ui:VisualElement name="VisualElement" style="width: 640px; height: 260px; padding: 32px 40px; justify-content: flex-start; align-items: center; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_OutGame_SceneTab.png?fileID=21300000&amp;guid=96c8d94dd68b3104fa34a3f388529d63&amp;type=3#UI_OutGame_SceneTab&quot;); -unity-background-scale-mode: stretch-to-fill;">
                 <ui:Label text="データを消去しますか？" name="DataResetMessage" style="-unity-text-align: middle-center; width: 100%; font-size: 34px; -unity-font-style: bold; color: rgb(255, 255, 255); white-space: normal;"/>
                 <ui:VisualElement style="width: 90%; height: 1px; background-color: rgba(255, 255, 255, 0.4); margin-top: 14px; margin-bottom: 10px;"/>
-                <ui:Label text="※削除するとデータは戻せません。" style="-unity-text-align: middle-center; width: 100%; font-size: 18px; color: rgb(210, 210, 220); white-space: normal; margin-bottom: 24px;"/>
+                <ui:Label name="DataResetWarning" text="※削除するとデータは戻せません。" style="-unity-text-align: middle-center; width: 100%; font-size: 18px; color: rgb(210, 210, 220); white-space: normal; margin-bottom: 24px;"/>
                 <ui:VisualElement style="flex-direction: row; justify-content: center; flex-grow: 1; align-items: center;">
                     <ui:Button text="消去する" name="DataResetConfirmButton" class="button" style="font-size: 22px; width: 180px; height: 56px; background-color: rgb(253, 253, 224); color: rgb(74, 27, 12); border-left-color: rgb(196, 164, 104); border-right-color: rgb(196, 164, 104); border-top-color: rgb(196, 164, 104); border-bottom-color: rgb(196, 164, 104); border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; border-top-left-radius: 6px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; border-bottom-left-radius: 6px;"/>
                     <ui:VisualElement style="width: 24px;"/>

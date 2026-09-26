@@ -120,9 +120,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
 
             UnityEngine.Camera warmupCamera = GetOrCreateWarmupCamera();
+            Vector3 originalPosition = instance.transform.position;
+            Quaternion originalRotation = instance.transform.rotation;
+
             instance.transform.SetPositionAndRotation(WARMUP_POSITION, Quaternion.identity);
             instance.gameObject.SetActive(true);
             warmupCamera.Render();
+
+            // WARMUP_POSITIONはNavMeshから遠く離れているため、位置を残したままプールへ戻すと
+            // 次回取り出し時のNavMeshAgent有効化でエージェント生成に失敗する。
+            instance.transform.SetPositionAndRotation(originalPosition, originalRotation);
         }
 
         /// <summary>

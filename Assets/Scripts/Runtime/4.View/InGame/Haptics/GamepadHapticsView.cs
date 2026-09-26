@@ -7,7 +7,7 @@ namespace KillChord.Runtime.View.InGame.Haptics
 {
     /// <summary>
     ///     ジャスト成立時にゲームパッドを短く振動させるView。
-    ///     ゲームパッド未接続時（マウス・キーボード・タッチ操作時）は何も行わない。
+    ///     Android・iOSでゲームパッド未接続時は端末を振動させる。
     /// </summary>
     public sealed class GamepadHapticsView : MonoBehaviour, IGamepadHapticsViewModel
     {
@@ -35,15 +35,19 @@ namespace KillChord.Runtime.View.InGame.Haptics
                 return;
             }
 
-            Gamepad gamepad = Gamepad.current;
-            if (gamepad == null)
+            float vibrationScale = Mathf.Clamp01(_environmentSettingsViewModel.VibrationScale.CurrentValue);
+            if (_config.PulseDuration <= 0f || vibrationScale <= 0f)
             {
                 return;
             }
 
-            float vibrationScale = Mathf.Clamp01(_environmentSettingsViewModel.VibrationScale.CurrentValue);
-            if (_config.PulseDuration <= 0f || vibrationScale <= 0f)
+            Gamepad gamepad = Gamepad.current;
+            if (gamepad == null)
             {
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
+                // 標準APIでは強さと長さを指定できないため、端末のOS標準振動を再生する。
+                Handheld.Vibrate();
+#endif
                 return;
             }
 

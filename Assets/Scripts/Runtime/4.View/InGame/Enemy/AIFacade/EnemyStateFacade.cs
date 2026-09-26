@@ -64,6 +64,8 @@ namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
         private float _sightRange = 15f;
         [SerializeField, Tooltip("未発見時、周囲を確認するために向きを変える速さ(度/秒)。"), Min(0f)]
         private float _lookAroundRotationSpeed = 60f;
+        [SerializeField, Tooltip("クリティカル被弾時、硬直状態が継続する時間(秒)。"), Min(0f)]
+        private float _stunDurationSeconds = 2f;
         private EnemyAIController _aiController;
         private Transform _target;
         private EnemyRaycastDetectView _raycastDetectView;
@@ -87,6 +89,9 @@ namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
         {
             // 一時。今後はAnimation Controllerで制御するはず
             Debug.Log("[EnemyStateFacade] クリティカルにより、敵硬直発生。");
+            // 硬直時間経過後に自動回復させる。多重予約を避けるため、既存の予約は一度キャンセルする。
+            CancelInvoke(nameof(StunRecover));
+            Invoke(nameof(StunRecover), _stunDurationSeconds);
         }
         /// <summary>
         ///     硬直回復。

@@ -7,6 +7,7 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Composition.Persistent.Music;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
@@ -19,10 +20,15 @@ using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Load;
+using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -69,6 +75,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
         private TitleSceneView _titleSceneView;
+        private TitleIdleVideoView _idleVideoView;
         private TitleStartController _titleStartController;
         private ScreenController _screenController;
         private ScreenRuleData _loadedRuleData;
@@ -76,13 +83,17 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
         private AudioSettingsModuleContainer _audioSettingsContainer;
+        private EnvironmentSettingsModuleContainer _environmentSettingsContainer;
         private VolumeSettingsTabView _volumeSettingsTabView;
+        private LanguageSettingsTabView _languageSettingsTabView;
 
         private bool _isInitialized;
         private bool _isSubscribed;
         private bool _isLoadingSubscribed;
         private bool _isResettingSaveData;
         private LoadingScreenController _loadingScreenController;
+        private EventNotificationView _eventNotificationView;
+        private CancellationTokenSource _resetCancellation;
 
         /// <summary>
         ///     タイトル画面に必要なアセットをロードします。
@@ -101,6 +112,13 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedSaveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!await ApplyInitialSkillLoadoutAsync())
+            {
+                return false;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
             return _loadedRuleData != null
                 && _loadedStageTreeAsset != null
                 && _loadedEnemyWaveDefinitionRepository != null
@@ -141,11 +159,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             SceneTransitionController sceneTransitionController;
             if (!TryGetServiceLocatorInstances(
                     out sceneTransitionController,
-                    out _audioSettingsContainer))
+                    out _audioSettingsContainer,
+                    out _environmentSettingsContainer))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: ServiceLocator から必要なインスタンスを取得できませんでした。");
 #endif
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out _eventNotificationView))
+            {
+                Debug.LogError($"[{nameof(TitleSceneInitializer)}] 常駐通知Viewを取得できませんでした。", this);
                 return false;
             }
 
@@ -179,11 +204,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
+            InitializeIdleVideo(titleRoot);
 
-            // コントローラーのOptionsボタンからオプション画面を開けるようにする。
+            HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
+
+            MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
+
+            // コントローラーのOptionsボタンでオプション画面を開閉できるようにする。
+            // 表示中の画面だけが入力を受け付けるため、開く側と閉じる側を別々の View が担当する。
             if (ServiceLocator.TryGetInstance(out PlayerInputView playerInputView))
             {
                 _titleSceneView.BindOptionInput(playerInputView);
+                menuScreenView.BindOptionInput(playerInputView);
             }
             else
             {
@@ -191,14 +223,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     $"{nameof(TitleSceneInitializer)}: PlayerInputView が ServiceLocator に登録されていません。"
                     + " Optionsボタンでのオプション表示は無効になります。");
             }
-            HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
 
-            MenuScreenView menuScreenView = new(menuRoot, _outGameUIEvent);
             CreditScreenView creditScreenView = new(creditRoot, _outGameUIEvent, creditNavgationScope);
             _volumeSettingsTabView = new VolumeSettingsTabView(
                 menuRoot,
                 _audioSettingsContainer.ViewModel,
                 _audioSettingsContainer.Command);
+            _languageSettingsTabView = new LanguageSettingsTabView(
+                menuRoot,
+                _environmentSettingsContainer.ViewModel,
+                _environmentSettingsContainer.Command);
 
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, creditScreenView);
 
@@ -273,6 +307,13 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         public override void Shutdown()
         {
+            _resetCancellation?.Cancel();
+            if (_idleVideoView != null)
+            {
+                _idleVideoView.Shutdown();
+                Destroy(_idleVideoView.gameObject);
+                _idleVideoView = null;
+            }
             UnsubscribeLoading();
             if (_outGameUIEvent != null && _isSubscribed)
             {
@@ -288,7 +329,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedSaveData = null;
             _volumeSettingsTabView?.Dispose();
             _volumeSettingsTabView = null;
+            _languageSettingsTabView?.Dispose();
+            _languageSettingsTabView = null;
             _audioSettingsContainer = null;
+            _environmentSettingsContainer = null;
             _titleScreenViewRegistry?.Dispose();
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
@@ -297,6 +341,40 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _outGameUIEvent = null;
             _isInitialized = false;
             _isSubscribed = false;
+        }
+
+        /// <summary>
+        ///     タイトル背景のPV演出を生成し、BGMの演出倍率だけを接続します。
+        /// </summary>
+        private void InitializeIdleVideo(VisualElement titleRoot)
+        {
+            if (!ServiceLocator.TryGetInstance(out MusicPlayer musicPlayer))
+            {
+                Debug.LogWarning($"[{nameof(TitleSceneInitializer)}] BGMが取得できないためPV演出を無効にします。", this);
+                return;
+            }
+
+            GameObject host = new("TitleIdleVideo");
+            host.transform.SetParent(transform, false);
+            _idleVideoView = host.AddComponent<TitleIdleVideoView>();
+            bool initialized = _idleVideoView.Initialize(
+                titleRoot,
+                () => _titleSceneView != null && _titleSceneView.IsIdleVideoAllowed,
+                gain =>
+                {
+                    if (musicPlayer != null)
+                    {
+                        musicPlayer.SetPresentationVolume(gain);
+                    }
+                },
+                () => musicPlayer != null ? musicPlayer.GetVolume() : 0f,
+                Path.Combine(UnityEngine.Application.streamingAssetsPath, "Title", "GamePV.mp4"));
+            if (!initialized)
+            {
+                _idleVideoView.Shutdown();
+                Destroy(host);
+                _idleVideoView = null;
+            }
         }
 
         /// <summary>
@@ -312,7 +390,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void HandleLoadingCompleted(bool success)
         {
-            ApplyInteractionEnabled(true);
+            ApplyInteractionEnabled(!_isResettingSaveData);
         }
 
         /// <summary>
@@ -350,13 +428,16 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         /// <param name="sceneTransitionController"></param>
         /// <param name="audioSettingsContainer"></param>
+        /// <param name="environmentSettingsContainer"></param>
         /// <returns></returns>
         private bool TryGetServiceLocatorInstances(
             out SceneTransitionController sceneTransitionController,
-            out AudioSettingsModuleContainer audioSettingsContainer)
+            out AudioSettingsModuleContainer audioSettingsContainer,
+            out EnvironmentSettingsModuleContainer environmentSettingsContainer)
         {
             sceneTransitionController = null;
             audioSettingsContainer = null;
+            environmentSettingsContainer = null;
 
             if (!ServiceLocator.TryGetInstance(out sceneTransitionController))
             {
@@ -370,6 +451,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: AudioSettingsModuleContainer が ServiceLocator に登録されていません。");
+#endif
+                return false;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out environmentSettingsContainer))
+            {
+#if UNITY_EDITOR
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: EnvironmentSettingsModuleContainer が ServiceLocator に登録されていません。");
 #endif
                 return false;
             }
@@ -482,13 +571,19 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             // リセット前の音量設定を保持する。
             AudioSettingsData preservedAudioSettings = GetPreservedAudioSettings();
             bool canResumeInteraction = false;
+            bool resetSucceeded = false;
+            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+            _resetCancellation = cancellation;
+            CancellationToken lifetimeToken = cancellation.Token;
 
             try
             {
                 await SaveStore.DeleteAsync<SaveData>();
+                lifetimeToken.ThrowIfCancellationRequested();
 
                 // セーブデータをロードして、初期状態に戻す。
                 _loadedSaveData = await LoadSaveData();
+                lifetimeToken.ThrowIfCancellationRequested();
                 if (_loadedSaveData == null)
                 {
                     Debug.LogError(
@@ -497,10 +592,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     return;
                 }
 
-                await ApplyInitialSkillLoadoutAsync();
-                await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
+                bool initialSkillLoadoutApplied = await ApplyInitialSkillLoadoutAsync();
+                lifetimeToken.ThrowIfCancellationRequested();
+                if (!initialSkillLoadoutApplied) { return; }
 
                 canResumeInteraction = ApplyStartDestination();
+                resetSucceeded = canResumeInteraction;
                 if (!canResumeInteraction)
                 {
                     Debug.LogError(
@@ -508,19 +605,51 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                         this);
                 }
             }
+            catch (OperationCanceledException) when (lifetimeToken.IsCancellationRequested)
+            {
+                // タイトル終了後は初期データの表示反映や成功通知へ進みません。
+            }
             catch (Exception exception)
             {
                 Debug.LogException(exception, this);
             }
             finally
             {
-                if (!canResumeInteraction)
+                try
                 {
-                    canResumeInteraction = await TryRecoverStartDestinationAsync();
+                    lifetimeToken.ThrowIfCancellationRequested();
+                    if (!canResumeInteraction)
+                    {
+                        canResumeInteraction = await TryRecoverStartDestinationAsync();
+                    }
+                    if (canResumeInteraction)
+                    {
+                        await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
+                    }
+                    lifetimeToken.ThrowIfCancellationRequested();
+                    if (resetSucceeded)
+                    {
+                        await _eventNotificationView.ShowAsync("ui.notification.save_reset", lifetimeToken);
+                    }
                 }
-
-                ApplyInteractionEnabled(canResumeInteraction);
-                _isResettingSaveData = false;
+                catch (OperationCanceledException) when (lifetimeToken.IsCancellationRequested)
+                {
+                    // タイトル終了による取消しでは通知後の操作再開を行いません。
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception, this);
+                }
+                finally
+                {
+                    _resetCancellation = null;
+                    _isResettingSaveData = false;
+                    if (this != null && _isInitialized && !lifetimeToken.IsCancellationRequested)
+                    {
+                        ApplyInteractionEnabled(canResumeInteraction
+                            && (_loadingScreenController == null || !_loadingScreenController.IsLoading));
+                    }
+                }
             }
         }
 
@@ -531,7 +660,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private async ValueTask<bool> TryRecoverStartDestinationAsync()
         {
             _loadedSaveData = await LoadSaveData();
-            if (_loadedSaveData != null && ApplyStartDestination())
+            if (_loadedSaveData != null
+                && await ApplyInitialSkillLoadoutAsync()
+                && ApplyStartDestination())
             {
                 return true;
             }
@@ -618,17 +749,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///     リセット直後のセーブデータへ初期解放・初期装備スキルを補完して保存する。
+        ///     タイトルで読み込んだセーブデータへ初期解放・初期装備スキルを補完して保存する。
         ///     <para>
         ///         補完処理は常駐シーンの起動時にしか走らないため、起動後のリセットでは
-        ///         ここで明示的に呼び直す必要がある。
+        ///         タイトルのリセット操作だけでなく、体験版終了後の再入場でも呼び直す。
         ///     </para>
         /// </summary>
-        private async ValueTask ApplyInitialSkillLoadoutAsync()
+        /// <returns> 補完が不要、または補完内容を保存できた場合はtrueです。 </returns>
+        private async ValueTask<bool> ApplyInitialSkillLoadoutAsync()
         {
             if (_loadedSaveData == null)
             {
-                return;
+                return false;
             }
 
             if (!ServiceLocator.TryGetInstance(out InitialSkillLoadoutService initialSkillLoadoutService))
@@ -636,23 +768,30 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 Debug.LogError(
                     $"[{nameof(TitleSceneInitializer)}] {nameof(InitialSkillLoadoutService)} が取得できませんでした。",
                     this);
-                return;
+                return false;
             }
 
+            int[] previousUnlockedSkillIds = (int[])_loadedSaveData.SkillUnlock.UnlockedSkillIds.Clone();
+            List<int> previousEquipmentSkillIds = new(_loadedSaveData.SkillBuild.EquipmentSkillIDs);
             if (!initialSkillLoadoutService.TryApply(_loadedSaveData))
             {
-                return;
+                return true;
             }
 
             try
             {
                 await SaveStore.SaveAsync<SaveData>();
+                return true;
             }
             catch (Exception ex)
             {
+                // 保存に失敗した補完結果をキャッシュへ残さず、次の復旧で再保存する。
+                _loadedSaveData.SkillUnlock.SetUnlockedSkillIds(previousUnlockedSkillIds);
+                _loadedSaveData.SkillBuild.SetEquipmentSkillIDs(previousEquipmentSkillIds);
                 Debug.LogError(
                     $"[{nameof(TitleSceneInitializer)}] 初期スキルの保存中にエラーが発生しました。{ex.Message}",
                     this);
+                return false;
             }
         }
 

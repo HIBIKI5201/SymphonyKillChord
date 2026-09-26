@@ -4,22 +4,19 @@
     <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI%20Toolkit/Uss/TopBar.uss?fileID=7433441132597879392&amp;guid=bb5c6f023ae9b494f9e906f04015c185&amp;type=3#TopBar"/>
     <ui:VisualElement name="VisualElement" class="screen-visible" style="position: relative; background-color: rgba(53, 65, 72, 0);">
         <ui:VisualElement name="BackgroundImage" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/BackGround_Home.jpg?fileID=21300000&amp;guid=05ed42cb1b0ef8542bdc9cfce91adc3c&amp;type=3#BackGround_Home&quot;); -unity-background-scale-mode: scale-and-crop;"/>
-        <ui:VisualElement name="CharacterContent" picking-mode="Ignore" style="position: absolute; left: 0; bottom: 0; width: 45%; height: 92%; align-items: flex-start; justify-content: flex-end; -unity-background-scale-mode: scale-and-crop;">
-            <ui:Image name="CharacterImage" picking-mode="Ignore" style="width: 100%; height: 100%; -unity-background-scale-mode: scale-to-fit;"/>
-        </ui:VisualElement>
         <ui:VisualElement name="TopBar" picking-mode="Position" class="home-top-bar" style="top: 5px; left: -1px; width: 732px; -unity-background-scale-mode: stretch-to-fill;">
             <ui:VisualElement name="PointsRow" class="home-points-row">
                 <ui:VisualElement name="RebuildPointBadge" class="home-point-badge" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Label.png?fileID=2800000&amp;guid=14019fcc13d64f041825db46c63bb542&amp;type=3#UI_Label&quot;);">
                     <ui:VisualElement name="RebuildPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ModificationPoint.PNG?fileID=21300000&amp;guid=4e62359d69f84914fb02f7ceb8910bd0&amp;type=3#UI_ModificationPoint&quot;); height: 60px; width: 60px;"/>
                     <ui:VisualElement name="RebuildPointInfo" picking-mode="Ignore" class="home-point-info">
-                        <ui:Label text="改造ポイント" picking-mode="Ignore" class="home-point-name-label"/>
+                        <ui:Label name="RebuildPointsNameLabel" text="改造ポイント" picking-mode="Ignore" class="home-point-name-label"/>
                         <ui:Label name="RebuildPointsValueLabel" text="0" picking-mode="Ignore" class="home-point-value-label"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="UnlockPointBadge" class="home-point-badge" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Label.png?fileID=2800000&amp;guid=14019fcc13d64f041825db46c63bb542&amp;type=3#UI_Label&quot;);">
                     <ui:VisualElement name="UnlockPointIcon" picking-mode="Ignore" class="home-point-icon" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/UI_ResearchPoint.PNG?fileID=21300000&amp;guid=c74ea33a7791b164c9a7d4735e466052&amp;type=3#UI_ResearchPoint&quot;); height: 60px; width: 60px;"/>
                     <ui:VisualElement name="UnlockPointInfo" picking-mode="Ignore" class="home-point-info">
-                        <ui:Label text="解放ポイント" picking-mode="Ignore" class="home-point-name-label"/>
+                        <ui:Label name="UnlockPointsNameLabel" text="解放ポイント" picking-mode="Ignore" class="home-point-name-label"/>
                         <ui:Label name="UnlockPointsValueLabel" text="0" picking-mode="Ignore" class="home-point-value-label"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -43,6 +40,9 @@
                     <ui:Button name="SkillTree" class="button home-image-button ui-se-window-research home-card-small" style="background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/Home/UI_SelectionFrame_SkillTree.png?fileID=2800000&amp;guid=c91513483b1fc6644bfa4cc9af798ff3&amp;type=3#UI_SelectionFrame_SkillTree&quot;); -unity-background-scale-mode: stretch-to-fill; height: 192px; width: 386px;"/>
                 </ui:VisualElement>
             </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="CharacterContent" picking-mode="Ignore" style="position: absolute; left: 0; bottom: 0; width: 45%; height: 92%; align-items: flex-start; justify-content: flex-end; -unity-background-scale-mode: scale-and-crop;">
+            <ui:Image name="CharacterImage" picking-mode="Ignore" style="width: 100%; height: 100%; -unity-background-scale-mode: scale-to-fit;"/>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

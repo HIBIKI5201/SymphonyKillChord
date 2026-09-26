@@ -145,6 +145,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageSequenceVoiceView.Initialize(
                 playerContainer.PlayerView);
 
+            _stageSequenceView.InitializeClearCamera(playerContainer.PlayerView.transform);
+
             _stageSequenceMusicView.Initialize(
                 _musicPlayer);
 
@@ -156,6 +158,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             _container.SequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
+                _stageSequenceVoiceView,
                 _stageSequenceMessageView,
                 _stageStartFadeView,
                 _stageResultView,

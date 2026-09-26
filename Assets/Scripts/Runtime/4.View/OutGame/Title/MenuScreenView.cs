@@ -1,6 +1,9 @@
+using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
 using System;
 using System.Threading;
@@ -25,6 +28,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             Initialize(rootElement);
             RegisterButtonCallbacks();
+            RegisterLocalizedTexts();
         }
 
         /// <summary>
@@ -33,8 +37,31 @@ namespace KillChord.Runtime.View.OutGame.Title
         public override void Dispose()
         {
             _slideMotionHandle.TryCancel();
+            UnbindOptionInput();
             UnregisterButtonCallbacks();
+            foreach (LocalizedElementText localizedText in _localizedTexts)
+            {
+                localizedText.Dispose();
+            }
+
             base.Dispose();
+        }
+
+        /// <summary>
+        ///     コントローラーのOptionsボタンでメニュー画面を閉じられるようにします。
+        /// </summary>
+        /// <param name="playerInputView"> 入力Viewです。nullの場合は購読しません。 </param>
+        public void BindOptionInput(PlayerInputView playerInputView)
+        {
+            UnbindOptionInput();
+
+            if (playerInputView == null)
+            {
+                return;
+            }
+
+            _playerInputView = playerInputView;
+            _playerInputView.OnOptionInput += OnOptionInput;
         }
 
         /// <summary>
@@ -73,6 +100,9 @@ namespace KillChord.Runtime.View.OutGame.Title
         protected override VisualElement CancelTargetElement => _backButton;
 
         private const string BGM_VOLUME_SLIDER_NAME = "BGMVolumeSlider";
+        private const string SOUND_EFFECT_VOLUME_SLIDER_NAME = "SEVolumeSlider";
+        private const string LANGUAGE_PREV_BUTTON_NAME = "LanguagePrevButton";
+        private const string LANGUAGE_NEXT_BUTTON_NAME = "LanguageNextButton";
         private const string CREDIT_BUTTON_NAME = "CreditButton";
         private const string DATA_RESET_BUTTON_NAME = "DataResetButton";
         private const string BACK_BUTTON_NAME = "BackButton";
@@ -81,6 +111,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const string DATA_RESET_CONFIRM_BUTTON_NAME = "DataResetConfirmButton";
         private const string DATA_RESET_CANCEL_BUTTON_NAME = "DataResetCancelButton";
         private const string WINDOW_ROOT_NAME = "Root";
+        private const string DATA_RESET_MESSAGE_NAME = "DataResetMessage";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         /// <summary> ウィンドウのスライドインにかかる時間(秒)。 </summary>
         private const float SLIDE_DURATION = 0.2f;
@@ -90,6 +122,9 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const Ease SLIDE_EASE = Ease.OutCirc;
 
         private SliderInt _bgmVolumeSlider;
+        private SliderInt _soundEffectVolumeSlider;
+        private Button _languagePrevButton;
+        private Button _languageNextButton;
         private Button _creditButton;
         private Button _dataResetButton;
 
@@ -99,10 +134,13 @@ namespace KillChord.Runtime.View.OutGame.Title
         private VisualElement _windowRoot;
 
         private VisualElement _dataResetDialog;
+        private Label _dataResetMessageLabel;
         private Button _dataResetConfirmButton;
         private Button _dataResetCancelButton;
 
         private MotionHandle _slideMotionHandle;
+        private LocalizedElementText[] _localizedTexts = Array.Empty<LocalizedElementText>();
+        private PlayerInputView _playerInputView;
 
         private IDisposable _creditButtonActivation;
         private IDisposable _dataResetButtonActivation;
@@ -129,6 +167,12 @@ namespace KillChord.Runtime.View.OutGame.Title
 
             _bgmVolumeSlider = rootElement.Q<SliderInt>(BGM_VOLUME_SLIDER_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {BGM_VOLUME_SLIDER_NAME}が見つかりません。");
+            _soundEffectVolumeSlider = rootElement.Q<SliderInt>(SOUND_EFFECT_VOLUME_SLIDER_NAME)
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {SOUND_EFFECT_VOLUME_SLIDER_NAME}が見つかりません。");
+            _languagePrevButton = rootElement.Q<Button>(LANGUAGE_PREV_BUTTON_NAME)
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {LANGUAGE_PREV_BUTTON_NAME}が見つかりません。");
+            _languageNextButton = rootElement.Q<Button>(LANGUAGE_NEXT_BUTTON_NAME)
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {LANGUAGE_NEXT_BUTTON_NAME}が見つかりません。");
             _creditButton = rootElement.Q<Button>(CREDIT_BUTTON_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {CREDIT_BUTTON_NAME}が見つかりません。");
             _dataResetButton = rootElement.Q<Button>(DATA_RESET_BUTTON_NAME)
@@ -141,6 +185,8 @@ namespace KillChord.Runtime.View.OutGame.Title
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {WINDOW_ROOT_NAME}が見つかりません。");
             _dataResetDialog = rootElement.Q<VisualElement>(DATA_RESET_DIALOG_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {DATA_RESET_DIALOG_NAME}が見つかりません。");
+            _dataResetMessageLabel = rootElement.Q<Label>(DATA_RESET_MESSAGE_NAME)
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {DATA_RESET_MESSAGE_NAME}が見つかりません。");
             _dataResetConfirmButton = rootElement.Q<Button>(DATA_RESET_CONFIRM_BUTTON_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {DATA_RESET_CONFIRM_BUTTON_NAME}が見つかりません。");
             _dataResetCancelButton = rootElement.Q<Button>(DATA_RESET_CANCEL_BUTTON_NAME)
@@ -153,6 +199,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void RegisterButtonCallbacks()
         {
             _bgmVolumeSlider.MakeNavigable();
+            _soundEffectVolumeSlider.MakeNavigable();
             _creditButton.MakeNavigable();
             _dataResetButton.MakeNavigable();
             _dataResetConfirmButton.MakeNavigable();
@@ -174,6 +221,8 @@ namespace KillChord.Runtime.View.OutGame.Title
             _dataResetDialog.RegisterCallback<NavigationCancelEvent>(
                 HandleDataResetDialogNavigationCancelHandler, TrickleDown.TrickleDown);
 
+            RootElement.RegisterCallback<NavigationMoveEvent>(
+                HandleMenuNavigationMoveHandler, TrickleDown.TrickleDown);
             // ScreenViewBase 側のキャンセル処理(フォーカス依存でバブリングする)より
             // 先に確実に捕まえるため、画面ルートにもトリクルダウンで購読しておく。
             RootElement.RegisterCallback<NavigationCancelEvent>(
@@ -196,8 +245,152 @@ namespace KillChord.Runtime.View.OutGame.Title
             _dataResetDialog.UnregisterCallback<PointerDownEvent>(OnDataResetDialogPointerDown);
             _dataResetDialog.UnregisterCallback<NavigationCancelEvent>(
                 HandleDataResetDialogNavigationCancelHandler, TrickleDown.TrickleDown);
+            RootElement.UnregisterCallback<NavigationMoveEvent>(
+                HandleMenuNavigationMoveHandler, TrickleDown.TrickleDown);
             RootElement.UnregisterCallback<NavigationCancelEvent>(
                 HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
+        }
+
+        /// <summary>
+        ///     音量・言語・下段ボタンを配置順に移動し、左右の音量調整はスライダーへ委ねます。
+        /// </summary>
+        /// <param name="navigationEvent"> ナビゲーション移動イベントです。 </param>
+        private void HandleMenuNavigationMoveHandler(NavigationMoveEvent navigationEvent)
+        {
+            if (!IsShowCompleted || RootElement.panel == null || !RootElement.enabledInHierarchy
+                || _windowRoot.resolvedStyle.display == DisplayStyle.None
+                || _dataResetDialog.resolvedStyle.display != DisplayStyle.None)
+            {
+                return;
+            }
+
+            VisualElement source = navigationEvent.target as VisualElement;
+            if (source == null || !_windowRoot.Contains(source) || !source.enabledInHierarchy)
+            {
+                return;
+            }
+
+            VisualElement destination = null;
+            // スライダー内部の入力要素へフォーカスしている場合も、音量行として扱う。
+            while (source != null && source != _windowRoot)
+            {
+                destination = GetMenuNavigationDestination(source, navigationEvent.direction);
+                if (destination != null)
+                {
+                    break;
+                }
+
+                source = source.parent;
+            }
+
+            if (destination == null || !destination.enabledInHierarchy
+                || !destination.canGrabFocus || destination.panel != RootElement.panel
+                || destination.resolvedStyle.display == DisplayStyle.None
+                || destination.resolvedStyle.visibility != Visibility.Visible)
+            {
+                return;
+            }
+
+            // 標準の位置判定やスライダーによる二重処理を抑え、指定先だけへ移動する。
+            navigationEvent.StopPropagation();
+            RootElement.panel.focusController?.IgnoreEvent(navigationEvent);
+            destination.Focus();
+        }
+
+        /// <summary>
+        ///     タイトル設定内の移動先を返します。音量の左右入力など、標準処理へ委ねる場合はnullです。
+        /// </summary>
+        /// <param name="source"> 移動元の要素です。 </param>
+        /// <param name="direction"> 入力された移動方向です。 </param>
+        private VisualElement GetMenuNavigationDestination(
+            VisualElement source,
+            NavigationMoveEvent.Direction direction)
+        {
+            bool isDown = direction == NavigationMoveEvent.Direction.Down;
+            if (isDown || direction == NavigationMoveEvent.Direction.Up)
+            {
+                if (source == _bgmVolumeSlider)
+                {
+                    return isDown ? _soundEffectVolumeSlider : _bgmVolumeSlider;
+                }
+                if (source == _soundEffectVolumeSlider)
+                {
+                    return isDown ? _languagePrevButton : _bgmVolumeSlider;
+                }
+                if (source == _languagePrevButton)
+                {
+                    return isDown ? _dataResetButton : _soundEffectVolumeSlider;
+                }
+                if (source == _languageNextButton)
+                {
+                    return isDown ? _creditButton : _soundEffectVolumeSlider;
+                }
+                if (source == _dataResetButton)
+                {
+                    return isDown ? _dataResetButton : _languagePrevButton;
+                }
+                if (source == _creditButton)
+                {
+                    return isDown ? _creditButton : _languageNextButton;
+                }
+            }
+            else if (direction == NavigationMoveEvent.Direction.Left
+                || direction == NavigationMoveEvent.Direction.Right)
+            {
+                bool isRight = direction == NavigationMoveEvent.Direction.Right;
+                if (source == _languagePrevButton || source == _languageNextButton)
+                {
+                    return isRight ? _languageNextButton : _languagePrevButton;
+                }
+                if (source == _dataResetButton || source == _creditButton)
+                {
+                    return isRight ? _creditButton : _dataResetButton;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     Optionsボタンの購読を解除します。
+        /// </summary>
+        private void UnbindOptionInput()
+        {
+            if (_playerInputView == null)
+            {
+                return;
+            }
+
+            _playerInputView.OnOptionInput -= OnOptionInput;
+            _playerInputView = null;
+        }
+
+        /// <summary>
+        ///     コントローラーのOptionsボタンでメニュー画面を閉じる。
+        ///     <para>
+        ///         メニュー画面表示中はタイトル画面側の操作が禁止されるため、
+        ///         開く操作と閉じる操作をそれぞれの画面で受け持つことで
+        ///         Optionsボタンの開閉トグルを成立させる。
+        ///     </para>
+        /// </summary>
+        /// <param name="inputContext"> 入力情報。 </param>
+        private void OnOptionInput(InputContext<float> inputContext)
+        {
+            // 押した瞬間のみ反応させる。離した際の通知では閉じない。
+            // フェードイン中は同一入力で開いた直後の可能性があるため、表示完了まで受け付けない。
+            if (!IsShowCompleted || !_backButton.enabledInHierarchy
+                || inputContext.Phase != UnityEngine.InputSystem.InputActionPhase.Performed)
+            {
+                return;
+            }
+
+            // データリセット確認ダイアログ表示中は、そちらの操作を優先する。
+            if (_dataResetDialog.resolvedStyle.display != DisplayStyle.None)
+            {
+                return;
+            }
+
+            OutGameUIEvent.OnScreenClosed?.Invoke();
         }
 
         /// <summary>
@@ -226,6 +419,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _dataResetDialog.style.display = DisplayStyle.None;
             _windowRoot.style.display = DisplayStyle.Flex;
+            SetInitialFocusElement(_dataResetButton);
+            RestoreFocus();
             OutGameUIEvent.OnDataResetButtonClicked?.Invoke();
         }
 
@@ -236,6 +431,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _dataResetDialog.style.display = DisplayStyle.None;
             _windowRoot.style.display = DisplayStyle.Flex;
+            SetInitialFocusElement(_dataResetButton);
+            RestoreFocus();
         }
 
         /// <summary>
@@ -321,6 +518,39 @@ namespace KillChord.Runtime.View.OutGame.Title
         private void SetWindowTranslateX(float x)
         {
             _windowRoot.style.translate = new Translate(x, 0);
+        }
+
+        /// <summary>
+        ///     静的なボタン・ラベルのテキストをUICommonテーブルへ連携する。
+        /// </summary>
+        private void RegisterLocalizedTexts()
+        {
+            Label soundEffectHeading = RootElement.Q<Label>("SoundEffectHeading");
+            Label languageHeading = RootElement.Q<Label>("LanguageHeading");
+            Label dataResetWarning = RootElement.Q<Label>("DataResetWarning");
+            _localizedTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.sound_effect", text => soundEffectHeading.text = text, "効果音"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.language", text => languageHeading.text = text, "言語"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.data_reset_warning", text => dataResetWarning.text = text, "※削除するとデータは戻せません。"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.data_reset", text => _dataResetButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.title.menu.credit", text => _creditButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.title.menu.data_reset_confirm_message",
+                    text => _dataResetMessageLabel.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.title.menu.data_reset_confirm",
+                    text => _dataResetConfirmButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.close", text => _dataResetCancelButton.text = text),
+            };
         }
     }
 }

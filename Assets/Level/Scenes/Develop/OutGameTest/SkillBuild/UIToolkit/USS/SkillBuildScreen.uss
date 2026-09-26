@@ -475,6 +475,14 @@
 }
 
 .skill-element-list {
+    flex-shrink: 0;
+}
+
+/* 自動幅のグループに対する百分率余白を避け、末尾カードまでスクロール範囲に含める。 */
+.skill-element-list .draggable {
+    flex-shrink: 0;
+    margin-left: 16px;
+    margin-right: 16px;
 }
 
 .skill-group-divider {

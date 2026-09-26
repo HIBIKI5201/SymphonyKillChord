@@ -1,5 +1,6 @@
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using UnityEngine.UIElements;
 
@@ -25,6 +26,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _outGameUIEvent = outGameUIEvent ?? throw new ArgumentNullException(nameof(outGameUIEvent));
             _resetButton = rootElement.Q<Button>(RESET_BUTTON_NAME)
                 ?? throw new InvalidOperationException($"{RESET_BUTTON_NAME} が見つかりません。");
+            Label resetButtonLabel = _resetButton.Q<Label>(RESET_BUTTON_LABEL_NAME)
+                ?? throw new InvalidOperationException($"{RESET_BUTTON_LABEL_NAME} が見つかりません。");
             _dialog = rootElement.Q<VisualElement>(RESET_DIALOG_NAME)
                 ?? throw new InvalidOperationException($"{RESET_DIALOG_NAME} が見つかりません。");
             _messageLabel = _dialog.Q<Label>(RESET_MESSAGE_NAME)
@@ -45,6 +48,15 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _cancelButtonActivation = _cancelButton.RegisterActivation(HandleCancelButtonClickedHandler);
             _dialog.RegisterCallback<NavigationCancelEvent>(
                 HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
+            _localizedTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill_tree.reset", text => resetButtonLabel.text = text, resetButtonLabel.text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill_tree.reset_confirm", text => _confirmButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill_tree.reset_cancel", text => _cancelButton.text = text),
+            };
             Hide();
         }
 
@@ -54,7 +66,11 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <param name="refundPoints"> 返却予定の研究ポイント。 </param>
         public void Show(int refundPoints)
         {
-            _messageLabel.text = $"スキルツリーをリセットしますか？\n返却される研究ポイント：{refundPoints}";
+            _messageLocalizedText?.Dispose();
+            _messageLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_tree.reset_message_format", text => _messageLabel.text = text,
+                $"スキルツリーをリセットしますか？\n返却される研究ポイント：{refundPoints}",
+                new object[] { refundPoints });
             _confirmButton.SetEnabled(refundPoints > 0);
             _dialog.style.display = DisplayStyle.Flex;
         }
@@ -99,18 +115,25 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// </summary>
         public void Dispose()
         {
+            _messageLocalizedText?.Dispose();
             _resetButtonActivation?.Dispose();
             _confirmButtonActivation?.Dispose();
             _cancelButtonActivation?.Dispose();
             _dialog.UnregisterCallback<NavigationCancelEvent>(
                 HandleDialogNavigationCancelHandler, TrickleDown.TrickleDown);
+            foreach (LocalizedElementText localizedText in _localizedTexts)
+            {
+                localizedText.Dispose();
+            }
         }
 
         private const string RESET_BUTTON_NAME = "ResetButton";
+        private const string RESET_BUTTON_LABEL_NAME = "ResetButtonLabel";
         private const string RESET_DIALOG_NAME = "SkillTreeResetDialog";
         private const string RESET_MESSAGE_NAME = "ResetMessage";
         private const string RESET_CONFIRM_BUTTON_NAME = "ResetConfirmButton";
         private const string RESET_CANCEL_BUTTON_NAME = "ResetCancelButton";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         private readonly OutGameUIEvent _outGameUIEvent;
         private readonly Button _resetButton;
@@ -118,6 +141,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly Label _messageLabel;
         private readonly Button _confirmButton;
         private readonly Button _cancelButton;
+        private readonly LocalizedElementText[] _localizedTexts;
+        private LocalizedElementText _messageLocalizedText;
         private IDisposable _resetButtonActivation;
         private IDisposable _confirmButtonActivation;
         private IDisposable _cancelButtonActivation;

@@ -19,7 +19,8 @@
             </ui:VisualElement>
             <ui:VisualElement name="SoundPanel" class="setting-panel" style="display: none;">
                 <ui:VisualElement class="setting-panel-top-bar">
-                    <ui:Label text="オーディオ設定" class="setting-panel-title"/>
+                    <ui:Label name="AudioPanelTitle" text="オーディオ設定" class="setting-panel-title"/>
+                    <ui:Button text="&lt;" name="SoundPanelBackButton" class="setting-panel-back-button ui-se-cancel"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-title-divider"/>
                 <ui:VisualElement class="setting-row">
@@ -52,12 +53,13 @@
             </ui:VisualElement>
             <ui:VisualElement name="EnvironmentPanel" class="setting-panel" style="display: none;">
                 <ui:VisualElement class="setting-panel-top-bar">
-                    <ui:Label text="環境設定" class="setting-panel-title"/>
+                    <ui:Label name="EnvironmentPanelTitle" text="環境設定" class="setting-panel-title"/>
+                    <ui:Button text="&lt;" name="EnvironmentPanelBackButton" class="setting-panel-back-button ui-se-cancel"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-title-divider"/>
                 <ui:VisualElement class="setting-row">
                     <ui:VisualElement class="setting-row-header">
-                        <ui:Label text="画面モード" class="setting-row-label"/>
+                        <ui:Label name="ScreenModeHeading" text="画面モード" class="setting-row-label"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="setting-select-row">
                         <ui:Button text="&lt;" name="ScreenModePrevButton" class="setting-select-arrow-button ui-se-select"/>
@@ -67,7 +69,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-row">
                     <ui:VisualElement class="setting-row-header">
-                        <ui:Label text="解像度" class="setting-row-label"/>
+                        <ui:Label name="ResolutionHeading" text="解像度" class="setting-row-label"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="setting-select-row">
                         <ui:Button text="&lt;" name="ResolutionPrevButton" class="setting-select-arrow-button ui-se-select"/>
@@ -77,7 +79,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-row">
                     <ui:VisualElement class="setting-row-header">
-                        <ui:Label text="画質" class="setting-row-label"/>
+                        <ui:Label name="QualityHeading" text="画質" class="setting-row-label"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="setting-select-row">
                         <ui:Button text="&lt;" name="QualityLevelPrevButton" class="setting-select-arrow-button ui-se-select"/>
@@ -87,7 +89,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-row">
                     <ui:VisualElement class="setting-row-header">
-                        <ui:Label text="明るさ" class="setting-row-label"/>
+                        <ui:Label name="BrightnessHeading" text="明るさ" class="setting-row-label"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="setting-control-row">
                         <ui:Label text="5" name="BrightnessValueLabel" class="setting-value-label"/>
@@ -96,7 +98,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-row">
                     <ui:VisualElement class="setting-row-header">
-                        <ui:Label text="言語" class="setting-row-label"/>
+                        <ui:Label name="LanguageHeading" text="言語" class="setting-row-label"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="setting-select-row">
                         <ui:Button text="&lt;" name="LanguagePrevButton" class="setting-select-arrow-button ui-se-select"/>
@@ -106,12 +108,21 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-row">
                     <ui:VisualElement class="setting-row-header">
-                        <ui:Label text="振動" class="setting-row-label"/>
+                        <ui:Label name="VibrationHeading" text="振動" class="setting-row-label"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="setting-select-row">
                         <ui:Button text="&lt;" name="VibrationPrevButton" class="setting-select-arrow-button ui-se-select"/>
                         <ui:Label text="強い" name="VibrationValueLabel" class="setting-select-value-label"/>
                         <ui:Button text="&gt;" name="VibrationNextButton" class="setting-select-arrow-button ui-se-select"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label name="RhythmOffsetHeading" text="リズム判定タイミング" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-control-row">
+                        <ui:Label text="±0.00秒" name="RhythmOffsetValueLabel" class="setting-value-label"/>
+                        <ui:SliderInt name="RhythmOffsetSlider" low-value="-6" high-value="6" value="0" show-input-field="false" page-size="1" class="setting-slider"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-menu-spacer"/>
@@ -120,10 +131,10 @@
         </ui:VisualElement>
         <ui:VisualElement name="ReturnToTitleDialog" picking-mode="Position" class="setting-dialog-overlay" style="display: none;">
             <ui:VisualElement class="setting-dialog">
-                <ui:Label text="タイトル画面に戻りますか？" class="setting-dialog-message"/>
+                <ui:Label name="ReturnToTitleMessage" text="タイトル画面に戻りますか？" class="setting-dialog-message"/>
                 <ui:VisualElement class="setting-dialog-buttons">
-                    <ui:Button text="タイトル画面に戻る" name="ConfirmReturnToTitleButton" class="setting-dialog-button setting-dialog-confirm"/>
-                    <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button ui-se-cancel"/>
+                    <ui:Button text="タイトル画面に戻る" name="ConfirmReturnToTitleButton" class="setting-dialog-button btn-skin"/>
+                    <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button btn-skin ui-se-cancel"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

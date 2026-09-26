@@ -69,6 +69,13 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             for (int i = 0; i < _slotElements.Count; i++)
             {
+                bool isSlotActive = i < slots.Count;
+                _slotElements[i].style.display = isSlotActive ? DisplayStyle.Flex : DisplayStyle.None;
+                if (!isSlotActive)
+                {
+                    continue;
+                }
+
                 BindSlot(_slotElements[i], _slotSkillIds[i]);
             }
         }

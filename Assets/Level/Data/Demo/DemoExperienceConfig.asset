@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f7f0738603c6254c963282eacef5985, type: 3}
   m_Name: DemoExperienceConfig
   m_EditorClassIdentifier: KillChord.Demo::KillChord.Demo.DemoExperienceConfig
-  _homeTimeLimitSeconds: 180
-  _overallTimeLimitSeconds: 480
+  _homeTimeLimitSeconds: 90
+  _overallTimeLimitSeconds: 300
+  _overallTimerStartPoint: 1
   _endSceneName: DemoEnd
   _titleSceneName: Title

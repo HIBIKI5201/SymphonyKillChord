@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Haptics;
+using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.Adaptor.InGame.Target;
@@ -165,6 +166,13 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 _rhythmGuideView,
                 new RhythmGuidePostEffectViewModel(_rhythmGuidePostEffectView, _effectConfig));
 
+            _targetFeedbackPresenter?.Dispose();
+            _targetFeedbackPresenter = new RhythmGuideTargetFeedbackPresenter(
+                playerAttackSignal,
+                () => TutorialAttackTargetQuery.GetTargetBeatCount(
+                    selectedBattleStageState, missionRuntimeServiceProvider.Invoke()),
+                _rhythmGuideView);
+
             // ゲームパッド振動は演出用途のoptional機能のため、Configが未ロードでもモジュール自体は成功させ、
             // 振動関連の生成のみスキップする。
             if (_loadedHapticsConfig == null)
@@ -192,7 +200,11 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             _gamepadHapticsView.Initialize(_loadedHapticsConfig, environmentSettingsViewModel);
-            _gamepadHapticsPresenter = new GamepadHapticsPresenter(playerAttackSignal, _gamepadHapticsView);
+            _gamepadHapticsPresenter = new GamepadHapticsPresenter(
+                playerAttackSignal,
+                _gamepadHapticsView,
+                () => TutorialAttackTargetQuery.GetTargetBeatCount(
+                    selectedBattleStageState, missionRuntimeServiceProvider.Invoke()));
 
             return true;
         }
@@ -204,6 +216,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
         {
             _postEffectPresenter?.Dispose();
             _postEffectPresenter = null;
+            _targetFeedbackPresenter?.Dispose();
+            _targetFeedbackPresenter = null;
             _gamepadHapticsPresenter?.Dispose();
             _gamepadHapticsPresenter = null;
             ReleaseLoadedHapticsConfig();
@@ -228,6 +242,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         private bool _isRegisteredToPlayDirector;
         private RhythmGuidePostEffectPresenter _postEffectPresenter;
+        private RhythmGuideTargetFeedbackPresenter _targetFeedbackPresenter;
         private GamepadHapticsPresenter _gamepadHapticsPresenter;
         private GamepadHapticsView _gamepadHapticsView;
         private GamepadHapticsConfig _loadedHapticsConfig;

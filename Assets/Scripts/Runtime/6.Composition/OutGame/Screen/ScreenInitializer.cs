@@ -125,6 +125,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 || SaveStore.Get<SaveData>().Tutorial.Phase >= TutorialPhase.BattleCompleted)
             {
                 _screenController.ShowHome();
+                RefreshHeaderPointsAsync();
             }
             return true;
         }
@@ -140,12 +141,22 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _isSubscribed = false;
 
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
-            ServiceLocator.UnregisterInstance<BattlePreparationScreen>();
+            ServiceLocator.UnregisterInstance<SkillTreeScreenView>();
             ServiceLocator.UnregisterInstance<StageSelectScreenView>();
             ServiceLocator.UnregisterInstance<HomeScreenView>();
             ServiceLocator.UnregisterInstance<SettingScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
+            if (_registeredScreenStateRepository != null
+                && ServiceLocator.TryGetInstance(out IScreenStateRepository registeredRepository)
+                && ReferenceEquals(registeredRepository, _registeredScreenStateRepository))
+            {
+                ServiceLocator.UnregisterInstance<IScreenStateRepository>();
+            }
+            _registeredScreenStateRepository = null;
+            _homeScreenView = null;
+            _skillBuildScreenView = null;
+            _skillTreeScreenView = null;
             _screenStateRepository = null;
 
             _screenRuleDataKey.ReleaseLoadedAsset(this);
@@ -225,6 +236,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return;
             }
 
+            // Cancelが先に通知された場合も、同じEsc入力で閉じた設定を開き直さない。
+            if (_settingClosedFrame == Time.frameCount)
+            {
+                return;
+            }
+
             // 既に設定画面を表示中の場合、連打で遷移履歴に同じ画面が積み重なってしまうため
             // 何もしない。
             if (_screenStateRepository != null
@@ -281,7 +298,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             VisualElement skillTreeRoot = rootElement.Q<VisualElement>(SKILLTREESCREEN_NAME);
             VisualElement playerStatusRoot = skillTreeRoot.Q<VisualElement>(SKILLTREESCREEN_PLAYERSTATUS_NAME);
             VisualElement skillBuildRoot = rootElement.Q<VisualElement>(SKILLBUILDSCREEN_NAME);
-            VisualElement battlePreparationRoot = rootElement.Q<VisualElement>(BATTLEPREPARATIONSCREEN_NAME);
             VisualElement settingRoot = rootElement.Q<VisualElement>(SETTINGSCREEN_NAME);
 
             // 各画面のルート要素が見つからない場合は、エラーログを出力して初期化を中断します。
@@ -320,13 +336,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 #endif
                 return false;
             }
-            if (battlePreparationRoot == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogError($"[{nameof(ScreenInitializer)}] {BATTLEPREPARATIONSCREEN_NAME} が見つかりませんでした。", this);
-#endif
-                return false;
-            }
             if (settingRoot == null)
             {
 #if UNITY_EDITOR
@@ -340,14 +349,14 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _getHomePointsUseCase = new GetHomePointsUseCase();
             StageSelectScreenView stageSelectScreenView = new StageSelectScreenView(stageSelectRoot, _outGameUIEvent);
             SkillTreeScreenView skillTreeScreenView = new SkillTreeScreenView(skillTreeRoot, _outGameUIEvent);
-            PlayerStatusScreenView playerStatusScreenView = new PlayerStatusScreenView(playerStatusRoot, _outGameUIEvent, null, null, null, null, null);
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent, _comboHexIcon);
-            BattlePreparationScreen battlePreparationScreen = new BattlePreparationScreen(battlePreparationRoot, _outGameUIEvent);
+            _skillTreeScreenView = skillTreeScreenView;
+            _skillBuildScreenView = skillBuildScreenView;
             SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
-            ServiceLocator.RegisterInstance(battlePreparationScreen);
+            ServiceLocator.RegisterInstance(skillTreeScreenView);
             // StageSelectモジュールから強制出撃中の戻る操作を制限する。
             ServiceLocator.RegisterInstance(stageSelectScreenView);
             // HomeCharacterPreviewInitializer から取得できるように登録する。
@@ -360,7 +369,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 stageSelectScreenView,
                 skillTreeScreenView,
                 skillBuildScreenView,
-                battlePreparationScreen,
                 settingScreenView);
 
             _screenViewRegistry = screenViewRegistry;
@@ -394,6 +402,20 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
+            if (!ServiceLocator.TryGetInstance(out IScreenStateRepository registeredRepository))
+            {
+                if (ServiceLocator.RegisterInstance<IScreenStateRepository>(screenStateRepository))
+                {
+                    _registeredScreenStateRepository = screenStateRepository;
+                }
+            }
+            else if (!ReferenceEquals(registeredRepository, screenStateRepository))
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ScreenInitializer)}] 画面状態は登録済みのため、既存の登録を維持します。",
+                    this);
+            }
+
             _isInitialized = true;
             _isSceneTransitioning = false;
             return true;
@@ -409,7 +431,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownStageSelectionScreen += HandleStageSelectionScreenShown;
             _outGameUIEvent.OnShownSkillTreeScreen += HandleSkillTreeScreenShown;
             _outGameUIEvent.OnShownSkillBuildScreen += HandleSkillBuildScreenShown;
-            _outGameUIEvent.OnShownBattlePreparationScreen += HandleBattlePreparationScreenShown;
             _outGameUIEvent.OnShownSettingScreen += HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed += HandleScreenClosed;
             _outGameUIEvent.OnStartGame += HandleStartGame;
@@ -428,7 +449,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _outGameUIEvent.OnShownStageSelectionScreen -= HandleStageSelectionScreenShown;
             _outGameUIEvent.OnShownSkillTreeScreen -= HandleSkillTreeScreenShown;
             _outGameUIEvent.OnShownSkillBuildScreen -= HandleSkillBuildScreenShown;
-            _outGameUIEvent.OnShownBattlePreparationScreen -= HandleBattlePreparationScreenShown;
             _outGameUIEvent.OnShownSettingScreen -= HandleSettingsShown;
             _outGameUIEvent.OnScreenClosed -= HandleScreenClosed;
             _outGameUIEvent.OnStartGame -= HandleStartGame;
@@ -457,16 +477,31 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             _screenController.ShowHome();
-            RefreshHomePointsAsync();
+            RefreshHeaderPointsAsync();
         }
 
         /// <summary>
-        ///     ホーム画面のトップバーに表示するポイントを最新の状態へ更新します。
+        ///     共通ヘッダーの残高を更新します。改造・研究で操作中の残高は各画面の更新処理に委ねます。
         /// </summary>
-        private async void RefreshHomePointsAsync()
+        private async void RefreshHeaderPointsAsync()
         {
-            HomePoints points = await _getHomePointsUseCase.ExecuteAsync();
-            _homeScreenView?.SetPoints(points.RebuildPoints, points.UnlockPoints);
+            HomeScreenView homeScreenView = _homeScreenView;
+            try
+            {
+                HomePoints points = await _getHomePointsUseCase.ExecuteAsync();
+                if (!_isInitialized || !ReferenceEquals(homeScreenView, _homeScreenView))
+                {
+                    return;
+                }
+
+                homeScreenView?.SetPoints(points.RebuildPoints, points.UnlockPoints);
+                _skillBuildScreenView?.SetUnlockPoints(points.UnlockPoints);
+                _skillTreeScreenView?.SetRebuildPoints(points.RebuildPoints);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -488,6 +523,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             if (IsForcedSortieMode) { return; }
 
             _screenController.ShowSkillTree();
+            RefreshHeaderPointsAsync();
         }
 
         /// <summary>
@@ -498,6 +534,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             if (IsForcedSortieMode) { return; }
 
             _screenController.ShowSkillBuild();
+            RefreshHeaderPointsAsync();
         }
 
         /// <summary>
@@ -511,23 +548,19 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         }
 
         /// <summary>
-        ///     戦闘準備画面表示イベントを処理します。
-        /// </summary>
-        private void HandleBattlePreparationScreenShown()
-        {
-            if (IsForcedSortieMode) { return; }
-
-            _screenController.ShowBattlePreparation();
-        }
-
-        /// <summary>
         ///     画面クローズイベントを処理します。
         /// </summary>
         private void HandleScreenClosed()
         {
             if (IsForcedSortieMode) { return; }
 
+            if (_screenStateRepository.TransitionState.CurrentScreenId == ScreenId.Setting)
+            {
+                _settingClosedFrame = Time.frameCount;
+            }
+
             _screenController.CloseCurrent();
+            RefreshHeaderPointsAsync();
         }
 
         /// <summary>
@@ -675,7 +708,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private const string SKILLTREESCREEN_NAME = "SkillTreeContainer";
         private const string SKILLTREESCREEN_PLAYERSTATUS_NAME = "PlayerStatus";
         private const string SKILLBUILDSCREEN_NAME = "SkillBuildContainer";
-        private const string BATTLEPREPARATIONSCREEN_NAME = "BattlePreparationContainer";
         private const string SETTINGSCREEN_NAME = "SettingContainer";
 
         [SerializeField]
@@ -696,14 +728,18 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private SceneTransitionController _sceneTransitionController;
         private ScreenRuleData _loadedScreenRuleData;
         private HomeScreenView _homeScreenView;
+        private SkillBuildScreenView _skillBuildScreenView;
+        private SkillTreeScreenView _skillTreeScreenView;
         private GetHomePointsUseCase _getHomePointsUseCase;
         private bool _isInitialized = false;
         private bool _isSubscribed;
         private bool _isLoadingSubscribed;
         private LoadingScreenController _loadingScreenController;
         private bool _isOptionInputSubscribed;
+        private int _settingClosedFrame = -1;
         private PlayerInputView _playerInputView;
         private IScreenStateRepository _screenStateRepository;
+        private IScreenStateRepository _registeredScreenStateRepository;
         private bool _isSceneTransitioning = false;
 
     }

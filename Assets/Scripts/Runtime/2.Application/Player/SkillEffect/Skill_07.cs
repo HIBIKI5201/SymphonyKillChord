@@ -60,11 +60,11 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             _hitCounts.Clear();
             ExecuteAttacks(targets, attackCount, context.IsJustHit);
 
-            // 攻撃力減少デバフを適用し、プレイヤーの攻撃力増加量を計算
+            // 敵の攻撃力は元の単位で減らし、プレイヤーへ加算する分だけ攻撃力の単位を合わせる。
             float playerIncreaseAmount = ApplyDebuffs(
                 reductionRate,
                 reductionCap,
-                durationSeconds);
+                durationSeconds) * PLAYER_DAMAGE_UNIT_MULTIPLIER;
 
             context.PlayerEntity.StatusEffectSystem.Add(
                 new AttackPowerIncreaseBuff(
@@ -77,6 +77,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 $"持続時間:{durationSeconds}秒、" +
                 $"プレイヤー増加量:{playerIncreaseAmount}");
         }
+
+        private const float PLAYER_DAMAGE_UNIT_MULTIPLIER = 10f;
 
         private readonly IAttackController _attackController;
         private readonly Dictionary<CharacterEntity, int> _hitCounts = new();

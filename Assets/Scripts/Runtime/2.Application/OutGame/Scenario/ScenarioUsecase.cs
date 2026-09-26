@@ -18,13 +18,16 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
             ScenarioHandlerRepo handlerRepo,
             ITextAdvanceWaiter textAdvanceWaiter,
             IScenarioCompletionNotifier completionNotifier,
+            IScenarioAutoAdvanceNotifier autoAdvanceNotifier,
             IScenarioSettingsRepository settingsRepository)
         {
             _scenarioRepo = repo;
             _handlerRepo = handlerRepo;
             _textAdvanceWaiter = textAdvanceWaiter;
             _completionNotifier = completionNotifier;
+            _autoAdvanceNotifier = autoAdvanceNotifier;
             _settingsRepository = settingsRepository;
+            _autoAdvanceNotifier.NotifyAutoAdvanceChanged(IsAutoAdvance);
         }
 
         /// <summary>
@@ -37,6 +40,11 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                 throw new ArgumentException("シナリオIDが設定されていません。", nameof(scenarioId));
             }
 
+            if (IsPlaying)
+            {
+                throw new InvalidOperationException("シナリオは既に再生中です。");
+            }
+            ResetPlaybackState();
             using CancellationTokenSource source = new CancellationTokenSource();
             _playCts = source;
             CancellationToken token = source.Token;
@@ -51,18 +59,32 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                     IScenarioEvent e = data.Events[i];
                     token.ThrowIfCancellationRequested();
 
-                    await EmitAsync(e, token);
-                    await WaitWhilePausedAsync(token);
                     bool isLastEvent = i == data.Events.Count - 1;
                     bool shouldWaitForAdvance = e.RequirePlayerAdvance
                         && (!isLastEvent || _settingsRepository.WaitForInputOnLastText);
-                    if (shouldWaitForAdvance)
+                    using CancellationTokenSource advanceSource =
+                        CancellationTokenSource.CreateLinkedTokenSource(token);
+                    // 表示完了と待機開始の隙間で入力を失わないよう、現在行の受付を先に開く。
+                    Task advanceTask = shouldWaitForAdvance
+                        ? _textAdvanceWaiter.WaitNextAsync(advanceSource.Token).AsTask()
+                        : null;
+                    try
                     {
-                        await WaitAdvanceAsync(token);
+                        await EmitAsync(e, token);
+                        await WaitWhilePausedAsync(token);
+                        if (shouldWaitForAdvance)
+                        {
+                            await WaitAdvanceAsync(advanceTask, token);
+                        }
+                    }
+                    finally
+                    {
+                        // Autoと手動の先着一回で閉じ、余った入力や待機を次行へ渡さない。
+                        advanceSource.Cancel();
                     }
                 }
             }
-            catch (OperationCanceledException ex) when (ex.CancellationToken == token)
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
                 // スキップ要求時はシナリオを正常終了する。
                 skipped = true;
@@ -72,6 +94,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                 if (ReferenceEquals(_playCts, source))
                 {
                     _playCts = null;
+                    ResetPlaybackState();
                 }
                 await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
             }
@@ -100,6 +123,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         public void TogglePause()
         {
             IsPaused = !IsPaused;
+            NotifyAdvanceStateChanged();
         }
 
         /// <summary>
@@ -126,6 +150,9 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         public void ToggleAutoAdvance()
         {
             IsAutoAdvance = !IsAutoAdvance;
+            _autoAdvanceVersion++;
+            NotifyAdvanceStateChanged();
+            _autoAdvanceNotifier.NotifyAutoAdvanceChanged(IsAutoAdvance);
         }
 
         /// <summary> シナリオが再生中かを示す。 </summary>
@@ -140,10 +167,14 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         private static readonly TimeSpan MINIMUM_PAUSE_POLL_INTERVAL = TimeSpan.FromMilliseconds(10);
 
         private CancellationTokenSource _playCts;
+        private int _autoAdvanceVersion;
+        private TaskCompletionSource<bool> _advanceStateChanged =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly ITextAdvanceWaiter _textAdvanceWaiter;
         private readonly ScenarioHandlerRepo _handlerRepo;
         private readonly IScenarioRepository _scenarioRepo;
         private readonly IScenarioCompletionNotifier _completionNotifier;
+        private readonly IScenarioAutoAdvanceNotifier _autoAdvanceNotifier;
         private readonly IScenarioSettingsRepository _settingsRepository;
 
         /// <summary>
@@ -162,61 +193,78 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         }
 
         /// <summary>
-        /// シナリオ再生の進行を待機する。
+        ///     現在行の手動送りとAuto待機を共有し、先に成立した一回だけ進行する。
         /// </summary>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        private async ValueTask WaitAdvanceAsync(CancellationToken ct)
+        private async ValueTask WaitAdvanceAsync(Task advanceTask, CancellationToken ct)
         {
-            if (!IsAutoAdvance)
-            {
-                // Autoではない場合は、クリックなどの手動送り入力が来るまで待機する。
-                await _textAdvanceWaiter.WaitNextAsync(ct);
-                return;
-            }
-
-            // Autoの場合は、設定された秒数だけ待ってから次のイベントへ進む。
-            await WaitAutoAdvanceDelayAsync(ct);
-        }
-
-        /// <summary>
-        ///     Auto時の次送り待機を行う。
-        ///     Pause中は待機時間を進めない。
-        /// </summary>
-        /// <param name="ct">キャンセルトークン。</param>
-        private async ValueTask WaitAutoAdvanceDelayAsync(CancellationToken ct)
-        {
-            // Autoで次へ進むまでの残り待機時間を設定から取得する。
             TimeSpan remainingDelay = _settingsRepository.AutoAdvanceDelay;
-
-            while (remainingDelay > TimeSpan.Zero)
+            int autoAdvanceVersion = _autoAdvanceVersion;
+            while (true)
             {
                 ct.ThrowIfCancellationRequested();
-
-                if (IsPaused)
+                await WaitWhilePausedAsync(ct);
+                if (advanceTask.IsCompleted)
                 {
-                    // Pause中は残り時間を減らさず、短い間隔でPause解除を待つ。
-                    await Task.Delay(_settingsRepository.PausePollInterval, ct);
+                    await advanceTask;
+                    return;
+                }
+
+                // Autoを切り替えた場合は現在行の待ち時間を開始し直す。
+                if (autoAdvanceVersion != _autoAdvanceVersion)
+                {
+                    autoAdvanceVersion = _autoAdvanceVersion;
+                    remainingDelay = _settingsRepository.AutoAdvanceDelay;
+                }
+                if (IsAutoAdvance && remainingDelay <= TimeSpan.Zero)
+                {
+                    return;
+                }
+
+                Task stateChangedTask = _advanceStateChanged.Task;
+                if (!IsAutoAdvance)
+                {
+                    await Task.WhenAny(advanceTask, stateChangedTask);
                     continue;
                 }
 
-                // 残り時間より長く待たないように、今回待つ時間を決める。
-                TimeSpan delay = remainingDelay < _settingsRepository.PausePollInterval
-                    ? remainingDelay
-                    : _settingsRepository.PausePollInterval;
-
-                // 短い単位で待機することで、待機中のPause切り替えを反映しやすくする。
-                await Task.Delay(delay, ct);
-
-                // Pauseしていなかった分だけ、Auto待機の残り時間を減らす。
-                remainingDelay -= delay;
+                TimeSpan interval = _settingsRepository.PausePollInterval > TimeSpan.Zero
+                    ? _settingsRepository.PausePollInterval
+                    : MINIMUM_PAUSE_POLL_INTERVAL;
+                TimeSpan delay = remainingDelay < interval ? remainingDelay : interval;
+                using CancellationTokenSource delaySource = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                Task delayTask = Task.Delay(delay, delaySource.Token);
+                Task completedTask = await Task.WhenAny(advanceTask, stateChangedTask, delayTask);
+                delaySource.Cancel();
+                if (ReferenceEquals(completedTask, delayTask)
+                    && IsAutoAdvance && !IsPaused && autoAdvanceVersion == _autoAdvanceVersion)
+                {
+                    await delayTask;
+                    remainingDelay -= delay;
+                }
             }
+        }
 
-            if (!IsAutoAdvance)
-            {
-                // Auto待機中にAutoがOFFになった場合は、手動送り待機に戻す。
-                await _textAdvanceWaiter.WaitNextAsync(ct);
-            }
+        /// <summary>
+        ///     Auto・ポーズの切替を現在の次送り待機へ直ちに通知する。
+        /// </summary>
+        private void NotifyAdvanceStateChanged()
+        {
+            TaskCompletionSource<bool> previous = _advanceStateChanged;
+            _advanceStateChanged = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            previous.TrySetResult(true);
+        }
+
+        /// <summary>
+        ///     終了したシナリオの操作状態を次の再生へ持ち越さない。
+        /// </summary>
+        private void ResetPlaybackState()
+        {
+            IsFastForward = false;
+            IsPaused = false;
+            IsAutoAdvance = false;
+            _autoAdvanceVersion++;
+            NotifyAdvanceStateChanged();
+            _autoAdvanceNotifier.NotifyAutoAdvanceChanged(false);
         }
     }
 }

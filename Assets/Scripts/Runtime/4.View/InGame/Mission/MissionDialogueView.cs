@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.View.InGame.Sequence;
+using KillChord.Runtime.View.Persistent.Localization;
 using R3;
 using System;
 using TMPro;
@@ -70,6 +71,7 @@ namespace KillChord.Runtime.View.InGame.Mission
         private LocalizedString _localizedText;
         private string _localizedTextEntryKey;
         private string _fallbackText;
+        private bool _isLocalizedTextPending;
         private bool _wasVisible;
 
         private void Awake()
@@ -139,7 +141,7 @@ namespace KillChord.Runtime.View.InGame.Mission
         {
             string entryKey = _viewModel.TextEntryKey ?? string.Empty;
             _fallbackText = _viewModel.FallbackText ?? string.Empty;
-            if (_localizedTextEntryKey == entryKey && _localizedText != null)
+            if (_localizedTextEntryKey == entryKey && (_localizedText != null || _isLocalizedTextPending))
             {
                 return;
             }
@@ -151,7 +153,37 @@ namespace KillChord.Runtime.View.InGame.Mission
                 return;
             }
 
+            // Localizationの初期化前に購読するとSelectedLocaleが未設定で例外になるため、初期化完了を待つ。
             _localizedTextEntryKey = entryKey;
+            _isLocalizedTextPending = true;
+            LocalizationInitializer.RunWhenInitialized(
+                hasSelectedLocale => HandleLocalizationInitialized(entryKey, hasSelectedLocale));
+        }
+
+        /// <summary>
+        ///     Localizationの初期化完了後にローカライズ文字列を購読します。
+        /// </summary>
+        /// <param name="entryKey"> 購読を要求したエントリキーです。 </param>
+        /// <param name="hasSelectedLocale"> Localeが設定済みかどうかです。 </param>
+        private void HandleLocalizationInitialized(string entryKey, bool hasSelectedLocale)
+        {
+            // 初期化待機中に会話が切り替わった場合や破棄された場合は購読しない。
+            if (this == null || !_isLocalizedTextPending || _localizedTextEntryKey != entryKey)
+            {
+                return;
+            }
+
+            _isLocalizedTextPending = false;
+
+            if (!hasSelectedLocale)
+            {
+                // Localeを取得できない場合はフォールバックテキストの表示を維持する。
+                Debug.LogWarning(
+                    $"[{nameof(MissionDialogueView)}] SelectedLocaleが未設定のため、フォールバックテキストを表示します。Entry={entryKey}",
+                    this);
+                return;
+            }
+
             _localizedText = new LocalizedString(TUTORIAL_SUBTITLES_TABLE, entryKey);
             _localizedText.StringChanged += HandleLocalizedTextChanged;
         }
@@ -176,6 +208,7 @@ namespace KillChord.Runtime.View.InGame.Mission
                 _localizedText = null;
             }
 
+            _isLocalizedTextPending = false;
             _localizedTextEntryKey = string.Empty;
         }
     }

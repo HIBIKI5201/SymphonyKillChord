@@ -52,7 +52,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private const string E_NAME_TOP_BAR_BACKGROUND = "TopBarBackground";
         private const string E_NAME_BACK_BUTTON = "BackButton";
         private const string E_NAME_SETTING_SHORTCUT_BUTTON = "SettingShortcutButton";
-        private const string E_NAME_TITLE = "Title";
+        private const string E_NAME_POINTS_ROW = "PointsRow";
         private const float DEFAULT_CRITICAL_DAMAGE_MULTIPLIER = 1f;
         private const float DEFAULT_AREA_ATTACK_RANGE = 1f;
 
@@ -119,11 +119,12 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
         /// <summary> 「振り直す」ボタンの要素。SkillTreeResetDialogView から受け取る。 </summary>
         private VisualElement _resetButtonRoot;
-        private VisualElement _titleRoot;
+        private VisualElement _pointsRowRoot;
         private VisualElement _playerStatusRoot;
         private VisualElement _previewVideoContainerRoot;
         private VisualElement _previewVideoRoot;
         private Label _currentPointsLabel;
+        private SkillTreeScreenView _skillTreeScreenView;
         private SkillDetailScreenView _skillDetailScreenView;
         private PlayerStatusScreenView _playerStatusScreenView;
         private PreviewVideoScreenView _previewVideoScreenView;
@@ -301,6 +302,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         public override void Shutdown()
         {
             Unsubscribe();
+            ServiceLocator.UnregisterInstance<SkillTreeStatusEntity>();
             if (_rootElement != null)
             {
                 _rootElement.UnregisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
@@ -397,8 +399,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 return false;
             }
 
+            if (!ServiceLocator.TryGetInstance(out _skillTreeScreenView))
+            {
+                Debug.LogError($"[{nameof(SkillTreeInitializer)}] SkillTreeScreenView が取得できませんでした。", this);
+                return false;
+            }
+
             _rootElement = _uiDocument.rootVisualElement;
-            // SettingShortcutButton・BackButton・Title・TopBarBackgroundは他のアウトゲーム画面にも
+            // SettingShortcutButton・BackButton・PointsRow・TopBarBackgroundは他のアウトゲーム画面にも
             // 同名で存在し、ドキュメントルートからQ()すると階層順で先に見つかった
             // 別画面の要素を掴んでしまう。研究画面のサブツリーに限定して検索すること。
             VisualElement skillTreeScreenRoot =
@@ -421,7 +429,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _topBarBackgroundRoot = _screenScope.Q<VisualElement>(E_NAME_TOP_BAR_BACKGROUND);
             _backButtonRoot = _screenScope.Q<VisualElement>(E_NAME_BACK_BUTTON);
             _settingShortcutButtonRoot = _screenScope.Q<VisualElement>(E_NAME_SETTING_SHORTCUT_BUTTON);
-            _titleRoot = _screenScope.Q<VisualElement>(E_NAME_TITLE);
+            _pointsRowRoot = _screenScope.Q<VisualElement>(E_NAME_POINTS_ROW);
 
             if (_skillDetailRoot == null
                 || _unlockConfirmBoxRoot == null
@@ -432,7 +440,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 || _topBarBackgroundRoot == null
                 || _backButtonRoot == null
                 || _settingShortcutButtonRoot == null
-                || _titleRoot == null)
+                || _pointsRowRoot == null)
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] スキルツリー用のUI要素が不足しています。", this);
                 return false;
@@ -476,6 +484,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             _skillTreeService = new SkillTreeService(_skillNodeEntities);
+            skillTreeEntity.SetSkillSlotBonus(
+                _skillTreeService.CalculateSkillSlotBonus(skillTreeEntity.UnlockedNodes));
+            ServiceLocator.RegisterInstance(skillTreeEntity);
             PlayerStatusBonusCalculator playerStatusBonusCalculator =
                 new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 
@@ -512,7 +523,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _loadedSkillRepository,
                 new SkillDisplayTextFormatter(new SkillEffectDescriptionFormatter()),
                 _skillGenreIcons,
-                _skillBeatColors);
+                _skillBeatColors,
+                _skillTreeScreenView.SetPoints,
+                () => _skillTreeScreenView.ListSeparator);
+            _skillTreeScreenView.OnListSeparatorChanged += _skillTreeController.RefreshSelectedText;
 
             _rootElement.RegisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
             _rootElement.RegisterCallback<NavigationCancelEvent>(HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
@@ -995,6 +1009,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void DisposeComponents()
         {
+            if (_skillTreeScreenView != null && _skillTreeController != null)
+            {
+                _skillTreeScreenView.OnListSeparatorChanged -= _skillTreeController.RefreshSelectedText;
+            }
+            _skillTreeScreenView = null;
             _previewVideoScreenView?.Dispose();
             _previewVideoScreenView = null;
             _skillTreeResetDialogView?.Dispose();
@@ -1005,6 +1024,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _unlockConfirmDialogView = null;
             _skillDetailScreenView?.Dispose();
             _skillDetailScreenView = null;
+            _playerStatusScreenView?.Dispose();
             _playerStatusScreenView = null;
             _skillTreeViewportView?.Dispose();
             _skillTreeViewportView = null;
@@ -1502,7 +1522,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _topBarBackgroundRoot.style.display = displayStyle;
             _backButtonRoot.style.display = displayStyle;
             _settingShortcutButtonRoot.style.display = displayStyle;
-            _titleRoot.style.display = displayStyle;
+            _pointsRowRoot.style.display = displayStyle;
             _currentPointsLabel.style.display = displayStyle;
             _skillDetailRoot.style.display = displayStyle;
             _playerStatusRoot.style.display = displayStyle;
