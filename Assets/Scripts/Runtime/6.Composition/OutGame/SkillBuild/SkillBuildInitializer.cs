@@ -625,16 +625,26 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private async void HandleSkillLevelUpHandler()
         {
-            SkillViewData? displayedSkill = _skillBuildViewModel?.DisplayedSkill.CurrentValue;
-            if (displayedSkill == null || _skillBuildController == null)
+            try
             {
-                return;
-            }
+                SkillViewData? displayedSkill = _skillBuildViewModel?.DisplayedSkill.CurrentValue;
+                if (displayedSkill == null || _skillBuildController == null)
+                {
+                    return;
+                }
 
-            bool succeeded = await _skillBuildController.LevelUpAsync(displayedSkill.Value.SkillId);
-            if (succeeded)
+                bool succeeded = await _skillBuildController.LevelUpAsync(displayedSkill.Value.SkillId);
+                if (succeeded)
+                {
+                    RefreshOwnedSkills(false);
+                }
+            }
+            catch (OperationCanceledException)
             {
-                RefreshOwnedSkills(false);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
             }
         }
 

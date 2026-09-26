@@ -67,6 +67,7 @@
 - 一行のブロックの場合でも以下のように、波カッコを使用する
 { Console.WriteLine(”message”); }
 - 1ファイルには1つの公開型（class/struct/interface/enum）のみを定義し、ファイル名を型名と一致させる。ネストしたprivate型は例外とする
+- `async void` は、Unityのイベント関数やイベントハンドラなど戻り値を `void` にしなければならない場合だけ使う。その場合は本体全体を `try`/`catch` で囲み、`OperationCanceledException` 以外の例外を `Debug.LogException` で出す。それ以外の非同期メソッドは `Task` / `Awaitable` / `UniTask` を返す
 
 ## ログ出力
 
