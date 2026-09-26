@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     攻撃クールダウンを表すVO。
     /// </summary>
-    public readonly struct AttackCooldown
+    public readonly struct AttackCooldown : IEquatable<AttackCooldown>
     {
         /// <summary>
         ///     攻撃クールダウンを生成する。

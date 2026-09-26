@@ -6,7 +6,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     攻撃力を表す値オブジェクト。
     /// </summary>
-    public readonly struct AttackPower
+    public readonly struct AttackPower : IEquatable<AttackPower>
     {
         /// <summary>
         ///     攻撃力を初期化するコンストラクタ。
