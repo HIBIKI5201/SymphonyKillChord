@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.Persistent.Input;
@@ -108,6 +109,16 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 freeLookRotationCalculator, lookAtRotationCalculator, lockOnRangeChecker, lockOnBreakTracker,
                 shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
+
+            // 設定画面のカメラ感度・反転・オートロックオンを反映する。取得できない場合は既定の挙動で続行する。
+            if (ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
+            {
+                _cameraSystem.BindEnvironmentSettings(environmentSettingsContainer.ViewModel);
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(CameraSystemInitializer)}] 環境設定を取得できないため、カメラ操作の設定なしで続行します。", this);
+            }
         }
 
         [SerializeField, Tooltip("カメラシステムの挙動を管理する View コンポーネント。")]
