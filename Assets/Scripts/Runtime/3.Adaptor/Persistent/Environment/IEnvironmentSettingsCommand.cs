@@ -47,6 +47,28 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         void SetRhythmOffsetStep(int step);
 
         /// <summary>
+        ///     カメラ感度を設定する（1～10）。
+        /// </summary>
+        /// <param name="cameraSensitivity"> 設定するカメラ感度。 </param>
+        void SetCameraSensitivity(int cameraSensitivity);
+
+        /// <summary>
+        ///     カメラ操作の反転方向を前後に切り替える。
+        /// </summary>
+        /// <param name="direction"> 1なら次、-1なら前へ切り替える。 </param>
+        void CycleCameraInvertMode(int direction);
+
+        /// <summary>
+        ///     攻撃時のオートロックオンのオンとオフを切り替える。
+        /// </summary>
+        void ToggleAutoLockOn();
+
+        /// <summary>
+        ///     ゲームパッドの決定・キャンセルの配置を海外式と日本式で切り替える。
+        /// </summary>
+        void ToggleButtonLayout();
+
+        /// <summary>
         ///     すべての環境設定を既定値へ戻す。
         /// </summary>
         void ResetToDefaults();

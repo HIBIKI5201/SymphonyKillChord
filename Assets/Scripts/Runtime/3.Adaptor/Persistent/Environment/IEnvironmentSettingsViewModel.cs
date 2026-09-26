@@ -37,6 +37,33 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         /// <summary> リズム判定タイミングへ加算するオフセット秒数。 </summary>
         ReadOnlyReactiveProperty<float> RhythmOffsetSeconds { get; }
 
+        /// <summary> カメラ感度（1～10）。 </summary>
+        ReadOnlyReactiveProperty<int> CameraSensitivity { get; }
+
+        /// <summary> カメラ入力へ掛ける感度の倍率。 </summary>
+        ReadOnlyReactiveProperty<float> CameraSensitivityScale { get; }
+
+        /// <summary> カメラ操作の反転方向の表示ラベル。 </summary>
+        ReadOnlyReactiveProperty<string> CameraInvertModeLabel { get; }
+
+        /// <summary> カメラの上下操作を反転するかどうか。 </summary>
+        ReadOnlyReactiveProperty<bool> IsCameraInvertVertical { get; }
+
+        /// <summary> カメラの左右操作を反転するかどうか。 </summary>
+        ReadOnlyReactiveProperty<bool> IsCameraInvertHorizontal { get; }
+
+        /// <summary> オートロックオンの表示ラベル。 </summary>
+        ReadOnlyReactiveProperty<string> AutoLockOnLabel { get; }
+
+        /// <summary> 攻撃時のオートロックオンを使うかどうか。 </summary>
+        ReadOnlyReactiveProperty<bool> IsAutoLockOnEnabled { get; }
+
+        /// <summary> ゲームパッドの決定・キャンセルの配置の表示ラベル。 </summary>
+        ReadOnlyReactiveProperty<string> ButtonLayoutLabel { get; }
+
+        /// <summary> ゲームパッドの決定・キャンセルが日本式（決定=右ボタン）かどうか。 </summary>
+        ReadOnlyReactiveProperty<bool> IsJapaneseButtonLayout { get; }
+
         /// <summary>
         ///     表示用DTOを環境設定へ反映する。
         /// </summary>

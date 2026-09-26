@@ -53,6 +53,10 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 saveData.EnvironmentSettings.SetLanguage(defaults.Language);
                 saveData.EnvironmentSettings.SetVibrationStrength(defaults.VibrationStrength);
                 saveData.EnvironmentSettings.SetRhythmOffsetSeconds(defaults.RhythmOffsetSeconds);
+                saveData.EnvironmentSettings.SetCameraSensitivity(defaults.CameraSensitivity);
+                saveData.EnvironmentSettings.SetCameraInvertMode(defaults.CameraInvertMode);
+                saveData.EnvironmentSettings.SetAutoLockOnEnabled(defaults.IsAutoLockOnEnabled);
+                saveData.EnvironmentSettings.SetJapaneseButtonLayout(defaults.IsJapaneseButtonLayout);
             }
 
             return saveData.EnvironmentSettings.Copy();
@@ -87,6 +91,10 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
             saveData.EnvironmentSettings.SetLanguage(environmentSettings.Language);
             saveData.EnvironmentSettings.SetVibrationStrength(environmentSettings.VibrationStrength);
             saveData.EnvironmentSettings.SetRhythmOffsetSeconds(environmentSettings.RhythmOffsetSeconds);
+            saveData.EnvironmentSettings.SetCameraSensitivity(environmentSettings.CameraSensitivity);
+            saveData.EnvironmentSettings.SetCameraInvertMode(environmentSettings.CameraInvertMode);
+            saveData.EnvironmentSettings.SetAutoLockOnEnabled(environmentSettings.IsAutoLockOnEnabled);
+            saveData.EnvironmentSettings.SetJapaneseButtonLayout(environmentSettings.IsJapaneseButtonLayout);
 
             // 保存に失敗した場合は、反映前の設定に戻してから例外を投げ直す。
             try
@@ -104,6 +112,10 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 saveData.EnvironmentSettings.SetLanguage(previousSettings.Language);
                 saveData.EnvironmentSettings.SetVibrationStrength(previousSettings.VibrationStrength);
                 saveData.EnvironmentSettings.SetRhythmOffsetSeconds(previousSettings.RhythmOffsetSeconds);
+                saveData.EnvironmentSettings.SetCameraSensitivity(previousSettings.CameraSensitivity);
+                saveData.EnvironmentSettings.SetCameraInvertMode(previousSettings.CameraInvertMode);
+                saveData.EnvironmentSettings.SetAutoLockOnEnabled(previousSettings.IsAutoLockOnEnabled);
+                saveData.EnvironmentSettings.SetJapaneseButtonLayout(previousSettings.IsJapaneseButtonLayout);
                 throw;
             }
         }
