@@ -22,7 +22,7 @@
 | **`StageClearData`** | Domain | 1ステージ分のクリア記録（StageId＋達成済み評価条件IDリスト、複数プレイ分を和集合でマージ） |
 | **`TutorialData`** | Domain | チュートリアル完了フラグ（`IsTutorialCompleted`）。`Complete()`で確定 |
 | **`SaveStore`** | SymphonyFrameWork | 型ごとのロード・保存・削除・キャッシュを行うフレームワーク側のAPI。旧`SaveBase`/`SavedataSystem`はこれへ統合され、当リポジトリからは削除済み |
-| **`PersistentFileSaveDataLoaderStrategy`** | Infrastructure | セーブデータを永続化領域のJSONファイルへ読み書きするローダー |
+| **`JsonUtilitySaveDataLoaderStrategy`** | SymphonyFrameWork | `SaveDataConfig.asset`が指定する、`SaveStore`がセーブデータの読み書きに使うフレームワーク側のローダー |
 | **`StageProgressSaveDataService`** | Application | ステージクリア時の評価結果を`StageProgressData`へ記録し保存する窓口。チュートリアル完了もあわせて記録 |
 | **`InitialSkillLoadoutService`** | Application | セーブデータへ初期解放・初期装備スキルを補完する。起動時とセーブデータリセット後の双方で使う |
 | **`SavedataSystemInitializer`** | Composition | セーブ機構の初期化とServiceLocatorへの登録（Order 10） |
@@ -113,7 +113,7 @@ graph TD
 ### ④ View
 当モジュールでは使用していない。
 ### ⑤ Infrastructure
-`PersistentFileSaveDataLoaderStrategy`が、永続化領域のJSONファイルへの読み書きを担当する。クリア済みステージ情報を提供する`SaveDataClearStageRepository`はStageSelectモジュール側にある。
+当モジュールには、セーブデータを読み書きするクラスは無い。読み書きは、`SaveDataConfig.asset`が指定するフレームワーク側の`JsonUtilitySaveDataLoaderStrategy`が担当する（自前のローダーは使っていなかったため削除した）。クリア済みステージ情報を提供する`SaveDataClearStageRepository`はStageSelectモジュール側にある。
 ### ⑥ Composition
 `SavedataSystemInitializer`（Order 10）が保存機構を初期化し、`InitialSkillLoadoutInitializer`（Order 20）が初期解放・初期装備スキルを補完する。`LegacyDataIdMigration`がID統一前の連番IDをハッシュIDへ移行する。
 
@@ -132,7 +132,7 @@ sequenceDiagram
     autonumber
     participant Caller as 呼び出し元（Title等）
     participant Store as SaveStore
-    participant Loader as PersistentFileSaveDataLoaderStrategy
+    participant Loader as JsonUtilitySaveDataLoaderStrategy
     participant File as JSONファイル
 
     Caller ->> Store: LoadAsync<SaveData>()
