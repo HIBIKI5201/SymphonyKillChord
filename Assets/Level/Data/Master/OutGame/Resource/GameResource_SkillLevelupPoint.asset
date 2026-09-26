@@ -16,5 +16,5 @@ MonoBehaviour:
     _id: SkillLevelupPoint
     _hashId: 1374829010
   _displayName: "\u6539\u9020\u30DD\u30A4\u30F3\u30C8"
-  _icon: {fileID: 0}
+  _icon: {fileID: 21300000, guid: 4e62359d69f84914fb02f7ceb8910bd0, type: 3}
   _description: 
