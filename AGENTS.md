@@ -3,6 +3,8 @@
 - Assets/Scripts/CodeGuidelines.md
 # 仕様に関するドキュメント
 - Docs/NotionSpecifications
+# 自律AIエージェントの出力ファイル
+- 解析記録・監査結果・ログなど、エージェントが生成するローカルファイルは `Docs/agent/` に置く（gitignore 対象）。リポジトリにはコミットしない。
 # 自律AIエージェントのブランチ・PR運用
 - 編集・修正・コミットは必ず自分に指定された作業ブランチ（例: `feature/demo/just-judgement/agent`）で行う。レビュー対応も同じ作業ブランチで行う。
 - ブランチ命名規則は `feature/○○/○○/agent` とする (例: `feature/demo/home-tutorial/agent`)。指定がない場合のみ `agent/○○` とする (例: `agent/cbt-qa-sheet`)。
