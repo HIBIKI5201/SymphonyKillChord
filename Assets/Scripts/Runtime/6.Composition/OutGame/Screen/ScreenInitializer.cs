@@ -356,7 +356,10 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             SkillBuildScreenView skillBuildScreenView = new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent, _comboHexIcon);
             _skillTreeScreenView = skillTreeScreenView;
             _skillBuildScreenView = skillBuildScreenView;
-            SettingScreenView settingScreenView = new SettingScreenView(settingRoot, _outGameUIEvent);
+            SettingScreenView settingScreenView = new SettingScreenView(
+                settingRoot,
+                _outGameUIEvent,
+                ServiceLocator.TryGetInstance(out PlayerInputView playerInputView) ? playerInputView : null);
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
             ServiceLocator.RegisterInstance(skillBuildScreenView);
