@@ -79,6 +79,11 @@ namespace KillChord.Runtime.Application.InGame.Music
             CancellationToken ct);
 
         /// <summary>
+        ///     被弾など拍を判定できない状況になったとき、リズムタイムアウトと同じ扱いで入力履歴を破棄する。
+        /// </summary>
+        void ForceRhythmTimeout();
+
+        /// <summary>
         ///     現在の拍種とジャスト成否を、副作用なく取得する。
         /// </summary>
         /// <param name="isJustHit"> ジャスト範囲内の場合はtrue。 </param>
