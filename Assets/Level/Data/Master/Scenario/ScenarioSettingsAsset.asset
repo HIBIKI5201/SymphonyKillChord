@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ScenarioSettingsAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.ScenarioSettingsAsset
   _normalTextCharIntervalSec: 0.03
-  _fastForwardTextCharIntervalSec: 0.025
+  _fastForwardTextCharIntervalSec: 0.01
   _pausePollIntervalSec: 0.05
   _closeDelayAfterCompleteSec: 5
   _autoAdvanceDelaySec: 2
