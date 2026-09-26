@@ -1,3 +1,4 @@
+using KillChord.Runtime.Utility.Diagnostics;
 using System.Diagnostics;
 using UnityEngine.UIElements;
 
@@ -16,7 +17,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
         [Conditional("UNITY_EDITOR")]
         public static void Log(string message)
         {
-            UnityEngine.Debug.Log($"[NavDebug] {message}");
+            DevLog.Log($"[NavDebug] {message}");
         }
 
         /// <summary>

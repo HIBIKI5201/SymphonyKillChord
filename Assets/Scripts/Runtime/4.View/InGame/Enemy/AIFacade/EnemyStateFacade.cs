@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
+using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -88,7 +89,7 @@ namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
         public void Stunned()
         {
             // 一時。今後はAnimation Controllerで制御するはず
-            Debug.Log("[EnemyStateFacade] クリティカルにより、敵硬直発生。");
+            DevLog.Log("[EnemyStateFacade] クリティカルにより、敵硬直発生。");
             // 硬直時間経過後に自動回復させる。多重予約を避けるため、既存の予約は一度キャンセルする。
             CancelInvoke(nameof(StunRecover));
             Invoke(nameof(StunRecover), _stunDurationSeconds);

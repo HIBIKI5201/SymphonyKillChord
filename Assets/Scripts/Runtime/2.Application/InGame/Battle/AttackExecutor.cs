@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -54,7 +55,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
 
             ApplyHitEffects(attacker, defender, result, hitEffects);
 
-            Debug.Log(
+            DevLog.Log(
                  $"[Attack] " +
                  $"AttackName:{attackDefinition.AttackName} " +
                  $"Damage:{result.FinalDamage.Value} " +

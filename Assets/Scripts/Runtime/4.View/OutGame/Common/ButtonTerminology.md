@@ -31,9 +31,10 @@
 新しいボタンにこのテンプレートを丸ごと適用する場合:
 
 ```csharp
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.OutGame.Common;
 
-var disposable = someButtonElement.ApplyBasicButtonPreset(() => Debug.Log("クリックされた"));
+var disposable = someButtonElement.ApplyBasicButtonPreset(() => DevLog.Log("クリックされた"));
 // 不要になったら disposable.Dispose() で解除する
 ```
 

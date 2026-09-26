@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Animation;
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Sequence;
@@ -716,7 +717,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 return;
             }
-            Debug.Log($"[{nameof(EnemyMoveView)}] OneShot要求 key={key} t={Time.time:F2}", this);
+            DevLog.Log($"[{nameof(EnemyMoveView)}] OneShot要求 key={key} t={Time.time:F2}", this);
             _characterAnimationSignal?.TryRequestOneShot(key, out _);
         }
 

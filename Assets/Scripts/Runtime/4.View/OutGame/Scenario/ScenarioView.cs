@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Utility.Diagnostics;
 using LitMotion;
 using System;
 using System.Collections.Generic;
@@ -389,7 +390,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void InputScenarioCompleted(bool skipped)
         {
-            Debug.Log(skipped
+            DevLog.Log(skipped
                 ? "シナリオ再生完了: スキップ終了。"
                 : "シナリオ再生完了: 全テキスト表示終了。");
             EndPlayback();

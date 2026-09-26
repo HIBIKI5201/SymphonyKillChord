@@ -1,4 +1,5 @@
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.Persistent.Audio;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
@@ -62,8 +63,8 @@ namespace KillChord.Runtime.Composition.Persistent.Music
                 && _voiceVolumeManager != null
                 && _soundEffectVolumeManager != null)
             {
-                Debug.Log(_voiceVolumeManager.GetVolume());
-                Debug.Log(_soundEffectVolumeManager.GetVolume());
+                DevLog.Log(_voiceVolumeManager.GetVolume());
+                DevLog.Log(_soundEffectVolumeManager.GetVolume());
             }
         }
 

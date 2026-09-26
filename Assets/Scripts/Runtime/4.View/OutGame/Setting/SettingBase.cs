@@ -1,3 +1,4 @@
+using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -66,7 +67,7 @@ namespace KillChord.Runtime.View
 
         // protected virtual void Info<T>(object message)
         // {
-        //     Debug.Log($"{typeof(T).Name}型 {message}");
+        //     DevLog.Log($"{typeof(T).Name}型 {message}");
         // }
 
         // protected virtual void Warning<T>(object message)

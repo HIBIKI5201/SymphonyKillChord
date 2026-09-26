@@ -3,6 +3,7 @@ using KillChord.Runtime.Application.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -64,7 +65,7 @@ namespace KillChord.Runtime.Application.InGame.Buff
                 return criticalDamageMultiplier;
             }
 
-            Debug.Log("[Skill09] クリティカルダメージ倍率を " + _criticalDamageMultiplier + " 倍に変更します。");
+            DevLog.Log("[Skill09] クリティカルダメージ倍率を " + _criticalDamageMultiplier + " 倍に変更します。");
 
             return _criticalDamageMultiplier;
         }
