@@ -67,13 +67,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.StageSelect
             int currentSkillUnlockPoint = inventory?.GetAmount(GameResourceIds.ResearchPoint) ?? 0;
             int currentSkillBuildPoint = inventory?.GetAmount(GameResourceIds.SkillLevelupPoint) ?? 0;
 
-            // 詳細画面のUIは、初回報酬ボックスに研究ポイント、成功報酬ボックスに改造ポイントを表示する。
+            // 初回報酬・成功報酬のそれぞれで、研究ポイントと改造ポイントの両方を集計する。
             var dto = new StageDetailDTO(
                 def.StageName,
                 def.FlavorText,
                 currentSkillUnlockPoint,
-                SumAmount(def.FirstClearReward, GameResourceIds.ResearchPoint),
                 currentSkillBuildPoint,
+                SumAmount(def.FirstClearReward, GameResourceIds.ResearchPoint),
+                SumAmount(def.FirstClearReward, GameResourceIds.SkillLevelupPoint),
+                SumAmount(def.ClearReward, GameResourceIds.ResearchPoint),
                 SumAmount(def.ClearReward, GameResourceIds.SkillLevelupPoint),
                 mainMissionText,
                 subMissionTexts,
