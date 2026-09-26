@@ -56736,7 +56736,7 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: HandgunShoot_1
+  _cueName: 
   _cueSheet: CueSheet_0
 --- !u!1 &820707987
 GameObject:
@@ -80042,7 +80042,7 @@ MonoBehaviour:
       type: {class: SoundEffectOneShotVisualEffect, ns: KillChord.Runtime.View.InGame.Character, asm: KillChord.View}
       data:
         _soundEffectSource: {fileID: 1133515518}
-        _cueNameOverride: FootStep
+        _cueNameOverride: SE_Enemy_Footsteps
 --- !u!114 &1133515518
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141114,7 +141114,7 @@ MonoBehaviour:
       type: {class: SoundEffectOneShotVisualEffect, ns: KillChord.Runtime.View.InGame.Character, asm: KillChord.View}
       data:
         _soundEffectSource: {fileID: 2141356083}
-        _cueNameOverride: FootStep
+        _cueNameOverride: SE_Enemy_Footsteps
 --- !u!114 &2141356083
 MonoBehaviour:
   m_ObjectHideFlags: 0
