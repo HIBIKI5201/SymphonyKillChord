@@ -34138,6 +34138,7 @@ MonoBehaviour:
   _equippedSkills: []
   _skillBuildRepositoryKey: SkillBuildRepository
   _skillRepositoryKey: 
+  _missionDefinitionRepositoryKey: MissionDefinitionRepository
 --- !u!114 &438459092
 MonoBehaviour:
   m_ObjectHideFlags: 0

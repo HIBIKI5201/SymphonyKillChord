@@ -55,6 +55,32 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         }
 
         /// <summary>
+        ///     スキル ID の一覧から装備スキル構成を作る。保存データとキャッシュは変えない。
+        /// </summary>
+        /// <param name="skillIds"> 装備するスキル ID の一覧。 </param>
+        /// <returns> 作成した装備スキル構成。解決できない ID は空のスロットになる。 </returns>
+        public IReadOnlyList<EquippedSkill> CreateEquippedSkills(IReadOnlyList<int> skillIds)
+        {
+            ValidateDependencies();
+            if (skillIds == null)
+            {
+                return Array.Empty<EquippedSkill>();
+            }
+
+            EquippedSkill[] equippedSkills = new EquippedSkill[skillIds.Count];
+            for (int i = 0; i < skillIds.Count; i++)
+            {
+                if (skillIds[i] != EMPTY_SKILL_ID
+                    && _skillRepository.TryGetSkill(new SkillId(skillIds[i]), out SkillTemplate skillData))
+                {
+                    equippedSkills[i] = new EquippedSkill(skillData);
+                }
+            }
+
+            return equippedSkills;
+        }
+
+        /// <summary>
         ///     プレイヤーの装備スキル構成を保存する。
         /// </summary>
         /// <param name="equippedSkills"> 保存する装備スキル構成。 </param>
