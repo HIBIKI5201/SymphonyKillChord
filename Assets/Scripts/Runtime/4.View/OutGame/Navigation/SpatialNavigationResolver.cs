@@ -55,6 +55,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
                 return null;
             }
 
+            // 移動方向と、それに直交する方向を求める。
             Vector2 directionVector = ToVector(direction);
             if (directionVector == Vector2.zero)
             {
@@ -73,6 +74,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
             for (int i = 0; i < candidates.Count; i++)
             {
                 VisualElement candidate = candidates[i];
+                // 選択できない要素、画面外の要素、逆方向の要素、横にずれすぎた要素は除く。
                 if (candidate == null || ReferenceEquals(candidate, current))
                 {
                     continue;
@@ -105,6 +107,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
                     continue;
                 }
 
+                // 進む方向の距離に、横のずれを重み付けして足したスコアが最小のものを選ぶ。
                 float score = primary + perpendicular * PERPENDICULAR_PENALTY_WEIGHT;
                 if (score < bestScore)
                 {
@@ -113,6 +116,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
                 }
             }
 
+            // デバッグ用に選んだ理由を出力する。
             NavigationDebugLog.Log(
                 $"[SpatialNav] {NavigationDebugLog.Describe(current)} dir={direction} "
                 + $"total={candidates.Count} excluded(selectable={excludedBySelectable}, "

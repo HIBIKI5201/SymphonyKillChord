@@ -34,6 +34,7 @@ namespace KillChord.Runtime.View
 
             Transform parent = _travelTarget.parent;
 
+            // プレイヤーの周囲のランダムな方向を開始位置にする。
             Vector3 startWorldPosition = context.PlayerTransform != null
                 ? context.PlayerTransform.position
                 : context.WorldPosition;
@@ -46,9 +47,11 @@ namespace KillChord.Runtime.View
                : startWorldPosition;
 
 
+            // 銃の最終的な向きをランダムに決める。
             _playerCenter = context.PlayerTransform.position;
             _gunGoalRotX = Random.Range(-10f, 45f);
             _gunGoalRotY = Random.Range(0f, 360f);
+            // 螺旋状に上昇し、外へ飛び出し、プレイヤーの背後へ回り込み、最後に向きを整える4段階のモーション。
             _handle = LSequence.Create()
                 .Append(LMotion.Create(0f,1f,0.3f / context.PlaybackSpeed)
                     .WithEase(Ease.InQuad)

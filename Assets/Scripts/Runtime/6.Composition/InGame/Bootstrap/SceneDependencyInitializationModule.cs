@@ -60,6 +60,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
+            // 依存するサービスとメインカメラを取得する。
             InputComposition inputComposition = ServiceLocator.GetInstance<InputComposition>();
             if (inputComposition == null)
             {
@@ -81,6 +82,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 return false;
             }
 
+            // シーンの依存をまとめたコンテナを登録し、共通の入力だけを有効にする。
             _container = new SceneDependencyModuleContainer(
                 _stageSceneInstance,
                 _musicPlayer,

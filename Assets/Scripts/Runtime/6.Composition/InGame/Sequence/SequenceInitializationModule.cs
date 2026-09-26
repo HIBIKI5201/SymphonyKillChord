@@ -96,6 +96,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
+            // 依存するコンテナと、その中身が初期化済みかを確認する。
             StageResultModuleContainer stageResultContainer =
                 ServiceLocator.GetInstance<StageResultModuleContainer>();
 
@@ -142,6 +143,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
+            // 演出用の各ビューを初期化する。
             _stageSequenceVoiceView.Initialize(
                 playerContainer.PlayerView);
 
@@ -156,6 +158,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartConstraintView.AddConstraintSource(
                 playerContainer.PlayerView.transform);
 
+            // ステージの開始から終了までの演出を進めるディレクターを作る。
             _container.SequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
                 _stageSequenceVoiceView,
@@ -168,6 +171,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _inGamePlayDirector,
                 _ambienceSoundView);
 
+            // ミッションの進行と選択中のステージを取得する。
             _missionRuntimeService = missionContainer.MissionRuntimeService;
             if (_missionRuntimeService == null)
             {
@@ -187,11 +191,13 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
+            // セーブと、次のノードへの遷移の予約を用意する。
             _stageProgressSaveDataService =
                 new StageProgressSaveDataService();
 
             ServiceLocator.TryGetInstance(out _pendingNodeTransitionState);
 
+            // ポーズ入力とミッションの終了を購読し、ロード完了後にゲームを開始する。
             _playerInputView.OnOptionInput += HandlePauseInput;
             _missionRuntimeService.OnMissionFinished += HandleMissionFinished;
             _inGamePlayDirector.StopGameplay();

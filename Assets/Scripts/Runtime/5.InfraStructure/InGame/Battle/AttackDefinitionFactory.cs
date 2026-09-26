@@ -22,6 +22,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
             AttackDefinitionAsset data,
             float criticalMultiplierAddition)
         {
+            // 必要なアセットが揃っているかを確認する。
             if (data == null)
             {
                 throw new System.ArgumentNullException(nameof(data));
@@ -37,12 +38,14 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
                 throw new System.ArgumentNullException(nameof(data.AttackPipelineAsset));
             }
 
+            // 会心倍率に加算分を足して攻撃仕様を作る。
             AttackSpec attackSpec = new AttackSpec(
                 new CriticalMultiplier(
                     data.CriticalDamageMultiplier + criticalMultiplierAddition),
                 new Damage(data.AttackSpecAsset.ConfirmedDamage)
             );
 
+            // 拍の種類を使う場合は、有効な値かを確認する。
             int? beatType = data.UseBeatType ? (int?)data.BeatType : null;
 
             BeatType? resolvedBeatType = null;
@@ -57,6 +60,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Battle
                 resolvedBeatType = (BeatType)beatType.Value;
             }
 
+            // 各値を有効な範囲に収めて攻撃定義を作る。
             return new AttackDefinition(
                 data.AttackName,
                 attackSpec,

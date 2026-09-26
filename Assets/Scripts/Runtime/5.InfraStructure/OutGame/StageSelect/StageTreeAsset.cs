@@ -80,6 +80,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             Dictionary<int, StageAssetBase> registeredStages = new();
             int tutorialCount = 0;
 
+            // 未設定・ID 未設定・ID 重複のステージを除いて登録する。
             for (int i = 0; i < _stageAssets.Count; i++)
             {
                 StageAssetBase stageAsset = _stageAssets[i];
@@ -113,6 +114,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 }
             }
 
+            // チュートリアルステージは1つまで。
             if (tutorialCount > 1)
             {
                 Debug.LogError(
@@ -134,12 +136,14 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             Dictionary<int, int> incomingCounts = new();
             Dictionary<int, List<int>> outgoingStages = new();
 
+            // 各ステージの入ってくる接続の数と、出ていく接続先を用意する。
             foreach (int stageId in registeredStages.Keys)
             {
                 incomingCounts.Add(stageId, 0);
                 outgoingStages.Add(stageId, new List<int>());
             }
 
+            // 未設定・参照先が不正・重複の接続を除いて集計する。
             for (int i = 0; i < _bindAssets.Count; i++)
             {
                 StageBindAsset bindAsset = _bindAssets[i];
@@ -169,6 +173,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 outgoingStages[fromStageId].Add(toStageId);
                 incomingCounts[toStageId]++;
 
+                // 同じ接続元から自動遷移できる先は1つまで。
                 if (bindAsset.AdvanceMode == StageAdvanceMode.AutoAdvance
                     && !autoAdvanceFromIds.Add(fromStageId))
                 {
@@ -179,6 +184,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 }
             }
 
+            // 集計した接続から、起点と循環を検証する。
             ValidateTopology(registeredStages, incomingCounts, outgoingStages);
         }
 
@@ -198,6 +204,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 return;
             }
 
+            // 入ってくる接続が無いステージを起点とする。
             Queue<int> processingQueue = new();
             foreach (int stageId in registeredStages.Keys)
             {
@@ -207,6 +214,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 }
             }
 
+            // 起点が無い場合は循環している。複数ある場合は警告する。
             int rootCount = processingQueue.Count;
             if (rootCount == 0)
             {
@@ -222,6 +230,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                     this);
             }
 
+            // 起点から順にたどり、たどり着けないステージがあれば循環している。
             int processedCount = 0;
             while (processingQueue.Count > 0)
             {

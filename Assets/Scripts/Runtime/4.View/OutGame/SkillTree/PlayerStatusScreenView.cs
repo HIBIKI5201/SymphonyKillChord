@@ -24,6 +24,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             Sprite criticalDamageIcon,
             Sprite areaAttackRangeIcon) : base(root, outGameUIEvent)
         {
+            // 各ステータスの現在値・矢印・変化量のラベルを取得する。
             _panelRoot = root.Q<VisualElement>(name: E_NAME_PANEL_ROOT)
                 ?? throw new InvalidOperationException($"{E_NAME_PANEL_ROOT} が見つかりませんでした。");
             _healthCurrentLabel = RequireLabel(root, E_NAME_HEALTH_CURRENT_LABEL);
@@ -42,11 +43,13 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _areaAttackRangeArrowLabel = RequireLabel(root, E_NAME_AREA_ATTACK_RANGE_ARROW_LABEL);
             _areaAttackRangeDeltaLabel = RequireLabel(root, E_NAME_AREA_ATTACK_RANGE_DELTA_LABEL);
 
+            // 各ステータスのアイコンを設定する。
             SetIcon(root.Q<Image>(name: E_NAME_HEALTH_ICON), healthIcon);
             SetIcon(root.Q<Image>(name: E_NAME_ATTACK_ICON), attackIcon);
             SetIcon(root.Q<Image>(name: E_NAME_CRITICAL_CHANCE_ICON), criticalChanceIcon);
             SetIcon(root.Q<Image>(name: E_NAME_CRITICAL_DAMAGE_ICON), criticalDamageIcon);
             SetIcon(root.Q<Image>(name: E_NAME_AREA_ATTACK_RANGE_ICON), areaAttackRangeIcon);
+            // 見出しの文言をローカライズに登録する。
             Label localizedTitleLable = root.Q<Label>("TitleLable");
             Label localizedHealthLabel = root.Q<Label>("HealthLabel");
             Label localizedAttackLabel = root.Q<Label>("AttackLabel");

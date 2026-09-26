@@ -45,6 +45,7 @@ namespace KillChord.Editor.AssetManagement
             EditorGUILayout.LabelField("認証・取得元 (機密情報 / UserSettings管理・Git対象外)", EditorStyles.boldLabel);
             EditorGUILayout.LabelField("Service Account JSON Key");
 
+            // JSON 鍵と取得元フォルダの入力欄を描画し、変更があれば保存する。
             EditorGUI.BeginChangeCheck();
             float width = EditorGUIUtility.currentViewWidth * 0.75f;
             var newApiKey = EditorGUILayout.TextArea(secrets.serviceAccountJsonKey,
@@ -70,6 +71,7 @@ namespace KillChord.Editor.AssetManagement
             
             EditorGUILayout.Space();
 
+            // 機密情報を他のマシンへ受け渡すためのコピー・貼り付けボタン。
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("Copy Secrets"))

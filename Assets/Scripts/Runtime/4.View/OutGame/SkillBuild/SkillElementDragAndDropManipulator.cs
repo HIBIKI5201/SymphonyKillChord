@@ -6,12 +6,12 @@ using PointerType = UnityEngine.UIElements.PointerType;
 namespace KillChord.Runtime.View.OutGame.SkillBuild
 {
     /// <summary>
-    ///   スキルアイコン UI (スキルビルド画面のスキル要素) のドラッグ&ドロップ操作を管理するクラス。
+    ///   スキルアイコン UI (スキルビルド画面のスキル要素) のドラッグ＆ドロップ操作を管理するクラス。
     /// </summary>
     public class SkillElementDragAndDropManipulator : PointerManipulator
     {
         /// <summary>
-        ///     ドラッグ&ドロップ操作を管理するマニピュレータのコンストラクタ。
+        ///     ドラッグ＆ドロップ操作を管理するマニピュレータのコンストラクタ。
         /// </summary>
         /// <param name="target"> 操作対象の VisualElement。 </param>
         /// <param name="onDropAction"> ドロップ時に実行されるアクション。 </param>
@@ -38,7 +38,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     ドラッグ&ドロップ操作に必要なポインタイベントのコールバックを
+        ///     ドラッグ＆ドロップ操作に必要なポインタイベントのコールバックを
         ///     ターゲットの VisualElement に登録するメソッド。
         /// </summary>
         protected override void RegisterCallbacksOnTarget()
@@ -57,7 +57,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///    ドラッグ&ドロップ操作に必要なポインタイベントのコールバックを
+        ///    ドラッグ＆ドロップ操作に必要なポインタイベントのコールバックを
         ///    ターゲットの VisualElement から解除するメソッド。
         /// </summary>
         protected override void UnregisterCallbacksFromTarget()

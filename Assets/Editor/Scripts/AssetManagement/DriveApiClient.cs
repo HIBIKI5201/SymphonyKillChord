@@ -94,6 +94,7 @@ namespace KillChord.Editor.AssetManagement
 
             do
             {
+                // フォルダ直下のファイル一覧を取得するリクエストを組み立てる。
                 var q = Uri.EscapeDataString($"'{folderId}' in parents and trashed = false");
                 var fields = Uri.EscapeDataString("files(id,name,mimeType,modifiedTime),nextPageToken");
                 var url = $"{FILES_ENDPOINT}?q={q}&fields={fields}&pageSize=1000" +
@@ -104,6 +105,7 @@ namespace KillChord.Editor.AssetManagement
                     url += $"&pageToken={Uri.EscapeDataString(pageToken)}";
                 }
 
+                // アクセストークンを付けて送信し、完了まで待つ。
                 var accessToken = await credential.GetAccessTokenForRequestAsync(cancellationToken: ct);
                 using var request = UnityWebRequest.Get(url);
                 request.timeout = 60;
@@ -121,6 +123,7 @@ namespace KillChord.Editor.AssetManagement
                         $"Drive API list failed ({request.responseCode}): {request.error}\n{request.downloadHandler?.text}");
                 }
 
+                // 取得結果をリストへ追加し、続きのページがあれば繰り返す。
                 var parsed = JsonUtility.FromJson<ListResponse>(request.downloadHandler.text);
                 if (parsed?.files != null)
                 {

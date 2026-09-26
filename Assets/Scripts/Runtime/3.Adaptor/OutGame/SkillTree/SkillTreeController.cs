@@ -46,6 +46,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             Action<int> showCurrentPoints,
             Func<string> getListSeparator)
         {
+            // 受け取った表示・サービス・データを保持する。
             _skillRepository = skillRepository;
             _skillDisplayTextFormatter = skillDisplayTextFormatter;
             _skillGenreIcons = skillGenreIcons;
@@ -69,6 +70,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _ownedSkillChanged = ownedSkillChanged;
             _nodesOnPath = new();
 
+            // 現在のポイントを表示する。
             _showCurrentPoints(_skillTreeStatusEntity.CurrentPoints);
         }
 
@@ -112,11 +114,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// </summary>
         public void RefreshSelectedText()
         {
+            // ノードが選ばれていなければ何もしない。
             if (_selectedNodeId == NO_SELECTION)
             {
                 return;
             }
 
+            // 選択中のノードについて、解放できるかと表示内容を求める。
             int nodeId = _selectedNodeId;
             SkillNodeEntity entity = _skillNodeEntities[new SkillNodeId(nodeId)];
             int currentPoints = _skillTreeStatusEntity.CurrentPoints;
@@ -136,6 +140,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 entity.IsUnlocked,
                 hasVideo,
                 ResolveComboStepColors(entity.UnlockSkillIds));
+            // スキル詳細の表示を更新する。
             _skillDetailPresenter.Push(dto);
         }
 
@@ -788,6 +793,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// <param name="result"> 保存済みのリセット結果。 </param>
         private void ApplyResetResult(SkillTreeResetResult result)
         {
+            // すべてのノードを未解放にし、接続線と解放段階の表示も初期状態に戻す。
             foreach (SkillNodeEntity node in _skillNodeEntities.Values)
             {
                 node.Lock();
@@ -807,6 +813,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 }
             }
 
+            // リセット後も解放済みのノードだけを解放し直す。
             ReadOnlySpan<SkillNodeId> unlockedNodeIds = result.UnlockedNodeIds.Span;
             for (int i = 0; i < unlockedNodeIds.Length; i++)
             {
@@ -822,6 +829,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 UpdateUnlockPhase(nodeId.Id);
             }
 
+            // ポイントと解放状態を反映し、選択を解除して表示を更新する。
             _skillTreeStatusEntity.Reset(
                 result.CurrentPoints,
                 result.UnlockedNodeIds,

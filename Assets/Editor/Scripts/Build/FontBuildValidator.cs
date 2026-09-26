@@ -118,6 +118,7 @@ namespace KillChord.Editor.Build
         /// <param name="errors"> 検出したエラー一覧です。 </param>
         private static void ValidateUiToolkitSettings(List<string> errors)
         {
+            // UI Toolkit の Text Settings を読み込む。
             ScriptableObject textSettings =
                 AssetDatabase.LoadAssetAtPath<ScriptableObject>(UI_TOOLKIT_TEXT_SETTINGS_PATH);
 
@@ -127,6 +128,7 @@ namespace KillChord.Editor.Build
                 return;
             }
 
+            // 既定のフォントアセットを取得し、ビルドに必要な設定を順に検証する。
             SerializedObject serializedSettings = new(textSettings);
             ValidateTextSettingsClearOnBuild(serializedSettings, "UI Toolkit Text Settings", errors);
             FontAsset fontAsset = serializedSettings.FindProperty("m_DefaultFontAsset")?.objectReferenceValue

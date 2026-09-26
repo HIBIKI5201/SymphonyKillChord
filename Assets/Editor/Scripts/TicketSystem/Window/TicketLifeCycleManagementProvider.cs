@@ -73,6 +73,7 @@ namespace KillChord.Editor.TicketSystem
         {
             EditorGUILayout.HelpBox("削除するチケットのシーンを選択", MessageType.Warning);
 
+            // チケット一覧を再取得するボタン。
             if (GUILayout.Button("更新", GUILayout.Height(35)))
             {
                 _isLoading = true;
@@ -81,6 +82,7 @@ namespace KillChord.Editor.TicketSystem
 
             EditorGUILayout.Space();
 
+            // 一覧の見出し。
             using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
             {
                 GUILayout.Label("シーン名", GUILayout.Width(100));
@@ -95,6 +97,7 @@ namespace KillChord.Editor.TicketSystem
                 return;
             }
 
+            // チケットごとに状態と破棄ボタンを表示する。
             IReadOnlyList<TicketData> cachedTickets = CachedTicketDataSingleton.instance.GetAll();
             using (var scrollViewScope = new EditorGUILayout.ScrollViewScope(_scrollPos))
             {
@@ -111,6 +114,7 @@ namespace KillChord.Editor.TicketSystem
                         isDispose = GUILayout.Button("破棄", GUILayout.Width(200));
                     }
 
+                    // 破棄ボタンが押されたら確認してからサーバーへ破棄を要求する。
                     if (!isDispose) continue;
                     var result = EditorDialog.DisplayDecisionDialog(
                         "チケット破棄の確認",

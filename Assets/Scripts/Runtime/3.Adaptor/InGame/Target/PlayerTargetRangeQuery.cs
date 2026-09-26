@@ -26,7 +26,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         ///     対象がプレイヤーから指定距離以内にいるかを判定する。
         ///     対象が死亡している場合や距離が不正な場合は false を返す。
         /// </summary>
-        /// < /inheritdoc>
         public bool IsWithinRange(CharacterEntity target, float range)
         {
             if (target == null || target.IsDead || !float.IsFinite(range) || range < 0f)

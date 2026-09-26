@@ -267,6 +267,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// </summary>
         public override void Shutdown()
         {
+            // スキルの武器・アニメーション・ボイスの要求の購読を解除する。
             if (_skillController != null && _attackWeaponView != null)
             {
                 _skillController.OnSkillWeaponRequested -= HandleSkillWeaponRequestedHandler;
@@ -280,6 +281,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 _skillController.OnSkillVoiceRequested -= _boundPlayerView.PlaySkillVoice;
             }
 
+            // スキルの制御を破棄し、読み込んだアセットを解放する。
             _skillHitScheduler?.Clear();
             _skillHitScheduler = null;
             _skillHitController = null;
@@ -292,6 +294,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             _loadedSkillRepository = null;
             _skillLevels = null;
 
+            // 登録したコンテナを解除する。
             if (!_isRegistered)
             {
                 return;

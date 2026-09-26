@@ -107,6 +107,7 @@ namespace KillChord.Editor.Addressables
                     continue;
                 }
 
+                // Bundled Asset Group Schema を持たないグループは検証の対象外にする。
                 BundledAssetGroupSchema schema = group.GetSchema<BundledAssetGroupSchema>();
 
                 if (schema == null)
@@ -114,6 +115,7 @@ namespace KillChord.Editor.Addressables
                     continue;
                 }
 
+                // ビルド先と読み込み先がローカルになっているかを確認する。
                 string buildPath = schema.BuildPath.GetValue(settings, false);
                 string loadPath = schema.LoadPath.GetValue(settings, false);
 
@@ -133,6 +135,7 @@ namespace KillChord.Editor.Addressables
                     errors.Add($"グループ「{group.Name}」のLoad PathをLocal.LoadPathに設定してください。");
                 }
 
+                // 圧縮形式とバンドルのまとめ方を確認する。
                 if (schema.Compression != BundledAssetGroupSchema.BundleCompressionMode.LZ4)
                 {
                     errors.Add($"グループ「{group.Name}」の圧縮形式をLZ4に設定してください。");

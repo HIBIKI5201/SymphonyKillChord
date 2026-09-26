@@ -266,9 +266,11 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// </summary>
         private void PlayAppearAnimation()
         {
+            // 再生中のモーションを止め、アイコンの形を元に戻してから再生する。
             _appearMotion.TryCancel();
             ResetIconTransforms();
 
+            // 左右のアイコンを拡大と回転で弾ませる。
             Vector3 scaleStrength = _baseLocalScale * (_animationSetting.InputSuccessScaleMultiplier - 1f);
             _appearMotion = LSequence.Create()
                 .Join(LMotion.Punch.Create(_baseLocalScale, scaleStrength, _animationSetting.InputSuccessDuration)

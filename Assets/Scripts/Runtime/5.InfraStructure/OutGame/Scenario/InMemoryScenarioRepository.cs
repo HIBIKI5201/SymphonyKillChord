@@ -20,11 +20,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         {
             ct.ThrowIfCancellationRequested();
 
+            // 動作確認用に、ID が test のシナリオだけを返す。
             if (!string.Equals(id, "test", StringComparison.Ordinal))
             {
                 throw new KeyNotFoundException($"Scenario not found: {id}");
             }
 
+            // テキストの表示に合わせて切り替える背景とアニメーション。
             var backgroundRoom = new BackgroundEvent(new BackgroundId(
                 DataIDHasher.Compute("ScenarioBackground", "bg_room")));
             var backgroundStreet = new BackgroundEvent(new BackgroundId(
@@ -32,6 +34,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             var heroIdle = new AnimationEvent(new AnimationId(
                 DataIDHasher.Compute("ScenarioAnimation", "anim_hero_idle")));
 
+            // 文字数やキーワードに合わせて演出を発火するテキストを並べる。
             IReadOnlyList<IScenarioEvent> events = new List<IScenarioEvent>
             {
                 new TextEvent("misa", "Hello", CreateTriggers(

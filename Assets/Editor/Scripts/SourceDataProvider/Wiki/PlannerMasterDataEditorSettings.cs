@@ -66,6 +66,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <returns> 初期ページ定義一覧です。 </returns>
         private static List<PageDefinition> CreateDefaultPages()
         {
+            // ページ名・表示する SourceAsset のキー・表示するコレクションキーの組。
             return new List<PageDefinition>
             {
                 new(

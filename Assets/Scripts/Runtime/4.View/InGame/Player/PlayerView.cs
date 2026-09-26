@@ -555,6 +555,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void OnAttack(InputContext<float> input)
         {
+            // 押した瞬間だけ受け付け、入力抑制中・回避中・攻撃中は無視する。
             if (input.Phase != InputActionPhase.Started)
             {
                 return;
@@ -581,6 +582,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
+            // 攻撃が成立したら、予約されたスキル用のアニメーションか、拍の種類に応じた攻撃アニメーションを再生する。
             if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
                 string animationKey = _pendingSkillAnimationKey;
@@ -594,6 +596,7 @@ namespace KillChord.Runtime.View.InGame.Player
                         : _characterAnimationSignal.RequestAttack(animationKey);
                 }
 
+                // 武器の演出を再生し、ロックオン中なら対象の方へ向ける。
                 _attackWeaponView?.Play(resultBeatType);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)

@@ -20,6 +20,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         public SkillDetailScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent, Sprite comboHexIcon) : base(rootElement, outGameUIEvent)
         {
             _comboHexIcon = comboHexIcon;
+            // 画面の各要素を取得する。
             _skillName = rootElement.Q<Label>(name: E_NAME_SKILL_NAME_LABEL);
             _skillHeaderGenreIcon = rootElement.Q<Image>(name: E_NAME_SKILL_HEADER_GENRE_ICON);
             _skillHeaderGenreIcon.scaleMode = ScaleMode.ScaleToFit;
@@ -32,6 +33,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _effectCaptionLabel = rootElement.Q<Label>(name: E_NAME_EFFECT_CAPTION_LABEL);
             _skillDetailScrollView = rootElement.Q<VisualElement>(name: E_NAME_SKILL_DETAIL_SCROLL_VIEW);
             _skillDetail = rootElement.Q<Label>(name: E_NAME_SKILL_DETAIL_LABEL);
+            // 詳細文はドラッグでスクロールできるようにする。
             if (_skillDetailScrollView is ScrollView skillDetailScrollView)
             {
                 _skillDetailDragScrollManipulator = new ScrollViewDragManipulator(skillDetailScrollView);
@@ -43,6 +45,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _backButton = rootElement.Q<Button>(name: E_NAME_BACK_BUTTON);
             _outGameUIEvent = outGameUIEvent;
 
+            // ボタンの操作を登録し、文言をローカライズに登録する。
             RegisterEvents();
             _statusBoostLocalizedText = new LocalizedElementText(
                 UI_COMMON_TABLE, "ui.skill_detail.status_boost", text =>

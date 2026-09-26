@@ -19,6 +19,7 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
         /// <param name="parentElement"> オーバーレイを配置する親要素です。 </param>
         public TutorialOverlayView(VisualElement parentElement)
         {
+            // 暗幕・矢印・メッセージの各要素を作成する。
             _parentElement = parentElement ?? throw new ArgumentNullException(nameof(parentElement));
             _modalNavigationScope = new ModalNavigationScope();
             _topCurtain = CreateCurtain();
@@ -31,6 +32,7 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
             _messageBox = CreateMessageBox(_messageLabel);
             _root = CreateRoot();
 
+            // 各要素をルートに追加し、クリックと決定の操作を登録する。
             _root.Add(_topCurtain);
             _root.Add(_bottomCurtain);
             _root.Add(_leftCurtain);
@@ -415,12 +417,14 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
         /// <param name="layoutGeneration"> 配置要求の世代番号です。 </param>
         private void UpdateLayout(VisualElement targetElement, int layoutGeneration)
         {
+            // 新しい配置の要求が来ている場合や、表示中でない場合は何もしない。
             if (_isDisposed || !_isActive || layoutGeneration != _layoutGeneration
                 || targetElement.panel == null)
             {
                 return;
             }
 
+            // 対象要素の範囲を画面内に収めて求める。
             float overlayWidth = _root.resolvedStyle.width;
             float overlayHeight = _root.resolvedStyle.height;
             Vector2 targetMin = _root.WorldToLocal(targetElement.worldBound.min);
@@ -430,6 +434,7 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
             float targetRight = Mathf.Clamp(targetMax.x, targetLeft, overlayWidth);
             float targetBottom = Mathf.Clamp(targetMax.y, targetTop, overlayHeight);
 
+            // 対象の周りの4方向を暗幕で覆う。
             SetRect(_topCurtain, 0f, 0f, overlayWidth, targetTop);
             SetRect(_bottomCurtain, 0f, targetBottom, overlayWidth, overlayHeight - targetBottom);
             SetRect(_leftCurtain, 0f, targetTop, targetLeft, targetBottom - targetTop);
@@ -440,6 +445,7 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
                 overlayWidth - targetRight,
                 targetBottom - targetTop);
 
+            // 対象が画面の上半分にあれば下向き、下半分にあれば上向きに矢印を置く。
             float targetCenterX = (targetLeft + targetRight) * 0.5f;
             bool isArrowDownward = (targetTop + targetBottom) * 0.5f < overlayHeight * 0.5f;
             float arrowBarTop = isArrowDownward
@@ -462,6 +468,7 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
                 ARROW_TIP_DIAMETER,
                 ARROW_TIP_DIAMETER);
 
+            // メッセージの幅を決め、大きさが決まった後で位置を合わせる。
             _messageBox.style.width = Mathf.Min(
                 MESSAGE_BOX_MAX_WIDTH,
                 Mathf.Max(0f, overlayWidth - SCREEN_MARGIN * 2f));

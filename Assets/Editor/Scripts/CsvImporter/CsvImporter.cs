@@ -45,6 +45,7 @@ namespace KillChord.Editor
 
             EditorGUILayout.Space();
 
+            // API キーとフォルダ ID の入力欄。変更があれば EditorPrefs に保存する。
             using (var scope = new EditorGUI.ChangeCheckScope())
             {
                 _apiKey = EditorGUILayout.PasswordField("API Key", _apiKey);
@@ -61,6 +62,7 @@ namespace KillChord.Editor
 
             EditorGUILayout.Space();
 
+            // 必要な入力が揃っていて実行中でない場合だけ、インポートボタンを押せるようにする。
             var canExecute = !_isRunning
                 && !string.IsNullOrWhiteSpace(_apiKey)
                 && !string.IsNullOrWhiteSpace(_folderId);
@@ -73,6 +75,7 @@ namespace KillChord.Editor
                 }
             }
 
+            // 前回の実行結果があれば表示する。
             if (string.IsNullOrEmpty(_resultMessage))
             {
                 return;
@@ -215,6 +218,7 @@ namespace KillChord.Editor
                 EditorUtility.DisplayProgressBar(
                     PROGRESS_TITLE, $"取得中: {entry.name}", (float)i / entries.Count);
 
+                // スプレッドシートは CSV に変換して、それ以外はファイルをそのまま取得する。
                 var isSpreadsheet = entry.mimeType == MIME_TYPE_SPREADSHEET;
                 var url = isSpreadsheet
                     ? $"{DRIVE_API_URL}/{entry.id}/export?mimeType={UnityWebRequest.EscapeURL(MIME_TYPE_CSV)}&key={_apiKey.Trim()}"
@@ -228,6 +232,7 @@ namespace KillChord.Editor
                     return null;
                 }
 
+                // 保存名が重複する場合は上書きを避けるため中断する。
                 var fileName = BuildFileName(entry.name);
                 if (!usedFileNames.Add(fileName))
                 {

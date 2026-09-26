@@ -26,6 +26,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         public StageDetailScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
         {
+            // 見出し・報酬・ミッション・出撃ボタンなどの各要素を取得する。見つからない場合は例外を投げる。
             VisualElement topHeader = rootElement.Q<VisualElement>(TOP_HEADER)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {TOP_HEADER} が見つかりませんでした。");
@@ -122,6 +123,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SKILL_BUILD_SHORTCUT_BUTTON} が見つかりませんでした。");
 
+            // 装備中のスキルを表示するスロットの各部品を取得する。
             VisualElement skillBuild = rootElement.Q<VisualElement>(SKILL_BUILD)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SKILL_BUILD} が見つかりませんでした。");
@@ -141,6 +143,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                     _equippedSkillSlots[i].Q<VisualElement>(className: EQUIPPED_SKILL_COMMAND_ROW_USS_CLASS));
             }
 
+            // ボタンの操作を登録し、文言をローカライズに登録する。
             RegisterButtonCallback();
             Label firstClearHeading = firstClearReward.Q<Label>("FirstClearRewardHeading");
             Label successHeading = successReward.Q<Label>("SuccessRewardHeading");

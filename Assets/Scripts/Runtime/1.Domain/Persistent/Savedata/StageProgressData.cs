@@ -76,6 +76,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             Dictionary<int, StageClearData> migratedRecordMap = new Dictionary<int, StageClearData>();
             bool isChanged = false;
 
+            // 各記録のステージ ID を新しい ID に置き換える。対応が無い ID はそのまま使う。
             for (int i = 0; i < _clearDatas.Count; i++)
             {
                 StageClearData sourceRecord = _clearDatas[i];
@@ -91,12 +92,14 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
                     : sourceStageId;
                 isChanged |= migratedStageId != sourceStageId;
 
+                // ID が 0 になった記録は捨てる。
                 if (migratedStageId == 0)
                 {
                     isChanged = true;
                     continue;
                 }
 
+                // 置き換え後に同じ ID になった記録は1つにまとめる。
                 if (migratedRecordMap.TryGetValue(migratedStageId, out StageClearData existingRecord))
                 {
                     existingRecord.Merge(sourceRecord);
@@ -110,6 +113,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
                 migratedRecords.Add(migratedRecord);
             }
 
+            // 変更があった場合だけ記録を差し替える。
             if (isChanged)
             {
                 _clearDatas = migratedRecords;

@@ -25,7 +25,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// <summary>
         ///     中心から範囲内にいるキャラクターを結果リストに追加する。
         /// </summary>
-        ///</inheritdoc/>
         public void Query(CharacterEntity center, float range, List<CharacterEntity> results)
         {
             if (results == null)

@@ -24,12 +24,14 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             PlayerInputView playerInputView,
             ScenarioViewModel viewModel)
         {
+            // 以前の状態を解除して、参照を差し替える。
             ClearSkipConfirmation();
             Unsubscribe();
             _inputController = inputController;
             _playerInputView = playerInputView;
             _viewModel = viewModel;
 
+            // 必要な参照が無い場合はコンポーネントを無効にする。
             if (_scenarioUIRaycastView == null || _scenarioUIHideView == null)
             {
                 Debug.LogError($"[{nameof(ScenarioInputView)}] ScenarioUIRaycastView / ScenarioUIHideView が未設定です。", this);
@@ -50,6 +52,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 enabled = false;
                 return;
             }
+            // スキップ確認と、スキップ・テキスト送りのアクションを用意する。
             _skipConfirmationView.Initialize(
                 _playerInputView.GetComponent<PlayerInput>(),
                 _playerInputView.GetComponent<InputSystemUIInputModule>());
@@ -57,6 +60,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _skipAction = actions.FindAction("Scenario/Skip", true);
             _advanceAction = actions.FindAction("Scenario/Advance", true);
 
+            // 有効な場合は入力の購読を始める。
             if (isActiveAndEnabled)
             {
                 Subscribe();

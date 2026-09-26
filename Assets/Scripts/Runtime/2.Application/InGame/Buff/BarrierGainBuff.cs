@@ -40,7 +40,6 @@ namespace KillChord.Runtime.Application.InGame.Buff
         ///     所有者が与えたダメージに応じてバリアを獲得する。
         ///     攻撃者が所有者でない場合は何もしない。
         /// </summary>
-        ///</inheritdoc/>
         public void OnDamageDealt(in DamageDealtContext context)
         {
             if (!ReferenceEquals(context.Attacker, _owner))

@@ -22,6 +22,7 @@ namespace KillChord.Editor.AIDebugPlay
             var texts = new List<object>();
             int buttonCount = 0;
             int textCount = 0;
+            // シーン上のボタンを列挙する。上限を超えた分は数だけ数える。
             foreach (var button in UnityEngine.Object.FindObjectsByType<Button>(FindObjectsSortMode.InstanceID))
             {
                 if (!IsSceneComponent(button)) { continue; }
@@ -30,6 +31,7 @@ namespace KillChord.Editor.AIDebugPlay
                 buttons.Add(Object(("instanceId", button.GetInstanceID()), ("path", Path(button.transform)),
                     ("interactable", button.IsInteractable()), ("active", button.isActiveAndEnabled)));
             }
+            // TextMeshPro と uGUI のテキストを列挙する。
             foreach (var label in UnityEngine.Object.FindObjectsByType<TMP_Text>(FindObjectsSortMode.InstanceID))
             {
                 if (!IsSceneComponent(label) || !label.isActiveAndEnabled) { continue; }

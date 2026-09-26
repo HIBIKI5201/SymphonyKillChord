@@ -53,6 +53,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             string targetSceneName,
             IEnemyWaveDefinitionRepository waveDefinitionRepository)
         {
+            // ミッション定義と Wave 定義のリポジトリが必要。
             if (_missionDefinitionId.Id == 0)
             {
                 throw new System.InvalidOperationException(
@@ -65,6 +66,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                     $"[{nameof(BattleStageAsset)}] 敵Wave定義リポジトリが未指定です。StageId: {stageId.Value}");
             }
 
+            // Wave 定義からバトルシーン名を取得する。
             EnemyWaveDefinitionId enemyWaveDefinitionId = new(_enemyWaveDefinitionId.Id);
             if (!waveDefinitionRepository.TryGetBattleSceneName(
                     enemyWaveDefinitionId,
@@ -75,6 +77,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                         + $" StageId: {stageId.Value}, EnemyWaveDefinitionId: {_enemyWaveDefinitionId.Id}");
             }
 
+            // バトルステージの定義を作る。
             return new BattleStageDefinition(
                 stageId,
                 stageName,

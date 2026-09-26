@@ -184,6 +184,7 @@ namespace KillChord.Runtime.InfraStructure.Player
         private void ValidateDisplaySettings()
         {
 #if UNITY_EDITOR
+            // 表示名と効果説明の設定漏れを確認する。コマンドのみ表示するスキルは効果説明を確認しない。
             if (string.IsNullOrWhiteSpace(_displayName))
             {
                 Debug.LogWarning($"[{nameof(SkillTemplateAsset)}] 表示名が設定されていません。", this);
@@ -200,6 +201,7 @@ namespace KillChord.Runtime.InfraStructure.Player
                 return;
             }
 
+            // 効果パラメーターの重複・不正な値・説明文で使われていないものを確認する。
             HashSet<SkillEffectParameterId> ids = new();
             SkillEffectParameterSetting[] parameters = _effectParameters ?? Array.Empty<SkillEffectParameterSetting>();
             for (int i = 0; i < parameters.Length; i++)
@@ -237,6 +239,7 @@ namespace KillChord.Runtime.InfraStructure.Player
                 }
             }
 
+            // 説明文のプレースホルダーに対応するパラメーターがあるかを確認する。
             MatchCollection placeholderMatches = Regex.Matches(
                 _skillDetail,
                 EFFECT_PARAMETER_PLACEHOLDER_PATTERN);
@@ -259,6 +262,7 @@ namespace KillChord.Runtime.InfraStructure.Player
         private void ValidateGrowthSettings()
         {
 #if UNITY_EDITOR
+            // 効果パラメーターの ID を集める。
             SkillEffectParameterSetting[] parameters = _effectParameters ?? Array.Empty<SkillEffectParameterSetting>();
             HashSet<SkillEffectParameterId> parameterIds = new();
             for (int i = 0; i < parameters.Length; i++)
@@ -270,6 +274,7 @@ namespace KillChord.Runtime.InfraStructure.Player
                 _effectParameterGrowths ?? Array.Empty<SkillEffectParameterGrowthSetting>();
             HashSet<SkillEffectParameterId> growthIds = new();
             int expectedStepCount = -1;
+            // 成長設定の重複と、存在しないパラメーターへの設定を確認する。
             for (int i = 0; i < growths.Length; i++)
             {
                 SkillEffectParameterGrowthSetting growth = growths[i];
@@ -289,6 +294,7 @@ namespace KillChord.Runtime.InfraStructure.Player
 
                 ValidateGrowthSteps(growth);
 
+                // 成長の段階数がパラメーター間で揃っているかを確認する。
                 int stepCount = growth.Steps?.Length ?? 0;
                 if (stepCount == 0)
                 {
@@ -320,6 +326,7 @@ namespace KillChord.Runtime.InfraStructure.Player
 #if UNITY_EDITOR
             SkillEffectParameterGrowthStepSetting[] steps =
                 growth.Steps ?? Array.Empty<SkillEffectParameterGrowthStepSetting>();
+            // 各段階の成長値が有効かを確認する。
             for (int i = 0; i < steps.Length; i++)
             {
                 SkillEffectParameterGrowthStepSetting step = steps[i];

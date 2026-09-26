@@ -162,6 +162,7 @@ namespace KillChord.Runtime.View
                 return;
             }
 
+            // 重ねて再生中のアニメーションの重みを求める。取り消し中は抜けるときの重みを使う。
             TryStartOverlayCancellation();
             float weight = _isOverlayCancelling
                 ? CalculateOverlayCancellationWeight()
@@ -169,6 +170,7 @@ namespace KillChord.Runtime.View
 
             _weights[_overlayIndex] = Mathf.Max(_weights[_overlayIndex], weight);
 
+            // 他のアニメーションの重みは、残りの割合に合わせて小さくする。
             float otherScale = 1f - weight;
             for (int i = 0; i < _weights.Length; i++)
             {
@@ -180,6 +182,7 @@ namespace KillChord.Runtime.View
                 _weights[i] *= otherScale;
             }
 
+            // 経過時間を進め、終わったら重ねての再生を終える。
             float progressDelta = _oneShotTimingCalculator.GetBaseProgressDelta(
                 Time.deltaTime,
                 _locomotionCalculator.AnimationSpeed);

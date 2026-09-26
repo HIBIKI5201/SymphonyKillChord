@@ -340,6 +340,7 @@ namespace KillChord.Runtime.Utility.Collections
             [MaybeNullWhen(false)] out TPriority priority,
             IEqualityComparer<TElement> equalityComparer = null)
         {
+            // 対象の要素の位置を探す。見つからない場合は失敗を返す。
             int index = FindIndex(element, equalityComparer);
             if (index < 0)
             {
@@ -348,10 +349,12 @@ namespace KillChord.Runtime.Utility.Collections
                 return false;
             }
 
+            // 対象の要素を取り出し、末尾の要素でその位置を埋める。
             (TElement Element, TPriority Priority)[] nodes = _nodes;
             (removedElement, priority) = nodes[index];
             int newSize = --_size;
 
+            // 埋めた要素が削除した要素より優先される場合は上へ、そうでなければ下へ移動してヒープを保つ。
             if (index < newSize)
             {
                 (TElement Element, TPriority Priority) lastNode = nodes[newSize];
@@ -380,6 +383,7 @@ namespace KillChord.Runtime.Utility.Collections
                 }
             }
 
+            // 参照を残さないよう末尾を空にする。
             nodes[newSize] = default;
             _version++;
             return true;
@@ -619,6 +623,7 @@ namespace KillChord.Runtime.Utility.Collections
             (TElement Element, TPriority Priority)[] nodes = _nodes;
             int size = _size;
 
+            // 子ノードのうち最も優先されるものを探す。
             int i;
             while ((i = GetFirstChildIndex(nodeIndex)) < size)
             {
@@ -636,6 +641,7 @@ namespace KillChord.Runtime.Utility.Collections
                     }
                 }
 
+                // ノードが子より優先される位置まで来たら止める。そうでなければ子を上に上げて下へ進む。
                 if (comparer.Compare(node.Priority, minChild.Priority) <= 0)
                 {
                     break;

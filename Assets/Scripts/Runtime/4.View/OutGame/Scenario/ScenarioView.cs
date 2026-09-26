@@ -459,6 +459,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             ScenarioFadeMode mode,
             out FadeState state)
         {
+            // 既存の状態があれば使う。対象が無くなっていれば破棄して作り直す。
             var key = new FadeChannelKey(target, mode);
             if (_fadeStates.TryGetValue(key, out state))
             {
@@ -472,6 +473,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 _fadeStates.Remove(key);
             }
 
+            // 黒フェードは立ち絵の色を変える。元の色を記録してから状態を作る。
             if (mode == ScenarioFadeMode.Black)
             {
                 Image portraitImage = ResolvePortraitImage(target);
@@ -486,6 +488,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return true;
             }
 
+            // それ以外は CanvasGroup の透明度を変える。
             CanvasGroup group = ResolveAlphaFadeTarget(target, out bool floorAlpha);
             if (group == null)
             {
@@ -876,11 +879,13 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         private void EnsurePortraitSlot(string slot, string objectName, Vector2 defaultPosition)
         {
+            // すでに有効な立ち絵がある場合は何もしない。
             if (_portraitBySlot.TryGetValue(slot, out Image existingImage) && existingImage != null)
             {
                 return;
             }
 
+            // 古い登録と、スロットの元の色の記録を消す。
             _portraitBySlot.Remove(slot);
             ScenarioFadeTarget? target = slot switch
             {
@@ -894,6 +899,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 _portraitBaseColors.Remove(target.Value);
             }
 
+            // 立ち絵のオブジェクトを探し、無ければ下中央基準で作成する。
             RectTransform root = _portraitRoot != null ? _portraitRoot : transform as RectTransform;
             if (root == null)
             {
@@ -914,6 +920,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 rectTransform.anchoredPosition = defaultPosition;
             }
 
+            // 大きさと表示状態を設定して登録する。
             rectTransform.sizeDelta = GetValidatedPortraitSize();
 
             Image image = go.GetComponent<Image>();

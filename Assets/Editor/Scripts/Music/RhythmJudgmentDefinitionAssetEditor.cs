@@ -43,6 +43,7 @@ namespace KillChord.Editor.Music
 
             int zoneCount = rangeData.arraySize;
 
+            // ゲージ本体とラベル表示の領域を確保し、背景と目盛りを描く。
             Rect fullRect = GUILayoutUtility.GetRect(
                 1f,
                 GAUGE_HEIGHT + LABEL_AREA_HEIGHT,
@@ -59,6 +60,7 @@ namespace KillChord.Editor.Music
 
             List<string> warnings = new();
 
+            // 判定ゾーンごとに、範囲・ジャスト範囲・ラベルを描く。
             for (int i = 0; i < zoneCount; i++)
             {
                 SerializedProperty element = rangeData.GetArrayElementAtIndex(i);
@@ -89,6 +91,7 @@ namespace KillChord.Editor.Music
                     $"n={beatType}\n[{start:0.###}, {end:0.###}]\nJust=[{justStart:0.###}, {justEnd:0.###})",
                     EditorStyles.miniLabel);
 
+                // ジャスト範囲が不正な場合は警告を溜めておき、最後にまとめて表示する。
                 if (!isJustRangeValid)
                 {
                     warnings.Add(

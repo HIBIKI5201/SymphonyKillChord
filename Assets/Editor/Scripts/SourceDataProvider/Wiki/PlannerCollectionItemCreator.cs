@@ -69,6 +69,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             out string errorMessage)
         {
             createdAsset = null;
+            // 作成先のフォルダと型を検証する。
             string directory = ResolveVariantCreationDirectory(
                 sourceAsset,
                 mapping.AssetCreationDirectory);
@@ -77,22 +78,26 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return false;
             }
 
+            // 重複しないパスで新しいアセットを作成する。
             EnsureFolder(directory);
             string assetPath = AssetDatabase.GenerateUniqueAssetPath(
                 $"{directory}/{assetType.Name}.asset");
             createdAsset = ScriptableObject.CreateInstance(assetType);
             createdAsset.name = System.IO.Path.GetFileNameWithoutExtension(assetPath);
 
+            // 元に戻せるよう Undo に記録してから作成する。
             Undo.RecordObject(sourceAsset, "Collectionへデータを追加");
             AssetDatabase.CreateAsset(createdAsset, assetPath);
             Undo.RegisterCreatedObjectUndo(createdAsset, "Collectionデータを作成");
 
+            // コレクションの末尾に新しいアセットを追加する。
             int newIndex = collectionProperty.arraySize;
             collectionProperty.InsertArrayElementAtIndex(newIndex);
             SerializedProperty newElement = collectionProperty.GetArrayElementAtIndex(newIndex);
             newElement.objectReferenceValue = createdAsset;
             serializedObject.ApplyModifiedProperties();
 
+            // 元アセットと新しいアセットを保存する。
             EditorUtility.SetDirty(sourceAsset);
             AssetDatabase.SaveAssetIfDirty(sourceAsset);
             AssetDatabase.SaveAssetIfDirty(createdAsset);
@@ -272,12 +277,14 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return;
             }
 
+            // 文字列以外の配列は空にする。
             if (property.isArray && property.propertyType != SerializedPropertyType.String)
             {
                 property.ClearArray();
                 return;
             }
 
+            // 型ごとの既定値に戻す。構造体は子のプロパティを1つずつ戻す。
             switch (property.propertyType)
             {
                 case SerializedPropertyType.Integer:

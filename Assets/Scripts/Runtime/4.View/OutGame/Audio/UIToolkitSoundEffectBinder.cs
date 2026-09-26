@@ -136,10 +136,12 @@ namespace KillChord.Runtime.View.OutGame.Audio
                 return true;
             }
 
+            // 押された要素から親へたどり、効果音の指定がある要素を探す。
             Button nearestButton = null;
             Tab nearestTab = null;
             for (VisualElement element = target; element != null; element = element.parent)
             {
+                // ドラッグ操作の完了時や、無効な要素の場合は鳴らさない。
                 if (element.ClassListContains(DRAG_COMPLETED_CLASS_NAME))
                 {
                     return true;
@@ -167,6 +169,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
                     return true;
                 }
 
+                // 指定が無い場合に備えて、最も近いボタンとタブを覚えておく。
                 nearestButton ??= element as Button;
                 if (nearestTab == null
                     && _tabByHeader.TryGetValue(element, out Tab tab))
@@ -180,6 +183,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
                 }
             }
 
+            // タブの見出しであれば、タブの指定または既定の音を鳴らす。
             if (nearestTab != null && nearestTab.enabledInHierarchy)
             {
                 if (_config.TryResolveActivationCue(
@@ -203,6 +207,7 @@ namespace KillChord.Runtime.View.OutGame.Audio
                 return true;
             }
 
+            // ボタンであれば既定の音を鳴らす。
             if (nearestButton != null && nearestButton.enabledInHierarchy)
             {
                 _player.Play(_config.DefaultButtonActivationCue);

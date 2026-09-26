@@ -198,12 +198,14 @@ namespace KillChord.Editor.SourceDataProvider.Core
             int index,
             ref int removeIndex)
         {
+            // 対応1件分の各プロパティを取得する。
             SerializedProperty collectionKey = mapping.FindPropertyRelative(COLLECTION_KEY_PROPERTY);
             SerializedProperty sourceAssetKey = mapping.FindPropertyRelative(COLLECTION_SOURCE_ASSET_KEY_PROPERTY);
             SerializedProperty propertyPath = mapping.FindPropertyRelative(COLLECTION_PROPERTY_PATH_PROPERTY);
             SerializedProperty assetCreationDirectory =
                 mapping.FindPropertyRelative(COLLECTION_ASSET_CREATION_DIRECTORY_PROPERTY);
 
+            // 見出しと削除ボタン。削除は描画後にまとめて行うため、対象の番号だけ記録する。
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField($"Collection {index + 1}", EditorStyles.boldLabel);
             if (GUILayout.Button("削除", GUILayout.Width(48f)))
@@ -215,6 +217,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             DrawSourceAssetSelector(sourceAssetKey, sourceAssets);
             EditorGUILayout.PropertyField(collectionKey, new GUIContent("Collection Key"));
 
+            // SourceAsset を解決できない場合は、プロパティパスを手入力できるようにする。
             if (!SourceDataProviderRepositoryResolver.TryResolveAsset(
                 sourceAssetKey.stringValue,
                 out ScriptableObject sourceAsset))
@@ -229,6 +232,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 EditorGUILayout.ObjectField("Resolved Source Asset", sourceAsset, sourceAsset.GetType(), false);
             }
 
+            // 解決できた場合は、配列・List の候補から選べるようにする。
             string[] availablePaths = SourceDataProviderRepositoryResolver.GetCollectionPropertyPaths(sourceAsset);
             if (availablePaths.Length > 0)
             {
@@ -281,6 +285,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             SerializedProperty sourceAssetKey,
             SerializedProperty sourceAssets)
         {
+            // 登録済みの SourceAsset を選択肢にする。
             List<string> labels = new() { "<未設定>" };
             List<string> values = new() { string.Empty };
             int selectedIndex = 0;
@@ -300,6 +305,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 }
             }
 
+            // 登録に無い値が入っている場合は、Missing として選択肢に残す。
             if (!string.IsNullOrWhiteSpace(sourceAssetKey.stringValue) && selectedIndex == 0)
             {
                 labels.Add($"Missing: {sourceAssetKey.stringValue}");

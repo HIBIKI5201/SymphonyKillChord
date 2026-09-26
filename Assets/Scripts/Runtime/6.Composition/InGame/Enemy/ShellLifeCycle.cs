@@ -60,6 +60,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="shellExplosionSoundView"> 爆発SEを再生する外部所有のView。 </param>
         public void Initialize(Action<ShellLifeCycle> releaseCallback, ReusableParticleSystemView shellExplosionEffectView, ReusableSoundEffectView shellExplosionSoundView)
         {
+            // 音楽同期とプレイヤーの参照を取得する。
             if (!_musicSyncInitializer) _musicSyncInitializer = FindFirstObjectByType<MusicSyncInitializer>();
             if (!_musicSyncView) _musicSyncView = FindAnyObjectByType<MusicSyncView>();
 
@@ -76,12 +77,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 throw new ArgumentNullException(nameof(_playerModuleContainer), "PlayerModuleContainerが見つかりません。");
             }
+            // 設定データから砲弾のエンティティを作る。
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(_musicSyncView.MusicSyncState, _musicSyncInitializer.MusicSyncService);
             ShellAttackSpec attackSpec = ShellFactory.CreateAttackSpec(_loadedAttackData);
             MusicSyncSpec musicSpec = ShellFactory.CreateMusicSpec(_loadedMusicData);
 
             ShellEntity entity = new ShellEntity(attackSpec, musicSpec, null);
 
+            // 着弾の予約・攻撃・表示を行うユースケースとコントローラーを作る。
             ShellReservationUsecase reservationUsecase = new ShellReservationUsecase(entity, musicActionScheduler);
             _reservationUsecase = reservationUsecase;
             ShellAttackUsecase attackUsecase = new ShellAttackUsecase();
@@ -96,6 +99,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 attackUsecase);
             _controller = controller;
 
+            // プレイヤーを狙うようにビューを初期化する。
             _view.Initialize(
                 _playerModuleContainer.PlayerView.transform,
                 shellSpecPresenter,

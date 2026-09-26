@@ -94,6 +94,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return false;
             }
 
+            // 読み込み済みのシーンはキャッシュを返す。
             if (_cache.TryGetValue(sceneName, out BattleSceneMapData cached))
             {
                 mapData = cached;
@@ -106,6 +107,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return false;
             }
 
+            // シーンファイルをテキストとして読み込み、スポーン地点と NavMesh を取り出す。
             string sceneText;
             try
             {
@@ -132,6 +134,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 NavMesh = navMesh,
                 HasNavMesh = hasNavMesh,
             };
+            // PlayMode 中は NavMesh が取れないことがあるため、取れた場合だけキャッシュする。
             if (hasNavMesh || !EditorApplication.isPlaying)
             {
                 _cache[sceneName] = mapData;
@@ -184,6 +187,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             error = string.Empty;
             List<SpawnPointInfo> result = new();
 
+            // PositionPair プレハブから、Transform とコンポーネントの fileID と既定値を取得する。
             GameObject prefabRoot = AssetDatabase.LoadAssetAtPath<GameObject>(POSITION_PAIR_PREFAB_PATH);
             if (prefabRoot == null)
             {
@@ -213,6 +217,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             Vector3 spawnDefaultPosition = prefabComponent.SpawnPosition.localPosition;
             Vector3 entryDefaultPosition = prefabComponent.EntryPosition.localPosition;
 
+            // シーン内の Transform と PositionPair のインスタンスを集める。
             Dictionary<long, PlainTransform> plainTransforms = BuildPlainTransforms(documents);
             List<PrefabInstanceDoc> instances = BuildPrefabInstances(documents, positionPairGuid);
 
@@ -221,6 +226,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 PrefabInstanceDoc instanceDoc = instances[i];
 
+                // ID が未設定のインスタンスは移行漏れとして数え、飛ばす。
                 string id = GetOverriddenString(
                     instanceDoc.Modifications, componentFileId, SPAWN_POINT_ID_PROPERTY_PATH, null);
                 int hashId = GetOverriddenInt(
@@ -231,6 +237,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                     continue;
                 }
 
+                // Prefab の上書き値から各 Transform のローカル座標を求める。
                 Vector3 rootLocalPosition = GetOverriddenVector3(
                     instanceDoc.Modifications, rootFileId, LOCAL_POSITION_PROPERTY_PREFIX, rootDefaultPosition);
                 Quaternion rootLocalRotation = GetOverriddenQuaternion(
@@ -240,6 +247,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 Vector3 entryLocalPosition = GetOverriddenVector3(
                     instanceDoc.Modifications, entryPosFileId, LOCAL_POSITION_PROPERTY_PREFIX, entryDefaultPosition);
 
+                // 親の Transform をたどってワールド座標に変換する。
                 Matrix4x4 parentWorld = ResolveWorldMatrix(
                     instanceDoc.TransformParentFileId, plainTransforms, MAX_PARENT_DEPTH);
                 Matrix4x4 rootLocal = Matrix4x4.TRS(rootLocalPosition, rootLocalRotation, Vector3.one);

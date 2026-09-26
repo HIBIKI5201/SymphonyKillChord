@@ -50,7 +50,6 @@ namespace KillChord.Runtime.Application.InGame.Buff
         /// <summary>
         ///     防御者が効果範囲内にいる場合、会心ダメージ倍率を上書きする。
         /// </summary>
-        /// </inheritdoc/>
         public float ModifyCriticalDamageMultiplier(IAttacker attacker, IDefender defender, float criticalDamageMultiplier)
         {
             // 防御者がプレイヤーキャラクターでない場合、クリティカルダメージ倍率を変更しない

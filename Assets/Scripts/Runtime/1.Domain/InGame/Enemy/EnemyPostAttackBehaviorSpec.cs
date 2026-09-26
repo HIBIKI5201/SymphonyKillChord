@@ -20,6 +20,7 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
             float obstacleApproachRatio,
             float arrivalThreshold)
         {
+            // 重みと距離が有効な範囲にあるかを検証する。
             if (stayWeight < 0f)
             {
                 throw new ArgumentOutOfRangeException(nameof(stayWeight), "重みの値は0より小さい。");
@@ -49,6 +50,7 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
                 throw new ArgumentOutOfRangeException(nameof(arrivalThreshold), "到達判定距離の値は0より小さい。");
             }
 
+            // 検証済みの値を保持する。
             StayWeight = stayWeight;
             RegroupWeight = regroupWeight;
             ObstacleApproachWeight = obstacleApproachWeight;

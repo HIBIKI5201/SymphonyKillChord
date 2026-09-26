@@ -35,7 +35,6 @@ namespace KillChord.Runtime.Application.InGame.Buff
         /// <summary>
         ///     攻撃力に加算量を足す。
         /// </summary>
-        ///</inheritdoc/>
         public Damage ModifyAttackPower(IAttacker attacker, IDefender defender, Damage attackPower)
         {
             return attackPower + _increaseAmount;

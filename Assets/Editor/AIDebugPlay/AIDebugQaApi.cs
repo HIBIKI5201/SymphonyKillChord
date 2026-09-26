@@ -17,12 +17,14 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         public static string GetSnapshotJson(bool includeUi = true)
         {
+            // 読み込まれているシーンの一覧を作る。
             var scenes = new List<object>();
             for (int index = 0; index < SceneManager.sceneCount; index++)
             {
                 var scene = SceneManager.GetSceneAt(index);
                 scenes.Add(Object(("name", scene.name), ("path", scene.path), ("loaded", scene.isLoaded)));
             }
+            // 各セクションの状態を読み取る。
             var sections = Object();
             Add(sections, "player", AIDebugCombatSnapshot.ReadPlayer);
             Add(sections, "rhythm", AIDebugCombatSnapshot.ReadRhythm);
@@ -32,6 +34,7 @@ namespace KillChord.Editor.AIDebugPlay
             Add(sections, "save", AIDebugSaveSnapshot.Read);
             sections.Add("observedCombat", AIDebugQaMonitor.ReadCombat());
             if (includeUi) { Add(sections, "ui", AIDebugUi.Read); }
+            // 環境情報と合わせて JSON にまとめる。
             return Serialize(Object(("schemaVersion", 1), ("success", true),
                 ("environment", "UnityEditor"), ("projectPath", System.IO.Path.GetDirectoryName(Application.dataPath)),
                 ("capturedAtUtc", DateTime.UtcNow.ToString("O")), ("frame", Time.frameCount),

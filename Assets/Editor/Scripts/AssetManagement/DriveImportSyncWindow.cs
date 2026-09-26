@@ -157,6 +157,7 @@ namespace KillChord.Editor.AssetManagement
         /// </summary>
         private void OnGUI()
         {
+            // 状態と進捗バーを描画する。
             EditorGUILayout.LabelField("状態", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(status);
 
@@ -173,6 +174,7 @@ namespace KillChord.Editor.AssetManagement
             EditorGUILayout.LabelField(string.IsNullOrEmpty(current) ? "-" : current);
 
             EditorGUILayout.Space();
+            // ログを描画する。情報以外は HelpBox で目立たせる。
             EditorGUILayout.LabelField("ログ", EditorStyles.boldLabel);
 
             scroll = EditorGUILayout.BeginScrollView(
@@ -194,12 +196,14 @@ namespace KillChord.Editor.AssetManagement
 
             EditorGUILayout.EndScrollView();
 
+            // 新しいログが追加されたら一番下までスクロールする。
             if (scrollToBottom)
             {
                 scroll.y = float.MaxValue;
                 scrollToBottom = false;
             }
 
+            // 実行中はキャンセルだけ、停止中は閉じるだけを押せるようにする。
             EditorGUILayout.BeginHorizontal();
 
             EditorGUI.BeginDisabledGroup(!isRunning);

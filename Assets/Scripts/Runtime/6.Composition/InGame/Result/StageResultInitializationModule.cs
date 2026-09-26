@@ -47,6 +47,7 @@ namespace KillChord.Runtime.Composition.InGame.Result
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
+            // 依存するコンテナと状態を取得する。
             MissionModuleContainer missionContainer = ServiceLocator.GetInstance<MissionModuleContainer>();
             if (missionContainer == null)
             {
@@ -72,6 +73,7 @@ namespace KillChord.Runtime.Composition.InGame.Result
                 return false;
             }
 
+            // リザルトのプレゼンター・コントローラーを作り、ビューを初期化する。
             StageResultViewModel viewModel = new();
             _container.Presenter = new StageResultPresenter(
                 missionContainer.MissionRuntimeService,

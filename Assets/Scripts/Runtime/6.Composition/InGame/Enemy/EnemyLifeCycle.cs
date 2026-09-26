@@ -571,6 +571,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         private void BeginDying()
         {
+            // 死亡イベントの購読を解除し、攻撃と AI を止める。
             if (_enemyEntity != null)
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
@@ -583,6 +584,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyBattleAIFacade?.StopGameplay();
             _view?.StopGameplay();
 
+            // 行動と移動を止める。
             if (_behaviorGraphAgent != null)
             {
                 _behaviorGraphAgent.enabled = false;
@@ -601,6 +603,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _attackPositionSearchView.enabled = false;
             }
 
+            // ターゲットと AI の登録を解除し、当たり判定を無効にする。
             _targetingSystem?.UnregisterTarget(_targetable);
             _battleAIRegistry?.Unregister(_aiController);
             SetDyingCollidersEnabled(false);

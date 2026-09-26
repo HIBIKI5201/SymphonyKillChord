@@ -100,6 +100,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         private string GetPlaceholder(SkillEffectParameterId id)
         {
+            // 説明文の中で置き換える文字列を返す。
             return id switch
             {
                 SkillEffectParameterId.DamageMultiplier => "{DamageMultiplier}",

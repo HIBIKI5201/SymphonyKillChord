@@ -24,6 +24,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         {
             RootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
             _soundEffectCommand = soundEffectCommand;
+            // 要素内の各部品を取得する。見つからない場合は例外を投げる。
             _icon = RootElement.Q<Image>(ICON_NAME)
                 ?? throw new InvalidOperationException(
                     $"[{nameof(SkillElementView)}] {ICON_NAME} が見つかりませんでした。");
@@ -40,9 +41,11 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 ?? throw new InvalidOperationException(
                     $"[{nameof(SkillElementView)}] {LOCKED_LABEL_NAME} が見つかりませんでした。");
 
+            // ドラッグできる見た目にし、クリック操作を登録する。
             RootElement.AddToClassList(DRAGGABLE_CLASS_NAME);
             RootElement.RegisterCallback<ClickEvent>(HandleClickHandler);
             _genreBadge.RegisterCallback<ClickEvent>(HandleGenreBadgeClickHandler);
+            // 未解放の表示文言をローカライズに登録する。
             _lockedLocalizedText = new LocalizedElementText(
                 "UICommon", "ui.skill.locked", text => _lockedLabel.text = text, _lockedLabel.text);
         }

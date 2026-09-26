@@ -25,6 +25,7 @@ namespace KillChord.Runtime.View.InGame.Skill
                 throw new System.InvalidOperationException("スキル入力進行UIの表示設定が存在しません。");
             }
 
+            // 拍の種類ごとの表示設定を作る。同じ拍の種類が重複していたら例外を投げる。
             List<SkillBeatVisualSetting> settings = new();
             HashSet<int> seenBeatTypes = new();
 
@@ -43,6 +44,7 @@ namespace KillChord.Runtime.View.InGame.Skill
                 settings.Add(setting);
             }
 
+            // 入力成功時とリセット時の演出設定をまとめる。
             SkillInputProgressAnimationSetting animationSetting = new(
                 _inputSuccessScaleMultiplier,
                 _inputSuccessRotationAngle,

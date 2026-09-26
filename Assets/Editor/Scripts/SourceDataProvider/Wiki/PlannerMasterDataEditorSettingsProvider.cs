@@ -110,6 +110,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             string[] collectionKeys,
             ref int removeIndex)
         {
+            // ページ1件分の各プロパティを取得する。
             SerializedProperty displayNameProperty =
                 pageProperty.FindPropertyRelative(DISPLAY_NAME_PROPERTY_NAME);
             SerializedProperty sourceAssetKeysProperty =
@@ -117,6 +118,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             SerializedProperty collectionCategoriesProperty =
                 pageProperty.FindPropertyRelative(COLLECTION_CATEGORIES_PROPERTY_NAME);
 
+            // 見出しと削除ボタン。削除は描画後にまとめて行うため、対象の番号だけ記録する。
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField($"Page {index + 1}", EditorStyles.boldLabel);
             if (GUILayout.Button("削除", GUILayout.Width(48f)))
@@ -125,6 +127,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             }
             EditorGUILayout.EndHorizontal();
 
+            // 表示名と、ページに表示する SourceAsset・コレクションの選択欄。
             EditorGUILayout.PropertyField(displayNameProperty, new GUIContent("Display Name"));
             DrawSelectableStringList(
                 "Source Assets",
