@@ -68,7 +68,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 UpdateBeatColors();
                 // 現在ビートの表示色は次のブロック遷移まで更新されないため、ここで即座に反映する。
                 UpdateCurrentBeatColor();
-                UpdateJustTimingMarkerColors();
+                UpdateJustOutlineColors();
                 RebuildTargetBeatFrames();
             }
         }
@@ -184,39 +184,34 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ジャストタイミング表示用の帯を現在の対象BeatCountに応じた透明度へ更新する。
+        ///     ジャスト位置の枠線を現在の対象BeatCountに応じた透明度へ更新する。
         /// </summary>
-        private void UpdateJustTimingMarkerColors()
+        private void UpdateJustOutlineColors()
         {
-            if (_justTimingMarkers == null || _effectConfig == null)
+            if (_effectConfig == null || _justOutlineImages == null)
             {
                 return;
             }
 
-            for (int zoneIndex = 0; zoneIndex < _zoneBeatCounts.Length; zoneIndex++)
+            for (int i = 0; i < _justOutlineImages.Length; i++)
             {
-                Color color = GetJustTimingMarkerColor(zoneIndex);
-                for (int sideIndex = 0; sideIndex < 2; sideIndex++)
+                if (_justOutlineImages[i] == null)
                 {
-                    int markerIndex = zoneIndex * 2 + sideIndex;
-                    if (markerIndex < _justTimingMarkers.Length &&
-                        _justTimingMarkers[markerIndex] != null &&
-                        _justTimingMarkers[markerIndex].TryGetComponent(out Image markerImage))
-                    {
-                        markerImage.color = color;
-                    }
+                    continue;
                 }
+
+                _justOutlineImages[i].color = GetJustOutlineColor(_justOutlineZoneIndices[i]);
             }
         }
 
         /// <summary>
-        ///     指定ゾーンのジャストタイミング表示用の帯色を取得する。
+        ///     指定ゾーンのジャスト位置の枠線色を取得する。
         /// </summary>
         /// <param name="zoneIndex"> 対象の判定ゾーンのインデックス。 </param>
-        /// <returns> 対象外の場合はゲージ色と同じ透明度を適用した帯色。 </returns>
-        private Color GetJustTimingMarkerColor(int zoneIndex)
+        /// <returns> 対象外の場合はゲージ色と同じ透明度を適用した枠線色。 </returns>
+        private Color GetJustOutlineColor(int zoneIndex)
         {
-            Color markerColor = _effectConfig.MarkerColor;
+            Color outlineColor = _effectConfig.JustOutlineColor;
             if (_beatColor == null ||
                 !_targetBeatCount.HasValue ||
                 zoneIndex < 0 ||
@@ -224,11 +219,11 @@ namespace KillChord.Runtime.View.InGame.Music
                 zoneIndex >= _beatColor.Length ||
                 _zoneBeatCounts[zoneIndex] == _targetBeatCount.Value)
             {
-                return markerColor;
+                return outlineColor;
             }
 
-            markerColor.a = ApplyTargetDim(_beatColor[zoneIndex], zoneIndex).a;
-            return markerColor;
+            outlineColor.a = ApplyTargetDim(_beatColor[zoneIndex], zoneIndex).a;
+            return outlineColor;
         }
 
         /// <summary>
@@ -444,8 +439,11 @@ namespace KillChord.Runtime.View.InGame.Music
             }
         }
 
-        /// <summary> ジャストタイミング位置を示す帯の横幅倍率。 </summary>
-        private const float JUST_TIMING_MARKER_WIDTH_SCALE = 1f / 3f;
+        /// <summary> ジャスト位置の枠線1つを構成する線の本数。上下左右の4本。 </summary>
+        private const int OUTLINE_LINE_COUNT = 4;
+
+        /// <summary> ジャスト位置の枠線の最小の太さ。 </summary>
+        private const float MIN_OUTLINE_THICKNESS = 0.1f;
 
         /// <summary> チュートリアル対象枠の線幅。 </summary>
         private const float TARGET_BEAT_FRAME_THICKNESS = 2f;
@@ -521,7 +519,8 @@ namespace KillChord.Runtime.View.InGame.Music
         private Image[] _leftBeatImages;
         private RectTransform[] _rightBeatRectTransforms;
         private Image[] _rightBeatImages;
-        private RectTransform[] _justTimingMarkers;
+        private Image[] _justOutlineImages = Array.Empty<Image>();
+        private int[] _justOutlineZoneIndices = Array.Empty<int>();
         private MotionHandle[] _handles;
         private RectTransform[] _targetBeatFrames = Array.Empty<RectTransform>();
         private MotionHandle _targetBeatFrameMotion;
@@ -601,7 +600,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 out _rightBeatRectTransforms,
                 out _handles);
 
-            CreateJustTimingMarkers();
+            CreateJustOutlines();
             RebuildTargetBeatFrames();
             _currentOpenIndex = -1;
             SynchronizeProgressImageWidths();
@@ -664,17 +663,9 @@ namespace KillChord.Runtime.View.InGame.Music
                 }
             }
 
-            if (_justTimingMarkers != null)
-            {
-                for (int i = 0; i < _justTimingMarkers.Length; i++)
-                {
-                    if (_justTimingMarkers[i] != null)
-                    {
-                        _justTimingMarkers[i].gameObject.SetActive(false);
-                        Destroy(_justTimingMarkers[i].gameObject);
-                    }
-                }
-            }
+            // 枠線はブロックの子のため、ブロックの破棄に付随して消える。参照だけを捨てる。
+            _justOutlineImages = Array.Empty<Image>();
+            _justOutlineZoneIndices = Array.Empty<int>();
 
             if (_leftBeatRectTransforms != null)
             {
@@ -756,62 +747,146 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ジャストタイミング位置を事前表示する帯を生成する。
+        ///     ジャストタイミング位置のブロックへ枠線を生成する。
+        ///     枠線はブロックの子として生成するため、高さのアニメーションへ自動的に追従する。
         /// </summary>
-        private void CreateJustTimingMarkers()
+        private void CreateJustOutlines()
         {
-            if (_effectConfig == null || _totalBeatBoxCount <= 0 || _canvasGroup == null)
+            if (_effectConfig == null
+                || _totalBeatBoxCount <= 0
+                || _leftBeatRectTransforms == null
+                || _rightBeatRectTransforms == null)
             {
-                _justTimingMarkers = Array.Empty<RectTransform>();
+                _justOutlineImages = Array.Empty<Image>();
+                _justOutlineZoneIndices = Array.Empty<int>();
                 return;
             }
 
-            _justTimingMarkers = new RectTransform[_zoneBeatCounts.Length * 2];
+            // 判定ゾーンごとに1ブロック、それを左右のガイド分で2倍の枠線を生成する。
+            int lineCount = _zoneBeatCounts.Length * OUTLINE_LINE_COUNT * 2;
+            _justOutlineImages = new Image[lineCount];
+            _justOutlineZoneIndices = new int[lineCount];
+
+            int writeIndex = 0;
             for (int i = 0; i < _zoneBeatCounts.Length; i++)
             {
-                float horizontalPosition = _layout.GetPosition((_justStarts[i] + _justEnds[i]) * 0.5f);
-                float width = (_layout.GetPosition(_justEnds[i]) - _layout.GetPosition(_justStarts[i]))
-                    * JUST_TIMING_MARKER_WIDTH_SCALE;
-                _justTimingMarkers[i * 2] = CreateJustTimingMarker(
-                    $"JustTimingMarker_Left_{i}",
-                    Vector2.left * horizontalPosition, width, i);
-                _justTimingMarkers[i * 2 + 1] = CreateJustTimingMarker(
-                    $"JustTimingMarker_Right_{i}",
-                    Vector2.right * horizontalPosition, width, i);
+                // 共通判定定義のジャスト範囲の中央が乗るブロックを枠線の対象にする。
+                // 範囲の端で求めると浮動小数の誤差で隣のブロックへずれるため中央で求める。
+                float justCenter = (_justStarts[i] + _justEnds[i]) * 0.5f;
+                int blockIndex = _layout.GetBlockIndex(justCenter);
+                if (blockIndex < 0 || blockIndex >= _leftBeatRectTransforms.Length)
+                {
+                    continue;
+                }
+
+                int zoneIndex = GetBeatSectionIndex(blockIndex);
+                writeIndex = CreateJustOutline(
+                    _leftBeatRectTransforms[blockIndex], $"JustOutline_Left_{i}", zoneIndex, writeIndex);
+                writeIndex = CreateJustOutline(
+                    _rightBeatRectTransforms[blockIndex], $"JustOutline_Right_{i}", zoneIndex, writeIndex);
+            }
+
+            // ブロック番号を解決できず生成を飛ばした分の空きを詰める。
+            if (writeIndex < lineCount)
+            {
+                Array.Resize(ref _justOutlineImages, writeIndex);
+                Array.Resize(ref _justOutlineZoneIndices, writeIndex);
             }
         }
 
         /// <summary>
-        ///     指定位置へジャストタイミング表示用の帯を生成する。
+        ///     1ブロック分の枠線を上下左右の4本で生成する。
+        ///     ブロックは左右が隣と密着しているため、左右の線は内側へ描き、上下の線だけ外へ張り出す。
+        ///     上と下の張り出し量は個別に設定できる。
         /// </summary>
-        /// <param name="objectName"> 生成するオブジェクト名。 </param>
-        /// <param name="anchoredPosition"> 生成位置。 </param>
-        /// <param name="width"> 共通ジャスト範囲から換算した帯の幅。 </param>
-        /// <param name="zoneIndex"> 対応する判定ゾーンのインデックス。 </param>
-        /// <returns> 生成した帯のRectTransform。 </returns>
-        private RectTransform CreateJustTimingMarker(string objectName, Vector2 anchoredPosition, float width, int zoneIndex)
+        /// <param name="parent"> 枠線を付けるブロック。 </param>
+        /// <param name="objectName"> 生成するオブジェクト名の接頭辞。 </param>
+        /// <param name="zoneIndex"> ブロックが属する判定ゾーンのインデックス。 </param>
+        /// <param name="writeIndex"> 生成した枠線を書き込む位置。 </param>
+        /// <returns> 次に書き込む位置。 </returns>
+        private int CreateJustOutline(RectTransform parent, string objectName, int zoneIndex, int writeIndex)
         {
-            GameObject markerObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
-            markerObject.layer = gameObject.layer;
-            markerObject.transform.SetParent(_canvasGroup.transform, false);
-            markerObject.transform.SetAsFirstSibling();
+            float thickness = Mathf.Max(MIN_OUTLINE_THICKNESS, _effectConfig.JustOutlineThickness);
+            float upperExtend = Mathf.Max(0f, _effectConfig.JustOutlineUpperExtend);
+            float lowerExtend = Mathf.Max(0f, _effectConfig.JustOutlineLowerExtend);
+            Color color = GetJustOutlineColor(zoneIndex);
 
-            RectTransform markerRectTransform = markerObject.GetComponent<RectTransform>();
-            markerRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-            markerRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            markerRectTransform.pivot = new Vector2(0.5f, 0.5f);
-            // 帯はpivot中央のため、高さの半分だけ持ち上げると下端がガイドの基準線に揃う。
-            // そこからの微調整はレイアウト依存のためConfigの補正値で行う。
-            float verticalOffset = _effectConfig.MarkerHeight * 0.5f + _effectConfig.MarkerVerticalOffset;
-            markerRectTransform.anchoredPosition = anchoredPosition + Vector2.up * verticalOffset;
-            markerRectTransform.sizeDelta = new Vector2(
-                width,
-                Mathf.Max(0.1f, _effectConfig.MarkerHeight));
+            // 縦の線は上下の張り出しを足した高さになり、上下で張り出し量が違う分だけ中心がずれる。
+            float verticalLineSizeDelta = upperExtend + lowerExtend;
+            float verticalLineOffset = (upperExtend - lowerExtend) * 0.5f;
 
-            Image markerImage = markerObject.GetComponent<Image>();
-            markerImage.color = GetJustTimingMarkerColor(zoneIndex);
-            markerImage.raycastTarget = false;
-            return markerRectTransform;
+            // 上辺。ブロック上端からupperExtendだけ外に出した位置へ、横いっぱいの線を引く。
+            Image topLine = CreateJustOutlineLine(
+                parent, $"{objectName}_Top", color,
+                new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+                new Vector2(0f, upperExtend), new Vector2(0f, thickness));
+
+            // 下辺。ブロック下端からlowerExtendだけ外に出した位置へ引く。
+            Image bottomLine = CreateJustOutlineLine(
+                parent, $"{objectName}_Bottom", color,
+                new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f),
+                new Vector2(0f, -lowerExtend), new Vector2(0f, thickness));
+
+            // 左辺。縦方向はストレッチアンカーで親へ追従させ、上辺と下辺の間をつなぐ高さにする。
+            Image leftLine = CreateJustOutlineLine(
+                parent, $"{objectName}_Left", color,
+                new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f),
+                new Vector2(0f, verticalLineOffset), new Vector2(thickness, verticalLineSizeDelta));
+
+            // 右辺。左辺と左右対称。
+            Image rightLine = CreateJustOutlineLine(
+                parent, $"{objectName}_Right", color,
+                new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1f, 0.5f),
+                new Vector2(0f, verticalLineOffset), new Vector2(thickness, verticalLineSizeDelta));
+
+            Image[] lines = { topLine, bottomLine, leftLine, rightLine };
+            for (int i = 0; i < lines.Length; i++)
+            {
+                _justOutlineImages[writeIndex] = lines[i];
+                _justOutlineZoneIndices[writeIndex] = zoneIndex;
+                writeIndex++;
+            }
+
+            return writeIndex;
+        }
+
+        /// <summary>
+        ///     枠線を構成する線を1本生成する。
+        /// </summary>
+        /// <param name="parent"> 線を付けるブロック。 </param>
+        /// <param name="objectName"> 生成するオブジェクト名。 </param>
+        /// <param name="color"> 線の色。 </param>
+        /// <param name="anchorMin"> アンカーの最小値。 </param>
+        /// <param name="anchorMax"> アンカーの最大値。 </param>
+        /// <param name="pivot"> ピボット。 </param>
+        /// <param name="anchoredPosition"> アンカーからの位置。 </param>
+        /// <param name="sizeDelta"> アンカー基準の大きさ。 </param>
+        /// <returns> 生成した線のImage。 </returns>
+        private Image CreateJustOutlineLine(
+            RectTransform parent,
+            string objectName,
+            Color color,
+            Vector2 anchorMin,
+            Vector2 anchorMax,
+            Vector2 pivot,
+            Vector2 anchoredPosition,
+            Vector2 sizeDelta)
+        {
+            GameObject lineObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
+            lineObject.layer = parent.gameObject.layer;
+            lineObject.transform.SetParent(parent, false);
+
+            RectTransform lineRectTransform = lineObject.GetComponent<RectTransform>();
+            lineRectTransform.anchorMin = anchorMin;
+            lineRectTransform.anchorMax = anchorMax;
+            lineRectTransform.pivot = pivot;
+            lineRectTransform.anchoredPosition = anchoredPosition;
+            lineRectTransform.sizeDelta = sizeDelta;
+
+            Image lineImage = lineObject.GetComponent<Image>();
+            lineImage.color = color;
+            lineImage.raycastTarget = false;
+            return lineImage;
         }
 
         /// <summary>
