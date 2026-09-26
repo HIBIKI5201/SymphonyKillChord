@@ -61,15 +61,18 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
             _fill.RegisterCallback<TransitionEndEvent>(OnTransitionEnd);
             using var registration = token.Register(() => tcs.TrySetResult(true));
+            // タイムアウト用の待機は、アニメーションの完了やキャンセルの時点で止め、タイマーを残さない。
+            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(token);
 
             try
             {
                 await Task.WhenAny(
                     tcs.Task,
-                    Task.Delay(TimeSpan.FromSeconds(ANIMATION_TIMEOUT_SEC), CancellationToken.None));
+                    Task.Delay(TimeSpan.FromSeconds(ANIMATION_TIMEOUT_SEC), timeoutCts.Token));
             }
             finally
             {
+                timeoutCts.Cancel();
                 _fill.UnregisterCallback<TransitionEndEvent>(OnTransitionEnd);
             }
         }

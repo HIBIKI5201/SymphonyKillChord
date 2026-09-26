@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using KillChord.Runtime.Domain.InGame.Battle;
 
@@ -14,7 +15,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
         ///     攻撃の硬直状態を管理するAttackIntervalEntityを受け取る。
         /// </summary>
         /// <param name="attackIntervalEntity"></param>
-        public AttackIntervalEvaluator(AttackIntervalEntity attackIntervalEntity)
+        /// <param name="lifetimeToken"> 所有者の寿命のトークン。キャンセルされると硬直待ちを打ち切る。 </param>
+        public AttackIntervalEvaluator(AttackIntervalEntity attackIntervalEntity, CancellationToken lifetimeToken)
         {
             if (attackIntervalEntity == null)
             {
@@ -22,6 +24,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             }
             
             _attackIntervalEntity = attackIntervalEntity;
+            _lifetimeToken = lifetimeToken;
         }
         
         /// <summary>
@@ -40,6 +43,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
         }
         
         private readonly AttackIntervalEntity _attackIntervalEntity;
+        private readonly CancellationToken _lifetimeToken;
         private int _currentIntervalId;
 
         /// <summary>
@@ -50,7 +54,13 @@ namespace KillChord.Runtime.Application.InGame.Battle
         private async UniTaskVoid EvaluateAttackIntervalAsync(AttackInterval duration, int attackId)
         {
             _attackIntervalEntity.UpdateAttackState(true);
-            await UniTask.Delay((int)(duration * 1000f));
+            // 所有者（シーン）が破棄されたら待機を打ち切り、破棄後に Entity を書き換えない。
+            bool isCanceled = await UniTask.Delay((int)(duration * 1000f), cancellationToken: _lifetimeToken)
+                .SuppressCancellationThrow();
+            if (isCanceled)
+            {
+                return;
+            }
 
             // フラグの更新は与えられたIDが最新の時のみ行う。
             if (attackId == _currentIntervalId)
