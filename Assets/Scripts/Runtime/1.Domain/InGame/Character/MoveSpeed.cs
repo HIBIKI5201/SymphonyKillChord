@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     移動速度を表す値オブジェクト。
     /// </summary>
-    public readonly struct MoveSpeed
+    public readonly struct MoveSpeed : IEquatable<MoveSpeed>
     {
         /// <summary>
         ///     移動速度を初期化するコンストラクタ。
