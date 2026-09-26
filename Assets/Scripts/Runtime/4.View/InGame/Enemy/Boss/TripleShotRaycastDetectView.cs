@@ -336,7 +336,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private bool IsEnemyOrigin(Vector3 sourcePosition)
         {
-            return (sourcePosition - transform.position).sqrMagnitude <= 0.0001f;
+            return EnemyAimOriginUtility.IsEnemyOrigin(sourcePosition, transform.position);
         }
 
         /// <summary>
