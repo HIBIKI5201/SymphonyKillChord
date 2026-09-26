@@ -3,7 +3,7 @@ namespace KillChord.Runtime.Application.InGame.Music
     /// <summary>
     ///     リズムガイドの表示位置を計算するユースケースクラス。
     /// </summary>
-    public class RhythmGuideUsecase
+    public class RhythmGuideUseCase
     {
         /// <summary>
         ///     インジケーターの正規化された位置を計算する。

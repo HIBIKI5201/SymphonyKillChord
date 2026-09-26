@@ -24,10 +24,10 @@ namespace KillChord.Runtime.Application.InGame.Mission
         public MissionRuntimeService(
             MissionDefinition missionDefinition,
             MissionProgress missionProgress,
-            MissionTimeAdvanceUsecase missionTimeAdvanceUseCase,
-            MissionEnemyKilledUsecase missionEnemyKilledUseCase,
-            MissionActionPerformedUsecase missionActionPerformedUseCase,
-            MissionPlayerDeadUsecase missionPlayerDeadUseCase,
+            MissionTimeAdvanceUseCase missionTimeAdvanceUseCase,
+            MissionEnemyKilledUseCase missionEnemyKilledUseCase,
+            MissionActionPerformedUseCase missionActionPerformedUseCase,
+            MissionPlayerDeadUseCase missionPlayerDeadUseCase,
             MissionRuleRunner missionRuleRunner,
             MissionEvaluationRunner missionEvaluationRunner)
         {
@@ -179,13 +179,13 @@ namespace KillChord.Runtime.Application.InGame.Mission
         /// <summary> 進行状況。 </summary>
         private readonly MissionProgress _missionProgress;
         /// <summary> 時間経過ユースケース。 </summary>
-        private readonly MissionTimeAdvanceUsecase _missionTimeAdvanceUseCase;
+        private readonly MissionTimeAdvanceUseCase _missionTimeAdvanceUseCase;
         /// <summary> 敵撃破ユースケース。 </summary>
-        private readonly MissionEnemyKilledUsecase _missionEnemyKilledUseCase;
+        private readonly MissionEnemyKilledUseCase _missionEnemyKilledUseCase;
         /// <summary> プレイヤー行動発動ユースケース。 </summary>
-        private readonly MissionActionPerformedUsecase _missionActionPerformedUseCase;
+        private readonly MissionActionPerformedUseCase _missionActionPerformedUseCase;
         /// <summary> プレイヤー死亡ユースケース。 </summary>
-        private readonly MissionPlayerDeadUsecase _missionPlayerDeadUseCase;
+        private readonly MissionPlayerDeadUseCase _missionPlayerDeadUseCase;
         /// <summary> ルール評価器。 </summary>
         private readonly MissionRuleRunner _missionRuleRunner;
         /// <summary> 評価実行器。 </summary>

@@ -49,7 +49,7 @@
 | **`ParticleSystemOneShotVisualEffect`** / **`PooledParticleSystemOneShotVisualEffect`** / **`VisualEffectGraphOneShotVisualEffect`** / **`SoundEffectOneShotVisualEffect`** | View | `IOneShotVisualEffect`の各実装 |
 | **`FootStepView`** | View | 足音演出の再生 |
 | **`CharacterDefinitionAsset`** / **`CharacterDefinitionRepository`** / **`CharacterFactory`** | Infrastructure | キャラクター定義アセットの保持・ID検索と、そこからの`CharacterEntity`生成 |
-| **`AttackDefinitionAsset`** / **`AttackDefinitionFactory`** / **`AttackSpecAsset`** / **`AttackPilpelineAsset`** | Infrastructure | 攻撃定義・攻撃パラメータ・パイプラインのScriptableObjectと生成 |
+| **`AttackDefinitionAsset`** / **`AttackDefinitionFactory`** / **`AttackSpecAsset`** / **`AttackPipelineAsset`** | Infrastructure | 攻撃定義・攻撃パラメータ・パイプラインのScriptableObjectと生成 |
 
 
 > `PlayerHealthHudPresenter` / `EnemyHealthHudPresenter` / `IHealthHudViewModel` / `HealthHudDTO` は、実体が`InGame/UI`モジュール（namespace `Adaptor.InGame.UI`）に属するため、本表からは除外している。HP変化通知（`CharacterEntity.OnHealthChanged`）の連携先として、処理フロー②で参照する。
@@ -139,7 +139,7 @@ graph TD
 > Presenterが配信したDTOを受け取って、画面にダメージ数値をポップアップ描画したり、HPバーを滑らかに変動させたりするUnityの描画・UIコンポーネントを担当する。
 
 ### ⑤ Infrastructure
-> `CharacterDefinitionAsset`と`CharacterDefinitionRepository`がキャラクター定義をIDで引けるようにし、`CharacterFactory`がそこから`CharacterEntity`を生成する。攻撃側は`AttackDefinitionAsset`・`AttackSpecAsset`・`AttackPilpelineAsset`が定義を保持し、`AttackDefinitionFactory`がDomainへ変換する。
+> `CharacterDefinitionAsset`と`CharacterDefinitionRepository`がキャラクター定義をIDで引けるようにし、`CharacterFactory`がそこから`CharacterEntity`を生成する。攻撃側は`AttackDefinitionAsset`・`AttackSpecAsset`・`AttackPipelineAsset`が定義を保持し、`AttackDefinitionFactory`がDomainへ変換する。
 
 ### ⑥ Composition
 > 当モジュールのクラスの依存解決（DI）は、呼び出し側となる Player または Enemy モジュールの初期化コンポーネント内で行われる。

@@ -56,7 +56,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 EnemyMissionKeyRepository missionKeyRepository =
                     await _missionKeyRepositoryKey.LoadAssetAsync<EnemyMissionKeyRepository>(this, cancellationToken);
                 missionKeyRepository?.TryGetAsset(new EnemyMissionKey(_missionKeyId.Id), out _loadedMissionKeyAsset);
-                _loadedAttackEntryRepo = await _attackEntryRepoKey.LoadAssetAsync<BossAttackEntryRepo>(this, cancellationToken);
+                _loadedAttackEntryRepo = await _attackEntryRepoKey.LoadAssetAsync<BossAttackEntryRepository>(this, cancellationToken);
             }
             catch (Exception ex) { Debug.LogException(ex, this); }
 
@@ -145,10 +145,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncState, musicSyncService);
 
             // UseCase
-            EnemyMoveUsecase moveUsecase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
-            EnemyTripleShotAttackUsecase tripleShotAttackUsecase = new EnemyTripleShotAttackUsecase(tripleRaycastDetectService);
-            BossAttackReservationUsecase reservationUsecase = new BossAttackReservationUsecase(musicActionScheduler);
+            EnemyMoveUseCase moveUsecase = new EnemyMoveUseCase(spec, raycastDetectService, attackPositionSearchService);
+            EnemyAttackUseCase attackUsecase = new EnemyAttackUseCase(raycastDetectService);
+            EnemyTripleShotAttackUseCase tripleShotAttackUsecase = new EnemyTripleShotAttackUseCase(tripleRaycastDetectService);
+            BossAttackReservationUseCase reservationUsecase = new BossAttackReservationUseCase(musicActionScheduler);
             _reservationUsecase = reservationUsecase;
 
             // AI判定用（移動・硬直・範囲）の戦闘状態。先頭攻撃の定義で初期化する。
@@ -359,13 +359,13 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
         private BossAIController _aiController;
-        private BossAttackReservationUsecase _reservationUsecase;
+        private BossAttackReservationUseCase _reservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _aiBattleState;
         private CharacterDefinitionAsset _loadedEnemyData;
         private EnemyMoveSpecAsset _loadedMoveData;
         private EnemyMissionKeyAsset _loadedMissionKeyAsset;
-        private BossAttackEntryRepo _loadedAttackEntryRepo;
+        private BossAttackEntryRepository _loadedAttackEntryRepo;
         private EnemyHealthHudPresenter _enemyHealthHudPresenter;
 
         /// <summary>

@@ -6,8 +6,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     /// <summary>
     ///     解放段階と必要スキルノードの紐づきを纏めたリポジトリー。
     /// </summary>
-    [CreateAssetMenu(fileName = "SkillNodePhaseBindDataRepo", menuName = "SymphonyDev/SkillTree/SkillNodePhaseBindDataRepo")]
-    public class SkillNodePhaseBindDataRepo : ScriptableObject
+    [CreateAssetMenu(fileName = "SkillNodePhaseBindDataRepository", menuName = "SymphonyDev/SkillTree/SkillNodePhaseBindDataRepository")]
+    public class SkillNodePhaseBindDataRepository : ScriptableObject
     {
         public SkillNodePhaseBindData[] PhaseBindData;
 

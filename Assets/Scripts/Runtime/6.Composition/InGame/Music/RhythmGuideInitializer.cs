@@ -43,7 +43,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             }
 
             // リズムガイドのユースケース・プレゼンター・ViewModel を作り、ビューを初期化する。
-            RhythmGuideUsecase usecase = new RhythmGuideUsecase();
+            RhythmGuideUseCase usecase = new RhythmGuideUseCase();
 
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
                 musicSyncService,

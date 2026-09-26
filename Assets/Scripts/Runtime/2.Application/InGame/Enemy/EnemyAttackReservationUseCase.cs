@@ -9,14 +9,14 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// <summary>
     ///     敵の攻撃を予約するユースケース。
     /// </summary>
-    public class EnemyAttackReservationUsecase : IDisposable
+    public class EnemyAttackReservationUseCase : IDisposable
     {
         /// <summary>
         ///     敵の攻撃を予約するユースケースのコンストラクタ。
         /// </summary>
         /// <param name="enemyAttackMusicSpec"></param>
         /// <param name="musicActionScheduler"></param>
-        public EnemyAttackReservationUsecase(
+        public EnemyAttackReservationUseCase(
             EnemyAttackMusicSpec enemyAttackMusicSpec,
             IMusicActionScheduler musicActionScheduler
             )
