@@ -36,7 +36,7 @@ MonoBehaviour:
     m_path: Assets/Level/Scenes/Master/Stages/Stage_02.unity
   - m_enabled: 0
     m_path: Assets/Level/Scenes/Develop/Dodge/InGameDodgeTest.unity
-  - m_enabled: 1
+  - m_enabled: 0
     m_path: Assets/Level/Scenes/Demo/DemoEnd.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
