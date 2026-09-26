@@ -410,6 +410,10 @@ MonoBehaviour:
     m_Localized: "The home timer has expired. Moving to the mission."
     m_Metadata:
       m_Items: []
+  - m_Id: 1870000004
+    m_Localized: "Failed to save data."
+    m_Metadata:
+      m_Items: []
   - m_Id: 1870000003
     m_Localized: "Save data has been reset."
     m_Metadata:
