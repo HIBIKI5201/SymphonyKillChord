@@ -7,10 +7,17 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     /// </summary>
     public class SkillDetailPresenter
     {
+        /// <summary>
+        ///     スキル詳細の ViewModel を指定して生成する。
+        /// </summary>
         public SkillDetailPresenter(ISkillDetailViewModel viewModel)
         {
             _viewModel = viewModel;
         }
+
+        /// <summary>
+        ///     スキル詳細を ViewModel に渡して表示を更新する。
+        /// </summary>
         public void Push(SkillDetailDTO dto)
         {
             _viewModel.Apply(dto);

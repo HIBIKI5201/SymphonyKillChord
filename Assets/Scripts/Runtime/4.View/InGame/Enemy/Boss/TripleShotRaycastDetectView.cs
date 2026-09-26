@@ -15,10 +15,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void Initialize(Transform targetTransform, float attackRange)
         {
+            // 判定結果のバッファと対象を用意する。
             _hitResults = new RaycastHit[_resultArraySize];
             _targetTransform = targetTransform;
             _attackRange = attackRange;
 
+            // 3本分の照準線と、対象のコライダーがあるかを確認する。
             if (_lineRenderers == null || _lineRenderers.Length != AIM_LINE_COUNT)
             {
                 Debug.LogError($"[TripleShotRaycastDetectView] LineRendererの数が不正:{_lineRenderers?.Length.ToString() ?? "null"}.");
@@ -37,6 +39,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
+            // 照準線を2点のワールド座標で描く設定にし、非表示で始める。
             foreach(LineRenderer lineRenderer in _lineRenderers)
             {
                 lineRenderer.enabled = false;

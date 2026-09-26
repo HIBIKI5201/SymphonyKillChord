@@ -235,11 +235,13 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <returns> 設定を追加した場合はtrueです。 </returns>
         private bool EnsureDefaultMappings()
         {
+            // 一覧が未初期化なら空で作る。
             _sourceAssetMappings ??= new List<SourceAssetMapping>();
             _sourceCollectionMappings ??= new List<SourceCollectionMapping>();
             _repositoryMappings ??= new List<RepositoryMapping>();
 
             bool changed = false;
+            // 既定の対応のうち、まだ登録されていないものを追加する。
             List<RepositoryMapping> defaults = CreateDefaultMappings();
             for (int i = 0; i < defaults.Count; i++)
             {
@@ -393,6 +395,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <returns> 初期設定です。 </returns>
         private static List<RepositoryMapping> CreateDefaultMappings()
         {
+            // コレクションキー・リポジトリの Addressables キー・配列のプロパティパスの組。
             return new List<RepositoryMapping>
             {
                 new("StageAsset", "StageTreeAsset", "_stageAssets"),
@@ -540,13 +543,13 @@ namespace KillChord.Editor.SourceDataProvider.Core
             /// <summary> 個別データ配列のプロパティパスです。 </summary>
             public string ArrayPropertyPath => _arrayPropertyPath;
 
-            [SerializeField]
+            [SerializeField, Tooltip("データのカテゴリ名。")]
             private string _category;
 
-            [SerializeField]
+            [SerializeField, Tooltip("対象アセットの Addressables キー。")]
             private string _addressableKey;
 
-            [SerializeField]
+            [SerializeField, Tooltip("コレクション配列の SerializedProperty パス。")]
             private string _arrayPropertyPath;
         }
     }

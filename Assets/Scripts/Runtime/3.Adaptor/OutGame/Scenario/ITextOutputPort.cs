@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface ITextOutputPort
     {
+        /// <summary>
+        ///     話者と本文を表示する。
+        /// </summary>
         ValueTask ShowTextAsync(string speaker, string message, CancellationToken ct);
     }
 }

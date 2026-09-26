@@ -13,6 +13,9 @@ namespace KillChord.Editor.TicketSystem
     [InitializeOnLoad]
     public class SceneSaveObserver
     {
+        /// <summary>
+        ///     シーン保存イベントを購読し、チケットデータを初回読み込みする。
+        /// </summary>
         static SceneSaveObserver()
         {
             // シーンが保存される直前に呼ばれるイベントを登録する。

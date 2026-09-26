@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// </summary>
     public interface IScenarioEventEmitter
     {
+        /// <summary>
+        ///     シナリオイベントを対応するハンドラーへ送る。
+        /// </summary>
         ValueTask EmitAsync(IScenarioEvent scenarioEvent, CancellationToken ct);
     }
 }

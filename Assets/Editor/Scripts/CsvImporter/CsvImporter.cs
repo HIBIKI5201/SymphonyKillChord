@@ -15,18 +15,27 @@ namespace KillChord.Editor
     /// </summary>
     public sealed class CsvImporter : EditorWindow
     {
+        /// <summary>
+        ///     CSV Importer ウィンドウを開く。
+        /// </summary>
         [MenuItem("Tools/Import CSV")]
         private static void Open()
         {
             GetWindow<CsvImporter>("CSV Importer");
         }
 
+        /// <summary>
+        ///     EditorPrefs から API キーとフォルダ ID を読み込む。
+        /// </summary>
         private void OnEnable()
         {
             _apiKey = EditorPrefs.GetString(API_KEY_PREFS_KEY, string.Empty);
             _folderId = EditorPrefs.GetString(FOLDER_ID_PREFS_KEY, DEFAULT_FOLDER_ID);
         }
 
+        /// <summary>
+        ///     API キーとフォルダ ID の入力欄と取得ボタンを描画する。
+        /// </summary>
         private void OnGUI()
         {
             EditorGUILayout.HelpBox(
@@ -36,6 +45,7 @@ namespace KillChord.Editor
 
             EditorGUILayout.Space();
 
+            // API キーとフォルダ ID の入力欄。変更があれば EditorPrefs に保存する。
             using (var scope = new EditorGUI.ChangeCheckScope())
             {
                 _apiKey = EditorGUILayout.PasswordField("API Key", _apiKey);
@@ -52,6 +62,7 @@ namespace KillChord.Editor
 
             EditorGUILayout.Space();
 
+            // 必要な入力が揃っていて実行中でない場合だけ、インポートボタンを押せるようにする。
             var canExecute = !_isRunning
                 && !string.IsNullOrWhiteSpace(_apiKey)
                 && !string.IsNullOrWhiteSpace(_folderId);
@@ -64,6 +75,7 @@ namespace KillChord.Editor
                 }
             }
 
+            // 前回の実行結果があれば表示する。
             if (string.IsNullOrEmpty(_resultMessage))
             {
                 return;
@@ -206,6 +218,7 @@ namespace KillChord.Editor
                 EditorUtility.DisplayProgressBar(
                     PROGRESS_TITLE, $"取得中: {entry.name}", (float)i / entries.Count);
 
+                // スプレッドシートは CSV に変換して、それ以外はファイルをそのまま取得する。
                 var isSpreadsheet = entry.mimeType == MIME_TYPE_SPREADSHEET;
                 var url = isSpreadsheet
                     ? $"{DRIVE_API_URL}/{entry.id}/export?mimeType={UnityWebRequest.EscapeURL(MIME_TYPE_CSV)}&key={_apiKey.Trim()}"
@@ -219,6 +232,7 @@ namespace KillChord.Editor
                     return null;
                 }
 
+                // 保存名が重複する場合は上書きを避けるため中断する。
                 var fileName = BuildFileName(entry.name);
                 if (!usedFileNames.Add(fileName))
                 {
@@ -368,6 +382,9 @@ namespace KillChord.Editor
         /// </summary>
         private readonly struct HttpResponse
         {
+            /// <summary>
+            ///     HTTP 通信の結果を生成する。
+            /// </summary>
             public HttpResponse(bool isSuccess, byte[] data, string error)
             {
                 IsSuccess = isSuccess;
@@ -396,6 +413,9 @@ namespace KillChord.Editor
         /// </summary>
         private readonly struct DownloadedCsv
         {
+            /// <summary>
+            ///     ダウンロードした CSV を生成する。
+            /// </summary>
             public DownloadedCsv(string fileName, byte[] data)
             {
                 FileName = fileName;

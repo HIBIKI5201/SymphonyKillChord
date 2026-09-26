@@ -22,34 +22,52 @@ namespace KillChord.Runtime.View.Persistent.Input
         }
 
         // イベント群。
+        /// <summary> オプション入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnOptionInput;
 
+        /// <summary> 決定入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnSubmitInput;
+        /// <summary> キャンセル入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnCancelInput;
 
+        /// <summary> 回避入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnDodgeInput;
         /// <summary> モバイル仮想スティックの方向付き回避入力を通知するイベント。 </summary>
         public event Action<InputContext<Vector2>> OnMobileDodgeFlickInput;
+        /// <summary> 攻撃入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnAttackInput;
+        /// <summary> 移動入力を通知するイベント。 </summary>
         public event Action<InputContext<Vector2>> OnMoveInput;
+        /// <summary> マウスによる視点入力を通知するイベント。 </summary>
         public event Action<InputContext<Vector2>> OnLookMouseInput;
+        /// <summary> ゲームパッドによる視点入力を通知するイベント。 </summary>
         public event Action<InputContext<Vector2>> OnLookGamepadInput;
         /// <summary> ロックオン入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnLockOnInput;
         /// <summary> ロックオン対象切り替え入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnLockOnSelectInput;
+        /// <summary> モバイルの視点入力を通知するイベント。 </summary>
         public event Action<InputContext<Vector2>> OnMobileLookInput;
 
         /// <summary> モバイルのロックオン対象切り替え入力を通知するイベント。 </summary>
         public event Action<float> OnMobileLockOnSelectInput;
 
+        /// <summary> シナリオのテキスト送り入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnScenarioAdvanceInput;
+        /// <summary> シナリオの早送り入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnScenarioFastForwardInput;
+        /// <summary> シナリオの一時停止入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnScenarioPauseInput;
+        /// <summary> シナリオのスキップ入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnScenarioSkipInput;
+        /// <summary> シナリオのオート送り入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnScenarioAutoInput;
+        /// <summary> シナリオの UI 非表示入力を通知するイベント。 </summary>
         public event Action<InputContext<float>> OnScenarioHideUIInput;
 
+        /// <summary>
+        ///     オプション入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnOption(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -63,6 +81,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnOptionInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     決定入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnSubmit(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -76,6 +97,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnSubmitInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     キャンセル入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnCancel(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -89,6 +113,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnCancelInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     回避入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnDodge(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -102,6 +129,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnDodgeInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     攻撃入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnAttack(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -115,6 +145,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnAttackInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     移動入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnMove(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -128,6 +161,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnMoveInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     視点入力を受け取り、入力デバイスに応じてマウスまたはゲームパッドの視点入力として通知する。
+        /// </summary>
         public void OnLook(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -149,6 +185,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             }
         }
 
+        /// <summary>
+        ///     ロックオン入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnLockOn(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -180,6 +219,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnLockOnSelectInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     シナリオのテキスト送り入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnScenarioAdvance(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -193,6 +235,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnScenarioAdvanceInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     シナリオの早送り入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnScenarioFastForward(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -206,6 +251,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnScenarioFastForwardInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     シナリオの一時停止入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnScenarioPause(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -219,6 +267,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnScenarioPauseInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     シナリオのスキップ入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnScenarioSkip(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -232,6 +283,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnScenarioSkipInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     シナリオのオート送り入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnScenarioAuto(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -245,6 +299,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnScenarioAutoInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     シナリオの UI 非表示入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnScenarioHideUI(InputAction.CallbackContext context)
         {
             if (!_isInputEnabled)
@@ -258,6 +315,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnScenarioHideUIInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     モバイルの画面ボタンの入力を受け取り、対応する入力として通知する。
+        /// </summary>
         public void OnMobileButton(InputActionKind actionId, InputActionPhase phase, float value)
         {
             if (!_isInputEnabled)
@@ -287,6 +347,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             action?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     モバイルの移動入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnMobileMove(InputActionPhase phase, Vector2 value)
         {
             if (!_isInputEnabled)
@@ -300,6 +363,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             OnMoveInput?.Invoke(inputContext);
         }
 
+        /// <summary>
+        ///     モバイルの視点入力を受け取り、入力が有効なら通知する。
+        /// </summary>
         public void OnMobileLook(InputActionPhase phase, Vector2 value)
         {
             if (!_isInputEnabled)
@@ -432,6 +498,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             CacheActions();
         }
 
+        /// <summary>
+        ///     各入力アクションにコールバックを登録する。
+        /// </summary>
         private void OnEnable()
         {
             RegisterAction(_optionAction, OnOption);
@@ -451,6 +520,9 @@ namespace KillChord.Runtime.View.Persistent.Input
             RegisterAction(_scenarioHideUIAction, OnScenarioHideUI);
         }
 
+        /// <summary>
+        ///     各入力アクションからコールバックを解除する。
+        /// </summary>
         private void OnDisable()
         {
             UnregisterAction(_optionAction, OnOption);

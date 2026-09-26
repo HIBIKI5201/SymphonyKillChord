@@ -83,6 +83,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 return;
             }
 
+            // 参照先の攻撃定義から、確定ダメージとジャスト倍率を合計する。
             int validCount = 0;
             for (int i = 0; i < attacks.arraySize; i++)
             {
@@ -105,6 +106,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 validCount++;
             }
 
+            // 有効だった攻撃の数で割って平均にする。
             if (validCount > 0)
             {
                 confirmedDamage /= validCount;

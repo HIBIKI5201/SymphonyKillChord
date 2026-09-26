@@ -25,6 +25,9 @@ namespace KillChord.Editor.Build
             ELEMENT_PATH,
             defaultDockPosition = MainToolbarDockPosition.Middle,
             defaultDockIndex = DEFAULT_DOCK_INDEX)]
+        /// <summary>
+        ///     メインツールバーに表示するビルドプロファイル切り替えのドロップダウンを生成する。
+        /// </summary>
         internal static MainToolbarDropdown CreateProfileDropdown()
         {
             _dropdown = new MainToolbarDropdown(

@@ -34,6 +34,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 SourceDataProviderSettings.instance.SourceAssetMappings;
             RebuildCacheIfNeeded(mappings);
 
+            // 登録済みの Addressables キーを選択肢にする。
             List<string> labels = new() { UNASSIGNED_LABEL };
             List<string> values = new() { string.Empty };
             int selectedIndex = 0;
@@ -48,6 +49,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 }
             }
 
+            // 登録に無い値が入っている場合は、Missing として選択肢に残す。
             if (!string.IsNullOrWhiteSpace(property.stringValue) && selectedIndex == 0)
             {
                 labels.Add($"Missing: {property.stringValue}");
@@ -55,6 +57,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 selectedIndex = values.Count - 1;
             }
 
+            // ポップアップ・Ping ボタン・移動ボタンの配置を決める。
             Rect popupRect = new(
                 position.x,
                 position.y,
@@ -71,6 +74,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 JUMP_BUTTON_WIDTH,
                 position.height);
 
+            // 選ばれた値をプロパティへ反映する。
             EditorGUI.BeginProperty(position, label, property);
             EditorGUI.BeginChangeCheck();
             int nextIndex = EditorGUI.Popup(popupRect, label.text, selectedIndex, labels.ToArray());
@@ -79,6 +83,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 property.stringValue = values[nextIndex];
             }
 
+            // 未選択でなければ、アセットの Ping と Planner ウィンドウへの移動を行えるようにする。
             using (new EditorGUI.DisabledScope(nextIndex <= 0))
             {
                 if (GUI.Button(pingRect, PING_LABEL)

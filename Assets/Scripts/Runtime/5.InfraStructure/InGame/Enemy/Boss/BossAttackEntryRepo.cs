@@ -9,10 +9,14 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     [CreateAssetMenu(fileName = "BossAttackEntryRepo", menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(BossAttackEntryRepo))]
     public class BossAttackEntryRepo : ScriptableObject
     {
+        /// <summary> ボスの攻撃の一覧。 </summary>
         public BossAttackEntryAsset[] AttackEntries => _attackEntries;
-        [SerializeField] private BossAttackEntryAsset[] _attackEntries;
+        [SerializeField, Tooltip("ボスの攻撃の一覧。")] private BossAttackEntryAsset[] _attackEntries;
 
 #if UNITY_EDITOR
+        /// <summary>
+        ///     未設定の攻撃が含まれていないかを確認する。
+        /// </summary>
         private void OnValidate()
         {
             if (_attackEntries == null) return;

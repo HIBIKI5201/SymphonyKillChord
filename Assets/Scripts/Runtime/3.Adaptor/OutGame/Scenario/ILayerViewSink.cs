@@ -5,6 +5,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface ILayerViewSink
     {
+        /// <summary>
+        ///     対象の表示順を変更する。
+        /// </summary>
         void SetLayerOrder(string target, int order);
     }
 }

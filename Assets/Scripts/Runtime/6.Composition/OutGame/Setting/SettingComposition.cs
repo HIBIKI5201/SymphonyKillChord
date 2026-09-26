@@ -34,6 +34,7 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
+            // 必要な参照と、設定画面のルート要素を取得する。
             if (_uiDocument == null
                 || !ServiceLocator.TryGetInstance(out AudioSettingsModuleContainer audioSettingsContainer)
                 || !ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
@@ -55,6 +56,7 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
                 return false;
             }
 
+            // メニュー・オーディオ設定・環境設定のビューを作る。失敗した場合は作ったものを破棄する。
             try
             {
                 HierarchicalNavigationScope settingNavigationScope = new(settingRoot);
@@ -82,6 +84,7 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
                 return false;
             }
 
+            // 設定画面の表示と戻る操作をメニューに結びつける。
             _outGameUIEvent.OnShownSettingScreen += _settingMenuView.ShowMenu;
             _settingScreenView.TryNavigateBack = _settingMenuView.TryGoBack;
             _settingMenuView.OnCancelEnvironmentChanges = _environmentSettingsView.CancelPendingChanges;

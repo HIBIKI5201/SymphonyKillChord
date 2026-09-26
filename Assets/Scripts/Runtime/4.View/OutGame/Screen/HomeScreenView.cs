@@ -19,6 +19,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public HomeScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
         {
+            // 画面の各ボタンとラベルを取得する。見つからない場合は例外を投げる。
             _stageSelectButton = RootElement.Q<Button>(STAGE_SELECT_BUTTON_NAME)
                 ?? throw new System.InvalidOperationException(
                     $"{STAGE_SELECT_BUTTON_NAME} が見つかりません。");
@@ -47,6 +48,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 ?? throw new System.InvalidOperationException(
                     $"{CHARACTER_IMAGE_NAME} が見つかりません。");
 
+            // ポイント名のローカライズを登録する。
             Label rebuildPointsName = RootElement.Q<Label>("RebuildPointsNameLabel");
             Label unlockPointsName = RootElement.Q<Label>("UnlockPointsNameLabel");
             _localizedTexts = new[]
@@ -56,6 +58,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 new LocalizedElementText(
                     UI_COMMON_TABLE, "ui.home.unlock_points", text => unlockPointsName.text = text, "解放ポイント"),
             };
+            // ボタンの操作を登録する。
             RegisterButtonCallbacks();
         }
 

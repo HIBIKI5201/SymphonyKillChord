@@ -10,16 +10,25 @@ namespace KillChord.Editor.AutoBuilder
     /// </summary>
     public class AutoBuilderProvider : SettingsProvider
     {
+        /// <summary>
+        ///     AutoBuilder の設定プロバイダーを生成する。
+        /// </summary>
         public AutoBuilderProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords)
         {
         }
 
+        /// <summary>
+        ///     Project Settings に AutoBuilder の設定ページを登録する。
+        /// </summary>
         [SettingsProvider]
         public static SettingsProvider CreateSettingsProvider()
         {
             return new AutoBuilderProvider(SETTINGS_PATH, SettingsScope.Project);
         }
 
+        /// <summary>
+        ///     ビルド枠ごとの出力先とビルドプロファイルの設定を描画する。
+        /// </summary>
         public override void OnGUI(string searchContext)
         {
             AutoBuilderSettings settings = AutoBuilderSettings.instance;

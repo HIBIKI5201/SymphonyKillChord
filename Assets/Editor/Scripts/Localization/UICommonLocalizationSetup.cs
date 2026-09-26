@@ -163,6 +163,7 @@ namespace KillChord.Editor.Localization
         /// <returns> 登録したUI共通テキストの件数です。 </returns>
         private static int EnsureStringTable(IReadOnlyList<Locale> locales)
         {
+            // テーブルコレクションが無ければ作成する。
             StringTableCollection collection = LocalizationEditorSettings.GetStringTableCollection(
                 UICommonTableName);
             if (collection == null)
@@ -173,6 +174,7 @@ namespace KillChord.Editor.Localization
                     locales.ToList());
             }
 
+            // 各キーについて、空のロケールだけ既定の文言を入れる。入力済みの文言は上書きしない。
             foreach (UIEntryDefinition definition in UIEntryDefinitions)
             {
                 SharedTableData.SharedTableEntry sharedEntry = collection.SharedData.GetEntry(definition.Key)
@@ -199,6 +201,7 @@ namespace KillChord.Editor.Localization
                 }
             }
 
+            // 変更を保存対象にし、エディタへ通知する。
             EditorUtility.SetDirty(collection);
             EditorUtility.SetDirty(collection.SharedData);
             LocalizationEditorSettings.EditorEvents.RaiseCollectionModified(null, collection);
@@ -230,6 +233,9 @@ namespace KillChord.Editor.Localization
         /// </summary>
         private readonly struct UIEntryDefinition
         {
+            /// <summary>
+            ///     UI 文言の定義を生成する。
+            /// </summary>
             public UIEntryDefinition(string key, string japanese, string english)
             {
                 Key = key;

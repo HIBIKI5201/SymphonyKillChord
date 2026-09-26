@@ -37,6 +37,7 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
         /// </summary>
         public override bool Build()
         {
+            // 各設定の適用先を取得する。
             if (!ServiceLocator.TryGetInstance(out ResolutionApplier resolutionApplier)
                 || !ServiceLocator.TryGetInstance(out QualityApplier qualityApplier)
                 || !ServiceLocator.TryGetInstance(out BrightnessApplier brightnessApplier)
@@ -48,6 +49,7 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
                 return false;
             }
 
+            // 環境設定の ViewModel・プレゼンター・コントローラーを作り、読み込んだ設定を表示に反映する。
             _environmentSettingsViewModel = new EnvironmentSettingsViewModel();
             _environmentSettingsPresenter = new EnvironmentSettingsPresenter(_environmentSettingsViewModel, qualityApplier);
             _environmentSettingsController = new EnvironmentSettingsController(
@@ -59,6 +61,7 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
                 brightnessApplier,
                 languageApplier);
             _environmentSettingsPresenter.Push(_loadedSettings);
+            // コンテナを登録する。
             _moduleContainer = new EnvironmentSettingsModuleContainer(
                 _environmentSettingsViewModel,
                 _environmentSettingsController);

@@ -266,6 +266,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             Dictionary<StageId, StageId[]> outgoingStageIds,
             Dictionary<StageId, StageId[]> incomingStageIds)
         {
+            // 入ってくる接続が無いステージから順に処理するトポロジカルソートで循環を検出する。
             Dictionary<StageId, int> remainingIncomingCounts = new(_nodes.Count);
             Queue<StageId> processingQueue = new();
             foreach (StageId stageId in _nodes.Keys)
@@ -283,6 +284,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             }
 
             int processedCount = 0;
+            // 処理したステージから出る接続を減らし、入ってくる接続が無くなったステージを追加する。
             while (processingQueue.Count > 0)
             {
                 StageId currentStageId = processingQueue.Dequeue();
@@ -305,6 +307,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
                 }
             }
 
+            // 処理できなかったステージがあれば、循環している。
             if (processedCount != _nodes.Count)
             {
                 throw new InvalidOperationException(

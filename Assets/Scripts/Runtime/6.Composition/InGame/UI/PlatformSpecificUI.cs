@@ -11,9 +11,12 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// </summary>
     public class PlatformSpecificUI : MonoBehaviour
     {
-        [Header("スマホ用のUIをEditorで表示するか")] [SerializeField]
+        [Header("スマホ用のUIをEditorで表示するか")] [SerializeField, Tooltip("エディタ上でスマホ用の UI を表示するか。")]
         private bool _showInEditor = false;
 
+        /// <summary>
+        ///     実行中のプラットフォームに応じて UI の表示を切り替える。
+        /// </summary>
         private void Awake()
         {
 #if UNITY_EDITOR

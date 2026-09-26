@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Domain.InGame.Music
     [MovedFrom(true, "KillChord.Runtime.Domain.InGame.Enemy", null, "EnemyMusicSpec")]
     public readonly struct MusicSyncSpec
     {
+        /// <summary>
+        ///     小節フラグ・拍子・目標拍を指定して生成する。
+        /// </summary>
         public MusicSyncSpec(byte barFlag, double timeSignature, double targetBeat)
         {
             BarFlag = barFlag;

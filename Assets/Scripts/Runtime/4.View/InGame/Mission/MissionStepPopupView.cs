@@ -59,6 +59,9 @@ namespace KillChord.Runtime.View.InGame.Mission
         private bool _isLocalizedImagePending;
         private bool _isLocalizedImageApplied;
 
+        /// <summary>
+        ///     入力を受け付けない表示専用の設定にする。
+        /// </summary>
         private void Awake()
         {
             // 入力を受け付けないパッシブな表示のため、常にfalseに固定する。
@@ -72,6 +75,9 @@ namespace KillChord.Runtime.View.InGame.Mission
             Hide();
         }
 
+        /// <summary>
+        ///     ローカライズ画像の購読を解除する。
+        /// </summary>
         private void OnDisable()
         {
             ReleaseLocalizedImage();

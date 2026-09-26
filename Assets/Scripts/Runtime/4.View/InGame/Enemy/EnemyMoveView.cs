@@ -279,6 +279,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
             SyncFootstepTiming();
         }
 
+        /// <summary>
+        ///     NavMeshAgent による自動回転を止める。
+        /// </summary>
         public void StopRotating()
         {
             if (_navMeshAgent == null || !_navMeshAgent.enabled) return;
@@ -286,6 +289,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _navMeshAgent.updateRotation = false;
         }
 
+        /// <summary>
+        ///     被弾時のエフェクトを再生する。
+        /// </summary>
         public void PlayDamageFeedback()
         {
             if (_damageEffectView != null)

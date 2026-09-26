@@ -383,6 +383,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private void RegisterLocalizedButtonTexts()
         {
+            // 見出しのラベルを取得する。
             Label titleLabel = Require<Label>(RootElement, "Title");
             Label audioPanelTitle = Require<Label>(RootElement, "AudioPanelTitle");
             Label environmentPanelTitle = Require<Label>(RootElement, "EnvironmentPanelTitle");
@@ -394,6 +395,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             Label languageHeading = Require<Label>(RootElement, "LanguageHeading");
             Label vibrationHeading = Require<Label>(RootElement, "VibrationHeading");
             Label rhythmOffsetHeading = Require<Label>(RootElement, "RhythmOffsetHeading");
+            // 見出しとボタンの文言をローカライズに登録する。
             _localizedButtonTexts = new[]
             {
                 new LocalizedElementText(

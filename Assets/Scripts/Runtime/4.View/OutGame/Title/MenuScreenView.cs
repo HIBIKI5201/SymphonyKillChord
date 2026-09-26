@@ -165,6 +165,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             }
 
 
+            // 画面の各要素を取得する。見つからない場合は例外を投げる。
             _bgmVolumeSlider = rootElement.Q<SliderInt>(BGM_VOLUME_SLIDER_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {BGM_VOLUME_SLIDER_NAME}が見つかりません。");
             _soundEffectVolumeSlider = rootElement.Q<SliderInt>(SOUND_EFFECT_VOLUME_SLIDER_NAME)
@@ -306,6 +307,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             VisualElement source,
             NavigationMoveEvent.Direction direction)
         {
+            // 上下の移動は、各項目の並び順に沿って移動先を決める。
             bool isDown = direction == NavigationMoveEvent.Direction.Down;
             if (isDown || direction == NavigationMoveEvent.Direction.Up)
             {
@@ -334,6 +336,7 @@ namespace KillChord.Runtime.View.OutGame.Title
                     return isDown ? _creditButton : _languageNextButton;
                 }
             }
+            // 左右の移動は、同じ行の中で移動先を決める。
             else if (direction == NavigationMoveEvent.Direction.Left
                 || direction == NavigationMoveEvent.Direction.Right)
             {
@@ -525,6 +528,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private void RegisterLocalizedTexts()
         {
+            // 見出しとボタンの文言をローカライズに登録する。
             Label soundEffectHeading = RootElement.Q<Label>("SoundEffectHeading");
             Label languageHeading = RootElement.Q<Label>("LanguageHeading");
             Label dataResetWarning = RootElement.Q<Label>("DataResetWarning");

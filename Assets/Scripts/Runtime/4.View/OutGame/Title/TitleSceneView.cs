@@ -227,11 +227,13 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// </summary>
         private async void StartGame()
         {
+            // 開始処理中や操作できない状態では受け付けない。
             if (_isDisposed || _isStarting || !_touchArea.enabledInHierarchy)
             {
                 return;
             }
 
+            // 二重に押されないよう、操作を止めてから遷移する。
             _isStarting = true;
             _touchArea.SetEnabled(false);
             _optionButton.SetEnabled(false);
@@ -259,6 +261,7 @@ namespace KillChord.Runtime.View.OutGame.Title
                 return;
             }
 
+            // 失敗した場合は、再び操作できるように戻す。
             if (isSuccess)
             {
 #if UNITY_EDITOR

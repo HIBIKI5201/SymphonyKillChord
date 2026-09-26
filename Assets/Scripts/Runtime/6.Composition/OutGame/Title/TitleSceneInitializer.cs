@@ -307,6 +307,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         public override void Shutdown()
         {
+            // 実行中の処理を止め、待機中の動画を破棄する。
             _resetCancellation?.Cancel();
             if (_idleVideoView != null)
             {
@@ -314,12 +315,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 Destroy(_idleVideoView.gameObject);
                 _idleVideoView = null;
             }
+            // 購読を解除する。
             UnsubscribeLoading();
             if (_outGameUIEvent != null && _isSubscribed)
             {
                 UnRegisterUIEventCallbacks();
             }
 
+            // 読み込んだアセットを解放し、参照を消す。
             _ruleDataKey.ReleaseLoadedAsset(this);
             _stageTreeAssetKey.ReleaseLoadedAsset(this);
             _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
@@ -327,6 +330,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedStageTreeAsset = null;
             _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
+            // 生成したビューと、依存の参照を破棄する。
             _volumeSettingsTabView?.Dispose();
             _volumeSettingsTabView = null;
             _languageSettingsTabView?.Dispose();
@@ -679,6 +683,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns> 遷移先を設定できた場合はtrueです。 </returns>
         private bool ApplyStartDestination()
         {
+            // チュートリアルを始めている場合は、通常の遷移先へ進む。
             if (_titleSceneView == null || _loadedSaveData == null)
             {
                 return false;
@@ -695,6 +700,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return true;
             }
 
+            // 初回はチュートリアルのシナリオを遷移先にする。
             if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario))
             {
                 Debug.LogError(

@@ -11,6 +11,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
     [CreateAssetMenu(
         fileName = nameof(StageBindAsset),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "StageSelect/" + nameof(StageBindAsset))]
+    /// <summary>
+    ///     ステージ間の接続を定義するデータ。
+    /// </summary>
     public sealed class StageBindAsset : ScriptableObject
     {
         /// <summary> 接続元ステージIDの入力値。 </summary>

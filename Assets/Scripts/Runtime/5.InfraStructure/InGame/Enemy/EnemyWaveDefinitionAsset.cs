@@ -127,6 +127,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         [SerializeField, Tooltip("繰り返す場合の開始Index")]
         private int _loopStart;
 
+        /// <summary>
+        ///     ウェーブ内で生成する敵1種類分の定義。
+        /// </summary>
         [Serializable]
         private class WaveDetailDefinition
         {
@@ -141,6 +144,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
             private EnemyType _legacyEnemyType;
         }
 
+        /// <summary>
+        ///     1ウェーブ分の定義。
+        /// </summary>
         [Serializable]
         private class SingleWaveDefinition
         {

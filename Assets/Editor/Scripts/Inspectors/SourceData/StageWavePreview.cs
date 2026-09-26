@@ -16,6 +16,7 @@ namespace KillChord.Editor.Inspectors.SourceData
         /// </summary>
         public static void Draw(ScriptableObject stage, ScriptableObject tree)
         {
+            // ステージが参照している Wave の ID を取得する。
             using SerializedObject serializedStage = new(stage);
             string waveId = serializedStage.FindProperty(WAVE_ID_PROPERTY)?.FindPropertyRelative(ID_PROPERTY)?.stringValue;
             if (string.IsNullOrWhiteSpace(waveId))
@@ -29,6 +30,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 EditorGUILayout.HelpBox("Wave Collectionが未登録です。", MessageType.Warning);
                 return;
             }
+            // 所属するツリーと同じ種別の Wave リポジトリから、ID が一致する Wave を探す。
             foreach (GameDataVariant variant in Enum.GetValues(typeof(GameDataVariant)))
             {
                 if (!SourceDataProviderRepositoryResolver.TryResolveAsset(TREE_KEY, variant, out ScriptableObject candidateTree, out _, out _)
@@ -47,6 +49,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                     }
                 }
             }
+            // 一意に決まった Wave について、開くボタンとスポーン位置のマップを表示する。
             if (waves.Count != 1)
             {
                 EditorGUILayout.HelpBox($"所属ツリーの参照Wave「{waveId}」を一意に解決できません（{waves.Count}件）。", MessageType.Warning);

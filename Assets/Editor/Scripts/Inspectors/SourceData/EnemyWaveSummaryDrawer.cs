@@ -59,6 +59,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 return;
             }
 
+            // 全ウェーブの合計時間を求める。
             float totalDuration = 0f;
             for (int i = 0; i < wavesProperty.arraySize; i++)
             {
@@ -73,6 +74,7 @@ namespace KillChord.Editor.Inspectors.SourceData
             EditorGUILayout.LabelField(
                 $"Wave数: {wavesProperty.arraySize} / Total Duration: {totalDuration:0.##} sec",
                 EditorStyles.miniBoldLabel);
+            // 上限数までのウェーブについて、敵の構成と時間の割合を描画する。
             for (int i = 0; i < Mathf.Min(wavesProperty.arraySize, elementLimit); i++)
             {
                 SerializedProperty wave = wavesProperty.GetArrayElementAtIndex(i);
@@ -94,6 +96,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 EditorGUI.ProgressBar(rect, progress, $"{duration:0.##} sec");
             }
 
+            // 表示しきれなかったウェーブがあれば案内を出す。
             if (wavesProperty.arraySize > elementLimit)
             {
                 EditorGUILayout.HelpBox(
@@ -121,6 +124,7 @@ namespace KillChord.Editor.Inspectors.SourceData
 
             EditorGUILayout.LabelField("スポーン候補地", EditorStyles.miniBoldLabel);
 
+            // 現在選ばれている候補地のハッシュを集める。
             HashSet<int> currentHashes = new();
             for (int i = 0; i < candidatesProperty.arraySize; i++)
             {
@@ -132,6 +136,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 }
             }
 
+            // 対象シーンが未設定の場合は、読み取り専用の一覧だけを表示する。
             SerializedProperty battleSceneNameProperty = serializedDefinition.FindProperty(BATTLE_SCENE_NAME_PROPERTY_NAME);
             string resolvedSceneName = battleSceneNameProperty == null ? string.Empty : battleSceneNameProperty.stringValue;
             if (string.IsNullOrWhiteSpace(resolvedSceneName))
@@ -143,6 +148,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 return;
             }
 
+            // マップ上をクリックして候補地を切り替えられるようにする。描画できない場合は一覧で代用する。
             bool mapDrawn = BattleSceneMapRenderer.Draw(
                 resolvedSceneName,
                 currentHashes,

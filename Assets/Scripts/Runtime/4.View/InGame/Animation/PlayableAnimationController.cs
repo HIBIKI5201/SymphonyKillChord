@@ -84,6 +84,9 @@ namespace KillChord.Runtime.View
         }
 
         // クリップを先頭に戻して再生位置をリセットする（先頭から確実に再生させたい時に呼ぶ）
+        /// <summary>
+        ///     指定インデックスのクリップの再生位置を先頭に戻す。
+        /// </summary>
         public void ReplayClipAtIndex(int index)
         {
             if (index < 0 || index >= _playables.Count) return;
@@ -92,6 +95,9 @@ namespace KillChord.Runtime.View
         }
 
         // 生のクリップ長（秒）を返す
+        /// <summary>
+        ///     指定インデックスのクリップの長さを返す。範囲外や未設定の場合は 0 を返す。
+        /// </summary>
         public float GetClipLength(int index)
         {
             if (index < 0 || index >= _clips.Length) return 0f;

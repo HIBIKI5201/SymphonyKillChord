@@ -11,6 +11,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
     /// </summary>
     public class PlayerTargetRangeQuery : IPlayerTargetRangeQuery
     {
+        /// <summary>
+        ///     ターゲットの ViewModel とプレイヤーの Transform を指定して生成する。
+        /// </summary>
         public PlayerTargetRangeQuery(
             ITargetSystemViewModel targetSystemViewModel,
             Transform playerTransform)
@@ -19,7 +22,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
             _playerTransform = playerTransform ?? throw new ArgumentNullException(nameof(playerTransform));
         }
 
-        /// < /inheritdoc>
+        /// <summary>
+        ///     対象がプレイヤーから指定距離以内にいるかを判定する。
+        ///     対象が死亡している場合や距離が不正な場合は false を返す。
+        /// </summary>
         public bool IsWithinRange(CharacterEntity target, float range)
         {
             if (target == null || target.IsDead || !float.IsFinite(range) || range < 0f)

@@ -168,6 +168,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
+            // 参照とステータスボーナスを確認し、プレイヤーのビューを生成する。
             if (!ValidateBuildReferences())
             {
                 return false;
@@ -186,6 +187,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
+            // ステータスボーナスを反映したプレイヤーのエンティティを作り、イベントを購読する。
             _playerEntity = CharacterFactory.Create(
                 _loadedPlayerData,
                 playerStatusBonusContainer.PlayerStatusBonus.MaxHealthMultiplier,
@@ -195,6 +197,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             _playerEntity.OnDamageAvoided += HandleDamageAvoided;
             _playerEntity.OnHealthChanged += HandlePlayerHealthChanged;
 
+            // スポーン地点に配置し、プレイヤーのコンテナを登録する。
             _player.transform.SetPositionAndRotation(
                 spawnPointTransform.position,
                 spawnPointTransform.rotation);

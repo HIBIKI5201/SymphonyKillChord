@@ -63,7 +63,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <returns>サマリー文字列。</returns>
         protected abstract string BuildSummary();
 
-        [SerializeField, Header("識別用Id")] private string _evaluationId;
+        [SerializeField, Tooltip("評価条件を識別する ID。"), Header("識別用Id")] private string _evaluationId;
 
         [SerializeField, Header("説明用のテキスト"), Tooltip("ミッションHUDに表示される条件の説明。空の場合は自動生成されます。")] private string _displayText;
 

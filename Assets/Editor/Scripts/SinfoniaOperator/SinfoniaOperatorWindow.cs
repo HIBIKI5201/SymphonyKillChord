@@ -18,6 +18,9 @@ namespace KillChord.Editor.SinfoniaOperator
     /// </summary>
     public sealed class SinfoniaOperatorWindow : EditorWindow
     {
+        /// <summary>
+        ///     Sinfonia Operator ウィンドウを開く。
+        /// </summary>
         [MenuItem(EditorWindowPathConst.SINFONIA_OPERATOR_PATH)]
         private static void Open()
         {
@@ -37,6 +40,9 @@ namespace KillChord.Editor.SinfoniaOperator
         private TextField _workLogField;
         private Label _statusLabel;
 
+        /// <summary>
+        ///     ヘッダーと一覧を含むウィンドウの UI を構築する。
+        /// </summary>
         private void CreateGUI()
         {
             rootVisualElement.Clear();
@@ -119,6 +125,7 @@ namespace KillChord.Editor.SinfoniaOperator
         {
             if (!EnsureConfigLoaded()) { return; }
 
+            // 送信する作業ログが空でないかを確認する。
             string message = _workLogField.value;
             if (string.IsNullOrWhiteSpace(message))
             {
@@ -126,6 +133,7 @@ namespace KillChord.Editor.SinfoniaOperator
                 return;
             }
 
+            // Bot を使う場合はチャンネル ID が、使わない場合は Webhook URL が必要。
             string botToken = OperatorConfig.GetValue(OperatorConfigKeys.DISCORD_BOT_TOKEN);
             string webhookUrl = OperatorConfig.GetValue(OperatorConfigKeys.DISCORD_WEBHOOK_URL);
             string workLogChannelIdRaw = OperatorConfig.GetValue(OperatorConfigKeys.DISCORD_WORK_LOG_CHANNEL_ID);
@@ -147,11 +155,13 @@ namespace KillChord.Editor.SinfoniaOperator
                 return;
             }
 
+            // 送信中はボタンを無効にする。
             _sendButton.SetEnabled(false);
             _statusLabel.text = "送信中...";
 
             try
             {
+                // 設定のユーザー名（未設定なら OS のユーザー名）を付けて送信する。
                 SinfoniaOperatorSettings settings = SinfoniaOperatorSettings.instance;
                 string userName = string.IsNullOrWhiteSpace(settings.WorkLogUserName)
                     ? Environment.UserName
@@ -288,6 +298,7 @@ namespace KillChord.Editor.SinfoniaOperator
         /// <returns></returns>
         private bool EnsureConfigLoaded()
         {
+            // 公開設定・秘密設定・分割前の旧設定のパスを解決する。
             SinfoniaOperatorSettings settings = SinfoniaOperatorSettings.instance;
             string environmentPath = ResolveConfigPath(
                 settings.EnvironmentConfigJsonPath,
@@ -299,6 +310,7 @@ namespace KillChord.Editor.SinfoniaOperator
                 SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH,
                 SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH);
 
+            // 公開設定を読み込む。見つからない場合は旧設定で代用する。
             OperatorConfig.ClearOverrides();
             if (!OperatorConfig.LoadJsonFile(environmentPath))
             {
@@ -315,6 +327,7 @@ namespace KillChord.Editor.SinfoniaOperator
                 return false;
             }
 
+            // 秘密設定を読み込む。見つからない場合は旧設定からトークンだけを読み込む。
             if (OperatorConfig.LoadJsonFile(secretsPath)) { return true; }
 
             if (OperatorConfig.LoadJsonFile(

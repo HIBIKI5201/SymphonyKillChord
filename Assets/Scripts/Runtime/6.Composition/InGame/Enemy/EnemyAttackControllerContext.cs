@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class EnemyAttackControllerContext
     {
+        /// <summary>
+        ///     攻撃コントローラーの生成に必要なユースケース・状態・スポナーを指定して生成する。
+        /// </summary>
         public EnemyAttackControllerContext(EnemyAttackUsecase attackUsecase, EnemyTripleShotAttackUsecase tripleShotAttackUsecase, EnemyBattleState battleState, ShellSpawner shellSpawner)
         {
             _attackUsecase = attackUsecase;

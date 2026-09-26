@@ -9,6 +9,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
     [CreateAssetMenu(
         fileName = "EnvironmentSettingsDefaultAsset",
         menuName = "KillChord/InfraStructure/Persistent/Environment Settings Default")]
+    /// <summary>
+    ///     初回起動時に適用する環境設定の既定値のデータ。
+    /// </summary>
     public sealed class EnvironmentSettingsDefaultAsset : ScriptableObject
     {
         /// <summary> 初回起動時に適用する解像度の幅。 </summary>

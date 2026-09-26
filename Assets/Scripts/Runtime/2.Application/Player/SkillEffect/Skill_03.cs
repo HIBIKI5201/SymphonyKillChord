@@ -55,6 +55,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
 
         private const float BASE_DAMAGE_MULTIPLIER = 1f;
 
+        /// <summary>
+        ///     対象にダメージを計算して与える。
+        /// </summary>
         private static void ApplyDamage(
             CharacterEntity attacker,
             CharacterEntity defender,

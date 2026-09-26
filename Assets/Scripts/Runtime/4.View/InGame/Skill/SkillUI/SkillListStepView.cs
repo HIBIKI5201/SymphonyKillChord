@@ -75,7 +75,7 @@ namespace KillChord.Runtime.View.InGame.Skill
 
         [SerializeField, Tooltip("アイコンを表示するImage。")]
         private Image _iconImage;
-        [SerializeField]
+        [SerializeField, Tooltip("ステップが入力されたときに光らせる Image。")]
         private Image _rhythmStepFlareImage;
 
         private Color _onColor;
@@ -85,6 +85,9 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Vector3 _baseLocalScale;
         private float _baseLocalEulerAngleZ;
         private bool _isActive;
+        /// <summary>
+        ///     フレア用の Image を非表示にする。
+        /// </summary>
         private void Awake()
         {
             _rhythmStepFlareImage.enabled = false;

@@ -95,12 +95,14 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
 
             try
             {
+                // 保存中に新しい変更が来た場合は、最新の設定で保存し直す。
                 while (_hasPendingSave && !cancellationToken.IsCancellationRequested)
                 {
                     AudioSettingsData settingsToSave = _pendingSettings;
                     _hasPendingSave = false;
                     int retryDelayMilliseconds = INITIAL_RETRY_DELAY_MILLISECONDS;
 
+                    // 失敗した場合は待ち時間を延ばしながら再試行する。
                     for (int saveAttempt = 1; saveAttempt <= MAX_SAVE_ATTEMPTS; saveAttempt++)
                     {
                         try
@@ -119,11 +121,13 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
                             Debug.LogError(
                                 $"[{nameof(AudioSettingsService)}] 音量設定の保存に失敗しました。{exception}");
 
+                            // 再試行中に新しい変更が来た場合は、その変更の保存へ移る。
                             if (_hasPendingSave)
                             {
                                 break;
                             }
 
+                            // 上限まで失敗した場合は、未保存のまま失敗を通知する。
                             if (saveAttempt >= MAX_SAVE_ATTEMPTS)
                             {
                                 _hasPendingSave = true;

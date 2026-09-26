@@ -57,6 +57,9 @@ namespace KillChord.Runtime.View.Persistent.Voice
             }
         }
 
+        /// <summary>
+        ///     現在のボイス音量を返す。
+        /// </summary>
         public float GetVolume()
         {
            return _volume;

@@ -75,6 +75,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             return step.GuideMessageText;
         }
 
+        /// <summary>
+        ///     評価の表示状況を HUD 用の表示状態に変換する。
+        /// </summary>
         private MissionEvaluationDisplayState ConvertDisplayState(
             MissionEvaluationDisplaySituation situation)
         {

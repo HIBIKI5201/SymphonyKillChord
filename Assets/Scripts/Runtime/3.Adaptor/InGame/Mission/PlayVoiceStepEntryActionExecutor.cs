@@ -11,6 +11,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public class PlayVoiceStepEntryActionExecutor : IMissionStepEntryActionExecutor
     {
+        /// <summary>
+        ///     ボイスの再生先を指定して生成する。
+        /// </summary>
         public PlayVoiceStepEntryActionExecutor(IPlayableAudioSource voiceSource)
         {
             _voiceSource = voiceSource;

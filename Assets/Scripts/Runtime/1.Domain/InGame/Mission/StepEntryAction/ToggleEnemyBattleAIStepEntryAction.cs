@@ -5,6 +5,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission.StepEntryAction
     /// </summary>
     public class ToggleEnemyBattleAIStepEntryAction : IMissionStepEntryAction
     {
+        /// <summary>
+        ///     敵の戦闘 AI を有効にするかを指定して生成する。
+        /// </summary>
         public ToggleEnemyBattleAIStepEntryAction(bool battleAiActivated)
         {
             IsBattleAiActivated = battleAiActivated;

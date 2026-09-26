@@ -719,11 +719,13 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <returns> 生成したモーションのハンドル。 </returns>
         private MotionHandle CreateJustTimingMotion(int index, Color beatColor)
         {
+            // 各演出の長さは 0 にならないよう下限を設ける。
             float overshootSizeDelta = _justTimingSizeDelta + Mathf.Max(0f, _effectConfig.JustOvershootAmount);
             float overshootDuration = Mathf.Max(0.01f, _effectConfig.JustOvershootDuration);
             float returnDuration = Mathf.Max(0.01f, _effectConfig.JustReturnDuration);
             float flashDuration = Mathf.Max(0.01f, _effectConfig.FlashDuration);
 
+            // 左右の枠を一度大きく伸ばしながら色をフラッシュさせ、その後で通常の大きさへ戻す。
             return LSequence.Create()
                 .Append(LMotion.Create(_justTimingSizeDelta, overshootSizeDelta, overshootDuration)
                     .WithEase(_effectConfig.JustOvershootEase)
@@ -976,6 +978,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <returns> 生成した赤枠のRectTransform。 </returns>
         private RectTransform CreateTargetBeatFrame(string objectName, Vector2 anchoredPosition, float width)
         {
+            // ガイドの子として枠のオブジェクトを作り、中央基準で配置する。
             GameObject frameObject = new GameObject(objectName, typeof(RectTransform));
             frameObject.layer = gameObject.layer;
             frameObject.transform.SetParent(_targetBeatFrameRoot, false);
@@ -986,6 +989,7 @@ namespace KillChord.Runtime.View.InGame.Music
             frameRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             frameRectTransform.pivot = new Vector2(0.5f, 0.5f);
             frameRectTransform.anchoredPosition = anchoredPosition;
+            // 枠の大きさは、対象の幅と高さに余白を足した大きさにする。
             float frameWidth = Mathf.Max(
                 TARGET_BEAT_FRAME_THICKNESS,
                 width + TARGET_BEAT_FRAME_HORIZONTAL_PADDING * 2f);
@@ -994,6 +998,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 _outTimingSizeDelta + TARGET_BEAT_FRAME_VERTICAL_PADDING * 2f);
             frameRectTransform.sizeDelta = new Vector2(frameWidth, frameHeight);
 
+            // 上下左右の辺をそれぞれ作る。
             float horizontalEdgeY = (frameHeight - TARGET_BEAT_FRAME_THICKNESS) * 0.5f;
             float verticalEdgeX = (frameWidth - TARGET_BEAT_FRAME_THICKNESS) * 0.5f;
             CreateTargetBeatFrameEdge(

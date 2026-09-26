@@ -6,6 +6,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     /// </summary>
     public readonly ref struct PlayerStatusDTO
     {
+        /// <summary>
+        ///     表示するプレイヤーのステータスを指定して生成する。
+        /// </summary>
         public PlayerStatusDTO(
             float playerHealth,
             float playerAttack,

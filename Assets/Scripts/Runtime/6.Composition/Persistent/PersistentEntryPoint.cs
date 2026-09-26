@@ -25,8 +25,8 @@ namespace KillChord.Runtime.Composition.Persistent
         /// <summary> 実行順です。 </summary>
         public override int Order => 1000;
 
-        [SerializeField] private bool _active = true;
-        [SerializeField, SceneNameSelector] private string _firstSceneName;
+        [SerializeField, Tooltip("起動時に最初のシーンを読み込むか。")] private bool _active = true;
+        [SerializeField, Tooltip("起動時に最初に読み込むシーン名。"), SceneNameSelector] private string _firstSceneName;
 
         private CancellationTokenSource _cancellationTokenSource;
         private List<IPersistentInitializationModule> _modules;

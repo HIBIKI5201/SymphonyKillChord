@@ -13,6 +13,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     [CreateAssetMenu(
         fileName = nameof(EnemyWaveDefinitionRepository),
         menuName = "KillChord/Enemy/" + nameof(EnemyWaveDefinitionRepository))]
+    /// <summary>
+    ///     ウェーブ定義を ID で検索するリポジトリ。
+    /// </summary>
     public sealed class EnemyWaveDefinitionRepository
         : ScriptableObjectRepositoryBase<EnemyWaveDefinitionId, EnemyWaveDefinitionAsset, EnemyWaveDefinitionAsset>,
             IEnemyWaveDefinitionRepository
@@ -81,8 +84,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         [SerializeField, Tooltip("IDで取得可能にする敵Wave定義アセットの一覧です。")]
         private EnemyWaveDefinitionAsset[] _waveDefinitionAssets;
 
+        /// <inheritdoc/>
         protected override IReadOnlyList<EnemyWaveDefinitionAsset> GetEntries() => _waveDefinitionAssets;
 
+        /// <inheritdoc/>
         protected override bool TryBuild(
             EnemyWaveDefinitionAsset entry,
             out EnemyWaveDefinitionId id,

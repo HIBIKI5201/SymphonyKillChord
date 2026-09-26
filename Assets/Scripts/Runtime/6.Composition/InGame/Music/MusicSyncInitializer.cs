@@ -154,6 +154,9 @@ namespace KillChord.Runtime.Composition.InGame.Music
         private bool _isModuleRegistered;
         private MusicSyncModuleContainer _moduleContainer;
 
+        /// <summary>
+        ///     登録済みの場合、登録したサービスを解除する。
+        /// </summary>
         private void OnDestroy()
         {
             if (!_isRegistered)

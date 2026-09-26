@@ -47,6 +47,7 @@ namespace KillChord.Runtime.Composition.OutGame.Audio
         /// <returns> ロードに成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            // 前回読み込んだ設定を解放してから読み込む。
             _config = null;
             _uiSoundEffectConfigKey.ReleaseLoadedAsset(this);
 
@@ -70,6 +71,7 @@ namespace KillChord.Runtime.Composition.OutGame.Audio
                 return false;
             }
 
+            // 読み込めなかった場合は解放してエラーを出す。
             if (_config != null)
             {
                 return true;
@@ -90,6 +92,7 @@ namespace KillChord.Runtime.Composition.OutGame.Audio
         /// <returns> 必須構成を解決できた場合はtrue。 </returns>
         public override bool Build()
         {
+            // 前回の状態を消してから、UIDocument と設定を確認する。
             _isBuilt = false;
             _player = null;
             _command = null;
@@ -128,6 +131,7 @@ namespace KillChord.Runtime.Composition.OutGame.Audio
                 return false;
             }
 
+            // 効果音の再生を行うプレイヤーを取得する。
             if (!ServiceLocator.TryGetInstance(out UISoundEffectModuleContainer moduleContainer)
                 || moduleContainer?.Player == null)
             {
@@ -138,6 +142,7 @@ namespace KillChord.Runtime.Composition.OutGame.Audio
                 return false;
             }
 
+            // 効果音を鳴らすコマンドを作り、コンテナを登録し直す。
             _player = moduleContainer.Player;
             _command = new UISoundEffectCommand(_config, _player);
 

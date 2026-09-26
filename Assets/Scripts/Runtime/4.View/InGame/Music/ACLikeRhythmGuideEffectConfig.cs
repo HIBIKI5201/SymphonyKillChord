@@ -9,6 +9,9 @@ namespace KillChord.Runtime.View.InGame.Music
     [CreateAssetMenu(
         fileName = nameof(ACLikeRhythmGuideEffectConfig),
         menuName = "KillChord/InGame/Music/ACLikeRhythmGuideEffectConfig")]
+    /// <summary>
+    ///     リズムガイドの枠線やフラッシュなどの演出を設定するデータ。
+    /// </summary>
     public sealed class ACLikeRhythmGuideEffectConfig : ScriptableObject
     {
         /// <summary> ジャストタイミング位置を囲む枠線の色。 </summary>

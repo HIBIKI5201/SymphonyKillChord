@@ -31,6 +31,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             /// <summary> 入場演出の移動目的地（ワールド座標）です。 </summary>
             public readonly Vector3 EntryPosition;
 
+            /// <summary>
+            ///     スポーン地点の情報を生成する。
+            /// </summary>
             public SpawnPointInfo(string id, int hashId, Vector3 spawnPosition, Vector3 entryPosition)
             {
                 Id = id;
@@ -50,6 +53,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             /// <summary> 三角形インデックス一覧です。 </summary>
             public readonly int[] Indices;
 
+            /// <summary>
+            ///     NavMesh の頂点とインデックスを保持するデータを生成する。
+            /// </summary>
             public NavMeshMapData(Vector3[] vertices, int[] indices)
             {
                 Vertices = vertices;
@@ -88,6 +94,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return false;
             }
 
+            // 読み込み済みのシーンはキャッシュを返す。
             if (_cache.TryGetValue(sceneName, out BattleSceneMapData cached))
             {
                 mapData = cached;
@@ -100,6 +107,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return false;
             }
 
+            // シーンファイルをテキストとして読み込み、スポーン地点と NavMesh を取り出す。
             string sceneText;
             try
             {
@@ -126,6 +134,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 NavMesh = navMesh,
                 HasNavMesh = hasNavMesh,
             };
+            // PlayMode 中は NavMesh が取れないことがあるため、取れた場合だけキャッシュする。
             if (hasNavMesh || !EditorApplication.isPlaying)
             {
                 _cache[sceneName] = mapData;
@@ -178,6 +187,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             error = string.Empty;
             List<SpawnPointInfo> result = new();
 
+            // PositionPair プレハブから、Transform とコンポーネントの fileID と既定値を取得する。
             GameObject prefabRoot = AssetDatabase.LoadAssetAtPath<GameObject>(POSITION_PAIR_PREFAB_PATH);
             if (prefabRoot == null)
             {
@@ -207,6 +217,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             Vector3 spawnDefaultPosition = prefabComponent.SpawnPosition.localPosition;
             Vector3 entryDefaultPosition = prefabComponent.EntryPosition.localPosition;
 
+            // シーン内の Transform と PositionPair のインスタンスを集める。
             Dictionary<long, PlainTransform> plainTransforms = BuildPlainTransforms(documents);
             List<PrefabInstanceDoc> instances = BuildPrefabInstances(documents, positionPairGuid);
 
@@ -215,6 +226,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 PrefabInstanceDoc instanceDoc = instances[i];
 
+                // ID が未設定のインスタンスは移行漏れとして数え、飛ばす。
                 string id = GetOverriddenString(
                     instanceDoc.Modifications, componentFileId, SPAWN_POINT_ID_PROPERTY_PATH, null);
                 int hashId = GetOverriddenInt(
@@ -225,6 +237,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                     continue;
                 }
 
+                // Prefab の上書き値から各 Transform のローカル座標を求める。
                 Vector3 rootLocalPosition = GetOverriddenVector3(
                     instanceDoc.Modifications, rootFileId, LOCAL_POSITION_PROPERTY_PREFIX, rootDefaultPosition);
                 Quaternion rootLocalRotation = GetOverriddenQuaternion(
@@ -234,6 +247,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 Vector3 entryLocalPosition = GetOverriddenVector3(
                     instanceDoc.Modifications, entryPosFileId, LOCAL_POSITION_PROPERTY_PREFIX, entryDefaultPosition);
 
+                // 親の Transform をたどってワールド座標に変換する。
                 Matrix4x4 parentWorld = ResolveWorldMatrix(
                     instanceDoc.TransformParentFileId, plainTransforms, MAX_PARENT_DEPTH);
                 Matrix4x4 rootLocal = Matrix4x4.TRS(rootLocalPosition, rootLocalRotation, Vector3.one);
@@ -701,6 +715,10 @@ namespace KillChord.Editor.SourceDataProvider.Core
             return documents;
         }
 
+        /// <summary>
+        ///     Prefab の上書き値から Vector3 を取得する。
+        ///     上書きされていない成分は既定値を使う。
+        /// </summary>
         private static Vector3 GetOverriddenVector3(
             List<ModificationEntry> modifications,
             long targetFileId,
@@ -713,6 +731,10 @@ namespace KillChord.Editor.SourceDataProvider.Core
             return new Vector3(x, y, z);
         }
 
+        /// <summary>
+        ///     Prefab の上書き値から Quaternion を取得する。
+        ///     上書きされていない成分は既定値を使う。
+        /// </summary>
         private static Quaternion GetOverriddenQuaternion(
             List<ModificationEntry> modifications,
             long targetFileId,
@@ -726,6 +748,10 @@ namespace KillChord.Editor.SourceDataProvider.Core
             return new Quaternion(x, y, z, w);
         }
 
+        /// <summary>
+        ///     Prefab の上書き値から float を取得する。
+        ///     該当する上書きが無い場合は既定値を返す。
+        /// </summary>
         private static float GetOverriddenFloat(
             List<ModificationEntry> modifications,
             long targetFileId,
@@ -753,6 +779,10 @@ namespace KillChord.Editor.SourceDataProvider.Core
             return defaultValue;
         }
 
+        /// <summary>
+        ///     Prefab の上書き値から int を取得する。
+        ///     該当する上書きが無い場合は既定値を返す。
+        /// </summary>
         private static int GetOverriddenInt(
             List<ModificationEntry> modifications,
             long targetFileId,
@@ -776,6 +806,10 @@ namespace KillChord.Editor.SourceDataProvider.Core
             return defaultValue;
         }
 
+        /// <summary>
+        ///     Prefab の上書き値から文字列を取得する。
+        ///     該当する上書きが無い場合は既定値を返す。
+        /// </summary>
         private static string GetOverriddenString(
             List<ModificationEntry> modifications,
             long targetFileId,
@@ -794,6 +828,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             return defaultValue;
         }
 
+        /// <summary>
+        ///     シーンテキストから指定フィールドの Vector3 を読み取る。見つからない場合は null を返す。
+        /// </summary>
         private static Vector3? ParseVector3(string body, string fieldName)
         {
             Match match = Regex.Match(
@@ -810,6 +847,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 float.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture));
         }
 
+        /// <summary>
+        ///     シーンテキストから指定フィールドの Quaternion を読み取る。見つからない場合は null を返す。
+        /// </summary>
         private static Quaternion? ParseQuaternion(string body, string fieldName)
         {
             Match match = Regex.Match(
@@ -828,12 +868,18 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 float.Parse(match.Groups[4].Value, CultureInfo.InvariantCulture));
         }
 
+        /// <summary>
+        ///     シーンテキストから指定フィールドの fileID を読み取る。見つからない場合は null を返す。
+        /// </summary>
         private static long? ParseFileId(string body, string fieldName)
         {
             Match match = Regex.Match(body, Regex.Escape(fieldName) + @":\s*\{fileID:\s*(-?\d+)");
             return match.Success ? long.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture) : null;
         }
 
+        /// <summary>
+        ///     シーンテキストから指定フィールドの GUID を読み取る。見つからない場合は null を返す。
+        /// </summary>
         private static string ParseGuid(string body, string fieldName)
         {
             Match match = Regex.Match(body, Regex.Escape(fieldName) + @":\s*\{[^}]*guid:\s*([0-9a-fA-F]+)");
@@ -851,6 +897,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             public readonly string ClassName;
             public readonly string Body;
 
+            /// <summary>
+            ///     シーンのドキュメント1件を生成する。
+            /// </summary>
             public SceneDocument(int typeId, long anchor, bool stripped, string className, string body)
             {
                 TypeId = typeId;
@@ -871,6 +920,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             public readonly Vector3 LocalScale;
             public readonly long FatherFileId;
 
+            /// <summary>
+            ///     Transform の値を生成する。
+            /// </summary>
             public PlainTransform(
                 Vector3 localPosition,
                 Quaternion localRotation,
@@ -893,6 +945,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             public readonly string PropertyPath;
             public readonly string Value;
 
+            /// <summary>
+            ///     Prefab の上書き値1件を生成する。
+            /// </summary>
             public ModificationEntry(long targetFileId, string propertyPath, string value)
             {
                 TargetFileId = targetFileId;
@@ -910,6 +965,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             public readonly Vector3 Position;
             public readonly Quaternion Rotation;
 
+            /// <summary>
+            ///     NavMeshSurface の情報を生成する。
+            /// </summary>
             public NavMeshSurfaceInfo(string navMeshDataGuid, Vector3 position, Quaternion rotation)
             {
                 NavMeshDataGuid = navMeshDataGuid;
@@ -927,6 +985,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             public readonly long TransformParentFileId;
             public readonly List<ModificationEntry> Modifications;
 
+            /// <summary>
+            ///     PrefabInstance のドキュメントを生成する。
+            /// </summary>
             public PrefabInstanceDoc(long anchor, long transformParentFileId, List<ModificationEntry> modifications)
             {
                 Anchor = anchor;

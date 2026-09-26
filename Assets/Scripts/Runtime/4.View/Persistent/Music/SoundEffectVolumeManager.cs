@@ -58,6 +58,10 @@ namespace KillChord.Runtime.View.Persistent.Music
                 source.ApplyVolume(_volume);
             }
         }
+
+        /// <summary>
+        ///     現在の SE 音量を返す。
+        /// </summary>
         public float GetVolume()
         {
             return _volume;

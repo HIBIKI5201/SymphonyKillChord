@@ -61,6 +61,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             Transform playerT,
             PlayerInputView playerInputView)
         {
+            // 受け取った処理と計算クラスを保持する。
             _changeTargetAction = changeTargetAction;
             _clearTargetAction = clearTargetAction;
             _getCurrentTargetPositionFunc = getCurrentTargetPositionFunc;
@@ -77,6 +78,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _viewSettings = viewSettings;
             _playerT = playerT;
             _inputView = playerInputView;
+            // カメラの参照と初期状態を設定する。
             _camera = _cameraT != null
                 ? _cameraT.GetComponent<UnityEngine.Camera>() ?? UnityEngine.Camera.main
                 : UnityEngine.Camera.main;
@@ -84,6 +86,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _hasCompletedInitialUpdate = false;
             _isExternallyControlled = false;
 
+            // プラットフォームに応じた視点操作の入力を購読する。
 #if UNITY_ANDROID
             _inputView.OnMobileLookInput += LookHandlerMobile;
             _inputView.OnMobileLockOnSelectInput += LockOnSelectHandlerMobile;
@@ -92,6 +95,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _inputView.OnLookGamepadInput += LookHandlerGamepad;
             _inputView.OnLockOnSelectInput += LockOnSelectHandler;
 #endif
+            // 共通の入力とゲーム内イベントを購読する。
             _inputView.OnMoveInput += MoveHandler;
             _inputView.OnLockOnInput += LockOnHandler;
             _inputView.OnAttackInput += OnAttack;
@@ -336,6 +340,9 @@ namespace KillChord.Runtime.View.InGame.Camera
             TrySelectAdjacentTarget(direction);
         }
 #else
+        /// <summary>
+        ///     マウスの移動量に感度を掛けて視点入力として保持する。
+        /// </summary>
         private void LookHandlerMouse(InputContext<Vector2> context)
         {
             _input = context.Value * _mouseLookSensitivity;

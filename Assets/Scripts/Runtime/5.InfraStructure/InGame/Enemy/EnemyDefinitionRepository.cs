@@ -11,6 +11,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     [CreateAssetMenu(
         fileName = nameof(EnemyDefinitionRepository),
         menuName = "KillChord/Enemy/" + nameof(EnemyDefinitionRepository))]
+    /// <summary>
+    ///     敵定義を ID で検索するリポジトリ。
+    /// </summary>
     public sealed class EnemyDefinitionRepository
         : ScriptableObjectRepositoryBase<EnemyDefinitionId, EnemyDefinitionAsset, EnemyDefinitionAsset>
     {

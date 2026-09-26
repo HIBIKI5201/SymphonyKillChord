@@ -11,6 +11,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
     /// </summary>
     [CreateAssetMenu(fileName = nameof(CharacterDefinitionAsset),
     menuName = "KillChord/Character/CharacterDefinitionAsset")]
+    /// <summary>
+    ///     キャラクターの能力値などを定義するデータ。
+    /// </summary>
     public class CharacterDefinitionAsset : ScriptableObject
     {
         /// <summary> キャラクター定義を一意に識別するIDを取得する。 </summary>

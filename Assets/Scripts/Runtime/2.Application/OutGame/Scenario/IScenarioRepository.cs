@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// </summary>
     public interface IScenarioRepository
     {
+        /// <summary>
+        ///     ID に対応するシナリオ定義を非同期で取得する。
+        /// </summary>
         ValueTask<ScenarioDefinition> FindByIdAsync(string id, CancellationToken ct);
     }
 }

@@ -167,6 +167,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             bool enterChildren = true;
             bool changed = false;
 
+            // 全プロパティを走査し、SourceDataCollection 属性付きの DataID だけを対象にする。
             while (iterator.NextVisible(enterChildren))
             {
                 enterChildren = true;
@@ -200,6 +201,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                     continue;
                 }
 
+                // コレクションキーと ID から正しいハッシュを計算して記録する。
                 int expectedHash = DataIDHasher.Compute(
                     collectionAttribute.CollectionKey,
                     idProperty.stringValue);
@@ -210,6 +212,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                     assetPath,
                     target);
 
+                // 保存されているハッシュと異なる場合だけ書き換える。
                 if (hashProperty.intValue == expectedHash)
                 {
                     continue;
@@ -220,6 +223,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 changed = true;
             }
 
+            // 変更があった場合だけ保存する。
             if (changed)
             {
                 serializedObject.ApplyModifiedPropertiesWithoutUndo();

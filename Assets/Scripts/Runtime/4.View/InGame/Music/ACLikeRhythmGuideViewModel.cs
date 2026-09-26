@@ -3,8 +3,14 @@ using KillChord.Runtime.View.InGame.Sequence;
 
 namespace KillChord.Runtime.View.InGame.Music
 {
+    /// <summary>
+    ///     リズムガイドのビューを毎フレーム更新する ViewModel。
+    /// </summary>
     public sealed class ACLikeRhythmGuideViewModel : IGameplayControllable
     {
+        /// <summary>
+        ///     ビューとプレゼンターを指定して生成し、ビューの更新イベントを購読する。
+        /// </summary>
         public ACLikeRhythmGuideViewModel(ACLikeRhythmGuideView view, RhythmGuidePresenter presenter)
         {
             this._view = view;
@@ -15,16 +21,25 @@ namespace KillChord.Runtime.View.InGame.Music
             view.OnStopGameplay += StopGameplay;
         }
 
+        /// <summary>
+        ///     ゲームプレイ開始時にガイドの更新を始める。
+        /// </summary>
         public void StartGameplay()
         {
             _isPlaying = true;
         }
 
+        /// <summary>
+        ///     ゲームプレイ停止時にガイドの更新を止める。
+        /// </summary>
         public void StopGameplay()
         {
             _isPlaying = false;
         }
 
+        /// <summary>
+        ///     再生中であれば、リズムガイドの表示を更新する。
+        /// </summary>
         private void Update()
         {
             if (!_isPlaying)

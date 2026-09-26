@@ -8,6 +8,10 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public class EnemyWaves
     {
+        /// <summary>
+        ///     ウェーブ定義の配列とループ設定を指定して生成する。
+        ///     ループ開始位置が範囲外の場合は例外を投げる。
+        /// </summary>
         public EnemyWaves(EnemyWaveDefinition[] waves, bool loopFlg, int loopStart)
         {
             if (waves == null) throw new ArgumentNullException(nameof(waves));
@@ -21,6 +25,7 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
             _currentIndex = 0;
         }
 
+        /// <summary> 最後のウェーブに到達しているか。ループする場合は常に false。 </summary>
         public bool IsLastWave => (!_loopFlg) && (_currentIndex >= _waves.Length);
 
         /// <summary>

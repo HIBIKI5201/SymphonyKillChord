@@ -11,6 +11,10 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
     /// </summary>
     public class StatusEffectSystem : IStatusEffectSystem
     {
+        /// <summary>
+        ///     現在時刻の取得方法を指定して生成する。
+        ///     省略した場合は既定の時刻を使う。
+        /// </summary>
         public StatusEffectSystem(Func<float> timeProvider = null)
         {
             _timeProvider = timeProvider ?? GetCurrentTime;
