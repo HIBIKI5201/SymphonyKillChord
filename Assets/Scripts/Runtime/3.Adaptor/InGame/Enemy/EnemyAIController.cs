@@ -117,6 +117,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public EnemyMoveInstruction GetMoveInstruction(Vector3 enemyPosition, Vector3 targetPosition)
         {
             _lastKnownPosition = enemyPosition;
+            _lastTargetPosition = targetPosition;
 
             // 攻撃後の行動選択で移動先が上書きされている場合、そちらを優先する
             if (_enemyBattleState.OverrideDestination.HasValue)
@@ -262,10 +263,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         }
 
         /// <summary>
-        ///     攻撃後の行動(再攻撃/合流/障害物接近)を選択し、必要であれば移動先を上書きする。
+        ///     攻撃後の行動を選択し、必要であれば移動先を上書きする。
+        ///     射程外なら接近、射線が障害物に遮られたなら迂回を優先し、それ以外は再攻撃/合流/障害物接近を抽選する。
         /// </summary>
         private void ChoosePostAttackBehavior()
         {
+            // 接近と迂回は通常の移動判断が行うため、移動先を上書きしない。
+            if (_lastTargetPosition.HasValue
+                && _enemyMoveUsecase.ShouldPrioritizeChase(_lastKnownPosition, _lastTargetPosition.Value))
+            {
+                _enemyBattleState.ClearOverrideDestination();
+                return;
+            }
+
             Vector3? allyPosition = _registry != null && _registry.TryFindNearestOtherActive(this, _lastKnownPosition, out EnemyAIController nearestAlly)
                 ? nearestAlly.CurrentPosition
                 : (Vector3?)null;
@@ -290,5 +300,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private IEnemyAttackController _attackController;
         private bool _isActive;
         private Vector3 _lastKnownPosition;
+        private Vector3? _lastTargetPosition;
     }
 }
