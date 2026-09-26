@@ -26,7 +26,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 90c87af4e2334fc4689e26dfcab7cdb2, type: 2}
   DemoMasterPath: Builds/Demo/Master/
   DemoMasterBuildProfiles:
+  - {fileID: 11400000, guid: 2a5720f109c143a2bcab073191b588e2, type: 2}
   - {fileID: 11400000, guid: 7ae90d06ea544b2c93ba8e39ec59bf87, type: 2}
   DemoDevelopPath: Builds/Demo/Dev/
   DemoDevelopBuildProfiles:
+  - {fileID: 11400000, guid: d44dc55631184810aa39170da8509ff9, type: 2}
   - {fileID: 11400000, guid: 5de3ca8383e740ff99c8dd04f4da4ac0, type: 2}
