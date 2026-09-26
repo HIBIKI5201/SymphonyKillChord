@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -36,7 +37,7 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             if (statusEffect.ReapplyPolicy == StatusEffectReapplyPolicy.Stack)
             {
                 _statusEffects.Add(new StatusEffectRuntimeEntity(statusEffect, currentTime));
-                Debug.Log($"{statusEffect.Id}を重複で付与" +
+                DevLog.Log($"{statusEffect.Id}を重複で付与" +
                           $"{statusEffect.ReapplyPolicy}で処理" +
                           $"{statusEffect.Duration.Seconds}秒の継続時間");
                 return;
@@ -47,7 +48,7 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             if (index < 0)
             {
                 _statusEffects.Add(new StatusEffectRuntimeEntity(statusEffect, currentTime));
-                Debug.Log($"{statusEffect.Id}を新規で付与" +
+                DevLog.Log($"{statusEffect.Id}を新規で付与" +
                           $"{statusEffect.ReapplyPolicy}で処理" +
                           $"{statusEffect.Duration.Seconds}秒の継続時間");
                 return;
@@ -80,7 +81,7 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
                     break;
 
                 case StatusEffectReapplyPolicy.Ignore:
-                    Debug.Log($"{statusEffect.Id}の再付与を無視" +
+                    DevLog.Log($"{statusEffect.Id}の再付与を無視" +
                               $"Until removed {beforeDuration}");
                     return;
 
@@ -92,7 +93,7 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             }
 
             float afterDuration = runtime.GetRemainingDuration(currentTime);
-            Debug.Log($"{statusEffect.Id}の再付与を処理" +
+            DevLog.Log($"{statusEffect.Id}の再付与を処理" +
                       $"Before: {beforeDuration}, After: {afterDuration}");
         }
 
@@ -207,7 +208,7 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             {
                 if (_statusEffects[i].IsExpired(currentTime))
                 {
-                    Debug.Log($"{_statusEffects[i].Effect.Id}の状態効果が期限切れのため削除されました。");
+                    DevLog.Log($"{_statusEffects[i].Effect.Id}の状態効果が期限切れのため削除されました。");
                     _statusEffects.RemoveAt(i);
                 }
             }
@@ -315,7 +316,7 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             {
                 if (_statusEffects[i].Effect is IConsumableStatusEffect consumable && consumable.IsConsumed)
                 {
-                    Debug.Log($"{_statusEffects[i].Effect.Id}の状態効果が消費されたため削除されました。");
+                    DevLog.Log($"{_statusEffects[i].Effect.Id}の状態効果が消費されたため削除されました。");
                     _statusEffects.RemoveAt(i);
                 }
             }

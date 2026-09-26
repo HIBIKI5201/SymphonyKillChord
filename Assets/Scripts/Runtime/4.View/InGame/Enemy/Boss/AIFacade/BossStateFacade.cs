@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Enemy;
 using UnityEngine;
 
@@ -44,7 +45,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <summary> 硬直発生。 </summary>
         public void Stunned()
         {
-            Debug.Log("[BossStateFacade] クリティカルにより、ボス硬直発生。");
+            DevLog.Log("[BossStateFacade] クリティカルにより、ボス硬直発生。");
         }
 
         /// <summary> 硬直回復。 </summary>

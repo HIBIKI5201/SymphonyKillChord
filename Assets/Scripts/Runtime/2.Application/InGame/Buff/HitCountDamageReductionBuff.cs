@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Buff
@@ -54,7 +55,7 @@ namespace KillChord.Runtime.Application.InGame.Buff
 
             Damage damage = attackResult.FinalDamage * (1f - _reductionRate);
 
-            Debug.Log($"[Skill10] ダメージ軽減: {_reductionRate * 100f}%、残りヒットカウント: {_remainingHitCount - 1}");
+            DevLog.Log($"[Skill10] ダメージ軽減: {_reductionRate * 100f}%、残りヒットカウント: {_remainingHitCount - 1}");
 
             return attackResult.WithFinalDamage(damage);
         }

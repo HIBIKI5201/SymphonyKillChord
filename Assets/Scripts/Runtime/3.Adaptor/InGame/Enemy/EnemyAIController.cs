@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
@@ -134,7 +135,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             {
                 if (_enemyBattleState.IsInAttackRange)
                 {
-                    Debug.Log("[EnemyAIController] 攻撃範囲を出た");
+                    DevLog.Log("[EnemyAIController] 攻撃範囲を出た");
                     _enemyBattleState.ExitRange();
                     // 射程外に出た場合、予約中の攻撃(音楽ビート待ち)も合わせてキャンセルする。
                     // これを行わないと、範囲表示もダメージも伴わない攻撃モーション・SEだけが
@@ -146,7 +147,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             {
                 if (!_enemyBattleState.IsInAttackRange)
                 {
-                    Debug.Log("[EnemyAIController] 攻撃範囲に入った");
+                    DevLog.Log("[EnemyAIController] 攻撃範囲に入った");
                     _enemyBattleState.EnterRange();
                 }
             }
@@ -163,7 +164,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             if (!_enemyAttackReservationUsecase.HasReservation)
             {
-                Debug.Log("[EnemyAIController] Encounter予約開始");
+                DevLog.Log("[EnemyAIController] Encounter予約開始");
                 if (_enemyBattleState.FirstAttack)
                 {
                     // 初回攻撃
@@ -233,7 +234,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         private void Handle2BeatBefore()
         {
-            Debug.Log("[EnemyAIController] 攻撃の2拍前");
+            DevLog.Log("[EnemyAIController] 攻撃の2拍前");
             On2BeatBefore?.Invoke();
         }
 
@@ -242,7 +243,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         private void Handle1BeatBefore()
         {
-            Debug.Log("[EnemyAIController] 攻撃の1拍前");
+            DevLog.Log("[EnemyAIController] 攻撃の1拍前");
             On1BeatBefore?.Invoke();
         }
 

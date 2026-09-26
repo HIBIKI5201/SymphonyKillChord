@@ -7,6 +7,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -146,7 +147,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             if (normalAttackDamagePolicy == SkillNormalAttackDamagePolicy.Skip)
             {
-                Debug.Log("[PlayerAttackController] 通常攻撃のダメージ適用をスキップします。");
+                DevLog.Log("[PlayerAttackController] 通常攻撃のダメージ適用をスキップします。");
 
                 OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
                 return true;

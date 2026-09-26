@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.Player.SkillEffect
@@ -28,7 +29,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     durationSeconds,
                     context.EffectSpec.ReapplyPolicy));
 
-            Debug.Log($"[Skill_04] 発動 " +
+            DevLog.Log($"[Skill_04] 発動 " +
                 $"BarrierGainRate: {barrierGainRate}" +
                 $", DurationSeconds: {durationSeconds}");
         }
