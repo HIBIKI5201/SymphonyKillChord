@@ -237,6 +237,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             if (_nodesOnPath == null || _nodesOnPath.Count == 0)
             {
                 Debug.LogError($"[SkillTreeController] 解放対象ノードの取得に失敗しました。");
+                return;
             }
 
             List<SkillNodeEntity> unlockOrder = BuildUnlockOrder(_nodesOnPath);
