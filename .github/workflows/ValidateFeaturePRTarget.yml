@@ -1,4 +1,4 @@
-name: Validate Feature Branch PR Target
+name: "[Git] Validate Feature Branch PR Target"
 
 on:
   pull_request:
