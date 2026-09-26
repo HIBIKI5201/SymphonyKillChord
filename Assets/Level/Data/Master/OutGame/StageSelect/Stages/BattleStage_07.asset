@@ -20,8 +20,8 @@ MonoBehaviour:
   _stageName: 
   _flavorText: 
   _targetSceneName: InGame
-  _rewardSkillBuildPoint: 0
-  _rewardSkillUnlockPoint: 0
+  _firstClearRewards: []
+  _clearRewards: []
   _isTutorial: 0
   _enemyWaveDefinitionId:
     _id: enemy_wave_default
