@@ -462,7 +462,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         [SerializeField, SourceDataAddress, Tooltip("シナリオ設定の Addressables キーです。")]
         private string _scenarioSettingsKey = "ScenarioSettingsAsset";
         [SerializeField, Min(0), Tooltip("コンボ数が表示される最小値。")]
-        private int _comboVisibleCount = 4;
+        private int _comboVisibleCount = 3;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;
