@@ -74,6 +74,20 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         }
 
         /// <summary>
+        ///     攻撃後の行動抽選より優先して、プレイヤーへ向かって移動するべきかを判定する。
+        ///     射程外なら接近、射線が障害物で遮られていれば迂回が必要なためtrueを返す。
+        /// </summary>
+        /// <param name="enemyPosition"> 敵の位置。 </param>
+        /// <param name="playerPosition"> プレイヤーの位置。 </param>
+        /// <returns> 接近または迂回を優先する場合はtrue。 </returns>
+        public bool ShouldPrioritizeChase(Vector3 enemyPosition, Vector3 playerPosition)
+        {
+            float distance = Vector3.Distance(enemyPosition, playerPosition);
+            return distance > _enemyMoveSpec.AttackRangeMax.Value
+                || !_raycastDetector.CanRaycastHitTarget;
+        }
+
+        /// <summary>
         ///     プレイヤーが敵の攻撃範囲内か判定する。
         /// </summary>
         /// <param name="enemyPosition"></param>
