@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Sequence;
 using UnityEngine;
 
@@ -79,7 +80,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             {
                 if(_waveTimer <= 0f)
                 {
-                    Debug.Log("[EnemyWaveTimerView] Wave Timeout.");
+                    DevLog.Log("[EnemyWaveTimerView] Wave Timeout.");
 
                     if (_autoSpawnSuppressed)
                     {

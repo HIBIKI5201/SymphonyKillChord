@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -102,7 +103,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             if (slot == null)
             {
 #if UNITY_EDITOR
-                Debug.Log($"{skill?.name} は元の位置に戻されました。");
+                DevLog.Log($"{skill?.name} は元の位置に戻されました。");
 #endif
                 return;
             }
@@ -125,7 +126,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             }
 
 #if UNITY_EDITOR
-            Debug.Log($"{skill?.name} が {slot.name} にドロップされました。");
+            DevLog.Log($"{skill?.name} が {slot.name} にドロップされました。");
 #endif
         }
 

@@ -3,6 +3,7 @@ using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -139,7 +140,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 && ReferenceEquals(registeredContainer, _moduleContainer))
             {
 #if UNITY_EDITOR
-                Debug.Log(
+                DevLog.Log(
                     $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(PlayerStatusBonusModuleContainer)} の登録を解除します。",
                     this);
 #endif

@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -228,7 +229,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             if (_lowHpEventTriggered) return;
             if(currentHp < maxHp * LOW_HP_EVENT_TRIGGER_RATIO)
             {
-                Debug.Log("<color=red>ボス体力が半分以下になった</color>");
+                DevLog.Log("<color=red>ボス体力が半分以下になった</color>");
                 OnLowHp?.Invoke();
                 _lowHpEventTriggered = true;
             }

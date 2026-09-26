@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.Input;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Input;
@@ -265,7 +266,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             if (isSuccess)
             {
 #if UNITY_EDITOR
-                Debug.Log(
+                DevLog.Log(
                     $"[{nameof(TitleSceneView)}] "
                     + $"{_currentSceneName} -> {_targetSceneName} への遷移に成功しました。");
 #endif

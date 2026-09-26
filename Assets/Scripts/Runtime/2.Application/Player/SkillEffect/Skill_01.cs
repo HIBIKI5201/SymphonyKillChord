@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using UnityEngine;
 
@@ -42,7 +43,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             result = DamageExecutor.Execute(
                 context.PlayerEntity, context.TargetEntity, result, DamageAttackType.Skill);
 
-            Debug.Log($"[Skill_01] 発動" +
+            DevLog.Log($"[Skill_01] 発動" +
                         $"Multiplier: {damageMultiplier}" +
                         $"FinalDamage: {result.FinalDamage.Value}");
         }
