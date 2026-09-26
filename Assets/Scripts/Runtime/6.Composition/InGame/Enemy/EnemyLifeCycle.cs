@@ -24,8 +24,6 @@ using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Music;
-using LitMotion;
-using LitMotion.Extensions;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
@@ -435,22 +433,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("死亡アニメーション開始前に無効化する判定。未設定の場合は何もしません。")]
         private Collider[] _disableOnDyingColliders;
 
-        [SerializeField, Tooltip("死亡演出でMaterialプロパティを変化させる対象のRendererです。未設定の場合は何もしません。")]
-        private Renderer[] _deathEffectRenderers;
-        [SerializeField, Tooltip("死亡演出用の沼のGameObjectです。")]
-        private GameObject _deathSwampGameObject;
+        [SerializeField, Tooltip("死体消滅演出。未設定の場合は何もしません。")]
+        private EnemyDestroyEffectView _destroyEffectView;
 
         [SerializeField, Tooltip("撃破時にSE_Defeatを再生するSE用Source。")]
         private SoundEffectSource _defeatSoundSource;
-
-        /// <summary>
-        ///     死亡演出で変化させるMaterialのfloatプロパティID（仮に"_DeathEffectAmount"）です。
-        /// </summary>
-        private static readonly int DeathEffectPropertyId = Shader.PropertyToID("_DeathEffectAmount");
-        [SerializeField, Min(0f), Tooltip("死亡演出のMaterialプロパティが変化する時間（秒）です。")]
-        private float _deathEffectDuration = 1f;
-        [SerializeField, Min(0f), Tooltip("死亡演出後、沼が沈み込むまでの時間（秒）です。")]
-        private float _deathSwampSinkDuration = 3f;
 
         [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
         private Transform _targetTransform;
@@ -653,61 +640,29 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         /// <summary>
-        ///     死亡演出として、対象RendererのMaterialプロパティをLMotionで変化させる。
+        ///     死体消滅演出を再生する。演出Viewが未設定の場合は何もしない。
         /// </summary>
         private ValueTask PlayDeathMaterialEffectAsync()
         {
-            if (_deathEffectRenderers == null || _deathEffectRenderers.Length == 0)
+            if (_destroyEffectView == null)
             {
                 return default;
             }
 
-            // DestroyFadeシェーダーは_DeathEffectAmountのデフォルトが1(通常表示)で、0に近づくほど消滅する。
-            MotionHandle handle = LMotion.Create(1f, 0f, _deathEffectDuration)
-                .WithEase(Ease.OutQuad)
-                .BindToMaterialPropertyBlockFloat(_deathEffectRenderers, DeathEffectPropertyId);
-
-            if (_deathSwampGameObject != null)
-            {
-                _deathSwampGameObject.SetActive(true);
-
-                handle = LSequence.Create()
-                    .Join(handle)
-                    .Join(LMotion.Create(Vector3.up * -0.5f, Vector3.up * 0.1f, _deathEffectDuration)
-                        .WithEase(Ease.OutQuad)
-                        .BindToLocalPosition(_deathSwampGameObject.transform))
-                    .Join(LMotion.Create(Vector3.up * 0.1f, Vector3.up * -0.5f, _deathSwampSinkDuration)
-                        .WithDelay(_deathEffectDuration)
-                        .BindToLocalPosition(_deathSwampGameObject.transform))
-                    .Run();
-            }
-
-            return handle.ToValueTask(destroyCancellationToken);
+            return _destroyEffectView.PlayDeathMaterialEffectAsync();
         }
 
         /// <summary>
-        ///     プールから再利用した際に、前回の死亡演出で変化したMaterialPropertyBlockを既定値へ戻す。
+        ///     プールから再利用した際に、前回の死亡演出の変化を既定値へ戻す。
         /// </summary>
         private void ResetDeathEffect()
         {
-            if (_deathEffectRenderers == null || _deathEffectRenderers.Length == 0)
+            if (_destroyEffectView == null)
             {
                 return;
             }
 
-            foreach (Renderer renderer in _deathEffectRenderers)
-            {
-                if (renderer == null)
-                {
-                    continue;
-                }
-
-                renderer.SetPropertyBlock(null);
-            }
-            if (_deathSwampGameObject != null)
-            {
-                _deathSwampGameObject.SetActive(false);
-            }
+            _destroyEffectView.ResetDeathEffect();
         }
 
         /// <summary>
