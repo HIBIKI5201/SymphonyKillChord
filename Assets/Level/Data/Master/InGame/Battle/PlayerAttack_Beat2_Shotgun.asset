@@ -15,7 +15,7 @@ MonoBehaviour:
   _attackName: ショットガン
   _attackParameterSetData: {fileID: 11400000, guid: ef0831d36d26b8b4d9e5ec4bb719f18c, type: 2}
   _attackPipelineAsset: {fileID: 11400000, guid: d4c8e287e8c321e4b980ea8a618c2146, type: 2}
-  _justDamageMultiplier: 1
+  _justDamageMultiplier: 2
   _useBeatType: 1
   _beatType: 2
   _weaponDamageMultiplier: 0.8
