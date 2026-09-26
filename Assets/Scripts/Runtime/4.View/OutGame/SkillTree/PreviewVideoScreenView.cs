@@ -15,6 +15,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
     /// </summary>
     public class PreviewVideoScreenView : ScreenViewBase, IDisposable, IPreviewVideoScreenViewModel, IPreviewVideoScreenViewShowable
     {
+        /// <summary>
+        ///     プレビュー動画の表示に使う要素・プレイヤー・動画を指定して生成する。
+        /// </summary>
         public PreviewVideoScreenView(VisualElement root, OutGameUIEvent outGameUIEvent, VideoPlayer player, Dictionary<int, VideoClip> videoClips) : base(root, outGameUIEvent)
         {
             _root = root;
@@ -53,6 +56,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _player.Stop();
         }
 
+        /// <summary>
+        ///     閉じるボタンの登録とローカライズ文言の購読を解除する。
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();
@@ -74,6 +80,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string ELEMENT_NAME_CLOSE_BUTTON = "ClosePreviewButton";
         private const string UI_COMMON_TABLE = "UICommon";
 
+        /// <summary>
+        ///     閉じるボタンの操作を登録する。フォーカス移動の対象からは外す。
+        /// </summary>
         private void RegisterEvents()
         {
             // キャンセル操作で閉じられるため、フォーカス移動の対象からは外す。

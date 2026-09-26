@@ -30,6 +30,10 @@ namespace KillChord.Runtime.Adaptor.Persistent.Load
         /// </summary>
         public bool IsLoading => _activeSession != null;
 
+        /// <summary>
+        ///     ロード画面のセッションを開始する。
+        ///     reuseActiveSession が true で実行中のセッションがある場合は、それを再利用する。
+        /// </summary>
         public ILoadingSession Begin(bool reuseActiveSession = false)
         {
             if(reuseActiveSession)

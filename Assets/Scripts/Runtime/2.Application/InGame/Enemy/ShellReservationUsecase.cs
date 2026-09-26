@@ -12,6 +12,10 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// </summary>
     public class ShellReservationUsecase : IDisposable
     {
+        /// <summary>
+        ///     砲弾のエンティティと拍のスケジューラーを指定して生成する。
+        ///     エンティティが null の場合は例外を投げる。
+        /// </summary>
         public ShellReservationUsecase(ShellEntity entity, IMusicActionScheduler musicActionScheduler)
         {
             if(entity == null)
@@ -34,6 +38,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <summary> 爆発予約が有効かどうか。 </summary>
         public bool HasDetonateReservation { get; private set; }
 
+        /// <summary>
+        ///     予約中の処理をキャンセルし、CancellationTokenSource を破棄する。
+        /// </summary>
         public void Dispose()
         {
             if (_cancellationTokenSource != null)

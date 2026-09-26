@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Domain.InGame.Battle
     /// </summary>
     public readonly struct DamageTakenContext
     {
+        /// <summary>
+        ///     ダメージを受けたときの情報を生成する。
+        /// </summary>
         public DamageTakenContext(
             IAttacker attacker,
             IDefender defender,

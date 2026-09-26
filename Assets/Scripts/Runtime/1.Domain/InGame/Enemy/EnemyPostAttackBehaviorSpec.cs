@@ -7,6 +7,10 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct EnemyPostAttackBehaviorSpec
     {
+        /// <summary>
+        ///     攻撃後の行動選択の重みと距離を指定して生成する。
+        ///     重みや距離が不正な場合は例外を投げる。
+        /// </summary>
         public EnemyPostAttackBehaviorSpec(
             float stayWeight,
             float regroupWeight,
@@ -16,6 +20,7 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
             float obstacleApproachRatio,
             float arrivalThreshold)
         {
+            // 重みと距離が有効な範囲にあるかを検証する。
             if (stayWeight < 0f)
             {
                 throw new ArgumentOutOfRangeException(nameof(stayWeight), "重みの値は0より小さい。");
@@ -45,6 +50,7 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
                 throw new ArgumentOutOfRangeException(nameof(arrivalThreshold), "到達判定距離の値は0より小さい。");
             }
 
+            // 検証済みの値を保持する。
             StayWeight = stayWeight;
             RegroupWeight = regroupWeight;
             ObstacleApproachWeight = obstacleApproachWeight;

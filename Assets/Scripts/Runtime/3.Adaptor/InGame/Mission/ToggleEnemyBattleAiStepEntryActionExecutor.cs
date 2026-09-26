@@ -10,6 +10,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public class ToggleEnemyBattleAiStepEntryActionExecutor : IMissionStepEntryActionExecutor
     {
+        /// <summary>
+        ///     敵 AI の登録簿を指定して生成する。
+        /// </summary>
         public ToggleEnemyBattleAiStepEntryActionExecutor(EnemyAIControllerRegistry battleAIRegistry)
         {
             _enemyBattleAIRegistry = battleAIRegistry ?? 

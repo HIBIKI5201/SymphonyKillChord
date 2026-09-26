@@ -260,6 +260,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return options;
             }
 
+            // プロパティパスが空ならアセット自体を、指定があればそのプロパティ以下を走査する。
             HashSet<int> visitedInstanceIds = new();
             SerializedObject serializedObject = new(sourceAsset);
             bool useRootObject = string.IsNullOrWhiteSpace(mapping.PropertyPath);
@@ -281,6 +282,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                     visitedInstanceIds);
             }
 
+            // ID 順に並べて返す。
             options.Sort((left, right) => string.Compare(left.Id, right.Id, StringComparison.Ordinal));
             return options;
         }
@@ -417,6 +419,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             List<SourceDataIDOption> options,
             HashSet<int> visitedInstanceIds)
         {
+            // ScriptableObject の参照であれば、その中身を走査する。
             if (property.propertyType == SerializedPropertyType.ObjectReference)
             {
                 if (property.objectReferenceValue is ScriptableObject scriptableObject)
@@ -426,6 +429,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return;
             }
 
+            // 指定したコレクションの DataID 以外は対象外にする。
             if (!string.Equals(property.type, nameof(DataID), StringComparison.Ordinal)
                 || !SerializedPropertyFieldResolver.TryResolve(
                     serializedObject.targetObject.GetType(),
@@ -443,6 +447,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return;
             }
 
+            // ID が入っているものだけを選択肢に加える。
             SerializedProperty idProperty = property.FindPropertyRelative(ID_PROPERTY_NAME);
             SerializedProperty hashProperty = property.FindPropertyRelative(HASH_PROPERTY_NAME);
             if (idProperty == null

@@ -15,10 +15,13 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// </summary>
     public sealed class SkillListUIInitializer : InGameInitializationModuleBase
     {
+        /// <inheritdoc/>
         public override string ModuleName => nameof(SkillListUIInitializer);
 
+        /// <inheritdoc/>
         public override int Order => 441;
 
+        /// <inheritdoc/>
         public override bool Build()
         {
             if (_uiConfig == null)
@@ -39,6 +42,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             return true;
         }
 
+        /// <inheritdoc/>
         public override void Shutdown()
         {
             if (_isRegistered)

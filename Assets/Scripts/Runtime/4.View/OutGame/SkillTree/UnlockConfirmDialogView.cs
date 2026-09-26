@@ -112,6 +112,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <param name="dto"> 解放確認ダイアログ用のDTO。 </param>
         public void Show(UnlockConfirmDTO dto)
         {
+            // 解放前後のポイントを表示する。
             int pointsAfter = dto.CurrentPoints - dto.Cost;
             _pointsLocalizedText?.Dispose();
             _pointsLocalizedText = new LocalizedElementText(
@@ -119,6 +120,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 $"{POINTS_LABEL_TEXT}{dto.CurrentPoints}　→　{pointsAfter}",
                 new object[] { dto.CurrentPoints, pointsAfter });
 
+            // 変化するステータスだけを表示し、1つも無ければ見出しも隠す。
             bool anyStatChanged = false;
             anyStatChanged |= ApplyStatRow(_healthRow, _healthValueLabel,
                 dto.PlayerHealth, dto.PreviewPlayerHealth, SkillTreeStatValueFormatter.FormatTruncated);
@@ -132,6 +134,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 dto.AreaAttackRangeMultiplier, dto.PreviewAreaAttackRangeMultiplier, SkillTreeStatValueFormatter.FormatMultiplier);
             _statsHeader.style.display = anyStatChanged ? DisplayStyle.Flex : DisplayStyle.None;
 
+            // 解放されるスキルの名前を並べる。
             _skillSection.style.display = dto.SkillNames.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             _skillNameList.Clear();
             for (int i = 0; i < dto.SkillNames.Length; i++)

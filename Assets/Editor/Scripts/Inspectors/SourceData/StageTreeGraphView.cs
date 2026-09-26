@@ -40,6 +40,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 return false;
             }
 
+            // Demo/Release の各ステージツリーのうち、対象アセットを含むものを集める。
             List<ScriptableObject> containingTrees = new();
             foreach (GameDataVariant variant in (GameDataVariant[])Enum.GetValues(typeof(GameDataVariant)))
             {
@@ -61,6 +62,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 }
             }
 
+            // 所属するツリーがちょうど1つのときだけ成功とする。
             if (containingTrees.Count == 0)
             {
                 message = $"対象アセットを含むStageTreeAsset(「{stageTreeAddressableKey}」)が"
@@ -313,6 +315,7 @@ namespace KillChord.Editor.Inspectors.SourceData
             float contentWidth,
             float contentHeight)
         {
+            // 左ドラッグの間だけ表示位置をずらす。
             int controlId = GUIUtility.GetControlID(PAN_HINT.GetHashCode(), FocusType.Passive, localViewportRect);
             Event current = Event.current;
             switch (current.GetTypeForControl(controlId))
@@ -370,6 +373,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 return false;
             }
 
+            // ステージアセットからノードを作り、ステージ ID で引けるようにする。
             SerializedObject serializedTree = new(stageTreeAsset);
             SerializedProperty stageAssets = serializedTree.FindProperty(STAGE_ASSETS_PROPERTY_NAME);
             SerializedProperty bindAssets = serializedTree.FindProperty(BIND_ASSETS_PROPERTY_NAME);
@@ -399,6 +403,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 }
             }
 
+            // 接続アセットから、両端のノードが揃っているものだけを辺として追加する。
             for (int i = 0; i < bindAssets.arraySize; i++)
             {
                 if (bindAssets.GetArrayElementAtIndex(i).objectReferenceValue
@@ -433,6 +438,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 toNode.IncomingCount++;
             }
 
+            // 入次数と出次数からノードの列を割り当てる。
             AssignColumns(nodes, out rootCount, out hasCycle);
             return true;
         }
@@ -605,6 +611,7 @@ namespace KillChord.Editor.Inspectors.SourceData
         {
             for (int i = 0; i < edges.Count; i++)
             {
+                // 接続元ノードの右端から接続先ノードの左端へ曲線を引く。
                 EdgeInfo edge = edges[i];
                 Vector2 start = contentOrigin + new Vector2(
                     edge.From.Rect.xMax,
@@ -625,6 +632,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                     null,
                     isSelected ? EDGE_WIDTH * SELECTED_EDGE_WIDTH_SCALE : EDGE_WIDTH);
 
+                // 線の中央に遷移の種類を表示する。
                 Rect labelRect = new(
                     (start.x + end.x) * 0.5f - EDGE_LABEL_WIDTH * 0.5f,
                     (start.y + end.y) * 0.5f - 10f,

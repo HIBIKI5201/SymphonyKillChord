@@ -18,6 +18,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         public bool Initialize(VisualElement titleRoot, Func<bool> canPlay, Action<float> setBgmGain,
             Func<float> getBgmVolume, string movieUrl)
         {
+            // タイトル背景と、依存する処理を保持する。
             VisualElement background = titleRoot.Q<VisualElement>("BackGround");
             if (background == null)
             {
@@ -30,6 +31,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             _canPlay = canPlay;
             _setBgmGain = setBgmGain;
             _getBgmVolume = getBgmVolume;
+            // 動画を表示するレイヤーを作り、パーティクルの上に重ねる。
             _layer = new VisualElement { name = "IdleVideoLayer", pickingMode = PickingMode.Ignore };
             _videoMatte = new Image { name = "IdleVideoMatte", pickingMode = PickingMode.Ignore };
             _videoSurface = new Image { name = "IdleVideo", pickingMode = PickingMode.Ignore, scaleMode = ScaleMode.ScaleToFit };
@@ -48,6 +50,7 @@ namespace KillChord.Runtime.View.OutGame.Title
             background.Insert(particleLayer != null ? background.IndexOf(particleLayer) + 1 : 0, _layer);
             _layer.style.display = DisplayStyle.None;
 
+            // 音声を消した状態で動画を再生するプレイヤーを用意する。
             _player = gameObject.AddComponent<VideoPlayer>();
             _player.playOnAwake = false;
             _player.isLooping = false;

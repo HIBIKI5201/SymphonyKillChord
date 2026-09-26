@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace KillChord.Editor.AssetManagement
 {
+    /// <summary>
+    ///     Drive 同期の進捗とログを表示するウィンドウ。
+    /// </summary>
     internal sealed class DriveImportSyncWindow : EditorWindow
     {
         /// <summary> 進捗表示ウィンドウ。 </summary>
@@ -149,8 +152,12 @@ namespace KillChord.Editor.AssetManagement
             }
         }
 
+        /// <summary>
+        ///     同期状態・進捗バー・ログを描画する。
+        /// </summary>
         private void OnGUI()
         {
+            // 状態と進捗バーを描画する。
             EditorGUILayout.LabelField("状態", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(status);
 
@@ -167,6 +174,7 @@ namespace KillChord.Editor.AssetManagement
             EditorGUILayout.LabelField(string.IsNullOrEmpty(current) ? "-" : current);
 
             EditorGUILayout.Space();
+            // ログを描画する。情報以外は HelpBox で目立たせる。
             EditorGUILayout.LabelField("ログ", EditorStyles.boldLabel);
 
             scroll = EditorGUILayout.BeginScrollView(
@@ -188,12 +196,14 @@ namespace KillChord.Editor.AssetManagement
 
             EditorGUILayout.EndScrollView();
 
+            // 新しいログが追加されたら一番下までスクロールする。
             if (scrollToBottom)
             {
                 scroll.y = float.MaxValue;
                 scrollToBottom = false;
             }
 
+            // 実行中はキャンセルだけ、停止中は閉じるだけを押せるようにする。
             EditorGUILayout.BeginHorizontal();
 
             EditorGUI.BeginDisabledGroup(!isRunning);
@@ -213,6 +223,9 @@ namespace KillChord.Editor.AssetManagement
             EditorGUILayout.EndHorizontal();
         }
 
+        /// <summary>
+        ///     ウィンドウ破棄時に保持している自身の参照を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             if (window == this)
@@ -244,6 +257,9 @@ namespace KillChord.Editor.AssetManagement
             /// <summary> ログメッセージ。 </summary>
             public readonly string Message;
 
+            /// <summary>
+            ///     ログ1件を生成する。
+            /// </summary>
             public LogEntry(LogType type, string message)
             {
                 Type = type;

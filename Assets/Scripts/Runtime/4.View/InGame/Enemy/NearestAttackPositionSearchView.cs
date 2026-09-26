@@ -100,11 +100,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
             return nearestDestination;
         }
 
+        /// <summary>
+        ///     探索間隔を計るタイマーを進める。
+        /// </summary>
         private void Update()
         {
             _timer += Time.deltaTime;
         }
 
+        /// <summary>
+        ///     探索した候補位置をシーンビューに表示する。
+        /// </summary>
         private void OnDrawGizmos()
         {
             if (_positionSamples == null) return;
@@ -148,8 +154,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField, Tooltip("最短経路の何倍までを「同程度に近い」候補として扱うか"), Range(1f, 1.5f)]
         private float _nearOptimalTolerance = 1.15f;
         [Space]
-        [SerializeField] private NavMeshAgent _agent;
-        [SerializeField] private EnemyRaycastDetectView _raycastView;
+        [SerializeField, Tooltip("経路探索に使う NavMeshAgent。")] private NavMeshAgent _agent;
+        [SerializeField, Tooltip("候補位置から射線が通るかを判定するビュー。")] private EnemyRaycastDetectView _raycastView;
         private Vector3[] _positionSamples;
         private float[] _pathLengths;
         private List<int> _nearOptimalIndices;

@@ -4,12 +4,18 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     トグル形式の設定項目。
+    /// </summary>
     public class SettingToggle : SettingBase
     {
-        [SerializeField]
+        [SerializeField, Tooltip("トグルの初期値。")]
         private bool _isOn;
         private Toggle _toggleInstance;
 
+        /// <summary>
+        ///     トグルを取得して初期値を設定する。
+        /// </summary>
         protected override void OnInitialize()
         {
             _toggleInstance = _baseInstance.Q<Toggle>();
@@ -26,6 +32,9 @@ namespace KillChord.Runtime.View
             });
         }
 
+        /// <summary>
+        ///     設定値の取得・反映の処理とトグルを結びつける。
+        /// </summary>
         public void Bind(Func<bool> getter, Action<bool> setter)
         {
             _toggleInstance.SetValueWithoutNotify(getter());

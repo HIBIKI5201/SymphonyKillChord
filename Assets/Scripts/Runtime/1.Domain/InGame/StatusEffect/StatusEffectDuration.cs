@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Domain.InGame.StatusEffect
     /// </summary>
     public readonly struct StatusEffectDuration
     {
+        /// <summary>
+        ///     秒数と、解除されるまで続くかを指定して生成する。
+        /// </summary>
         private StatusEffectDuration(float seconds, bool isPermanent)
         {
             Seconds = seconds;

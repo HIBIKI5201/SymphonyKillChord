@@ -16,6 +16,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
     /// </summary>
     public class SceneTransitionService : ISceneTransitionService
     {
+        /// <summary>
+        ///     遷移元のシーンを破棄して遷移先のシーンを読み込む。
+        /// </summary>
         public async Task<bool> ChangeSceneAsync(
             string fromSceneName,
             string toSceneName,
@@ -30,6 +33,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return false;
             }
 
+            // 遷移先がまだ読み込まれていなければ追加で読み込む。
             if (!SceneLoader.GetExistScene(toSceneName, out Scene destinationScene)
                 || !destinationScene.isLoaded)
             {
@@ -53,6 +57,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
 
             progress?.Report(LoadingConstants.SCENE_LOAD_END_PROGRESS);
 
+            // 遷移元が別のシーンとして読み込まれていれば破棄する。
             if (!string.IsNullOrEmpty(fromSceneName) &&
                 !string.Equals(fromSceneName, toSceneName, StringComparison.Ordinal) &&
                 SceneLoader.GetExistScene(fromSceneName, out Scene sourceScene) && sourceScene.isLoaded)
@@ -77,6 +82,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             return true;
         }
 
+        /// <summary>
+        ///     シーンを追加で読み込む。
+        /// </summary>
         public async Task<bool> LoadAdditiveAsync(
             string sceneName,
             IProgress<float> progress,
@@ -114,6 +122,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         }
 
 
+        /// <summary>
+        ///     指定したシーンを破棄する。
+        /// </summary>
         public async Task<bool> UnloadAsync(
             string sceneName,
             IProgress<float> progress,
@@ -126,6 +137,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return false;
             }
 
+            // 読み込まれていないシーンは、破棄済みとして成功を返す。
             if (!SceneLoader.GetExistScene(
                     sceneName,
                     out Scene loadedScene)
@@ -154,6 +166,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             return true;
         }
 
+        /// <summary>
+        ///     指定したシーンを破棄し、別のシーンをアクティブにする。
+        /// </summary>
         public async Task<bool> UnloadAndSetActiveAsync(
             string unloadSceneName,
             string activeSceneName,
@@ -162,6 +177,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         {
             progress?.Report(0f);
 
+            // 先に指定のシーンをアクティブにする。
             if (!TrySetActiveScene(activeSceneName))
             {
                 Debug.LogError($"ActiveSceneの復帰に失敗しました。SceneName:{activeSceneName}");
@@ -170,6 +186,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
 
             progress?.Report(LoadingConstants.ACTIVE_SCENE_PROGRESS);
 
+            // 破棄対象が別のシーンとして読み込まれていれば破棄する。
             if (!string.IsNullOrWhiteSpace(unloadSceneName)
                 && !string.IsNullOrWhiteSpace(activeSceneName)
                 && !string.Equals(unloadSceneName, activeSceneName, StringComparison.Ordinal)
@@ -198,6 +215,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         }
 
 
+        /// <summary>
+        ///     指定したシーンを読み込み直す。
+        /// </summary>
         public async Task<bool> ReloadSceneAsync(
             string sceneName,
             IProgress<float> progress,
@@ -214,6 +234,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return false;
             }
 
+            // 読み込み済みの場合は、先に破棄する。
             if (SceneLoader.GetExistScene(
                 sceneName,
                 out Scene loadedScene)
@@ -221,6 +242,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             {
                 Scene activeScene = SceneManager.GetActiveScene();
 
+                // 対象がアクティブな場合は、破棄する前に別のシーンを一時的にアクティブにする。
                 if (string.Equals(activeScene.name, sceneName, StringComparison.Ordinal))
                 {
                     if (!TryGetFallbackScene(sceneName, out Scene fallbackScene))
@@ -242,6 +264,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     }
                 }
 
+                // シーンを破棄し、破棄が完了するまで待つ。
                 IProgress<float> unloadProgress =
                     CreateProgressRange(progress, 0f, LoadingConstants.SCENE_RELOAD_UNLOAD_END_PROGRESS);
 
@@ -279,6 +302,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     LoadingConstants.SCENE_RELOAD_UNLOAD_END_PROGRESS);
             }
 
+            // シーンを読み込み直す。
             IProgress<float> loadProgress =
                 CreateProgressRange(
                     progress,

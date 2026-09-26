@@ -29,12 +29,14 @@ namespace KillChord.Runtime.Composition.Bootstrap
         {
             progress?.Report(0f);
 
+            // モジュールが無ければ完了とする。
             if (modules == null || modules.Count == 0)
             {
                 progress?.Report(1f);
                 return true;
             }
 
+            // Init・リソース読み込み・Build・Ready の各段階を、全モジュールについて順に実行する。
             int completedStepCount = 0;
             int totalStepCount = modules.Count * PhaseCount;
 
@@ -275,6 +277,9 @@ namespace KillChord.Runtime.Composition.Bootstrap
             progress?.Report((float)completedStepCount / totalStepCount);
         }
 
+        /// <summary>
+        ///     初期化処理の段階。
+        /// </summary>
         private enum InitializationPhase
         {
             Init = 0,

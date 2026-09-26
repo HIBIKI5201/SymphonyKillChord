@@ -12,6 +12,9 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
     /// </summary>
     internal class InfectionDebuff : StatusEffectBase, IDamageTakenHandler, IConsumableStatusEffect
     {
+        /// <summary>
+        ///     感染させた攻撃者・所属する感染グループ・再付与時の扱いを指定して生成する。
+        /// </summary>
         public InfectionDebuff(
             CharacterEntity owner, InfectionGroup infectionGroup, StatusEffectReapplyPolicy reapplyPolicy)
             : base(
@@ -24,6 +27,7 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
             _infectionGroup = infectionGroup ?? throw new ArgumentNullException(nameof(infectionGroup));
         }
 
+        /// <summary> 感染デバフの状態効果 ID。 </summary>
         /// <summary > ステータス効果のIDを取得します。 </summary>
         public static StatusEffectId EffectId => EFFECT_ID;
 

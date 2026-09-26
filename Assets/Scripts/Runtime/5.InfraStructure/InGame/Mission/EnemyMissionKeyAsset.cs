@@ -10,6 +10,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
     [CreateAssetMenu(
         fileName = nameof(EnemyMissionKeyAsset),
         menuName = "KillChord/Mission" + "/" + nameof(EnemyMissionKeyAsset))]
+    /// <summary>
+    ///     ミッションの条件で敵を識別するためのキーのデータ。
+    /// </summary>
     public class EnemyMissionKeyAsset : ScriptableObject
     {
         /// <summary> 敵のミッションキーを取得します。 </summary>

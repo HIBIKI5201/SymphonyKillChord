@@ -11,6 +11,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
     [CreateAssetMenu(
         fileName = nameof(EnemyMissionKeyRepository),
         menuName = "KillChord/Mission/" + nameof(EnemyMissionKeyRepository))]
+    /// <summary>
+    ///     敵のミッションキーを ID で検索するリポジトリ。
+    /// </summary>
     public sealed class EnemyMissionKeyRepository
         : ScriptableObjectRepositoryBase<EnemyMissionKey, EnemyMissionKeyAsset, EnemyMissionKeyAsset>
     {
@@ -28,8 +31,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         [SerializeField, Tooltip("IDで取得可能にする敵ミッションキーアセットの一覧です。")]
         private EnemyMissionKeyAsset[] _missionKeyAssets;
 
+        /// <inheritdoc/>
         protected override IReadOnlyList<EnemyMissionKeyAsset> GetEntries() => _missionKeyAssets;
 
+        /// <inheritdoc/>
         protected override bool TryBuild(
             EnemyMissionKeyAsset entry,
             out EnemyMissionKey id,

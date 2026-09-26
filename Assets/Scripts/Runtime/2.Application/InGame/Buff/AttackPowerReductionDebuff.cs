@@ -4,9 +4,15 @@ using KillChord.Runtime.Domain.InGame.StatusEffect;
 
 namespace KillChord.Runtime.Application.InGame.Buff
 {
+    /// <summary>
+    ///     一定時間、攻撃力を固定値だけ下げるデバフ。
+    /// </summary>
     public class AttackPowerReductionDebuff
         : StatusEffectBase, IAttackPowerModifier
     {
+        /// <summary>
+        ///     攻撃力の減少量と持続時間を指定して生成する。
+        /// </summary>
         public AttackPowerReductionDebuff(
             float reductionAmount,
             float durationInSeconds)
@@ -32,6 +38,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
         /// <summary> 現在の攻撃力減少量。 </summary>
         public float ReductionAmount => _reductionAmount;
 
+        /// <summary>
+        ///     攻撃力から減少量を引く。
+        /// </summary>
         public Damage ModifyAttackPower(IAttacker attacker, IDefender defender, Damage attackPower)
         {
             return attackPower - _reductionAmount;

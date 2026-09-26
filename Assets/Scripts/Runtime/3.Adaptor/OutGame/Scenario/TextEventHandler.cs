@@ -54,9 +54,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             var fired = new HashSet<TextTimingTrigger>();
             try
             {
+                // 話者を表示し、0文字目のトリガーを発火する。
                 await _textOutputPort.ShowTextAsync(e.Speaker, string.Empty, ct);
                 await TryFireTriggersAsync(e.Triggers, fired, 0, string.Empty, ct);
 
+                // 1文字ずつ本文を表示する。送りの要求が来たら残りを一度に表示して終える。
                 for (int i = 1; i <= e.Text.Length; i++)
                 {
                     if (completionSource.Task.IsCompleted)
@@ -65,6 +67,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
                         break;
                     }
 
+                    // 一時停止中は、送りの要求を待ちながら再開まで待つ。
                     while (_playbackState.IsPaused)
                     {
                         TimeSpan pauseDelay = _settingsRepository.PausePollInterval < TimeSpan.FromMilliseconds(10)
@@ -77,6 +80,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
                         }
                     }
 
+                    // 表示した文字数に応じたトリガーを発火する。
                     await _textOutputPort.ShowTextAsync(e.Speaker, e.Text[..i], ct);
                     string visibleText = e.Text[..i];
 
@@ -87,6 +91,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
                         continue;
                     }
 
+                    // 早送り中は短い間隔で次の文字へ進む。
                     TimeSpan delay = _playbackState.IsFastForward
                         ? _settingsRepository.FastForwardTextCharInterval
                         : _settingsRepository.NormalTextCharInterval;

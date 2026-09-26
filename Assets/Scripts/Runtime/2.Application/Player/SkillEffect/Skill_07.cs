@@ -194,6 +194,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
 
             foreach (var kvp in _hitCounts)
             {
+                // 基礎攻撃力に減少率と攻撃回数を掛けた量を、上限を超えない範囲で減らす。
                 CharacterEntity target = kvp.Key;
                 float baseAttackPower = target.BaseDamage.Value;
                 float maxReductionAmount = Mathf.Min(reductionCap, baseAttackPower);
@@ -201,6 +202,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 float requestedReductionAmount = reductionPerHit * kvp.Value;
                 float reductionAmount = Mathf.Min(requestedReductionAmount, maxReductionAmount);
 
+                // 減らせる量がある対象にだけデバフを付与する。
                 if (maxReductionAmount > 0f)
                 {
                     target.StatusEffectSystem.Add(

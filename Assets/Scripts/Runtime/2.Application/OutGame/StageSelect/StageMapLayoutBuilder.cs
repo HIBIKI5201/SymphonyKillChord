@@ -24,6 +24,7 @@ namespace KillChord.Runtime.Application.OutGame.StageSelect
                 throw new ArgumentNullException(nameof(stageTree));
             }
 
+            // 入ってくる接続が無いステージを起点として列の割り当てを始める。
             IReadOnlyList<StageNode> nodes = stageTree.Nodes;
             Dictionary<StageId, int> remainingIncomingCounts = new(nodes.Count);
             Dictionary<StageId, int> columns = new(nodes.Count);
@@ -41,6 +42,7 @@ namespace KillChord.Runtime.Application.OutGame.StageSelect
                 }
             }
 
+            // 起点から順に列を決める。処理できなかったステージがあれば循環している。
             rootCount = processingQueue.Count;
             int processedCount = AssignColumns(
                 stageTree,
@@ -53,6 +55,7 @@ namespace KillChord.Runtime.Application.OutGame.StageSelect
                     "ステージ接続に循環があるため、作戦画面の自動配置を構築できません。");
             }
 
+            // 列ごとに行を割り当てる。
             return AssignRows(nodes, columns);
         }
 

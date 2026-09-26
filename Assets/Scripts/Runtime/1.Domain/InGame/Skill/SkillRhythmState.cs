@@ -11,6 +11,10 @@ namespace KillChord.Runtime.Domain.InGame.Skill
     /// </summary>
     public class SkillRhythmState
     {
+        /// <summary>
+        ///     入力履歴の保持数を指定して生成する。
+        ///     0 以下の場合は例外を投げる。
+        /// </summary>
         public SkillRhythmState(int capacity)
         {
             if (capacity <= 0)

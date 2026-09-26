@@ -15,6 +15,9 @@ namespace KillChord.Editor.TicketSystem
     {
         // --- ウィンドウの描画部分 ---
 
+        /// <summary>
+        ///     Master Ticket Window を開く。
+        /// </summary>
         [MenuItem(EditorWindowPathConst.TICKET_SYSTEM_PATH)]
         public static void ShowWindow()
         {
@@ -30,6 +33,9 @@ namespace KillChord.Editor.TicketSystem
         private bool _isLoading;
         private Vector2 _scrollPos;
 
+        /// <summary>
+        ///     最小サイズを設定し、利用者名が設定済みならチケットを読み込む。
+        /// </summary>
         private void OnEnable()
         {
             minSize = _minWindowSize;
@@ -41,6 +47,9 @@ namespace KillChord.Editor.TicketSystem
             }
         }
 
+        /// <summary>
+        ///     利用者名の変更を反映し、チケット一覧を描画する。
+        /// </summary>
         private void OnGUI()
         {
             var currentUserName = TicketSystemSettings.instance.UserName;
@@ -64,6 +73,9 @@ namespace KillChord.Editor.TicketSystem
             DrawMainUI();
         }
 
+        /// <summary>
+        ///     チケット一覧をサーバーから再取得し、完了後に再描画する。
+        /// </summary>
         private void UpdateTickets()
         {
             _isLoading = true;

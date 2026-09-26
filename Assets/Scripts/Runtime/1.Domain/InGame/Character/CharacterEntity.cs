@@ -84,18 +84,21 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <summary> キャラクターの会心率を取得する。 </summary>
         public CriticalChance CriticalChance => _criticalChance;
 
-        /// </inheritdoc />
+        /// <inheritdoc />
         public bool CanTakeDamage => !IsDead && !IsInvincible;
 
         /// <inheritdoc />
         public float CurrentBarrier => _barrierEntity.CurrentValue;
 
+        /// <summary>
+        ///     基礎ダメージを変更する。
+        /// </summary>
         public void ChangeBaseDamage(Damage newDamage)
         {
             _baseDamage = newDamage;
         }
 
-        /// </inheritdoc> 
+        /// <inheritdoc />
         public Damage TakeDamage(Damage damage)
         {
             if (IsDead)

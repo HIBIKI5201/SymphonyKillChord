@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
     /// </summary>
     public class PlayerHealthHudPresenter : IHealthHudPresenter
     {
+        /// <summary>
+        ///     プレイヤーのエンティティと HP 表示の ViewModel を指定して生成する。
+        /// </summary>
         public PlayerHealthHudPresenter(IDefender entity, IHealthHudViewModel healthHudViewModel)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity), "プレイヤーEntityがNULL。");
@@ -26,6 +29,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Player
         /// </summary>
         public event Action OnDamaged;
 
+        /// <summary>
+        ///     HP 変化イベントの購読を解除する。
+        /// </summary>
         public void Dispose()
         {
             _entity.OnHealthChanged -= UpdateHealthHud;

@@ -80,12 +80,14 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
 
             for (int i = 0; i < _registeredTargets.Count; i++)
             {
+                // 生存している敵だけを対象にする。
                 ITargetableViewModel target = _registeredTargets[i];
                 if (target == null || !target.IsAlive)
                 {
                     continue;
                 }
 
+                // 一定距離より遠い敵と、画面内に見えている敵は表示しない。
                 Vector3 targetPosition = target.Position;
                 Vector3 difference = targetPosition - playerPosition;
                 float sqrDistance = difference.sqrMagnitude;
@@ -97,12 +99,14 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
                     continue;
                 }
 
+                // 水平方向の向きが決められない真上・真下の敵は除く。
                 difference.y = 0f;
                 if (difference.sqrMagnitude <= DIRECTION_SQR_EPSILON)
                 {
                     continue;
                 }
 
+                // 向きと距離を候補として追加する。
                 _candidates.Add(new Candidate(
                     target.TargetId,
                     difference.normalized,

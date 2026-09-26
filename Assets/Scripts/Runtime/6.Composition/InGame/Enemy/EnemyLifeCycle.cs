@@ -410,18 +410,18 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
 
-        [SerializeField] private EnemyMoveView _view;
-        [SerializeField] private EnemyHealthView _healthView;
-        [SerializeField] private EnemyRaycastDetectView _raycastView;
-        [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
+        [SerializeField, Tooltip("敵の移動と見た目を扱うビュー。")] private EnemyMoveView _view;
+        [SerializeField, Tooltip("敵の HP 表示のビュー。")] private EnemyHealthView _healthView;
+        [SerializeField, Tooltip("攻撃の射線判定と警告表示のビュー。")] private EnemyRaycastDetectView _raycastView;
+        [SerializeField, Tooltip("攻撃位置を探索するビュー。")] private NearestAttackPositionSearchView _attackPositionSearchView;
         [SerializeField, Tooltip("周囲の障害物を検索するViewです。")] private NearbyObstacleSearchView _obstacleSearchView;
-        [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
-        [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
-        [SerializeField] private EnemyStateFacade _enemyStateFacade;
-        [SerializeField] private EnemySharedFacade _enemySharedFacade;
-        [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
-        [SerializeField] private NavMeshAgent _navMeshAgent;
-        [SerializeField] private CharacterAnimationView _characterAnimationView;
+        [SerializeField, Tooltip("Behavior Graph から移動を操作する窓口。")] private EnemyMovementAIFacade _enemyMovementAIFacade;
+        [SerializeField, Tooltip("Behavior Graph から攻撃を操作する窓口。")] private EnemyBattleAIFacade _enemyBattleAIFacade;
+        [SerializeField, Tooltip("Behavior Graph から状態を参照する窓口。")] private EnemyStateFacade _enemyStateFacade;
+        [SerializeField, Tooltip("Behavior Graph と共有する参照の窓口。")] private EnemySharedFacade _enemySharedFacade;
+        [SerializeField, Tooltip("敵の AI を動かす Behavior Graph。")] private BehaviorGraphAgent _behaviorGraphAgent;
+        [SerializeField, Tooltip("敵の経路移動に使う NavMeshAgent。")] private NavMeshAgent _navMeshAgent;
+        [SerializeField, Tooltip("敵のアニメーションを再生するビュー。")] private CharacterAnimationView _characterAnimationView;
         [SerializeField, Tooltip("敵キャラクターのアニメーション設定です。")]
         private CharacterAnimationCatalogConfig _characterAnimationConfig;
         [SerializeField, Tooltip("死亡時に再生するワンショットアニメーションキー。")]
@@ -459,7 +459,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private float _overrideArrivalThreshold = 0.5f;
 
         [Header("砲兵の場合のみ必要")]
-        [SerializeField] private ShellSpawner _shellSpawner;
+        [SerializeField, Tooltip("砲弾を生成するスポナー。")] private ShellSpawner _shellSpawner;
 
         private TargetSystemController _targetingSystem;
         private TransformTargetable _targetable;
@@ -571,6 +571,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         private void BeginDying()
         {
+            // 死亡イベントの購読を解除し、攻撃と AI を止める。
             if (_enemyEntity != null)
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
@@ -583,6 +584,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyBattleAIFacade?.StopGameplay();
             _view?.StopGameplay();
 
+            // 行動と移動を止める。
             if (_behaviorGraphAgent != null)
             {
                 _behaviorGraphAgent.enabled = false;
@@ -601,6 +603,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _attackPositionSearchView.enabled = false;
             }
 
+            // ターゲットと AI の登録を解除し、当たり判定を無効にする。
             _targetingSystem?.UnregisterTarget(_targetable);
             _battleAIRegistry?.Unregister(_aiController);
             SetDyingCollidersEnabled(false);

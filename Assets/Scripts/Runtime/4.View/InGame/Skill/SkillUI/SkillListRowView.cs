@@ -95,6 +95,9 @@ namespace KillChord.Runtime.View.InGame.Skill
         {
         }
 
+        /// <summary>
+        ///     クールダウン中であれば、クールダウン表示を更新する。
+        /// </summary>
         private void Update()
         {
             if (!_isSkillCoolingDown)
@@ -128,11 +131,11 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Image _cooldownBackgroundImage;
         [SerializeField, Tooltip("この行が担当するスキル自体のアイコンを表示するImage。未設定の場合はスキルアイコン表示なし。")]
         private Image _skillIconImage;
-        [SerializeField]
+        [SerializeField, Tooltip("行の表示に使うマテリアル。現在はコードから参照されていない。")]
         private Material _material;
-        [SerializeField]
+        [SerializeField, Tooltip("リズム入力がリセットされたときに光らせる Image。")]
         private Image _rhythmResetFlareImage;
-        [SerializeField]
+        [SerializeField, Tooltip("リズム入力でスキルが発動したときに光らせる Image。")]
         private Image _rhythmTriggerdFlareImage;
 
         private SkillListStepView[] _stepViews;
@@ -146,6 +149,9 @@ namespace KillChord.Runtime.View.InGame.Skill
         private float _skillReadyTimestamp;
         private float _stepRootBaseAnchoredPositionX;
 
+        /// <summary>
+        ///     フレア用の Image を非表示にする。
+        /// </summary>
         private void Awake()
         {
             _rhythmResetFlareImage.enabled = false;
@@ -230,6 +236,10 @@ namespace KillChord.Runtime.View.InGame.Skill
                     .BindToAnchoredPositionX(_stepRootRectTransform);
             PlayFlareReset();
         }
+
+        /// <summary>
+        ///     スキル発動時のフレアを点滅させる。
+        /// </summary>
         private void PlayFlareTriggered()
         {
             _progressFlareHandle.TryComplete();
@@ -240,6 +250,10 @@ namespace KillChord.Runtime.View.InGame.Skill
                     .BindToColorA(_rhythmTriggerdFlareImage);
             _rhythmTriggerdFlareImage.enabled = true;
         }
+
+        /// <summary>
+        ///     リズム入力のリセット時のフレアを点滅させる。
+        /// </summary>
         private void PlayFlareReset()
         {
             _progressFlareHandle.TryComplete();

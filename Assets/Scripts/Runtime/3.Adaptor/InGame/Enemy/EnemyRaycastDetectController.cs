@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyRaycastDetectController : IEnemyRaycastDetectRepository
     {
+        /// <summary>
+        ///     射線判定の ViewModel を指定して生成する。
+        /// </summary>
         public EnemyRaycastDetectController(IEnemyRaycastDetectViewModel model)
         {
             _model = model;

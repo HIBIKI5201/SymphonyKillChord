@@ -8,6 +8,10 @@ namespace KillChord.Runtime.Domain.InGame.Mission.StepEntryAction
     /// </summary>
     public class PlayVoiceStepEntryAction : IMissionStepEntryAction
     {
+        /// <summary>
+        ///     再生するボイスの CueName を指定して生成する。
+        ///     未設定の場合は例外を投げる。
+        /// </summary>
         public PlayVoiceStepEntryAction(string voiceCueName)
         {
             if (string.IsNullOrWhiteSpace(voiceCueName))

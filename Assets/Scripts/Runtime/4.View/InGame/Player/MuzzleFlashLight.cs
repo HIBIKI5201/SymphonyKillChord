@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     射撃時にマズルフラッシュのライトを一瞬点灯させる。
+    /// </summary>
     [RequireComponent(typeof(Light))]
     public class MuzzleFlashLight : MonoBehaviour
     {
@@ -32,6 +35,9 @@ namespace KillChord.Runtime.View
             }
         }
 
+        /// <summary>
+        ///     ライトを点灯し、設定時間が経ったら消灯する。
+        /// </summary>
         public async ValueTask Flash(CancellationToken token = default)
         {
             _light.enabled = true;
@@ -46,16 +52,25 @@ namespace KillChord.Runtime.View
         private float _timedFlashEndTime;
         private bool _isTimedFlashActive;
 
+        /// <summary>
+        ///     Light コンポーネントを取得する。
+        /// </summary>
         private void Awake()
         {
             _light = GetComponent<Light>();
         }
 
+        /// <summary>
+        ///     有効化時にライトを消灯する。
+        /// </summary>
         private void OnEnable()
         {
             Stop();
         }
 
+        /// <summary>
+        ///     無効化時にライトを消灯する。
+        /// </summary>
         private void OnDisable()
         {
             Stop();

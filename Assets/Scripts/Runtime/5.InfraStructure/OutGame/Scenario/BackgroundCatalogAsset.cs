@@ -16,7 +16,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary> Entries を取得する。 </summary>
         public IReadOnlyList<BackgroundCatalogEntry> Entries => _entries;
 
-        [SerializeField]
+        [SerializeField, Tooltip("背景の登録一覧。")]
         private BackgroundCatalogEntry[] _entries = Array.Empty<BackgroundCatalogEntry>();
     }
 }

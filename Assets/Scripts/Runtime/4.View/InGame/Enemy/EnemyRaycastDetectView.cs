@@ -119,7 +119,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
         private LayerMask _hitLayers;
-        [SerializeField]
+        [SerializeField, Tooltip("攻撃の射線を予告するデカール。")]
         private DecalProjector _attackWarningDecal;
         private Material _decalMaterial;
 
@@ -224,6 +224,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             ApplyWarningDecalJustOffset();
         }
+
+        /// <summary>
+        ///     実行時に複製したデカールのマテリアルを破棄する。
+        /// </summary>
         private void OnDestroy()
         {
             if (_decalMaterial != null)

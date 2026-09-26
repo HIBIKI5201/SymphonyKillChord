@@ -20,10 +20,12 @@ namespace KillChord.Runtime.View.OutGame.Setting
             IEnvironmentSettingsViewModel environmentSettingsViewModel,
             IEnvironmentSettingsCommand environmentSettingsCommand)
         {
+            // ViewModel とコマンドを保持する。
             _environmentSettingsViewModel = environmentSettingsViewModel
                 ?? throw new ArgumentNullException(nameof(environmentSettingsViewModel));
             _environmentSettingsCommand = environmentSettingsCommand
                 ?? throw new ArgumentNullException(nameof(environmentSettingsCommand));
+            // 画面の各項目のボタン・ラベル・スライダーを取得する。
             _screenModePrevButton = Require<Button>(rootElement, SCREEN_MODE_PREV_BUTTON_NAME);
             _screenModeNextButton = Require<Button>(rootElement, SCREEN_MODE_NEXT_BUTTON_NAME);
             _screenModeValueLabel = Require<Label>(rootElement, SCREEN_MODE_VALUE_LABEL_NAME);
@@ -46,6 +48,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _saveButton = Require<Button>(rootElement, SAVE_BUTTON_NAME);
             _subscriptions = new CompositeDisposable();
 
+            // 操作の登録と ViewModel の購読を行う。
             RegisterCallbacks();
             SubscribeViewModel();
         }
@@ -171,6 +174,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// </summary>
         private void SubscribeViewModel()
         {
+            // 各設定値の表示文言の変化を購読する。
             _environmentSettingsViewModel.ScreenModeLabel
                 .Subscribe(HandleScreenModeLabelPublished)
                 .AddTo(_subscriptions);

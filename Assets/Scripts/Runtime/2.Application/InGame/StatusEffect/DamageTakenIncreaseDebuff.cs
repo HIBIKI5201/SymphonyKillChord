@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
     /// </summary>
     public class DamageTakenIncreaseDebuff : StatusEffectBase, IIncomingDamageModifier
     {
+        /// <summary>
+        ///     被ダメージの増加率・持続時間・再付与時の扱いを指定して生成する。
+        /// </summary>
         public DamageTakenIncreaseDebuff(
             float increaseRate,
             float durationSeconds,
@@ -28,6 +31,9 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
             _increaseRate = increaseRate;
         }
 
+        /// <summary>
+        ///     最終ダメージに増加率を掛けて返す。
+        /// </summary>
         public AttackResult ModifyIncomingDamage(IAttacker attacker, IDefender defender, AttackResult attackResult)
         {
             Damage damage = attackResult.FinalDamage * (1f + _increaseRate);

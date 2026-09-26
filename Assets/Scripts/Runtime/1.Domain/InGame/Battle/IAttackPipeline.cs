@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
+    /// <summary>
+    ///     攻撃の各ステップを順に実行するパイプライン。
+    /// </summary>
     public interface IAttackPipeline
     {
         /// <summary>

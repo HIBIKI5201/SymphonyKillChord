@@ -95,6 +95,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
             InputSuppressionState = inputSuppressionState;
         }
 
+        /// <summary>
+        ///     プレイヤーの行動制限状態を設定する。
+        /// </summary>
         public void SetActionRestrictionState(PlayerActionRestrictionState actionRestrictionState)
         {
             PlayerActionRestrictionState = actionRestrictionState;

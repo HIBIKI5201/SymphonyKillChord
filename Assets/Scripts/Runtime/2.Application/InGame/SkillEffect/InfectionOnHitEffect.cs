@@ -12,6 +12,9 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
     /// </summary>
     public class InfectionOnHitEffect : IAttackHitEffect
     {
+        /// <summary>
+        ///     感染の範囲判定と、感染の範囲・発動回数・ダメージ倍率などを指定して生成する。
+        /// </summary>
         public InfectionOnHitEffect(
             ITargetRadiusQuery targetRadiusQuery,
             AttackDefinition attackDefinition,
