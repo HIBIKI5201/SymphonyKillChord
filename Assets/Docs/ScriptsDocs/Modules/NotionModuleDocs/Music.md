@@ -38,14 +38,12 @@
 | **`MusicSyncView`** | View | Unity の `AudioSource` と連携して BGM を再生し、毎フレーム `MusicSyncController.Tick` を呼び出して再生タイムスタンプを更新する MonoBehaviour |
 | **`MusicPlayer`** | View | BGM/SE/Voice の音源管理およびボリュームマネージャーとの仲介を担う MonoBehaviour（`IVolumeManager` を実装） |
 | **`MusicViewModel`** | View | 楽曲情報の表示状態を保持する ViewModel（`IMusicViewModel` を実装） |
-| **`RhythmGuideView`** / **`RhythmGuideViewModel`** / **`RhythmGuideLabelView`** / **`RhythmGuideUpdateView`** | View | リズムガイドの描画とラベル表示 |
 | **`ACLikeRhythmGuideView`** / **`ACLikeRhythmGuideViewModel`** / **`ACLikeRhythmGuideEffectConfig`** | View | AC風リズムガイドのビート表示・判定ゾーン描画とその演出設定 |
 | **`SoundEffectSource`** / **`SoundEffectVolumeManager`** / **`AttackSoundConfig`** | View (Persistent) | SEの再生元・音量管理・攻撃SE設定 |
 | **`VoiceSource`** / **`VoiceVolumeManager`** | View (Persistent) | Voice再生用のCRI Atom Sourceの登録と、音量の一括管理 |
 | **`PersistentAudioVolumeRegistryView`** | View (Persistent) | 永続音量管理の登録窓口 |
 | **`RhythmJudgmentDefinitionAsset`** / **`BgmSelectorLabelTableAsset`** | Infrastructure | 判定定義とBGMセレクターラベル表のScriptableObject |
 | **`MusicSyncInitializer`** | Composition (InGame) | 楽曲とタイミング制御エンジンの結びつけ・ServiceLocator への登録 |
-| **`RhythmGuideInitializer`** | Composition (InGame) | リズムガイド UI の紐付け初期化 |
 | **`MusicPlayerInitializer`** | Composition (Persistent) | `MusicPlayer` を常駐シーンでセットアップする初期化クラス |
 | **`MusicSyncModuleContainer`** | Composition (InGame) | 音楽同期まわりをServiceLocatorへ公開するContainer |
 | **`EquipmentBgmInitializer`** / **`EquipmentBgmModuleContainer`** | Composition (InGame) | 装備BGM切り替えの構築と公開 |
@@ -84,7 +82,7 @@ graph TD
     end
 
     subgraph UIModule [UI モジュール]
-        UI_View["View\n(RhythmGuideView 等)"]
+        UI_View["View\n(ACLikeRhythmGuideView 等)"]
     end
 
     subgraph TitleModule [OutGame/Title モジュール]
@@ -151,7 +149,7 @@ graph TD
 > `RhythmJudgmentDefinitionAsset`が判定定義を、`BgmSelectorLabelTableAsset`がBGMセレクターラベル表をScriptableObjectとして供給する。
 
 ### ⑥ Composition
-> ゲーム内BGMとタイミング同期システムをリンクさせる `MusicSyncInitializer`、UI側のタイミング連動を行う `RhythmGuideInitializer`、常駐シーンの `MusicPlayerInitializer` など、アプリ全域へのDIセットアップを担当する。
+> ゲーム内BGMとタイミング同期システムをリンクさせる `MusicSyncInitializer`、UI側のタイミング連動を行う `ACLikeRhythmGuideInitializer`（UIモジュール）、常駐シーンの `MusicPlayerInitializer` など、アプリ全域へのDIセットアップを担当する。
 
 ## 🔄処理フロー
 
