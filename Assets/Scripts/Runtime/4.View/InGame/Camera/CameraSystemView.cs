@@ -104,6 +104,29 @@ namespace KillChord.Runtime.View.InGame.Camera
             EventBus<EOnPlayerAttackExecuted>.Register(PlayerAttackExecutedHandler);
             EventBus<EOnPlayerTakeDamage>.Register(PlayerTakeDamageHandler);
             EventBus<EOnSkillExecuted>.Register(SkillExecutedHandler);
+
+            // 毎フレームの更新で個別にnull判定しないよう、必須の依存はここで1度だけ検証する。
+            _hasRequiredDependencies = ValidateRequiredDependencies();
+        }
+
+        /// <summary>
+        ///     カメラ更新に必須の処理・計算クラス・Transformが揃っているかを検証する。
+        ///     欠けている場合は1度だけエラーを出し、更新を行わない。
+        /// </summary>
+        /// <returns> すべて揃っている場合はtrue。 </returns>
+        private bool ValidateRequiredDependencies()
+        {
+            if (_changeTargetAction != null && _clearTargetAction != null && _getCurrentTargetPositionFunc != null
+                && _updateCandidateAction != null && _trySetTargetByIdFunc != null && _followCalculator != null
+                && _lockOnRotationCalculator != null && _freeLookRotationCalculator != null
+                && _lookAtRotationCalculator != null && _lockOnRangeChecker != null && _lockOnBreakTracker != null
+                && _viewSettings != null && _playerT != null && _cameraT != null)
+            {
+                return true;
+            }
+
+            Debug.LogError($"[{nameof(CameraSystemView)}] カメラ更新に必要な依存が不足しているため、カメラを更新しません。", this);
+            return false;
         }
 
         /// <summary>
@@ -246,6 +269,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private float _autoLockOnIdleTimer;
         private float _autoLockOnViewportGraceTimer;
         private bool _isExternallyControlled;
+        private bool _hasRequiredDependencies;
 
 #if UNITY_EDITOR
         /// <summary>
@@ -261,8 +285,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void FixedUpdate()
         {
-            if (_isExternallyControlled || _playerT == null) { return; }
-            if (_updateMode != UpdateModeEnum.FixedUpdate) { return; }
+            if (_updateMode != UpdateModeEnum.FixedUpdate || _isExternallyControlled) { return; }
 
             Tick(Time.fixedDeltaTime);
         }
@@ -272,10 +295,8 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void Update()
         {
-            if (_isExternallyControlled || _playerT == null) { return; }
+            if (_updateMode != UpdateModeEnum.Update || _isExternallyControlled) { return; }
 
-            if (_updateMode != UpdateModeEnum.Update)
-            { return; }
             Tick(Time.deltaTime);
         }
 
@@ -284,10 +305,8 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void LateUpdate()
         {
-            if (_isExternallyControlled || _playerT == null) { return; }
+            if (_updateMode != UpdateModeEnum.LateUpdate || _isExternallyControlled) { return; }
 
-            if (_updateMode != UpdateModeEnum.LateUpdate)
-            { return; }
             Tick(Time.deltaTime);
         }
 
@@ -497,11 +516,8 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="deltaTime"> 前フレームからの経過時間。</param>
         private void Tick(float deltaTime)
         {
-            if (_changeTargetAction == null || _clearTargetAction == null || _getCurrentTargetPositionFunc == null
-                || _updateCandidateAction == null || _trySetTargetByIdFunc == null || _followCalculator == null || _lockOnRotationCalculator == null
-                || _freeLookRotationCalculator == null || _lookAtRotationCalculator == null
-                || _lockOnRangeChecker == null || _lockOnBreakTracker == null
-                || _playerT == null || _cameraT == null)
+            // 処理と計算クラスはInitializeで検証済み。破棄され得るTransformだけを毎回確認する。
+            if (!_hasRequiredDependencies || _playerT == null || _cameraT == null)
             {
                 return;
             }
