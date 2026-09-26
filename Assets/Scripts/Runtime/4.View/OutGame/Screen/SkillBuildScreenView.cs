@@ -603,7 +603,17 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private async void HandleSkillBuildSaveButtonActivationHandler()
         {
-            await TrySaveCurrentSkillBuildAsync();
+            try
+            {
+                await TrySaveCurrentSkillBuildAsync();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+            }
         }
 
         /// <summary>
@@ -619,14 +629,24 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         private async void HandleUnsavedSaveAndCloseButtonActivationHandler()
         {
-            bool isSaved = await TrySaveCurrentSkillBuildAsync();
-            if (!isSaved)
+            try
             {
-                return;
-            }
+                bool isSaved = await TrySaveCurrentSkillBuildAsync();
+                if (!isSaved)
+                {
+                    return;
+                }
 
-            HideUnsavedChangesDialog();
-            OutGameUIEvent.OnScreenClosed?.Invoke();
+                HideUnsavedChangesDialog();
+                OutGameUIEvent.OnScreenClosed?.Invoke();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+            }
         }
 
         /// <summary>
