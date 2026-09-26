@@ -154,9 +154,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private Dictionary<int, VideoClip> _skillPreviewVideos;
         private Dictionary<StatusBonusEffectKind, Sprite> _statusBonusEffectIcons;
         private Dictionary<SkillType, Sprite> _skillGenreIcons;
-        private SkillNodeDataRepo _loadedSkillNodeDataRepo;
-        private SkillNodeBindRepo _loadedSkillNodeBindRepo;
-        private SkillNodePhaseBindDataRepo _loadedSkillNodePhaseBindRepo;
+        private SkillNodeDataRepository _loadedSkillNodeDataRepo;
+        private SkillNodeBindRepository _loadedSkillNodeBindRepo;
+        private SkillNodePhaseBindDataRepository _loadedSkillNodePhaseBindRepo;
         private StatusBonusEffectIconCatalogAsset _loadedStatusBonusEffectIconCatalog;
         private SkillRepository _loadedSkillRepository;
         private SkillGenreIconCatalogAsset _loadedSkillGenreIconCatalog;
@@ -173,10 +173,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _loadedSkillNodeDataRepo = await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepo>(this, destroyCancellationToken);
-            _loadedSkillNodeBindRepo = await _skillNodeBindRepoKey.LoadAssetAsync<SkillNodeBindRepo>(this, destroyCancellationToken);
+            _loadedSkillNodeDataRepo = await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepository>(this, destroyCancellationToken);
+            _loadedSkillNodeBindRepo = await _skillNodeBindRepoKey.LoadAssetAsync<SkillNodeBindRepository>(this, destroyCancellationToken);
             _loadedSkillNodePhaseBindRepo =
-                await _skillNodePhaseBindRepoKey.LoadAssetAsync<SkillNodePhaseBindDataRepo>(this, destroyCancellationToken);
+                await _skillNodePhaseBindRepoKey.LoadAssetAsync<SkillNodePhaseBindDataRepository>(this, destroyCancellationToken);
 
             if (_loadedSkillNodeDataRepo == null
                 || _loadedSkillNodeBindRepo == null

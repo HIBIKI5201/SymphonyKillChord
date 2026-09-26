@@ -11,8 +11,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     /// <summary>
     ///     スキルノードデータを纏めたリポジトリー。
     /// </summary>
-    [CreateAssetMenu(fileName = "SkillNodeDataRepo", menuName = "SymphonyDev/SkillTree/SkillNodeDataRepo")]
-    public class SkillNodeDataRepo :
+    [CreateAssetMenu(fileName = "SkillNodeDataRepository", menuName = "SymphonyDev/SkillTree/SkillNodeDataRepository")]
+    public class SkillNodeDataRepository :
         ScriptableObjectRepositoryBase<SkillNodeId, SkillNodeData, SkillNodeData>,
         ISkillNodeRepository
     {
@@ -28,13 +28,13 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         {
             if (_skillNodes == null || _skillNodes.Length <= 0)
             {
-                Debug.LogError($"[SkillNodeDataRepo] スキルノード情報リポジトリーが空です。");
+                Debug.LogError($"[SkillNodeDataRepository] スキルノード情報リポジトリーが空です。");
                 return null;
             }
 
             if (!TryFind(id, out SkillNodeData node))
             {
-                Debug.LogError($"[SkillNodeDataRepo] 指定されてスキルノードIDが見つかりません。");
+                Debug.LogError($"[SkillNodeDataRepository] 指定されてスキルノードIDが見つかりません。");
                 return null;
             }
 

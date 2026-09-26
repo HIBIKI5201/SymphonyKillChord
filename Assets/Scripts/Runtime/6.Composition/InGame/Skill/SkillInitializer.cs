@@ -202,7 +202,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 targetRangeQuery,
                 targetRadiusQuery,
                 _skillHitScheduler);
-            SkillUsecase skillUsecase = new SkillUsecase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
+            SkillUseCase skillUsecase = new SkillUseCase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
 
             SkillView[] skillVisuals = ResolveSkillVisuals(playerModuleContainer.PlayerInitializer);
             InitializeSkillVisuals(
@@ -395,7 +395,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             MusicSyncState musicSyncState,
             SkillResultPresenter skillResultPresenter,
             SkillCheckService checkService,
-            SkillUsecase skillUsecase)
+            SkillUseCase skillUsecase)
         {
             if (equippedSkills == null || equippedSkills.Count == 0)
             {

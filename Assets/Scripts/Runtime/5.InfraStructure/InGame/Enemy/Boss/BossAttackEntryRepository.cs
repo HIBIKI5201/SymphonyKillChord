@@ -6,8 +6,8 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     /// <summary>
     ///     ボスの攻撃定義の集合。
     /// </summary>
-    [CreateAssetMenu(fileName = "BossAttackEntryRepo", menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(BossAttackEntryRepo))]
-    public class BossAttackEntryRepo : ScriptableObject
+    [CreateAssetMenu(fileName = "BossAttackEntryRepository", menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(BossAttackEntryRepository))]
+    public class BossAttackEntryRepository : ScriptableObject
     {
         /// <summary> ボスの攻撃の一覧。 </summary>
         public BossAttackEntryAsset[] AttackEntries => _attackEntries;

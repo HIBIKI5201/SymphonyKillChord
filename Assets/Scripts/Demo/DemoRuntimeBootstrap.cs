@@ -490,10 +490,10 @@ namespace KillChord.Demo
                 _timerView?.Refresh(false);
                 return;
             }
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionUsecase sceneTransitionUsecase))
+            if (!ServiceLocator.TryGetInstance(out SceneTransitionUseCase sceneTransitionUsecase))
             {
                 Debug.LogError(
-                    $"[{nameof(DemoRuntimeBootstrap)}] {nameof(SceneTransitionUsecase)} が取得できません。",
+                    $"[{nameof(DemoRuntimeBootstrap)}] {nameof(SceneTransitionUseCase)} が取得できません。",
                     this);
                 return;
             }

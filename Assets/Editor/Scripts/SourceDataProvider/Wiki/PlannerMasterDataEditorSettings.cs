@@ -122,7 +122,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     {
                         "ExampleEnemyMoveData",
                         "ShellAttackData",
-                        "BossAttackEntryRepo",
+                        "BossAttackEntryRepository",
                         "EnemyDefinitionRepository",
                         "CharacterDefinitionRepository",
                         "ExampleBattleMusicData",
@@ -139,10 +139,10 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     "Skill Tree",
                     new List<string>
                     {
-                        "SkillNodeDataRepo",
-                        "SkillNodeBindRepo",
+                        "SkillNodeDataRepository",
+                        "SkillNodeBindRepository",
                         "OutGameSkillRepository",
-                        "SkillNodePhaseBindDataRepo"
+                        "SkillNodePhaseBindDataRepository"
                     },
                     new List<string>
                     {

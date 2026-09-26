@@ -47,7 +47,7 @@ namespace KillChord.Demo.End
             {
                 Debug.LogError(
                     $"[{nameof(DemoEndSequenceInitializer)}] " +
-                    $"{nameof(SceneTransitionUsecase)} が取得できません。",
+                    $"{nameof(SceneTransitionUseCase)} が取得できません。",
                     this);
                 return false;
             }
@@ -121,7 +121,7 @@ namespace KillChord.Demo.End
         [SerializeField, Tooltip("BGMの再生とフェードアウトを行うViewです。")]
         private DemoEndBgmView _bgmView;
 
-        private SceneTransitionUsecase _sceneTransitionUsecase;
+        private SceneTransitionUseCase _sceneTransitionUsecase;
         private PlayerInputView _playerInputView;
         private InputComposition _inputComposition;
         private LoadingScreenController _loadingScreenController;

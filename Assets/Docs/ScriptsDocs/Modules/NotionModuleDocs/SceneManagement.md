@@ -18,12 +18,12 @@
 | **`ISceneTransitionService`** | Application | シーンロード処理そのものの抽象（実装はInfrastructure層） |
 | **`ISceneInitializationReadiness`** | Application | シーン名をキーに初期化完了を追跡・待機する契約 |
 | **`SceneInitializationReadinessRegistry`** | Application | `ISceneInitializationReadiness`実装。シーン名ごとの完了状態を保持し、フレームポーリングで待機する |
-| **`SceneTransitionUsecase`** | Application | シーンロードと初期化完了待機を1つの継続的な処理としてまとめるユースケース |
+| **`SceneTransitionUseCase`** | Application | シーンロードと初期化完了待機を1つの継続的な処理としてまとめるユースケース |
 | **`ILoadingOperationExecutor`** | Application | ロード画面付き処理の実行機能の抽象 |
 | **`LoadingOperationExecutor`** | Application | ロードセッションの開始〜完了/失敗までを管理する実装 |
 | **`ILoadingSession` / `ILoadingSessionFactory`** | Application | ロードセッションの抽象契約 |
 | **`LoadingExecutionOptions` / `LoadingProgressRange`** | Application | ロード進捗の範囲・継続オプションを表す値オブジェクト |
-| **`SceneTransitionController`** | Adaptor | Viewからのシーン遷移要求を受け取り`SceneTransitionUsecase`へ委譲する薄いパススルー |
+| **`SceneTransitionController`** | Adaptor | Viewからのシーン遷移要求を受け取り`SceneTransitionUseCase`へ委譲する薄いパススルー |
 | **`LoadingScreenController`** | Adaptor | ロードセッションの開始・成功・失敗を管理し`LoadingStarted`/`LoadingCompleted`イベントを発行 |
 | **`SceneTransitionView`** | View | シーン遷移状態のデバッグ表示 |
 | **`LoadingScreenView`** | View | ロード画面本体の表示/非表示（`LoadingScreenController`のイベントを購読） |
@@ -38,7 +38,7 @@
 | --- | --- |
 | **Initializerクラス** | `SceneTransitionInitializer` |
 | **Order** | 0（Persistentシーン内で最初に初期化される） |
-| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無し。`LoadingScreenController`、`ILoadingSessionFactory`、`ILoadingOperationExecutor`、`ISceneTransitionService`、`ISceneInitializationReadiness`、`SceneTransitionUsecase`、`SceneTransitionController`を個別にServiceLocatorへ登録 |
+| **公開する ModuleContainer / ServiceLocator登録型** | 専用の`ModuleContainer`は無し。`LoadingScreenController`、`ILoadingSessionFactory`、`ILoadingOperationExecutor`、`ISceneTransitionService`、`ISceneInitializationReadiness`、`SceneTransitionUseCase`、`SceneTransitionController`を個別にServiceLocatorへ登録 |
 
 ---
 
@@ -48,7 +48,7 @@
 graph TD
     %% 定義 (接続のないレイヤーは省略)
     subgraph SceneManagementModule [SceneManagement モジュール]
-        SM_App["Application<br>SceneTransitionUsecase, ISceneInitializationReadiness"]
+        SM_App["Application<br>SceneTransitionUseCase, ISceneInitializationReadiness"]
         SM_Adaptor["Adaptor<br>SceneTransitionController, LoadingScreenController"]
         SM_Composition["Composition<br>SceneTransitionInitializer"]
         SM_App --> SM_Adaptor
@@ -87,10 +87,10 @@ graph TD
   * *参照箇所*: `SceneTransitionController.LoadAdditiveAsync`/`UnloadAsync`
   * *詳細*: `TitleStartController.StartGameAsync`がシーン遷移に使用する
 * **`Result`**
-  * *参照箇所*: `SceneTransitionUsecase.UnloadThenChangeSceneAsync`/`UnloadThenReloadSceneAsync`
+  * *参照箇所*: `SceneTransitionUseCase.UnloadThenChangeSceneAsync`/`UnloadThenReloadSceneAsync`
   * *詳細*: `StageResultController`の完了/リトライボタンから使用される
 * **`StageSelect` / `Scenario`**
-  * *参照箇所*: `SceneTransitionUsecase.LoadAdditiveAsync`/`ChangeSceneAsync`
+  * *参照箇所*: `SceneTransitionUseCase.LoadAdditiveAsync`/`ChangeSceneAsync`
   * *詳細*: 出撃・シナリオ再生開始時のシーン遷移に使用される
 
 ---
@@ -102,7 +102,7 @@ graph TD
 ### ① Domain
 当モジュールでは使用していない。
 ### ② Application
-`SceneTransitionUsecase`がシーンロードと初期化完了待機を1つの継続処理として扱い、`ISceneInitializationReadiness`がシーン名ごとの完了状態を管理する。`ILoadingOperationExecutor`/`LoadingOperationExecutor`がロードセッションの実行制御を担う。
+`SceneTransitionUseCase`がシーンロードと初期化完了待機を1つの継続処理として扱い、`ISceneInitializationReadiness`がシーン名ごとの完了状態を管理する。`ILoadingOperationExecutor`/`LoadingOperationExecutor`がロードセッションの実行制御を担う。
 ### ③ Adaptor
 `SceneTransitionController`がViewからの要求を仲介し、`LoadingScreenController`がロードセッションの開始・成功・失敗イベントを発行する。
 ### ④ View
@@ -126,7 +126,7 @@ graph TD
 sequenceDiagram
     autonumber
     participant Caller as 呼び出し元（Title等）
-    participant Usecase as SceneTransitionUsecase
+    participant Usecase as SceneTransitionUseCase
     participant Readiness as SceneInitializationReadinessRegistry
     participant Service as SceneTransitionService
     participant RootInit as 遷移先シーンのルート初期化クラス

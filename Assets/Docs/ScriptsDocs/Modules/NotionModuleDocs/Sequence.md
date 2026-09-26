@@ -69,7 +69,7 @@ graph TD
     end
 
     subgraph SceneManagementModule [Persistent/SceneManagement モジュール]
-        SM_App["Application<br>SceneTransitionUsecase"]
+        SM_App["Application<br>SceneTransitionUseCase"]
     end
 
     subgraph OtherGameplayModules [Enemy / Player / Music / Input / Mission モジュール群]
@@ -100,7 +100,7 @@ graph TD
   * *依存箇所*: `SelectedBattleStageState`
   * *詳細*: `CurrentStageDefinition.StageId`/`IsTutorial`を保存呼び出しに使用する
 * **`Persistent/SceneManagement`**
-  * *依存箇所*: `SceneTransitionUsecase`
+  * *依存箇所*: `SceneTransitionUseCase`
   * *詳細*: `ReturnToTitleController`がインゲームをアンロードしてタイトルシーンへ戻る際に使用する
 
 ### 📤 依存されているもの
@@ -188,7 +188,7 @@ sequenceDiagram
     actor Player as プレイヤー
     participant Init as ReturnToTitleInitializer
     participant Ctrl as ReturnToTitleController
-    participant SceneUC as SceneTransitionUsecase
+    participant SceneUC as SceneTransitionUseCase
 
     Player ->> Init: ESCを長押し
     Init ->> Ctrl: タイトル復帰要求

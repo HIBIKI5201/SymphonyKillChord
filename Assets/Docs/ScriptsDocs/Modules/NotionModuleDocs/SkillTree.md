@@ -35,9 +35,9 @@
 | **`SkillDetailScreenView`** / **`PlayerStatusScreenView`** | View | ノード詳細画面とステータス画面 |
 | **`PreviewVideoScreenView`** | View | スキルのプレビュー動画の再生 |
 | **`SkillTreeResetDialogView`** | View | ツリーリセットの確認ダイアログ |
-| **`SkillNodeData`** / **`SkillNodeDataRepo`** | Infrastructure | ノード定義アセットとその集合 |
-| **`SkillNodeBindData`** / **`SkillNodeBindRepo`** | Infrastructure | ノード間の接続定義とその集合 |
-| **`SkillNodePhaseBindData`** / **`SkillNodePhaseBindDataRepo`** | Infrastructure | 解放段階と、各段階で必要になるノードの紐づき |
+| **`SkillNodeData`** / **`SkillNodeDataRepository`** | Infrastructure | ノード定義アセットとその集合 |
+| **`SkillNodeBindData`** / **`SkillNodeBindRepository`** | Infrastructure | ノード間の接続定義とその集合 |
+| **`SkillNodePhaseBindData`** / **`SkillNodePhaseBindDataRepository`** | Infrastructure | 解放段階と、各段階で必要になるノードの紐づき |
 | **`SavedataSkillUnlockRepository`** | Infrastructure | `ISkillUnlockRepository`実装。セーブデータから解放済みノードを取得する |
 | **`SkillTreeInitializer`** | Composition | 上記一式の構築とServiceLocatorへの登録 |
 

@@ -20,7 +20,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
         /// <param name="selectedMissionState"> 選択中ミッションの状態。省略可。 </param>
         /// <param name="titleSceneName"> 遷移先となるタイトルシーン名。 </param>
         public ReturnToTitleController(
-            SceneTransitionUsecase usecase,
+            SceneTransitionUseCase usecase,
             SelectedBattleStageState selectedBattleStageState,
             SelectedMissionState selectedMissionState,
             string titleSceneName)
@@ -88,7 +88,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
             return true;
         }
 
-        private readonly SceneTransitionUsecase _usecase;
+        private readonly SceneTransitionUseCase _usecase;
         private readonly SelectedBattleStageState _selectedBattleStageState;
         private readonly SelectedMissionState _selectedMissionState;
         private readonly string _titleSceneName;

@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <param name="selectedBattleStageState"> チュートリアル判定に使用する選択中ステージ状態。未使用の場合はnull。 </param>
         public RhythmGuidePresenter(
             IMusicSyncService musicSyncService,
-            RhythmGuideUsecase rhythmGuideUsecase,
+            RhythmGuideUseCase rhythmGuideUsecase,
             TargetSystemController targetingSystem,
             Func<MissionRuntimeService> missionRuntimeServiceProvider = null,
             SelectedBattleStageState selectedBattleStageState = null)
@@ -93,7 +93,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         }
 
         private readonly IMusicSyncService _musicSyncService;
-        private readonly RhythmGuideUsecase _rhythmGuideUsecase;
+        private readonly RhythmGuideUseCase _rhythmGuideUsecase;
         private readonly TargetSystemController _targetingSystem;
         private readonly Func<MissionRuntimeService> _missionRuntimeServiceProvider;
         private readonly SelectedBattleStageState _selectedBattleStageState;
