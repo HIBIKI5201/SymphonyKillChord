@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using SymphonyFrameWork.Attribute;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.Persistent.SceneManagement
@@ -23,18 +24,28 @@ namespace KillChord.Runtime.View.Persistent.SceneManagement
         /// </summary>
         public async void ChangeScene()
         {
-            bool success = await _controller.ChangeSceneAsync(
-                _fromSceneName,
-                _toSceneName,
-                default);
+            try
+            {
+                bool success = await _controller.ChangeSceneAsync(
+                    _fromSceneName,
+                    _toSceneName,
+                    default);
 
-            if (!success)
-            {
-                Debug.LogError($"シーン遷移失敗: {_fromSceneName} -> {_toSceneName}");
+                if (!success)
+                {
+                    Debug.LogError($"シーン遷移失敗: {_fromSceneName} -> {_toSceneName}");
+                }
+                else
+                {
+                    Debug.Log($"シーン遷移成功: {_fromSceneName} -> {_toSceneName}");
+                }
             }
-            else
+            catch (OperationCanceledException)
             {
-                Debug.Log($"シーン遷移成功: {_fromSceneName} -> {_toSceneName}");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
             }
         }
 
