@@ -1,0 +1,3977 @@
+{
+  "repoPath": ".",
+  "config": {
+    "layers": [
+      {
+        "glob": "Assets/Arts/**",
+        "layer": "vendor"
+      },
+      {
+        "glob": "Assets/DevelopProducts/Design/**",
+        "layer": "research-prototype"
+      },
+      {
+        "glob": "Assets/DevelopProducts/Mocks/**",
+        "layer": "mock-prototype"
+      },
+      {
+        "glob": "Assets/DevelopProducts/Research/**",
+        "layer": "research-prototype"
+      },
+      {
+        "glob": "Assets/DevelopProducts/TicketSystem/**",
+        "layer": "editor-tooling"
+      },
+      {
+        "glob": "Assets/DevelopProducts/Utility/**",
+        "layer": "editor-tooling"
+      },
+      {
+        "glob": "Assets/Editor/**",
+        "layer": "editor-tooling"
+      },
+      {
+        "glob": "Assets/Level/**",
+        "layer": "develop-test"
+      },
+      {
+        "glob": "Assets/Scripts/Develop/**",
+        "layer": "develop-test"
+      },
+      {
+        "glob": "Assets/Scripts/Runtime/0.Utility/**",
+        "layer": "shared"
+      },
+      {
+        "glob": "Assets/Scripts/Runtime/1.Domain/**",
+        "layer": "domain"
+      },
+      {
+        "glob": "Assets/Scripts/Runtime/2.Application/**",
+        "layer": "application"
+      },
+      {
+        "glob": "Assets/Scripts/Runtime/3.Adaptor/**",
+        "layer": "adaptor"
+      },
+      {
+        "glob": "Assets/Scripts/Runtime/4.View/**",
+        "layer": "view"
+      },
+      {
+        "glob": "Assets/Scripts/Runtime/5.InfraStructure/**",
+        "layer": "infrastructure"
+      },
+      {
+        "glob": "Assets/Scripts/Runtime/6.Composition/**",
+        "layer": "composition"
+      },
+      {
+        "glob": "Assets/Scripts/Shaders/**",
+        "layer": "view"
+      },
+      {
+        "glob": "Assets/Scripts/SymphonyFrameWork/**",
+        "layer": "shared"
+      },
+      {
+        "glob": "Assets/Settings/**",
+        "layer": "shared"
+      },
+      {
+        "glob": "SinfoniaOperator/**",
+        "layer": "external-tooling"
+      }
+    ],
+    "mergeCouplingThreshold": 1
+  },
+  "configPresent": true,
+  "layers": [
+    {
+      "layer": "adaptor",
+      "domainCount": 31,
+      "moduleCount": 31,
+      "symbolCount": 483
+    },
+    {
+      "layer": "application",
+      "domainCount": 21,
+      "moduleCount": 21,
+      "symbolCount": 296
+    },
+    {
+      "layer": "composition",
+      "domainCount": 37,
+      "moduleCount": 37,
+      "symbolCount": 529
+    },
+    {
+      "layer": "develop-test",
+      "domainCount": 10,
+      "moduleCount": 10,
+      "symbolCount": 37
+    },
+    {
+      "layer": "domain",
+      "domainCount": 24,
+      "moduleCount": 24,
+      "symbolCount": 474
+    },
+    {
+      "layer": "editor-tooling",
+      "domainCount": 20,
+      "moduleCount": 20,
+      "symbolCount": 432
+    },
+    {
+      "layer": "external-tooling",
+      "domainCount": 5,
+      "moduleCount": 5,
+      "symbolCount": 305
+    },
+    {
+      "layer": "infrastructure",
+      "domainCount": 19,
+      "moduleCount": 19,
+      "symbolCount": 233
+    },
+    {
+      "layer": "mock-prototype",
+      "domainCount": 21,
+      "moduleCount": 21,
+      "symbolCount": 348
+    },
+    {
+      "layer": "research-prototype",
+      "domainCount": 68,
+      "moduleCount": 68,
+      "symbolCount": 591
+    },
+    {
+      "layer": "shared",
+      "domainCount": 6,
+      "moduleCount": 6,
+      "symbolCount": 113
+    },
+    {
+      "layer": "vendor",
+      "domainCount": 1,
+      "moduleCount": 1,
+      "symbolCount": 131
+    },
+    {
+      "layer": "view",
+      "domainCount": 50,
+      "moduleCount": 50,
+      "symbolCount": 1498
+    }
+  ],
+  "modules": [
+    {
+      "moduleId": "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts",
+      "layer": "vendor",
+      "source": "config",
+      "symbolCount": 131,
+      "files": [
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/Benchmark01_UGUI.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/Benchmark02.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/Benchmark03.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/Benchmark04.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/CameraController.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/ChatController.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/DropdownSample.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/EnvMapAnimator.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/ObjectSpin.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/ShaderPropAnimator.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/SimpleScript.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/SkewTextExample.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_DigitValidator.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_ExampleScript_01.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_FrameRateCounter.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_PhoneNumberValidator.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextEventCheck.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextEventHandler.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextInfoDebugTool.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextSelector_A.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_TextSelector_B.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMP_UiFrameRateCounter.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TMPro_InstructionOverlay.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TeleType.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TextConsoleSimulator.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TextMeshProFloatingText.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/TextMeshSpawner.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/VertexColorCycler.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/VertexJitter.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/VertexShakeA.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/VertexShakeB.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/VertexZoom.cs",
+        "Assets/Arts/TextAssets/TextMesh Pro/Examples & Extras/Scripts/WarpTextExample.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Architecture/Scripts/1.Domain",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/DevelopProducts/Design/Architecture/Scripts/1.Domain/CharacterEntity.cs",
+        "Assets/DevelopProducts/Design/Architecture/Scripts/1.Domain/DamageContext.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Architecture/Scripts/2.Application",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/DevelopProducts/Design/Architecture/Scripts/2.Application/AttackPipeline.cs",
+        "Assets/DevelopProducts/Design/Architecture/Scripts/2.Application/CharacterAttack.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Architecture/Scripts/2.Application/AttackModifier",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/DevelopProducts/Design/Architecture/Scripts/2.Application/AttackModifier/ArmorModifier.cs",
+        "Assets/DevelopProducts/Design/Architecture/Scripts/2.Application/AttackModifier/CriticalModifier.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Architecture/Scripts/3.Adaptor",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 6,
+      "files": [
+        "Assets/DevelopProducts/Design/Architecture/Scripts/3.Adaptor/CharacterController.cs",
+        "Assets/DevelopProducts/Design/Architecture/Scripts/3.Adaptor/CharacterPresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Architecture/Scripts/4.InfraStructure",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Design/Architecture/Scripts/4.InfraStructure/AttackPipelineAsset.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Architecture/Scripts/5.View",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/DevelopProducts/Design/Architecture/Scripts/5.View/CharacterView.cs",
+        "Assets/DevelopProducts/Design/Architecture/Scripts/5.View/CharacterViewModel.cs",
+        "Assets/DevelopProducts/Design/Architecture/Scripts/5.View/InputBuffer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Architecture/Scripts/6.Composition",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/DevelopProducts/Design/Architecture/Scripts/6.Composition/CharacterInitializer.cs",
+        "Assets/DevelopProducts/Design/Architecture/Scripts/6.Composition/Initializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 26,
+      "files": [
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/AndClearConditionGroup.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/AndFailConditionGroup.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/ClearTimeEvaluationCondition.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/ElapsedTimeClearCondition.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/ElapsedTimeFailCondition.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/EnemyKillCountClearCondition.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/EnemyKillStatics.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/EnemyRuntimeState.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/OrClearConditionGroup.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/OrFailConditionGroup.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/PlayerDeadFailCondition.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/PlayerRuntimeState.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/StageRuntimeContext.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/1.Domain/StageTimeState.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/GameMode/Scripts/2.Application",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 14,
+      "files": [
+        "Assets/DevelopProducts/Design/GameMode/Scripts/2.Application/AdvanceTimeUsecase.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/2.Application/DamageEnemyUsecase.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/2.Application/DamagePlayerUsecase.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/2.Application/EvaluationResult.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/2.Application/EvaluationRunner.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/2.Application/GameModeRuntime.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/2.Application/StageRuleRunner.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/GameMode/Scripts/3.Adaptor",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/DevelopProducts/Design/GameMode/Scripts/3.Adaptor/PlayerColisionController.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/3.Adaptor/StageHudPresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/GameMode/Scripts/5.View",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/DevelopProducts/Design/GameMode/Scripts/5.View/EnemyView.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/5.View/InGameHudView.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/5.View/PlayerCollisionView.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/5.View/PlayerMoveView.cs",
+        "Assets/DevelopProducts/Design/GameMode/Scripts/5.View/StageLoopView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/GameMode/Scripts/6.Composition",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Design/GameMode/Scripts/6.Composition/GameModeMockInitilizer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Persistent/Scripts",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 34,
+      "files": [
+        "Assets/DevelopProducts/Design/Persistent/Scripts/PersidentTest.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Persistent/Scripts/0.Utility",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/DevelopProducts/Design/Persistent/Scripts/0.Utility/RingBuffer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Persistent/Scripts/1.Domain/Input",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 16,
+      "files": [
+        "Assets/DevelopProducts/Design/Persistent/Scripts/1.Domain/Input/BufferedInput.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/1.Domain/Input/InputActionId.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/1.Domain/Input/InputActionIds.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/1.Domain/Input/InputPheseId.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/1.Domain/Input/InputPheseIds.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Persistent/Scripts/2.Application",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/DevelopProducts/Design/Persistent/Scripts/2.Application/BufferButtonInputUsecase.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/2.Application/BufferMoveInputUsecase.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/2.Application/BufferdInputBuffer.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/2.Application/SwichInputMapUseCase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Persistent/Scripts/3.Adaptor",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/DevelopProducts/Design/Persistent/Scripts/3.Adaptor/ButtonInputAdaptor.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/3.Adaptor/InputTimestampProvider.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/3.Adaptor/MoveInputAdaptor.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/3.Adaptor/SceneTransitionService.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/3.Adaptor/UnityInputMapController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Persistent/Scripts/5.View",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 16,
+      "files": [
+        "Assets/DevelopProducts/Design/Persistent/Scripts/5.View/InputBufferDebugView.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/5.View/MobileInputButtonView.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/5.View/MobileMoveButtonView.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/5.View/PlayerInputView.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/5.View/SceneTransitionDebugView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Design/Persistent/Scripts/6.Composition",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 6,
+      "files": [
+        "Assets/DevelopProducts/Design/Persistent/Scripts/6.Composition/InGameSceneInitializer.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/6.Composition/PersistentEntryPoint.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/6.Composition/PersistentInputInstaller.cs",
+        "Assets/DevelopProducts/Design/Persistent/Scripts/6.Composition/SceneInputViewInstaller.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/2D_Mock/Scripts/GameSystem",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/DevelopProducts/Mocks/2D_Mock/Scripts/GameSystem/ControllerManager.cs",
+        "Assets/DevelopProducts/Mocks/2D_Mock/Scripts/GameSystem/SenceChanger.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/2D_Mock/Scripts/RythemPart",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/DevelopProducts/Mocks/2D_Mock/Scripts/RythemPart/NotesManager.cs",
+        "Assets/DevelopProducts/Mocks/2D_Mock/Scripts/RythemPart/RythemManager.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/CharacterControl_Mock/Scripts",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 20,
+      "files": [
+        "Assets/DevelopProducts/Mocks/CharacterControl_Mock/Scripts/InputBuffer.cs",
+        "Assets/DevelopProducts/Mocks/CharacterControl_Mock/Scripts/PlayerInitializer.cs",
+        "Assets/DevelopProducts/Mocks/CharacterControl_Mock/Scripts/PlayerManager.cs",
+        "Assets/DevelopProducts/Mocks/CharacterControl_Mock/Scripts/RootMotionActivator.cs",
+        "Assets/DevelopProducts/Mocks/CharacterControl_Mock/Scripts/SymphonyAnimeController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Basis",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 25,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Basis/EnemyUtility.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Basis/ExplanationManager.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Basis/GameManager.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Basis/HudUtility.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Basis/InputActionEntity.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Basis/InputBuffer.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Basis/ParticleController.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Basis/PlayerInitUtility.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Battle",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Battle/LockOnManager.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Camera",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Camera/CameraManager.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Camera/CameraMover.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Camera/Develop",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Camera/Develop/CameraDevInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Character",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Character/HealthEntity.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Enemy",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 28,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Enemy/AttackIndicater.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Enemy/EnemyAttack.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Enemy/EnemyContainer.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Enemy/EnemyFactory.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Enemy/EnemyManager.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Enemy/EnemyMover.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Enemy/Develop",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Enemy/Develop/EnemyInit.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 33,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/BarTimingInfo.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/CriMusicBuffer.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/CriMusicPlayer.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/MusicActionHandler.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/MusicInputHandler.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/MusicSyncManager.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/RythemPatternData.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/ScheduledAction.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/SignatureDatabase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/Develop",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/Develop/BeatIndicatorController.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/Develop/MusicUI.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/Develop/TestEnemy.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/Develop/TestPlayer.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/MusicSync/Develop/TestSystem.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 39,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/PlayerAnimationController.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/PlayerAttacker.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/PlayerManager.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/PlayerMover.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/PlayerStatus.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/PlayerStatusTransfer.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/SpecialAttackData.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/Develop",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/Develop/PlayerDevInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/SpecialAttack",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/SpecialAttack/SpecialAttackDTO.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/SpecialAttack/SpecialAttacker.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/SpecialAttack/Module",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/SpecialAttack/Module/ISpecialAttackModule.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/SpecialAttack/Module/SpecialAttackLogModule.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/SpecialAttack/Module/SpecialAttackSoundModule.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Player/SpecialAttack/Module/SpecialAttackVFXModule.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 37,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/DamageTextEntity.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/DamageTextPool.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/EnemyHealthBar.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/IngameHUDManager.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/LockOnCursor.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/MusicSyncStaffNotation.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/PlayerHealthBar.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/VisualElementUtility.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/Develop",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/Develop/EnemyHealthBarDebugger.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/Develop/MusicBufferForUIDebugger.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/UI/Develop/PlayerHealthBarDebugger.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Utility",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Utility/BeatLength.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Utility/ComponentUtility.cs",
+        "Assets/DevelopProducts/Mocks/MusicBattle_Mock/Scripts/Utility/PriorityQueue.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/MusicSyncMock/Scripts",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 19,
+      "files": [
+        "Assets/DevelopProducts/Mocks/MusicSyncMock/Scripts/CriMusicBuffer.cs",
+        "Assets/DevelopProducts/Mocks/MusicSyncMock/Scripts/CriMusicPlayer.cs",
+        "Assets/DevelopProducts/Mocks/MusicSyncMock/Scripts/MusicBuffer.cs",
+        "Assets/DevelopProducts/Mocks/MusicSyncMock/Scripts/MusicInput.cs",
+        "Assets/DevelopProducts/Mocks/MusicSyncMock/Scripts/MusicPlayer.cs",
+        "Assets/DevelopProducts/Mocks/MusicSyncMock/Scripts/MusicUI.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts",
+      "layer": "mock-prototype",
+      "source": "config",
+      "symbolCount": 56,
+      "files": [
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/CameraManager.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/CameraMover.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/EnemyContainer.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/EnemyManager.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/GameManager.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/HealthEntity.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/HealthbarManager.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/InputActionEntity.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/InputBuffer.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/PlayerAttacker.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/PlayerManager.cs",
+        "Assets/DevelopProducts/Mocks/TPS_Mock/Scripts/PlayerMover.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/Achievement/Scripts/Runtime",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/DevelopProducts/Research/Achievement/Scripts/Runtime/AchievementContext.cs",
+        "Assets/DevelopProducts/Research/Achievement/Scripts/Runtime/AchievementElement.cs",
+        "Assets/DevelopProducts/Research/Achievement/Scripts/Runtime/AchievementElementAsset.cs",
+        "Assets/DevelopProducts/Research/Achievement/Scripts/Runtime/AchievementElementID.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/Achievement/Scripts/Runtime/Conditon",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Research/Achievement/Scripts/Runtime/Conditon/EnemyKillCountCondition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/AnimationControl/Scripts/Runtime",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 19,
+      "files": [
+        "Assets/DevelopProducts/Research/AnimationControl/Scripts/Runtime/AnimationAdaptor.cs",
+        "Assets/DevelopProducts/Research/AnimationControl/Scripts/Runtime/AnimationBlendClipData.cs",
+        "Assets/DevelopProducts/Research/AnimationControl/Scripts/Runtime/AnimationBlendClipRequest.cs",
+        "Assets/DevelopProducts/Research/AnimationControl/Scripts/Runtime/AnimationManager.cs",
+        "Assets/DevelopProducts/Research/AnimationControl/Scripts/Runtime/AnimatorPlayableBlend.cs",
+        "Assets/DevelopProducts/Research/AnimationControl/Scripts/Runtime/SymphonyAnimeAdaptor.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BindingSystem/Scripts/Binding",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Binding/KeyBindingPlayModeResetter.cs",
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Binding/KeyRebindSetting.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BindingSystem/Scripts/Common",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Common/SelectSettingItemBase.cs",
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Common/SettingItemBase.cs",
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Common/SliderSettingItemBase.cs",
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Common/ToggleSettingItemBase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BindingSystem/Scripts/Graphic",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 9,
+      "files": [
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Graphic/ResolutionSetting.cs",
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Graphic/ScreenModeSelectSetting.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BindingSystem/Scripts/OtherSetting",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/OtherSetting/UiSizeSetting.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BindingSystem/Scripts/Sensitivity",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Sensitivity/LookSensitivitySetting.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BindingSystem/Scripts/View",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/View/PauseMenuPanelView.cs",
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/View/SettingPanelView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BindingSystem/Scripts/Volume",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Research/BindingSystem/Scripts/Volume/MasterVolume.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BossSystem/Scripts/Adaptor",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Adaptor/BossAIController.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Adaptor/EnemyTripleShotAttackController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BossSystem/Scripts/Application",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Application/BossAttackReservationUsecase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BossSystem/Scripts/BehaviorGraphNode",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 24,
+      "files": [
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/BehaviorGraphNode/BossAttackTargetAction.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/BehaviorGraphNode/BossGetStunnedAction.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/BehaviorGraphNode/BossIsAimSightClearCondition.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/BehaviorGraphNode/BossIsAttackingCondition.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/BehaviorGraphNode/BossIsStunnedCondition.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/BehaviorGraphNode/BossIsTargetInAttackRangeCondition.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/BehaviorGraphNode/BossMoveToAttackAction.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/BehaviorGraphNode/BossStopMovingAction.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BossSystem/Scripts/Composition",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Composition/BossLifeCycle.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Composition/EnemyTripleShotAttackControllerGenerator.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BossSystem/Scripts/Entity",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Entity/BossAttackPattern.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BossSystem/Scripts/Facade",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Facade/BossBattleAIFacade.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Facade/BossMovementAIFacade.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Facade/BossSharedFacade.cs",
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/Facade/BossStateFacade.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/BossSystem/Scripts/View",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 21,
+      "files": [
+        "Assets/DevelopProducts/Research/BossSystem/Scripts/View/BossMoveView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/EquipmentBGM/Scripts",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/DevelopProducts/Research/EquipmentBGM/Scripts/BgmSelectorLabelTable.cs",
+        "Assets/DevelopProducts/Research/EquipmentBGM/Scripts/EquipmentBgmInitializer.cs",
+        "Assets/DevelopProducts/Research/EquipmentBGM/Scripts/EquipmentBgmService.cs",
+        "Assets/DevelopProducts/Research/EquipmentBGM/Scripts/MusicPlayerExtension.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/Pause/Scripts",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 34,
+      "files": [
+        "Assets/DevelopProducts/Research/Pause/Scripts/EnemyTest.cs",
+        "Assets/DevelopProducts/Research/Pause/Scripts/PauseToken.cs",
+        "Assets/DevelopProducts/Research/Pause/Scripts/PlayerTest.cs",
+        "Assets/DevelopProducts/Research/Pause/Scripts/TimeScaleController.cs",
+        "Assets/DevelopProducts/Research/Pause/Scripts/TimeScaleData.cs",
+        "Assets/DevelopProducts/Research/Pause/Scripts/TimeScaleHandler.cs",
+        "Assets/DevelopProducts/Research/Pause/Scripts/TimeScaleManager.cs",
+        "Assets/DevelopProducts/Research/Pause/Scripts/TimeScaleSystem.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/Pause/Scripts/Button",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/DevelopProducts/Research/Pause/Scripts/Button/TimeScaleByIdButton.cs",
+        "Assets/DevelopProducts/Research/Pause/Scripts/Button/TimeScaleByTypeButton.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/RenderingExtension/Scripts/Runtime",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/DevelopProducts/Research/RenderingExtension/Scripts/Runtime/BitonicPixelSortingFeatureMod.cs",
+        "Assets/DevelopProducts/Research/RenderingExtension/Scripts/Runtime/TestFade.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/AwaitableExtension.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/EventBus.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/PropertyCopyUtil.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/EventDefinition",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/EventDefinition/EOnLoadError.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/EventDefinition/EOnSaveError.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/SaveUtility",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 17,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/SaveUtility/SaveBase.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/SaveUtility/SaveCryptoUtility.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/SaveUtility/SaveSystem.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/0.Utility/SaveUtility/SaveSystemTestButton.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/1.Domain",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/1.Domain/OutGameData.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/1.Domain/PlayerData.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/1.Domain/SystemData.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/1.Domain/Entity",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/1.Domain/Entity/SaveDataEntity.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/LoadService.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/SaveDataMigration.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/SaveService.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/ValidationResult.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/SaveDataMigrations",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 6,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/SaveDataMigrations/OutGameDataMigration_0_1_To_0_2.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/SaveDataMigrations/PlayerDataMigration_0_1_To_0_2.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/SaveDataMigrations/SystemDataMigration_0_1_To_0_2.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/Validators",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/Validators/OutGameDataValidator.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/Validators/PlayerDataValidator.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/2.Application/Validators/SystemDataValidator.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/3.Adaptor",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/3.Adaptor/LoadOutGameDataController.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/3.Adaptor/LoadPlayerDataController.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/3.Adaptor/LoadSystemDataController.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/3.Adaptor/SaveOutGameDataController.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/3.Adaptor/SavePlayerDataController.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/3.Adaptor/SaveSystemDataController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/4.InfraStructure",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/4.InfraStructure/LoadGameSymphonyRepository.cs",
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/4.InfraStructure/SaveGameSymphonyRepository.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/5.View",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 23,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/5.View/TestHomeView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/6.Composition",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/DevelopProducts/Research/SaveSystem/Scripts/SaveData/6.Composition/SaveDataSystemInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/1.Domain/Entity",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/1.Domain/Entity/SkillNodeEntity.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/1.Domain/ValueObject",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 20,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/1.Domain/ValueObject/SkillNodeId.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/1.Domain/ValueObject/UnlockCost.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/1.Domain/ValueObject/UnlockPoint.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/2.Application",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/2.Application/CanUnlockUsecase.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/2.Application/PathResult.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/2.Application/UnlockUsecase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/2.Application/Service",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/2.Application/Service/AllNodeSearchService.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/2.Application/Service/AnyNodeSearchService.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/2.Application/Service/SkillCanUnlockService.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/NodeRegistry.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/Command",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/Command/NodeCanUnlockController.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/Command/NodeInVisibleController.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/Command/NodeUnlockController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/DTO",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/DTO/CanUnlockDTO.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/DTO/CheckVisibleDTO.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/DTO/UnlockDTO.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/Query",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/3.Adaptor/Query/SkillNodePresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/4.View/View",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/4.View/View/NodeSelectPanelView.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/4.View/View/NodeView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/4.View/ViewModel",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/4.View/ViewModel/NodeViewModel.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/5.Infrastructure",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/5.Infrastructure/PointChecker.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/5.Infrastructure/SkillNodeAsset.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/5.Infrastructure/SkillPointRepository.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/5.Infrastructure/SkillTreeRepository.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/5.Infrastructure/UnlockEffect",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/5.Infrastructure/UnlockEffect/HealthUp.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/5.Infrastructure/UnlockEffect/PowerUp.cs",
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/5.Infrastructure/UnlockEffect/SkillUnlock.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SkillTree/Scripts/6.Compositon",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/DevelopProducts/Research/SkillTree/Scripts/6.Compositon/SkillTreeInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/SpringBone/Scripts/Runtime",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/DevelopProducts/Research/SpringBone/Scripts/Runtime/SpringBoneInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/ToonShader/Scripts/Editor",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/DevelopProducts/Research/ToonShader/Scripts/Editor/InspectorTangentBaker.cs",
+        "Assets/DevelopProducts/Research/ToonShader/Scripts/Editor/MaterialsAttach.cs",
+        "Assets/DevelopProducts/Research/ToonShader/Scripts/Editor/OutLineInjector.cs",
+        "Assets/DevelopProducts/Research/ToonShader/Scripts/Editor/OutLineInjectorWindow.cs",
+        "Assets/DevelopProducts/Research/ToonShader/Scripts/Editor/TangentBaker.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Research/ToonShader/Scripts/Editor/SmoothNormal",
+      "layer": "research-prototype",
+      "source": "config",
+      "symbolCount": 9,
+      "files": [
+        "Assets/DevelopProducts/Research/ToonShader/Scripts/Editor/SmoothNormal/MeshAssetTool.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/TicketSystem/Scripts/Editor",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/DevelopProducts/TicketSystem/Scripts/Editor/CachedTicketDataSingleton.cs",
+        "Assets/DevelopProducts/TicketSystem/Scripts/Editor/SceneSaveObserver.cs",
+        "Assets/DevelopProducts/TicketSystem/Scripts/Editor/TicketSystemWebClient.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/TicketSystem/Scripts/Editor/Settings",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/DevelopProducts/TicketSystem/Scripts/Editor/Settings/TicketSystemSettings.cs",
+        "Assets/DevelopProducts/TicketSystem/Scripts/Editor/Settings/TicketSystemSettingsProvider.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/TicketSystem/Scripts/Editor/Window",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/DevelopProducts/TicketSystem/Scripts/Editor/Window/MasterTicketWindow.cs",
+        "Assets/DevelopProducts/TicketSystem/Scripts/Editor/Window/TicketLifeCycleManagementProvider.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/DevelopProducts/Utility/Editor/Scripts",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 6,
+      "files": [
+        "Assets/DevelopProducts/Utility/Editor/Scripts/DevelopProductsTemplateCreator.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/Addressables",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/Editor/Scripts/Addressables/AddressableKeyValidator.cs",
+        "Assets/Editor/Scripts/Addressables/AddressableStoreBuildValidator.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/AssetManagement",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 23,
+      "files": [
+        "Assets/Editor/Scripts/AssetManagement/DriveApiClient.cs",
+        "Assets/Editor/Scripts/AssetManagement/DriveImportManifest.cs",
+        "Assets/Editor/Scripts/AssetManagement/DriveImportSync.cs",
+        "Assets/Editor/Scripts/AssetManagement/DriveImportSyncWindow.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/AssetManagement/Authentication",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Editor/Scripts/AssetManagement/Authentication/DriveAuthProvider.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/AssetManagement/Settings",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Editor/Scripts/AssetManagement/Settings/DriveImportSecrets.cs",
+        "Assets/Editor/Scripts/AssetManagement/Settings/DriveImportSettings.cs",
+        "Assets/Editor/Scripts/AssetManagement/Settings/DriveImportSettingsProvider.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/AssetStorePackagePipeline",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Editor/Scripts/AssetStorePackagePipeline/DriveUploadPackageStrategy.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/AutoBuilder",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 46,
+      "files": [
+        "Assets/Editor/Scripts/AutoBuilder/AutoBuildExecuter.cs",
+        "Assets/Editor/Scripts/AutoBuilder/AutoBuildWindow.cs",
+        "Assets/Editor/Scripts/AutoBuilder/AutoBuilder.cs",
+        "Assets/Editor/Scripts/AutoBuilder/AutoBuilderProvider.cs",
+        "Assets/Editor/Scripts/AutoBuilder/AutoBuilderSettings.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/Build",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/Editor/Scripts/Build/FontBuildValidator.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/CsvImporter",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 14,
+      "files": [
+        "Assets/Editor/Scripts/CsvImporter/CsvImporter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/KillChordDebugger",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/Editor/Scripts/KillChordDebugger/KillChordDebuggerWindow.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/Music",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Editor/Scripts/Music/RhythmJudgmentDefinitionAssetEditor.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/SinfoniaOperator",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/Editor/Scripts/SinfoniaOperator/SinfoniaOperatorLogBridge.cs",
+        "Assets/Editor/Scripts/SinfoniaOperator/SinfoniaOperatorSettings.cs",
+        "Assets/Editor/Scripts/SinfoniaOperator/SinfoniaOperatorSettingsProvider.cs",
+        "Assets/Editor/Scripts/SinfoniaOperator/SinfoniaOperatorWindow.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/SourceDataProvider",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 218,
+      "files": [
+        "Assets/Editor/Scripts/SourceDataProvider/BattleSceneDataReader.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/DataIDCollisionDetector.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/DataIDPropertyDrawer.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/DataIDRebuildMenu.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/PlannerBattleSceneMapRenderer.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/PlannerCollectionItemCreator.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/PlannerEnemyStatusPreview.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/PlannerEnemyWavePreview.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/PlannerMasterDataEditorSettings.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/PlannerMasterDataEditorSettingsProvider.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/PlannerMasterDataWindow.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/PlannerStageTreeGraphRenderer.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SceneScopedDataIDOptionResolver.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SerializedPropertyFieldResolver.Editor.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SourceDataAddressSelectorDrawer.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SourceDataIDOption.Editor.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SourceDataProviderRepositoryResolver.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SourceDataProviderSettings.Editor.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SourceDataProviderSettingsProvider.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SourceDataRegistrationHeader.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SpawnPositionPairEditor.cs",
+        "Assets/Editor/Scripts/SourceDataProvider/SpawnPositionPairIndexMigrationMenu.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/TicketSystem",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Editor/Scripts/TicketSystem/CachedTicketDataSingleton.cs",
+        "Assets/Editor/Scripts/TicketSystem/SceneSaveObserver.cs",
+        "Assets/Editor/Scripts/TicketSystem/TicketSystemWebClient.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/TicketSystem/Settings",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Editor/Scripts/TicketSystem/Settings/TicketSystemSettings.cs",
+        "Assets/Editor/Scripts/TicketSystem/Settings/TicketSystemSettingsProvider.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/TicketSystem/Window",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/Editor/Scripts/TicketSystem/Window/MasterTicketWindow.cs",
+        "Assets/Editor/Scripts/TicketSystem/Window/TicketLifeCycleManagementProvider.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Editor/Scripts/Utility",
+      "layer": "editor-tooling",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Editor/Scripts/Utility/SolutionProjectInjector.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Level/Scenes/Develop/EnemyAttackDecalShaderTest",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Level/Scenes/Develop/EnemyAttackDecalShaderTest/DecalMaterialPlayer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Develop",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/Scripts/Develop/DataIDDebugUtility.cs",
+        "Assets/Scripts/Develop/RingBufferTest.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Develop/Application/Player/SkillEffect",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/Scripts/Develop/Application/Player/SkillEffect/TestSkillEffect.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Develop/Application/Player/SkillVisual",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/Scripts/Develop/Application/Player/SkillVisual/SkillVisualTest.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Develop/Composition/InGame/SkillEffect",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/Scripts/Develop/Composition/InGame/SkillEffect/SkillEffectDemoBoot.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Develop/Composition/OutGame",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Develop/Composition/OutGame/DevelopSkillUnlockInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Develop/Composition/OutGame/SkillBuild",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/Scripts/Develop/Composition/OutGame/SkillBuild/SkillBuildDebugger.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Develop/Composition/Persistent/Input",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Develop/Composition/Persistent/Input/InputDebugLogger.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Develop/View/InGame/Enemy",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Develop/View/InGame/Enemy/SpawnPointsPairDrawer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Develop/View/InGame/SkillEffect",
+      "layer": "develop-test",
+      "source": "config",
+      "symbolCount": 6,
+      "files": [
+        "Assets/Scripts/Develop/View/InGame/SkillEffect/SkillEffectDemoController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/0.Utility/Collections",
+      "layer": "shared",
+      "source": "config",
+      "symbolCount": 38,
+      "files": [
+        "Assets/Scripts/Runtime/0.Utility/Collections/PriorityQueue.cs",
+        "Assets/Scripts/Runtime/0.Utility/Collections/RingBuffer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/0.Utility/Constant",
+      "layer": "shared",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/0.Utility/Constant/MusicConstants.cs",
+        "Assets/Scripts/Runtime/0.Utility/Constant/ScenePriorityResolver.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/0.Utility/Identity",
+      "layer": "shared",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/Scripts/Runtime/0.Utility/Identity/DataID.cs",
+        "Assets/Scripts/Runtime/0.Utility/Identity/DataIDHasher.cs",
+        "Assets/Scripts/Runtime/0.Utility/Identity/SourceDataCollectionAttribute.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/0.Utility/Persistent",
+      "layer": "shared",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Scripts/Runtime/0.Utility/Persistent/EOnEnemyDefeated.cs",
+        "Assets/Scripts/Runtime/0.Utility/Persistent/EOnPlayerTakeDamage.cs",
+        "Assets/Scripts/Runtime/0.Utility/Persistent/EOnSkillExecuted.cs",
+        "Assets/Scripts/Runtime/0.Utility/Persistent/EOnTakeDamage.cs",
+        "Assets/Scripts/Runtime/0.Utility/Persistent/EventBus.cs",
+        "Assets/Scripts/Runtime/0.Utility/Persistent/EventBusResetRegistry.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/0.Utility/Rendering",
+      "layer": "shared",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/0.Utility/Rendering/LitMotionRendererExtensions.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Battle",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 20,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/AttackDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/AttackInterval.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/AttackIntervalEntity.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/AttackResult.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/AttackSpec.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/AttackStepContext.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/AttackTarget.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/Damage.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/DamageDealtContext.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Battle/DamageTakenContext.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Character",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 61,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/AttackCooldown.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/AttackPower.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/AttackRangeMax.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/AttackRangeMin.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/AttackRotationSpeed.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/BarrierEntity.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/CharacterCombatSpec.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/CharacterDefinitionId.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/CharacterEntity.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/CharacterName.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/CriticalChance.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/CriticalMultiplier.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/DodgeCooldown.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/DodgeDuration.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/DodgeSpeed.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/Health.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/HealthEntity.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Character/MoveSpeed.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Enemy",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 20,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyAttackMusicSpec.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyDefinitionId.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyMoveDecision.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyMoveSpec.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyWaveDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyWaveDefinitionId.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyWaveDetail.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/EnemyWaves.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/ShellAttackSpec.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Enemy/ShellEntity.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Mission",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 49,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ComboCount.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/EnemyKillRecord.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/EnemyMissionKey.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionActionRecord.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionDamageTaken.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionElapsedTime.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionEvaluationId.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionEvaluationProgress.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionEvaluationResult.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionId.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionMaxCombo.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionProgress.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/MissionWeaponVariety.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/StageRankCalculator.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 53,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/ActionRepeatCountClearCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/AndClearConditionGroup.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/ClearConditionChain.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/ElapsedTimeClearCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/EnemyKillCountClearCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/ObjectiveSequenceClearCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/ObjectiveSequenceStep.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/OrClearConditionGroup.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/PlayerBuffClearCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/PopupClearCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/ScenarioPlaybackClearCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/ClearCondition/WaveStartClearCondition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Mission/EvaluationCondition",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 16,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/EvaluationCondition/ClearTimeEvaluationCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/EvaluationCondition/ComboEvaluationCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/EvaluationCondition/DamageTakenEvaluationCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/EvaluationCondition/WeaponVarietyEvaluationCondition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Mission/FailCondition",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/FailCondition/AndFailConditionGroup.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/FailCondition/ElapsedTimeFailCondition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/FailCondition/OrFailConditionGroup.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/FailCondition/PlayerDeadFailCondition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Mission/StepEntryAction",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/StepEntryAction/PlayVoiceStepEntryAction.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/StepEntryAction/SetSkillExecutionEnabledStepEntryAction.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Mission/StepEntryAction/ToggleEnemyBattleAIStepEntryAction.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Music",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 34,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/BgmSelectorSequence.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/ExecuteRequestTiming.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/MusicSyncSpec.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/MusicTimingCalculator.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/RhythmDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/RhythmInputRecord.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/RhythmJudgmentDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/RhythmJudgmentRange.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/RhythmPattern.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/RhythmState.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/ScheduledAction.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Music/SkillBgmSelectorTable.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Player",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Player/PlayerMoveSpec.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Skill",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 38,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Skill/SkillCooldownTime.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Skill/SkillDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Skill/SkillEffectParameter.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Skill/SkillEffectSpec.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Skill/SkillId.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Skill/SkillLevel.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Skill/SkillPattern.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/Skill/SkillRhythmState.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/Stage",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/Stage/StageEffectDefinition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/InGame/StatusEffect",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 15,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/InGame/StatusEffect/StatusEffectDuration.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/StatusEffect/StatusEffectId.cs",
+        "Assets/Scripts/Runtime/1.Domain/InGame/StatusEffect/StatusEffectRuntimeEntity.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/AnimationDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/AnimationEvent.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/AnimationId.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/BackgroundDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/BackgroundEvent.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/BackgroundId.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/FadeEvent.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/LayerEvent.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/PortraitDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/PortraitEvent.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/PortraitId.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/ScenarioDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/TextEvent.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Scenario/TextTimingTrigger.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/OutGame/Screen",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Screen/MemberAffiliationName.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Screen/MemberClassName.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Screen/MemberData.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Screen/MemberName.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/Screen/ScreenTransitionRule.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/OutGame/SkillBuild",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillBuild/EquippedSkill.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillBuild/SkillBuildDefinition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 23,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/AreaAttackRangeAdditionEffect.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/AttackPowerMultiplierEffect.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/CriticalChanceAdditionEffect.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/CriticalDamageMultiplierAdditionEffect.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/MaxHealthMultiplierEffect.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/PlayerStatusBonus.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/PlayerStatusBonusBuilder.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/Entity",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/Entity/PlayerStatusEntity.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/Entity/SkillNodeEntity.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/Entity/SkillTreeStatusEntity.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/ValueObject",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 21,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/ValueObject/SkillNodeId.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/ValueObject/UnlockCost.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/SkillTree/ValueObject/UnlockPoint.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 32,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect/BattleStageDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect/ScenarioStageDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect/StageDefinition.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect/StageId.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect/StageNode.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect/StageNodeConnection.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect/StageReward.cs",
+        "Assets/Scripts/Runtime/1.Domain/OutGame/StageSelect/StageTree.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/Persistent/Input",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Input/BufferedInput.cs",
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Input/InputBufferingQueue.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/Persistent/Music",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Music/Beat.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/Persistent/Savedata",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 22,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Savedata/AudioSettingsData.cs",
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Savedata/SaveData.cs",
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Savedata/SkillBuildData.cs",
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Savedata/SkillUnlockData.cs",
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Savedata/StageClearData.cs",
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Savedata/StageProgressData.cs",
+        "Assets/Scripts/Runtime/1.Domain/Persistent/Savedata/TutorialData.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/1.Domain/Player",
+      "layer": "domain",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/1.Domain/Player/SkillEffectContext.cs",
+        "Assets/Scripts/Runtime/1.Domain/Player/SkillTemplate.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/Battle",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 26,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/AttackCalculator.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/AttackExecutor.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/AttackIntervalEvaluator.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/AttackPipeline.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/ConfirmedDamage.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/CriticalStep.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/DamageExecutor.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/OutOfRangeDamageStep.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/PendingAttackEffectService.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/SkillHitScheduler.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Battle/WeaponDamageStep.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/Buff",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 17,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/Buff/AttackPowerIncreaseBuff.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Buff/AttackPowerMultiplierBuff.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Buff/AttackPowerReductionDebuff.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Buff/BarrierGainBuff.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Buff/CriticalDamageFieldBuff.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Buff/DamageReductionBuff.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Buff/HitCountDamageReductionBuff.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Buff/LifeStealBuff.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/Enemy",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 25,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyAttackReservationUsecase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyAttackUsecase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyMoveUsecase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Enemy/EnemyRaycastDetectService.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Enemy/NearestAttackPositionSearchService.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Enemy/ShellAttackUsecase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Enemy/ShellReservationUsecase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/Enemy/Boss",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/Enemy/Boss/BossAttackReservationUsecase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Enemy/Boss/EnemyTripleShotAttackUsecase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/Mission",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/Mission/MissionActionPerformedUsecase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Mission/MissionEnemyKilledUsecase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Mission/MissionEvaluationRunner.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Mission/MissionFactory.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Mission/MissionPlayerDeadUsecase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Mission/MissionRuleRunner.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Mission/MissionRuntimeService.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Mission/MissionTimeAdvanceUsecase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/Music",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 23,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/Music/EquipmentBgmService.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Music/MusicSyncService.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Music/RhythmGuideUsecase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Music/RhythmJustService.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/Player",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/Player/PlayerApplication.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Player/PlayerDodgeMovementApplication.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Player/PlayerMovementApplication.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/Skill",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 6,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/Skill/SkillCheckService.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Skill/SkillEffectExecutorResolver.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Skill/SkillTargetResolveResult.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/Skill/SkillUseCase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/SkillEffect",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 14,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/SkillEffect/DamageTakenIncreaseOnHitEffect.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/SkillEffect/InfectionDebuff.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/SkillEffect/InfectionGroup.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/SkillEffect/InfectionOnHitEffect.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/InGame/StatusEffect",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/InGame/StatusEffect/DamageTakenIncreaseDebuff.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/StatusEffect/StatusEffectBase.cs",
+        "Assets/Scripts/Runtime/2.Application/InGame/StatusEffect/StatusEffectSystem.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/OutGame/Scenario",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/OutGame/Scenario/ScenarioHandlerRepo.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/Scenario/ScenarioUsecase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/OutGame/Screen",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/OutGame/Screen/CloseCurrentScreenUseCase.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/Screen/ResetToHomeScreenUseCase.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/Screen/ScreenTransitionResult.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/Screen/ScreenTransitionState.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/Screen/ShowMemberListUseCase.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/Screen/ShowScreenCommand.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/Screen/ShowScreenUseCase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/OutGame/SkillBuild",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/OutGame/SkillBuild/SkillBuildUseCase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/OutGame/SkillTree",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/LoadPlayerStatusBonusUseCase.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/PlayerStatusBonusCalculator.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeResetResult.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeService.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/OutGame/Sortie",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/OutGame/Sortie/OutGameSortieUseCase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/OutGame/StageSelect",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/OutGame/StageSelect/StageMapLayoutBuilder.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/StageSelect/StageMapNodePosition.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/StageSelect/StageProgressService.cs",
+        "Assets/Scripts/Runtime/2.Application/OutGame/StageSelect/StageSelectOpenUseCase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/Persistent/Input",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/Persistent/Input/InputBufferRecorder.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/Persistent/Load",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/Persistent/Load/LoadingExecutionOptions.cs",
+        "Assets/Scripts/Runtime/2.Application/Persistent/Load/LoadingOperationExecutor.cs",
+        "Assets/Scripts/Runtime/2.Application/Persistent/Load/LoadingProgressRange.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/Persistent/Savedata",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 15,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/Persistent/Savedata/AudioSettingsService.cs",
+        "Assets/Scripts/Runtime/2.Application/Persistent/Savedata/InitialSkillLoadoutService.cs",
+        "Assets/Scripts/Runtime/2.Application/Persistent/Savedata/StageProgressSaveDataService.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/Persistent/SceneManagement",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 16,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/Persistent/SceneManagement/SceneInitializationReadinessRegistry.cs",
+        "Assets/Scripts/Runtime/2.Application/Persistent/SceneManagement/SceneTransitionUsecase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/2.Application/Player/SkillEffect",
+      "layer": "application",
+      "source": "config",
+      "symbolCount": 30,
+      "files": [
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/SkillBase.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/SkillEffectExecutorFactory.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_00.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_01.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_02.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_03.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_04.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_05.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_06.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_07.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_08.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_09.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_10.cs",
+        "Assets/Scripts/Runtime/2.Application/Player/SkillEffect/Skill_13.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Battle",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 19,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Battle/AttackResultDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Battle/AttackResultPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Battle/PlayerAttackController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Battle/PlayerBattleState.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Combo",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Combo/ComboDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Combo/ComboHudPresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 54,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/DamageNumberDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyAIControllerRegistry.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyArtilleryAttackController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyBattleState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyHealthHudPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyInfantryAttackController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyMoveInstruction.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyRaycastDetectController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyWaveSpawnerController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/EnemyWaveSpawnerState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/NearestAttackPositionSearchController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/ShellController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/ShellSpecPresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/Boss",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 17,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/Boss/BossAIController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/Boss/BossAttackPattern.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Enemy/Boss/EnemyTripleShotAttackController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 53,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionEvaluationItemDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionEventController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionHudDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionHudPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionPlayerBuffController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionProgressRecorderController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionScenarioController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionStepEntryActionController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionStepPopupController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/MissionWaveController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/OutGameMissionSelectController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/PlayVoiceStepEntryActionExecutor.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/SelectedMissionState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/SetSkillExecutionEnabledStepEntryActionExecutor.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Mission/ToggleEnemyBattleAiStepEntryActionExecutor.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Music",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 21,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Music/EquipmentBgmController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Music/MusicSchedulerAdaptor.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Music/MusicSyncController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Music/MusicSyncState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Music/RhythmGuideDto.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Music/RhythmGuidePresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Music/RhythmGuideZoneDto.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Player",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Player/PlayerActionRestrictionState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Player/PlayerController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Player/PlayerHealthHudPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Player/PlayerInputSuppressionState.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/PostEffect",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/PostEffect/RhythmGuidePostEffectDto.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/PostEffect/RhythmGuidePostEffectPresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Result",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Result/StageResultController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Result/StageResultDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Result/StageResultMissionItemDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Result/StageResultPresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Reticle",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Reticle/ReticleHudPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Reticle/ReticleMarker.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Sequence",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Sequence/BattlePauseController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Sequence/ReturnToTitleController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 29,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillAttackController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillCooldownState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillExecutionController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillExecutionResult.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillHitController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillResultDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillResultPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillTargetResolver.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/Effect",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/Effect/SkillEffectContext.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 17,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillCrosshairProgressController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillGuideProgressController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillInputProgressController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillInputProgressPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillInputProgressState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Skill/SkillUI/SkillInputProgressUpdateDTO.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Stage",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Stage/StageEffectPresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/StageSelect",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/StageSelect/SelectedBattleStageState.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/Target",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 26,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Target/PlayerTargetRangeQuery.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Target/TargetAreaHit.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Target/TargetAreaQuery.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Target/TargetEntityRegistry.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Target/TargetRadiusQuery.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/Target/TargetSystemController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/InGame/UI",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/UI/EnemyDirectionIndicatorDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/UI/EnemyDirectionIndicatorPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/UI/HUDEnemyHealthDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/UI/HUDEnemyHealthPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/UI/HealthHudDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/InGame/UI/IngameHudDTO.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/OutGame/BattlePreparation",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/BattlePreparation/BattlePreparationSkillDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/BattlePreparation/BattlePreparationSkillPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/BattlePreparation/BattlePreparationSkillViewDTO.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 37,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/AnimationEventHandler.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/AnimationPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/BackgroundEventHandler.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/BackgroundPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/FadeEventHandler.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/FadePresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/LayerEventHandler.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/LayerPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/PortraitEventHandler.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/PortraitPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/ScenarioAdvanceGate.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/ScenarioInputController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/ScenarioPresenterFacade.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/SelectedScenarioState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/TextEventHandler.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Scenario/TextPresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 20,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/MemberListPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/MemberViewDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/ScreenController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/ScreenPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/ScreenViewApplicator.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Screen/ScreenViewDTO.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/OutGame/Skill",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Skill/SkillDisplayText.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Skill/SkillDisplayTextFormatter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Skill/SkillEffectDescriptionFormatter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillBuild",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 21,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillBuild/SkillBuildController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillBuild/SkillBuildPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillBuild/SkillBuildSlotData.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillBuild/SkillBuildSlotState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillBuild/SkillBuildViewDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillBuild/SkillViewData.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/PlayerStatusDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/PlayerStatusPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillDetailDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillDetailPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillTreeController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillTreeFocusPresenter.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/OutGame/Sortie",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Sortie/OutGameSortieController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 24,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/BattleSortieSelectionService.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/NodeTransitionExecutor.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/PendingNodeTransition.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/PendingNodeTransitionState.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/StageDetailDTO.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/StageDetailPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/StageNodeAnimationSequencer.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/StageNodePresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/StageSelect/StageSelectController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/OutGame/Title",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/OutGame/Title/TitleStartController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/Persistent/Input",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/Persistent/Input/InputContext.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/Persistent/Input/InputIdConverter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/Persistent/Input/InputTimestampProvider.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/Persistent/Input/RecordController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/Persistent/Load",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 9,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/Persistent/Load/LoadingScreenController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/Persistent/Music",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/Persistent/Music/AudioSettingsController.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/Persistent/Music/AudioSettingsPresenter.cs",
+        "Assets/Scripts/Runtime/3.Adaptor/Persistent/Music/AudioSettingsViewDTO.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/3.Adaptor/Persistent/SceneManagement",
+      "layer": "adaptor",
+      "source": "config",
+      "symbolCount": 6,
+      "files": [
+        "Assets/Scripts/Runtime/3.Adaptor/Persistent/SceneManagement/SceneTransitionController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Animation",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 52,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationLocomotionCalculator.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationOneShotTimingCalculator.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationPlaybackMap.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationRequest.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationSignal.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationViewContext.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/PlayableAnimationController.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Animation/PlayerCharacterAnimationSignal.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Battle",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Battle/AttackResultView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Battle/AttackResultViewModel.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Camera",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 38,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/CameraUpdateContext.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/CameraUpdateFrame.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraFollowCalculator.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraFollowVelocityTracker.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraFreeLookRotationCalculator.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraLockOnBreakTracker.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraLockOnRangeChecker.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraLockOnRotationCalculator.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraLookAtRotationCalculator.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Camera/Calculation/CameraShakeCalculator.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Character",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 34,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Character/FootStepView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Character/ParticleSystemOneShotVisualEffect.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Character/ParticleSystemPoolView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Character/ParticleSystemRingBufferView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Character/PooledParticleSystemOneShotVisualEffect.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Character/ReusableParticleSystemView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Character/SoundEffectOneShotVisualEffect.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Character/VisualEffectGraphOneShotVisualEffect.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Combo",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Combo/ComboHudView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Combo/ComboHudViewModel.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Enemy",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 115,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/DamageNumberPoolView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/DamageNumberView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyHealthBillboardView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyHealthView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyMoveView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyRaycastDetectView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemySpawnPositionSearcher.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyWaveTimerView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/NearestAttackPositionSearchView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/ShellSpawner.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/ShellView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/SpawnPositionPair.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Enemy/AIFacade",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/AIFacade/EnemyBattleAIFacade.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/AIFacade/EnemyMovementAIFacade.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/AIFacade/EnemySharedFacade.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/AIFacade/EnemyStateFacade.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/AttackTargetAction.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/GetStunnedAction.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/MoveToAttackAction.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Action/StopMovingAction.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 15,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsAimSightClearCondition.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsAttackingCondition.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsBattleAiActivatedCondition.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsStunnedCondition.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/BehaviorGraphNode/Condition/IsTargetInAttackRangeCondition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 44,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BossMoveView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/TripleShotRaycastDetectView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/AIFacade",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/AIFacade/BossBattleAIFacade.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/AIFacade/BossMovementAIFacade.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/AIFacade/BossSharedFacade.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/AIFacade/BossStateFacade.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BehaviorGraphNode",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 24,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BehaviorGraphNode/BossAttackTargetAction.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BehaviorGraphNode/BossGetStunnedAction.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BehaviorGraphNode/BossIsAimSightClearCondition.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BehaviorGraphNode/BossIsAttackingCondition.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BehaviorGraphNode/BossIsStunnedCondition.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BehaviorGraphNode/BossIsTargetInAttackRangeCondition.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BehaviorGraphNode/BossMoveToAttackAction.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BehaviorGraphNode/BossStopMovingAction.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Mission",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 21,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Mission/MissionEvaluationItemView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Mission/MissionEvaluationItemViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Mission/MissionHudView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Mission/MissionHudViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Mission/MissionLoopView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Mission/MissionStepPopupView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Music",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 46,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Music/ACLikeRhythmGuideView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Music/ACLikeRhythmGuideViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Music/MusicSyncView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Music/MusicViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Music/RhythmGuideLabelView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Music/RhythmGuideUpdateView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Music/RhythmGuideView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Music/RhythmGuideViewModel.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Player",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 56,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Player/PlayerAttackWeaponView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Player/PlayerGroundOffsetView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Player/PlayerView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Player/WeaponItemView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/PostEffect",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 6,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/PostEffect/RhythmGuidePostEffectView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/PostEffect/RhythmGuidePostEffectViewModel.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Result",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 39,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Result/ResultTextSlideIn.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultMissionItemView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultMissionItemViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewModel.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Reticle",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Reticle/CameraScreenProjector.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Reticle/ReticleHudView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Reticle/ReticleMarkerView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Scene",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Scene/IngameSceneView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Sequence",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 41,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Sequence/InGameHudVisibilityView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Sequence/StageSequenceMessageView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Sequence/StageSequenceMusicView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Sequence/StageSequenceView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Sequence/StageSequenceVoiceView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Sequence/StageStartConstraintView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Sequence/StageStartFadeView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Skill",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillHitLoopView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillResultView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillResultViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 39,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/SkillEffectCatalogConfig.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/SkillEffectContextFactory.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/SkillEffectInstance.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/SkillEffectPart.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/SkillEffectSpawner.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/BetweenPointsSkillEffectPlacement.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/PlayerFollowSkillEffectPlacement.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/PlayerPointSkillEffectPlacement.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/SkillEffectPlacementResolver.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/SkillEffectPose.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/SkillEffectRotationUtility.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/TargetFollowSkillEffectPlacement.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/TargetPointSkillEffectPlacement.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/WeaponFollowSkillEffectPlacement.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Placement/WorldPointSkillEffectPlacement.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 54,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/CriticalBranchSkillEffectPresentation.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/GameObjectSkillEffectPresentation.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/MaterialFloatMotionSkillEffectPresentation.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/MotionSkillEffectPresentationBase.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/ParticleSystemSkillEffectPresentation.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/ScalePunchSkillEffectPresentation.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/ScatterTravelSkillEffectPresentation.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/SkillEffectMotionFunnel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/SkillEffectPresentationBase.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/TimelineSkillEffectPresentation.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/TracerSkillEffectPresentation.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/TravelMotionSkillEffectPresentation.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/Effect/Presentation/VisualEffectGraphSkillEffectPresentation.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 53,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillBeatVisualSetting.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillBeatVisualSettingConfig.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillCrosshairProgressView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillCrosshairStepView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillGuideProgressView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillInputProgressAnimationSetting.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillInputProgressUIConfig.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillInputProgressViewSetting.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillListRowView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillListStepView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Stage",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/AnimatorTriggerOneShotVisualEffect.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/GameObjectActivationOneShotVisualEffect.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/StageEffectView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/StageEffectViewModel.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 32,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/BarrageFireBehaviour.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/BarrageFireClip.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/BarragePauseBridge.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/BarragePauseRateManager.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/BarrageSpread.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/BarrageSystemGroup.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/BulletAuthoring.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/BulletUpdateJob.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/BulletUpdateSystem.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/TurretAuthoring.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/TurretFireSystem.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Stage/Barrage/TurretRequestRoutingSystem.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/Target",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 20,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/Target/TargetingSystem.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/Target/TransformTargetable.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/InGame/UI",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 57,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/InGame/UI/EnemyDirectionIndicatorSlot.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/EnemyDirectionIndicatorView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/EnemyDirectionIndicatorViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/HUDEnemyHealthView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/HUDEnemyHealthViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/HealthBarView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/HealthHudView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/HealthHudViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/HealthTextView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/IngameHudView.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/IngameHudViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/LetterBoxAnimationGUI.cs",
+        "Assets/Scripts/Runtime/4.View/InGame/UI/ParticleController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/Audio",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/Audio/UISoundEffectCommand.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Audio/UISoundEffectConfig.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Audio/UIToolkitSoundEffectBinder.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/BattlePreparation",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/BattlePreparation/BattlePreparationSkillViewModel.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/Navigation",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 9,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScope.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensions.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/Scenario",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 59,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/Scenario/CommandBarToggleView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioInputView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioUIHideView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioUIRaycastView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Scenario/ViewModel.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/Screen",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 85,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/Screen/BattlePreparationScreen.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Screen/HomeScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBase.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Screen/StageSelectScreenView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/Setting",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 40,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/AudioConfig.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/AudioSettingData.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/AudioSettingsView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/ScreenConfig.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/ScreenSettingData.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingBase.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingDropDown.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingSlider.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingToggle.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 83,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillBuildSlotLayout.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillBuildViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillDetailView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipController.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementDragAndDropManipulator.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementDragAndDropSetup.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillListView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 57,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/PlayerStatusScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/PreviewVideoScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillDetailScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillNodeConnView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillNodeView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeResetDialogView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/StageSelect",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 15,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageDetailScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageNodeConnectionView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageNodeView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/OutGame/Title",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 56,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Title/DataResetTabView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneView.cs",
+        "Assets/Scripts/Runtime/4.View/OutGame/Title/VolumeSettingsTabView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/Persistent/Audio",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/Persistent/Audio/PersistentAudioVolumeRegistryView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/Persistent/Input",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 53,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/Persistent/Input/MobileInput.cs",
+        "Assets/Scripts/Runtime/4.View/Persistent/Input/MobileStickFlickInput.cs",
+        "Assets/Scripts/Runtime/4.View/Persistent/Input/PlayerInputView.cs",
+        "Assets/Scripts/Runtime/4.View/Persistent/Input/UnityInputMapController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/Persistent/Load",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 15,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/Persistent/Load/LoadingScreenView.cs",
+        "Assets/Scripts/Runtime/4.View/Persistent/Load/LoadingTipsConfig.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/Persistent/Music",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 24,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/Persistent/Music/AudioSettingsViewModel.cs",
+        "Assets/Scripts/Runtime/4.View/Persistent/Music/MusicPlayer.cs",
+        "Assets/Scripts/Runtime/4.View/Persistent/Music/SoundEffectSource.cs",
+        "Assets/Scripts/Runtime/4.View/Persistent/Music/SoundEffectVolumeManager.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/Persistent/PostEffect",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 22,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/Persistent/PostEffect/PostEffectOverlayCamera.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/Persistent/SceneManagement",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/Persistent/SceneManagement/SceneTransitionView.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/4.View/Persistent/Voice",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/Scripts/Runtime/4.View/Persistent/Voice/VoiceSource.cs",
+        "Assets/Scripts/Runtime/4.View/Persistent/Voice/VoiceVolumeManager.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/Addressables",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/Addressables/ScriptableObjectAddressableLoader.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/Csv",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/Csv/CsvLineParser.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/InGame/Battle",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Battle/AttackDefinitionFactory.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Battle/AttackPilpelineAsset.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/InGame/Buff",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Buff/AttackPowerMultiplierBuffAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Buff/DamageReductionBuffAsset.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/InGame/Character",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Character/CharacterDefinitionRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Character/CharacterFactory.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/InGame/Enemy",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 14,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Enemy/EnemyDefinitionRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Enemy/EnemyFactory.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Enemy/EnemyWaveDefinitionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Enemy/EnemyWaveDefinitionRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Enemy/ShellFactory.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/InGame/Enemy/Boss",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Enemy/Boss/BossAttackEntryRepo.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 60,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/ActionRepeatCountClearConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/AndClearConditionGroupAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/AndFailConditionGroupAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/ClearTimeEvaluationConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/ComboEvaluationConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/DamageTakenEvaluationConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/ElapsedTimeClearConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/ElapsedTimeFailConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/EnemyKillCountClearConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/EnemyMissionKeyAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/EnemyMissionKeyRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/MissionClearConditionAssetBase.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/MissionDefinitionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/MissionDefinitionRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/MissionEvaluationConditionAssetBase.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/MissionFailConditionAssetBase.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/MissionStepEntryActionAssetBase.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/ObjectiveSequenceStepAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/OrClearConditionGroupAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/OrFailConditionGroupAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/PlayVoiceStepEntryActionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/PlayerBuffClearConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/PlayerDeadFailConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/PopupClearConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/ScenarioPlaybackClearConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/SetSkillExecutionEnabledStepEntryActionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/ToggleEnemyBattleAiStepEntryActionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/WaveStartClearConditionAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Mission/WeaponVarietyEvaluationConditionAsset.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/InGame/Music",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Music/BgmSelectorLabelTableAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Music/RhythmJudgmentDefinitionAsset.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/InGame/Stage",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 9,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Stage/BuildingCollapseStageEffectAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Stage/ExplosionStageEffectAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Stage/ObstacleStageEffectAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/InGame/Stage/StageEffectAssetBase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 55,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/AnimationRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/AuthoringTriggerRow.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/BackgroundRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/CatalogRepositoryBase.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/InMemoryScenarioRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/PlainEventDefinition.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/PortraitRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/ScenarioCsvUtility.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/ScenarioEventRows.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/ScenarioRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/ScenarioSettingsRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/TextEventDefinition.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Scenario/TriggerRow.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Screen",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Screen/MemberCsvParser.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Screen/MemberCsvRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/Screen/ScreenRuleRepository.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillBuild",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 13,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillBuild/InitialSkillLoadoutAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillBuild/OwnedSkillRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillBuild/SkillBuildRepository.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillTree",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillTree/SavedataSkillUnlockRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillTree/SkillNodeBindRepo.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillTree/SkillNodeData.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillTree/SkillNodeDataRepo.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/SkillTree/SkillNodePhaseBindDataRepo.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/OutGame/StageSelect",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 12,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/StageSelect/BattleStageAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/StageSelect/SaveDataClearStageRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/StageSelect/ScenarioStageAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/StageSelect/StageAssetBase.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/StageSelect/StageBindAsset.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/OutGame/StageSelect/StageTreeAsset.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/Persistent/Savedata",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/Persistent/Savedata/AudioSettingsRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/Persistent/Savedata/PersistentFileSaveDataLoaderStrategy.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/Persistent/SceneManagement",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/Persistent/SceneManagement/SceneTransitionService.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/Player",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/Player/SkillRepository.cs",
+        "Assets/Scripts/Runtime/5.InfraStructure/Player/SkillTemplateAsset.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/5.InfraStructure/Repository",
+      "layer": "infrastructure",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/Scripts/Runtime/5.InfraStructure/Repository/ScriptableObjectRepositoryBase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/Bootstrap",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/Bootstrap/InitializationCoordinator.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Animation",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Animation/AnimationComposition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Bootstrap",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 17,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Bootstrap/InGameInitializationModule.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Bootstrap/IngameComposition.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Bootstrap/SceneDependencyInitializationModule.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Bootstrap/SceneDependencyModuleContainer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Camera",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Camera/CameraSystemInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Enemy",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 67,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyArtilleryAttackControllerGenerator.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyArtillerySpawner.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyAttackControllerContext.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyInfantryAttackControllerGenerator.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyInfantrySpawner.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyLifeCycle.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyModuleContainer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemyPools.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/EnemySpawnerRouter.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/ShellLifeCycle.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/Boss",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 11,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/Boss/BossInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/Boss/BossLifeCycle.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Enemy/Boss/EnemyTripleShotAttackControllerGenerator.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Mission",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 21,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Mission/InGameMissionInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Mission/InGameScenarioInputModeController.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Mission/MissionModuleContainer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Music",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 19,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Music/EquipmentBgmInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Music/EquipmentBgmModuleContainer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Music/MusicSyncInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Music/MusicSyncModuleContainer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Music/RhythmGuideInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Player",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 33,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerModuleContainer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerMoveSpecDebug.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerStatusBonusInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Player/PlayerStatusBonusModuleContainer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Player/StageSceneInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Result",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 4,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Result/StageResultInitializationModule.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Result/StageResultModuleContainer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Reticle",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 1,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Reticle/ReticleHudInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Sequence",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 34,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Sequence/BattlePauseModule.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Sequence/InGamePlayDirector.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Sequence/InGameSequenceDirector.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Sequence/InputGamePlayControllable.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Sequence/ReturnToTitleInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Sequence/SequenceInitializationModule.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Skill",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 17,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Skill/SkillInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Skill/SkillModuleContainer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Skill/Effect",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Skill/Effect/SkillEffectInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Skill/Effect/SkillEffectModuleContainer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Stage",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Stage/StageEffectInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/Target",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/Target/TargetSystemInitializationModule.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Target/TargetSystemInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/Target/TargetSystemModuleContainer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/InGame/UI",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 27,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/InGame/UI/ACLikeRhythmGuideInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/UI/EnemyDirectionIndicatorInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/UI/HUDEnemyHealthInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/UI/InGameHudInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/UI/PlatformSpecificUI.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/UI/SkillCrosshairProgressUIInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/UI/SkillInputProgressUIInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/InGame/UI/SkillListUIInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/OutGameSceneInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/Audio",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Audio/OutGameUISoundEffectInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Audio/OutGameUISoundEffectModuleContainer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/BattlePreparation",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/BattlePreparation/BattlePreparationSkillInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/Bootstrap",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Bootstrap/OutGameInitializationModuleBase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/Music",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Music/OutGameBgmInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/Scenario",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 21,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Scenario/OutGameScenarioInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Scenario/OutGameScenarioSceneInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Scenario/ScenarioCom.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/Screen",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 29,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistry.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/Setting",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Setting/SettingComposition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 19,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 32,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/Sortie",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 7,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Sortie/OutGameSortieInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Sortie/OutGameSortieOutputPort.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 33,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/OutGame/Title",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 27,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleSceneInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistry.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/Persistent",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/Persistent/PersistentEntryPoint.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/Persistent/Bootstrap",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 5,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Bootstrap/PersistentInitializationModuleBase.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/Persistent/Camera",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 2,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Camera/CameraInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/Persistent/Input",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Input/InputComposition.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/Persistent/Music",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 15,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Music/AudioSettingsInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Music/AudioSettingsModuleContainer.cs",
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Music/MusicPlayerInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Music/MusicPlayerModuleContainer.cs",
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Music/SoundEffectInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Music/UISoundEffectInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Music/UISoundEffectModuleContainer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/Persistent/Savedata",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 10,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Savedata/InitialSkillLoadoutInitializer.cs",
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Savedata/LegacyDataIdMigration.cs",
+        "Assets/Scripts/Runtime/6.Composition/Persistent/Savedata/SavedataSystemInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Runtime/6.Composition/Persistent/SceneManagement",
+      "layer": "composition",
+      "source": "config",
+      "symbolCount": 3,
+      "files": [
+        "Assets/Scripts/Runtime/6.Composition/Persistent/SceneManagement/SceneTransitionInitializer.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Shaders/SilToon/Editor",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 16,
+      "files": [
+        "Assets/Scripts/Shaders/SilToon/Editor/SilToonFaceOverlayGUI.cs",
+        "Assets/Scripts/Shaders/SilToon/Editor/SilToonGUI.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Shaders/SilToon/Runtime",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 8,
+      "files": [
+        "Assets/Scripts/Shaders/SilToon/Runtime/HeadNFace.cs",
+        "Assets/Scripts/Shaders/SilToon/Runtime/HeadNFaceDTO.cs",
+        "Assets/Scripts/Shaders/SilToon/Runtime/SilToonRenderController.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Scripts/Shaders/SilToon/Runtime/SilToonShadowCaster",
+      "layer": "view",
+      "source": "config",
+      "symbolCount": 18,
+      "files": [
+        "Assets/Scripts/Shaders/SilToon/Runtime/SilToonShadowCaster/SilToonShadowCaster.cs",
+        "Assets/Scripts/Shaders/SilToon/Runtime/SilToonShadowCaster/SilToonShadowFeature.cs",
+        "Assets/Scripts/Shaders/SilToon/Runtime/SilToonShadowCaster/SilToonShadowRenderPass.cs"
+      ]
+    },
+    {
+      "moduleId": "Assets/Settings/Input",
+      "layer": "shared",
+      "source": "config",
+      "symbolCount": 50,
+      "files": [
+        "Assets/Settings/Input/KillChordInputActioMap.cs"
+      ]
+    },
+    {
+      "moduleId": "SinfoniaOperator/DiscordLogExporter",
+      "layer": "external-tooling",
+      "source": "config",
+      "symbolCount": 43,
+      "files": [
+        "SinfoniaOperator/DiscordLogExporter/DiscordApiClient.cs",
+        "SinfoniaOperator/DiscordLogExporter/DiscordApiException.cs",
+        "SinfoniaOperator/DiscordLogExporter/DiscordLogExporter.cs",
+        "SinfoniaOperator/DiscordLogExporter/ExporterOptions.cs",
+        "SinfoniaOperator/DiscordLogExporter/Program.cs"
+      ]
+    },
+    {
+      "moduleId": "SinfoniaOperator/NotionMarkdownExporter",
+      "layer": "external-tooling",
+      "source": "config",
+      "symbolCount": 124,
+      "files": [
+        "SinfoniaOperator/NotionMarkdownExporter/AssetDownloader.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/ExportManifest.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/ExportNodes.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/ExporterOptions.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/MarkdownDecorationProcessor.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/MarkdownReferenceProcessor.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/NotionApiClient.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/NotionApiException.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/NotionExporter.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/NotionIdentifier.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/NotionModels.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/PathUtility.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/Program.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/PropertyFormatter.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/RequestRateLimiter.cs",
+        "SinfoniaOperator/NotionMarkdownExporter/StallWatchdog.cs"
+      ]
+    },
+    {
+      "moduleId": "SinfoniaOperator/NotionMarkdownWriter",
+      "layer": "external-tooling",
+      "source": "config",
+      "symbolCount": 78,
+      "files": [
+        "SinfoniaOperator/NotionMarkdownWriter/CommandArguments.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/CreateCommand.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/LocalPageLocator.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/MarkdownDiffBuilder.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/NotionWriteClient.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/Program.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/PullCommand.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/PullSnapshot.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/PushCommand.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/WriteScopeGuard.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/WriterEnvironment.cs",
+        "SinfoniaOperator/NotionMarkdownWriter/WriterException.cs"
+      ]
+    },
+    {
+      "moduleId": "SinfoniaOperator/SinfoniaOperator",
+      "layer": "external-tooling",
+      "source": "config",
+      "symbolCount": 15,
+      "files": [
+        "SinfoniaOperator/SinfoniaOperator/DiscordBotManager.cs",
+        "SinfoniaOperator/SinfoniaOperator/DiscordEnvironment.cs",
+        "SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.cs"
+      ]
+    },
+    {
+      "moduleId": "SinfoniaOperator/SinfoniaOperator.Core",
+      "layer": "external-tooling",
+      "source": "config",
+      "symbolCount": 45,
+      "files": [
+        "SinfoniaOperator/SinfoniaOperator.Core/DateTimeUtility.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/DiscordBotRestClient.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/DiscordMessageUtility.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/DiscordNotifier.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/DiscordWebhookClient.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/EnvironmentValidator.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/EnvironmentVariable.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/NotionEnvironment.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/NotionMarkdownSanitizer.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/NotionReader.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/NotionSprintListReader.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/NotionTaskItem.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/NotionTaskListReader.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/OperatorConfig.cs",
+        "SinfoniaOperator/SinfoniaOperator.Core/OperatorLog.cs"
+      ]
+    }
+  ],
+  "unclassified": [],
+  "totals": {
+    "modules": 313,
+    "symbols": 5470,
+    "domains": 313,
+    "unclassifiedModules": 0,
+    "unclassifiedSymbols": 0
+  }
+}

@@ -99,6 +99,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             EventBus<EOnEnemyDefeated>.Register(EnemyDefeatedHandler);
             EventBus<EOnPlayerAttackExecuted>.Register(PlayerAttackExecutedHandler);
             EventBus<EOnPlayerTakeDamage>.Register(PlayerTakeDamageHandler);
+            EventBus<EOnSkillExecuted>.Register(SkillExecutedHandler);
         }
 
         /// <summary>
@@ -203,6 +204,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField, Tooltip("プレイヤーが被弾した時のカメラシェイク設定")]
         private CameraShakeConfig _playerDamageShakeConfig;
 
+        [SerializeField, Tooltip("スキルを発動した時のカメラシェイク設定")]
+        private CameraShakeConfig _skillExecutedShakeConfig;
+
+#if UNITY_EDITOR
+        [Header("Debug (Editor Only)")]
+        [SerializeField, Tooltip("（エディタ確認用）攻撃時に自動でカメラが敵をロックオンする挙動の有効/無効。ビルドでは常に有効。")]
+        private bool _enableAttackAutoLockOn = true;
+#endif
+
         private PlayerInputView _inputView;
         private UnityEngine.Camera _camera;
         private Transform _playerT;
@@ -232,6 +242,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         private float _autoLockOnIdleTimer;
         private float _autoLockOnViewportGraceTimer;
         private bool _isExternallyControlled;
+
+#if UNITY_EDITOR
+        /// <summary>
+        ///     攻撃をきっかけとした自動ロックオン（オートフォーカス）が有効かどうか。
+        ///     エディタ専用。<see cref="_enableAttackAutoLockOn"/> で切り替える。
+        ///     手動ロックオンには影響しない。
+        /// </summary>
+        private bool IsAttackAutoLockOnEnabled => _enableAttackAutoLockOn;
+#endif
 
         /// <summary>
         ///     FixedUpdate タイミングでカメラを更新する。
@@ -281,6 +300,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             EventBus<EOnEnemyDefeated>.Unregister(EnemyDefeatedHandler);
             EventBus<EOnPlayerAttackExecuted>.Unregister(PlayerAttackExecutedHandler);
             EventBus<EOnPlayerTakeDamage>.Unregister(PlayerTakeDamageHandler);
+            EventBus<EOnSkillExecuted>.Unregister(SkillExecutedHandler);
 
             if (_inputView == null) { return; }
 
@@ -308,7 +328,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     モバイルのロックオン対象切り替え入力を受け取り、手動ロックオン対象の切り替えを試みる。
+        ///     モバイルのロックオン対象切り替え入力を受け取り、自動・手動ロックオン対象の切り替えを試みる。
         /// </summary>
         /// <param name="direction"> 左右方向を表す入力値。 </param>
         private void LockOnSelectHandlerMobile(float direction)
@@ -331,7 +351,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     ロックオン対象切り替え入力を受け取り、手動ロックオン対象の切り替えを試みる。
+        ///     ロックオン対象切り替え入力を受け取り、自動・手動ロックオン対象の切り替えを試みる。
         /// </summary>
         /// <param name="context"> ロックオン対象切り替えの入力コンテキスト。</param>
         private void LockOnSelectHandler(InputContext<float> context)
@@ -355,12 +375,12 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     ロックオン入力を受け取り、マニュアルロックオン状態をトグルする。
+        ///     押下が確定したロックオン入力だけを受け取り、ロック状態をトグルする。
         /// </summary>
         /// <param name="context"> ロックオン操作の入力コンテキスト。</param>
         private void LockOnHandler(InputContext<float> context)
         {
-            if (context.Phase == InputActionPhase.Started)
+            if (context.Phase == InputActionPhase.Performed)
             {
                 ToggleLockOnState(_playerT.position, GetCurrentForward());
             }
@@ -374,6 +394,13 @@ namespace KillChord.Runtime.View.InGame.Camera
         {
             if (context.Phase == InputActionPhase.Started)
             {
+#if UNITY_EDITOR
+                if (!IsAttackAutoLockOnEnabled)
+                {
+                    return;
+                }
+#endif
+
                 TryActiveAutoLockOn(_playerT.position, GetCurrentForward());
             }
         }
@@ -388,6 +415,13 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 return;
             }
+
+#if UNITY_EDITOR
+            if (!IsAttackAutoLockOnEnabled)
+            {
+                return;
+            }
+#endif
 
             if (_trySetTargetByIdFunc == null || !_trySetTargetByIdFunc.Invoke(eventData.DefenderId))
             {
@@ -425,6 +459,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void PlayerTakeDamageHandler(EOnPlayerTakeDamage eventData)
         {
             RequestShake(_playerDamageShakeConfig);
+        }
+
+        /// <summary>
+        ///     スキルの発動イベントを受け取り、発動時のカメラシェイクを要求する。
+        /// </summary>
+        /// <param name="eventData"> スキル発動イベント。 </param>
+        private void SkillExecutedHandler(EOnSkillExecuted eventData)
+        {
+            RequestShake(_skillExecutedShakeConfig);
         }
 
         /// <summary>
@@ -530,7 +573,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     マニュアルロックオン状態をトグルする。
+        ///     未ロックなら手動でロックし、自動・手動のロック中なら解除する。
         /// </summary>
         /// <param name="currentPosition"> プレイヤーの現在位置。</param>
         /// <param name="direction"> 現在のカメラ前方方向。</param>
@@ -645,7 +688,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="direction"> 左右方向を表す入力値。 </param>
         private void TrySelectAdjacentTarget(float direction)
         {
-            if (_lockOnState != CameraLockOnState.LockOnManual
+            if (!IsLockOn()
                 || _trySwitchTargetFunc == null
                 || _playerT == null
                 || _cameraT == null)
@@ -653,11 +696,12 @@ namespace KillChord.Runtime.View.InGame.Camera
                 return;
             }
 
-            float selectDirection = Mathf.Sign(direction);
-            if (Mathf.Approximately(selectDirection, 0f))
+            if (Mathf.Approximately(direction, 0f))
             {
                 return;
             }
+
+            float selectDirection = Mathf.Sign(direction);
 
             Vector3 candidateDirection = GetCurrentForward() + (_cameraT.right * selectDirection);
             if (candidateDirection.sqrMagnitude <= float.Epsilon)
@@ -665,7 +709,13 @@ namespace KillChord.Runtime.View.InGame.Camera
                 return;
             }
 
-            _trySwitchTargetFunc.Invoke(_playerT.position, candidateDirection.normalized);
+            if (_trySwitchTargetFunc.Invoke(_playerT.position, candidateDirection.normalized)
+                && _lockOnState == CameraLockOnState.LockOnAuto)
+            {
+                // 視野外の対象へ切り替えた直後も追従できるよう、既存の猶予だけを更新する。
+                // 自動ロックの非命中タイマーと、手動ロックの継続条件は変えない。
+                _autoLockOnViewportGraceTimer = _viewSettings.AutoLockOnViewportGraceDuration;
+            }
         }
 
         /// <summary>

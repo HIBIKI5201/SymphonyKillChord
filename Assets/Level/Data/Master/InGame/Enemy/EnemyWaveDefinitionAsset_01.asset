@@ -28,7 +28,35 @@ MonoBehaviour:
         _hashId: -313234560
       EnemyAmount: 1
       _legacyEnemyType: 1
-    WaveDuration: 30
+    WaveDuration: 15
+    StageEffects: []
+    SpawnPointCandidates: []
+  - Details:
+    - EnemyDefinitionId:
+        _id: enemy_infantry_default
+        _hashId: -454697840
+      EnemyAmount: 3
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
+      EnemyAmount: 1
+      _legacyEnemyType: 1
+    WaveDuration: 15
+    StageEffects: []
+    SpawnPointCandidates: []
+  - Details:
+    - EnemyDefinitionId:
+        _id: enemy_artillery_marked
+        _hashId: -1476855641
+      EnemyAmount: 1
+      _legacyEnemyType: 0
+    - EnemyDefinitionId:
+        _id: enemy_artillery_default
+        _hashId: -313234560
+      EnemyAmount: 0
+      _legacyEnemyType: 1
+    WaveDuration: 15
     StageEffects: []
     SpawnPointCandidates: []
   _loop: 0

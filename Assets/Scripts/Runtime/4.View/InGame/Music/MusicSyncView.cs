@@ -41,6 +41,20 @@ namespace KillChord.Runtime.View.InGame.Music
                 .RegisterTo(destroyCancellationToken);
         }
 
+        /// <summary>
+        ///     ゲームプレイ中だけ音楽同期を更新し、終了時に入力系列を破棄する。
+        /// </summary>
+        public void SetGameplayActive(bool isActive)
+        {
+            _isGameplayActive = isActive;
+            if (!isActive)
+            {
+                _musicSyncController?.ResetPlayback();
+            }
+        }
+
+        private bool _isGameplayActive;
+        private bool _hasMusicCue;
         private double _testBpm;
         private double _beatOffsetSeconds;
         private MusicPlayer _musicPlayer;
@@ -53,13 +67,22 @@ namespace KillChord.Runtime.View.InGame.Music
         /// </summary>
         private void Update()
         {
-            if (_musicPlayer == null
+            if (!_isGameplayActive
+                || !_hasMusicCue
+                || _musicPlayer == null
                 || _musicSyncState == null
                 || _musicSyncController == null
                 || _musicSyncState.Bpm <= 0
                 || _musicSyncState.BeatLength <= 0) return;
 
-            _musicSyncController.Tick(_musicPlayer.Time);
+            double playbackTime = _musicPlayer.Time;
+            if (playbackTime < 0d)
+            {
+                _musicSyncController.ResetPlayback();
+                return;
+            }
+
+            _musicSyncController.Tick(playbackTime);
         }
 
         /// <summary>
@@ -68,6 +91,8 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="cueName"> キュー名。 </param>
         private void PlayBgm(string cueName)
         {
+            _hasMusicCue = !string.IsNullOrEmpty(cueName);
+            _musicSyncController.ResetPlayback();
             _musicSyncState.SetRhythm(_testBpm, _beatOffsetSeconds);
         }
     }

@@ -1,0 +1,113 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
+
+const sections = [
+	{
+		title: '1. はじめに(適用範囲)',
+		body: '本プライバシーポリシーは、本サイト(Symphony Kill Chord 公式サイト)および本サイトを通じて配布・案内する本作品(以下「本作品」)の利用に適用されます。',
+	},
+	{
+		title: '2. 収集する情報について',
+		body: '本サイトおよび本作品は、利用者の個人情報を含むいかなる情報も収集しません。',
+	},
+	{
+		title: '3. アクセスログについて',
+		body: '本サイトはGitHub Pagesでホスティングされており、閲覧時にホスティング事業者側で標準的なアクセスログ(IPアドレス等)が記録される場合があります。これは本サイト運営者が意図的に収集・保存するものではなく、ホスティング事業者のインフラ運用によるものです。',
+	},
+	{
+		title: '4. 禁止事項',
+		body: '利用者は、本作品の利用にあたり、以下の行為を行ってはなりません。逆コンパイル・逆アセンブル・リバースエンジニアリング等の解析行為、通信内容の解析行為、チートツール等の不正な手段の使用、ゲーム内データの無断抽出、改変版の作成・配布、商用目的での無断二次利用、エンディング等の未公開コンテンツの無断公開。',
+	},
+	{
+		title: '5. 第三者提供について',
+		body: '本サイトおよび本作品は、利用者に関するいかなる情報も第三者に提供、共有、販売することはありません。',
+	},
+	{
+		title: '6. 外部サイトへのリンクについて',
+		body: '本サイトには、配信サイト等の外部サイトへのリンクが含まれる場合があります。リンク先での情報の取り扱いについては、遷移先事業者が定めるプライバシーポリシーに従うものとし、本サイトはその内容について責任を負いません。',
+	},
+	{
+		title: '7. Cookie等について',
+		body: '本サイトは、Cookie等のトラッキング技術を独自に使用しません。',
+	},
+	{
+		title: '8. 広告について',
+		body: '本サイトおよび本作品は広告を表示しません。',
+	},
+	{
+		title: '9. プライバシーポリシーの変更について',
+		body: '本プライバシーポリシーの内容は、利用者への予告なく変更される場合があります。変更後のプライバシーポリシーは、本ページに掲載した時点から効力を生じるものとします。',
+	},
+];
+
+const establishedDate = '制定日: 2026年9月15日';
+---
+
+<Layout title="プライバシーポリシー | Symphony Kill Chord" description="Symphony Kill Chord プライバシーポリシー。">
+	<main>
+		<PageHeader eyebrow="Privacy Policy" title="プライバシーポリシー" />
+
+		<section id="policy-body">
+			{
+				sections.map((section) => (
+					<div class="policy-section">
+						<h2 class="section-title">{section.title}</h2>
+						<p>{section.body}</p>
+					</div>
+				))
+			}
+			<p class="established-date">{establishedDate}</p>
+		</section>
+	</main>
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		width: 100%;
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	#policy-body {
+		border-top: 1px solid var(--color-surface-border);
+		padding-top: 40px;
+	}
+
+	.policy-section {
+		padding: 24px 0;
+		border-top: 2px solid var(--color-signal-dim);
+	}
+
+	.policy-section:first-child {
+		border-top: none;
+		padding-top: 0;
+	}
+
+	.section-title {
+		margin: 0 0 8px;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: 1.0625rem;
+		font-weight: 800;
+		color: var(--color-signal);
+	}
+
+	.policy-section p {
+		margin: 0;
+		font-size: 0.9375rem;
+		line-height: 1.8;
+		color: var(--color-text-muted);
+	}
+
+	.established-date {
+		margin: 32px 0 0;
+		font-family: var(--font-mono);
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+	}
+</style>

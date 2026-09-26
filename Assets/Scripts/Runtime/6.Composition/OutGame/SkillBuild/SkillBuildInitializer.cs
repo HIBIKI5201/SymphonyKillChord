@@ -1,18 +1,28 @@
+using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.Skill;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using KillChord.Runtime.Application.OutGame.SkillBuild;
+using KillChord.Runtime.Composition.OutGame.Audio;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.OutGame.Skill;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
+using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,9 +56,25 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         [Tooltip("セーブデータから装備済みスキルを取得するリポジトリの Addressables キーです。")]
         private string _skillBuildRepositoryKey;
 
+        [SerializeField, SourceDataAddress]
+        [Tooltip("全スキルデータを取得する SkillRepository の Addressables キーです。未開放スキルの一覧表示に使用します。")]
+        private string _skillRepositoryKey = "OutGameSkillRepository";
+
+        [SerializeField, SourceDataAddress]
+        [Tooltip("スキルジャンルアイコンカタログの Addressables キーです。読み込みに失敗してもアイコンなしで続行します。")]
+        private string _skillGenreIconCatalogKey;
+
+        [SerializeField, SourceDataAddress]
+        [Tooltip("発動コマンドの拍子ごとの色設定(SkillInputProgressUIConfig)の Addressables キーです。読み込みに失敗しても既定色で続行します。")]
+        private string _skillInputProgressUIConfigKey;
+
         [SerializeField]
         [Tooltip("スキル要素のテンプレート UXML（Skill.uxml）です。")]
         private VisualTreeAsset _skillElementTemplate;
+
+        [SerializeField]
+        [Tooltip("発動コマンド表示に使う正六角形スプライト（Assets/Arts/UI/UI_hexagon.png）です。")]
+        private Sprite _comboHexIcon;
 
         private SkillBuildScreenView _skillBuildScreenView;
         private SkillBuildViewModel _skillBuildViewModel;
@@ -57,11 +83,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private SkillBuildPresenter _skillBuildPresenter;
         private OutGameUIEvent _outGameUIEvent;
         private SkillElementDragAndDropSetup _skillElementDragAndDropSetup;
+        private SkillElementControllerEquipController _skillElementControllerEquipController;
         private OwnedSkillRepository _loadedOwnedSkillRepository;
         private SkillBuildRepository _loadedSkillBuildRepository;
+        private SkillRepository _loadedSkillRepository;
+        private SkillGenreIconCatalogAsset _loadedSkillGenreIconCatalog;
+        private Dictionary<SkillType, Sprite> _skillGenreIcons;
+        private SkillInputProgressUIConfig _loadedSkillInputProgressUIConfig;
+        private Dictionary<int, Color> _skillBeatColors;
         private IReadOnlyList<EquippedSkill> _loadedEquippedSkills;
         private SkillTemplate[] _loadedOwnedSkillTemplates;
+        private IReadOnlyCollection<SkillTemplate> _loadedAllSkillTemplates;
         private int _loadedOwnedPoints;
+        private IReadOnlyDictionary<int, int> _loadedSkillLevels;
         private bool _isInitialized;
         private bool _isSubscribed;
 
@@ -80,10 +114,60 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return false;
             }
 
+            try
+            {
+                _loadedSkillRepository =
+                    await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, destroyCancellationToken);
+            }
+            catch (System.Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning(
+                    $"[{nameof(SkillBuildInitializer)}] SkillRepositoryの読み込みに失敗しました。未開放スキル一覧なしで続行します。{ex.Message}",
+                    this);
+#endif
+                _loadedSkillRepository = null;
+            }
+
+            try
+            {
+                _loadedSkillGenreIconCatalog =
+                    await _skillGenreIconCatalogKey.LoadAssetAsync<SkillGenreIconCatalogAsset>(this, destroyCancellationToken);
+            }
+            catch (System.Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning(
+                    $"[{nameof(SkillBuildInitializer)}] SkillGenreIconCatalogAssetの読み込みに失敗しました。ジャンルアイコンなしで続行します。{ex.Message}",
+                    this);
+#endif
+                _loadedSkillGenreIconCatalog = null;
+            }
+
+            try
+            {
+                _loadedSkillInputProgressUIConfig =
+                    await _skillInputProgressUIConfigKey.LoadAssetAsync<SkillInputProgressUIConfig>(this, destroyCancellationToken);
+            }
+            catch (System.Exception ex)
+            {
+#if UNITY_EDITOR
+                Debug.LogWarning(
+                    $"[{nameof(SkillBuildInitializer)}] SkillInputProgressUIConfigの読み込みに失敗しました。既定色で続行します。{ex.Message}",
+                    this);
+#endif
+                _loadedSkillInputProgressUIConfig = null;
+            }
+
+            BuildSkillGenreIconMap();
+            BuildSkillBeatColorMap();
+
             _loadedEquippedSkills = await GetEquippedSkillsAsync();
             IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
             _loadedOwnedSkillTemplates = BuildOwnedSkills(ownedSkills);
+            _loadedAllSkillTemplates = BuildAllSkills();
             _loadedOwnedPoints = await GetOwnedPointsAsync();
+            _loadedSkillLevels = await _loadedSkillBuildRepository.GetSkillLevelsAsync();
 
             return _loadedEquippedSkills != null && _loadedOwnedSkillTemplates != null;
         }
@@ -117,10 +201,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 
             _ownedSkillRepositoryKey.ReleaseLoadedAsset(this);
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
+            _skillRepositoryKey.ReleaseLoadedAsset(this);
+            _skillGenreIconCatalogKey.ReleaseLoadedAsset(this);
+            _skillInputProgressUIConfigKey.ReleaseLoadedAsset(this);
             _loadedOwnedSkillRepository = null;
             _loadedSkillBuildRepository = null;
+            _loadedSkillRepository = null;
+            _loadedSkillGenreIconCatalog = null;
+            _skillGenreIcons = null;
+            _loadedSkillInputProgressUIConfig = null;
+            _skillBeatColors = null;
             _loadedEquippedSkills = null;
             _loadedOwnedSkillTemplates = null;
+            _loadedAllSkillTemplates = null;
             _loadedOwnedPoints = 0;
             _outGameUIEvent = null;
             _isInitialized = false;
@@ -157,6 +250,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return false;
             }
 
+            ServiceLocator.TryGetInstance(
+                out OutGameUISoundEffectModuleContainer soundEffectContainer);
+            IUISoundEffectCommand soundEffectCommand = soundEffectContainer?.Command;
+
             if (!ServiceLocator.TryGetInstance(out _skillBuildScreenView))
             {
                 _skillBuildScreenView = CreateSkillBuildScreenView();
@@ -169,17 +266,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 }
             }
 
+            int baseSlotCount = SkillBuildDefinition.INITIAL_SLOT_COUNT + ResolveSkillSlotBonus();
             if (!ServiceLocator.TryGetInstance(out _skillBuildDefinition))
             {
                 _skillBuildDefinition = new SkillBuildDefinition(ToArray(_loadedEquippedSkills));
+                _skillBuildDefinition.EnsureSlotCount(baseSlotCount);
                 ServiceLocator.RegisterInstance(_skillBuildDefinition);
             }
             else
             {
                 _skillBuildDefinition.EnsureSlotCount(
-                    _loadedEquippedSkills.Count > SkillBuildDefinition.INITIAL_SLOT_COUNT
+                    _loadedEquippedSkills.Count > baseSlotCount
                         ? _loadedEquippedSkills.Count
-                        : SkillBuildDefinition.INITIAL_SLOT_COUNT);
+                        : baseSlotCount);
             }
 
             SkillBuildUseCase skillBuildUseCase =
@@ -189,17 +288,37 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             SkillEffectDescriptionFormatter skillEffectDescriptionFormatter =
                 new SkillEffectDescriptionFormatter();
             SkillDisplayTextFormatter textFormatter =
-                new SkillDisplayTextFormatter(skillEffectDescriptionFormatter);
-            _skillBuildPresenter = new(_skillBuildViewModel, textFormatter);
+                new SkillDisplayTextFormatter(skillEffectDescriptionFormatter, _skillBeatColors);
+            _skillBuildPresenter = new(_skillBuildViewModel, textFormatter, _skillGenreIcons);
 
-            _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(_uiDocument, _skillBuildViewModel);
+            _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(
+                _uiDocument,
+                _skillBuildViewModel,
+                soundEffectCommand);
+            _skillElementControllerEquipController = new SkillElementControllerEquipController(
+                _uiDocument,
+                _skillBuildViewModel,
+                soundEffectCommand);
 
-            _skillBuildScreenView.InitializeSkillList(_skillElementTemplate, _skillElementDragAndDropSetup.SetupDraggable);
+            // 動的に生成されるスキル要素へ、マウスとコントローラーの両方の操作を設定する。
+            void SetupSkillElement(VisualElement element)
+            {
+                _skillElementDragAndDropSetup.SetupDraggable(element);
+                _skillElementControllerEquipController.SetupSkillElement(element);
+            }
+
+            _skillBuildScreenView.InitializeSkillList(
+                _skillElementTemplate,
+                SetupSkillElement,
+                soundEffectCommand);
             _skillBuildScreenView.Bind(_skillBuildViewModel);
+            _skillBuildScreenView.OnSkillListRefreshed += HandleSkillListRefreshedHandler;
             _skillBuildPresenter.Push(
                 _skillBuildDefinition.EquippedSkills,
                 _loadedOwnedSkillTemplates,
-                _loadedOwnedPoints);
+                _loadedAllSkillTemplates,
+                _loadedOwnedPoints,
+                _loadedSkillLevels);
 
             _isInitialized = true;
             return true;
@@ -248,6 +367,67 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         }
 
         /// <summary>
+        ///     全スキル一覧(未開放を含む)を構築します。
+        /// </summary>
+        /// <returns> 全スキル一覧です。読み込み失敗時は空。 </returns>
+        private IReadOnlyCollection<SkillTemplate> BuildAllSkills()
+        {
+            if (_loadedSkillRepository == null)
+            {
+                return System.Array.Empty<SkillTemplate>();
+            }
+
+            return _loadedSkillRepository.GetAllSkills();
+        }
+
+        /// <summary>
+        ///     スキルジャンルとアイコンの対応表を構築します。
+        /// </summary>
+        private void BuildSkillGenreIconMap()
+        {
+            _skillGenreIcons = new Dictionary<SkillType, Sprite>();
+            if (_loadedSkillGenreIconCatalog == null)
+            {
+                return;
+            }
+
+            foreach (SkillGenreIconCatalogEntry entry in _loadedSkillGenreIconCatalog.Entries)
+            {
+                if (entry.Icon != null)
+                {
+                    _skillGenreIcons[entry.Genre] = entry.Icon;
+                }
+            }
+        }
+
+        /// <summary>
+        ///     発動コマンドの拍子(BeatType)と色の対応表を構築します。
+        ///     実際のインゲーム入力進行UIと同じ色設定(SkillInputProgressUIConfig)を流用します。
+        /// </summary>
+        private void BuildSkillBeatColorMap()
+        {
+            _skillBeatColors = new Dictionary<int, Color>();
+            if (_loadedSkillInputProgressUIConfig == null)
+            {
+                return;
+            }
+
+            SkillInputProgressViewSetting viewSetting = _loadedSkillInputProgressUIConfig.Create();
+            foreach (BeatType beatType in Enum.GetValues(typeof(BeatType)))
+            {
+                try
+                {
+                    SkillBeatVisualSetting setting = viewSetting.GetSetting((int)beatType);
+                    _skillBeatColors[(int)beatType] = setting.NormalColor;
+                }
+                catch (InvalidOperationException)
+                {
+                    // 該当する拍子の設定が存在しない場合はスキップする。
+                }
+            }
+        }
+
+        /// <summary>
         ///     入手済みスキル一覧を取得します。
         /// </summary>
         /// <returns> 入手済みスキル一覧です。 </returns>
@@ -275,7 +455,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
-            return saveData.SkillBuild.SkillLevelupPoint;
+            return saveData.ResourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint);
         }
 
         /// <summary>
@@ -289,6 +469,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
                 IReadOnlyList<EquippedSkill> equippedSkills = await _loadedSkillBuildRepository.LoadSkillBuild();
                 int ownedPoints = await GetOwnedPointsAsync();
+                _loadedSkillLevels = await _loadedSkillBuildRepository.GetSkillLevelsAsync();
                 SkillTemplate[] ownedSkillData = BuildOwnedSkills(ownedSkills);
                 if (_skillBuildDefinition == null || !_isInitialized)
                 {
@@ -303,7 +484,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 _skillBuildPresenter?.Push(
                     _skillBuildDefinition.EquippedSkills,
                     ownedSkillData,
-                    ownedPoints);
+                    _loadedAllSkillTemplates,
+                    ownedPoints,
+                    _loadedSkillLevels);
                 if (resetsDetailToDefault)
                 {
                     _skillBuildViewModel?.ResetDetailToDefault();
@@ -344,7 +527,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return null;
             }
 
-            return new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent);
+            return new SkillBuildScreenView(skillBuildRoot, _outGameUIEvent, _comboHexIcon);
         }
 
         /// <summary>
@@ -356,6 +539,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 
             if (_skillBuildScreenView != null)
             {
+                _skillBuildScreenView.OnSkillListRefreshed -= HandleSkillListRefreshedHandler;
                 _skillBuildScreenView.Unbind();
                 _skillBuildScreenView = null;
             }
@@ -364,6 +548,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             _skillBuildViewModel = null;
             _skillBuildPresenter = null;
             _skillElementDragAndDropSetup = null;
+            _skillElementControllerEquipController?.Dispose();
+            _skillElementControllerEquipController = null;
         }
 
         /// <summary>
@@ -378,6 +564,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 
             _outGameUIEvent.OnOwnedSkillChanged += HandleOwnedSkillChangedHandler;
             _outGameUIEvent.OnShownSkillBuildScreen += HandleShownSkillBuildScreenHandler;
+            _outGameUIEvent.OnSkillLevelUp += HandleSkillLevelUpHandler;
             _isSubscribed = true;
         }
 
@@ -393,6 +580,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
 
             _outGameUIEvent.OnOwnedSkillChanged -= HandleOwnedSkillChangedHandler;
             _outGameUIEvent.OnShownSkillBuildScreen -= HandleShownSkillBuildScreenHandler;
+            _outGameUIEvent.OnSkillLevelUp -= HandleSkillLevelUpHandler;
             _isSubscribed = false;
         }
 
@@ -401,7 +589,18 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private void HandleOwnedSkillChangedHandler()
         {
+            _skillBuildDefinition?.EnsureSlotCount(
+                SkillBuildDefinition.INITIAL_SLOT_COUNT + ResolveSkillSlotBonus());
             RefreshOwnedSkills(false);
+        }
+
+        /// <summary>
+        ///     スキル一覧の再構築を処理します。
+        ///     カード要素が作り直されてフォーカスが失われていた場合、選択中スキルへ戻します。
+        /// </summary>
+        private void HandleSkillListRefreshedHandler()
+        {
+            _skillElementControllerEquipController?.RestoreFocusIfLost();
         }
 
         /// <summary>
@@ -410,6 +609,36 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         private void HandleShownSkillBuildScreenHandler()
         {
             RefreshOwnedSkills(true);
+        }
+
+        /// <summary>
+        ///     スキル強化(レベルアップ)イベントを処理します。
+        ///     表示中のスキルを対象に、レベルアップの実処理を実行してから画面を再取得します。
+        /// </summary>
+        private async void HandleSkillLevelUpHandler()
+        {
+            SkillViewData? displayedSkill = _skillBuildViewModel?.DisplayedSkill.CurrentValue;
+            if (displayedSkill == null || _skillBuildController == null)
+            {
+                return;
+            }
+
+            bool succeeded = await _skillBuildController.LevelUpAsync(displayedSkill.Value.SkillId);
+            if (succeeded)
+            {
+                RefreshOwnedSkills(false);
+            }
+        }
+
+        /// <summary>
+        ///     スキルツリーで解放済みの「編成枠を増やすノード」の件数を取得します。
+        /// </summary>
+        /// <returns> 未登録の場合は0。 </returns>
+        private int ResolveSkillSlotBonus()
+        {
+            return ServiceLocator.TryGetInstance(out SkillTreeStatusEntity skillTreeStatus)
+                ? skillTreeStatus.SkillSlotBonus
+                : 0;
         }
     }
 }

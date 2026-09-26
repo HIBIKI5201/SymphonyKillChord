@@ -27,20 +27,25 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// <param name="animationContext"> アニメーション文脈です。 </param>
         /// <param name="musicSyncState"> 音楽同期状態です。 </param>
         /// <param name="damageEffectView"> ダメージエフェクトViewです。 </param>
+        /// <param name="isAttackIndicatorVisible"> 発射元の攻撃インジケーターが実際に表示中かを返します。 </param>
         public void Initialize(
             EnemyAIController enemyAIController,
             Transform target,
             ICharacterAnimationViewContext animationContext,
             MusicSyncState musicSyncState,
-            ReusableParticleSystemView damageEffectView)
+            ReusableParticleSystemView damageEffectView,
+            System.Func<bool> isAttackIndicatorVisible)
         {
             _enemyAIController = enemyAIController;
             _target = target;
             _characterAnimationViewModel = animationContext.ViewModel;
             _damageEffectView = damageEffectView;
+            _isAttackIndicatorVisible = isAttackIndicatorVisible
+                ?? throw new System.ArgumentNullException(nameof(isAttackIndicatorVisible));
             _characterAnimationSignal = animationContext.Signal;
             _musicSyncState = musicSyncState;
             _isPlaying = false;
+            _speedVarianceMultiplier = Random.Range(_speedVarianceMin, _speedVarianceMax);
             SyncFootstepTiming();
         }
 
@@ -88,7 +93,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return false;
             }
 
-            _navMeshAgent.speed = 3f;
+            // 戦闘ポーズ中の停止時間を入場期限へ含めない。
+            float arrivalDeadline = Time.time + ENTRANCE_TIMEOUT_SECONDS;
+            _navMeshAgent.speed = 3f * _speedVarianceMultiplier;
             _navMeshAgent.isStopped = false;
             _navMeshAgent.updateRotation = true;
             if (!_navMeshAgent.SetDestination(target))
@@ -99,12 +106,18 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             while (CanUseNavMeshAgent() && _navMeshAgent.pathPending)
             {
+                if (Time.time >= arrivalDeadline)
+                {
+                    _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+                    return false;
+                }
+
                 await Awaitable.NextFrameAsync(ct);
             }
 
             ct.ThrowIfCancellationRequested();
 
-            if (!CanUseNavMeshAgent() || _navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
+            if (!CanUseNavMeshAgent() || _navMeshAgent.pathStatus != NavMeshPathStatus.PathComplete)
             {
                 _characterAnimationViewModel?.SetVelocity(Vector2.zero);
                 return false;
@@ -113,6 +126,11 @@ namespace KillChord.Runtime.View.InGame.Enemy
             while (CanUseNavMeshAgent())
             {
                 ct.ThrowIfCancellationRequested();
+                if (Time.time >= arrivalDeadline
+                    || (!_navMeshAgent.pathPending && _navMeshAgent.pathStatus != NavMeshPathStatus.PathComplete))
+                {
+                    break;
+                }
 
                 Vector3 velocity = _navMeshAgent.desiredVelocity;
                 _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
@@ -140,13 +158,22 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void MoveToAttack()
         {
+            _isStrafing = false;
             if (!_isPlaying) return;
-            if (!_navMeshAgent.isOnNavMesh || _target == null) return;
+            if (!CanUseNavMeshAgent() || _target == null)
+            {
+                return;
+            }
+            if (_isAttackIndicatorVisible.Invoke())
+            {
+                StopMoving();
+                return;
+            }
 
             EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
             if (intruction.ShouldMove)
             {
-                _navMeshAgent.speed = intruction.MoveSpeed;
+                _navMeshAgent.speed = intruction.MoveSpeed * _speedVarianceMultiplier;
                 _navMeshAgent.isStopped = false;
                 _navMeshAgent.updateRotation = true;
                 _navMeshAgent.SetDestination(intruction.Destination);
@@ -158,9 +185,77 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
             else
             {
-                _characterAnimationViewModel?.SetVelocity(Vector2.zero);
-                SyncFootstepTiming();
+                StopMoving();
             }
+        }
+
+        /// <summary>
+        ///     攻撃待機中、射程を保ちながらプレイヤーを向いて横移動する。
+        ///     進行可否はNavMeshで確認し、敵同士の回避は既存Agentに任せる。
+        /// </summary>
+        /// <param name="direction"> 左右の向きを表す符号。 </param>
+        public void StrafeWhileWaiting(int direction)
+        {
+            _enemyAIController.RecordPosition(transform.position);
+            if (!_isPlaying || !CanUseNavMeshAgent() || _target == null
+                || _isAttackIndicatorVisible.Invoke())
+            {
+                StopStrafing();
+                return;
+            }
+
+            StopRotating();
+            FaceToTarget();
+            Vector3 offset = transform.position - _target.position;
+            offset.y = 0f;
+            float distance = offset.magnitude;
+            if (distance <= Mathf.Epsilon)
+            {
+                StopStrafing();
+                return;
+            }
+
+            float speed = _enemyAIController.MoveSpeed * STRAFE_SPEED_RATIO * _speedVarianceMultiplier;
+            float stepDistance = Mathf.Max(_navMeshAgent.radius, speed * STRAFE_LOOK_AHEAD_SECONDS);
+            float angle = direction * stepDistance / distance * Mathf.Rad2Deg;
+            Vector3 destination = _target.position + Quaternion.AngleAxis(angle, Vector3.up) * offset;
+            destination.y = transform.position.y;
+
+            // 壁の反対側や別の階へ迂回せず、行き止まりでは同じ方向の抽選期限まで待つ。
+            if (!NavMesh.SamplePosition(destination, out NavMeshHit sample, STRAFE_SAMPLE_DISTANCE, _navMeshAgent.areaMask)
+                || !_enemyAIController.IsPlayerInAttackRange(sample.position, _target.position)
+                || _navMeshAgent.Raycast(sample.position, out _))
+            {
+                StopStrafing();
+                return;
+            }
+
+            _navMeshAgent.speed = speed;
+            if (!_navMeshAgent.SetDestination(sample.position))
+            {
+                StopStrafing();
+                return;
+            }
+
+            _navMeshAgent.isStopped = false;
+            _isStrafing = true;
+            // 構えの重みで歩行が消えないよう、移動中だけロコモーションを優先する。
+            _characterAnimationViewModel?.SetReserving(false);
+            Vector3 velocity = _navMeshAgent.desiredVelocity;
+            _characterAnimationViewModel?.SetVelocity(new Vector2(velocity.x, velocity.z));
+            PlayFootstepSound(velocity);
+        }
+
+        /// <summary>
+        ///     横移動だけを終了し、攻撃後に引き継がれた移動を止めない。
+        /// </summary>
+        public void StopStrafing()
+        {
+            if (!_isStrafing)
+            {
+                return;
+            }
+            StopMoving();
         }
 
         /// <summary>
@@ -168,6 +263,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void StopMoving()
         {
+            if (_isStrafing)
+            {
+                // 予約そのものは維持し、横移動の終了時に構えへ戻す。
+                _characterAnimationViewModel?.SetReserving(_enemyAIController.IsAttacking);
+            }
+            _isStrafing = false;
             if (!CanUseNavMeshAgent())
             {
                 return;
@@ -204,6 +305,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         {
             _enemyAIController.OnAttackReserved += PlayEffectReserved;
             _enemyAIController.OnAttack += PlayEffectHit;
+            _enemyAIController.OnAttackCanceled += PlayEffectCanceled;
             _enemyAIController.On1BeatBefore += On1BeatBefore;
             _enemyAIController.On2BeatBefore += On2BeatBefore;
         }
@@ -213,10 +315,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void Deactivate()
         {
+            StopStrafing();
             if (_enemyAIController != null)
             {
                 _enemyAIController.OnAttackReserved -= PlayEffectReserved;
                 _enemyAIController.OnAttack -= PlayEffectHit;
+                _enemyAIController.OnAttackCanceled -= PlayEffectCanceled;
                 _enemyAIController.On1BeatBefore -= On1BeatBefore;
                 _enemyAIController.On2BeatBefore -= On2BeatBefore;
             }
@@ -226,6 +330,12 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
         [SerializeField, Tooltip("敵攻撃SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
         private SoundEffectSource _attackSoundSource;
+
+        [SerializeField, Tooltip("攻撃予測1回目（2拍前）SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
+        private SoundEffectSource _attackAlertFirstSoundSource;
+
+        [SerializeField, Tooltip("攻撃予測2回目（1拍前）SE用Source。歩兵、砲兵などの違いは敵Prefabごとに設定します。")]
+        private SoundEffectSource _attackAlertSecondSoundSource;
 
         [SerializeField, Tooltip("攻撃ヒット時に再生するエフェクトPrefab。")]
         private ParticleSystem _attackHitEffectPrefab;
@@ -261,9 +371,23 @@ namespace KillChord.Runtime.View.InGame.Enemy
         [SerializeField,Tooltip("攻撃ヒット時に再生するエフェクトのTransformです。")]
         private Transform _damageEffectTransform;
 
+        [Header("人間味調整")]
+        [SerializeField, Tooltip("移動速度の個体差(倍率)の下限。1体ごとに初期化時抽選されます。")]
+        private float _speedVarianceMin = 0.9f;
+        [SerializeField, Tooltip("移動速度の個体差(倍率)の上限。1体ごとに初期化時抽選されます。")]
+        private float _speedVarianceMax = 1.1f;
+
+        private const float ENTRANCE_TIMEOUT_SECONDS = 30f;
         private const float MIN_FOOTSTEP_VELOCITY_SQR = 0.01f;
+        /// <summary> 通常移動速度に対する横歩き速度の比率。 </summary>
+        private const float STRAFE_SPEED_RATIO = 0.5f;
+        /// <summary> 横歩きの移動先を先読みする秒数。 </summary>
+        private const float STRAFE_LOOK_AHEAD_SECONDS = 0.3f;
+        /// <summary> 横歩きの候補位置をNavMeshへ補正する最大距離。 </summary>
+        private const float STRAFE_SAMPLE_DISTANCE = 0.25f;
         private float _lastFootstepTime;
         private int _lastFootstepEighthIndex = int.MinValue;
+        private float _speedVarianceMultiplier = 1f;
         private NavMeshAgent _navMeshAgent;
         private Transform _target;
         private EnemyAIController _enemyAIController;
@@ -274,6 +398,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private ParticleSystem _attackHitEffectInstance;
         private ParticleSystem _attackReserveEffectInstance;
         private bool _isPlaying;
+        private bool _isStrafing;
+        private System.Func<bool> _isAttackIndicatorVisible;
 
         /// <summary>
         ///     初期化時に必要な参照を取得します。
@@ -288,6 +414,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void OnDisable()
         {
+            _isStrafing = false;
             ResetAttackEffects();
         }
 
@@ -332,7 +459,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void PlayEffectHit()
         {
             if (!_isPlaying) return;
-            
+
             _weaponItemView?.Play();
             _characterAnimationViewModel?.SetReserving(false);
             PlayAttackEffect(_attackHitEffectInstance);
@@ -340,6 +467,18 @@ namespace KillChord.Runtime.View.InGame.Enemy
             MoveToAttack();
             // 攻撃アニメを再生（構えアニメより優先）
             _characterAnimationSignal?.RequestAttack();
+        }
+        /// <summary>
+        ///     予約中の攻撃がキャンセルされた際に、予約状態と予約エフェクトを解除する。
+        /// </summary>
+        private void PlayEffectCanceled()
+        {
+            StopStrafing();
+            _characterAnimationViewModel?.SetReserving(false);
+            if (_attackReserveEffectInstance != null)
+            {
+                _attackReserveEffectInstance.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
         }
         /// <summary>
         ///    ターゲットの方向を向く。
@@ -488,16 +627,27 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private void On1BeatBefore()
         {
+            if (!_isPlaying) return;
+
             StopMoving();
             StopRotating();
             _characterAnimationViewModel?.SetVelocity(Vector2.zero);
+            PlaySound(_attackAlertSecondSoundSource, null);
         }
         /// <summary>
         ///     攻撃の2拍前に呼び出される処理。
         /// </summary>
         private void On2BeatBefore()
         {
+            if (!_isPlaying) return;
 
+            if (_isAttackIndicatorVisible.Invoke())
+            {
+                StopMoving();
+                StopRotating();
+            }
+
+            PlaySound(_attackAlertFirstSoundSource, null);
         }
 
         /// <summary>

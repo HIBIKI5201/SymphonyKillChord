@@ -1,0 +1,34 @@
+{
+    "name": "KillChord.Demo",
+    "rootNamespace": "KillChord.Demo",
+    "references": [
+        "GUID:68a532f43eeefd5408e4e8871b769ee4",
+        "GUID:912501d3a9c2c414ba93298e84096560",
+        "GUID:dd408af17d035564b957321d79adba1d",
+        "GUID:5063a8a7d003d7b458ff51a6863e5e74",
+        "GUID:d596684d98378c643b70bc587024d24e",
+        "GUID:d07e9a279d4339845a9adaacdd0a1727",
+        "GUID:9465426c1e0fea94a9e89064d2be4eb8",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:73907d139b13f8a43b7e3e95c329d30a",
+        "GUID:33661e06c33d31b4c9223810bf503247",
+        "GUID:3b570a5146f9d4f0fa107ed4559471a3",
+        "GUID:3aa1866a824b5472da50fe142777d95f",
+        "GUID:15fc0a57446b3144c949da3e2b9737a9",
+        "GUID:ef4b8c106275d524db0f0e619b590ae2",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:9e24947de15b9834991c9d8411ea37cf",
+        "GUID:84651a3751eca9349aac36a66bba901b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "KILLCHORD_DEMO"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

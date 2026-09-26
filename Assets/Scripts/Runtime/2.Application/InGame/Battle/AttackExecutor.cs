@@ -47,7 +47,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 throw new ArgumentNullException(nameof(defender));
             }
 
-            // 計算を行い、ダメージを適用する。
+            // 攻撃力補正と確定ダメージを計算し、ダメージを適用する。
             AttackResult result = AttackCalculator.Calculate(attackDefinition, attacker, defender, isJustHit, baseDamage, isOutOfRange);
 
             result = DamageExecutor.Execute(attacker, defender, result, damageAttackType, notifyNormalDamage);

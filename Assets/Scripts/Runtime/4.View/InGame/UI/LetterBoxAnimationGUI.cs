@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View.InGame.UI
         /// </summary>
         public void ActiveAspectImmediate()
         {
+            _handle.TryCancel();
             if (!_isValid)
             {
                 return;
@@ -30,6 +31,7 @@ namespace KillChord.Runtime.View.InGame.UI
         /// </summary>
         public void DeactiveAspectImmediate()
         {
+            _handle.TryCancel();
             if (!_isValid)
             {
                 return;

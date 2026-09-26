@@ -46,25 +46,57 @@ namespace KillChord.Runtime.View.Persistent.Music
         }
 
         /// <summary>
-        ///     音量を適用する。
+        ///     再生中のCueを停止する。ループ再生するSE（環境音など）を明示的に止める用途に使用する。
         /// </summary>
-        /// <param name="volume"> 音量。 </param>
-        public void ApplyVolume(float volume)
+        public void Stop()
         {
             if (!TryEnsureSource())
             {
                 return;
             }
 
-            _source.volume = volume;
+            _source.Stop();
+        }
+
+        /// <summary>
+        ///     SE全体音量の比率を適用する。
+        /// </summary>
+        /// <param name="volumeRatio"> 0から1の音量比率。 </param>
+        public void ApplyVolume(float volumeRatio)
+        {
+            if (!TryEnsureSource())
+            {
+                return;
+            }
+
+            _source.volume = _baseVolume * volumeRatio;
+        }
+
+        /// <summary>
+        ///     非アクティブな再生用複製へ、音量設定適用前の基準音量を引き継ぎます。
+        /// </summary>
+        /// <param name="template"> 複製元のSE Sourceです。 </param>
+        public void CopyBaseVolumeFrom(SoundEffectSource template)
+        {
+            if (template == null || !template.TryEnsureSource() || !TryEnsureSource())
+            {
+                return;
+            }
+
+            _baseVolume = template._baseVolume;
+            _baseVolumeCaptured = true;
+            _source.volume = template._source.volume;
         }
 
         private CriAtomSource _source;
         private PersistentAudioVolumeRegistryView _volumeRegistryView;
+        private float _baseVolume = 1f;
+        private bool _baseVolumeCaptured;
 
         private void Awake()
         {
             _source = GetComponent<CriAtomSource>();
+            CaptureBaseVolume();
         }
 
         private void OnEnable()
@@ -92,11 +124,26 @@ namespace KillChord.Runtime.View.Persistent.Music
             _source = GetComponent<CriAtomSource>();
             if (_source != null)
             {
+                CaptureBaseVolume();
                 return true;
             }
 
             Debug.LogError("[SoundEffectSource] CriAtomSource is not assigned.", this);
             return false;
+        }
+
+        /// <summary>
+        ///     CriAtomSourceに設定されている元の音量を保持します。
+        /// </summary>
+        private void CaptureBaseVolume()
+        {
+            if (_baseVolumeCaptured)
+            {
+                return;
+            }
+
+            _baseVolume = _source.volume;
+            _baseVolumeCaptured = true;
         }
     }
 }

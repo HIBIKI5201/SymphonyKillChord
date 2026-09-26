@@ -54,6 +54,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// 現在の敵位置からの攻撃レイがターゲットに届くかを返します。
         /// </summary>
         public bool CanRaycastHitTarget => CheckCurrentAttackRaycastHitTarget();
+        /// <summary> 攻撃インジケーターのデカールが実際に表示中か。 </summary>
+        public bool IsWarningVisible => _warningDisplayState != WarningDisplayState.Hidden
+            && _attackWarningDecal != null && _attackWarningDecal.isActiveAndEnabled;
 
         /// <summary>
         /// 指定位置からの自由なレイがターゲットに届くかを返します。
@@ -61,7 +64,16 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public bool CheckCanRaycastHitTarget(Vector3 sourcePosition)
         {
-            return CheckRaycastHitTarget(sourcePosition);
+            return CheckRaycastHitTarget(sourcePosition, _attackRange);
+        }
+
+        /// <summary>
+        /// 指定位置から指定距離までの自由なレイがターゲットに届くかを返します。
+        /// 索敵など、攻撃射程と異なる距離での視線判定に使用します。
+        /// </summary>
+        public bool CheckCanRaycastHitTargetAtRange(Vector3 sourcePosition, float maxDistance)
+        {
+            return CheckRaycastHitTarget(sourcePosition, maxDistance);
         }
 
         /// <summary>
@@ -132,20 +144,20 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private bool CheckCurrentAttackRaycastHitTarget()
         {
-            return CheckRaycastHitTarget(transform.position);
+            return CheckRaycastHitTarget(transform.position, _attackRange);
         }
 
         /// <summary>
-        /// 指定位置から飛ばしたレイが最初にターゲットへ到達するかを判定します。
+        /// 指定位置から飛ばしたレイが、指定距離以内で最初にターゲットへ到達するかを判定します。
         /// </summary>
-        private bool CheckRaycastHitTarget(Vector3 sourcePosition)
+        private bool CheckRaycastHitTarget(Vector3 sourcePosition, float maxDistance)
         {
             if (!IsReadyForRaycast())
             {
                 return false;
             }
 
-            int hitCount = CastAndGetHitCount(sourcePosition);
+            int hitCount = CastAndGetHitCount(sourcePosition, maxDistance);
             if (hitCount <= 0)
             {
                 return false;
@@ -156,9 +168,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
-        /// 指定位置からレイを飛ばし、記録されたヒット数を返します。
+        /// 指定位置から指定距離までレイを飛ばし、記録されたヒット数を返します。
         /// </summary>
-        private int CastAndGetHitCount(Vector3 sourcePosition)
+        private int CastAndGetHitCount(Vector3 sourcePosition, float maxDistance)
         {
             Ray ray = CreateRay(sourcePosition);
             if (ray.direction.sqrMagnitude <= Mathf.Epsilon)
@@ -166,7 +178,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return 0;
             }
 
-            return Physics.RaycastNonAlloc(ray, _hitResults, _attackRange, _hitLayers);
+            return Physics.RaycastNonAlloc(ray, _hitResults, maxDistance, _hitLayers);
         }
 
         /// <summary>

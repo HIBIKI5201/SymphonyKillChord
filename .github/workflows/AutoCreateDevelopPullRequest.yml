@@ -1,0 +1,90 @@
+name: AutoCreateDevelopPullRequest
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches:
+      - 'feature/**/master'
+
+jobs:
+  create-draft-pull-request:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Create draft pull request to develop
+        uses: actions/github-script@v7
+        env:
+          MASTER_BRANCH: ${{ github.event.pull_request.base.ref }}
+        with:
+          script: |
+            const head = process.env.MASTER_BRANCH;
+            const base = "develop";
+            const repo = context.repo;
+
+            try {
+              const existingPullRequests = await github.rest.pulls.list({
+                owner: repo.owner,
+                repo: repo.repo,
+                head: `${repo.owner}:${head}`,
+                base: base,
+                state: "open",
+              });
+
+              if (existingPullRequests.data.length > 0) {
+                console.log(`Pull request already exists: ${existingPullRequests.data[0].html_url}`);
+                return;
+              }
+
+              const body = [
+                "## 必須チェック（未チェックのPRは提出しないでください）",
+                "- [ ] コンパイルエラーが無いことを確認した",
+                "- [ ] 変更が関係しうるシーンでPlayModeを最低1回通した",
+                "",
+                "## 概要",
+                `${head} の変更を develop に取り込むための自動生成Draft PRです。`,
+                "",
+                "## 原因",
+                "なし。",
+                "",
+                "## 対処",
+                "feature配下の作業ブランチを同階層のmasterへ集約し、運用規定に従ってdevelopへ取り込みます。",
+                "",
+                "## 確認済みの内容",
+                `- 作業ブランチから ${head} へのPRがマージされたこと。`,
+                "",
+                "## 未確認・残論点",
+                "- コンパイルおよびPlayModeでの動作確認は未実施です。",
+                "",
+                "ご確認いただけますと幸いです。",
+              ].join("\n");
+
+              const pullRequest = await github.rest.pulls.create({
+                owner: repo.owner,
+                repo: repo.repo,
+                title: `${head} → develop`,
+                head: head,
+                base: base,
+                body: body,
+                draft: true,
+              });
+              console.log(`Created draft pull request: ${pullRequest.data.html_url}`);
+            } catch (e) {
+              const details = JSON.stringify(e.response?.data ?? {});
+
+              if (e.status === 403) {
+                core.warning(`Draft pull request was not created because GitHub Actions is not permitted to create pull requests: ${details}`);
+                return;
+              }
+
+              if (e.status === 422 && details.includes("No commits between")) {
+                core.notice(`Draft pull request is unnecessary because there are no commits between ${base} and ${head}.`);
+                return;
+              }
+
+              throw e;
+            }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LitMotion;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -16,6 +17,7 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
     {
         /// <summary>
         ///     指定Configのポストプロセスを開始する。
+        ///     フェードインの秒数が設定されている場合は、現在の強さから設定値まで持ち上げる。
         /// </summary>
         /// <param name="config"> 開始する対象のConfigです。 </param>
         public void Add(PostEffectOverlayConfig config)
@@ -27,8 +29,18 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
 
             if (_overlays.TryGetValue(config, out OverlayEntry entry))
             {
-                // 同じConfigの重複要求は数えるだけで、描画構成は変えない。
-                entry.ReferenceCount++;
+                if (entry.ReferenceCount > 0)
+                {
+                    // 同じConfigの重複要求は数えるだけで、描画構成は変えない。
+                    entry.ReferenceCount++;
+                    return;
+                }
+
+                // フェードアウト中の再要求は、描画資源を作り直さず今の強さから戻す。
+                // 作り直すと強さが一度0まで落ちて絵がちらつき、CameraとVolumeの生成も毎回走る。
+                entry.Handle.TryCancel();
+                entry.ReferenceCount = 1;
+                PlayFadeIn(config, entry);
                 return;
             }
 
@@ -42,15 +54,23 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
             entry = CreateEntry(config);
             _overlays.Add(config, entry);
             ApplyOverlayRendering(entry, true);
+            PlayFadeIn(config, entry);
         }
 
         /// <summary>
         ///     指定Configのポストプロセスを取り下げる。
+        ///     フェードアウトの秒数が設定されている場合は、下がり切ってから破棄する。
         /// </summary>
         /// <param name="config"> 取り下げる対象のConfigです。 </param>
         public void Remove(PostEffectOverlayConfig config)
         {
             if (config == null || !_overlays.TryGetValue(config, out OverlayEntry entry))
+            {
+                return;
+            }
+
+            // フェードアウト中のエントリはすでに取り下げ済みのため、参照数を割り込ませない。
+            if (entry.ReferenceCount <= 0)
             {
                 return;
             }
@@ -61,13 +81,13 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
                 return;
             }
 
-            ApplyOverlayRendering(entry, false);
-            _overlays.Remove(config);
-            DestroyEntry(entry);
+            // フェードインが残っていると開始値が競合するため、今の強さで止める。
+            // 完了させると強さが設定値まで跳ね上がってから落ちるため、取り消しで受け渡す。
+            entry.Handle.TryCancel();
 
-            if (_overlays.Count == 0)
+            if (!TryPlayFadeOut(config, entry))
             {
-                _baseCameraData.renderPostProcessing = _wasPostProcessingEnabled;
+                FinalizeRemove(config, entry);
             }
         }
 
@@ -76,7 +96,7 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
         /// </summary>
         /// <param name="config"> 開始する対象のConfigです。 </param>
         /// <param name="delaySeconds"> 開始までの待機秒数です。0以下なら即座に開始します。 </param>
-        /// <param name="durationSeconds"> 継続する秒数です。0以下なら何もしません。 </param>
+        /// <param name="durationSeconds"> 継続する秒数です。0以下なら何もしません。フェードアウトはこの秒数の経過後に始まります。 </param>
         public void AddForSeconds(PostEffectOverlayConfig config, float delaySeconds, float durationSeconds)
         {
             if (config == null || durationSeconds <= 0f)
@@ -253,8 +273,79 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
             volume.isGlobal = true;
             volume.priority = OVERLAY_VOLUME_PRIORITY;
             volume.sharedProfile = config.VolumeProfile;
-            volume.weight = config.VolumeWeight;
+
+            // 強さはフェードで持ち上げるため、生成時点では効かせない。
+            volume.weight = 0f;
             return volume;
+        }
+
+        /// <summary>
+        ///     Volumeの強さを現在値からConfigの設定値まで持ち上げる。
+        /// </summary>
+        /// <param name="config"> 適用する対象のConfigです。 </param>
+        /// <param name="entry"> 対象のエントリです。 </param>
+        private void PlayFadeIn(PostEffectOverlayConfig config, OverlayEntry entry)
+        {
+            if (entry.Volume == null)
+            {
+                return;
+            }
+
+            // フェード時間が無い場合はモーションを作らず、そのフレームから効かせる。
+            if (config.FadeInSeconds <= 0f)
+            {
+                entry.Volume.weight = config.VolumeWeight;
+                return;
+            }
+
+            entry.Handle = LMotion.Create(entry.Volume.weight, config.VolumeWeight, config.FadeInSeconds)
+                .WithEase(config.FadeEase)
+                .WithScheduler(MotionScheduler.Update)
+                .Bind(entry.Volume, static (weight, volume) => volume.weight = weight);
+        }
+
+        /// <summary>
+        ///     Volumeの強さを0まで下げ、下がり切った時点で破棄するモーションを開始する。
+        /// </summary>
+        /// <param name="config"> 取り下げる対象のConfigです。 </param>
+        /// <param name="entry"> 対象のエントリです。 </param>
+        /// <returns> フェードアウトを開始できた場合はtrue。 </returns>
+        private bool TryPlayFadeOut(PostEffectOverlayConfig config, OverlayEntry entry)
+        {
+            if (entry.Volume == null || config.FadeOutSeconds <= 0f)
+            {
+                return false;
+            }
+
+            entry.Handle = LMotion.Create(entry.Volume.weight, 0f, config.FadeOutSeconds)
+                .WithEase(config.FadeEase)
+                .WithScheduler(MotionScheduler.Update)
+                .WithOnComplete(() => FinalizeRemove(config, entry))
+                .Bind(entry.Volume, static (weight, volume) => volume.weight = weight);
+            return true;
+        }
+
+        /// <summary>
+        ///     取り下げの後始末として描画構成を戻し、エントリを破棄する。
+        /// </summary>
+        /// <param name="config"> 取り下げる対象のConfigです。 </param>
+        /// <param name="entry"> 対象のエントリです。 </param>
+        private void FinalizeRemove(PostEffectOverlayConfig config, OverlayEntry entry)
+        {
+            // フェードアウトの完了と秒数未設定時の即時取り下げの双方から呼ばれるため、二重実行を弾く。
+            if (!_overlays.TryGetValue(config, out OverlayEntry current) || current != entry)
+            {
+                return;
+            }
+
+            ApplyOverlayRendering(entry, false);
+            _overlays.Remove(config);
+            DestroyEntry(entry);
+
+            if (_overlays.Count == 0)
+            {
+                _baseCameraData.renderPostProcessing = _wasPostProcessingEnabled;
+            }
         }
 
         /// <summary>
@@ -334,6 +425,9 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
         /// <param name="entry"> 破棄する対象のエントリです。 </param>
         private void DestroyEntry(OverlayEntry entry)
         {
+            // 破棄後のVolumeへモーションが書き込まないよう、先に止める。
+            entry.Handle.TryCancel();
+
             if (entry.Volume != null)
             {
                 Destroy(entry.Volume.gameObject);
@@ -372,8 +466,11 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
             /// <summary> 適用するVolumeです。 </summary>
             public Volume Volume { get; }
 
-            /// <summary> 現在の要求数です。 </summary>
+            /// <summary> 現在の要求数です。0以下はフェードアウト中を表します。 </summary>
             public int ReferenceCount { get; set; }
+
+            /// <summary> Volumeの強さを変化させている再生中のモーションです。 </summary>
+            public MotionHandle Handle { get; set; }
         }
 
         /// <summary>

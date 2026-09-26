@@ -1,0 +1,25 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
+import GameplayCarousel from '../components/GameplayCarousel.astro';
+---
+
+<Layout title="ゲームプレイ | Symphony Kill Chord" description="リズムコマンド戦闘・キルコード編成・同期する戦場など、ゲームプレイの仕組みを紹介。">
+	<main>
+		<PageHeader eyebrow="Gameplay" title="ゲームプレイ" />
+
+		<GameplayCarousel />
+	</main>
+
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		width: 100%;
+		max-width: 1080px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+</style>

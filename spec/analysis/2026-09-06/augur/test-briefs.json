@@ -1,0 +1,1387 @@
+{
+  "planId": "plan_01M1VR4ZQP8NNJXJENGNPGT7VY",
+  "author": "session",
+  "briefs": [
+    {
+      "key": "assurance:0140074059659583",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
+      "brief": {
+        "title": "Assurance: Show",
+        "purpose": "Prove the observable contract of Show for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Show",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistry.cs",
+          "line": 41
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:0557f5d00760cc09",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
+      "brief": {
+        "title": "Assurance: ExcludeFromNavigation",
+        "purpose": "Prove the observable contract of ExcludeFromNavigation for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "ExcludeFromNavigation",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensions.cs",
+          "line": 144
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:0a218b7f2da09642",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "brief": {
+        "title": "Assurance: Dispose",
+        "purpose": "Prove the observable contract of Dispose for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Dispose",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryView.cs",
+          "line": 39
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:0a83a1fa6a3219c9",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "brief": {
+        "title": "Assurance: Disable",
+        "purpose": "Prove the observable contract of Disable for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Disable",
+          "file": "Assets/Settings/Input/KillChordInputActioMap.cs",
+          "line": 1809
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:17d5e20a16b59f51",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+      "brief": {
+        "title": "Assurance: RegisterScreenGeometryCallback",
+        "purpose": "Prove the observable contract of RegisterScreenGeometryCallback for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "RegisterScreenGeometryCallback",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportView.cs",
+          "line": 406
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:1a2ad96fbe4e5946",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "brief": {
+        "title": "Assurance: RegisterCallbacks",
+        "purpose": "Prove the observable contract of RegisterCallbacks for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "RegisterCallbacks",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryView.cs",
+          "line": 68
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:1ddf65e619a0f818",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "brief": {
+        "title": "Assurance: Disable",
+        "purpose": "Prove the observable contract of Disable for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Disable",
+          "file": "Assets/Settings/Input/KillChordInputActioMap.cs",
+          "line": 1626
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:1f707dd2c1be1094",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
+      "brief": {
+        "title": "Assurance: SaveSkillUnlockData",
+        "purpose": "Prove the observable contract of SaveSkillUnlockData for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "SaveSkillUnlockData",
+          "file": "Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeService.cs",
+          "line": 175
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:20d002cd2d40ecd4",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "brief": {
+        "title": "Assurance: Show",
+        "purpose": "Prove the observable contract of Show for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Show",
+          "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+          "line": 39
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:24dc0b735591edcd",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+      "brief": {
+        "title": "Assurance: Initialize",
+        "purpose": "Prove the observable contract of Initialize for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Initialize",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializer.cs",
+          "line": 214
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:24fb5b5e2b47d604",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "brief": {
+        "title": "Assurance: HandleSystemCategoryClickedHandler",
+        "purpose": "Prove the observable contract of HandleSystemCategoryClickedHandler for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "HandleSystemCategoryClickedHandler",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryView.cs",
+          "line": 87
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:26b99788c93111c2",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "brief": {
+        "title": "Assurance: SelectButton",
+        "purpose": "Prove the observable contract of SelectButton for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "SelectButton",
+          "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+          "line": 604
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:27db24ed3f3cc02b",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "brief": {
+        "title": "Assurance: RebuildSubMissionItems",
+        "purpose": "Prove the observable contract of RebuildSubMissionItems for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "RebuildSubMissionItems",
+          "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+          "line": 541
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:294f18693cd49424",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
+      "brief": {
+        "title": "Assurance: Show",
+        "purpose": "Prove the observable contract of Show for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Show",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBase.cs",
+          "line": 46
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:2ef7d0a8a4da080c",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+      "brief": {
+        "title": "Assurance: PrepareFocusAfterLayout",
+        "purpose": "Prove the observable contract of PrepareFocusAfterLayout for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "PrepareFocusAfterLayout",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportView.cs",
+          "line": 188
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:2f12b4320d414883",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+      "brief": {
+        "title": "Assurance: HandleSkillTreeScreenShownHandler",
+        "purpose": "Prove the observable contract of HandleSkillTreeScreenShownHandler for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "HandleSkillTreeScreenShownHandler",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializer.cs",
+          "line": 673
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:3177dc227d910a09",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensionsTests.cs",
+      "brief": {
+        "title": "Assurance: EnableSubmitAsClick",
+        "purpose": "Prove the observable contract of EnableSubmitAsClick for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "EnableSubmitAsClick",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Navigation/UINavigationExtensions.cs",
+          "line": 72
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:389d4541b3d2efd3",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBaseTests.cs",
+      "brief": {
+        "title": "Assurance: Dispose",
+        "purpose": "Prove the observable contract of Dispose for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Dispose",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Screen/ScreenViewBase.cs",
+          "line": 104
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:3c325b7fe78da3cd",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "brief": {
+        "title": "Assurance: Require",
+        "purpose": "Prove the observable contract of Require for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Require",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryView.cs",
+          "line": 128
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:41c05a8dc16e3688",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+      "brief": {
+        "title": "Assurance: IsFinite",
+        "purpose": "Prove the observable contract of IsFinite for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "IsFinite",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportView.cs",
+          "line": 398
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:4c5853964e4b4e68",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenViewTests.cs",
+      "brief": {
+        "title": "Assurance: Show",
+        "purpose": "Prove the observable contract of Show for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Show",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenView.cs",
+          "line": 35
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:4f2b0a7a8c129941",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
+      "brief": {
+        "title": "Assurance: TryGetNearestLockedNodeIdsFromStart",
+        "purpose": "Prove the observable contract of TryGetNearestLockedNodeIdsFromStart for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "TryGetNearestLockedNodeIdsFromStart",
+          "file": "Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeService.cs",
+          "line": 73
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:51a9e55ef7890ff6",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipControllerTests.cs",
+      "brief": {
+        "title": "Assurance: Dispose",
+        "purpose": "Prove the observable contract of Dispose for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Dispose",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementControllerEquipController.cs",
+          "line": 94
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:52a8724cf84c0f91",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
+      "brief": {
+        "title": "Assurance: TryBuildStageMapElements",
+        "purpose": "Prove the observable contract of TryBuildStageMapElements for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "TryBuildStageMapElements",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializer.cs",
+          "line": 550
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:53cb1cc741e385a8",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "brief": {
+        "title": "Assurance: Hide",
+        "purpose": "Prove the observable contract of Hide for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Hide",
+          "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+          "line": 64
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:590a658a71ff8fab",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenViewTests.cs",
+      "brief": {
+        "title": "Assurance: Dispose",
+        "purpose": "Prove the observable contract of Dispose for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Dispose",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenView.cs",
+          "line": 28
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:5ecf0519b538cdc2",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportViewTests.cs",
+      "brief": {
+        "title": "Assurance: IsElementVisible",
+        "purpose": "Prove the observable contract of IsElementVisible for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "IsElementVisible",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillTreeViewportView.cs",
+          "line": 356
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:5fa78ef9efe662bc",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneViewTests.cs",
+      "brief": {
+        "title": "Assurance: Dispose",
+        "purpose": "Prove the observable contract of Dispose for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Dispose",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneView.cs",
+          "line": 60
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:710b299249a0f158",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "brief": {
+        "title": "Assurance: RestoreInteraction",
+        "purpose": "Prove the observable contract of RestoreInteraction for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "RestoreInteraction",
+          "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+          "line": 592
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:71140ea94e4101d0",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "brief": {
+        "title": "Assurance: OnRetryButtonClicked",
+        "purpose": "Prove the observable contract of OnRetryButtonClicked for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "OnRetryButtonClicked",
+          "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+          "line": 114
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:737b959a374e37f4",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializerTests.cs",
+      "brief": {
+        "title": "Assurance: Subscribe",
+        "purpose": "Prove the observable contract of Subscribe for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Subscribe",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/SkillTree/SkillTreeInitializer.cs",
+          "line": 547
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:7c4fb4678891c72d",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScopeTests.cs",
+      "brief": {
+        "title": "Assurance: Activate",
+        "purpose": "Prove the observable contract of Activate for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Activate",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Navigation/ModalNavigationScope.cs",
+          "line": 26
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:80fc6983794dc3cc",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "brief": {
+        "title": "Assurance: SettingCategoryView",
+        "purpose": "Prove the observable contract of SettingCategoryView for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "SettingCategoryView",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryView.cs",
+          "line": 14
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:83e617b24c6a2fe8",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryViewTests.cs",
+      "brief": {
+        "title": "Assurance: HandleSoundCategoryClickedHandler",
+        "purpose": "Prove the observable contract of HandleSoundCategoryClickedHandler for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "HandleSoundCategoryClickedHandler",
+          "file": "Assets/Scripts/Runtime/4.View/OutGame/Setting/SettingCategoryView.cs",
+          "line": 78
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:8ea4fbd363c0bd01",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistryTests.cs",
+      "brief": {
+        "title": "Assurance: Dispose",
+        "purpose": "Prove the observable contract of Dispose for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Dispose",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/Title/TitleScreenViewRegistry.cs",
+          "line": 127
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:9765882327876cb7",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "brief": {
+        "title": "Assurance: Enable",
+        "purpose": "Prove the observable contract of Enable for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Enable",
+          "file": "Assets/Settings/Input/KillChordInputActioMap.cs",
+          "line": 1624
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:97fb1c763adf37aa",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "brief": {
+        "title": "Assurance: Disable",
+        "purpose": "Prove the observable contract of Disable for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Disable",
+          "file": "Assets/Settings/Input/KillChordInputActioMap.cs",
+          "line": 1489
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:9d05c6b3af0908fc",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeServiceTests.cs",
+      "brief": {
+        "title": "Assurance: ResetSkillTreeAsync",
+        "purpose": "Prove the observable contract of ResetSkillTreeAsync for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "ResetSkillTreeAsync",
+          "file": "Assets/Scripts/Runtime/2.Application/OutGame/SkillTree/SkillTreeService.cs",
+          "line": 251
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:a93b2f79338bfffc",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+      "brief": {
+        "title": "Assurance: Hide",
+        "purpose": "Prove the observable contract of Hide for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Hide",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistry.cs",
+          "line": 66
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:b03a6e106771944f",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "brief": {
+        "title": "Assurance: Enable",
+        "purpose": "Prove the observable contract of Enable for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Enable",
+          "file": "Assets/Settings/Input/KillChordInputActioMap.cs",
+          "line": 1487
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:b8848fa2ad1d10fe",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+      "brief": {
+        "title": "Assurance: Dispose",
+        "purpose": "Prove the observable contract of Dispose for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Dispose",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistry.cs",
+          "line": 115
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:bc4aa4e8c320e8cf",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "brief": {
+        "title": "Assurance: ClearSelection",
+        "purpose": "Prove the observable contract of ClearSelection for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "ClearSelection",
+          "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+          "line": 620
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:c0d797162398bd7c",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializerTests.cs",
+      "brief": {
+        "title": "Assurance: SetupSkillElement",
+        "purpose": "Prove the observable contract of SetupSkillElement for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "SetupSkillElement",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializer.cs",
+          "line": 211
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:c5ebbc472f549f94",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Result/StageResultViewTests.cs",
+      "brief": {
+        "title": "Assurance: OnCompleteButtonClicked",
+        "purpose": "Prove the observable contract of OnCompleteButtonClicked for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "OnCompleteButtonClicked",
+          "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+          "line": 82
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:d173bd129c07d7e5",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/Persistent/Music/MusicPlayerTests.cs",
+      "brief": {
+        "title": "Assurance: Initialize",
+        "purpose": "Prove the observable contract of Initialize for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Initialize",
+          "file": "Assets/Scripts/Runtime/4.View/Persistent/Music/MusicPlayer.cs",
+          "line": 33
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:d85ed2533ad70209",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "brief": {
+        "title": "Assurance: Disable",
+        "purpose": "Prove the observable contract of Disable for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Disable",
+          "file": "Assets/Settings/Input/KillChordInputActioMap.cs",
+          "line": 1382
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:e0c25f7dd4c86271",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistryTests.cs",
+      "brief": {
+        "title": "Assurance: Show",
+        "purpose": "Prove the observable contract of Show for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Show",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/Screen/ScreenViewRegistry.cs",
+          "line": 39
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:e16a7970803777a7",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializerTests.cs",
+      "brief": {
+        "title": "Assurance: ExecutePendingNodeTransitionAsync",
+        "purpose": "Prove the observable contract of ExecutePendingNodeTransitionAsync for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "ExecutePendingNodeTransitionAsync",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/StageSelect/StageSelectInitializer.cs",
+          "line": 955
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:e4eefd3e5b77c9da",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillTreeFocusPresenterTests.cs",
+      "brief": {
+        "title": "Assurance: Push",
+        "purpose": "Prove the observable contract of Push for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Push",
+          "file": "Assets/Scripts/Runtime/3.Adaptor/OutGame/SkillTree/SkillTreeFocusPresenter.cs",
+          "line": 31
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:e73afaff382545e9",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemViewTests.cs",
+      "brief": {
+        "title": "Assurance: Initialize",
+        "purpose": "Prove the observable contract of Initialize for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Initialize",
+          "file": "Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemView.cs",
+          "line": 45
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:f31fa31f9eb8b115",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "brief": {
+        "title": "Assurance: Enable",
+        "purpose": "Prove the observable contract of Enable for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Enable",
+          "file": "Assets/Settings/Input/KillChordInputActioMap.cs",
+          "line": 1380
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:ff9678396d015369",
+      "file": "Assets/Tests/EditMode/Assets/Settings/Input/KillChordInputActioMapTests.cs",
+      "brief": {
+        "title": "Assurance: Enable",
+        "purpose": "Prove the observable contract of Enable for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Enable",
+          "file": "Assets/Settings/Input/KillChordInputActioMap.cs",
+          "line": 1807
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    },
+    {
+      "key": "assurance:ffa3d3d2bee4fa97",
+      "file": "Assets/Tests/EditMode/Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializerTests.cs",
+      "brief": {
+        "title": "Assurance: Initialize",
+        "purpose": "Prove the observable contract of Initialize for the changed behavior and its impacted callers.",
+        "subject": {
+          "symbol": "Initialize",
+          "file": "Assets/Scripts/Runtime/6.Composition/OutGame/SkillBuild/SkillBuildInitializer.cs",
+          "line": 136
+        },
+        "risks": [
+          "contract"
+        ],
+        "exemplars": [],
+        "mustAssert": [
+          "the subject's observable return value or state change",
+          "public preconditions, postconditions, and compatibility behavior"
+        ],
+        "mustNot": [
+          "network",
+          "real database",
+          "sleep"
+        ]
+      }
+    }
+  ],
+  "authored": [],
+  "failed": [],
+  "dropped": []
+}

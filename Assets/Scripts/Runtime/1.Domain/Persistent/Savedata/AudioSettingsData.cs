@@ -16,9 +16,9 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <param name="soundEffectVolume"> 効果音音量。 </param>
         /// <param name="voiceVolume"> ボイス音量。 </param>
         public AudioSettingsData(
-            int bgmVolume = DEFAULT_VOLUME,
-            int soundEffectVolume = DEFAULT_VOLUME,
-            int voiceVolume = DEFAULT_VOLUME)
+            int bgmVolume = DEFAULT_BGM_VOLUME,
+            int soundEffectVolume = DEFAULT_SOUND_EFFECT_VOLUME,
+            int voiceVolume = DEFAULT_VOICE_VOLUME)
         {
             SetVolumes(bgmVolume, soundEffectVolume, voiceVolume);
         }
@@ -34,7 +34,15 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
 
         public const int MIN_VOLUME = 0;
         public const int MAX_VOLUME = 10;
-        public const int DEFAULT_VOLUME = 5;
+
+        /// <summary> BGMの既定音量。 </summary>
+        public const int DEFAULT_BGM_VOLUME = 5;
+
+        /// <summary> 効果音の既定音量。 </summary>
+        public const int DEFAULT_SOUND_EFFECT_VOLUME = 4;
+
+        /// <summary> ボイスの既定音量。ボイスは他より小さく聞こえるため個別に設定する。 </summary>
+        public const int DEFAULT_VOICE_VOLUME = 8;
 
         /// <summary>
         ///     BGM音量を設定する。
@@ -79,13 +87,13 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         }
 
         [SerializeField, Tooltip("BGM音量（0～10）")]
-        private int _bgmVolume = DEFAULT_VOLUME;
+        private int _bgmVolume = DEFAULT_BGM_VOLUME;
 
         [SerializeField, Tooltip("効果音音量（0～10）")]
-        private int _soundEffectVolume = DEFAULT_VOLUME;
+        private int _soundEffectVolume = DEFAULT_SOUND_EFFECT_VOLUME;
 
         [SerializeField, Tooltip("ボイス音量（0～10）")]
-        private int _voiceVolume = DEFAULT_VOLUME;
+        private int _voiceVolume = DEFAULT_VOICE_VOLUME;
 
         /// <summary>
         ///     音量を有効範囲へ制限する。

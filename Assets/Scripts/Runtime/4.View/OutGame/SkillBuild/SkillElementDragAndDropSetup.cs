@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
 using System;
 using System.Collections.Generic;
@@ -17,10 +18,15 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// </summary>
         /// <param name="uiDocument"> ドキュメントの UIDocument。 </param>
         /// <param name="skillBuildViewModel"> 一時スロット状態を保持する ViewModel。 </param>
-        public SkillElementDragAndDropSetup(UIDocument uiDocument, ISkillBuildViewModel skillBuildViewModel)
+        /// <param name="soundEffectCommand"> UI操作音の再生コマンド。 </param>
+        public SkillElementDragAndDropSetup(
+            UIDocument uiDocument,
+            ISkillBuildViewModel skillBuildViewModel,
+            IUISoundEffectCommand soundEffectCommand)
         {
             _uiDocument = uiDocument ?? throw new ArgumentNullException(nameof(uiDocument));
             _skillBuildViewModel = skillBuildViewModel ?? throw new ArgumentNullException(nameof(skillBuildViewModel));
+            _soundEffectCommand = soundEffectCommand;
 
             VisualElement root = _uiDocument.rootVisualElement;
             SetupDraggables(root);
@@ -28,8 +34,10 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
         private readonly UIDocument _uiDocument;
         private readonly ISkillBuildViewModel _skillBuildViewModel;
+        private readonly IUISoundEffectCommand _soundEffectCommand;
 
         private const string DRAGGABLE_CLASSNAME = "draggable";
+        private const string LOCKED_CLASSNAME = "is-locked";
         private const string SKILL_ELEMENT_CONTAINER_CLASSNAME = "skill-element-container";
         private const string SKILL_ELEMENT_SLOT_CLASSNAME = "skill-element-slot";
         /// <summary>
@@ -39,7 +47,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="element"> セットアップ対象の VisualElement。 </param>
         public void SetupDraggable(VisualElement element)
         {
-            if (element == null)
+            // 未解放カードにも選択操作は登録されるが、ドラッグによる装備は許可しない。
+            if (element == null || element.ClassListContains(LOCKED_CLASSNAME))
             {
                 return;
             }
@@ -48,7 +57,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 element,
                 OnSkillElementDrop,
                 slotContainerName: SKILL_ELEMENT_CONTAINER_CLASSNAME,
-                slotName: SKILL_ELEMENT_SLOT_CLASSNAME);
+                slotName: SKILL_ELEMENT_SLOT_CLASSNAME,
+                onDragStarted: OnSkillElementDragStarted);
 
             element.AddManipulator(manipulator);
         }
@@ -66,6 +76,20 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             {
                 SetupDraggable(draggables[i]);
             }
+        }
+
+        /// <summary>
+        ///     スキル要素のドラッグが確定したときに、そのスキルを詳細パネルの表示対象として選択する。
+        /// </summary>
+        /// <param name="skill"> ドラッグ中のスキル要素の VisualElement。 </param>
+        private void OnSkillElementDragStarted(VisualElement skill)
+        {
+            if (skill?.userData is not int skillId)
+            {
+                return;
+            }
+
+            _skillBuildViewModel.SelectSkill(skillId);
         }
 
         /// <summary>
@@ -91,7 +115,14 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             }
 
             int? destinationSlotIndex = FindSlotIndex(slot);
+            bool playsSkillSetSound =
+                destinationSlotIndex.HasValue &&
+                IsDifferentSkillSet(skillId, destinationSlotIndex.Value);
             _skillBuildViewModel.ApplyDrop(skillId, destinationSlotIndex);
+            if (playsSkillSetSound)
+            {
+                _soundEffectCommand?.Play(UISoundEffectKind.SkillSet);
+            }
 
 #if UNITY_EDITOR
             Debug.Log($"{skill?.name} が {slot.name} にドロップされました。");
@@ -122,6 +153,27 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             throw new InvalidOperationException(
                 $"[{nameof(SkillElementDragAndDropSetup)}] ドロップ先スロットがルート要素内に見つかりません。");
+        }
+
+        /// <summary>
+        ///     移動先スロットへ別のスキルがセットされるか判定する。
+        /// </summary>
+        /// <param name="skillId"> ドロップされたスキル ID。 </param>
+        /// <param name="destinationSlotIndex"> 移動先スロット番号。 </param>
+        /// <returns> 移動先スロットの内容が変わる場合は true。 </returns>
+        private bool IsDifferentSkillSet(int skillId, int destinationSlotIndex)
+        {
+            IReadOnlyList<SkillBuildSlotState> slots = _skillBuildViewModel.Slots.CurrentValue;
+            for (int i = 0; i < slots.Count; i++)
+            {
+                SkillBuildSlotState slot = slots[i];
+                if (slot.SlotIndex == destinationSlotIndex)
+                {
+                    return slot.CurrentSkillId != skillId;
+                }
+            }
+
+            return false;
         }
     }
 }

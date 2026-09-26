@@ -1,146 +1,113 @@
 using System;
 using System.Collections.Generic;
 using LitMotion;
-using LitMotion.Extensions;
+using TMPro;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Result
 {
     /// <summary>
-    ///     UI要素を左から本来の位置へ右方向にスライドインさせる共通演出です。
-    ///     LitMotionでanchoredPositionとCanvasGroup.alphaを同時に動かします。
+    ///     文字の描画頂点だけを動かし、レイアウトと入力領域を保持します。
     /// </summary>
-    internal static class ResultTextSlideIn
+    internal sealed class ResultTextSlideIn : IDisposable
     {
         /// <summary>
-        ///     対象を本来の位置から左へ寄せてから、右方向へスライドインさせます。
+        ///     Timelineでの表示順を待つ文字を開始位置に準備します。
         /// </summary>
-        /// <param name="target"> 動かすRectTransform。 </param>
-        /// <param name="endAnchoredPosition"> スライドインの終点となる本来のanchoredPosition。 </param>
-        /// <param name="setting"> 演出設定。 </param>
-        /// <param name="delay"> 再生開始までの遅延（秒）。 </param>
-        /// <param name="handles"> 生成したモーションハンドルの追加先。 </param>
-        public static void Play(
-            RectTransform target,
-            Vector2 endAnchoredPosition,
-            ResultTextSlideInSetting setting,
-            float delay,
-            List<MotionHandle> handles,
-            Action onCompleted = null)
+        public ResultTextSlideIn(TMP_Text text, ResultTextSlideInSetting setting)
         {
-            if (target == null || setting == null || !setting.IsEnabled)
+            _text = text;
+            _setting = setting;
+            _text.OnPreRenderText += HandlePreRenderText;
+            RefreshMesh();
+        }
+
+        /// <summary>
+        ///     待機中の文字を表示位置へ動かします。
+        /// </summary>
+        public void Play(List<MotionHandle> handles, Action onCompleted, float delay = 0f)
+        {
+            if (_setting.Duration <= 0f)
             {
+                Dispose();
                 onCompleted?.Invoke();
                 return;
             }
 
-            CanvasGroup canvasGroup =
-                setting.UseFade ? EnsureCanvasGroup(target.gameObject) : null;
-
-            if (setting.Duration <= 0f)
-            {
-                ApplyEndState(target, endAnchoredPosition, canvasGroup);
-                onCompleted?.Invoke();
-                return;
-            }
-
-            Vector2 startAnchoredPosition =
-                new(endAnchoredPosition.x - setting.Distance, endAnchoredPosition.y);
-
-            // WithDelayの待機中はバインドが走らず終点のまま見えてしまうため、
-            // 開始状態を先に反映しておく。
-            target.anchoredPosition = startAnchoredPosition;
-
-            if (canvasGroup != null)
-            {
-                canvasGroup.alpha = 0f;
-            }
-
-            MotionHandle positionHandle =
-                LMotion.Create(
-                        startAnchoredPosition,
-                        endAnchoredPosition,
-                        setting.Duration)
-                    .WithDelay(delay)
-                    .WithEase(setting.Ease)
-                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
-                    .WithOnComplete(() => onCompleted?.Invoke())
-                    .BindToAnchoredPosition(target)
-                    .AddTo(target.gameObject);
-
-            handles?.Add(positionHandle);
-            if (canvasGroup == null)
-            {
-                return;
-            }
-
-            MotionHandle alphaHandle =
-                LMotion.Create(0f, 1f, setting.Duration)
-                    .WithDelay(delay)
-                    .WithEase(setting.Ease)
-                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
-                    .BindToAlpha(canvasGroup)
-                    .AddTo(target.gameObject);
-
-            handles?.Add(alphaHandle);
+            MotionHandle handle = LMotion.Create(0f, 1f, _setting.Duration)
+                .WithDelay(delay)
+                .WithEase(_setting.Ease)
+                .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                .WithOnComplete(() =>
+                {
+                    Dispose();
+                    onCompleted?.Invoke();
+                })
+                .Bind(progress =>
+                {
+                    _progress = progress;
+                    RefreshMesh();
+                });
+            handles.Add(handle);
         }
 
         /// <summary>
-        ///     再生中のスライドインを停止し、ハンドルを破棄します。
+        ///     描画フックを解放し、途中終了でも元の文字表示へ戻します。
         /// </summary>
-        /// <param name="handles"> 停止するモーションハンドル一覧。 </param>
-        public static void Stop(List<MotionHandle> handles)
+        public void Dispose()
         {
-            if (handles == null)
+            if (_disposed)
             {
                 return;
             }
 
-            for (int i = 0; i < handles.Count; i++)
+            _disposed = true;
+            if (_text != null)
             {
-                handles[i].TryCancel();
+                _text.OnPreRenderText -= HandlePreRenderText;
+                RefreshMesh();
             }
-
-            handles.Clear();
         }
 
+        private readonly TMP_Text _text;
+        private readonly ResultTextSlideInSetting _setting;
+        private float _progress;
+        private bool _disposed;
+
         /// <summary>
-        ///     対象を演出終了後の表示状態へ戻します。
+        ///     TMPが生成した新しい頂点へ表示オフセットと透明度を適用します。
         /// </summary>
-        /// <param name="target"> 対象のRectTransform。 </param>
-        /// <param name="endAnchoredPosition"> 本来のanchoredPosition。 </param>
-        /// <param name="canvasGroup"> フェードに使用したCanvasGroup。未使用ならnull。 </param>
-        public static void ApplyEndState(
-            RectTransform target,
-            Vector2 endAnchoredPosition,
-            CanvasGroup canvasGroup)
+        private void HandlePreRenderText(TMP_TextInfo info)
         {
-            if (target == null)
+            Vector3 offset = Vector3.left * (_setting.Distance * (1f - _progress));
+            float alpha = _setting.UseFade ? Mathf.Clamp01(_progress) : 1f;
+            for (int index = 0; index < info.characterCount; index++)
             {
-                return;
-            }
+                TMP_CharacterInfo character = info.characterInfo[index];
+                if (!character.isVisible)
+                {
+                    continue;
+                }
 
-            target.anchoredPosition = endAnchoredPosition;
-
-            if (canvasGroup != null)
-            {
-                canvasGroup.alpha = 1f;
+                TMP_MeshInfo mesh = info.meshInfo[character.materialReferenceIndex];
+                for (int corner = 0; corner < 4; corner++)
+                {
+                    int vertex = character.vertexIndex + corner;
+                    mesh.vertices[vertex] += offset;
+                    mesh.colors32[vertex].a = (byte)(mesh.colors32[vertex].a * alpha);
+                }
             }
         }
 
         /// <summary>
-        ///     指定GameObjectにCanvasGroupを確保します。
+        ///     元の文字情報から再生成し、オフセットの累積を防ぎます。
         /// </summary>
-        /// <param name="gameObject"> 対象のGameObject。 </param>
-        /// <returns> 確保したCanvasGroup。 </returns>
-        private static CanvasGroup EnsureCanvasGroup(GameObject gameObject)
+        private void RefreshMesh()
         {
-            if (!gameObject.TryGetComponent(out CanvasGroup canvasGroup))
+            if (_text != null && _text.isActiveAndEnabled)
             {
-                canvasGroup = gameObject.AddComponent<CanvasGroup>();
+                _text.ForceMeshUpdate();
             }
-
-            return canvasGroup;
         }
     }
 }

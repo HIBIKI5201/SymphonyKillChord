@@ -1,8 +1,10 @@
 using SymphonyFrameWork.Utility;
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using KillChord.Editor.SourceDataProvider.Core;
 using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEditor.Build.Reporting;
@@ -127,6 +129,11 @@ namespace KillChord.Editor.AutoBuilder
         private const int MAX_CAPTURED_LOG_COUNT = 50;
 
         /// <summary>
+        ///     プロファイル切替や明示的なアセット更新に伴う再コンパイルの待機上限です。
+        /// </summary>
+        private const int EXTENDED_EDITOR_READY_TIMEOUT_SECONDS = 900;
+
+        /// <summary>
         ///     ドメインリロードによる再試行が同一プロファイルに対して許容される最大回数です。
         ///     超過した場合はそのプロファイルを失敗としてスキップし、次のプロファイルへ進めます。
         /// </summary>
@@ -215,12 +222,12 @@ namespace KillChord.Editor.AutoBuilder
         /// <param name="type"> ログ種別です。 </param>
         private static void HandleLogMessage(string message, string stackTrace, LogType type)
         {
-            LogDebug("ログメッセージ捕捉処理を開始");
             if (type != LogType.Error && type != LogType.Exception && type != LogType.Assert)
             {
                 return;
             }
 
+            LogDebug("ログメッセージ捕捉処理を開始");
             if (!IsRunning)
             {
                 return;
@@ -464,10 +471,17 @@ namespace KillChord.Editor.AutoBuilder
                 Debug.Log($"[{nameof(AutoBuildExecuter)}] Start Build : {profile.name}");
                 ShowBuildProgress(session, $"{profile.name} をビルドしています。");
 
+                // 体験版Profileは、グローバルのシーン一覧に終了シーンを加えた一覧へ揃えてからビルドする。
+                GameDataVariantProfiles.SynchronizeDemoScenes(profile);
+
                 // Profile切替。
                 BuildProfile.SetActiveBuildProfile(profile);
 
-                await WaitForEditorReady();
+                // プラットフォーム切替（特にAndroid/iOS）はスクリプトの全再コンパイルを
+                // 引き起こすことがあり、Libraryがまっさらな状態では120秒を超えることがある。
+                // 明示的なアセット更新時と同じく長めに待つ（超過時は例外を投げてこの
+                // プロファイルをスキップする挙動は変えない）。
+                await WaitForEditorReady(timeoutSeconds: EXTENDED_EDITOR_READY_TIMEOUT_SECONDS);
                 LogDebug($"プロファイル切替後のエディタ準備完了: {profile.name}");
 
                 string[] scenes = profile.GetScenesForBuild()
@@ -511,7 +525,9 @@ namespace KillChord.Editor.AutoBuilder
 
                 AssetDatabase.Refresh(ImportAssetOptions.DontDownloadFromCacheServer);
 
-                await WaitForEditorReady();
+                // クリーンなCI環境では、上記Refreshによる初回インポートと再コンパイルが
+                // デフォルトの120秒を超えるため、プロファイル切替時と同じ上限で待機する。
+                await WaitForEditorReady(timeoutSeconds: EXTENDED_EDITOR_READY_TIMEOUT_SECONDS);
                 LogDebug($"プレイヤービルド直前のエディタ準備完了: {profile.name}");
 
                 int executePlayerBuildRetryCount = 0;
@@ -565,6 +581,17 @@ namespace KillChord.Editor.AutoBuilder
                     catch (Exception exception)
                     {
                         Debug.LogException(exception);
+                        hasFailure = true;
+                    }
+
+                    // プロファイルごとにZIP化・元データ削除を行い、ディスク使用量を1プロファイル分に抑える。
+                    // 失敗したプロファイルはZIP化せず削除し、リリース対象へ含めない。
+                    if (hasFailure)
+                    {
+                        TryDeleteFailedBuildOutput(buildDir, profile.name);
+                    }
+                    else if (!TryArchiveBuildOutput(buildDir, profile.name, session.OutputPath))
+                    {
                         hasFailure = true;
                     }
 
@@ -662,6 +689,170 @@ namespace KillChord.Editor.AutoBuilder
 
             // 念のためさらに1フレーム待つ。
             await Awaitable.NextFrameAsync();
+        }
+
+        /// <summary>
+        ///     失敗したプロファイルのビルド出力ディレクトリを削除します。
+        /// </summary>
+        /// <param name="buildDir"> 削除対象のビルド出力ディレクトリです。 </param>
+        /// <param name="profileName"> ビルドプロファイル名です（ログ表示用）。 </param>
+        private static void TryDeleteFailedBuildOutput(string buildDir, string profileName)
+        {
+            LogDebug($"失敗したビルド出力の削除処理を開始: {profileName}");
+
+            if (!Directory.Exists(buildDir))
+            {
+                return;
+            }
+
+            try
+            {
+                Directory.Delete(buildDir, true);
+                Debug.Log($"[{nameof(AutoBuildExecuter)}] 失敗したビルドの出力ディレクトリを削除しました（リリース対象外）。Profile: {profileName}, Path: {buildDir}");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] 失敗したビルドの出力ディレクトリの削除に失敗しました。Profile: {profileName}, Path: {buildDir}\n{exception}");
+            }
+        }
+
+        /// <summary>
+        ///     1プロファイル分のビルド出力ディレクトリをZIP圧縮し、圧縮元のディレクトリを削除します。
+        /// </summary>
+        /// <param name="buildDir"> 圧縮対象のビルド出力ディレクトリです。 </param>
+        /// <param name="profileName"> ビルドプロファイル名です。ZIPファイル名（拡張子を除く部分）に使用します。 </param>
+        /// <param name="outputRoot"> ZIPファイルの出力先ルートディレクトリです（全プロファイル共通の出力先）。 </param>
+        /// <returns> 圧縮に成功した場合はtrueです。ディレクトリ削除の失敗はビルド失敗として扱いません。 </returns>
+        private static bool TryArchiveBuildOutput(string buildDir, string profileName, string outputRoot)
+        {
+            LogDebug($"ビルド出力のZIP圧縮処理を開始: {profileName}");
+
+            if (!Directory.Exists(buildDir))
+            {
+                Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] 圧縮対象のビルド出力ディレクトリが見つかりません。ZIP化をスキップします。Path: {buildDir}");
+                return false;
+            }
+
+            string zipPath = Path.Combine(outputRoot, profileName + ".zip");
+            string temporaryZipPath = zipPath + ".partial";
+
+            try
+            {
+                // ドメインリロード後の再試行等で同名ZIPが残っている場合は上書きする。
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
+
+                if (File.Exists(temporaryZipPath))
+                {
+                    File.Delete(temporaryZipPath);
+                }
+
+                Debug.Log($"[{nameof(AutoBuildExecuter)}] ビルド出力をZIP圧縮しています: {buildDir} -> {zipPath}");
+
+                // 未完成ファイルがリリース対象の*.zip検索に入らないよう、完成後に正式名へ移す。
+                CreateArchiveFromDirectory(buildDir, temporaryZipPath);
+                long zipSizeBytes = new FileInfo(temporaryZipPath).Length;
+                File.Move(temporaryZipPath, zipPath);
+
+                Debug.Log($"[{nameof(AutoBuildExecuter)}] ZIP圧縮が完了しました: {zipPath} ({zipSizeBytes / 1024.0 / 1024.0:F2} MB)");
+            }
+            catch (Exception exception)
+            {
+                // ZIP化に失敗した場合、この時点の生データも中途半端なZIPも成果物として不完全なため、
+                // 呼び出し元でビルド失敗として扱わせる。生データは復旧の余地を残すため削除しない。
+                Debug.LogError($"[{nameof(AutoBuildExecuter)}] ビルド出力のZIP圧縮に失敗しました。Profile: {profileName}, Path: {buildDir}\n{exception}");
+
+                try
+                {
+                    if (File.Exists(temporaryZipPath))
+                    {
+                        File.Delete(temporaryZipPath);
+                    }
+                }
+                catch (Exception cleanupException)
+                {
+                    Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] 不完全なZIPファイルの削除に失敗しました。Path: {temporaryZipPath}\n{cleanupException}");
+                }
+
+                return false;
+            }
+
+            try
+            {
+                Directory.Delete(buildDir, true);
+                LogDebug($"圧縮済みのビルド出力ディレクトリを削除しました: {buildDir}");
+            }
+            catch (Exception exception)
+            {
+                // ZIP自体は作成済みで成果物としては確保できているため、削除失敗はビルド失敗として扱わない。
+                Debug.LogWarning($"[{nameof(AutoBuildExecuter)}] 圧縮済みのビルド出力ディレクトリの削除に失敗しました。Path: {buildDir}\n{exception}");
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        ///     ビルド出力ディレクトリをZIPファイルへ圧縮します。
+        /// </summary>
+        /// <param name="sourceDirectoryPath"> 圧縮対象のディレクトリです。 </param>
+        /// <param name="destinationArchivePath"> 作成するZIPファイルのパスです。 </param>
+        private static void CreateArchiveFromDirectory(string sourceDirectoryPath, string destinationArchivePath)
+        {
+            string sourceRoot = Path.GetFullPath(sourceDirectoryPath).TrimEnd(
+                Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
+            using (ZipArchive archive = ZipFile.Open(destinationArchivePath, ZipArchiveMode.Create))
+            {
+                foreach (string filePath in Directory.EnumerateFiles(
+                             sourceRoot,
+                             "*",
+                             SearchOption.AllDirectories))
+                {
+                    string entryName = filePath.Substring(sourceRoot.Length)
+                        .Replace(Path.DirectorySeparatorChar, '/');
+                    ZipArchiveEntry entry = archive.CreateEntry(entryName, System.IO.Compression.CompressionLevel.Optimal);
+
+                    // WindowsのMAX_PATH境界を超えるビルド成果物は、拡張長パスで直接読み込む。
+                    using (FileStream sourceStream = new FileStream(
+                               GetExtendedLengthPath(filePath),
+                               FileMode.Open,
+                               FileAccess.Read,
+                               FileShare.Read))
+                    using (Stream entryStream = entry.Open())
+                    {
+                        sourceStream.CopyTo(entryStream);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Windowsではファイルシステムパスを拡張長形式へ変換します。
+        /// </summary>
+        /// <param name="path"> 変換するファイルシステムパスです。 </param>
+        /// <returns> Windowsでは拡張長パス、それ以外のOSでは入力パスです。 </returns>
+        private static string GetExtendedLengthPath(string path)
+        {
+            if (Path.DirectorySeparatorChar != '\\')
+            {
+                return path;
+            }
+
+            string fullPath = Path.GetFullPath(path);
+            if (fullPath.StartsWith(@"\\?\", StringComparison.Ordinal))
+            {
+                return fullPath;
+            }
+
+            if (fullPath.StartsWith(@"\\", StringComparison.Ordinal))
+            {
+                return @"\\?\UNC\" + fullPath.Substring(2);
+            }
+
+            return @"\\?\" + fullPath;
         }
 
         /// <summary>

@@ -2,9 +2,52 @@
 }
 
 .title-option-button {
-    width: 15%;
+    width: 22%;
     align-self: center;
     -unity-font-style: bold;
-    font-size: 36px;
+    font-size: 34px;
     aspect-ratio: 2;
+    scale: 1 1;
+    transition-property: scale;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-out-circ;
 }
+.title-option-button:hover,
+.title-option-button:focus {
+    scale: 1.2 1.2;
+}
+
+.title-option-button.navigable:focus {
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+    border-left-color: rgb(255, 220, 90);
+    border-right-color: rgb(255, 220, 90);
+    border-top-color: rgb(255, 220, 90);
+    border-bottom-color: rgb(255, 220, 90);
+    --unity-focus-outline-color: rgba(0, 0, 0, 0);
+}
+
+.title-option-button:active {
+    scale: 0.9 0.9;
+}
+
+.bottom-button-root {
+    position: absolute;
+    bottom: 5%;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.volume-slider .unity-base-slider__tracker {
+    height: 18px;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+    border-bottom-left-radius: 9px;
+}
+

@@ -1,0 +1,93 @@
+---
+import GameplayRing from './GameplayRing.astro';
+import RhythmGaugeDemo from './RhythmGaugeDemo.astro';
+
+interface Segment {
+	value: string;
+	caption: string;
+	locked?: boolean;
+	color?: string;
+	ratio?: number;
+}
+
+interface Props {
+	name: string;
+	description: string;
+	ringLabel: string;
+	ringSegments: Segment[];
+	current: number;
+	total: number;
+	ringWord: string;
+	rhythmSegments?: Segment[];
+}
+
+const { name, description, ringLabel, ringSegments, current, total, ringWord, rhythmSegments } = Astro.props;
+---
+
+<article class="slide">
+	<div class="visual">
+		<GameplayRing
+			legendTitle={ringLabel}
+			segments={ringSegments}
+			current={current}
+			total={total}
+			centerLabel={ringWord}
+		/>
+	</div>
+
+	<div class="body">
+		<h2 class="name">{name}</h2>
+		<p class="description">{description}</p>
+		{rhythmSegments && <RhythmGaugeDemo segments={rhythmSegments as { value: string; caption: string; color: string; ratio?: number }[]} />}
+	</div>
+</article>
+
+<style>
+	.slide {
+		display: grid;
+		grid-template-columns: 260px minmax(0, 460px);
+		align-items: center;
+		justify-content: center;
+		gap: 48px;
+		height: 100%;
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 48px 16px;
+	}
+
+	.visual {
+		display: flex;
+		justify-content: center;
+	}
+
+	.name {
+		margin: 0;
+		font-family: var(--font-display);
+		letter-spacing: var(--tracking-display);
+		font-size: clamp(1.375rem, 3vw, 1.75rem);
+		font-weight: 800;
+		color: var(--color-text-primary);
+	}
+
+	.description {
+		margin: 16px 0 0;
+		max-width: 52ch;
+		font-size: 0.9375rem;
+		line-height: 1.9;
+		color: var(--color-text-muted);
+		white-space: pre-line;
+	}
+
+	@media (max-width: 767px) {
+		.slide {
+			grid-template-columns: 1fr;
+			text-align: center;
+			padding: 32px 8px;
+		}
+
+		.description {
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+</style>

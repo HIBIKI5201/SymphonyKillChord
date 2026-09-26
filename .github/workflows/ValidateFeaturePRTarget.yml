@@ -1,0 +1,62 @@
+name: Validate Feature Branch PR Target
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  validate-target:
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'feature/')
+    steps:
+      - name: Validate PR target branch
+        id: validate
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          SLASH_COUNT=$(echo "$HEAD_REF" | grep -o "/" | wc -l)
+          LAST=$(basename "$HEAD_REF")
+
+          # feature/<階層...>/<個人名> の4階層以上 かつ 末尾がmasterでない場合のみ対象。
+          if [ "$SLASH_COUNT" -lt 3 ] || [ "$LAST" = "master" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          DIR_PATH=$(dirname "$HEAD_REF")
+          EXPECTED_BASE="${DIR_PATH}/master"
+
+          if [ "$BASE_REF" = "$EXPECTED_BASE" ]; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "expected=$EXPECTED_BASE" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set commit status (success)
+        if: steps.validate.outputs.skip == 'true' || steps.validate.outputs.valid == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          gh api repos/$REPO/statuses/$SHA -X POST \
+            -f state=success -f context="feature-pr-target" \
+            -f description="✅ マージ先ブランチは正しいです"
+
+      - name: Set commit status (failure)
+        if: steps.validate.outputs.valid == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          EXPECTED: ${{ steps.validate.outputs.expected }}
+        run: |
+          gh api repos/$REPO/statuses/$SHA -X POST \
+            -f state=failure -f context="feature-pr-target" \
+            -f description="❌ マージ先が不正です。正しくは ${EXPECTED} です"

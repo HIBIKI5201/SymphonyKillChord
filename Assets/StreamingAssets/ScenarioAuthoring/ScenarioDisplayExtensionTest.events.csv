@@ -1,0 +1,116 @@
+# シナリオシステム総合手動確認用。シナリオID: ScenarioDisplayExtensionTest
+# 操作も含めて上から順に体験する。Skipだけは再生を終了するため、最後に再実行して確認する。
+
+# 1. Background / Text / CSVエスケープ / 手動送り
+10,Background,OutdoorsInCity
+20,Text,案内役,シナリオシステム総合確認を開始します。クリックまたは決定入力で次へ進んでください。
+30,Text,,話者名が空の地の文です。本文位置が移動せず、話者名欄だけが隠れることを確認します。
+40,Text,非常に長い話者名の表示確認用サンプル,長い名前が本文と重ならず、設定どおり省略されることを確認します。
+50,Text,案内役,"CSVでは、カンマを含む本文も表示できます。"
+60,Text,案内役,"引用符は""このように""表示できます。"
+
+# 2. Portrait: 3スロット / 座標 / 拡大率 / Sprite差替え / 非表示と再表示
+100,Portrait,Left,Prelude,-500,-120,0.85,true
+110,Portrait,Center,Symphony,0,-120,1,true
+120,Portrait,Right,Triad,500,-120,1.15,true
+130,Text,案内役,左・中央・右の3スロット、座標、拡大率の違いを確認します。
+140,Portrait,Left,Triad,-420,-80,1,true
+150,Text,案内役,左スロットのSprite・座標・拡大率を更新しました。
+160,Portrait,Right,Triad,420,-120,1,false
+170,Text,案内役,右スロットをVisible=falseで非表示にしました。
+180,Portrait,Right,Enemy,420,-120,1,true
+190,Text,案内役,右スロットを別Spriteで再表示しました。
+
+# 3. Layer: 全対象。CanvasはsortingOrder、それ以外は兄弟順を変更する。
+200,Layer,Background,0
+210,Layer,PortraitLeft,1
+220,Layer,PortraitCenter,2
+230,Layer,PortraitRight,3
+240,Layer,Text,4
+250,Layer,Canvas,0
+260,Text,案内役,Background・3立ち絵・Text・CanvasのLayerイベントを適用しました。
+
+# 4. Fade Alpha: 全対象。各項目を消してから戻す。
+300,Text,案内役,まずScreen Alphaを下げます。会話枠は表示されたまま、背景と立ち絵が消えることを確認します。
+310,Fade,1,0,0.5,Screen,Alpha
+320,Fade,0,1,0.5,Screen,Alpha
+330,Text,案内役,次に背景だけをFadeします。
+340,Fade,1,0,0.5,Background,Alpha
+350,Fade,0,1,0.5,Background,Alpha
+360,Text,案内役,左・中央・右の立ち絵を順番にAlpha Fadeします。
+370,Fade,1,0,0.35,PortraitLeft,Alpha
+380,Fade,0,1,0.35,PortraitLeft,Alpha
+390,Fade,1,0,0.35,PortraitCenter,Alpha
+400,Fade,0,1,0.35,PortraitCenter,Alpha
+410,Fade,1,0,0.35,PortraitRight,Alpha
+420,Fade,0,1,0.35,PortraitRight,Alpha
+430,Text,案内役,Text Alphaでは枠・話者名・本文が一体で消えて戻ります。
+440,Fade,1,0,0.5,Text,Alpha
+450,Fade,0,1,0.5,Text,Alpha
+460,Text,案内役,Blackターゲットは全画面黒オーバーレイです。完全暗転時に古い文字状態も消去されます。
+470,Fade,0,1,0.5,Black,Alpha
+475,Text,暗転中,全画面が暗転している状態で新しい話者名と本文を表示しています。
+480,Fade,1,0,0.5,Black,Alpha
+490,Text,案内役,全画面暗転から復帰しました。
+
+# 5. Fade Black: 3立ち絵のRGB黒化。Alphaとは独立する。
+500,Fade,0,1,0.5,PortraitLeft,Black
+510,Text,案内役,左だけを黒化しました。輪郭と透明部分は維持されます。
+520,Portrait,Left,Prelude,-420,-120,1,true
+530,Text,案内役,黒化中にSpriteを差し替えても左スロットの黒さを維持します。
+540,Fade,0,1,0.5,PortraitCenter,Black
+550,Fade,0,1,0.5,PortraitRight,Black
+560,Text,案内役,3スロットのBlackチャネルは互いに独立しています。
+570,Fade,1,0,0.35,PortraitLeft,Black
+580,Fade,1,0,0.35,PortraitCenter,Black
+590,Fade,1,0,0.35,PortraitRight,Black
+600,Fade,0,1,0,PortraitLeft,Black
+610,Fade,1,0,0,PortraitLeft,Black
+620,Text,案内役,時間0のFadeは補間せず即時適用されます。
+
+# 6. Trigger条件4種 + Trigger発火イベント5種
+# AtCharIndex -> Portrait
+700,Text,案内役,8文字目で左の立ち絵がTriadへ切り替わります。
+701,Trigger,700,AtCharIndex,8,,Portrait,Left,Triad,-360
+# AtKeyword -> Background
+710,Text,案内役,キーワード「背景切替」が表示された時点で背景イベントが発火します。
+711,Trigger,710,AtKeyword,,背景切替,Background,background
+# AtSuffix -> Layer
+720,Text,案内役,この文が合図で終わるとTextを最前面へ移動します。合図
+721,Trigger,720,AtSuffix,,合図,Layer,Text,4
+# AtTextEnd -> Fade
+730,Text,案内役,本文末で中央の立ち絵を黒化します。
+731,Trigger,730,AtTextEnd,,,Fade,0,1,0.5,PortraitCenter,Black
+740,Fade,1,0,0.5,PortraitCenter,Black
+# AtKeyword -> Animation（現状はAnimationCatalogが空で、表示側Animation参照も未設定のため安全な無反応を確認）
+750,Text,案内役,キーワード「アニメ発火」でAnimationイベントを発火します。アニメ発火
+751,Trigger,750,AtKeyword,,アニメ発火,Animation,ScenarioSystemTestAnimation
+# AtTextEnd -> 通常のPortrait引数とは異なるTrigger Portrait経路
+760,Text,案内役,本文末で右の立ち絵をSymphonyへ切り替えます。
+761,Trigger,760,AtTextEnd,,,Portrait,Right,Symphony,360
+
+# 7. 通常Animationイベント（カタログ未登録時の安全な無反応）
+800,Text,案内役,次の行で通常のAnimationイベント経路を実行します。現状は未登録なので画面変化はありません。
+810,Animation,ScenarioSystemTestAnimation
+820,Text,案内役,Animation未登録でもシナリオが停止せず進行することを確認します。
+
+# 8. 入力機能: FastForward / Pause / UI非表示・復帰 / Auto
+900,Text,操作確認,この長い文章の表示中に早送り入力を押し続け、文字送り速度が通常より速くなることを確認してください。確認後に次へ進みます。
+910,Text,操作確認,この文章の表示途中でPause入力を行い、文字送りが停止することを確認してください。もう一度Pause入力を行うと再開します。
+920,Text,操作確認,UI非表示入力を行ってください。会話枠・話者名・本文だけが消え、背景と立ち絵は残ります。非表示中に決定入力すると最新文字へ復帰し、その入力だけでは次へ進みません。
+930,Text,操作確認,Auto入力を行ってください。この文以降は設定された待機時間で自動的に進みます。
+940,Text,Auto確認,この文はAutoで次へ進みます。途中でPauseするとAuto待機時間も停止します。
+950,Text,Auto確認,Autoをもう一度押して解除すると、以後は手動送りへ戻ります。
+960,Text,操作確認,Skipは即時終了するため、全項目の確認後にこのシナリオを再実行し、任意の位置でSkip入力を確認してください。
+
+# 9. 最終復元と正常完了
+1000,Background,OutdoorsInCity
+1010,Portrait,Left,Prelude,-420,-120,1,true
+1020,Portrait,Center,Symphony,0,-120,1,true
+1030,Portrait,Right,Triad,420,-120,1,true
+1040,Layer,Background,0
+1050,Layer,PortraitLeft,1
+1060,Layer,PortraitCenter,2
+1070,Layer,PortraitRight,3
+1080,Layer,Text,4
+1090,Text,案内役,総合確認は完了です。正常終了後の画面遷移と、再実行時に表示状態が初期化されることを確認してください。

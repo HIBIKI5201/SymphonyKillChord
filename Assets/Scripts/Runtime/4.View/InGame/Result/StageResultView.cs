@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Playables;
 using UnityEngine.UI;
 
 namespace KillChord.Runtime.View.InGame.Result
@@ -49,6 +51,9 @@ namespace KillChord.Runtime.View.InGame.Result
             _isUiSlided = false;
 
             SetInteractionEnabled(true);
+            SelectButton(_completeButton);
+            _isShown = true;
+            RefreshButtonFocus();
 
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -62,6 +67,7 @@ namespace KillChord.Runtime.View.InGame.Result
         /// </summary>
         public void Hide()
         {
+            _isShown = false;
             StopTextSlideIn();
             StopCountUps(true);
 
@@ -71,6 +77,7 @@ namespace KillChord.Runtime.View.InGame.Result
             }
 
             SetInteractionEnabled(false);
+            ClearSelection();
         }
 
         /// <summary>
@@ -94,12 +101,12 @@ namespace KillChord.Runtime.View.InGame.Result
 
                 if (!success)
                 {
-                    RestoreInteraction();
+                    RestoreInteraction(_completeButton);
                 }
             }
             catch (Exception exception)
             {
-                RestoreInteraction();
+                RestoreInteraction(_completeButton);
 
                 Debug.LogException(exception, this);
             }
@@ -126,18 +133,19 @@ namespace KillChord.Runtime.View.InGame.Result
 
                 if (!success)
                 {
-                    RestoreInteraction();
+                    RestoreInteraction(_retryButton);
                 }
             }
             catch (Exception exception)
             {
-                RestoreInteraction();
+                RestoreInteraction(_retryButton);
 
                 Debug.LogException(exception, this);
             }
         }
 
         private const int SECOND_PER_MINUTE = 60;
+        private const float FOCUSED_BUTTON_SCALE = 1.1f;
 
         [Header("Root")]
         [SerializeField, Tooltip("リザルト画面全体を制御するCanvasGroup。")]
@@ -160,6 +168,19 @@ namespace KillChord.Runtime.View.InGame.Result
 
         [SerializeField, Tooltip("インゲームのCanvas。")]
         private Canvas[] _inGameCanvas;
+
+        [Header("Button")]
+        [SerializeField, Tooltip("ホームへ戻る完了ボタン。")]
+        private Button _completeButton;
+
+        [SerializeField, Tooltip("同じステージへ再出撃するボタン。")]
+        private Button _retryButton;
+
+        [SerializeField, Tooltip("完了ボタンの文言を表示するText。")]
+        private TMP_Text _completeButtonLabel;
+
+        [SerializeField, Tooltip("リトライボタンの文言を表示するText。")]
+        private TMP_Text _retryButtonLabel;
 
         [Header("Text")]
         [SerializeField, Tooltip("リザルトタイトルを表示するText。")]
@@ -210,6 +231,12 @@ namespace KillChord.Runtime.View.InGame.Result
         [SerializeField, Tooltip("数値をカウントアップ表示させる演出の設定。")]
         private ResultCountUpSetting _countUpSetting = new();
 
+        [SerializeField, Tooltip("勝利時の文字表示順を編集するTimeline。進捗カーブを0から1へ動かします。")]
+        private PlayableDirector _revealTimeline;
+
+        [SerializeField, Range(0f, 1f), Tooltip("Timelineで操作する上から下への文字表示進捗。")]
+        private float _revealProgress;
+
         private readonly Dictionary<TMP_Text, (float Value, Func<float, string> Formatter)> _pendingCountUpValues = new();
         private readonly Dictionary<TMP_Text, (MotionHandle Handle, float Value, Func<float, string> Formatter)> _countUpHandles = new();
         private readonly List<TMP_Text> _countUpKeysBuffer = new();
@@ -217,6 +244,11 @@ namespace KillChord.Runtime.View.InGame.Result
         private StageResultController _controller;
         private bool _isTransitioning;
         private bool _isUiSlided;
+        private bool _isShown;
+        private Vector3 _completeButtonOriginalScale;
+        private Vector3 _retryButtonOriginalScale;
+        private Color _completeButtonOriginalColor;
+        private Color _retryButtonOriginalColor;
         private IDisposable _stageNameDisposable;
         private IDisposable _mainMissionDisposable;
         private IDisposable _mainMissionStateDisposable;
@@ -227,21 +259,61 @@ namespace KillChord.Runtime.View.InGame.Result
         private IDisposable _resultTypeDisposable;
         private readonly List<StageResultMissionItemView> _spawnedSubMissionItems = new();
         private readonly List<MotionHandle> _slideInHandles = new();
-        private readonly Dictionary<RectTransform, Vector2> _slideInOriginalPositions = new();
+        private readonly List<ResultTextSlideIn> _textPresentations = new();
         private readonly List<TMP_Text> _slideInTexts = new();
         private readonly List<TMP_Text> _slideInTextBuffer = new();
-        private readonly List<RectTransform> _releasedSlideInTargets = new();
+        private int _nextRevealIndex;
+        private int _remainingSlideIns;
+        private bool _isRevealTimelinePlaying;
 
+        /// <summary>
+        ///     シーンに設定された文言の見た目を保存し、左右の選択移動を設定します。
+        /// </summary>
         private void Awake()
         {
+            if (_completeButtonLabel == null || _retryButtonLabel == null)
+            {
+                Debug.LogError($"[{nameof(StageResultView)}] ボタンの文言用Textが未設定です。", this);
+            }
+
+            _completeButtonOriginalScale = _completeButtonLabel != null ? _completeButtonLabel.transform.localScale : Vector3.one;
+            _retryButtonOriginalScale = _retryButtonLabel != null ? _retryButtonLabel.transform.localScale : Vector3.one;
+            _completeButtonOriginalColor = _completeButtonLabel != null ? _completeButtonLabel.color : Color.white;
+            _retryButtonOriginalColor = _retryButtonLabel != null ? _retryButtonLabel.color : Color.white;
+            ConfigureButtonNavigation();
             Hide();
+        }
+
+        /// <summary>
+        ///     表示中だけ、フォーカスの変更をボタンの文言へ反映します。
+        /// </summary>
+        private void Update()
+        {
+            if (_isShown)
+            {
+                RefreshButtonFocus();
+                if (_isRevealTimelinePlaying)
+                {
+                    RevealThroughProgress();
+                }
+            }
+        }
+
+        /// <summary>
+        ///     無効化されたリザルトのボタンを元の見た目へ戻します。
+        /// </summary>
+        private void OnDisable()
+        {
+            StopTextSlideIn();
+            StopCountUps(false);
+            RefreshButtonFocus();
         }
 
         private void OnDestroy()
         {
             UnsubscribeViewModel();
 
-            ResultTextSlideIn.Stop(_slideInHandles);
+            StopTextSlideIn();
             StopCountUps(false);
         }
 
@@ -250,6 +322,17 @@ namespace KillChord.Runtime.View.InGame.Result
         /// </summary>
         private void PlayTextSlideIn()
         {
+            if (_viewModel == null)
+            {
+                throw new InvalidOperationException("リザルト表示前にInitializeを実行してください。");
+            }
+
+            bool isVictory = _viewModel.ResultType.Value == StageResultType.Victory;
+            if (isVictory && (_revealTimeline == null || _revealTimeline.playableAsset == null))
+            {
+                throw new InvalidOperationException("勝利リザルトの文字表示Timelineが未設定です。");
+            }
+
             StopTextSlideIn();
             StopCountUps(true);
             _isUiSlided = false;
@@ -260,68 +343,102 @@ namespace KillChord.Runtime.View.InGame.Result
                 return;
             }
 
+            Canvas.ForceUpdateCanvases();
             CollectSlideInTexts();
-
-            if (_slideInTexts.Count == 0)
+            _remainingSlideIns = _slideInTexts.Count;
+            if (_remainingSlideIns == 0)
             {
                 OnTextSlideInCompleted();
                 return;
             }
 
-            // 全テキストのスライドインが完了した時点でカウントアップを開始する。
-            int remainingSlideIns = _slideInTexts.Count;
-
-            for (int i = 0; i < _slideInTexts.Count; i++)
+            foreach (TMP_Text text in _slideInTexts)
             {
-                RectTransform rectTransform = _slideInTexts[i].rectTransform;
+                _textPresentations.Add(new ResultTextSlideIn(text, _textSlideIn));
+            }
 
-                ResultTextSlideIn.Play(
-                    rectTransform,
-                    GetSlideInOriginalPosition(rectTransform),
-                    _textSlideIn,
-                    i * _textSlideIn.Interval,
-                    _slideInHandles,
-                    () =>
-                    {
-                        remainingSlideIns--;
+            if (isVictory)
+            {
+                _nextRevealIndex = 0;
+                _revealProgress = 0f;
+                _isRevealTimelinePlaying = true;
+                _revealTimeline.stopped += HandleRevealTimelineStopped;
+                _revealTimeline.time = 0d;
+                _revealTimeline.Evaluate();
+                _revealTimeline.Play();
+                RevealThroughProgress();
+                return;
+            }
 
-                        if (remainingSlideIns <= 0)
-                        {
-                            OnTextSlideInCompleted();
-                        }
-                    });
+            // 敗北時の順序と間隔は従来の設定を維持する。
+            for (int i = 0; i < _textPresentations.Count; i++)
+            {
+                _textPresentations[i].Play(_slideInHandles, HandleTextSlideCompleted, i * _textSlideIn.Interval);
             }
         }
 
         /// <summary>
-        ///     再生中のスライドインを停止し、本来の表示状態へ戻す。
+        ///     Timelineの進捗カーブに合わせ、画面上から文字を表示します。
+        /// </summary>
+        private void RevealThroughProgress()
+        {
+            int count = _textPresentations.Count;
+            int visibleCount = Mathf.Clamp(Mathf.FloorToInt(Mathf.Clamp01(_revealProgress) * (count - 1)) + 1, 0, count);
+            while (_nextRevealIndex < visibleCount)
+            {
+                _textPresentations[_nextRevealIndex++].Play(_slideInHandles, HandleTextSlideCompleted);
+            }
+        }
+
+        /// <summary>
+        ///     Timelineの最終フレームで残った文字も表示し、短縮編集にも対応します。
+        /// </summary>
+        private void HandleRevealTimelineStopped(PlayableDirector director)
+        {
+            director.stopped -= HandleRevealTimelineStopped;
+            if (_isRevealTimelinePlaying)
+            {
+                _revealProgress = 1f;
+                RevealThroughProgress();
+                _isRevealTimelinePlaying = false;
+            }
+        }
+
+        /// <summary>
+        ///     全ての文字が表示された後、既存のカウントアップを開始します。
+        /// </summary>
+        private void HandleTextSlideCompleted()
+        {
+            _remainingSlideIns--;
+            if (_remainingSlideIns == 0)
+            {
+                OnTextSlideInCompleted();
+            }
+        }
+
+        /// <summary>
+        ///     Timelineと描画フックを解放し、途中終了でも元の表示を復元します。
         /// </summary>
         private void StopTextSlideIn()
         {
-            ResultTextSlideIn.Stop(_slideInHandles);
-
-            _releasedSlideInTargets.Clear();
-
-            foreach (KeyValuePair<RectTransform, Vector2> entry in _slideInOriginalPositions)
+            _isRevealTimelinePlaying = false;
+            if (_revealTimeline != null)
             {
-                // サブミッション項目は作り直されるため、破棄済みの対象を溜め込まない。
-                if (entry.Key == null)
-                {
-                    _releasedSlideInTargets.Add(entry.Key);
-                    continue;
-                }
-
-                entry.Key.TryGetComponent(out CanvasGroup canvasGroup);
-
-                ResultTextSlideIn.ApplyEndState(entry.Key, entry.Value, canvasGroup);
+                _revealTimeline.stopped -= HandleRevealTimelineStopped;
+                _revealTimeline.Stop();
             }
 
-            for (int i = 0; i < _releasedSlideInTargets.Count; i++)
+            foreach (MotionHandle handle in _slideInHandles)
             {
-                _slideInOriginalPositions.Remove(_releasedSlideInTargets[i]);
+                handle.TryCancel();
             }
+            _slideInHandles.Clear();
 
-            _releasedSlideInTargets.Clear();
+            foreach (ResultTextSlideIn presentation in _textPresentations)
+            {
+                presentation.Dispose();
+            }
+            _textPresentations.Clear();
         }
 
         /// <summary>
@@ -346,11 +463,6 @@ namespace KillChord.Runtime.View.InGame.Result
                 }
 
                 if (IsExcludedFromSlideIn(text.transform))
-                {
-                    continue;
-                }
-
-                if (IsLayoutControlled(text.rectTransform))
                 {
                     continue;
                 }
@@ -393,18 +505,6 @@ namespace KillChord.Runtime.View.InGame.Result
         }
 
         /// <summary>
-        ///     親のLayoutGroupにanchoredPositionを制御されるかを判定する。
-        ///     制御される要素を動かすとレイアウト更新と競合するため、演出対象から外す。
-        /// </summary>
-        /// <param name="rectTransform"> 判定対象のRectTransform。 </param>
-        /// <returns> レイアウト制御下ならtrue。 </returns>
-        private static bool IsLayoutControlled(RectTransform rectTransform)
-        {
-            return rectTransform.parent != null
-                   && rectTransform.parent.TryGetComponent(out LayoutGroup _);
-        }
-
-        /// <summary>
         ///     画面上側のTextが先に来るように比較する。
         /// </summary>
         /// <param name="left"> 比較元のText。 </param>
@@ -415,25 +515,6 @@ namespace KillChord.Runtime.View.InGame.Result
             return right.rectTransform.position.y.CompareTo(
                 left.rectTransform.position.y);
         }
-
-        /// <summary>
-        ///     スライドインの終点となる本来のanchoredPositionを取得する。
-        ///     演出で位置を書き換えるため、初回の値をそのまま保持し続ける。
-        /// </summary>
-        /// <param name="rectTransform"> 対象のRectTransform。 </param>
-        /// <returns> 本来のanchoredPosition。 </returns>
-        private Vector2 GetSlideInOriginalPosition(RectTransform rectTransform)
-        {
-            if (!_slideInOriginalPositions.TryGetValue(rectTransform, out Vector2 original))
-            {
-                original = rectTransform.anchoredPosition;
-
-                _slideInOriginalPositions[rectTransform] = original;
-            }
-
-            return original;
-        }
-
 
         /// <summary>
         ///     ViewModelが保持する表示値を購読する。
@@ -579,11 +660,114 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <summary>
         ///     シーン遷移失敗後にリザルト画面の操作を復帰する。
         /// </summary>
-        private void RestoreInteraction()
+        /// <param name="focusTarget"> フォーカスを戻すボタン。 </param>
+        private void RestoreInteraction(Button focusTarget)
         {
             _isTransitioning = false;
 
             SetInteractionEnabled(true);
+            SelectButton(focusTarget);
+            RefreshButtonFocus();
+        }
+
+        /// <summary>
+        ///     操作可能な選択中のボタンの文言だけを拡大し、水色にします。
+        /// </summary>
+        private void RefreshButtonFocus()
+        {
+            GameObject selectedObject = _isShown && !_isTransitioning && isActiveAndEnabled
+                ? EventSystem.current?.currentSelectedGameObject
+                : null;
+            ApplyButtonFocus(_completeButton, _completeButtonLabel,
+                _completeButtonOriginalScale, _completeButtonOriginalColor, selectedObject);
+            ApplyButtonFocus(_retryButton, _retryButtonLabel,
+                _retryButtonOriginalScale, _retryButtonOriginalColor, selectedObject);
+        }
+
+        /// <summary>
+        ///     ボタンの選択状態が変わった場合だけ、保存した見た目を基準に更新します。
+        /// </summary>
+        /// <param name="button"> 表示対象のボタンです。 </param>
+        /// <param name="label"> ボタンの文言です。 </param>
+        /// <param name="originalScale"> シーンに設定された拡大率です。 </param>
+        /// <param name="originalColor"> シーンに設定された文言の色です。 </param>
+        /// <param name="selectedObject"> 現在操作可能な選択対象です。 </param>
+        private static void ApplyButtonFocus(
+            Button button, TMP_Text label, Vector3 originalScale, Color originalColor, GameObject selectedObject)
+        {
+            bool isFocused = button != null && selectedObject == button.gameObject
+                && button.IsActive() && button.IsInteractable();
+            Vector3 scale = originalScale * (isFocused ? FOCUSED_BUTTON_SCALE : 1f);
+            if (label != null && label.transform.localScale != scale)
+            {
+                label.transform.localScale = scale;
+            }
+
+            Color color = isFocused ? Color.cyan : originalColor;
+            color.a = originalColor.a;
+            if (label != null && label.color != color)
+            {
+                label.color = color;
+            }
+        }
+
+        /// <summary>
+        ///     完了から左でリトライ、リトライから右で完了にだけ移動できるようにします。
+        /// </summary>
+        private void ConfigureButtonNavigation()
+        {
+            if (_completeButton != null)
+            {
+                _completeButton.navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnLeft = _retryButton
+                };
+            }
+
+            if (_retryButton != null)
+            {
+                _retryButton.navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnRight = _completeButton
+                };
+            }
+        }
+
+        /// <summary>
+        ///     指定したボタンへEventSystemのフォーカスを移す。
+        /// </summary>
+        /// <param name="button"> フォーカス対象のボタン。 </param>
+        private static void SelectButton(Button button)
+        {
+            EventSystem eventSystem = EventSystem.current;
+
+            if (eventSystem == null || button == null || !button.IsActive() || !button.IsInteractable())
+            {
+                return;
+            }
+
+            eventSystem.SetSelectedGameObject(null);
+            eventSystem.SetSelectedGameObject(button.gameObject);
+        }
+
+        /// <summary>
+        ///     リザルト画面内に残っているEventSystemの選択を解除する。
+        /// </summary>
+        private void ClearSelection()
+        {
+            EventSystem eventSystem = EventSystem.current;
+            GameObject selectedObject = eventSystem != null
+                ? eventSystem.currentSelectedGameObject
+                : null;
+
+            if (selectedObject == null || !selectedObject.transform.IsChildOf(transform))
+            {
+                return;
+            }
+
+            eventSystem.SetSelectedGameObject(null);
         }
 
         /// <summary>
@@ -615,6 +799,11 @@ namespace KillChord.Runtime.View.InGame.Result
         /// <param name="isEnabled"> 操作可能にする場合はtrue。 </param>
         private void SetInteractionEnabled(bool isEnabled)
         {
+            if (!isEnabled)
+            {
+                RefreshButtonFocus();
+            }
+
             if (_canvasGroup == null)
             {
                 return;
@@ -780,5 +969,6 @@ namespace KillChord.Runtime.View.InGame.Result
 
             _pendingCountUpValues.Clear();
         }
+
     }
 }

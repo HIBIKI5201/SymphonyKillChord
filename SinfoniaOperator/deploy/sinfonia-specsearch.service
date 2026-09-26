@@ -1,0 +1,18 @@
+[Unit]
+Description=Sinfonia specification search Discord bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sinfonia
+Group=sinfonia
+WorkingDirectory=/opt/sinfonia-specsearch/repository
+EnvironmentFile=/etc/sinfonia-specsearch.env
+ExecStart=/opt/sinfonia-specsearch/publish/SinfoniaOperator serve
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target
