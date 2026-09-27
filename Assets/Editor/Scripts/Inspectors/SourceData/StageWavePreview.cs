@@ -35,7 +35,7 @@ namespace KillChord.Editor.Inspectors.SourceData
             {
                 if (!SourceDataProviderRepositoryResolver.TryResolveAsset(TREE_KEY, variant, out ScriptableObject candidateTree, out _, out _)
                     || candidateTree != tree
-                    || !SourceDataProviderRepositoryResolver.TryResolveAsset(mapping.SourceAssetAddressableKey, variant,
+                    || !SourceDataProviderRepositoryResolver.TryResolveAsset(mapping.DataAssetAddressableKey, variant,
                         out ScriptableObject repository, out _, out _)) { continue; }
                 using SerializedObject serializedRepository = new(repository);
                 SerializedProperty array = serializedRepository.FindProperty(mapping.PropertyPath);
