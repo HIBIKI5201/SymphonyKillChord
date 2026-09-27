@@ -54,18 +54,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             BeatType currentBeatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
             int currentBeatCount = (int)currentBeatType;
 
-            _zones.Clear();
-
-            foreach (RhythmJudgmentRange range in _musicSyncService.RhythmJudgmentDefinition.JudgmentRanges)
-            {
-                _zones.Add(new RhythmGuideZoneDto(
-                    (int)range.BeatType,
-                    range.StartNormalized,
-                    range.EndNormalized,
-                    range.JustStartNormalized,
-                    range.JustEndNormalized
-                ));
-            }
+            RefreshZonesIfDefinitionChanged();
 
             bool hasTarget = _targetingSystem.TryGetCurrentTargetEntity(out _);
             int? targetBeatCount = GetTutorialTargetBeatCount();
@@ -79,6 +68,40 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
                 _musicSyncService.RhythmJudgmentDefinition.TimeoutBarCount,
                 targetBeatCount
             );
+        }
+
+        /// <summary>
+        ///     判定定義が変わった時だけ、表示用の判定ゾーン一覧を作り直す。
+        ///     判定定義はプレイ中に変わらないため、通常は初回の1度だけ作る。
+        /// </summary>
+        private void RefreshZonesIfDefinitionChanged()
+        {
+            RhythmJudgmentDefinition definition = _musicSyncService.RhythmJudgmentDefinition;
+            if (ReferenceEquals(definition, _zonesSourceDefinition))
+            {
+                return;
+            }
+
+            _zonesSourceDefinition = definition;
+            _zones.Clear();
+            if (definition == null)
+            {
+                return;
+            }
+
+            // インターフェース越しのforeachは列挙子がボクシングされるため、インデックスで回す。
+            IReadOnlyList<RhythmJudgmentRange> ranges = definition.JudgmentRanges;
+            for (int i = 0; i < ranges.Count; i++)
+            {
+                RhythmJudgmentRange range = ranges[i];
+                _zones.Add(new RhythmGuideZoneDto(
+                    (int)range.BeatType,
+                    range.StartNormalized,
+                    range.EndNormalized,
+                    range.JustStartNormalized,
+                    range.JustEndNormalized
+                ));
+            }
         }
 
         /// <summary>
@@ -98,5 +121,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         private readonly Func<MissionRuntimeService> _missionRuntimeServiceProvider;
         private readonly SelectedBattleStageState _selectedBattleStageState;
         private readonly List<RhythmGuideZoneDto> _zones = new();
+        private RhythmJudgmentDefinition _zonesSourceDefinition;
     }
 }

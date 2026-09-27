@@ -42,11 +42,10 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             if (_raycastDetector.CanRaycastHitTarget)
             {
                 AttackResult result = AttackExecutor.Execute(
-                    attackDefinition, attacker, defender, false, _baseDamage);
+                    attackDefinition, attacker, defender, false, attacker.BaseDamage);
                 Debug.Log($"[EnemyTripleShotAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
             }
         }
-        private Damage _baseDamage = new Damage(10); // TODO敵の基礎攻撃力があるはずなので、それを使用するようにする。
         private readonly EnemyRaycastDetectService _raycastDetector;
     }
 }
