@@ -17,6 +17,7 @@ MonoBehaviour:
   PreviewVideoClip: {fileID: 0}
   _statusBonusEffects: []
   _unlockSkills: []
+  _hasSkillSlotBonus: 1
   _nodeId:
     _id: node_n7
     _hashId: 320610499
