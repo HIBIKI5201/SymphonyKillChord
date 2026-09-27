@@ -1,9 +1,9 @@
 ---
-name: codex-implement
+name: skc-codex-implement
 description: "Delegate an implementation task to Codex CLI with rate-limit protection, then review the result. Use when the user asks to implement a feature via Codex, or wants to offload coding to Codex/an external model while keeping design and review in Claude. Falls back to implementing directly when Codex quota is low."
 ---
 
-# codex-implement
+# skc-codex-implement
 
 設計・計画は Claude が行い、**実装だけを Codex CLI に委任**する。
 Codex の残枠が足りない場合は委任をスキップし、Claude 自身が実装まで完遂する。

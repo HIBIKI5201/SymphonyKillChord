@@ -1,5 +1,5 @@
 ---
-name: ai-debug-attack-queue
+name: skc-ai-debug-attack-queue
 description: Inspect Symphony Kill Chord gameplay as JSON, record combat and stability evidence, operate UI buttons, and queue precise rhythm attacks for the repository QA sheets. Editor-only; distinguish assisted QA from physical device verification.
 ---
 
@@ -14,10 +14,10 @@ Run from the same project checkout opened in Unity. Every request checks `Applic
 ## JSON state and bounded observations
 
 ```powershell
-node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-qa.mjs snapshot
-node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-qa.mjs snapshot --no-ui
-node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-qa.mjs run --qa CBT:12-3 --seconds 900
-node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-qa.mjs run --qa CBT:4-3 --seconds 120 --repeat 2 --queue "purple:1,blue:1,cyan:1,green:1,yellow:1,orange:1"
+node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-qa.mjs snapshot
+node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-qa.mjs snapshot --no-ui
+node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-qa.mjs run --qa CBT:12-3 --seconds 900
+node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-qa.mjs run --qa CBT:4-3 --seconds 120 --repeat 2 --queue "purple:1,blue:1,cyan:1,green:1,yellow:1,orange:1"
 ```
 
 Snapshots include scene/frame/time, HP, rhythm history, targets, mission progress, loaded save data and active UI. Uninitialized sections are `available: false`. Current timing windows are not past input judgments. Start a monitor to capture actual attack judgments, weapon hits, skill IDs and damage events.
@@ -31,7 +31,7 @@ Snapshots include scene/frame/time, HP, rhythm history, targets, mission progres
 Get `sections.ui.value.buttons` from a fresh snapshot, then:
 
 ```powershell
-node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-qa.mjs button --id 1234 --path "<exact path from snapshot>"
+node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-qa.mjs button --id 1234 --path "<exact path from snapshot>"
 ```
 
 This dispatches Button.onClick. Poll a new snapshot to verify completion. It does not prove pointer hit testing, keyboard navigation, visibility or hardware input. Use screenshots and real input for those checks. Destructive UI operations such as save reset require authorization for that scenario.
@@ -42,20 +42,20 @@ This dispatches Button.onClick. Poll a new snapshot to verify completion. It doe
 2. Enqueue attacks:
 
    ```powershell
-   node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-attacks.mjs enqueue --queue "green:4,orange:8"
+   node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-attacks.mjs enqueue --queue "green:4,orange:8"
    ```
 
 3. Poll status without sending additional input:
 
    ```powershell
-   node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-attacks.mjs status
+   node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-attacks.mjs status
    ```
 
 4. Verify the gameplay objective or mission state after `state` becomes `Completed`. Read Unity errors when it becomes `Failed`.
 5. Cancel a remaining queue when stopping or changing the scenario:
 
    ```powershell
-   node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-attacks.mjs cancel --run-id "<runId from enqueue/status>"
+   node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-attacks.mjs cancel --run-id "<runId from enqueue/status>"
    ```
 
 The default primer attack establishes a fresh rhythm reference before the requested sequence. Pass `--no-prime` only when an extra attack would invalidate the scenario and a recent attack already provides the intended reference.

@@ -1,5 +1,5 @@
 ---
-name: unity-autobuilder
+name: skc-unity-autobuilder
 description: "Run or troubleshoot local player builds via this project's AutoBuilder tooling (Assets/Editor/Scripts/AutoBuilder), and explain how local builds relate to the BuildAndRelease.yml CI workflow. Use when the user wants to build the game locally (Master or Develop), asks about BuildProfiles/AutoBuilderSettings, wants to reproduce or debug a CI build failure locally, or asks how the automated GitHub Actions release build works."
 ---
 

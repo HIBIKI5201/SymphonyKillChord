@@ -1,5 +1,5 @@
 ---
-name: planner-masterdata-workflow
+name: skc-planner-masterdata-workflow
 description: "Add, edit, or troubleshoot planner-facing master data via the SourceDataProvider system (Assets/Editor/Scripts/SourceDataProvider) and the Planner Master Data window. Use whenever the user wants to add a new master data type/entry, register a ScriptableObject with Addressables for planner editing, work with DataID/CollectionKey/hash IDs, debug 'not registered in SourceDataProvider' or hash-mismatch warnings, or extend the Planner Master Data window's pages. Also covers adding a brand-new SourceData collection type from scratch."
 ---
 
@@ -45,7 +45,7 @@ When a new master data ScriptableObject type is introduced and needs to appear i
 4. On the data class itself, mark the ID field with `[SourceDataCollection("YourCollectionKey")]` (namespace `KillChord.Runtime.Utility.Identity`) so `DataIDPropertyDrawer` and `SourceDataAddressSelectorDrawer` know how to resolve it.
 5. If you need a custom preview panel in the detail pane (like `PlannerEnemyStatusPreview`/`PlannerEnemyWavePreview`/`PlannerStageTreeGraphRenderer`), follow those existing previewer classes as a pattern and wire them into `DrawDataAssetPreview`/`DrawCollectionPreview` in `PlannerMasterDataWindow.cs` — but this is source-code work, confirm with the user before editing `PlannerMasterDataWindow.cs` itself since it's a shared, sizeable file.
 
-No Addressables build/rebuild step is required just to make new entries visible in the planner window — the window reads directly from the Addressable Groups asset via `AddressableAssetSettingsDefaultObject.Settings`. An Addressables build is only needed when shipping (see the `unity-autobuilder` skill / CI).
+No Addressables build/rebuild step is required just to make new entries visible in the planner window — the window reads directly from the Addressable Groups asset via `AddressableAssetSettingsDefaultObject.Settings`. An Addressables build is only needed when shipping (see the `skc-unity-autobuilder` skill / CI).
 
 ## Task: debug ID/collision/hash warnings
 

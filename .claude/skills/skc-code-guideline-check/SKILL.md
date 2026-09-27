@@ -1,5 +1,5 @@
 ---
-name: code-guideline-check
+name: skc-code-guideline-check
 description: "Review C# files against this project's coding conventions (Assets/Scripts/CodeGuidelines.md) and Clean Architecture layer rules (Assets/Scripts/DesignPhilosophy.md). Use after writing or editing any C# file under Assets/Scripts or Assets/Editor, or whenever the user asks for a style review, architecture review, layer-dependency check, or general code review of C# changes. Report violations with file:line references, not just prose."
 ---
 
