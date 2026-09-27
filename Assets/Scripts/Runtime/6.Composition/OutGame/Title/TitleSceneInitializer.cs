@@ -28,6 +28,7 @@ using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TMPro;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -71,6 +72,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
         [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
         private TextAsset _memberCsv;
+
+        [SerializeField, Tooltip("開始案内の決定ボタンを入力機器ごとに切り替えるための入力アイコンの Sprite Asset です。未設定なら UXML の画像のままです。")]
+        private TMP_SpriteAsset _inputGlyphSpriteAsset;
 
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
@@ -204,6 +208,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
+            _titleSceneView.BindStartButtonGlyph(_inputGlyphSpriteAsset);
             InitializeIdleVideo(titleRoot);
 
             HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
