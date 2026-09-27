@@ -15,38 +15,38 @@ namespace KillChord.Editor.SourceDataProvider.Core
     internal static class SourceDataProviderRepositoryResolver
     {
         /// <summary>
-        ///     AddressableキーからSourceAssetを取得します。
+        ///     AddressableキーからDataAssetを取得します。
         /// </summary>
-        /// <param name="addressableKey"> SourceAssetのAddressableキーです。 </param>
-        /// <param name="sourceAsset"> 解決したSourceAssetです。 </param>
-        /// <returns> SourceAssetを解決できた場合はtrueです。 </returns>
-        public static bool TryResolveAsset(string addressableKey, out ScriptableObject sourceAsset)
+        /// <param name="addressableKey"> DataAssetのAddressableキーです。 </param>
+        /// <param name="dataAsset"> 解決したDataAssetです。 </param>
+        /// <returns> DataAssetを解決できた場合はtrueです。 </returns>
+        public static bool TryResolveAsset(string addressableKey, out ScriptableObject dataAsset)
         {
             return TryResolveAsset(
                 addressableKey,
                 GameDataVariantEditorState.SelectedVariant,
-                out sourceAsset,
+                out dataAsset,
                 out _,
                 out _);
         }
 
         /// <summary>
-        ///     Addressableキーとゲームデータ種別からSourceAssetを取得します。
+        ///     Addressableキーとゲームデータ種別からDataAssetを取得します。
         /// </summary>
-        /// <param name="addressableKey"> SourceAssetのAddressableキーです。 </param>
+        /// <param name="addressableKey"> DataAssetのAddressableキーです。 </param>
         /// <param name="variant"> 解決対象のゲームデータ種別です。 </param>
-        /// <param name="sourceAsset"> 解決したSourceAssetです。 </param>
+        /// <param name="dataAsset"> 解決したDataAssetです。 </param>
         /// <param name="groupName"> 解決元のAddressables Group名です。 </param>
         /// <param name="errorMessage"> 解決できなかった理由です。 </param>
-        /// <returns> SourceAssetを一意に解決できた場合はtrueです。 </returns>
+        /// <returns> DataAssetを一意に解決できた場合はtrueです。 </returns>
         public static bool TryResolveAsset(
             string addressableKey,
             GameDataVariant variant,
-            out ScriptableObject sourceAsset,
+            out ScriptableObject dataAsset,
             out string groupName,
             out string errorMessage)
         {
-            sourceAsset = null;
+            dataAsset = null;
             groupName = string.Empty;
             if (string.IsNullOrWhiteSpace(addressableKey))
             {
@@ -102,9 +102,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
             }
 
             AddressableAssetEntry resolvedEntry = matches[0];
-            sourceAsset = AssetDatabase.LoadMainAssetAtPath(resolvedEntry.AssetPath) as ScriptableObject;
+            dataAsset = AssetDatabase.LoadMainAssetAtPath(resolvedEntry.AssetPath) as ScriptableObject;
             groupName = resolvedEntry.parentGroup?.Name ?? string.Empty;
-            if (sourceAsset == null)
+            if (dataAsset == null)
             {
                 errorMessage = $"Addressableキー「{addressableKey}」のAssetがScriptableObjectではありません。";
                 return false;
@@ -123,12 +123,12 @@ namespace KillChord.Editor.SourceDataProvider.Core
         public static bool TryResolveRepository(string addressableKey, out UnityEngine.Object repository)
         {
             repository = null;
-            if (!TryResolveAsset(addressableKey, out ScriptableObject sourceAsset))
+            if (!TryResolveAsset(addressableKey, out ScriptableObject dataAsset))
             {
                 return false;
             }
 
-            repository = sourceAsset;
+            repository = dataAsset;
             return true;
         }
 
@@ -143,9 +143,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         /// <summary>
-        ///     SourceAssetが持つ配列プロパティのパス一覧を取得します。
+        ///     DataAssetが持つ配列プロパティのパス一覧を取得します。
         /// </summary>
-        /// <param name="repository"> 対象SourceAssetです。 </param>
+        /// <param name="repository"> 対象DataAssetです。 </param>
         /// <returns> 配列プロパティのパス一覧です。 </returns>
         public static string[] GetArrayPropertyPaths(UnityEngine.Object repository)
         {
@@ -153,19 +153,19 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         /// <summary>
-        ///     SourceAssetが持つ配列プロパティのパス一覧を取得します。
+        ///     DataAssetが持つ配列プロパティのパス一覧を取得します。
         /// </summary>
-        /// <param name="sourceAsset"> 対象SourceAssetです。 </param>
+        /// <param name="dataAsset"> 対象DataAssetです。 </param>
         /// <returns> 配列プロパティのパス一覧です。 </returns>
-        public static string[] GetCollectionPropertyPaths(UnityEngine.Object sourceAsset)
+        public static string[] GetCollectionPropertyPaths(UnityEngine.Object dataAsset)
         {
-            if (sourceAsset == null)
+            if (dataAsset == null)
             {
                 return Array.Empty<string>();
             }
 
             List<string> paths = new();
-            foreach (FieldInfo fieldInfo in GetSerializableFields(sourceAsset.GetType()))
+            foreach (FieldInfo fieldInfo in GetSerializableFields(dataAsset.GetType()))
             {
                 if (IsCollectionField(fieldInfo.FieldType))
                 {
@@ -178,22 +178,22 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         /// <summary>
-        ///     SourceAssetのcollectionプロパティから要素型を取得します。
+        ///     DataAssetのcollectionプロパティから要素型を取得します。
         /// </summary>
-        /// <param name="sourceAsset"> collectionを保持するSourceAssetです。 </param>
+        /// <param name="dataAsset"> collectionを保持するDataAssetです。 </param>
         /// <param name="propertyPath"> collectionのSerializedPropertyパスです。 </param>
         /// <param name="elementType"> 取得した要素型です。 </param>
         /// <returns> 配列またはListの要素型を取得できた場合はtrueです。 </returns>
         public static bool TryGetCollectionElementType(
-            UnityEngine.Object sourceAsset,
+            UnityEngine.Object dataAsset,
             string propertyPath,
             out Type elementType)
         {
             elementType = null;
-            if (sourceAsset == null
+            if (dataAsset == null
                 || string.IsNullOrWhiteSpace(propertyPath)
                 || !SerializedPropertyFieldResolver.TryResolve(
-                    sourceAsset.GetType(),
+                    dataAsset.GetType(),
                     propertyPath,
                     out FieldInfo fieldInfo))
             {
@@ -218,9 +218,9 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         /// <summary>
-        ///     指定SourceAssetに紐づく有効なcollectionプロパティパス一覧を取得します。
+        ///     指定DataAssetに紐づく有効なcollectionプロパティパス一覧を取得します。
         /// </summary>
-        /// <param name="addressableKey"> SourceAssetのAddressableキーです。 </param>
+        /// <param name="addressableKey"> DataAssetのAddressableキーです。 </param>
         /// <returns> 有効なcollectionプロパティパス一覧です。 </returns>
         public static string[] GetConfiguredCollectionPropertyPaths(string addressableKey)
         {
@@ -255,14 +255,14 @@ namespace KillChord.Editor.SourceDataProvider.Core
         {
             List<SourceDataIDOption> options = new();
             if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out SourceDataProviderSettings.SourceCollectionMapping mapping)
-                || !TryResolveAsset(mapping.SourceAssetAddressableKey, out ScriptableObject sourceAsset))
+                || !TryResolveAsset(mapping.DataAssetAddressableKey, out ScriptableObject dataAsset))
             {
                 return options;
             }
 
             // プロパティパスが空ならアセット自体を、指定があればそのプロパティ以下を走査する。
             HashSet<int> visitedInstanceIds = new();
-            SerializedObject serializedObject = new(sourceAsset);
+            SerializedObject serializedObject = new(dataAsset);
             bool useRootObject = string.IsNullOrWhiteSpace(mapping.PropertyPath);
             SerializedProperty rootProperty = useRootObject
                 ? null
@@ -270,7 +270,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
 
             if (useRootObject)
             {
-                CollectFromObject(sourceAsset, collectionKey, options, visitedInstanceIds);
+                CollectFromObject(dataAsset, collectionKey, options, visitedInstanceIds);
             }
             else if (rootProperty != null)
             {
@@ -300,12 +300,12 @@ namespace KillChord.Editor.SourceDataProvider.Core
             string propertyPath)
         {
             if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out SourceDataProviderSettings.SourceCollectionMapping mapping)
-                || !TryResolveAsset(mapping.SourceAssetAddressableKey, out ScriptableObject sourceAsset))
+                || !TryResolveAsset(mapping.DataAssetAddressableKey, out ScriptableObject dataAsset))
             {
                 return true;
             }
 
-            if (target == sourceAsset)
+            if (target == dataAsset)
             {
                 return string.IsNullOrWhiteSpace(mapping.PropertyPath)
                     || string.Equals(propertyPath, mapping.PropertyPath, StringComparison.Ordinal)
@@ -317,7 +317,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return false;
             }
 
-            SerializedObject serializedObject = new(sourceAsset);
+            SerializedObject serializedObject = new(dataAsset);
             SerializedProperty collectionProperty = serializedObject.FindProperty(mapping.PropertyPath);
             if (collectionProperty == null || !collectionProperty.isArray)
             {

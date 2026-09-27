@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     最大射程距離を表す値オブジェクト。
     /// </summary>
-    public readonly struct AttackRangeMax
+    public readonly struct AttackRangeMax : IEquatable<AttackRangeMax>
     {
         /// <summary>
         ///     最大射程距離を初期化するコンストラクタ。
