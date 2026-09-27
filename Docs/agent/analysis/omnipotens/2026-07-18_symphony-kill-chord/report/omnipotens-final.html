@@ -1,0 +1,498 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>Symphony Kill Chord — Omnipotens 最終解析 — Omnipotens 最終レポート</title><style>
+:root{color-scheme:light;--bg:#f3f0e8;--paper:#fffdf8;--ink:#22231f;--muted:#6f716a;--line:#ded9cd;--gold:#9a6b1f;--gold-soft:#f6ead2;--red:#a33a31;--green:#2f714f;--shadow:0 15px 45px rgba(56,45,27,.10)}[data-theme=dark]{color-scheme:dark;--bg:#151511;--paper:#1e1e19;--ink:#f2eee4;--muted:#aaa79e;--line:#3b3930;--gold:#e0ae59;--gold-soft:#342b1d;--red:#ff8f84;--green:#7dd3a5;--shadow:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Yu Gothic UI","Noto Sans JP",system-ui,sans-serif;line-height:1.7}.shell{max-width:1440px;margin:auto;min-height:100vh;background:var(--paper);box-shadow:var(--shadow)}.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(12px)}.brand{font-family:Georgia,serif;font-weight:800;letter-spacing:.12em;color:var(--gold)}.grow{flex:1}button,.button{border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink);padding:6px 10px;text-decoration:none;cursor:pointer;font:inherit}.hero{padding:34px 38px 26px;background:linear-gradient(135deg,var(--gold-soft),transparent 58%);border-bottom:1px solid var(--line)}.hero h1{font:800 clamp(28px,4vw,48px)/1.15 Georgia,"Yu Mincho",serif;margin:0}.hero p{max-width:850px;color:var(--muted)}.meta,.badges{display:flex;gap:8px;flex-wrap:wrap}.badge{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-size:12px;background:var(--paper)}.layout{display:grid;grid-template-columns:250px minmax(0,1fr)}.nav{position:sticky;top:49px;align-self:start;height:calc(100vh - 49px);overflow:auto;padding:18px 14px;border-right:1px solid var(--line)}.nav a{display:block;color:var(--ink);text-decoration:none;padding:7px 9px;border-radius:6px;font-size:13px}.nav a:hover{background:var(--gold-soft)}.content{padding:26px 34px 60px;min-width:0}.overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:25px}.card{border:1px solid var(--line);border-radius:10px;padding:13px;background:var(--paper)}.card .label{font-size:12px;color:var(--muted)}.card .value{font-size:27px;font-weight:800;color:var(--gold)}.stage{scroll-margin-top:65px;border-top:3px double var(--line);padding-top:22px;margin-top:34px}.stage-head{display:flex;align-items:flex-start;gap:12px}.stage-no{font:700 13px Georgia,serif;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:4px 8px}.stage h2{font:750 26px/1.3 Georgia,"Yu Mincho",serif;margin:0}.summary{border-left:3px solid var(--gold);padding:8px 13px;background:var(--gold-soft);margin:12px 0 20px}.document{margin:22px 0}.document-title{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:7px}.document-title h3{margin:0}.source{font-size:11px;color:var(--muted)}h1,h2,h3,h4{line-height:1.35}h1{font-size:28px}h2{font-size:23px}h3{font-size:19px}h4{font-size:16px}p{margin:8px 0}code{font-family:"Cascadia Code",Consolas,monospace;background:var(--gold-soft);padding:1px 4px;border-radius:3px}pre{background:#252720;color:#f4f1e8;border-radius:8px;padding:12px;overflow:auto;font-size:12px}pre code{background:none;padding:0}blockquote{border-left:3px solid var(--gold);margin:12px 0;padding:8px 13px;background:var(--gold-soft)}.table-scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px;margin:12px 0}th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}th{background:var(--gold-soft)}a{color:var(--gold)}.related{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px}.related a{display:block;border:1px solid var(--line);border-radius:8px;padding:11px;text-decoration:none}.related a:hover{background:var(--gold-soft)}.empty-search{display:none;color:var(--muted);padding:20px}.search{width:min(420px,48vw);border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink);padding:7px 10px}
+@media(max-width:800px){.hero{padding:24px 17px}.layout{display:block}.nav{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);display:flex;overflow:auto;gap:4px;padding:8px}.nav a{white-space:nowrap}.content{padding:20px 15px 45px}.top{padding:8px 10px}.brand{font-size:13px}}
+@media print{body{background:#fff}.shell{box-shadow:none;max-width:none}.top,.nav{display:none}.layout{display:block}.hero{padding:0 0 15px}.content{padding:0}.stage{break-before:page}.stage:first-of-type{break-before:auto}.document{break-inside:avoid-page}.related a{color:#000}}
+</style></head><body><div class="shell"><header class="top"><span class="brand">OMNIPOTENS</span><span class="grow"></span><button data-theme type="button">◐ テーマ</button><button data-print type="button">⎙ 印刷</button></header><section class="hero"><div class="badges"><span class="badge">最終レポート</span><span class="badge">2026-07-18T18:24:23+09:00</span></div><h1>Symphony Kill Chord — Omnipotens 最終解析</h1><p>仕様、遊び、ドメイン、コード、メカニクス、UX、市場性、議論を、存在する証拠だけから統合した最終レポート。</p></section><div class="layout"><nav class="nav"><a href="#stage-00"><b>00</b> 最終まとめ</a><a href="#stage-01"><b>01</b> プロダクトと仕様</a><a href="#stage-02"><b>02</b> Ludus プレイ分類</a><a href="#stage-03"><b>03</b> 仕様起点ドメイン</a><a href="#stage-04"><b>04</b> Unity対応Anatomia</a><a href="#stage-05"><b>05</b> 仕様・ドメイン・コード</a><a href="#stage-06"><b>06</b> メカニクスと内部経済</a><a href="#stage-07"><b>07</b> AI Formatとアーキテクチャ健全性</a><a href="#stage-08"><b>08</b> UX・配信・TGS体験</a><a href="#stage-09"><b>09</b> 市場性</a><a href="#stage-10"><b>10</b> Di合議結果</a></nav><main class="content"><div class="overview"><div class="card"><div class="label">収録工程</div><div class="value">11</div></div><div class="card"><div class="label">入力成果物</div><div class="value">80</div></div><div class="card"><div class="label">生成形式</div><div class="value">HTML</div></div></div><input class="search" type="search" placeholder="全工程を検索" aria-label="全工程を検索"><div class="empty-search">一致する工程がありません。</div><section class="stage" id="stage-00" data-stage><div class="stage-head"><span class="stage-no">00</span><div><h2>最終まとめ</h2><div class="badges"><span class="badge">2 件の成果物</span></div></div></div><p class="summary">Symphony Kill Chordの中核である「入力間隔が武器を選び、ノーツ列がKill Chordを成立させ、編成が戦術と音楽を変える」という構造には、独自性と反復価値の根拠がある。一方、現時点で商品価値を証明する実機証拠は不足している。最優先はコンテンツ追加ではなく、Cadence→Weapon→Pattern Skill→Kill Chord…</p><article class="document"><div class="document-title"><h3>Symphony Kill Chord Omnipotens 最終まとめ</h3><span class="source">spec/plan/01-final-summary.md</span></div><h1>Symphony Kill Chord Omnipotens 最終まとめ</h1>
+<h2>最終判断</h2>
+<p>Symphony Kill Chordの中核である「入力間隔が武器を選び、ノーツ列がKill Chordを成立させ、編成が戦術と音楽を変える」という構造には、独自性と反復価値の根拠がある。一方、現時点で商品価値を証明する実機証拠は不足している。最優先はコンテンツ追加ではなく、Cadence→Weapon→Pattern Skill→Kill Chord→Rewardを、初見でも理解でき、失敗から回復でき、テストで再現できる一本のvertical sliceとして閉じることである。</p>
+<p>実装順はbehavior-firstを採用する。All/timeout、line-of-sight、rewardのexactly-once確定、recoverable save、multimodal HUD/tutorial transferを先に固定し、Scene遷移の分割はその受入テストを支える範囲に留める。Adaptive BGMはイベント契約と仮表示を先行し、コアループ成立後に実音源へ接続する。</p>
+<h2>最優先の5課題</h2>
+<ol>
+<li>All note、1.5小節timeout、被弾・pause復帰を一つの回復契約へ統一する。</li>
+<li>遮蔽物を含むline-of-sightと、攻撃不成立理由のフィードバックを確定する。</li>
+<li>result ID単位で報酬を一度だけ付与し、retry・crash・再起動でも重複させない。</li>
+<li>versioned・atomic・recoverableなsaveと、破損・移行・reset確認を一体で設計する。</li>
+<li>beat、weapon変化、Kill Chord、敵予告を音・視覚・振動で対応付け、通常ステージへの学習転移を測る。</li>
+</ol>
+<h2>8月末までの開発アプローチ</h2>
+<p>以下は2026年7月18日時点の静的解析から導いた推奨順であり、担当人数を前提にした工数見積ではない。</p>
+<h3>7月後半: ルール固定と回帰防止</h3>
+<ul>
+<li>6拍種を正本候補として、All/timeout、reward確定時点、result遷移先を決定する。</li>
+<li>GS-01、GS-02、GS-05/06、GS-07、GS-09のcharacterization testを先に置く。</li>
+<li>TGS版の対象scene、約2分のプレイ範囲、使用可能build、対応入力端末を固定する。</li>
+<li>Kill Chord成立時の視覚・音・物理フィードバックについて、HUD・combat・reward間のイベント契約を定義する。</li>
+</ul>
+<h3>8月前半: 計測可能なvertical slice</h3>
+<ul>
+<li>Cadence→Weapon→Pattern Skill→Kill Chord→Result/Rewardを一本のプレイ経路として閉じる。</li>
+<li>敗北Tips、retry、pause復帰、tutorial prompt fadeを実装し、初見・失敗・再挑戦を同じbuildで確認できるようにする。</li>
+<li>Adaptive BGMは実音源の完成を待たず、phrase選択イベントとUI仮表示で入力との因果を検証する。</li>
+<li>PC 60 FPS、Android 30 FPS、ロード3秒、15分安定性の計測手順を自動化する。</li>
+</ul>
+<h3>8月後半: TGS候補版の固定</h3>
+<ul>
+<li>初見者プレイテストで、開始5秒後の目標理解、最初のKill Chordまでの時間、mute条件の理解、retry後改善を測る。</li>
+<li>配信・会場騒音を想定し、字幕、visual beat、enemy telegraph、Kill Chord成立表示を音なしでも読める状態にする。</li>
+<li>2分デモの開始、終了、即時reset、controller再接続、save隔離、異常終了復帰を通しで確認する。</li>
+<li>8月末に機能を固定し、それ以降はTGS blocker、可読性、性能、運用性を優先する。</li>
+</ul>
+<h2>9月中旬TGSまでの課題</h2>
+<h3>9月上旬: 安定化と展示運用</h3>
+<ul>
+<li>TGS対象端末で連続プレイ、熱、メモリ、入力切断、音声出力切替、scene reloadを検証する。</li>
+<li>操作説明を短縮し、スタッフ説明なしでもattack、cadence差、Kill Chordの目的が伝わるか確認する。</li>
+<li>デモ終了後の自動reset、ログ採取、クラッシュ時の復帰、予備buildへの切替手順を用意する。</li>
+<li>未完成のadaptive BGM、boss、成長要素を完成済みとして見せず、体験範囲と製品予定を明確に分ける。</li>
+</ul>
+<h3>TGS直前: 体験と発信の整合</h3>
+<ul>
+<li>会場版、配信用capture、説明パネル、短尺動画で、同じCadence→Weapon→Kill Chordの因果を示す。</li>
+<li>会場騒音、mute配信、小画面視聴でも成立するUIサイズとcaptionを最終確認する。</li>
+<li>待機列を含むセッション時間、離脱地点、初回成功率、スタッフ介入回数を記録できるようにする。</li>
+<li>blocker以外の新機能を止め、既知問題、回避策、再起動不要の復旧手順を共有する。</li>
+</ul>
+<h2>TGS時点の合格条件</h2>
+<ul>
+<li>初見者が説明なし、または最小説明で4拍／8拍の武器変化を試せる。</li>
+<li>一回のセッション中にKill Chord成立とその効果を本人・観客の双方が識別できる。</li>
+<li>失敗理由と次の行動が画面から分かり、retry後に同じ誤りが減る。</li>
+<li>連続展示で進行不能、報酬重複、save破損、入力不能が発生しない。</li>
+<li>配信映像だけを見た人が「撃つ速さが武器と必殺パターンを変える」と説明できる。</li>
+</ul>
+<h2>証拠境界</h2>
+<p>本まとめは公開仕様、commit 0cca5d536257fd5a2f7951f7d3a0756dfc0d5788の静的コード、Unity対応Anatomia、Ludus、Vitia、Di合議を統合した判断である。実機プレイ、来場者観察、販売データ、配信視聴データは未取得であり、面白さ、売上、TGSでの反応は予測として扱う。</p></article><article class="document"><div class="document-title"><h3>Symphony Kill Chord 最終解析の出典</h3><span class="source">spec/plan/00-source-manifest.md</span></div><h1>Symphony Kill Chord 最終解析の出典</h1>
+<p><strong>ステータス: complete（静的証拠について完了）。ランタイム検証は未実施。</strong></p>
+<ul>
+<li>Analysis profile: final eleven-stage Omnipotens analysis</li>
+<li>Analysis date: 2026-07-18 (Asia/Tokyo)</li>
+<li>Repository: https://github.com/HIBIKI5201/SymphonyKillChord</li>
+<li>Analysis branch: <code>analysis/omnipotens-core</code></li>
+<li>Pinned source commit: <code>0cca5d536257fd5a2f7951f7d3a0756dfc0d5788</code></li>
+<li>Unity editor declaration: <code>6000.3.10f1 (e35f0c77bd8e)</code></li>
+<li>Runtime scope: <code>Assets/Scripts/Runtime</code> (799 C# files)</li>
+</ul>
+<h2>企画・仕様ソース</h2>
+<ul>
+<li>Public root: https://lying-foxglove-81a.notion.site/27d7c2c6cc02819a9547f211f355dfec</li>
+<li>Root title: <code>仕様概要</code></li>
+<li>Coverage: rootから発見した35ページを統合コーパスとして確認した。</li>
+<li>Final index: <code>spec/data/notion-full-spec-index.json</code></li>
+<li>Source payloads: <code>spec/data/notion-full-pages/*.json</code> および本文補完用payload</li>
+<li>公開ページはCanalis <code>NotionPublicSource</code>で取得した。</li>
+<li>画像内だけに存在するレイアウト・数値はテキスト抽出で欠落しうる。原ページの <code>:未確定:</code>、空ページ、内部矛盾は確定要件へ補完していない。</li>
+</ul>
+<h2>ツール・辞書の固定</h2>
+<ul>
+<li>Anatomia: <code>0.1.0</code>, Unity対応 commit <code>d0cc4d6e77d1a10d1b4b1ca911026a1bec304cbb</code></li>
+<li>Anatomia parser: tree-sitter WASM による決定的 C# 構文解析。LLM・clang・Unity Editor は不使用。</li>
+<li>Ludus public OKF: <code>b949cfa136fa27de101ace324f99a715f17e6846</code>; verifier result 907 typed docs / 906 nodes / 2,863 edges</li>
+<li>Vitia: <code>3fa33c9e5e7913c35a2a085dbbe49631cdee9eae</code></li>
+<li>Vitia source manifest: <code>spec/data/vitia-ux-source-manifest.json</code></li>
+<li>AI Format: <code>ff3edc1a927170d1728df10f635af28fd000dd7c</code></li>
+<li>Canalis: <code>0.1.0</code>, <code>69b7fdaedc54233589d60c77b185ef195e78d5c8</code></li>
+</ul>
+<h2>実施境界</h2>
+<ul>
+<li>実施: 全仕様の整理、Ludus対応付け、10ドメイン再定義、Unity-aware静的解析、仕様配線、mechanics/economy、AI Format、Vitia UX／市場性、Di合議、HTML統合。</li>
+<li>未実施: Unity/ゲーム起動、ビルド、実機プレイ、Prefab/Sceneのシリアライズ参照解決、CRI実行、Profiler、端末性能、ユーザテスト、ストア・価格・販売データ検証。</li>
+<li>サービスの再起動・起動テストは行っていない。</li>
+</ul></article></section><section class="stage" id="stage-01" data-stage><div class="stage-head"><span class="stage-no">01</span><div><h2>プロダクトと仕様</h2><div class="badges"><span class="badge">2 件の成果物</span></div></div></div><p class="summary">**出典:** 公開Notionの `仕様概要` とリンク先35ページを統合した最終コーパス。インデックスは `spec/data/notion-full-spec-index.json`。 **出典:** 本作は、馴染みのある移動・射撃・回避操作の上に、より複雑なリズムパターン戦闘を構築する三人称リズムコマンドアクションである。 **出典:** 想定…</p><article class="document"><div class="document-title"><h3>プロダクト概要: Symphony Kill Chord</h3><span class="source">spec/feature/product-brief.md</span></div><h1>プロダクト概要: Symphony Kill Chord</h1>
+<h2>証拠の状態</h2>
+<ul>
+<li><strong>出典:</strong> 公開Notionの <code>仕様概要</code> とリンク先35ページを統合した最終コーパス。インデックスは <code>spec/data/notion-full-spec-index.json</code>。</li>
+<li><strong>出典:</strong> 本作は、馴染みのある移動・射撃・回避操作の上に、より複雑なリズムパターン戦闘を構築する三人称リズムコマンドアクションである。</li>
+<li><strong>出典:</strong> 想定対象は、コンシューマーアクションゲームとニコニコ由来の音楽ゲーム文化に馴染みのある26～35歳。β版の対象プラットフォームとしてPCとAndroidが明記されている。</li>
+<li><strong>実装のみ:</strong> リポジトリの評価対象は commit <code>0cca5d536257fd5a2f7951f7d3a0756dfc0d5788</code>。</li>
+<li><strong>未解決:</strong> 商業モデル、価格、発売日、アクセシビリティ受入基準、最終コンテンツ量、ローカライズ範囲は未指定である。</li>
+</ul>
+<h2>プロダクトが約束する体験</h2>
+<p>攻撃入力は一つだが、認識されたリズムが攻撃／武器を選択し、装備中のキルコードを成立させるノーツになる。馴染みのある三人称の移動・射撃・ローリングによって操作負荷を抑え、リズムの選択、同期する敵攻撃の把握、スキルパターンの完成へ注意を配分できるようにする意図がある。</p>
+<p>仕様例では、2拍入力をショットガン、4拍入力をハンドガン、8拍入力をサブマシンガンに対応付ける。スキルはリズムパターンとアクション種別を組み合わせ、攻撃、バフ、デバフを発生させる。</p>
+<h2>中核ループ</h2>
+<ol>
+<li><strong>戦闘:</strong> 音楽と敵予告を読む → 移動・射撃・回避 → 拍ノーツを記録 → 装備中キルコードを成立 → damage／buffを解決 → ミッション達成。</li>
+<li><strong>ステージ:</strong> ステージまたはシナリオを選択 → 約2分の戦闘 → ミッション、時間、最大コンボ、ランクを確認 → 戻る／再出撃。</li>
+<li><strong>編成:</strong> スキルを獲得・解放 → 初期2枠、特殊ノード解放後は3枠へ装備 → コマンドとinteractive BGM編成の両方へ反映。</li>
+<li><strong>成長:</strong> ステージ報酬を受領 → スキルツリーノードとスキルを解放 → 個別スキルを強化 → 進捗と設定を保存。</li>
+</ol>
+<h2>表現方針</h2>
+<ul>
+<li>トゥーン調の肌とリアルな装備を組み合わせたキャラクター、現実的で落ち着いた環境表現。</li>
+<li>クラシック音楽とEDMの融合。</li>
+<li>戦闘BGMはintro、差し替え可能なloop、outroで構成し、装備スキルからloop phraseを選ぶ。現在再生中の音楽要素を視覚表示する。</li>
+</ul>
+<h2>β版の受入目標</h2>
+<ul>
+<li>PCは60 FPS以上、Androidは30 FPS以上。</li>
+<li>インゲームのロード時間は3秒以内。</li>
+<li>15分間、エラーなし、かつメモリリークがほぼない状態でプレイできる。</li>
+<li>コンテンツ制作と調整に移行できる、基本ゲームループの完成をβ版の目標とする。</li>
+</ul></article><article class="document"><div class="document-title"><h3>ゲーム仕様ベースライン</h3><span class="source">spec/feature/game-spec.md</span></div><h1>ゲーム仕様ベースライン</h1>
+<p>以下は、仕様rootからリンクされた公開Notion35ページの統合コーパスから整理した最終規則である。取得手順や旧版との差分ではなく、現在確認できる仕様だけを記載する。画像内だけの詳細、空ページ、明示的な <code>:未確定:</code> は推測で補完しない。コード観測は commit <code>0cca5d536257fd5a2f7951f7d3a0756dfc0d5788</code> に固定する。</p>
+<h2>GS-01 リズム判定</h2>
+<ul>
+<li><strong>出典:</strong> 攻撃と回避入力がノーツを作る。直前入力からの間隔をBPMで補正し、拍種を選択する。</li>
+<li><strong>出典:</strong> 専用ページ <code>リズム判定</code> は、1、2、3、4、6、8の6拍種を定義する。</li>
+<li><strong>出典:</strong> 最初の入力、1.5小節以上空いた後の入力、被弾直後の入力では拍を判定できない。これらはコマンド先頭でのみ利用可能なAllノーツとなる。</li>
+<li><strong>出典:</strong> 音楽gridに合う入力はJust判定となる。攻撃の硬直時間は0.56秒と記載されている。</li>
+<li><strong>矛盾:</strong> <code>コアメカニクスについて</code> は12と16を加えた8拍種を記載する。専用判定ページとコードは6拍種であり、仕様の所有元を決定する必要がある。</li>
+</ul>
+<h2>GS-02 リズムコマンド戦闘</h2>
+<ul>
+<li><strong>出典:</strong> 一つの攻撃入力で選択中の敵を射撃し、リズムが武器／攻撃定義を選ぶ。例は2=ショットガン、4=ハンドガン、8=サブマシンガン。</li>
+<li><strong>出典:</strong> PCと標的の間に障害物がなければ射撃が命中する。</li>
+<li><strong>出典:</strong> キャラクターは体力を持ち、0以下で死亡する。プレイヤーの死亡は戦闘終了となる。</li>
+<li><strong>出典:</strong> 敵は戦闘音楽に同期して攻撃し、攻撃前にlineまたはareaを表示する。</li>
+<li><strong>出典:</strong> 非critical damageは攻撃力×攻撃時補正。critical時はさらにcritical倍率を適用する。</li>
+</ul>
+<h2>GS-03 キルコードと編成</h2>
+<ul>
+<li><strong>出典:</strong> キルコードはリズムパターンと、攻撃または末尾入力の回避などのアクション種別条件から発動する。</li>
+<li><strong>出典:</strong> スキル種別は直接攻撃、プレイヤーbuff、敵debuff。一部はHPまたは命中対象数も条件にする。</li>
+<li><strong>出典:</strong> 初期スキルは0、13、1と記載される。スキルツリーは簡単な4/8拍から難しい3/6/1拍へ、単純な効果から複雑な効果へ進む。</li>
+<li><strong>出典:</strong> 初期装備枠は2。6スキル解放後の特殊ノードで3枠になる。</li>
+<li><strong>出典:</strong> コマンド末尾が同じノーツのスキルは同時装備できない。</li>
+<li><strong>出典:</strong> 各スキルは個別のレベルと上限を持ち、改造画面で強化する。</li>
+</ul>
+<h2>GS-04 音楽と遭遇の同期</h2>
+<ul>
+<li><strong>出典:</strong> 戦闘中は必ず戦闘音楽が流れ、敵と予約アクションは拍へ同期する。</li>
+<li><strong>出典:</strong> BGMは4小節intro、16小節repeat loop、4小節outroで構成する。loopはCRIにより差し替え可能な2小節blockへ分割する。</li>
+<li><strong>出典:</strong> 2スキル装備時はoriginal → skill 1 → original → skill 2、3スキル装備時はoriginal → skill 1 → skill 2 → skill 3の順とする。</li>
+<li><strong>出典:</strong> HUDは現在再生中の音楽要素を識別可能にする。</li>
+</ul>
+<h2>GS-05 ステージ、ミッション、リザルト</h2>
+<ul>
+<li><strong>出典:</strong> ステージ時間は約2分を目標とし、戦闘に関係する成功条件を用いる。</li>
+<li><strong>出典:</strong> 成功時はゲームプレイを終了してリザルトを開く。失敗時は演出後にゲームプレイを終了する。</li>
+<li><strong>出典:</strong> 勝利リザルトはステージ、キャラクター、メイン／サブミッション、経過時間、最大コンボ、ランクを表示する。敗北時はサブミッション／ランクの代わりに攻略Tipsを表示する。どちらも完了と再出撃を提供する。</li>
+<li><strong>出典:</strong> チュートリアルはステージ0であり、リズムアクション、通常戦闘、ボスを予告する。</li>
+<li><strong>矛盾:</strong> <code>ステージルール</code> はリザルト完了後の戻り先を、ある箇所ではHome、別の箇所では作戦／Stage Selectとしている。</li>
+</ul>
+<h2>GS-06 アウトゲームと成長</h2>
+<ul>
+<li><strong>出典:</strong> New Gameはtitle → 最初のstory → battle tutorial → home tutorial → Home。Continueはtitle → Home → Operation → 選択story/stage → mission完了と進む。</li>
+<li><strong>出典:</strong> β版範囲は、報酬受領、stage/story選択、skill装備、skill-tree解放、進捗保存を要求する。</li>
+<li><strong>コード:</strong> 3つの評価条件をC/B/A/Sランクへ対応付けるが、取得仕様にはその計算式がない。</li>
+</ul>
+<h2>GS-07 永続化</h2>
+<ul>
+<li><strong>出典:</strong> 永続データは、クリア済みstage node、skill-tree進捗、装備中Kill Chordと順序、Kill Chord別level、optionの5分類を持つ。</li>
+<li><strong>出典:</strong> β版指針はplatformに適したsave管理と一定の暗号化を要求する。</li>
+<li><strong>未解決:</strong> schema version、migration、cloud save、複数profile、破損復旧は指定されていない。</li>
+</ul>
+<h2>GS-08 品質・プラットフォーム制約</h2>
+<ul>
+<li><strong>出典:</strong> PCは60 FPS以上、Androidは30 FPS以上を維持する。</li>
+<li><strong>出典:</strong> インゲームのロードは3秒以内に完了する。</li>
+<li><strong>出典:</strong> 15分間のセッションでerrorを発生させず、memory leakをほぼ発生させない。</li>
+<li><strong>出典（リポジトリ設計）:</strong> RuntimeはUtility、Domain、Application、Adaptor、View、Infrastructure、Compositionへ分離し、段階的初期化と逆順shutdownを行う。</li>
+</ul>
+<h2>GS-09 導線、ガイダンス、回復</h2>
+<ul>
+<li><strong>出典:</strong> Homeはアウトゲームのhubであり、作戦、研究、改造／編成、設定へアクセスできる。</li>
+<li><strong>出典:</strong> 作戦画面はbattleとscenario nodeを一つの左→右解放treeで示す。battle detailはmission条件、reward、過去progressを表示し、選択後は出撃前の編成確認を開く。</li>
+<li><strong>出典:</strong> 改造画面はskill filter、effect／command／level詳細、preview、drag-and-dropまたはclick置換、明示的save、未保存で離脱する際の保存／破棄判断を提供する。</li>
+<li><strong>出典:</strong> 研究treeは現在parameter、cost、unlock可能／locked状態を表示し、resetを提供する。難しい入力systemが苦手なplayerの救済経路として明記されている。</li>
+<li><strong>出典:</strong> 設定はscene遷移ではなくoverlayで、決定／取消を提供する。titleはvolume、credit、save data resetを公開する。</li>
+<li><strong>出典:</strong> β版指針はpause、時間停止、resume countdown、rhythm／skill／mission HUD、enemy attack telegraph、loading progress、controller navigation、mobile向け操作を要求する。</li>
+<li><strong>出典:</strong> 敗北resultは攻略tipを提示し、tutorialは通常進行前にrhythm action、通常combat、boss combatを予告する。</li>
+<li><strong>未解決:</strong> data reset確認、音cueのaccessibility代替、remap範囲、font／可読性目標、tutorial完了基準は指定されていない。</li>
+</ul></article></section><section class="stage" id="stage-02" data-stage><div class="stage-head"><span class="stage-no">02</span><div><h2>Ludus プレイ分類</h2><div class="badges"><span class="badge">1 件の成果物</span></div></div></div><p class="summary">**ステータス: complete（分類対応は完了）。製品固有の結論は本リポジトリ内だけに保持する。**</p><article class="document"><div class="document-title"><h3>Stage 2: Ludus プレイ分類分析</h3><span class="source">spec/plan/03-ludus-analysis.md</span></div><h1>Stage 2: Ludus プレイ分類分析</h1>
+<p><strong>ステータス: complete（分類対応は完了）。製品固有の結論は本リポジトリ内だけに保持する。</strong></p>
+<p>Ludus 公開 OKF bundle を commit <code>b949cfa136fa27de101ace324f99a715f17e6846</code> に固定し、<code>tools/verify-okf-bundle.mjs</code> で 907 type documents、906 property-graph nodes、2,863 edges を検証した。辞書全体は複製せず、選択した stable ID と採否だけを <code>spec/data/ludus-okf-selection.json</code> に保存した。</p>
+<h2>選択した分類</h2>
+<div class="table-scroll"><table><thead><tr><th>Ludus ID</th><th>Symphony Kill Chord への適用</th><th>判断</th></tr></thead><tbody><tr><td><code>genre:rhythm</code></td><td>入力間隔の拍判定、コマンド列、音楽同期</td><td>主分類。ただし既存譜面を再生する標準音ゲーではなく、TPS行動がノーツになる差分を保持</td></tr><tr><td><code>genre:action</code></td><td>移動、回避、ロックオン、即時フィードバック</td><td>主分類。入力応答と回復可能性をリズム判定と同時に設計する</td></tr><tr><td><code>genre:shooter</code></td><td>TPS照準、障害物、命中、ヒットフィードバック</td><td>補助分類。リコイル／弾薬など未採用の一般要素は自動要件化しない</td></tr><tr><td><code>system:rhythm:s01</code></td><td>ノーツ／判定</td><td>適用。判定規則はゲーム固有の6拍種＋All/Justを優先</td></tr><tr><td><code>system:rhythm:s02</code></td><td>段階的難易度</td><td>適用。仕様の4/8拍→3/6/1拍、研究による救済と対応</td></tr><tr><td><code>system:action:character-controller</code></td><td>移動・回避・入力応答</td><td>適用。入力バッファ等は候補であり未確認要件ではない</td></tr><tr><td><code>system:action:camera</code> / <code>system:action:lock-on</code></td><td>手動カメラ、自動／手動ロック</td><td>適用。意図しない視点移動を設定で解除できる仕様を重視</td></tr><tr><td><code>system:action:combo</code></td><td>最大コンボと達成フィードバック</td><td>部分適用。仕様上のコンボ報酬式は未確定</td></tr><tr><td><code>system:action:i-frames</code></td><td>回避・立て直し</td><td>調査候補。仕様／コードで無敵時間の正式契約を確定できない</td></tr><tr><td><code>system:shooter:s03</code></td><td>命中の即時フィードバック</td><td>適用。HUD仕様が薄く、複合フィードバックの受入条件が必要</td></tr><tr><td><code>system:shooter:s06</code></td><td>障害物と命中方式</td><td>部分適用。リアル弾道を要求せず、仕様のline-of-sightだけを採用</td></tr></tbody></table></div>
+<h2>ドメインへの影響</h2>
+<p>Ludus の <code>音とリズム</code>、<code>入力と操作</code>、<code>演出とフィードバック</code>、<code>アクセシビリティと支援</code> を横断要素として確認した。これにより Music と Rhythm、Action と Targeting、Guidance と View adapter を別境界として保つ判断が補強された。一方、Ludus は汎用辞書であり、製品固有のKill Chord、2小節BGM編成、研究ツリー、ミッション報酬の正本にはしない。</p>
+<h2>データ境界</h2>
+<p>この解析結果、固有名、ローカルパス、実装ギャップは Ludus へ自動書き戻ししない。公開可能な汎化知識を提案する場合のみ、別途人間レビュー付きPRで扱う。</p></article></section><section class="stage" id="stage-03" data-stage><div class="stage-head"><span class="stage-no">03</span><div><h2>仕様起点ドメイン</h2><div class="badges"><span class="badge">1 件の成果物</span></div></div></div><p class="summary">**ステータス: complete（静的仕様証拠について完了）。** 2026-07-18 に公開仕様 35/35 ページと Ludus public OKF commit `b949cfa136fa27de101ace324f99a715f17e6846` を確認して再定義した。ランタイム観測は未実施である。境界名と直下の説明文は、今回の Anato…</p><article class="document"><div class="document-title"><h3>Stage 3: 仕様起点ドメインモデル（再定義）</h3><span class="source">spec/plan/04-domain-model.md</span></div><h1>Stage 3: 仕様起点ドメインモデル（再定義）</h1>
+<p><strong>ステータス: complete（静的仕様証拠について完了）。</strong> 2026-07-18 に公開仕様 35/35 ページと Ludus public OKF commit <code>b949cfa136fa27de101ace324f99a715f17e6846</code> を確認して再定義した。ランタイム観測は未実施である。境界名と直下の説明文は、今回の Anatomia 入力でバイト単位に固定する。</p>
+<p>実装レイヤ、Unityの <code>MonoBehaviour</code>、Prefab、Scene、View、Presenter、Repository はドメインそのものではない。以下はプレイヤーに約束するルールと、その不変条件が一緒に変化する単位である。</p>
+<h2>Musical Time and Adaptive Arrangement</h2>
+<p>音楽時間、BPM・拍子・小節位置、ビート同期スケジューリング、および装備中のキルコードに応じたイントロ・ループ・アウトロと2小節ブロックの動的編成を所有する。</p>
+<ul>
+<li>集約/エンティティ: <code>MusicSyncSpec</code>、音楽時計、予約アクション列、BGMセクション/ブロック編成。</li>
+<li>値オブジェクト: BPM、拍子、小節位置、再生区間、実行要求時刻。</li>
+<li>コマンド/イベント: 音楽開始、ブロック編成確定、予約、ビート到達、イントロ/ループ/アウトロ遷移。</li>
+<li>不変条件: 全同期処理は同じ音楽時計を使う。予約は要求位置以後に一度だけ実行する。2/3スロット編成は仕様順を保つ。</li>
+</ul>
+<h2>Rhythm Input and Kill Chord Resolution</h2>
+<p>攻撃・回避入力の間隔をノーツへ判定し、All/Just/タイムアウト規則とアクション種別を使ってキルコード列を照合し発動可否を決定する。</p>
+<ul>
+<li>集約/エンティティ: リズム入力列、ノーツ状態、キルコード照合状態。</li>
+<li>値オブジェクト: beat type、All note、Just判定範囲、リズムパターン、アクション種別。</li>
+<li>コマンド/イベント: 入力記録、判定、列の前進/リセット、キルコード成立/失敗。</li>
+<li>不変条件: All note は列の先頭だけに使える。1.5小節以上の空白と被弾直後は基準入力になる。拍種6/8種類の矛盾は決定されるまで明示する。</li>
+</ul>
+<h2>Player Action and Combat Targeting</h2>
+<p>移動、照準、攻撃、回避、硬直・クールダウン・キャンセル、遮蔽物を含む標的選択を所有し、プレイヤー意図を戦闘要求へ変換する。</p>
+<ul>
+<li>集約/エンティティ: プレイヤー行動状態、攻撃選択、回避状態、標的候補。</li>
+<li>値オブジェクト: 移動入力、照準方向、硬直時間、クールダウン、line-of-sight結果。</li>
+<li>コマンド/イベント: 移動、照準、攻撃、回避、標的確定、キャンセル。</li>
+<li>不変条件: 障害物越しの射撃は命中しない。硬直/クールダウン中の入力可否と回避キャンセルは一つの方針で決まる。PCとAndroidの入力面は同じ行動意味へ変換する。</li>
+</ul>
+<h2>Combat State and Effect Resolution</h2>
+<p>体力と能力値、攻撃定義、ダメージ・クリティカル、多段ヒット抑制、バフ・デバフ・回復の一回限りの適用を所有する。</p>
+<ul>
+<li>集約/エンティティ: Character、Health、Attack、Effect collection。</li>
+<li>値オブジェクト: HP、攻撃/防御、クリティカル率/倍率、効果量、継続時間。</li>
+<li>コマンド/イベント: 攻撃解決、被弾、回復、効果追加/失効、死亡。</li>
+<li>不変条件: HPは範囲内に留まる。攻撃pipelineは定義順で一度だけ適用する。同一攻撃の多段適用を仕様方針に従って抑制する。</li>
+</ul>
+<h2>Enemy Encounter and Stage Simulation</h2>
+<p>敵の判断、スポーン・プール・ウェーブ、予告付きビート攻撃、ボス、ステージギミック、および遭遇開始から終了までのシミュレーションを所有する。</p>
+<ul>
+<li>集約/エンティティ: Enemy、Wave、Spawner、Boss phase、Stage effect。</li>
+<li>値オブジェクト: enemy type、wave definition、attack area/line、stage effect ID。</li>
+<li>コマンド/イベント: spawn、wave開始/終了、敵攻撃予約、撃破、ギミック発火、遭遇終了。</li>
+<li>不変条件: wave index/loop点とspawn数はauthoring範囲内。攻撃前に可読な予告を出す。ステージ効果は既知IDへ解決する。</li>
+</ul>
+<h2>Mission Evaluation and Result</h2>
+<p>メイン・サブミッション、成功・失敗条件、経過時間・最大コンボ・ランク・報酬、勝敗リザルトと再出撃判断を所有する。</p>
+<ul>
+<li>集約/エンティティ: Mission、条件木、評価記録、Stage result。</li>
+<li>値オブジェクト: mission ID、終了理由、rank、elapsed time、combo、reward。</li>
+<li>コマンド/イベント: 進捗記録、成功/失敗、評価、報酬確定、完了、再出撃。</li>
+<li>不変条件: 終了理由と結果は一度だけ確定する。報酬は定義された条件で一度だけ付与する。Home/作戦画面の戻り先矛盾は解決されるまで遷移側へ委ねない。</li>
+</ul>
+<h2>Progression, Research and Loadout</h2>
+<p>ステージ解放、報酬ポイント、研究ツリー、スキル獲得・レベル、装備スロットと末尾ノーツ競合、出撃編成を所有する。</p>
+<ul>
+<li>集約/エンティティ: Stage tree、Skill tree、Kill Chord、Loadout、Owned skill collection。</li>
+<li>値オブジェクト: stage/node/skill ID、unlock cost、skill level、slot、progression point。</li>
+<li>コマンド/イベント: 報酬受取、node解放/リセット、level up、装備/解除、編成確定。</li>
+<li>不変条件: 前提node/stageを満たす。未所持スキルは装備不可。同じ末尾ノーツのキルコードは同時装備不可。初期2枠、条件達成後3枠を守る。</li>
+</ul>
+<h2>Narrative and Game Flow</h2>
+<p>新規/継続開始、シナリオ読了、ホーム・作戦・準備・戦闘・リザルト間の遷移、およびシーン完了の一回性を所有する。</p>
+<ul>
+<li>集約/エンティティ: Game flow session、Scenario event stream、Screen/scene state、selected sortie。</li>
+<li>値オブジェクト: scenario ID、event row、screen ID、transition rule。</li>
+<li>コマンド/イベント: new/continue、シナリオ再生/skip、screen open/close、出撃、scene loaded/completed。</li>
+<li>不変条件: 初回は物語→戦闘tutorial→Home tutorialへ進む。Homeはアウトゲームhubである。完了通知とscene遷移は一度だけ発火する。</li>
+</ul>
+<h2>Persistence and Player Settings</h2>
+<p>五分類の永続データ、プラットフォーム別保存、暗号化・移行・破損回復、および音量・操作・表示設定の確定/取消を所有する。</p>
+<ul>
+<li>集約/エンティティ: Save data、Save slot、Settings draft/committed state。</li>
+<li>値オブジェクト: save version、<code>DataID</code>、volume、display/input option、repository address。</li>
+<li>コマンド/イベント: load、save、migrate、reset、setting変更/確定/取消、corruption検出。</li>
+<li>不変条件: 五分類を欠落させない。ID移行は冪等。保存失敗/破損は明示し、既存進捗を原子的に守る。未確定設定はキャンセルで破棄できる。</li>
+</ul>
+<h2>Guidance, Feedback and Recovery</h2>
+<p>リズム・BGM要素・敵攻撃・ミッションの可視化、チュートリアル転移、ポーズ/再開カウントダウン、失敗Tips、ロード進捗を通じて行動発見と回復可能性を所有する。</p>
+<ul>
+<li>集約/エンティティ: Guidance session、Tutorial step、Feedback cue、Recovery state。</li>
+<li>値オブジェクト: cue priority、progress、tip、countdown、input prompt。</li>
+<li>コマンド/イベント: cue表示/消去、tutorial step達成、pause/resume、loading進捗、失敗tip選択。</li>
+<li>不変条件: 音だけに依存せず同等の視覚手掛かりを出す。敵攻撃は反応前に予告する。初回学習は通常ステージの操作へ転移可能にする。中断/失敗後は次の有効行動を示す。</li>
+</ul>
+<h2>境界上の判断</h2>
+<ul>
+<li>Unity lifecycle、Scene/Prefab/ScriptableObject、UI Toolkit、CRI、Addressables、Service Locator、Composition initializer は実装・基盤の証拠として別集計し、製品ドメインへ昇格しない。</li>
+<li><code>Music</code> フォルダは Musical Time と Rhythm Input の二つの意味を含むため、ファイル名・型名の証拠で分ける。フォルダ境界だけで同一ドメインとみなさない。</li>
+<li><code>Skill</code> は入力成立（Rhythm Input）、効果解決（Combat State）、所有/装備（Progression）の三境界に跨る。Anatomiaのoverlapは欠陥の証明ではなく、責務分割候補を探す信号として扱う。</li>
+<li>Guidance は表示技術ではなくプレイヤー向けルールを所有する。View/Presenterの詳細はこの境界のadapterであり、ドメイン定義を置換しない。</li>
+</ul></article></section><section class="stage" id="stage-04" data-stage><div class="stage-head"><span class="stage-no">04</span><div><h2>Unity対応Anatomia</h2><div class="badges"><span class="badge">2 件の成果物</span></div></div></div><p class="summary">**ステータス: complete（決定的静的解析について完了）。ランタイムとUnityのserialized配線は対象外。**</p><article class="document"><div class="document-title"><h3>Stage 4: Unity 対応 Anatomia アーキテクチャ解析</h3><span class="source">spec/plan/05-anatomia-analysis.md</span></div><h1>Stage 4: Unity 対応 Anatomia アーキテクチャ解析</h1>
+<p><strong>ステータス: complete（決定的静的解析について完了）。ランタイムとUnityのserialized配線は対象外。</strong></p>
+<h2>解析方法</h2>
+<p>Anatomia commit <code>d0cc4d6e77d1a10d1b4b1ca911026a1bec304cbb</code> を固定し、<code>Assets/Scripts/Runtime</code> 799 C# files を解析した。tree-sitter WASM で構文木を作り、型・関数・呼出・継承・Unity lifecycle を規則ベースでグラフ化する。LLM、clang、Unity Editor は使わない。Unity profile は <code>unity</code>、既定表示は class graph となり、74 Unity views / 22 screen edges を検出した。</p>
+<p>解析器の build と Unity向け focused tests は成功した（3 files / 5 tests）。プロジェクト本体の起動やサービス起動はしていない。</p>
+<h2>全体結果</h2>
+<div class="table-scroll"><table><thead><tr><th>指標</th><th>最終値</th><th>解釈</th></tr></thead><tbody><tr><td>Functions</td><td>2,311</td><td><code>Assets/Scripts/Runtime</code>の解析対象</td></tr><tr><td>Call edges</td><td>7,780</td><td>1,954 unresolved callsを別途保持</td></tr><tr><td>Generic violations</td><td>11</td><td>候補であり、欠陥確定ではない</td></tr><tr><td>Hotspots</td><td>20</td><td>scene transition系が上位</td></tr><tr><td>Cycles</td><td>201</td><td>同名／overload誤結合の確認が必要</td></tr><tr><td>Orphans</td><td>715</td><td>Unity lifecycle認識後の値</td></tr><tr><td>Cross-domain coupling</td><td>107</td><td>仕様起点10境界間の静的結合</td></tr><tr><td>Spec gaps</td><td>792</td><td>未配線候補。未実装確定値ではない</td></tr><tr><td>Spec links</td><td>8</td><td>68 clausesに対して少なく、網羅性不足</td></tr></tbody></table></div>
+<p>上位hotspotは <code>SceneTransitionUsecase.LoadSceneAndWaitForReadyAsync</code>、<code>UnloadAndSetActiveAsync</code>、<code>ScenePriorityResolver.Resolve</code>、<code>SceneTransitionService.ReloadSceneAsync</code> / <code>ChangeSceneAsync</code> で、coupling 98–102、cyclomatic 47–50。これはフロー境界の集中を示すが、Scene遷移の性質上必要な協調も含む。</p>
+<h2>仕様起点10ドメイン</h2>
+<div class="table-scroll"><table><thead><tr><th>Domain</th><th>Implementors</th><th>Cohesion</th><th>Isolated</th></tr></thead><tbody><tr><td>Musical Time and Adaptive Arrangement</td><td>42</td><td>0.480</td><td>22</td></tr><tr><td>Rhythm Input and Kill Chord Resolution</td><td>78</td><td>0.295</td><td>33</td></tr><tr><td>Player Action and Combat Targeting</td><td>128</td><td>0.727</td><td>49</td></tr><tr><td>Combat State and Effect Resolution</td><td>175</td><td>0.307</td><td>111</td></tr><tr><td>Enemy Encounter and Stage Simulation</td><td>424</td><td>0.837</td><td>149</td></tr><tr><td>Mission Evaluation and Result</td><td>198</td><td>0.537</td><td>89</td></tr><tr><td>Progression, Research and Loadout</td><td>317</td><td>0.505</td><td>107</td></tr><tr><td>Narrative and Game Flow</td><td>418</td><td>0.384</td><td>166</td></tr><tr><td>Persistence and Player Settings</td><td>145</td><td>0.720</td><td>36</td></tr><tr><td>Guidance, Feedback and Recovery</td><td>323</td><td>0.617</td><td>129</td></tr></tbody></table></div>
+<p><code>Rhythm Input</code>、<code>Combat State</code>、<code>Narrative</code> の低いcohesionは境界漏れ／adapter混入の調査優先度を上げる。重複所属は Music/Skill/UI の意図的横断も含むため、単純にゼロを目指さない。</p>
+<p>集計の99.78% assignment coverageは built-in <code>state-machine</code> が2,271 functionsを取得するため、手動10ドメインの強さとして使わない。<code>Enemy Encounter</code>、<code>Guidance</code>、<code>Mission</code>、<code>Narrative</code>、<code>Player Action</code>、<code>Rhythm Input</code> の spec-integrity warning は「specRefがあるがspec-linked implementorが0」の警告であり、未実装の確定ではない。</p>
+<h2>制約と確認方法</h2>
+<ul>
+<li>Reflection、Service Locator、DI、UnityEvent、serialized Prefab/Scene、Addressables、CRIの実行時経路は静的call graphだけでは完全に解決できない。</li>
+<li>generic violation例（<code>SkillTreeInitializer</code>、<code>AttackIntervalEvaluator</code>）はソース確認後に修正判断する。</li>
+<li>raw data: <code>spec/data/anatomia-unity-*.json</code></li>
+<li>interactive graph: <code>report/architecture-review-unity.html</code></li>
+</ul></article><h3>関連HTML</h3><div class="related"><a href="architecture-review-unity.html">↗ architecture-review-unity.html<br><small>report/architecture-review-unity.html</small></a></div></section><section class="stage" id="stage-05" data-stage><div class="stage-head"><span class="stage-no">05</span><div><h2>仕様・ドメイン・コード</h2><div class="badges"><span class="badge">2 件の成果物</span></div></div></div><p class="summary">**ステータス: complete（静的仕様35/35について完了）。ランタイム配線はpartial（部分完了）。**</p><article class="document"><div class="document-title"><h3>Stage 5: 仕様・ドメイン・コード対応表</h3><span class="source">spec/plan/06-spec-domain-code-map.md</span></div><h1>Stage 5: 仕様・ドメイン・コード対応表</h1>
+<p><strong>ステータス: complete（静的仕様35/35について完了）。ランタイム配線はpartial（部分完了）。</strong></p>
+<div class="table-scroll"><table><thead><tr><th>Source rule</th><th>Domain</th><th>Implementation evidence</th><th>Wiring state</th></tr></thead><tbody><tr><td>6拍種、All、Just、1.5小節timeout</td><td>Rhythm Input and Kill Chord Resolution</td><td><code>BeatType.cs</code> は1/2/3/4/6/8、<code>MusicSyncService</code> はOne fallback</td><td>All/timeoutは矛盾、12/16は仕様内矛盾</td></tr><tr><td>リズムで武器／攻撃を選ぶ</td><td>Player Action and Combat Targeting</td><td><code>PlayerAttackController</code>, <code>CharacterCombatSpec</code></td><td>implemented</td></tr><tr><td>障害物がなければ命中</td><td>Player Action and Combat Targeting</td><td><code>PlayerAttackController</code> にline-of-sight TODO</td><td>contradictory</td></tr><tr><td>敵が拍に同期し攻撃予告</td><td>Enemy Encounter and Stage Simulation / Guidance</td><td>scheduling、ray/range viewあり</td><td>partial; runtime可読性未検証</td></tr><tr><td>Kill Chordのpattern＋action条件</td><td>Rhythm Input / Combat State</td><td><code>SkillDefinition</code>, <code>SkillCheckService</code>, execution controller</td><td>implemented</td></tr><tr><td>装備スキルで2小節BGMを編成</td><td>Musical Time and Adaptive Arrangement</td><td>initializerはserialized <code>_testCue</code> を再生</td><td>specification-only</td></tr><tr><td>初期2枠→条件で3枠、末尾note競合禁止</td><td>Progression, Research and Loadout</td><td>initial count 2、拡張処理あり、競合validation未発見</td><td>partial</td></tr><tr><td>node解放、parameter増加、reset</td><td>Progression, Research and Loadout</td><td>unlock/spend/saveあり、effect/status TODO</td><td>partial</td></tr><tr><td>勝敗result、time/combo/rank/tips/retry</td><td>Mission Evaluation and Result / Guidance</td><td>DTO/view model/controllerに経路あり</td><td>implemented; navigation runtime未検証</td></tr><tr><td>reward pointを一度だけ付与</td><td>Mission Evaluation and Result / Progression</td><td>detail表示はあるがcrediting参照未発見</td><td>specification-only</td></tr><tr><td>Home hubと画面遷移</td><td>Narrative and Game Flow</td><td>screen/scene controllers、Unity views 74</td><td>partial; serialized graph未解決</td></tr><tr><td>設定draftの決定／取消</td><td>Persistence and Player Settings</td><td>settings UI/pathあり</td><td>partial;全項目・永続化未検証</td></tr><tr><td>5分類save、暗号化、reset</td><td>Persistence and Player Settings</td><td>stage/tree/equipmentあり、skill level/options/encryption不足</td><td>contradictory</td></tr><tr><td>tutorial再プレイ、prompt fade、通常stageへの転移</td><td>Guidance, Feedback and Recovery</td><td>tutorial pageとbeta guidanceあり</td><td>fade/transfer criteriaはspec gap</td></tr><tr><td>pause、resume countdown、loading progress</td><td>Guidance, Feedback and Recovery</td><td>関連view/controllerを検出</td><td>runtime behavior unknown</td></tr><tr><td>PC60/Android30、load≤3秒、15分安定</td><td>横断quality constraint</td><td>自動performance gateなし</td><td>unknown/unverified</td></tr></tbody></table></div>
+<p>仕様からコードへのexplicit linksは68 clauses中8 linksに留まり、792 spec-gap candidatesを生んでいる。これらは「実装がない」件数ではなく、命名・属性・テストIDを通じたtraceability不足を含む。優先要件には <code>GS-*</code> IDをtest名またはasset metadataへ接続する。</p></article><article class="document"><div class="document-title"><h3>Stage 5: 仕様ギャップ</h3><span class="source">spec/plan/07-spec-gaps.md</span></div><h1>Stage 5: 仕様ギャップ</h1>
+<p><strong>ステータス: complete（静的仕様35/35の比較について完了）。</strong></p>
+<div class="table-scroll"><table><thead><tr><th>Severity</th><th>Gap</th><th>Impact</th></tr></thead><tbody><tr><td>High</td><td>All note／1.5小節timeout契約が実装経路に見つからない</td><td>command開始と被弾後復帰が設計と変わる</td></tr><tr><td>High</td><td>player shotのline-of-sightがTODO</td><td>TPSの標的・遮蔽物ルールを破る</td></tr><tr><td>High</td><td>装備連動interactive BGM wiringがなくtest cue再生</td><td>Build選択が音による入力支援へ届かない</td></tr><tr><td>High</td><td>stage reward crediting経路が見つからない</td><td>研究・強化loopが閉じない</td></tr><tr><td>High</td><td>saveのskill level/options/encryption/atomic recoveryが不足</td><td>進捗喪失と移行不能リスク</td></tr><tr><td>High</td><td>enemy damageに<code>new Damage(10)</code>経路</td><td>content dataとbalanceが乖離</td></tr><tr><td>High</td><td>PC/Android FPS、load、memoryの自動証拠がない</td><td>beta acceptanceを再現できない</td></tr><tr><td>High</td><td>HUD仕様が見出しのみで、音と同等のbeat／hit／skill視覚cue受入条件がない</td><td>聴覚依存、戦闘中の因果不明</td></tr><tr><td>Medium</td><td>同末尾noteの同時装備禁止が未強制</td><td>同時成立が曖昧になる</td></tr><tr><td>Medium</td><td>rhythm sourceが6拍種と8拍種で矛盾</td><td>authoring不能／未対応pattern混入</td></tr><tr><td>Medium</td><td>result完了後の遷移先がHome／Operationで矛盾</td><td>flow acceptance未定義</td></tr><tr><td>Medium</td><td>skill-tree効果・slot unlockにTODO</td><td>支払ったnodeが成長へ反映されない</td></tr><tr><td>Medium</td><td>tutorialは順序列挙のみでprompt fade、skip、help、後続transfer判定がない</td><td>完了しても学習を証明できない</td></tr><tr><td>Medium</td><td>titleのdata resetに確認、backup、取消、結果通知が未記載</td><td>誤操作による不可逆損失</td></tr><tr><td>Medium</td><td>accessibilityの字幕、色覚、振動、remap、文字可読性が未定義</td><td>音中心のcore promiseへアクセスできない</td></tr><tr><td>Medium</td><td>auto lockの優先規則に「HPまたは距離」の未決定が残る</td><td>同一入力の結果が定義不能</td></tr><tr><td>Medium</td><td>mutable外部ZIPをchecksumなしでimport</td><td>同一Git revisionでもbuildが変わる</td></tr></tbody></table></div>
+<h2>決定が必要な事項</h2>
+<ol>
+<li>専用リズム判定ページを正本にして6拍種へ統一するか、12/16を全経路へ追加する。</li>
+<li>result遷移先、reward確定時点、再試行時のidempotencyを一つの状態機械で定める。</li>
+<li>save version、per-skill level、暗号化境界、atomic replace、破損復旧、destructive reset確認を一体で設計する。</li>
+<li>tutorialのtarget action、prompt fade、再プレイ／skip、通常stageでのunaided transferを受入条件化する。</li>
+<li>beat／hit／enemy telegraphを視覚・聴覚・触覚で冗長化し、設定と端末ごとの代替を定義する。</li>
+</ol></article></section><section class="stage" id="stage-06" data-stage><div class="stage-head"><span class="stage-no">06</span><div><h2>メカニクスと内部経済</h2><div class="badges"><span class="badge">1 件の成果物</span></div></div></div><p class="summary">**ステータス: partial（部分完了）。正式仕様と静的コードのみで、プレイテストとtelemetryは未実施。** 音楽、phrase、敵予告を読む。 移動・camera・lock-onで標的と安全位置を選ぶ。 攻撃／回避のcadenceでnote列を作り、武器とKill Chordを選び分ける。 attack/buff/debuffを解決し、w…</p><article class="document"><div class="document-title"><h3>Stage 6: メカニクスと内部経済</h3><span class="source">spec/plan/08-mechanics-economy.md</span></div><h1>Stage 6: メカニクスと内部経済</h1>
+<p><strong>ステータス: partial（部分完了）。正式仕様と静的コードのみで、プレイテストとtelemetryは未実施。</strong></p>
+<h2>意図されたループ</h2>
+<ol>
+<li>音楽、phrase、敵予告を読む。</li>
+<li>移動・camera・lock-onで標的と安全位置を選ぶ。</li>
+<li>攻撃／回避のcadenceでnote列を作り、武器とKill Chordを選び分ける。</li>
+<li>attack/buff/debuffを解決し、waveとmissionを進める。</li>
+<li>resultでmission、time、max combo、rank、tipを受け取り、retryまたは次のnodeへ進む。</li>
+<li>rewardを研究／強化／loadoutに使い、より複雑なcommandとBGM phraseへ進む。</li>
+</ol>
+<p>Ludusの <code>genre:rhythm</code> × <code>genre:action</code> × <code>genre:shooter</code> では、時間判定・即応性・命中feedbackを同時に閉じる必要がある。現状はbeat-selected attackとpattern skillは強いが、All recovery、line-of-sight、adaptive BGM、reward creditが欠け、loopの学習と成長が途中で切れる。</p>
+<h2>難易度と回復</h2>
+<p>仕様は初心者に拍外行動を許し、tutorial敵damageを0にし、序盤を4/8拍、後半を3/6/1拍にする。研究は操作が苦手でもstoryを完遂するための恒久的救済であり、単なるmeta economyではない。上級者には複雑なKill Chordとendless missionを置く。これは一つのdifficulty sliderではなく、入力自由度・pattern複雑度・成長量の三軸である。</p>
+<h2>経済台帳</h2>
+<div class="table-scroll"><table><thead><tr><th>Resource</th><th>Source</th><th>Sink / meaning</th><th>Static assessment</th></tr></thead><tbody><tr><td>Research points</td><td>mission/stage reward</td><td>tree path/node、parameter、slot</td><td>sink/saveあり、source crediting未発見</td></tr><tr><td>Skill level points</td><td>stage reward</td><td>individual Kill Chord level</td><td>aggregate pointのみ、個別level schema不足</td></tr><tr><td>Unlocked skills/nodes</td><td>tree purchase/tutorial grant</td><td>loadout variety、difficulty access</td><td>persistenceあり、effect delivery一部TODO</td></tr><tr><td>Equipped Kill Chords</td><td>grant/tree</td><td>command set、intended BGM phrases</td><td>combat使用あり、BGM arrangementなし</td></tr><tr><td>Stage rank / combo</td><td>battle evaluation</td><td>mastery feedback、reward候補</td><td>C/B/A/S pathあり、reward式未定義</td></tr></tbody></table></div>
+<p>commercial price、課金、randomized paid rewardは仕様にないため monetization audit は not-applicable とする。無料／買い切り等を推測しない。</p>
+<h2>効果の大きい実施順序</h2>
+<p>rhythm source統一 → All/timeoutとline-of-sight → multimodal HUD → exactly-once rewardとsave migration → skill effect／slot rule → build-directed BGM → deterministic balance simulation → representative playtestとtelemetry、の順がよい。stage duration、unaided Kill Chord成立、retry理由、tip後改善、resource収支を観測する。</p></article></section><section class="stage" id="stage-07" data-stage><div class="stage-head"><span class="stage-no">07</span><div><h2>AI Formatとアーキテクチャ健全性</h2><div class="badges"><span class="badge">1 件の成果物</span></div></div></div><p class="summary">**ステータス: complete（静的証拠について完了）。ランタイム品質は未検証。**</p><article class="document"><div class="document-title"><h3>Stage 7: AI Formatとアーキテクチャ健全性レビュー</h3><span class="source">spec/plan/09-aiformat-architecture-review.md</span></div><h1>Stage 7: AI Formatとアーキテクチャ健全性レビュー</h1>
+<p><strong>ステータス: complete（静的証拠について完了）。ランタイム品質は未検証。</strong></p>
+<h2>総合評価</h2>
+<p>Static readiness: <strong>C</strong>。Clean Architecture/DDDの意図、typed concepts、明示的composition lifecycleは強い。一方、仕様35ページとUnity-aware graphは rhythm recovery、obstacle hit、adaptive music、reward/save、guidance traceability、automated verificationの高優先gapを示す。</p>
+<div class="table-scroll"><table><thead><tr><th>Area</th><th>Grade</th><th>Evidence</th></tr></thead><tbody><tr><td>Design strength</td><td>B</td><td>7 layer assemblies、typed IDs/value objects、phased init/reverse shutdown</td></tr><tr><td>Domain alignment</td><td>C</td><td>10境界を認識できるが Rhythm/Combat/Narrativeのcohesionが低くspec linksは8</td></tr><tr><td>Unity lifecycle handling</td><td>B-</td><td>lifecycle認識でorphans 802→715、74 views検出</td></tr><tr><td>Scene/flow concentration</td><td>C</td><td>98–102 coupling、47–50 cyclomaticのscene transition hotspots</td></tr><tr><td>Persistence</td><td>C-</td><td>category一部実装、version/encryption/atomic recovery不足</td></tr><tr><td>Data-driven design</td><td>C</td><td>asset定義あり、enemy damage・一部effectがhard-coded/TODO</td></tr><tr><td>Test strategy</td><td>D</td><td>tracked executable tests/CI performance gateを確認できない</td></tr><tr><td>Build reproducibility</td><td>C</td><td>action pinningは良いが外部ZIPがmutable/unchecked</td></tr><tr><td>Runtime performance</td><td>not rated</td><td>FPS/load/memory目標はあるが測定なし</td></tr></tbody></table></div>
+<p>201 cycles、715 orphans、792 spec gapsは自動候補であり欠陥数として扱わない。reflection、DI、serialized Unity referencesと同名method誤結合を人手で除外してから改修する。</p>
+<h2>推奨アーキテクチャ境界</h2>
+<ul>
+<li>Musical clockとBGM arrangementを分け、Kill Chord loadoutは公開event/portでarrangementへ渡す。</li>
+<li>Rhythm inputはnote判定とcommand resolutionを所有し、Combat effectへ成立結果だけを渡す。</li>
+<li>GuidanceはView寄せ集めではなく、cue priority、tutorial competence、recovery stateを所有するapplication/domain boundaryにする。</li>
+<li>Scene transition hotspotはrequest、policy、loading progress、completion notificationを分け、exactly-once条件をtestする。</li>
+<li><code>GS-*</code> requirement IDをtest/asset metadataへ持たせ、68 clauses→code/testのtraceabilityを増やす。</li>
+</ul>
+<p>最初の実装束は All/timeout、line-of-sight、reward idempotency、save recovery、HUD cue acceptance の5本とし、各々をEditMode/PlayModeで固定してから構造分割へ進む。</p></article></section><section class="stage" id="stage-08" data-stage><div class="stage-head"><span class="stage-no">08</span><div><h2>UX・配信・TGS体験</h2><div class="badges"><span class="badge">1 件の成果物</span></div></div></div><p class="summary">**ステータス: partial（部分完了）。** Vitia commit `3fa33c9e5e7913c35a2a085dbbe49631cdee9eae`、source manifest `spec/data/vitia-ux-source-manifest.json`、仕様35/35、静的コードを使用した。実機観察・ユーザテストは未実施である。</p><article class="document"><div class="document-title"><h3>Stage 8: Vitia UX・オンボーディングレビュー</h3><span class="source">spec/plan/10-ux-review.md</span></div><h1>Stage 8: Vitia UX・オンボーディングレビュー</h1>
+<p><strong>ステータス: partial（部分完了）。</strong> Vitia commit <code>3fa33c9e5e7913c35a2a085dbbe49631cdee9eae</code>、source manifest <code>spec/data/vitia-ux-source-manifest.json</code>、仕様35/35、静的コードを使用した。実機観察・ユーザテストは未実施である。</p>
+<h2>ラベル中立性の確認</h2>
+<p>採点時は <code>[artifact-A]</code>、<code>[hybrid-action]</code> として製品名、ジャンルの評判、Vitiaラベルを無視した。名称を別名へ置換しても「時間入力と即時戦闘を同時に理解し、失敗から通常stageへ転移できるか」という診断は変わらないため rename check は pass。以下の数値は仕様証拠のcoverage heuristicであり、楽しさや売上を測らない。</p>
+<h2>証拠台帳</h2>
+<ul>
+<li><strong>観測済み（仕様／静的コード）:</strong> 一入力でattack、拍により武器が変化、patternでKill Chord、tutorial敵damage 0、4/8拍から開始、tutorial再プレイ、敗北Tips、retry、研究による恒久支援、pause/resume countdown、settings、controller/mobile方針。</li>
+<li><strong>推論:</strong> tutorialの安全性と段階設計は学習を助ける可能性がある。adaptive BGMと視覚HUDが配線されれば、入力の予測可能性を高めうる。</li>
+<li><strong>未確認:</strong> 初見の注視点、誤入力、time-to-first-Kill-Chord、音なしでの理解、prompt依存、通常stageでのtransfer、酔い、疲労、mobile操作、設定変更の効果。</li>
+</ul>
+<h2>行動発見の連鎖</h2>
+<div class="table-scroll"><table><thead><tr><th>Link</th><th>仕様上の意図</th><th>静的な問題</th><th>検証</th></tr></thead><tbody><tr><td>user goal</td><td>敵を倒しmissionを達成</td><td>mission HUD詳細が薄い</td><td>開始5秒後に目標を説明できる率</td></tr><tr><td>available action</td><td>move / attack / dodge / lock-on</td><td>platform mappingの完全性未確認</td><td>input device別のunaided action success</td></tr><tr><td>signifier</td><td>music、rhythm UI、telegraph、radio cue</td><td>HUD pageが見出しのみ、audio依存</td><td>mute/low-vision条件でcue検出率</td></tr><tr><td>attempted action</td><td>拍に合わせattackしpatternを作る</td><td>All/timeout不一致で期待と結果がずれる</td><td>first attempt、hesitation、confident error</td></tr><tr><td>feedback</td><td>weapon、note、skill、hit、combo</td><td>adaptive BGM未配線、hit cue受入条件なし</td><td>action→cause attribution、latency</td></tr><tr><td>recovery</td><td>enemy damage 0、retry、Tips、research</td><td>prompt fade/transfer criteriaなし</td><td>retry後改善率、help使用、resume time</td></tr></tbody></table></div>
+<h2>チュートリアルと学習転移</h2>
+<p>チュートリアルは story → move → attack → 1/2/4/8拍 → Kill Chord → lock-on → defeat と多くの関係を一つのstageで扱う。安全な試行（enemy damage 0）と再プレイは強いが、最小の価値単位を「4拍attackを2回成功し、因果を説明できる」に切り、次に8拍、最後にpatternへ組み合わせるべきである。各stepは cue → safe attempt → action-specific feedback → 変形課題 → prompt fade の順にし、通常stage冒頭でunaided transferを測る。skip、control reference、captions、visual beat、振動代替は罰なしで提供する。</p>
+<h2>初期体験とピーク体験の連続性</h2>
+<div class="table-scroll"><table><thead><tr><th>Dimension</th><th>First meaningful stage</th><th>Peak-value stage</th><th>Gap</th></tr></thead><tbody><tr><td>Goal</td><td>基本attackで敵撃破</td><td>mission制約下でcommandを選択</td><td>mission/commandの同時負荷を段階化</td></tr><tr><td>Actions</td><td>move、attack、4/8 beat</td><td>dodge終端、3/6/1 beat、3-slot build</td><td>transfer introduction位置が未定義</td></tr><tr><td>Decision</td><td>cadenceを変える</td><td>敵・HP・build・phraseでpattern選択</td><td>early敵にも意味ある選択を置く</td></tr><tr><td>Feedback</td><td>radio cue、rhythm UI</td><td>adaptive BGM、telegraph、combo/rank</td><td>BGM配線とmultimodal HUDが未完成</td></tr><tr><td>Promise</td><td>音に合わせると戦い方が変わる</td><td>自作buildが音と戦術を変える</td><td>tutorial固定buildからownershipへの橋</td></tr><tr><td>Failure/recovery</td><td>damage 0</td><td>defeat Tips、retry、research</td><td>Tipsの診断性と改善を未測定</td></tr></tbody></table></div>
+<h2>4レンズ監査</h2>
+<p>Deterministic output: <code>spec/data/vitia-game-experience-audit.json</code>。</p>
+<ul>
+<li><strong>Play promise — supported 0.582:</strong> goal/action/rule/outcomeは仕様上つながる。feedback traceabilityとadaptive musicが弱点。</li>
+<li><strong>Challenge and learning — needs work 0.522:</strong> 安全な試行と研究救済はあるが、later transfer証拠がなくprompt fadeも未定義。</li>
+<li><strong>Player agency/fairness — exploratory 0.434:</strong> solo中心で強制的social pressureは見当たらないが、coverage 0.45・confidence 0.45で結論不可。</li>
+<li><strong>Repeat value — supported 0.594:</strong> build、pattern、mission variationに再訪価値がある。endless、satiation、stopping cueは実機未確認。</li>
+</ul>
+<p>Monetizationは価格、購入、広告、paid rewardの資料がなく <strong>not-applicable</strong>。不明をゼロ評価しない。</p>
+<h2>アクセシビリティ、情報密度、疲労、回復</h2>
+<ul>
+<li>beatを音だけに置かず、位相／次beat／成立noteを色だけに依存しない形で表示し、振動強度と簡略表示を選べるようにする。</li>
+<li>combat HUDは「今の目標」「次に入力可能なaction」「成立中pattern」「敵予告」をpriority順で制限する。情報数の一律上限ではなくtask successで調整する。</li>
+<li>camera shake、auto lock、brightness、text speed、caption、remap、hold/toggle、rhythm timing calibrationをglobal settingsとして整理する。</li>
+<li>pause復帰はcountdown中にbeat phaseとtargetを再提示し、最初の入力をAll扱いにするか仕様で決める。</li>
+<li>destructive reset、unsaved loadout、skill-tree resetには対象、結果、取消可能性を明示する。</li>
+</ul>
+<h2>改善案</h2>
+<div class="table-scroll"><table><thead><tr><th>Proposal</th><th>Impact</th><th>Risk / cost</th><th>Validation</th><th>Guardrail</th></tr></thead><tbody><tr><td>Beat/command HUD contractを先に確定</td><td>core因果を可視化</td><td>画面密度増</td><td>mute条件のaction attribution</td><td>色・音単独に依存しない</td></tr><tr><td>Tutorialをcompetence gate＋fadeへ分割</td><td>transfer改善</td><td>実装・計測追加</td><td>normal stage unaided success</td><td>skip/replay/helpを常設</td></tr><tr><td>All/timeoutをpause/被弾と統一</td><td>recovery予測性</td><td>balance変更</td><td>resume/被弾後error rate</td><td>hidden leniencyにしない</td></tr><tr><td>敗北Tipsを原因別に選択</td><td>retry学習</td><td>誤診断</td><td>tip後の同一error減少</td><td>shame、課金誘導なし</td></tr><tr><td>Settingsをcombatから試聴・試操作</td><td>calibration短縮</td><td>state rollback複雑化</td><td>adjust→resume time</td><td>cancelで完全復元</td></tr></tbody></table></div>
+<p>優先順は HUD contract → All/recovery → tutorial transfer → settings/accessibility → first/peak playtest。completion率だけでなく、unaided discovery、later transfer、recovery time、accessibility failureを併記する。</p>
+<h2>配信映え</h2>
+<p><strong>評価: 素材は強いが、視聴者へ因果を伝える実装証拠が不足している。</strong> Cadenceによるweapon変化、note列の蓄積、Kill Chord成立、敵への結果が同じ画面内で連続すれば、短いclipでも「操作が音楽と戦術を変えた」と理解できる。反対に、HUD、hit cue、adaptive BGMが分断されたままでは、配信者本人には手応えがあっても視聴者には通常のTPSとして見える。</p>
+<p>配信画面では次を独立した受入条件にする。</p>
+<ul>
+<li>3秒以内に現在のcadence、選ばれたweapon、完成中patternを小画面でも判別できる。</li>
+<li>Kill Chord成立前後を、色だけでなく形、動き、caption、音で区別できる。</li>
+<li>失敗時も「入力時機」「対象遮蔽」「pattern不一致」のどれかを配信者が説明できる。</li>
+<li>mute autoplayと音声圧縮後の双方で、Cadence→Weapon→Kill Chordの順序が崩れない。</li>
+<li>配信者向け表示がプレイヤーの照準・敵予告・mission情報を塞がない。</li>
+</ul>
+<p>推奨captureは、同一敵・同一cameraで4拍と8拍のweapon差を示し、pattern完了からKill Chord結果までを切らずに映す8～12秒である。検証指標はclip視聴後のrule comprehension、誤説明率、Kill Chord瞬間の視線到達、字幕条件差とする。視聴数やリアクション数だけを成功指標にしない。</p>
+<h2>TGSでのゲームプレイ予想</h2>
+<p><strong>位置付け: 実機観察前の予測。</strong> 約2分のステージと初見来場者を前提にすると、序盤は馴染みのある移動・照準・attackで参加しやすい一方、会場騒音下では拍の違い、All/timeout、pattern進行を見失う可能性が高い。最も強い瞬間は、入力速度でweaponが変わり、note列完成とKill Chord結果が観客にも同時に見える場面である。</p>
+<p>予想されるプレイ推移:</p>
+<ol>
+<li><strong>開始0～20秒:</strong> 移動・attackは試せるが、mission目標とリズム入力の関係はHUD次第。スタッフ説明へ依存しやすい。</li>
+<li><strong>20～60秒:</strong> 4拍／8拍でweaponが変わることを理解できれば、本作固有の試行が始まる。変化が小さい場合は連打へ固定される。</li>
+<li><strong>60～120秒:</strong> patternとKill Chordへ注意を移せるかが分岐点。敵予告、照準、note列の情報競合が強いと、成立前に理由不明の失敗となる。</li>
+<li><strong>終了時:</strong> Kill Chordを一度でも自力で成立できれば記憶に残りやすい。未成立でも次の有効行動と再挑戦理由を示せれば、失敗を体験価値へ変えられる。</li>
+</ol>
+<p>TGS向けの重点課題は、音なしでも読めるvisual beat、最初の一成功までの短縮、即時retry/reset、controller再接続、長時間連続稼働、スタッフ介入なしの目標理解である。観測項目はtime-to-first-attack、time-to-first-weapon-change、time-to-first-Kill-Chord、スタッフ介入回数、離脱地点、retry率、終了後のルール説明正答とする。</p>
+<p>展示版では全システムを見せるより、「Cadenceがweaponを変える」「patternがKill Chordになる」「結果が明確に返る」の3点を確実に完遂させる。Adaptive BGMや成長要素が未完成なら、説明で補って完成済みと誤認させず、会場版の体験範囲を明示する。</p></article></section><section class="stage" id="stage-09" data-stage><div class="stage-head"><span class="stage-no">09</span><div><h2>市場性</h2><div class="badges"><span class="badge">1 件の成果物</span></div></div></div><p class="summary">**ステータス: partial（探索的評価）。** Stage 8と同じVitia rootを再利用したが、UX結論を採点入力へ逆流させず、公開仕様に記載された体験・対象・証拠だけで独立評価した。store page、price、demo telemetry、creative testは未取得。</p><article class="document"><div class="document-title"><h3>Stage 9: ラベル中立Vitia市場性分析</h3><span class="source">spec/plan/11-vitia-marketability.md</span></div><h1>Stage 9: ラベル中立Vitia市場性分析</h1>
+<p><strong>ステータス: partial（探索的評価）。</strong> Stage 8と同じVitia rootを再利用したが、UX結論を採点入力へ逆流させず、公開仕様に記載された体験・対象・証拠だけで独立評価した。store page、price、demo telemetry、creative testは未取得。</p>
+<h2>1. ラベル中立性の確認</h2>
+<p>製品名、<code>rhythm</code>、<code>TPS</code>、希少ジャンルという自己記述、Latin domain名を <code>[artifact-A]</code>、<code>[mechanism-X]</code> に置換して採点した。rename後も「音楽のphraseを戦闘選択に変える瞬間を、短い実演で証明できるか」が主課題で変わらないため pass。</p>
+<h2>2. 真実性台帳</h2>
+<ul>
+<li><strong>Verified:</strong> 一つのattack入力、cadence別weapon、pattern skill、classical×EDM方針、third-person combat、adaptive BGM設計、build/progression、target age 26–35という企画仮説。</li>
+<li><strong>Assumed:</strong> 代表ユーザはactionの即応性と音楽patternの習得を両方求めうる。短い動画／体験版が説明文より適する可能性がある。</li>
+<li><strong>Unknown:</strong> 市場規模、認知、実機品質、art/audio完成度、価格、platform/store、demo availability、wishlist/conversion、比較タイトルからのswitch理由。</li>
+</ul>
+<h2>3. 診断</h2>
+<ul>
+<li>Objective: 最初の接触で「音に合わせる装飾」ではなく「cadenceがweaponとskillを変える戦闘」を理解させる。</li>
+<li>Bottleneck: 価値が時間的で、静止画やジャンル名だけではrule→action→outcomeを証明しづらい。現状のtrialability signalは0.4、proof strengthは0.45。</li>
+<li>Audience context: 26–35歳という記述はdesigner仮説であり、campaign segmentの実証ではない。年齢やnostalgiaを脆弱性推定に使わない。</li>
+</ul>
+<h2>4. 体験と収益化の監査</h2>
+<p>play promiseとrepeat valueには仕様上の支持があるが、challenge learningはneeds work。宣伝でadaptive musicや自在なcommand masteryを先行させる前に、実装配線とdemoで証明する。commercial model不明のためmonetizationは <strong>not-applicable</strong>。総額、購入、renewal、random rewardを推測しない。</p>
+<h2>5. Vitiaドメイン選択</h2>
+<p>Deterministic output: <code>spec/data/vitia-marketability-score.json</code>。</p>
+<ul>
+<li>Primary <strong>Luxuria 0.570</strong>: 音、cadence、weapon変化、クラシック×EDM、即時戦闘という感覚的・時間的実演が最も強い。</li>
+<li>Secondary <strong>Gula 0.502</strong>: build/pattern/missionの組合せが反復価値を示す。ただし強制習慣ではなく、新しい判断とmasteryを示す。</li>
+<li>Acedia 0.462: 説明負荷低減は重要だが、主価値ではなくactivation支援。</li>
+<li>Superbia 0.344: masteryは候補だが、実機skill proofが不足。</li>
+<li>Invidia/Avaritia: social comparison、価格・経済価値のcoverage不足で選ばない。</li>
+<li>Luxuria + Gula は mandatory compulsion audit。near miss、expiry、obligation、failure直後offerは使わない。</li>
+</ul>
+<h2>6. 補助メカニズム監査</h2>
+<p>最優先は <strong>mental simulationではなく直接的rule demonstration</strong>。8–12秒の同一sceneで「遅いcadence→shotgun」「速いcadence→SMG」「pattern完了→Kill Chord」をUIと音で対応させる。readiness gapはadaptive BGM未配線、HUD受入条件不足、実機captureなし。attentionは中間指標であり、理解・trial開始をprimary outcomeにする。</p>
+<h2>7. 戦略カード</h2>
+<ul>
+<li>Mechanism: truthful sensory demonstration + meaningful variation</li>
+<li>Proposition hypothesis: 「撃つ速さそのものが、武器と必殺の譜面になる」</li>
+<li>Proof: 同一敵・同一cameraでcadence、note列、weapon、resultを連続表示</li>
+<li>Message: 「一つの攻撃で、リズムを組み替えて戦う」</li>
+<li>CTA: 「30秒で4拍と8拍を試す」—実際に短いdemoが提供できる場合のみ</li>
+<li>Channel: muted autoplayでも理解できるcaptioned short video、store capsuleから同じdemoへ接続</li>
+<li>Boundary: 未実装adaptive BGM、未検証performance、boss内容を完成済みとして見せない</li>
+</ul>
+<h2>8. 実験計画</h2>
+<ul>
+<li>Control: art/style中心の15秒video</li>
+<li>Treatment: 同一sceneでcadence→weapon→Kill Chordの因果をcaption付きで示す15秒video</li>
+<li>Primary metric: 視聴後の三択rule comprehension正答率。その後にqualified demo start率を副指標とする。</li>
+<li>Guardrails: expectation mismatch、mute/字幕条件の理解差、negative feedback、demo開始後60秒以内離脱。</li>
+<li>Duration/stopping: segment事前固定、各cellが事前sample sizeへ達するか2週間。途中の年齢／脆弱性後付けtargetingは禁止。</li>
+<li>Disconfirming result: comprehensionが改善しない、またはdemo離脱／期待不一致が悪化したらpropositionとHUD proofを再設計する。</li>
+</ul>
+<h2>9. 倫理確認</h2>
+<p>fabricated rarity、nostalgia pressure、status shame、near-miss、variable paid reward、false countdownは使わない。字幕、visual beat、easy exitを保持し、conversionと同時にregret、expectation mismatch、accessibility failureを測る。</p></article></section><section class="stage" id="stage-10" data-stage><div class="stage-head"><span class="stage-no">10</span><div><h2>Di合議結果</h2><div class="badges"><span class="badge">1 件の成果物</span></div></div></div><p class="summary">**ステータス: complete。** 仕様起点10ドメイン、Unity対応Anatomia、Ludus、Vitiaの証拠を用いて合議し、実装・検証方針を確定した。参照セッションは abba676c-4aaa-4ede-a86d-2911a5f1a4ab。 **面白さ:** Cadence→Weapon→Pattern Skill→Kill Chor…</p><article class="document"><div class="document-title"><h3>Stage 10: Di合議結果</h3><span class="source">spec/plan/12-di-discussion-paper.md</span></div><h1>Stage 10: Di合議結果</h1>
+<p><strong>ステータス: complete。</strong> 仕様起点10ドメイン、Unity対応Anatomia、Ludus、Vitiaの証拠を用いて合議し、実装・検証方針を確定した。参照セッションは abba676c-4aaa-4ede-a86d-2911a5f1a4ab。</p>
+<h2>最終判断</h2>
+<ul>
+<li><strong>面白さ:</strong> Cadence→Weapon→Pattern Skill→Kill Chordという操作と結果の連鎖には、面白さを成立させる設計上の根拠がある。</li>
+<li><strong>奥深さ:</strong> 未証明である。5回・10回の反復で新しい判断が生まれるか、習熟が画面から分かるか、通常ステージへ学習が転移するかを実機で確認する必要がある。</li>
+<li><strong>市場性:</strong> 条件付きである。リズム判定と三人称アクションの同時成功を、本作固有の即時フィードバックとして短時間で伝えられるかが差別化の中心になる。</li>
+<li><strong>優先方針:</strong> behavior-first vertical sliceを採用する。architecture-first refactorとadaptive music firstは選ばない。</li>
+</ul>
+<h2>採用する実装束</h2>
+<p>Core vertical sliceを「All/timeout + line-of-sight + exactly-once reward + recoverable save + multimodal HUD/tutorial transfer」に固定する。</p>
+<p>Kill Chord成立時の視覚・音・物理フィードバックは、単独の演出ではなく、weapon selection、pattern skill、reward creditの契約を同時に確認できる計測点として実装する。Scene遷移の分割はこの受入テストを支える範囲に留める。Adaptive BGMはphrase選択イベントと仮表示を先行し、core rule、reward、save、guidanceの成立後に実音源へ接続する。</p>
+<h2>反対論を踏まえた制約</h2>
+<ul>
+<li>コアループが接続されていることと、習熟によって深まることは別である。仕様上の循環だけで奥深さを断定しない。</li>
+<li>一要素だけを磨いても、reward、save、guidanceが切れていれば商品ループは成立しない。</li>
+<li>Vitiaのrepeat value 0.594とchallenge learning 0.522は仕様証拠のcoverage heuristicであり、実ユーザの再訪率やリテンションではない。</li>
+<li>「売れる」は未検証仮説である。価格、競合、ストア訴求、実プレイ継続率、配信・TGS反応を取得するまで条件付き評価に留める。</li>
+<li>合議内の期間表現は見積根拠を持たないため、納期として採用しない。</li>
+</ul>
+<h2>最初の受入テスト</h2>
+<ol>
+<li>GS-01: first/silence/hit/resume入力がAllとなり、command先頭以外では成立しない。</li>
+<li>GS-02: targetとの間にobstacleがあるshotはdamageを与えず、feedbackが理由を示す。</li>
+<li>GS-05/06: result ID単位でrewardが一度だけ付与され、retry、crash、reopenで二重付与されない。</li>
+<li>GS-07: versioned saveがatomicに更新され、破損時は既存progressを保持して明示的に回復できる。</li>
+<li>GS-09: mute条件でもbeat、enemy telegraph、Kill Chord成立が識別でき、tutorial後の通常stageでpromptなし成功を測れる。</li>
+</ol>
+<p>ownerは実装着手時に各ドメイン担当へ割り当てる。担当情報がないため本解析では未割当とする。</p></article></section></main></div></div><script>const r=document.documentElement;const s=localStorage.getItem('omnipotens-theme');if(s)r.dataset.theme=s;document.querySelector('button[data-theme]').onclick=()=>{r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';localStorage.setItem('omnipotens-theme',r.dataset.theme)};document.querySelector('button[data-print]').onclick=()=>print();const q=document.querySelector('.search'),ss=[...document.querySelectorAll('[data-stage]')],empty=document.querySelector('.empty-search');q.oninput=()=>{const n=q.value.trim().toLocaleLowerCase();let shown=0;for(const s of ss){const hit=!n||s.textContent.toLocaleLowerCase().includes(n);s.hidden=!hit;if(hit)shown++}empty.style.display=shown?'none':'block'};</script></body></html>

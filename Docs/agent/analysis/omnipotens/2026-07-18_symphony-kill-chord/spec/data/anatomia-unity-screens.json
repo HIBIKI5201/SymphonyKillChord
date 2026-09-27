@@ -1,0 +1,1103 @@
+{
+  "screens": [
+    {
+      "name": "ACLikeRhythmGuideView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Music/ACLikeRhythmGuideView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class ACLikeRhythmGuideView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "AttackResultView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Battle/AttackResultView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class AttackResultView",
+      "domains": [
+        "Combat State and Effect Resolution",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "BattlePreparationScreen",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Screen/BattlePreparationScreen.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class BattlePreparationScreen",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "BossMoveView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/BossMoveView.cs",
+      "line": 13,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "EnemyMoveView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class BossMoveView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "CameraSystemView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Camera/CameraSystemView.cs",
+      "line": 16,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "PlayerInputView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class CameraSystemView",
+      "domains": [
+        "state-machine"
+      ]
+    },
+    {
+      "name": "CharacterAnimationView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Animation/CharacterAnimationView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class CharacterAnimationView",
+      "domains": [
+        "state-machine"
+      ]
+    },
+    {
+      "name": "CommandBarToggleView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Scenario/CommandBarToggleView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class CommandBarToggleView",
+      "domains": [
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "CreditScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Title/CreditScreenView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class CreditScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "DamageNumberView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/DamageNumberView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class DamageNumberView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "DataResetTabView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Title/DataResetTabView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class DataResetTabView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "EnemyHealthBillboardView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyHealthBillboardView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class EnemyHealthBillboardView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "EnemyHealthView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyHealthView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "DamageNumberView",
+        "HealthHudView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class EnemyHealthView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "EnemyMoveView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyMoveView.cs",
+      "line": 19,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "FootStepView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class EnemyMoveView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "EnemyRaycastDetectView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyRaycastDetectView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class EnemyRaycastDetectView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "EnemyWaveTimerView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/EnemyWaveTimerView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class EnemyWaveTimerView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "FootStepView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Character/FootStepView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class FootStepView",
+      "domains": [
+        "Combat State and Effect Resolution",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "HealthHudView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/UI/HealthHudView.cs",
+      "line": 17,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class HealthHudView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "HomeScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Screen/HomeScreenView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class HomeScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "HUDEnemyHealthView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/UI/HUDEnemyHealthView.cs",
+      "line": 16,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class HUDEnemyHealthView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "IngameHudView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/UI/IngameHudView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class IngameHudView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "IngameSceneView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Scene/IngameSceneView.cs",
+      "line": 13,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class IngameSceneView",
+      "domains": [
+        "state-machine"
+      ]
+    },
+    {
+      "name": "LoadingScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/Persistent/Load/LoadingScreenView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class LoadingScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "MenuScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Title/MenuScreenView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class MenuScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "MissionEvaluationItemView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Mission/MissionEvaluationItemView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class MissionEvaluationItemView",
+      "domains": [
+        "Mission Evaluation and Result"
+      ]
+    },
+    {
+      "name": "MissionHudView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Mission/MissionHudView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "MissionEvaluationItemView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class MissionHudView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Mission Evaluation and Result",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "MissionLoopView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Mission/MissionLoopView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class MissionLoopView",
+      "domains": [
+        "Mission Evaluation and Result",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "MusicSyncView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Music/MusicSyncView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class MusicSyncView",
+      "domains": [
+        "Musical Time and Adaptive Arrangement",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "NearestAttackPositionSearchView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/NearestAttackPositionSearchView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "EnemyRaycastDetectView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class NearestAttackPositionSearchView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "OptionsScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Title/OptionsScreenView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class OptionsScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "ParticleSystemPoolView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Character/ParticleSystemPoolView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "ReusableParticleSystemView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class ParticleSystemPoolView",
+      "domains": [
+        "Combat State and Effect Resolution",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "ParticleSystemRingBufferView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Character/ParticleSystemRingBufferView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "ReusableParticleSystemView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class ParticleSystemRingBufferView",
+      "domains": [
+        "Combat State and Effect Resolution",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "PersistentAudioVolumeRegistryView",
+      "file": "Assets/Scripts/Runtime/4.View/Persistent/Audio/PersistentAudioVolumeRegistryView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class PersistentAudioVolumeRegistryView",
+      "domains": [
+        "state-machine"
+      ]
+    },
+    {
+      "name": "PlayerAttackWeaponView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Player/PlayerAttackWeaponView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "WeaponItemView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class PlayerAttackWeaponView",
+      "domains": [
+        "Player Action and Combat Targeting",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "PlayerInputView",
+      "file": "Assets/Scripts/Runtime/4.View/Persistent/Input/PlayerInputView.cs",
+      "line": 14,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class PlayerInputView",
+      "domains": [
+        "Persistence and Player Settings",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "PlayerStatusScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/PlayerStatusScreenView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class PlayerStatusScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "PlayerView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Player/PlayerView.cs",
+      "line": 23,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "FootStepView",
+        "PlayerAttackWeaponView",
+        "PlayerInputView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class PlayerView",
+      "domains": [
+        "Player Action and Combat Targeting",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "PreviewVideoScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/PreviewVideoScreenView.cs",
+      "line": 14,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class PreviewVideoScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "ReusableParticleSystemView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Character/ReusableParticleSystemView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class ReusableParticleSystemView",
+      "domains": [
+        "Combat State and Effect Resolution",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "RhythmGuideLabelView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Music/RhythmGuideLabelView.cs",
+      "line": 9,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class RhythmGuideLabelView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Rhythm Input and Kill Chord Resolution",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "RhythmGuideUpdateView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Music/RhythmGuideUpdateView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "RhythmGuideView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class RhythmGuideUpdateView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Rhythm Input and Kill Chord Resolution",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "RhythmGuideView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Music/RhythmGuideView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "RhythmGuideLabelView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class RhythmGuideView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Rhythm Input and Kill Chord Resolution",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "ScenarioInputView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioInputView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "PlayerInputView",
+        "ScenarioUIHideView",
+        "ScenarioUIRaycastView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class ScenarioInputView",
+      "domains": [
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "ScenarioUIHideView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioUIHideView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class ScenarioUIHideView",
+      "domains": [
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "ScenarioUIRaycastView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioUIRaycastView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class ScenarioUIRaycastView",
+      "domains": [
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "ScenarioView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Scenario/ScenarioView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class ScenarioView",
+      "domains": [
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SceneTransitionView",
+      "file": "Assets/Scripts/Runtime/4.View/Persistent/SceneManagement/SceneTransitionView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SceneTransitionView",
+      "domains": [
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SettingScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Screen/SettingScreenView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SettingScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "ShellView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/ShellView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class ShellView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillBuildScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillBuildScreenView.cs",
+      "line": 13,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "SkillListView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class SkillBuildScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillBuildSlotView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillBuildSlotView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillBuildSlotView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillDetailScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillDetailScreenView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillDetailScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillDetailView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillDetailView.cs",
+      "line": 7,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillDetailView",
+      "domains": []
+    },
+    {
+      "name": "SkillElementView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillElementView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillElementView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillInputProgressRowView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillInputProgressRowView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "SkillInputProgressStepView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class SkillInputProgressRowView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillInputProgressStepView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillUI/SkillInputProgressStepView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillInputProgressStepView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillListView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillBuild/SkillListView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "SkillBuildSlotView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class SkillListView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillNodeConnView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillNodeConnView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillNodeConnView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillNodeView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/SkillTree/SkillNodeView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillNodeView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillResultView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillResultView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillResultView",
+      "domains": [
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillTreeScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Screen/SkillTreeScreenView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillTreeScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "SkillView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Skill/SkillView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class SkillView",
+      "domains": [
+        "state-machine"
+      ]
+    },
+    {
+      "name": "StageDetailScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageDetailScreenView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class StageDetailScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "StageEffectView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Stage/StageEffectView.cs",
+      "line": 13,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class StageEffectView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "StageNodeConnectionView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageNodeConnectionView.cs",
+      "line": 13,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class StageNodeConnectionView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "StageNodeView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/StageSelect/StageNodeView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class StageNodeView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Progression, Research and Loadout",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "StageResultMissionItemView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultMissionItemView.cs",
+      "line": 9,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class StageResultMissionItemView",
+      "domains": [
+        "Mission Evaluation and Result"
+      ]
+    },
+    {
+      "name": "StageResultView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Result/StageResultView.cs",
+      "line": 13,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [
+        "StageResultMissionItemView"
+      ],
+      "navigatesTo": [],
+      "reason": "game UI class StageResultView",
+      "domains": [
+        "Mission Evaluation and Result",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "StageSelectScreenView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Screen/StageSelectScreenView.cs",
+      "line": 8,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class StageSelectScreenView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "StageSequenceMessageView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Sequence/StageSequenceMessageView.cs",
+      "line": 9,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class StageSequenceMessageView",
+      "domains": [
+        "state-machine"
+      ]
+    },
+    {
+      "name": "StageSequenceView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Sequence/StageSequenceView.cs",
+      "line": 12,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class StageSequenceView",
+      "domains": [
+        "state-machine"
+      ]
+    },
+    {
+      "name": "TitleSceneView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Title/TitleSceneView.cs",
+      "line": 13,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class TitleSceneView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "TripleShotRaycastDetectView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Enemy/Boss/TripleShotRaycastDetectView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class TripleShotRaycastDetectView",
+      "domains": [
+        "Enemy Encounter and Stage Simulation",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "VolumeSettingsTabView",
+      "file": "Assets/Scripts/Runtime/4.View/OutGame/Title/VolumeSettingsTabView.cs",
+      "line": 10,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class VolumeSettingsTabView",
+      "domains": [
+        "Guidance, Feedback and Recovery",
+        "Narrative and Game Flow",
+        "state-machine"
+      ]
+    },
+    {
+      "name": "WeaponItemView",
+      "file": "Assets/Scripts/Runtime/4.View/InGame/Player/WeaponItemView.cs",
+      "line": 11,
+      "kind": "view",
+      "stack": "unity",
+      "contains": [],
+      "navigatesTo": [],
+      "reason": "game UI class WeaponItemView",
+      "domains": [
+        "Player Action and Combat Targeting",
+        "state-machine"
+      ]
+    }
+  ],
+  "summary": {
+    "total": 74,
+    "byStack": {
+      "unity": 74
+    },
+    "byKind": {
+      "view": 74
+    },
+    "edges": 22
+  }
+}
