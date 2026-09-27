@@ -92,6 +92,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private MobileStickFlickInputConfig _loadedMobileStickFlickInputConfig;
 
         private Action _onDodgeEndedHandler;
+        private PlayerDodgeMovementApplication _dodgeMovementApplication;
         private IPlayerCharacterAnimationSignal _characterAnimationSignal;
         private PlayerAttackSignal _playerAttackSignal;
         private CharacterEntity _playerEntity;
@@ -355,16 +356,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerAttackAnimationConfig);
 
             PlayerDodgeMovementApplication dodge = new PlayerDodgeMovementApplication(parameter);
-            dodge.OnDodgeStarted += (duration, direction) =>
-            {
-                _playerEntity.SetInvincible(true);
-                _player.PlayDodgeMaterialEffect(duration, direction);
-            };
-            dodge.OnDodgeEnded += () =>
-            {
-                _playerEntity.SetInvincible(false);
-                _player.ResetDodgeMaterialEffect();
-            };
+            _dodgeMovementApplication = dodge;
+            dodge.OnDodgeStarted += HandleDodgeStarted;
+            dodge.OnDodgeEnded += HandleDodgeEnded;
 
             _onDodgeEndedHandler = () => playerAttackController.StartAttackCooldown();
             _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
@@ -457,6 +451,26 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
+        ///     回避の開始時に、無敵にして回避のマテリアル演出を再生します。
+        /// </summary>
+        /// <param name="duration"> 回避の継続時間です。 </param>
+        /// <param name="direction"> 回避の方向です。 </param>
+        private void HandleDodgeStarted(float duration, Vector3 direction)
+        {
+            _playerEntity.SetInvincible(true);
+            _player.PlayDodgeMaterialEffect(duration, direction);
+        }
+
+        /// <summary>
+        ///     回避の終了時に、無敵を解除して回避のマテリアル演出を戻します。
+        /// </summary>
+        private void HandleDodgeEnded()
+        {
+            _playerEntity.SetInvincible(false);
+            _player.ResetDodgeMaterialEffect();
+        }
+
+        /// <summary>
         ///     破棄時の購読解除を行います。
         /// </summary>
         private void OnDestroy()
@@ -468,6 +482,13 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerInputView != null)
             {
                 _playerInputView = null;
+            }
+
+            if (_dodgeMovementApplication != null)
+            {
+                _dodgeMovementApplication.OnDodgeStarted -= HandleDodgeStarted;
+                _dodgeMovementApplication.OnDodgeEnded -= HandleDodgeEnded;
+                _dodgeMovementApplication = null;
             }
 
             if (_characterAnimationSignal != null && _onDodgeEndedHandler != null)
