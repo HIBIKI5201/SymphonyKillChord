@@ -71,7 +71,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _reservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
             _reservationUsecase.On2BeatBefore += Handle2BeatBefore;
             _reservationUsecase.On1BeatBefore += Handle1BeatBefore;
-            EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
             _isActive = true;
         }
 
@@ -86,7 +85,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _reservationUsecase.On2BeatBefore -= Handle2BeatBefore;
             _reservationUsecase.On1BeatBefore -= Handle1BeatBefore;
             _reservationUsecase.Deactivate();
-            EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
             _isActive = false;
         }
 
@@ -201,19 +199,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 view.LockWarningDirection();
             }
             On1BeatBefore?.Invoke();
-        }
-
-        /// <summary>
-        ///     ダメージを受けた時の処理。クリティカル時は硬直する。
-        /// </summary>
-        private void HandleOnDamageTaken(EOnTakeDamage eventParam)
-        {
-            if (eventParam.DefenderId != _enemyBattleState.Attacker.Id) return;
-            if (eventParam.Critical)
-            {
-                _enemyBattleState.Stunned();
-                _stateFacade.Stunned();
-            }
         }
 
         /// <summary>

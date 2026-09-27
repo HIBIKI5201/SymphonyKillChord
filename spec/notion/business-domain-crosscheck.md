@@ -56,10 +56,12 @@
 
 ### 2.2 完全性のある既存スナップショット
 
-`Docs/G-Lab/Symphony Kill Chord-Spec/spec/plan/00-source-manifest.md` は、2026-07-18 に公開ルート
+`Docs/agent/analysis/omnipotens/2026-07-18_symphony-kill-chord/spec/plan/00-source-manifest.md` は、2026-07-18 に公開ルート
 `仕様概要` から発見した35/35ページをCanalis `NotionPublicSource`で取得した記録を持つ。
 同スナップショットから仕様起点10ドメインを再定義した正本候補が
-`Docs/G-Lab/Symphony Kill Chord-Spec/spec/plan/04-domain-model.md` である。
+`Docs/agent/analysis/omnipotens/2026-07-18_symphony-kill-chord/spec/plan/04-domain-model.md` である。
+
+※ 旧 `Docs/G-Lab/` は 2026-09-27 に `Docs/agent/` の定義済み構成（`Docs/agent/README.md`）へ移した。
 
 現行公開クロールが部分取得のため、本提案では次の証拠順位を採用する。
 

@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     回避クールダウンを表すVO。
     /// </summary>
-    public readonly struct DodgeCooldown
+    public readonly struct DodgeCooldown : IEquatable<DodgeCooldown>
     {
         /// <summary>
         ///     回避クールダウンを初期化するコンストラクタ。
