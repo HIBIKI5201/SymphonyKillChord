@@ -1,6 +1,6 @@
 # 概要
 > 💡 **モジュール概要**
-> プレイヤーのセーブデータ（スキル解放・装備構成・ステージ進行・チュートリアル完了状態）の読み込み・保存・キャッシュを司る常駐モジュールである。JSONファイルへの永続化と、型ごとのキャッシュ・排他制御を担う。
+> プレイヤーのセーブデータ（スキル解放・装備構成・ステージ進行・チュートリアル完了状態）の読み込み・保存・キャッシュを司る常駐モジュールである。暗号化ファイル（AES-256-CBC・`.sav`）への永続化と、型ごとのキャッシュ・排他制御を担う。
 
 | 項目 | 内容 |
 | --- | --- |
@@ -22,7 +22,8 @@
 | **`StageClearData`** | Domain | 1ステージ分のクリア記録（StageId＋達成済み評価条件IDリスト、複数プレイ分を和集合でマージ） |
 | **`TutorialData`** | Domain | チュートリアル完了フラグ（`IsTutorialCompleted`）。`Complete()`で確定 |
 | **`SaveStore`** | SymphonyFrameWork | 型ごとのロード・保存・削除・キャッシュを行うフレームワーク側のAPI。旧`SaveBase`/`SavedataSystem`はこれへ統合され、当リポジトリからは削除済み |
-| **`PersistentFileSaveDataLoaderStrategy`** | Infrastructure | セーブデータを永続化領域のJSONファイルへ読み書きするローダー |
+| **`EncryptedFileSaveDataLoaderStrategy`** | Infrastructure | `SaveDataConfig.asset`が指定するローダー。セーブデータをAES-256-CBCで暗号化し、永続化領域の`型名.sav`へ読み書きする。以前のローダーがPlayerPrefsへ平文で保存したデータを移行する |
+| **`SaveDataCrypto`** | Infrastructure | セーブデータの暗号化・復号。鍵は端末ごとに初回生成してPlayerPrefsへ保存する（覗き見防止が目的で、改ざん耐性は無い） |
 | **`StageProgressSaveDataService`** | Application | ステージクリア時の評価結果を`StageProgressData`へ記録し保存する窓口。チュートリアル完了もあわせて記録 |
 | **`InitialSkillLoadoutService`** | Application | セーブデータへ初期解放・初期装備スキルを補完する。起動時とセーブデータリセット後の双方で使う |
 | **`SavedataSystemInitializer`** | Composition | セーブ機構の初期化とServiceLocatorへの登録（Order 10） |
@@ -113,7 +114,7 @@ graph TD
 ### ④ View
 当モジュールでは使用していない。
 ### ⑤ Infrastructure
-`PersistentFileSaveDataLoaderStrategy`が、永続化領域のJSONファイルへの読み書きを担当する。クリア済みステージ情報を提供する`SaveDataClearStageRepository`はStageSelectモジュール側にある。
+`SaveDataConfig.asset`が指定する`EncryptedFileSaveDataLoaderStrategy`が、セーブデータの読み書きを担当する。JSONを`SaveDataCrypto`でAES-256-CBC暗号化し、永続化領域の`型名.sav`へ一時ファイル経由で原子的に保存する。暗号化ファイルが無い場合は、以前のローダー（フレームワークの`JsonUtilitySaveDataLoaderStrategy`）がPlayerPrefsへ平文で保存したデータを読み込み、次の保存で暗号化ファイルへ移して平文データを消す。復号できない場合は既定値で始める。クリア済みステージ情報を提供する`SaveDataClearStageRepository`はStageSelectモジュール側にある。
 ### ⑥ Composition
 `SavedataSystemInitializer`（Order 10）が保存機構を初期化し、`InitialSkillLoadoutInitializer`（Order 20）が初期解放・初期装備スキルを補完する。`LegacyDataIdMigration`がID統一前の連番IDをハッシュIDへ移行する。
 
@@ -132,19 +133,20 @@ sequenceDiagram
     autonumber
     participant Caller as 呼び出し元（Title等）
     participant Store as SaveStore
-    participant Loader as PersistentFileSaveDataLoaderStrategy
-    participant File as JSONファイル
+    participant Loader as EncryptedFileSaveDataLoaderStrategy
+    participant File as 暗号化ファイル（.sav）
 
     Caller ->> Store: LoadAsync<SaveData>()
     alt 読み込み済み
         Store -->> Caller: キャッシュされたSaveDataを返却
     else 未読み込み
         Store ->> Loader: 永続化領域から読み込み
-        Loader ->> File: {persistentDataPath}のJSONを読み込み
+        Loader ->> File: {persistentDataPath}/SaveData.savを読み込み
         alt ファイルが存在する
-            File -->> Loader: JSON文字列
+            File -->> Loader: 暗号化バイト列
+            Note over Loader: 復号してJSON文字列にする（失敗時は既定値）
         else ファイルが存在しない
-            Note over Loader: 既定値のまま（新規プレイヤー扱い）
+            Note over Loader: PlayerPrefsの平文データ（移行前）を読む。無ければ既定値のまま（新規プレイヤー扱い）
         end
         Store ->> Store: キャッシュに格納
         Store -->> Caller: SaveDataを返却

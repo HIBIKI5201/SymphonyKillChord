@@ -12,17 +12,22 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary>
         ///     攻撃者・攻撃対象・現在の攻撃定義を指定して生成する。
         /// </summary>
+        /// <param name="useDiscoverySystem">
+        ///     発見システムを使う場合はtrue。falseの場合は常に発見済みとして扱う。
+        /// </param>
         public EnemyBattleState(CharacterEntity attacker,
             CharacterEntity target,
-            AttackDefinition currentAttack)
+            AttackDefinition currentAttack,
+            bool useDiscoverySystem = false)
         {
+            _useDiscoverySystem = useDiscoverySystem;
             Attacker = attacker;
             Target = target;
             CurrentAttack = currentAttack;
             FirstAttack = true;
             IsStunned = false;
             IsBattleAIActivated = true;
-            IsDiscovered = false;
+            IsDiscovered = !useDiscoverySystem;
         }
 
         /// <summary> 攻撃者（自身）のエンティティ </summary>
@@ -103,9 +108,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             IsStunned = false;
             IsBattleAIActivated = true;
             OverrideDestination = null;
-            IsDiscovered = false;
+            IsDiscovered = !_useDiscoverySystem;
         }
 
+        private readonly bool _useDiscoverySystem;
         private int _activeShellIndicatorCount;
         private uint _shellIndicatorGeneration;
     }

@@ -6,13 +6,13 @@ using SinfoniaStudio.NotionMarkdownExporter;
 namespace SinfoniaStudio.NotionMarkdownWriter
 {
     /// <summary>
-    ///     指定した親ブロック（ページ・トグルなど）の子要素の末尾に、新しい段落を1件追加するコマンド。
-    ///     Notion APIに位置指定の手段が無いため、常に末尾に追加される。トグルの中や、巨大な画像ブロックの隣接に
-    ///     依存せず新しい内容を足したい場合に使う（途中の位置へ移すのは、そのあとのpull/pushで行う）。
+    ///     指定した親ブロック（ページ・トグルなど）の子要素に、新しい段落を1件追加するコマンド。
+    ///     --after で兄弟ブロックを指定するとその直後へ、指定しなければ末尾へ追加する。
+    ///     トグルの中や、巨大な画像ブロックの隣接に依存せず新しい内容を足したい場合に使う。
     /// </summary>
     internal static class AppendCommand
     {
-        private static readonly string[] _valueOptions = { "text" };
+        private static readonly string[] _valueOptions = { "text", "after" };
         private static readonly string[] _flagOptions = { "confirm" };
         private static readonly string[] _repeatableOptions = Array.Empty<string>();
 
@@ -36,6 +36,8 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             bool isConfirmed = arguments.HasFlag("confirm");
             WriterEnvironment environment = WriterEnvironment.Load();
             string parentId = BlockReferenceResolver.Resolve(target);
+            string? afterTarget = arguments.GetValue("after");
+            string? afterBlockId = string.IsNullOrEmpty(afterTarget) ? null : BlockReferenceResolver.Resolve(afterTarget);
             List<Dictionary<string, object>> richText = RichTextParser.Parse(text);
 
             using NotionWriteClient client = new(environment.NotionToken);
@@ -60,7 +62,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             Console.WriteLine($"追加先: {parentDescription}");
             Console.WriteLine($"許可ルート: {allowedRootId}");
             Console.WriteLine($"追加する段落: {text}");
-            Console.WriteLine("位置: 子要素の末尾（Notion APIに途中への挿入位置指定は無い）");
+            Console.WriteLine(afterBlockId == null ? "位置: 子要素の末尾" : $"位置: ブロック {afterBlockId} の直後");
 
             if (!isConfirmed)
             {
@@ -69,7 +71,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 return 0;
             }
 
-            IReadOnlyList<string> createdIds = await client.AppendParagraphAsync(parentId, richText);
+            IReadOnlyList<string> createdIds = await client.AppendParagraphAsync(parentId, richText, afterBlockId);
             Console.WriteLine();
             Console.WriteLine($"追加しました。ブロックID: {string.Join(", ", createdIds)}");
             return 0;

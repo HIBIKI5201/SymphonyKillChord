@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace KillChord.Editor.SourceDataProvider.Wiki
 {
@@ -66,7 +67,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <returns> 初期ページ定義一覧です。 </returns>
         private static List<PageDefinition> CreateDefaultPages()
         {
-            // ページ名・表示する SourceAsset のキー・表示するコレクションキーの組。
+            // ページ名・表示するデータアセットのキー・表示するコレクションキーの組。
             return new List<PageDefinition>
             {
                 new(
@@ -179,23 +180,23 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             ///     ページ定義を初期化します。
             /// </summary>
             /// <param name="displayName"> 表示名です。 </param>
-            /// <param name="sourceAssetAddressableKeys"> 紐づくSourceAssetキー一覧です。 </param>
+            /// <param name="dataAssetAddressableKeys"> 紐づくDataAssetキー一覧です。 </param>
             /// <param name="collectionCategories"> 紐づくcollectionカテゴリ一覧です。 </param>
             public PageDefinition(
                 string displayName,
-                List<string> sourceAssetAddressableKeys,
+                List<string> dataAssetAddressableKeys,
                 List<string> collectionCategories)
             {
                 _displayName = displayName;
-                _sourceAssetAddressableKeys = sourceAssetAddressableKeys ?? new List<string>();
+                _dataAssetAddressableKeys = dataAssetAddressableKeys ?? new List<string>();
                 _collectionCategories = collectionCategories ?? new List<string>();
             }
 
             /// <summary> ページの表示名です。 </summary>
             public string DisplayName => _displayName;
 
-            /// <summary> ページで扱うSourceAssetキー一覧です。 </summary>
-            public IReadOnlyList<string> SourceAssetAddressableKeys => _sourceAssetAddressableKeys;
+            /// <summary> ページで扱うDataAssetキー一覧です。 </summary>
+            public IReadOnlyList<string> DataAssetAddressableKeys => _dataAssetAddressableKeys;
 
             /// <summary> ページで扱うcollectionカテゴリ一覧です。 </summary>
             public IReadOnlyList<string> CollectionCategories => _collectionCategories;
@@ -203,8 +204,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             [SerializeField, Tooltip("サイドバーへ表示するページ名です。")]
             private string _displayName;
 
-            [SerializeField, Tooltip("このページで扱うSourceAssetのAddressableキー一覧です。")]
-            private List<string> _sourceAssetAddressableKeys = new();
+            [FormerlySerializedAs("_sourceAssetAddressableKeys")]
+            [SerializeField, Tooltip("このページで扱うデータアセットのAddressableキー一覧です。")]
+            private List<string> _dataAssetAddressableKeys = new();
 
             [SerializeField, Tooltip("このページで扱うcollectionカテゴリ一覧です。")]
             private List<string> _collectionCategories = new();
