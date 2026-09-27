@@ -1,5 +1,5 @@
 ---
-name: sinfonia-importers
+name: skc-sinfonia-importers
 description: "Fetch project data into the repo with the SinfoniaOperator importers: NotionMarkdownExporter (Notion spec pages -> Docs/NotionSpecifications) and DiscordLogExporter (Discord channel/forum logs -> Docs/DiscordLog). Use when you need current Notion specification text or Discord discussion history and the local snapshot may be stale or missing — e.g. 'refresh the spec export', 'what did the team decide in Discord about X', 'check the design doc for Y', or any question whose answer lives in Notion or Discord rather than in code."
 ---
 
@@ -43,7 +43,7 @@ Never hardcode a token; if one is missing the tool says so — ask the user to f
 - If it appears to hang, see the memory note on the stall watchdog / environmental freezes
   before assuming the tool is broken.
 
-For comparing this export against the implementation, use the `notion-spec-diff-check` skill —
+For comparing this export against the implementation, use the `skc-notion-spec-diff-check` skill —
 it owns the categorization scheme and the precedent report.
 
 ## Discord → Docs/DiscordLog

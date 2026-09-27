@@ -1,5 +1,5 @@
 ---
-name: notion-spec-write
+name: skc-notion-spec-write
 description: "Write to the Notion game specification from Claude — create a new spec page or update an existing one — using the NotionMarkdownWriter CLI (SinfoniaOperator/NotionMarkdownWriter.exe). Use whenever the user asks to add, edit, update, fix, or document something in the Notion spec (仕様書), reflect an implementation into the spec, write up a system's documentation to Notion, or act on the findings of a spec/implementation diff report. Covers the pull → edit → dry-run → confirm → push loop, the write allowlist, and conflict handling. Do NOT use for read-only spec questions — read Docs/NotionSpecifications directly for those."
 ---
 
@@ -9,7 +9,7 @@ description: "Write to the Notion game specification from Claude — create a ne
 Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を使う。ツールの詳細は
 [SinfoniaOperator/NotionMarkdownWriter/README.md](../../../SinfoniaOperator/NotionMarkdownWriter/README.md)。
 
-`notion-spec-diff-check`（差分の発見）の続きとして使うことが多い。差分レポートの指摘を仕様書側へ反映するのがこのスキル。
+`skc-notion-spec-diff-check`（差分の発見）の続きとして使うことが多い。差分レポートの指摘を仕様書側へ反映するのがこのスキル。
 
 ## 書く前に読むもの
 
@@ -97,4 +97,4 @@ Notion側の書式正規化が入っている。作業ファイルが最新本�
 `push`や`create`は`Docs/NotionSpecifications/`のミラーを更新しない。
 ミラーを合わせるには`NotionMarkdownExporter`の再実行が必要だが、全ページ再取得の重い処理なので、
 1ページ書き換えるたびに回さない。差分チェックなど次の作業でミラーの鮮度が問題になるときだけ、
-`notion-spec-diff-check`の手順に従って実行する。
+`skc-notion-spec-diff-check`の手順に従って実行する。
