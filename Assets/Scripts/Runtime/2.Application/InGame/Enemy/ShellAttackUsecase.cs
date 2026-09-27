@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Enemy
@@ -19,7 +20,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         {
             AttackResult attackResult = AttackExecutor.Execute(
                 attackDefinition, attacker, defender, false, attacker.BaseDamage);
-            Debug.Log($"[ShellAttackUsecase] ExecuteAttack 完了 Damage={attackResult.FinalDamage.Value}");
+            DevLog.Log($"[ShellAttackUsecase] ExecuteAttack 完了 Damage={attackResult.FinalDamage.Value}");
         }
 
     }

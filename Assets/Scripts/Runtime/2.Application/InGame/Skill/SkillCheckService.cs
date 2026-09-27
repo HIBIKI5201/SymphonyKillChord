@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ namespace KillChord.Runtime.Application.InGame.Skill
 
             if (skillDefinition.IsMatch(reversedInput))
             {
-                Debug.Log($"[SkillCheckService({skillDefinition.Id.Value})] SKILL PATTERN MATCHED. SKILL ID: {skillDefinition.Id.Value}");
+                DevLog.Log($"[SkillCheckService({skillDefinition.Id.Value})] SKILL PATTERN MATCHED. SKILL ID: {skillDefinition.Id.Value}");
                 return true;
             }
             return false;

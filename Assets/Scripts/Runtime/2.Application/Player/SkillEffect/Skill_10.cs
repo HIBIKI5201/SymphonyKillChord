@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Buff;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -32,7 +33,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     hitCount,
                     reapplyPolicy));
 
-            Debug.Log($"[Skill_10]発動。減少率: {reductionRate}, ヒット回数: {hitCount}");
+            DevLog.Log($"[Skill_10]発動。減少率: {reductionRate}, ヒット回数: {hitCount}");
         }
 
         /// <summary>

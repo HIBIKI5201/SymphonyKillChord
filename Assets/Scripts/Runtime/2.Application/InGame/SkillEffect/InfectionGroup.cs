@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -120,7 +121,7 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
             // 伝染回数を消費する
             _remainingTriggerCount--;
 
-            Debug.Log($"[Skill08] 伝染ダメージを適用しました。残り伝染回数: {_remainingTriggerCount}");
+            DevLog.Log($"[Skill08] 伝染ダメージを適用しました。残り伝染回数: {_remainingTriggerCount}");
 
             if (IsConsumed)
             {

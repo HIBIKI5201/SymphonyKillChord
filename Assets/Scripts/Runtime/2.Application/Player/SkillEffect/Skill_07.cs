@@ -4,6 +4,7 @@ using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -71,7 +72,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     playerIncreaseAmount,
                     durationSeconds));
 
-            Debug.Log($"[Skill07]発動。" +
+            DevLog.Log($"[Skill07]発動。" +
                 $"攻撃回数:{attackCount}、" +
                 $"減少率:{reductionRate}、" +
                 $"持続時間:{durationSeconds}秒、" +
@@ -213,7 +214,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
 
                 totalReductionAmount += reductionAmount;
 
-                Debug.Log($"[Skill07]対象:{target.Name}、" +
+                DevLog.Log($"[Skill07]対象:{target.Name}、" +
                     $"攻撃回数:{kvp.Value}、" +
                     $"基礎攻撃力:{baseAttackPower}、" +
                     $"減少率:{reductionRate}、" +

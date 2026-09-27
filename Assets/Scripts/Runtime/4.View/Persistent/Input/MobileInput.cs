@@ -1,3 +1,4 @@
+using KillChord.Runtime.Utility.Diagnostics;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -55,7 +56,7 @@ namespace KillChord.Runtime.View.Persistent.Input
             TouchSimulation.Enable();
 #endif
 
-            Debug.Log("MobileInput Initialize");
+            DevLog.Log("MobileInput Initialize");
         }
 
         /// <summary>

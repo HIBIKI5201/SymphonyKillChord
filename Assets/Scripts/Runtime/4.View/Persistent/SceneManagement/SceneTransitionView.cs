@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Utility.Diagnostics;
 using SymphonyFrameWork.Attribute;
 using System;
 using UnityEngine;
@@ -37,7 +38,7 @@ namespace KillChord.Runtime.View.Persistent.SceneManagement
                 }
                 else
                 {
-                    Debug.Log($"シーン遷移成功: {_fromSceneName} -> {_toSceneName}");
+                    DevLog.Log($"シーン遷移成功: {_fromSceneName} -> {_toSceneName}");
                 }
             }
             catch (OperationCanceledException)

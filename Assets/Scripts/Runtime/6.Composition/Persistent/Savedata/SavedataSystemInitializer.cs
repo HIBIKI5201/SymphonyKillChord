@@ -1,5 +1,6 @@
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.Utility.Diagnostics;
 using SymphonyFrameWork.System.SaveSystem;
 using System.Threading;
 using UnityEngine;
@@ -30,7 +31,7 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
             if (LegacyDataIdMigration.TryMigrate(saveData))
             {
                 await SaveStore.SaveAsync<SaveData>(cancellationToken);
-                Debug.Log($"[{nameof(SavedataSystemInitializer)}] 旧IDを統一IDへ移行しました。", this);
+                DevLog.Log($"[{nameof(SavedataSystemInitializer)}] 旧IDを統一IDへ移行しました。", this);
             }
 
             return true;

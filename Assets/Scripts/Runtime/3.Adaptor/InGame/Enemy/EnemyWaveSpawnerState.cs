@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -72,12 +73,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             {
                 if (_isLastWave)
                 {
-                    Debug.Log("[EnemyWaveSpawnerState] All Wave Cleared.");
+                    DevLog.Log("[EnemyWaveSpawnerState] All Wave Cleared.");
                     OnWaveAllCleared?.Invoke();
                 }
                 else
                 {
-                    Debug.Log("[EnemyWaveSpawnerState] Wave Cleared.");
+                    DevLog.Log("[EnemyWaveSpawnerState] Wave Cleared.");
                     OnWaveCleared?.Invoke();
                 }
             }
