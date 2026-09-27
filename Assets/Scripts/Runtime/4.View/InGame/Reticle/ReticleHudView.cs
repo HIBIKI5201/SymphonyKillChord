@@ -24,6 +24,9 @@ namespace KillChord.Runtime.View.InGame.Reticle
             _presenter = presenter ?? throw new ArgumentNullException(nameof(presenter));
         }
 
+        /// <summary>
+        ///     マーカーのプレハブが設定されているかを確認する。
+        /// </summary>
         private void Awake()
         {
             if (_markerPrefab == null)
@@ -37,6 +40,9 @@ namespace KillChord.Runtime.View.InGame.Reticle
             }
         }
 
+        /// <summary>
+        ///     毎フレームの最後にレティクルのマーカー表示を更新する。
+        /// </summary>
         private void LateUpdate()
         {
             if (_presenter == null || _markerPrefab == null || _markerRoot == null)
@@ -48,6 +54,9 @@ namespace KillChord.Runtime.View.InGame.Reticle
             ApplyMarkers();
         }
 
+        /// <summary>
+        ///     プレゼンターの参照を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             _presenter = null;

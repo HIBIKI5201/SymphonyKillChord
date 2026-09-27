@@ -29,6 +29,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public SkillBuildScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent, Sprite comboHexIcon)
             : base(rootElement, outGameUIEvent)
         {
+            // 画面の各要素を取得する。見つからない場合は例外を投げる。
             _comboHexIcon = comboHexIcon;
             _backButton = rootElement.Q<Button>(BACKBUTTON_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {BACKBUTTON_NAME} が見つかりませんでした。");
@@ -47,6 +48,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _unlockPointsLabel = rootElement.Q<Label>("UnlockPointsValueLabel")
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] UnlockPointsValueLabel が見つかりませんでした。");
 
+            // スキル詳細とジャンル絞り込みのビューを作成する。
             VisualElement skillDetailRoot = rootElement.Q<VisualElement>(SKILL_DETAIL_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILL_DETAIL_NAME} が見つかりませんでした。");
             _skillDetailView = new SkillDetailView(skillDetailRoot, _comboHexIcon);
@@ -57,6 +59,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _skillGenreFilterBarView = new SkillGenreFilterBarView(skillGenreFilterBarRoot);
             _skillGenreFilterBarView.OnGenreFilterSelected += HandleGenreFilterBarSelectedHandler;
 
+            // 未保存の変更がある場合に出すダイアログを取得し、非表示にしておく。
             _skillBuildDialog = rootElement.Q<VisualElement>(SKILLBUILD_DIALOG_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {SKILLBUILD_DIALOG_NAME} が見つかりませんでした。");
             _unsavedChangesDialogOverlay = _skillBuildDialog.Q<VisualElement>(DIALOG_BACKGROUND_NAME)
@@ -68,8 +71,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             _dialogPanel = GetDialogPanel(_unsavedChangesDialogOverlay);
             HideUnsavedChangesDialog();
+            // ボタンの操作を登録する。
             RegisterButtonCallback();
 
+            // ダイアログと見出しの文言をローカライズに登録する。
             _discardAndCloseLocalizedText = new LocalizedElementText(
                 UI_COMMON_TABLE,
                 "ui.skill_build_dialog.discard_and_close",
@@ -164,6 +169,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 throw new InvalidOperationException("先に SkillListView の初期化が必要です。");
             }
 
+            // 以前の購読を解除してから、ViewModel の各値の変化を購読する。
             Unbind();
             _viewModel = viewModel;
             _subscriptions = new CompositeDisposable();
@@ -205,6 +211,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public override void Dispose()
         {
+            // ローカライズ・購読・ボタンの登録を解除する。
             foreach (LocalizedElementText localizedText in _headingLocalizedTexts)
             {
                 localizedText.Dispose();
@@ -213,6 +220,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             Unbind();
             UnregisterButtonCallback();
 
+            // 子のビューのイベントを解除して破棄する。
             if (_skillListView != null)
             {
                 _skillListView.OnSkillSelected -= HandleSkillSelectedHandler;

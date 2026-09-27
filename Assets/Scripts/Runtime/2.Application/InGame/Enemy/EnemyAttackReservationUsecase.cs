@@ -33,7 +33,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
 
         /// <summary> 予約タイミングが到達時に発火するイベント </summary>
         public event Action OnReservedTimingReached;
+        /// <summary> 攻撃の2拍前に発火するイベント。 </summary>
         public event Action On2BeatBefore;
+        /// <summary> 攻撃の1拍前に発火するイベント。 </summary>
         public event Action On1BeatBefore;
 
         /// <summary>
@@ -68,6 +70,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
             _hasReservation = false;
         }
 
+        /// <summary>
+        ///     予約中の処理をキャンセルし、CancellationTokenSource を破棄する。
+        /// </summary>
         public void Dispose()
         {
             if (_cancellationTokenSource != null)

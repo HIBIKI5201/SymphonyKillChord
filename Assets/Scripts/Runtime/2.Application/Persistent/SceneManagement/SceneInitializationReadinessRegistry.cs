@@ -121,6 +121,9 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             }
         }
 
+        /// <summary>
+        ///     シーン1つ分の初期化状態。
+        /// </summary>
         private sealed class SceneInitializationState
         {
             /// <summary> 初期化通知を受信済みの場合はtrueです。 </summary>

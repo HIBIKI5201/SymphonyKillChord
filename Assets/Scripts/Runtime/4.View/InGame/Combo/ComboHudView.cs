@@ -20,6 +20,7 @@ namespace KillChord.Runtime.View.InGame.Combo
         /// <param name="comboVisibleCount"> コンボ表示を開始する最小コンボ数です。 </param>
         public void Initialize(ComboHudViewModel viewModel, int comboVisibleCount)
         {
+            // 表示に必要な参照を確認する。
             if (_comboText == null)
             {
                 Debug.LogError($"[{nameof(ComboHudView)}] {nameof(_comboText)}が未設定です。", this);
@@ -33,6 +34,7 @@ namespace KillChord.Runtime.View.InGame.Combo
                 return;
             }
 
+            // 以前の購読を解除してから、コンボ数の変化を購読する。
             _comboDisposable?.Dispose();
             _comboHudViewModel = viewModel;
 
@@ -42,6 +44,7 @@ namespace KillChord.Runtime.View.InGame.Combo
                       if (_comboText == null || _comboRoot == null) { return; }
 
                       _handle.TryComplete();
+                      // 表示する最小のコンボ数に満たない間は非表示にする。
                       bool isVisible = comboCount >= comboVisibleCount;
                       _comboRoot.SetActive(isVisible);
                       if (!isVisible)
@@ -50,6 +53,7 @@ namespace KillChord.Runtime.View.InGame.Combo
                           return;
                       }
 
+                      // コンボ数を表示し、文字を揺らす演出を再生する。
                       _comboText.SetText("{0}", comboCount);
                       _handle = LSequence.Create()
                         .Join(LMotion.Punch.Create(0f, 5f, 0.1f)

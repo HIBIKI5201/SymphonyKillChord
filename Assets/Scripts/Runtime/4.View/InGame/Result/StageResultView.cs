@@ -309,6 +309,9 @@ namespace KillChord.Runtime.View.InGame.Result
             RefreshButtonFocus();
         }
 
+        /// <summary>
+        ///     ViewModel の購読を解除し、再生中の演出を止める。
+        /// </summary>
         private void OnDestroy()
         {
             UnsubscribeViewModel();
@@ -521,6 +524,7 @@ namespace KillChord.Runtime.View.InGame.Result
         /// </summary>
         private void SubscribeViewModel()
         {
+            // 文字列の項目は、値が変わったらそのまま表示する。
             _stageNameDisposable =
                 _viewModel.StageNameText.Subscribe(
                     value => SetText(_stageNameText, value));
@@ -533,6 +537,7 @@ namespace KillChord.Runtime.View.InGame.Result
                 _viewModel.MainMissionStateText.Subscribe(
                     value => SetText(_mainMissionStateText, value));
 
+            // 時間とコンボ数は、数値をカウントアップさせて表示する。
             _battleTimeDisposable =
                 _viewModel.BattleTimeSeconds.Subscribe(
                     value => SetCountUp(_battleTimeText, value, FormatBattleTime));
@@ -549,6 +554,7 @@ namespace KillChord.Runtime.View.InGame.Result
                 _viewModel.TipsText.Subscribe(
                     value => SetText(_tipsText, value));
 
+            // 勝敗の種類とサブミッションの一覧の変化を反映する。
             _resultTypeDisposable =
                 _viewModel.ResultType.Subscribe(
                     ApplyResultType);

@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public readonly struct EnemyMoveInstruction
     {
+        /// <summary>
+        ///     移動するか、移動先、移動速度を指定して生成する。
+        /// </summary>
         public EnemyMoveInstruction(bool shouldMove, Vector3 destination, float moveSpeed)
         {
             ShouldMove = shouldMove;

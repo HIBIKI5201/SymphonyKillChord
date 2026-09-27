@@ -5,14 +5,20 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View
 {
+    /// <summary>
+    ///     ドロップダウン形式の設定項目。
+    /// </summary>
     public class SettingDropDown : SettingBase
     {
-        [SerializeField]
+        [SerializeField, Tooltip("ドロップダウンの選択肢。")]
         private List<string> _choices = new List<string> { "Option" };
-        [SerializeField]
+        [SerializeField, Tooltip("選択中の選択肢のインデックス。")]
         private int _selectedIndex;
         private DropdownField _dropDownInstance;
 
+        /// <summary>
+        ///     ドロップダウンを取得し、選択肢と選択中の項目を設定する。
+        /// </summary>
         protected override void OnInitialize()
         {
             _dropDownInstance = _baseInstance.Q<DropdownField>();
@@ -43,6 +49,9 @@ namespace KillChord.Runtime.View
             });
         }
 
+        /// <summary>
+        ///     設定値の取得・反映の処理とドロップダウンを結びつける。
+        /// </summary>
         public void Bind(Func<int> getter, Action<int> setter)
         {
             if (_dropDownInstance.choices.Count <= 0)

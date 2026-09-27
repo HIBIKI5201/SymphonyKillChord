@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission
     /// </summary>
     public readonly struct MissionDialogueLine
     {
+        /// <summary>
+        ///     台詞1行分のデータを生成する。
+        /// </summary>
         public MissionDialogueLine(
             string textEntryKey,
             string fallbackText,

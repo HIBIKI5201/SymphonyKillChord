@@ -56,7 +56,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
         }
 
-        [SerializeField, Header("ゲーム開始と終了の演出に関わるIGameplayControllableを実装したMonoBehaviourリスト")]
+        [SerializeField, Tooltip("ゲーム開始と終了の演出に関わる IGameplayControllable を実装した MonoBehaviour の一覧。"), Header("ゲーム開始と終了の演出に関わるIGameplayControllableを実装したMonoBehaviourリスト")]
         private MonoBehaviour[] _gamePlayControllableObjects;
 
         private readonly List<IGameplayControllable> _gameplayControllables = new();

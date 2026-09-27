@@ -72,6 +72,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private MotionHandle _fadeHandle;
         private MotionHandle _backgroundFadeHandle;
 
+        /// <summary>
+        ///     再生中のモーションを止め、完了時のコールバックを解除する。
+        /// </summary>
         private void OnDestroy()
         {
             ResetMotion();

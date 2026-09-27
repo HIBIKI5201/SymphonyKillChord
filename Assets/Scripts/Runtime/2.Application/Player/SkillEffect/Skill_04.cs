@@ -10,6 +10,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_04 : SkillBase
     {
+        /// <summary>
+        ///     プレイヤーに、与えたダメージに応じてバリアを獲得するバフを付与する。
+        /// </summary>
         public override void Execute(in SkillEffectContext context)
         {
             float barrierGainRate = (float)context.EffectSpec.GetRequiredValue(

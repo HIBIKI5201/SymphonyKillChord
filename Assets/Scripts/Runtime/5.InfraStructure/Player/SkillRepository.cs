@@ -40,6 +40,10 @@ namespace KillChord.Runtime.InfraStructure.Player
             return GetAllValues();
         }
 
+        /// <summary>
+        ///     ID に対応するスキルを、BPM に合わせたスキル定義として取得する。
+        ///     見つからない場合は例外を投げる。
+        /// </summary>
         public SkillDefinition GetSkill(SkillId id, double bpm)
         {
 #if UNITY_EDITOR
@@ -52,10 +56,12 @@ namespace KillChord.Runtime.InfraStructure.Player
             return skillData.ToSkillDefinition(bpm);
         }
 
-        [SerializeField] private SkillTemplateAsset[] _skillDataAssets;
+        [SerializeField, Tooltip("スキルのテンプレートの一覧。")] private SkillTemplateAsset[] _skillDataAssets;
 
+        /// <inheritdoc/>
         protected override IReadOnlyList<SkillTemplateAsset> GetEntries() => _skillDataAssets;
 
+        /// <inheritdoc/>
         protected override bool TryBuild(SkillTemplateAsset entry, out SkillId id, out SkillTemplate value)
         {
             id = entry.Id;

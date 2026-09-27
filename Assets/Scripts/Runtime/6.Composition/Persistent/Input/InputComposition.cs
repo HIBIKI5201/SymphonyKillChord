@@ -24,15 +24,18 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         /// <summary> 実行順です。 </summary>
         public override int Order => 50;
 
+        /// <summary> プレイヤーの入力を受け取るビュー。 </summary>
         public PlayerInputView GetInputView => _playerInputView;
 
+        /// <summary> 入力マップの切り替えを制御するコントローラー。 </summary>
         public UnityInputMapController GetInputMapController => _inputMapController;
 
+        /// <summary> 入力を記録するバッファ。 </summary>
         public InputBufferingQueue GetBufferedInputBuffer => _bufferedInputBuffer;
 
 
         [Header("Bufferの最大容量")]
-        [SerializeField]
+        [SerializeField, Tooltip("入力バッファに保持する入力の数。")]
         private int _bufferCapacity;
 
         private PlayerInput _playerInput;

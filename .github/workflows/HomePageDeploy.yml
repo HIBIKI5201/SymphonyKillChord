@@ -1,4 +1,4 @@
-name: Deploy Astro to GitHub Pages
+name: "[CI/CD] Deploy Astro to GitHub Pages"
 
 on:
   push:

@@ -11,6 +11,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyHealthHudPresenter : IHealthHudPresenter
     {
+        /// <summary>
+        ///     敵のエンティティと HP 表示・ダメージ数値表示の出力先を指定して生成する。
+        /// </summary>
         public EnemyHealthHudPresenter(
             IDefender entity,
             Guid defenderId,
@@ -31,6 +34,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary> 被弾時に呼び出されるイベント。 </summary>
         public event Action OnDamaged;
 
+        /// <summary>
+        ///     購読を解除して破棄する。
+        /// </summary>
         public void Dispose()
         {
             Deactivate();

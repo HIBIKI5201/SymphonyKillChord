@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
     /// </summary>
     public abstract class StatusEffectBase : IStatusEffect
     {
+        /// <summary>
+        ///     ID・分類・持続時間・再付与時の扱いを指定して生成する。
+        /// </summary>
         protected StatusEffectBase(
             StatusEffectId id,
             StatusEffectCategory category,

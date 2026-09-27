@@ -52,6 +52,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             TargetSystemController targetSystemController,
             IMusicSyncService musicSyncService)
         {
+            // 以前の購読を解除してから、参照を差し替える。
             Unbind();
 
             _playerEntity = playerEntity
@@ -67,6 +68,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _musicSyncService = musicSyncService
                 ?? throw new ArgumentNullException(nameof(musicSyncService));
 
+            // ミッションの進行に関わるイベントを購読する。
             _playerEntity.OnHealthChanged += HandleHealthChanged;
             _playerController.OnMoved += HandleMoved;
             _playerController.OnDodgeSucceeded += HandleDodgeSucceeded;
@@ -82,6 +84,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// </summary>
         public void Unbind()
         {
+            // 保留中の攻撃の種類を消し、各イベントの購読を解除する。
             _pendingAttackBeatKind = null;
 
             if (_playerEntity != null)
@@ -116,6 +119,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 _musicSyncService.OnRhythmTimedOut -= HandleRhythmTimedOutHandler;
             }
 
+            // 参照を解除する。
             _playerEntity = null;
             _attackController = null;
             _skillController = null;

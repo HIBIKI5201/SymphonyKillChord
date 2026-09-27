@@ -38,6 +38,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         /// </summary>
         public override bool Build()
         {
+            // 音量を適用する先を取得する。
             if (!ServiceLocator.TryGetInstance(out MusicPlayer musicPlayer)
                 || !ServiceLocator.TryGetInstance(out SoundEffectVolumeManager soundEffectVolumeManager)
                 || !ServiceLocator.TryGetInstance(out VoiceVolumeManager voiceVolumeManager))
@@ -48,6 +49,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
                 return false;
             }
 
+            // 音量設定の ViewModel・プレゼンター・コントローラーを作り、読み込んだ設定を表示に反映する。
             _audioSettingsViewModel = new AudioSettingsViewModel();
             _audioSettingsPresenter = new AudioSettingsPresenter(_audioSettingsViewModel);
             _audioSettingsController = new AudioSettingsController(
@@ -58,6 +60,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
                 soundEffectVolumeManager,
                 voiceVolumeManager);
             _audioSettingsPresenter.Push(_loadedSettings);
+            // コンテナを登録する。
             _moduleContainer = new AudioSettingsModuleContainer(
                 _audioSettingsViewModel,
                 _audioSettingsController);

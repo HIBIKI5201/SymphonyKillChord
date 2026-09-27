@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
     /// </summary>
     public class SkillNodeEntity
     {
+        /// <summary>
+        ///     スキルツリーのノードを生成する。
+        /// </summary>
         public SkillNodeEntity(SkillNodeId nodeId,
             int cost, string skillDetail,
             SkillId[] unlockSkillIds,

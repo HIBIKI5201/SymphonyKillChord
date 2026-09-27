@@ -19,6 +19,9 @@ namespace KillChord.Editor.AutoBuilder
     {
         /// <summary> 自動ビルドセッションが実行中の場合はtrueです。 </summary>
         public static bool IsRunning => BuildSession.LoadSession().Running;
+        /// <summary>
+        ///     実行中のビルド1回分の情報。
+        /// </summary>
         [Serializable]
         private struct BuildSession
         {
@@ -151,6 +154,7 @@ namespace KillChord.Editor.AutoBuilder
         public static void Run(string path, BuildProfile[] profiles, bool isBatchMode = false)
         {
             LogDebug("自動ビルド処理を開始");
+            // プロファイルが無い場合や、現在のプロファイルを取得できない場合は中止する。
             if (profiles == null || profiles.Length == 0)
             {
                 Debug.LogError("Build Profiles are not set.");
@@ -164,6 +168,7 @@ namespace KillChord.Editor.AutoBuilder
                 return;
             }
 
+            // ドメインリロードを挟んでも続きから再開できるよう、ビルドの進行状況を保存する。
             BuildSession session = new()
             {
                 OutputPath = path,
@@ -190,6 +195,7 @@ namespace KillChord.Editor.AutoBuilder
             BuildSession.SaveSession(session);
             ShowBuildProgress(session, "自動ビルドを準備しています。");
 
+            // 次のエディタ更新でビルドを再開する。
             EditorApplication.delayCall += ResumeBuild;
         }
 
@@ -289,6 +295,7 @@ namespace KillChord.Editor.AutoBuilder
         private static void ReplayPendingLogIfAny()
         {
             LogDebug("ドメインリロードで消失したログの再出力処理を開始");
+            // ドメインリロード前に記録したログが無ければ何もしない。
             string json = SessionState.GetString(PENDING_LOG_KEY, string.Empty);
             if (string.IsNullOrEmpty(json))
             {
@@ -307,6 +314,7 @@ namespace KillChord.Editor.AutoBuilder
                 $"[{nameof(AutoBuildExecuter)}] ビルドプロファイル復元時のドメインリロードでコンソールがクリアされたため、" +
                 $"直前の自動ビルドで記録されたログを再出力します。({replay.Entries.Length}件)");
 
+            // 記録していたログをコンソールへ出し直す。
             foreach (CapturedLogEntry entry in replay.Entries)
             {
                 string formatted = string.IsNullOrEmpty(entry.StackTrace)
@@ -406,6 +414,7 @@ namespace KillChord.Editor.AutoBuilder
 
             BuildSession session = BuildSession.LoadSession();
 
+            // 同じプロファイルのやり直し回数を数える。
             if (!session.Running)
             {
                 return;
@@ -414,6 +423,7 @@ namespace KillChord.Editor.AutoBuilder
             session.CurrentProfileAttemptCount++;
             BuildSession.SaveSession(session);
 
+            // 上限を超えたプロファイルは失敗として飛ばし、次のプロファイルへ進む。
             if (session.CurrentProfileAttemptCount > MAX_PROFILE_ATTEMPT_COUNT)
             {
                 string guid = session.CurrentIndex < session.ProfileGuids.Length
@@ -432,6 +442,7 @@ namespace KillChord.Editor.AutoBuilder
                 return;
             }
 
+            // ビルドを実行する。例外が出た場合はセッションを失敗として終える。
             try
             {
                 await ExecuteBuildAsync(session);

@@ -36,6 +36,7 @@ namespace KillChord.Runtime.View.InGame.UI
             Ease fadeEase,
             float fadeDuration)
         {
+            // 二重の初期化は行わない。
             if (_isInitialized)
             {
                 Debug.LogWarning($"[{nameof(EnemyDirectionIndicatorView)}] 既に初期化されています。", this);
@@ -47,6 +48,7 @@ namespace KillChord.Runtime.View.InGame.UI
                 return false;
             }
 
+            // 設定を保持し、ルートの位置を合わせる。
             _camera = camera;
             _fadeDuration = fadeDuration;
             _fadeEase = fadeEase;
@@ -55,6 +57,7 @@ namespace KillChord.Runtime.View.InGame.UI
             transform.SetLocalPositionAndRotation(positionOffset, Quaternion.identity);
             transform.localScale = Vector3.one;
 
+            // 表示数の上限だけマーカーを生成し、透明にして非表示で待機させる。
             for (int i = 0; i < capacity; i++)
             {
                 GameObject indicator = Instantiate(_indicatorPrefab, transform, false);
@@ -196,6 +199,7 @@ namespace KillChord.Runtime.View.InGame.UI
             int capacity,
             float fadeDuration)
         {
+            // カメラ・プレハブ・設定値を確認する。
             if (camera == null
                 || _indicatorPrefab == null
                 || capacity <= 0
@@ -207,6 +211,7 @@ namespace KillChord.Runtime.View.InGame.UI
                 return false;
             }
 
+            // マーカーの Material が、透明度を制御できる設定になっているかを確認する。
             Renderer[] prefabRenderers = _indicatorPrefab.GetComponentsInChildren<Renderer>(true);
             if (prefabRenderers.Length == 0)
             {

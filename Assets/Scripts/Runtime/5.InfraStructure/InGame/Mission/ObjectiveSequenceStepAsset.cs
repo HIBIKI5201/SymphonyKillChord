@@ -54,6 +54,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 return Array.Empty<IMissionStepEntryAction>();
             }
 
+            // 各アクションを作る。失敗した場合はどのアクションかが分かる例外を投げる。
             List<IMissionStepEntryAction> actions = new(_entryActions.Count);
             for (int i = 0; i < _entryActions.Count; i++)
             {
@@ -76,6 +77,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 }
             }
 
+            // 会話は1ステップに1つまでとし、ボイス再生との同時指定も許さない。
             int dialogueCount = 0;
             bool hasVoiceAction = false;
             for (int i = 0; i < actions.Count; i++)

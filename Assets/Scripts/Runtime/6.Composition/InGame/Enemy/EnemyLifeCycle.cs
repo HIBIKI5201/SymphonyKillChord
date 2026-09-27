@@ -24,8 +24,6 @@ using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Music;
-using LitMotion;
-using LitMotion.Extensions;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
@@ -412,18 +410,18 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private Action<EnemyLifeCycle> _releaseCallback;
         private ICharacterAnimationViewContext _characterAnimationContext;
 
-        [SerializeField] private EnemyMoveView _view;
-        [SerializeField] private EnemyHealthView _healthView;
-        [SerializeField] private EnemyRaycastDetectView _raycastView;
-        [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
+        [SerializeField, Tooltip("敵の移動と見た目を扱うビュー。")] private EnemyMoveView _view;
+        [SerializeField, Tooltip("敵の HP 表示のビュー。")] private EnemyHealthView _healthView;
+        [SerializeField, Tooltip("攻撃の射線判定と警告表示のビュー。")] private EnemyRaycastDetectView _raycastView;
+        [SerializeField, Tooltip("攻撃位置を探索するビュー。")] private NearestAttackPositionSearchView _attackPositionSearchView;
         [SerializeField, Tooltip("周囲の障害物を検索するViewです。")] private NearbyObstacleSearchView _obstacleSearchView;
-        [SerializeField] private EnemyMovementAIFacade _enemyMovementAIFacade;
-        [SerializeField] private EnemyBattleAIFacade _enemyBattleAIFacade;
-        [SerializeField] private EnemyStateFacade _enemyStateFacade;
-        [SerializeField] private EnemySharedFacade _enemySharedFacade;
-        [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
-        [SerializeField] private NavMeshAgent _navMeshAgent;
-        [SerializeField] private CharacterAnimationView _characterAnimationView;
+        [SerializeField, Tooltip("Behavior Graph から移動を操作する窓口。")] private EnemyMovementAIFacade _enemyMovementAIFacade;
+        [SerializeField, Tooltip("Behavior Graph から攻撃を操作する窓口。")] private EnemyBattleAIFacade _enemyBattleAIFacade;
+        [SerializeField, Tooltip("Behavior Graph から状態を参照する窓口。")] private EnemyStateFacade _enemyStateFacade;
+        [SerializeField, Tooltip("Behavior Graph と共有する参照の窓口。")] private EnemySharedFacade _enemySharedFacade;
+        [SerializeField, Tooltip("敵の AI を動かす Behavior Graph。")] private BehaviorGraphAgent _behaviorGraphAgent;
+        [SerializeField, Tooltip("敵の経路移動に使う NavMeshAgent。")] private NavMeshAgent _navMeshAgent;
+        [SerializeField, Tooltip("敵のアニメーションを再生するビュー。")] private CharacterAnimationView _characterAnimationView;
         [SerializeField, Tooltip("敵キャラクターのアニメーション設定です。")]
         private CharacterAnimationCatalogConfig _characterAnimationConfig;
         [SerializeField, Tooltip("死亡時に再生するワンショットアニメーションキー。")]
@@ -435,22 +433,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("死亡アニメーション開始前に無効化する判定。未設定の場合は何もしません。")]
         private Collider[] _disableOnDyingColliders;
 
-        [SerializeField, Tooltip("死亡演出でMaterialプロパティを変化させる対象のRendererです。未設定の場合は何もしません。")]
-        private Renderer[] _deathEffectRenderers;
-        [SerializeField, Tooltip("死亡演出用の沼のGameObjectです。")]
-        private GameObject _deathSwampGameObject;
+        [SerializeField, Tooltip("死体消滅演出。未設定の場合は何もしません。")]
+        private EnemyDestroyEffectView _destroyEffectView;
 
         [SerializeField, Tooltip("撃破時にSE_Defeatを再生するSE用Source。")]
         private SoundEffectSource _defeatSoundSource;
-
-        /// <summary>
-        ///     死亡演出で変化させるMaterialのfloatプロパティID（仮に"_DeathEffectAmount"）です。
-        /// </summary>
-        private static readonly int DeathEffectPropertyId = Shader.PropertyToID("_DeathEffectAmount");
-        [SerializeField, Min(0f), Tooltip("死亡演出のMaterialプロパティが変化する時間（秒）です。")]
-        private float _deathEffectDuration = 1f;
-        [SerializeField, Min(0f), Tooltip("死亡演出後、沼が沈み込むまでの時間（秒）です。")]
-        private float _deathSwampSinkDuration = 3f;
 
         [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
         private Transform _targetTransform;
@@ -472,7 +459,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private float _overrideArrivalThreshold = 0.5f;
 
         [Header("砲兵の場合のみ必要")]
-        [SerializeField] private ShellSpawner _shellSpawner;
+        [SerializeField, Tooltip("砲弾を生成するスポナー。")] private ShellSpawner _shellSpawner;
 
         private TargetSystemController _targetingSystem;
         private TransformTargetable _targetable;
@@ -584,6 +571,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         private void BeginDying()
         {
+            // 死亡イベントの購読を解除し、攻撃と AI を止める。
             if (_enemyEntity != null)
             {
                 _enemyEntity.OnDied -= HandleEnemyDied;
@@ -596,6 +584,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyBattleAIFacade?.StopGameplay();
             _view?.StopGameplay();
 
+            // 行動と移動を止める。
             if (_behaviorGraphAgent != null)
             {
                 _behaviorGraphAgent.enabled = false;
@@ -614,6 +603,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _attackPositionSearchView.enabled = false;
             }
 
+            // ターゲットと AI の登録を解除し、当たり判定を無効にする。
             _targetingSystem?.UnregisterTarget(_targetable);
             _battleAIRegistry?.Unregister(_aiController);
             SetDyingCollidersEnabled(false);
@@ -653,61 +643,29 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         }
 
         /// <summary>
-        ///     死亡演出として、対象RendererのMaterialプロパティをLMotionで変化させる。
+        ///     死体消滅演出を再生する。演出Viewが未設定の場合は何もしない。
         /// </summary>
         private ValueTask PlayDeathMaterialEffectAsync()
         {
-            if (_deathEffectRenderers == null || _deathEffectRenderers.Length == 0)
+            if (_destroyEffectView == null)
             {
                 return default;
             }
 
-            // DestroyFadeシェーダーは_DeathEffectAmountのデフォルトが1(通常表示)で、0に近づくほど消滅する。
-            MotionHandle handle = LMotion.Create(1f, 0f, _deathEffectDuration)
-                .WithEase(Ease.OutQuad)
-                .BindToMaterialPropertyBlockFloat(_deathEffectRenderers, DeathEffectPropertyId);
-
-            if (_deathSwampGameObject != null)
-            {
-                _deathSwampGameObject.SetActive(true);
-
-                handle = LSequence.Create()
-                    .Join(handle)
-                    .Join(LMotion.Create(Vector3.up * -0.5f, Vector3.up * 0.1f, _deathEffectDuration)
-                        .WithEase(Ease.OutQuad)
-                        .BindToLocalPosition(_deathSwampGameObject.transform))
-                    .Join(LMotion.Create(Vector3.up * 0.1f, Vector3.up * -0.5f, _deathSwampSinkDuration)
-                        .WithDelay(_deathEffectDuration)
-                        .BindToLocalPosition(_deathSwampGameObject.transform))
-                    .Run();
-            }
-
-            return handle.ToValueTask(destroyCancellationToken);
+            return _destroyEffectView.PlayDeathMaterialEffectAsync();
         }
 
         /// <summary>
-        ///     プールから再利用した際に、前回の死亡演出で変化したMaterialPropertyBlockを既定値へ戻す。
+        ///     プールから再利用した際に、前回の死亡演出の変化を既定値へ戻す。
         /// </summary>
         private void ResetDeathEffect()
         {
-            if (_deathEffectRenderers == null || _deathEffectRenderers.Length == 0)
+            if (_destroyEffectView == null)
             {
                 return;
             }
 
-            foreach (Renderer renderer in _deathEffectRenderers)
-            {
-                if (renderer == null)
-                {
-                    continue;
-                }
-
-                renderer.SetPropertyBlock(null);
-            }
-            if (_deathSwampGameObject != null)
-            {
-                _deathSwampGameObject.SetActive(false);
-            }
+            _destroyEffectView.ResetDeathEffect();
         }
 
         /// <summary>

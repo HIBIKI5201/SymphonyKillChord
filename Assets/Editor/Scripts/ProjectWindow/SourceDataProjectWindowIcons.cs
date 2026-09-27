@@ -13,12 +13,12 @@ namespace KillChord.Editor.ProjectWindow
         private const float LIST_BADGE_SIZE = 7f;
         private const float GRID_BADGE_SIZE = 12f;
         private const float BADGE_GAP = 1f;
+        private const float BADGE_OUTLINE_WIDTH = 1f;
 
-        private static readonly Color _addressableFallbackColor = new(0.2f, 0.6f, 1f, 0.9f);
+        private static readonly Color _addressableColor = new(0.2f, 0.6f, 1f, 0.9f);
         private static readonly Color _collectionItemColor = new(0.85f, 0.55f, 0.15f, 0.9f);
         private static readonly Color _buildDependencyColor = new(0.3f, 0.8f, 0.4f, 0.9f);
-        private static readonly Texture _addressableIcon = ResolveIcon(
-            EditorGUIUtility.isProSkin ? "d_Linked" : "Linked");
+        private static readonly Color _badgeOutlineColor = new(0f, 0f, 0f, 0.75f);
 
         /// <summary>
         ///     Project Windowの描画イベントを購読します。
@@ -58,44 +58,35 @@ namespace KillChord.Editor.ProjectWindow
 
             if ((flags & SourceDataAssetFlags.Addressable) != 0)
             {
-                DrawAddressableBadge(badgeRect);
+                DrawBadge(badgeRect, _addressableColor);
                 badgeRect.x -= badgeSize + BADGE_GAP;
             }
 
             if ((flags & SourceDataAssetFlags.CollectionItem) != 0)
             {
-                EditorGUI.DrawRect(badgeRect, _collectionItemColor);
+                DrawBadge(badgeRect, _collectionItemColor);
             }
             else if ((flags & SourceDataAssetFlags.BuildDependency) != 0)
             {
                 // collection要素はほぼ全てビルドに含まれるため、重複表示を避けてcollection要素の表示を優先する。
-                EditorGUI.DrawRect(badgeRect, _buildDependencyColor);
+                DrawBadge(badgeRect, _buildDependencyColor);
             }
         }
 
         /// <summary>
-        ///     Addressables登録状態のバッジを描画します。
+        ///     選択中の行や背景色に埋もれないよう、暗色の縁取りを付けてバッジを描画します。
         /// </summary>
         /// <param name="badgeRect"> バッジの描画領域です。 </param>
-        private static void DrawAddressableBadge(Rect badgeRect)
+        /// <param name="color"> バッジの色です。 </param>
+        private static void DrawBadge(Rect badgeRect, Color color)
         {
-            if (_addressableIcon != null)
-            {
-                GUI.DrawTexture(badgeRect, _addressableIcon);
-                return;
-            }
-
-            EditorGUI.DrawRect(badgeRect, _addressableFallbackColor);
-        }
-
-        /// <summary>
-        ///     Unity Editor組み込みアイコンを取得します。
-        /// </summary>
-        /// <param name="iconName"> 取得するアイコン名です。 </param>
-        /// <returns> 見つかったアイコンです。 </returns>
-        private static Texture ResolveIcon(string iconName)
-        {
-            return EditorGUIUtility.IconContent(iconName)?.image;
+            Rect outlineRect = new(
+                badgeRect.x - BADGE_OUTLINE_WIDTH,
+                badgeRect.y - BADGE_OUTLINE_WIDTH,
+                badgeRect.width + BADGE_OUTLINE_WIDTH * 2f,
+                badgeRect.height + BADGE_OUTLINE_WIDTH * 2f);
+            EditorGUI.DrawRect(outlineRect, _badgeOutlineColor);
+            EditorGUI.DrawRect(badgeRect, color);
         }
     }
 

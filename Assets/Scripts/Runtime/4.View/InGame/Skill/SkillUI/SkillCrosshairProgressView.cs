@@ -10,6 +10,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     /// </summary>
     public sealed class SkillCrosshairProgressView : MonoBehaviour, ISkillCrosshairProgressView
     {
+        /// <summary> 毎フレームの更新時に発火するイベント。 </summary>
         public event Action OnUpdate;
         /// <summary> StepViewを並べる親Transform。 </summary>
         public Transform StepRoot => _stepRoot;
@@ -58,10 +59,18 @@ namespace KillChord.Runtime.View.InGame.Skill
                 _stepRoot.gameObject.SetActive(visible);
             }
         }
+
+        /// <summary>
+        ///     更新イベントを発火する。
+        /// </summary>
         private void Update()
         {
             OnUpdate?.Invoke();
         }
+
+        /// <summary>
+        ///     更新イベントの購読をすべて解除する。
+        /// </summary>
         private void OnDestroy()
         {
             OnUpdate = null;

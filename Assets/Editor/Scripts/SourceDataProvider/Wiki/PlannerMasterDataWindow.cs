@@ -161,6 +161,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         private void DrawToolbar()
         {
+            // Variant の切り替え。
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             GUILayout.Label("Variant", GUILayout.Width(46f));
             GameDataVariant currentVariant = GameDataVariantEditorState.SelectedVariant;
@@ -174,6 +175,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 OnVariantChanged();
             }
 
+            // 検索欄とクリアボタン。
             GUILayout.Space(8f);
             GUILayout.Label("Search", GUILayout.Width(46f));
             GUI.SetNextControlName(SEARCH_FIELD_CONTROL_NAME);
@@ -192,6 +194,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 GUI.FocusControl(null);
             }
 
+            // Addressables からの再読み込みと、設定画面を開くボタン。
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("Refresh", EditorStyles.toolbarButton, GUILayout.Width(72f)))
             {
@@ -256,6 +259,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         {
             IReadOnlyList<PlannerMasterDataEditorSettings.PageDefinition> pages =
                 PlannerMasterDataEditorSettings.instance.Pages;
+            // ページが無い場合は選択をすべて解除する。
             if (pages.Count == 0)
             {
                 _selectedPageIndex = 0;
@@ -265,6 +269,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return;
             }
 
+            // 選択中のページに表示できる項目が無い方のモードから、ある方のモードへ切り替える。
             _selectedPageIndex = Mathf.Clamp(_selectedPageIndex, 0, pages.Count - 1);
             PlannerMasterDataEditorSettings.PageDefinition page = pages[_selectedPageIndex];
             List<string> visibleDataAssetKeys = GetVisibleDataAssetKeys(page);
@@ -281,6 +286,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _navigationMode = NavigationMode.DataAssets;
             }
 
+            // 選択中の項目がページに無ければ、先頭の項目を選び直す。
             if (_navigationMode == NavigationMode.DataAssets)
             {
                 if (!Contains(page.DataAssetAddressableKeys, _selectedDataAssetKey)
@@ -343,6 +349,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <param name="page"> 選択中ページです。 </param>
         private void DrawNavigationColumn(PlannerMasterDataEditorSettings.PageDefinition page)
         {
+            // データアセットとコレクションの表示モードの切り替え。切り替えたら選択をやり直す。
             EditorGUILayout.BeginVertical(GUILayout.Width(NAVIGATION_COLUMN_WIDTH));
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             NavigationMode nextMode = (NavigationMode)GUILayout.Toolbar(
@@ -358,6 +365,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 GUIUtility.ExitGUI();
             }
 
+            // モードに応じたナビゲーションを描画する。
             using (EditorGUILayout.ScrollViewScope scope = new(_navigationScrollPosition))
             {
                 _navigationScrollPosition = scope.scrollPosition;
@@ -514,6 +522,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <param name="collectionKey"> 対象CollectionKeyです。 </param>
         private void DrawCollectionItems(string collectionKey)
         {
+            // コレクションを解決できない場合はエラーを表示する。
             if (!TryResolveCollection(
                     collectionKey,
                     out SourceDataProviderSettings.SourceCollectionMapping mapping,
@@ -526,6 +535,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return;
             }
 
+            // ツールバー（並び順の切り替えとデータアセットを開くボタン）。
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
             EditorGUILayout.LabelField($"Collection [{collectionKey}]", EditorStyles.boldLabel);
             GUILayout.FlexibleSpace();
@@ -540,6 +550,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             }
             EditorGUILayout.EndHorizontal();
 
+            // コレクションの情報と追加などの操作ボタンを描画する。
             DrawCollectionMetadata(mapping);
 
             if (!collectionProperty.isArray)
@@ -562,6 +573,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return;
             }
 
+            // 指定の並び順で要素を並べ、選択できるボタンとして表示する。
             List<int> order = BuildItemDisplayOrder(collectionProperty, collectionKey, _collectionSortMode);
             for (int position = 0; position < order.Count; position++)
             {
@@ -929,6 +941,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <param name="addressableKey"> 移動先DataAssetのAddressableキーです。 </param>
         public void NavigateToDataAsset(string addressableKey)
         {
+            // データアセットを解決できたら、Project ウィンドウで選択する。
             bool resolved = SourceDataProviderRepositoryResolver.TryResolveAsset(
                 addressableKey,
                 out ScriptableObject dataAsset);
@@ -938,6 +951,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 EditorGUIUtility.PingObject(dataAsset);
             }
 
+            // 選択中のページから順に、データアセットを表示するページを探して切り替える。
             IReadOnlyList<PlannerMasterDataEditorSettings.PageDefinition> pages =
                 PlannerMasterDataEditorSettings.instance.Pages;
             bool pageFound = false;
@@ -954,6 +968,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _selectedDataAssetKey = addressableKey;
                 _selectedCollectionKey = string.Empty;
                 _selectedCollectionItemIndex = 0;
+                // リポジトリ専用のアセットは、コレクションの表示に切り替える。
                 if (IsRepositoryOnlyDataAsset(addressableKey))
                 {
                     string collectionKey = SourceDataProviderSettings.instance
@@ -970,6 +985,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 break;
             }
 
+            // 解決できなかった場合や、表示するページが無かった場合は通知する。
             if (!resolved)
             {
                 ShowNotification(new GUIContent(
@@ -994,6 +1010,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <param name="dataId"> 移動先の個別データIDです。 </param>
         public void NavigateToCollectionItem(string collectionKey, string dataId)
         {
+            // コレクションを解決し、ID が一致する要素を探して選択する。
             bool collectionResolved = TryResolveCollection(
                     collectionKey,
                     out _,
@@ -1022,6 +1039,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 }
             }
 
+            // コレクションを表示するページに切り替える。
             int pageIndex = FindCollectionPage(collectionKey);
 
             if (pageIndex >= 0)
@@ -1033,6 +1051,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _selectedCollectionItemIndex = itemIndex;
             }
 
+            // 解決できなかった場合や、要素・ページが見つからなかった場合は通知する。
             if (!collectionResolved)
             {
                 ShowNotification(new GUIContent(
@@ -1171,9 +1190,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         {
             if (SourceDataProviderRepositoryResolver.TryResolveAsset(addressableKey, out ScriptableObject dataAsset))
             {
-                int collectionCount =
-                    SourceDataProviderSettings.instance.GetCollectionMappingsByAddressableKey(addressableKey).Count;
-                return $"{dataAsset.name} ({dataAsset.GetType().Name}) [{collectionCount}]";
+                return $"{dataAsset.name} ({dataAsset.GetType().Name})";
             }
 
             return addressableKey;
@@ -1427,6 +1444,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         private void NavigateToSearchResult(SearchResult result)
         {
+            // 検索後にデータが変わっていた場合は、検索をやり直す。
             if (_lastIndexedSearchQuery != _searchQuery
                 || !TryResolveCollection(result.CollectionKey, out _, out ScriptableObject owner, out SerializedProperty collection)
                 || !collection.isArray
@@ -1436,6 +1454,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 GUIUtility.ExitGUI();
                 return;
             }
+            // プロパティパスが一致する要素を探し、そのページを開いて選択する。
             for (int i = 0; i < collection.arraySize; i++)
             {
                 SerializedProperty element = collection.GetArrayElementAtIndex(i);
@@ -1453,6 +1472,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 SetSearchQuery(string.Empty);
                 return;
             }
+            // 見つからなかった場合は、データが変わったとみなして検索をやり直す。
             ShowNotification(new GUIContent("検索対象が変更されています。検索結果を更新します。"));
             InvalidateSearch();
         }
@@ -1469,6 +1489,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 return;
             }
 
+            // データアセットの名前とキーから検索する。
             IReadOnlyList<SourceDataProviderSettings.DataAssetMapping> dataAssetMappings =
                 SourceDataProviderSettings.instance.DataAssetMappings;
             for (int i = 0; i < dataAssetMappings.Count; i++)
@@ -1486,6 +1507,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 }
             }
 
+            // コレクションキーから検索する。
             IReadOnlyList<SourceDataProviderSettings.SourceCollectionMapping> collectionMappings =
                 SourceDataProviderSettings.instance.SourceCollectionMappings;
             for (int i = 0; i < collectionMappings.Count; i++)
@@ -1503,6 +1525,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                         BuildCollectionLabel(mapping.CollectionKey)));
                 }
 
+                // コレクションの各要素の内容から検索する。
                 if (!SourceDataProviderRepositoryResolver.TryResolveAsset(
                         mapping.DataAssetAddressableKey,
                         out ScriptableObject dataAsset))
@@ -1605,6 +1628,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         private readonly struct SearchResult
         {
+            /// <summary>
+            ///     検索結果を生成する。
+            /// </summary>
             private SearchResult(
                 SearchResultKind kind,
                 string addressableKey,
@@ -1636,12 +1662,21 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 _ => "Item",
             };
 
+            /// <summary>
+            ///     データアセットの検索結果を生成する。
+            /// </summary>
             public static SearchResult ForDataAsset(string addressableKey, string label) =>
                 new(SearchResultKind.DataAsset, addressableKey, null, null, label);
 
+            /// <summary>
+            ///     コレクションの検索結果を生成する。
+            /// </summary>
             public static SearchResult ForCollection(string collectionKey, string label) =>
                 new(SearchResultKind.Collection, null, collectionKey, null, label);
 
+            /// <summary>
+            ///     コレクション要素の検索結果を生成する。
+            /// </summary>
             public static SearchResult ForCollectionItem(string collectionKey, string propertyPath, string label, ScriptableObject owner) =>
                 new(SearchResultKind.CollectionItem, null, collectionKey, propertyPath, label, owner);
         }

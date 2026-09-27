@@ -11,6 +11,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Resource
     [CreateAssetMenu(
         fileName = nameof(GameResourceDefinitionAsset),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "Resource/" + nameof(GameResourceDefinitionAsset))]
+    /// <summary>
+    ///     ゲーム内リソースを定義するデータ。
+    /// </summary>
     public sealed class GameResourceDefinitionAsset : ScriptableObject
     {
         /// <summary> リソースのIDです。 </summary>

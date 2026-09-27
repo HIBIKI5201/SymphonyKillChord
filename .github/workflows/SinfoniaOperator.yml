@@ -1,4 +1,4 @@
-name: Sinfonia Operator
+name: "[Bot] Sinfonia Operator"
 
 on:
   schedule:

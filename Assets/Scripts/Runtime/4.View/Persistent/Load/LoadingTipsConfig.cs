@@ -7,6 +7,9 @@ namespace KillChord.Runtime.View.Persistent.Load
     /// </summary>
     [CreateAssetMenu(fileName = nameof(LoadingTipsConfig),
         menuName = "KillChord/Persistent/LoadingTipsConfig")]
+    /// <summary>
+    ///     ロード画面に表示する Tips を設定するデータ。
+    /// </summary>
     public class LoadingTipsConfig : ScriptableObject
     {
         /// <summary>

@@ -10,8 +10,11 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     [CreateAssetMenu(fileName = "BossAttackEntryAsset", menuName = PathConst.CREATE_ASSET_MENU_PATH + "Enemy/" + nameof(BossAttackEntryAsset))]
     public class BossAttackEntryAsset : ScriptableObject
     {
+        /// <summary> ボスの攻撃の種類。 </summary>
         public BossAttackKind Kind => _kind;
+        /// <summary> 攻撃の番号。 </summary>
         public int AttackIndex => _attackIndex;
+        /// <summary> 攻撃のタイミングを決める音楽同期の設定。 </summary>
         public EnemyMusicSpecAsset MusicData => _musicData;
 
         [SerializeField, Tooltip("ボスの攻撃種別")] private BossAttackKind _kind;

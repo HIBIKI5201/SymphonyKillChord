@@ -1,4 +1,4 @@
-name: AutoCreateDevelopPullRequest
+name: "[Git] AutoCreateDevelopPullRequest"
 
 on:
   pull_request_target:

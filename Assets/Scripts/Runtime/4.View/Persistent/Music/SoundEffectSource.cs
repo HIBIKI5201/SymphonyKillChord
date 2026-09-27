@@ -93,18 +93,27 @@ namespace KillChord.Runtime.View.Persistent.Music
         private float _baseVolume = 1f;
         private bool _baseVolumeCaptured;
 
+        /// <summary>
+        ///     CriAtomSource を取得し、基準の音量を記録する。
+        /// </summary>
         private void Awake()
         {
             _source = GetComponent<CriAtomSource>();
             CaptureBaseVolume();
         }
 
+        /// <summary>
+        ///     音量管理に自身を登録する。
+        /// </summary>
         private void OnEnable()
         {
             _volumeRegistryView ??= FindAnyObjectByType<PersistentAudioVolumeRegistryView>();
             _volumeRegistryView?.RegisterSoundEffectSource(this);
         }
 
+        /// <summary>
+        ///     音量管理から自身の登録を解除する。
+        /// </summary>
         private void OnDisable()
         {
             _volumeRegistryView?.UnregisterSoundEffectSource(this);

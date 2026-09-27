@@ -11,8 +11,10 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// </summary>
     public sealed class InGameHudInitializer : InGameInitializationModuleBase
     {
+        /// <inheritdoc/>
         public override string ModuleName => nameof(InGameHudInitializer);
 
+        /// <inheritdoc/>
         public override int Order => 495;
         /// <summary>
         ///     HPバーHUDの初期化。
@@ -23,11 +25,15 @@ namespace KillChord.Runtime.Composition.InGame.UI
             _playerHealthTextView.Bind(healthHudViewModel);
             _playerHealthBarView.Bind(healthHudViewModel);
         }
+
+        /// <inheritdoc/>
         public override bool Build()
         {
             ServiceLocator.RegisterInstance<InGameHudInitializer>(this, LocateTypeEnum.Locator);
             return true;
         }
+
+        /// <inheritdoc/>
         public override void Shutdown()
         {
             ServiceLocator.UnregisterInstance<InGameHudInitializer>(this);

@@ -32,6 +32,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         {
             _isBuilt = false;
 
+            // UI 操作音の Source が子 GameObject にあり、CriAtomSource を持っているかを確認する。
             if (_soundEffectSource == null)
             {
                 Debug.LogError(
@@ -56,11 +57,13 @@ namespace KillChord.Runtime.Composition.Persistent.Music
                 return false;
             }
 
+            // 使うまでは Source を無効にしておく。
             if (_soundEffectSource.gameObject.activeSelf)
             {
                 _soundEffectSource.gameObject.SetActive(false);
             }
 
+            // UI 操作音のプレイヤーとしてコンテナを登録する。
             _player = _soundEffectSource;
             _moduleContainer = new UISoundEffectModuleContainer(_player);
             if (!ServiceLocator.RegisterInstance(_moduleContainer))

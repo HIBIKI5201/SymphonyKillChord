@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
     /// </summary>
     public class InputTimestampProvider
     {
+        /// <summary>
+        ///     タイムスケールの影響を受けない現在時刻を返す。
+        /// </summary>
         public float GetCurrentTimestamp()
         {
             return Time.unscaledTime;

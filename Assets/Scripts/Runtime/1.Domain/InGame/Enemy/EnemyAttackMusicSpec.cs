@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public readonly struct EnemyAttackMusicSpec
     {
+        /// <summary>
+        ///     遭遇時と戦闘時の攻撃タイミングを指定して生成する。
+        /// </summary>
         public EnemyAttackMusicSpec(MusicSyncSpec encounterTiming, MusicSyncSpec battleTiming)
         {
             EncounterTiming = encounterTiming;

@@ -11,6 +11,10 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// </summary>
     public class ScenarioHandlerRepo
     {
+        /// <summary>
+        ///     イベントの型に対応するハンドラーを登録する。
+        ///     同じ型が登録済みの場合は上書きする。
+        /// </summary>
         public void Register<TEvent>(Func<TEvent, CancellationToken, ValueTask> handler)
             where TEvent : IScenarioEvent
         {

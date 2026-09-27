@@ -13,6 +13,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Resource
     [CreateAssetMenu(
         fileName = nameof(GameResourceDefinitionRepository),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "Resource/" + nameof(GameResourceDefinitionRepository))]
+    /// <summary>
+    ///     ゲーム内リソースの定義を ID で検索するリポジトリ。
+    /// </summary>
     public sealed class GameResourceDefinitionRepository
         : ScriptableObjectRepositoryBase<GameResourceId, GameResourceDefinitionAsset, GameResourceDefinitionAsset>,
             IGameResourceDefinitionRepository

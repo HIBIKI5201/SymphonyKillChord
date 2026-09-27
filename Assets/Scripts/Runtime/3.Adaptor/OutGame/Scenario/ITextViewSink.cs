@@ -5,6 +5,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface ITextViewSink
     {
+        /// <summary>
+        ///     テキストの表示内容を反映する。
+        /// </summary>
         void SetText(in ScenarioTextViewDTO dto);
     }
 }

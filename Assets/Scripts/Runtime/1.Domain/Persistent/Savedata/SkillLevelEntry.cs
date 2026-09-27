@@ -35,7 +35,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             _level = level;
         }
 
-        [SerializeField] private int _skillId;
-        [SerializeField] private int _level;
+        [SerializeField, Tooltip("スキル ID。")] private int _skillId;
+        [SerializeField, Tooltip("スキルレベル。")] private int _level;
     }
 }

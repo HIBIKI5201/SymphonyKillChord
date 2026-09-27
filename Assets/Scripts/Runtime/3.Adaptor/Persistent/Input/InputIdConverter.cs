@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
     /// </summary>
     public static class InputIdConverter
     {
+        /// <summary>
+        ///     入力アクションの種類を入力アクション ID に変換する。
+        /// </summary>
         public static InputActionId Convert(InputActionKind actionKind)
         {
             InputActionId actionId = actionKind switch

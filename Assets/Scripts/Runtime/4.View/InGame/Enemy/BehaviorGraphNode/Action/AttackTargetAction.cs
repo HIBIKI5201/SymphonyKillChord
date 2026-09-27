@@ -6,6 +6,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Action
 {
+    /// <summary>
+    ///     敵にターゲットへの攻撃を行わせる Behavior Graph のアクションノード。
+    /// </summary>
     [Serializable, GeneratePropertyBag]
     [NodeDescription(name: "AttackTarget", story: "対象を攻撃する [Battle] [State] [Movement]", category: "Action", id: "611c230a6a1f2c1d944d9d2cf1c3a297")]
     public partial class AttackTargetAction : Unity.Behavior.Action

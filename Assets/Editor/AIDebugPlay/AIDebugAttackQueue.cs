@@ -17,6 +17,9 @@ namespace KillChord.Editor.AIDebugPlay
     [InitializeOnLoad]
     public static class AIDebugAttackQueue
     {
+        /// <summary>
+        ///     PlayMode 変更とアセンブリリロードのイベントを購読する。
+        /// </summary>
         static AIDebugAttackQueue()
         {
             EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
@@ -33,6 +36,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// <returns> 登録後の状態を表すJSON。 </returns>
         public static string Enqueue(string specification, bool prime = true, string runId = null, double timeoutSeconds = 120d)
         {
+            // 引数と実行状態を検証する。同じ runId の再要求は現在の状態を返す。
             if (runId != null && !Guid.TryParse(runId, out _))
             {
                 return CreateErrorJson("runIdにはUUIDを指定してください。");
@@ -49,6 +53,7 @@ namespace KillChord.Editor.AIDebugPlay
                 return CreateErrorJson("Play Modeで実行してください。");
             }
 
+            // 攻撃指定を解析し、実行中のキューは新しいキューで置き換える。
             if (!TryParseSpecification(specification, out Queue<BeatType> parsedQueue, out string error))
             {
                 return CreateErrorJson(error);
@@ -61,6 +66,7 @@ namespace KillChord.Editor.AIDebugPlay
                 return CreateErrorJson(error);
             }
 
+            // 実行状態を初期化し、解析した攻撃をキューへ積む。
             _runId = runId ?? Guid.NewGuid().ToString();
             _deadline = EditorApplication.timeSinceStartup + timeoutSeconds;
 
@@ -77,9 +83,11 @@ namespace KillChord.Editor.AIDebugPlay
                 ? "基準攻撃の実行待ちです。"
                 : "ジャスト攻撃の実行待ちです。";
 
+            // 攻撃の成立通知と毎フレームの更新を購読する。
             _playerModule.PlayerAttackSignal.OnAttackExecuted += HandleAttackBeatExecuted;
             EditorApplication.update += Update;
 
+            // 基準攻撃を省略する場合は、すぐ最初の攻撃の準備に入る。
             if (!prime)
             {
                 PrepareNextAttack();
@@ -156,6 +164,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         private static void Tick()
         {
+            // PlayMode の終了・期限切れ・サービスの差し替えを検出したら停止する。
             if (!EditorApplication.isPlaying)
             {
                 CancelInternal("Play Modeが終了しました。");
@@ -180,6 +189,7 @@ namespace KillChord.Editor.AIDebugPlay
                 return;
             }
 
+            // 前フレームで押した攻撃入力を離す。離すまでは次の処理に進まない。
             if (_isPressHeld && Time.frameCount > _pressFrame)
             {
                 ReleaseAttackInput();
@@ -190,6 +200,7 @@ namespace KillChord.Editor.AIDebugPlay
                 return;
             }
 
+            // 入力を離した後に、完了または次の攻撃の準備を行う。
             if (_shouldFinishAfterRelease)
             {
                 Complete();
@@ -202,6 +213,7 @@ namespace KillChord.Editor.AIDebugPlay
                 PrepareNextAttack();
             }
 
+            // 攻撃の成立通知を待っている間は、タイムアウトだけを確認する。
             if (_isAwaitingAttackResult)
             {
                 if (EditorApplication.timeSinceStartup - _attackRequestedAt > ATTACK_RESULT_TIMEOUT_SECONDS)
@@ -212,6 +224,7 @@ namespace KillChord.Editor.AIDebugPlay
                 return;
             }
 
+            // 基準攻撃は拍の位置を問わず、入力できる状態になったらすぐ入力する。
             if (_isPriming)
             {
                 if (CanInjectAttack())
@@ -231,6 +244,7 @@ namespace KillChord.Editor.AIDebugPlay
                 return;
             }
 
+            // ジャスト範囲の中央に達したら、期待した判定になることを確かめてから入力する。
             float progress = _musicSyncService.GetBarProgressUnclamped();
             if (progress >= _currentRange.JustEndNormalized)
             {
@@ -463,6 +477,7 @@ namespace KillChord.Editor.AIDebugPlay
                 return false;
             }
 
+            // 「種類:回数」をカンマ区切りで読み、回数分だけキューへ積む。
             string[] entries = specification.Split(',', StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < entries.Length; i++)
             {
@@ -503,6 +518,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// <returns> 変換できた場合はtrue。 </returns>
         private static bool TryParseBeatType(string value, out BeatType beatType)
         {
+            // 英名・和名・数字のどの表記でも受け付ける。
             string normalized = value.Trim().ToLowerInvariant();
             switch (normalized)
             {
@@ -641,6 +657,9 @@ namespace KillChord.Editor.AIDebugPlay
             return AIDebugJson.Serialize(AIDebugJson.Object(("success", false), ("state", "Rejected"), ("message", message)));
         }
 
+        /// <summary>
+        ///     攻撃キューの処理状態。
+        /// </summary>
         private enum QueueState
         {
             Idle,

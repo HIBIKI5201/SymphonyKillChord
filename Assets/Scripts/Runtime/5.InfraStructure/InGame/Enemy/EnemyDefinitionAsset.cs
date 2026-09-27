@@ -12,6 +12,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
     [CreateAssetMenu(
         fileName = nameof(EnemyDefinitionAsset),
         menuName = "KillChord/Enemy/" + nameof(EnemyDefinitionAsset))]
+    /// <summary>
+    ///     敵の能力値などを定義するデータ。
+    /// </summary>
     public sealed class EnemyDefinitionAsset : ScriptableObject
     {
         /// <summary> 敵定義IDです。 </summary>

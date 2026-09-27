@@ -5,6 +5,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface IBackgroundViewSink
     {
+        /// <summary>
+        ///     指定した背景を表示に反映する。
+        /// </summary>
         void SetBackground(string assetKey);
     }
 }

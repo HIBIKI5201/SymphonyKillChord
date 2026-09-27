@@ -72,8 +72,10 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         [Tooltip("スキルノード定義Asset一覧です。")]
         private SkillNodeData[] _skillNodes;
 
+        /// <inheritdoc/>
         protected override IReadOnlyList<SkillNodeData> GetEntries() => _skillNodes;
 
+        /// <inheritdoc/>
         protected override bool TryBuild(SkillNodeData entry, out SkillNodeId id, out SkillNodeData value)
         {
             id = entry.NodeId;

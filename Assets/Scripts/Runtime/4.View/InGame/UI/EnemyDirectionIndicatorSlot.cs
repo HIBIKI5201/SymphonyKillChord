@@ -29,11 +29,13 @@ namespace KillChord.Runtime.View.InGame.UI
                 throw new ArgumentNullException(nameof(renderers));
             }
 
+            // 参照を保持し、Renderer ごとの Material の状態を記録する領域を用意する。
             GameObject = gameObject;
             Transform = gameObject.transform;
             _renderers = renderers;
             _materialStates = new RendererMaterialState[renderers.Length][];
 
+            // 各 Material について、透明度を変えるための色のプロパティと元の色を記録する。
             for (int i = 0; i < renderers.Length; i++)
             {
                 Renderer renderer = renderers[i];

@@ -5,12 +5,18 @@ using UnityEngine.UIElements;
 
 namespace KillChord.Runtime.View.OutGame.Setting
 {
+    /// <summary>
+    ///     画面設定の項目を生成するための設定データ。
+    /// </summary>
     [CreateAssetMenu(menuName = "KillChord/Settings/Screen")]
     public class ScreenConfig : ScriptableObject
     {
-        [SerializeField] private SettingDropDown _dropDownPrefab;
-        [SerializeField] private SettingToggle _togglePrefab;
+        [SerializeField, Tooltip("ドロップダウン項目のプレハブ。")] private SettingDropDown _dropDownPrefab;
+        [SerializeField, Tooltip("トグル項目のプレハブ。")] private SettingToggle _togglePrefab;
 
+        /// <summary>
+        ///     解像度・画面モード・垂直同期の設定項目を生成する。
+        /// </summary>
         public void Build(UIDocument document, ScreenSettingData model)
         {
             CreateDropDown(document,
@@ -29,6 +35,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 value => model.IsVSync = value);
         }
 
+        /// <summary>
+        ///     ドロップダウンの設定項目を生成して値と結びつける。
+        /// </summary>
         private void CreateDropDown(
             UIDocument document,
             string title,
@@ -41,6 +50,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
             dropDown.Bind(getter, setter);
         }
 
+        /// <summary>
+        ///     トグルの設定項目を生成して値と結びつける。
+        /// </summary>
         private void CreateToggle(
             UIDocument document,
             string title,

@@ -11,6 +11,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     public class HitCountDamageReductionBuff :
         StatusEffectBase, IIncomingDamageModifier, IDamageTakenHandler, IConsumableStatusEffect
     {
+        /// <summary>
+        ///     被ダメージの軽減率・有効な被弾回数・再付与時の扱いを指定して生成する。
+        /// </summary>
         public HitCountDamageReductionBuff(
             float reductionRate,
             int hitCount,

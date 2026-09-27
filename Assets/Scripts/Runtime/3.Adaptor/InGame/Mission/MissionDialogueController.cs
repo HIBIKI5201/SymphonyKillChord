@@ -13,6 +13,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public sealed class MissionDialogueController : IMissionStepEntryActionExecutor, IDisposable
     {
+        /// <summary>
+        ///     ミッション・ポーズ制御・ボイス・表示の出力先を指定して生成する。
+        /// </summary>
         public MissionDialogueController(MissionRuntimeService mission, BattlePauseController pause,
             IControllableVoiceSource voice, MissionDialoguePresenter presenter)
         {

@@ -301,6 +301,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         public override void Shutdown()
         {
+            // 購読とルート要素の操作の登録を解除する。
             Unsubscribe();
             ServiceLocator.UnregisterInstance<SkillTreeStatusEntity>();
             if (_rootElement != null)
@@ -310,12 +311,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _rootElement.UnregisterCallback<NavigationMoveEvent>(
                     HandleSkillNodeNavigationMoveHandler, TrickleDown.TrickleDown);
             }
+            // ダイアログの状態を戻し、生成したコンポーネントを破棄する。
             _isSkillDetailOpen = false;
             _isUnlockConfirmOpen = false;
             _skipUnlockConfirmation = false;
             DisposeComponents();
             CancelAndDisposeCts();
 
+            // 読み込んだアセットを解放し、参照を消す。
             _skillNodeDataRepoKey.ReleaseLoadedAsset(this);
             _skillNodeBindRepoKey.ReleaseLoadedAsset(this);
             _skillNodePhaseBindRepoKey.ReleaseLoadedAsset(this);
@@ -612,6 +615,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void BuildSkillNodes()
         {
+            // UI のノードごとに、対応するデータからエンティティとビューを作る。
             List<Button> nodes = _rootElement.Query<Button>(className: UssClassNameConstants.USS_CLASS_SKILL_NODE).ToList();
             _skillNodeEntities = new();
             _skillNodeViews = new();
@@ -637,6 +641,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillNodeElements.Add(nodeData.NodeId.Id, nodes[i]);
             }
 
+            // 各ノードの親ノードを設定する。
             foreach (SkillNodeEntity entity in _skillNodeEntities.Values)
             {
                 SkillNodeData data = _loadedSkillNodeDataRepo.FindNodeData(entity.SkillNodeIdVO);
@@ -656,6 +661,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 entity.SetParent(parents);
             }
 
+            // ノード間の隣接関係と、最初にフォーカスするノードを決める。
             _skillNodeElementList = new List<VisualElement>(_skillNodeElements.Values);
             BuildSkillNodeAdjacency();
             MarkInitialFocusNode();
@@ -1009,6 +1015,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void DisposeComponents()
         {
+            // ビューのイベントを解除し、各画面を破棄する。
             if (_skillTreeScreenView != null && _skillTreeController != null)
             {
                 _skillTreeScreenView.OnListSeparatorChanged -= _skillTreeController.RefreshSelectedText;
@@ -1034,6 +1041,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _playerStatusPresenter = null;
             _skillTreeFocusPresenter = null;
 
+            // ノードのビューを破棄し、ノードの情報を消す。
             if (_skillNodeViews != null)
             {
                 foreach (ISkillNodeViewModel skillNodeViewModel in _skillNodeViews.Values)
@@ -1631,6 +1639,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private async void HandleSkillTreeResetConfirmed()
         {
+            // 実行中は二重に押されないよう、ダイアログの操作を止める。
             SkillTreeResetDialogView dialogView = _skillTreeResetDialogView;
             SkillTreeController controller = _skillTreeController;
             if (dialogView == null || controller == null || _cts == null)
@@ -1640,6 +1649,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
 
             dialogView.SetInteractionEnabled(false);
             bool isSucceeded;
+            // リセットを行い、ダイアログがそのままであれば操作を戻す。
             try
             {
                 isSucceeded = await controller.ResetSkillTreeAsync(_cts.Token);
@@ -1652,6 +1662,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 }
             }
 
+            // 成功した場合は、ダイアログと詳細を閉じて初期表示に戻す。
             if (!_isInitialized || !isSucceeded || !ReferenceEquals(dialogView, _skillTreeResetDialogView))
             {
                 return;

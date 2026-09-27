@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public sealed class EnemyTripleShotAttackController : IEnemyAttackController
     {
+        /// <summary>
+        ///     3連射攻撃のユースケースと戦闘状態を指定して生成する。
+        /// </summary>
         public EnemyTripleShotAttackController(
             EnemyTripleShotAttackUsecase enemyAttackUsecase,
             EnemyBattleState enemyBattleState)

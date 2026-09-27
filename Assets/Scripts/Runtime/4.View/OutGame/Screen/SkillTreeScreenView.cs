@@ -61,6 +61,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             return base.Show(cancellationToken);
         }
 
+        /// <summary>
+        ///     ローカライズ文言の購読と表示中の要素を破棄する。
+        /// </summary>
         public override void Dispose()
         {
             _listSeparatorLocalizedText.Dispose();
