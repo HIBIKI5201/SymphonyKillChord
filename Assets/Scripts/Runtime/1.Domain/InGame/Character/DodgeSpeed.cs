@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     回避速度を表すVO。
     /// </summary>
-    public readonly struct DodgeSpeed
+    public readonly struct DodgeSpeed : IEquatable<DodgeSpeed>
     {
         /// <summary>
         ///     回避速度を初期化するコンストラクタ。

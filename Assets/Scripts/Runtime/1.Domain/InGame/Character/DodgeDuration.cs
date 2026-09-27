@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     回避の持続時間を表すVO。
     /// </summary>
-    public readonly struct DodgeDuration
+    public readonly struct DodgeDuration : IEquatable<DodgeDuration>
     {
         /// <summary>
         ///     回避の持続時間を初期化するコンストラクタ。

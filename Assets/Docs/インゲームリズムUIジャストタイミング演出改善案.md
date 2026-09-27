@@ -3,7 +3,7 @@
 - 作成日: 2026-07-20
 - 対象: インゲーム戦闘中のリズムガイドUI（`ACLikeRhythmGuideView`）における、ジャストタイミングの視認性改善
 - 前提: 本ドキュメントは演出案の検討メモであり、実装計画ではない。実装方針・優先度は別途検討のうえ決定する。
-- 参照元: `Docs/G-Lab`配下のAI解析レポート（Vitia UXレビュー）における「action_feedback_traceable」「色や単一チャネルへの依存回避」の指摘を、本UIの実装調査と突き合わせて整理した。
+- 参照元: `Docs/agent/analysis/omnipotens/2026-07-18_symphony-kill-chord/`配下のAI解析レポート（旧 `Docs/G-Lab`）（Vitia UXレビュー）における「action_feedback_traceable」「色や単一チャネルへの依存回避」の指摘を、本UIの実装調査と突き合わせて整理した。
 
 ---
 
@@ -57,5 +57,5 @@ float targetSizeDelta = isJustTiming ? _justTimingSizeDelta : _inTimingSizeDelta
 
 ## 5. 関連ドキュメント
 
-- `Docs/G-Lab/Symphony Kill Chord-Spec/spec/plan/10-ux-review.md`（Vitia UXレビュー。action_feedback_traceabilityの弱さ、multimodal HUDの必要性を指摘）
-- `Docs/G-Lab/Symphony Kill Chord-Spec/spec/data/vitia-game-experience-audit.json`（4レンズ監査の定量データ）
+- `Docs/agent/analysis/omnipotens/2026-07-18_symphony-kill-chord/spec/plan/10-ux-review.md`（Vitia UXレビュー。action_feedback_traceabilityの弱さ、multimodal HUDの必要性を指摘）
+- `Docs/agent/analysis/omnipotens/2026-07-18_symphony-kill-chord/spec/data/vitia-game-experience-audit.json`（4レンズ監査の定量データ）

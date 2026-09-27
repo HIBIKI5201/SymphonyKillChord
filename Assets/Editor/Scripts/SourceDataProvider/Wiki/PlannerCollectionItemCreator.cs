@@ -51,16 +51,16 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <summary>
         ///     ScriptableObjectを生成してCollectionへ登録します。
         /// </summary>
-        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
+        /// <param name="dataAsset"> Collectionを保持するDataAssetです。 </param>
         /// <param name="mapping"> Collection設定です。 </param>
-        /// <param name="serializedObject"> SourceAssetのSerializedObjectです。 </param>
+        /// <param name="serializedObject"> DataAssetのSerializedObjectです。 </param>
         /// <param name="collectionProperty"> Collectionプロパティです。 </param>
         /// <param name="assetType"> 生成するScriptableObject型です。 </param>
         /// <param name="createdAsset"> 生成したアセットです。 </param>
         /// <param name="errorMessage"> 生成できなかった理由です。 </param>
         /// <returns> 作成と登録に成功した場合はtrueです。 </returns>
         public static bool TryCreateAsset(
-            ScriptableObject sourceAsset,
+            ScriptableObject dataAsset,
             SourceDataProviderSettings.SourceCollectionMapping mapping,
             SerializedObject serializedObject,
             SerializedProperty collectionProperty,
@@ -71,7 +71,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             createdAsset = null;
             // 作成先のフォルダと型を検証する。
             string directory = ResolveVariantCreationDirectory(
-                sourceAsset,
+                dataAsset,
                 mapping.AssetCreationDirectory);
             if (!ValidateAssetCreation(directory, collectionProperty, assetType, out errorMessage))
             {
@@ -86,7 +86,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             createdAsset.name = System.IO.Path.GetFileNameWithoutExtension(assetPath);
 
             // 元に戻せるよう Undo に記録してから作成する。
-            Undo.RecordObject(sourceAsset, "Collectionへデータを追加");
+            Undo.RecordObject(dataAsset, "Collectionへデータを追加");
             AssetDatabase.CreateAsset(createdAsset, assetPath);
             Undo.RegisterCreatedObjectUndo(createdAsset, "Collectionデータを作成");
 
@@ -98,8 +98,8 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             serializedObject.ApplyModifiedProperties();
 
             // 元アセットと新しいアセットを保存する。
-            EditorUtility.SetDirty(sourceAsset);
-            AssetDatabase.SaveAssetIfDirty(sourceAsset);
+            EditorUtility.SetDirty(dataAsset);
+            AssetDatabase.SaveAssetIfDirty(dataAsset);
             AssetDatabase.SaveAssetIfDirty(createdAsset);
             errorMessage = string.Empty;
             return true;
@@ -108,33 +108,33 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// <summary>
         ///     インラインCollectionへ既定値の要素を追加します。
         /// </summary>
-        /// <param name="sourceAsset"> Collectionを保持するSourceAssetです。 </param>
-        /// <param name="serializedObject"> SourceAssetのSerializedObjectです。 </param>
+        /// <param name="dataAsset"> Collectionを保持するDataAssetです。 </param>
+        /// <param name="serializedObject"> DataAssetのSerializedObjectです。 </param>
         /// <param name="collectionProperty"> Collectionプロパティです。 </param>
         /// <param name="elementType"> Collectionの要素型です。 </param>
         /// <param name="errorMessage"> 追加できなかった理由です。 </param>
         /// <returns> 追加に成功した場合はtrueです。 </returns>
         public static bool TryAddInlineItem(
-            ScriptableObject sourceAsset,
+            ScriptableObject dataAsset,
             SerializedObject serializedObject,
             SerializedProperty collectionProperty,
             Type elementType,
             out string errorMessage)
         {
-            if (sourceAsset == null || collectionProperty == null || !collectionProperty.isArray)
+            if (dataAsset == null || collectionProperty == null || !collectionProperty.isArray)
             {
                 errorMessage = "Collectionプロパティを解決できません。";
                 return false;
             }
 
-            Undo.RecordObject(sourceAsset, "Collectionへデータを追加");
+            Undo.RecordObject(dataAsset, "Collectionへデータを追加");
             int newIndex = collectionProperty.arraySize;
             collectionProperty.InsertArrayElementAtIndex(newIndex);
             SerializedProperty newElement = collectionProperty.GetArrayElementAtIndex(newIndex);
             TryResetInlineValue(newElement, elementType);
             serializedObject.ApplyModifiedProperties();
-            EditorUtility.SetDirty(sourceAsset);
-            AssetDatabase.SaveAssetIfDirty(sourceAsset);
+            EditorUtility.SetDirty(dataAsset);
+            AssetDatabase.SaveAssetIfDirty(dataAsset);
             errorMessage = string.Empty;
             return true;
         }
@@ -189,7 +189,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         ///     Demo編集中はMaster側の生成先を同じ相対構造のDemoフォルダーへ切り替えます。
         /// </summary>
         private static string ResolveVariantCreationDirectory(
-            ScriptableObject sourceAsset,
+            ScriptableObject dataAsset,
             string configuredDirectory)
         {
             if (string.IsNullOrWhiteSpace(configuredDirectory))
@@ -204,7 +204,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 .Replace(VARIANT_TOKEN, variantDirectoryName)
                 .Replace('\\', '/')
                 .TrimEnd('/');
-            string sourcePath = AssetDatabase.GetAssetPath(sourceAsset).Replace('\\', '/');
+            string sourcePath = AssetDatabase.GetAssetPath(dataAsset).Replace('\\', '/');
             if (GameDataVariantEditorState.SelectedVariant == GameDataVariant.Demo
                 && sourcePath.StartsWith(DEMO_DATA_ROOT, StringComparison.Ordinal)
                 && directory.StartsWith(RELEASE_DATA_ROOT, StringComparison.Ordinal))
