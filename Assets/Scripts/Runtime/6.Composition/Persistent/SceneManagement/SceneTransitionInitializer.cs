@@ -111,7 +111,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
             _sceneTransitionService = new SceneTransitionService();
             _sceneInitializationReadiness = new SceneInitializationReadinessRegistry(
                 _sceneInitializationTimeoutFrameCount);
-            _sceneTransitionUsecase = new SceneTransitionUsecase(
+            _sceneTransitionUsecase = new SceneTransitionUseCase(
                 _sceneTransitionService,
                 _loadingOperationExecutor,
                 _sceneInitializationReadiness);
@@ -184,10 +184,10 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 ServiceLocator.UnregisterInstance<SceneTransitionController>();
             }
 
-            if (ServiceLocator.TryGetInstance(out SceneTransitionUsecase registeredUsecase)
+            if (ServiceLocator.TryGetInstance(out SceneTransitionUseCase registeredUsecase)
                 && ReferenceEquals(registeredUsecase, _sceneTransitionUsecase))
             {
-                ServiceLocator.UnregisterInstance<SceneTransitionUsecase>();
+                ServiceLocator.UnregisterInstance<SceneTransitionUseCase>();
             }
 
             if (ServiceLocator.TryGetInstance<ISceneTransitionService>(out var registeredService)
@@ -256,7 +256,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
         private ILoadingOperationExecutor _loadingOperationExecutor;
         private ISceneTransitionService _sceneTransitionService;
         private ISceneInitializationReadiness _sceneInitializationReadiness;
-        private SceneTransitionUsecase _sceneTransitionUsecase;
+        private SceneTransitionUseCase _sceneTransitionUsecase;
         private SceneTransitionController _sceneTransitionController;
         private bool _ownsRegistrations;
         private CancellationTokenSource _persistentLifetimeCancellation;

@@ -67,7 +67,7 @@ graph TD
     end
 
     subgraph SceneManagementModule [Persistent/SceneManagement モジュール]
-        SM_App["Application<br>SceneTransitionUsecase"]
+        SM_App["Application<br>SceneTransitionUseCase"]
     end
 
     %% 依存関係
@@ -86,7 +86,7 @@ graph TD
   * *依存箇所*: `SelectedScenarioState`
   * *詳細*: シナリオステージの場合、再生するシナリオIDを設定する
 * **`Persistent/SceneManagement`**
-  * *依存箇所*: `SceneTransitionUsecase`
+  * *依存箇所*: `SceneTransitionUseCase`
   * *詳細*: シナリオ再生や出撃に伴うシーン遷移に使用する
 
 ### 📤 依存されているもの
@@ -139,7 +139,7 @@ sequenceDiagram
     participant Ctrl as OutGameSortieController
     participant UseCase as OutGameSortieUseCase
     participant Port as OutGameSortieOutputPort
-    participant Scene as SceneTransitionUsecase
+    participant Scene as SceneTransitionUseCase
 
     Player ->> Detail: 出撃ボタン
     Detail ->> Ctrl: RequestSortieAsync
@@ -162,7 +162,7 @@ sequenceDiagram
     autonumber
     participant Scenario as シナリオ再生完了
     participant UseCase as OutGameSortieUseCase
-    participant Scene as SceneTransitionUsecase
+    participant Scene as SceneTransitionUseCase
     participant Port as OutGameSortieOutputPort
 
     Scenario ->> UseCase: ReturnFromScenarioAsync

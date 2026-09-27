@@ -8,8 +8,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     /// <summary>
     ///     スキルノードに対応するデータを纏めたリポジトリー。
     /// </summary>
-    [CreateAssetMenu(fileName = "SkillNodeBindRepo", menuName = "SymphonyDev/SkillTree/SkillNodeBindRepo")]
-    public class SkillNodeBindRepo : ScriptableObjectRepositoryBase<SkillNodeId, SkillNodeBindData, SkillNodeBindData>
+    [CreateAssetMenu(fileName = "SkillNodeBindRepository", menuName = "SymphonyDev/SkillTree/SkillNodeBindRepository")]
+    public class SkillNodeBindRepository : ScriptableObjectRepositoryBase<SkillNodeId, SkillNodeBindData, SkillNodeBindData>
     {
         public SkillNodeBindData[] SkillNodeBinds;
 

@@ -3,18 +3,21 @@ using KillChord.Runtime.Domain.InGame.Mission;
 namespace KillChord.Runtime.Application.InGame.Mission
 {
     /// <summary>
-    ///     経過時間を進めるユースケースクラス。
+    ///     プレイヤーの死亡イベントを処理するユースケース。
     /// </summary>
-    public class MissionTimeAdvanceUsecase
+    public class MissionPlayerDeadUseCase
     {
         /// <summary>
         ///     ユースケースを実行します。
         /// </summary>
         /// <param name="progress">進行状況。</param>
-        /// <param name="deltaTime">経過時間。</param>
-        public void Execute(MissionProgress progress, float deltaTime)
+        public void Execute(MissionProgress progress)
         {
-            progress.AdvanceTime(deltaTime);
+            if (progress.IsFinished)
+            {
+                return;
+            }
+            progress.MarkPlayerDead();
         }
     }
 }

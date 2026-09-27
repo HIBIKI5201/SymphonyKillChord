@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
         ///     常駐寿命と初期化待機上限を指定して生成します。
         /// </summary>
         public SceneTransitionController(
-            SceneTransitionUsecase usecase,
+            SceneTransitionUseCase usecase,
             CancellationToken persistentLifetimeToken = default,
             int maxWaitFrameCount = DEFAULT_MAX_WAIT_FRAME_COUNT)
         {
@@ -245,7 +245,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
 
         private const int DEFAULT_MAX_WAIT_FRAME_COUNT = 3600;
 
-        private readonly SceneTransitionUsecase _useCase;
+        private readonly SceneTransitionUseCase _useCase;
         private readonly CancellationToken _persistentLifetimeToken;
         private readonly int _maxWaitFrameCount;
         private bool _isScenarioBattleSortieActive;

@@ -8,14 +8,14 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// <summary>
     /// シナリオ再生の進行と操作状態を管理するユースケース。
     /// </summary>
-    public class ScenarioUsecase : IScenarioEventEmitter, IScenarioPlaybackControl, IScenarioPlaybackState, IScenarioPlaybackService
+    public class ScenarioUseCase : IScenarioEventEmitter, IScenarioPlaybackControl, IScenarioPlaybackState, IScenarioPlaybackService
     {
         /// <summary>
         /// シナリオ再生ユースケースの依存関係を受け取る。
         /// </summary>
-        public ScenarioUsecase(
+        public ScenarioUseCase(
             IScenarioRepository repo,
-            ScenarioHandlerRepo handlerRepo,
+            ScenarioHandlerRepository handlerRepo,
             ITextAdvanceWaiter textAdvanceWaiter,
             IScenarioCompletionNotifier completionNotifier,
             IScenarioAutoAdvanceNotifier autoAdvanceNotifier,
@@ -171,7 +171,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         private TaskCompletionSource<bool> _advanceStateChanged =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly ITextAdvanceWaiter _textAdvanceWaiter;
-        private readonly ScenarioHandlerRepo _handlerRepo;
+        private readonly ScenarioHandlerRepository _handlerRepo;
         private readonly IScenarioRepository _scenarioRepo;
         private readonly IScenarioCompletionNotifier _completionNotifier;
         private readonly IScenarioAutoAdvanceNotifier _autoAdvanceNotifier;

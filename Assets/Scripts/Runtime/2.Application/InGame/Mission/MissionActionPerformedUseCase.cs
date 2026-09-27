@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Application.InGame.Mission
     /// <summary>
     ///     プレイヤー行動の発動を記録するユースケース。
     /// </summary>
-    public class MissionActionPerformedUsecase
+    public class MissionActionPerformedUseCase
     {
         /// <summary>
         ///     ユースケースを実行します。

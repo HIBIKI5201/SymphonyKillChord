@@ -9,8 +9,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
     ///     解放段階と必要スキルノードの紐づきを纏めたリポジトリー。
     ///     必要スキルノードIDで引けるよう、他のリポジトリーと同じく辞書で検索する。
     /// </summary>
-    [CreateAssetMenu(fileName = "SkillNodePhaseBindDataRepo", menuName = "SymphonyDev/SkillTree/SkillNodePhaseBindDataRepo")]
-    public class SkillNodePhaseBindDataRepo : ScriptableObjectRepositoryBase<SkillNodeId, SkillNodePhaseBindData, SkillNodePhaseBindData>
+    [CreateAssetMenu(fileName = "SkillNodePhaseBindDataRepository", menuName = "SymphonyDev/SkillTree/SkillNodePhaseBindDataRepository")]
+    public class SkillNodePhaseBindDataRepository : ScriptableObjectRepositoryBase<SkillNodeId, SkillNodePhaseBindData, SkillNodePhaseBindData>
     {
         public SkillNodePhaseBindData[] PhaseBindData;
 

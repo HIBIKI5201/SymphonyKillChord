@@ -67,9 +67,9 @@ namespace KillChord.Runtime.Composition.InGame.Result
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionUsecase sceneTransitionUsecase))
+            if (!ServiceLocator.TryGetInstance(out SceneTransitionUseCase sceneTransitionUsecase))
             {
-                Debug.LogError($"[{nameof(StageResultInitializationModule)}] {nameof(SceneTransitionUsecase)} が見つかりません。", this);
+                Debug.LogError($"[{nameof(StageResultInitializationModule)}] {nameof(SceneTransitionUseCase)} が見つかりません。", this);
                 return false;
             }
 

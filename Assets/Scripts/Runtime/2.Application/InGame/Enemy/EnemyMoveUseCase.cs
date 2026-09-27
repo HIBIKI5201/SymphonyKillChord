@@ -6,13 +6,13 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// <summary>
     ///     敵の追従移動ロジック。
     /// </summary>
-    public class EnemyMoveUsecase
+    public class EnemyMoveUseCase
     {
         /// <summary>
         ///     敵の移動に関する仕様を受け取るコンストラクタ。
         /// </summary>
         /// <param name="enemyMoveSpec"></param>
-        public EnemyMoveUsecase(EnemyMoveSpec enemyMoveSpec, EnemyRaycastDetectService raycastDetector, NearestAttackPositionSearchService nearestAttackPositionSearcher)
+        public EnemyMoveUseCase(EnemyMoveSpec enemyMoveSpec, EnemyRaycastDetectService raycastDetector, NearestAttackPositionSearchService nearestAttackPositionSearcher)
         {
             _enemyMoveSpec = enemyMoveSpec;
             _raycastDetector = raycastDetector;

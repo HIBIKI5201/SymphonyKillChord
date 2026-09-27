@@ -11,7 +11,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary>
         ///     攻撃のユースケースと戦闘状態を指定して生成する。
         /// </summary>
-        public EnemyInfantryAttackController(EnemyAttackUsecase enemyAttackUsecase, EnemyBattleState enemyBattleState)
+        public EnemyInfantryAttackController(EnemyAttackUseCase enemyAttackUsecase, EnemyBattleState enemyBattleState)
         {
             _enemyAttackUsecase = enemyAttackUsecase;
             _enemyBattleState = enemyBattleState;
@@ -26,7 +26,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 _enemyBattleState.Attacker,
                 _enemyBattleState.Target);
         }
-        private EnemyAttackUsecase _enemyAttackUsecase;
+        private EnemyAttackUseCase _enemyAttackUsecase;
         private EnemyBattleState _enemyBattleState;
     }
 }

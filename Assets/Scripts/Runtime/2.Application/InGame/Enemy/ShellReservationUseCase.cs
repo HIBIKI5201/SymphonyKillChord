@@ -10,13 +10,13 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// <summary>
     ///     砲弾の爆発予約処理。
     /// </summary>
-    public class ShellReservationUsecase : IDisposable
+    public class ShellReservationUseCase : IDisposable
     {
         /// <summary>
         ///     砲弾のエンティティと拍のスケジューラーを指定して生成する。
         ///     エンティティが null の場合は例外を投げる。
         /// </summary>
-        public ShellReservationUsecase(ShellEntity entity, IMusicActionScheduler musicActionScheduler)
+        public ShellReservationUseCase(ShellEntity entity, IMusicActionScheduler musicActionScheduler)
         {
             if(entity == null)
             {
@@ -92,7 +92,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         ///     着弾予告（デカールの変化開始）タイミングを予約する。
         ///     デカール側の進捗演出（ShellLifeCycle.GetDetonateApproach）が0から動き出す瞬間と
         ///     完全に同じ拍になるよう、爆発予約と同じ拍数（ShellMusicConstants.DETONATE_LEAD_BEAT_COUNT）
-        ///     だけ遡ったタイミングを使う。スケジューリング処理自体はEnemyAttackReservationUsecaseと
+        ///     だけ遡ったタイミングを使う。スケジューリング処理自体はEnemyAttackReservationUseCaseと
         ///     共通のLeadNotificationSchedulerに委譲する。
         /// </summary>
         /// <param name="musicSpec"> 爆発本体のタイミング。 </param>

@@ -25,8 +25,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <param name="patterns"> ボスが使用する攻撃パターン群（通常1/通常2/特殊1等）。 </param>
         public BossAIController(
             IDefender entity,
-            EnemyMoveUsecase enemyMoveUsecase,
-            BossAttackReservationUsecase reservationUsecase,
+            EnemyMoveUseCase enemyMoveUsecase,
+            BossAttackReservationUseCase reservationUsecase,
             EnemyBattleState enemyBattleState,
             IEnemyStateFacade stateFacade,
             Dictionary<Type, IRaycastDetectView> raycastViews,
@@ -223,8 +223,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private const float LOW_HP_EVENT_TRIGGER_RATIO = 0.5f;
 
         private readonly IDefender _entity;
-        private readonly EnemyMoveUsecase _enemyMoveUsecase;
-        private readonly BossAttackReservationUsecase _reservationUsecase;
+        private readonly EnemyMoveUseCase _enemyMoveUsecase;
+        private readonly BossAttackReservationUseCase _reservationUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
         private readonly IReadOnlyList<BossAttackPattern> _patterns;

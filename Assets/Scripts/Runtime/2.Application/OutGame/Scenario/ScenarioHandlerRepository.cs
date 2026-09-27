@@ -9,7 +9,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// <summary>
     /// シナリオイベントの型に応じて処理ハンドラを管理する。
     /// </summary>
-    public class ScenarioHandlerRepo
+    public class ScenarioHandlerRepository
     {
         /// <summary>
         ///     イベントの型に対応するハンドラーを登録する。

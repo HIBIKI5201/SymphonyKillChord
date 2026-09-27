@@ -1,5 +1,4 @@
 using KillChord.Runtime.Application.InGame.Battle;
-using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
@@ -7,15 +6,15 @@ using UnityEngine;
 namespace KillChord.Runtime.Application.InGame.Enemy
 {
     /// <summary>
-    ///     敵の攻撃を実行するユースケースクラス。
+    ///     敵の3方向攻撃のUsecaseクラス。
     /// </summary>
-    public class EnemyAttackUsecase
+    public class EnemyTripleShotAttackUseCase
     {
         /// <summary>
-        ///     敵の攻撃を実行するユースケースクラスのインスタンスを生成する。
+        ///     コンストラクター。
         /// </summary>
         /// <param name="raycastDectector"></param>
-        public EnemyAttackUsecase(EnemyRaycastDetectService raycastDectector)
+        public EnemyTripleShotAttackUseCase(EnemyRaycastDetectService raycastDectector)
         {
             _raycastDetector = raycastDectector;
         }
@@ -35,17 +34,17 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         {
             if (attackDefinition == null)
             {
-                Debug.LogError("[EnemyAttackUsecase] attackDefinition is null");
+                Debug.LogError("[EnemyTripleShotAttackUseCase] attackDefinition is null");
                 return;
             }
 
-            DevLog.Log($"[EnemyAttackUsecase] ExecuteAttack 開始 Attack={attackDefinition?.AttackName}");
+            DevLog.Log($"[EnemyTripleShotAttackUseCase] ExecuteAttack 開始 Attack={attackDefinition?.AttackName}");
 
             if (_raycastDetector.CanRaycastHitTarget)
             {
                 AttackResult result = AttackExecutor.Execute(
                     attackDefinition, attacker, defender, false, attacker.BaseDamage);
-                DevLog.Log($"[EnemyAttackUsecase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
+                DevLog.Log($"[EnemyTripleShotAttackUseCase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
             }
         }
         private readonly EnemyRaycastDetectService _raycastDetector;

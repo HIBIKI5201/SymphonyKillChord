@@ -24,13 +24,13 @@
 | **`EnemyAttackMusicSpec`** | Domain | 敵の攻撃に関する音楽同期のタイミング情報 |
 | **`ShellEntity`** / **`ShellAttackSpec`** | Domain | 砲弾のEntityと、砲弾固有の攻撃パラメータ |
 | **`BossAttackKind`** | Domain | ボスの攻撃種別 |
-| **`EnemyMoveUsecase`** | Application | 移動方向の算出とレイキャストによる衝突回避 |
-| **`EnemyAttackUsecase`** / **`EnemyAttackReservationUsecase`** | Application | 攻撃の実行と、ビートに同期した攻撃予約 |
-| **`ShellAttackUsecase`** / **`ShellReservationUsecase`** | Application | 砲弾の攻撃処理と、爆発の予約 |
-| **`BossAttackReservationUsecase`** / **`EnemyTripleShotAttackUsecase`** | Application | ボス専用の攻撃予約と、3方向攻撃 |
+| **`EnemyMoveUseCase`** | Application | 移動方向の算出とレイキャストによる衝突回避 |
+| **`EnemyAttackUseCase`** / **`EnemyAttackReservationUseCase`** | Application | 攻撃の実行と、ビートに同期した攻撃予約 |
+| **`ShellAttackUseCase`** / **`ShellReservationUseCase`** | Application | 砲弾の攻撃処理と、爆発の予約 |
+| **`BossAttackReservationUseCase`** / **`EnemyTripleShotAttackUseCase`** | Application | ボス専用の攻撃予約と、3方向攻撃 |
 | **`EnemyRaycastDetectService`** | Application | 索敵・壁検知のレイキャスト |
 | **`NearestAttackPositionSearchService`** | Application | プレイヤーへ接近する際の最適な攻撃座標を探索 |
-| **`EnemyPostAttackBehaviorUsecase`** | Application | 攻撃後の行動（再攻撃/味方合流/障害物接近）を重み抽選で決定し、合流・接近の場合は上書き移動先を算出する |
+| **`EnemyPostAttackBehaviorUseCase`** | Application | 攻撃後の行動（再攻撃/味方合流/障害物接近）を重み抽選で決定し、合流・接近の場合は上書き移動先を算出する |
 | **`ObstacleSearchService`** | Application | 最も近い障害物の位置検索を`IObstacleSearchRepository`へ委譲する |
 | **`IEnemyWaveDefinitionRepository`** / **`IEnemyRaycastDetectRepository`** / **`INearestAttackPositionSearchRepository`** / **`IObstacleSearchRepository`** | Application | 各種リポジトリ境界 |
 | **`EnemyAIController`** | Adaptor | AIの状態管理と、移動・攻撃予約への仲介 |
@@ -62,7 +62,7 @@
 | **`EnemyDefinitionAsset`** / **`EnemyDefinitionRepository`** / **`EnemyFactory`** | Infrastructure | 敵定義アセットの保持・検索と、そこからのDomain生成 |
 | **`EnemyWaveDefinitionAsset`** / **`EnemyWaveDefinitionRepository`** | Infrastructure | Wave定義アセットとID検索 |
 | **`EnemyMoveSpecAsset`** / **`EnemyMusicSpecAsset`** / **`ShellAttackSpecAsset`** / **`ShellFactory`** | Infrastructure | 移動・音楽同期・砲弾パラメータのアセットと生成 |
-| **`BossAttackEntryAsset`** / **`BossAttackEntryRepo`** | Infrastructure | ボスの攻撃定義アセットとその集合 |
+| **`BossAttackEntryAsset`** / **`BossAttackEntryRepository`** | Infrastructure | ボスの攻撃定義アセットとその集合 |
 | **`EnemyInitializer`** / **`EnemyModuleContainer`** | Composition | 敵まわりの構築とServiceLocatorへの公開（Order 700） |
 | **`EnemyLifeCycle`** / **`BossLifeCycle`** / **`ShellLifeCycle`** | Composition | 敵・ボス・砲弾それぞれの依存構築とライフサイクル管理 |
 | **`EnemySpawnerRouter`** | Composition | 敵定義から処理種別を解決し、対応するスポナーへ生成を委譲する |
@@ -87,7 +87,7 @@
 graph TD
     %% 定義 (接続のないレイヤーは省略)
     subgraph EnemyModule [Enemy モジュール]
-        E_App["Application<br>EnemyMoveUsecase, EnemyAttackReservationUsecase"]
+        E_App["Application<br>EnemyMoveUseCase, EnemyAttackReservationUseCase"]
         E_Adaptor["Adaptor<br>EnemyAIController, EnemyWaveSpawnerState"]
         E_Composition["Composition<br>EnemyInitializer, BossInitializer, EnemyModuleContainer"]
         E_App --> E_Adaptor
@@ -160,7 +160,7 @@ graph TD
 ### ① Domain
 出現敵とウェーブ構成（`EnemyWaveDefinition`）、ウェーブ全体のループ・進行管理（`EnemyWaves`）、移動の意思決定（`EnemyMoveDecision`）を保持する。あわせて敵定義の識別子（`EnemyDefinitionId`）、音楽同期のタイミング（`EnemyAttackMusicSpec`）、砲弾のEntityとパラメータ（`ShellEntity`, `ShellAttackSpec`）も持つ。
 ### ② Application
-索敵、最適な攻撃立ち位置の探索、移動意思決定（`EnemyMoveUsecase`）、およびビートと同期させて2拍前・1拍前・攻撃のタイミングをコールバック処理する「攻撃予約」（`EnemyAttackReservationUsecase`）を実装する。砲弾の攻撃と爆発予約（`ShellAttackUsecase`, `ShellReservationUsecase`）、ボス専用の攻撃予約と3方向攻撃も同層にある。
+索敵、最適な攻撃立ち位置の探索、移動意思決定（`EnemyMoveUseCase`）、およびビートと同期させて2拍前・1拍前・攻撃のタイミングをコールバック処理する「攻撃予約」（`EnemyAttackReservationUseCase`）を実装する。砲弾の攻撃と爆発予約（`ShellAttackUseCase`, `ShellReservationUseCase`）、ボス専用の攻撃予約と3方向攻撃も同層にある。
 ### ③ Adaptor
 AIの状態管理とユースケース連携を担う`EnemyAIController`とボス用の`BossAIController`、戦闘状態（`EnemyBattleState`）、ウェーブ撃破検知と次ウェーブ生成指示を行う`EnemyWaveSpawnerController`/`EnemyWaveSpawnerState`を提供する。BehaviorGraphから敵へ触るための4種のファサード契約（共通・状態・移動・戦闘）と、敵種別ごとの攻撃コントローラーもここに属する。
 ### ④ View
@@ -189,7 +189,7 @@ sequenceDiagram
     autonumber
     participant EView as EnemyView (MonoBehaviour)
     participant EAI as EnemyAIController
-    participant EMoveUC as EnemyMoveUsecase
+    participant EMoveUC as EnemyMoveUseCase
     participant EBState as EnemyBattleState
 
     Note over EView: 毎フレーム of Update ループ
@@ -213,9 +213,9 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant EAI as EnemyAIController
-    participant EResUC as EnemyAttackReservationUsecase
+    participant EResUC as EnemyAttackReservationUseCase
     participant Scheduler as IMusicActionScheduler
-    participant EAttUC as EnemyAttackUsecase
+    participant EAttUC as EnemyAttackUseCase
 
     EAI ->> EResUC: 攻撃予約開始 (ReserveEncounter / ReserveBattle)
     EResUC ->> Scheduler: ビートタイミングでのコールバックを登録
@@ -264,7 +264,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant EAI as EnemyAIController
-    participant PostAttackUC as EnemyPostAttackBehaviorUsecase
+    participant PostAttackUC as EnemyPostAttackBehaviorUseCase
     participant ObstacleUC as ObstacleSearchService
     participant EBState as EnemyBattleState
 

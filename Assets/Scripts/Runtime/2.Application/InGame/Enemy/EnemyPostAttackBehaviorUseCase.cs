@@ -6,12 +6,12 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// <summary>
     ///     攻撃後の行動(再攻撃/合流/障害物接近)を決定するロジック。
     /// </summary>
-    public class EnemyPostAttackBehaviorUsecase
+    public class EnemyPostAttackBehaviorUseCase
     {
         /// <summary>
         ///     攻撃後の行動選択の設定を指定して生成する。
         /// </summary>
-        public EnemyPostAttackBehaviorUsecase(EnemyPostAttackBehaviorSpec spec)
+        public EnemyPostAttackBehaviorUseCase(EnemyPostAttackBehaviorSpec spec)
         {
             _spec = spec;
         }
