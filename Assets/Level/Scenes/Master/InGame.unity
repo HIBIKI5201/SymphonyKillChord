@@ -57726,7 +57726,7 @@ MonoBehaviour:
   _animationCatalogKey: AnimationCatalogAsset
   _portraitCatalogKey: PortraitCatalogAsset
   _scenarioSettingsKey: ScenarioSettingsAsset
-  _comboVisibleCount: 4
+  _comboVisibleCount: 3
 --- !u!4 &866643818
 Transform:
   m_ObjectHideFlags: 0

@@ -38,6 +38,18 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
         /// <summary> 初回起動時に適用するリズム判定オフセット秒数。 </summary>
         public double RhythmOffsetSeconds => _rhythmOffsetSeconds;
 
+        /// <summary> 初回起動時に適用するカメラ感度。 </summary>
+        public int CameraSensitivity => _cameraSensitivity;
+
+        /// <summary> 初回起動時に適用するカメラ操作の反転方向。 </summary>
+        public CameraInvertMode CameraInvertMode => _cameraInvertMode;
+
+        /// <summary> 初回起動時にオートロックオンを使うかどうか。 </summary>
+        public bool IsAutoLockOnEnabled => _isAutoLockOnEnabled;
+
+        /// <summary> 初回起動時にゲームパッドの決定・キャンセルを日本式にするかどうか。 </summary>
+        public bool IsJapaneseButtonLayout => _isJapaneseButtonLayout;
+
         /// <summary>
         ///     初回起動時に適用する環境設定のDomainデータへ変換する。
         /// </summary>
@@ -51,7 +63,11 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 _brightness,
                 _language,
                 _vibrationStrength,
-                _rhythmOffsetSeconds);
+                _rhythmOffsetSeconds,
+                _cameraSensitivity,
+                _cameraInvertMode,
+                _isAutoLockOnEnabled,
+                _isJapaneseButtonLayout);
         }
 
         [SerializeField, Tooltip("初回起動時に適用する解像度の幅")]
@@ -77,5 +93,17 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
 
         [SerializeField, Tooltip("初回起動時に適用するリズム判定オフセット秒数（±0.30秒、0.05秒刻み）")]
         private double _rhythmOffsetSeconds = EnvironmentSettingsData.DEFAULT_RHYTHM_OFFSET_SECONDS;
+
+        [SerializeField, Tooltip("初回起動時に適用するカメラ感度（1～10）")]
+        private int _cameraSensitivity = EnvironmentSettingsData.DEFAULT_CAMERA_SENSITIVITY;
+
+        [SerializeField, Tooltip("初回起動時に適用するカメラ操作の反転方向")]
+        private CameraInvertMode _cameraInvertMode = EnvironmentSettingsData.DEFAULT_CAMERA_INVERT_MODE;
+
+        [SerializeField, Tooltip("初回起動時にオートロックオンを使うかどうか")]
+        private bool _isAutoLockOnEnabled = EnvironmentSettingsData.DEFAULT_IS_AUTO_LOCK_ON_ENABLED;
+
+        [SerializeField, Tooltip("初回起動時にゲームパッドの決定・キャンセルを日本式（決定=右ボタン）にするかどうか")]
+        private bool _isJapaneseButtonLayout = EnvironmentSettingsData.DEFAULT_IS_JAPANESE_BUTTON_LAYOUT;
     }
 }

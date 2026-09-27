@@ -50,7 +50,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             CacheControllables();
 
-            if (!_gameplayControllables.Contains(controllable))
+            if (_registeredControllables.Add(controllable))
             {
                 _gameplayControllables.Add(controllable);
             }
@@ -59,7 +59,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         [SerializeField, Tooltip("ゲーム開始と終了の演出に関わる IGameplayControllable を実装した MonoBehaviour の一覧。"), Header("ゲーム開始と終了の演出に関わるIGameplayControllableを実装したMonoBehaviourリスト")]
         private MonoBehaviour[] _gamePlayControllableObjects;
 
+        // 開始・終了演出を呼ぶ順序を保つため List で持ち、重複の判定だけ HashSet で行う。
         private readonly List<IGameplayControllable> _gameplayControllables = new();
+        private readonly HashSet<IGameplayControllable> _registeredControllables = new();
         private bool _cached;
 
         /// <summary>
@@ -74,6 +76,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
 
             _gameplayControllables.Clear();
+            _registeredControllables.Clear();
 
             // _gamePlayControllableObjectsから
             // IGameplayControllableを実装しているものを抽出して_gameplayControllablesに追加する。
@@ -88,6 +91,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 if (mono is IGameplayControllable controllable)
                 {
                     _gameplayControllables.Add(controllable);
+                    _registeredControllables.Add(controllable);
                 }
                 else
                 {
