@@ -1247,7 +1247,7 @@ MonoBehaviour:
       type: {class: SoundEffectOneShotVisualEffect, ns: KillChord.Runtime.View.InGame.Character, asm: KillChord.View}
       data:
         _soundEffectSource: {fileID: 1147706061352626450}
-        _cueNameOverride: FootStep
+        _cueNameOverride: SE_Enemy_Footsteps
 --- !u!1 &9170197150612482612
 GameObject:
   m_ObjectHideFlags: 0
