@@ -1,5 +1,5 @@
 ---
-name: symphony-kill-chord-code-review
+name: skc-code-review
 description: Review Symphony Kill Chord Unity/C# changes against the repository's coding guidelines, design philosophy, module boundaries, feature specifications, and ubiquitous language. Use for code reviews, staged or working-tree diff reviews, architecture checks, module/class necessity checks, refactoring reviews, and implementation-plan validation in this repository.
 ---
 

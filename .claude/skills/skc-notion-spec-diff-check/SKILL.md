@@ -1,5 +1,5 @@
 ---
-name: notion-spec-diff-check
+name: skc-notion-spec-diff-check
 description: "Find gaps and inconsistencies between the Notion game specification (mirrored at Docs/NotionSpecifications) and the actual implementation (Assets/Scripts/Runtime and related). Use whenever the user asks to check spec/implementation drift, find undocumented systems, find unimplemented spec items, refresh the Notion export, or audit whether a specific feature/system matches its written spec. Produces a categorized report (spec-but-no-impl / impl-but-no-spec / both-incomplete) with file:line evidence, following the precedent at Docs/仕様書と実装の差分分析_2026-08-23.md."
 ---
 

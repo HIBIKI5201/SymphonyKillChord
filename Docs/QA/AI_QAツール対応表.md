@@ -43,17 +43,17 @@ CBTのインストール/ストア掲載/法務、端末中断/復帰、熱/電�
 
 ## 操作入口
 
-共有手順: [SKILL.md](../../.agents/skills/ai-debug-attack-queue/SKILL.md)。取得項目と制限: [JSON API](../../.agents/skills/ai-debug-attack-queue/references/json-api.md)。
+共有手順: [SKILL.md](../../.agents/skills/skc-ai-debug-attack-queue/SKILL.md)。取得項目と制限: [JSON API](../../.agents/skills/skc-ai-debug-attack-queue/references/json-api.md)。
 
 ```powershell
 # 現在の状態をJSONで取得
-node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-qa.mjs snapshot
+node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-qa.mjs snapshot
 
 # 六拍種を2回、最大120秒
-node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-qa.mjs run --qa CBT:4-3 --seconds 120 --repeat 2 --queue "purple:1,blue:1,cyan:1,green:1,yellow:1,orange:1"
+node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-qa.mjs run --qa CBT:4-3 --seconds 120 --repeat 2 --queue "purple:1,blue:1,cyan:1,green:1,yellow:1,orange:1"
 
 # 15分観測。入力は別途通常のプレイで行う
-node .agents/skills/ai-debug-attack-queue/scripts/ai-debug-qa.mjs run --qa PC:6-3 --seconds 900
+node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-qa.mjs run --qa PC:6-3 --seconds 900
 ```
 
 上記は利用時の例であり、この実装セッションでの実行記録ではない。

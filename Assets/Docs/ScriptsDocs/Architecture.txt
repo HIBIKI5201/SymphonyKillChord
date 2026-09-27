@@ -1,5 +1,5 @@
 この文書は設計思想（Assets/Scripts/DesignPhilosophy.md）の写しである。
-アーキテクチャ監査を AI に依頼する手順は、スキル architecture-audit（.claude/skills/architecture-audit/SKILL.md、.codex/skills/architecture-audit/SKILL.md）に移した。
+アーキテクチャ監査を AI に依頼する手順は、スキル skc-architecture-audit（.claude/skills/skc-architecture-audit/SKILL.md、.codex/skills/skc-architecture-audit/SKILL.md）に移した。
 
 ---
 
