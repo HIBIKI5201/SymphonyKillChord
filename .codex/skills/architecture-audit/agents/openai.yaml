@@ -1,0 +1,4 @@
+interface:
+  display_name: "Symphony Kill Chord Architecture Audit"
+  short_description: "設計思想への準拠をプロジェクト全体で監査"
+  default_prompt: "Use $architecture-audit to audit whether Assets/Scripts/Runtime follows the project's design philosophy."
