@@ -50,7 +50,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 environmentSettings.CameraInvertMode == CameraInvertMode.Horizontal
                     || environmentSettings.CameraInvertMode == CameraInvertMode.Both,
                 environmentSettings.IsAutoLockOnEnabled ? AUTO_LOCK_ON_ON_KEY : AUTO_LOCK_ON_OFF_KEY,
-                environmentSettings.IsAutoLockOnEnabled);
+                environmentSettings.IsAutoLockOnEnabled,
+                environmentSettings.IsJapaneseButtonLayout ? BUTTON_LAYOUT_JAPANESE_KEY : BUTTON_LAYOUT_WESTERN_KEY,
+                environmentSettings.IsJapaneseButtonLayout);
             _environmentSettingsViewModel.Apply(in dto);
         }
 
@@ -72,6 +74,8 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         private const string CAMERA_INVERT_BOTH_KEY = "ui.setting.camera_invert_both";
         private const string AUTO_LOCK_ON_ON_KEY = "ui.setting.auto_lock_on_on";
         private const string AUTO_LOCK_ON_OFF_KEY = "ui.setting.auto_lock_on_off";
+        private const string BUTTON_LAYOUT_WESTERN_KEY = "ui.setting.button_layout_western";
+        private const string BUTTON_LAYOUT_JAPANESE_KEY = "ui.setting.button_layout_japanese";
 
         private readonly IEnvironmentSettingsViewModel _environmentSettingsViewModel;
         private readonly IQualityApplier _qualityApplier;

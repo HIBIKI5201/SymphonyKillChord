@@ -31,6 +31,8 @@ namespace KillChord.Runtime.View.Persistent.Environment
             _isCameraInvertHorizontal = new ReactiveProperty<bool>();
             _autoLockOnLabel = new ReactiveProperty<string>(string.Empty);
             _isAutoLockOnEnabled = new ReactiveProperty<bool>(true);
+            _buttonLayoutLabel = new ReactiveProperty<string>(string.Empty);
+            _isJapaneseButtonLayout = new ReactiveProperty<bool>();
         }
 
         /// <summary> 解像度の表示ラベル。 </summary>
@@ -84,6 +86,12 @@ namespace KillChord.Runtime.View.Persistent.Environment
         /// <summary> 攻撃時のオートロックオンを使うかどうか。 </summary>
         public ReadOnlyReactiveProperty<bool> IsAutoLockOnEnabled => _isAutoLockOnEnabled;
 
+        /// <summary> ゲームパッドの決定・キャンセルの配置の表示ラベル。 </summary>
+        public ReadOnlyReactiveProperty<string> ButtonLayoutLabel => _buttonLayoutLabel;
+
+        /// <summary> ゲームパッドの決定・キャンセルが日本式（決定=右ボタン）かどうか。 </summary>
+        public ReadOnlyReactiveProperty<bool> IsJapaneseButtonLayout => _isJapaneseButtonLayout;
+
         /// <summary>
         ///     表示用DTOを環境設定へ反映する。
         /// </summary>
@@ -106,6 +114,8 @@ namespace KillChord.Runtime.View.Persistent.Environment
             _isCameraInvertHorizontal.Value = dto.IsCameraInvertHorizontal;
             _autoLockOnLabel.Value = dto.AutoLockOnLabel;
             _isAutoLockOnEnabled.Value = dto.IsAutoLockOnEnabled;
+            _buttonLayoutLabel.Value = dto.ButtonLayoutLabel;
+            _isJapaneseButtonLayout.Value = dto.IsJapaneseButtonLayout;
         }
 
         /// <summary>
@@ -130,6 +140,8 @@ namespace KillChord.Runtime.View.Persistent.Environment
             _isCameraInvertHorizontal.Dispose();
             _autoLockOnLabel.Dispose();
             _isAutoLockOnEnabled.Dispose();
+            _buttonLayoutLabel.Dispose();
+            _isJapaneseButtonLayout.Dispose();
         }
 
         private readonly ReactiveProperty<string> _resolutionLabel;
@@ -149,5 +161,7 @@ namespace KillChord.Runtime.View.Persistent.Environment
         private readonly ReactiveProperty<bool> _isCameraInvertHorizontal;
         private readonly ReactiveProperty<string> _autoLockOnLabel;
         private readonly ReactiveProperty<bool> _isAutoLockOnEnabled;
+        private readonly ReactiveProperty<string> _buttonLayoutLabel;
+        private readonly ReactiveProperty<bool> _isJapaneseButtonLayout;
     }
 }

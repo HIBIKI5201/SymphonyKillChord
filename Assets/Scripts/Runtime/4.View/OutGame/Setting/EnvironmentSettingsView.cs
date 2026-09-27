@@ -55,6 +55,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _autoLockOnNextButton = Require<Button>(rootElement, AUTO_LOCK_ON_NEXT_BUTTON_NAME);
             _autoLockOnValueLabel = Require<Label>(rootElement, AUTO_LOCK_ON_VALUE_LABEL_NAME);
             _controlSaveButton = Require<Button>(rootElement, CONTROL_SAVE_BUTTON_NAME);
+            _buttonLayoutPrevButton = Require<Button>(rootElement, BUTTON_LAYOUT_PREV_BUTTON_NAME);
+            _buttonLayoutNextButton = Require<Button>(rootElement, BUTTON_LAYOUT_NEXT_BUTTON_NAME);
+            _buttonLayoutValueLabel = Require<Label>(rootElement, BUTTON_LAYOUT_VALUE_LABEL_NAME);
             _subscriptions = new CompositeDisposable();
 
             // 操作の登録と ViewModel の購読を行う。
@@ -81,6 +84,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _cameraInvertNextButtonPreset.Dispose();
             _autoLockOnPrevButtonPreset.Dispose();
             _autoLockOnNextButtonPreset.Dispose();
+            _buttonLayoutPrevButtonPreset.Dispose();
+            _buttonLayoutNextButtonPreset.Dispose();
+            _buttonLayoutLocalizedText?.Dispose();
             _cameraSensitivitySlider.UnregisterValueChangedCallback(HandleCameraSensitivityChanged);
             _controlSaveButton.clicked -= HandleSaveButtonClicked;
             _cameraInvertLocalizedText?.Dispose();
@@ -133,6 +139,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string AUTO_LOCK_ON_NEXT_BUTTON_NAME = "AutoLockOnNextButton";
         private const string AUTO_LOCK_ON_VALUE_LABEL_NAME = "AutoLockOnValueLabel";
         private const string CONTROL_SAVE_BUTTON_NAME = "ControlPanelSaveButton";
+        private const string BUTTON_LAYOUT_PREV_BUTTON_NAME = "ButtonLayoutPrevButton";
+        private const string BUTTON_LAYOUT_NEXT_BUTTON_NAME = "ButtonLayoutNextButton";
+        private const string BUTTON_LAYOUT_VALUE_LABEL_NAME = "ButtonLayoutValueLabel";
         private const string UI_COMMON_TABLE = "UICommon";
         private const int CYCLE_PREVIOUS_DIRECTION = -1;
         private const int CYCLE_NEXT_DIRECTION = 1;
@@ -168,6 +177,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _autoLockOnNextButton;
         private readonly Label _autoLockOnValueLabel;
         private readonly Button _controlSaveButton;
+        private readonly Button _buttonLayoutPrevButton;
+        private readonly Button _buttonLayoutNextButton;
+        private readonly Label _buttonLayoutValueLabel;
         private readonly CompositeDisposable _subscriptions;
         private IDisposable _screenModePrevButtonPreset;
         private IDisposable _screenModeNextButtonPreset;
@@ -183,12 +195,15 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private IDisposable _cameraInvertNextButtonPreset;
         private IDisposable _autoLockOnPrevButtonPreset;
         private IDisposable _autoLockOnNextButtonPreset;
+        private IDisposable _buttonLayoutPrevButtonPreset;
+        private IDisposable _buttonLayoutNextButtonPreset;
         private LocalizedElementText _screenModeLocalizedText;
         private LocalizedElementText _languageLocalizedText;
         private LocalizedElementText _vibrationLocalizedText;
         private LocalizedElementText _rhythmOffsetLocalizedText;
         private LocalizedElementText _cameraInvertLocalizedText;
         private LocalizedElementText _autoLockOnLocalizedText;
+        private LocalizedElementText _buttonLayoutLocalizedText;
 
         /// <summary>
         ///     UIのコールバックを登録する。
@@ -214,6 +229,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _autoLockOnNextButtonPreset = _autoLockOnNextButton.ApplyBasicButtonPreset(HandleAutoLockOnButtonClicked);
             _cameraSensitivitySlider.RegisterValueChangedCallback(HandleCameraSensitivityChanged);
             _controlSaveButton.clicked += HandleSaveButtonClicked;
+            _buttonLayoutPrevButtonPreset = _buttonLayoutPrevButton.ApplyBasicButtonPreset(HandleButtonLayoutButtonClicked);
+            _buttonLayoutNextButtonPreset = _buttonLayoutNextButton.ApplyBasicButtonPreset(HandleButtonLayoutButtonClicked);
         }
 
         /// <summary>
@@ -254,6 +271,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 .AddTo(_subscriptions);
             _environmentSettingsViewModel.AutoLockOnLabel
                 .Subscribe(HandleAutoLockOnLabelPublished)
+                .AddTo(_subscriptions);
+            _environmentSettingsViewModel.ButtonLayoutLabel
+                .Subscribe(HandleButtonLayoutLabelPublished)
                 .AddTo(_subscriptions);
         }
 
@@ -386,6 +406,14 @@ namespace KillChord.Runtime.View.OutGame.Setting
         }
 
         /// <summary>
+        ///     ゲームパッドの決定・キャンセルの配置を切り替える。
+        /// </summary>
+        private void HandleButtonLayoutButtonClicked()
+        {
+            _environmentSettingsCommand.ToggleButtonLayout();
+        }
+
+        /// <summary>
         ///     プレビュー中の変更を保存として確定する。
         /// </summary>
         private void HandleSaveButtonClicked()
@@ -512,6 +540,19 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 UI_COMMON_TABLE,
                 labelKey,
                 text => _autoLockOnValueLabel.text = text);
+        }
+
+        /// <summary>
+        ///     ゲームパッドの決定・キャンセルの配置を表示へ反映する。
+        /// </summary>
+        /// <param name="labelKey"> UICommonテーブルのローカライズキーです。 </param>
+        private void HandleButtonLayoutLabelPublished(string labelKey)
+        {
+            _buttonLayoutLocalizedText?.Dispose();
+            _buttonLayoutLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                labelKey,
+                text => _buttonLayoutValueLabel.text = text);
         }
 
         /// <summary>

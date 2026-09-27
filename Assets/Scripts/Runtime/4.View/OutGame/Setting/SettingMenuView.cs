@@ -55,6 +55,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _autoLockOnPrevButton = Require<Button>(rootElement, AUTO_LOCK_ON_PREV_BUTTON_NAME);
             _autoLockOnNextButton = Require<Button>(rootElement, AUTO_LOCK_ON_NEXT_BUTTON_NAME);
             _controlPanelSaveButton = Require<Button>(rootElement, CONTROL_PANEL_SAVE_BUTTON_NAME);
+            _buttonLayoutPrevButton = Require<Button>(rootElement, BUTTON_LAYOUT_PREV_BUTTON_NAME);
+            _buttonLayoutNextButton = Require<Button>(rootElement, BUTTON_LAYOUT_NEXT_BUTTON_NAME);
             // メニューを第1階層、オーディオ設定・環境設定・操作設定を第2階層とする操作範囲を登録する。
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
@@ -104,6 +106,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _cameraInvertNextButton,
                     _autoLockOnPrevButton,
                     _autoLockOnNextButton,
+                    _buttonLayoutPrevButton,
+                    _buttonLayoutNextButton,
                     _controlPanelSaveButton,
                     _controlPanelBackButton,
                 },
@@ -204,6 +208,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string CAMERA_INVERT_NEXT_BUTTON_NAME = "CameraInvertNextButton";
         private const string AUTO_LOCK_ON_PREV_BUTTON_NAME = "AutoLockOnPrevButton";
         private const string AUTO_LOCK_ON_NEXT_BUTTON_NAME = "AutoLockOnNextButton";
+        private const string BUTTON_LAYOUT_PREV_BUTTON_NAME = "ButtonLayoutPrevButton";
+        private const string BUTTON_LAYOUT_NEXT_BUTTON_NAME = "ButtonLayoutNextButton";
         private const string ENVIRONMENT_SETTING_BUTTON_NAME = "EnvironmentSettingButton";
         private const string AUDIO_SETTING_BUTTON_NAME = "AudioSettingButton";
         private const string RETURN_TO_TITLE_BUTTON_NAME = "ReturnToTitleButton";
@@ -269,6 +275,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _autoLockOnPrevButton;
         private readonly Button _autoLockOnNextButton;
         private readonly Button _controlPanelSaveButton;
+        private readonly Button _buttonLayoutPrevButton;
+        private readonly Button _buttonLayoutNextButton;
         private readonly HierarchicalNavigationScope _navigationScope;
         private IDisposable _audioSettingButtonPreset;
         private IDisposable _environmentSettingButtonPreset;

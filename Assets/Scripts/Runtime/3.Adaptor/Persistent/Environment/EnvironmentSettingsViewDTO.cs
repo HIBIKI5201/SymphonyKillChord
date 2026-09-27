@@ -25,7 +25,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             bool isCameraInvertVertical,
             bool isCameraInvertHorizontal,
             string autoLockOnLabel,
-            bool isAutoLockOnEnabled)
+            bool isAutoLockOnEnabled,
+            string buttonLayoutLabel,
+            bool isJapaneseButtonLayout)
         {
             ResolutionLabel = resolutionLabel;
             ScreenModeLabel = screenModeLabel;
@@ -44,6 +46,8 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             IsCameraInvertHorizontal = isCameraInvertHorizontal;
             AutoLockOnLabel = autoLockOnLabel;
             IsAutoLockOnEnabled = isAutoLockOnEnabled;
+            ButtonLayoutLabel = buttonLayoutLabel;
+            IsJapaneseButtonLayout = isJapaneseButtonLayout;
         }
 
         /// <summary> 解像度の表示ラベル。 </summary>
@@ -96,5 +100,11 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
 
         /// <summary> 攻撃時のオートロックオンを使うかどうか。 </summary>
         public bool IsAutoLockOnEnabled { get; }
+
+        /// <summary> ゲームパッドの決定・キャンセルの配置の表示ラベル。 </summary>
+        public string ButtonLayoutLabel { get; }
+
+        /// <summary> ゲームパッドの決定・キャンセルが日本式かどうか。 </summary>
+        public bool IsJapaneseButtonLayout { get; }
     }
 }

@@ -399,6 +399,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             Label cameraSensitivityHeading = Require<Label>(RootElement, "CameraSensitivityHeading");
             Label cameraInvertHeading = Require<Label>(RootElement, "CameraInvertHeading");
             Label autoLockOnHeading = Require<Label>(RootElement, "AutoLockOnHeading");
+            Label buttonLayoutHeading = Require<Label>(RootElement, "ButtonLayoutHeading");
             // 見出しとボタンの文言をローカライズに登録する。
             _localizedButtonTexts = new[]
             {
@@ -432,6 +433,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
                     UI_COMMON_TABLE, "ui.setting.camera_invert", text => cameraInvertHeading.text = text, "カメラ反転"),
                 new LocalizedElementText(
                     UI_COMMON_TABLE, "ui.setting.auto_lock_on", text => autoLockOnHeading.text = text, "オートロックオン"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.button_layout", text => buttonLayoutHeading.text = text, "決定・キャンセルボタン"),
                 new LocalizedElementText(
                     UI_COMMON_TABLE, "ui.setting.close", text => _backButton.text = text),
                 new LocalizedElementText(

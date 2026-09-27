@@ -197,6 +197,15 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         }
 
         /// <summary>
+        ///     ゲームパッドの決定・キャンセルの配置を海外式と日本式で切り替える。プレビュー適用のみ行い、保存はしない。
+        /// </summary>
+        public void ToggleButtonLayout()
+        {
+            _workingSettings.SetJapaneseButtonLayout(!_workingSettings.IsJapaneseButtonLayout);
+            _environmentSettingsPresenter.Push(_workingSettings);
+        }
+
+        /// <summary>
         ///     すべての環境設定を既定値へ戻す。プレビュー適用のみ行い、保存はしない。
         /// </summary>
         public void ResetToDefaults()
@@ -213,6 +222,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _workingSettings.SetCameraSensitivity(EnvironmentSettingsData.DEFAULT_CAMERA_SENSITIVITY);
             _workingSettings.SetCameraInvertMode(EnvironmentSettingsData.DEFAULT_CAMERA_INVERT_MODE);
             _workingSettings.SetAutoLockOnEnabled(EnvironmentSettingsData.DEFAULT_IS_AUTO_LOCK_ON_ENABLED);
+            _workingSettings.SetJapaneseButtonLayout(EnvironmentSettingsData.DEFAULT_IS_JAPANESE_BUTTON_LAYOUT);
             ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }
@@ -234,6 +244,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _committedSettings.SetCameraSensitivity(_workingSettings.CameraSensitivity);
             _committedSettings.SetCameraInvertMode(_workingSettings.CameraInvertMode);
             _committedSettings.SetAutoLockOnEnabled(_workingSettings.IsAutoLockOnEnabled);
+            _committedSettings.SetJapaneseButtonLayout(_workingSettings.IsJapaneseButtonLayout);
             _environmentSettingsService.QueueSave(_committedSettings);
         }
 
@@ -254,6 +265,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _workingSettings.SetCameraSensitivity(_committedSettings.CameraSensitivity);
             _workingSettings.SetCameraInvertMode(_committedSettings.CameraInvertMode);
             _workingSettings.SetAutoLockOnEnabled(_committedSettings.IsAutoLockOnEnabled);
+            _workingSettings.SetJapaneseButtonLayout(_committedSettings.IsJapaneseButtonLayout);
             ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }

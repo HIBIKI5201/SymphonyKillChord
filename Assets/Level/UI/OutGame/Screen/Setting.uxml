@@ -164,6 +164,16 @@
                         <ui:Button text="&gt;" name="AutoLockOnNextButton" class="setting-select-arrow-button ui-se-select"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:VisualElement class="setting-row">
+                    <ui:VisualElement class="setting-row-header">
+                        <ui:Label name="ButtonLayoutHeading" text="決定・キャンセルボタン" class="setting-row-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setting-select-row">
+                        <ui:Button text="&lt;" name="ButtonLayoutPrevButton" class="setting-select-arrow-button ui-se-select"/>
+                        <ui:Label text="決定：下 / キャンセル：右" name="ButtonLayoutValueLabel" class="setting-select-value-label"/>
+                        <ui:Button text="&gt;" name="ButtonLayoutNextButton" class="setting-select-arrow-button ui-se-select"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 <ui:VisualElement class="setting-menu-spacer"/>
                 <ui:Button text="設定を保存" name="ControlPanelSaveButton" class="setting-menu-button ui-se-select"/>
             </ui:VisualElement>

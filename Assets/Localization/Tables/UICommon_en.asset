@@ -473,6 +473,18 @@ MonoBehaviour:
     m_Localized: "Off"
     m_Metadata:
       m_Items: []
+  - m_Id: 1880000011
+    m_Localized: "Confirm / Cancel Buttons"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000012
+    m_Localized: "Confirm: Bottom / Cancel: Right"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1880000013
+    m_Localized: "Confirm: Right / Cancel: Bottom"
+    m_Metadata:
+      m_Items: []
   - m_Id: 2059000100
     m_Localized: '{input.device:choose(keyboard|xbox|playstation|switch):<size=16><sprite
       name="w"><sprite name="a"><sprite name="s"><sprite name="d"></size>|<sprite

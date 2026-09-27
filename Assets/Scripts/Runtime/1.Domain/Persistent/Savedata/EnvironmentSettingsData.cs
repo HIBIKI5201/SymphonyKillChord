@@ -23,6 +23,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <param name="cameraSensitivity"> カメラ感度（1～10）。 </param>
         /// <param name="cameraInvertMode"> カメラ操作の反転方向。 </param>
         /// <param name="isAutoLockOnEnabled"> 攻撃時のオートロックオンを使うかどうか。 </param>
+        /// <param name="isJapaneseButtonLayout"> ゲームパッドの決定・キャンセルを日本式（決定=右ボタン）にするかどうか。 </param>
         public EnvironmentSettingsData(
             int resolutionWidth = DEFAULT_RESOLUTION_WIDTH,
             int resolutionHeight = DEFAULT_RESOLUTION_HEIGHT,
@@ -34,7 +35,8 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             double rhythmOffsetSeconds = DEFAULT_RHYTHM_OFFSET_SECONDS,
             int cameraSensitivity = DEFAULT_CAMERA_SENSITIVITY,
             CameraInvertMode cameraInvertMode = DEFAULT_CAMERA_INVERT_MODE,
-            bool isAutoLockOnEnabled = DEFAULT_IS_AUTO_LOCK_ON_ENABLED)
+            bool isAutoLockOnEnabled = DEFAULT_IS_AUTO_LOCK_ON_ENABLED,
+            bool isJapaneseButtonLayout = DEFAULT_IS_JAPANESE_BUTTON_LAYOUT)
         {
             SetResolution(resolutionWidth, resolutionHeight, isFullScreen);
             SetQualityLevel(qualityLevel);
@@ -45,6 +47,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             SetCameraSensitivity(cameraSensitivity);
             SetCameraInvertMode(cameraInvertMode);
             SetAutoLockOnEnabled(isAutoLockOnEnabled);
+            SetJapaneseButtonLayout(isJapaneseButtonLayout);
         }
 
         /// <summary> 解像度の幅。 </summary>
@@ -85,6 +88,12 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <summary> 攻撃時のオートロックオンを使うかどうか。 </summary>
         public bool IsAutoLockOnEnabled => !_isAutoLockOnDisabled;
 
+        /// <summary>
+        ///     ゲームパッドの決定・キャンセルが日本式（決定=右ボタン、キャンセル=下ボタン）かどうか。
+        ///     falseの場合は海外式（決定=下ボタン、キャンセル=右ボタン）。
+        /// </summary>
+        public bool IsJapaneseButtonLayout => _isJapaneseButtonLayout;
+
         public const int MIN_BRIGHTNESS = 0;
         public const int MAX_BRIGHTNESS = 10;
 
@@ -120,6 +129,9 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
 
         /// <summary> オートロックオンの既定値。 </summary>
         public const bool DEFAULT_IS_AUTO_LOCK_ON_ENABLED = true;
+
+        /// <summary> ゲームパッドの決定・キャンセルの既定値。海外式（決定=下ボタン）。 </summary>
+        public const bool DEFAULT_IS_JAPANESE_BUTTON_LAYOUT = false;
 
         /// <summary> 明るさの既定値。 </summary>
         public const int DEFAULT_BRIGHTNESS = 5;
@@ -224,6 +236,14 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         }
 
         /// <summary>
+        ///     ゲームパッドの決定・キャンセルを日本式にするかどうかを設定する。
+        /// </summary>
+        public void SetJapaneseButtonLayout(bool isJapaneseButtonLayout)
+        {
+            _isJapaneseButtonLayout = isJapaneseButtonLayout;
+        }
+
+        /// <summary>
         ///     現在値の複製を作成する。
         /// </summary>
         public EnvironmentSettingsData Copy()
@@ -239,7 +259,8 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
                 RhythmOffsetSeconds,
                 CameraSensitivity,
                 CameraInvertMode,
-                IsAutoLockOnEnabled);
+                IsAutoLockOnEnabled,
+                IsJapaneseButtonLayout);
         }
 
         [SerializeField, Tooltip("解像度の幅")]
@@ -275,6 +296,10 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         // 項目追加前のセーブデータでもオンになるよう、無効側をbool値で保持する。
         [SerializeField, Tooltip("攻撃時のオートロックオンを使わないかどうか")]
         private bool _isAutoLockOnDisabled = !DEFAULT_IS_AUTO_LOCK_ON_ENABLED;
+
+        // 項目追加前のセーブデータでは既定値の海外式（false）になる。
+        [SerializeField, Tooltip("ゲームパッドの決定・キャンセルを日本式（決定=右ボタン）にするかどうか")]
+        private bool _isJapaneseButtonLayout = DEFAULT_IS_JAPANESE_BUTTON_LAYOUT;
 
         /// <summary>
         ///     明るさを有効範囲へ制限する。
