@@ -25,10 +25,8 @@ namespace KillChord.Runtime.View.InGame.Character
             PrepareInstanceForPlayback(particleSystem);
             particleSystem.Play();
 
-            if (!_activeParticleSystems.Contains(particleSystem))
-            {
-                _activeParticleSystems.Add(particleSystem);
-            }
+            // プールから取り出したインスタンスは再生中一覧に含まれていないため、重複の確認は不要。
+            _activeParticleSystems.Add(particleSystem);
         }
 
         /// <summary>

@@ -18,15 +18,17 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackResult"> 攻撃結果です。 </param>
         /// <param name="attackType"> 攻撃タイプです。 </param>
         /// <param name="notifyNormalDamage"> 通常ダメージを通知するかどうかを示す値です。 </param>
+        /// <param name="confirmedDamage"> 全ての計算（被ダメージの補正・バリアの吸収を含む）のあとに加算する確定ダメージです。 </param>
         /// <returns> 計算結果の攻撃結果です。 </returns>
         public static AttackResult Execute(
             IAttacker attacker,
             IDefender defender,
             AttackResult attackResult,
             DamageAttackType attackType,
-            bool notifyNormalDamage = false)
+            bool notifyNormalDamage = false,
+            Damage confirmedDamage = default)
         {
-            return ExecuteInternal(attacker, defender, attackResult, attackType, true, notifyNormalDamage);
+            return ExecuteInternal(attacker, defender, attackResult, attackType, true, notifyNormalDamage, confirmedDamage);
         }
 
         /// <summary>
@@ -44,7 +46,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
             AttackResult attackResult,
             DamageAttackType attackType)
         {
-            return ExecuteInternal(attacker, defender, attackResult, attackType, false, false);
+            return ExecuteInternal(attacker, defender, attackResult, attackType, false, false, default);
         }
 
         /// <summary>
@@ -55,6 +57,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackResult"> 攻撃結果です。 </param>
         /// <param name="attackType"> 攻撃タイプです。 </param>
         /// <param name="applyOutgoingModifiers"> 攻撃者のステータス効果によるダメージ修正を適用するかどうかを示す値です。 </param>
+        /// <param name="notifyNormalDamage"> 通常ダメージを通知するかどうかを示す値です。 </param>
+        /// <param name="confirmedDamage"> 全ての計算のあとに加算する確定ダメージです。 </param>
         /// <returns> 計算結果の攻撃結果です。 </returns>
         public static AttackResult ExecuteInternal(
             IAttacker attacker,
@@ -62,7 +66,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
             AttackResult attackResult,
             DamageAttackType attackType,
             bool applyOutgoingModifiers,
-            bool notifyNormalDamage)
+            bool notifyNormalDamage,
+            Damage confirmedDamage)
         {
             if (attacker == null)
             {
@@ -94,6 +99,12 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 defender is IBarrierHolder barrierHolder)
             {
                 damageToHealth = barrierHolder.AbsorbBarrier(result.FinalDamage, out barrierDamage);
+            }
+
+            // 確定ダメージは、被ダメージの補正とバリアの吸収のあとに加算する（下限への引き上げではない）。
+            if (confirmedDamage.Value > 0f && defender.CanTakeDamage)
+            {
+                damageToHealth = new Damage(damageToHealth.Value + confirmedDamage.Value);
             }
 
             Damage appliedDamage = default;

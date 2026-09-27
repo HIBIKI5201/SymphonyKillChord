@@ -15,5 +15,10 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         ///     攻撃者の会心率を取得する。会心率は武器ではなく攻撃者が持つ。
         /// </summary>
         CriticalChance CriticalChance { get; }
+
+        /// <summary>
+        ///     攻撃者の基本攻撃のダメージ（基礎攻撃力）を取得する。
+        /// </summary>
+        Damage BaseDamage { get; }
     }
 }
