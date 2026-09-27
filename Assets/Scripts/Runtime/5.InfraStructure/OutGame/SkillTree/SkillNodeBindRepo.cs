@@ -25,31 +25,55 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
 
         /// <summary>
         ///     名前が一致するスキルノードの対応データを取得する。見つからない場合は null を返す。
+        ///     呼び出し元はUIの要素名しか持たないため、名前の辞書を作って引く。
         /// </summary>
         public SkillNodeBindData FindByName(string name)
         {
-            if (SkillNodeBinds == null || SkillNodeBinds.Length <= 0)
+#if UNITY_EDITOR
+            // エディタではアセットの編集を反映するため、毎回作り直す。
+            _nameMap = null;
+#endif
+            if (name == null)
             {
                 return null;
             }
 
-            for (int i = 0; i < SkillNodeBinds.Length; i++)
-            {
-                var bind = SkillNodeBinds[i];
-                if (bind == null)
-                {
-                    continue;
-                }
-                if (bind.NodeName == name)
-                {
-                    return bind;
-                }
-            }
-            return null;
+            EnsureNameMap();
+            return _nameMap.TryGetValue(name, out SkillNodeBindData bind) ? bind : null;
         }
 
         /// <inheritdoc/>
         protected override IReadOnlyList<SkillNodeBindData> GetEntries() => SkillNodeBinds;
+
+        private Dictionary<string, SkillNodeBindData> _nameMap;
+
+        /// <summary>
+        ///     名前からスキルノードの対応データを引く辞書を作る。名前が重複する場合は先頭を使う。
+        /// </summary>
+        private void EnsureNameMap()
+        {
+            if (_nameMap != null)
+            {
+                return;
+            }
+
+            _nameMap = new Dictionary<string, SkillNodeBindData>();
+            if (SkillNodeBinds == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < SkillNodeBinds.Length; i++)
+            {
+                SkillNodeBindData bind = SkillNodeBinds[i];
+                if (bind == null || bind.NodeName == null || _nameMap.ContainsKey(bind.NodeName))
+                {
+                    continue;
+                }
+
+                _nameMap.Add(bind.NodeName, bind);
+            }
+        }
 
         /// <inheritdoc/>
         protected override bool TryBuild(SkillNodeBindData entry, out SkillNodeId id, out SkillNodeBindData value)
