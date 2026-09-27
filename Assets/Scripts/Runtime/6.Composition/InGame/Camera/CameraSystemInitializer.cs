@@ -44,7 +44,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 return false;
             }
 
-            Initialize(targetContainer.TargetSystemViewModel);
+            Initialize(targetContainer.TargetSystemViewModel, targetContainer.TargetSystemController);
 
 #if UNITY_ANDROID
             MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
@@ -63,7 +63,11 @@ namespace KillChord.Runtime.Composition.InGame.Camera
         ///     カメラシステムを構成する各クラスを生成し、依存関係を解決して初期化する。
         /// </summary>
         /// <param name="targetingSystem"> カメラが参照するターゲット選択機能。</param>
-        public void Initialize(ITargetSystemViewModel targetingSystem)
+        /// <param name="targetSystemController">
+        ///     ロックオン入力を通すターゲットシステムのコントローラー。ロックオンの成立をミッションなどへ通知する。
+        ///     null の場合は <paramref name="targetingSystem"/> を直接呼ぶ。
+        /// </param>
+        public void Initialize(ITargetSystemViewModel targetingSystem, TargetSystemController targetSystemController = null)
         {
             if (_config == null)
             {
@@ -93,7 +97,17 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             }
 
             _cameraSystem.Initialize(
-                (playerPosition, direction) => targetingSystem.ChangeTarget(playerPosition, direction),
+                (playerPosition, direction) =>
+                {
+                    // ロックオン入力はコントローラーを通し、OnTargetLocked（ミッションの LockOn 行動の計上など）を発火させる。
+                    if (targetSystemController != null)
+                    {
+                        targetSystemController.ChangeTarget(playerPosition, direction);
+                        return;
+                    }
+
+                    targetingSystem.ChangeTarget(playerPosition, direction);
+                },
                 () => targetingSystem.ClearTarget(),
                 () =>
                 {
