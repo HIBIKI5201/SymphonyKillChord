@@ -69,14 +69,14 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private static void DrawPages(SerializedProperty pagesProperty)
         {
             int removeIndex = -1;
-            string[] sourceAssetKeys = GetSourceAssetKeys();
+            string[] dataAssetKeys = GetDataAssetKeys();
             string[] collectionKeys = GetCollectionKeys();
 
             for (int i = 0; i < pagesProperty.arraySize; i++)
             {
                 SerializedProperty pageProperty = pagesProperty.GetArrayElementAtIndex(i);
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                DrawPage(pageProperty, i, sourceAssetKeys, collectionKeys, ref removeIndex);
+                DrawPage(pageProperty, i, dataAssetKeys, collectionKeys, ref removeIndex);
                 EditorGUILayout.EndVertical();
             }
 
@@ -90,7 +90,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                 pagesProperty.InsertArrayElementAtIndex(pagesProperty.arraySize);
                 SerializedProperty newPage = pagesProperty.GetArrayElementAtIndex(pagesProperty.arraySize - 1);
                 newPage.FindPropertyRelative(DISPLAY_NAME_PROPERTY_NAME).stringValue = "New Page";
-                newPage.FindPropertyRelative(SOURCE_ASSET_KEYS_PROPERTY_NAME).ClearArray();
+                newPage.FindPropertyRelative(DATA_ASSET_KEYS_PROPERTY_NAME).ClearArray();
                 newPage.FindPropertyRelative(COLLECTION_CATEGORIES_PROPERTY_NAME).ClearArray();
             }
         }
@@ -100,21 +100,21 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         /// </summary>
         /// <param name="pageProperty"> ページ設定です。 </param>
         /// <param name="index"> 配列位置です。 </param>
-        /// <param name="sourceAssetKeys"> 選択可能なSourceAssetキー一覧です。 </param>
+        /// <param name="dataAssetKeys"> 選択可能なDataAssetキー一覧です。 </param>
         /// <param name="collectionKeys"> 選択可能なCollectionKey一覧です。 </param>
         /// <param name="removeIndex"> 削除対象の配列位置です。 </param>
         private static void DrawPage(
             SerializedProperty pageProperty,
             int index,
-            string[] sourceAssetKeys,
+            string[] dataAssetKeys,
             string[] collectionKeys,
             ref int removeIndex)
         {
             // ページ1件分の各プロパティを取得する。
             SerializedProperty displayNameProperty =
                 pageProperty.FindPropertyRelative(DISPLAY_NAME_PROPERTY_NAME);
-            SerializedProperty sourceAssetKeysProperty =
-                pageProperty.FindPropertyRelative(SOURCE_ASSET_KEYS_PROPERTY_NAME);
+            SerializedProperty dataAssetKeysProperty =
+                pageProperty.FindPropertyRelative(DATA_ASSET_KEYS_PROPERTY_NAME);
             SerializedProperty collectionCategoriesProperty =
                 pageProperty.FindPropertyRelative(COLLECTION_CATEGORIES_PROPERTY_NAME);
 
@@ -127,13 +127,13 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
             }
             EditorGUILayout.EndHorizontal();
 
-            // 表示名と、ページに表示する SourceAsset・コレクションの選択欄。
+            // 表示名と、ページに表示するデータアセット・コレクションの選択欄。
             EditorGUILayout.PropertyField(displayNameProperty, new GUIContent("Display Name"));
             DrawSelectableStringList(
-                "Source Assets",
-                sourceAssetKeysProperty,
-                sourceAssetKeys,
-                SOURCE_ASSET_ITEM_LABEL);
+                "Data Assets",
+                dataAssetKeysProperty,
+                dataAssetKeys,
+                DATA_ASSET_ITEM_LABEL);
             DrawSelectableStringList(
                 "Collections",
                 collectionCategoriesProperty,
@@ -223,13 +223,13 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         }
 
         /// <summary>
-        ///     選択可能なSourceAssetキー一覧を取得します。
+        ///     選択可能なDataAssetキー一覧を取得します。
         /// </summary>
-        /// <returns> SourceAssetキー一覧です。 </returns>
-        private static string[] GetSourceAssetKeys()
+        /// <returns> DataAssetキー一覧です。 </returns>
+        private static string[] GetDataAssetKeys()
         {
-            IReadOnlyList<SourceDataProviderSettings.SourceAssetMapping> mappings =
-                SourceDataProviderSettings.instance.SourceAssetMappings;
+            IReadOnlyList<SourceDataProviderSettings.DataAssetMapping> mappings =
+                SourceDataProviderSettings.instance.DataAssetMappings;
             string[] results = new string[mappings.Count];
             for (int i = 0; i < mappings.Count; i++)
             {
@@ -269,9 +269,9 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
         private const string SETTINGS_PATH = ProviderConst.PROJECT_PATH + "Planner Master Data";
         private const string PAGES_PROPERTY_NAME = "_pages";
         private const string DISPLAY_NAME_PROPERTY_NAME = "_displayName";
-        private const string SOURCE_ASSET_KEYS_PROPERTY_NAME = "_sourceAssetAddressableKeys";
+        private const string DATA_ASSET_KEYS_PROPERTY_NAME = "_dataAssetAddressableKeys";
         private const string COLLECTION_CATEGORIES_PROPERTY_NAME = "_collectionCategories";
-        private const string SOURCE_ASSET_ITEM_LABEL = "Source Asset";
+        private const string DATA_ASSET_ITEM_LABEL = "Data Asset";
         private const string COLLECTION_ITEM_LABEL = "Collection";
     }
 }

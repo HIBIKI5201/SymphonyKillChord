@@ -34,12 +34,12 @@ namespace KillChord.Editor.SourceDataProvider.Core
             Rect idRect = new(
                 position.x,
                 position.y,
-                position.width - JUMP_BUTTON_WIDTH - EditorGUIUtility.standardVerticalSpacing,
+                position.width - PING_BUTTON_WIDTH - EditorGUIUtility.standardVerticalSpacing,
                 EditorGUIUtility.singleLineHeight);
-            Rect jumpRect = new(
+            Rect pingRect = new(
                 idRect.xMax + EditorGUIUtility.standardVerticalSpacing,
                 position.y,
-                JUMP_BUTTON_WIDTH,
+                PING_BUTTON_WIDTH,
                 EditorGUIUtility.singleLineHeight);
             Rect hashRect = new(
                 position.x,
@@ -90,15 +90,13 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 hashProperty.intValue = DataIDHasher.Compute(collectionKey, idProperty.stringValue);
             }
 
-            // シーン内完結のCollectionKeyはPlannerに対応ページがないためジャンプできない。
-            using (new EditorGUI.DisabledScope(
-                isSceneScoped
-                || string.IsNullOrWhiteSpace(collectionKey)
-                || string.IsNullOrWhiteSpace(idProperty.stringValue)))
+            // 選択中IDを定義しているデータ本体をProject/HierarchyでPingする。
+            UnityEngine.Object pingTarget = FindOptionSource(options, idProperty.stringValue);
+            using (new EditorGUI.DisabledScope(pingTarget == null))
             {
-                if (GUI.Button(jumpRect, JUMP_LABEL, EditorStyles.miniButton))
+                if (GUI.Button(pingRect, PING_LABEL, EditorStyles.miniButton))
                 {
-                    PlannerNavigationHub.TryNavigateToCollectionItem(collectionKey, idProperty.stringValue);
+                    EditorGUIUtility.PingObject(pingTarget);
                 }
             }
 
@@ -288,12 +286,36 @@ namespace KillChord.Editor.SourceDataProvider.Core
             return false;
         }
 
+        /// <summary>
+        ///     候補一覧から指定IDを定義しているデータ本体を取得します。
+        /// </summary>
+        /// <param name="options"> 候補一覧です。 </param>
+        /// <param name="id"> 検索する文字列IDです。 </param>
+        /// <returns> 見つかったデータ本体です。見つからない場合はnullです。 </returns>
+        private static UnityEngine.Object FindOptionSource(IReadOnlyList<SourceDataIDOption> options, string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return null;
+            }
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                if (string.Equals(options[i].Id, id, StringComparison.Ordinal))
+                {
+                    return options[i].Source;
+                }
+            }
+
+            return null;
+        }
+
         private const float COPY_BUTTON_WIDTH = 52f;
-        private const float JUMP_BUTTON_WIDTH = 56f;
+        private const float PING_BUTTON_WIDTH = 40f;
         private const float WARNING_LINE_COUNT = 2f;
         private const string HASH_LABEL = "Hash";
         private const string COPY_LABEL = "Copy";
-        private const string JUMP_LABEL = "Planner";
+        private const string PING_LABEL = "Ping";
         private const string UNASSIGNED_LABEL = "<未設定>";
     }
 }
