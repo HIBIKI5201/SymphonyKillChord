@@ -46,6 +46,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 lineRenderer.positionCount = 2;
                 lineRenderer.useWorldSpace = true;
             }
+            CreateLineMaterials();
             HideWarningInternal();
 
 #if UNITY_EDITOR
@@ -111,6 +112,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private const int AIM_LINE_INDEX_CENTER = 1;
         private const int AIM_LINE_INDEX_RIGHT = 2;
 
+        private static readonly int EMISSION_COLOR = Shader.PropertyToID("_EmissionColor");
+
         [SerializeField, Tooltip("Maximum number of raycast hits stored per query.")]
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
@@ -127,6 +130,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private WarningDisplayState _warningDisplayState;
         private Vector3 _lockedRayDirection;
         private Color _currentLineColor;
+        // 照準線ごとに複製したマテリアル。破棄時に Destroy する。
+        private Material[] _lineMaterials;
 
 #if UNITY_EDITOR
         private bool _initializedFlg;
@@ -255,17 +260,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             _lineRenderers[AIM_LINE_INDEX_LEFT].enabled = true;
-            _lineRenderers[AIM_LINE_INDEX_LEFT].material.SetColor("_EmissionColor", _currentLineColor);
+            SetLineEmissionColor(AIM_LINE_INDEX_LEFT, _currentLineColor);
             _lineRenderers[AIM_LINE_INDEX_LEFT].SetPosition(0, ray.origin);
             _lineRenderers[AIM_LINE_INDEX_LEFT].SetPosition(1, ray.origin + (Quaternion.Euler(0, -SpreadAngleDegrees, 0) * ray.direction) * _attackRange);
 
             _lineRenderers[AIM_LINE_INDEX_CENTER].enabled = true;
-            _lineRenderers[AIM_LINE_INDEX_CENTER].material.SetColor("_EmissionColor", _currentLineColor);
+            SetLineEmissionColor(AIM_LINE_INDEX_CENTER, _currentLineColor);
             _lineRenderers[AIM_LINE_INDEX_CENTER].SetPosition(0, ray.origin);
             _lineRenderers[AIM_LINE_INDEX_CENTER].SetPosition(1, ray.origin + ray.direction * _attackRange);
 
             _lineRenderers[AIM_LINE_INDEX_RIGHT].enabled = true;
-            _lineRenderers[AIM_LINE_INDEX_RIGHT].material.SetColor("_EmissionColor", _currentLineColor);
+            SetLineEmissionColor(AIM_LINE_INDEX_RIGHT, _currentLineColor);
             _lineRenderers[AIM_LINE_INDEX_RIGHT].SetPosition(0, ray.origin);
             _lineRenderers[AIM_LINE_INDEX_RIGHT].SetPosition(1, ray.origin + (Quaternion.Euler(0, SpreadAngleDegrees, 0) * ray.direction) * _attackRange);
         }
@@ -393,6 +398,72 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private void OnDisable()
         {
             HideWarningInternal();
+        }
+
+        /// <summary>
+        ///     実行時に複製した照準線のマテリアルを破棄します。
+        /// </summary>
+        private void OnDestroy()
+        {
+            DestroyLineMaterials();
+        }
+
+        /// <summary>
+        ///     照準線ごとにマテリアルを複製して割り当てます。
+        ///     毎フレーム LineRenderer.material を参照すると暗黙に複製され、破棄されないまま残るため、明示的に複製して保持します。
+        /// </summary>
+        private void CreateLineMaterials()
+        {
+            DestroyLineMaterials();
+
+            _lineMaterials = new Material[_lineRenderers.Length];
+            for (int i = 0; i < _lineRenderers.Length; i++)
+            {
+                Material sharedMaterial = _lineRenderers[i].sharedMaterial;
+                if (sharedMaterial == null)
+                {
+                    continue;
+                }
+
+                _lineMaterials[i] = new Material(sharedMaterial);
+                _lineRenderers[i].sharedMaterial = _lineMaterials[i];
+            }
+        }
+
+        /// <summary>
+        ///     指定した照準線の発光色を設定します。
+        /// </summary>
+        /// <param name="index"> 照準線の番号。 </param>
+        /// <param name="color"> 設定する発光色。 </param>
+        private void SetLineEmissionColor(int index, Color color)
+        {
+            if (_lineMaterials == null || index < 0 || index >= _lineMaterials.Length || _lineMaterials[index] == null)
+            {
+                return;
+            }
+
+            _lineMaterials[index].SetColor(EMISSION_COLOR, color);
+        }
+
+        /// <summary>
+        ///     複製した照準線のマテリアルを破棄します。
+        /// </summary>
+        private void DestroyLineMaterials()
+        {
+            if (_lineMaterials == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _lineMaterials.Length; i++)
+            {
+                if (_lineMaterials[i] != null)
+                {
+                    Destroy(_lineMaterials[i]);
+                }
+            }
+
+            _lineMaterials = null;
         }
     }
 }
