@@ -633,7 +633,17 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageCleared(int stageIdValue)
         {
-            await CompleteAndAnimateAsync(new StageId(stageIdValue));
+            try
+            {
+                await CompleteAndAnimateAsync(new StageId(stageIdValue));
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -750,28 +760,38 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageSelectScreenCompleted()
         {
-            VisualElement initialFocusBefore = _initialStageFocusElement;
-            ServiceLocator.TryGetInstance(out StageSelectScreenView screenView);
-            VisualElement focusedBefore = screenView?.FocusedElement;
-
-            // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
-            UpdateEquippedSkillDisplay();
-            if (_isForcedSortieMode)
+            try
             {
-                // 作戦画面のフェードとフォーカス復元が済んでから詳細を開く。
-                HandleStageNodeSelected(_forcedStageId.Value);
+                VisualElement initialFocusBefore = _initialStageFocusElement;
+                ServiceLocator.TryGetInstance(out StageSelectScreenView screenView);
+                VisualElement focusedBefore = screenView?.FocusedElement;
+
+                // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
+                UpdateEquippedSkillDisplay();
+                if (_isForcedSortieMode)
+                {
+                    // 作戦画面のフェードとフォーカス復元が済んでから詳細を開く。
+                    HandleStageNodeSelected(_forcedStageId.Value);
+                }
+
+                await ApplyNewlyClearedStagesAsync(_cts.Token);
+
+                // 解放演出中に移動・決定したフォーカスや、他画面からの復元は上書きしない。
+                if (_isInitialized && !_isForcedSortieMode && !_isFocusFrameLocked
+                    && screenView != null && _initialStageFocusElement != initialFocusBefore
+                    && (focusedBefore == null || focusedBefore == initialFocusBefore)
+                    && (screenView.FocusedElement == focusedBefore
+                        || screenView.FocusedElement == initialFocusBefore))
+                {
+                    screenView.RestoreFocus();
+                }
             }
-
-            await ApplyNewlyClearedStagesAsync(_cts.Token);
-
-            // 解放演出中に移動・決定したフォーカスや、他画面からの復元は上書きしない。
-            if (_isInitialized && !_isForcedSortieMode && !_isFocusFrameLocked
-                && screenView != null && _initialStageFocusElement != initialFocusBefore
-                && (focusedBefore == null || focusedBefore == initialFocusBefore)
-                && (screenView.FocusedElement == focusedBefore
-                    || screenView.FocusedElement == initialFocusBefore))
+            catch (OperationCanceledException)
             {
-                screenView.RestoreFocus();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
             }
         }
 
