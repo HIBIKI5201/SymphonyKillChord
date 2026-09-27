@@ -1,5 +1,5 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/Level/Scenes/Develop/OutGameTest/SkillTree/UIToolkit/USS/SkillTreeLayout.uss?fileID=7433441132597879392&amp;guid=26021df5ccc97f84d9802e0b454cd7e2&amp;type=3#SkillTreeLayout"/>
+    <Style src="project://database/Assets/Level/UI/OutGame/SkillTree/USS/SkillTreeLayout.uss?fileID=7433441132597879392&amp;guid=26021df5ccc97f84d9802e0b454cd7e2&amp;type=3#SkillTreeLayout"/>
     <ui:VisualElement name="PlayerStatusPanelRoot" picking-mode="Ignore" class="skilltree-panel" style="flex-grow: 0; width: 390px; height: auto; align-self: flex-start;">
         <ui:Label text="ステータス" name="TitleLable" class="skilltree-panel-header-bar"/>
         <ui:VisualElement name="StatusContainer" class="skilltree-panel-body">
