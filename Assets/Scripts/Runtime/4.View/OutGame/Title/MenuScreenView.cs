@@ -101,6 +101,7 @@ namespace KillChord.Runtime.View.OutGame.Title
 
         private const string BGM_VOLUME_SLIDER_NAME = "BGMVolumeSlider";
         private const string SOUND_EFFECT_VOLUME_SLIDER_NAME = "SEVolumeSlider";
+        private const string VOICE_VOLUME_SLIDER_NAME = "VoiceVolumeSlider";
         private const string LANGUAGE_PREV_BUTTON_NAME = "LanguagePrevButton";
         private const string LANGUAGE_NEXT_BUTTON_NAME = "LanguageNextButton";
         private const string CREDIT_BUTTON_NAME = "CreditButton";
@@ -123,6 +124,7 @@ namespace KillChord.Runtime.View.OutGame.Title
 
         private SliderInt _bgmVolumeSlider;
         private SliderInt _soundEffectVolumeSlider;
+        private SliderInt _voiceVolumeSlider;
         private Button _languagePrevButton;
         private Button _languageNextButton;
         private Button _creditButton;
@@ -170,6 +172,8 @@ namespace KillChord.Runtime.View.OutGame.Title
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {BGM_VOLUME_SLIDER_NAME}が見つかりません。");
             _soundEffectVolumeSlider = rootElement.Q<SliderInt>(SOUND_EFFECT_VOLUME_SLIDER_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {SOUND_EFFECT_VOLUME_SLIDER_NAME}が見つかりません。");
+            _voiceVolumeSlider = rootElement.Q<SliderInt>(VOICE_VOLUME_SLIDER_NAME)
+                ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {VOICE_VOLUME_SLIDER_NAME}が見つかりません。");
             _languagePrevButton = rootElement.Q<Button>(LANGUAGE_PREV_BUTTON_NAME)
                 ?? throw new NullReferenceException($"{nameof(MenuScreenView)}: {LANGUAGE_PREV_BUTTON_NAME}が見つかりません。");
             _languageNextButton = rootElement.Q<Button>(LANGUAGE_NEXT_BUTTON_NAME)
@@ -201,6 +205,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         {
             _bgmVolumeSlider.MakeNavigable();
             _soundEffectVolumeSlider.MakeNavigable();
+            _voiceVolumeSlider.MakeNavigable();
             _creditButton.MakeNavigable();
             _dataResetButton.MakeNavigable();
             _dataResetConfirmButton.MakeNavigable();
@@ -317,15 +322,19 @@ namespace KillChord.Runtime.View.OutGame.Title
                 }
                 if (source == _soundEffectVolumeSlider)
                 {
-                    return isDown ? _languagePrevButton : _bgmVolumeSlider;
+                    return isDown ? _voiceVolumeSlider : _bgmVolumeSlider;
+                }
+                if (source == _voiceVolumeSlider)
+                {
+                    return isDown ? _languagePrevButton : _soundEffectVolumeSlider;
                 }
                 if (source == _languagePrevButton)
                 {
-                    return isDown ? _dataResetButton : _soundEffectVolumeSlider;
+                    return isDown ? _dataResetButton : _voiceVolumeSlider;
                 }
                 if (source == _languageNextButton)
                 {
-                    return isDown ? _creditButton : _soundEffectVolumeSlider;
+                    return isDown ? _creditButton : _voiceVolumeSlider;
                 }
                 if (source == _dataResetButton)
                 {

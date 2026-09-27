@@ -33,7 +33,9 @@ namespace KillChord.Runtime.View.InGame.Camera
                 targetFollowCenterOffset *= _parameter.FollowOffsetPower;
             }
 
-            cameraCenterPosition = Vector3.Lerp(cameraCenterPosition, targetFollowCenterOffset, _parameter.FollowLerpSpeed * context.DeltaTime);
+            // 補間係数を指数減衰にし、フレームレートによらず同じ速さで収束させる（係数が 1 を超えないようにする）。
+            float interpolationRatio = 1f - Mathf.Exp(-_parameter.FollowLerpSpeed * context.DeltaTime);
+            cameraCenterPosition = Vector3.Lerp(cameraCenterPosition, targetFollowCenterOffset, interpolationRatio);
         }
 
         private readonly CameraConfig _parameter;
