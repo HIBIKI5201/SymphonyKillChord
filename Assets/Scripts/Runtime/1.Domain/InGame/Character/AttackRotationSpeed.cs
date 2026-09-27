@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     攻撃時の回転速度を表す値オブジェクト。
     /// </summary>
-    public readonly struct AttackRotationSpeed
+    public readonly struct AttackRotationSpeed : IEquatable<AttackRotationSpeed>
     {
         /// <summary>
         ///     攻撃時の回転速度を生成する。

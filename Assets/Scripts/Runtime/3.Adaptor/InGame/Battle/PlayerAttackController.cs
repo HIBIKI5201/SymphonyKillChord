@@ -148,7 +148,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             {
                 Debug.Log("[PlayerAttackController] 通常攻撃のダメージ適用をスキップします。");
 
-                OnAttackExecuted?.Invoke(attackDefinition.AttackName, false);
+                // キルコードが対象へ発動したため、通常攻撃のダメージを飛ばしても命中として扱い、コンボを途切れさせない。
+                OnAttackExecuted?.Invoke(attackDefinition.AttackName, true);
                 return true;
             }
 

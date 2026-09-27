@@ -19,8 +19,6 @@ public enum SceneListEnum : int
     Stage_01 = 6,
     /// <summary> Stage_02を表す。 </summary>
     Stage_02 = 7,
-    /// <summary> InGameDodgeTestを表す。 </summary>
-    InGameDodgeTest = 8,
     /// <summary> DemoEndを表す。 </summary>
-    DemoEnd = 9,
+    DemoEnd = 8,
 }
