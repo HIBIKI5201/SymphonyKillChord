@@ -31,7 +31,6 @@
 | **`*EventHandler`（Text/Background/Animation/Fade/Layer/Portrait）** | Adaptor | イベント種別ごとの実処理。`*Presenter`経由でViewへ通知 |
 | **`ScenarioPresenterFacade`** | Adaptor | 全出力ポートを束ねるFacade（`IScenarioCompletionNotifier`も実装） |
 | **`I*ViewSink`（Text/Portrait/Background/Animation/Fade/Layer/ScenarioCompletion）** | Adaptor | 表示反映の契約。`I*OutputPort`が「何を出すか」、ViewSinkが「どう反映するか」を分ける |
-| **`IOutPutPort`** | Adaptor | 旧名の出力ポート。`[Obsolete]`が付いており`IOutputPort`へ移行中 |
 | **`ScenarioAdvanceGate`** | Adaptor | ロック＋`TaskCompletionSource`によるプレイヤー入力待機ゲート |
 | **`ScenarioInputController`** | Adaptor | 入力を再生制御コマンドへ変換 |
 | **`SelectedScenarioState`** | Adaptor | OutGameシーンで選択したシナリオIDを保持するクロスシーン状態 |

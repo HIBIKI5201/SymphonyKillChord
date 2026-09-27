@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
@@ -46,7 +47,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _enemyAttackReservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
             _enemyAttackReservationUsecase.On2BeatBefore += Handle2BeatBefore;
             _enemyAttackReservationUsecase.On1BeatBefore += Handle1BeatBefore;
-            EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
             _isActive = true;
         }
 
@@ -60,7 +60,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _enemyAttackReservationUsecase.On2BeatBefore -= Handle2BeatBefore;
             _enemyAttackReservationUsecase.On1BeatBefore -= Handle1BeatBefore;
             _enemyAttackReservationUsecase.Deactivate();
-            EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
             _isActive = false;
         }
         /// <summary>
@@ -117,6 +116,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public EnemyMoveInstruction GetMoveInstruction(Vector3 enemyPosition, Vector3 targetPosition)
         {
             _lastKnownPosition = enemyPosition;
+            _lastTargetPosition = targetPosition;
 
             // 攻撃後の行動選択で移動先が上書きされている場合、そちらを優先する
             if (_enemyBattleState.OverrideDestination.HasValue)
@@ -134,7 +134,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             {
                 if (_enemyBattleState.IsInAttackRange)
                 {
-                    Debug.Log("[EnemyAIController] 攻撃範囲を出た");
+                    DevLog.Log("[EnemyAIController] 攻撃範囲を出た");
                     _enemyBattleState.ExitRange();
                     // 射程外に出た場合、予約中の攻撃(音楽ビート待ち)も合わせてキャンセルする。
                     // これを行わないと、範囲表示もダメージも伴わない攻撃モーション・SEだけが
@@ -146,7 +146,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             {
                 if (!_enemyBattleState.IsInAttackRange)
                 {
-                    Debug.Log("[EnemyAIController] 攻撃範囲に入った");
+                    DevLog.Log("[EnemyAIController] 攻撃範囲に入った");
                     _enemyBattleState.EnterRange();
                 }
             }
@@ -163,7 +163,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             if (!_enemyAttackReservationUsecase.HasReservation)
             {
-                Debug.Log("[EnemyAIController] Encounter予約開始");
+                DevLog.Log("[EnemyAIController] Encounter予約開始");
                 if (_enemyBattleState.FirstAttack)
                 {
                     // 初回攻撃
@@ -209,8 +209,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             _enemyAttackReservationUsecase.OnReservedTimingReached -= HandleReservedTimingReached;
             _enemyAttackReservationUsecase.Dispose();
-
-            EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
         }
 
         /// <summary>
@@ -233,7 +231,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         private void Handle2BeatBefore()
         {
-            Debug.Log("[EnemyAIController] 攻撃の2拍前");
+            DevLog.Log("[EnemyAIController] 攻撃の2拍前");
             On2BeatBefore?.Invoke();
         }
 
@@ -242,30 +240,24 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// </summary>
         private void Handle1BeatBefore()
         {
-            Debug.Log("[EnemyAIController] 攻撃の1拍前");
+            DevLog.Log("[EnemyAIController] 攻撃の1拍前");
             On1BeatBefore?.Invoke();
         }
 
         /// <summary>
-        ///     ダメージを受ける時の処理。
-        /// </summary>
-        /// <param name="eventParam"></param>
-        private void HandleOnDamageTaken(EOnTakeDamage eventParam)
-        {
-            if (eventParam.DefenderId != _enemyBattleState.Attacker.Id) return;
-            // クリティカル発生時、硬直行動をする
-            if (eventParam.Critical)
-            {
-                _enemyBattleState.Stunned();
-                _stateFacade.Stunned();
-            }
-        }
-
-        /// <summary>
-        ///     攻撃後の行動(再攻撃/合流/障害物接近)を選択し、必要であれば移動先を上書きする。
+        ///     攻撃後の行動を選択し、必要であれば移動先を上書きする。
+        ///     射程外なら接近、射線が障害物に遮られたなら迂回を優先し、それ以外は再攻撃/合流/障害物接近を抽選する。
         /// </summary>
         private void ChoosePostAttackBehavior()
         {
+            // 接近と迂回は通常の移動判断が行うため、移動先を上書きしない。
+            if (_lastTargetPosition.HasValue
+                && _enemyMoveUsecase.ShouldPrioritizeChase(_lastKnownPosition, _lastTargetPosition.Value))
+            {
+                _enemyBattleState.ClearOverrideDestination();
+                return;
+            }
+
             Vector3? allyPosition = _registry != null && _registry.TryFindNearestOtherActive(this, _lastKnownPosition, out EnemyAIController nearestAlly)
                 ? nearestAlly.CurrentPosition
                 : (Vector3?)null;
@@ -290,5 +282,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private IEnemyAttackController _attackController;
         private bool _isActive;
         private Vector3 _lastKnownPosition;
+        private Vector3? _lastTargetPosition;
     }
 }

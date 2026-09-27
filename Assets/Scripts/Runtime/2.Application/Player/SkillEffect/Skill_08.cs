@@ -5,6 +5,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -61,7 +62,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     infectionDamageRate,
                     context.EffectSpec.ReapplyPolicy));
 
-            Debug.Log($"[Skill_08] 発動" +
+            DevLog.Log($"[Skill_08] 発動" +
                 $"Range: {infectionRange}, TriggerCount: {infectionTriggerCount}, DamageRate: {infectionDamageRate}");
         }
 

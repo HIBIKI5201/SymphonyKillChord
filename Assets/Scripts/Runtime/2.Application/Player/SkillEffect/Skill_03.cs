@@ -3,6 +3,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
@@ -76,7 +77,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
             result = DamageExecutor.Execute(attacker, defender, result, DamageAttackType.Skill);
 
-            Debug.Log($"[Skill_03] 発動。" +
+            DevLog.Log($"[Skill_03] 発動。" +
                 $"Target: {defender}" +
                 $"Secondary: {isSecondaryTarget}");
         }

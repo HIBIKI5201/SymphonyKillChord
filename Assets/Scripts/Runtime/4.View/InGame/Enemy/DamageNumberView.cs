@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using LitMotion;
 using LitMotion.Extensions;
 using System;
@@ -97,7 +98,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                 return;
             }
 
-            Debug.Log($"[DamageNumberView] Type:{type} Color:{style.TextColor} Material:{style.FontMaterial?.name}", this);
+            DevLog.Log($"[DamageNumberView] Type:{type} Color:{style.TextColor} Material:{style.FontMaterial?.name}", this);
 
             if (style.FontMaterial != null)
             {

@@ -20,8 +20,10 @@ using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
+using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -530,6 +532,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillTreeScreenView.SetPoints,
                 () => _skillTreeScreenView.ListSeparator);
             _skillTreeScreenView.OnListSeparatorChanged += _skillTreeController.RefreshSelectedText;
+            _skillTreeController.OnUnlockSaveFailed += HandleUnlockSaveFailed;
 
             _rootElement.RegisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
             _rootElement.RegisterCallback<NavigationCancelEvent>(HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
@@ -1011,6 +1014,36 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     スキル解放データの保存に失敗したことを、中央の通知でプレイヤーへ伝えます。
+        /// </summary>
+        private async void HandleUnlockSaveFailed()
+        {
+            // 通知を表示できない場合は、コントローラー側のログだけに任せる。
+            if (!ServiceLocator.TryGetInstance(out EventNotificationView notificationView)
+                || notificationView == null
+                || notificationView.IsVisible
+                || !notificationView.isActiveAndEnabled)
+            {
+                return;
+            }
+
+            try
+            {
+                await notificationView.ShowAsync(SAVE_FAILED_NOTIFICATION_ENTRY, destroyCancellationToken);
+            }
+            catch (System.OperationCanceledException)
+            {
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary> 保存失敗を伝える通知のUICommonエントリです。 </summary>
+        private const string SAVE_FAILED_NOTIFICATION_ENTRY = "ui.notification.save_failed";
+
+        /// <summary>
         ///     生成したコンポーネントを解放します。
         /// </summary>
         private void DisposeComponents()
@@ -1019,6 +1052,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             if (_skillTreeScreenView != null && _skillTreeController != null)
             {
                 _skillTreeScreenView.OnListSeparatorChanged -= _skillTreeController.RefreshSelectedText;
+            }
+            if (_skillTreeController != null)
+            {
+                _skillTreeController.OnUnlockSaveFailed -= HandleUnlockSaveFailed;
             }
             _skillTreeScreenView = null;
             _previewVideoScreenView?.Dispose();
@@ -1639,44 +1676,54 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private async void HandleSkillTreeResetConfirmed()
         {
-            // 実行中は二重に押されないよう、ダイアログの操作を止める。
-            SkillTreeResetDialogView dialogView = _skillTreeResetDialogView;
-            SkillTreeController controller = _skillTreeController;
-            if (dialogView == null || controller == null || _cts == null)
-            {
-                return;
-            }
-
-            dialogView.SetInteractionEnabled(false);
-            bool isSucceeded;
-            // リセットを行い、ダイアログがそのままであれば操作を戻す。
             try
             {
-                isSucceeded = await controller.ResetSkillTreeAsync(_cts.Token);
-            }
-            finally
-            {
-                if (_isInitialized && ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                // 実行中は二重に押されないよう、ダイアログの操作を止める。
+                SkillTreeResetDialogView dialogView = _skillTreeResetDialogView;
+                SkillTreeController controller = _skillTreeController;
+                if (dialogView == null || controller == null || _cts == null)
                 {
-                    dialogView.SetInteractionEnabled(true);
+                    return;
                 }
-            }
 
-            // 成功した場合は、ダイアログと詳細を閉じて初期表示に戻す。
-            if (!_isInitialized || !isSucceeded || !ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                dialogView.SetInteractionEnabled(false);
+                bool isSucceeded;
+                // リセットを行い、ダイアログがそのままであれば操作を戻す。
+                try
+                {
+                    isSucceeded = await controller.ResetSkillTreeAsync(_cts.Token);
+                }
+                finally
+                {
+                    if (_isInitialized && ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                    {
+                        dialogView.SetInteractionEnabled(true);
+                    }
+                }
+
+                // 成功した場合は、ダイアログと詳細を閉じて初期表示に戻す。
+                if (!_isInitialized || !isSucceeded || !ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                {
+                    return;
+                }
+
+                dialogView.Hide();
+                _isSkillDetailOpen = false;
+                _isUnlockConfirmOpen = false;
+                _unlockConfirmDialogView?.Hide();
+                _dialogNavigationScope.Deactivate();
+                _skillDetailNavigationScope.Deactivate();
+                _skillDetailScreenView?.HideImmediately();
+                dialogView.SetResetButtonVisible(true);
+                _skillTreeViewportView?.ClearFocusZoom();
+            }
+            catch (OperationCanceledException)
             {
-                return;
             }
-
-            dialogView.Hide();
-            _isSkillDetailOpen = false;
-            _isUnlockConfirmOpen = false;
-            _unlockConfirmDialogView?.Hide();
-            _dialogNavigationScope.Deactivate();
-            _skillDetailNavigationScope.Deactivate();
-            _skillDetailScreenView?.HideImmediately();
-            dialogView.SetResetButtonVisible(true);
-            _skillTreeViewportView?.ClearFocusZoom();
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>

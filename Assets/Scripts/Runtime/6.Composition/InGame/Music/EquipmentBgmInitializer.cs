@@ -4,6 +4,7 @@ using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.InGame.Music;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -83,7 +84,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             {
                 // 装備スキルが無い場合はセレクターを操作せず、
                 // CRIのデフォルト＝通常BGMをそのまま再生する正常系。
-                Debug.Log($"[{ModuleName}] 切り替え対象のスキルが無いため、通常BGMで再生します。", this);
+                DevLog.Log($"[{ModuleName}] 切り替え対象のスキルが無いため、通常BGMで再生します。", this);
                 EquipmentBgmService = null;
                 return true;
             }
@@ -119,7 +120,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             }
 
             EquipmentBgmController.Start();
-            Debug.Log(
+            DevLog.Log(
                 $"<color=yellow>[{ModuleName}] BGMループ開始 → 原曲 '{EquipmentBgmService.InitialLabel}'</color>",
                 this);
             return true;
@@ -134,7 +135,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         {
             if (equippedSkillIds.Count == 0)
             {
-                Debug.Log(
+                DevLog.Log(
                     $"<color=yellow>[{ModuleName}] InGame開始時の装備スキル: なし（取得元: {skillSource}）</color>",
                     this);
                 return;
@@ -146,7 +147,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 descriptions.Add($"slot{i}: {DescribeSkill(equippedSkillIds[i])}");
             }
 
-            Debug.Log(
+            DevLog.Log(
                 $"<color=yellow>[{ModuleName}] InGame開始時の装備スキル {equippedSkillIds.Count}個" +
                 $"（取得元: {skillSource}） [{string.Join(" / ", descriptions)}]</color>",
                 this);
@@ -164,7 +165,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 labels[i] = sequence.ResolveLabel(i);
             }
 
-            Debug.Log(
+            DevLog.Log(
                 $"<color=yellow>[{ModuleName}] BGMシーケンス構築: {sequence.Length}区切り" +
                 $"（1区切り={_measuresPerDivision}小節） [{string.Join(", ", labels)}]</color>",
                 this);
@@ -180,7 +181,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             string kind = label == _originalLabel ? "原曲" : "スキル";
             int division = measureIndex / _measuresPerDivision;
 
-            Debug.Log(
+            DevLog.Log(
                 $"<color=yellow>[{ModuleName}] セレクター切替 → {kind} '{label}' " +
                 $"(小節={measureIndex}, 区切り={division})</color>",
                 this);

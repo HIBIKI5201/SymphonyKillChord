@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Enemy
@@ -18,10 +19,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         public void ExecuteAttack(AttackDefinition attackDefinition, IAttacker attacker, IDefender defender)
         {
             AttackResult attackResult = AttackExecutor.Execute(
-                attackDefinition, attacker, defender, false, _baseDamage);
-            Debug.Log($"[ShellAttackUseCase] ExecuteAttack 完了 Damage={attackResult.FinalDamage.Value}");
+                attackDefinition, attacker, defender, false, attacker.BaseDamage);
+            DevLog.Log($"[ShellAttackUseCase] ExecuteAttack 完了 Damage={attackResult.FinalDamage.Value}");
         }
 
-        private Damage _baseDamage = new Damage(10);// TODO敵の基礎攻撃力があるはずなので、それを使用するようにする。
     }
 }

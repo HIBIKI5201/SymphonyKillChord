@@ -139,6 +139,17 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         {
             NotionPageInfo updatedPage = await client.GetPageAsync(snapshot.PageId);
             string current = MarkdownDiffBuilder.Normalize(await client.GetMarkdownAsync(snapshot.PageId));
+            bool isExactMatch = string.Equals(current, expected, StringComparison.Ordinal);
+            bool isWhitespaceOnlyDifference = !isExactMatch && IsEquivalentIgnoringWhitespace(current, expected);
+            string intendedFilePath = workFilePath + ".notion-push-intended.md";
+
+            // Notionはブロックへ変換した結果を返すため、書式の正規化を超える差が出ることがある。
+            // 作業ファイルは実際の反映結果で上書きするため、送ろうとした内容を先に別ファイルへ残す。
+            // この保存に失敗した場合は、作業ファイルを上書きせずに止まる。
+            if (!isExactMatch && !isWhitespaceOnlyDifference)
+            {
+                await File.WriteAllTextAsync(intendedFilePath, expected, new UTF8Encoding(false));
+            }
 
             await File.WriteAllTextAsync(workFilePath, current, new UTF8Encoding(false));
             snapshot.LastEditedTime = updatedPage.LastEditedTime;
@@ -146,14 +157,13 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             snapshot.Baseline = current;
             snapshot.Save(workFilePath);
 
-            if (string.Equals(current, expected, StringComparison.Ordinal))
+            if (isExactMatch)
             {
                 if (!isQuiet) { Console.WriteLine("反映後の本文が編集内容と一致することを確認しました。"); }
                 return;
             }
 
-            string intendedFilePath = workFilePath + ".notion-push-intended.md";
-            if (IsEquivalentIgnoringWhitespace(current, expected))
+            if (isWhitespaceOnlyDifference)
             {
                 if (!isQuiet)
                 {
@@ -165,9 +175,6 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 return;
             }
 
-            // Notionはブロックへ変換した結果を返すため、書式の正規化を超える差が出ることがある。
-            // 作業ファイルは実際の反映結果で上書きするため、送ろうとした内容を別ファイルへ残す。
-            await File.WriteAllTextAsync(intendedFilePath, expected, new UTF8Encoding(false));
             Console.WriteLine(
                 "反映後の本文が編集内容と完全には一致しません（Notion側の書式正規化を超える差の可能性があります）。" +
                 $"作業ファイルは最新の本文で更新済みです。送ろうとした内容は {intendedFilePath} に残しています。差分を確認してください。");
@@ -176,6 +183,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         /// <summary>
         ///     行末・空行の違いだけかを判定する。
         ///     Notionの書式正規化（末尾空白の除去など）を、内容の不一致と誤検知しないようにする。
+        ///     ただし、2個以上の末尾スペースはCommonMarkの強制改行なので、その有無の違いは不一致として扱う。
         /// </summary>
         /// <param name="left">比較対象。</param>
         /// <param name="right">比較対象。</param>
@@ -189,9 +197,21 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             for (int index = 0; index < leftLines.Length; index++)
             {
                 if (leftLines[index].TrimEnd() != rightLines[index].TrimEnd()) { return false; }
+
+                if (HasHardBreak(leftLines[index]) != HasHardBreak(rightLines[index])) { return false; }
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     行末が強制改行（2個以上の半角スペース）かを判定する。
+        /// </summary>
+        /// <param name="line">判定する行。</param>
+        /// <returns>強制改行ならtrue。</returns>
+        private static bool HasHardBreak(string line)
+        {
+            return line.EndsWith("  ", StringComparison.Ordinal);
         }
     }
 }

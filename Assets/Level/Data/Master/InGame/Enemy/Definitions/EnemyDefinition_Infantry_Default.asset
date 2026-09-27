@@ -19,6 +19,7 @@ MonoBehaviour:
   _viewPrefab: {fileID: 1465007639519197220, guid: a42f8c3107bfca34fb2d20c8d317eb39, type: 3}
   _characterDefinition: {fileID: 11400000, guid: 93524034675db3e489e93312c0366c23, type: 2}
   _moveSpec: {fileID: 11400000, guid: 71243b714fe682a479522c36402275ac, type: 2}
+  _postAttackBehaviorSpec: {fileID: 11400000, guid: eef6c8692532494da44b8b2a62c9930e, type: 2}
   _encounterMusicSpec: {fileID: 11400000, guid: bad017c822c5b8c4da79df297d30324c, type: 2}
   _battleMusicSpec: {fileID: 11400000, guid: 2d1972e01a7a86243aac0caff66ff428, type: 2}
   _missionKey: {fileID: 11400000, guid: 5e72162da6cb4a54fb6e019bf90f79c3, type: 2}

@@ -7,7 +7,7 @@ namespace DevelopProducts.Boss
 {
     /// <summary>
     ///     ボス専用の攻撃予約ユースケース。
-    ///     EnemyAttackReservationUsecase には手を入れず、
+    ///     EnemyAttackReservationUseCase には手を入れず、
     ///     IMusicActionScheduler を直接使って任意タイミングの予約を行う。
     /// </summary>
     public sealed class BossAttackReservationUsecase : IDisposable

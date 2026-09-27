@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using UnityEngine;
 
@@ -40,7 +41,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 result,
                 DamageAttackType.Skill);
 #if UNITY_EDITOR
-            Debug.Log($"Skill_00 発動" +
+            DevLog.Log($"Skill_00 発動" +
                 $"Damage: {result.FinalDamage.Value}," +
                 $" Critical: {result.IsCritical}");
 #endif

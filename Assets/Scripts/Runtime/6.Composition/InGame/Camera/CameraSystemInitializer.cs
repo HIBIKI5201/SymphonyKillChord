@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Target;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.Persistent.Input;
@@ -44,7 +45,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 return false;
             }
 
-            Initialize(targetContainer.TargetSystemViewModel);
+            Initialize(targetContainer.TargetSystemViewModel, targetContainer.TargetSystemController);
 
 #if UNITY_ANDROID
             MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
@@ -63,7 +64,11 @@ namespace KillChord.Runtime.Composition.InGame.Camera
         ///     カメラシステムを構成する各クラスを生成し、依存関係を解決して初期化する。
         /// </summary>
         /// <param name="targetingSystem"> カメラが参照するターゲット選択機能。</param>
-        public void Initialize(ITargetSystemViewModel targetingSystem)
+        /// <param name="targetSystemController">
+        ///     ロックオン入力を通すターゲットシステムのコントローラー。ロックオンの成立をミッションなどへ通知する。
+        ///     null の場合は <paramref name="targetingSystem"/> を直接呼ぶ。
+        /// </param>
+        public void Initialize(ITargetSystemViewModel targetingSystem, TargetSystemController targetSystemController = null)
         {
             if (_config == null)
             {
@@ -93,7 +98,17 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             }
 
             _cameraSystem.Initialize(
-                (playerPosition, direction) => targetingSystem.ChangeTarget(playerPosition, direction),
+                (playerPosition, direction) =>
+                {
+                    // ロックオン入力はコントローラーを通し、OnTargetLocked（ミッションの LockOn 行動の計上など）を発火させる。
+                    if (targetSystemController != null)
+                    {
+                        targetSystemController.ChangeTarget(playerPosition, direction);
+                        return;
+                    }
+
+                    targetingSystem.ChangeTarget(playerPosition, direction);
+                },
                 () => targetingSystem.ClearTarget(),
                 () =>
                 {
@@ -108,6 +123,16 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 freeLookRotationCalculator, lookAtRotationCalculator, lockOnRangeChecker, lockOnBreakTracker,
                 shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
+
+            // 設定画面のカメラ感度・反転・オートロックオンを反映する。取得できない場合は既定の挙動で続行する。
+            if (ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
+            {
+                _cameraSystem.BindEnvironmentSettings(environmentSettingsContainer.ViewModel);
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(CameraSystemInitializer)}] 環境設定を取得できないため、カメラ操作の設定なしで続行します。", this);
+            }
         }
 
         [SerializeField, Tooltip("カメラシステムの挙動を管理する View コンポーネント。")]
