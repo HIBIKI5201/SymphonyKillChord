@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public interface IFadeOutputPort
     {
+        /// <summary>
+        ///     対象を指定した範囲と時間でフェードさせる。
+        /// </summary>
         ValueTask FadeAsync(
             FadeTarget target,
             FadeMode mode,

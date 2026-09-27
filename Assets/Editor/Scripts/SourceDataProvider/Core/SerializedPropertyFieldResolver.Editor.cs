@@ -25,6 +25,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return false;
             }
 
+            // 配列要素のパスを「[]」にまとめ、「.」区切りで1段ずつフィールドをたどる。
             string normalizedPath = ARRAY_PATH_PATTERN.Replace(propertyPath, "[]");
             string[] segments = normalizedPath.Split('.');
             Type currentType = targetType;
@@ -43,6 +44,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                     return false;
                 }
 
+                // 配列やリストの場合は要素の型に進む。
                 currentType = fieldInfo.FieldType;
                 if (isCollection)
                 {

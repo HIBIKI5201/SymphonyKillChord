@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public sealed class SetSkillExecutionEnabledStepEntryActionExecutor : IMissionStepEntryActionExecutor
     {
+        /// <summary>
+        ///     プレイヤーの行動制限状態を指定して生成する。
+        /// </summary>
         public SetSkillExecutionEnabledStepEntryActionExecutor(PlayerActionRestrictionState playerActionRestriction)
         {
             _playerActionRestriction = playerActionRestriction ?? throw new ArgumentNullException(nameof(playerActionRestriction));

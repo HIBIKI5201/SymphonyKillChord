@@ -76,7 +76,7 @@ DBプロパティが未整備でも、PageId / PathContainsの設定で資料を
 
 ### デプロイworkflow
 
-Deploy Sinfonia Operatorは公開envからSPEC_SEARCHだけをパッケージへ抽出する。VM上の既存キャッシュ（Library/NotionSpecifications優先、旧Docsへフォールバック）と既設モデルから、新リリースのディレクトリへ索引を再生成する。Notionの取得は行わないため、必要なキャッシュ更新は配備前に別途行う。
+`[CI/CD] Deploy Sinfonia Operator` ワークフローは公開envからSPEC_SEARCHだけをパッケージへ抽出する。VM上の既存キャッシュ（Library/NotionSpecifications優先、旧Docsへフォールバック）と既設モデルから、新リリースのディレクトリへ索引を再生成する。Notionの取得は行わないため、必要なキャッシュ更新は配備前に別途行う。
 
 serveは実行ファイルと同じ場所のspec-search.release.jsonが存在する場合、その検索設定・索引パス・モデルパスを最後に読み込む。この3項目はVM既存設定よりリリースの組を優先し、トークンやその他の設定はVM側の既存値を使う。公開envの変更もデプロイを起動する。
 

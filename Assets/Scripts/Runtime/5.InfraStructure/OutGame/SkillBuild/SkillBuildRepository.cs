@@ -18,6 +18,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
     /// </summary>
     [CreateAssetMenu(fileName = nameof(SkillBuildRepository),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" + nameof(SkillBuildRepository))]
+    /// <summary>
+    ///     スキルビルドの装備内容を管理するリポジトリ。
+    /// </summary>
     public class SkillBuildRepository : ScriptableObject, ISkillBuildRepository
     {
         private const int EMPTY_SKILL_ID = -1;

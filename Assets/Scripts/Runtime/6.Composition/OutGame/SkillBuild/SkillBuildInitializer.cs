@@ -106,6 +106,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            // 入手済みスキルとスキルビルドのリポジトリを読み込む。
             _loadedOwnedSkillRepository = await _ownedSkillRepositoryKey.LoadAssetAsync<OwnedSkillRepository>(this, destroyCancellationToken);
             _loadedSkillBuildRepository = await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, destroyCancellationToken);
 
@@ -114,6 +115,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return false;
             }
 
+            // 無くても続行できるアセットは、読み込めなかった場合に警告だけ出す。
             try
             {
                 _loadedSkillRepository =
@@ -159,9 +161,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 _loadedSkillInputProgressUIConfig = null;
             }
 
+            // アイコンと色の対応表を作る。
             BuildSkillGenreIconMap();
             BuildSkillBeatColorMap();
 
+            // 装備中・入手済み・全スキル・ポイント・スキルレベルを読み込む。
             _loadedEquippedSkills = await GetEquippedSkillsAsync();
             IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
             _loadedOwnedSkillTemplates = BuildOwnedSkills(ownedSkills);
@@ -196,9 +200,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         public override void Shutdown()
         {
+            // 購読と生成したコンポーネントを破棄する。
             Unsubscribe();
             DisposeComponents();
 
+            // 読み込んだアセットを解放し、参照を消す。
             _ownedSkillRepositoryKey.ReleaseLoadedAsset(this);
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
             _skillRepositoryKey.ReleaseLoadedAsset(this);
@@ -466,6 +472,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         {
             try
             {
+                // 最新の入手済みスキル・装備・ポイント・スキルレベルを読み込む。
                 IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
                 IReadOnlyList<EquippedSkill> equippedSkills = await _loadedSkillBuildRepository.LoadSkillBuild();
                 int ownedPoints = await GetOwnedPointsAsync();
@@ -479,6 +486,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                     return;
                 }
 
+                // 装備と入手済みスキルを反映し、表示を更新する。
                 _skillBuildDefinition.UpdateEquippedSkills(ToArray(equippedSkills));
                 _skillBuildController?.UpdateOwnedSkills(ownedSkillData);
                 _skillBuildPresenter?.Push(

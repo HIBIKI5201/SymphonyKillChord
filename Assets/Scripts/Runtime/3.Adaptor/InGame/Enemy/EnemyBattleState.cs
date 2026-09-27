@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyBattleState
     {
+        /// <summary>
+        ///     攻撃者・攻撃対象・現在の攻撃定義を指定して生成する。
+        /// </summary>
         public EnemyBattleState(CharacterEntity attacker,
             CharacterEntity target,
             AttackDefinition currentAttack)
@@ -35,6 +38,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public bool FirstAttack { get; private set; }
         /// <summary> 硬直中か </summary>
         public bool IsStunned { get; private set; }
+        /// <summary> 戦闘 AI が有効か。 </summary>
         public bool IsBattleAIActivated { get; private set; }
         /// <summary> 攻撃後の行動選択によって一時的に上書きされた移動先 </summary>
         public Vector3? OverrideDestination { get; private set; }

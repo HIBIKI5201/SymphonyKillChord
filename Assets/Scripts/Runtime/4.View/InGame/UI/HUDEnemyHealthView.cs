@@ -72,14 +72,26 @@ namespace KillChord.Runtime.View.InGame.UI
         {
             transform.position = position;
         }
+
+        /// <summary>
+        ///     ロックオン時のレティクルの大きさを記録する。
+        /// </summary>
         private void Awake()
         {
             _lockedOnSize = _reticleRectTransform.sizeDelta;
         }
+
+        /// <summary>
+        ///     毎フレームの最後に更新イベントを発火する。
+        /// </summary>
         private void LateUpdate()
         {
             OnUpdate?.Invoke();
         }
+
+        /// <summary>
+        ///     更新イベントの購読を解除し、再生中のモーションを止める。
+        /// </summary>
         private void OnDestroy()
         {
             OnUpdate = null;
@@ -87,6 +99,10 @@ namespace KillChord.Runtime.View.InGame.UI
             _visibleHandle.TryCancel();
             _barHandle.TryCancel();
         }
+
+        /// <summary>
+        ///     ロックオン時にレティクルと HP バーを表示するアニメーションを再生する。
+        /// </summary>
         private void MotionVisibleLockedOn()
         {
             _barHandle.TryComplete();
@@ -100,12 +116,12 @@ namespace KillChord.Runtime.View.InGame.UI
                     .BindToAlpha(_reticleAlpha))
                 .Run();
         }
-        [SerializeField]
+        [SerializeField, Tooltip("ロックオン時に表示するレティクル。")]
         private RectTransform _reticleRectTransform;
 
-        [SerializeField]
+        [SerializeField, Tooltip("レティクルの表示・非表示を切り替える CanvasGroup。")]
         private CanvasGroup _reticleAlpha;
-        [SerializeField]
+        [SerializeField, Tooltip("敵の HP バーの Image。")]
         private Image _healthBarImage;
 
         [SerializeField, Tooltip("ロックオン候補と確定対象の表示に使用するImage。")]

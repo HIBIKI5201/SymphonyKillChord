@@ -12,6 +12,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
     /// </summary>
     public class BattlePauseModule : IBattlePauseModule
     {
+        /// <summary>
+        ///     ポーズ時に止める音楽プレイヤーを指定して生成し、入力の制御を取得する。
+        /// </summary>
         public BattlePauseModule(MusicPlayer musicPlayer)
         {
             InputComposition inputComposition = ServiceLocator.GetInstance<InputComposition>();

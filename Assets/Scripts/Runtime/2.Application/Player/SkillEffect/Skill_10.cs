@@ -12,6 +12,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_10 : SkillBase
     {
+        /// <summary>
+        ///     プレイヤーに、一定回数の被弾ダメージを軽減するバフを付与する。
+        /// </summary>
         public override void Execute(in SkillEffectContext context)
         {
             float reductionRate = (float)context.EffectSpec.GetRequiredValue(

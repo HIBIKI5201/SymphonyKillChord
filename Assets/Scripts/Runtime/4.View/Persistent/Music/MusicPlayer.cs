@@ -67,6 +67,9 @@ namespace KillChord.Runtime.View.Persistent.Music
             ApplyVolume();
         }
 
+        /// <summary>
+        ///     現在の音量の倍率を返す。
+        /// </summary>
         public float GetVolume()
         {
             return _volumeRatio;

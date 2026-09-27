@@ -40,17 +40,20 @@ namespace KillChord.Runtime.View.Persistent.Load
         /// </summary>
         public async Task ShowAsync(string entry, CancellationToken cancellationToken)
         {
+            // 表示中や無効な状態では表示できない。
             cancellationToken.ThrowIfCancellationRequested();
             if (IsVisible || !isActiveAndEnabled)
             {
                 throw new InvalidOperationException("通知を表示できる状態ではありません。");
             }
 
+            // 呼び出し元の取り消しか破棄で止められるようにする。
             using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
                 cancellationToken, destroyCancellationToken);
             _activeCancellation = cancellation;
             try
             {
+                // 通知を表示し、一定時間待ってからフェードアウトさせる。
                 OnVisibilityChanged?.Invoke(true);
                 using var localizedText = new LocalizedElementText(
                     "UICommon", entry, text => _message.text = text, GetFallback(entry));
@@ -69,6 +72,7 @@ namespace KillChord.Runtime.View.Persistent.Load
             }
             finally
             {
+                // 止められた場合も含め、必ず非表示に戻す。
                 if (_panel != null)
                 {
                     _panel.alpha = 0f;

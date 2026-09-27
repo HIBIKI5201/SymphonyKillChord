@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// </summary>
     public class NearestAttackPositionSearchService
     {
+        /// <summary>
+        ///     攻撃位置探索のリポジトリを指定して生成する。
+        /// </summary>
         public NearestAttackPositionSearchService(INearestAttackPositionSearchRepository repository)
         {
             _repository = repository;

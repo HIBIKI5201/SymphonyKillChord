@@ -78,6 +78,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
             return _actionKind == actionKind;
         }
 
+        /// <summary> 行動の種別。 </summary>
         private readonly MissionActionKind _actionKind;
         /// <summary> 必要な発動回数。 </summary>
         private readonly int _requiredCount;

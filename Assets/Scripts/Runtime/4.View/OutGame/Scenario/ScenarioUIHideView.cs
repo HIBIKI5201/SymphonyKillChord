@@ -74,6 +74,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return targets;
             }
 
+            // null と重複を除いた非表示対象を集める。
             for (int i = 0; i < _hideTargets.Length; i++)
             {
                 RectTransform target = _hideTargets[i];
@@ -96,6 +97,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 targets.Add(target);
             }
 
+            // 親子の両方が登録されている場合は、親だけを残す。
             for (int i = targets.Count - 1; i >= 0; i--)
             {
                 for (int j = 0; j < targets.Count; j++)

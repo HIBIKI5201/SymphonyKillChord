@@ -16,6 +16,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// </summary>
         public SettingMenuView(VisualElement rootElement, HierarchicalNavigationScope hierarchicalNavigationScope)
         {
+            // 画面の各要素を取得する。
             rootElement = rootElement
                 ?? throw new ArgumentNullException(nameof(rootElement));
             _backGround = Require<VisualElement>(rootElement, BACKGROUND_NAME);
@@ -45,6 +46,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _vibrationNextButton = Require<Button>(rootElement, VIBRATION_NEXT_BUTTON_NAME);
             _rhythmOffsetSlider = Require<SliderInt>(rootElement, RHYTHM_OFFSET_SLIDER_NAME);
             _environmentPanelSaveButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_SAVE_BUTTON_NAME);
+            // メニューを第1階層、オーディオ設定と環境設定を第2階層とする操作範囲を登録する。
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
             {
@@ -84,9 +86,11 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 },
                 _screenModePrevButton);
 
+            // 操作を登録し、メニューを表示する。
             RegisterCallbacks();
             ShowMenu();
 
+            // ボタンの文言をローカライズに登録する。
             _audioSettingLocalizedText = new LocalizedElementText(
                 UI_COMMON_TABLE, "ui.setting.audio", text => _audioSettingButton.text = text);
             _environmentPanelSaveLocalizedText = new LocalizedElementText(

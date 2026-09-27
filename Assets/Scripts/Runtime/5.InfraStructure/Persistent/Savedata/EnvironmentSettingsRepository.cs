@@ -71,11 +71,13 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 throw new ArgumentNullException(nameof(environmentSettings));
             }
 
+            // セーブデータを取得し、失敗時に戻せるよう現在の設定を控えておく。
             SaveData saveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>(cancellationToken);
             EnvironmentSettingsData previousSettings = saveData.EnvironmentSettings.Copy();
 
+            // 新しい設定を反映する。
             saveData.EnvironmentSettings.SetResolution(
                 environmentSettings.ResolutionWidth,
                 environmentSettings.ResolutionHeight,
@@ -86,6 +88,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
             saveData.EnvironmentSettings.SetVibrationStrength(environmentSettings.VibrationStrength);
             saveData.EnvironmentSettings.SetRhythmOffsetSeconds(environmentSettings.RhythmOffsetSeconds);
 
+            // 保存に失敗した場合は、反映前の設定に戻してから例外を投げ直す。
             try
             {
                 await SaveStore.SaveAsync<SaveData>(cancellationToken);

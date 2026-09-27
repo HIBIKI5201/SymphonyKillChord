@@ -33,8 +33,14 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public static explicit operator float(Health health) => health.Value;
 
         public static bool operator <=(Health left, Health right) => left.CompareTo(right) <= 0;
+        /// <summary>
+        ///     左辺が右辺より小さいかを判定する。
+        /// </summary>
         public static bool operator <(Health left, Health right) => left.CompareTo(right) < 0;
         public static bool operator >=(Health left, Health right) => left.CompareTo(right) >= 0;
+        /// <summary>
+        ///     左辺が右辺より大きいかを判定する。
+        /// </summary>
         public static bool operator >(Health left, Health right) => left.CompareTo(right) > 0;
 
         /// <summary>

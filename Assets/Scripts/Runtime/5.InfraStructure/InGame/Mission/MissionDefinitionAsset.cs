@@ -69,6 +69,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <returns> ミッション定義。 </returns>
         public MissionDefinition Create(EnemyMissionKeyRepository missionKeyRepository)
         {
+            // クリア条件の各ステップを作る。失敗した場合はどのステップかが分かる例外を投げる。
             List<ObjectiveSequenceStep> steps = new();
 
             if (_clearConditionSteps != null)
@@ -94,6 +95,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 }
             }
 
+            // 評価条件を作る。評価 ID は必須で、重複を許さない。
             ObjectiveSequenceClearCondition clearCondition = new ObjectiveSequenceClearCondition(steps);
 
             List<IMissionEvaluationCondition> evaluations = new();
@@ -129,6 +131,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 evaluations.Add(condition.Create());
             }
 
+            // ミッション定義を作る。
             return new MissionDefinition(
                 Id,
                 _displayName,

@@ -1,4 +1,4 @@
-name: Deploy Sinfonia Operator
+name: "[CI/CD] Deploy Sinfonia Operator"
 
 on:
   push:

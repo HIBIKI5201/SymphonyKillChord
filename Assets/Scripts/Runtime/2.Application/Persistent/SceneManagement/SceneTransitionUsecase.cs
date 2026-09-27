@@ -221,6 +221,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             return _executor.ExecuteAsync(
                 async progress =>
                 {
+                    // 進捗の前半で追加シーンを破棄し、元のシーンをアクティブに戻す。
                     IProgress<float> additiveUnloadProgress =
                         new LoadingProgressRange(
                             progress,
@@ -240,8 +241,10 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                         return false;
                     }
 
+                    // 破棄した追加シーンの初期化状態を消す。
                     _sceneInitializationReadiness.Clear(additiveSceneName);
 
+                    // 進捗の後半で遷移先のシーンを読み込み、初期化の完了を待つ。
                     IProgress<float> changeSceneProgress =
                         new LoadingProgressRange(
                             progress,
@@ -284,6 +287,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             return _executor.ExecuteAsync(
                 async progress =>
                 {
+                    // 進捗の前半で追加シーンを破棄し、読み込み直すシーンをアクティブに戻す。
                     IProgress<float> unloadProgress =
                         new LoadingProgressRange(
                             progress,
@@ -303,9 +307,11 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                         return false;
                     }
 
+                    // 両方のシーンの初期化状態を消す。
                     _sceneInitializationReadiness.Clear(additiveSceneName);
                     _sceneInitializationReadiness.Clear(reloadSceneName);
 
+                    // 進捗の後半でシーンを読み込み直し、初期化の完了を待つ。
                     IProgress<float> reloadProgress =
                         new LoadingProgressRange(
                             progress,
@@ -345,8 +351,10 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 throw new ArgumentNullException(nameof(loadOperation));
             }
 
+            // 読み込みの前から初期化の通知を待ち受ける。
             _sceneInitializationReadiness.BeginTracking(sceneName);
 
+            // 読み込みに失敗した場合は、初期化の待ち受けを失敗として終える。
             bool loadSuccess;
             try
             {
@@ -364,6 +372,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 return false;
             }
 
+            // 遷移元のシーンが破棄された場合は、その初期化状態を消す。
             if (!string.IsNullOrWhiteSpace(unloadedSceneName)
                 && !string.Equals(
                     unloadedSceneName,
@@ -373,6 +382,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 _sceneInitializationReadiness.Clear(unloadedSceneName);
             }
 
+            // 読み込んだシーンの初期化が終わるまで待つ。
             return await _sceneInitializationReadiness.WaitForReadyAsync(
                 sceneName,
                 cancellationToken);

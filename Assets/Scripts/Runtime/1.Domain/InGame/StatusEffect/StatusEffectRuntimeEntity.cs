@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Domain.InGame.StatusEffect
     /// </summary>
     public class StatusEffectRuntimeEntity
     {
+        /// <summary>
+        ///     状態効果を指定して生成し、現在時刻から持続時間を設定する。
+        /// </summary>
         public StatusEffectRuntimeEntity(IStatusEffect effect, float currentTime)
         {
             Effect = effect ?? throw new ArgumentNullException(nameof(effect));

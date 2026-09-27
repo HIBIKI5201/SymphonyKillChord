@@ -15,6 +15,9 @@ namespace KillChord.Runtime.Utility.Persistent
         public readonly Guid DefenderId;
         public readonly DamageAttackType AttackType;
 
+        /// <summary>
+        ///     被弾イベントを生成する。
+        /// </summary>
         public EOnTakeDamage(float damage, bool critical, bool isJustHit, Guid defenderId, DamageAttackType attackType)
         {
             DefenderId = defenderId;

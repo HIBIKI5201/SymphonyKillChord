@@ -47,11 +47,17 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             }
         }
 
+        /// <summary>
+        ///     入力中かつロックオン中のときだけ照準の進捗表示を出す。
+        /// </summary>
         private static void ApplyVisibility(ISkillCrosshairProgressView crosshairView, bool isInProgress, bool isLockedOn)
         {
             crosshairView.SetVisible(isInProgress && isLockedOn);
         }
 
+        /// <summary>
+        ///     ロックオン中のターゲットがいるかを判定する。
+        /// </summary>
         private static bool IsLockedOn()
         {
             return ServiceLocator.TryGetInstance<TargetSystemController>(out var targetSystemController)

@@ -135,11 +135,13 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public override void Shutdown()
         {
+            // 購読を解除する。
             UnsubscribeLoading();
             UnsubscribeOptionInput();
             Unsubscribe();
             _isSubscribed = false;
 
+            // 各画面の登録を解除して破棄する。
             ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
             ServiceLocator.UnregisterInstance<SkillTreeScreenView>();
             ServiceLocator.UnregisterInstance<StageSelectScreenView>();
@@ -147,6 +149,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             ServiceLocator.UnregisterInstance<SettingScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
+            // 自身が登録した画面状態のリポジトリだけを解除する。
             if (_registeredScreenStateRepository != null
                 && ServiceLocator.TryGetInstance(out IScreenStateRepository registeredRepository)
                 && ReferenceEquals(registeredRepository, _registeredScreenStateRepository))
@@ -159,6 +162,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _skillTreeScreenView = null;
             _screenStateRepository = null;
 
+            // 読み込んだアセットを解放する。
             _screenRuleDataKey.ReleaseLoadedAsset(this);
             _loadedScreenRuleData = null;
             _isInitialized = false;
@@ -623,6 +627,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         private async void HandleReturnToTitleRequested()
         {
+            // 遷移中や、シナリオからの出撃中は受け付けない。
             if (_isSceneTransitioning || _sceneTransitionController.HasScenarioBattleSortie
                 || _sceneTransitionController.PersistentLifetimeToken.IsCancellationRequested)
             {
@@ -639,12 +644,14 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return;
             }
 
+            // 遷移中の状態にし、完了後も使う参照を控えておく。
             _isSceneTransitioning = true;
             string currentSceneName = gameObject.scene.name;
             string titleSceneName = _titleSceneName;
             OutGameUIEvent uiEvent = _outGameUIEvent;
             SceneTransitionController transition = _sceneTransitionController;
 
+            // タイトルへ遷移し、成功したら完了を通知する。
             try
             {
                 bool success = await transition.ChangeSceneWithPersistentLifetimeAsync(
@@ -671,6 +678,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 Debug.LogException(exception);
             }
 
+            // 失敗した場合は、破棄されていなければ再び操作できるように戻す。
             if (this == null || transition.PersistentLifetimeToken.IsCancellationRequested) { return; }
             _isSceneTransitioning = false;
             uiEvent.OnReturnToTitleRequestCompleted?.Invoke(false);

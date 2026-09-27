@@ -184,17 +184,20 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public void RestoreFocus()
         {
+            // 表示中でない場合は何もしない。
             if (_isDisposed || !_isShowing)
             {
                 return;
             }
 
+            // 操作できない間は、復元の要求だけを残しておく。
             _isFocusRestorePending = true;
             if (!_isInteractionEnabled || !_isShowCompleted)
             {
                 return;
             }
 
+            // 次のフレームで復元する。その間に新しい要求や状態の変化があれば中止する。
             int generation = ++_focusRequestGeneration;
             RootElement.schedule.Execute(() =>
             {

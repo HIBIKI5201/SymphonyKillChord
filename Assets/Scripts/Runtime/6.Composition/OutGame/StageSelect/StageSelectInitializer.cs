@@ -960,6 +960,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         public override void Shutdown()
         {
+            // 購読を解除し、自身が登録したコンテナだけを解除する。
             UnsubscribeLoadingCompleted();
             Unsubscribe();
             _isSubscribed = false;
@@ -976,6 +977,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _forcedStageId = default;
             _hasForcedSortiePreparationFailed = false;
             _failedForcedSortieStageId = default;
+            // 操作の登録と、背景・マップの設定を解除する。
             if (_rootVisualElement != null)
             {
                 _rootVisualElement.UnregisterCallback<PointerDownEvent>(
@@ -1000,11 +1002,13 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _stageMapDragManipulator.target = null;
                 _stageMapDragManipulator = null;
             }
+            // 実行中の処理を止め、ノードのコンポーネントを破棄して、読み込んだアセットを解放する。
             _cts?.Cancel();
             DisposeNodeComponents();
             _cts?.Dispose();
             _cts = null;
             ReleaseLoadedResources();
+            // マップとフォーカスの状態を消す。
             _stageMapScrollView = null;
             _stageMapContent = null;
             _stageMapCanvas = null;
@@ -1431,6 +1435,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             out float contentWidth,
             out float contentHeight)
         {
+            // 列ごとの行数と、最大の列番号・行数を求める。
             Dictionary<int, int> columnCounts = new();
             int maxColumn = 0;
             int maxRowCount = 1;
@@ -1446,6 +1451,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 maxRowCount = Mathf.Max(maxRowCount, rowCount);
             }
 
+            // マップ全体の大きさを決める。
             contentWidth = MAP_PADDING * 2.0f + NODE_SIZE + maxColumn * HORIZONTAL_SPACING;
             contentHeight = MAP_PADDING * 2.0f + NODE_SIZE + (maxRowCount - 1) * VERTICAL_SPACING;
             mapCanvas.style.position = Position.Absolute;
@@ -1454,6 +1460,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             mapCanvas.style.width = contentWidth;
             mapCanvas.style.height = contentHeight;
 
+            // 各ノードの中心位置を求める。行数が少ない列は縦方向の中央に寄せる。
             Dictionary<StageId, Vector2> nodeCenters = new(nodePositions.Count);
             foreach (KeyValuePair<StageId, StageMapNodePosition> pair in nodePositions)
             {
@@ -1482,6 +1489,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             for (int i = 0; i < _stageTree.Connections.Count; i++)
             {
+                // 接続元から接続先へ向かう線を、回転させた要素として配置する。
                 StageNodeConnection connection = _stageTree.Connections[i];
                 Vector2 fromPosition = nodeCenters[connection.FromStageId];
                 Vector2 toPosition = nodeCenters[connection.ToStageId];
@@ -1506,6 +1514,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                         Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg,
                         AngleUnit.Degree));
 
+                // 進行度に応じて伸ばす塗りの要素を加える。
                 var fillElement = new VisualElement
                 {
                     name = CONNECTION_FILL_NAME,
@@ -1515,6 +1524,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 connectionElement.Add(fillElement);
                 mapContent.Add(connectionElement);
 
+                // 接続先のステージごとに、入ってくる接続の表示をまとめる。
                 if (!connectionViewMap.TryGetValue(
                         connection.ToStageId,
                         out List<IStageConnectionViewModel> incomingConnections))
@@ -1776,6 +1786,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <param name="stageDefinition"> 出撃対象のステージ定義です。 </param>
         private void ReserveNodeTransitionChain(StageDefinition stageDefinition)
         {
+            // 予約を消してから、自動遷移の連鎖を先頭から順に予約する。
             if (_pendingNodeTransitionState == null)
             {
                 return;
@@ -1793,6 +1804,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                        currentStageDefinition.StageId,
                        out StageDefinition targetStageDefinition))
             {
+                // 同じステージに戻ってきた場合は循環しているため、予約を消して中止する。
                 if (!visitedStageIds.Add(currentStageDefinition.StageId))
                 {
 #if UNITY_EDITOR

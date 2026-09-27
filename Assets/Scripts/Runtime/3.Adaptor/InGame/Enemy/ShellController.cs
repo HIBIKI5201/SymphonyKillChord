@@ -10,6 +10,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class ShellController : IDisposable
     {
+        /// <summary>
+        ///     砲弾の制御に必要なエンティティ・表示・予約・攻撃者などを指定して生成する。
+        /// </summary>
         public ShellController(ShellEntity entity, IShellView viewModel, ShellReservationUsecase reservationUsecase, IAttacker attacker, IDefender defender, ShellAttackUsecase attackUsecase)
         {
             _entity = entity;
@@ -49,6 +52,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _defender = null;
         }
 
+        /// <summary>
+        ///     予約イベントの購読を解除して破棄する。
+        /// </summary>
         public void Dispose()
         {
             // 破棄する前に購読を解除する。

@@ -21,7 +21,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         /// <summary> 実行順です。 </summary>
         public override int Order => 30;
 
-        [SerializeField]
+        [SerializeField, Tooltip("デバッグ用に毎フレーム音量をログへ出すか。")]
         private bool _isDebug = true;
         private bool _initialized = false;
         private PersistentAudioVolumeRegistryView _volumeRegistryView;
@@ -53,6 +53,9 @@ namespace KillChord.Runtime.Composition.Persistent.Music
             return true;
         }
 
+        /// <summary>
+        ///     デバッグが有効な場合、ボイスと SE の音量をログへ出す。
+        /// </summary>
         private void Update()
         {
             if (_isDebug

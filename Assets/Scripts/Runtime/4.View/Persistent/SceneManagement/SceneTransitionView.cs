@@ -38,8 +38,8 @@ namespace KillChord.Runtime.View.Persistent.SceneManagement
             }
         }
 
-        [SerializeField, SceneNameSelector] private string _fromSceneName;
-        [SerializeField, SceneNameSelector] private string _toSceneName;
+        [SerializeField, Tooltip("遷移元のシーン名。"), SceneNameSelector] private string _fromSceneName;
+        [SerializeField, Tooltip("遷移先のシーン名。"), SceneNameSelector] private string _toSceneName;
 
         private SceneTransitionController _controller;
     }

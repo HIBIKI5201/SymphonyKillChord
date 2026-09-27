@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// </summary>
     public class EnemyPostAttackBehaviorUsecase
     {
+        /// <summary>
+        ///     攻撃後の行動選択の設定を指定して生成する。
+        /// </summary>
         public EnemyPostAttackBehaviorUsecase(EnemyPostAttackBehaviorSpec spec)
         {
             _spec = spec;

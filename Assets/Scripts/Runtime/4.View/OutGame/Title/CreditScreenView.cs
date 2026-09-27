@@ -151,6 +151,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         /// <exception cref="NullReferenceException"> 必要な UI 要素が見つからない場合に発生します。 </exception>
         private void Initialize(VisualElement rootElement, HierarchicalNavigationScope hierarchicalNavigationScope)
         {
+            // 引数が無い場合はエラーを出す。
             if (rootElement == null)
             {
 #if UNITY_EDITOR
@@ -165,6 +166,7 @@ namespace KillChord.Runtime.View.OutGame.Title
 #endif
             }
 
+            // 画面の各要素を取得する。見つからない場合は例外を投げる。
             _backButton = rootElement.Q<Button>(BACK_BUTTON_NAME)
                 ?? throw new NullReferenceException($"{nameof(CreditScreenView)}: {BACK_BUTTON_NAME}が見つかりません。");
             _backGround = rootElement.Q<VisualElement>(BACK_GROUND_NAME)
@@ -179,6 +181,7 @@ namespace KillChord.Runtime.View.OutGame.Title
                 ?? throw new NullReferenceException($"{nameof(CreditScreenView)}: {MENBER_SCROLL_VIEW_NAME}が見つかりません。");
             _assetsUsedListView = _assetsUsedTab.Q<ListView>()
                 ?? throw new NullReferenceException($"{nameof(CreditScreenView)}: 使用アセットのListViewが見つかりません。");
+            // タブ見出しを第1階層、各タブの中身を第2階層とする操作範囲を登録する。
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
             {
@@ -200,6 +203,7 @@ namespace KillChord.Runtime.View.OutGame.Title
                 },
                 _assetsUsedListView);
 
+            // メンバー一覧はドラッグでスクロールできるようにする。
             _dragScrollManipulator = new ScrollViewDragManipulator(_memberScrollView);
         }
 

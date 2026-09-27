@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Adaptor
     /// </summary>
     public class PlayerActionRestrictionState
     {
+        /// <summary>
+        ///     制限が何も無い状態で生成する。
+        /// </summary>
         public PlayerActionRestrictionState()
         {
             _skillRestriction = new HashSet<PlayerActionRestrictionReason>();

@@ -28,14 +28,16 @@ dotnet --info
 
 ## 3. 必要なディレクトリだけ取得する
 
-`REPOSITORY_URL`は実際のGitリポジトリURLへ置き換えてください。partial cloneとsparse-checkoutを組み合わせ、Unityの`Assets/`全体を取得せず、仕様書とBotだけを作業ツリーへ展開します。
+`REPOSITORY_URL`は実際のGitリポジトリURLへ置き換えてください。partial cloneとsparse-checkoutを組み合わせ、Unityの`Assets/`全体を取得せず、Botだけを作業ツリーへ展開します。
+
+仕様書のキャッシュ（`Docs/NotionSpecifications`）はgitで追跡していないため、cloneでは取得できません。NotionMarkdownExporterで生成したキャッシュを、作業ツリーの`Library/NotionSpecifications`へ別途コピーしてください（インデックス生成は`Library/NotionSpecifications`を優先し、無ければ`Docs/NotionSpecifications`を読みます）。
 
 ```bash
 sudo -u sinfonia git clone --filter=blob:none --no-checkout --sparse REPOSITORY_URL \
   /opt/sinfonia-specsearch/repository
 cd /opt/sinfonia-specsearch/repository
-sudo -u sinfonia git sparse-checkout set Docs/NotionSpecifications SinfoniaOperator
-sudo -u sinfonia git checkout main
+sudo -u sinfonia git sparse-checkout set SinfoniaOperator
+sudo -u sinfonia git checkout develop
 ```
 
 更新時も同じ作業ツリーで`sudo -u sinfonia git pull --ff-only`を実行します。
@@ -56,7 +58,7 @@ sudo -u sinfonia SinfoniaOperator/deploy/download-embedding-model.sh
 cd /opt/sinfonia-specsearch/repository
 sudo -u sinfonia dotnet publish SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj \
   --configuration Release \
-  --runtime linux-arm64 \
+  --runtime linux-x64 \
   --self-contained true \
   --output /opt/sinfonia-specsearch/publish
 ```
@@ -102,7 +104,7 @@ sudo systemctl stop sinfonia-specsearch.service
 
 ## 7. GitHub Actionsから自動デプロイする
 
-`Deploy Sinfonia Operator`ワークフローは、`develop`のSinfoniaOperator関連ファイルが更新されたとき、または手動実行されたときに次の処理を行います。
+`[CI/CD] Deploy Sinfonia Operator`ワークフローは、`develop`のSinfoniaOperator関連ファイルが更新されたとき、または手動実行されたときに次の処理を行います。
 
 1. Oracle VMのCPUに合う自己完結バイナリを発行する。
 2. Oracle VMへ成果物を転送する。

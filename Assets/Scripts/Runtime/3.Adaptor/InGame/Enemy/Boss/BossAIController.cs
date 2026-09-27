@@ -147,6 +147,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             }
         }
 
+        /// <summary>
+        ///     AI を停止して破棄する。
+        /// </summary>
         public void Dispose()
         {
             Deactivate();
@@ -176,6 +179,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             OnAttack?.Invoke();
         }
 
+        /// <summary>
+        ///     攻撃の2拍前に、現在の攻撃の射線警告の追従を開始する。
+        /// </summary>
         private void Handle2BeatBefore()
         {
             if (_current != null && _raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))
@@ -185,6 +191,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             On2BeatBefore?.Invoke();
         }
 
+        /// <summary>
+        ///     攻撃の1拍前に、射線警告の向きを固定して通知する。
+        /// </summary>
         private void Handle1BeatBefore()
         {
             if (_current != null && _raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))            {

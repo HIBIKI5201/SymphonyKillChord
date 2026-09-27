@@ -153,6 +153,7 @@ namespace KillChord.Runtime.Composition.InGame.Stage
         private IReadOnlyDictionary<int, IStageEffectDefinition> BuildEffectCatalog(
             EnemyModuleContainer enemyContainer)
         {
+            // 個別に設定されていなければ、敵の Wave 定義から作った演出の一覧を使う。
             StageEffectAssetBase[] catalogAssets =
                 _stageEffectCatalogAssets ?? Array.Empty<StageEffectAssetBase>();
             if (catalogAssets.Length == 0)
@@ -161,6 +162,7 @@ namespace KillChord.Runtime.Composition.InGame.Stage
                     ?? new Dictionary<int, IStageEffectDefinition>();
             }
 
+            // ID の重複を除いて演出の定義を作る。
             Dictionary<int, IStageEffectDefinition> catalog = new();
             for (int i = 0; i < catalogAssets.Length; i++)
             {

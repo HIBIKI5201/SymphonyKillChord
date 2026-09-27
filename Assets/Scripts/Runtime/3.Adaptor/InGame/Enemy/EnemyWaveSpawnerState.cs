@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyWaveSpawnerState
     {
+        /// <summary>
+        ///     敵の数を0にした初期状態で生成する。
+        /// </summary>
         public EnemyWaveSpawnerState()
         {
             _enemyCount = 0;

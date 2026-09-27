@@ -113,10 +113,12 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         /// <param name="skillId"> 装備中スキル ID。空の場合は EMPTY_SKILL_ID。 </param>
         private void BindSlot(VisualElement slotElement, int skillId)
         {
+            // スロット内の各要素を取得する。
             Image icon = slotElement.Q<Image>(SLOT_ICON_NAME);
             Label nameLabel = slotElement.Q<Label>(SLOT_NAME_LABEL_NAME);
             VisualElement comboRow = slotElement.Q<VisualElement>(SLOT_COMBO_ROW_NAME);
 
+            // 空のスロットは、アイコン・名前・コマンドを消す。
             if (skillId == EMPTY_SKILL_ID)
             {
                 slotElement.RemoveFromClassList(SLOT_FILLED_CLASS_NAME);
@@ -135,6 +137,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
+            // スキルが入っているスロットは、アイコン・名前・コマンドを表示する。
             SkillViewData? data = _skillDataResolver(skillId);
             slotElement.AddToClassList(SLOT_FILLED_CLASS_NAME);
             if (icon != null)

@@ -12,6 +12,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
     [CreateAssetMenu(
         fileName = nameof(MissionDefinitionRepository),
         menuName = "KillChord/Mission/" + nameof(MissionDefinitionRepository))]
+    /// <summary>
+    ///     ミッション定義を ID で検索するリポジトリ。
+    /// </summary>
     public sealed class MissionDefinitionRepository
         : ScriptableObjectRepositoryBase<MissionId, MissionDefinitionAsset, MissionDefinitionAsset>, IMissionPreviewProvider
     {
@@ -72,8 +75,10 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         [SerializeField, Tooltip("プランナーが編集可能にするミッション定義アセットの一覧です。")]
         private MissionDefinitionAsset[] _missionDefinitionAssets;
 
+        /// <inheritdoc/>
         protected override IReadOnlyList<MissionDefinitionAsset> GetEntries() => _missionDefinitionAssets;
 
+        /// <inheritdoc/>
         protected override bool TryBuild(
             MissionDefinitionAsset entry,
             out MissionId id,

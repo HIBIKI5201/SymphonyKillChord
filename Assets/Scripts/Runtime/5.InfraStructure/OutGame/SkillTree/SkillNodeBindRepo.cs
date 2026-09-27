@@ -23,6 +23,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
             return TryFind(id, out SkillNodeBindData bind) ? bind : null;
         }
 
+        /// <summary>
+        ///     名前が一致するスキルノードの対応データを取得する。見つからない場合は null を返す。
+        /// </summary>
         public SkillNodeBindData FindByName(string name)
         {
             if (SkillNodeBinds == null || SkillNodeBinds.Length <= 0)
@@ -45,8 +48,10 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
             return null;
         }
 
+        /// <inheritdoc/>
         protected override IReadOnlyList<SkillNodeBindData> GetEntries() => SkillNodeBinds;
 
+        /// <inheritdoc/>
         protected override bool TryBuild(SkillNodeBindData entry, out SkillNodeId id, out SkillNodeBindData value)
         {
             value = entry;

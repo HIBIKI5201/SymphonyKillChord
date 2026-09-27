@@ -12,6 +12,9 @@ namespace KillChord.Editor.SinfoniaOperator
     /// </summary>
     [FilePath(ProviderConst.USER_SETTINGS_PATH + nameof(SinfoniaOperatorSettings) + ProviderConst.ASSET_EXT,
         FilePathAttribute.Location.ProjectFolder)]
+    /// <summary>
+    ///     SinfoniaOperator の設定ファイルのパスなどを保持するプロジェクト設定。
+    /// </summary>
     public class SinfoniaOperatorSettings : ScriptableSingleton<SinfoniaOperatorSettings>
     {
         [FormerlySerializedAs("ConfigJsonPath")]

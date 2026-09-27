@@ -110,6 +110,7 @@ namespace KillChord.Editor.Inspectors.SourceData
             float minX = float.MaxValue, maxX = float.MinValue;
             float minZ = float.MaxValue, maxZ = float.MinValue;
 
+            // スポーン地点と NavMesh の頂点をすべて含む XZ 平面の範囲を求める。
             foreach (BattleSceneDataReader.SpawnPointInfo sp in mapData.SpawnPoints)
             {
                 Expand(sp.SpawnPosition, ref minX, ref maxX, ref minZ, ref maxZ);
@@ -133,6 +134,7 @@ namespace KillChord.Editor.Inspectors.SourceData
                 return false;
             }
 
+            // 範囲が狭すぎる場合は、中心を保ったまま最小サイズまで広げる。
             if (maxX - minX < MIN_BOUNDS_SIZE)
             {
                 float centerX = (minX + maxX) * 0.5f;

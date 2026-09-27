@@ -8,6 +8,9 @@ namespace KillChord.Runtime.View.InGame.Sequence
     [CreateAssetMenu(
         fileName = nameof(StageStartSequenceConfig),
         menuName = "KillChord/StageStartSequenceConfig")]
+    /// <summary>
+    ///     ステージ開始演出の時間などを設定するデータ。
+    /// </summary>
     public class StageStartSequenceConfig : ScriptableObject
     {
         /// <summary> 黒画面を表示する時間。 </summary>

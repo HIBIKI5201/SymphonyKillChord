@@ -5,18 +5,30 @@ using UnityEngine;
 
 namespace KillChord.Editor.AutoBuilder
 {
+    /// <summary>
+    ///     自動ビルドの実行と状態確認を行うエディタウィンドウ。
+    /// </summary>
     public class AutoBuildWindow : EditorWindow
     {
+        /// <summary>
+        ///     AutoBuilder ウィンドウを開く。
+        /// </summary>
         [MenuItem(ToolConst.TOOLS_PATH + "AutoBuilder")]
         public static void ShowWindow()
         {
             GetWindow<AutoBuildWindow>("AutoBuilder");
         }
 
+        /// <summary>
+        ///     ウィンドウ有効化時の処理。現在は何もしない。
+        /// </summary>
         private void OnEnable()
         {
         }
 
+        /// <summary>
+        ///     ビルド設定の確認と実行ボタンを描画する。
+        /// </summary>
         private void OnGUI()
         {
             AutoBuilderSettings settings = AutoBuilderSettings.instance;

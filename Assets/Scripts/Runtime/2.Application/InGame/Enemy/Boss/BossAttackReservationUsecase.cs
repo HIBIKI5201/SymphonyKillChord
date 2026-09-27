@@ -12,6 +12,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// </summary>
     public sealed class BossAttackReservationUsecase : IDisposable
     {
+        /// <summary>
+        ///     拍の予約に使うスケジューラーを指定して生成する。
+        /// </summary>
         public BossAttackReservationUsecase(IMusicActionScheduler musicActionScheduler)
         {
             _musicActionScheduler = musicActionScheduler;
@@ -69,16 +72,28 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         public void Deactivate() => Cancel();
 
+        /// <summary>
+        ///     予約中の攻撃をキャンセルして破棄する。
+        /// </summary>
         public void Dispose() => Cancel();
 
+        /// <summary>
+        ///     予約した拍に到達したとき、予約状態を解除して通知する。
+        /// </summary>
         private void HandleReservedTimingReached()
         {
             _hasReservation = false;
             OnReservedTimingReached?.Invoke();
         }
 
+        /// <summary>
+        ///     攻撃の2拍前になったことを通知する。
+        /// </summary>
         private void Handle2BeatBefore() => On2BeatBefore?.Invoke();
 
+        /// <summary>
+        ///     攻撃の1拍前になったことを通知する。
+        /// </summary>
         private void Handle1BeatBefore() => On1BeatBefore?.Invoke();
 
         /// <summary>

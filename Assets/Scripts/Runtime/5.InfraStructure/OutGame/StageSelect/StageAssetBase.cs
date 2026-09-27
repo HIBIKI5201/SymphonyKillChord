@@ -35,7 +35,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 new StageId(_stageId.Id),
                 _stageName,
                 _flavorText,
-                BuildFirstClearReward(),
+                BuildReward(_firstClearRewards),
                 BuildReward(_clearRewards),
                 _targetSceneName,
                 waveDefinitionRepository);
@@ -45,8 +45,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
 
             return new StageNode(definition, initialStatus);
         }
-
-        private const int LEGACY_REWARD_KIND_COUNT = 2;
 
 #if UNITY_EDITOR
         [Header("プランナーメモ")]
@@ -81,16 +79,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         [SerializeField, Tooltip("クリアするたびに付与するリソースと数量。初回クリア時は初回クリア報酬と合わせて付与する。")]
         private StageRewardEntry[] _clearRewards;
 
-        // 旧形式の初回クリア報酬。既存アセットのシリアライズ値を保持するため残す。
-        // 初回クリア報酬が未設定のアセットに限り、既知のリソースIDへ読み替えて使用する。
-        // 初回クリア報酬を「なし」にしたい場合に0へ戻せるよう、Inspector には表示したままにする。
-        [Header("旧形式の初回クリア報酬（移行用）")]
-        [SerializeField, Min(0), Tooltip("旧形式の改造ポイント。上の「初回クリア報酬」が空のときだけ使われる。初回クリア報酬をなしにする場合は0にすること。")]
-        private int _rewardSkillBuildPoint;
-
-        [SerializeField, Min(0), Tooltip("旧形式の研究ポイント。上の「初回クリア報酬」が空のときだけ使われる。初回クリア報酬をなしにする場合は0にすること。")]
-        private int _rewardSkillUnlockPoint;
-
         /// <summary>
         ///     ステージ固有の定義情報を生成する。
         /// </summary>
@@ -110,32 +98,6 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
             StageReward clearReward,
             string targetSceneName,
             IEnemyWaveDefinitionRepository waveDefinitionRepository);
-
-        /// <summary>
-        ///     初回クリア報酬を生成する。
-        ///     新形式が未設定の場合は、旧形式のポイント設定を既知のリソースIDへ読み替える。
-        /// </summary>
-        /// <returns> 初回クリア報酬。</returns>
-        private StageReward BuildFirstClearReward()
-        {
-            if (_firstClearRewards != null && _firstClearRewards.Length > 0)
-            {
-                return BuildReward(_firstClearRewards);
-            }
-
-            List<GameResourceAmount> legacyItems = new(LEGACY_REWARD_KIND_COUNT);
-            if (_rewardSkillBuildPoint > 0)
-            {
-                legacyItems.Add(new GameResourceAmount(GameResourceIds.SkillLevelupPoint, _rewardSkillBuildPoint));
-            }
-
-            if (_rewardSkillUnlockPoint > 0)
-            {
-                legacyItems.Add(new GameResourceAmount(GameResourceIds.ResearchPoint, _rewardSkillUnlockPoint));
-            }
-
-            return new StageReward(legacyItems);
-        }
 
         /// <summary>
         ///     入力された報酬エントリから報酬を生成する。ID未設定や数量0のエントリは無視する。

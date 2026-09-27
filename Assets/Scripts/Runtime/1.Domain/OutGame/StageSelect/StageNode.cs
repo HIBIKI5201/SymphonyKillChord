@@ -30,6 +30,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         public StageStatus Status => _status;
         /// <summary> ステージの定義情報。 </summary>
 
+        /// <summary> ステージの定義。 </summary>
         public StageDefinition Definition => _definition;
         /// <summary>
         ///     ステージをクリア済みにする。

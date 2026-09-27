@@ -11,6 +11,9 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     public interface IScenarioEventHandler
     {
         Type EventType { get; }
+        /// <summary>
+        ///     シナリオイベントを処理する。
+        /// </summary>
         ValueTask HandleAsync(IScenarioEvent e, CancellationToken ct);
     }
 }

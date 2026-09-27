@@ -91,6 +91,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             _patternMatchCount = dto.PatternMatchCount;
         }
 
+        /// <summary>
+        ///     リズムガイドの位置が取れるまで、表示位置の設定を毎フレーム再試行する。
+        /// </summary>
         private void Update()
         {
             // ACLikeRhythmGuideViewのゾーンデータは実プレイ開始後まで構築されないため、
@@ -102,6 +105,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             RefreshIconPosition(_displayedStepIndex);
         }
 
+        /// <summary>
+        ///     クールダウン中であれば、クールダウン表示を更新する。
+        /// </summary>
         private void FixedUpdate()
         {
             if (!_isSkillCoolingDown)
@@ -129,6 +135,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
         }
 
+        /// <summary>
+        ///     リズムガイドのレイアウト変更イベントの購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             if (_rhythmGuideView != null)
@@ -257,9 +266,11 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// </summary>
         private void PlayAppearAnimation()
         {
+            // 再生中のモーションを止め、アイコンの形を元に戻してから再生する。
             _appearMotion.TryCancel();
             ResetIconTransforms();
 
+            // 左右のアイコンを拡大と回転で弾ませる。
             Vector3 scaleStrength = _baseLocalScale * (_animationSetting.InputSuccessScaleMultiplier - 1f);
             _appearMotion = LSequence.Create()
                 .Join(LMotion.Punch.Create(_baseLocalScale, scaleStrength, _animationSetting.InputSuccessDuration)

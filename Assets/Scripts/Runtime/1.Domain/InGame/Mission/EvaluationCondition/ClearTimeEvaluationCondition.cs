@@ -26,8 +26,11 @@ namespace KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition
             _thresholdTime = thresholdTime;
             _description = description;
         }
+
+        /// <inheritdoc/>
         public MissionEvaluationId MissionEvaluationId { get; }
 
+        /// <inheritdoc/>
         public MissionEvaluationResultTiming ResultTiming => MissionEvaluationResultTiming.Cleared;
 
 

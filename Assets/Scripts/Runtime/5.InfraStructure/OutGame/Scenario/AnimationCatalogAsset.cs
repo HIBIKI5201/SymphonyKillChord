@@ -16,7 +16,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// <summary> Entries を取得する。 </summary>
         public IReadOnlyList<AnimationCatalogEntry> Entries => _entries;
 
-        [SerializeField]
+        [SerializeField, Tooltip("アニメーションの登録一覧。")]
         private AnimationCatalogEntry[] _entries = Array.Empty<AnimationCatalogEntry>();
     }
 }

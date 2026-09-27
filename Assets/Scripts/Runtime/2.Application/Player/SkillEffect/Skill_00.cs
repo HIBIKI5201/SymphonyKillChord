@@ -12,13 +12,18 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_00 : SkillBase
     {
+        /// <summary>
+        ///     対象に、倍率を掛けたスキルダメージを与える。
+        /// </summary>
         public override void Execute(in SkillEffectContext context)
         {
+            // ダメージ倍率と、現在の拍に対応する攻撃定義を取得する。
             float multiplier = (float)context.EffectSpec.GetRequiredValue(
                 SkillEffectParameterId.DamageMultiplier);
             AttackDefinition attackDefinition = context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
 
 
+            // 武器のダメージ倍率を使わずにダメージを計算し、スキルの倍率を掛ける。
             AttackResult result = AttackCalculator.Calculate(
                 attackDefinition,
                 context.PlayerEntity,
@@ -28,6 +33,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 applyWeaponDamageMultiplier: false);
             result = result.WithFinalDamage(result.FinalDamage * multiplier);
 
+            // ダメージを与える。
             result = DamageExecutor.Execute(
                 context.PlayerEntity,
                 context.TargetEntity,

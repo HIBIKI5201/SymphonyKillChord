@@ -14,6 +14,9 @@ namespace KillChord.Editor.AutoBuilder
     [FilePath(
         ProviderConst.PROJECT_SETTINGS_PATH + nameof(AutoBuilderSettings) + ProviderConst.ASSET_EXT,
         FilePathAttribute.Location.ProjectFolder)]
+    /// <summary>
+    ///     AutoBuilder のビルド出力先とビルドプロファイルを保持するプロジェクト設定。
+    /// </summary>
     public class AutoBuilderSettings : ScriptableSingleton<AutoBuilderSettings>
     {
         [FormerlySerializedAs("MasterPath")]
@@ -43,16 +46,25 @@ namespace KillChord.Editor.AutoBuilder
             new(GameDataVariant.Demo, AutoBuildMode.Development, nameof(DemoDevelopPath), nameof(DemoDevelopBuildProfiles)),
         };
 
+        /// <summary>
+        ///     出力先パスが空でなく、末尾がスラッシュで終わっているかを判定する。
+        /// </summary>
         public static bool IsPathValid(string path)
         {
             return !IsPathNullOrEmpty(path) && IsPathEndsWithSlash(path);
         }
 
+        /// <summary>
+        ///     出力先パスが未設定かを判定する。
+        /// </summary>
         public static bool IsPathNullOrEmpty(string path)
         {
             return string.IsNullOrEmpty(path);
         }
 
+        /// <summary>
+        ///     出力先パスの末尾がスラッシュまたはバックスラッシュかを判定する。
+        /// </summary>
         public static bool IsPathEndsWithSlash(string path)
         {
             if (path.Length < 1) { return false; }
@@ -60,16 +72,25 @@ namespace KillChord.Editor.AutoBuilder
             return path[^1] == '/' || path[^1] == '\\';
         }
 
+        /// <summary>
+        ///     ビルドプロファイルの配列が空でなく、null や重複を含まないかを判定する。
+        /// </summary>
         public static bool IsBuildProfilesValid(BuildProfile[] profiles)
         {
             return !IsBuildProfilesNullOrEmpty(profiles) && !HasEmptyBuildProfile(profiles) && !HasDuplicateBuildProfiles(profiles);
         }
 
+        /// <summary>
+        ///     ビルドプロファイルの配列が未設定または空かを判定する。
+        /// </summary>
         public static bool IsBuildProfilesNullOrEmpty(BuildProfile[] profiles)
         {
             return profiles == null || profiles.Length == 0;
         }
 
+        /// <summary>
+        ///     ビルドプロファイルの配列に null の要素が含まれるかを判定する。
+        /// </summary>
         public static bool HasEmptyBuildProfile(BuildProfile[] profiles)
         {
             foreach (BuildProfile profile in profiles)
@@ -83,6 +104,9 @@ namespace KillChord.Editor.AutoBuilder
             return false;
         }
 
+        /// <summary>
+        ///     ビルドプロファイルの配列に同じプロファイルが重複して含まれるかを判定する。
+        /// </summary>
         public static bool HasDuplicateBuildProfiles(BuildProfile[] profiles)
         {
             HashSet<BuildProfile> uniqueProfiles = new();
@@ -99,6 +123,9 @@ namespace KillChord.Editor.AutoBuilder
             return false;
         }
 
+        /// <summary>
+        ///     設定をファイルへ保存する。
+        /// </summary>
         public static void Save() => instance.Save(true);
 
         /// <summary>

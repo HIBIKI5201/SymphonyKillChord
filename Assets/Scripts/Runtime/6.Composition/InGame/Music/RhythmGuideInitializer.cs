@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         /// </summary>
         public void Initialize()
         {
+            // ビューと、依存するサービスを確認する。
             if (_rhythmGuideView == null || _rhythmGuideUpdateView == null)
             {
                 Debug.LogError($"[{nameof(RhythmGuideInitializer)}] RhythmGuideView / RhythmGuideUpdateView の参照を設定してください。", this);
@@ -41,6 +42,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 return;
             }
 
+            // リズムガイドのユースケース・プレゼンター・ViewModel を作り、ビューを初期化する。
             RhythmGuideUsecase usecase = new RhythmGuideUsecase();
 
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(

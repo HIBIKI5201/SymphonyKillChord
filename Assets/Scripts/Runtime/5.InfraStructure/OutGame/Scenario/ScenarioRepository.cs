@@ -110,12 +110,14 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 return new ScenarioDefinition(Array.Empty<IScenarioEvent>());
             }
 
+            // 1行目のヘッダーから列の位置を引けるようにする。
             List<string> headers = ParseCsvLine(lines[0]);
             var headerIndex = BuildHeaderIndex(headers);
             var eventRows = new List<EventRow>(Math.Max(4, lines.Length - 1));
             var triggerRows = new List<TriggerRow>(Math.Max(2, lines.Length / 2));
             int autoStep = 1;
 
+            // 2行目以降を読み、空行とコメント行は飛ばす。トリガー行とイベント行に分けて集める。
             for (int lineNo = 2; lineNo <= lines.Length; lineNo++)
             {
                 string raw = lines[lineNo - 1];
@@ -139,6 +141,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                     continue;
                 }
 
+                // ステップ番号が省略された行は、直前の番号の次を割り当てる。
                 int step = ParseOptionalInt(
                     GetValue(values, headerIndex, STEP_COLUMN),
                     autoStep,
@@ -148,6 +151,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 eventRows.Add(new EventRow(lineNo, step, type, values));
             }
 
+            // イベントを作り、ステップ番号の重複を確認する。
             var definitions = new Dictionary<int, EventDefinition>();
             var orderedSteps = new List<int>(eventRows.Count);
 
@@ -163,6 +167,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 orderedSteps.Add(row.Step);
             }
 
+            // トリガーを親のテキストイベントへ追加する。
             foreach (TriggerRow row in triggerRows)
             {
                 if (!definitions.TryGetValue(row.ParentStep, out EventDefinition parent))
@@ -180,6 +185,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 textParent.AddTrigger(trigger);
             }
 
+            // 記述順にイベントを並べて返す。
             var events = new List<IScenarioEvent>(orderedSteps.Count);
             foreach (int step in orderedSteps)
             {
@@ -198,6 +204,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             var orderedSteps = new List<int>(Math.Max(4, lines.Length));
             var pendingTriggers = new List<AuthoringTriggerRow>(Math.Max(2, lines.Length / 2));
 
+            // 1列目をステップ番号、2列目を種類として読む。空行とコメント行は飛ばす。
             for (int lineNo = 1; lineNo <= lines.Length; lineNo++)
             {
                 string raw = lines[lineNo - 1];
@@ -218,6 +225,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                     throw new FormatException($"line {lineNo}: {TYPE_COLUMN} is required.");
                 }
 
+                // トリガー行は、すべてのイベントを作った後で親に追加するため保留する。
                 if (type.Equals(TRIGGER_EVENT_TYPE, StringComparison.OrdinalIgnoreCase))
                 {
                     pendingTriggers.Add(new AuthoringTriggerRow(lineNo, fields));
@@ -234,6 +242,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 orderedSteps.Add(step);
             }
 
+            // 保留していたトリガーを親のテキストイベントへ追加する。
             foreach (AuthoringTriggerRow triggerRow in pendingTriggers)
             {
                 int parentStep = ParseRequiredInt(
@@ -255,6 +264,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
                 textParent.AddTrigger(trigger);
             }
 
+            // 記述順にイベントを並べて返す。
             var events = new List<IScenarioEvent>(orderedSteps.Count);
             foreach (int step in orderedSteps)
             {
@@ -269,6 +279,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// </summary>
         private static EventDefinition CreateAuthoringEventDefinition(int step, string type, IReadOnlyList<string> fields, int lineNo)
         {
+            // 種類に応じて、3列目以降を引数として読みイベントを作る。
             switch (type.Trim().ToLowerInvariant())
             {
                 case TEXT_EVENT_TYPE:
@@ -343,6 +354,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// </summary>
         private static TextTimingTrigger CreateAuthoringTrigger(IReadOnlyList<string> fields, int lineNo, string text)
         {
+            // 発火条件の種類と、発火させるイベントの種類は必須。
             string triggerTypeRaw = GetAuthoringField(fields, 3);
             string triggerType = triggerTypeRaw?.Trim();
             if (string.IsNullOrWhiteSpace(triggerType))
@@ -358,6 +370,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
 
             IScenarioEvent fireEvent = CreateAuthoringTriggerEvent(fields, lineNo, onTriggerType);
+            // 発火条件の種類に応じてトリガーを作る。文末は本文の文字数の位置で発火させる。
             switch (triggerType.ToLowerInvariant())
             {
                 case AT_CHAR_INDEX_TRIGGER_TYPE:
@@ -398,6 +411,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
         /// </summary>
         private static IScenarioEvent CreateAuthoringTriggerEvent(IReadOnlyList<string> fields, int lineNo, string onTriggerType)
         {
+            // 種類に応じて、8列目以降を引数として読みイベントを作る。
             switch (onTriggerType.ToLowerInvariant())
             {
                 case FADE_EVENT_TYPE:
@@ -672,6 +686,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             int lineNo,
             string text)
         {
+            // 発火させるイベントの種類は必須。
             string onTriggerTypeRaw = GetValue(values, headerIndex, ON_TRIGGER_TYPE_COLUMN);
             string onTriggerType = onTriggerTypeRaw?.Trim();
             if (string.IsNullOrWhiteSpace(onTriggerType))
@@ -681,6 +696,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             }
 
             IScenarioEvent fireEvent = CreateTriggerEvent(values, headerIndex, lineNo, onTriggerType);
+            // 発火条件の種類に応じてトリガーを作る。文末は本文の文字数の位置で発火させる。
             string triggerTypeRaw = GetValue(values, headerIndex, TRIGGER_TYPE_COLUMN);
             string triggerType = triggerTypeRaw?.Trim();
 
@@ -735,6 +751,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             int lineNo,
             string onTriggerType)
         {
+            // 種類に応じて、引数の列を読みイベントを作る。
             switch (onTriggerType.ToLowerInvariant())
             {
                 case FADE_EVENT_TYPE:

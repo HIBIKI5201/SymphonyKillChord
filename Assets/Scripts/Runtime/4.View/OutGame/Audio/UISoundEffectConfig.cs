@@ -12,6 +12,9 @@ namespace KillChord.Runtime.View.OutGame.Audio
     [CreateAssetMenu(
         fileName = nameof(UISoundEffectConfig),
         menuName = "KillChord/OutGame/Audio/UI Sound Effect Config")]
+    /// <summary>
+    ///     UI 操作時に再生する効果音の Cue を設定するデータ。
+    /// </summary>
     public sealed class UISoundEffectConfig : ScriptableObject
     {
         /// <summary> Buttonに使用する既定のClick Cue。 </summary>
@@ -251,6 +254,9 @@ namespace KillChord.Runtime.View.OutGame.Audio
             return false;
         }
 
+        /// <summary>
+        ///     USS クラスと効果音の Cue 名の対応。
+        /// </summary>
         [Serializable]
         private sealed class SoundMapping
         {

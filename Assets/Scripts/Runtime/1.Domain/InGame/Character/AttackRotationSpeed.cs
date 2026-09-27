@@ -7,6 +7,10 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// </summary>
     public readonly struct AttackRotationSpeed
     {
+        /// <summary>
+        ///     攻撃時の回転速度を生成する。
+        ///     負の値は例外を投げる。
+        /// </summary>
         public AttackRotationSpeed(float value)
         {
             if (value < 0f)

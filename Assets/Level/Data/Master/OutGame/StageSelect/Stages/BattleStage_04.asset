@@ -20,8 +20,16 @@ MonoBehaviour:
   _stageName: 3
   _flavorText: "\u30B9\u30C6\u30FC\u30B83\n\u5927\u91CF\u306E\u6575\u3092\u6BB2\u6EC5\u3057\u3001\u52DD\u5229\u3092\u63B4\u307F\u3068\u308C"
   _targetSceneName: InGame
-  _rewardSkillBuildPoint: 10
-  _rewardSkillUnlockPoint: 5
+  _firstClearRewards:
+  - _resourceId:
+      _id: SkillLevelupPoint
+      _hashId: 1374829010
+    _amount: 10
+  - _resourceId:
+      _id: ResearchPoint
+      _hashId: -806205115
+    _amount: 5
+  _clearRewards: []
   _isTutorial: 0
   _enemyWaveDefinitionId:
     _id: enemy_wave_04

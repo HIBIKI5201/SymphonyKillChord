@@ -9,6 +9,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
     /// </summary>
     public class RecordController
     {
+        /// <summary>
+        ///     入力を記録するレコーダーを指定して生成する。
+        /// </summary>
         public RecordController(InputBufferRecorder inputBufferRecorder)
         {
             _inputBufferRecorder = inputBufferRecorder;
@@ -49,6 +52,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
 
         private readonly InputBufferRecorder _inputBufferRecorder;
 
+        /// <summary>
+        ///     Vector2 型の入力をバッファ記録用の形式に変換する。
+        /// </summary>
         private BufferedInput Convert(InputActionId id, InputContext<Vector2> context)
         {
             return new(
@@ -60,6 +66,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Input
                 );
         }
 
+        /// <summary>
+        ///     float 型の入力をバッファ記録用の形式に変換する。
+        /// </summary>
         private BufferedInput Convert(InputActionId id, InputContext<float> context)
         {
             return new(

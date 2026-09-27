@@ -76,6 +76,9 @@ namespace KillChord.Runtime.View.InGame.Mission
         private bool _isInitialized;
         private bool _isPaused;
 
+        /// <summary>
+        ///     再生中のスライドアニメーションを止める。
+        /// </summary>
         private void OnDisable()
         {
             _motion.TryCancel();

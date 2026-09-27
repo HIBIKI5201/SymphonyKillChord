@@ -9,12 +9,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     /// </summary>
     public class SkillCooldownState
     {
+        /// <summary>
+        ///     スキル定義を指定して、すぐ使える状態で生成する。
+        /// </summary>
         public SkillCooldownState(in SkillDefinition skill)
         {
             _skillDefinition = skill;
             _skillReadyTimestamp = 0f;
         }
 
+        /// <summary> スキルを再び使えるようになる時刻。 </summary>
         public float SkillReadyTimestamp => _skillReadyTimestamp;
 
         /// <summary>

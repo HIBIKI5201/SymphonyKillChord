@@ -10,6 +10,10 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
     [Serializable]
     public class StageClearData
     {
+        /// <summary>
+        ///     ステージ ID を指定してクリアデータを生成する。
+        ///     0 の場合は例外を投げる。
+        /// </summary>
         public StageClearData(int stageId)
         {
             if (stageId == 0)
@@ -74,7 +78,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
             AddAchievedEvaluationIds(other._achievedEvaluationIds);
         }
 
-        [SerializeField] private int _stageId;
-        [SerializeField] private List<string> _achievedEvaluationIds;
+        [SerializeField, Tooltip("ステージ ID。")] private int _stageId;
+        [SerializeField, Tooltip("達成済みの評価 ID の一覧。")] private List<string> _achievedEvaluationIds;
     }
 }

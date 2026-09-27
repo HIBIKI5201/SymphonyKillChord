@@ -10,6 +10,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     public class AttackPowerIncreaseBuff
         : StatusEffectBase, IAttackPowerModifier
     {
+        /// <summary>
+        ///     攻撃力の加算量と持続時間を指定して生成する。
+        /// </summary>
         public AttackPowerIncreaseBuff(
             float increaseAmount,
             float durationSeconds)
@@ -29,7 +32,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
             _increaseAmount = increaseAmount;
         }
 
-        ///</inheritdoc/>
+        /// <summary>
+        ///     攻撃力に加算量を足す。
+        /// </summary>
         public Damage ModifyAttackPower(IAttacker attacker, IDefender defender, Damage attackPower)
         {
             return attackPower + _increaseAmount;
