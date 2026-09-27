@@ -154,7 +154,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _attackReservationUsecase = attackReservationUsecase;
 
 
-            EnemyBattleState battleState = new EnemyBattleState(_enemyEntity, targetEntity, attackDefinition);
+            EnemyBattleState battleState = new EnemyBattleState(_enemyEntity, targetEntity, attackDefinition, _useDiscoverySystem);
             _battleState = battleState;
 
             // AttackController生成用コンテキスト
@@ -421,6 +421,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, Tooltip("Behavior Graph と共有する参照の窓口。")] private EnemySharedFacade _enemySharedFacade;
         [SerializeField, Tooltip("敵の AI を動かす Behavior Graph。")] private BehaviorGraphAgent _behaviorGraphAgent;
         [SerializeField, Tooltip("敵の経路移動に使う NavMeshAgent。")] private NavMeshAgent _navMeshAgent;
+        [SerializeField, Tooltip("発見システムを使うか。オフの場合は出現時から常に発見状態で動きます。")]
+        private bool _useDiscoverySystem;
         [SerializeField, Tooltip("敵のアニメーションを再生するビュー。")] private CharacterAnimationView _characterAnimationView;
         [SerializeField, Tooltip("敵キャラクターのアニメーション設定です。")]
         private CharacterAnimationCatalogConfig _characterAnimationConfig;
