@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -70,7 +71,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _reservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
             _reservationUsecase.On2BeatBefore += Handle2BeatBefore;
             _reservationUsecase.On1BeatBefore += Handle1BeatBefore;
-            EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
             _isActive = true;
         }
 
@@ -85,7 +85,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _reservationUsecase.On2BeatBefore -= Handle2BeatBefore;
             _reservationUsecase.On1BeatBefore -= Handle1BeatBefore;
             _reservationUsecase.Deactivate();
-            EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
             _isActive = false;
         }
 
@@ -203,19 +202,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         }
 
         /// <summary>
-        ///     ダメージを受けた時の処理。クリティカル時は硬直する。
-        /// </summary>
-        private void HandleOnDamageTaken(EOnTakeDamage eventParam)
-        {
-            if (eventParam.DefenderId != _enemyBattleState.Attacker.Id) return;
-            if (eventParam.Critical)
-            {
-                _enemyBattleState.Stunned();
-                _stateFacade.Stunned();
-            }
-        }
-
-        /// <summary>
         ///     ボスのHPが変わった時の処理。
         ///     半分以下になった時、イベントを発火する。
         ///     イベントの発火は1度のみとする。
@@ -228,7 +214,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             if (_lowHpEventTriggered) return;
             if(currentHp < maxHp * LOW_HP_EVENT_TRIGGER_RATIO)
             {
-                Debug.Log("<color=red>ボス体力が半分以下になった</color>");
+                DevLog.Log("<color=red>ボス体力が半分以下になった</color>");
                 OnLowHp?.Invoke();
                 _lowHpEventTriggered = true;
             }

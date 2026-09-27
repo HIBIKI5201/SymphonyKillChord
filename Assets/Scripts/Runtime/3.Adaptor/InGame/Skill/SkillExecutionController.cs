@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
@@ -58,7 +59,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         {
             if (!_skillCooldownState.IsSkillReady(now))
             {
-                Debug.Log($"[SkillExecutionController] クールダウン中。ID：{_skillDefinition.Id.Value}");
+                DevLog.Log($"[SkillExecutionController] クールダウン中。ID：{_skillDefinition.Id.Value}");
                 return new SkillExecutionResult(SkillExecutionResultType.CooldownBlocked);
             }
 

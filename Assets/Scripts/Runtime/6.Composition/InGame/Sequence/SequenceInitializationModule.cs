@@ -263,15 +263,25 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <param name="isSuccess"> ロード処理に成功した場合はtrue。 </param>
         private async void HandleLoadingCompleted(bool isSuccess)
         {
-            UnsubscribeLoadingCompleted();
-
-            if (isSuccess)
+            try
             {
-                StartStageSequence();
-                return;
-            }
+                UnsubscribeLoadingCompleted();
 
-            await ReturnToOutGameAfterLoadingFailureAsync();
+                if (isSuccess)
+                {
+                    StartStageSequence();
+                    return;
+                }
+
+                await ReturnToOutGameAfterLoadingFailureAsync();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>

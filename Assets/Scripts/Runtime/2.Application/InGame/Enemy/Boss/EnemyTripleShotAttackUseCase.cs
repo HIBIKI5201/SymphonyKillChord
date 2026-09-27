@@ -1,5 +1,6 @@
 using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Enemy
@@ -37,16 +38,15 @@ namespace KillChord.Runtime.Application.InGame.Enemy
                 return;
             }
 
-            Debug.Log($"[EnemyTripleShotAttackUseCase] ExecuteAttack 開始 Attack={attackDefinition?.AttackName}");
+            DevLog.Log($"[EnemyTripleShotAttackUseCase] ExecuteAttack 開始 Attack={attackDefinition?.AttackName}");
 
             if (_raycastDetector.CanRaycastHitTarget)
             {
                 AttackResult result = AttackExecutor.Execute(
-                    attackDefinition, attacker, defender, false, _baseDamage);
-                Debug.Log($"[EnemyTripleShotAttackUseCase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
+                    attackDefinition, attacker, defender, false, attacker.BaseDamage);
+                DevLog.Log($"[EnemyTripleShotAttackUseCase] ExecuteAttack 完了 Damage={result.FinalDamage.Value}");
             }
         }
-        private Damage _baseDamage = new Damage(10); // TODO敵の基礎攻撃力があるはずなので、それを使用するようにする。
         private readonly EnemyRaycastDetectService _raycastDetector;
     }
 }

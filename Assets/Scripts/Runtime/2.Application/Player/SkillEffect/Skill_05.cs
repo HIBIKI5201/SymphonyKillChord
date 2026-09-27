@@ -3,6 +3,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
@@ -49,7 +50,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             result = DamageExecutor.Execute(
                 context.PlayerEntity, context.TargetEntity, result, DamageAttackType.Skill);
 
-            Debug.Log(
+            DevLog.Log(
                 $"[Skill05] 発動。" +
                 $"RequestedCost:{requestHealthCost.Value:0.##}, " +
                 $"ConsumedHealth:{consumedHealth.Value:0.##}, " +

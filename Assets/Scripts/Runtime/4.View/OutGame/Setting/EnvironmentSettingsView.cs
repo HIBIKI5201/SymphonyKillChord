@@ -46,6 +46,18 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _vibrationNextButton = Require<Button>(rootElement, VIBRATION_NEXT_BUTTON_NAME);
             _vibrationValueLabel = Require<Label>(rootElement, VIBRATION_VALUE_LABEL_NAME);
             _saveButton = Require<Button>(rootElement, SAVE_BUTTON_NAME);
+            _cameraSensitivitySlider = Require<SliderInt>(rootElement, CAMERA_SENSITIVITY_SLIDER_NAME);
+            _cameraSensitivityValueLabel = Require<Label>(rootElement, CAMERA_SENSITIVITY_VALUE_LABEL_NAME);
+            _cameraInvertPrevButton = Require<Button>(rootElement, CAMERA_INVERT_PREV_BUTTON_NAME);
+            _cameraInvertNextButton = Require<Button>(rootElement, CAMERA_INVERT_NEXT_BUTTON_NAME);
+            _cameraInvertValueLabel = Require<Label>(rootElement, CAMERA_INVERT_VALUE_LABEL_NAME);
+            _autoLockOnPrevButton = Require<Button>(rootElement, AUTO_LOCK_ON_PREV_BUTTON_NAME);
+            _autoLockOnNextButton = Require<Button>(rootElement, AUTO_LOCK_ON_NEXT_BUTTON_NAME);
+            _autoLockOnValueLabel = Require<Label>(rootElement, AUTO_LOCK_ON_VALUE_LABEL_NAME);
+            _controlSaveButton = Require<Button>(rootElement, CONTROL_SAVE_BUTTON_NAME);
+            _buttonLayoutPrevButton = Require<Button>(rootElement, BUTTON_LAYOUT_PREV_BUTTON_NAME);
+            _buttonLayoutNextButton = Require<Button>(rootElement, BUTTON_LAYOUT_NEXT_BUTTON_NAME);
+            _buttonLayoutValueLabel = Require<Label>(rootElement, BUTTON_LAYOUT_VALUE_LABEL_NAME);
             _subscriptions = new CompositeDisposable();
 
             // 操作の登録と ViewModel の購読を行う。
@@ -68,6 +80,17 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _languageNextButtonPreset.Dispose();
             _vibrationPrevButtonPreset.Dispose();
             _vibrationNextButtonPreset.Dispose();
+            _cameraInvertPrevButtonPreset.Dispose();
+            _cameraInvertNextButtonPreset.Dispose();
+            _autoLockOnPrevButtonPreset.Dispose();
+            _autoLockOnNextButtonPreset.Dispose();
+            _buttonLayoutPrevButtonPreset.Dispose();
+            _buttonLayoutNextButtonPreset.Dispose();
+            _buttonLayoutLocalizedText?.Dispose();
+            _cameraSensitivitySlider.UnregisterValueChangedCallback(HandleCameraSensitivityChanged);
+            _controlSaveButton.clicked -= HandleSaveButtonClicked;
+            _cameraInvertLocalizedText?.Dispose();
+            _autoLockOnLocalizedText?.Dispose();
             _brightnessSlider.UnregisterValueChangedCallback(HandleBrightnessChanged);
             _rhythmOffsetSlider.UnregisterValueChangedCallback(HandleRhythmOffsetChanged);
             _saveButton.clicked -= HandleSaveButtonClicked;
@@ -107,6 +130,18 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string VIBRATION_NEXT_BUTTON_NAME = "VibrationNextButton";
         private const string VIBRATION_VALUE_LABEL_NAME = "VibrationValueLabel";
         private const string SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
+        private const string CAMERA_SENSITIVITY_SLIDER_NAME = "CameraSensitivitySlider";
+        private const string CAMERA_SENSITIVITY_VALUE_LABEL_NAME = "CameraSensitivityValueLabel";
+        private const string CAMERA_INVERT_PREV_BUTTON_NAME = "CameraInvertPrevButton";
+        private const string CAMERA_INVERT_NEXT_BUTTON_NAME = "CameraInvertNextButton";
+        private const string CAMERA_INVERT_VALUE_LABEL_NAME = "CameraInvertValueLabel";
+        private const string AUTO_LOCK_ON_PREV_BUTTON_NAME = "AutoLockOnPrevButton";
+        private const string AUTO_LOCK_ON_NEXT_BUTTON_NAME = "AutoLockOnNextButton";
+        private const string AUTO_LOCK_ON_VALUE_LABEL_NAME = "AutoLockOnValueLabel";
+        private const string CONTROL_SAVE_BUTTON_NAME = "ControlPanelSaveButton";
+        private const string BUTTON_LAYOUT_PREV_BUTTON_NAME = "ButtonLayoutPrevButton";
+        private const string BUTTON_LAYOUT_NEXT_BUTTON_NAME = "ButtonLayoutNextButton";
+        private const string BUTTON_LAYOUT_VALUE_LABEL_NAME = "ButtonLayoutValueLabel";
         private const string UI_COMMON_TABLE = "UICommon";
         private const int CYCLE_PREVIOUS_DIRECTION = -1;
         private const int CYCLE_NEXT_DIRECTION = 1;
@@ -133,6 +168,18 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _vibrationNextButton;
         private readonly Label _vibrationValueLabel;
         private readonly Button _saveButton;
+        private readonly SliderInt _cameraSensitivitySlider;
+        private readonly Label _cameraSensitivityValueLabel;
+        private readonly Button _cameraInvertPrevButton;
+        private readonly Button _cameraInvertNextButton;
+        private readonly Label _cameraInvertValueLabel;
+        private readonly Button _autoLockOnPrevButton;
+        private readonly Button _autoLockOnNextButton;
+        private readonly Label _autoLockOnValueLabel;
+        private readonly Button _controlSaveButton;
+        private readonly Button _buttonLayoutPrevButton;
+        private readonly Button _buttonLayoutNextButton;
+        private readonly Label _buttonLayoutValueLabel;
         private readonly CompositeDisposable _subscriptions;
         private IDisposable _screenModePrevButtonPreset;
         private IDisposable _screenModeNextButtonPreset;
@@ -144,10 +191,19 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private IDisposable _languageNextButtonPreset;
         private IDisposable _vibrationPrevButtonPreset;
         private IDisposable _vibrationNextButtonPreset;
+        private IDisposable _cameraInvertPrevButtonPreset;
+        private IDisposable _cameraInvertNextButtonPreset;
+        private IDisposable _autoLockOnPrevButtonPreset;
+        private IDisposable _autoLockOnNextButtonPreset;
+        private IDisposable _buttonLayoutPrevButtonPreset;
+        private IDisposable _buttonLayoutNextButtonPreset;
         private LocalizedElementText _screenModeLocalizedText;
         private LocalizedElementText _languageLocalizedText;
         private LocalizedElementText _vibrationLocalizedText;
         private LocalizedElementText _rhythmOffsetLocalizedText;
+        private LocalizedElementText _cameraInvertLocalizedText;
+        private LocalizedElementText _autoLockOnLocalizedText;
+        private LocalizedElementText _buttonLayoutLocalizedText;
 
         /// <summary>
         ///     UIのコールバックを登録する。
@@ -167,6 +223,14 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _brightnessSlider.RegisterValueChangedCallback(HandleBrightnessChanged);
             _rhythmOffsetSlider.RegisterValueChangedCallback(HandleRhythmOffsetChanged);
             _saveButton.clicked += HandleSaveButtonClicked;
+            _cameraInvertPrevButtonPreset = _cameraInvertPrevButton.ApplyBasicButtonPreset(HandleCameraInvertPrevButtonClicked);
+            _cameraInvertNextButtonPreset = _cameraInvertNextButton.ApplyBasicButtonPreset(HandleCameraInvertNextButtonClicked);
+            _autoLockOnPrevButtonPreset = _autoLockOnPrevButton.ApplyBasicButtonPreset(HandleAutoLockOnButtonClicked);
+            _autoLockOnNextButtonPreset = _autoLockOnNextButton.ApplyBasicButtonPreset(HandleAutoLockOnButtonClicked);
+            _cameraSensitivitySlider.RegisterValueChangedCallback(HandleCameraSensitivityChanged);
+            _controlSaveButton.clicked += HandleSaveButtonClicked;
+            _buttonLayoutPrevButtonPreset = _buttonLayoutPrevButton.ApplyBasicButtonPreset(HandleButtonLayoutButtonClicked);
+            _buttonLayoutNextButtonPreset = _buttonLayoutNextButton.ApplyBasicButtonPreset(HandleButtonLayoutButtonClicked);
         }
 
         /// <summary>
@@ -198,6 +262,18 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 .AddTo(_subscriptions);
             _environmentSettingsViewModel.RhythmOffsetLabel
                 .Subscribe(HandleRhythmOffsetLabelPublished)
+                .AddTo(_subscriptions);
+            _environmentSettingsViewModel.CameraSensitivity
+                .Subscribe(HandleCameraSensitivityPublished)
+                .AddTo(_subscriptions);
+            _environmentSettingsViewModel.CameraInvertModeLabel
+                .Subscribe(HandleCameraInvertModeLabelPublished)
+                .AddTo(_subscriptions);
+            _environmentSettingsViewModel.AutoLockOnLabel
+                .Subscribe(HandleAutoLockOnLabelPublished)
+                .AddTo(_subscriptions);
+            _environmentSettingsViewModel.ButtonLayoutLabel
+                .Subscribe(HandleButtonLayoutLabelPublished)
                 .AddTo(_subscriptions);
         }
 
@@ -298,6 +374,46 @@ namespace KillChord.Runtime.View.OutGame.Setting
         }
 
         /// <summary>
+        ///     カメラ感度ゲージの変更を環境設定へ渡す。
+        /// </summary>
+        private void HandleCameraSensitivityChanged(ChangeEvent<int> changeEvent)
+        {
+            _environmentSettingsCommand.SetCameraSensitivity(changeEvent.newValue);
+        }
+
+        /// <summary>
+        ///     カメラ操作の反転方向を前へ切り替える。
+        /// </summary>
+        private void HandleCameraInvertPrevButtonClicked()
+        {
+            _environmentSettingsCommand.CycleCameraInvertMode(CYCLE_PREVIOUS_DIRECTION);
+        }
+
+        /// <summary>
+        ///     カメラ操作の反転方向を次へ切り替える。
+        /// </summary>
+        private void HandleCameraInvertNextButtonClicked()
+        {
+            _environmentSettingsCommand.CycleCameraInvertMode(CYCLE_NEXT_DIRECTION);
+        }
+
+        /// <summary>
+        ///     オートロックオンのオンとオフを切り替える。
+        /// </summary>
+        private void HandleAutoLockOnButtonClicked()
+        {
+            _environmentSettingsCommand.ToggleAutoLockOn();
+        }
+
+        /// <summary>
+        ///     ゲームパッドの決定・キャンセルの配置を切り替える。
+        /// </summary>
+        private void HandleButtonLayoutButtonClicked()
+        {
+            _environmentSettingsCommand.ToggleButtonLayout();
+        }
+
+        /// <summary>
         ///     プレビュー中の変更を保存として確定する。
         /// </summary>
         private void HandleSaveButtonClicked()
@@ -389,6 +505,54 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 text => _rhythmOffsetValueLabel.text = text,
                 fallback: label + "秒",
                 arguments: new object[] { label });
+        }
+
+        /// <summary>
+        ///     カメラ感度をゲージと数値表示へ反映する。
+        /// </summary>
+        private void HandleCameraSensitivityPublished(int cameraSensitivity)
+        {
+            _cameraSensitivitySlider.SetValueWithoutNotify(cameraSensitivity);
+            _cameraSensitivityValueLabel.text = cameraSensitivity.ToString();
+        }
+
+        /// <summary>
+        ///     カメラ操作の反転方向を表示へ反映する。
+        /// </summary>
+        /// <param name="labelKey"> UICommonテーブルのローカライズキーです。 </param>
+        private void HandleCameraInvertModeLabelPublished(string labelKey)
+        {
+            _cameraInvertLocalizedText?.Dispose();
+            _cameraInvertLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                labelKey,
+                text => _cameraInvertValueLabel.text = text);
+        }
+
+        /// <summary>
+        ///     オートロックオンのオンとオフを表示へ反映する。
+        /// </summary>
+        /// <param name="labelKey"> UICommonテーブルのローカライズキーです。 </param>
+        private void HandleAutoLockOnLabelPublished(string labelKey)
+        {
+            _autoLockOnLocalizedText?.Dispose();
+            _autoLockOnLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                labelKey,
+                text => _autoLockOnValueLabel.text = text);
+        }
+
+        /// <summary>
+        ///     ゲームパッドの決定・キャンセルの配置を表示へ反映する。
+        /// </summary>
+        /// <param name="labelKey"> UICommonテーブルのローカライズキーです。 </param>
+        private void HandleButtonLayoutLabelPublished(string labelKey)
+        {
+            _buttonLayoutLocalizedText?.Dispose();
+            _buttonLayoutLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                labelKey,
+                text => _buttonLayoutValueLabel.text = text);
         }
 
         /// <summary>

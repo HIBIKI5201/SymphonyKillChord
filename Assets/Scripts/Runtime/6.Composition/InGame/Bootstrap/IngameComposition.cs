@@ -6,6 +6,7 @@ using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Camera;
 using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -55,7 +56,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         {
             if (!IsBootedThroughPersistentFlow)
             {
-                Debug.Log(
+                DevLog.Log(
                     $"[{nameof(IngameComposition)}] " +
                     $"常駐シーンが未起動のため、インゲーム初期化を行いません。{gameObject.scene.name}");
                 return;

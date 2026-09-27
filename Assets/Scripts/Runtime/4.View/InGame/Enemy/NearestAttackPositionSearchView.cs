@@ -15,7 +15,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         public void Initialize()
         {
-            _timer = 0;
+            // 探索タイミングが全個体で揃わないよう、タイマーの初期値を探索間隔の範囲でずらす。
+            _timer = Random.Range(0f, _searchInterval);
             Vector3 initPos = transform.position;
             _positionSamples = new Vector3[_samplingCount];
             _pathLengths = new float[_samplingCount];
@@ -26,6 +27,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
             _destinationCache = transform.position;
             _path = new NavMeshPath();
+            _pathCorners = new Vector3[INITIAL_PATH_CORNER_CAPACITY];
         }
         /// <summary>
         ///     最も近い攻撃可能な位置を探索する。
@@ -56,6 +58,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             float minDistance = float.MaxValue;
+            Vector3 pathOrigin = _agent.nextPosition;
 
             for (int i = 0; i < _positionSamples.Length; i++)
             {
@@ -65,26 +68,36 @@ namespace KillChord.Runtime.View.InGame.Enemy
                     continue;
                 }
                 _positionSamples[i] = hit.position;
-                // サンプリングポイントからプレイヤーへのパスを計算
-                if (_agent.CalculatePath(_positionSamples[i], _path))
+
+                // 経路長は直線距離より短くならない。直線距離の時点で採用の上限を超える候補は、経路探索と Raycast を省く。
+                float selectionLimit = minDistance * _nearOptimalTolerance;
+                if (Vector3.Distance(pathOrigin, _positionSamples[i]) > selectionLimit)
                 {
-                    if (_path.status == NavMeshPathStatus.PathComplete)
+                    continue;
+                }
+
+                // サンプリングポイントからプレイヤーへのパスを計算
+                if (!_agent.CalculatePath(_positionSamples[i], _path)
+                    || _path.status != NavMeshPathStatus.PathComplete)
+                {
+                    continue;
+                }
+
+                float pathLength = CalculatePathLength(_path);
+
+                // 経路長が採用の上限を超える候補は、Raycast を省く（上限は探索が進むほど小さくなるだけなので、後で採用されることは無い）。
+                if (pathLength > selectionLimit)
+                {
+                    continue;
+                }
+
+                // プレイヤーに直撃できるポジションのみ候補として記録する
+                if (_raycastView.CheckCanRaycastHitTarget(_positionSamples[i]))
+                {
+                    _pathLengths[i] = pathLength;
+                    if (pathLength < minDistance)
                     {
-                        float pathLength = 0;
-                        // パスの長さを計算
-                        for (int j = 1; j < _path.corners.Length; j++)
-                        {
-                            pathLength += Vector3.Distance(_path.corners[j - 1], _path.corners[j]);
-                        }
-                        // プレイヤーに直撃できるポジションのみ候補として記録する
-                        if (_raycastView.CheckCanRaycastHitTarget(_positionSamples[i]))
-                        {
-                            _pathLengths[i] = pathLength;
-                            if (pathLength < minDistance)
-                            {
-                                minDistance = pathLength;
-                            }
-                        }
+                        minDistance = pathLength;
                     }
                 }
             }
@@ -127,6 +140,31 @@ namespace KillChord.Runtime.View.InGame.Enemy
         }
 
         /// <summary>
+        ///     経路の長さを、角の配列を確保せずに求める。
+        /// </summary>
+        /// <param name="path"> 長さを求める経路。 </param>
+        /// <returns> 経路の長さ。 </returns>
+        private float CalculatePathLength(NavMeshPath path)
+        {
+            // NavMeshPath.corners は参照のたびに配列を確保するため、使い回すバッファへ書き出す。
+            int cornerCount = path.GetCornersNonAlloc(_pathCorners);
+            while (cornerCount >= _pathCorners.Length)
+            {
+                // バッファが足りない場合は広げて取り直す（角の数が多い経路のときだけ起きる）。
+                _pathCorners = new Vector3[_pathCorners.Length * 2];
+                cornerCount = path.GetCornersNonAlloc(_pathCorners);
+            }
+
+            float pathLength = 0f;
+            for (int j = 1; j < cornerCount; j++)
+            {
+                pathLength += Vector3.Distance(_pathCorners[j - 1], _pathCorners[j]);
+            }
+
+            return pathLength;
+        }
+
+        /// <summary>
         ///     最短経路に近い候補の中からランダムに1つ選ぶ。
         /// </summary>
         /// <param name="minDistance">候補群の中の最短経路長。</param>
@@ -145,6 +183,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
             return _positionSamples[pickedIndex];
         }
 
+        private const int INITIAL_PATH_CORNER_CAPACITY = 32;
+
         [Header("性能調整")]
         [SerializeField, Tooltip("探索の侯選ポジション数")] private int _samplingCount;
         [SerializeField, Tooltip("探索間隔(秒)"), Range(0f, 1f)] private float _searchInterval;
@@ -160,6 +200,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private float[] _pathLengths;
         private List<int> _nearOptimalIndices;
         private NavMeshPath _path;
+        // 経路の角を書き出すバッファ。NavMeshPath.corners の毎回の配列確保を避けるために使い回す。
+        private Vector3[] _pathCorners;
         private float _timer;
         private Vector3 _destinationCache;
     }

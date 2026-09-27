@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
@@ -73,7 +74,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             _healthHudViewModel.UpdateHealth(new HealthHudDTO(currentHealth, maxHealth));
 
-            Debug.Log($"[EnemyHealthHudPresenter] 敵HP更新：{currentHealth} / {maxHealth}　変化量：{amountChanged}");
+            DevLog.Log($"[EnemyHealthHudPresenter] 敵HP更新：{currentHealth} / {maxHealth}　変化量：{amountChanged}");
 
             if (amountChanged < 0)
             {

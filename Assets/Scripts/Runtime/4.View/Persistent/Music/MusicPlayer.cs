@@ -1,5 +1,6 @@
 using CriWare;
 using KillChord.Runtime.Adaptor.Persistent.Music;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Music;
 using R3;
 using UnityEngine;
@@ -152,13 +153,13 @@ namespace KillChord.Runtime.View.Persistent.Music
             if (string.IsNullOrEmpty(cueName))
             {
                 StopBgm();
-                Debug.Log("BGMの再生を停止します。");
+                DevLog.Log("BGMの再生を停止します。");
                 return;
             }
 
             if (cueName == currentCueName)
             {
-                Debug.Log("cueNameが元と同じです。");
+                DevLog.Log("cueNameが元と同じです。");
                 return;
             }
 

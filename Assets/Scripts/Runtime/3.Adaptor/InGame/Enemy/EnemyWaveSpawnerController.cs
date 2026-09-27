@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -55,7 +56,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             {
                 if (!_waves.TryGetNextWave(out int waveIndex, out EnemyWaveDefinition waveDefinition))
                 {
-                    Debug.Log("[EnemyWaveSpawnerController] これ以上のWaveがない。");
+                    DevLog.Log("[EnemyWaveSpawnerController] これ以上のWaveがない。");
                     _waveTimer.StopTimer();
                     return;
                 }

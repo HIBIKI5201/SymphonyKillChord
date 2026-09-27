@@ -142,7 +142,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 selectedBattleStageState
             );
 
-            new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
+            _rhythmGuideViewModel?.Dispose();
+            _rhythmGuideViewModel = new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
 
             if (_rhythmGuidePostEffectView == null || _effectConfig == null)
             {
@@ -214,6 +215,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// </summary>
         public override void Shutdown()
         {
+            _rhythmGuideViewModel?.Dispose();
+            _rhythmGuideViewModel = null;
             _postEffectPresenter?.Dispose();
             _postEffectPresenter = null;
             _targetFeedbackPresenter?.Dispose();
@@ -241,6 +244,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         [SerializeField, SourceDataAddress] private string _hapticsConfigKey;
 
         private bool _isRegisteredToPlayDirector;
+        private ACLikeRhythmGuideViewModel _rhythmGuideViewModel;
         private RhythmGuidePostEffectPresenter _postEffectPresenter;
         private RhythmGuideTargetFeedbackPresenter _targetFeedbackPresenter;
         private GamepadHapticsPresenter _gamepadHapticsPresenter;

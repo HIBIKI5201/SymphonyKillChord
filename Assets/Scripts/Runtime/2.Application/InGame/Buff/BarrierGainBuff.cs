@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -64,7 +65,7 @@ namespace KillChord.Runtime.Application.InGame.Buff
             _owner.AddBarrier(barrierAmount);
 
 
-            Debug.Log($"[Skill04] バリア獲得: {barrierAmount}");
+            DevLog.Log($"[Skill04] バリア獲得: {barrierAmount}");
         }
 
         private static readonly StatusEffectId EFFECT_ID =

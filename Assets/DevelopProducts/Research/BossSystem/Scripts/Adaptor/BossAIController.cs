@@ -26,7 +26,7 @@ namespace DevelopProducts.Boss
         /// <param name="stateFacade"> 状態通知のファサード。 </param>
         /// <param name="patterns"> ボスが使用する攻撃パターン群（通常1/通常2/特殊1等）。 </param>
         public BossAIController(
-            EnemyMoveUsecase enemyMoveUsecase,
+            EnemyMoveUseCase enemyMoveUsecase,
             BossAttackReservationUsecase reservationUsecase,
             EnemyBattleState enemyBattleState,
             IEnemyStateFacade stateFacade,
@@ -186,7 +186,7 @@ namespace DevelopProducts.Boss
             }
         }
 
-        private readonly EnemyMoveUsecase _enemyMoveUsecase;
+        private readonly EnemyMoveUseCase _enemyMoveUsecase;
         private readonly BossAttackReservationUsecase _reservationUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
