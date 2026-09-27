@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.Persistent.Localization;
 using R3;
 using System;
 using System.Collections.Generic;
@@ -35,12 +36,13 @@ namespace KillChord.Runtime.View.InGame.Mission
 
             _viewModel = viewModel;
 
+            // 入力機器が変わったら、同じ文を今の機器のアイコンで表示し直す。
+            _glyphTextFormatter ??= new InputGlyphTextFormatter(ApplyMainMissionText);
+
             _mainMissionDisposable = viewModel.MainMissionText.Subscribe(value =>
             {
-                if (_mainMissionText != null)
-                {
-                    _mainMissionText.text = value;
-                }
+                _rawMainMissionText = value;
+                ApplyMainMissionText();
             });
 
             _viewModel.OnEvaluationItemsUpdated += ReBuildEvaluationItems;
@@ -62,6 +64,10 @@ namespace KillChord.Runtime.View.InGame.Mission
         private IDisposable _mainMissionDisposable;
         /// <summary> 結果テキスト購読解除用。 </summary>
         private IDisposable _resultDisposable;
+        /// <summary> 入力アイコンの変数を展開する処理。 </summary>
+        private InputGlyphTextFormatter _glyphTextFormatter;
+        /// <summary> 変数を展開する前のメインミッションテキスト。 </summary>
+        private string _rawMainMissionText;
         /// <summary> 表示中の評価項目のリスト。 </summary>
         private readonly List<MissionEvaluationItemView> _spawnedEvaluationItems = new();
         /// <summary> 評価項目のオブジェクトプール。 </summary>
@@ -74,6 +80,7 @@ namespace KillChord.Runtime.View.InGame.Mission
         {
             _mainMissionDisposable?.Dispose();
             _resultDisposable?.Dispose();
+            _glyphTextFormatter?.Dispose();
 
             if (_viewModel != null)
             {
@@ -81,6 +88,19 @@ namespace KillChord.Runtime.View.InGame.Mission
             }
 
             _evaluationItemPool?.Clear();
+        }
+
+        /// <summary>
+        ///     メインミッションテキストの入力アイコンを展開して表示します。
+        /// </summary>
+        private void ApplyMainMissionText()
+        {
+            if (_mainMissionText == null || _rawMainMissionText == null)
+            {
+                return;
+            }
+
+            _mainMissionText.text = _glyphTextFormatter.Format(_rawMainMissionText);
         }
 
         /// <summary>

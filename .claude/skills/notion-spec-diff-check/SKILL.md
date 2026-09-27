@@ -1,6 +1,6 @@
 ---
 name: notion-spec-diff-check
-description: "Find gaps and inconsistencies between the Notion game specification (mirrored at Docs/NotionSpecifications) and the actual implementation (Assets/Scripts/Runtime and related). Use whenever the user asks to check spec/implementation drift, find undocumented systems, find unimplemented spec items, refresh the Notion export, or audit whether a specific feature/system matches its written spec. Produces a categorized report (spec-but-no-impl / impl-but-no-spec / both-incomplete) with file:line evidence, following the precedent at Docs/仕様書と実装の差分分析_2026-07-27.md."
+description: "Find gaps and inconsistencies between the Notion game specification (mirrored at Docs/NotionSpecifications) and the actual implementation (Assets/Scripts/Runtime and related). Use whenever the user asks to check spec/implementation drift, find undocumented systems, find unimplemented spec items, refresh the Notion export, or audit whether a specific feature/system matches its written spec. Produces a categorized report (spec-but-no-impl / impl-but-no-spec / both-incomplete) with file:line evidence, following the precedent at Docs/仕様書と実装の差分分析_2026-08-23.md."
 ---
 
 # Notion Spec ↔ Implementation Diff Check
@@ -8,7 +8,7 @@ description: "Find gaps and inconsistencies between the Notion game specificatio
 This project mirrors its Notion specification into the repo as Markdown
 (`Docs/NotionSpecifications/`) via a custom exporter, and there's already one
 full-scale precedent report at
-[Docs/仕様書と実装の差分分析_2026-07-27.md](../../../Docs/仕様書と実装の差分分析_2026-07-27.md).
+[Docs/仕様書と実装の差分分析_2026-08-23.md](../../../Docs/仕様書と実装の差分分析_2026-08-23.md).
 Read that file first — it defines the categorization scheme this skill reuses and shows
 what good evidence (file:line citations on both sides) looks like in practice.
 
@@ -23,8 +23,7 @@ what good evidence (file:line citations on both sides) looks like in practice.
 **Refreshing is a bulk overwrite of ~1,800 files** (per the precedent report: 1,747 Notion pages).
 Before running it:
 1. `git status` on `Docs/NotionSpecifications/` — if there are uncommitted local edits under
-   that path (this has happened before — see the precedent report's note about
-   `Docs/Missionステップ用バフ・デバフ付与機構_計画書.md`), stash or commit them first, or warn the user they'll be overwritten.
+   that path (this has happened before — see the precedent report's notes), stash or commit them first, or warn the user they'll be overwritten.
 2. Confirm with the user before running the exporter — it hits the live Notion API and takes time.
 3. **Run it from the repository root**, not from `SinfoniaOperator/`. `NOTION_EXPORT_OUTPUT` in
    `SinfoniaOperator/sinfonia-operator.env.json` is the relative path `Docs/NotionSpecifications`,
@@ -36,7 +35,7 @@ Before running it:
    ./SinfoniaOperator/NotionMarkdownExporter/bin/Release/net10.0/win-x64/publish/NotionMarkdownExporter.exe
    ```
    Or pass `--output "Docs/NotionSpecifications"` explicitly to be safe regardless of CWD.
-4. Requires `NOTION_TOKEN` to be configured (gitignored `SinfoniaOperator/sinfonia-operator.settings.json`,
+4. Requires `NOTION_TOKEN` to be configured (gitignored `SinfoniaOperator/sinfonia-operator.secrets.json`,
    or environment variable) — if missing, the exporter will say so; don't try to hardcode a token.
 5. After it finishes, sanity-check the page/database counts it prints against the last known
    counts (the precedent report table in §0.3 is a reference point) — a sudden large jump or drop

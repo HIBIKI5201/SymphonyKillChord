@@ -57,7 +57,7 @@
 | **`EnemyWaveTimerView`** | View | ウェーブの残り時間表示 |
 | **`EnemyRaycastDetectView`** / **`TripleShotRaycastDetectView`** / **`NearestAttackPositionSearchView`** | View | 索敵と攻撃位置探索のUnity側実装 |
 | **`EnemySpawnPositionSearcher`** / **`SpawnPositionPair`** | View | 敵の生成位置の探索 |
-| **`ShellView`** / **`ShellSpawner`** / **`IShellPool`** / **`IShellInitializer`** | View | 砲弾の表示・生成・プール |
+| **`ShellView`** / **`ShellSpawner`** / **`IShellPool`** | View | 砲弾の表示・生成・プール |
 | **`FootstepSoundConfig`** / **`WarningDisplayState`** | View | 足音設定と、警告表示の状態 |
 | **`EnemyDefinitionAsset`** / **`EnemyDefinitionRepository`** / **`EnemyFactory`** | Infrastructure | 敵定義アセットの保持・検索と、そこからのDomain生成 |
 | **`EnemyWaveDefinitionAsset`** / **`EnemyWaveDefinitionRepository`** | Infrastructure | Wave定義アセットとID検索 |

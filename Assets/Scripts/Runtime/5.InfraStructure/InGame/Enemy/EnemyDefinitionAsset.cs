@@ -32,6 +32,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         /// <summary> 移動仕様です。 </summary>
         public EnemyMoveSpecAsset MoveSpec => _moveSpec;
 
+        /// <summary> 攻撃後行動の仕様です。未設定の場合は敵プレハブの値を使います。 </summary>
+        public EnemyPostAttackBehaviorSpecAsset PostAttackBehaviorSpec => _postAttackBehaviorSpec;
+
         /// <summary> 初回攻撃用の音楽仕様です。 </summary>
         public EnemyMusicSpecAsset EncounterMusicSpec => _encounterMusicSpec;
 
@@ -64,6 +67,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
 
         [SerializeField, Tooltip("移動速度や攻撃距離などの移動仕様です。")]
         private EnemyMoveSpecAsset _moveSpec;
+
+        [SerializeField, Tooltip("攻撃後行動の抽選の重みなどの仕様です。未設定の場合は敵プレハブの値を使います。")]
+        private EnemyPostAttackBehaviorSpecAsset _postAttackBehaviorSpec;
 
         [SerializeField, Tooltip("初回攻撃に使用する音楽仕様です。")]
         private EnemyMusicSpecAsset _encounterMusicSpec;
