@@ -8,6 +8,8 @@ namespace SinfoniaStudio.NotionMarkdownWriter
     ///     ブロックIDで直接指定して、そのリッチテキストを書き換えるコマンド。
     ///     Markdown Content APIの文字列一致（push）では、巨大な画像ブロックに挟まれた短文や、
     ///     同名のトグルの見出しなどを安全に一意特定できない。ブロックIDならその問題が無い。
+    ///     リッチテキストは全体が置き換わる。既存のブロックがメンション・リンク・装飾を含む場合は、
+    ///     それらが消えるため、--discard-formatting を付けたときだけ書き換える。
     /// </summary>
     internal static class EditBlockCommand
     {
@@ -19,7 +21,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         };
 
         private static readonly string[] _valueOptions = { "text" };
-        private static readonly string[] _flagOptions = { "confirm" };
+        private static readonly string[] _flagOptions = { "confirm", "discard-formatting" };
         private static readonly string[] _repeatableOptions = Array.Empty<string>();
 
         /// <summary>
@@ -38,6 +40,8 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             }
 
             bool isConfirmed = arguments.HasFlag("confirm");
+            bool isFormattingDiscardAllowed = arguments.HasFlag("discard-formatting");
+            List<Dictionary<string, object>> richText = RichTextParser.Parse(text);
             WriterEnvironment environment = WriterEnvironment.Load();
             string blockId = BlockReferenceResolver.Resolve(target);
 
@@ -66,6 +70,14 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 return 0;
             }
 
+            if (block.HasFormatting && !isFormattingDiscardAllowed)
+            {
+                throw new WriterException(
+                    "変更前のブロックに、メンション・リンク・装飾（太字・色など）が含まれています。" +
+                    "書き換えるとそれらは消えます（ページメンションは --text に <mention-page url=\"...\">表示名</mention-page> で書けば残せます）。" +
+                    "消えてよい場合は --discard-formatting を付けて再実行してください。");
+            }
+
             if (!isConfirmed)
             {
                 Console.WriteLine();
@@ -73,7 +85,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 return 0;
             }
 
-            NotionBlockInfo updated = await client.UpdateBlockRichTextAsync(block.Id, block.Type, text);
+            NotionBlockInfo updated = await client.UpdateBlockRichTextAsync(block.Id, block.Type, richText);
             Console.WriteLine();
             Console.WriteLine($"書き換えました。反映後: {updated.PlainText}");
             return 0;

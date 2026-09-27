@@ -26,6 +26,15 @@
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; padding: 14px; margin-top: 14px;">
                         <ui:VisualElement style="background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 11px;">
+                            <ui:Label name="VoiceHeading" text="Voice" style="font-size: 25px; -unity-font-style: bold; color: white;"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement style="background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 14px;">
+                            <ui:Label text="5" name="VoiceVolumeValue" style="font-size: 25px; -unity-font-style: bold; color: white; -unity-text-align: middle-center;"/>
+                        </ui:VisualElement>
+                        <ui:SliderInt name="VoiceVolumeSlider" low-value="0" high-value="10" value="5" page-size="1" class="volume-slider" style="flex-grow: 1; height: 45px;"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement style="flex-direction: row; align-items: center; background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom-right-radius: 11px; border-bottom-left-radius: 11px; padding: 14px; margin-top: 14px;">
+                        <ui:VisualElement style="background-color: rgba(88, 171, 239, 0.08); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; padding: 8px 14px; margin-right: 11px;">
                             <ui:Label name="LanguageHeading" text="言語" style="font-size: 25px; -unity-font-style: bold; color: white;"/>
                         </ui:VisualElement>
                         <ui:VisualElement style="flex-direction: row; align-items: center; flex-grow: 1; justify-content: space-between;">

@@ -5,7 +5,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
     /// <summary>
     ///     最小射程距離を表す値オブジェクト。
     /// </summary>
-    public readonly struct AttackRangeMin
+    public readonly struct AttackRangeMin : IEquatable<AttackRangeMin>
     {
         /// <summary>
         ///     最小射程距離を初期化するコンストラクタ。
