@@ -442,6 +442,12 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャスト位置の枠線1つを構成する線の本数。上下左右の4本。 </summary>
         private const int OUTLINE_LINE_COUNT = 4;
 
+        /// <summary>
+        ///     ジャスト帯の幅（小節単位）。判定幅に関係なく、この幅で描く。
+        ///     値は従来の見た目（ジャスト判定幅の1/32小節）に合わせている。
+        /// </summary>
+        private const float JUST_BAND_WIDTH_IN_BARS = 0.03125f;
+
         /// <summary> ジャスト位置の枠線の最小の太さ。 </summary>
         private const float MIN_OUTLINE_THICKNESS = 0.1f;
 
@@ -519,6 +525,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private Image[] _leftBeatImages;
         private RectTransform[] _rightBeatRectTransforms;
         private Image[] _rightBeatImages;
+        private int[] _blockSectionIndices = Array.Empty<int>();
         private Image[] _justOutlineImages = Array.Empty<Image>();
         private int[] _justOutlineZoneIndices = Array.Empty<int>();
         private MotionHandle[] _handles;
@@ -590,6 +597,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private void RebuildBeatRectTransforms()
         {
             ClearGeneratedBeatObjects();
+            RebuildBlockSectionIndices();
             InitBeatGUI(
                 _canvasGroup.gameObject,
                 _outTimingSizeDelta,
@@ -781,11 +789,18 @@ namespace KillChord.Runtime.View.InGame.Music
                     continue;
                 }
 
+                // 帯の太さは判定幅に依存させず、ジャスト範囲の中央を中心に固定幅で描く。
                 int zoneIndex = GetBeatSectionIndex(blockIndex);
-                writeIndex = CreateJustOutline(
-                    _leftBeatRectTransforms[blockIndex], $"JustOutline_Left_{i}", zoneIndex, writeIndex);
-                writeIndex = CreateJustOutline(
-                    _rightBeatRectTransforms[blockIndex], $"JustOutline_Right_{i}", zoneIndex, writeIndex);
+                float bandWidth = _layout.LengthInBars > 0f
+                    ? _layout.HalfWidth * JUST_BAND_WIDTH_IN_BARS / _layout.LengthInBars
+                    : 0f;
+                float centerOffset = _layout.GetPosition(justCenter) - _layout.GetBlockBoundary(blockIndex);
+                RectTransform leftBand = CreateJustBand(
+                    _leftBeatRectTransforms[blockIndex], $"JustBand_Left_{i}", 1f, -centerOffset, bandWidth);
+                RectTransform rightBand = CreateJustBand(
+                    _rightBeatRectTransforms[blockIndex], $"JustBand_Right_{i}", 0f, centerOffset, bandWidth);
+                writeIndex = CreateJustOutline(leftBand, $"JustOutline_Left_{i}", zoneIndex, writeIndex);
+                writeIndex = CreateJustOutline(rightBand, $"JustOutline_Right_{i}", zoneIndex, writeIndex);
             }
 
             // ブロック番号を解決できず生成を飛ばした分の空きを詰める。
@@ -797,11 +812,37 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     1ブロック分の枠線を上下左右の4本で生成する。
-        ///     ブロックは左右が隣と密着しているため、左右の線は内側へ描き、上下の線だけ外へ張り出す。
+        ///     ジャスト帯の枠線を載せる、固定幅の入れ物を生成する。
+        ///     縦方向はブロックへストレッチさせ、高さのアニメーションへ追従させる。
+        /// </summary>
+        /// <param name="block"> 帯を付けるブロック。 </param>
+        /// <param name="objectName"> 生成するオブジェクト名。 </param>
+        /// <param name="innerEdgeAnchorX"> ブロックの中心側の端を表すアンカーX。左側は1、右側は0。 </param>
+        /// <param name="centerOffset"> 中心側の端から帯の中心までの距離。左側は負の値。 </param>
+        /// <param name="bandWidth"> 帯の幅。 </param>
+        /// <returns> 生成した入れ物のRectTransform。 </returns>
+        private static RectTransform CreateJustBand(
+            RectTransform block, string objectName, float innerEdgeAnchorX, float centerOffset, float bandWidth)
+        {
+            GameObject bandObject = new GameObject(objectName, typeof(RectTransform));
+            bandObject.layer = block.gameObject.layer;
+            bandObject.transform.SetParent(block, false);
+
+            RectTransform bandRectTransform = bandObject.GetComponent<RectTransform>();
+            bandRectTransform.anchorMin = new Vector2(innerEdgeAnchorX, 0f);
+            bandRectTransform.anchorMax = new Vector2(innerEdgeAnchorX, 1f);
+            bandRectTransform.pivot = new Vector2(0.5f, 0.5f);
+            bandRectTransform.anchoredPosition = new Vector2(centerOffset, 0f);
+            bandRectTransform.sizeDelta = new Vector2(bandWidth, 0f);
+            return bandRectTransform;
+        }
+
+        /// <summary>
+        ///     ジャスト帯1つ分の枠線を上下左右の4本で生成する。
+        ///     左右の線は帯の内側へ描き、上下の線だけ外へ張り出す。
         ///     上と下の張り出し量は個別に設定できる。
         /// </summary>
-        /// <param name="parent"> 枠線を付けるブロック。 </param>
+        /// <param name="parent"> 枠線を付けるジャスト帯。 </param>
         /// <param name="objectName"> 生成するオブジェクト名の接頭辞。 </param>
         /// <param name="zoneIndex"> ブロックが属する判定ゾーンのインデックス。 </param>
         /// <param name="writeIndex"> 生成した枠線を書き込む位置。 </param>
@@ -1203,10 +1244,44 @@ namespace KillChord.Runtime.View.InGame.Music
 
         /// <summary>
         ///     ブロックインデックスがどの判定ゾーンに属するかを返す。
+        ///     ブロックを作り直した時に作る索引を引き、索引の範囲外だけ計算で求める。
         /// </summary>
         /// <param name="blockIndex"> ブロックのインデックス。 </param>
         /// <returns> 属する判定ゾーンのインデックス。 </returns>
         private int GetBeatSectionIndex(int blockIndex)
+        {
+            if (blockIndex >= 0 && blockIndex < _blockSectionIndices.Length)
+            {
+                return _blockSectionIndices[blockIndex];
+            }
+
+            return ResolveBeatSectionIndex(blockIndex);
+        }
+
+        /// <summary>
+        ///     全ブロックの判定ゾーンを求め、索引として保持する。
+        ///     レイアウトと判定ゾーンを更新した後、ブロックを生成する前に呼ぶ。
+        /// </summary>
+        private void RebuildBlockSectionIndices()
+        {
+            int blockCount = Mathf.Max(0, _layout.BlockCount);
+            if (_blockSectionIndices.Length != blockCount)
+            {
+                _blockSectionIndices = blockCount > 0 ? new int[blockCount] : Array.Empty<int>();
+            }
+
+            for (int i = 0; i < blockCount; i++)
+            {
+                _blockSectionIndices[i] = ResolveBeatSectionIndex(i);
+            }
+        }
+
+        /// <summary>
+        ///     ブロックインデックスがどの判定ゾーンに属するかを、判定ゾーンを探索して求める。
+        /// </summary>
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <returns> 属する判定ゾーンのインデックス。 </returns>
+        private int ResolveBeatSectionIndex(int blockIndex)
         {
             float position = _layout.GetBlockBarProgress(blockIndex);
 

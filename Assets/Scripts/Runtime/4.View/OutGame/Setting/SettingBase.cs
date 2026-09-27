@@ -1,4 +1,3 @@
-using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -64,19 +63,5 @@ namespace KillChord.Runtime.View
 
             root.Q<VisualElement>(pageName).style.display = DisplayStyle.Flex;
         }
-
-        // protected virtual void Info<T>(object message)
-        // {
-        //     DevLog.Log($"{typeof(T).Name}型 {message}");
-        // }
-
-        // protected virtual void Warning<T>(object message)
-        // {
-        //     Debug.LogWarning($"{typeof(T).Name}型 {message}");
-        // }
-        // protected virtual void Error<T>(object message)
-        // {
-        //     Debug.LogError($"{typeof(T).Name}型 {message}");
-        // }
     }
 }

@@ -91,7 +91,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                     _waveSpawnerController.SpawnNextWave();
                     return;
                 }
-                _waveTimer -= Time.deltaTime;
+                _waveTimer -= Time.fixedDeltaTime;
             }
         }
 

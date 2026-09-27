@@ -1,10 +1,13 @@
+using KillChord.Runtime.Adaptor.Persistent.Environment;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Application.Persistent.Input;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Domain.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Load;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
@@ -45,6 +48,9 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         private PlayerInputView _playerInputView;
         private InputTimestampProvider _timestampProvider;
         private UnityInputMapController _inputMapController;
+        private GamepadButtonLayoutView _gamepadButtonLayoutView;
+        private InputDeviceKindObserver _deviceKindObserver;
+        private InputDeviceLocalizationVariable _deviceLocalizationVariable;
         private LoadingScreenController _loadingScreenController;
         private EventNotificationView _notificationView;
         private bool _isNotificationSubscribed;
@@ -62,6 +68,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             InitializePureObjects();
             InitializeInputMaps();
             BindViewToAdaptor();
+            InitializeDeviceKind();
             ServiceLocator.RegisterInstance(_playerInputView);
             ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             return true;
@@ -95,7 +102,33 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             }
 
             RefreshInputSuppression();
+            BindGamepadButtonLayout();
             return true;
+        }
+
+        /// <summary>
+        ///     ゲームパッドの決定・キャンセルの配置を環境設定に合わせる。
+        ///     環境設定を取得できない場合は既定の海外式で固定する。
+        /// </summary>
+        private void BindGamepadButtonLayout()
+        {
+            if (_gamepadButtonLayoutView != null)
+            {
+                return;
+            }
+
+            IEnvironmentSettingsViewModel environmentSettingsViewModel =
+                ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
+                    ? environmentSettingsContainer.ViewModel
+                    : null;
+            if (environmentSettingsViewModel == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(InputComposition)}] 環境設定を取得できないため、決定・キャンセルは既定の配置で続行します。",
+                    this);
+            }
+
+            _gamepadButtonLayoutView = new GamepadButtonLayoutView(_playerInput.actions, environmentSettingsViewModel);
         }
 
         /// <summary>
@@ -119,6 +152,9 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             _notificationView = null;
             UnsubscribeLoading();
             UnbindViewAdaptor();
+            _gamepadButtonLayoutView?.Dispose();
+            _gamepadButtonLayoutView = null;
+            DisposeDeviceKind();
 
             if (ServiceLocator.TryGetInstance(out PlayerInputView registeredInputView)
                 && ReferenceEquals(registeredInputView, _playerInputView))
@@ -224,6 +260,31 @@ namespace KillChord.Runtime.Composition.Persistent.Input
 
             _timestampProvider = new InputTimestampProvider();
             _playerInputView.Initialize(_timestampProvider);
+        }
+
+        /// <summary>
+        ///     入力機器の種類の監視を開始し、操作案内のローカライズ変数へ反映する。
+        /// </summary>
+        private void InitializeDeviceKind()
+        {
+            if (_deviceKindObserver != null)
+            {
+                return;
+            }
+
+            _deviceKindObserver = new InputDeviceKindObserver();
+            _deviceLocalizationVariable = new InputDeviceLocalizationVariable(_deviceKindObserver);
+        }
+
+        /// <summary>
+        ///     入力機器の種類の監視を終了する。
+        /// </summary>
+        private void DisposeDeviceKind()
+        {
+            _deviceLocalizationVariable?.Dispose();
+            _deviceLocalizationVariable = null;
+            _deviceKindObserver?.Dispose();
+            _deviceKindObserver = null;
         }
 
         /// <summary>

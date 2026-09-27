@@ -1075,7 +1075,7 @@ MonoBehaviour:
     - 0
     - 0
     - 0
-  _cueName: HandgunShoot_1
+  _cueName: 
   _cueSheet: CueSheet_0
 --- !u!114 &795784838904872616
 MonoBehaviour:

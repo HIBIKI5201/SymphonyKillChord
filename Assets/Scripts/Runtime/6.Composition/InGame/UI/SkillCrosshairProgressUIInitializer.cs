@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
+using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
@@ -42,7 +43,10 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             _viewSetting = _uiConfig.Create();
-            _controller = new SkillCrosshairProgressController();
+            _controller = new SkillCrosshairProgressController(
+                () => ServiceLocator.TryGetInstance(out TargetSystemController targetSystemController)
+                    ? targetSystemController
+                    : null);
             ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             _isRegistered = true;
             return true;
