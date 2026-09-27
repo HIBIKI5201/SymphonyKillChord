@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Editor::KillChord.Editor.SourceDataProvider.PlannerMasterDataEditorSettings
   _pages:
   - _displayName: Stage Select
-    _sourceAssetAddressableKeys:
+    _dataAssetAddressableKeys:
     - DemoExperienceConfig
     - StageTreeAsset
     - EnemyWaveDefinitionRepository
@@ -29,7 +29,7 @@ MonoBehaviour:
     - EnemyMissionKey
     - Mission
   - _displayName: Player
-    _sourceAssetAddressableKeys:
+    _dataAssetAddressableKeys:
     - Player
     - PlayerConfig
     - OutGameSkillRepository
@@ -39,7 +39,7 @@ MonoBehaviour:
     - Skill
     - SkillGenreIcon
   - _displayName: UI
-    _sourceAssetAddressableKeys:
+    _dataAssetAddressableKeys:
     - CameraConfig
     - SkillInputProgressViewConfigAsset
     - RhythmJudgmentDefinitionAsset
@@ -51,7 +51,7 @@ MonoBehaviour:
     - OutGameScreenRule
     - LoadingTip
   - _displayName: Enemy
-    _sourceAssetAddressableKeys:
+    _dataAssetAddressableKeys:
     - ExampleEnemyMoveData
     - ShellAttackData
     - BossAttackEntryRepo
@@ -67,7 +67,7 @@ MonoBehaviour:
     - Character
     - BgmSelectorLabel
   - _displayName: Skill Tree
-    _sourceAssetAddressableKeys:
+    _dataAssetAddressableKeys:
     - SkillNodeDataRepo
     - SkillNodeBindRepo
     - OutGameSkillRepository
@@ -80,7 +80,7 @@ MonoBehaviour:
     - SkillNodePhaseBind
     - StatusBonusEffectIcon
   - _displayName: Scenario
-    _sourceAssetAddressableKeys:
+    _dataAssetAddressableKeys:
     - BackgroundCatalogAsset
     - AnimationCatalogAsset
     - PortraitCatalogAsset
@@ -90,7 +90,7 @@ MonoBehaviour:
     - ScenarioAnimation
     - ScenarioPortrait
   - _displayName: Resource
-    _sourceAssetAddressableKeys:
+    _dataAssetAddressableKeys:
     - GameResourceDefinitionRepository
     _collectionCategories:
     - GameResource

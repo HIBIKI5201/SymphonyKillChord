@@ -95,7 +95,7 @@ jobs:
           # ターゲットブランチに応じたタグプレフィックスを特定します
           TAG_PREFIX="dev"
           if [ "${{ github.base_ref }}" = "main" ]; then
-            TAG_PREFIX="release"
+            TAG_PREFIX="master"
           fi
 
           # GitHub APIからリリース一覧（最大100件）を取得します
@@ -345,7 +345,7 @@ jobs:
           }
           if ($BaseRef -eq "main") {
             $BuildMode = "Master"
-            $TagPrefix = "release"
+            $TagPrefix = "master"
           } elseif ($BaseRef -eq "develop") {
             $BuildMode = "Development"
             $TagPrefix = "dev"
@@ -1700,9 +1700,14 @@ jobs:
           
           $VersionString = $env:CURRENT_BUILD_VERSION
 
-          $TagName = "$env:TAG_PREFIX-$VersionString"
+          # タグは <ビルドモード>-<ゲームデータ種別>-<版>（例: dev-demo-v1.2.3、master-release-v1.2.3）。
+          # 各ZIPは <ビルドモード>-<ゲームデータ種別>-<プラットフォーム>-<版>.zip とする。
+          $AssetPrefix = "$env:TAG_PREFIX-$env:BUILD_VARIANT"
+          $TagName = "$AssetPrefix-$VersionString"
 
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
+          "ASSET_PREFIX=$AssetPrefix" | Add-Content -Path $env:GITHUB_OUTPUT
+          "VERSION=$VersionString" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[INFO]: タグ名を生成しました: $TagName"
           Write-Host "::endgroup::"
         
@@ -1711,6 +1716,8 @@ jobs:
       - name: ビルド成果物ZIPへのタグ付与と配置
         env:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
+          ASSET_PREFIX: ${{ steps.tag_gen.outputs.ASSET_PREFIX }}
+          RELEASE_VERSION: ${{ steps.tag_gen.outputs.VERSION }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -1738,7 +1745,6 @@ jobs:
             exit 1
           }
 
-          $TagName = $env:TAG_NAME
           $ZipFiles = Get-ChildItem -Path $ResolvedOutputDir -Filter "*.zip" -File
           if ($ZipFiles.Count -eq 0) {
             Write-Host "[ERROR]: $ResolvedOutputDir 配下にプロファイル別のビルドZIPが見つかりません"
@@ -1748,7 +1754,9 @@ jobs:
 
           foreach ($ZipFile in $ZipFiles) {
             $ProfileName = [System.IO.Path]::GetFileNameWithoutExtension($ZipFile.Name)
-            $DestName = "$ProfileName-$TagName.zip"
+            # プロファイル名（例: Demo_Dev_Android）の末尾をプラットフォーム名にする。
+            $Platform = ($ProfileName -split '_')[-1].ToLowerInvariant()
+            $DestName = "$env:ASSET_PREFIX-$Platform-$env:RELEASE_VERSION.zip"
             $DestPath = Join-Path -Path $PWD -ChildPath $DestName
 
             try {
@@ -1800,7 +1808,7 @@ jobs:
 
             **ビルド対象プロファイル:**
             - ビルドプロファイル枠: ${{ steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release' }}${{ steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master' }}BuildProfiles
-          files: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          files: "${{ steps.tag_gen.outputs.ASSET_PREFIX }}-*-${{ steps.tag_gen.outputs.VERSION }}.zip"
           fail_on_unmatched_files: true
           overwrite_files: true
         env:
@@ -1841,13 +1849,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.tag_gen.outputs.TAG_NAME }}
+          ASSET_PREFIX: ${{ steps.tag_gen.outputs.ASSET_PREFIX }}
+          RELEASE_VERSION: ${{ steps.tag_gen.outputs.VERSION }}
           UPLOAD_SUCCEEDED: ${{ steps.release_attempt_1.outcome == 'success' || steps.release_attempt_2.outcome == 'success' || steps.release_attempt_3.outcome == 'success' }}
         run: |
           if ($env:UPLOAD_SUCCEEDED -ne 'true') {
             throw 'Release upload failed after three attempts. The build ZIPs will be retained as an artifact.'
           }
           $ExpectedFiles = @(Get-ChildItem -LiteralPath $env:GITHUB_WORKSPACE -File |
-            Where-Object { $_.Name.EndsWith("-$($env:RELEASE_TAG).zip", [StringComparison]::Ordinal) })
+            Where-Object { $_.Name.StartsWith("$($env:ASSET_PREFIX)-", [StringComparison]::Ordinal) -and $_.Name.EndsWith("-$($env:RELEASE_VERSION).zip", [StringComparison]::Ordinal) })
           if ($ExpectedFiles.Count -eq 0) { throw 'No release ZIPs were found for verification.' }
           $Headers = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
           $Tag = [Uri]::EscapeDataString($env:RELEASE_TAG)
@@ -1864,7 +1874,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: unreleased-build-${{ github.run_id }}-${{ github.run_attempt }}
-          path: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          path: "${{ steps.tag_gen.outputs.ASSET_PREFIX }}-*-${{ steps.tag_gen.outputs.VERSION }}.zip"
           if-no-files-found: error
           compression-level: 0
           retention-days: 7

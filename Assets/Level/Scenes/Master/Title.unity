@@ -155,6 +155,7 @@ MonoBehaviour:
   _stageTreeAssetKey: StageTreeAsset
   _enemyWaveDefinitionRepositoryKey: EnemyWaveDefinitionRepository
   _memberCsv: {fileID: 4900000, guid: feeba90d749b926ab6f260b1810104ae, type: 3}
+  _inputGlyphSpriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
 --- !u!4 &79626151
 Transform:
   m_ObjectHideFlags: 0
@@ -276,6 +277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d37b2a4157264d0cb43757df98f3f208, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.OutGame.OutGameSceneInitializer
+  _titleSceneName: Title
 --- !u!4 &1266340407
 Transform:
   m_ObjectHideFlags: 0
