@@ -96,6 +96,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private IPlayerCharacterAnimationSignal _characterAnimationSignal;
         private PlayerAttackSignal _playerAttackSignal;
         private CharacterEntity _playerEntity;
+        private IMusicSyncService _musicSyncService;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
         private bool _isModuleRegistered;
@@ -321,6 +322,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return;
             }
 
+            // 被弾直後の入力は拍を判定できないため、リズムタイムアウトと同じ扱いにする。
+            _musicSyncService = musicSyncService;
+            _playerEntity.OnDamageTaken += HandlePlayerDamageTaken;
+
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
             PlayerAttackPresenter playerAttackPresenter = new PlayerAttackPresenter(_playerAttackSignal);
@@ -451,6 +456,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
+        ///     プレイヤーの被弾を受け取り、リズムの入力履歴をタイムアウトと同じ扱いで破棄します。
+        /// </summary>
+        /// <param name="_"> 実際に減ったHPです。 </param>
+        private void HandlePlayerDamageTaken(Damage _)
+        {
+            _musicSyncService?.ForceRhythmTimeout();
+        }
+
+        /// <summary>
         ///     回避の開始時に、無敵にして回避のマテリアル演出を再生します。
         /// </summary>
         /// <param name="duration"> 回避の継続時間です。 </param>
@@ -511,6 +525,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerEntity.OnDied -= HandlePlayerDied;
                 _playerEntity.OnDamageAvoided -= HandleDamageAvoided;
                 _playerEntity.OnHealthChanged -= HandlePlayerHealthChanged;
+                _playerEntity.OnDamageTaken -= HandlePlayerDamageTaken;
             }
         }
 
