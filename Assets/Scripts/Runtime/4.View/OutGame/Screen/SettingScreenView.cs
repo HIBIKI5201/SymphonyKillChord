@@ -4,7 +4,6 @@ using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
-using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +19,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
     {
 
         /// <summary> View を初期化します。 </summary>
-        public SettingScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
+        /// <param name="rootElement"> 設定画面のルート要素です。 </param>
+        /// <param name="outGameUIEvent"> アウトゲームのUIイベントです。 </param>
+        /// <param name="playerInputView"> Cancel入力を購読する入力Viewです。nullの場合はCancel入力での操作を無効にします。 </param>
+        public SettingScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent, PlayerInputView playerInputView)
             : base(rootElement, outGameUIEvent)
         {
             _backButton = rootElement.Q<Button>(BACKBUTTON_NAME)
@@ -38,7 +40,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             // UI Toolkit の NavigationCancelEvent はフォーカス状態に依存し不安定なため、
             // OnOptionInput と同様に PlayerInputView の Cancel アクションを直接購読する。
-            if (!ServiceLocator.TryGetInstance(out _playerInputView))
+            _playerInputView = playerInputView;
+            if (_playerInputView == null)
             {
                 UnityEngine.Debug.LogWarning(
                     $"[{nameof(SettingScreenView)}] PlayerInputViewを取得できませんでした。"
