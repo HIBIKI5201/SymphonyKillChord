@@ -18,7 +18,14 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             float vibrationScale,
             int rhythmOffsetStep,
             string rhythmOffsetLabel,
-            float rhythmOffsetSeconds)
+            float rhythmOffsetSeconds,
+            int cameraSensitivity,
+            float cameraSensitivityScale,
+            string cameraInvertModeLabel,
+            bool isCameraInvertVertical,
+            bool isCameraInvertHorizontal,
+            string autoLockOnLabel,
+            bool isAutoLockOnEnabled)
         {
             ResolutionLabel = resolutionLabel;
             ScreenModeLabel = screenModeLabel;
@@ -30,6 +37,13 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             RhythmOffsetStep = rhythmOffsetStep;
             RhythmOffsetLabel = rhythmOffsetLabel;
             RhythmOffsetSeconds = rhythmOffsetSeconds;
+            CameraSensitivity = cameraSensitivity;
+            CameraSensitivityScale = cameraSensitivityScale;
+            CameraInvertModeLabel = cameraInvertModeLabel;
+            IsCameraInvertVertical = isCameraInvertVertical;
+            IsCameraInvertHorizontal = isCameraInvertHorizontal;
+            AutoLockOnLabel = autoLockOnLabel;
+            IsAutoLockOnEnabled = isAutoLockOnEnabled;
         }
 
         /// <summary> 解像度の表示ラベル。 </summary>
@@ -61,5 +75,26 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
 
         /// <summary> リズム判定タイミングへ加算するオフセット秒数。 </summary>
         public float RhythmOffsetSeconds { get; }
+
+        /// <summary> カメラ感度（1～10）。 </summary>
+        public int CameraSensitivity { get; }
+
+        /// <summary> カメラ入力へ掛ける感度の倍率。 </summary>
+        public float CameraSensitivityScale { get; }
+
+        /// <summary> カメラ操作の反転方向の表示ラベル。 </summary>
+        public string CameraInvertModeLabel { get; }
+
+        /// <summary> カメラの上下操作を反転するかどうか。 </summary>
+        public bool IsCameraInvertVertical { get; }
+
+        /// <summary> カメラの左右操作を反転するかどうか。 </summary>
+        public bool IsCameraInvertHorizontal { get; }
+
+        /// <summary> オートロックオンの表示ラベル。 </summary>
+        public string AutoLockOnLabel { get; }
+
+        /// <summary> 攻撃時のオートロックオンを使うかどうか。 </summary>
+        public bool IsAutoLockOnEnabled { get; }
     }
 }

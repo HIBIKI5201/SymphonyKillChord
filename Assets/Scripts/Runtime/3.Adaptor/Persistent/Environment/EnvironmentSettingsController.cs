@@ -163,6 +163,40 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         }
 
         /// <summary>
+        ///     カメラ感度を設定する。プレビュー適用のみ行い、保存はしない。
+        /// </summary>
+        public void SetCameraSensitivity(int cameraSensitivity)
+        {
+            int previousCameraSensitivity = _workingSettings.CameraSensitivity;
+            _workingSettings.SetCameraSensitivity(cameraSensitivity);
+            if (previousCameraSensitivity == _workingSettings.CameraSensitivity)
+            {
+                return;
+            }
+
+            _environmentSettingsPresenter.Push(_workingSettings);
+        }
+
+        /// <summary>
+        ///     カメラ操作の反転方向を前後に切り替える。プレビュー適用のみ行い、保存はしない。
+        /// </summary>
+        public void CycleCameraInvertMode(int direction)
+        {
+            int nextIndex = Wrap((int)_workingSettings.CameraInvertMode, direction, CAMERA_INVERT_OPTION_COUNT);
+            _workingSettings.SetCameraInvertMode((CameraInvertMode)nextIndex);
+            _environmentSettingsPresenter.Push(_workingSettings);
+        }
+
+        /// <summary>
+        ///     攻撃時のオートロックオンのオンとオフを切り替える。プレビュー適用のみ行い、保存はしない。
+        /// </summary>
+        public void ToggleAutoLockOn()
+        {
+            _workingSettings.SetAutoLockOnEnabled(!_workingSettings.IsAutoLockOnEnabled);
+            _environmentSettingsPresenter.Push(_workingSettings);
+        }
+
+        /// <summary>
         ///     すべての環境設定を既定値へ戻す。プレビュー適用のみ行い、保存はしない。
         /// </summary>
         public void ResetToDefaults()
@@ -176,6 +210,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _workingSettings.SetLanguage(EnvironmentSettingsData.DEFAULT_LANGUAGE);
             _workingSettings.SetVibrationStrength(EnvironmentSettingsData.DEFAULT_VIBRATION_STRENGTH);
             _workingSettings.SetRhythmOffsetSeconds(EnvironmentSettingsData.DEFAULT_RHYTHM_OFFSET_SECONDS);
+            _workingSettings.SetCameraSensitivity(EnvironmentSettingsData.DEFAULT_CAMERA_SENSITIVITY);
+            _workingSettings.SetCameraInvertMode(EnvironmentSettingsData.DEFAULT_CAMERA_INVERT_MODE);
+            _workingSettings.SetAutoLockOnEnabled(EnvironmentSettingsData.DEFAULT_IS_AUTO_LOCK_ON_ENABLED);
             ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }
@@ -194,6 +231,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _committedSettings.SetLanguage(_workingSettings.Language);
             _committedSettings.SetVibrationStrength(_workingSettings.VibrationStrength);
             _committedSettings.SetRhythmOffsetSeconds(_workingSettings.RhythmOffsetSeconds);
+            _committedSettings.SetCameraSensitivity(_workingSettings.CameraSensitivity);
+            _committedSettings.SetCameraInvertMode(_workingSettings.CameraInvertMode);
+            _committedSettings.SetAutoLockOnEnabled(_workingSettings.IsAutoLockOnEnabled);
             _environmentSettingsService.QueueSave(_committedSettings);
         }
 
@@ -211,6 +251,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
             _workingSettings.SetLanguage(_committedSettings.Language);
             _workingSettings.SetVibrationStrength(_committedSettings.VibrationStrength);
             _workingSettings.SetRhythmOffsetSeconds(_committedSettings.RhythmOffsetSeconds);
+            _workingSettings.SetCameraSensitivity(_committedSettings.CameraSensitivity);
+            _workingSettings.SetCameraInvertMode(_committedSettings.CameraInvertMode);
+            _workingSettings.SetAutoLockOnEnabled(_committedSettings.IsAutoLockOnEnabled);
             ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }
@@ -218,6 +261,7 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         private const float NORMALIZED_BRIGHTNESS_SCALE = 0.1f;
         private const int LANGUAGE_OPTION_COUNT = 2;
         private const int VIBRATION_OPTION_COUNT = 3;
+        private const int CAMERA_INVERT_OPTION_COUNT = 4;
         private const string JAPANESE_LOCALE_CODE = "ja";
         private const string ENGLISH_LOCALE_CODE = "en";
 

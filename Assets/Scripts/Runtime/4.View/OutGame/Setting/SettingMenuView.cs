@@ -23,6 +23,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _settingTitleBar = Require<VisualElement>(rootElement, SETTING_TITLE_BAR_NAME);
             _environmentSettingButton = Require<Button>(rootElement, ENVIRONMENT_SETTING_BUTTON_NAME);
             _audioSettingButton = Require<Button>(rootElement, AUDIO_SETTING_BUTTON_NAME);
+            _controlSettingButton = Require<Button>(rootElement, CONTROL_SETTING_BUTTON_NAME);
             _returnToTitleButton = Require<Button>(rootElement, RETURN_TO_TITLE_BUTTON_NAME);
             _closeButton = Require<Button>(rootElement, CLOSE_BUTTON_NAME);
             _settingMenu = Require<VisualElement>(rootElement, SETTING_MENU_NAME);
@@ -46,12 +47,21 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _vibrationNextButton = Require<Button>(rootElement, VIBRATION_NEXT_BUTTON_NAME);
             _rhythmOffsetSlider = Require<SliderInt>(rootElement, RHYTHM_OFFSET_SLIDER_NAME);
             _environmentPanelSaveButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_SAVE_BUTTON_NAME);
-            // メニューを第1階層、オーディオ設定と環境設定を第2階層とする操作範囲を登録する。
+            _controlPanel = Require<VisualElement>(rootElement, CONTROL_PANEL_NAME);
+            _controlPanelBackButton = Require<Button>(rootElement, CONTROL_PANEL_BACK_BUTTON_NAME);
+            _cameraSensitivitySlider = Require<SliderInt>(rootElement, CAMERA_SENSITIVITY_SLIDER_NAME);
+            _cameraInvertPrevButton = Require<Button>(rootElement, CAMERA_INVERT_PREV_BUTTON_NAME);
+            _cameraInvertNextButton = Require<Button>(rootElement, CAMERA_INVERT_NEXT_BUTTON_NAME);
+            _autoLockOnPrevButton = Require<Button>(rootElement, AUTO_LOCK_ON_PREV_BUTTON_NAME);
+            _autoLockOnNextButton = Require<Button>(rootElement, AUTO_LOCK_ON_NEXT_BUTTON_NAME);
+            _controlPanelSaveButton = Require<Button>(rootElement, CONTROL_PANEL_SAVE_BUTTON_NAME);
+            // メニューを第1階層、オーディオ設定・環境設定・操作設定を第2階層とする操作範囲を登録する。
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
             {
                 _environmentSettingButton,
                 _audioSettingButton,
+                _controlSettingButton,
                 _returnToTitleButton,
                 _closeButton,
             });
@@ -85,6 +95,19 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _environmentPanelBackButton,
                 },
                 _screenModePrevButton);
+            _navigationScope.AddChildLevel(
+                _controlSettingButton,
+                new VisualElement[]
+                {
+                    _cameraSensitivitySlider,
+                    _cameraInvertPrevButton,
+                    _cameraInvertNextButton,
+                    _autoLockOnPrevButton,
+                    _autoLockOnNextButton,
+                    _controlPanelSaveButton,
+                    _controlPanelBackButton,
+                },
+                _cameraSensitivitySlider);
 
             // 操作を登録し、メニューを表示する。
             RegisterCallbacks();
@@ -95,6 +118,10 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 UI_COMMON_TABLE, "ui.setting.audio", text => _audioSettingButton.text = text);
             _environmentPanelSaveLocalizedText = new LocalizedElementText(
                 UI_COMMON_TABLE, "ui.setting.environment_save", text => _environmentPanelSaveButton.text = text);
+            _controlSettingLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.setting.control", text => _controlSettingButton.text = text, "操作設定");
+            _controlPanelSaveLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.setting.environment_save", text => _controlPanelSaveButton.text = text);
         }
 
         /// <summary>
@@ -111,8 +138,10 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _settingMenu.style.display = DisplayStyle.Flex;
             _soundPanel.style.display = DisplayStyle.None;
             _environmentPanel.style.display = DisplayStyle.None;
+            _controlPanel.style.display = DisplayStyle.None;
             _backGround.RemoveFromClassList(AUDIO_BACKGROUND_CLASS);
             _backGround.RemoveFromClassList(ENVIRONMENT_BACKGROUND_CLASS);
+            _backGround.RemoveFromClassList(CONTROL_BACKGROUND_CLASS);
             _backGround.AddToClassList(MENU_BACKGROUND_CLASS);
             _navigationScope.ResetToRootLevel();
             _currentState = PanelState.Menu;
@@ -130,7 +159,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 return false;
             }
 
-            if (_currentState == PanelState.Environment)
+            // 環境設定と操作設定は同じ環境設定を編集するため、どちらから離れる場合も未保存の変更を破棄する。
+            if (_currentState == PanelState.Environment || _currentState == PanelState.Control)
             {
                 OnCancelEnvironmentChanges?.Invoke();
             }
@@ -149,8 +179,13 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _environmentPanelBackButtonPreset.Dispose();
             _environmentSettingButtonPreset.Dispose();
             _environmentPanelSaveButtonPreset.Dispose();
+            _controlSettingButtonPreset.Dispose();
+            _controlPanelBackButtonPreset.Dispose();
+            _controlPanelSaveButtonPreset.Dispose();
             _audioSettingLocalizedText.Dispose();
             _environmentPanelSaveLocalizedText.Dispose();
+            _controlSettingLocalizedText.Dispose();
+            _controlPanelSaveLocalizedText.Dispose();
             _navigationScope.Dispose();
         }
 
@@ -159,6 +194,16 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string MENU_BACKGROUND_CLASS = "setting-window--menu";
         private const string AUDIO_BACKGROUND_CLASS = "setting-window--audio";
         private const string ENVIRONMENT_BACKGROUND_CLASS = "setting-window--environment";
+        private const string CONTROL_BACKGROUND_CLASS = "setting-window--control";
+        private const string CONTROL_SETTING_BUTTON_NAME = "ControlSettingButton";
+        private const string CONTROL_PANEL_NAME = "ControlPanel";
+        private const string CONTROL_PANEL_BACK_BUTTON_NAME = "ControlPanelBackButton";
+        private const string CONTROL_PANEL_SAVE_BUTTON_NAME = "ControlPanelSaveButton";
+        private const string CAMERA_SENSITIVITY_SLIDER_NAME = "CameraSensitivitySlider";
+        private const string CAMERA_INVERT_PREV_BUTTON_NAME = "CameraInvertPrevButton";
+        private const string CAMERA_INVERT_NEXT_BUTTON_NAME = "CameraInvertNextButton";
+        private const string AUTO_LOCK_ON_PREV_BUTTON_NAME = "AutoLockOnPrevButton";
+        private const string AUTO_LOCK_ON_NEXT_BUTTON_NAME = "AutoLockOnNextButton";
         private const string ENVIRONMENT_SETTING_BUTTON_NAME = "EnvironmentSettingButton";
         private const string AUDIO_SETTING_BUTTON_NAME = "AudioSettingButton";
         private const string RETURN_TO_TITLE_BUTTON_NAME = "ReturnToTitleButton";
@@ -215,12 +260,26 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _vibrationNextButton;
         private readonly SliderInt _rhythmOffsetSlider;
         private readonly Button _environmentPanelSaveButton;
+        private readonly Button _controlSettingButton;
+        private readonly VisualElement _controlPanel;
+        private readonly Button _controlPanelBackButton;
+        private readonly SliderInt _cameraSensitivitySlider;
+        private readonly Button _cameraInvertPrevButton;
+        private readonly Button _cameraInvertNextButton;
+        private readonly Button _autoLockOnPrevButton;
+        private readonly Button _autoLockOnNextButton;
+        private readonly Button _controlPanelSaveButton;
         private readonly HierarchicalNavigationScope _navigationScope;
         private IDisposable _audioSettingButtonPreset;
         private IDisposable _environmentSettingButtonPreset;
         private IDisposable _environmentPanelSaveButtonPreset;
+        private IDisposable _controlSettingButtonPreset;
+        private IDisposable _controlPanelBackButtonPreset;
+        private IDisposable _controlPanelSaveButtonPreset;
         private LocalizedElementText _audioSettingLocalizedText;
         private LocalizedElementText _environmentPanelSaveLocalizedText;
+        private LocalizedElementText _controlSettingLocalizedText;
+        private LocalizedElementText _controlPanelSaveLocalizedText;
         private PanelState _currentState;
 
         /// <summary>
@@ -252,6 +311,20 @@ namespace KillChord.Runtime.View.OutGame.Setting
         }
 
         /// <summary>
+        ///     操作設定パネルを開き、最初の設定項目へフォーカスを移す。
+        /// </summary>
+        private void HandleControlSettingButtonClickedHandler()
+        {
+            _settingTitleBar.style.display = DisplayStyle.None;
+            _settingMenu.style.display = DisplayStyle.None;
+            _controlPanel.style.display = DisplayStyle.Flex;
+            _backGround.RemoveFromClassList(MENU_BACKGROUND_CLASS);
+            _backGround.AddToClassList(CONTROL_BACKGROUND_CLASS);
+            _navigationScope.EnterLevel(_controlSettingButton);
+            _currentState = PanelState.Control;
+        }
+
+        /// <summary>
         ///     環境設定パネルを閉じ、メニューへ戻る。
         /// </summary>
         private void HandleEnvironmentPanelSaveButtonClickedHandler()
@@ -269,6 +342,9 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _audioSettingButtonPreset = _audioSettingButton.ApplyBasicButtonPreset(HandleAudioSettingButtonClickedHandler);
             _environmentSettingButtonPreset = _environmentSettingButton.ApplyBasicButtonPreset(HandleEnvironmentSettingButtonClickedHandler);
             _environmentPanelSaveButtonPreset = _environmentPanelSaveButton.ApplyBasicButtonPreset(HandleEnvironmentPanelSaveButtonClickedHandler);
+            _controlSettingButtonPreset = _controlSettingButton.ApplyBasicButtonPreset(HandleControlSettingButtonClickedHandler);
+            _controlPanelBackButtonPreset = _controlPanelBackButton.ApplyBasicButtonPreset(HandlePanelBackButtonClickedHandler);
+            _controlPanelSaveButtonPreset = _controlPanelSaveButton.ApplyBasicButtonPreset(HandleEnvironmentPanelSaveButtonClickedHandler);
         }
 
         /// <summary>
@@ -298,6 +374,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             Menu,
             Sound,
             Environment,
+            Control,
         }
     }
 }
