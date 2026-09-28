@@ -5,6 +5,8 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// </summary>
     public interface IScenarioPlaybackState
     {
+        /// <summary> シナリオが再生中かを示す。 </summary>
+        bool IsPlaying { get; }
         /// <summary> シナリオ再生が早送り中かを示す。 </summary>
         bool IsFastForward { get; }
         /// <summary> シナリオ再生が自動進行中かを示す。 </summary>

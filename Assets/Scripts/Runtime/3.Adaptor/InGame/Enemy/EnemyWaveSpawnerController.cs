@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -55,9 +56,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             {
                 if (!_waves.TryGetNextWave(out int waveIndex, out EnemyWaveDefinition waveDefinition))
                 {
-                    Debug.Log("[EnemyWaveSpawnerController] これ以上のWaveがない。");
+                    DevLog.Log("[EnemyWaveSpawnerController] これ以上のWaveがない。");
                     _waveTimer.StopTimer();
                     return;
+                }
+
+                // 入場待ちの敵が未加算の間に、旧Waveの最後の敵が死んでも全滅扱いにしない。
+                // 生成失敗・取消は撃破ではないため、成功callbackが来るまで予約を残す。
+                for (int i = 0; i < waveDefinition.Details.Length; i++)
+                {
+                    _state.ReserveEnemySpawns(waveDefinition.Details[i].EnemyAmount);
                 }
 
                 // これ以上Wave定義がない時、stateクラスの最終Waveフラグを設定する
@@ -85,6 +93,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             }
         }
 
+        /// <summary>
+        ///     自動進行時に購読したウェーブクリアイベントを解除する。
+        /// </summary>
         public void Dispose()
         {
             if (_autoAdvanceWaves)
@@ -119,6 +130,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 AddStateEnemyCount);
         }
 
+        /// <summary>
+        ///     生存中の敵の数を1増やす。
+        /// </summary>
         private void AddStateEnemyCount()
         {
             _state.AddEnemyCount(1);

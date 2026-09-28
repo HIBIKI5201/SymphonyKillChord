@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// </summary>
     public interface IScenarioCompletionNotifier
     {
+        /// <summary>
+        ///     シナリオの再生完了を通知する。
+        /// </summary>
         ValueTask NotifyCompletedAsync(bool skipped, CancellationToken ct);
     }
 }

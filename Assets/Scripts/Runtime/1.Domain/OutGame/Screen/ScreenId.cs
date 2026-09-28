@@ -15,7 +15,7 @@ namespace KillChord.Runtime.Domain.OutGame.Screen
         SkillBuild,
         /// <summary> 設定画面。 </summary>
         Setting,
-        /// <summary> 戦闘準備画面。 </summary>
+        /// <summary> 廃止した戦闘準備画面の予約値。後続画面のシリアライズ済み番号を維持します。 </summary>
         BattlePreparation,
         /// <summary> タイトル画面。 </summary>
         Title,

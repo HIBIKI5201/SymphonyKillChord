@@ -2,8 +2,6 @@ using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
-using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 namespace KillChord.Editor.SourceDataProvider.Core
@@ -106,22 +104,4 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
     }
 
-    /// <summary>
-    ///     ビルド直前に、ビルドするBuild Profileの種別とAddressables Groupの不整合を防止します。
-    /// </summary>
-    internal sealed class GameDataVariantBuildPreprocessor : IPreprocessBuildWithReport
-    {
-        /// <inheritdoc />
-        public int callbackOrder => -1000;
-
-        /// <inheritdoc />
-        public void OnPreprocessBuild(BuildReport report)
-        {
-            // AutoBuildExecuterはビルド前にProfileをアクティブ化するため、アクティブなProfileを正本とする。
-            if (!GameDataVariantBuildSettings.Apply(GameDataVariantProfiles.GetActiveVariant()))
-            {
-                throw new BuildFailedException("ゲームデータ種別のビルド設定を適用できませんでした。");
-            }
-        }
-    }
 }

@@ -27,9 +27,6 @@ namespace KillChord.Runtime.Adaptor.OutGame.Screen
         /// <summary> 改造画面を表示します。 </summary>
         void ShowSkillBuild();
 
-        /// <summary> 戦闘準備画面を表示します。 </summary>
-        void ShowBattlePreparation();
-
         /// <summary> 設定画面を表示します。 </summary>
         void ShowSetting();
 

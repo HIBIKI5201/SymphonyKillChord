@@ -11,6 +11,9 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
     [CreateAssetMenu(
         fileName = "PostEffectOverlayConfig",
         menuName = "KillChord/View/PostEffect/Post Effect Overlay Config")]
+    /// <summary>
+    ///     ポストエフェクトのオーバーレイ表示を設定するデータ。
+    /// </summary>
     public sealed class PostEffectOverlayConfig : ScriptableObject
     {
         /// <summary> Volumeの影響から除外するレイヤーです。 </summary>

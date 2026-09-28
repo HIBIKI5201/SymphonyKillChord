@@ -1,0 +1,115 @@
+---
+import NewsList from './NewsList.astro';
+import { sortedNews } from '../data/news';
+
+const newsHref = `${import.meta.env.BASE_URL}news`;
+---
+
+<div class="updates">
+	<section class="panel" aria-labelledby="news-heading">
+		<div class="panel-header">
+			<h2 id="news-heading">News</h2>
+			<a href={newsHref}>一覧を見る <span aria-hidden="true">↗</span></a>
+		</div>
+		<NewsList items={sortedNews.slice(0, 3)} />
+	</section>
+
+	<section class="panel" aria-labelledby="sns-heading">
+		<div class="panel-header">
+			<h2 id="sns-heading">SNS</h2>
+		</div>
+		<div class="sns-links">
+			<a href="https://www.youtube.com/@SinfoniaStudioOfficial" target="_blank" rel="noopener noreferrer">
+				<svg class="sns-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+					<rect x="2" y="5" width="20" height="14" rx="4" stroke="currentColor" stroke-width="1.8" />
+					<path d="m10 8.5 5.5 3.5-5.5 3.5v-7Z" fill="currentColor" />
+				</svg>
+				YouTube <span aria-hidden="true">↗</span>
+			</a>
+			<a href="https://x.com/Sinfonia_Studio" target="_blank" rel="noopener noreferrer">
+				<svg class="sns-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+					<path d="M4 3h4l12 18h-4L4 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+					<path d="M20 3 4 21" stroke="currentColor" stroke-width="1.8" />
+				</svg>
+				X (Twitter) <span aria-hidden="true">↗</span>
+			</a>
+		</div>
+	</section>
+</div>
+
+<style>
+	.updates {
+		display: grid;
+		gap: 24px;
+		padding: 64px 0 96px;
+	}
+
+	.panel {
+		padding: 24px 32px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-surface-border);
+	}
+
+	.panel-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 16px;
+		padding-bottom: 14px;
+		border-bottom: 1px solid var(--color-signal-dim);
+	}
+
+	h2 {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+		letter-spacing: var(--tracking-display);
+	}
+
+	.panel-header a,
+	.sns-links a {
+		color: var(--color-signal);
+		text-decoration: none;
+	}
+
+	.panel-header a:hover,
+	.panel-header a:focus-visible,
+	.sns-links a:hover,
+	.sns-links a:focus-visible {
+		text-decoration: underline;
+	}
+
+	.sns-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		padding-top: 24px;
+	}
+
+	.sns-links a {
+		display: inline-flex;
+		align-items: center;
+		gap: 12px;
+		min-width: 160px;
+		padding: 14px 18px;
+		font-family: var(--font-mono);
+		border: 1px solid var(--color-signal-dim);
+	}
+
+	.sns-icon {
+		flex: none;
+		width: 22px;
+		height: 22px;
+		color: inherit;
+	}
+
+	@media (max-width: 600px) {
+		.updates {
+			padding: 40px 0 64px;
+		}
+
+		.panel {
+			padding: 20px;
+		}
+	}
+</style>

@@ -27,6 +27,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         public static string Start(string runId, double durationSeconds = 900d)
         {
+            // 引数と実行状態を検証する。同じ runId の再要求は現在の状態を返す。
             if (!Guid.TryParse(runId, out _) || double.IsNaN(durationSeconds) || double.IsInfinity(durationSeconds)
                 || durationSeconds < 1d || durationSeconds > MAX_DURATION_SECONDS)
             {
@@ -41,6 +42,7 @@ namespace KillChord.Editor.AIDebugPlay
             {
                 return Serialize(Object(("success", false), ("message", "An unpaused PlayMode session is required")));
             }
+            // 計測値を初期化する。
             _runId = runId;
             _state = "Running";
             _reason = "";
@@ -54,6 +56,7 @@ namespace KillChord.Editor.AIDebugPlay
             _memoryStart = _memoryCurrent = Profiler.GetTotalAllocatedMemoryLong();
             _memoryPeak = _memoryCurrent;
             _sampleCount = 0;
+            // 前回のログを消し、ログと戦闘の記録を開始する。
             lock (_logLock)
             {
                 _logs.Clear();
@@ -72,6 +75,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         public static string GetStatusJson()
         {
+            // 計測していない場合は、ドメインリロードで中断された結果があればそれを返す。
             if (_runId == null)
             {
                 string interrupted = SessionState.GetString(RELOAD_KEY, "");
@@ -81,6 +85,7 @@ namespace KillChord.Editor.AIDebugPlay
             int errors;
             int warnings;
             int sequence;
+            // ログは別スレッドからも書き込まれるため、ロックしてから写し取る。
             lock (_logLock)
             {
                 logs = _logs.ToArray();
@@ -88,6 +93,7 @@ namespace KillChord.Editor.AIDebugPlay
                 warnings = _warnings;
                 sequence = _logSequence;
             }
+            // 計測結果を JSON にまとめる。
             double elapsed = _runId == null ? 0d
                 : (_state == "Running" ? EditorApplication.timeSinceStartup : _endedAt) - _startedAt;
             return Serialize(Object(("success", true), ("runId", _runId), ("state", _state), ("reason", _reason),

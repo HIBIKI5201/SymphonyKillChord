@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Sequence;
 using UnityEngine;
 
@@ -9,6 +10,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// </summary>
     public class EnemyWaveTimerView : MonoBehaviour, IGameplayControllable, IEnemyWaveTimerView
     {
+        /// <summary>
+        ///     ゲームプレイ開始時にウェーブタイマーを動かし始める。
+        ///     自動スポーンが抑止されている場合は何もしない。
+        /// </summary>
         public void StartGameplay()
         {
             if (_autoSpawnSuppressed)
@@ -19,11 +24,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _waveSpawnerController.SpawnNextWave();
         }
 
+        /// <summary>
+        ///     ゲームプレイ停止時にタイマーを止める。
+        /// </summary>
         public void StopGameplay()
         {
             StopTimer();
         }
 
+        /// <summary>
+        ///     ウェーブの生成を制御するコントローラーを設定し、タイマーを初期化する。
+        /// </summary>
         public void Initialize(EnemyWaveSpawnerController controller)
         {
             _waveSpawnerController = controller;
@@ -59,13 +70,17 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _timerActive = false;
         }
 
+        /// <summary>
+        ///     タイマーを減らし、時間切れになったら次のウェーブを生成する。
+        ///     自動スポーンが抑止されている場合はタイマーを止める。
+        /// </summary>
         private void FixedUpdate()
         {
             if (_timerActive)
             {
                 if(_waveTimer <= 0f)
                 {
-                    Debug.Log("[EnemyWaveTimerView] Wave Timeout.");
+                    DevLog.Log("[EnemyWaveTimerView] Wave Timeout.");
 
                     if (_autoSpawnSuppressed)
                     {
@@ -76,7 +91,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                     _waveSpawnerController.SpawnNextWave();
                     return;
                 }
-                _waveTimer -= Time.deltaTime;
+                _waveTimer -= Time.fixedDeltaTime;
             }
         }
 

@@ -1,5 +1,11 @@
 # Astro Starter Kit: Basics
 
+## ホームページを試す
+
+Windowsでは `dev.bat` をダブルクリックすると、開発サーバーがバックグラウンドで起動し、ブラウザでホーム画面が開きます。初回は依存パッケージをインストールします。Node.js 22.12以上が必要です。
+
+終了するときは、このフォルダーで `npm run astro -- dev stop` を実行してください。
+
 ```sh
 npm create astro@latest -- --template basics
 ```

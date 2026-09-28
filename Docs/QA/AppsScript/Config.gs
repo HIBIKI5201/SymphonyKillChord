@@ -7,10 +7,11 @@
 const CONFIG = {
   /**
    * 回答の集約先スプレッドシートのID。
-   * スプレッドシートのURL https://docs.google.com/spreadsheets/d/【ここ】/edit の部分。
-   * 空文字のままにする場合は CREATE_SPREADSHEET_IF_MISSING を true にすること。
+   * 通常は空のままにし、スクリプト プロパティ DESTINATION_SPREADSHEET_ID に設定する (README の手順5)。
+   * IDをリポジトリに残さないため。スクリプト プロパティが無いときだけ、この値を使う。
+   * どちらも空のまま新規作成する場合は CREATE_SPREADSHEET_IF_MISSING を true にすること。
    */
-  DESTINATION_SPREADSHEET_ID: '1g3NfpsxYKHK5FMxiSqd3pAEkX7CCiHfw9fWVXzvBiqE',
+  DESTINATION_SPREADSHEET_ID: '',
 
   /**
    * DESTINATION_SPREADSHEET_ID が空のときに、新しいスプレッドシートを作るかどうか。

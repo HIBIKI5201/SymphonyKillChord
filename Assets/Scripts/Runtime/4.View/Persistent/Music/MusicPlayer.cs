@@ -1,5 +1,6 @@
 using CriWare;
 using KillChord.Runtime.Adaptor.Persistent.Music;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Music;
 using R3;
 using UnityEngine;
@@ -54,9 +55,22 @@ namespace KillChord.Runtime.View.Persistent.Music
         public void SetVolume(float volumeRatio)
         {
             _volumeRatio = volumeRatio;
-            _cri.volume = _baseVolume * volumeRatio;
+            ApplyVolume();
         }
 
+        /// <summary>
+        ///     保存済み音量とは独立したBGM演出用の音量倍率を設定します。
+        /// </summary>
+        /// <param name="volumeRatio"> 演出用の0から1の音量倍率です。 </param>
+        public void SetPresentationVolume(float volumeRatio)
+        {
+            _presentationVolumeRatio = Mathf.Clamp01(volumeRatio);
+            ApplyVolume();
+        }
+
+        /// <summary>
+        ///     現在の音量の倍率を返す。
+        /// </summary>
         public float GetVolume()
         {
             return _volumeRatio;
@@ -109,7 +123,19 @@ namespace KillChord.Runtime.View.Persistent.Music
         private bool _isPlaying;
         private float _baseVolume = 1f;
         private float _volumeRatio = 1f;
+        private float _presentationVolumeRatio = 1f;
         private bool _baseVolumeCaptured;
+
+        /// <summary>
+        ///     最新の音量設定に演出用倍率を掛けてBGMへ反映します。
+        /// </summary>
+        private void ApplyVolume()
+        {
+            if (_cri != null)
+            {
+                _cri.volume = _baseVolume * _volumeRatio * _presentationVolumeRatio;
+            }
+        }
 
         /// <summary>
         ///     BGMを変更して再生する。
@@ -127,13 +153,13 @@ namespace KillChord.Runtime.View.Persistent.Music
             if (string.IsNullOrEmpty(cueName))
             {
                 StopBgm();
-                Debug.Log("BGMの再生を停止します。");
+                DevLog.Log("BGMの再生を停止します。");
                 return;
             }
 
             if (cueName == currentCueName)
             {
-                Debug.Log("cueNameが元と同じです。");
+                DevLog.Log("cueNameが元と同じです。");
                 return;
             }
 

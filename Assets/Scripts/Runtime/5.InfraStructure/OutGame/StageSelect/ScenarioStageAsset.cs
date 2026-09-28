@@ -11,6 +11,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
     [CreateAssetMenu(
         fileName = nameof(ScenarioStageAsset),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "StageSelect/" + nameof(ScenarioStageAsset))]
+    /// <summary>
+    ///     シナリオステージの定義データ。
+    /// </summary>
     public sealed class ScenarioStageAsset : StageAssetBase
     {
         [Header("シナリオ情報")]

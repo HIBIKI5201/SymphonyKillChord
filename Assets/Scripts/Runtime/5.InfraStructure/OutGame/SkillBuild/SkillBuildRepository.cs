@@ -7,6 +7,7 @@ using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
 using SymphonyFrameWork.System.SaveSystem;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -18,6 +19,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
     /// </summary>
     [CreateAssetMenu(fileName = nameof(SkillBuildRepository),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" + nameof(SkillBuildRepository))]
+    /// <summary>
+    ///     スキルビルドの装備内容を管理するリポジトリ。
+    /// </summary>
     public class SkillBuildRepository : ScriptableObject, ISkillBuildRepository
     {
         private const int EMPTY_SKILL_ID = -1;
@@ -49,6 +53,32 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
                 : await SaveStore.LoadAsync<SaveData>();
             BuildEquippedSkills(saveData.SkillBuild.EquipmentSkillIDs);
             return _equippedSkills.AsReadOnly();
+        }
+
+        /// <summary>
+        ///     スキル ID の一覧から装備スキル構成を作る。保存データとキャッシュは変えない。
+        /// </summary>
+        /// <param name="skillIds"> 装備するスキル ID の一覧。 </param>
+        /// <returns> 作成した装備スキル構成。解決できない ID は空のスロットになる。 </returns>
+        public IReadOnlyList<EquippedSkill> CreateEquippedSkills(IReadOnlyList<int> skillIds)
+        {
+            ValidateDependencies();
+            if (skillIds == null)
+            {
+                return Array.Empty<EquippedSkill>();
+            }
+
+            EquippedSkill[] equippedSkills = new EquippedSkill[skillIds.Count];
+            for (int i = 0; i < skillIds.Count; i++)
+            {
+                if (skillIds[i] != EMPTY_SKILL_ID
+                    && _skillRepository.TryGetSkill(new SkillId(skillIds[i]), out SkillTemplate skillData))
+                {
+                    equippedSkills[i] = new EquippedSkill(skillData);
+                }
+            }
+
+            return equippedSkills;
         }
 
         /// <summary>

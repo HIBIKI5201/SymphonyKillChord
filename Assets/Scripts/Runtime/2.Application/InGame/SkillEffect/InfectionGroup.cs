@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,9 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
     /// </summary>
     internal class InfectionGroup
     {
+        /// <summary>
+        ///     攻撃者・攻撃定義・ダメージ倍率・発動に必要な回数を指定して感染グループを生成する。
+        /// </summary>
         public InfectionGroup(
             IAttacker attacker,
             AttackDefinition attackDefinition,
@@ -117,7 +121,7 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
             // 伝染回数を消費する
             _remainingTriggerCount--;
 
-            Debug.Log($"[Skill08] 伝染ダメージを適用しました。残り伝染回数: {_remainingTriggerCount}");
+            DevLog.Log($"[Skill08] 伝染ダメージを適用しました。残り伝染回数: {_remainingTriggerCount}");
 
             if (IsConsumed)
             {
@@ -133,15 +137,23 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
         private int _remainingTriggerCount;
         private bool _isTransmitting;
 
+        /// <summary>
+        ///     感染グループに属するキャラクターと、そのデバフの組。
+        /// </summary>
         private readonly struct InfectionMember
         {
+            /// <summary>
+            ///     キャラクターとデバフを指定して生成する。
+            /// </summary>
             public InfectionMember(CharacterEntity character, InfectionDebuff effect)
             {
                 Character = character;
                 Effect = effect;
             }
 
+            /// <summary> 感染しているキャラクター。 </summary>
             public CharacterEntity Character { get; }
+            /// <summary> キャラクターに付与された感染デバフ。 </summary>
             public InfectionDebuff Effect { get; }
         }
 

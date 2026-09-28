@@ -12,6 +12,9 @@ using UnityEngine;
 
 namespace KillChord.Editor.AssetManagement
 {
+    /// <summary>
+    ///     Google Drive 上のアセットをプロジェクトへ取り込む同期処理。
+    /// </summary>
     internal static class DriveImportSync
     {
         private static bool isRunning;
@@ -28,6 +31,10 @@ namespace KillChord.Editor.AssetManagement
             }
         }
 
+        /// <summary>
+        ///     Drive との同期を開始する。
+        ///     実行中の場合はダイアログを出して何もしない。
+        /// </summary>
         [MenuItem(ToolConst.TOOLS_PATH + "/" + nameof(DriveImportSync) + "/Sync Now")]
         public static async void SyncNow()
         {
@@ -50,6 +57,7 @@ namespace KillChord.Editor.AssetManagement
 
             try
             {
+                // 認証情報と取得元フォルダが設定されているかを確認する。
                 var secrets = DriveImportSecrets.instance;
                 var settings = DriveImportSettings.instance;
                 var manifest = DriveImportManifest.instance;
@@ -71,6 +79,7 @@ namespace KillChord.Editor.AssetManagement
                     return;
                 }
 
+                // Service Account の認証情報を取得する。
                 ServiceAccountCredential credential;
                 try
                 {
@@ -92,6 +101,7 @@ namespace KillChord.Editor.AssetManagement
                 }
 
                 var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+                // 取得元フォルダごとに、ダウンロード対象のファイルを集める。
                 foreach (var sourceFolder in secrets.sourceFolders)
                 {
                     if (string.IsNullOrEmpty(sourceFolder.folderId))
@@ -142,6 +152,7 @@ namespace KillChord.Editor.AssetManagement
                     int total = queue.Count;
                     int done = 0;
 
+                    // 前回から更新されていないファイルは飛ばし、それ以外をダウンロードする。
                     foreach (var (node, absPath) in queue)
                     {
                         done++;
@@ -203,6 +214,7 @@ namespace KillChord.Editor.AssetManagement
 
             finally
             {
+                // 同期の状態を戻し、ダウンロードしたアセットをまとめてインポートする。
                 isRunning = false;
                 cts?.Dispose();
                 cts = null;
@@ -227,6 +239,7 @@ namespace KillChord.Editor.AssetManagement
                     AssetDatabase.Refresh();
                 }
 
+                // 集計結果をウィンドウに出す。
                 DriveImportSyncWindow.Log("");
                 DriveImportSyncWindow.Log($"更新 : {totalUpdated}");
                 DriveImportSyncWindow.Log($"スキップ : {totalSkipped}");

@@ -30,6 +30,7 @@ namespace KillChord.Editor.TicketSystem
         /// </summary>
         public static async UniTask RefreshList()
         {
+            // キャッシュを空にしてから取得する。
             if (CachedTicketDataSingleton.instance == null)
             {
                 Debug.LogError("CachedTicketDataSingletonのインスタンスがありません。");
@@ -38,6 +39,7 @@ namespace KillChord.Editor.TicketSystem
 
             CachedTicketDataSingleton.instance.Clear();
 
+            // 設定と URL を検証する。URL は HTTPS のみ受け付ける。
             if (TicketSystemSettings.instance == null)
             {
                 Debug.LogError("TicketSystemSettingsのインスタンスがありません。");
@@ -57,11 +59,13 @@ namespace KillChord.Editor.TicketSystem
                 return;
             }
 
+            // チケット一覧を取得する。
             using var request = UnityWebRequest.Get(url);
             await request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
             {
+                // レスポンスは配列なので、JsonUtility で読めるようにオブジェクトで包む。
                 var json = "{\"items\":" + request.downloadHandler.text + "}";
                 var wrapper = JsonUtility.FromJson<TicketListWrapper>(json);
                 if (wrapper?.items == null)

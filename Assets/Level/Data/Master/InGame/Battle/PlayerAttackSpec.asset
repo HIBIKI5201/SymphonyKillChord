@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70b09cd4dcca8064e8545393717dd426, type: 3}
   m_Name: PlayerAttackSpec
   m_EditorClassIdentifier: 
-  _confirmedDamage: 5
+  _confirmedDamage: 50

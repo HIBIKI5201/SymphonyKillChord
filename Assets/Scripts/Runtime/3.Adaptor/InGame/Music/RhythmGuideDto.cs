@@ -16,7 +16,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <param name="hasTarget"> ターゲットの有無。 </param>
         /// <param name="isJustTiming"> 音楽同期サービスによる現在のジャスト成否。 </param>
         /// <param name="targetBeatCount"> チュートリアル中等のミッション指定拍数。 </param>
-        public RhythmGuideDto(float indicatorNormalized, int? currentBeatCount, IReadOnlyList<RhythmGuideZoneDto> zones, bool hasTarget, bool isJustTiming, int? targetBeatCount = null)
+        /// <param name="guideLengthInBars"> タイムアウトと共有するゲージ全長の小節数。 </param>
+        public RhythmGuideDto(float indicatorNormalized, int? currentBeatCount, IReadOnlyList<RhythmGuideZoneDto> zones, bool hasTarget, bool isJustTiming, float guideLengthInBars, int? targetBeatCount = null)
         {
             IndicatorNormalized = indicatorNormalized;
             CurrentBeatCount = currentBeatCount;
@@ -24,6 +25,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             HasTarget = hasTarget;
             IsJustTiming = isJustTiming;
             TargetBeatCount = targetBeatCount;
+            GuideLengthInBars = guideLengthInBars;
         }
 
         /// <summary> インジケーターの正規化位置。1が1小節でジャスト通過分だけ1を超える。 </summary>
@@ -38,5 +40,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         public bool IsJustTiming { get; }
         /// <summary> チュートリアル等のミッション指定拍数。 </summary>
         public int? TargetBeatCount { get; }
+        /// <summary> タイムアウトと共有するゲージ全長の小節数。 </summary>
+        public float GuideLengthInBars { get; }
     }
 }

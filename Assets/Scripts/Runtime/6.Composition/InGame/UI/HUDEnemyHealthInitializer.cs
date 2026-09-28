@@ -63,6 +63,9 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private HUDEnemyHealthViewModel _viewModel;
         private HUDEnemyHealthPresenter _presenter;
 
+        /// <summary>
+        ///     ビューの更新イベントからプレゼンターの購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             if (_view != null && _presenter != null)

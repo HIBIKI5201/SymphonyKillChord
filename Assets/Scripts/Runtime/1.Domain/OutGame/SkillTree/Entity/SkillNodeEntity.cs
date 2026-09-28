@@ -9,10 +9,14 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
     /// </summary>
     public class SkillNodeEntity
     {
+        /// <summary>
+        ///     スキルツリーのノードを生成する。
+        /// </summary>
         public SkillNodeEntity(SkillNodeId nodeId,
             int cost, string skillDetail,
             SkillId[] unlockSkillIds,
-            IStatusBonusEffect[] statusBonusEffects = null)
+            IStatusBonusEffect[] statusBonusEffects = null,
+            bool hasSkillSlotBonus = false)
         {
             SkillNodeIdVO = nodeId;
             UnlockCost = new UnlockCost(cost);
@@ -22,6 +26,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             _statusBonusEffects = statusBonusEffects == null || statusBonusEffects.Length == 0
                 ? Array.Empty<IStatusBonusEffect>()
                 : (IStatusBonusEffect[])statusBonusEffects.Clone();
+            HasSkillSlotBonus = hasSkillSlotBonus;
         }
         /// <summary> ノードのID。 </summary>
         public SkillNodeId SkillNodeIdVO { get; }
@@ -40,6 +45,9 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
 
         /// <summary> 保持しているステータスボーナス効果。 </summary>
         public IReadOnlyList<IStatusBonusEffect> StatusBonusEffects => _statusBonusEffects;
+
+        /// <summary> 解放時にスキル編成枠を1つ増やすか。 </summary>
+        public bool HasSkillSlotBonus { get; }
 
         /// <summary>
         ///     親ノードを設定する。

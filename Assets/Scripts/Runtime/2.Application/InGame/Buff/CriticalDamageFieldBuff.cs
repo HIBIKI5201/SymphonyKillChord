@@ -3,6 +3,7 @@ using KillChord.Runtime.Application.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -13,6 +14,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     /// </summary>
     public class CriticalDamageFieldBuff : StatusEffectBase, ICriticalDamageMultiplierModifier
     {
+        /// <summary>
+        ///     範囲判定・効果範囲・会心ダメージ倍率・持続時間・再付与時の扱いを指定して生成する。
+        /// </summary>
         public CriticalDamageFieldBuff(
             IPlayerTargetRangeQuery rangeQuery,
             float range,
@@ -44,7 +48,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
             _criticalDamageMultiplier = criticalDamageMultiplier;
         }
 
-        /// </inheritdoc/>
+        /// <summary>
+        ///     防御者が効果範囲内にいる場合、会心ダメージ倍率を上書きする。
+        /// </summary>
         public float ModifyCriticalDamageMultiplier(IAttacker attacker, IDefender defender, float criticalDamageMultiplier)
         {
             // 防御者がプレイヤーキャラクターでない場合、クリティカルダメージ倍率を変更しない
@@ -59,7 +65,7 @@ namespace KillChord.Runtime.Application.InGame.Buff
                 return criticalDamageMultiplier;
             }
 
-            Debug.Log("[Skill09] クリティカルダメージ倍率を " + _criticalDamageMultiplier + " 倍に変更します。");
+            DevLog.Log("[Skill09] クリティカルダメージ倍率を " + _criticalDamageMultiplier + " 倍に変更します。");
 
             return _criticalDamageMultiplier;
         }

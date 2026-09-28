@@ -6,8 +6,14 @@ using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Target
 {
+    /// <summary>
+    ///     中心のキャラクターから一定範囲内にいるターゲットを探す。
+    /// </summary>
     public class TargetRadiusQuery : ITargetRadiusQuery
     {
+        /// <summary>
+        ///     ターゲットの ViewModel とエンティティの登録簿を指定して生成する。
+        /// </summary>
         public TargetRadiusQuery(
             ITargetSystemViewModel viewModel,
             TargetEntityRegistry targetEntityRegistry)
@@ -16,7 +22,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
             _targetEntityRegistry = targetEntityRegistry ?? throw new ArgumentNullException(nameof(targetEntityRegistry));
         }
 
-        ///</inheritdoc/>
+        /// <summary>
+        ///     中心から範囲内にいるキャラクターを結果リストに追加する。
+        /// </summary>
         public void Query(CharacterEntity center, float range, List<CharacterEntity> results)
         {
             if (results == null)

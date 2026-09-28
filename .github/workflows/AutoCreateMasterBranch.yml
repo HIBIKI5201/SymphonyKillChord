@@ -1,4 +1,4 @@
-name: AutoCreateMasterBranch
+name: "[Git] AutoCreateMasterBranch"
 
 on:
   create:

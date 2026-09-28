@@ -28,6 +28,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// <summary> ホームチュートリアルの完了を通知するイベント。 </summary>
         public Action OnHomeTutorialCompleted;
 
+        /// <summary> ホームチュートリアルの強制完了を要求するイベント。 </summary>
+        public Action OnHomeTutorialForceCompleteRequested;
+
         /// <summary> 作戦画面を表示するイベント。 </summary>
         public Action OnShownStageSelectionScreen;
 
@@ -39,9 +42,6 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <summary> OutGame UIの表示状態を切り替えるイベント。 </summary>
         public Action<bool> OnOutGameUiVisibilityChanged;
-
-        /// <summary> 戦闘準備画面を表示するイベントです。 </summary>
-        public Action OnShownBattlePreparationScreen;
 
         /// <summary> 設定画面を表示するイベント。 </summary>
         public Action OnShownSettingScreen;

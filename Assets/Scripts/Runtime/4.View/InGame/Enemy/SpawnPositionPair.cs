@@ -8,7 +8,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// </summary>
     public class SpawnPositionPair : MonoBehaviour
     {
+        /// <summary> 敵を生成する位置。 </summary>
         public Transform SpawnPosition => _spawnPosition;
+        /// <summary> 生成した敵が最初に向かう位置。 </summary>
         public Transform EntryPosition => _entryPosition;
         /// <summary> シーン内でこの生成位置を一意に識別するIDです。 </summary>
         public DataID SpawnPointId => _spawnPointId;
@@ -37,6 +39,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         public const string SPAWN_POINT_COLLECTION_KEY = "SpawnPoint";
         private bool _isInUse = false;
 
+        /// <summary>
+        ///     生成位置から進入位置までの線をシーンビューに表示する。
+        /// </summary>
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.cyan;

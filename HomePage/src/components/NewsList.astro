@@ -1,0 +1,70 @@
+---
+import type { NewsItem } from '../data/news';
+
+interface Props {
+	items: NewsItem[];
+}
+
+const { items } = Astro.props;
+---
+
+{items.length > 0 ? (
+	<ul class="news-list">
+		{items.map((item) => (
+			<li>
+				<a href={item.href}>
+					<time datetime={item.date}>{item.date}</time>
+					<span>{item.title}</span>
+				</a>
+			</li>
+		))}
+	</ul>
+) : (
+	<p class="empty">現在、お知らせはありません。</p>
+)}
+
+<style>
+	.news-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.news-list li + li {
+		border-top: 1px solid var(--color-surface-border);
+	}
+
+	.news-list a {
+		display: flex;
+		gap: 20px;
+		align-items: baseline;
+		padding: 18px 0;
+		color: var(--color-text-primary);
+		text-decoration: none;
+	}
+
+	.news-list a:hover,
+	.news-list a:focus-visible {
+		color: var(--color-signal);
+	}
+
+	time {
+		flex-shrink: 0;
+		font-family: var(--font-mono);
+		font-size: 0.875rem;
+		color: var(--color-label-muted);
+	}
+
+	.empty {
+		margin: 0;
+		padding: 24px 0;
+		color: var(--color-text-muted);
+	}
+
+	@media (max-width: 600px) {
+		.news-list a {
+			flex-direction: column;
+			gap: 6px;
+		}
+	}
+</style>

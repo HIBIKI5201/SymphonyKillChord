@@ -7,8 +7,12 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Skill
 {
+    /// <summary>
+    ///     スキル発動時のエフェクトと効果音を再生するビュー。
+    /// </summary>
     public class SkillView : MonoBehaviour, ISkillVisual
     {
+        /// <summary> スキル ID。 </summary>
         public int Id => _id.Id;
 
         /// <summary>
@@ -22,6 +26,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             _contextFactory = contextFactory;
         }
 
+        /// <summary>
+        ///     スキルのエフェクトと効果音を再生する。
+        /// </summary>
         public void Execute()
         {
             PlaySkillEffect();

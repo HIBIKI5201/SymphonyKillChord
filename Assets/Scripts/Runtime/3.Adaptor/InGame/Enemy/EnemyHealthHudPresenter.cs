@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
@@ -11,6 +12,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyHealthHudPresenter : IHealthHudPresenter
     {
+        /// <summary>
+        ///     敵のエンティティと HP 表示・ダメージ数値表示の出力先を指定して生成する。
+        /// </summary>
         public EnemyHealthHudPresenter(
             IDefender entity,
             Guid defenderId,
@@ -31,6 +35,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <summary> 被弾時に呼び出されるイベント。 </summary>
         public event Action OnDamaged;
 
+        /// <summary>
+        ///     購読を解除して破棄する。
+        /// </summary>
         public void Dispose()
         {
             Deactivate();
@@ -67,7 +74,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         {
             _healthHudViewModel.UpdateHealth(new HealthHudDTO(currentHealth, maxHealth));
 
-            Debug.Log($"[EnemyHealthHudPresenter] 敵HP更新：{currentHealth} / {maxHealth}　変化量：{amountChanged}");
+            DevLog.Log($"[EnemyHealthHudPresenter] 敵HP更新：{currentHealth} / {maxHealth}　変化量：{amountChanged}");
 
             if (amountChanged < 0)
             {

@@ -8,6 +8,7 @@ using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure;
@@ -105,6 +106,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            // 入手済みスキルとスキルビルドのリポジトリを読み込む。
             _loadedOwnedSkillRepository = await _ownedSkillRepositoryKey.LoadAssetAsync<OwnedSkillRepository>(this, destroyCancellationToken);
             _loadedSkillBuildRepository = await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, destroyCancellationToken);
 
@@ -113,6 +115,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return false;
             }
 
+            // 無くても続行できるアセットは、読み込めなかった場合に警告だけ出す。
             try
             {
                 _loadedSkillRepository =
@@ -158,9 +161,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 _loadedSkillInputProgressUIConfig = null;
             }
 
+            // アイコンと色の対応表を作る。
             BuildSkillGenreIconMap();
             BuildSkillBeatColorMap();
 
+            // 装備中・入手済み・全スキル・ポイント・スキルレベルを読み込む。
             _loadedEquippedSkills = await GetEquippedSkillsAsync();
             IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
             _loadedOwnedSkillTemplates = BuildOwnedSkills(ownedSkills);
@@ -195,9 +200,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         public override void Shutdown()
         {
+            // 購読と生成したコンポーネントを破棄する。
             Unsubscribe();
             DisposeComponents();
 
+            // 読み込んだアセットを解放し、参照を消す。
             _ownedSkillRepositoryKey.ReleaseLoadedAsset(this);
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
             _skillRepositoryKey.ReleaseLoadedAsset(this);
@@ -265,17 +272,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 }
             }
 
+            int baseSlotCount = SkillBuildDefinition.INITIAL_SLOT_COUNT + ResolveSkillSlotBonus();
             if (!ServiceLocator.TryGetInstance(out _skillBuildDefinition))
             {
                 _skillBuildDefinition = new SkillBuildDefinition(ToArray(_loadedEquippedSkills));
+                _skillBuildDefinition.EnsureSlotCount(baseSlotCount);
                 ServiceLocator.RegisterInstance(_skillBuildDefinition);
             }
             else
             {
                 _skillBuildDefinition.EnsureSlotCount(
-                    _loadedEquippedSkills.Count > SkillBuildDefinition.INITIAL_SLOT_COUNT
+                    _loadedEquippedSkills.Count > baseSlotCount
                         ? _loadedEquippedSkills.Count
-                        : SkillBuildDefinition.INITIAL_SLOT_COUNT);
+                        : baseSlotCount);
             }
 
             SkillBuildUseCase skillBuildUseCase =
@@ -463,6 +472,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         {
             try
             {
+                // 最新の入手済みスキル・装備・ポイント・スキルレベルを読み込む。
                 IReadOnlyList<EquippedSkill> ownedSkills = await GetOwnedSkillsAsync();
                 IReadOnlyList<EquippedSkill> equippedSkills = await _loadedSkillBuildRepository.LoadSkillBuild();
                 int ownedPoints = await GetOwnedPointsAsync();
@@ -476,6 +486,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                     return;
                 }
 
+                // 装備と入手済みスキルを反映し、表示を更新する。
                 _skillBuildDefinition.UpdateEquippedSkills(ToArray(equippedSkills));
                 _skillBuildController?.UpdateOwnedSkills(ownedSkillData);
                 _skillBuildPresenter?.Push(
@@ -586,6 +597,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private void HandleOwnedSkillChangedHandler()
         {
+            _skillBuildDefinition?.EnsureSlotCount(
+                SkillBuildDefinition.INITIAL_SLOT_COUNT + ResolveSkillSlotBonus());
             RefreshOwnedSkills(false);
         }
 
@@ -612,17 +625,38 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// </summary>
         private async void HandleSkillLevelUpHandler()
         {
-            SkillViewData? displayedSkill = _skillBuildViewModel?.DisplayedSkill.CurrentValue;
-            if (displayedSkill == null || _skillBuildController == null)
+            try
             {
-                return;
-            }
+                SkillViewData? displayedSkill = _skillBuildViewModel?.DisplayedSkill.CurrentValue;
+                if (displayedSkill == null || _skillBuildController == null)
+                {
+                    return;
+                }
 
-            bool succeeded = await _skillBuildController.LevelUpAsync(displayedSkill.Value.SkillId);
-            if (succeeded)
-            {
-                RefreshOwnedSkills(false);
+                bool succeeded = await _skillBuildController.LevelUpAsync(displayedSkill.Value.SkillId);
+                if (succeeded)
+                {
+                    RefreshOwnedSkills(false);
+                }
             }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary>
+        ///     スキルツリーで解放済みの「編成枠を増やすノード」の件数を取得します。
+        /// </summary>
+        /// <returns> 未登録の場合は0。 </returns>
+        private int ResolveSkillSlotBonus()
+        {
+            return ServiceLocator.TryGetInstance(out SkillTreeStatusEntity skillTreeStatus)
+                ? skillTreeStatus.SkillSlotBonus
+                : 0;
         }
     }
 }

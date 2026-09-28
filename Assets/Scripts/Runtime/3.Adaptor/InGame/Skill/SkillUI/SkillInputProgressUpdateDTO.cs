@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     /// </summary>
     public readonly ref struct SkillInputProgressUpdateDTO
     {
+        /// <summary>
+        ///     入力進捗の更新内容を生成する。
+        /// </summary>
         public SkillInputProgressUpdateDTO(int patternMatchCount, float currentTimestamp, float skillReadyTimestamp, bool skillTriggeredFlg)
         {
             PatternMatchCount = patternMatchCount;

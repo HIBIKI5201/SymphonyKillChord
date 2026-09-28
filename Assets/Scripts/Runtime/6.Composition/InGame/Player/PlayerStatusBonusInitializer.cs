@@ -3,6 +3,7 @@ using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -26,7 +27,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [Tooltip("スキルノード定義リポジトリの Addressables キーです。")]
         private string _skillNodeDataRepoKey;
 
-        private SkillNodeDataRepo _loadedSkillNodeDataRepo;
+        private SkillNodeDataRepository _loadedSkillNodeDataRepo;
         private PlayerStatusBonus _playerStatusBonus = PlayerStatusBonus.None;
         private PlayerStatusBonusModuleContainer _moduleContainer;
 
@@ -37,23 +38,26 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <returns> 読み込みに成功した場合は true です。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            // 読み込みに失敗した場合に備えて、ボーナス無しにしておく。
             _playerStatusBonus = PlayerStatusBonus.None;
 
             try
             {
+                // スキルノードのデータを読み込む。
                 _loadedSkillNodeDataRepo =
-                    await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepo>(this, cancellationToken);
+                    await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepository>(this, cancellationToken);
                 if (_loadedSkillNodeDataRepo == null)
                 {
 #if UNITY_EDITOR
                     Debug.LogError(
-                        $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(SkillNodeDataRepo)} の読み込み結果が null です。",
+                        $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(SkillNodeDataRepository)} の読み込み結果が null です。",
                         this);
 #endif
                     ReleaseLoadedSkillNodeDataRepo();
                     return false;
                 }
 
+                // セーブデータの解放済みノードからステータスボーナスを計算する。
                 SavedataSkillUnlockRepository savedataSkillUnlockRepository =
                     new SavedataSkillUnlockRepository();
                 PlayerStatusBonusCalculator calculator =
@@ -89,11 +93,12 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <returns> 登録に成功した場合は true です。 </returns>
         public override bool Build()
         {
+            // 読み込み済みで、コンテナがまだ登録されていないことを確認する。
             if (_loadedSkillNodeDataRepo == null)
             {
 #if UNITY_EDITOR
                 Debug.LogError(
-                    $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(SkillNodeDataRepo)} が読み込まれていません。",
+                    $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(SkillNodeDataRepository)} が読み込まれていません。",
                     this);
 #endif
                 return false;
@@ -119,6 +124,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
+            // ステータスボーナスのコンテナを登録する。
             _moduleContainer = new PlayerStatusBonusModuleContainer(_playerStatusBonus);
             ServiceLocator.RegisterInstance(_moduleContainer);
             return true;
@@ -134,7 +140,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 && ReferenceEquals(registeredContainer, _moduleContainer))
             {
 #if UNITY_EDITOR
-                Debug.Log(
+                DevLog.Log(
                     $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(PlayerStatusBonusModuleContainer)} の登録を解除します。",
                     this);
 #endif

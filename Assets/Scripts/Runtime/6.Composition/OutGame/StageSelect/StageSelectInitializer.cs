@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Sortie;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.StageSelect;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Skill;
@@ -70,6 +71,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private const int NODE_STAR_MAX_COUNT = 3;
         /// <summary> クリックしたノードに残すフレームのUSSクラス名。 </summary>
         private const string FOCUS_FRAME_USS_CLASS = "stage-node-focus-frame";
+        /// <summary> 牙フレームを表示しているノードのUSSクラス名。 </summary>
+        private const string FOCUS_FRAME_NODE_USS_CLASS = "stage-node--focus-frame";
         /// <summary> フレーム要素名。 </summary>
         private const string FOCUS_FRAME_NAME = "StageNodeFocusFrame";
         /// <summary> 作戦マップScrollView要素名。 </summary>
@@ -155,6 +158,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private Dictionary<StageId, StageNodePresenter> _nodePresenterMap;
         private CancellationTokenSource _cts;
         private bool _isInitialized;
+        private bool _isSortieRequesting;
         private OutGameSortieController _outGameSortieController;
         private OutGameMissionSelectController _missionSelectController;
         private string _currentSceneName;
@@ -182,6 +186,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private VisualElement _stageNodeFocusFrame;
         private bool _isFocusFrameLocked;
         private Dictionary<StageId, VisualElement> _stageNodeElementMap;
+        private VisualElement _initialStageFocusElement;
         private Dictionary<StageId, Vector2> _stageNodeCenterMap;
         private bool _isSubscribed;
         private VisualElement _rootVisualElement;
@@ -196,6 +201,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private LoadingScreenController _loadingScreenController;
         private bool _isWaitingForLoadingCompleted;
         private bool _isAutomaticTutorialFlowStarted;
+        private bool _isForcedSortieMode;
+        private StageId _forcedStageId;
+        private bool _hasForcedSortiePreparationFailed;
+        private StageId _failedForcedSortieStageId;
 
         /// <summary>
         ///     単体で実行できる初期化を行います。
@@ -310,6 +319,65 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     対象ステージを検証し、作戦画面を強制出撃状態で開きます。
+        /// </summary>
+        /// <param name="stageId"> 強制選択するバトルステージです。 </param>
+        /// <returns> 要求を受け付けた場合はtrueです。 </returns>
+        private bool TryForceBattleSortie(StageId stageId)
+        {
+            if (IsSortieBlocked() || !_isSubscribed
+                || !ServiceLocator.TryGetInstance(out StageSelectScreenView screenView))
+            {
+                return false;
+            }
+
+            // Demoから毎フレーム要求されても表示アニメーションを再開しない。
+            if (_isForcedSortieMode)
+            {
+                return _forcedStageId.Equals(stageId);
+            }
+
+            // 同じ定義不備で準備とログを繰り返さず、新たな解放ステージは再評価する。
+            if (_hasForcedSortiePreparationFailed && _failedForcedSortieStageId.Equals(stageId))
+            {
+                return false;
+            }
+
+            if (!_stageTree.TryGetNode(stageId, out StageNode node)
+                || node.Definition is not BattleStageDefinition battleStage)
+            {
+                _hasForcedSortiePreparationFailed = true;
+                _failedForcedSortieStageId = stageId;
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] 強制出撃対象のバトルステージ定義がありません。 StageId: {stageId.Value}",
+                    this);
+                return false;
+            }
+
+            if (!TryPrepareBattleSortie(battleStage))
+            {
+                _hasForcedSortiePreparationFailed = true;
+                _failedForcedSortieStageId = stageId;
+                Debug.LogError(
+                    $"[{nameof(StageSelectInitializer)}] 強制出撃のミッションまたはシーン設定が不正です。 " +
+                    $"StageId: {stageId.Value}, MissionId: {battleStage.MissionId.Value}, " +
+                    $"BattleSceneName: {battleStage.BattleSceneName}, ReturnSceneName: {_currentSceneName}",
+                    this);
+                return false;
+            }
+
+            _forcedStageId = stageId;
+            _isForcedSortieMode = true;
+            screenView.SetForcedSortieMode(true);
+            _detailScreenView.SetForcedSortieMode(true);
+            _detailScreenView.HideImmediately();
+            _settingShortcutButton?.SetEnabled(false);
+            _stageMapScrollView.SetEnabled(false);
+            _outGameUIEvent.OnShownStageSelectionScreen?.Invoke();
+            return true;
+        }
+
+        /// <summary>
         ///     ロード済みのAddressablesハンドルを解放します。
         /// </summary>
         private void ReleaseLoadedResources()
@@ -329,6 +397,21 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
+        ///     コントローラーのフォーカス移動先へ、マウス操作と同じ牙フレームを表示します。
+        /// </summary>
+        private void HandleStageNodeFocusInHandler(FocusInEvent focusEvent)
+        {
+            if (_isFocusFrameLocked || focusEvent.target is not VisualElement node
+                || !node.ClassListContains(NODE_USS_CLASS) || !node.enabledInHierarchy)
+            {
+                return;
+            }
+
+            AttachFocusFrameTo(node);
+            _stageMapScrollView?.ScrollTo(node);
+        }
+
+        /// <summary>
         ///     ステージノードが選択されたときのイベントハンドラ。
         ///     クリックと決定操作(コントローラーのAボタン)の両方から通知される。
         ///     クリック時と同じく、選択したノードへフォーカスフレームを固定する。
@@ -336,6 +419,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private void HandleStageNodeSelected(int stageIdValue)
         {
             StageId stageId = new StageId(stageIdValue);
+            if (_isForcedSortieMode && !stageId.Equals(_forcedStageId)) { return; }
+
             if (_stageNodeElementMap != null
                 && _stageNodeElementMap.TryGetValue(stageId, out VisualElement nodeElement))
             {
@@ -407,6 +492,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleStageDetailClosed()
         {
+            if (_isForcedSortieMode) { return; }
+
             _isFocusFrameLocked = false;
             ResetMapZoom();
             _detailScreenView.Hide();
@@ -495,12 +582,14 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleSettingShortcutButtonActivationHandler()
         {
+            if (_isForcedSortieMode) { return; }
+
             _outGameUIEvent.OnShownSettingScreen?.Invoke();
         }
 
         /// <summary>
-        ///     ステージ詳細ウィンドウ表示中、ウィンドウ外へのポインター入力を無効化する。
-        ///     B(キャンセル)操作以外でウィンドウを閉じたり、外側の要素を操作したりできないようにする。
+        ///     詳細の外側クリックで選択を解除し、別ノードへの選択変更を許可する。
+        ///     強制出撃中は外側への入力を遮断する。
         /// </summary>
         /// <param name="evt"> ポインタ押下イベント。 </param>
         private void HandleRootPointerDown(PointerDownEvent evt)
@@ -511,7 +600,18 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             if (_detailScreenRoot != null && _detailScreenRoot.Contains(target)) { return; }
 
-            evt.StopPropagation();
+            if (_isForcedSortieMode)
+            {
+                evt.StopPropagation();
+                return;
+            }
+
+            for (VisualElement current = target; current != null; current = current.parent)
+            {
+                if (current.ClassListContains(NODE_USS_CLASS)) { return; }
+            }
+
+            _outGameUIEvent.OnStageDetailClosed?.Invoke();
         }
 
         /// <summary>
@@ -519,7 +619,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void HandleScreenClosed()
         {
+            if (_isForcedSortieMode) { return; }
+
             _isFocusFrameLocked = false;
+            DetachFocusFrame();
             ResetMapZoom();
             _detailScreenView.Hide();
             HideAllStarRows();
@@ -530,72 +633,109 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageCleared(int stageIdValue)
         {
-            await CompleteAndAnimateAsync(new StageId(stageIdValue));
+            try
+            {
+                await CompleteAndAnimateAsync(new StageId(stageIdValue));
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
         ///     出撃ボタンが押されたときの処理。
-        ///     ステージタイプに応じて戦闘準備画面表示またはシナリオ直接遷移イベントを発火します。
+        ///     ステージタイプに応じてバトル開始またはシナリオ遷移を要求します。
         /// </summary>
         private async void HandleSortieRequested()
         {
-            if (!_stageSelectController.TryGetSortieInfo(out StageDefinition stageDefinition))
+            if (IsSortieBlocked()) { return; }
+            _isSortieRequesting = true;
+            try
             {
-                return;
-            }
-
-            ReserveNodeTransitionChain(stageDefinition);
-            if (stageDefinition is BattleStageDefinition battleStageDefinition)
-            {
-                _selectedScenarioState.Clear();
-                if (!TryPrepareBattleSortie(battleStageDefinition))
+                if (!_stageSelectController.TryGetSortieInfo(out StageDefinition stageDefinition))
                 {
+                    return;
+                }
+
+                // 表示切替中に残っている以前の選択からは出撃させない。
+                if (_isForcedSortieMode && !stageDefinition.StageId.Equals(_forcedStageId))
+                {
+                    return;
+                }
+
+                ReserveNodeTransitionChain(stageDefinition);
+                if (stageDefinition is BattleStageDefinition battleStageDefinition)
+                {
+                    _selectedScenarioState.Clear();
+                    if (!TryPrepareBattleSortie(battleStageDefinition))
+                    {
+                        _pendingNodeTransitionState?.Clear();
+                        return;
+                    }
+                }
+                else if (stageDefinition is ScenarioStageDefinition scenarioStageDefinition)
+                {
+                    _selectedBattleStageState.Clear();
+                    _selectedMissionState.Clear();
+
+                    _selectedScenarioState.SelectScenario(scenarioStageDefinition);
+                }
+
+                bool isScenarioStage = stageDefinition is ScenarioStageDefinition;
+                if (isScenarioStage)
+                {
+                    _detailScreenView.HideImmediately();
+                }
+
+                bool requested;
+                try
+                {
+                    requested = await _outGameSortieController.RequestSortieAsync(
+                        stageDefinition.StageType,
+                        _currentSceneName,
+                        stageDefinition.TargetSceneName,
+                        _cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // シーン終了・キャンセル時は詳細画面を復元しません。
+                    throw;
+                }
+                catch
+                {
+                    if (isScenarioStage && this != null)
+                    {
+                        _ = _detailScreenView.Show();
+                    }
+
+                    throw;
+                }
+
+                if (!requested)
+                {
+                    if (isScenarioStage && this != null)
+                    {
+                        _ = _detailScreenView.Show();
+                    }
+
                     _pendingNodeTransitionState?.Clear();
                     return;
                 }
             }
-            else if (stageDefinition is ScenarioStageDefinition scenarioStageDefinition)
+            catch (OperationCanceledException)
             {
-                _selectedBattleStageState.Clear();
-                _selectedMissionState.Clear();
-
-                _selectedScenarioState.SelectScenario(scenarioStageDefinition);
             }
-
-            bool isScenarioStage = stageDefinition is ScenarioStageDefinition;
-            if (isScenarioStage)
+            catch (Exception exception)
             {
-                _detailScreenView.HideImmediately();
+                Debug.LogException(exception);
             }
-
-            bool requested;
-            try
+            finally
             {
-                requested = await _outGameSortieController.RequestSortieAsync(
-                    stageDefinition.StageType,
-                    _currentSceneName,
-                    stageDefinition.TargetSceneName,
-                    _cts.Token);
-            }
-            catch
-            {
-                if (isScenarioStage)
-                {
-                    _ = _detailScreenView.Show();
-                }
-
-                throw;
-            }
-
-            if (!requested)
-            {
-                if (isScenarioStage)
-                {
-                    _ = _detailScreenView.Show();
-                }
-
-                _pendingNodeTransitionState?.Clear();
-                return;
+                _isSortieRequesting = false;
             }
         }
 
@@ -620,9 +760,39 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async void HandleStageSelectScreenCompleted()
         {
-            // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
-            UpdateEquippedSkillDisplay();
-            await ApplyNewlyClearedStagesAsync(_cts.Token);
+            try
+            {
+                VisualElement initialFocusBefore = _initialStageFocusElement;
+                ServiceLocator.TryGetInstance(out StageSelectScreenView screenView);
+                VisualElement focusedBefore = screenView?.FocusedElement;
+
+                // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
+                UpdateEquippedSkillDisplay();
+                if (_isForcedSortieMode)
+                {
+                    // 作戦画面のフェードとフォーカス復元が済んでから詳細を開く。
+                    HandleStageNodeSelected(_forcedStageId.Value);
+                }
+
+                await ApplyNewlyClearedStagesAsync(_cts.Token);
+
+                // 解放演出中に移動・決定したフォーカスや、他画面からの復元は上書きしない。
+                if (_isInitialized && !_isForcedSortieMode && !_isFocusFrameLocked
+                    && screenView != null && _initialStageFocusElement != initialFocusBefore
+                    && (focusedBefore == null || focusedBefore == initialFocusBefore)
+                    && (screenView.FocusedElement == focusedBefore
+                        || screenView.FocusedElement == initialFocusBefore))
+                {
+                    screenView.RestoreFocus();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -659,7 +829,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 ServiceLocator.RegisterInstance(_pendingNodeTransitionState);
             }
 
-            _battleSortieSelectionService = new BattleSortieSelectionService();
+            _battleSortieSelectionService = BattleSortieSelectionStateResolver.CreateSelectionService();
             _missionSelectController = new OutGameMissionSelectController(_selectedMissionState);
 
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
@@ -737,6 +907,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _detailScreenRoot = detailRoot;
             _rootVisualElement.RegisterCallback<PointerDownEvent>(
                 HandleRootPointerDown, TrickleDown.TrickleDown);
+            _rootVisualElement.RegisterCallback<FocusInEvent>(HandleStageNodeFocusInHandler);
 
             _settingShortcutButton = root.Q<Button>(SETTING_SHORTCUT_BUTTON_NAME);
             if (_settingShortcutButton != null)
@@ -788,7 +959,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _moduleContainer = new StageSelectModuleContainer(
                 _stageTree,
                 _battleSortieSelectionService,
-                _currentSceneName);
+                _currentSceneName,
+                TryForceBattleSortie);
             _isModuleContainerRegistered = ServiceLocator.RegisterInstance(_moduleContainer);
             if (!_isModuleContainerRegistered)
             {
@@ -808,6 +980,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         public override void Shutdown()
         {
+            // 購読を解除し、自身が登録したコンテナだけを解除する。
             UnsubscribeLoadingCompleted();
             Unsubscribe();
             _isSubscribed = false;
@@ -820,10 +993,16 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
 
             _moduleContainer = null;
             _isModuleContainerRegistered = false;
+            _isForcedSortieMode = false;
+            _forcedStageId = default;
+            _hasForcedSortiePreparationFailed = false;
+            _failedForcedSortieStageId = default;
+            // 操作の登録と、背景・マップの設定を解除する。
             if (_rootVisualElement != null)
             {
                 _rootVisualElement.UnregisterCallback<PointerDownEvent>(
                     HandleRootPointerDown, TrickleDown.TrickleDown);
+                _rootVisualElement.UnregisterCallback<FocusInEvent>(HandleStageNodeFocusInHandler);
                 _rootVisualElement = null;
             }
             _detailScreenRoot = null;
@@ -843,19 +1022,23 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _stageMapDragManipulator.target = null;
                 _stageMapDragManipulator = null;
             }
+            // 実行中の処理を止め、ノードのコンポーネントを破棄して、読み込んだアセットを解放する。
             _cts?.Cancel();
             DisposeNodeComponents();
             _cts?.Dispose();
             _cts = null;
             ReleaseLoadedResources();
+            // マップとフォーカスの状態を消す。
             _stageMapScrollView = null;
             _stageMapContent = null;
             _stageMapCanvas = null;
             _stageMapCanvasHeight = 0.0f;
             _stageMapCanvasWidth = 0.0f;
+            DetachFocusFrame();
             _stageNodeFocusFrame = null;
             _isFocusFrameLocked = false;
             _stageNodeElementMap = null;
+            _initialStageFocusElement = null;
             _stageNodeCenterMap = null;
             _battleSortieSelectionService = null;
             _loadingScreenController = null;
@@ -1204,12 +1387,6 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 VisualElement nodeElement = nodeElementMap[stageId];
                 var nodeView = new StageNodeView(nodeElement, stageId.Value, _outGameUIEvent);
 
-                // 親を持たない起点ステージ(マップ最左)を初期フォーカス先として印を付ける。
-                if (_stageTree.GetPreviousIds(stageId).Count == 0)
-                {
-                    nodeElement.AddToClassList(UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME);
-                }
-
                 // このノードへの接続線View一覧を取得する（存在しない場合はnull）。
                 connectionViewMap.TryGetValue(stageId, out List<IStageConnectionViewModel> incomingConnectionViews);
 
@@ -1224,6 +1401,44 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 // ID で引けるようにマップへも登録する
                 _nodePresenterMap.Add(stageId, nodePresenter);
             }
+
+            UpdateInitialStageFocus();
+        }
+
+        /// <summary>
+        ///     接続関係から配置した進行列が最も先の、解放済みノードを初期フォーカスにします。
+        ///     同じ列では既存のノード順を維持し、クリア済みの最終ステージも候補に含めます。
+        /// </summary>
+        private void UpdateInitialStageFocus()
+        {
+            // 解放演出の待機中にシーンが破棄された場合は、解放済みUIへ触らない。
+            if (_stageNodeElementMap == null || _stageNodeCenterMap == null)
+            {
+                return;
+            }
+
+            VisualElement latestNodeElement = null;
+            float latestColumnX = float.NegativeInfinity;
+            foreach (StageNode node in _stageTree.Nodes)
+            {
+                if (node.Status == StageStatus.Locked
+                    || !_stageNodeElementMap.TryGetValue(node.Id, out VisualElement element)
+                    || !element.enabledSelf
+                    || element.style.display.value == DisplayStyle.None
+                    || element.style.visibility.value == Visibility.Hidden
+                    || !_stageNodeCenterMap.TryGetValue(node.Id, out Vector2 center)
+                    || center.x <= latestColumnX)
+                {
+                    continue;
+                }
+
+                latestNodeElement = element;
+                latestColumnX = center.x;
+            }
+
+            _initialStageFocusElement?.RemoveFromClassList(UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME);
+            _initialStageFocusElement = latestNodeElement;
+            _initialStageFocusElement?.AddToClassList(UINavigationExtensions.INITIAL_FOCUS_CLASS_NAME);
         }
 
         /// <summary>
@@ -1240,6 +1455,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             out float contentWidth,
             out float contentHeight)
         {
+            // 列ごとの行数と、最大の列番号・行数を求める。
             Dictionary<int, int> columnCounts = new();
             int maxColumn = 0;
             int maxRowCount = 1;
@@ -1255,6 +1471,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 maxRowCount = Mathf.Max(maxRowCount, rowCount);
             }
 
+            // マップ全体の大きさを決める。
             contentWidth = MAP_PADDING * 2.0f + NODE_SIZE + maxColumn * HORIZONTAL_SPACING;
             contentHeight = MAP_PADDING * 2.0f + NODE_SIZE + (maxRowCount - 1) * VERTICAL_SPACING;
             mapCanvas.style.position = Position.Absolute;
@@ -1263,6 +1480,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             mapCanvas.style.width = contentWidth;
             mapCanvas.style.height = contentHeight;
 
+            // 各ノードの中心位置を求める。行数が少ない列は縦方向の中央に寄せる。
             Dictionary<StageId, Vector2> nodeCenters = new(nodePositions.Count);
             foreach (KeyValuePair<StageId, StageMapNodePosition> pair in nodePositions)
             {
@@ -1291,6 +1509,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             for (int i = 0; i < _stageTree.Connections.Count; i++)
             {
+                // 接続元から接続先へ向かう線を、回転させた要素として配置する。
                 StageNodeConnection connection = _stageTree.Connections[i];
                 Vector2 fromPosition = nodeCenters[connection.FromStageId];
                 Vector2 toPosition = nodeCenters[connection.ToStageId];
@@ -1315,6 +1534,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                         Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg,
                         AngleUnit.Degree));
 
+                // 進行度に応じて伸ばす塗りの要素を加える。
                 var fillElement = new VisualElement
                 {
                     name = CONNECTION_FILL_NAME,
@@ -1324,6 +1544,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 connectionElement.Add(fillElement);
                 mapContent.Add(connectionElement);
 
+                // 接続先のステージごとに、入ってくる接続の表示をまとめる。
                 if (!connectionViewMap.TryGetValue(
                         connection.ToStageId,
                         out List<IStageConnectionViewModel> incomingConnections))
@@ -1348,6 +1569,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             Dictionary<StageId, Vector2> nodeCenters,
             Dictionary<StageId, VisualElement> nodeElementMap)
         {
+            DetachFocusFrame();
             _stageNodeFocusFrame = new VisualElement
             {
                 name = FOCUS_FRAME_NAME,
@@ -1439,8 +1661,22 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         {
             if (_stageNodeFocusFrame == null || node == null) { return; }
 
+            DetachFocusFrame();
             node.Insert(0, _stageNodeFocusFrame);
+            node.AddToClassList(FOCUS_FRAME_NODE_USS_CLASS);
             _stageNodeFocusFrame.style.display = DisplayStyle.Flex;
+        }
+
+        /// <summary>
+        ///     牙フレームと選択表示を外し、元のノードのクリア状態に応じた円へ戻します。
+        /// </summary>
+        private void DetachFocusFrame()
+        {
+            if (_stageNodeFocusFrame == null) { return; }
+
+            _stageNodeFocusFrame.parent?.RemoveFromClassList(FOCUS_FRAME_NODE_USS_CLASS);
+            _stageNodeFocusFrame.RemoveFromHierarchy();
+            _stageNodeFocusFrame.style.display = DisplayStyle.None;
         }
 
         /// <summary>
@@ -1551,11 +1787,26 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         }
 
         /// <summary>
-        ///     現在のステージから連続する自動遷移を予約する。
+        ///     共有選択・予約を変更する前に、進行中の出撃やロードを確認します。
+        /// </summary>
+        private bool IsSortieBlocked()
+        {
+            if (!_isInitialized || _isSortieRequesting) { return true; }
+            if (ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+                && (transition.HasScenarioBattleSortie || transition.PersistentLifetimeToken.IsCancellationRequested))
+            {
+                return true;
+            }
+            return _loadingScreenController != null && _loadingScreenController.IsLoading;
+        }
+
+        /// <summary>
+        ///     現在のステージから連続する自動遷移を予約します。
         /// </summary>
         /// <param name="stageDefinition"> 出撃対象のステージ定義です。 </param>
         private void ReserveNodeTransitionChain(StageDefinition stageDefinition)
         {
+            // 予約を消してから、自動遷移の連鎖を先頭から順に予約する。
             if (_pendingNodeTransitionState == null)
             {
                 return;
@@ -1573,6 +1824,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                        currentStageDefinition.StageId,
                        out StageDefinition targetStageDefinition))
             {
+                // 同じステージに戻ってきた場合は循環しているため、予約を消して中止する。
                 if (!visitedStageIds.Add(currentStageDefinition.StageId))
                 {
 #if UNITY_EDITOR
@@ -1598,25 +1850,34 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private async Task<bool> TryExecutePendingNodeTransitionAfterReturnAsync()
         {
-            if (_pendingNodeTransitionState == null
-                || !_pendingNodeTransitionState.HasPending)
+            if (IsSortieBlocked()) { return true; }
+            _isSortieRequesting = true;
+            try
             {
-                return false;
-            }
+                if (_pendingNodeTransitionState == null
+                    || !_pendingNodeTransitionState.HasPending)
+                {
+                    return false;
+                }
 
-            if (!_pendingNodeTransitionState.TryConsumeCompleted(
-                    out PendingNodeTransition pendingNodeTransition))
-            {
-                _pendingNodeTransitionState.Clear();
+                if (!_pendingNodeTransitionState.TryConsumeCompleted(
+                        out PendingNodeTransition pendingNodeTransition))
+                {
+                    _pendingNodeTransitionState.Clear();
+                    return true;
+                }
+
+                if (!await ExecutePendingNodeTransitionAsync(pendingNodeTransition))
+                {
+                    _pendingNodeTransitionState.Clear();
+                }
+
                 return true;
             }
-
-            if (!await ExecutePendingNodeTransitionAsync(pendingNodeTransition))
+            finally
             {
-                _pendingNodeTransitionState.Clear();
+                _isSortieRequesting = false;
             }
-
-            return true;
         }
 
         /// <summary>
@@ -1624,6 +1885,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private bool TryStartTutorialSegment()
         {
+            if (IsSortieBlocked()) { return true; }
+
             if (!_isInitialized
                 || _loadedSaveData == null
                 || _pendingNodeTransitionState.HasPending)
@@ -1704,6 +1967,8 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 if (!_nodePresenterMap.TryGetValue(nextIds[i], out var presenter)) { continue; }
                 await presenter.TransitionTask;
             }
+
+            UpdateInitialStageFocus();
         }
 
         /// <summary>

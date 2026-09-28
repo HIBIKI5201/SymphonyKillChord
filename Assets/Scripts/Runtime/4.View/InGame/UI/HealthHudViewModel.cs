@@ -9,6 +9,9 @@ namespace KillChord.Runtime.View.InGame.UI
     /// </summary>
     public class HealthHudViewModel : IHealthHudViewModel
     {
+        /// <summary>
+        ///     現在 HP と最大 HP を指定して生成する。
+        /// </summary>
         public HealthHudViewModel(float currentHealth, float maxHealth)
         {
             _healthHudDto = new ReactiveProperty<HealthHudDTO>(new HealthHudDTO(currentHealth, maxHealth));

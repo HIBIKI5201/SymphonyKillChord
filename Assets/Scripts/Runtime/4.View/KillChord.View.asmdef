@@ -23,7 +23,8 @@
         "GUID:e0cd26848372d4e5c891c569017e11f1",
         "GUID:2665a8d13d1b3f18800f46e256720795",
         "GUID:f06555f75b070af458a003d92f9efb00",
-        "Unity.Localization"
+        "Unity.Localization",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

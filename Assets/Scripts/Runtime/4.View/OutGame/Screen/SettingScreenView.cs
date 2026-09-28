@@ -2,8 +2,8 @@ using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
-using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +19,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
     {
 
         /// <summary> View を初期化します。 </summary>
-        public SettingScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
+        /// <param name="rootElement"> 設定画面のルート要素です。 </param>
+        /// <param name="outGameUIEvent"> アウトゲームのUIイベントです。 </param>
+        /// <param name="playerInputView"> Cancel入力を購読する入力Viewです。nullの場合はCancel入力での操作を無効にします。 </param>
+        public SettingScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent, PlayerInputView playerInputView)
             : base(rootElement, outGameUIEvent)
         {
             _backButton = rootElement.Q<Button>(BACKBUTTON_NAME)
@@ -37,7 +40,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             // UI Toolkit の NavigationCancelEvent はフォーカス状態に依存し不安定なため、
             // OnOptionInput と同様に PlayerInputView の Cancel アクションを直接購読する。
-            if (!ServiceLocator.TryGetInstance(out _playerInputView))
+            _playerInputView = playerInputView;
+            if (_playerInputView == null)
             {
                 UnityEngine.Debug.LogWarning(
                     $"[{nameof(SettingScreenView)}] PlayerInputViewを取得できませんでした。"
@@ -46,6 +50,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             RegisterButtonCallback();
             ResetReturnToTitleDialog();
+            RegisterLocalizedButtonTexts();
         }
 
         /// <summary>
@@ -60,6 +65,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         public override ValueTask Show(CancellationToken cancellationToken = default)
         {
             _isActive = true;
+            _shownFrame = UnityEngine.Time.frameCount;
             ResetReturnToTitleDialog();
 
             // 背面のホーム画面は表示されたままのため、フォーカスを設定画面内へ閉じ込める。
@@ -99,6 +105,10 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _slideMotionHandle.TryCancel();
             base.Dispose();
             UnregisterButtonCallback();
+            foreach (LocalizedElementText localizedText in _localizedButtonTexts)
+            {
+                localizedText.Dispose();
+            }
         }
 
         /// <summary>
@@ -109,8 +119,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _backButtonPreset = _backButton.ApplyBasicButtonPreset(HandleBackButtonActivationHandler);
             _cancelTargetActivation = _cancelTarget.RegisterActivation(HandleBackButtonActivationHandler);
             _returnToTitleButtonPreset = _returnToTitleButton.ApplyBasicButtonPreset(ShowReturnToTitleDialog);
-            _cancelReturnToTitleButton.clicked += HideReturnToTitleDialog;
-            _confirmReturnToTitleButton.clicked += RequestReturnToTitle;
+
+            // MakeNavigable() で navigable クラスを付与し、他UIと同じ黄色のフォーカス枠を出す。
+            // Button.clicked はコントローラーの決定操作(NavigationSubmitEvent)には反応しないため、
+            // RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
+            _cancelReturnToTitleButton.MakeNavigable();
+            _confirmReturnToTitleButton.MakeNavigable();
+            _cancelReturnToTitleButtonActivation =
+                _cancelReturnToTitleButton.RegisterActivation(HideReturnToTitleDialog);
+            _confirmReturnToTitleButtonActivation =
+                _confirmReturnToTitleButton.RegisterActivation(RequestReturnToTitle);
             OutGameUIEvent.OnReturnToTitleRequestCompleted += HandleReturnToTitleRequestCompleted;
             _outsideClickArea.RegisterCallback<PointerDownEvent>(HandleOutsidePointerDown);
 
@@ -128,8 +146,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _backButtonPreset?.Dispose();
             _cancelTargetActivation?.Dispose();
             _returnToTitleButtonPreset?.Dispose();
-            _cancelReturnToTitleButton.clicked -= HideReturnToTitleDialog;
-            _confirmReturnToTitleButton.clicked -= RequestReturnToTitle;
+            _cancelReturnToTitleButtonActivation?.Dispose();
+            _confirmReturnToTitleButtonActivation?.Dispose();
             OutGameUIEvent.OnReturnToTitleRequestCompleted -= HandleReturnToTitleRequestCompleted;
             _outsideClickArea.UnregisterCallback<PointerDownEvent>(HandleOutsidePointerDown);
 
@@ -168,6 +186,19 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 return;
             }
 
+            // EscはOptionとCancelの両方に割り当てられているため、開いた入力で即座に閉じない。
+            if (_shownFrame == UnityEngine.Time.frameCount)
+            {
+                return;
+            }
+
+            // 確認ダイアログ表示中のキャンセル操作は、ダイアログを閉じる動作に割り当てる。
+            if (_isReturnToTitleDialogVisible)
+            {
+                HideReturnToTitleDialog();
+                return;
+            }
+
             HandleBackButtonActivationHandler();
         }
 
@@ -180,6 +211,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string OUTSIDE_CLICK_AREA_NAME = "Root";
         private const string BACK_GROUND_NAME = "BackGround";
         private const string CANCEL_TARGET_NAME = "CancelTarget";
+        private const string UI_COMMON_TABLE = "UICommon";
 
         /// <summary> ウィンドウのスライドインにかかる時間(秒)。 </summary>
         private const float SLIDE_DURATION = 0.2f;
@@ -216,10 +248,14 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private IDisposable _backButtonPreset;
         private IDisposable _returnToTitleButtonPreset;
         private IDisposable _cancelTargetActivation;
+        private IDisposable _cancelReturnToTitleButtonActivation;
+        private IDisposable _confirmReturnToTitleButtonActivation;
         private bool _isReturnToTitleDialogVisible;
         private bool _isReturnToTitleRequested;
         private bool _isActive;
+        private int _shownFrame = -1;
         private MotionHandle _slideMotionHandle;
+        private LocalizedElementText[] _localizedButtonTexts = Array.Empty<LocalizedElementText>();
 
         /// <summary>
         ///     設定ウィンドウ外が押された場合に設定画面を閉じる。
@@ -258,7 +294,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             // 背面の設定項目へフォーカスが抜けないようにする。
             _dialogNavigationScope.Activate(_returnToTitleDialog);
-            _cancelReturnToTitleButton.Focus();
+
+            // Activate() はダイアログ内で最初に見つかった要素へ遅延フォーカスするため、
+            // 並び順の先頭にある確定ボタンが既定になってしまう。誤操作でタイトルへ戻らないよう、
+            // 後から予約して必ずキャンセルボタンを既定のフォーカス先にする。
+            _cancelReturnToTitleButton.FocusDeferred();
         }
 
         /// <summary>
@@ -339,6 +379,80 @@ namespace KillChord.Runtime.View.OutGame.Screen
             return rootElement.Q<T>(elementName)
                 ?? throw new System.InvalidOperationException(
                     $"[{nameof(SettingScreenView)}] {elementName} が見つかりませんでした。");
+        }
+
+        /// <summary>
+        ///     静的なボタン・見出し・確認文をUICommonテーブルへ連携する。
+        /// </summary>
+        private void RegisterLocalizedButtonTexts()
+        {
+            // 見出しのラベルを取得する。
+            Label titleLabel = Require<Label>(RootElement, "Title");
+            Label audioPanelTitle = Require<Label>(RootElement, "AudioPanelTitle");
+            Label environmentPanelTitle = Require<Label>(RootElement, "EnvironmentPanelTitle");
+            Label screenModeHeading = Require<Label>(RootElement, "ScreenModeHeading");
+            Label resolutionHeading = Require<Label>(RootElement, "ResolutionHeading");
+            Label qualityHeading = Require<Label>(RootElement, "QualityHeading");
+            Label brightnessHeading = Require<Label>(RootElement, "BrightnessHeading");
+            Label returnToTitleMessage = Require<Label>(RootElement, "ReturnToTitleMessage");
+            Label languageHeading = Require<Label>(RootElement, "LanguageHeading");
+            Label vibrationHeading = Require<Label>(RootElement, "VibrationHeading");
+            Label rhythmOffsetHeading = Require<Label>(RootElement, "RhythmOffsetHeading");
+            Label controlPanelTitle = Require<Label>(RootElement, "ControlPanelTitle");
+            Label cameraSensitivityHeading = Require<Label>(RootElement, "CameraSensitivityHeading");
+            Label cameraInvertHeading = Require<Label>(RootElement, "CameraInvertHeading");
+            Label autoLockOnHeading = Require<Label>(RootElement, "AutoLockOnHeading");
+            Label buttonLayoutHeading = Require<Label>(RootElement, "ButtonLayoutHeading");
+            // 見出しとボタンの文言をローカライズに登録する。
+            _localizedButtonTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.title", text => titleLabel.text = text, "設定"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.audio", text => audioPanelTitle.text = text, "オーディオ設定"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.environment", text => environmentPanelTitle.text = text, "環境設定"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.screen_mode", text => screenModeHeading.text = text, "画面モード"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.resolution", text => resolutionHeading.text = text, "解像度"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.quality", text => qualityHeading.text = text, "画質"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.brightness", text => brightnessHeading.text = text, "明るさ"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.return_to_title_message", text => returnToTitleMessage.text = text, "タイトル画面に戻りますか？"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.language", text => languageHeading.text = text, "言語"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.vibration", text => vibrationHeading.text = text, "振動"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.rhythm_offset", text => rhythmOffsetHeading.text = text, "リズム判定タイミング"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.control", text => controlPanelTitle.text = text, "操作設定"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.camera_sensitivity", text => cameraSensitivityHeading.text = text, "カメラ感度"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.camera_invert", text => cameraInvertHeading.text = text, "カメラ反転"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.auto_lock_on", text => autoLockOnHeading.text = text, "オートロックオン"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.button_layout", text => buttonLayoutHeading.text = text, "決定・キャンセルボタン"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.close", text => _backButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.environment", text => _environmentSettingButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.setting.return_to_title", text => _returnToTitleButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.setting.cancel_return_to_title",
+                    text => _cancelReturnToTitleButton.text = text),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.setting.confirm_return_to_title",
+                    text => _confirmReturnToTitleButton.text = text),
+            };
         }
     }
 }

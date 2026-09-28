@@ -5,6 +5,7 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -15,6 +16,9 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_08 : SkillBase
     {
+        /// <summary>
+        ///     次の攻撃への効果予約サービスと範囲判定を指定して生成する。
+        /// </summary>
         public Skill_08(
             PendingAttackEffectService pendingAttackEffectService,
             ITargetRadiusQuery targetRadiusQuery)
@@ -23,8 +27,12 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             _targetRadiusQuery = targetRadiusQuery ?? throw new System.ArgumentNullException(nameof(targetRadiusQuery));
         }
 
+        /// <summary>
+        ///     次の攻撃が当たったときに感染を広げる効果を予約する。
+        /// </summary>
         public override void Execute(in SkillEffectContext context)
         {
+            // 感染の範囲・発動回数・ダメージ率と、現在の拍に対応する攻撃定義を取得する。
             float infectionRange =
                 (float)context.EffectSpec.GetRequiredValue(SkillEffectParameterId.InfectionRange);
 
@@ -37,12 +45,14 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             AttackDefinition attackDefinition =
                 context.PlayerEntity.CombatSpec.GetAttackDefinitionByBeatType(context.CurrentBeatType);
 
+            // パラメーターが有効な範囲にあるかを検証する。
             ValidateParameters(
                 infectionRange,
                 infectionTriggerCount,
                 infectionDamageRate,
                 context.EffectSpec.ReapplyPolicy);
 
+            // 次の攻撃が当たったときに感染を広げる効果を予約する。
             _pendingAttackEffectService.Register(
                 new InfectionOnHitEffect(
                     _targetRadiusQuery,
@@ -52,7 +62,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     infectionDamageRate,
                     context.EffectSpec.ReapplyPolicy));
 
-            Debug.Log($"[Skill_08] 発動" +
+            DevLog.Log($"[Skill_08] 発動" +
                 $"Range: {infectionRange}, TriggerCount: {infectionTriggerCount}, DamageRate: {infectionDamageRate}");
         }
 

@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.Persistent.Localization;
 
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.SkillTree;
@@ -31,6 +32,22 @@ namespace KillChord.Runtime.View.OutGame.Screen
             }
 
             RegisterButtonCallback();
+            _pointsLabel = rootElement.Q<Label>("Points");
+            _rebuildPointsLabel = rootElement.Q<Label>("RebuildPointsValueLabel")
+                ?? throw new ArgumentNullException($"[{nameof(SkillTreeScreenView)}] RebuildPointsValueLabel が見つかりませんでした。");
+            _listSeparatorLocalizedText = new LocalizedElementText(
+                "UICommon", "ui.skill_tree.list_separator", text =>
+                {
+                    ListSeparator = text;
+                    OnListSeparatorChanged?.Invoke();
+                }, "、");
+            Label localizedRebuildPointsHeading = rootElement.Q<Label>("RebuildPointsNameLabel");
+            Label localizedUnlockPointsHeading = rootElement.Q<Label>("UnlockPointsNameLabel");
+            _headingLocalizedTexts = new[]
+            {
+                new LocalizedElementText("UICommon", "ui.home.mod_points", text => localizedRebuildPointsHeading.text = text, localizedRebuildPointsHeading.text),
+                new LocalizedElementText("UICommon", "ui.home.unlock_points", text => localizedUnlockPointsHeading.text = text, localizedUnlockPointsHeading.text)
+            };
         }
 
         /// <summary>
@@ -44,8 +61,17 @@ namespace KillChord.Runtime.View.OutGame.Screen
             return base.Show(cancellationToken);
         }
 
+        /// <summary>
+        ///     ローカライズ文言の購読と表示中の要素を破棄する。
+        /// </summary>
         public override void Dispose()
         {
+            _listSeparatorLocalizedText.Dispose();
+            OnListSeparatorChanged = null;
+            foreach (LocalizedElementText localizedText in _headingLocalizedTexts)
+            {
+                localizedText.Dispose();
+            }
             base.Dispose();
             UnregisterButtonCallback();
 
@@ -99,8 +125,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             // MakeNavigable() とあわせて RegisterActivation() でクリックと決定操作を1つの処理へ統合する。
             _settingShortcutButtonActivation =
                 _settingShortcutButton.RegisterActivation(HandleSettingShortcutButtonActivationHandler);
-            // キャンセル操作で戻れるため、フォーカス移動の対象からは外す。
-            _backButton.ExcludeFromNavigation();
+            // 画面左端のフォーカス移動チェーン(ツリー→設定→戻る)の終端として使うため、
+            // キャンセル操作で戻れる画面だがフォーカス移動の対象に含める。
+            _backButton.MakeNavigable();
             _backButtonActivation = _backButton.RegisterActivation(HandleBackButtonActivationHandler);
         }
 
@@ -128,6 +155,31 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             OutGameUIEvent.OnShownSettingScreen?.Invoke();
         }
+
+        /// <summary> スキル名一覧の区切り文字が変更された時に通知する。 </summary>
+        public event Action OnListSeparatorChanged;
+
+        /// <summary> 選択中言語のスキル名一覧の区切り文字。 </summary>
+        public string ListSeparator { get; private set; } = "、";
+
+        /// <summary> ヘッダーに現在の解放ポイントを表示する。 </summary>
+        /// <param name="points"> 現在の解放ポイント。 </param>
+        public void SetPoints(int points)
+        {
+            _pointsLabel.text = points.ToString();
+        }
+
+        /// <summary> ヘッダーに現在の改造ポイントを表示する。 </summary>
+        /// <param name="rebuildPoints"> 現在の改造ポイント。 </param>
+        public void SetRebuildPoints(int rebuildPoints)
+        {
+            _rebuildPointsLabel.text = rebuildPoints.ToString();
+        }
+
+        private readonly Label _pointsLabel;
+        private readonly Label _rebuildPointsLabel;
+        private readonly LocalizedElementText _listSeparatorLocalizedText;
+        private readonly LocalizedElementText[] _headingLocalizedTexts;
 
         private const string BACKBUTTON_NAME = "BackButton";
         private const string SETTING_SHORTCUT_BUTTON_NAME = "SettingShortcutButton";

@@ -27,6 +27,9 @@ namespace KillChord.Runtime.View.InGame.UI
             _vm.HealthHudDTO.Subscribe(UpdateHpHud).RegisterTo(destroyCancellationToken);
         }
 
+        /// <summary>
+        ///     UI の参照が設定されているかを確認する。
+        /// </summary>
         private void Awake()
         {
             if (_healthBarImage == null
@@ -47,10 +50,10 @@ namespace KillChord.Runtime.View.InGame.UI
             _healthBarDamageMotion.TryCancel();
         }
 
-        [SerializeField] private Image _healthBarImage;
-        [SerializeField] private Image _healthBarImageRed;
-        [SerializeField] private TextMeshProUGUI _currentHealthText;
-        [SerializeField] private TextMeshProUGUI _maxHealthText;
+        [SerializeField, Tooltip("HP バーの Image。")] private Image _healthBarImage;
+        [SerializeField, Tooltip("減った HP を遅れて示す赤いバーの Image。")] private Image _healthBarImageRed;
+        [SerializeField, Tooltip("現在 HP を表示するテキスト。")] private TextMeshProUGUI _currentHealthText;
+        [SerializeField, Tooltip("最大 HP を表示するテキスト。")] private TextMeshProUGUI _maxHealthText;
 
         [Header("アニメーション関連")]
         [SerializeField, Tooltip("HP変化分の反映アニメーションの長さ（秒）")]
@@ -60,10 +63,10 @@ namespace KillChord.Runtime.View.InGame.UI
 
 #if UNITY_EDITOR
         [Header("デバッグ用")]
-        [SerializeField]
+        [SerializeField, Tooltip("デバッグ用のキー操作を有効にするか。")]
         private bool _debugFlg = false;
         [DisplayText("ZキーでHPゲージ減少、Xキーで満タン")]
-        [SerializeField]
+        [SerializeField, Tooltip("デバッグ操作で1回に減らす HP の割合。")]
         private float _decreasePercent = 0.2f;
 #endif
 
@@ -106,6 +109,9 @@ namespace KillChord.Runtime.View.InGame.UI
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        ///     デバッグ操作が有効な場合、キー入力で HP ゲージを増減させる。
+        /// </summary>
         private void Update()
         {
             if (!_debugFlg) return;

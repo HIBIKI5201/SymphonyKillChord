@@ -48,6 +48,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            // 選択中のバトルステージと、読み込むリポジトリのキーを確認する。
             if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage)
             {
@@ -73,6 +74,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
+            // 敵の Wave 定義と個別の敵定義のリポジトリを読み込む。
             try
             {
                 _loadedEnemyWaveDefinitionRepository =
@@ -95,6 +97,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
+            // 選択中のステージの Wave と演出の一覧を作る。
             EnemyWaveDefinitionId enemyWaveDefinitionId =
                 selectedBattleStageState.CurrentStageDefinition.EnemyWaveDefinitionId;
             if (!_loadedEnemyWaveDefinitionRepository.TryCreateEnemyWaves(
@@ -111,6 +114,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
+            // 敵とボスのアセットを読み込む。
             if (_enemyPools == null || !await _enemyPools.LoadAddressableAssetsAsync(cancellationToken))
             {
                 Debug.LogError($"[{nameof(EnemyInitializer)}] 敵プール用アセットのロードに失敗しました。", this);
@@ -153,6 +157,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
+            // 依存するコンテナを取得する。
             TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
             MusicSyncModuleContainer musicSyncContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
             PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
@@ -173,6 +178,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
+            // コンテナの参照を受け取り、敵の生成に必要なものを初期化する。
             Initialize(targetSystemContainer.TargetSystemController, _enemyPools, _moduleContainer.EnemyWaveSpawnerState);
             _musicSyncService = musicSyncContainer.MusicSyncService;
             _musicSyncState = musicSyncContainer.MusicSyncState;
@@ -190,10 +196,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyInfantrySpawner.Initialize();
             _enemyArtillerySpawner.Initialize();
 
-            bool isMissionControlledWave = TryResolveMissionControlledWaveSequence(
+            // ミッションで Wave の開始を制御する場合は、自動での Wave 進行を止める。
+            bool hasMissionWaveSequence = TryResolveMissionWaveSequence(
                 out MissionRuntimeService missionRuntimeService,
                 out ObjectiveSequenceClearCondition objectiveSequence);
+            bool isMissionControlledWave = hasMissionWaveSequence
+                && objectiveSequence.HasStepWithCondition<WaveStartClearCondition>();
 
+            // Wave の生成と進行を制御するコントローラーを作る。
             _moduleContainer.StageEffectCatalog = _loadedStageEffectCatalog;
             EnemySpawnerRouter enemySpawner = new EnemySpawnerRouter(
                 _loadedEnemyDefinitionRepository,
@@ -207,15 +217,17 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 !isMissionControlledWave);
             _enemyWaveTimerView.Initialize(_moduleContainer.EnemyWaveSpawnerController);
 
-            if (isMissionControlledWave)
+            if (hasMissionWaveSequence)
             {
                 _missionWaveController = new MissionWaveController(
                     missionRuntimeService,
                     objectiveSequence,
                     _moduleContainer.EnemyWaveSpawnerController,
+                    _moduleContainer.EnemyWaveSpawnerState,
                     _enemyWaveTimerView);
             }
 
+            // ボスがいれば初期化し、ゲームの開始・終了の制御対象に加える。
             _moduleContainer.BossInitializer = TryInitializeBoss(targetSystemContainer.TargetSystemController, _enemyPools, _damageEffectView);
             if (_moduleContainer.BossInitializer != null)
             {
@@ -303,6 +315,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public override void Shutdown()
         {
+            _enemyInfantrySpawner?.Shutdown();
+            _enemyArtillerySpawner?.Shutdown();
+
             _missionWaveController?.Dispose();
             _missionWaveController = null;
 
@@ -370,12 +385,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private ReusableParticleSystemView _damageEffectView;
 
         /// <summary>
-        ///     MissionがWave開始を制御する目標シーケンスを取得します。
+        ///     敵Waveの開始・全滅通知を結合するMissionの目標シーケンスを取得します。
         /// </summary>
         /// <param name="missionRuntimeService"> Missionのランタイムサービスです。 </param>
-        /// <param name="objectiveSequence"> Waveステップを含む目標シーケンスです。 </param>
-        /// <returns> Waveステップを含む目標シーケンスを取得できた場合はtrueです。 </returns>
-        private bool TryResolveMissionControlledWaveSequence(
+        /// <param name="objectiveSequence"> Missionの目標シーケンスです。 </param>
+        /// <returns> Missionの目標シーケンスを取得できた場合はtrueです。 </returns>
+        private bool TryResolveMissionWaveSequence(
             out MissionRuntimeService missionRuntimeService,
             out ObjectiveSequenceClearCondition objectiveSequence)
         {
@@ -383,7 +398,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 ServiceLocator.GetInstance<MissionModuleContainer>();
             missionRuntimeService = missionModuleContainer?.MissionRuntimeService;
             ObjectiveSequenceClearCondition sequence = missionRuntimeService?.MissionDefinition.ClearCondition;
-            if (sequence == null || !sequence.HasStepWithCondition<WaveStartClearCondition>())
+            if (sequence == null)
             {
                 objectiveSequence = null;
                 return false;

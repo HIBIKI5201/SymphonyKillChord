@@ -8,7 +8,11 @@ namespace KillChord.Runtime.Domain.InGame.Mission.StepEntryAction
     /// </summary>
     public sealed class PlayDialogueStepEntryAction : IMissionStepEntryAction
     {
-        public PlayDialogueStepEntryAction(IReadOnlyList<MissionDialogueLine> lines)
+        /// <summary>
+        ///     会話とステップ変更時のキャンセル方針を設定する。
+        /// </summary>
+        public PlayDialogueStepEntryAction(IReadOnlyList<MissionDialogueLine> lines,
+            bool isStepChangeCancellationEnabled = true)
         {
             if (lines == null || lines.Count == 0)
             {
@@ -25,9 +29,13 @@ namespace KillChord.Runtime.Domain.InGame.Mission.StepEntryAction
                 copy.Add(lines[i]);
             }
             Lines = copy.AsReadOnly();
+            IsStepChangeCancellationEnabled = isStepChangeCancellationEnabled;
         }
 
         /// <summary> 順番に再生する台詞 </summary>
         public IReadOnlyList<MissionDialogueLine> Lines { get; }
+
+        /// <summary> ステップ変更時に音声と字幕をキャンセルするか。 </summary>
+        public bool IsStepChangeCancellationEnabled { get; }
     }
 }

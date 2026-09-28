@@ -1,0 +1,32 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import PageHeader from '../components/PageHeader.astro';
+import NewsList from '../components/NewsList.astro';
+import { sortedNews } from '../data/news';
+---
+
+<Layout title="News | Symphony Kill Chord" description="Symphony Kill Chordのお知らせ一覧。">
+	<main>
+		<PageHeader eyebrow="Information" title="News" />
+		<section aria-label="お知らせ一覧">
+			<NewsList items={sortedNews} />
+		</section>
+	</main>
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		width: 100%;
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	section {
+		padding: 0 24px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-surface-border);
+	}
+</style>

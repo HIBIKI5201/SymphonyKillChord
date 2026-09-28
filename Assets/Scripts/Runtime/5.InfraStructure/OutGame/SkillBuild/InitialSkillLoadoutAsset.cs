@@ -10,6 +10,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
     /// </summary>
     [CreateAssetMenu(fileName = nameof(InitialSkillLoadoutAsset),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" + nameof(InitialSkillLoadoutAsset))]
+    /// <summary>
+    ///     ゲーム開始時に解放済みとするスキルを設定するデータ。
+    /// </summary>
     public sealed class InitialSkillLoadoutAsset : ScriptableObject
     {
         /// <summary>

@@ -28,6 +28,21 @@ namespace KillChord.Editor.Localization
         private const string POPUP_IMAGES_DIRECTORY = "Assets/Arts/Images/Sprites/TutorialPopupImages/New";
 
         private static readonly string[] LocaleCodes = { "ja", "en" };
+        // 既存のテーブルキーと提供画像のファイル名を対応付けます。
+        private static readonly (string Key, string FileStem)[] PopupImageDefinitions =
+        {
+            ("Attack", "Attack"),
+            ("Blue", "BlueAttack"),
+            ("Green", "GreenAttack"),
+            ("JustAttack", "JustAttack"),
+            ("KillChord", "KillChord"),
+            ("Move", "Douge"),
+            ("Orenge", "OrangeAttack"),
+            ("Purple", "PurpleAttack"),
+            ("Water", "WaterAttack"),
+            ("Yellow", "YellowAttack")
+        };
+
         private static readonly SubtitleDefinition[] SubtitleDefinitions =
         {
             new(
@@ -188,6 +203,7 @@ namespace KillChord.Editor.Localization
         /// <returns> 登録した字幕の件数です。 </returns>
         private static int EnsureStringTable(IReadOnlyList<Locale> locales)
         {
+            // テーブルコレクションが無ければ作成する。
             StringTableCollection collection = LocalizationEditorSettings.GetStringTableCollection(
                 TutorialSubtitlesTableName);
             if (collection == null)
@@ -198,6 +214,7 @@ namespace KillChord.Editor.Localization
                     locales.ToList());
             }
 
+            // 各キーについて、空のロケールだけ既定の文言を入れる。入力済みの文言は上書きしない。
             foreach (SubtitleDefinition definition in SubtitleDefinitions)
             {
                 SharedTableData.SharedTableEntry sharedEntry = collection.SharedData.GetEntry(definition.Key)
@@ -225,6 +242,7 @@ namespace KillChord.Editor.Localization
                 }
             }
 
+            // 変更を保存対象にし、エディタへ通知する。
             EditorUtility.SetDirty(collection);
             EditorUtility.SetDirty(collection.SharedData);
             LocalizationEditorSettings.EditorEvents.RaiseCollectionModified(null, collection);
@@ -248,26 +266,26 @@ namespace KillChord.Editor.Localization
                     locales.ToList());
             }
 
-            string[] imageGuids = AssetDatabase.FindAssets("t:Sprite", new[] { POPUP_IMAGES_DIRECTORY });
-            foreach (string imageGuid in imageGuids)
+            foreach ((string key, string fileStem) in PopupImageDefinitions)
             {
-                string imagePath = AssetDatabase.GUIDToAssetPath(imageGuid);
-                Sprite image = AssetDatabase.LoadAssetAtPath<Sprite>(imagePath);
-                if (image == null)
-                {
-                    continue;
-                }
-
                 foreach (Locale locale in locales)
                 {
-                    collection.AddAssetToTable(locale.Identifier, image.name, image);
+                    string suffix = locale.Identifier.Code == "ja" ? "jp" : locale.Identifier.Code;
+                    string imagePath = $"{POPUP_IMAGES_DIRECTORY}/{fileStem}_{suffix}.png";
+                    Sprite image = AssetDatabase.LoadAssetAtPath<Sprite>(imagePath);
+                    if (image == null)
+                    {
+                        throw new InvalidOperationException($"チュートリアル画像が見つかりません: {imagePath}");
+                    }
+
+                    collection.AddAssetToTable(locale.Identifier, key, image);
                 }
             }
 
             EditorUtility.SetDirty(collection);
             EditorUtility.SetDirty(collection.SharedData);
             LocalizationEditorSettings.EditorEvents.RaiseCollectionModified(null, collection);
-            return imageGuids.Length;
+            return PopupImageDefinitions.Length;
         }
 
         /// <summary>
@@ -295,6 +313,9 @@ namespace KillChord.Editor.Localization
         /// </summary>
         private readonly struct SubtitleDefinition
         {
+            /// <summary>
+            ///     字幕の定義を生成する。
+            /// </summary>
             public SubtitleDefinition(string key, string japanese, string english)
             {
                 Key = key;

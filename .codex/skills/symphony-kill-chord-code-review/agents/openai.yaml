@@ -1,4 +1,0 @@
-interface:
-  display_name: "Symphony Kill Chord Code Review"
-  short_description: "設計・規約・仕様用語に基づいてUnityコードをレビュー"
-  default_prompt: "Use $symphony-kill-chord-code-review to review the current code changes against the project architecture, coding rules, and ubiquitous language."

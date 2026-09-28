@@ -32,6 +32,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 読み込みに成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            // 前回読み込んだ設定を解放してから読み込む。
             ReleaseLoadedConfig();
 
             try
@@ -71,6 +72,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
+            // 初期化済みの場合は何もしない。以前の状態を片付けてから設定を確認する。
             if (_isInitialized)
             {
                 return true;
@@ -85,6 +87,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             try
             {
+                // 依存するターゲット・プレイヤー・カメラを取得する。
                 TargetSystemModuleContainer targetContainer =
                     ServiceLocator.GetInstance<TargetSystemModuleContainer>();
                 PlayerModuleContainer playerContainer =
@@ -102,6 +105,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                     return false;
                 }
 
+                // プレイヤーの子としてビューを生成して初期化する。
                 Transform playerTransform = playerContainer.PlayerView.transform;
                 _view = Instantiate(_viewPrefab, playerTransform, false);
                 if (!_view.Initialize(
@@ -115,6 +119,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                     return false;
                 }
 
+                // ViewModel とプレゼンターを作り、ビューの更新で表示を更新する。
                 _viewModel = new EnemyDirectionIndicatorViewModel(_view);
                 _getPlayerPosition = () => playerTransform != null
                     ? playerTransform.position
@@ -176,6 +181,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 初期化可能な場合はtrue。 </returns>
         private bool ValidateConfig()
         {
+            // 設定とプレハブが揃っているかを確認する。
             if (_loadedConfig == null || _viewPrefab == null)
             {
                 Debug.LogError(
@@ -184,6 +190,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
+            // 表示数・距離・位置・フェード時間が有効な範囲にあるかを確認する。
             if (_loadedConfig.MaximumDisplayCount <= 0
                 || _loadedConfig.MaximumDisplayCount > EnemyDirectionIndicatorConfig.MAXIMUM_DISPLAY_COUNT
                 || _loadedConfig.MaximumDistance < 0f

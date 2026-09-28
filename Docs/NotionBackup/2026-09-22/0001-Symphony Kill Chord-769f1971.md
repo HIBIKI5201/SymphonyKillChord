@@ -1,0 +1,371 @@
+# Symphony Kill Chord
+
+- id: 27d7c2c6-cc02-801d-9648-fbe2769f1971
+- path: Symphony Kill Chord
+- last_edited: 2026-07-27T03:44:53.140Z
+
+- 📄 [[**基本情報**]] (27d7c2c6-cc02-81c8-9188-de0e0b2eb4e9)
+- 📄 [[重要リンク]] (38d7c2c6-cc02-8038-b7cb-e17ceeac75d9)
+---
+- 📄 [[仕様書 ガイド]] (2ee7c2c6-cc02-8082-8f87-ecc178235d82)
+- 📄 [[クレジット]] (3127c2c6-cc02-80d6-a0d9-e1215ca78df0)
+---
+---
+
+## マネジメント
+- 📄 [[スケジュール]] (27d7c2c6-cc02-818c-a2f8-d6fb1a06b078)
+- 📄 [[ステータスリスト]] (3407c2c6-cc02-8085-b5db-d3920631fe50)
+- 🗃 DB「仕様検討フォーラム」 (27d7c2c6-cc02-81de-aeb2-d40ffda5299e) rows=127
+  - [[リズムとアクションのマルチタスク解消の方針]] (2cd7c2c6-cc02-806e-8a87-ffd664c0f2f9) ステータス: 適用済
+  - [[プログラマーワークフロー パッケージ導入について]] (3277c2c6-cc02-8076-bc6d-f325365871cd) 担当者: 八幡 | ステータス: 適用済
+  - [[シーンの概要と意図]] (3167c2c6-cc02-80a5-996d-f7693b7c6cbd) 担当者: 松下 | 優先度: 10 | ステータス: 適用済
+  - [[インゲームHUDの構成要素]] (3167c2c6-cc02-80c2-ab62-d4cbbdeb654e) ステータス: 適用済
+  - [[リズムUI]] (3167c2c6-cc02-804d-840d-c20c5cf72709) ステータス: 適用済
+  - [[前回の入力が一定以上離れた時の用語]] (3177c2c6-cc02-8014-8eec-c6ca7dc51c58) ステータス: 適用済
+  - [[コンフィグについて]] (3137c2c6-cc02-8092-a2fe-ca60eabec568) 担当者: 塚本 | ステータス: 適用済
+  - [[プレイヤーの概要]] (3167c2c6-cc02-80c6-a9cb-eddfc314f354) 担当者: 松下 | 優先度: 10 | ステータス: 適用済
+  - [[敵の概要]] (3167c2c6-cc02-8080-a8e5-e2ab2a2f78c9) 担当者: 松下 | 優先度: 10 | ステータス: 適用済
+  - [[新規クライアント部門向けの研修]] (3347c2c6-cc02-80c5-aa54-c7dcb0763852) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[敵の行動アルゴリズム]] (32c7c2c6-cc02-8037-8de7-c15999e6bd10) 担当者: 松下 | 優先度: 10 | ステータス: 適用済
+  - [[プレイヤーが使う武器のリファレンス探し]] (3257c2c6-cc02-8024-b839-ffa954a509a5) 担当者: 兼子 | 優先度: 8 | ステータス: 適用済
+  - [[シナリオライター勧誘手順]] (3257c2c6-cc02-80f5-9453-fdc7f5c5d084) 担当者: 八幡 | 優先度: 8 | ステータス: 適用済
+  - [[BGMアセットリスト]] (3357c2c6-cc02-80e2-9329-d543c8eaef7c) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[リザルト]] (3257c2c6-cc02-80f5-b958-f0bb490fb6fb) 担当者: 兼子 | 優先度: 9 | ステータス: 適用済
+  - [[ステージ開始前の挙動]] (3337c2c6-cc02-8060-a167-fc72a01620ee) 担当者: 兼子 | 優先度: 9 | ステータス: 適用済
+  - [[ベータ版期間のマイルストーン]] (3697c2c6-cc02-8012-a0a3-f4426f5d2f9d) 担当者: 八幡 | 優先度: 15 | ステータス: 適用済
+  - [[配信(7/29)までの作業内容]] (38f7c2c6-cc02-8095-9d8e-fdad78341ae9) 担当者: 松下,横障子 | 優先度: 100 | ステータス: 却下
+  - [[ステージ演出]] (3437c2c6-cc02-80b2-bffe-eb26dbc9e2ec) 優先度: 12
+  - [[チュートリアル]] (3437c2c6-cc02-8087-8e5c-d48098966497) 担当者: 八幡 | 優先度: 12 | ステータス: 適用済
+  - [[ボス]] (3437c2c6-cc02-8045-b176-d5d0601504ab) 担当者: 八幡 | 優先度: 12 | ステータス: 適用済
+  - [[シナリオパート]] (3437c2c6-cc02-80c5-9173-f4d72921690e) 担当者: 八幡 | 優先度: 12 | ステータス: 適用済
+  - [[敵のスポーン挙動について]] (3437c2c6-cc02-80cf-871b-d24c0385963e) 担当者: 八幡 | 優先度: 12 | ステータス: 適用済
+  - [[武器ごとの攻撃性能]] (3437c2c6-cc02-80dc-b3a3-c41d8abf6a73) 担当者: 八幡 | 優先度: 12 | ステータス: 適用済
+  - [[作戦画面のレイアウトについて]] (3497c2c6-cc02-8049-88a7-dd4bb3991bab) 担当者: 松下 | 優先度: 12 | ステータス: 適用済
+  - [[ベータ版開発指針]] (3577c2c6-cc02-80ee-8471-c4099273b4a6) 担当者: 八幡 | 優先度: 15 | ステータス: 適用済
+  - [[敵の攻撃挙動]] (36f7c2c6-cc02-8005-a0c3-c4e0775de195) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[スキル獲得方法]] (3397c2c6-cc02-80c6-9471-f5367c76fd71) 担当者: 松下 | 優先度: 8 | ステータス: 適用済
+  - [[タイトル画面発注]] (3637c2c6-cc02-80fb-90a0-fe7fc162e4bc) 担当者: 田中 | ステータス: 却下
+  - [[エフェクト代替アセット]] (35e7c2c6-cc02-803e-9d13-d8d1695b1879) 担当者: 田中 | ステータス: 採用
+  - [[SEの発注書の進捗]] (33f7c2c6-cc02-80b4-b0db-f8616c7145b3) 担当者: 兼子 | 優先度: 8 | ステータス: 適用済
+  - [[ステージ設計]] (3487c2c6-cc02-80e2-b899-ddeecfa71754) 優先度: 10
+  - [[Symphony 台本]] (3437c2c6-cc02-80f8-a75a-f4f5dabb9d23) 優先度: 6 | ステータス: 却下
+  - [[フレーバーテキストの追加場所]] (3337c2c6-cc02-802d-9934-e89002738273) 優先度: 6
+  - [[ユーザーデータ]] (31e7c2c6-cc02-800f-92ab-ecc6a60b2e5f) 担当者: 八幡 | 優先度: 5 | ステータス: 適用済
+  - [[ゴア表現のレベル]] (3167c2c6-cc02-809a-b0f7-f41dd89abf3a) 担当者: 兼子 | 優先度: 5 | ステータス: 適用済
+  - [[ゲームルールの成功条件の複数化]] (3167c2c6-cc02-80a7-b6a6-e557bdaa6f6a) ステータス: 適用済
+  - [[コアメカニクス]] (2aa7c2c6-cc02-8024-8bc5-ef6f4dc4c634) ステータス: 適用済
+  - [[音楽同期戦闘モック 追加実装項目]] (2e07c2c6-cc02-805d-9bb5-d087605e9517) ステータス: 適用済
+  - [[戦闘音楽のトンマナ]] (2aa7c2c6-cc02-8064-99eb-e424783dd674) ステータス: 適用済
+  - [[プレイヤーの行動パターン]] (30b7c2c6-cc02-8051-8436-ea0cfee9ed0f) ステータス: 適用済
+  - [[スキルのコマンドの発動重複対策]] (30b7c2c6-cc02-80db-9e20-fea5c726aef4) ステータス: 適用済
+  - [[カメラワーク]] (30b7c2c6-cc02-802b-a14c-cb826bb3aacf) ステータス: 適用済
+  - [[コマンド]] (30a7c2c6-cc02-8061-9e45-e822dca46f4c) ステータス: 却下
+  - [[スキル]] (30a7c2c6-cc02-800d-a783-ee6ab29e6566) ステータス: 適用済
+  - [[リズムの判定]] (30a7c2c6-cc02-80e4-b9a6-c8fd731573b9) ステータス: 適用済
+  - [[シーン構成]] (30b7c2c6-cc02-8082-b67b-c1b4aa90bbd4) ステータス: 適用済
+  - [[ゲームルール]] (30d7c2c6-cc02-8013-bfc6-fda18170a2d2) ステータス: 適用済
+  - [[プレイヤー]] (30e7c2c6-cc02-8030-96fe-e3ad3130e1f5) ステータス: 適用済
+  - [[敵の種類]] (30e7c2c6-cc02-802d-be04-d3247402c4d8) ステータス: 適用済
+  - [[ステージ基本]] (30f7c2c6-cc02-80ed-bbe8-ece6f550dd06) ステータス: 適用済
+  - [[ステージ詳細]] (30f7c2c6-cc02-805f-8a8f-da659ce65b17) ステータス: 適用済
+  - [[シフト表システム]] (3227c2c6-cc02-80a8-a316-f6a75eea49f8) 担当者: 八幡 | ステータス: 適用済
+  - [[ホーム画面の構成要素]] (3227c2c6-cc02-802d-8f10-d1d8e5a379d5) 担当者: 兼子 | ステータス: 適用済
+  - [[コンボについて]] (3227c2c6-cc02-8025-9deb-c7c73e491c62) ステータス: 適用済
+  - [[アウトゲームUIの構成要素]] (3167c2c6-cc02-80a4-95ee-fc67109a68c7) 担当者: 兼子 | ステータス: 適用済
+  - [[スペシャル技の導入]] (3277c2c6-cc02-80bb-999b-d2fae856ef39) 担当者: 塚本 | 優先度: 5 | ステータス: 却下
+  - [[仕様書ガイド ストーリー]] (3307c2c6-cc02-800e-91a7-dcb92390f78e) 担当者: 田中 | 優先度: 5 | ステータス: 適用済
+  - [[ミニマップ]] (3167c2c6-cc02-807b-a0c6-c6aca64a6277) 担当者: 兼子 | 優先度: 3 | ステータス: 却下
+  - [[バトル チュートリアル]] (3107c2c6-cc02-808f-8bef-e1c8692f7461) 優先度: 3
+  - [[対応デバイスの世代]] (3287c2c6-cc02-80d6-91f1-e0f223602ec5) 優先度: 3 | ステータス: 却下
+  - [[コンボによる能力の追加]] (3257c2c6-cc02-8033-8370-d664177c0a91) 担当者: 塚本 | 優先度: 3 | ステータス: 却下
+  - [[ステージ差分のリファレンス]] (3367c2c6-cc02-8078-a333-e5eec1cd8a78) 担当者: 兼子 | 優先度: 3 | ステータス: 作業中
+  - [[長押しの導入]] (2cd7c2c6-cc02-80af-b77f-fe4dc315631b) 優先度: 1 | ステータス: 却下
+  - [[回避時の音]] (33a7c2c6-cc02-808d-8e40-f26c1216d9e4) 優先度: 1
+  - [[スキルの使用映像]] (3497c2c6-cc02-809a-b7be-e0f039d0e133) 優先度: 1
+  - [[改造画面の仕様追記]] (34c7c2c6-cc02-80d4-b779-c3888b3915c0) 担当者: 兼子 | 優先度: 10 | ステータス: 適用済
+  - [[スキルの書き方]] (34d7c2c6-cc02-806b-ad81-d7a7e06685a3) 担当者: 八幡 | 優先度: 8 | ステータス: 却下
+  - [[[３Dモデラー]敵モデルのボーン修正]] (3777c2c6-cc02-809f-8202-d0993edaf601) 担当者: 東 | ステータス: 検討中
+  - [[スキルの詳細]] (3567c2c6-cc02-8024-997d-efd9f78789a2) 担当者: 松下,八幡 | 優先度: 15 | ステータス: 適用済
+  - [[Notionの「用語」について]] (3567c2c6-cc02-807c-8008-c88a8f1fc758) 担当者: 東 | 優先度: 12 | ステータス: 適用済
+  - [[ステージ障害物のリファレンス]] (34f7c2c6-cc02-8017-8560-fa9d421b0dc5) 担当者: 兼子 | 優先度: 12 | ステータス: 適用済
+  - [[研究画面の仕様追記]] (34c7c2c6-cc02-80e9-80b7-e4fd3a36de89) 担当者: 兼子 | 優先度: 6 | ステータス: 適用済
+  - [[タイトル画面]] (35a7c2c6-cc02-8079-aa87-ec3203a45b50) 
+  - [[仕様概要に記載する内容]] (35b7c2c6-cc02-806b-be14-d4ac5871b0eb) 
+  - [[ボス戦仕様]] (38f7c2c6-cc02-8001-a66b-cea4bc8d2720) 
+  - [[リストアップ]] (3a17c2c6-cc02-80da-8216-d38f7970cc76) 担当者: 野田 | ステータス: 検討中
+  - [[BGM仕様案]] (39d7c2c6-cc02-806b-bba5-d472f2cb2c7b) ステータス: 適用済
+  - [[不明点のリストアップ]] (39d7c2c6-cc02-80d4-aae8-f7a77ced5969) 担当者: 兼子 | ステータス: 検討中
+  - [[アセットなどの用語系の命名規則の不足確認]] (3ae7c2c6-cc02-80b5-9769-db7ec54eb6d6) 担当者: 東 | ステータス: 検討中
+  - [[仕様書見ずらい]] (3607c2c6-cc02-80c5-8efc-e823708b5508) 担当者: 東 | ステータス: 却下
+  - [[ロックオンHUDについて]] (3527c2c6-cc02-8056-ab65-c8353f7590f0) 担当者: 東 | ステータス: 却下
+  - [[UIトンマナ修正]] (3787c2c6-cc02-80df-9ff2-f6503823b367) ステータス: 却下
+  - [[リズムUI案]] (3707c2c6-cc02-804b-9af2-c85c47683953) 担当者: 東 | ステータス: 却下
+  - [[シナリオシステム テキストウィンドウについて]] (3777c2c6-cc02-80a2-835c-d92af833e0de) 担当者: 工藤 | ステータス: 適用済
+  - [[ステージ方針]] (3607c2c6-cc02-8011-88e2-ec14d47edb7e) 担当者: 八幡 | 優先度: 15 | ステータス: 採用
+  - [[スキル(全体)仕様]] (35a7c2c6-cc02-80bf-88ab-e6ff72b89d7c) 担当者: 兼子 | 優先度: 10 | ステータス: 却下
+  - [[デザイナー発注書進捗]] (3427c2c6-cc02-805c-ad66-c472661e0ce5) 担当者: 田中 | 優先度: 10 | ステータス: 適用済
+  - [[ノックバック]] (3327c2c6-cc02-804a-8a16-f857c2eeeadb) 担当者: 塚本 | 優先度: 5 | ステータス: 却下
+  - [[敵の攻撃中断]] (3327c2c6-cc02-80ea-918f-c74c92821c9b) 担当者: 塚本 | 優先度: 5 | ステータス: 却下
+  - [[BGMの要項]] (3357c2c6-cc02-80e5-b6c8-fd0f158757a7) 担当者: 八幡 | 優先度: 8 | ステータス: 適用済
+  - [[アルファ版期間 デザイナースケジュール]] (32f7c2c6-cc02-80f2-9e4d-fdcfc2794e74) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[インゲームUIの構成要素]] (3207c2c6-cc02-8018-b012-e2b2a008300a) 担当者: 兼子 | 優先度: 10 | ステータス: 適用済
+  - [[UIで必要なもの]] (3207c2c6-cc02-8007-9e0d-edcba3a121df) 担当者: 松下 | ステータス: 適用済
+  - [[メンバーハンドブック]] (3227c2c6-cc02-80e0-891c-f2e5d5fc9980) ステータス: 適用済
+  - [[仕様書添削 2/25]] (3127c2c6-cc02-80b1-a505-ed4cd33fa343) ステータス: 適用済
+  - [[戦闘の銃について]] (3127c2c6-cc02-80ee-a332-eec10a8eb190) ステータス: 適用済
+  - [[クライアント部門設立計画書]] (3257c2c6-cc02-80c5-8d9a-fdf3f0f3a4fb) 担当者: 八幡 | ステータス: 適用済
+  - [[アルファ版の制作範囲]] (3267c2c6-cc02-806b-b345-c076a6799d0b) 担当者: 八幡 | ステータス: 適用済
+  - [[ミッションセレクト画面という用語]] (3267c2c6-cc02-807c-82d0-f8e8fbd69b1e) 担当者: 八幡 | ステータス: 適用済
+  - [[仕様概要ページの要素削減方針]] (32b7c2c6-cc02-8002-ae35-cb8ea0d5c095) 担当者: 八幡 | ステータス: 適用済
+  - [[敵のダウンシステム]] (3277c2c6-cc02-80d8-8d66-ff5ff90fde06) 担当者: 塚本 | ステータス: 却下
+  - [[シナリオ項目の改名]] (32c7c2c6-cc02-8043-968b-c91324e834a9) 担当者: 八幡 | 優先度: 5 | ステータス: 適用済
+  - [[UIのトンマナ]] (32d7c2c6-cc02-80bd-bd70-d6a6dcd9c17f) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[プレイヤーの操作の用語]] (32d7c2c6-cc02-8037-9e21-ce04aa7fe966) 担当者: 八幡 | 優先度: 8 | ステータス: 適用済
+  - [[シナリオ概要書の適用]] (32d7c2c6-cc02-80b1-8492-dd9f36a40c24) 担当者: 田中 | 優先度: 8 | ステータス: 適用済
+  - [[クリティカルの要素]] (3277c2c6-cc02-80d3-94cb-e33e0167fed9) 担当者: 塚本 | 優先度: 8 | ステータス: 却下
+  - [[2Dデザイン必要素材]] (32c7c2c6-cc02-8076-ac27-dfdf0f52d1ac) 担当者: 八幡 | ステータス: 適用済
+  - [[メンバーハンドブック Discord利用と休暇日 項目追記]] (3267c2c6-cc02-80f6-860f-def9cfdccf81) 担当者: 八幡 | ステータス: 適用済
+  - [[ステージ差分]] (3357c2c6-cc02-8032-bc0c-fa117ae0b93f) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[SEアセットリスト]] (3357c2c6-cc02-8006-8255-e31bb47da24b) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[モーションアセットリスト]] (3357c2c6-cc02-80bc-bc2a-e81d4b665afb) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[回避アクションの詳細]] (3397c2c6-cc02-807f-bb15-e6906667f689) 担当者: 松下 | 優先度: 10 | ステータス: 適用済
+  - [[敵の使用する武器]] (33a7c2c6-cc02-807d-a13b-f3113c130f49) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[プログラマーメンバー]] (3447c2c6-cc02-80b6-a7d3-e4033210f715) 担当者: 東 | ステータス: 適用済
+  - [[TGSのゲームフロー]] (3457c2c6-cc02-803c-a229-ef3071b5ef01) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[フェーズ管理]] (3447c2c6-cc02-80bb-bfc1-f6db4b939281) 担当者: 松下 | 優先度: 12 | ステータス: 適用済
+  - [[作戦画面]] (3437c2c6-cc02-807d-ae09-fb06bc822254) 担当者: 松下 | 優先度: 10 | ステータス: 適用済
+  - [[スキルツリー]] (3437c2c6-cc02-8095-a63c-fc4a5dc588e2) 担当者: 松下 | 優先度: 10 | ステータス: 適用済
+  - [[ホーム]] (3437c2c6-cc02-80ea-a2d2-e0e206bdaad6) 担当者: 八幡 | 優先度: 12 | ステータス: 適用済
+  - [[シナリオ機能の仕様]] (3417c2c6-cc02-8084-af73-ecc1c0055d65) 担当者: 松下 | 優先度: 12 | ステータス: 適用済
+  - [[組織改編 リード/マネージャー]] (3397c2c6-cc02-80df-bf33-de1c1ba57ded) 担当者: 八幡 | 優先度: 10 | ステータス: 却下
+  - [[レベルデザイン方針]] (3457c2c6-cc02-806a-b6ba-d2660473b758) 担当者: 八幡 | 優先度: 10 | ステータス: 適用済
+  - [[マネージャーのタスク定時報告義務]] (3457c2c6-cc02-80d3-bafe-d73d96f693d1) 担当者: 八幡 | 優先度: 8 | ステータス: 適用済
+  - [[体験版マイルストーン]] (3a47c2c6-cc02-80d3-bf4e-d37093d07501) 優先度: 15 | ステータス: 採用
+  - [[AKITOファイルのアセット元]] (3bb7c2c6-cc02-80a6-b8df-c32b11afc6cd) 担当者: 東 | ステータス: 検討中
+  - [[UI周りの更新]] (3cc7c2c6-cc02-80b5-a56c-ceeffdc3a6e3) ステータス: 検討中
+- 🗃 DB「議事録」 (27d7c2c6-cc02-814f-8a42-dd9d4739a3c5) rows=68
+  - [[プランナー定例会9/12]] (3d97c2c6-cc02-8015-b885-fd5647a93990) 
+  - [[TGS後 方針決定会]] (3e07c2c6-cc02-8096-b46d-c613f632c64a) 
+  - [[声優収録 9/12]] (3d87c2c6-cc02-8013-9129-ffd8b460c641) 日付: 2026-09-12 | 議題: Symphony, Triad, Soldier14
+  - [[プランナー定例会　09/05]] (3d27c2c6-cc02-8086-835d-f0c4eeaf81aa) 日付: 2026-09-05
+  - [[プランナー定例会 8/15]] (3bd7c2c6-cc02-8034-a6e6-f27de868d8f8) 日付: 2026-08-15
+  - [[プランナー定例会　8/8]] (3b67c2c6-cc02-8071-9db9-f1e32cfea879) 日付: 2026-08-08
+  - [[プランナー定例会　08/01]] (3af7c2c6-cc02-80d5-ae11-eccb95c69b1c) 日付: 2026-08-01
+  - [[プランナー定例会　07/25]] (3a87c2c6-cc02-8017-a2b2-c545639c7a87) 日付: 2026-07-25
+  - [[プランナー定例会　07/18]] (3a17c2c6-cc02-80dc-89cd-d3045979c34a) 日付: 2026-07-18
+  - [[プランナー定例]] (39a7c2c6-cc02-8010-bde8-c53b7929a2f4) 日付: 2026-07-11
+  - [[第1次 サウンドクリエーター面接]] (3967c2c6-cc02-80c5-b8db-d74ed007cfd6) 日付: 2026-07-08
+  - [[プランナー定例]] (3937c2c6-cc02-80c0-84e5-f273718e11a4) 日付: 2026-07-04
+  - [[シナリオ定例会]] (38b7c2c6-cc02-80b2-9499-d413b19f92c9) 日付: 2026-06-26
+  - [[G-Lab集会 6/14]] (37f7c2c6-cc02-808c-884a-ee8cbd69d1fa) 日付: 2026-06-14
+  - [[第一次 プランナー会議]] (3777c2c6-cc02-8005-8010-cef4394b215c) 日付: 2026-06-06
+  - [[第一次 デザイナー面接]] (3757c2c6-cc02-801e-b4ea-fd2e96971182) 日付: 2026-06-04 | 議題: 主に2Dイラストレーターの面接
+  - [[声優二次面接]] (3717c2c6-cc02-8027-a4ac-e44bdcb834f6) 日付: 2026-06-01 | 議題: Symphony/Triadの声優の二次面接ログ
+  - [[プログラマー管理者会議]] (36d7c2c6-cc02-804d-9a97-ef02fd1e6b25) 日付: 2026-05-28 | 議題: プログラマ－リードの管理方法変更
+  - [[コロプラ作品レビュー会]] (3667c2c6-cc02-8009-a9d9-eb2b95cca830) 日付: 2026-05-27 | 議題: コロプラ本社での社員によるフィードバック会ログ
+  - [[BrushUpレビュー会　]] (3697c2c6-cc02-806a-b4df-d1a9ea921990) 日付: 2026-05-23 | 議題: BrushUpによる作品相互レビューイベントのログ
+  - [[コロプラ説明会 作品レビュー会]] (3667c2c6-cc02-8050-909b-d88be5cef4fe) 日付: 2026-05-19 | 議題: コロプラの会社説明会後の作品フィードバック会のログ
+  - [[サウンド会議]] (3607c2c6-cc02-8067-9cb9-ea6ed448074a) 日付: 2026-05-14
+  - [[インゲームUI会議]] (3497c2c6-cc02-80ca-a3ce-c9c6efa93af8) 日付: 2026-05-13
+  - [[第二回シナリオ部門進捗会議]] (35a7c2c6-cc02-80b3-b97f-f5ab1933a4c3) 日付: 2026-05-08
+  - [[シナリオ部門進捗会議]] (3467c2c6-cc02-8070-ab24-fe3a1682719c) 日付: 2026-04-24
+  - [[4/20 作業会]] (3487c2c6-cc02-80d8-bb7a-d7c0297b3f0c) 日付: 2026-04-20 | 議題: 作業会
+  - [[産学に関して]] (3467c2c6-cc02-8029-a3ce-ff058215b8ff) 日付: 2026-04-18 | 議題: G-Labからの業務連絡
+  - [[プランナー×ディレクターx田口さん]] (3437c2c6-cc02-8099-9452-d422e531f6bd) 日付: 2026-04-15 | 議題: 企画プランナー廃止について
+  - [[第4回プランナー定例会]] (3417c2c6-cc02-8060-b019-e347c0ff6e27) 日付: 2026-04-13
+  - [[シナリオ部門制作会議]] (33e7c2c6-cc02-80db-b350-dd2c211a179a) 日付: 2026-04-10 | 議題: シナリオ部門制作開始に伴う諸要項の確定
+  - [[シナリオ勧誘]] (3357c2c6-cc02-8051-8c78-c88e4c0ab96f) 日付: 2026-04-05
+  - [[サウンドのスタートアップ会議]] (3387c2c6-cc02-80fb-b89c-dee847c271da) 日付: 2026-04-04 | 議題: サウンドクリエイターとBGMやSEのアセットリストの確認や、特殊なインゲームBGMの仕様を説明する
+  - [[UIスタートアップ会議]] (3387c2c6-cc02-8005-9e24-ea5a98ff0483) 日付: 2026-04-04
+  - [[プランナー定例会]] (3347c2c6-cc02-805e-a5cc-d3c9205058ab) 日付: 2026-03-31 | 議題: アルファ版に向けたプランナーの業務を決定する
+  - [[シナリオ 会議]] (3337c2c6-cc02-80a0-a690-f716c951abb6) 日付: 2026-03-30 | 議題: シナリオライターの募集要項や募集人数についての会議
+  - [[クライアント部門 試験的運用振り返り]] (3317c2c6-cc02-8058-b496-ee2cb9a25c58) 日付: 2026-03-28 | 議題: クライアント部門の初期メンバーによる試験的運用を振り返り課題を発見する
+  - [[キャラモデラ― Unity導入会]] (32f7c2c6-cc02-80e5-a19f-d42d79cfb586) 日付: 2026-03-26 | 議題: キャラモデラ―がUnityを使用してキャラモデルの調整を行えるようにする会議
+  - [[クライアント部門スタートアップ会議]] (32a7c2c6-cc02-808c-bdfc-cda38cad7aba) 日付: 2026-03-22 | 議題: クライアント部門の試験的運用週間の活動を決める
+  - [[プランナー定例会]] (3257c2c6-cc02-80f0-bcbd-c79ddd6363c2) 日付: 2026-03-16 | 議題: プランナーの働き方改革を適用する
+  - [[リードプランナー働き方改革]] (3227c2c6-cc02-80ab-96fb-cac9c1294cbd) 日付: 2026-03-13 | 議題: リードプランナーに一極集中しているタスクを分散するための改善案決め
+  - [[3Dモデラ―懇談会]] (3217c2c6-cc02-80b4-bc70-f6b127ad38f1) 日付: 2026-03-12 | 議題: 3Dモデラ―の二人仲良くなる会及び技術交流会
+  - [[UI制作フロー決定会議]] (3207c2c6-cc02-8030-8182-eaaf8a198414) 日付: 2026-03-11 | 議題: UIデザイナーとUIのプログラマーおよびUIプランナーとの会議
+  - [[G-Labプロジェクトリクルート＆背景デザイナー状況把握会議]] (31c7c2c6-cc02-803b-8263-eab4e6133d2b) 日付: 2026-03-07 | 議題: G-Labプロジェクトの各プロジェクトとG-Lab内のリクルート方法について話すのと、背景デザイナーの参入に関してSeptemberと協議する
+  - [[第一次プランナー会議]] (3177c2c6-cc02-80f1-a67f-d2cfc1168f77) 日付: 2026-03-02 | 議題: 新入プランナーの作業担当決定
+  - [[シナリオの次タスク]] (3147c2c6-cc02-8023-bb42-e26ecfbef56e) 日付: 2026-02-28 | 議題: シナリオライターの3月中のタスクについて
+  - [[第一次プランナー作業内容]] (3167c2c6-cc02-804b-b0d7-d4eaaf3fdd9b) 日付: 2026-02-28 | 議題: 新入プランナーの作業の一覧
+  - [[一次プログラマー全体会議]] (3107c2c6-cc02-8050-812c-e00c0bb4a690) 日付: 2026-02-25 | 議題: 技術班と設計班の担当等を決定する
+  - [[一次プログラマー作業内容]] (30d7c2c6-cc02-80d8-98fb-db38386d906d) 日付: 2026-02-21 | 議題: 技術班と設計班のタスクを決定する
+  - [[第一次シナリオ概要書共有回]] (30c7c2c6-cc02-80e5-9d67-e76e99c02880) 日付: 2026-02-19 | 議題: シナリオ概要書の途中経過を確認し、重要な設定を決定する
+  - [[プログラマー審査会 講評]] (30b7c2c6-cc02-802f-bb0a-c5011b9d87ca) 日付: 2026-02-18 | 議題: プログラマー審査会でためになる話
+  - [[プログラマー一次募集]] (30a7c2c6-cc02-8035-9531-f973b84bff0c) 日付: 2026-02-17 | 議題: プログラマーによる技術検証を開始する人員を募集する
+  - [[世界観方針 デザイナー合意会議]] (3037c2c6-cc02-800b-acf9-ee53c5c5d0d6) 日付: 2026-02-12 | 議題: 世界観方針およびゲーム方針についてデザイナーと合意する
+  - [[G-Lab企画発表会対策会議]] (3037c2c6-cc02-80eb-855a-c03a13892939) 日付: 2026-02-10 | 議題: G-Lab企画発表会の内容を決める
+  - [[世界観方針 プランナー合意会議]] (3027c2c6-cc02-8042-8dd7-d2939645b898) 日付: 2026-02-09 | 議題: 世界観方針およびゲーム方針についてプランナーと合意する
+  - [[キャラモデラ―向け共有資料]] (2fd7c2c6-cc02-8097-9cf1-dc168b6806eb) 日付: 2026-02-04 | 議題: キャラモデラ―に現状の環境や要求を共有する資料
+  - [[G-Labコンペ資料向け対策会]] (2f57c2c6-cc02-8005-9b3e-f21d487e8dea) 日付: 2026-01-27 | 議題: 本作品をG-Labプロジェクトにする理由を出す
+  - [[G-Labコンペ**企画相談会**]] (2f37c2c6-cc02-800b-94d5-e743b908edef) 日付: 2026-01-25 | 議題: 1/25のG-Lab企画相談会にて、コンペ合格への助言を受ける
+  - [[企画書作成]] (2ed7c2c6-cc02-800c-ae55-d85a29dce312) 日付: 2026-01-20
+  - [[企業座談会 質問決め]] (2e17c2c6-cc02-8076-a841-e3414d7869b7) 日付: 2026-01-08
+  - [[ミヘイル密談]] (2cc7c2c6-cc02-80ed-9415-ce613c03cba9) 日付: 2025-12-17
+  - [[ミヘイル会合]] (2b77c2c6-cc02-809b-be66-c63d8b06f279) 日付: 2025-11-26
+  - [[プランナー定例会　07/25]] (3a87c2c6-cc02-8028-9465-cddc6099e5c6) 
+  - [[議事録テンプレ]] (3af7c2c6-cc02-80e4-94b6-e9ff5828415f) 
+  - [[G-Lab集会 7/12]] (39b7c2c6-cc02-805c-8ba9-ed89379b7b58) 
+  - [[G-Lab集会]] (3637c2c6-cc02-8044-b112-eaf7e910bcef) 
+  - [[アセット インフラ システム技術交流会]] (3227c2c6-cc02-80ba-a2c2-d762189f8736) 議題: Septemberが運用するインフラシステムについての技術交流を行う。
+  - [[スキルアイコン]] (3b47c2c6-cc02-80e6-bbeb-c9a1c48c3eb9) 
+  - [[プランナー定例会 8/29]] (3cb7c2c6-cc02-800b-8dd5-de88d3e9630a) 
+- 🗃 DB「使用素材一覧表」 (27d7c2c6-cc02-814a-aae1-c011961e1d46) rows=34
+  - [[イワシロ音楽素材 RPG]] (2e37c2c6-cc02-8022-b706-d1159b98940f) タイプ: サウンド | 使用用途: モックのスペシャル攻撃のSEに使用 | URL: [https://iwashiro-sounds.work/bgm/rpg/](https://iwashiro-sounds.work/bgm/rpg/) | 説明:  ファミコン風BGM・SE(効果音)を無料で配布している素材サイトのRPG向けSE集
+  - [[**Animated Hands with Weapons Pack**]] (2be7c2c6-cc02-80f7-be64-fa645cf17629) タイプ: モデル,サウンド,VFX,テクスチャ,アニメーション | 使用用途: モックに発砲サウンドを使用 | URL: [https://assetstore.unity.com/packages/3d/characters/animated-hands-with-weapons-pack-132915](https://assetstore.unity.com/packages/3d/characters/animated-hands-with-weapons-pack-132915) | 説明: 銃モデル、発砲サウンド、発砲炎パーティクルなどのパック
+  - [[**52 Special Effects Pack**]] (3b87c2c6-cc02-80f4-bdb4-f493851c845a) タイプ: VFX | URL: [https://assetstore.unity.com/packages/vfx/particles/spells/52-special-effects-pack-10419?locale=ja-JP&srsltid=AfmBOooVLp99nBD4XmDIGY6Ddor0miT6JPG8IKttnsNHA-XtRhmbSiTP#description](https://assetstore.unity.com/packages/vfx/particles/spells/52-special-effects-pack-10419?locale=ja-JP&srsltid=AfmBOooVLp99nBD4XmDIGY6Ddor0miT6JPG8IKttnsNHA-XtRhmbSiTP#description) | 説明: 特殊効果のパーティクルのパック
+  - [[**Farming Game FX - MIssion**]] (3b87c2c6-cc02-8044-b92d-d5804180e9af) タイプ: VFX | URL: [https://assetstore.unity.com/packages/vfx/particles/environment/farming-game-fx-mission-236550?srsltid=AfmBOopPDdVRTTl4AJco-CxdBvWHP5s7EVCHsL2Kr-IoJ8wXhmJIisD-](https://assetstore.unity.com/packages/vfx/particles/environment/farming-game-fx-mission-236550?srsltid=AfmBOopPDdVRTTl4AJco-CxdBvWHP5s7EVCHsL2Kr-IoJ8wXhmJIisD-) | 説明: 土埃や水しぶきなどのパーティクルのパック
+  - [[**Free Slash VFX**]] (3b87c2c6-cc02-80a1-b5a3-ffa69a0d29a2) タイプ: VFX | 使用用途: 攻撃エフェクトに使用 | URL: [https://assetstore.unity.com/packages/vfx/shaders/free-slash-vfx-309498?locale=ja-JP&srsltid=AfmBOop-fYSWDBGPiorP7mfZ4IeopnbklkehwRYI-5s_HCtvIAcAWiMw](https://assetstore.unity.com/packages/vfx/shaders/free-slash-vfx-309498?locale=ja-JP&srsltid=AfmBOop-fYSWDBGPiorP7mfZ4IeopnbklkehwRYI-5s_HCtvIAcAWiMw) | 説明: 斬撃や銃撃時のエフェクトパーティクルのパック
+  - [[**Free Quick Effects Vol. 1**]] (3b87c2c6-cc02-80b4-9911-c7387ab0879e) タイプ: VFX | URL: [https://assetstore.unity.com/packages/vfx/particles/free-quick-effects-vol-1-304424?srsltid=AfmBOorn8No1qOon3CnAPdkXdhAsSfm0WF8QrRS0Y19lX-ESbj9TPDYw](https://assetstore.unity.com/packages/vfx/particles/free-quick-effects-vol-1-304424?srsltid=AfmBOorn8No1qOon3CnAPdkXdhAsSfm0WF8QrRS0Y19lX-ESbj9TPDYw) | 説明: 爆発や閃光などのエフェクトパーティクルのパック
+  - [[**War FX**]] (3b87c2c6-cc02-805b-b91f-cdaaa94e17b2) タイプ: VFX | URL: [https://assetstore.unity.com/packages/vfx/particles/war-fx-5669?locale=ja-JP&srsltid=AfmBOooOBXRZgCQpxA4snKWDdh59LdVB4UrjTMiyR8dll9sVP8wWMDF-](https://assetstore.unity.com/packages/vfx/particles/war-fx-5669?locale=ja-JP&srsltid=AfmBOooOBXRZgCQpxA4snKWDdh59LdVB4UrjTMiyR8dll9sVP8wWMDF-) | 説明: 爆発や弾丸の着弾などのエフェクトパーティクルのパック
+  - [[**Magica Cloth 2**]] (3b87c2c6-cc02-8088-81c1-df896396f861) タイプ: VFX | URL: [https://assetstore.unity.com/packages/tools/physics/magica-cloth-2-242307?locale=ja-JP&srsltid=AfmBOorCHhqRlZWlc2sQaTfh4pwfH1rwq2B6JtNdcdVre-c-Yfh5y65-](https://assetstore.unity.com/packages/tools/physics/magica-cloth-2-242307?locale=ja-JP&srsltid=AfmBOorCHhqRlZWlc2sQaTfh4pwfH1rwq2B6JtNdcdVre-c-Yfh5y65-) | 説明: TransformとMeshの両方で使用できるクロスシミュレーションシステム
+  - [[**Free Fire VFX - URP**]] (3b87c2c6-cc02-8086-9cda-f488dc6452e4) タイプ: VFX | URL: [https://assetstore.unity.com/packages/vfx/particles/fire-explosions/free-fire-vfx-urp-266226?locale=ja-JP&srsltid=AfmBOoo9BoEeBzCDjopq2AkSkOgcSUe4e97bvQ1wXluwm8tvv2k3QRUm](https://assetstore.unity.com/packages/vfx/particles/fire-explosions/free-fire-vfx-urp-266226?locale=ja-JP&srsltid=AfmBOoo9BoEeBzCDjopq2AkSkOgcSUe4e97bvQ1wXluwm8tvv2k3QRUm) | 説明: 炎のパーティクルシステムのパック
+  - [[**Insurgent - (LITE)**]] (3b87c2c6-cc02-803e-9b5e-e12e561a515c) タイプ: モデル,テクスチャ | URL: [https://assetstore.unity.com/packages/3d/characters/humanoids/humans/insurgent-lite-274543?locale=ja-JP&srsltid=AfmBOoqGBRibG86pMaldutXnI8eBy0uSxI841rnNrfA7pJWB8yS01yDA#description](https://assetstore.unity.com/packages/3d/characters/humanoids/humans/insurgent-lite-274543?locale=ja-JP&srsltid=AfmBOoqGBRibG86pMaldutXnI8eBy0uSxI841rnNrfA7pJWB8yS01yDA#description) | 説明: キャラモデル、マテリアル、テクスチャなどのパック
+  - [[**50 Female Animations**]] (3b87c2c6-cc02-80e2-ae09-ddeba8f9f63a) タイプ: アニメーション | URL: [https://assetstore.unity.com/packages/3d/animations/50-female-animations-263626?locale=ja-JP&srsltid=AfmBOorf58xoC1ZdZLo7cgHN4VZVTkUg5Bn5cl2d1iVA5mxR62g3knoV#content](https://assetstore.unity.com/packages/3d/animations/50-female-animations-263626?locale=ja-JP&srsltid=AfmBOorf58xoC1ZdZLo7cgHN4VZVTkUg5Bn5cl2d1iVA5mxR62g3knoV#content) | 説明: 女性キャラクターの動きに関するアニメーションのパック
+  - [[**Human Basic Motions FREE**]] (3b87c2c6-cc02-8076-80f3-e5eaee1979f8) タイプ: アニメーション | 使用用途: プレイヤー移動モーションに使用 | URL: [https://assetstore-fallback.unity.com/packages/3d/animations/human-basic-motions-free-154271#content](https://assetstore-fallback.unity.com/packages/3d/animations/human-basic-motions-free-154271#content) | 説明: 人の動きに関するアニメーションのパック
+  - [[**MC Sample - Believable 3D Animations by MoCap Central**]] (3b87c2c6-cc02-801b-89b7-e290dab1f09c) タイプ: アニメーション | URL: [https://assetstore-fallback.unity.com/packages/3d/animations/mc-sample-believable-3d-animations-by-mocap-central-291284#content](https://assetstore-fallback.unity.com/packages/3d/animations/mc-sample-believable-3d-animations-by-mocap-central-291284#content) | 説明: 人の動きに関するアニメーションのパック
+  - [[**Rapier Anim Set**]] (3b87c2c6-cc02-8041-8bb2-f9b198c969a6) タイプ: アニメーション | 使用用途: プレイヤー回避モーションに使用 | URL: [https://assetstore.unity.com/packages/3d/animations/rapier-anim-set-148084?locale=ja-JP&srsltid=AfmBOopeznKXRORoY6EM7tlTfubGqpXp9BU7kqJVbKj5K5aJ6fzG6wqE#content](https://assetstore.unity.com/packages/3d/animations/rapier-anim-set-148084?locale=ja-JP&srsltid=AfmBOopeznKXRORoY6EM7tlTfubGqpXp9BU7kqJVbKj5K5aJ6fzG6wqE#content) | 説明: 攻撃や回避など戦闘に関するアニメーション
+  - [[**Platform Animation**]] (3b87c2c6-cc02-80cf-b2d1-da3608040e32) タイプ: アニメーション | URL: [https://assetstore-fallback.unity.com/packages/3d/animations/platform-animation-182928#content](https://assetstore-fallback.unity.com/packages/3d/animations/platform-animation-182928#content) | 説明: 武器を持ったときの人の動きに関するアニメーション
+  - [[**Free Sample Animation Set**]] (3b87c2c6-cc02-80ed-96cd-ebf04a3d0998) タイプ: アニメーション | URL: [https://assetstore-fallback.unity.com/packages/3d/animations/free-sample-animation-set-321560#content](https://assetstore-fallback.unity.com/packages/3d/animations/free-sample-animation-set-321560#content) | 説明: 人の動きに関するアニメーションのパック
+  - [[**Low Poly Soldiers Demo**]] (3b97c2c6-cc02-80eb-8584-d0d2ba8d8047) タイプ: アニメーション | 使用用途: 一般兵モーションに使用 | URL: [https://assetstore.unity.com/packages/3d/characters/low-poly-soldiers-demo-73611](https://assetstore.unity.com/packages/3d/characters/low-poly-soldiers-demo-73611) | 説明: 銃を持って攻撃するアニメーションパック
+  - [[**Human Soldier Animations FREE**]] (3ba7c2c6-cc02-80db-827a-d4f200ba4bad) タイプ: アニメーション | 使用用途: 一般兵モーションに使用 | URL: [https://assetstore.unity.com/packages/3d/animations/human-soldier-animations-free-340690](https://assetstore.unity.com/packages/3d/animations/human-soldier-animations-free-340690) | 説明: 武器を持ったときの人の動きに関するアニメーション
+  - [[**Soldier-AAA-Pack.vol2**]] (3b87c2c6-cc02-8034-95df-fa4e1dc0b8ea) タイプ: モデル,テクスチャ | URL: [https://assetstore.unity.com/packages/3d/characters/soldier-aaa-pack-vol2-326560#content](https://assetstore.unity.com/packages/3d/characters/soldier-aaa-pack-vol2-326560#content) | 説明: モジュール化された兵士のキャラクターパック
+  - [[LitMotion]] (3277c2c6-cc02-80ce-a615-f297b1bb3400) タイプ: サードパーティー | 使用用途: 演出全体 | URL: [https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion](https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion) | 説明: フィールド・プロパティをアニメーションさせるための機能
+  - [[Bitonic Pixel Sorter]] (3277c2c6-cc02-80d1-9e1a-e14f0989e0ba) タイプ: サードパーティー | 使用用途: フェード演出など | URL: [https://github.com/ruccho/BitonicPixelSorter.git](https://github.com/ruccho/BitonicPixelSorter.git) | 説明: ピクセルソートする処理のライブラリ
+  - [[CRIWARE]] (3ba7c2c6-cc02-805a-9fe1-c22aed419512) タイプ: サードパーティー | URL: [https://game.criware.jp/manual/unity_plugin/latest/contents/addon4u_assetsupport_assets_overview.html](https://game.criware.jp/manual/unity_plugin/latest/contents/addon4u_assetsupport_assets_overview.html) | 説明: Editor上でCRIWARE関連のファイルをUnityアセットとして扱うようにする追加機能
+  - [[Google.Apis.1.75.0]] (3ba7c2c6-cc02-80ca-bd15-dcc6aefa745d) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/google.apis](https://www.nuget.org/packages/google.apis) | 説明: .NET環境でGoogleの各種サービスを利用するための公式クライアントライブラリ
+  - [[Google.Apis.Auth.1.75.0]] (3ba7c2c6-cc02-808c-b0a7-e69019158fdb) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/google.apis.auth/](https://www.nuget.org/packages/google.apis.auth/) | 説明: .NET 向けの Google API クライアントライブラリに含まれる認証用パッケージ
+  - [[Google.Apis.Core.1.75.0]] (3ba7c2c6-cc02-80dd-a322-dd8a90e807b3) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/google.apis.core/](https://www.nuget.org/packages/google.apis.core/) | 説明: .NET環境でGoogleの各種サービスを利用するための公式クライアントライブラリ
+  - [[Microsoft.Bcl.AsyncInterfaces.6.0.0]] (3ba7c2c6-cc02-80fd-9322-d93f34c2fdc0) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/6.0.0](https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/6.0.0) | 説明: 古い .NET 環境でも「非同期ストリーム」などのインターフェースを利用できるようにするための互換性用 NuGet パッケージ
+  - [[Microsoft.Bcl.TimeProvider.8.0.0]] (3ba7c2c6-cc02-8063-aa6a-db81a47b2b66) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/Microsoft.Bcl.TimeProvider/8.0.0-preview.7.23375.6](https://www.nuget.org/packages/Microsoft.Bcl.TimeProvider/8.0.0-preview.7.23375.6) | 説明: .NET 8 で導入された `System.TimeProvider` および `System.ITimer` の抽象化機能を、古い環境でも利用できるように提供する公式の互換ライブラリ
+  - [[R3.1.3.0]] (3ba7c2c6-cc02-8010-8078-e66ea868f874) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/R3/1.3.0](https://www.nuget.org/packages/R3/1.3.0) | 説明: C#向けのリアクティブプログラミングライブラリ
+  - [[System.CodeDom.7.0.0]] (3ba7c2c6-cc02-8014-b697-c6144cef9690) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/System.CodeDom/7.0.0](https://www.nuget.org/packages/System.CodeDom/7.0.0) | 説明: ソースコードの構造をモデル化し、対応する言語でコードを出力するための型を提供する .NETパッケージ
+  - [[System.ComponentModel.Annotations.5.0.0]] (3ba7c2c6-cc02-80d9-a7a4-f0f14ac7a261) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/system.componentmodel.annotations/](https://www.nuget.org/packages/system.componentmodel.annotations/) | 説明: .NET アプリケーションでデータ検証やメタデータ定義を行うための属性を提供する NuGet パッケージ
+  - [[System.Management.7.0.2]] (3ba7c2c6-cc02-806a-8627-d653fa4acd43) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/System.Management.Automation/7.0.2](https://www.nuget.org/packages/System.Management.Automation/7.0.2) | 説明: Windowsのシステム情報や管理イベントへのアクセスを提供する.NETパッケージ
+  - [[System.Threading.Channels.8.0.0]] (3ba7c2c6-cc02-8054-a51a-d9d6683eb84b) タイプ: サードパーティー | URL: [https://www.nuget.org/packages/System.Threading.Channels/8.0.0](https://www.nuget.org/packages/System.Threading.Channels/8.0.0) | 説明: .NET アプリケーションでデータの送受信を非同期に行うためのライブラリ
+  - [[VRM Inporter]] (3ba7c2c6-cc02-80e8-b67b-d41fabcbdbcc) タイプ: サードパーティー | 説明: VRMファイルを、3D制作ソフトやゲームエンジンに読み込むための機能やアドオン
+  - [[ZLinq.1.5.5]] (3ba7c2c6-cc02-80d0-a81d-fa783f440682) タイプ: サードパーティー | URL: [https://feed.nuget.org/packages/ZLinq.FileSystem/1.5.5](https://feed.nuget.org/packages/ZLinq.FileSystem/1.5.5) | 説明: C#/.NET環境向けのメモリ割り当てをゼロに抑えて動作するLINQライブラリ
+- 📄 [[ワークフロー]] (2ef7c2c6-cc02-8001-b4f0-d69b499c64f0)
+---
+
+## システム
+- 📄 [[**仕様概要**]] (27d7c2c6-cc02-819a-9547-f211f355dfec)
+- 📄 [[システム概要]] (27d7c2c6-cc02-818d-95ec-c1dc9a3c6761)
+- 📄 [[**用語**]] (27d7c2c6-cc02-813b-a93f-e6baf4d4f679)
+- 🗃 DB「マスターデータ」 (3177c2c6-cc02-8045-8c81-cd9fa39ea57d) rows=3
+  - [[スキルツリーのノード]] (3457c2c6-cc02-80c7-9f6c-e61509e22518) 
+  - [[スキル]] (35a7c2c6-cc02-805b-9ad4-cbed45b4ed04) 
+  - [[ステージ]] (3b77c2c6-cc02-807d-9554-ddfb00a32705) 
+---
+
+## **ビジュアル**
+- 📄 [[デザイン]] (27d7c2c6-cc02-8149-9b3e-f5586a9b882e)
+- 📄 [[**トンマナ**]] (27d7c2c6-cc02-81fa-8790-e2145dba5ecf)
+- 📄 [[**キャラクタービジュアル**]] (27d7c2c6-cc02-81b2-ac02-c453db82c5d6)
+---
+
+## **ストーリー**
+- 📄 [[**メインシナリオ**]] (27d7c2c6-cc02-81f9-9dad-dc7a905eb25c)
+- 📄 [[**サイドシナリオ**]] (27d7c2c6-cc02-81a7-9047-dc2ad2cd0fe0)
+- 📄 [[背景設定]] (27d7c2c6-cc02-81d9-8c23-e8f340e08031)
+- 📄 [[世界観設定]] (27d7c2c6-cc02-8111-92c8-e61ffbebdbce)
+- 📄 [[**キャラクター設定**]] (27d7c2c6-cc02-8150-803b-c5020617f899)
+---
+
+## **サウンド**
+- 📄 [[**バックグラウンド ミュージック（BGM）**]] (27d7c2c6-cc02-8191-a43c-fc5d571a639e)
+- 📄 [[**サウンドエフェクト（SE）**]] (27d7c2c6-cc02-8169-b74b-f3779d948a9b)
+- 📄 [[**キャラクターボイス**]] (27d7c2c6-cc02-81f2-9810-e857eaeafeab)
+
+## 管理用
+- 🗃 DB「アセットデータベース」 (3aa7c2c6-cc02-80d1-b2fb-d71a31b9da94) rows=88
+  - [[Symphony 3Dモデル]] (3aa7c2c6-cc02-80c7-ac64-db3d561fcbf7) ファイル名: CHM_Symphony_model | カテゴリー: プレイヤー | 種類: キャラモデル
+  - [[歩兵 3Dモデル]] (3aa7c2c6-cc02-80c7-a328-cd199b7ae7d1) ファイル名: CHM_Infantry_model | カテゴリー: 敵 | 種類: キャラモデル
+  - [[14号 3Dモデル]] (3aa7c2c6-cc02-802f-b4d3-f68b3f832570) ファイル名: CHM_Soldier14 | カテゴリー: 敵 | 種類: キャラモデル
+  - [[大口径ライフル]] (3aa7c2c6-cc02-8095-9515-ca9359d8bfeb) ファイル名: WPN_SniperRifle | カテゴリー: キャラクター | 種類: 武器モデル
+  - [[レバーアクションライフル]] (3aa7c2c6-cc02-8055-a7d5-db279f0f2949) ファイル名: WPN_LeverActionRifle | カテゴリー: キャラクター | 種類: 武器モデル
+  - [[アサルトライフル]] (3aa7c2c6-cc02-804c-939d-e383dddbfe0f) ファイル名: WPN_AssultRifle | カテゴリー: キャラクター | 種類: 武器モデル
+  - [[リボルバー]] (3aa7c2c6-cc02-8049-b44e-fb919eee5c7e) ファイル名: WPN_Revolver | カテゴリー: キャラクター | 種類: 武器モデル
+  - [[ハンドガン]] (3aa7c2c6-cc02-80a2-94f0-fab685c54c62) ファイル名: WPN_HandGun | カテゴリー: キャラクター | 種類: 武器モデル
+  - [[サブマシンガン]] (3aa7c2c6-cc02-807a-aea9-c3593fe36395) ファイル名: WPN_SubmachineGun | カテゴリー: キャラクター | 種類: 武器モデル
+  - [[ステージ 街中]] (3aa7c2c6-cc02-8059-8f9a-cd2bb70072f3) ファイル名: STG_IntensityLevel | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル 建物]] (3aa7c2c6-cc02-80f7-9e29-d1e1deaf7024) ファイル名: ENV_Building | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル 瓦礫]] (3aa7c2c6-cc02-8082-949d-ce14e36a8046) ファイル名: ENV_Prop_Rubble | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル 軍用トラック]] (3aa7c2c6-cc02-80d7-9493-ca5a5dd00f35) ファイル名: VEH_MilitaryCategory | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル バス]] (3aa7c2c6-cc02-8055-9c8e-f968fdd11ebf) ファイル名: VEH_Bus | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル 一般車]] (3aa7c2c6-cc02-804f-82db-f235a079e0fe) ファイル名: VEH_Car_Generic | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル 破損したバイク]] (3aa7c2c6-cc02-8073-b937-dd7ea73849d5) ファイル名: VEH_VEH_Motorcycle_Damaged | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル バイク]] (3aa7c2c6-cc02-8078-8738-e96acda60f2d) ファイル名: VEH_Motorcycle | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル 戦車]] (3aa7c2c6-cc02-80f4-90cb-c525d9b59b1a) ファイル名: VEH_Tank | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル ヘリコプター]] (3aa7c2c6-cc02-80e3-903f-fa5bf0404b84) ファイル名: VEH_Helicopter | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル 有刺鉄線]] (3aa7c2c6-cc02-80f2-95b9-f20248a9e129) ファイル名: ENV_Prop_BarbedWire | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル タイヤ]] (3aa7c2c6-cc02-8059-835d-dd8b8a97c8d3) ファイル名: ENV_Prop_Tire | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル　武器箱]] (3b67c2c6-cc02-806d-a391-f42288a340bf) ファイル名: VEH_WeaponBox | カテゴリー: バトル | 種類: 背景モデル
+  - [[ステージモデル　室外機]] (3b67c2c6-cc02-802b-a6fe-ffd5a177f3ef) ファイル名: VEH_outdoor unit | カテゴリー: バトル | 種類: 背景モデル
+  - [[スキル0 アイコン]] (3aa7c2c6-cc02-805f-8bdb-dc9e0a664c88) ファイル名: UI_Skll0 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル1 アイコン]] (3aa7c2c6-cc02-808a-b25d-fe7ad7d871a5) ファイル名: UI_Skll1 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル2 アイコン]] (3aa7c2c6-cc02-80ad-aba6-e05d39dbc804) ファイル名: UI_Skll2 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル3 アイコン]] (3aa7c2c6-cc02-8043-acd5-f74e7c6e1a6a) ファイル名: UI_Skll3 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル4 アイコン]] (3aa7c2c6-cc02-800a-b703-dfb32d26b9bd) ファイル名: UI_Skll4 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル5 アイコン]] (3aa7c2c6-cc02-80b2-b852-f831cfe2a391) ファイル名: UI_Skll5 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル6 アイコン]] (3aa7c2c6-cc02-800e-a8f4-ca4a4d1f4aa2) ファイル名: UI_Skll6 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル7 アイコン]] (3aa7c2c6-cc02-80ec-a575-cc656203ee12) ファイル名: UI_Skll7 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル8 アイコン]] (3aa7c2c6-cc02-809e-b6cf-f890d55810bf) ファイル名: UI_Skll8 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル9 アイコン]] (3aa7c2c6-cc02-80ca-91c7-c8022e03e4bf) ファイル名: UI_Skll9 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル10 アイコン]] (3aa7c2c6-cc02-809e-b190-c337b38f1c01) ファイル名: UI_Skll10 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[スキル13 アイコン]] (3aa7c2c6-cc02-808b-8c25-ec384836ef3e) ファイル名: UI_Skll13 | カテゴリー: プレイヤー | 種類: イラスト
+  - [[Symphony 立ち絵]] (3aa7c2c6-cc02-80e6-bb81-f705b2a00b22) ファイル名: CHS_Symphony | カテゴリー: シナリオ | 種類: イラスト
+  - [[Triad 立ち絵]] (3aa7c2c6-cc02-80e4-96b6-d129704e13e4) ファイル名: CHS_Triad | カテゴリー: シナリオ | 種類: イラスト
+  - [[Prelude 立ち絵]] (3aa7c2c6-cc02-80a5-b2b4-d0848825728e) ファイル名: CHS_Prelude | カテゴリー: シナリオ | 種類: イラスト
+  - [[ヴォロノフ 立ち絵]] (3aa7c2c6-cc02-80a2-b174-e4a6c6d7ebaa) ファイル名: CHS_Voronov | カテゴリー: シナリオ | 種類: イラスト
+  - [[14号 立ち絵]] (3aa7c2c6-cc02-8083-bc11-c35fad33c238) ファイル名: CHS_Soldier14 | カテゴリー: シナリオ | 種類: イラスト
+  - [[街中 背景画]] (3aa7c2c6-cc02-8092-b383-fb54078e1084) ファイル名: ENV_BG_City | カテゴリー: シナリオ | 種類: イラスト
+  - [[キャンプ 背景画]] (3aa7c2c6-cc02-808f-a2b4-f71ac790bee8) ファイル名: ENV_BG_Camp | カテゴリー: シナリオ | 種類: イラスト
+  - [[タイトル画]] (3aa7c2c6-cc02-80ec-88d5-c82f56c62076) ファイル名: UI_TitleScreen | カテゴリー: ホーム | 種類: イラスト
+  - [[ZeroDivide組織章]] (3aa7c2c6-cc02-80f1-8633-f9494cdc2fcd) ファイル名: EMB_ZeroDivide | カテゴリー: ホーム | 種類: イラスト
+  - [[カぺリメイステル組織章]] (3ac7c2c6-cc02-8084-b342-d8c17d27b612) ファイル名: EMB_Kapellmeister | カテゴリー: ホーム | 種類: イラスト
+  - [[ストアページ向けバナー]] (3aa7c2c6-cc02-8032-865b-d94542fa131e) ファイル名: UI_StoreBanner | カテゴリー: ホーム | 種類: イラスト
+  - [[アプリアイコン]] (3aa7c2c6-cc02-8094-a411-caf40ee5fb4c) ファイル名: UI_AppIcon | カテゴリー: ホーム | 種類: イラスト
+  - [[タイトルロゴ]] (3aa7c2c6-cc02-8005-bafc-fc071608f4ee) ファイル名: UI_TitleLogo | カテゴリー: ホーム | 種類: イラスト
+  - [[移動砂埃エフェクト]] (3aa7c2c6-cc02-80bd-a097-db4513240e47) ファイル名: VFX_MoveDust | カテゴリー: キャラクター | 種類: エフェクト
+  - [[被弾エフェクト]] (3aa7c2c6-cc02-80b4-a696-c6541e6a4f3f) ファイル名: VFX_Hit_Player | カテゴリー: キャラクター | 種類: エフェクト
+  - [[Hitエフェクト]] (3ac7c2c6-cc02-80ce-a513-d137cf472b0a) ファイル名: VFX_Hit_Enemy | カテゴリー: キャラクター | 種類: エフェクト
+  - [[発砲炎エフェクト]] (3aa7c2c6-cc02-80d7-9275-d3bf07978a2c) ファイル名: VFX_Attack | カテゴリー: キャラクター | 種類: エフェクト
+  - [[スキル発動エフェクト]] (3aa7c2c6-cc02-80b6-9389-e9aa5417b65e) ファイル名: VFX_Skll | カテゴリー: プレイヤー | 種類: エフェクト
+  - [[撃破エフェクト]] (3ac7c2c6-cc02-8094-afe8-d1ed18fb2c91) ファイル名: VFX_EnemyDefeat | カテゴリー: 敵 | 種類: エフェクト
+  - [[敵攻撃範囲]] (3ac7c2c6-cc02-8051-8a12-db292f94a8c1) ファイル名: VFX_EnemyAttackRange | カテゴリー: 敵 | 種類: エフェクト
+  - [[ノックバック]] (3ac7c2c6-cc02-8098-9caa-e19af8ac4fc2) ファイル名: VFX_Knockback | カテゴリー: 敵 | 種類: エフェクト
+  - [[建築物 炎]] (3aa7c2c6-cc02-8083-b249-e4a09baff9a6) ファイル名: VFX_BackgroundFire | カテゴリー: バトル | 種類: エフェクト
+  - [[爆破]] (3ac7c2c6-cc02-8076-a93b-df79d2d1f3c3) ファイル名: VFX_Explosion | カテゴリー: バトル | 種類: エフェクト
+  - [[場外の霧・砂埃]] (3ac7c2c6-cc02-80e9-87db-e14e717e23c9) ファイル名: VFX_FieldFogDust | カテゴリー: バトル | 種類: エフェクト
+  - [[回避]] (3ac7c2c6-cc02-80b7-9005-c73607c958a6) ファイル名: VFX_Dodge | カテゴリー: プレイヤー | 種類: エフェクト
+  - [[プレイヤー 攻撃モーション 右手]] (3aa7c2c6-cc02-8086-8fb2-c8738c9d97e5) ファイル名: MOT_RightAttack | カテゴリー: プレイヤー | 種類: モーション
+  - [[プレイヤー 攻撃モーション 左手]] (3aa7c2c6-cc02-80fa-ad20-f2490226c6eb) ファイル名: MOT_LeftAttack | カテゴリー: プレイヤー | 種類: モーション
+  - [[プレイヤー 移動モーション]] (3aa7c2c6-cc02-8067-b837-f9e7b0185ea8) ファイル名: MOT_Move_Player | カテゴリー: プレイヤー | 種類: モーション
+  - [[プレイヤー 待機モーション(戦闘)]] (3aa7c2c6-cc02-8023-94f5-d70eeabf9f7d) ファイル名: MOT_IdleBattle | カテゴリー: プレイヤー | 種類: モーション
+  - [[プレイヤー 待機モーション(ホーム) ]] (3ac7c2c6-cc02-8060-a4d9-c1f7bda09bc0) ファイル名: MOT_IdleBattle | カテゴリー: プレイヤー | 種類: モーション
+  - [[プレイヤー 回避モーション]] (3aa7c2c6-cc02-8098-b82e-e00f517a18c2) ファイル名: MOT_Dodge_Player | カテゴリー: プレイヤー | 種類: モーション
+  - [[プレイヤー スキルモーション(拳銃)]] (3aa7c2c6-cc02-80f1-9c31-e18b7534a46c) ファイル名: MOT_Skill_HandGun | カテゴリー: プレイヤー | 種類: モーション
+  - [[プレイヤー スキルモーション(ライフル)]] (3ac7c2c6-cc02-801f-8810-cb2d9a883e3c) ファイル名: MOT_Skill_Rifle | カテゴリー: プレイヤー | 種類: モーション
+  - [[敵 移動モーション]] (3aa7c2c6-cc02-808b-964c-c07ad080be90) ファイル名: MOT_Move_Enemy | カテゴリー: 敵 | 種類: モーション
+  - [[敵 攻撃モーション]] (3aa7c2c6-cc02-80e2-ac67-e7fc61d49337) ファイル名: MOT_Attack_Enemy | カテゴリー: 敵 | 種類: モーション
+  - [[敵 待機モーション]] (3aa7c2c6-cc02-8029-8ac2-c7f4e9aef670) ファイル名: MOT_Idle_Enemy | カテゴリー: 敵 | 種類: モーション
+  - [[クロスヘアUI]] (3aa7c2c6-cc02-80e3-9571-cca8c576d484) ファイル名: UI_Crosshair | カテゴリー: バトル | 種類: UI
+  - [[ミッションウィンドウUI]] (3aa7c2c6-cc02-80ee-ab0e-fa2ec52103d8) ファイル名: UI_MissionWindow | カテゴリー: バトル | 種類: UI
+  - [[プレイヤー 体力バー]] (3aa7c2c6-cc02-809b-b85a-dd77ebd7c209) ファイル名: UI_HealthBar_Player | カテゴリー: バトル | 種類: UI
+  - [[敵 体力バー]] (3aa7c2c6-cc02-80fb-b4bd-dfaaa8c0ca72) ファイル名: UI_HealthBar_Enemy | カテゴリー: バトル | 種類: UI
+  - [[コンボ UI]] (3aa7c2c6-cc02-80eb-bce9-ed3d0d888958) ファイル名: UI_ComboCounter | カテゴリー: バトル | 種類: UI
+  - [[バフUI]] (3aa7c2c6-cc02-8093-a142-ec5c797580ab) ファイル名: UI_BuffDebuffIcon | カテゴリー: バトル | 種類: UI
+  - [[コマンドUI]] (3aa7c2c6-cc02-8070-b5ce-dd69750c0778) ファイル名: UI_CommandHistoryPrediction | カテゴリー: バトル | 種類: UI
+  - [[シナリオ 機能一覧UI]] (3aa7c2c6-cc02-80ed-b049-c3b653725ff7) ファイル名: UI_FeatureListButton | カテゴリー: シナリオ | 種類: UI
+  - [[シナリオ 設定ボタンUI]] (3aa7c2c6-cc02-801f-b291-ead50362e0cc) ファイル名: UI_SettingsButton_InGameScenario | カテゴリー: シナリオ | 種類: UI
+  - [[シナリオ UI非表示ボタンUI]] (3aa7c2c6-cc02-8069-9651-ceb5130fc859) ファイル名: UI_HideAllToggle | カテゴリー: シナリオ | 種類: UI
+  - [[ログ表示ボタンUI]] (3aa7c2c6-cc02-80de-b09b-d0c943103c6f) ファイル名: UI_LogDisplay | カテゴリー: シナリオ | 種類: UI
+  - [[シナリオ オートボタンUI]] (3aa7c2c6-cc02-8021-9063-c5623beac21f) ファイル名: UI_AutoButton | カテゴリー: シナリオ | 種類: UI
+  - [[シナリオ テキストボックスUI]] (3aa7c2c6-cc02-803c-8152-d26f78fdaf1d) ファイル名: UI_TextBox | カテゴリー: シナリオ | 種類: UI
+  - [[シナリオ 早送りボタンUI]] (3aa7c2c6-cc02-80a7-82c5-fd063e36ffa7) ファイル名: UI_ButtonFrame | カテゴリー: シナリオ | 種類: UI
+  - [[設定ボタンUI]] (3aa7c2c6-cc02-809e-b67c-f44d6df0e0b9) ファイル名: UI_SettingsButton_OutGame | カテゴリー: ホーム | 種類: UI
+  - [[ボタンフレームUI]] (3aa7c2c6-cc02-8054-a0f4-c3c44a0a5ca9) ファイル名: UI_SelectionFrame | カテゴリー: ホーム | 種類: UI
+  - [[選択フレームUI]] (3aa7c2c6-cc02-80ea-9b8c-d61ac6afd9f8) ファイル名: UI_SelectionFrame | カテゴリー: ホーム | 種類: UI

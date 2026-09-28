@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             _value = value;
         }
 
+        /// <summary> ステージ ID の数値。 </summary>
         public int Value => _value;
 
         /// <summary>

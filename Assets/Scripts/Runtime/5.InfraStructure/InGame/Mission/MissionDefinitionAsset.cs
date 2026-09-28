@@ -22,6 +22,26 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         public string MainMissionText => _mainMissionText;
 
         /// <summary>
+        ///     このミッションの間だけ使う装備スキル（キルコード）のID一覧を取得する。
+        ///     空の場合は保存されている装備で戦う。保存データの装備は変えない。
+        /// </summary>
+        public IReadOnlyList<int> GetOverrideEquippedSkillIds()
+        {
+            if (_overrideEquippedSkillIds == null || _overrideEquippedSkillIds.Length == 0)
+            {
+                return Array.Empty<int>();
+            }
+
+            int[] skillIds = new int[_overrideEquippedSkillIds.Length];
+            for (int i = 0; i < _overrideEquippedSkillIds.Length; i++)
+            {
+                skillIds[i] = _overrideEquippedSkillIds[i].Id;
+            }
+
+            return skillIds;
+        }
+
+        /// <summary>
         ///     評価条件の説明文一覧を取得します。敵ミッションキーの解決を必要としないため、
         ///     OutGame側のプレビュー表示でも利用できます。
         /// </summary>
@@ -69,6 +89,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <returns> ミッション定義。 </returns>
         public MissionDefinition Create(EnemyMissionKeyRepository missionKeyRepository)
         {
+            // クリア条件の各ステップを作る。失敗した場合はどのステップかが分かる例外を投げる。
             List<ObjectiveSequenceStep> steps = new();
 
             if (_clearConditionSteps != null)
@@ -94,6 +115,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 }
             }
 
+            // 評価条件を作る。評価 ID は必須で、重複を許さない。
             ObjectiveSequenceClearCondition clearCondition = new ObjectiveSequenceClearCondition(steps);
 
             List<IMissionEvaluationCondition> evaluations = new();
@@ -129,6 +151,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
                 evaluations.Add(condition.Create());
             }
 
+            // ミッション定義を作る。
             return new MissionDefinition(
                 Id,
                 _displayName,
@@ -151,6 +174,11 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         [Header("UI情報")]
         [SerializeField, TextArea, Tooltip("ミッションHUDに表示される説明文。")] private string _mainMissionText;
         [SerializeField, Tooltip("敗北時に表示する攻略Tips一覧。")] private List<string> _defeatTips = new();
+
+        [Header("装備")]
+        [SerializeField, SourceDataCollection("Skill")]
+        [Tooltip("このミッションの間だけ使う装備スキル（キルコード）。空の場合は保存されている装備で戦う。保存データの装備は変えない。")]
+        private DataID[] _overrideEquippedSkillIds = Array.Empty<DataID>();
 
         [Header("クリア条件")]
         [SerializeField, Tooltip("ミッションクリアとなる目標の並び。単一の条件で済む場合は要素数1にする。")]

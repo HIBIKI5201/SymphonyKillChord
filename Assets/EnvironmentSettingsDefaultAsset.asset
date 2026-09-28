@@ -17,3 +17,5 @@ MonoBehaviour:
   _isFullScreen: 1
   _qualityLevel: 3
   _brightness: 5
+  _language: 0
+  _vibrationStrength: 0

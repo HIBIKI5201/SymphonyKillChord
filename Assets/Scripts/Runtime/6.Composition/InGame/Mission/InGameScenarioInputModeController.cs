@@ -10,6 +10,9 @@ namespace KillChord.Runtime.Composition.InGame.Mission
     /// </summary>
     public sealed class InGameScenarioInputModeController : IScenarioInputModeController
     {
+        /// <summary>
+        ///     入力マップの制御を指定して生成する。
+        /// </summary>
         public InGameScenarioInputModeController(UnityInputMapController inputMapController)
         {
             _inputMapController = inputMapController ?? throw new ArgumentNullException(nameof(inputMapController));

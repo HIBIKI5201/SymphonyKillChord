@@ -13,6 +13,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Music
     [CreateAssetMenu(
         fileName = nameof(BgmSelectorLabelTableAsset),
         menuName = "KillChord/InGame/Music/BgmSelectorLabelTable")]
+    /// <summary>
+    ///     BGM のセレクターラベル名の対応表のデータ。
+    /// </summary>
     public class BgmSelectorLabelTableAsset : ScriptableObject
     {
         /// <summary> 原曲のセレクターラベル名。 </summary>

@@ -1,11 +1,13 @@
 using KillChord.Runtime.Adaptor;
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Enemy;
+using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Skill;
@@ -51,6 +53,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            // アウトゲームで選択されたミッションが必要。
             if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState)
                 || !selectedMissionState.HasSelectedMission)
             {
@@ -60,6 +63,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
+            // ミッション定義と敵のミッションキーのリポジトリを読み込む。
             _loadedMissionDefinitionRepository =
                 await _missionDefinitionRepositoryKey.LoadAssetAsync<MissionDefinitionRepository>(this, cancellationToken);
             _loadedEnemyMissionKeyRepository =
@@ -73,6 +77,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
+            // 選択されたミッションの定義を作る。
             if (!_loadedMissionDefinitionRepository.TryCreateMissionDefinition(
                     selectedMissionState.CurrentMissionId,
                     _loadedEnemyMissionKeyRepository,
@@ -84,6 +89,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
+            // シナリオを再生するミッションの場合だけ、シナリオ用のアセットを読み込む。
             if (!RequiresScenarioPlayback())
             {
                 return true;
@@ -154,23 +160,30 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// <returns> 結合に成功した場合はtrueです。 </returns>
         public override bool Ready()
         {
+            // 前回のチュートリアル用の表示を破棄し、依存するモジュールを取得する。
+            DisposeTutorialFeedback();
+
             PlayerModuleContainer playerModuleContainer =
                 ServiceLocator.GetInstance<PlayerModuleContainer>();
             SkillModuleContainer skillModuleContainer =
                 ServiceLocator.GetInstance<SkillModuleContainer>();
+            MusicSyncModuleContainer musicSyncModuleContainer =
+                ServiceLocator.GetInstance<MusicSyncModuleContainer>();
             if (playerModuleContainer == null
                 || playerModuleContainer.PlayerEntity == null
                 || playerModuleContainer.PlayerController == null
                 || playerModuleContainer.PlayerAttackController == null
                 || skillModuleContainer?.SkillController == null
+                || musicSyncModuleContainer?.MusicSyncService == null
                 || !ServiceLocator.TryGetInstance(out TargetSystemController targetSystemController))
             {
                 Debug.LogError(
-                    $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールを取得できませんでした。",
+                    $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールまたは音楽同期サービスを取得できませんでした。",
                     this);
                 return false;
             }
 
+            // プレイヤーの行動をミッションの進行へ記録するコントローラーを作る。
             MissionProgressRecorderController recorderController =
                 new MissionProgressRecorderController(
                     _moduleContainer.MissionRuntimeService.MissionProgress,
@@ -181,9 +194,11 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 playerModuleContainer.PlayerController,
                 playerModuleContainer.PlayerAttackController,
                 skillModuleContainer.SkillController,
-                targetSystemController);
+                targetSystemController,
+                musicSyncModuleContainer.MusicSyncService);
             _recorderController = recorderController;
 
+            // ステップのポップアップと、ミッション中のプレイヤーのバフを制御するコントローラーを作る。
             if (_missionStepPopupView != null)
             {
                 _popupController = new MissionStepPopupController(
@@ -198,6 +213,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
                 playerModuleContainer.PlayerEntity);
 
+            // ステップ開始時のアクションを実行する処理を用意する。会話がある場合は会話の処理も加える。
             List<IMissionStepEntryActionExecutor> entryActionExecutors = new()
             {
                 new SetSkillExecutionEnabledStepEntryActionExecutor(playerModuleContainer.PlayerActionRestrictionState),
@@ -214,12 +230,14 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
                 entryActionExecutors);
 
+            // シナリオを再生するミッションの場合は、シナリオの制御を初期化する。
             if (_scenarioUsecase != null
                 && !TryInitializeMissionScenarioController())
             {
                 return false;
             }
 
+            InitializeTutorialFeedback(playerModuleContainer);
             return true;
         }
 
@@ -232,6 +250,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         {
             missionRuntimeService = null;
 
+            // 参照と、解決済みのミッション定義を確認する。
             if (!ValidateReferences())
             {
                 return false;
@@ -247,19 +266,21 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
+            // ミッションの進行を管理するサービスを作る。
             MissionDefinition definition = _resolvedMissionDefinition;
             MissionProgress progress = new MissionFactory().CreateMissionProgress();
 
             missionRuntimeService = new MissionRuntimeService(
                 definition,
                 progress,
-                new MissionTimeAdvanceUsecase(),
-                new MissionEnemyKilledUsecase(),
-                new MissionActionPerformedUsecase(),
-                new MissionPlayerDeadUsecase(),
+                new MissionTimeAdvanceUseCase(),
+                new MissionEnemyKilledUseCase(),
+                new MissionActionPerformedUseCase(),
+                new MissionPlayerDeadUseCase(),
                 new MissionRuleRunner(definition),
                 new MissionEvaluationRunner());
 
+            // HUD・イベント・コンボ表示を作り、ビューを初期化する。
             MissionHudViewModel missionHudViewModel = new MissionHudViewModel();
 
             MissionHudPresenter missionHudPresenter = new MissionHudPresenter(
@@ -279,6 +300,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
             missionHudPresenter.Present();
 
+            // 他のモジュールから使えるよう登録する。
             ServiceLocator.RegisterInstance(missionRuntimeService);
             ServiceLocator.RegisterInstance(missionEventController);
 
@@ -293,6 +315,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// </summary>
         public override void Shutdown()
         {
+            // コントローラーとビューを破棄する。
+            DisposeTutorialFeedback();
             _recorderController?.Dispose();
             _popupController?.Dispose();
             _mobileTapAttackInput?.Dispose();
@@ -318,6 +342,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             if (_scenarioView != null) { _scenarioView.EndPlayback(); }
             SetScenarioDisplayActive(false);
 
+            // 読み込んだアセットを解放し、参照を消す。
             _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _enemyMissionKeyRepositoryKey.ReleaseLoadedAsset(this);
             _backgroundCatalogKey.ReleaseLoadedAsset(this);
@@ -335,6 +360,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             _scenarioInputController = null;
             _scenarioViewModel = null;
 
+            // 登録したコンテナを解除する。
             if (!_isModuleRegistered)
             {
                 return;
@@ -343,6 +369,46 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             ServiceLocator.UnregisterInstance<MissionModuleContainer>();
             _moduleContainer = null;
             _isModuleRegistered = false;
+        }
+
+        /// <summary>
+        ///     色指定攻撃とスキル課題の表示を成立通知へ結合します。表示参照不足は進行を妨げません。
+        /// </summary>
+        /// <param name="playerModuleContainer"> 攻撃Signalを保持するプレイヤーContainerです。 </param>
+        private void InitializeTutorialFeedback(PlayerModuleContainer playerModuleContainer)
+        {
+            if (_tutorialAttackFeedbackView == null
+                || playerModuleContainer.PlayerAttackSignal == null
+                || !ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            {
+                Debug.LogWarning($"[{nameof(InGameMissionInitializer)}] 色指定攻撃の表示参照を取得できないため、フィードバック表示を省略します。", this);
+                return;
+            }
+
+            _tutorialAttackFeedbackPresenter = new TutorialAttackFeedbackPresenter(
+                playerModuleContainer.PlayerAttackSignal,
+                () => ServiceLocator.TryGetInstance(out MissionRuntimeService mission) ? mission : null,
+                selectedBattleStageState,
+                _tutorialAttackFeedbackView);
+            _tutorialSkillFeedbackPresenter = new TutorialSkillFeedbackPresenter(
+                () => ServiceLocator.TryGetInstance(out MissionRuntimeService mission) ? mission : null,
+                selectedBattleStageState,
+                _tutorialAttackFeedbackView);
+        }
+
+        /// <summary>
+        ///     再初期化・終了・破棄時に攻撃・スキル購読と表示中のフィードバックを解放します。
+        /// </summary>
+        private void DisposeTutorialFeedback()
+        {
+            _tutorialSkillFeedbackPresenter?.Dispose();
+            _tutorialSkillFeedbackPresenter = null;
+            _tutorialAttackFeedbackPresenter?.Dispose();
+            _tutorialAttackFeedbackPresenter = null;
+            if (_tutorialAttackFeedbackView != null)
+            {
+                _tutorialAttackFeedbackView.ClearFeedback();
+            }
         }
 
         /// <summary>
@@ -370,6 +436,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         [SerializeField, Tooltip("ミッションの更新処理を行うループのビュー。")] private MissionLoopView _missionLoopView;
         [SerializeField, Tooltip("目標ステップの説明ポップアップを表示するビュー。未設定の場合はポップアップ機能を使用しない。")] private MissionStepPopupView _missionStepPopupView;
         [SerializeField, Tooltip("現在のコンボ数を表示するビュー。")] private ComboHudView _comboHudView;
+        [SerializeField, Tooltip("チュートリアルの色指定攻撃の成功・失敗を表示します。未設定でもミッション進行は継続します。")]
+        private TutorialAttackFeedbackView _tutorialAttackFeedbackView;
         [SerializeField, Min(0f), Tooltip("説明ポップアップ表示直後にプレイヤー入力を無効化する秒数。")] private float _popupInputSuppressionDuration = MissionStepPopupController.DefaultInputSuppressionDuration;
         [SerializeField, SourceDataAddress, Tooltip("ミッション定義リポジトリの Addressables キーです。")]
         private string _missionDefinitionRepositoryKey;
@@ -394,13 +462,15 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         [SerializeField, SourceDataAddress, Tooltip("シナリオ設定の Addressables キーです。")]
         private string _scenarioSettingsKey = "ScenarioSettingsAsset";
         [SerializeField, Min(0), Tooltip("コンボ数が表示される最小値。")]
-        private int _comboVisibleCount = 1;
+        private int _comboVisibleCount = 3;
 
         private bool _registeredMissionRuntimeService;
         private bool _registeredMissionEventController;
         private bool _isModuleRegistered;
         private MissionModuleContainer _moduleContainer;
         private MissionProgressRecorderController _recorderController;
+        private TutorialAttackFeedbackPresenter _tutorialAttackFeedbackPresenter;
+        private TutorialSkillFeedbackPresenter _tutorialSkillFeedbackPresenter;
         private MissionStepPopupController _popupController;
         private MobileTapAttackInput _mobileTapAttackInput;
         private MissionPlayerBuffController _playerBuffController;
@@ -416,7 +486,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private AnimationCatalogAsset _loadedAnimationCatalog;
         private PortraitCatalogAsset _loadedPortraitCatalog;
         private ScenarioSettingsAsset _loadedScenarioSettings;
-        private ScenarioUsecase _scenarioUsecase;
+        private ScenarioUseCase _scenarioUsecase;
         private ScenarioInputController _scenarioInputController;
         private ScenarioViewModel _scenarioViewModel;
 
@@ -435,6 +505,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// </summary>
         private bool TryInitializeDialogue(List<IMissionStepEntryActionExecutor> executors)
         {
+            // いずれかのステップに会話があるかを調べる。無ければ会話の処理は用意しない。
             ObjectiveSequenceClearCondition sequence = _resolvedMissionDefinition.ClearCondition;
             bool hasDialogue = false;
             for (int i = 0; i < sequence.StepCount; i++)
@@ -448,6 +519,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             {
                 return true;
             }
+            // 会話に必要なビュー・ボイス・ポーズの参照を確認する。
             InGamePlayDirector playDirector = FindFirstObjectByType<InGamePlayDirector>();
             if (_missionDialogueView == null || _missionVoiceSource == null || playDirector == null
                 || !ServiceLocator.TryGetInstance(out SequenceModuleContainer sequenceContainer)
@@ -456,6 +528,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 Debug.LogError($"[{nameof(InGameMissionInitializer)}] 会話View、VoiceSource、ゲーム開始またはポーズの参照が不足しています。", this);
                 return false;
             }
+            // 会話の ViewModel とコントローラーを作り、ステップ開始時のアクションとして登録する。
             _dialogueViewModel = new MissionDialogueViewModel();
             _dialogueController = new MissionDialogueController(_moduleContainer.MissionRuntimeService,
                 sequenceContainer.BattlePauseController, _missionVoiceSource, new MissionDialoguePresenter(_dialogueViewModel));
@@ -471,6 +544,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// <returns>構築に成功した場合はtrue</returns>
         private bool TryBuildScenarioPlayback()
         {
+            // シナリオを再生しないミッションでは何もしない。
             if (!RequiresScenarioPlayback())
             {
                 return true;
@@ -481,9 +555,10 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
+            // シナリオの読み込み・表示・進行に必要なリポジトリとプレゼンターを作る。
             ScenarioAdvanceGate advanceGate = new();
             _scenarioViewModel = new ScenarioViewModel();
-            ScenarioHandlerRepo handlerRepo = new();
+            ScenarioHandlerRepository handlerRepo = new();
             IScenarioRepository scenarioRepository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_loadedBackgroundCatalog);
             IAnimationRepository animationRepository = new AnimationRepository(_loadedAnimationCatalog);
@@ -503,24 +578,28 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 animationPresenter,
                 portraitPresenter,
                 layerPresenter,
+                _scenarioViewModel,
                 _scenarioViewModel);
 
-            _scenarioUsecase = new ScenarioUsecase(
+            // シナリオの進行を管理するユースケースと、入力の制御を作る。
+            _scenarioUsecase = new ScenarioUseCase(
                 scenarioRepository,
                 handlerRepo,
                 advanceGate,
                 presenterFacade,
+                presenterFacade,
                 scenarioSettingsRepository);
-            _scenarioInputController = new ScenarioInputController(
-                advanceGate,
-                _scenarioUsecase,
-                _scenarioUsecase);
-
             TextEventHandler textEventHandler = new(
                 presenterFacade,
                 _scenarioUsecase,
                 _scenarioUsecase,
                 scenarioSettingsRepository);
+            _scenarioInputController = new ScenarioInputController(
+                advanceGate,
+                textEventHandler,
+                _scenarioUsecase,
+                _scenarioUsecase);
+            // イベントの種類ごとのハンドラーを登録する。
             FadeEventHandler fadeEventHandler = new(presenterFacade);
             BackgroundEventHandler backgroundEventHandler = new(presenterFacade, backgroundRepository);
             AnimationEventHandler animationEventHandler = new(presenterFacade, animationRepository);
@@ -533,6 +612,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             handlerRepo.Register<PortraitEvent>(portraitEventHandler.HandleAsync);
             handlerRepo.Register<LayerEvent>(layerEventHandler.HandleAsync);
 
+            // 表示レイヤーの並び順を設定し、ビューを初期化する。
             List<string> layerOrder = new(_loadedScenarioSettings.LayerBackToFront.Count);
             for (int i = 0; i < _loadedScenarioSettings.LayerBackToFront.Count; i++)
             {
@@ -555,6 +635,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// <returns>結合に成功した場合はtrueです。</returns>
         private bool TryInitializeMissionScenarioController()
         {
+            // 入力とバトルのポーズの制御を取得する。
             if (!ServiceLocator.TryGetInstance(out InputComposition inputComposition)
                 || inputComposition.GetInputView == null
                 || inputComposition.GetInputMapController == null
@@ -566,6 +647,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
+            // シナリオの入力とミッションのシナリオ制御を初期化し、再生の開始・終了を購読する。
             _scenarioInputView.Initialize(
                 _scenarioInputController,
                 inputComposition.GetInputView,
@@ -737,8 +819,12 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             return map;
         }
 
+        /// <summary>
+        ///     チュートリアルのフィードバックを破棄し、登録したサービスを解除する。
+        /// </summary>
         private void OnDestroy()
         {
+            DisposeTutorialFeedback();
             if (_registeredMissionRuntimeService)
             {
                 ServiceLocator.UnregisterInstance<MissionRuntimeService>();

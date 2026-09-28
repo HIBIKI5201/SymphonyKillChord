@@ -218,7 +218,7 @@ private DataID _effectId;
 ### Phase 2: セーブデータに関与する対象
 1. `StageNodeAsset`/`StageTreeAsset`の`_stageId`・接続データを`DataID`（カテゴリ="Stage"）化する（Domain `StageId`は無変更）。
 2. `SkillId`を新設し、`SkillTemplateAsset`・`SkillRepository`・`OwnedSkillRepository`・`SkillBuildRepository`・セーブデータ変換箇所を`SkillId`経由に統一する。
-3. `SkillNodeId`（既存Domain VO）を正式採用し、`SkillNodeData`/`SkillNodeDataRepo`/`SkillNodeBindRepo`/`SkillNodePhaseBindDataRepo`/`SkillTreeService`の生`int`を置き換える。
+3. `SkillNodeId`（既存Domain VO）を正式採用し、`SkillNodeData`/`SkillNodeDataRepository`/`SkillNodeBindRepository`/`SkillNodePhaseBindDataRepository`/`SkillTreeService`の生`int`を置き換える。
 4. `SaveData.INITIAL_UNLOCKED_SKILL_IDS`等の初期値を新ハッシュIDへ更新する。
 5. 既存アセットの`_id`文字列を設定し直す（このタイミングで`"stage_forest_01"`のような人間可読な命名を最初から採用してよい。セーブリセット前提のため旧int値に縛られる必要がない）。
 

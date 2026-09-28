@@ -37,8 +37,8 @@ MonoBehaviour:
     - rid: 4309480244433387708
       type: {class: ElapsedTimeClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "120\u79D2\u751F\u5B58\u3059\u308B\u6761\u4EF6"
-        _requiredElapsedTime: 120
+        _inspectorSummary: "60\u79D2\u751F\u5B58\u3059\u308B\u6761\u4EF6"
+        _requiredElapsedTime: 60
     - rid: 4309480244433387709
       type: {class: PlayerDeadFailConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:

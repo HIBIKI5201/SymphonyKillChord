@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 namespace KillChord.Editor.SourceDataProvider.Core
 {
     /// <summary>
-    ///     SourceDataProviderのSourceAsset設定とcollection設定を編集します。
+    ///     SourceDataProviderのDataAsset設定とcollection設定を編集します。
     /// </summary>
     internal sealed class SourceDataProviderSettingsProvider : SettingsProvider
     {
@@ -43,20 +43,20 @@ namespace KillChord.Editor.SourceDataProvider.Core
         public override void OnGUI(string searchContext)
         {
             SourceDataProviderSettings settings = SourceDataProviderSettings.instance;
-            _ = settings.SourceAssetMappings.Count;
+            _ = settings.DataAssetMappings.Count;
             _ = settings.SourceCollectionMappings.Count;
             SerializedObject serializedObject = new(settings);
-            SerializedProperty sourceAssets = serializedObject.FindProperty(SOURCE_ASSET_MAPPINGS_PROPERTY);
+            SerializedProperty dataAssets = serializedObject.FindProperty(DATA_ASSET_MAPPINGS_PROPERTY);
             SerializedProperty collections = serializedObject.FindProperty(SOURCE_COLLECTION_MAPPINGS_PROPERTY);
 
             EditorGUILayout.HelpBox(
-                "SourceAssetとcollectionを分離して管理します。"
-                + " SourceAssetにはAddressable ScriptableObjectのみを登録し、collection側でどの配列をリポジトリとして扱うかを設定します。",
+                "データアセットとcollectionを分離して管理します。"
+                + " データアセットにはAddressable ScriptableObjectのみを登録し、collection側でどの配列をリポジトリとして扱うかを設定します。",
                 MessageType.Info);
 
-            DrawSourceAssetSection(sourceAssets);
+            DrawDataAssetSection(dataAssets);
             EditorGUILayout.Space();
-            DrawCollectionSection(collections, sourceAssets);
+            DrawCollectionSection(collections, dataAssets);
 
             serializedObject.ApplyModifiedProperties();
             if (GUILayout.Button("設定を適用"))
@@ -66,42 +66,42 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         /// <summary>
-        ///     設定画面表示開始時にSourceAsset一覧を同期します。
+        ///     設定画面表示開始時にDataAsset一覧を同期します。
         /// </summary>
         /// <param name="searchContext"> 検索文字列です。 </param>
         /// <param name="rootElement"> ルートGUI要素です。 </param>
         public override void OnActivate(string searchContext, VisualElement rootElement)
         {
-            SourceDataProviderSettings.instance.RefreshSourceAssetsFromAddressables();
+            SourceDataProviderSettings.instance.RefreshDataAssetsFromAddressables();
         }
 
         /// <summary>
-        ///     SourceAsset設定セクションを描画します。
+        ///     DataAsset設定セクションを描画します。
         /// </summary>
-        /// <param name="sourceAssets"> SourceAsset設定配列です。 </param>
-        private static void DrawSourceAssetSection(SerializedProperty sourceAssets)
+        /// <param name="dataAssets"> DataAsset設定配列です。 </param>
+        private static void DrawDataAssetSection(SerializedProperty dataAssets)
         {
-            EditorGUILayout.LabelField("Source Assets", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Data Assets", EditorStyles.boldLabel);
 
             int removeIndex = -1;
-            for (int i = 0; i < sourceAssets.arraySize; i++)
+            for (int i = 0; i < dataAssets.arraySize; i++)
             {
-                SerializedProperty mapping = sourceAssets.GetArrayElementAtIndex(i);
+                SerializedProperty mapping = dataAssets.GetArrayElementAtIndex(i);
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                DrawSourceAssetMapping(mapping, i, ref removeIndex);
+                DrawDataAssetMapping(mapping, i, ref removeIndex);
                 EditorGUILayout.EndVertical();
             }
 
             if (removeIndex >= 0)
             {
-                sourceAssets.DeleteArrayElementAtIndex(removeIndex);
+                dataAssets.DeleteArrayElementAtIndex(removeIndex);
             }
 
-            if (GUILayout.Button("Source Assetを追加"))
+            if (GUILayout.Button("データアセットを追加"))
             {
-                sourceAssets.InsertArrayElementAtIndex(sourceAssets.arraySize);
-                SerializedProperty mapping = sourceAssets.GetArrayElementAtIndex(sourceAssets.arraySize - 1);
-                mapping.FindPropertyRelative(SOURCE_ASSET_ADDRESSABLE_KEY_PROPERTY).stringValue = string.Empty;
+                dataAssets.InsertArrayElementAtIndex(dataAssets.arraySize);
+                SerializedProperty mapping = dataAssets.GetArrayElementAtIndex(dataAssets.arraySize - 1);
+                mapping.FindPropertyRelative(DATA_ASSET_ADDRESSABLE_KEY_PROPERTY).stringValue = string.Empty;
             }
         }
 
@@ -109,10 +109,10 @@ namespace KillChord.Editor.SourceDataProvider.Core
         ///     collection設定セクションを描画します。
         /// </summary>
         /// <param name="collections"> collection設定配列です。 </param>
-        /// <param name="sourceAssets"> SourceAsset設定配列です。 </param>
+        /// <param name="dataAssets"> DataAsset設定配列です。 </param>
         private static void DrawCollectionSection(
             SerializedProperty collections,
-            SerializedProperty sourceAssets)
+            SerializedProperty dataAssets)
         {
             EditorGUILayout.LabelField("Collections", EditorStyles.boldLabel);
 
@@ -121,7 +121,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 SerializedProperty mapping = collections.GetArrayElementAtIndex(i);
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                DrawCollectionMapping(mapping, sourceAssets, i, ref removeIndex);
+                DrawCollectionMapping(mapping, dataAssets, i, ref removeIndex);
                 EditorGUILayout.EndVertical();
             }
 
@@ -135,27 +135,27 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 collections.InsertArrayElementAtIndex(collections.arraySize);
                 SerializedProperty mapping = collections.GetArrayElementAtIndex(collections.arraySize - 1);
                 mapping.FindPropertyRelative(COLLECTION_KEY_PROPERTY).stringValue = string.Empty;
-                mapping.FindPropertyRelative(COLLECTION_SOURCE_ASSET_KEY_PROPERTY).stringValue = string.Empty;
+                mapping.FindPropertyRelative(COLLECTION_DATA_ASSET_KEY_PROPERTY).stringValue = string.Empty;
                 mapping.FindPropertyRelative(COLLECTION_PROPERTY_PATH_PROPERTY).stringValue = string.Empty;
                 mapping.FindPropertyRelative(COLLECTION_ASSET_CREATION_DIRECTORY_PROPERTY).stringValue = string.Empty;
             }
         }
 
         /// <summary>
-        ///     1件分のSourceAsset設定を描画します。
+        ///     1件分のDataAsset設定を描画します。
         /// </summary>
         /// <param name="mapping"> 描画対象の設定です。 </param>
         /// <param name="index"> 設定の配列位置です。 </param>
         /// <param name="removeIndex"> 削除する配列位置です。 </param>
-        private static void DrawSourceAssetMapping(
+        private static void DrawDataAssetMapping(
             SerializedProperty mapping,
             int index,
             ref int removeIndex)
         {
-            SerializedProperty addressableKey = mapping.FindPropertyRelative(SOURCE_ASSET_ADDRESSABLE_KEY_PROPERTY);
+            SerializedProperty addressableKey = mapping.FindPropertyRelative(DATA_ASSET_ADDRESSABLE_KEY_PROPERTY);
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField($"Source Asset {index + 1}", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField($"Data Asset {index + 1}", EditorStyles.boldLabel);
             if (GUILayout.Button("削除", GUILayout.Width(48f)))
             {
                 removeIndex = index;
@@ -165,7 +165,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             EditorGUILayout.PropertyField(addressableKey, new GUIContent("Addressable Key"));
             if (!SourceDataProviderRepositoryResolver.TryResolveAsset(
                 addressableKey.stringValue,
-                out ScriptableObject sourceAsset))
+                out ScriptableObject dataAsset))
             {
                 EditorGUILayout.HelpBox("AddressableキーからScriptableObjectを解決できません。", MessageType.Warning);
                 return;
@@ -173,10 +173,10 @@ namespace KillChord.Editor.SourceDataProvider.Core
 
             using (new EditorGUI.DisabledScope(true))
             {
-                EditorGUILayout.ObjectField("Source Asset", sourceAsset, sourceAsset.GetType(), false);
+                EditorGUILayout.ObjectField("Data Asset", dataAsset, dataAsset.GetType(), false);
             }
 
-            string[] availablePaths = SourceDataProviderRepositoryResolver.GetCollectionPropertyPaths(sourceAsset);
+            string[] availablePaths = SourceDataProviderRepositoryResolver.GetCollectionPropertyPaths(dataAsset);
             if (availablePaths.Length > 0)
             {
                 EditorGUILayout.HelpBox(
@@ -189,21 +189,23 @@ namespace KillChord.Editor.SourceDataProvider.Core
         ///     1件分のcollection設定を描画します。
         /// </summary>
         /// <param name="mapping"> 描画対象の設定です。 </param>
-        /// <param name="sourceAssets"> SourceAsset設定配列です。 </param>
+        /// <param name="dataAssets"> DataAsset設定配列です。 </param>
         /// <param name="index"> 設定の配列位置です。 </param>
         /// <param name="removeIndex"> 削除する配列位置です。 </param>
         private static void DrawCollectionMapping(
             SerializedProperty mapping,
-            SerializedProperty sourceAssets,
+            SerializedProperty dataAssets,
             int index,
             ref int removeIndex)
         {
+            // 対応1件分の各プロパティを取得する。
             SerializedProperty collectionKey = mapping.FindPropertyRelative(COLLECTION_KEY_PROPERTY);
-            SerializedProperty sourceAssetKey = mapping.FindPropertyRelative(COLLECTION_SOURCE_ASSET_KEY_PROPERTY);
+            SerializedProperty dataAssetKey = mapping.FindPropertyRelative(COLLECTION_DATA_ASSET_KEY_PROPERTY);
             SerializedProperty propertyPath = mapping.FindPropertyRelative(COLLECTION_PROPERTY_PATH_PROPERTY);
             SerializedProperty assetCreationDirectory =
                 mapping.FindPropertyRelative(COLLECTION_ASSET_CREATION_DIRECTORY_PROPERTY);
 
+            // 見出しと削除ボタン。削除は描画後にまとめて行うため、対象の番号だけ記録する。
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField($"Collection {index + 1}", EditorStyles.boldLabel);
             if (GUILayout.Button("削除", GUILayout.Width(48f)))
@@ -212,24 +214,26 @@ namespace KillChord.Editor.SourceDataProvider.Core
             }
             EditorGUILayout.EndHorizontal();
 
-            DrawSourceAssetSelector(sourceAssetKey, sourceAssets);
+            DrawDataAssetSelector(dataAssetKey, dataAssets);
             EditorGUILayout.PropertyField(collectionKey, new GUIContent("Collection Key"));
 
+            // データアセットを解決できない場合は、プロパティパスを手入力できるようにする。
             if (!SourceDataProviderRepositoryResolver.TryResolveAsset(
-                sourceAssetKey.stringValue,
-                out ScriptableObject sourceAsset))
+                dataAssetKey.stringValue,
+                out ScriptableObject dataAsset))
             {
-                EditorGUILayout.HelpBox("選択中のSourceAssetを解決できません。", MessageType.Warning);
+                EditorGUILayout.HelpBox("選択中のデータアセットを解決できません。", MessageType.Warning);
                 EditorGUILayout.PropertyField(propertyPath, new GUIContent("Collection Property Path"));
                 return;
             }
 
             using (new EditorGUI.DisabledScope(true))
             {
-                EditorGUILayout.ObjectField("Resolved Source Asset", sourceAsset, sourceAsset.GetType(), false);
+                EditorGUILayout.ObjectField("Resolved Data Asset", dataAsset, dataAsset.GetType(), false);
             }
 
-            string[] availablePaths = SourceDataProviderRepositoryResolver.GetCollectionPropertyPaths(sourceAsset);
+            // 解決できた場合は、配列・List の候補から選べるようにする。
+            string[] availablePaths = SourceDataProviderRepositoryResolver.GetCollectionPropertyPaths(dataAsset);
             if (availablePaths.Length > 0)
             {
                 EditorGUILayout.HelpBox(
@@ -273,45 +277,47 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         /// <summary>
-        ///     SourceAsset選択欄を描画します。
+        ///     DataAsset選択欄を描画します。
         /// </summary>
-        /// <param name="sourceAssetKey"> 選択結果を保存するプロパティです。 </param>
-        /// <param name="sourceAssets"> SourceAsset設定配列です。 </param>
-        private static void DrawSourceAssetSelector(
-            SerializedProperty sourceAssetKey,
-            SerializedProperty sourceAssets)
+        /// <param name="dataAssetKey"> 選択結果を保存するプロパティです。 </param>
+        /// <param name="dataAssets"> DataAsset設定配列です。 </param>
+        private static void DrawDataAssetSelector(
+            SerializedProperty dataAssetKey,
+            SerializedProperty dataAssets)
         {
+            // 登録済みのデータアセットを選択肢にする。
             List<string> labels = new() { "<未設定>" };
             List<string> values = new() { string.Empty };
             int selectedIndex = 0;
 
-            for (int i = 0; i < sourceAssets.arraySize; i++)
+            for (int i = 0; i < dataAssets.arraySize; i++)
             {
-                SerializedProperty mapping = sourceAssets.GetArrayElementAtIndex(i);
-                SerializedProperty addressableKey = mapping.FindPropertyRelative(SOURCE_ASSET_ADDRESSABLE_KEY_PROPERTY);
+                SerializedProperty mapping = dataAssets.GetArrayElementAtIndex(i);
+                SerializedProperty addressableKey = mapping.FindPropertyRelative(DATA_ASSET_ADDRESSABLE_KEY_PROPERTY);
                 string value = addressableKey.stringValue;
                 labels.Add(string.IsNullOrWhiteSpace(value)
-                    ? $"Source Asset {i + 1}"
+                    ? $"Data Asset {i + 1}"
                     : value);
                 values.Add(value);
-                if (string.Equals(value, sourceAssetKey.stringValue, StringComparison.Ordinal))
+                if (string.Equals(value, dataAssetKey.stringValue, StringComparison.Ordinal))
                 {
                     selectedIndex = values.Count - 1;
                 }
             }
 
-            if (!string.IsNullOrWhiteSpace(sourceAssetKey.stringValue) && selectedIndex == 0)
+            // 登録に無い値が入っている場合は、Missing として選択肢に残す。
+            if (!string.IsNullOrWhiteSpace(dataAssetKey.stringValue) && selectedIndex == 0)
             {
-                labels.Add($"Missing: {sourceAssetKey.stringValue}");
-                values.Add(sourceAssetKey.stringValue);
+                labels.Add($"Missing: {dataAssetKey.stringValue}");
+                values.Add(dataAssetKey.stringValue);
                 selectedIndex = values.Count - 1;
             }
 
             EditorGUI.BeginChangeCheck();
-            int nextIndex = EditorGUILayout.Popup("Source Asset", selectedIndex, labels.ToArray());
+            int nextIndex = EditorGUILayout.Popup("Data Asset", selectedIndex, labels.ToArray());
             if (EditorGUI.EndChangeCheck())
             {
-                sourceAssetKey.stringValue = values[nextIndex];
+                dataAssetKey.stringValue = values[nextIndex];
             }
         }
 
@@ -354,11 +360,11 @@ namespace KillChord.Editor.SourceDataProvider.Core
         }
 
         private const string SETTINGS_PATH = ProviderConst.PROJECT_PATH + "Source Data Provider";
-        private const string SOURCE_ASSET_MAPPINGS_PROPERTY = "_sourceAssetMappings";
+        private const string DATA_ASSET_MAPPINGS_PROPERTY = "_dataAssetMappings";
         private const string SOURCE_COLLECTION_MAPPINGS_PROPERTY = "_sourceCollectionMappings";
-        private const string SOURCE_ASSET_ADDRESSABLE_KEY_PROPERTY = "_addressableKey";
+        private const string DATA_ASSET_ADDRESSABLE_KEY_PROPERTY = "_addressableKey";
         private const string COLLECTION_KEY_PROPERTY = "_collectionKey";
-        private const string COLLECTION_SOURCE_ASSET_KEY_PROPERTY = "_sourceAssetAddressableKey";
+        private const string COLLECTION_DATA_ASSET_KEY_PROPERTY = "_dataAssetAddressableKey";
         private const string COLLECTION_PROPERTY_PATH_PROPERTY = "_propertyPath";
         private const string COLLECTION_ASSET_CREATION_DIRECTORY_PROPERTY = "_assetCreationDirectory";
     }

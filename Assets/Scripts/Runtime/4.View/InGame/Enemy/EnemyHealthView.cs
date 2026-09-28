@@ -62,6 +62,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _damageNumberPoolView.ShowDamage(dto, position, rotation);
         }
 
+        /// <summary>
+        ///     プレゼンターを破棄する。
+        /// </summary>
         private void OnDestroy()
         {
             _presenter?.Dispose();

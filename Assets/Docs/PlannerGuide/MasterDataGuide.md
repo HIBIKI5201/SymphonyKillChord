@@ -123,7 +123,7 @@
 | アセット | メニュー | 内容 |
 | --- | --- | --- |
 | `BossAttackEntryAsset` | `KillChord/Runtime/Enemy/BossAttackEntryAsset` | ボスの攻撃種別、対応する攻撃定義のインデックス（`CharacterDefinitionAsset`の攻撃リストの何番目か）、音楽同期情報 |
-| `BossAttackEntryRepo` | `KillChord/Runtime/Enemy/BossAttackEntryRepo` | 上記の集合。**空欄のスロットがあるとコンソールに警告が出ます** |
+| `BossAttackEntryRepository` | `KillChord/Runtime/Enemy/BossAttackEntryRepository` | 上記の集合。**空欄のスロットがあるとコンソールに警告が出ます** |
 
 ### 🔧 要エンジニア
 - `Infantry`/`Artillery`以外の**新しい敵種類**を追加する場合（見た目だけでなく、AIの挙動が根本的に異なる新カテゴリを作る場合）。
@@ -234,9 +234,9 @@ Wave開始時にBGMと同期して発生する演出です。
 graph TD
     A["① SkillTemplateAsset<br>（スキル本体のデータ）"] --> B["SkillRepository<br>（全スキルの一覧に登録）"]
     A --> C["② SkillNodeData<br>（スキルツリーのノード）"]
-    C --> D["SkillNodeDataRepo<br>（ノード一覧に登録）"]
+    C --> D["SkillNodeDataRepository<br>（ノード一覧に登録）"]
     C --> E["③ SkillNodeBindData<br>（ツリー画面のUI要素と対応付け）"]
-    E --> F["SkillNodeBindRepo<br>（バインド一覧に登録）"]
+    E --> F["SkillNodeBindRepository<br>（バインド一覧に登録）"]
 ```
 
 ### 手順
@@ -262,14 +262,14 @@ graph TD
    - フォルダ: `Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeData/`
    - メニュー: `SymphonyDev/SkillTree/SkillNodeData`
    - 設定項目: ノードID（重複不可）、前提ノードID（複数可）、解放に必要な研究ポイント、ノード詳細テキスト、プレビュー動画（任意）、**このノードで解放されるスキル**（①のアセットを割り当て）
-   - 作成後、`Assets/Level/Data/Master/OutGame/SkillTree/` の `SkillNodeDataRepo` へ登録する
+   - 作成後、`Assets/Level/Data/Master/OutGame/SkillTree/` の `SkillNodeDataRepository` へ登録する
 
 4. **ツリー画面のUI要素と対応付ける**
    - フォルダ: `Assets/Level/Data/Master/OutGame/SkillTree/SkillNodeBindData/`
    - メニュー: `SymphonyDev/SkillTree/SkillNodeBindData`
    - 対応するUI Toolkit画面上の要素名、接続線の要素名を設定します。**この画面レイアウトは事前にUI担当が用意している必要があります**（新しいノードの見た目の配置を追加する場合は、先にUI担当へ相談してください）
-   - 作成後、`SkillNodeBindRepo` へ登録する
-   - 新しい階層（フェーズ）を追加する場合のみ、同様に `SkillNodePhaseBindData` を作成し `SkillNodePhaseBindDataRepo` へ登録する
+   - 作成後、`SkillNodeBindRepository` へ登録する
+   - 新しい階層（フェーズ）を追加する場合のみ、同様に `SkillNodePhaseBindData` を作成し `SkillNodePhaseBindDataRepository` へ登録する
 
 ### 🔧 要エンジニア（スキルで特に多いパターン）
 

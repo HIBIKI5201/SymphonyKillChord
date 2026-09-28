@@ -67,6 +67,8 @@ if [[ "$binary_description" != *"$expected_binary_architecture"* ]]; then
   exit 1
 fi
 
+bash "$STAGING_DIRECTORY/prepare-spec-index.sh" "$STAGING_DIRECTORY" "$RELEASE_DIRECTORY" "$DEPLOY_ROOT"
+
 rm -rf -- "$RELEASE_DIRECTORY"
 mv "$STAGING_DIRECTORY" "$RELEASE_DIRECTORY"
 
@@ -150,7 +152,8 @@ for _ in {1..90}; do
   fi
 
   registration_logs="$(sudo journalctl --unit "$SERVICE_NAME" --since "$deployment_start" --no-pager)"
-  if grep --fixed-strings --quiet "/branchesを" <<< "$registration_logs"; then
+  if grep --fixed-strings --quiet "/branchesを" <<< "$registration_logs" \
+    && grep --fixed-strings --quiet "/specを" <<< "$registration_logs"; then
     is_ready=true
     break
   fi
@@ -159,7 +162,7 @@ for _ in {1..90}; do
 done
 
 if [[ "$is_ready" != true ]]; then
-  echo "[Deploy] /branches command registration was not confirmed." >&2
+  echo "[Deploy] /spec and /branches command registration was not confirmed." >&2
   handle_deploy_error 1
 fi
 

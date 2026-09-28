@@ -2,6 +2,9 @@ using System;
 
 namespace KillChord.Editor.TicketSystem
 {
+    /// <summary>
+    ///     シーンの編集チケット1件のデータ。
+    /// </summary>
     [Serializable]
     public class TicketData
     {

@@ -12897,7 +12897,8 @@ PrefabInstance:
       propertyPath: m_StaticShadowCaster
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5263472498179009463, guid: 431ce2849830598498c0967d06daaa29, type: 3}
     m_RemovedGameObjects:
     - {fileID: 4309545522276947315, guid: 431ce2849830598498c0967d06daaa29, type: 3}
     m_AddedGameObjects: []

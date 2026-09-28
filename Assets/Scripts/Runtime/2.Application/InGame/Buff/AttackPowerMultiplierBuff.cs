@@ -10,6 +10,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     /// </summary>
     public class AttackPowerMultiplierBuff : StatusEffectBase, IOutgoingDamageModifier
     {
+        /// <summary>
+        ///     攻撃力の倍率と再付与時の扱いを指定して生成する。
+        /// </summary>
         public AttackPowerMultiplierBuff(float multiplier, StatusEffectReapplyPolicy reapplyPolicy)
             : base(
                 EFFECT_ID,

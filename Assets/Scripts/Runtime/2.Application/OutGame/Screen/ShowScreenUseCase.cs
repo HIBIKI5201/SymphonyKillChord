@@ -29,6 +29,13 @@ namespace KillChord.Runtime.Application.OutGame.Screen
             ScreenId? previousScreenId = transitionState.CurrentScreenId;
             ScreenTransitionRule rule = _screenRuleRepository.GetRule(command.TargetScreenId);
 
+            // 表示中の画面をもう一度表示しようとした場合は何もしない。
+            // 履歴に同じ画面が積み重なり、閉じる操作を表示回数分繰り返す必要が生じるため。
+            if (rule.TransitionType != ScreenTransitionType.Reset && previousScreenId == command.TargetScreenId)
+            {
+                return;
+            }
+
             if (rule.TransitionType == ScreenTransitionType.Reset)
             {
                 transitionState.Reset(command.TargetScreenId);

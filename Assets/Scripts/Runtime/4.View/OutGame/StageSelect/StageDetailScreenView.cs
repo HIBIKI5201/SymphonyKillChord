@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         public StageDetailScreenView(VisualElement rootElement, OutGameUIEvent outGameUIEvent)
             : base(rootElement, outGameUIEvent)
         {
+            // 見出し・報酬・ミッション・出撃ボタンなどの各要素を取得する。見つからない場合は例外を投げる。
             VisualElement topHeader = rootElement.Q<VisualElement>(TOP_HEADER)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {TOP_HEADER} が見つかりませんでした。");
@@ -49,13 +51,21 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_SUCCESS} が見つかりませんでした。");
 
-            _rewardSkillUnlockLabel = firstClearReward.Q<Label>(REWARD_POINT)
+            _firstClearResearchPointLabel = firstClearReward.Q<Label>(REWARD_RESEARCH_POINT)
                 ?? throw new System.ArgumentNullException(
-                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_FIRST_CLEAR}/{REWARD_POINT} が見つかりませんでした。");
+                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_FIRST_CLEAR}/{REWARD_RESEARCH_POINT} が見つかりませんでした。");
 
-            _rewardSkillBuildLabel = successReward.Q<Label>(REWARD_POINT)
+            _firstClearSkillLevelupPointLabel = firstClearReward.Q<Label>(REWARD_SKILL_LEVELUP_POINT)
                 ?? throw new System.ArgumentNullException(
-                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_SUCCESS}/{REWARD_POINT} が見つかりませんでした。");
+                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_FIRST_CLEAR}/{REWARD_SKILL_LEVELUP_POINT} が見つかりませんでした。");
+
+            _successResearchPointLabel = successReward.Q<Label>(REWARD_RESEARCH_POINT)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_SUCCESS}/{REWARD_RESEARCH_POINT} が見つかりませんでした。");
+
+            _successSkillLevelupPointLabel = successReward.Q<Label>(REWARD_SKILL_LEVELUP_POINT)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(StageDetailScreenView)}] {REWARD}/{REWARD_SUCCESS}/{REWARD_SKILL_LEVELUP_POINT} が見つかりませんでした。");
 
             _missionSection = rootElement.Q<VisualElement>(MISSION)
                 ?? throw new System.ArgumentNullException(
@@ -113,10 +123,15 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SORTIE_BUTTON} が見つかりませんでした。");
 
+            _sortieButtonMainLabel = rootElement.Q<Label>(SORTIE_BUTTON_MAIN_LABEL)
+                ?? throw new System.ArgumentNullException(
+                    $"[{nameof(StageDetailScreenView)}] {SORTIE_BUTTON_MAIN_LABEL} が見つかりませんでした。");
+
             _skillBuildShortcutButton = rootElement.Q<Button>(SKILL_BUILD_SHORTCUT_BUTTON)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SKILL_BUILD_SHORTCUT_BUTTON} が見つかりませんでした。");
 
+            // 装備中のスキルを表示するスロットの各部品を取得する。
             VisualElement skillBuild = rootElement.Q<VisualElement>(SKILL_BUILD)
                 ?? throw new System.ArgumentNullException(
                     $"[{nameof(StageDetailScreenView)}] {SKILL_BUILD} が見つかりませんでした。");
@@ -136,7 +151,55 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                     _equippedSkillSlots[i].Q<VisualElement>(className: EQUIPPED_SKILL_COMMAND_ROW_USS_CLASS));
             }
 
+            // ボタンの操作を登録し、文言をローカライズに登録する。
             RegisterButtonCallback();
+            Label firstClearHeading = firstClearReward.Q<Label>("FirstClearRewardHeading");
+            Label successHeading = successReward.Q<Label>("SuccessRewardHeading");
+            VisualElement firstClearUnlockPointsIcon = firstClearReward.Q<VisualElement>(REWARD_RESEARCH_POINT_ICON);
+            VisualElement firstClearModPointsIcon = firstClearReward.Q<VisualElement>(REWARD_SKILL_LEVELUP_POINT_ICON);
+            VisualElement successUnlockPointsIcon = successReward.Q<VisualElement>(REWARD_RESEARCH_POINT_ICON);
+            VisualElement successModPointsIcon = successReward.Q<VisualElement>(REWARD_SKILL_LEVELUP_POINT_ICON);
+            _localizedTexts = new[]
+            {
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.stage_select.sortie", text => _sortieButtonMainLabel.text = text, "出撃"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.stage_select.first_reward", text => firstClearHeading.text = text, "初回報酬"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.stage_select.success_reward", text => successHeading.text = text, "成功報酬"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.points.unlock", text =>
+                    {
+                        firstClearUnlockPointsIcon.tooltip = text;
+                        successUnlockPointsIcon.tooltip = text;
+                    }, "解放P"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.points.mod", text =>
+                    {
+                        firstClearModPointsIcon.tooltip = text;
+                        successModPointsIcon.tooltip = text;
+                    }, "改造P"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill.formation", text => _skillBuildShortcutButton.text = text, "編成"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, "ui.skill.empty_slot_symbol",
+                    text => skillBuild.Query<Label>(className: "equipped-skill-placeholder")
+                        .ForEach(label => label.text = text), "＋"),
+            };
+        }
+
+        /// <summary>
+        ///     強制出撃中の装備変更と詳細パネルのキャンセルを禁止します。
+        /// </summary>
+        /// <param name="isForced"> 強制出撃中の場合はtrueです。 </param>
+        public void SetForcedSortieMode(bool isForced)
+        {
+            _isForcedSortieMode = isForced;
+            _skillBuildShortcutButton.SetEnabled(!isForced);
+            if (isForced)
+            {
+                SetInitialFocusElement(_sortieButton);
+            }
         }
 
         /// <summary>
@@ -158,11 +221,11 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                 _flavorTextLabel.text = dto.FlavorText;
             }
 
-            // 初回報酬ボックス: 解放P「現在値 → 加算後」、成功報酬ボックス: 改造P「現在値 → 加算後」。
-            _rewardSkillUnlockLabel.text = BuildRewardArrowText(
-                dto.CurrentSkillUnlockPoint, dto.FirstClearRewardSkillUnlockPoint);
-            _rewardSkillBuildLabel.text = BuildRewardArrowText(
-                dto.CurrentSkillBuildPoint, dto.SuccessRewardSkillBuildPoint);
+            // 報酬アイコンの隣には、ステージ定義の獲得量を初回報酬・成功報酬ごとに全リソース分表示する。
+            _firstClearResearchPointLabel.text = dto.FirstClearRewardSkillUnlockPoint.ToString();
+            _firstClearSkillLevelupPointLabel.text = dto.FirstClearRewardSkillBuildPoint.ToString();
+            _successResearchPointLabel.text = dto.SuccessRewardSkillUnlockPoint.ToString();
+            _successSkillLevelupPointLabel.text = dto.SuccessRewardSkillBuildPoint.ToString();
 
             // バトルパートのみミッション見出し・ミッションセクションを表示する
             _missionHeadingRoot.style.display = dto.IsBattle ? DisplayStyle.Flex : DisplayStyle.None;
@@ -196,17 +259,6 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
                     MISSION_CHECK_ACHIEVED_USS_CLASS,
                     subMissionCleared != null && subMissionCleared.Length > 2 && subMissionCleared[2]);
             }
-        }
-
-        /// <summary>
-        ///     「現在値 → 現在値+加算量」形式の報酬表示テキストを組み立てます。
-        /// </summary>
-        /// <param name="currentPoint"> 現在のポイント。 </param>
-        /// <param name="rewardPoint"> 加算されるポイント。 </param>
-        /// <returns> 「現在値 → 加算後の値」形式の文字列。 </returns>
-        private static string BuildRewardArrowText(int currentPoint, int rewardPoint)
-        {
-            return $"{currentPoint} {REWARD_ARROW} {currentPoint + rewardPoint}";
         }
 
         /// <summary>
@@ -251,11 +303,18 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
             _equippedSkillRow.style.justifyContent = Justify.Center;
         }
 
+        /// <summary>
+        ///     スライドのモーションを止め、コールバックとローカライズ文言の購読を解除する。
+        /// </summary>
         public override void Dispose()
         {
             _slideMotionHandle.TryCancel();
             base.Dispose();
             UnregisterButtonCallback();
+            foreach (LocalizedElementText localizedText in _localizedTexts)
+            {
+                localizedText.Dispose();
+            }
         }
 
         /// <summary>
@@ -340,6 +399,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// </summary>
         private void HandleCancelActivationHandler()
         {
+            if (_isForcedSortieMode) { return; }
+
             OutGameUIEvent.OnStageDetailClosed?.Invoke();
         }
 
@@ -358,6 +419,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         /// </summary>
         private void HandleSkillBuildShortcutButtonActivationHandler()
         {
+            if (_isForcedSortieMode) { return; }
+
             OutGameUIEvent.OnShownSkillBuildScreen?.Invoke();
         }
 
@@ -367,7 +430,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string REWARD = "Reward";
         private const string REWARD_FIRST_CLEAR = "FirstClear";
         private const string REWARD_SUCCESS = "Success";
-        private const string REWARD_POINT = "Point";
+        private const string REWARD_RESEARCH_POINT = "ResearchPoint";
+        private const string REWARD_SKILL_LEVELUP_POINT = "SkillLevelupPoint";
+        private const string REWARD_RESEARCH_POINT_ICON = "ResearchPointIcon";
+        private const string REWARD_SKILL_LEVELUP_POINT_ICON = "SkillLevelupPointIcon";
         private const string SUB_MISSION_LABEL1 = "SubMissionLabel1";
         private const string SUB_MISSION_LABEL2 = "SubMissionLabel2";
         private const string SUB_MISSION_LABEL3 = "SubMissionLabel3";
@@ -380,6 +446,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string MISSION_CHECK = "MissionCheck";
         private const string MISSION_CHECK_ACHIEVED_USS_CLASS = "mission-check-mission-achieved";
         private const string SORTIE_BUTTON = "SortieButton";
+        private const string SORTIE_BUTTON_MAIN_LABEL = "SortieButtonMainLabel";
+        private const string UI_COMMON_TABLE = "UICommon";
         private const string SKILL_BUILD_SHORTCUT_BUTTON = "SkillBuildShortcutButton";
         private const string SKILL_BUILD = "SkillBuild";
         private const string SKILL_SLOT = "SkillSlot";
@@ -389,8 +457,6 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private const string EQUIPPED_SKILL_ICON_USS_CLASS = "equipped-skill-icon";
         private const string EQUIPPED_SKILL_COMMAND_ROW_USS_CLASS = "equipped-skill-command-row";
         private const string EQUIPPED_SKILL_COMMAND_HEX_USS_CLASS = "equipped-skill-command-hex";
-        /// <summary> 報酬表示の矢印記号。 </summary>
-        private const string REWARD_ARROW = "→";
         /// <summary> パネルのスライドインにかかる時間(秒)。 </summary>
         private const float SLIDE_DURATION = 0.25f;
         /// <summary> パネルのスライド開始位置(画面右外側へのオフセット、px)。パネル幅(500px)ぶん逃がす。 </summary>
@@ -400,8 +466,10 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
         private readonly Label _stageNameLabel;
         private readonly Label _flavorTextLabel;
-        private readonly Label _rewardSkillBuildLabel;
-        private readonly Label _rewardSkillUnlockLabel;
+        private readonly Label _firstClearResearchPointLabel;
+        private readonly Label _firstClearSkillLevelupPointLabel;
+        private readonly Label _successResearchPointLabel;
+        private readonly Label _successSkillLevelupPointLabel;
         private readonly Label _subMissionLabel1;
         private readonly Label _subMissionLabel2;
         private readonly Label _subMissionLabel3;
@@ -426,6 +494,8 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         protected override VisualElement CancelTargetElement => RootElement;
 
         private readonly Button _sortieButton;
+        private readonly Label _sortieButtonMainLabel;
+        private readonly LocalizedElementText[] _localizedTexts;
         private readonly Button _skillBuildShortcutButton;
         private readonly VisualElement _equippedSkillRow;
         private readonly List<VisualElement> _equippedSkillSlots;
@@ -436,6 +506,7 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
         private IDisposable _sortieButtonActivation;
         private IDisposable _skillBuildShortcutButtonActivation;
         private IDisposable _cancelActivation;
+        private bool _isForcedSortieMode;
         /// <summary> ウィンドウ表示中、フォーカスをウィンドウ内へ閉じ込めます。 </summary>
         private readonly ModalNavigationScope _navigationScope = new();
     }

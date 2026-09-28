@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Text;
 namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
 {
     /// <summary>
-    ///     仕様書チャンクを保持し、コサイン類似度検索と永続化を提供する。
+    ///     仕様書チャンクとページ属性を保持し、索引の永続化を提供する。
     /// </summary>
     public sealed class SpecIndex
     {
@@ -24,47 +25,6 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
 
         /// <summary> 保持している仕様書チャンク。 </summary>
         public IReadOnlyList<SpecChunkRecord> Records => _records;
-
-        /// <summary>
-        ///     クエリベクトルとのコサイン類似度が高いチャンクを返す。
-        /// </summary>
-        /// <param name="queryVector">検索クエリの埋め込みベクトル。</param>
-        /// <param name="k">取得する最大件数。</param>
-        /// <param name="priorityTable">ソースファイルごとの任意の検索優先度テーブル。</param>
-        /// <returns>重み付けした類似度の降順に並んだ仕様書チャンク。</returns>
-        public SpecChunkRecord[] TopK(float[] queryVector, int k, SpecPriorityTable? priorityTable = null)
-        {
-            ArgumentNullException.ThrowIfNull(queryVector);
-            if (k <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(k));
-            }
-
-            if (_records.Length == 0)
-            {
-                return Array.Empty<SpecChunkRecord>();
-            }
-
-            if (queryVector.Length != _records[0].Vector.Length)
-            {
-                throw new ArgumentException("クエリとインデックスのベクトル次元が一致しません。", nameof(queryVector));
-            }
-
-            return _records
-                .Select(record =>
-                {
-                    double similarity = CalculateCosineSimilarity(queryVector, record.Vector);
-                    double score = priorityTable == null
-                        ? similarity
-                        : similarity * priorityTable.GetWeight(record.SourceFile);
-                    return new { Record = record, Score = score };
-                })
-                .OrderByDescending(result => result.Score)
-                .ThenBy(result => result.Record.SourceFile, StringComparer.Ordinal)
-                .Take(k)
-                .Select(result => result.Record)
-                .ToArray();
-        }
 
         /// <summary>
         ///     インデックスをバイナリファイルへ保存する。
@@ -91,6 +51,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
                 writer.Write(record.HeadingBreadcrumb);
                 writer.Write(record.NotionUrl);
                 writer.Write(record.Text);
+                writer.Write(JsonConvert.SerializeObject(record.Metadata));
                 writer.Write(record.Vector.Length);
                 foreach (float value in record.Vector)
                 {
@@ -116,7 +77,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
 
             if (reader.ReadInt32() != FILE_VERSION)
             {
-                throw new InvalidDataException("未対応の仕様検索インデックス形式です。");
+                throw new InvalidDataException("仕様検索インデックスの形式が古いか未対応です。indexコマンドで再生成してください。");
             }
 
             int recordCount = ReadNonNegativeCount(reader, "チャンク件数");
@@ -127,6 +88,8 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
                 string breadcrumb = reader.ReadString();
                 string notionUrl = reader.ReadString();
                 string text = reader.ReadString();
+                SpecPageMetadata metadata = JsonConvert.DeserializeObject<SpecPageMetadata>(reader.ReadString())
+                    ?? throw new InvalidDataException("ページ属性が不正です。");
                 int vectorLength = ReadNonNegativeCount(reader, "ベクトル次元");
                 float[] vector = new float[vectorLength];
                 for (int vectorIndex = 0; vectorIndex < vectorLength; vectorIndex++)
@@ -134,7 +97,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
                     vector[vectorIndex] = reader.ReadSingle();
                 }
 
-                records[recordIndex] = new SpecChunkRecord(sourceFile, breadcrumb, notionUrl, text, vector);
+                records[recordIndex] = new SpecChunkRecord(sourceFile, breadcrumb, notionUrl, text, vector, metadata);
             }
 
             if (stream.Position != stream.Length)
@@ -146,7 +109,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         }
 
         private const uint FILE_MAGIC = 0x58444E53U;
-        private const int FILE_VERSION = 1;
+        private const int FILE_VERSION = 2;
         private const double MINIMUM_NORM = 1.0e-12D;
 
         private readonly SpecChunkRecord[] _records;
@@ -163,7 +126,8 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
             }
 
             int vectorLength = records[0].Vector.Length;
-            if (vectorLength == 0 || records.Any(record => record.Vector.Length != vectorLength))
+            if (vectorLength == 0 || records.Any(record => record.Vector.Length != vectorLength
+                || record.Vector.Any(value => !float.IsFinite(value))))
             {
                 throw new ArgumentException("埋め込みベクトルは空でない同一次元である必要があります。", nameof(records));
             }
@@ -175,16 +139,16 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         /// <param name="left">左辺のベクトル。</param>
         /// <param name="right">右辺のベクトル。</param>
         /// <returns>コサイン類似度。</returns>
-        private static double CalculateCosineSimilarity(float[] left, float[] right)
+        internal static double CalculateCosineSimilarity(float[] left, float[] right)
         {
             double dotProduct = 0.0D;
             double leftSquaredNorm = 0.0D;
             double rightSquaredNorm = 0.0D;
             for (int index = 0; index < left.Length; index++)
             {
-                dotProduct += left[index] * right[index];
-                leftSquaredNorm += left[index] * left[index];
-                rightSquaredNorm += right[index] * right[index];
+                dotProduct += (double)left[index] * right[index];
+                leftSquaredNorm += (double)left[index] * left[index];
+                rightSquaredNorm += (double)right[index] * right[index];
             }
 
             double denominator = Math.Sqrt(leftSquaredNorm) * Math.Sqrt(rightSquaredNorm);

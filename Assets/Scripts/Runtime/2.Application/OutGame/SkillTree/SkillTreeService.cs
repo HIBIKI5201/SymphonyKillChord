@@ -82,6 +82,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             }
 
             nodeIds = Array.Empty<SkillNodeId>();
+            // 候補の ID のうち、存在するノードだけを集める。
             HashSet<SkillNodeEntity> candidateNodes = new HashSet<SkillNodeEntity>();
             foreach (SkillNodeId candidateNodeId in candidateNodeIds)
             {
@@ -98,6 +99,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 return true;
             }
 
+            // 各候補の起点からの距離を求める。
             Dictionary<SkillNodeEntity, int> distanceByNode =
                 new Dictionary<SkillNodeEntity, int>(candidateNodes.Count);
             foreach (SkillNodeEntity node in candidateNodes)
@@ -110,6 +112,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 }
             }
 
+            // 未解放のノードのうち、起点から最も近いものを集める。
             List<SkillNodeId> targetNodeIds = new List<SkillNodeId>();
             int targetDistance = int.MaxValue;
             foreach (SkillNodeEntity node in candidateNodes)
@@ -132,6 +135,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 }
             }
 
+            // すべて解放済みの場合は、起点から最も遠いものを集める。
             if (targetNodeIds.Count == 0)
             {
                 targetDistance = int.MinValue;
@@ -151,6 +155,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 }
             }
 
+            // ID 順に並べて返す。
             targetNodeIds.Sort((left, right) => left.Id.CompareTo(right.Id));
             nodeIds = targetNodeIds;
             return true;
@@ -241,6 +246,33 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             }
 
             return refundPoints;
+        }
+
+        /// <summary>
+        ///     解放済みノードのうち、スキル編成枠を増やすノードの件数を算出する。
+        /// </summary>
+        /// <param name="unlockedNodes"> 現在解放されているノード。 </param>
+        /// <returns> 編成枠のボーナス件数。 </returns>
+        public int CalculateSkillSlotBonus(IReadOnlyCollection<SkillNodeId> unlockedNodes)
+        {
+            if (unlockedNodes == null)
+            {
+                throw new ArgumentNullException(nameof(unlockedNodes));
+            }
+
+            int bonus = 0;
+            HashSet<SkillNodeId> processedNodeIds = new HashSet<SkillNodeId>();
+            foreach (SkillNodeId nodeId in unlockedNodes)
+            {
+                if (processedNodeIds.Add(nodeId)
+                    && _skillNodeEntityDict.TryGetValue(nodeId, out SkillNodeEntity node)
+                    && node.HasSkillSlotBonus)
+                {
+                    bonus++;
+                }
+            }
+
+            return bonus;
         }
 
         /// <summary>

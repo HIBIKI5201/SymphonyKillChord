@@ -38,6 +38,9 @@ namespace KillChord.Runtime.Application.Persistent.Load
         /// </summary>
         public bool IsSessionActive => _sessionFactory.IsLoading;
 
+        /// <summary>
+        ///     既定の設定でロード処理を実行する。
+        /// </summary>
         public Task<bool> ExecuteAsync(Func<IProgress<float>, Task<bool>> operation, CancellationToken cancellationToken = default)
         {
             return ExecuteAsync(
@@ -46,6 +49,9 @@ namespace KillChord.Runtime.Application.Persistent.Load
                 cancellationToken);
         }
 
+        /// <summary>
+        ///     設定を指定してロード処理を実行する。
+        /// </summary>
         public async Task<bool> ExecuteAsync(Func<IProgress<float>, Task<bool>> operation, LoadingExecutionOptions options, CancellationToken cancellationToken = default)
         {
             if (operation == null)

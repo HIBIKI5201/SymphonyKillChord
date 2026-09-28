@@ -38,6 +38,9 @@ namespace KillChord.Runtime.View.Persistent.Load
             }
         }
 
+        /// <summary>
+        ///     購読を解除し、再生中のモーションを止める。
+        /// </summary>
         private void OnDestroy()
         {
             Unsubscribe();
@@ -140,14 +143,18 @@ namespace KillChord.Runtime.View.Persistent.Load
         /// </summary>
         private void ApplyRandomTip()
         {
-            if (_tipsText == null)
+            // Tips設定が存在する場合はランダムにTipsを取得し、存在しない場合はデフォルト値（空文字列）を設定する。
+            LoadingTip tip = _tipsConfig != null ? _tipsConfig.GetRandomTip() : default;
+
+            if (_tipsTitleText != null)
             {
-                return;
+                _tipsTitleText.SetText(tip.Title);
             }
 
-            // Tips設定が存在する場合はランダムにTipsを取得し、存在しない場合は空文字列を設定する。
-            string tip = _tipsConfig != null ? _tipsConfig.GetRandomTip() : string.Empty;
-            _tipsText.SetText(tip);
+            if (_tipsText != null)
+            {
+                _tipsText.SetText(tip.Body);
+            }
         }
 
         /// <summary>
@@ -371,17 +378,20 @@ namespace KillChord.Runtime.View.Persistent.Load
         [SerializeField, Tooltip("伸縮するロードゲージのImage（FillAmountに使う）")]
         private Image _progressImage;
 
-        [SerializeField]
+        [SerializeField, Tooltip("ロードの進捗を表示するテキスト。")]
         private TMP_Text _progressText;
 
-        [SerializeField]
+        [SerializeField, Tooltip("画面のフェードに使う Image。")]
         private Image _fadeImage;
 
         [Header("Tips表示設定")]
         [SerializeField, Tooltip("ロード画面に表示するTipsの設定")]
         private LoadingTipsConfig _tipsConfig;
 
-        [SerializeField, Tooltip("ロード画面に表示するTipsのText")]
+        [SerializeField, Tooltip("ロード画面に表示するTipsのタイトルText")]
+        private TMP_Text _tipsTitleText;
+
+        [SerializeField, Tooltip("ロード画面に表示するTipsの本文Text")]
         private TMP_Text _tipsText;
 
         [Header("勲章回転設定")]

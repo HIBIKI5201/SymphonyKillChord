@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -12,6 +13,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     /// </summary>
     public class BarrierGainBuff : StatusEffectBase, IDamageDealtHandler
     {
+        /// <summary>
+        ///     所有者・バリア獲得率・持続時間・再付与時の扱いを指定して生成する。
+        /// </summary>
         public BarrierGainBuff(CharacterEntity owner,
             float barrierGainRate,
             float durationSeconds,
@@ -33,7 +37,10 @@ namespace KillChord.Runtime.Application.InGame.Buff
             _barrierGainRate = barrierGainRate;
         }
 
-        ///</inheritdoc/>
+        /// <summary>
+        ///     所有者が与えたダメージに応じてバリアを獲得する。
+        ///     攻撃者が所有者でない場合は何もしない。
+        /// </summary>
         public void OnDamageDealt(in DamageDealtContext context)
         {
             if (!ReferenceEquals(context.Attacker, _owner))
@@ -58,7 +65,7 @@ namespace KillChord.Runtime.Application.InGame.Buff
             _owner.AddBarrier(barrierAmount);
 
 
-            Debug.Log($"[Skill04] バリア獲得: {barrierAmount}");
+            DevLog.Log($"[Skill04] バリア獲得: {barrierAmount}");
         }
 
         private static readonly StatusEffectId EFFECT_ID =

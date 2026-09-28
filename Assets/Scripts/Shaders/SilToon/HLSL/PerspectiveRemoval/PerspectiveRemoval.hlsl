@@ -23,7 +23,7 @@ void CorePerspectiveRemoval(
     float4 posVS = mul(UNITY_MATRIX_MV, float4(positionOS, 1.0));
     float4 centerVS = mul(UNITY_MATRIX_MV, float4(objectCenterOS, 1.0));
     
-    float scale = posVS.z / min(centerVS.z, -0.001);
+    float scale = posVS.z * rcp(min(centerVS.z, -0.001));
     posVS.xy *= scale;
     
     float4 posWS = mul(UNITY_MATRIX_I_V, posVS);
@@ -43,7 +43,7 @@ float3 GetPerspectiveRemoval(
     CorePerspectiveRemoval(positionOS, headOS, positionOS_out);
         
     half dist = half(distance(headOS, positionOS));
-    half influence = saturate(1.0h - dist / half(max(radius, 0.0001f)));
+    half influence = saturate(1.0h - dist * rcp(half(max(radius, 0.0001f))));
     
     float t = GetCameraDot(headWS) * ratio * influence;
     

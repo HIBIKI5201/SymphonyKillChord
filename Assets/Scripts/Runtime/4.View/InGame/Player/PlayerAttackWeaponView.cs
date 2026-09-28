@@ -17,20 +17,21 @@ namespace KillChord.Runtime.View.InGame.Player
         /// <param name="beatType"> 拍子。 </param>
         public void Play(int beatType)
         {
-            HideAllWeaponsImmediate();
-
             if (!TryGetDefinition(beatType, out PlayerAttackWeaponConfig definition))
             {
+                HideAllWeaponsImmediate();
                 Debug.LogError($"BeatType {beatType} に対応する武器設定が見つかりませんでした。", this);
                 return;
             }
 
             if (definition.WeaponItem == null)
             {
+                HideAllWeaponsImmediate();
                 Debug.LogError($"BeatType {beatType} の武器Viewが未設定です。", this);
                 return;
             }
 
+            HideWeaponsImmediateExcept(definition.WeaponItem);
             _currentWeaponView = definition.WeaponItem;
             _currentWeaponView.Play();
         }
@@ -74,20 +75,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         public void HideAllWeaponsImmediate()
         {
-            if (_definitions == null)
-            {
-                _currentWeaponView = null;
-                return;
-            }
-            for (int i = 0; i < _definitions.Length; i++)
-            {
-                if (_definitions[i].WeaponItem == null)
-                {
-                    continue;
-                }
-                _definitions[i].WeaponItem?.HideWeaponImmediate();
-            }
-            _currentWeaponView = null;
+            HideWeaponsImmediateExcept(null);
         }
 
         [SerializeField, Tooltip("BeatTypeごとの武器表示と攻撃SE設定。")]
@@ -109,6 +97,28 @@ namespace KillChord.Runtime.View.InGame.Player
         private void OnDisable()
         {
             HideAllWeaponsImmediate();
+        }
+
+        /// <summary>
+        ///     選択した武器の表示状態を保ち、ほかの武器を即座に非表示にします。
+        /// </summary>
+        /// <param name="visibleWeapon"> 表示を保持する武器。nullなら全武器を非表示にします。 </param>
+        private void HideWeaponsImmediateExcept(WeaponItemView visibleWeapon)
+        {
+            if (_definitions == null)
+            {
+                _currentWeaponView = null;
+                return;
+            }
+            for (int i = 0; i < _definitions.Length; i++)
+            {
+                if (_definitions[i].WeaponItem == null || _definitions[i].WeaponItem == visibleWeapon)
+                {
+                    continue;
+                }
+                _definitions[i].WeaponItem.HideWeaponImmediate();
+            }
+            _currentWeaponView = null;
         }
 
         /// <summary>

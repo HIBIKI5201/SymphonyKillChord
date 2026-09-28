@@ -54,6 +54,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// 現在の敵位置からの攻撃レイがターゲットに届くかを返します。
         /// </summary>
         public bool CanRaycastHitTarget => CheckCurrentAttackRaycastHitTarget();
+        /// <summary> 攻撃インジケーターのデカールが実際に表示中か。 </summary>
+        public bool IsWarningVisible => _warningDisplayState != WarningDisplayState.Hidden
+            && _attackWarningDecal != null && _attackWarningDecal.isActiveAndEnabled;
 
         /// <summary>
         /// 指定位置からの自由なレイがターゲットに届くかを返します。
@@ -116,7 +119,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private int _resultArraySize = 8;
         [SerializeField, Tooltip("Layers that block or receive the enemy attack ray.")]
         private LayerMask _hitLayers;
-        [SerializeField]
+        [SerializeField, Tooltip("攻撃の射線を予告するデカール。")]
         private DecalProjector _attackWarningDecal;
         private Material _decalMaterial;
 
@@ -221,6 +224,10 @@ namespace KillChord.Runtime.View.InGame.Enemy
 
             ApplyWarningDecalJustOffset();
         }
+
+        /// <summary>
+        ///     実行時に複製したデカールのマテリアルを破棄する。
+        /// </summary>
         private void OnDestroy()
         {
             if (_decalMaterial != null)
@@ -384,7 +391,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
         /// </summary>
         private bool IsEnemyOrigin(Vector3 sourcePosition)
         {
-            return (sourcePosition - transform.position).sqrMagnitude <= 0.0001f;
+            return EnemyAimOriginUtility.IsEnemyOrigin(sourcePosition, transform.position);
         }
 
         /// <summary>

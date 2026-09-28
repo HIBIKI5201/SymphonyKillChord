@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
     /// </summary>
     public class ShellEntity
     {
+        /// <summary>
+        ///     攻撃仕様・音楽同期仕様・攻撃定義を指定して砲弾を生成する。
+        /// </summary>
         public ShellEntity(ShellAttackSpec attackSpec, MusicSyncSpec musicSpec, AttackDefinition attackDefinition)
         {
             _attackSpec = attackSpec;

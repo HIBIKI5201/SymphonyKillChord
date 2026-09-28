@@ -2,6 +2,7 @@ using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.Utility.Diagnostics;
 using SymphonyFrameWork.System.SaveSystem;
 using System;
 using System.Collections.Generic;
@@ -184,7 +185,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
 
                 await SaveStore.SaveAsync<SaveData>();
 
-                Debug.Log(
+                DevLog.Log(
                     $"<color=#FFFF00>[{nameof(StageProgressSaveDataService)}] "
                     + "ステージクリア報酬の付与に成功しました。"
                     + $" StageId: {stageId.Value},"

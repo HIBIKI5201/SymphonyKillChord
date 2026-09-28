@@ -78,6 +78,9 @@ namespace KillChord.Runtime.View.InGame.Mission
         private EventSystem _pointerEventSystem;
         private bool _isActive;
 
+        /// <summary>
+        ///     有効な間、画面タップを攻撃入力として処理する。
+        /// </summary>
         private void Update()
         {
             if (!_isActive || _playerInputView == null)
@@ -112,6 +115,9 @@ namespace KillChord.Runtime.View.InGame.Mission
             }
         }
 
+        /// <summary>
+        ///     追跡中のタッチを解放する。
+        /// </summary>
         private void OnDisable()
         {
             ReleaseTrackedTouches();

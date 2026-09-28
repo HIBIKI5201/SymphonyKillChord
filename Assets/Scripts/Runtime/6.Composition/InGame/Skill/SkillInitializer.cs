@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
@@ -17,6 +18,7 @@ using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
@@ -51,19 +53,25 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         [Tooltip("テスト用の装備スキルID一覧です。未設定時はPlayer側設定を流用します。")]
         private DataID[] _equippedSkills;
         [SerializeField, SourceDataAddress]
-        [Tooltip("改造画面を経由していない場合に、セーブデータから装備スキルを解決するためのリポジトリの Addressables キーです。")]
+        [Tooltip("戦闘開始ごとにセーブデータから装備スキルを読み直すリポジトリの Addressables キーです。")]
         private string _skillBuildRepositoryKey;
         [SerializeField, SourceDataAddress]
         [Tooltip("テスト用装備スキルIDの解決に使うスキルリポジトリの Addressables キーです。")]
         private string _skillRepositoryKey;
+        [SerializeField, SourceDataAddress]
+        [Tooltip("ミッションごとの装備の上書き（チュートリアルのキルコードなど）を読むミッション定義リポジトリの Addressables キーです。未設定時は上書きしません。")]
+        private string _missionDefinitionRepositoryKey;
 
         /// <summary>
-        ///     改造画面を経由せずシーンへ入った場合に備え、セーブデータ由来の装備スキルを非同期で解決します。
+        ///     戦闘開始ごとに現在のセーブデータから装備とレベルを読み直し、共有する装備定義を更新します。
         /// </summary>
         /// <param name="cancellationToken"> キャンセルトークンです。 </param>
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
+            _saveDataEquippedSkills = null;
+            _skillLevels = null;
+
             if (!string.IsNullOrWhiteSpace(_skillRepositoryKey))
             {
                 _loadedSkillRepository = await _skillRepositoryKey.LoadAssetAsync<SkillRepository>(this, cancellationToken);
@@ -74,25 +82,59 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 return true;
             }
 
-            bool hasBuildDefinition = ServiceLocator.TryGetInstance(out SkillBuildDefinition _);
-
             try
             {
                 SkillBuildRepository skillBuildRepository =
                     await _skillBuildRepositoryKey.LoadAssetAsync<SkillBuildRepository>(this, cancellationToken);
+                // リセット前のScriptableObjectキャッシュを使わず、SaveStoreの現在の装備から再構築する。
+                IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.LoadSkillBuild();
                 _skillLevels = await skillBuildRepository.GetSkillLevelsAsync();
+                cancellationToken.ThrowIfCancellationRequested();
 
-                if (!hasBuildDefinition)
+                EquippedSkill[] savedEquipment = new EquippedSkill[equippedSkills.Count];
+                for (int i = 0; i < equippedSkills.Count; i++)
                 {
-                    // 改造画面経由で既にSkillBuildDefinitionが登録済みの場合は、
-                    // 装備スキル一覧の再ロードは行わない(レベル辞書のみ取得する)。
-                    IReadOnlyList<EquippedSkill> equippedSkills = await skillBuildRepository.GetEquippedSkills();
-                    _saveDataEquippedSkills = ToSkillTemplates(equippedSkills);
+                    savedEquipment[i] = equippedSkills[i];
                 }
+
+                // ミッションが装備を指定している場合（チュートリアルなど）は、保存データを変えずにその装備で戦う。
+                EquippedSkill[] currentEquipment = savedEquipment;
+                IReadOnlyList<int> overrideSkillIds = await LoadMissionOverrideSkillIdsAsync(cancellationToken);
+                if (overrideSkillIds.Count > 0)
+                {
+                    IReadOnlyList<EquippedSkill> overrideSkills = skillBuildRepository.CreateEquippedSkills(overrideSkillIds);
+                    currentEquipment = new EquippedSkill[overrideSkills.Count];
+                    for (int i = 0; i < overrideSkills.Count; i++)
+                    {
+                        currentEquipment[i] = overrideSkills[i];
+                    }
+
+                    // 共有する装備定義は戦闘後にアウトゲームでも使うため、終了時に保存されている装備へ戻す。
+                    _equipmentToRestore = savedEquipment;
+                }
+
+                // 全ResourceLoadの後にBGM等のBuildが走るため、同じ最新構成を先に公開する。
+                // 装備定義はOutGameと同様にシーン間で保持し、次の戦闘開始時にも再同期する。
+                if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition))
+                {
+                    buildDefinition.UpdateEquippedSkills(currentEquipment);
+                }
+                else if (!ServiceLocator.RegisterInstance(new SkillBuildDefinition(currentEquipment)))
+                {
+                    Debug.LogError($"[{nameof(SkillInitializer)}] 装備スキル定義を登録できませんでした。", this);
+                    return false;
+                }
+
+                _saveDataEquippedSkills = ToSkillTemplates(currentEquipment);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception exception)
             {
                 Debug.LogError($"[{nameof(SkillInitializer)}] セーブデータ由来の装備スキル解決に失敗しました: {exception}", this);
+                return false;
             }
 
             return true;
@@ -181,7 +223,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 targetRangeQuery,
                 targetRadiusQuery,
                 _skillHitScheduler);
-            SkillUsecase skillUsecase = new SkillUsecase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
+            SkillUseCase skillUsecase = new SkillUseCase(targetResolver, effectExecutorResolver, playerModuleContainer.PlayerEntity);
 
             SkillView[] skillVisuals = ResolveSkillVisuals(playerModuleContainer.PlayerInitializer);
             InitializeSkillVisuals(
@@ -191,7 +233,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 targetSystemContainer.TargetSystemViewModel,
                 playbackSpeed);
 
-            _skillController = new SkillController(musicSyncContainer.MusicSyncService);
+            _skillController = new SkillController(musicSyncContainer.MusicSyncService, () => Time.unscaledTime);
             _skillController.Initialize(BuildSkillExecutionControllers(
                 equippedSkills,
                 skillVisuals,
@@ -246,6 +288,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// </summary>
         public override void Shutdown()
         {
+            // スキルの武器・アニメーション・ボイスの要求の購読を解除する。
             if (_skillController != null && _attackWeaponView != null)
             {
                 _skillController.OnSkillWeaponRequested -= HandleSkillWeaponRequestedHandler;
@@ -259,17 +302,29 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 _skillController.OnSkillVoiceRequested -= _boundPlayerView.PlaySkillVoice;
             }
 
+            // スキルの制御を破棄し、読み込んだアセットを解放する。
             _skillHitScheduler?.Clear();
             _skillHitScheduler = null;
             _skillHitController = null;
             _boundPlayerView = null;
+            _skillController?.Dispose();
             _skillController = null;
             _saveDataEquippedSkills = null;
+
+            // ミッション中だけ差し替えた装備を、保存されている装備へ戻す。
+            if (_equipmentToRestore != null
+                && ServiceLocator.TryGetInstance(out SkillBuildDefinition skillBuildDefinition))
+            {
+                skillBuildDefinition.UpdateEquippedSkills(_equipmentToRestore);
+            }
+
+            _equipmentToRestore = null;
             _skillBuildRepositoryKey.ReleaseLoadedAsset(this);
             _skillRepositoryKey.ReleaseLoadedAsset(this);
             _loadedSkillRepository = null;
             _skillLevels = null;
 
+            // 登録したコンテナを解除する。
             if (!_isRegistered)
             {
                 return;
@@ -370,7 +425,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             MusicSyncState musicSyncState,
             SkillResultPresenter skillResultPresenter,
             SkillCheckService checkService,
-            SkillUsecase skillUsecase)
+            SkillUseCase skillUsecase)
         {
             if (equippedSkills == null || equippedSkills.Count == 0)
             {
@@ -453,6 +508,12 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// </summary>
         private SkillTemplate[] ResolveEquippedSkills(PlayerInitializer playerInitializer)
         {
+            // 空配列も正常な保存済み構成として扱い、以前の装備やテスト用設定へ戻さない。
+            if (_saveDataEquippedSkills != null)
+            {
+                return _saveDataEquippedSkills;
+            }
+
             if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition) &&
                 buildDefinition.EquippedSkills != null &&
                 buildDefinition.EquippedSkills.Count > 0)
@@ -473,11 +534,6 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 {
                     return buildSkills.ToArray();
                 }
-            }
-
-            if (_saveDataEquippedSkills != null && _saveDataEquippedSkills.Length > 0)
-            {
-                return _saveDataEquippedSkills;
             }
 
             SkillId[] fallbackIds = ConvertToSkillIds(_equippedSkills);
@@ -527,6 +583,35 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
 
             return ids.ToArray();
+        }
+
+        /// <summary>
+        ///     選択中のミッションが指定する装備スキルID一覧を読み込みます。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 装備スキルID一覧です。指定が無い場合は空です。 </returns>
+        private async Awaitable<IReadOnlyList<int>> LoadMissionOverrideSkillIdsAsync(CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(_missionDefinitionRepositoryKey)
+                || !ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState)
+                || !selectedMissionState.HasSelectedMission)
+            {
+                return Array.Empty<int>();
+            }
+
+            MissionDefinitionRepository missionDefinitionRepository =
+                await _missionDefinitionRepositoryKey.LoadAssetAsync<MissionDefinitionRepository>(this, cancellationToken);
+            try
+            {
+                return missionDefinitionRepository != null
+                    && missionDefinitionRepository.TryGetAsset(selectedMissionState.CurrentMissionId, out MissionDefinitionAsset missionAsset)
+                        ? missionAsset.GetOverrideEquippedSkillIds()
+                        : Array.Empty<int>();
+            }
+            finally
+            {
+                _missionDefinitionRepositoryKey.ReleaseLoadedAsset(this);
+            }
         }
 
         /// <summary>
@@ -601,6 +686,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private PlayerView _boundPlayerView;
         private bool _isRegistered;
         private SkillTemplate[] _saveDataEquippedSkills;
+        private EquippedSkill[] _equipmentToRestore;
         private SkillRepository _loadedSkillRepository;
         private IReadOnlyDictionary<int, int> _skillLevels;
     }

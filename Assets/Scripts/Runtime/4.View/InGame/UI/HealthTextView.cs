@@ -33,6 +33,9 @@ namespace KillChord.Runtime.View.InGame.UI
         private MotionHandle _handle;
         private int _health;
 
+        /// <summary>
+        ///     UI の参照が設定されているかを確認する。
+        /// </summary>
         private void Awake()
         {
             if (_currentHealthText == null || _maxHealthText == null)
@@ -40,6 +43,10 @@ namespace KillChord.Runtime.View.InGame.UI
                 Debug.LogError($"[{nameof(HealthTextView)}] UIの参照が失われています。", this);
             }
         }
+
+        /// <summary>
+        ///     再生中のモーションを止める。
+        /// </summary>
         private void OnDestroy()
         {
             _handle.TryCancel();

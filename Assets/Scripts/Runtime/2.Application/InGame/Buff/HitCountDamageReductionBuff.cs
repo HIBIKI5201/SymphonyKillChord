@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Buff
@@ -11,6 +12,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     public class HitCountDamageReductionBuff :
         StatusEffectBase, IIncomingDamageModifier, IDamageTakenHandler, IConsumableStatusEffect
     {
+        /// <summary>
+        ///     被ダメージの軽減率・有効な被弾回数・再付与時の扱いを指定して生成する。
+        /// </summary>
         public HitCountDamageReductionBuff(
             float reductionRate,
             int hitCount,
@@ -51,7 +55,7 @@ namespace KillChord.Runtime.Application.InGame.Buff
 
             Damage damage = attackResult.FinalDamage * (1f - _reductionRate);
 
-            Debug.Log($"[Skill10] ダメージ軽減: {_reductionRate * 100f}%、残りヒットカウント: {_remainingHitCount - 1}");
+            DevLog.Log($"[Skill10] ダメージ軽減: {_reductionRate * 100f}%、残りヒットカウント: {_remainingHitCount - 1}");
 
             return attackResult.WithFinalDamage(damage);
         }

@@ -2,7 +2,10 @@ using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem.UI;
 
 namespace KillChord.Runtime.View.OutGame.Scenario
 {
@@ -21,10 +24,14 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             PlayerInputView playerInputView,
             ScenarioViewModel viewModel)
         {
+            // 以前の状態を解除して、参照を差し替える。
+            ClearSkipConfirmation();
+            Unsubscribe();
             _inputController = inputController;
             _playerInputView = playerInputView;
             _viewModel = viewModel;
 
+            // 必要な参照が無い場合はコンポーネントを無効にする。
             if (_scenarioUIRaycastView == null || _scenarioUIHideView == null)
             {
                 Debug.LogError($"[{nameof(ScenarioInputView)}] ScenarioUIRaycastView / ScenarioUIHideView が未設定です。", this);
@@ -39,17 +46,37 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 return;
             }
 
+            if (_skipConfirmationView == null)
+            {
+                Debug.LogError($"[{nameof(ScenarioInputView)}] スキップ確認Viewが未設定です。", this);
+                enabled = false;
+                return;
+            }
+            // スキップ確認と、スキップ・テキスト送りのアクションを用意する。
+            _skipConfirmationView.Initialize(
+                _playerInputView.GetComponent<PlayerInput>(),
+                _playerInputView.GetComponent<InputSystemUIInputModule>());
+            InputActionAsset actions = _playerInputView.GetComponent<PlayerInput>().actions;
+            _skipAction = actions.FindAction("Scenario/Skip", true);
+            _advanceAction = actions.FindAction("Scenario/Advance", true);
+
+            // 有効な場合は入力の購読を始める。
             if (isActiveAndEnabled)
             {
                 Subscribe();
             }
         }
 
+        /// <summary>
+        ///     フレームの最後に、要求された UI の表示・非表示を反映する。
+        /// </summary>
         private void LateUpdate()
         {
             if (_requestShowUI)
             {
                 _requestShowUI = false;
+                _requestHideUI = false;
+                _blockedInputFrame = Time.frameCount;
                 _scenarioUIHideView?.ShowUI();
                 _viewModel?.RefreshText();
             }
@@ -66,27 +93,53 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         /// </summary>
         public void RestoreUIForPlayback()
         {
+            ClearSkipConfirmation();
             _requestHideUI = false;
             _requestShowUI = false;
             _scenarioUIHideView?.RestoreForPlayback();
             _viewModel?.RefreshText();
         }
 
+        /// <summary>
+        ///     確認表示と一時停止状態を片付け、終了操作の次送りへの流入を防ぐ。
+        /// </summary>
+        public void ClearSkipConfirmation()
+        {
+            _blockedInputFrame = Time.frameCount;
+            _ignoreSkipUntilRelease = IsSkipControlPressed();
+            _skipConfirmationView?.Hide();
+            _inputController?.CancelSkipConfirmation();
+        }
+
+        /// <summary>
+        ///     入力イベントを購読する。
+        /// </summary>
         private void OnEnable()
         {
             Subscribe();
         }
 
+        /// <summary>
+        ///     スキップ確認を解除し、入力イベントの購読を解除する。
+        /// </summary>
         private void OnDisable()
         {
+            ClearSkipConfirmation();
             Unsubscribe();
         }
 
+        /// <summary>
+        ///     スキップ確認を解除し、入力イベントの購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
+            ClearSkipConfirmation();
             Unsubscribe();
         }
 
+        /// <summary>
+        ///     シナリオ操作の入力イベントを購読する。購読済みの場合は何もしない。
+        /// </summary>
         private void Subscribe()
         {
             if (_playerInputView == null || _isSubscribed)
@@ -100,10 +153,19 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _playerInputView.OnScenarioSkipInput += HandleSkipInput;
             _playerInputView.OnScenarioAutoInput += HandleAutoAdvanceInput;
             _playerInputView.OnScenarioHideUIInput += HandleHideUIInput;
+            if (_skipConfirmationView != null)
+            {
+                _skipConfirmationView.OnConfirmed += HandleSkipConfirmedHandler;
+                _skipConfirmationView.OnCancelled += HandleSkipCancelledHandler;
+            }
+            if (_viewModel != null) { _viewModel.OnScenarioCompleted += HandleScenarioCompletedHandler; }
 
             _isSubscribed = true;
         }
 
+        /// <summary>
+        ///     シナリオ操作の入力イベントの購読を解除する。
+        /// </summary>
         private void Unsubscribe()
         {
             if (_playerInputView == null || !_isSubscribed)
@@ -117,33 +179,60 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _playerInputView.OnScenarioSkipInput -= HandleSkipInput;
             _playerInputView.OnScenarioAutoInput -= HandleAutoAdvanceInput;
             _playerInputView.OnScenarioHideUIInput -= HandleHideUIInput;
+            if (_skipConfirmationView != null)
+            {
+                _skipConfirmationView.OnConfirmed -= HandleSkipConfirmedHandler;
+                _skipConfirmationView.OnCancelled -= HandleSkipCancelledHandler;
+            }
+            if (_viewModel != null) { _viewModel.OnScenarioCompleted -= HandleScenarioCompletedHandler; }
 
             _isSubscribed = false;
         }
 
+        /// <summary>
+        ///     テキスト送りの入力を処理する。
+        /// </summary>
         private void HandleAdvanceInput(InputContext<float> context)
         {
+            if (IsScenarioInputBlocked()) { return; }
             if (context.Phase != InputActionPhase.Performed)
             {
                 return;
             }
 
-            if (_scenarioUIRaycastView != null && _scenarioUIRaycastView.IsPointerOverScenarioUI())
+            bool isPointerInput = _advanceAction?.activeControl?.device is Pointer;
+            if (!isPointerInput)
             {
-                return;
+                // シナリオ送りを優先し、同じ決定キーによる残留選択ボタンのSubmitを防ぐ。
+                EventSystem.current?.SetSelectedGameObject(null);
             }
 
-            if (_scenarioUIHideView != null && _scenarioUIHideView.IsHidden)
+            if (_requestShowUI || (_scenarioUIHideView != null && _scenarioUIHideView.IsHidden))
             {
                 _requestShowUI = true;
+                _requestHideUI = false;
+                _blockedInputFrame = Time.frameCount;
                 return;
             }
 
+            // ポインター上の操作UIはマウス・タッチ入力だけを抑止する。
+            // マウスをAutoボタン上に残したままでもキーボード・パッドでは送れる。
+            if (isPointerInput
+                && _scenarioUIRaycastView != null && _scenarioUIRaycastView.IsPointerOverScenarioUI())
+            {
+                return;
+            }
+
+            _blockedInputFrame = Time.frameCount;
             _inputController?.MouseClick();
         }
 
+        /// <summary>
+        ///     早送りの入力を処理する。押している間だけ早送りにする。
+        /// </summary>
         private void HandleFastForwardInput(InputContext<float> context)
         {
+            if (context.Phase != InputActionPhase.Canceled && IsScenarioInputBlocked()) { return; }
             if (context.Phase == InputActionPhase.Started ||
                 context.Phase == InputActionPhase.Performed)
             {
@@ -157,8 +246,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             }
         }
 
+        /// <summary>
+        ///     一時停止の入力を処理する。
+        /// </summary>
         private void HandlePauseInput(InputContext<float> context)
         {
+            if (IsScenarioInputBlocked()) { return; }
             if (context.Phase != InputActionPhase.Performed)
             {
                 return;
@@ -167,18 +260,37 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController?.TogglePause();
         }
 
+        /// <summary>
+        ///     スキップの入力を処理する。
+        /// </summary>
         private void HandleSkipInput(InputContext<float> context)
         {
+            if (context.Phase == InputActionPhase.Canceled)
+            {
+                _ignoreSkipUntilRelease = IsSkipControlPressed();
+                return;
+            }
+            if (_ignoreSkipUntilRelease) { return; }
+            if (IsScenarioInputBlocked()) { return; }
             if (context.Phase != InputActionPhase.Performed)
             {
                 return;
             }
 
-            _inputController?.Skip();
+            if (_inputController != null && _inputController.BeginSkipConfirmation())
+            {
+                _requestHideUI = false;
+                _requestShowUI = false;
+                _skipConfirmationView.Show();
+            }
         }
 
+        /// <summary>
+        ///     オート送りの入力を処理する。
+        /// </summary>
         private void HandleAutoAdvanceInput(InputContext<float> context)
         {
+            if (IsScenarioInputBlocked()) { return; }
             if (context.Phase != InputActionPhase.Performed)
             {
                 return;
@@ -186,8 +298,12 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _inputController?.ToggleAutoAdvance();
         }
 
+        /// <summary>
+        ///     UI 非表示の入力を処理する。
+        /// </summary>
         private void HandleHideUIInput(InputContext<float> context)
         {
+            if (IsScenarioInputBlocked()) { return; }
             if (context.Phase != InputActionPhase.Performed)
             {
                 return;
@@ -196,10 +312,67 @@ namespace KillChord.Runtime.View.OutGame.Scenario
             _requestHideUI = true;
         }
 
-        [SerializeField]
+        /// <summary>
+        ///     確定操作をスキップ処理へ引き渡し、確認画面を閉じる。
+        /// </summary>
+        private void HandleSkipConfirmedHandler()
+        {
+            _blockedInputFrame = Time.frameCount;
+            _skipConfirmationView.Hide();
+            _inputController?.ConfirmSkip();
+        }
+
+        /// <summary>
+        ///     キャンセル操作で確認を解除する。
+        /// </summary>
+        private void HandleSkipCancelledHandler()
+        {
+            ClearSkipConfirmation();
+        }
+
+        /// <summary>
+        ///     再生終了時に確認状態を解除する。
+        /// </summary>
+        private void HandleScenarioCompletedHandler(bool skipped)
+        {
+            ClearSkipConfirmation();
+            _requestHideUI = false;
+            _requestShowUI = false;
+            _scenarioUIHideView?.RestoreForPlayback();
+        }
+
+        /// <summary>
+        ///     確認中と確認を閉じたフレームのシナリオ入力を抑止する。
+        /// </summary>
+        private bool IsScenarioInputBlocked()
+        {
+            return (_inputController != null && _inputController.IsSkipConfirmationOpen)
+                || _blockedInputFrame == Time.frameCount;
+        }
+
+        /// <summary>
+        ///     Action通知の順序に依存せず、スキップに割り当てられたボタンの押下を確認する。
+        /// </summary>
+        private bool IsSkipControlPressed()
+        {
+            if (_skipAction == null) { return false; }
+            foreach (InputControl control in _skipAction.controls)
+            {
+                if (control is ButtonControl button && button.device.added && button.isPressed)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        [SerializeField, Tooltip("シナリオの非表示やフェードから独立したスキップ確認画面。")]
+        private ScenarioSkipConfirmationView _skipConfirmationView;
+
+        [SerializeField, Tooltip("ポインターがシナリオ UI の上にあるかを判定するビュー。")]
         private ScenarioUIRaycastView _scenarioUIRaycastView;
 
-        [SerializeField]
+        [SerializeField, Tooltip("シナリオ UI の表示・非表示を切り替えるビュー。")]
         private ScenarioUIHideView _scenarioUIHideView;
 
         private ScenarioInputController _inputController;
@@ -208,5 +381,9 @@ namespace KillChord.Runtime.View.OutGame.Scenario
         private bool _isSubscribed;
         private bool _requestHideUI;
         private bool _requestShowUI;
+        private int _blockedInputFrame = -1;
+        private InputAction _skipAction;
+        private InputAction _advanceAction;
+        private bool _ignoreSkipUntilRelease;
     }
 }

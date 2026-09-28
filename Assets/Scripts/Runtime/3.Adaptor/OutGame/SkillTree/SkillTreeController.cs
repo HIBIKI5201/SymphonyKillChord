@@ -21,6 +21,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
     /// </summary>
     public class SkillTreeController
     {
+        /// <summary>
+        ///     スキルツリー画面の表示・サービス・プレゼンターを指定して生成する。
+        /// </summary>
         public SkillTreeController(ISkillDetailShowable skillDetailView,
             SkillDetailPresenter presenter,
             Label currentPointsLabel,
@@ -39,14 +42,19 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             ISkillRepository skillRepository,
             SkillDisplayTextFormatter skillDisplayTextFormatter,
             IReadOnlyDictionary<SkillType, Sprite> skillGenreIcons,
-            IReadOnlyDictionary<int, Color> skillBeatColors)
+            IReadOnlyDictionary<int, Color> skillBeatColors,
+            Action<int> showCurrentPoints,
+            Func<string> getListSeparator)
         {
+            // 受け取った表示・サービス・データを保持する。
             _skillRepository = skillRepository;
             _skillDisplayTextFormatter = skillDisplayTextFormatter;
             _skillGenreIcons = skillGenreIcons;
             _skillBeatColors = skillBeatColors;
             _skillDetailPresenter = presenter;
             _currentPointsLabel = currentPointsLabel;
+            _showCurrentPoints = showCurrentPoints;
+            _getListSeparator = getListSeparator;
             _skillDetailView = skillDetailView;
             _skillTreeService = skillTreeService;
             _playerStatusPresenter = playerStatusPresenter;
@@ -62,11 +70,19 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _ownedSkillChanged = ownedSkillChanged;
             _nodesOnPath = new();
 
-            _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
+            // 現在のポイントを表示する。
+            _showCurrentPoints(_skillTreeStatusEntity.CurrentPoints);
         }
 
-        /// <summary> 現在選択中のノードIDを取得する。未選択の場合は-1。 </summary>
+        /// <summary> 現在選択中のノードIDを取得する。未選択の場合は<see cref="NO_SELECTION"/>。 </summary>
         public int SelectedNodeId => _selectedNodeId;
+
+        /// <summary>
+        ///     ノード未選択を表すセンチネル値。
+        ///     ノードIDは<see cref="KillChord.Runtime.Utility.Identity.DataID"/>のハッシュ値であり負値も取り得るため、
+        ///     未選択判定は必ずこの値との一致で行うこと。範囲比較(&lt; 0)にすると負IDのノードを未選択と誤判定する。
+        /// </summary>
+        private const int NO_SELECTION = -1;
 
         /// <summary> 連続解放演出において、ノード1つあたりの演出開始をずらす間隔(ミリ秒)。Composition層のカメラ演出時間算出にも使用する。 </summary>
         public const long UNLOCK_STAGGER_INTERVAL_MILLISECONDS = 90L;
@@ -77,18 +93,37 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// <param name="nodeId"></param>
         public void OnSkillNodeSelected(int nodeId)
         {
-            if (_selectedNodeId != -1)
+            if (_selectedNodeId != NO_SELECTION)
             {
                 _skillNodeViews[_selectedNodeId].SetUnSelected();
             }
             _selectedNodeId = nodeId;
             SkillNodeId selectedNodeId = new SkillNodeId(nodeId);
-            SkillNodeEntity entity = _skillNodeEntities[selectedNodeId];
             ISkillNodeViewModel view = _skillNodeViews[nodeId];
-            int currentPoints = _skillTreeStatusEntity.CurrentPoints;
             _nodesOnPath.Clear();
             _costToUnlock = _skillTreeService.TryGetTotalCost(selectedNodeId, _nodesOnPath);
 
+            RefreshSelectedText();
+            _skillDetailView.Show();
+            view.SetSelected();
+            _playerStatusPresenter.PushPreview(_nodesOnPath);
+        }
+
+        /// <summary>
+        ///     選択状態や表示画面を変えず、選択中ノードの翻訳に依存する表示を更新する。
+        /// </summary>
+        public void RefreshSelectedText()
+        {
+            // ノードが選ばれていなければ何もしない。
+            if (_selectedNodeId == NO_SELECTION)
+            {
+                return;
+            }
+
+            // 選択中のノードについて、解放できるかと表示内容を求める。
+            int nodeId = _selectedNodeId;
+            SkillNodeEntity entity = _skillNodeEntities[new SkillNodeId(nodeId)];
+            int currentPoints = _skillTreeStatusEntity.CurrentPoints;
             bool canUnlock = _costToUnlock >= 0 && currentPoints >= _costToUnlock && !entity.IsUnlocked;
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(nodeId);
             SkillDetailDTO dto = new SkillDetailDTO(
@@ -98,16 +133,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 ResolveSkillCommand(entity.UnlockSkillIds),
                 ResolveSkillGenre(entity.UnlockSkillIds),
                 ResolveSkillGenreIcon(entity.UnlockSkillIds),
+                ResolveSkillIcon(entity.UnlockSkillIds),
                 entity.SkillDetail,
                 _costToUnlock,
                 canUnlock,
                 entity.IsUnlocked,
                 hasVideo,
                 ResolveComboStepColors(entity.UnlockSkillIds));
+            // スキル詳細の表示を更新する。
             _skillDetailPresenter.Push(dto);
-            _skillDetailView.Show();
-            view.SetSelected();
-            _playerStatusPresenter.PushPreview(_nodesOnPath);
         }
 
         /// <summary>
@@ -194,15 +228,41 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     スキル解放データの保存に失敗したときに発火するイベント。
+        ///     画面上は解放済みのままのため、保存されていないことをプレイヤーへ伝えるために使う。
+        /// </summary>
+        public event Action OnUnlockSaveFailed;
+
+        /// <summary>
+        ///     スキル解放データを保存し、失敗した場合はログを出して <see cref="OnUnlockSaveFailed"/> で通知する。
+        /// </summary>
+        private async Task SaveUnlockDataAsync()
+        {
+            try
+            {
+                await _skillTreeService.SaveSkillUnlockData(
+                    _skillTreeStatusEntity.UnlockedNodes,
+                    _skillTreeStatusEntity.UnlockedSkillIds,
+                    _skillTreeStatusEntity.CurrentPoints);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"[SkillTreeController] スキル解放データ保存失敗: {exception}");
+                OnUnlockSaveFailed?.Invoke();
+            }
+        }
+
+        /// <summary>
         ///     スキルを解放した時の処理。
         /// </summary>
         public void OnSkillUnlocked()
         {
-            if (_selectedNodeId == -1 || _costToUnlock < 0) return;
+            if (_selectedNodeId == NO_SELECTION || _costToUnlock < 0) return;
             if (_skillTreeStatusEntity.CurrentPoints < _costToUnlock) return;
             if (_nodesOnPath == null || _nodesOnPath.Count == 0)
             {
                 Debug.LogError($"[SkillTreeController] 解放対象ノードの取得に失敗しました。");
+                return;
             }
 
             List<SkillNodeEntity> unlockOrder = BuildUnlockOrder(_nodesOnPath);
@@ -217,14 +277,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 _skillTreeStatusEntity.AddUnlockedSkillIds(entity.UnlockSkillIds);
             }
             _skillTreeStatusEntity.ModifyPoint(-_costToUnlock);
+            _skillTreeStatusEntity.SetSkillSlotBonus(
+                _skillTreeService.CalculateSkillSlotBonus(_skillTreeStatusEntity.UnlockedNodes));
 
             PlayUnlockSequence(unlockOrder);
 
-            _skillTreeService
-                .SaveSkillUnlockData(_skillTreeStatusEntity.UnlockedNodes, _skillTreeStatusEntity.UnlockedSkillIds, _skillTreeStatusEntity.CurrentPoints)
-                .ContinueWith(
-                    t => Debug.LogError($"[SkillTreeController] スキル解放データ保存失敗: {t.Exception}"),
-                    TaskContinuationOptions.OnlyOnFaulted);
+            _ = SaveUnlockDataAsync();
 
             SkillNodeEntity selectedNode = _skillNodeEntities[new SkillNodeId(_selectedNodeId)];
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(_selectedNodeId);
@@ -235,6 +293,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 ResolveSkillCommand(selectedNode.UnlockSkillIds),
                 ResolveSkillGenre(selectedNode.UnlockSkillIds),
                 ResolveSkillGenreIcon(selectedNode.UnlockSkillIds),
+                ResolveSkillIcon(selectedNode.UnlockSkillIds),
                 selectedNode.SkillDetail,
                 -1,
                 false,
@@ -242,7 +301,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 hasVideo,
                 ResolveComboStepColors(selectedNode.UnlockSkillIds));
             _skillDetailPresenter.Push(dto);
-            _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + _skillTreeStatusEntity.CurrentPoints.ToString();
+            _showCurrentPoints(_skillTreeStatusEntity.CurrentPoints);
             _playerStatusPresenter.Push();
             _ownedSkillChanged?.Invoke();
         }
@@ -298,10 +357,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// </summary>
         public void OnSkillDetailClosed()
         {
-            if (_selectedNodeId == -1) return;
+            if (_selectedNodeId == NO_SELECTION) return;
             _skillNodeViews[_selectedNodeId].SetUnSelected();
             _nodesOnPath.Clear();
-            _selectedNodeId = -1;
+            _selectedNodeId = NO_SELECTION;
             _playerStatusPresenter.Push();
         }
 
@@ -310,7 +369,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// </summary>
         public void OnPreviewButtonClicked()
         {
-            if (_selectedNodeId == -1) return;
+            if (_selectedNodeId == NO_SELECTION) return;
             _previewVideoScreenViewShowable.Show();
             _previewVideoScreenView.PlayPreviewVideo(_selectedNodeId);
         }
@@ -354,17 +413,17 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private SkillTreeService _skillTreeService;
         private PlayerStatusPresenter _playerStatusPresenter;
         private Label _currentPointsLabel;
+        private readonly Action<int> _showCurrentPoints;
+        private readonly Func<string> _getListSeparator;
         private SkillTreeStatusEntity _skillTreeStatusEntity;
         private IPreviewVideoScreenViewModel _previewVideoScreenView;
         private IPreviewVideoScreenViewShowable _previewVideoScreenViewShowable;
         private Action _ownedSkillChanged;
         private int _costToUnlock = -1;
-        private int _selectedNodeId = -1;
+        private int _selectedNodeId = NO_SELECTION;
         private bool _isResetting;
         private readonly List<(IVisualElementScheduledItem Item, int NodeId)> _pendingUnlockAnimations = new();
 
-        private const string CURRENT_POINTS_LABEL_TEXT = "解放P：";
-        private const string SKILL_NAME_SEPARATOR = "、";
         private const string COMMAND_SEPARATOR = " → ";
         private static readonly Color DEFAULT_COMBO_STEP_COLOR = Color.gray;
 
@@ -400,7 +459,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
                 if (builder.Length > 0)
                 {
-                    builder.Append(SKILL_NAME_SEPARATOR);
+                    builder.Append(_getListSeparator());
                 }
                 builder.Append(skillData.DisplayName);
             }
@@ -462,7 +521,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
                 if (builder.Length > 0)
                 {
-                    builder.Append(SKILL_NAME_SEPARATOR);
+                    builder.Append(_getListSeparator());
                 }
                 builder.Append(BuildCommandLabel(skillData.Pattern));
             }
@@ -517,7 +576,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
                 if (builder.Length > 0)
                 {
-                    builder.Append(SKILL_NAME_SEPARATOR);
+                    builder.Append(_getListSeparator());
                 }
                 builder.Append(_skillDisplayTextFormatter.Format(skillData).SkillTypeLabel);
             }
@@ -550,6 +609,29 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 }
 
                 return _skillGenreIcons.TryGetValue(skillData.Type[0], out Sprite icon) ? icon : null;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        ///     ノードが解放する最初のスキル固有のアイコンを解決する。
+        /// </summary>
+        /// <param name="skillIds"> 解放対象のスキルID一覧。 </param>
+        /// <returns> スキル固有のアイコン。解決できない場合はnull。 </returns>
+        private Sprite ResolveSkillIcon(SkillId[] skillIds)
+        {
+            if (_skillRepository == null || skillIds == null)
+            {
+                return null;
+            }
+
+            foreach (SkillId skillId in skillIds)
+            {
+                if (_skillRepository.TryGetSkill(skillId, out SkillTemplate skillData))
+                {
+                    return skillData.Icon;
+                }
             }
 
             return null;
@@ -733,6 +815,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         /// <param name="result"> 保存済みのリセット結果。 </param>
         private void ApplyResetResult(SkillTreeResetResult result)
         {
+            // すべてのノードを未解放にし、接続線と解放段階の表示も初期状態に戻す。
             foreach (SkillNodeEntity node in _skillNodeEntities.Values)
             {
                 node.Lock();
@@ -752,6 +835,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 }
             }
 
+            // リセット後も解放済みのノードだけを解放し直す。
             ReadOnlySpan<SkillNodeId> unlockedNodeIds = result.UnlockedNodeIds.Span;
             for (int i = 0; i < unlockedNodeIds.Length; i++)
             {
@@ -767,14 +851,17 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 UpdateUnlockPhase(nodeId.Id);
             }
 
+            // ポイントと解放状態を反映し、選択を解除して表示を更新する。
             _skillTreeStatusEntity.Reset(
                 result.CurrentPoints,
                 result.UnlockedNodeIds,
                 result.UnlockedSkillIds);
+            _skillTreeStatusEntity.SetSkillSlotBonus(
+                _skillTreeService.CalculateSkillSlotBonus(_skillTreeStatusEntity.UnlockedNodes));
             _nodesOnPath.Clear();
-            _selectedNodeId = -1;
+            _selectedNodeId = NO_SELECTION;
             _costToUnlock = -1;
-            _currentPointsLabel.text = CURRENT_POINTS_LABEL_TEXT + result.CurrentPoints.ToString();
+            _showCurrentPoints(result.CurrentPoints);
             _playerStatusPresenter.Push();
             _ownedSkillChanged?.Invoke();
         }

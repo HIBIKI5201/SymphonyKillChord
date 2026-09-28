@@ -19,7 +19,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             ScreenViewBase stageSelectScreenView,
             ScreenViewBase skillTreeScreenView,
             ScreenViewBase skillBuildScreenView,
-            ScreenViewBase battlePreparationScreenView,
             ScreenViewBase settingScreenView)
         {
             _views = new Dictionary<ScreenId, ScreenViewBase>
@@ -28,7 +27,6 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 { ScreenId.StageSelect, stageSelectScreenView },
                 { ScreenId.SkillTree, skillTreeScreenView },
                 { ScreenId.SkillBuild, skillBuildScreenView },
-                { ScreenId.BattlePreparation, battlePreparationScreenView },
                 { ScreenId.Setting, settingScreenView },
             };
         }

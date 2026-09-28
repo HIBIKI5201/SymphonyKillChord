@@ -32,6 +32,10 @@ namespace KillChord.Runtime.View.InGame.Skill
             _stepSettings = stepSettings ?? throw new ArgumentNullException(nameof(stepSettings));
             _animationSetting = animationSetting ?? throw new ArgumentNullException(nameof(animationSetting));
             _rhythmGuideView = rhythmGuideView;
+            if (_rhythmGuideView != null)
+            {
+                _rhythmGuideView.OnLayoutChanged += HandleLayoutChangedHandler;
+            }
             _baseLocalScale = _leftIconImage.rectTransform.localScale;
             _baseLocalEulerAngleZ = _leftIconImage.rectTransform.localEulerAngles.z;
 
@@ -87,6 +91,9 @@ namespace KillChord.Runtime.View.InGame.Skill
             _patternMatchCount = dto.PatternMatchCount;
         }
 
+        /// <summary>
+        ///     リズムガイドの位置が取れるまで、表示位置の設定を毎フレーム再試行する。
+        /// </summary>
         private void Update()
         {
             // ACLikeRhythmGuideViewのゾーンデータは実プレイ開始後まで構築されないため、
@@ -95,9 +102,12 @@ namespace KillChord.Runtime.View.InGame.Skill
             {
                 return;
             }
-            RefreshIconPosition(_patternMatchCount);
+            RefreshIconPosition(_displayedStepIndex);
         }
 
+        /// <summary>
+        ///     クールダウン中であれば、クールダウン表示を更新する。
+        /// </summary>
         private void FixedUpdate()
         {
             if (!_isSkillCoolingDown)
@@ -125,10 +135,25 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
         }
 
+        /// <summary>
+        ///     リズムガイドのレイアウト変更イベントの購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
+            if (_rhythmGuideView != null)
+            {
+                _rhythmGuideView.OnLayoutChanged -= HandleLayoutChangedHandler;
+            }
             _appearMotion.TryCancel();
             _resetShakeMotion.TryCancel();
+        }
+
+        /// <summary>
+        ///     画面幅やゲージ全長の変更後も、現在の入力対象アイコンを追従させる。
+        /// </summary>
+        private void HandleLayoutChangedHandler()
+        {
+            RefreshIconPosition(_displayedStepIndex);
         }
 
         /// <summary>
@@ -138,6 +163,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         /// <param name="index"> 表示するSignaturesのインデックス。 </param>
         private void ApplyStep(int index)
         {
+            _displayedStepIndex = index;
             RefreshIconPosition(index);
         }
 
@@ -154,13 +180,19 @@ namespace KillChord.Runtime.View.InGame.Skill
             }
 
             SkillBeatVisualSetting setting = _stepSettings[index];
-            if (!_rhythmGuideView.TryGetJustTimingXPosition(setting.BeatType, out float xPosition))
+            if (!_rhythmGuideView.TryGetJustTimingXPosition(setting.BeatType, out float xPosition)
+                || !_rhythmGuideView.TryGetBeatRange(
+                    setting.BeatType,
+                    out float rangeCenter,
+                    out float inputRangeWidth))
             {
                 return;
             }
 
             SetAnchoredX(_leftIconImage.rectTransform, -xPosition);
             SetAnchoredX(_rightIconImage.rectTransform, xPosition);
+            UpdateInputRange(_leftInputRangeImage, -rangeCenter, inputRangeWidth, setting.BeatType);
+            UpdateInputRange(_rightInputRangeImage, rangeCenter, inputRangeWidth, setting.BeatType);
 
             if (!_isPositioned)
             {
@@ -177,6 +209,8 @@ namespace KillChord.Runtime.View.InGame.Skill
             bool visible = _isPositioned && _isDisplayAllowed;
             _leftIconImage.enabled = visible;
             _rightIconImage.enabled = visible;
+            _leftInputRangeImage.enabled = visible;
+            _rightInputRangeImage.enabled = visible;
 
             if (_cooldownBackgroundImage == null)
             {
@@ -210,13 +244,33 @@ namespace KillChord.Runtime.View.InGame.Skill
         }
 
         /// <summary>
+        ///     スキル入力受付範囲を示す横帯の位置・幅・拍色を更新する。
+        /// </summary>
+        /// <param name="inputRangeImage"> 更新対象の横帯。 </param>
+        /// <param name="xPosition"> 横帯の中心X座標。 </param>
+        /// <param name="width"> 入力受付範囲の表示幅。 </param>
+        /// <param name="beatType"> 横帯へ適用する拍種。 </param>
+        private void UpdateInputRange(Image inputRangeImage, float xPosition, float width, int beatType)
+        {
+            SetAnchoredX(inputRangeImage.rectTransform, xPosition);
+            inputRangeImage.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+
+            if (_rhythmGuideView.TryGetBeatColor(beatType, out Color beatColor))
+            {
+                inputRangeImage.color = beatColor;
+            }
+        }
+
+        /// <summary>
         ///     アイコン出現時の拡大と左右回転アニメーションを再生する。
         /// </summary>
         private void PlayAppearAnimation()
         {
+            // 再生中のモーションを止め、アイコンの形を元に戻してから再生する。
             _appearMotion.TryCancel();
             ResetIconTransforms();
 
+            // 左右のアイコンを拡大と回転で弾ませる。
             Vector3 scaleStrength = _baseLocalScale * (_animationSetting.InputSuccessScaleMultiplier - 1f);
             _appearMotion = LSequence.Create()
                 .Join(LMotion.Punch.Create(_baseLocalScale, scaleStrength, _animationSetting.InputSuccessDuration)
@@ -320,6 +374,10 @@ namespace KillChord.Runtime.View.InGame.Skill
         private Image _leftIconImage;
         [SerializeField, Tooltip("右側に表示する拍子アイコンのImage。")]
         private Image _rightIconImage;
+        [SerializeField, Tooltip("左側に表示するスキル入力受付範囲の横帯。")]
+        private Image _leftInputRangeImage;
+        [SerializeField, Tooltip("右側に表示するスキル入力受付範囲の横帯。")]
+        private Image _rightInputRangeImage;
         [SerializeField, Tooltip("クールダウンを表現するための背景。未設定の場合はクールダウン表示なし。")]
         private Image[] _cooldownBackgroundImage;
 
@@ -334,6 +392,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         private bool _isPositioned;
         private bool _isDisplayAllowed = true;
         private int _patternMatchCount;
+        private int _displayedStepIndex;
         private float _skillTriggeredTimestamp;
         private float _skillReadyTimestamp;
     }

@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Adaptor.Persistent.Load;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
@@ -95,6 +96,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
+            // 依存するコンテナと、その中身が初期化済みかを確認する。
             StageResultModuleContainer stageResultContainer =
                 ServiceLocator.GetInstance<StageResultModuleContainer>();
 
@@ -141,8 +143,11 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
+            // 演出用の各ビューを初期化する。
             _stageSequenceVoiceView.Initialize(
                 playerContainer.PlayerView);
+
+            _stageSequenceView.InitializeClearCamera(playerContainer.PlayerView.transform);
 
             _stageSequenceMusicView.Initialize(
                 _musicPlayer);
@@ -153,8 +158,10 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartConstraintView.AddConstraintSource(
                 playerContainer.PlayerView.transform);
 
+            // ステージの開始から終了までの演出を進めるディレクターを作る。
             _container.SequenceDirector = new InGameSequenceDirector(
                 _stageSequenceView,
+                _stageSequenceVoiceView,
                 _stageSequenceMessageView,
                 _stageStartFadeView,
                 _stageResultView,
@@ -164,6 +171,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _inGamePlayDirector,
                 _ambienceSoundView);
 
+            // ミッションの進行と選択中のステージを取得する。
             _missionRuntimeService = missionContainer.MissionRuntimeService;
             if (_missionRuntimeService == null)
             {
@@ -183,11 +191,13 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
+            // セーブと、次のノードへの遷移の予約を用意する。
             _stageProgressSaveDataService =
                 new StageProgressSaveDataService();
 
             ServiceLocator.TryGetInstance(out _pendingNodeTransitionState);
 
+            // ポーズ入力とミッションの終了を購読し、ロード完了後にゲームを開始する。
             _playerInputView.OnOptionInput += HandlePauseInput;
             _missionRuntimeService.OnMissionFinished += HandleMissionFinished;
             _inGamePlayDirector.StopGameplay();
@@ -229,7 +239,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _isEnding = false;
         }
 
-        [SerializeField] private InGameHudVisibilityView _visibilityView;
+        [SerializeField, Tooltip("インゲーム HUD の表示・非表示を切り替えるビュー。")] private InGameHudVisibilityView _visibilityView;
 
         /// <summary>
         ///     ロード画面の終了後にステージ開始シーケンスを開始します。
@@ -253,15 +263,25 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <param name="isSuccess"> ロード処理に成功した場合はtrue。 </param>
         private async void HandleLoadingCompleted(bool isSuccess)
         {
-            UnsubscribeLoadingCompleted();
-
-            if (isSuccess)
+            try
             {
-                StartStageSequence();
-                return;
-            }
+                UnsubscribeLoadingCompleted();
 
-            await ReturnToOutGameAfterLoadingFailureAsync();
+                if (isSuccess)
+                {
+                    StartStageSequence();
+                    return;
+                }
+
+                await ReturnToOutGameAfterLoadingFailureAsync();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -282,6 +302,14 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             // 不完全なステージ画面を表示しないように、
             // OutGameへの遷移が完了するまで黒画面を維持する。
             _stageStartFadeView.ShowBlackImmediate();
+
+            // 専用出撃の失敗はPersistentが所有し、Sequenceから別の帰還を開始しません。
+            if (ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+                && transition.HasScenarioBattleSortie)
+            {
+                transition.StopScenarioBattleInitialization();
+                return;
+            }
 
             Debug.LogError(
                 $"[{nameof(SequenceInitializationModule)}] "

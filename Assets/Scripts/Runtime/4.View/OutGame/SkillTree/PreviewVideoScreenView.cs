@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.OutGame.SkillTree;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
     /// </summary>
     public class PreviewVideoScreenView : ScreenViewBase, IDisposable, IPreviewVideoScreenViewModel, IPreviewVideoScreenViewShowable
     {
+        /// <summary>
+        ///     プレビュー動画の表示に使う要素・プレイヤー・動画を指定して生成する。
+        /// </summary>
         public PreviewVideoScreenView(VisualElement root, OutGameUIEvent outGameUIEvent, VideoPlayer player, Dictionary<int, VideoClip> videoClips) : base(root, outGameUIEvent)
         {
             _root = root;
@@ -23,6 +27,10 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _videoClips = videoClips;
 
             RegisterEvents();
+            _closeButtonLocalizedText = new LocalizedElementText(
+                UI_COMMON_TABLE,
+                "ui.skill_tree.close_preview",
+                text => ((Button)_closeButton).text = text);
         }
 
         /// <summary>
@@ -48,10 +56,14 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _player.Stop();
         }
 
+        /// <summary>
+        ///     閉じるボタンの登録とローカライズ文言の購読を解除する。
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();
             _closeButtonActivation?.Dispose();
+            _closeButtonLocalizedText?.Dispose();
         }
 
         private Dictionary<int, VideoClip> _videoClips;
@@ -63,9 +75,14 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private VisualElement _closeButton;
         private OutGameUIEvent _outGameUIEvent;
         private IDisposable _closeButtonActivation;
+        private LocalizedElementText _closeButtonLocalizedText;
 
         private const string ELEMENT_NAME_CLOSE_BUTTON = "ClosePreviewButton";
+        private const string UI_COMMON_TABLE = "UICommon";
 
+        /// <summary>
+        ///     閉じるボタンの操作を登録する。フォーカス移動の対象からは外す。
+        /// </summary>
         private void RegisterEvents()
         {
             // キャンセル操作で閉じられるため、フォーカス移動の対象からは外す。

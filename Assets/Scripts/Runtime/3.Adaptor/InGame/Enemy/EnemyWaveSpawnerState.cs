@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -9,9 +10,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyWaveSpawnerState
     {
+        /// <summary>
+        ///     敵の数を0にした初期状態で生成する。
+        /// </summary>
         public EnemyWaveSpawnerState()
         {
             _enemyCount = 0;
+            _pendingEnemyCount = 0;
             _isLastWave = false;
         }
 
@@ -25,11 +30,31 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public event Action<int, EnemyWaveDefinition> OnWaveStarted;
 
         /// <summary>
-        ///     敵数を加算する。
+        ///     非同期生成を開始する前に、Wave全体の生成予定数を予約します。
         /// </summary>
-        /// <param name="count"></param>
+        /// <param name="count"> 生成予定の敵数です。 </param>
+        public void ReserveEnemySpawns(int count)
+        {
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+
+            _pendingEnemyCount = checked(_pendingEnemyCount + count);
+        }
+
+        /// <summary>
+        ///     入場が完了した敵を生成待ちから生存数へ移します。
+        /// </summary>
+        /// <param name="count"> 入場が完了した敵数です。 </param>
         public void AddEnemyCount(int count)
         {
+            if (count <= 0 || count > _pendingEnemyCount)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+
+            _pendingEnemyCount -= count;
             _enemyCount += count;
         }
 
@@ -44,16 +69,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             {
                 throw new Exception($"[EnemyWaveSpawnerState] 敵の数管理に異常が発生しました。敵数：{_enemyCount}");
             }
-            if (_enemyCount == 0)
+            if (_enemyCount == 0 && _pendingEnemyCount == 0)
             {
                 if (_isLastWave)
                 {
-                    Debug.Log("[EnemyWaveSpawnerState] All Wave Cleared.");
+                    DevLog.Log("[EnemyWaveSpawnerState] All Wave Cleared.");
                     OnWaveAllCleared?.Invoke();
                 }
                 else
                 {
-                    Debug.Log("[EnemyWaveSpawnerState] Wave Cleared.");
+                    DevLog.Log("[EnemyWaveSpawnerState] Wave Cleared.");
                     OnWaveCleared?.Invoke();
                 }
             }
@@ -80,6 +105,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         }
 
         private int _enemyCount;
+        private int _pendingEnemyCount;
         private bool _isLastWave;
     }
 }

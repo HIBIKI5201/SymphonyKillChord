@@ -32,6 +32,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         [SerializeField, Tooltip("ノードを解放した時に解放されるスキル")]
         [SourceDataCollection("Skill")]
         private DataID[] _unlockSkills;
+        [SerializeField, Tooltip("ノードを解放した時にスキル編成枠を1つ増やすか。")]
+        private bool _hasSkillSlotBonus;
 
         /// <summary>
         ///     保持するデータよりEntityを生成する。
@@ -56,7 +58,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
                 UnlockCost,
                 SkillDetail,
                 skillIds.ToArray(),
-                _statusBonusEffects);
+                _statusBonusEffects,
+                _hasSkillSlotBonus);
         }
 
         /// <summary>

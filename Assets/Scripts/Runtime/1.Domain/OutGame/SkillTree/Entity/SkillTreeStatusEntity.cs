@@ -38,6 +38,8 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
         public List<SkillNodeId> UnlockedNodes => _unlockedNodes;
         /// <summary> 解放されたスキルの ID リストを取得します。 </summary>
         public List<SkillId> UnlockedSkillIds => _unlockedSkillIds;
+        /// <summary> 解放済みノードから算出された、スキル編成枠のボーナス件数を取得します。 </summary>
+        public int SkillSlotBonus { get; private set; }
 
         /// <summary>
         ///     研究ポイントを増減させます。
@@ -64,6 +66,15 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
         public void AddUnlockedSkillIds(SkillId[] skillIds)
         {
             _unlockedSkillIds.AddRange(skillIds);
+        }
+
+        /// <summary>
+        ///     スキル編成枠のボーナス件数を設定します。
+        /// </summary>
+        /// <param name="bonus"> 解放済みノードから算出されたボーナス件数。 </param>
+        public void SetSkillSlotBonus(int bonus)
+        {
+            SkillSlotBonus = bonus;
         }
 
         /// <summary>

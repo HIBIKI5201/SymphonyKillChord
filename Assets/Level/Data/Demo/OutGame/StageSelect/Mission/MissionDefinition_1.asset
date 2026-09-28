@@ -61,10 +61,6 @@ MonoBehaviour:
       data:
         _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FC\u304C\u6B7B\u3093\u3060\u3089\u5931\u6557\u3059\u308B\u6761\u4EF6"
     - rid: 4309480244433387718
-      type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      type: {class: AllEnemyWavesClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:1401557065)\u30927\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
-        _enemyMissionKeyId:
-          _id: enemy_red
-          _hashId: 1401557065
-        _requiredKillCount: 7
+        _inspectorSummary: "最終Waveまでのすべての敵を撃破する条件"

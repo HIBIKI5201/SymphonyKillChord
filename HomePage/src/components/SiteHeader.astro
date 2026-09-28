@@ -6,6 +6,7 @@ import characterIcon from '../assets/icons/nav-character.svg?raw';
 import gameplayIcon from '../assets/icons/nav-gameplay.svg?raw';
 import creditIcon from '../assets/icons/nav-credit.svg?raw';
 import downloadIcon from '../assets/icons/nav-download.svg?raw';
+import feedbackIcon from '../assets/icons/nav-feedback.svg?raw';
 
 interface NavItem {
 	label: string;
@@ -30,6 +31,10 @@ const {
 	downloadHref,
 	downloadLabel = 'Download',
 } = Astro.props;
+
+// 感想フォーム(Google Form)への導線。イベント期間中の一時的な告知として目立たせる
+const feedbackHref = 'https://docs.google.com/forms/d/e/1FAIpQLSealIIGmVfJWvzkDWzFn5KMR3usHc4bre5POy5bRiMSBJ2eGQ/viewform?usp=dialog';
+const feedbackLabel = '感想募集中です!';
 
 const isDownloadReady = Boolean(downloadHref);
 
@@ -62,6 +67,11 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 		}
 	</nav>
 
+	<a class="feedback-cta" href={feedbackHref} target="_blank" rel="noopener noreferrer">
+		<span class="nav-icon" set:html={feedbackIcon} />
+		<span class="nav-label">{feedbackLabel}</span>
+	</a>
+
 	{/* 配信サイトのURL確定後にdownloadHrefを差し替えると、自動的に通常のリンクへ切り替わる */}
 	<a class="download-cta" href={downloadHref} aria-disabled={!isDownloadReady} tabindex={isDownloadReady ? undefined : -1}>
 		<span class="nav-icon" set:html={downloadIcon} />
@@ -90,6 +100,10 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 				</a>
 			))
 		}
+		<a class="mobile-nav-link mobile-feedback-cta" href={feedbackHref} target="_blank" rel="noopener noreferrer">
+			<span class="nav-icon" set:html={feedbackIcon} />
+			<span class="nav-label">{feedbackLabel}</span>
+		</a>
 		{/* 配信サイトのURL確定後にdownloadHrefを差し替えると、自動的に通常のリンクへ切り替わる */}
 		<a
 			class="mobile-nav-link mobile-download-cta"
@@ -274,6 +288,59 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 		opacity: 1;
 	}
 
+	.feedback-cta {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		width: calc(100% - 24px);
+		margin-left: 12px;
+		margin-right: 12px;
+		padding: 10px 12px;
+		font-family: var(--font-mono);
+		letter-spacing: var(--tracking-label);
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--color-bg);
+		text-decoration: none;
+		white-space: nowrap;
+		background-color: var(--color-signal);
+		border: 1px solid var(--color-signal);
+		border-radius: 4px;
+		box-shadow: 0 0 0 0 rgba(79, 227, 122, 0.6);
+		animation: feedback-pulse 2s ease-in-out infinite;
+	}
+
+	.feedback-cta:hover {
+		background-color: var(--color-bg);
+		color: var(--color-signal);
+	}
+
+	@keyframes feedback-pulse {
+		0%,
+		100% {
+			box-shadow: 0 0 0 0 rgba(79, 227, 122, 0.5);
+		}
+		50% {
+			box-shadow: 0 0 0 6px rgba(79, 227, 122, 0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.feedback-cta {
+			animation: none;
+		}
+	}
+
+	.feedback-cta .nav-label {
+		opacity: 0;
+		transition: opacity 0.2s ease;
+	}
+
+	.site-header:hover .feedback-cta .nav-label,
+	.site-header:focus-within .feedback-cta .nav-label {
+		opacity: 1;
+	}
+
 	.menu-toggle {
 		display: none;
 		flex-direction: column;
@@ -349,6 +416,28 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 			display: none;
 		}
 
+		.feedback-cta {
+			width: auto;
+			height: 32px;
+			margin: 0;
+			padding: 0 12px;
+			gap: 8px;
+			justify-content: center;
+			border: none;
+			border-radius: 6px;
+			font-size: 11px;
+			white-space: nowrap;
+		}
+
+		.feedback-cta .nav-label {
+			opacity: 1;
+		}
+
+		.feedback-cta .nav-icon {
+			width: 18px;
+			height: 18px;
+		}
+
 		.menu-toggle {
 			display: flex;
 		}
@@ -400,6 +489,7 @@ const logoWebp = await getImage({ src: logoSrc, format: 'webp', width: 240, qual
 			color: var(--color-signal);
 		}
 
+		.mobile-feedback-cta,
 		.mobile-download-cta {
 			color: var(--color-signal);
 		}

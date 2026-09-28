@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.StatusEffect;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using UnityEngine;
@@ -13,6 +14,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     /// </summary>
     public class LifeStealBuff : StatusEffectBase, IDamageDealtHandler
     {
+        /// <summary>
+        ///     所有者・吸収率・1ヒットあたりの回復上限・持続時間・再付与時の扱いを指定して生成する。
+        /// </summary>
         public LifeStealBuff(
             CharacterEntity owner,
             float lifeStealRate,
@@ -75,7 +79,7 @@ namespace KillChord.Runtime.Application.InGame.Buff
             _owner.Heal(new Health(healAmount));
 
 #if UNITY_EDITOR
-            Debug.Log("[LifeStealBuff] " + _owner.Name + "が" + healAmount + "回復しました。");
+            DevLog.Log("[LifeStealBuff] " + _owner.Name + "が" + healAmount + "回復しました。");
 #endif
         }
 

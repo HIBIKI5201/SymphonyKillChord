@@ -72,23 +72,48 @@ namespace KillChord.Runtime.View.Persistent.Music
             _source.volume = _baseVolume * volumeRatio;
         }
 
+        /// <summary>
+        ///     非アクティブな再生用複製へ、音量設定適用前の基準音量を引き継ぎます。
+        /// </summary>
+        /// <param name="template"> 複製元のSE Sourceです。 </param>
+        public void CopyBaseVolumeFrom(SoundEffectSource template)
+        {
+            if (template == null || !template.TryEnsureSource() || !TryEnsureSource())
+            {
+                return;
+            }
+
+            _baseVolume = template._baseVolume;
+            _baseVolumeCaptured = true;
+            _source.volume = template._source.volume;
+        }
+
         private CriAtomSource _source;
         private PersistentAudioVolumeRegistryView _volumeRegistryView;
         private float _baseVolume = 1f;
         private bool _baseVolumeCaptured;
 
+        /// <summary>
+        ///     CriAtomSource を取得し、基準の音量を記録する。
+        /// </summary>
         private void Awake()
         {
             _source = GetComponent<CriAtomSource>();
             CaptureBaseVolume();
         }
 
+        /// <summary>
+        ///     音量管理に自身を登録する。
+        /// </summary>
         private void OnEnable()
         {
             _volumeRegistryView ??= FindAnyObjectByType<PersistentAudioVolumeRegistryView>();
             _volumeRegistryView?.RegisterSoundEffectSource(this);
         }
 
+        /// <summary>
+        ///     音量管理から自身の登録を解除する。
+        /// </summary>
         private void OnDisable()
         {
             _volumeRegistryView?.UnregisterSoundEffectSource(this);

@@ -184,17 +184,20 @@ namespace KillChord.Runtime.View.OutGame.Screen
         /// </summary>
         public void RestoreFocus()
         {
+            // 表示中でない場合は何もしない。
             if (_isDisposed || !_isShowing)
             {
                 return;
             }
 
+            // 操作できない間は、復元の要求だけを残しておく。
             _isFocusRestorePending = true;
             if (!_isInteractionEnabled || !_isShowCompleted)
             {
                 return;
             }
 
+            // 次のフレームで復元する。その間に新しい要求や状態の変化があれば中止する。
             int generation = ++_focusRequestGeneration;
             RootElement.schedule.Execute(() =>
             {
@@ -219,6 +222,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 focusElement.Focus();
             });
         }
+
+        /// <summary>
+        ///     フェードインを終えて操作を受け付けられる状態かどうかを取得します。
+        ///     <para>
+        ///         表示直後のフェード中は入力ブロッカーが最前面にあり、UI 側の操作は届きません。
+        ///         画面外から届く入力(コントローラーのOptionsボタンなど)も同じ扱いにするため、
+        ///         派生クラスはこの値をガード条件として参照します。
+        ///     </para>
+        /// </summary>
+        protected bool IsShowCompleted => _isShowCompleted;
 
         /// <summary>
         ///     コントローラー操作の起点となる要素を返します。

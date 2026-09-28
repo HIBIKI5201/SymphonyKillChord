@@ -8,6 +8,7 @@ namespace KillChord.Runtime.Adaptor.InGame.UI
     /// </summary>
     public interface IHealthHudViewModel
     {
+        /// <summary> 現在の HP 表示内容。 </summary>
         public ReadOnlyReactiveProperty<HealthHudDTO> HealthHudDTO { get; }
         /// <summary>
         ///     HP情報を更新する。

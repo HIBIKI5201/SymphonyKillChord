@@ -8,6 +8,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class ShellSpecPresenter
     {
+        /// <summary>
+        ///     砲弾のエンティティを指定して生成する。
+        ///     null の場合は例外を投げる。
+        /// </summary>
         public ShellSpecPresenter(ShellEntity entity)
         {
             if(entity == null)

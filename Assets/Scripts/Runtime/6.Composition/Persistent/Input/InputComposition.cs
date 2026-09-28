@@ -1,9 +1,13 @@
+using KillChord.Runtime.Adaptor.Persistent.Environment;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.Persistent.Input;
 using KillChord.Runtime.Application.Persistent.Input;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Domain.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Load;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using UnityEngine;
@@ -23,15 +27,18 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         /// <summary> 実行順です。 </summary>
         public override int Order => 50;
 
+        /// <summary> プレイヤーの入力を受け取るビュー。 </summary>
         public PlayerInputView GetInputView => _playerInputView;
 
+        /// <summary> 入力マップの切り替えを制御するコントローラー。 </summary>
         public UnityInputMapController GetInputMapController => _inputMapController;
 
+        /// <summary> 入力を記録するバッファ。 </summary>
         public InputBufferingQueue GetBufferedInputBuffer => _bufferedInputBuffer;
 
 
         [Header("Bufferの最大容量")]
-        [SerializeField]
+        [SerializeField, Tooltip("入力バッファに保持する入力の数。")]
         private int _bufferCapacity;
 
         private PlayerInput _playerInput;
@@ -41,7 +48,12 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         private PlayerInputView _playerInputView;
         private InputTimestampProvider _timestampProvider;
         private UnityInputMapController _inputMapController;
+        private GamepadButtonLayoutView _gamepadButtonLayoutView;
+        private InputDeviceKindObserver _deviceKindObserver;
+        private InputDeviceLocalizationVariable _deviceLocalizationVariable;
         private LoadingScreenController _loadingScreenController;
+        private EventNotificationView _notificationView;
+        private bool _isNotificationSubscribed;
         private bool _isLoadingSubscribed;
         private bool _isViewBound;
 
@@ -56,6 +68,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             InitializePureObjects();
             InitializeInputMaps();
             BindViewToAdaptor();
+            InitializeDeviceKind();
             ServiceLocator.RegisterInstance(_playerInputView);
             ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             return true;
@@ -68,7 +81,8 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         {
             if (_playerInputView == null || !_playerInputView.HasUIInputModule
                 || _inputMapController == null
-                || !ServiceLocator.TryGetInstance(out _loadingScreenController))
+                || !ServiceLocator.TryGetInstance(out _loadingScreenController)
+                || !ServiceLocator.TryGetInstance(out _notificationView))
             {
                 Debug.LogError($"[{nameof(InputComposition)}] ロード中の入力制御に必要な依存を取得できませんでした。", this);
                 return false;
@@ -81,8 +95,40 @@ namespace KillChord.Runtime.Composition.Persistent.Input
                 _isLoadingSubscribed = true;
             }
 
-            ApplyInputSuppression(_loadingScreenController.IsLoading);
+            if (!_isNotificationSubscribed)
+            {
+                _notificationView.OnVisibilityChanged += HandleNotificationVisibilityChanged;
+                _isNotificationSubscribed = true;
+            }
+
+            RefreshInputSuppression();
+            BindGamepadButtonLayout();
             return true;
+        }
+
+        /// <summary>
+        ///     ゲームパッドの決定・キャンセルの配置を環境設定に合わせる。
+        ///     環境設定を取得できない場合は既定の海外式で固定する。
+        /// </summary>
+        private void BindGamepadButtonLayout()
+        {
+            if (_gamepadButtonLayoutView != null)
+            {
+                return;
+            }
+
+            IEnvironmentSettingsViewModel environmentSettingsViewModel =
+                ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
+                    ? environmentSettingsContainer.ViewModel
+                    : null;
+            if (environmentSettingsViewModel == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(InputComposition)}] 環境設定を取得できないため、決定・キャンセルは既定の配置で続行します。",
+                    this);
+            }
+
+            _gamepadButtonLayoutView = new GamepadButtonLayoutView(_playerInput.actions, environmentSettingsViewModel);
         }
 
         /// <summary>
@@ -98,8 +144,17 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         /// </summary>
         public override void Shutdown()
         {
+            if (_isNotificationSubscribed && _notificationView != null)
+            {
+                _notificationView.OnVisibilityChanged -= HandleNotificationVisibilityChanged;
+            }
+            _isNotificationSubscribed = false;
+            _notificationView = null;
             UnsubscribeLoading();
             UnbindViewAdaptor();
+            _gamepadButtonLayoutView?.Dispose();
+            _gamepadButtonLayoutView = null;
+            DisposeDeviceKind();
 
             if (ServiceLocator.TryGetInstance(out PlayerInputView registeredInputView)
                 && ReferenceEquals(registeredInputView, _playerInputView))
@@ -127,7 +182,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         /// </summary>
         private void HandleLoadingStarted()
         {
-            ApplyInputSuppression(true);
+            RefreshInputSuppression();
         }
 
         /// <summary>
@@ -135,7 +190,24 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         /// </summary>
         private void HandleLoadingCompleted(bool success)
         {
-            ApplyInputSuppression(false);
+            RefreshInputSuppression();
+        }
+
+        /// <summary>
+        ///     通知表示の変更時にロード状態と入力抑止を合成します。
+        /// </summary>
+        private void HandleNotificationVisibilityChanged(bool isVisible)
+        {
+            RefreshInputSuppression();
+        }
+
+        /// <summary>
+        ///     一方の完了で他方の入力抑止を解除しないよう状態を同期します。
+        /// </summary>
+        private void RefreshInputSuppression()
+        {
+            ApplyInputSuppression((_loadingScreenController != null && _loadingScreenController.IsLoading)
+                || (_notificationView != null && _notificationView.IsVisible));
         }
 
         /// <summary>
@@ -188,6 +260,31 @@ namespace KillChord.Runtime.Composition.Persistent.Input
 
             _timestampProvider = new InputTimestampProvider();
             _playerInputView.Initialize(_timestampProvider);
+        }
+
+        /// <summary>
+        ///     入力機器の種類の監視を開始し、操作案内のローカライズ変数へ反映する。
+        /// </summary>
+        private void InitializeDeviceKind()
+        {
+            if (_deviceKindObserver != null)
+            {
+                return;
+            }
+
+            _deviceKindObserver = new InputDeviceKindObserver();
+            _deviceLocalizationVariable = new InputDeviceLocalizationVariable(_deviceKindObserver);
+        }
+
+        /// <summary>
+        ///     入力機器の種類の監視を終了する。
+        /// </summary>
+        private void DisposeDeviceKind()
+        {
+            _deviceLocalizationVariable?.Dispose();
+            _deviceLocalizationVariable = null;
+            _deviceKindObserver?.Dispose();
+            _deviceKindObserver = null;
         }
 
         /// <summary>

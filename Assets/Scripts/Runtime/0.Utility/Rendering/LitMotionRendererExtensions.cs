@@ -41,6 +41,9 @@ namespace KillChord.Runtime.Utility.Rendering
             private readonly int _propertyId;
             private readonly MaterialPropertyBlock _propertyBlock;
 
+            /// <summary>
+            ///     対象の Renderer 群とプロパティ ID を指定して生成する。
+            /// </summary>
             public RenderersPropertyBlockBinding(Renderer[] renderers, int propertyId)
             {
                 _renderers = renderers;
@@ -48,6 +51,9 @@ namespace KillChord.Runtime.Utility.Rendering
                 _propertyBlock = new MaterialPropertyBlock();
             }
 
+            /// <summary>
+            ///     全 Renderer の MaterialPropertyBlock に float 値を設定する。
+            /// </summary>
             public void SetFloat(float value)
             {
                 for (int i = 0; i < _renderers.Length; i++)

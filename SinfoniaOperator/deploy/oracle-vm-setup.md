@@ -8,7 +8,7 @@ Oracle Cloud InfrastructureでUbuntu 22.04 x86-64 Computeを作成します。Bo
 
 ```bash
 sudo apt-get update
-sudo apt-get install --yes ca-certificates curl file git
+sudo apt-get install --yes ca-certificates curl file git python3
 sudo useradd --system --create-home --shell /usr/sbin/nologin sinfonia
 sudo mkdir -p /opt/sinfonia-specsearch
 sudo chown -R sinfonia:sinfonia /opt/sinfonia-specsearch
@@ -28,14 +28,16 @@ dotnet --info
 
 ## 3. 必要なディレクトリだけ取得する
 
-`REPOSITORY_URL`は実際のGitリポジトリURLへ置き換えてください。partial cloneとsparse-checkoutを組み合わせ、Unityの`Assets/`全体を取得せず、仕様書とBotだけを作業ツリーへ展開します。
+`REPOSITORY_URL`は実際のGitリポジトリURLへ置き換えてください。partial cloneとsparse-checkoutを組み合わせ、Unityの`Assets/`全体を取得せず、Botだけを作業ツリーへ展開します。
+
+仕様書のキャッシュ（`Docs/NotionSpecifications`）はgitで追跡していないため、cloneでは取得できません。NotionMarkdownExporterで生成したキャッシュを、作業ツリーの`Library/NotionSpecifications`へ別途コピーしてください（インデックス生成は`Library/NotionSpecifications`を優先し、無ければ`Docs/NotionSpecifications`を読みます）。
 
 ```bash
 sudo -u sinfonia git clone --filter=blob:none --no-checkout --sparse REPOSITORY_URL \
   /opt/sinfonia-specsearch/repository
 cd /opt/sinfonia-specsearch/repository
-sudo -u sinfonia git sparse-checkout set Docs/NotionSpecifications SinfoniaOperator
-sudo -u sinfonia git checkout main
+sudo -u sinfonia git sparse-checkout set SinfoniaOperator
+sudo -u sinfonia git checkout develop
 ```
 
 更新時も同じ作業ツリーで`sudo -u sinfonia git pull --ff-only`を実行します。
@@ -56,7 +58,7 @@ sudo -u sinfonia SinfoniaOperator/deploy/download-embedding-model.sh
 cd /opt/sinfonia-specsearch/repository
 sudo -u sinfonia dotnet publish SinfoniaOperator/SinfoniaOperator/SinfoniaOperator.csproj \
   --configuration Release \
-  --runtime linux-arm64 \
+  --runtime linux-x64 \
   --self-contained true \
   --output /opt/sinfonia-specsearch/publish
 ```
@@ -102,14 +104,15 @@ sudo systemctl stop sinfonia-specsearch.service
 
 ## 7. GitHub Actionsから自動デプロイする
 
-`Deploy Sinfonia Operator`ワークフローは、`develop`のSinfoniaOperator関連ファイルが更新されたとき、または手動実行されたときに次の処理を行います。
+`[CI/CD] Deploy Sinfonia Operator`ワークフローは、`develop`のSinfoniaOperator関連ファイルが更新されたとき、または手動実行されたときに次の処理を行います。
 
 1. Oracle VMのCPUに合う自己完結バイナリを発行する。
 2. Oracle VMへ成果物を転送する。
 3. `/opt/sinfonia-specsearch/releases/<commit SHA>-<run ID>-<attempt>`へ展開する。
-4. `publish`シンボリックリンクを新リリースへ切り替える。
-5. systemdサービスを再起動し、最大3分間、稼働状態と`/branches`登録ログを確認する。
-6. 稼働確認に失敗した場合は直前のリリースへ戻し、成功時は新しい3リリースだけを保持する。
+4. VMの既存仕様キャッシュと既設モデルから、新リリース専用の索引を生成する。失敗した場合は稼働中のリリースを維持する。
+5. `publish`シンボリックリンクを新リリースへ切り替える。
+6. systemdサービスを再起動し、最大3分間、稼働状態と`/spec`・`/branches`両方の登録ログを確認する。
+7. 稼働確認に失敗した場合は直前のリリースへ戻し、成功時は新しい3リリースだけを保持する。
 
 GitHubの`Sinfonia Operator` Environmentに以下のSecretsを登録してください。
 
@@ -122,7 +125,9 @@ GitHubの`Sinfonia Operator` Environmentに以下のSecretsを登録してくだ
 
 VMはx86-64なので、Environment Variableの`ORACLE_RUNTIME`には`linux-x64`を設定します。未設定時も`linux-x64`が使われます。配備スクリプトも実機とバイナリのCPU形式を照合し、不一致の場合はサービスを止める前に中断します。SSHで`sudo -n systemctl status sinfonia-specsearch.service`と`sudo -n journalctl --unit sinfonia-specsearch.service --lines 1 --no-pager`が成功することを事前に確認してください。
 
-Botが参照する設定ファイルはデプロイ対象に含めません。DiscordやGitHubのトークンはOracle VMにだけ保存します。自動デプロイは`/branches`の登録ログをヘルスチェックに使うため、Botへ渡すJSONまたは環境ファイルに`GITHUB_REPOSITORY`を必ず設定してください。
+公開envの`SPEC_SEARCH`だけをデプロイ対象に含めます。DiscordやGitHubのトークンはOracle VMにだけ保存します。新リリースの`spec-search.release.json`には検索設定・専用索引の絶対パス・モデルの絶対パスを保存し、serve時はVM側の同名設定より優先します。自動デプロイは`/spec`と`/branches`の登録ログをヘルスチェックに使うため、Botへ渡すJSONまたは環境ファイルに`GITHUB_REPOSITORY`を必ず設定してください。
+
+索引生成はSSHユーザー権限で実行します。既存キャッシュ（`repository/Library/NotionSpecifications`優先、旧`repository/Docs/NotionSpecifications`へフォールバック）と`models/multilingual-e5-small`のモデル・トークナイザーを読み取れることが必要です。キャッシュは自動取得しません。更新手順と検索設定は[仕様検索README](../SinfoniaOperator.SpecSearch/README.md)を参照してください。
 
 ```json
 "GITHUB_REPOSITORY": "HIBIKI5201/SymphonyKillChord"

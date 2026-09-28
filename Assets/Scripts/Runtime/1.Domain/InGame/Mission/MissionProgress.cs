@@ -42,6 +42,16 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         public bool IsFinished => _endReason != MissionEndReason.None;
         /// <summary> ミッションの終了理由を取得します。 </summary>
         public MissionEndReason EndReason => _endReason;
+        /// <summary> 最終Waveまでのすべての敵を撃破したかどうかを取得します。 </summary>
+        public bool HasClearedAllEnemyWaves => _hasClearedAllEnemyWaves;
+
+        /// <summary>
+        ///     すべての敵Waveの撃破完了を記録します。
+        /// </summary>
+        public void RecordAllEnemyWavesCleared()
+        {
+            _hasClearedAllEnemyWaves = true;
+        }
 
         /// <summary>
         ///     経過時間を進めます。
@@ -149,6 +159,8 @@ namespace KillChord.Runtime.Domain.InGame.Mission
 
         /// <summary> プレイヤー死亡フラグ。 </summary>
         private bool _isPlayerDead;
+        /// <summary> 最終Waveまでの敵の撃破完了状態。 </summary>
+        private bool _hasClearedAllEnemyWaves;
         /// <summary> 終了理由。 </summary>
         private MissionEndReason _endReason;
         /// <summary> 目標シーケンスの現在ステップIndex。 </summary>

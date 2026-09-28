@@ -20,29 +20,41 @@ namespace KillChord.Runtime.View.InGame.Combo
         /// <param name="comboVisibleCount"> コンボ表示を開始する最小コンボ数です。 </param>
         public void Initialize(ComboHudViewModel viewModel, int comboVisibleCount)
         {
+            // 表示に必要な参照を確認する。
             if (_comboText == null)
             {
-                Debug.LogError($"[{nameof(ComboHudView)}] {nameof(_comboText)}がNullです。", this);
+                Debug.LogError($"[{nameof(ComboHudView)}] {nameof(_comboText)}が未設定です。", this);
                 return;
             }
 
+            _comboRoot = _comboText.rectTransform.parent?.gameObject;
+            if (_comboRoot == null)
+            {
+                Debug.LogError($"[{nameof(ComboHudView)}] コンボ表示ルートを取得できません。", this);
+                return;
+            }
+
+            // 以前の購読を解除してから、コンボ数の変化を購読する。
             _comboDisposable?.Dispose();
             _comboHudViewModel = viewModel;
 
             _comboDisposable = _comboHudViewModel.ComboCount
                 .Subscribe(comboCount =>
                   {
-                      if (_comboText == null) { return; }
+                      if (_comboText == null || _comboRoot == null) { return; }
 
-                      if (comboCount < comboVisibleCount)
+                      _handle.TryComplete();
+                      // 表示する最小のコンボ数に満たない間は非表示にする。
+                      bool isVisible = comboCount >= comboVisibleCount;
+                      _comboRoot.SetActive(isVisible);
+                      if (!isVisible)
                       {
                           _comboText.SetText(string.Empty);
+                          return;
                       }
-                      else
-                      {
-                          _comboText.SetText("{0}", comboCount);
-                      }
-                      _handle.TryComplete();
+
+                      // コンボ数を表示し、文字を揺らす演出を再生する。
+                      _comboText.SetText("{0}", comboCount);
                       _handle = LSequence.Create()
                         .Join(LMotion.Punch.Create(0f, 5f, 0.1f)
                             .WithFrequency(Random.Range(2, 5))
@@ -54,7 +66,9 @@ namespace KillChord.Runtime.View.InGame.Combo
                   });
         }
 
-        [SerializeField] private TextMeshProUGUI _comboText;
+        [SerializeField, Tooltip("コンボ数を表示するテキストです。")]
+        private TextMeshProUGUI _comboText;
+        private GameObject _comboRoot;
         private ComboHudViewModel _comboHudViewModel;
         private IDisposable _comboDisposable;
         private MotionHandle _handle;

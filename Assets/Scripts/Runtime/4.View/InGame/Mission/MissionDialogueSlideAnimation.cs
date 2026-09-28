@@ -13,8 +13,13 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// <inheritdoc />
         public override void HideImmediate()
         {
-            Initialize();
             _motion.TryCancel();
+            if (_isInitialized && (_panel == null || _canvasGroup == null))
+            {
+                return;
+            }
+
+            Initialize();
             _panel.anchoredPosition = GetHiddenPosition();
             _canvasGroup.alpha = 0f;
         }
@@ -71,6 +76,9 @@ namespace KillChord.Runtime.View.InGame.Mission
         private bool _isInitialized;
         private bool _isPaused;
 
+        /// <summary>
+        ///     再生中のスライドアニメーションを止める。
+        /// </summary>
         private void OnDisable()
         {
             _motion.TryCancel();
