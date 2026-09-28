@@ -1,6 +1,6 @@
 ---
 name: skc-feature-flow
-description: "Run this repo's full feature-branch flow end to end: create `feature/<stage>/<name>/agent`, push it empty, implement and commit, open the agent→master PR with the project PR template, self-merge it, then rewrite the auto-generated master→develop draft PR body (or create it manually when the automation cannot fire). Use when the user says things like 'ブランチ名○○で実装して', 'masterにセルフマージして', 'DraftPRのメッセージを直して', or asks to take a change from branch creation through to the develop PR. Implementation itself is delegated to the other skc-/uloop- skills; this skill owns only the git/PR choreography."
+description: "Run this repo's full feature-branch flow end to end: create `feature/<stage>/<name>/agent`, push it empty, implement and commit, open the agent→master PR with the project PR template, self-merge it, then check the auto-generated master→develop draft PR (its body is built from the agent→master PR; fix the source PR, or trigger the workflow manually when the automation cannot fire). Use when the user says things like 'ブランチ名○○で実装して', 'masterにセルフマージして', 'DraftPRのメッセージを直して', or asks to take a change from branch creation through to the develop PR. Implementation itself is delegated to the other skc-/uloop- skills; this skill owns only the git/PR choreography."
 ---
 
 # skc-feature-flow
@@ -25,7 +25,7 @@ description: "Run this repo's full feature-branch flow end to end: create `featu
 - **ブランチ名**: `feature/<段階>/<作業名>/agent`。ユーザーが「ブランチ名○○で」と言ったら `○○` を作業名に使う。すでに完全な形（`feature/.../agent`）なら、そのまま使う。
   - 段階は `demo`・`release`・`tools` など。指定がなければ作業内容から選び、選んだ段階を報告する。
   - `agent` は末尾（個人名の位置）に置く。`agent/○○` の形は使わない。
-- **Issue 番号**: 関連 Issue があれば控えておく。`Closes #N` は **develop 向けの PR（2段目）にだけ**書く。`master` 向けの PR（1段目）に書いてもクローズされない。
+- **Issue 番号**: 関連 Issue があれば控えておく。1段目（`master` 向け）の PR の「クローズするIssue」節に `- #N` で書くと、2段目（develop 向け）の Draft PR に `Closes #N` として自動で引き継がれる。1段目の PR だけではクローズされない（develop へのマージで初めてクローズされる）。
 - **マージしてよい範囲**: `feature/**/master` へのセルフマージは、自分の判断で行ってよい。`develop` へのマージはしない（ユーザーの明示的な指示があるときだけ）。
 
 ## 1. ブランチを作り、空のまま push する
@@ -65,7 +65,8 @@ git push
 - 必須チェックの項目は、**実際に確かめたものだけ** `[x]` にする。PlayMode を通していなければ `[ ]` のままにし、理由を「未確認・残論点」に書く。
 - 「確認済みの内容」には、確認の方法（uloop-compile / dotnet build / PlayMode / テスト名）を項目ごとに書く。
 - 本文の末尾に、会話で指定された PR 用の署名行を付ける。
-- この PR には `Closes #N` を書かない。
+- クローズしたい Issue は「クローズするIssue」節に `- #N` で書く（無ければ「なし」）。ここに書いたものだけが develop 向け PR の `Closes` になる。本文中の `#N` は参照扱いで、クローズされない。
+- この本文が、そのまま develop 向け Draft PR の本文の材料になる。各節を省略せずに埋める。
 
 ```bash
 gh pr create --base feature/<段階>/<作業名>/master --head feature/<段階>/<作業名>/agent \
@@ -88,28 +89,31 @@ gh run watch $(gh run list --workflow AutoCreateDevelopPullRequest.yml --limit 1
 gh pr list --head feature/<段階>/<作業名>/master --base develop --state open --json number,url,isDraft
 ```
 
-## 5. develop 向け Draft PR の本文を直す
+## 5. develop 向け Draft PR の本文を確かめる
 
-自動生成された本文は定型文（「自動生成Draft PRです」「動作確認は未実施です」）なので、そのままにしない。手順 3 の本文をもとに、次の点を変えて書き直す。
+ワークフロー（処理本体は `.github/scripts/BuildDevelopPullRequest.js`）が、`master` に取り込まれていて develop にまだ入っていない PR の本文から、テンプレ構成の本文を組み立てる。
 
-- 概要・原因・対処・確認済みの内容・未確認・残論点を、実際の変更内容で埋める。
-- 関連 Issue があれば、概要の直後などに `Closes #N` を書く（ここで初めて書く）。
-- タイトルが `feature/.../master → develop` のままなら、変更内容がわかるタイトルに変える。
-- Draft のまま残す。Ready for review にするか、develop へマージするかはユーザーが決める。
+- 各節は元 PR の同じ節を写す。元 PR が複数あれば、PR ごとの小見出しを付けて並べる。
+- 必須チェックは、全ての元 PR でチェック済みの項目だけ `[x]` になる。未チェックがあれば「未確認・残論点」に自動で書かれる。
+- 元 PR の「クローズするIssue」節の `#N`（と、本文中の `Closes #N` など）は、実在する Issue であることを確かめたうえで `Closes #N` にする。PR 番号や存在しない番号は除外し、理由を書く。
+- タイトルは元 PR のタイトル（複数なら「〜 ほかN件」）。
+- 同じ `master` へ後から PR がマージされたり、マージ済みの元 PR の本文を直したりすると、本文を作り直す。
 
-```bash
-gh pr edit <develop向けPR番号> --title "<タイトル>" --body-file <本文ファイル>
-```
+したがって、通常は書き直さない。内容を確かめ、足りないところがあれば**元の agent→master PR の本文を直す**（`edited` で作り直される）。
+
+develop 向け PR の本文を直接書き直したいときは、先頭の `<!-- auto-develop-pr ... -->` の行を消す。消すと以降は自動で作り直さず、新しく見つかった Issue の `Closes #N` を末尾に追記するだけになる。タイトルを手で変えた場合は、目印が残っていてもタイトルは上書きしない。
+
+Draft のまま残す。Ready for review にするか、develop へマージするかはユーザーが決める。
 
 ### 例外: 自動の Draft PR が作られないとき
 
-- 作業ブランチと `master` が同じコミットだと（先に編集してから push した場合など）、agent→master の PR は「No commits between」で作れない。この場合は手順 3・4 を省き、`master` を作業ブランチに合わせてから develop 向け Draft PR を**手動で**作る:
+- 作業ブランチと `master` が同じコミットだと（先に編集してから push した場合など）、agent→master の PR は「No commits between」で作れない。この場合は手順 3・4 を省き、`master` を作業ブランチに合わせてから、ワークフローを手動で実行する:
   ```bash
   git push origin feature/<段階>/<作業名>/agent:feature/<段階>/<作業名>/master
-  gh pr create --draft --base develop --head feature/<段階>/<作業名>/master --title "<タイトル>" --body-file <本文ファイル>
+  gh workflow run AutoCreateDevelopPullRequest.yml --ref develop -f master_branch=feature/<段階>/<作業名>/master
   ```
-- ワークフローが 403（Actions に PR 作成の権限がない）で警告だけ出して終わった場合も、同じく手動で作る。
-- すでに開いている develop 向け PR があるときは、ワークフローは何もしない。その既存 PR の本文を更新する。
+  元になる PR が無いので、本文はコミット一覧から作られる。作成後に目印の行を消し、手順 3 と同じ粒度で本文を書き直す（`Closes #N` もここで書く）。
+- ワークフローが 403（Actions に PR 作成の権限がない）で警告だけ出して終わった場合は、`gh pr create --draft --base develop --head <master> --title "<タイトル>" --body-file <本文ファイル>` で手動で作る。
 
 ## 6. 報告する
 
