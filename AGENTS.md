@@ -17,7 +17,7 @@
 - `feature/` で始まらない作業ブランチは、Pull Request の作成先は常に `develop` とする。
 - 例: `feature/demo/just-judgement/agent` → `feature/demo/just-judgement/master`。
 - 作業ブランチから直接 `develop` にPRを作成せず、取り込み後の `master` から `develop` にPRを作成する。
-  - ただし `feature/**/master` へのPRがマージされると、GitHub Actions (`AutoCreateDevelopPullRequest.yml`) が `master` → `develop` のドラフトPR (テンプレ構成込み) を自動作成する。そのため通常は手動で develop 向けPRを作る必要はない。
-  - 例外: `AutoCreateMasterBranch.yml` は作業ブランチのpush時点の内容でそのまま `master` を自動生成するため、作業ブランチと `master` が同一コミットになり実際のマージが一度も発生しないケースがある。この場合は上記の自動化が発火しないため、develop向けPRは手動で作成する必要がある(この場合、`agent`→`master`のPRは「No commits between」で作成不可なので省略してよい)。
+  - ただし `feature/**/master` へのPRがマージされると、GitHub Actions (`AutoCreateDevelopPullRequest.yml`) が `master` → `develop` のドラフトPRを自動作成する。本文は `master` に取り込まれたPRの本文から組み立てられ、「クローズするIssue」節の `#N` は `Closes #N` として引き継がれる。そのため通常は手動で develop 向けPRを作る必要はなく、本文の修正は元の `agent`→`master` PR 側で行う。
+  - 例外: `AutoCreateMasterBranch.yml` は作業ブランチのpush時点の内容でそのまま `master` を自動生成するため、作業ブランチと `master` が同一コミットになり実際のマージが一度も発生しないケースがある。この場合は上記の自動化が発火しないため、`AutoCreateDevelopPullRequest.yml` を手動実行 (`workflow_dispatch`、入力は `master` ブランチ名) するか、develop向けPRを手動で作成する(この場合、`agent`→`master`のPRは「No commits between」で作成不可なので省略してよい)。
 - PR本文は `.github/PULL_REQUEST_TEMPLATE.md` の構成を使用し、確認済み・未確認を正確に記載する(自動生成されるdevelop向けPRも同テンプレ構成)。
 - テスト実行や `develop` へのマージ可否は、現在のセッションのユーザー指示に従う。
