@@ -1,0 +1,46 @@
+{
+  "id": 10234589,
+  "name": "master-review",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": [
+        "refs/heads/feature/**/master"
+      ]
+    }
+  },
+  "bypass_actors": [
+    {
+      "actor_id": 5,
+      "actor_type": "RepositoryRole",
+      "bypass_mode": "pull_request"
+    }
+  ],
+  "rules": [
+    {
+      "type": "copilot_code_review",
+      "parameters": {
+        "review_on_push": false,
+        "review_draft_pull_requests": false
+      }
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": false,
+        "do_not_enforce_on_create": true,
+        "required_status_checks": [
+          {
+            "context": "feature-pr-target",
+            "integration_id": 15368
+          }
+        ]
+      }
+    }
+  ]
+}
