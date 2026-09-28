@@ -81,6 +81,13 @@ export async function runAging(call, { seconds, repeat, queue, qa, signal }, roo
         const response = await call(expression);
         if (expression.startsWith('AIDebugQaMonitor.')) { monitor = response; }
         await record({ cleanup: response });
+        if (response.cleanupPending) {
+          const release = await call('AIDebugAttackQueue.GetStatusJson()');
+          await record({ cleanup: release });
+          if (release.runId !== attackId || release.cleanupPending) {
+            throw new Error('Attack release not confirmed; resume gameplay or run cancel --force-release, then inspect queue status');
+          }
+        }
       }
       catch (error) { summary.cleanupErrors.push(error.message); }
     }
