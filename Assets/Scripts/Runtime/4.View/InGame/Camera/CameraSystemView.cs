@@ -22,9 +22,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> カメラの Transform。 </summary>
         public Transform CameraTransform => _cameraT;
 
-        /// <summary> 外部から制御されている場合はtrueです。 </summary>
-        public bool IsExternallyControlled => _isExternallyControlled;
-
         /// <summary>
         ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
         /// </summary>
@@ -85,7 +82,6 @@ namespace KillChord.Runtime.View.InGame.Camera
                 : UnityEngine.Camera.main;
             _currentDistance = viewSettings.Distance;
             _hasCompletedInitialUpdate = false;
-            _isExternallyControlled = false;
 
             // プラットフォームに応じた視点操作の入力を購読する。
 #if UNITY_ANDROID
@@ -136,31 +132,13 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <returns> 更新が成功したかどうかを示す値。 </returns>
         public bool RefreshImmediate()
         {
-            if (_isExternallyControlled || _playerT == null || _cameraT == null || _viewSettings == null)
+            if (_playerT == null || _cameraT == null || _viewSettings == null)
             {
                 return false;
             }
 
             Tick(0f);
             return _hasCompletedInitialUpdate;
-        }
-
-        /// <summary>
-        ///     ステージ演出などへカメラTransformの制御を委譲するため、外部制御モードへ切り替える。
-        /// </summary>
-        public void BeginExternalControl()
-        {
-            ClearInputState();
-            _isExternallyControlled = true;
-        }
-
-        /// <summary>
-        ///     外部制御モードを終了し、カメラシステムの制御へ戻す。
-        /// </summary>
-        public void EndExternalControl()
-        {
-            ClearInputState();
-            _isExternallyControlled = false;
         }
 
         /// <summary>
@@ -269,7 +247,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         private bool _hasCompletedInitialUpdate;
         private float _autoLockOnIdleTimer;
         private float _autoLockOnViewportGraceTimer;
-        private bool _isExternallyControlled;
         private bool _hasRequiredDependencies;
         private IEnvironmentSettingsViewModel _environmentSettingsViewModel;
 
@@ -309,7 +286,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void FixedUpdate()
         {
-            if (_updateMode != UpdateModeEnum.FixedUpdate || _isExternallyControlled) { return; }
+            if (_updateMode != UpdateModeEnum.FixedUpdate) { return; }
 
             Tick(Time.fixedDeltaTime);
         }
@@ -319,7 +296,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void Update()
         {
-            if (_updateMode != UpdateModeEnum.Update || _isExternallyControlled) { return; }
+            if (_updateMode != UpdateModeEnum.Update) { return; }
 
             Tick(Time.deltaTime);
         }
@@ -329,7 +306,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void LateUpdate()
         {
-            if (_updateMode != UpdateModeEnum.LateUpdate || _isExternallyControlled) { return; }
+            if (_updateMode != UpdateModeEnum.LateUpdate) { return; }
 
             Tick(Time.deltaTime);
         }
