@@ -410,6 +410,10 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             catch (OperationCanceledException)
             {
             }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
