@@ -33,6 +33,13 @@ const CLOSING_LINE = "ご確認いただけますと幸いです。";
 // 本文の解析
 // ---------------------------------------------------------------------------
 
+/** 改行を LF にそろえ、HTML コメントを取り除く。`<!-- -->` のようにコード中に書かれたものは残す。 */
+function stripComments(body) {
+    return (body ?? "")
+        .replace(/\r\n/g, "\n")
+        .replace(/(?<!`)<!--[\s\S]*?-->(?!`)/g, "");
+}
+
 /** 見出し文字列をテンプレの key に対応付ける。対応しなければ null。 */
 function sectionKeyOf(heading) {
     // 「必須チェック（未チェックの…）」のような括弧書きを落として比較する。
@@ -50,9 +57,7 @@ function sectionKeyOf(heading) {
  * @returns {{ sections: Record<string,string>, extras: {heading:string, body:string}[] }}
  */
 function parseBody(body) {
-    const text = (body ?? "")
-        .replace(/\r\n/g, "\n")
-        .replace(/<!--[\s\S]*?-->/g, "");
+    const text = stripComments(body);
 
     const sections = {};
     const extras = [];
@@ -124,7 +129,7 @@ function parseChecks(checkSection) {
  * @returns {{owner:string, repo:string, number:number}[]}
  */
 function extractIssueRefs(body, repo) {
-    const text = (body ?? "").replace(/\r\n/g, "\n").replace(/<!--[\s\S]*?-->/g, "");
+    const text = stripComments(body);
     const { sections } = parseBody(body);
 
     const refPattern = String.raw`(?:https://github\.com/([\w.-]+)/([\w.-]+)/issues/(\d+)|(?:([\w.-]+)/([\w.-]+))?#(\d+))`;

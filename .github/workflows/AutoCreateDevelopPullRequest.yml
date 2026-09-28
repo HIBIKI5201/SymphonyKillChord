@@ -43,7 +43,8 @@ jobs:
             *) echo "::error::feature/**/master の形ではありません: $MASTER_BRANCH"; exit 1 ;;
           esac
 
-      # スクリプトだけを取り出す。pull_request_target では、マージ済みの master（信頼できる側）の内容になる。
+      # スクリプトだけを取り出す。pull_request_target ではワークフロー定義もチェックアウト先もデフォルトブランチ（develop）になる。
+      # そのため、この処理の変更は develop に入ってから全ての master に効く。
       - name: Checkout scripts
         uses: actions/checkout@v4
         with:
