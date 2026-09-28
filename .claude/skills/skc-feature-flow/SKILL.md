@@ -63,6 +63,7 @@ git push
 本文は必ず [.github/PULL_REQUEST_TEMPLATE.md](../../../.github/PULL_REQUEST_TEMPLATE.md) の構成にする（Summary / Test plan のような汎用の形式にはしない）。
 
 - 必須チェックの項目は、**実際に確かめたものだけ** `[x]` にする。PlayMode を通していなければ `[ ]` のままにし、理由を「未確認・残論点」に書く。
+  - 例外: 確認が**不要**な変更（C#を変更していない → コンパイル不要、Unity外のワークフロー・ドキュメント等だけ → PlayMode不要）は、`[x]` にして末尾に `（不要: 理由）` を書く。括弧の補足は develop 向け Draft PR にも引き継がれる。
 - 「確認済みの内容」には、確認の方法（uloop-compile / dotnet build / PlayMode / テスト名）を項目ごとに書く。
 - 本文の末尾に、会話で指定された PR 用の署名行を付ける。
 - クローズしたい Issue は「クローズするIssue」節に `- #N` で書く（無ければ「なし」）。ここに書いたものだけが develop 向け PR の `Closes` になる。本文中の `#N` は参照扱いで、クローズされない。
