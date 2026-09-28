@@ -1,0 +1,53 @@
+name: "[Git] Validate Feature Master PR"
+
+# マージ先が feature/**/master のPRを検証し、コミットステータス feature-pr-target に結果を出す。
+# 作業ブランチ → feature/**/master のルールのみを扱う。develop 向け・hotfix は別ワークフローで扱う。
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review, converted_to_draft]
+    branches:
+      - 'feature/**/master'
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR source branch
+        id: validate
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          EXPECTED_DIR=$(dirname "$BASE_REF")
+
+          # develop の変更を取り込む同期PRは許可する。
+          if [ "$HEAD_REF" = "develop" ]; then
+            echo "state=success" >> $GITHUB_OUTPUT
+            echo "message=✅ develop からの同期PRです" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # マージ元は同じ階層の作業ブランチ（末尾が master でない）であること。
+          if [ "$(dirname "$HEAD_REF")" = "$EXPECTED_DIR" ] && [ "$(basename "$HEAD_REF")" != "master" ]; then
+            echo "state=success" >> $GITHUB_OUTPUT
+            echo "message=✅ マージ元・マージ先は正しいです" >> $GITHUB_OUTPUT
+          else
+            echo "state=failure" >> $GITHUB_OUTPUT
+            echo "message=❌ マージ元は ${EXPECTED_DIR}/<作業者> である必要があります" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set commit status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          STATE: ${{ steps.validate.outputs.state }}
+          MESSAGE: ${{ steps.validate.outputs.message }}
+        run: |
+          gh api repos/$REPO/statuses/$SHA -X POST \
+            -f state="$STATE" -f context="feature-pr-target" \
+            -f description="$MESSAGE"
