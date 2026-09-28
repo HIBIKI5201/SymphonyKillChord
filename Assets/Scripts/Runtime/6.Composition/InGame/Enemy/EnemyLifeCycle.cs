@@ -571,6 +571,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             catch (OperationCanceledException)
             {
             }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
