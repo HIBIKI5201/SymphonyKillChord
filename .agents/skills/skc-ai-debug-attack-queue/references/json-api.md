@@ -44,9 +44,9 @@ AIDebugQaMonitor.Start(runId, durationSeconds)、GetStatusJson()、Stop(runId)�
 
 ## 操作と結果
 
-攻撃キューの状態には`cleanupPending`と`diagnostics`を含む。`diagnostics`はゲーム用入力更新数/種別、成立待ち時間、押下状態、基準攻撃かどうか、`environment`内の入力抑制/クールダウン/Mouse/フォーカス/停止状態を返す。失敗後は失敗直前のコピーを保持する。`mouseButtonPressedAtCapture`は取得時に有効な入力バッファの値であり、Editor更新から取得した場合はゲーム側の状態を証明しない。
+攻撃キューの状態には`cleanupPending`と`diagnostics`を含む。`diagnostics`はゲーム用入力更新数/種別、成立待ち時間、押下状態、基準攻撃かどうか、`environment`内の入力抑制/クールダウン/Mouse/フォーカス/停止状態を返す。`environment`は失敗時と`GetStatusJson(true)`（CLIの`status --verbose`）でだけ取得し、通常のポーリングでは`null`になる。失敗後は失敗直前のコピーを保持する。`mouseButtonPressedAtCapture`は取得時に有効な入力バッファの値であり、Editor更新から取得した場合はゲーム側の状態を証明しない。
 
-`cleanupPending:true`は、キャンセルまたは失敗時の押下を次のゲーム用入力更新で解放する必要がある状態。新規キューは解放完了まで拒否する。PlayMode終了・Reload時は終了処理で残った押下を解放する。操作成功だけで入力解放済みとせず、最新の状態を確認する。背景: [基準攻撃の通知待ち不具合](known-issues.md)。
+`cleanupPending:true`は、キャンセルまたは失敗時の押下を次のゲーム用入力更新で解放する必要がある状態。解放待ちでも新規キューは受け付け、その最初のゲーム用入力更新で前の押下を解放してから次の押下に進む。一時停止を解かずに解放する場合は`Cancel(runId, true)`（CLIの`cancel --force-release`）で即時に解放する。この経路は攻撃Actionの解放通知が省略される場合があり、直後の実クリックが1回無視されうる。PlayMode終了・Reload時は終了処理で残った押下を解放する。操作成功だけで入力解放済みとせず、最新の状態を確認する。背景: [基準攻撃の通知待ち不具合](known-issues.md)。
 
 buttonはButton.onClickの発行。completionVerifiedとinputDeviceVerifiedはfalse。操作後の状態を別途読む。状態取得APIに操作を混ぜない。
 

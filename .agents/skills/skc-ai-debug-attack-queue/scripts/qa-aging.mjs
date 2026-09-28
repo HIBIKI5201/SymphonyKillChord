@@ -85,7 +85,7 @@ export async function runAging(call, { seconds, repeat, queue, qa, signal }, roo
           const release = await call('AIDebugAttackQueue.GetStatusJson()');
           await record({ cleanup: release });
           if (release.runId !== attackId || release.cleanupPending) {
-            throw new Error('Attack release not confirmed; resume gameplay and inspect queue status before retrying');
+            throw new Error('Attack release not confirmed; resume gameplay or run cancel --force-release, then inspect queue status');
           }
         }
       }
