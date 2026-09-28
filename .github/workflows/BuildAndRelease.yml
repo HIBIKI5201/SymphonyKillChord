@@ -66,6 +66,10 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write       # 自身の実行をキャンセルするため。
+      contents: read
+      pull-requests: read  # 後続実行のPRがマージ済みか調べるため。
     outputs:
       should_run: ${{ steps.release_age.outputs.should_run }}
       hours: ${{ steps.release_age.outputs.hours }}
@@ -73,8 +77,55 @@ jobs:
       RELEASE_THRESHOLD_HOURS: ${{ vars.RELEASE_THRESHOLD_HOURS }}
 
     steps:
+      # Runner停止中などでPRマージが重なった場合、古いビルドを飛ばして最新のビルドを優先する。
+      # 同じマージ先で、自分より後に作成された未完了の実行（マージ済みPR起動）があれば自分をキャンセルする。
+      - name: 後続の予約済みビルドを確認
+        id: supersede
+        if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BASE_REF: ${{ github.base_ref }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          echo "========== 後続ビルドの確認 =========="
+          echo "自身: run #${RUN_NUMBER} (id: ${RUN_ID}), マージ先: ${BASE_REF}"
+
+          # 自分より新しく、まだ完了していない pull_request 起動の実行を新しい順に列挙する。
+          NEWER_RUNS=$(gh api "repos/${REPO}/actions/workflows/BuildAndRelease.yml/runs?event=pull_request&per_page=50" \
+            --jq ".workflow_runs[] | select(.run_number > ${RUN_NUMBER} and .status != \"completed\") | \"\(.id) \(.run_number) \(.head_sha) \(.head_branch)\"")
+
+          SUPERSEDED_BY=""
+          while read -r ID NUMBER SHA BRANCH; do
+            [ -z "${ID:-}" ] && continue
+            # PRを閉じただけの実行はビルドしないため、同じマージ先へマージ済みのPRに紐づく実行だけを対象にする。
+            # 実行の pull_requests はPRが閉じると空になるため、head ブランチと head SHA からPRを引く。
+            MERGED=$(gh api "repos/${REPO}/pulls?state=closed&base=${BASE_REF}&head=${REPO%%/*}:${BRANCH}" \
+              --jq "[.[] | select(.merged_at != null and .head.sha == \"${SHA}\")] | length")
+            echo "[INFO]: run #${NUMBER} (id: ${ID}) head: ${SHA} → ${BASE_REF} へのマージ済みPR: ${MERGED}件"
+            if [ "${MERGED}" -gt 0 ]; then
+              SUPERSEDED_BY="${NUMBER}"
+              break
+            fi
+          done <<< "${NEWER_RUNS}"
+
+          if [ -z "${SUPERSEDED_BY}" ]; then
+            echo "[Decision]: 後続の予約済みビルドはありません。ビルドを続行します。"
+            echo "superseded=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "::notice::より新しいビルド run #${SUPERSEDED_BY} が予約済みのため、この実行 (#${RUN_NUMBER}) をキャンセルします。"
+          echo "superseded=true" >> $GITHUB_OUTPUT
+          # キャンセル要求が失敗しても、superseded=true によりビルドジョブはスキップされる。
+          gh api -X POST "repos/${REPO}/actions/runs/${RUN_ID}/cancel" \
+            || echo "::warning::自身の実行のキャンセル要求に失敗しました。ビルドはスキップします。"
+
       - name: 最終リリースからの経過時間をチェック
         id: release_age
+        if: steps.supersede.outputs.superseded != 'true'
         run: |
           set -e
           echo "========== リリース経過時間チェック =========="
