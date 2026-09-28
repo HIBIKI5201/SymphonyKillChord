@@ -22,9 +22,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> カメラの Transform。 </summary>
         public Transform CameraTransform => _cameraT;
 
-        /// <summary> 外部から制御されている場合はtrueです。 </summary>
-        public bool IsExternallyControlled => _isExternallyControlled;
-
         /// <summary>
         ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
         /// </summary>
@@ -39,7 +36,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="freeLookRotationCalculator"> フリールック回転計算クラス。</param>
         /// <param name="lookAtRotationCalculator"> カメラ回転計算クラス。</param>
         /// <param name="lockOnRangeChecker"> 自動ロックオン対象の視野内判定クラス。</param>
-        /// <param name="lockOnBreakTracker"> 強い視点操作によるロックオン解除判定クラス。</param>
+        /// <param name="autoLockOnReleaseTracker"> オートロックオンの解除条件の判定クラス。</param>
         /// <param name="shakeCalculator"> カメラシェイクの揺れ量計算クラス。</param>
         /// <param name="viewSettings"> View が利用するカメラ設定値。</param>
         /// <param name="playerT"> プレイヤーの Transform。</param>
@@ -56,7 +53,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             CameraFreeLookRotationCalculator freeLookRotationCalculator,
             CameraLookAtRotationCalculator lookAtRotationCalculator,
             CameraLockOnRangeChecker lockOnRangeChecker,
-            CameraLockOnBreakTracker lockOnBreakTracker,
+            CameraAutoLockOnReleaseTracker autoLockOnReleaseTracker,
             CameraShakeCalculator shakeCalculator,
             CameraConfig viewSettings,
             Transform playerT,
@@ -74,7 +71,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _freeLookRotationCalculator = freeLookRotationCalculator;
             _lookAtRotationCalculator = lookAtRotationCalculator;
             _lockOnRangeChecker = lockOnRangeChecker;
-            _lockOnBreakTracker = lockOnBreakTracker;
+            _autoLockOnReleaseTracker = autoLockOnReleaseTracker;
             _shakeCalculator = shakeCalculator;
             _viewSettings = viewSettings;
             _playerT = playerT;
@@ -85,7 +82,6 @@ namespace KillChord.Runtime.View.InGame.Camera
                 : UnityEngine.Camera.main;
             _currentDistance = viewSettings.Distance;
             _hasCompletedInitialUpdate = false;
-            _isExternallyControlled = false;
 
             // プラットフォームに応じた視点操作の入力を購読する。
 #if UNITY_ANDROID
@@ -120,7 +116,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             if (_changeTargetAction != null && _clearTargetAction != null && _getCurrentTargetPositionFunc != null
                 && _updateCandidateAction != null && _trySetTargetByIdFunc != null && _followCalculator != null
                 && _lockOnRotationCalculator != null && _freeLookRotationCalculator != null
-                && _lookAtRotationCalculator != null && _lockOnRangeChecker != null && _lockOnBreakTracker != null
+                && _lookAtRotationCalculator != null && _lockOnRangeChecker != null && _autoLockOnReleaseTracker != null
                 && _viewSettings != null && _playerT != null && _cameraT != null)
             {
                 return true;
@@ -136,31 +132,13 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <returns> 更新が成功したかどうかを示す値。 </returns>
         public bool RefreshImmediate()
         {
-            if (_isExternallyControlled || _playerT == null || _cameraT == null || _viewSettings == null)
+            if (_playerT == null || _cameraT == null || _viewSettings == null)
             {
                 return false;
             }
 
             Tick(0f);
             return _hasCompletedInitialUpdate;
-        }
-
-        /// <summary>
-        ///     ステージ演出などへカメラTransformの制御を委譲するため、外部制御モードへ切り替える。
-        /// </summary>
-        public void BeginExternalControl()
-        {
-            ClearInputState();
-            _isExternallyControlled = true;
-        }
-
-        /// <summary>
-        ///     外部制御モードを終了し、カメラシステムの制御へ戻す。
-        /// </summary>
-        public void EndExternalControl()
-        {
-            ClearInputState();
-            _isExternallyControlled = false;
         }
 
         /// <summary>
@@ -257,7 +235,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraFreeLookRotationCalculator _freeLookRotationCalculator;
         private CameraLookAtRotationCalculator _lookAtRotationCalculator;
         private CameraLockOnRangeChecker _lockOnRangeChecker;
-        private CameraLockOnBreakTracker _lockOnBreakTracker;
+        private CameraAutoLockOnReleaseTracker _autoLockOnReleaseTracker;
         private CameraShakeCalculator _shakeCalculator;
         private Action<Vector3, Vector3> _changeTargetAction;
         private Action<Vector3, Vector3> _updateCandidateAction;
@@ -267,9 +245,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Func<Guid, bool> _trySetTargetByIdFunc;
         private CameraLockOnState _lockOnState;
         private bool _hasCompletedInitialUpdate;
-        private float _autoLockOnIdleTimer;
-        private float _autoLockOnViewportGraceTimer;
-        private bool _isExternallyControlled;
         private bool _hasRequiredDependencies;
         private IEnvironmentSettingsViewModel _environmentSettingsViewModel;
 
@@ -309,7 +284,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void FixedUpdate()
         {
-            if (_updateMode != UpdateModeEnum.FixedUpdate || _isExternallyControlled) { return; }
+            if (_updateMode != UpdateModeEnum.FixedUpdate) { return; }
 
             Tick(Time.fixedDeltaTime);
         }
@@ -319,7 +294,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void Update()
         {
-            if (_updateMode != UpdateModeEnum.Update || _isExternallyControlled) { return; }
+            if (_updateMode != UpdateModeEnum.Update) { return; }
 
             Tick(Time.deltaTime);
         }
@@ -329,7 +304,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// </summary>
         private void LateUpdate()
         {
-            if (_updateMode != UpdateModeEnum.LateUpdate || _isExternallyControlled) { return; }
+            if (_updateMode != UpdateModeEnum.LateUpdate) { return; }
 
             Tick(Time.deltaTime);
         }
@@ -475,9 +450,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             }
 
             _lockOnState = CameraLockOnState.LockOnAuto;
-            _lockOnBreakTracker.Reset();
-            _autoLockOnIdleTimer = 0f;
-            _autoLockOnViewportGraceTimer = _viewSettings.AutoLockOnViewportGraceDuration;
+            _autoLockOnReleaseTracker.ResetOnHit();
         }
 
         /// <summary>
@@ -609,9 +582,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             }
 
             _lockOnState = CameraLockOnState.LockOnAuto;
-            _lockOnBreakTracker.Reset();
-            _autoLockOnIdleTimer = 0f;
-            _autoLockOnViewportGraceTimer = 0f;
+            _autoLockOnReleaseTracker.Reset();
             _changeTargetAction.Invoke(currentPosition, direction);
         }
 
@@ -625,9 +596,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             if (!IsLockOn())
             {
                 _lockOnState = CameraLockOnState.LockOnManual;
-                _lockOnBreakTracker.Reset();
-                _autoLockOnIdleTimer = 0f;
-                _autoLockOnViewportGraceTimer = 0f;
+                _autoLockOnReleaseTracker.Reset();
                 _changeTargetAction.Invoke(currentPosition, direction);
                 return;
             }
@@ -694,9 +663,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                     targetPosition = targetResult.TargetPosition;
                     if (_lockOnState == CameraLockOnState.LockOnAuto)
                     {
-                        _autoLockOnIdleTimer += deltaTime;
-                        _autoLockOnViewportGraceTimer = Mathf.Max(0f, _autoLockOnViewportGraceTimer - deltaTime);
-                        if (ShouldClearAutoLockOn(context, targetPosition))
+                        if (_autoLockOnReleaseTracker.Update(context, IsTargetWithinViewport(targetPosition)))
                         {
                             ClearLockOn();
                             targetPosition = Vector3.zero;
@@ -719,9 +686,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private void ClearLockOn()
         {
             _lockOnState = CameraLockOnState.Free;
-            _lockOnBreakTracker.Reset();
-            _autoLockOnIdleTimer = 0f;
-            _autoLockOnViewportGraceTimer = 0f;
+            _autoLockOnReleaseTracker.Reset();
             _clearTargetAction.Invoke();
         }
 
@@ -757,31 +722,19 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 // 視野外の対象へ切り替えた直後も追従できるよう、既存の猶予だけを更新する。
                 // 自動ロックの非命中タイマーと、手動ロックの継続条件は変えない。
-                _autoLockOnViewportGraceTimer = _viewSettings.AutoLockOnViewportGraceDuration;
+                _autoLockOnReleaseTracker.ExtendViewportGrace();
             }
         }
 
         /// <summary>
-        ///     オートロックオンを解除するべきかを判定する。
+        ///     ロックオン対象が有効ビューポート内にあるかを返す。
+        ///     カメラを取得できない場合は、視野外による解除を行わないよう範囲内として扱う。
         /// </summary>
-        /// <param name="context"> 今フレームの更新コンテキスト。 </param>
         /// <param name="targetPosition"> 現在のロックオン対象座標。 </param>
-        /// <returns> 解除するべき場合は true。 </returns>
-        private bool ShouldClearAutoLockOn(in CameraUpdateContext context, in Vector3 targetPosition)
+        /// <returns> 範囲内として扱う場合は true。 </returns>
+        private bool IsTargetWithinViewport(in Vector3 targetPosition)
         {
-            if (_autoLockOnIdleTimer >= _viewSettings.AutoLockOnReleaseDelay)
-            {
-                return true;
-            }
-
-            if (_autoLockOnViewportGraceTimer <= 0f
-                && _camera != null
-                && !_lockOnRangeChecker.IsWithinRange(_camera, targetPosition))
-            {
-                return true;
-            }
-
-            return _lockOnBreakTracker.Update(context);
+            return _camera == null || _lockOnRangeChecker.IsWithinRange(_camera, targetPosition);
         }
 
         /// <summary>
