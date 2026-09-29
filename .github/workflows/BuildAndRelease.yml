@@ -1427,90 +1427,28 @@ jobs:
             return [Math]::Round($DriveInfo.Free / 1GB, 2)
           }
 
-          # 実行中のCPU使用率の手動切り替え（PowerShell/SetBuildCpuMode.ps1）。
-          # コマンドが実行中ジョブの Runner.Worker のPIDを添えてファイルに書き、ここで読み取ってUnityに反映する。
-          # 別のジョブで書かれたファイルは、PIDが一致しないので無視する。
-          $CpuModeFile = Join-Path $env:ProgramData "SymphonyKillChord\build-cpu-mode.json"
+          # 実行中のCPU使用率の手動切り替え（PowerShell/SetBuildCpuMode.ps1）。処理は .github/scripts/BuildCpuMode.ps1 にある。
+          # ワークフロー1ステップの run は21000文字の上限があるため、関数は外部スクリプトに置く。
           $RunnerWorkerId = $null
           if ($env:RUNNER_OS -eq "Windows") {
             try {
-              $AncestorId = $PID
-              $VisitedIds = @{}
-              while ($AncestorId -and -not $VisitedIds.ContainsKey($AncestorId)) {
-                $VisitedIds[$AncestorId] = $true
-                $AncestorProcess = Get-CimInstance Win32_Process -Filter "ProcessId=$AncestorId" -ErrorAction Stop
-                if (-not $AncestorProcess) { break }
-                if ($AncestorProcess.Name -eq "Runner.Worker.exe") {
-                  $RunnerWorkerId = [int]$AncestorId
-                  break
-                }
-                $AncestorId = [int]$AncestorProcess.ParentProcessId
-              }
+              . (Join-Path "${{ github.workspace }}" ".github/scripts/BuildCpuMode.ps1")
+              $RunnerWorkerId = Get-RunnerWorkerId
             } catch {
-              Write-Host "[WARN]: Runner.Worker の特定に失敗しました。CPU使用率の手動切り替えは無効です: $_"
+              Write-Host "[WARN]: CPU使用率の手動切り替えを初期化できませんでした。切り替えは無効です: $_"
             }
           }
           if ($RunnerWorkerId) {
             Write-Host "[INFO]: CPU使用率は実行中に切り替えられます（PowerShell/SetBuildCpuMode.ps1、Runner.Worker PID: $RunnerWorkerId）。"
           }
 
-          # 手動切り替えが有効ならその割合、無ければ $null を返す
-          function Get-CpuModeOverridePercent {
-            if (-not $RunnerWorkerId -or -not (Test-Path -LiteralPath $CpuModeFile)) {
-              return $null
-            }
-            try {
-              $CpuMode = Get-Content -LiteralPath $CpuModeFile -Raw -Encoding UTF8 | ConvertFrom-Json
-            } catch {
-              return $null
-            }
-            if ([int]$CpuMode.runner_worker_pid -ne $RunnerWorkerId) {
-              return $null
-            }
-            if ("$($CpuMode.percent)%" -notin $AllowedCpuUsagePercentages) {
-              return $null
-            }
-            return [int]$CpuMode.percent
-          }
-
-          function Get-CpuCountForPercent([int]$Percent) {
-            $Capacity = [Math]::Min($MaximumAffinityCpuCount, $CpuCount)
-            return [int][Math]::Max(1, [Math]::Floor($Capacity * $Percent / 100))
-          }
-
-          function Get-AffinityMaskForCpuCount([int]$Count) {
-            if ($Count -eq $MaximumAffinityCpuCount) {
-              return [Int64]::MaxValue
-            }
-            return ([int64]1 -shl $Count) - 1
-          }
-
-          # Unity と、Unity が起動した子プロセス（コンパイラや Gradle など）にまとめて反映する。
-          # 子プロセスは起動時に親の設定を引き継ぐが、すでに動いているものには反映されないため。
-          function Set-ProcessTreeAffinity([int]$RootId, [Int64]$Mask) {
-            $AllProcesses = @(Get-CimInstance Win32_Process -Property ProcessId, ParentProcessId)
-            $TreeIds = [System.Collections.Generic.List[int]]::new()
-            $TreeIds.Add($RootId)
-            $SeenIds = @{ $RootId = $true }
-            for ($Index = 0; $Index -lt $TreeIds.Count; $Index++) {
-              foreach ($Candidate in $AllProcesses) {
-                $CandidateId = [int]$Candidate.ProcessId
-                if ([int]$Candidate.ParentProcessId -eq $TreeIds[$Index] -and -not $SeenIds.ContainsKey($CandidateId)) {
-                  $SeenIds[$CandidateId] = $true
-                  $TreeIds.Add($CandidateId)
-                }
-              }
-            }
-            $AppliedCount = 0
-            foreach ($TreeId in $TreeIds) {
-              try {
-                (Get-Process -Id $TreeId -ErrorAction Stop).ProcessorAffinity = $Mask
-                $AppliedCount++
-              } catch {
-                # 終了済みのプロセスや、権限のないプロセスは飛ばす
-              }
-            }
-            return $AppliedCount
+          # 手動切り替えがあれば @(割合, CPU数, マスク)、無ければ $null を返す
+          function Get-CpuModeAffinity {
+            if (-not $RunnerWorkerId) { return $null }
+            $Percent = Get-CpuModeOverridePercent $RunnerWorkerId $AllowedCpuUsagePercentages
+            if ($null -eq $Percent) { return $null }
+            $Count = Get-CpuCountForPercent $Percent $CpuCount $MaximumAffinityCpuCount
+            return @($Percent, $Count, (Get-AffinityMaskForCpuCount $Count $MaximumAffinityCpuCount))
           }
 
           function Clear-UnityLibraryForProfile {
@@ -1574,11 +1512,11 @@ jobs:
             # 手動切り替えが有効なら、その割合でUnityを起動する
             $ProfileCpuCount = $UnityCpuCount
             $ProfileAffinityMask = $AffinityMask
-            $CpuModeOverridePercent = Get-CpuModeOverridePercent
-            if ($null -ne $CpuModeOverridePercent) {
-              $ProfileCpuCount = Get-CpuCountForPercent $CpuModeOverridePercent
-              $ProfileAffinityMask = Get-AffinityMaskForCpuCount $ProfileCpuCount
-              Write-Host "[INFO]: CPU使用率の手動切り替えを適用します: $CpuModeOverridePercent%（$ProfileCpuCount CPU）"
+            $CpuModeAffinity = Get-CpuModeAffinity
+            if ($CpuModeAffinity) {
+              $ProfileCpuCount = $CpuModeAffinity[1]
+              $ProfileAffinityMask = $CpuModeAffinity[2]
+              Write-Host "[INFO]: CPU使用率の手動切り替えを適用します: $($CpuModeAffinity[0])%（$ProfileCpuCount CPU）"
             }
 
             $UnityArgs = @(
@@ -1640,17 +1578,13 @@ jobs:
                 }
 
                 # CPU使用率の手動切り替えを反映する（解除されたら既定値に戻す）
-                if ($env:RUNNER_OS -eq "Windows" -and $RunnerWorkerId) {
-                  $CpuModeOverridePercent = Get-CpuModeOverridePercent
-                  $DesiredAffinityMask = if ($null -ne $CpuModeOverridePercent) {
-                    Get-AffinityMaskForCpuCount (Get-CpuCountForPercent $CpuModeOverridePercent)
-                  } else {
-                    $AffinityMask
-                  }
+                if ($RunnerWorkerId) {
+                  $CpuModeAffinity = Get-CpuModeAffinity
+                  $DesiredAffinityMask = if ($CpuModeAffinity) { $CpuModeAffinity[2] } else { $AffinityMask }
                   if ($DesiredAffinityMask -ne $AppliedAffinityMask) {
                     $AppliedProcessCount = Set-ProcessTreeAffinity $UnityProcess.Id $DesiredAffinityMask
                     $AppliedAffinityMask = $DesiredAffinityMask
-                    $CpuModeLabel = if ($null -ne $CpuModeOverridePercent) { "$CpuModeOverridePercent%" } else { "既定値" }
+                    $CpuModeLabel = if ($CpuModeAffinity) { "$($CpuModeAffinity[0])%" } else { "既定値" }
                     Write-Host "[INFO]: CPU使用率を $CpuModeLabel に切り替えました（マスク: 0x$('{0:X}' -f $DesiredAffinityMask)、$AppliedProcessCount プロセス）。"
                   }
                 }
