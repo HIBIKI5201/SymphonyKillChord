@@ -1,0 +1,31 @@
+{
+  "name": "Sinfonia Operator",
+  "used_by": [
+    ".github/workflows/SinfoniaOperator.yml",
+    ".github/workflows/DeploySinfoniaOperator.yml"
+  ],
+  "protection_rules": [],
+  "deployment_branch_policy": null,
+  "can_admins_bypass": true,
+  "variables": {
+    "ORACLE_RUNTIME": "DeploySinfoniaOperator.yml が発行する .NET のランタイム識別子（未設定時は linux-x64）",
+    "DISCORD_SPRINT_CHANNEL_ID": "未参照。ワークフローから渡していない（公開設定はリポジトリ内の env JSON を使う）",
+    "DISCORD_TASK_ALERT_CHANNEL_ID": "未参照。同上",
+    "DISCORD_TASK_CHANNEL_ID": "未参照。同上",
+    "NOTION_DATABASE_DATE_PROPERTY": "未参照。同上",
+    "NOTION_DATABASE_NAME_PROPERTY": "未参照。同上",
+    "NOTION_DATABASE_STATUS_PROPERTY": "未参照。同上",
+    "NOTION_DATABASE_STATUS_TASK_DONE_PROPERTY": "未参照。同上",
+    "NOTION_SPRINT_DATABASE_ID": "未参照。同上",
+    "NOTION_TASK_DATABASE_ID": "未参照。同上"
+  },
+  "secrets": {
+    "DISCORD_BOT_TOKEN": "Sinfonia Operator（毎朝の定期実行）が Discord に投稿するための Bot トークン",
+    "NOTION_TOKEN": "Sinfonia Operator が Notion を読むためのインテグレーショントークン",
+    "ORACLE_HOST": "Sinfonia Operator の配備先サーバーのホスト名",
+    "ORACLE_SSH_USER": "配備先サーバーの SSH ユーザー名",
+    "ORACLE_SSH_PRIVATE_KEY": "配備先サーバーへの SSH 秘密鍵",
+    "ORACLE_KNOWN_HOSTS": "配備先サーバーの known_hosts",
+    "DISCORD_WEBHOOK": "未参照。ワークフローから渡していない"
+  }
+}
