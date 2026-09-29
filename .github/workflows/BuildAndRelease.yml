@@ -1608,10 +1608,22 @@ jobs:
         
 # ==================================================================================================
 
+      # 変数更新用の GitHub App（sinfonia-variable-updater）からトークンを発行する。
+      # トークンの有効期限は1時間のため、ジョブ開始時ではなく使用する直前に発行する。
+      # App が未設定（Client ID 未登録）の間は発行せず、従来の VAR_UPDATE_TOKEN を使う。
+      # App と権限の詳細は .github/apps/README.md を参照。
+      - name: 変数更新用トークンの発行（バージョン解決）
+        id: variable_token_resolve
+        if: vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID != ''
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID }}
+          private-key: ${{ secrets.SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY }}
+
       - name: 現行ビルドバージョンの解決
         env:
-          VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
-          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
+          VAR_UPDATE_TOKEN: ${{ steps.variable_token_resolve.outputs.token || secrets.VAR_UPDATE_TOKEN }}
+          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -1932,11 +1944,20 @@ jobs:
 
 # ==================================================================================================
 
+      # ビルド後はバージョン解決時のトークンが失効している可能性があるため、改めて発行する。
+      - name: 変数更新用トークンの発行（パッチ番号更新）
+        id: variable_token_increment
+        if: steps.create_release.outcome == 'success' && vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID != ''
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID }}
+          private-key: ${{ secrets.SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY }}
+
       - name: リリースのパッチ番号のインクリメント
         if: steps.create_release.outcome == 'success'
         env:
-          VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
-          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
+          VAR_UPDATE_TOKEN: ${{ steps.variable_token_increment.outputs.token || secrets.VAR_UPDATE_TOKEN }}
+          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
