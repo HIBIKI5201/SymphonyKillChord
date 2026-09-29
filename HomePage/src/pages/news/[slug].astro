@@ -1,0 +1,110 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { news, type NewsItem } from '../../data/news';
+
+export function getStaticPaths() {
+	return news.map((item) => ({ params: { slug: item.slug }, props: { item } }));
+}
+
+interface Props {
+	item: NewsItem;
+}
+
+const { item } = Astro.props;
+const listHref = `${import.meta.env.BASE_URL}news`;
+---
+
+<Layout title={`${item.title} | Symphony Kill Chord`} description={item.body[0]}>
+	<main>
+		<PageHeader eyebrow="News" title={item.title} />
+
+		<article>
+			<time datetime={item.date}>{item.date}</time>
+			{item.body.map((paragraph) => <p>{paragraph}</p>)}
+			{
+				item.links.length > 0 && (
+					<ul class="links">
+						{item.links.map((link) => (
+							<li>
+								<a href={link.href} target="_blank" rel="noopener noreferrer">
+									{link.label} <span aria-hidden="true">↗</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				)
+			}
+		</article>
+
+		<a class="back" href={listHref}>お知らせ一覧へ戻る</a>
+	</main>
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		width: 100%;
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	article {
+		padding: 32px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-surface-border);
+	}
+
+	time {
+		display: block;
+		margin-bottom: 20px;
+		padding-bottom: 14px;
+		border-bottom: 1px solid var(--color-signal-dim);
+		font-family: var(--font-mono);
+		font-size: 0.875rem;
+		color: var(--color-label-muted);
+	}
+
+	p {
+		margin: 0 0 16px;
+		font-size: 0.9375rem;
+		line-height: 1.8;
+		color: var(--color-text-primary);
+	}
+
+	.links {
+		list-style: none;
+		margin: 24px 0 0;
+		padding: 0;
+	}
+
+	.links li + li {
+		margin-top: 8px;
+	}
+
+	.links a,
+	.back {
+		color: var(--color-signal);
+		text-decoration: none;
+	}
+
+	.links a:hover,
+	.links a:focus-visible,
+	.back:hover,
+	.back:focus-visible {
+		text-decoration: underline;
+	}
+
+	.back {
+		display: inline-block;
+		margin-top: 32px;
+	}
+
+	@media (max-width: 600px) {
+		article {
+			padding: 24px 20px;
+		}
+	}
+</style>
