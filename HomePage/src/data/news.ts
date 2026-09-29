@@ -33,7 +33,7 @@ export const news: NewsItem[] = [
 	},
 	{
 		slug: 'famitsu-2026-09',
-		date: '2026-09-17',
+		date: '2026-09-19',
 		title: 'ファミ通.comで紹介されました',
 		body: [
 			'ファミ通.comにて、本間ひまわりさん（にじさんじ）がバンタンの学生のゲーム制作をサポートした企画の記事が公開され、『Symphony Kill Chord』が紹介されました。',
