@@ -16,6 +16,6 @@ GitHub Actions の Environment の構成を記録したもの。
 | Environment | 用途 |
 | --- | --- |
 | [AutoBuildAndRelease](AutoBuildAndRelease.json) | Unity の自動ビルドとリリース（`BuildAndRelease.yml`） |
-| [Sinfonia Operator](SinfoniaOperator.json) | Sinfonia Operator の定期実行と配備（`SinfoniaOperator.yml` / `DeploySinfoniaOperator.yml`） |
+| [Sinfonia Operator](SinfoniaOperator.json) | Sinfonia Operator の日次通知（無効化中）と配備（`SinfoniaOperator.yml` / `DeploySinfoniaOperator.yml`） |
 | [github-pages](github-pages.json) | ホームページの GitHub Pages への配備（`HomePageDeploy.yml`） |
 | [(リポジトリ全体)](repository.json) | Environment に属さない、リポジトリの Secret・変数 |

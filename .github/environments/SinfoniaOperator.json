@@ -7,6 +7,7 @@
   "protection_rules": [],
   "deployment_branch_policy": null,
   "can_admins_bypass": true,
+  "note": "SinfoniaOperator.yml（[Bot] Sinfonia Operator Daily Notification）は 2026-09-29 時点で手動で無効化されている。DeploySinfoniaOperator.yml は有効。",
   "variables": {
     "ORACLE_RUNTIME": "DeploySinfoniaOperator.yml が発行する .NET のランタイム識別子（未設定時は linux-x64）",
     "DISCORD_SPRINT_CHANNEL_ID": "未参照。ワークフローから渡していない（公開設定はリポジトリ内の env JSON を使う）",
