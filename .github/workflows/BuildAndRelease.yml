@@ -1427,6 +1427,30 @@ jobs:
             return [Math]::Round($DriveInfo.Free / 1GB, 2)
           }
 
+          # 実行中のCPU使用率の手動切り替え（PowerShell/SetBuildCpuMode.ps1）。処理は .github/scripts/BuildCpuMode.ps1 にある。
+          # ワークフロー1ステップの run は21000文字の上限があるため、関数は外部スクリプトに置く。
+          $RunnerWorkerId = $null
+          if ($env:RUNNER_OS -eq "Windows") {
+            try {
+              . (Join-Path "${{ github.workspace }}" ".github/scripts/BuildCpuMode.ps1")
+              $RunnerWorkerId = Get-RunnerWorkerId
+            } catch {
+              Write-Host "[WARN]: CPU使用率の手動切り替えを初期化できませんでした。切り替えは無効です: $_"
+            }
+          }
+          if ($RunnerWorkerId) {
+            Write-Host "[INFO]: CPU使用率は実行中に切り替えられます（PowerShell/SetBuildCpuMode.ps1、Runner.Worker PID: $RunnerWorkerId）。"
+          }
+
+          # 手動切り替えがあれば @(割合, CPU数, マスク)、無ければ $null を返す
+          function Get-CpuModeAffinity {
+            if (-not $RunnerWorkerId) { return $null }
+            $Percent = Get-CpuModeOverridePercent $RunnerWorkerId $AllowedCpuUsagePercentages
+            if ($null -eq $Percent) { return $null }
+            $Count = Get-CpuCountForPercent $Percent $CpuCount $MaximumAffinityCpuCount
+            return @($Percent, $Count, (Get-AffinityMaskForCpuCount $Count $MaximumAffinityCpuCount))
+          }
+
           function Clear-UnityLibraryForProfile {
             param(
               [Parameter(Mandatory = $true)]
@@ -1485,9 +1509,19 @@ jobs:
               continue
             }
 
+            # 手動切り替えが有効なら、その割合でUnityを起動する
+            $ProfileCpuCount = $UnityCpuCount
+            $ProfileAffinityMask = $AffinityMask
+            $CpuModeAffinity = Get-CpuModeAffinity
+            if ($CpuModeAffinity) {
+              $ProfileCpuCount = $CpuModeAffinity[1]
+              $ProfileAffinityMask = $CpuModeAffinity[2]
+              Write-Host "[INFO]: CPU使用率の手動切り替えを適用します: $($CpuModeAffinity[0])%（$ProfileCpuCount CPU）"
+            }
+
             $UnityArgs = @(
               "-batchmode",
-              "-job-worker-count", "$UnityCpuCount",
+              "-job-worker-count", "$ProfileCpuCount",
               "-projectPath", "${{ github.workspace }}",
               "-executeMethod", "$ExecuteMethod",
               "-buildMode", "$env:BUILD_MODE",
@@ -1510,7 +1544,7 @@ jobs:
               # ProcessorAffinity は Windows 専用API。macOS/Linux ではスキップする。
               if ($env:RUNNER_OS -eq "Windows") {
                 try {
-                  $UnityProcess.ProcessorAffinity = $AffinityMask
+                  $UnityProcess.ProcessorAffinity = $ProfileAffinityMask
                   Write-Host "[INFO]: Unity プロセッサアフィニティを設定しました。"
                 } catch {
                   Write-Host "[WARN]: Unity プロセッサアフィニティの設定に失敗しました。ビルドは続行します: $_"
@@ -1518,6 +1552,7 @@ jobs:
               }
 
               $ProfileStartedAt = [DateTime]::UtcNow
+              $AppliedAffinityMask = $ProfileAffinityMask
               $StopReason = $null
               while (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
                 $ElapsedSeconds = ([DateTime]::UtcNow - $ProfileStartedAt).TotalSeconds
@@ -1539,6 +1574,18 @@ jobs:
                     $StopReason = "LogSize"
                     Write-Host "[ERROR]: $ProfileName のUnityログが $LogSizeGB GBまで肥大化したため、ランナー保護のため停止します。"
                     break
+                  }
+                }
+
+                # CPU使用率の手動切り替えを反映する（解除されたら既定値に戻す）
+                if ($RunnerWorkerId) {
+                  $CpuModeAffinity = Get-CpuModeAffinity
+                  $DesiredAffinityMask = if ($CpuModeAffinity) { $CpuModeAffinity[2] } else { $AffinityMask }
+                  if ($DesiredAffinityMask -ne $AppliedAffinityMask) {
+                    $AppliedProcessCount = Set-ProcessTreeAffinity $UnityProcess.Id $DesiredAffinityMask
+                    $AppliedAffinityMask = $DesiredAffinityMask
+                    $CpuModeLabel = if ($CpuModeAffinity) { "$($CpuModeAffinity[0])%" } else { "既定値" }
+                    Write-Host "[INFO]: CPU使用率を $CpuModeLabel に切り替えました（マスク: 0x$('{0:X}' -f $DesiredAffinityMask)、$AppliedProcessCount プロセス）。"
                   }
                 }
               }
