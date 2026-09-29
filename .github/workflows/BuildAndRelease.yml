@@ -71,7 +71,8 @@ jobs:
       contents: read
       pull-requests: read  # 後続実行のPRがマージ済みか調べるため。
     outputs:
-      should_run: ${{ steps.release_age.outputs.should_run }}
+      # 経過時間とUnityプロジェクトの変更の両方の条件を満たしたときだけビルドする。
+      should_run: ${{ steps.release_age.outputs.should_run == 'true' && steps.unity_change.outputs.changed == 'true' }}
       hours: ${{ steps.release_age.outputs.hours }}
     env:
       RELEASE_THRESHOLD_HOURS: ${{ vars.RELEASE_THRESHOLD_HOURS }}
@@ -170,7 +171,11 @@ jobs:
             exit 0
           fi
           
-          echo "[INFO]: 最新リリースの公開日時: $RELEASE_DATE"
+          # Unityプロジェクトの変更チェックで比較の起点にするため、最新リリースのタグ名を渡します
+          LAST_TAG=$(echo "$RESPONSE" | jq -r --arg prefix "${TAG_PREFIX}-" '[.[] | select(.tag_name != null and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .tag_name // empty')
+          echo "last_tag=$LAST_TAG" >> $GITHUB_OUTPUT
+
+          echo "[INFO]: 最新リリースの公開日時: $RELEASE_DATE (タグ: $LAST_TAG)"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
           HOURS=$(( (NOW_TS - RELEASE_TS) / 3600 ))
@@ -192,6 +197,65 @@ jobs:
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "[Decision]: should_run=true (最終リリースが $HOURS hours前の分、Threshold ${RELEASE_THRESHOLD_HOURS}hours 超過)"
+          fi
+
+      # 前回のリリースから今回のマージまでに、Unityプロジェクト（Assets / Packages / ProjectSettings）の
+      # 変更が無ければビルドしない。マージしたPRの差分だけを見ると、経過時間の条件で見送られた
+      # Unityの変更が、後からUnity外だけのPRがマージされたときに取り残されるため、前回のリリースを起点にする。
+      - name: Unityプロジェクトの変更をチェック
+        id: unity_change
+        if: steps.release_age.outputs.should_run == 'true'
+        env:
+          LAST_TAG: ${{ steps.release_age.outputs.last_tag }}
+          HEAD_SHA: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+        run: |
+          set -e
+          echo "========== Unityプロジェクト変更チェック =========="
+
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (手動実行)"
+            exit 0
+          fi
+
+          if [ -z "${LAST_TAG}" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (比較の起点になるリリースが無い)"
+            exit 0
+          fi
+
+          echo "[INFO]: 比較範囲: ${LAST_TAG}...${HEAD_SHA}"
+          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/compare/${LAST_TAG}...${HEAD_SHA}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          RESPONSE=$(echo "$RESPONSE" | head -n -1)
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            # 比較できないときは、ビルドを取りこぼさないほうに倒す
+            echo "[WARN]: 差分の取得に失敗しました (HTTP $HTTP_CODE)。ビルドを実行します。"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (差分を取得できなかった)"
+            exit 0
+          fi
+
+          FILE_COUNT=$(echo "$RESPONSE" | jq '.files | length')
+          # compare API が返すファイルは最大300件のため、上限に達したときは全件を確かめられない
+          if [ "$FILE_COUNT" -ge 300 ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (変更ファイルが ${FILE_COUNT} 件以上あり、全件を確認できない)"
+            exit 0
+          fi
+
+          UNITY_FILES=$(echo "$RESPONSE" | jq -r '.files[] | [.filename, (.previous_filename // empty)] | .[]' | grep -E '^(Assets|Packages|ProjectSettings)/' | sort -u || true)
+          UNITY_COUNT=$(echo -n "$UNITY_FILES" | grep -c '' || true)
+          echo "[INFO]: 変更ファイル: ${FILE_COUNT} 件 (うちUnityプロジェクト: ${UNITY_COUNT} 件)"
+
+          if [ "$UNITY_COUNT" -gt 0 ]; then
+            echo "$UNITY_FILES" | head -n 20 | sed 's/^/  - /'
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (Unityプロジェクトの変更あり)"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=false (前回のリリース ${LAST_TAG} からUnityプロジェクトの変更なし)"
           fi
 
   build-and-release:
