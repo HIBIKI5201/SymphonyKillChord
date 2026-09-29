@@ -1,0 +1,13 @@
+{
+  "name": "sinfonia-variable-updater",
+  "url": "https://github.com/HIBIKI5201/SymphonyKillChord",
+  "description": "Symphony Kill Chord の CI がリポジトリ変数（ビルドバージョン）を読み書きするための App。",
+  "public": false,
+  "hook_attributes": {
+    "active": false
+  },
+  "default_permissions": {
+    "actions_variables": "write"
+  },
+  "default_events": []
+}
