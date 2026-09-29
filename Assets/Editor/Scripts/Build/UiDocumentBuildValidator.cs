@@ -35,9 +35,9 @@ namespace KillChord.Editor.Build
         private const int VALIDATION_ORDER = -300;
         private const string PROJECT_URI_PREFIX = "project://database/";
         private const string TITLE_PATH =
-            "Assets/Level/Scenes/Develop/OutGameTest/Title/UIToolkit/TitleScreen.uxml";
+            "Assets/Level/UI/OutGame/Title/TitleScreen.uxml";
         private const string OUT_GAME_PATH =
-            "Assets/Level/Scenes/Develop/OutGameTest/ScreenTransitionTest/UI Toolkit/OutGame.uxml";
+            "Assets/Level/UI/OutGame/Screen/OutGame.uxml";
         private const ImportAssetOptions IMPORT_OPTIONS = ImportAssetOptions.ForceUpdate
                                                          | ImportAssetOptions.ForceSynchronousImport
                                                          | ImportAssetOptions.DontDownloadFromCacheServer;
