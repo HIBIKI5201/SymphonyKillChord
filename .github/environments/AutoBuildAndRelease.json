@@ -13,7 +13,6 @@
   "secrets": {
     "GOOGLE_DRIVE_API_KEY": "ビルド前に展開する unitypackage を Google Drive から取得するための API キー",
     "GOOGLE_DRIVE_FOLDER_ID": "unitypackage を置いている Google Drive フォルダの ID",
-    "SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY": "GitHub App sinfonia-variable-updater の秘密鍵（.pem の中身）",
-    "VAR_UPDATE_TOKEN": "移行期間用。リポジトリ変数を読み書きする Fine-grained token。App の動作を確認したら削除する"
+    "SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY": "GitHub App sinfonia-variable-updater の秘密鍵（.pem の中身）"
   }
 }

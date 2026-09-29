@@ -8,8 +8,8 @@ CI で使う GitHub App の設定を記録したもの。
 
 ## sinfonia-variable-updater
 
-`BuildAndRelease.yml` がリポジトリ変数（`VERSION_BASE_*` / `BUILD_VERSION_*`）を読み書きするための App。
-`GITHUB_TOKEN` にはリポジトリ変数を書き換える権限がないため、以前は個人の Fine-grained token（`VAR_UPDATE_TOKEN`）を使っていた。
+`BuildAndRelease.yml` がリポジトリ変数（`VERSION_*`）を読み書きするための App。
+`GITHUB_TOKEN` にはリポジトリ変数を書き換える権限がないため、以前は個人の Fine-grained token（`VAR_UPDATE_TOKEN`、2026-09-29 に削除）を使っていた。
 App に切り替えると、トークンの期限切れや、発行した個人のアカウントへの依存がなくなる。
 
 | 項目 | 値 |
@@ -19,6 +19,7 @@ App に切り替えると、トークンの期限切れや、発行した個人�
 | インストール先 | `HIBIKI5201/SymphonyKillChord` のみ |
 | 権限 | Repository permissions → Variables: Read and write（Metadata: Read-only は自動で付く） |
 | Webhook | 使わない |
+| App ID | `5119490` |
 | Client ID | Environment `AutoBuildAndRelease` の変数 `SINFONIA_VARIABLE_UPDATER_CLIENT_ID` |
 | 秘密鍵 | Environment `AutoBuildAndRelease` の Secret `SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY` |
 
@@ -26,7 +27,6 @@ App に切り替えると、トークンの期限切れや、発行した個人�
 
 変数を読み書きするステップの直前で `actions/create-github-app-token` を使い、トークンを発行する。
 発行されるトークンは1時間で失効するため、ジョブの最初で発行してビルド後まで使い回さない。
-Client ID の変数が未登録のときはトークンを発行せず、従来の `VAR_UPDATE_TOKEN` を使う（移行期間用）。
 
 `create-github-app-token` には Variables 用の `permission-*` 入力がないため、権限の絞り込みは App 側の権限設定で行う。
 App に Variables 以外の権限を足すと、ワークフローのトークンにもその権限が付く点に注意する。
