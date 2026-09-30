@@ -13,8 +13,8 @@ const { items } = Astro.props;
 		{items.map((item) => (
 			<li>
 				<a href={newsHref(item)}>
-					<time datetime={item.date}>{item.date}</time>
-					<span>{item.title}</span>
+					<time datetime={item.data.date}>{item.data.date}</time>
+					<span>{item.data.title}</span>
 				</a>
 			</li>
 		))}
