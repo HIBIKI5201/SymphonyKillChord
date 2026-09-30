@@ -125,7 +125,7 @@ foreach ($path in $submodulePaths) {
         Add-Result "サブモジュール $path" 'Fixed' '取得しました。'
     }
     else {
-        Add-Result "サブモジュール $path" 'Error' '取得できませんでした（上に出た git のエラーを参照）。非公開リポジトリの閲覧権限が無い可能性があります。リードに GitHub の招待を頼んでください。'
+        Add-Result "サブモジュール $path" 'Error' '取得できませんでした。上に出た git のエラーを確認してください。認証や「Repository not found」のエラーなら、非公開リポジトリの閲覧権限がありません。リードに GitHub の招待を頼んでください。'
     }
 }
 
