@@ -14,9 +14,10 @@ secrets from `SinfoniaOperator/sinfonia-operator.secrets.json` (gitignored), in 
 | `NotionMarkdownExporter` | Notion root page + subtree | `Docs/NotionSpecifications/` | `NOTION_TOKEN` |
 | `DiscordLogExporter` | channels in `DISCORD_LOG_CHANNEL_IDS` | `Docs/DiscordLog/` | `DISCORD_BOT_TOKEN` |
 
-Both output directories are **gitignored snapshots**, not live data. Read them first; only
-run an importer when the snapshot is missing, or is old enough to matter for the question.
-Check staleness with file mtimes (`ls -l`), not git.
+Both outputs are snapshots, not live data. `Docs/DiscordLog/` is gitignored; check its staleness
+with file mtimes (`ls -l`). `Docs/NotionSpecifications/` is a submodule synced by CI — see below.
+Read them first; only run an importer when the snapshot is missing, or is old enough to matter
+for the question.
 
 ## Before running either
 
@@ -27,6 +28,22 @@ Never hardcode a token; if one is missing the tool says so — ask the user to f
 ## Notion → Docs/NotionSpecifications
 
 ~1,800 Markdown pages plus downloaded images/attachments.
+
+**Normally, do not run the exporter — pull instead.** `Docs/NotionSpecifications` is a git
+submodule (private repo `SymphonyKillChord_Specifications`). The
+`[Bot] Notion Specifications Sync` workflow (`.github/workflows/NotionSpecificationsSync.yml`)
+is the only thing that fetches from Notion (every 3 hours) and pushes there, so the team does not
+spend Notion API quota. Unity pulls it on editor start (`NotionSpecificationsAutoPull`). To
+update by hand:
+
+```bash
+git submodule update --init --remote --depth 1 -- Docs/NotionSpecifications
+```
+
+Check freshness with `git -C Docs/NotionSpecifications log -1`. Only run the exporter locally
+when the user needs changes newer than the last sync; it writes into the submodule's working
+tree, so afterwards discard those local changes (`git -C Docs/NotionSpecifications checkout -- . && git -C Docs/NotionSpecifications clean -fd`)
+after confirming with the user, or the next pull will fail.
 
 ```bash
 ./SinfoniaOperator/NotionMarkdownExporter.exe --output "Docs/NotionSpecifications"
