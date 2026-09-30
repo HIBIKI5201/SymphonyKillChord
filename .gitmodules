@@ -2,3 +2,9 @@
 	path = Assets/AssetStoreTools
 	url = ../SymphonyKillChord_AssetStoreTools.git
 	branch = main
+[submodule "Docs/NotionSpecifications"]
+	path = Docs/NotionSpecifications
+	url = ../SymphonyKillChord_Specifications.git
+	branch = main
+	ignore = all
+	shallow = true
