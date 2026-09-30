@@ -12,6 +12,9 @@ namespace SinfoniaStudio.NotionMarkdownExporter
     {
         private const int MAX_NAME_LENGTH = 80;
 
+        // 実行するOSに関係なく、Windowsで開けるファイル名にする。CIはLinuxで書き出し、各自はWindowsで読むため。
+        private static readonly HashSet<char> _invalidWindowsCharacters = new("<>:\"/\\|?*");
+
         private static readonly HashSet<string> _reservedWindowsNames = new(
             new[]
             {
@@ -61,6 +64,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         internal static string CreateSafeName(string value)
         {
             HashSet<char> invalidCharacters = new(Path.GetInvalidFileNameChars());
+            invalidCharacters.UnionWith(_invalidWindowsCharacters);
             char[] characters = value.Trim()
                 .Select(character => invalidCharacters.Contains(character) || char.IsControl(character) ? '_' : character)
                 .ToArray();
@@ -74,6 +78,18 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             if (_reservedWindowsNames.Contains(result)) { result = $"_{result}"; }
             if (result.Length > MAX_NAME_LENGTH) { result = result[..MAX_NAME_LENGTH].TrimEnd('.', ' '); }
             return result;
+        }
+
+        /// <summary>
+        ///     相対パスの各部分に、Windowsで使えない文字が含まれるかを調べる。
+        ///     Windows以外で書き出した古い出力を見つけ、新しい名前で書き直すために使う。
+        /// </summary>
+        /// <param name="relativePath">出力先からの相対パス。</param>
+        /// <returns>使えない文字が含まれる場合はtrue。</returns>
+        internal static bool ContainsInvalidWindowsCharacters(string relativePath)
+        {
+            return relativePath.Split('/', '\\').Any(segment =>
+                segment.Any(character => _invalidWindowsCharacters.Contains(character) || char.IsControl(character)));
         }
 
         /// <summary>
