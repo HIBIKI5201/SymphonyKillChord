@@ -114,14 +114,18 @@ foreach ($path in $submodulePaths) {
     if ($ignore -eq 'all') { $arguments += @('--remote', '--depth', '1') }
     $arguments += @('--', $path)
 
+    # 大きなサブモジュールは時間がかかるので、git の進捗表示をそのまま見せる。
     Write-Host "  $path を取得しています..."
-    $result = Invoke-Git $arguments
-    if ($result.ExitCode -eq 0) {
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    & git -C $RepoRoot @arguments
+    $exitCode = $LASTEXITCODE
+    $ErrorActionPreference = $previous
+    if ($exitCode -eq 0) {
         Add-Result "サブモジュール $path" 'Fixed' '取得しました。'
     }
     else {
-        $firstLine = ($result.Output -split "`n" | Where-Object { $_ } | Select-Object -First 1)
-        Add-Result "サブモジュール $path" 'Error' "取得できませんでした。非公開リポジトリの閲覧権限が無い可能性があります。リードに GitHub の招待を頼んでください。（$firstLine）"
+        Add-Result "サブモジュール $path" 'Error' '取得できませんでした（上に出た git のエラーを参照）。非公開リポジトリの閲覧権限が無い可能性があります。リードに GitHub の招待を頼んでください。'
     }
 }
 
