@@ -74,12 +74,12 @@ gh pr create --base feature/<段階>/<作業名>/master --head feature/<段階>/
   --title "<作業内容の要約>" --body-file <本文ファイル>
 ```
 
-本文ファイルは scratchpad に書く。`ValidateFeaturePRTarget.yml` が、マージ先が同じ階層の `master` かどうかを検査する（commit status `feature-pr-target`）。
+本文ファイルは scratchpad に書く。`ValidatePRTarget.yml` が、すべてのPRについてマージ元とマージ先の組み合わせを検査する（commit status `pr-target`）。作業ブランチのマージ先は同じ階層の `master` だけが通る。
 
 ## 4. master へセルフマージする
 
 ```bash
-gh pr checks <PR番号>          # feature-pr-target が成功していること
+gh pr checks <PR番号>          # pr-target が成功していること
 gh pr merge <PR番号> --merge   # マージコミットで取り込む（squash しない）
 ```
 
