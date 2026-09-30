@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
@@ -24,7 +25,7 @@ namespace KillChord.Runtime.Composition.Persistent.Session
     /// <summary>
     ///     プレイセッションのセーブデータから起動時に開くシーンを決め、シーン間で持ち込む選択状態を用意する。
     ///     <para>
-    ///         シーン間の選択状態（バトル・ミッション・シナリオ）は常駐シーンが登録するため、
+    ///         シーン間の選択状態（バトル・ミッション・シナリオ・予約済み遷移）は常駐シーンが登録するため、
     ///         どのシーンから開始しても各シーンの初期化に必要な状態が揃う。
     ///         起動後は画面の切り替わりを監視し、最後にいた画面と選択中のステージをセーブデータへ記録する。
     ///     </para>
@@ -70,7 +71,9 @@ namespace KillChord.Runtime.Composition.Persistent.Session
             _selectedBattleStageState = GetOrRegister<SelectedBattleStageState>(ref _ownsBattleStageState);
             _selectedMissionState = GetOrRegister<SelectedMissionState>(ref _ownsMissionState);
             _selectedScenarioState = GetOrRegister<SelectedScenarioState>(ref _ownsScenarioState);
-            if (_selectedBattleStageState == null || _selectedMissionState == null || _selectedScenarioState == null)
+            _pendingNodeTransitionState = GetOrRegister<PendingNodeTransitionState>(ref _ownsPendingNodeTransitionState);
+            if (_selectedBattleStageState == null || _selectedMissionState == null || _selectedScenarioState == null
+                || _pendingNodeTransitionState == null)
             {
                 Debug.LogError($"[{nameof(PlaySessionInitializer)}] シーン間の選択状態を登録できませんでした。", this);
                 return false;
@@ -129,7 +132,10 @@ namespace KillChord.Runtime.Composition.Persistent.Session
             UnregisterIfOwned(_selectedBattleStageState, ref _ownsBattleStageState);
             UnregisterIfOwned(_selectedMissionState, ref _ownsMissionState);
             UnregisterIfOwned(_selectedScenarioState, ref _ownsScenarioState);
+            UnregisterIfOwned(_pendingNodeTransitionState, ref _ownsPendingNodeTransitionState);
             _selectedBattleStageState = null;
+            _pendingNodeTransitionState = null;
+            _resumeStageTree = null;
             _selectedMissionState = null;
             _selectedScenarioState = null;
             _sessionData = null;
@@ -163,15 +169,18 @@ namespace KillChord.Runtime.Composition.Persistent.Session
 
         private PlaySessionData _sessionData;
         private StageDefinition _resumeStageDefinition;
+        private StageTree _resumeStageTree;
         private SelectedBattleStageState _selectedBattleStageState;
         private SelectedMissionState _selectedMissionState;
         private SelectedScenarioState _selectedScenarioState;
+        private PendingNodeTransitionState _pendingNodeTransitionState;
         private ISceneInitializationNotifier _sceneInitializationNotifier;
         private string _firstSceneName;
         private bool _isFirstSceneKeepLoading;
         private bool _ownsBattleStageState;
         private bool _ownsMissionState;
         private bool _ownsScenarioState;
+        private bool _ownsPendingNodeTransitionState;
         private bool _isSaving;
         private bool _hasPendingSave;
 
@@ -228,6 +237,7 @@ namespace KillChord.Runtime.Composition.Persistent.Session
                 }
 
                 StageTree stageTree = stageTreeAsset.Create(waveDefinitionRepository);
+                _resumeStageTree = stageTree;
                 if (!stageTree.TryGetDefinition(stageId, out StageDefinition stageDefinition))
                 {
                     Debug.LogWarning(
@@ -268,7 +278,15 @@ namespace KillChord.Runtime.Composition.Persistent.Session
                 case PlaySessionScene.Scenario when _resumeStageDefinition is ScenarioStageDefinition scenarioStage:
                     if (_sessionData.IsOpeningTutorialScenario)
                     {
+                        // タイトルから始めた場合と同じく、完了後はチュートリアル戦闘へ直接進む。
                         _selectedScenarioState.SelectOpeningTutorialScenario(scenarioStage);
+                        if (!OpeningTutorialRoute.TryReserveTutorialBattle(
+                                _resumeStageTree, scenarioStage, _pendingNodeTransitionState, _outGameSceneName))
+                        {
+                            Debug.LogWarning(
+                                $"[{nameof(PlaySessionInitializer)}] チュートリアル戦闘を予約できないため、OutGame から開始します。",
+                                this);
+                        }
                     }
                     else
                     {

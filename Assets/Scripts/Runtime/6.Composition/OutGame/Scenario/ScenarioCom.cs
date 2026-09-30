@@ -4,9 +4,13 @@ using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Application.OutGame.Sortie;
+using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.OutGame.Sortie;
+using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.Composition.Persistent.SceneManagement;
 using KillChord.Runtime.Domain.OutGame.Scenario;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Addressables;
@@ -456,7 +460,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         {
             PendingNodeTransitionState pending = _pendingNodeTransitionState;
             OutGameSortieController sortie = _outGameSortieController;
-            if (pending == null || sortie == null
+            if (pending == null
                 || !pending.TryPeekCompleted(out PendingNodeTransition candidate))
             {
                 return ScenarioTransitionResult.None;
@@ -481,8 +485,10 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             // アンロード前に必要な値を保持し、await後はCompositionのフィールドを使用しません。
             string sceneName = gameObject.scene.name;
             int selectionRevision = _selectedScenarioState.SelectionRevision;
-            NodeTransitionExecutor executor = new(sortie);
-            ScenarioBattleSortieResult result = await executor.TryExecuteAsync(candidate, sceneName, selectionRevision);
+            // タイトルから直接始めたシナリオには OutGame が無いため、シナリオから直接出撃する。
+            ScenarioBattleSortieResult result = sortie != null
+                ? await new NodeTransitionExecutor(sortie).TryExecuteAsync(candidate, sceneName, selectionRevision)
+                : await RequestBattleSortieWithoutOutGameAsync(pending, candidate, sceneName, selectionRevision);
             switch (result)
             {
                 case ScenarioBattleSortieResult.Started:
@@ -506,6 +512,37 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                     pending.Clear();
                     return ScenarioTransitionResult.None;
             }
+        }
+
+        /// <summary>
+        ///     OutGame を経由せず、シナリオから予約済みのバトルステージへ出撃します。
+        ///     <para> 出撃を準備できない場合は予約を残し、OutGame へ戻ってから OutGame 側で出撃させます。 </para>
+        /// </summary>
+        /// <param name="pending"> 予約済み遷移の状態。 </param>
+        /// <param name="candidate"> 実行する予約。 </param>
+        /// <param name="sceneName"> このシナリオシーン名。 </param>
+        /// <param name="selectionRevision"> 出撃要求時のシナリオ選択の改訂番号。 </param>
+        /// <returns> 出撃の結果。 </returns>
+        private Task<ScenarioBattleSortieResult> RequestBattleSortieWithoutOutGameAsync(
+            PendingNodeTransitionState pending, PendingNodeTransition candidate,
+            string sceneName, int selectionRevision)
+        {
+            if (!ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var loadingExecutor)
+                || !ServiceLocator.TryGetInstance(out SceneTransitionInitializer transitionInitializer))
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ScenarioCom)}] 出撃に必要な常駐サービスが無いため、OutGame へ戻ってから出撃します。",
+                    this);
+                return Task.FromResult(ScenarioBattleSortieResult.PreparationFailed);
+            }
+
+            BattleStageDefinition battleStageDefinition = candidate.TargetStageDefinition as BattleStageDefinition;
+            bool isInputValid = battleStageDefinition != null && battleStageDefinition.MissionId.Value != 0;
+            ScenarioBattleSortieExecutor sortieExecutor = new(
+                _sceneTransitionController, loadingExecutor, transitionInitializer);
+            return sortieExecutor.ExecuteAsync(
+                pending, _selectedScenarioState, BattleSortieSelectionStateResolver.CreateSelectionService(),
+                sceneName, null, candidate.ReturnSceneName, battleStageDefinition, selectionRevision, isInputValid);
         }
 
         /// <summary>

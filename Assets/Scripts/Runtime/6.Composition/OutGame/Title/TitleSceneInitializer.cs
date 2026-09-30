@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
@@ -702,12 +703,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     existingScenarioState.Clear();
                 }
 
+                // 初回ルートの予約が残っていても、OutGame へ持ち込まない。
+                if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState existingPendingState))
+                {
+                    existingPendingState.Clear();
+                }
+
                 _titleSceneView.SetTargetSceneName(_targetSceneName);
                 return true;
             }
 
             // 初回はチュートリアルのシナリオを遷移先にする。
-            if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario))
+            if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario, out StageTree stageTree))
             {
                 Debug.LogError(
                     $"[{nameof(TitleSceneInitializer)}] 起点となるチュートリアルシナリオがありません。",
@@ -728,24 +735,55 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             selectedScenarioState.SelectOpeningTutorialScenario(openingScenario);
+            ReserveOpeningTutorialBattle(stageTree, openingScenario);
             _titleSceneView.SetTargetSceneName(openingScenario.TargetSceneName);
             return true;
+        }
+
+        /// <summary>
+        ///     初回シナリオの完了後に、OutGame を経由せずチュートリアル戦闘へ進むよう予約します。
+        ///     <para> 予約できない場合は、従来どおり OutGame へ戻ってからチュートリアル戦闘を始めます。 </para>
+        /// </summary>
+        /// <param name="stageTree"> 初回シナリオを取得したステージツリーです。 </param>
+        /// <param name="openingScenario"> 初回シナリオです。 </param>
+        private void ReserveOpeningTutorialBattle(StageTree stageTree, ScenarioStageDefinition openingScenario)
+        {
+            if (!ServiceLocator.TryGetInstance(out PendingNodeTransitionState pendingState))
+            {
+                pendingState = new PendingNodeTransitionState();
+                if (!ServiceLocator.RegisterInstance(pendingState))
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(TitleSceneInitializer)}] {nameof(PendingNodeTransitionState)} を登録できないため、チュートリアル戦闘は OutGame から開始します。",
+                        this);
+                    return;
+                }
+            }
+
+            if (!OpeningTutorialRoute.TryReserveTutorialBattle(stageTree, openingScenario, pendingState, _targetSceneName))
+            {
+                Debug.LogWarning(
+                    $"[{nameof(TitleSceneInitializer)}] チュートリアル戦闘を予約できないため、OutGame から開始します。",
+                    this);
+            }
         }
 
         /// <summary>
         ///     選択中のゲームデータから前提ノードを持たない最初のシナリオを取得します。
         /// </summary>
         /// <param name="scenarioStageDefinition"> 取得したシナリオステージです。 </param>
+        /// <param name="stageTree"> 取得に使ったステージツリーです。 </param>
         /// <returns> 対象を取得できた場合はtrueです。 </returns>
-        private bool TryGetOpeningScenario(out ScenarioStageDefinition scenarioStageDefinition)
+        private bool TryGetOpeningScenario(out ScenarioStageDefinition scenarioStageDefinition, out StageTree stageTree)
         {
             scenarioStageDefinition = null;
+            stageTree = null;
             if (_loadedStageTreeAsset == null || _loadedEnemyWaveDefinitionRepository == null)
             {
                 return false;
             }
 
-            StageTree stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
+            stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
             for (int i = 0; i < stageTree.Nodes.Count; i++)
             {
                 StageNode node = stageTree.Nodes[i];
