@@ -52,6 +52,10 @@
           {
             "context": "develop-pr-rule",
             "integration_id": 15368
+          },
+          {
+            "context": "pr-target",
+            "integration_id": 15368
           }
         ]
       }
