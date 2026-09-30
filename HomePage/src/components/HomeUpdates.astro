@@ -1,8 +1,9 @@
 ---
 import NewsList from './NewsList.astro';
-import { sortedNews } from '../data/news';
+import { getSortedNews } from '../data/news';
 
 const newsHref = `${import.meta.env.BASE_URL}news`;
+const sortedNews = await getSortedNews();
 ---
 
 <div class="updates">
