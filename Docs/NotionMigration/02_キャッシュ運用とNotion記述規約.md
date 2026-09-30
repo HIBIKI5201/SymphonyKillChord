@@ -22,6 +22,18 @@
 本書は、決定を実現するための**キャッシュの仕組みの設計案**と、**Notion 側の記述規約案**である。
 パス名など細部はまだ案であり、実装（§2.6 の T-1〜T-8）のときに確定させる。
 
+### 0.1 2026-09-30 の再決定（サブモジュール化）
+
+2026-09-30、八幡さんが上の表のうち「キャッシュの置き場」「キャッシュの更新」「取り直しの判断」を次のとおり変えた。§1 以降はこの再決定に合わせて書き直してある。
+
+| 項目 | 再決定 |
+| --- | --- |
+| **キャッシュの置き場** | **`Library/` には置かない。** 全体ミラーは `Docs/NotionSpecifications` に、非公開リポジトリ `SymphonyKillChord_Specifications` のサブモジュールとして置く。ツール用の別キャッシュ（`Library/NotionCache/`）も作らない |
+| **キャッシュの更新** | **CI だけが Notion から取得する**（3 時間ごとと手動実行）。各自とスキルは pull するだけで、`NOTION_TOKEN` を使わない |
+| **取り直しの判断** | スキルは Notion を取り直さない。新しい変更が要るときは CI を手動実行する |
+
+これにより [90_未決事項.md](90_未決事項.md) の D-05・D-11・D-12・D-13・D-17 の決定の一部を改めた（各行に再決定を追記した）。
+
 ---
 
 ## 1. 現状の仕組みと、変える点
@@ -31,10 +43,10 @@ Notion からリポジトリへ落とす仕組みは既に 1 つある。`Sinfon
 
 | # | 現状 | 変える点 |
 | --- | --- | --- |
-| 1 | 出力先が `Docs/NotionSpecifications/` | **`Library/` 配下へ移す**（決定）。`Docs/` はエージェントのログ置き場になる |
-| 2 | 出力パスが**ページタイトルの階層**で決まる（例: `.../Symphony Kill Chord/システム概要/コード規定.md`） | Notion でページ名を変えたり移動したりするとパスが変わり、そのパスを読むスキルが壊れる。**ツールが読むページは page id で固定パスに結び付ける**（§2.2） |
-| 3 | 取得は常にルート配下の全ページ（約 2,000 ページ、初回は数十分） | スキルが要るのは十数ページである。**指定したページだけを取り直すモード**を足す（§2.6 T-2） |
-| 4 | 出力ファイルに正本の URL と取得時点が書かれない | ファイルの先頭に書く（§2.3） |
+| 1 | 出力先が `Docs/NotionSpecifications/`（gitignore の対象で共有されない） | **非公開の仕様書リポジトリのサブモジュールにし、CI だけが書き出す**（§0.1）。パスは変えない |
+| 2 | 出力パスが**ページタイトルの階層**で決まる（例: `.../Symphony Kill Chord/システム概要/コード規定.md`） | Notion でページ名を変えたり移動したりするとパスが変わり、そのパスを読むスキルが壊れる。**スキルには page id を書き、マニフェストからパスを引く**（§2.2） |
+| 3 | 取得は常にルート配下の全ページ（約 2,000 ページ、初回は数十分） | 取得は CI だけが行うので、各自の取得回数は問題にならない。指定ページだけを取るモードは作らない（§2.4） |
+| 4 | 出力ファイルに正本の URL と取得時点が書かれない | 正本の URL と Notion 側の最終更新は既に先頭に書かれている。取得時点は仕様書リポジトリのコミット日時で分かる（§2.3） |
 
 ---
 
@@ -42,92 +54,76 @@ Notion からリポジトリへ落とす仕組みは既に 1 つある。`Sinfon
 
 ### 2.1 置き場
 
-| 種類 | 置き場（案） | 中身 | git |
+| 種類 | 置き場 | 中身 | git |
 | --- | --- | --- | --- |
-| 全体ミラー | `Library/NotionSpecifications/` | 仕様書の全ページ（現在の `Docs/NotionSpecifications/` を移す） | 管理しない（`/[Ll]ibrary/` は既に `.gitignore` の対象） |
-| ツール用キャッシュ | `Library/NotionCache/` | スキル・AI 指示が固定パスで読むページだけ | 管理しない |
-| キャッシュマップ | `SinfoniaOperator/notion-cache-map.json` | page id と `Library/NotionCache/` 内のパスの対応表 | **管理する**（全員で同じ対応表を使うため） |
+| 全体ミラー | `Docs/NotionSpecifications/`（サブモジュール） | 仕様書の全ページと、差分取得用のマニフェスト `.notion-export-manifest.json` | **非公開リポジトリ `SymphonyKillChord_Specifications` で管理する。** 本体からは `.gitmodules` の `ignore = all` で参照するので、本体の差分には出ない |
+| 参照表（案） | `SinfoniaOperator/notion-cache-map.json` | ツールが読むページの page id と、読むスキル（`readers`） | **管理する**（全員で同じ表を使うため） |
 | エージェントのログ | `Docs/agent/` | 差分レポート・QA の証跡など（§2.5）。不具合ログは GitHub Issue | 管理しない（`Docs/` は gitignore のまま） |
 
-`Library/` を選ぶ利点と、気をつける点:
+ツール用に別のキャッシュ（旧案の `Library/NotionCache/`）は作らない。スキルも全体ミラーを読む。
 
-- `Library/` は Unity の生成物置き場で、もともと git の対象外である。消えても作り直せるという性質が、キャッシュと一致する。
-- Unity の不具合対処で `Library/` を丸ごと消すと、キャッシュも消える。スキルは「キャッシュが無ければ取り直す」前提で書く（§2.4）。
-- Unity が `Library/` 直下の知らないフォルダを消すことはないが、作業の前に実機で一度確かめる（T-1 の受入条件）。
+サブモジュールにした理由と、気をつける点:
 
-### 2.2 固定パスの付け方（キャッシュマップ）
+- Notion API の制限（平均で毎秒 3 回程度）を人数分で奪い合わないよう、Notion から取るのは CI だけにする。各自とスキルは git で pull するだけで、`NOTION_TOKEN` が要らない。
+- 本体リポジトリは公開、仕様書リポジトリは非公開である。仕様書を読むには、仕様書リポジトリの閲覧権限（collaborator）が要る。
+- 手元でエクスポーターを動かすとサブモジュールの作業ツリーが変わり、次の pull が失敗する。手元での実行は避け、急ぐときは CI を手動実行する（§2.4）。
 
-パスをページタイトルから作らず、**キャッシュマップで page id とパスを結び付ける**。Notion 側でページ名を変えても、移動しても、キャッシュのパスは変わらない。
+### 2.2 page id からパスを引く
+
+全体ミラーのパスは**ページタイトルの階層**で決まるので、Notion でページ名を変えたり移動したりすると変わる。
+スキルや AI 指示にはパスを書かず、**page id を書き、マニフェストからパスを引く。**
+
+- `Docs/NotionSpecifications/.notion-export-manifest.json` の `Pages[]` に、各ページの `Id` と、書き出したファイルの `File`（全体ミラーからの相対パス）が載っている。
+- 例: `jq -r '.Pages[] | select(.Id == "2a87c2c6-cc02-80f9-a10a-f0b72b95fbb3") | .File' Docs/NotionSpecifications/.notion-export-manifest.json`
+- ツールが読むページは、参照表 `SinfoniaOperator/notion-cache-map.json`（案）に page id・呼び名・`readers` を載せる。ページの削除や統合の影響範囲を、この表だけで判断できるようにするため。パスは載せない。
 
 ```json
 // SinfoniaOperator/notion-cache-map.json（案）
 {
-  "output": "Library/NotionCache",
   "pages": [
-    { "id": "2a87c2c6-cc02-80f9-a10a-f0b72b95fbb3", "path": "rules/code-guidelines.md",  "readers": ["code-guideline-check", "codex-implement", "AGENTS.md"] },
-    { "id": "31c7c2c6-cc02-80f3-92c0-e6929d962476", "path": "rules/design-philosophy.md", "readers": ["code-guideline-check", "notion-spec-diff-check"] }
+    { "id": "2a87c2c6-cc02-80f9-a10a-f0b72b95fbb3", "name": "rules/code-guidelines",  "readers": ["code-guideline-check", "codex-implement", "AGENTS.md"] },
+    { "id": "31c7c2c6-cc02-80f3-92c0-e6929d962476", "name": "rules/design-philosophy", "readers": ["code-guideline-check", "notion-spec-diff-check"] }
   ]
 }
 ```
 
-- `path` は英小文字とハイフンで書く。日本語のファイル名は、`git ls-files` で `core.quotepath=off` を付けないと取りこぼす（棚卸しで 57 件漏れた）ほか、シェル経由で文字化けしやすい。
-- `readers` には、そのキャッシュを読むスキル・設定ファイルを書く。ページの削除や統合の影響範囲を、この欄だけで判断できるようにするため。
-- 子ページもキャッシュする場合は、子ページを 1 件ずつ対応表に載せる（自動では辿らない）。
+### 2.3 ファイルの先頭
 
-### 2.3 キャッシュファイルの先頭
+エクスポーターは、各ページの先頭に「自動生成ファイルであること」「Notion で開くリンク」「Notion 側の最終更新日時」を書く（既存の機能）。
+取得日時は、仕様書リポジトリのコミット日時（`git -C Docs/NotionSpecifications log -1`）で分かる。
 
-生成したファイルの先頭には、必ず次のヘッダを付ける。
+### 2.4 更新の方法: CI だけが取得し、各自は pull する
 
-```markdown
-<!--
-NOTION CACHE — このファイルを編集しないこと。正本は Notion である。
-source: https://www.notion.so/<page id>
-page_id: <page id>
-last_edited: 2026-09-22T08:00:00Z   (Notion 側の最終更新)
-fetched: 2026-09-22T10:00:00Z       (取得日時)
-update: ./SinfoniaOperator/NotionMarkdownExporter.exe --check --pages <page id>  (更新があれば --pages <page id>)
--->
-```
+再決定（2026-09-30、§0.1）: Notion からの取得は、本体リポジトリの `[Bot] Notion Specifications Sync`（`.github/workflows/NotionSpecificationsSync.yml`）だけが行う。
 
-### 2.4 更新の方法: 必要なときに、変わったページだけ取る
+- **3 時間ごと**と**手動実行**で動く。エクスポーターの差分取得（マニフェストの取得日時と各ページの `last_edited_time` を比べる）で書き出し、変更があれば仕様書リポジトリへ push する。
+- 本体リポジトリは公開なので、GitHub Actions の実行時間は無料である。ログは誰でも読めるため、ページタイトルは出さず、件数だけを出す。
+- 仕様書リポジトリへの push にはデプロイキー（Environment `Sinfonia Operator` の `SPECIFICATIONS_DEPLOY_KEY`）を使う。
 
-決定（D-13・D-17）: キャッシュは**各自の手動実行**と**スキルからの AI 実行**で更新する。**定期的には取り直さない。**
-AI は、必要になったときに、**関連するページの更新日時だけを先に取得し、更新があったページだけを取り直す**。どのページが関連するかは、AI がその場で判断する。
+各自の手元では、次の 2 か所で自動的に pull する。どちらも裏で動き、失敗しても作業は止めない。
 
-#### 定期的に取り直さない理由
+| いつ | 仕組み |
+| --- | --- |
+| Unity エディタの起動時 | `NotionSpecificationsAutoPull`（`[InitializeOnLoad]`、エディタ起動ごとに 1 回） |
+| Claude Code のセッション開始時 | `.claude/settings.json` の `SessionStart` フック |
 
-Notion API にはリクエスト数の制限がある（平均で毎秒 3 回程度）。
-現在のエクスポーターは差分更新のときも、ページごとにメタデータを 1 回ずつ取得してから、変わったかどうかを判断する（`NotionExporter.cs:185`）。
-そのため、変更が 1 件も無くても、全体ミラーの更新には**約 2,000 回のリクエスト**がかかる。
-スキルを動かすたびにこれを行うと、すぐ制限に掛かる。
+手で更新するときは `git submodule update --init --remote --depth 1 -- Docs/NotionSpecifications` を実行する。
 
 #### AI の手順（各スキルに共通で書く）
 
-1. **関連ページを決める。** 作業に必要なページを、その場で選ぶ。
-   - ツール用キャッシュなら、キャッシュマップの `readers` にそのスキルが載っているページ。
-   - 仕様を調べるなら、全体ミラーのページ一覧から、作業内容に関係するページを選ぶ（例: スキル効果を直すなら「仕様概要 / スキル」「システムリスト / スキル効果」「用語 / Just判定」）。
-   - 目安は 1 回の作業で数件〜十数件とし、全ページを対象にしない。
-2. **更新日時だけを取る。** 選んだページについて、Notion 側の `last_edited_time` だけを取得する（1 ページにつき 1 回。本文は取らない）。
-3. **比べる。** 手元のキャッシュのヘッダにある `last_edited` と比べる。
-4. **変わったページだけ本文を取る。** キャッシュが無いページも取る。変わっていないページは手元のキャッシュをそのまま使う。
-5. **取れなかったときは続ける。** `NOTION_TOKEN` が無い、ネットワークが無い、制限に掛かった（HTTP 429）などの場合は、手元のキャッシュで作業を続ける。そのとき、**使ったキャッシュの取得日時と、確認できなかったことをユーザーに伝える**。キャッシュも無ければ作業を止め、トークンの設定をユーザーに頼む。
+1. **pull する。** 上のコマンドで全体ミラーを最新にする（セッション開始時に済んでいれば省略してよい）。
+2. **関連ページを決める。** 作業に必要なページを、その場で選ぶ。ツールが読むページは参照表の `readers`、仕様を調べるなら全体ミラーのページ一覧から選ぶ。
+3. **page id からパスを引いて読む**（§2.2）。
+4. **取得日時を伝える。** 読んだページと、全体ミラーの最終コミット日時を作業報告に書く。pull できなかったとき（仕様書リポジトリの権限が無い、ネットワークが無いなど）は、手元の全体ミラーで作業を続け、そのことをユーザーに伝える。全体ミラーも無ければ作業を止め、権限の設定をユーザーに頼む。
 
-この手順に要るツールの機能は T-2 にまとめた（`--check` と `--pages`）。
-
-#### 手動の実行
-
-| 目的 | コマンド（案） | リクエスト数の目安 |
-| --- | --- | --- |
-| 特定のページだけ確認・更新する | `NotionMarkdownExporter.exe --check --pages <id,id,...>` / `--pages <id,id,...>` | ページ数 × 1〜数回 |
-| ツール用キャッシュを確認・更新する | `NotionMarkdownExporter.exe --check --cache-map SinfoniaOperator/notion-cache-map.json` / `--cache-map ...` | 十数ページ分 |
-| 全体ミラーを作り直す | `NotionMarkdownExporter.exe`（出力先は `Library/NotionSpecifications`） | 約 2,000 回以上。初回と、全体を読み直したいときだけ使う |
+最新の同期（最大 3 時間前）より新しい変更が要るときは、`gh workflow run NotionSpecificationsSync.yml` で CI を手動実行し、終わってから pull する。
 
 #### この方式の代償
 
-- **各自のマシンに `NOTION_TOKEN` が要る**（`SinfoniaOperator/sinfonia-operator.secrets.json`）。トークンを持たないメンバーの AI はキャッシュを作れない。
-- **関連ページの選び方は AI の判断になる。** 選び漏れたページは古いまま読まれる。そのため、スキルは読んだページとその取得日時を作業報告に書く。
-- **GitHub 上で動くツールはキャッシュを読めない。** CodeRabbit（`.coderabbit.yaml`）、GitHub Actions、クラウドで動く AI セッションが該当する。これらには Notion の URL を示すか、読む対象から外す（T-6）。
-- 仕様検索 Bot（Oracle VM）は `Docs/NotionSpecifications` を前提にしている（`SinfoniaOperator.SpecSearch/MarkdownChunker.cs:69`）。VM 側でエクスポーターを動かす構成に合わせて直す（T-5）。
+- **仕様書は最大 3 時間遅れる。** 急ぐときは CI を手動実行する。
+- **各メンバーを仕様書リポジトリの collaborator にする必要がある。**
+- **GitHub 上で動くツールのうち、仕様書リポジトリの権限を持たないものは読めない。** CodeRabbit（`.coderabbit.yaml`）が該当する。これらには Notion の URL を示すか、読む対象から外す（T-6）。
+- 仕様検索 Bot（Oracle VM）は、手でコピーしたキャッシュ（`Library/NotionSpecifications` を優先）を読んでいる（`SinfoniaOperator.SpecSearch/MarkdownChunker.cs`）。サブモジュールから取る形に直す（T-5、#2329）。
 
 ### 2.5 エージェントのログ（`Docs/agent/`）と不具合ログ
 
@@ -152,11 +148,11 @@ Notion API にはリクエスト数の制限がある（平均で毎秒 3 回程
 
 | # | 内容 | 備考 |
 | --- | --- | --- |
-| T-1 | 全体ミラーの出力先を `Library/NotionSpecifications` に変える | 変更箇所: `sinfonia-operator.env.json` の `NOTION_EXPORT_OUTPUT`、`NotionMarkdownExporter/ExporterOptions.cs:190,290`（既定値とヘルプ）、`NotionMarkdownWriter/WriterEnvironment.cs:110`、`SinfoniaOperator/SinfoniaOperator.cs:504,514`、両ツールの README、`.gitignore:96`（不要になる）。**受入条件: Unity を起動・再インポートしても `Library/NotionSpecifications` が残ること** |
-| T-2 | NotionMarkdownExporter に次のモードを足す。<br>・`--pages <id,...>`: 指定したページだけを取得する。<br>・`--cache-map <path>`: キャッシュマップに載ったページだけを、固定パスへヘッダ付きで書き出す。<br>・`--check`: 本文を取らずに、各ページの Notion 側の `last_edited_time` と手元のキャッシュの `last_edited` を並べて表示する（変わったページの一覧を AI が読める形で出す）。<br>`--pages` / `--cache-map` の本文取得は、`last_edited` が変わったページか、キャッシュが無いページに限る | Enhanced Markdown API による変換はそのまま使う。子ページへのリンクは Notion の URL のまま残す。429 を受けたら `Retry-After` に従い、既存の `RequestRateLimiter` を使う |
-| T-3 | キャッシュマップ `SinfoniaOperator/notion-cache-map.json` を作る | §3 の表から作る |
-| T-4 | スキル・AI 指示の参照先をキャッシュパスへ書き換え、§2.4 の「読む前の手順」を入れる | 対象: `AGENTS.md`、code-guideline-check、codex-implement、notion-spec-diff-check、notion-spec-write、sinfonia-importers、ai-debug-qa、`.codex` のレビュースキル（`source-routing.md`）。全体ミラーを指している箇所も `Library/NotionSpecifications` に直す |
-| T-5 | 仕様検索 Bot の参照パスを直す | `SinfoniaOperator.SpecSearch/MarkdownChunker.cs:69`、`deploy/oracle-vm-setup.md`（sparse-checkout 前提の手順は既に壊れている。D-09） |
+| T-1 | ~~全体ミラーの出力先を `Library/NotionSpecifications` に変える~~ → **サブモジュール化で置き換え（実装済み）** | `Docs/NotionSpecifications` を非公開リポジトリ `SymphonyKillChord_Specifications` のサブモジュールにし、CI（`NotionSpecificationsSync.yml`）が書き出す。Unity 起動時と Claude Code のセッション開始時に自動で pull する（PR #2325、develop へは #2326） |
+| T-2 | ~~NotionMarkdownExporter に `--pages` / `--cache-map` / `--check` を足す~~ → **不要** | 取得は CI だけが行い、スキルは pull するだけなので、指定ページだけを取るモードは要らない（§2.4） |
+| T-3 | 参照表 `SinfoniaOperator/notion-cache-map.json` を作る（案） | §3 の表から、page id・呼び名・`readers` だけを載せる。パスは載せない（§2.2） |
+| T-4 | スキル・AI 指示の参照を page id に書き換え、§2.4 の「読む前の手順」を入れる | 対象: `AGENTS.md`、code-guideline-check、codex-implement、notion-spec-diff-check、notion-spec-write、sinfonia-importers、ai-debug-qa、`.codex` のレビュースキル（`source-routing.md`）。全体ミラーのパスは `Docs/NotionSpecifications` のまま |
+| T-5 | 仕様検索 Bot が読む仕様書をサブモジュールから取る | 今は VM に手でコピーしたキャッシュを読む（`SinfoniaOperator.SpecSearch/MarkdownChunker.cs` は `Library/NotionSpecifications` を優先）。VM に仕様書リポジトリの読み取り鍵を置き、`Library/` を読む処理と `deploy/oracle-vm-setup.md` を直す（#2329） |
 | T-6 | GitHub 上で動くツールの扱いを決めて直す | `.coderabbit.yaml:7`（今も存在しない `Assets/Docs/AGENTS.md` を指している）には Notion の URL を書くか、参照を外す |
 | T-7 | 書き先を変える。<br>・record-problem-log: GitHub Issue へ送る（`gh issue create`、ラベル `problem-log`）。LUDIARS 共通スキルなので、プロジェクト側で上書きできるか要確認。<br>・既存の `spec/plan/problem_logs/*.md`（2 件）を Issue に移す。<br>・notion-spec-diff-check: 出力先を `Docs/agent/spec-diff/` にする | |
 | T-8 | `scripts/notion/sync_module.py`・`split_module_doc.py` を廃止し、`notion-spec-write/references/module-docs.md` を「Notion を直接編集する」運用へ書き換える | repo → Notion の一方向同期を止める（D-01） |
@@ -166,9 +162,9 @@ Notion API にはリクエスト数の制限がある（平均で毎秒 3 回程
 ## 3. ツール用キャッシュの対象（案）
 
 [01_ドキュメント棚卸し.md](01_ドキュメント棚卸し.md) の 2-1・2-3 で、スキルやツールが読むと判定した文書を、Notion 正本へ移したあとの形にまとめた。
-「キャッシュ化」は、Notion へ移して正本とし、リポジトリ（`Library/NotionCache/`）にはキャッシュだけを置くという意味である。
+「キャッシュ化」は、Notion へ移して正本とし、リポジトリには全体ミラー（`Docs/NotionSpecifications/`）の写しだけを置くという意味である。
 
-| 現在のリポジトリ文書 | Notion の正本（移行先） | キャッシュパス（案、`Library/NotionCache/` からの相対） | 読むもの |
+| 現在のリポジトリ文書 | Notion の正本（移行先） | 参照表での呼び名（案） | 読むもの |
 | --- | --- | --- | --- |
 | `Assets/Scripts/CodeGuidelines.md` と `Assets/Docs/ScriptsDocs/CodingConventions.txt`（重複のため統合） | システム概要 / コード規定 | `rules/code-guidelines.md` | code-guideline-check、codex-implement、`.codex` のレビュースキル、`AGENTS.md` |
 | `Assets/Scripts/DesignPhilosophy.md` と `Assets/Docs/ScriptsDocs/Architecture.txt`（旧版のため統合） | システム概要 / 設計思想 | `rules/design-philosophy.md` | 同上、notion-spec-diff-check |
@@ -181,7 +177,7 @@ Notion API にはリクエスト数の制限がある（平均で毎秒 3 回程
 | `Assets/Scripts/ScenarioCsvGuide.md` | 既存: シナリオコマンド使い方 / シナリオCSV～ドライブ同期～ | （キャッシュ不要） | 現在パスで読むスキルは無い |
 | `spec/feature/game-spec.md` | 仕様概要の各ページ | （保留） | Augur 設定（`spec/domains/*.domain.json`）が見出しアンカー 22 本を参照している。Augur の参照先をキャッシュへ変えられるかを確かめてから決める |
 
-**リポジトリに実体として残すもの**（キャッシュではない）: キャッシュを読み込む側の設定ファイルである。`AGENTS.md`、`.gemini/GEMINI.md`、`.claude/`・`.codex/`・`.agents/` のスキル、`.coderabbit.yaml`、キャッシュマップがこれにあたる。
+**リポジトリに実体として残すもの**（キャッシュではない）: キャッシュを読み込む側の設定ファイルである。`AGENTS.md`、`.gemini/GEMINI.md`、`.claude/`・`.codex/`・`.agents/` のスキル、`.coderabbit.yaml`、参照表がこれにあたる。
 これらは内容を持たず、キャッシュへの参照だけを持つ薄いファイルにする。
 加えて、`README.md`・`third-party-notices.md`・フォントの `OFL.txt`・PR テンプレート・ゲームが読む CSV・Apps Script のコード・ツールの README も残す。
 
@@ -192,9 +188,9 @@ Notion API にはリクエスト数の制限がある（平均で毎秒 3 回程
 スキルや AI 指示の中で、リポジトリの文書をパスで指している箇所を、次の形に書き換える。
 
 ```markdown
-コード規約: `Library/NotionCache/rules/code-guidelines.md`
-（Notion「システム概要 / コード規定」のキャッシュ。git 管理外。
- 読む前に §2.4 の手順で更新日時を確かめ、変わっていれば取り直す）
+コード規約: Notion「システム概要 / コード規定」（page id `2a87c2c6-cc02-80f9-a10a-f0b72b95fbb3`）
+（全体ミラー `Docs/NotionSpecifications` の写しを読む。パスはマニフェストから引く。
+ 読む前に §2.4 の手順で pull する）
 ```
 
 - スキルの判定基準を、スキル本文の中に書き写さない。書き写すと、正本・キャッシュ・スキルの 3 か所に同じ内容ができる。
@@ -282,8 +278,8 @@ Notion API にはリクエスト数の制限がある（平均で毎秒 3 回程
 | --- | --- | --- |
 | W-13 | **API キー・トークン・パスワード・スプレッドシート ID などの秘密情報を書かない。** 置き場所（例: `sinfonia-operator.secrets.json`）だけを書く | 公開ページに API キーが平文で載っていた（SC-06、TL-21）。キャッシュに入ると各自のマシンにも複製される |
 | W-22 | 仕様を変える実装 PR では、同じ PR の中で Notion の該当ページも更新する。PR テンプレートに「Notion の更新先（URL）」の欄を足す | 実装が先に進んで仕様書が遅れる、という今回の問題の再発を防ぐため |
-| W-23 | ページを削除・統合するときは、キャッシュマップ（`cache-map.json`）に載っていないかを先に確かめる | page id で結び付けているため、ページを消すとキャッシュの取得が失敗する |
-| W-24 | キャッシュファイルを直接編集しない。直したいときは Notion を直し、キャッシュを取り直す | 次の取得で上書きされて消えるため |
+| W-23 | ページを削除・統合するときは、参照表（`notion-cache-map.json`）に載っていないかを先に確かめる | スキルは page id で読むため、ページを消すと読めなくなる |
+| W-24 | 全体ミラーのファイルを直接編集しない。直したいときは Notion を直し、次の同期を待つ（急ぐなら CI を手動実行する） | 次の同期で上書きされて消えるため |
 | W-25 | ツールがリポジトリへ書き出したログ（`Docs/agent/`）に仕様の結論を残したままにしない。結論は Notion の該当ページに書く | ログは正本ではないため（§2.5） |
 
 ---
@@ -299,7 +295,7 @@ Notion API にはリクエスト数の制限がある（平均で毎秒 3 回程
 | 状態 | セレクト | 実装済 / 一部実装 / 未実装 / 体験版のみ / アーカイブ | 未実装の仕様を消さずに残す（決定 No.34）ときの目印。本文に「未実装」と書く代わりにもなる |
 | 適用範囲 | マルチセレクト | 製品版 / 体験版（TGS 2026） | 体験版だけの仕様を区別する（W-11） |
 | 値の正本 | セレクト | このページ / マスターデータ / コード | 数値をどこで管理するかを示す（決定 No.14。ステータスはマスターデータ） |
-| キャッシュ対象 | チェックボックス | ✓ | ツール用キャッシュ（`SinfoniaOperator/notion-cache-map.json`）に載っているページ（W-23） |
+| キャッシュ対象 | チェックボックス | ✓ | 参照表（`SinfoniaOperator/notion-cache-map.json`）に載っているページ（W-23） |
 | 関連 Issue | URL またはテキスト | #1916 | 仕様と実装の食い違いを直す Issue（決定 No.35） |
 
 DB に入っていないページ（ワークフロー配下など）は、この規約の対象外とする。【要確認: 追加するプロパティを決める】
@@ -318,8 +314,8 @@ DB に入っていないページ（ワークフロー配下など）は、こ�
 
 [00_移行作業手順書.md](00_移行作業手順書.md) は、この決定に合わせて次のように読み替える（手順書にも反映済み）。
 
-- **段階 1（スナップショット）**: 全体ミラーの出力先は T-1 の後は `Library/NotionSpecifications/` になる。
+- **段階 1（スナップショット）**: 全体ミラーはサブモジュール `Docs/NotionSpecifications/` を pull して使う。2026-09-22 以降の変更は、仕様書リポジトリの git 履歴でも追える。
 - **段階 3（文書の移植）**: 01 で「リポジトリ残置を推奨」とした文書のうち、§3 の表に載っているものは「Notion へ移し、キャッシュ化する」に変わる。
-- **段階 4（参照の付け替え）**: 参照先はキャッシュパスにする（§4）。T-2・T-3（キャッシュの生成）が先に要る。
+- **段階 4（参照の付け替え）**: 参照は page id にし、全体ミラーのパスはマニフェストから引く（§4）。T-3（参照表）が先に要る。
 - **段階 5（削除 PR）**: 削除するのは、Notion へ移した文書の実体である。`Docs/` フォルダはエージェントのログ置き場（`Docs/agent/`）として残る。
 - **システムリスト**: 最後の repo → Notion 同期は行わない。repo の方が新しい 3 件（SourceDataProvider・Animation・NotionDocsRules）の差分だけを Notion へ手で反映し、以後は Notion を直接編集する（T-8）。
