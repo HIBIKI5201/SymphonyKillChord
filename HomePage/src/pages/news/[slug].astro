@@ -1,0 +1,116 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { render } from 'astro:content';
+import { getSortedNews, type NewsItem } from '../../data/news';
+
+export async function getStaticPaths() {
+	const news = await getSortedNews();
+	return news.map((item) => ({ params: { slug: item.id }, props: { item } }));
+}
+
+interface Props {
+	item: NewsItem;
+}
+
+const { item } = Astro.props;
+const { title, date, links } = item.data;
+const { Content } = await render(item);
+// 本文の最初の段落を説明文に使う。
+const description = item.body?.trim().split(/\n\s*\n/)[0] ?? title;
+const listHref = `${import.meta.env.BASE_URL}news`;
+---
+
+<Layout title={`${title} | Symphony Kill Chord`} description={description}>
+	<main>
+		<PageHeader eyebrow="News" title={title} />
+
+		<article>
+			<time datetime={date}>{date}</time>
+			<Content />
+			{
+				links.length > 0 && (
+					<ul class="links">
+						{links.map((link) => (
+							<li>
+								<a href={link.href} target="_blank" rel="noopener noreferrer">
+									{link.label} <span aria-hidden="true">↗</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				)
+			}
+		</article>
+
+		<a class="back" href={listHref}>お知らせ一覧へ戻る</a>
+	</main>
+	<SiteFooter />
+</Layout>
+
+<style>
+	main {
+		width: 100%;
+		max-width: 720px;
+		margin: 0 auto;
+		padding: 0 24px 96px;
+	}
+
+	article {
+		padding: 32px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-surface-border);
+	}
+
+	time {
+		display: block;
+		margin-bottom: 20px;
+		padding-bottom: 14px;
+		border-bottom: 1px solid var(--color-signal-dim);
+		font-family: var(--font-mono);
+		font-size: 0.875rem;
+		color: var(--color-label-muted);
+	}
+
+	article :global(p) {
+		margin: 0 0 16px;
+		font-size: 0.9375rem;
+		line-height: 1.8;
+		color: var(--color-text-primary);
+	}
+
+	.links {
+		list-style: none;
+		margin: 24px 0 0;
+		padding: 0;
+	}
+
+	.links li + li {
+		margin-top: 8px;
+	}
+
+	.links a,
+	.back {
+		color: var(--color-signal);
+		text-decoration: none;
+	}
+
+	.links a:hover,
+	.links a:focus-visible,
+	.back:hover,
+	.back:focus-visible {
+		text-decoration: underline;
+	}
+
+	.back {
+		display: inline-block;
+		margin-top: 32px;
+	}
+
+	@media (max-width: 600px) {
+		article {
+			padding: 24px 20px;
+		}
+	}
+</style>

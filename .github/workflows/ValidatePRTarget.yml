@@ -1,0 +1,80 @@
+name: "[Git] Validate PR Target"
+
+# すべてのPRについて、マージ元とマージ先の組み合わせが運用規定に合っているかを検証し、コミットステータス pr-target に結果を出す。
+# PRテンプレの必須チェックなど、マージ先ごとのそれ以外のルールは ValidateDevelopPR.yml / ValidateHotfixPR.yml が扱う。
+#
+# | マージ元                               | 許可するマージ先                                    |
+# | -------------------------------------- | --------------------------------------------------- |
+# | feature/<段階>/<作業名>/<作業者>       | 同じ階層の feature/<段階>/<作業名>/master           |
+# | feature/<段階>/<作業名>/master         | develop                                             |
+# | develop                                | main、または feature/**/master（develop の同期）    |
+# | hotfix/<作業対象>                      | develop                                             |
+# | それ以外（feature/ で始まらないもの）  | develop                                             |
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR target
+        id: validate
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          result() {
+            echo "state=$1" >> $GITHUB_OUTPUT
+            echo "message=$2" >> $GITHUB_OUTPUT
+            exit 0
+          }
+
+          # feature/ で始まり末尾が master のものを統合ブランチ、それ以外の feature/ を作業ブランチとみなす。
+          is_feature_master() { case "$1" in feature/*/master) return 0 ;; *) return 1 ;; esac; }
+          is_feature_work() { case "$1" in feature/*) ! is_feature_master "$1" ;; *) return 1 ;; esac; }
+
+          # 作業ブランチは、同じ階層の master にだけ入れる。
+          if is_feature_work "$HEAD_REF"; then
+            EXPECTED="$(dirname "$HEAD_REF")/master"
+            [ "$BASE_REF" = "$EXPECTED" ] && result success "✅ 作業ブランチから同じ階層の master へのPRです"
+            result failure "❌ 作業ブランチのマージ先は ${EXPECTED} です（現在: ${BASE_REF}）"
+          fi
+
+          # 各ブランチ種別の規則は冒頭の表を参照。
+          case "$BASE_REF" in
+            develop)
+              [ "$HEAD_REF" = "main" ] && result failure "❌ main から develop へのPRは想定していません"
+              result success "✅ develop へのPRです"
+              ;;
+            main)
+              [ "$HEAD_REF" = "develop" ] && result success "✅ develop から main へのPRです"
+              result failure "❌ main へのマージ元は develop のみです（現在: ${HEAD_REF}）"
+              ;;
+            feature/*/master)
+              [ "$HEAD_REF" = "develop" ] && result success "✅ develop からの同期PRです"
+              result failure "❌ feature の master へのマージ元は、同じ階層の作業ブランチか develop のみです（現在: ${HEAD_REF}）"
+              ;;
+            *)
+              if is_feature_master "$HEAD_REF"; then
+                result failure "❌ ${HEAD_REF} のマージ先は develop です（現在: ${BASE_REF}）"
+              fi
+              result failure "❌ マージ先は develop / main / feature/<段階>/<作業名>/master のいずれかです（現在: ${BASE_REF}）"
+              ;;
+          esac
+
+      - name: Set commit status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          STATE: ${{ steps.validate.outputs.state }}
+          MESSAGE: ${{ steps.validate.outputs.message }}
+        run: |
+          gh api repos/$REPO/statuses/$SHA -X POST \
+            -f state="$STATE" -f context="pr-target" \
+            -f description="$MESSAGE"
