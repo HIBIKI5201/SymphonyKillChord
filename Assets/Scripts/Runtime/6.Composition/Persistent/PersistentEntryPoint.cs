@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.SceneManagement;
+using KillChord.Runtime.Composition.Persistent.Session;
 using KillChord.Runtime.Utility.Constant;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SceneLoad;
@@ -134,15 +135,27 @@ namespace KillChord.Runtime.Composition.Persistent
                 return;
             }
 
+            // プレイセッションに再開地点があればそのシーンを、無ければ既定のシーンを開く。
+            string firstSceneName = _firstSceneName;
+            bool isKeepLoading = false;
+            IPersistentFirstSceneProvider provider = _modules?.OfType<IPersistentFirstSceneProvider>().FirstOrDefault();
+            if (provider != null && provider.TryGetFirstScene(out string resumeSceneName, out bool isResumeKeepLoading))
+            {
+                firstSceneName = resumeSceneName;
+                isKeepLoading = isResumeKeepLoading;
+            }
+
             try
             {
-                bool success = await controller.LoadAdditiveAsync(
-                    _firstSceneName,
-                    _cancellationTokenSource.Token);
+                bool success = isKeepLoading
+                    ? await controller.LoadAdditiveKeepingLoadingWithPersistentLifetimeAsync(firstSceneName)
+                    : await controller.LoadAdditiveAsync(
+                        firstSceneName,
+                        _cancellationTokenSource.Token);
 
                 if (!success)
                 {
-                    Debug.LogError($"初回ロードに失敗 : {_firstSceneName}", this);
+                    Debug.LogError($"[{nameof(PersistentEntryPoint)}] 初回ロードに失敗しました。{firstSceneName}", this);
                 }
             }
             catch (OperationCanceledException)

@@ -636,6 +636,7 @@ GameObject:
   m_Component:
   - component: {fileID: 372844321}
   - component: {fileID: 372844322}
+  - component: {fileID: 372844323}
   m_Layer: 0
   m_Name: SavedataSystem
   m_TagString: Untagged
@@ -670,6 +671,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de759fe507ac0e649b73940d6d1c7323, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.SavedataSystemInitializer
+--- !u!114 &372844323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 372844320}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0e96340646cc2a438320e542e3e5bc2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.Persistent.Session.PlaySessionInitializer
+  _titleSceneName: Title
+  _outGameSceneName: OutGame
+  _stageTreeAssetKey: StageTreeAsset
+  _enemyWaveDefinitionRepositoryKey: EnemyWaveDefinitionRepository
 --- !u!1 &509160714
 GameObject:
   m_ObjectHideFlags: 0

@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.InGame.StageSelect
     /// </summary>
     public class SelectedBattleStageState
     {
+        /// <summary> バトルステージが選択されたとき、または選択が解除されたときに通知します。 </summary>
+        public event Action OnSelectionChanged;
+
         /// <summary> 現在選択されているステージ定義。 </summary>
         public BattleStageDefinition CurrentStageDefinition
         {
@@ -77,6 +80,7 @@ namespace KillChord.Runtime.Adaptor.InGame.StageSelect
 
             _currentBattleStageDefinition = stageDefinition;
             _returnSceneName = returnSceneName;
+            OnSelectionChanged?.Invoke();
         }
 
         /// <summary>
@@ -86,6 +90,7 @@ namespace KillChord.Runtime.Adaptor.InGame.StageSelect
         {
             _currentBattleStageDefinition = null;
             _returnSceneName = string.Empty;
+            OnSelectionChanged?.Invoke();
         }
 
         private BattleStageDefinition _currentBattleStageDefinition;

@@ -140,6 +140,32 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
         }
 
         /// <summary>
+        ///     Additiveシーンを読み込むが、ロード画面を閉じずに進捗を保持する。
+        ///     読み込んだシーンが同じロードセッションを引き継いで完了させる場合に使う。
+        /// </summary>
+        /// <param name="sceneName"> 読み込むAdditiveシーン名。 </param>
+        /// <param name="ct"> キャンセルトークン。 </param>
+        /// <returns> シーン読み込みの成否を示すタスク。 </returns>
+        public Task<bool> LoadAdditiveKeepLoadingAsync(
+            string sceneName,
+            CancellationToken ct)
+        {
+            return _executor.ExecuteAsync(
+                progress => LoadSceneAndWaitForReadyAsync(
+                    sceneName,
+                    () => _service.LoadAdditiveAsync(
+                        sceneName,
+                        progress,
+                        ct),
+                    null,
+                    ct),
+                LoadingExecutionOptions.KeepOpen(
+                    0f,
+                    LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS),
+                ct);
+        }
+
+        /// <summary>
         ///     Additiveシーンをアンロードする。
         /// </summary>
         /// <param name="sceneName"> アンロードするAdditiveシーン名。 </param>

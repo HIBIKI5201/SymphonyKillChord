@@ -1,7 +1,9 @@
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using System.Collections.Generic;
 using SymphonyFrameWork.System.SceneLoad;
@@ -38,6 +40,14 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         /// </summary>
         private async void Start()
         {
+            // 常駐シーンの起動前に直接再生されたシーンは、起動時のシーン整理でアンロードされるため初期化しない。
+            if (!PersistentBootState.IsBootedThroughPersistentFlow)
+            {
+                DevLog.Log(
+                    $"[{nameof(OutGameScenarioSceneInitializer)}] 常駐シーンが未起動のため、シナリオ初期化を行いません。{gameObject.scene.name}");
+                return;
+            }
+
             bool isSuccess = false;
 
             try
