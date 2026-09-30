@@ -43,3 +43,4 @@ Docs/agent/
 | --- | --- |
 | `analysis/omnipotens/2026-07-18_symphony-kill-chord/` | Omnipotens 最終解析（アーキテクチャレビュー・仕様起点ドメインモデル・UX レビュー）。旧 `Docs/G-Lab/` |
 | `reports/2026-09-28_event-exhibition-meeting.md` | 今後のイベント出展・コンテスト応募の検討会議の議事録（候補の規約調査と決定） |
+| `reports/2026-09-29_homepage-news-meeting.md` | ホームページのお知らせ追加（TGS出展・ファミ通掲載）の議事録（Issue #2321 / #2322、タスク） |
