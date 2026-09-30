@@ -1,7 +1,7 @@
 name: "[Git] Validate Hotfix PR"
 
 # hotfix/** からのPRを検証し、コミットステータス develop-pr-rule に結果を出す。
-# hotfix のマージ先は develop のみ。
+# hotfix のマージ先が develop であることは ValidatePRTarget.yml（pr-target）が検証する。
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review, converted_to_draft]
@@ -19,7 +19,6 @@ jobs:
         id: validate
         env:
           HEAD_REF: ${{ github.head_ref }}
-          BASE_REF: ${{ github.base_ref }}
           IS_DRAFT: ${{ github.event.pull_request.draft }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
@@ -32,10 +31,6 @@ jobs:
           # 命名規則: hotfix/<作業対象>（ロウワーチェーンケース、1階層）。
           if ! echo "$HEAD_REF" | grep -Eq '^hotfix/[a-z0-9]+(-[a-z0-9]+)*$'; then
             fail "❌ ブランチ名は hotfix/<作業対象>（ロウワーチェーンケース）にしてください"
-          fi
-
-          if [ "$BASE_REF" != "develop" ]; then
-            fail "❌ hotfix のマージ先は develop のみです（現在: ${BASE_REF}）"
           fi
 
           # Draft 中はテンプレの必須チェックを問わない。Ready for review 時に再検証される。

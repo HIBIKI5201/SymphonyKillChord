@@ -2,6 +2,7 @@ name: "[Git] Validate Develop PR"
 
 # マージ先が develop のPR（hotfix を除く）を検証し、コミットステータス develop-pr-rule に結果を出す。
 # hotfix/** からのPRは ValidateHotfixPR.yml が同じステータスを出す。
+# マージ元が develop に入れてよいブランチかどうかは ValidatePRTarget.yml（pr-target）が検証する。
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review, converted_to_draft]
@@ -20,7 +21,6 @@ jobs:
       - name: Validate PR
         id: validate
         env:
-          HEAD_REF: ${{ github.head_ref }}
           IS_DRAFT: ${{ github.event.pull_request.draft }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
@@ -29,16 +29,6 @@ jobs:
             echo "message=$1" >> $GITHUB_OUTPUT
             exit 0
           }
-
-          # feature 配下の作業ブランチは、同じ階層の master を経由して develop に入れる。
-          case "$HEAD_REF" in
-            feature/*)
-              SLASH_COUNT=$(echo "$HEAD_REF" | grep -o "/" | wc -l)
-              if [ "$SLASH_COUNT" -ge 3 ] && [ "$(basename "$HEAD_REF")" != "master" ]; then
-                fail "❌ 作業ブランチから直接PRできません。$(dirname "$HEAD_REF")/master を経由してください"
-              fi
-              ;;
-          esac
 
           # Draft 中はテンプレの必須チェックを問わない。Ready for review 時に再検証される。
           if [ "$IS_DRAFT" = "true" ]; then
