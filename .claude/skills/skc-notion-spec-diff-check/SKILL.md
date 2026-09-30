@@ -16,9 +16,12 @@ what good evidence (file:line citations on both sides) looks like in practice.
 
 `Docs/NotionSpecifications/` is a point-in-time snapshot, not live data. Before trusting it:
 
-- Check `Docs/NotionSpecifications/Symphony Kill Chord.md` (or any page) file timestamps / git log to gauge staleness.
-- If the user wants current data, or the export looks old, refresh it with the exporter at
-  `SinfoniaOperator/NotionMarkdownExporter/`.
+- It is a git submodule synced from Notion by CI every 3 hours. First pull it:
+  `git submodule update --init --remote --depth 1 -- Docs/NotionSpecifications`, then check
+  `git -C Docs/NotionSpecifications log -1` to gauge staleness.
+- Only if the user needs changes newer than the last CI sync, refresh it with the exporter at
+  `SinfoniaOperator/NotionMarkdownExporter/` (see the `skc-sinfonia-importers` skill for cleaning
+  up the submodule afterwards). The steps below apply to that case.
 
 **Refreshing is a bulk overwrite of ~1,800 files** (per the precedent report: 1,747 Notion pages).
 Before running it:
