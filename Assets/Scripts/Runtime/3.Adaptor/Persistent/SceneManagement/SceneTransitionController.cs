@@ -78,6 +78,20 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
         }
 
         /// <summary>
+        ///     常駐シーンの寿命に従って、ロード画面を閉じずにシーンをAdditiveロードする。
+        ///     読み込んだシーンの初期化がロード画面を引き継いで閉じる場合に使用する。
+        /// </summary>
+        /// <param name="sceneName"> 読み込むシーン名。 </param>
+        /// <returns> 成功した場合はtrue。 </returns>
+        public Task<bool> LoadAdditiveKeepingLoadingWithPersistentLifetimeAsync(string sceneName)
+        {
+            _persistentLifetimeToken.ThrowIfCancellationRequested();
+            return _useCase.LoadAdditiveKeepLoadingAsync(
+                sceneName,
+                _persistentLifetimeToken);
+        }
+
+        /// <summary>
         ///     シーンをアンロードする。
         /// </summary>
         public async Task<bool> UnloadAsync(

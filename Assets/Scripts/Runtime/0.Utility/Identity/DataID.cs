@@ -14,6 +14,19 @@ namespace KillChord.Runtime.Utility.Identity
         public int Id => _hashId;
 
         /// <summary>
+        ///     実行時に記録した数値IDからDataIDを生成します。
+        ///     <para> 文字列IDは持たないため、エディタでは数値IDが一致する候補として表示されます。 </para>
+        /// </summary>
+        /// <param name="hashId"> 数値IDです。 </param>
+        /// <returns> 数値IDだけを持つDataIDです。 </returns>
+        public static DataID FromHash(int hashId)
+        {
+            DataID dataId = default;
+            dataId._hashId = hashId;
+            return dataId;
+        }
+
+        /// <summary>
         ///     別のDataIDと等価か判定します。
         /// </summary>
         /// <param name="other"> 比較対象のDataIDです。 </param>

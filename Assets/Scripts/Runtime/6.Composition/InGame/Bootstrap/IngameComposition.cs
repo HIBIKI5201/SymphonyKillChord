@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Player;
+using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Diagnostics;
@@ -54,7 +55,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         private async Task InitializeAsync(string sceneName, SceneTransitionController transition,
             bool isDedicated, CancellationToken initializationToken)
         {
-            if (!IsBootedThroughPersistentFlow)
+            if (!PersistentBootState.IsBootedThroughPersistentFlow)
             {
                 DevLog.Log(
                     $"[{nameof(IngameComposition)}] " +
@@ -165,15 +166,6 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 }
             }
         }
-
-        /// <summary>
-        ///     常駐シーンの初期化を経てこのシーンが起動されたかを示します。
-        ///     falseの場合、このシーンはインゲームシーンを直接開いて再生した場合などの
-        ///     フローに乗っていないシーンであり、起動時のシーン整理でアンロードされます。
-        ///     前提となる常駐サービスは登録されないため、待機しても解決しません。
-        /// </summary>
-        private static bool IsBootedThroughPersistentFlow =>
-            ServiceLocator.IsExistInstance<ISceneInitializationReadiness>();
 
         /// <summary>
         ///     現在のインゲームシーン優先度を登録します。
