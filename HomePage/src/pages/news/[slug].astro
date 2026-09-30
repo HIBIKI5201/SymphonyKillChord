@@ -2,10 +2,12 @@
 import Layout from '../../layouts/Layout.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import { news, type NewsItem } from '../../data/news';
+import { render } from 'astro:content';
+import { getSortedNews, type NewsItem } from '../../data/news';
 
-export function getStaticPaths() {
-	return news.map((item) => ({ params: { slug: item.slug }, props: { item } }));
+export async function getStaticPaths() {
+	const news = await getSortedNews();
+	return news.map((item) => ({ params: { slug: item.id }, props: { item } }));
 }
 
 interface Props {
@@ -13,20 +15,24 @@ interface Props {
 }
 
 const { item } = Astro.props;
+const { title, date, links } = item.data;
+const { Content } = await render(item);
+// 本文の最初の段落を説明文に使う。
+const description = item.body?.trim().split(/\n\s*\n/)[0] ?? title;
 const listHref = `${import.meta.env.BASE_URL}news`;
 ---
 
-<Layout title={`${item.title} | Symphony Kill Chord`} description={item.body[0]}>
+<Layout title={`${title} | Symphony Kill Chord`} description={description}>
 	<main>
-		<PageHeader eyebrow="News" title={item.title} />
+		<PageHeader eyebrow="News" title={title} />
 
 		<article>
-			<time datetime={item.date}>{item.date}</time>
-			{item.body.map((paragraph) => <p>{paragraph}</p>)}
+			<time datetime={date}>{date}</time>
+			<Content />
 			{
-				item.links.length > 0 && (
+				links.length > 0 && (
 					<ul class="links">
-						{item.links.map((link) => (
+						{links.map((link) => (
 							<li>
 								<a href={link.href} target="_blank" rel="noopener noreferrer">
 									{link.label} <span aria-hidden="true">↗</span>
@@ -67,7 +73,7 @@ const listHref = `${import.meta.env.BASE_URL}news`;
 		color: var(--color-label-muted);
 	}
 
-	p {
+	article :global(p) {
 		margin: 0 0 16px;
 		font-size: 0.9375rem;
 		line-height: 1.8;
