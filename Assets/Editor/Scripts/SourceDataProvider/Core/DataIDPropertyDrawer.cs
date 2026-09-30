@@ -157,6 +157,22 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 }
             }
 
+            // 実行時に数値IDだけ記録された値は、数値IDが一致する候補の文字列IDで補う。
+            if (selectedIndex == 0
+                && string.IsNullOrEmpty(idProperty.stringValue)
+                && hashProperty.intValue != 0)
+            {
+                for (int i = 0; i < options.Count; i++)
+                {
+                    if (options[i].HashId == hashProperty.intValue)
+                    {
+                        idProperty.stringValue = options[i].Id;
+                        selectedIndex = i + 1;
+                        break;
+                    }
+                }
+            }
+
             int nextIndex = EditorGUI.Popup(position, label.text, selectedIndex, labels);
             if (nextIndex == selectedIndex)
             {
