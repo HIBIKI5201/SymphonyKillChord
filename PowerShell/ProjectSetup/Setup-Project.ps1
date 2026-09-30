@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Unity を開く前に、次を確かめて、直せるものは直す。
-    - クローン先のパス（日本語・空白が無いか）
+    - クローン先のパス（日本語・空白が無いか）とフォルダ名（SymphonyKillChord か）
     - git の設定（submodule.recurse / core.longpaths）
     - サブモジュールの取得（閲覧権限が無ければ招待を頼むよう案内する）
     - Unity エディタのバージョンと Android Build Support
@@ -69,6 +69,18 @@ if ($RepoRoot -match '[^\x21-\x7E\\:]') {
 }
 else {
     Add-Result 'クローン先のパス' 'OK' $RepoRoot
+}
+
+# --- クローン先のフォルダ名 ------------------------------------------------
+# Unity と IDE はフォルダ名からソリューション（<フォルダ名>.slnx）を作る。
+# 名前が違うと別名のソリューションができ、誤ってコミットされて二重になるため、名前を揃える。
+$folderName = Split-Path $RepoRoot -Leaf
+$expectedFolderName = $Config.RepositoryFolderName
+if ($folderName -ceq $expectedFolderName) {
+    Add-Result 'クローン先のフォルダ名' 'OK' $folderName
+}
+else {
+    Add-Result 'クローン先のフォルダ名' 'Error' "フォルダ名が '$folderName' です。Unity と IDE を閉じてから、フォルダ名を '$expectedFolderName' に変えてください（変えたあと、古い名前の .sln / .slnx は消してよい）。"
 }
 
 # --- git の設定 ------------------------------------------------------------

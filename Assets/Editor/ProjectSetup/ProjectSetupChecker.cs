@@ -47,8 +47,9 @@ namespace KillChord.Editor.ProjectSetup
             List<string> problems = new();
             string root = RepositoryRoot;
 
-            int requiredVersion = ReadSetupVersion(Path.Combine(root, CONFIG_RELATIVE_PATH));
-            int completedVersion = ReadSetupVersion(Path.Combine(root, STATE_RELATIVE_PATH));
+            SetupJson config = ReadSetupJson(Path.Combine(root, CONFIG_RELATIVE_PATH));
+            int requiredVersion = config.SetupVersion;
+            int completedVersion = ReadSetupJson(Path.Combine(root, STATE_RELATIVE_PATH)).SetupVersion;
             if (completedVersion == 0)
             {
                 problems.Add("セットアップ（Setup.bat）をまだ実行していません。");
@@ -56,6 +57,14 @@ namespace KillChord.Editor.ProjectSetup
             else if (completedVersion < requiredVersion)
             {
                 problems.Add($"セットアップの手順が更新されました（{completedVersion} → {requiredVersion}）。Setup.bat をもう一度実行してください。");
+            }
+
+            // Unity と IDE はフォルダ名からソリューションを作るので、名前が違うと別名の .slnx ができて二重になる。
+            string folderName = Path.GetFileName(root);
+            if (!string.IsNullOrEmpty(config.RepositoryFolderName) &&
+                !string.Equals(folderName, config.RepositoryFolderName, StringComparison.Ordinal))
+            {
+                problems.Add($"クローン先のフォルダ名が「{folderName}」です。Unity と IDE を閉じてから「{config.RepositoryFolderName}」に変えてください。");
             }
 
             foreach (string submodulePath in ReadSubmodulePaths(Path.Combine(root, ".gitmodules")))
@@ -94,21 +103,21 @@ namespace KillChord.Editor.ProjectSetup
         }
 
         /// <summary>
-        ///     JSON ファイルから SetupVersion を読む。
+        ///     project-setup.json か ProjectSetupState.json を読む。
         /// </summary>
         /// <param name="path">JSON ファイルのパス。</param>
-        /// <returns>SetupVersion。ファイルが無い・読めない場合は0。</returns>
-        private static int ReadSetupVersion(string path)
+        /// <returns>読んだ内容。ファイルが無い・読めない場合は既定値（SetupVersion が0）。</returns>
+        private static SetupJson ReadSetupJson(string path)
         {
-            if (!File.Exists(path)) { return 0; }
+            if (!File.Exists(path)) { return new SetupJson(); }
 
             try
             {
-                return JsonUtility.FromJson<SetupVersionJson>(File.ReadAllText(path)).SetupVersion;
+                return JsonUtility.FromJson<SetupJson>(File.ReadAllText(path)) ?? new SetupJson();
             }
             catch (Exception)
             {
-                return 0;
+                return new SetupJson();
             }
         }
 
@@ -134,10 +143,13 @@ namespace KillChord.Editor.ProjectSetup
         ///     project-setup.json と ProjectSetupState.json の共通部分。
         /// </summary>
         [Serializable]
-        private sealed class SetupVersionJson
+        private sealed class SetupJson
         {
             /// <summary> セットアップ手順のバージョン。JsonUtility で読むため公開フィールドにする。 </summary>
             public int SetupVersion = 0;
+
+            /// <summary> クローン先のフォルダ名（project-setup.json だけが持つ）。 </summary>
+            public string RepositoryFolderName = string.Empty;
         }
     }
 }
