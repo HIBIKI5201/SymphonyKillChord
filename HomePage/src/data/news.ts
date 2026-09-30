@@ -1,10 +1,9 @@
-export interface NewsItem {
-	date: string;
-	title: string;
-	href: string;
-}
+import { getCollection, type CollectionEntry } from 'astro:content';
 
-// お知らせを追加すると、ホームと一覧ページの両方に新しい順で表示される。
-export const news: NewsItem[] = [];
+export type NewsItem = CollectionEntry<'news'>;
 
-export const sortedNews = [...news].sort((a, b) => b.date.localeCompare(a.date));
+// お知らせの本文は src/content/news/ の Markdown に書く。ここでは新しい順に並べて返すだけ。
+export const getSortedNews = async (): Promise<NewsItem[]> =>
+	(await getCollection('news')).sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+export const newsHref = (item: NewsItem) => `${import.meta.env.BASE_URL}news/${item.id}`;

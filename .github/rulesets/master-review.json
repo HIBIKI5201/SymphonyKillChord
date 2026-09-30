@@ -36,7 +36,7 @@
         "do_not_enforce_on_create": true,
         "required_status_checks": [
           {
-            "context": "feature-pr-target",
+            "context": "pr-target",
             "integration_id": 15368
           }
         ]

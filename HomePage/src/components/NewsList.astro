@@ -1,5 +1,5 @@
 ---
-import type { NewsItem } from '../data/news';
+import { newsHref, type NewsItem } from '../data/news';
 
 interface Props {
 	items: NewsItem[];
@@ -12,9 +12,9 @@ const { items } = Astro.props;
 	<ul class="news-list">
 		{items.map((item) => (
 			<li>
-				<a href={item.href}>
-					<time datetime={item.date}>{item.date}</time>
-					<span>{item.title}</span>
+				<a href={newsHref(item)}>
+					<time datetime={item.data.date}>{item.data.date}</time>
+					<span>{item.data.title}</span>
 				</a>
 			</li>
 		))}

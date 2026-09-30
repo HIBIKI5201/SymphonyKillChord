@@ -626,6 +626,8 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         private string? TryGetPreviousPagePath(ExportedPageManifest? previousPage)
         {
             if (previousPage == null || string.IsNullOrWhiteSpace(previousPage.File)) { return null; }
+            // Windowsで開けない名前は再利用せず、新しい名前で書き直させる。
+            if (PathUtility.ContainsInvalidWindowsCharacters(previousPage.File)) { return null; }
 
             string filePath = Path.GetFullPath(Path.Combine(_options.OutputDirectory, previousPage.File));
             if (!PathUtility.IsInsideDirectory(_options.OutputDirectory, filePath) || !File.Exists(filePath))
@@ -654,6 +656,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
 
             ExportedDatabaseManifest? previousDatabase = _previousManifest.FindDatabase(databaseId);
             if (previousDatabase == null || string.IsNullOrWhiteSpace(previousDatabase.File)) { return null; }
+            if (PathUtility.ContainsInvalidWindowsCharacters(previousDatabase.File)) { return null; }
 
             string filePath = Path.GetFullPath(Path.Combine(_options.OutputDirectory, previousDatabase.File));
             return PathUtility.IsInsideDirectory(_options.OutputDirectory, filePath) ? filePath : null;
