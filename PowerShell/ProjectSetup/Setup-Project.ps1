@@ -8,6 +8,7 @@
     - git の設定（submodule.recurse / core.longpaths）
     - サブモジュールの取得（閲覧権限が無ければ招待を頼むよう案内する）
     - Unity エディタのバージョンと Android Build Support
+    - Unity CLI（unity コマンド。無ければ公式のスクリプトで入れる）
     必須の項目がすべて通ったら、UserSettings/KillChord/ProjectSetupState.json に記録する。
     Unity はこの記録を起動時に読み、無ければ警告ウィンドウを出す。
     手順を増やしたら project-setup.json の SetupVersion を上げる。既存のメンバーにも再実行を促せる。
@@ -169,6 +170,34 @@ else {
     }
     else {
         Add-Result 'Android Build Support' 'Error' "入っていません。Unity Hub の「インストール」で $unityVersion の歯車 →「モジュールを加える」から入れてください。"
+    }
+}
+
+# --- Unity CLI --------------------------------------------------------------
+# AI エージェントが Unity を操作するのに使う（エディタの操作は com.unity.pipeline 経由）。
+# 公式のインストールスクリプトで、ユーザーのフォルダ（%LOCALAPPDATA%\Unity\bin）に入る。
+if (Get-Command unity -ErrorAction SilentlyContinue) {
+    Add-Result 'Unity CLI' 'OK' "$(& unity --version 2>$null)"
+}
+elseif ($Check) {
+    Add-Result 'Unity CLI' 'Error' '入っていません。'
+}
+else {
+    Write-Host '  Unity CLI を入れています...'
+    try {
+        $env:UNITY_CLI_CHANNEL = 'beta'
+        Invoke-RestMethod 'https://public-cdn.cloud.unity3d.com/hub/prod/cli/install.ps1' | Invoke-Expression
+        # インストーラーはユーザーの PATH に足すだけなので、このセッションでも使えるよう読み直す。
+        $env:Path = [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine')
+        if (Get-Command unity -ErrorAction SilentlyContinue) {
+            Add-Result 'Unity CLI' 'Fixed' "$(& unity --version 2>$null) を入れました。新しく開いたターミナルから unity コマンドを使えます。"
+        }
+        else {
+            Add-Result 'Unity CLI' 'Error' '入れましたが unity コマンドが見つかりません。ターミナルを開き直してから、もう一度実行してください。'
+        }
+    }
+    catch {
+        Add-Result 'Unity CLI' 'Error' "入れられませんでした（$($_.Exception.Message)）。ネットワークを確かめて、もう一度実行してください。"
     }
 }
 
