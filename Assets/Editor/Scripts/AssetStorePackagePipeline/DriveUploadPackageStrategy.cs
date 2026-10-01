@@ -33,6 +33,8 @@ namespace KillChord.Editor.AssetStorePackagePipeline
         };
 
         private const string LOG_PREFIX = "[" + nameof(DriveUploadPackageStrategy) + "]";
+        private const float PERCENTAGE_SCALE = 100f;
+        private const int BYTES_PER_MEGABYTE = 1024 * 1024;
 
         [SerializeField]
         [Tooltip("アップロード先のGoogleDriveフォルダID。Service Accountのメールアドレスへ編集権限で共有しておく。")]
@@ -67,9 +69,15 @@ namespace KillChord.Editor.AssetStorePackagePipeline
                 // 1ファイルの失敗で残りのアップロードを止めない。
                 try
                 {
+                    string fileName = Path.GetFileName(target);
+
                     // Execute段階は同期実行のため、完了まで待ってから次のファイルへ進む。
                     string fileId = DriveApiClient
-                        .UploadFileAsync(target, _folderId, credential)
+                        .UploadFileAsync(
+                            target,
+                            _folderId,
+                            credential,
+                            (sent, total) => ReportProgress(fileName, sent, total))
                         .GetAwaiter()
                         .GetResult();
 
@@ -82,6 +90,25 @@ namespace KillChord.Editor.AssetStorePackagePipeline
                         $"{LOG_PREFIX}\nアップロード失敗: {Path.GetFileName(target)}\n{e}", LogKindEnum.Error);
                 }
             }
+        }
+
+        /// <summary>
+        ///     アップロードの進捗をログへ出力する。
+        /// </summary>
+        /// <remarks>
+        ///     Execute段階はメインスレッドを占有するため、進捗バーは更新されない。
+        ///     完了後にログを追える形にして、どこまで送れたのかを残す。
+        /// </remarks>
+        /// <param name="fileName"> アップロード中のファイル名。 </param>
+        /// <param name="sentBytes"> 送信済みのバイト数。 </param>
+        /// <param name="totalBytes"> 送信するファイルの総バイト数。 </param>
+        private static void ReportProgress(string fileName, long sentBytes, long totalBytes)
+        {
+            // チャンクごとに1行出るため、割合とサイズだけの短い行にとどめる。
+            float percentage = totalBytes <= 0 ? 0f : sentBytes * PERCENTAGE_SCALE / totalBytes;
+            SymphonyDebugLogger.LogDirect(
+                $"{LOG_PREFIX}\nアップロード中: {fileName} {percentage:F1}% " +
+                $"({sentBytes / (float)BYTES_PER_MEGABYTE:F1}MB / {totalBytes / (float)BYTES_PER_MEGABYTE:F1}MB)");
         }
 
         /// <summary>

@@ -56,7 +56,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 EnemyMissionKeyRepository missionKeyRepository =
                     await _missionKeyRepositoryKey.LoadAssetAsync<EnemyMissionKeyRepository>(this, cancellationToken);
                 missionKeyRepository?.TryGetAsset(new EnemyMissionKey(_missionKeyId.Id), out _loadedMissionKeyAsset);
-                _loadedAttackEntryRepo = await _attackEntryRepoKey.LoadAssetAsync<BossAttackEntryRepo>(this, cancellationToken);
+                _loadedAttackEntryRepo = await _attackEntryRepoKey.LoadAssetAsync<BossAttackEntryRepository>(this, cancellationToken);
             }
             catch (Exception ex) { Debug.LogException(ex, this); }
 
@@ -145,10 +145,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncState, musicSyncService);
 
             // UseCase
-            EnemyMoveUsecase moveUsecase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
-            EnemyTripleShotAttackUsecase tripleShotAttackUsecase = new EnemyTripleShotAttackUsecase(tripleRaycastDetectService);
-            BossAttackReservationUsecase reservationUsecase = new BossAttackReservationUsecase(musicActionScheduler);
+            EnemyMoveUseCase moveUsecase = new EnemyMoveUseCase(spec, raycastDetectService, attackPositionSearchService);
+            EnemyAttackUseCase attackUsecase = new EnemyAttackUseCase(raycastDetectService);
+            EnemyTripleShotAttackUseCase tripleShotAttackUsecase = new EnemyTripleShotAttackUseCase(tripleRaycastDetectService);
+            BossAttackReservationUseCase reservationUsecase = new BossAttackReservationUseCase(musicActionScheduler);
             _reservationUsecase = reservationUsecase;
 
             // AI判定用（移動・硬直・範囲）の戦闘状態。先頭攻撃の定義で初期化する。
@@ -333,39 +333,39 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         [SerializeField, SourceDataCollection("Character"), Tooltip("このボスが対応するキャラクター定義のIDです。")] private DataID _characterId;
         [SerializeField, SourceDataAddress, Tooltip("ボス移動仕様の Addressables キーです。")] private string _moveDataKey;
 
-        [SerializeField] private BossMoveView _view;
-        [SerializeField] private EnemyHealthView _healthView;
-        [SerializeField] private EnemyRaycastDetectView _raycastView;
-        [SerializeField] private TripleShotRaycastDetectView _tripleShotRaycastView;
-        [SerializeField] private NearestAttackPositionSearchView _attackPositionSearchView;
+        [SerializeField, Tooltip("ボスの移動と見た目を扱うビュー。")] private BossMoveView _view;
+        [SerializeField, Tooltip("ボスの HP 表示のビュー。")] private EnemyHealthView _healthView;
+        [SerializeField, Tooltip("攻撃の射線判定と警告表示のビュー。")] private EnemyRaycastDetectView _raycastView;
+        [SerializeField, Tooltip("3連射攻撃の射線判定と警告表示のビュー。")] private TripleShotRaycastDetectView _tripleShotRaycastView;
+        [SerializeField, Tooltip("攻撃位置を探索するビュー。")] private NearestAttackPositionSearchView _attackPositionSearchView;
         [SerializeField, SourceDataAddress, Tooltip("ボスミッションキーリポジトリの Addressables キーです。")] private string _missionKeyRepositoryKey;
         [SerializeField, SourceDataCollection("EnemyMissionKey"), Tooltip("このボスが対応する敵ミッションキーのIDです。")] private DataID _missionKeyId;
         [SerializeField, SourceDataAddress, Tooltip("ボス攻撃定義群の Addressables キーです。")] private string _attackEntryRepoKey;
-        [SerializeField] private BossMovementAIFacade _bossMovementAIFacade;
-        [SerializeField] private BossBattleAIFacade _bossBattleAIFacade;
-        [SerializeField] private BossStateFacade _bossStateFacade;
-        [SerializeField] private BossSharedFacade _bossSharedFacade;
-        [SerializeField] private BehaviorGraphAgent _behaviorGraphAgent;
-        [SerializeField] private NavMeshAgent _navMeshAgent;
+        [SerializeField, Tooltip("Behavior Graph から移動を操作する窓口。")] private BossMovementAIFacade _bossMovementAIFacade;
+        [SerializeField, Tooltip("Behavior Graph から攻撃を操作する窓口。")] private BossBattleAIFacade _bossBattleAIFacade;
+        [SerializeField, Tooltip("Behavior Graph から状態を参照する窓口。")] private BossStateFacade _bossStateFacade;
+        [SerializeField, Tooltip("Behavior Graph と共有する参照の窓口。")] private BossSharedFacade _bossSharedFacade;
+        [SerializeField, Tooltip("ボスの AI を動かす Behavior Graph。")] private BehaviorGraphAgent _behaviorGraphAgent;
+        [SerializeField, Tooltip("ボスの経路移動に使う NavMeshAgent。")] private NavMeshAgent _navMeshAgent;
 
         [SerializeField, Tooltip("敵ロックオン時の中心となるTransform")]
         private Transform _targetTransform;
 
         [Header("砲撃攻撃を含む場合に必要")]
-        [SerializeField] private ShellSpawner _shellSpawner;
+        [SerializeField, Tooltip("砲弾を生成するスポナー。")] private ShellSpawner _shellSpawner;
 
         private TargetSystemController _targetingSystem;
         private TransformTargetable _targetable;
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
         private BossAIController _aiController;
-        private BossAttackReservationUsecase _reservationUsecase;
+        private BossAttackReservationUseCase _reservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _aiBattleState;
         private CharacterDefinitionAsset _loadedEnemyData;
         private EnemyMoveSpecAsset _loadedMoveData;
         private EnemyMissionKeyAsset _loadedMissionKeyAsset;
-        private BossAttackEntryRepo _loadedAttackEntryRepo;
+        private BossAttackEntryRepository _loadedAttackEntryRepo;
         private EnemyHealthHudPresenter _enemyHealthHudPresenter;
 
         /// <summary>

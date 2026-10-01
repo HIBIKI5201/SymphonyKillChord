@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
     /// </summary>
     public class SelectedScenarioState
     {
+        /// <summary> 選択中のシナリオが変わったとき、または選択が解除されたときに通知します。 </summary>
+        public event Action OnSelectionChanged;
+
         /// <summary> 現在選択されているシナリオIDを取得します。 </summary>
         public string CurrentScenarioId
         {
@@ -56,9 +59,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
                 throw new ArgumentNullException(nameof(stageDefinition));
             }
 
-            _currentStageDefinition = stageDefinition;
-            IsOpeningTutorialScenario = false;
-            _selectionRevision++;
+            ApplySelection(stageDefinition, false);
         }
 
         /// <summary>
@@ -67,8 +68,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// <param name="stageDefinition"> 選択するシナリオステージ定義。 </param>
         public void SelectOpeningTutorialScenario(ScenarioStageDefinition stageDefinition)
         {
-            SelectScenario(stageDefinition);
-            IsOpeningTutorialScenario = true;
+            if (stageDefinition == null)
+            {
+                throw new ArgumentNullException(nameof(stageDefinition));
+            }
+
+            ApplySelection(stageDefinition, true);
         }
 
         /// <summary>
@@ -76,9 +81,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
         /// </summary>
         public void Clear()
         {
-            _currentStageDefinition = null;
-            IsOpeningTutorialScenario = false;
-            _selectionRevision++;
+            ApplySelection(null, false);
         }
 
         /// <summary>
@@ -99,5 +102,18 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
 
         private ScenarioStageDefinition _currentStageDefinition;
         private int _selectionRevision;
+
+        /// <summary>
+        ///     選択状態を差し替えて変更を通知します。
+        /// </summary>
+        /// <param name="stageDefinition"> 選択するシナリオステージ定義。解除する場合はnull。</param>
+        /// <param name="isOpeningTutorialScenario"> オープニングチュートリアルのシナリオの場合はtrue。</param>
+        private void ApplySelection(ScenarioStageDefinition stageDefinition, bool isOpeningTutorialScenario)
+        {
+            _currentStageDefinition = stageDefinition;
+            IsOpeningTutorialScenario = isOpeningTutorialScenario;
+            _selectionRevision++;
+            OnSelectionChanged?.Invoke();
+        }
     }
 }

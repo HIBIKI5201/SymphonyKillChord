@@ -274,7 +274,8 @@ namespace SinfoniaStudio.SinfoniaOperator
                 string modelPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_EMBEDDING_MODEL_PATH);
                 string tokenizerPath = GetTokenizerPath(modelPath);
                 string repositoryRoot = FindRepositoryRoot();
-                MarkdownChunker chunker = new(repositoryRoot);
+                string sourcePath = OperatorConfig.GetValue(OperatorConfigKeys.NOTION_EXPORT_OUTPUT);
+                MarkdownChunker chunker = new(repositoryRoot, specificationRootPath: string.IsNullOrWhiteSpace(sourcePath) ? null : sourcePath);
                 using OnnxEmbeddingModel embeddingModel = new(modelPath, tokenizerPath);
                 SpecIndexBuilder indexBuilder = new(chunker, embeddingModel);
                 SpecIndex index = await indexBuilder.BuildAndSaveAsync(indexPath);
@@ -301,22 +302,34 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             try
             {
+                // 配備済みの検索設定・索引・モデルは同一リリースの組を優先する。
+                OperatorConfig.LoadJsonFile(
+                    Path.Combine(AppContext.BaseDirectory, "spec-search.release.json"),
+                    OperatorConfigKeys.SPEC_SEARCH,
+                    OperatorConfigKeys.SPEC_SEARCH_INDEX_PATH,
+                    OperatorConfigKeys.SPEC_SEARCH_EMBEDDING_MODEL_PATH);
                 string discordBotToken = GetRequiredConfigValue(OperatorConfigKeys.DISCORD_BOT_TOKEN);
                 string indexPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_INDEX_PATH);
                 string modelPath = GetRequiredConfigValue(OperatorConfigKeys.SPEC_SEARCH_EMBEDDING_MODEL_PATH);
                 string tokenizerPath = GetTokenizerPath(modelPath);
                 ulong? guildId = ParseOptionalGuildId(OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_DISCORD_GUILD_ID));
                 int topK = ParseTopK(OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_TOP_K));
-                string priorityPath = OperatorConfig.GetValue(OperatorConfigKeys.SPEC_SEARCH_PRIORITY_PATH);
-                SpecPriorityTable? priorityTable = string.IsNullOrWhiteSpace(priorityPath)
-                    ? null
-                    : SpecPriorityTable.Load(priorityPath);
+                string searchJson = OperatorConfig.GetJsonValue(OperatorConfigKeys.SPEC_SEARCH);
+                if (string.IsNullOrWhiteSpace(searchJson))
+                {
+                    throw new InvalidOperationException("公開envのSPEC_SEARCHに資料・節の重みを設定してください。旧SPEC_SEARCH_PRIORITY_PATHは使用しません。");
+                }
+                SpecSearchSettings searchSettings = SpecSearchSettings.Parse(searchJson);
+                if (topK > searchSettings.CandidateCount)
+                {
+                    throw new InvalidOperationException("SPEC_SEARCH_TOP_KはSPEC_SEARCH.CandidateCount以下にしてください。");
+                }
                 string geminiApiKey = OperatorConfig.GetValue(OperatorConfigKeys.GEMINI_API_KEY);
                 SpecIndex index = SpecIndex.Load(indexPath);
                 using OnnxEmbeddingModel embeddingModel = new(modelPath, tokenizerPath);
                 using GeminiSummarizer? summarizer = CreateGeminiSummarizer(geminiApiKey);
                 await using DiscordBotManager discordBot = new(discordBotToken);
-                discordBot.ConfigureSpecSearch(index, embeddingModel, guildId, topK, priorityTable, summarizer);
+                discordBot.ConfigureSpecSearch(index, embeddingModel, guildId, topK, searchSettings, summarizer);
 
                 // GITHUB_REPOSITORYが設定されている場合のみ、ブランチ整理コマンドを有効にする。
                 string gitHubRepository = OperatorConfig.GetValue(OperatorConfigKeys.GITHUB_REPOSITORY);
@@ -502,7 +515,10 @@ namespace SinfoniaStudio.SinfoniaOperator
                 while (directory != null)
                 {
                     string specificationPath = Path.Combine(directory.FullName, "Docs", "NotionSpecifications");
-                    if (Directory.Exists(specificationPath))
+                    if (Directory.Exists(Path.Combine(directory.FullName, ".git"))
+                        || File.Exists(Path.Combine(directory.FullName, ".git"))
+                        || Directory.Exists(specificationPath)
+                        || Directory.Exists(Path.Combine(directory.FullName, "Library", "NotionSpecifications")))
                     {
                         return directory.FullName;
                     }
@@ -511,7 +527,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 }
             }
 
-            throw new DirectoryNotFoundException("Docs/NotionSpecificationsを含むリポジトリルートが見つかりません。");
+            throw new DirectoryNotFoundException("仕様書キャッシュまたは.gitを含むリポジトリルートが見つかりません。");
         }
 
         /// <summary>

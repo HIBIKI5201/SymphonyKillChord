@@ -10,6 +10,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
     /// </summary>
     public class DamageReductionBuff : StatusEffectBase, IIncomingDamageModifier
     {
+        /// <summary>
+        ///     被ダメージの軽減率と再付与時の扱いを指定して生成する。
+        /// </summary>
         public DamageReductionBuff(float reductionRate, StatusEffectReapplyPolicy reapplyPolicy)
             : base(
                 EFFECT_ID,

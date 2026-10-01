@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class NearestAttackPositionSearchController : INearestAttackPositionSearchRepository
     {
+        /// <summary>
+        ///     攻撃位置探索の ViewModel を指定して生成する。
+        /// </summary>
         public NearestAttackPositionSearchController(INearestAttackPositionSearchViewModel viewModel)
         {
             _viewModel = viewModel;

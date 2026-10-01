@@ -76,6 +76,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             ref int skippedCount,
             ref int errorCount)
         {
+            // シーンを開き、SpawnPositionPair を集める。
             Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
             SpawnPositionPair[] pairs = UnityEngine.Object.FindObjectsByType<SpawnPositionPair>(
                 FindObjectsSortMode.None);
@@ -87,12 +88,14 @@ namespace KillChord.Editor.SourceDataProvider.Core
             bool changed = false;
             foreach (SpawnPositionPair pair in pairs)
             {
+                // ID が設定済みのものは飛ばす。
                 if (pair.SpawnPointId.Id != 0)
                 {
                     skippedCount++;
                     continue;
                 }
 
+                // GameObject 名を ID として使う。シーン内で名前が重複する場合は移行できない。
                 string candidateId = pair.gameObject.name;
                 if (!IsUniqueInScene(pairs, pair, candidateId))
                 {
@@ -104,6 +107,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                     continue;
                 }
 
+                // ID とハッシュを書き込む。
                 SerializedObject serializedObject = new(pair);
                 SerializedProperty spawnPointIdProperty = serializedObject.FindProperty(SPAWN_POINT_ID_PROPERTY_NAME);
                 spawnPointIdProperty.FindPropertyRelative(ID_PROPERTY_NAME).stringValue = candidateId;
@@ -115,6 +119,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 changed = true;
             }
 
+            // 変更があった場合だけシーンを保存する。
             if (changed)
             {
                 EditorSceneManager.SaveScene(scene);

@@ -37,6 +37,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         public static void ExportProfileNamesFromCli()
         {
+            // コマンドライン引数を読み取り、設定が揃っているかを確認する。
             string buildMode = GetCliArg("-buildMode");
             string gameDataVariant = GetCliArg("-gameDataVariant");
             string selectedProfiles = GetCliArg("-selectedProfiles");
@@ -55,6 +56,7 @@ namespace KillChord.Editor.AutoBuilder
                 return;
             }
 
+            // 種別とモードに合うプロファイルを集め、指定があればさらに絞り込む。
             BuildProfile[] profiles = CollectProfiles(settings, variant, modes);
             if (profiles.Length == 0 || !ValidateProfileVariants(profiles, variant))
             {
@@ -72,6 +74,7 @@ namespace KillChord.Editor.AutoBuilder
                 return;
             }
 
+            // プロファイル名をファイルへ書き出して終了する。
             string[] profileNames = profiles
                 .Where(profile => profile != null)
                 .Select(profile => profile.name)

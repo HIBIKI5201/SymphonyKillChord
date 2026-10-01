@@ -57,7 +57,7 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     チュートリアル等で対象となっているBeatCountを設定し、対象外ビートの表示を暗くする。
+        ///     チュートリアル等で対象となっているBeatCountを設定し、対象外ビートの表示を薄くする。
         /// </summary>
         /// <param name="targetBeatCount"> 対象のBeatCount。対象がない場合はnull。 </param>
         public void SetTargetBeatCount(int? targetBeatCount)
@@ -68,7 +68,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 UpdateBeatColors();
                 // 現在ビートの表示色は次のブロック遷移まで更新されないため、ここで即座に反映する。
                 UpdateCurrentBeatColor();
-                UpdateJustTimingMarkerColors();
+                UpdateJustOutlineColors();
                 RebuildTargetBeatFrames();
             }
         }
@@ -146,7 +146,7 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ガイド表示用に、対象BeatCountと一致しない判定ゾーンの色を暗くする。
+        ///     ガイド表示用に、対象BeatCountと一致しない判定ゾーンの色を薄くする。
         /// </summary>
         /// <param name="color"> 減光前の色。 </param>
         /// <param name="zoneIndex"> 対象の判定ゾーンのインデックス。 </param>
@@ -158,7 +158,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 return color;
             }
 
-            // 対象外ビートを暗くする。
+            // 対象外ビートを薄くする。
             if (_zoneBeatCounts[zoneIndex] != _targetBeatCount.Value)
             {
                 color.a *= _dimAlpha;
@@ -168,7 +168,7 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ガイド表示に適用するブロックの色を取得する。対象BeatCountと一致しない場合は暗くする。
+        ///     ガイド表示に適用するブロックの色を取得する。対象BeatCountと一致しない場合は薄くする。
         ///     判定ゾーンを解決できない場合は既定値を返す。
         /// </summary>
         /// <param name="blockIndex"> ブロックのインデックス。 </param>
@@ -184,39 +184,34 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ジャストタイミング表示用の帯を現在の対象BeatCountに応じた透明度へ更新する。
+        ///     ジャスト位置の枠線を現在の対象BeatCountに応じた透明度へ更新する。
         /// </summary>
-        private void UpdateJustTimingMarkerColors()
+        private void UpdateJustOutlineColors()
         {
-            if (_justTimingMarkers == null || _effectConfig == null)
+            if (_effectConfig == null || _justOutlineImages == null)
             {
                 return;
             }
 
-            for (int zoneIndex = 0; zoneIndex < _zoneBeatCounts.Length; zoneIndex++)
+            for (int i = 0; i < _justOutlineImages.Length; i++)
             {
-                Color color = GetJustTimingMarkerColor(zoneIndex);
-                for (int sideIndex = 0; sideIndex < 2; sideIndex++)
+                if (_justOutlineImages[i] == null)
                 {
-                    int markerIndex = zoneIndex * 2 + sideIndex;
-                    if (markerIndex < _justTimingMarkers.Length &&
-                        _justTimingMarkers[markerIndex] != null &&
-                        _justTimingMarkers[markerIndex].TryGetComponent(out Image markerImage))
-                    {
-                        markerImage.color = color;
-                    }
+                    continue;
                 }
+
+                _justOutlineImages[i].color = GetJustOutlineColor(_justOutlineZoneIndices[i]);
             }
         }
 
         /// <summary>
-        ///     指定ゾーンのジャストタイミング表示用の帯色を取得する。
+        ///     指定ゾーンのジャスト位置の枠線色を取得する。
         /// </summary>
         /// <param name="zoneIndex"> 対象の判定ゾーンのインデックス。 </param>
-        /// <returns> 対象外の場合はゲージ色と同じ透明度を適用した帯色。 </returns>
-        private Color GetJustTimingMarkerColor(int zoneIndex)
+        /// <returns> 対象外の場合はゲージ色と同じ透明度を適用した枠線色。 </returns>
+        private Color GetJustOutlineColor(int zoneIndex)
         {
-            Color markerColor = _effectConfig.MarkerColor;
+            Color outlineColor = _effectConfig.JustOutlineColor;
             if (_beatColor == null ||
                 !_targetBeatCount.HasValue ||
                 zoneIndex < 0 ||
@@ -224,11 +219,11 @@ namespace KillChord.Runtime.View.InGame.Music
                 zoneIndex >= _beatColor.Length ||
                 _zoneBeatCounts[zoneIndex] == _targetBeatCount.Value)
             {
-                return markerColor;
+                return outlineColor;
             }
 
-            markerColor.a = ApplyTargetDim(_beatColor[zoneIndex], zoneIndex).a;
-            return markerColor;
+            outlineColor.a = ApplyTargetDim(_beatColor[zoneIndex], zoneIndex).a;
+            return outlineColor;
         }
 
         /// <summary>
@@ -444,8 +439,17 @@ namespace KillChord.Runtime.View.InGame.Music
             }
         }
 
-        /// <summary> ジャストタイミング位置を示す帯の横幅倍率。 </summary>
-        private const float JUST_TIMING_MARKER_WIDTH_SCALE = 1f / 3f;
+        /// <summary> ジャスト位置の枠線1つを構成する線の本数。上下左右の4本。 </summary>
+        private const int OUTLINE_LINE_COUNT = 4;
+
+        /// <summary>
+        ///     ジャスト帯の幅（小節単位）。判定幅に関係なく、この幅で描く。
+        ///     値は従来の見た目（ジャスト判定幅の1/32小節）に合わせている。
+        /// </summary>
+        private const float JUST_BAND_WIDTH_IN_BARS = 0.03125f;
+
+        /// <summary> ジャスト位置の枠線の最小の太さ。 </summary>
+        private const float MIN_OUTLINE_THICKNESS = 0.1f;
 
         /// <summary> チュートリアル対象枠の線幅。 </summary>
         private const float TARGET_BEAT_FRAME_THICKNESS = 2f;
@@ -521,7 +525,9 @@ namespace KillChord.Runtime.View.InGame.Music
         private Image[] _leftBeatImages;
         private RectTransform[] _rightBeatRectTransforms;
         private Image[] _rightBeatImages;
-        private RectTransform[] _justTimingMarkers;
+        private int[] _blockSectionIndices = Array.Empty<int>();
+        private Image[] _justOutlineImages = Array.Empty<Image>();
+        private int[] _justOutlineZoneIndices = Array.Empty<int>();
         private MotionHandle[] _handles;
         private RectTransform[] _targetBeatFrames = Array.Empty<RectTransform>();
         private MotionHandle _targetBeatFrameMotion;
@@ -591,6 +597,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private void RebuildBeatRectTransforms()
         {
             ClearGeneratedBeatObjects();
+            RebuildBlockSectionIndices();
             InitBeatGUI(
                 _canvasGroup.gameObject,
                 _outTimingSizeDelta,
@@ -601,7 +608,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 out _rightBeatRectTransforms,
                 out _handles);
 
-            CreateJustTimingMarkers();
+            CreateJustOutlines();
             RebuildTargetBeatFrames();
             _currentOpenIndex = -1;
             SynchronizeProgressImageWidths();
@@ -664,17 +671,9 @@ namespace KillChord.Runtime.View.InGame.Music
                 }
             }
 
-            if (_justTimingMarkers != null)
-            {
-                for (int i = 0; i < _justTimingMarkers.Length; i++)
-                {
-                    if (_justTimingMarkers[i] != null)
-                    {
-                        _justTimingMarkers[i].gameObject.SetActive(false);
-                        Destroy(_justTimingMarkers[i].gameObject);
-                    }
-                }
-            }
+            // 枠線はブロックの子のため、ブロックの破棄に付随して消える。参照だけを捨てる。
+            _justOutlineImages = Array.Empty<Image>();
+            _justOutlineZoneIndices = Array.Empty<int>();
 
             if (_leftBeatRectTransforms != null)
             {
@@ -728,11 +727,13 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <returns> 生成したモーションのハンドル。 </returns>
         private MotionHandle CreateJustTimingMotion(int index, Color beatColor)
         {
+            // 各演出の長さは 0 にならないよう下限を設ける。
             float overshootSizeDelta = _justTimingSizeDelta + Mathf.Max(0f, _effectConfig.JustOvershootAmount);
             float overshootDuration = Mathf.Max(0.01f, _effectConfig.JustOvershootDuration);
             float returnDuration = Mathf.Max(0.01f, _effectConfig.JustReturnDuration);
             float flashDuration = Mathf.Max(0.01f, _effectConfig.FlashDuration);
 
+            // 左右の枠を一度大きく伸ばしながら色をフラッシュさせ、その後で通常の大きさへ戻す。
             return LSequence.Create()
                 .Append(LMotion.Create(_justTimingSizeDelta, overshootSizeDelta, overshootDuration)
                     .WithEase(_effectConfig.JustOvershootEase)
@@ -756,62 +757,179 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ジャストタイミング位置を事前表示する帯を生成する。
+        ///     ジャストタイミング位置のブロックへ枠線を生成する。
+        ///     枠線はブロックの子として生成するため、高さのアニメーションへ自動的に追従する。
         /// </summary>
-        private void CreateJustTimingMarkers()
+        private void CreateJustOutlines()
         {
-            if (_effectConfig == null || _totalBeatBoxCount <= 0 || _canvasGroup == null)
+            if (_effectConfig == null
+                || _totalBeatBoxCount <= 0
+                || _leftBeatRectTransforms == null
+                || _rightBeatRectTransforms == null)
             {
-                _justTimingMarkers = Array.Empty<RectTransform>();
+                _justOutlineImages = Array.Empty<Image>();
+                _justOutlineZoneIndices = Array.Empty<int>();
                 return;
             }
 
-            _justTimingMarkers = new RectTransform[_zoneBeatCounts.Length * 2];
+            // 判定ゾーンごとに1ブロック、それを左右のガイド分で2倍の枠線を生成する。
+            int lineCount = _zoneBeatCounts.Length * OUTLINE_LINE_COUNT * 2;
+            _justOutlineImages = new Image[lineCount];
+            _justOutlineZoneIndices = new int[lineCount];
+
+            int writeIndex = 0;
             for (int i = 0; i < _zoneBeatCounts.Length; i++)
             {
-                float horizontalPosition = _layout.GetPosition((_justStarts[i] + _justEnds[i]) * 0.5f);
-                float width = (_layout.GetPosition(_justEnds[i]) - _layout.GetPosition(_justStarts[i]))
-                    * JUST_TIMING_MARKER_WIDTH_SCALE;
-                _justTimingMarkers[i * 2] = CreateJustTimingMarker(
-                    $"JustTimingMarker_Left_{i}",
-                    Vector2.left * horizontalPosition, width, i);
-                _justTimingMarkers[i * 2 + 1] = CreateJustTimingMarker(
-                    $"JustTimingMarker_Right_{i}",
-                    Vector2.right * horizontalPosition, width, i);
+                // 共通判定定義のジャスト範囲の中央が乗るブロックを枠線の対象にする。
+                // 範囲の端で求めると浮動小数の誤差で隣のブロックへずれるため中央で求める。
+                float justCenter = (_justStarts[i] + _justEnds[i]) * 0.5f;
+                int blockIndex = _layout.GetBlockIndex(justCenter);
+                if (blockIndex < 0 || blockIndex >= _leftBeatRectTransforms.Length)
+                {
+                    continue;
+                }
+
+                // 帯の太さは判定幅に依存させず、ジャスト範囲の中央を中心に固定幅で描く。
+                int zoneIndex = GetBeatSectionIndex(blockIndex);
+                float bandWidth = _layout.LengthInBars > 0f
+                    ? _layout.HalfWidth * JUST_BAND_WIDTH_IN_BARS / _layout.LengthInBars
+                    : 0f;
+                float centerOffset = _layout.GetPosition(justCenter) - _layout.GetBlockBoundary(blockIndex);
+                RectTransform leftBand = CreateJustBand(
+                    _leftBeatRectTransforms[blockIndex], $"JustBand_Left_{i}", 1f, -centerOffset, bandWidth);
+                RectTransform rightBand = CreateJustBand(
+                    _rightBeatRectTransforms[blockIndex], $"JustBand_Right_{i}", 0f, centerOffset, bandWidth);
+                writeIndex = CreateJustOutline(leftBand, $"JustOutline_Left_{i}", zoneIndex, writeIndex);
+                writeIndex = CreateJustOutline(rightBand, $"JustOutline_Right_{i}", zoneIndex, writeIndex);
+            }
+
+            // ブロック番号を解決できず生成を飛ばした分の空きを詰める。
+            if (writeIndex < lineCount)
+            {
+                Array.Resize(ref _justOutlineImages, writeIndex);
+                Array.Resize(ref _justOutlineZoneIndices, writeIndex);
             }
         }
 
         /// <summary>
-        ///     指定位置へジャストタイミング表示用の帯を生成する。
+        ///     ジャスト帯の枠線を載せる、固定幅の入れ物を生成する。
+        ///     縦方向はブロックへストレッチさせ、高さのアニメーションへ追従させる。
         /// </summary>
+        /// <param name="block"> 帯を付けるブロック。 </param>
         /// <param name="objectName"> 生成するオブジェクト名。 </param>
-        /// <param name="anchoredPosition"> 生成位置。 </param>
-        /// <param name="width"> 共通ジャスト範囲から換算した帯の幅。 </param>
-        /// <param name="zoneIndex"> 対応する判定ゾーンのインデックス。 </param>
-        /// <returns> 生成した帯のRectTransform。 </returns>
-        private RectTransform CreateJustTimingMarker(string objectName, Vector2 anchoredPosition, float width, int zoneIndex)
+        /// <param name="innerEdgeAnchorX"> ブロックの中心側の端を表すアンカーX。左側は1、右側は0。 </param>
+        /// <param name="centerOffset"> 中心側の端から帯の中心までの距離。左側は負の値。 </param>
+        /// <param name="bandWidth"> 帯の幅。 </param>
+        /// <returns> 生成した入れ物のRectTransform。 </returns>
+        private static RectTransform CreateJustBand(
+            RectTransform block, string objectName, float innerEdgeAnchorX, float centerOffset, float bandWidth)
         {
-            GameObject markerObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
-            markerObject.layer = gameObject.layer;
-            markerObject.transform.SetParent(_canvasGroup.transform, false);
-            markerObject.transform.SetAsFirstSibling();
+            GameObject bandObject = new GameObject(objectName, typeof(RectTransform));
+            bandObject.layer = block.gameObject.layer;
+            bandObject.transform.SetParent(block, false);
 
-            RectTransform markerRectTransform = markerObject.GetComponent<RectTransform>();
-            markerRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-            markerRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            markerRectTransform.pivot = new Vector2(0.5f, 0.5f);
-            // 帯はpivot中央のため、高さの半分だけ持ち上げると下端がガイドの基準線に揃う。
-            // そこからの微調整はレイアウト依存のためConfigの補正値で行う。
-            float verticalOffset = _effectConfig.MarkerHeight * 0.5f + _effectConfig.MarkerVerticalOffset;
-            markerRectTransform.anchoredPosition = anchoredPosition + Vector2.up * verticalOffset;
-            markerRectTransform.sizeDelta = new Vector2(
-                width,
-                Mathf.Max(0.1f, _effectConfig.MarkerHeight));
+            RectTransform bandRectTransform = bandObject.GetComponent<RectTransform>();
+            bandRectTransform.anchorMin = new Vector2(innerEdgeAnchorX, 0f);
+            bandRectTransform.anchorMax = new Vector2(innerEdgeAnchorX, 1f);
+            bandRectTransform.pivot = new Vector2(0.5f, 0.5f);
+            bandRectTransform.anchoredPosition = new Vector2(centerOffset, 0f);
+            bandRectTransform.sizeDelta = new Vector2(bandWidth, 0f);
+            return bandRectTransform;
+        }
 
-            Image markerImage = markerObject.GetComponent<Image>();
-            markerImage.color = GetJustTimingMarkerColor(zoneIndex);
-            markerImage.raycastTarget = false;
-            return markerRectTransform;
+        /// <summary>
+        ///     ジャスト帯1つ分の枠線を上下左右の4本で生成する。
+        ///     左右の線は帯の内側へ描き、上下の線だけ外へ張り出す。
+        ///     上と下の張り出し量は個別に設定できる。
+        /// </summary>
+        /// <param name="parent"> 枠線を付けるジャスト帯。 </param>
+        /// <param name="objectName"> 生成するオブジェクト名の接頭辞。 </param>
+        /// <param name="zoneIndex"> ブロックが属する判定ゾーンのインデックス。 </param>
+        /// <param name="writeIndex"> 生成した枠線を書き込む位置。 </param>
+        /// <returns> 次に書き込む位置。 </returns>
+        private int CreateJustOutline(RectTransform parent, string objectName, int zoneIndex, int writeIndex)
+        {
+            float thickness = Mathf.Max(MIN_OUTLINE_THICKNESS, _effectConfig.JustOutlineThickness);
+            float upperExtend = Mathf.Max(0f, _effectConfig.JustOutlineUpperExtend);
+            float lowerExtend = Mathf.Max(0f, _effectConfig.JustOutlineLowerExtend);
+            Color color = GetJustOutlineColor(zoneIndex);
+
+            // 縦の線は上下の張り出しを足した高さになり、上下で張り出し量が違う分だけ中心がずれる。
+            float verticalLineSizeDelta = upperExtend + lowerExtend;
+            float verticalLineOffset = (upperExtend - lowerExtend) * 0.5f;
+
+            // 上辺。ブロック上端からupperExtendだけ外に出した位置へ、横いっぱいの線を引く。
+            Image topLine = CreateJustOutlineLine(
+                parent, $"{objectName}_Top", color,
+                new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+                new Vector2(0f, upperExtend), new Vector2(0f, thickness));
+
+            // 下辺。ブロック下端からlowerExtendだけ外に出した位置へ引く。
+            Image bottomLine = CreateJustOutlineLine(
+                parent, $"{objectName}_Bottom", color,
+                new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f),
+                new Vector2(0f, -lowerExtend), new Vector2(0f, thickness));
+
+            // 左辺。縦方向はストレッチアンカーで親へ追従させ、上辺と下辺の間をつなぐ高さにする。
+            Image leftLine = CreateJustOutlineLine(
+                parent, $"{objectName}_Left", color,
+                new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f),
+                new Vector2(0f, verticalLineOffset), new Vector2(thickness, verticalLineSizeDelta));
+
+            // 右辺。左辺と左右対称。
+            Image rightLine = CreateJustOutlineLine(
+                parent, $"{objectName}_Right", color,
+                new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1f, 0.5f),
+                new Vector2(0f, verticalLineOffset), new Vector2(thickness, verticalLineSizeDelta));
+
+            Image[] lines = { topLine, bottomLine, leftLine, rightLine };
+            for (int i = 0; i < lines.Length; i++)
+            {
+                _justOutlineImages[writeIndex] = lines[i];
+                _justOutlineZoneIndices[writeIndex] = zoneIndex;
+                writeIndex++;
+            }
+
+            return writeIndex;
+        }
+
+        /// <summary>
+        ///     枠線を構成する線を1本生成する。
+        /// </summary>
+        /// <param name="parent"> 線を付けるブロック。 </param>
+        /// <param name="objectName"> 生成するオブジェクト名。 </param>
+        /// <param name="color"> 線の色。 </param>
+        /// <param name="anchorMin"> アンカーの最小値。 </param>
+        /// <param name="anchorMax"> アンカーの最大値。 </param>
+        /// <param name="pivot"> ピボット。 </param>
+        /// <param name="anchoredPosition"> アンカーからの位置。 </param>
+        /// <param name="sizeDelta"> アンカー基準の大きさ。 </param>
+        /// <returns> 生成した線のImage。 </returns>
+        private Image CreateJustOutlineLine(
+            RectTransform parent,
+            string objectName,
+            Color color,
+            Vector2 anchorMin,
+            Vector2 anchorMax,
+            Vector2 pivot,
+            Vector2 anchoredPosition,
+            Vector2 sizeDelta)
+        {
+            GameObject lineObject = new GameObject(objectName, typeof(RectTransform), typeof(Image));
+            lineObject.layer = parent.gameObject.layer;
+            lineObject.transform.SetParent(parent, false);
+
+            RectTransform lineRectTransform = lineObject.GetComponent<RectTransform>();
+            lineRectTransform.anchorMin = anchorMin;
+            lineRectTransform.anchorMax = anchorMax;
+            lineRectTransform.pivot = pivot;
+            lineRectTransform.anchoredPosition = anchoredPosition;
+            lineRectTransform.sizeDelta = sizeDelta;
+
+            Image lineImage = lineObject.GetComponent<Image>();
+            lineImage.color = color;
+            lineImage.raycastTarget = false;
+            return lineImage;
         }
 
         /// <summary>
@@ -901,6 +1019,7 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <returns> 生成した赤枠のRectTransform。 </returns>
         private RectTransform CreateTargetBeatFrame(string objectName, Vector2 anchoredPosition, float width)
         {
+            // ガイドの子として枠のオブジェクトを作り、中央基準で配置する。
             GameObject frameObject = new GameObject(objectName, typeof(RectTransform));
             frameObject.layer = gameObject.layer;
             frameObject.transform.SetParent(_targetBeatFrameRoot, false);
@@ -911,6 +1030,7 @@ namespace KillChord.Runtime.View.InGame.Music
             frameRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             frameRectTransform.pivot = new Vector2(0.5f, 0.5f);
             frameRectTransform.anchoredPosition = anchoredPosition;
+            // 枠の大きさは、対象の幅と高さに余白を足した大きさにする。
             float frameWidth = Mathf.Max(
                 TARGET_BEAT_FRAME_THICKNESS,
                 width + TARGET_BEAT_FRAME_HORIZONTAL_PADDING * 2f);
@@ -919,6 +1039,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 _outTimingSizeDelta + TARGET_BEAT_FRAME_VERTICAL_PADDING * 2f);
             frameRectTransform.sizeDelta = new Vector2(frameWidth, frameHeight);
 
+            // 上下左右の辺をそれぞれ作る。
             float horizontalEdgeY = (frameHeight - TARGET_BEAT_FRAME_THICKNESS) * 0.5f;
             float verticalEdgeX = (frameWidth - TARGET_BEAT_FRAME_THICKNESS) * 0.5f;
             CreateTargetBeatFrameEdge(
@@ -1123,10 +1244,44 @@ namespace KillChord.Runtime.View.InGame.Music
 
         /// <summary>
         ///     ブロックインデックスがどの判定ゾーンに属するかを返す。
+        ///     ブロックを作り直した時に作る索引を引き、索引の範囲外だけ計算で求める。
         /// </summary>
         /// <param name="blockIndex"> ブロックのインデックス。 </param>
         /// <returns> 属する判定ゾーンのインデックス。 </returns>
         private int GetBeatSectionIndex(int blockIndex)
+        {
+            if (blockIndex >= 0 && blockIndex < _blockSectionIndices.Length)
+            {
+                return _blockSectionIndices[blockIndex];
+            }
+
+            return ResolveBeatSectionIndex(blockIndex);
+        }
+
+        /// <summary>
+        ///     全ブロックの判定ゾーンを求め、索引として保持する。
+        ///     レイアウトと判定ゾーンを更新した後、ブロックを生成する前に呼ぶ。
+        /// </summary>
+        private void RebuildBlockSectionIndices()
+        {
+            int blockCount = Mathf.Max(0, _layout.BlockCount);
+            if (_blockSectionIndices.Length != blockCount)
+            {
+                _blockSectionIndices = blockCount > 0 ? new int[blockCount] : Array.Empty<int>();
+            }
+
+            for (int i = 0; i < blockCount; i++)
+            {
+                _blockSectionIndices[i] = ResolveBeatSectionIndex(i);
+            }
+        }
+
+        /// <summary>
+        ///     ブロックインデックスがどの判定ゾーンに属するかを、判定ゾーンを探索して求める。
+        /// </summary>
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <returns> 属する判定ゾーンのインデックス。 </returns>
+        private int ResolveBeatSectionIndex(int blockIndex)
         {
             float position = _layout.GetBlockBarProgress(blockIndex);
 

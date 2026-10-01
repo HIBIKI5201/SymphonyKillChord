@@ -9,9 +9,12 @@ namespace KillChord.Runtime.View.InGame.Battle
     /// </summary>
     public class AttackResultViewModel : IAttackResultViewModel
     {
+        /// <summary> 攻撃結果が変わったときに発火するイベント。引数はダメージ量と会心かどうか。 </summary>
         public event Action<float, bool> OnChanged;
 
+        /// <summary> 直近の攻撃のダメージ量。 </summary>
         public float Damage { get; private set; }
+        /// <summary> 直近の攻撃が会心だったか。 </summary>
         public bool IsCritical { get; private set; }
 
         /// <summary>

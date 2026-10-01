@@ -1,0 +1,82 @@
+name: "[Bot] Notion Specifications Sync"
+
+# Notionの仕様書をMarkdownへ書き出し、非公開の仕様書リポジトリ（Docs/NotionSpecificationsのサブモジュール）へpushする。
+# NotionのAPI制限を各メンバーが消費しないよう、取得はこのワークフローだけで行い、各自はサブモジュールをpullして読む。
+# このリポジトリは公開されているため、Actionsの実行時間は無料で、ログは誰でも閲覧できる。ページタイトルをログへ出さない。
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'  # 3時間ごと。差分取得なので変更がない回は短時間で終わる。
+  workflow_dispatch:       # 手動実行も可能。
+
+# 同時に走ると同じ差分を二重にpushしようとするため、実行中の回が終わるまで次を待たせる。
+concurrency:
+  group: notion-specifications-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120   # 初回やマニフェスト形式の更新時は全ページを取得するため長めにとる。
+    environment: 'Sinfonia Operator' # NOTION_TOKENとデプロイキーはこの環境のSecretに置く。
+    env:
+      EXPORTER_PROJECT: 'SinfoniaOperator/NotionMarkdownExporter/NotionMarkdownExporter.csproj'
+      EXPORTER_CONFIG: 'SinfoniaOperator/sinfonia-operator.env.json'
+      SPEC_DIRECTORY: 'Docs/NotionSpecifications'
+
+    steps:
+      - name: エクスポーターのソースを取得
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: SinfoniaOperator
+          submodules: false
+
+      - name: 仕様書リポジトリを取得
+        uses: actions/checkout@v4
+        with:
+          repository: HIBIKI5201/SymphonyKillChord_Specifications
+          ssh-key: ${{ secrets.SPECIFICATIONS_DEPLOY_KEY }}
+          path: ${{ env.SPEC_DIRECTORY }}
+
+      - name: .NETをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Notionから書き出し
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: |
+          # 配布用の設定はWindows向けの自己完結exeのため、CIではLinux向けに上書きして実行する。
+          # ログにはページタイトルが含まれるため、ファイルへ退避して件数の集計だけを表示する。
+          log_file="$RUNNER_TEMP/notion-export.log"
+          set +e
+          dotnet run --project "$EXPORTER_PROJECT" --configuration Release \
+            --runtime linux-x64 --self-contained false \
+            -- --config "$EXPORTER_CONFIG" --output "$GITHUB_WORKSPACE/$SPEC_DIRECTORY" \
+            > "$log_file" 2>&1 < /dev/null
+          status=$?
+          set -e
+          if [ $status -ne 0 ]; then
+            echo "::error::エクスポートに失敗しました（終了コード: $status）。詳細はローカルで NotionMarkdownExporter を実行して確認してください。"
+            grep -E '^(エラー|エクスポートに失敗しました|error)' "$log_file" | head -n 5 || true
+            exit $status
+          fi
+          sed -n '/エクスポートが完了しました/,$p' "$log_file" | grep -v '出力先'
+
+      - name: 仕様書リポジトリへpush
+        working-directory: ${{ env.SPEC_DIRECTORY }}
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Notion側に変更はありませんでした。"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --quiet -m "Notion仕様書を同期 ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+          git push --quiet origin HEAD
+          echo "$(git show --stat --format= HEAD | tail -n 1)"

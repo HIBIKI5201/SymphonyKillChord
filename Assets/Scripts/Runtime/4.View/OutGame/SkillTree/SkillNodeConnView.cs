@@ -9,6 +9,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
     /// </summary>
     public class SkillNodeConnView : ISkillNodeConnViewModel
     {
+        /// <summary>
+        ///     ノード間の接続線の要素を指定して、未通過の見た目で生成する。
+        /// </summary>
         public SkillNodeConnView(VisualElement root)
         {
             _root = root;

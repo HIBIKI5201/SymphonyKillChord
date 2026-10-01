@@ -12,8 +12,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
     /// </summary>
     public class StageResultController
     {
+        /// <summary>
+        ///     シーン遷移・選択中のステージとミッション・リザルト終了時の遷移方針を指定して生成する。
+        /// </summary>
         public StageResultController(
-            SceneTransitionUsecase usecase,
+            SceneTransitionUseCase usecase,
             SelectedBattleStageState selectedBattleStageState,
             SelectedMissionState selectedMissionState,
             IStageResultExitPolicy exitPolicy = null)
@@ -123,7 +126,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         }
 
 
-        private readonly SceneTransitionUsecase _usecase;
+        private readonly SceneTransitionUseCase _usecase;
         private readonly SelectedBattleStageState _selectedBattleStageState;
         private readonly SelectedMissionState _selectedMissionState;
         private readonly IStageResultExitPolicy _exitPolicy;

@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Application.Persistent.Input
     /// </summary>
     public class InputBufferRecorder
     {
+        /// <summary>
+        ///     記録先の入力バッファを指定して生成する。
+        /// </summary>
         public InputBufferRecorder(InputBufferingQueue inputBuffer)
         {
             _inputBuffer = inputBuffer;

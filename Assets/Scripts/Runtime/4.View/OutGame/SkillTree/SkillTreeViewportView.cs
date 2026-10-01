@@ -215,6 +215,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 return;
             }
 
+            // 要素と表示範囲の大きさがまだ決まっていない場合は何もしない。
             Rect elementBounds = element.worldBound;
             Rect viewportBounds = _scrollView.contentViewport.worldBound;
             if (!IsValidRect(elementBounds) || !IsValidRect(viewportBounds))
@@ -222,6 +223,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 return;
             }
 
+            // 要素が余白込みで表示範囲からはみ出している分だけ、スクロール位置をずらす。
             float scrollOffsetX = _scrollView.scrollOffset.x;
             float scrollOffsetY = _scrollView.scrollOffset.y;
 
@@ -243,6 +245,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 scrollOffsetX += elementBounds.xMax - (viewportBounds.xMax - ENSURE_VISIBLE_MARGIN);
             }
 
+            // スクロールできる範囲に収め、ほとんど動かない場合は何もしない。
             Vector2 targetOffset = new Vector2(
                 ClampScrollOffsetX(scrollOffsetX),
                 ClampScrollOffsetY(scrollOffsetY));
@@ -466,6 +469,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private void PrepareFocusAfterLayout()
         {
             _pendingLayoutItem = null;
+            // フォーカスの要求が無い場合は何もしない。
             if (_isDisposed || !_isFocusRequested || _focusTargetNodeIds.Length == 0)
             {
                 return;
@@ -474,12 +478,14 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             VisualElement viewport = _scrollView.contentViewport;
             Rect viewportBounds = viewport.worldBound;
             Rect pointsBounds = _points.worldBound;
+            // スクロールビューが見えていない場合は、要求だけ終える。
             if (!IsElementVisible(_scrollView))
             {
                 CompleteFocusRequest();
                 return;
             }
 
+            // レイアウトがまだ決まっていない場合は、決まった後にやり直す。
             if (!IsValidRect(viewportBounds)
                 || !IsValidRect(pointsBounds))
             {
@@ -503,6 +509,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 return;
             }
 
+            // 対象ノードを縦は既定の位置（ただしポイント表示に被らない位置）、横は既定の位置に来るようにスクロールする。
             float targetCenterInContentY = targetBounds.center.y
                 - viewportBounds.yMin
                 + _scrollView.scrollOffset.y;
@@ -619,6 +626,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             targetBounds = default;
             isLayoutPending = false;
             bool hasTarget = false;
+            // 対象ノードすべてを含む範囲を求める。レイアウトが済んでいないノードがあれば待つ。
             for (int i = 0; i < _focusTargetNodeIds.Length; i++)
             {
                 if (!_nodeElements.TryGetValue(

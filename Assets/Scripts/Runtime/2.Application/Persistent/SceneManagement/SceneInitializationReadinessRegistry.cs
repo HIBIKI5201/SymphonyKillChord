@@ -8,7 +8,8 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
     /// <summary>
     ///     シーン名ごとの初期化結果を保持するレジストリです。
     /// </summary>
-    public sealed class SceneInitializationReadinessRegistry : ISceneInitializationReadiness
+    public sealed class SceneInitializationReadinessRegistry
+        : ISceneInitializationReadiness, ISceneInitializationNotifier
     {
         /// <summary>
         ///     最大待機フレーム数を指定して生成します。
@@ -27,6 +28,9 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
 
             _maxWaitFrameCount = maxWaitFrameCount;
         }
+
+        /// <summary> シーンの初期化が成功で完了したときに、そのシーン名を通知します。 </summary>
+        public event Action<string> OnSceneInitialized;
 
         /// <summary>
         ///     対象シーンの初期化追跡を開始します。
@@ -61,6 +65,11 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             }
 
             state.Complete(isSuccess);
+
+            if (isSuccess)
+            {
+                OnSceneInitialized?.Invoke(sceneName);
+            }
         }
 
         /// <summary>
@@ -121,6 +130,9 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
             }
         }
 
+        /// <summary>
+        ///     シーン1つ分の初期化状態。
+        /// </summary>
         private sealed class SceneInitializationState
         {
             /// <summary> 初期化通知を受信済みの場合はtrueです。 </summary>

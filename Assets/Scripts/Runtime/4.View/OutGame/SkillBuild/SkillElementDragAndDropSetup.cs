@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Audio;
 using KillChord.Runtime.Adaptor.OutGame.SkillBuild;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,13 +9,13 @@ using UnityEngine.UIElements;
 namespace KillChord.Runtime.View.OutGame.SkillBuild
 {
     /// <summary>
-    ///     改造画面のスキル UI のドラッグ&ドロップのセットアップを担当するクラス。
+    ///     改造画面のスキル UI のドラッグ＆ドロップのセットアップを担当するクラス。
     /// </summary>
     public class SkillElementDragAndDropSetup
     {
         /// <summary>
         ///     SkillElementDragAndDropSetup クラスのコンストラクタ。
-        ///     UIDocument を受け取り、既存要素へのドラッグ&ドロップのセットアップを行う。
+        ///     UIDocument を受け取り、既存要素へのドラッグ＆ドロップのセットアップを行う。
         /// </summary>
         /// <param name="uiDocument"> ドキュメントの UIDocument。 </param>
         /// <param name="skillBuildViewModel"> 一時スロット状態を保持する ViewModel。 </param>
@@ -41,7 +42,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string SKILL_ELEMENT_CONTAINER_CLASSNAME = "skill-element-container";
         private const string SKILL_ELEMENT_SLOT_CLASSNAME = "skill-element-slot";
         /// <summary>
-        ///     単一のスキル要素にドラッグ&ドロップ操作を設定する。
+        ///     単一のスキル要素にドラッグ＆ドロップ操作を設定する。
         ///     新規スキル入手時など、動的に追加された要素に対して呼び出す。
         /// </summary>
         /// <param name="element"> セットアップ対象の VisualElement。 </param>
@@ -102,7 +103,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             if (slot == null)
             {
 #if UNITY_EDITOR
-                Debug.Log($"{skill?.name} は元の位置に戻されました。");
+                DevLog.Log($"{skill?.name} は元の位置に戻されました。");
 #endif
                 return;
             }
@@ -125,7 +126,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             }
 
 #if UNITY_EDITOR
-            Debug.Log($"{skill?.name} が {slot.name} にドロップされました。");
+            DevLog.Log($"{skill?.name} が {slot.name} にドロップされました。");
 #endif
         }
 

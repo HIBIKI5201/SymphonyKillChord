@@ -8,6 +8,9 @@ namespace KillChord.Runtime.View.InGame.Haptics
     [CreateAssetMenu(
         fileName = nameof(GamepadHapticsConfig),
         menuName = "KillChord/InGame/Haptics/Gamepad Haptics Config")]
+    /// <summary>
+    ///     ゲームパッドの振動の強さと長さを設定するデータ。
+    /// </summary>
     public sealed class GamepadHapticsConfig : ScriptableObject
     {
         /// <summary> 低周波モーターの振動の強さ（0〜1）。 </summary>

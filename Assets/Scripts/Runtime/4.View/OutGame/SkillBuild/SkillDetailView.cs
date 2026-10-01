@@ -27,6 +27,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
 
             _comboHexIcon = comboHexIcon;
 
+            // 画面の各要素を取得する。見つからない場合は例外を投げる。
             _icon = rootElement.Q<Image>(ICON_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {ICON_NAME} が見つかりませんでした。");
             _nameLabel = rootElement.Q<Label>(NAME_LABEL_NAME)
@@ -47,6 +48,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {LEVEL_LABEL_NAME} が見つかりませんでした。");
             _levelupPointLabel = rootElement.Q<Label>(LEVELUP_POINT_LABEL_NAME)
                 ?? throw new ArgumentNullException($"[{nameof(SkillDetailView)}] {LEVELUP_POINT_LABEL_NAME} が見つかりませんでした。");
+            // 未選択時の文言と最大レベルの文言をローカライズに登録する。
             _emptySelectionLocalizedText = new LocalizedElementText(
                 "UICommon", "ui.skill_build.empty_selection", text =>
                 {

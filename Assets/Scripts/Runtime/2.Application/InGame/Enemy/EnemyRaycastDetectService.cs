@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     public class EnemyRaycastDetectService
     {
 
+        /// <summary>
+        ///     射線判定のリポジトリを指定して生成する。
+        /// </summary>
         public EnemyRaycastDetectService(IEnemyRaycastDetectRepository raycastDetectRepo)
         {
             _raycastDetectRepo = raycastDetectRepo;

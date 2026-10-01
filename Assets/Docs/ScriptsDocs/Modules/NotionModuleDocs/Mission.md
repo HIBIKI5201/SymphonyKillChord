@@ -35,7 +35,7 @@
 | **`MissionRuntimeService`** | Application | ミッション進行の中心オーケストレーター。`Tick`/`OnEnemyKilled`/`OnPlayerDead`/`BuildEvaluationResult()`を公開し、`OnMissionFinished(MissionEndReason)`イベントを発火する。コンストラクタDIのみで構成され、ServiceLocatorに依存しない |
 | **`MissionRuleRunner`** | Application | 失敗条件→クリア条件の順で評価し、`MissionProgress.Finish()`を呼ぶ |
 | **`MissionEvaluationRunner`** | Application | 全評価条件を実行し`MissionEvaluationResult`を構築。表示状態（未達成/挑戦中/達成済み）の状態遷移も担う |
-| **`MissionEnemyKilledUsecase` / `MissionPlayerDeadUsecase` / `MissionTimeAdvanceUsecase` / `MissionActionPerformedUsecase`** | Application | `MissionProgress`を更新する単機能ユースケース群 |
+| **`MissionEnemyKilledUseCase` / `MissionPlayerDeadUseCase` / `MissionTimeAdvanceUseCase` / `MissionActionPerformedUseCase`** | Application | `MissionProgress`を更新する単機能ユースケース群 |
 | **`IMissionPreviewProvider`** | Application | ミッションのプレビュー表示テキストを解決する契約 |
 | **`MissionFactory`** | Application | `MissionProgress`の生成 |
 | **`MissionEventController`** | Adaptor | Compositionからの通知窓口。`Tick`/`NotifyEnemyKilled`/`NotifyPlayerDead`を公開し`MissionRuntimeService`へ委譲、HUD更新もトリガーする |
@@ -156,7 +156,7 @@ Compositionからの通知窓口`MissionEventController`、Player側イベント
 | 新しいサブミッション（評価条件）を追加したい | `IMissionEvaluationCondition`（Domain）を実装し、`MissionEvaluationConditionAssetBase`（Infrastructure）を継承したAssetクラスを作成する | 不要（`[SerializeReference, SubclassSelector]`によりInspectorへ自動的に出現） |
 | 新しいクリア条件・失敗条件を追加したい | `IMissionClearCondition`/`IMissionFailCondition`（Domain）を実装し、対応する`MissionClearConditionAssetBase`/`MissionFailConditionAssetBase`（Infrastructure）派生を作成する | 不要（同上）。`And`/`Or`の複合条件Assetと組み合わせて複雑な条件も表現できる |
 | 目標ステップに新しい副作用を持たせたい | `IDecoratorClearCondition`を実装したデコレータ条件（Domain）と、それを検出して副作用を起こすControllerを作る。既存例は説明ポップアップ・敵Wave生成・バフ付与の3つ | 必要（Controllerを`InGameMissionInitializer`で構築・購読させないと、条件は判定されるが副作用が起きない） |
-| 計測できるプレイヤー行動を増やしたい | `MissionActionKind`へ値を追加し、行動の発生元から`MissionActionPerformedUsecase`を呼ぶ | 必要（呼び出し漏れの場合、回数が増えず条件が永久に未達成になる） |
+| 計測できるプレイヤー行動を増やしたい | `MissionActionKind`へ値を追加し、行動の発生元から`MissionActionPerformedUseCase`を呼ぶ | 必要（呼び出し漏れの場合、回数が増えず条件が永久に未達成になる） |
 
 ## 🔄処理フロー
 

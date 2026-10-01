@@ -53,7 +53,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         private ScenarioInputView _scenarioInputView;
         [SerializeField, Tooltip("Autoボタンがあるシーンのみ設定する状態表示View。")]
         private ScenarioAutoButtonView _scenarioAutoButtonView;
-        private ScenarioUsecase _usecase;
+        private ScenarioUseCase _usecase;
         private ScenarioInputController _inputController;
         private ScenarioViewModel _viewModel;
         private InputComposition _inputComposition;
@@ -100,7 +100,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         {
             ScenarioAdvanceGate gate = new ScenarioAdvanceGate();
             _viewModel = new ScenarioViewModel();
-            ScenarioHandlerRepo handlerRepo = new ScenarioHandlerRepo();
+            ScenarioHandlerRepository handlerRepo = new ScenarioHandlerRepository();
             IScenarioRepository repository = new ScenarioRepository();
             IBackgroundRepository backgroundRepository = new BackgroundRepository(_loadedBackgroundCatalog);
             IAnimationRepository animationRepository = new AnimationRepository(_loadedAnimationCatalog);
@@ -123,7 +123,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 _viewModel,
                 _viewModel);
 
-            _usecase = new ScenarioUsecase(
+            _usecase = new ScenarioUseCase(
                 repository,
                 handlerRepo,
                 gate,
@@ -183,6 +183,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
+            // 初期化済みで、依存するサービスが揃っているかを確認する。
             if (!_isInitialized)
             {
                 return false;
@@ -200,6 +201,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
+            // 無くても動作するサービスは、あれば取得する。
             ServiceLocator.TryGetInstance(out _outGameUIEvent);
             ServiceLocator.TryGetInstance(out _outGameSortieController);
 
@@ -209,6 +211,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
+            // セーブと、次のノードへの遷移の予約を用意する。
             _stageProgressSaveDataService = new StageProgressSaveDataService();
 
             if (!ServiceLocator.TryGetInstance(out _pendingNodeTransitionState))
@@ -217,6 +220,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 ServiceLocator.RegisterInstance(_pendingNodeTransitionState);
             }
 
+            // 入力を初期化し、シナリオの入力を有効にしてから再生を始める。
             _scenarioInputView.Initialize(_inputController, _inputComposition.GetInputView, _viewModel);
             _inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.Scenario);
             _isShuttingDown = false;

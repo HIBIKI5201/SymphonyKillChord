@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -9,6 +10,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyWaveSpawnerState
     {
+        /// <summary>
+        ///     敵の数を0にした初期状態で生成する。
+        /// </summary>
         public EnemyWaveSpawnerState()
         {
             _enemyCount = 0;
@@ -69,12 +73,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             {
                 if (_isLastWave)
                 {
-                    Debug.Log("[EnemyWaveSpawnerState] All Wave Cleared.");
+                    DevLog.Log("[EnemyWaveSpawnerState] All Wave Cleared.");
                     OnWaveAllCleared?.Invoke();
                 }
                 else
                 {
-                    Debug.Log("[EnemyWaveSpawnerState] Wave Cleared.");
+                    DevLog.Log("[EnemyWaveSpawnerState] Wave Cleared.");
                     OnWaveCleared?.Invoke();
                 }
             }

@@ -20,8 +20,10 @@ using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
+using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -154,9 +156,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private Dictionary<int, VideoClip> _skillPreviewVideos;
         private Dictionary<StatusBonusEffectKind, Sprite> _statusBonusEffectIcons;
         private Dictionary<SkillType, Sprite> _skillGenreIcons;
-        private SkillNodeDataRepo _loadedSkillNodeDataRepo;
-        private SkillNodeBindRepo _loadedSkillNodeBindRepo;
-        private SkillNodePhaseBindDataRepo _loadedSkillNodePhaseBindRepo;
+        private SkillNodeDataRepository _loadedSkillNodeDataRepo;
+        private SkillNodeBindRepository _loadedSkillNodeBindRepo;
+        private SkillNodePhaseBindDataRepository _loadedSkillNodePhaseBindRepo;
         private StatusBonusEffectIconCatalogAsset _loadedStatusBonusEffectIconCatalog;
         private SkillRepository _loadedSkillRepository;
         private SkillGenreIconCatalogAsset _loadedSkillGenreIconCatalog;
@@ -173,10 +175,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <returns> 成功した場合はtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _loadedSkillNodeDataRepo = await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepo>(this, destroyCancellationToken);
-            _loadedSkillNodeBindRepo = await _skillNodeBindRepoKey.LoadAssetAsync<SkillNodeBindRepo>(this, destroyCancellationToken);
+            _loadedSkillNodeDataRepo = await _skillNodeDataRepoKey.LoadAssetAsync<SkillNodeDataRepository>(this, destroyCancellationToken);
+            _loadedSkillNodeBindRepo = await _skillNodeBindRepoKey.LoadAssetAsync<SkillNodeBindRepository>(this, destroyCancellationToken);
             _loadedSkillNodePhaseBindRepo =
-                await _skillNodePhaseBindRepoKey.LoadAssetAsync<SkillNodePhaseBindDataRepo>(this, destroyCancellationToken);
+                await _skillNodePhaseBindRepoKey.LoadAssetAsync<SkillNodePhaseBindDataRepository>(this, destroyCancellationToken);
 
             if (_loadedSkillNodeDataRepo == null
                 || _loadedSkillNodeBindRepo == null
@@ -301,6 +303,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         public override void Shutdown()
         {
+            // 購読とルート要素の操作の登録を解除する。
             Unsubscribe();
             ServiceLocator.UnregisterInstance<SkillTreeStatusEntity>();
             if (_rootElement != null)
@@ -310,12 +313,14 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _rootElement.UnregisterCallback<NavigationMoveEvent>(
                     HandleSkillNodeNavigationMoveHandler, TrickleDown.TrickleDown);
             }
+            // ダイアログの状態を戻し、生成したコンポーネントを破棄する。
             _isSkillDetailOpen = false;
             _isUnlockConfirmOpen = false;
             _skipUnlockConfirmation = false;
             DisposeComponents();
             CancelAndDisposeCts();
 
+            // 読み込んだアセットを解放し、参照を消す。
             _skillNodeDataRepoKey.ReleaseLoadedAsset(this);
             _skillNodeBindRepoKey.ReleaseLoadedAsset(this);
             _skillNodePhaseBindRepoKey.ReleaseLoadedAsset(this);
@@ -527,6 +532,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillTreeScreenView.SetPoints,
                 () => _skillTreeScreenView.ListSeparator);
             _skillTreeScreenView.OnListSeparatorChanged += _skillTreeController.RefreshSelectedText;
+            _skillTreeController.OnUnlockSaveFailed += HandleUnlockSaveFailed;
 
             _rootElement.RegisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
             _rootElement.RegisterCallback<NavigationCancelEvent>(HandleRootNavigationCancelHandler, TrickleDown.TrickleDown);
@@ -612,6 +618,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private void BuildSkillNodes()
         {
+            // UI のノードごとに、対応するデータからエンティティとビューを作る。
             List<Button> nodes = _rootElement.Query<Button>(className: UssClassNameConstants.USS_CLASS_SKILL_NODE).ToList();
             _skillNodeEntities = new();
             _skillNodeViews = new();
@@ -637,6 +644,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillNodeElements.Add(nodeData.NodeId.Id, nodes[i]);
             }
 
+            // 各ノードの親ノードを設定する。
             foreach (SkillNodeEntity entity in _skillNodeEntities.Values)
             {
                 SkillNodeData data = _loadedSkillNodeDataRepo.FindNodeData(entity.SkillNodeIdVO);
@@ -656,6 +664,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 entity.SetParent(parents);
             }
 
+            // ノード間の隣接関係と、最初にフォーカスするノードを決める。
             _skillNodeElementList = new List<VisualElement>(_skillNodeElements.Values);
             BuildSkillNodeAdjacency();
             MarkInitialFocusNode();
@@ -1005,13 +1014,48 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     スキル解放データの保存に失敗したことを、中央の通知でプレイヤーへ伝えます。
+        /// </summary>
+        private async void HandleUnlockSaveFailed()
+        {
+            // 通知を表示できない場合は、コントローラー側のログだけに任せる。
+            if (!ServiceLocator.TryGetInstance(out EventNotificationView notificationView)
+                || notificationView == null
+                || notificationView.IsVisible
+                || !notificationView.isActiveAndEnabled)
+            {
+                return;
+            }
+
+            try
+            {
+                await notificationView.ShowAsync(SAVE_FAILED_NOTIFICATION_ENTRY, destroyCancellationToken);
+            }
+            catch (System.OperationCanceledException)
+            {
+            }
+            catch (System.Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+        }
+
+        /// <summary> 保存失敗を伝える通知のUICommonエントリです。 </summary>
+        private const string SAVE_FAILED_NOTIFICATION_ENTRY = "ui.notification.save_failed";
+
+        /// <summary>
         ///     生成したコンポーネントを解放します。
         /// </summary>
         private void DisposeComponents()
         {
+            // ビューのイベントを解除し、各画面を破棄する。
             if (_skillTreeScreenView != null && _skillTreeController != null)
             {
                 _skillTreeScreenView.OnListSeparatorChanged -= _skillTreeController.RefreshSelectedText;
+            }
+            if (_skillTreeController != null)
+            {
+                _skillTreeController.OnUnlockSaveFailed -= HandleUnlockSaveFailed;
             }
             _skillTreeScreenView = null;
             _previewVideoScreenView?.Dispose();
@@ -1034,6 +1078,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _playerStatusPresenter = null;
             _skillTreeFocusPresenter = null;
 
+            // ノードのビューを破棄し、ノードの情報を消す。
             if (_skillNodeViews != null)
             {
                 foreach (ISkillNodeViewModel skillNodeViewModel in _skillNodeViews.Values)
@@ -1631,41 +1676,54 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// </summary>
         private async void HandleSkillTreeResetConfirmed()
         {
-            SkillTreeResetDialogView dialogView = _skillTreeResetDialogView;
-            SkillTreeController controller = _skillTreeController;
-            if (dialogView == null || controller == null || _cts == null)
-            {
-                return;
-            }
-
-            dialogView.SetInteractionEnabled(false);
-            bool isSucceeded;
             try
             {
-                isSucceeded = await controller.ResetSkillTreeAsync(_cts.Token);
-            }
-            finally
-            {
-                if (_isInitialized && ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                // 実行中は二重に押されないよう、ダイアログの操作を止める。
+                SkillTreeResetDialogView dialogView = _skillTreeResetDialogView;
+                SkillTreeController controller = _skillTreeController;
+                if (dialogView == null || controller == null || _cts == null)
                 {
-                    dialogView.SetInteractionEnabled(true);
+                    return;
                 }
-            }
 
-            if (!_isInitialized || !isSucceeded || !ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                dialogView.SetInteractionEnabled(false);
+                bool isSucceeded;
+                // リセットを行い、ダイアログがそのままであれば操作を戻す。
+                try
+                {
+                    isSucceeded = await controller.ResetSkillTreeAsync(_cts.Token);
+                }
+                finally
+                {
+                    if (_isInitialized && ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                    {
+                        dialogView.SetInteractionEnabled(true);
+                    }
+                }
+
+                // 成功した場合は、ダイアログと詳細を閉じて初期表示に戻す。
+                if (!_isInitialized || !isSucceeded || !ReferenceEquals(dialogView, _skillTreeResetDialogView))
+                {
+                    return;
+                }
+
+                dialogView.Hide();
+                _isSkillDetailOpen = false;
+                _isUnlockConfirmOpen = false;
+                _unlockConfirmDialogView?.Hide();
+                _dialogNavigationScope.Deactivate();
+                _skillDetailNavigationScope.Deactivate();
+                _skillDetailScreenView?.HideImmediately();
+                dialogView.SetResetButtonVisible(true);
+                _skillTreeViewportView?.ClearFocusZoom();
+            }
+            catch (OperationCanceledException)
             {
-                return;
             }
-
-            dialogView.Hide();
-            _isSkillDetailOpen = false;
-            _isUnlockConfirmOpen = false;
-            _unlockConfirmDialogView?.Hide();
-            _dialogNavigationScope.Deactivate();
-            _skillDetailNavigationScope.Deactivate();
-            _skillDetailScreenView?.HideImmediately();
-            dialogView.SetResetButtonVisible(true);
-            _skillTreeViewportView?.ClearFocusZoom();
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>

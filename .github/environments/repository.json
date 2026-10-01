@@ -1,0 +1,14 @@
+{
+  "name": "(リポジトリ全体)",
+  "note": "Environment ではなく、リポジトリの Settings → Secrets and variables → Actions に置いているもの。どのワークフローからも参照できる。",
+  "variables": {
+    "VERSION_DEVELOPMENT": "Development ビルドで次に使う版（例: v3.1.0）。BuildAndRelease.yml がリリース成功時にパッチ番号を1つ進める。メジャー・マイナーを上げるときは手で書き換える",
+    "VERSION_MASTER": "Master ビルドで次に使う版。同上",
+    "RELEASE_THRESHOLD_HOURS": "BuildAndRelease.yml で、前回のリリースからこの時間以内ならビルドしない（未設定時は72）",
+    "GDRIVE_ASSET_SEARCH_QUERY": "BuildAndRelease.yml が Google Drive から unitypackage を探すときの検索条件",
+    "UNITY_EXE_PATH": "セルフホストランナー上の Unity 実行ファイルのパス（未設定時は自動で探す）",
+    "UNITY_BUILD_EXECUTE_METHOD": "Unity をバッチ実行するときに呼ぶビルド用メソッド",
+    "UNITY_BUILD_TIMEOUT_SEC": "未参照。どのワークフローからも使っていない"
+  },
+  "secrets": {}
+}

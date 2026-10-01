@@ -13,6 +13,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
     /// </summary>
     public class SkillNodeView : ISkillNodeViewModel, IDisposable
     {
+        /// <summary>
+        ///     ノードの要素と ID を指定して生成する。
+        /// </summary>
         public SkillNodeView(VisualElement root, int nodeId, OutGameUIEvent outGameUIEvent)
         {
             _root = root;
@@ -25,6 +28,9 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             SetLocked();
         }
 
+        /// <summary>
+        ///     操作の登録を解除し、再生中の演出を止める。
+        /// </summary>
         public void Dispose()
         {
             _activationRegistration.Dispose();

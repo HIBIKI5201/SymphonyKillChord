@@ -57,6 +57,9 @@ namespace KillChord.Runtime.View.OutGame.Screen
             OutGameUIEvent.OnStageSelectScreenCompleted?.Invoke();
         }
 
+        /// <summary>
+        ///     ボタンのコールバックとローカライズ文言の購読を解除する。
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();

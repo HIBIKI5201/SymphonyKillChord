@@ -39,6 +39,9 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     "create" => await CreateCommand.RunAsync(commandArguments),
                     "set-properties" => await PropertiesCommand.RunAsync(commandArguments),
                     "rename" => await RenameCommand.RunAsync(commandArguments),
+                    "move" => await MoveCommand.RunAsync(commandArguments),
+                    "edit-block" => await EditBlockCommand.RunAsync(commandArguments),
+                    "append" => await AppendCommand.RunAsync(commandArguments),
                     _ => WriteUnknownCommand(command)
                 };
             }
@@ -88,6 +91,16 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             Console.WriteLine("      データベース内の既存ページのプロパティ（カテゴリー等、複数可）を後から設定・更新する。本文には触れない。");
             Console.WriteLine("  NotionMarkdownWriter.exe rename <Markdownパス|URL|ID> --title <ページ名> [--confirm]");
             Console.WriteLine("      既存ページのタイトルだけを変更する。本文には触れない。");
+            Console.WriteLine("  NotionMarkdownWriter.exe move <Markdownパス|URL|ID> --to <移動先データベースのMarkdownパス|URL|ID> [--confirm]");
+            Console.WriteLine("      既存ページを子ページからデータベースの行へ移動する。ページIDは変わらない。プロパティと本文には触れない。");
+            Console.WriteLine("  NotionMarkdownWriter.exe edit-block <ブロックのURL|ID> --text <新しいテキスト> [--discard-formatting] [--confirm]");
+            Console.WriteLine("      ブロックIDを直接指定してリッチテキストを書き換える。段落・見出し・トグル・リスト項目などが対象。");
+            Console.WriteLine("      pushの文字列一致では安全に特定できない箇所（巨大な画像に挟まれた短文、同名のトグルなど）に使う。");
+            Console.WriteLine("      --text には <mention-page url=\"...\">表示名</mention-page> でページメンションを埋め込める。");
+            Console.WriteLine("      変更前のブロックにメンション・リンク・装飾があると、それらが消えるため止まる。消えてよい場合は --discard-formatting を付ける。");
+            Console.WriteLine("  NotionMarkdownWriter.exe append <追加先のURL|ID> --text <追加する段落> [--after <直前のブロックのURL|ID>] [--confirm]");
+            Console.WriteLine("      指定した親（ページ・トグルなど）の子要素に段落を1件追加する。--after を付けるとそのブロックの直後、無ければ末尾に追加する。");
+            Console.WriteLine("      --text には <mention-page url=\"...\">表示名</mention-page> でページメンションを埋め込める。");
             Console.WriteLine();
             Console.WriteLine("設定キー:");
             Console.WriteLine($"  {OperatorConfigKeys.NOTION_TOKEN}                必須。秘密設定または環境変数に置くNotionトークン。");

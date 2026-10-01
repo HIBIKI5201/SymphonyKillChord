@@ -82,6 +82,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             }
 
             nodeIds = Array.Empty<SkillNodeId>();
+            // 候補の ID のうち、存在するノードだけを集める。
             HashSet<SkillNodeEntity> candidateNodes = new HashSet<SkillNodeEntity>();
             foreach (SkillNodeId candidateNodeId in candidateNodeIds)
             {
@@ -98,6 +99,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 return true;
             }
 
+            // 各候補の起点からの距離を求める。
             Dictionary<SkillNodeEntity, int> distanceByNode =
                 new Dictionary<SkillNodeEntity, int>(candidateNodes.Count);
             foreach (SkillNodeEntity node in candidateNodes)
@@ -110,6 +112,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 }
             }
 
+            // 未解放のノードのうち、起点から最も近いものを集める。
             List<SkillNodeId> targetNodeIds = new List<SkillNodeId>();
             int targetDistance = int.MaxValue;
             foreach (SkillNodeEntity node in candidateNodes)
@@ -132,6 +135,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 }
             }
 
+            // すべて解放済みの場合は、起点から最も遠いものを集める。
             if (targetNodeIds.Count == 0)
             {
                 targetDistance = int.MinValue;
@@ -151,6 +155,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 }
             }
 
+            // ID 順に並べて返す。
             targetNodeIds.Sort((left, right) => left.Id.CompareTo(right.Id));
             nodeIds = targetNodeIds;
             return true;

@@ -7,7 +7,7 @@ namespace KillChord.Runtime.Application.InGame.Music
 {
     /// <summary>
     ///     基準タイミングから指定拍数だけ遡った予告を予約するための共通処理。
-    ///     EnemyAttackReservationUsecase（敵の攻撃予告）とShellReservationUsecase
+    ///     EnemyAttackReservationUseCase（敵の攻撃予告）とShellReservationUseCase
     ///     （砲弾の着弾予告）の両方から利用される。
     /// </summary>
     public static class LeadNotificationScheduler

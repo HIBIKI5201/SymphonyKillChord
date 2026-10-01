@@ -13,11 +13,17 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
     /// </summary>
     public class Skill_09 : SkillBase
     {
+        /// <summary>
+        ///     プレイヤーからの範囲判定を指定して生成する。
+        /// </summary>
         public Skill_09(IPlayerTargetRangeQuery rangeQuery)
         {
             _rangeQuery = rangeQuery ?? throw new ArgumentNullException(nameof(rangeQuery));
         }
 
+        /// <summary>
+        ///     プレイヤーに、範囲内の敵への会心ダメージ倍率を上げるバフを付与する。
+        /// </summary>
         public override void Execute(in SkillEffectContext context)
         {
             float criticalDamageMultiplier =

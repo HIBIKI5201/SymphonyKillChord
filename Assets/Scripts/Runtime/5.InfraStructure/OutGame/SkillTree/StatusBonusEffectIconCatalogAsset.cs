@@ -15,7 +15,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         /// <summary> Entries を取得する。 </summary>
         public IReadOnlyList<StatusBonusEffectIconCatalogEntry> Entries => _entries;
 
-        [SerializeField]
+        [SerializeField, Tooltip("ステータスボーナス効果ごとのアイコンの登録一覧。")]
         private StatusBonusEffectIconCatalogEntry[] _entries = Array.Empty<StatusBonusEffectIconCatalogEntry>();
     }
 }

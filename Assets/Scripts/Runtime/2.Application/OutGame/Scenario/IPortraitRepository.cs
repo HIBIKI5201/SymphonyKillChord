@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
     /// </summary>
     public interface IPortraitRepository
     {
+        /// <summary>
+        ///     ID に対応する立ち絵定義を取得する。見つからない場合は false を返す。
+        /// </summary>
         bool TryFindById(PortraitId id, out PortraitDefinition portrait);
     }
 }

@@ -5,6 +5,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyArtilleryAttackController : IEnemyAttackController
     {
+        /// <summary>
+        ///     砲弾の生成処理と戦闘状態を指定して生成する。
+        /// </summary>
         public EnemyArtilleryAttackController(IShellSpawner shellSpawner, EnemyBattleState enemyBattleState)
         {
             _shellSpawner = shellSpawner;

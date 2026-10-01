@@ -46,6 +46,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// </summary>
         public event Action<float, float, float> OnHealthChanged;
 
+        /// <summary>
+        ///     被弾によってHPが実際に減ったときに発火するイベント。<br/>
+        ///     HP消費（<see cref="ConsumeHealth"/>）や回復では発火しない。引数は実際に減ったHP。
+        /// </summary>
+        public event Action<Damage> OnDamageTaken;
+
         /// <summary> キャラクター死亡時に発火するイベント。 </summary>
         public event Action<CharacterEntity> OnDied;
 
@@ -84,18 +90,21 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <summary> キャラクターの会心率を取得する。 </summary>
         public CriticalChance CriticalChance => _criticalChance;
 
-        /// </inheritdoc />
+        /// <inheritdoc />
         public bool CanTakeDamage => !IsDead && !IsInvincible;
 
         /// <inheritdoc />
         public float CurrentBarrier => _barrierEntity.CurrentValue;
 
+        /// <summary>
+        ///     基礎ダメージを変更する。
+        /// </summary>
         public void ChangeBaseDamage(Damage newDamage)
         {
             _baseDamage = newDamage;
         }
 
-        /// </inheritdoc> 
+        /// <inheritdoc />
         public Damage TakeDamage(Damage damage)
         {
             if (IsDead)
@@ -117,6 +126,11 @@ namespace KillChord.Runtime.Domain.InGame.Character
 
             float amountChanged = CurrentHealth.Value - prevHealthValue;
             OnHealthChanged?.Invoke(CurrentHealth.Value, MaxHealth.Value, amountChanged);
+
+            if (amountChanged < 0f)
+            {
+                OnDamageTaken?.Invoke(new Damage(-amountChanged));
+            }
 
             if (CurrentHealth.Value <= 0f && !_isDeadNotified)
             {

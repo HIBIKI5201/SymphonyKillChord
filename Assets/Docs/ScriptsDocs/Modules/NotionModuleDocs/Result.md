@@ -62,7 +62,7 @@ graph TD
     end
 
     subgraph SceneManagementModule [Persistent/SceneManagement モジュール]
-        SM_App["Application<br>SceneTransitionUsecase"]
+        SM_App["Application<br>SceneTransitionUseCase"]
     end
 
     subgraph SequenceModule [Sequence モジュール]
@@ -85,7 +85,7 @@ graph TD
   * *依存箇所*: `SelectedBattleStageState`, `SelectedMissionState`
   * *詳細*: ステージ名・遷移先シーン名の取得、および`CompleteAsync`成功時の選択状態クリアに使用する
 * **`Persistent/SceneManagement`**
-  * *依存箇所*: `SceneTransitionUsecase`
+  * *依存箇所*: `SceneTransitionUseCase`
   * *詳細*: `CompleteAsync`は`UnloadThenChangeSceneAsync`、`RetryAsync`は`UnloadThenReloadSceneAsync`を呼ぶ
 
 ### 📤 依存されているもの
@@ -135,7 +135,7 @@ sequenceDiagram
     participant View as StageResultView
     actor Player as プレイヤー
     participant Controller as StageResultController
-    participant SceneUC as SceneTransitionUsecase
+    participant SceneUC as SceneTransitionUseCase
 
     Seq ->> Presenter: PresentVictory(evaluationResult)
     Presenter ->> Presenter: StageRankCalculator.Calculate / MissionProgressから時間・コンボ取得
@@ -159,7 +159,7 @@ sequenceDiagram
     participant View as StageResultView
     actor Player as プレイヤー
     participant Controller as StageResultController
-    participant SceneUC as SceneTransitionUsecase
+    participant SceneUC as SceneTransitionUseCase
 
     Seq ->> Presenter: PresentDefeat()
     Presenter ->> Presenter: DefeatTipsからランダムに1件選択

@@ -41,6 +41,9 @@ namespace KillChord.Runtime.View.InGame.Sequence
         private const float SOURCE_WEIGHT = 1.0f;
         [SerializeField, Tooltip("Playerのステージ開始時に動かすオブジェクトのSourceを持っているObject")] private PositionConstraint _constraint;
         private int _sourceIndex = -1;
+        /// <summary>
+        ///     制約の参照が設定されているかを確認する。
+        /// </summary>
         private void Awake()
         {
             if (_constraint == null)

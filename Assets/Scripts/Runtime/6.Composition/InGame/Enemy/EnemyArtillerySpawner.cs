@@ -90,7 +90,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private const int SPAWN_RETRY_DELAY_MILLISECONDS = 1000;
         private const int SPAWN_RETRY_LOG_INTERVAL = 10;
 
-        [SerializeField] private EnemyPools _enemyPools;
+        [SerializeField, Tooltip("敵の種類ごとのオブジェクトプール。")] private EnemyPools _enemyPools;
         [SerializeField, Tooltip("敵の生成位置を探索するコンポーネント")]
         private EnemySpawnPositionSearcher _spawnPositionSearcher;
 

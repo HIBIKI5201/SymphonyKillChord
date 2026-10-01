@@ -29,7 +29,17 @@ namespace KillChord.Runtime.View.InGame.Camera
                 return false;
             }
 
-            Vector3 viewportPosition = camera.WorldToViewportPoint(targetPosition);
+            return IsWithinViewport(camera.WorldToViewportPoint(targetPosition));
+        }
+
+        /// <summary>
+        ///     ビューポート座標がカメラ前方かつマージンを考慮した範囲内にあるか判定します。
+        ///     カメラを用意せずに判定条件を検証できるよう、座標変換と分けています。
+        /// </summary>
+        /// <param name="viewportPosition"> 対象のビューポート座標。zはカメラからの奥行き。 </param>
+        /// <returns> カメラ前方かつ有効ビューポート内の場合はtrue。 </returns>
+        public bool IsWithinViewport(in Vector3 viewportPosition)
+        {
             float margin = Mathf.Clamp(_config.LockOnViewportMargin, 0f, 0.5f);
             return viewportPosition.z > 0f
                 && viewportPosition.x >= margin

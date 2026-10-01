@@ -181,6 +181,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
         /// </summary>
         private async void StartHomeTutorial()
         {
+            // バトルのチュートリアルを終えていて、全体のチュートリアルが未完了のときだけ始める。
             if (!_isInitialized
                 || _isTutorialRunning
                 || _loadedSaveData == null
@@ -194,6 +195,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             _isTutorialRunning = true;
             try
             {
+                // 開始を記録してから、ホーム画面のチュートリアルを進める。
                 if (_loadedSaveData.Tutorial.StartHome())
                 {
                     await SaveStore.SaveAsync<SaveData>(destroyCancellationToken);
@@ -202,6 +204,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                 _outGameUIEvent.OnHomeTutorialStarted?.Invoke();
                 await RunHomeTutorialAsync(destroyCancellationToken);
 
+                // 完了を記録して通知する。
                 if (_loadedSaveData.Tutorial.Complete())
                 {
                     await SaveStore.SaveAsync<SaveData>(destroyCancellationToken);
@@ -234,6 +237,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                 return;
             }
 
+            // オーバーレイを作り、各ステップの対象を順に案内する。
             TutorialOverlayView overlayView = new TutorialOverlayView(_homeScreenView.OutGameRootElement);
             _activeOverlayView = overlayView;
             try
@@ -245,6 +249,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                         break;
                     }
 
+                    // 対象が見つからないステップは飛ばす。
                     VisualElement target = _homeScreenView.FindTutorialTarget(step.TargetElementName);
                     if (target == null)
                     {
@@ -263,12 +268,17 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                     }
                 }
 
+                // すべてのステップを終えたらオーバーレイを閉じる。
                 await overlayView.HideAsync(cancellationToken);
             }
             finally
             {
                 _activeOverlayView = null;
                 overlayView.Dispose();
+
+                // オーバーレイは開始時のフォーカスへ戻すが、開始がホーム画面の初期フォーカスより
+                // 先になると戻り先が無いか別のボタンになるため、ホーム画面の既定のフォーカスを取り直す。
+                _homeScreenView.RestoreFocus();
             }
         }
 

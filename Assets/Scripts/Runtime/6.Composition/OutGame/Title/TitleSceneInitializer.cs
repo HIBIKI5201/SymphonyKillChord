@@ -28,6 +28,7 @@ using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using TMPro;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -71,6 +72,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
         [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
         private TextAsset _memberCsv;
+
+        [SerializeField, Tooltip("開始案内の決定ボタンを入力機器ごとに切り替えるための入力アイコンの Sprite Asset です。未設定なら UXML の画像のままです。")]
+        private TMP_SpriteAsset _inputGlyphSpriteAsset;
 
         private OutGameUIEvent _outGameUIEvent;
         private TitleScreenViewRegistry _titleScreenViewRegistry;
@@ -204,6 +208,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
+            _titleSceneView.BindStartButtonGlyph(_inputGlyphSpriteAsset);
             InitializeIdleVideo(titleRoot);
 
             HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
@@ -307,6 +312,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         public override void Shutdown()
         {
+            // 実行中の処理を止め、待機中の動画を破棄する。
             _resetCancellation?.Cancel();
             if (_idleVideoView != null)
             {
@@ -314,12 +320,14 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 Destroy(_idleVideoView.gameObject);
                 _idleVideoView = null;
             }
+            // 購読を解除する。
             UnsubscribeLoading();
             if (_outGameUIEvent != null && _isSubscribed)
             {
                 UnRegisterUIEventCallbacks();
             }
 
+            // 読み込んだアセットを解放し、参照を消す。
             _ruleDataKey.ReleaseLoadedAsset(this);
             _stageTreeAssetKey.ReleaseLoadedAsset(this);
             _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
@@ -327,6 +335,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedStageTreeAsset = null;
             _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
+            // 生成したビューと、依存の参照を破棄する。
             _volumeSettingsTabView?.Dispose();
             _volumeSettingsTabView = null;
             _languageSettingsTabView?.Dispose();
@@ -568,8 +577,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _isResettingSaveData = true;
             ApplyInteractionEnabled(false);
-            // リセット前の音量設定を保持する。
+            // リセット前の音量設定と、言語・判定オフセットを保持する。
             AudioSettingsData preservedAudioSettings = GetPreservedAudioSettings();
+            EnvironmentSettingsData preservedEnvironmentSettings = GetPreservedEnvironmentSettings();
             bool canResumeInteraction = false;
             bool resetSucceeded = false;
             using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
@@ -624,7 +634,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     }
                     if (canResumeInteraction)
                     {
-                        await ApplyPreservedAudioSettingsAsync(preservedAudioSettings);
+                        await ApplyPreservedSettingsAsync(preservedAudioSettings, preservedEnvironmentSettings);
                     }
                     lifetimeToken.ThrowIfCancellationRequested();
                     if (resetSucceeded)
@@ -679,6 +689,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns> 遷移先を設定できた場合はtrueです。 </returns>
         private bool ApplyStartDestination()
         {
+            // チュートリアルを始めている場合は、通常の遷移先へ進む。
             if (_titleSceneView == null || _loadedSaveData == null)
             {
                 return false;
@@ -695,6 +706,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return true;
             }
 
+            // 初回はチュートリアルのシナリオを遷移先にする。
             if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario))
             {
                 Debug.LogError(
@@ -818,19 +830,46 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///     リセット前に保持した音量設定を、リセット後のセーブデータへ反映して保存する。
+        ///     リセット前の環境設定の写しを取得する。セーブデータが未ロードの場合は null を返す。
         /// </summary>
-        private async ValueTask ApplyPreservedAudioSettingsAsync(AudioSettingsData preservedAudioSettings)
+        /// <returns> 現在の環境設定の写し。 </returns>
+        private EnvironmentSettingsData GetPreservedEnvironmentSettings()
         {
-            if (_loadedSaveData == null || preservedAudioSettings == null)
+            if (!SaveStore.IsLoaded<SaveData>())
+            {
+                return null;
+            }
+
+            return SaveStore.Get<SaveData>().EnvironmentSettings.Copy();
+        }
+
+        /// <summary>
+        ///     リセット前に保持した音量設定と、言語・判定オフセットを、リセット後のセーブデータへ反映して保存する。
+        /// </summary>
+        /// <param name="preservedAudioSettings"> リセット前の音量設定。 </param>
+        /// <param name="preservedEnvironmentSettings"> リセット前の環境設定。言語と判定オフセットだけを引き継ぐ。 </param>
+        private async ValueTask ApplyPreservedSettingsAsync(
+            AudioSettingsData preservedAudioSettings,
+            EnvironmentSettingsData preservedEnvironmentSettings)
+        {
+            if (_loadedSaveData == null)
             {
                 return;
             }
 
-            _loadedSaveData.AudioSettings.SetVolumes(
-                preservedAudioSettings.BgmVolume,
-                preservedAudioSettings.SoundEffectVolume,
-                preservedAudioSettings.VoiceVolume);
+            if (preservedAudioSettings != null)
+            {
+                _loadedSaveData.AudioSettings.SetVolumes(
+                    preservedAudioSettings.BgmVolume,
+                    preservedAudioSettings.SoundEffectVolume,
+                    preservedAudioSettings.VoiceVolume);
+            }
+
+            if (preservedEnvironmentSettings != null)
+            {
+                _loadedSaveData.EnvironmentSettings.SetLanguage(preservedEnvironmentSettings.Language);
+                _loadedSaveData.EnvironmentSettings.SetRhythmOffsetSeconds(preservedEnvironmentSettings.RhythmOffsetSeconds);
+            }
 
             try
             {
@@ -838,7 +877,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
             catch (Exception ex)
             {
-                Debug.LogError($"{nameof(TitleSceneInitializer)}: 音量設定の再保存中にエラーが発生しました。{ex.Message}");
+                Debug.LogError($"{nameof(TitleSceneInitializer)}: 引き継ぐ設定の再保存中にエラーが発生しました。{ex.Message}");
             }
         }
 

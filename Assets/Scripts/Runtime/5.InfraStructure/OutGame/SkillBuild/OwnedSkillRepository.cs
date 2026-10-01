@@ -17,6 +17,9 @@ namespace KillChord.Runtime.InfraStructure
     /// </summary>
     [CreateAssetMenu(fileName = nameof(OwnedSkillRepository),
         menuName = PathConst.CREATE_ASSET_MENU_PATH + "SkillBuild/" + nameof(OwnedSkillRepository))]
+    /// <summary>
+    ///     入手済みスキルを管理するリポジトリ。
+    /// </summary>
     public class OwnedSkillRepository : ScriptableObject, IOwnedSkillRepository
     {
         /// <summary>

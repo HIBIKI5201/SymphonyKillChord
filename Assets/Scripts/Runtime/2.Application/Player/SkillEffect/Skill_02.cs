@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Application.InGame.SkillEffect;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
+using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using UnityEngine;
 
@@ -33,7 +34,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             float durationSeconds = (float)context.EffectSpec.GetRequiredValue(
                 SkillEffectParameterId.DurationSeconds);
 
-            Debug.Log($"[Skill_02] 発動: ダメージ増加率={increaseRate}, 効果時間={durationSeconds}秒");
+            DevLog.Log($"[Skill_02] 発動: ダメージ増加率={increaseRate}, 効果時間={durationSeconds}秒");
 
             // 攻撃ヒット時にダメージ増加効果を付与する処理を登録します。
             _pendingAttackEffectService.Register(

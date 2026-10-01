@@ -74,6 +74,9 @@ namespace KillChord.Runtime.View.InGame.Mission
         private bool _isLocalizedTextPending;
         private bool _wasVisible;
 
+        /// <summary>
+        ///     入力を受け付けない設定にし、会話ウィンドウを非表示にする。
+        /// </summary>
         private void Awake()
         {
             _canvasGroup.interactable = false;
@@ -81,11 +84,17 @@ namespace KillChord.Runtime.View.InGame.Mission
             _animation.HideImmediate();
         }
 
+        /// <summary>
+        ///     会話の進行を毎フレーム更新する。
+        /// </summary>
         private void Update()
         {
             _controller?.Tick(Time.unscaledDeltaTime);
         }
 
+        /// <summary>
+        ///     再有効化時に、表示中の会話のローカライズを購読し直す。
+        /// </summary>
         private void OnEnable()
         {
             // OnDisable でローカライズ購読を解除しているため、再有効化時に表示中の会話で購読し直す。
@@ -95,12 +104,18 @@ namespace KillChord.Runtime.View.InGame.Mission
             }
         }
 
+        /// <summary>
+        ///     会話の進行を止め、ローカライズの購読を解除する。
+        /// </summary>
         private void OnDisable()
         {
             _controller?.StopGameplay();
             ReleaseLocalizedText();
         }
 
+        /// <summary>
+        ///     ローカライズと ViewModel の購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             ReleaseLocalizedText();

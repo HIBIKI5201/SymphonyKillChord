@@ -114,7 +114,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public BossLifeCycle LifeCycle => _boss;
 
-        [SerializeField]
+        [SerializeField, Tooltip("初期化するボス。")]
         private BossLifeCycle _boss;
 
         private PlayerInitializer _playerInitializer;

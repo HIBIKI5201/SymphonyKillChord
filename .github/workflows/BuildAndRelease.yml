@@ -1,4 +1,4 @@
-name: Unity Build and Release
+name: "[CI/CD] Unity Build and Release"
 
 on:
   pull_request:
@@ -66,15 +66,67 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      actions: write       # 自身の実行をキャンセルするため。
+      contents: read
+      pull-requests: read  # 後続実行のPRがマージ済みか調べるため。
     outputs:
-      should_run: ${{ steps.release_age.outputs.should_run }}
+      # 経過時間とUnityプロジェクトの変更の両方の条件を満たしたときだけビルドする。
+      should_run: ${{ steps.release_age.outputs.should_run == 'true' && steps.unity_change.outputs.changed == 'true' }}
       hours: ${{ steps.release_age.outputs.hours }}
     env:
       RELEASE_THRESHOLD_HOURS: ${{ vars.RELEASE_THRESHOLD_HOURS }}
 
     steps:
+      # Runner停止中などでPRマージが重なった場合、古いビルドを飛ばして最新のビルドを優先する。
+      # 同じマージ先で、自分より後に作成された未完了の実行（マージ済みPR起動）があれば自分をキャンセルする。
+      - name: 後続の予約済みビルドを確認
+        id: supersede
+        if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BASE_REF: ${{ github.base_ref }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          echo "========== 後続ビルドの確認 =========="
+          echo "自身: run #${RUN_NUMBER} (id: ${RUN_ID}), マージ先: ${BASE_REF}"
+
+          # 自分より新しく、まだ完了していない pull_request 起動の実行を新しい順に列挙する。
+          NEWER_RUNS=$(gh api "repos/${REPO}/actions/workflows/BuildAndRelease.yml/runs?event=pull_request&per_page=50" \
+            --jq ".workflow_runs[] | select(.run_number > ${RUN_NUMBER} and .status != \"completed\") | \"\(.id) \(.run_number) \(.head_sha) \(.head_branch)\"")
+
+          SUPERSEDED_BY=""
+          while read -r ID NUMBER SHA BRANCH; do
+            [ -z "${ID:-}" ] && continue
+            # PRを閉じただけの実行はビルドしないため、同じマージ先へマージ済みのPRに紐づく実行だけを対象にする。
+            # 実行の pull_requests はPRが閉じると空になるため、head ブランチと head SHA からPRを引く。
+            MERGED=$(gh api "repos/${REPO}/pulls?state=closed&base=${BASE_REF}&head=${REPO%%/*}:${BRANCH}" \
+              --jq "[.[] | select(.merged_at != null and .head.sha == \"${SHA}\")] | length")
+            echo "[INFO]: run #${NUMBER} (id: ${ID}) head: ${SHA} → ${BASE_REF} へのマージ済みPR: ${MERGED}件"
+            if [ "${MERGED}" -gt 0 ]; then
+              SUPERSEDED_BY="${NUMBER}"
+              break
+            fi
+          done <<< "${NEWER_RUNS}"
+
+          if [ -z "${SUPERSEDED_BY}" ]; then
+            echo "[Decision]: 後続の予約済みビルドはありません。ビルドを続行します。"
+            echo "superseded=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "::notice::より新しいビルド run #${SUPERSEDED_BY} が予約済みのため、この実行 (#${RUN_NUMBER}) をキャンセルします。"
+          echo "superseded=true" >> $GITHUB_OUTPUT
+          # キャンセル要求が失敗しても、superseded=true によりビルドジョブはスキップされる。
+          gh api -X POST "repos/${REPO}/actions/runs/${RUN_ID}/cancel" \
+            || echo "::warning::自身の実行のキャンセル要求に失敗しました。ビルドはスキップします。"
+
       - name: 最終リリースからの経過時間をチェック
         id: release_age
+        if: steps.supersede.outputs.superseded != 'true'
         run: |
           set -e
           echo "========== リリース経過時間チェック =========="
@@ -95,7 +147,7 @@ jobs:
           # ターゲットブランチに応じたタグプレフィックスを特定します
           TAG_PREFIX="dev"
           if [ "${{ github.base_ref }}" = "main" ]; then
-            TAG_PREFIX="release"
+            TAG_PREFIX="master"
           fi
 
           # GitHub APIからリリース一覧（最大100件）を取得します
@@ -119,7 +171,11 @@ jobs:
             exit 0
           fi
           
-          echo "[INFO]: 最新リリースの公開日時: $RELEASE_DATE"
+          # Unityプロジェクトの変更チェックで比較の起点にするため、最新リリースのタグ名を渡します
+          LAST_TAG=$(echo "$RESPONSE" | jq -r --arg prefix "${TAG_PREFIX}-" '[.[] | select(.tag_name != null and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .tag_name // empty')
+          echo "last_tag=$LAST_TAG" >> $GITHUB_OUTPUT
+
+          echo "[INFO]: 最新リリースの公開日時: $RELEASE_DATE (タグ: $LAST_TAG)"
           RELEASE_TS=$(date -d "$RELEASE_DATE" +%s)
           NOW_TS=$(date -u +%s)
           HOURS=$(( (NOW_TS - RELEASE_TS) / 3600 ))
@@ -141,6 +197,65 @@ jobs:
           else
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "[Decision]: should_run=true (最終リリースが $HOURS hours前の分、Threshold ${RELEASE_THRESHOLD_HOURS}hours 超過)"
+          fi
+
+      # 前回のリリースから今回のマージまでに、Unityプロジェクト（Assets / Packages / ProjectSettings）の
+      # 変更が無ければビルドしない。マージしたPRの差分だけを見ると、経過時間の条件で見送られた
+      # Unityの変更が、後からUnity外だけのPRがマージされたときに取り残されるため、前回のリリースを起点にする。
+      - name: Unityプロジェクトの変更をチェック
+        id: unity_change
+        if: steps.release_age.outputs.should_run == 'true'
+        env:
+          LAST_TAG: ${{ steps.release_age.outputs.last_tag }}
+          HEAD_SHA: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+        run: |
+          set -e
+          echo "========== Unityプロジェクト変更チェック =========="
+
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (手動実行)"
+            exit 0
+          fi
+
+          if [ -z "${LAST_TAG}" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (比較の起点になるリリースが無い)"
+            exit 0
+          fi
+
+          echo "[INFO]: 比較範囲: ${LAST_TAG}...${HEAD_SHA}"
+          RESPONSE=$(curl -s -w "\n%{http_code}" -H "Authorization: Bearer ${{ github.token }}" "https://api.github.com/repos/${{ github.repository }}/compare/${LAST_TAG}...${HEAD_SHA}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n 1)
+          RESPONSE=$(echo "$RESPONSE" | head -n -1)
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            # 比較できないときは、ビルドを取りこぼさないほうに倒す
+            echo "[WARN]: 差分の取得に失敗しました (HTTP $HTTP_CODE)。ビルドを実行します。"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (差分を取得できなかった)"
+            exit 0
+          fi
+
+          FILE_COUNT=$(echo "$RESPONSE" | jq '.files | length')
+          # compare API が返すファイルは最大300件のため、上限に達したときは全件を確かめられない
+          if [ "$FILE_COUNT" -ge 300 ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (変更ファイルが ${FILE_COUNT} 件以上あり、全件を確認できない)"
+            exit 0
+          fi
+
+          UNITY_FILES=$(echo "$RESPONSE" | jq -r '.files[] | [.filename, (.previous_filename // empty)] | .[]' | grep -E '^(Assets|Packages|ProjectSettings)/' | sort -u || true)
+          UNITY_COUNT=$(echo -n "$UNITY_FILES" | grep -c '' || true)
+          echo "[INFO]: 変更ファイル: ${FILE_COUNT} 件 (うちUnityプロジェクト: ${UNITY_COUNT} 件)"
+
+          if [ "$UNITY_COUNT" -gt 0 ]; then
+            echo "$UNITY_FILES" | head -n 20 | sed 's/^/  - /'
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=true (Unityプロジェクトの変更あり)"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "[Decision]: changed=false (前回のリリース ${LAST_TAG} からUnityプロジェクトの変更なし)"
           fi
 
   build-and-release:
@@ -345,7 +460,7 @@ jobs:
           }
           if ($BaseRef -eq "main") {
             $BuildMode = "Master"
-            $TagPrefix = "release"
+            $TagPrefix = "master"
           } elseif ($BaseRef -eq "develop") {
             $BuildMode = "Development"
             $TagPrefix = "dev"
@@ -1312,6 +1427,30 @@ jobs:
             return [Math]::Round($DriveInfo.Free / 1GB, 2)
           }
 
+          # 実行中のCPU使用率の手動切り替え（PowerShell/SetBuildCpuMode.ps1）。処理は .github/scripts/BuildCpuMode.ps1 にある。
+          # ワークフロー1ステップの run は21000文字の上限があるため、関数は外部スクリプトに置く。
+          $RunnerWorkerId = $null
+          if ($env:RUNNER_OS -eq "Windows") {
+            try {
+              . (Join-Path "${{ github.workspace }}" ".github/scripts/BuildCpuMode.ps1")
+              $RunnerWorkerId = Get-RunnerWorkerId
+            } catch {
+              Write-Host "[WARN]: CPU使用率の手動切り替えを初期化できませんでした。切り替えは無効です: $_"
+            }
+          }
+          if ($RunnerWorkerId) {
+            Write-Host "[INFO]: CPU使用率は実行中に切り替えられます（PowerShell/SetBuildCpuMode.ps1、Runner.Worker PID: $RunnerWorkerId）。"
+          }
+
+          # 手動切り替えがあれば @(割合, CPU数, マスク)、無ければ $null を返す
+          function Get-CpuModeAffinity {
+            if (-not $RunnerWorkerId) { return $null }
+            $Percent = Get-CpuModeOverridePercent $RunnerWorkerId $AllowedCpuUsagePercentages
+            if ($null -eq $Percent) { return $null }
+            $Count = Get-CpuCountForPercent $Percent $CpuCount $MaximumAffinityCpuCount
+            return @($Percent, $Count, (Get-AffinityMaskForCpuCount $Count $MaximumAffinityCpuCount))
+          }
+
           function Clear-UnityLibraryForProfile {
             param(
               [Parameter(Mandatory = $true)]
@@ -1370,9 +1509,19 @@ jobs:
               continue
             }
 
+            # 手動切り替えが有効なら、その割合でUnityを起動する
+            $ProfileCpuCount = $UnityCpuCount
+            $ProfileAffinityMask = $AffinityMask
+            $CpuModeAffinity = Get-CpuModeAffinity
+            if ($CpuModeAffinity) {
+              $ProfileCpuCount = $CpuModeAffinity[1]
+              $ProfileAffinityMask = $CpuModeAffinity[2]
+              Write-Host "[INFO]: CPU使用率の手動切り替えを適用します: $($CpuModeAffinity[0])%（$ProfileCpuCount CPU）"
+            }
+
             $UnityArgs = @(
               "-batchmode",
-              "-job-worker-count", "$UnityCpuCount",
+              "-job-worker-count", "$ProfileCpuCount",
               "-projectPath", "${{ github.workspace }}",
               "-executeMethod", "$ExecuteMethod",
               "-buildMode", "$env:BUILD_MODE",
@@ -1395,7 +1544,7 @@ jobs:
               # ProcessorAffinity は Windows 専用API。macOS/Linux ではスキップする。
               if ($env:RUNNER_OS -eq "Windows") {
                 try {
-                  $UnityProcess.ProcessorAffinity = $AffinityMask
+                  $UnityProcess.ProcessorAffinity = $ProfileAffinityMask
                   Write-Host "[INFO]: Unity プロセッサアフィニティを設定しました。"
                 } catch {
                   Write-Host "[WARN]: Unity プロセッサアフィニティの設定に失敗しました。ビルドは続行します: $_"
@@ -1403,6 +1552,7 @@ jobs:
               }
 
               $ProfileStartedAt = [DateTime]::UtcNow
+              $AppliedAffinityMask = $ProfileAffinityMask
               $StopReason = $null
               while (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
                 $ElapsedSeconds = ([DateTime]::UtcNow - $ProfileStartedAt).TotalSeconds
@@ -1424,6 +1574,18 @@ jobs:
                     $StopReason = "LogSize"
                     Write-Host "[ERROR]: $ProfileName のUnityログが $LogSizeGB GBまで肥大化したため、ランナー保護のため停止します。"
                     break
+                  }
+                }
+
+                # CPU使用率の手動切り替えを反映する（解除されたら既定値に戻す）
+                if ($RunnerWorkerId) {
+                  $CpuModeAffinity = Get-CpuModeAffinity
+                  $DesiredAffinityMask = if ($CpuModeAffinity) { $CpuModeAffinity[2] } else { $AffinityMask }
+                  if ($DesiredAffinityMask -ne $AppliedAffinityMask) {
+                    $AppliedProcessCount = Set-ProcessTreeAffinity $UnityProcess.Id $DesiredAffinityMask
+                    $AppliedAffinityMask = $DesiredAffinityMask
+                    $CpuModeLabel = if ($CpuModeAffinity) { "$($CpuModeAffinity[0])%" } else { "既定値" }
+                    Write-Host "[INFO]: CPU使用率を $CpuModeLabel に切り替えました（マスク: 0x$('{0:X}' -f $DesiredAffinityMask)、$AppliedProcessCount プロセス）。"
                   }
                 }
               }
@@ -1557,10 +1719,19 @@ jobs:
         
 # ==================================================================================================
 
+      # 変数更新用の GitHub App（sinfonia-variable-updater）からトークンを発行する。
+      # トークンの有効期限は1時間のため、ジョブ開始時ではなく使用する直前に発行する。
+      # App と権限の詳細は .github/apps/README.md を参照。
+      - name: 変数更新用トークンの発行（バージョン解決）
+        id: variable_token_resolve
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID }}
+          private-key: ${{ secrets.SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY }}
+
       - name: 現行ビルドバージョンの解決
         env:
-          VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
-          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
+          VAR_UPDATE_TOKEN: ${{ steps.variable_token_resolve.outputs.token }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -1573,56 +1744,28 @@ jobs:
 
           Write-Host "::group::現行ビルドバージョンの解決"
 
-          # VERSION_BASE_{BuildMode} にバージョン文字列全体（例: v1.0.X）を格納する。
-          # 未設定時は v1.0.X として扱い、BUILD_VERSION_{BuildMode} のパッチ番号を末尾に適用する。
-          $VarName = "VERSION_BASE_$env:BUILD_MODE"
-          $script:Headers = @{
+          # VERSION_{BuildMode}（例: VERSION_DEVELOPMENT）に、次にビルドする版を v<メジャー>.<マイナー>.<パッチ> で格納する。
+          # リリースに成功するとパッチ番号を1つ進めて書き戻す。メジャー・マイナーを上げるときは変数を手で書き換える。
+          # 未設定時は v1.0.0 で作成する。
+          $VarName = "VERSION_$env:BUILD_MODE"
+          $Headers = @{
               "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
-          $script:UsingFallbackToken = $false
-
-          function Invoke-GitHubApi {
-              param([string]$Uri, [string]$Method, $Body = $null)
-
-              $Parameters = @{ Uri = $Uri; Method = $Method; Headers = $script:Headers }
-              if ($null -ne $Body) {
-                  $Parameters.Body = $Body
-                  $Parameters.ContentType = "application/json"
-              }
-
-              try {
-                  return Invoke-RestMethod @Parameters
-              } catch {
-                  $StatusCode = if ($_.Exception.Response) { $_.Exception.Response.StatusCode.value__ } else { 0 }
-                  if ($script:UsingFallbackToken -or $StatusCode -ne 401) { throw }
-                  if ([string]::IsNullOrWhiteSpace($env:VAR_UPDATE_TOKEN_FALLBACK)) {
-                      throw "VAR_UPDATE_TOKEN_FALLBACK が設定されていません。"
-                  }
-
-                  Write-Host "[WARN]: 通常トークンによるGitHub REST API認証に失敗しました。フォールバックトークンで再試行します。"
-                  $script:Headers.Authorization = "Bearer $env:VAR_UPDATE_TOKEN_FALLBACK"
-                  $script:UsingFallbackToken = $true
-                  return Invoke-RestMethod @Parameters
-              }
-          }
-
-          Write-Host "[INFO]: Repository Variables API には通常トークンを使用します。"
           $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
 
           try {
-              $VarResponse = Invoke-GitHubApi -Uri $GetUrl -Method GET
-              $VersionString = $VarResponse.value
+              $VersionString = (Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers).value
           } catch {
               if ($_.Exception.Response.StatusCode.value__ -eq 404) {
-                  Write-Host "[WARN]: リポジトリ変数 '$VarName' が見つかりません。デフォルト値 'v1.0.X' で作成中..."
+                  Write-Host "[WARN]: リポジトリ変数 '$VarName' が見つかりません。デフォルト値 'v1.0.0' で作成中..."
                   $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
-                  $Body = @{ "name" = $VarName; "value" = "v1.0.X" } | ConvertTo-Json
+                  $Body = @{ "name" = $VarName; "value" = "v1.0.0" } | ConvertTo-Json
                   try {
-                      Invoke-GitHubApi -Uri $CreateUrl -Method POST -Body $Body | Out-Null
-                      $VersionString = "v1.0.X"
-                      Write-Host "[INFO]: '$VarName' がデフォルト値 'v1.0.X' で作成されました。"
+                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      $VersionString = "v1.0.0"
+                      Write-Host "[INFO]: '$VarName' がデフォルト値 'v1.0.0' で作成されました。"
                   } catch {
                       Write-Host "[ERROR]: リポジトリ変数 '$VarName' の作成に失敗しました: $_"
                       Write-Host "::endgroup::"
@@ -1635,50 +1778,16 @@ jobs:
               }
           }
 
-          # BUILD_VERSION_{BuildMode} にパッチ番号を格納する。          
-          $PatchVarName = "BUILD_VERSION_$env:BUILD_MODE"
-          $PatchGetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$PatchVarName"
-          try {
-              $PatchVarResponse = Invoke-GitHubApi -Uri $PatchGetUrl -Method GET
-              $PatchNumber = $PatchVarResponse.value
-          } catch {
-              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
-                  Write-Host "[WARN]: リポジトリ変数 '$PatchVarName' が見つかりません。デフォルト値 '0' で作成中..."
-                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
-                  $Body = @{ "name" = $PatchVarName; "value" = "0" } | ConvertTo-Json
-                  try {
-                      Invoke-GitHubApi -Uri $CreateUrl -Method POST -Body $Body | Out-Null
-                      $PatchNumber = "0"
-                      Write-Host "[INFO]: '$PatchVarName' がデフォルト値 '0' で作成されました。"
-                  } catch {
-                      Write-Host "[ERROR]: リポジトリ変数 '$PatchVarName' の作成に失敗しました: $_"
-                      Write-Host "::endgroup::"
-                      exit 1
-                  }
-              } else {
-                  Write-Host "[ERROR]: リポジトリ変数 '$PatchVarName' の取得に失敗しました: $_"
-                  Write-Host "::endgroup::"
-                  exit 1
-              }
-          }
-
-          if ($PatchNumber -notmatch '^\d+$') {
-              Write-Host "[ERROR]: '$PatchVarName' の値 '$PatchNumber' は非負の整数ではありません。"
+          # 手で設定したときに紛れ込んだ前後の空白・改行は取り除く
+          $VersionString = "$VersionString".Trim()
+          if ($VersionString -notmatch '^v\d+\.\d+\.\d+$') {
+              Write-Host "[ERROR]: '$VarName' の値 '$VersionString' が期待される形式 (例: v1.0.0) と一致しません。"
               Write-Host "::endgroup::"
               exit 1
           }
 
-          if ($VersionString -match '^(.*\.)[Xx]$') {
-              $VersionString = "$($Matches[1])$PatchNumber"
-          } else {
-              Write-Host "[ERROR]: '$VarName' の値 '$VersionString' が期待される形式 (例: v1.0.X) と一致しません。"
-              Write-Host "::endgroup::"
-              exit 1
-          }
-
-          "PATCH_NUMBER_VAR_NAME=$PatchVarName" | Add-Content -Path $env:GITHUB_ENV
-          "PATCH_NUMBER=$PatchNumber"            | Add-Content -Path $env:GITHUB_ENV
-          "CURRENT_BUILD_VERSION=$VersionString"  | Add-Content -Path $env:GITHUB_ENV
+          "VERSION_VAR_NAME=$VarName"            | Add-Content -Path $env:GITHUB_ENV
+          "CURRENT_BUILD_VERSION=$VersionString" | Add-Content -Path $env:GITHUB_ENV
           Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
           Write-Host "::endgroup::"
         
@@ -1700,9 +1809,14 @@ jobs:
           
           $VersionString = $env:CURRENT_BUILD_VERSION
 
-          $TagName = "$env:TAG_PREFIX-$VersionString"
+          # タグは <ビルドモード>-<ゲームデータ種別>-<版>（例: dev-demo-v1.2.3、master-release-v1.2.3）。
+          # 各ZIPは <ビルドモード>-<ゲームデータ種別>-<プラットフォーム>-<版>.zip とする。
+          $AssetPrefix = "$env:TAG_PREFIX-$env:BUILD_VARIANT"
+          $TagName = "$AssetPrefix-$VersionString"
 
           "TAG_NAME=$TagName" | Add-Content -Path $env:GITHUB_OUTPUT
+          "ASSET_PREFIX=$AssetPrefix" | Add-Content -Path $env:GITHUB_OUTPUT
+          "VERSION=$VersionString" | Add-Content -Path $env:GITHUB_OUTPUT
           Write-Host "[INFO]: タグ名を生成しました: $TagName"
           Write-Host "::endgroup::"
         
@@ -1711,6 +1825,8 @@ jobs:
       - name: ビルド成果物ZIPへのタグ付与と配置
         env:
           TAG_NAME: ${{ steps.tag_gen.outputs.TAG_NAME }}
+          ASSET_PREFIX: ${{ steps.tag_gen.outputs.ASSET_PREFIX }}
+          RELEASE_VERSION: ${{ steps.tag_gen.outputs.VERSION }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -1738,7 +1854,6 @@ jobs:
             exit 1
           }
 
-          $TagName = $env:TAG_NAME
           $ZipFiles = Get-ChildItem -Path $ResolvedOutputDir -Filter "*.zip" -File
           if ($ZipFiles.Count -eq 0) {
             Write-Host "[ERROR]: $ResolvedOutputDir 配下にプロファイル別のビルドZIPが見つかりません"
@@ -1748,7 +1863,9 @@ jobs:
 
           foreach ($ZipFile in $ZipFiles) {
             $ProfileName = [System.IO.Path]::GetFileNameWithoutExtension($ZipFile.Name)
-            $DestName = "$ProfileName-$TagName.zip"
+            # プロファイル名（例: Demo_Dev_Android）の末尾をプラットフォーム名にする。
+            $Platform = ($ProfileName -split '_')[-1].ToLowerInvariant()
+            $DestName = "$env:ASSET_PREFIX-$Platform-$env:RELEASE_VERSION.zip"
             $DestPath = Join-Path -Path $PWD -ChildPath $DestName
 
             try {
@@ -1800,7 +1917,7 @@ jobs:
 
             **ビルド対象プロファイル:**
             - ビルドプロファイル枠: ${{ steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release' }}${{ steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master' }}BuildProfiles
-          files: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          files: "${{ steps.tag_gen.outputs.ASSET_PREFIX }}-*-${{ steps.tag_gen.outputs.VERSION }}.zip"
           fail_on_unmatched_files: true
           overwrite_files: true
         env:
@@ -1841,13 +1958,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ steps.tag_gen.outputs.TAG_NAME }}
+          ASSET_PREFIX: ${{ steps.tag_gen.outputs.ASSET_PREFIX }}
+          RELEASE_VERSION: ${{ steps.tag_gen.outputs.VERSION }}
           UPLOAD_SUCCEEDED: ${{ steps.release_attempt_1.outcome == 'success' || steps.release_attempt_2.outcome == 'success' || steps.release_attempt_3.outcome == 'success' }}
         run: |
           if ($env:UPLOAD_SUCCEEDED -ne 'true') {
             throw 'Release upload failed after three attempts. The build ZIPs will be retained as an artifact.'
           }
           $ExpectedFiles = @(Get-ChildItem -LiteralPath $env:GITHUB_WORKSPACE -File |
-            Where-Object { $_.Name.EndsWith("-$($env:RELEASE_TAG).zip", [StringComparison]::Ordinal) })
+            Where-Object { $_.Name.StartsWith("$($env:ASSET_PREFIX)-", [StringComparison]::Ordinal) -and $_.Name.EndsWith("-$($env:RELEASE_VERSION).zip", [StringComparison]::Ordinal) })
           if ($ExpectedFiles.Count -eq 0) { throw 'No release ZIPs were found for verification.' }
           $Headers = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
           $Tag = [Uri]::EscapeDataString($env:RELEASE_TAG)
@@ -1864,18 +1983,26 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: unreleased-build-${{ github.run_id }}-${{ github.run_attempt }}
-          path: "*-${{ steps.tag_gen.outputs.TAG_NAME }}.zip"
+          path: "${{ steps.tag_gen.outputs.ASSET_PREFIX }}-*-${{ steps.tag_gen.outputs.VERSION }}.zip"
           if-no-files-found: error
           compression-level: 0
           retention-days: 7
 
 # ==================================================================================================
 
+      # ビルド後はバージョン解決時のトークンが失効している可能性があるため、改めて発行する。
+      - name: 変数更新用トークンの発行（パッチ番号更新）
+        id: variable_token_increment
+        if: steps.create_release.outcome == 'success'
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID }}
+          private-key: ${{ secrets.SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY }}
+
       - name: リリースのパッチ番号のインクリメント
         if: steps.create_release.outcome == 'success'
         env:
-          VAR_UPDATE_TOKEN: ${{ secrets.VAR_UPDATE_TOKEN }}
-          VAR_UPDATE_TOKEN_FALLBACK: ${{ secrets.VAR_UPDATE_TOKEN_FALLBACK }}
+          VAR_UPDATE_TOKEN: ${{ steps.variable_token_increment.outputs.token }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -1887,55 +2014,31 @@ jobs:
           }
 
           Write-Host "::group::リリースパッチ番号のインクリメント"
-          $VarName      = $env:PATCH_NUMBER_VAR_NAME
-          $PatchNumber  = [int]$env:PATCH_NUMBER
-          $NextPatchNumber = $PatchNumber + 1
+          $VarName        = $env:VERSION_VAR_NAME
+          $CurrentVersion = $env:CURRENT_BUILD_VERSION
+
+          if ($CurrentVersion -notmatch '^(v\d+\.\d+\.)(\d+)$') {
+              Write-Host "[ERROR]: 現行ビルドバージョン '$CurrentVersion' が期待される形式 (例: v1.0.0) と一致しません。"
+              Write-Host "::endgroup::"
+              exit 1
+          }
+          $NextVersion = "$($Matches[1])$([int]$Matches[2] + 1)"
 
           Write-Host "変数名: $VarName"
-          Write-Host "現在のパッチ番号: $PatchNumber"
-          Write-Host "次のパッチ番号: $NextPatchNumber"
-          
-          # Update repository variable using GitHub API
-          $script:Headers = @{
+          Write-Host "現在のバージョン: $CurrentVersion"
+          Write-Host "次のバージョン: $NextVersion"
+
+          $Headers = @{
               "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
-          $script:UsingFallbackToken = $false
-
-          function Invoke-GitHubApi {
-              param([string]$Uri, [string]$Method, $Body = $null)
-
-              $Parameters = @{ Uri = $Uri; Method = $Method; Headers = $script:Headers }
-              if ($null -ne $Body) {
-                  $Parameters.Body = $Body
-                  $Parameters.ContentType = "application/json"
-              }
-
-              try {
-                  return Invoke-RestMethod @Parameters
-              } catch {
-                  $StatusCode = if ($_.Exception.Response) { $_.Exception.Response.StatusCode.value__ } else { 0 }
-                  if ($script:UsingFallbackToken -or $StatusCode -ne 401) { throw }
-                  if ([string]::IsNullOrWhiteSpace($env:VAR_UPDATE_TOKEN_FALLBACK)) {
-                      throw "VAR_UPDATE_TOKEN_FALLBACK が設定されていません。"
-                  }
-
-                  Write-Host "[WARN]: 通常トークンによるGitHub REST API認証に失敗しました。フォールバックトークンで再試行します。"
-                  $script:Headers.Authorization = "Bearer $env:VAR_UPDATE_TOKEN_FALLBACK"
-                  $script:UsingFallbackToken = $true
-                  return Invoke-RestMethod @Parameters
-              }
-          }
-
-          Write-Host "[INFO]: Repository Variables API には通常トークンを使用します。"
-
           $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
-          $Body = @{ "name" = $VarName; "value" = "$NextPatchNumber" } | ConvertTo-Json
+          $Body = @{ "name" = $VarName; "value" = $NextVersion } | ConvertTo-Json
 
           try {
-              Invoke-GitHubApi -Uri $Url -Method PATCH -Body $Body | Out-Null
-              Write-Host "[INFO]: $VarName を $NextPatchNumber に更新しました。"
+              Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+              Write-Host "[INFO]: $VarName を $NextVersion に更新しました。"
           } catch {
               Write-Host "[ERROR]: $VarName の更新に失敗しました: $_"
               Write-Host "::endgroup::"

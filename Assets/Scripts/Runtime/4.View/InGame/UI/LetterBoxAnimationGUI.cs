@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.UI
 {
+    /// <summary>
+    ///     画面上下のレターボックスを表示・非表示にするアニメーション。
+    /// </summary>
     public sealed class LetterBoxAnimationGUI : MonoBehaviour
     {
         /// <summary>

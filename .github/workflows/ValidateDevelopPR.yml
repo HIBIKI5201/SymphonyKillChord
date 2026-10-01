@@ -1,0 +1,60 @@
+name: "[Git] Validate Develop PR"
+
+# マージ先が develop のPR（hotfix を除く）を検証し、コミットステータス develop-pr-rule に結果を出す。
+# hotfix/** からのPRは ValidateHotfixPR.yml が同じステータスを出す。
+# マージ元が develop に入れてよいブランチかどうかは ValidatePRTarget.yml（pr-target）が検証する。
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review, converted_to_draft]
+    branches:
+      - develop
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    if: ${{ !startsWith(github.head_ref, 'hotfix/') }}
+    steps:
+      - name: Validate PR
+        id: validate
+        env:
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          fail() {
+            echo "state=failure" >> $GITHUB_OUTPUT
+            echo "message=$1" >> $GITHUB_OUTPUT
+            exit 0
+          }
+
+          # Draft 中はテンプレの必須チェックを問わない。Ready for review 時に再検証される。
+          if [ "$IS_DRAFT" = "true" ]; then
+            echo "state=success" >> $GITHUB_OUTPUT
+            echo "message=✅ Draft のため必須チェックは未検証です" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          BODY=$(printf '%s' "$PR_BODY" | tr -d '\r')
+          for ITEM in "コンパイルエラーが無いことを確認した" "変更が関係しうるシーンでPlayModeを最低1回通した"; do
+            if ! printf '%s\n' "$BODY" | grep -Eq "^[[:space:]]*-[[:space:]]*\[[xX]\][[:space:]]*${ITEM}"; then
+              fail "❌ PRテンプレの必須チェック「${ITEM}」が未チェックです"
+            fi
+          done
+
+          echo "state=success" >> $GITHUB_OUTPUT
+          echo "message=✅ develop へのPRルールを満たしています" >> $GITHUB_OUTPUT
+
+      - name: Set commit status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          STATE: ${{ steps.validate.outputs.state }}
+          MESSAGE: ${{ steps.validate.outputs.message }}
+        run: |
+          gh api repos/$REPO/statuses/$SHA -X POST \
+            -f state="$STATE" -f context="develop-pr-rule" \
+            -f description="$MESSAGE"

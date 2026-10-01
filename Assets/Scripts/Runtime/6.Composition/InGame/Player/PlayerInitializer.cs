@@ -92,9 +92,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private MobileStickFlickInputConfig _loadedMobileStickFlickInputConfig;
 
         private Action _onDodgeEndedHandler;
+        private PlayerDodgeMovementApplication _dodgeMovementApplication;
         private IPlayerCharacterAnimationSignal _characterAnimationSignal;
         private PlayerAttackSignal _playerAttackSignal;
         private CharacterEntity _playerEntity;
+        private IMusicSyncService _musicSyncService;
         private MissionEventController _missionEventController;
         private InGameHudInitializer _inGameHudInitializer;
         private bool _isModuleRegistered;
@@ -168,6 +170,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
+            // 参照とステータスボーナスを確認し、プレイヤーのビューを生成する。
             if (!ValidateBuildReferences())
             {
                 return false;
@@ -186,6 +189,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
+            // ステータスボーナスを反映したプレイヤーのエンティティを作り、イベントを購読する。
             _playerEntity = CharacterFactory.Create(
                 _loadedPlayerData,
                 playerStatusBonusContainer.PlayerStatusBonus.MaxHealthMultiplier,
@@ -195,6 +199,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             _playerEntity.OnDamageAvoided += HandleDamageAvoided;
             _playerEntity.OnHealthChanged += HandlePlayerHealthChanged;
 
+            // スポーン地点に配置し、プレイヤーのコンテナを登録する。
             _player.transform.SetPositionAndRotation(
                 spawnPointTransform.position,
                 spawnPointTransform.rotation);
@@ -317,12 +322,16 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return;
             }
 
+            // 被弾直後の入力は拍を判定できないため、リズムタイムアウトと同じ扱いにする。
+            _musicSyncService = musicSyncService;
+            _playerEntity.OnDamageTaken += HandlePlayerDamageTaken;
+
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
             PlayerAttackPresenter playerAttackPresenter = new PlayerAttackPresenter(_playerAttackSignal);
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
             PlayerActionRestrictionState actionRestrictionState = new PlayerActionRestrictionState();
-            AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity);
+            AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity, destroyCancellationToken);
             PlayerAttackController playerAttackController = new PlayerAttackController(
                 attackResultPresenter,
                 playerAttackPresenter,
@@ -352,16 +361,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerAttackAnimationConfig);
 
             PlayerDodgeMovementApplication dodge = new PlayerDodgeMovementApplication(parameter);
-            dodge.OnDodgeStarted += (duration, direction) =>
-            {
-                _playerEntity.SetInvincible(true);
-                _player.PlayDodgeMaterialEffect(duration, direction);
-            };
-            dodge.OnDodgeEnded += () =>
-            {
-                _playerEntity.SetInvincible(false);
-                _player.ResetDodgeMaterialEffect();
-            };
+            _dodgeMovementApplication = dodge;
+            dodge.OnDodgeStarted += HandleDodgeStarted;
+            dodge.OnDodgeEnded += HandleDodgeEnded;
 
             _onDodgeEndedHandler = () => playerAttackController.StartAttackCooldown();
             _characterAnimationSignal = (IPlayerCharacterAnimationSignal)animationContext.Signal;
@@ -454,6 +456,35 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
+        ///     プレイヤーの被弾を受け取り、リズムの入力履歴をタイムアウトと同じ扱いで破棄します。
+        /// </summary>
+        /// <param name="_"> 実際に減ったHPです。 </param>
+        private void HandlePlayerDamageTaken(Damage _)
+        {
+            _musicSyncService?.ForceRhythmTimeout();
+        }
+
+        /// <summary>
+        ///     回避の開始時に、無敵にして回避のマテリアル演出を再生します。
+        /// </summary>
+        /// <param name="duration"> 回避の継続時間です。 </param>
+        /// <param name="direction"> 回避の方向です。 </param>
+        private void HandleDodgeStarted(float duration, Vector3 direction)
+        {
+            _playerEntity.SetInvincible(true);
+            _player.PlayDodgeMaterialEffect(duration, direction);
+        }
+
+        /// <summary>
+        ///     回避の終了時に、無敵を解除して回避のマテリアル演出を戻します。
+        /// </summary>
+        private void HandleDodgeEnded()
+        {
+            _playerEntity.SetInvincible(false);
+            _player.ResetDodgeMaterialEffect();
+        }
+
+        /// <summary>
         ///     破棄時の購読解除を行います。
         /// </summary>
         private void OnDestroy()
@@ -465,6 +496,13 @@ namespace KillChord.Runtime.Composition.InGame.Player
             if (_playerInputView != null)
             {
                 _playerInputView = null;
+            }
+
+            if (_dodgeMovementApplication != null)
+            {
+                _dodgeMovementApplication.OnDodgeStarted -= HandleDodgeStarted;
+                _dodgeMovementApplication.OnDodgeEnded -= HandleDodgeEnded;
+                _dodgeMovementApplication = null;
             }
 
             if (_characterAnimationSignal != null && _onDodgeEndedHandler != null)
@@ -487,6 +525,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _playerEntity.OnDied -= HandlePlayerDied;
                 _playerEntity.OnDamageAvoided -= HandleDamageAvoided;
                 _playerEntity.OnHealthChanged -= HandlePlayerHealthChanged;
+                _playerEntity.OnDamageTaken -= HandlePlayerDamageTaken;
             }
         }
 

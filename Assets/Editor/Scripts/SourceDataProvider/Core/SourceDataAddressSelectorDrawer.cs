@@ -30,10 +30,11 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 return;
             }
 
-            IReadOnlyList<SourceDataProviderSettings.SourceAssetMapping> mappings =
-                SourceDataProviderSettings.instance.SourceAssetMappings;
+            IReadOnlyList<SourceDataProviderSettings.DataAssetMapping> mappings =
+                SourceDataProviderSettings.instance.DataAssetMappings;
             RebuildCacheIfNeeded(mappings);
 
+            // 登録済みの Addressables キーを選択肢にする。
             List<string> labels = new() { UNASSIGNED_LABEL };
             List<string> values = new() { string.Empty };
             int selectedIndex = 0;
@@ -48,6 +49,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 }
             }
 
+            // 登録に無い値が入っている場合は、Missing として選択肢に残す。
             if (!string.IsNullOrWhiteSpace(property.stringValue) && selectedIndex == 0)
             {
                 labels.Add($"Missing: {property.stringValue}");
@@ -55,6 +57,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 selectedIndex = values.Count - 1;
             }
 
+            // ポップアップ・Ping ボタン・移動ボタンの配置を決める。
             Rect popupRect = new(
                 position.x,
                 position.y,
@@ -71,6 +74,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 JUMP_BUTTON_WIDTH,
                 position.height);
 
+            // 選ばれた値をプロパティへ反映する。
             EditorGUI.BeginProperty(position, label, property);
             EditorGUI.BeginChangeCheck();
             int nextIndex = EditorGUI.Popup(popupRect, label.text, selectedIndex, labels.ToArray());
@@ -79,29 +83,30 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 property.stringValue = values[nextIndex];
             }
 
+            // 未選択でなければ、アセットの Ping と Planner ウィンドウへの移動を行えるようにする。
             using (new EditorGUI.DisabledScope(nextIndex <= 0))
             {
                 if (GUI.Button(pingRect, PING_LABEL)
                     && SourceDataProviderRepositoryResolver.TryResolveAsset(
                         property.stringValue,
-                        out ScriptableObject sourceAsset))
+                        out ScriptableObject dataAsset))
                 {
-                    EditorGUIUtility.PingObject(sourceAsset);
+                    EditorGUIUtility.PingObject(dataAsset);
                 }
 
                 if (GUI.Button(jumpRect, JUMP_LABEL, EditorStyles.miniButton))
                 {
-                    PlannerNavigationHub.TryNavigateToSourceAsset(property.stringValue);
+                    PlannerNavigationHub.TryNavigateToDataAsset(property.stringValue);
                 }
             }
             EditorGUI.EndProperty();
         }
 
         /// <summary>
-        ///     SourceAsset候補キャッシュを必要時のみ再構築します。
+        ///     DataAsset候補キャッシュを必要時のみ再構築します。
         /// </summary>
-        /// <param name="mappings"> 現在のSourceAsset設定一覧です。 </param>
-        private static void RebuildCacheIfNeeded(IReadOnlyList<SourceDataProviderSettings.SourceAssetMapping> mappings)
+        /// <param name="mappings"> 現在のDataAsset設定一覧です。 </param>
+        private static void RebuildCacheIfNeeded(IReadOnlyList<SourceDataProviderSettings.DataAssetMapping> mappings)
         {
             int hash = 17;
             for (int i = 0; i < mappings.Count; i++)
@@ -119,29 +124,29 @@ namespace KillChord.Editor.SourceDataProvider.Core
             _cachedLabels = new string[mappings.Count];
             for (int i = 0; i < mappings.Count; i++)
             {
-                SourceDataProviderSettings.SourceAssetMapping mapping = mappings[i];
+                SourceDataProviderSettings.DataAssetMapping mapping = mappings[i];
                 _cachedKeys[i] = mapping?.AddressableKey ?? string.Empty;
                 _cachedLabels[i] = BuildLabel(mapping);
             }
         }
 
         /// <summary>
-        ///     SourceAsset設定の表示名を生成します。
+        ///     DataAsset設定の表示名を生成します。
         /// </summary>
         /// <param name="mapping"> 対象のリポジトリ設定です。 </param>
         /// <returns> セレクターへ表示する名前です。 </returns>
-        private static string BuildLabel(SourceDataProviderSettings.SourceAssetMapping mapping)
+        private static string BuildLabel(SourceDataProviderSettings.DataAssetMapping mapping)
         {
             if (mapping == null || string.IsNullOrWhiteSpace(mapping.AddressableKey))
             {
-                return "<空のSourceAsset>";
+                return "<空のデータアセット>";
             }
 
             if (SourceDataProviderRepositoryResolver.TryResolveAsset(
                 mapping.AddressableKey,
-                out ScriptableObject sourceAsset))
+                out ScriptableObject dataAsset))
             {
-                return $"{sourceAsset.GetType().Name} ({mapping.AddressableKey})";
+                return $"{dataAsset.GetType().Name} ({mapping.AddressableKey})";
             }
 
             return $"{mapping.AddressableKey}";

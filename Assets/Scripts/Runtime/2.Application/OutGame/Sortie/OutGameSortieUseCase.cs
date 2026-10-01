@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
         /// <param name="outputPort"> 出力ポート。 </param>
         /// <param name="scenarioTransitionCancellationToken"> OutGameシーンの終了時にキャンセルされるトークン。 </param>
         public OutGameSortieUseCase(
-            SceneTransitionUsecase sceneTransitionUsecase,
+            SceneTransitionUseCase sceneTransitionUsecase,
             IOutGameSortieOutputPort outputPort,
             CancellationToken scenarioTransitionCancellationToken)
         {
@@ -130,7 +130,7 @@ namespace KillChord.Runtime.Application.OutGame.Sortie
                 scenarioSelectionRevision, isInputValid);
         }
 
-        private readonly SceneTransitionUsecase _usecase;
+        private readonly SceneTransitionUseCase _usecase;
         private readonly IOutGameSortieOutputPort _outputPort;
         private readonly CancellationToken _scenarioTransitionCancellationToken;
     }

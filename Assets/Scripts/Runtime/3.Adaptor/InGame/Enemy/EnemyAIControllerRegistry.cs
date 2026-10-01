@@ -8,6 +8,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// </summary>
     public class EnemyAIControllerRegistry
     {
+        /// <summary>
+        ///     空の登録簿を生成する。戦闘 AI は有効な状態で始まる。
+        /// </summary>
         public EnemyAIControllerRegistry()
         {
             _activeControllers = new();

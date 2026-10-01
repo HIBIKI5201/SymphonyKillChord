@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Sequence;
 using UnityEngine;
 
@@ -23,14 +24,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
         public void StartAttack()
         {
             if (!_isPlaying || _aiController == null) return;
-            Debug.Log("[BossBattleAIFacade] Attack Started.");
+            DevLog.Log("[BossBattleAIFacade] Attack Started.");
             _aiController.ReserveAttack();
         }
 
         /// <summary> 指示：被弾硬直アニメーションを開始する。 </summary>
         public void StartStunAnimation()
         {
-            Debug.Log("被弾アニメーション実装待ち");
+            DevLog.Log("被弾アニメーション実装待ち");
         }
 
         /// <summary> 指示：進行中の攻撃をキャンセルする。 </summary>

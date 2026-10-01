@@ -2,6 +2,9 @@ using KillChord.Runtime.Domain.InGame.Character;
 
 namespace KillChord.Runtime.Domain.InGame.Battle
 {
+    /// <summary>
+    ///     Application 層から攻撃処理を呼び出すための窓口。
+    /// </summary>
     public interface IAttackController
     {
         /// <summary>

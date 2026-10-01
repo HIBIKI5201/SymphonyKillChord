@@ -6,6 +6,7 @@ using KillChord.Runtime.Application.OutGame.Sortie;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
+using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Composition.Persistent.SceneManagement;
 using KillChord.Runtime.View.OutGame.Screen;
@@ -47,12 +48,12 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionUsecase sceneTransitionUseCase))
+            if (!ServiceLocator.TryGetInstance(out SceneTransitionUseCase sceneTransitionUseCase))
             {
 #if UNITY_EDITOR
                 Debug.LogError(
                     $"[{nameof(OutGameSortieInitializer)}] " +
-                    $"{nameof(SceneTransitionUsecase)}が取得できませんでした。",
+                    $"{nameof(SceneTransitionUseCase)}が取得できませんでした。",
                     this);
 #endif
                 return false;
@@ -93,7 +94,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                 Debug.LogError($"[{nameof(OutGameSortieInitializer)}] 専用出撃のStateを取得できませんでした。", this);
                 return false;
             }
-            _outputPort.ConnectScenarioBattleSortie(pendingState, selectedState, new BattleSortieSelectionService());
+            _outputPort.ConnectScenarioBattleSortie(pendingState, selectedState, BattleSortieSelectionStateResolver.CreateSelectionService());
             return true;
         }
 

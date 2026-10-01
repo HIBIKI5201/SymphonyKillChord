@@ -52,6 +52,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
             IReadOnlyList<VisualElement> elements,
             VisualElement initialFocusElement)
         {
+            // 登録の順番と引数を検証する。
             ThrowIfDisposed();
             ThrowIfStarted();
 
@@ -73,6 +74,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
             ValidateElementWithinRoot(entryElement, nameof(entryElement));
             ValidateElementWithinRoot(initialFocusElement, nameof(initialFocusElement));
 
+            // 入口要素が登録済みのレベルに属し、まだ子レベルを持たないことを確認する。
             if (!_elementOwners.TryGetValue(entryElement, out LevelNode parentNode))
             {
                 throw new InvalidOperationException("入口要素は登録済みレベルの操作要素である必要があります。");
@@ -83,6 +85,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
                 throw new ArgumentException("同じ入口要素には複数の子レベルを登録できません。", nameof(entryElement));
             }
 
+            // 操作要素の一覧を検証し、初期フォーカス先がその中にあるかを確認する。
             VisualElement[] copiedElements = CopyAndValidateElements(elements, nameof(elements));
             ValidateNewOperationRanges(copiedElements, entryElement);
 
@@ -93,6 +96,7 @@ namespace KillChord.Runtime.View.OutGame.Navigation
                     nameof(initialFocusElement));
             }
 
+            // 子レベルを作成して登録する。
             var childNode = new LevelNode(
                 parentNode,
                 entryElement,

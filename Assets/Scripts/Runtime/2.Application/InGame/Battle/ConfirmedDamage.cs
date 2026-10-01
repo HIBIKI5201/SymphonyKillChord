@@ -1,4 +1,5 @@
 ﻿using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.Utility.Diagnostics;
 using UnityEngine;
 
 namespace KillChord.Runtime.Application.InGame.Battle
@@ -20,7 +21,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
 
             if (context.Damage.Value < confirmedDamage.Value)
             {
-                Debug.Log($"[ConfirmedDamage] Damage increased from {context.Damage.Value} to {confirmedDamage.Value}.");
+                DevLog.Log($"[ConfirmedDamage] Damage increased from {context.Damage.Value} to {confirmedDamage.Value}.");
                 return new AttackStepContext(confirmedDamage, context.CriticalCount, context);
             }
 

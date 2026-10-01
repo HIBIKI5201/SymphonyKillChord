@@ -1,0 +1,18 @@
+{
+  "name": "AutoBuildAndRelease",
+  "used_by": [
+    ".github/workflows/BuildAndRelease.yml"
+  ],
+  "protection_rules": [],
+  "deployment_branch_policy": null,
+  "can_admins_bypass": true,
+  "variables": {
+    "BUILD_VARIANT": "ビルドのバリアント（例: demo）",
+    "SINFONIA_VARIABLE_UPDATER_CLIENT_ID": "GitHub App sinfonia-variable-updater の Client ID"
+  },
+  "secrets": {
+    "GOOGLE_DRIVE_API_KEY": "ビルド前に展開する unitypackage を Google Drive から取得するための API キー",
+    "GOOGLE_DRIVE_FOLDER_ID": "unitypackage を置いている Google Drive フォルダの ID",
+    "SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY": "GitHub App sinfonia-variable-updater の秘密鍵（.pem の中身）"
+  }
+}

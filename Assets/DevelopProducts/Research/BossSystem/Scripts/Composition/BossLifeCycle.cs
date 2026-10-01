@@ -87,8 +87,8 @@ namespace DevelopProducts.Boss
             IMusicActionScheduler musicActionScheduler = new MusicSchedulerAdaptor(musicSyncState, musicSyncService);
 
             // UseCase
-            EnemyMoveUsecase moveUsecase = new EnemyMoveUsecase(spec, raycastDetectService, attackPositionSearchService);
-            EnemyAttackUsecase attackUsecase = new EnemyAttackUsecase(raycastDetectService);
+            EnemyMoveUseCase moveUsecase = new EnemyMoveUseCase(spec, raycastDetectService, attackPositionSearchService);
+            EnemyAttackUseCase attackUsecase = new EnemyAttackUseCase(raycastDetectService);
             BossAttackReservationUsecase reservationUsecase = new BossAttackReservationUsecase(musicActionScheduler);
             _reservationUsecase = reservationUsecase;
 

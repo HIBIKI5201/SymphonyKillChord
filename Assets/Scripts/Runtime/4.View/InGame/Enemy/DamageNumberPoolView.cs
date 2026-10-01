@@ -46,12 +46,18 @@ namespace KillChord.Runtime.View.InGame.Enemy
         private IObjectPool<DamageNumberView> _damageNumberPool;
         private Action<DamageNumberView> _releaseHandler;
 
+        /// <summary>
+        ///     プールを初期化し、ダメージ数値を事前に生成しておく。
+        /// </summary>
         private void Awake()
         {
             EnsureInitialized();
             Prewarm();
         }
 
+        /// <summary>
+        ///     プールを破棄する。
+        /// </summary>
         private void OnDestroy()
         {
             _damageNumberPool?.Clear();

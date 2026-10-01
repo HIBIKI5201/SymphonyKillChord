@@ -11,31 +11,43 @@ namespace KillChord.Runtime.View
     /// </summary>
     public class StageResultViewModel : IStageResultViewModel
     {
+        /// <summary> 勝敗などのリザルトの種類。 </summary>
         public ReactiveProperty<StageResultType> ResultType { get; }
             = new(StageResultType.Victory);
 
+        /// <summary> ステージ名。 </summary>
         public ReactiveProperty<string> StageNameText { get; }
             = new(string.Empty);
 
+        /// <summary> メインミッションの達成状態の文言。 </summary>
         public ReactiveProperty<string> MainMissionStateText { get; }
             = new(string.Empty);
 
+        /// <summary> メインミッションの文言。 </summary>
         public ReactiveProperty<string> MainMissionText { get; }
             = new(string.Empty);
 
+        /// <summary> バトルにかかった秒数。 </summary>
         public ReactiveProperty<float> BattleTimeSeconds { get; }
             = new(0f);
 
+        /// <summary> 最大コンボ数。 </summary>
         public ReactiveProperty<int> MaxCombo { get; }
             = new(0);
 
+        /// <summary> ランクの文言。 </summary>
         public ReactiveProperty<string> RankText { get; }
             = new(string.Empty);
 
+        /// <summary> Tips の文言。 </summary>
         public ReactiveProperty<string> TipsText { get; }
             = new(string.Empty);
 
+        /// <summary> サブミッションの表示項目が更新されたときに発火するイベント。 </summary>
         public event Action<IReadOnlyList<StageResultMissionItemViewModel>> OnSubMissionItemsUpdated;
+        /// <summary>
+        ///     リザルトの内容を各プロパティへ反映する。
+        /// </summary>
         public void Apply(in StageResultDTO dto)
         {
             ResultType.Value = dto.ResultType;

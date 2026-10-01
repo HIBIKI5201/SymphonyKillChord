@@ -23,15 +23,14 @@
 | **`PortraitId` / `BackgroundId` / `AnimationId`** | Domain | 立ち絵・背景・アニメーションを一意に識別する値型ID |
 | **`ScenarioLayer` / `FadeTarget`** | Domain | 表示レイヤーとフェード対象の指定 |
 | **`ScenarioDefinition`** | Domain | `IScenarioEvent`の順序付きリスト。1シナリオ分の全体定義 |
-| **`ScenarioUsecase`** | Application | 再生エンジン本体。`IScenarioEventEmitter`/`IScenarioPlaybackControl`/`IScenarioPlaybackState`を実装 |
-| **`ScenarioHandlerRepo`** | Application | イベント種別→ハンドラの振り分け辞書 |
+| **`ScenarioUseCase`** | Application | 再生エンジン本体。`IScenarioEventEmitter`/`IScenarioPlaybackControl`/`IScenarioPlaybackState`を実装 |
+| **`ScenarioHandlerRepository`** | Application | イベント種別→ハンドラの振り分け辞書 |
 | **`IScenarioEventHandler<T>`**| Application | イベント種別ごとの処理契約 |
 | **`IScenarioRepository`** | Application | シナリオ定義の取得抽象（実装はInfrastructure層） |
 | **`ITextAdvanceWaiter`** | Application | プレイヤーの「次へ」入力待機の抽象 |
 | **`*EventHandler`（Text/Background/Animation/Fade/Layer/Portrait）** | Adaptor | イベント種別ごとの実処理。`*Presenter`経由でViewへ通知 |
 | **`ScenarioPresenterFacade`** | Adaptor | 全出力ポートを束ねるFacade（`IScenarioCompletionNotifier`も実装） |
 | **`I*ViewSink`（Text/Portrait/Background/Animation/Fade/Layer/ScenarioCompletion）** | Adaptor | 表示反映の契約。`I*OutputPort`が「何を出すか」、ViewSinkが「どう反映するか」を分ける |
-| **`IOutPutPort`** | Adaptor | 旧名の出力ポート。`[Obsolete]`が付いており`IOutputPort`へ移行中 |
 | **`ScenarioAdvanceGate`** | Adaptor | ロック＋`TaskCompletionSource`によるプレイヤー入力待機ゲート |
 | **`ScenarioInputController`** | Adaptor | 入力を再生制御コマンドへ変換 |
 | **`SelectedScenarioState`** | Adaptor | OutGameシーンで選択したシナリオIDを保持するクロスシーン状態 |
@@ -66,7 +65,7 @@
 graph TD
     %% 定義 (接続のないレイヤーは省略)
     subgraph ScenarioModule [Scenario モジュール]
-        SC_App["Application<br>ScenarioUsecase"]
+        SC_App["Application<br>ScenarioUseCase"]
         SC_Adaptor["Adaptor<br>SelectedScenarioState, ScenarioPresenterFacade"]
         SC_Composition["Composition<br>ScenarioCom"]
         SC_App --> SC_Adaptor
@@ -115,7 +114,7 @@ graph TD
 ### ① Domain
 `IScenarioEvent`とその6種の具象（テキスト・立ち絵・背景・アニメーション・フェード・レイヤー順）、およびテキスト表示中に副次イベントを差し込む`TextTimingTrigger`を保持する。
 ### ② Application
-`ScenarioUsecase`を中心に、シナリオの取得・順次再生・イベントディスパッチ（`ScenarioHandlerRepo`）を実装する。
+`ScenarioUseCase`を中心に、シナリオの取得・順次再生・イベントディスパッチ（`ScenarioHandlerRepository`）を実装する。
 ### ③ Adaptor
 イベント種別ごとの`*EventHandler`/`*Presenter`、それらを束ねる`ScenarioPresenterFacade`、プレイヤー入力待機の`ScenarioAdvanceGate`を定義する。
 ### ④ View
@@ -129,7 +128,7 @@ graph TD
 
 | 拡張したいこと | 実装する場所 | 追加登録の要否 |
 | --- | --- | --- |
-| 新しいイベント種別を追加したい | `IScenarioEvent`（Domain）の実装クラスを追加し、対応する`IScenarioEventHandler<T>`（Adaptor）を実装する | 必要（`ScenarioHandlerRepo`への型登録を`ScenarioCom.Build()`に追記しないと、CSVにその種別が現れても処理されない） |
+| 新しいイベント種別を追加したい | `IScenarioEvent`（Domain）の実装クラスを追加し、対応する`IScenarioEventHandler<T>`（Adaptor）を実装する | 必要（`ScenarioHandlerRepository`への型登録を`ScenarioCom.Build()`に追記しないと、CSVにその種別が現れても処理されない） |
 
 ## 🔄処理フロー
 
@@ -143,9 +142,9 @@ sequenceDiagram
     autonumber
     participant Com as ScenarioCom (Ready)
     participant State as SelectedScenarioState
-    participant Usecase as ScenarioUsecase
+    participant Usecase as ScenarioUseCase
     participant Repo as ScenarioRepository
-    participant HandlerRepo as ScenarioHandlerRepo
+    participant HandlerRepo as ScenarioHandlerRepository
     participant Handler as TextEventHandler 等
     participant View as ScenarioView
 

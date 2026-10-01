@@ -83,6 +83,7 @@ namespace KillChord.Runtime.Composition
                 CharacterAnimationOneShotTimingCalculator,
                 CharacterAnimationSignal> signalFactory)
         {
+            // 基本の種類ごとのクリップとブレンドのフレーム数を用意する。
             var baseClipTypes = (CharacterAnimationClipType[])Enum.GetValues(typeof(CharacterAnimationClipType));
             var baseClips = new AnimationClip[baseClipTypes.Length];
             var baseEnterBlendFrameCounts = new int[baseClipTypes.Length];
@@ -100,6 +101,7 @@ namespace KillChord.Runtime.Composition
                 ? config.ExitBlendFrameCount
                 : 0;
 
+            // キーの無いエントリを、基本の種類のクリップとして登録する。
             if (config != null && config.Entries != null)
             {
                 for (int i = 0; i < config.Entries.Count; i++)
@@ -131,6 +133,7 @@ namespace KillChord.Runtime.Composition
                 }
             }
 
+            // クリップの一覧を、基本のクリップ・攻撃のクリップ・キー付きのワンショットのクリップの順に並べる。
             for (int i = 0; i < baseClips.Length; i++)
             {
                 combinedClips.Add(baseClips[i]);
@@ -180,6 +183,7 @@ namespace KillChord.Runtime.Composition
                 }
             }
 
+            // 各クリップの長さを求める。
             var clipLengths = new float[combinedClips.Count];
             for (int i = 0; i < combinedClips.Count; i++)
             {
@@ -188,6 +192,7 @@ namespace KillChord.Runtime.Composition
                     : 0f;
             }
 
+            // 再生の対応表とシグナルを作り、ビューを初期化する。
             CharacterAnimationViewModel viewModel = new CharacterAnimationViewModel();
             CharacterAnimationPlaybackMap playbackMap = new CharacterAnimationPlaybackMap(
                 attack: (int)CharacterAnimationClipType.Attack,

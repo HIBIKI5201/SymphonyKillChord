@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <param name="selectedBattleStageState"> チュートリアル判定に使用する選択中ステージ状態。未使用の場合はnull。 </param>
         public RhythmGuidePresenter(
             IMusicSyncService musicSyncService,
-            RhythmGuideUsecase rhythmGuideUsecase,
+            RhythmGuideUseCase rhythmGuideUsecase,
             TargetSystemController targetingSystem,
             Func<MissionRuntimeService> missionRuntimeServiceProvider = null,
             SelectedBattleStageState selectedBattleStageState = null)
@@ -54,18 +54,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             BeatType currentBeatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
             int currentBeatCount = (int)currentBeatType;
 
-            _zones.Clear();
-
-            foreach (RhythmJudgmentRange range in _musicSyncService.RhythmJudgmentDefinition.JudgmentRanges)
-            {
-                _zones.Add(new RhythmGuideZoneDto(
-                    (int)range.BeatType,
-                    range.StartNormalized,
-                    range.EndNormalized,
-                    range.JustStartNormalized,
-                    range.JustEndNormalized
-                ));
-            }
+            RefreshZonesIfDefinitionChanged();
 
             bool hasTarget = _targetingSystem.TryGetCurrentTargetEntity(out _);
             int? targetBeatCount = GetTutorialTargetBeatCount();
@@ -82,6 +71,40 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         }
 
         /// <summary>
+        ///     判定定義が変わった時だけ、表示用の判定ゾーン一覧を作り直す。
+        ///     判定定義はプレイ中に変わらないため、通常は初回の1度だけ作る。
+        /// </summary>
+        private void RefreshZonesIfDefinitionChanged()
+        {
+            RhythmJudgmentDefinition definition = _musicSyncService.RhythmJudgmentDefinition;
+            if (ReferenceEquals(definition, _zonesSourceDefinition))
+            {
+                return;
+            }
+
+            _zonesSourceDefinition = definition;
+            _zones.Clear();
+            if (definition == null)
+            {
+                return;
+            }
+
+            // インターフェース越しのforeachは列挙子がボクシングされるため、インデックスで回す。
+            IReadOnlyList<RhythmJudgmentRange> ranges = definition.JudgmentRanges;
+            for (int i = 0; i < ranges.Count; i++)
+            {
+                RhythmJudgmentRange range = ranges[i];
+                _zones.Add(new RhythmGuideZoneDto(
+                    (int)range.BeatType,
+                    range.StartNormalized,
+                    range.EndNormalized,
+                    range.JustStartNormalized,
+                    range.JustEndNormalized
+                ));
+            }
+        }
+
+        /// <summary>
         ///     チュートリアル中に指定されているミッションアクションのBeatCountを取得する。
         /// </summary>
         /// <returns> 対象が存在しない、またはチュートリアル中でない場合はnull。 </returns>
@@ -93,10 +116,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         }
 
         private readonly IMusicSyncService _musicSyncService;
-        private readonly RhythmGuideUsecase _rhythmGuideUsecase;
+        private readonly RhythmGuideUseCase _rhythmGuideUsecase;
         private readonly TargetSystemController _targetingSystem;
         private readonly Func<MissionRuntimeService> _missionRuntimeServiceProvider;
         private readonly SelectedBattleStageState _selectedBattleStageState;
         private readonly List<RhythmGuideZoneDto> _zones = new();
+        private RhythmJudgmentDefinition _zonesSourceDefinition;
     }
 }

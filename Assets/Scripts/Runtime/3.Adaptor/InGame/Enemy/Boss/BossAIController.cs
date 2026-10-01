@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Enemy.EnemyAIFacadeInterface;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Enemy;
+using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Persistent;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         /// <param name="patterns"> ボスが使用する攻撃パターン群（通常1/通常2/特殊1等）。 </param>
         public BossAIController(
             IDefender entity,
-            EnemyMoveUsecase enemyMoveUsecase,
-            BossAttackReservationUsecase reservationUsecase,
+            EnemyMoveUseCase enemyMoveUsecase,
+            BossAttackReservationUseCase reservationUsecase,
             EnemyBattleState enemyBattleState,
             IEnemyStateFacade stateFacade,
             Dictionary<Type, IRaycastDetectView> raycastViews,
@@ -70,7 +71,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _reservationUsecase.OnReservedTimingReached += HandleReservedTimingReached;
             _reservationUsecase.On2BeatBefore += Handle2BeatBefore;
             _reservationUsecase.On1BeatBefore += Handle1BeatBefore;
-            EventBus<EOnTakeDamage>.Register(HandleOnDamageTaken);
             _isActive = true;
         }
 
@@ -85,7 +85,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _reservationUsecase.On2BeatBefore -= Handle2BeatBefore;
             _reservationUsecase.On1BeatBefore -= Handle1BeatBefore;
             _reservationUsecase.Deactivate();
-            EventBus<EOnTakeDamage>.Unregister(HandleOnDamageTaken);
             _isActive = false;
         }
 
@@ -147,6 +146,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             }
         }
 
+        /// <summary>
+        ///     AI を停止して破棄する。
+        /// </summary>
         public void Dispose()
         {
             Deactivate();
@@ -176,6 +178,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             OnAttack?.Invoke();
         }
 
+        /// <summary>
+        ///     攻撃の2拍前に、現在の攻撃の射線警告の追従を開始する。
+        /// </summary>
         private void Handle2BeatBefore()
         {
             if (_current != null && _raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))
@@ -185,25 +190,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             On2BeatBefore?.Invoke();
         }
 
+        /// <summary>
+        ///     攻撃の1拍前に、射線警告の向きを固定して通知する。
+        /// </summary>
         private void Handle1BeatBefore()
         {
             if (_current != null && _raycastViews.TryGetValue(_current.Controller.GetType(), out IRaycastDetectView view))            {
                 view.LockWarningDirection();
             }
             On1BeatBefore?.Invoke();
-        }
-
-        /// <summary>
-        ///     ダメージを受けた時の処理。クリティカル時は硬直する。
-        /// </summary>
-        private void HandleOnDamageTaken(EOnTakeDamage eventParam)
-        {
-            if (eventParam.DefenderId != _enemyBattleState.Attacker.Id) return;
-            if (eventParam.Critical)
-            {
-                _enemyBattleState.Stunned();
-                _stateFacade.Stunned();
-            }
         }
 
         /// <summary>
@@ -219,7 +214,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             if (_lowHpEventTriggered) return;
             if(currentHp < maxHp * LOW_HP_EVENT_TRIGGER_RATIO)
             {
-                Debug.Log("<color=red>ボス体力が半分以下になった</color>");
+                DevLog.Log("<color=red>ボス体力が半分以下になった</color>");
                 OnLowHp?.Invoke();
                 _lowHpEventTriggered = true;
             }
@@ -228,8 +223,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         private const float LOW_HP_EVENT_TRIGGER_RATIO = 0.5f;
 
         private readonly IDefender _entity;
-        private readonly EnemyMoveUsecase _enemyMoveUsecase;
-        private readonly BossAttackReservationUsecase _reservationUsecase;
+        private readonly EnemyMoveUseCase _enemyMoveUsecase;
+        private readonly BossAttackReservationUseCase _reservationUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
         private readonly IReadOnlyList<BossAttackPattern> _patterns;

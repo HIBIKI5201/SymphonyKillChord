@@ -111,7 +111,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
             _sceneTransitionService = new SceneTransitionService();
             _sceneInitializationReadiness = new SceneInitializationReadinessRegistry(
                 _sceneInitializationTimeoutFrameCount);
-            _sceneTransitionUsecase = new SceneTransitionUsecase(
+            _sceneTransitionUsecase = new SceneTransitionUseCase(
                 _sceneTransitionService,
                 _loadingOperationExecutor,
                 _sceneInitializationReadiness);
@@ -152,9 +152,11 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
         /// </summary>
         public override void Shutdown()
         {
+            // 常駐中の処理を止め、シナリオからの出撃状態と復帰用の表示を片付ける。
             _persistentLifetimeCancellation?.Cancel();
             if (_ownsRegistrations) { _sceneTransitionController?.EndScenarioBattleSortie(); }
             ClearRecoveryView();
+            // 自身の登録を解除する。登録を所有していない場合はここで終える。
             if (ServiceLocator.TryGetInstance(out SceneTransitionInitializer registeredInitializer)
                 && ReferenceEquals(registeredInitializer, this))
             {
@@ -165,6 +167,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 return;
             }
 
+            // 自身が登録したサービスだけを解除する。
             if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState pending))
             {
                 pending.Clear();
@@ -181,10 +184,10 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 ServiceLocator.UnregisterInstance<SceneTransitionController>();
             }
 
-            if (ServiceLocator.TryGetInstance(out SceneTransitionUsecase registeredUsecase)
+            if (ServiceLocator.TryGetInstance(out SceneTransitionUseCase registeredUsecase)
                 && ReferenceEquals(registeredUsecase, _sceneTransitionUsecase))
             {
-                ServiceLocator.UnregisterInstance<SceneTransitionUsecase>();
+                ServiceLocator.UnregisterInstance<SceneTransitionUseCase>();
             }
 
             if (ServiceLocator.TryGetInstance<ISceneTransitionService>(out var registeredService)
@@ -217,6 +220,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 ServiceLocator.UnregisterInstance<LoadingScreenController>();
             }
 
+            // 参照を消す。
             _loadingScreenController = null;
             _loadingOperationExecutor = null;
             _sceneTransitionService = null;
@@ -252,7 +256,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
         private ILoadingOperationExecutor _loadingOperationExecutor;
         private ISceneTransitionService _sceneTransitionService;
         private ISceneInitializationReadiness _sceneInitializationReadiness;
-        private SceneTransitionUsecase _sceneTransitionUsecase;
+        private SceneTransitionUseCase _sceneTransitionUsecase;
         private SceneTransitionController _sceneTransitionController;
         private bool _ownsRegistrations;
         private CancellationTokenSource _persistentLifetimeCancellation;

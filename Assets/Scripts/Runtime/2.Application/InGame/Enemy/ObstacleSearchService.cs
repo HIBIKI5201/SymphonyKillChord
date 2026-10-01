@@ -7,6 +7,9 @@ namespace KillChord.Runtime.Application.InGame.Enemy
     /// </summary>
     public class ObstacleSearchService
     {
+        /// <summary>
+        ///     障害物探索のリポジトリを指定して生成する。
+        /// </summary>
         public ObstacleSearchService(IObstacleSearchRepository repository)
         {
             _repository = repository;

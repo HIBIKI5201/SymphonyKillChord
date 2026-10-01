@@ -24,9 +24,9 @@ namespace KillChord.Runtime.View.InGame.Player
     [DefaultExecutionOrder(ExecutionOrderConst.MOVEMENT)]
     public sealed class PlayerView : MonoBehaviour, IDamageable, IGameplayControllable
     {
-        [SerializeField] private string _blendName;
-        [SerializeField] private Animator _animator;
-        [SerializeField] private Rigidbody _rb;
+        [SerializeField, Tooltip("移動のブレンドに使う Animator のパラメーター名。")] private string _blendName;
+        [SerializeField, Tooltip("プレイヤーの Animator。")] private Animator _animator;
+        [SerializeField, Tooltip("プレイヤーの Rigidbody。")] private Rigidbody _rb;
 
         [SerializeField, Tooltip("攻撃時の武器表示と攻撃SEを管理するView。")]
         private PlayerAttackWeaponView _attackWeaponView;
@@ -166,6 +166,10 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayerAttackController?.UpdateAttackCooldown(Time.deltaTime);
             UpdateMovement();
         }
+
+        /// <summary>
+        ///     初期化済みでプレイ中の場合、計算済みの速度と回転を Rigidbody に反映する。
+        /// </summary>
         private void FixedUpdate()
         {
             if (!_isInitialized || !_isPlaying || _controller == null)
@@ -175,6 +179,9 @@ namespace KillChord.Runtime.View.InGame.Player
             UpdateRigidbody();
         }
 
+        /// <summary>
+        ///     イベントと入力の購読を解除する。
+        /// </summary>
         private void OnDestroy()
         {
             EventBus<EOnTakeDamage>.Unregister(HandleTakeDamage);
@@ -400,6 +407,9 @@ namespace KillChord.Runtime.View.InGame.Player
             PlayPriorityVoice(_skillVoiceCueName);
         }
 
+        /// <summary>
+        ///     指定したキーのスキルアニメーションを再生する。
+        /// </summary>
         public void PlaySkillAnimation(string animationKey)
         {
             if (string.IsNullOrWhiteSpace(animationKey))
@@ -545,6 +555,7 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void OnAttack(InputContext<float> input)
         {
+            // 押した瞬間だけ受け付け、入力抑制中・回避中・攻撃中は無視する。
             if (input.Phase != InputActionPhase.Started)
             {
                 return;
@@ -571,6 +582,7 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
+            // 攻撃が成立したら、予約されたスキル用のアニメーションか、拍の種類に応じた攻撃アニメーションを再生する。
             if (PlayerAttackController.ExecuteAttack(out int resultBeatType))
             {
                 string animationKey = _pendingSkillAnimationKey;
@@ -584,6 +596,7 @@ namespace KillChord.Runtime.View.InGame.Player
                         : _characterAnimationSignal.RequestAttack(animationKey);
                 }
 
+                // 武器の演出を再生し、ロックオン中なら対象の方へ向ける。
                 _attackWeaponView?.Play(resultBeatType);
 
                 if (PlayerAttackController.HasCurrentLockOnTarget)
@@ -593,6 +606,9 @@ namespace KillChord.Runtime.View.InGame.Player
             }
         }
 
+        /// <summary>
+        ///     計算した速度と回転を Rigidbody に反映する。
+        /// </summary>
         private void UpdateRigidbody()
         {
             _rb.linearVelocity = _cacheVelocity;

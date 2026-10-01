@@ -1,0 +1,20 @@
+{
+  "name": "github-pages",
+  "used_by": [
+    ".github/workflows/HomePageDeploy.yml"
+  ],
+  "protection_rules": [
+    "branch_policy"
+  ],
+  "deployment_branch_policy": {
+    "protected_branches": false,
+    "custom_branch_policies": true,
+    "branches": [
+      "develop",
+      "main"
+    ]
+  },
+  "can_admins_bypass": true,
+  "variables": {},
+  "secrets": {}
+}

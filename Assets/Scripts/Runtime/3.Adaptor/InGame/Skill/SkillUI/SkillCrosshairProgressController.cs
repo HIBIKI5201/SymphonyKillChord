@@ -1,5 +1,4 @@
 using KillChord.Runtime.Adaptor.InGame.Target;
-using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
 
@@ -13,6 +12,18 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     /// </summary>
     public sealed class SkillCrosshairProgressController
     {
+        /// <summary>
+        ///     ロックオン状態の取得元を指定して生成する。
+        /// </summary>
+        /// <param name="targetSystemProvider">
+        ///     ターゲットシステムを返す処理。登録順に依存しないよう判定のたびに呼ぶ。取得できない場合はnullを返す。
+        /// </param>
+        public SkillCrosshairProgressController(Func<TargetSystemController> targetSystemProvider)
+        {
+            _targetSystemProvider = targetSystemProvider
+                ?? throw new ArgumentNullException(nameof(targetSystemProvider));
+        }
+
         /// <summary>
         ///     スキルごとの入力進行状態を報告する。
         /// </summary>
@@ -47,17 +58,25 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             }
         }
 
+        /// <summary>
+        ///     入力中かつロックオン中のときだけ照準の進捗表示を出す。
+        /// </summary>
         private static void ApplyVisibility(ISkillCrosshairProgressView crosshairView, bool isInProgress, bool isLockedOn)
         {
             crosshairView.SetVisible(isInProgress && isLockedOn);
         }
 
-        private static bool IsLockedOn()
+        /// <summary>
+        ///     ロックオン中のターゲットがいるかを判定する。
+        /// </summary>
+        private bool IsLockedOn()
         {
-            return ServiceLocator.TryGetInstance<TargetSystemController>(out var targetSystemController)
+            TargetSystemController targetSystemController = _targetSystemProvider();
+            return targetSystemController != null
                 && targetSystemController.TryGetCurrentTargetEntity(out _);
         }
 
+        private readonly Func<TargetSystemController> _targetSystemProvider;
         private readonly Dictionary<ISkillCrosshairProgressView, bool> _progressStates = new();
     }
 }

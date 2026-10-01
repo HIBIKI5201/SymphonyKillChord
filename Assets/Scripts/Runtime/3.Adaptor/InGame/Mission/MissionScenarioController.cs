@@ -13,6 +13,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
     /// </summary>
     public sealed class MissionScenarioController : IDisposable
     {
+        /// <summary>
+        ///     ミッション進行・シナリオ再生・バトルのポーズ・入力モードの制御を指定して生成する。
+        /// </summary>
         public MissionScenarioController(
             MissionRuntimeService missionRuntimeService,
             ObjectiveSequenceClearCondition objectiveSequence,
@@ -53,6 +56,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             HandleObjectiveStepChanged(_missionRuntimeService.MissionProgress.ObjectiveStepIndex);
         }
 
+        /// <summary>
+        ///     購読を解除して破棄する。二重に呼ばれても一度だけ処理する。
+        /// </summary>
         public void Dispose()
         {
             if (_isDisposed)
@@ -104,6 +110,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             bool isScenarioPlaybackStarted = false;
             try
             {
+                // バトルをポーズできた場合だけシナリオを始める。
                 isScenarioPauseStarted = _battlePauseController.BeginScenarioPause();
                 if (!isScenarioPauseStarted)
                 {
@@ -112,6 +119,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                     return;
                 }
 
+                // 入力をシナリオ用に切り替えて再生する。破棄されていなければ再生完了を条件へ伝える。
                 _inputModeController.EnterScenarioInputMode();
                 isScenarioPlaybackStarted = true;
                 OnScenarioPlaybackStarted?.Invoke();
@@ -128,6 +136,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             }
             finally
             {
+                // 始めた処理だけを元に戻す。
                 if (isScenarioPlaybackStarted)
                 {
                     _inputModeController.ExitScenarioInputMode();

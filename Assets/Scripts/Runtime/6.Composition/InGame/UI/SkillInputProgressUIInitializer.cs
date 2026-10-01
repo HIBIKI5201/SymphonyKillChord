@@ -17,10 +17,13 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <summary> 全スキルのコマンド表示を横断的に制御するコントローラー。 </summary>
         public SkillGuideProgressController GuideProgressController => _guideProgressController;
 
+        /// <inheritdoc/>
         public override string ModuleName => nameof(SkillInputProgressUIInitializer);
 
+        /// <inheritdoc/>
         public override int Order => 442;
 
+        /// <inheritdoc/>
         public override bool Build()
         {
             if (_skillInputProgressUIConfig == null)
@@ -40,6 +43,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
 
             return true;
         }
+
+        /// <inheritdoc/>
         public override void Shutdown()
         {
             if (_isRegistered)

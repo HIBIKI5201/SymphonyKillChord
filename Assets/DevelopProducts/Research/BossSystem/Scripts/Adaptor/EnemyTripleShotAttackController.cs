@@ -8,7 +8,7 @@ namespace DevelopProducts.Boss
     ///     正面・右斜め30度・左斜め30度の三方向に直線攻撃を行う。
     /// </summary>
     /// <remarks>
-    ///     現状は EnemyAttackUsecase.ExecuteAttack を三方向ぶん呼び出す枠組みのみ。
+    ///     現状は EnemyAttackUseCase.ExecuteAttack を三方向ぶん呼び出す枠組みのみ。
     ///     射線判定（EnemyRaycastDetectView）と警告表示は単一方向前提のため、
     ///     方向ごとの射線判定・警告ラインに対応する拡張が別途必要。TODO参照。
     /// </remarks>
@@ -18,7 +18,7 @@ namespace DevelopProducts.Boss
         public const float SpreadAngleDegrees = 30f;
 
         public EnemyTripleShotAttackController(
-            EnemyAttackUsecase enemyAttackUsecase,
+            EnemyAttackUseCase enemyAttackUsecase,
             EnemyBattleState enemyBattleState)
         {
             _enemyAttackUsecase = enemyAttackUsecase;
@@ -31,7 +31,7 @@ namespace DevelopProducts.Boss
         public void ExecuteAttack()
         {
             // TODO: 方向ごとの射線判定が必要。
-            // 現状の EnemyAttackUsecase は内部の単一方向 raycast でヒット判定するため、
+            // 現状の EnemyAttackUseCase は内部の単一方向 raycast でヒット判定するため、
             // 角度オフセット（0, +30, -30）を渡せるオーバーロード or
             // 三方向対応の RaycastDetectService 拡張を追加してから差し替える。
             _enemyAttackUsecase.ExecuteAttack(
@@ -40,7 +40,7 @@ namespace DevelopProducts.Boss
                 _enemyBattleState.Target);
         }
 
-        private readonly EnemyAttackUsecase _enemyAttackUsecase;
+        private readonly EnemyAttackUseCase _enemyAttackUsecase;
         private readonly EnemyBattleState _enemyBattleState;
     }
 }
