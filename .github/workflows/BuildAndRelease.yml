@@ -46,7 +46,7 @@ on:
         type: boolean
         default: false
       cpu_usage_percent:
-        description: 'Unity使用コア数割合（手動実行時は既存の安全制限を一時的に無効化）'
+        description: 'Unity使用コア数割合（自動ビルドは50%）'
         required: true
         type: choice
         default: '25%'
@@ -286,6 +286,8 @@ jobs:
       UNITY_EXE_PATH: ${{ vars.UNITY_EXE_PATH }}
       UNITY_BUILD_EXECUTE_METHOD: ${{ vars.UNITY_BUILD_EXECUTE_METHOD }}
       UNITY_PROFILE_BUILD_TIMEOUT_SEC: 7200
+      # Android は IL2CPP とシェーダー（GLES3 / Vulkan）の処理が重く、2時間では終わらないことがあるため長めにする。
+      UNITY_ANDROID_PROFILE_BUILD_TIMEOUT_SEC: 10800
       IS_MANUAL_BUILD: ${{ github.event_name == 'workflow_dispatch' }}
       UNITY_CPU_USAGE_PERCENT: ${{ inputs.cpu_usage_percent }}
       AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
@@ -877,7 +879,7 @@ jobs:
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
           Write-Host "Unity実行メソッド: $(if ($env:UNITY_BUILD_EXECUTE_METHOD) { $env:UNITY_BUILD_EXECUTE_METHOD } else { '未設定 (デフォルト使用)' })"
           Write-Host "プロファイルごとのUnityビルドタイムアウト: $env:UNITY_PROFILE_BUILD_TIMEOUT_SEC 秒"
-          Write-Host "Unity使用コア数割合: $(if ($env:IS_MANUAL_BUILD -eq 'true') { $env:UNITY_CPU_USAGE_PERCENT } else { '自動設定（安全制限あり）' })"
+          Write-Host "Unity使用コア数割合: $(if ($env:IS_MANUAL_BUILD -eq 'true') { $env:UNITY_CPU_USAGE_PERCENT } else { '自動設定（50%）' })"
           Write-Host "対象プロファイル: $(if ($env:SELECTED_PROFILES) { $env:SELECTED_PROFILES } else { '指定なし（全件）' })"
           Write-Host ""
 
@@ -1259,7 +1261,6 @@ jobs:
           $EmergencyMinimumFreeSpaceGB = 5
           $MaximumLogSizeGB = 1
           $ResourceCheckIntervalMilliseconds = 30000
-          $WindowsUnityCpuLimit = 4
           $MaximumAffinityCpuCount = 63
           $AllowedCpuUsagePercentages = @("25%", "50%", "75%", "100%")
           $RunTimestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
@@ -1366,14 +1367,14 @@ jobs:
               exit 1
             }
             $UnityCpuUsagePercent = [int]([string]$env:UNITY_CPU_USAGE_PERCENT).TrimEnd('%')
-            $UnityCpuCapacity = [Math]::Min($MaximumAffinityCpuCount, $CpuCount)
-            $UnityCpuCount = [int][Math]::Max(1, [Math]::Floor($UnityCpuCapacity * $UnityCpuUsagePercent / 100))
-            $CpuAllocationMode = "手動指定（既存の安全制限を一時的に無効化）"
+            $CpuAllocationMode = "手動指定"
           } else {
-            $UnityCpuLimit = if ($env:RUNNER_OS -eq "Windows") { $WindowsUnityCpuLimit } else { $MaximumAffinityCpuCount }
-            $UnityCpuCount = [int][Math]::Min($UnityCpuLimit, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
-            $CpuAllocationMode = "自動設定（既存の安全制限を適用）"
+            # 自動ビルドは論理CPUの半分を使う（ビルド中の作業用に残りを空ける）。
+            $UnityCpuUsagePercent = 50
+            $CpuAllocationMode = "自動設定"
           }
+          $UnityCpuCapacity = [Math]::Min($MaximumAffinityCpuCount, $CpuCount)
+          $UnityCpuCount = [int][Math]::Max(1, [Math]::Floor($UnityCpuCapacity * $UnityCpuUsagePercent / 100))
 
           # プロセッサアフィニティビットマスクの生成
           $AffinityMask = if ($UnityCpuCount -eq $MaximumAffinityCpuCount) {
@@ -1384,9 +1385,7 @@ jobs:
 
           Write-Host "検出された論理 CPU 数: $CpuCount"
           Write-Host "CPU割り当てモード: $CpuAllocationMode"
-          if ($IsManualBuild) {
-            Write-Host "Unity使用コア数割合: $UnityCpuUsagePercent%"
-          }
+          Write-Host "Unity使用コア数割合: $UnityCpuUsagePercent%"
           Write-Host "Unity 割り当て CPU 数: $UnityCpuCount"
           Write-Host "Unity CPU アフィニティマスク: 0x$('{0:X}' -f $AffinityMask)"
           Write-Host ""
@@ -1531,6 +1530,19 @@ jobs:
             if ($env:BUILD_VARIANT) {
               $UnityArgs += @("-gameDataVariant", "$env:BUILD_VARIANT")
             }
+            # 前回のビルド対象（例: Android）のまま起動して途中で切り替えると、Entities のコンテンツ作成が
+            # 「Unable to build with the current configuration」で失敗するため、最初から目的の対象で起動する。
+            $BuildTargetArg = switch -Regex ($ProfileName) {
+              '(?i)_Android$' { 'Android' }
+              '(?i)_Windows$' { 'Win64' }
+              '(?i)_iOS$' { 'iOS' }
+              '(?i)_macOS$' { 'OSXUniversal' }
+              default { $null }
+            }
+            if ($BuildTargetArg) {
+              $UnityArgs += @("-buildTarget", $BuildTargetArg)
+            }
+            $ProfileBuildTimeoutSec = if ($ProfileName -match '(?i)_Android$') { [int]$env:UNITY_ANDROID_PROFILE_BUILD_TIMEOUT_SEC } else { $ProfileTimeoutSec }
 
             try {
               $UnityProcess = Start-Process `
@@ -1556,7 +1568,7 @@ jobs:
               $StopReason = $null
               while (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
                 $ElapsedSeconds = ([DateTime]::UtcNow - $ProfileStartedAt).TotalSeconds
-                if ($ElapsedSeconds -ge $ProfileTimeoutSec) {
+                if ($ElapsedSeconds -ge $ProfileBuildTimeoutSec) {
                   $StopReason = "Timeout"
                   break
                 }
@@ -1592,7 +1604,7 @@ jobs:
 
               if ($StopReason) {
                 if ($StopReason -eq "Timeout") {
-                  Write-Host "[ERROR]: $ProfileName のビルドが $ProfileTimeoutSec 秒後にタイムアウトしました。"
+                  Write-Host "[ERROR]: $ProfileName のビルドが $ProfileBuildTimeoutSec 秒後にタイムアウトしました。"
                 }
                 try {
                   if ($env:RUNNER_OS -eq "Windows") {
