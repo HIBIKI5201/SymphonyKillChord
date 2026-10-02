@@ -1,0 +1,11 @@
+# BuildRunner に置くもののうち、リポジトリで管理するのは下の許可リストのファイルだけ。
+# ランナー本体（bin / externals / *.cmd）、作業フォルダ（_work）、診断ログ（_diag）、
+# 登録情報（.runner / .credentials / .credentials_rsaparams など）はPCごとのもので、
+# 登録情報はそのPCのランナーとしてGitHubに接続するための秘密情報なので、絶対にコミットしない。
+/*
+!/.gitignore
+!/README.md
+!/setup-runner.ps1
+!/runner-menu.bat
+!/runner-menu.ps1
+!/SetBuildCpuMode.ps1

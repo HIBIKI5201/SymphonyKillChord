@@ -10,10 +10,10 @@
   - Unity の -job-worker-count は起動時に決まるため、次のプロファイル（Unity の再起動）から反映される。
 
 .EXAMPLE
-  .\PowerShell\SetBuildCpuMode.ps1 100     # 100% に切り替える
-  .\PowerShell\SetBuildCpuMode.ps1 25      # 25% に切り替える
-  .\PowerShell\SetBuildCpuMode.ps1 reset   # 切り替えを解除して、ジョブ開始時の設定に戻す
-  .\PowerShell\SetBuildCpuMode.ps1         # 今の状態を表示する
+  .\BuildRunner\SetBuildCpuMode.ps1 100     # 100% に切り替える
+  .\BuildRunner\SetBuildCpuMode.ps1 25      # 25% に切り替える
+  .\BuildRunner\SetBuildCpuMode.ps1 reset   # 切り替えを解除して、ジョブ開始時の設定に戻す
+  .\BuildRunner\SetBuildCpuMode.ps1         # 今の状態を表示する
 #>
 param(
     [ValidateSet("25", "50", "75", "100", "reset", "status")]

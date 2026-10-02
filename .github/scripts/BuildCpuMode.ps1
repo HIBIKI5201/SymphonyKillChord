@@ -1,5 +1,5 @@
 # Helpers for switching the CPU usage of a running Unity build (BuildAndRelease.yml).
-# PowerShell/SetBuildCpuMode.ps1 writes the requested percent together with the PID of the
+# BuildRunner/SetBuildCpuMode.ps1 writes the requested percent together with the PID of the
 # job's Runner.Worker; the build step dot-sources this file and applies the setting.
 # Keep this file ASCII-only so Windows PowerShell 5.1 can read it without a BOM.
 

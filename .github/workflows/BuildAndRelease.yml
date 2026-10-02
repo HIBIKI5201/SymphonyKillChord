@@ -1426,7 +1426,7 @@ jobs:
             return [Math]::Round($DriveInfo.Free / 1GB, 2)
           }
 
-          # 実行中のCPU使用率の手動切り替え（PowerShell/SetBuildCpuMode.ps1）。処理は .github/scripts/BuildCpuMode.ps1 にある。
+          # 実行中のCPU使用率の手動切り替え（BuildRunner/SetBuildCpuMode.ps1）。処理は .github/scripts/BuildCpuMode.ps1 にある。
           # ワークフロー1ステップの run は21000文字の上限があるため、関数は外部スクリプトに置く。
           $RunnerWorkerId = $null
           if ($env:RUNNER_OS -eq "Windows") {
@@ -1438,7 +1438,7 @@ jobs:
             }
           }
           if ($RunnerWorkerId) {
-            Write-Host "[INFO]: CPU使用率は実行中に切り替えられます（PowerShell/SetBuildCpuMode.ps1、Runner.Worker PID: $RunnerWorkerId）。"
+            Write-Host "[INFO]: CPU使用率は実行中に切り替えられます（BuildRunner/SetBuildCpuMode.ps1、Runner.Worker PID: $RunnerWorkerId）。"
           }
 
           # 手動切り替えがあれば @(割合, CPU数, マスク)、無ければ $null を返す
