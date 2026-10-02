@@ -4,7 +4,8 @@
 
 - develop へのマージなどでビルドが予約されると、起動中のランナーのどれか1台が Unity でビルドし、GitHub のリリースにアップロードする。
 - ビルドは全体で同時に1つまで。ランナーが何台あっても、空いている1台が順番に引き受ける。
-- ランナー本体・作業フォルダ（`_work`）・登録情報はこのフォルダの中にできるが、`.gitignore` でリポジトリの管理対象から外している。
+- ランナー本体と登録情報はこのフォルダの中にできるが、`.gitignore` でリポジトリの管理対象から外している。
+- ビルドの作業フォルダは、パスが短くなるよう原則 `<ドライブ>:\SKCWork` に置く（BuildRunner の場所が浅ければ `BuildRunner\_work`）。Unity は 260 文字を超えるパスを扱えず、作業フォルダが深いと `Library\PackageCache` の中のファイルでビルドが失敗するため。
 
 | ファイル | 役割 |
 |---|---|
@@ -69,7 +70,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 | 種類 | 項目 |
 |---|---|
 | 起動を止める | 未セットアップ、すでにランナーが起動している |
-| 警告して確認する | 空き容量が 80GB 未満（40GB 未満は強い警告）、Unity やモジュールがない、ランナーの作業フォルダのプロジェクトを Unity で開いている、バッテリー駆動、一定時間でスリープする電源設定、GitHub に接続できない、前回 Ctrl+C などで止められた |
+| 警告して確認する | 作業フォルダのパスが長い（ビルド先が70文字超）、空き容量が 80GB 未満（40GB 未満は強い警告）、Unity やモジュールがない、ランナーの作業フォルダのプロジェクトを Unity で開いている、バッテリー駆動、一定時間でスリープする電源設定、GitHub に接続できない、前回 Ctrl+C などで止められた |
 
 警告が出たときは `Y`（そのまま起動）か `n`（取りやめ）を選ぶ。
 
@@ -111,6 +112,21 @@ gh workflow run BuildAndRelease.yml --repo HIBIKI5201/SymphonyKillChord --ref de
 
 - `clean_build=true` を付けると Unity の Library を消して作り直す。トラブルのときだけ使う（Windows でも1時間以上延びる）。
 - タイムアウト: Android は 180 分、ほかは 120 分。
+
+## 作業フォルダを短い場所に移す
+
+`start-runner.bat` が「ビルド先のパスが長い」と警告したときの手順。登録し直す必要はない。
+
+1. ビルドが動いていないとき（メニューの状態が「待機中」）に、ランナーのウィンドウを閉じる。
+2. `BuildRunner\.runner` をメモ帳で開き、`"workFolder": "_work"` を短い場所に書き換える（例: `"workFolder": "C:\\SKCWork"`。`\` は2つ重ねる）。
+3. 今の作業フォルダの中身（`_work\SymphonyKillChord`）を新しい場所に移す。21GB ほどあり、同じドライブでも10分ほどかかる。移さなくてもよいが、その場合は最初のビルドで Library を作り直すので1時間ほど長くかかる。
+
+   ```powershell
+   New-Item -ItemType Directory C:\SKCWork -Force
+   robocopy .\BuildRunner\_work\SymphonyKillChord C:\SKCWork\SymphonyKillChord /E /MOVE /R:1 /W:1 /MT:16 /NFL /NDL /NP
+   ```
+
+4. `start-runner.bat` で起動する。
 
 ## ランナーをやめる
 
