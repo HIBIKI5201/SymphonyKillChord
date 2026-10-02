@@ -7,7 +7,7 @@
     1. ビルドに必要な環境（Unity・モジュール・gh・空き容量）を確認し、足りないものは入れ方を案内する
     2. GitHub Actions のランナー本体（公式リリース）をダウンロードし、SHA-256 を照合して展開する
     3. 登録トークンを用意する（gh で発行できなければ、オーナーから受け取ったものを貼り付ける）
-    4. ランナーとして登録する（作業フォルダは BuildRunner\_work）
+    4. ランナーとして登録する（作業フォルダは BuildRunner\_work。パスが長くなる場所なら <ドライブ>:\SKCWork）
     5. 必要ならそのまま起動する
   詳しくは README.md を参照。
 
@@ -15,10 +15,12 @@
   .\BuildRunner\setup-runner.ps1                 # 対話しながらセットアップする
   .\BuildRunner\setup-runner.ps1 -Token XXXXX    # 受け取った登録トークンを渡してセットアップする
   .\BuildRunner\setup-runner.ps1 -Remove         # このPCのランナー登録を外す
+  .\BuildRunner\setup-runner.ps1 -WorkDir D:\SKCWork   # 作業フォルダを指定する
 #>
 param(
     [string]$Token,
     [string]$RunnerName = $env:COMPUTERNAME,
+    [string]$WorkDir,
     [switch]$Remove,
     [switch]$SkipChecks
 )
@@ -32,6 +34,10 @@ $Repo = "HIBIKI5201/SymphonyKillChord"
 $RunnerDir = $PSScriptRoot
 $ProjectRoot = Split-Path -Parent $RunnerDir
 $MinimumFreeSpaceGB = 80
+# ビルドはリポジトリを <作業フォルダ>\SymphonyKillChord\SymphonyKillChord に取り出す。Unity は 260 文字を超える
+# パスを扱えず、Library\PackageCache の深いファイルで失敗するため、このフォルダのパスは短く保つ。
+$WorkspaceSubPath = "SymphonyKillChord\SymphonyKillChord"
+$MaxWorkspacePathLength = 70
 
 function Write-Step([string]$Message) {
     Write-Host ""
@@ -291,13 +297,23 @@ if (-not $Token) {
 # 4. 登録
 # ---------------------------------------------------------------------------
 Write-Step "4/5 ランナーとして登録する"
+if (-not $WorkDir) {
+    $WorkDir = "_work"
+    $DefaultWorkspace = Join-Path (Join-Path $RunnerDir "_work") $WorkspaceSubPath
+    if ($DefaultWorkspace.Length -gt $MaxWorkspacePathLength) {
+        $WorkDir = "$($Drive.Name):\SKCWork"
+        Write-Host "BuildRunner の場所が深いため、作業フォルダを $WorkDir にします。" -ForegroundColor Yellow
+        Write-Host "  （BuildRunner\_work だとビルド先が $($DefaultWorkspace.Length) 文字になり、Unity がパスの長さの上限で失敗する）"
+    }
+}
+$WorkFolderPath = if ([System.IO.Path]::IsPathRooted($WorkDir)) { $WorkDir } else { Join-Path $RunnerDir $WorkDir }
 Write-Host "リポジトリ: $Repo"
 Write-Host "ランナー名: $RunnerName"
-Write-Host "作業フォルダ: $(Join-Path $RunnerDir '_work')"
+Write-Host "作業フォルダ: $WorkFolderPath"
 Push-Location $RunnerDir
 try {
     # ラベルは既定（self-hosted / Windows / X64）のまま。ワークフローは runs-on: [self-hosted, windows] で選ぶ。
-    & .\config.cmd --unattended --url "https://github.com/$Repo" --token $Token --name $RunnerName --work "_work" --replace
+    & .\config.cmd --unattended --url "https://github.com/$Repo" --token $Token --name $RunnerName --work $WorkDir --replace
     if ($LASTEXITCODE -ne 0) {
         Write-Host "登録に失敗しました（終了コード $LASTEXITCODE）。トークンの期限（1時間）が切れていないか確認してください。" -ForegroundColor Red
         exit 1
