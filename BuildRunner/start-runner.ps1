@@ -14,7 +14,8 @@ param(
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $RunnerDir = $PSScriptRoot
 $ProjectRoot = Split-Path -Parent $RunnerDir
-$WorkProjectDir = Join-Path $RunnerDir "_work\SymphonyKillChord\SymphonyKillChord"
+$WorkspaceSubPath = "SymphonyKillChord\SymphonyKillChord"
+$MaxWorkspacePathLength = 70
 $RecommendedFreeSpaceGB = 80
 $CriticalFreeSpaceGB = 40
 
@@ -38,6 +39,23 @@ if (Get-Process -Name "Runner.Listener" -ErrorAction SilentlyContinue) {
     $Errors.Add("ランナーはすでに起動しています（ほかのウィンドウを確認してください）。")
 } else {
     Write-Ok "ほかにランナーは起動していない"
+}
+
+# --- 作業フォルダのパスの長さ -------------------------------------------------------
+# Unity は 260 文字を超えるパスを扱えず、Library\PackageCache の深いファイルでビルドが失敗する。
+$WorkFolder = Join-Path $RunnerDir "_work"
+$RunnerConfigFile = Join-Path $RunnerDir ".runner"
+if (Test-Path -LiteralPath $RunnerConfigFile) {
+    $ConfiguredWorkFolder = (Get-Content -LiteralPath $RunnerConfigFile -Raw -Encoding UTF8 | ConvertFrom-Json).workFolder
+    if ($ConfiguredWorkFolder) {
+        $WorkFolder = if ([System.IO.Path]::IsPathRooted($ConfiguredWorkFolder)) { $ConfiguredWorkFolder } else { Join-Path $RunnerDir $ConfiguredWorkFolder }
+    }
+}
+$WorkProjectDir = Join-Path $WorkFolder $WorkspaceSubPath
+if ($WorkProjectDir.Length -gt $MaxWorkspacePathLength) {
+    $Warnings.Add("ビルド先のパスが $($WorkProjectDir.Length) 文字と長く、Unity がパスの長さの上限（260文字）で失敗する可能性があります: $WorkProjectDir。README の「作業フォルダを短い場所に移す」を参照してください。")
+} else {
+    Write-Ok "作業フォルダ $WorkFolder"
 }
 
 # --- 空き容量 -----------------------------------------------------------------
@@ -127,6 +145,7 @@ if ($LastLog -and (Select-String -LiteralPath $LastLog.FullName -Pattern "Runner
 Write-Host ""
 if ($Errors.Count -gt 0) {
     foreach ($Message in $Errors) { Write-Host "[エラー] $Message" -ForegroundColor Red }
+    foreach ($Message in $Warnings) { Write-Host "[警告] $Message" -ForegroundColor Yellow }
     Write-Host "ランナーを起動できません。" -ForegroundColor Red
     exit 1
 }
