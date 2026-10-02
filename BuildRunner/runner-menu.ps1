@@ -52,9 +52,9 @@ function Start-Runner {
         Write-Host "ランナーはすでに起動しています。"
         return
     }
-    # 別ウィンドウで起動する。そのウィンドウで Ctrl+C を押したり閉じたりするとランナーが止まる。
-    Start-Process -FilePath (Join-Path $RunnerDir "run.cmd") -WorkingDirectory $RunnerDir
-    Write-Host "ランナーを別ウィンドウで起動しました。そのウィンドウでは Ctrl+C を押さず、閉じないでください。"
+    # 起動前チェック付きの start-runner.bat を別ウィンドウで開く。そのウィンドウがランナーになる。
+    Start-Process -FilePath (Join-Path $RunnerDir "start-runner.bat") -WorkingDirectory $RunnerDir
+    Write-Host "別ウィンドウで起動前チェックを行い、ランナーを起動します。そのウィンドウでは Ctrl+C を押さず、閉じないでください。"
 }
 
 function Invoke-Setup {
@@ -120,7 +120,7 @@ while ($true) {
     Write-Host ""
     Write-Host "===== SymphonyKillChord ランナー管理（ランナー: $(Get-RunnerState)） ====="
     Write-Host " 1. 状態を見る（ランナー・CPU切り替え・最近のビルド）"
-    Write-Host " 2. ランナーを起動する（別ウィンドウ）"
+    Write-Host " 2. ランナーを起動する（起動前チェック付き、別ウィンドウ）"
     Write-Host " 3. CPU 25%     4. CPU 50%     5. CPU 75%     6. CPU 100%"
     Write-Host " 7. CPU の切り替えを解除する"
     Write-Host " 8. 実行中のビルドを見守る（Ctrl+C で見守りだけ終了）"
