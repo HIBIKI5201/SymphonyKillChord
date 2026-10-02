@@ -311,8 +311,8 @@ Write-Host "[OK] 登録しました。"
 # 5. 起動
 # ---------------------------------------------------------------------------
 Write-Step "5/5 起動"
-Write-Host "普段の操作は BuildRunner\runner-menu.bat（管理メニュー）から行えます。"
+Write-Host "次回からは BuildRunner\start-runner.bat で起動し、操作は BuildRunner\runner-menu.bat（管理メニュー）から行えます。"
 if (Confirm-Yes "今すぐランナーを起動しますか？（別ウィンドウで開く）") {
-    Start-Process -FilePath (Join-Path $RunnerDir "run.cmd") -WorkingDirectory $RunnerDir
-    Write-Host "起動しました。そのウィンドウでは Ctrl+C を押さず、閉じないでください（ランナーが止まり、実行中のビルドがキャンセルされる）。"
+    Start-Process -FilePath (Join-Path $RunnerDir "start-runner.bat") -WorkingDirectory $RunnerDir
+    Write-Host "別ウィンドウで起動前チェックを行い、ランナーを起動します。そのウィンドウでは Ctrl+C を押さず、閉じないでください（ランナーが止まり、実行中のビルドがキャンセルされる）。"
 }
