@@ -2,3 +2,8 @@ root = true
 
 [*.{cs,md,json,yml}]
 charset = utf-8
+
+# Roslynアナライザ(RoslynAnalyzers/SkcAnalyzers)の深刻度。既存コードの違反を解消するまではwarningとする。
+[*.cs]
+dotnet_diagnostic.SKC0001.severity = warning
+dotnet_diagnostic.SKC0002.severity = warning
