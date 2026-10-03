@@ -41,7 +41,7 @@ if (Get-Process -Name "Runner.Listener" -ErrorAction SilentlyContinue) {
 }
 
 # --- 作業フォルダ -------------------------------------------------------------
-# ビルド先のパスが長くても、ワークフローが短い別名（<ドライブ>:\SKCBuild\<ランナー名>）から Unity を起動する。
+# ビルド先のパスが長くても、ワークフローが短い別名（<ドライブ>:\SKCBuilder\<ランナー名>）から Unity を起動する。
 $WorkFolder = Join-Path $RunnerDir "_work"
 $RunnerConfigFile = Join-Path $RunnerDir ".runner"
 if (Test-Path -LiteralPath $RunnerConfigFile) {
