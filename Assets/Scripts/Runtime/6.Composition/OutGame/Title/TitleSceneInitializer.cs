@@ -70,6 +70,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。")]
         private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
 
+        [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
+        private TextAsset _memberCsv;
+
         [SerializeField, Tooltip("開始案内の決定ボタンを入力機器ごとに切り替えるための入力アイコンの Sprite Asset です。未設定なら UXML の画像のままです。")]
         private TMP_SpriteAsset _inputGlyphSpriteAsset;
 
@@ -83,7 +86,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private StageTreeAsset _loadedStageTreeAsset;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
-        private IMemberRepository _loadedMemberRepository;
         private AudioSettingsModuleContainer _audioSettingsContainer;
         private EnvironmentSettingsModuleContainer _environmentSettingsContainer;
         private VolumeSettingsTabView _volumeSettingsTabView;
@@ -114,7 +116,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedSaveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
-            _loadedMemberRepository = await LoadMemberRepositoryAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (!await ApplyInitialSkillLoadoutAsync())
             {
@@ -475,43 +476,22 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///     StreamingAssets のクレジット JSON を読み込みます。
-        /// </summary>
-        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
-        /// <returns> 読み込んだリポジトリです。読み込めなかった場合は null です。 </returns>
-        private async ValueTask<IMemberRepository> LoadMemberRepositoryAsync(CancellationToken cancellationToken)
-        {
-            // クレジットが読めなくてもタイトル画面は使えるようにするため、失敗は警告にとどめる。
-            try
-            {
-                return await MemberJsonRepository.LoadAsync(cancellationToken);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                Debug.LogWarning(
-                    $"[{nameof(TitleSceneInitializer)}] クレジット JSON を読み込めなかったため、クレジット画面のメンバー一覧は空になります。{exception.Message}",
-                    this);
-                return null;
-            }
-        }
-
-        /// <summary>
-        ///     読み込み済みの制作メンバー情報を、クレジット画面へ一覧として反映します。
+        ///     制作メンバー CSV を読み込み、クレジット画面へ一覧を反映します。
         /// </summary>
         /// <param name="creditScreenView"> 一覧の反映先となるクレジット画面 View です。 </param>
         private void BuildMemberList(CreditScreenView creditScreenView)
         {
-            if (_loadedMemberRepository == null)
+            if (_memberCsv == null)
             {
+                Debug.LogWarning(
+                    $"[{nameof(TitleSceneInitializer)}] 制作メンバー CSV が設定されていないため、クレジット画面のメンバー一覧は空になります。",
+                    this);
                 return;
             }
 
+            IMemberRepository memberRepository = new MemberCsvRepository(_memberCsv.text);
             IMemberListPresenter memberListPresenter = new MemberListPresenter(creditScreenView);
-            ShowMemberListUseCase showMemberListUseCase = new(_loadedMemberRepository, memberListPresenter);
+            ShowMemberListUseCase showMemberListUseCase = new(memberRepository, memberListPresenter);
             showMemberListUseCase.Execute();
         }
 
