@@ -445,14 +445,13 @@ jobs:
 
       # Unity は 260 文字を超えるパスを扱えず、作業フォルダが深いと Library\PackageCache の深いファイルで
       # ビルドが失敗する（BuildRunner/README.md「作業フォルダを短い場所に移す」）。Unity に渡すプロジェクトの
-      # パス（UNITY_PROJECT_PATH）をここで決め、時間のかかるビルドを始める前に問題を検出する。
+      # パス（UNITY_PROJECT_PATH）をここで決める。ランナーの作業フォルダは <作業フォルダ>\<リポジトリ名>\<リポジトリ名>
+      # という固定の形で深くなりやすいため、長い場合は短い別名から Unity を起動する。
       # - 70 文字以内ならそのまま使う。
-      # - 長い場合、リポジトリ変数 PROJECT_JUNCTION_RUNNERS に名前があるランナーでは、短い別名
-      #   （<ドライブ>:\SKCBuild\<ランナー名> のジャンクション）を作って使う（試験運用）。
-      # - それ以外は、直し方を表示して止める。
+      # - 長い場合は <ドライブ>:\SKCBuild\<ランナー名> にジャンクションを作って使う。Unity は別名のまま
+      #   プロジェクトを開くので、パスの長さの上限を避けられる（2026-10 に Windows ビルドで確認）。
+      # - ジャンクションを作れなかったときは、直し方を表示して止める。
       - name: Unityプロジェクトのパス長の確認
-        env:
-          PROJECT_JUNCTION_RUNNERS: ${{ vars.PROJECT_JUNCTION_RUNNERS }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -472,28 +471,25 @@ jobs:
             exit 0
           }
 
-          $JunctionRunners = @("$env:PROJECT_JUNCTION_RUNNERS" -split '[,\s]+' | Where-Object { $_ })
-          if ($env:RUNNER_NAME -in $JunctionRunners) {
-            $JunctionRoot = Join-Path ([System.IO.Path]::GetPathRoot($Workspace)) "SKCBuild"
-            $Junction = Join-Path $JunctionRoot $env:RUNNER_NAME
-            New-Item -ItemType Directory -Path $JunctionRoot -Force | Out-Null
+          $JunctionRoot = Join-Path ([System.IO.Path]::GetPathRoot($Workspace)) "SKCBuild"
+          $Junction = Join-Path $JunctionRoot $env:RUNNER_NAME
+          try {
+            New-Item -ItemType Directory -Path $JunctionRoot -Force -ErrorAction Stop | Out-Null
             if (Test-Path -LiteralPath $Junction) {
               $Existing = Get-Item -LiteralPath $Junction -Force
               if (-not ($Existing.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
-                Write-Host "::error::$Junction はジャンクションではない通常のフォルダです。中身を確認して移動または削除してください。"
-                exit 1
+                throw "$Junction はジャンクションではない通常のフォルダです。中身を確認して移動または削除してください。"
               }
               # 前回のジャンクションは、リンク先の中身を消さないよう rmdir でリンクだけ外す
               cmd /c rmdir "$Junction"
             }
-            New-Item -ItemType Junction -Path $Junction -Target $Workspace | Out-Null
-            "UNITY_PROJECT_PATH=$Junction" | Add-Content -Path $env:GITHUB_ENV
-            Write-Host "::warning::プロジェクトのパスが長いため、短い別名 $Junction（ジャンクション）から Unity を起動します（試験運用）。"
-            exit 0
+            New-Item -ItemType Junction -Path $Junction -Target $Workspace -ErrorAction Stop | Out-Null
+          } catch {
+            Write-Host "::error::プロジェクトのパスが $($Workspace.Length) 文字で長いため短い別名（$Junction）を作ろうとしましたが、失敗しました: $_。このままでは Unity がパスの長さの上限（260文字）でビルドに失敗します。ランナー $env:RUNNER_NAME の作業フォルダを短い場所に移してください（BuildRunner/README.md の「作業フォルダを短い場所に移す」）。"
+            exit 1
           }
-
-          Write-Host "::error::プロジェクトのパスが $($Workspace.Length) 文字で長すぎます（上限 $MaxProjectPathLength 文字）。このままでは Unity がパスの長さの上限（260文字）でビルドに失敗します。ランナー $env:RUNNER_NAME の作業フォルダを短い場所（例: C:\SKCWork）に移してください。手順は BuildRunner/README.md の「作業フォルダを短い場所に移す」にあります。"
-          exit 1
+          "UNITY_PROJECT_PATH=$Junction" | Add-Content -Path $env:GITHUB_ENV
+          Write-Host "[INFO]: パスが長いため、短い別名 $Junction（ジャンクション）から Unity を起動します。"
 
 # ==================================================================================================
 
