@@ -15,7 +15,6 @@ param(
 $RunnerDir = $PSScriptRoot
 $ProjectRoot = Split-Path -Parent $RunnerDir
 $WorkspaceSubPath = "SymphonyKillChord\SymphonyKillChord"
-$MaxWorkspacePathLength = 70
 $RecommendedFreeSpaceGB = 80
 $CriticalFreeSpaceGB = 40
 
@@ -41,8 +40,8 @@ if (Get-Process -Name "Runner.Listener" -ErrorAction SilentlyContinue) {
     Write-Ok "ほかにランナーは起動していない"
 }
 
-# --- 作業フォルダのパスの長さ -------------------------------------------------------
-# Unity は 260 文字を超えるパスを扱えず、Library\PackageCache の深いファイルでビルドが失敗する。
+# --- 作業フォルダ -------------------------------------------------------------
+# ビルド先のパスが長くても、ワークフローが短い別名（<ドライブ>:\SKCBuild\<ランナー名>）から Unity を起動する。
 $WorkFolder = Join-Path $RunnerDir "_work"
 $RunnerConfigFile = Join-Path $RunnerDir ".runner"
 if (Test-Path -LiteralPath $RunnerConfigFile) {
@@ -52,11 +51,7 @@ if (Test-Path -LiteralPath $RunnerConfigFile) {
     }
 }
 $WorkProjectDir = Join-Path $WorkFolder $WorkspaceSubPath
-if ($WorkProjectDir.Length -gt $MaxWorkspacePathLength) {
-    $Warnings.Add("ビルド先のパスが $($WorkProjectDir.Length) 文字と長く、Unity がパスの長さの上限（260文字）で失敗する可能性があります: $WorkProjectDir。README の「作業フォルダを短い場所に移す」を参照してください。")
-} else {
-    Write-Ok "作業フォルダ $WorkFolder"
-}
+Write-Ok "作業フォルダ $WorkFolder"
 
 # --- 空き容量 -----------------------------------------------------------------
 $Drive = (Get-Item -LiteralPath $RunnerDir).PSDrive
