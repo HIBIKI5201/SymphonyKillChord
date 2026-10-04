@@ -6,12 +6,13 @@
 
 ```
 dotnet build RoslynAnalyzers/SkcAnalyzers -c Release   # DLLを Assets/Editor/Roslyn/ へ自動コピー
-dotnet test  RoslynAnalyzers/SkcAnalyzers.Tests
+dotnet test  RoslynAnalyzers/SkcAnalyzers.Tests          # Debugで実行する。Releaseだとビルドが Assets のDLLを上書きし、DLLの検証が成り立たない
 ```
 
 - DLLと`.meta`はコミットする。`.meta` には `RoslynAnalyzer` ラベルを付け、全プラットフォームを無効にしている(プレイヤービルドに含めないため)。
 - コピーは Release ビルドのときだけ行う(Debug の DLL が Assets に入らないようにするため)。
-- アナライザのソースを変えたら、Release ビルドしてDLLもコミットする。CI(`RoslynAnalyzers.yml`)がテストを実行し、DLLが古いと警告する。
+- アナライザのソースを変えたら、Release ビルドしてDLLもコミットする。CI(`RoslynAnalyzers.yml`)がテストを実行し、コミット済みDLLがソースと同じアナライザ・診断IDを持つか(`CommittedDllTests`)を検証する。
+  DLLのバイト列はコンパイラのバージョン差で変わるため、バイト比較はしない。そのためメソッド本体だけの変更は検出できない。ルールを変えたら必ず再ビルドしてコミットする。
 
 ## ルール
 
