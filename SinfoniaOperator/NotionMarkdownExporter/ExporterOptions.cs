@@ -187,7 +187,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
             Console.WriteLine();
             Console.WriteLine("オプション:");
             Console.WriteLine("  --root <URL|ID>     エクスポートするルートページ。");
-            Console.WriteLine("  --output <PATH>     出力先。既定値はプロジェクトのDocs\\NotionSpecifications。");
+            Console.WriteLine("  --output <PATH>     出力先。既定値はプロジェクトのDocs/NotionSpecifications。");
             Console.WriteLine("  --config <PATH>     明示的に読み込むJSON設定ファイル。");
             Console.WriteLine("  --no-assets         画像や添付ファイルをダウンロードしない。");
             Console.WriteLine("  --help              このヘルプを表示する。");
@@ -303,7 +303,9 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 DirectoryInfo? current = new(Path.GetFullPath(startDirectory));
                 while (current != null)
                 {
-                    if (Directory.Exists(Path.Combine(current.FullName, ".git"))) { return current.FullName; }
+                    // git worktree では .git がファイルになるため、ファイルも対象にする。
+                    string gitPath = Path.Combine(current.FullName, ".git");
+                    if (Directory.Exists(gitPath) || File.Exists(gitPath)) { return current.FullName; }
                     current = current.Parent;
                 }
             }

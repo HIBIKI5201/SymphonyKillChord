@@ -1,6 +1,6 @@
 # Notion Markdown Writer
 
-Notionの仕様書ページへMarkdownで書き込むWindows向けツールです。
+Notionの仕様書ページへMarkdownで書き込むツールです。
 `NotionMarkdownExporter`が読み取り専用なのに対して、こちらは作成と部分更新を担当します。
 
 Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSONを組み立てる必要はありません。
@@ -59,6 +59,16 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 ```
 
 本文の最初の行は`# ページ名`にしてください。この見出しがページタイトルになり、本文からは取り除かれます。
+
+### macOS / Linuxで実行する
+
+配布用の`NotionMarkdownWriter.exe`はWindows専用です。それ以外のOSでは、.NET 10 SDKを入れたうえで
+`run-tool.sh`から実行します。ソースから`dotnet run`でビルドして起動し、引数はexeと同じです。
+Windowsで実行した場合は、Git Bashなどからでもexeをそのまま起動します。
+
+```bash
+./SinfoniaOperator/run-tool.sh NotionMarkdownWriter pull "<Markdownパス|URL|ID>"
+```
 
 ## 作業ファイル
 

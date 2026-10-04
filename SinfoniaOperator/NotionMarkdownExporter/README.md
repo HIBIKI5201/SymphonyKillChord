@@ -42,6 +42,16 @@ Notionのルートページ以下をEnhanced Markdown APIで再帰取得するWi
 ./NotionMarkdownExporter.exe --root "PAGE_ID" --no-assets
 ```
 
+### macOS / Linuxで実行する
+
+配布用の`NotionMarkdownExporter.exe`はWindows専用です。それ以外のOSでは、.NET 10 SDKを入れたうえで
+`run-tool.sh`から実行します。ソースから`dotnet run`でビルドして起動し、引数はexeと同じです。
+Windowsで実行した場合は、Git Bashなどからでもexeをそのまま起動します。
+
+```bash
+./SinfoniaOperator/run-tool.sh NotionMarkdownExporter --output "Docs/NotionSpecifications"
+```
+
 ## メモリ使用量
 
 取得したページ本文は、ページ単位でOSの一時ディレクトリへ直ちに退避します。
