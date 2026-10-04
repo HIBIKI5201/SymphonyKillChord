@@ -1,7 +1,8 @@
 name: "[Check] Roslyn Analyzers"
 
 # RoslynAnalyzers/ または コミット済みのアナライザDLLが変わるPRで、
-# アナライザのユニットテストと、DLLがソースと一致していることを確認する。
+# アナライザのユニットテストを実行する。テストには、コミット済みDLLがソースと同じアナライザ集合を持つかの検証を含む
+# (DLLのバイト列はコンパイラのバージョン差で変わるため、バイト比較はしない)。
 on:
   pull_request:
     paths:
@@ -26,27 +27,5 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: ユニットテスト
-        run: dotnet test RoslynAnalyzers/SkcAnalyzers.Tests --configuration Release
-
-  dll-freshness:
-    # コンパイラのバージョン差でDLLのバイト列が変わりうるため、参考情報として扱い、失敗してもPRはブロックしない。
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - name: ソースを取得
-        uses: actions/checkout@v4
-
-      - name: .NETをセットアップ
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Releaseビルド(DLLを Assets/Editor/Roslyn へ配置)
-        run: dotnet build RoslynAnalyzers/SkcAnalyzers --configuration Release
-
-      - name: コミット済みDLLがソースと一致するか確認
-        run: |
-          if ! git diff --exit-code -- Assets/Editor/Roslyn/SkcAnalyzers.dll; then
-            echo "::warning::Assets/Editor/Roslyn/SkcAnalyzers.dll がソースと一致しません。dotnet build RoslynAnalyzers/SkcAnalyzers -c Release を実行してDLLをコミットしてください。"
-            exit 1
-          fi
+        # Debugで実行する(Releaseだとビルドがコミット済みDLLを上書きし、DLLの検証が成り立たない)。
+        run: dotnet test RoslynAnalyzers/SkcAnalyzers.Tests --configuration Debug
