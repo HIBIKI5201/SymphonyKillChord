@@ -11,6 +11,10 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- リリース追跡ファイルは運用しない。 -->
     <NoWarn>$(NoWarn);RS2008</NoWarn>
+    <!-- DLLにビルド環境の絶対パスを埋め込まず、どの環境でも同じバイト列になりやすくする。 -->
+    <DebugType>none</DebugType>
+    <Deterministic>true</Deterministic>
+    <PathMap>$(MSBuildProjectDirectory)=/src</PathMap>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,8 +28,8 @@
     <UnityAnalyzerDir>$(MSBuildThisFileDirectory)..\..\Assets\Editor\Roslyn\</UnityAnalyzerDir>
   </PropertyGroup>
 
-  <!-- ビルド後、アナライザ本体のDLLだけをUnityのAssetsへ配置する。Microsoft.CodeAnalysis.*は配置しない。 -->
-  <Target Name="CopyToUnity" AfterTargets="Build">
+  <!-- Releaseビルド後、アナライザ本体のDLLだけをUnityのAssetsへ配置する。Microsoft.CodeAnalysis.*は配置しない。 -->
+  <Target Name="CopyToUnity" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
     <MakeDir Directories="$(UnityAnalyzerDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(UnityAnalyzerDir)" SkipUnchangedFiles="true" />
   </Target>
