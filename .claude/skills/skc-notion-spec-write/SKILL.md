@@ -6,7 +6,9 @@ description: "Write to the Notion game specification from Claude — create a ne
 # Notion 仕様書への書き込み
 
 このリポジトリはNotionの仕様書を`Docs/NotionSpecifications/`へミラーしているが、そちらは**読み取り専用のコピー**。
-Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を使う。ツールの詳細は
+Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を使う。
+macOS / Linuxではexeが動かないため、以下の`./SinfoniaOperator/NotionMarkdownWriter.exe`を
+`./SinfoniaOperator/run-tool.sh NotionMarkdownWriter`に読み替える（.NET 10 SDKで`dotnet run`する。引数は同じ）。ツールの詳細は
 [SinfoniaOperator/NotionMarkdownWriter/README.md](../../../SinfoniaOperator/NotionMarkdownWriter/README.md)。
 
 `skc-notion-spec-diff-check`（差分の発見）の続きとして使うことが多い。差分レポートの指摘を仕様書側へ反映するのがこのスキル。

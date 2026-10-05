@@ -36,7 +36,7 @@ namespace KillChord.Editor.ProjectSetup
         private void OnGUI()
         {
             EditorGUILayout.HelpBox(
-                "このプロジェクトのセットアップが済んでいません。Setup.bat を実行してから、Unity を開き直してください。",
+                $"このプロジェクトのセットアップが済んでいません。{ProjectSetupChecker.SetupEntryFileName} を実行してから、Unity を開き直してください。",
                 MessageType.Warning);
 
             _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition);
@@ -67,24 +67,52 @@ namespace KillChord.Editor.ProjectSetup
         }
 
         /// <summary>
-        ///     Setup.bat を別のコンソールで起動する。
+        ///     セットアップの入口（Setup.bat / Setup.command）を別のコンソールで起動する。
         /// </summary>
         private void RunSetup()
         {
-            string batchPath = ProjectSetupChecker.SetupBatchPath;
-            if (!File.Exists(batchPath))
+            string entryPath = ProjectSetupChecker.SetupEntryPath;
+            if (!File.Exists(entryPath))
             {
-                Debug.LogError($"[{nameof(ProjectSetupWindow)}] {batchPath} が見つかりません。");
+                Debug.LogError($"[{nameof(ProjectSetupWindow)}] {entryPath} が見つかりません。");
                 return;
             }
 
-            // 結果を読めるよう、Setup.bat の最後で止まる別ウィンドウで開く。
-            ProcessStartInfo startInfo = new(batchPath)
+            ProcessStartInfo startInfo = CreateSetupStartInfo(entryPath);
+            if (startInfo == null)
             {
-                WorkingDirectory = ProjectSetupChecker.RepositoryRoot,
-                UseShellExecute = true
-            };
+                Debug.LogWarning($"[{nameof(ProjectSetupWindow)}] この OS ではターミナルを自動で開けません。ターミナルから {entryPath} を実行してください。");
+                return;
+            }
+
             Process.Start(startInfo);
+        }
+
+        /// <summary>
+        ///     結果を読めるよう、入口の最後で止まる別ウィンドウで開くための起動情報を作る。
+        /// </summary>
+        /// <param name="entryPath">セットアップの入口のパス。</param>
+        /// <returns>起動情報。開くターミナルが決まらない OS（Linux）では null。</returns>
+        private static ProcessStartInfo CreateSetupStartInfo(string entryPath)
+        {
+            switch (Application.platform)
+            {
+                case RuntimePlatform.WindowsEditor:
+                    return new ProcessStartInfo(entryPath)
+                    {
+                        WorkingDirectory = ProjectSetupChecker.RepositoryRoot,
+                        UseShellExecute = true
+                    };
+                case RuntimePlatform.OSXEditor:
+                    // .command はターミナル.app で開くと、そのウィンドウで実行される。
+                    return new ProcessStartInfo("open", $"-a Terminal \"{entryPath}\"")
+                    {
+                        WorkingDirectory = ProjectSetupChecker.RepositoryRoot,
+                        UseShellExecute = false
+                    };
+                default:
+                    return null;
+            }
         }
 
         /// <summary>

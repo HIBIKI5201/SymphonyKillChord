@@ -34,6 +34,16 @@
 ./DiscordLogExporter.exe --config ./sinfonia-operator.env.json
 ```
 
+### macOS / Linuxで実行する
+
+配布用の`DiscordLogExporter.exe`はWindows専用です。それ以外のOSでは、.NET 10 SDKを入れたうえで
+`run-tool.sh`から実行します。ソースから`dotnet run`でビルドして起動し、引数はexeと同じです。
+Windowsで実行した場合は、Git Bashなどからでもexeをそのまま起動します。
+
+```bash
+./SinfoniaOperator/run-tool.sh DiscordLogExporter
+```
+
 ## 出力形式
 
 - 通常チャンネル: `<チャンネル名>_<チャンネルID>.txt`

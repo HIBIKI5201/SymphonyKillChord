@@ -35,7 +35,8 @@ Before running it:
    updating the real one (this exact mistake is documented in the precedent report §0.2).
    ```bash
    # from repo root:
-   ./SinfoniaOperator/NotionMarkdownExporter/bin/Release/net10.0/win-x64/publish/NotionMarkdownExporter.exe
+   ./SinfoniaOperator/NotionMarkdownExporter.exe              # Windows
+   ./SinfoniaOperator/run-tool.sh NotionMarkdownExporter      # macOS / Linux (dotnet run)
    ```
    Or pass `--output "Docs/NotionSpecifications"` explicitly to be safe regardless of CWD.
 4. Requires `NOTION_TOKEN` to be configured (gitignored `SinfoniaOperator/sinfonia-operator.secrets.json`,
