@@ -135,7 +135,7 @@ namespace SinfoniaStudio.DiscordLogExporter
             Console.WriteLine($"  {OperatorConfigKeys.DISCORD_BOT_TOKEN}       必須。秘密設定または環境変数に置くBotトークン。");
             Console.WriteLine($"  {OperatorConfigKeys.DISCORD_LOG_CHANNEL_IDS}  必須。取得対象のチャンネルID配列。");
             Console.WriteLine();
-            Console.WriteLine("出力先はプロジェクトのDocs\\DiscordLogに固定されています。");
+            Console.WriteLine("出力先はプロジェクトのDocs/DiscordLogに固定されています。");
         }
 
         /// <summary>
@@ -224,7 +224,9 @@ namespace SinfoniaStudio.DiscordLogExporter
                 DirectoryInfo? current = new(Path.GetFullPath(startDirectory));
                 while (current != null)
                 {
-                    if (Directory.Exists(Path.Combine(current.FullName, ".git"))) { return current.FullName; }
+                    // git worktree では .git がファイルになるため、ファイルも対象にする。
+                    string gitPath = Path.Combine(current.FullName, ".git");
+                    if (Directory.Exists(gitPath) || File.Exists(gitPath)) { return current.FullName; }
                     current = current.Parent;
                 }
             }
