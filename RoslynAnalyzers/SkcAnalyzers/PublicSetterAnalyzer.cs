@@ -32,6 +32,12 @@ namespace SymphonyKillChord.Analyzers
         {
             var property = (IPropertySymbol)context.Symbol;
 
+            if (!SkcSyntax.IsTarget(property))
+            {
+                return;
+            }
+
+
             if (property.DeclaredAccessibility != Accessibility.Public ||
                 property.SetMethod == null ||
                 property.SetMethod.DeclaredAccessibility != Accessibility.Public ||

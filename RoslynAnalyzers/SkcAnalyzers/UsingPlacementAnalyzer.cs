@@ -31,6 +31,11 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> 名前空間の内側にある、または型宣言より後ろにあるusingを報告する。 </summary>
         private static void AnalyzeUsing(SyntaxNodeAnalysisContext context)
         {
+            if (!SkcSyntax.IsTarget(context.Node.SyntaxTree))
+            {
+                return;
+            }
+
             var directive = (UsingDirectiveSyntax)context.Node;
 
             if (directive.Parent is CompilationUnitSyntax unit)

@@ -256,5 +256,53 @@ public class A
 }";
             Assert.Equal(new[] { "SKC0022", "SKC0022" }, AnalyzerTestHelper.Run<MemberOrderAnalyzer>(bad));
         }
+
+        [Theory]
+        [InlineData("Assets/AssetStoreTools/CRIMW/CriWare/CriAtomExOutputAnalyzer.cs", 0)]
+        [InlineData("Assets\\AssetStoreTools\\CRIMW\\Foo.cs", 0)]
+        [InlineData("/repo/Assets/Plugins/Foo.cs", 0)]
+        [InlineData("Assets/DevelopProducts/Research/Foo.cs", 0)]
+        [InlineData("Assets/Scripts/SymphonyFrameWork/Foo.cs", 0)]
+        [InlineData("Assets/Scripts/Runtime/1.Domain/InGame/Foo.cs", 1)]
+        [InlineData("Assets/Scripts/Develop/Foo.cs", 1)]
+        [InlineData("Assets/Editor/Scripts/Foo.cs", 1)]
+        [InlineData("/repo/Assets/Scripts/Runtime/Foo.cs", 1)]
+        [InlineData("Test.cs", 1)]
+        public void 検査対象のパスだけを検査する(string path, int expected)
+        {
+            // 外部ライブラリ由来のようなPascalCaseでないメソッド名。
+            const string source = "public class Foo { public void bad_name() { } }";
+            var ids = AnalyzerTestHelper.Run<NamingConventionAnalyzer>(source, path);
+            Assert.Equal(expected, ids.Count(i => i == "SKC0012"));
+        }
+
+        [Fact]
+        public void Unityの相対パスでも名前空間とフォルダの一致を検査する()
+        {
+            const string source = "namespace KillChord.Runtime.Domain.InGame { public class A { } }";
+            Assert.Equal(
+                new[] { "SKC0005" },
+                AnalyzerTestHelper.Run<NamespaceFolderAnalyzer>(source, "Assets/Scripts/Runtime/1.Domain/InGame/Skill/A.cs"));
+            Assert.Empty(
+                AnalyzerTestHelper.Run<NamespaceFolderAnalyzer>(source, "Assets/Scripts/Runtime/1.Domain/InGame/A.cs"));
+        }
+
+        [Fact]
+        public void 件数の多いルールは既定でInfo()
+        {
+            var infoIds = new[] { "SKC0005", "SKC0013", "SKC0014", "SKC0018", "SKC0020", "SKC0022" };
+            var descriptors = typeof(PublicSetterAnalyzer).Assembly.GetTypes()
+                .Where(t => typeof(Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer).IsAssignableFrom(t) && !t.IsAbstract)
+                .SelectMany(t => ((Microsoft.CodeAnalysis.Diagnostics.DiagnosticAnalyzer)System.Activator.CreateInstance(t)!)
+                    .SupportedDiagnostics)
+                .ToDictionary(d => d.Id);
+
+            foreach (var id in infoIds)
+            {
+                Assert.Equal(Microsoft.CodeAnalysis.DiagnosticSeverity.Info, descriptors[id].DefaultSeverity);
+            }
+
+            Assert.Equal(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning, descriptors["SKC0012"].DefaultSeverity);
+        }
     }
 }

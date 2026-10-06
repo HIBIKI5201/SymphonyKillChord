@@ -35,6 +35,12 @@ namespace SymphonyKillChord.Analyzers
         private static void AnalyzeType(SymbolAnalysisContext context)
         {
             var type = (INamedTypeSymbol)context.Symbol;
+
+            if (!SkcSyntax.IsTarget(type))
+            {
+                return;
+            }
+
             var ns = type.ContainingNamespace?.ToDisplayString() ?? string.Empty;
 
             if (!SkcSyntax.TryParseRuntimeNamespace(ns, out var layer, out _) ||

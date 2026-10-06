@@ -38,7 +38,8 @@ namespace SymphonyKillChord.Analyzers
         private static readonly DiagnosticDescriptor ModuleRule = SkcDescriptors.Create(
             SkcDiagnosticIds.CrossModuleDependency,
             "他モジュールへの依存はAdaptor層のみ",
-            "{0} 層の {1} モジュールが {2} モジュール '{3}' に直接依存しています。Adaptor層を介してください");
+            "{0} 層の {1} モジュールが {2} モジュール '{3}' に直接依存しています。Adaptor層を介してください",
+            DiagnosticSeverity.Info);
 
         /// <inheritdoc />
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
@@ -56,6 +57,12 @@ namespace SymphonyKillChord.Analyzers
         private static void AnalyzeUsing(SyntaxNodeAnalysisContext context)
         {
             var directive = (UsingDirectiveSyntax)context.Node;
+
+            if (!SkcSyntax.IsTarget(directive.SyntaxTree))
+            {
+                return;
+            }
+
             if (directive.Name == null)
             {
                 return;
