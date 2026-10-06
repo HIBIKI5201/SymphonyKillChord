@@ -11,6 +11,8 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
   `NOTION_WRITE_ALLOWED_ROOTS`に列挙したページID自身か、その子孫以外は、送信前に拒否します。
 - **更新は部分置換（`update_content`）だけ**です。全文置換（`replace_content`）と
   子ページ削除（`allow_deleting_content`）は実装していません。
+- ページを消すときは`archive`でゴミ箱へ移します。完全削除はできず、Notion上で復元できます。
+  書き込み許可ルート自身は対象外で、子ページがあるページは`--with-children`を付けないと止まります。
 - `--confirm`を付けるまで**何も送信しません**。既定は差分表示のみです。
 - pull以降にNotion側が更新されていた場合、`last_edited_time`の比較で中断します。
 - APIが本文を分割して返す巨大ページは、原文が欠けた状態で差分を作らないよう編集を拒否します。
@@ -59,6 +61,20 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 ```
 
 本文の最初の行は`# ページ名`にしてください。この見出しがページタイトルになり、本文からは取り除かれます。
+
+データベースへ行を追加するときは、`--set`でタイトルを含むプロパティを指定します。
+`select`・`status`・`multi_select`などは、選択肢の名前を完全一致で書きます。
+本文の先頭の見出しが`--set`のタイトルと同じ場合は、本文から取り除かれます。違う見出しは本文として残ります。
+
+```powershell
+./NotionMarkdownWriter.exe create row.md --parent "<データベースのURL|ID>" --set "名前=ページ名" --set "ステータス=検討中" --confirm
+```
+
+ページをゴミ箱へ移す（確認だけなら`--confirm`を付けない）:
+
+```powershell
+./NotionMarkdownWriter.exe archive "<Markdownパス|URL|ID>" --confirm
+```
 
 ### macOS / Linuxで実行する
 
