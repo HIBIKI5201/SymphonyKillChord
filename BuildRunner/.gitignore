@@ -7,5 +7,7 @@
 !/README.md
 !/setup-runner.ps1
 !/runner-menu.bat
+!/start-runner.bat
+!/start-runner.ps1
 !/runner-menu.ps1
 !/SetBuildCpuMode.ps1
