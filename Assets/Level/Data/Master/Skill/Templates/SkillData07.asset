@@ -63,6 +63,6 @@ MonoBehaviour:
   _cooldownDenomimator: 1
   _skillEffectType: 7
   _skillTargetingType: 3
-  _statusEffectReapplyPolicy: 4
+  _statusEffectReapplyPolicy: 3
   _skillNormalAttackDamagePolicy: 1
   _animationKey: 
