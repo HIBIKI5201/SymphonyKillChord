@@ -31,7 +31,8 @@ namespace SymphonyKillChord.Analyzers
         private static readonly DiagnosticDescriptor Rule = SkcDescriptors.Create(
             SkcDiagnosticIds.MemberOrder,
             "メンバーはCodeGuidelines.mdの順序で並べる",
-            "'{0}'({1}) は直前の '{2}'({3}) より前に置いてください");
+            "'{0}'({1}) は直前の '{2}'({3}) より前に置いてください",
+            DiagnosticSeverity.Info);
 
         /// <inheritdoc />
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
@@ -53,6 +54,11 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> 型の直下のメンバーを順に見て、順位が逆転した箇所を報告する。 </summary>
         private static void AnalyzeType(SyntaxNodeAnalysisContext context)
         {
+            if (!SkcSyntax.IsTarget(context.Node.SyntaxTree))
+            {
+                return;
+            }
+
             var declaration = (TypeDeclarationSyntax)context.Node;
             var semanticModel = context.SemanticModel;
 

@@ -27,7 +27,8 @@ namespace SymphonyKillChord.Analyzers
         private static readonly DiagnosticDescriptor PeriodRule = SkcDescriptors.Create(
             SkcDiagnosticIds.SummaryPeriod,
             "日本語のサマリーは「。」で終える",
-            "'{0}' のサマリーが「。」で終わっていません");
+            "'{0}' のサマリーが「。」で終わっていません",
+            DiagnosticSeverity.Info);
 
         /// <inheritdoc />
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
@@ -55,6 +56,11 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> サマリーの有無と末尾の句点を検査する。 </summary>
         private static void AnalyzeMember(SyntaxNodeAnalysisContext context)
         {
+            if (!SkcSyntax.IsTarget(context.Node.SyntaxTree))
+            {
+                return;
+            }
+
             var member = (MemberDeclarationSyntax)context.Node;
             var comment = GetDocComment(member);
             var name = GetName(member);

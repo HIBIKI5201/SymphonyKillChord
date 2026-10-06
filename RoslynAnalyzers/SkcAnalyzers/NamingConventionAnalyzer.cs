@@ -51,7 +51,8 @@ namespace SymphonyKillChord.Analyzers
         private static readonly DiagnosticDescriptor PublicFieldRule = SkcDescriptors.Create(
             SkcDiagnosticIds.PublicField,
             "フィールドを直接公開しない",
-            "フィールド '{0}' が公開されています。プロパティを使用してください");
+            "フィールド '{0}' が公開されています。プロパティを使用してください",
+            DiagnosticSeverity.Info);
 
         /// <inheritdoc />
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
@@ -70,6 +71,11 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> シンボルの種類ごとに命名を検査する。 </summary>
         private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
+            if (!SkcSyntax.IsTarget(context.Symbol))
+            {
+                return;
+            }
+
             switch (context.Symbol)
             {
                 case IFieldSymbol field:

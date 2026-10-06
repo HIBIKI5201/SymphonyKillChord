@@ -44,6 +44,11 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> アクセス修飾子が必要な宣言に修飾子が無ければ報告する。 </summary>
         private static void AnalyzeMember(SyntaxNodeAnalysisContext context)
         {
+            if (!SkcSyntax.IsTarget(context.Node.SyntaxTree))
+            {
+                return;
+            }
+
             var member = (MemberDeclarationSyntax)context.Node;
             var modifiers = member.Modifiers;
 

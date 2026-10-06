@@ -17,7 +17,8 @@ namespace SymphonyKillChord.Analyzers
         private static readonly DiagnosticDescriptor Rule = SkcDescriptors.Create(
             SkcDiagnosticIds.NamespaceFolder,
             "名前空間はフォルダ構成と一致させる",
-            "名前空間 '{0}' がフォルダ構成と一致しません。期待値は '{1}' です");
+            "名前空間 '{0}' がフォルダ構成と一致しません。期待値は '{1}' です",
+            DiagnosticSeverity.Info);
 
         /// <inheritdoc />
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
@@ -38,6 +39,11 @@ namespace SymphonyKillChord.Analyzers
         private static void AnalyzeNamespace(SyntaxNodeAnalysisContext context)
         {
             var declaration = (BaseNamespaceDeclarationSyntax)context.Node;
+
+            if (!SkcSyntax.IsTarget(declaration.SyntaxTree))
+            {
+                return;
+            }
 
             // 入れ子の名前空間宣言は外側と合成されるため、最も外側のみを検査する。
             if (declaration.Parent is BaseNamespaceDeclarationSyntax)

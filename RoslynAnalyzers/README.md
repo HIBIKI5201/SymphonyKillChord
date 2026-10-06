@@ -48,21 +48,29 @@ dotnet test  RoslynAnalyzers/SkcAnalyzers.Tests          # Debugで実行する�
 - 次の規約は機械的に判定できないため対象外: メソッド名が動詞で始まること、マジックナンバー、コメントの量と質、`.uxml`/`.uss` の命名、AIの編集範囲の制限。
 - 次の設計は未実装: Entity/ValueObject/DTO の型の種類(`class` / `readonly struct` / `readonly ref struct`)の検査。レイヤー間のアセンブリ参照はasmdefで守られている。
 
-## 深刻度
+## 対象範囲と深刻度
 
-アナライザはUnityの全アセンブリに適用されるため、`.editorconfig` で既定を `none` にし、
-`Assets/Scripts/{Runtime,Develop,Demo}` と `Assets/Editor/{Scripts,AIDebugPlay,ProjectSetup}` だけを有効にしている。
-`DevelopProducts`・`Plugins`・`AssetStoreTools`・`SymphonyFrameWork` は対象外。
+アナライザはUnityの全アセンブリ(AssetStoreTools・Plugins・DevelopProductsなど)に適用される。
+Unityのコンパイラは `.editorconfig` の深刻度や除外を反映しない場合があるため、**対象範囲はアナライザ自身がパスで絞る**(`SkcSyntax.IsTargetPath`)。
+Assets配下のファイルは、次のフォルダだけを検査する。
+
+- `Assets/Scripts/{Runtime,Develop,Demo}`
+- `Assets/Editor/{Scripts,AIDebugPlay,ProjectSetup}`
+
+Assets配下でないパス(テストなど)は検査する。Unityが渡す相対パス(`Assets/...`)にも対応している。
+
+深刻度の既定値もアナライザ側で決めている。既存コードの違反が多いルール(SKC0005/0013/0014/0018/0020/0022)は Info(Unityのコンソールには出ず、IDEにだけ表示)、それ以外は Warning。
+`.editorconfig` の `dotnet_diagnostic.SKC00xx.severity` で変更できる(IDEでは反映される。Unityのコンパイラで反映されるかは未確認)。
 
 導入時点の `Assets/Scripts/Runtime` の違反件数(構文中心の簡易計測)と、既定の深刻度:
 
 | 深刻度 | ルール(件数) |
 |---|---|
-| warning | SKC0003(0) / 0004(19) / 0006(8) / 0007(8) / 0008(24) / 0010(9) / 0011(25) / 0012(17) / 0015(1) / 0016(19) / 0017(7) / 0019(6) / 0021(1) |
-| suggestion | SKC0005(90) / 0013(154) / 0014(154) / 0018(181) / 0020(166) / 0022(502) |
+| Warning | SKC0003(0) / 0004(19) / 0006(8) / 0007(8) / 0008(24) / 0010(9) / 0011(25) / 0012(17) / 0015(1) / 0016(19) / 0017(7) / 0019(6) / 0021(1) |
+| Info | SKC0005(90) / 0013(154) / 0014(154) / 0018(181) / 0020(166) / 0022(502) |
 
 SKC0001/0002 は Unity の型を解決できる環境でないと件数を出せないため未計測。
-違反を解消したルールから `.editorconfig` の `dotnet_diagnostic.SKC00xx.severity` を `warning` → `error` へ引き上げる。
+違反を解消したルールから、アナライザの既定値と `.editorconfig` の深刻度を引き上げる(Info → Warning → Error)。
 
 ## 注意
 

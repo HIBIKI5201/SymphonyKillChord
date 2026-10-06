@@ -42,6 +42,12 @@ namespace SymphonyKillChord.Analyzers
         {
             var invocation = (InvocationExpressionSyntax)context.Node;
 
+            if (!SkcSyntax.IsTarget(invocation.SyntaxTree))
+            {
+                return;
+            }
+
+
             if (!(context.SemanticModel.GetSymbolInfo(invocation, context.CancellationToken).Symbol is IMethodSymbol method))
             {
                 return;

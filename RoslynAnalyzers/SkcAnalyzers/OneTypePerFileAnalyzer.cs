@@ -36,6 +36,11 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> ファイル内の公開型を数え、ファイル名と比べる。 </summary>
         private static void AnalyzeTree(SyntaxTreeAnalysisContext context)
         {
+            if (!SkcSyntax.IsTarget(context.Tree))
+            {
+                return;
+            }
+
             var path = context.Tree.FilePath;
             if (string.IsNullOrEmpty(path))
             {

@@ -34,6 +34,11 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> async voidメソッドの本体の形を検査する。 </summary>
         private static void AnalyzeMethod(SyntaxNodeAnalysisContext context)
         {
+            if (!SkcSyntax.IsTarget(context.Node.SyntaxTree))
+            {
+                return;
+            }
+
             var method = (MethodDeclarationSyntax)context.Node;
 
             if (!SkcSyntax.HasModifier(method.Modifiers, SyntaxKind.AsyncKeyword) ||

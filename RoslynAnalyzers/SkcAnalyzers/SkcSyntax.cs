@@ -13,13 +13,69 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> ランタイムコードの名前空間の接頭辞。 </summary>
         public const string RuntimeNamespace = "KillChord.Runtime";
 
+        private const string AssetsFolder = "/Assets/";
         private const string RuntimeFolder = "/Assets/Scripts/Runtime/";
+
+        /// <summary> 規約の検査対象にするフォルダ。サードパーティ・研究用コードは含めない。 </summary>
+        private static readonly string[] TargetFolders =
+        {
+            "/Assets/Scripts/Runtime/",
+            "/Assets/Scripts/Develop/",
+            "/Assets/Scripts/Demo/",
+            "/Assets/Editor/Scripts/",
+            "/Assets/Editor/AIDebugPlay/",
+            "/Assets/Editor/ProjectSetup/",
+        };
         private static readonly Regex LayerPrefix = new Regex(@"^\d+\.", RegexOptions.Compiled);
 
         /// <summary> パス区切りを / に揃える。 </summary>
         public static string NormalizePath(string path)
         {
             return path.Replace('\\', '/');
+        }
+
+        /// <summary>
+        ///     パス区切りを揃え、先頭を / にする。Unityはコンパイラへ <c>Assets/...</c> の相対パスを渡すため、
+        ///     絶対パスと同じ形(/Assets/...)で扱えるようにする。
+        /// </summary>
+        public static string NormalizeWithLeadingSlash(string path)
+        {
+            var normalized = NormalizePath(path);
+            return normalized.StartsWith("/", StringComparison.Ordinal) ? normalized : "/" + normalized;
+        }
+
+        /// <summary>
+        ///     検査の対象ファイルか。Assets配下のファイルは、このプロジェクト自身のコードだけを対象にする。
+        ///     (アナライザはUnityの全アセンブリに適用され、.editorconfigの除外がコンパイラに効かない場合があるため、アナライザ側で絞る。)
+        ///     Assets配下でないパス(テストなど)は対象にする。
+        /// </summary>
+        public static bool IsTargetPath(string? path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return true;
+            }
+
+            var normalized = NormalizeWithLeadingSlash(path!);
+            if (normalized.IndexOf(AssetsFolder, StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                return true;
+            }
+
+            return TargetFolders.Any(folder => normalized.IndexOf(folder, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        /// <summary> 構文木が検査対象のファイルのものか。 </summary>
+        public static bool IsTarget(SyntaxTree? tree)
+        {
+            return tree == null || IsTargetPath(tree.FilePath);
+        }
+
+        /// <summary> シンボルの宣言が検査対象のファイルにあるか。ソースの宣言が無いシンボルは対象外。 </summary>
+        public static bool IsTarget(ISymbol symbol)
+        {
+            var location = symbol.Locations.FirstOrDefault(l => l.IsInSource);
+            return location != null && IsTarget(location.SourceTree);
         }
 
         /// <summary> ファイルがAssets/Scripts/Runtime配下なら、そこからのフォルダ区切り(番号除去済み)を返す。 </summary>
@@ -31,7 +87,7 @@ namespace SymphonyKillChord.Analyzers
                 return false;
             }
 
-            var normalized = NormalizePath(filePath);
+            var normalized = NormalizeWithLeadingSlash(filePath);
             var index = normalized.IndexOf(RuntimeFolder, StringComparison.OrdinalIgnoreCase);
             if (index < 0)
             {

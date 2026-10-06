@@ -4,8 +4,9 @@ root = true
 charset = utf-8
 
 # Roslynアナライザ(RoslynAnalyzers/SkcAnalyzers)の深刻度。
-# アナライザはUnityの全アセンブリに適用されるため、既定は無効(none)にし、
-# このプロジェクト自身のコードだけを下のセクションで有効にする(サードパーティ・研究用コードは対象外)。
+# アナライザはUnityの全アセンブリに適用される。対象範囲はアナライザ自身がパスで絞っている(SkcSyntax.IsTargetPath)。
+# Unityのコンパイラはこの設定を反映しない場合があるため、ここは主にIDE向け。
+# 既定は無効(none)にし、このプロジェクト自身のコードだけを下のセクションで有効にする(サードパーティ・研究用コードは対象外)。
 # 既存コードの違反が少ないルールはwarning、多いルールはsuggestionにしている。
 # 違反を解消したルールから順に warning → error へ引き上げる。件数は RoslynAnalyzers/README.md を参照。
 [*.cs]

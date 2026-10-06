@@ -38,6 +38,12 @@ namespace SymphonyKillChord.Analyzers
         private static void AnalyzeField(SymbolAnalysisContext context)
         {
             var field = (IFieldSymbol)context.Symbol;
+
+            if (!SkcSyntax.IsTarget(field))
+            {
+                return;
+            }
+
             var attributes = field.GetAttributes();
 
             // SerializeFieldが無ければ対象外。

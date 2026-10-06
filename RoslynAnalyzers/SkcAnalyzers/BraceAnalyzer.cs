@@ -13,7 +13,8 @@ namespace SymphonyKillChord.Analyzers
         private static readonly DiagnosticDescriptor Rule = SkcDescriptors.Create(
             SkcDiagnosticIds.Braces,
             "制御文は波カッコで囲む",
-            "{0} の本体は波カッコ {{ }} で囲んでください");
+            "{0} の本体は波カッコ {{ }} で囲んでください",
+            DiagnosticSeverity.Info);
 
         /// <inheritdoc />
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
@@ -37,6 +38,11 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> 制御文の本体がブロックでなければ報告する。 </summary>
         private static void AnalyzeStatement(SyntaxNodeAnalysisContext context)
         {
+            if (!SkcSyntax.IsTarget(context.Node.SyntaxTree))
+            {
+                return;
+            }
+
             StatementSyntax body;
             string name;
             switch (context.Node)
