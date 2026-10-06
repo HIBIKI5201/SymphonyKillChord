@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,19 +14,14 @@ namespace SymphonyKillChord.Analyzers
         /// <summary> ランタイムコードの名前空間の接頭辞。 </summary>
         public const string RuntimeNamespace = "KillChord.Runtime";
 
-        private const string AssetsFolder = "/Assets/";
         private const string RuntimeFolder = "/Assets/Scripts/Runtime/";
 
-        /// <summary> 規約の検査対象にするフォルダ。サードパーティ・研究用コードは含めない。 </summary>
-        private static readonly string[] TargetFolders =
-        {
-            "/Assets/Scripts/Runtime/",
-            "/Assets/Scripts/Develop/",
-            "/Assets/Scripts/Demo/",
-            "/Assets/Editor/Scripts/",
-            "/Assets/Editor/AIDebugPlay/",
-            "/Assets/Editor/ProjectSetup/",
-        };
+        /// <summary> 規約の検査対象にする名前空間(とその配下)。サードパーティ・研究用コードは含めない。 </summary>
+        private static readonly string[] TargetNamespaces = { "KillChord.Runtime", "KillChord.Editor" };
+
+        private static readonly ConditionalWeakTable<SyntaxTree, StrongBox<bool>> TargetTreeCache =
+            new ConditionalWeakTable<SyntaxTree, StrongBox<bool>>();
+
         private static readonly Regex LayerPrefix = new Regex(@"^\d+\.", RegexOptions.Compiled);
 
         /// <summary> パス区切りを / に揃える。 </summary>
@@ -45,37 +41,57 @@ namespace SymphonyKillChord.Analyzers
         }
 
         /// <summary>
-        ///     検査の対象ファイルか。Assets配下のファイルは、このプロジェクト自身のコードだけを対象にする。
-        ///     (アナライザはUnityの全アセンブリに適用され、.editorconfigの除外がコンパイラに効かない場合があるため、アナライザ側で絞る。)
-        ///     Assets配下でないパス(テストなど)は対象にする。
+        ///     検査の対象の名前空間か。<c>KillChord.Runtime</c> と <c>KillChord.Editor</c>(とその配下)だけを対象にする。
+        ///     アナライザはUnityの全アセンブリ(Packages・AssetStoreTools・研究用コードなど)に適用され、
+        ///     Unityのコンパイラは.editorconfigの除外を反映しない場合があるため、除外ではなく対象をここで絞る。
         /// </summary>
-        public static bool IsTargetPath(string? path)
+        public static bool IsTargetNamespace(string? ns)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                return true;
-            }
-
-            var normalized = NormalizeWithLeadingSlash(path!);
-            if (normalized.IndexOf(AssetsFolder, StringComparison.OrdinalIgnoreCase) < 0)
-            {
-                return true;
-            }
-
-            return TargetFolders.Any(folder => normalized.IndexOf(folder, StringComparison.OrdinalIgnoreCase) >= 0);
+            return ns != null &&
+                   TargetNamespaces.Any(t => ns == t || ns.StartsWith(t + ".", StringComparison.Ordinal));
         }
 
-        /// <summary> 構文木が検査対象のファイルのものか。 </summary>
+        /// <summary> 構文木が検査対象か。対象の名前空間を1つでも宣言していれば対象。名前空間の無いファイルは対象外。 </summary>
         public static bool IsTarget(SyntaxTree? tree)
         {
-            return tree == null || IsTargetPath(tree.FilePath);
+            if (tree == null)
+            {
+                return false;
+            }
+
+            return TargetTreeCache.GetValue(tree, t => new StrongBox<bool>(ComputeIsTarget(t))).Value;
         }
 
-        /// <summary> シンボルの宣言が検査対象のファイルにあるか。ソースの宣言が無いシンボルは対象外。 </summary>
+        /// <summary> シンボルが検査対象の名前空間に属するか。 </summary>
         public static bool IsTarget(ISymbol symbol)
         {
-            var location = symbol.Locations.FirstOrDefault(l => l.IsInSource);
-            return location != null && IsTarget(location.SourceTree);
+            var ns = symbol.ContainingNamespace;
+            return ns != null && IsTargetNamespace(ns.ToDisplayString());
+        }
+
+        /// <summary> 構文木内の名前空間宣言に、対象の名前空間があるか。 </summary>
+        private static bool ComputeIsTarget(SyntaxTree tree)
+        {
+            var root = tree.GetRoot();
+            return root
+                .DescendantNodes(n => n is CompilationUnitSyntax || n is BaseNamespaceDeclarationSyntax)
+                .OfType<BaseNamespaceDeclarationSyntax>()
+                .Any(n => IsTargetNamespace(GetFullNamespace(n)));
+        }
+
+        /// <summary> 入れ子の名前空間宣言を連結した完全名を返す。 </summary>
+        private static string GetFullNamespace(BaseNamespaceDeclarationSyntax declaration)
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            for (SyntaxNode? node = declaration; node != null; node = node.Parent)
+            {
+                if (node is BaseNamespaceDeclarationSyntax ns)
+                {
+                    parts.Insert(0, ns.Name.ToString());
+                }
+            }
+
+            return string.Join(".", parts);
         }
 
         /// <summary> ファイルがAssets/Scripts/Runtime配下なら、そこからのフォルダ区切り(番号除去済み)を返す。 </summary>

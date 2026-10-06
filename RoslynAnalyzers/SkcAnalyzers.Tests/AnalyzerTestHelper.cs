@@ -28,7 +28,14 @@ namespace UnityEngine
     }
 }";
 
-        /// <summary> 診断IDの一覧を返す。filePathでフォルダ依存の規則を検証できる。 </summary>
+        /// <summary> 名前空間を持たないテスト用ソースを包む、検査対象の名前空間。 </summary>
+        public const string TargetNamespace = "KillChord.Runtime.Test";
+
+        /// <summary>
+        ///     診断IDの一覧を返す。filePathでフォルダ依存の規則を検証できる。
+        ///     アナライザは名前空間が KillChord.Runtime / KillChord.Editor のコードだけを検査するため、
+        ///     名前空間を持たないソースは、先頭の using を残して <see cref="TargetNamespace"/> で包む。
+        /// </summary>
         public static string[] Run<TAnalyzer>(string source, string filePath = "Test.cs")
             where TAnalyzer : DiagnosticAnalyzer, new()
         {
@@ -36,7 +43,7 @@ namespace UnityEngine
             var trees = new[]
             {
                 CSharpSyntaxTree.ParseText(UnityStub, parse, "UnityStub.cs"),
-                CSharpSyntaxTree.ParseText(source, parse, filePath),
+                CSharpSyntaxTree.ParseText(WrapInTargetNamespace(source), parse, filePath),
             };
 
             var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
@@ -57,6 +64,21 @@ namespace UnityEngine
                 .Select(d => d.Id)
                 .OrderBy(id => id, StringComparer.Ordinal)
                 .ToArray();
+        }
+
+        /// <summary> 名前空間の宣言が無いソースを、先頭のusingを残して対象の名前空間で包む。 </summary>
+        private static string WrapInTargetNamespace(string source)
+        {
+            if (source.Contains("namespace "))
+            {
+                return source;
+            }
+
+            var lines = source.Split('\n').ToList();
+            var headerCount = lines.TakeWhile(l => l.Trim().Length == 0 || l.TrimStart().StartsWith("using ")).Count();
+            var header = string.Join("\n", lines.Take(headerCount));
+            var body = string.Join("\n", lines.Skip(headerCount));
+            return header + "\nnamespace " + TargetNamespace + "\n{\n" + body + "\n}\n";
         }
     }
 }

@@ -205,7 +205,7 @@ public class A
         {
             const string source = @"
 using System;
-namespace N
+namespace KillChord.Runtime.Test
 {
     using System.Linq;
     public class A { }
@@ -258,22 +258,36 @@ public class A
         }
 
         [Theory]
-        [InlineData("Assets/AssetStoreTools/CRIMW/CriWare/CriAtomExOutputAnalyzer.cs", 0)]
-        [InlineData("Assets\\AssetStoreTools\\CRIMW\\Foo.cs", 0)]
-        [InlineData("/repo/Assets/Plugins/Foo.cs", 0)]
-        [InlineData("Assets/DevelopProducts/Research/Foo.cs", 0)]
-        [InlineData("Assets/Scripts/SymphonyFrameWork/Foo.cs", 0)]
-        [InlineData("Assets/Scripts/Runtime/1.Domain/InGame/Foo.cs", 1)]
-        [InlineData("Assets/Scripts/Develop/Foo.cs", 1)]
-        [InlineData("Assets/Editor/Scripts/Foo.cs", 1)]
-        [InlineData("/repo/Assets/Scripts/Runtime/Foo.cs", 1)]
-        [InlineData("Test.cs", 1)]
-        public void 検査対象のパスだけを検査する(string path, int expected)
+        [InlineData("KillChord.Runtime.Domain.InGame", 1)]
+        [InlineData("KillChord.Runtime", 1)]
+        [InlineData("KillChord.Editor.Tools", 1)]
+        [InlineData("KillChord.Develop", 0)]
+        [InlineData("KillChord.Demo", 0)]
+        [InlineData("KillChord.RuntimeExtra", 0)]
+        [InlineData("SingularityGroup.HotReload", 0)]
+        [InlineData("CriWare", 0)]
+        [InlineData("UnityEngine.Rendering", 0)]
+        public void 検査対象の名前空間だけを検査する(string ns, int expected)
         {
-            // 外部ライブラリ由来のようなPascalCaseでないメソッド名。
-            const string source = "public class Foo { public void bad_name() { } }";
-            var ids = AnalyzerTestHelper.Run<NamingConventionAnalyzer>(source, path);
-            Assert.Equal(expected, ids.Count(i => i == "SKC0012"));
+            // 外部ライブラリ由来のようなPascalCaseでないメソッド名と、アクセス修飾子の無い型。
+            var source = $"namespace {ns} {{ class BurstChecker {{ public void bad_name() {{ }} }} }}";
+            Assert.Equal(expected, AnalyzerTestHelper.Run<NamingConventionAnalyzer>(source).Count(i => i == "SKC0012"));
+            Assert.Equal(expected, AnalyzerTestHelper.Run<ExplicitAccessibilityAnalyzer>(source).Length);
+        }
+
+        [Fact]
+        public void 名前空間の無いファイルは検査しない()
+        {
+            // Packagesのコードのように、対象の名前空間を持たないファイル。
+            const string source = "namespace Other { class A { } }\nclass B { }";
+            Assert.Empty(AnalyzerTestHelper.Run<ExplicitAccessibilityAnalyzer>(source));
+        }
+
+        [Fact]
+        public void 入れ子の名前空間でも対象を判定する()
+        {
+            const string source = "namespace KillChord { namespace Runtime { class A { } } }";
+            Assert.Single(AnalyzerTestHelper.Run<ExplicitAccessibilityAnalyzer>(source));
         }
 
         [Fact]

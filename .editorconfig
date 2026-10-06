@@ -3,80 +3,9 @@ root = true
 [*.{cs,md,json,yml}]
 charset = utf-8
 
-# Roslynアナライザ(RoslynAnalyzers/SkcAnalyzers)の深刻度。
-# アナライザはUnityの全アセンブリに適用される。対象範囲はアナライザ自身がパスで絞っている(SkcSyntax.IsTargetPath)。
-# Unityのコンパイラはこの設定を反映しない場合があるため、ここは主にIDE向け。
-# 既定は無効(none)にし、このプロジェクト自身のコードだけを下のセクションで有効にする(サードパーティ・研究用コードは対象外)。
-# 既存コードの違反が少ないルールはwarning、多いルールはsuggestionにしている。
-# 違反を解消したルールから順に warning → error へ引き上げる。件数は RoslynAnalyzers/README.md を参照。
-[*.cs]
-dotnet_diagnostic.SKC0001.severity = none
-dotnet_diagnostic.SKC0002.severity = none
-dotnet_diagnostic.SKC0003.severity = none
-dotnet_diagnostic.SKC0004.severity = none
-dotnet_diagnostic.SKC0005.severity = none
-dotnet_diagnostic.SKC0006.severity = none
-dotnet_diagnostic.SKC0007.severity = none
-dotnet_diagnostic.SKC0008.severity = none
-dotnet_diagnostic.SKC0009.severity = none
-dotnet_diagnostic.SKC0010.severity = none
-dotnet_diagnostic.SKC0011.severity = none
-dotnet_diagnostic.SKC0012.severity = none
-dotnet_diagnostic.SKC0013.severity = none
-dotnet_diagnostic.SKC0014.severity = none
-dotnet_diagnostic.SKC0015.severity = none
-dotnet_diagnostic.SKC0016.severity = none
-dotnet_diagnostic.SKC0017.severity = none
-dotnet_diagnostic.SKC0018.severity = none
-dotnet_diagnostic.SKC0019.severity = none
-dotnet_diagnostic.SKC0020.severity = none
-dotnet_diagnostic.SKC0021.severity = none
-dotnet_diagnostic.SKC0022.severity = none
-
-[Assets/Scripts/{Runtime,Develop,Demo}/**.cs]
-dotnet_diagnostic.SKC0001.severity = warning
-dotnet_diagnostic.SKC0002.severity = warning
-dotnet_diagnostic.SKC0003.severity = warning
-dotnet_diagnostic.SKC0004.severity = warning
-dotnet_diagnostic.SKC0005.severity = suggestion
-dotnet_diagnostic.SKC0006.severity = warning
-dotnet_diagnostic.SKC0007.severity = warning
-dotnet_diagnostic.SKC0008.severity = warning
-dotnet_diagnostic.SKC0009.severity = warning
-dotnet_diagnostic.SKC0010.severity = warning
-dotnet_diagnostic.SKC0011.severity = warning
-dotnet_diagnostic.SKC0012.severity = warning
-dotnet_diagnostic.SKC0013.severity = suggestion
-dotnet_diagnostic.SKC0014.severity = suggestion
-dotnet_diagnostic.SKC0015.severity = warning
-dotnet_diagnostic.SKC0016.severity = warning
-dotnet_diagnostic.SKC0017.severity = warning
-dotnet_diagnostic.SKC0018.severity = suggestion
-dotnet_diagnostic.SKC0019.severity = warning
-dotnet_diagnostic.SKC0020.severity = suggestion
-dotnet_diagnostic.SKC0021.severity = warning
-dotnet_diagnostic.SKC0022.severity = suggestion
-
-[Assets/Editor/{Scripts,AIDebugPlay,ProjectSetup}/**.cs]
-dotnet_diagnostic.SKC0001.severity = warning
-dotnet_diagnostic.SKC0002.severity = warning
-dotnet_diagnostic.SKC0003.severity = warning
-dotnet_diagnostic.SKC0004.severity = warning
-dotnet_diagnostic.SKC0005.severity = suggestion
-dotnet_diagnostic.SKC0006.severity = warning
-dotnet_diagnostic.SKC0007.severity = warning
-dotnet_diagnostic.SKC0008.severity = warning
-dotnet_diagnostic.SKC0009.severity = warning
-dotnet_diagnostic.SKC0010.severity = warning
-dotnet_diagnostic.SKC0011.severity = warning
-dotnet_diagnostic.SKC0012.severity = warning
-dotnet_diagnostic.SKC0013.severity = suggestion
-dotnet_diagnostic.SKC0014.severity = suggestion
-dotnet_diagnostic.SKC0015.severity = warning
-dotnet_diagnostic.SKC0016.severity = warning
-dotnet_diagnostic.SKC0017.severity = warning
-dotnet_diagnostic.SKC0018.severity = suggestion
-dotnet_diagnostic.SKC0019.severity = warning
-dotnet_diagnostic.SKC0020.severity = suggestion
-dotnet_diagnostic.SKC0021.severity = warning
-dotnet_diagnostic.SKC0022.severity = suggestion
+# Roslynアナライザ(RoslynAnalyzers/SkcAnalyzers)。
+# 検査対象(名前空間が KillChord.Runtime / KillChord.Editor のコード)と、ルールごとの既定の深刻度は
+# アナライザ側で決めている(Unityのコンパイラはこのファイルの深刻度を反映しない場合があるため)。
+# 特定のルールの深刻度を変えたい場合だけ、次のように書く(IDEでは反映される)。
+#   [*.cs]
+#   dotnet_diagnostic.SKC0017.severity = error
