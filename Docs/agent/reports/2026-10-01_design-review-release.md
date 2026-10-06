@@ -34,9 +34,9 @@ GitHub Releasesへの公開再試行・検証もあり、配布事故への備�
 | BP | `Assets/Settings/Build Profiles/` |
 | AB | `Assets/Editor/Scripts/AutoBuilder/` |
 | NS | `Docs/NotionSpecifications/Symphony Kill Chord/` |
-| STORE | `Docs/ストア仮登録_手順と事前決定事項_2026-08-14.md` |
-| PLAN | `Docs/逆算スケジュール案_2026-08-05.md` |
-| RIGHTS | `Docs/TGS後メンバー入れ替え_権利確認・引継ぎ事項一覧_2026-09-27.md` |
+| STORE | `Docs/agent/handoffs/ストア仮登録_手順と事前決定事項_2026-08-14.md` |
+| PLAN | `Docs/agent/handoffs/逆算スケジュール案_2026-08-05.md` |
+| RIGHTS | `Docs/agent/reports/TGS後メンバー入れ替え_権利確認・引継ぎ事項一覧_2026-09-27.md` |
 | EVENT | `Docs/agent/reports/2026-09-28_event-exhibition-meeting.md` |
 | DRIVE | `.design-review/drive_snapshot.md`、`.design-review/drive_issue_2141.md` |
 

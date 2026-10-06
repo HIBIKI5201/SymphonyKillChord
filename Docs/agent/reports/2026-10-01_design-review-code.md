@@ -22,7 +22,7 @@ SourceDataProvider／DataID／Addressablesの編集支援は充実している�
 - すべてのメソッド・全シーンの参照を手動で精査したわけではない。未読の実装を「問題なし」とは判定しない。
 - 名前だけの型参照抽出にはプロパティ名との誤結合がある。循環は候補から実コードで再確認できたものだけを確定例にした。
 - 略記 `R/` は `Assets/Scripts/Runtime/`、`E/` は `Assets/Editor/`、`N/` は `Docs/NotionSpecifications/Symphony Kill Chord/`。
-- `RA/` は `Docs/RuntimeAudit/`、`JUL/` は `Docs/agent/analysis/omnipotens/2026-07-18_symphony-kill-chord/spec/`。
+- `RA/` は `Docs/agent/analysis/runtime-audit/2026-09-17_runtime-scripts/report/`、`JUL/` は `Docs/agent/analysis/omnipotens/2026-07-18_symphony-kill-chord/spec/`。
 - 行番号は現在のローカルファイル。旧監査の行番号・件数は、その文書の記録として区別する。
 - GitHubのruntime-audit Issue一覧を読み取りで取得しようとしたが、接続プロキシの拒否で失敗した。既存Issueとの完全な重複排除は未完了。
 
@@ -556,7 +556,7 @@ Driveは `.design-review/drive_snapshot.md` と `drive_issue_2141.md` のスナ�
 Issue #2141、#1985、#2137の取込・配布に関する論点は、データ検証と外部依存の受入確認へ接続する。最新のIssue進捗は未照会。
 Discordのアーキテクチャ進捗ログには、Sceneごとの方針分裂を防ぐために共通設計を行う意図が記録されている。
 根拠：`Docs/DiscordLog/進捗共有_アーキテクチャ_1477735282953420931.txt:13`。個人の発言を現行規約より優先しない。
-8月の `Docs/AI資料まとめ/仕様書と実装の差分分析_2026-08-05.md` は過去差分として参照し、最新Notionの状態と混同しない。
+8月の `Docs/agent/reports/仕様書と実装の差分分析_2026-08-05.md` は過去差分として参照し、最新Notionの状態と混同しない。
 
 ## 未確認事項
 
