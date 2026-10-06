@@ -50,17 +50,15 @@ dotnet test  RoslynAnalyzers/SkcAnalyzers.Tests          # Debugで実行する�
 
 ## 対象範囲と深刻度
 
-アナライザはUnityの全アセンブリ(AssetStoreTools・Plugins・DevelopProductsなど)に適用される。
-Unityのコンパイラは `.editorconfig` の深刻度や除外を反映しない場合があるため、**対象範囲はアナライザ自身がパスで絞る**(`SkcSyntax.IsTargetPath`)。
-Assets配下のファイルは、次のフォルダだけを検査する。
+アナライザはUnityの全アセンブリ(Packages・AssetStoreTools・研究用コードなど)に適用される。
+Unityのコンパイラは `.editorconfig` の除外や深刻度を反映しない場合があるため、**除外ではなく、対象をアナライザ自身が絞る**。
 
-- `Assets/Scripts/{Runtime,Develop,Demo}`
-- `Assets/Editor/{Scripts,AIDebugPlay,ProjectSetup}`
-
-Assets配下でないパス(テストなど)は検査する。Unityが渡す相対パス(`Assets/...`)にも対応している。
+- 検査するのは、名前空間が `KillChord.Runtime` または `KillChord.Editor`(とその配下)のコードだけ(`SkcSyntax.IsTargetNamespace`)。
+- 名前空間を持たないファイルや、それ以外の名前空間のコードは検査しない。`KillChord.Develop` / `KillChord.Demo` も対象外(Develop フォルダでも名前空間が `KillChord.Runtime` のファイルは対象になる)。
+- パスには依存しないので、Unityが渡す相対パス・絶対パス、区切り文字の違いの影響を受けない。
 
 深刻度の既定値もアナライザ側で決めている。既存コードの違反が多いルール(SKC0005/0013/0014/0018/0020/0022)は Info(Unityのコンソールには出ず、IDEにだけ表示)、それ以外は Warning。
-`.editorconfig` の `dotnet_diagnostic.SKC00xx.severity` で変更できる(IDEでは反映される。Unityのコンパイラで反映されるかは未確認)。
+特定のルールの深刻度を変えたいときは `.editorconfig` に `dotnet_diagnostic.SKC00xx.severity` を書く(IDEでは反映される。Unityのコンパイラで反映されるかは未確認)。
 
 導入時点の `Assets/Scripts/Runtime` の違反件数(構文中心の簡易計測)と、既定の深刻度:
 
@@ -70,7 +68,7 @@ Assets配下でないパス(テストなど)は検査する。Unityが渡す相�
 | Info | SKC0005(90) / 0013(154) / 0014(154) / 0018(181) / 0020(166) / 0022(502) |
 
 SKC0001/0002 は Unity の型を解決できる環境でないと件数を出せないため未計測。
-違反を解消したルールから、アナライザの既定値と `.editorconfig` の深刻度を引き上げる(Info → Warning → Error)。
+違反を解消したルールから、`SkcDescriptors.Create` に渡す既定の深刻度を引き上げる(Info → Warning → Error)。
 
 ## 注意
 
