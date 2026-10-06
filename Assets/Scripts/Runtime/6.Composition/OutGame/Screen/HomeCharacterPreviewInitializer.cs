@@ -76,6 +76,15 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             }
 
             homeScreenView.SetCharacterTexture(_renderTexture);
+
+            // ホームが見えていない間はカメラの描画を止める。
+            // キャラクター本体(TimelineやAnimator)は他画面と共有のため止めない。
+            if (_homeScreenView == null)
+            {
+                _homeScreenView = homeScreenView;
+                _homeScreenView.VisibilityChanged += HandleHomeVisibilityChanged;
+            }
+            HandleHomeVisibilityChanged(_homeScreenView.IsVisible);
             return true;
         }
 
@@ -84,6 +93,12 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// </summary>
         public override void Shutdown()
         {
+            if (_homeScreenView != null)
+            {
+                _homeScreenView.VisibilityChanged -= HandleHomeVisibilityChanged;
+                _homeScreenView = null;
+            }
+
             if (_previewCamera != null)
             {
                 _previewCamera.targetTexture = null;
@@ -111,12 +126,25 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private Vector3 _cameraLocalEulerAngles = new(0f, 210f, 0f);
         [SerializeField, Tooltip("プレビューカメラの画角です。")]
         private float _fieldOfView = 30f;
-        [SerializeField, Tooltip("レンダーテクスチャの幅です。")]
+        [SerializeField, Tooltip("レンダーテクスチャの幅です。端末での画質・メモリ計測に基づいて調整します(比較候補: 512)。")]
         private int _renderTextureWidth = 1024;
-        [SerializeField, Tooltip("レンダーテクスチャの高さです。")]
+        [SerializeField, Tooltip("レンダーテクスチャの高さです。端末での画質・メモリ計測に基づいて調整します(比較候補: 1024)。")]
         private int _renderTextureHeight = 2048;
 
         private Camera _previewCamera;
         private RenderTexture _renderTexture;
+        private HomeScreenView _homeScreenView;
+
+        /// <summary>
+        ///     ホーム画面の表示状態に合わせてプレビューカメラの描画を切り替えます。
+        /// </summary>
+        /// <param name="isVisible"> ホーム画面が表示中かどうか。 </param>
+        private void HandleHomeVisibilityChanged(bool isVisible)
+        {
+            if (_previewCamera != null)
+            {
+                _previewCamera.enabled = isVisible;
+            }
+        }
     }
 }
