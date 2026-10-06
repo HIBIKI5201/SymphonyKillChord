@@ -170,8 +170,8 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   androidMinAspectRatio: 1
   applicationIdentifier:
-    Android: jp.sinfoniastudio.symphonykillchord
-    Standalone: jp.sinfoniastudio.symphonykillchord
+    Android: com.symphonykillchord.app
+    Standalone: com.symphonykillchord.app
   buildNumber:
     Standalone: 0
     VisionOS: 0
