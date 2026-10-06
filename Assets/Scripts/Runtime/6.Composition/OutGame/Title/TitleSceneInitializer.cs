@@ -96,6 +96,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private LoadingScreenController _loadingScreenController;
         private EventNotificationView _eventNotificationView;
         private CancellationTokenSource _resetCancellation;
+        private VisualElement _boundTitleRoot;
 
         /// <summary>
         ///     タイトル画面に必要なアセットをロードします。
@@ -206,6 +207,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
+            _boundTitleRoot = titleRoot;
             _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
             _titleSceneView.BindStartButtonGlyph(_inputGlyphSpriteAsset);
             InitializeIdleVideo(titleRoot);
@@ -299,11 +301,75 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 _isLoadingSubscribed = true;
             }
 
-            ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
+            ShowBoundTitle();
+            return true;
+        }
+
+#if UNITY_EDITOR
+        /// <summary>
+        ///     Hot Reload で UI が作り直されたら、新しい UI 要素へ View を結び直します。
+        /// </summary>
+        private void Update()
+        {
+            if (!_isInitialized || _boundTitleRoot == null || _boundTitleRoot.panel != null)
+            {
+                return;
+            }
+
+            RebindViews();
+        }
+
+        /// <summary>
+        ///     古い View を破棄し、現在の Visual Tree から View を作り直します。
+        /// </summary>
+        private void RebindViews()
+        {
+            // 古い UI 要素に残ったコールバックを外してから作り直し、二重登録を防ぐ。
+            UnRegisterUIEventCallbacks();
+            DisposeViews();
+            _isInitialized = false;
+            if (!Build())
+            {
+                Debug.LogError($"[{nameof(TitleSceneInitializer)}] Hot Reload 後のタイトル画面を再構築できませんでした。", this);
+                return;
+            }
+
+            ShowBoundTitle();
+            Debug.Log($"[{nameof(TitleSceneInitializer)}] Hot Reload で作り直された UI へタイトル画面を再接続しました。", this);
+        }
+#endif
+
+        /// <summary>
+        ///     構築済みの View で入力を受け付け、タイトル画面を表示します。
+        /// </summary>
+        private void ShowBoundTitle()
+        {
+            ApplyInteractionEnabled(_loadingScreenController == null || !_loadingScreenController.IsLoading);
             RegisterUIEventCallbacks();
             _titleScreenViewRegistry.ResetFocusHistory();
             _screenController.ShowTitle();
-            return true;
+        }
+
+        /// <summary>
+        ///     生成した View と待機動画を破棄します。
+        /// </summary>
+        private void DisposeViews()
+        {
+            if (_idleVideoView != null)
+            {
+                _idleVideoView.Shutdown();
+                Destroy(_idleVideoView.gameObject);
+                _idleVideoView = null;
+            }
+
+            _volumeSettingsTabView?.Dispose();
+            _volumeSettingsTabView = null;
+            _languageSettingsTabView?.Dispose();
+            _languageSettingsTabView = null;
+            _titleScreenViewRegistry?.Dispose();
+            _titleScreenViewRegistry = null;
+            _titleSceneView = null;
+            _boundTitleRoot = null;
         }
 
         /// <summary>
@@ -313,12 +379,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         {
             // 実行中の処理を止め、待機中の動画を破棄する。
             _resetCancellation?.Cancel();
-            if (_idleVideoView != null)
-            {
-                _idleVideoView.Shutdown();
-                Destroy(_idleVideoView.gameObject);
-                _idleVideoView = null;
-            }
             // 購読を解除する。
             UnsubscribeLoading();
             if (_outGameUIEvent != null && _isSubscribed)
@@ -335,15 +395,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
             // 生成したビューと、依存の参照を破棄する。
-            _volumeSettingsTabView?.Dispose();
-            _volumeSettingsTabView = null;
-            _languageSettingsTabView?.Dispose();
-            _languageSettingsTabView = null;
+            DisposeViews();
             _audioSettingsContainer = null;
             _environmentSettingsContainer = null;
-            _titleScreenViewRegistry?.Dispose();
-            _titleScreenViewRegistry = null;
-            _titleSceneView = null;
             _titleStartController = null;
             _screenController = null;
             _outGameUIEvent = null;
