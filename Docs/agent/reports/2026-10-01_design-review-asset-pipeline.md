@@ -35,7 +35,7 @@ AssetStoreToolsはサブモジュールとDrive ZIPの二経路を持ち、CIは
 |---|---|
 | Snapshot | `.design-review/drive_snapshot.md` |
 | Drive記録 | `.design-review/drive_issue_2141.md` |
-| 命名提案 | `Docs/アセット名リスト_命名規則提案.md` |
+| 命名提案 | `Docs/agent/reports/アセット名リスト_命名規則提案.md` |
 | Sync | `Assets/Editor/Scripts/AssetManagement/DriveImportSync.cs` |
 | Manifest | `Assets/Editor/Scripts/AssetManagement/DriveImportManifest.cs` |
 | Sync設定 | `ProjectSettings/KillChord/DriveImportSettings` |

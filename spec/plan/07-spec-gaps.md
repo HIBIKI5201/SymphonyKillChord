@@ -70,6 +70,6 @@
   slot unlock 強制 / ZIP checksum) は、記号名検索では判定できない。
   Anatomia の `where` / `context` か実コード読解で確定させる。
 - **仕様が決まっていない項目**は QA の合否判定ができないため、
-  `spec/analysis/2026-09-06/qa-testcases.md` の `保留理由` 列に落としてある。
+  `Docs/agent/analysis/anatomia-augur/2026-09-06_symphony-kill-chord/spec/qa-testcases.md` の `保留理由` 列に落としてある。
 - **GS-08 の性能要件**は Augur の `kind: guardrail` として台帳に載せ、
   media-based testing (外部キャプチャ + フレーム解析) で計測を残す。
