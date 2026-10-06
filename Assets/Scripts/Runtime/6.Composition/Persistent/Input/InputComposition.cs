@@ -7,6 +7,7 @@ using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Domain.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Load;
+using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -51,6 +52,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         private GamepadButtonLayoutView _gamepadButtonLayoutView;
         private InputDeviceKindObserver _deviceKindObserver;
         private InputDeviceLocalizationVariable _deviceLocalizationVariable;
+        private NavigationInputModeObserver _navigationInputModeObserver;
         private LoadingScreenController _loadingScreenController;
         private EventNotificationView _notificationView;
         private bool _isNotificationSubscribed;
@@ -274,6 +276,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
 
             _deviceKindObserver = new InputDeviceKindObserver();
             _deviceLocalizationVariable = new InputDeviceLocalizationVariable(_deviceKindObserver);
+            _navigationInputModeObserver = new NavigationInputModeObserver();
         }
 
         /// <summary>
@@ -281,6 +284,8 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         /// </summary>
         private void DisposeDeviceKind()
         {
+            _navigationInputModeObserver?.Dispose();
+            _navigationInputModeObserver = null;
             _deviceLocalizationVariable?.Dispose();
             _deviceLocalizationVariable = null;
             _deviceKindObserver?.Dispose();
