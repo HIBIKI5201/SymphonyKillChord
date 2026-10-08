@@ -15,7 +15,7 @@
 対象外: Notion の `システム概要` 配下 (ターゲットシステム / カメラ / 音楽 / スキル効果 /
 シークエンス / セーブ 等) は **実装モジュール設計書**であって遊びの規則ではない。
 本書には取り込まず、モジュール構成は Anatomia のプログラムドメイン
-(`spec/analysis/2026-09-06/anatomia/program-domains.json`) を正とする。
+(`Docs/agent/analysis/anatomia-augur/2026-09-06_symphony-kill-chord/spec/anatomia/program-domains.json`) を正とする。
 同様に コード規定 / GitHub 運用規定 / 研修資料 / 最適化記事まとめ も対象外。
 
 ---

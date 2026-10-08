@@ -117,13 +117,13 @@ Runnerが物理的に1台かどうかは不明。確認できるのは、代替�
 | 対象 | Markdown数など | 所見 |
 |---|---:|---|
 | `Docs/`直下 | 16 md | 14件は日付入り。うち名称に「引継ぎ資料」を含むもの3件 |
-| `Docs/AI資料まとめ/`再帰 | 31 md | 旧監査・仕様下書き・候補集が残る |
+| `Docs/AI資料まとめ/`再帰（現 `Docs/agent/reports/` と `Docs/agent/handoffs/仕様更新ドラフト_2026-08-03/`） | 31 md | 旧監査・仕様下書き・候補集が残る |
 | `Docs/agent/` | 22 md | README 1、analysis 19、reports 2、handoffs配下のmd 0 |
 | `Docs/DiscordLog/` | 160 txt | 議論の背景を保持。正式仕様や最新タスク状態ではない |
 | 旧版・退避領域 | 複数 | NotionBackup、NotionMigration、NotionSpecifications_oldが併存 |
 
-- `Docs/アセット名リスト_命名規則提案.md`と旧AI資料側の同名ファイルはSHA-256一致。
-- `Docs/用語集_追加候補.md`と旧AI資料側の同名ファイルもSHA-256一致。
+- `Docs/agent/reports/アセット名リスト_命名規則提案.md`と旧AI資料側の同名ファイルはSHA-256一致。
+- `Docs/agent/reports/用語集_追加候補.md`と旧AI資料側の同名ファイルもSHA-256一致。
 - 少なくとも2組は内容の完全重複であり、題名が似ているだけの判断ではない。
 - `Docs/agent/reports/`の既存2件は日付先頭・英小文字ケバブケースに準拠する。
 - `Docs/agent/analysis/omnipotens/2026-07-18_symphony-kill-chord/`もREADMEの構成に沿う。
@@ -193,7 +193,7 @@ D2141の保存タイトルは`[TODO]`で始まる。これは1件の例で、形
 | OPS-11 | 高 | 正本・キャッシュ文書が「定期取得しない」「agent記録をGit管理しない」と案内 | `N/ワークフロー/Notion 仕様書の運用（正本とキャッシュ）.md`対`W/NotionSpecificationsSync.yml:7–24`、`Docs/agent/README.md` | 新担当が現行の同期・共有方針を逆に理解する |
 | OPS-12 | 中 | 旧DocsとAI資料の完全重複、引継ぎの配置分散、ignoreとの不整合 | 配置計数、同名2組のhash一致、`.gitignore`末尾、`Docs/agent/README.md` | 新しい引継ぎがローカルだけに残る、旧提案を現行ルールと誤読する可能性 |
 | OPS-13 | 高 | 個人所有Driveと自己ホスト環境への依存に対し、後任による復旧完了の証跡がない | DS「前提・所有者」、`W/BuildAndRelease.yml:264–288`、9月27日引継ぎ資料§4–5 | 担当者不在時に配布・認証回復が止まる可能性。実際のバス係数を1と断定する資料はない |
-| OPS-14 | 中 | 引継ぎ一覧は共有ドライブ・職種別READMEを指示し、9月27日最新決定と不一致 | `Docs/TGS後メンバー入れ替え_権利確認・引継ぎ事項一覧_2026-09-27.md`§3,10、D2141「決めたこと」 | 後任が利用しないサービス・旧分類を前提に準備する |
+| OPS-14 | 中 | 引継ぎ一覧は共有ドライブ・職種別READMEを指示し、9月27日最新決定と不一致 | `Docs/agent/reports/TGS後メンバー入れ替え_権利確認・引継ぎ事項一覧_2026-09-27.md`§3,10、D2141「決めたこと」 | 後任が利用しないサービス・旧分類を前提に準備する |
 | OPS-15 | 中 | 日次通知の文書・定義・有効化状態が異なり、初期設定失敗でも正常returnする | `N/ワークフロー/スプリント.md`、`.github/environments/SinfoniaOperator.json:12`、`S/SinfoniaOperator/SinfoniaOperator.cs:46–69,599–602` | 通知停止と対象なしの区別が弱い。日曜はコード上も通知しない。現稼働は未確認 |
 | OPS-16 | 中 | Issue・Notion・Discordの状態確認が人の転記に依存する | `N/ワークフロー/QA・バグ報告.md`、Discord「プログラマーリーダー認識共有」11–23行 | Issue完了だけではNotionタスク・仕様反映完了を意味しない。現在の漏れ件数は未取得 |
 | OPS-17 | 中 | 二段階PRを一人の小変更にも適用し、例外手順が増えている | `AGENTS.md`、履歴#2341/#2342、#2347/#2348、5本のGit Workflow | 新規参加者の理解・復旧負担が増える。共同作業では有益なため全面廃止は不要 |

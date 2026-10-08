@@ -161,7 +161,7 @@ hookはstartup時に仕様submoduleをバックグラウンド更新し、標準
 | 個人記憶の索引 | `.design-review/claude_memory_index.md`、21項目 | 失敗経験が蓄積。リンク先本文は今回の提供対象外 |
 | 共有出力規約 | `Docs/agent/README.md:3`、`:9`、`:38` | 追跡対象、命名、秘密・生ログの除外を明文化 |
 | 過去成果物 | Docs直下16 md、旧AI資料31 md、Docs/agent配下22 md | 数は全てローカル実在数。Git追跡数ではない |
-| 引継ぎの散在例 | `Docs/作戦画面UI刷新_引継ぎ資料_2026-09-08.md`等 | 過去資料を新規違反とは断定しないが、正本への誘導が必要 |
+| 引継ぎの散在例 | `Docs/agent/handoffs/作戦画面UI刷新_引継ぎ資料_2026-09-08.md`等 | 過去資料を新規違反とは断定しないが、正本への誘導が必要 |
 | 追加の実装レポート | `SinfoniaOperator/GeminiSummarizer実装レポート.md`等 | ツールREADMEとAI作業記録が混在 |
 | QA生証跡 | `.uloop/qa/<runId>/` | `.gitignore:113`で除外。共有用要約への昇格が必要 |
 | worktree | `.claude/worktrees/`は存在し、今回列挙時は空 | 過去の並列編集やcleanupの安全性までは分からない |

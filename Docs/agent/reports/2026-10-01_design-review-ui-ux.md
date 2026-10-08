@@ -137,7 +137,7 @@ BattlePreparationは列挙型の予約値であり、現役の戦闘準備画面
 | 作戦引継ぎ 9/8 | 初回ズーム位置異常は未解決 | 後続の幾何更新・フォーカス処理あり。再現状況は不明 |
 | 研究引継ぎ 9/8 | ドラッグ共有・横方向未検証 | 同Manipulatorを作戦でも利用。共有変更の受入範囲は要確認 |
 
-根拠：`Docs/UI発注書_2026-08-31.md`、各引継ぎ資料の「実装内容」「検証状況」。
+根拠：`Docs/agent/reports/UI発注書_2026-08-31.md`、各引継ぎ資料の「実装内容」「検証状況」。
 現コード：`R/4.View/OutGame/Screen/HomeScreenView.cs:72`、`:148`。
 改造：`R/4.View/OutGame/Screen/SkillBuildScreenView.cs:57`、SkillElementDragAndDropManipulatorのSnapBackToStart。
 作戦：`R/6.Composition/OutGame/StageSelect/StageSelectInitializer.cs:1241`、`:1408`。
@@ -188,7 +188,7 @@ Localizationのchooseも同じ4種類である。
 | 教示媒体 | 無線＋テキスト＋コマンド | ポップアップ画像、ガイド文、字幕、成否表示 |
 | 終了後 | 通常課題への転移 | BattleCompleted後にHomeの4項目を案内 |
 
-根拠：`Docs/チュートリアルフロー詳細_ボイス収録用_2026-08-05.md` §3、Phase 3。
+根拠：`Docs/agent/reports/チュートリアルフロー詳細_ボイス収録用_2026-08-05.md` §3、Phase 3。
 現データ：`L/Data/Master/OutGame/StageSelect/Mission/MissionDefinition_Tutorial.asset:22`、`:27`、`:191`、`:542`。
 保存段階：`R/1.Domain/Persistent/Savedata/TutorialPhase.cs`。
 Home案内：`R/6.Composition/OutGame/Tutorial/OutGameTutorialInitializer.cs:28`。
