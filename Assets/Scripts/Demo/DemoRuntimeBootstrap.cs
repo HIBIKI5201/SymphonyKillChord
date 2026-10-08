@@ -178,6 +178,12 @@ namespace KillChord.Demo
                 return;
             }
 
+            // タイマーを使わない設定では計時を開始せず、時間切れによる強制出撃や終了遷移も起こさない。
+            if (!_config.IsTimerEnabled)
+            {
+                return;
+            }
+
             TryStartSessionFromOpeningScenario();
             TryStartSessionFromTutorialBattle();
             TryStartHomeTimer(isOutGameActive);
@@ -686,11 +692,13 @@ namespace KillChord.Demo
         /// <summary>
         ///     専用終了画面が表示された時点でセーブデータを削除します。
         ///     言語と音量は次のプレイヤーへ引き継ぐため、削除後のセーブデータへ戻して保存します。
+        ///     削除しない設定の場合は、タイトルから続きを再開できるようセーブデータを残します。
         /// </summary>
         private async void TryResetSaveDataOnEndScene(Scene scene)
         {
             if (_isSaveDataReset
                 || _config == null
+                || !_config.IsSaveDataResetOnEnd
                 || !string.Equals(scene.name, _config.EndSceneName, StringComparison.Ordinal))
             {
                 return;
