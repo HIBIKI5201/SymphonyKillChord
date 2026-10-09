@@ -98,6 +98,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         bool TrySwitchTarget(in Vector3 playerPosition, in Vector3 direction);
 
         /// <summary>
+        ///     現在のターゲットを候補から外して評価し、次のターゲットへの切り替えを試みる。
+        /// </summary>
+        /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
+        /// <param name="direction"> 選択基準に使用する方向。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。 </returns>
+        bool TrySwitchToNextTarget(in Vector3 playerPosition, in Vector3 direction);
+
+        /// <summary>
         ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
         /// </summary>
         /// <param name="targetId"> 設定対象のターゲットID。 </param>

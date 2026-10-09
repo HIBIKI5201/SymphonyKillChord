@@ -30,6 +30,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="getCurrentTargetPositionFunc"> 現在ターゲット位置の取得処理。</param>
         /// <param name="updateCandidateAction"> 候補ターゲット更新処理。</param>
         /// <param name="trySwitchTargetFunc"> 別ターゲットへの切り替え処理。</param>
+        /// <param name="trySwitchToNextTargetFunc"> 現在ターゲットを除いた次のターゲットへの切り替え処理。</param>
         /// <param name="trySetTargetByIdFunc"> 指定IDのターゲットを現在ターゲットへ設定する処理。</param>
         /// <param name="followCalculator"> 追従移動計算クラス。</param>
         /// <param name="lockOnRotationCalculator"> ロックオン回転計算クラス。</param>
@@ -47,6 +48,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             Func<(bool HasTarget, Vector3 TargetPosition)> getCurrentTargetPositionFunc,
             Action<Vector3, Vector3> updateCandidateAction,
             Func<Vector3, Vector3, bool> trySwitchTargetFunc,
+            Func<Vector3, Vector3, bool> trySwitchToNextTargetFunc,
             Func<Guid, bool> trySetTargetByIdFunc,
             CameraFollowCalculator followCalculator,
             CameraLockOnRotationCalculator lockOnRotationCalculator,
@@ -65,6 +67,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _getCurrentTargetPositionFunc = getCurrentTargetPositionFunc;
             _updateCandidateAction = updateCandidateAction;
             _trySwitchTargetFunc = trySwitchTargetFunc;
+            _trySwitchToNextTargetFunc = trySwitchToNextTargetFunc;
             _trySetTargetByIdFunc = trySetTargetByIdFunc;
             _followCalculator = followCalculator;
             _lockOnRotationCalculator = lockOnRotationCalculator;
@@ -242,6 +245,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Action _clearTargetAction;
         private Func<(bool HasTarget, Vector3 TargetPosition)> _getCurrentTargetPositionFunc;
         private Func<Vector3, Vector3, bool> _trySwitchTargetFunc;
+        private Func<Vector3, Vector3, bool> _trySwitchToNextTargetFunc;
         private Func<Guid, bool> _trySetTargetByIdFunc;
         private CameraLockOnState _lockOnState;
         private bool _hasCompletedInitialUpdate;
@@ -587,7 +591,8 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     未ロックなら手動でロックし、自動・手動のロック中なら解除する。
+        ///     未ロックなら手動でロックし、手動ロック中なら解除する。
+        ///     自動ロック中は次の敵へ移り、移れる敵がいなければ解除する。
         /// </summary>
         /// <param name="currentPosition"> プレイヤーの現在位置。</param>
         /// <param name="direction"> 現在のカメラ前方方向。</param>
@@ -598,6 +603,15 @@ namespace KillChord.Runtime.View.InGame.Camera
                 _lockOnState = CameraLockOnState.LockOnManual;
                 _autoLockOnReleaseTracker.Reset();
                 _changeTargetAction.Invoke(currentPosition, direction);
+                return;
+            }
+
+            if (_lockOnState == CameraLockOnState.LockOnAuto
+                && _trySwitchToNextTargetFunc != null
+                && _trySwitchToNextTargetFunc.Invoke(currentPosition, direction))
+            {
+                // 左右切り替えと同じく自動ロックのまま、視野外の対象へ移った直後の猶予だけを更新する。
+                _autoLockOnReleaseTracker.ExtendViewportGrace();
                 return;
             }
 
