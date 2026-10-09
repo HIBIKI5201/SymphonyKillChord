@@ -1,6 +1,6 @@
 # 機械テストのテストランナー設計 (2026-09-06)
 
-`spec/analysis/2026-09-06/qa-testcases.md` で **実行者 = 機械 / 機械+人間** とした 37 ケースを、
+`Docs/agent/analysis/anatomia-augur/2026-09-06_symphony-kill-chord/spec/qa-testcases.md` で **実行者 = 機械 / 機械+人間** とした 37 ケースを、
 Unity Test Framework で回すための構成。Augur 台帳 (`.augur/tests.config.json`) から
 `augur tests run` で起動できる形に合わせる。
 

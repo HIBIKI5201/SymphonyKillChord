@@ -802,6 +802,44 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private void StageMapViewportGeometryChangedHandler(GeometryChangedEvent evt)
         {
             UpdateStageMapVerticalAlignment(evt.newRect.height);
+            UpdateStageMapContentWidth(evt.newRect.width);
+        }
+
+        /// <summary>
+        ///     作戦マップ内容要素の幅を、右端ノードもフォーカス位置へスクロールできる長さに更新する。
+        /// </summary>
+        /// <param name="viewportWidth"> 作戦マップScrollViewの表示領域幅。 </param>
+        private void UpdateStageMapContentWidth(float viewportWidth)
+        {
+            if (_stageMapContent == null) { return; }
+
+            _stageMapContent.style.width =
+                _stageMapCanvasWidth + MAP_LEFT_DRAG_BUFFER + CalculateMapRightScrollBuffer(viewportWidth);
+        }
+
+        /// <summary>
+        ///     キャンバス右端の座標が表示領域のフォーカス位置まで来られるよう、右側に足すスクロール余白を求める。
+        /// </summary>
+        /// <param name="viewportWidth"> 作戦マップScrollViewの表示領域幅。 </param>
+        /// <returns> 右側のスクロール余白。表示領域幅が未確定の場合は0。 </returns>
+        private float CalculateMapRightScrollBuffer(float viewportWidth)
+        {
+            if (!IsValidLayoutLength(viewportWidth)) { return 0.0f; }
+
+            return viewportWidth * (1.0f - FOCUS_TARGET_SCREEN_RATIO);
+        }
+
+        /// <summary>
+        ///     作戦マップの水平スクロール可能な最大オフセットを求める。
+        /// </summary>
+        /// <returns> 右側のスクロール余白を含めた最大スクロールオフセットX。 </returns>
+        private float GetStageMapMaxScrollX()
+        {
+            float viewportWidth = GetStageMapViewportWidth();
+            return Mathf.Max(
+                0.0f,
+                _stageMapCanvasWidth + MAP_LEFT_DRAG_BUFFER
+                    + CalculateMapRightScrollBuffer(viewportWidth) - viewportWidth);
         }
 
         /// <summary>
@@ -1238,6 +1276,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             _stageMapCanvas = mapCanvas;
             _stageMapCanvasHeight = canvasHeight;
             _stageMapCanvasWidth = canvasWidth;
+            UpdateStageMapContentWidth(GetStageMapViewportWidth());
             _stageMapScrollView.contentViewport.RegisterCallback<GeometryChangedEvent>(
                 StageMapViewportGeometryChangedHandler);
             _stageMapDragManipulator = new ScrollViewDragManipulator(_stageMapScrollView, ScrollDragAxis.Horizontal);
@@ -1276,9 +1315,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             // 影響でタイミングによって範囲が取得できないことがあるため、
             // ClampScrollOffsetXと同じ「自前で追跡しているキャンバス幅/表示領域幅」から算出する。
             float viewportWidth = GetStageMapViewportWidth();
-            float maxScrollX = Mathf.Max(
-                0.0f,
-                _stageMapCanvasWidth + MAP_LEFT_DRAG_BUFFER - viewportWidth);
+            float maxScrollX = GetStageMapMaxScrollX();
             float t = maxScrollX > 0.0f
                 ? Mathf.Clamp01(_stageMapScrollView.scrollOffset.x / maxScrollX)
                 : 0.0f;
@@ -1730,9 +1767,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <returns> スクロール可能範囲にクランプされたスクロールオフセット。 </returns>
         private float ClampScrollOffsetX(float rawScrollX)
         {
-            float maxScrollX = Mathf.Max(
-                0.0f,
-                _stageMapCanvasWidth + MAP_LEFT_DRAG_BUFFER - GetStageMapViewportWidth());
+            float maxScrollX = GetStageMapMaxScrollX();
             return Mathf.Clamp(rawScrollX, 0.0f, maxScrollX);
         }
 

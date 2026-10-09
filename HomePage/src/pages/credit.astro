@@ -3,7 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import PageHeader from '../components/PageHeader.astro';
 import CreditCategory from '../components/CreditCategory.astro';
-import credits from '../data/credits.json';
+// クレジットの正本はゲームと共有している Assets/StreamingAssets/Credits/credits.json である。
+// サイトはカテゴリ・役職・名前・リードだけを表示し、読み仮名・役職表記・所属はゲーム側で使う。
+import credits from '../../../Assets/StreamingAssets/Credits/credits.json';
 ---
 
 <Layout title="クレジット | Symphony Kill Chord" description="Symphony Kill Chordの制作スタッフ一覧。">
@@ -11,7 +13,7 @@ import credits from '../data/credits.json';
 		<PageHeader eyebrow="Credit" title="クレジット" />
 
 		<section id="credit-list">
-			{credits.map((entry) => <CreditCategory category={entry.category} roles={entry.roles} />)}
+			{credits.categories.map((entry) => <CreditCategory category={entry.category} roles={entry.roles} />)}
 		</section>
 	</main>
 

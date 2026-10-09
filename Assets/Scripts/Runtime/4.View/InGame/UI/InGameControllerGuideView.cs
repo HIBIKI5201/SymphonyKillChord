@@ -50,6 +50,18 @@ namespace KillChord.Runtime.View.InGame.UI
         private int _subscriptionRevision;
 
         /// <summary>
+        ///     スマホではタッチで操作するため、コントローラーとキーボードの操作説明を隠します。
+        /// </summary>
+        private void Awake()
+        {
+            // タイトル画面の案内と同じ判定にそろえる。Awake中に隠すため、OnEnableでの購読も行わない。
+            if (UnityEngine.Application.isMobilePlatform)
+            {
+                gameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>
         ///     ローカライズの初期化後に現在言語の操作説明を購読します。
         /// </summary>
         private void OnEnable()

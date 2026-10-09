@@ -46,7 +46,7 @@ on:
         type: boolean
         default: false
       cpu_usage_percent:
-        description: 'Unity使用コア数割合（手動実行時は既存の安全制限を一時的に無効化）'
+        description: 'Unity使用コア数割合（自動ビルドは50%）'
         required: true
         type: choice
         default: '25%'
@@ -286,6 +286,8 @@ jobs:
       UNITY_EXE_PATH: ${{ vars.UNITY_EXE_PATH }}
       UNITY_BUILD_EXECUTE_METHOD: ${{ vars.UNITY_BUILD_EXECUTE_METHOD }}
       UNITY_PROFILE_BUILD_TIMEOUT_SEC: 7200
+      # Android は IL2CPP とシェーダー（GLES3 / Vulkan）の処理が重く、2時間では終わらないことがあるため長めにする。
+      UNITY_ANDROID_PROFILE_BUILD_TIMEOUT_SEC: 10800
       IS_MANUAL_BUILD: ${{ github.event_name == 'workflow_dispatch' }}
       UNITY_CPU_USAGE_PERCENT: ${{ inputs.cpu_usage_percent }}
       AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
@@ -438,6 +440,61 @@ jobs:
           persist-credentials: false
           # Library の削除可否は直前の事前クリーンアップで判断するため、checkout では削除しない。
           clean: false
+
+# ==================================================================================================
+
+      # Unity は 260 文字を超えるパスを扱えず、作業フォルダが深いと Library\PackageCache の深いファイルで
+      # ビルドが失敗する（BuildRunner/README.md「作業フォルダを短い場所に移す」）。Unity に渡すプロジェクトの
+      # パス（UNITY_PROJECT_PATH）をここで決める。ランナーの作業フォルダは <作業フォルダ>\<リポジトリ名>\<リポジトリ名>
+      # という固定の形で深くなりやすいため、長い場合は短い別名から Unity を起動する。
+      # - 70 文字以内ならそのまま使う。
+      # - 長い場合は <ドライブ>:\SKCBuilder\<ランナー名> にジャンクションを作って使う。Unity は別名のまま
+      #   プロジェクトを開くので、パスの長さの上限を避けられる（2026-10 に Windows ビルドで確認）。
+      #   SKCBuilder には、このフォルダの説明（BuildRunner/SKCBuilder-README.md）を README.md として置く。
+      # - ジャンクションを作れなかったときは、直し方を表示して止める。
+      - name: Unityプロジェクトのパス長の確認
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          $Workspace = $env:GITHUB_WORKSPACE
+          $MaxProjectPathLength = 70
+          Write-Host "プロジェクトのパス: $Workspace（$($Workspace.Length) 文字、上限 $MaxProjectPathLength 文字）"
+          if ($Workspace.Length -le $MaxProjectPathLength) {
+            "UNITY_PROJECT_PATH=$Workspace" | Add-Content -Path $env:GITHUB_ENV
+            Write-Host "[INFO]: そのまま Unity に渡します。"
+            exit 0
+          }
+
+          $JunctionRoot = Join-Path ([System.IO.Path]::GetPathRoot($Workspace)) "SKCBuilder"
+          $Junction = Join-Path $JunctionRoot $env:RUNNER_NAME
+          try {
+            New-Item -ItemType Directory -Path $JunctionRoot -Force -ErrorAction Stop | Out-Null
+            $ReadmeSource = Join-Path $Workspace "BuildRunner\SKCBuilder-README.md"
+            if (Test-Path -LiteralPath $ReadmeSource) {
+              Copy-Item -LiteralPath $ReadmeSource -Destination (Join-Path $JunctionRoot "README.md") -Force
+            }
+            if (Test-Path -LiteralPath $Junction) {
+              $Existing = Get-Item -LiteralPath $Junction -Force
+              if (-not ($Existing.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+                throw "$Junction はジャンクションではない通常のフォルダです。中身を確認して移動または削除してください。"
+              }
+              # 前回のジャンクションは、リンク先の中身を消さないよう rmdir でリンクだけ外す
+              cmd /c rmdir "$Junction"
+            }
+            New-Item -ItemType Junction -Path $Junction -Target $Workspace -ErrorAction Stop | Out-Null
+          } catch {
+            Write-Host "::error::プロジェクトのパスが $($Workspace.Length) 文字で長いため短い別名（$Junction）を作ろうとしましたが、失敗しました: $_。このままでは Unity がパスの長さの上限（260文字）でビルドに失敗します。ランナー $env:RUNNER_NAME の作業フォルダを短い場所に移してください（BuildRunner/README.md の「作業フォルダを短い場所に移す」）。"
+            exit 1
+          }
+          "UNITY_PROJECT_PATH=$Junction" | Add-Content -Path $env:GITHUB_ENV
+          Write-Host "[INFO]: パスが長いため、短い別名 $Junction（ジャンクション）から Unity を起動します。"
 
 # ==================================================================================================
 
@@ -877,7 +934,7 @@ jobs:
           Write-Host "Unity実行ファイルパス: $env:UNITY_EXE_PATH"
           Write-Host "Unity実行メソッド: $(if ($env:UNITY_BUILD_EXECUTE_METHOD) { $env:UNITY_BUILD_EXECUTE_METHOD } else { '未設定 (デフォルト使用)' })"
           Write-Host "プロファイルごとのUnityビルドタイムアウト: $env:UNITY_PROFILE_BUILD_TIMEOUT_SEC 秒"
-          Write-Host "Unity使用コア数割合: $(if ($env:IS_MANUAL_BUILD -eq 'true') { $env:UNITY_CPU_USAGE_PERCENT } else { '自動設定（安全制限あり）' })"
+          Write-Host "Unity使用コア数割合: $(if ($env:IS_MANUAL_BUILD -eq 'true') { $env:UNITY_CPU_USAGE_PERCENT } else { '自動設定（50%）' })"
           Write-Host "対象プロファイル: $(if ($env:SELECTED_PROFILES) { $env:SELECTED_PROFILES } else { '指定なし（全件）' })"
           Write-Host ""
 
@@ -912,7 +969,7 @@ jobs:
               "-batchmode",
               "-quit",
               "-nographics",
-              "-projectPath", $env:GITHUB_WORKSPACE,
+              "-projectPath", $env:UNITY_PROJECT_PATH,
               "-ignorecompilererrors",
               "-logFile", $LogPath
             ) `
@@ -1259,7 +1316,6 @@ jobs:
           $EmergencyMinimumFreeSpaceGB = 5
           $MaximumLogSizeGB = 1
           $ResourceCheckIntervalMilliseconds = 30000
-          $WindowsUnityCpuLimit = 4
           $MaximumAffinityCpuCount = 63
           $AllowedCpuUsagePercentages = @("25%", "50%", "75%", "100%")
           $RunTimestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
@@ -1272,7 +1328,7 @@ jobs:
           $DiscoveryLogFile = "unity_build_${RunTimestamp}_profile-discovery.log"
           $DiscoveryArgs = @(
             "-batchmode",
-            "-projectPath", "${{ github.workspace }}",
+            "-projectPath", "$env:UNITY_PROJECT_PATH",
             "-executeMethod", "KillChord.Editor.AutoBuilder.AutoBuilder.ExportProfileNamesFromCli",
             "-buildMode", "$env:BUILD_MODE",
             "-gameDataVariant", "$env:BUILD_VARIANT",
@@ -1366,14 +1422,14 @@ jobs:
               exit 1
             }
             $UnityCpuUsagePercent = [int]([string]$env:UNITY_CPU_USAGE_PERCENT).TrimEnd('%')
-            $UnityCpuCapacity = [Math]::Min($MaximumAffinityCpuCount, $CpuCount)
-            $UnityCpuCount = [int][Math]::Max(1, [Math]::Floor($UnityCpuCapacity * $UnityCpuUsagePercent / 100))
-            $CpuAllocationMode = "手動指定（既存の安全制限を一時的に無効化）"
+            $CpuAllocationMode = "手動指定"
           } else {
-            $UnityCpuLimit = if ($env:RUNNER_OS -eq "Windows") { $WindowsUnityCpuLimit } else { $MaximumAffinityCpuCount }
-            $UnityCpuCount = [int][Math]::Min($UnityCpuLimit, [Math]::Max(1, [Math]::Floor($CpuCount / 2)))
-            $CpuAllocationMode = "自動設定（既存の安全制限を適用）"
+            # 自動ビルドは論理CPUの半分を使う（ビルド中の作業用に残りを空ける）。
+            $UnityCpuUsagePercent = 50
+            $CpuAllocationMode = "自動設定"
           }
+          $UnityCpuCapacity = [Math]::Min($MaximumAffinityCpuCount, $CpuCount)
+          $UnityCpuCount = [int][Math]::Max(1, [Math]::Floor($UnityCpuCapacity * $UnityCpuUsagePercent / 100))
 
           # プロセッサアフィニティビットマスクの生成
           $AffinityMask = if ($UnityCpuCount -eq $MaximumAffinityCpuCount) {
@@ -1384,9 +1440,7 @@ jobs:
 
           Write-Host "検出された論理 CPU 数: $CpuCount"
           Write-Host "CPU割り当てモード: $CpuAllocationMode"
-          if ($IsManualBuild) {
-            Write-Host "Unity使用コア数割合: $UnityCpuUsagePercent%"
-          }
+          Write-Host "Unity使用コア数割合: $UnityCpuUsagePercent%"
           Write-Host "Unity 割り当て CPU 数: $UnityCpuCount"
           Write-Host "Unity CPU アフィニティマスク: 0x$('{0:X}' -f $AffinityMask)"
           Write-Host ""
@@ -1427,7 +1481,7 @@ jobs:
             return [Math]::Round($DriveInfo.Free / 1GB, 2)
           }
 
-          # 実行中のCPU使用率の手動切り替え（PowerShell/SetBuildCpuMode.ps1）。処理は .github/scripts/BuildCpuMode.ps1 にある。
+          # 実行中のCPU使用率の手動切り替え（BuildRunner/SetBuildCpuMode.ps1）。処理は .github/scripts/BuildCpuMode.ps1 にある。
           # ワークフロー1ステップの run は21000文字の上限があるため、関数は外部スクリプトに置く。
           $RunnerWorkerId = $null
           if ($env:RUNNER_OS -eq "Windows") {
@@ -1439,7 +1493,7 @@ jobs:
             }
           }
           if ($RunnerWorkerId) {
-            Write-Host "[INFO]: CPU使用率は実行中に切り替えられます（PowerShell/SetBuildCpuMode.ps1、Runner.Worker PID: $RunnerWorkerId）。"
+            Write-Host "[INFO]: CPU使用率は実行中に切り替えられます（BuildRunner/SetBuildCpuMode.ps1、Runner.Worker PID: $RunnerWorkerId）。"
           }
 
           # 手動切り替えがあれば @(割合, CPU数, マスク)、無ければ $null を返す
@@ -1522,7 +1576,7 @@ jobs:
             $UnityArgs = @(
               "-batchmode",
               "-job-worker-count", "$ProfileCpuCount",
-              "-projectPath", "${{ github.workspace }}",
+              "-projectPath", "$env:UNITY_PROJECT_PATH",
               "-executeMethod", "$ExecuteMethod",
               "-buildMode", "$env:BUILD_MODE",
               "-selectedProfiles", "$ProfileName",
@@ -1531,6 +1585,19 @@ jobs:
             if ($env:BUILD_VARIANT) {
               $UnityArgs += @("-gameDataVariant", "$env:BUILD_VARIANT")
             }
+            # 前回のビルド対象（例: Android）のまま起動して途中で切り替えると、Entities のコンテンツ作成が
+            # 「Unable to build with the current configuration」で失敗するため、最初から目的の対象で起動する。
+            $BuildTargetArg = switch -Regex ($ProfileName) {
+              '(?i)_Android$' { 'Android' }
+              '(?i)_Windows$' { 'Win64' }
+              '(?i)_iOS$' { 'iOS' }
+              '(?i)_macOS$' { 'OSXUniversal' }
+              default { $null }
+            }
+            if ($BuildTargetArg) {
+              $UnityArgs += @("-buildTarget", $BuildTargetArg)
+            }
+            $ProfileBuildTimeoutSec = if ($ProfileName -match '(?i)_Android$') { [int]$env:UNITY_ANDROID_PROFILE_BUILD_TIMEOUT_SEC } else { $ProfileTimeoutSec }
 
             try {
               $UnityProcess = Start-Process `
@@ -1556,7 +1623,7 @@ jobs:
               $StopReason = $null
               while (-not $UnityProcess.WaitForExit($ResourceCheckIntervalMilliseconds)) {
                 $ElapsedSeconds = ([DateTime]::UtcNow - $ProfileStartedAt).TotalSeconds
-                if ($ElapsedSeconds -ge $ProfileTimeoutSec) {
+                if ($ElapsedSeconds -ge $ProfileBuildTimeoutSec) {
                   $StopReason = "Timeout"
                   break
                 }
@@ -1592,7 +1659,7 @@ jobs:
 
               if ($StopReason) {
                 if ($StopReason -eq "Timeout") {
-                  Write-Host "[ERROR]: $ProfileName のビルドが $ProfileTimeoutSec 秒後にタイムアウトしました。"
+                  Write-Host "[ERROR]: $ProfileName のビルドが $ProfileBuildTimeoutSec 秒後にタイムアウトしました。"
                 }
                 try {
                   if ($env:RUNNER_OS -eq "Windows") {

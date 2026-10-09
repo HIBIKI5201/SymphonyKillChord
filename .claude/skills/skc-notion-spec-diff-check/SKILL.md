@@ -1,6 +1,6 @@
 ---
 name: skc-notion-spec-diff-check
-description: "Find gaps and inconsistencies between the Notion game specification (mirrored at Docs/NotionSpecifications) and the actual implementation (Assets/Scripts/Runtime and related). Use whenever the user asks to check spec/implementation drift, find undocumented systems, find unimplemented spec items, refresh the Notion export, or audit whether a specific feature/system matches its written spec. Produces a categorized report (spec-but-no-impl / impl-but-no-spec / both-incomplete) with file:line evidence, following the precedent at Docs/仕様書と実装の差分分析_2026-08-23.md."
+description: "Find gaps and inconsistencies between the Notion game specification (mirrored at Docs/NotionSpecifications) and the actual implementation (Assets/Scripts/Runtime and related). Use whenever the user asks to check spec/implementation drift, find undocumented systems, find unimplemented spec items, refresh the Notion export, or audit whether a specific feature/system matches its written spec. Produces a categorized report (spec-but-no-impl / impl-but-no-spec / both-incomplete) with file:line evidence, following the precedent at Docs/agent/reports/仕様書と実装の差分分析_2026-08-23.md."
 ---
 
 # Notion Spec ↔ Implementation Diff Check
@@ -8,7 +8,7 @@ description: "Find gaps and inconsistencies between the Notion game specificatio
 This project mirrors its Notion specification into the repo as Markdown
 (`Docs/NotionSpecifications/`) via a custom exporter, and there's already one
 full-scale precedent report at
-[Docs/仕様書と実装の差分分析_2026-08-23.md](../../../Docs/仕様書と実装の差分分析_2026-08-23.md).
+[Docs/agent/reports/仕様書と実装の差分分析_2026-08-23.md](../../../Docs/agent/reports/仕様書と実装の差分分析_2026-08-23.md).
 Read that file first — it defines the categorization scheme this skill reuses and shows
 what good evidence (file:line citations on both sides) looks like in practice.
 
@@ -35,7 +35,8 @@ Before running it:
    updating the real one (this exact mistake is documented in the precedent report §0.2).
    ```bash
    # from repo root:
-   ./SinfoniaOperator/NotionMarkdownExporter/bin/Release/net10.0/win-x64/publish/NotionMarkdownExporter.exe
+   ./SinfoniaOperator/NotionMarkdownExporter.exe              # Windows
+   ./SinfoniaOperator/run-tool.sh NotionMarkdownExporter      # macOS / Linux (dotnet run)
    ```
    Or pass `--output "Docs/NotionSpecifications"` explicitly to be safe regardless of CWD.
 4. Requires `NOTION_TOKEN` to be configured (gitignored `SinfoniaOperator/sinfonia-operator.secrets.json`,
@@ -122,7 +123,7 @@ series of audits, not a one-off format:
 ```
 
 Order findings by priority within each section, most severe first. Save the report as
-`Docs/仕様書と実装の差分分析_<YYYY-MM-DD>.md` (matching the existing filename convention) rather
+`Docs/agent/reports/<YYYY-MM-DD>_spec-impl-diff.md` (matching the existing filename convention) rather
 than overwriting the precedent report — each run is a dated snapshot, and older ones stay as
 history. Don't create the file until you've actually gathered evidence; don't pad the report with
 low-confidence guesses just to fill out a section — "要確認" is a legitimate priority when the

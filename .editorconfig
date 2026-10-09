@@ -2,3 +2,10 @@ root = true
 
 [*.{cs,md,json,yml}]
 charset = utf-8
+
+# Roslynアナライザ(RoslynAnalyzers/SkcAnalyzers)。
+# 検査対象(名前空間が KillChord.Runtime / KillChord.Editor のコード)と、ルールごとの既定の深刻度は
+# アナライザ側で決めている(Unityのコンパイラはこのファイルの深刻度を反映しない場合があるため)。
+# 特定のルールの深刻度を変えたい場合だけ、次のように書く(IDEでは反映される)。
+#   [*.cs]
+#   dotnet_diagnostic.SKC0017.severity = error

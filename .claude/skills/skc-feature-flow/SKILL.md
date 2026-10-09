@@ -19,6 +19,7 @@ description: "Run this repo's full feature-branch flow end to end: create `featu
 | C# を編集したあとの規約レビュー | `skc-code-guideline-check` |
 | 動作確認 | `uloop-run-tests` / `uloop-control-play-mode` など |
 | 仕様書への反映が要るとき | `skc-notion-spec-write`（別作業として扱い、ユーザーに確認してから） |
+| 作業中に見つけた、今回は直さない問題・課題 | `skc-issue-report`（Issue にして、PR の「未確認・残論点」から `#N` で参照する） |
 
 ## 0. 入力を決める
 

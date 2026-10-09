@@ -42,5 +42,32 @@ Docs/agent/
 | パス | 内容 |
 | --- | --- |
 | `analysis/omnipotens/2026-07-18_symphony-kill-chord/` | Omnipotens 最終解析（アーキテクチャレビュー・仕様起点ドメインモデル・UX レビュー）。旧 `Docs/G-Lab/` |
+| `analysis/anatomia-augur/2026-09-06_symphony-kill-chord/` | Anatomia / Augur の解析結果とドメイン突き合わせ・QA テストケース。旧 `spec/analysis/2026-09-06/`（Issue #2081） |
+| `analysis/runtime-audit/2026-09-17_runtime-scripts/` | ランタイムコード監査（購読解除漏れ・GC・設計原則など 18 観点）。旧 `Docs/RuntimeAudit/`（Issue #2081） |
 | `reports/2026-09-28_event-exhibition-meeting.md` | 今後のイベント出展・コンテスト応募の検討会議の議事録（候補の規約調査と決定） |
 | `reports/2026-09-29_homepage-news-meeting.md` | ホームページのお知らせ追加（TGS出展・ファミ通掲載）の議事録（Issue #2321 / #2322、タスク） |
+| `reports/2026-10-01_design-review-summary.md` | 全体設計レビューの総括（10 観点の評価・観点をまたぐ問題・優先順位・限界。Issue #2358〜#2363・#2415〜#2418） |
+| `reports/2026-10-01_design-review-google-drive.md` | 全体設計レビュー: Google Drive の構成・命名・所有権・共有権限・ID 依存（Issue #2358） |
+| `reports/2026-10-01_design-review-notion-spec.md` | 全体設計レビュー: Notion 仕様書の情報設計・規則の競合・仕様とコードの差（Issue #2359） |
+| `reports/2026-10-01_design-review-game.md` | 全体設計レビュー: コアループ・メタループ・チュートリアル・スコープ（Issue #2360） |
+| `reports/2026-10-01_design-review-code.md` | 全体設計レビュー: コード・アーキテクチャ（設計思想への準拠・モジュール境界・テスト）（Issue #2361） |
+| `reports/2026-10-01_design-review-ops.md` | 全体設計レビュー: ブランチ・PR・CI・ドキュメント・引継ぎの運用（Issue #2362） |
+| `reports/2026-10-01_design-review-harness.md` | 全体設計レビュー: AI エージェントの運用基盤（指示・スキル・道具・検証・記憶）（Issue #2363） |
+| `reports/2026-10-01_design-review-asset-pipeline.md` | 全体設計レビュー: Drive → Assets → Addressables のアセットパイプラインと命名（Issue #2415） |
+| `reports/2026-10-01_design-review-ui-ux.md` | 全体設計レビュー: 画面遷移・入力・オンボーディング・アクセシビリティ（Issue #2416） |
+| `reports/2026-10-01_design-review-qa.md` | 全体設計レビュー: 自動テスト・QA シート・再検証・リリース判定（Issue #2417） |
+| `reports/2026-10-01_design-review-release.md` | 全体設計レビュー: ビルド・署名・ストア・性能・権利・セーブ互換（Issue #2418） |
+
+## 旧置き場から移したもの（Issue #2081）
+
+命名規則より前に作られたため、ファイル名は元のまま（日本語名・日付が末尾）にしている。
+
+| 旧パス | 新パス |
+| --- | --- |
+| `Docs/AI資料まとめ/*.md` | `reports/`（同名ファイル） |
+| `Docs/AI資料まとめ/仕様更新ドラフト_2026-08-03/` | `handoffs/仕様更新ドラフト_2026-08-03/` |
+| `Docs/` 直下の調査・差分分析・発注書・権利確認一覧（5 件） | `reports/`（同名ファイル） |
+| `Docs/` 直下の引継ぎ資料・計画・Notion 下書き（9 件） | `handoffs/`（同名ファイル） |
+| `Docs/アセット名リスト_命名規則提案.md`・`Docs/用語集_追加候補.md` | `Docs/AI資料まとめ/` の同内容ファイルと重複していたため削除し、`reports/` 側に一本化 |
+| `Docs/RuntimeAudit/` | `analysis/runtime-audit/2026-09-17_runtime-scripts/report/` |
+| `spec/analysis/2026-09-06/` | `analysis/anatomia-augur/2026-09-06_symphony-kill-chord/spec/` |

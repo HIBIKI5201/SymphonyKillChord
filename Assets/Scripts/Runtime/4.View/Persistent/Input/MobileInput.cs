@@ -23,6 +23,9 @@ namespace KillChord.Runtime.View.Persistent.Input
         [SerializeField, Min(0f), Tooltip("フリックとして扱う画面上の最小移動距離。")]
         private float _flickMinDistance = 80f;
 
+        [SerializeField, Range(0f, 1f), Tooltip("視点操作を受け付ける領域の左端（画面幅に対する割合）。0.5で右半分。")]
+        private float _lookAreaMinScreenRatioX = 0.5f;
+
         private PointerEventData _eventData;
         private bool _initialized = false;
         private bool _isTracking = false;
@@ -165,6 +168,10 @@ namespace KillChord.Runtime.View.Persistent.Input
         private bool IsInsideTouchArea(Vector2 screenPosition)
         {
             const string TAG_NAME = "TouchArea";
+
+            // 視点操作は開始位置が画面右側のタッチに限る。左側は移動スティック用。
+            if (screenPosition.x < Screen.width * _lookAreaMinScreenRatioX)
+                return false;
 
             _eventData.position = screenPosition;
 

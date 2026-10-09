@@ -25,6 +25,21 @@ namespace KillChord.Runtime.View.OutGame.Navigation
         /// </summary>
         public const string INITIAL_FOCUS_CLASS_NAME = "initial-focus";
 
+        /// <summary> ナビゲーション可能な要素のフォーカスを入力状態に合わせるコールバックです。 </summary>
+        private static readonly EventCallback<FocusEvent> s_navigableFocusCallback = HandleNavigableFocus;
+
+        /// <summary>
+        ///     ナビゲーション可能な要素がフォーカスを得たことを入力状態の管理へ伝えます。
+        /// </summary>
+        /// <param name="focusEvent"> フォーカスイベントです。 </param>
+        private static void HandleNavigableFocus(FocusEvent focusEvent)
+        {
+            if (focusEvent.currentTarget is VisualElement element)
+            {
+                NavigationFocusVisibility.HandleFocused(element);
+            }
+        }
+
         /// <summary>
         ///     要素のフォーカス状態を親要素のUSSクラスへ同期します。
         ///     <para>
@@ -106,6 +121,10 @@ namespace KillChord.Runtime.View.OutGame.Navigation
             }
 
             element.AddToClassList(NAVIGABLE_CLASS_NAME);
+
+            // ポインター操作中のフォーカスは :hover と装飾が重なるため、共通の仕組みで外す。
+            // 同じデリゲートの二重登録は UI Toolkit 側で無視される。
+            element.RegisterCallback(s_navigableFocusCallback);
             return element;
         }
 
@@ -147,6 +166,13 @@ namespace KillChord.Runtime.View.OutGame.Navigation
         {
             if (element == null || element.panel == null)
             {
+                return;
+            }
+
+            // マウス・タッチ操作中は初期フォーカスを付けず、コントローラー入力時の再開先として記憶だけする。
+            if (!NavigationFocusVisibility.IsNavigationActive)
+            {
+                NavigationFocusVisibility.RememberPending(element);
                 return;
             }
 
