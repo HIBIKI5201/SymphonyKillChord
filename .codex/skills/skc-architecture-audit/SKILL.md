@@ -1,21 +1,23 @@
 ---
 name: skc-architecture-audit
-description: "Audit whether the whole Symphony Kill Chord codebase (Assets/Scripts/Runtime and related) follows the project's design philosophy (Assets/Scripts/DesignPhilosophy.md): module dependencies, class responsibilities, DI in the Composition layer, cross-module references only through the Adaptor layer, circular dependencies, and an architecture quality score with concrete improvement proposals. Use when the user asks for an architecture audit, a design-philosophy compliance check, a refactoring survey, or a module/layer dependency analysis across the project (not a review of one diff — use skc-code-guideline-check for that)."
+description: "Audit whether the whole Symphony Kill Chord codebase (Assets/Scripts/Runtime and related) follows the project's design philosophy (Assets/Scripts/DesignPhilosophy.md): module dependencies, class responsibilities, DI in the Composition layer, cross-module references only through the Adaptor layer, circular dependencies, and an architecture quality score with concrete improvement proposals. Use when the user asks for an architecture audit, a design-philosophy compliance check, a refactoring survey, or a module/layer dependency analysis across the project (not a review of one diff — use skc-code-review for that)."
 ---
 
 # Architecture Audit
 
 プロジェクト全体が設計思想に従って実装されているかを、ソフトウェアアーキテクトとして調査する。
-差分のレビューではなく、モジュール・レイヤー単位の横断的な監査に使う（1 つの変更のレビューは `skc-code-guideline-check` を使う）。
+差分のレビューではなく、モジュール・レイヤー単位の横断的な監査に使う（1 つの変更のレビューは `skc-code-review` を使う）。
 
 ## 必須参照
 
-監査を始める前に、次の正本を全文読む。
+監査を始める前に、次の共通規則を読む。同じ版をこのセッションで既に読んでいれば再読は不要。
 
 - `Assets/Scripts/DesignPhilosophy.md`（レイヤー構成・責務・DI・モジュール間公開の規則）
 - `Assets/Scripts/CodeGuidelines.md`（命名・クラスの種類）
 
 `Assets/Docs/ScriptsDocs/Architecture.txt` は設計思想の写しなので、正本と食い違うときは正本を優先する。
+
+対象レイヤーのクラス責務は `Assets/Scripts/DesignClassRoles.md` の該当節で確認する。実装例は必要時だけ読む。
 
 ## 最重要事項
 
@@ -108,4 +110,4 @@ Entity / ValueObject / Factory / Controller / Presenter / State / DTO / ViewMode
 
 ## 報告の置き場
 
-報告を保存するときは `Docs/agent/`（gitignore 対象）に置く。既に Issue がある指摘（`runtime-audit` ラベルなど）は、重複して報告せず Issue 番号を示す。
+報告を保存するときは `Docs/agent/`（git追跡対象。`Docs/agent/README.md` の命名に従いコミットする）に置く。既に Issue がある指摘（`runtime-audit` ラベルなど）は、重複して報告せず Issue 番号を示す。
