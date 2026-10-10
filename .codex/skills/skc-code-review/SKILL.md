@@ -9,11 +9,13 @@ description: Review Symphony Kill Chord Unity/C# changes against the repository'
 
 ## 必須参照
 
-レビュー開始時に、次の正本を全文読む。
+レビュー開始時に、次の共通規則を読む。同じ版をこのセッションで既に読んでいれば再読は不要。
 
 - `Assets/Scripts/DesignPhilosophy.md`
 - `Assets/Scripts/CodeGuidelines.md`
 - `references/source-routing.md`
+
+クラス責務は `Assets/Scripts/DesignClassRoles.md` の対象レイヤー節を読む。
 
 対象機能に関係する仕様書と用語ファイルだけを追加で読む。仕様書群全体を無差別に読み込まない。
 
