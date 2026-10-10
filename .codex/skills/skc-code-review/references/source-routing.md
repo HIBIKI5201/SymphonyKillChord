@@ -3,6 +3,8 @@
 ## 設計・規約の正本
 
 - 設計思想とレイヤー責務: `Assets/Scripts/DesignPhilosophy.md`
+- クラス責務の正本: `Assets/Scripts/DesignClassRoles.md`（対象レイヤーだけ読む）
+- 実装例: `Assets/Scripts/DesignExamples.md`（必要時だけ）
 - コード規約: `Assets/Scripts/CodeGuidelines.md`
 - 実装から抽出された補助資料: `Assets/Docs/ScriptsDocs/Architecture.txt`、`Assets/Docs/ScriptsDocs/CodingConventions.txt`
 
