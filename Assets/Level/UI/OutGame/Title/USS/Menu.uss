@@ -34,10 +34,8 @@
 }
 
 .bottom-button-root {
-    position: absolute;
-    bottom: 5%;
-    left: 0;
-    right: 0;
+    flex-shrink: 0;
+    margin-top: 24px;
     flex-direction: row;
     justify-content: center;
     align-items: center;
