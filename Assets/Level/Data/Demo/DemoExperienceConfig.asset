@@ -16,5 +16,6 @@ MonoBehaviour:
   _homeTimeLimitSeconds: 90
   _overallTimeLimitSeconds: 300
   _overallTimerStartPoint: 1
+  _isSaveDataResetOnEnd: 0
   _endSceneName: DemoEnd
   _titleSceneName: Title
