@@ -4,8 +4,15 @@ on:
   pull_request:
     branches:
       - develop
-      - main 
+      - main
     types: [ closed ]
+    # ゲーム内容（Unityプロジェクト）を変更しないPRでは実行自体を作らない。
+    # 実行を作ると、ビルド中の実行の後ろで待たされたうえ、先に待っているゲームのビルドを
+    # 後続ビルドとして打ち切らせてしまうため。範囲は check ジョブの変更チェックと揃える。
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
 
   workflow_dispatch:
     inputs:
@@ -200,8 +207,8 @@ jobs:
           fi
 
       # 前回のリリースから今回のマージまでに、Unityプロジェクト（Assets / Packages / ProjectSettings）の
-      # 変更が無ければビルドしない。マージしたPRの差分だけを見ると、経過時間の条件で見送られた
-      # Unityの変更が、後からUnity外だけのPRがマージされたときに取り残されるため、前回のリリースを起点にする。
+      # 変更が無ければビルドしない。PR自体の差分はトリガーの paths で絞っているが、経過時間の条件で
+      # 見送られたUnityの変更を次のビルドに含めるため、ここでは前回のリリースを起点にする。
       - name: Unityプロジェクトの変更をチェック
         id: unity_change
         if: steps.release_age.outputs.should_run == 'true'
