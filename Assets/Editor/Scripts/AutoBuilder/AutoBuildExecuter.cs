@@ -541,25 +541,24 @@ namespace KillChord.Editor.AutoBuilder
                 await WaitForEditorReady(timeoutSeconds: EXTENDED_EDITOR_READY_TIMEOUT_SECONDS);
                 LogDebug($"プレイヤービルド直前のエディタ準備完了: {profile.name}");
 
-                int executePlayerBuildRetryCount = 0;
-                const int MAX_EXECUTE_PLAYER_BUILD_RETRY = 300;
-                
+                // 準備完了の直後にも、Refreshが要求した再コンパイルとそれに伴う再インポートが
+                // 始まることがある。回数で打ち切ると数十秒で失敗するため、時間で待機する。
+                var executePlayerBuildWaitStopwatch = System.Diagnostics.Stopwatch.StartNew();
+
                 // BuildはdelayCallから実行する。
                 EditorApplication.delayCall += ExecutePlayerBuild;
 
                 void ExecutePlayerBuild()
                 {
-                    LogDebug("実際のプレイヤービルド処理(BuildPipeline.BuildPlayer)を開始");
                     EditorApplication.delayCall -= ExecutePlayerBuild;
 
                     if (EditorApplication.isCompiling || EditorApplication.isUpdating)
                     {
-                        executePlayerBuildRetryCount++;
-
-                        if (executePlayerBuildRetryCount > MAX_EXECUTE_PLAYER_BUILD_RETRY)
+                        if (executePlayerBuildWaitStopwatch.Elapsed.TotalSeconds > EXTENDED_EDITOR_READY_TIMEOUT_SECONDS)
                         {
                             Debug.LogError(
-                                $"[{nameof(AutoBuildExecuter)}] BuildPlayer retry limit exceeded : {profile.name}");
+                                $"[{nameof(AutoBuildExecuter)}] BuildPlayer wait timeout exceeded {EXTENDED_EDITOR_READY_TIMEOUT_SECONDS}s : {profile.name}. " +
+                                $"isCompiling={EditorApplication.isCompiling}, isUpdating={EditorApplication.isUpdating}");
 
                             NextSession(true);
                             return;
@@ -568,6 +567,11 @@ namespace KillChord.Editor.AutoBuilder
                         EditorApplication.delayCall += ExecutePlayerBuild;
                         return;
                     }
+
+                    executePlayerBuildWaitStopwatch.Stop();
+                    LogDebug(
+                        "実際のプレイヤービルド処理(BuildPipeline.BuildPlayer)を開始。" +
+                        $"準備待機: {executePlayerBuildWaitStopwatch.Elapsed.TotalSeconds:F2}秒");
 
                     bool hasFailure;
                     try
