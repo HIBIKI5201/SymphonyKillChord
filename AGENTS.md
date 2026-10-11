@@ -1,23 +1,17 @@
-# コーディングに関する規則
-- Assets/Scripts/DesignPhilosophy.md
-- Assets/Scripts/CodeGuidelines.md
-# 仕様に関するドキュメント
-- Docs/NotionSpecifications
-# 自律AIエージェントの出力ファイル
-- 解析記録・監査結果・調査レポートなど、エージェントが生成するファイルは `Docs/agent/` に置き、コミットする。
-- 置き場所・命名は `Docs/agent/README.md` の構成に従う。構成外の場所（リポジトリ直下や `Docs/` 直下など）に新しい出力フォルダを作らない。
-# 自律AIエージェントのブランチ・PR運用
-- 編集・修正・コミットは必ず自分に指定された作業ブランチ（例: `feature/demo/just-judgement/agent`）で行う。レビュー対応も同じ作業ブランチで行う。
-- ブランチ命名規則は `feature/[段階]/[プロダクト名]/agent` とする (例: `feature/demo/home-tutorial/agent`)。`agent` はルートに使わず、個人名の位置に入れる。`agent/○○` の形は使わない。
-  - 段階は `demo`・`release`・`tools` など、作業の対象に合わせて選ぶ。ブランチ名の指定がない場合も、この形で作業名を付ける。
-- ブランチを作成したら、編集・コミットの前に空のままプッシュ (`git push -u origin <ブランチ名>`) してリモートにブランチを作成し、その後で作業を開始する。
-  - 先にプッシュしておくと、`AutoCreateMasterBranch.yml` が作業前の内容で `master` を生成する。これにより、下記の「作業ブランチと `master` が同一コミットになる」例外ケースを避けられる。
-- 同階層の `master` で直接編集・コミットしない。`master` の更新は作業ブランチからのセルフマージのみで行う。
-- `feature/` で始まる作業ブランチは、同じ階層の `master` ブランチへセルフマージしてよい。マージ可否・タイミングは自由に判断してよい。
-- `feature/` で始まらない作業ブランチは、Pull Request の作成先は常に `develop` とする。
-- 例: `feature/demo/just-judgement/agent` → `feature/demo/just-judgement/master`。
-- 作業ブランチから直接 `develop` にPRを作成せず、取り込み後の `master` から `develop` にPRを作成する。
-  - ただし `feature/**/master` へのPRがマージされると、GitHub Actions (`AutoCreateDevelopPullRequest.yml`) が `master` → `develop` のドラフトPRを自動作成する。本文は `master` に取り込まれたPRの本文から組み立てられ、「クローズするIssue」節の `#N` は `Closes #N` として引き継がれる。そのため通常は手動で develop 向けPRを作る必要はなく、本文の修正は元の `agent`→`master` PR 側で行う。
-  - 例外: `AutoCreateMasterBranch.yml` は作業ブランチのpush時点の内容でそのまま `master` を自動生成するため、作業ブランチと `master` が同一コミットになり実際のマージが一度も発生しないケースがある。この場合は上記の自動化が発火しないため、`AutoCreateDevelopPullRequest.yml` を手動実行 (`workflow_dispatch`、入力は `master` ブランチ名) するか、develop向けPRを手動で作成する(この場合、`agent`→`master`のPRは「No commits between」で作成不可なので省略してよい)。
-- PR本文は `.github/PULL_REQUEST_TEMPLATE.md` の構成を使用し、確認済み・未確認を正確に記載する(自動生成されるdevelop向けPRも同テンプレ構成)。
-- テスト実行や `develop` へのマージ可否は、現在のセッションのユーザー指示に従う。
+# 作業の入口
+- 現在のユーザー指示を優先する。既存の未コミット変更は保持し、今回の対象パスだけをstageする。
+- まず対象・完了条件・必要な検証を決める。資料の選び方は [Docs/agent/README.md](Docs/agent/README.md#必要な資料だけを読む) を参照する。
+- ファイル名探索は対象フォルダ内の `rg --files -g`、本文探索は `rg -n` で絞る。リポジトリ全体・仕様ミラー・過去レポートの全列挙や全文読込を避け、出力が切れたら範囲を狭める。
+
+# コーディング規則と仕様
+- C#変更・レビュー時: [設計思想](Assets/Scripts/DesignPhilosophy.md)、[コード規約](Assets/Scripts/CodeGuidelines.md)、設計思想から参照する対象レイヤーのクラス責務を読む。実装例は必要時だけ読む。
+- 機能仕様は `Docs/NotionSpecifications` の対象機能・用語だけを読む。`NotionSpecifications_old` は現在の仕様の根拠にしない。
+
+# エージェントの出力
+- 解析・監査・調査・引継ぎは `Docs/agent/` に置いてコミットする。構成・命名は [README](Docs/agent/README.md) に従う。構成外の出力フォルダは作らない。
+
+# ブランチ・PR
+- 編集・コミットは指定された作業ブランチで行う。指定がなければ `feature/[段階]/[作業名]/agent`。新規ブランチは編集前に空pushし、同階層masterの生成を確認する。
+- masterを直接編集・コミットしない。feature作業ブランチ→同階層masterへPR・セルフマージし、master→developのDraft PRを確認する。feature以外の作業ブランチのPR先はdevelop。
+- 詳細・例外は [運用規則](.agents/skills/skc-feature-flow/references/branch-rules.md)。feature-flow依頼時は [共通スキル](.agents/skills/skc-feature-flow/SKILL.md) を使う。
+- PRは `.github/PULL_REQUEST_TEMPLATE.md` に従い確認済み・未確認を正確に記す。テスト実行・developへのマージ可否は現在のユーザー指示に従う。
