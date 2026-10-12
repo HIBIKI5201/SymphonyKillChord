@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="attackResult"> 攻撃結果です。 </param>
         /// <param name="attackType"> 攻撃タイプです。 </param>
         /// <param name="notifyNormalDamage"> 通常ダメージを通知するかどうかを示す値です。 </param>
-        /// <param name="confirmedDamage"> 全ての計算（被ダメージの補正・バリアの吸収を含む）のあとに加算する確定ダメージです。 </param>
+        /// <param name="confirmedDamage"> 与ダメージ倍率を掛け、全ての計算（被ダメージの補正・バリアの吸収を含む）のあとに加算する確定ダメージです。 </param>
         /// <returns> 計算結果の攻撃結果です。 </returns>
         public static AttackResult Execute(
             IAttacker attacker,
@@ -86,6 +86,10 @@ namespace KillChord.Runtime.Application.InGame.Battle
             {
                 result = attacker.StatusEffectSystem.ApplyOutgoingDamageModifiers(
                     attacker, defender, result);
+
+                // 確定ダメージにも与ダメージ倍率のバフを掛ける。
+                confirmedDamage = ApplyOutgoingModifiersToConfirmedDamage(
+                    attacker, defender, attackResult, confirmedDamage);
             }
 
             result = defender.StatusEffectSystem.ApplyIncomingDamageModifiers(
@@ -101,7 +105,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 damageToHealth = barrierHolder.AbsorbBarrier(result.FinalDamage, out barrierDamage);
             }
 
-            // 確定ダメージは、被ダメージの補正とバリアの吸収のあとに加算する（下限への引き上げではない）。
+            // 確定ダメージは、与ダメージ倍率を掛けたうえで、被ダメージの補正とバリアの吸収のあとに加算する（下限への引き上げではない）。
             if (confirmedDamage.Value > 0f && defender.CanTakeDamage)
             {
                 damageToHealth = new Damage(damageToHealth.Value + confirmedDamage.Value);
@@ -138,6 +142,32 @@ namespace KillChord.Runtime.Application.InGame.Battle
                     attackType));
 
             return result;
+        }
+
+        /// <summary>
+        ///     確定ダメージに攻撃者の与ダメージ補正を適用します。
+        /// </summary>
+        /// <param name="attacker"> 攻撃者です。 </param>
+        /// <param name="defender"> 防御者です。 </param>
+        /// <param name="attackResult"> 補正前の攻撃結果です。会心などの情報を補正へ渡すために使います。 </param>
+        /// <param name="confirmedDamage"> 補正前の確定ダメージです。 </param>
+        /// <returns> 補正後の確定ダメージです。 </returns>
+        private static Damage ApplyOutgoingModifiersToConfirmedDamage(
+            IAttacker attacker,
+            IDefender defender,
+            in AttackResult attackResult,
+            Damage confirmedDamage)
+        {
+            if (confirmedDamage.Value <= 0f)
+            {
+                return confirmedDamage;
+            }
+
+            // 確定ダメージを最終ダメージとした攻撃結果に、通常のダメージと同じ補正を掛ける。
+            AttackResult confirmedResult = attacker.StatusEffectSystem.ApplyOutgoingDamageModifiers(
+                attacker, defender, attackResult.WithFinalDamage(confirmedDamage));
+
+            return confirmedResult.FinalDamage;
         }
 
         /// <summary>
