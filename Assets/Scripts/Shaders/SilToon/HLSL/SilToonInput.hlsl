@@ -60,6 +60,17 @@ CBUFFER_START(UnityPerMaterial)
     half _Roughness;
     half _SpecularIntensity;
     half _EnvReflectionIntensity;
+
+    half4 _SheerColor;
+    half4 _SheenColor;
+    half _SheerAmount;
+    half _SheerPower;
+    half _SheenPower;
+
+    half4 _AnisoColor;
+    half _AnisoExponent;
+    half _AnisoShift;
+    half _AnisoAround;
 CBUFFER_END
 
 #endif

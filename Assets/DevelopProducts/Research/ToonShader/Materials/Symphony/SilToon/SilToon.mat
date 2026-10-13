@@ -12,7 +12,6 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
-  - _CHAR_SHADOW_ON
   - _NORMALMAP
   m_InvalidKeywords:
   - _CHAR_OUTLINE_ON
@@ -101,12 +100,16 @@ Material:
     - _AddPrecomputedVelocity: 0
     - _AlphaClip: 0
     - _AlphaToMask: 0
+    - _AnisoAround: 0
+    - _AnisoExponent: 64
+    - _AnisoOn: 0
+    - _AnisoShift: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BumpScale: 1
     - _CharOutline: 1
     - _CharShadow: 1
-    - _CharShadowOn: 1
+    - _CharShadowOn: 0
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Cull: 2
@@ -148,6 +151,10 @@ Material:
     - _SSSThickness: 0.3
     - _SSSTransmissionPower: 4
     - _SSSWrap: 0.3
+    - _SheenOn: 0
+    - _SheenPower: 3
+    - _SheerAmount: 0
+    - _SheerPower: 2
     - _SmearsOn: 0
     - _SmearsPower: 0
     - _Smoothness: 0.5
@@ -168,18 +175,22 @@ Material:
     - _ZOffset: -0
     - _ZWrite: 1
     m_Colors:
+    - _AnisoColor: {r: 0.3, g: 0.3, b: 0.3, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorLit: {r: 1, g: 1, b: 1, a: 1}
     - _ColorMiddle: {r: 0.28431374, g: 0.28431374, b: 0.3, a: 1}
     - _ColorShadow: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FaceUp: {r: 0.0022517145, g: 0.99976754, b: 0.021457046, a: 0}
+    - _FaceUp: {r: -1, g: 0, b: 0, a: 0}
     - _FakeShadowColor: {r: 0.6, g: 0.54999995, b: 0.6, a: 1}
-    - _Head: {r: 2.2472775, g: 1.2653241, b: -1.5610399, a: 0}
+    - _FakeShadowOffset: {r: 0, g: -0.005, b: 0, a: 0}
+    - _Head: {r: 3.91, g: 0, b: 0.787, a: 0}
     - _OutLineColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _SSSColor: {r: 1, g: 0.39999998, b: 0.29999998, a: 1}
+    - _SheenColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _SheerColor: {r: 0.93, g: 0.78, b: 0.72, a: 1}
     - _SmearsDirection: {r: 0, g: 1, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
