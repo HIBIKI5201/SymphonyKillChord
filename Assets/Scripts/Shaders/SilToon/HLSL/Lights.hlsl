@@ -20,11 +20,11 @@ void GetToonMainLight(
 )
 {
     characterShadowAtten = 1.0h;
+#ifdef SHADERGRAPH_PREVIEW
     direction   = half3(0.5, 0.5, 0);
     color       = half3(1, 1, 1);
     shadowAtten = 1.0h;
-    return;
-
+#else
     Light mainLight = GetMainLight();
     direction = mainLight.direction;
     color = mainLight.color;
@@ -42,6 +42,7 @@ void GetToonMainLight(
     // メインライト側の受け取りバイアス(自己投影の棄却)はこちらには適用しない
     //shadowAtten = saturate(max(0.2, shadowAtten) * min(SampleCharacterShadow(positionWS),0.7));
     characterShadowAtten = SampleCharacterShadow(positionWS, normalWS);
+#endif
 #endif
 }
 
