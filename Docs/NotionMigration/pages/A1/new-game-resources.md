@@ -25,8 +25,9 @@
 - 実装の修正が必要: No.3 リソースの表示名が「研究ポイント」のまま（根拠 `Assets/Level/Data/Master/OutGame/Resource/GameResource_ResearchPoint.asset:18` `_displayName`）。スキルツリー画面の文言も「研究ポイント」「研究P」のまま（`Assets/Localization/Tables/UICommon_ja.asset:330,334`、`Assets/Editor/Scripts/Localization/UICommonLocalizationSetup.cs:103-104`）
 - 織り込んだ反映項目: OG-105
 - 出典: 実装（`StageAssetBase.cs:80-160`（報酬の新旧形式）、`GameResourceIds.cs:14-23`、`SkillTreeService.cs:197-212`、`SkillBuildRepository.cs:115-160`、`SaveData.cs:94-104`）/ マスターデータ `Assets/Level/Data/Master/OutGame/Resource/GameResource_ResearchPoint.asset`・`GameResource_SkillLevelupPoint.asset` / PR #1544, #1779
+- 決定（2026-10-14 ディレクター）: 資源は反復で成長できるようにする（初回クリア報酬＋毎回の成功報酬）。毎回の成功報酬は初回クリア報酬の約半分をステージごとに設定する（端数の扱いは実装時に決める）。「仕様意図」節の【要確認】を外して意図を書き、「詳細説明」節に報酬の決め方を足した（#2360 G06、#2063）
 - 要確認:
-  - リソースを増やす予定（通貨など）があるか。仕様意図の根拠となる議事録・フォーラムが見つからない（要企画確認）
+  - リソースを増やす予定（通貨など）があるか（要企画確認）
   - 各リソースの入手量（報酬）はステージごとのデータにある。作戦画面のページとどちらに書くか（要企画確認）
 
 ## 適用する本文
@@ -47,7 +48,8 @@
 [[解放ポイント／研究ポイント]]
 
 ## 仕様意図
-【要確認: 仕様意図を企画に確認】
+ゲーム内リソースの入手の意図は次のとおりである。
+- 報酬を初回クリア報酬と毎回の成功報酬に分けるのは、同じステージを繰り返し遊んでも成長できるようにするため
 
 ## 詳細説明
 
@@ -60,6 +62,8 @@
 
 - 各リソースの正本は `Assets/Level/Data/Master/OutGame/Resource/` の `GameResource_ResearchPoint.asset` と `GameResource_SkillLevelupPoint.asset` である
 - ステージごとの入手量は、作戦画面のステージのデータ（初回クリア報酬・通常クリア報酬）で決める
+  - 初回クリア報酬は、そのステージを初めてクリアしたときに1回だけ受け取る
+  - 成功報酬（通常クリア報酬）は、クリアするたびに受け取る。量は初回クリア報酬の約半分を、ステージごとに設定する（端数の扱いは実装時に決める）
 - 所持数はセーブデータに保存する
 
 ### リソースの追加方法
