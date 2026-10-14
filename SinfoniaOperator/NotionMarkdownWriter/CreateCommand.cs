@@ -114,6 +114,9 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     $"指定できるプロパティ: {string.Join(", ", database.PropertyTypes.Keys)}");
             }
 
+            // タイトルは--setで渡すため、本文先頭に同じ見出しがあると本文に重複して残る。
+            markdown = RemoveHeadingSameAsTitle(markdown, displayValues[titlePropertyName]);
+
             Console.WriteLine($"作成先データベース: {database.Title}");
             Console.WriteLine($"URL: {database.Url}");
             Console.WriteLine($"許可ルート: {allowedRootId}");
@@ -256,6 +259,12 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     {
                         ["select"] = new Dictionary<string, string> { ["name"] = value }
                     };
+                case "status":
+                    // 選択肢に無い名前を送るとNotion側で拒否される。名前は選択肢と完全一致で指定する。
+                    return new Dictionary<string, object>
+                    {
+                        ["status"] = new Dictionary<string, string> { ["name"] = value }
+                    };
                 case "multi_select":
                     return new Dictionary<string, object>
                     {
@@ -333,6 +342,32 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             string[] lines = markdown.Split('\n');
             int index = Array.FindIndex(lines, line => !string.IsNullOrWhiteSpace(line));
             if (index < 0)
+            {
+                return markdown;
+            }
+
+            return string.Join('\n', lines.Skip(index + 1)).TrimStart('\n');
+        }
+
+        /// <summary>
+        ///     本文先頭の見出しがタイトルと同じ場合に、その見出し行を本文から取り除く。
+        ///     異なる見出しは本文の一部なので残す。
+        /// </summary>
+        /// <param name="markdown">本文のMarkdown。</param>
+        /// <param name="title">--setで指定されたタイトル。</param>
+        /// <returns>必要に応じて見出し行を除いた本文。</returns>
+        internal static string RemoveHeadingSameAsTitle(string markdown, string title)
+        {
+            string[] lines = markdown.Split('\n');
+            int index = Array.FindIndex(lines, line => !string.IsNullOrWhiteSpace(line));
+            if (index < 0)
+            {
+                return markdown;
+            }
+
+            string firstLine = lines[index].Trim();
+            if (!firstLine.StartsWith("# ", StringComparison.Ordinal) ||
+                firstLine[2..].Trim() != title.Trim())
             {
                 return markdown;
             }

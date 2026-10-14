@@ -167,7 +167,9 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 DirectoryInfo? current = new(Path.GetFullPath(startDirectory));
                 while (current != null)
                 {
-                    if (Directory.Exists(Path.Combine(current.FullName, ".git"))) { return current.FullName; }
+                    // git worktree では .git がファイルになるため、ファイルも対象にする。
+                    string gitPath = Path.Combine(current.FullName, ".git");
+                    if (Directory.Exists(gitPath) || File.Exists(gitPath)) { return current.FullName; }
                     current = current.Parent;
                 }
             }

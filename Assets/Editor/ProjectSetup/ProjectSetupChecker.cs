@@ -10,7 +10,7 @@ namespace KillChord.Editor.ProjectSetup
     /// <summary>
     ///     エディタ起動時に、クローン後の初期セットアップが済んでいるかを確かめるクラス。
     ///     足りなければ <see cref="ProjectSetupWindow"/> で警告する。
-    ///     セットアップの本体は Unity の外の CLI（Setup.bat）である。
+    ///     セットアップの本体は Unity の外の CLI（Windows は Setup.bat、macOS / Linux は Setup.command）である。
     ///     他のアセンブリのコンパイルエラーに巻き込まれないよう、このアセンブリは何も参照しない。
     /// </summary>
     [InitializeOnLoad]
@@ -35,8 +35,12 @@ namespace KillChord.Editor.ProjectSetup
         /// <summary> リポジトリのルート。 </summary>
         public static string RepositoryRoot => Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
 
+        /// <summary> ダブルクリックで実行するセットアップの入口のファイル名（実行中の OS 向け）。 </summary>
+        public static string SetupEntryFileName =>
+            Application.platform == RuntimePlatform.WindowsEditor ? WINDOWS_SETUP_FILE_NAME : UNIX_SETUP_FILE_NAME;
+
         /// <summary> ダブルクリックで実行するセットアップの入口。 </summary>
-        public static string SetupBatchPath => Path.Combine(RepositoryRoot, "Setup.bat");
+        public static string SetupEntryPath => Path.Combine(RepositoryRoot, SetupEntryFileName);
 
         /// <summary>
         ///     セットアップの不足を調べる。
@@ -52,11 +56,11 @@ namespace KillChord.Editor.ProjectSetup
             int completedVersion = ReadSetupJson(Path.Combine(root, STATE_RELATIVE_PATH)).SetupVersion;
             if (completedVersion == 0)
             {
-                problems.Add("セットアップ（Setup.bat）をまだ実行していません。");
+                problems.Add($"セットアップ（{SetupEntryFileName}）をまだ実行していません。");
             }
             else if (completedVersion < requiredVersion)
             {
-                problems.Add($"セットアップの手順が更新されました（{completedVersion} → {requiredVersion}）。Setup.bat をもう一度実行してください。");
+                problems.Add($"セットアップの手順が更新されました（{completedVersion} → {requiredVersion}）。{SetupEntryFileName} をもう一度実行してください。");
             }
 
             // Unity と IDE はフォルダ名からソリューションを作るので、名前が違うと別名の .slnx ができて二重になる。
@@ -86,6 +90,8 @@ namespace KillChord.Editor.ProjectSetup
         }
 
         private const string SESSION_KEY = "KillChord.ProjectSetupChecker.HasChecked";
+        private const string WINDOWS_SETUP_FILE_NAME = "Setup.bat";
+        private const string UNIX_SETUP_FILE_NAME = "Setup.command";
         private const string CONFIG_RELATIVE_PATH = "PowerShell/ProjectSetup/project-setup.json";
         private const string STATE_RELATIVE_PATH = "UserSettings/KillChord/ProjectSetupState.json";
         private const string SUBMODULE_PATH_KEY = "path";

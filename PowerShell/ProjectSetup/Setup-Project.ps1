@@ -12,6 +12,7 @@
     必須の項目がすべて通ったら、UserSettings/KillChord/ProjectSetupState.json に記録する。
     Unity はこの記録を起動時に読み、無ければ警告ウィンドウを出す。
     手順を増やしたら project-setup.json の SetupVersion を上げる。既存のメンバーにも再実行を促せる。
+    macOS / Linux 用の Setup-Project.sh（入口は Setup.command）も同じ手順にそろえる。
 
 .PARAMETER Check
     確認だけを行い、何も変更しない。

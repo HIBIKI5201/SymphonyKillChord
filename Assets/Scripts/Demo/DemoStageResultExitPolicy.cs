@@ -5,6 +5,7 @@ using KillChord.Runtime.Domain.Persistent.Savedata;
 using SymphonyFrameWork.System.SaveSystem;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace KillChord.Demo
 {
@@ -26,12 +27,17 @@ namespace KillChord.Demo
         }
 
         /// <summary>
-        ///     ステージツリーの解放順から最終バトルステージを設定します。
+        ///     設定で指定された終了ステージ、未指定の場合はステージツリーの解放順から最終バトルステージを設定します。
         /// </summary>
         /// <param name="stageTree"> 体験版で使用するステージツリーです。 </param>
         /// <returns> 最終バトルステージを設定できた場合はtrueです。 </returns>
         public bool TryConfigureFinalStage(StageTree stageTree)
         {
+            if (_config.EndStageIdValue != 0)
+            {
+                return TryConfigureSpecifiedFinalStage(stageTree, new StageId(_config.EndStageIdValue));
+            }
+
             if (!TryResolveLatestBattleNode(
                     stageTree,
                     false,
@@ -43,6 +49,42 @@ namespace KillChord.Demo
             _finalStageId = finalBattleNode.Id;
             _hasFinalStage = true;
             return true;
+        }
+
+        /// <summary>
+        ///     設定で指定されたステージがツリー上のバトルステージであれば、終了ステージとして設定します。
+        /// </summary>
+        /// <param name="stageTree"> 体験版で使用するステージツリーです。 </param>
+        /// <param name="stageId"> 設定で指定されたステージIDです。 </param>
+        /// <returns> 終了ステージを設定できた場合はtrueです。 </returns>
+        private bool TryConfigureSpecifiedFinalStage(StageTree stageTree, StageId stageId)
+        {
+            if (stageTree == null)
+            {
+                return false;
+            }
+
+            IReadOnlyList<StageNode> nodes = stageTree.Nodes;
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                StageNode node = nodes[i];
+                if (node?.Definition is BattleStageDefinition && node.Id.Equals(stageId))
+                {
+                    _finalStageId = stageId;
+                    _hasFinalStage = true;
+                    return true;
+                }
+            }
+
+            if (!_hasLoggedMissingSpecifiedStage)
+            {
+                _hasLoggedMissingSpecifiedStage = true;
+                Debug.LogError(
+                    $"[{nameof(DemoStageResultExitPolicy)}] 体験版の終了ステージ (ID: {stageId.Value}) が" +
+                    "ステージツリー上のバトルステージにありません。DemoExperienceConfigの設定を確認してください。");
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -195,5 +237,6 @@ namespace KillChord.Demo
         private readonly DemoExperienceConfig _config;
         private StageId _finalStageId;
         private bool _hasFinalStage;
+        private bool _hasLoggedMissingSpecifiedStage;
     }
 }

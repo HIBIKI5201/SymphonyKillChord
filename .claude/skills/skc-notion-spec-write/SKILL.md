@@ -6,7 +6,9 @@ description: "Write to the Notion game specification from Claude — create a ne
 # Notion 仕様書への書き込み
 
 このリポジトリはNotionの仕様書を`Docs/NotionSpecifications/`へミラーしているが、そちらは**読み取り専用のコピー**。
-Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を使う。ツールの詳細は
+Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を使う。
+macOS / Linuxではexeが動かないため、以下の`./SinfoniaOperator/NotionMarkdownWriter.exe`を
+`./SinfoniaOperator/run-tool.sh NotionMarkdownWriter`に読み替える（.NET 10 SDKで`dotnet run`する。引数は同じ）。ツールの詳細は
 [SinfoniaOperator/NotionMarkdownWriter/README.md](../../../SinfoniaOperator/NotionMarkdownWriter/README.md)。
 
 `skc-notion-spec-diff-check`（差分の発見）の続きとして使うことが多い。差分レポートの指摘を仕様書側へ反映するのがこのスキル。
@@ -21,6 +23,7 @@ Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を�
 
 ## 絶対に守ること
 
+- **実行したら、変更・追加したページの一覧を、表で報告する。** 書き込んだページが1件でも必須である（下の「報告する」）。
 - **`--confirm`は、その会話でユーザーが明示的に承認してから付ける。** Notionは共有ワークスペースであり、
   書き込みは他人から見える不可逆な変更。dry-runの結果を提示し、承認を得てから送信する。
 - **`Docs/NotionSpecifications/`配下の`.md`を編集しても、Notionには反映されない。** ミラーを直接書き換えて
@@ -29,8 +32,11 @@ Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を�
   必ず`pull`で取得した原文を編集する。
 - **文体はライティング規則に従う。** である調で書く。既存ページの一部だけを直す場合も、
   周囲がです・ます調のまま残っていないか確認する。
-- Notion APIの`replace_content`と既存ページの削除はツールが実装していない。ページの削除を要求されたら
-  Notion上での手作業を案内する。
+- Notion APIの`replace_content`と完全削除はツールが実装していない。ページを消す要求は`archive`でゴミ箱へ移す
+  （Notion上で復元できる）。書き込み許可ルート自身は対象外で、子ページがあるページは`--with-children`が要る。
+  `archive`も`--confirm`の前にユーザーの承認を取る。
+- データベースへ行を作るときは`create --parent <データベース> --set "名前=..." --set "ステータス=..."`の形にする。
+  `status`・`select`は選択肢の名前を完全一致で書く。本文の先頭の見出しが`--set`のタイトルと同じなら、ツールが取り除く。
 - 本文を全面的に書き換える場合は`push --whole`を使う。`update_content`の枠内で、本文全体を1件の置換として
   送る。部分差分は組み立てないため、一意な`old_str`を作れない編集でも通り、適用の成否がページ単位に揃う。
   逆に、部分更新（`--whole`なし）は置換が一意にならないと送信前に中断する。
@@ -98,3 +104,24 @@ Notion側の書式正規化が入っている。作業ファイルが最新本�
 ミラーを合わせるには`NotionMarkdownExporter`の再実行が必要だが、全ページ再取得の重い処理なので、
 1ページ書き換えるたびに回さない。差分チェックなど次の作業でミラーの鮮度が問題になるときだけ、
 `skc-notion-spec-diff-check`の手順に従って実行する。
+
+## 報告する（必須）
+
+`create`・`push`・`rename`・`move`・`set-properties`・`append`・`edit-block`など、Notionへ書き込む操作を1回でも実行したら、
+作業の最後に、変更・追加したページの一覧を次の形の表で報告する。書き込みの件数が多いときも、省略しない。
+
+| 操作 | ページ | 配置 | 内容 | 状態 |
+| --- | --- | --- | --- | --- |
+| 新規作成 | [ページ名](URL) | 親ページまたはデータベース | 何を書いたか（1文） | 反映済 |
+| 更新 | [ページ名](URL) | 親ページまたはデータベース | どの節をどう変えたか（1文） | 反映済 |
+
+- **操作**: 新規作成・更新・名前変更・移動・プロパティ設定・段落の追加・ブロックの編集・ゴミ箱へ移した、のいずれか。
+- **ページ**: ページ名に、Notionへのリンクを付ける。ゴミ箱へ移したページもリンクを書く。
+- **配置**: 親ページか、データベース名。移動したときは「移動元 → 移動先」と書く。
+- **内容**: 変えた中身を1文で書く。設定したプロパティ（カテゴリー・親仕様など）も、ここに書く。
+- **状態**: 「反映済」か「dry-runのみ（未反映）」か「失敗」のどれか。送信していないものを「反映済」と書かない。
+
+表の外に、次の2点を1〜2行で添える。
+
+- 反映できなかったもの（失敗したページと、その原因）。
+- 人が手作業で直す必要があるもの（ツールが未対応の設定など）。

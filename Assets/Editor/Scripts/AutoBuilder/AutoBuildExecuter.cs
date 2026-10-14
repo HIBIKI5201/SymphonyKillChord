@@ -541,25 +541,24 @@ namespace KillChord.Editor.AutoBuilder
                 await WaitForEditorReady(timeoutSeconds: EXTENDED_EDITOR_READY_TIMEOUT_SECONDS);
                 LogDebug($"プレイヤービルド直前のエディタ準備完了: {profile.name}");
 
-                int executePlayerBuildRetryCount = 0;
-                const int MAX_EXECUTE_PLAYER_BUILD_RETRY = 300;
-                
+                // 準備完了の直後にも、Refreshが要求した再コンパイルとそれに伴う再インポートが
+                // 始まることがある。回数で打ち切ると数十秒で失敗するため、時間で待機する。
+                var executePlayerBuildWaitStopwatch = System.Diagnostics.Stopwatch.StartNew();
+
                 // BuildはdelayCallから実行する。
                 EditorApplication.delayCall += ExecutePlayerBuild;
 
                 void ExecutePlayerBuild()
                 {
-                    LogDebug("実際のプレイヤービルド処理(BuildPipeline.BuildPlayer)を開始");
                     EditorApplication.delayCall -= ExecutePlayerBuild;
 
                     if (EditorApplication.isCompiling || EditorApplication.isUpdating)
                     {
-                        executePlayerBuildRetryCount++;
-
-                        if (executePlayerBuildRetryCount > MAX_EXECUTE_PLAYER_BUILD_RETRY)
+                        if (executePlayerBuildWaitStopwatch.Elapsed.TotalSeconds > EXTENDED_EDITOR_READY_TIMEOUT_SECONDS)
                         {
                             Debug.LogError(
-                                $"[{nameof(AutoBuildExecuter)}] BuildPlayer retry limit exceeded : {profile.name}");
+                                $"[{nameof(AutoBuildExecuter)}] BuildPlayer wait timeout exceeded {EXTENDED_EDITOR_READY_TIMEOUT_SECONDS}s : {profile.name}. " +
+                                $"isCompiling={EditorApplication.isCompiling}, isUpdating={EditorApplication.isUpdating}");
 
                             NextSession(true);
                             return;
@@ -569,12 +568,19 @@ namespace KillChord.Editor.AutoBuilder
                         return;
                     }
 
+                    executePlayerBuildWaitStopwatch.Stop();
+                    LogDebug(
+                        "実際のプレイヤービルド処理(BuildPipeline.BuildPlayer)を開始。" +
+                        $"準備待機: {executePlayerBuildWaitStopwatch.Elapsed.TotalSeconds:F2}秒");
+
                     bool hasFailure;
                     try
                     {
                         Debug.Log(
                             $"[{nameof(AutoBuildExecuter)}] About to call BuildPipeline.BuildPlayer for profile: {profile.name}");
-                        
+
+                        SyncSelectedBuildTargetGroupWithActiveTarget();
+
                         BuildReport report = BuildPipeline.BuildPlayer(options);
                         hasFailure = report.summary.result != BuildResult.Succeeded;
 
@@ -653,6 +659,24 @@ namespace KillChord.Editor.AutoBuilder
                 
                 EditorApplication.delayCall += ResumeBuild;
             }
+        }
+
+        /// <summary>
+        ///     ビルド設定画面で選択中のプラットフォームを、Profile切替後のアクティブなターゲットに合わせます。
+        ///     SetActiveBuildProfileは選択中のプラットフォームを更新しない。Entitiesのコンテンツビルドは
+        ///     選択中のプラットフォームのスクリプティングバックエンドでビルド可否を判定するため、
+        ///     Android(IL2CPP)の後にWindows(Mono)をビルドすると「IL2CPPが未インストール」として失敗する。
+        /// </summary>
+        private static void SyncSelectedBuildTargetGroupWithActiveTarget()
+        {
+            BuildTargetGroup activeGroup = BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
+            if (EditorUserBuildSettings.selectedBuildTargetGroup == activeGroup)
+            {
+                return;
+            }
+
+            LogDebug($"選択中のプラットフォームを {EditorUserBuildSettings.selectedBuildTargetGroup} から {activeGroup} に合わせます");
+            EditorUserBuildSettings.selectedBuildTargetGroup = activeGroup;
         }
 
         /// <summary>

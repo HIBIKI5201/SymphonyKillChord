@@ -625,6 +625,57 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         }
 
         /// <summary>
+        ///     ページをゴミ箱へ移す。完全削除ではなく、Notion上でゴミ箱から復元できる。
+        ///     子ページ・子ブロックはページと一緒にゴミ箱へ移る。
+        /// </summary>
+        /// <param name="pageId">ページID。</param>
+        internal async Task ArchivePageAsync(string pageId)
+        {
+            Dictionary<string, object> requestBody = new() { ["in_trash"] = true };
+            string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
+            await SendAsync(
+                HttpMethod.Patch,
+                $"{API_BASE_URL}/pages/{Uri.EscapeDataString(pageId)}",
+                json,
+                false);
+        }
+
+        /// <summary>
+        ///     ページ直下にある子ページ・子データベースの数を数える。
+        ///     最初の1ページ分（最大100ブロック）だけを調べる。
+        /// </summary>
+        /// <param name="pageId">ページID。</param>
+        /// <returns>子ページと子データベースの合計数。</returns>
+        internal async Task<int> CountChildPagesAsync(string pageId)
+        {
+            string responseBody = await SendAsync(
+                HttpMethod.Get,
+                $"{API_BASE_URL}/blocks/{Uri.EscapeDataString(pageId)}/children?page_size=100",
+                null,
+                true);
+            using JsonDocument document = JsonDocument.Parse(responseBody);
+            if (!document.RootElement.TryGetProperty("results", out JsonElement results) ||
+                results.ValueKind != JsonValueKind.Array)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            foreach (JsonElement block in results.EnumerateArray())
+            {
+                string type = block.TryGetProperty("type", out JsonElement typeElement)
+                    ? typeElement.GetString() ?? string.Empty
+                    : string.Empty;
+                if (type is "child_page" or "child_database")
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        /// <summary>
         ///     既存ページの本文を部分置換で更新する。
         ///     全文置換（replace_content）と子ページ削除（allow_deleting_content）は意図的に実装しない。
         /// </summary>

@@ -17,7 +17,11 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
-WRITER = os.path.join(REPO, "SinfoniaOperator", "NotionMarkdownWriter.exe")
+# Windowsは配布用exeを直接、それ以外はrun-tool.sh経由（dotnet run）で起動する。
+if os.name == "nt":
+    WRITER = [os.path.join(REPO, "SinfoniaOperator", "NotionMarkdownWriter.exe")]
+else:
+    WRITER = ["bash", os.path.join(REPO, "SinfoniaOperator", "run-tool.sh"), "NotionMarkdownWriter"]
 SPLIT = os.path.join(HERE, "split_module_doc.py")
 WORK_FILE_PATTERN = re.compile(r"作業ファイル: (.+)")
 CHILD_TITLE_PATTERN = re.compile(r'^<page url="([^"]+)">(.*)</page>$')
@@ -34,7 +38,7 @@ def run(args, quiet=False):
 
 
 def pull(target):
-    code, output = run([WRITER, "pull", target], quiet=True)
+    code, output = run([*WRITER, "pull", target], quiet=True)
     if code != 0:
         raise SystemExit("pullに失敗しました:\n" + output)
 
@@ -65,7 +69,7 @@ def update_child_page(url, flow_path, title):
     body = "\n".join(lines[1:]).strip("\n") + "\n"
     io.open(child_work, "w", encoding="utf-8", newline="").write(body)
 
-    code, output = run([WRITER, "push", child_work, "--whole", "--confirm", "--quiet"], quiet=True)
+    code, output = run([*WRITER, "push", child_work, "--whole", "--confirm", "--quiet"], quiet=True)
     if code != 0:
         raise SystemExit(f"子ページの更新に失敗しました（{title}）:\n" + output)
     return "変更なし" not in output
@@ -96,7 +100,7 @@ def main():
         print(f"[{name}] 子ページを{len(missing)}件作成")
         for number, title in missing:
             flow_path = os.path.join(out_dir, f"flow_{number}.md")
-            code, output = run([WRITER, "create", flow_path, "--parent", target, "--confirm"], quiet=True)
+            code, output = run([*WRITER, "create", flow_path, "--parent", target, "--confirm"], quiet=True)
             if code != 0:
                 raise SystemExit(f"子ページの作成に失敗しました（{title}）:\n" + output)
             print(f"   作成: {title}")
@@ -119,7 +123,7 @@ def main():
     io.open(work_file, "w", encoding="utf-8", newline="").write(body)
 
     print(f"[{name}] 本文を反映")
-    code, output = run([WRITER, "push", work_file, "--whole", "--confirm", "--quiet"], quiet=True)
+    code, output = run([*WRITER, "push", work_file, "--whole", "--confirm", "--quiet"], quiet=True)
     if code != 0:
         raise SystemExit("pushに失敗しました:\n" + output)
 

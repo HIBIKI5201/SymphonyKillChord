@@ -9,11 +9,28 @@
     <AssemblyName>DiscordLogExporter</AssemblyName>
   </PropertyGroup>
 
+  <!-- 配布用exeはWindows向けの自己完結単一ファイルにする。
+       Windows以外ではRIDを固定せず、run-tool.sh から dotnet run でそのまま実行できるようにする。 -->
+  <PropertyGroup>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' And '$(OS)' == 'Windows_NT'">win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('win'))">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference
       Include="..\SinfoniaOperator.Core\SinfoniaOperator.Core.csproj"
       SetTargetFramework="TargetFramework=net10.0"
       SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
+
+  <!-- dotnet publish の完了後、配布用exeをリポジトリ直下（SinfoniaOperator/DiscordLogExporter.exe）へ自動コピーする。 -->
+  <Target Name="CopyPublishedExeToRepoRoot" AfterTargets="Publish" Condition="$(RuntimeIdentifier.StartsWith('win'))">
+    <Copy SourceFiles="$(PublishDir)$(AssemblyName).exe"
+          DestinationFolder="$(MSBuildProjectDirectory)/.." />
+  </Target>
 
 </Project>

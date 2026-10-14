@@ -154,7 +154,6 @@ MonoBehaviour:
   _targetSceneName: OutGame
   _stageTreeAssetKey: StageTreeAsset
   _enemyWaveDefinitionRepositoryKey: EnemyWaveDefinitionRepository
-  _memberCsv: {fileID: 4900000, guid: feeba90d749b926ab6f260b1810104ae, type: 3}
   _inputGlyphSpriteAsset: {fileID: 11400000, guid: eb4900cff819cb64ea0b65757c522550, type: 2}
 --- !u!4 &79626151
 Transform:

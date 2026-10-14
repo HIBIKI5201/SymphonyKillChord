@@ -40,6 +40,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     "set-properties" => await PropertiesCommand.RunAsync(commandArguments),
                     "rename" => await RenameCommand.RunAsync(commandArguments),
                     "move" => await MoveCommand.RunAsync(commandArguments),
+                    "archive" => await ArchiveCommand.RunAsync(commandArguments),
                     "edit-block" => await EditBlockCommand.RunAsync(commandArguments),
                     "append" => await AppendCommand.RunAsync(commandArguments),
                     _ => WriteUnknownCommand(command)
@@ -93,6 +94,9 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             Console.WriteLine("      既存ページのタイトルだけを変更する。本文には触れない。");
             Console.WriteLine("  NotionMarkdownWriter.exe move <Markdownパス|URL|ID> --to <移動先データベースのMarkdownパス|URL|ID> [--confirm]");
             Console.WriteLine("      既存ページを子ページからデータベースの行へ移動する。ページIDは変わらない。プロパティと本文には触れない。");
+            Console.WriteLine("  NotionMarkdownWriter.exe archive <Markdownパス|URL|ID> [--with-children] [--confirm]");
+            Console.WriteLine("      既存ページをゴミ箱へ移す。完全削除ではなく、Notion上で復元できる。書き込み許可ルート自身は対象外。");
+            Console.WriteLine("      直下に子ページ・子データベースがある場合は、一緒に移ってよいと確認したうえで --with-children を付ける。");
             Console.WriteLine("  NotionMarkdownWriter.exe edit-block <ブロックのURL|ID> --text <新しいテキスト> [--discard-formatting] [--confirm]");
             Console.WriteLine("      ブロックIDを直接指定してリッチテキストを書き換える。段落・見出し・トグル・リスト項目などが対象。");
             Console.WriteLine("      pushの文字列一致では安全に特定できない箇所（巨大な画像に挟まれた短文、同名のトグルなど）に使う。");

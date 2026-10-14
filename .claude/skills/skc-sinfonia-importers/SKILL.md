@@ -5,7 +5,7 @@ description: "Fetch project data into the repo with the SinfoniaOperator importe
 
 # SinfoniaOperator Importers
 
-Two Windows CLI tools pull external project data into the repo as local files.
+Two CLI tools pull external project data into the repo as local files.
 Both read config from `SinfoniaOperator/sinfonia-operator.env.json` (shared, in git) and
 secrets from `SinfoniaOperator/sinfonia-operator.secrets.json` (gitignored), in that order.
 
@@ -18,6 +18,11 @@ Both outputs are snapshots, not live data. `Docs/DiscordLog/` is gitignored; che
 with file mtimes (`ls -l`). `Docs/NotionSpecifications/` is a submodule synced by CI — see below.
 Read them first; only run an importer when the snapshot is missing, or is old enough to matter
 for the question.
+
+**Running on macOS / Linux:** the `.exe` files are Windows-only. Everywhere else, call the same tool
+through `./SinfoniaOperator/run-tool.sh <ToolName> [args]` — it runs the source with `dotnet run`
+(needs the .NET 10 SDK; it also finds `~/.dotnet/dotnet`) and keeps the caller's CWD, so arguments
+behave exactly like the exe. On Windows (Git Bash) it just launches the `.exe`.
 
 ## Before running either
 
@@ -47,6 +52,8 @@ after confirming with the user, or the next pull will fail.
 
 ```bash
 ./SinfoniaOperator/NotionMarkdownExporter.exe --output "Docs/NotionSpecifications"
+# macOS / Linux:
+./SinfoniaOperator/run-tool.sh NotionMarkdownExporter --output "Docs/NotionSpecifications"
 ```
 
 - `NOTION_EXPORT_OUTPUT` is a **CWD-relative** path. Run from the repository root, or pass
@@ -70,6 +77,8 @@ body, attachment URLs, and embed text.
 
 ```bash
 ./SinfoniaOperator/DiscordLogExporter.exe
+# macOS / Linux:
+./SinfoniaOperator/run-tool.sh DiscordLogExporter
 ```
 
 - Output is fixed at `<repo root>/Docs/DiscordLog/`; the tool locates the git root itself,

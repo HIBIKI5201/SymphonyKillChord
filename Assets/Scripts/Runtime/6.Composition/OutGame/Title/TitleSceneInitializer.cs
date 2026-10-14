@@ -70,9 +70,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         [SerializeField, SourceDataAddress, Tooltip("敵Wave定義リポジトリの Addressables キーです。")]
         private string _enemyWaveDefinitionRepositoryKey = "EnemyWaveDefinitionRepository";
 
-        [SerializeField, Tooltip("クレジット画面に表示する制作メンバー CSV です。列は 名前,役職,所属 の順です。")]
-        private TextAsset _memberCsv;
-
         [SerializeField, Tooltip("開始案内の決定ボタンを入力機器ごとに切り替えるための入力アイコンの Sprite Asset です。未設定なら UXML の画像のままです。")]
         private TMP_SpriteAsset _inputGlyphSpriteAsset;
 
@@ -86,6 +83,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private StageTreeAsset _loadedStageTreeAsset;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
+        private IMemberRepository _loadedMemberRepository;
         private AudioSettingsModuleContainer _audioSettingsContainer;
         private EnvironmentSettingsModuleContainer _environmentSettingsContainer;
         private VolumeSettingsTabView _volumeSettingsTabView;
@@ -98,6 +96,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private LoadingScreenController _loadingScreenController;
         private EventNotificationView _eventNotificationView;
         private CancellationTokenSource _resetCancellation;
+        private VisualElement _boundTitleRoot;
 
         /// <summary>
         ///     タイトル画面に必要なアセットをロードします。
@@ -116,6 +115,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedSaveData = SaveStore.IsLoaded<SaveData>()
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
+            _loadedMemberRepository = await LoadMemberRepositoryAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (!await ApplyInitialSkillLoadoutAsync())
             {
@@ -207,6 +207,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
+            _boundTitleRoot = titleRoot;
             _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
             _titleSceneView.BindStartButtonGlyph(_inputGlyphSpriteAsset);
             InitializeIdleVideo(titleRoot);
@@ -300,11 +301,75 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 _isLoadingSubscribed = true;
             }
 
-            ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
+            ShowBoundTitle();
+            return true;
+        }
+
+#if UNITY_EDITOR
+        /// <summary>
+        ///     Hot Reload で UI が作り直されたら、新しい UI 要素へ View を結び直します。
+        /// </summary>
+        private void Update()
+        {
+            if (!_isInitialized || _boundTitleRoot == null || _boundTitleRoot.panel != null)
+            {
+                return;
+            }
+
+            RebindViews();
+        }
+
+        /// <summary>
+        ///     古い View を破棄し、現在の Visual Tree から View を作り直します。
+        /// </summary>
+        private void RebindViews()
+        {
+            // 古い UI 要素に残ったコールバックを外してから作り直し、二重登録を防ぐ。
+            UnRegisterUIEventCallbacks();
+            DisposeViews();
+            _isInitialized = false;
+            if (!Build())
+            {
+                Debug.LogError($"[{nameof(TitleSceneInitializer)}] Hot Reload 後のタイトル画面を再構築できませんでした。", this);
+                return;
+            }
+
+            ShowBoundTitle();
+            Debug.Log($"[{nameof(TitleSceneInitializer)}] Hot Reload で作り直された UI へタイトル画面を再接続しました。", this);
+        }
+#endif
+
+        /// <summary>
+        ///     構築済みの View で入力を受け付け、タイトル画面を表示します。
+        /// </summary>
+        private void ShowBoundTitle()
+        {
+            ApplyInteractionEnabled(_loadingScreenController == null || !_loadingScreenController.IsLoading);
             RegisterUIEventCallbacks();
             _titleScreenViewRegistry.ResetFocusHistory();
             _screenController.ShowTitle();
-            return true;
+        }
+
+        /// <summary>
+        ///     生成した View と待機動画を破棄します。
+        /// </summary>
+        private void DisposeViews()
+        {
+            if (_idleVideoView != null)
+            {
+                _idleVideoView.Shutdown();
+                Destroy(_idleVideoView.gameObject);
+                _idleVideoView = null;
+            }
+
+            _volumeSettingsTabView?.Dispose();
+            _volumeSettingsTabView = null;
+            _languageSettingsTabView?.Dispose();
+            _languageSettingsTabView = null;
+            _titleScreenViewRegistry?.Dispose();
+            _titleScreenViewRegistry = null;
+            _titleSceneView = null;
+            _boundTitleRoot = null;
         }
 
         /// <summary>
@@ -314,12 +379,6 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         {
             // 実行中の処理を止め、待機中の動画を破棄する。
             _resetCancellation?.Cancel();
-            if (_idleVideoView != null)
-            {
-                _idleVideoView.Shutdown();
-                Destroy(_idleVideoView.gameObject);
-                _idleVideoView = null;
-            }
             // 購読を解除する。
             UnsubscribeLoading();
             if (_outGameUIEvent != null && _isSubscribed)
@@ -336,15 +395,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _loadedEnemyWaveDefinitionRepository = null;
             _loadedSaveData = null;
             // 生成したビューと、依存の参照を破棄する。
-            _volumeSettingsTabView?.Dispose();
-            _volumeSettingsTabView = null;
-            _languageSettingsTabView?.Dispose();
-            _languageSettingsTabView = null;
+            DisposeViews();
             _audioSettingsContainer = null;
             _environmentSettingsContainer = null;
-            _titleScreenViewRegistry?.Dispose();
-            _titleScreenViewRegistry = null;
-            _titleSceneView = null;
             _titleStartController = null;
             _screenController = null;
             _outGameUIEvent = null;
@@ -476,22 +529,43 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///     制作メンバー CSV を読み込み、クレジット画面へ一覧を反映します。
+        ///     StreamingAssets のクレジット JSON を読み込みます。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 読み込んだリポジトリです。読み込めなかった場合は null です。 </returns>
+        private async ValueTask<IMemberRepository> LoadMemberRepositoryAsync(CancellationToken cancellationToken)
+        {
+            // クレジットが読めなくてもタイトル画面は使えるようにするため、失敗は警告にとどめる。
+            try
+            {
+                return await MemberJsonRepository.LoadAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(TitleSceneInitializer)}] クレジット JSON を読み込めなかったため、クレジット画面のメンバー一覧は空になります。{exception.Message}",
+                    this);
+                return null;
+            }
+        }
+
+        /// <summary>
+        ///     読み込み済みの制作メンバー情報を、クレジット画面へ一覧として反映します。
         /// </summary>
         /// <param name="creditScreenView"> 一覧の反映先となるクレジット画面 View です。 </param>
         private void BuildMemberList(CreditScreenView creditScreenView)
         {
-            if (_memberCsv == null)
+            if (_loadedMemberRepository == null)
             {
-                Debug.LogWarning(
-                    $"[{nameof(TitleSceneInitializer)}] 制作メンバー CSV が設定されていないため、クレジット画面のメンバー一覧は空になります。",
-                    this);
                 return;
             }
 
-            IMemberRepository memberRepository = new MemberCsvRepository(_memberCsv.text);
             IMemberListPresenter memberListPresenter = new MemberListPresenter(creditScreenView);
-            ShowMemberListUseCase showMemberListUseCase = new(memberRepository, memberListPresenter);
+            ShowMemberListUseCase showMemberListUseCase = new(_loadedMemberRepository, memberListPresenter);
             showMemberListUseCase.Execute();
         }
 

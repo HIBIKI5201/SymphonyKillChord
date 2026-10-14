@@ -1,0 +1,31 @@
+name: "[Check] Roslyn Analyzers"
+
+# RoslynAnalyzers/ または コミット済みのアナライザDLLが変わるPRで、
+# アナライザのユニットテストを実行する。テストには、コミット済みDLLがソースと同じアナライザ集合を持つかの検証を含む
+# (DLLのバイト列はコンパイラのバージョン差で変わるため、バイト比較はしない)。
+on:
+  pull_request:
+    paths:
+      - 'RoslynAnalyzers/**'
+      - 'Assets/Editor/Roslyn/**'
+      - '.github/workflows/RoslynAnalyzers.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ソースを取得
+        uses: actions/checkout@v4
+
+      - name: .NETをセットアップ
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: ユニットテスト
+        # Debugで実行する(Releaseだとビルドがコミット済みDLLを上書きし、DLLの検証が成り立たない)。
+        run: dotnet test RoslynAnalyzers/SkcAnalyzers.Tests --configuration Debug
