@@ -79,6 +79,7 @@ Docs/agent/
 | `reports/2026-10-01_design-review-harness.md` | 全体設計レビュー: AI エージェントの運用基盤（指示・スキル・道具・検証・記憶）（Issue #2363） |
 | `reports/2026-10-01_design-review-asset-pipeline.md` | 全体設計レビュー: Drive → Assets → Addressables のアセットパイプラインと命名（Issue #2415） |
 | `reports/2026-10-14_director-decisions.md` | ディレクター判断 21 件の決定一覧（判定の正本・報酬・チュートリアル・用語・運用・公開条件・Drive） |
+| `reports/2026-10-16_lead-programmer-decisions.md` | リードプログラマー判断の決定一覧（開発用処理の除外・DataID 検証・固定 ID・保存互換・モジュール境界・CI・Codex・rc タグ・性能） |
 | `reports/2026-10-01_design-review-ui-ux.md` | 全体設計レビュー: 画面遷移・入力・オンボーディング・アクセシビリティ（Issue #2416） |
 | `reports/2026-10-01_design-review-qa.md` | 全体設計レビュー: 自動テスト・QA シート・再検証・リリース判定（Issue #2417） |
 | `reports/2026-10-01_design-review-release.md` | 全体設計レビュー: ビルド・署名・ストア・性能・権利・セーブ互換（Issue #2418） |
