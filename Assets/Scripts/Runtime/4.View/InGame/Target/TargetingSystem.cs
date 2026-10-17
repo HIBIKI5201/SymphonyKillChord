@@ -232,6 +232,26 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
+        ///     現在のターゲットを候補から外して評価し、次のターゲットへの切り替えを試みる。
+        ///     選び方は <see cref="TrySwitchTarget"/> と同じ評価を用いる。
+        /// </summary>
+        /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
+        /// <param name="direction"> 選択基準に使用する方向。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。 </returns>
+        public bool TrySwitchToNextTarget(in Vector3 playerPosition, in Vector3 direction)
+        {
+            ITargetableViewModel target = EvaluateBestTarget(playerPosition, direction, _currentTarget);
+            if (target == null)
+            {
+                return false;
+            }
+
+            SetCurrentTarget(target);
+            _currentCandidate = null;
+            return true;
+        }
+
+        /// <summary>
         ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
         /// </summary>
         /// <param name="targetId"> 設定対象のターゲットID。 </param>
@@ -317,9 +337,10 @@ namespace KillChord.Runtime.View.InGame.Target
         /// </summary>
         /// <param name="center"> 基準位置。 </param>
         /// <param name="direction"> 基準方向。 </param>
+        /// <param name="excludedTarget"> 候補から外すターゲット。外さない場合は null。 </param>
         /// <returns> 選択されたターゲット。候補がない場合は null。 </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ITargetableViewModel EvaluateBestTarget(in Vector3 center, in Vector3 direction)
+        private ITargetableViewModel EvaluateBestTarget(in Vector3 center, in Vector3 direction, ITargetableViewModel excludedTarget = null)
         {
             ITargetableViewModel shortestTarget = null;
             ITargetableViewModel bestAlignedTarget = null;
@@ -328,7 +349,7 @@ namespace KillChord.Runtime.View.InGame.Target
 
             foreach (ITargetableViewModel targetable in _targets)
             {
-                if (!IsSelectableTarget(targetable))
+                if (!IsSelectableTarget(targetable) || ReferenceEquals(targetable, excludedTarget))
                 {
                     continue;
                 }
