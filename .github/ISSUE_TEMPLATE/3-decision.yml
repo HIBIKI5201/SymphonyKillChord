@@ -1,0 +1,63 @@
+name: 仕様・意思決定の相談
+description: ディレクター・リードの判断が必要な論点を起こす
+title: "[相談] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        判断する人が、この本文だけで選べる状態にしてください。
+        決まったら結論をコメントに残し、必要なら「タスク（TODO）」のIssueへ切り出してください。
+  - type: textarea
+    id: question
+    attributes:
+      label: 決めたいこと
+      description: 何を決めればよいかを1文で。
+    validations:
+      required: true
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景
+      description: なぜ今決める必要があるか。現状の仕様・実装（`Docs/NotionSpecifications` や `file:line`）。
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: 選択肢
+      description: 選択肢ごとに利点・代償を書く。
+      value: |
+        ### A. 
+        - 利点: 
+        - 代償: 
+
+        ### B. 
+        - 利点: 
+        - 代償: 
+    validations:
+      required: true
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: 推し
+      description: 起票者のおすすめと理由。無ければ「なし」。
+  - type: input
+    id: deadline
+    attributes:
+      label: 回答期限
+      description: 例「2026-10-31（TGS提出版に入れるため）」。無ければ空欄。
+  - type: textarea
+    id: after
+    attributes:
+      label: 決定後にやること
+      description: 仕様書の更新・実装・アセット依頼など。
+      placeholder: |
+        - [ ] 
+  - type: textarea
+    id: related
+    attributes:
+      label: 関連
+      description: 関連Issue・PRは `#N`。議論の場（Discordスレッドなど）があれば場所も。
+      placeholder: |
+        - 
