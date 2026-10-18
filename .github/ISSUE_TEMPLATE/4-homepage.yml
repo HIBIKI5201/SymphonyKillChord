@@ -1,0 +1,54 @@
+name: ホームページ更新
+description: 公式ホームページ（HomePage/）のお知らせ追加・ページ修正を依頼する
+title: "ホームページ: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        タイトルは「ホームページ: お知らせ「○○」を追加する」のように、何をするかを一文で書いてください。
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 種類
+      options:
+        - お知らせ（News）の追加
+        - 既存ページの修正
+        - 新しいページの追加
+        - その他
+    validations:
+      required: true
+  - type: textarea
+    id: content
+    attributes:
+      label: 内容
+      description: 載せる文面・伝えたいこと。外部記事やイベントへのリンクがあれば必ず。
+    validations:
+      required: true
+  - type: textarea
+    id: assets
+    attributes:
+      label: 使う画像・素材
+      description: 画像を使う場合はここに添付するか、置き場所を書く。無ければ「なし」。
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了条件
+      value: |
+        - [ ] ホームのNews欄と `/news` 一覧に表示される
+        - [ ] リンクが正しく開く
+        - [ ] `npm run build` が通る
+    validations:
+      required: true
+  - type: input
+    id: deadline
+    attributes:
+      label: 納期
+      description: 公開してほしい日。例「2026-10-31」
+  - type: textarea
+    id: related
+    attributes:
+      label: 関連
+      description: 議事録・依頼元・関連Issueなど。
+      placeholder: |
+        - 

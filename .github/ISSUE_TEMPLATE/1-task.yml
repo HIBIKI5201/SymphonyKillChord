@@ -1,0 +1,58 @@
+name: タスク（TODO）
+description: 機能追加・改善・運用の課題など、やることを記録する
+title: "[TODO] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        タイトルは「[TODO] やることを一文で」にしてください。
+        事実と推測を分け、確かめていないことは「未確認」と書いてください。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: 何を、どうしたいか。2〜3文で。
+    validations:
+      required: true
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景・根拠
+      description: どこで見つかったか、根拠（`file:line`・ログ・レポートへのリンク）、影響。
+      placeholder: |
+        - 
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: 進め方の案
+      description: 分かる範囲で。決めきれない場合は選択肢と、それぞれの利点・欠点。
+      placeholder: |
+        - 
+  - type: textarea
+    id: todo
+    attributes:
+      label: やること
+      description: 1つ1つが完了を判定できる粒度で。「改善する」だけの行は書かない。
+      value: |
+        - [ ] 
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了条件
+      description: 確かめ方まで書く。例「○○を実行して△△が出なくなる」
+      placeholder: |
+        - 
+    validations:
+      required: true
+  - type: textarea
+    id: related
+    attributes:
+      label: 関連
+      description: 関連Issue・PRは `#N`。リポジトリ内のファイルやレポートはGitHubのリンクで。
+      placeholder: |
+        - 
