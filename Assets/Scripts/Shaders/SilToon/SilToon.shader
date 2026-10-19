@@ -33,6 +33,21 @@
         _SpecularIntensity("Specular Intensity", Range(0, 4)) = 1
         _EnvReflectionIntensity("Env Reflection Intensity", Range(0, 4)) = 1
 
+        [Header(Sheer and Sheen)]
+        [Toggle(_SHEEN_ON)] _SheenOn("Sheer & Sheen On", Float) = 0
+        _SheerColor("Sheer Color", Color) = (0.93, 0.78, 0.72, 1)
+        _SheerAmount("Sheer Amount", Range(0, 1)) = 0
+        _SheerPower("Sheer Power", Range(0.5, 8)) = 2
+        [HDR] _SheenColor("Sheen Color", Color) = (0.5, 0.5, 0.5, 1)
+        _SheenPower("Sheen Power", Range(0.5, 8)) = 3
+
+        [Header(Anisotropic Highlight)]
+        [Toggle(_ANISO_ON)] _AnisoOn("Anisotropic Highlight On", Float) = 0
+        [HDR] _AnisoColor("Color", Color) = (0.3, 0.3, 0.3, 1)
+        _AnisoExponent("Exponent", Range(1, 512)) = 64
+        _AnisoShift("Shift", Range(-1, 1)) = 0
+        [Toggle] _AnisoAround("Fiber Along U (Tights)", Float) = 0
+
         [Header(SSS)]
         [Toggle(SSS_ON)] _SSSOn("SSS On", Float) = 0
         _SSSColor("SSS Color", Color) = (1.0, 0.4, 0.3, 1)
@@ -124,6 +139,8 @@
                 #pragma shader_feature_local_fragment _CHAR_SHADOW_ON
                 #pragma shader_feature_local_fragment SSS_ON
                 #pragma shader_feature_local_fragment _PBR_ON
+                #pragma shader_feature_local_fragment _SHEEN_ON
+                #pragma shader_feature_local _ANISO_ON
                 #pragma shader_feature_local_vertex _PERSPECTIVE_REMOVAL_ON
 
                 #pragma multi_compile_fragment _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN

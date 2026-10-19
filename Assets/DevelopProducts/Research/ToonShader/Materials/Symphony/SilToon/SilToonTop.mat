@@ -12,7 +12,6 @@ Material:
   m_Parent: {fileID: 2100000, guid: f5e7e29d00bee8a44831699bd033b8c5, type: 2}
   m_ModifiedSerializedProperties: 16
   m_ValidKeywords:
-  - _CHAR_SHADOW_ON
   - _NORMALMAP
   - _PBR_ON
   m_InvalidKeywords:
@@ -52,6 +51,7 @@ Material:
     - _Metallic: 1
     - _PBROn: 1
     - _Roughness: 1
+    - _SheenOn: 0
     - _SpecularIntensity: 0.2
     m_Colors:
     - _FaceUp: {r: 0, g: 1, b: 0, a: 1}
