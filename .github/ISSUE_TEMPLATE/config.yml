@@ -1,0 +1,2 @@
+# Issue作成画面の設定。テンプレに当てはまらないときは白紙のIssueも作れる。
+blank_issues_enabled: true

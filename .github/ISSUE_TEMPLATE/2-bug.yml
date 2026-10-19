@@ -1,0 +1,88 @@
+name: バグ報告
+description: ゲームやツールの不具合を報告する
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        タイトルは「[Bug] 起きている現象を一文で」にしてください。
+        再現できるかどうかに関わらず、分かっていることだけを書けば大丈夫です。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: 何が起きているかを1〜2文で。報告者・報告日があれば併記する。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 起動から現象が起きるまで。分からなければ「不明」。
+      value: |
+        1. 
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待する動作
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の動作
+    validations:
+      required: true
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: 発生頻度
+      options:
+        - 毎回
+        - ときどき
+        - 1回だけ
+        - 不明
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 発生環境
+      multiple: true
+      options:
+        - Unityエディタ
+        - ビルド（Develop）
+        - ビルド（Master）
+        - 展示機（TGSなど）
+        - その他・不明
+    validations:
+      required: true
+  - type: dropdown
+    id: input
+    attributes:
+      label: 入力デバイス
+      options:
+        - キーボード・マウス
+        - コントローラー
+        - 両方
+        - 関係なし・不明
+  - type: input
+    id: version
+    attributes:
+      label: バージョン・コミット
+      description: ビルドのバージョン、またはブランチ名・コミットハッシュ。
+  - type: textarea
+    id: evidence
+    attributes:
+      label: スクリーンショット・ログ
+      description: 画像・動画・Consoleのログなど。ドラッグで添付できる。
+  - type: textarea
+    id: related
+    attributes:
+      label: 関連
+      description: 関連Issue・PRは `#N`。原因の見当があれば `file:line` も。
+      placeholder: |
+        - 

@@ -4,6 +4,8 @@
 
 本文は必ず [.github/PULL_REQUEST_TEMPLATE.md](../../../../.github/PULL_REQUEST_TEMPLATE.md) の構成にする（Summary / Test plan のような汎用の形式にはしない）。
 
+- Unity外（ドキュメント・ワークフロー・HomePageなど）だけの変更は [non-unity.md](../../../../.github/PULL_REQUEST_TEMPLATE/non-unity.md)、`hotfix/` からの修正は [hotfix.md](../../../../.github/PULL_REQUEST_TEMPLATE/hotfix.md) の記入例を使う。見出しと必須チェックの文言はどれも同じ。
+
 - 必須チェックの項目は、**実際に確かめたものだけ** `[x]` にする。PlayMode を通していなければ `[ ]` のままにし、理由を「未確認・残論点」に書く。
   - 例外: 確認が**不要**な変更（C#を変更していない → コンパイル不要、Unity外のワークフロー・ドキュメント等だけ → PlayMode不要）は、`[x]` にして末尾に `（不要: 理由）` を書く。括弧の補足は develop 向け Draft PR にも引き継がれる。
 - 「確認済みの内容」には、確認の方法（uloop-compile / dotnet build / PlayMode / テスト名）を項目ごとに書く。

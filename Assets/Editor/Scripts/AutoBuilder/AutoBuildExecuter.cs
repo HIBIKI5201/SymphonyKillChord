@@ -578,7 +578,9 @@ namespace KillChord.Editor.AutoBuilder
                     {
                         Debug.Log(
                             $"[{nameof(AutoBuildExecuter)}] About to call BuildPipeline.BuildPlayer for profile: {profile.name}");
-                        
+
+                        SyncSelectedBuildTargetGroupWithActiveTarget();
+
                         BuildReport report = BuildPipeline.BuildPlayer(options);
                         hasFailure = report.summary.result != BuildResult.Succeeded;
 
@@ -657,6 +659,24 @@ namespace KillChord.Editor.AutoBuilder
                 
                 EditorApplication.delayCall += ResumeBuild;
             }
+        }
+
+        /// <summary>
+        ///     ビルド設定画面で選択中のプラットフォームを、Profile切替後のアクティブなターゲットに合わせます。
+        ///     SetActiveBuildProfileは選択中のプラットフォームを更新しない。Entitiesのコンテンツビルドは
+        ///     選択中のプラットフォームのスクリプティングバックエンドでビルド可否を判定するため、
+        ///     Android(IL2CPP)の後にWindows(Mono)をビルドすると「IL2CPPが未インストール」として失敗する。
+        /// </summary>
+        private static void SyncSelectedBuildTargetGroupWithActiveTarget()
+        {
+            BuildTargetGroup activeGroup = BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
+            if (EditorUserBuildSettings.selectedBuildTargetGroup == activeGroup)
+            {
+                return;
+            }
+
+            LogDebug($"選択中のプラットフォームを {EditorUserBuildSettings.selectedBuildTargetGroup} から {activeGroup} に合わせます");
+            EditorUserBuildSettings.selectedBuildTargetGroup = activeGroup;
         }
 
         /// <summary>
