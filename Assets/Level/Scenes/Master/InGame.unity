@@ -14032,9 +14032,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.StageResultUIView
   _canvasGroup: {fileID: 191554237}
   _messageText: {fileID: 395575199}
-  _stageStartMessage: Mission Start!
-  _clearMessage: Stage Clear!
-  _gameOverMessage: Game Over!
 --- !u!114 &191554239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132176,12 +132173,12 @@ MonoBehaviour:
   _mainMissionStateText: {fileID: 40473773}
   _battleTimeText: {fileID: 1027378106}
   _maxComboText: {fileID: 2093001570}
+  _battleTimeHeadingText: {fileID: 535389977}
+  _maxComboHeadingText: {fileID: 79359770}
   _rankText: {fileID: 1706356192}
   _tipsText: {fileID: 1904377324}
   _subMissionContentRoot: {fileID: 1662669971}
   _subMissionItemPrefab: {fileID: 1540853839903194264, guid: 4d2e39ef6c4727b4e8b6eb596ec4dcfe, type: 3}
-  _victoryTitle: Mission Complete
-  _defeatTitle: Mission Failed
   _textSlideIn:
     _isEnabled: 1
     _distance: 600

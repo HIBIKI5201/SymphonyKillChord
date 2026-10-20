@@ -556,6 +556,102 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 7215909566452859023
+  - m_Id: 2081000100
+    m_Localized: "Overall"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000101
+    m_Localized: "Home"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000102
+    m_Localized: "Mission Start!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000103
+    m_Localized: "Stage Clear!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000104
+    m_Localized: "Game Over!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000105
+    m_Localized: "Mission Complete"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000106
+    m_Localized: "Mission Failed"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000107
+    m_Localized: "Cleared"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000108
+    m_Localized: "Failed"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000109
+    m_Localized: "Achieved"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000110
+    m_Localized: "Not Achieved"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000111
+    m_Localized: "Watch the enemy's attacks closely, and strike in the opening after you dodge."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000112
+    m_Localized: "Success"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000113
+    m_Localized: "Miss"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000114
+    m_Localized: "Perfect"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000115
+    m_Localized: "Choose a stage to sortie to and head into battle from here."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000116
+    m_Localized: "Advance your research to unlock new skills and upgrades."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000117
+    m_Localized: "Combine the skills you have unlocked to customize your weapons."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000118
+    m_Localized: "Change settings such as volume and controls."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000119
+    m_Localized: "All"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000120
+    m_Localized: "Battle Time"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000121
+    m_Localized: "Max Combo"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000122
+    m_Localized: "Complete"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000123
+    m_Localized: "Retry"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

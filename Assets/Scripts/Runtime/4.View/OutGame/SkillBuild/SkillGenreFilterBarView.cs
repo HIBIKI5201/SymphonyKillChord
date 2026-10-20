@@ -1,4 +1,5 @@
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,7 +21,8 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         {
             _container = container ?? throw new ArgumentNullException(nameof(container));
             _allButton = CreateButton(ALL_BUTTON_CLASS_NAME);
-            _allButton.text = "全て";
+            _allButtonText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.skill_build.genre_all", text => _allButton.text = text, "全て");
             _allButton.clicked += HandleAllButtonClickedHandler;
             _container.Add(_allButton);
         }
@@ -79,16 +81,19 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         public void Dispose()
         {
             _allButton.clicked -= HandleAllButtonClickedHandler;
+            _allButtonText.Dispose();
             ClearGenreButtons();
             OnGenreFilterSelected = null;
         }
 
+        private const string UI_COMMON_TABLE = "UICommon";
         private const string ALL_BUTTON_CLASS_NAME = "skill-genre-filter-button-all";
         private const string GENRE_BUTTON_CLASS_NAME = "skill-genre-filter-button";
         private const string GENRE_BUTTON_ICON_CLASS_NAME = "skill-genre-filter-button-icon";
         private const string ACTIVE_CLASS_NAME = "is-active";
 
         private readonly VisualElement _container;
+        private readonly LocalizedElementText _allButtonText;
         private readonly Button _allButton;
         private readonly List<(int GenreId, Button Button)> _genreButtons = new();
         private int[] _currentGenreIds = Array.Empty<int>();
