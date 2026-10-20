@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.View.Persistent.Localization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,13 +14,13 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// <inheritdoc />
         public void ShowFeedback(bool isSuccess)
         {
-            ShowPopup(isSuccess ? "Success" : "Miss", isSuccess ? SUCCESS_GLOW_COLOR : MISS_GLOW_COLOR);
+            ShowPopup(isSuccess ? _successLabel : _missLabel, isSuccess ? SUCCESS_GLOW_COLOR : MISS_GLOW_COLOR);
         }
 
         /// <inheritdoc />
         public void ShowPerfectFeedback()
         {
-            ShowPopup("Perfect", PERFECT_GLOW_COLOR);
+            ShowPopup(_perfectLabel, PERFECT_GLOW_COLOR);
         }
 
         /// <summary>
@@ -39,6 +40,7 @@ namespace KillChord.Runtime.View.InGame.Mission
             _nextItemIndex = 0;
         }
 
+        private const string UI_COMMON_TABLE = "UICommon";
         private const int DEFAULT_POOL_SIZE = 16;
         private const int MAX_POOL_SIZE = 64;
         private const float FADE_IN_SECONDS = 0.3f;
@@ -55,12 +57,24 @@ namespace KillChord.Runtime.View.InGame.Mission
 
         private PopupItem[] _items;
         private int _nextItemIndex;
+        private LocalizedElementText[] _localizedLabels;
+        private string _successLabel = "成功";
+        private string _missLabel = "ミス";
+        private string _perfectLabel = "パーフェクト";
 
         /// <summary>
         ///     連続攻撃で生成負荷が発生しないよう、表示枠を最初にまとめて生成します。
         /// </summary>
         private void Awake()
         {
+            // 判定文字は選択中の言語で取得しておき、言語の切り替えにも追従させる。
+            _localizedLabels = new[]
+            {
+                new LocalizedElementText(UI_COMMON_TABLE, "ui.tutorial.feedback.success", text => _successLabel = text, _successLabel),
+                new LocalizedElementText(UI_COMMON_TABLE, "ui.tutorial.feedback.miss", text => _missLabel = text, _missLabel),
+                new LocalizedElementText(UI_COMMON_TABLE, "ui.tutorial.feedback.perfect", text => _perfectLabel = text, _perfectLabel),
+            };
+
             if (_popupTemplate == null
                 || _popupTemplate.GetComponent<CanvasGroup>() == null
                 || _popupTemplate.GetComponentInChildren<TMP_Text>(true) == null
@@ -108,6 +122,15 @@ namespace KillChord.Runtime.View.InGame.Mission
         /// </summary>
         private void OnDestroy()
         {
+            if (_localizedLabels != null)
+            {
+                foreach (LocalizedElementText localizedLabel in _localizedLabels)
+                {
+                    localizedLabel.Dispose();
+                }
+                _localizedLabels = null;
+            }
+
             if (_items == null)
             {
                 return;

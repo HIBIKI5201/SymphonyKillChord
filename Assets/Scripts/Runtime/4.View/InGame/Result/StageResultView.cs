@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.InGame.Result;
+using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
 using R3;
 using System;
@@ -146,6 +147,7 @@ namespace KillChord.Runtime.View.InGame.Result
 
         private const int SECOND_PER_MINUTE = 60;
         private const float FOCUSED_BUTTON_SCALE = 1.1f;
+        private const string UI_COMMON_TABLE = "UICommon";
 
         [Header("Root")]
         [SerializeField, Tooltip("リザルト画面全体を制御するCanvasGroup。")]
@@ -201,6 +203,12 @@ namespace KillChord.Runtime.View.InGame.Result
         [SerializeField, Tooltip("最大コンボ数を表示するText。")]
         private TMP_Text _maxComboText;
 
+        [SerializeField, Tooltip("戦闘時間の見出しを表示するText。")]
+        private TMP_Text _battleTimeHeadingText;
+
+        [SerializeField, Tooltip("最大コンボ数の見出しを表示するText。")]
+        private TMP_Text _maxComboHeadingText;
+
         [SerializeField, Tooltip("リザルトランクを表示するText。")]
         private TMP_Text _rankText;
 
@@ -213,13 +221,6 @@ namespace KillChord.Runtime.View.InGame.Result
 
         [SerializeField, Tooltip("サブミッション1件分の表示Prefab。")]
         private StageResultMissionItemView _subMissionItemPrefab;
-
-        [Header("Message")]
-        [SerializeField, Tooltip("勝利時に表示するリザルトタイトル。")]
-        private string _victoryTitle = "Mission Complete";
-
-        [SerializeField, Tooltip("敗北時に表示するリザルトタイトル。")]
-        private string _defeatTitle = "Mission Failed";
 
         [Header("Animation")]
         [SerializeField, Tooltip("テキストを左から右方向へスライドインさせる演出の設定。")]
@@ -251,13 +252,13 @@ namespace KillChord.Runtime.View.InGame.Result
         private Color _retryButtonOriginalColor;
         private IDisposable _stageNameDisposable;
         private IDisposable _mainMissionDisposable;
-        private IDisposable _mainMissionStateDisposable;
         private IDisposable _battleTimeDisposable;
         private IDisposable _maxComboDisposable;
         private IDisposable _rankDisposable;
         private IDisposable _tipsDisposable;
         private IDisposable _resultTypeDisposable;
         private readonly List<StageResultMissionItemView> _spawnedSubMissionItems = new();
+        private readonly Dictionary<TMP_Text, LocalizedElementText> _localizedTexts = new();
         private readonly List<MotionHandle> _slideInHandles = new();
         private readonly List<ResultTextSlideIn> _textPresentations = new();
         private readonly List<TMP_Text> _slideInTexts = new();
@@ -280,6 +281,10 @@ namespace KillChord.Runtime.View.InGame.Result
             _retryButtonOriginalScale = _retryButtonLabel != null ? _retryButtonLabel.transform.localScale : Vector3.one;
             _completeButtonOriginalColor = _completeButtonLabel != null ? _completeButtonLabel.color : Color.white;
             _retryButtonOriginalColor = _retryButtonLabel != null ? _retryButtonLabel.color : Color.white;
+            SetLocalizedText(_completeButtonLabel, "ui.result.complete", "完了");
+            SetLocalizedText(_retryButtonLabel, "ui.result.retry", "リトライ");
+            SetLocalizedText(_battleTimeHeadingText, "ui.result.battle_time", "戦闘時間");
+            SetLocalizedText(_maxComboHeadingText, "ui.result.max_combo", "最大コンボ");
             ConfigureButtonNavigation();
             Hide();
         }
@@ -315,6 +320,7 @@ namespace KillChord.Runtime.View.InGame.Result
         private void OnDestroy()
         {
             UnsubscribeViewModel();
+            DisposeLocalizedTexts();
 
             StopTextSlideIn();
             StopCountUps(false);
@@ -533,10 +539,6 @@ namespace KillChord.Runtime.View.InGame.Result
                 _viewModel.MainMissionText.Subscribe(
                     value => SetText(_mainMissionText, value));
 
-            _mainMissionStateDisposable =
-                _viewModel.MainMissionStateText.Subscribe(
-                    value => SetText(_mainMissionStateText, value));
-
             // 時間とコンボ数は、数値をカウントアップさせて表示する。
             _battleTimeDisposable =
                 _viewModel.BattleTimeSeconds.Subscribe(
@@ -552,7 +554,7 @@ namespace KillChord.Runtime.View.InGame.Result
 
             _tipsDisposable =
                 _viewModel.TipsText.Subscribe(
-                    value => SetText(_tipsText, value));
+                    ApplyTips);
 
             // 勝敗の種類とサブミッションの一覧の変化を反映する。
             _resultTypeDisposable =
@@ -570,7 +572,6 @@ namespace KillChord.Runtime.View.InGame.Result
         {
             _stageNameDisposable?.Dispose();
             _mainMissionDisposable?.Dispose();
-            _mainMissionStateDisposable?.Dispose();
             _battleTimeDisposable?.Dispose();
             _maxComboDisposable?.Dispose();
             _rankDisposable?.Dispose();
@@ -579,7 +580,6 @@ namespace KillChord.Runtime.View.InGame.Result
 
             _stageNameDisposable = null;
             _mainMissionDisposable = null;
-            _mainMissionStateDisposable = null;
             _battleTimeDisposable = null;
             _maxComboDisposable = null;
             _rankDisposable = null;
@@ -609,7 +609,75 @@ namespace KillChord.Runtime.View.InGame.Result
             _rankRoot.SetActive(isVictory);
             _tipsRoot.SetActive(!isVictory);
 
-            SetText(_titleText, isVictory ? _victoryTitle : _defeatTitle);
+            if (isVictory)
+            {
+                SetLocalizedText(_titleText, "ui.result.title_victory", "ミッション達成");
+                SetLocalizedText(_mainMissionStateText, "ui.result.main_mission_cleared", "達成");
+            }
+            else
+            {
+                SetLocalizedText(_titleText, "ui.result.title_defeat", "ミッション失敗");
+                SetLocalizedText(_mainMissionStateText, "ui.result.main_mission_failed", "失敗");
+            }
+        }
+
+        /// <summary>
+        ///     敗北時のTipsを表示する。ミッションにTipsが無い場合は既定のTipsを選択中の言語で表示する。
+        /// </summary>
+        /// <param name="tips"> ミッションから選ばれたTips。無い場合は空文字列。 </param>
+        private void ApplyTips(string tips)
+        {
+            if (string.IsNullOrEmpty(tips))
+            {
+                SetLocalizedText(_tipsText, "ui.result.default_defeat_tip", "敵の攻撃をよくみて、回避後の隙に攻撃しましょう。");
+                return;
+            }
+
+            DisposeLocalizedText(_tipsText);
+            SetText(_tipsText, tips);
+        }
+
+        /// <summary>
+        ///     UICommonの文言を表示し、言語の切り替えにも追従させる。
+        /// </summary>
+        /// <param name="text"> 設定対象のText。 </param>
+        /// <param name="entry"> UICommonのキー。 </param>
+        /// <param name="fallback"> 翻訳を取得できない場合の文言。 </param>
+        private void SetLocalizedText(TMP_Text text, string entry, string fallback)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            DisposeLocalizedText(text);
+            _localizedTexts[text] = new LocalizedElementText(
+                UI_COMMON_TABLE, entry, value => text.text = value, fallback);
+        }
+
+        /// <summary>
+        ///     指定したTextの文言の変更通知を解除する。
+        /// </summary>
+        /// <param name="text"> 解除対象のText。 </param>
+        private void DisposeLocalizedText(TMP_Text text)
+        {
+            if (text != null && _localizedTexts.Remove(text, out LocalizedElementText localizedText))
+            {
+                localizedText.Dispose();
+            }
+        }
+
+        /// <summary>
+        ///     すべての文言の変更通知を解除する。
+        /// </summary>
+        private void DisposeLocalizedTexts()
+        {
+            foreach (LocalizedElementText localizedText in _localizedTexts.Values)
+            {
+                localizedText.Dispose();
+            }
+
+            _localizedTexts.Clear();
         }
 
         /// <summary>

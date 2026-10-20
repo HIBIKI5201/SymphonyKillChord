@@ -511,6 +511,102 @@ MonoBehaviour:
     m_Key: ui.input.glyph.submit
     m_Metadata:
       m_Items: []
+  - m_Id: 2081000100
+    m_Key: ui.demo.timer.overall
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000101
+    m_Key: ui.demo.timer.home
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000102
+    m_Key: ui.battle.sequence.start
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000103
+    m_Key: ui.battle.sequence.clear
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000104
+    m_Key: ui.battle.sequence.game_over
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000105
+    m_Key: ui.result.title_victory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000106
+    m_Key: ui.result.title_defeat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000107
+    m_Key: ui.result.main_mission_cleared
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000108
+    m_Key: ui.result.main_mission_failed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000109
+    m_Key: ui.result.sub_mission_achieved
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000110
+    m_Key: ui.result.sub_mission_not_achieved
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000111
+    m_Key: ui.result.default_defeat_tip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000112
+    m_Key: ui.tutorial.feedback.success
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000113
+    m_Key: ui.tutorial.feedback.miss
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000114
+    m_Key: ui.tutorial.feedback.perfect
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000115
+    m_Key: ui.home_tutorial.stage_select
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000116
+    m_Key: ui.home_tutorial.skill_tree
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000117
+    m_Key: ui.home_tutorial.skill_build
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000118
+    m_Key: ui.home_tutorial.option
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000119
+    m_Key: ui.skill_build.genre_all
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000120
+    m_Key: ui.result.battle_time
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000121
+    m_Key: ui.result.max_combo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000122
+    m_Key: ui.result.complete
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000123
+    m_Key: ui.result.retry
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.OutGame.Screen;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using TMPro;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace KillChord.Demo
         public void Initialize(IDemoSession session)
         {
             _session = session ?? throw new ArgumentNullException(nameof(session));
+            SubscribeLabels();
             Refresh(false);
         }
 
@@ -99,14 +101,14 @@ namespace KillChord.Demo
             if (_overallTimerText != null)
             {
                 _overallTimerText.text =
-                    $"全体  {FormatTime(_session.OverallRemainingSeconds)}";
+                    $"{_overallLabel}  {FormatTime(_session.OverallRemainingSeconds)}";
             }
 
             if (_homeTimerText != null)
             {
                 _homeTimerText.gameObject.SetActive(isHomeActive);
                 _homeTimerText.text =
-                    $"ホーム  {FormatTime(_session.HomeRemainingSeconds)}";
+                    $"{_homeLabel}  {FormatTime(_session.HomeRemainingSeconds)}";
             }
         }
 
@@ -130,6 +132,33 @@ namespace KillChord.Demo
             rect.sizeDelta = new Vector2(-32f, 50f);
         }
 
+        /// <summary>
+        ///     タイマー名を選択中の言語で取得し、言語の切り替えにも追従させます。
+        /// </summary>
+        private void SubscribeLabels()
+        {
+            DisposeLabels();
+            _overallLabelText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.demo.timer.overall", text => _overallLabel = text, "全体");
+            _homeLabelText = new LocalizedElementText(
+                UI_COMMON_TABLE, "ui.demo.timer.home", text => _homeLabel = text, "ホーム");
+        }
+
+        /// <summary> タイマー名の変更通知を解除します。 </summary>
+        private void DisposeLabels()
+        {
+            _overallLabelText?.Dispose();
+            _homeLabelText?.Dispose();
+            _overallLabelText = null;
+            _homeLabelText = null;
+        }
+
+        /// <summary> 破棄時にタイマー名の変更通知を解除します。 </summary>
+        private void OnDestroy()
+        {
+            DisposeLabels();
+        }
+
         private static string FormatTime(float remainingSeconds)
         {
             int totalSeconds = Mathf.Max(0, Mathf.CeilToInt(remainingSeconds));
@@ -137,6 +166,8 @@ namespace KillChord.Demo
             int seconds = totalSeconds % 60;
             return $"{minutes:00}:{seconds:00}";
         }
+
+        private const string UI_COMMON_TABLE = "UICommon";
 
         [SerializeField, Tooltip("タイマー表示用Canvasです。")]
         private Canvas _canvas;
@@ -185,5 +216,9 @@ namespace KillChord.Demo
 
         private IDemoSession _session;
         private bool _isSkillBuildActive;
+        private LocalizedElementText _overallLabelText;
+        private LocalizedElementText _homeLabelText;
+        private string _overallLabel = "全体";
+        private string _homeLabel = "ホーム";
     }
 }

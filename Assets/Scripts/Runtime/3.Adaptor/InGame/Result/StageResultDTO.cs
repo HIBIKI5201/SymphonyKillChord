@@ -14,7 +14,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             StageResultType resultType,
             string stageNameText,
             string mainMissionText,
-            string mainMissionStateText,
             ReadOnlySpan<StageResultMissionItemDTO> subMissionItems,
             float battleTimeSeconds,
             int maxCombo,
@@ -24,7 +23,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
             ResultType = resultType;
             StageNameText = stageNameText ?? string.Empty;
             MainMissionText = mainMissionText ?? string.Empty;
-            MainMissionStateText = mainMissionStateText ?? string.Empty;
             SubMissionItems = subMissionItems;
             BattleTimeSeconds = battleTimeSeconds;
             MaxCombo = maxCombo;
@@ -41,9 +39,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         /// <summary> メインミッションのテキストを取得します。 </summary>
         public string MainMissionText { get; }
 
-        /// <summary> メインミッションの状態のテキストを取得します。 </summary>
-        public string MainMissionStateText { get; }
-
         /// <summary> サブミッションのアイテムを取得します。 </summary>
         public ReadOnlySpan<StageResultMissionItemDTO> SubMissionItems { get; }
 
@@ -56,7 +51,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         /// <summary> ランクのテキストを取得します。 </summary>
         public string RankText { get; }
 
-        /// <summary> ヒントのテキストを取得します。 </summary>
+        /// <summary> ヒントのテキストを取得します。ミッションにヒントが無い場合は空です。 </summary>
         public string TipsText { get; }
     }
 }

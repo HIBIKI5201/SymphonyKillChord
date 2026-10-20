@@ -19,10 +19,6 @@ namespace KillChord.Runtime.View
         public ReactiveProperty<string> StageNameText { get; }
             = new(string.Empty);
 
-        /// <summary> メインミッションの達成状態の文言。 </summary>
-        public ReactiveProperty<string> MainMissionStateText { get; }
-            = new(string.Empty);
-
         /// <summary> メインミッションの文言。 </summary>
         public ReactiveProperty<string> MainMissionText { get; }
             = new(string.Empty);
@@ -53,7 +49,6 @@ namespace KillChord.Runtime.View
             ResultType.Value = dto.ResultType;
             StageNameText.Value = dto.StageNameText;
             MainMissionText.Value = dto.MainMissionText;
-            MainMissionStateText.Value = dto.MainMissionStateText;
             BattleTimeSeconds.Value = dto.BattleTimeSeconds;
             MaxCombo.Value = dto.MaxCombo;
             RankText.Value = dto.RankText;

@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.Persistent.Localization;
 using TMPro;
 using UnityEngine;
 
@@ -26,7 +27,10 @@ namespace KillChord.Runtime.View.InGame.Result
 
             if (_stateText != null)
             {
-                _stateText.text = viewModel.IsCompleted ? _completedText : _failedText;
+                _localizedState?.Dispose();
+                _localizedState = viewModel.IsCompleted
+                    ? new LocalizedElementText(UI_COMMON_TABLE, "ui.result.sub_mission_achieved", ApplyStateText, "達成")
+                    : new LocalizedElementText(UI_COMMON_TABLE, "ui.result.sub_mission_not_achieved", ApplyStateText, "未達成");
             }
 
             if (_completedRoot != null)
@@ -40,6 +44,8 @@ namespace KillChord.Runtime.View.InGame.Result
             }
         }
 
+        private const string UI_COMMON_TABLE = "UICommon";
+
         [SerializeField, Tooltip("サブミッションの説明文を表示するText。")]
         private TMP_Text _descriptionText;
 
@@ -52,10 +58,24 @@ namespace KillChord.Runtime.View.InGame.Result
         [SerializeField, Tooltip("未達成時に表示するオブジェクト。")]
         private GameObject _failedRoot;
 
-        [SerializeField, Tooltip("達成時の表示文。")]
-        private string _completedText = "達成";
+        private LocalizedElementText _localizedState;
 
-        [SerializeField, Tooltip("未達成時の表示文。")]
-        private string _failedText = "未達成";
+        /// <summary>
+        ///     破棄時に達成状態の文言の変更通知を解除します。
+        /// </summary>
+        private void OnDestroy()
+        {
+            _localizedState?.Dispose();
+            _localizedState = null;
+        }
+
+        /// <summary>
+        ///     達成状態の文言を表示します。
+        /// </summary>
+        /// <param name="text"> 表示する文言です。 </param>
+        private void ApplyStateText(string text)
+        {
+            _stateText.text = text;
+        }
     }
 }
