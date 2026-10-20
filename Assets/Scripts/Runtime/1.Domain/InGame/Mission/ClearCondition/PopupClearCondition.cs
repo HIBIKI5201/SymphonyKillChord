@@ -4,15 +4,19 @@ using UnityEngine;
 namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
 {
     /// <summary>
-    ///     内側の達成条件をラップし、このステップの開始時に説明ポップアップを表示する目印を兼ねるクリア条件です。
-    ///     達成判定(＝ポップアップが閉じる条件)自体は内側の条件に委譲します。
+    ///     このステップの開始時に説明ポップアップを表示し、閉じる入力で達成となるクリア条件です。
+    ///     <para>
+    ///         特定のアクションを説明するポップアップは、内側の条件(そのアクションの実行)で閉じます。
+    ///         内側の条件が無いポップアップは、決定入力(<see cref="MissionActionKind.PopupConfirm"/>)で閉じます。
+    ///         スマートフォンの画面タップも決定入力として通知されるため、内側の条件があっても閉じられます。
+    ///     </para>
     /// </summary>
     public sealed class PopupClearCondition : IMissionClearCondition, IObjectiveSequenceStepCondition, IObjectiveProgressReporter, IDecoratorClearCondition
     {
         /// <summary>
         ///     PopupClearCondition クラスの新しいインスタンスを初期化します。
         /// </summary>
-        /// <param name="innerCondition"> ポップアップが閉じる判定を委譲する内側の条件です。 </param>
+        /// <param name="innerCondition"> 説明対象のアクションで閉じる場合の条件です。決定入力で閉じる場合はnullです。 </param>
         /// <param name="popupImageEntryKey"> ポップアップ画像テーブルのエントリーキーです。 </param>
         /// <param name="popupImage"> ローカライズ画像を取得できない場合に表示する画像です。不要な場合はnullです。 </param>
         public PopupClearCondition(
@@ -20,7 +24,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
             string popupImageEntryKey,
             Sprite popupImage)
         {
-            _innerCondition = innerCondition ?? throw new ArgumentNullException(nameof(innerCondition));
+            _innerCondition = innerCondition;
             PopupImageEntryKey = popupImageEntryKey ?? string.Empty;
             PopupImage = popupImage;
         }
@@ -31,24 +35,38 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         /// <summary> ローカライズ画像を取得できない場合に表示する画像です。未設定の場合はnullです。 </summary>
         public Sprite PopupImage { get; }
 
+        /// <summary>
+        ///     説明対象のアクションの実行で閉じるポップアップかどうかです。
+        ///     falseの場合は、PCのUI決定ボタンで閉じます。
+        /// </summary>
+        public bool IsClosedByAction => _innerCondition != null;
+
         /// <inheritdoc />
         public IMissionClearCondition InnerCondition => _innerCondition;
 
         /// <inheritdoc />
         public bool IsSatisfied(MissionProgress progress)
         {
-            return _innerCondition.IsSatisfied(progress);
+            if (progress.ActionRecord.GetCount(MissionActionKind.PopupConfirm) > _baselineConfirmCount)
+            {
+                return true;
+            }
+
+            return _innerCondition != null && _innerCondition.IsSatisfied(progress);
         }
 
         /// <inheritdoc />
         public string GetDescription()
         {
-            return _innerCondition.GetDescription();
+            return _innerCondition != null ? _innerCondition.GetDescription() : "説明ポップアップを決定入力で閉じる。";
         }
 
         /// <inheritdoc />
         public void BeginStep(MissionProgress progress)
         {
+            // ステップ開始前の決定入力で閉じないよう、開始時点の回数を基準にする。
+            _baselineConfirmCount = progress.ActionRecord.GetCount(MissionActionKind.PopupConfirm);
+
             if (_innerCondition is IObjectiveSequenceStepCondition stepCondition)
             {
                 stepCondition.BeginStep(progress);
@@ -58,12 +76,15 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         /// <inheritdoc />
         public int CurrentCount(MissionProgress progress)
         {
-            return _innerCondition is IObjectiveProgressReporter reporter ? reporter.CurrentCount(progress) : 0;
+            return 0;
         }
 
-        /// <inheritdoc />
-        public int RequiredCount => _innerCondition is IObjectiveProgressReporter reporter ? reporter.RequiredCount : 0;
+        /// <summary>
+        ///     ポップアップは閉じる操作を案内するもので回数の目標ではないため、HUDに回数を出さないよう0を返します。
+        /// </summary>
+        public int RequiredCount => 0;
 
         private readonly IMissionClearCondition _innerCondition;
+        private int _baselineConfirmCount;
     }
 }
