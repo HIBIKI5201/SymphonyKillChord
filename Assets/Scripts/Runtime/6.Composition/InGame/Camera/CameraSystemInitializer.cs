@@ -98,16 +98,16 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             }
 
             _cameraSystem.Initialize(
-                (playerPosition, direction) =>
+                (playerPosition, direction, notifyLockOn) =>
                 {
                     // ロックオン入力はコントローラーを通し、OnTargetLocked（ミッションの LockOn 行動の計上など）を発火させる。
                     if (targetSystemController != null)
                     {
-                        targetSystemController.ChangeTarget(playerPosition, direction);
+                        targetSystemController.ChangeTarget(playerPosition, direction, notifyLockOn);
                         return;
                     }
 
-                    targetingSystem.ChangeTarget(playerPosition, direction);
+                    targetingSystem.ChangeTarget(playerPosition, direction, notifyLockOn);
                 },
                 () => targetingSystem.ClearTarget(),
                 () =>
@@ -124,6 +124,9 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 freeLookRotationCalculator, lookAtRotationCalculator, lockOnRangeChecker, autoLockOnReleaseTracker,
                 shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
+
+            // ロックオン対象はカメラの視界範囲内の敵から選ぶ。
+            targetingSystem.SetViewFilter(_cameraSystem.IsWithinLockOnView);
 
             // 設定画面のカメラ感度・反転・オートロックオンを反映する。取得できない場合は既定の挙動で続行する。
             if (ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer))

@@ -80,7 +80,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// </summary>
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
         /// <param name="direction"> 選択基準に使用する方向。 </param>
-        void ChangeTarget(in Vector3 playerPosition, in Vector3 direction);
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。入力によらない付け替えではfalseを指定する。 </param>
+        void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true);
 
         /// <summary>
         ///     プレイヤー位置と方向をもとに候補ターゲットを更新する。
@@ -117,5 +118,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         ///     現在のターゲット選択を解除する。
         /// </summary>
         void ClearTarget();
+
+        /// <summary>
+        ///     ロックオン対象を選ぶときに、視界範囲内かどうかを判定する関数を設定する。
+        ///     未設定の場合は、すべての対象を視界範囲内として扱う。
+        /// </summary>
+        /// <param name="isWithinView"> 対象位置が視界範囲内ならtrueを返す関数。 </param>
+        void SetViewFilter(Func<Vector3, bool> isWithinView);
     }
 }

@@ -204,7 +204,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _enemyHealthHudPresenter.OnDamaged += _view.PlayDamageFeedback;
 
-            _targetable = new TransformTargetable(_enemyEntity.Id, _targetTransform, GetComponent<Collider>());
+            CharacterEntity enemyEntity = _enemyEntity;
+            _targetable = new TransformTargetable(
+                _enemyEntity.Id,
+                _targetTransform,
+                GetComponent<Collider>(),
+                () => enemyEntity.CurrentHealth.Value);
 
             // View接続
             _view.Initialize(aiController, target, damageEffectView);
