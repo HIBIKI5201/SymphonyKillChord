@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using KillChord.Editor.Utility;
 using UnityEditor;
 using UnityEditor.Localization;
 using UnityEngine;
@@ -114,7 +115,7 @@ namespace KillChord.Editor.Localization
         /// <summary>
         ///     UI共通テキスト用のロケールとString Table Collectionを作成または更新します。
         /// </summary>
-        [MenuItem("KillChord/Localization/UI共通テキスト用テーブルをセットアップ")]
+        [MenuItem(ToolConst.TOOLS_PATH + "Localization/UI共通テキスト用テーブルをセットアップ")]
         public static void Setup()
         {
             EnsureDirectory(LOCALIZATION_ROOT);
