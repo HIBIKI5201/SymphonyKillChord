@@ -416,6 +416,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
 
         /// <summary>
         ///     常駐シーンを基盤に両旧シーンを終了し、InGame の初期化まで待ちます。
+        ///     <para> タイトルから直接始めたシナリオのように OutGame が無い場合は、outGameSceneName を空にします。 </para>
         /// </summary>
         public Task<bool> UnloadSourcesThenLoadSceneKeepLoadingAsync(
             string scenarioSceneName, string outGameSceneName, string persistentSceneName,
@@ -431,13 +432,17 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                             cancellationToken)) { return false; }
                     _sceneInitializationReadiness.Clear(scenarioSceneName);
 
-                    if (!await _service.UnloadAndSetActiveAsync(
-                            outGameSceneName, persistentSceneName,
-                            new LoadingProgressRange(progress,
-                                LoadingConstants.SCENARIO_SORTIE_UNLOAD_END_PROGRESS,
-                                LoadingConstants.SCENARIO_SORTIE_SOURCES_UNLOAD_END_PROGRESS),
-                            cancellationToken)) { return false; }
-                    _sceneInitializationReadiness.Clear(outGameSceneName);
+                    // OutGame を経由していない場合は、終了するシーンがシナリオだけになる。
+                    if (!string.IsNullOrWhiteSpace(outGameSceneName))
+                    {
+                        if (!await _service.UnloadAndSetActiveAsync(
+                                outGameSceneName, persistentSceneName,
+                                new LoadingProgressRange(progress,
+                                    LoadingConstants.SCENARIO_SORTIE_UNLOAD_END_PROGRESS,
+                                    LoadingConstants.SCENARIO_SORTIE_SOURCES_UNLOAD_END_PROGRESS),
+                                cancellationToken)) { return false; }
+                        _sceneInitializationReadiness.Clear(outGameSceneName);
+                    }
 
                     // InGame の Start より先に両旧シーンを終了し、専用の開始待ちを不要にします。
                     _sceneInitializationReadiness.Clear(inGameSceneName);
