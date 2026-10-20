@@ -48,7 +48,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416006
-    m_Localized: Display Settings
+    m_Localized: Settings
     m_Metadata:
       m_Items: []
   - m_Id: 1724416007
@@ -328,23 +328,23 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416076
-    m_Localized: "Reset the skill tree?\n\u8FD4\u5374\u3055\u308C\u308B\u7814\u7A76\u30DD\u30A4\u30F3\u30C8\uFF1A{0}"
+    m_Localized: "Reset the skill tree?\nUnlock Points refunded: {0}"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416077
-    m_Localized: "\u7814\u7A76P\uFF1A{0} \u2192 {1}"
+    m_Localized: "Unlock Points: {0} \u2192 {1}"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416078
-    m_Localized: "\u8A00\u8A9E"
+    m_Localized: Language
     m_Metadata:
       m_Items: []
   - m_Id: 1724416079
-    m_Localized: "\u632F\u52D5"
+    m_Localized: Vibration
     m_Metadata:
       m_Items: []
   - m_Id: 1724416080
-    m_Localized: "\u30EA\u30BA\u30E0\u5224\u5B9A\u30BF\u30A4\u30DF\u30F3\u30B0"
+    m_Localized: Rhythm Timing
     m_Metadata:
       m_Items: []
   - m_Id: 1724416081
