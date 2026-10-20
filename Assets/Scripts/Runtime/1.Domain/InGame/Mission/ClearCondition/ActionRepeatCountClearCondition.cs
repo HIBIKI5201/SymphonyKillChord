@@ -27,6 +27,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
             _requiredCount = requiredCount;
         }
 
+        /// <summary> 計測する行動の種別です。 </summary>
+        public MissionActionKind ActionKind => _actionKind;
+
         /// <summary>
         ///     条件の説明文を取得します。
         /// </summary>

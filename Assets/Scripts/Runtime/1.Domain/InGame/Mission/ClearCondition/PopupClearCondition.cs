@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
@@ -17,23 +16,17 @@ namespace KillChord.Runtime.Domain.InGame.Mission.ClearCondition
         ///     PopupClearCondition クラスの新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="innerCondition"> 説明対象のアクションで閉じる場合の条件です。決定入力で閉じる場合はnullです。 </param>
-        /// <param name="popupImageEntryKey"> ポップアップ画像テーブルのエントリーキーです。 </param>
-        /// <param name="popupImage"> ローカライズ画像を取得できない場合に表示する画像です。不要な場合はnullです。 </param>
+        /// <param name="popupPrefab"> 表示する説明ポップアップのPrefabです。表示しない場合はnullです。 </param>
         public PopupClearCondition(
             IMissionClearCondition innerCondition,
-            string popupImageEntryKey,
-            Sprite popupImage)
+            GameObject popupPrefab)
         {
             _innerCondition = innerCondition;
-            PopupImageEntryKey = popupImageEntryKey ?? string.Empty;
-            PopupImage = popupImage;
+            PopupPrefab = popupPrefab;
         }
 
-        /// <summary> ポップアップ画像テーブルのエントリーキーです。 </summary>
-        public string PopupImageEntryKey { get; }
-
-        /// <summary> ローカライズ画像を取得できない場合に表示する画像です。未設定の場合はnullです。 </summary>
-        public Sprite PopupImage { get; }
+        /// <summary> 表示する説明ポップアップのPrefabです。未設定の場合はnullです。 </summary>
+        public GameObject PopupPrefab { get; }
 
         /// <summary>
         ///     説明対象のアクションの実行で閉じるポップアップかどうかです。

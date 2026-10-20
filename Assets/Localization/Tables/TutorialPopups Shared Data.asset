@@ -1,0 +1,116 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: TutorialPopups Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: TutorialPopups
+  m_TableCollectionNameGuidString: 28ef56a5b71510142b480be2aea60eb6
+  m_Entries:
+  - m_Id: 1573421056
+    m_Key: tutorial.popup.close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1640529920
+    m_Key: tutorial.popup.close_tap
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1644724224
+    m_Key: tutorial.popup.move.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1644724225
+    m_Key: tutorial.popup.move.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918528
+    m_Key: tutorial.popup.attack.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918529
+    m_Key: tutorial.popup.attack.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918530
+    m_Key: tutorial.popup.kill_chord.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918531
+    m_Key: tutorial.popup.kill_chord.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918532
+    m_Key: tutorial.popup.just_attack.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918533
+    m_Key: tutorial.popup.just_attack.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918534
+    m_Key: tutorial.popup.green.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918535
+    m_Key: tutorial.popup.green.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918536
+    m_Key: tutorial.popup.orange.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918537
+    m_Key: tutorial.popup.orange.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918538
+    m_Key: tutorial.popup.blue.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918539
+    m_Key: tutorial.popup.blue.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918540
+    m_Key: tutorial.popup.purple.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918541
+    m_Key: tutorial.popup.purple.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918542
+    m_Key: tutorial.popup.light_blue.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918543
+    m_Key: tutorial.popup.light_blue.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918544
+    m_Key: tutorial.popup.yellow.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918545
+    m_Key: tutorial.popup.yellow.body
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 6106260330607018182
+  references:
+    version: 2
+    RefIds:
+    - rid: 6106260330607018182
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1792483286746

@@ -1,0 +1,206 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: TutorialPopups_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 28ef56a5b71510142b480be2aea60eb6, type: 2}
+  m_Metadata:
+    m_Items:
+    - rid: 6106260330607018183
+  m_TableData:
+  - m_Id: 1573421056
+    m_Localized: Close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1640529920
+    m_Localized: Tap to close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1644724224
+    m_Localized: Move & Dodge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1644724225
+    m_Localized: "Moving and dodging let you avoid enemy attacks.\nDodge steps you
+      forward and briefly nullifies all incoming attacks.\n\n{input.device:choose(keyboard|xbox|playstation|switch):<sprite
+      name=\"space\">|<sprite name=\"xa\">|<sprite name=\"px\">|<sprite name=\"nb\">}
+      Dodge\u3000\u3000\u3000\u3000{input.device:choose(keyboard|xbox|playstation|switch):<size=80%><sprite
+      name=\"w\"><sprite name=\"a\"><sprite name=\"s\"><sprite name=\"d\"></size>|<sprite
+      name=\"jl\">|<sprite name=\"jl\">|<sprite name=\"jl\">} Move"
+    m_Metadata:
+      m_Items:
+      - rid: 6106260330607018183
+  - m_Id: 1648918528
+    m_Localized: Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918529
+    m_Localized: 'Press the {input.device:choose(keyboard|xbox|playstation|switch):<sprite
+      name="ml">|<sprite name="xb">|<sprite name="po">|<sprite name="na">} button
+      to attack.
+
+      There''s a wave on the bar at the bottom of the screen,
+
+      and
+      the color changes the type of attack.'
+    m_Metadata:
+      m_Items:
+      - rid: 6106260330607018183
+  - m_Id: 1648918530
+    m_Localized: Kill Chord (Skill)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918531
+    m_Localized: 'By landing attacks in a row that match
+
+      the colors of the
+      hexagons
+
+      inside the red frame, and the timing of the icons
+
+      in
+      the white frame at the bottom of the screen,
+
+      you can trigger a special
+      attack called a Kill Chord.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918532
+    m_Localized: Just Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918533
+    m_Localized: "If you attack exactly when the judgment bar\nat the bottom of the
+      screen lines up\nwith each attack's yellow line,\nyou'll perform a \"Just Attack\"
+      \u2014\nan attack stronger than normal."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918534
+    m_Localized: Green Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918535
+    m_Localized: 'Weapon: Rifle
+
+      Performed by attacking on the green timing.
+
+      A
+      relatively easy-to-use attack
+
+      that delivers stable performance
+
+      in
+      any situation.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918536
+    m_Localized: Orange Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918537
+    m_Localized: 'Weapon: Submachine Gun
+
+      Performed by attacking on the orange
+      timing.
+
+      A rapid, continuous attack.
+
+      Fires 3-round bursts,
+
+      dealing
+      damage with multiple hits.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918538
+    m_Localized: Blue Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918539
+    m_Localized: 'Weapon: Shotgun
+
+      Performed by attacking on the blue timing.
+
+      A
+      close-range attack that covers a wide area.
+
+      Fires a fan-shaped spread
+      that can hit multiple enemies at once,
+
+      but is less effective against
+      distant targets.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918540
+    m_Localized: Purple Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918541
+    m_Localized: 'Weapon: Anti-Materiel Rifle
+
+      Performed by attacking on the
+      purple timing.
+
+      High damage and long range, but slow to execute.
+
+      The
+      bullet travels in a straight line and pierces enemies,
+
+      hitting multiple
+      targets at once.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918542
+    m_Localized: Light Blue Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918543
+    m_Localized: 'Weapon: Revolver
+
+      Performed by attacking on the light blue
+      timing.
+
+      An attack that combines power and suppression.
+
+      Easily
+      knocks back the target.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918544
+    m_Localized: Yellow Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918545
+    m_Localized: 'Weapon: Handgun
+
+      Performed by attacking on the yellow timing.
+
+      A
+      fast, high-power attack.
+
+      Because of that, it''s difficult to input,
+
+      and
+      shows its true value with precise rhythm timing.'
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 6106260330607018183
+      type: {class: SmartFormatTag, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries: 
+        m_SharedEntries:
+        - id: 1644724225
+        - id: 1648918529

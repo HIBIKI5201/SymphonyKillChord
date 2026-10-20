@@ -6,6 +6,7 @@ namespace KillChord.Runtime.View.InGame.Mission
 {
     /// <summary>
     ///     説明ポップアップの表示に合わせて、スマートフォンの画面タップ入力を切り替えるデコレータです。
+    ///     スマートフォンでは種類を問わず画面タップで閉じるため、閉じる案内もタップに差し替えます。
     /// </summary>
     public sealed class MobileTapPopupViewDecorator : IMissionStepPopupView
     {
@@ -25,12 +26,12 @@ namespace KillChord.Runtime.View.InGame.Mission
         }
 
         /// <inheritdoc />
-        public void Show(string imageEntryKey, Sprite fallbackImage)
+        public void Show(GameObject popupPrefab, MissionStepPopupCloseInput closeInput)
         {
-            _inner.Show(imageEntryKey, fallbackImage);
+            _inner.Show(popupPrefab, MissionStepPopupCloseInput.ScreenTap);
 
-            // 画像キーもフォールバック画像も無いステップでは何も表示されないため、タップも有効にしない。
-            if (!string.IsNullOrWhiteSpace(imageEntryKey) || fallbackImage != null)
+            // Prefabが無いステップでは何も表示されないため、タップも有効にしない。
+            if (popupPrefab != null)
             {
                 _tapInput.Activate();
             }

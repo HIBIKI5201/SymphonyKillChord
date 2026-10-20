@@ -107,8 +107,43 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 return;
             }
 
-            _popupView.Show(popupCondition.PopupImageEntryKey, popupCondition.PopupImage);
+            _popupView.Show(popupCondition.PopupPrefab, ResolveCloseInput(popupCondition));
             _inputSuppressionState?.Suppress(_inputSuppressionDuration);
+        }
+
+        /// <summary>
+        ///     ポップアップを閉じる入力を、説明対象のアクションから決めます。
+        /// </summary>
+        /// <param name="popupCondition"> 表示するポップアップの条件です。 </param>
+        /// <returns> 閉じる案内に出す入力です。 </returns>
+        private static MissionStepPopupCloseInput ResolveCloseInput(PopupClearCondition popupCondition)
+        {
+            if (!popupCondition.IsClosedByAction)
+            {
+                return MissionStepPopupCloseInput.Submit;
+            }
+
+            ActionRepeatCountClearCondition actionCondition =
+                ClearConditionChain.Find<ActionRepeatCountClearCondition>(popupCondition.InnerCondition);
+            if (actionCondition == null)
+            {
+                return MissionStepPopupCloseInput.None;
+            }
+
+            return actionCondition.ActionKind switch
+            {
+                MissionActionKind.Dodge => MissionStepPopupCloseInput.Dodge,
+                MissionActionKind.Move => MissionStepPopupCloseInput.Move,
+                MissionActionKind.LockOn => MissionStepPopupCloseInput.LockOn,
+                MissionActionKind.Attack
+                    or MissionActionKind.AttackOneBeat
+                    or MissionActionKind.AttackTwoBeat
+                    or MissionActionKind.AttackThreeBeat
+                    or MissionActionKind.AttackFourBeat
+                    or MissionActionKind.AttackSixBeat
+                    or MissionActionKind.AttackEightBeat => MissionStepPopupCloseInput.Attack,
+                _ => MissionStepPopupCloseInput.None,
+            };
         }
 
         /// <summary>

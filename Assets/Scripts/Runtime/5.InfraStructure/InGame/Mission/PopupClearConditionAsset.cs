@@ -16,8 +16,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         {
             return new PopupClearCondition(
                 _innerCondition?.Create(missionKeyRepository),
-                ResolvePopupImageEntryKey(),
-                _popupImage);
+                _popupPrefab);
         }
 
         /// <inheritdoc />
@@ -30,24 +29,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         [SerializeReference, SubclassSelector, Tooltip("説明対象のアクションで閉じる場合の条件。空欄の場合はUIの決定ボタンで閉じる。スマホは常に画面タップで閉じる。")]
         private MissionClearConditionAssetBase _innerCondition;
 
-        [SerializeField, Tooltip("TutorialPopupImagesテーブルのエントリーキー。空欄の場合は画像名を使用する。")]
-        private string _popupImageEntryKey;
-
-        [SerializeField, Tooltip("ローカライズ画像を取得できない場合に表示する画像。不要な場合は空欄。")]
-        private Sprite _popupImage;
-
-        /// <summary>
-        ///     ポップアップ画像テーブルのエントリーキーを解決します。
-        /// </summary>
-        /// <returns> 設定済みのキー、または従来画像のアセット名です。 </returns>
-        private string ResolvePopupImageEntryKey()
-        {
-            if (!string.IsNullOrWhiteSpace(_popupImageEntryKey))
-            {
-                return _popupImageEntryKey;
-            }
-
-            return _popupImage != null ? _popupImage.name : string.Empty;
-        }
+        [SerializeField, Tooltip("表示する説明ポップアップのPrefab。TutorialPopup_Baseのバリアントを指定する。")]
+        private GameObject _popupPrefab;
     }
 }
