@@ -262,7 +262,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             if (hasUnmigrated)
             {
                 error = "IDが未設定のSpawnPositionPairがあります。"
-                    + "Tools/Source Data Provider/Migrate SpawnPositionPair Idsを実行してください。";
+                    + "Tools/KillChord/Source Data Provider/Migrate SpawnPositionPair Idsを実行してください。";
             }
 
             return result;

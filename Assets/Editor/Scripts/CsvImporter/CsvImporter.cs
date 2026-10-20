@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using KillChord.Editor.Utility;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -18,7 +19,7 @@ namespace KillChord.Editor
         /// <summary>
         ///     CSV Importer ウィンドウを開く。
         /// </summary>
-        [MenuItem("Tools/Import CSV")]
+        [MenuItem(ToolConst.TOOLS_PATH + "Import CSV")]
         private static void Open()
         {
             GetWindow<CsvImporter>("CSV Importer");

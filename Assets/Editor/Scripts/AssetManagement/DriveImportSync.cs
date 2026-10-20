@@ -35,7 +35,7 @@ namespace KillChord.Editor.AssetManagement
         ///     Drive との同期を開始する。
         ///     実行中の場合はダイアログを出して何もしない。
         /// </summary>
-        [MenuItem(ToolConst.TOOLS_PATH + "/" + nameof(DriveImportSync) + "/Sync Now")]
+        [MenuItem(ToolConst.TOOLS_PATH + nameof(DriveImportSync) + "/Sync Now")]
         public static async void SyncNow()
         {
             if (isRunning)

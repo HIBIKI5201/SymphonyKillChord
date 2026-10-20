@@ -174,7 +174,7 @@ sequenceDiagram
     Drawer -->> Planner: HelpBoxへ警告表示
 ```
 
-> 一括再計算が必要な場合（大量リネーム後など）は`DataIDRebuildMenu`（`Tools/Source Data Provider/Rebuild All DataID Hashes`）で全ScriptableObject/Prefab/Sceneを走査し、`DataIDHasher.Compute`との不一致を一括修正する。走査中に検出したハッシュ衝突はDialogではなくConsoleへエラーログ出力される点に注意する。
+> 一括再計算が必要な場合（大量リネーム後など）は`DataIDRebuildMenu`（`Tools/KillChord/Source Data Provider/Rebuild All DataID Hashes`）で全ScriptableObject/Prefab/Sceneを走査し、`DataIDHasher.Compute`との不一致を一括修正する。走査中に検出したハッシュ衝突はDialogではなくConsoleへエラーログ出力される点に注意する。
 
 ### ③ GameDataVariant切替でRelease/Demoのデータを出し分ける仕組み
 
