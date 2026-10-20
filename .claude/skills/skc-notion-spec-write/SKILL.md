@@ -35,6 +35,8 @@ macOS / Linuxではexeが動かないため、以下の`./SinfoniaOperator/Notio
 - Notion APIの`replace_content`と完全削除はツールが実装していない。ページを消す要求は`archive`でゴミ箱へ移す
   （Notion上で復元できる）。書き込み許可ルート自身は対象外で、子ページがあるページは`--with-children`が要る。
   `archive`も`--confirm`の前にユーザーの承認を取る。
+- データベースの実体を別ページへ移すときは`move-database <データベース> --to <ページ>`を使う。IDと行は変わらない。
+  リンクドビューはAPIで作れないため、元の位置へのリンクドビュー作成はユーザーにNotion上で頼む。`--confirm`の前に承認を取る。
 - データベースへ行を作るときは`create --parent <データベース> --set "名前=..." --set "ステータス=..."`の形にする。
   `status`・`select`は選択肢の名前を完全一致で書く。本文の先頭の見出しが`--set`のタイトルと同じなら、ツールが取り除く。
 - 本文を全面的に書き換える場合は`push --whole`を使う。`update_content`の枠内で、本文全体を1件の置換として
@@ -107,7 +109,7 @@ Notion側の書式正規化が入っている。作業ファイルが最新本�
 
 ## 報告する（必須）
 
-`create`・`push`・`rename`・`move`・`set-properties`・`append`・`edit-block`など、Notionへ書き込む操作を1回でも実行したら、
+`create`・`push`・`rename`・`move`・`move-database`・`set-properties`・`append`・`edit-block`など、Notionへ書き込む操作を1回でも実行したら、
 作業の最後に、変更・追加したページの一覧を次の形の表で報告する。書き込みの件数が多いときも、省略しない。
 
 | 操作 | ページ | 配置 | 内容 | 状態 |
