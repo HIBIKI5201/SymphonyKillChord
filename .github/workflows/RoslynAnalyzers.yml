@@ -1,4 +1,4 @@
-name: "[Check] Roslyn Analyzers"
+name: "[CI/CD] Roslyn Analyzers"
 
 # RoslynAnalyzers/ または コミット済みのアナライザDLLが変わるPRで、
 # アナライザのユニットテストを実行する。テストには、コミット済みDLLがソースと同じアナライザ集合を持つかの検証を含む
