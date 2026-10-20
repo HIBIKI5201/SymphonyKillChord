@@ -1,4 +1,5 @@
 using KillChord.Runtime.View.OutGame.Navigation;
+using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
 using System;
 using System.Threading;
@@ -50,12 +51,14 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
         ///     決定入力を受けるまで待機するValueTaskを返します。
         /// </summary>
         /// <param name="targetElement"> ハイライトする要素です。 </param>
-        /// <param name="message"> 表示する説明文です。 </param>
+        /// <param name="messageEntry"> 表示する説明文のUICommonのキーです。 </param>
+        /// <param name="fallbackMessage"> 翻訳を取得できない場合の説明文です。 </param>
         /// <param name="cancellationToken"> キャンセルトークンです。 </param>
         /// <returns> 決定入力を受けるまで待機するValueTaskです。 </returns>
         public ValueTask ShowStepAsync(
             VisualElement targetElement,
-            string message,
+            string messageEntry,
+            string fallbackMessage,
             CancellationToken cancellationToken = default)
         {
             if (_isDisposed)
@@ -77,7 +80,9 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
                 () => completionSource.TrySetCanceled(cancellationToken));
 
             ApplyGuideStyles();
-            _messageLabel.text = message;
+            _localizedMessage?.Dispose();
+            _localizedMessage = new LocalizedElementText(
+                UI_COMMON_TABLE, messageEntry, text => _messageLabel.text = text, fallbackMessage);
             int layoutGeneration = ++_layoutGeneration;
             CancelLayoutWait();
 
@@ -143,6 +148,8 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
             _layoutGeneration++;
             _stepCancellationRegistration.Dispose();
             _stepCompletionSource?.TrySetCanceled();
+            _localizedMessage?.Dispose();
+            _localizedMessage = null;
             _opacityMotionHandle.TryCancel();
             CancelLayoutWait();
             _root.UnregisterCallback<ClickEvent>(HandleClickHandler);
@@ -157,6 +164,8 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
             _isActive = false;
         }
 
+        /// <summary> 説明文を参照するString Table Collection名です。 </summary>
+        private const string UI_COMMON_TABLE = "UICommon";
         /// <summary> フェードにかかる時間(秒)です。 </summary>
         private const float FADE_DURATION = 0.2f;
         /// <summary> フェードのイージングです。 </summary>
@@ -210,6 +219,8 @@ namespace KillChord.Runtime.View.OutGame.Tutorial
         private readonly VisualElement _messageBox;
         /// <summary> チュートリアルの説明文を表示するラベルです。 </summary>
         private readonly Label _messageLabel;
+        /// <summary> 表示中の説明文の言語切り替えを購読するハンドルです。 </summary>
+        private LocalizedElementText _localizedMessage;
         /// <summary> 現在の決定入力を待機する完了ソースです。 </summary>
         private TaskCompletionSource<bool> _stepCompletionSource;
         /// <summary> 現在の決定入力待機に対するキャンセル登録です。 </summary>

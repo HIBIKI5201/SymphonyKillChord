@@ -29,15 +29,19 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
         {
             new HomeTutorialStep(
                 "StageSelect",
+                "ui.home_tutorial.stage_select",
                 "ここから出撃するステージを選んで戦闘に挑みます。"),
             new HomeTutorialStep(
                 "SkillTree",
+                "ui.home_tutorial.skill_tree",
                 "研究を進めて新しいスキルや強化を解放できます。"),
             new HomeTutorialStep(
                 "SkillBuild",
+                "ui.home_tutorial.skill_build",
                 "解放したスキルを組み合わせて武装を改造します。"),
             new HomeTutorialStep(
                 "OptionIcon",
+                "ui.home_tutorial.option",
                 "音量や操作方法などの各種設定を変更できます。"),
         };
 
@@ -260,7 +264,8 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                         continue;
                     }
 
-                    await overlayView.ShowStepAsync(target, step.Message, cancellationToken);
+                    await overlayView.ShowStepAsync(
+                        target, step.MessageEntry, step.FallbackMessage, cancellationToken);
 
                     if (_isForceCompleteRequested)
                     {
@@ -305,18 +310,23 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             ///     ホームチュートリアルの1手順を初期化します。
             /// </summary>
             /// <param name="targetElementName"> 対象要素の名前です。 </param>
-            /// <param name="message"> 表示する説明文です。 </param>
-            public HomeTutorialStep(string targetElementName, string message)
+            /// <param name="messageEntry"> 表示する説明文のUICommonのキーです。 </param>
+            /// <param name="fallbackMessage"> 翻訳を取得できない場合の説明文です。 </param>
+            public HomeTutorialStep(string targetElementName, string messageEntry, string fallbackMessage)
             {
                 TargetElementName = targetElementName;
-                Message = message;
+                MessageEntry = messageEntry;
+                FallbackMessage = fallbackMessage;
             }
 
             /// <summary> 対象要素の名前を取得します。 </summary>
             public string TargetElementName { get; }
 
-            /// <summary> 表示する説明文を取得します。 </summary>
-            public string Message { get; }
+            /// <summary> 表示する説明文のUICommonのキーを取得します。 </summary>
+            public string MessageEntry { get; }
+
+            /// <summary> 翻訳を取得できない場合の説明文を取得します。 </summary>
+            public string FallbackMessage { get; }
         }
     }
 }

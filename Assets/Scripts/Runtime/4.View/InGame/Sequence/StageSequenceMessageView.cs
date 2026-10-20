@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.Persistent.Localization;
 using TMPro;
 using UnityEngine;
 
@@ -21,7 +22,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// </summary>
         public void SetStageStartMessage()
         {
-            SetMessage(_stageStartMessage);
+            SetMessage(STAGE_START_ENTRY, STAGE_START_FALLBACK);
         }
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// </summary>
         public void SetClearMessage()
         {
-            SetMessage(_clearMessage);
+            SetMessage(CLEAR_ENTRY, CLEAR_FALLBACK);
         }
 
         /// <summary>
@@ -37,7 +38,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// </summary>
         public void SetGameOverMessage()
         {
-            SetMessage(_gameOverMessage);
+            SetMessage(GAME_OVER_ENTRY, GAME_OVER_FALLBACK);
         }
 
         /// <summary>
@@ -45,7 +46,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// </summary>
         public void ShowClear()
         {
-            Show(_clearMessage);
+            Show(CLEAR_ENTRY, CLEAR_FALLBACK);
         }
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// </summary>
         public void ShowGameOver()
         {
-            Show(_gameOverMessage);
+            Show(GAME_OVER_ENTRY, GAME_OVER_FALLBACK);
         }
 
         /// <summary>
@@ -71,28 +72,39 @@ namespace KillChord.Runtime.View.InGame.Sequence
             _canvasGroup.blocksRaycasts = false;
         }
 
+        private const string UI_COMMON_TABLE = "UICommon";
+        private const string STAGE_START_ENTRY = "ui.battle.sequence.start";
+        private const string CLEAR_ENTRY = "ui.battle.sequence.clear";
+        private const string GAME_OVER_ENTRY = "ui.battle.sequence.game_over";
+        private const string STAGE_START_FALLBACK = "ミッションスタート！";
+        private const string CLEAR_FALLBACK = "ステージクリア！";
+        private const string GAME_OVER_FALLBACK = "ゲームオーバー";
+
         [SerializeField, Tooltip("結果画面全体のCanvasGroup")]
         private CanvasGroup _canvasGroup;
 
         [SerializeField, Tooltip("結果画面に表示するメッセージのText")]
         private TextMeshProUGUI _messageText;
 
-        [SerializeField, Tooltip("ステージ開始時に表示するメッセージ")]
-        private string _stageStartMessage = "Mission Start!";
+        private LocalizedElementText _localizedMessage;
 
-        [SerializeField, Tooltip("ステージクリア時に表示するメッセージ")]
-        private string _clearMessage = "Stage Clear!";
-
-        [SerializeField, Tooltip("ゲームオーバー時に表示するメッセージ")]
-        private string _gameOverMessage = "Game Over!";
+        /// <summary>
+        ///     破棄時にメッセージの変更通知を解除します。
+        /// </summary>
+        private void OnDestroy()
+        {
+            _localizedMessage?.Dispose();
+            _localizedMessage = null;
+        }
 
         /// <summary>
         ///     結果画面を表示します。
         /// </summary>
-        /// <param name="message">表示するメッセージ。</param>
-        private void Show(string message)
+        /// <param name="entry">表示するメッセージのUICommonのキー。</param>
+        /// <param name="fallback">翻訳を取得できない場合のメッセージ。</param>
+        private void Show(string entry, string fallback)
         {
-            SetMessage(message);
+            SetMessage(entry, fallback);
 
             if (_canvasGroup == null)
             {
@@ -107,15 +119,18 @@ namespace KillChord.Runtime.View.InGame.Sequence
         /// <summary>
         ///     メッセージのみを変更します。
         /// </summary>
-        /// <param name="message">表示するメッセージ。</param>
-        private void SetMessage(string message)
+        /// <param name="entry">表示するメッセージのUICommonのキー。</param>
+        /// <param name="fallback">翻訳を取得できない場合のメッセージ。</param>
+        private void SetMessage(string entry, string fallback)
         {
             if (_messageText == null)
             {
                 return;
             }
 
-            _messageText.text = message;
+            _localizedMessage?.Dispose();
+            _localizedMessage = new LocalizedElementText(
+                UI_COMMON_TABLE, entry, text => _messageText.text = text, fallback);
         }
     }
 }
