@@ -10,9 +10,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <summary>
         ///     ポップアップを表示します。
         /// </summary>
-        /// <param name="imageEntryKey"> TutorialPopupImagesテーブルのエントリーキーです。 </param>
-        /// <param name="fallbackImage"> ローカライズ画像を取得できない場合に表示する画像です。未設定の場合はnullです。 </param>
-        void Show(string imageEntryKey, Sprite fallbackImage);
+        /// <param name="popupPrefab"> 表示する説明ポップアップのPrefabです。未設定の場合は何も表示しません。 </param>
+        /// <param name="closeInput"> ポップアップを閉じる入力です。閉じる案内のアイコンに使います。 </param>
+        void Show(GameObject popupPrefab, MissionStepPopupCloseInput closeInput);
 
         /// <summary>
         ///     ポップアップを非表示にします。

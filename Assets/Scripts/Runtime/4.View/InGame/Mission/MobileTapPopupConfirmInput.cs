@@ -1,5 +1,3 @@
-using KillChord.Runtime.Adaptor.Persistent.Input;
-using KillChord.Runtime.View.Persistent.Input;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,35 +10,30 @@ using UnityEngine.UI;
 namespace KillChord.Runtime.View.InGame.Mission
 {
     /// <summary>
-    ///     スマートフォンで説明ポップアップ表示中に、画面のタップを攻撃入力として扱うViewクラス。
+    ///     スマートフォンで説明ポップアップ表示中に、画面のタップをポップアップを閉じる入力として通知するViewクラス。
     ///     <para>
-    ///         ポップアップ表示中は他のCanvasにタップを取られて攻撃ボタンが押せなくなるため、
-    ///         UIの上に判定を重ねるのではなく、タッチを直接読み取って攻撃入力を送ります。
+    ///         ポップアップ表示中は他のCanvasにタップを取られるため、UIの上に判定を重ねるのではなく、
+    ///         タッチを直接読み取って通知します。
     ///         UIのレイキャストを遮らないので、仮想スティックやボタンなどの操作はそのまま使えます。
     ///     </para>
     /// </summary>
-    public sealed class MobileTapAttackInput : MonoBehaviour
+    public sealed class MobileTapPopupConfirmInput : MonoBehaviour
     {
-        /// <summary>
-        ///     タップ攻撃入力を生成します。生成直後は無効です。
-        /// </summary>
-        /// <param name="playerInputView"> 攻撃入力の送信先です。 </param>
-        /// <returns> 生成したタップ攻撃入力です。 </returns>
-        public static MobileTapAttackInput Create(PlayerInputView playerInputView)
-        {
-            if (playerInputView == null)
-            {
-                throw new ArgumentNullException(nameof(playerInputView));
-            }
+        /// <summary> ポップアップ表示中に画面がタップされたことを通知するイベント。 </summary>
+        public event Action OnTapped;
 
-            GameObject inputObject = new GameObject(nameof(MobileTapAttackInput));
-            MobileTapAttackInput input = inputObject.AddComponent<MobileTapAttackInput>();
-            input._playerInputView = playerInputView;
-            return input;
+        /// <summary>
+        ///     タップ入力を生成します。生成直後は無効です。
+        /// </summary>
+        /// <returns> 生成したタップ入力です。 </returns>
+        public static MobileTapPopupConfirmInput Create()
+        {
+            GameObject inputObject = new GameObject(nameof(MobileTapPopupConfirmInput));
+            return inputObject.AddComponent<MobileTapPopupConfirmInput>();
         }
 
         /// <summary>
-        ///     タップによる攻撃入力の受け付けを開始します。
+        ///     タップの受け付けを開始します。
         /// </summary>
         public void Activate()
         {
@@ -48,12 +41,11 @@ namespace KillChord.Runtime.View.InGame.Mission
         }
 
         /// <summary>
-        ///     タップによる攻撃入力の受け付けを終了します。押下中のタッチには解放を通知します。
+        ///     タップの受け付けを終了します。
         /// </summary>
         public void Deactivate()
         {
             _isActive = false;
-            ReleaseTrackedTouches();
         }
 
         /// <summary>
@@ -67,23 +59,23 @@ namespace KillChord.Runtime.View.InGame.Mission
             }
 
             Deactivate();
+            OnTapped = null;
             Destroy(gameObject);
         }
 
-        private readonly HashSet<int> _trackedTouchIds = new();
         private readonly List<RaycastResult> _raycastResults = new();
 
-        private PlayerInputView _playerInputView;
         private PointerEventData _pointerEventData;
         private EventSystem _pointerEventSystem;
         private bool _isActive;
 
         /// <summary>
-        ///     有効な間、画面タップを攻撃入力として処理する。
+        ///     有効な間、画面のタップを通知する。
         /// </summary>
         private void Update()
         {
-            if (!_isActive || _playerInputView == null)
+            // ポーズ中のメニュー操作でポップアップが閉じないよう、時間停止中は通知しない。
+            if (!_isActive || Time.timeScale <= 0f)
             {
                 return;
             }
@@ -96,45 +88,20 @@ namespace KillChord.Runtime.View.InGame.Mission
 
             foreach (TouchControl touch in touchscreen.touches)
             {
-                int touchId = touch.touchId.ReadValue();
-                if (touch.press.wasPressedThisFrame)
+                if (!touch.press.wasPressedThisFrame)
                 {
-                    // 仮想スティックやボタンなどの操作UIへのタップは、その操作に任せる。
-                    if (IsOverInteractiveUi(touch.position.ReadValue()))
-                    {
-                        continue;
-                    }
-
-                    _trackedTouchIds.Add(touchId);
-                    _playerInputView.OnMobileButton(InputActionKind.Attack, InputActionPhase.Started, 1f);
+                    continue;
                 }
-                else if (touch.press.wasReleasedThisFrame && _trackedTouchIds.Remove(touchId))
+
+                // 仮想スティックやボタンなどの操作UIへのタップは、その操作に任せる。
+                if (IsOverInteractiveUi(touch.position.ReadValue()))
                 {
-                    _playerInputView.OnMobileButton(InputActionKind.Attack, InputActionPhase.Canceled, 0f);
+                    continue;
                 }
-            }
-        }
 
-        /// <summary>
-        ///     追跡中のタッチを解放する。
-        /// </summary>
-        private void OnDisable()
-        {
-            ReleaseTrackedTouches();
-        }
-
-        /// <summary>
-        ///     押下中として追跡しているタッチに解放を通知します。
-        /// </summary>
-        private void ReleaseTrackedTouches()
-        {
-            if (_trackedTouchIds.Count == 0)
-            {
+                OnTapped?.Invoke();
                 return;
             }
-
-            _trackedTouchIds.Clear();
-            _playerInputView?.OnMobileButton(InputActionKind.Attack, InputActionPhase.Canceled, 0f);
         }
 
         /// <summary>
