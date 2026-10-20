@@ -33,7 +33,9 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         /// <summary>
         /// 設定されたシナリオを先頭から順に再生する。
         /// </summary>
-        public async ValueTask PlayScenario(string scenarioId)
+        /// <param name="scenarioId"> 再生するシナリオID。 </param>
+        /// <param name="cancellationToken"> キャンセルされた場合はスキップと同じく再生を終える。 </param>
+        public async ValueTask PlayScenario(string scenarioId, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(scenarioId))
             {
@@ -45,7 +47,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                 throw new InvalidOperationException("シナリオは既に再生中です。");
             }
             ResetPlaybackState();
-            using CancellationTokenSource source = new CancellationTokenSource();
+            using CancellationTokenSource source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _playCts = source;
             CancellationToken token = source.Token;
             bool skipped = false;
@@ -96,7 +98,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                     _playCts = null;
                     ResetPlaybackState();
                 }
-                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
+                await _completionNotifier.NotifyCompletedAsync(skipped, cancellationToken);
             }
         }
 

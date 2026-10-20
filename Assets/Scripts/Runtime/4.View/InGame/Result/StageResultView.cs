@@ -97,7 +97,7 @@ namespace KillChord.Runtime.View.InGame.Result
 
             try
             {
-                bool success = await _controller.CompleteAsync();
+                bool success = await _controller.CompleteAsync(destroyCancellationToken);
 
                 if (!success)
                 {
@@ -129,7 +129,7 @@ namespace KillChord.Runtime.View.InGame.Result
 
             try
             {
-                bool success = await _controller.RetryAsync();
+                bool success = await _controller.RetryAsync(destroyCancellationToken);
 
                 if (!success)
                 {

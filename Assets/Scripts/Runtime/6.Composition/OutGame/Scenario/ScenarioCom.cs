@@ -294,7 +294,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                                 _scenarioView.gameObject.SetActive(true);
                             }
                             _scenarioView.PrepareForPlayback();
-                            await _usecase.PlayScenario(_selectedScenarioState.CurrentScenarioId);
+                            await _usecase.PlayScenario(_selectedScenarioState.CurrentScenarioId, destroyCancellationToken);
                         }
                         finally
                         {
