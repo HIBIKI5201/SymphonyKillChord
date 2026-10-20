@@ -7,9 +7,9 @@ name: "[Git] CleanupStaleBranches"
 #   3. develop に無いコミットが master に無い
 # 1・2 を満たすが develop 未取り込みのコミットが残る master は、Job Summary に「要確認」として出すだけで消さない。
 #
-# 既定は dry-run（削除候補を Job Summary に出すだけ）。
-# - workflow_dispatch: 入力 dry_run で切り替える（既定 true）。
-# - schedule / delete: リポジトリ変数 BRANCH_CLEANUP_ENABLED が 'true' のときだけ実際に削除する。
+# 結果（削除した／要確認／対象外）は Job Summary に出す。
+# - workflow_dispatch: 入力 dry_run で切り替える（既定 true。削除せず候補を報告するだけ）。
+# - schedule / delete: 実際に削除する。リポジトリ変数 BRANCH_CLEANUP_ENABLED を 'false' にすると dry-run に戻る。
 # schedule と delete はデフォルトブランチ（develop）のワークフロー定義で動く。
 
 on:
@@ -49,7 +49,7 @@ jobs:
       - name: Cleanup stale master branches
         uses: actions/github-script@v7
         env:
-          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || github.event_name != 'workflow_dispatch' && vars.BRANCH_CLEANUP_ENABLED != 'true' }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || github.event_name != 'workflow_dispatch' && vars.BRANCH_CLEANUP_ENABLED == 'false' }}
           DELETED_BRANCH: ${{ github.event_name == 'delete' && github.event.ref || '' }}
         with:
           script: |
