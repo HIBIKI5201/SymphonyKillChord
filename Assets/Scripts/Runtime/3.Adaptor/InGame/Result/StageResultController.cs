@@ -39,8 +39,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         /// <summary>
         ///     戦闘を完了してOutGameへ戻る。
         /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークン。 </param>
         /// <returns>遷移に成功した場合はtrue。</returns>
-        public async Task<bool> CompleteAsync()
+        public async Task<bool> CompleteAsync(CancellationToken cancellationToken)
         {
             string destinationSceneName = ResolveDestinationScene(
                 StageResultExitAction.Complete,
@@ -51,7 +52,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                         _selectedBattleStageState.BattleSceneName,
                         _selectedBattleStageState.InGameSceneName,
                         destinationSceneName,
-                        CancellationToken.None);
+                        cancellationToken);
 
             if (!success)
             {
@@ -67,8 +68,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         /// <summary>
         ///     同じステージへ再出撃する。
         /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークン。 </param>
         /// <returns>再出撃に成功した場合はtrue。</returns>
-        public async Task<bool> RetryAsync()
+        public async Task<bool> RetryAsync(CancellationToken cancellationToken)
         {
             if (!TryResolvePolicyDestination(
                     StageResultExitAction.Retry,
@@ -78,14 +80,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                     .UnloadThenReloadSceneAsync(
                         _selectedBattleStageState.BattleSceneName,
                         _selectedBattleStageState.InGameSceneName,
-                        CancellationToken.None);
+                        cancellationToken);
             }
 
             bool success = await _usecase.UnloadThenChangeSceneAsync(
                 _selectedBattleStageState.BattleSceneName,
                 _selectedBattleStageState.InGameSceneName,
                 destinationSceneName,
-                CancellationToken.None);
+                cancellationToken);
             if (success)
             {
                 _selectedBattleStageState.Clear();

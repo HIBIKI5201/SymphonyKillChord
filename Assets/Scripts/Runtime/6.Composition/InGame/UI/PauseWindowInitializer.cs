@@ -190,7 +190,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private void HandleRestartRequested()
         {
             // シーン遷移の実処理はUsecase側にあるため、ここでは多重実行だけを防ぐ。
-            _ = ExecuteTransitionAsync(() => _stageResultController.RetryAsync(), "ステージのリスタート");
+            _ = ExecuteTransitionAsync(() => _stageResultController.RetryAsync(destroyCancellationToken), "ステージのリスタート");
         }
 
         /// <summary>
