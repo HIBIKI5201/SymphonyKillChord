@@ -117,6 +117,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 },
                 (playerPosition, direction) => targetingSystem.UpdateCandidate(playerPosition, direction),
                 (playerPosition, direction) => targetingSystem.TrySwitchTarget(playerPosition, direction),
+                (playerPosition, direction) => targetingSystem.TrySwitchToNextTarget(playerPosition, direction),
                 // 被弾による自動再ターゲットはロックオン成立イベントを発火させない（AoE/継続ダメージでのロックオンSE多重発火防止）。
                 targetId => targetingSystem.TrySetCurrentTarget(targetId, notifyLockOn: false),
                 followCalculator, lockOnRotationCalculator,
