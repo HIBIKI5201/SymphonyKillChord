@@ -7,7 +7,7 @@ namespace KillChord.Editor.Utility
     /// </summary>
     public static class ToolConst
     {
-        public const string TOOLS_PATH = "Tools/";
-        public const string WINDOW_PATH = "Window/";
+        public const string TOOLS_PATH = "Tools/KillChord/";
+        public const string WINDOW_PATH = "Window/KillChord/";
     }
 }

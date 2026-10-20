@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using KillChord.Editor.Utility;
 using UnityEditor;
 using UnityEditor.Localization;
 using UnityEngine;
@@ -94,7 +95,7 @@ namespace KillChord.Editor.Localization
         /// <summary>
         ///     チュートリアル用のLocalization Settings、ロケール、テーブルを作成または更新します。
         /// </summary>
-        [MenuItem("KillChord/Localization/チュートリアル用テーブルをセットアップ")]
+        [MenuItem(ToolConst.TOOLS_PATH + "Localization/チュートリアル用テーブルをセットアップ")]
         public static void Setup()
         {
             EnsureDirectory(LOCALIZATION_ROOT);
