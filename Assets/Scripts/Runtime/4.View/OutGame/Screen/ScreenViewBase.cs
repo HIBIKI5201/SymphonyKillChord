@@ -63,6 +63,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             RootElement.style.display = DisplayStyle.Flex;
             RootElement.BringToFront();
+            OnShowStarted();
 
             // フェード中は入力を受け付けないようブロッカーを最前面に配置する。
             RootElement.Add(_brocker);
@@ -112,6 +113,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             SetOpacity(0f);
             RootElement.style.display = DisplayStyle.None;
             RemoveBrocker();
+            OnHidden();
         }
 
         /// <summary>
@@ -251,6 +253,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         ///     </para>
         /// </summary>
         protected virtual VisualElement CancelTargetElement => null;
+
+        /// <summary>
+        ///     表示を開始した直後(フェードイン開始時)に呼び出されます。
+        /// </summary>
+        protected virtual void OnShowStarted() { }
+
+        /// <summary>
+        ///     フェードアウト完了または即時非表示により、画面がレイアウトから外れた直後に呼び出されます。
+        /// </summary>
+        protected virtual void OnHidden() { }
 
         /// <summary>
         ///     フェードイン完了後に呼び出され、ブロッカーを取り除いて初期フォーカスを設定します。
@@ -405,6 +417,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             RootElement.style.display = DisplayStyle.None;
             RemoveBrocker();
+            OnHidden();
         }
 
         /// <summary>
