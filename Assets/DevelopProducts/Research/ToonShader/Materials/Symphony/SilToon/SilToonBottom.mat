@@ -15,6 +15,7 @@ Material:
   - _CHAR_SHADOW_ON
   - _NORMALMAP
   - _PBR_ON
+  - _SHEEN_ON
   m_InvalidKeywords:
   - _CHAR_OUTLINE_ON
   - _ISSMOOTHNORMAL_ON
@@ -44,6 +45,8 @@ Material:
     - _NormalMapIntensity: 2
     - _PBROn: 1
     - _Roughness: 1
+    - _SheenOn: 1
+    - _SheerAmount: 0
     - _SpecularIntensity: 2
     m_Colors:
     - _FaceUp: {r: 0, g: 1, b: 0, a: 1}
