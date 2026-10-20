@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
@@ -69,7 +70,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 ?? throw new ArgumentNullException(nameof(musicSyncService));
 
             // ミッションの進行に関わるイベントを購読する。
-            _playerEntity.OnHealthChanged += HandleHealthChanged;
+            _playerEntity.OnDamageTaken += HandleDamageTaken;
             _playerController.OnMoved += HandleMoved;
             _playerController.OnDodgeSucceeded += HandleDodgeSucceeded;
             _attackController.OnAttackExecuted += HandleAttackExecuted;
@@ -89,7 +90,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
             if (_playerEntity != null)
             {
-                _playerEntity.OnHealthChanged -= HandleHealthChanged;
+                _playerEntity.OnDamageTaken -= HandleDamageTaken;
             }
 
             if (_attackController != null)
@@ -203,22 +204,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         }
 
         /// <summary>
-        ///     プレイヤーHP変化を記録します。
+        ///     被弾によるダメージを記録し、コンボを破棄します。
         /// </summary>
-        /// <param name="currentHealth"> 現在HPです。 </param>
-        /// <param name="maximumHealth"> 最大HPです。 </param>
-        /// <param name="amountChanged"> HP変化量です。 </param>
-        private void HandleHealthChanged(
-            float currentHealth,
-            float maximumHealth,
-            float amountChanged)
+        /// <remarks>
+        ///     スキルのHP消費は被ダメージとして扱わないため、HP変化ではなく被弾のイベントを使います。
+        /// </remarks>
+        /// <param name="damage"> 実際に減ったHPです。 </param>
+        private void HandleDamageTaken(Damage damage)
         {
-            if (amountChanged >= 0f)
-            {
-                return;
-            }
-
-            _missionProgress.RecordDamageTaken(-amountChanged);
+            _missionProgress.RecordDamageTaken(damage.Value);
             _missionProgress.ResetCombo();
             _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
         }
