@@ -1,0 +1,61 @@
+name: "[Git] CleanupStaleBranches"
+
+# 使われなくなった feature/<段階>/<作業名>/master を削除する。処理本体は .github/scripts/CleanupStaleBranches.js。
+# 削除するのは、次をすべて満たす master だけ。
+#   1. 同階層に master 以外のブランチ（名前ブランチ）が無い
+#   2. その master を head / base とする open PR が無い
+#   3. develop に無いコミットが master に無い
+# 1・2 を満たすが develop 未取り込みのコミットが残る master は、Job Summary に「要確認」として出すだけで消さない。
+#
+# 既定は dry-run（削除候補を Job Summary に出すだけ）。
+# - workflow_dispatch: 入力 dry_run で切り替える（既定 true）。
+# - schedule / delete: リポジトリ変数 BRANCH_CLEANUP_ENABLED が 'true' のときだけ実際に削除する。
+# schedule と delete はデフォルトブランチ（develop）のワークフロー定義で動く。
+
+on:
+  schedule:
+    - cron: "0 18 * * *" # 毎日 03:00 JST
+  # 名前ブランチが消されたとき、その階層の master だけを判定する。
+  delete:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "削除せず、削除候補を報告するだけにする"
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: cleanup-stale-branches
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    # delete はブランチの削除だけを扱う（タグは対象外）。
+    if: github.event_name != 'delete' || github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write      # ブランチの削除に必要な権限。
+      pull-requests: read  # open PR の確認に必要な権限。
+
+    steps:
+      - name: Checkout scripts
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
+      - name: Cleanup stale master branches
+        uses: actions/github-script@v7
+        env:
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || github.event_name != 'workflow_dispatch' && vars.BRANCH_CLEANUP_ENABLED != 'true' }}
+          DELETED_BRANCH: ${{ github.event_name == 'delete' && github.event.ref || '' }}
+        with:
+          script: |
+            const { run } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/CleanupStaleBranches.js`);
+            await run({
+              github, context, core,
+              dryRun: process.env.DRY_RUN !== "false",
+              deletedBranch: process.env.DELETED_BRANCH || undefined,
+            });
