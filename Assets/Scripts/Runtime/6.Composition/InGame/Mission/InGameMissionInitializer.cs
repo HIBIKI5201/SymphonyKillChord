@@ -31,6 +31,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using AnimationEventData = KillChord.Runtime.Domain.OutGame.Scenario.AnimationEvent;
 
 namespace KillChord.Runtime.Composition.InGame.Mission
@@ -203,10 +204,12 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             {
                 _popupController = new MissionStepPopupController(
                     _moduleContainer.MissionRuntimeService,
+                    _moduleContainer.MissionEventController,
                     _moduleContainer.MissionRuntimeService.MissionDefinition.ClearCondition,
                     CreatePopupView(),
                     playerModuleContainer.InputSuppressionState,
                     _popupInputSuppressionDuration);
+                BindPopupConfirmInputs();
             }
             _playerBuffController = new MissionPlayerBuffController(
                 _moduleContainer.MissionRuntimeService,
@@ -318,9 +321,10 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             // コントローラーとビューを破棄する。
             DisposeTutorialFeedback();
             _recorderController?.Dispose();
+            UnbindPopupConfirmInputs();
             _popupController?.Dispose();
-            _mobileTapAttackInput?.Dispose();
-            _mobileTapAttackInput = null;
+            _mobileTapPopupConfirmInput?.Dispose();
+            _mobileTapPopupConfirmInput = null;
             _playerBuffController?.Dispose();
             _stepEntryActionController?.Dispose();
             _dialogueController?.Dispose();
@@ -413,7 +417,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
         /// <summary>
         ///     説明ポップアップのViewを生成します。
-        ///     スマートフォンでは、表示中に画面のタップを攻撃入力として扱うデコレータで包みます。
+        ///     スマートフォンでは、表示中に画面のタップを受け付けるデコレータで包みます。
         /// </summary>
         /// <returns> ポップアップ表示に使用するViewです。 </returns>
         private IMissionStepPopupView CreatePopupView()
@@ -422,14 +426,55 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             // スマホ用UIが無効な環境では、従来どおりポップアップのみを表示する。
             MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
             if (mobileInput != null
-                && mobileInput.gameObject.activeInHierarchy
-                && ServiceLocator.TryGetInstance(out PlayerInputView playerInputView))
+                && mobileInput.gameObject.activeInHierarchy)
             {
-                _mobileTapAttackInput = MobileTapAttackInput.Create(playerInputView);
-                return new MobileTapAttackPopupViewDecorator(_missionStepPopupView, _mobileTapAttackInput);
+                _mobileTapPopupConfirmInput = MobileTapPopupConfirmInput.Create();
+                return new MobileTapPopupViewDecorator(_missionStepPopupView, _mobileTapPopupConfirmInput);
             }
 #endif
             return _missionStepPopupView;
+        }
+
+        /// <summary>
+        ///     説明ポップアップを閉じる入力(PCのUI決定ボタン、スマホの画面タップ)をControllerへ結びます。
+        /// </summary>
+        private void BindPopupConfirmInputs()
+        {
+            if (ServiceLocator.TryGetInstance(out PlayerInputView playerInputView)
+                && playerInputView.TryGetComponent(out PlayerInput playerInput))
+            {
+                _popupSubmitInput = new PopupSubmitInput(playerInput);
+                _popupSubmitInput.OnSubmitted += _popupController.HandleSubmitInput;
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"[{nameof(InGameMissionInitializer)}] PlayerInputを取得できないため、決定ボタンで説明ポップアップを閉じられません。",
+                    this);
+            }
+
+            if (_mobileTapPopupConfirmInput != null)
+            {
+                _mobileTapPopupConfirmInput.OnTapped += _popupController.HandleScreenTap;
+            }
+        }
+
+        /// <summary>
+        ///     説明ポップアップを閉じる入力の購読を解除します。
+        /// </summary>
+        private void UnbindPopupConfirmInputs()
+        {
+            if (_popupSubmitInput != null)
+            {
+                _popupSubmitInput.OnSubmitted -= _popupController.HandleSubmitInput;
+                _popupSubmitInput.Dispose();
+                _popupSubmitInput = null;
+            }
+
+            if (_mobileTapPopupConfirmInput != null && _popupController != null)
+            {
+                _mobileTapPopupConfirmInput.OnTapped -= _popupController.HandleScreenTap;
+            }
         }
 
         [SerializeField, Tooltip("ミッション情報を表示するHUDのビュー。")] private MissionHudView _missionHudView;
@@ -472,7 +517,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private TutorialAttackFeedbackPresenter _tutorialAttackFeedbackPresenter;
         private TutorialSkillFeedbackPresenter _tutorialSkillFeedbackPresenter;
         private MissionStepPopupController _popupController;
-        private MobileTapAttackInput _mobileTapAttackInput;
+        private MobileTapPopupConfirmInput _mobileTapPopupConfirmInput;
+        private PopupSubmitInput _popupSubmitInput;
         private MissionPlayerBuffController _playerBuffController;
         private MissionStepEntryActionController _stepEntryActionController;
         private MissionDialogueController _dialogueController;

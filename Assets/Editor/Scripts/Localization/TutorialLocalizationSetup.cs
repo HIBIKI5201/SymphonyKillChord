@@ -19,31 +19,12 @@ namespace KillChord.Editor.Localization
         /// <summary> チュートリアル字幕のString Table Collection名です。 </summary>
         public const string TutorialSubtitlesTableName = "TutorialSubtitles";
 
-        /// <summary> チュートリアルポップアップ画像のAsset Table Collection名です。 </summary>
-        public const string TutorialPopupImagesTableName = "TutorialPopupImages";
-
         private const string LOCALIZATION_ROOT = "Assets/Localization";
         private const string LOCALES_DIRECTORY = LOCALIZATION_ROOT + "/Locales";
         private const string TABLES_DIRECTORY = LOCALIZATION_ROOT + "/Tables";
         private const string SETTINGS_PATH = LOCALIZATION_ROOT + "/LocalizationSettings.asset";
-        private const string POPUP_IMAGES_DIRECTORY = "Assets/Arts/Images/Sprites/TutorialPopupImages/New";
 
         private static readonly string[] LocaleCodes = { "ja", "en" };
-        // 既存のテーブルキーと提供画像のファイル名を対応付けます。
-        private static readonly (string Key, string FileStem)[] PopupImageDefinitions =
-        {
-            ("Attack", "Attack"),
-            ("Blue", "BlueAttack"),
-            ("Green", "GreenAttack"),
-            ("JustAttack", "JustAttack"),
-            ("KillChord", "KillChord"),
-            ("Move", "Douge"),
-            ("Orenge", "OrangeAttack"),
-            ("Purple", "PurpleAttack"),
-            ("Water", "WaterAttack"),
-            ("Yellow", "YellowAttack")
-        };
-
         private static readonly SubtitleDefinition[] SubtitleDefinitions =
         {
             new(
@@ -106,7 +87,6 @@ namespace KillChord.Editor.Localization
             IReadOnlyList<Locale> locales = EnsureLocales();
             EnsureDefaultLocale(settings, locales);
             int registeredSubtitleCount = EnsureStringTable(locales);
-            int registeredImageCount = EnsurePopupImageTable(locales);
 
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
@@ -114,8 +94,7 @@ namespace KillChord.Editor.Localization
 
             Debug.Log(
                 $"[{nameof(TutorialLocalizationSetup)}] セットアップが完了しました。"
-                + $" ロケール: {string.Join(", ", LocaleCodes)}、字幕: {registeredSubtitleCount}件、"
-                + $"ポップアップ画像: {registeredImageCount}件。");
+                + $" ロケール: {string.Join(", ", LocaleCodes)}、字幕: {registeredSubtitleCount}件。");
         }
 
         /// <summary>
@@ -248,45 +227,6 @@ namespace KillChord.Editor.Localization
             EditorUtility.SetDirty(collection.SharedData);
             LocalizationEditorSettings.EditorEvents.RaiseCollectionModified(null, collection);
             return SubtitleDefinitions.Length;
-        }
-
-        /// <summary>
-        ///     チュートリアルポップアップ画像用Asset Table Collectionを作成して現行画像を登録します。
-        /// </summary>
-        /// <param name="locales"> テーブルを作成するロケール一覧です。 </param>
-        /// <returns> 登録した画像の件数です。 </returns>
-        private static int EnsurePopupImageTable(IReadOnlyList<Locale> locales)
-        {
-            AssetTableCollection collection = LocalizationEditorSettings.GetAssetTableCollection(
-                TutorialPopupImagesTableName);
-            if (collection == null)
-            {
-                collection = LocalizationEditorSettings.CreateAssetTableCollection(
-                    TutorialPopupImagesTableName,
-                    TABLES_DIRECTORY,
-                    locales.ToList());
-            }
-
-            foreach ((string key, string fileStem) in PopupImageDefinitions)
-            {
-                foreach (Locale locale in locales)
-                {
-                    string suffix = locale.Identifier.Code == "ja" ? "jp" : locale.Identifier.Code;
-                    string imagePath = $"{POPUP_IMAGES_DIRECTORY}/{fileStem}_{suffix}.png";
-                    Sprite image = AssetDatabase.LoadAssetAtPath<Sprite>(imagePath);
-                    if (image == null)
-                    {
-                        throw new InvalidOperationException($"チュートリアル画像が見つかりません: {imagePath}");
-                    }
-
-                    collection.AddAssetToTable(locale.Identifier, key, image);
-                }
-            }
-
-            EditorUtility.SetDirty(collection);
-            EditorUtility.SetDirty(collection.SharedData);
-            LocalizationEditorSettings.EditorEvents.RaiseCollectionModified(null, collection);
-            return PopupImageDefinitions.Length;
         }
 
         /// <summary>
