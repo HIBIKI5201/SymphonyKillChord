@@ -1,4 +1,4 @@
-name: Agent Harness
+name: "[CI/CD] Agent Harness"
 
 on:
   pull_request:
