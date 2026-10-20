@@ -196,9 +196,10 @@ namespace KillChord.Runtime.View.InGame.Target
         /// </summary>
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
         /// <param name="direction"> 選択基準に使用する方向。 </param>
-        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。入力によらない付け替えではfalseを指定する。 </param>
+        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true)
         {
-            SetCurrentTarget(EvaluateLockOnTarget(playerPosition));
+            SetCurrentTarget(EvaluateLockOnTarget(playerPosition), notifyLockOn);
             _currentCandidate = null;
         }
 
@@ -354,31 +355,45 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <returns> 選択されたターゲット。視界範囲内に候補がない場合は null。 </returns>
         private ITargetableViewModel EvaluateLockOnTarget(in Vector3 center, ITargetableViewModel excludedTarget = null)
         {
+            // 1パス目: 視界範囲内で最も近い敵までの距離を求める。
+            float nearestDistance = float.PositiveInfinity;
+            foreach (ITargetableViewModel targetable in _targets)
+            {
+                if (!IsLockOnCandidate(targetable, excludedTarget))
+                {
+                    continue;
+                }
+
+                nearestDistance = Mathf.Min(nearestDistance, Vector3.Distance(targetable.Position, center));
+            }
+
+            if (float.IsPositiveInfinity(nearestDistance))
+            {
+                return null;
+            }
+
+            // 2パス目: 最も近い敵から許容差以内の敵のうち、HPが低い敵を選ぶ。HPが同じなら近い敵を選ぶ。
+            float distanceLimit = nearestDistance + DISTANCE_TIE_TOLERANCE;
             ITargetableViewModel bestTarget = null;
             float bestDistance = float.PositiveInfinity;
             float bestHealth = float.PositiveInfinity;
-
             foreach (ITargetableViewModel targetable in _targets)
             {
-                if (!IsSelectableTarget(targetable) || ReferenceEquals(targetable, excludedTarget))
+                if (!IsLockOnCandidate(targetable, excludedTarget))
                 {
                     continue;
                 }
 
-                Vector3 position = targetable.Position;
-                if (_isWithinView != null && !_isWithinView.Invoke(position))
+                float distance = Vector3.Distance(targetable.Position, center);
+                if (distance > distanceLimit)
                 {
                     continue;
                 }
 
-                float distance = Vector3.Distance(position, center);
                 float health = targetable.CurrentHealth;
-
-                // 明らかに近い敵を優先し、距離がほぼ同じ場合だけHPの低い敵を選ぶ。
-                bool isCloser = distance < bestDistance - DISTANCE_TIE_TOLERANCE;
-                bool isTiedAndWeaker = Mathf.Abs(distance - bestDistance) <= DISTANCE_TIE_TOLERANCE
-                    && (health < bestHealth || (Mathf.Approximately(health, bestHealth) && distance < bestDistance));
-                if (bestTarget == null || isCloser || isTiedAndWeaker)
+                bool isWeaker = health < bestHealth;
+                bool isSameHealthAndCloser = Mathf.Approximately(health, bestHealth) && distance < bestDistance;
+                if (bestTarget == null || isWeaker || isSameHealthAndCloser)
                 {
                     bestTarget = targetable;
                     bestDistance = distance;
@@ -387,6 +402,22 @@ namespace KillChord.Runtime.View.InGame.Target
             }
 
             return bestTarget;
+        }
+
+        /// <summary>
+        ///     ロックオン対象の候補になるかを判定する。
+        /// </summary>
+        /// <param name="targetable"> 判定するターゲット。 </param>
+        /// <param name="excludedTarget"> 候補から外すターゲット。外さない場合は null。 </param>
+        /// <returns> 選択可能で、除外対象でなく、視界範囲内にある場合は true。 </returns>
+        private bool IsLockOnCandidate(ITargetableViewModel targetable, ITargetableViewModel excludedTarget)
+        {
+            if (!IsSelectableTarget(targetable) || ReferenceEquals(targetable, excludedTarget))
+            {
+                return false;
+            }
+
+            return _isWithinView == null || _isWithinView.Invoke(targetable.Position);
         }
 
         /// <summary>

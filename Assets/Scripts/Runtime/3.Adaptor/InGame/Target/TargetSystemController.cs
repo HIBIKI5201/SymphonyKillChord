@@ -123,10 +123,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// </summary>
         /// <param name="playerPosition"> プレイヤー位置。 </param>
         /// <param name="direction"> 基準方向。 </param>
-        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
+        /// <param name="notifyLockOn"> ロックオン成立を通知するかどうか。入力によらない付け替えではfalseを指定する。 </param>
+        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true)
         {
-            _targetSystemViewModel.ChangeTarget(playerPosition, direction);
-            NotifyTargetLockedIfAvailable();
+            _targetSystemViewModel.ChangeTarget(playerPosition, direction, notifyLockOn);
+            if (notifyLockOn)
+            {
+                NotifyTargetLockedIfAvailable();
+            }
         }
 
         /// <summary>

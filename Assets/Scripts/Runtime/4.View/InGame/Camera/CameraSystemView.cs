@@ -25,7 +25,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary>
         ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
         /// </summary>
-        /// <param name="changeTargetAction"> ターゲット切り替え処理。</param>
+        /// <param name="changeTargetAction"> ターゲット切り替え処理。第3引数はロックオン成立を通知するかどうか。</param>
         /// <param name="clearTargetAction"> ターゲット解除処理。</param>
         /// <param name="getCurrentTargetPositionFunc"> 現在ターゲット位置の取得処理。</param>
         /// <param name="updateCandidateAction"> 候補ターゲット更新処理。</param>
@@ -43,7 +43,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="playerT"> プレイヤーの Transform。</param>
         /// <param name="playerInputView"> プレイヤー入力の View クラス。</param>
         public void Initialize(
-            Action<Vector3, Vector3> changeTargetAction,
+            Action<Vector3, Vector3, bool> changeTargetAction,
             Action clearTargetAction,
             Func<(bool HasTarget, Vector3 TargetPosition)> getCurrentTargetPositionFunc,
             Action<Vector3, Vector3> updateCandidateAction,
@@ -240,7 +240,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraLockOnRangeChecker _lockOnRangeChecker;
         private CameraAutoLockOnReleaseTracker _autoLockOnReleaseTracker;
         private CameraShakeCalculator _shakeCalculator;
-        private Action<Vector3, Vector3> _changeTargetAction;
+        private Action<Vector3, Vector3, bool> _changeTargetAction;
         private Action<Vector3, Vector3> _updateCandidateAction;
         private Action _clearTargetAction;
         private Func<(bool HasTarget, Vector3 TargetPosition)> _getCurrentTargetPositionFunc;
@@ -605,7 +605,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             _lockOnState = CameraLockOnState.LockOnAuto;
             _autoLockOnReleaseTracker.Reset();
-            _changeTargetAction.Invoke(currentPosition, direction);
+            _changeTargetAction.Invoke(currentPosition, direction, true);
         }
 
         /// <summary>
@@ -620,7 +620,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 _lockOnState = CameraLockOnState.LockOnManual;
                 _autoLockOnReleaseTracker.Reset();
-                _changeTargetAction.Invoke(currentPosition, direction);
+                _changeTargetAction.Invoke(currentPosition, direction, true);
                 return;
             }
 
@@ -689,7 +689,8 @@ namespace KillChord.Runtime.View.InGame.Camera
                 if (!targetResult.HasTarget && _lockOnState == CameraLockOnState.LockOnManual)
                 {
                     // マニュアルロックオンの対象が倒れたら、視界範囲内の次の敵へ付け替える。
-                    _changeTargetAction.Invoke(_playerT.position, GetCurrentForward());
+                    // 入力による操作ではないため、ロックオン成立は通知しない（ロックオンSE・ミッションの計上を防ぐ）。
+                    _changeTargetAction.Invoke(_playerT.position, GetCurrentForward(), false);
                     targetResult = _getCurrentTargetPositionFunc.Invoke();
                 }
 

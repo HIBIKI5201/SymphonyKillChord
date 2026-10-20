@@ -98,16 +98,16 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             }
 
             _cameraSystem.Initialize(
-                (playerPosition, direction) =>
+                (playerPosition, direction, notifyLockOn) =>
                 {
                     // ロックオン入力はコントローラーを通し、OnTargetLocked（ミッションの LockOn 行動の計上など）を発火させる。
                     if (targetSystemController != null)
                     {
-                        targetSystemController.ChangeTarget(playerPosition, direction);
+                        targetSystemController.ChangeTarget(playerPosition, direction, notifyLockOn);
                         return;
                     }
 
-                    targetingSystem.ChangeTarget(playerPosition, direction);
+                    targetingSystem.ChangeTarget(playerPosition, direction, notifyLockOn);
                 },
                 () => targetingSystem.ClearTarget(),
                 () =>
