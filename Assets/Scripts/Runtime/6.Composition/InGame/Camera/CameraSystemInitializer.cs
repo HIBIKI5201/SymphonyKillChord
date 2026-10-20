@@ -124,6 +124,9 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
 
+            // ロックオン対象はカメラの視界範囲内の敵から選ぶ。
+            targetingSystem.SetViewFilter(_cameraSystem.IsWithinLockOnView);
+
             // 設定画面のカメラ感度・反転・オートロックオンを反映する。取得できない場合は既定の挙動で続行する。
             if (ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
             {

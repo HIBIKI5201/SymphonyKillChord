@@ -198,7 +198,7 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <param name="direction"> 選択基準に使用する方向。 </param>
         public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
         {
-            SetCurrentTarget(EvaluateBestTarget(playerPosition, direction));
+            SetCurrentTarget(EvaluateLockOnTarget(playerPosition));
             _currentCandidate = null;
         }
 
@@ -209,7 +209,7 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <param name="direction"> 選択基準に使用する方向。 </param>
         public void UpdateCandidate(in Vector3 playerPosition, in Vector3 direction)
         {
-            _currentCandidate = EvaluateBestTarget(playerPosition, direction);
+            _currentCandidate = EvaluateLockOnTarget(playerPosition);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <returns> 別ターゲットへ切り替えた場合はtrue。 </returns>
         public bool TrySwitchTarget(in Vector3 playerPosition, in Vector3 direction)
         {
-            ITargetableViewModel target = EvaluateBestTarget(playerPosition, direction);
+            ITargetableViewModel target = EvaluateAlignedTarget(playerPosition, direction);
             if (target == null || ReferenceEquals(target, _currentTarget))
             {
                 return false;
@@ -269,6 +269,16 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
+        ///     ロックオン対象を選ぶときに、視界範囲内かどうかを判定する関数を設定する。
+        ///     未設定の場合は、すべての対象を視界範囲内として扱う。
+        /// </summary>
+        /// <param name="isWithinView"> 対象位置が視界範囲内ならtrueを返す関数。 </param>
+        public void SetViewFilter(Func<Vector3, bool> isWithinView)
+        {
+            _isWithinView = isWithinView;
+        }
+
+        /// <summary>
         ///     現在のターゲットを更新する。既存のターゲットと異なる敵へ新たにロックオンした場合、捕捉イベントを発火する。
         /// </summary>
         /// <param name="newTarget"> 新たに設定するターゲット。null の場合はロックオン解除として扱う。 </param>
@@ -293,9 +303,13 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary> 正面判定に使用する閾値。 </summary>
         private const float DOT_FORWARD_THRESHOLD = 0f;
 
+        /// <summary> 距離がほぼ同じとみなし、HPの低さで選ぶ距離差(m)。 </summary>
+        private const float DISTANCE_TIE_TOLERANCE = 0.5f;
+
         private readonly HashSet<ITargetableViewModel> _targets = new();
         private ITargetableViewModel _currentTarget;
         private ITargetableViewModel _currentCandidate;
+        private Func<Vector3, bool> _isWithinView;
 
         /// <summary>
         ///     ターゲットが選択可能な状態かを判定する。
@@ -313,13 +327,55 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
-        ///     優先順位に従って最適なターゲットを選択する。
+        ///     ロックオン対象を選ぶ。視界範囲内で最も近い敵を選び、距離がほぼ同じならHPが低い敵を選ぶ。
+        /// </summary>
+        /// <param name="center"> 距離の基準位置。 </param>
+        /// <returns> 選択されたターゲット。視界範囲内に候補がない場合は null。 </returns>
+        private ITargetableViewModel EvaluateLockOnTarget(in Vector3 center)
+        {
+            ITargetableViewModel bestTarget = null;
+            float bestDistance = float.PositiveInfinity;
+            float bestHealth = float.PositiveInfinity;
+
+            foreach (ITargetableViewModel targetable in _targets)
+            {
+                if (!IsSelectableTarget(targetable))
+                {
+                    continue;
+                }
+
+                Vector3 position = targetable.Position;
+                if (_isWithinView != null && !_isWithinView.Invoke(position))
+                {
+                    continue;
+                }
+
+                float distance = Vector3.Distance(position, center);
+                float health = targetable.CurrentHealth;
+
+                // 明らかに近い敵を優先し、距離がほぼ同じ場合だけHPの低い敵を選ぶ。
+                bool isCloser = distance < bestDistance - DISTANCE_TIE_TOLERANCE;
+                bool isTiedAndWeaker = Mathf.Abs(distance - bestDistance) <= DISTANCE_TIE_TOLERANCE
+                    && (health < bestHealth || (Mathf.Approximately(health, bestHealth) && distance < bestDistance));
+                if (bestTarget == null || isCloser || isTiedAndWeaker)
+                {
+                    bestTarget = targetable;
+                    bestDistance = distance;
+                    bestHealth = health;
+                }
+            }
+
+            return bestTarget;
+        }
+
+        /// <summary>
+        ///     指定方向に最も近い向きのターゲットを選択する。左右の切り替えに使う。
         /// </summary>
         /// <param name="center"> 基準位置。 </param>
         /// <param name="direction"> 基準方向。 </param>
         /// <returns> 選択されたターゲット。候補がない場合は null。 </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ITargetableViewModel EvaluateBestTarget(in Vector3 center, in Vector3 direction)
+        private ITargetableViewModel EvaluateAlignedTarget(in Vector3 center, in Vector3 direction)
         {
             ITargetableViewModel shortestTarget = null;
             ITargetableViewModel bestAlignedTarget = null;

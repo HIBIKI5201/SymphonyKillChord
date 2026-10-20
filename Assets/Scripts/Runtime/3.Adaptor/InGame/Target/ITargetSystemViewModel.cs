@@ -109,5 +109,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         ///     現在のターゲット選択を解除する。
         /// </summary>
         void ClearTarget();
+
+        /// <summary>
+        ///     ロックオン対象を選ぶときに、視界範囲内かどうかを判定する関数を設定する。
+        ///     未設定の場合は、すべての対象を視界範囲内として扱う。
+        /// </summary>
+        /// <param name="isWithinView"> 対象位置が視界範囲内ならtrueを返す関数。 </param>
+        void SetViewFilter(Func<Vector3, bool> isWithinView);
     }
 }

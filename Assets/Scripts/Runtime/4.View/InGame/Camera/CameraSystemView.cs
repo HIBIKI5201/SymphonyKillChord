@@ -280,6 +280,24 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
+        ///     対象位置がロックオンの視界範囲(カメラ前方かつ有効ビューポート内)にあるかを返す。
+        ///     カメラを取得できない場合は、ロックオンできなくならないよう範囲内として扱う。
+        /// </summary>
+        /// <param name="targetPosition"> 判定する対象のワールド座標。 </param>
+        /// <returns> 視界範囲内として扱う場合は true。 </returns>
+        public bool IsWithinLockOnView(Vector3 targetPosition)
+        {
+            if (_camera == null)
+            {
+                _camera = UnityEngine.Camera.main;
+            }
+
+            return _camera == null
+                || _lockOnRangeChecker == null
+                || _lockOnRangeChecker.IsWithinRange(_camera, targetPosition);
+        }
+
+        /// <summary>
         ///     FixedUpdate タイミングでカメラを更新する。
         /// </summary>
         private void FixedUpdate()
@@ -654,6 +672,13 @@ namespace KillChord.Runtime.View.InGame.Camera
             if (IsLockOn())
             {
                 var targetResult = _getCurrentTargetPositionFunc.Invoke();
+                if (!targetResult.HasTarget && _lockOnState == CameraLockOnState.LockOnManual)
+                {
+                    // マニュアルロックオンの対象が倒れたら、視界範囲内の次の敵へ付け替える。
+                    _changeTargetAction.Invoke(_playerT.position, GetCurrentForward());
+                    targetResult = _getCurrentTargetPositionFunc.Invoke();
+                }
+
                 if (!targetResult.HasTarget)
                 {
                     ClearLockOn();

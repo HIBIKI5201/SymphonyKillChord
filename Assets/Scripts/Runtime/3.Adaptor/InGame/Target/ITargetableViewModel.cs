@@ -16,5 +16,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
 
         /// <summary> 対象が有効である場合は true。 </summary>
         public bool IsAlive { get; }
+
+        /// <summary> 対象の現在HP。HPを持たない対象は <see cref="float.MaxValue"/>。ロックオン対象の選択に使う。 </summary>
+        public float CurrentHealth { get; }
     }
 }
