@@ -76,6 +76,15 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 ./NotionMarkdownWriter.exe archive "<Markdownパス|URL|ID>" --confirm
 ```
 
+データベースの実体を別ページの直下へ移す（確認だけなら`--confirm`を付けない）:
+
+```powershell
+./NotionMarkdownWriter.exe move-database "<データベースの_database.mdパス|URL|ID>" --to "<移動先ページのMarkdownパス|URL|ID>" --confirm
+```
+
+データベースID・行・ビュー・リレーションは変わりません。移動元と移動先の両方が許可ページの配下にある必要があります。
+リンクドビューはデータソースを持たないため対象外です。元の位置へのリンクドビュー作成と、移動先ページ内での並べ替えはNotion上で行います。
+
 ### macOS / Linuxで実行する
 
 配布用の`NotionMarkdownWriter.exe`はWindows専用です。それ以外のOSでは、.NET 10 SDKを入れたうえで
@@ -134,5 +143,7 @@ Windowsで実行した場合は、Git Bashなどからでもexeをそのまま�
 - 設定ファイルとリポジトリルートの探索は、エクスポーターの`ExporterOptions`と同じ規則を`WriterEnvironment`へ実装しています。
 - ページの移動（`move`）は`PATCH /pages/{id}`ではなく`POST /pages/{id}/move`でしか効かない（前者は200を返すが親を変更しない）。
   `MoveCommand`は送信後に親を再取得し、実際に変わったか検証してから成功と報告する。
+- データベースの移動（`move-database`）は`PATCH /databases/{id}`の`parent`で送る。`MoveDatabaseCommand`は
+  応答の親が移動先ページになったかを検証してから成功と報告する。
 - `edit-block`・`append`は`GET/PATCH /blocks/{id}`・`PATCH /blocks/{id}/children`（classic Blocks API）を使う。
   Markdown Content API（`update_content`）と併用できる。

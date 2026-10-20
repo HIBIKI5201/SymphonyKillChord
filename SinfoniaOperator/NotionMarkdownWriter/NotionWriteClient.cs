@@ -428,6 +428,33 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         }
 
         /// <summary>
+        ///     データベースの親ページを変更する。行・ビュー・スキーマには触れない。
+        ///     データベースIDは移動後も変わらないため、リレーションや既存のリンクはそのまま使える。
+        /// </summary>
+        /// <param name="databaseId">対象データベースID。</param>
+        /// <param name="pageId">移動先ページID。</param>
+        /// <returns>応答に含まれる更新後の親への参照。</returns>
+        internal async Task<NotionParentReference> UpdateDatabaseParentAsync(string databaseId, string pageId)
+        {
+            Dictionary<string, object> requestBody = new()
+            {
+                ["parent"] = new Dictionary<string, string>
+                {
+                    ["type"] = "page_id",
+                    ["page_id"] = pageId
+                }
+            };
+            string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
+            string responseBody = await SendAsync(
+                HttpMethod.Patch,
+                $"{API_BASE_URL}/databases/{Uri.EscapeDataString(databaseId)}",
+                json,
+                false);
+            using JsonDocument document = JsonDocument.Parse(responseBody);
+            return ParseParent(document.RootElement);
+        }
+
+        /// <summary>
         ///     ブロックのメタデータとリッチテキストを取得する。
         ///     Markdown Content APIでは文字列一致でしか編集できない箇所（巨大な画像ブロックに挟まれた短文、
         ///     同名のトグルなど）を、ブロックIDで直接特定して編集するために使う。
