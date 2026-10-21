@@ -28,10 +28,9 @@ namespace KillChord.Runtime.View.InGame.Enemy
             _aiController.ReserveAttack();
         }
 
-        /// <summary> 指示：被弾硬直アニメーションを開始する。 </summary>
+        /// <summary> 指示：被弾硬直アニメーションを開始する。ボスはスタンしないため何もしない。 </summary>
         public void StartStunAnimation()
         {
-            DevLog.Log("被弾アニメーション実装待ち");
         }
 
         /// <summary> 指示：進行中の攻撃をキャンセルする。 </summary>
