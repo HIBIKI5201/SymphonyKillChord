@@ -19,5 +19,18 @@ MonoBehaviour:
   - _id: node_n7
     _hashId: 320610499
   UnlockCost: 10
-  SkillDetail: 
+  SkillDetail: "\u7BC4\u56F2\u653B\u6483\u306E\u5C04\u7A0B\u3000\uFF0B0.3\n\u4F55\u5EA6\u3067\u3082\u5F37\u5316\u3067\u304D\u308B"
   PreviewVideoClip: {fileID: 0}
+  _statusBonusEffects:
+  - rid: 135001
+  _unlockSkills: []
+  _hasSkillSlotBonus: 0
+  _maxLevel: 1
+  _isUnlimitedLevel: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 135001
+      type: {class: AreaAttackRangeAdditionEffect, ns: KillChord.Runtime.Domain.OutGame.SkillTree, asm: KillChord.Domain}
+      data:
+        _value: 0.3

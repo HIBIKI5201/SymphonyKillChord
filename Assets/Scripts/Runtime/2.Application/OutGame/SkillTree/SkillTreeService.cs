@@ -48,11 +48,18 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 Debug.LogWarning($"[SkillTreeService] ノードID {nodeId} が見つかりません。");
                 return -1;
             }
-            // 解放済みの場合は支払うコストがないため探索終了する。
+            // 強化上限に達している場合は支払うコストがないため探索終了する。
             // 親ノードを持たない起点ノードは、自身のコストのみで解放できるため探索を続行する。
-            if (node.IsUnlocked)
+            if (!node.IsLevelUpAvailable)
             {
                 return -1;
+            }
+
+            // 解放済みでさらに強化できる場合は、親も解放済みのため自身のコストだけを支払う。
+            if (node.IsUnlocked)
+            {
+                nodesOnPath.Add(node);
+                return node.UnlockCost.Cost;
             }
             FindNodesOnPath(node, nodesOnPath);
 
@@ -224,7 +231,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <summary>
         ///     現在の解放状態をリセットした場合に返却される研究ポイントを算出する。
         /// </summary>
-        /// <param name="unlockedNodes"> 現在解放されているノード。 </param>
+        /// <param name="unlockedNodes"> 現在解放されているノード。強化回数分だけ同じIDを含む。 </param>
         /// <returns> 返却される研究ポイント。 </returns>
         public int CalculateResetRefundPoints(IReadOnlyCollection<SkillNodeId> unlockedNodes)
         {
@@ -233,15 +240,22 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 throw new ArgumentNullException(nameof(unlockedNodes));
             }
 
-            int refundPoints = 0;
-            HashSet<SkillNodeId> processedNodeIds = new HashSet<SkillNodeId>();
+            // ノードごとの強化回数を数える。
+            Dictionary<SkillNodeId, int> levelByNodeId = new Dictionary<SkillNodeId, int>();
             foreach (SkillNodeId nodeId in unlockedNodes)
             {
-                if (processedNodeIds.Add(nodeId)
-                    && _skillNodeEntityDict.TryGetValue(nodeId, out SkillNodeEntity node)
+                levelByNodeId.TryGetValue(nodeId, out int level);
+                levelByNodeId[nodeId] = level + 1;
+            }
+
+            // 強化上限までの回数分のコストを返却する。
+            int refundPoints = 0;
+            foreach (KeyValuePair<SkillNodeId, int> pair in levelByNodeId)
+            {
+                if (_skillNodeEntityDict.TryGetValue(pair.Key, out SkillNodeEntity node)
                     && !IsInitialNode(node))
                 {
-                    refundPoints += node.UnlockCost.Cost;
+                    refundPoints = checked(refundPoints + node.UnlockCost.Cost * node.ClampLevel(pair.Value));
                 }
             }
 

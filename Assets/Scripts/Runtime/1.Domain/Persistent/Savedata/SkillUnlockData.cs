@@ -21,7 +21,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
 
         /// <summary> 旧形式の研究ポイント。ResourceInventory への移行処理専用。 </summary>
         public int ResearchPoint => _researchPoint;
-        /// <summary> 解放済みのノードID </summary>
+        /// <summary> 解放済みのノードID。強化できるノードは強化回数分だけ同じIDを含む。 </summary>
         public int[] UnlockedSkillNodeIds => _unlockedSkillNodeIds;
         /// <summary> 解放済みのスキルID </summary>
         public int[] UnlockedSkillIds => _unlockedSkillIds;
@@ -56,7 +56,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         [SerializeField, Tooltip("研究ポイント")]
         private int _researchPoint;
 
-        [SerializeField, Tooltip("解放済みのノード ID")]
+        [SerializeField, Tooltip("解放済みのノード ID。強化できるノードは強化回数分だけ同じ ID を含む。")]
         private int[] _unlockedSkillNodeIds;
 
         [SerializeField, Tooltip("解放済みのスキル ID")]
