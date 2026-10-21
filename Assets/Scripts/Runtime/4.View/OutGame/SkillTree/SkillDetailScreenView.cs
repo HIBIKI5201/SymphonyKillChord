@@ -51,7 +51,8 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
                 UI_COMMON_TABLE, "ui.skill_detail.status_boost", text =>
                 {
                     _statusBoostTitle = text;
-                    if (!_hasSkill)
+                    // 強化回数の表示中は、強化回数の文言側で見出しを更新する。
+                    if (!_hasSkill && _levelLocalizedText == null)
                     {
                         _skillName.text = text;
                     }
@@ -84,6 +85,17 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _currentNodeId = dto.SkillNodeId;
             _hasSkill = dto.HasSkill;
             _skillName.text = dto.HasSkill ? dto.SkillName : _statusBoostTitle;
+            // 複数回強化できるステータス強化ノードは、見出しに強化回数を添える。
+            _levelLocalizedText?.Dispose();
+            _levelLocalizedText = null;
+            if (dto.HasLevel && !dto.HasSkill)
+            {
+                _levelLocalizedText = new LocalizedElementText(
+                    UI_COMMON_TABLE,
+                    "ui.skill_detail.level_format",
+                    text => _skillName.text = text,
+                    arguments: new object[] { _statusBoostTitle, dto.Level });
+            }
             _skillHeaderGenreIcon.sprite = dto.HasSkill ? dto.SkillIcon : null;
             _skillHeaderGenreIcon.style.display = _skillHeaderGenreIcon.sprite == null ? DisplayStyle.None : DisplayStyle.Flex;
             _skillCommand.text = dto.SkillCommand;
@@ -140,6 +152,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
             _previewButtonLocalizedText?.Dispose();
             _backButtonLocalizedText?.Dispose();
             _unlockButtonLocalizedText?.Dispose();
+            _levelLocalizedText?.Dispose();
 
             if (_skillDetailDragScrollManipulator != null)
             {
@@ -152,6 +165,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private readonly LocalizedElementText _statusBoostLocalizedText;
         private string _statusBoostTitle = STRING_STATUS_BOOST_TITLE;
         private bool _hasSkill;
+        private LocalizedElementText _levelLocalizedText;
 
         private const string E_NAME_SKILL_NAME_LABEL = "SkillNameLabel";
         private const string E_NAME_SKILL_HEADER_GENRE_ICON = "SkillHeaderGenreIcon";

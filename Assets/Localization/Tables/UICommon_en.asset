@@ -652,6 +652,10 @@ MonoBehaviour:
     m_Localized: "Retry"
     m_Metadata:
       m_Items: []
+  - m_Id: 2081000124
+    m_Localized: "{0}  Lv.{1}"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

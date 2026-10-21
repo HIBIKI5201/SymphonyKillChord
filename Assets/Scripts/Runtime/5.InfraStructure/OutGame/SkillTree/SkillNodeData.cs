@@ -40,6 +40,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         private int _maxLevel = SkillNodeEntity.DEFAULT_MAX_LEVEL;
         [SerializeField, Tooltip("強化回数の上限を無くすか（無限強化ノード）。trueの場合は強化上限を使わない。")]
         private bool _isUnlimitedLevel;
+        [SerializeField, Min(0), Tooltip("強化1回ごとに増える解放コスト。1回目は UnlockCost、n回目は UnlockCost + 増加量 × (n - 1)。")]
+        private int _unlockCostIncreasePerLevel;
 
         /// <summary>
         ///     保持するデータよりEntityを生成する。
@@ -67,7 +69,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
                 _statusBonusEffects,
                 _hasSkillSlotBonus,
                 _maxLevel,
-                _isUnlimitedLevel);
+                _isUnlimitedLevel,
+                _unlockCostIncreasePerLevel);
         }
 
         /// <summary>

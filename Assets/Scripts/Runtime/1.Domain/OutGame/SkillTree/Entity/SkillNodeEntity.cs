@@ -18,11 +18,17 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             IStatusBonusEffect[] statusBonusEffects = null,
             bool hasSkillSlotBonus = false,
             int maxLevel = DEFAULT_MAX_LEVEL,
-            bool isUnlimitedLevel = false)
+            bool isUnlimitedLevel = false,
+            int unlockCostIncreasePerLevel = 0)
         {
             if (!isUnlimitedLevel && maxLevel < DEFAULT_MAX_LEVEL)
             {
                 throw new ArgumentOutOfRangeException(nameof(maxLevel), "強化上限は1以上を指定する。");
+            }
+
+            if (unlockCostIncreasePerLevel < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(unlockCostIncreasePerLevel), "強化ごとのコスト増加量は0以上を指定する。");
             }
 
             SkillNodeIdVO = nodeId;
@@ -36,6 +42,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             HasSkillSlotBonus = hasSkillSlotBonus;
             MaxLevel = maxLevel;
             IsUnlimitedLevel = isUnlimitedLevel;
+            UnlockCostIncreasePerLevel = unlockCostIncreasePerLevel;
         }
 
         /// <summary> ノードのID。 </summary>
@@ -58,6 +65,12 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
 
         /// <summary> さらに強化(解放)できるか。 </summary>
         public bool IsLevelUpAvailable => IsUnlimitedLevel || _level < MaxLevel;
+
+        /// <summary> 強化1回ごとに増える解放コスト。 </summary>
+        public int UnlockCostIncreasePerLevel { get; }
+
+        /// <summary> 次の1回の強化(解放)に必要なコスト。 </summary>
+        public int NextUnlockCost => GetUnlockCost(_level);
 
         /// <summary> 親ノード。 </summary>
         public SkillNodeEntity[] Parents => _parents;
@@ -104,6 +117,33 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
         public void Lock()
         {
             _level = 0;
+        }
+
+        /// <summary>
+        ///     指定した強化回数の状態から、次の1回の強化に必要なコストを取得する。
+        /// </summary>
+        /// <param name="currentLevel"> 強化前の強化回数。 </param>
+        /// <returns> 次の1回の強化に必要なコスト。 </returns>
+        public int GetUnlockCost(int currentLevel)
+        {
+            return checked(UnlockCost.Cost + UnlockCostIncreasePerLevel * Math.Max(0, currentLevel));
+        }
+
+        /// <summary>
+        ///     未解放から指定した強化回数まで強化するのに必要なコストの合計を取得する。
+        /// </summary>
+        /// <param name="level"> 強化回数。強化上限の範囲に収めて計算する。 </param>
+        /// <returns> コストの合計。 </returns>
+        public int GetTotalUnlockCost(int level)
+        {
+            int clampedLevel = ClampLevel(level);
+            int totalCost = 0;
+            for (int i = 0; i < clampedLevel; i++)
+            {
+                totalCost = checked(totalCost + GetUnlockCost(i));
+            }
+
+            return totalCost;
         }
 
         /// <summary>
