@@ -55,11 +55,11 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 return -1;
             }
 
-            // 解放済みでさらに強化できる場合は、親も解放済みのため自身のコストだけを支払う。
+            // 解放済みでさらに強化できる場合は、親も解放済みのため自身の次の強化コストだけを支払う。
             if (node.IsUnlocked)
             {
                 nodesOnPath.Add(node);
-                return node.UnlockCost.Cost;
+                return node.NextUnlockCost;
             }
             FindNodesOnPath(node, nodesOnPath);
 
@@ -67,7 +67,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             int unlockCost = 0;
             foreach (SkillNodeEntity nodeOnPath in nodesOnPath)
             {
-                unlockCost += nodeOnPath.UnlockCost.Cost;
+                unlockCost += nodeOnPath.NextUnlockCost;
             }
             return unlockCost;
         }
@@ -248,14 +248,14 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 levelByNodeId[nodeId] = level + 1;
             }
 
-            // 強化上限までの回数分のコストを返却する。
+            // 強化上限までの回数分のコスト(強化ごとの増加分を含む)を返却する。
             int refundPoints = 0;
             foreach (KeyValuePair<SkillNodeId, int> pair in levelByNodeId)
             {
                 if (_skillNodeEntityDict.TryGetValue(pair.Key, out SkillNodeEntity node)
                     && !IsInitialNode(node))
                 {
-                    refundPoints = checked(refundPoints + node.UnlockCost.Cost * node.ClampLevel(pair.Value));
+                    refundPoints = checked(refundPoints + node.GetTotalUnlockCost(pair.Value));
                 }
             }
 

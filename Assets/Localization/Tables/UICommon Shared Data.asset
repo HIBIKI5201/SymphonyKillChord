@@ -607,6 +607,10 @@ MonoBehaviour:
     m_Key: ui.result.retry
     m_Metadata:
       m_Items: []
+  - m_Id: 2081000124
+    m_Key: ui.skill_detail.level_format
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

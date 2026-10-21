@@ -1,10 +1,10 @@
 using System;
-using UnityEngine;
 
 namespace KillChord.Runtime.Domain.InGame.Character
 {
     /// <summary>
     ///     クリティカル率を表す値オブジェクト。
+    ///     1(100%)を超える値は、1ごとにクリティカルが確定で1回重なることを表す。
     /// </summary>
     public readonly struct CriticalChance
     {
@@ -19,18 +19,31 @@ namespace KillChord.Runtime.Domain.InGame.Character
                 throw new ArgumentException("value must be finite.", nameof(value));
             }
 
-            if (value < 0f || value > 1f)
+            if (value < 0f)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), "CriticalChanceは0から1の間である必要があります。");
+                throw new ArgumentOutOfRangeException(nameof(value), "CriticalChanceは0以上である必要があります。");
             }
 
-            _value = Mathf.Clamp01(value);
+            _value = value;
         }
 
         /// <summary>
-        ///     クリティカル率を0から1の範囲で表す値を取得する。
+        ///     クリティカル率を取得する。1が100%で、1を超える場合はクリティカルの重複を含む。
         /// </summary>
         public float Value => _value;
+
+        /// <summary>
+        ///     このクリティカル率で発生するクリティカルの回数を抽選する。
+        ///     整数部の回数は確定で、小数部は1回追加される確率になる。
+        /// </summary>
+        /// <param name="randomValue"> 0以上1未満の乱数。 </param>
+        /// <returns> クリティカルの回数。0の場合はクリティカルなし。 </returns>
+        public int RollCriticalCount(float randomValue)
+        {
+            int guaranteedCount = (int)MathF.Floor(_value);
+            float extraChance = _value - guaranteedCount;
+            return randomValue < extraChance ? guaranteedCount + 1 : guaranteedCount;
+        }
 
         /// <summary>
         ///     指定された値より小さいかどうかを判定する。

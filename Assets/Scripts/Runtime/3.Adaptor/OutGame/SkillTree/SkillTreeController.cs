@@ -139,7 +139,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 canUnlock,
                 !entity.IsLevelUpAvailable,
                 hasVideo,
-                ResolveComboStepColors(entity.UnlockSkillIds));
+                ResolveComboStepColors(entity.UnlockSkillIds),
+                entity.IsUnlimitedLevel || entity.MaxLevel > SkillNodeEntity.DEFAULT_MAX_LEVEL,
+                entity.Level);
             // スキル詳細の表示を更新する。
             _skillDetailPresenter.Push(dto);
         }
