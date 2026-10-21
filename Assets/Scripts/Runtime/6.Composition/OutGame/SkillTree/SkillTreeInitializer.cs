@@ -775,10 +775,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="entity"> 対象ノードEntityです。 </param>
         private void SetNodeUnlockState(SkillNodeView view, SkillNodeEntity entity)
         {
-            if (_skillUnlockData.UnlockedSkillNodeIds.Contains(entity.SkillNodeIdVO.Id))
+            // セーブデータには強化回数分だけ同じIDが記録されているため、その回数分だけ強化する。
+            int[] unlockedNodeIds = _skillUnlockData.UnlockedSkillNodeIds;
+            for (int i = 0; i < unlockedNodeIds.Length; i++)
+            {
+                if (unlockedNodeIds[i] == entity.SkillNodeIdVO.Id)
+                {
+                    entity.Unlock();
+                }
+            }
+
+            if (entity.IsUnlocked)
             {
                 view.SetUnlocked();
-                entity.Unlock();
             }
         }
 

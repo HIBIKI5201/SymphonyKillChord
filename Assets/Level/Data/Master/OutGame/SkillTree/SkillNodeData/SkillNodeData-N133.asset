@@ -19,5 +19,18 @@ MonoBehaviour:
   - _id: node_n7
     _hashId: 320610499
   UnlockCost: 10
-  SkillDetail: 
+  SkillDetail: "\u6700\u5927\u4F53\u529B\u3000\uFF0B6.25\uFF05\n\u4F55\u5EA6\u3067\u3082\u5F37\u5316\u3067\u304D\u308B"
   PreviewVideoClip: {fileID: 0}
+  _statusBonusEffects:
+  - rid: 133001
+  _unlockSkills: []
+  _hasSkillSlotBonus: 0
+  _maxLevel: 1
+  _isUnlimitedLevel: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 133001
+      type: {class: MaxHealthMultiplierEffect, ns: KillChord.Runtime.Domain.OutGame.SkillTree, asm: KillChord.Domain}
+      data:
+        _multiplier: 0.0625

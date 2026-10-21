@@ -124,7 +124,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             int nodeId = _selectedNodeId;
             SkillNodeEntity entity = _skillNodeEntities[new SkillNodeId(nodeId)];
             int currentPoints = _skillTreeStatusEntity.CurrentPoints;
-            bool canUnlock = _costToUnlock >= 0 && currentPoints >= _costToUnlock && !entity.IsUnlocked;
+            bool canUnlock = _costToUnlock >= 0 && currentPoints >= _costToUnlock && entity.IsLevelUpAvailable;
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(nodeId);
             SkillDetailDTO dto = new SkillDetailDTO(
                 entity.SkillNodeIdVO.Id,
@@ -137,7 +137,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 entity.SkillDetail,
                 _costToUnlock,
                 canUnlock,
-                entity.IsUnlocked,
+                !entity.IsLevelUpAvailable,
                 hasVideo,
                 ResolveComboStepColors(entity.UnlockSkillIds));
             // スキル詳細の表示を更新する。
@@ -268,12 +268,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             List<SkillNodeEntity> unlockOrder = BuildUnlockOrder(_nodesOnPath);
             foreach (SkillNodeEntity entity in unlockOrder)
             {
-                // TODO 実装待ち：スキル効果をプレイヤーに反映する処理
-                entity.Unlock();
-                if (!_skillTreeStatusEntity.UnlockedNodes.Contains(entity.SkillNodeIdVO))
+                // 強化回数を1つ進め、セーブ用に強化回数分だけIDを記録する。
+                if (!entity.Unlock())
                 {
-                    _skillTreeStatusEntity.AddUnlockedNode(entity.SkillNodeIdVO);
+                    continue;
                 }
+
+                _skillTreeStatusEntity.AddUnlockedNode(entity.SkillNodeIdVO);
                 _skillTreeStatusEntity.AddUnlockedSkillIds(entity.UnlockSkillIds);
             }
             _skillTreeStatusEntity.ModifyPoint(-_costToUnlock);
@@ -284,23 +285,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
             _ = SaveUnlockDataAsync();
 
-            SkillNodeEntity selectedNode = _skillNodeEntities[new SkillNodeId(_selectedNodeId)];
-            bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(_selectedNodeId);
-            SkillDetailDTO dto = new SkillDetailDTO(
-                selectedNode.SkillNodeIdVO.Id,
-                HasUnlockSkill(selectedNode.UnlockSkillIds),
-                ResolveSkillName(selectedNode.UnlockSkillIds),
-                ResolveSkillCommand(selectedNode.UnlockSkillIds),
-                ResolveSkillGenre(selectedNode.UnlockSkillIds),
-                ResolveSkillGenreIcon(selectedNode.UnlockSkillIds),
-                ResolveSkillIcon(selectedNode.UnlockSkillIds),
-                selectedNode.SkillDetail,
-                -1,
-                false,
-                selectedNode.IsUnlocked,
-                hasVideo,
-                ResolveComboStepColors(selectedNode.UnlockSkillIds));
-            _skillDetailPresenter.Push(dto);
+            // 無限強化ノードは続けて強化できるため、選択中ノードの次の強化コストを求め直して表示する。
+            _nodesOnPath.Clear();
+            _costToUnlock = _skillTreeService.TryGetTotalCost(new SkillNodeId(_selectedNodeId), _nodesOnPath);
+            RefreshSelectedText();
             _showCurrentPoints(_skillTreeStatusEntity.CurrentPoints);
             _playerStatusPresenter.Push();
             _ownedSkillChanged?.Invoke();
