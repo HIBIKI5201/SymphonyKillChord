@@ -226,7 +226,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // ファサード初期化（Boss専用）
             _bossMovementAIFacade.Initialize(_view);
             _bossBattleAIFacade.Initialize(aiController);
-            _bossStateFacade.Initialize(aiController, target, _raycastView, aiBattleState);
+            _bossStateFacade.Initialize(aiController, target, _raycastView);
             _bossSharedFacade.Initialize(target);
         }
 
