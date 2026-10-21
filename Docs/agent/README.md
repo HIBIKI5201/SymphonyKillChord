@@ -74,6 +74,7 @@ Docs/agent/
 | `handoffs/2026-10-05_spec-implementation-diff-notion-update.md` | 上記差分を受けた Notion 仕様書更新の引継ぎ（16ページ分の追記・修正内容と再開手順） |
 | `handoffs/2026-10-05_notion-spec-overview-cleanup.md` | Notion「仕様概要（仕様リスト）」の整理の引継ぎ（設定画面のパイロットで決めた書き方と残りの作業） |
 | `handoffs/2026-10-05_spec-guide-reinforcement.md` | Notion「仕様書 ガイド」全ページの補強兼要約の引継ぎ（決定事項・作成済みの貼り付け用本文・残りの作業） |
+| `handoffs/2026-10-21_store-release-preparation.md` | Google Play・Steam のストア公開準備の引継ぎ（申告・仕様書・素材・アップロード鍵の状況、10/31 に出せるストアページ、クローズドテストまでの手順、道具の注意点） |
 | `reports/2026-10-01_design-review-summary.md` | 全体設計レビューの総括（10 観点の評価・観点をまたぐ問題・優先順位・限界。Issue #2358〜#2363・#2415〜#2418） |
 | `reports/2026-10-01_design-review-google-drive.md` | 全体設計レビュー: Google Drive の構成・命名・所有権・共有権限・ID 依存（Issue #2358） |
 | `reports/2026-10-01_design-review-notion-spec.md` | 全体設計レビュー: Notion 仕様書の情報設計・規則の競合・仕様とコードの差（Issue #2359） |
