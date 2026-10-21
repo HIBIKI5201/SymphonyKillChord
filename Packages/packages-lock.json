@@ -518,16 +518,6 @@
       "dependencies": {},
       "hash": "cfb3a9f75dd2ef7cc4253b0439806646cdd79814"
     },
-    "com.unity.postprocessing": {
-      "version": "3.5.4",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.modules.imgui": "1.0.0",
-        "com.unity.modules.physics": "1.0.0"
-      },
-      "url": "https://packages.unity.com"
-    },
     "com.unity.probuilder": {
       "version": "6.0.9",
       "depth": 0,
