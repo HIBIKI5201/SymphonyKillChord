@@ -1317,24 +1317,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: CriMw.CriWare.Runtime::CriWare.CriAtom
   acfFile: SymphonyKillChord.acf
   cueSheets:
-  - name: GunSound
-    acbFile: GunSound.acb
-    awbFile: 
-    loaderStatus: 0
-  - name: MusicSyncMock
-    acbFile: MusicSyncMock.acb
-    awbFile: 
-    loaderStatus: 0
-  - name: SpecialAttack
-    acbFile: SpecialAttack.acb
-    awbFile: 
-    loaderStatus: 0
   - name: CueSheet_0
     acbFile: CueSheet_0.acb
-    awbFile: 
-    loaderStatus: 0
-  - name: BattleSE
-    acbFile: BattleSE.acb
     awbFile: 
     loaderStatus: 0
   dspBusSetting: 
