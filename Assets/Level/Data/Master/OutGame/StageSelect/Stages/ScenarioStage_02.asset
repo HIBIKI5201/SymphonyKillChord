@@ -29,5 +29,13 @@ MonoBehaviour:
       _id: ResearchPoint
       _hashId: -806205115
     _amount: 2
-  _clearRewards: []
+  _clearRewards:
+  - _resourceId:
+      _id: SkillLevelupPoint
+      _hashId: 1374829010
+    _amount: 1
+  - _resourceId:
+      _id: ResearchPoint
+      _hashId: -806205115
+    _amount: 1
   _scenarioId: Episode_2

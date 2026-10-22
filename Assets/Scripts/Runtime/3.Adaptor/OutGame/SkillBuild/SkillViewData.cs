@@ -21,6 +21,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <param name="tips"> 改造画面に表示するスキルTips。 </param>
         /// <param name="level"> レベル。 </param>
         /// <param name="maxLevel"> 最大レベル。 </param>
+        /// <param name="levelUpCost"> 次のレベルへ上げるときの改造Pのコスト。最大レベルの場合は 0。 </param>
         /// <param name="isUnlocked"> 解放済みの場合は true。 </param>
         /// <param name="genreIcon"> ジャンルバッジアイコン。 </param>
         /// <param name="genreIds"> スキルが属するジャンル ID 一覧(絞り込み判定用、Domain 非依存)。 </param>
@@ -36,6 +37,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             string tips,
             int level,
             int maxLevel,
+            int levelUpCost,
             bool isUnlocked,
             Sprite genreIcon,
             int[] genreIds,
@@ -51,6 +53,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             Tips = tips ?? string.Empty;
             Level = level;
             MaxLevel = maxLevel;
+            LevelUpCost = levelUpCost;
             IsUnlocked = isUnlocked;
             GenreIcon = genreIcon;
             GenreIds = genreIds ?? Array.Empty<int>();
@@ -87,6 +90,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         /// <summary> 最大レベル。 </summary>
         public int MaxLevel { get; }
 
+        /// <summary> 次のレベルへ上げるときの改造Pのコスト。最大レベルの場合は 0。 </summary>
+        public int LevelUpCost { get; }
+
         /// <summary> 解放済みの場合は true。 </summary>
         public bool IsUnlocked { get; }
 
@@ -115,6 +121,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                    EffectDescription == other.EffectDescription &&
                    Tips == other.Tips &&
                    Level == other.Level &&
+                   LevelUpCost == other.LevelUpCost &&
                    IsUnlocked == other.IsUnlocked &&
                    GenreIcon == other.GenreIcon;
         }
@@ -145,6 +152,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
             hashCode.Add(EffectDescription);
             hashCode.Add(Tips);
             hashCode.Add(Level);
+            hashCode.Add(LevelUpCost);
             hashCode.Add(IsUnlocked);
             hashCode.Add(GenreIcon);
             return hashCode.ToHashCode();
