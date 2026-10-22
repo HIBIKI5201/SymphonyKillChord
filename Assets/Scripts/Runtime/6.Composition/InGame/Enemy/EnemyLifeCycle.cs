@@ -373,8 +373,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public void StopGameplay()
         {
             _raycastView?.HideWarning();
-            _attackReservationUsecase?.Deactivate();
+            // 予約を破棄する前にキャンセルし、OnAttackCanceled を発火させる。
             _aiController?.CancelAttack();
+            _attackReservationUsecase?.Deactivate();
 
             if (_behaviorGraphAgent != null)
             {
@@ -593,8 +594,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
 
-            _attackReservationUsecase?.Deactivate();
+            // 予約を破棄する前にキャンセルし、OnAttackCanceled を発火させる。
             _aiController?.CancelAttack();
+            _attackReservationUsecase?.Deactivate();
+            // 発射済みで着弾前の砲弾も消す。
+            _battleState?.CancelShells();
             _raycastView?.HideWarning();
             _aiController?.Deactivate();
             _enemyBattleAIFacade?.StopGameplay();
