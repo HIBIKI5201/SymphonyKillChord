@@ -84,6 +84,12 @@ ExportedPackages/
 
 /SinfoniaOperator/sinfonia-operator.secrets.json
 
+# Android の署名鍵（アップロード鍵）。鍵と証明書はリポジトリに置かない。
+*.jks
+*.keystore
+*.pem
+*.p12
+
 # NotionMarkdownWriter が pull した編集用の作業ファイル。
 /SinfoniaOperator/.notion-work/
 
