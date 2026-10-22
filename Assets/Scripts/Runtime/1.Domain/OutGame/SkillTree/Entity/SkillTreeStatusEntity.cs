@@ -34,7 +34,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
 
         /// <summary> 現在の研究ポイントを取得します。 </summary>
         public int CurrentPoints => _currentPoints;
-        /// <summary> 解放されたノードの ID リストを取得します。 </summary>
+        /// <summary> 解放されたノードの ID リストを取得します。強化できるノードは強化回数分だけ同じ ID を含みます。 </summary>
         public List<SkillNodeId> UnlockedNodes => _unlockedNodes;
         /// <summary> 解放されたスキルの ID リストを取得します。 </summary>
         public List<SkillId> UnlockedSkillIds => _unlockedSkillIds;

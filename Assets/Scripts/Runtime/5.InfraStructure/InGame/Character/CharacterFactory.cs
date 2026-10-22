@@ -60,8 +60,9 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
             CharacterCombatSpec combatSpec = new CharacterCombatSpec(attackDefinitions);
 
             // 会心率はキャラクターが持つため、加算値もここで適用する。
+            // 100% を超えた分はクリティカルの重複になるため、上限を設けない。
             CriticalChance criticalChance = new CriticalChance(
-                Mathf.Clamp01(data.CriticalChance + criticalChanceAddition));
+                Mathf.Max(0f, data.CriticalChance + criticalChanceAddition));
 
             return new CharacterEntity(
                 new CharacterName(data.CharacterName),

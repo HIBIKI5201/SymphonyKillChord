@@ -35,6 +35,18 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         [SerializeField, Tooltip("ノードを解放した時にスキル編成枠を1つ増やすか。")]
         private bool _hasSkillSlotBonus;
 
+        [Header("強化回数")]
+        [SerializeField, Min(SkillNodeEntity.DEFAULT_MAX_LEVEL), Tooltip("ノードを解放（強化）できる回数の上限。通常のノードは1。")]
+        private int _maxLevel = SkillNodeEntity.DEFAULT_MAX_LEVEL;
+        [SerializeField, Tooltip("強化回数の上限を無くすか（無限強化ノード）。trueの場合は強化上限を使わない。")]
+        private bool _isUnlimitedLevel;
+        [SerializeField, Min(0), Tooltip("強化1回ごとに増える解放コスト。1回目は UnlockCost、n回目は UnlockCost + 増加量 × (n - 1)。")]
+        private int _unlockCostIncreasePerLevel;
+
+        [Header("解放条件")]
+        [SerializeField, Tooltip("親ノードに加えて、この条件を持たない全ノードの解放を必要とするか。")]
+        private bool _requiresAllNodesUnlocked;
+
         /// <summary>
         ///     保持するデータよりEntityを生成する。
         /// </summary>
@@ -59,7 +71,11 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
                 SkillDetail,
                 skillIds.ToArray(),
                 _statusBonusEffects,
-                _hasSkillSlotBonus);
+                _hasSkillSlotBonus,
+                _maxLevel,
+                _isUnlimitedLevel,
+                _unlockCostIncreasePerLevel,
+                _requiresAllNodesUnlocked);
         }
 
         /// <summary>
