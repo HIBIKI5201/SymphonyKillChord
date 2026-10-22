@@ -109,6 +109,7 @@ namespace KillChord.Editor.Localization
             new("ui.skill.empty_slot_symbol", "＋", "+"),
             new("ui.skill.max_level", "レベルMax", "Max Level"),
             new("ui.skill_detail.status_boost", "ステータス強化", "Stat Boost"),
+            new("ui.skill_detail.level_format", "{0}　Lv.{1}", "{0}  Lv.{1}"),
             new("ui.setting.rhythm_offset_seconds_format", "{0}秒", "{0}s")
         };
 
