@@ -17,3 +17,4 @@ MonoBehaviour:
   _requiredSkillNodeId:
     _id: node_n11
     _hashId: -671561957
+  _requiresAllNodesUnlocked: 1
