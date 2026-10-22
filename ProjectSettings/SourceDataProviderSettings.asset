@@ -124,7 +124,7 @@ MonoBehaviour:
   - _collectionKey: BossAttackEntry
     _dataAssetAddressableKey: BossAttackEntryRepo
     _propertyPath: _attackEntries
-    _assetCreationDirectory: Assets/Level/Data/Develop/Boss
+    _assetCreationDirectory: Assets/Level/Data/Master/InGame/Enemy/Boss
   - _collectionKey: PlayerAttack
     _dataAssetAddressableKey: Player
     _propertyPath: _attackDifinitions
