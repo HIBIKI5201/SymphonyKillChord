@@ -48,11 +48,24 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 Debug.LogWarning($"[SkillTreeService] ノードID {nodeId} が見つかりません。");
                 return -1;
             }
-            // 解放済みの場合は支払うコストがないため探索終了する。
+            // 強化上限に達している場合は支払うコストがないため探索終了する。
             // 親ノードを持たない起点ノードは、自身のコストのみで解放できるため探索を続行する。
-            if (node.IsUnlocked)
+            if (!node.IsLevelUpAvailable)
             {
                 return -1;
+            }
+
+            // 全ノードの解放が条件のノードは、条件を満たすまで解放できない。
+            if (node.RequiresAllNodesUnlocked && !AreAllNodesUnlocked())
+            {
+                return -1;
+            }
+
+            // 解放済みでさらに強化できる場合は、親も解放済みのため自身の次の強化コストだけを支払う。
+            if (node.IsUnlocked)
+            {
+                nodesOnPath.Add(node);
+                return node.NextUnlockCost;
             }
             FindNodesOnPath(node, nodesOnPath);
 
@@ -60,9 +73,26 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             int unlockCost = 0;
             foreach (SkillNodeEntity nodeOnPath in nodesOnPath)
             {
-                unlockCost += nodeOnPath.UnlockCost.Cost;
+                unlockCost += nodeOnPath.NextUnlockCost;
             }
             return unlockCost;
+        }
+
+        /// <summary>
+        ///     <see cref="SkillNodeEntity.RequiresAllNodesUnlocked"/> を持たない全ノードが解放済みか判定する。
+        /// </summary>
+        /// <returns> 全て解放済みの場合はtrue。 </returns>
+        public bool AreAllNodesUnlocked()
+        {
+            foreach (SkillNodeEntity node in _skillNodeEntityDict.Values)
+            {
+                if (!node.RequiresAllNodesUnlocked && !node.IsUnlocked)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -224,7 +254,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <summary>
         ///     現在の解放状態をリセットした場合に返却される研究ポイントを算出する。
         /// </summary>
-        /// <param name="unlockedNodes"> 現在解放されているノード。 </param>
+        /// <param name="unlockedNodes"> 現在解放されているノード。強化回数分だけ同じIDを含む。 </param>
         /// <returns> 返却される研究ポイント。 </returns>
         public int CalculateResetRefundPoints(IReadOnlyCollection<SkillNodeId> unlockedNodes)
         {
@@ -233,15 +263,22 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 throw new ArgumentNullException(nameof(unlockedNodes));
             }
 
-            int refundPoints = 0;
-            HashSet<SkillNodeId> processedNodeIds = new HashSet<SkillNodeId>();
+            // ノードごとの強化回数を数える。
+            Dictionary<SkillNodeId, int> levelByNodeId = new Dictionary<SkillNodeId, int>();
             foreach (SkillNodeId nodeId in unlockedNodes)
             {
-                if (processedNodeIds.Add(nodeId)
-                    && _skillNodeEntityDict.TryGetValue(nodeId, out SkillNodeEntity node)
+                levelByNodeId.TryGetValue(nodeId, out int level);
+                levelByNodeId[nodeId] = level + 1;
+            }
+
+            // 強化上限までの回数分のコスト(強化ごとの増加分を含む)を返却する。
+            int refundPoints = 0;
+            foreach (KeyValuePair<SkillNodeId, int> pair in levelByNodeId)
+            {
+                if (_skillNodeEntityDict.TryGetValue(pair.Key, out SkillNodeEntity node)
                     && !IsInitialNode(node))
                 {
-                    refundPoints += node.UnlockCost.Cost;
+                    refundPoints = checked(refundPoints + node.GetTotalUnlockCost(pair.Value));
                 }
             }
 

@@ -9,14 +9,13 @@ Notionの「システムリスト」データベースにあるモジュール�
 | --- | --- |
 | Notion「システムリスト」DBの各ページ | 正本。本文と処理フローの子ページを直接編集する |
 | `Docs/NotionSpecifications/Symphony Kill Chord/システム概要/システムリスト/` | 読み取り専用の写し。読むときに使う |
-| `Assets/Docs/ScriptsDocs/Modules/NotionModuleDocs/NotionDocsRules.txt` | 節構成のテンプレートと記述ルール |
 
-`Assets/Docs/ScriptsDocs/Modules/NotionModuleDocs/<Module>.md` は旧正本であり、更新しない。
-Notionへ移した後に削除する予定である。リポジトリからNotionへ同期するスクリプトは廃止した。
+リポジトリにあった旧正本（`Assets/Docs/ScriptsDocs/Modules/NotionModuleDocs/`）はNotionへ反映したうえで削除した。
+リポジトリからNotionへ同期するスクリプトも廃止した。
 
 ## 節の構成
 
-`NotionDocsRules.txt` のテンプレートに従う。加えて次を守る。
+既存のモジュールページ（例: 敵・ミッション）と同じ節構成にする。加えて次を守る。
 
 - **クラス一覧はトグル見出しにする。** `## 🏗️ クラス {toggle="true"}` と書く。
   `### 🧩 Composition初期化情報`は畳まない（初期化順が見えなくなるため）。

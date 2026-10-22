@@ -20,10 +20,9 @@
 ## 機能仕様
 
 - エクスポートされた仕様: `Docs/NotionSpecifications/Symphony Kill Chord/`
-- コードモジュール資料: `Docs/NotionSpecifications/Symphony Kill Chord/システム概要/システムリスト/`（正本はNotion。旧正本の`Assets/Docs/ScriptsDocs/Modules/NotionModuleDocs/`は更新されない）
-- 実装計画書: `Assets/Docs/*.md`
+- コードモジュール資料: `Docs/NotionSpecifications/Symphony Kill Chord/システム概要/システムリスト/`（正本はNotion）
 
-対象機能と同名・類義のファイルを`rg --files`で絞り、最新の計画書と関係する仕様だけを読む。議事録は、仕様書と計画書だけでは決定理由や新旧判定ができない場合に限って参照する。
+対象機能と同名・類義のファイルを`rg --files`で絞り、関係する仕様だけを読む。設計判断の理由はシステムリストの各ページの「設計方針」にある。議事録は、仕様書だけでは決定理由や新旧判定ができない場合に限って参照する。
 
 ## 仕様の優先順位
 

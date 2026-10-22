@@ -1011,7 +1011,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
         private const int PREFAB_INSTANCE_TYPE_ID = 1001;
         private const int MAX_PARENT_DEPTH = 32;
 
-        private const string POSITION_PAIR_PREFAB_PATH = "Assets/Level/Prefabs/Develop/PositionPair.prefab";
+        private const string POSITION_PAIR_PREFAB_PATH = "Assets/Level/Prefabs/Master/InGame/Stage/PositionPair.prefab";
         private const string SPAWN_POINT_ID_PROPERTY_PATH = "_spawnPointId._id";
         private const string SPAWN_POINT_HASH_PROPERTY_PATH = "_spawnPointId._hashId";
         private const string LOCAL_POSITION_PROPERTY_PREFIX = "m_LocalPosition";

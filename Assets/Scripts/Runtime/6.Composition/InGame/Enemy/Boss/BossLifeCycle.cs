@@ -148,7 +148,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyMoveUseCase moveUsecase = new EnemyMoveUseCase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackUseCase attackUsecase = new EnemyAttackUseCase(raycastDetectService);
             EnemyTripleShotAttackUseCase tripleShotAttackUsecase = new EnemyTripleShotAttackUseCase(tripleRaycastDetectService);
-            BossAttackReservationUseCase reservationUsecase = new BossAttackReservationUseCase(musicActionScheduler);
+            AttackReservationUseCase reservationUsecase = new AttackReservationUseCase(musicActionScheduler);
             _reservationUsecase = reservationUsecase;
 
             // AI判定用（移動・硬直・範囲）の戦闘状態。先頭攻撃の定義で初期化する。
@@ -226,7 +226,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // ファサード初期化（Boss専用）
             _bossMovementAIFacade.Initialize(_view);
             _bossBattleAIFacade.Initialize(aiController);
-            _bossStateFacade.Initialize(aiController, target, _raycastView, aiBattleState);
+            _bossStateFacade.Initialize(aiController, target, _raycastView);
             _bossSharedFacade.Initialize(target);
         }
 
@@ -364,7 +364,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
         private BossAIController _aiController;
-        private BossAttackReservationUseCase _reservationUsecase;
+        private AttackReservationUseCase _reservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _aiBattleState;
         private CharacterDefinitionAsset _loadedEnemyData;
