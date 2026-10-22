@@ -149,9 +149,15 @@ $unityVersion = [regex]::Match($versionText, 'm_EditorVersion:\s*(\S+)').Groups[
 $unityRevision = [regex]::Match($versionText, 'm_EditorVersionWithRevision:\s*\S+\s*\((\w+)\)').Groups[1].Value
 $hubInstallUri = "unityhub://$unityVersion/$unityRevision"
 
-# Unity Hub の既定のインストール先と、Hub で変更したインストール先を探す。
+# Unity Hub の既定のインストール先（.github\unity-paths.json の editorRoots。CI と同じ）と、
+# Hub で変更したインストール先を探す。unity-paths.json を読めないときは固定のパスを使う。
 $editorRoots = New-Object System.Collections.Generic.List[string]
-$editorRoots.Add((Join-Path $env:ProgramFiles 'Unity\Hub\Editor'))
+$unityPathsFile = Join-Path $RepoRoot '.github\unity-paths.json'
+if (Test-Path -LiteralPath $unityPathsFile) {
+    $unityPaths = Get-Content -LiteralPath $unityPathsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    foreach ($root in @($unityPaths.Windows.editorRoots)) { if ($root) { $editorRoots.Add($root) } }
+}
+if ($editorRoots.Count -eq 0) { $editorRoots.Add((Join-Path $env:ProgramFiles 'Unity\Hub\Editor')) }
 $secondaryPathFile = Join-Path $env:APPDATA 'UnityHub\secondaryInstallPath.json'
 if (Test-Path $secondaryPathFile) {
     $secondary = (Get-Content $secondaryPathFile -Raw | ConvertFrom-Json)
@@ -161,7 +167,7 @@ $editorPath = $editorRoots | ForEach-Object { Join-Path $_ $unityVersion } |
     Where-Object { Test-Path (Join-Path $_ 'Editor\Unity.exe') } | Select-Object -First 1
 
 if (-not $editorPath) {
-    Add-Result "Unity $unityVersion" 'Error' "インストールされていません。Unity Hub で $hubInstallUri を開き、Android Build Support を付けて入れてください。"
+    Add-Result "Unity $unityVersion" 'Error' "インストールされていません（探した場所: $($editorRoots -join ', ')）。Unity Hub で $hubInstallUri を開き、Android Build Support を付けて入れてください。"
 }
 else {
     Add-Result "Unity $unityVersion" 'OK' $editorPath
