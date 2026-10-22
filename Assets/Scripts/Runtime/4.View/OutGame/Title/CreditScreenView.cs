@@ -15,7 +15,7 @@ namespace KillChord.Runtime.View.OutGame.Title
     /// <summary>
     ///     クレジット画面の View クラス。
     /// </summary>
-    public class CreditScreenView : ScreenViewBase, IMemberListApplicable
+    public class CreditScreenView : ScreenViewBase, IMemberListApplicable, IThirdPartyNoticeListApplicable
     {
         /// <summary>
         ///    クレジット画面の View を初期化します。
@@ -55,6 +55,12 @@ namespace KillChord.Runtime.View.OutGame.Title
                 _dragScrollManipulator.target = null;
                 _dragScrollManipulator = null;
             }
+
+            if (_assetsDragScrollManipulator != null)
+            {
+                _assetsDragScrollManipulator.target = null;
+                _assetsDragScrollManipulator = null;
+            }
         }
 
         /// <summary>
@@ -85,6 +91,31 @@ namespace KillChord.Runtime.View.OutGame.Title
             }
         }
 
+        /// <summary>
+        ///     サードパーティ素材の表記一覧を「使用アセット」タブへ反映します。
+        /// </summary>
+        /// <param name="notices"> 反映するサードパーティ素材の表記 DTO の一覧です。 </param>
+        public void ApplyThirdPartyNoticeList(IReadOnlyList<ThirdPartyNoticeViewDTO> notices)
+        {
+            if (_assetsScrollView == null)
+            {
+                return;
+            }
+
+            // 前回の反映結果が残らないよう、毎回作り直す。
+            _assetsScrollView.Clear();
+
+            if (notices == null)
+            {
+                return;
+            }
+
+            foreach (ThirdPartyNoticeViewDTO notice in notices)
+            {
+                _assetsScrollView.Add(CreateNoticeElement(notice));
+            }
+        }
+
         /// <inheritdoc />
         protected override VisualElement InitialFocusElement =>
             _tabView.activeTab?.tabHeader ?? _productionTeamTab.tabHeader;
@@ -97,7 +128,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const string MENBER_SCROLL_VIEW_NAME = "MemberScrollView";
         private const string PRODUCTION_TEAM_TAB_NAME = "ProductionTeam";
         private const string ASSETS_USED_TAB_NAME = "AssetsUsed";
-        private const float MEMBER_SCROLL_STEP = 80f;
+        private const string ASSETS_SCROLL_VIEW_NAME = "AssetsScrollView";
+        private const float SCROLL_STEP = 80f;
 
         private const string MEMBER_ROLE_GROUP_CLASS = "member-role-group";
         private const string MEMBER_ROLE_LABEL_CLASS = "member-role-label";
@@ -105,6 +137,11 @@ namespace KillChord.Runtime.View.OutGame.Title
         private const string MEMBER_NAME_ITEM_CLASS = "member-name-item";
         private const string MEMBER_NAME_CAPTION_CLASS = "member-name-caption";
         private const string MEMBER_NAME_LABEL_CLASS = "member-name-label";
+
+        private const string NOTICE_ITEM_CLASS = "notice-item";
+        private const string NOTICE_NAME_LABEL_CLASS = "notice-name-label";
+        private const string NOTICE_DETAIL_LABEL_CLASS = "notice-detail-label";
+        private const string NOTICE_TEXT_LABEL_CLASS = "notice-text-label";
 
         private const char OPEN_PARENTHESIS = '（';
         private const char CLOSE_PARENTHESIS = '）';
@@ -138,10 +175,11 @@ namespace KillChord.Runtime.View.OutGame.Title
         private Tab _productionTeamTab;
         private Tab _assetsUsedTab;
         private ScrollView _memberScrollView;
-        private ListView _assetsUsedListView;
+        private ScrollView _assetsScrollView;
         private HierarchicalNavigationScope _navigationScope;
         private IDisposable _backButtonActivation;
         private ScrollViewDragManipulator _dragScrollManipulator;
+        private ScrollViewDragManipulator _assetsDragScrollManipulator;
 
         /// <summary>
         ///     クレジット画面の UI 要素を初期化します。
@@ -179,8 +217,8 @@ namespace KillChord.Runtime.View.OutGame.Title
                 ?? throw new NullReferenceException($"{nameof(CreditScreenView)}: {ASSETS_USED_TAB_NAME}が見つかりません。");
             _memberScrollView = rootElement.Q<ScrollView>(MENBER_SCROLL_VIEW_NAME)
                 ?? throw new NullReferenceException($"{nameof(CreditScreenView)}: {MENBER_SCROLL_VIEW_NAME}が見つかりません。");
-            _assetsUsedListView = _assetsUsedTab.Q<ListView>()
-                ?? throw new NullReferenceException($"{nameof(CreditScreenView)}: 使用アセットのListViewが見つかりません。");
+            _assetsScrollView = rootElement.Q<ScrollView>(ASSETS_SCROLL_VIEW_NAME)
+                ?? throw new NullReferenceException($"{nameof(CreditScreenView)}: {ASSETS_SCROLL_VIEW_NAME}が見つかりません。");
             // タブ見出しを第1階層、各タブの中身を第2階層とする操作範囲を登録する。
             _navigationScope = hierarchicalNavigationScope;
             _navigationScope.SetRootLevel(new VisualElement[]
@@ -199,12 +237,13 @@ namespace KillChord.Runtime.View.OutGame.Title
                 _assetsUsedTab.tabHeader,
                 new VisualElement[]
                 {
-                    _assetsUsedListView,
+                    _assetsScrollView,
                 },
-                _assetsUsedListView);
+                _assetsScrollView);
 
-            // メンバー一覧はドラッグでスクロールできるようにする。
+            // メンバー一覧と使用アセット一覧はドラッグでスクロールできるようにする。
             _dragScrollManipulator = new ScrollViewDragManipulator(_memberScrollView);
+            _assetsDragScrollManipulator = new ScrollViewDragManipulator(_assetsScrollView);
         }
 
         /// <summary>
@@ -220,7 +259,8 @@ namespace KillChord.Runtime.View.OutGame.Title
             _productionTeamTab.tabHeader.RegisterCallback<NavigationSubmitEvent>(HandleProductionTeamTabSubmittedHandler);
             _assetsUsedTab.tabHeader.RegisterCallback<ClickEvent>(HandleAssetsUsedTabClickedHandler);
             _assetsUsedTab.tabHeader.RegisterCallback<NavigationSubmitEvent>(HandleAssetsUsedTabSubmittedHandler);
-            _memberScrollView.RegisterCallback<NavigationMoveEvent>(HandleMemberScrollNavigationHandler);
+            _memberScrollView.RegisterCallback<NavigationMoveEvent>(HandleScrollNavigationHandler);
+            _assetsScrollView.RegisterCallback<NavigationMoveEvent>(HandleScrollNavigationHandler);
         }
 
         /// <summary>
@@ -234,7 +274,8 @@ namespace KillChord.Runtime.View.OutGame.Title
             _productionTeamTab.tabHeader.UnregisterCallback<NavigationSubmitEvent>(HandleProductionTeamTabSubmittedHandler);
             _assetsUsedTab.tabHeader.UnregisterCallback<ClickEvent>(HandleAssetsUsedTabClickedHandler);
             _assetsUsedTab.tabHeader.UnregisterCallback<NavigationSubmitEvent>(HandleAssetsUsedTabSubmittedHandler);
-            _memberScrollView.UnregisterCallback<NavigationMoveEvent>(HandleMemberScrollNavigationHandler);
+            _memberScrollView.UnregisterCallback<NavigationMoveEvent>(HandleScrollNavigationHandler);
+            _assetsScrollView.UnregisterCallback<NavigationMoveEvent>(HandleScrollNavigationHandler);
         }
 
         /// <summary>
@@ -276,30 +317,35 @@ namespace KillChord.Runtime.View.OutGame.Title
         }
 
         /// <summary>
-        ///     制作メンバー一覧への上下入力をスクロールへ変換する。
+        ///     制作メンバー一覧・使用アセット一覧への上下入力をスクロールへ変換する。
         /// </summary>
         /// <param name="navigationEvent"> ナビゲーション移動イベント。 </param>
-        private void HandleMemberScrollNavigationHandler(NavigationMoveEvent navigationEvent)
+        private void HandleScrollNavigationHandler(NavigationMoveEvent navigationEvent)
         {
+            if (navigationEvent.currentTarget is not ScrollView scrollView)
+            {
+                return;
+            }
+
             float scrollDelta;
             switch (navigationEvent.direction)
             {
                 case NavigationMoveEvent.Direction.Up:
-                    scrollDelta = -MEMBER_SCROLL_STEP;
+                    scrollDelta = -SCROLL_STEP;
                     break;
                 case NavigationMoveEvent.Direction.Down:
-                    scrollDelta = MEMBER_SCROLL_STEP;
+                    scrollDelta = SCROLL_STEP;
                     break;
                 default:
                     return;
             }
 
-            Vector2 scrollOffset = _memberScrollView.scrollOffset;
+            Vector2 scrollOffset = scrollView.scrollOffset;
             scrollOffset.y = Mathf.Clamp(
                 scrollOffset.y + scrollDelta,
-                _memberScrollView.verticalScroller.lowValue,
-                _memberScrollView.verticalScroller.highValue);
-            _memberScrollView.scrollOffset = scrollOffset;
+                scrollView.verticalScroller.lowValue,
+                scrollView.verticalScroller.highValue);
+            scrollView.scrollOffset = scrollOffset;
             navigationEvent.StopPropagation();
         }
 
@@ -454,6 +500,44 @@ namespace KillChord.Runtime.View.OutGame.Title
             nameItem.Add(nameLabel);
 
             return nameItem;
+        }
+
+        /// <summary>
+        ///     サードパーティ素材1件分の表示要素を生成します。素材名を見出しにし、
+        ///     その下に権利者とライセンス名、著作表記などの本文を順に並べます。空の項目は表示しません。
+        /// </summary>
+        /// <param name="notice"> サードパーティ素材の表記 DTO です。 </param>
+        /// <returns> 生成した表示要素です。 </returns>
+        private static VisualElement CreateNoticeElement(ThirdPartyNoticeViewDTO notice)
+        {
+            var noticeItem = new VisualElement();
+            noticeItem.AddToClassList(NOTICE_ITEM_CLASS);
+
+            AddLabelIfNotEmpty(noticeItem, notice.Name, NOTICE_NAME_LABEL_CLASS);
+            AddLabelIfNotEmpty(noticeItem, notice.Holder, NOTICE_DETAIL_LABEL_CLASS);
+            AddLabelIfNotEmpty(noticeItem, notice.License, NOTICE_DETAIL_LABEL_CLASS);
+            AddLabelIfNotEmpty(noticeItem, notice.Text, NOTICE_TEXT_LABEL_CLASS);
+
+            return noticeItem;
+        }
+
+        /// <summary>
+        ///     文字列が空でなければ、指定クラスを付けたラベルを親要素へ追加します。
+        /// </summary>
+        /// <param name="parent"> 追加先の親要素です。 </param>
+        /// <param name="text"> 表示する文字列です。 </param>
+        /// <param name="className"> ラベルに付ける USS クラス名です。 </param>
+        private static void AddLabelIfNotEmpty(VisualElement parent, string text, string className)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return;
+            }
+
+            // ライセンス文の記号がタグとして解釈されないよう、リッチテキストは使わない。
+            var label = new Label(text) { enableRichText = false };
+            label.AddToClassList(className);
+            parent.Add(label);
         }
 
         /// <summary>

@@ -15,7 +15,7 @@
                 <ui:Tab label="使用アセット" name="AssetsUsed" class="ui-se-select">
                     <ui:VisualElement name="BackGround" style="width: 100%; height: 566px; flex-grow: 1; position: relative;">
                         <ui:VisualElement name="BackGroundImage" picking-mode="Ignore" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0.1; background-image: url(&quot;project://database/Assets/Arts/Images/Sprites/UI/OutGame/UI_Back_Text.png?fileID=2800000&amp;guid=522fda19571fbc24db0d164d903c2ea9&amp;type=3#UI_Back_Text&quot;);"/>
-                        <ui:ListView style="width: 100%; height: 100%;"/>
+                        <ui:ScrollView name="AssetsScrollView" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" style="width: 100%; height: 100%;"/>
                     </ui:VisualElement>
                 </ui:Tab>
             </ui:TabView>

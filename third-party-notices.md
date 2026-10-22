@@ -2,6 +2,8 @@
 
 このプロジェクトでは、以下のサードパーティ素材を使用しています。
 
+ゲーム内のクレジット「使用アセット」タブは、この内容をまとめた `Assets/StreamingAssets/Credits/third-party-notices.json` を表示する。素材を足したときは両方を更新する。
+
 ## Google Fonts — Material Symbols / Material Icons
 
 - **提供元**: Google
