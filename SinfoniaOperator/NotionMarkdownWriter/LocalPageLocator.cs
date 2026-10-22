@@ -19,6 +19,9 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             @"\[Notionで開く\]\((?<url>[^)]+)\)",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
+        /// <summary> エクスポーターがデータベースのフォルダー内へ出力する、データベース自身のMarkdown名。 </summary>
+        private const string DATABASE_MARKDOWN_FILE_NAME = "_database.md";
+
         /// <summary> ページIDを探すために読む冒頭行数。 </summary>
         private const int HEADER_SCAN_LINE_COUNT = 10;
 
@@ -85,6 +88,8 @@ namespace SinfoniaStudio.NotionMarkdownWriter
 
         /// <summary>
         ///     エクスポートのディレクトリ構造から祖先ページIDを近い順に列挙する。
+        ///     データベースは「データベース名」フォルダー内の「_database.md」として出力されるため、
+        ///     各フォルダーについて同名の「フォルダー名.md」に加えて「_database.md」も読み、データベースIDも祖先に含める。
         /// </summary>
         /// <param name="markdownPath">対象Markdownの絶対パス。</param>
         /// <param name="exportDirectory">エクスポート出力先の絶対パス。</param>
@@ -93,7 +98,8 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         {
             List<string> ancestors = new();
             string exportRoot = Path.GetFullPath(exportDirectory).TrimEnd(Path.DirectorySeparatorChar);
-            string? currentDirectory = Path.GetDirectoryName(Path.GetFullPath(markdownPath));
+            string targetPath = Path.GetFullPath(markdownPath);
+            string? currentDirectory = Path.GetDirectoryName(targetPath);
 
             while (!string.IsNullOrEmpty(currentDirectory))
             {
@@ -103,6 +109,14 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 {
                     // エクスポート出力先の外にあるファイルは、ローカル構造から祖先を判定できない。
                     return Array.Empty<string>();
+                }
+
+                string databaseMarkdownPath = Path.Combine(normalized, DATABASE_MARKDOWN_FILE_NAME);
+                bool isOwnDatabaseMarkdown = string.Equals(
+                    databaseMarkdownPath, targetPath, StringComparison.OrdinalIgnoreCase);
+                if (!isOwnDatabaseMarkdown && TryReadPageId(databaseMarkdownPath, out string databaseId))
+                {
+                    ancestors.Add(databaseId);
                 }
 
                 string parentMarkdownPath = normalized + ".md";
