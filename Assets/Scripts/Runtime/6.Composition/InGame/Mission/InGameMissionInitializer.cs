@@ -217,10 +217,12 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 playerModuleContainer.PlayerEntity);
 
             // ステップ開始時のアクションを実行する処理を用意する。会話がある場合は会話の処理も加える。
+            EnemyModuleContainer enemyModuleContainer = ServiceLocator.GetInstance<EnemyModuleContainer>();
             List<IMissionStepEntryActionExecutor> entryActionExecutors = new()
             {
                 new SetSkillExecutionEnabledStepEntryActionExecutor(playerModuleContainer.PlayerActionRestrictionState),
-                new ToggleEnemyBattleAiStepEntryActionExecutor(ServiceLocator.GetInstance<EnemyModuleContainer>().EnemyBattleAIRegistry),
+                new ToggleEnemyBattleAiStepEntryActionExecutor(enemyModuleContainer.EnemyBattleAIRegistry),
+                new SetEnemyInvincibleStepEntryActionExecutor(enemyModuleContainer.EnemyInvincibilityRegistry),
                 new PlayVoiceStepEntryActionExecutor(_missionVoiceSource)
             };
             if (!TryInitializeDialogue(entryActionExecutors))
