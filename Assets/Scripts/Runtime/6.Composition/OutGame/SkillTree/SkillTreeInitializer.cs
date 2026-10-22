@@ -153,6 +153,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private Dictionary<string, ISkillNodeConnViewModel> _skillNodeConnViews;
         private Dictionary<int, string[]> _skillNodeConnBinds;
         private Dictionary<int, VisualElement> _unlockPhases;
+        private List<VisualElement> _allNodesUnlockedPhases;
         private Dictionary<int, VideoClip> _skillPreviewVideos;
         private Dictionary<StatusBonusEffectKind, Sprite> _statusBonusEffectIcons;
         private Dictionary<SkillType, Sprite> _skillGenreIcons;
@@ -489,6 +490,10 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             _skillTreeService = new SkillTreeService(_skillNodeEntities);
+            if (_skillTreeService.AreAllNodesUnlocked())
+            {
+                SetAllNodesUnlockedPhasesVisible();
+            }
             skillTreeEntity.SetSkillSlotBonus(
                 _skillTreeService.CalculateSkillSlotBonus(skillTreeEntity.UnlockedNodes));
             ServiceLocator.RegisterInstance(skillTreeEntity);
@@ -522,6 +527,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _skillNodeConnBinds,
                 _skillNodeConnViews,
                 _unlockPhases,
+                _allNodesUnlockedPhases,
                 _skillPreviewVideos,
                 skillTreeEntity,
                 () => _outGameUIEvent.OnOwnedSkillChanged?.Invoke(),
@@ -775,10 +781,19 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         /// <param name="entity"> 対象ノードEntityです。 </param>
         private void SetNodeUnlockState(SkillNodeView view, SkillNodeEntity entity)
         {
-            if (_skillUnlockData.UnlockedSkillNodeIds.Contains(entity.SkillNodeIdVO.Id))
+            // セーブデータには強化回数分だけ同じIDが記録されているため、その回数分だけ強化する。
+            int[] unlockedNodeIds = _skillUnlockData.UnlockedSkillNodeIds;
+            for (int i = 0; i < unlockedNodeIds.Length; i++)
+            {
+                if (unlockedNodeIds[i] == entity.SkillNodeIdVO.Id)
+                {
+                    entity.Unlock();
+                }
+            }
+
+            if (entity.IsUnlocked)
             {
                 view.SetUnlocked();
-                entity.Unlock();
             }
         }
 
@@ -788,18 +803,39 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private void InitializePhaseState()
         {
             _unlockPhases = new();
+            _allNodesUnlockedPhases = new();
             for (int i = 0; i < _loadedSkillNodePhaseBindRepo.PhaseBindData.Length; i++)
             {
                 SkillNodePhaseBindData phaseBindData = _loadedSkillNodePhaseBindRepo.PhaseBindData[i];
                 string phaseName = phaseBindData.PhaseName;
                 VisualElement phaseRoot = _rootElement.Q(phaseName);
-                _unlockPhases.Add(phaseBindData.RequiredSkillNodeId.Id, phaseRoot);
+                if (phaseBindData.RequiresAllNodesUnlocked)
+                {
+                    // 全ノードの解放で開く段階は、サービス生成後にまとめて判定する。
+                    _allNodesUnlockedPhases.Add(phaseRoot);
+                }
+                else
+                {
+                    _unlockPhases.Add(phaseBindData.RequiredSkillNodeId.Id, phaseRoot);
+                }
+
                 phaseRoot.visible = false;
             }
 
             for (int i = 0; i < _skillUnlockData.UnlockedSkillNodeIds.Length; i++)
             {
                 SetUnlockPhaseState(_skillUnlockData.UnlockedSkillNodeIds[i]);
+            }
+        }
+
+        /// <summary>
+        ///     全ノードの解放で開く段階を表示します。
+        /// </summary>
+        private void SetAllNodesUnlockedPhasesVisible()
+        {
+            for (int i = 0; i < _allNodesUnlockedPhases.Count; i++)
+            {
+                _allNodesUnlockedPhases[i].visible = true;
             }
         }
 
@@ -1098,6 +1134,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             _skillNodeConnViews = null;
             _skillNodeConnBinds = null;
             _unlockPhases = null;
+            _allNodesUnlockedPhases = null;
             _skillPreviewVideos = null;
             _statusBonusEffectIcons = null;
             _skillGenreIcons = null;
