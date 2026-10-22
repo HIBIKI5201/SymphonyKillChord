@@ -19,5 +19,14 @@ MonoBehaviour:
   - _id: node_n6
     _hashId: 1679495253
   UnlockCost: 10
-  SkillDetail: 
+  SkillDetail: "\u6700\u5927\u4F53\u529B\u3000\uFF0B6.25\uFF05"
   PreviewVideoClip: {fileID: 0}
+  _statusBonusEffects:
+  - rid: 113001
+  references:
+    version: 2
+    RefIds:
+    - rid: 113001
+      type: {class: MaxHealthMultiplierEffect, ns: KillChord.Runtime.Domain.OutGame.SkillTree, asm: KillChord.Domain}
+      data:
+        _multiplier: 0.0625

@@ -36,6 +36,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             Dictionary<int, string[]> skillNodeConnBinds,
             Dictionary<string, ISkillNodeConnViewModel> nodeConns,
             Dictionary<int, VisualElement> unlockPhases,
+            List<VisualElement> allNodesUnlockedPhases,
             Dictionary<int, VideoClip> videoClipBinds,
             SkillTreeStatusEntity skillTreeStatusEntity,
             Action ownedSkillChanged,
@@ -65,6 +66,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _previewVideoScreenViewShowable = previewVideoScreenViewShowable;
             _nodeConns = nodeConns;
             _unlockPhases = unlockPhases;
+            _allNodesUnlockedPhases = allNodesUnlockedPhases;
             _videoClipBinds = videoClipBinds;
             _skillTreeStatusEntity = skillTreeStatusEntity;
             _ownedSkillChanged = ownedSkillChanged;
@@ -391,6 +393,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
         private HashSet<SkillNodeEntity> _nodesOnPath;
         private Dictionary<int, VisualElement> _unlockPhases;
+        private List<VisualElement> _allNodesUnlockedPhases;
         private Dictionary<int, string[]> _skillNodeConnBinds;
         private Dictionary<string, ISkillNodeConnViewModel> _nodeConns;
         private Dictionary<int, VideoClip> _videoClipBinds;
@@ -780,6 +783,28 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             {
                 _unlockPhases[nodeId].visible = true;
             }
+
+            // 全ノードの解放で開く段階は、どのノードが最後でも開くよう毎回判定する。
+            if (_skillTreeService.AreAllNodesUnlocked())
+            {
+                SetAllNodesUnlockedPhasesVisible(true);
+            }
+        }
+
+        /// <summary>
+        ///     全ノードの解放で開く段階の表示を切り替える。
+        /// </summary>
+        /// <param name="visible"> 表示する場合はtrue。 </param>
+        private void SetAllNodesUnlockedPhasesVisible(bool visible)
+        {
+            for (int i = 0; i < _allNodesUnlockedPhases.Count; i++)
+            {
+                VisualElement phase = _allNodesUnlockedPhases[i];
+                if (phase != null)
+                {
+                    phase.visible = visible;
+                }
+            }
         }
 
         /// <summary>
@@ -824,6 +849,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                     unlockPhase.visible = false;
                 }
             }
+
+            SetAllNodesUnlockedPhasesVisible(false);
 
             // リセット後も解放済みのノードだけを解放し直す。
             ReadOnlySpan<SkillNodeId> unlockedNodeIds = result.UnlockedNodeIds.Span;

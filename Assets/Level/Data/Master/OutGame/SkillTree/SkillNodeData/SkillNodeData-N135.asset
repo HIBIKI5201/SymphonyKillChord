@@ -28,6 +28,7 @@ MonoBehaviour:
   _maxLevel: 1
   _isUnlimitedLevel: 1
   _unlockCostIncreasePerLevel: 2
+  _requiresAllNodesUnlocked: 1
   references:
     version: 2
     RefIds:

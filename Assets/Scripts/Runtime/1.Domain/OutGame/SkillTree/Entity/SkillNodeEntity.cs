@@ -19,7 +19,8 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             bool hasSkillSlotBonus = false,
             int maxLevel = DEFAULT_MAX_LEVEL,
             bool isUnlimitedLevel = false,
-            int unlockCostIncreasePerLevel = 0)
+            int unlockCostIncreasePerLevel = 0,
+            bool requiresAllNodesUnlocked = false)
         {
             if (!isUnlimitedLevel && maxLevel < DEFAULT_MAX_LEVEL)
             {
@@ -43,6 +44,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             MaxLevel = maxLevel;
             IsUnlimitedLevel = isUnlimitedLevel;
             UnlockCostIncreasePerLevel = unlockCostIncreasePerLevel;
+            RequiresAllNodesUnlocked = requiresAllNodesUnlocked;
         }
 
         /// <summary> ノードのID。 </summary>
@@ -83,6 +85,12 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
 
         /// <summary> 解放時にスキル編成枠を1つ増やすか。 </summary>
         public bool HasSkillSlotBonus { get; }
+
+        /// <summary>
+        ///     解放に、この条件を持たない全ノードの解放が必要か。
+        ///     親ノードの解放に加えて求める条件。
+        /// </summary>
+        public bool RequiresAllNodesUnlocked { get; }
 
         /// <summary> 強化上限の既定値。通常のノードは1回だけ解放できる。 </summary>
         public const int DEFAULT_MAX_LEVEL = 1;

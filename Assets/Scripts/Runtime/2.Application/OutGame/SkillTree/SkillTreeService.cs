@@ -55,6 +55,12 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 return -1;
             }
 
+            // 全ノードの解放が条件のノードは、条件を満たすまで解放できない。
+            if (node.RequiresAllNodesUnlocked && !AreAllNodesUnlocked())
+            {
+                return -1;
+            }
+
             // 解放済みでさらに強化できる場合は、親も解放済みのため自身の次の強化コストだけを支払う。
             if (node.IsUnlocked)
             {
@@ -70,6 +76,23 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 unlockCost += nodeOnPath.NextUnlockCost;
             }
             return unlockCost;
+        }
+
+        /// <summary>
+        ///     <see cref="SkillNodeEntity.RequiresAllNodesUnlocked"/> を持たない全ノードが解放済みか判定する。
+        /// </summary>
+        /// <returns> 全て解放済みの場合はtrue。 </returns>
+        public bool AreAllNodesUnlocked()
+        {
+            foreach (SkillNodeEntity node in _skillNodeEntityDict.Values)
+            {
+                if (!node.RequiresAllNodesUnlocked && !node.IsUnlocked)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
