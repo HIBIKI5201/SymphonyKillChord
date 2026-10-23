@@ -10,6 +10,14 @@
 # エージェントの出力
 - 解析・監査・調査・引継ぎは `Docs/agent/` に置いてコミットする。構成・命名は [README](Docs/agent/README.md) に従う。構成外の出力フォルダは作らない。
 
+# 作業の許可範囲
+- コードの実装・修正は、依頼者が明示的に頼んだときに行う（[コード規約](Assets/Scripts/CodeGuidelines.md)のCG-002）。レビュー・調査だけの依頼ではコードを変更せず、結果は `Docs/agent/` に出す。
+- 依頼で指定された出力先・Git操作・Unity操作・外部送信の制限は、それぞれ独立した条件として守る。作業を委任するときも、そのまま渡す。
+
+# Unity検証の前に
+- compile・run-tests・hot-reload・Playの開始の前に `node scripts/harness/unity-preflight.mjs` を実行する（Claudeはhookで自動実行）。未保存のScene・Prefab、またはPlay中を検知したら止まり、保存・破棄・停止をユーザーに確認する。自分が始めたPlayは止めてよい。
+- run-testsには `--unsaved-changes fail` を付け、未保存の変更を勝手に保存・破棄しない。
+
 # ブランチ・PR
 - 編集・コミットは指定された作業ブランチで行う。指定がなければ `feature/[段階]/[作業名]/agent`。新規ブランチは編集前に空pushし、同階層masterの生成を確認する。
 - masterを直接編集・コミットしない。feature作業ブランチ→同階層masterへPR・セルフマージし、master→developのDraft PRを確認する。feature以外の作業ブランチのPR先はdevelop。
