@@ -175,7 +175,27 @@ Notion からリポジトリへ落とす仕組みは既に 1 つある。`Sinfon
 | `Assets/Docs/ScriptsDocs/Modules/NotionModuleDocs/NotionDocsRules.txt` | 本書 §5 の規約とあわせて 仕様書 ガイド 配下へ | `rules/notion-writing-rules.md` | notion-spec-write |
 | `Assets/Docs/PlannerGuide/MasterDataGuide.md` | 既存: マスターデータ運用ガイド（プランナー向け）。Notion 側が古いので、repo の 09-16 版で更新してから正本にする | （キャッシュ不要） | 現在パスで読むスキルは無い（プランナーと AI は全体ミラーで読む） |
 | `Assets/Scripts/ScenarioCsvGuide.md` | 既存: シナリオコマンド使い方 / シナリオCSV～ドライブ同期～ | （キャッシュ不要） | 現在パスで読むスキルは無い |
-| `spec/feature/game-spec.md` | 仕様概要の各ページ | （保留） | Augur 設定（`spec/domains/*.domain.json`）が見出しアンカー 22 本を参照している。Augur の参照先をキャッシュへ変えられるかを確かめてから決める |
+| `spec/feature/game-spec.md` | 仕様概要の各ページ | （キャッシュ化しない） | Augur・Anatomia のドメイン定義（`spec/domains/*.domain.json`）が見出しアンカー 22 本を参照している。参照先はキャッシュへ変えず、リポジトリに残す（§3.1、#2488） |
+
+### 3.1 Augur の参照先をキャッシュへ変えない理由（#2488、2026-10-22 調査）
+
+決定シート No.153 で、`spec/domains` と `game-spec.md` の二層ドメイン運用を続けたうえで、参照先を全体ミラーへ変えられるかを確かめることになった。結論は**変えない**。`game-spec.md` は Augur・Anatomia 用の索引としてリポジトリに残す。
+
+**今の参照先**
+
+- `spec/domains/*.domain.json` 10 件の `specRefs`（計 22 本）が、`spec/feature/game-spec.md#gs-01-リズム判定` の形で見出しアンカーを指している。参照されている GS は 01〜07・09〜13・15 の 13 節。
+- `specRefs` を解決するのは Anatomia の spec linkage（spec-integrity）である。Augur は `.augur/tests.config.json` の `quota.domains` でドメイン名だけを使い、仕様本文は Anatomia の解析結果を通して読む。Augur・Anatomia の本体はどのリポジトリにも無いので、参照の書式（ページ ID を受け付けるか、空白入りのパスを解決できるか）は確かめられていない。
+
+**変えない理由**
+
+1. **CI とクラウドでは全体ミラーが無い。** `Docs/NotionSpecifications` は `ignore = all`・`shallow = true` のサブモジュールで、通常の clone では空のディレクトリになる。本体は公開、仕様書リポジトリは非公開なので、閲覧権限の無い環境では読めない。参照先を変えると、そうした環境で 22 本すべてが解決しなくなる。
+2. **パスがページタイトルで決まる。** 全体ミラーのパス（例: `Docs/NotionSpecifications/Symphony Kill Chord/仕様概要/仕様リスト/リズム判定.md`）は Notion でページ名を変えたり移動したりすると変わる。§2.2 と W-18 は「パスではなく page id で参照する」としているが、`specRefs` は「パス#アンカー」の書式なので、この規約に合わせられない。見出しアンカーも Notion 側の見出し変更で変わる。
+3. **1 対 1 に置き換えられない。** GS の各節は複数の仕様ページをまとめた要約である。例えば GS-02（リズムコマンド戦闘）は「コアメカニクスについて」「攻撃アクション」「ダメージ計算」「コンボについて」にまたがり、GS-09（導線、ガイダンス、回復）にちょうど対応するページは無い。置き換えると 22 本が数十本に増え、どのページを所有とするかの判断がまた要る。
+
+**もし変えるなら必要になること**
+
+- Anatomia が page id（マニフェストの `Pages[].Id`）で仕様を参照できるようになること、または CI が全体ミラーを checkout できること（非公開リポジトリを読むトークンが要る）。
+- この 2 つが揃うまでは、`game-spec.md` の GS 見出し（アンカー）を変えないこと。変える場合は `spec/domains/*.domain.json` の `specRefs` も同じ PR で直す。
 
 **リポジトリに実体として残すもの**（キャッシュではない）: キャッシュを読み込む側の設定ファイルである。`AGENTS.md`、`.gemini/GEMINI.md`、`.claude/`・`.codex/`・`.agents/` のスキル、`.coderabbit.yaml`、参照表がこれにあたる。
 これらは内容を持たず、キャッシュへの参照だけを持つ薄いファイルにする。
