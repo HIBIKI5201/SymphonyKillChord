@@ -129,6 +129,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _indicatorOwner = enemyBattleState;
             _indicatorOwnerGeneration = enemyBattleState.BeginShellIndicator();
+            // 発射元が死亡したら、着弾前でも砲弾を消す。
+            enemyBattleState.OnShellsCanceled += Deactivate;
             _controller.Activate(enemyBattleState);
         }
 
@@ -161,13 +163,17 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private uint _indicatorOwnerGeneration;
 
         /// <summary>
-        ///     表示開始時の発射元へ一度だけ終了を通知する。
+        ///     表示開始時の発射元へ一度だけ終了を通知し、取り消し通知の購読を解除する。
         ///     再利用された敵の新しい世代には古い砲弾の終了を反映しない。
         /// </summary>
         private void ReleaseIndicatorOwner()
         {
             EnemyBattleState owner = _indicatorOwner;
             _indicatorOwner = null;
+            if (owner != null)
+            {
+                owner.OnShellsCanceled -= Deactivate;
+            }
             owner?.EndShellIndicator(_indicatorOwnerGeneration);
         }
 
