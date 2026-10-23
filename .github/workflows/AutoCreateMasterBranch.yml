@@ -106,7 +106,9 @@ jobs:
               });
               console.log("Created branch: " + target);
             } catch (e) {
-              if (e.status === 422) {
+              // 422 はブランチが既にある場合のほか、Ruleset に拒否された場合にも返る。
+              // 既にある場合だけ成功として扱い、それ以外は失敗させる。
+              if (e.status === 422 && /Reference already exists/i.test(e.message)) {
                 console.log("Branch already exists: " + target);
               } else {
                 throw e;

@@ -8,6 +8,8 @@ AGENTS.mdから参照する運用規則。現在のユーザー指示を優先�
 - ブランチを作成したら、編集・コミットの前に空のままプッシュ (`git push -u origin <ブランチ名>`) してリモートにブランチを作成し、その後で作業を開始する。
   - 先にプッシュしておくと、`AutoCreateMasterBranch.yml` が作業前の内容で `master` を生成する。これにより、下記の「作業ブランチと `master` が同一コミットになる」例外ケースを避けられる。
 - 同階層の `master` で直接編集・コミットしない。`master` の更新は作業ブランチからのセルフマージのみで行う。
+  - `feature/**/master` は Ruleset `master-review`（`pr-target` 必須）で保護されており、PR のマージ以外の書き込みは拒否される。`master` へ直接 push しない。
+  - `develop` の変更を `master` に取り込む（同期する）ときは、`develop` → `master` の PR を作ってマージする（`ValidatePRTarget.yml` が許可済み）。`gh pr update-branch` などの直接更新は拒否される。
 - `feature/` で始まる作業ブランチは、同じ階層の `master` ブランチへセルフマージしてよい。マージ可否・タイミングは自由に判断してよい。
 - `feature/` で始まらない作業ブランチは、Pull Request の作成先は常に `develop` とする。
 - 例: `feature/demo/just-judgement/agent` → `feature/demo/just-judgement/master`。
