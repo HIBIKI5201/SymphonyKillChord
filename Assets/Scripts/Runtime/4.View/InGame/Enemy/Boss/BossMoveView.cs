@@ -11,7 +11,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     ///     EnemyMoveView のボス専用複製。移動意思は BossAIController に委譲する。
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
-    public class BossMoveView : MonoBehaviour, IGameplayControllable
+    public class BossMoveView : MonoBehaviour, IEnemyMoveView, IGameplayControllable
     {
         /// <summary>
         ///     初期化処理。
