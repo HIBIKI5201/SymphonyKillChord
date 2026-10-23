@@ -128,6 +128,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         private SkillViewData BuildSkillViewData(SkillTemplate skillTemplate, bool isUnlocked, int level)
         {
             SkillDisplayText text = GetOrCreateText(skillTemplate, level);
+            skillTemplate.TryGetLevelUpCost(level, out int levelUpCost);
             return new SkillViewData(
                 skillTemplate.Id.Value,
                 skillTemplate.DisplayName,
@@ -139,6 +140,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
                 skillTemplate.Tips,
                 level,
                 skillTemplate.MaxLevel,
+                levelUpCost,
                 isUnlocked,
                 ResolveGenreIcon(skillTemplate),
                 ResolveGenreIds(skillTemplate),

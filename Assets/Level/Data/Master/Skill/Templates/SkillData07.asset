@@ -57,6 +57,7 @@ MonoBehaviour:
       _growthValue: 1.2
     - _growthType: 1
       _growthValue: 1.2
+  _levelUpCosts: 0100000001000000020000000200000003000000
   _skillType: 0100000002000000
   _level: 0
   _cooldownNumerator: 1

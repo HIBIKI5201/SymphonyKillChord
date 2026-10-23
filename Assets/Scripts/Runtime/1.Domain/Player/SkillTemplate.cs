@@ -47,7 +47,13 @@ namespace KillChord.Runtime.Domain.Player
         /// <summary> レベルアップ時の効果パラメータ成長設定一覧です。 </summary>
         public IReadOnlyList<SkillEffectParameterGrowth> EffectParameterGrowths { get; }
 
-        /// <summary> このスキルのレベル上限です。成長ステップが未設定の場合は既定値になります。 </summary>
+        /// <summary> レベルアップ1回ごとの改造Pのコスト一覧です。先頭が基準レベルから1つ上げるときのコストです。 </summary>
+        public IReadOnlyList<int> LevelUpCosts { get; }
+
+        /// <summary>
+        ///     このスキルのレベル上限です。
+        ///     <para> コスト一覧があれば「基準レベル＋コストの件数」、無ければ成長ステップの件数から決まり、どちらも無ければ既定値になります。 </para>
+        /// </summary>
         public int MaxLevel => ComputeMaxLevel();
 
         /// <summary> 再生するアニメーションキーです。 </summary>
@@ -64,6 +70,7 @@ namespace KillChord.Runtime.Domain.Player
         /// <param name="cooldownDenomimator"> クールダウン分母です。 </param>
         /// <param name="effectSpec"> 効果定義です。 </param>
         /// <param name="effectParameterGrowths"> レベルアップ時の効果パラメータ成長設定一覧です。未指定時は成長しません。 </param>
+        /// <param name="levelUpCosts"> レベルアップ1回ごとの改造Pのコスト一覧です。未指定時は1回あたり既定値です。 </param>
         /// <param name="animationKey"> アニメーションキーです。 </param>
         /// <param name="displayName"> スキルの表示名です </param>
         /// <param name="skillDetail"> スキルの詳細です </param>
@@ -79,6 +86,7 @@ namespace KillChord.Runtime.Domain.Player
             int cooldownDenomimator,
             SkillEffectSpec effectSpec,
             IReadOnlyList<SkillEffectParameterGrowth> effectParameterGrowths,
+            IReadOnlyList<int> levelUpCosts,
             string animationKey,
             string displayName,
             string skillDetail,
@@ -103,6 +111,7 @@ namespace KillChord.Runtime.Domain.Player
             Level = level;
             EffectSpec = effectSpec;
             EffectParameterGrowths = CopyEffectParameterGrowths(effectParameterGrowths);
+            LevelUpCosts = CopyLevelUpCosts(levelUpCosts);
             AnimationKey = animationKey;
             DisplayName = displayName;
             SkillDetail = skillDetail;
@@ -140,8 +149,36 @@ namespace KillChord.Runtime.Domain.Player
             return BuildScaledEffectSpec(currentLevel);
         }
 
+        /// <summary>
+        ///     現在レベルから1つ上げるときの改造Pのコストの取得を試みる。
+        /// </summary>
+        /// <param name="currentLevel"> 現在のスキルレベルです。 </param>
+        /// <param name="cost"> 取得したコストです。 </param>
+        /// <returns> レベル上限に達していない場合はtrue。 </returns>
+        public bool TryGetLevelUpCost(int currentLevel, out int cost)
+        {
+            if (currentLevel >= MaxLevel)
+            {
+                cost = 0;
+                return false;
+            }
+
+            if (LevelUpCosts.Count == 0)
+            {
+                cost = DEFAULT_LEVEL_UP_COST;
+                return true;
+            }
+
+            int index = Math.Max(0, currentLevel - Level.Value);
+            cost = LevelUpCosts[index];
+            return true;
+        }
+
         /// <summary> 成長ステップが未設定の場合に適用するレベル上限の既定値です。 </summary>
         private const int DEFAULT_MAX_LEVEL = 10;
+
+        /// <summary> コスト一覧が未設定の場合に適用する、レベルアップ1回あたりのコストです。 </summary>
+        private const int DEFAULT_LEVEL_UP_COST = 1;
 
         /// <summary>
         ///     現在レベルに応じて効果パラメータを成長させた効果定義を構築する。
@@ -222,11 +259,16 @@ namespace KillChord.Runtime.Domain.Player
         }
 
         /// <summary>
-        ///     成長ステップの最大件数からこのスキルのレベル上限を算出する。
+        ///     コスト一覧の件数、または成長ステップの最大件数からこのスキルのレベル上限を算出する。
         /// </summary>
-        /// <returns> レベル上限です。成長ステップが1件も無ければ既定値を返します。 </returns>
+        /// <returns> レベル上限です。コスト一覧も成長ステップも無ければ既定値を返します。 </returns>
         private int ComputeMaxLevel()
         {
+            if (LevelUpCosts.Count > 0)
+            {
+                return Level.Value + LevelUpCosts.Count;
+            }
+
             int maxStepCount = 0;
             for (int i = 0; i < EffectParameterGrowths.Count; i++)
             {
@@ -238,6 +280,33 @@ namespace KillChord.Runtime.Domain.Player
             }
 
             return maxStepCount > 0 ? Level.Value + maxStepCount : DEFAULT_MAX_LEVEL;
+        }
+
+        /// <summary>
+        ///     レベルアップのコスト一覧を複製し、負の値が無いことを検証する。
+        /// </summary>
+        /// <param name="levelUpCosts"> 複製元です。 </param>
+        /// <returns> 複製した配列です。 </returns>
+        /// <exception cref="ArgumentException"></exception>
+        private static int[] CopyLevelUpCosts(IReadOnlyList<int> levelUpCosts)
+        {
+            if (levelUpCosts == null || levelUpCosts.Count == 0)
+            {
+                return Array.Empty<int>();
+            }
+
+            int[] result = new int[levelUpCosts.Count];
+            for (int i = 0; i < levelUpCosts.Count; i++)
+            {
+                if (levelUpCosts[i] < 0)
+                {
+                    throw new ArgumentException("レベルアップのコストは0未満では設定できません。");
+                }
+
+                result[i] = levelUpCosts[i];
+            }
+
+            return result;
         }
 
         /// <summary>
