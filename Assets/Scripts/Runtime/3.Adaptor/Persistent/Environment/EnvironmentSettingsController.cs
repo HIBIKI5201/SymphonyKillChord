@@ -206,9 +206,9 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         }
 
         /// <summary>
-        ///     すべての環境設定を既定値へ戻す。プレビュー適用のみ行い、保存はしない。
+        ///     環境設定パネルの項目を既定値へ戻す。表示言語は戻さない。プレビュー適用のみ行い、保存はしない。
         /// </summary>
-        public void ResetToDefaults()
+        public void ResetEnvironmentToDefaults()
         {
             // 初回起動時と同じ既定値（画質はプラットフォーム別、解像度はモニタ解像度）を使う。
             EnvironmentSettingsData defaults = _environmentSettingsService.CreateDefaultSettings();
@@ -218,14 +218,22 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
                 defaults.IsFullScreen);
             _workingSettings.SetQualityLevel(defaults.QualityLevel);
             _workingSettings.SetBrightness(defaults.Brightness);
-            _workingSettings.SetLanguage(defaults.Language);
             _workingSettings.SetVibrationStrength(defaults.VibrationStrength);
             _workingSettings.SetRhythmOffsetSeconds(defaults.RhythmOffsetSeconds);
+            ApplyToDevice(_workingSettings);
+            _environmentSettingsPresenter.Push(_workingSettings);
+        }
+
+        /// <summary>
+        ///     操作設定パネルの項目を既定値へ戻す。プレビュー適用のみ行い、保存はしない。
+        /// </summary>
+        public void ResetControlToDefaults()
+        {
+            EnvironmentSettingsData defaults = _environmentSettingsService.CreateDefaultSettings();
             _workingSettings.SetCameraSensitivity(defaults.CameraSensitivity);
             _workingSettings.SetCameraInvertMode(defaults.CameraInvertMode);
             _workingSettings.SetAutoLockOnEnabled(defaults.IsAutoLockOnEnabled);
             _workingSettings.SetJapaneseButtonLayout(defaults.IsJapaneseButtonLayout);
-            ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }
 

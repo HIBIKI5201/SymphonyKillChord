@@ -47,6 +47,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _vibrationNextButton = Require<Button>(rootElement, VIBRATION_NEXT_BUTTON_NAME);
             _rhythmOffsetSlider = Require<SliderInt>(rootElement, RHYTHM_OFFSET_SLIDER_NAME);
             _environmentPanelSaveButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_SAVE_BUTTON_NAME);
+            _environmentPanelResetButton = Require<Button>(rootElement, ENVIRONMENT_PANEL_RESET_BUTTON_NAME);
             _controlPanel = Require<VisualElement>(rootElement, CONTROL_PANEL_NAME);
             _controlPanelBackButton = Require<Button>(rootElement, CONTROL_PANEL_BACK_BUTTON_NAME);
             _cameraSensitivitySlider = Require<SliderInt>(rootElement, CAMERA_SENSITIVITY_SLIDER_NAME);
@@ -55,6 +56,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _autoLockOnPrevButton = Require<Button>(rootElement, AUTO_LOCK_ON_PREV_BUTTON_NAME);
             _autoLockOnNextButton = Require<Button>(rootElement, AUTO_LOCK_ON_NEXT_BUTTON_NAME);
             _controlPanelSaveButton = Require<Button>(rootElement, CONTROL_PANEL_SAVE_BUTTON_NAME);
+            _controlPanelResetButton = Require<Button>(rootElement, CONTROL_PANEL_RESET_BUTTON_NAME);
             _buttonLayoutPrevButton = Require<Button>(rootElement, BUTTON_LAYOUT_PREV_BUTTON_NAME);
             _buttonLayoutNextButton = Require<Button>(rootElement, BUTTON_LAYOUT_NEXT_BUTTON_NAME);
             // メニューを第1階層、オーディオ設定・環境設定・操作設定を第2階層とする操作範囲を登録する。
@@ -93,6 +95,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _vibrationPrevButton,
                     _vibrationNextButton,
                     _rhythmOffsetSlider,
+                    _environmentPanelResetButton,
                     _environmentPanelSaveButton,
                     _environmentPanelBackButton,
                 },
@@ -108,6 +111,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _autoLockOnNextButton,
                     _buttonLayoutPrevButton,
                     _buttonLayoutNextButton,
+                    _controlPanelResetButton,
                     _controlPanelSaveButton,
                     _controlPanelBackButton,
                 },
@@ -203,6 +207,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string CONTROL_PANEL_NAME = "ControlPanel";
         private const string CONTROL_PANEL_BACK_BUTTON_NAME = "ControlPanelBackButton";
         private const string CONTROL_PANEL_SAVE_BUTTON_NAME = "ControlPanelSaveButton";
+        private const string CONTROL_PANEL_RESET_BUTTON_NAME = "ControlPanelResetButton";
         private const string CAMERA_SENSITIVITY_SLIDER_NAME = "CameraSensitivitySlider";
         private const string CAMERA_INVERT_PREV_BUTTON_NAME = "CameraInvertPrevButton";
         private const string CAMERA_INVERT_NEXT_BUTTON_NAME = "CameraInvertNextButton";
@@ -235,6 +240,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string VIBRATION_NEXT_BUTTON_NAME = "VibrationNextButton";
         private const string RHYTHM_OFFSET_SLIDER_NAME = "RhythmOffsetSlider";
         private const string ENVIRONMENT_PANEL_SAVE_BUTTON_NAME = "EnvironmentPanelSaveButton";
+        private const string ENVIRONMENT_PANEL_RESET_BUTTON_NAME = "EnvironmentPanelResetButton";
         private const string UI_COMMON_TABLE = "UICommon";
 
         private readonly VisualElement _backGround;
@@ -266,6 +272,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _vibrationNextButton;
         private readonly SliderInt _rhythmOffsetSlider;
         private readonly Button _environmentPanelSaveButton;
+        private readonly Button _environmentPanelResetButton;
         private readonly Button _controlSettingButton;
         private readonly VisualElement _controlPanel;
         private readonly Button _controlPanelBackButton;
@@ -275,6 +282,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly Button _autoLockOnPrevButton;
         private readonly Button _autoLockOnNextButton;
         private readonly Button _controlPanelSaveButton;
+        private readonly Button _controlPanelResetButton;
         private readonly Button _buttonLayoutPrevButton;
         private readonly Button _buttonLayoutNextButton;
         private readonly HierarchicalNavigationScope _navigationScope;
