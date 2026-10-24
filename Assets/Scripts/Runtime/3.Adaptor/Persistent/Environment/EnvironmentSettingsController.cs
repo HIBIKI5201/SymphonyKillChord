@@ -210,19 +210,21 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         /// </summary>
         public void ResetToDefaults()
         {
+            // 初回起動時と同じ既定値（画質はプラットフォーム別、解像度はモニタ解像度）を使う。
+            EnvironmentSettingsData defaults = _environmentSettingsService.CreateDefaultSettings();
             _workingSettings.SetResolution(
-                EnvironmentSettingsData.DEFAULT_RESOLUTION_WIDTH,
-                EnvironmentSettingsData.DEFAULT_RESOLUTION_HEIGHT,
-                EnvironmentSettingsData.DEFAULT_IS_FULL_SCREEN);
-            _workingSettings.SetQualityLevel(EnvironmentSettingsData.DEFAULT_QUALITY_LEVEL);
-            _workingSettings.SetBrightness(EnvironmentSettingsData.DEFAULT_BRIGHTNESS);
-            _workingSettings.SetLanguage(EnvironmentSettingsData.DEFAULT_LANGUAGE);
-            _workingSettings.SetVibrationStrength(EnvironmentSettingsData.DEFAULT_VIBRATION_STRENGTH);
-            _workingSettings.SetRhythmOffsetSeconds(EnvironmentSettingsData.DEFAULT_RHYTHM_OFFSET_SECONDS);
-            _workingSettings.SetCameraSensitivity(EnvironmentSettingsData.DEFAULT_CAMERA_SENSITIVITY);
-            _workingSettings.SetCameraInvertMode(EnvironmentSettingsData.DEFAULT_CAMERA_INVERT_MODE);
-            _workingSettings.SetAutoLockOnEnabled(EnvironmentSettingsData.DEFAULT_IS_AUTO_LOCK_ON_ENABLED);
-            _workingSettings.SetJapaneseButtonLayout(EnvironmentSettingsData.DEFAULT_IS_JAPANESE_BUTTON_LAYOUT);
+                defaults.ResolutionWidth,
+                defaults.ResolutionHeight,
+                defaults.IsFullScreen);
+            _workingSettings.SetQualityLevel(defaults.QualityLevel);
+            _workingSettings.SetBrightness(defaults.Brightness);
+            _workingSettings.SetLanguage(defaults.Language);
+            _workingSettings.SetVibrationStrength(defaults.VibrationStrength);
+            _workingSettings.SetRhythmOffsetSeconds(defaults.RhythmOffsetSeconds);
+            _workingSettings.SetCameraSensitivity(defaults.CameraSensitivity);
+            _workingSettings.SetCameraInvertMode(defaults.CameraInvertMode);
+            _workingSettings.SetAutoLockOnEnabled(defaults.IsAutoLockOnEnabled);
+            _workingSettings.SetJapaneseButtonLayout(defaults.IsJapaneseButtonLayout);
             ApplyToDevice(_workingSettings);
             _environmentSettingsPresenter.Push(_workingSettings);
         }
