@@ -33,6 +33,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <param name="targetAreaQuery"> 扇形範囲クエリです。 </param>
         /// <param name="playerTransform"> 判定の原点となるプレイヤーTransformです。 </param>
         /// <param name="pendingAttackEffectService"> 攻撃の多段ヒットを管理するサービスです。 </param>
+        /// <param name="attackOcclusion"> 攻撃が障害物に遮られるかを判定するViewModelです。 </param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
             PlayerAttackPresenter attackPresenter,
@@ -46,6 +47,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             TargetAreaQuery targetAreaQuery,
             Transform playerTransform,
             PendingAttackEffectService pendingAttackEffectService,
+            IAttackOcclusionViewModel attackOcclusion,
             float attackRotationSpeed,
             float attackCooldown
         )
@@ -62,6 +64,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             _targetAreaQuery = targetAreaQuery;
             _playerTransform = playerTransform;
             _pendingAttackEffectService = pendingAttackEffectService ?? throw new ArgumentNullException(nameof(pendingAttackEffectService));
+            _attackOcclusion = attackOcclusion ?? throw new ArgumentNullException(nameof(attackOcclusion));
             AttackRotationSpeed = attackRotationSpeed;
 
             _attackCooldown = attackCooldown * (60d / musicSyncState.Bpm);
@@ -279,6 +282,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary>
         ///     命中対象へ1ヒット分のダメージを適用する。
         ///     単体攻撃の場合は生存している最も近い1体のみを対象とする。
+        ///     障害物の裏にいる対象には当たらない。ロックオンは外さず、弾だけが遮られる。
         /// </summary>
         /// <param name="attackDefinition"> 攻撃定義。 </param>
         /// <param name="pendingHitEffects"> 保留中の多段ヒットのエフェクト。 </param>
@@ -291,11 +295,19 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         {
             _attackTargets.Clear();
 
+            // 遮蔽はヒットごとに確かめる。多段ヒットの途中で対象が障害物の裏へ入ったら、その後のヒットは当たらない。
+            Vector3 origin = _playerTransform.position;
+
             // 一覧は水平距離の昇順。多段ヒットの途中で対象が倒れた場合は次に近い対象へ移る。
             for (int i = 0; i < _hitTargets.Count; i++)
             {
                 TargetAreaHit hit = _hitTargets[i];
                 if (!IsHitTargetAlive(hit))
+                {
+                    continue;
+                }
+
+                if (_attackOcclusion.IsOccluded(origin, hit.Target.Position))
                 {
                     continue;
                 }
@@ -433,6 +445,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly TargetAreaQuery _targetAreaQuery;
         private readonly Transform _playerTransform;
         private readonly PendingAttackEffectService _pendingAttackEffectService;
+        private readonly IAttackOcclusionViewModel _attackOcclusion;
         private readonly List<TargetAreaHit> _hitTargets = new List<TargetAreaHit>();
         private readonly List<AttackTarget> _attackTargets = new List<AttackTarget>();
         private readonly List<AttackResult> _hitResults = new List<AttackResult>();
