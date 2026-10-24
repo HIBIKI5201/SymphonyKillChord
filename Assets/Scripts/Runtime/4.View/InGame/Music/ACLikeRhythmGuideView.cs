@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.PostEffect;
 using KillChord.Runtime.View.InGame.Sequence;
+using KillChord.Runtime.View.Persistent.Music;
 using LitMotion;
 using LitMotion.Extensions;
 using System;
@@ -102,12 +103,18 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
-        ///     ジャストが成立した拍のジャスト位置の枠線を白から金へ光らせ、帯を一瞬広げる。
-        ///     判定ゾーンの色とは別の色と形の変化で、成立したことを伝える。
+        ///     ジャスト成立専用のSEを鳴らし、成立した拍のジャスト位置の枠線を白から金へ光らせて帯を一瞬広げる。
+        ///     判定ゾーンの色とは別の色と形の変化、および音で、成立したことを伝える。
         /// </summary>
         /// <param name="beatCount"> 入力時に確定した攻撃の拍種の整数値。 </param>
         public void PlayJustHitFeedback(int beatCount)
         {
+            // 音は命中の有無や枠線の有無に関係なく、視覚と独立に鳴らす。
+            if (_justHitSoundSource != null)
+            {
+                _justHitSoundSource.Play();
+            }
+
             int zoneIndex = Array.IndexOf(_zoneBeatCounts, beatCount);
             if (_effectConfig == null || zoneIndex < 0 || Array.IndexOf(_justOutlineZoneIndices, zoneIndex) < 0)
             {
@@ -517,6 +524,9 @@ namespace KillChord.Runtime.View.InGame.Music
 
         [SerializeField, Tooltip("ジャストタイミング演出の設定。")]
         private ACLikeRhythmGuideEffectConfig _effectConfig;
+
+        [SerializeField, Tooltip("ジャスト成立時に鳴らす専用SEのSource。未設定ならSEは鳴らさない。クリティカルのSEとは別のキューを設定する。")]
+        private SoundEffectSource _justHitSoundSource;
 
         [Tooltip("ビートの色。判定ゾーンの順番に対応します。")]
         [SerializeField] private Color[] _beatColor;

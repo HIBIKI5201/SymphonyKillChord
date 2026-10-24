@@ -6,7 +6,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
     public interface IRhythmGuideJustHitFeedbackViewModel
     {
         /// <summary>
-        ///     ジャストが成立した拍のジャスト位置をフラッシュさせる。
+        ///     ジャスト成立専用のSEを鳴らし、成立した拍のジャスト位置をフラッシュさせる。
         /// </summary>
         /// <param name="beatCount"> 入力時に確定した攻撃の拍種の整数値。 </param>
         void PlayJustHitFeedback(int beatCount);
