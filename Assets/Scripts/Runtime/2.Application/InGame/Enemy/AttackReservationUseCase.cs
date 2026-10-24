@@ -30,6 +30,12 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// <summary> 予約が存在するか。 </summary>
         public bool HasReservation => _hasReservation;
 
+        /// <summary>
+        ///     予約中の攻撃の予兆（2拍前・1拍前の通知）が始まったか。
+        ///     予約が無い場合は false。
+        /// </summary>
+        public bool HasWarningStarted => _hasReservation && _hasWarningStarted;
+
         /// <summary> 予約中の攻撃時刻（音源再生時間・秒）。予約が無い場合は無効。 </summary>
         public double AttackExecutionTime { get; private set; }
 
@@ -42,6 +48,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         {
             CancellationToken token = _cancellationSource.Renew();
             _hasReservation = true;
+            _hasWarningStarted = false;
 
             // 攻撃の絶対時刻を保持し、演出側が残り時間から進捗を算出できるようにする。
             AttackExecutionTime = _musicActionScheduler.Schedule(
@@ -61,6 +68,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         {
             _cancellationSource.Cancel();
             _hasReservation = false;
+            _hasWarningStarted = false;
         }
 
         /// <summary>
@@ -87,6 +95,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         private readonly IMusicActionScheduler _musicActionScheduler;
         private readonly ReservationCancellationSource _cancellationSource = new ReservationCancellationSource();
         private bool _hasReservation;
+        private bool _hasWarningStarted;
 
         /// <summary>
         ///     予約した拍に到達したとき、予約状態を解除して通知する。
@@ -94,6 +103,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         private void HandleReservedTimingReached()
         {
             _hasReservation = false;
+            _hasWarningStarted = false;
             OnReservedTimingReached?.Invoke();
         }
 
@@ -102,6 +112,7 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         private void Handle2BeatBefore()
         {
+            _hasWarningStarted = true;
             On2BeatBefore?.Invoke();
         }
 
@@ -110,6 +121,8 @@ namespace KillChord.Runtime.Application.InGame.Enemy
         /// </summary>
         private void Handle1BeatBefore()
         {
+            // 2拍前の予告を予約できなかった場合も、1拍前から予兆の後として扱う。
+            _hasWarningStarted = true;
             On1BeatBefore?.Invoke();
         }
     }
