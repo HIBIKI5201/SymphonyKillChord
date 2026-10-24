@@ -220,7 +220,8 @@ namespace KillChord.Runtime.Domain.InGame.Character
         /// <inheritdoc />
         public void AddBarrier(float amount)
         {
-            _barrierEntity.Add(amount);
+            // バリアの上限は最大HPと同じ量にする。
+            _barrierEntity.Add(amount, _health.MaxHealth.Value);
         }
 
         /// <inheritdoc />
