@@ -13,7 +13,8 @@ namespace KillChord.Runtime.View.InGame.Music
     /// <summary>
     ///     AC風リズムガイドのビート表示と判定ゾーンを描画するViewです。
     /// </summary>
-    public sealed class ACLikeRhythmGuideView : MonoBehaviour, IGameplayControllable, IRhythmGuideBeatViewModel, IRhythmGuideTargetFeedbackViewModel
+    public sealed class ACLikeRhythmGuideView : MonoBehaviour, IGameplayControllable, IRhythmGuideBeatViewModel, IRhythmGuideTargetFeedbackViewModel,
+        IRhythmGuideJustHitFeedbackViewModel
     {
         /// <summary> ガイド表示の更新タイミングを通知します。 </summary>
         public event Action OnUpdate;
@@ -97,6 +98,43 @@ namespace KillChord.Runtime.View.InGame.Music
             }
 
             _targetBeatFrameMotion = sequence.Run(
+                motion => motion.WithScheduler(MotionScheduler.UpdateIgnoreTimeScale));
+        }
+
+        /// <summary>
+        ///     ジャストが成立した拍のジャスト位置の枠線を白から金へ光らせ、帯を一瞬広げる。
+        ///     判定ゾーンの色とは別の色と形の変化で、成立したことを伝える。
+        /// </summary>
+        /// <param name="beatCount"> 入力時に確定した攻撃の拍種の整数値。 </param>
+        public void PlayJustHitFeedback(int beatCount)
+        {
+            int zoneIndex = Array.IndexOf(_zoneBeatCounts, beatCount);
+            if (_effectConfig == null || zoneIndex < 0 || Array.IndexOf(_justOutlineZoneIndices, zoneIndex) < 0)
+            {
+                // 枠線が無い拍では動かす対象が無いため、何もしない。
+                return;
+            }
+
+            // 前回の演出を止め、枠線の色と帯の大きさを通常へ戻してから始める。
+            _justHitFlashMotion.TryCancel();
+            ResetJustHitFlash();
+
+            float flashDuration = Mathf.Max(MIN_JUST_HIT_FLASH_DURATION, _effectConfig.JustHitFlashDuration);
+            float returnDuration = Mathf.Max(MIN_JUST_HIT_FLASH_DURATION, _effectConfig.JustHitFlashReturnDuration);
+            Vector3 flashScale = Vector3.one * Mathf.Max(1f, _effectConfig.JustHitFlashScale);
+            Color startColor = _effectConfig.JustHitFlashStartColor;
+            Color endColor = _effectConfig.JustHitFlashEndColor;
+            Color outlineColor = GetJustOutlineColor(zoneIndex);
+
+            // 白から金へ移りながら帯を広げ、その後で通常の枠線色と大きさへ戻す。
+            MotionSequenceBuilder sequence = LSequence.Create();
+            AddJustHitFlashStep(
+                sequence, zoneIndex, startColor, endColor, Vector3.one, flashScale, flashDuration, Ease.OutQuad, false);
+            AddJustHitFlashStep(
+                sequence, zoneIndex, endColor, outlineColor, flashScale, Vector3.one, returnDuration, Ease.InQuad, true);
+
+            // ジャストのスロー演出中も同じ長さで見せるため、時間の倍率を無視する。
+            _justHitFlashMotion = sequence.Run(
                 motion => motion.WithScheduler(MotionScheduler.UpdateIgnoreTimeScale));
         }
 
@@ -192,6 +230,9 @@ namespace KillChord.Runtime.View.InGame.Music
             {
                 return;
             }
+
+            // 成立演出の色の書き込みと競合しないよう、先に終わらせる。
+            _justHitFlashMotion.TryComplete();
 
             for (int i = 0; i < _justOutlineImages.Length; i++)
             {
@@ -451,6 +492,9 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャスト位置の枠線の最小の太さ。 </summary>
         private const float MIN_OUTLINE_THICKNESS = 0.1f;
 
+        /// <summary> ジャスト成立時の枠線フラッシュの各段の最短時間（秒）。 </summary>
+        private const float MIN_JUST_HIT_FLASH_DURATION = 0.01f;
+
         /// <summary> チュートリアル対象枠の線幅。 </summary>
         private const float TARGET_BEAT_FRAME_THICKNESS = 2f;
 
@@ -528,6 +572,9 @@ namespace KillChord.Runtime.View.InGame.Music
         private int[] _blockSectionIndices = Array.Empty<int>();
         private Image[] _justOutlineImages = Array.Empty<Image>();
         private int[] _justOutlineZoneIndices = Array.Empty<int>();
+        private RectTransform[] _justBandRectTransforms = Array.Empty<RectTransform>();
+        private int[] _justBandZoneIndices = Array.Empty<int>();
+        private MotionHandle _justHitFlashMotion;
         private MotionHandle[] _handles;
         private RectTransform[] _targetBeatFrames = Array.Empty<RectTransform>();
         private MotionHandle _targetBeatFrameMotion;
@@ -581,6 +628,7 @@ namespace KillChord.Runtime.View.InGame.Music
             OnLayoutChanged = null;
 
             ClearTargetBeatFrames();
+            _justHitFlashMotion.TryCancel();
             if (_handles != null)
             {
                 for (int i = 0; i < _handles.Length; i++)
@@ -671,9 +719,12 @@ namespace KillChord.Runtime.View.InGame.Music
                 }
             }
 
-            // 枠線はブロックの子のため、ブロックの破棄に付随して消える。参照だけを捨てる。
+            // 枠線と帯はブロックの子のため、ブロックの破棄に付随して消える。参照だけを捨てる。
+            _justHitFlashMotion.TryCancel();
             _justOutlineImages = Array.Empty<Image>();
             _justOutlineZoneIndices = Array.Empty<int>();
+            _justBandRectTransforms = Array.Empty<RectTransform>();
+            _justBandZoneIndices = Array.Empty<int>();
 
             if (_leftBeatRectTransforms != null)
             {
@@ -769,6 +820,8 @@ namespace KillChord.Runtime.View.InGame.Music
             {
                 _justOutlineImages = Array.Empty<Image>();
                 _justOutlineZoneIndices = Array.Empty<int>();
+                _justBandRectTransforms = Array.Empty<RectTransform>();
+                _justBandZoneIndices = Array.Empty<int>();
                 return;
             }
 
@@ -776,8 +829,12 @@ namespace KillChord.Runtime.View.InGame.Music
             int lineCount = _zoneBeatCounts.Length * OUTLINE_LINE_COUNT * 2;
             _justOutlineImages = new Image[lineCount];
             _justOutlineZoneIndices = new int[lineCount];
+            int bandCount = _zoneBeatCounts.Length * 2;
+            _justBandRectTransforms = new RectTransform[bandCount];
+            _justBandZoneIndices = new int[bandCount];
 
             int writeIndex = 0;
+            int bandWriteIndex = 0;
             for (int i = 0; i < _zoneBeatCounts.Length; i++)
             {
                 // 共通判定定義のジャスト範囲の中央が乗るブロックを枠線の対象にする。
@@ -801,6 +858,14 @@ namespace KillChord.Runtime.View.InGame.Music
                     _rightBeatRectTransforms[blockIndex], $"JustBand_Right_{i}", 0f, centerOffset, bandWidth);
                 writeIndex = CreateJustOutline(leftBand, $"JustOutline_Left_{i}", zoneIndex, writeIndex);
                 writeIndex = CreateJustOutline(rightBand, $"JustOutline_Right_{i}", zoneIndex, writeIndex);
+
+                // 成立演出で帯ごと広げるため、ゾーンと対応付けて控える。
+                _justBandRectTransforms[bandWriteIndex] = leftBand;
+                _justBandZoneIndices[bandWriteIndex] = zoneIndex;
+                bandWriteIndex++;
+                _justBandRectTransforms[bandWriteIndex] = rightBand;
+                _justBandZoneIndices[bandWriteIndex] = zoneIndex;
+                bandWriteIndex++;
             }
 
             // ブロック番号を解決できず生成を飛ばした分の空きを詰める。
@@ -808,6 +873,96 @@ namespace KillChord.Runtime.View.InGame.Music
             {
                 Array.Resize(ref _justOutlineImages, writeIndex);
                 Array.Resize(ref _justOutlineZoneIndices, writeIndex);
+            }
+            if (bandWriteIndex < bandCount)
+            {
+                Array.Resize(ref _justBandRectTransforms, bandWriteIndex);
+                Array.Resize(ref _justBandZoneIndices, bandWriteIndex);
+            }
+        }
+
+        /// <summary>
+        ///     ジャスト成立演出の1段分として、指定ゾーンの枠線の色と帯の大きさを同時に動かすモーションを加える。
+        /// </summary>
+        /// <param name="sequence"> モーションを加えるシーケンス。 </param>
+        /// <param name="zoneIndex"> 対象の判定ゾーンのインデックス。 </param>
+        /// <param name="fromColor"> 枠線の開始色。 </param>
+        /// <param name="toColor"> 枠線の終了色。 </param>
+        /// <param name="fromScale"> 帯の開始倍率。 </param>
+        /// <param name="toScale"> 帯の終了倍率。 </param>
+        /// <param name="duration"> この段の時間（秒）。 </param>
+        /// <param name="ease"> この段のイージング。 </param>
+        /// <param name="isAfterPreviousStep"> 前の段が終わってから始める場合はtrue。 </param>
+        private void AddJustHitFlashStep(
+            MotionSequenceBuilder sequence,
+            int zoneIndex,
+            Color fromColor,
+            Color toColor,
+            Vector3 fromScale,
+            Vector3 toScale,
+            float duration,
+            Ease ease,
+            bool isAfterPreviousStep)
+        {
+            // 段の最初の1本だけAppendで前の段の後ろへつなぎ、残りはJoinで同時に動かす。
+            bool needsAppend = isAfterPreviousStep;
+            for (int i = 0; i < _justOutlineImages.Length; i++)
+            {
+                if (_justOutlineZoneIndices[i] != zoneIndex || _justOutlineImages[i] == null)
+                {
+                    continue;
+                }
+
+                MotionHandle colorMotion = LMotion.Create(fromColor, toColor, duration)
+                    .WithEase(ease)
+                    .BindToColor(_justOutlineImages[i]);
+                AddToStep(sequence, colorMotion, ref needsAppend);
+            }
+
+            for (int i = 0; i < _justBandRectTransforms.Length; i++)
+            {
+                if (_justBandZoneIndices[i] != zoneIndex || _justBandRectTransforms[i] == null)
+                {
+                    continue;
+                }
+
+                MotionHandle scaleMotion = LMotion.Create(fromScale, toScale, duration)
+                    .WithEase(ease)
+                    .BindToLocalScale(_justBandRectTransforms[i]);
+                AddToStep(sequence, scaleMotion, ref needsAppend);
+            }
+        }
+
+        /// <summary>
+        ///     段の最初のモーションだけAppendし、以降はJoinでシーケンスへ加える。
+        /// </summary>
+        /// <param name="sequence"> モーションを加えるシーケンス。 </param>
+        /// <param name="motion"> 加えるモーション。 </param>
+        /// <param name="needsAppend"> Appendで加える必要がある場合はtrue。加えた後はfalseにする。 </param>
+        private static void AddToStep(MotionSequenceBuilder sequence, MotionHandle motion, ref bool needsAppend)
+        {
+            if (needsAppend)
+            {
+                sequence.Append(motion);
+                needsAppend = false;
+                return;
+            }
+
+            sequence.Join(motion);
+        }
+
+        /// <summary>
+        ///     ジャスト成立演出で変えた枠線の色と帯の大きさを通常へ戻す。
+        /// </summary>
+        private void ResetJustHitFlash()
+        {
+            UpdateJustOutlineColors();
+            for (int i = 0; i < _justBandRectTransforms.Length; i++)
+            {
+                if (_justBandRectTransforms[i] != null)
+                {
+                    _justBandRectTransforms[i].localScale = Vector3.one;
+                }
             }
         }
 

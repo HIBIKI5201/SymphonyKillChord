@@ -174,6 +174,12 @@ namespace KillChord.Runtime.Composition.InGame.UI
                     selectedBattleStageState, missionRuntimeServiceProvider.Invoke()),
                 _rhythmGuideView);
 
+            // ジャスト成立時の枠線フラッシュ。判定ゾーンの色と分けて、成立したことだけを伝える。
+            _justHitFeedbackPresenter?.Dispose();
+            _justHitFeedbackPresenter = new RhythmGuideJustHitFeedbackPresenter(
+                playerAttackSignal,
+                _rhythmGuideView);
+
             // ゲームパッド振動は演出用途のoptional機能のため、Configが未ロードでもモジュール自体は成功させ、
             // 振動関連の生成のみスキップする。
             if (_loadedHapticsConfig == null)
@@ -221,6 +227,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
             _postEffectPresenter = null;
             _targetFeedbackPresenter?.Dispose();
             _targetFeedbackPresenter = null;
+            _justHitFeedbackPresenter?.Dispose();
+            _justHitFeedbackPresenter = null;
             _gamepadHapticsPresenter?.Dispose();
             _gamepadHapticsPresenter = null;
             ReleaseLoadedHapticsConfig();
@@ -247,6 +255,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private ACLikeRhythmGuideViewModel _rhythmGuideViewModel;
         private RhythmGuidePostEffectPresenter _postEffectPresenter;
         private RhythmGuideTargetFeedbackPresenter _targetFeedbackPresenter;
+        private RhythmGuideJustHitFeedbackPresenter _justHitFeedbackPresenter;
         private GamepadHapticsPresenter _gamepadHapticsPresenter;
         private GamepadHapticsView _gamepadHapticsView;
         private GamepadHapticsConfig _loadedHapticsConfig;

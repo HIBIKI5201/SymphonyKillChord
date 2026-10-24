@@ -89,7 +89,7 @@ namespace KillChord.Runtime.View.InGame.Player
         [SerializeField, Tooltip("回避SE用Source。")]
         private SoundEffectSource _dodgeSoundSource;
 
-        [SerializeField, Tooltip("Critical SE用Source。")]
+        [SerializeField, Tooltip("ジャスト成立の攻撃が当たった時のSE（SE_Hit_Critical）用Source。")]
         private SoundEffectSource _criticalSoundSource;
 
         [SerializeField, Tooltip("敵への通常Hit時のSE用Source。")]
@@ -876,7 +876,8 @@ namespace KillChord.Runtime.View.InGame.Player
 
         /// <summary>
         ///     プレイヤーの攻撃が敵に命中した際のHit SEを再生します。
-        ///     Criticalヒットの場合はCritical用SE、それ以外は通常Hit用SEを再生します。
+        ///     ジャスト成立の攻撃はジャスト用SE（SE_Hit_Critical）、それ以外は通常Hit用SEを再生します。
+        ///     ジャストを音だけでも聞き分けられるよう、確率で起きるクリティカルではなくジャスト成否で選びます。
         ///     射程外ヒットなどダメージが0の場合は「当たったが効いていない」表示のみのため再生しません。
         ///     EOnTakeDamageは被弾者を問わず発火するため、プレイヤー自身が被弾した通知は無視する。
         ///     また、AoEや継続ダメージで同一フレーム内に複数回発火しても、Hit SEは1フレームにつき1回だけ再生する。
@@ -900,7 +901,7 @@ namespace KillChord.Runtime.View.InGame.Player
             }
             _lastHitSoundFrame = Time.frameCount;
 
-            if (e.Critical)
+            if (e.IsJustHit)
             {
                 PlaySound(_criticalSoundSource, null);
             }
