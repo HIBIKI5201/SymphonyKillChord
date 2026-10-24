@@ -11,6 +11,7 @@ class HarnessValidationTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         for relative in set(LIMITS) | set(LINKED):
             self.write(relative, "short document")
+        self.write("CLAUDE.md", "@AGENTS.md\n")
         self.skill(".agents", "shared")
         self.skill(".agents", "skc-feature-flow")
 
@@ -53,6 +54,10 @@ class HarnessValidationTests(unittest.TestCase):
     def test_missing_entrypoint_is_rejected(self):
         (self.root / "AGENTS.md").unlink()
         self.assertTrue(any("missing entrypoint" in e for e in validate(self.root)[1]))
+
+    def test_claude_entry_without_agents_import_is_rejected(self):
+        self.write("CLAUDE.md", "AGENTS.md を読む")
+        self.assertTrue(any("must import AGENTS.md" in e for e in validate(self.root)[1]))
 
     def test_malformed_skill_is_rejected(self):
         self.write(".agents/skills/shared/SKILL.md", "no metadata")
