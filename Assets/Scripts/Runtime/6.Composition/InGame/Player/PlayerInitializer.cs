@@ -58,6 +58,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <summary> 実行順です。 </summary>
         public override int Order => 500;
 
+        /// <summary> 攻撃を遮るレイヤーの既定値。Obstacle（レイヤー6）です。 </summary>
+        private const int DEFAULT_ATTACK_OBSTACLE_LAYERS = 1 << 6;
+        /// <summary> 攻撃の遮蔽判定でレイを通す高さの既定値（メートル）。腰の高さに合わせています。 </summary>
+        private const float DEFAULT_ATTACK_OCCLUSION_RAY_HEIGHT = 1f;
+
         [SerializeField, Tooltip("プレイヤー移動設定です。")]
         private PlayerMoveSpecAsset _playerConfig;
         [SerializeField, Tooltip("プレイヤーViewプレハブです。")]
@@ -77,6 +82,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private string _mobileStickFlickInputConfigKey;
         [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
         private ReusableParticleSystemView _damageEffectView;
+        [SerializeField, Tooltip("プレイヤーの攻撃を遮る障害物のレイヤーです。")]
+        private LayerMask _attackObstacleLayers = DEFAULT_ATTACK_OBSTACLE_LAYERS;
+        [SerializeField, Tooltip("攻撃の遮蔽判定で、プレイヤーと敵の足元からレイを通す高さ（メートル）です。"), Min(0f)]
+        private float _attackOcclusionRayHeight = DEFAULT_ATTACK_OCCLUSION_RAY_HEIGHT;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -345,6 +354,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 targetSystemContainer.TargetAreaQuery,
                 _player.transform,
                 pendingAttackEffectService,
+                new AttackOcclusionView(_attackObstacleLayers, _attackOcclusionRayHeight),
                 (float)parameter.AttackRotationSpeed,
                 (float)parameter.AttackCooldown.Value);
             _moduleContainer.SetActionRestrictionState(actionRestrictionState);
