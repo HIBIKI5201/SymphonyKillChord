@@ -1,0 +1,38 @@
+name: "[CI/CD] Tutorial Definition Sync"
+
+# チュートリアルの定義は Demo を正本とし、Master は同じ内容にする（#2075、2026-09-22 決定 R63）。
+# 片方だけ直したPRを止めるため、Demo と Master の対になるアセットの本文が同じかを比べる。
+# .meta（GUID）は Demo と Master で別なので比べない。
+on:
+  pull_request:
+    paths:
+      - 'Assets/Level/Data/Demo/OutGame/StageSelect/Mission/MissionDefinition_Tutorial.asset'
+      - 'Assets/Level/Data/Master/OutGame/StageSelect/Mission/MissionDefinition_Tutorial.asset'
+      - 'Assets/Level/Data/Demo/OutGame/StageSelect/Stages/BattleStage_Tutorial.asset'
+      - 'Assets/Level/Data/Master/OutGame/StageSelect/Stages/BattleStage_Tutorial.asset'
+      - '.github/workflows/TutorialDefinitionSync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Demo と Master のチュートリアル定義を比べる
+        run: |
+          status=0
+          for path in \
+            OutGame/StageSelect/Mission/MissionDefinition_Tutorial.asset \
+            OutGame/StageSelect/Stages/BattleStage_Tutorial.asset; do
+            demo="Assets/Level/Data/Demo/$path"
+            master="Assets/Level/Data/Master/$path"
+            if ! diff -u "$demo" "$master"; then
+              echo "::error file=$master::Demo（正本）と内容が違います。Demo を直したら Master にも同じ変更を入れてください"
+              status=1
+            fi
+          done
+          exit $status
