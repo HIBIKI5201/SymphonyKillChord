@@ -200,7 +200,7 @@
                     <ui:Label text="" name="UnlockConfirmAreaAttackRangeValueLabel" class="unlock-confirm-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="UnlockConfirmSkillSection">
-                    <ui:Label name="UnlockConfirmSkillsHeading" text="解放されるスキル" class="unlock-confirm-section-header"/>
+                    <ui:Label name="UnlockConfirmSkillsHeading" text="解放されるキルコード" class="unlock-confirm-section-header"/>
                     <ui:VisualElement name="UnlockConfirmSkillNameList" class="unlock-confirm-skill-name-list"/>
                 </ui:VisualElement>
             </ui:ScrollView>
