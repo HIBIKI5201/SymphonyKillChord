@@ -15,6 +15,6 @@ MonoBehaviour:
   _id:
     _id: ResearchPoint
     _hashId: -806205115
-  _displayName: "\u7814\u7A76\u30DD\u30A4\u30F3\u30C8"
+  _displayName: "\u89E3\u653E\u30DD\u30A4\u30F3\u30C8"
   _icon: {fileID: 21300000, guid: 6715bda062a0f544abfcab6fd825dd21, type: 3}
   _description: 
