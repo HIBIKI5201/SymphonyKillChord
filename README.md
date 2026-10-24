@@ -20,3 +20,7 @@ https://hibiki5201.github.io/SymphonyKillChord/home/
 | `Docs/NotionSpecifications` | [SymphonyKillChord_Specifications](https://github.com/HIBIKI5201/SymphonyKillChord_Specifications) | Notion 仕様書の写し。CI が3時間ごとに更新する |
 
 セットアップの手順を増やしたら、`PowerShell/ProjectSetup/project-setup.json` の `SetupVersion` を上げる。既存のメンバーも、次に Unity を開いたときに再実行を促される。
+
+## Gemini CLI を使う
+
+リポジトリのルートで `gemini` を実行する。Windows では `PowerShell/StartGemini.ps1` を実行すると、ルートへ移動してから起動する。macOS / Linux はターミナルでルートへ移動して `gemini` を実行する。

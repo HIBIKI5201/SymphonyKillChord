@@ -43,7 +43,12 @@ namespace SinfoniaStudio.SinfoniaOperator
             Console.WriteLine("[Main] SinfoniaOperator 起動中...");
 
             // 設定ソースを選択する。JSON設定があれば優先し、なければ環境変数を使用する。
-            if (!TryLoadConfig(args)) { return; }
+            // 設定の失敗は「通知対象なし」と区別できるよう、非0で終了する。
+            if (!TryLoadConfig(args))
+            {
+                Environment.ExitCode = 1;
+                return;
+            }
 
             DiscordEnvironment discordEnv = default;
             NotionEnvironment notionEnv = default;
@@ -66,6 +71,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             catch (Exception ex)
             {
                 Console.WriteLine($"[Main] 環境変数の読み込み中にエラーが発生しました: {ex.Message}");
+                Environment.ExitCode = 1;
                 return;
             }
 

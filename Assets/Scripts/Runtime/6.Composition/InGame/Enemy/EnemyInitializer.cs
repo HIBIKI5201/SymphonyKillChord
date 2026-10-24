@@ -148,6 +148,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _isModuleRegistered = true;
             _battleAIRegistry = new EnemyAIControllerRegistry();
             _moduleContainer.EnemyBattleAIRegistry = _battleAIRegistry;
+            _invincibilityRegistry = new EnemyInvincibilityRegistry();
+            _moduleContainer.EnemyInvincibilityRegistry = _invincibilityRegistry;
             return true;
         }
 
@@ -307,7 +309,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
                 _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator,
-                shellPool, _damageNumberPoolView, _damageEffectView, _waveSpawnState, releaseCallback, enemyType, _battleAIRegistry);
+                shellPool, _damageNumberPoolView, _damageEffectView, _waveSpawnState, releaseCallback, enemyType, _battleAIRegistry,
+                _invincibilityRegistry);
         }
 
         /// <summary>
@@ -377,6 +380,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private bool _isModuleRegistered;
         private EnemyModuleContainer _moduleContainer;
         private EnemyAIControllerRegistry _battleAIRegistry;
+        private EnemyInvincibilityRegistry _invincibilityRegistry;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private EnemyDefinitionRepository _loadedEnemyDefinitionRepository;
         private EnemyWaves _loadedEnemyWaves;

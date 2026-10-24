@@ -7,6 +7,7 @@ import unicodedata
 ROOT = Path(__file__).resolve().parents[2]
 LIMITS = {
     "AGENTS.md": 1600,
+    "CLAUDE.md": 300,
     "Assets/Scripts/DesignPhilosophy.md": 2000,
     ".agents/skills/skc-feature-flow/SKILL.md": 1400,
     ".claude/skills/skc-feature-flow/SKILL.md": 500,
@@ -14,6 +15,7 @@ LIMITS = {
 }
 LINKED = [
     "AGENTS.md", "Assets/Scripts/DesignPhilosophy.md",
+    "Assets/Scripts/CodeGuidelines.md",
     "Assets/Scripts/DesignClassRoles.md", "Assets/Scripts/DesignExamples.md",
     ".claude/skills/skc-feature-flow/SKILL.md",
     ".claude/skills/skc-code-guideline-check/SKILL.md",
@@ -39,6 +41,9 @@ def validate(root):
         metrics[relative] = size
         if size > limit:
             errors.append(f"budget exceeded: {relative}: {size} > {limit} characters")
+    claude = root / "CLAUDE.md"
+    if claude.is_file() and not re.search(r"^@AGENTS\.md$", claude.read_text(encoding="utf-8-sig"), re.M):
+        errors.append("CLAUDE.md must import AGENTS.md with a line '@AGENTS.md'")
     linked = [root / p for p in LINKED]
     linked.extend((root / ".agents/skills/skc-feature-flow").rglob("*.md"))
     for path in linked:

@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.Adaptor.InGame.Enemy
@@ -51,6 +52,18 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
         public bool IsDiscovered { get; private set; }
         /// <summary> この敵が発射した砲弾のインジケーターが表示中か。 </summary>
         public bool HasActiveShellIndicators => _activeShellIndicatorCount > 0;
+
+        /// <summary> この敵が発射した着弾前の砲弾を取り消すときに発火する。 </summary>
+        public event Action OnShellsCanceled;
+
+        /// <summary>
+        ///     この敵が発射した着弾前の砲弾をすべて取り消す。
+        ///     発射元が死亡したあとに砲弾が着弾してダメージを与えないようにするため。
+        /// </summary>
+        public void CancelShells()
+        {
+            OnShellsCanceled?.Invoke();
+        }
 
         /// <summary>
         ///     表示を開始した砲弾を数え、終了通知に必要な世代を返す。

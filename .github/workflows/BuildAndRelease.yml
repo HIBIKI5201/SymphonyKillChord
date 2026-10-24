@@ -1016,6 +1016,14 @@ jobs:
             Microsoft.PowerShell.Utility\Write-Host $Object
           }
 
+          # 外部 API の例外は、公開ログに応答本文や URL を出さないよう、HTTP 状態と例外の種類だけに要約する。
+          function Get-ApiErrorSummary($ErrorRecord) {
+            $Ex = $ErrorRecord.Exception
+            if (-not $Ex.Response -and $Ex.InnerException) { $Ex = $Ex.InnerException }
+            if ($Ex.Response -and $Ex.Response.StatusCode) { return "HTTP $([int]$Ex.Response.StatusCode)" }
+            return $Ex.GetType().Name
+          }
+
           # ==========================================
           # 1. 準備 および Google Drive からの ZIP ダウンロード
           # ==========================================
@@ -1046,7 +1054,7 @@ jobs:
           try {
             $ListResponse = Invoke-RestMethod -Uri $ListUrl -Method Get
           } catch {
-            Write-Host "[ERROR]: Google Drive API のクエリに失敗しました: $_"
+            Write-Host "[ERROR]: Google Drive API のクエリに失敗しました（ファイル一覧の取得）: $(Get-ApiErrorSummary $_)"
             Write-Host "::endgroup::"
             exit 1
           }
@@ -1059,17 +1067,20 @@ jobs:
 
           $FileId   = $ListResponse.files[0].id
           $FileName = $ListResponse.files[0].name
-          Write-Host "ZIP ファイルが見つかりました: $FileName (ID: $FileId)"
+          # Drive の識別子は公開ログに出さない。取得内容はファイル名・サイズ・SHA-256 で確認する。
+          Write-Host "ZIP ファイルが見つかりました: $FileName"
 
           $DownloadUrl = "https://www.googleapis.com/drive/v3/files/$FileId`?alt=media&key=$ApiKey"
           try {
             (New-Object Net.WebClient).DownloadFile($DownloadUrl, $TempZipPath)
           } catch {
-            Write-Host "[ERROR]: ZIP のダウンロードに失敗しました: $_"
+            Write-Host "[ERROR]: ZIP のダウンロードに失敗しました（ダウンロード）: $(Get-ApiErrorSummary $_)"
             Write-Host "::endgroup::"
             exit 1
           }
-          Write-Host "[OK]: ZIP のダウンロードが完了しました。"
+          $ZipSizeMB = [Math]::Round((Get-Item $TempZipPath).Length / 1MB, 1)
+          $ZipHash   = (Get-FileHash -Path $TempZipPath -Algorithm SHA256).Hash
+          Write-Host "[OK]: ZIP のダウンロードが完了しました: $FileName ($ZipSizeMB MB, SHA-256 $ZipHash)"
           Write-Host "::endgroup::"
 
           # ==========================================
@@ -1816,6 +1827,14 @@ jobs:
             Microsoft.PowerShell.Utility\Write-Host $Object
           }
 
+          # 外部 API の例外は、公開ログに応答本文や URL を出さないよう、HTTP 状態と例外の種類だけに要約する。
+          function Get-ApiErrorSummary($ErrorRecord) {
+            $Ex = $ErrorRecord.Exception
+            if (-not $Ex.Response -and $Ex.InnerException) { $Ex = $Ex.InnerException }
+            if ($Ex.Response -and $Ex.Response.StatusCode) { return "HTTP $([int]$Ex.Response.StatusCode)" }
+            return $Ex.GetType().Name
+          }
+
           Write-Host "::group::現行ビルドバージョンの解決"
 
           # VERSION_{BuildMode}（例: VERSION_DEVELOPMENT）に、次にビルドする版を v<メジャー>.<マイナー>.<パッチ> で格納する。
@@ -1841,12 +1860,12 @@ jobs:
                       $VersionString = "v1.0.0"
                       Write-Host "[INFO]: '$VarName' がデフォルト値 'v1.0.0' で作成されました。"
                   } catch {
-                      Write-Host "[ERROR]: リポジトリ変数 '$VarName' の作成に失敗しました: $_"
+                      Write-Host "[ERROR]: リポジトリ変数 '$VarName' の作成に失敗しました: $(Get-ApiErrorSummary $_)"
                       Write-Host "::endgroup::"
                       exit 1
                   }
               } else {
-                  Write-Host "[ERROR]: リポジトリ変数 '$VarName' の取得に失敗しました: $_"
+                  Write-Host "[ERROR]: リポジトリ変数 '$VarName' の取得に失敗しました: $(Get-ApiErrorSummary $_)"
                   Write-Host "::endgroup::"
                   exit 1
               }
@@ -2107,6 +2126,14 @@ jobs:
               "Accept"        = "application/vnd.github+json"
               "X-GitHub-Api-Version" = "2022-11-28"
           }
+          # 外部 API の例外は、公開ログに応答本文や URL を出さないよう、HTTP 状態と例外の種類だけに要約する。
+          function Get-ApiErrorSummary($ErrorRecord) {
+            $Ex = $ErrorRecord.Exception
+            if (-not $Ex.Response -and $Ex.InnerException) { $Ex = $Ex.InnerException }
+            if ($Ex.Response -and $Ex.Response.StatusCode) { return "HTTP $([int]$Ex.Response.StatusCode)" }
+            return $Ex.GetType().Name
+          }
+
           $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
           $Body = @{ "name" = $VarName; "value" = $NextVersion } | ConvertTo-Json
 
@@ -2114,7 +2141,7 @@ jobs:
               Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
               Write-Host "[INFO]: $VarName を $NextVersion に更新しました。"
           } catch {
-              Write-Host "[ERROR]: $VarName の更新に失敗しました: $_"
+              Write-Host "[ERROR]: $VarName の更新に失敗しました: $(Get-ApiErrorSummary $_)"
               Write-Host "::endgroup::"
               exit 1
           }
