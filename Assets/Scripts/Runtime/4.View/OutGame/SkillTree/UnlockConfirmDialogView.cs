@@ -208,7 +208,7 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         private const string SKIP_ROW_NAME = "UnlockConfirmSkipRow";
         private const string SKIP_CHECKMARK_NAME = "UnlockConfirmSkipCheckmark";
         private const string CONFIRM_BUTTON_NAME = "UnlockConfirmButton";
-        private const string POINTS_LABEL_TEXT = "研究P：";
+        private const string POINTS_LABEL_TEXT = "解放P：";
         private const string UI_COMMON_TABLE = "UICommon";
 
         private readonly OutGameUIEvent _outGameUIEvent;

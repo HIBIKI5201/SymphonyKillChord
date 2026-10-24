@@ -38,7 +38,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Resource
         }
 
         [SerializeField, SourceDataCollection(GameResourceIds.COLLECTION_KEY)]
-        [Tooltip("リソースを一意に識別するID。研究ポイントは \"ResearchPoint\"、改造ポイントは \"SkillLevelupPoint\" を入力する。")]
+        [Tooltip("リソースを一意に識別するID。解放ポイントは \"ResearchPoint\"、改造ポイントは \"SkillLevelupPoint\" を入力する。")]
         private DataID _id;
 
         [SerializeField, Tooltip("画面に表示するリソース名。")]

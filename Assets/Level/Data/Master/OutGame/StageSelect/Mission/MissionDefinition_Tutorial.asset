@@ -106,7 +106,7 @@ MonoBehaviour:
     _entryActions: []
   - _condition:
       rid: 900169900000000037
-    _guideMessageText: "\u30B9\u30AD\u30EB\u306B\u3064\u3044\u3066"
+    _guideMessageText: "\u30AD\u30EB\u30B3\u30FC\u30C9\u306B\u3064\u3044\u3066"
     _entryActions:
     - rid: 7260318751720735100
   - _condition:
