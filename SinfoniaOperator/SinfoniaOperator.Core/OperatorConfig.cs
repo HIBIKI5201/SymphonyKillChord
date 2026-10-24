@@ -16,8 +16,15 @@ namespace SinfoniaStudio.SinfoniaOperator
     public static class OperatorConfig
     {
         public const string ENVIRONMENT_CONFIG_FILE_NAME = "sinfonia-operator.env.json";
+        /// <summary> 移行前の秘密設定ファイル名。移行期間だけ読む。 </summary>
         public const string SECRETS_CONFIG_FILE_NAME = "sinfonia-operator.secrets.json";
         public const string LEGACY_CONFIG_FILE_NAME = "sinfonia-operator.settings.json";
+
+        /// <summary>
+        ///     SinfoniaOperatorとUnityのエディタツールが共用する秘密設定ファイルの、リポジトリルートからの相対パス。
+        ///     UserSettingsはUnity標準のユーザーごとの設定置き場で、Gitの除外対象になっている。
+        /// </summary>
+        public const string SHARED_SECRETS_CONFIG_RELATIVE_PATH = "UserSettings/KillChord/secrets.json";
 
         /// <summary>
         ///     フラットなJSONファイル（{"KEY": "value", "ARRAY": ["value"], ...}）を読み込み、
@@ -79,6 +86,31 @@ namespace SinfoniaStudio.SinfoniaOperator
 
             OperatorLog.Write($"[OperatorConfig] JSON設定を読み込みました: {path} ({count} 件)");
             return true;
+        }
+
+        /// <summary>
+        ///     指定したディレクトリとその祖先から秘密設定ファイルを探す。
+        ///     共通ファイル（UserSettings/KillChord/secrets.json）を優先し、見つからない場合だけ
+        ///     移行前の sinfonia-operator.secrets.json を探して移行を促すログを出す。
+        /// </summary>
+        /// <param name="startDirectories">探索を始めるディレクトリ。</param>
+        /// <returns>見つかった秘密設定ファイルのパス。見つからない場合はnull。</returns>
+        public static string? FindSecretsConfigFile(IEnumerable<string> startDirectories)
+        {
+            string[] directories = startDirectories.ToArray();
+            string sharedRelativePath = SHARED_SECRETS_CONFIG_RELATIVE_PATH.Replace('/', Path.DirectorySeparatorChar);
+            string? sharedPath = FindInAncestors(directories, sharedRelativePath);
+            if (sharedPath != null) { return sharedPath; }
+
+            string? legacyPath = FindInAncestors(directories, SECRETS_CONFIG_FILE_NAME);
+            if (legacyPath != null)
+            {
+                OperatorLog.Write($"[OperatorConfig] 移行前の秘密設定ファイルを読み込みます: {legacyPath}\n" +
+                    $"リポジトリルートの{SHARED_SECRETS_CONFIG_RELATIVE_PATH}へ移動してください。" +
+                    "移動すると、SinfoniaOperatorの各CLIとUnityのエディタツールが同じファイルを使います。");
+            }
+
+            return legacyPath;
         }
 
         /// <summary>
@@ -154,6 +186,28 @@ namespace SinfoniaStudio.SinfoniaOperator
             return _jsonOverrides.TryGetValue(key, out string? value)
                 ? value
                 : Environment.GetEnvironmentVariable(key) ?? string.Empty;
+        }
+
+        /// <summary>
+        ///     各ディレクトリの祖先を順にたどり、相対パスのファイルを探す。
+        /// </summary>
+        /// <param name="startDirectories">探索を始めるディレクトリ。</param>
+        /// <param name="relativePath">各ディレクトリからの相対パス。</param>
+        /// <returns>見つかったファイルのパス。見つからない場合はnull。</returns>
+        private static string? FindInAncestors(IEnumerable<string> startDirectories, string relativePath)
+        {
+            foreach (string startDirectory in startDirectories)
+            {
+                DirectoryInfo? current = new(Path.GetFullPath(startDirectory));
+                while (current != null)
+                {
+                    string candidate = Path.Combine(current.FullName, relativePath);
+                    if (File.Exists(candidate)) { return candidate; }
+                    current = current.Parent;
+                }
+            }
+
+            return null;
         }
 
         private static readonly Dictionary<string, string> _jsonOverrides = new();

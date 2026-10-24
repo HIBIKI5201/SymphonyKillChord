@@ -133,7 +133,11 @@ namespace SinfoniaStudio.SinfoniaOperator
         private static void LoadConfigFromDefaultLocations()
         {
             string? environmentConfigPath = FindConfigFile(OperatorConfig.ENVIRONMENT_CONFIG_FILE_NAME);
-            string? secretsConfigPath = FindConfigFile(OperatorConfig.SECRETS_CONFIG_FILE_NAME);
+            string? secretsConfigPath = OperatorConfig.FindSecretsConfigFile(new[]
+            {
+                Directory.GetCurrentDirectory(),
+                AppContext.BaseDirectory
+            });
             string? legacyConfigPath = FindConfigFile(OperatorConfig.LEGACY_CONFIG_FILE_NAME);
 
             if (environmentConfigPath != null)
@@ -159,7 +163,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                         OperatorConfigKeys.NOTION_TOKEN);
                 }
 
-                Console.WriteLine($"[Main] 旧設定ファイルを読み込みました。{OperatorConfig.SECRETS_CONFIG_FILE_NAME}への移行を推奨します。");
+                Console.WriteLine($"[Main] 旧設定ファイルを読み込みました。{OperatorConfig.SHARED_SECRETS_CONFIG_RELATIVE_PATH}への移行を推奨します。");
             }
 
             if (environmentConfigPath == null && secretsConfigPath == null && legacyConfigPath == null)

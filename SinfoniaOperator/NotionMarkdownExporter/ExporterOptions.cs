@@ -73,16 +73,15 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                             StringComparison.OrdinalIgnoreCase))
                     {
                         string? directory = Path.GetDirectoryName(Path.GetFullPath(explicitConfigPath));
-                        string siblingSecretsPath = Path.Combine(
-                            directory ?? Directory.GetCurrentDirectory(),
-                            OperatorConfig.SECRETS_CONFIG_FILE_NAME);
-                        OperatorConfig.LoadJsonFile(siblingSecretsPath);
+                        string? explicitSecretsPath = OperatorConfig.FindSecretsConfigFile(
+                            new[] { directory ?? Directory.GetCurrentDirectory() });
+                        if (explicitSecretsPath != null) { OperatorConfig.LoadJsonFile(explicitSecretsPath); }
                     }
                 }
                 else
                 {
                     environmentConfigPath = FindConfigFile(OperatorConfig.ENVIRONMENT_CONFIG_FILE_NAME);
-                    secretsConfigPath = FindConfigFile(OperatorConfig.SECRETS_CONFIG_FILE_NAME);
+                    secretsConfigPath = OperatorConfig.FindSecretsConfigFile(GetSearchStartDirectories());
                     legacyConfigPath = FindConfigFile(OperatorConfig.LEGACY_CONFIG_FILE_NAME);
                     configBasePath = environmentConfigPath ?? legacyConfigPath ?? secretsConfigPath;
 
