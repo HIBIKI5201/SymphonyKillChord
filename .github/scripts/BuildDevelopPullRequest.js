@@ -401,7 +401,7 @@ async function run({ github, context, core, masterBranch, dryRun = false }) {
     const diff = await collectDiff(github, repo, head);
     if (diff.totalCommits === 0) {
         core.notice(`${head} と ${BASE_BRANCH} の間にコミットが無いため、Draft PR は不要です。`);
-        return { action: "none" };
+        return { action: "none", reason: "no-commits" };
     }
 
     const refs = dedupeRefs(pulls.flatMap((p) => extractIssueRefs(p.body, repo)));
@@ -422,12 +422,13 @@ async function run({ github, context, core, masterBranch, dryRun = false }) {
         } catch (e) {
             const details = JSON.stringify(e.response?.data ?? {});
             if (e.status === 403) {
-                core.warning(`GitHub Actions に PR 作成の権限が無いため、Draft PR を作れませんでした: ${details}`);
-                return { action: "none" };
+                // 「何もしなかった」と区別するため、権限不足は失敗にする。二段目の PR が無いまま緑になるのを防ぐ。
+                core.setFailed(`GitHub Actions に PR 作成の権限が無いため、Draft PR を作れませんでした。手動で develop 向け PR を作るか、Settings → Actions の「Allow GitHub Actions to create and approve pull requests」を確認してください: ${details}`);
+                return { action: "failed", reason: "forbidden" };
             }
             if (e.status === 422 && details.includes("No commits between")) {
                 core.notice(`${head} と ${BASE_BRANCH} の間にコミットが無いため、Draft PR は不要です。`);
-                return { action: "none" };
+                return { action: "none", reason: "no-commits" };
             }
             throw e;
         }
@@ -451,11 +452,30 @@ async function run({ github, context, core, masterBranch, dryRun = false }) {
         return { action: "append", number: existing.number };
     }
     core.info(`本文は手で書き直されているため、更新しません: ${existing.html_url}`);
-    return { action: "none", number: existing.number };
+    return { action: "none", reason: "manual-body", number: existing.number };
+}
+
+/**
+ * run の結果を、ジョブの概要に出す 1 行の説明にする。ログ全文を読まずに結果を見分けられるようにする。
+ * @param {{ action: string, reason?: string, number?: number }} result
+ */
+function describeResult(result) {
+    const pr = result.number ? ` #${result.number}` : "";
+    switch (result.action) {
+        case "create": return `✅ Draft PR${pr} を作成した`;
+        case "update": return `✅ Draft PR${pr} の本文を更新した`;
+        case "append": return `✅ PR${pr} に Closes を追記した`;
+        case "failed": return `❌ Draft PR を作れなかった（${result.reason}）。要対応`;
+        default:
+            if (result.reason === "no-commits") return "➖ develop との差分が無いため何もしなかった";
+            if (result.reason === "manual-body") return `➖ PR${pr} の本文が手で書き直されているため更新しなかった`;
+            return `➖ 何もしなかった（${result.reason ?? "理由不明"}）`;
+    }
 }
 
 module.exports = {
     run,
+    describeResult,
     parseBody,
     parseChecks,
     extractIssueRefs,

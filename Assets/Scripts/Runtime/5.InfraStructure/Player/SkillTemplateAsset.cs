@@ -71,7 +71,7 @@ namespace KillChord.Runtime.InfraStructure.Player
         {
             return new SkillTemplate(
                 Id, _pattern, _skillType, Level, _cooldownNumerator, _cooldownDenomimator,
-                EffectSpec, EffectParameterGrowths, _animationKey, _displayName, _skillDetail, _tips, _icon, _effectDisplayMode);
+                EffectSpec, EffectParameterGrowths, _levelUpCosts, _animationKey, _displayName, _skillDetail, _tips, _icon, _effectDisplayMode);
         }
 
         private const string EFFECT_PARAMETER_PLACEHOLDER_PATTERN = "\\{([^{}]+)\\}";
@@ -101,6 +101,9 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         [SerializeField, Tooltip("レベルアップ時に成長させるパラメータのみ設定してください。未設定のパラメータは変化しません。")]
         private SkillEffectParameterGrowthSetting[] _effectParameterGrowths = Array.Empty<SkillEffectParameterGrowthSetting>();
+
+        [SerializeField, Min(0), Tooltip("レベルアップ1回ごとの改造Pのコストです。先頭が基準レベルから1つ上げるときのコストで、件数がレベルアップできる回数(上限)になります。空の場合は成長ステップの件数が上限になり、コストは1回1です。")]
+        private int[] _levelUpCosts = { 1, 1, 2, 2, 3 };
 
         [SerializeField, Tooltip("スキルの種類です。")]
         private SkillType[] _skillType;

@@ -85,6 +85,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
         private IMemberRepository _loadedMemberRepository;
+        private IThirdPartyNoticeRepository _loadedThirdPartyNoticeRepository;
         private AudioSettingsModuleContainer _audioSettingsContainer;
         private EnvironmentSettingsModuleContainer _environmentSettingsContainer;
         private VolumeSettingsTabView _volumeSettingsTabView;
@@ -117,6 +118,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
             _loadedMemberRepository = await LoadMemberRepositoryAsync(cancellationToken);
+            _loadedThirdPartyNoticeRepository = await LoadThirdPartyNoticeRepositoryAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (!await ApplyInitialSkillLoadoutAsync())
             {
@@ -244,6 +246,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, creditScreenView);
 
             BuildMemberList(creditScreenView);
+            BuildThirdPartyNoticeList(creditScreenView);
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
             IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedRuleData);
@@ -568,6 +571,48 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             IMemberListPresenter memberListPresenter = new MemberListPresenter(creditScreenView);
             ShowMemberListUseCase showMemberListUseCase = new(_loadedMemberRepository, memberListPresenter);
             showMemberListUseCase.Execute();
+        }
+
+        /// <summary>
+        ///     StreamingAssets のサードパーティ素材の表記 JSON を読み込みます。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 読み込んだリポジトリです。読み込めなかった場合は null です。 </returns>
+        private async ValueTask<IThirdPartyNoticeRepository> LoadThirdPartyNoticeRepositoryAsync(
+            CancellationToken cancellationToken)
+        {
+            // 使用アセットが読めなくてもタイトル画面は使えるようにするため、失敗は警告にとどめる。
+            try
+            {
+                return await ThirdPartyNoticeJsonRepository.LoadAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(TitleSceneInitializer)}] 使用アセットの JSON を読み込めなかったため、クレジット画面の使用アセット一覧は空になります。{exception.Message}",
+                    this);
+                return null;
+            }
+        }
+
+        /// <summary>
+        ///     読み込み済みのサードパーティ素材の表記を、クレジット画面の「使用アセット」へ一覧として反映します。
+        /// </summary>
+        /// <param name="creditScreenView"> 一覧の反映先となるクレジット画面 View です。 </param>
+        private void BuildThirdPartyNoticeList(CreditScreenView creditScreenView)
+        {
+            if (_loadedThirdPartyNoticeRepository == null)
+            {
+                return;
+            }
+
+            IThirdPartyNoticeListPresenter noticeListPresenter = new ThirdPartyNoticeListPresenter(creditScreenView);
+            ShowThirdPartyNoticeListUseCase showNoticeListUseCase = new(_loadedThirdPartyNoticeRepository, noticeListPresenter);
+            showNoticeListUseCase.Execute();
         }
 
         /// <summary>

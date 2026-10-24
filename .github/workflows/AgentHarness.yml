@@ -4,10 +4,12 @@ on:
   pull_request:
     paths:
       - 'AGENTS.md'
+      - 'CLAUDE.md'
       - '.agents/skills/**'
       - '.codex/skills/**'
       - '.claude/skills/**'
       - 'Assets/Scripts/Design*.md'
+      - 'Assets/Scripts/CodeGuidelines.md'
       - 'Docs/agent/README.md'
       - 'scripts/harness/**'
       - '.github/workflows/AgentHarness.yml'
@@ -28,3 +30,5 @@ jobs:
         run: python scripts/harness/check_harness.py
       - name: Test harness validation failure cases
         run: python -m unittest discover -s scripts/harness -p 'test_*.py'
+      - name: Test Unity preflight command detection
+        run: node --test scripts/harness/unity-preflight.test.mjs
