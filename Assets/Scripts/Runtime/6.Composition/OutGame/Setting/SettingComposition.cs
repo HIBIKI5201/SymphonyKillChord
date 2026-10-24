@@ -27,6 +27,7 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
 
         private AudioSettingsView _audioSettingsView;
         private EnvironmentSettingsView _environmentSettingsView;
+        private SettingResetConfirmationView _settingResetConfirmationView;
 
         /// <summary>
         ///     設定画面を初期化します。
@@ -69,12 +70,17 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
                     settingRoot,
                     environmentSettingsContainer.ViewModel,
                     environmentSettingsContainer.Command);
+                _settingResetConfirmationView = new SettingResetConfirmationView(
+                    settingRoot,
+                    environmentSettingsContainer.Command);
             }
             catch (Exception exception)
             {
+                _settingResetConfirmationView?.Dispose();
                 _environmentSettingsView?.Dispose();
                 _audioSettingsView?.Dispose();
                 _settingMenuView?.Dispose();
+                _settingResetConfirmationView = null;
                 _environmentSettingsView = null;
                 _audioSettingsView = null;
                 _settingMenuView = null;
@@ -85,8 +91,10 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
             }
 
             // 設定画面の表示と戻る操作をメニューに結びつける。
+            // 既定値に戻す確認ダイアログの表示中は、戻る操作でダイアログだけを閉じる。
             _outGameUIEvent.OnShownSettingScreen += _settingMenuView.ShowMenu;
-            _settingScreenView.TryNavigateBack = _settingMenuView.TryGoBack;
+            _outGameUIEvent.OnShownSettingScreen += _settingResetConfirmationView.Hide;
+            _settingScreenView.TryNavigateBack = TryNavigateBack;
             _settingMenuView.OnCancelEnvironmentChanges = _environmentSettingsView.CancelPendingChanges;
             return true;
         }
@@ -101,6 +109,11 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
                 _outGameUIEvent.OnShownSettingScreen -= _settingMenuView.ShowMenu;
             }
 
+            if (_outGameUIEvent != null && _settingResetConfirmationView != null)
+            {
+                _outGameUIEvent.OnShownSettingScreen -= _settingResetConfirmationView.Hide;
+            }
+
             if (_settingScreenView != null)
             {
                 _settingScreenView.TryNavigateBack = null;
@@ -111,9 +124,11 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
                 _settingMenuView.OnCancelEnvironmentChanges = null;
             }
 
+            _settingResetConfirmationView?.Dispose();
             _environmentSettingsView?.Dispose();
             _audioSettingsView?.Dispose();
             _settingMenuView?.Dispose();
+            _settingResetConfirmationView = null;
             _environmentSettingsView = null;
             _audioSettingsView = null;
             _settingMenuView = null;
@@ -126,5 +141,14 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
         private SettingMenuView _settingMenuView;
         private SettingScreenView _settingScreenView;
         private OutGameUIEvent _outGameUIEvent;
+
+        /// <summary>
+        ///     設定画面の戻る操作を、確認ダイアログ・サブパネルの順に一段だけ戻す。
+        /// </summary>
+        /// <returns> 設定画面内で戻した場合はtrue。設定画面を閉じてよい場合はfalse。 </returns>
+        private bool TryNavigateBack()
+        {
+            return _settingResetConfirmationView.TryHide() || _settingMenuView.TryGoBack();
+        }
     }
 }
