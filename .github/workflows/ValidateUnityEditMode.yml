@@ -1,0 +1,172 @@
+name: "[CI/CD] Unity Compile and EditMode Tests"
+
+# develop へのPRで、GameCI（GitHub ホストのランナー）を使ってコンパイルと EditMode テストを実行し、
+# コミットステータス unity-editmode に結果を出す（2026-10-16 リードプログラマー決定、#2362 P9）。
+# C# に関わる変更が無いPRは実行せず、理由を付けて success にする。Draft 中も実行しない（Ready for review で再実行される）。
+# 必要な Secret: UNITY_LICENSE・UNITY_EMAIL・UNITY_PASSWORD（Unity ライセンス）、
+#                ASSET_STORE_TOOLS_DEPLOY_KEY（サブモジュール SymphonyKillChord_AssetStoreTools の読み取り用 Deploy Key）。
+# 配布の条件（実機・許諾）はここでは見ない。Release 側で別に確認する。
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+  pull-requests: read
+
+concurrency:
+  group: unity-editmode-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  STATUS_CONTEXT: unity-editmode
+  HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Set pending status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/${{ github.repository }}/statuses/$HEAD_SHA -X POST \
+            -f state=pending -f context="$STATUS_CONTEXT" -f description="Unity のコンパイルと EditMode テストを確認中"
+
+      # 実行するかを決める。run=false のときは reason を success の説明に使う。
+      - name: Decide whether to run
+        id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HAS_LICENSE: ${{ secrets.UNITY_LICENSE != '' && secrets.UNITY_EMAIL != '' && secrets.UNITY_PASSWORD != '' }}
+          HAS_DEPLOY_KEY: ${{ secrets.ASSET_STORE_TOOLS_DEPLOY_KEY != '' }}
+        run: |
+          out() { echo "$1=$2" >> $GITHUB_OUTPUT; }
+
+          if [ "$IS_DRAFT" = "true" ]; then
+            out run false; out reason "Draft のため未実行（Ready for review で実行）"; exit 0
+          fi
+
+          if [ -n "$PR_NUMBER" ]; then
+            FILES=$(gh api "repos/${{ github.repository }}/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename')
+            # C#・アセンブリ定義・パッケージ・Unity の版・アセットストアのサブモジュールの変更だけを対象にする。
+            if ! printf '%s\n' "$FILES" | grep -Eq '\.(cs|asmdef|asmref|rsp)$|^Packages/|^ProjectSettings/ProjectVersion\.txt$|^Assets/AssetStoreTools$'; then
+              out run false; out reason "C# に関わる変更が無いため不要"; exit 0
+            fi
+          fi
+
+          # Secret が無いときは「何もしなかった」を成功にしない。
+          if [ "$HAS_LICENSE" != "true" ] || [ "$HAS_DEPLOY_KEY" != "true" ]; then
+            echo "::error::Unity ライセンス（UNITY_LICENSE・UNITY_EMAIL・UNITY_PASSWORD）または ASSET_STORE_TOOLS_DEPLOY_KEY の Secret が未登録です。"
+            out run false; out missing true; exit 0
+          fi
+
+          out run true
+
+      - name: Free disk space
+        if: steps.decide.outputs.run == 'true'
+        run: |
+          sudo rm -rf /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
+
+      - name: Checkout
+        if: steps.decide.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          submodules: false
+          persist-credentials: false
+
+      # サブモジュールは Deploy Key がリポジトリごとなので、本体とは別に、記録されたコミットで取得する。
+      - name: Resolve AssetStoreTools commit
+        if: steps.decide.outputs.run == 'true'
+        id: submodule
+        run: echo "sha=$(git rev-parse HEAD:Assets/AssetStoreTools)" >> $GITHUB_OUTPUT
+
+      - name: Checkout AssetStoreTools
+        if: steps.decide.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/SymphonyKillChord_AssetStoreTools
+          ref: ${{ steps.submodule.outputs.sha }}
+          path: Assets/AssetStoreTools
+          ssh-key: ${{ secrets.ASSET_STORE_TOOLS_DEPLOY_KEY }}
+          persist-credentials: false
+
+      - name: Cache Library
+        if: steps.decide.outputs.run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: unity-library-linux-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}-${{ hashFiles('Assets/**/*.asmdef') }}
+          restore-keys: |
+            unity-library-linux-${{ hashFiles('Packages/packages-lock.json', 'ProjectSettings/ProjectVersion.txt') }}-
+            unity-library-linux-
+
+      - name: Setup .NET
+        if: steps.decide.outputs.run == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # BuildAndRelease.yml と同じく、NuGetForUnity の CLI で NuGet パッケージを復元する。
+      - name: Restore NuGet packages
+        if: steps.decide.outputs.run == 'true'
+        run: |
+          dotnet tool install --global NuGetForUnity.Cli
+          nugetforunity restore "$GITHUB_WORKSPACE"
+
+      - name: Run EditMode tests
+        if: steps.decide.outputs.run == 'true'
+        id: tests
+        continue-on-error: true
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          testMode: editmode
+          artifactsPath: unity-test-results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity EditMode Test Results
+
+      # 結果（XML 等）を対象 SHA 付きで残す。
+      - name: Upload test results
+        if: always() && steps.decide.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-editmode-${{ env.HEAD_SHA }}
+          path: unity-test-results
+          if-no-files-found: warn
+
+      - name: Set final status
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN: ${{ steps.decide.outputs.run }}
+          REASON: ${{ steps.decide.outputs.reason }}
+          MISSING: ${{ steps.decide.outputs.missing }}
+          OUTCOME: ${{ steps.tests.outcome }}
+        run: |
+          if [ "$RUN" = "false" ] && [ "$MISSING" = "true" ]; then
+            STATE=failure; MESSAGE="❌ Unity ライセンスまたは Deploy Key の Secret が未登録のため未検証"
+          elif [ "$RUN" = "false" ] && [ -n "$REASON" ]; then
+            STATE=success; MESSAGE="➖ $REASON"
+          elif [ "$OUTCOME" = "success" ]; then
+            STATE=success; MESSAGE="✅ コンパイルと EditMode テストが通った"
+          else
+            STATE=failure; MESSAGE="❌ コンパイルまたは EditMode テストが失敗した（${OUTCOME:-途中で停止}）"
+          fi
+          echo "$MESSAGE" >> $GITHUB_STEP_SUMMARY
+          gh api repos/${{ github.repository }}/statuses/$HEAD_SHA -X POST \
+            -f state="$STATE" -f context="$STATUS_CONTEXT" -f description="$MESSAGE" \
+            -f target_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          [ "$STATE" = "success" ]

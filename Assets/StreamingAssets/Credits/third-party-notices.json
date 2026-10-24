@@ -1,0 +1,100 @@
+{
+	"notices": [
+		{
+			"name": "CRIWARE（CRI ADX LE）",
+			"holder": "株式会社CRI・ミドルウェア",
+			"license": "CRI ADX LE 使用許諾",
+			"text": "本ソフトウェアには、(株)CRI・ミドルウェアの「CRIWARE」が使用されています。\nThis software uses \"CRIWARE (TM)\" by CRI Middleware Co., Ltd."
+		},
+		{
+			"name": "Material Symbols / Material Icons",
+			"holder": "Google",
+			"license": "Apache License, Version 2.0",
+			"text": "Copyright 2026 Google LLC\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License."
+		},
+		{
+			"name": "IBM Plex Serif",
+			"holder": "Copyright © 2017 IBM Corp. with Reserved Font Name \"Plex\"",
+			"license": "SIL Open Font License 1.1",
+			"text": "https://openfontlicense.org"
+		},
+		{
+			"name": "Inria Serif",
+			"holder": "Copyright 2017 The Inria Serif Project Authors (https://github.com/BlackFoundryCom/InriaFonts)",
+			"license": "SIL Open Font License 1.1",
+			"text": "https://openfontlicense.org"
+		},
+		{
+			"name": "Kosugi Maru",
+			"holder": "Copyright 2010 The Kosugi Maru Project Authors (https://github.com/googlefonts/kosugi-maru)",
+			"license": "Apache License 2.0",
+			"text": "http://www.apache.org/licenses/LICENSE-2.0"
+		},
+		{
+			"name": "Anton",
+			"holder": "Copyright 2020 The Anton Project Authors (https://github.com/googlefonts/AntonFont)",
+			"license": "SIL Open Font License 1.1",
+			"text": "https://openfontlicense.org"
+		},
+		{
+			"name": "LitMotion",
+			"holder": "Copyright (c) 2023 Yusuke Nakada",
+			"license": "MIT License",
+			"text": "https://github.com/annulusgames/LitMotion"
+		},
+		{
+			"name": "UniTask",
+			"holder": "Copyright (c) 2019 Yoshifumi Kawai / Cysharp, Inc.",
+			"license": "MIT License",
+			"text": "https://github.com/Cysharp/UniTask"
+		},
+		{
+			"name": "R3",
+			"holder": "Copyright (c) 2024 Cysharp, Inc.",
+			"license": "MIT License",
+			"text": "https://github.com/Cysharp/R3"
+		},
+		{
+			"name": "ZLinq",
+			"holder": "Copyright (c) Yoshifumi Kawai, Copyright (c) Cysharp, Inc.",
+			"license": "MIT License",
+			"text": "https://github.com/Cysharp/ZLinq"
+		},
+		{
+			"name": "ZString",
+			"holder": "Copyright (c) 2020 Cysharp, Inc.",
+			"license": "MIT License",
+			"text": "https://github.com/Cysharp/ZString"
+		},
+		{
+			"name": "ObservableCollections",
+			"holder": "Copyright (c) 2021 Cysharp, Inc.",
+			"license": "MIT License",
+			"text": "https://github.com/Cysharp/ObservableCollections"
+		},
+		{
+			"name": "BitonicPixelSorter",
+			"holder": "Copyright (c) 2020 ruccho",
+			"license": "MIT License",
+			"text": "https://github.com/ruccho/BitonicPixelSorter"
+		},
+		{
+			"name": "UnityChanSpringBone",
+			"holder": "Copyright (c) 2018 Unity Technologies",
+			"license": "MIT License",
+			"text": "https://github.com/unity3d-jp/UnityChanSpringBone"
+		},
+		{
+			"name": ".NET ライブラリ（R3 の依存）",
+			"holder": "Copyright (c) .NET Foundation and Contributors",
+			"license": "MIT License",
+			"text": "Microsoft.Bcl.AsyncInterfaces\nMicrosoft.Bcl.TimeProvider\nSystem.ComponentModel.Annotations\nSystem.Runtime.CompilerServices.Unsafe\nSystem.Threading.Channels\nhttps://github.com/dotnet/runtime"
+		},
+		{
+			"name": "MIT License",
+			"holder": "",
+			"license": "",
+			"text": "上記の MIT License のライブラリに共通する許諾表示です。\n\nMIT License\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE."
+		}
+	]
+}

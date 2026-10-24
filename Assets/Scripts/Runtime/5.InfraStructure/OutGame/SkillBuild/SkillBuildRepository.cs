@@ -137,7 +137,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     指定したスキルのレベルを1上げ、改造Pを1消費する。
+        ///     指定したスキルのレベルを1上げ、スキルのマスターデータで決まるコスト分の改造Pを消費する。
         /// </summary>
         /// <param name="skillId"> 対象スキルID。 </param>
         /// <param name="baseLevel"> 保存記録が無い場合の基準レベル(テンプレートの初期レベル)。 </param>
@@ -149,22 +149,14 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
                 : await SaveStore.LoadAsync<SaveData>();
 
             int previousPoint = saveData.ResourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint);
-            if (previousPoint < MIN_LEVEL_UP_COST)
-            {
-                return false;
-            }
-
             int previousLevel = saveData.SkillBuild.GetSkillLevel(skillId, baseLevel);
-            int maxLevel = _skillRepository != null && _skillRepository.TryGetSkill(new SkillId(skillId), out SkillTemplate template)
-                ? template.MaxLevel
-                : DEFAULT_MAX_LEVEL;
-            if (previousLevel >= maxLevel)
+            if (!TryGetLevelUpCost(skillId, previousLevel, out int cost) || previousPoint < cost)
             {
                 return false;
             }
 
             saveData.SkillBuild.SetSkillLevel(skillId, previousLevel + 1);
-            if (!saveData.ResourceInventory.TryConsume(GameResourceIds.SkillLevelupPoint, MIN_LEVEL_UP_COST))
+            if (!saveData.ResourceInventory.TryConsume(GameResourceIds.SkillLevelupPoint, cost))
             {
                 saveData.SkillBuild.SetSkillLevel(skillId, previousLevel);
                 return false;
@@ -186,8 +178,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             return true;
         }
 
-        private const int MIN_LEVEL_UP_COST = 1;
-        private const int DEFAULT_MAX_LEVEL = 10;
+        private const int FALLBACK_LEVEL_UP_COST = 1;
+        private const int FALLBACK_MAX_LEVEL = 10;
 
         [SerializeField, Tooltip("スキル ID から SkillTemplate を取得するリポジトリ。")]
         private SkillRepository _skillRepository;
@@ -204,6 +196,25 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             {
                 throw new System.InvalidOperationException("SkillRepository が設定されていません。");
             }
+        }
+
+        /// <summary>
+        ///     指定したスキルを現在レベルから1つ上げるときのコストの取得を試みる。
+        ///     スキルのマスターデータが見つからない場合は、1回1・上限10として扱う。
+        /// </summary>
+        /// <param name="skillId"> 対象スキルID。 </param>
+        /// <param name="currentLevel"> 現在のレベル。 </param>
+        /// <param name="cost"> 取得したコスト。 </param>
+        /// <returns> レベル上限に達していない場合は true。 </returns>
+        private bool TryGetLevelUpCost(int skillId, int currentLevel, out int cost)
+        {
+            if (_skillRepository != null && _skillRepository.TryGetSkill(new SkillId(skillId), out SkillTemplate template))
+            {
+                return template.TryGetLevelUpCost(currentLevel, out cost);
+            }
+
+            cost = FALLBACK_LEVEL_UP_COST;
+            return currentLevel < FALLBACK_MAX_LEVEL;
         }
 
         /// <summary>

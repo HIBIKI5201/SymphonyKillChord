@@ -6,95 +6,63 @@ on:
 jobs:
   auto-create-master-branch:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref_name, 'feature/') # feature ブランチ作成のみトリガー。
+    # feature ブランチ作成のみトリガー。タグの作成では動かさない。
+    if: github.event.ref_type == 'branch' && startsWith(github.ref_name, 'feature/')
 
     permissions:
       contents: write  # ブランチ作成に必要な権限。
 
     steps:
-      - name: Extract original branch name
-        run: |
-          echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
-
       - name: Validate conditions
         id: validate
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
         run: |
           BR="${BRANCH_NAME}"
+
+          skip() {
+            echo "Conditions not met. Skipping branch creation: $1"
+            echo "::notice::master を作りません: $1"
+            echo "pass=false" >> $GITHUB_OUTPUT
+            exit 0
+          }
 
           # 1. root が feature であること。
           case "$BR" in
             feature/*) ;;
-            *)
-              echo "Invalid: root is not feature"
-              echo "pass=false" >> $GITHUB_OUTPUT
-              exit 0
-              ;;
+            *) skip "root is not feature" ;;
           esac
 
           # 2. ディレクトリ階層が4層以上であること（/ が 3 つ以上）
           SLASH_COUNT=$(echo "$BR" | grep -o "/" | wc -l)
           if [ "$SLASH_COUNT" -lt 3 ]; then
-            echo "Invalid: less than 4 directory levels"
-            echo "pass=false" >> $GITHUB_OUTPUT
-            exit 0
+            skip "less than 4 directory levels"
           fi
 
           # 3. 最下層が master でないこと。
           LAST=$(basename "$BR")
           if [ "$LAST" = "master" ]; then
-            echo "Invalid: last directory name is master"
-            echo "pass=false" >> $GITHUB_OUTPUT
-            exit 0
+            skip "last directory name is master"
           fi
 
-          echo "Conditions passed"
+          TARGET_BRANCH="$(dirname "$BR")/master"
+          echo "Conditions passed. Target branch: $TARGET_BRANCH"
           echo "pass=true" >> $GITHUB_OUTPUT
+          echo "target=$TARGET_BRANCH" >> $GITHUB_OUTPUT
 
-      - name: Stop if conditions not met
-        if: ${{ steps.validate.outputs.pass != 'true' }}
-        run: echo "Conditions not met. Skipping branch creation." && exit 0
-
-        # ユーザーの更新が終わるまで待機する。
-      - name: Wait User Update
-        run: sleep 10
-
-      - name: Build target branch name
-        run: |
-          ORG="${BRANCH_NAME}"
-          DIR_PATH=$(dirname "$ORG")
-          TARGET_BRANCH="${DIR_PATH}/master"
-          echo "TARGET_BRANCH=$TARGET_BRANCH" >> $GITHUB_ENV
-          echo "Target branch: $TARGET_BRANCH"
-
-      # 元ブランチの最新 commit SHA を取得。
-      - name: Get latest commit SHA
-        id: sha
-        uses: actions/github-script@v7
-        env:
-          BRANCH_NAME: ${{ env.BRANCH_NAME }}
-        with:
-          script: |
-            const branch = process.env.BRANCH_NAME;
-            const repo = context.repo;
-
-            const res = await github.rest.repos.getBranch({
-              owner: repo.owner,
-              repo: repo.repo,
-              branch: branch,
-            });
-
-            // commit sha を result として返す。
-            return res.data.commit.sha;
-
-      # 新しい master ブランチを作成。
+      # 生成元は create イベント時点のコミット（github.sha）に固定する。
+      # 以前は 10 秒待ってから最新の SHA を取っていたため、空 push の直後に変更を push すると
+      # master が変更済みのコミットになり、作業ブランチと同一コミットになることがあった。
       - name: Create new branch
+        if: ${{ steps.validate.outputs.pass == 'true' }}
         uses: actions/github-script@v7
         env:
-          TARGET_BRANCH: ${{ env.TARGET_BRANCH }}
+          TARGET_BRANCH: ${{ steps.validate.outputs.target }}
+          SOURCE_SHA: ${{ github.sha }}
         with:
           script: |
             const target = process.env.TARGET_BRANCH;
-            const sha = ${{ steps.sha.outputs.result }};
+            const sha = process.env.SOURCE_SHA;
             const repo = context.repo;
 
             try {
@@ -104,13 +72,21 @@ jobs:
                 ref: "refs/heads/" + target,
                 sha: sha,
               });
-              console.log("Created branch: " + target);
+              console.log(`Created branch: ${target} (${sha})`);
             } catch (e) {
-              // 422 はブランチが既にある場合のほか、Ruleset に拒否された場合にも返る。
-              // 既にある場合だけ成功として扱い、それ以外は失敗させる。
-              if (e.status === 422 && /Reference already exists/i.test(e.message)) {
-                console.log("Branch already exists: " + target);
-              } else {
-                throw e;
+              if (e.status !== 422) throw e;
+
+              // 422 は「既に存在する」以外の検証エラーでも返るため、実際に存在するかを確かめる。
+              // 既存の master は上書きしない。
+              let existing;
+              try {
+                existing = await github.rest.repos.getBranch({ owner: repo.owner, repo: repo.repo, branch: target });
+              } catch (getError) {
+                if (getError.status === 404) {
+                  core.setFailed(`master を作れませんでした（422）: ${e.message}`);
+                  return;
+                }
+                throw getError;
               }
+              core.notice(`既に存在するため作りません: ${target} (${existing.data.commit.sha})`);
             }

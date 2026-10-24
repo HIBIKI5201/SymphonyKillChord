@@ -148,7 +148,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyMoveUseCase moveUsecase = new EnemyMoveUseCase(spec, raycastDetectService, attackPositionSearchService);
             EnemyAttackUseCase attackUsecase = new EnemyAttackUseCase(raycastDetectService);
             EnemyTripleShotAttackUseCase tripleShotAttackUsecase = new EnemyTripleShotAttackUseCase(tripleRaycastDetectService);
-            BossAttackReservationUseCase reservationUsecase = new BossAttackReservationUseCase(musicActionScheduler);
+            AttackReservationUseCase reservationUsecase = new AttackReservationUseCase(musicActionScheduler);
             _reservationUsecase = reservationUsecase;
 
             // AI判定用（移動・硬直・範囲）の戦闘状態。先頭攻撃の定義で初期化する。
@@ -166,6 +166,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             // 攻撃パターンを構築。各パターンは定義固定の専用 BattleState を持つ。
             var patterns = new List<BossAttackPattern>(_loadedAttackEntryRepo.AttackEntries.Length);
+            _patternBattleStates.Clear();
             Dictionary<Type, IRaycastDetectView> raycastViews = new();
             foreach (BossAttackEntryAsset entry in _loadedAttackEntryRepo.AttackEntries)
             {
@@ -176,6 +177,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                     entry.MusicData.TargetBeat);
 
                 EnemyBattleState patternState = new EnemyBattleState(_enemyEntity, targetEntity, definition);
+                _patternBattleStates.Add(patternState);
                 EnemyAttackControllerContext ctx = new EnemyAttackControllerContext(attackUsecase, tripleShotAttackUsecase, patternState, _shellSpawner);
                 IEnemyAttackController controller = generators[entry.Kind].Generate(ctx);
 
@@ -278,6 +280,12 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _aiController.Deactivate();
             _healthHudPresenter.Deactivate();
 
+            // 発射済みで着弾前の砲弾も消す。
+            foreach (EnemyBattleState patternState in _patternBattleStates)
+            {
+                patternState.CancelShells();
+            }
+
             _spawnerCallback?.Invoke();
             _spawnerCallback = null;
             gameObject.SetActive(false);
@@ -310,8 +318,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// </summary>
         public void StopGameplay()
         {
-            _reservationUsecase?.Deactivate();
+            // 予約を破棄する前にキャンセルする。
             _aiController?.CancelAttack();
+            _reservationUsecase?.Deactivate();
 
             if (_behaviorGraphAgent != null)
             {
@@ -364,9 +373,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private MissionEventController _missionEventController;
         private CharacterEntity _enemyEntity;
         private BossAIController _aiController;
-        private BossAttackReservationUseCase _reservationUsecase;
+        private AttackReservationUseCase _reservationUsecase;
         private IHealthHudPresenter _healthHudPresenter;
         private EnemyBattleState _aiBattleState;
+        private readonly List<EnemyBattleState> _patternBattleStates = new();
         private CharacterDefinitionAsset _loadedEnemyData;
         private EnemyMoveSpecAsset _loadedMoveData;
         private EnemyMissionKeyAsset _loadedMissionKeyAsset;
