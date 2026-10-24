@@ -265,18 +265,191 @@ jobs:
             echo "[Decision]: changed=false (前回のリリース ${LAST_TAG} からUnityプロジェクトの変更なし)"
           fi
 
-  build-and-release:
+  # ビルドモード・ゲームデータ種別・版と、どのOSのランナーで何をビルドするかを1回だけ決める。
+  # OSごとのビルドジョブが並行して同じリリースへアップロードするため、版はここで先に確定させる。
+  prepare:
     needs: check
     if: needs.check.outputs.should_run == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
-    runs-on: [self-hosted, windows]
+    runs-on: ubuntu-latest
+    environment: 'AutoBuildAndRelease'
+    permissions: {}
     defaults:
       run:
-        # PowerShell 5.1 は BOM なしの run 本文を ANSI として解析するため、解析前に UTF-8 で読み込む。
+        shell: pwsh
+    outputs:
+      build_mode: ${{ steps.determine_mode.outputs.build_mode }}
+      build_variant: ${{ steps.determine_mode.outputs.build_variant }}
+      tag_prefix: ${{ steps.determine_mode.outputs.tag_prefix }}
+      matrix: ${{ steps.determine_hosts.outputs.matrix }}
+      version: ${{ steps.resolve_version.outputs.version }}
+      version_var_name: ${{ steps.resolve_version.outputs.version_var_name }}
+    env:
+      AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
+      MACOS_RUNNER_ENABLED: ${{ vars.MACOS_RUNNER_ENABLED }}
+
+    steps:
+      - name: ビルドモードの決定
+        id: determine_mode
+        run: |
+          $BaseRef = "${{ github.base_ref }}"
+          if (-not $BaseRef) {
+            $InputMode = "${{ inputs.build_mode }}"
+            if ($InputMode -eq "Master") { $BaseRef = "main" } else { $BaseRef = "develop" }
+          }
+          if ($BaseRef -eq "main") {
+            $BuildMode = "Master"
+            $TagPrefix = "master"
+          } elseif ($BaseRef -eq "develop") {
+            $BuildMode = "Development"
+            $TagPrefix = "dev"
+          } else {
+            Write-Host "::error::サポートされていないベースブランチです: $BaseRef"
+            exit 1
+          }
+
+          $BuildVariant = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            "${{ inputs.build_variant }}"
+          } else {
+            $env:AUTO_BUILD_VARIANT
+          }
+          $BuildVariant = ([string]$BuildVariant).Trim().ToLowerInvariant()
+          if ($BuildVariant -notin @("demo", "release")) {
+            Write-Host "::error::ゲームデータ種別には demo または release を指定してください。現在値: '$BuildVariant'"
+            exit 1
+          }
+
+          Write-Host "ベースブランチ: $BaseRef, ビルド種別: $BuildVariant, タグの接頭辞: $TagPrefix"
+          "build_mode=$BuildMode"       | Add-Content -Path $env:GITHUB_OUTPUT
+          "build_variant=$BuildVariant" | Add-Content -Path $env:GITHUB_OUTPUT
+          "tag_prefix=$TagPrefix"       | Add-Content -Path $env:GITHUB_OUTPUT
+
+      # OSごとに担当するプロファイルを決める（BuildRunner/README.md「OSごとの担当」）。
+      # - Windows ランナー: Android と Windows
+      # - macOS ランナー: macOS と iOS。常時起動の Mac がないとジョブが待ち続け、後続のビルドも止まるため、
+      #   リポジトリ変数 MACOS_RUNNER_ENABLED が true のときだけ割り当てる。
+      # 手動実行では、選ばれたプロファイルがあるOSのジョブだけを作る。
+      - name: ビルドするOSの決定
+        id: determine_hosts
+        run: |
+          $IsManual = "${{ github.event_name }}" -eq "workflow_dispatch"
+          $Selected = @{
+            "Android" = "${{ inputs.profile_android }}" -eq "true"
+            "Windows" = "${{ inputs.profile_windows }}" -eq "true"
+            "MacOS"   = "${{ inputs.profile_macos }}" -eq "true"
+            "iOS"     = "${{ inputs.profile_ios }}" -eq "true"
+          }
+          $MacEnabled = ([string]$env:MACOS_RUNNER_ENABLED).Trim().ToLowerInvariant() -eq "true"
+          $Hosts = @(
+            [ordered]@{ host = "windows"; runs_on = @("self-hosted", "windows"); concurrency_group = "unity-self-hosted-build"; profiles = @("Android", "Windows"); enabled = $true },
+            [ordered]@{ host = "macos"; runs_on = @("self-hosted", "macOS"); concurrency_group = "unity-self-hosted-build-macos"; profiles = @("MacOS", "iOS"); enabled = $MacEnabled }
+          )
+
+          $Include = @()
+          foreach ($HostEntry in $Hosts) {
+            $Profiles = @($HostEntry.profiles | Where-Object { -not $IsManual -or $Selected[$_] })
+            if ($Profiles.Count -eq 0) { continue }
+            if (-not $HostEntry.enabled) {
+              Write-Host "::warning::リポジトリ変数 MACOS_RUNNER_ENABLED が true ではないため、$($Profiles -join ', ') はビルドしません（macOS ランナーを使うときは true にする）。"
+              continue
+            }
+            $Include += [ordered]@{
+              host = $HostEntry.host
+              runs_on = $HostEntry.runs_on
+              concurrency_group = $HostEntry.concurrency_group
+              profiles = $Profiles -join ","
+            }
+            Write-Host "[INFO]: $($HostEntry.host) ランナー: $($Profiles -join ', ')"
+          }
+          if ($Include.Count -eq 0) {
+            Write-Host "::error::ビルドするプロファイルがありません。"
+            exit 1
+          }
+          $Matrix = @{ include = $Include } | ConvertTo-Json -Depth 5 -Compress
+          "matrix=$Matrix" | Add-Content -Path $env:GITHUB_OUTPUT
+
+      # 変数更新用の GitHub App（sinfonia-variable-updater）からトークンを発行する。
+      # App と権限の詳細は .github/apps/README.md を参照。
+      - name: 変数更新用トークンの発行（バージョン解決）
+        id: variable_token_resolve
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID }}
+          private-key: ${{ secrets.SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY }}
+
+      - name: 現行ビルドバージョンの解決
+        id: resolve_version
+        env:
+          VAR_UPDATE_TOKEN: ${{ steps.variable_token_resolve.outputs.token }}
+          BUILD_MODE: ${{ steps.determine_mode.outputs.build_mode }}
+        run: |
+          # 外部 API の例外は、公開ログに応答本文や URL を出さないよう、HTTP 状態と例外の種類だけに要約する。
+          function Get-ApiErrorSummary($ErrorRecord) {
+            $Ex = $ErrorRecord.Exception
+            if (-not $Ex.Response -and $Ex.InnerException) { $Ex = $Ex.InnerException }
+            if ($Ex.Response -and $Ex.Response.StatusCode) { return "HTTP $([int]$Ex.Response.StatusCode)" }
+            return $Ex.GetType().Name
+          }
+
+          # VERSION_{BuildMode}（例: VERSION_DEVELOPMENT）に、次にビルドする版を v<メジャー>.<マイナー>.<パッチ> で格納する。
+          # リリースに成功すると finalize ジョブがパッチ番号を1つ進めて書き戻す。メジャー・マイナーを上げるときは変数を手で書き換える。
+          # 未設定時は v1.0.0 で作成する。
+          $VarName = "VERSION_$env:BUILD_MODE"
+          $Headers = @{
+              "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
+              "Accept"        = "application/vnd.github+json"
+              "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
+
+          try {
+              $VersionString = (Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers).value
+          } catch {
+              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
+                  Write-Host "::warning::リポジトリ変数 '$VarName' が見つかりません。デフォルト値 'v1.0.0' で作成します。"
+                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
+                  $Body = @{ "name" = $VarName; "value" = "v1.0.0" } | ConvertTo-Json
+                  try {
+                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
+                      $VersionString = "v1.0.0"
+                  } catch {
+                      Write-Host "::error::リポジトリ変数 '$VarName' の作成に失敗しました: $(Get-ApiErrorSummary $_)"
+                      exit 1
+                  }
+              } else {
+                  Write-Host "::error::リポジトリ変数 '$VarName' の取得に失敗しました: $(Get-ApiErrorSummary $_)"
+                  exit 1
+              }
+          }
+
+          # 手で設定したときに紛れ込んだ前後の空白・改行は取り除く
+          $VersionString = "$VersionString".Trim()
+          if ($VersionString -notmatch '^v\d+\.\d+\.\d+$') {
+              Write-Host "::error::'$VarName' の値 '$VersionString' が期待される形式 (例: v1.0.0) と一致しません。"
+              exit 1
+          }
+
+          "version_var_name=$VarName" | Add-Content -Path $env:GITHUB_OUTPUT
+          "version=$VersionString"    | Add-Content -Path $env:GITHUB_OUTPUT
+          Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
+
+  build-and-release:
+    needs: [check, prepare]
+    name: build-and-release (${{ matrix.host }})
+    strategy:
+      # 片方のOSが失敗しても、もう片方のビルドとリリースは続ける。
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    runs-on: ${{ matrix.runs_on }}
+    defaults:
+      run:
+        # Windows: PowerShell 5.1 は BOM なしの run 本文を ANSI として解析するため、解析前に UTF-8 で読み込む。
         # powershell を維持し、runner が付与するエラー停止・終了コード伝播も引き続き適用する。
+        # macOS: PowerShell 7（pwsh）で実行する。pwsh は run 本文を UTF-8 として読む。
         shell: >-
-          powershell -NoLogo -NoProfile -NonInteractive -Command ". ([scriptblock]::Create([System.IO.File]::ReadAllText('{0}', [System.Text.Encoding]::UTF8)))"
+          ${{ matrix.host == 'macos' && 'pwsh' || 'powershell -NoLogo -NoProfile -NonInteractive -Command ". ([scriptblock]::Create([System.IO.File]::ReadAllText(''{0}'', [System.Text.Encoding]::UTF8)))"' }}
     concurrency:
-      group: unity-self-hosted-build
+      # OSごとに同時1ビルドまで。Windows のグループ名は従来の名前のまま。
+      group: ${{ matrix.concurrency_group }}
       cancel-in-progress: false
       queue: max
     timeout-minutes: 1440
@@ -297,7 +470,6 @@ jobs:
       UNITY_ANDROID_PROFILE_BUILD_TIMEOUT_SEC: 10800
       IS_MANUAL_BUILD: ${{ github.event_name == 'workflow_dispatch' }}
       UNITY_CPU_USAGE_PERCENT: ${{ inputs.cpu_usage_percent }}
-      AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
       BUILD_MODE: ''
       BUILD_VARIANT: ''
 
@@ -517,52 +689,21 @@ jobs:
             Microsoft.PowerShell.Utility\Write-Host $Object
           }
 
-          $BaseRef = "${{ github.base_ref }}"
-          if (-not $BaseRef) {
-            $InputMode = "${{ inputs.build_mode }}"
-            if ($InputMode -eq "Master") { $BaseRef = "main" } else { $BaseRef = "develop" }
-          }
-          if ($BaseRef -eq "main") {
-            $BuildMode = "Master"
-            $TagPrefix = "master"
-          } elseif ($BaseRef -eq "develop") {
-            $BuildMode = "Development"
-            $TagPrefix = "dev"
-          } else {
-             Write-Host "[ERROR]: サポートされていないベースブランチです: $BaseRef"
-             exit 1
-          }
-
-          $BuildVariant = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-            "${{ inputs.build_variant }}"
-          } else {
-            $env:AUTO_BUILD_VARIANT
-          }
-          $BuildVariant = ([string]$BuildVariant).Trim().ToLowerInvariant()
-          if ($BuildVariant -notin @("demo", "release")) {
-            Write-Host "[ERROR]: ゲームデータ種別には demo または release を指定してください。現在値: '$BuildVariant'"
-            exit 1
-          }
- 
-          Write-Host "ベースブランチ: $BaseRef, ビルド種別: $BuildVariant, タグの接頭辞: $TagPrefix"
+          # モード・種別・版は prepare ジョブで1回だけ決めたものを使う（OSごとのジョブで同じ値にするため）。
+          $BuildMode = "${{ needs.prepare.outputs.build_mode }}"
+          $BuildVariant = "${{ needs.prepare.outputs.build_variant }}"
+          $TagPrefix = "${{ needs.prepare.outputs.tag_prefix }}"
+          Write-Host "ビルドモード: $BuildMode, ビルド種別: $BuildVariant, タグの接頭辞: $TagPrefix, 版: ${{ needs.prepare.outputs.version }}"
           "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
           "BUILD_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
           "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
+          "CURRENT_BUILD_VERSION=${{ needs.prepare.outputs.version }}" | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
           "build_variant=$BuildVariant" | Add-Content -Path $env:GITHUB_OUTPUT
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
 
-          # workflow_dispatch以外（PRマージ起動時）はこの入力自体が存在せず空文字になり、
-          # 後続でのプロファイル絞り込みは行われず全件ビルドの従来動作を維持する。
-          $SelectedProfiles = @()
-          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-            if ("${{ inputs.profile_android }}" -eq "true") { $SelectedProfiles += "Android" }
-            if ("${{ inputs.profile_windows }}" -eq "true") { $SelectedProfiles += "Windows" }
-            if ("${{ inputs.profile_macos }}" -eq "true")   { $SelectedProfiles += "MacOS" }
-            if ("${{ inputs.profile_ios }}" -eq "true")     { $SelectedProfiles += "iOS" }
-          }
-          $TargetProfiles = $SelectedProfiles -join ","
-          "SELECTED_PROFILES=$TargetProfiles" | Add-Content -Path $env:GITHUB_ENV
+          # このOSのランナーが担当するプロファイル（prepare ジョブで手動実行の選択と突き合わせ済み）だけをビルドする。
+          "SELECTED_PROFILES=${{ matrix.profiles }}" | Add-Content -Path $env:GITHUB_ENV
 
 # ==================================================================================================
 
@@ -1742,7 +1883,8 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always() && steps.unity_build.outputs.log_file != ''
         with:
-          name: unity-build-log
+          # OSごとのジョブが同じ名前でアップロードすると衝突するため、OS名を付ける。
+          name: unity-build-log-${{ matrix.host }}
           path: ${{ steps.unity_build.outputs.log_file }}
 
 # ==================================================================================================
@@ -1800,88 +1942,6 @@ jobs:
             Write-Host "::endgroup::"
             exit 1
           }
-          Write-Host "::endgroup::"
-        
-# ==================================================================================================
-
-      # 変数更新用の GitHub App（sinfonia-variable-updater）からトークンを発行する。
-      # トークンの有効期限は1時間のため、ジョブ開始時ではなく使用する直前に発行する。
-      # App と権限の詳細は .github/apps/README.md を参照。
-      - name: 変数更新用トークンの発行（バージョン解決）
-        id: variable_token_resolve
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          client-id: ${{ vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID }}
-          private-key: ${{ secrets.SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY }}
-
-      - name: 現行ビルドバージョンの解決
-        env:
-          VAR_UPDATE_TOKEN: ${{ steps.variable_token_resolve.outputs.token }}
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
-          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
-          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
-          function Write-Host($Object) {
-            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
-            Microsoft.PowerShell.Utility\Write-Host $Object
-          }
-
-          # 外部 API の例外は、公開ログに応答本文や URL を出さないよう、HTTP 状態と例外の種類だけに要約する。
-          function Get-ApiErrorSummary($ErrorRecord) {
-            $Ex = $ErrorRecord.Exception
-            if (-not $Ex.Response -and $Ex.InnerException) { $Ex = $Ex.InnerException }
-            if ($Ex.Response -and $Ex.Response.StatusCode) { return "HTTP $([int]$Ex.Response.StatusCode)" }
-            return $Ex.GetType().Name
-          }
-
-          Write-Host "::group::現行ビルドバージョンの解決"
-
-          # VERSION_{BuildMode}（例: VERSION_DEVELOPMENT）に、次にビルドする版を v<メジャー>.<マイナー>.<パッチ> で格納する。
-          # リリースに成功するとパッチ番号を1つ進めて書き戻す。メジャー・マイナーを上げるときは変数を手で書き換える。
-          # 未設定時は v1.0.0 で作成する。
-          $VarName = "VERSION_$env:BUILD_MODE"
-          $Headers = @{
-              "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
-              "Accept"        = "application/vnd.github+json"
-              "X-GitHub-Api-Version" = "2022-11-28"
-          }
-          $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
-
-          try {
-              $VersionString = (Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers).value
-          } catch {
-              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
-                  Write-Host "[WARN]: リポジトリ変数 '$VarName' が見つかりません。デフォルト値 'v1.0.0' で作成中..."
-                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
-                  $Body = @{ "name" = $VarName; "value" = "v1.0.0" } | ConvertTo-Json
-                  try {
-                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
-                      $VersionString = "v1.0.0"
-                      Write-Host "[INFO]: '$VarName' がデフォルト値 'v1.0.0' で作成されました。"
-                  } catch {
-                      Write-Host "[ERROR]: リポジトリ変数 '$VarName' の作成に失敗しました: $(Get-ApiErrorSummary $_)"
-                      Write-Host "::endgroup::"
-                      exit 1
-                  }
-              } else {
-                  Write-Host "[ERROR]: リポジトリ変数 '$VarName' の取得に失敗しました: $(Get-ApiErrorSummary $_)"
-                  Write-Host "::endgroup::"
-                  exit 1
-              }
-          }
-
-          # 手で設定したときに紛れ込んだ前後の空白・改行は取り除く
-          $VersionString = "$VersionString".Trim()
-          if ($VersionString -notmatch '^v\d+\.\d+\.\d+$') {
-              Write-Host "[ERROR]: '$VarName' の値 '$VersionString' が期待される形式 (例: v1.0.0) と一致しません。"
-              Write-Host "::endgroup::"
-              exit 1
-          }
-
-          "VERSION_VAR_NAME=$VarName"            | Add-Content -Path $env:GITHUB_ENV
-          "CURRENT_BUILD_VERSION=$VersionString" | Add-Content -Path $env:GITHUB_ENV
-          Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
           Write-Host "::endgroup::"
         
 # ==================================================================================================
@@ -2044,7 +2104,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 公開確認を従来のcreate_release成功ゲートとし、失敗を成功扱いして版数を進めない。
+      # 公開確認を従来のcreate_release成功ゲートとし、失敗を成功扱いしない（版数は finalize ジョブが進める）。
       - name: リリースアセットの公開確認
         id: create_release
         if: ${{ !cancelled() && (steps.release_attempt_1.outcome == 'success' || steps.release_attempt_1.outcome == 'failure') }}
@@ -2075,78 +2135,12 @@ jobs:
         if: ${{ !cancelled() && steps.create_release.outcome == 'failure' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: unreleased-build-${{ github.run_id }}-${{ github.run_attempt }}
+          name: unreleased-build-${{ matrix.host }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: "${{ steps.tag_gen.outputs.ASSET_PREFIX }}-*-${{ steps.tag_gen.outputs.VERSION }}.zip"
           if-no-files-found: error
           compression-level: 0
           retention-days: 7
 
-# ==================================================================================================
-
-      # ビルド後はバージョン解決時のトークンが失効している可能性があるため、改めて発行する。
-      - name: 変数更新用トークンの発行（パッチ番号更新）
-        id: variable_token_increment
-        if: steps.create_release.outcome == 'success'
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          client-id: ${{ vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID }}
-          private-key: ${{ secrets.SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY }}
-
-      - name: リリースのパッチ番号のインクリメント
-        if: steps.create_release.outcome == 'success'
-        env:
-          VAR_UPDATE_TOKEN: ${{ steps.variable_token_increment.outputs.token }}
-        run: |
-          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
-          [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
-          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
-          function Write-Host($Object) {
-            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
-            Microsoft.PowerShell.Utility\Write-Host $Object
-          }
-
-          Write-Host "::group::リリースパッチ番号のインクリメント"
-          $VarName        = $env:VERSION_VAR_NAME
-          $CurrentVersion = $env:CURRENT_BUILD_VERSION
-
-          if ($CurrentVersion -notmatch '^(v\d+\.\d+\.)(\d+)$') {
-              Write-Host "[ERROR]: 現行ビルドバージョン '$CurrentVersion' が期待される形式 (例: v1.0.0) と一致しません。"
-              Write-Host "::endgroup::"
-              exit 1
-          }
-          $NextVersion = "$($Matches[1])$([int]$Matches[2] + 1)"
-
-          Write-Host "変数名: $VarName"
-          Write-Host "現在のバージョン: $CurrentVersion"
-          Write-Host "次のバージョン: $NextVersion"
-
-          $Headers = @{
-              "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
-              "Accept"        = "application/vnd.github+json"
-              "X-GitHub-Api-Version" = "2022-11-28"
-          }
-          # 外部 API の例外は、公開ログに応答本文や URL を出さないよう、HTTP 状態と例外の種類だけに要約する。
-          function Get-ApiErrorSummary($ErrorRecord) {
-            $Ex = $ErrorRecord.Exception
-            if (-not $Ex.Response -and $Ex.InnerException) { $Ex = $Ex.InnerException }
-            if ($Ex.Response -and $Ex.Response.StatusCode) { return "HTTP $([int]$Ex.Response.StatusCode)" }
-            return $Ex.GetType().Name
-          }
-
-          $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
-          $Body = @{ "name" = $VarName; "value" = $NextVersion } | ConvertTo-Json
-
-          try {
-              Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
-              Write-Host "[INFO]: $VarName を $NextVersion に更新しました。"
-          } catch {
-              Write-Host "[ERROR]: $VarName の更新に失敗しました: $(Get-ApiErrorSummary $_)"
-              Write-Host "::endgroup::"
-              exit 1
-          }
-          Write-Host "::endgroup::"
-        
 # ==================================================================================================
 
       - name: リリースの完了
