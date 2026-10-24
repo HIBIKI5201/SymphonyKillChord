@@ -146,7 +146,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
-#if UNITY_ANDROID || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
             if (_mobileStickFlickInput != null)
             {
                 _loadedMobileStickFlickInputConfig =
@@ -537,7 +537,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             _playerAttackSignal?.Dispose();
             _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();
-#if UNITY_ANDROID || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
             _mobileStickFlickInputConfigKey.ReleaseLoadedAsset(this);
             _loadedMobileStickFlickInputConfig = null;
 #endif
@@ -555,15 +555,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
-        ///     Androidの仮想スティックフリック入力を入力Viewへ接続する。
+        ///     モバイル（Android・iOS）の仮想スティックフリック入力を入力Viewへ接続する。
         /// </summary>
         /// <param name="inputView"> フリック入力の通知先。 </param>
         private void InitializeMobileStickFlickInput(PlayerInputView inputView)
         {
-#if UNITY_ANDROID || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
             if (_mobileStickFlickInput == null)
             {
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
                 Debug.LogWarning(
                     $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInput)} が設定されていません。",
                     this);
@@ -580,7 +580,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void UninitializeMobileStickFlickInput()
         {
-#if UNITY_ANDROID || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
             _mobileStickFlickInput?.Uninitialize();
 #endif
         }
