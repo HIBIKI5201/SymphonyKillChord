@@ -31,6 +31,7 @@ MonoBehaviour:
   - _addressableKey: Player
   - _addressableKey: RhythmJudgmentDefinitionAsset
   - _addressableKey: ExampleEnemyMoveData
+  - _addressableKey: InfantryEnemyMoveData
   - _addressableKey: ShellAttackData
   - _addressableKey: TestSkillData2
   - _addressableKey: ScenarioSettingsAsset
