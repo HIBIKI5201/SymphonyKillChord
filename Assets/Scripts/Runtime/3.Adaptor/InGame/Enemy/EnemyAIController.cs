@@ -11,7 +11,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// <summary>
     ///     敵の動きを制御するコントローラークラス。
     /// </summary>
-    public class EnemyAIController : IDisposable
+    public class EnemyAIController : IEnemyAIController, IDisposable
     {
         /// <summary>
         ///     敵 AI が使うユースケースと状態を指定して生成する。

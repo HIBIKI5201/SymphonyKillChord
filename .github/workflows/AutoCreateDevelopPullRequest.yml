@@ -57,5 +57,6 @@ jobs:
           MASTER_BRANCH: ${{ github.event.pull_request.base.ref || inputs.master_branch }}
         with:
           script: |
-            const { run } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/BuildDevelopPullRequest.js`);
-            await run({ github, context, core, masterBranch: process.env.MASTER_BRANCH });
+            const { run, describeResult } = require(`${process.env.GITHUB_WORKSPACE}/.github/scripts/BuildDevelopPullRequest.js`);
+            const result = await run({ github, context, core, masterBranch: process.env.MASTER_BRANCH });
+            await core.summary.addRaw(`${describeResult(result)}（${process.env.MASTER_BRANCH}）`).write();

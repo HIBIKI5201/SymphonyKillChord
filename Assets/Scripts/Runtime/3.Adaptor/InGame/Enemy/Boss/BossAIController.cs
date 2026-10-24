@@ -13,20 +13,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
     /// <summary>
     ///     ボスの行動を制御するコントローラー。
     /// </summary>
-    public sealed class BossAIController : IDisposable
+    public sealed class BossAIController : IEnemyAIController, IDisposable
     {
         /// <summary>
         ///     コンストラクタ。
         /// </summary>
         /// <param name="enemyMoveUsecase"> 移動意思決定のユースケース。 </param>
-        /// <param name="reservationUsecase"> ボス専用の攻撃予約ユースケース。 </param>
+        /// <param name="reservationUsecase"> 攻撃予約ユースケース。 </param>
         /// <param name="enemyBattleState"> AI判定用（移動・硬直・範囲）の戦闘状態。 </param>
         /// <param name="stateFacade"> 状態通知のファサード。 </param>
         /// <param name="patterns"> ボスが使用する攻撃パターン群（通常1/通常2/特殊1等）。 </param>
         public BossAIController(
             IDefender entity,
             EnemyMoveUseCase enemyMoveUsecase,
-            BossAttackReservationUseCase reservationUsecase,
+            AttackReservationUseCase reservationUsecase,
             EnemyBattleState enemyBattleState,
             IEnemyStateFacade stateFacade,
             Dictionary<Type, IRaycastDetectView> raycastViews,
@@ -224,7 +224,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         private readonly IDefender _entity;
         private readonly EnemyMoveUseCase _enemyMoveUsecase;
-        private readonly BossAttackReservationUseCase _reservationUsecase;
+        private readonly AttackReservationUseCase _reservationUsecase;
         private readonly EnemyBattleState _enemyBattleState;
         private readonly IEnemyStateFacade _stateFacade;
         private readonly IReadOnlyList<BossAttackPattern> _patterns;

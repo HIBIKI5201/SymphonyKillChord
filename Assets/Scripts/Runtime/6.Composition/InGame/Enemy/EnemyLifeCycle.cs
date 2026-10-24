@@ -89,7 +89,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             EnemyWaveSpawnerState waveSpawnerState,
             Action<EnemyLifeCycle> releaseCallback,
             EnemyType enemyType,
-            EnemyAIControllerRegistry battleAiRegistry
+            EnemyAIControllerRegistry battleAiRegistry,
+            EnemyInvincibilityRegistry invincibilityRegistry
             )
         {
             if (_view == null)
@@ -112,6 +113,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
             _waveSpawnerState = waveSpawnerState;
             _battleAIRegistry = battleAiRegistry;
+            _invincibilityRegistry = invincibilityRegistry;
 
             MissionModuleContainer missionModuleContainer = ServiceLocator.GetInstance<MissionModuleContainer>();
             _missionEventController = missionModuleContainer?.MissionEventController;
@@ -240,6 +242,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyEntity.OnDied += HandleEnemyDied;
             _targetingSystem?.RegisterTarget(_targetable, _enemyEntity);
             _battleAIRegistry?.Register(_aiController);
+            _invincibilityRegistry?.Register(_enemyEntity);
 
             // コンポーネント有効化
             SetDyingCollidersEnabled(true);
@@ -336,6 +339,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _enemyEntity.OnDied -= HandleEnemyDied;
             _targetingSystem?.UnregisterTarget(_targetable);
             _battleAIRegistry?.Unregister(_aiController);
+            _invincibilityRegistry?.Unregister(_enemyEntity);
 
             _attackReservationUsecase.Deactivate();
             _aiController.Deactivate();
@@ -373,8 +377,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public void StopGameplay()
         {
             _raycastView?.HideWarning();
-            _attackReservationUsecase?.Deactivate();
+            // 予約を破棄する前にキャンセルし、OnAttackCanceled を発火させる。
             _aiController?.CancelAttack();
+            _attackReservationUsecase?.Deactivate();
 
             if (_behaviorGraphAgent != null)
             {
@@ -483,6 +488,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private EnemyHealthHudPresenter _enemyHealthHudPresenter;
         private EnemyBattleState _battleState;
         private EnemyAIControllerRegistry _battleAIRegistry;
+        private EnemyInvincibilityRegistry _invincibilityRegistry;
         private EnemyWaveSpawnerState _waveSpawnerState;
         private bool _isDying;
         private int _attackIndex;
@@ -593,8 +599,11 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 _enemyEntity.OnDied -= HandleEnemyDied;
             }
 
-            _attackReservationUsecase?.Deactivate();
+            // 予約を破棄する前にキャンセルし、OnAttackCanceled を発火させる。
             _aiController?.CancelAttack();
+            _attackReservationUsecase?.Deactivate();
+            // 発射済みで着弾前の砲弾も消す。
+            _battleState?.CancelShells();
             _raycastView?.HideWarning();
             _aiController?.Deactivate();
             _enemyBattleAIFacade?.StopGameplay();
@@ -622,6 +631,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // ターゲットと AI の登録を解除し、当たり判定を無効にする。
             _targetingSystem?.UnregisterTarget(_targetable);
             _battleAIRegistry?.Unregister(_aiController);
+            _invincibilityRegistry?.Unregister(_enemyEntity);
             SetDyingCollidersEnabled(false);
         }
 
@@ -791,6 +801,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _healthHudPresenter?.Dispose();
             _targetingSystem?.UnregisterTarget(_targetable);
             _battleAIRegistry?.Unregister(_aiController);
+            _invincibilityRegistry?.Unregister(_enemyEntity);
             _targetable?.Dispose();
             _loadedEnemyData = null;
             _loadedMoveData = null;
