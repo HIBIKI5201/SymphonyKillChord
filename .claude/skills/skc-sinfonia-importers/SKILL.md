@@ -7,7 +7,7 @@ description: "Fetch project data into the repo with the SinfoniaOperator importe
 
 Two CLI tools pull external project data into the repo as local files.
 Both read config from `SinfoniaOperator/sinfonia-operator.env.json` (shared, in git) and
-secrets from `SinfoniaOperator/sinfonia-operator.secrets.json` (gitignored), in that order.
+secrets from `UserSettings/KillChord/secrets.json` (gitignored, shared with the Unity editor tools; the old `SinfoniaOperator/sinfonia-operator.secrets.json` is still read during migration), in that order.
 
 | Tool | Source | Destination | Token |
 |---|---|---|---|
