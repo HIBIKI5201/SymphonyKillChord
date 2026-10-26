@@ -72,7 +72,8 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
                     environmentSettingsContainer.Command);
                 _settingResetConfirmationView = new SettingResetConfirmationView(
                     settingRoot,
-                    environmentSettingsContainer.Command);
+                    environmentSettingsContainer.Command,
+                    audioSettingsContainer.Command);
             }
             catch (Exception exception)
             {

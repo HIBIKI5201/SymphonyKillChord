@@ -1,4 +1,5 @@
 using KillChord.Runtime.Adaptor.Persistent.Environment;
+using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.View.OutGame.Common;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.Persistent.Localization;
@@ -8,8 +9,9 @@ using UnityEngine.UIElements;
 namespace KillChord.Runtime.View.OutGame.Setting
 {
     /// <summary>
-    ///     環境設定・操作設定パネルの「既定値に戻す」ボタンと確認ダイアログを管理するView。
-    ///     確定すると表示中のパネルの項目だけを既定値へ戻す。保存は各パネルの「設定を保存」で行う。
+    ///     環境設定・操作設定・オーディオ設定パネルの「既定値に戻す」ボタンと確認ダイアログを管理するView。
+    ///     確定すると表示中のパネルの項目だけを既定値へ戻す。
+    ///     環境設定・操作設定は各パネルの「設定を保存」で保存し、オーディオ設定はその場で保存する。
     /// </summary>
     public sealed class SettingResetConfirmationView : IDisposable
     {
@@ -18,15 +20,19 @@ namespace KillChord.Runtime.View.OutGame.Setting
         /// </summary>
         public SettingResetConfirmationView(
             VisualElement rootElement,
-            IEnvironmentSettingsCommand environmentSettingsCommand)
+            IEnvironmentSettingsCommand environmentSettingsCommand,
+            IAudioSettingsCommand audioSettingsCommand)
         {
             // コマンドと画面の各要素を取得する。
             rootElement = rootElement
                 ?? throw new ArgumentNullException(nameof(rootElement));
             _environmentSettingsCommand = environmentSettingsCommand
                 ?? throw new ArgumentNullException(nameof(environmentSettingsCommand));
+            _audioSettingsCommand = audioSettingsCommand
+                ?? throw new ArgumentNullException(nameof(audioSettingsCommand));
             _environmentResetButton = Require<Button>(rootElement, ENVIRONMENT_RESET_BUTTON_NAME);
             _controlResetButton = Require<Button>(rootElement, CONTROL_RESET_BUTTON_NAME);
+            _audioResetButton = Require<Button>(rootElement, AUDIO_RESET_BUTTON_NAME);
             _dialog = Require<VisualElement>(rootElement, DIALOG_NAME);
             _messageLabel = Require<Label>(rootElement, MESSAGE_LABEL_NAME);
             _confirmButton = Require<Button>(rootElement, CONFIRM_BUTTON_NAME);
@@ -43,6 +49,8 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     UI_COMMON_TABLE, RESET_BUTTON_ENTRY, text => _environmentResetButton.text = text, "既定値に戻す"),
                 new LocalizedElementText(
                     UI_COMMON_TABLE, RESET_BUTTON_ENTRY, text => _controlResetButton.text = text, "既定値に戻す"),
+                new LocalizedElementText(
+                    UI_COMMON_TABLE, RESET_BUTTON_ENTRY, text => _audioResetButton.text = text, "既定値に戻す"),
                 new LocalizedElementText(
                     UI_COMMON_TABLE, MESSAGE_ENTRY, text => _messageLabel.text = text, "設定を既定値に戻しますか？"),
                 new LocalizedElementText(
@@ -85,6 +93,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _dialogNavigationScope.Deactivate();
             _environmentResetButtonPreset?.Dispose();
             _controlResetButtonPreset?.Dispose();
+            _audioResetButtonPreset?.Dispose();
             _confirmButtonActivation?.Dispose();
             _cancelButtonActivation?.Dispose();
             foreach (LocalizedElementText localizedText in _localizedTexts)
@@ -95,6 +104,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
 
         private const string ENVIRONMENT_RESET_BUTTON_NAME = "EnvironmentPanelResetButton";
         private const string CONTROL_RESET_BUTTON_NAME = "ControlPanelResetButton";
+        private const string AUDIO_RESET_BUTTON_NAME = "SoundPanelResetButton";
         private const string DIALOG_NAME = "ResetToDefaultsDialog";
         private const string MESSAGE_LABEL_NAME = "ResetToDefaultsMessage";
         private const string CONFIRM_BUTTON_NAME = "ConfirmResetToDefaultsButton";
@@ -109,8 +119,10 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly ModalNavigationScope _dialogNavigationScope = new();
 
         private readonly IEnvironmentSettingsCommand _environmentSettingsCommand;
+        private readonly IAudioSettingsCommand _audioSettingsCommand;
         private readonly Button _environmentResetButton;
         private readonly Button _controlResetButton;
+        private readonly Button _audioResetButton;
         private readonly VisualElement _dialog;
         private readonly Label _messageLabel;
         private readonly Button _confirmButton;
@@ -118,6 +130,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly LocalizedElementText[] _localizedTexts;
         private IDisposable _environmentResetButtonPreset;
         private IDisposable _controlResetButtonPreset;
+        private IDisposable _audioResetButtonPreset;
         private IDisposable _confirmButtonActivation;
         private IDisposable _cancelButtonActivation;
         private ResetTarget _pendingTarget;
@@ -140,6 +153,14 @@ namespace KillChord.Runtime.View.OutGame.Setting
         }
 
         /// <summary>
+        ///     オーディオ設定パネルの項目を戻す確認ダイアログを表示する。
+        /// </summary>
+        private void HandleAudioResetButtonActivated()
+        {
+            Show(ResetTarget.Audio);
+        }
+
+        /// <summary>
         ///     確認ダイアログで確定され、対象パネルの項目を既定値へ戻す。
         /// </summary>
         private void HandleConfirmButtonActivated()
@@ -149,14 +170,18 @@ namespace KillChord.Runtime.View.OutGame.Setting
                 return;
             }
 
-            // 戻すのはプレビューだけで、保存は「設定を保存」で行う。
-            if (_pendingTarget == ResetTarget.Environment)
+            // 環境設定・操作設定はプレビューだけ戻し、保存は「設定を保存」で行う。オーディオ設定はその場で保存する。
+            switch (_pendingTarget)
             {
-                _environmentSettingsCommand.ResetEnvironmentToDefaults();
-            }
-            else
-            {
-                _environmentSettingsCommand.ResetControlToDefaults();
+                case ResetTarget.Environment:
+                    _environmentSettingsCommand.ResetEnvironmentToDefaults();
+                    break;
+                case ResetTarget.Control:
+                    _environmentSettingsCommand.ResetControlToDefaults();
+                    break;
+                case ResetTarget.Audio:
+                    _audioSettingsCommand.ResetToDefaults();
+                    break;
             }
 
             HideAndRestoreFocus();
@@ -177,6 +202,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         {
             _environmentResetButtonPreset = _environmentResetButton.ApplyBasicButtonPreset(HandleEnvironmentResetButtonActivated);
             _controlResetButtonPreset = _controlResetButton.ApplyBasicButtonPreset(HandleControlResetButtonActivated);
+            _audioResetButtonPreset = _audioResetButton.ApplyBasicButtonPreset(HandleAudioResetButtonActivated);
 
             // ダイアログのボタンはタイトル復帰の確認と同じく、クリックと決定操作を1つの処理へまとめる。
             _confirmButton.MakeNavigable();
@@ -212,10 +238,20 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private void HideAndRestoreFocus()
         {
             Hide();
-            Button resetButton = _pendingTarget == ResetTarget.Environment
-                ? _environmentResetButton
-                : _controlResetButton;
-            resetButton.Focus();
+            GetResetButton(_pendingTarget).Focus();
+        }
+
+        /// <summary>
+        ///     対象パネルの「既定値に戻す」ボタンを取得する。
+        /// </summary>
+        private Button GetResetButton(ResetTarget target)
+        {
+            return target switch
+            {
+                ResetTarget.Environment => _environmentResetButton,
+                ResetTarget.Control => _controlResetButton,
+                _ => _audioResetButton,
+            };
         }
 
         /// <summary>
@@ -236,6 +272,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         {
             Environment,
             Control,
+            Audio,
         }
     }
 }

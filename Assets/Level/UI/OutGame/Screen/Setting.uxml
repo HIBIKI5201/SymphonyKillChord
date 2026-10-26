@@ -51,6 +51,8 @@
                         <ui:SliderInt name="VoiceVolumeSlider" low-value="0" high-value="10" value="5" show-input-field="false" page-size="1" class="setting-slider"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:VisualElement class="setting-menu-spacer"/>
+                <ui:Button text="既定値に戻す" name="SoundPanelResetButton" class="setting-menu-button ui-se-select"/>
             </ui:VisualElement>
             <ui:VisualElement name="EnvironmentPanel" class="setting-panel" style="display: none;">
                 <ui:VisualElement class="setting-panel-top-bar">
