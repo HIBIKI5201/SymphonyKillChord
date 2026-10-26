@@ -141,8 +141,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             bool hasHit = false;
             bool shouldApplyPendingHits = false;
 
-            // ロックオン対象がいない場合、仕様上は進行方向へ攻撃が発生するが敵にはHitしない。
-            if (hasTarget && HasCurrentLockOnTarget && TryResolveHitTargets(attackDefinition))
+            // ロックオン対象がいない場合は正面へ射程まで撃ち、途中の敵に当てる。
+            if (TryResolveHitTargets(attackDefinition, hasTarget && HasCurrentLockOnTarget))
             {
                 if (normalAttackDamagePolicy == SkillNormalAttackDamagePolicy.Skip)
                 {
@@ -258,8 +258,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         ///     攻撃範囲内の対象を解決し、命中対象の一覧を作る。
         /// </summary>
         /// <param name="attackDefinition"> 攻撃定義。 </param>
+        /// <param name="hasLockOnTarget"> ロックオン対象がいる場合はtrue。 </param>
         /// <returns> 命中対象が1体以上いる場合はtrue。 </returns>
-        private bool TryResolveHitTargets(AttackDefinition attackDefinition)
+        private bool TryResolveHitTargets(AttackDefinition attackDefinition, bool hasLockOnTarget)
         {
             _hitTargets.Clear();
 
@@ -277,10 +278,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             // 射程外にもダメージ減衰付きで命中させるため、探索距離は射程ではなく上限距離を使う。
             // 減衰率が0でもヒット自体は成立させる。当たらないとプレイヤーには不具合に見えるため、
             // ダメージ0の表示を出して「当たったが効いていない」ことを伝える。
+            float queryDistance = OUT_OF_RANGE_QUERY_DISTANCE;
+
+            // ロックオン対象がいない場合は正面へ射程まで撃ち、途中の敵に当てる。
+            // 狙っていない遠くの敵に当たらないよう、射程外の減衰ヒットは扱わない。
+            if (!hasLockOnTarget)
+            {
+                direction = _playerTransform.forward;
+                queryDistance = attackDefinition.Range;
+            }
+
             _targetAreaQuery.QueryFanArea(
                 origin,
                 direction,
-                OUT_OF_RANGE_QUERY_DISTANCE,
+                queryDistance,
                 attackDefinition.HalfAngleDegrees,
                 _hitTargets);
 

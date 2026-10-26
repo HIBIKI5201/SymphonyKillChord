@@ -39,7 +39,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _activeEnemies.Add(enemyEntity);
             if (_isInvincible)
             {
-                enemyEntity.StatusEffectSystem.Add(_invincibleBuff);
+                ApplyInvincible(enemyEntity, true);
             }
         }
 
@@ -54,7 +54,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 return;
             }
 
-            enemyEntity.StatusEffectSystem.Remove(_invincibleBuff);
+            ApplyInvincible(enemyEntity, false);
         }
 
         /// <summary>
@@ -67,14 +67,27 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
             _isInvincible = isInvincible;
             foreach (CharacterEntity enemyEntity in _activeEnemies)
             {
-                if (isInvincible)
-                {
-                    enemyEntity.StatusEffectSystem.Add(_invincibleBuff);
-                }
-                else
-                {
-                    enemyEntity.StatusEffectSystem.Remove(_invincibleBuff);
-                }
+                ApplyInvincible(enemyEntity, isInvincible);
+            }
+        }
+
+        /// <summary>
+        ///     敵へ無敵状態を付与または解除する。
+        ///     状態効果だけでは確定ダメージが被ダメージの補正のあとに加算されて通るため、
+        ///     Entityの無敵フラグも合わせて切り替え、ダメージを受けない状態にする。
+        /// </summary>
+        /// <param name="enemyEntity"> 対象の敵のEntity。 </param>
+        /// <param name="isInvincible"> 無敵にする場合はtrue、解除する場合はfalse。 </param>
+        private void ApplyInvincible(CharacterEntity enemyEntity, bool isInvincible)
+        {
+            enemyEntity.SetInvincible(isInvincible);
+            if (isInvincible)
+            {
+                enemyEntity.StatusEffectSystem.Add(_invincibleBuff);
+            }
+            else
+            {
+                enemyEntity.StatusEffectSystem.Remove(_invincibleBuff);
             }
         }
 
