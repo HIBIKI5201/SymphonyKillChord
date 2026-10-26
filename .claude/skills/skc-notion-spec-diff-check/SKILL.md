@@ -39,7 +39,7 @@ Before running it:
    ./SinfoniaOperator/run-tool.sh NotionMarkdownExporter      # macOS / Linux (dotnet run)
    ```
    Or pass `--output "Docs/NotionSpecifications"` explicitly to be safe regardless of CWD.
-4. Requires `NOTION_TOKEN` to be configured (gitignored `SinfoniaOperator/sinfonia-operator.secrets.json`,
+4. Requires `NOTION_TOKEN` to be configured (gitignored `UserSettings/KillChord/secrets.json`,
    or environment variable) — if missing, the exporter will say so; don't try to hardcode a token.
 5. After it finishes, sanity-check the page/database counts it prints against the last known
    counts (the precedent report table in §0.3 is a reference point) — a sudden large jump or drop
