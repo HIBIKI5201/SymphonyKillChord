@@ -33,6 +33,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
             _bgmVolumeSlider = Require<SliderInt>(rootElement, BGM_VOLUME_SLIDER_NAME);
             _soundEffectVolumeSlider = Require<SliderInt>(rootElement, SOUND_EFFECT_VOLUME_SLIDER_NAME);
             _voiceVolumeSlider = Require<SliderInt>(rootElement, VOICE_VOLUME_SLIDER_NAME);
+            _soundPanelResetButton = Require<Button>(rootElement, SOUND_PANEL_RESET_BUTTON_NAME);
             _environmentPanel = Require<VisualElement>(rootElement, ENVIRONMENT_PANEL_NAME);
             _screenModePrevButton = Require<Button>(rootElement, SCREEN_MODE_PREV_BUTTON_NAME);
             _screenModeNextButton = Require<Button>(rootElement, SCREEN_MODE_NEXT_BUTTON_NAME);
@@ -77,6 +78,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
                     _soundPanelBackButton,
                     _soundEffectVolumeSlider,
                     _voiceVolumeSlider,
+                    _soundPanelResetButton,
                 },
                 _bgmVolumeSlider);
             _navigationScope.AddChildLevel(
@@ -222,6 +224,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private const string SETTING_MENU_NAME = "SettingMenu";
         private const string SOUND_PANEL_NAME = "SoundPanel";
         private const string SOUND_PANEL_BACK_BUTTON_NAME = "SoundPanelBackButton";
+        private const string SOUND_PANEL_RESET_BUTTON_NAME = "SoundPanelResetButton";
         private const string ENVIRONMENT_PANEL_BACK_BUTTON_NAME = "EnvironmentPanelBackButton";
         private const string BGM_VOLUME_SLIDER_NAME = "BgmVolumeSlider";
         private const string SOUND_EFFECT_VOLUME_SLIDER_NAME = "SoundEffectVolumeSlider";
@@ -258,6 +261,7 @@ namespace KillChord.Runtime.View.OutGame.Setting
         private readonly SliderInt _bgmVolumeSlider;
         private readonly SliderInt _soundEffectVolumeSlider;
         private readonly SliderInt _voiceVolumeSlider;
+        private readonly Button _soundPanelResetButton;
         private readonly VisualElement _environmentPanel;
         private readonly Button _screenModePrevButton;
         private readonly Button _screenModeNextButton;
