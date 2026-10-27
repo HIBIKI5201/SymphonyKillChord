@@ -47,6 +47,8 @@ namespace KillChord.Editor.Build
 
         private const int VALIDATION_ORDER = -200;
         private const int MAX_REPORTED_ISSUES = 50;
+        /// <summary> 走査で子要素へ進む深さの上限です。DataIDはこれより浅い位置にあります。 </summary>
+        private const int MAX_PROPERTY_DEPTH = 64;
         private const string EXCLUDED_FOLDER = "Assets/DevelopProducts/";
 
         private static readonly string[] SEARCH_FOLDERS = { "Assets" };
@@ -198,11 +200,12 @@ namespace KillChord.Editor.Build
         {
             SerializedObject serializedObject = new(target);
             SerializedProperty iterator = serializedObject.GetIterator();
+            HashSet<long> visitedReferenceIds = new();
             bool enterChildren = true;
 
             while (iterator.NextVisible(enterChildren))
             {
-                enterChildren = true;
+                enterChildren = CanEnterChildren(iterator, visitedReferenceIds);
                 if (!string.Equals(iterator.type, nameof(DataID), StringComparison.Ordinal)
                     || !SerializedPropertyFieldResolver.TryResolve(
                         target.GetType(),
@@ -253,6 +256,29 @@ namespace KillChord.Editor.Build
                     checker.AddReference(collectionKey, id, hashId, location);
                 }
             }
+        }
+
+        /// <summary>
+        ///     走査で子要素へ進んでよいか判定します。辿り済みのSerializeReferenceと深すぎる入れ子には進みません。
+        /// </summary>
+        /// <param name="property"> 判定するプロパティです。 </param>
+        /// <param name="visitedReferenceIds"> このオブジェクトで辿り済みのSerializeReferenceのIDです。 </param>
+        /// <returns> 子要素へ進む場合はtrueです。 </returns>
+        private static bool CanEnterChildren(SerializedProperty property, HashSet<long> visitedReferenceIds)
+        {
+            if (property.depth >= MAX_PROPERTY_DEPTH)
+            {
+                return false;
+            }
+
+            // BehaviorGraphのノードのように互いを参照し合うSerializeReferenceは、同じ参照先を何度も辿ると
+            // 走査が終わらずメモリを使い切る（自動ビルド run #901 で発生）。参照先ごとに一度だけ辿る。
+            if (property.propertyType == SerializedPropertyType.ManagedReference)
+            {
+                return visitedReferenceIds.Add(property.managedReferenceId);
+            }
+
+            return true;
         }
 
         /// <summary>
