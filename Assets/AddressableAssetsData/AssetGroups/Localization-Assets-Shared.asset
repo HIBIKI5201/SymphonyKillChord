@@ -16,7 +16,7 @@ MonoBehaviour:
   m_GUID: f7ea32954e3ee4a42a4d79228e847ed3
   m_SerializeEntries:
   - m_GUID: 28ef56a5b71510142b480be2aea60eb6
-    m_Address: Assets/Localization/Tables/TutorialPopups Shared Data.asset
+    m_Address: TutorialPopups Shared Data
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
