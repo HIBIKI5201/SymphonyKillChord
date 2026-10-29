@@ -37,6 +37,15 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
+        ///     表示中の武器の表示を変えず、SE・銃口演出・薬莢だけを再生します。
+        ///     多段攻撃の2発目以降に使います。武器が表示されていない場合は何もしません。
+        /// </summary>
+        public void PlayCurrentWeaponAttackEffects()
+        {
+            _currentWeaponView?.PlayAttackEffects();
+        }
+
+        /// <summary>
         ///     表示中の武器を非表示にする。
         ///     攻撃アニメーション終了時のAnimation Eventから呼び出す。
         /// </summary>
