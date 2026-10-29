@@ -102,7 +102,7 @@ namespace KillChord.Editor.Localization
                 ATTACK_GLYPH + "ボタンを押すことで攻撃が可能\n画面下のバーに波があり、\n色によって攻撃の種類が変わる",
                 "Press the " + ATTACK_GLYPH + " button to attack.\nThere's a wave on the bar at the bottom of the screen,\nand the color changes the type of attack."),
 
-            new("tutorial.popup.kill_chord.title", "キルコード（スキル）", "Kill Chord (Skill)"),
+            new("tutorial.popup.kill_chord.title", "キルコード", "Kill Chord"),
             new("tutorial.popup.kill_chord.body",
                 "画面下にある赤枠内にある六角形の色や\n白枠のアイコンのタイミングでの\n攻撃を連続で行うことで、\nキルコードという特殊な攻撃を発動できる",
                 "By landing attacks in a row that match\nthe colors of the hexagons\ninside the red frame, and the timing of the icons\nin the white frame at the bottom of the screen,\nyou can trigger a special attack called a Kill Chord."),
