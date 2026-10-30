@@ -124,7 +124,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416025
-    m_Localized: 'Unlock Skill (Required Points: {0})'
+    m_Localized: "Unlock Kill Chord (Required Points: {0})"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416026
@@ -132,7 +132,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416027
-    m_Localized: Show Skill Video
+    m_Localized: "Show Kill Chord Video"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416028
@@ -168,15 +168,15 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416036
-    m_Localized: Please select a skill
+    m_Localized: "Please select a Kill Chord"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416037
-    m_Localized: Skill Type
+    m_Localized: "Kill Chord Type"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416038
-    m_Localized: Skill Effect
+    m_Localized: "Kill Chord Effect"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416039
@@ -192,7 +192,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416042
-    m_Localized: Your equipped skill changes haven't been saved. Save them?
+    m_Localized: "Your equipped Kill Chord changes haven't been saved. Save them?"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416043
@@ -232,11 +232,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416052
-    m_Localized: 'Skill Genre:'
+    m_Localized: "Kill Chord Genre:"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416053
-    m_Localized: ' Skill Effect'
+    m_Localized: " Kill Chord Effect"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416054
@@ -244,7 +244,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416055
-    m_Localized: Unlock this skill?
+    m_Localized: "Unlock this node?"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416056
@@ -252,7 +252,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416057
-    m_Localized: Skills to Unlock
+    m_Localized: "Kill Chords to Unlock"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416058
@@ -264,11 +264,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416060
-    m_Localized: Equipped Skills
+    m_Localized: "Equipped Kill Chords"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416061
-    m_Localized: Equipped Skill Details
+    m_Localized: "Equipped Kill Chord Details"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416062
@@ -320,7 +320,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416074
-    m_Localized: 'Skill Type: '
+    m_Localized: "Kill Chord Type: "
     m_Metadata:
       m_Items: []
   - m_Id: 1724416075
@@ -621,11 +621,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2081000116
-    m_Localized: "Advance your research to unlock new skills and upgrades."
+    m_Localized: "Advance your research to unlock new Kill Chords and upgrades."
     m_Metadata:
       m_Items: []
   - m_Id: 2081000117
-    m_Localized: "Combine the skills you have unlocked to customize your weapons."
+    m_Localized: "Combine the Kill Chords you have unlocked to customize your weapons."
     m_Metadata:
       m_Items: []
   - m_Id: 2081000118
@@ -654,6 +654,22 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 2081000124
     m_Localized: "{0}  Lv.{1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000001
+    m_Localized: Reset to Defaults
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000002
+    m_Localized: "Reset these settings to their defaults?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000003
+    m_Localized: Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000004
+    m_Localized: Cancel
     m_Metadata:
       m_Items: []
   references:

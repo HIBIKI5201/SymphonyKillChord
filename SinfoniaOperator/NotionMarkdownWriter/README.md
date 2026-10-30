@@ -33,7 +33,7 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 }
 ```
 
-`NOTION_TOKEN`は`sinfonia-operator.secrets.json`または環境変数から読み取ります。
+`NOTION_TOKEN`は秘密設定`UserSettings/KillChord/secrets.json`または環境変数から読み取ります。旧パス`SinfoniaOperator/sinfonia-operator.secrets.json`も移行期間中は読み込みますが、読み込んだときは移行を促すログを出します。
 この公開設定はGitで共有されるため、許可ページの追加はレビュー対象になります。
 
 ## 使い方
