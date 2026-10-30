@@ -34,6 +34,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <param name="playerTransform"> 判定の原点となるプレイヤーTransformです。 </param>
         /// <param name="pendingAttackEffectService"> 攻撃の多段ヒットを管理するサービスです。 </param>
         /// <param name="attackOcclusion"> 攻撃が障害物に遮られるかを判定するViewModelです。 </param>
+        /// <param name="attackCooldown"> 回避の後に攻撃できない時間（拍数）です。 </param>
+        /// <param name="attackRecoveryBeats"> 通常攻撃の攻撃硬直（拍数）です。スキルが発動した攻撃はスキルの値を使います。 </param>
         public PlayerAttackController(
             AttackResultPresenter presenter,
             PlayerAttackPresenter attackPresenter,
@@ -49,7 +51,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
             PendingAttackEffectService pendingAttackEffectService,
             IAttackOcclusionViewModel attackOcclusion,
             float attackRotationSpeed,
-            float attackCooldown
+            float attackCooldown,
+            AttackRecoveryBeats attackRecoveryBeats
         )
         {
             _attackIntervalEvaluator = attackIntervalEvaluator;
@@ -69,6 +72,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             _attackCooldown = attackCooldown * (60d / musicSyncState.Bpm);
             _attackCooldownRemainig = 0d;
+            _attackRecoveryBeats = attackRecoveryBeats;
+            CurrentRecoveryBeats = attackRecoveryBeats.Value;
         }
 
         /// <summary> プレイヤーが攻撃を実行したときに発火します。入力1回につき1回だけ発火します。 </summary>
@@ -86,7 +91,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary> 現在攻撃中かどうかを表すプロパティ。 </summary>
         public bool IsAttacking => _attackIntervalEvaluator.IsAttacking;
 
-        /// <summary> 攻撃クールダウン中かどうかを表すプロパティ。 </summary>
+        /// <summary> 回避後の攻撃クールダウン中かどうかを表すプロパティ。 </summary>
         public bool IsAttackCooldown => _attackCooldownRemainig > 0f;
 
         /// <summary> ロックオン対象が存在する場合はtrue。 </summary>
@@ -97,6 +102,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
         /// <summary> 攻撃時に対象へ向き直る回転速度。 </summary>
         public float AttackRotationSpeed { get; }
+
+        /// <summary> 直近の攻撃で使った攻撃硬直の拍数。攻撃前は通常攻撃の値。 </summary>
+        public float CurrentRecoveryBeats { get; private set; }
 
         /// <summary>
         ///     攻撃を実行する。
@@ -118,7 +126,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             bool hasTarget = TryUpdateCurrentTarget();
 
-            var normalAttackDamagePolicy = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now, musicTime, isJustHit, _actionRestrictionState.CanUseSkill);
+            var normalAttackDamagePolicy = _skillController.TryExecuteSkill(BattleActionType.Attack, beatType, now, musicTime, isJustHit, _actionRestrictionState.CanUseSkill, out AttackRecoveryBeats? skillRecoveryBeats);
 
             IAttackHitEffect[] pendingHitEffects = _pendingAttackEffectService.Consume();
 
@@ -129,8 +137,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return false;
             }
 
-            StartAttackInterval();
-            StartAttackCooldown();
+            // スキルが発動した攻撃はスキルの硬直、それ以外は通常攻撃の硬直を拍数で使う。
+            StartAttackInterval(skillRecoveryBeats ?? _attackRecoveryBeats);
             OnAttackBeatExecuted?.Invoke(beatType);
             _attackPresenter.Push(beatType, isJustHit);
             resultBeatType = (int)beatType;
@@ -180,14 +188,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         }
 
         /// <summary>
-        ///     攻撃インターバルを開始する。
+        ///     攻撃硬直を開始する。拍数を現在の1拍の長さで秒数に直すため、BPMが変わっても拍に合う。
         /// </summary>
-        public void StartAttackInterval()
+        /// <param name="recoveryBeats"> 攻撃硬直の拍数。 </param>
+        public void StartAttackInterval(AttackRecoveryBeats recoveryBeats)
         {
-            _attackIntervalEvaluator.EvaluateInterval();
+            CurrentRecoveryBeats = recoveryBeats.Value;
+            _attackIntervalEvaluator.EvaluateInterval(recoveryBeats.ToInterval(_musicSyncState.BeatLength));
         }
 
-        /// <summary> 攻撃クールダウンを開始する。 </summary>
+        /// <summary> 回避後の攻撃クールダウンを開始する。 </summary>
         public void StartAttackCooldown()
         {
             _attackCooldownRemainig = _attackCooldown;
@@ -468,6 +478,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         private readonly Transform _playerTransform;
         private readonly PendingAttackEffectService _pendingAttackEffectService;
         private readonly IAttackOcclusionViewModel _attackOcclusion;
+        private readonly AttackRecoveryBeats _attackRecoveryBeats;
         private readonly List<TargetAreaHit> _hitTargets = new List<TargetAreaHit>();
         private readonly List<AttackTarget> _attackTargets = new List<AttackTarget>();
         private readonly List<AttackResult> _hitResults = new List<AttackResult>();

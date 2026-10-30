@@ -36,10 +36,11 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <summary>
         ///     攻撃の硬直時間を評価するメソッド。攻撃の開始から指定時間が経過するまでIsAttackingフラグを立てる。
         /// </summary>
-        public void EvaluateInterval()
+        /// <param name="duration"> 今回の攻撃の硬直時間。攻撃ごとに拍数から求めた秒数を渡す。 </param>
+        public void EvaluateInterval(AttackInterval duration)
         {
             int attackIntervalId = ++_currentIntervalId;
-            EvaluateAttackIntervalAsync(_attackIntervalEntity.Interval, attackIntervalId).Forget();
+            EvaluateAttackIntervalAsync(duration, attackIntervalId).Forget();
         }
         
         private readonly AttackIntervalEntity _attackIntervalEntity;
