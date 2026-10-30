@@ -9,7 +9,7 @@ namespace KillChord.Runtime.Domain.InGame.Battle
         float CurrentBarrier { get; }
 
         /// <summary>
-        ///     バリアを追加する。
+        ///     バリアを追加する。上限を超えた分は捨てる。
         /// </summary>
         /// <param name="amount"> 追加するバリアの量。 </param>
         void AddBarrier(float amount);

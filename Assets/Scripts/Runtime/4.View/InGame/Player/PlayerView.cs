@@ -198,6 +198,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 _healthHudPresenter?.Dispose();
             }
 
+            if (PlayerAttackController != null)
+            {
+                PlayerAttackController.OnFollowUpShotFired -= HandleFollowUpShotFired;
+            }
+
             _dodgeMaterialEffectHandle.TryCancel();
             _damageEffectHandle.TryCancel();
         }
@@ -234,6 +239,10 @@ namespace KillChord.Runtime.View.InGame.Player
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
             _healthHudPresenter.OnDamaged += PlayDamageFeedback;
+            if (PlayerAttackController != null)
+            {
+                PlayerAttackController.OnFollowUpShotFired += HandleFollowUpShotFired;
+            }
             EventBus<EOnTakeDamage>.Register(HandleTakeDamage);
             EventBus<EOnLockOnAcquired>.Register(HandleLockOnAcquired);
 
@@ -908,6 +917,15 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 PlaySound(_hitSoundSource, null);
             }
+        }
+
+        /// <summary>
+        ///     多段攻撃の2発目以降の発射演出を再生します。
+        ///     対象がいなくても1射ごとにSE・マズルフラッシュ・薬莢を出し、3点バーストに見せます。
+        /// </summary>
+        private void HandleFollowUpShotFired()
+        {
+            _attackWeaponView?.PlayCurrentWeaponAttackEffects();
         }
 
         /// <summary>

@@ -1,0 +1,28 @@
+{
+    "name": "KillChord.Tests.EditMode",
+    "rootNamespace": "KillChord.Tests.EditMode",
+    "references": [
+        "GUID:912501d3a9c2c414ba93298e84096560",
+        "GUID:dd408af17d035564b957321d79adba1d",
+        "GUID:5063a8a7d003d7b458ff51a6863e5e74",
+        "GUID:65db0e58aded98845bffcf0bb939daac",
+        "GUID:d07e9a279d4339845a9adaacdd0a1727",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

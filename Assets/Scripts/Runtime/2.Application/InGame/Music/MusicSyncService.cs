@@ -202,13 +202,16 @@ namespace KillChord.Runtime.Application.InGame.Music
 
         /// <summary>
         ///     バトルアクションの履歴を登録する。
+        ///     記録時刻とゲージの基準は、曲の8拍子・6拍子のタイミングのうち最も近いものへクオンタイズする。
         /// </summary>
         /// <param name="actionType"> アクションの種類。 </param>
         /// <param name="beatType"> 拍の種類。 </param>
         public void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType)
         {
-            _rhythmState.Enqueue(beatType, (float)_currentPlayTime, actionType);
-            _gaugeStartPlayTime = _currentPlayTime;
+            // 押した時刻のままだとJust幅の中のずれが次の基準へ積み重なるため、曲の拍へ揃える。
+            double quantizedPlayTime = MusicTimingCalculator.QuantizePlayTime(_rhythmDefinition, _currentPlayTime);
+            _rhythmState.Enqueue(beatType, (float)quantizedPlayTime, actionType);
+            _gaugeStartPlayTime = quantizedPlayTime;
         }
 
         /// <summary>

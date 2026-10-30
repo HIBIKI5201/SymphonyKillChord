@@ -25,6 +25,9 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> 視野外による解除を猶予する残り時間。 </summary>
         public float ViewportGraceRemaining => _viewportGraceTimer;
 
+        /// <summary> 蓄積中の視点操作の向き。画面の右と上を正とする。 </summary>
+        public Vector2 LookDirection => _breakTracker.BreakDirection;
+
         /// <summary>
         ///     ロックオンの開始・解除時に、蓄積した判定状態を初期化する。
         /// </summary>
@@ -54,28 +57,40 @@ namespace KillChord.Runtime.View.InGame.Camera
         }
 
         /// <summary>
-        ///     1フレーム分の時間を進め、オートロックオンを解除するべきかを返す。
+        ///     強い視点操作で対象を切り替えた後に、視点操作の蓄積を初期化して視野外解除の猶予を与え直す。
+        ///     非命中時間は変えない。
+        /// </summary>
+        public void ResetOnLookSwitch()
+        {
+            _breakTracker.Reset();
+            ExtendViewportGrace();
+        }
+
+        /// <summary>
+        ///     1フレーム分の時間を進め、オートロックオンを解除するべきかとその理由を返す。
         /// </summary>
         /// <param name="context"> 今フレームの更新コンテキスト。 </param>
         /// <param name="isTargetWithinViewport"> ロックオン対象が有効ビューポート内にあるかどうか。 </param>
-        /// <returns> オートロックオンを解除するべき場合は true。 </returns>
-        public bool Update(in CameraUpdateContext context, bool isTargetWithinViewport)
+        /// <returns> 解除する理由。解除しない場合は <see cref="CameraAutoLockOnReleaseReason.None"/>。 </returns>
+        public CameraAutoLockOnReleaseReason Update(in CameraUpdateContext context, bool isTargetWithinViewport)
         {
             _idleTimer += context.DeltaTime;
             _viewportGraceTimer = Mathf.Max(0f, _viewportGraceTimer - context.DeltaTime);
 
             if (_idleTimer >= _config.AutoLockOnReleaseDelay)
             {
-                return true;
+                return CameraAutoLockOnReleaseReason.Idle;
             }
 
             if (_viewportGraceTimer <= 0f && !isTargetWithinViewport)
             {
-                return true;
+                return CameraAutoLockOnReleaseReason.OutOfViewport;
             }
 
             // 視点操作の蓄積は、ほかの条件で解除しないフレームだけ進める。
-            return _breakTracker.Update(context);
+            return _breakTracker.Update(context)
+                ? CameraAutoLockOnReleaseReason.StrongLook
+                : CameraAutoLockOnReleaseReason.None;
         }
 
         private readonly CameraConfig _config;

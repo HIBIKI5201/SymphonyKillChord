@@ -253,9 +253,20 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <returns> 登録済みのDataID一覧です。 </returns>
         public static IReadOnlyList<SourceDataIDOption> GetOptions(string collectionKey)
         {
+            return GetOptions(collectionKey, GameDataVariantEditorState.SelectedVariant);
+        }
+
+        /// <summary>
+        ///     ゲームデータ種別を指定して、指定カテゴリへ登録済みのDataID一覧を取得します。
+        /// </summary>
+        /// <param name="collectionKey"> 取得するCollectionKeyです。 </param>
+        /// <param name="variant"> 解決対象のゲームデータ種別です。 </param>
+        /// <returns> 登録済みのDataID一覧です。 </returns>
+        public static IReadOnlyList<SourceDataIDOption> GetOptions(string collectionKey, GameDataVariant variant)
+        {
             List<SourceDataIDOption> options = new();
             if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out SourceDataProviderSettings.SourceCollectionMapping mapping)
-                || !TryResolveAsset(mapping.DataAssetAddressableKey, out ScriptableObject dataAsset))
+                || !TryResolveAsset(mapping.DataAssetAddressableKey, variant, out ScriptableObject dataAsset, out _, out _))
             {
                 return options;
             }
@@ -299,8 +310,29 @@ namespace KillChord.Editor.SourceDataProvider.Core
             UnityEngine.Object target,
             string propertyPath)
         {
+            return IsAuthoringProperty(
+                collectionKey,
+                GameDataVariantEditorState.SelectedVariant,
+                target,
+                propertyPath);
+        }
+
+        /// <summary>
+        ///     ゲームデータ種別を指定して、対象DataIDが生成側フィールドか判定します。
+        /// </summary>
+        /// <param name="collectionKey"> DataIDのCollectionKeyです。 </param>
+        /// <param name="variant"> 解決対象のゲームデータ種別です。 </param>
+        /// <param name="target"> DataIDを保持するUnityオブジェクトです。 </param>
+        /// <param name="propertyPath"> DataIDのプロパティパスです。 </param>
+        /// <returns> 生成側フィールドの場合はtrueです。 </returns>
+        public static bool IsAuthoringProperty(
+            string collectionKey,
+            GameDataVariant variant,
+            UnityEngine.Object target,
+            string propertyPath)
+        {
             if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out SourceDataProviderSettings.SourceCollectionMapping mapping)
-                || !TryResolveAsset(mapping.DataAssetAddressableKey, out ScriptableObject dataAsset))
+                || !TryResolveAsset(mapping.DataAssetAddressableKey, variant, out ScriptableObject dataAsset, out _, out _))
             {
                 return true;
             }

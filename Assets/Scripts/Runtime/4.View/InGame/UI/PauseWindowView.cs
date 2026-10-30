@@ -69,7 +69,7 @@ namespace KillChord.Runtime.View.InGame.UI
             Cursor.visible = true;
 
             // 上下移動での選択を始められるよう、先頭のボタンへフォーカスを移す。
-            SelectButton(_restartButton);
+            SelectButton(GetFirstButton());
         }
 
         /// <summary>
@@ -98,6 +98,11 @@ namespace KillChord.Runtime.View.InGame.UI
         {
             _isInteractionEnabled = isEnabled;
             if (!isEnabled) { _isCancelPending = false; }
+            if (_resumeButton != null)
+            {
+                _resumeButton.interactable = isEnabled;
+            }
+
             if (_restartButton != null)
             {
                 _restartButton.interactable = isEnabled;
@@ -115,13 +120,16 @@ namespace KillChord.Runtime.View.InGame.UI
         public void RestoreInteraction()
         {
             SetInteractionEnabled(true);
-            SelectButton(_restartButton);
+            SelectButton(GetFirstButton());
         }
 
         [SerializeField, Tooltip("表示と非表示を切り替えるウィンドウのルートオブジェクトです。")]
         private Image _windowRoot;
 
-        [SerializeField, Tooltip("ステージをリスタートするボタンです。表示時に最初に選択されます。")]
+        [SerializeField, Tooltip("ポーズを解除して戦闘へ戻るボタンです。表示時に最初に選択されます。")]
+        private Button _resumeButton;
+
+        [SerializeField, Tooltip("ステージをリスタートするボタンです。")]
         private Button _restartButton;
 
         [SerializeField, Tooltip("タイトルへ戻るボタンです。")]
@@ -188,7 +196,7 @@ namespace KillChord.Runtime.View.InGame.UI
             }
 
             GameObject selected = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
-            return selected == null || selected == _restartButton?.gameObject || selected == _returnToTitleButton?.gameObject;
+            return selected == null || selected == _resumeButton?.gameObject || selected == _restartButton?.gameObject || selected == _returnToTitleButton?.gameObject;
         }
 
         /// <summary>
@@ -208,6 +216,15 @@ namespace KillChord.Runtime.View.InGame.UI
                 return;
             }
 
+            if (_resumeButton != null)
+            {
+                _resumeButton.onClick.AddListener(HandleResumeButtonClicked);
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(PauseWindowView)}] ゲームに戻るボタンが設定されていません。", this);
+            }
+
             _restartButton.onClick.AddListener(HandleRestartButtonClicked);
             _returnToTitleButton.onClick.AddListener(HandleReturnToTitleButtonClicked);
 
@@ -221,6 +238,11 @@ namespace KillChord.Runtime.View.InGame.UI
         private void OnDestroy()
         {
             UnbindCancelInput();
+            if (_resumeButton != null)
+            {
+                _resumeButton.onClick.RemoveListener(HandleResumeButtonClicked);
+            }
+
             if (_restartButton != null)
             {
                 _restartButton.onClick.RemoveListener(HandleRestartButtonClicked);
@@ -229,6 +251,17 @@ namespace KillChord.Runtime.View.InGame.UI
             if (_returnToTitleButton != null)
             {
                 _returnToTitleButton.onClick.RemoveListener(HandleReturnToTitleButtonClicked);
+            }
+        }
+
+        /// <summary>
+        ///     ゲームに戻るボタンのクリックを、取消操作と同じ再開要求として通知する。
+        /// </summary>
+        private void HandleResumeButtonClicked()
+        {
+            if (_isInteractionEnabled)
+            {
+                OnCancelRequested?.Invoke();
             }
         }
 
@@ -248,6 +281,15 @@ namespace KillChord.Runtime.View.InGame.UI
             OnReturnToTitleRequested?.Invoke();
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+        }
+
+        /// <summary>
+        ///     表示時に最初に選択するボタンを返す。ゲームに戻るボタンが無い場合はリスタートボタン。
+        /// </summary>
+        /// <returns> 最初に選択するボタン。 </returns>
+        private Button GetFirstButton()
+        {
+            return _resumeButton != null ? _resumeButton : _restartButton;
         }
 
         /// <summary>
