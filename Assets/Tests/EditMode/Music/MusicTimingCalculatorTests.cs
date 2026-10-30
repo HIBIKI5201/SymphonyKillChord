@@ -81,6 +81,33 @@ namespace KillChord.Tests.EditMode.Music
             Assert.That(MusicTimingCalculator.TryCreateLeadTiming(currentBar, 1d, out _), Is.False);
         }
 
+        /// <summary>
+        ///     8拍子・6拍子のタイミングのうち最も近いものへスナップすることを確認します。
+        ///     BPM120・オフセット0.25秒なので、1/8小節は0.25秒、1/6小節は約0.333秒です。
+        /// </summary>
+        [TestCase(0.25d + 0.27d, 0.25d + 0.25d)]
+        [TestCase(0.25d + 0.32d, 0.25d + 2d / 6d)]
+        [TestCase(0.25d + 1.04d, 0.25d + 1d)]
+        [TestCase(0.25d + 1.95d, 0.25d + 2d)]
+        public void QuantizePlayTime_SnapsToNearestEightOrSixDivision(double playTime, double expected)
+        {
+            RhythmDefinition rhythm = new(RhythmTestData.BPM, 0.25d);
+
+            Assert.That(MusicTimingCalculator.QuantizePlayTime(rhythm, playTime), Is.EqualTo(expected).Within(TOLERANCE));
+        }
+
+        /// <summary>
+        ///     最初の小節頭より前のスナップ結果が負にならないことを確認します。
+        /// </summary>
+        [Test]
+        public void QuantizePlayTime_BeforeOffset_IsNotNegative()
+        {
+            RhythmDefinition rhythm = new(RhythmTestData.BPM, 0.1d);
+
+            Assert.That(MusicTimingCalculator.QuantizePlayTime(rhythm, 0d), Is.EqualTo(0.1d).Within(TOLERANCE));
+            Assert.That(MusicTimingCalculator.QuantizePlayTime(rhythm, 0d), Is.GreaterThanOrEqualTo(0d));
+        }
+
         private const double TOLERANCE = 1e-6d;
     }
 }
