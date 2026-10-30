@@ -88,6 +88,7 @@ Docs/agent/
 | `reports/2026-10-01_design-review-ui-ux.md` | 全体設計レビュー: 画面遷移・入力・オンボーディング・アクセシビリティ（Issue #2416） |
 | `reports/2026-10-01_design-review-qa.md` | 全体設計レビュー: 自動テスト・QA シート・再検証・リリース判定（Issue #2417） |
 | `reports/2026-10-01_design-review-release.md` | 全体設計レビュー: ビルド・署名・ストア・性能・権利・セーブ互換（Issue #2418） |
+| `reports/2026-10-27_tutorial-kill-step-deadlock.md` | チュートリアルの敵撃破ステップで敵が1体足りず進めなくなる不具合の原因調査（無敵バフを確定ダメージが貫通） |
 
 ## 旧置き場から移したもの（Issue #2081）
 

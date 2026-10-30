@@ -159,14 +159,15 @@ namespace SinfoniaStudio.DiscordLogExporter
                 {
                     string directory = Path.GetDirectoryName(Path.GetFullPath(explicitConfigPath)) ??
                                        Directory.GetCurrentDirectory();
-                    OperatorConfig.LoadJsonFile(Path.Combine(directory, OperatorConfig.SECRETS_CONFIG_FILE_NAME));
+                    string? secretsPath = OperatorConfig.FindSecretsConfigFile(new[] { directory });
+                    if (secretsPath != null) { OperatorConfig.LoadJsonFile(secretsPath); }
                 }
 
                 return null;
             }
 
             string? environmentConfigPath = FindConfigFile(OperatorConfig.ENVIRONMENT_CONFIG_FILE_NAME);
-            string? secretsConfigPath = FindConfigFile(OperatorConfig.SECRETS_CONFIG_FILE_NAME);
+            string? secretsConfigPath = OperatorConfig.FindSecretsConfigFile(GetSearchStartDirectories());
             string? legacyConfigPath = FindConfigFile(OperatorConfig.LEGACY_CONFIG_FILE_NAME);
             if (environmentConfigPath != null)
             {
