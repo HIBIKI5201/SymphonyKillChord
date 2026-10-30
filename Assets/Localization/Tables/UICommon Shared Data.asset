@@ -415,6 +415,10 @@ MonoBehaviour:
     m_Key: ui.notification.save_reset
     m_Metadata:
       m_Items: []
+  - m_Id: 1870000005
+    m_Key: ui.notification.save_recovered
+    m_Metadata:
+      m_Items: []
   - m_Id: 1880000001
     m_Key: ui.setting.control
     m_Metadata:
@@ -609,6 +613,22 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 2081000124
     m_Key: ui.skill_detail.level_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000001
+    m_Key: ui.setting.reset_to_defaults
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000002
+    m_Key: ui.setting.reset_to_defaults_message
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000003
+    m_Key: ui.setting.confirm_reset_to_defaults
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000004
+    m_Key: ui.setting.cancel_reset_to_defaults
     m_Metadata:
       m_Items: []
   m_Metadata:

@@ -58,6 +58,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <summary> 実行順です。 </summary>
         public override int Order => 500;
 
+        /// <summary> 攻撃を遮るレイヤーの既定値。Obstacle（レイヤー6）です。 </summary>
+        private const int DEFAULT_ATTACK_OBSTACLE_LAYERS = 1 << 6;
+        /// <summary> 攻撃の遮蔽判定でレイを通す高さの既定値（メートル）。腰の高さに合わせています。 </summary>
+        private const float DEFAULT_ATTACK_OCCLUSION_RAY_HEIGHT = 1f;
+
         [SerializeField, Tooltip("プレイヤー移動設定です。")]
         private PlayerMoveSpecAsset _playerConfig;
         [SerializeField, Tooltip("プレイヤーViewプレハブです。")]
@@ -77,6 +82,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private string _mobileStickFlickInputConfigKey;
         [SerializeField, Tooltip("被弾時のエフェクトを再生するViewです。")]
         private ReusableParticleSystemView _damageEffectView;
+        [SerializeField, Tooltip("プレイヤーの攻撃を遮る障害物のレイヤーです。")]
+        private LayerMask _attackObstacleLayers = DEFAULT_ATTACK_OBSTACLE_LAYERS;
+        [SerializeField, Tooltip("攻撃の遮蔽判定で、プレイヤーと敵の足元からレイを通す高さ（メートル）です。"), Min(0f)]
+        private float _attackOcclusionRayHeight = DEFAULT_ATTACK_OCCLUSION_RAY_HEIGHT;
 
         [Space]
         [Header("キャラクターデータ（テスト用）")]
@@ -146,7 +155,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
-#if UNITY_ANDROID || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
             if (_mobileStickFlickInput != null)
             {
                 _loadedMobileStickFlickInputConfig =
@@ -345,6 +354,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 targetSystemContainer.TargetAreaQuery,
                 _player.transform,
                 pendingAttackEffectService,
+                new AttackOcclusionView(_attackObstacleLayers, _attackOcclusionRayHeight),
                 (float)parameter.AttackRotationSpeed,
                 (float)parameter.AttackCooldown.Value);
             _moduleContainer.SetActionRestrictionState(actionRestrictionState);
@@ -537,7 +547,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             _playerAttackSignal?.Dispose();
             _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();
-#if UNITY_ANDROID || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
             _mobileStickFlickInputConfigKey.ReleaseLoadedAsset(this);
             _loadedMobileStickFlickInputConfig = null;
 #endif
@@ -555,15 +565,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
         }
 
         /// <summary>
-        ///     Androidの仮想スティックフリック入力を入力Viewへ接続する。
+        ///     モバイル（Android・iOS）の仮想スティックフリック入力を入力Viewへ接続する。
         /// </summary>
         /// <param name="inputView"> フリック入力の通知先。 </param>
         private void InitializeMobileStickFlickInput(PlayerInputView inputView)
         {
-#if UNITY_ANDROID || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
             if (_mobileStickFlickInput == null)
             {
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
                 Debug.LogWarning(
                     $"[{nameof(PlayerInitializer)}] {nameof(MobileStickFlickInput)} が設定されていません。",
                     this);
@@ -580,7 +590,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void UninitializeMobileStickFlickInput()
         {
-#if UNITY_ANDROID || UNITY_EDITOR
+#if UNITY_ANDROID || UNITY_IOS || UNITY_EDITOR
             _mobileStickFlickInput?.Uninitialize();
 #endif
         }

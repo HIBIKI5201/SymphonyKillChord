@@ -63,13 +63,13 @@ namespace KillChord.Runtime.View.OutGame.SkillTree
         /// <summary>
         ///     返却ポイントを表示して確認ダイアログを開く。
         /// </summary>
-        /// <param name="refundPoints"> 返却予定の研究ポイント。 </param>
+        /// <param name="refundPoints"> 返却予定の解放ポイント。 </param>
         public void Show(int refundPoints)
         {
             _messageLocalizedText?.Dispose();
             _messageLocalizedText = new LocalizedElementText(
                 UI_COMMON_TABLE, "ui.skill_tree.reset_message_format", text => _messageLabel.text = text,
-                $"スキルツリーをリセットしますか？\n返却される研究ポイント：{refundPoints}",
+                $"スキルツリーをリセットしますか？\n返却される解放ポイント：{refundPoints}",
                 new object[] { refundPoints });
             _confirmButton.SetEnabled(refundPoints > 0);
             _dialog.style.display = DisplayStyle.Flex;

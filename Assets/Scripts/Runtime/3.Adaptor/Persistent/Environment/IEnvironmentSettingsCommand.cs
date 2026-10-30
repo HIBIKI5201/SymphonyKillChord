@@ -69,9 +69,14 @@ namespace KillChord.Runtime.Adaptor.Persistent.Environment
         void ToggleButtonLayout();
 
         /// <summary>
-        ///     すべての環境設定を既定値へ戻す。
+        ///     環境設定パネルの項目を既定値へ戻す。表示言語は戻さない。
         /// </summary>
-        void ResetToDefaults();
+        void ResetEnvironmentToDefaults();
+
+        /// <summary>
+        ///     操作設定パネルの項目を既定値へ戻す。
+        /// </summary>
+        void ResetControlToDefaults();
 
         /// <summary>
         ///     プレビュー中の変更を保存として確定する。

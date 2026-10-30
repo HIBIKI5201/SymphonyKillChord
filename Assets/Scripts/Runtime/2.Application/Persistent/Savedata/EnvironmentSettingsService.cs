@@ -35,6 +35,14 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         }
 
         /// <summary>
+        ///     初回起動時と同じ既定値の環境設定を作成する。
+        /// </summary>
+        public EnvironmentSettingsData CreateDefaultSettings()
+        {
+            return _environmentSettingsRepository.CreateDefaultSettings();
+        }
+
+        /// <summary>
         ///     最新の環境設定を保存キューへ追加する。
         /// </summary>
         public void QueueSave(EnvironmentSettingsData environmentSettings)

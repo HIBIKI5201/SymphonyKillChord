@@ -31,6 +31,9 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="updateCandidateAction"> 候補ターゲット更新処理。</param>
         /// <param name="trySwitchTargetFunc"> 別ターゲットへの切り替え処理。</param>
         /// <param name="trySwitchToNextTargetFunc"> 現在ターゲットを除いた次のターゲットへの切り替え処理。</param>
+        /// <param name="trySwitchTargetInScreenDirectionFunc">
+        ///     画面上の方向と、ワールド座標をビューポート座標へ変換する処理を受け取り、その方向の敵へ切り替える処理。
+        /// </param>
         /// <param name="trySetTargetByIdFunc"> 指定IDのターゲットを現在ターゲットへ設定する処理。</param>
         /// <param name="followCalculator"> 追従移動計算クラス。</param>
         /// <param name="lockOnRotationCalculator"> ロックオン回転計算クラス。</param>
@@ -49,6 +52,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             Action<Vector3, Vector3> updateCandidateAction,
             Func<Vector3, Vector3, bool> trySwitchTargetFunc,
             Func<Vector3, Vector3, bool> trySwitchToNextTargetFunc,
+            Func<Vector2, Func<Vector3, Vector3>, bool> trySwitchTargetInScreenDirectionFunc,
             Func<Guid, bool> trySetTargetByIdFunc,
             CameraFollowCalculator followCalculator,
             CameraLockOnRotationCalculator lockOnRotationCalculator,
@@ -68,6 +72,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _updateCandidateAction = updateCandidateAction;
             _trySwitchTargetFunc = trySwitchTargetFunc;
             _trySwitchToNextTargetFunc = trySwitchToNextTargetFunc;
+            _trySwitchTargetInScreenDirectionFunc = trySwitchTargetInScreenDirectionFunc;
             _trySetTargetByIdFunc = trySetTargetByIdFunc;
             _followCalculator = followCalculator;
             _lockOnRotationCalculator = lockOnRotationCalculator;
@@ -83,6 +88,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _camera = _cameraT != null
                 ? _cameraT.GetComponent<UnityEngine.Camera>() ?? UnityEngine.Camera.main
                 : UnityEngine.Camera.main;
+            _worldToViewportFunc = WorldToViewportPoint;
             _currentDistance = viewSettings.Distance;
             _hasCompletedInitialUpdate = false;
 
@@ -189,6 +195,17 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> 障害物衝突時のカメラ最小距離。 </summary>
         private const float MIN_CAMERA_DISTANCE = 0.1f;
 
+        /// <summary>
+        ///     強い視点操作でロックオン対象を切り替えるかどうか。スマホだけ有効にする。
+        ///     PC・コントローラーには切り替えボタンがあるため、強い視点操作は従来どおり解除だけにする。
+        /// </summary>
+        private static readonly bool IS_STRONG_LOOK_SWITCH_ENABLED =
+#if UNITY_ANDROID
+            true;
+#else
+            false;
+#endif
+
         [SerializeField, Tooltip("カメラの Transform")]
         private Transform _cameraT;
 
@@ -246,6 +263,8 @@ namespace KillChord.Runtime.View.InGame.Camera
         private Func<(bool HasTarget, Vector3 TargetPosition)> _getCurrentTargetPositionFunc;
         private Func<Vector3, Vector3, bool> _trySwitchTargetFunc;
         private Func<Vector3, Vector3, bool> _trySwitchToNextTargetFunc;
+        private Func<Vector2, Func<Vector3, Vector3>, bool> _trySwitchTargetInScreenDirectionFunc;
+        private Func<Vector3, Vector3> _worldToViewportFunc;
         private Func<Guid, bool> _trySetTargetByIdFunc;
         private CameraLockOnState _lockOnState;
         private bool _hasCompletedInitialUpdate;
@@ -703,8 +722,16 @@ namespace KillChord.Runtime.View.InGame.Camera
                     targetPosition = targetResult.TargetPosition;
                     if (_lockOnState == CameraLockOnState.LockOnAuto)
                     {
-                        if (_autoLockOnReleaseTracker.Update(context, IsTargetWithinViewport(targetPosition)))
+                        CameraAutoLockOnReleaseReason releaseReason =
+                            _autoLockOnReleaseTracker.Update(context, IsTargetWithinViewport(targetPosition));
+                        if (releaseReason == CameraAutoLockOnReleaseReason.StrongLook && TrySwitchTargetByStrongLook())
                         {
+                            // 強い視点操作の向きにいる敵へ切り替えたので、切り替え先を追う。
+                            targetPosition = _getCurrentTargetPositionFunc.Invoke().TargetPosition;
+                        }
+                        else if (releaseReason != CameraAutoLockOnReleaseReason.None)
+                        {
+                            // その向きに敵がいない場合も含め、解除条件を満たしたら解除する。
                             ClearLockOn();
                             targetPosition = Vector3.zero;
                         }
@@ -764,6 +791,38 @@ namespace KillChord.Runtime.View.InGame.Camera
                 // 自動ロックの非命中タイマーと、手動ロックの継続条件は変えない。
                 _autoLockOnReleaseTracker.ExtendViewportGrace();
             }
+        }
+
+        /// <summary>
+        ///     強い視点操作をした向きにいる敵のうち、画面中心に最も近い敵への切り替えを試みる。
+        ///     スマホだけで行う。PC・コントローラーには切り替えボタンがあるため、従来どおり解除する。
+        /// </summary>
+        /// <returns> 別の敵へ切り替えた場合は true。 </returns>
+        private bool TrySwitchTargetByStrongLook()
+        {
+            if (!IS_STRONG_LOOK_SWITCH_ENABLED || _trySwitchTargetInScreenDirectionFunc == null || _camera == null)
+            {
+                return false;
+            }
+
+            if (!_trySwitchTargetInScreenDirectionFunc.Invoke(_autoLockOnReleaseTracker.LookDirection, _worldToViewportFunc))
+            {
+                return false;
+            }
+
+            // 続けて切り替わらないよう視点操作の蓄積を消し、視野外の対象へ切り替えた直後も追従できるよう猶予を与える。
+            _autoLockOnReleaseTracker.ResetOnLookSwitch();
+            return true;
+        }
+
+        /// <summary>
+        ///     ワールド座標をカメラのビューポート座標へ変換する。z はカメラからの奥行き。
+        /// </summary>
+        /// <param name="worldPosition"> ワールド座標。 </param>
+        /// <returns> ビューポート座標。 </returns>
+        private Vector3 WorldToViewportPoint(Vector3 worldPosition)
+        {
+            return _camera.WorldToViewportPoint(worldPosition);
         }
 
         /// <summary>

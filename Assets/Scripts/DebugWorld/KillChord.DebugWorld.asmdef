@@ -1,0 +1,22 @@
+{
+    "name": "KillChord.DebugWorld",
+    "rootNamespace": "KillChord.DebugWorld",
+    "references": [
+        "GUID:912501d3a9c2c414ba93298e84096560",
+        "GUID:5063a8a7d003d7b458ff51a6863e5e74",
+        "GUID:d596684d98378c643b70bc587024d24e",
+        "GUID:68a532f43eeefd5408e4e8871b769ee4",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_EDITOR || DEVELOPMENT_BUILD"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

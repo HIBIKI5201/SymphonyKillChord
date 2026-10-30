@@ -154,7 +154,7 @@ namespace KillChord.Editor.TicketSystem
         private static async UniTask SendPost(string action, TicketData data)
         {
             var json = JsonUtility.ToJson(data);
-            var hashedKey = GetSha256Hash(TicketSystemSettings.instance.ApiKey);
+            var hashedKey = GetSha256Hash(TicketSystemSettings.instance.GetApiKey());
             json = json.Insert(1, $"\"action\":\"{action}\",\"key\":\"{hashedKey}\",");
 
             var url = TicketSystemSettings.instance.GasUrl;
