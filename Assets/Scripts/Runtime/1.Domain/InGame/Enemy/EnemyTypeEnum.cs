@@ -10,6 +10,8 @@ namespace KillChord.Runtime.Domain.InGame.Enemy
         /// <summary> 歩兵 </summary>
         Infantry,
         /// <summary> 砲兵 </summary>
-        Artillery
+        Artillery,
+        /// <summary> ボス。シーンに配置したボスをウェーブで出現させる。 </summary>
+        Boss
     }
 }
