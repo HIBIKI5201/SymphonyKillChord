@@ -100,7 +100,13 @@
                 </ui:VisualElement>
                 <ui:VisualElement name="ListActionsSection" class="skillbuild-list-actions-section" style="margin-top: 5px;">
                     <ui:VisualElement name="SkillListPanel" class="skillbuild-panel skillbuild-panel-nested skillbuild-list-panel">
-                        <ui:VisualElement name="SkillGenreFilterBar" class="skill-genre-filter-bar"/>
+                        <ui:VisualElement name="SkillListHeader" class="skillbuild-list-header">
+                            <ui:VisualElement name="SkillGenreFilterBar" class="skill-genre-filter-bar"/>
+                            <ui:VisualElement name="SkillCollectionRate" picking-mode="Ignore" class="skillbuild-collection-rate">
+                                <ui:Label name="SkillCollectionRateNameLabel" text="収集率" picking-mode="Ignore" class="skillbuild-collection-rate-name-label"/>
+                                <ui:Label name="SkillCollectionRateValueLabel" text="0/0" picking-mode="Ignore" class="skillbuild-collection-rate-value-label"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                         <ui:VisualElement name="BottomSection" class="skillbuild-list-section">
                             <ui:ScrollView name="SkillScrollView" mode="Horizontal" vertical-scroller-visibility="Hidden" touch-scroll-type="Elastic" horizontal-scroller-visibility="Hidden" class="skillbuild-list-scrollview">
                                 <ui:VisualElement class="skill-element-list" style="flex-grow: 0; flex-direction: row; height: auto; justify-content: flex-start; align-self: center; margin-left: 0;"/>

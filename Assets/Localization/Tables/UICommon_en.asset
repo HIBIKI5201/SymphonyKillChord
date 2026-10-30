@@ -171,6 +171,10 @@ MonoBehaviour:
     m_Localized: "Please select a Kill Chord"
     m_Metadata:
       m_Items: []
+  - m_Id: 1724416900
+    m_Localized: Collected
+    m_Metadata:
+      m_Items: []
   - m_Id: 1724416037
     m_Localized: "Kill Chord Type"
     m_Metadata:
