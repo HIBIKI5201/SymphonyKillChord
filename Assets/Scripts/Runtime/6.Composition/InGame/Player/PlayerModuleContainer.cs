@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Player;
 
@@ -22,13 +23,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <param name="playerStatusBonus"> プレイヤーステータスボーナスです。 </param>
         /// <param name="damageEffectView"> 被弾エフェクトViewです。 </param>
         /// <param name="playerAttackSignal"> 攻撃成立を表示側へ伝えるSignalです。 </param>
+        /// <param name="justSlowMotionViewModel"> ジャスト成立時のアニメーションのスローモーションです。 </param>
         public PlayerModuleContainer(
             PlayerInitializer playerInitializer,
             PlayerView playerView,
             CharacterEntity playerEntity,
             PlayerStatusBonus playerStatusBonus,
             ReusableParticleSystemView damageEffectView,
-            IPlayerAttackSignal playerAttackSignal)
+            IPlayerAttackSignal playerAttackSignal,
+            JustSlowMotionViewModel justSlowMotionViewModel)
         {
             PlayerInitializer = playerInitializer;
             PlayerView = playerView;
@@ -36,6 +39,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             PlayerStatusBonus = playerStatusBonus;
             DamageEffectView = damageEffectView;
             PlayerAttackSignal = playerAttackSignal;
+            JustSlowMotionViewModel = justSlowMotionViewModel;
         }
 
         /// <summary> プレイヤー初期化クラスです。 </summary>
@@ -61,6 +65,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         /// <summary> 攻撃成立を表示側へ伝えるSignalです。 </summary>
         public IPlayerAttackSignal PlayerAttackSignal { get; }
+
+        /// <summary> ジャスト成立時のアニメーションのスローモーションです。敵のアニメーションも参照します。 </summary>
+        public JustSlowMotionViewModel JustSlowMotionViewModel { get; }
 
         /// <summary> プレイヤー移動Controllerです。 </summary>
         public PlayerController PlayerController { get; private set; }

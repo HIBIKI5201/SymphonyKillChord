@@ -7,6 +7,7 @@ using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Mission;
+using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Enemy;
@@ -187,9 +188,17 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 () => enemyEntity.CurrentHealth.Value);
 
             // View接続
+            // ジャストのスローモーションはプレイヤーと共有する。プレイヤーがいない場面ではスローをかけない。
+            JustSlowMotionViewModel justSlowMotionViewModel =
+                ServiceLocator.TryGetInstance(out PlayerModuleContainer playerModuleContainer)
+                    ? playerModuleContainer.JustSlowMotionViewModel
+                    : null;
             var animationComposition = new AnimationComposition();
-            ICharacterAnimationViewContext animationContext =
-                animationComposition.Init(_characterAnimationView, _characterAnimationConfig, musicSyncState);
+            ICharacterAnimationViewContext animationContext = animationComposition.Init(
+                _characterAnimationView,
+                _characterAnimationConfig,
+                musicSyncState,
+                justSlowMotionViewModel);
             _characterAnimationContext = animationContext;
             _view.Initialize(aiController, target, animationContext, musicSyncState, damageEffectView,
                 () => _raycastView.IsWarningVisible || _battleState.HasActiveShellIndicators);
