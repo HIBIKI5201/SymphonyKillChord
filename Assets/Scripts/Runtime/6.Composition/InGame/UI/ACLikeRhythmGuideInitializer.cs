@@ -139,7 +139,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 new RhythmGuideUseCase(),
                 targetingSystem,
                 missionRuntimeServiceProvider,
-                selectedBattleStageState
+                selectedBattleStageState,
+                GetPlayerRecoveryBeats
             );
 
             _rhythmGuideViewModel?.Dispose();
@@ -289,6 +290,22 @@ namespace KillChord.Runtime.Composition.InGame.UI
         {
             _hapticsConfigKey.ReleaseLoadedAsset(this);
             _loadedHapticsConfig = null;
+        }
+
+        /// <summary>
+        ///     プレイヤーの直近の攻撃硬直の拍数を取得する。
+        ///     プレイヤーの初期化順に依存しないよう、呼び出しの都度ServiceLocatorへ問い合わせる。
+        /// </summary>
+        /// <returns> 攻撃硬直の拍数。プレイヤーが未初期化の場合は0。 </returns>
+        private static float GetPlayerRecoveryBeats()
+        {
+            if (!ServiceLocator.TryGetInstance(out PlayerModuleContainer playerModuleContainer)
+                || playerModuleContainer.PlayerAttackController == null)
+            {
+                return 0f;
+            }
+
+            return playerModuleContainer.PlayerAttackController.CurrentRecoveryBeats;
         }
     }
 }

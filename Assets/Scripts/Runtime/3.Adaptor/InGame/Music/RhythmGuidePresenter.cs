@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Utility.Constant;
 using System;
 using System.Collections.Generic;
 
@@ -26,18 +27,21 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         ///     未使用の場合はnull。
         /// </param>
         /// <param name="selectedBattleStageState"> チュートリアル判定に使用する選択中ステージ状態。未使用の場合はnull。 </param>
+        /// <param name="recoveryBeatsProvider"> 直近の攻撃硬直の拍数を取得するデリゲート。灰色の範囲を出さない場合はnull。 </param>
         public RhythmGuidePresenter(
             IMusicSyncService musicSyncService,
             RhythmGuideUseCase rhythmGuideUsecase,
             TargetSystemController targetingSystem,
             Func<MissionRuntimeService> missionRuntimeServiceProvider = null,
-            SelectedBattleStageState selectedBattleStageState = null)
+            SelectedBattleStageState selectedBattleStageState = null,
+            Func<float> recoveryBeatsProvider = null)
         {
             _musicSyncService = musicSyncService;
             _rhythmGuideUsecase = rhythmGuideUsecase;
             _targetingSystem = targetingSystem;
             _missionRuntimeServiceProvider = missionRuntimeServiceProvider;
             _selectedBattleStageState = selectedBattleStageState;
+            _recoveryBeatsProvider = recoveryBeatsProvider;
         }
 
         /// <summary>
@@ -59,6 +63,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             bool hasTarget = _targetingSystem.TryGetCurrentTargetEntity(out _);
             int? targetBeatCount = GetTutorialTargetBeatCount();
 
+            // ゲージは1小節を1とするため、硬直の拍数を小節単位へ直す。
+            float recoveryBeats = _recoveryBeatsProvider?.Invoke() ?? 0f;
+            float lockedBarProgress = (float)(recoveryBeats / MusicConstants.STANDARD_BEATS_PER_BAR);
+
             return new RhythmGuideDto(
                 indicatorNormalized,
                 currentBeatCount,
@@ -66,7 +74,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
                 hasTarget,
                 isJustHit,
                 _musicSyncService.RhythmJudgmentDefinition.TimeoutBarCount,
-                targetBeatCount
+                targetBeatCount,
+                lockedBarProgress
             );
         }
 
@@ -120,6 +129,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         private readonly TargetSystemController _targetingSystem;
         private readonly Func<MissionRuntimeService> _missionRuntimeServiceProvider;
         private readonly SelectedBattleStageState _selectedBattleStageState;
+        private readonly Func<float> _recoveryBeatsProvider;
         private readonly List<RhythmGuideZoneDto> _zones = new();
         private RhythmJudgmentDefinition _zonesSourceDefinition;
     }
