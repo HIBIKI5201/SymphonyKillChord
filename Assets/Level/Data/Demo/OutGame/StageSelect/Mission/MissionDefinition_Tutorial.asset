@@ -269,10 +269,10 @@ MonoBehaviour:
     - rid: 4420609062207899
       type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
-        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:1401557065)\u30925\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:-1976604850)\u30925\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
         _enemyMissionKeyId:
-          _id: enemy_red
-          _hashId: 1401557065
+          _id: enemy_soldier
+          _hashId: -1976604850
         _requiredKillCount: 5
     - rid: 4420609062208001
       type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}

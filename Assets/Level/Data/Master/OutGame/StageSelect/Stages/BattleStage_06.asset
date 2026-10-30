@@ -17,15 +17,31 @@ MonoBehaviour:
     _id: stage_06
     _hashId: -531492513
   _isInitiallyUnlocked: 0
-  _stageName: 
-  _flavorText: 
+  _stageName: "\u30B9\u30C6\u30FC\u30B806\u300C\u7591\u554F\u300D"
+  _flavorText: "\uFF08\u4EEE\uFF09\u62BC\u3057\u5BC4\u305B\u308B\u6575\u5175\u306E\u6CE2\u3092\u3001\u63F4\u8B77\u304C\u6765\u308B\u307E\u3067\u8010\u3048\u629C\u304F\u3002"
   _targetSceneName: InGame
-  _firstClearRewards: []
-  _clearRewards: []
+  _firstClearRewards:
+  - _resourceId:
+      _id: SkillLevelupPoint
+      _hashId: 1374829010
+    _amount: 12
+  - _resourceId:
+      _id: ResearchPoint
+      _hashId: -806205115
+    _amount: 6
+  _clearRewards:
+  - _resourceId:
+      _id: SkillLevelupPoint
+      _hashId: 1374829010
+    _amount: 5
+  - _resourceId:
+      _id: ResearchPoint
+      _hashId: -806205115
+    _amount: 2
   _isTutorial: 0
   _enemyWaveDefinitionId:
-    _id: enemy_wave_default
-    _hashId: -1074717099
+    _id: enemy_wave_06
+    _hashId: -2100963520
   _missionDefinitionId:
-    _id: Test
-    _hashId: 418143992
+    _id: Stage06
+    _hashId: -1034724247

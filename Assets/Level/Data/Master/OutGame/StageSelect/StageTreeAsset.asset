@@ -35,7 +35,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5f5bf359c89e8c04a9cbade34e8b87ef, type: 2}
   - {fileID: 11400000, guid: 2ae8cce04d53ae9419a2dd509a637909, type: 2}
   - {fileID: 11400000, guid: de5194f58a7363a40bba6efad315eaef, type: 2}
-  - {fileID: 11400000, guid: 0c1491d88ed053e4f83d3a2a4c2fb6fa, type: 2}
+  - {fileID: 11400000, guid: 10cb4894fe4ece049a06343b2f73de2a, type: 2}
   _bindAssets:
   - {fileID: 11400000, guid: 694e9657f9a24ba68c1a9e883f466917, type: 2}
   - {fileID: 11400000, guid: dd2e8c55b6355f44bb52b973ae4819ff, type: 2}
