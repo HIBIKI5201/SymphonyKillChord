@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
@@ -112,6 +113,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                     + $" Id: {enemyWaveDefinitionId.Value}",
                     this);
                 return false;
+            }
+
+            // 差し替えが登録されていれば、ステージのWaveの代わりに使う。演出の一覧はステージのものを使う。
+            if (ServiceLocator.TryGetInstance(out IEnemyWavesOverride enemyWavesOverride))
+            {
+                EnemyWaves overriddenWaves = enemyWavesOverride.CreateEnemyWaves();
+                if (overriddenWaves != null)
+                {
+                    _loadedEnemyWaves = overriddenWaves;
+                }
             }
 
             // 敵とボスのアセットを読み込む。
