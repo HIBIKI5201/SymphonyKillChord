@@ -66,6 +66,39 @@ namespace KillChord.Tests.EditMode.Music
         }
 
         /// <summary>
+        ///     拍から遅れて押した入力の基準が曲の拍へクオンタイズされ、次のジャストがずれないことを確認します。
+        /// </summary>
+        [Test]
+        public void RegisterBattleActionHistory_LateInput_QuantizesGaugeStart()
+        {
+            // 1小節目の頭（2秒）より0.04秒遅れて押す。
+            _service.Update(RhythmTestData.BAR_SECONDS + 0.04d);
+            _service.RegisterBattleActionHistory(BattleActionType.Attack, BeatType.One);
+
+            Assert.That(_service.GetBeatTypeTiming()[0], Is.EqualTo((float)RhythmTestData.BAR_SECONDS).Within(TOLERANCE));
+
+            // 基準は2秒なので、2秒＋半小節で2拍のジャストの中心になる。
+            _service.Update(RhythmTestData.BAR_SECONDS * 1.5d);
+            Assert.That(_service.GetBarProgress(), Is.EqualTo(0.5f).Within(TOLERANCE));
+            Assert.That(_service.GetCurrentBeatType(out bool isJust), Is.EqualTo(BeatType.Two));
+            Assert.That(isJust, Is.True);
+        }
+
+        /// <summary>
+        ///     拍より早く押した入力は先の拍へクオンタイズされ、基準に届くまで進捗が0のままになることを確認します。
+        /// </summary>
+        [Test]
+        public void RegisterBattleActionHistory_EarlyInput_QuantizesToNextGrid()
+        {
+            // 2秒の小節頭より0.05秒早く押す。
+            _service.Update(RhythmTestData.BAR_SECONDS - 0.05d);
+            _service.RegisterBattleActionHistory(BattleActionType.Attack, BeatType.One);
+
+            Assert.That(_service.GetBeatTypeTiming()[0], Is.EqualTo((float)RhythmTestData.BAR_SECONDS).Within(TOLERANCE));
+            Assert.That(_service.GetBarProgressUnclamped(), Is.EqualTo(0f));
+        }
+
+        /// <summary>
         ///     入力から2小節経つと履歴を破棄してタイムアウトを1回通知することを確認します。
         /// </summary>
         [Test]
