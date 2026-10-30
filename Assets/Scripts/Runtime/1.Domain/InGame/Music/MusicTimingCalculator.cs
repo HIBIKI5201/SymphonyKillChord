@@ -111,9 +111,48 @@ namespace KillChord.Runtime.Domain.InGame.Music
             return true;
         }
 
+        /// <summary>
+        ///     再生時間を、曲の1小節を8分割・6分割したタイミングのうち最も近いものへスナップする。
+        ///     小節の頭は音源先頭から最初の小節頭までのオフセットを基準にする。
+        /// </summary>
+        /// <param name="rhythmDefinition"> リズム定義。 </param>
+        /// <param name="playTimeSeconds"> 入力した音源の再生時間（秒）。 </param>
+        /// <returns> スナップ後の再生時間（秒）。0未満にはしない。 </returns>
+        public static double QuantizePlayTime(RhythmDefinition rhythmDefinition, double playTimeSeconds)
+        {
+            if (rhythmDefinition.BarLength <= 0d
+                || double.IsNaN(playTimeSeconds)
+                || double.IsInfinity(playTimeSeconds))
+            {
+                return playTimeSeconds;
+            }
+
+            double barPosition = (playTimeSeconds - rhythmDefinition.BeatOffsetSeconds) / rhythmDefinition.BarLength;
+            double nearestBarPosition = barPosition;
+            double nearestDistance = double.MaxValue;
+
+            // 分割ごとに最も近い格子点を求め、全分割の中で最も近いものを採用する。
+            for (int i = 0; i < QUANTIZE_BAR_DIVISIONS.Length; i++)
+            {
+                double division = QUANTIZE_BAR_DIVISIONS[i];
+                double candidate = Math.Round(barPosition * division, MidpointRounding.AwayFromZero) / division;
+                double distance = Math.Abs(candidate - barPosition);
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestBarPosition = candidate;
+                }
+            }
+
+            double quantizedPlayTime = rhythmDefinition.BeatOffsetSeconds + nearestBarPosition * rhythmDefinition.BarLength;
+            return quantizedPlayTime > 0d ? quantizedPlayTime : 0d;
+        }
+
         /// <summary> ジャスト間位相の全体長。 </summary>
         private const double FULL_PHASE = 1d;
         /// <summary> 小節内の最初の拍。 </summary>
         private const double FIRST_BEAT = 1d;
+        /// <summary> クオンタイズに使う1小節の分割数。8拍子と6拍子のタイミングへ合わせる。 </summary>
+        private static readonly double[] QUANTIZE_BAR_DIVISIONS = { 8d, 6d };
     }
 }
