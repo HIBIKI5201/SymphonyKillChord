@@ -437,6 +437,10 @@ MonoBehaviour:
     m_Localized: Save data has been reset.
     m_Metadata:
       m_Items: []
+  - m_Id: 1870000005
+    m_Localized: The save data could not be loaded, so the game starts from the beginning.
+    m_Metadata:
+      m_Items: []
   - m_Id: 1880000001
     m_Localized: "Controls"
     m_Metadata:

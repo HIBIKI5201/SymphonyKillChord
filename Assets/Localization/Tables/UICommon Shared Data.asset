@@ -415,6 +415,10 @@ MonoBehaviour:
     m_Key: ui.notification.save_reset
     m_Metadata:
       m_Items: []
+  - m_Id: 1870000005
+    m_Key: ui.notification.save_recovered
+    m_Metadata:
+      m_Items: []
   - m_Id: 1880000001
     m_Key: ui.setting.control
     m_Metadata:

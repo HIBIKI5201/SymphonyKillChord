@@ -131,6 +131,9 @@ namespace KillChord.Runtime.View.Persistent.Load
                 "ui.notification.save_failed" => isEnglish
                     ? "Failed to save data."
                     : "データの保存に失敗しました。",
+                "ui.notification.save_recovered" => isEnglish
+                    ? "The save data could not be loaded, so the game starts from the beginning."
+                    : "セーブデータを読み込めなかったため、初期状態から始めます。",
                 _ => throw new ArgumentOutOfRangeException(nameof(entry), entry, "未定義の通知です。"),
             };
         }
