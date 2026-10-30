@@ -642,6 +642,22 @@ MonoBehaviour:
     m_Localized: "{0}\u3000Lv.{1}"
     m_Metadata:
       m_Items: []
+  - m_Id: 2090000001
+    m_Localized: "\u65E2\u5B9A\u5024\u306B\u623B\u3059"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000002
+    m_Localized: "\u8A2D\u5B9A\u3092\u65E2\u5B9A\u5024\u306B\u623B\u3057\u307E\u3059\u304B\uFF1F"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000003
+    m_Localized: "\u65E2\u5B9A\u5024\u306B\u623B\u3059"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000004
+    m_Localized: "\u30AD\u30E3\u30F3\u30BB\u30EB"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

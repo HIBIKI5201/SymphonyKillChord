@@ -656,6 +656,22 @@ MonoBehaviour:
     m_Localized: "{0}  Lv.{1}"
     m_Metadata:
       m_Items: []
+  - m_Id: 2090000001
+    m_Localized: Reset to Defaults
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000002
+    m_Localized: "Reset these settings to their defaults?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000003
+    m_Localized: Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000004
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

@@ -611,6 +611,22 @@ MonoBehaviour:
     m_Key: ui.skill_detail.level_format
     m_Metadata:
       m_Items: []
+  - m_Id: 2090000001
+    m_Key: ui.setting.reset_to_defaults
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000002
+    m_Key: ui.setting.reset_to_defaults_message
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000003
+    m_Key: ui.setting.confirm_reset_to_defaults
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000004
+    m_Key: ui.setting.cancel_reset_to_defaults
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
