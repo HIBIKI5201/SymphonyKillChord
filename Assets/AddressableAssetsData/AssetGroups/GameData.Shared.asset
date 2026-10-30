@@ -115,6 +115,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6bd8c9b5da464ad9869fd0f6e5bb1f64
+    m_Address: InfantryEnemyMoveData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 77438a4db85a96f4982b191e886666d5
     m_Address: CharacterDefinitionRepository
     m_ReadOnly: 0

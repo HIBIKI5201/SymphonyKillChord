@@ -223,7 +223,7 @@ MonoBehaviour:
         State:
           rid: 4420143682420752
     - rid: 4420143682420745
-      type: {class: BossGetStunnedAction, ns: KillChord.Runtime.View.InGame.Enemy, asm: KillChord.View}
+      type: {class: BossGetStunnedAction, ns: DevelopProducts.Boss.BehaviorGraphNode, asm: DevelopProducts-Boss}
       data:
         ID:
           m_Value0: 18308684116021897195
@@ -678,8 +678,8 @@ MonoBehaviour:
   - Name: BossGetStunned
     Story: "\u30B9\u30BF\u30F3\u72B6\u614B\u3092\u958B\u59CB\u3059\u308B(Boss) [State]
       [Battle]"
-    RuntimeTypeString: KillChord.Runtime.View.InGame.Enemy.BossGetStunnedAction,
-      KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    RuntimeTypeString: DevelopProducts.Boss.BehaviorGraphNode.BossGetStunnedAction,
+      DevelopProducts-Boss, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     RuntimeTypeID:
       m_Value0: 3479568062598202324
       m_Value1: 3785764116548148754
@@ -998,8 +998,8 @@ MonoBehaviour:
         - rid: 8353671707150779386
         - rid: 8353671707150779387
         NodeType:
-          m_SerializableType: KillChord.Runtime.View.InGame.Enemy.BossGetStunnedAction,
-            KillChord.View, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+          m_SerializableType: DevelopProducts.Boss.BehaviorGraphNode.BossGetStunnedAction,
+            DevelopProducts-Boss, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
         NodeTypeID:
           m_Value0: 3479568062598202324
           m_Value1: 3785764116548148754

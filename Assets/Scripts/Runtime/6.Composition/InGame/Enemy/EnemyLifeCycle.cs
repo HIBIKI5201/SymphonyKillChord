@@ -577,7 +577,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 await PlayDeathAnimationAsync();
                 Deactivate();
-                _waveSpawnerState.OnEnemyDeath();
+                // Waveの切り替えは、死亡演出が終わってから行う。
+                _waveSpawnerState.NotifyEnemyRemoved();
             }
             catch (OperationCanceledException)
             {
@@ -771,6 +772,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
             }
+
+            // Waveの全滅判定も、キル数と同じく体力が尽きた瞬間に行う。
+            _waveSpawnerState.NotifyEnemyDefeated();
 
             DieAsync();
         }

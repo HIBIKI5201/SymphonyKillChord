@@ -14,9 +14,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
     /// </summary>
     public class SkillExecutionController
     {
-        /// <summary> 対象不成立時のポリシーです。 </summary>
-        private const SkillExecutionFailurePolicy TARGET_REJECT_POLICY = SkillExecutionFailurePolicy.ResetProgressOnly;
-
         /// <summary>
         ///     音楽再生位置の巻き戻しとみなす許容誤差（秒）です。
         ///     MusicSyncServiceの巻き戻し検知と同じ扱いで、入力履歴のTimingが非単調になるのを防ぎます。
@@ -99,7 +96,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                     ResolveWeaponBeatType());
             }
 
-            ApplyFailurePolicy(now);
+            ResetProgressOnFailure(now);
             Debug.LogWarning(
                 $"[{nameof(SkillExecutionController)}] 入力パターンは一致しましたが、" +
                 $"対象を解決できないためスキルを実行しませんでした。ID: {_skillDefinition.Id.Value}, " +
@@ -137,25 +134,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         }
 
         /// <summary>
-        ///     失敗時ポリシーに応じて内部状態を更新します。
+        ///     対象不成立時に、入力の進行だけをリセットします。
+        ///     クールダウンは消費しません。
         /// </summary>
         /// <param name="now"> 現在時刻です。 </param>
-        private void ApplyFailurePolicy(float now)
+        private void ResetProgressOnFailure(float now)
         {
-            switch (TARGET_REJECT_POLICY)
-            {
-                case SkillExecutionFailurePolicy.KeepProgress:
-                    return;
-                case SkillExecutionFailurePolicy.ResetProgressOnly:
-                    _skillRhythmState.Clear();
-                    _progressController.ResetProgress(now, _skillCooldownState.SkillReadyTimestamp);
-                    return;
-                case SkillExecutionFailurePolicy.ResetProgressAndConsumeCooldown:
-                    _skillRhythmState.Clear();
-                    _skillCooldownState.SetSkillCooldown(now);
-                    _progressController.SkillTriggered(now, _skillCooldownState.SkillReadyTimestamp);
-                    return;
-            }
+            _skillRhythmState.Clear();
+            _progressController.ResetProgress(now, _skillCooldownState.SkillReadyTimestamp);
         }
 
         private readonly SkillResultPresenter _presenter;

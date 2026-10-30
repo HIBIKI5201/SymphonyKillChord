@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Domain.OutGame.Scenario;
@@ -186,17 +187,20 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             TimeSpan delay,
             CancellationToken ct)
         {
-            Task delayTask = Task.Delay(delay, ct);
-            Task completedTask = await Task.WhenAny(delayTask, completionTask);
-            if (ReferenceEquals(completedTask, completionTask))
+            int completedIndex = await UniTask.WhenAny(
+                UniTask.Delay(delay, DelayType.Realtime, cancellationToken: ct),
+                completionTask.AsUniTask());
+            if (completedIndex == COMPLETION_TASK_INDEX)
             {
                 ct.ThrowIfCancellationRequested();
                 return true;
             }
 
-            await delayTask;
             return false;
         }
+
+        /// <summary> 文字送り待機で完了要求が先に届いたことを表す WhenAny の添字。 </summary>
+        private const int COMPLETION_TASK_INDEX = 1;
 
         private readonly ITextOutputPort _textOutputPort;
         private readonly IScenarioEventEmitter _eventEmitter;

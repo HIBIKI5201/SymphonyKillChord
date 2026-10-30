@@ -122,6 +122,7 @@ namespace KillChord.Editor.SourceDataProvider.Wiki
                     new List<string>
                     {
                         "ExampleEnemyMoveData",
+                        "InfantryEnemyMoveData",
                         "ShellAttackData",
                         "BossAttackEntryRepo",
                         "EnemyDefinitionRepository",
