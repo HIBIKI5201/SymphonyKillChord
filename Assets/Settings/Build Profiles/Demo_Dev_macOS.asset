@@ -36,6 +36,8 @@ MonoBehaviour:
     m_path: Assets/Level/Scenes/Master/Stages/Stage_02.unity
   - m_enabled: 1
     m_path: Assets/Level/Scenes/Demo/DemoEnd.unity
+  - m_enabled: 1
+    m_path: Assets/Level/Scenes/Debug/DebugHub.unity
   m_HasScriptingDefines: 1
   m_ScriptingDefines:
   - KILLCHORD_DEMO
