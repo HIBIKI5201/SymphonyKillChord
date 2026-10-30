@@ -51,6 +51,7 @@ namespace KillChord.Editor.Localization
                 + "（フォルダの場所は Notion の「重要リンク」を見てください）。\n"
                 + "スプレッドシートの名前を String Table Collection 名（UICommon など）と同じにし、"
                 + "先頭のシートに「キー / 日本語 / 英語 / 備考」の列を置きます。英語が空の行は、英語でも日本語を表示します。\n"
+                + "マスターデータの訳文（MasterText）はキーを空にでき、日本語の文からキーを作ります。テーブルが無ければ作ります。\n"
                 + "フォルダは「リンクを知っている全員」が閲覧できる共有にしてください。"
                 + "APIキーはシナリオのCSV取り込みと共用で、このマシンのEditorPrefsにだけ保存します。",
                 MessageType.Info);

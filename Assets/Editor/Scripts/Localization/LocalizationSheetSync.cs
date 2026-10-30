@@ -4,9 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using KillChord.Runtime.View.Persistent.Localization;
 using UnityEditor;
 using UnityEditor.Localization;
 using UnityEngine;
+using UnityEngine.Localization;
 
 namespace KillChord.Editor.Localization
 {
@@ -60,6 +62,11 @@ namespace KillChord.Editor.Localization
             foreach (GoogleDriveSheetClient.SheetFile file in files)
             {
                 StringTableCollection collection = LocalizationEditorSettings.GetStringTableCollection(file.Name);
+                if (collection == null && file.Name == MasterTextKey.TABLE_NAME)
+                {
+                    collection = CreateMasterTextCollection();
+                }
+
                 if (collection == null)
                 {
                     skipped.Add(file.Name);
@@ -72,7 +79,12 @@ namespace KillChord.Editor.Localization
                     return (false, $"「{file.Name}」を取得できませんでした。\n{exportError}");
                 }
 
-                if (!LocalizationSheetCsv.TryParse(csv, out List<LocalizationSheetRow> rows, out string parseError))
+                // MasterText はキーを日本語から作るため、キー列が空の行も読む。
+                Func<string, string> createKey = file.Name == MasterTextKey.TABLE_NAME
+                    ? MasterTextKey.Create
+                    : null;
+                if (!LocalizationSheetCsv.TryParse(
+                    csv, createKey, out List<LocalizationSheetRow> rows, out string parseError))
                 {
                     return (false, $"「{file.Name}」を読み取れませんでした。{parseError}");
                 }
@@ -133,6 +145,27 @@ namespace KillChord.Editor.Localization
             }
 
             return count;
+        }
+
+        private const string TABLES_DIRECTORY = "Assets/Localization/Tables";
+
+        /// <summary>
+        ///     マスターデータの訳文テーブルを、日本語と英語のロケールで作ります。ロケールが足りなければnullを返します。
+        /// </summary>
+        private static StringTableCollection CreateMasterTextCollection()
+        {
+            List<Locale> locales = LocalizationEditorSettings.GetLocales()
+                .Where(locale => locale.Identifier.Code == LocalizationTableSheetBridge.JAPANESE_LOCALE_CODE
+                    || locale.Identifier.Code == LocalizationTableSheetBridge.ENGLISH_LOCALE_CODE)
+                .ToList();
+            if (locales.Count != 2)
+            {
+                Debug.LogWarning($"[{nameof(LocalizationSheetSync)}] 日本語と英語のロケールが無いため、{MasterTextKey.TABLE_NAME}テーブルを作れません。");
+                return null;
+            }
+
+            return LocalizationEditorSettings.CreateStringTableCollection(
+                MasterTextKey.TABLE_NAME, TABLES_DIRECTORY, locales);
         }
     }
 }

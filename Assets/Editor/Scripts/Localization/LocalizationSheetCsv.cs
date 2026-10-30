@@ -22,10 +22,17 @@ namespace KillChord.Editor.Localization
         ///     CSVの文字列を行の一覧に変換します。見出し行の列名で列を探すため、列の順番は問いません。
         /// </summary>
         /// <param name="csvText"> スプレッドシートから書き出したCSVです。 </param>
-        /// <param name="rows"> 読み取った行の一覧です。キーが空の行は含みません。 </param>
+        /// <param name="createKeyFromJapanese">
+        ///     キーが空の行に、日本語からキーを作る処理です。nullならキーが空の行は読み飛ばします。
+        /// </param>
+        /// <param name="rows"> 読み取った行の一覧です。キーが空のままの行は含みません。 </param>
         /// <param name="error"> 読み取れなかったときの理由です。 </param>
         /// <returns> 読み取れたときはtrueです。 </returns>
-        public static bool TryParse(string csvText, out List<LocalizationSheetRow> rows, out string error)
+        public static bool TryParse(
+            string csvText,
+            Func<string, string> createKeyFromJapanese,
+            out List<LocalizationSheetRow> rows,
+            out string error)
         {
             rows = new List<LocalizationSheetRow>();
             List<List<string>> records = ParseRecords(csvText ?? string.Empty);
@@ -52,6 +59,11 @@ namespace KillChord.Editor.Localization
             {
                 List<string> record = records[i];
                 string key = GetCell(record, keyColumn).Trim();
+                if (string.IsNullOrEmpty(key) && createKeyFromJapanese != null)
+                {
+                    key = createKeyFromJapanese(GetCell(record, japaneseColumn));
+                }
+
                 if (string.IsNullOrEmpty(key))
                 {
                     continue;
