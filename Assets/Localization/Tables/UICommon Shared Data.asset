@@ -167,6 +167,10 @@ MonoBehaviour:
     m_Key: ui.skill_build.empty_selection
     m_Metadata:
       m_Items: []
+  - m_Id: 1724416900
+    m_Key: ui.skill_build.collection_rate
+    m_Metadata:
+      m_Items: []
   - m_Id: 1724416037
     m_Key: ui.skill.type
     m_Metadata:
@@ -413,6 +417,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 1870000003
     m_Key: ui.notification.save_reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000005
+    m_Key: ui.notification.save_recovered
     m_Metadata:
       m_Items: []
   - m_Id: 1880000001

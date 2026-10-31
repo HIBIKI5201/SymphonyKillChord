@@ -24,20 +24,20 @@ MonoBehaviour:
   - _resourceId:
       _id: SkillLevelupPoint
       _hashId: 1374829010
-    _amount: 14
-  - _resourceId:
-      _id: ResearchPoint
-      _hashId: -806205115
-    _amount: 7
-  _clearRewards:
-  - _resourceId:
-      _id: SkillLevelupPoint
-      _hashId: 1374829010
     _amount: 6
   - _resourceId:
       _id: ResearchPoint
       _hashId: -806205115
+    _amount: 40
+  _clearRewards:
+  - _resourceId:
+      _id: SkillLevelupPoint
+      _hashId: 1374829010
     _amount: 3
+  - _resourceId:
+      _id: ResearchPoint
+      _hashId: -806205115
+    _amount: 20
   _isTutorial: 0
   _enemyWaveDefinitionId:
     _id: enemy_wave_07

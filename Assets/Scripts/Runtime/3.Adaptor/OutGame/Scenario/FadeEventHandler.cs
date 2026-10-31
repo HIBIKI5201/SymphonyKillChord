@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.OutGame.Scenario;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using KillChord.Runtime.Domain.OutGame.Scenario;
 
@@ -39,7 +40,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Scenario
             double remainingSec = e.DurationSec - elapsedSec;
             if (remainingSec > 0d)
             {
-                await Task.Delay(TimeSpan.FromSeconds(remainingSec), ct);
+                await UniTask.Delay(TimeSpan.FromSeconds(remainingSec), DelayType.Realtime, cancellationToken: ct);
             }
         }
 

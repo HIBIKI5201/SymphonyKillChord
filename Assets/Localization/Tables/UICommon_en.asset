@@ -171,6 +171,10 @@ MonoBehaviour:
     m_Localized: "Please select a Kill Chord"
     m_Metadata:
       m_Items: []
+  - m_Id: 1724416900
+    m_Localized: Collected
+    m_Metadata:
+      m_Items: []
   - m_Id: 1724416037
     m_Localized: "Kill Chord Type"
     m_Metadata:
@@ -435,6 +439,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 1870000003
     m_Localized: Save data has been reset.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000005
+    m_Localized: The save data could not be loaded, so the game starts from the beginning.
     m_Metadata:
       m_Items: []
   - m_Id: 1880000001

@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using System;
@@ -59,6 +60,9 @@ namespace KillChord.Runtime.Domain.Player
         /// <summary> 再生するアニメーションキーです。 </summary>
         public string AnimationKey { get; }
 
+        /// <summary> スキル発動時の攻撃硬直（拍数）です。 </summary>
+        public AttackRecoveryBeats RecoveryBeats { get; }
+
         /// <summary>
         ///     スキルテンプレートを初期化します。
         /// </summary>
@@ -77,6 +81,7 @@ namespace KillChord.Runtime.Domain.Player
         /// <param name="tips"> 改造画面に表示するスキルTipsです。 </param>
         /// <param name="icon"> アウトゲーム画面で表示するアイコンです。 </param>
         /// <param name="effectDisplayMode"> アウトゲーム画面でのスキル効果表示モードです。 </param>
+        /// <param name="recoveryBeats"> スキル発動時の攻撃硬直（拍数）です。 </param>
         public SkillTemplate(
             SkillId id,
             BeatType[] pattern,
@@ -92,7 +97,8 @@ namespace KillChord.Runtime.Domain.Player
             string skillDetail,
             string tips,
             Sprite icon,
-            SkillEffectDisplayMode effectDisplayMode)
+            SkillEffectDisplayMode effectDisplayMode,
+            AttackRecoveryBeats recoveryBeats)
         {
             if (cooldownDenomimator <= 0)
             {
@@ -118,6 +124,7 @@ namespace KillChord.Runtime.Domain.Player
             Tips = tips ?? string.Empty;
             Icon = icon;
             EffectDisplayMode = effectDisplayMode;
+            RecoveryBeats = recoveryBeats;
         }
 
         /// <summary>
@@ -136,7 +143,8 @@ namespace KillChord.Runtime.Domain.Player
                 CooldownBarRatio,
                 GetEffectSpec(currentLevel),
                 bpm,
-                AnimationKey);
+                AnimationKey,
+                RecoveryBeats);
         }
 
         /// <summary>
