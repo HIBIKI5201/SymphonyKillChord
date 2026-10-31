@@ -66,6 +66,7 @@ namespace KillChord.Editor.Localization
             new("ui.skill_build.points_heading", "改造P：", "Mod Points:"),
             new("ui.skill_build.details", "詳細", "Details"),
             new("ui.skill_build.empty_selection", "キルコードを選択してください", "Please select a Kill Chord"),
+            new("ui.skill_build.collection_rate", "収集率", "Collected"),
             new("ui.skill.type", "キルコードタイプ", "Kill Chord Type"),
             new("ui.skill.effect", "キルコード効果", "Kill Chord Effect"),
             new("ui.skill.level", "レベル", "Level"),
