@@ -74,6 +74,7 @@ namespace KillChord.DebugWorld.Hub
 
             _view.OnPlayerControlTestRequested -= HandlePlayerControlTestRequested;
             _view.OnEnemyTestRequested -= HandleEnemyTestRequested;
+            _view.OnBossTestRequested -= HandleBossTestRequested;
             _view.OnReturnRequested -= HandleReturnRequested;
             _view.Dispose();
             _view = null;
@@ -84,7 +85,7 @@ namespace KillChord.DebugWorld.Hub
         /// </summary>
         private void HandlePlayerControlTestRequested()
         {
-            _ = SortieAsync(new DebugBattleOverrides());
+            _ = SortieAsync(DebugBattleOverrides.CreatePlayerControlTest());
         }
 
         /// <summary>
@@ -100,7 +101,21 @@ namespace KillChord.DebugWorld.Hub
                 return;
             }
 
-            _ = SortieAsync(new DebugBattleOverrides(enemyId, enemyAmount));
+            _ = SortieAsync(DebugBattleOverrides.CreateEnemyTest(enemyId, enemyAmount));
+        }
+
+        /// <summary>
+        ///     ボスを1体出す戦闘へ出撃します。
+        /// </summary>
+        private void HandleBossTestRequested()
+        {
+            if (_catalog == null || !_catalog.HasBoss)
+            {
+                Debug.LogError($"[{nameof(DebugHubInitializer)}] ボステストで出すボスが見つかりません。", this);
+                return;
+            }
+
+            _ = SortieAsync(DebugBattleOverrides.CreateBossTest(_catalog.BossId));
         }
 
         /// <summary>
@@ -235,9 +250,15 @@ namespace KillChord.DebugWorld.Hub
             }
 
             bool isBattleAvailable = _catalog != null && _catalog.HasBaseStage;
-            _view = new DebugHubView(_uiDocument.rootVisualElement, _catalog?.EnemyNames, isBattleAvailable);
+            bool isBossTestAvailable = _catalog != null && _catalog.HasBoss;
+            _view = new DebugHubView(
+                _uiDocument.rootVisualElement,
+                _catalog?.EnemyNames,
+                isBattleAvailable,
+                isBossTestAvailable);
             _view.OnPlayerControlTestRequested += HandlePlayerControlTestRequested;
             _view.OnEnemyTestRequested += HandleEnemyTestRequested;
+            _view.OnBossTestRequested += HandleBossTestRequested;
             _view.OnReturnRequested += HandleReturnRequested;
             return true;
         }

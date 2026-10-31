@@ -17,7 +17,12 @@ namespace KillChord.DebugWorld.Hub
         /// <param name="rootElement"> ハブ画面を置くルート要素です。 </param>
         /// <param name="enemyNames"> 敵テストで選べる敵の表示名の一覧です。 </param>
         /// <param name="isBattleAvailable"> 戦闘のテストを始められる場合はtrueです。 </param>
-        public DebugHubView(VisualElement rootElement, IReadOnlyList<string> enemyNames, bool isBattleAvailable)
+        /// <param name="isBossTestAvailable"> ボステストを始められる場合はtrueです。 </param>
+        public DebugHubView(
+            VisualElement rootElement,
+            IReadOnlyList<string> enemyNames,
+            bool isBattleAvailable,
+            bool isBossTestAvailable)
         {
             _rootElement = rootElement ?? throw new ArgumentNullException(nameof(rootElement));
             List<string> choices = enemyNames?.ToList() ?? new List<string>();
@@ -42,9 +47,9 @@ namespace KillChord.DebugWorld.Hub
             _enemyAmountSlider.SetEnabled(isEnemyTestAvailable);
             _enemyTestButton.SetEnabled(isEnemyTestAvailable);
 
-            Button bossTestButton = CreateButton(BOSS_TEST_TEXT + UNAVAILABLE_SUFFIX, null);
-            bossTestButton.SetEnabled(false);
-            _container.Add(bossTestButton);
+            _bossTestButton = CreateButton(BOSS_TEST_TEXT, HandleBossTestClicked);
+            _bossTestButton.SetEnabled(isBattleAvailable && isBossTestAvailable);
+            _container.Add(_bossTestButton);
 
             _returnButton = CreateButton(RETURN_TEXT, HandleReturnClicked);
             _container.Add(_returnButton);
@@ -57,6 +62,9 @@ namespace KillChord.DebugWorld.Hub
 
         /// <summary> 敵テストが選ばれたときに、敵の一覧の位置と数を通知します。 </summary>
         public event Action<int, int> OnEnemyTestRequested;
+
+        /// <summary> ボステストが選ばれたときに通知します。 </summary>
+        public event Action OnBossTestRequested;
 
         /// <summary> タイトルへ戻るボタンが押されたときに通知します。 </summary>
         public event Action OnReturnRequested;
@@ -84,10 +92,12 @@ namespace KillChord.DebugWorld.Hub
         {
             _playerControlTestButton.clicked -= HandlePlayerControlTestClicked;
             _enemyTestButton.clicked -= HandleEnemyTestClicked;
+            _bossTestButton.clicked -= HandleBossTestClicked;
             _returnButton.clicked -= HandleReturnClicked;
             _container.RemoveFromHierarchy();
             OnPlayerControlTestRequested = null;
             OnEnemyTestRequested = null;
+            OnBossTestRequested = null;
             OnReturnRequested = null;
         }
 
@@ -96,8 +106,7 @@ namespace KillChord.DebugWorld.Hub
         private const string ENEMY_TEST_TEXT = "敵テストへ出撃";
         private const string ENEMY_LABEL_TEXT = "敵";
         private const string ENEMY_AMOUNT_LABEL_TEXT = "1回に出す数";
-        private const string BOSS_TEST_TEXT = "ボステスト";
-        private const string UNAVAILABLE_SUFFIX = "（準備中）";
+        private const string BOSS_TEST_TEXT = "ボステストへ出撃";
         private const string RETURN_TEXT = "タイトルへ戻る";
         private const int MIN_ENEMY_AMOUNT = 1;
         private const int MAX_ENEMY_AMOUNT = 20;
@@ -119,6 +128,7 @@ namespace KillChord.DebugWorld.Hub
         private readonly DropdownField _enemyDropdown;
         private readonly SliderInt _enemyAmountSlider;
         private readonly Button _enemyTestButton;
+        private readonly Button _bossTestButton;
         private readonly Button _returnButton;
 
         /// <summary>
@@ -140,6 +150,14 @@ namespace KillChord.DebugWorld.Hub
             }
 
             OnEnemyTestRequested?.Invoke(_enemyDropdown.index, _enemyAmountSlider.value);
+        }
+
+        /// <summary>
+        ///     ボステストが選ばれたことを通知します。
+        /// </summary>
+        private void HandleBossTestClicked()
+        {
+            OnBossTestRequested?.Invoke();
         }
 
         /// <summary>

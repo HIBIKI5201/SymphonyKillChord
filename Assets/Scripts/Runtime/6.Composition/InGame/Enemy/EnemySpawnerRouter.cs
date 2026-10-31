@@ -18,14 +18,17 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="repository"> 個別の敵定義リポジトリです。 </param>
         /// <param name="infantrySpawner"> 歩兵スポナーです。 </param>
         /// <param name="artillerySpawner"> 砲兵スポナーです。 </param>
+        /// <param name="bossSpawner"> ボススポナーです。ウェーブにボスがいない場合はnullです。 </param>
         public EnemySpawnerRouter(
             EnemyDefinitionRepository repository,
             IEnemySpawner infantrySpawner,
-            IEnemySpawner artillerySpawner)
+            IEnemySpawner artillerySpawner,
+            IEnemySpawner bossSpawner)
         {
             _repository = repository;
             _infantrySpawner = infantrySpawner;
             _artillerySpawner = artillerySpawner;
+            _bossSpawner = bossSpawner;
         }
 
         /// <summary>
@@ -53,6 +56,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 EnemyType.Infantry => _infantrySpawner,
                 EnemyType.Artillery => _artillerySpawner,
+                EnemyType.Boss => _bossSpawner,
                 _ => null,
             };
             if (spawner == null)
@@ -68,5 +72,6 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private readonly EnemyDefinitionRepository _repository;
         private readonly IEnemySpawner _infantrySpawner;
         private readonly IEnemySpawner _artillerySpawner;
+        private readonly IEnemySpawner _bossSpawner;
     }
 }

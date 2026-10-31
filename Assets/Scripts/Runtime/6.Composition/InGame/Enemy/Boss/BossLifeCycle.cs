@@ -40,6 +40,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// </summary>
     public class BossLifeCycle : MonoBehaviour, IGameplayControllable
     {
+        /// <summary> ボスが撃破されたときに呼ばれます。 </summary>
+        public event Action OnDefeated;
+
         /// <summary>
         ///     ボス用 Addressables アセットをロードします。
         /// </summary>
@@ -243,10 +246,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _aiController.Activate();
             _healthHudPresenter.Activate();
 
-            if (_missionEventController != null && _loadedMissionKeyAsset != null)
-            {
-                _enemyEntity.OnDied += HandleEnemyDied;
-            }
+            _enemyEntity.OnDied += HandleEnemyDied;
             _targetingSystem?.RegisterTarget(_targetable, _enemyEntity);
 
             // コンポーネント有効化
@@ -270,10 +270,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _attackPositionSearchView.enabled = false;
             _view.Deactivate();
 
-            if (_missionEventController != null && _loadedMissionKeyAsset != null)
-            {
-                _enemyEntity.OnDied -= HandleEnemyDied;
-            }
+            _enemyEntity.OnDied -= HandleEnemyDied;
             _targetingSystem?.UnregisterTarget(_targetable);
 
             _reservationUsecase.Deactivate();
@@ -396,6 +393,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             {
                 _missionEventController.NotifyEnemyKilled(_loadedMissionKeyAsset.Id);
             }
+
+            OnDefeated?.Invoke();
             Deactivate();
         }
 

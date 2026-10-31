@@ -7,12 +7,12 @@ using System.Collections.Generic;
 namespace KillChord.DebugWorld.Battle
 {
     /// <summary>
-    ///     裏世界の戦闘で使う出撃先のステージと、選べる敵の一覧をまとめるクラスです。
+    ///     裏世界の戦闘で使う出撃先のステージと、選べる敵・ボスをまとめるクラスです。
     /// </summary>
     public sealed class DebugBattleCatalog
     {
         /// <summary>
-        ///     ステージツリーと敵定義から、出撃先と敵の一覧を作ります。
+        ///     ステージツリーと敵定義から、出撃先と敵の一覧、ボスを作ります。
         /// </summary>
         /// <param name="stageTree"> ステージツリーです。 </param>
         /// <param name="enemyDefinitionRepository"> 個別の敵定義リポジトリです。 </param>
@@ -34,7 +34,24 @@ namespace KillChord.DebugWorld.Battle
             for (int i = 0; i < definitions.Count; i++)
             {
                 EnemyDefinitionAsset definition = definitions[i];
-                if (definition == null || definition.Id.Value == 0 || definition.ViewPrefab == null)
+                if (definition == null || definition.Id.Value == 0)
+                {
+                    continue;
+                }
+
+                // ボスはシーンに置いたボスを1体だけ出すため、敵の一覧には入れずボステストで使う。
+                if (definition.EnemyType == EnemyType.Boss)
+                {
+                    if (!_hasBoss)
+                    {
+                        _hasBoss = true;
+                        _bossId = definition.Id;
+                    }
+
+                    continue;
+                }
+
+                if (definition.ViewPrefab == null)
                 {
                     continue;
                 }
@@ -49,6 +66,12 @@ namespace KillChord.DebugWorld.Battle
 
         /// <summary> 出撃先のステージ定義です。 </summary>
         public BattleStageDefinition BaseStage => _baseStage;
+
+        /// <summary> ボステストで出すボスが見つかった場合はtrueです。 </summary>
+        public bool HasBoss => _hasBoss;
+
+        /// <summary> ボステストで出すボスの定義IDです。 </summary>
+        public EnemyDefinitionId BossId => _bossId;
 
         /// <summary> 選べる敵の表示名の一覧です。 </summary>
         public IReadOnlyList<string> EnemyNames => _enemyNames;
@@ -74,6 +97,8 @@ namespace KillChord.DebugWorld.Battle
         private readonly BattleStageDefinition _baseStage;
         private readonly List<EnemyDefinitionId> _enemyIds = new();
         private readonly List<string> _enemyNames = new();
+        private readonly bool _hasBoss;
+        private readonly EnemyDefinitionId _bossId;
 
         /// <summary>
         ///     チュートリアル以外で、指定した戦闘シーンを使うバトルステージを探します。
