@@ -422,6 +422,13 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <param name="evaluationResult"> 保存する評価結果です。 </param>
         private async Task SaveClearResultAsync(MissionEvaluationResult evaluationResult)
         {
+            // 保存を止める状態が登録されていれば、進捗も報酬も書き込まない。
+            if (ServiceLocator.TryGetInstance(out ISaveSuppression saveSuppression)
+                && saveSuppression.IsSaveSuppressed)
+            {
+                return;
+            }
+
             try
             {
                 BattleStageDefinition stageDefinition =

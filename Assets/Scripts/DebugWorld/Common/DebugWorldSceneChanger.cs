@@ -27,7 +27,31 @@ namespace KillChord.DebugWorld.Common
         /// <param name="fromSceneName"> 遷移元のシーン名です。 </param>
         /// <param name="toSceneName"> 遷移先のシーン名です。 </param>
         /// <returns> 遷移に成功した場合はtrueです。 </returns>
-        public static async Task<bool> ChangeSceneAsync(string fromSceneName, string toSceneName)
+        public static Task<bool> ChangeSceneAsync(string fromSceneName, string toSceneName)
+        {
+            return ChangeSceneAsync(fromSceneName, toSceneName, false);
+        }
+
+        /// <summary>
+        ///     ロード画面を閉じずにシーンを切り替えます。
+        ///     <para> インゲームのように、遷移先が初期化を終えてからロード画面を閉じるシーンへ使います。 </para>
+        /// </summary>
+        /// <param name="fromSceneName"> 遷移元のシーン名です。 </param>
+        /// <param name="toSceneName"> 遷移先のシーン名です。 </param>
+        /// <returns> 遷移に成功した場合はtrueです。 </returns>
+        public static Task<bool> ChangeSceneKeepingLoadingAsync(string fromSceneName, string toSceneName)
+        {
+            return ChangeSceneAsync(fromSceneName, toSceneName, true);
+        }
+
+        /// <summary>
+        ///     常駐シーンの遷移コントローラーでシーンを切り替えます。
+        /// </summary>
+        /// <param name="fromSceneName"> 遷移元のシーン名です。 </param>
+        /// <param name="toSceneName"> 遷移先のシーン名です。 </param>
+        /// <param name="isKeepLoading"> ロード画面を閉じずに引き渡す場合はtrueです。 </param>
+        /// <returns> 遷移に成功した場合はtrueです。 </returns>
+        private static async Task<bool> ChangeSceneAsync(string fromSceneName, string toSceneName, bool isKeepLoading)
         {
             if (!ServiceLocator.TryGetInstance(out SceneTransitionController controller))
             {
@@ -39,7 +63,9 @@ namespace KillChord.DebugWorld.Common
 
             try
             {
-                bool isSuccess = await controller.ChangeSceneWithPersistentLifetimeAsync(fromSceneName, toSceneName);
+                bool isSuccess = isKeepLoading
+                    ? await controller.ChangeSceneKeepingLoadingWithPersistentLifetimeAsync(fromSceneName, toSceneName)
+                    : await controller.ChangeSceneWithPersistentLifetimeAsync(fromSceneName, toSceneName);
                 if (!isSuccess)
                 {
                     Debug.LogError(
