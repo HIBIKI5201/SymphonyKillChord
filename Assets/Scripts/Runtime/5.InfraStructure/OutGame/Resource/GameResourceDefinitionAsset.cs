@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.Persistent.Localization;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Resource
@@ -34,7 +35,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Resource
         /// <returns> 生成したリソース定義です。 </returns>
         public GameResourceDefinition CreateDefinition()
         {
-            return new GameResourceDefinition(Id, _displayName);
+            return new GameResourceDefinition(Id, MasterTextLocalizer.Localize(_displayName));
         }
 
         [SerializeField, SourceDataCollection(GameResourceIds.COLLECTION_KEY)]

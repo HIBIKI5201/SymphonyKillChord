@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.Attribute;
 using System.Collections.Generic;
 using UnityEngine;
@@ -68,7 +69,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
             return new SkillNodeEntity(
                 NodeId,
                 UnlockCost,
-                SkillDetail,
+                MasterTextLocalizer.Localize(SkillDetail),
                 skillIds.ToArray(),
                 _statusBonusEffects,
                 _hasSkillSlotBonus,

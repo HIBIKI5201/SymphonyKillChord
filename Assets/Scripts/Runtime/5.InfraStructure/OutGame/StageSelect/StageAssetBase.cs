@@ -2,6 +2,7 @@ using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.Attribute;
 using System.Collections.Generic;
 using UnityEngine;
@@ -33,8 +34,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
 
             StageDefinition definition = CreateDefinition(
                 new StageId(_stageId.Id),
-                _stageName,
-                _flavorText,
+                MasterTextLocalizer.Localize(_stageName),
+                MasterTextLocalizer.Localize(_flavorText),
                 BuildReward(_firstClearRewards),
                 BuildReward(_clearRewards),
                 _targetSceneName,
