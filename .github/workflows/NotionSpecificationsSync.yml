@@ -1,6 +1,7 @@
 name: "[Bot] Notion Specifications Sync"
 
 # Notionの仕様書をMarkdownへ書き出し、非公開の仕様書リポジトリ（Docs/NotionSpecificationsのサブモジュール）へpushする。
+# 書き出し後に仕様書の目録（_catalog.md / _catalog.jsonl）を生成し、同じコミットに含める。
 # NotionのAPI制限を各メンバーが消費しないよう、取得はこのワークフローだけで行い、各自はサブモジュールをpullして読む。
 # このリポジトリは公開されているため、Actionsの実行時間は無料で、ログは誰でも閲覧できる。ページタイトルをログへ出さない。
 
@@ -31,7 +32,9 @@ jobs:
       - name: エクスポーターのソースを取得
         uses: actions/checkout@v4
         with:
-          sparse-checkout: SinfoniaOperator
+          sparse-checkout: |
+            SinfoniaOperator
+            scripts/notion
           submodules: false
 
       - name: 仕様書リポジトリを取得
@@ -66,6 +69,13 @@ jobs:
             exit $status
           fi
           sed -n '/エクスポートが完了しました/,$p' "$log_file" | grep -v '出力先'
+
+      - name: 仕様書の目録を生成
+        # LLM・エージェントが最初に読む目録（_catalog.md / _catalog.jsonl）を仕様書のルートへ書き出し、同じコミットで届ける。
+        # 内容が変わらなければ同じ出力になるため、Notion側に変更がない回はコミットされない。ログは件数だけを表示する。
+        # 目録の失敗で仕様書の同期を止めない（目録は前回のまま残る）。
+        continue-on-error: true
+        run: python3 scripts/notion/build_spec_catalog.py --source "$SPEC_DIRECTORY"
 
       - name: 仕様書リポジトリへpush
         working-directory: ${{ env.SPEC_DIRECTORY }}
