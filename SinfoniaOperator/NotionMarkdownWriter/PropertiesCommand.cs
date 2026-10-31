@@ -42,7 +42,8 @@ namespace SinfoniaStudio.NotionMarkdownWriter
 
             string databaseId = await ResolveDatabaseIdAsync(client, page.Parent);
             NotionDatabaseInfo database = await client.GetDatabaseAsync(databaseId);
-            Dictionary<string, object> properties = CreateCommand.BuildProperties(database, assignments, out Dictionary<string, string> displayValues);
+            IReadOnlyList<NotionUserInfo>? users = await CreateCommand.LoadUsersIfNeededAsync(client, database, assignments);
+            Dictionary<string, object> properties = CreateCommand.BuildProperties(database, assignments, users, out Dictionary<string, string> displayValues);
 
             Console.WriteLine($"対象ページ: {page.Title}");
             Console.WriteLine($"URL: {page.Url}");

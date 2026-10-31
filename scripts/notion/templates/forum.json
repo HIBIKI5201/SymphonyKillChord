@@ -1,0 +1,39 @@
+{
+  "type": "forum",
+  "label": "仕様検討フォーラム",
+  "database": "27d7c2c6-cc02-81de-aeb2-d40ffda5299e",
+  "title_property": "名前",
+  "properties": {
+    "ステータス": { "type": "status", "options": ["作業中", "検討中", "採用", "却下", "適用済"], "default": "作業中" },
+    "担当者": { "type": "multi_select", "options": ["野田", "横障子", "東", "八幡", "松下", "兼子", "塚本", "工藤"] },
+    "優先度": { "type": "number" }
+  },
+  "sections": {
+    "記述指針": {},
+    "仕様概要": {},
+    "仕様意図": {},
+    "仕様詳細": {},
+    "経緯": { "required": true },
+    "初期案の要約": { "inline": true, "required": true },
+    "初期案": { "required": true }
+  },
+  "body": [
+    "# 結論 {toggle=\"true\"}",
+    "\t# 記述指針",
+    "\t{{記述指針}}",
+    "\t# 仕様概要",
+    "\t{{仕様概要}}",
+    "\t# 仕様意図",
+    "\t{{仕様意図}}",
+    "\t# 仕様詳細",
+    "\t{{仕様詳細}}",
+    "# ログ {toggle=\"true\"}",
+    "\t## 経緯",
+    "\t{{経緯}}",
+    "\t## 提案",
+    "\t<details>",
+    "\t<summary>初期案<br>{{初期案の要約}}</summary>",
+    "\t\t{{初期案}}",
+    "\t</details>"
+  ]
+}
