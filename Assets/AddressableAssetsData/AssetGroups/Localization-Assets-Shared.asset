@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: Localization-Assets-Shared
   m_GUID: f7ea32954e3ee4a42a4d79228e847ed3
   m_SerializeEntries:
+  - m_GUID: f72ed376cdb85bfd1a937dbe8c84c6d7
+    m_Address: MasterText Shared Data
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 28ef56a5b71510142b480be2aea60eb6
     m_Address: TutorialPopups Shared Data
     m_ReadOnly: 1

@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.Attribute;
 using System;
 using UnityEngine;
@@ -51,7 +52,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         {
             if (!string.IsNullOrWhiteSpace(_displayText))
             {
-                return _displayText;
+                return MasterTextLocalizer.Localize(_displayText);
             }
 
             return BuildSummary();

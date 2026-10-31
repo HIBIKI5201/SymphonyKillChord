@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.Mission.StepEntryAction;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.Attribute;
 using System;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
 
             return new ObjectiveSequenceStep(
                 _condition.Create(missionKeyRepository),
-                _guideMessageText,
+                MasterTextLocalizer.Localize(_guideMessageText),
                 CreateEntryActions());
         }
 

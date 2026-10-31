@@ -2,6 +2,7 @@ using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.Attribute;
 using System;
 using System.Collections.Generic;
@@ -154,12 +155,12 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
             // ミッション定義を作る。
             return new MissionDefinition(
                 Id,
-                _displayName,
-                _mainMissionText,
+                MasterTextLocalizer.Localize(_displayName),
+                MasterTextLocalizer.Localize(_mainMissionText),
                 clearCondition,
                 _failCondition?.Create(),
                 evaluations,
-                _defeatTips
+                MasterTextLocalizer.LocalizeAll(_defeatTips)
             );
         }
 
