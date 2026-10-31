@@ -12,6 +12,7 @@ using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Composition.Persistent.Environment;
+using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Haptics;
@@ -213,6 +214,19 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 () => TutorialAttackTargetQuery.GetTargetBeatCount(
                     selectedBattleStageState, missionRuntimeServiceProvider.Invoke()));
 
+            _playerDamageHapticsPresenter?.Dispose();
+            _playerDamageHapticsPresenter = null;
+            CharacterEntity playerEntity = ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerEntity;
+            if (playerEntity == null)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(ACLikeRhythmGuideInitializer)}] プレイヤーのEntityを取得できないため、被弾時の振動なしで続行します。",
+                    this);
+                return true;
+            }
+
+            _playerDamageHapticsPresenter = new PlayerDamageHapticsPresenter(playerEntity, _gamepadHapticsView);
+
             return true;
         }
 
@@ -231,6 +245,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
             _justHitFeedbackPresenter = null;
             _gamepadHapticsPresenter?.Dispose();
             _gamepadHapticsPresenter = null;
+            _playerDamageHapticsPresenter?.Dispose();
+            _playerDamageHapticsPresenter = null;
             ReleaseLoadedHapticsConfig();
 
             if (_gamepadHapticsView != null)
@@ -257,6 +273,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private RhythmGuideTargetFeedbackPresenter _targetFeedbackPresenter;
         private RhythmGuideJustHitFeedbackPresenter _justHitFeedbackPresenter;
         private GamepadHapticsPresenter _gamepadHapticsPresenter;
+        private PlayerDamageHapticsPresenter _playerDamageHapticsPresenter;
         private GamepadHapticsView _gamepadHapticsView;
         private GamepadHapticsConfig _loadedHapticsConfig;
 
