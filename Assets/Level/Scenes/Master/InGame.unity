@@ -93903,7 +93903,6 @@ GameObject:
   - component: {fileID: 1435826634}
   - component: {fileID: 1435826636}
   - component: {fileID: 1435826635}
-  - component: {fileID: 1435826637}
   - component: {fileID: 827911324}
   - component: {fileID: 726190438}
   - component: {fileID: 179700110}
@@ -94117,19 +94116,6 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
---- !u!114 &1435826637
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1435826633}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 147e44e44b88be446a4632b7ff363bd9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.InGame.Sequence.StageSequenceMusicView
-  _stageClearCueName: 
 --- !u!1 &1441437016
 GameObject:
   m_ObjectHideFlags: 0
