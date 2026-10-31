@@ -77,6 +77,7 @@ MonoBehaviour:
   - _addressableKey: ACLikeRhythmGuideEffectConfig
   - _addressableKey: DemoEndSequenceConfig
   - _addressableKey: SkillExecutedShakeConfig
+  - _addressableKey: StageEffectCatalogAsset
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _dataAssetAddressableKey: StageTreeAsset
@@ -168,6 +169,10 @@ MonoBehaviour:
     _assetCreationDirectory: 
   - _collectionKey: SkillGenreIcon
     _dataAssetAddressableKey: SkillGenreIconCatalogAsset
+    _propertyPath: _entries
+    _assetCreationDirectory: 
+  - _collectionKey: StageEffect
+    _dataAssetAddressableKey: StageEffectCatalogAsset
     _propertyPath: _entries
     _assetCreationDirectory: 
   _repositoryMappings:

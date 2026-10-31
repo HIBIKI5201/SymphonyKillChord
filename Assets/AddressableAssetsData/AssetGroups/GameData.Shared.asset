@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: GameData.Shared
   m_GUID: b75cc6c79834e1e46b6d9b75aeb6f054
   m_SerializeEntries:
+  - m_GUID: f75fc765bf9548f59090b1b42f9a02af
+    m_Address: StageEffectCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 02ac4acd11c13e94f951e778560963f3
     m_Address: PlayerConfig
     m_ReadOnly: 0
