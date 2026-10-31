@@ -70,6 +70,9 @@ namespace KillChord.Runtime.Composition.InGame.Player
         [SerializeField, Tooltip("プレイヤーの攻撃種別ごとのアニメーション設定です。")]
         private PlayerAttackAnimationConfig _playerAttackAnimationConfig;
 
+        [SerializeField, Tooltip("ジャスト成立時に、プレイヤーと敵のアニメーションにかけるスローモーションの設定です。")]
+        private JustSlowMotionSettings _justSlowMotionSettings = new JustSlowMotionSettings();
+
         [SerializeField, Tooltip("モバイルスティックフリック入力です。")]
         private MobileStickFlickInput _mobileStickFlickInput;
 
@@ -95,6 +98,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         private PlayerDodgeMovementApplication _dodgeMovementApplication;
         private IPlayerCharacterAnimationSignal _characterAnimationSignal;
         private PlayerAttackSignal _playerAttackSignal;
+        private JustSlowMotionViewModel _justSlowMotionViewModel;
+        private JustSlowMotionPresenter _justSlowMotionPresenter;
         private CharacterEntity _playerEntity;
         private IMusicSyncService _musicSyncService;
         private MissionEventController _missionEventController;
@@ -204,13 +209,15 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 spawnPointTransform.position,
                 spawnPointTransform.rotation);
             _playerAttackSignal = new PlayerAttackSignal();
+            _justSlowMotionViewModel = new JustSlowMotionViewModel(_justSlowMotionSettings);
             _moduleContainer = new PlayerModuleContainer(
                 this,
                 _player,
                 _playerEntity,
                 playerStatusBonusContainer.PlayerStatusBonus,
                 _damageEffectView,
-                _playerAttackSignal);
+                _playerAttackSignal,
+                _justSlowMotionViewModel);
             ServiceLocator.RegisterInstance(_moduleContainer);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;
@@ -329,6 +336,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
             AttackResultViewModel attackResultViewModel = new AttackResultViewModel();
             AttackResultPresenter attackResultPresenter = new AttackResultPresenter(attackResultViewModel);
             PlayerAttackPresenter playerAttackPresenter = new PlayerAttackPresenter(_playerAttackSignal);
+
+            // ジャスト成立時に、プレイヤーと敵のアニメーションだけをスローにする。
+            _justSlowMotionPresenter?.Dispose();
+            _justSlowMotionPresenter = new JustSlowMotionPresenter(_playerAttackSignal, _justSlowMotionViewModel);
             PlayerBattleState playerBattleState = new PlayerBattleState(_playerEntity);
             PlayerActionRestrictionState actionRestrictionState = new PlayerActionRestrictionState();
             AttackIntervalEvaluator attackIntervalEvaluator = new AttackIntervalEvaluator(_playerEntity.AttackIntervalEntity, destroyCancellationToken);
@@ -358,7 +369,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _characterAnimationView,
                 _characterAnimationConfig,
                 musicSyncState,
-                _playerAttackAnimationConfig);
+                _playerAttackAnimationConfig,
+                _justSlowMotionViewModel);
 
             PlayerDodgeMovementApplication dodge = new PlayerDodgeMovementApplication(parameter);
             _dodgeMovementApplication = dodge;
@@ -489,6 +501,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void OnDestroy()
         {
+            _justSlowMotionPresenter?.Dispose();
+            _justSlowMotionPresenter = null;
             _playerAttackSignal?.Dispose();
             _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();
@@ -534,6 +548,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         public override void Shutdown()
         {
+            _justSlowMotionPresenter?.Dispose();
+            _justSlowMotionPresenter = null;
             _playerAttackSignal?.Dispose();
             _playerAttackSignal = null;
             UninitializeMobileStickFlickInput();

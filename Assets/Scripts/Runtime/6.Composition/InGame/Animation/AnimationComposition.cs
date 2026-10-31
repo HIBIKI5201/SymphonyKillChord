@@ -19,17 +19,20 @@ namespace KillChord.Runtime.Composition
         /// <param name="view"> アニメーション再生View。 </param>
         /// <param name="config"> キャラクター共通のアニメーション設定。 </param>
         /// <param name="musicSyncState"> BPM参照元。 </param>
+        /// <param name="justSlowMotionViewModel"> ジャストのスローモーションの再生倍率の参照元。未指定ならスローをかけない。 </param>
         /// <returns> 初期化済みのView側依存群。 </returns>
         public ICharacterAnimationViewContext Init(
             CharacterAnimationView view,
             CharacterAnimationCatalogConfig config,
-            MusicSyncState musicSyncState)
+            MusicSyncState musicSyncState,
+            JustSlowMotionViewModel justSlowMotionViewModel = null)
         {
             return InitInternal(
                 view,
                 config,
                 musicSyncState,
                 null,
+                justSlowMotionViewModel,
                 (playbackMap, animationSpeedProvider, timingCalculator) =>
                     new CharacterAnimationSignal(
                         playbackMap,
@@ -44,18 +47,21 @@ namespace KillChord.Runtime.Composition
         /// <param name="config"> キャラクター共通のアニメーション設定。 </param>
         /// <param name="musicSyncState"> BPM参照元。 </param>
         /// <param name="playerAttackConfig"> プレイヤー攻撃アニメーション設定。 </param>
+        /// <param name="justSlowMotionViewModel"> ジャストのスローモーションの再生倍率の参照元。未指定ならスローをかけない。 </param>
         /// <returns> 初期化済みのView側依存群。 </returns>
         public ICharacterAnimationViewContext InitForPlayer(
             CharacterAnimationView view,
             CharacterAnimationCatalogConfig config,
             MusicSyncState musicSyncState,
-            PlayerAttackAnimationConfig playerAttackConfig)
+            PlayerAttackAnimationConfig playerAttackConfig,
+            JustSlowMotionViewModel justSlowMotionViewModel = null)
         {
             return InitInternal(
                 view,
                 config,
                 musicSyncState,
                 playerAttackConfig,
+                justSlowMotionViewModel,
                 (playbackMap, animationSpeedProvider, timingCalculator) =>
                     new PlayerCharacterAnimationSignal(
                         playbackMap,
@@ -70,6 +76,7 @@ namespace KillChord.Runtime.Composition
         /// <param name="config"> キャラクター共通のアニメーション設定。 </param>
         /// <param name="musicSyncState"> BPM参照元。 </param>
         /// <param name="playerAttackConfig"> プレイヤー攻撃アニメーション設定。 </param>
+        /// <param name="justSlowMotionViewModel"> ジャストのスローモーションの再生倍率の参照元です。 </param>
         /// <param name="signalFactory"> Signal生成処理です。 </param>
         /// <returns> 初期化済みのView側依存群。 </returns>
         private ICharacterAnimationViewContext InitInternal(
@@ -77,6 +84,7 @@ namespace KillChord.Runtime.Composition
             CharacterAnimationCatalogConfig config,
             MusicSyncState musicSyncState,
             PlayerAttackAnimationConfig playerAttackConfig,
+            JustSlowMotionViewModel justSlowMotionViewModel,
             Func<
                 CharacterAnimationPlaybackMap,
                 Func<float>,
@@ -211,7 +219,7 @@ namespace KillChord.Runtime.Composition
                 timingCalculator);
             CharacterAnimationViewContext context = new CharacterAnimationViewContext(viewModel, signal);
 
-            view.Initialize(context, combinedClips.ToArray(), musicSyncState);
+            view.Initialize(context, combinedClips.ToArray(), musicSyncState, justSlowMotionViewModel);
             return context;
         }
 
