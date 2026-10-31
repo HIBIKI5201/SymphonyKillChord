@@ -495,11 +495,39 @@
     background-color: rgb(120, 120, 120);
 }
 
+.skillbuild-list-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .skill-genre-filter-bar {
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+    flex-grow: 1;
+    flex-shrink: 1;
     padding-left: 12px;
+}
+
+.skillbuild-collection-rate {
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: center;
+    padding-right: 24px;
+}
+
+.skillbuild-collection-rate-name-label {
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin-right: 8px;
+}
+
+.skillbuild-collection-rate-value-label {
+    color: rgb(255, 255, 255);
+    font-size: 26px;
+    -unity-font-style: bold;
 }
 
 .skill-genre-filter-button-all,

@@ -16,13 +16,16 @@ namespace KillChord.Runtime.View
         /// <param name="context"> アニメーションのView側依存。 </param>
         /// <param name="clips"> 再生対象のアニメーションクリップ一覧。 </param>
         /// <param name="musicSyncState"> BPM参照元。 </param>
+        /// <param name="justSlowMotionViewModel"> ジャスト成立時のスローモーションの再生倍率の参照元。未指定ならスローをかけない。 </param>
         public void Initialize(
             CharacterAnimationViewContext context,
             AnimationClip[] clips,
-            MusicSyncState musicSyncState)
+            MusicSyncState musicSyncState,
+            JustSlowMotionViewModel justSlowMotionViewModel = null)
         {
             _context = context;
             _musicSyncState = musicSyncState;
+            _justSlowMotionViewModel = justSlowMotionViewModel;
             _locomotionCalculator = new CharacterAnimationLocomotionCalculator();
             _oneShotTimingCalculator = new CharacterAnimationOneShotTimingCalculator();
             _weights = clips != null
@@ -81,7 +84,11 @@ namespace KillChord.Runtime.View
 
             ApplyOverlayWeight();
 
-            _playableController.SetAnimationSpeed(_locomotionCalculator.AnimationSpeed);
+            // ジャストのスローモーションは再生速度だけにかけ、ワンショットの終了判定などの時間は変えない。
+            float slowMotionScale = _justSlowMotionViewModel != null
+                ? _justSlowMotionViewModel.GetCurrentPlaybackScale()
+                : 1f;
+            _playableController.SetAnimationSpeed(_locomotionCalculator.AnimationSpeed * slowMotionScale);
             for (int i = 0; i < _weights.Length; i++)
             {
                 _playableController.SetWeight(i, _weights[i]);
@@ -219,6 +226,7 @@ namespace KillChord.Runtime.View
         private CharacterAnimationOneShotTimingCalculator _oneShotTimingCalculator;
         private ICharacterAnimationViewContext _context;
         private MusicSyncState _musicSyncState;
+        private JustSlowMotionViewModel _justSlowMotionViewModel;
         private float[] _weights;
         private bool _isInitialized;
         private float _overlayBaseDuration;

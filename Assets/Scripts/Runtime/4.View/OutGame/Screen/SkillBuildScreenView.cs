@@ -47,6 +47,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {OWNED_POINTS_LABEL_NAME} が見つかりませんでした。");
             _unlockPointsLabel = rootElement.Q<Label>("UnlockPointsValueLabel")
                 ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] UnlockPointsValueLabel が見つかりませんでした。");
+            _collectionRateValueLabel = rootElement.Q<Label>(COLLECTION_RATE_VALUE_LABEL_NAME)
+                ?? throw new ArgumentNullException($"[{nameof(SkillBuildScreenView)}] {COLLECTION_RATE_VALUE_LABEL_NAME} が見つかりませんでした。");
 
             // スキル詳細とジャンル絞り込みのビューを作成する。
             VisualElement skillDetailRoot = rootElement.Q<VisualElement>(SKILL_DETAIL_NAME)
@@ -92,6 +94,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             Label localizedRebuildPointsHeading = rootElement.Q<Label>("RebuildPointsNameLabel");
             Label localizedUnlockPointsHeading = rootElement.Q<Label>("UnlockPointsNameLabel");
             Label localizedDetailsHeading = rootElement.Q<Label>("DetailsHeading");
+            Label localizedCollectionRateHeading = rootElement.Q<Label>(COLLECTION_RATE_NAME_LABEL_NAME);
             Label localizedSkillTypeHeading = rootElement.Q<Label>("SkillTypeHeading");
             Label localizedSkillEffectHeading = rootElement.Q<Label>("SkillEffectHeading");
             Label localizedLevelHeading = rootElement.Q<Label>("LevelHeading");
@@ -102,6 +105,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
                 new LocalizedElementText("UICommon", "ui.home.mod_points", text => localizedRebuildPointsHeading.text = text, localizedRebuildPointsHeading.text),
                 new LocalizedElementText("UICommon", "ui.home.unlock_points", text => localizedUnlockPointsHeading.text = text, localizedUnlockPointsHeading.text),
                 new LocalizedElementText("UICommon", "ui.skill_build.details", text => localizedDetailsHeading.text = text, localizedDetailsHeading.text),
+                new LocalizedElementText("UICommon", "ui.skill_build.collection_rate", text => localizedCollectionRateHeading.text = text, localizedCollectionRateHeading.text),
                 new LocalizedElementText("UICommon", "ui.skill.type", text => localizedSkillTypeHeading.text = text, localizedSkillTypeHeading.text),
                 new LocalizedElementText("UICommon", "ui.skill.effect", text => localizedSkillEffectHeading.text = text, localizedSkillEffectHeading.text),
                 new LocalizedElementText("UICommon", "ui.skill.level", text => localizedLevelHeading.text = text, localizedLevelHeading.text),
@@ -255,6 +259,8 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private const string SKILL_GENRE_FILTER_BAR_NAME = "SkillGenreFilterBar";
         private const string SKILL_ELEMENT_LIST_CLASS_NAME = "skill-element-list";
         private const string SKILL_SCROLL_VIEW_NAME = "SkillScrollView";
+        private const string COLLECTION_RATE_NAME_LABEL_NAME = "SkillCollectionRateNameLabel";
+        private const string COLLECTION_RATE_VALUE_LABEL_NAME = "SkillCollectionRateValueLabel";
         private const string SKILLBUILD_DIALOG_NAME = "SkillBuildDialog";
         private const string DIALOG_BACKGROUND_NAME = "BackGround";
         private const string DISCARD_AND_CLOSE_BUTTON_NAME = "DiscardAndCloseButton";
@@ -271,6 +277,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         private readonly Button _skillLevelUpButton;
         private readonly Label _ownedPointsLabel;
         private readonly Label _unlockPointsLabel;
+        private readonly Label _collectionRateValueLabel;
         private readonly VisualElement _skillElementList;
         private readonly ScrollView _skillScrollView;
         private readonly SkillDetailView _skillDetailView;
@@ -363,7 +370,26 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             _currentSkills = skills ?? Array.Empty<SkillViewData>();
             _skillGenreFilterBarView.SetAvailableGenres(ExtractDistinctGenres(_currentSkills));
+            SetCollectionRate(_currentSkills);
             RefreshSkillListOrder();
+        }
+
+        /// <summary>
+        ///     スキル一覧の上に、解放済みの数と全スキル数を収集率として表示する。
+        /// </summary>
+        /// <param name="skills"> 未開放を含むスキル一覧。 </param>
+        private void SetCollectionRate(IReadOnlyList<SkillViewData> skills)
+        {
+            int unlockedCount = 0;
+            for (int i = 0; i < skills.Count; i++)
+            {
+                if (skills[i].IsUnlocked)
+                {
+                    unlockedCount++;
+                }
+            }
+
+            _collectionRateValueLabel.text = $"{unlockedCount}/{skills.Count}";
         }
 
         /// <summary>

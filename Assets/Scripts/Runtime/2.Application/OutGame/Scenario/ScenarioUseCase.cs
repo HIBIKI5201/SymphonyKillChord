@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.OutGame.Scenario;
 using System;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application.OutGame.Scenario
@@ -167,6 +168,8 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         public bool IsAutoAdvance { get; private set; }
 
         private static readonly TimeSpan MINIMUM_PAUSE_POLL_INTERVAL = TimeSpan.FromMilliseconds(10);
+        /// <summary> 次送り待機で Auto の待ち時間が先に終わったことを表す WhenAny の添字。 </summary>
+        private const int AUTO_ADVANCE_DELAY_INDEX = 2;
 
         private CancellationTokenSource _playCts;
         private int _autoAdvanceVersion;
@@ -189,7 +192,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                 TimeSpan interval = _settingsRepository.PausePollInterval > TimeSpan.Zero
                     ? _settingsRepository.PausePollInterval
                     : MINIMUM_PAUSE_POLL_INTERVAL;
-                await Task.Delay(interval, ct);
+                await UniTask.Delay(interval, DelayType.Realtime, cancellationToken: ct);
             }
             ct.ThrowIfCancellationRequested();
         }
@@ -234,13 +237,14 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                     : MINIMUM_PAUSE_POLL_INTERVAL;
                 TimeSpan delay = remainingDelay < interval ? remainingDelay : interval;
                 using CancellationTokenSource delaySource = CancellationTokenSource.CreateLinkedTokenSource(ct);
-                Task delayTask = Task.Delay(delay, delaySource.Token);
-                Task completedTask = await Task.WhenAny(advanceTask, stateChangedTask, delayTask);
+                int completedIndex = await UniTask.WhenAny(
+                    advanceTask.AsUniTask(),
+                    stateChangedTask.AsUniTask(),
+                    UniTask.Delay(delay, DelayType.Realtime, cancellationToken: delaySource.Token));
                 delaySource.Cancel();
-                if (ReferenceEquals(completedTask, delayTask)
+                if (completedIndex == AUTO_ADVANCE_DELAY_INDEX
                     && IsAutoAdvance && !IsPaused && autoAdvanceVersion == _autoAdvanceVersion)
                 {
-                    await delayTask;
                     remainingDelay -= delay;
                 }
             }

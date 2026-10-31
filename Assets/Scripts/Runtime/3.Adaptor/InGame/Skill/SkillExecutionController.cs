@@ -93,7 +93,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                     SkillExecutionResultType.Executed,
                     _skillDefinition.AnimationKey,
                     _skillDefinition.EffectSpec.SkillNormalAttackDamagePolicy,
-                    ResolveWeaponBeatType());
+                    ResolveWeaponBeatType(),
+                    _skillDefinition.RecoveryBeats);
             }
 
             ResetProgressOnFailure(now);

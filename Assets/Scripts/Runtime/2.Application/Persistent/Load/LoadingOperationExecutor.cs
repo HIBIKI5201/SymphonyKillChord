@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application.Persistent.Load
@@ -134,7 +135,7 @@ namespace KillChord.Runtime.Application.Persistent.Load
                 return;
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(remainingTime), cancellationToken);
+            await UniTask.Delay(TimeSpan.FromSeconds(remainingTime), DelayType.Realtime, cancellationToken: cancellationToken);
         }
 
         private readonly ILoadingSessionFactory _sessionFactory;

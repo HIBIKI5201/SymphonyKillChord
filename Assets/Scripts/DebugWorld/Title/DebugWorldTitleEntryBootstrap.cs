@@ -1,3 +1,4 @@
+using KillChord.DebugWorld.Battle;
 using KillChord.DebugWorld.Common;
 using System;
 using UnityEngine;
@@ -35,6 +36,9 @@ namespace KillChord.DebugWorld.Title
             {
                 return;
             }
+
+            // 戦闘からポーズでタイトルへ戻った場合も、裏世界の戦闘設定を外す。
+            DebugBattleSession.End();
 
             // ハブシーンがビルドに無いProfileでは、開けない入口を出さない。
             if (!DebugWorldSceneChanger.CanOpenHub())
