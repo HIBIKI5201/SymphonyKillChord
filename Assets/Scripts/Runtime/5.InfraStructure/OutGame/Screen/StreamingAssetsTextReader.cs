@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using UnityEngine.Networking;
 
@@ -43,7 +44,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Screen
             while (!operation.isDone)
             {
                 ct.ThrowIfCancellationRequested();
-                await Task.Yield();
+                await UniTask.Yield();
             }
 
             ct.ThrowIfCancellationRequested();

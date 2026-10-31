@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using System;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -145,7 +146,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
 
                             try
                             {
-                                await Task.Delay(retryDelayMilliseconds, cancellationToken);
+                                await UniTask.Delay(retryDelayMilliseconds, DelayType.Realtime, cancellationToken: cancellationToken);
                             }
                             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                             {

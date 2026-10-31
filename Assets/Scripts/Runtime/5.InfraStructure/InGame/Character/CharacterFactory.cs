@@ -68,7 +68,6 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
                 new CharacterName(data.CharacterName),
                 new HealthEntity(data.MaxHealth * maxHealthMultiplier),
                 combatSpec,
-                new AttackInterval(data.AttackInterval),
                 new Damage(data.BaseDamage * attackPowerMultiplier),
                 new StatusEffectSystem(),
                 criticalChance

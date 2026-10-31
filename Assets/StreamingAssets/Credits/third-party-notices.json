@@ -67,12 +67,6 @@
 			"text": "https://github.com/Cysharp/ZString"
 		},
 		{
-			"name": "ObservableCollections",
-			"holder": "Copyright (c) 2021 Cysharp, Inc.",
-			"license": "MIT License",
-			"text": "https://github.com/Cysharp/ObservableCollections"
-		},
-		{
 			"name": "BitonicPixelSorter",
 			"holder": "Copyright (c) 2020 ruccho",
 			"license": "MIT License",
