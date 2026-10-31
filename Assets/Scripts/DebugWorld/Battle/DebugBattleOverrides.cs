@@ -11,11 +11,26 @@ namespace KillChord.DebugWorld.Battle
     public sealed class DebugBattleOverrides : IEnemyWavesOverride, ISaveSuppression
     {
         /// <summary>
+        ///     Waveの並びと繰り返し開始位置で初期化します。
+        /// </summary>
+        /// <param name="waves"> Waveの並びです。 </param>
+        /// <param name="loopStart"> 繰り返しを始めるWaveの位置です。 </param>
+        private DebugBattleOverrides(EnemyWaveDefinition[] waves, int loopStart)
+        {
+            _waves = waves;
+            _loopStart = loopStart;
+        }
+
+        /// <summary> 裏世界の戦闘は常にセーブを止めます。 </summary>
+        public bool IsSaveSuppressed => true;
+
+        /// <summary>
         ///     敵を出さない戦闘の設定を作ります。
         /// </summary>
-        public DebugBattleOverrides()
+        /// <returns> 作った設定です。 </returns>
+        public static DebugBattleOverrides CreatePlayerControlTest()
         {
-            _hasEnemy = false;
+            return new DebugBattleOverrides(new[] { CreateEmptyWave() }, 0);
         }
 
         /// <summary>
@@ -23,35 +38,54 @@ namespace KillChord.DebugWorld.Battle
         /// </summary>
         /// <param name="enemyDefinitionId"> 出す敵の定義IDです。 </param>
         /// <param name="enemyAmount"> 1回に出す数です。 </param>
-        public DebugBattleOverrides(EnemyDefinitionId enemyDefinitionId, int enemyAmount)
+        /// <returns> 作った設定です。 </returns>
+        public static DebugBattleOverrides CreateEnemyTest(EnemyDefinitionId enemyDefinitionId, int enemyAmount)
         {
             if (enemyAmount <= 0) { throw new ArgumentOutOfRangeException(nameof(enemyAmount)); }
 
-            _hasEnemy = true;
-            _enemyDefinitionId = enemyDefinitionId;
-            _enemyAmount = enemyAmount;
+            EnemyWaveDefinition enemyWave = new(
+                new[] { new EnemyWaveDetail(enemyDefinitionId, enemyAmount) },
+                WAVE_DURATION);
+            return new DebugBattleOverrides(new[] { enemyWave }, 0);
         }
 
-        /// <summary> 裏世界の戦闘は常にセーブを止めます。 </summary>
-        public bool IsSaveSuppressed => true;
+        /// <summary>
+        ///     最初にボスを1体だけ出し、その後は敵を出さない戦闘の設定を作ります。
+        ///     <para> ボスはシーンに1体だけ置かれているため、繰り返し出しません。 </para>
+        /// </summary>
+        /// <param name="bossDefinitionId"> 出すボスの定義IDです。 </param>
+        /// <returns> 作った設定です。 </returns>
+        public static DebugBattleOverrides CreateBossTest(EnemyDefinitionId bossDefinitionId)
+        {
+            EnemyWaveDefinition bossWave = new(
+                new[] { new EnemyWaveDetail(bossDefinitionId, BOSS_AMOUNT) },
+                WAVE_DURATION);
+            return new DebugBattleOverrides(new[] { bossWave, CreateEmptyWave() }, 1);
+        }
 
         /// <summary>
-        ///     1つのWaveを繰り返す敵Waveを生成します。敵なしの場合は空のWaveを繰り返します。
+        ///     設定したWaveを、繰り返し開始位置から繰り返す敵Waveを生成します。
         /// </summary>
         /// <returns> 差し替える敵Waveです。 </returns>
         public EnemyWaves CreateEnemyWaves()
         {
-            EnemyWaveDetail[] details = _hasEnemy
-                ? new[] { new EnemyWaveDetail(_enemyDefinitionId, _enemyAmount) }
-                : Array.Empty<EnemyWaveDetail>();
-            EnemyWaveDefinition[] waves = { new EnemyWaveDefinition(details, WAVE_DURATION) };
-            return new EnemyWaves(waves, true, 0);
+            // 敵Waveは進行状態を持つため、出撃のたびに新しく作る。
+            return new EnemyWaves(_waves, true, _loopStart);
         }
 
         private const float WAVE_DURATION = 30f;
+        private const int BOSS_AMOUNT = 1;
 
-        private readonly bool _hasEnemy;
-        private readonly EnemyDefinitionId _enemyDefinitionId;
-        private readonly int _enemyAmount;
+        private readonly EnemyWaveDefinition[] _waves;
+        private readonly int _loopStart;
+
+        /// <summary>
+        ///     敵を出さないWaveを作ります。
+        /// </summary>
+        /// <returns> 作ったWaveです。 </returns>
+        private static EnemyWaveDefinition CreateEmptyWave()
+        {
+            return new EnemyWaveDefinition(Array.Empty<EnemyWaveDetail>(), WAVE_DURATION);
+        }
     }
 }
