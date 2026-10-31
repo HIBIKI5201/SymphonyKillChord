@@ -356,7 +356,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 pendingAttackEffectService,
                 new AttackOcclusionView(_attackObstacleLayers, _attackOcclusionRayHeight),
                 (float)parameter.AttackRotationSpeed,
-                (float)parameter.AttackCooldown.Value);
+                (float)parameter.AttackCooldown.Value,
+                parameter.AttackRecoveryBeats);
             _moduleContainer.SetActionRestrictionState(actionRestrictionState);
             _moduleContainer.SetPlayerAttackController(playerAttackController);
 

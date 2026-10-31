@@ -21,8 +21,6 @@ namespace KillChord.Runtime.Domain.OutGame.Screen
         Title,
         /// <summary> メニュー画面。 </summary>
         Menu,
-        /// <summary> オプション画面。 </summary>
-        Options,
         /// <summary> クレジット画面。 </summary>
         Credit,
     }

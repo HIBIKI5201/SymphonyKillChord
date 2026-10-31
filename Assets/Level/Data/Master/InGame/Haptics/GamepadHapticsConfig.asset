@@ -15,3 +15,6 @@ MonoBehaviour:
   _lowFrequencyMotorSpeed: 0.35
   _highFrequencyMotorSpeed: 0.6
   _pulseDuration: 0.12
+  _damageLowFrequencyMotorSpeed: 0.6
+  _damageHighFrequencyMotorSpeed: 0.2
+  _damagePulseDuration: 0.15

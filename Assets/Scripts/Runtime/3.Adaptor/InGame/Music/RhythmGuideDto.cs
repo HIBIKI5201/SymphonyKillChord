@@ -17,7 +17,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <param name="isJustTiming"> 音楽同期サービスによる現在のジャスト成否。 </param>
         /// <param name="targetBeatCount"> チュートリアル中等のミッション指定拍数。 </param>
         /// <param name="guideLengthInBars"> タイムアウトと共有するゲージ全長の小節数。 </param>
-        public RhythmGuideDto(float indicatorNormalized, int? currentBeatCount, IReadOnlyList<RhythmGuideZoneDto> zones, bool hasTarget, bool isJustTiming, float guideLengthInBars, int? targetBeatCount = null)
+        /// <param name="lockedBarProgress"> 攻撃硬直で入力できない範囲の長さ（小節単位）。 </param>
+        public RhythmGuideDto(float indicatorNormalized, int? currentBeatCount, IReadOnlyList<RhythmGuideZoneDto> zones, bool hasTarget, bool isJustTiming, float guideLengthInBars, int? targetBeatCount = null, float lockedBarProgress = 0f)
         {
             IndicatorNormalized = indicatorNormalized;
             CurrentBeatCount = currentBeatCount;
@@ -26,6 +27,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             IsJustTiming = isJustTiming;
             TargetBeatCount = targetBeatCount;
             GuideLengthInBars = guideLengthInBars;
+            LockedBarProgress = lockedBarProgress;
         }
 
         /// <summary> インジケーターの正規化位置。1が1小節でジャスト通過分だけ1を超える。 </summary>
@@ -42,5 +44,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         public int? TargetBeatCount { get; }
         /// <summary> タイムアウトと共有するゲージ全長の小節数。 </summary>
         public float GuideLengthInBars { get; }
+        /// <summary> 攻撃硬直で入力できない範囲の長さ（小節単位）。直前の入力位置からこの長さまでを灰色にする。 </summary>
+        public float LockedBarProgress { get; }
     }
 }

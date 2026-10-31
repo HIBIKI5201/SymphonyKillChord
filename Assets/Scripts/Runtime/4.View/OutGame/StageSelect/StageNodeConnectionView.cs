@@ -1,6 +1,7 @@
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using System;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using UnityEngine.UIElements;
 
@@ -66,9 +67,9 @@ namespace KillChord.Runtime.View.OutGame.StageSelect
 
             try
             {
-                await Task.WhenAny(
-                    tcs.Task,
-                    Task.Delay(TimeSpan.FromSeconds(ANIMATION_TIMEOUT_SEC), timeoutCts.Token));
+                await UniTask.WhenAny(
+                    tcs.Task.AsUniTask(),
+                    UniTask.Delay(TimeSpan.FromSeconds(ANIMATION_TIMEOUT_SEC), DelayType.Realtime, cancellationToken: timeoutCts.Token));
             }
             finally
             {

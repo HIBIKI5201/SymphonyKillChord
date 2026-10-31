@@ -13,14 +13,12 @@ namespace KillChord.Runtime.Domain.InGame.Character
         ///     コンストラクタ。
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="attackInterval"></param>
         /// <param name="health"></param>
         /// <param name="combatSpec"></param>
         /// <param name="criticalChance"> 会心率。武器ではなくキャラクターが持つ。 </param>
         public CharacterEntity(CharacterName name,
             HealthEntity health,
             CharacterCombatSpec combatSpec,
-            AttackInterval attackInterval,
             Damage baseDamage,
             IStatusEffectSystem statusEffectSystem,
             CriticalChance criticalChance = default
@@ -34,7 +32,7 @@ namespace KillChord.Runtime.Domain.InGame.Character
             _name = name;
             _health = health;
             _combatSpec = combatSpec;
-            _attackIntervalEntity = new AttackIntervalEntity(attackInterval);
+            _attackIntervalEntity = new AttackIntervalEntity();
             _baseDamage = baseDamage;
             _statusEffectSystem = statusEffectSystem ?? throw new ArgumentNullException(nameof(statusEffectSystem));
             _criticalChance = criticalChance;
