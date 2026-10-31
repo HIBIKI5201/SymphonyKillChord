@@ -4900,7 +4900,7 @@ GameObject:
   - component: {fileID: 2076786195142350680}
   - component: {fileID: 1532870987105150619}
   m_Layer: 0
-  m_Name: 'run_smoke '
+  m_Name: run_smoke
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
