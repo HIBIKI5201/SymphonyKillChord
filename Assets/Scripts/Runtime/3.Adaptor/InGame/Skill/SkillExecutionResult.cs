@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 
@@ -14,16 +15,20 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <param name="resultType"> 結果種別です。 </param>
         /// <param name="animationKey"> 再生するアニメーションキーです。 </param>
         /// <param name="skillNormalAttackDamagePolicy"> 通常攻撃のダメージ計算ポリシーです。 </param>
+        /// <param name="weaponBeatType"> このスキルで構える武器を決めるBeatTypeです。 </param>
+        /// <param name="recoveryBeats"> スキル発動時の攻撃硬直（拍数）です。 </param>
         public SkillExecutionResult(
             SkillExecutionResultType resultType,
             string animationKey = null,
             SkillNormalAttackDamagePolicy skillNormalAttackDamagePolicy = SkillNormalAttackDamagePolicy.Apply,
-            BeatType weaponBeatType = default)
+            BeatType weaponBeatType = default,
+            AttackRecoveryBeats recoveryBeats = default)
         {
             ResultType = resultType;
             AnimationKey = animationKey;
             SkillNormalAttackDamagePolicy = skillNormalAttackDamagePolicy;
             WeaponBeatType = weaponBeatType;
+            RecoveryBeats = recoveryBeats;
         }
 
         /// <summary> 結果種別です。 </summary>
@@ -37,5 +42,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
 
         /// <summary> このスキルで構える武器を決めるBeatTypeです。 </summary>
         public BeatType WeaponBeatType { get; }
+
+        /// <summary> スキル発動時の攻撃硬直（拍数）です。 </summary>
+        public AttackRecoveryBeats RecoveryBeats { get; }
     }
 }

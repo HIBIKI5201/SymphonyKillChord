@@ -17,8 +17,8 @@ MonoBehaviour:
     _id: stage_07
     _hashId: -1756028471
   _isInitiallyUnlocked: 0
-  _stageName: 
-  _flavorText: 
+  _stageName: "\u30B9\u30C6\u30FC\u30B807\u300C\u4F11\u606F\u300D"
+  _flavorText: "\uFF08\u4EEE\uFF09\u4F11\u3080\u9593\u3082\u306A\u304F\u73FE\u308C\u308B\u6575\u5175\u3092\u3001\u6C7A\u3081\u3089\u308C\u305F\u6570\u3060\u3051\u8A0E\u3061\u53D6\u308B\u3002"
   _targetSceneName: InGame
   _firstClearRewards:
   - _resourceId:
@@ -40,8 +40,8 @@ MonoBehaviour:
     _amount: 20
   _isTutorial: 0
   _enemyWaveDefinitionId:
-    _id: enemy_wave_default
-    _hashId: -1074717099
+    _id: enemy_wave_07
+    _hashId: -171776042
   _missionDefinitionId:
-    _id: Test
-    _hashId: 418143992
+    _id: Stage07
+    _hashId: -1252758273

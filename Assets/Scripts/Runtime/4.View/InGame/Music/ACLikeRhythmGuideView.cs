@@ -76,6 +76,22 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
+        ///     攻撃硬直で入力できない範囲を設定し、ゲージのその範囲を灰色にする。
+        /// </summary>
+        /// <param name="lockedBarProgress"> 直前の入力位置から入力できない範囲の長さ（小節単位）。0なら灰色にしない。 </param>
+        public void SetLockedRange(float lockedBarProgress)
+        {
+            lockedBarProgress = Mathf.Max(0f, lockedBarProgress);
+            if (Mathf.Approximately(_lockedBarProgress, lockedBarProgress))
+            {
+                return;
+            }
+
+            _lockedBarProgress = lockedBarProgress;
+            UpdateBeatColors();
+        }
+
+        /// <summary>
         ///     チュートリアル対象拍の攻撃成功時に赤枠の拡縮演出を再生する。
         /// </summary>
         public void PlayTargetBeatSuccessFeedback()
@@ -225,7 +241,24 @@ namespace KillChord.Runtime.View.InGame.Music
                 return default;
             }
 
+            // 攻撃硬直で入力できない範囲は、拍子の色の代わりに灰色で描く。
+            if (IsLockedBlock(blockIndex))
+            {
+                return _lockedColor;
+            }
+
             return ApplyTargetDim(color, zoneIndex);
+        }
+
+        /// <summary>
+        ///     指定ブロックが攻撃硬直で入力できない範囲にあるかを判定する。
+        ///     境界をまたぐブロックは、中心が範囲内にあれば範囲内として扱う。
+        /// </summary>
+        /// <param name="blockIndex"> ブロックのインデックス。 </param>
+        /// <returns> 入力できない範囲にある場合はtrue。 </returns>
+        private bool IsLockedBlock(int blockIndex)
+        {
+            return _lockedBarProgress > 0f && _layout.GetBlockBarProgress(blockIndex) < _lockedBarProgress;
         }
 
         /// <summary>
@@ -531,6 +564,9 @@ namespace KillChord.Runtime.View.InGame.Music
         [Tooltip("ビートの色。判定ゾーンの順番に対応します。")]
         [SerializeField] private Color[] _beatColor;
 
+        [SerializeField, Tooltip("攻撃硬直で入力できない範囲のビートの色。")]
+        private Color _lockedColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+
         [Tooltip("ビートの幅")]
         [SerializeField] private float _beatWidth;
 
@@ -597,6 +633,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private int[] _zoneBeatCounts = Array.Empty<int>();
         private int? _targetBeatCount;
         private int? _currentBeatCount;
+        private float _lockedBarProgress;
         private RhythmGuideLayout _layout;
         private Canvas _rootCanvas;
 

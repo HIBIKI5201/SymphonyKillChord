@@ -17,8 +17,8 @@ MonoBehaviour:
     _id: stage_Boss
     _hashId: 2031084639
   _isInitiallyUnlocked: 0
-  _stageName: 
-  _flavorText: 
+  _stageName: "\u30DC\u30B9\u300C\u518D\u958B\u300D"
+  _flavorText: "\uFF08\u4EEE\uFF09\u56E0\u7E01\u306E\u76F8\u624B\u304C\u6226\u5834\u306B\u73FE\u308C\u308B\u3002\u6C7A\u7740\u3092\u3064\u3051\u308D\u3002"
   _targetSceneName: InGame
   _firstClearRewards:
   - _resourceId:
@@ -40,8 +40,8 @@ MonoBehaviour:
     _amount: 30
   _isTutorial: 0
   _enemyWaveDefinitionId:
-    _id: enemy_wave_default
-    _hashId: -1074717099
+    _id: enemy_wave_boss
+    _hashId: 1717584109
   _missionDefinitionId:
-    _id: Test
-    _hashId: 418143992
+    _id: StageBoss
+    _hashId: -125933050

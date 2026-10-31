@@ -106,7 +106,8 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                 throw new WriterException($"データベース {database.Title} にタイトルプロパティがありません。");
             }
 
-            Dictionary<string, object> properties = BuildProperties(database, assignments, out Dictionary<string, string> displayValues);
+            IReadOnlyList<NotionUserInfo>? users = await LoadUsersIfNeededAsync(client, database, assignments);
+            Dictionary<string, object> properties = BuildProperties(database, assignments, users, out Dictionary<string, string> displayValues);
             if (!properties.ContainsKey(titlePropertyName))
             {
                 throw new WriterException(
@@ -206,11 +207,13 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         /// </summary>
         /// <param name="database">作成先データベース。</param>
         /// <param name="assignments">「プロパティ名=値」形式の指定。</param>
+        /// <param name="users">people型の名前解決に使うユーザー一覧。people型を指定しない場合はnullでよい。</param>
         /// <param name="displayValues">確認表示用の値。</param>
         /// <returns>APIへ送るプロパティ。</returns>
         internal static Dictionary<string, object> BuildProperties(
             NotionDatabaseInfo database,
             IReadOnlyList<string> assignments,
+            IReadOnlyList<NotionUserInfo>? users,
             out Dictionary<string, string> displayValues)
         {
             Dictionary<string, object> properties = new();
@@ -232,7 +235,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                         $"指定できるプロパティ: {string.Join(", ", database.PropertyTypes.Keys)}");
                 }
 
-                properties[name] = CreatePropertyValue(name, type, value);
+                properties[name] = CreatePropertyValue(name, type, value, users);
                 displayValues[name] = value;
             }
 
@@ -245,8 +248,9 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         /// <param name="name">プロパティ名。</param>
         /// <param name="type">Notion上の型。</param>
         /// <param name="value">指定された値。</param>
+        /// <param name="users">people型の名前解決に使うユーザー一覧。</param>
         /// <returns>APIへ送る値。</returns>
-        private static object CreatePropertyValue(string name, string type, string value)
+        private static object CreatePropertyValue(string name, string type, string value, IReadOnlyList<NotionUserInfo>? users)
         {
             switch (type)
             {
@@ -310,9 +314,90 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                             })
                             .ToList()
                     };
+                case "people":
+                    // 値はカンマ区切りのユーザー名またはユーザーID。名前は空白の有無を無視して完全一致で探す。
+                    return new Dictionary<string, object>
+                    {
+                        ["people"] = value
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(item => new Dictionary<string, string>
+                            {
+                                ["object"] = "user",
+                                ["id"] = ResolveUserId(name, item.Trim(), users)
+                            })
+                            .ToList()
+                    };
                 default:
                     throw new WriterException($"このツールが未対応のプロパティ型です: {name}（{type}）");
             }
+        }
+
+        /// <summary>
+        ///     --setでpeople型のプロパティが指定されている場合だけ、ワークスペースのユーザー一覧を取得する。
+        /// </summary>
+        /// <param name="client">APIクライアント。</param>
+        /// <param name="database">作成先データベース。</param>
+        /// <param name="assignments">「プロパティ名=値」形式の指定。</param>
+        /// <returns>ユーザー一覧。people型の指定が無い場合はnull。</returns>
+        internal static async Task<IReadOnlyList<NotionUserInfo>?> LoadUsersIfNeededAsync(
+            NotionWriteClient client,
+            NotionDatabaseInfo database,
+            IReadOnlyList<string> assignments)
+        {
+            bool hasPeople = assignments.Any(assignment =>
+            {
+                int separatorIndex = assignment.IndexOf('=', StringComparison.Ordinal);
+                return separatorIndex > 0 &&
+                       database.PropertyTypes.TryGetValue(assignment[..separatorIndex].Trim(), out string? type) &&
+                       type == "people";
+            });
+            return hasPeople ? await client.ListUsersAsync() : null;
+        }
+
+        /// <summary>
+        ///     people型に指定された名前またはIDをユーザーIDへ解決する。
+        /// </summary>
+        /// <param name="propertyName">エラー表示に使うプロパティ名。</param>
+        /// <param name="item">ユーザー名またはユーザーID。</param>
+        /// <param name="users">ワークスペースのユーザー一覧。</param>
+        /// <returns>ユーザーID。</returns>
+        internal static string ResolveUserId(string propertyName, string item, IReadOnlyList<NotionUserInfo>? users)
+        {
+            IReadOnlyList<NotionUserInfo> candidates = users ?? Array.Empty<NotionUserInfo>();
+            string compactItem = RemoveWhitespace(item);
+            string normalizedId = compactItem.Replace("-", string.Empty, StringComparison.Ordinal);
+            NotionUserInfo? byId = candidates.FirstOrDefault(user =>
+                user.Id.Replace("-", string.Empty, StringComparison.Ordinal).Equals(normalizedId, StringComparison.OrdinalIgnoreCase));
+            if (byId != null) { return byId.Id; }
+
+            // 一覧に出ないユーザー（ゲストなど）も、IDを直接書けば指定できるようにする。
+            if (normalizedId.Length == 32 && normalizedId.All(Uri.IsHexDigit)) { return compactItem; }
+
+            // 「郷音 ヒビキ」と「郷音ヒビキ」のように、空白の入れ方だけが違う名前を同一人物として扱う。
+            List<NotionUserInfo> byName = candidates
+                .Where(user => RemoveWhitespace(user.Name) == compactItem)
+                .ToList();
+            if (byName.Count == 1) { return byName[0].Id; }
+
+            if (byName.Count > 1)
+            {
+                throw new WriterException($"同じ名前のユーザーが複数います。ユーザーIDで指定してください: {propertyName}={item}");
+            }
+
+            string known = string.Join(", ", candidates.Where(user => user.Type == "person").Select(user => user.Name));
+            throw new WriterException(
+                $"ユーザーが見つかりません: {propertyName}={item}。" +
+                $"インテグレーションから見えるユーザー: {(known.Length > 0 ? known : "なし")}");
+        }
+
+        /// <summary>
+        ///     文字列から空白文字（全角空白を含む）をすべて取り除く。
+        /// </summary>
+        /// <param name="value">文字列。</param>
+        /// <returns>空白を除いた文字列。</returns>
+        private static string RemoveWhitespace(string value)
+        {
+            return new string(value.Where(character => !char.IsWhiteSpace(character)).ToArray());
         }
 
         /// <summary>

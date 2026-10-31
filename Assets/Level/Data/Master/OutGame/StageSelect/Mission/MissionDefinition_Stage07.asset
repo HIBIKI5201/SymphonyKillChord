@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f368caefeeb82b439f56866e03ca24a, type: 3}
+  m_Name: MissionDefinition_Stage07
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Mission.MissionDefinitionAsset
+  _plannerMemo: 
+  _missionId:
+    _id: Stage07
+    _hashId: -1252758273
+  _displayName: "\u8A0E\u4F10\u6226"
+  _mainMissionText: "\u6575\u5175\u309230\u4F53\u6483\u7834\u3059\u308B"
+  _defeatTips:
+  - "\u5371\u967A\u306A\u653B\u6483\u306F\u8DDD\u96E2\u3092\u53D6\u3063\u3066\u56DE\u907F\u3057\u3088\u3046"
+  - "\u30B9\u30AD\u30EB\u306E\u6539\u9020\u3092\u3057\u3066\u307F\u3088\u3046\uFF01"
+  _overrideEquippedSkillIds: []
+  _clearConditionSteps:
+  - _condition:
+      rid: 8100240000000006011
+    _guideMessageText: 
+    _entryActions: []
+  _failCondition:
+    rid: 8100240000000006661
+  _evaluationConditions:
+  - rid: 8100240000000006780
+  - rid: 8100240000000007236
+  - rid: 8100240000000007656
+  references:
+    version: 2
+    RefIds:
+    - rid: 8100240000000006011
+      type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:-1976604850)\u309230\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _enemyMissionKeyId:
+          _id: enemy_soldier
+          _hashId: -1976604850
+        _requiredKillCount: 30
+    - rid: 8100240000000006661
+      type: {class: PlayerDeadFailConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FC\u304C\u6B7B\u3093\u3060\u3089\u5931\u6557\u3059\u308B\u6761\u4EF6"
+    - rid: 8100240000000006780
+      type: {class: ClearTimeEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _evaluationId: time_120
+        _displayText: 
+        _inspectorSummary: "\u30AF\u30EA\u30A2\u30BF\u30A4\u30E0\u304C120\u79D2\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _clearTime: 120
+    - rid: 8100240000000007236
+      type: {class: DamageTakenEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _evaluationId: damage_75
+        _displayText: 
+        _inspectorSummary: "\u7D2F\u8A08\u88AB\u30C0\u30E1\u30FC\u30B8\u304C75\u4EE5\u4E0B\u3067\u3042\u308B\u6761\u4EF6"
+        _maximumDamage: 75
+    - rid: 8100240000000007656
+      type: {class: ComboEvaluationConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _evaluationId: combo_30
+        _displayText: 
+        _inspectorSummary: "\u6700\u5927\u30B3\u30F3\u30DC\u6570\u304C30\u4EE5\u4E0A\u3067\u3042\u308B\u6761\u4EF6"
+        _requiredCombo: 30

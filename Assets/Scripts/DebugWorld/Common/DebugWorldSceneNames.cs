@@ -10,5 +10,8 @@ namespace KillChord.DebugWorld.Common
 
         /// <summary> 裏世界への入口を置くタイトルシーンの名前です。 </summary>
         public const string TITLE = "Title";
+
+        /// <summary> 裏世界の戦闘で使う戦闘シーンの名前です。 </summary>
+        public const string BATTLE = "Stage_01";
     }
 }
