@@ -4,6 +4,7 @@ using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -72,7 +73,8 @@ namespace KillChord.Runtime.InfraStructure.Player
         {
             return new SkillTemplate(
                 Id, _pattern, _skillType, Level, _cooldownNumerator, _cooldownDenomimator,
-                EffectSpec, EffectParameterGrowths, _levelUpCosts, _animationKey, _displayName, _skillDetail, _tips, _icon, _effectDisplayMode,
+                EffectSpec, EffectParameterGrowths, _levelUpCosts, _animationKey,
+                MasterTextLocalizer.Localize(_displayName), MasterTextLocalizer.Localize(_skillDetail), MasterTextLocalizer.Localize(_tips), _icon, _effectDisplayMode,
                 new AttackRecoveryBeats(_recoveryBeats));
         }
 
