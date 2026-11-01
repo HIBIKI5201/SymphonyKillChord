@@ -93,7 +93,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _hasCompletedInitialUpdate = false;
 
             // プラットフォームに応じた視点操作の入力を購読する。
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
             _inputView.OnMobileLookInput += LookHandlerMobile;
             _inputView.OnMobileLockOnSelectInput += LockOnSelectHandlerMobile;
 #else
@@ -200,7 +200,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     PC・コントローラーには切り替えボタンがあるため、強い視点操作は従来どおり解除だけにする。
         /// </summary>
         private static readonly bool IS_STRONG_LOOK_SWITCH_ENABLED =
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
             true;
 #else
             false;
@@ -367,7 +367,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             if (_inputView == null) { return; }
 
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
             _inputView.OnMobileLookInput -= LookHandlerMobile;
             _inputView.OnMobileLockOnSelectInput -= LockOnSelectHandlerMobile;
 #else
@@ -384,7 +384,7 @@ namespace KillChord.Runtime.View.InGame.Camera
         ///     視点操作入力を受け取り、入力値を更新する。
         /// </summary>
         /// <param name="context"> 視点操作の入力コンテキスト。</param>
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
         private void LookHandlerMobile(InputContext<Vector2> context)
         {
             _input = context.Value * _mobileLookSensitivity;
