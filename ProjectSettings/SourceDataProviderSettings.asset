@@ -40,7 +40,6 @@ MonoBehaviour:
   - _addressableKey: ShellMusicData
   - _addressableKey: SkillBuildRepositoryDebug
   - _addressableKey: OutGameScreenRuleData
-  - _addressableKey: SkillTreeTestInputData
   - _addressableKey: CameraConfig
   - _addressableKey: EnemyMissionKeyRepository
   - _addressableKey: CharacterDefinitionRepository

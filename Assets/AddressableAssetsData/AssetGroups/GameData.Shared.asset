@@ -265,11 +265,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fa8820e093edab1489d8bbed0db664af
-    m_Address: SkillTreeTestInputData
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fde7af9a64f846a5b973922797594073
     m_Address: SkillExecutedShakeConfig
     m_ReadOnly: 0
