@@ -41,7 +41,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     public class BossLifeCycle : MonoBehaviour, IGameplayControllable
     {
         /// <summary> ボスが撃破されたときに呼ばれます。 </summary>
-        public event Action OnDefeated;
+        public event System.Action OnDefeated;
 
         /// <summary>
         ///     ボス用 Addressables アセットをロードします。
