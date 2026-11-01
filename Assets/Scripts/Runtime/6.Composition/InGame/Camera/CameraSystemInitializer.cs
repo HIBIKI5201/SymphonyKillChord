@@ -47,7 +47,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
 
             Initialize(targetContainer.TargetSystemViewModel, targetContainer.TargetSystemController);
 
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
             MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
             PlayerInputView playerInputView = ServiceLocator.GetInstance<PlayerInputView>();
             if (mobileInput != null && playerInputView != null)
