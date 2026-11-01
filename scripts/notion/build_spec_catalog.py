@@ -61,6 +61,8 @@ class Page:
     headings: list = field(default_factory=list)
     raw_links: list = field(default_factory=list)
     characters: int = 0
+    # 本文が始まる行番号（前置きの直後）。spec_query.py が本文だけを読むときに使う。目録には出さない。
+    body_start: int = 0
 
 
 @dataclass
@@ -130,6 +132,7 @@ def parse_page(text, relative_path):
             break
         break
 
+    page.body_start = index
     body = lines[index:]
     page.characters = sum(len(line.strip()) for line in body)
     page.headings = parse_headings(body)
