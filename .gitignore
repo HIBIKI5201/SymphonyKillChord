@@ -93,8 +93,7 @@ ExportedPackages/
 # NotionMarkdownWriter が pull した編集用の作業ファイル。
 /SinfoniaOperator/.notion-work/
 
-# CRI Atom Craft 作曲プロジェクト実体 (バックアップ/セッション等を含み肥大化するため除外。
-# ランタイムは Assets/StreamingAssets の .acb/.acf のみ使用する)
+# CRI Atom Craft のプロジェクトは Sound/CRIAtomCraft にサブモジュール（非公開リポジトリ）として置く。Assets 下に置くと Unity が素材 wav を取り込むので除外する。
 /[Aa]ssets/SymphonyKillChord/
 /[Aa]ssets/SymphonyKillChord.meta
 Docs/NotionSpecifications/
