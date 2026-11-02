@@ -93,10 +93,22 @@ ExportedPackages/
 # NotionMarkdownWriter が pull した編集用の作業ファイル。
 /SinfoniaOperator/.notion-work/
 
-# CRI Atom Craft 作曲プロジェクト実体 (バックアップ/セッション等を含み肥大化するため除外。
-# ランタイムは Assets/StreamingAssets の .acb/.acf のみ使用する)
+# CRI Atom Craft のプロジェクトを Assets 下に置くと、Unity が素材 wav を取り込んでしまうので除外する。
+# プロジェクトは下の Sound/CRIAtomCraft/ に置く。
 /[Aa]ssets/SymphonyKillChord/
 /[Aa]ssets/SymphonyKillChord.meta
+# CRI Atom Craft のプロジェクト（Sound/CRIAtomCraft/）は、Atom Craft で開くのに要る
+# .atmcproject・.atmcglobal・WorkUnits（素材 wav を含む）だけを入れる。キャッシュ・ビルド出力・
+# 自動バックアップ・セッション・個人設定は Atom Craft が作り直すので除外する。
+# ランタイムが読む .acb/.acf は Assets/StreamingAssets に置く。
+/Sound/CRIAtomCraft/**/*_Cache/
+/Sound/CRIAtomCraft/**/*_Backup/
+/Sound/CRIAtomCraft/*/Public/
+/Sound/CRIAtomCraft/*/Session/
+/Sound/CRIAtomCraft/**/*.atmcuser
+/Sound/CRIAtomCraft/**/*.awbtmp
+__MACOSX/
+.DS_Store
 Docs/NotionSpecifications/
 Docs/DiscordLog/
 
