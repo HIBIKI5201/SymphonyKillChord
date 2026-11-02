@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Orca XML File Format -->
+<OrcaTrees ObjectTypeExpression="Full" BinaryEncodingType="Base64" FileVersion="3" FileRevision="0">
+  <OrcaTree OrcaName="(no name)">
+    <Orca OrcaName="GlobalSettings" DefaultMixer="/CriAtomCraftV2Root/GlobalSettings/MixerFolder/Mixer_0" FormatVersion="Ver.1.16.00" OoUniqId="661be20b-340c-4af9-ad75-50e12c9068c0" VersionInfoV3="Ver.3.56.01" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoGlobalFolder">
+      <Orca OrcaName="TargetConfigs" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoTargetConfigFolder">
+        <Orca OrcaName="Public" DownMixMode="None" EncodeType="HCA" ForceResamplingRate="48000" HcamxPlaybackRate="48000" OoUniqId="87424f19-3205-419f-9531-f03a39c53e3d" SpeakerSetting="/CriAtomCraftV2Root/GlobalSettings/SpeakerSettings/Public" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoTargetConfigPublic"/>
+      </Orca>
+      <Orca OrcaName="SpeakerSettings" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSpeakerSettingFolder">
+        <Orca OrcaName="Public" EnableBinauralizer="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSpeakerSetting"/>
+      </Orca>
+      <Orca OrcaName="LanguageSettings" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoLanguageSettingFolder"/>
+      <Orca OrcaName="OutputPortFolder" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoOutputPortFolder"/>
+      <Orca OrcaName="VoicePoolFolder" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoVoicePoolFolder">
+        <Orca OrcaName="VoicePool" NumVoices="50" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoVoicePool"/>
+      </Orca>
+      <Orca OrcaName="MixerFolder" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspSettingFolder">
+        <Orca OrcaName="Mixer_0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspSetting">
+          <Orca OrcaName="MasterOut" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspBusMaster">
+            <Orca OrcaName="Limiter" Threshold="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFxLimiter"/>
+          </Orca>
+          <Orca OrcaName="BUS_BGM" Volume="0.7079458" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspBus">
+            <Orca OrcaName="Send0" BusSend="/CriAtomCraftV2Root/GlobalSettings/MixerFolder/Mixer_0/MasterOut" BusSendLevel="1" BusSendType="PostPan" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspBusLink"/>
+            <Orca OrcaName="32BandsEqualizer" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQ">
+              <Orca OrcaName="Filter01" FilterNumber="1" Frequency="1338" Gain="-1.7" UseFilter="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter02" FilterNumber="2" Frequency="36" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter03" FilterNumber="3" Frequency="45" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter04" FilterNumber="4" Frequency="55" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter05" FilterNumber="5" Frequency="68" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter06" FilterNumber="6" Frequency="84" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter07" FilterNumber="7" Frequency="104" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter08" FilterNumber="8" Frequency="128" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter09" FilterNumber="9" Frequency="158" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter10" FilterNumber="10" Frequency="195" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter11" FilterNumber="11" Frequency="240" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter12" FilterNumber="12" Frequency="296" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter13" FilterNumber="13" Frequency="365" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter14" FilterNumber="14" Frequency="450" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter15" FilterNumber="15" Frequency="554" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter16" FilterNumber="16" Frequency="684" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter17" FilterNumber="17" Frequency="843" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter18" FilterNumber="18" Frequency="1039" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter19" FilterNumber="19" Frequency="1281" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter20" FilterNumber="20" Frequency="1579" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter21" FilterNumber="21" Frequency="1947" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter22" FilterNumber="22" Frequency="2400" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter23" FilterNumber="23" Frequency="2959" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter24" FilterNumber="24" Frequency="3648" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter25" FilterNumber="25" Frequency="4497" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter26" FilterNumber="26" Frequency="5544" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter27" FilterNumber="27" Frequency="6835" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter28" FilterNumber="28" Frequency="8427" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter29" FilterNumber="29" Frequency="10389" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter30" FilterNumber="30" Frequency="12808" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter31" FilterNumber="31" Frequency="15790" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter32" FilterNumber="32" Frequency="19467" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+            </Orca>
+          </Orca>
+          <Orca OrcaName="BUS_SE" Volume="0.2818383" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspBus">
+            <Orca OrcaName="Send0" BusSend="/CriAtomCraftV2Root/GlobalSettings/MixerFolder/Mixer_0/MasterOut" BusSendLevel="1" BusSendType="PostPan" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspBusLink"/>
+            <Orca OrcaName="32BandsEqualizer" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQ">
+              <Orca OrcaName="Filter01" FilterNumber="1" Frequency="1502" Gain="-0.48" UseFilter="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter02" FilterNumber="2" FilterType="HiShelf" Frequency="7765" Gain="0.36" UseFilter="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter03" FilterNumber="3" Frequency="45" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter04" FilterNumber="4" Frequency="55" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter05" FilterNumber="5" Frequency="68" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter06" FilterNumber="6" Frequency="84" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter07" FilterNumber="7" Frequency="104" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter08" FilterNumber="8" Frequency="128" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter09" FilterNumber="9" Frequency="158" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter10" FilterNumber="10" Frequency="195" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter11" FilterNumber="11" Frequency="240" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter12" FilterNumber="12" Frequency="296" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter13" FilterNumber="13" Frequency="365" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter14" FilterNumber="14" Frequency="450" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter15" FilterNumber="15" Frequency="554" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter16" FilterNumber="16" Frequency="684" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter17" FilterNumber="17" Frequency="843" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter18" FilterNumber="18" Frequency="1039" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter19" FilterNumber="19" Frequency="1281" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter20" FilterNumber="20" Frequency="1579" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter21" FilterNumber="21" Frequency="1947" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter22" FilterNumber="22" Frequency="2400" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter23" FilterNumber="23" Frequency="2959" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter24" FilterNumber="24" Frequency="3648" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter25" FilterNumber="25" Frequency="4497" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter26" FilterNumber="26" Frequency="5544" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter27" FilterNumber="27" Frequency="6835" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter28" FilterNumber="28" Frequency="8427" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter29" FilterNumber="29" Frequency="10389" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter30" FilterNumber="30" Frequency="12808" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter31" FilterNumber="31" Frequency="15790" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter32" FilterNumber="32" Frequency="19467" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+            </Orca>
+          </Orca>
+          <Orca OrcaName="BUS_VOICE" Volume="0.3981072" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspBus">
+            <Orca OrcaName="Send0" BusSend="/CriAtomCraftV2Root/GlobalSettings/MixerFolder/Mixer_0/MasterOut" BusSendLevel="1" BusSendType="PostPan" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspBusLink"/>
+            <Orca OrcaName="32BandsEqualizer" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQ">
+              <Orca OrcaName="Filter01" FilterNumber="1" Frequency="1212" Gain="1.28" UseFilter="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter02" FilterNumber="2" Frequency="8714" Gain="0.91" UseFilter="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter03" FilterNumber="3" Frequency="250" Gain="-0.97" UseFilter="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter04" FilterNumber="4" Frequency="55" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter05" FilterNumber="5" Frequency="68" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter06" FilterNumber="6" Frequency="84" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter07" FilterNumber="7" Frequency="104" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter08" FilterNumber="8" Frequency="128" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter09" FilterNumber="9" Frequency="158" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter10" FilterNumber="10" Frequency="195" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter11" FilterNumber="11" Frequency="240" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter12" FilterNumber="12" Frequency="296" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter13" FilterNumber="13" Frequency="365" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter14" FilterNumber="14" Frequency="450" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter15" FilterNumber="15" Frequency="554" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter16" FilterNumber="16" Frequency="684" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter17" FilterNumber="17" Frequency="843" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter18" FilterNumber="18" Frequency="1039" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter19" FilterNumber="19" Frequency="1281" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter20" FilterNumber="20" Frequency="1579" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter21" FilterNumber="21" Frequency="1947" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter22" FilterNumber="22" Frequency="2400" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter23" FilterNumber="23" Frequency="2959" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter24" FilterNumber="24" Frequency="3648" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter25" FilterNumber="25" Frequency="4497" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter26" FilterNumber="26" Frequency="5544" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter27" FilterNumber="27" Frequency="6835" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter28" FilterNumber="28" Frequency="8427" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter29" FilterNumber="29" Frequency="10389" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter30" FilterNumber="30" Frequency="12808" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter31" FilterNumber="31" Frequency="15790" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+              <Orca OrcaName="Filter32" FilterNumber="32" Frequency="19467" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFx32BandEQFilter"/>
+            </Orca>
+            <Orca OrcaName="Limiter" Threshold="-13" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFxLimiter"/>
+            <Orca OrcaName="Compressor" AttackTime="15" Threshold="-37.21" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDspFxComp"/>
+          </Orca>
+        </Orca>
+      </Orca>
+      <Orca OrcaName="BusMap" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoBusMapRootFolder">
+        <Orca OrcaName="BusMapforCue" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoBusMapFolder">
+          <Orca OrcaName="BusMap_Default" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoBusMap"/>
+          <Orca OrcaName="BusMap_BGM" DspBusName0="BUS_BGM" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoBusMap"/>
+          <Orca OrcaName="BusMap_SE" DspBusName0="BUS_SE" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoBusMap"/>
+          <Orca OrcaName="BusMap_VOICE" DspBusName0="BUS_VOICE" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoBusMap"/>
+        </Orca>
+        <Orca OrcaName="BusMapForAisacAndAutomation" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoBusMapAisacGraph"/>
+      </Orca>
+      <Orca OrcaName="Categories" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCategoryFolder">
+        <Orca OrcaName="Main" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCategoryGroup">
+          <Orca OrcaName="BGM" CueLimitEnableFlag="True" CueLimits="2" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCategory"/>
+          <Orca OrcaName="SE" CategoryId="1" CueLimitShortDistancePriorityFlag="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCategory"/>
+          <Orca OrcaName="VOICE" CategoryId="2" CueLimitEnableFlag="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCategory"/>
+        </Orca>
+        <Orca OrcaName="Sub" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCategoryGroup">
+          <Orca OrcaName="Ambience" CategoryId="3" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCategory"/>
+        </Orca>
+      </Orca>
+      <Orca OrcaName="REACT" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoReactFolder">
+        <Orca OrcaName="React_0" DecrementTime="2000" DestCategory="/CriAtomCraftV2Root/GlobalSettings/Categories/Sub/Ambience" IncrementTime="2000" Level="0.25" SourceCategory="/CriAtomCraftV2Root/GlobalSettings/Categories/Main/BGM" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoReact"/>
+      </Orca>
+      <Orca OrcaName="VoiceLimitGroups" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoVoiceLimitGroupFolder">
+        <Orca OrcaName="VoiceLimitGroup_0" VoiceLimitNum="1" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoVoiceLimitGroup"/>
+      </Orca>
+      <Orca OrcaName="AISAC-Controls" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControlFolder">
+        <Orca OrcaName="AisacControl_00" ControlId="0" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_01" ControlId="1" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_02" ControlId="2" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_03" ControlId="3" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_04" ControlId="4" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_05" ControlId="5" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_06" ControlId="6" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_07" ControlId="7" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_08" ControlId="8" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_09" ControlId="9" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_10" ControlId="10" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_11" ControlId="11" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_12" ControlId="12" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_13" ControlId="13" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_14" ControlId="14" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+        <Orca OrcaName="AisacControl_15" ControlId="15" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoAisacControl"/>
+      </Orca>
+      <Orca OrcaName="GlobalAISACs" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoGlobalAisacFolder"/>
+      <Orca OrcaName="GameVariables" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoGameVariableFolder">
+        <Orca OrcaName="Default" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoGameVariable"/>
+      </Orca>
+      <Orca OrcaName="SelectorFolder" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorFolder">
+        <Orca OrcaName="Selector_BGM" DefaultSelectorLabel="/CriAtomCraftV2Root/GlobalSettings/SelectorFolder/Selector_BGM/SelectorLabel_S00" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelector">
+          <Orca OrcaName="SelectorLabel_S00" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S01" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S02" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S03" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S04" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S05" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S06" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S07" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S08" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S09" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S10" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+          <Orca OrcaName="SelectorLabel_S13" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoSelectorLabel"/>
+        </Orca>
+      </Orca>
+      <Orca OrcaName="BeatSyncLabelFolder" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoBeatSyncLabelFolder">
+        <Orca OrcaName="BeatSyncLabel_BGM" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoBeatSyncLabel"/>
+      </Orca>
+    </Orca>
+  </OrcaTree>
+</OrcaTrees>
+<!-- Copyright (c) CRI Middleware Co.,LTD. -->
+<!-- end of document -->
