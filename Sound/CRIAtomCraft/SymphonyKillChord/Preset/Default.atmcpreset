@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Orca XML File Format -->
+<OrcaTrees ObjectTypeExpression="Full" BinaryEncodingType="Base64" FileVersion="3" FileRevision="0">
+  <OrcaTree OrcaName="(no name)">
+    <Orca OrcaName="Default" FormatVersion="1.00.01" VersionInfoV3="Ver.3.56.01" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoDefaultValuePreset">
+      <Orca OrcaName="Cue" CueID="0" EnablePos3dInteriorDistance="False" EnablePos3dSourceRadius="False" Pos3dDistanceMax="500" Pos3dDistanceMin="1" SynthType="SynthPolyphonic" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSynthCue"/>
+      <Orca OrcaName="Track" ObjectColor="200, 40, 120, 200" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSynthTrack"/>
+      <Orca OrcaName="WaveformRegion" PanType="Default" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoCueSynthWaveform"/>
+      <Orca OrcaName="SequenceLoopMarker" EventEnableFlag="True" EventEndTime="1000" EventStartTime="0" InfinityLoopFlag="True" OrcaType="CriMw.CriAtomCraft.AcCore.AcOoEventLoop"/>
+    </Orca>
+  </OrcaTree>
+</OrcaTrees>
+<!-- Copyright (c) CRI Middleware Co.,LTD. -->
+<!-- end of document -->
