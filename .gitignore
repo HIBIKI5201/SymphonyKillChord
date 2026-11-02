@@ -106,6 +106,7 @@ ExportedPackages/
 /Sound/CRIAtomCraft/*/Public/
 /Sound/CRIAtomCraft/*/Session/
 /Sound/CRIAtomCraft/**/*.atmcuser
+/Sound/CRIAtomCraft/**/*.user_settings
 /Sound/CRIAtomCraft/**/*.awbtmp
 __MACOSX/
 .DS_Store
