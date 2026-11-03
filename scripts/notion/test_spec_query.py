@@ -217,6 +217,20 @@ class SpecQueryTests(unittest.TestCase):
         self.assertEqual((code, err), (0, ""))
         self.assertIn(DODGE_ID, out)
 
+    def test_path_reads_pages_and_databases_from_manifest(self):
+        code, _, err = self.run_cli("path", DODGE_ID)
+        self.assertEqual(code, 2)
+        self.assertIn("にこのIDがありません", err)
+        manifest = {
+            "Pages": [{"Id": "33a7c2c6-cc02-8053-a4fb-f138ffac7b74", "File": "SKC/仕様概要/仕様リスト/回避.md"}],
+            "Databases": [{"Id": "3567c2c6-cc02-80d1-bd4e-e6dea0d41181", "File": "SKC/用語/用語リスト/_database.md"}],
+        }
+        (self.root / ".notion-export-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+        self.assertEqual(self.run_cli("path", "https://app.notion.com/p/33a7c2c6cc028053a4fbf138ffac7b74")[:2],
+                         (0, "SKC/仕様概要/仕様リスト/回避.md\n"))
+        code, out, _ = self.run_cli("--json", "path", "3567c2c6cc0280d1bd4ee6dea0d41181")
+        self.assertEqual((code, json.loads(out)), (0, {"path": "SKC/用語/用語リスト/_database.md"}))
+
 
 if __name__ == "__main__":
     unittest.main()
