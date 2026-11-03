@@ -8,3 +8,7 @@
 	branch = main
 	ignore = all
 	shallow = true
+[submodule "Sound/CRIAtomCraft"]
+	path = Sound/CRIAtomCraft
+	url = ../SymphonyKillChord_CriAtomCraft.git
+	branch = main
