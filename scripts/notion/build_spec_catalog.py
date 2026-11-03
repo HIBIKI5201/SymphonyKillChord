@@ -11,6 +11,10 @@
 
 使い方（リポジトリのルートから）:
   python scripts/notion/build_spec_catalog.py --source Docs/NotionSpecifications
+  python scripts/notion/build_spec_catalog.py --source Docs/NotionSpecifications --check
+
+--check は書き込まずに、目録ファイルが今のページから作り直した目録と同じ版かを確かめる（#2396 段階1）。
+目録の生成だけが失敗して古い目録が残った、手でページだけを直した、などのずれを見つける。
 """
 import argparse
 import json
@@ -353,9 +357,33 @@ def write_if_changed(path, content):
     return True
 
 
+def compare_catalog(source, markdown, jsonl):
+    """目録ファイルが今のページから作り直した目録と同じ版かを比べ、ずれの件数を返す。
+
+    ページタイトルは返さない（同期のログは公開リポジトリで誰でも読めるため、件数だけを出す）。
+    """
+    expected = {json.loads(line)["path"]: line for line in jsonl.splitlines() if line.strip()}
+    jsonl_file = source / CATALOG_JSONL
+    actual = {}
+    if jsonl_file.is_file():
+        for line in jsonl_file.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                actual[json.loads(line)["path"]] = line
+    markdown_file = source / CATALOG_MARKDOWN
+    return {
+        "missing": len(expected.keys() - actual.keys()),
+        "extra": len(actual.keys() - expected.keys()),
+        "changed": sum(1 for path in expected.keys() & actual.keys() if expected[path] != actual[path]),
+        "markdown": not markdown_file.is_file() or markdown_file.read_text(encoding="utf-8") != markdown,
+        "no_file": not jsonl_file.is_file(),
+    }
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Notion仕様書ミラーの目録を生成する。")
     parser.add_argument("--source", required=True, type=Path, help="仕様書リポジトリのルート")
+    parser.add_argument("--check", action="store_true",
+                        help="書き込まず、目録ファイルが今のページと同じ版かを確かめる（ずれていれば終了コード1）")
     args = parser.parse_args(argv)
     source = args.source.resolve()
     if not source.is_dir():
@@ -364,9 +392,22 @@ def main(argv=None):
 
     pages, databases = collect(source)
     resolved = resolve_links(pages)
+    markdown, jsonl = build_markdown(pages, databases, resolved), build_jsonl(pages, resolved)
+    if args.check:
+        diff = compare_catalog(source, markdown, jsonl)
+        if diff["no_file"]:
+            print(f"{CATALOG_JSONL} がありません。", file=sys.stderr)
+            return 1
+        if diff["missing"] or diff["extra"] or diff["changed"] or diff["markdown"]:
+            print(f"目録がページと別の版です（目録に無いページ {diff['missing']} 件、消えたページ {diff['extra']} 件、"
+                  f"内容が違う行 {diff['changed']} 件、{CATALOG_MARKDOWN} の不一致 {'あり' if diff['markdown'] else 'なし'}）。"
+                  "build_spec_catalog.py を --check なしで実行して作り直す。", file=sys.stderr)
+            return 1
+        print(f"目録はページと同じ版です（ページ {len(pages)} 件）。")
+        return 0
     changed = [
-        write_if_changed(source / CATALOG_MARKDOWN, build_markdown(pages, databases, resolved)),
-        write_if_changed(source / CATALOG_JSONL, build_jsonl(pages, resolved)),
+        write_if_changed(source / CATALOG_MARKDOWN, markdown),
+        write_if_changed(source / CATALOG_JSONL, jsonl),
     ]
     status = "目録を更新しました" if any(changed) else "目録に変更はありませんでした"
     print(f"{status}（ページ {len(pages)} 件、DB {len(databases)} 件）。")
