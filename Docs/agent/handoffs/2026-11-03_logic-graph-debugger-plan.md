@@ -31,13 +31,13 @@
 | Graph Toolkit（モジュール） | 6.4 以降 | 6.4 でエディタ組み込みのモジュールになり、パッケージ導入が不要になった。カスタムのグラフ編集ツールを作るための「前面（UI）」の枠組み。 | 確認済み |
 | Graph Toolkit（実験版パッケージ `com.unity.graphtoolkit` 0.x） | 6.2〜6.3 | 実験版で本番利用は非推奨。6.4 以降に入れるとモジュールと衝突してコンパイルエラーになる。 | 確認済み |
 | Graph Toolkit のコードからのグラフ生成 | 6.5 以降 | `GraphDatabase.CreateGraph<T>`、`AddNode`、`Connect` などでグラフをコードから作り、操作できる。6.5 は正式公開済み（「Unity 6.5 is now available」告知）で、API リファレンスにも `CreateGraph<T>` が載っている。 | 確認済み |
-| Graph Toolkit の実行時デバッグ表示 | 6.6（6000.6.0b1 以降。alpha/beta） | 6.6 alpha の告知が「デバッグ機能」を主題にしており、実行中のグラフで要素を特定する機能を含む。ワイヤーのアニメーションやノードの進捗表示が含まれるかは検索結果では確認できなかった。6.6 の正式版（LTS かどうかを含む）での提供は未確認。6.3 では使えない。 | 6.6 alpha の主題は確認済み。個別機能と正式版の状況は未確認 |
+| Graph Toolkit の実行時デバッグ表示 | 6.6 以降（正式公開済み。LTS ではなく Supported release） | 6.6 の公開告知と 6.6 マニュアルに、実行時バックエンドを持つツール向けのデバッグ層が載っている: 実行中の状態をグラフ上に表示、ワイヤーのアニメーションで実行の流れを表示、グラフ・ノード・ポート・サブグラフの一意 ID 取得、グラフウィンドウのツールバーへのボタン追加。6.6 alpha 告知にはノードの進捗表示・ポートのプレビューも挙がっている（正式版に入ったかは未確認）。API の多くは 6000.6.0a7 から。6.3 では使えない。 | 6.6 正式版のデバッグ層は確認済み（検索で得た公式告知・マニュアルの要約）。ノード進捗・ポートプレビューの正式版での有無は未確認 |
 | Graph Toolkit の実行環境 | - | 公式ドキュメントに「実行時の実行バックエンドは含まない」とある。実行時の動きは自前で作る。 | 確認済み |
 | GraphView（`UnityEditor.Experimental.GraphView`） | 6.3 で利用可 | Shader Graph などで使われてきた旧来の UI Toolkit 製グラフ UI。パン・ズーム・ミニマップ・ノード移動が揃っている。Experimental 名前空間のまま。 | 6.3 で使えることは確認済み。将来 Graph Toolkit に置き換わり削除される時期は推測 |
 | UI Toolkit の自作（`VisualElement` ＋ `Painter2D`） | 6.3 で利用可 | ノードを VisualElement、エッジを Painter2D で描く。部品はすべて自作。 | 確認済み |
-| 6.6 の状況 | - | 6.6 は検索時点で Alpha のドキュメントしか確認できず、LTS かどうかも確認できなかった。 | 推測 |
+| 6.6 / 6.7 の状況 | - | 6.6 は正式公開済みの Supported release（LTS ではない）。6.7 は beta。現在の LTS は 6.3（2027 年 12 月までサポート）。 | 確認済み（検索要約） |
 
-要点: Graph Toolkit は「グラフをアセットとして編集するツール」を作るための枠組みで、Play 中に変わり続けるロジックを読み取り専用で映す用途とは向きが違う。6.5 のコード生成 API とデバッグ表示が揃えば使いやすくなるが、プロジェクトは 6.3 LTS なので今すぐは使えない。
+要点: Graph Toolkit は「グラフをアセットとして編集するツール」を作るための枠組み。6.5 のコード生成 API と 6.6 のデバッグ層（実行状態の表示・ワイヤーのアニメーション・要素 ID）で、実行中の様子を見せる道具も作れるようになった。ただし前提は「グラフアセットが実行の元になっているツール」で、このゲームのロジックは C# コードなので、コードの構造を写したグラフアセットを生成し、記録した実行を ID で対応付ける作業が要る。またプロジェクトは 6.3 LTS で、6.6 は LTS ではないため、使うにはエンジン更新が必要。
 
 ## 3. プロジェクト側の現状（調べた範囲）
 
@@ -70,7 +70,7 @@
 | UI Toolkit 自作 | 見た目と配置を完全に自由にできる。廃止リスクがない | パン・ズームは自作（ドラッグでの移動だけなら小さい）。ミニマップ等も自作 |
 | Graph Toolkit | Unity 公式の後継。保存・ブラックボード・インスペクター・ミニマップが付く | 6.4 以上が必要。グラフ編集ツール向けで、実行中の様子を出す機能は予告のみ。ノードの見た目の自由度は GraphView より低い可能性（推測） |
 
-移行コストの見立て: 記録（トレース）と「ノード・エッジ・状態」のデータを表示から分けておけば、移行で作り直すのは表示部分だけになる。ただし Graph Toolkit は「アセットとして編集するグラフ」が前提なので、表示部分はほぼ書き直しになり、実行中のハイライトも自前で足す必要がある。移行は Graph Toolkit に実行時デバッグ表示が入ってから判断するのがよい。6.6 alpha でデバッグ機能が入り始めているので、6.6 の正式版（と LTS 化）が出た時点で見直す。
+移行コストの見立て: 記録（トレース）と「ノード・エッジ・状態」のデータを表示から分けておけば、移行で作り直すのは表示部分だけになる。ただし Graph Toolkit は「アセットとして編集するグラフ」が前提なので、表示部分はほぼ書き直しになり、実行中のハイライトも自前で足す必要がある。Graph Toolkit の実行時デバッグ表示は 6.6 正式版で入ったので、移行の判断材料は揃っている。移行するかはプロジェクトの Unity を 6.6 以降（または次の LTS）に上げるかどうかで決まる。上げる判断が出た時点で見直す。
 
 ### Q2. 最初にグラフにするロジック（決定: 攻撃パイプライン）
 
@@ -94,6 +94,8 @@
 
 - Graph Toolkit（Unity 6.4 マニュアル）: https://docs.unity3d.com/Manual/gtk/gtk-index.html
 - Graph Toolkit 実験版 0.4 の紹介: https://docs.unity3d.com/Packages/com.unity.graphtoolkit@0.4/manual/introduction.html
+- Unity 6.6 is now available（フォーラム）: https://discussions.unity.com/t/unity-6-6-is-now-available/1735357
+- New in Unity 6.6（マニュアル）: https://docs.unity.com/en-us/engine/6000.6/manual/whats-new/unity66
 - Unity 6.5 is now available（フォーラム）: https://discussions.unity.com/t/unity-6-5-is-now-available/1723176
 - Graph Toolkit Update in Unity 6.6 alpha（フォーラム）: https://discussions.unity.com/t/graph-toolkit-update-in-unity-6-6-alpha/1721970
 - Graph Toolkit Update in Unity 6.5 alpha（フォーラム）: https://discussions.unity.com/t/graph-toolkit-update-in-unity-6-5-alpha/1712169
