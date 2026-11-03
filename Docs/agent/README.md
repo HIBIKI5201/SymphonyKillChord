@@ -103,3 +103,4 @@ Docs/agent/
 | `Docs/アセット名リスト_命名規則提案.md`・`Docs/用語集_追加候補.md` | `Docs/AI資料まとめ/` の同内容ファイルと重複していたため削除し、`reports/` 側に一本化 |
 | `Docs/RuntimeAudit/` | `analysis/runtime-audit/2026-09-17_runtime-scripts/report/` |
 | `spec/analysis/2026-09-06/` | `analysis/anatomia-augur/2026-09-06_symphony-kill-chord/spec/` |
+| `handoffs/2026-11-03_logic-graph-debugger-plan.md` | ゲームロジックをグラフ表示するデバッグウィンドウの実装計画（Unity 6.x の Graph Toolkit・GraphView の比較と決めてほしいこと） |
