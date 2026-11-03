@@ -5,7 +5,7 @@
 
 # コーディング規則と仕様
 - C#変更・レビュー時: [設計思想](Assets/Scripts/DesignPhilosophy.md)、[コード規約](Assets/Scripts/CodeGuidelines.md)、設計思想から参照する対象レイヤーのクラス責務を読む。実装例は必要時だけ読む。
-- 機能仕様は `Docs/NotionSpecifications` の対象機能・用語だけを読む。`NotionSpecifications_old` は現在の仕様の根拠にしない。
+- 機能仕様は `Docs/NotionSpecifications` の対象機能・用語だけを読む。移行の台帳 `Docs/NotionMigration` は現在の仕様の根拠にしない。
 
 # エージェントの出力
 - 解析・監査・調査・引継ぎは `Docs/agent/` に置いてコミットする。構成・命名は [README](Docs/agent/README.md) に従う。構成外の出力フォルダは作らない。
