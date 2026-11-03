@@ -58,8 +58,8 @@ exhaustively in one pass with reliable accuracy. Scope every run:
   scope to that. This is the common case and the one to default to when the request is specific.
 - **If the user wants a broad/full sweep**, split by domain (e.g. one pass per top-level Runtime
   folder like `InGame/Mission`, `InGame/Buff`, `OutGame/StageSelect`, `OutGame/SkillTree`, ...,
-  matched against the corresponding `システム概要/システムリスト/*.md` / `仕様概要/仕様リスト/*.md`
-  pages) and spawn one Explore or general-purpose subagent per domain in parallel rather than doing
+  matched against the corresponding pages of the システムリスト / 仕様リスト databases)
+  and spawn one Explore or general-purpose subagent per domain in parallel rather than doing
   it serially yourself — each domain is a self-contained research task. Merge their findings into
   one report afterward, keeping the categorization scheme consistent across domains.
 - Don't silently narrow scope without saying so — if you decide to sample rather than cover
@@ -69,14 +69,19 @@ exhaustively in one pass with reliable accuracy. Scope every run:
 
 For the scoped domain:
 
-1. Find the relevant Notion pages. Game-design-facing content lives under
-   `Docs/NotionSpecifications/Symphony Kill Chord/仕様概要/仕様リスト/`; technical/system specs
-   (often written from the actual code, sometimes citing class names and file paths directly)
-   live under `.../システム概要/システムリスト/`. Grep for the feature name in both trees — Japanese
-   terminology may differ from the code's English class names, so also check
-   `Docs/NotionSpecifications/Symphony Kill Chord/用語.md` for the mapping.
+1. Find the relevant Notion pages. Start with `python scripts/notion/spec_query.py search <feature>`
+   and read each hit with `get <page id>` (add `--status` for the implementation list rows).
+   Game-design-facing content is the 仕様リスト database (id `27d7c2c6-cc02-8131-aee3-cf5d08b0b03a`);
+   technical/system specs (often written from the actual code, sometimes citing class names and
+   file paths directly) are the システムリスト database (id `27d7c2c6-cc02-81ee-963f-f0e4195b52e0`).
+   Get either folder with `spec_query.py path <id>` instead of hard-coding the path, since the
+   mirror path changes when a page is renamed. Japanese terminology may differ from the code's
+   English class names, so also check the 用語 page (page id `27d7c2c6-cc02-813b-a93f-e6baf4d4f679`)
+   for the mapping. In the report, list the pages read and the mirror's last commit time, following
+   the [reading steps](../../../Docs/agent/README.md#必要な資料だけを読む).
 2. Find the relevant implementation. Follow the layer structure from
-   [Assets/Scripts/DesignPhilosophy.md](../../../Assets/Scripts/DesignPhilosophy.md) — a feature's
+   [Assets/Scripts/DesignPhilosophy.md](../../../Assets/Scripts/DesignPhilosophy.md) (its Notion
+   counterpart is the 設計思想 page, page id `31c7c2c6-cc02-80f3-92c0-e6929d962476`) — a feature's
    logic is usually spread across `1.Domain/`, `2.Application/`, `3.Adaptor/` under a matching
    folder name (e.g. `InGame/Mission/ClearCondition/`). Master data instances often live under
    `Assets/Level/Data/Master/`.
