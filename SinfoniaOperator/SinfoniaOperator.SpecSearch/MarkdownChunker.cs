@@ -58,12 +58,11 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         private readonly int _overlapLength;
 
         /// <summary>
-        ///     新キャッシュを優先し、移行前だけ旧パスを利用する。
+        ///     仕様書リポジトリのサブモジュール（Docs/NotionSpecifications）を読む。
         /// </summary>
         private static string ResolveDefaultRoot(string root)
         {
-            string migrated = Path.Combine(root, "Library", "NotionSpecifications");
-            return Directory.Exists(migrated) ? migrated : Path.Combine(root, "Docs", "NotionSpecifications");
+            return Path.Combine(root, "Docs", "NotionSpecifications");
         }
 
         /// <summary>
