@@ -15,8 +15,6 @@ description: "Audit whether the whole Symphony Kill Chord codebase (Assets/Scrip
 - `Assets/Scripts/DesignPhilosophy.md`（レイヤー構成・責務・DI・モジュール間公開の規則）
 - `Assets/Scripts/CodeGuidelines.md`（命名・クラスの種類）
 
-`Assets/Docs/ScriptsDocs/Architecture.txt` は設計思想の写しなので、正本と食い違うときは正本を優先する。
-
 対象レイヤーのクラス責務は `Assets/Scripts/DesignClassRoles.md` の該当節で確認する。実装例は必要時だけ読む。
 
 ## 最重要事項
