@@ -12,7 +12,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Player
     public sealed class PlayerMoveSpecAsset : ScriptableObject
     {
         /// <summary> 通常攻撃の攻撃硬直の既定値（拍数）。 </summary>
-        private const float DEFAULT_ATTACK_RECOVERY_BEATS = 0.5f;
+        private const float DEFAULT_ATTACK_RECOVERY_BEATS = 0.25f;
 
         [SerializeField, Tooltip("通常移動速度。")]
         private float _moveSpeed;
