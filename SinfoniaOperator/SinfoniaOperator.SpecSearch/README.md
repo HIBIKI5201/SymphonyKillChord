@@ -48,7 +48,7 @@ HeadingContains に一致する節とその子孫へ Weight を適用する。�
 
 ## Notionキャッシュとの接続
 
-index コマンドは NOTION_EXPORT_OUTPUT のディレクトリを読む。未設定なら Library/NotionSpecifications を優先し、存在しなければ旧 Docs/NotionSpecifications を読む。リポジトリ全体・Git履歴・移行原稿を検索対象にしない。DB索引（先頭が _ のファイル）と assets は本文候補に含めない。
+index コマンドは NOTION_EXPORT_OUTPUT のディレクトリを読む。未設定ならリポジトリの Docs/NotionSpecifications（仕様書リポジトリのサブモジュール）を読む。リポジトリ全体・Git履歴・移行原稿を検索対象にしない。DB索引（先頭が _ のファイル）と assets は本文候補に含めない。
 
 従来Exporterの「Notionで開く」リンク・最終更新行・プロパティ表を読み取る。移行案のHTMLコメントヘッダ（source / page_id / last_edited）にも対応する。プロパティ表から次の名前を読む。
 
@@ -58,6 +58,8 @@ index コマンドは NOTION_EXPORT_OUTPUT のディレクトリを読む。未�
 | 仕様状態 | 採用済み・廃止など。実装状態と区別 |
 | 実装状態 | 未実装を含めて回答生成へ伝える |
 | 適用範囲 | 製品版・体験版などを回答生成へ伝える |
+
+ページのプロパティ表に無い値は、仕様書ルートの目録 `_catalog.jsonl`（仕様書の窓口 `scripts/notion/spec_query.py` と同じ目録）で補う（`SpecCatalog`）。文書用途は仕様リストではカテゴリー、システムリストでは種別を使う（ミラーに文書用途の列が無いため）。実装状態は、実装リストの行のうち `仕様` リレーションでそのページを指すもののステータスをまとめる（全部完了なら実装済、全部未着手なら未実装、それ以外は一部実装。対象外は数えない）。適用範囲は目録の値を使う。目録が無い版では補わない。
 | 状態 | 旧構成との互換。アーカイブ等は仕様状態、未実装等は実装状態へ振り分ける |
 
 DBプロパティが未整備でも、PageId / PathContainsの設定で資料を分類できる。プロパティを読み取れないページを、本文の雰囲気だけで正式仕様に分類しない。
@@ -76,7 +78,7 @@ DBプロパティが未整備でも、PageId / PathContainsの設定で資料を
 
 ### デプロイworkflow
 
-`[CI/CD] Deploy Sinfonia Operator` ワークフローは公開envからSPEC_SEARCHだけをパッケージへ抽出する。VM上の既存キャッシュ（Library/NotionSpecifications優先、旧Docsへフォールバック）と既設モデルから、新リリースのディレクトリへ索引を再生成する。Notionの取得は行わないため、必要なキャッシュ更新は配備前に別途行う。
+`[CI/CD] Deploy Sinfonia Operator` ワークフローは公開envからSPEC_SEARCHだけをパッケージへ抽出する。仕様書リポジトリ（`SymphonyKillChord_Specifications`）をデプロイキー `SPECIFICATIONS_DEPLOY_KEY` で取得し、Markdownだけをパッケージの `specifications/` に同梱する。VMでは同梱した仕様書と既設モデルから新リリースのディレクトリへ索引を再生成し、生成後に仕様書を消す。VMで仕様書を手でコピーする必要はない。仕様書は同期CIが3時間ごとに更新するため、デプロイは毎日1回（04:00 JST）定期実行して索引を作り直す。Notionの取得はデプロイでは行わない。
 
 serveは実行ファイルと同じ場所のspec-search.release.jsonが存在する場合、その検索設定・索引パス・モデルパスを最後に読み込む。この3項目はVM既存設定よりリリースの組を優先し、トークンやその他の設定はVM側の既存値を使う。公開envの変更もデプロイを起動する。
 
