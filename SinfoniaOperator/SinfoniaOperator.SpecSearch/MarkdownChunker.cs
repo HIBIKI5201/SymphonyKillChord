@@ -43,9 +43,10 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
                 AttributesToSkip = FileAttributes.ReparsePoint,
                 IgnoreInaccessible = false
             };
+            SpecCatalog catalog = SpecCatalog.Load(_specificationRootPath);
             return Directory.EnumerateFiles(_specificationRootPath, "*.md", options)
                 .Where(IsSearchTarget).OrderBy(path => path, StringComparer.Ordinal)
-                .SelectMany(ChunkFile).ToArray();
+                .SelectMany(path => ChunkFile(path, catalog)).ToArray();
         }
 
         private const int DEFAULT_CHUNK_LENGTH = 800;
@@ -81,12 +82,14 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
 
         /// <summary>
         ///     コード内の見出しを無視し、トグルの開始・終了でも必ず本文を区切る。
+        ///     ページ本文に無い属性（資料の種類・実装状態・適用範囲）は目録で補う。
         /// </summary>
-        private IEnumerable<SpecChunkRecord> ChunkFile(string path)
+        private IEnumerable<SpecChunkRecord> ChunkFile(string path, SpecCatalog catalog)
         {
             string markdown = File.ReadAllText(path, Encoding.UTF8).Replace("\r\n", "\n", StringComparison.Ordinal);
             string notionUrl = SpecPageMetadataReader.ReadNotionUrl(markdown);
-            SpecPageMetadata metadata = SpecPageMetadataReader.Read(markdown, notionUrl);
+            string catalogPath = Path.GetRelativePath(_specificationRootPath, path).Replace('\\', '/');
+            SpecPageMetadata metadata = catalog.Complete(catalogPath, SpecPageMetadataReader.Read(markdown, notionUrl));
             string sourceFile = Path.GetRelativePath(_repositoryRootPath, path).Replace('\\', '/');
             string title = Path.GetFileNameWithoutExtension(path);
             string[] headings = new string[MAX_HEADING_LEVEL];
