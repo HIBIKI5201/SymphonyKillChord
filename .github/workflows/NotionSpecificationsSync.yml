@@ -90,3 +90,9 @@ jobs:
           git commit --quiet -m "Notion仕様書を同期 ($(date -u '+%Y-%m-%d %H:%M UTC'))"
           git push --quiet origin HEAD
           echo "$(git show --stat --format= HEAD | tail -n 1)"
+
+      - name: 目録の版を検証
+        # 目録の生成は失敗しても同期を止めない（上の continue-on-error）。そのときは古い目録が残り、ページと版がずれる。
+        # pushの後で、目録が今のページから作り直した目録と同じかを確かめ、ずれていればこの実行を失敗にして気付けるようにする。
+        # ログは件数だけを出す（ページタイトルは出さない）。
+        run: python3 scripts/notion/build_spec_catalog.py --source "$SPEC_DIRECTORY" --check

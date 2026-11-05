@@ -17,6 +17,7 @@ const SECTIONS = {
     issues: "クローズするIssue",
     cause: "原因",
     fix: "対処",
+    spec: "仕様への影響",
     verified: "確認済みの内容",
     unverified: "未確認・残論点",
 };
@@ -222,6 +223,10 @@ function buildPullRequest({ head, repo, pulls, issues, diff }) {
 
     out.push(`## ${SECTIONS.fix}`);
     out.push(mergeSection(parsed, "fix", multi) || "元PRに記載なし。");
+    out.push("");
+
+    out.push(`## ${SECTIONS.spec}`);
+    out.push(mergeSection(parsed, "spec", multi) || "元PRに記載なし。");
     out.push("");
 
     out.push(`## ${SECTIONS.verified}`);

@@ -14,7 +14,7 @@
 | 資料・CI・運用の修正 | 対象ファイルとその参照元 | C#・Unity挙動を変更しなければUnity起動・全規約・全仕様読込は不要 |
 | 調査・引継ぎ | このREADMEの配置規則 | 対象テーマの既存レポートだけ。過去の全レポートを読まない |
 
-- 探索はファイル名 → 見出し・一致行 → 該当節の順に進める。`Docs/NotionSpecifications` はまず `python scripts/notion/spec_query.py search <語>` でページを絞り、`get <ID・タイトル>` で仕様の節だけを読む（経緯・却下案は `--rationale`、実装状態は `--status`）。窓口を使えないときはルートの目録 `_catalog.md`（1ページ1行。同期CIが生成）を `rg` で引き、目録がない版では機能に対応するサブフォルダから絞る。大量一致は `rg -l`、必要な一致行は `rg -n -m` を使う（`-m` はファイルごとの上限）。
+- 探索はファイル名 → 見出し・一致行 → 該当節の順に進める。`Docs/NotionSpecifications` はまず MCP サーバー `spec` の `spec_search`（使えないときは `python scripts/notion/spec_query.py search <語>`）でページを絞り、`spec_get`（`get <ID・タイトル>`）で仕様の節だけを読む（経緯・却下案は `rationale`、実装状態は `status`）。窓口を使えないときはルートの目録 `_catalog.md`（1ページ1行。同期CIが生成）を `rg` で引き、目録がない版では機能に対応するサブフォルダから絞る。大量一致は `rg -l`、必要な一致行は `rg -n -m` を使う（`-m` はファイルごとの上限）。
 - 同じセッションで読んだ同じ版の資料は再読しない。編集・ブランチ変更・同期があれば対象資料を再確認する。
 - ログや階層は件数・期間・ルートを絞る。出力が切れたら上限を増やす前に探索範囲を狭める。
 - 外部サービスの読取・更新は依頼に必要なときだけ。報告用の巨大な生ログはコミットしない。
@@ -89,6 +89,7 @@ Docs/agent/
 | `reports/2026-10-01_design-review-qa.md` | 全体設計レビュー: 自動テスト・QA シート・再検証・リリース判定（Issue #2417） |
 | `reports/2026-10-01_design-review-release.md` | 全体設計レビュー: ビルド・署名・ストア・性能・権利・セーブ互換（Issue #2418） |
 | `reports/2026-10-27_tutorial-kill-step-deadlock.md` | チュートリアルの敵撃破ステップで敵が1体足りず進めなくなる不具合の原因調査（無敵バフを確定ダメージが貫通） |
+| `reports/2026-11-03_spec-query-eval.md` | 仕様書の窓口（spec_query）と全文検索を評価セット40問で比べた結果（#2396 段階3） |
 | `handoffs/2026-11-03_logic-graph-debugger-plan.md` | ゲームロジックをグラフ表示するデバッグウィンドウの実装計画（Unity 6.x の Graph Toolkit・GraphView の比較と決めてほしいこと） |
 
 ## 旧置き場から移したもの（Issue #2081）

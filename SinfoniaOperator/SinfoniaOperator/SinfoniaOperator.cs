@@ -527,8 +527,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     string specificationPath = Path.Combine(directory.FullName, "Docs", "NotionSpecifications");
                     if (Directory.Exists(Path.Combine(directory.FullName, ".git"))
                         || File.Exists(Path.Combine(directory.FullName, ".git"))
-                        || Directory.Exists(specificationPath)
-                        || Directory.Exists(Path.Combine(directory.FullName, "Library", "NotionSpecifications")))
+                        || Directory.Exists(specificationPath))
                     {
                         return directory.FullName;
                     }

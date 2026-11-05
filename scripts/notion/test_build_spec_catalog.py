@@ -1,4 +1,6 @@
 """仕様書目録の生成を、小さな仕様書ミラーで確かめる。"""
+import contextlib
+import io
 import json
 import tempfile
 import unittest
@@ -121,6 +123,25 @@ class BuildSpecCatalogTests(unittest.TestCase):
         self.build()
         rows, _ = self.build()
         self.assertFalse(any(path.startswith("_catalog") for path in rows))
+
+    def check(self):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = main(["--source", str(self.root), "--check"])
+        return code, out.getvalue() + err.getvalue()
+
+    def test_check_passes_only_for_the_same_version(self):
+        self.assertEqual(self.check()[0], 1)
+        self.build()
+        self.assertEqual(self.check(), (0, "目録はページと同じ版です（ページ 2 件）。\n"))
+        self.write("SKC/用語/キルコード.md", TERM_PAGE.replace("# キルコード", "# キルコード\n\n## 追加の節"))
+        self.write("SKC/用語/新しい語.md", "# 新しい語\n")
+        code, output = self.check()
+        self.assertEqual(code, 1)
+        self.assertIn("目録に無いページ 1 件、消えたページ 0 件、内容が違う行", output)
+        self.assertNotIn("新しい語", output)
+        self.assertIn("SKC/用語/新しい語.md", self.build()[0])
+        self.assertEqual(self.check()[0], 0)
 
 
 if __name__ == "__main__":
