@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using SymphonyFrameWork.System.SaveSystem;
 using System;
@@ -19,9 +20,13 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         ///     スキルツリー処理で使用する依存関係を初期化する。
         /// </summary>
         /// <param name="skillNodeEntityDict"> ノード一覧です。 </param>
-        public SkillTreeService(Dictionary<SkillNodeId, SkillNodeEntity> skillNodeEntityDict)
+        /// <param name="clearedStageIds"> クリア済みのステージIDです。ステージのクリアを条件にするノードの判定に使います。 </param>
+        public SkillTreeService(
+            Dictionary<SkillNodeId, SkillNodeEntity> skillNodeEntityDict,
+            IReadOnlyCollection<StageId> clearedStageIds = null)
         {
             _skillNodeEntityDict = skillNodeEntityDict ?? throw new ArgumentNullException(nameof(skillNodeEntityDict));
+            _clearedStageIds = clearedStageIds == null ? new HashSet<StageId>() : new HashSet<StageId>(clearedStageIds);
             _visitedNodes = new();
         }
 
@@ -69,6 +74,16 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             }
             FindNodesOnPath(node, nodesOnPath);
 
+            // ステージのクリアが条件のノードは、条件を満たすまで経路ごと解放できない。
+            foreach (SkillNodeEntity nodeOnPath in nodesOnPath)
+            {
+                if (!IsClearedStageConditionMet(nodeOnPath))
+                {
+                    nodesOnPath.Clear();
+                    return -1;
+                }
+            }
+
             // 結果経路のノードの必要ポイントを合計する
             int unlockCost = 0;
             foreach (SkillNodeEntity nodeOnPath in nodesOnPath)
@@ -76,6 +91,23 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 unlockCost += nodeOnPath.NextUnlockCost;
             }
             return unlockCost;
+        }
+
+        /// <summary>
+        ///     ノードのステージのクリア条件を満たしているか判定する。解放済みのノードは条件を問わない。
+        /// </summary>
+        /// <param name="node"> 判定するノード。 </param>
+        /// <returns> 条件が無い、条件のステージをクリア済み、または解放済みの場合はtrue。 </returns>
+        public bool IsClearedStageConditionMet(SkillNodeEntity node)
+        {
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            return node.IsUnlocked
+                || !node.HasRequiredClearedStage
+                || _clearedStageIds.Contains(node.RequiredClearedStageId);
         }
 
         /// <summary>
@@ -591,6 +623,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
 
         private readonly Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntityDict;
         private readonly HashSet<SkillNodeEntity> _visitedNodes;
+        private readonly HashSet<StageId> _clearedStageIds;
 
         // TryGetDistanceFromStart で使い回すための作業用フィールド。
         private readonly Stack<(SkillNodeEntity Node, int ParentIndex, int MinParentDistance)> _distanceWorkStack = new();
