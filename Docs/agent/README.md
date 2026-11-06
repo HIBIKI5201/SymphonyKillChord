@@ -15,6 +15,7 @@
 | 調査・引継ぎ | このREADMEの配置規則 | 対象テーマの既存レポートだけ。過去の全レポートを読まない |
 
 - 探索はファイル名 → 見出し・一致行 → 該当節の順に進める。`Docs/NotionSpecifications` はまず MCP サーバー `spec` の `spec_search`（使えないときは `python scripts/notion/spec_query.py search <語>`）でページを絞り、`spec_get`（`get <ID・タイトル>`）で仕様の節だけを読む（経緯・却下案は `rationale`、実装状態は `status`）。窓口を使えないときはルートの目録 `_catalog.md`（1ページ1行。同期CIが生成）を `rg` で引き、目録がない版では機能に対応するサブフォルダから絞る。大量一致は `rg -l`、必要な一致行は `rg -n -m` を使う（`-m` はファイルごとの上限）。
+- スキル・設定が読む決まったNotionページは、パスではなくpage idで書く（#1955）。一覧は参照表 `SinfoniaOperator/notion-cache-map.json`（page id・呼び名・`readers`）。読む手順: ① `git submodule update --init --remote --depth 1 -- Docs/NotionSpecifications` で写しを最新にする（セッション開始時に済んでいれば省く） ② 作業に要るページを参照表か `search` で選ぶ ③ `python scripts/notion/spec_query.py get <page id>`（データベースは `path <id>` でパスを引いて読む） ④ 読んだページと `git -C Docs/NotionSpecifications log -1 --format=%cI` の日時を報告に書く。pullできなければ手元の写しで続けてその旨を伝え、写しも無ければ止めて仕様書リポジトリの閲覧権限を頼む。ページを消す・統合する前に参照表の `readers` を確かめる。運用の正本はNotion「Notion 仕様書の運用（正本とキャッシュ）」（`3e37c2c6-cc02-815b-9dac-f6b834c1e56b`）と「AIエージェント向け参照先一覧」（`3e37c2c6-cc02-812f-94e0-dbf07db926f8`）である。
 - 同じセッションで読んだ同じ版の資料は再読しない。編集・ブランチ変更・同期があれば対象資料を再確認する。
 - ログや階層は件数・期間・ルートを絞る。出力が切れたら上限を増やす前に探索範囲を狭める。
 - 外部サービスの読取・更新は依頼に必要なときだけ。報告用の巨大な生ログはコミットしない。
