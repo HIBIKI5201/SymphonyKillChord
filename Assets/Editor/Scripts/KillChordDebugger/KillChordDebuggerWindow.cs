@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KillChord.Editor.Debugger.LogicGraph;
 using KillChord.Editor.Utility;
 using SymphonyFrameWork.Editor;
 using UnityEditor;
@@ -19,6 +20,7 @@ namespace KillChord.Editor.Debugger
             "Assets/Editor/Scripts/KillChordDebugger/KillChordDebugger.uss";
 
         private const string SAVE_DATA_PANEL_KEY = "savedata";
+        private const string LOGIC_GRAPH_PANEL_KEY = "logicgraph";
 
         /// <summary> KillChordデバッガーを開きます。 </summary>
         [MenuItem(EditorWindowPathConst.KILL_CHORD_DEBUGGER_PATH)]
@@ -34,6 +36,8 @@ namespace KillChord.Editor.Debugger
         {
             _saveDataView?.Dispose();
             _saveDataView = null;
+            _logicGraphPanel?.Dispose();
+            _logicGraphPanel = null;
             rootVisualElement.Clear();
             _panels.Clear();
 
@@ -53,12 +57,18 @@ namespace KillChord.Editor.Debugger
 
             VisualElement content = rootVisualElement.Q<VisualElement>("kcd-content");
             Button saveDataNavButton = rootVisualElement.Q<Button>("kcd-nav-savedata");
+            Button logicGraphNavButton = rootVisualElement.Q<Button>("kcd-nav-logicgraph");
 
             _saveDataView = new SaveDataWindow();
             content.Add(_saveDataView);
             _panels[SAVE_DATA_PANEL_KEY] = _saveDataView;
 
+            _logicGraphPanel = new LogicGraphPanel();
+            content.Add(_logicGraphPanel);
+            _panels[LOGIC_GRAPH_PANEL_KEY] = _logicGraphPanel;
+
             saveDataNavButton?.RegisterCallback<ClickEvent>(_ => ShowPanel(SAVE_DATA_PANEL_KEY, saveDataNavButton));
+            logicGraphNavButton?.RegisterCallback<ClickEvent>(_ => ShowPanel(LOGIC_GRAPH_PANEL_KEY, logicGraphNavButton));
 
             ShowPanel(SAVE_DATA_PANEL_KEY, saveDataNavButton);
         }
@@ -81,13 +91,16 @@ namespace KillChord.Editor.Debugger
         }
 
         private SaveDataWindow _saveDataView;
+        private LogicGraphPanel _logicGraphPanel;
         private readonly Dictionary<string, VisualElement> _panels = new();
 
-        /// <summary> ウィンドウ無効化時にセーブデータパネルを破棄します。 </summary>
+        /// <summary> ウィンドウ無効化時にセーブデータパネルとロジックパネルを破棄します。 </summary>
         private void OnDisable()
         {
             _saveDataView?.Dispose();
             _saveDataView = null;
+            _logicGraphPanel?.Dispose();
+            _logicGraphPanel = null;
         }
     }
 }
