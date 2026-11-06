@@ -44,7 +44,7 @@ TOOLS = [
         "description": (
             "Symphony Kill Chord の Notion 仕様書ミラーを目録で探し、ページID・タイトル・サマリーを返す。"
             "仕様を読むときは、まずこれで候補を絞り、spec_get で必要なページだけ読む。"
-            "カテゴリー「開発用」（旧版・参考）は既定で外す。"
+            "カテゴリー「開発用（旧版・参考）」は既定で外す。"
         ),
         "inputSchema": {
             "type": "object",
@@ -54,7 +54,7 @@ TOOLS = [
                 "parent": {"type": "string", "description": "親仕様（ID・パス・タイトル）"},
                 "scope": {"type": "string", "description": "適用範囲（体験版など）。未設定のページは含める"},
                 "db": {"type": "string", "description": "所属DB名の部分一致（例: 仕様リスト、用語リスト）"},
-                "include_dev": {"type": "boolean", "description": "カテゴリー「開発用」も含める"},
+                "include_dev": {"type": "boolean", "description": "カテゴリー「開発用（旧版・参考）」も含める"},
                 "limit": {"type": "integer", "description": f"返す件数（既定 {DEFAULT_LIMIT}）", "minimum": 1},
             },
         },
