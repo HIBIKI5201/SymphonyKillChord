@@ -1,0 +1,655 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: MasterText_ja
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: ja
+  m_SharedData: {fileID: 11400000, guid: f72ed376cdb85bfd1a937dbe8c84c6d7, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 1900000000
+    m_Localized: "敵兵"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000001
+    m_Localized: "敵兵を10体撃破する"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000002
+    m_Localized: "危険な攻撃は距離を取って回避しよう"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000003
+    m_Localized: "キルコードの改造をしてみよう！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000004
+    m_Localized: "30秒以下にクリアする"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000005
+    m_Localized: "60秒以下にクリアする"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000006
+    m_Localized: "殲滅戦"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000007
+    m_Localized: "全ての兵士を殲滅する"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000008
+    m_Localized: "挑戦時間が200秒を超えない"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000009
+    m_Localized: "挑戦時間が180秒を超えない"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000010
+    m_Localized: "挑戦時間が150秒を超えない"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000011
+    m_Localized: "耐久戦"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000012
+    m_Localized: "戦場を120秒間生き残れ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000013
+    m_Localized: "青攻撃などの範囲攻撃などを使うと敵を殲滅できるぞ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000014
+    m_Localized: "受けたダメージが50ダメージ以下"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000015
+    m_Localized: "受けたダメージが75ダメージ以下"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000016
+    m_Localized: "受けたダメージが25ダメージ以下"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000017
+    m_Localized: "チュートリアル"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000018
+    m_Localized: "基本操作を確認しよう"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000019
+    m_Localized: "スティック(<size=24>{input.move}</size>)で移動してみよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000020
+    m_Localized: "移動と回避について"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000021
+    m_Localized: "回避(<size=24>{input.dodge}</size>)してみよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000022
+    m_Localized: "攻撃について"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000023
+    m_Localized: "ジャスト攻撃の種類について"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000024
+    m_Localized: "攻撃(<size=24>{input.attack_button}</size>)をしてみよう"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000025
+    m_Localized: "緑のタイミングで攻撃(<size=24>{input.attack_button}</size>)してみよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000026
+    m_Localized: "オレンジのタイミングで攻撃(<size=24>{input.attack_button}</size>)してみよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000027
+    m_Localized: "青のタイミングで攻撃(<size=24>{input.attack_button}</size>)してみよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000028
+    m_Localized: "紫のタイミングで攻撃(<size=24>{input.attack_button}</size>)してみよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000029
+    m_Localized: "水色のタイミングでも攻撃(<size=24>{input.attack_button}</size>)してみよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000030
+    m_Localized: "黄色のタイミングでも攻撃(<size=24>{input.attack_button}</size>)してみよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000031
+    m_Localized: "キルコードについて"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000032
+    m_Localized: "キルコード(<size=24>{input.attack_button}</size>)を発動してみよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000033
+    m_Localized: "敵を撃破しよう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000034
+    m_Localized: "さて実践だ。教えたことを存分に活用して暴れるんだ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000035
+    m_Localized: "まず移動と回避についてだ。戦場の移動や敵の攻撃の回避に使うから覚えていてくれ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000036
+    m_Localized: "次に、お前が行う攻撃についてだ。攻撃によって特徴が異なるからしっかり把握しておいてくれ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000037
+    m_Localized: "最後にお前の特殊能力、キルコードについてだ。フレーズを奏でることで発動する特殊な力、使いこなせるかはお前次第だ！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000038
+    m_Localized: "いいか？"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000039
+    m_Localized: "よし、次に行くぞ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000040
+    m_Localized: "第1話「ZeroDivide」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000041
+    m_Localized: "依頼人からの任務により、廃市街を占領する敵兵勢力を制圧せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000042
+    m_Localized: "ステージ3\n大量の敵を殲滅し、勝利を掴みとれ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000043
+    m_Localized: "ステージ1\n敵を殲滅せよ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000044
+    m_Localized: "シナリオ1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000045
+    m_Localized: "ステージ2\n敵の猛攻を耐えしのぐ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000046
+    m_Localized: "キルコード13"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000047
+    m_Localized: "ターゲットを行っている敵単体に攻撃力{DamageMultiplier}の{HitCount}攻撃を行う。\n\nこの攻撃でクリティカルが発生した場合、クリティカルダメージは{CriticalMultiplier}になる。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000048
+    m_Localized: "キルコード1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000049
+    m_Localized: "ターゲットに威力{DamageMultiplier}の強力な一回攻撃。\n\n確定でクリティカル発生"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000050
+    m_Localized: "キルコード3"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000051
+    m_Localized: "ターゲットに対して攻撃力{DamageMultiplier}の強力な1回の貫通攻撃を行う。\nターゲット以外の敵に当たった場合は威力が元の{SecondaryDamageRate}になる。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000052
+    m_Localized: "キルコード8"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000053
+    m_Localized: "3拍子の通常攻撃を行う。\nその通常攻撃が当たった敵とその敵の半径{InfectionRange}以内にいる敵に対して伝染状態を付与する。\n（伝染回数は{InfectionTriggerCount}で効果が消滅する。）\n\n【伝染状態】\n攻撃を受けたときすべての伝染状態の敵に対して、攻撃を受けた敵の被ダメージの{InfectionDamageRate}のダメージを与える。\n他の伝染状態の敵に与えたときのダメージ判定は通常攻撃を受けたときと同じものを行う。\n（クリティカル判定やジャスト判定も行い、その倍率もかかる）"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000054
+    m_Localized: "キルコード5"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000055
+    m_Localized: "自身の体力を{HealthCostRatio}消費する。その後、（消費した体力×10）×{DamageMultiplier}のダメージを与える。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000056
+    m_Localized: "キルコード10"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000057
+    m_Localized: "{DamageReductionHitCount}まで{DamageReductionRate}のダメージを軽減するバフを自身に与える。（重複不可）"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000058
+    m_Localized: "キルコード9"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000059
+    m_Localized: "{DurationSeconds}間、クリティカル判定が成功した敵に対して\nクリティカルダメージの倍率が{CriticalMultiplier}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000060
+    m_Localized: "キルコード2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000061
+    m_Localized: "通常攻撃のショットガンの攻撃を発動し、\nその攻撃に当たった対象に被ダメージ量{DamageTakenIncreaseRate}増加のデバフを{DurationSeconds}間付与する。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000062
+    m_Localized: "キルコード7"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000063
+    m_Localized: "自身の前方にいる敵に対して{HitCount}回「対象の最大攻撃力を{AttackPowerReductionRate}減少させる」デバフを付与する攻撃を行う。\nその後、自身の攻撃力を{DurationSeconds}間、「敵の減少させた攻撃力」×10分上昇させる。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000064
+    m_Localized: "キルコード4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000065
+    m_Localized: "{DurationSeconds}間、攻撃で与えたダメージの{BarrierGainRate}の過剰HP（バリア）を獲得する。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000066
+    m_Localized: "キルコード0"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000067
+    m_Localized: "ターゲットを行っている敵単体に攻撃力{DamageMultiplier}の一回攻撃を行う。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000068
+    m_Localized: "キルコード6"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000069
+    m_Localized: "自身に対して「{DurationSeconds}間、与えたダメージの{LifeStealRate}のHP（一発の回復上限：{HealPerHitCap}）を回復する」バフを付与する。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000070
+    m_Localized: "攻撃力　＋6.25％"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000071
+    m_Localized: "クリティカルダメージ　＋10％"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000072
+    m_Localized: "クリティカル率　＋2％\n何度でも強化できる"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000073
+    m_Localized: "最大体力　＋6.25％"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000074
+    m_Localized: "クリティカル率　＋2％"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000075
+    m_Localized: "キルコード効果\n自身前方の扇形の\n敵に対して4拍の\n通常攻撃を3回行う\n\n攻撃した対象は攻撃力を\n最大10%を10秒間減少させる\nその後、自身の攻撃力を10秒間、\n減少させた敵の攻撃力分上昇"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000076
+    m_Localized: "キルコード効果\nターゲットを行っている敵単体に\n攻撃力500％の一回攻撃\n\n\n\nキルコード効果\nターゲットを行っている敵単体に\n攻撃力60％の5回攻撃を行う。\n\nこの攻撃でクリティカルが発生した\n場合、ダメージは2倍になる\n\n\nキルコード効果\nターゲットに強力な一回攻撃\n\n確定でクリティカル発生"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000077
+    m_Localized: "キルコード効果\n\n5秒間、攻撃で与えたダメージの\n30%をバリアを獲得する"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000078
+    m_Localized: "装備スロットを一枠解放\n\nTips\n四輪駆動車、装甲車、戦車、\nガンシップに至るまであらゆるビーグルの整備\n運用を一人で行い、\n作戦時においてパイロットとして活躍する。\n替えが聞かないほどの人材、\nそれが被検体12号だった。\nそんな雄才を持ち得る彼女だが\nその生まれはただの、\n数ある量産個体の一人にすぎなかった。\nそんな彼女にとっても、\nSymphonyは一番年の近い姉妹で\nあることに変わりない。\n研究施設武装蜂起。\n当時、Symphonyは単独で\n施設を抜け出した。\nそれを事前に知り、\n手助けしたものが\nただ一人だけいたことは\n未だ二人だけの秘密である。\n「Symphonyのためなら\n何でもやるわ。あの時と同じように」\nただ一人の妹のように思う\n彼女の感情は愛情か、劣情か\n本人はまだ気づいていないだろう"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000079
+    m_Localized: "キルコード効果\nターゲットに対して単発高火力\n\nターゲットに的中した後、\nプレイヤーと敵との\n半直線状にいる敵に対して\nキルコード火力の50％の\nダメージを与える"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000080
+    m_Localized: "最大体力　＋6.25％\n何度でも強化できる"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000081
+    m_Localized: "範囲攻撃の射程　＋0.3\n何度でも強化できる"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000082
+    m_Localized: "キルコード効果\n自身の体力をn%消費して、\nその消費量×mのダメージを与える"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000083
+    m_Localized: "範囲攻撃の射程　＋0.3"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000084
+    m_Localized: "キルコード効果\n通常攻撃のショットガンの攻撃を\n発動し、その攻撃対象に\n被ダメージ量25%増加のデバフを\n5秒間付与する"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000085
+    m_Localized: "クリティカルダメージ　＋10％\n何度でも強化できる"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000086
+    m_Localized: "キルコード効果\nSymphonyを中心に\n半径nメートルのフィールド\nを展開\n\nフィールド内では対象に対する\n攻撃がクリティカルの場合\nクリティカルダメージをn倍にする"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000087
+    m_Localized: "攻撃力　＋6.25％\n何度でも強化できる"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000088
+    m_Localized: "キルコード効果\nn回までs%のダメージを\n軽減を付与(重複不可)"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000089
+    m_Localized: "キルコード効果\n3拍攻撃を行い、攻撃対象と\n対象周囲の敵に感染を付与\n\n感染状態\n感染状態の敵を攻撃を行うと、\n他の感染状態の敵すべてに\n対象のn%のダメージを与える"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000090
+    m_Localized: "キルコード効果\n自身にn秒間、\n「ダメージの10%を回復する」\nを付与(一発の回復上限:5)"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000091
+    m_Localized: "解放ポイント"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000092
+    m_Localized: "改造ポイント"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000093
+    m_Localized: "第11話「邪悪」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000094
+    m_Localized: "謎の被検体14号及び、連邦軍の敵兵を踏破せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000095
+    m_Localized: "テストシーン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000096
+    m_Localized: "第5話「計画」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000097
+    m_Localized: "行政区内を隠密に捜索し、キャンプに侵入、敵を掃討せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000098
+    m_Localized: "第9話「残響」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000099
+    m_Localized: "敵の銃弾を避け、襲い来る連邦兵に強行せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000100
+    m_Localized: "第8話「斥候」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000101
+    m_Localized: "行政区内西部地区に潜入し、機密情報を入手するため敵を滅せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000102
+    m_Localized: "第7話「休息」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000103
+    m_Localized: "連邦兵から姿を隠し、物資の補給、敵を排除せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000104
+    m_Localized: "第12話「終幕」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000105
+    m_Localized: "Symphonyと姿見の同じ敵、被検体14号を撃破せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000106
+    m_Localized: "第3話「強攻」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000107
+    m_Localized: "カペリメイステルの全貌を暴くため、敵を撃滅せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000108
+    m_Localized: "第6話「疑問」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000109
+    m_Localized: "新たな情報を奪取するため、襲い来る連邦兵を突破せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000110
+    m_Localized: "第4話「潜入」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000111
+    m_Localized: "HALO降下を成功させ、行政中央区へ潜入し連邦軍を打破せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000112
+    m_Localized: "第2話「復讐」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000113
+    m_Localized: "潜入メンバーの施策中、前線拠点に現れた連邦軍を殲滅せよ。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000114
+    m_Localized: "第10話「再開」"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000115
+    m_Localized: "行政区東部地区を偵察し、機密情報を窃取するため敵を打ち砕け。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000116
+    m_Localized: "人造人間計画について 1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000117
+    m_Localized: "『人造人間計画』。1967～1989年まで実施されていた強化人間製造策。0号をはじめ多くの被検体が生み出され、計画は量産型の製造着手にまで至っていた。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000118
+    m_Localized: "人造人間計画について 2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000119
+    m_Localized: "計画は良好、軍事運用まであと一歩のところまで来ていた。しかし連邦の崩壊危機により研究所は閉鎖、計画は途絶。その結果、量産型からナンバーズに至るまで、被検体はすべて処分と言う方針で決まったのだった。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000120
+    m_Localized: "ZeroDivideについて 1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000121
+    m_Localized: "『民間軍事会社ZeroDivide』。被検体１号Triadによって設立され、そのメンバーは『人造人間計画』の被検体13人で構成された傭兵集団である。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000122
+    m_Localized: "ZeroDivideについて 2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000123
+    m_Localized: "彼らの目的は『秘密結社カペリメイステル』への復讐及び壊滅、そして、人造人間である彼ら自身を人間と認めさせることであった。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000124
+    m_Localized: "カペリメイステルについて 1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000125
+    m_Localized: "『秘密結社カペリメイステル』。連邦政府の一部の高官、そしてかつての『人造人間計画』、その研究者で構成され『指揮者計画』の再現を企む秘密結社財団組織である。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000126
+    m_Localized: "カペリメイステルについて 2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000127
+    m_Localized: "軍事転用を目的とする彼らは計画復活のため、かつての被検体の捕獲を企んでいるが、未だにそれは成しえていない。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000128
+    m_Localized: "0号について 1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000129
+    m_Localized: "実験中の事故により息を引き取ってしまった被検体0号は、『人造人間計画』によって生み出された最初の被検体であり、その後に生み出される人造人間の始祖に当たる存在だった。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000130
+    m_Localized: "0号について 2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000131
+    m_Localized: "彼女は他の被検体たちからとても敬愛、信頼、尊敬、そのすべての念を向けられていた。それは亡き今もなお、それは変わらず、彼女は慕われ続けている。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000132
+    m_Localized: "13号について 1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000133
+    m_Localized: "被検体0号が死亡し、研究の衰退を危惧した研究者は、彼女の肉体的クローンを製造することを決定した。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000134
+    m_Localized: "13号について 2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000135
+    m_Localized: "初号被検体0号、そのクローンとして造られたのが製造ナンバー『被検体13号』。Symphonyであった。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000136
+    m_Localized: "孤児院について 1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000137
+    m_Localized: "ネベリスク近郊に、かつて孤児院があった。しかし、奏でられるピアノの音色、寮母と共に仲睦まじく暮らす子供たちの姿はもう、そこにはない。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000138
+    m_Localized: "孤児院について 2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000139
+    m_Localized: "開けた大地にあるのはただ、瓦礫の散らばる広い敷地に、それを眺める機械少女の背中が小さく映るだけだった。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000140
+    m_Localized: "研究所蜂起について 1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000141
+    m_Localized: "研究所閉鎖に伴い、被検体たちは処分される予定であった。それを察知した彼らは研究所閉鎖前日、一斉に武装蜂起を企てる。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000142
+    m_Localized: "研究所蜂起について 2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000143
+    m_Localized: "彼らは研究所内に立てこもり、脱出したのち、『民間軍事会社ZeroDivide』を設立する。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000144
+    m_Localized: "バイクについて 1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000145
+    m_Localized: "Symphonyは武装蜂起後、単独で東へと逃亡した。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000146
+    m_Localized: "バイクについて 2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000147
+    m_Localized: "その後孤児院に拾われた彼女は、その少女の見た目とはかけ離れた、機動二輪IZ-49に跨りその大地を駆け抜けていた。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000148
+    m_Localized: "指揮者計画について 1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000149
+    m_Localized: "『指揮者計画』。1962年、連邦政府により立案された、核戦争による汚染環境での作戦展開を可能にする兵士の開発計画。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000150
+    m_Localized: "指揮者計画について 2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000151
+    m_Localized: "当時、計画は実現することはなくとん挫した。しかし現在、『秘密結社カペリメイステル』によってその計画は再始動している。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000152
+    m_Localized: "対物ライフル"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000153
+    m_Localized: "サブマシンガン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000154
+    m_Localized: "ショットガン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000155
+    m_Localized: "ハンドガン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000156
+    m_Localized: "リボルバー"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1900000157
+    m_Localized: "ライフル"
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

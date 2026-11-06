@@ -150,7 +150,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string TIPS_LABEL_NAME = "skill-tips-label";
         private const string LEVEL_LABEL_NAME = "skill-level-label";
         private const string LEVELUP_POINT_LABEL_NAME = "skill-levelup-point-label";
-        private const string EMPTY_SELECTION_LABEL = "スキルを選択してください";
+        private const string EMPTY_SELECTION_LABEL = "キルコードを選択してください";
         private const string EMPTY_VALUE_LABEL = "—";
         private const string MAX_LEVEL_LABEL = "レベルMax";
         private const string NO_LEVELUP_COST_LABEL = "ー";

@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 namespace KillChord.Runtime.View.InGame.Haptics
 {
     /// <summary>
-    ///     ジャスト成立時にゲームパッドを短く振動させるView。
+    ///     ジャスト成立時と被弾時にゲームパッドを短く振動させるView。
     ///     Android・iOSでゲームパッド未接続時は端末を振動させる。
     /// </summary>
     public sealed class GamepadHapticsView : MonoBehaviour, IGamepadHapticsViewModel
@@ -29,33 +29,30 @@ namespace KillChord.Runtime.View.InGame.Haptics
         /// </summary>
         public void PlayJustHitPulse()
         {
-            if (_config == null || _environmentSettingsViewModel == null)
+            if (_config == null)
             {
                 Debug.LogError($"[{nameof(GamepadHapticsView)}] 振動再生に必要な設定が未設定です。", this);
                 return;
             }
 
-            float vibrationScale = Mathf.Clamp01(_environmentSettingsViewModel.VibrationScale.CurrentValue);
-            if (_config.PulseDuration <= 0f || vibrationScale <= 0f)
+            PlayPulse(_config.LowFrequencyMotorSpeed, _config.HighFrequencyMotorSpeed, _config.PulseDuration);
+        }
+
+        /// <summary>
+        ///     プレイヤーが被弾したときの振動を一度だけ再生する。
+        /// </summary>
+        public void PlayDamagePulse()
+        {
+            if (_config == null)
             {
+                Debug.LogError($"[{nameof(GamepadHapticsView)}] 振動再生に必要な設定が未設定です。", this);
                 return;
             }
 
-            Gamepad gamepad = Gamepad.current;
-            if (gamepad == null)
-            {
-#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-                // 標準APIでは強さと長さを指定できないため、端末のOS標準振動を再生する。
-                Handheld.Vibrate();
-#endif
-                return;
-            }
-
-            gamepad.SetMotorSpeeds(
-                _config.LowFrequencyMotorSpeed * vibrationScale,
-                _config.HighFrequencyMotorSpeed * vibrationScale);
-            _pulsingGamepad = gamepad;
-            _remainingPulseTime = _config.PulseDuration;
+            PlayPulse(
+                _config.DamageLowFrequencyMotorSpeed,
+                _config.DamageHighFrequencyMotorSpeed,
+                _config.DamagePulseDuration);
         }
 
         private GamepadHapticsConfig _config;
@@ -101,6 +98,41 @@ namespace KillChord.Runtime.View.InGame.Haptics
             }
 
             _pulsingGamepad = null;
+        }
+
+        /// <summary>
+        ///     設定の振動強度をかけて、指定した強さと長さで一度だけ振動させる。
+        /// </summary>
+        /// <param name="lowFrequency"> 低周波モーターの強さ（0〜1）。 </param>
+        /// <param name="highFrequency"> 高周波モーターの強さ（0〜1）。 </param>
+        /// <param name="duration"> 振動の長さ（秒）。 </param>
+        private void PlayPulse(float lowFrequency, float highFrequency, float duration)
+        {
+            if (_environmentSettingsViewModel == null)
+            {
+                Debug.LogError($"[{nameof(GamepadHapticsView)}] 振動再生に必要な設定が未設定です。", this);
+                return;
+            }
+
+            float vibrationScale = Mathf.Clamp01(_environmentSettingsViewModel.VibrationScale.CurrentValue);
+            if (duration <= 0f || vibrationScale <= 0f)
+            {
+                return;
+            }
+
+            Gamepad gamepad = Gamepad.current;
+            if (gamepad == null)
+            {
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
+                // 標準APIでは強さと長さを指定できないため、端末のOS標準振動を再生する。
+                Handheld.Vibrate();
+#endif
+                return;
+            }
+
+            gamepad.SetMotorSpeeds(lowFrequency * vibrationScale, highFrequency * vibrationScale);
+            _pulsingGamepad = gamepad;
+            _remainingPulseTime = duration;
         }
     }
 }

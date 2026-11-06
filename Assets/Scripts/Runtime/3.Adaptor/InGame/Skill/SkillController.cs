@@ -64,9 +64,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         /// <param name="unscaledTime"> クールダウンやUI表示に使う、ゲーム側の現在時刻です。 </param>
         /// <param name="musicTime"> リズム入力履歴に記録する、音楽の再生時間です。 </param>
         /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうか。 </param>
+        /// <param name="recoveryBeats"> 発動したスキルの攻撃硬直（拍数）です。複数発動したときは最も長いもの、発動しなかったときはnullです。 </param>
         /// <returns> スキル発動の結果、通常攻撃のダメージを適用するかどうかのポリシーです。 </returns>
-        public SkillNormalAttackDamagePolicy TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime, float musicTime, bool isJustHit, bool canUseSkill)
+        public SkillNormalAttackDamagePolicy TryExecuteSkill(BattleActionType actionType, BeatType beatType, float unscaledTime, float musicTime, bool isJustHit, bool canUseSkill, out AttackRecoveryBeats? recoveryBeats)
         {
+            recoveryBeats = null;
             _musicSyncService.RegisterBattleActionHistory(actionType, beatType);
             SkillNormalAttackDamagePolicy normalAttackDamagePolicy =
                 SkillNormalAttackDamagePolicy.Apply;
@@ -85,6 +87,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                     OnSkillAnimationRequested?.Invoke(result.AnimationKey);
                     OnSkillVoiceRequested?.Invoke();
                     OnSkillWeaponRequested?.Invoke(result.WeaponBeatType);
+
+                    // 同じ入力で複数のスキルが発動した場合は、最も長い硬直を使う。
+                    if (!recoveryBeats.HasValue || result.RecoveryBeats.Value > recoveryBeats.Value.Value)
+                    {
+                        recoveryBeats = result.RecoveryBeats;
+                    }
 
                     if (result.SkillNormalAttackDamagePolicy == SkillNormalAttackDamagePolicy.Skip)
                     {

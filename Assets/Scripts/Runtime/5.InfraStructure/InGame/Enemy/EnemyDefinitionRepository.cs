@@ -58,6 +58,13 @@ namespace KillChord.Runtime.InfraStructure.InGame.Enemy
         {
             id = entry.Id;
             value = entry;
+
+            // ボスはシーンに配置したボスを使うため、IDだけで登録する。
+            if (id.Value != 0 && entry.EnemyType == EnemyType.Boss)
+            {
+                return true;
+            }
+
             if (id.Value != 0
                 && entry.ViewPrefab != null
                 && entry.CharacterDefinition != null

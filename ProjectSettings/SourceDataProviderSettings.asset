@@ -23,7 +23,6 @@ MonoBehaviour:
   - _addressableKey: EnemyWaveDefinitionRepository
   - _addressableKey: PlayerConfig
   - _addressableKey: SkillInputProgressViewConfigAsset
-  - _addressableKey: TestSkillData1
   - _addressableKey: OwnedSkillRepository
   - _addressableKey: TitleScreenRuleData
   - _addressableKey: ExampleBattleMusicData
@@ -31,8 +30,8 @@ MonoBehaviour:
   - _addressableKey: Player
   - _addressableKey: RhythmJudgmentDefinitionAsset
   - _addressableKey: ExampleEnemyMoveData
+  - _addressableKey: InfantryEnemyMoveData
   - _addressableKey: ShellAttackData
-  - _addressableKey: TestSkillData2
   - _addressableKey: ScenarioSettingsAsset
   - _addressableKey: OwnedSkillRepositoryDebug
   - _addressableKey: ExampleEncountMusicData
@@ -41,14 +40,12 @@ MonoBehaviour:
   - _addressableKey: ShellMusicData
   - _addressableKey: SkillBuildRepositoryDebug
   - _addressableKey: OutGameScreenRuleData
-  - _addressableKey: SkillTreeTestInputData
   - _addressableKey: CameraConfig
   - _addressableKey: EnemyMissionKeyRepository
   - _addressableKey: CharacterDefinitionRepository
   - _addressableKey: SkillInputProgressUIConfig
   - _addressableKey: InitialSkillLoadout
   - _addressableKey: MissionDefinitionRepository
-  - _addressableKey: MobileStickFlickInput
   - _addressableKey: MobileStickFlickInputConfig
   - _addressableKey: EnemyDefinitionRepository
   - _addressableKey: EnemyDirectionIndicatorConfig
@@ -58,20 +55,15 @@ MonoBehaviour:
   - _addressableKey: SkillGenreIconCatalogAsset
   - _addressableKey: LoadingTipsConfig
   - _addressableKey: BgmSelectorLabelTableAsset
-  - _addressableKey: Assets/Level/Data/Master/OutGame/StageSelect/Stream_StageTreeAsset.asset
   - _addressableKey: GameResourceDefinitionRepository
   - _addressableKey: GamepadHapticsConfig
   - _addressableKey: TutorialSubtitles_en
   - _addressableKey: English
   - _addressableKey: Japanese
-  - _addressableKey: TutorialPopupImages_ja
-  - _addressableKey: TutorialPopupImages_en
   - _addressableKey: TutorialSubtitles_ja
-  - _addressableKey: TutorialPopupImages Shared Data
   - _addressableKey: TutorialSubtitles Shared Data
   - _addressableKey: UICommon_en
   - _addressableKey: UICommon_ja
-  - _addressableKey: Assets/Localization/Tables/UICommon Shared Data.asset
   - _addressableKey: UICommon Shared Data
   - _addressableKey: EnemyDefeatedShakeConfig
   - _addressableKey: PlayerAttackAnimationConfig
@@ -84,6 +76,7 @@ MonoBehaviour:
   - _addressableKey: ACLikeRhythmGuideEffectConfig
   - _addressableKey: DemoEndSequenceConfig
   - _addressableKey: SkillExecutedShakeConfig
+  - _addressableKey: StageEffectCatalogAsset
   _sourceCollectionMappings:
   - _collectionKey: StageAsset
     _dataAssetAddressableKey: StageTreeAsset
@@ -175,6 +168,10 @@ MonoBehaviour:
     _assetCreationDirectory: 
   - _collectionKey: SkillGenreIcon
     _dataAssetAddressableKey: SkillGenreIconCatalogAsset
+    _propertyPath: _entries
+    _assetCreationDirectory: 
+  - _collectionKey: StageEffect
+    _dataAssetAddressableKey: StageEffectCatalogAsset
     _propertyPath: _entries
     _assetCreationDirectory: 
   _repositoryMappings:

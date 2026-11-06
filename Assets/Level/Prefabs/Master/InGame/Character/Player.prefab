@@ -482,9 +482,9 @@ MonoBehaviour:
   _voiceSource: {fileID: 795784838904872616}
   _damageVoiceCueName: VOICE_Damage_Light
   _stageStartVoiceCueName: VOICE_Battlestart
-  _stageClearVoiceCueNamePerfect: 
-  _stageClearVoiceCueNameGood: 
-  _stageClearVoiceCueNameBad: 
+  _stageClearVoiceCueNamePerfect: VOICE_Symphony_Gameclear1
+  _stageClearVoiceCueNameGood: VOICE_Symphony_Gameclear2
+  _stageClearVoiceCueNameBad: VOICE_Symphony_Gameclear3
   _gameOverVoiceCueName: 
   _skillVoiceCueName: VOICE_Skill
   _damageSoundSource: {fileID: 7161724074417242993}

@@ -59,7 +59,6 @@ This software uses "CRIWARE (TM)" by CRI Middleware Co., Ltd.
 | R3 | Copyright (c) 2024 Cysharp, Inc. | https://github.com/Cysharp/R3 |
 | ZLinq | Copyright (c) Yoshifumi Kawai, Copyright (c) Cysharp, Inc. | https://github.com/Cysharp/ZLinq |
 | ZString | Copyright (c) 2020 Cysharp, Inc. | https://github.com/Cysharp/ZString |
-| ObservableCollections | Copyright (c) 2021 Cysharp, Inc. | https://github.com/Cysharp/ObservableCollections |
 | BitonicPixelSorter | Copyright (c) 2020 ruccho | https://github.com/ruccho/BitonicPixelSorter |
 | UnityChanSpringBone | Copyright (c) 2018 Unity Technologies | https://github.com/unity3d-jp/UnityChanSpringBone |
 | Microsoft.Bcl.AsyncInterfaces、Microsoft.Bcl.TimeProvider、System.ComponentModel.Annotations、System.Runtime.CompilerServices.Unsafe、System.Threading.Channels（R3 の依存） | Copyright (c) .NET Foundation and Contributors | https://github.com/dotnet/runtime |

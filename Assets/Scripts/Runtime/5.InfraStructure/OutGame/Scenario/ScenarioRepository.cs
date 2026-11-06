@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using UnityEngine.Networking;
 
@@ -537,7 +538,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Scenario
             while (!operation.isDone)
             {
                 ct.ThrowIfCancellationRequested();
-                await Task.Yield();
+                await UniTask.Yield();
             }
 
             if (request.result != UnityWebRequest.Result.Success)

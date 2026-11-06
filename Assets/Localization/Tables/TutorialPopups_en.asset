@@ -58,7 +58,7 @@ MonoBehaviour:
       m_Items:
       - rid: 6106260330607018183
   - m_Id: 1648918530
-    m_Localized: Kill Chord (Skill)
+    m_Localized: "Kill Chord"
     m_Metadata:
       m_Items: []
   - m_Id: 1648918531

@@ -93,6 +93,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
 
         /// <summary> 敵が攻撃中か。 </summary>
         public bool IsAttacking => _enemyAttackReservationUsecase.HasReservation;
+        /// <summary>
+        ///     予約中の攻撃の予兆（攻撃ライン・予兆音）が始まり、射程外でも最後まで攻撃するか。
+        /// </summary>
+        public bool IsAttackCommitted => _enemyAttackReservationUsecase.HasWarningStarted;
         /// <summary> 直近に取得した自身の位置。 </summary>
         public Vector3 CurrentPosition => _lastKnownPosition;
         /// <summary> 敵の基本移動速度。 </summary>
@@ -136,10 +140,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Enemy
                 {
                     DevLog.Log("[EnemyAIController] 攻撃範囲を出た");
                     _enemyBattleState.ExitRange();
-                    // 射程外に出た場合、予約中の攻撃(音楽ビート待ち)も合わせてキャンセルする。
-                    // これを行わないと、範囲表示もダメージも伴わない攻撃モーション・SEだけが
-                    // 後から発火してしまう。
-                    CancelAttack();
+                    // 予兆の前（攻撃準備中）に射程外へ出た場合だけ、予約中の攻撃をキャンセルする。
+                    // 予兆が出た後は、射程外でも攻撃を最後まで行う。
+                    if (!IsAttackCommitted)
+                    {
+                        CancelAttack();
+                    }
                 }
             }
             else

@@ -9,5 +9,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Haptics
         ///     ジャスト成立時の振動を一度だけ再生する。
         /// </summary>
         void PlayJustHitPulse();
+
+        /// <summary>
+        ///     プレイヤーが被弾したときの振動を一度だけ再生する。
+        /// </summary>
+        void PlayDamagePulse();
     }
 }

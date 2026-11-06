@@ -253,6 +253,72 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
+        ///     画面上で現在の対象から指定方向にいる敵のうち、画面中心に最も近い敵への切り替えを試みる。
+        ///     候補はロックオン時と同じく視界範囲内の敵に限る。スマホの強い視点操作による切り替えに使う。
+        /// </summary>
+        /// <param name="screenDirection"> 画面上の方向。右と上を正とする。 </param>
+        /// <param name="worldToViewport"> ワールド座標をビューポート座標（z はカメラからの奥行き）へ変換する処理。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。その方向に敵がいない場合はfalse。 </returns>
+        public bool TrySwitchTargetInScreenDirection(in Vector2 screenDirection, Func<Vector3, Vector3> worldToViewport)
+        {
+            if (worldToViewport == null || screenDirection.sqrMagnitude <= float.Epsilon)
+            {
+                return false;
+            }
+
+            // 方向の基準は現在の対象の画面位置。カメラの後ろなどで取れない場合は画面中心にする。
+            Vector2 origin = VIEWPORT_CENTER;
+            if (IsSelectableTarget(_currentTarget))
+            {
+                Vector3 currentViewport = worldToViewport.Invoke(_currentTarget.Position);
+                if (currentViewport.z > 0f)
+                {
+                    origin = currentViewport;
+                }
+            }
+
+            ITargetableViewModel bestTarget = null;
+            float bestSqrDistance = float.PositiveInfinity;
+            foreach (ITargetableViewModel targetable in _targets)
+            {
+                if (!IsLockOnCandidate(targetable, _currentTarget))
+                {
+                    continue;
+                }
+
+                // カメラの後ろにいる敵は画面上の位置が反転するため外す。
+                Vector3 viewport = worldToViewport.Invoke(targetable.Position);
+                if (viewport.z <= 0f)
+                {
+                    continue;
+                }
+
+                // 操作した向きと反対側（または真横より後ろ側）にいる敵は外す。
+                Vector2 screenPosition = viewport;
+                if (Vector2.Dot(screenPosition - origin, screenDirection) <= 0f)
+                {
+                    continue;
+                }
+
+                float sqrDistance = (screenPosition - VIEWPORT_CENTER).sqrMagnitude;
+                if (sqrDistance < bestSqrDistance)
+                {
+                    bestSqrDistance = sqrDistance;
+                    bestTarget = targetable;
+                }
+            }
+
+            if (bestTarget == null)
+            {
+                return false;
+            }
+
+            SetCurrentTarget(bestTarget);
+            _currentCandidate = null;
+            return true;
+        }
+
+        /// <summary>
         ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
         /// </summary>
         /// <param name="targetId"> 設定対象のターゲットID。 </param>
@@ -314,6 +380,9 @@ namespace KillChord.Runtime.View.InGame.Target
                 EventBus<EOnLockOnAcquired>.Raise(new EOnLockOnAcquired());
             }
         }
+
+        /// <summary> ビューポート座標での画面中心。 </summary>
+        private static readonly Vector2 VIEWPORT_CENTER = new(0.5f, 0.5f);
 
         /// <summary> NormalizeDot で使用するゼロ除算回避の下限閾値。 </summary>
         private const float NORMALIZE_DOT_EPSILON = 1E-15f;

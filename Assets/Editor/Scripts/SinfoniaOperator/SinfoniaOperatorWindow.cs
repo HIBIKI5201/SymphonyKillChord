@@ -306,6 +306,9 @@ namespace KillChord.Editor.SinfoniaOperator
             string secretsPath = ResolveConfigPath(
                 settings.SecretsConfigJsonPath,
                 SinfoniaOperatorSettings.DEFAULT_SECRETS_CONFIG_JSON_PATH);
+            string legacySecretsPath = ResolveConfigPath(
+                SinfoniaOperatorSettings.LEGACY_SECRETS_CONFIG_JSON_PATH,
+                SinfoniaOperatorSettings.LEGACY_SECRETS_CONFIG_JSON_PATH);
             string legacyPath = ResolveConfigPath(
                 SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH,
                 SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH);
@@ -327,8 +330,17 @@ namespace KillChord.Editor.SinfoniaOperator
                 return false;
             }
 
-            // 秘密設定を読み込む。見つからない場合は旧設定からトークンだけを読み込む。
+            // 秘密設定を読み込む。見つからない場合は、共通ファイルへ移す前の秘密設定、
+            // 分割前の旧設定（トークンだけ）の順に読み込む。
             if (OperatorConfig.LoadJsonFile(secretsPath)) { return true; }
+
+            if (secretsPath != legacySecretsPath && OperatorConfig.LoadJsonFile(legacySecretsPath))
+            {
+                Debug.LogWarning($"[{nameof(SinfoniaOperatorWindow)}] 移行前の秘密設定ファイルを読み込みました: {legacySecretsPath}\n" +
+                    $"{SinfoniaOperatorSettings.DEFAULT_SECRETS_CONFIG_JSON_PATH}へ移動してください。" +
+                    "移動すると、SinfoniaOperatorの各CLIとUnityのエディタツールが同じファイルを使います。");
+                return true;
+            }
 
             if (OperatorConfig.LoadJsonFile(
                     legacyPath,
@@ -341,7 +353,8 @@ namespace KillChord.Editor.SinfoniaOperator
             }
 
             Debug.LogError($"[{nameof(SinfoniaOperatorWindow)}] 秘密JSON設定ファイルが見つかりません: {secretsPath}\n" +
-                "sinfonia-operator.secrets.sample.jsonをコピーし、NotionとDiscordのトークンを設定してください。");
+                "SinfoniaOperator/secrets.sample.jsonをUserSettings/KillChord/secrets.jsonとしてコピーし、" +
+                "NotionとDiscordのトークンを設定してください。");
             _statusLabel.text = "秘密設定が見つかりません";
             return false;
         }
@@ -358,6 +371,13 @@ namespace KillChord.Editor.SinfoniaOperator
             string path = string.IsNullOrWhiteSpace(configuredPath) ? defaultPath : configuredPath;
             if (path == SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH &&
                 defaultPath != SinfoniaOperatorSettings.LEGACY_CONFIG_JSON_PATH)
+            {
+                path = defaultPath;
+            }
+
+            // 既定パスを変える前の設定が保存されている場合は、新しい既定パスに読み替える。
+            if (path == SinfoniaOperatorSettings.LEGACY_SECRETS_CONFIG_JSON_PATH &&
+                defaultPath == SinfoniaOperatorSettings.DEFAULT_SECRETS_CONFIG_JSON_PATH)
             {
                 path = defaultPath;
             }

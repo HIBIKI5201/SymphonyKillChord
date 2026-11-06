@@ -1,8 +1,10 @@
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -71,8 +73,13 @@ namespace KillChord.Runtime.InfraStructure.Player
         {
             return new SkillTemplate(
                 Id, _pattern, _skillType, Level, _cooldownNumerator, _cooldownDenomimator,
-                EffectSpec, EffectParameterGrowths, _levelUpCosts, _animationKey, _displayName, _skillDetail, _tips, _icon, _effectDisplayMode);
+                EffectSpec, EffectParameterGrowths, _levelUpCosts, _animationKey,
+                MasterTextLocalizer.Localize(_displayName), MasterTextLocalizer.Localize(_skillDetail), MasterTextLocalizer.Localize(_tips), _icon, _effectDisplayMode,
+                new AttackRecoveryBeats(_recoveryBeats));
         }
+
+        /// <summary> スキルの攻撃硬直の既定値（拍数）。設定していないスキルはこの値を使う。 </summary>
+        private const float DEFAULT_RECOVERY_BEATS = 0.5f;
 
         private const string EFFECT_PARAMETER_PLACEHOLDER_PATTERN = "\\{([^{}]+)\\}";
         private const int PLACEHOLDER_ID_GROUP = 1;
@@ -131,6 +138,9 @@ namespace KillChord.Runtime.InfraStructure.Player
 
         [SerializeField, Tooltip("スキル発動時に再生するアニメーションキー。空なら通常攻撃アニメーションを使う。")]
         private string _animationKey;
+
+        [SerializeField, Min(0f), Tooltip("スキル発動時の攻撃硬直（拍数）。通常攻撃の硬直の代わりに使い、この間は移動・攻撃できない。")]
+        private float _recoveryBeats = DEFAULT_RECOVERY_BEATS;
 
         /// <summary>
         ///     Inspector 設定からドメイン用パラメータ一覧を構築します。

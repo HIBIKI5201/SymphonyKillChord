@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.Persistent.Localization;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Mission
@@ -18,7 +19,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         /// <summary> 敵のミッションキーを取得します。 </summary>
         public EnemyMissionKey Id => new EnemyMissionKey(_id.Id);
         /// <summary> 表示名を取得します。 </summary>
-        public string DisplayName => _displayName;
+        public string DisplayName => MasterTextLocalizer.Localize(_displayName);
 
         [SerializeField, SourceDataCollection("EnemyMissionKey"), Tooltip("敵を識別するためのユニークなID。")] private DataID _id;
         [SerializeField, Tooltip("ミッションHUD等に表示される敵の名称。")] private string _displayName;

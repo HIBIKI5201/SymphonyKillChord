@@ -94,6 +94,18 @@ namespace KillChord.Runtime.View
             // MixerでのウェイトはView側でフェードする想定なのでここでは再生位置のみリセットする
         }
 
+        /// <summary>
+        ///     指定インデックスのクリップの再生位置を設定する。
+        ///     曲の途中で生成したキャラクターのロコモーションを拍に合わせるときに使う。
+        /// </summary>
+        /// <param name="index"> クリップのインデックス。 </param>
+        /// <param name="time"> クリップ内の再生位置（秒）。 </param>
+        public void SetClipTime(int index, double time)
+        {
+            if (index < 0 || index >= _playables.Count || !_playables[index].IsValid()) return;
+            _playables[index].SetTime(time);
+        }
+
         // 生のクリップ長（秒）を返す
         /// <summary>
         ///     指定インデックスのクリップの長さを返す。範囲外や未設定の場合は 0 を返す。

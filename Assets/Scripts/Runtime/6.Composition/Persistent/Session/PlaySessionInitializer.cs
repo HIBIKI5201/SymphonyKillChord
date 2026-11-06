@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
@@ -329,6 +330,13 @@ namespace KillChord.Runtime.Composition.Persistent.Session
         private void RecordCurrentScreen()
         {
             if (_sessionData == null)
+            {
+                return;
+            }
+
+            // 保存を止める状態が登録されている間は、再開地点を書き換えない。
+            if (ServiceLocator.TryGetInstance(out ISaveSuppression saveSuppression)
+                && saveSuppression.IsSaveSuppressed)
             {
                 return;
             }

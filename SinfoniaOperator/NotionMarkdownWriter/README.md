@@ -33,7 +33,7 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 }
 ```
 
-`NOTION_TOKEN`は`sinfonia-operator.secrets.json`または環境変数から読み取ります。
+`NOTION_TOKEN`は秘密設定`UserSettings/KillChord/secrets.json`または環境変数から読み取ります。旧パス`SinfoniaOperator/sinfonia-operator.secrets.json`も移行期間中は読み込みますが、読み込んだときは移行を促すログを出します。
 この公開設定はGitで共有されるため、許可ページの追加はレビュー対象になります。
 
 ## 使い方
@@ -65,6 +65,10 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 データベースへ行を追加するときは、`--set`でタイトルを含むプロパティを指定します。
 `select`・`status`・`multi_select`などは、選択肢の名前を完全一致で書きます。
 本文の先頭の見出しが`--set`のタイトルと同じ場合は、本文から取り除かれます。違う見出しは本文として残ります。
+`people`（担当者など）は、カンマ区切りのNotionの表示名かユーザーIDで書きます。名前は空白の有無を無視して照合し、
+インテグレーションから見えるユーザー（`GET /users`）の中から探します。
+
+タスク・議事録・仕様検討フォーラムの行は、JSONから`scripts/notion/apply_entry.py`で作れます（`.claude/skills/skc-notion-entry`）。
 
 ```powershell
 ./NotionMarkdownWriter.exe create row.md --parent "<データベースのURL|ID>" --set "名前=ページ名" --set "ステータス=検討中" --confirm

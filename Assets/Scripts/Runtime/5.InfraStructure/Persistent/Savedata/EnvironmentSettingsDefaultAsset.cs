@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
 {
@@ -23,8 +24,18 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
         /// <summary> 初回起動時にフルスクリーンにするかどうか。 </summary>
         public bool IsFullScreen => _isFullScreen;
 
-        /// <summary> 初回起動時に適用する画質プリセットのレベル。 </summary>
-        public int QualityLevel => _qualityLevel;
+        /// <summary> 初回起動時に適用する画質プリセットのレベル。実行中のプラットフォームに応じてPC用とモバイル用を切り替える。 </summary>
+        public int QualityLevel
+        {
+            get
+            {
+#if UNITY_ANDROID || UNITY_IOS
+                return _mobileQualityLevel;
+#else
+                return _pcQualityLevel;
+#endif
+            }
+        }
 
         /// <summary> 初回起動時に適用する画面の明るさ。 </summary>
         public int Brightness => _brightness;
@@ -59,7 +70,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 _resolutionWidth,
                 _resolutionHeight,
                 _isFullScreen,
-                _qualityLevel,
+                QualityLevel,
                 _brightness,
                 _language,
                 _vibrationStrength,
@@ -70,6 +81,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 _isJapaneseButtonLayout);
         }
 
+        private const int DEFAULT_PC_QUALITY_LEVEL = 5;
+        private const int DEFAULT_MOBILE_QUALITY_LEVEL = 2;
+
         [SerializeField, Tooltip("初回起動時に適用する解像度の幅")]
         private int _resolutionWidth = EnvironmentSettingsData.DEFAULT_RESOLUTION_WIDTH;
 
@@ -79,8 +93,11 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
         [SerializeField, Tooltip("初回起動時にフルスクリーンにするかどうか")]
         private bool _isFullScreen = EnvironmentSettingsData.DEFAULT_IS_FULL_SCREEN;
 
-        [SerializeField, Tooltip("初回起動時に適用する画質プリセットのレベル")]
-        private int _qualityLevel = EnvironmentSettingsData.DEFAULT_QUALITY_LEVEL;
+        [SerializeField, FormerlySerializedAs("_qualityLevel"), Tooltip("初回起動時に適用するPC向けの画質プリセットのレベル")]
+        private int _pcQualityLevel = DEFAULT_PC_QUALITY_LEVEL;
+
+        [SerializeField, Tooltip("初回起動時に適用するモバイル（Android・iOS）向けの画質プリセットのレベル")]
+        private int _mobileQualityLevel = DEFAULT_MOBILE_QUALITY_LEVEL;
 
         [SerializeField, Tooltip("初回起動時に適用する画面の明るさ（0～10）")]
         private int _brightness = EnvironmentSettingsData.DEFAULT_BRIGHTNESS;

@@ -35,6 +35,21 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> ジャストタイミング成立時のフラッシュイージング。 </summary>
         public Ease FlashEase => _flashEase;
 
+        /// <summary> ジャスト成立時に枠線が最初に光る色。 </summary>
+        public Color JustHitFlashStartColor => _justHitFlashStartColor;
+
+        /// <summary> ジャスト成立時に枠線が白から移る金色。 </summary>
+        public Color JustHitFlashEndColor => _justHitFlashEndColor;
+
+        /// <summary> ジャスト成立時に白から金へ移る時間。 </summary>
+        public float JustHitFlashDuration => _justHitFlashDuration;
+
+        /// <summary> ジャスト成立時に金から通常の枠線色へ戻る時間。 </summary>
+        public float JustHitFlashReturnDuration => _justHitFlashReturnDuration;
+
+        /// <summary> ジャスト成立時に枠線の帯を一瞬広げる倍率。 </summary>
+        public float JustHitFlashScale => _justHitFlashScale;
+
         /// <summary> 通常タイミングの縮小イージング。 </summary>
         public Ease NormalTimingEase => _normalTimingEase;
 
@@ -93,6 +108,22 @@ namespace KillChord.Runtime.View.InGame.Music
 
         [SerializeField, Tooltip("ジャストタイミング成立時のフラッシュイージング。")]
         private Ease _flashEase = Ease.OutQuad;
+
+        [Header("ジャスト成立時の枠線フラッシュ")]
+        [SerializeField, Tooltip("ジャスト成立時に、成立した拍のジャスト位置の枠線が最初に光る色。判定ゾーンの色と分けるため白にする。")]
+        private Color _justHitFlashStartColor = Color.white;
+
+        [SerializeField, Tooltip("ジャスト成立時に、枠線が白から移る金色。")]
+        private Color _justHitFlashEndColor = new Color(1f, 0.78f, 0.2f, 1f);
+
+        [SerializeField, Min(0.01f), Tooltip("ジャスト成立時に白から金へ移る時間（秒）。")]
+        private float _justHitFlashDuration = 0.08f;
+
+        [SerializeField, Min(0.01f), Tooltip("ジャスト成立時に金から通常の枠線色へ戻る時間（秒）。")]
+        private float _justHitFlashReturnDuration = 0.25f;
+
+        [SerializeField, Min(1f), Tooltip("ジャスト成立時に枠線の帯を一瞬広げる倍率。色の変化が見えにくい人にも形で伝える。")]
+        private float _justHitFlashScale = 1.4f;
 
         [Header("モーション")]
         [SerializeField, Tooltip("通常タイミングの縮小イージング。")]

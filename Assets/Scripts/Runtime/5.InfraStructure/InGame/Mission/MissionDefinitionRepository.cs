@@ -1,6 +1,7 @@
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.InfraStructure.Repository;
+using KillChord.Runtime.View.Persistent.Localization;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,7 +39,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Mission
         {
             if (TryFind(missionId, out MissionDefinitionAsset asset))
             {
-                mainMissionText = asset.MainMissionText;
+                mainMissionText = MasterTextLocalizer.Localize(asset.MainMissionText);
                 evaluationDescriptions = asset.GetEvaluationDescriptions();
                 evaluationIds = asset.GetEvaluationIds();
                 return true;

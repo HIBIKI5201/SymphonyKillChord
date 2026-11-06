@@ -17,6 +17,12 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         ValueTask<EnvironmentSettingsData> LoadAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
+        ///     初回起動時と同じ既定値の環境設定を作成する。
+        /// </summary>
+        /// <returns> 既定値の環境設定。 </returns>
+        EnvironmentSettingsData CreateDefaultSettings();
+
+        /// <summary>
         ///     指定した環境設定を保存する。
         /// </summary>
         /// <param name="environmentSettings"> 保存する環境設定。 </param>

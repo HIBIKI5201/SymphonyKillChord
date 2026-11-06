@@ -1,3 +1,4 @@
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Constant;
 using System;
@@ -30,12 +31,15 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary> スキル発動時に再生するアニメーションのキー。空なら通常攻撃アニメーションを使う。 </summary>
         public string AnimationKey { get; }
 
+        /// <summary> スキル発動時の攻撃硬直（拍数）。通常攻撃の硬直の代わりに使う。 </summary>
+        public AttackRecoveryBeats RecoveryBeats { get; }
+
         private const int MIN_PATTERN_LENGTH = 1;
 
         /// <summary>
         ///     コンストラクタ。ID・パターン・効果を指定して初期化する。
         /// </summary>
-        public SkillDefinition(SkillId id, SkillPattern skillPattern, SkillType[] type, SkillLevel level, double cooldownBarRatio, SkillEffectSpec effectSpec, double bpm, string animationKey)
+        public SkillDefinition(SkillId id, SkillPattern skillPattern, SkillType[] type, SkillLevel level, double cooldownBarRatio, SkillEffectSpec effectSpec, double bpm, string animationKey, AttackRecoveryBeats recoveryBeats)
         {
             if (!double.IsFinite(bpm) || bpm <= 0d)
             {
@@ -53,6 +57,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
             Level = level;
             EffectSpec = effectSpec;
             AnimationKey = animationKey;
+            RecoveryBeats = recoveryBeats;
             CooldownTime = new SkillCooldownTime(CalcCooldownTime(cooldownBarRatio, bpm));
         }
 

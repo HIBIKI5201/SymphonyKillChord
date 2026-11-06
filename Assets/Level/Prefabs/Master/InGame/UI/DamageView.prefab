@@ -163,7 +163,7 @@ MonoBehaviour:
     _fontMaterial: {fileID: 2140474, guid: 8a89fa14b10d46a99122fd4f73fca9a2, type: 2}
     _backGroundSprite: {fileID: 0}
   - _type: 3
-    _textColor: {r: 0.5698112, g: 0, b: 0.048491035, a: 1}
+    _textColor: {r: 1, g: 0.8, b: 0.1, a: 1}
     _fontMaterial: {fileID: 2100000, guid: 36c5fe8750bc4c545898f06eaed11b00, type: 2}
     _backGroundSprite: {fileID: 0}
   _exitType: 2

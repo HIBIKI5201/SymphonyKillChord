@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
@@ -52,7 +53,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
                     }
                 }
                 // 使える生成位置がない場合、一定時間待って再探索する
-                await Task.Delay(_searchDelay, cancellationToken);
+                await UniTask.Delay(_searchDelay, DelayType.Realtime, cancellationToken: cancellationToken);
                 loopCnt++;
             }
             // 一定回数探索しても生成位置が見つからない場合、候補内かつ距離条件を満たす既定位置に限り使用する
