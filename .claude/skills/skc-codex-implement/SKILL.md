@@ -29,6 +29,7 @@ Codex を呼ぶ前に、Claude が責任を持って設計する。
 - リポジトリ規約を必ず確認する（[AGENTS.md](../../../AGENTS.md) 参照）
   - `Assets/Scripts/DesignPhilosophy.md`
   - `Assets/Scripts/CodeGuidelines.md`
+  - 食い違いを確かめるときは Notion「コード規定」（page id `2a87c2c6-cc02-80f9-a10a-f0b72b95fbb3`）・「設計思想」（page id `31c7c2c6-cc02-80f3-92c0-e6929d962476`）の写しを `python scripts/notion/spec_query.py get <page id>` で読む（[読む手順](../../../Docs/agent/README.md#必要な資料だけを読む)）
 - 変更対象ファイル・公開 API・依存関係を確定する
 
 そのうえで **Codex 用プロンプト**を書く。Codex は会話履歴を持たないので、

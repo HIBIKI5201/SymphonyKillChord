@@ -15,6 +15,10 @@
   python scripts/notion/spec_query.py search --category バトルパート --parent プレイヤー
   python scripts/notion/spec_query.py get 回避アクション --rationale --status
   python scripts/notion/spec_query.py get 33a7c2c6cc028053a4fbf138ffac7b74 --json
+  python scripts/notion/spec_query.py path 3567c2c6-cc02-80d1-bd4e-e6dea0d41181
+
+path はマニフェスト（.notion-export-manifest.json）でページ・データベースのIDからミラー内のパスを引く（#1955）。
+スキルにはパスではなくIDを書き、読むときにこれでパスを引く。
 """
 import argparse
 import json
@@ -370,6 +374,22 @@ def clean_cell(cell):
     return re.sub(r"\s*\n\s*", "<br>", cell.strip()).replace("|", "\\|")
 
 
+MANIFEST = ".notion-export-manifest.json"
+
+
+def manifest_path(source, target):
+    """マニフェストの Pages[]・Databases[] で、ページID・データベースIDから書き出したファイルのパスを引く。"""
+    page_id = extract_page_id(target)
+    manifest_file = source / MANIFEST
+    if not page_id or not manifest_file.is_file():
+        return ""
+    manifest = json.loads(manifest_file.read_text(encoding="utf-8-sig"))
+    for entry in manifest.get("Pages", []) + manifest.get("Databases", []):
+        if entry.get("Id", "").replace("-", "").lower() == page_id:
+            return entry.get("File", "")
+    return ""
+
+
 def resolve_target(catalog, target):
     """ID・URL・パス・タイトルのどれかで1ページに決める。タイトルが重なれば候補を返す。"""
     page_id = extract_page_id(target)
@@ -504,6 +524,9 @@ def build_parser():
     get_parser.add_argument("target", help="ページID・Notion URL・パス・タイトル")
     get_parser.add_argument("--rationale", action="store_true", help="仕様意図（経緯・却下・保留した案）も返す")
     get_parser.add_argument("--status", action="store_true", help="実装リストの実装状態も返す")
+
+    path_parser = commands.add_parser("path", help="ページID・データベースIDからミラー内のパスを引く")
+    path_parser.add_argument("target", help="ページID・データベースID・Notion URL")
     return parser
 
 
@@ -513,6 +536,13 @@ def main(argv=None):
     if not source.is_dir():
         print(f"仕様書のディレクトリが見つかりません: {args.source}", file=sys.stderr)
         return 1
+    if args.command == "path":
+        path = manifest_path(source, args.target)
+        if not path:
+            print(f"{MANIFEST} にこのIDがありません。ページが消えたか、ミラーが古い可能性があります。", file=sys.stderr)
+            return 2
+        print(json.dumps({"path": path}, ensure_ascii=False) if args.json else path)
+        return 0
     catalog = load_catalog(source)
     if not catalog.from_file:
         print(f"{CATALOG_JSONL} が無いため、目録をその場で作りました。", file=sys.stderr)

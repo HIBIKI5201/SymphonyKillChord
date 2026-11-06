@@ -1,5 +1,6 @@
 """Validate the repository's lightweight agent entrypoints without external dependencies."""
 from pathlib import Path
+import json
 import re
 import sys
 import unicodedata
@@ -20,6 +21,9 @@ LINKED = [
     ".claude/skills/skc-feature-flow/SKILL.md",
     ".claude/skills/skc-code-guideline-check/SKILL.md",
 ]
+
+NOTION_MAP = "SinfoniaOperator/notion-cache-map.json"
+UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 
 
 def heading_anchor(heading):
@@ -63,6 +67,7 @@ def validate(root):
                                       destination.read_text(encoding="utf-8-sig"), re.M)
                 if fragment not in {heading_anchor(h) for h in headings}:
                     errors.append(f"broken heading link: {path.relative_to(root)} -> {target}#{fragment}")
+    errors.extend(validate_notion_map(root))
     names = {}
     for directory in [".agents/skills", ".codex/skills"]:
         for path in sorted((root / directory).glob("*/SKILL.md")):
@@ -83,6 +88,33 @@ def validate(root):
                 errors.append(f"duplicate skill: {key}: {names[key]} and {path.relative_to(root)}")
             names[key] = path.relative_to(root)
     return metrics, errors
+
+
+def validate_notion_map(root):
+    """Notionページの参照表で、page idの形・呼び名の重複・readersのファイルにidが書かれているかを確かめる。"""
+    path = root / NOTION_MAP
+    if not path.is_file():
+        return []
+    try:
+        pages = json.loads(path.read_text(encoding="utf-8-sig"))["pages"]
+    except (ValueError, KeyError) as error:
+        return [f"invalid notion map: {NOTION_MAP}: {error}"]
+    errors, seen = [], set()
+    for page in pages:
+        page_id, name = page.get("id", ""), page.get("name", "")
+        if not UUID_RE.fullmatch(page_id) or not name or not page.get("readers"):
+            errors.append(f"invalid notion map entry: {name or page_id}")
+            continue
+        if page_id in seen or name in seen:
+            errors.append(f"duplicate notion map entry: {name}")
+        seen.update((page_id, name))
+        for reader in page["readers"]:
+            reader_path = root / reader
+            if not reader_path.is_file():
+                errors.append(f"missing notion map reader: {name} -> {reader}")
+            elif page_id not in reader_path.read_text(encoding="utf-8-sig"):
+                errors.append(f"notion map reader lacks page id: {name} -> {reader}")
+    return errors
 
 
 def main():

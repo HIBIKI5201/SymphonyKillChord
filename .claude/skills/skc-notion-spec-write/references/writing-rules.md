@@ -1,7 +1,7 @@
 # 仕様書 ライティング規則
 
 正本はNotionの[仕様書 ライティング規則](https://app.notion.com/p/2ae7c2c6cc02806cac67fa2af79e2a99)。
-ミラーは `Docs/NotionSpecifications/Symphony Kill Chord/仕様書 ガイド/仕様書 ライティング規則.md`。
+page id は `2ae7c2c6-cc02-806c-ac67-fa2af79e2a99`。写しは `python scripts/notion/spec_query.py get <page id>` で読む（[読む手順](../../../../Docs/agent/README.md#必要な資料だけを読む)）。
 ここはその要約であり、食い違ったらNotion側が正しい。
 
 仕様書のページを書くとき、および既存ページを更新するときに従う。

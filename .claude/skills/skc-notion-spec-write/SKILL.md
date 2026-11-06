@@ -54,7 +54,7 @@ macOS / Linuxではexeが動かないため、以下の`./SinfoniaOperator/Notio
 ## 既存ページを更新する
 
 ```bash
-./SinfoniaOperator/NotionMarkdownWriter.exe pull "<Docs/NotionSpecifications配下の.mdパス|URL|ページID>"
+./SinfoniaOperator/NotionMarkdownWriter.exe pull "<ページID|URL|Docs/NotionSpecifications配下の.mdパス>"
 ```
 
 1. リポジトリルートから実行する。出力された作業ファイルのパスを控える。

@@ -63,6 +63,22 @@ class HarnessValidationTests(unittest.TestCase):
         self.write(".agents/skills/shared/SKILL.md", "no metadata")
         self.assertTrue(any("invalid frontmatter" in e for e in validate(self.root)[1]))
 
+    def test_notion_map_reader_must_cite_page_id(self):
+        page_id = "2a87c2c6-cc02-80f9-a10a-f0b72b95fbb3"
+        self.write("SinfoniaOperator/notion-cache-map.json",
+                   '{"pages": [{"id": "%s", "name": "rules/code", "readers": ["AGENTS.md"]}]}' % page_id)
+        self.assertTrue(any("lacks page id" in e for e in validate(self.root)[1]))
+        self.write("AGENTS.md", f"コード規定 `{page_id}`")
+        self.assertEqual(validate(self.root)[1], [])
+
+    def test_notion_map_rejects_bad_entries(self):
+        self.write("SinfoniaOperator/notion-cache-map.json",
+                   '{"pages": [{"id": "2a87c2c6", "name": "x", "readers": ["AGENTS.md"]},'
+                   ' {"id": "31c7c2c6-cc02-80f3-92c0-e6929d962476", "name": "y", "readers": ["missing.md"]}]}')
+        errors = validate(self.root)[1]
+        self.assertTrue(any("invalid notion map entry" in e for e in errors))
+        self.assertTrue(any("missing notion map reader" in e for e in errors))
+
 
 if __name__ == "__main__":
     unittest.main()
