@@ -35,18 +35,10 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
 
             if (!hasExistingSave && _defaultAsset != null)
             {
-                EnvironmentSettingsData defaults = _defaultAsset.ToEnvironmentSettingsData();
-
-                // 初回起動時は、アセットの固定値ではなく実際のモニタ解像度を優先する。
-                // Screen.currentResolutionが0x0など不正な値を返した場合のみアセットの値へフォールバックする。
-                Resolution currentResolution = Screen.currentResolution;
-                bool hasValidCurrentResolution = currentResolution.width > 0 && currentResolution.height > 0;
-                int resolutionWidth = hasValidCurrentResolution ? currentResolution.width : defaults.ResolutionWidth;
-                int resolutionHeight = hasValidCurrentResolution ? currentResolution.height : defaults.ResolutionHeight;
-
+                EnvironmentSettingsData defaults = CreateDefaultSettings();
                 saveData.EnvironmentSettings.SetResolution(
-                    resolutionWidth,
-                    resolutionHeight,
+                    defaults.ResolutionWidth,
+                    defaults.ResolutionHeight,
                     defaults.IsFullScreen);
                 saveData.EnvironmentSettings.SetQualityLevel(defaults.QualityLevel);
                 saveData.EnvironmentSettings.SetBrightness(defaults.Brightness);
@@ -60,6 +52,27 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
             }
 
             return saveData.EnvironmentSettings.Copy();
+        }
+
+        /// <summary>
+        ///     初回起動時と同じ既定値の環境設定を作成する。
+        ///     既定値アセットが未指定の場合はDomainの既定値を使用する。
+        /// </summary>
+        public EnvironmentSettingsData CreateDefaultSettings()
+        {
+            EnvironmentSettingsData defaults = _defaultAsset != null
+                ? _defaultAsset.ToEnvironmentSettingsData()
+                : new EnvironmentSettingsData();
+
+            // アセットの固定値ではなく実際のモニタ解像度を優先する。
+            // Screen.currentResolutionが0x0など不正な値を返した場合のみ既定値の解像度へフォールバックする。
+            Resolution currentResolution = Screen.currentResolution;
+            if (currentResolution.width > 0 && currentResolution.height > 0)
+            {
+                defaults.SetResolution(currentResolution.width, currentResolution.height, defaults.IsFullScreen);
+            }
+
+            return defaults;
         }
 
         /// <summary>

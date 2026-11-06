@@ -51,7 +51,7 @@ MonoBehaviour:
       m_Items:
       - rid: 6106260330607018184
   - m_Id: 1648918530
-    m_Localized: "\u30AD\u30EB\u30B3\u30FC\u30C9\uFF08\u30B9\u30AD\u30EB\uFF09"
+    m_Localized: "\u30AD\u30EB\u30B3\u30FC\u30C9"
     m_Metadata:
       m_Items: []
   - m_Id: 1648918531

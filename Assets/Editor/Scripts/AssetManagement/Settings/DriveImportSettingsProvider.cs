@@ -35,6 +35,7 @@ namespace KillChord.Editor.AssetManagement
 
         /// <summary>
         ///     機密情報セクション (Service Account JSON Key と取得元フォルダ) を描画する。
+        ///     JSON 鍵は共通秘密設定ファイルへ、取得元フォルダは DriveImportSecrets へ保存する。
         /// </summary>
         private static void DrawSecretsSection()
         {
@@ -43,29 +44,15 @@ namespace KillChord.Editor.AssetManagement
             serialized.Update();
 
             EditorGUILayout.LabelField("認証・取得元 (機密情報 / UserSettings管理・Git対象外)", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Service Account JSON Key");
-
-            // JSON 鍵と取得元フォルダの入力欄を描画し、変更があれば保存する。
-            EditorGUI.BeginChangeCheck();
-            float width = EditorGUIUtility.currentViewWidth * 0.75f;
-            var newApiKey = EditorGUILayout.TextArea(secrets.serviceAccountJsonKey,
-                GUILayout.Width(width));
-            var changedJsonKey = EditorGUI.EndChangeCheck();
+            DrawJsonKeySection(secrets);
 
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(
                 serialized.FindProperty("sourceFolders"),
                 new GUIContent("Source Folders"), true);
-            var changedFolders = EditorGUI.EndChangeCheck();
-
-            if (changedFolders)
+            if (EditorGUI.EndChangeCheck())
             {
                 serialized.ApplyModifiedProperties();
-            }
-
-            if (changedJsonKey || changedFolders)
-            {
-                secrets.serviceAccountJsonKey = newApiKey;
                 secrets.Persist();
             }
             
@@ -76,7 +63,12 @@ namespace KillChord.Editor.AssetManagement
             {
                 if (GUILayout.Button("Copy Secrets"))
                 {
+                    // JSON 鍵は共通秘密設定ファイルにあるため、コピー時だけ埋めて渡す。
+                    // 保存はせず、シリアライズする間だけ値を差し替える。
+                    string legacyJsonKey = secrets.serviceAccountJsonKey;
+                    secrets.serviceAccountJsonKey = secrets.GetServiceAccountJsonKey();
                     string json = JsonUtility.ToJson(secrets);
+                    secrets.serviceAccountJsonKey = legacyJsonKey;
                     EditorGUIUtility.systemCopyBuffer = json;
 
                     EditorUtility.DisplayDialog(
@@ -90,6 +82,15 @@ namespace KillChord.Editor.AssetManagement
                     try
                     {
                         JsonUtility.FromJsonOverwrite(EditorGUIUtility.systemCopyBuffer, secrets);
+
+                        // 貼り付けた JSON 鍵は共通秘密設定ファイルへ書き、この設定には残さない。
+                        if (!string.IsNullOrEmpty(secrets.serviceAccountJsonKey))
+                        {
+                            SharedSecrets.SetValue(
+                                SharedSecrets.GOOGLE_SERVICE_ACCOUNT_JSON_KEY,
+                                secrets.serviceAccountJsonKey);
+                            secrets.serviceAccountJsonKey = "";
+                        }
 
                         secrets.Persist();
 
@@ -108,6 +109,42 @@ namespace KillChord.Editor.AssetManagement
                             "OK");
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        ///     Service Account JSON Key の入力欄を描画する。値は共通秘密設定ファイルへ保存する。
+        ///     移行前の値が DriveImportSecrets に残っている場合は、移行ボタンを出す。
+        /// </summary>
+        /// <param name="secrets"> 取得元フォルダなどを保持する設定。 </param>
+        private static void DrawJsonKeySection(DriveImportSecrets secrets)
+        {
+            EditorGUILayout.LabelField("Service Account JSON Key");
+            EditorGUILayout.LabelField($"保存先: {SharedSecrets.FullPath}", EditorStyles.miniLabel);
+
+            if (!string.IsNullOrEmpty(secrets.serviceAccountJsonKey))
+            {
+                EditorGUILayout.HelpBox(
+                    "移行前の設定に JSON 鍵が残っています。共通ファイルへ移すと、SinfoniaOperator の CLI と同じファイルで管理できます。",
+                    MessageType.Warning);
+                if (GUILayout.Button("共通ファイルへ移す") && !secrets.MigrateToSharedSecrets())
+                {
+                    EditorUtility.DisplayDialog(
+                        "Drive Import",
+                        "共通ファイルに別の JSON 鍵がすでにあるため、移しませんでした。どちらを使うか確認してください。",
+                        "OK");
+                }
+            }
+
+            // JSON 鍵の入力欄を描画し、変更があれば共通ファイルへ保存する。
+            EditorGUI.BeginChangeCheck();
+            float width = EditorGUIUtility.currentViewWidth * 0.75f;
+            var newJsonKey = EditorGUILayout.TextArea(
+                SharedSecrets.GetValue(SharedSecrets.GOOGLE_SERVICE_ACCOUNT_JSON_KEY),
+                GUILayout.Width(width));
+            if (EditorGUI.EndChangeCheck())
+            {
+                SharedSecrets.SetValue(SharedSecrets.GOOGLE_SERVICE_ACCOUNT_JSON_KEY, newJsonKey);
             }
         }
 

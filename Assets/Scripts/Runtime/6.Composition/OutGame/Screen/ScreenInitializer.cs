@@ -10,10 +10,12 @@ using KillChord.Runtime.Domain.OutGame.Screen;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.Screen;
+using KillChord.Runtime.InfraStructure.Persistent.Savedata;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -485,6 +487,37 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             _screenController.ShowHome();
             RefreshHeaderPointsAsync();
+            ShowSaveDataRecoveryNoticeAsync();
+        }
+
+        /// <summary>
+        ///     セーブデータを読めず既定値で始めたときに、ホーム画面で1回だけ知らせます。
+        /// </summary>
+        private async void ShowSaveDataRecoveryNoticeAsync()
+        {
+            try
+            {
+                if (!SaveDataRecoveryRecord.HasPending) { return; }
+
+                // 通知を出せないときは記録を残し、次にホーム画面を開いたときに知らせる。
+                if (!ServiceLocator.TryGetInstance(out EventNotificationView notificationView)
+                    || notificationView == null
+                    || notificationView.IsVisible
+                    || !notificationView.isActiveAndEnabled)
+                {
+                    return;
+                }
+
+                SaveDataRecoveryRecord.Clear();
+                await notificationView.ShowAsync(SAVE_RECOVERED_NOTIFICATION_ENTRY, destroyCancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
         }
 
         /// <summary>
@@ -720,6 +753,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private const string SKILLTREESCREEN_PLAYERSTATUS_NAME = "PlayerStatus";
         private const string SKILLBUILDSCREEN_NAME = "SkillBuildContainer";
         private const string SETTINGSCREEN_NAME = "SettingContainer";
+
+        /// <summary> セーブデータを既定値で始めたことを知らせる通知のUICommonエントリです。 </summary>
+        private const string SAVE_RECOVERED_NOTIFICATION_ENTRY = "ui.notification.save_recovered";
 
         [SerializeField]
         [Tooltip("画面表示に使用する UIDocument です。")]

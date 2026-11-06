@@ -62,7 +62,8 @@ namespace KillChord.Editor.AssetManagement
                 var settings = DriveImportSettings.instance;
                 var manifest = DriveImportManifest.instance;
 
-                if (string.IsNullOrEmpty(secrets.serviceAccountJsonKey))
+                string serviceAccountJsonKey = secrets.GetServiceAccountJsonKey();
+                if (string.IsNullOrEmpty(serviceAccountJsonKey))
                 {
                     const string msg =
                         "[DriveImport] Service AccountのJSON鍵が未設定です。Project Settings > Drive Import で設定してください。";
@@ -83,7 +84,7 @@ namespace KillChord.Editor.AssetManagement
                 ServiceAccountCredential credential;
                 try
                 {
-                    credential = DriveAuthProvider.GetCredential(secrets.serviceAccountJsonKey);
+                    credential = DriveAuthProvider.GetCredential(serviceAccountJsonKey);
                 }
                 catch (InvalidOperationException e)
                 {

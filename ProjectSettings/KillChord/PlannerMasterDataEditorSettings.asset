@@ -53,6 +53,7 @@ MonoBehaviour:
   - _displayName: Enemy
     _dataAssetAddressableKeys:
     - ExampleEnemyMoveData
+    - InfantryEnemyMoveData
     - ShellAttackData
     - BossAttackEntryRepo
     - EnemyDefinitionRepository

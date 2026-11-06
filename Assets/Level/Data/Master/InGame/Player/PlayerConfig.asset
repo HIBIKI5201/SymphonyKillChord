@@ -18,3 +18,4 @@ MonoBehaviour:
   _dodgeDuration: 0.2
   _dodgeCooldown: 0.3
   _attackCooldown: 0.2
+  _attackRecoveryBeats: 0.5

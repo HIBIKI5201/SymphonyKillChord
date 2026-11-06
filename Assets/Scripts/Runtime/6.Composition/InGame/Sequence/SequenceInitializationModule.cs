@@ -48,7 +48,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageResultView = FindFirstObjectByType<StageResultView>();
             _inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
             _stageSequenceVoiceView = FindFirstObjectByType<StageSequenceVoiceView>();
-            _stageSequenceMusicView = FindFirstObjectByType<StageSequenceMusicView>();
             _stageStartConstraintView = FindFirstObjectByType<StageStartConstraintView>();
             _playerInputView = FindFirstObjectByType<PlayerInputView>();
             _musicPlayer = FindFirstObjectByType<MusicPlayer>();
@@ -60,7 +59,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 || _stageResultView == null
                 || _inGamePlayDirector == null
                 || _stageSequenceVoiceView == null
-                || _stageSequenceMusicView == null
                 || _stageStartConstraintView == null
                 || _playerInputView == null
                 || _musicPlayer == null)
@@ -148,9 +146,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 playerContainer.PlayerView);
 
             _stageSequenceView.InitializeClearCamera(playerContainer.PlayerView.transform);
-
-            _stageSequenceMusicView.Initialize(
-                _musicPlayer);
 
             _stageResultController = stageResultContainer.Controller;
 
@@ -422,6 +417,13 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <param name="evaluationResult"> 保存する評価結果です。 </param>
         private async Task SaveClearResultAsync(MissionEvaluationResult evaluationResult)
         {
+            // 保存を止める状態が登録されていれば、進捗も報酬も書き込まない。
+            if (ServiceLocator.TryGetInstance(out ISaveSuppression saveSuppression)
+                && saveSuppression.IsSaveSuppressed)
+            {
+                return;
+            }
+
             try
             {
                 BattleStageDefinition stageDefinition =
@@ -482,7 +484,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private LoadingScreenController _loadingScreenController;
         private StageSequenceVoiceView _stageSequenceVoiceView;
-        private StageSequenceMusicView _stageSequenceMusicView;
         private StageStartConstraintView _stageStartConstraintView;
         private MusicPlayer _musicPlayer;
         private AmbienceSoundView _ambienceSoundView;

@@ -9,7 +9,7 @@
 2. Developer PortalのBot設定で`Message Content Intent`を有効にします。
 3. Botに対象チャンネルの「チャンネルを見る」と「メッセージ履歴を読む」権限を付与します。
 4. 公開設定`SinfoniaOperator/sinfonia-operator.env.json`の`DISCORD_LOG_CHANNEL_IDS`へ取得対象IDを配列で設定します。
-5. 秘密設定`SinfoniaOperator/sinfonia-operator.secrets.json`の`DISCORD_BOT_TOKEN`へBotトークンを設定します。
+5. 秘密設定`UserSettings/KillChord/secrets.json`（`SinfoniaOperator/secrets.sample.json`をコピーして作成）の`DISCORD_BOT_TOKEN`へBotトークンを設定します。
 
 ```json
 {

@@ -51,6 +51,8 @@
                         <ui:SliderInt name="VoiceVolumeSlider" low-value="0" high-value="10" value="5" show-input-field="false" page-size="1" class="setting-slider"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:VisualElement class="setting-menu-spacer"/>
+                <ui:Button text="既定値に戻す" name="SoundPanelResetButton" class="setting-menu-button ui-se-select"/>
             </ui:VisualElement>
             <ui:VisualElement name="EnvironmentPanel" class="setting-panel" style="display: none;">
                 <ui:VisualElement class="setting-panel-top-bar">
@@ -127,6 +129,7 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-menu-spacer"/>
+                <ui:Button text="既定値に戻す" name="EnvironmentPanelResetButton" class="setting-menu-button ui-se-select"/>
                 <ui:Button text="設定を保存" name="EnvironmentPanelSaveButton" class="setting-menu-button ui-se-select"/>
             </ui:VisualElement>
             <ui:VisualElement name="ControlPanel" class="setting-panel" style="display: none;">
@@ -175,6 +178,7 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="setting-menu-spacer"/>
+                <ui:Button text="既定値に戻す" name="ControlPanelResetButton" class="setting-menu-button ui-se-select"/>
                 <ui:Button text="設定を保存" name="ControlPanelSaveButton" class="setting-menu-button ui-se-select"/>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -184,6 +188,15 @@
                 <ui:VisualElement class="setting-dialog-buttons">
                     <ui:Button text="タイトル画面に戻る" name="ConfirmReturnToTitleButton" class="setting-dialog-button btn-skin"/>
                     <ui:Button text="キャンセル" name="CancelReturnToTitleButton" class="setting-dialog-button btn-skin ui-se-cancel"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ResetToDefaultsDialog" picking-mode="Position" class="setting-dialog-overlay" style="display: none;">
+            <ui:VisualElement class="setting-dialog">
+                <ui:Label name="ResetToDefaultsMessage" text="設定を既定値に戻しますか？" class="setting-dialog-message"/>
+                <ui:VisualElement class="setting-dialog-buttons">
+                    <ui:Button text="既定値に戻す" name="ConfirmResetToDefaultsButton" class="setting-dialog-button btn-skin"/>
+                    <ui:Button text="キャンセル" name="CancelResetToDefaultsButton" class="setting-dialog-button btn-skin ui-se-cancel"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

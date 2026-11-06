@@ -107,6 +107,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         bool TrySwitchToNextTarget(in Vector3 playerPosition, in Vector3 direction);
 
         /// <summary>
+        ///     画面上で現在の対象から指定方向にいる敵のうち、画面中心に最も近い敵への切り替えを試みる。
+        /// </summary>
+        /// <param name="screenDirection"> 画面上の方向。右と上を正とする。 </param>
+        /// <param name="worldToViewport"> ワールド座標をビューポート座標（z はカメラからの奥行き）へ変換する処理。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。その方向に敵がいない場合はfalse。 </returns>
+        bool TrySwitchTargetInScreenDirection(in Vector2 screenDirection, Func<Vector3, Vector3> worldToViewport);
+
+        /// <summary>
         ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
         /// </summary>
         /// <param name="targetId"> 設定対象のターゲットID。 </param>

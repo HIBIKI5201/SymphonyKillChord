@@ -47,7 +47,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         {
             OperatorConfig.ClearOverrides();
             string? environmentConfigPath = FindConfigFile(OperatorConfig.ENVIRONMENT_CONFIG_FILE_NAME);
-            string? secretsConfigPath = FindConfigFile(OperatorConfig.SECRETS_CONFIG_FILE_NAME);
+            string? secretsConfigPath = OperatorConfig.FindSecretsConfigFile(GetSearchStartDirectories());
             if (environmentConfigPath != null) { OperatorConfig.LoadJsonFile(environmentConfigPath); }
             if (secretsConfigPath != null) { OperatorConfig.LoadJsonFile(secretsConfigPath); }
 

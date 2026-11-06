@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: GameData.Shared
   m_GUID: b75cc6c79834e1e46b6d9b75aeb6f054
   m_SerializeEntries:
+  - m_GUID: f75fc765bf9548f59090b1b42f9a02af
+    m_Address: StageEffectCatalogAsset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 02ac4acd11c13e94f951e778560963f3
     m_Address: PlayerConfig
     m_ReadOnly: 0
@@ -112,6 +117,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 71243b714fe682a479522c36402275ac
     m_Address: ExampleEnemyMoveData
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6bd8c9b5da464ad9869fd0f6e5bb1f64
+    m_Address: InfantryEnemyMoveData
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -252,11 +262,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f4b5344a42c4ffd4893bcdb0152a3bda
     m_Address: BgmSelectorLabelTableAsset
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fa8820e093edab1489d8bbed0db664af
-    m_Address: SkillTreeTestInputData
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

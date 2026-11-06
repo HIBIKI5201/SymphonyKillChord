@@ -172,7 +172,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
-            if (intruction.ShouldMove)
+            // 予兆が出た攻撃は、射程外でも終わるまでその場で行う。終わったら移動に戻る。
+            if (intruction.ShouldMove && !_enemyAIController.IsAttackCommitted)
             {
                 _navMeshAgent.speed = intruction.MoveSpeed * _speedVarianceMultiplier;
                 _navMeshAgent.isStopped = false;
