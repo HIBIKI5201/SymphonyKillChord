@@ -141,7 +141,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                     or MissionActionKind.AttackThreeBeat
                     or MissionActionKind.AttackFourBeat
                     or MissionActionKind.AttackSixBeat
-                    or MissionActionKind.AttackEightBeat => MissionStepPopupCloseInput.Attack,
+                    or MissionActionKind.AttackEightBeat
+                    or MissionActionKind.JustAttack => MissionStepPopupCloseInput.Attack,
                 _ => MissionStepPopupCloseInput.None,
             };
         }

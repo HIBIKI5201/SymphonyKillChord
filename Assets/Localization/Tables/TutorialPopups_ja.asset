@@ -114,6 +114,22 @@ MonoBehaviour:
     m_Localized: "\u4F7F\u7528\u6B66\u5668\uFF1A\u30CF\u30F3\u30C9\u30AC\u30F3\n\u9EC4\u8272\u306E\u30BF\u30A4\u30DF\u30F3\u30B0\u3067\u653B\u6483\u6642\u306B\u884C\u3046\u3001\n\u7D20\u65E9\u304F\u5A01\u529B\u306E\u9AD8\u3044\u653B\u6483\u3002\n\u305D\u306E\u305F\u3081\u3001\u5165\u529B\u96E3\u6613\u5EA6\u306F\u9AD8\u304F\n\u6B63\u78BA\u306A\u30EA\u30BA\u30E0\u5165\u529B\u306B\u3088\u3063\u3066\u771F\u4FA1\u3092\u767A\u63EE\u3059\u308B\u3002"
     m_Metadata:
       m_Items: []
+  - m_Id: 1648918546
+    m_Localized: "\u30ED\u30C3\u30AF\u30AA\u30F3"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918547
+    m_Localized: "\u30ED\u30C3\u30AF\u30AA\u30F3\u3059\u308B\u3068\u3001\u72D9\u3046\u6575\u3092\u56FA\u5B9A\u3057\u3001\n\u30AB\u30E1\u30E9\u304C\u305D\u306E\u6575\u3092\u8FFD\u3044\u304B\u3051\u308B\u3002\n\u3082\u3046\u4E00\u5EA6\u62BC\u3059\u3068\u89E3\u9664\u3059\u308B\u3002\n\n{input.device:choose(keyboard|xbox|playstation|switch):<sprite name=\"mm\">|<sprite name=\"lt\">|<sprite name=\"lt\">|<sprite name=\"lt\">} \u30ED\u30C3\u30AF\u30AA\u30F3"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918548
+    m_Localized: "\u6575\u306E\u8CC7\u6599"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918549
+    m_Localized: "\u6226\u95D8\u54E1\n\u8FD1\u3065\u3044\u3066\u653B\u6483\u3057\u3066\u304F\u308B\u6575\u3002\n\u653B\u6483\u306E\u524D\u306B\u4E88\u5146\uFF08\u30E9\u30A4\u30F3\u3068\u97F3\uFF09\u304C\u51FA\u308B\u306E\u3067\u3001\n\u56DE\u907F\u3067\u907F\u3051\u3088\u3046\u3002"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -124,3 +140,4 @@ MonoBehaviour:
         m_SharedEntries:
         - id: 1644724225
         - id: 1648918529
+        - id: 1648918547

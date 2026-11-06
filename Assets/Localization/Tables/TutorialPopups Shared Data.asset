@@ -103,6 +103,22 @@ MonoBehaviour:
     m_Key: tutorial.popup.yellow.body
     m_Metadata:
       m_Items: []
+  - m_Id: 1648918546
+    m_Key: tutorial.popup.lock_on.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918547
+    m_Key: tutorial.popup.lock_on.body
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918548
+    m_Key: tutorial.popup.enemy_intel.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918549
+    m_Key: tutorial.popup.enemy_intel.body
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
