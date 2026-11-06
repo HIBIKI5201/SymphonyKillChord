@@ -41,8 +41,9 @@ from build_spec_catalog import (
 
 DEFAULT_SOURCE = Path(__file__).resolve().parents[2] / "Docs" / "NotionSpecifications"
 
-# 仕様リストのカテゴリー「開発用」は旧版・参考として、検索の既定から外す（#2396 段階0）。
-DEVELOPMENT_CATEGORIES = {"開発用"}
+# 仕様リストのカテゴリー「開発用（旧版・参考）」は、検索の既定から外す（#2396 段階0）。
+# 2026-11-06 に「開発用」から名前を変えた。写しが古いときのため、前の名前も残す。
+DEVELOPMENT_CATEGORIES = {"開発用（旧版・参考）", "開発用"}
 CATEGORY_PROPERTIES = ("カテゴリー", "種別")
 SUMMARY_PROPERTIES = ("サマリー", "概要")
 SCOPE_PROPERTY = "適用範囲"
@@ -496,7 +497,7 @@ def build_parser():
     search_parser.add_argument("--parent", help="親仕様（ID・パス・タイトル）")
     search_parser.add_argument("--scope", help="適用範囲（製品版・体験版など）。未設定のページは含める")
     search_parser.add_argument("--db", help="所属DB名の部分一致（例: 仕様リスト）")
-    search_parser.add_argument("--include-dev", action="store_true", help="カテゴリー「開発用」も含める")
+    search_parser.add_argument("--include-dev", action="store_true", help="カテゴリー「開発用（旧版・参考）」も含める")
     search_parser.add_argument("--no-fallback", action="store_true", help="目録で0件のときに本文を検索しない")
     search_parser.add_argument("--limit", type=int, default=DEFAULT_LIMIT, help=f"表示件数（既定 {DEFAULT_LIMIT}）")
 
