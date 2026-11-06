@@ -21,6 +21,7 @@ using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using KillChord.Runtime.View.Persistent.Load;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -514,6 +515,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 GetBaseCriticalDamageMultiplier(),
                 GetBaseAreaAttackRange());
             _playerStatusPresenter.Push();
+            UiCommonTextProvider uiTextProvider = new UiCommonTextProvider();
             _skillTreeController = new SkillTreeController(
                 _skillDetailScreenView,
                 _skillDetailPresenter,
@@ -532,7 +534,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 skillTreeEntity,
                 () => _outGameUIEvent.OnOwnedSkillChanged?.Invoke(),
                 _loadedSkillRepository,
-                new SkillDisplayTextFormatter(new SkillEffectDescriptionFormatter()),
+                new SkillDisplayTextFormatter(
+                    new SkillEffectDescriptionFormatter(uiTextProvider), textProvider: uiTextProvider),
                 _skillGenreIcons,
                 _skillBeatColors,
                 _skillTreeScreenView.SetPoints,
