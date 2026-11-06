@@ -12,3 +12,6 @@
 !/runner-menu.ps1
 !/SetBuildCpuMode.ps1
 !/SKCBuilder-README.md
+!/RunnerPlatform.ps1
+!/start-runner.command
+!/runner-menu.command
