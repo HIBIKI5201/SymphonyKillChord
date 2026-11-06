@@ -1,6 +1,6 @@
 ﻿<#
   SymphonyKillChord セルフホストランナーの管理メニュー。
-  runner-menu.bat から起動する。説明は同じフォルダの README.md を参照。
+  runner-menu.bat（macOS は runner-menu.command）から起動する。説明は同じフォルダの README.md を参照。
 
   引数で直接実行もできる:
     runner-menu.bat status
@@ -21,6 +21,7 @@ $RunnerDir = $PSScriptRoot
 $Repo = "HIBIKI5201/SymphonyKillChord"
 $CpuModeScript = Join-Path $RunnerDir "SetBuildCpuMode.ps1"
 $SetupScript = Join-Path $RunnerDir "setup-runner.ps1"
+. (Join-Path $RunnerDir "RunnerPlatform.ps1")
 
 function Test-RunnerConfigured {
     return Test-Path -LiteralPath (Join-Path $RunnerDir ".runner")
@@ -52,8 +53,8 @@ function Start-Runner {
         Write-Host "ランナーはすでに起動しています。"
         return
     }
-    # 起動前チェック付きの start-runner.bat を別ウィンドウで開く。そのウィンドウがランナーになる。
-    Start-Process -FilePath (Join-Path $RunnerDir "start-runner.bat") -WorkingDirectory $RunnerDir
+    # 起動前チェック付きの start-runner.bat（macOS は start-runner.command）を別ウィンドウで開く。そのウィンドウがランナーになる。
+    Start-RunnerEntryWindow (Join-Path $RunnerDir (Get-RunnerEntryName "start-runner"))
     Write-Host "別ウィンドウで起動前チェックを行い、ランナーを起動します。そのウィンドウでは Ctrl+C を押さず、閉じないでください。"
 }
 
