@@ -184,6 +184,16 @@ class SpecQueryTests(unittest.TestCase):
         self.assertNotIn("爽快感", text)
         self.assertEqual(result["omitted_sections"], ["詳細説明 > 経緯", "仕様意図"])
 
+    def test_replace_mentions_reads_titled_mentions(self):
+        from spec_query import replace_mentions
+
+        class EmptyCatalog:
+            by_id = {}
+            by_path = {}
+
+        text = replace_mentions(EmptyCatalog(), '<mention-page url="https://app.notion.com/p/0123456789abcdef0123456789abcdef">A&amp;B</mention-page> と <mention-page url="https://app.notion.com/p/fedcba9876543210fedcba9876543210"/>')
+        self.assertEqual(text, "[A&B](https://app.notion.com/p/0123456789abcdef0123456789abcdef) と [目録に無いページ](https://app.notion.com/p/fedcba9876543210fedcba9876543210)")
+
     def test_get_rationale_converts_tables_and_links(self):
         result = self.get(DODGE_ID, "--rationale")
         rationale = [section for section in result["sections"] if section["kind"] == "制作意図"]

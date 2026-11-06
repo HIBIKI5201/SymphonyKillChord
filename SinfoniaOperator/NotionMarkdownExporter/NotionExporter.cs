@@ -69,6 +69,9 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                     pair => pair.Key,
                     pair => pair.Value.FilePath,
                     StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, string> titles = new(StringComparer.OrdinalIgnoreCase);
+                foreach (KeyValuePair<string, PageExportNode> pair in _pagesById) { titles[pair.Key] = pair.Value.Title; }
+                foreach (KeyValuePair<string, DatabaseExportNode> pair in _databasesById) { titles.TryAdd(pair.Key, pair.Value.Metadata.Title); }
                 HashSet<string> generatedFiles = new(StringComparer.OrdinalIgnoreCase);
                 int assetCount = 0;
 
@@ -95,6 +98,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                         page.FilePath,
                         pagePaths,
                         databasePaths);
+                    markdown = MarkdownReferenceProcessor.FillMentionTitles(markdown, titles);
                     string pageRelativePath = Path.GetRelativePath(_options.OutputDirectory, page.FilePath);
                     generatedFiles.Add(pageRelativePath);
                     page.GeneratedFiles.Add(pageRelativePath);
@@ -189,6 +193,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                              previousFilePath == null ||
                              metadata.LastEditedTime == null ||
                              _previousManifest == null ||
+                             _previousManifest.Version < ExportManifest.CURRENT_VERSION ||
                              _previousManifest.DownloadsAssets != _options.DownloadsAssets ||
                              metadata.LastEditedTime > _previousManifest.ExportedAtUtc;
             IReadOnlyList<MarkdownReference> pageReferences;
