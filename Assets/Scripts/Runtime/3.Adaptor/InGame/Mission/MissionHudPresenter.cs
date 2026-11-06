@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.Persistent.Localization;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
@@ -14,10 +15,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// </summary>
         /// <param name="missionRuntimeService">ミッションランタイムサービス。</param>
         /// <param name="missionHudViewModel">ミッションHUDビューモデル。</param>
-        public MissionHudPresenter(MissionRuntimeService missionRuntimeService, IMissionHudViewModel missionHudViewModel)
+        /// <param name="textProvider">進捗回数の書式の取得元。nullなら日本語で表示する。</param>
+        public MissionHudPresenter(
+            MissionRuntimeService missionRuntimeService,
+            IMissionHudViewModel missionHudViewModel,
+            IUiTextProvider textProvider = null)
         {
             _missionRuntimeService = missionRuntimeService;
             _missionHudViewModel = missionHudViewModel;
+            _textProvider = textProvider;
         }
 
         /// <summary>
@@ -47,10 +53,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _missionHudViewModel.Apply(dto);
         }
 
+        private const string PROGRESS_COUNT_FORMAT_KEY = "ui.mission.progress_count_format";
+        private const string PROGRESS_COUNT_FORMAT_FALLBACK = "{0}({1}/{2}回)";
+
         /// <summary> ミッションランタイムサービス。 </summary>
         private readonly MissionRuntimeService _missionRuntimeService;
         /// <summary> ミッションHUDビューモデル。 </summary>
         private readonly IMissionHudViewModel _missionHudViewModel;
+        /// <summary> 進捗回数の書式の取得元。 </summary>
+        private readonly IUiTextProvider _textProvider;
 
         /// <summary>
         ///     現在の進行状態に対応するメインミッション表示文を取得します。
@@ -69,7 +80,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 && progressReporter.RequiredCount > 0)
             {
                 int currentCount = progressReporter.CurrentCount(_missionRuntimeService.MissionProgress);
-                return $"{step.GuideMessageText}({currentCount}/{progressReporter.RequiredCount}回)";
+                return UiText.Format(
+                    _textProvider,
+                    PROGRESS_COUNT_FORMAT_KEY,
+                    PROGRESS_COUNT_FORMAT_FALLBACK,
+                    step.GuideMessageText,
+                    currentCount,
+                    progressReporter.RequiredCount);
             }
 
             return step.GuideMessageText;
