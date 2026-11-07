@@ -9,8 +9,8 @@ using Debug = UnityEngine.Debug;
 namespace KillChord.Editor.SinfoniaOperator
 {
     /// <summary>
-    ///     エディタ起動時に、Notion仕様書のサブモジュール（Docs/NotionSpecifications）を裏で最新化するクラス。
-    ///     仕様書はCIだけがNotionから取得して仕様書リポジトリへpushするため、各自はpullするだけでよい。
+    ///     エディタ起動時に、Notionのプロジェクト ドキュメントのサブモジュール（Docs/NotionSpecifications）を裏で最新化するクラス。
+    ///     プロジェクト ドキュメントはCIだけがNotionから取得して仕様書リポジトリへpushするため、各自はpullするだけでよい。
     /// </summary>
     [InitializeOnLoad]
     internal static class NotionSpecificationsAutoPull
@@ -48,7 +48,7 @@ namespace KillChord.Editor.SinfoniaOperator
             }
             catch (Exception exception)
             {
-                Debug.LogWarning($"[{nameof(NotionSpecificationsAutoPull)}] 仕様書を更新できませんでした: {exception.Message}");
+                Debug.LogWarning($"[{nameof(NotionSpecificationsAutoPull)}] プロジェクト ドキュメントを更新できませんでした: {exception.Message}");
             }
         }
 
@@ -67,7 +67,7 @@ namespace KillChord.Editor.SinfoniaOperator
                 false);
             if (result.ExitCode != 0)
             {
-                Debug.LogWarning($"[{nameof(NotionSpecificationsAutoPull)}] 仕様書を更新できませんでした。" +
+                Debug.LogWarning($"[{nameof(NotionSpecificationsAutoPull)}] プロジェクト ドキュメントを更新できませんでした。" +
                                  $"仕様書リポジトリへのアクセス権と、{SPECIFICATIONS_PATH} に手元の変更が残っていないかを確認してください。\n{result.Output}");
                 return;
             }
@@ -75,12 +75,12 @@ namespace KillChord.Editor.SinfoniaOperator
             string after = RunGit(repositoryRoot, $"-C \"{SPECIFICATIONS_PATH}\" rev-parse --short HEAD", true).Output;
             if (before != after)
             {
-                Debug.Log($"[{nameof(NotionSpecificationsAutoPull)}] 仕様書を最新に更新しました（{after}）。");
+                Debug.Log($"[{nameof(NotionSpecificationsAutoPull)}] プロジェクト ドキュメントを最新に更新しました（{after}）。");
             }
         }
 
         /// <summary>
-        ///     サブモジュール化する前に手元で書き出した仕様書があれば、消さずに別名で退避する。
+        ///     サブモジュール化する前に手元で書き出したプロジェクト ドキュメントがあれば、消さずに別名で退避する。
         ///     中身が残っているとサブモジュールを取得できないため。
         /// </summary>
         /// <param name="repositoryRoot">本体リポジトリのルート。</param>

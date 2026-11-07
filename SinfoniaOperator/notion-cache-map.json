@@ -5,7 +5,7 @@
       "readers": [".claude/skills/skc-code-guideline-check/SKILL.md", ".claude/skills/skc-codex-implement/SKILL.md"] },
     { "id": "31c7c2c6-cc02-80f3-92c0-e6929d962476", "name": "rules/design-philosophy", "title": "設計思想",
       "readers": [".claude/skills/skc-code-guideline-check/SKILL.md", ".claude/skills/skc-codex-implement/SKILL.md", ".claude/skills/skc-notion-spec-diff-check/SKILL.md"] },
-    { "id": "2ae7c2c6-cc02-806c-ac67-fa2af79e2a99", "name": "rules/spec-writing", "title": "仕様書 ライティング規則",
+    { "id": "2ae7c2c6-cc02-806c-ac67-fa2af79e2a99", "name": "rules/spec-writing", "title": "プロジェクト ドキュメント ライティング規則",
       "readers": [".claude/skills/skc-notion-spec-write/references/writing-rules.md"] },
     { "id": "27d7c2c6-cc02-813b-a93f-e6baf4d4f679", "name": "terms/glossary", "title": "用語",
       "readers": [".claude/skills/skc-notion-spec-diff-check/SKILL.md"] },
@@ -17,7 +17,7 @@
       "readers": [".codex/skills/skc-code-review/references/source-routing.md", ".claude/skills/skc-notion-spec-write/references/module-docs.md"] },
     { "id": "3e37c2c6-cc02-8198-8919-e7d9fba1f7b8", "name": "workflow/qa", "title": "QA",
       "readers": [".claude/skills/skc-ai-debug-qa/SKILL.md", ".codex/skills/skc-ai-debug-qa/SKILL.md"] },
-    { "id": "3e37c2c6-cc02-815b-9dac-f6b834c1e56b", "name": "workflow/spec-operation", "title": "Notion 仕様書の運用（正本とキャッシュ）",
+    { "id": "3e37c2c6-cc02-815b-9dac-f6b834c1e56b", "name": "workflow/spec-operation", "title": "Notion プロジェクト ドキュメントの運用",
       "readers": ["Docs/agent/README.md", ".claude/skills/skc-sinfonia-importers/SKILL.md"] },
     { "id": "3e37c2c6-cc02-812f-94e0-dbf07db926f8", "name": "workflow/agent-references", "title": "AIエージェント向け参照先一覧",
       "readers": ["Docs/agent/README.md"] }

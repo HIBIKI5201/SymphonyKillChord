@@ -1,4 +1,4 @@
-"""仕様書の窓口（search / get）を、小さな仕様書ミラーで確かめる。"""
+"""プロジェクト ドキュメントの窓口（search / get）を、小さなプロジェクト ドキュメントのミラーで確かめる。"""
 import contextlib
 import io
 import json
