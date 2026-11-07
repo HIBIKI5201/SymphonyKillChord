@@ -11,20 +11,19 @@ namespace KillChord.Tests.EditMode.Battle
     public sealed class AttackPipelineTraceTests
     {
         /// <summary>
-        ///     観測者に、開始・各ステップの前後のダメージ・結果が順に記録されることを確認します。
+        ///     包んだステップから記録係に、開始・各ステップの前後のダメージ・結果が順に記録されることを確認します。
         /// </summary>
         [Test]
-        public void Execute_WithTracer_RecordsEachStep()
+        public void Execute_WithTracingSteps_RecordsEachStep()
         {
-            AttackPipeline pipeline = new AttackPipeline(new IAttackStep[]
-            {
+            AttackPipelineTraceRecorder recorder = new AttackPipelineTraceRecorder();
+            AttackPipeline pipeline = CreateTracedPipeline(
+                recorder,
                 new MultiplyStep(2f),
                 new MultiplyStep(1f),
-                new MultiplyStep(1.5f)
-            });
-            AttackPipelineTraceRecorder recorder = new AttackPipelineTraceRecorder();
+                new MultiplyStep(1.5f));
 
-            AttackResult result = pipeline.Execute(CreateContext(10f, isJustHit: true), recorder);
+            AttackResult result = pipeline.Execute(CreateContext(10f, isJustHit: true));
 
             Assert.That(result.FinalDamage.Value, Is.EqualTo(30f).Within(TOLERANCE));
             Assert.That(recorder.Records.Count, Is.EqualTo(1));
@@ -46,17 +45,22 @@ namespace KillChord.Tests.EditMode.Battle
         }
 
         /// <summary>
-        ///     観測者を渡さなくても、結果が観測者ありの場合と同じになることを確認します。
+        ///     記録用に包んでも、攻撃結果が包まない場合と同じになることを確認します。
         /// </summary>
         [Test]
-        public void Execute_WithoutTracer_ReturnsSameResult()
+        public void Execute_WithTracingSteps_ReturnsSameResult()
         {
-            AttackPipeline pipeline = new AttackPipeline(new IAttackStep[] { new MultiplyStep(3f) });
+            AttackPipeline plain = new AttackPipeline(new IAttackStep[] { new MultiplyStep(3f), new MultiplyStep(0.5f) });
+            AttackPipeline traced = CreateTracedPipeline(
+                new AttackPipelineTraceRecorder(),
+                new MultiplyStep(3f),
+                new MultiplyStep(0.5f));
 
-            AttackResult withoutTracer = pipeline.Execute(CreateContext(4f), null);
-            AttackResult withTracer = pipeline.Execute(CreateContext(4f), new AttackPipelineTraceRecorder());
+            AttackResult withoutTracer = plain.Execute(CreateContext(4f));
+            AttackResult withTracer = traced.Execute(CreateContext(4f));
 
-            Assert.That(withoutTracer.FinalDamage.Value, Is.EqualTo(withTracer.FinalDamage.Value).Within(TOLERANCE));
+            Assert.That(withTracer.FinalDamage.Value, Is.EqualTo(withoutTracer.FinalDamage.Value).Within(TOLERANCE));
+            Assert.That(withTracer.IsCritical, Is.EqualTo(withoutTracer.IsCritical));
         }
 
         /// <summary>
@@ -65,12 +69,12 @@ namespace KillChord.Tests.EditMode.Battle
         [Test]
         public void Recorder_DropsOldRecordsAndHonorsPause()
         {
-            AttackPipeline pipeline = new AttackPipeline(new IAttackStep[] { new MultiplyStep(1f) });
             AttackPipelineTraceRecorder recorder = new AttackPipelineTraceRecorder(capacity: 2);
+            AttackPipeline pipeline = CreateTracedPipeline(recorder, new MultiplyStep(1f));
 
-            pipeline.Execute(CreateContext(1f), recorder);
-            pipeline.Execute(CreateContext(2f), recorder);
-            pipeline.Execute(CreateContext(3f), recorder);
+            pipeline.Execute(CreateContext(1f));
+            pipeline.Execute(CreateContext(2f));
+            pipeline.Execute(CreateContext(3f));
 
             Assert.That(recorder.Records.Count, Is.EqualTo(2));
             Assert.That(recorder.Records[0].BaseDamage, Is.EqualTo(2f).Within(TOLERANCE));
@@ -78,13 +82,32 @@ namespace KillChord.Tests.EditMode.Battle
 
             int version = recorder.Version;
             recorder.SetPaused(true);
-            pipeline.Execute(CreateContext(4f), recorder);
+            pipeline.Execute(CreateContext(4f));
 
             Assert.That(recorder.Records.Count, Is.EqualTo(2));
             Assert.That(recorder.Version, Is.EqualTo(version));
         }
 
         private const float TOLERANCE = 0.0001f;
+
+        /// <summary>
+        ///     各ステップを記録用のステップで包んだパイプラインを作ります。
+        /// </summary>
+        /// <param name="recorder"> 記録係。 </param>
+        /// <param name="steps"> 包む前のステップ。 </param>
+        /// <returns> 包んだステップを持つパイプライン。 </returns>
+        private static AttackPipeline CreateTracedPipeline(
+            AttackPipelineTraceRecorder recorder,
+            params IAttackStep[] steps)
+        {
+            IAttackStep[] wrapped = new IAttackStep[steps.Length];
+            for (int i = 0; i < steps.Length; i++)
+            {
+                wrapped[i] = new TracingAttackStep(steps[i], i, steps.Length, recorder);
+            }
+
+            return new AttackPipeline(wrapped);
+        }
 
         /// <summary>
         ///     攻撃定義・攻撃者・防御者なしの攻撃処理の文脈を作ります。

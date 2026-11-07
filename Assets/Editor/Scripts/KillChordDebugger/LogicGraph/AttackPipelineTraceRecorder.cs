@@ -1,4 +1,3 @@
-using KillChord.Runtime.Application.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Battle;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,9 +6,9 @@ namespace KillChord.Editor.Debugger.LogicGraph
 {
     /// <summary>
     ///     攻撃パイプラインの実行を、新しい順に一定数まで記録する。
-    ///     <para> ロジックのグラフ表示パネルがServiceLocatorへ登録して使う。 </para>
+    ///     <para> 記録用に包んだ攻撃ステップ（<see cref="TracingAttackStep"/>）から呼ばれる。 </para>
     /// </summary>
-    public sealed class AttackPipelineTraceRecorder : IAttackPipelineTracer
+    public sealed class AttackPipelineTraceRecorder
     {
         /// <summary>
         ///     記録する最大件数を指定して初期化する。
@@ -82,12 +81,12 @@ namespace KillChord.Editor.Debugger.LogicGraph
         ///     1つのステップの実行結果を記録する。
         /// </summary>
         /// <param name="stepIndex"> 0から数えたステップの位置。 </param>
-        /// <param name="step"> 実行したステップ。 </param>
+        /// <param name="stepName"> 実行したステップの名前。 </param>
         /// <param name="before"> ステップに渡した文脈。 </param>
         /// <param name="after"> ステップが返した文脈。 </param>
         public void RecordStepExecuted(
             int stepIndex,
-            IAttackStep step,
+            string stepName,
             in AttackStepContext before,
             in AttackStepContext after)
         {
@@ -95,7 +94,7 @@ namespace KillChord.Editor.Debugger.LogicGraph
 
             AttackStepTraceEntry entry = new AttackStepTraceEntry(
                 stepIndex,
-                step != null ? step.GetType().Name : UNKNOWN_STEP_NAME,
+                string.IsNullOrEmpty(stepName) ? UNKNOWN_STEP_NAME : stepName,
                 before.Damage.Value,
                 after.Damage.Value,
                 after.CriticalCount);
