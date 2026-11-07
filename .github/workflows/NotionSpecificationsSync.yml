@@ -77,6 +77,16 @@ jobs:
         continue-on-error: true
         run: python3 scripts/notion/build_spec_catalog.py --source "$SPEC_DIRECTORY"
 
+      - name: 仕様書の書き方を検査
+        # 切れたリンク・範囲外のメンション・必須属性の空き・経緯の種別・ページの移動と消失を数える（#2359 P9）。
+        # 前回の目録（仕様書リポジトリの今のコミット）と比べて、page id のパスの変化を数える。
+        # 知らせるだけで同期は止めない。ログは件数だけを出す（パスは手元で --details を付けて見る）。
+        continue-on-error: true
+        run: |
+          previous="$RUNNER_TEMP/previous_catalog.jsonl"
+          git -C "$SPEC_DIRECTORY" show HEAD:_catalog.jsonl > "$previous" 2>/dev/null || : > "$previous"
+          python3 scripts/notion/build_spec_catalog.py --source "$SPEC_DIRECTORY" --lint --previous "$previous"
+
       - name: 仕様書リポジトリへpush
         working-directory: ${{ env.SPEC_DIRECTORY }}
         run: |
