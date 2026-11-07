@@ -635,6 +635,38 @@ MonoBehaviour:
     m_Key: ui.setting.cancel_reset_to_defaults
     m_Metadata:
       m_Items: []
+  - m_Id: 2096100001
+    m_Key: ui.screen_guide.skill_tree.points
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100002
+    m_Key: ui.screen_guide.skill_tree.first_node
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100003
+    m_Key: ui.screen_guide.skill_tree.next
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100004
+    m_Key: ui.screen_guide.skill_build.formation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100005
+    m_Key: ui.screen_guide.skill_build.list
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100006
+    m_Key: ui.screen_guide.skill_build.save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100007
+    m_Key: ui.screen_guide.stage_select.unlock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100008
+    m_Key: ui.screen_guide.stage_select.reward
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
