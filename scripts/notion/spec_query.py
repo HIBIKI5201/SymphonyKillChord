@@ -1,13 +1,13 @@
-"""Notion仕様書ミラーを、目録で探して（search）必要な節だけ読む（get）ための窓口。
+"""Notionのプロジェクト ドキュメントのミラーを、目録で探して（search）必要な節だけ読む（get）ための窓口。
 
-仕様書改定方針（#2396）の段階2。AI・エージェントが仕様を読むとき、仕様書ミラーを全文検索して
+仕様書改定方針（#2396）の段階2。AI・エージェントが仕様を読むとき、プロジェクト ドキュメントのミラーを全文検索して
 ページを丸ごと読む代わりに、次の二段階で必要な範囲だけを取り出す。
 
   search  目録（_catalog.jsonl）をキーワードとプロパティで絞り込み、ページID・タイトル・サマリーを返す
   get     1ページの「仕様」の節（仕様概要・詳細説明）を返す。親仕様・子仕様・関連ページを添える
           --rationale で仕様意図（経緯・却下・保留した案）を、--status で実装リストの実装状態を足す
 
-目録がない版の仕様書ミラーでも動くよう、そのときは build_spec_catalog.py と同じ処理で目録をその場で作る。
+目録がない版のプロジェクト ドキュメントのミラーでも動くよう、そのときは build_spec_catalog.py と同じ処理で目録をその場で作る。
 本文の <mention-page> はページ名とパスに置き換えて返す（書き出すとページ名が落ちる問題 #2483 D-14 を読む側で補う）。
 
 使い方（リポジトリのルートから）:
@@ -150,7 +150,7 @@ class Catalog:
 
 
 def load_catalog(source):
-    """仕様書ルートの _catalog.jsonl を読む。無ければ目録をその場で作る（ファイルには書かない）。"""
+    """プロジェクト ドキュメントのルートの _catalog.jsonl を読む。無ければ目録をその場で作る（ファイルには書かない）。"""
     catalog_file = source / CATALOG_JSONL
     if catalog_file.is_file():
         text = catalog_file.read_text(encoding="utf-8")
@@ -324,7 +324,7 @@ def split_sections(body):
 
 
 def replace_mentions(catalog, text, page_path=""):
-    """<mention-page> を [タイトル](<パス>) に、ページ内の相対リンクを仕様書ルートからのパスに置き換える。
+    """<mention-page> を [タイトル](<パス>) に、ページ内の相対リンクをプロジェクト ドキュメントのルートからのパスに置き換える。
     目録に無いページはURLを残す。"""
 
     def replace_mention(match):
@@ -510,8 +510,8 @@ def format_get(result):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(description="Notion仕様書ミラーを目録で探し、必要な節だけ読む。")
-    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE, help="仕様書ミラーのルート（既定: Docs/NotionSpecifications）")
+    parser = argparse.ArgumentParser(description="Notionのプロジェクト ドキュメントのミラーを目録で探し、必要な節だけ読む。")
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE, help="プロジェクト ドキュメントのミラーのルート（既定: Docs/NotionSpecifications）")
     parser.add_argument("--json", action="store_true", help="結果をJSONで出す")
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -539,7 +539,7 @@ def main(argv=None):
     args = build_parser().parse_args(argv)
     source = args.source.resolve()
     if not source.is_dir():
-        print(f"仕様書のディレクトリが見つかりません: {args.source}", file=sys.stderr)
+        print(f"プロジェクト ドキュメントのディレクトリが見つかりません: {args.source}", file=sys.stderr)
         return 1
     if args.command == "path":
         path = manifest_path(source, args.target)

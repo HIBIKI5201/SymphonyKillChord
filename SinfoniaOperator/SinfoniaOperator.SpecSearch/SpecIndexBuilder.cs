@@ -12,7 +12,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         /// <summary>
         ///     チャンク生成器と埋め込みモデルを受け取る。
         /// </summary>
-        /// <param name="chunker">仕様書のチャンク生成器。</param>
+        /// <param name="chunker">プロジェクト ドキュメントのチャンク生成器。</param>
         /// <param name="embeddingModel">埋め込みモデル。</param>
         public SpecIndexBuilder(MarkdownChunker chunker, IEmbeddingModel embeddingModel)
         {
@@ -21,7 +21,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         }
 
         /// <summary>
-        ///     すべての仕様書チャンクを埋め込み、インデックスへ保存する。
+        ///     すべてのプロジェクト ドキュメントのチャンクを埋め込み、インデックスへ保存する。
         /// </summary>
         /// <param name="outputPath">インデックスの保存先パス。</param>
         /// <param name="cancellationToken">処理のキャンセルトークン。</param>

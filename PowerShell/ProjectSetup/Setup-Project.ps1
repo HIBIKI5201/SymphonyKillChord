@@ -120,7 +120,7 @@ foreach ($path in $submodulePaths) {
         continue
     }
 
-    # 仕様書のように本体の記録を気にせず最新を読むもの（ignore = all）は、ブランチの最新を取る。
+    # プロジェクト ドキュメントのように本体の記録を気にせず最新を読むもの（ignore = all）は、ブランチの最新を取る。
     $name = (Invoke-Git @('config', '-f', '.gitmodules', '--get-regexp', '^submodule\..*\.path$')).Output -split "`n" |
         Where-Object { $_ -match " $([regex]::Escape($path))$" } | ForEach-Object { ($_ -split ' ', 2)[0] -replace '\.path$', '' }
     $ignore = (Invoke-Git @('config', '-f', '.gitmodules', '--get', "$name.ignore")).Output

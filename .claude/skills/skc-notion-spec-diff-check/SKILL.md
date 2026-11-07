@@ -98,29 +98,29 @@ Follow the structure of the precedent report exactly enough that it reads as one
 series of audits, not a one-off format:
 
 ```
-# 仕様書と実装の差分分析
+# プロジェクト ドキュメントと実装の差分分析
 
 作成日: <today's date>
 対象ブランチ: `<current branch>`
 対象コード: `<scoped path(s)>`
-対象仕様書: <export freshness — refreshed today, or "既存エクスポート (日付不明/概算)">
+対象プロジェクト ドキュメント: <export freshness — refreshed today, or "既存エクスポート (日付不明/概算)">
 
 ## 0. 調査の前提
 (scope covered, scope explicitly NOT covered, export freshness caveat)
 
 | 記号 | 意味 |
 | --- | --- |
-| A | 仕様書にあるが実装が無い |
-| B | 実装があるが仕様書に無い |
+| A | プロジェクト ドキュメントにあるが実装が無い |
+| B | 実装があるがプロジェクト ドキュメントに無い |
 | C | 双方に穴がある |
 
 ## A. システム側に足りていないもの
 ### A-1. <title>
-**仕様書の記述** — `<path>:<line>` + quote
+**プロジェクト ドキュメントの記述** — `<path>:<line>` + quote
 **実装の状況** — `<path>:<line>` citations, or explicit "該当なし"
 **優先度**: 最高 / 高 / 中 / 要確認
 
-## B. 仕様書側に足りていないもの
+## B. プロジェクト ドキュメント側に足りていないもの
 (same shape, reversed)
 
 ## C. 双方に穴があるもの

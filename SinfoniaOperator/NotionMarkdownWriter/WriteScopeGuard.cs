@@ -43,7 +43,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             if (isInsideAllowedRoot) { return; }
 
             throw new WriterException(
-                "エクスポート済みの仕様書ツリー上、対象ページは書き込み許可ページの配下にありません。" +
+                "エクスポート済みのプロジェクト ドキュメントのツリー上、対象ページは書き込み許可ページの配下にありません。" +
                 $"許可ページ: {string.Join(", ", _allowedRootPageIds)}");
         }
 

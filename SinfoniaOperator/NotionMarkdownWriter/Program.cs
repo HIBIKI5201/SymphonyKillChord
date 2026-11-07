@@ -77,7 +77,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         private static void WriteHelp()
         {
             Console.WriteLine("Notion Markdown Writer");
-            Console.WriteLine("仕様書ページへMarkdownで書き込むツールです。書き込みは部分置換のみで、全文置換は行いません。");
+            Console.WriteLine("プロジェクト ドキュメントのページへMarkdownで書き込むツールです。書き込みは部分置換のみで、全文置換は行いません。");
             Console.WriteLine();
             Console.WriteLine("使用方法:");
             Console.WriteLine("  NotionMarkdownWriter.exe pull <Markdownパス|URL|ID> [--out <ファイル>]");

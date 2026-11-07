@@ -17,7 +17,7 @@ https://hibiki5201.github.io/SymphonyKillChord/home/
 | パス | リポジトリ | 中身 |
 | --- | --- | --- |
 | `Assets/AssetStoreTools` | [SymphonyKillChord_AssetStoreTools](https://github.com/HIBIKI5201/SymphonyKillChord_AssetStoreTools) | 外部アセットと NuGet パッケージ。無いとコンパイルエラーになる |
-| `Docs/NotionSpecifications` | [SymphonyKillChord_Specifications](https://github.com/HIBIKI5201/SymphonyKillChord_Specifications) | Notion 仕様書の写し。CI が3時間ごとに更新する |
+| `Docs/NotionSpecifications` | [SymphonyKillChord_Specifications](https://github.com/HIBIKI5201/SymphonyKillChord_Specifications) | Notion のプロジェクト ドキュメントの写し。CI が3時間ごとに更新する |
 
 セットアップの手順を増やしたら、`PowerShell/ProjectSetup/project-setup.json` の `SetupVersion` を上げる。既存のメンバーも、次に Unity を開いたときに再実行を促される。
 
