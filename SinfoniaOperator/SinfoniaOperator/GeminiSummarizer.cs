@@ -35,10 +35,10 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     仕様書チャンクだけを根拠に、ユーザーの質問への回答を生成する。
+        ///     プロジェクト ドキュメントのチャンクだけを根拠に、ユーザーの質問への回答を生成する。
         /// </summary>
         /// <param name="query">ユーザーの質問文。</param>
-        /// <param name="records">要約の根拠にする仕様書チャンク。</param>
+        /// <param name="records">要約の根拠にするプロジェクト ドキュメントのチャンク。</param>
         /// <param name="includeHistory">過去の経緯を含む検索であるか。</param>
         /// <param name="cancellationToken">処理を中止するトークン。</param>
         /// <returns>引用番号を検証した回答。</returns>
@@ -144,10 +144,10 @@ namespace SinfoniaStudio.SinfoniaOperator
         private readonly HttpClient _httpClient;
 
         /// <summary>
-        ///     質問文と仕様書チャンクからGeminiへ渡すプロンプトを構築する。
+        ///     質問文とプロジェクト ドキュメントのチャンクからGeminiへ渡すプロンプトを構築する。
         /// </summary>
         /// <param name="query">ユーザーの質問文。</param>
-        /// <param name="records">要約の根拠にする仕様書チャンク。</param>
+        /// <param name="records">要約の根拠にするプロジェクト ドキュメントのチャンク。</param>
         /// <param name="includeHistory">過去の経緯を含む検索であるか。</param>
         /// <returns>Geminiへ渡すプロンプト。</returns>
         private static string BuildPrompt(string query, IReadOnlyList<SpecChunkRecord> records, bool includeHistory)

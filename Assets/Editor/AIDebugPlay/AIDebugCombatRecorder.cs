@@ -73,11 +73,11 @@ namespace KillChord.Editor.AIDebugPlay
         private int _sequence;
 
         /// <summary>
-        ///     成立した拍種を記録する。
+        ///     成立した拍種と、Just攻撃だったかどうかを記録する。
         /// </summary>
-        private void AttackBeatHandler(BeatType beat)
+        private void AttackBeatHandler(BeatType beat, bool isJustHit)
         {
-            Record("attackBeat", Object(("beatType", beat.ToString())));
+            Record("attackBeat", Object(("beatType", beat.ToString()), ("isJustHit", isJustHit)));
         }
 
         /// <summary>

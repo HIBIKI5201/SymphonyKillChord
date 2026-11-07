@@ -15,7 +15,11 @@ namespace SinfoniaStudio.NotionMarkdownExporter
     {
         private const string MANIFEST_FILE_NAME = ".notion-export-manifest.json";
         private const int LEGACY_VERSION = 1;
-        private const int CURRENT_VERSION = 2;
+        /// <summary>
+        ///     現在のマニフェスト形式のバージョン。
+        ///     3: メンションにページ名を補うようにした（#2483 D-14）。前の版で書き出したページは、すべて書き直す。
+        /// </summary>
+        internal const int CURRENT_VERSION = 3;
 
         /// <summary> マニフェスト形式のバージョン。 </summary>
         public int Version { get; set; } = CURRENT_VERSION;
@@ -55,7 +59,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 throw new InvalidDataException("マニフェストの内容が空です。");
             }
 
-            if (manifest.Version is not LEGACY_VERSION and not CURRENT_VERSION)
+            if (manifest.Version is < LEGACY_VERSION or > CURRENT_VERSION)
             {
                 throw new InvalidDataException($"未対応のマニフェストバージョンです: {manifest.Version}");
             }

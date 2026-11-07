@@ -1,4 +1,4 @@
-"""仕様書目録の生成を、小さな仕様書ミラーで確かめる。"""
+"""プロジェクト ドキュメントの目録の生成を、小さなプロジェクト ドキュメントのミラーで確かめる。"""
 import contextlib
 import io
 import json
@@ -142,6 +142,35 @@ class BuildSpecCatalogTests(unittest.TestCase):
         self.assertNotIn("新しい語", output)
         self.assertIn("SKC/用語/新しい語.md", self.build()[0])
         self.assertEqual(self.check()[0], 0)
+
+
+    def lint(self, *args):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            code = main(["--source", str(self.root), "--lint", *args])
+        return code, out.getvalue()
+
+    def test_lint_counts_broken_links_properties_history_and_moves(self):
+        self.build()
+        previous = self.root / "previous.jsonl"
+        previous.write_text((self.root / CATALOG_JSONL).read_text(encoding="utf-8"), encoding="utf-8")
+        broken = SPEC_PAGE.replace("| サマリー | プレイヤーが発動するスキル |", "| サマリー |  |") + (
+            "[無いページ](無い.md) [外](https://example.com/a.md)\n"
+            "<mention-page url=\"https://app.notion.com/p/0123456789abcdef0123456789abcdef\"/>\n"
+            "## 経緯\n<table header-row=\"true\">\n<tr>\n<td>日付</td>\n<td>種別</td>\n</tr>\n"
+            "<tr>\n<td>2026-10-01</td>\n<td>変更</td>\n</tr>\n<tr>\n<td>2026-10-02</td>\n<td>検討</td>\n</tr>\n</table>\n")
+        self.write("SKC/仕様概要/仕様リスト/スキル.md", broken)
+        (self.root / "SKC/用語/キルコード.md").rename(self.root / "SKC/用語/キルコード（改名）.md")
+        code, output = self.lint("--previous", str(previous))
+        self.assertEqual(code, 0)
+        self.assertIn("切れたリンク 2 件", output)  # 無い.md と、改名で切れた用語へのリンク
+        self.assertIn("範囲外のメンション 1 件", output)
+        self.assertIn("必須属性の空き 1 件", output)
+        self.assertIn("経緯の種別がW-09以外 1 件", output)
+        self.assertIn("移動したページ 1 件、消えたページ 0 件", output)
+        self.assertNotIn("無い.md", output)
+        self.assertIn("無い.md", self.lint("--details")[1])
+        self.assertEqual(self.lint("--strict")[0], 1)
 
 
 if __name__ == "__main__":

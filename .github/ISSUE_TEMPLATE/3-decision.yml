@@ -51,7 +51,7 @@ body:
     id: after
     attributes:
       label: 決定後にやること
-      description: 仕様書の更新・実装・アセット依頼など。
+      description: プロジェクト ドキュメントの更新・実装・アセット依頼など。
       placeholder: |
         - [ ] 
   - type: textarea

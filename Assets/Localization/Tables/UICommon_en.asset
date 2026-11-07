@@ -680,6 +680,42 @@ MonoBehaviour:
     m_Localized: Cancel
     m_Metadata:
       m_Items: []
+  - m_Id: 2096000000
+    m_Localized: "Activation Combo: {0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000001
+    m_Localized: "Attack"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000002
+    m_Localized: "Buff"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000003
+    m_Localized: "Debuff"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000004
+    m_Localized: "{0}x"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000005
+    m_Localized: "{0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000006
+    m_Localized: "{0}s"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000007
+    m_Localized: "({0})"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000008
+    m_Localized: "{0} ({1}/{2})"
+    m_Metadata:
+      m_Items: []
   - m_Id: 2096100001
     m_Localized: "Spend Unlock Points on research to unlock Kill Chords and upgrades. You earn Unlock Points by clearing stages for the first time, among other ways."
     m_Metadata:

@@ -31,5 +31,7 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         EnemyAttack,
         /// <summary> 説明ポップアップを閉じる決定入力(PCのUI決定ボタン、スマホの画面タップ)。 </summary>
         PopupConfirm,
+        /// <summary> Just攻撃（拍子の色は問わない）。 </summary>
+        JustAttack,
     }
 }

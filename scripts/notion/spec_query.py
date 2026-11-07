@@ -1,13 +1,13 @@
-"""Notion仕様書ミラーを、目録で探して（search）必要な節だけ読む（get）ための窓口。
+"""Notionのプロジェクト ドキュメントのミラーを、目録で探して（search）必要な節だけ読む（get）ための窓口。
 
-仕様書改定方針（#2396）の段階2。AI・エージェントが仕様を読むとき、仕様書ミラーを全文検索して
+仕様書改定方針（#2396）の段階2。AI・エージェントが仕様を読むとき、プロジェクト ドキュメントのミラーを全文検索して
 ページを丸ごと読む代わりに、次の二段階で必要な範囲だけを取り出す。
 
   search  目録（_catalog.jsonl）をキーワードとプロパティで絞り込み、ページID・タイトル・サマリーを返す
   get     1ページの「仕様」の節（仕様概要・詳細説明）を返す。親仕様・子仕様・関連ページを添える
           --rationale で仕様意図（経緯・却下・保留した案）を、--status で実装リストの実装状態を足す
 
-目録がない版の仕様書ミラーでも動くよう、そのときは build_spec_catalog.py と同じ処理で目録をその場で作る。
+目録がない版のプロジェクト ドキュメントのミラーでも動くよう、そのときは build_spec_catalog.py と同じ処理で目録をその場で作る。
 本文の <mention-page> はページ名とパスに置き換えて返す（書き出すとページ名が落ちる問題 #2483 D-14 を読む側で補う）。
 
 使い方（リポジトリのルートから）:
@@ -15,8 +15,13 @@
   python scripts/notion/spec_query.py search --category バトルパート --parent プレイヤー
   python scripts/notion/spec_query.py get 回避アクション --rationale --status
   python scripts/notion/spec_query.py get 33a7c2c6cc028053a4fbf138ffac7b74 --json
+  python scripts/notion/spec_query.py path 3567c2c6-cc02-80d1-bd4e-e6dea0d41181
+
+path はマニフェスト（.notion-export-manifest.json）でページ・データベースのIDからミラー内のパスを引く（#1955）。
+スキルにはパスではなくIDを書き、読むときにこれでパスを引く。
 """
 import argparse
+import html
 import json
 import re
 import sys
@@ -41,8 +46,9 @@ from build_spec_catalog import (
 
 DEFAULT_SOURCE = Path(__file__).resolve().parents[2] / "Docs" / "NotionSpecifications"
 
-# 仕様リストのカテゴリー「開発用」は旧版・参考として、検索の既定から外す（#2396 段階0）。
-DEVELOPMENT_CATEGORIES = {"開発用"}
+# 仕様リストのカテゴリー「開発用（旧版・参考）」は、検索の既定から外す（#2396 段階0）。
+# 2026-11-06 に「開発用」から名前を変えた。写しが古いときのため、前の名前も残す。
+DEVELOPMENT_CATEGORIES = {"開発用（旧版・参考）", "開発用"}
 CATEGORY_PROPERTIES = ("カテゴリー", "種別")
 SUMMARY_PROPERTIES = ("サマリー", "概要")
 SCOPE_PROPERTY = "適用範囲"
@@ -72,7 +78,9 @@ PRIMARY_DATABASES = ("仕様リスト", "システムリスト", "用語リス�
 SPEC_DATABASES = ("仕様リスト", "システムリスト")
 DEFAULT_LIMIT = 20
 
-MENTION_TAG_RE = re.compile(r'<mention-(?:page|database)\s+url="(?P<url>[^"]+)"\s*/?>(?:</mention-(?:page|database)>)?')
+# Exporter がページ名を補った <mention-page url="...">名前</mention-page> の形も読む（#2483 D-14）。
+MENTION_TAG_RE = re.compile(
+    r'<mention-(?:page|database)\s+url="(?P<url>[^"]+)"\s*(?:/>|>(?P<title>[^<]*)</mention-(?:page|database)>|>)')
 TABLE_OF_CONTENTS_RE = re.compile(r"^\s*<table_of_contents[^>]*/>\s*$")
 TABLE_START_RE = re.compile(r"^\s*<table(?:\s[^>]*)?>\s*$")
 TABLE_END_RE = re.compile(r"^\s*</table>\s*$")
@@ -142,7 +150,7 @@ class Catalog:
 
 
 def load_catalog(source):
-    """仕様書ルートの _catalog.jsonl を読む。無ければ目録をその場で作る（ファイルには書かない）。"""
+    """プロジェクト ドキュメントのルートの _catalog.jsonl を読む。無ければ目録をその場で作る（ファイルには書かない）。"""
     catalog_file = source / CATALOG_JSONL
     if catalog_file.is_file():
         text = catalog_file.read_text(encoding="utf-8")
@@ -316,7 +324,7 @@ def split_sections(body):
 
 
 def replace_mentions(catalog, text, page_path=""):
-    """<mention-page> を [タイトル](<パス>) に、ページ内の相対リンクを仕様書ルートからのパスに置き換える。
+    """<mention-page> を [タイトル](<パス>) に、ページ内の相対リンクをプロジェクト ドキュメントのルートからのパスに置き換える。
     目録に無いページはURLを残す。"""
 
     def replace_mention(match):
@@ -324,7 +332,8 @@ def replace_mentions(catalog, text, page_path=""):
         row = catalog.by_id.get(extract_page_id(url))
         if row:
             return f"[{row['title']}](<{row['path']}>)"
-        return f"[目録に無いページ]({url})"
+        title = html.unescape(match.group("title") or "").strip()
+        return f"[{title or '目録に無いページ'}]({url})"
 
     def replace_link(match):
         target = match.group("target")
@@ -368,6 +377,22 @@ def convert_tables(text):
 
 def clean_cell(cell):
     return re.sub(r"\s*\n\s*", "<br>", cell.strip()).replace("|", "\\|")
+
+
+MANIFEST = ".notion-export-manifest.json"
+
+
+def manifest_path(source, target):
+    """マニフェストの Pages[]・Databases[] で、ページID・データベースIDから書き出したファイルのパスを引く。"""
+    page_id = extract_page_id(target)
+    manifest_file = source / MANIFEST
+    if not page_id or not manifest_file.is_file():
+        return ""
+    manifest = json.loads(manifest_file.read_text(encoding="utf-8-sig"))
+    for entry in manifest.get("Pages", []) + manifest.get("Databases", []):
+        if entry.get("Id", "").replace("-", "").lower() == page_id:
+            return entry.get("File", "")
+    return ""
 
 
 def resolve_target(catalog, target):
@@ -485,8 +510,8 @@ def format_get(result):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(description="Notion仕様書ミラーを目録で探し、必要な節だけ読む。")
-    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE, help="仕様書ミラーのルート（既定: Docs/NotionSpecifications）")
+    parser = argparse.ArgumentParser(description="Notionのプロジェクト ドキュメントのミラーを目録で探し、必要な節だけ読む。")
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE, help="プロジェクト ドキュメントのミラーのルート（既定: Docs/NotionSpecifications）")
     parser.add_argument("--json", action="store_true", help="結果をJSONで出す")
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -496,7 +521,7 @@ def build_parser():
     search_parser.add_argument("--parent", help="親仕様（ID・パス・タイトル）")
     search_parser.add_argument("--scope", help="適用範囲（製品版・体験版など）。未設定のページは含める")
     search_parser.add_argument("--db", help="所属DB名の部分一致（例: 仕様リスト）")
-    search_parser.add_argument("--include-dev", action="store_true", help="カテゴリー「開発用」も含める")
+    search_parser.add_argument("--include-dev", action="store_true", help="カテゴリー「開発用（旧版・参考）」も含める")
     search_parser.add_argument("--no-fallback", action="store_true", help="目録で0件のときに本文を検索しない")
     search_parser.add_argument("--limit", type=int, default=DEFAULT_LIMIT, help=f"表示件数（既定 {DEFAULT_LIMIT}）")
 
@@ -504,6 +529,9 @@ def build_parser():
     get_parser.add_argument("target", help="ページID・Notion URL・パス・タイトル")
     get_parser.add_argument("--rationale", action="store_true", help="仕様意図（経緯・却下・保留した案）も返す")
     get_parser.add_argument("--status", action="store_true", help="実装リストの実装状態も返す")
+
+    path_parser = commands.add_parser("path", help="ページID・データベースIDからミラー内のパスを引く")
+    path_parser.add_argument("target", help="ページID・データベースID・Notion URL")
     return parser
 
 
@@ -511,8 +539,15 @@ def main(argv=None):
     args = build_parser().parse_args(argv)
     source = args.source.resolve()
     if not source.is_dir():
-        print(f"仕様書のディレクトリが見つかりません: {args.source}", file=sys.stderr)
+        print(f"プロジェクト ドキュメントのディレクトリが見つかりません: {args.source}", file=sys.stderr)
         return 1
+    if args.command == "path":
+        path = manifest_path(source, args.target)
+        if not path:
+            print(f"{MANIFEST} にこのIDがありません。ページが消えたか、ミラーが古い可能性があります。", file=sys.stderr)
+            return 2
+        print(json.dumps({"path": path}, ensure_ascii=False) if args.json else path)
+        return 0
     catalog = load_catalog(source)
     if not catalog.from_file:
         print(f"{CATALOG_JSONL} が無いため、目録をその場で作りました。", file=sys.stderr)
