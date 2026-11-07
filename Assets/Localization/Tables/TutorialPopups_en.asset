@@ -194,6 +194,22 @@ MonoBehaviour:
       shows its true value with precise rhythm timing.'
     m_Metadata:
       m_Items: []
+  - m_Id: 1648918546
+    m_Localized: "Lock-On"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918547
+    m_Localized: "Lock-on fixes your aim on one enemy,\nand the camera follows it.\nPress again to release.\n\n{input.device:choose(keyboard|xbox|playstation|switch):<sprite name=\"mm\">|<sprite name=\"lt\">|<sprite name=\"lt\">|<sprite name=\"lt\">} Lock-On"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918548
+    m_Localized: "Enemy Intel"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1648918549
+    m_Localized: "Soldier\nAn enemy that closes in to attack.\nA warning (a line and a sound) appears before it strikes,\nso dodge to avoid it."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -204,3 +220,4 @@ MonoBehaviour:
         m_SharedEntries:
         - id: 1644724225
         - id: 1648918529
+        - id: 1648918547

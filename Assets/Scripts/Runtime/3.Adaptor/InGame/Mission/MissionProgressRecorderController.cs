@@ -76,7 +76,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _attackController.OnAttackExecuted += HandleAttackExecuted;
             _attackController.OnAttackBeatExecuted += HandleAttackBeatExecuted;
             _skillController.OnSkillAnimationRequested += HandleSkillAnimationRequested;
-            _targetSystemController.OnTargetLocked += HandleTargetLocked;
+            _targetSystemController.OnLockOnInputPerformed += HandleLockOnInputPerformed;
             _musicSyncService.OnRhythmTimedOut += HandleRhythmTimedOutHandler;
         }
 
@@ -87,6 +87,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         {
             // 保留中の攻撃の種類を消し、各イベントの購読を解除する。
             _pendingAttackBeatKind = null;
+            _isPendingAttackJust = false;
 
             if (_playerEntity != null)
             {
@@ -112,7 +113,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
             if (_targetSystemController != null)
             {
-                _targetSystemController.OnTargetLocked -= HandleTargetLocked;
+                _targetSystemController.OnLockOnInputPerformed -= HandleLockOnInputPerformed;
             }
 
             if (_musicSyncService != null)
@@ -148,6 +149,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private ComboHudPresenter _comboHudPresenter;
         /// <summary> <see cref="HandleAttackExecuted"/>と一緒に通知する、保留中の拍子攻撃です。 </summary>
         private MissionActionKind? _pendingAttackBeatKind;
+        /// <summary> 保留中の攻撃がJust攻撃だった場合はtrueです。 </summary>
+        private bool _isPendingAttackJust;
         private readonly List<MissionActionKind> _attackActionBuffer = new();
 
         /// <summary>
@@ -173,8 +176,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _missionEventController.NotifyActionPerformed(MissionActionKind.Move);
         }
 
-        /// <summary> ロックオン成立をMissionへ通知します。 </summary>
-        private void HandleTargetLocked()
+        /// <summary> ロックオン入力で対象を捉えたことをMissionへ通知します。攻撃時の自動ロックオンは数えません。 </summary>
+        private void HandleLockOnInputPerformed()
         {
             _missionEventController.NotifyActionPerformed(MissionActionKind.LockOn);
         }
@@ -189,8 +192,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         ///     </para>
         /// </summary>
         /// <param name="beatType"> 実行した攻撃の拍子です。 </param>
-        private void HandleAttackBeatExecuted(BeatType beatType)
+        /// <param name="isJustHit"> Just攻撃だった場合はtrueです。 </param>
+        private void HandleAttackBeatExecuted(BeatType beatType, bool isJustHit)
         {
+            _isPendingAttackJust = isJustHit;
             _pendingAttackBeatKind = beatType switch
             {
                 BeatType.One => MissionActionKind.AttackOneBeat,
@@ -250,7 +255,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 _attackActionBuffer.Add(_pendingAttackBeatKind.Value);
             }
 
+            // Just攻撃は拍子の色を問わずに数える。
+            if (_isPendingAttackJust)
+            {
+                _attackActionBuffer.Add(MissionActionKind.JustAttack);
+            }
+
             _pendingAttackBeatKind = null;
+            _isPendingAttackJust = false;
             _attackActionBuffer.Add(MissionActionKind.Attack);
             _missionEventController.NotifyActionsPerformed(_attackActionBuffer);
         }
