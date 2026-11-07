@@ -79,7 +79,7 @@ namespace KillChord.Runtime.InfraStructure.Player
         }
 
         /// <summary> スキルの攻撃硬直の既定値（拍数）。設定していないスキルはこの値を使う。 </summary>
-        private const float DEFAULT_RECOVERY_BEATS = 0.5f;
+        private const float DEFAULT_RECOVERY_BEATS = 0.25f;
 
         private const string EFFECT_PARAMETER_PLACEHOLDER_PATTERN = "\\{([^{}]+)\\}";
         private const int PLACEHOLDER_ID_GROUP = 1;
