@@ -9,8 +9,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
     /// </summary>
     public sealed class TargetSystemController
     {
-        /// <summary> 有効なターゲットをロックオンした時に発火します。 </summary>
-        public event Action OnTargetLocked;
+        /// <summary> ロックオン入力で有効なターゲットを捉えた時に発火します。攻撃時の自動ロックオンや付け替えでは発火しません。 </summary>
+        public event Action OnLockOnInputPerformed;
 
         /// <summary>
         ///     ターゲット選択ViewModelとレジストリを受け取り、コントローラーを初期化する。
@@ -127,9 +127,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true)
         {
             _targetSystemViewModel.ChangeTarget(playerPosition, direction, notifyLockOn);
-            if (notifyLockOn)
+        }
+
+        /// <summary>
+        ///     ロックオン入力の後に、有効なターゲットを捉えていればそれを通知する。
+        /// </summary>
+        public void NotifyLockOnInput()
+        {
+            if (_targetSystemViewModel.TryGetCurrentTarget(out _))
             {
-                NotifyTargetLockedIfAvailable();
+                OnLockOnInputPerformed?.Invoke();
             }
         }
 
@@ -161,13 +168,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// <returns> 設定に成功した場合は true。 </returns>
         public bool TrySetCurrentTarget(Guid targetId)
         {
-            bool succeeded = _targetSystemViewModel.TrySetCurrentTarget(targetId);
-            if (succeeded)
-            {
-                OnTargetLocked?.Invoke();
-            }
-
-            return succeeded;
+            return _targetSystemViewModel.TrySetCurrentTarget(targetId);
         }
 
         /// <summary>
@@ -180,16 +181,5 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
 
         private readonly ITargetSystemViewModel _targetSystemViewModel;
         private readonly TargetEntityRegistry _targetEntityRegistry;
-
-        /// <summary>
-        ///     現在のターゲットが有効な場合にロックオン成立を通知します。
-        /// </summary>
-        private void NotifyTargetLockedIfAvailable()
-        {
-            if (_targetSystemViewModel.TryGetCurrentTarget(out _))
-            {
-                OnTargetLocked?.Invoke();
-            }
-        }
     }
 }

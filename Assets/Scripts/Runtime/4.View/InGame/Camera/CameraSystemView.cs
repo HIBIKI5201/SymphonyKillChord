@@ -16,6 +16,9 @@ namespace KillChord.Runtime.View.InGame.Camera
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
     public sealed class CameraSystemView : MonoBehaviour
     {
+        /// <summary> ロックオン入力で対象を捉えたとき（手動ロックの開始と、次の敵への切り替え）に発火します。解除では発火しません。 </summary>
+        public event Action OnLockOnInputPerformed;
+
         /// <summary> 初回カメラ更新が完了している場合はtrueです。 </summary>
         public bool HasCompletedInitialUpdate => _hasCompletedInitialUpdate;
 
@@ -640,6 +643,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 _lockOnState = CameraLockOnState.LockOnManual;
                 _autoLockOnReleaseTracker.Reset();
                 _changeTargetAction.Invoke(currentPosition, direction, true);
+                OnLockOnInputPerformed?.Invoke();
                 return;
             }
 
@@ -649,6 +653,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 // 左右切り替えと同じく自動ロックのまま、視野外の対象へ移った直後の猶予だけを更新する。
                 _autoLockOnReleaseTracker.ExtendViewportGrace();
+                OnLockOnInputPerformed?.Invoke();
                 return;
             }
 

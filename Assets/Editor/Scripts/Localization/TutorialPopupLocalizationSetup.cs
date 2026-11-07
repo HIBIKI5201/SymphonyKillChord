@@ -77,13 +77,15 @@ namespace KillChord.Editor.Localization
 
         private const string TABLES_DIRECTORY = "Assets/Localization/Tables";
 
-        // UICommonの ui.input.glyph.attack_button / dodge / move と同じ定義。
+        // UICommonの ui.input.glyph.attack_button / dodge / move / lock_on と同じ定義。
         private const string ATTACK_GLYPH =
             "{input.device:choose(keyboard|xbox|playstation|switch):<sprite name=\"ml\">|<sprite name=\"xb\">|<sprite name=\"po\">|<sprite name=\"na\">}";
         private const string DODGE_GLYPH =
             "{input.device:choose(keyboard|xbox|playstation|switch):<sprite name=\"space\">|<sprite name=\"xa\">|<sprite name=\"px\">|<sprite name=\"nb\">}";
         private const string MOVE_GLYPH =
             "{input.device:choose(keyboard|xbox|playstation|switch):<size=80%><sprite name=\"w\"><sprite name=\"a\"><sprite name=\"s\"><sprite name=\"d\"></size>|<sprite name=\"jl\">|<sprite name=\"jl\">|<sprite name=\"jl\">}";
+        private const string LOCK_ON_GLYPH =
+            "{input.device:choose(keyboard|xbox|playstation|switch):<sprite name=\"mm\">|<sprite name=\"lt\">|<sprite name=\"lt\">|<sprite name=\"lt\">}";
 
         private static readonly EntryDefinition[] _definitions =
         {
@@ -141,6 +143,16 @@ namespace KillChord.Editor.Localization
             new("tutorial.popup.yellow.body",
                 "使用武器：ハンドガン\n黄色のタイミングで攻撃時に行う、\n素早く威力の高い攻撃。\nそのため、入力難易度は高く\n正確なリズム入力によって真価を発揮する。",
                 "Weapon: Handgun\nPerformed by attacking on the yellow timing.\nA fast, high-power attack.\nBecause of that, it's difficult to input,\nand shows its true value with precise rhythm timing."),
+
+            new("tutorial.popup.lock_on.title", "ロックオン", "Lock-On"),
+            new("tutorial.popup.lock_on.body",
+                "ロックオンすると、狙う敵を固定し、\nカメラがその敵を追いかける。\nもう一度押すと解除する。\n\n" + LOCK_ON_GLYPH + " ロックオン",
+                "Lock-on fixes your aim on one enemy,\nand the camera follows it.\nPress again to release.\n\n" + LOCK_ON_GLYPH + " Lock-On"),
+
+            new("tutorial.popup.enemy_intel.title", "敵の資料", "Enemy Intel"),
+            new("tutorial.popup.enemy_intel.body",
+                "戦闘員\n近づいて攻撃してくる敵。\n攻撃の前に予兆（ラインと音）が出るので、\n回避で避けよう。",
+                "Soldier\nAn enemy that closes in to attack.\nA warning (a line and a sound) appears before it strikes,\nso dodge to avoid it."),
         };
 
         /// <summary>
