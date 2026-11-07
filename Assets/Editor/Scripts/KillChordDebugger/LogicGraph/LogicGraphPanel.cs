@@ -1,5 +1,3 @@
-using KillChord.Runtime.Application.InGame.Battle;
-using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
@@ -11,6 +9,7 @@ namespace KillChord.Editor.Debugger.LogicGraph
     /// <summary>
     ///     KillChord Debugger の「ロジック」パネル。
     ///     <para> Play中に攻撃パイプラインの実行を記録し、左の一覧で選んだ1回分をグラフで表示する。 </para>
+    ///     <para> 記録はエディタ側だけで行い、ランタイムのコードには手を入れない。 </para>
     /// </summary>
     public sealed class LogicGraphPanel : VisualElement, IDisposable
     {
@@ -44,20 +43,27 @@ namespace KillChord.Editor.Debugger.LogicGraph
             _graphView.AddToClassList("lgd-graph-host");
             body.Add(_graphView);
 
+            _installer = new AttackPipelineTraceInstaller(_recorder);
             _refreshItem = schedule.Execute(Refresh).Every(REFRESH_INTERVAL_MS);
             EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
+            AssemblyReloadEvents.beforeAssemblyReload += HandleBeforeAssemblyReload;
+            EditorApplication.quitting += HandleEditorQuitting;
+            LogicGraphAssetSaveGuard.OnWillSave += HandleWillSaveAssets;
             Refresh();
         }
 
         /// <summary>
-        ///     記録の取り込みを止め、ServiceLocatorから登録を外す。
+        ///     記録の取り込みを止め、包んだ攻撃ステップを元に戻す。
         /// </summary>
         public void Dispose()
         {
             EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
+            AssemblyReloadEvents.beforeAssemblyReload -= HandleBeforeAssemblyReload;
+            EditorApplication.quitting -= HandleEditorQuitting;
+            LogicGraphAssetSaveGuard.OnWillSave -= HandleWillSaveAssets;
             _refreshItem?.Pause();
             _refreshItem = null;
-            UnregisterRecorder();
+            _installer.Uninstall();
         }
 
         private const string STYLE_SHEET_PATH =
@@ -67,6 +73,7 @@ namespace KillChord.Editor.Debugger.LogicGraph
         private const string DAMAGE_FORMAT = "F1";
 
         private readonly AttackPipelineTraceRecorder _recorder = new();
+        private readonly AttackPipelineTraceInstaller _installer;
         private readonly List<AttackTraceRecord> _listItems = new();
         private readonly AttackPipelineGraphView _graphView;
         private readonly ListView _recordList;
@@ -75,21 +82,53 @@ namespace KillChord.Editor.Debugger.LogicGraph
         private AttackTraceRecord _shownRecord;
         private int _shownVersion = -1;
         private bool _isFollowingLatest = true;
-        private bool _isRegistered;
 
         /// <summary>
-        ///     Playの開始・終了に合わせて登録状態を整える。
+        ///     Playの開始・終了に合わせて、攻撃ステップを包む・戻す。
         /// </summary>
         /// <param name="change"> Playモードの変化。 </param>
         private void HandlePlayModeStateChanged(PlayModeStateChange change)
         {
-            // Play終了時はServiceLocatorごと破棄されるため、登録済みの印だけ戻す。
+            // Playを抜ける前に元へ戻し、アセットに記録用のステップを残さない。
             if (change == PlayModeStateChange.ExitingPlayMode)
             {
-                UnregisterRecorder();
+                _installer.Uninstall();
             }
 
             Refresh();
+        }
+
+        /// <summary>
+        ///     再コンパイルの前に、包んだ攻撃ステップを元に戻す。
+        /// </summary>
+        private void HandleBeforeAssemblyReload()
+        {
+            _installer.Uninstall();
+        }
+
+        /// <summary>
+        ///     エディタ終了の前に、包んだ攻撃ステップを元に戻す。
+        /// </summary>
+        private void HandleEditorQuitting()
+        {
+            _installer.Uninstall();
+        }
+
+        /// <summary>
+        ///     アセット保存の直前に元へ戻し、保存が終わってから包み直す。
+        /// </summary>
+        private void HandleWillSaveAssets()
+        {
+            if (!_installer.IsInstalled) { return; }
+
+            _installer.Uninstall();
+            EditorApplication.delayCall += () =>
+            {
+                if (EditorApplication.isPlaying && _refreshItem != null)
+                {
+                    _installer.Install();
+                }
+            };
         }
 
         /// <summary>
@@ -181,13 +220,15 @@ namespace KillChord.Editor.Debugger.LogicGraph
         /// </summary>
         private void Refresh()
         {
-            if (EditorApplication.isPlaying)
+            // Play中で、Playを抜ける途中でなければ攻撃ステップを包む。
+            if (EditorApplication.isPlaying && EditorApplication.isPlayingOrWillChangePlaymode
+                &&!_installer.IsInstalled)
             {
-                EnsureRecorderRegistered();
+                _installer.Install();
             }
 
             _statusLabel.text = EditorApplication.isPlaying
-                ? $"記録中 {_recorder.Records.Count} 件{(_recorder.IsPaused ? "（停止中）" : string.Empty)}"
+                ? $"記録中 {_recorder.Records.Count} 件（パイプライン {_installer.InstalledAssetCount} 個）{(_recorder.IsPaused ? "（停止中）" : string.Empty)}"
                 : $"Play中に記録します（{_recorder.Records.Count} 件）";
 
             if (_shownVersion == _recorder.Version) { return; }
@@ -219,36 +260,6 @@ namespace KillChord.Editor.Debugger.LogicGraph
 
             _shownRecord = record;
             _graphView.ShowRecord(record);
-        }
-
-        /// <summary>
-        ///     Play中、記録係がServiceLocatorに登録されていなければ登録する。
-        ///     シーン遷移などで登録が消えても、次の更新で登録し直す。
-        /// </summary>
-        private void EnsureRecorderRegistered()
-        {
-            if (ServiceLocator.TryGetInstance(out IAttackPipelineTracer current))
-            {
-                _isRegistered = ReferenceEquals(current, _recorder);
-                return;
-            }
-
-            _isRegistered = ServiceLocator.RegisterInstance<IAttackPipelineTracer>(_recorder);
-        }
-
-        /// <summary>
-        ///     自分が登録した記録係だけをServiceLocatorから外す。
-        /// </summary>
-        private void UnregisterRecorder()
-        {
-            if (_isRegistered
-                && ServiceLocator.TryGetInstance(out IAttackPipelineTracer current)
-                && ReferenceEquals(current, _recorder))
-            {
-                ServiceLocator.UnregisterInstance<IAttackPipelineTracer>();
-            }
-
-            _isRegistered = false;
         }
 
         /// <summary>
