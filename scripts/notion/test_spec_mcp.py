@@ -1,4 +1,4 @@
-"""仕様書の窓口の MCP サーバー（spec_mcp.py）を、小さな仕様書ミラーで確かめる。"""
+"""プロジェクト ドキュメントの窓口の MCP サーバー（spec_mcp.py）を、小さなプロジェクト ドキュメントのミラーで確かめる。"""
 import io
 import json
 import unittest

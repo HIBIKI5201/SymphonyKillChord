@@ -1,6 +1,6 @@
 # Notion Markdown Writer
 
-Notionの仕様書ページへMarkdownで書き込むツールです。
+Notionのプロジェクト ドキュメントページへMarkdownで書き込むツールです。
 `NotionMarkdownExporter`が読み取り専用なのに対して、こちらは作成と部分更新を担当します。
 
 Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSONを組み立てる必要はありません。

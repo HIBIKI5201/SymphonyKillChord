@@ -279,7 +279,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         {
             SlashCommandBuilder commandBuilder = new SlashCommandBuilder()
                 .WithName(SPEC_COMMAND_NAME)
-                .WithDescription("仕様書から関連する記述を検索します。")
+                .WithDescription("プロジェクト ドキュメントから関連する記述を検索します。")
                 .AddOption(
                     QUERY_OPTION_NAME,
                     ApplicationCommandOptionType.String,
@@ -304,7 +304,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         ///     検索結果をDiscord Embedへ変換する。
         /// </summary>
         /// <param name="query">ユーザーが入力した検索文字列。</param>
-        /// <param name="records">類似度順の仕様書チャンク。</param>
+        /// <param name="records">類似度順のプロジェクト ドキュメントのチャンク。</param>
         /// <returns>検索結果のEmbed構築器。</returns>
         private static EmbedBuilder BuildSearchResultEmbed(string query, SpecChunkRecord[] records)
         {
@@ -335,7 +335,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         /// </summary>
         /// <param name="query">ユーザーが入力した検索文字列。</param>
         /// <param name="summary">AIが生成した要約文または生成失敗メッセージ。</param>
-        /// <param name="records">要約の根拠にした仕様書チャンク。</param>
+        /// <param name="records">要約の根拠にしたプロジェクト ドキュメントのチャンク。</param>
         /// <returns>AI要約結果のEmbed構築器。</returns>
         private static EmbedBuilder BuildSummarizedResultEmbed(string query, SpecSearchAnswer summary, SpecChunkRecord[] records)
         {

@@ -280,7 +280,7 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         }
 
         /// <summary>
-        ///     Gitリポジトリのルートを探し、既定の仕様書出力先を決定する。
+        ///     Gitリポジトリのルートを探し、既定のプロジェクト ドキュメントの出力先を決定する。
         /// </summary>
         /// <returns>既定の出力先。</returns>
         private static string FindDefaultOutputDirectory()

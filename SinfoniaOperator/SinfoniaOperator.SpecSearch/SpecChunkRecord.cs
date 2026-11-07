@@ -3,12 +3,12 @@ using System;
 namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
 {
     /// <summary>
-    ///     仕様書の検索単位と埋め込みベクトルを保持する。
+    ///     プロジェクト ドキュメントの検索単位と埋め込みベクトルを保持する。
     /// </summary>
     public sealed class SpecChunkRecord
     {
         /// <summary>
-        ///     仕様書の検索単位を生成する。
+        ///     プロジェクト ドキュメントの検索単位を生成する。
         /// </summary>
         /// <param name="sourceFile">リポジトリルートからの相対パス。</param>
         /// <param name="headingBreadcrumb">見出しのパンくず。</param>

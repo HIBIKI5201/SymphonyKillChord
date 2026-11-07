@@ -8,7 +8,7 @@ Notionの「システムリスト」データベースにあるモジュール�
 | 場所 | 役割 |
 | --- | --- |
 | Notion「システムリスト」DBの各ページ | 正本。本文と処理フローの子ページを直接編集する |
-| 仕様書の写し `Docs/NotionSpecifications` のシステムリスト（データベース id `27d7c2c6-cc02-81ee-963f-f0e4195b52e0`。パスは `python scripts/notion/spec_query.py path <id>` で引く） | 読み取り専用の写し。読むときに使う（[読む手順](../../../../Docs/agent/README.md#必要な資料だけを読む)） |
+| プロジェクト ドキュメントの写し `Docs/NotionSpecifications` のシステムリスト（データベース id `27d7c2c6-cc02-81ee-963f-f0e4195b52e0`。パスは `python scripts/notion/spec_query.py path <id>` で引く） | 読み取り専用の写し。読むときに使う（[読む手順](../../../../Docs/agent/README.md#必要な資料だけを読む)） |
 
 リポジトリにあった旧正本（`Assets/Docs/ScriptsDocs/Modules/NotionModuleDocs/`）はNotionへ反映したうえで削除した。
 リポジトリからNotionへ同期するスクリプトも廃止した。

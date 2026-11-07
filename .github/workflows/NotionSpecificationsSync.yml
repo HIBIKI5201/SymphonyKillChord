@@ -1,7 +1,7 @@
 name: "[Bot] Notion Specifications Sync"
 
-# Notionの仕様書をMarkdownへ書き出し、非公開の仕様書リポジトリ（Docs/NotionSpecificationsのサブモジュール）へpushする。
-# 書き出し後に仕様書の目録（_catalog.md / _catalog.jsonl）を生成し、同じコミットに含める。
+# Notionのプロジェクト ドキュメントをMarkdownへ書き出し、非公開の仕様書リポジトリ（Docs/NotionSpecificationsのサブモジュール）へpushする。
+# 書き出し後にプロジェクト ドキュメントの目録（_catalog.md / _catalog.jsonl）を生成し、同じコミットに含める。
 # NotionのAPI制限を各メンバーが消費しないよう、取得はこのワークフローだけで行い、各自はサブモジュールをpullして読む。
 # このリポジトリは公開されているため、Actionsの実行時間は無料で、ログは誰でも閲覧できる。ページタイトルをログへ出さない。
 
@@ -70,14 +70,14 @@ jobs:
           fi
           sed -n '/エクスポートが完了しました/,$p' "$log_file" | grep -v '出力先'
 
-      - name: 仕様書の目録を生成
-        # LLM・エージェントが最初に読む目録（_catalog.md / _catalog.jsonl）を仕様書のルートへ書き出し、同じコミットで届ける。
+      - name: プロジェクト ドキュメントの目録を生成
+        # LLM・エージェントが最初に読む目録（_catalog.md / _catalog.jsonl）をプロジェクト ドキュメントのルートへ書き出し、同じコミットで届ける。
         # 内容が変わらなければ同じ出力になるため、Notion側に変更がない回はコミットされない。ログは件数だけを表示する。
-        # 目録の失敗で仕様書の同期を止めない（目録は前回のまま残る）。
+        # 目録の失敗でプロジェクト ドキュメントの同期を止めない（目録は前回のまま残る）。
         continue-on-error: true
         run: python3 scripts/notion/build_spec_catalog.py --source "$SPEC_DIRECTORY"
 
-      - name: 仕様書の書き方を検査
+      - name: プロジェクト ドキュメントの書き方を検査
         # 切れたリンク・範囲外のメンション・必須属性の空き・経緯の種別・ページの移動と消失を数える（#2359 P9）。
         # 前回の目録（仕様書リポジトリの今のコミット）と比べて、page id のパスの変化を数える。
         # 知らせるだけで同期は止めない。ログは件数だけを出す（パスは手元で --details を付けて見る）。
@@ -97,7 +97,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit --quiet -m "Notion仕様書を同期 ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+          git commit --quiet -m "Notionのプロジェクト ドキュメントを同期 ($(date -u '+%Y-%m-%d %H:%M UTC'))"
           git push --quiet origin HEAD
           echo "$(git show --stat --format= HEAD | tail -n 1)"
 
