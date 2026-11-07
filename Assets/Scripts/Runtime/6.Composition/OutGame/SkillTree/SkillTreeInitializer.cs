@@ -6,12 +6,14 @@ using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Battle;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.OutGame.Skill;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
+using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.Utility.Identity;
@@ -142,6 +144,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private SkillTreeFocusPresenter _skillTreeFocusPresenter;
         private SkillUnlockData _skillUnlockData;
         private int _researchPoint;
+        private IReadOnlyList<StageId> _clearedStageIds;
         private OutGameUIEvent _outGameUIEvent;
         private CancellationTokenSource _cts;
         private RenderTexture _renderTexture;
@@ -270,6 +273,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
 
             _skillUnlockData = saveData.SkillUnlock;
+            _clearedStageIds = new SaveDataClearStageRepository(saveData.StageProgress).GetClearedStageIds();
             _researchPoint = saveData.ResourceInventory.GetAmount(GameResourceIds.ResearchPoint);
             return _skillUnlockData != null;
         }
@@ -489,7 +493,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _researchPoint,
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
-            _skillTreeService = new SkillTreeService(_skillNodeEntities);
+            _skillTreeService = new SkillTreeService(_skillNodeEntities, _clearedStageIds);
             if (_skillTreeService.AreAllNodesUnlocked())
             {
                 SetAllNodesUnlockedPhasesVisible();
