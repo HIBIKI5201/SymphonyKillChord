@@ -45,6 +45,11 @@ update by hand:
 git submodule update --init --remote --depth 1 -- Docs/NotionSpecifications
 ```
 
+To read a page after pulling, use its page id, not its path: `python scripts/notion/spec_query.py get <page id>`
+(or `path <id>` for a database), as in the [reading steps](../../../Docs/agent/README.md#必要な資料だけを読む).
+The canonical rules for the mirror are the Notion page "Notion プロジェクト ドキュメントの運用"
+(page id `3e37c2c6-cc02-815b-9dac-f6b834c1e56b`).
+
 Check freshness with `git -C Docs/NotionSpecifications log -1`. Only run the exporter locally
 when the user needs changes newer than the last sync; it writes into the submodule's working
 tree, so afterwards discard those local changes (`git -C Docs/NotionSpecifications checkout -- . && git -C Docs/NotionSpecifications clean -fd`)

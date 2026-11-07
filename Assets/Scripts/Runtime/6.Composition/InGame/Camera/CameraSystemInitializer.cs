@@ -100,7 +100,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             _cameraSystem.Initialize(
                 (playerPosition, direction, notifyLockOn) =>
                 {
-                    // ロックオン入力はコントローラーを通し、OnTargetLocked（ミッションの LockOn 行動の計上など）を発火させる。
+                    // ターゲットの切り替えはコントローラーを通す。ミッションの LockOn 行動はロックオン入力の通知（OnLockOnInputPerformed）で数える。
                     if (targetSystemController != null)
                     {
                         targetSystemController.ChangeTarget(playerPosition, direction, notifyLockOn);
@@ -129,6 +129,20 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             // ロックオン対象はカメラの視界範囲内の敵から選ぶ。
             targetingSystem.SetViewFilter(_cameraSystem.IsWithinLockOnView);
 
+            // ロックオン入力で対象を捉えたことを、コントローラー経由でミッションなどへ通知する。
+            // 初期化をやり直したときに二重に数えないよう、前の購読を外してからつなぐ。
+            if (_lockOnInputController != null)
+            {
+                _cameraSystem.OnLockOnInputPerformed -= _lockOnInputController.NotifyLockOnInput;
+                _lockOnInputController = null;
+            }
+
+            if (targetSystemController != null)
+            {
+                _lockOnInputController = targetSystemController;
+                _cameraSystem.OnLockOnInputPerformed += _lockOnInputController.NotifyLockOnInput;
+            }
+
             // 設定画面のカメラ感度・反転・オートロックオンを反映する。取得できない場合は既定の挙動で続行する。
             if (ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
             {
@@ -140,10 +154,27 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             }
         }
 
+        /// <summary>
+        ///     ロックオン入力の通知の購読を解除する。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (_lockOnInputController != null && _cameraSystem != null)
+            {
+                _cameraSystem.OnLockOnInputPerformed -= _lockOnInputController.NotifyLockOnInput;
+            }
+
+            _lockOnInputController = null;
+            base.Shutdown();
+        }
+
         [SerializeField, Tooltip("カメラシステムの挙動を管理する View コンポーネント。")]
         private CameraSystemView _cameraSystem;
 
         [SerializeField, Tooltip("カメラシステムのパラメータを定義するコンフィグ。")]
         private CameraConfig _config;
+
+        /// <summary> ロックオン入力を通知する先のコントローラーです。 </summary>
+        private TargetSystemController _lockOnInputController;
     }
 }

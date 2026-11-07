@@ -120,7 +120,7 @@ while read -r key path <&3; do
         continue
     fi
 
-    # 仕様書のように本体の記録を気にせず最新を読むもの（ignore = all）は、ブランチの最新を取る。
+    # プロジェクト ドキュメントのように本体の記録を気にせず最新を読むもの（ignore = all）は、ブランチの最新を取る。
     arguments=(submodule update --init --recursive)
     if [ "$(git_in_repo config -f .gitmodules --get "$name.ignore")" = 'all' ]; then
         arguments+=(--remote --depth 1)

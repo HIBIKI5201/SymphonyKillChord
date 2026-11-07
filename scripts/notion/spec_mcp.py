@@ -1,11 +1,11 @@
-"""仕様書の窓口（spec_query.py の search / get）を MCP のツールとして公開する stdio サーバー。
+"""プロジェクト ドキュメントの窓口（spec_query.py の search / get）を MCP のツールとして公開する stdio サーバー。
 
-仕様書改定方針（#2396）の段階2の「MCP で公開する」。Claude Code と Codex から、仕様書ミラーを
+仕様書改定方針（#2396）の段階2の「MCP で公開する」。Claude Code と Codex から、プロジェクト ドキュメントのミラーを
 全文検索せずに、目録で探して（spec_search）必要な節だけ読む（spec_get）ために使う。
 
 外部のライブラリを使わず、MCP の stdio トランスポート（1行1メッセージの JSON-RPC 2.0）を直接話す。
 扱うメソッドは initialize・ping・tools/list・tools/call だけで、通知（id の無いメッセージ）には返事をしない。
-目録は最初の呼び出しで読み、仕様書ミラーの _catalog.jsonl が更新されたら読み直す。
+目録は最初の呼び出しで読み、プロジェクト ドキュメントのミラーの _catalog.jsonl が更新されたら読み直す。
 
 登録の例（リポジトリのルートから）:
   Claude Code: .mcp.json の "spec" サーバー
@@ -42,9 +42,9 @@ TOOLS = [
     {
         "name": "spec_search",
         "description": (
-            "Symphony Kill Chord の Notion 仕様書ミラーを目録で探し、ページID・タイトル・サマリーを返す。"
+            "Symphony Kill Chord の Notion のプロジェクト ドキュメントのミラーを目録で探し、ページID・タイトル・サマリーを返す。"
             "仕様を読むときは、まずこれで候補を絞り、spec_get で必要なページだけ読む。"
-            "カテゴリー「開発用」（旧版・参考）は既定で外す。"
+            "カテゴリー「開発用（旧版・参考）」は既定で外す。"
         ),
         "inputSchema": {
             "type": "object",
@@ -54,7 +54,7 @@ TOOLS = [
                 "parent": {"type": "string", "description": "親仕様（ID・パス・タイトル）"},
                 "scope": {"type": "string", "description": "適用範囲（体験版など）。未設定のページは含める"},
                 "db": {"type": "string", "description": "所属DB名の部分一致（例: 仕様リスト、用語リスト）"},
-                "include_dev": {"type": "boolean", "description": "カテゴリー「開発用」も含める"},
+                "include_dev": {"type": "boolean", "description": "カテゴリー「開発用（旧版・参考）」も含める"},
                 "limit": {"type": "integer", "description": f"返す件数（既定 {DEFAULT_LIMIT}）", "minimum": 1},
             },
         },
@@ -62,7 +62,7 @@ TOOLS = [
     {
         "name": "spec_get",
         "description": (
-            "仕様書の1ページから、仕様の節（仕様概要・詳細説明）と、親仕様・子仕様・関連ページを返す。"
+            "プロジェクト ドキュメントの1ページから、仕様の節（仕様概要・詳細説明）と、親仕様・子仕様・関連ページを返す。"
             "rationale で仕様意図（経緯・却下・保留した案）を、status で実装リストの実装状態を足す。"
         ),
         "inputSchema": {
@@ -172,7 +172,7 @@ class Server:
             if handler is None:
                 return error(request_id, INVALID_PARAMS, f"Unknown tool: {name}")
             if not self.source.is_dir():
-                return result(request_id, tool_result(f"仕様書のディレクトリが見つかりません: {self.source}", None, True))
+                return result(request_id, tool_result(f"プロジェクト ドキュメントのディレクトリが見つかりません: {self.source}", None, True))
             try:
                 text, structured, is_error = handler(self.cache.get(), params.get("arguments") or {})
             except Exception as exception:  # ツールの失敗は、プロトコルのエラーではなくツールの結果として返す。
@@ -213,8 +213,8 @@ def serve(server, reader, writer):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="仕様書の窓口を MCP（stdio）で公開する。")
-    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE, help="仕様書ミラーのルート（既定: Docs/NotionSpecifications）")
+    parser = argparse.ArgumentParser(description="プロジェクト ドキュメントの窓口を MCP（stdio）で公開する。")
+    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE, help="プロジェクト ドキュメントのミラーのルート（既定: Docs/NotionSpecifications）")
     args = parser.parse_args(argv)
     # Windows でも UTF-8 で読み書きする（既定のコードページでは日本語が化ける）。
     sys.stdin.reconfigure(encoding="utf-8")

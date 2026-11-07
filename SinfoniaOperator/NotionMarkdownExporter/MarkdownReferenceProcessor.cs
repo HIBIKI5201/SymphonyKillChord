@@ -17,6 +17,9 @@ namespace SinfoniaStudio.NotionMarkdownExporter
         private static readonly Regex _urlAttributePattern = new(
             "\\burl\\s*=\\s*\"(?<url>[^\"]+)\"",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex _mentionPattern = new(
+            @"<mention-(?<kind>page|database)\b(?<attributes>[^>]*?)(?:>(?<title>.*?)</mention-\k<kind>>|\s*/>)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
         /// <summary>
         ///     Markdown内の子ページ参照を取得する。
@@ -56,6 +59,36 @@ namespace SinfoniaStudio.NotionMarkdownExporter
                 RewriteMatch(match, currentFilePath, pagePaths));
             return _databasePattern.Replace(rewritten, match =>
                 RewriteMatch(match, currentFilePath, databasePaths));
+        }
+
+        /// <summary>
+        ///     ページ名の無いページ・データベースのメンションに、エクスポートしたページのタイトルを補う。
+        ///     Notion の Markdown は <c>&lt;mention-page url="..."/&gt;</c> の形でメンションを返し、ページ名が落ちるため（#2483 D-14）。
+        /// </summary>
+        /// <param name="markdown">Enhanced Markdown。</param>
+        /// <param name="titles">ページ・データベースのIDとタイトルの対応。</param>
+        /// <returns>タイトルを補ったMarkdown。対応表に無いメンションは元のまま残す。</returns>
+        internal static string FillMentionTitles(string markdown, IReadOnlyDictionary<string, string> titles)
+        {
+            return _mentionPattern.Replace(markdown, match =>
+            {
+                if (!string.IsNullOrWhiteSpace(match.Groups["title"].Value)) { return match.Value; }
+
+                string attributes = match.Groups["attributes"].Value;
+                Match urlMatch = _urlAttributePattern.Match(attributes);
+                if (!urlMatch.Success) { return match.Value; }
+
+                string url = WebUtility.HtmlDecode(urlMatch.Groups["url"].Value).Trim('{', '}');
+                if (!NotionIdentifier.TryExtract(url, out string id) ||
+                    !titles.TryGetValue(id, out string? title) ||
+                    string.IsNullOrWhiteSpace(title))
+                {
+                    return match.Value;
+                }
+
+                string kind = match.Groups["kind"].Value;
+                return $"<mention-{kind}{attributes.TrimEnd()}>{WebUtility.HtmlEncode(title)}</mention-{kind}>";
+            });
         }
 
         /// <summary>
