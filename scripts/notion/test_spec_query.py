@@ -123,7 +123,7 @@ class SpecQueryTests(unittest.TestCase):
         (specs / "回避" / "実装.md").write_text(
             "# 回避アクション 実装状況\n\n[Notionで開く](https://app.notion.com/p/3fb7c2c6cc0281fba598f659c3a93542)\n\n---\n\n古い置き場\n",
             encoding="utf-8")
-        (specs / "旧回避.md").write_text(spec_page("旧回避メモ", DEV_ID, "開発用", "回避の古い案"), encoding="utf-8")
+        (specs / "旧回避.md").write_text(spec_page("旧回避メモ", DEV_ID, "開発用（旧版・参考）", "回避の古い案"), encoding="utf-8")
         (status / "回避アクション.md").write_text(STATUS_PAGE, encoding="utf-8")
         (terms / "回避アクション.md").write_text(TERM_PAGE, encoding="utf-8")
 
