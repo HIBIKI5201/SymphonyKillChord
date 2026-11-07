@@ -1,0 +1,231 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f368caefeeb82b439f56866e03ca24a, type: 3}
+  m_Name: MissionDefinition_Tutorial2
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.MissionDefinitionAsset
+  _plannerMemo: 
+  _missionId:
+    _id: Tutorial2
+    _hashId: -353630358
+  _displayName: "\u30BB\u30AB\u30F3\u30C9\u30C1\u30E5\u30FC\u30C8\u30EA\u30A2\u30EB"
+  _mainMissionText: "3\u62CD\u5B50\u30686\u62CD\u5B50\u3092\u899A\u3048\u3088\u3046"
+  _defeatTips: []
+  _overrideEquippedSkillIds: []
+  _clearConditionSteps:
+  - _condition:
+      rid: 900169900000000029
+    _guideMessageText: "\u6C34\u8272\u306E\u30BF\u30A4\u30DF\u30F3\u30B0\u3067\u3082\u653B\u6483(<size=24>{input.attack_button}</size>)\u3057\u3066\u307F\u3088\u3046\u3002"
+    _entryActions:
+    - rid: 4364854031301738869
+    - rid: 7260318751720735097
+    - rid: 900173000000000001
+  - _condition:
+      rid: 900169900000000031
+    _guideMessageText: "\u6C34\u8272\u306E\u30BF\u30A4\u30DF\u30F3\u30B0\u3067\u3082\u653B\u6483(<size=24>{input.attack_button}</size>)\u3057\u3066\u307F\u3088\u3046\u3002"
+    _entryActions: []
+  - _condition:
+      rid: 900169900000000033
+    _guideMessageText: "\u9EC4\u8272\u306E\u30BF\u30A4\u30DF\u30F3\u30B0\u3067\u3082\u653B\u6483(<size=24>{input.attack_button}</size>)\u3057\u3066\u307F\u3088\u3046\u3002"
+    _entryActions:
+    - rid: 900173000000000002
+  - _condition:
+      rid: 900169900000000035
+    _guideMessageText: "\u9EC4\u8272\u306E\u30BF\u30A4\u30DF\u30F3\u30B0\u3067\u3082\u653B\u6483(<size=24>{input.attack_button}</size>)\u3057\u3066\u307F\u3088\u3046\u3002"
+    _entryActions: []
+  - _condition:
+      rid: 4420578705146136
+    _guideMessageText: "\u6575\u3092\u6483\u7834\u3057\u3088\u3046\u3002"
+    _entryActions:
+    - rid: 4364854031301738870
+    - rid: 7260318751720735099
+    - rid: 1841141540767924224
+  _failCondition:
+    rid: 4420565426504021
+  _evaluationConditions: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 4420565426504021
+      type: {class: PlayerDeadFailConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FC\u304C\u6B7B\u3093\u3060\u3089\u5931\u6557\u3059\u308B\u6761\u4EF6"
+    - rid: 4420578705146131
+      type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "AttackSixBeat\u30923\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
+        _actionKind: 10
+        _requiredCount: 3
+    - rid: 4420578705146132
+      type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "AttackThreeBeat\u30922\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
+        _actionKind: 9
+        _requiredCount: 2
+    - rid: 4420578705146136
+      type: {class: WaveStartClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "Wave\u958B\u59CB + PlayerBuffClearConditionAsset"
+        _innerCondition:
+          rid: 4420609062207897
+    - rid: 4420609062207897
+      type: {class: PlayerBuffClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FCBuff\u4ED8\u4E0E(1\u4EF6)
+          + EnemyKillCountClearConditionAsset"
+        _innerCondition:
+          rid: 4420609062207899
+        _buffs:
+        - rid: 4420609062207898
+    - rid: 4420609062207898
+      type: {class: DamageReductionBuffAsset, ns: KillChord.Runtime.InfraStructure.InGame.Buff, asm: KillChord.Structure}
+      data:
+        _reapplyPolicy: 4
+        _reductionRate: 1
+    - rid: 4420609062207899
+      type: {class: EnemyKillCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u6575\u30DF\u30C3\u30B7\u30E7\u30F3\u30AD\u30FC(Id:-1976604850)\u30925\u4F53\u4EE5\u4E0A\u5012\u3059\u6761\u4EF6"
+        _enemyMissionKeyId:
+          _id: enemy_soldier
+          _hashId: -1976604850
+        _requiredKillCount: 5
+    - rid: 4420609062208005
+      type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
+        _innerCondition:
+          rid: 4420609062208105
+        _popupPrefab: {fileID: 183073235953859533, guid: 0166e310d9f478145834d6d79d9d0e2a, type: 3}
+    - rid: 4420609062208006
+      type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
+        _innerCondition:
+          rid: 4420609062208106
+        _popupPrefab: {fileID: 526671600597271610, guid: d84338cfe07f7cd4b89369fcc6dfb4f5, type: 3}
+    - rid: 4420609062208105
+      type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "Attack\u30921\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
+        _actionKind: 1
+        _requiredCount: 1
+    - rid: 4420609062208106
+      type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "Attack\u30921\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
+        _actionKind: 1
+        _requiredCount: 1
+    - rid: 1841141540767924224
+      type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _continueAfterStepChange: 1
+        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
+        _lines:
+        - _textEntryKey: triad.tutorial.09
+          _text: "\u3055\u3066\u5B9F\u8DF5\u3060\u3002\u6559\u3048\u305F\u3053\u3068\u3092\u5B58\u5206\u306B\u6D3B\u7528\u3057\u3066\u66B4\u308C\u308B\u3093\u3060"
+          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
+          _voiceCueName: VOICE_Triad_Tutorial9
+          _silentDuration: 0.1
+    - rid: 4364854031301738869
+      type: {class: SetSkillExecutionEnabledStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30B9\u30AD\u30EB\u767A\u52D5\u4E0D\u53EF\u306B\u3059\u308B"
+        _isSkillExecutionEnabled: 0
+    - rid: 4364854031301738870
+      type: {class: SetSkillExecutionEnabledStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u30B9\u30AD\u30EB\u767A\u52D5\u53EF\u80FD\u306B\u3059\u308B"
+        _isSkillExecutionEnabled: 1
+    - rid: 7260318751720735097
+      type: {class: ToggleEnemyBattleAiStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u6575\u6226\u95D8AI\u3092\u7121\u52B9\u306B\u3059\u308B"
+        _isBattleAiActive: 0
+    - rid: 7260318751720735099
+      type: {class: ToggleEnemyBattleAiStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "\u6575\u6226\u95D8AI\u3092\u6709\u52B9\u306B\u3059\u308B"
+        _isBattleAiActive: 1
+    - rid: 900169900000000029
+      type: {class: PlayerBuffClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "プレイヤーBuff付与(1件) + PopupClearConditionAsset"
+        _innerCondition:
+          rid: 4420609062208005
+        _buffs:
+        - rid: 900169900000000030
+    - rid: 900169900000000030
+      type: {class: DamageReductionBuffAsset, ns: KillChord.Runtime.InfraStructure.InGame.Buff, asm: KillChord.Structure}
+      data:
+        _reapplyPolicy: 4
+        _reductionRate: 1
+    - rid: 900169900000000031
+      type: {class: PlayerBuffClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "プレイヤーBuff付与(1件) + ActionRepeatCountClearConditionAsset"
+        _innerCondition:
+          rid: 4420578705146132
+        _buffs:
+        - rid: 900169900000000032
+    - rid: 900169900000000032
+      type: {class: DamageReductionBuffAsset, ns: KillChord.Runtime.InfraStructure.InGame.Buff, asm: KillChord.Structure}
+      data:
+        _reapplyPolicy: 4
+        _reductionRate: 1
+    - rid: 900169900000000033
+      type: {class: PlayerBuffClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "プレイヤーBuff付与(1件) + PopupClearConditionAsset"
+        _innerCondition:
+          rid: 4420609062208006
+        _buffs:
+        - rid: 900169900000000034
+    - rid: 900169900000000034
+      type: {class: DamageReductionBuffAsset, ns: KillChord.Runtime.InfraStructure.InGame.Buff, asm: KillChord.Structure}
+      data:
+        _reapplyPolicy: 4
+        _reductionRate: 1
+    - rid: 900169900000000035
+      type: {class: PlayerBuffClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _inspectorSummary: "プレイヤーBuff付与(1件) + ActionRepeatCountClearConditionAsset"
+        _innerCondition:
+          rid: 4420578705146131
+        _buffs:
+        - rid: 900169900000000036
+    - rid: 900169900000000036
+      type: {class: DamageReductionBuffAsset, ns: KillChord.Runtime.InfraStructure.InGame.Buff, asm: KillChord.Structure}
+      data:
+        _reapplyPolicy: 4
+        _reductionRate: 1
+    - rid: 900173000000000001
+      type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _continueAfterStepChange: 1
+        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
+        _lines:
+        - _textEntryKey: triad.tutorial.04
+          _text: "\u3044\u3044\u304B\uFF1F"
+          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
+          _voiceCueName: VOICE_Triad_Tutorial4
+          _silentDuration: 3
+    - rid: 900173000000000002
+      type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
+      data:
+        _continueAfterStepChange: 1
+        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
+        _lines:
+        - _textEntryKey: triad.tutorial.05
+          _text: "\u3088\u3057\u3001\u6B21\u306B\u884C\u304F\u305E\u3002"
+          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
+          _voiceCueName: VOICE_Triad_Tutorial5
+          _silentDuration: 3

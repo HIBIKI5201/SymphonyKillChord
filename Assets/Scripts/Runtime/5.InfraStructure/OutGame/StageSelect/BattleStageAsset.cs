@@ -27,6 +27,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
         [SerializeField, Tooltip("初回起動時に自動出撃するチュートリアルステージの場合はオンにする。")]
         private bool _isTutorial;
 
+        [SerializeField, Tooltip("最初のチュートリアル以外で、チュートリアルと同じ課題の案内（攻撃する拍子の強調など）を出す場合はオンにする。セカンドチュートリアル用。")]
+        private bool _hasTutorialGuide;
+
         [SerializeField, SourceDataCollection("Wave"), Tooltip("バトルパートで使用する敵Wave定義ID。スポーン候補地の都合により、ステージシーン名もこの定義が保持する。")]
         private DataID _enemyWaveDefinitionId;
 
@@ -88,7 +91,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.StageSelect
                 battleSceneName,
                 new MissionId(_missionDefinitionId.Id),
                 _isTutorial,
-                enemyWaveDefinitionId);
+                enemyWaveDefinitionId,
+                _hasTutorialGuide);
         }
     }
 }
