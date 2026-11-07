@@ -21,6 +21,7 @@ path はマニフェスト（.notion-export-manifest.json）でページ・デ�
 スキルにはパスではなくIDを書き、読むときにこれでパスを引く。
 """
 import argparse
+import html
 import json
 import re
 import sys
@@ -76,7 +77,9 @@ PRIMARY_DATABASES = ("仕様リスト", "システムリスト", "用語リス�
 SPEC_DATABASES = ("仕様リスト", "システムリスト")
 DEFAULT_LIMIT = 20
 
-MENTION_TAG_RE = re.compile(r'<mention-(?:page|database)\s+url="(?P<url>[^"]+)"\s*/?>(?:</mention-(?:page|database)>)?')
+# Exporter がページ名を補った <mention-page url="...">名前</mention-page> の形も読む（#2483 D-14）。
+MENTION_TAG_RE = re.compile(
+    r'<mention-(?:page|database)\s+url="(?P<url>[^"]+)"\s*(?:/>|>(?P<title>[^<]*)</mention-(?:page|database)>|>)')
 TABLE_OF_CONTENTS_RE = re.compile(r"^\s*<table_of_contents[^>]*/>\s*$")
 TABLE_START_RE = re.compile(r"^\s*<table(?:\s[^>]*)?>\s*$")
 TABLE_END_RE = re.compile(r"^\s*</table>\s*$")
@@ -328,7 +331,8 @@ def replace_mentions(catalog, text, page_path=""):
         row = catalog.by_id.get(extract_page_id(url))
         if row:
             return f"[{row['title']}](<{row['path']}>)"
-        return f"[目録に無いページ]({url})"
+        title = html.unescape(match.group("title") or "").strip()
+        return f"[{title or '目録に無いページ'}]({url})"
 
     def replace_link(match):
         target = match.group("target")
