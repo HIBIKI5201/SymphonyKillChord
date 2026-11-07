@@ -6,9 +6,6 @@
 - クラス責務の正本: `Assets/Scripts/DesignClassRoles.md`（対象レイヤーだけ読む）
 - 実装例: `Assets/Scripts/DesignExamples.md`（必要時だけ）
 - コード規約: `Assets/Scripts/CodeGuidelines.md`
-- 実装から抽出された補助資料: `Assets/Docs/ScriptsDocs/Architecture.txt`、`Assets/Docs/ScriptsDocs/CodingConventions.txt`
-
-正本と補助資料が矛盾する場合は、`Assets/Scripts`配下を優先して矛盾を報告する。
 
 ## ユビキタス言語
 

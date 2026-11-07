@@ -4,8 +4,8 @@
  * 責務: 生成するフォームの内容を宣言的に保持する。Google Forms API は呼ばない。
  * ITEM_TYPE / JUDGEMENT_COLUMNS / JUDGEMENT_HELP は FormDefinitions.gs のものを共用する。
  *
- * 原本は Docs/QA/PC版_QAシート_2026-09-07.md。
- * 設問を足す・直すときは、md と本ファイルの両方を更新すること。
+ * 原本は Notion「QA」配下の「PC版 QAシート」（page id `40e7c2c6-cc02-8170-91ba-c48d598ab529`）。
+ * 設問を足す・直すときは、Notion と本ファイルの両方を更新すること。
  */
 
 /** P1〜P4 すべての冒頭に置くヘッダ設問。Android版とは異なりOS/端末情報を聞く。 */
