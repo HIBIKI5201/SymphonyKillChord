@@ -716,6 +716,38 @@ MonoBehaviour:
     m_Localized: "{0} ({1}/{2})"
     m_Metadata:
       m_Items: []
+  - m_Id: 2096100001
+    m_Localized: "Spend Unlock Points on research to unlock Kill Chords and upgrades. You earn Unlock Points by clearing stages for the first time, among other ways."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100002
+    m_Localized: "Start by unlocking this node to get a new Kill Chord."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100003
+    m_Localized: "Kill Chords you unlock can be equipped in Customize."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100004
+    m_Localized: "The Kill Chords you take into battle are lined up here."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100005
+    m_Localized: "Pick from the Kill Chords you own to swap them in."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100006
+    m_Localized: "After swapping, save to confirm your loadout."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100007
+    m_Localized: "Clearing a stage unlocks the next one."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100008
+    m_Localized: "Clearing a stage for the first time earns rewards such as Unlock Points. Select a stage to check its rewards."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
