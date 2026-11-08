@@ -13,13 +13,20 @@ LIMITS = {
     ".agents/skills/skc-feature-flow/SKILL.md": 1400,
     ".claude/skills/skc-feature-flow/SKILL.md": 500,
     ".claude/skills/skc-code-guideline-check/SKILL.md": 2000,
+    "Docs/agent/README.md": 4500,
 }
+# Skill descriptions stay in every session's listing; bodies load only when used.
+# uloop-* skills are installed by the uloop tool and are not edited here.
+DESCRIPTION_LIMIT = 300
+DESCRIPTION_DIRS = [".claude/skills", ".agents/skills", ".codex/skills"]
+VENDOR_PREFIX = "uloop-"
 LINKED = [
     "AGENTS.md", "Assets/Scripts/DesignPhilosophy.md",
     "Assets/Scripts/CodeGuidelines.md",
     "Assets/Scripts/DesignClassRoles.md", "Assets/Scripts/DesignExamples.md",
     ".claude/skills/skc-feature-flow/SKILL.md",
     ".claude/skills/skc-code-guideline-check/SKILL.md",
+    "Docs/agent/README.md", "Docs/agent/index.md",
 ]
 
 NOTION_MAP = "SinfoniaOperator/notion-cache-map.json"
@@ -68,6 +75,7 @@ def validate(root):
                 if fragment not in {heading_anchor(h) for h in headings}:
                     errors.append(f"broken heading link: {path.relative_to(root)} -> {target}#{fragment}")
     errors.extend(validate_notion_map(root))
+    errors.extend(validate_descriptions(root, metrics))
     names = {}
     for directory in [".agents/skills", ".codex/skills"]:
         for path in sorted((root / directory).glob("*/SKILL.md")):
@@ -88,6 +96,38 @@ def validate(root):
                 errors.append(f"duplicate skill: {key}: {names[key]} and {path.relative_to(root)}")
             names[key] = path.relative_to(root)
     return metrics, errors
+
+
+def skill_description(text):
+    """Return the one-line description in a SKILL.md frontmatter, or None."""
+    match = re.match(r"---\n(.*?)\n---", text, re.S)
+    found = match and re.search(r"^description: *([^\n]+)", match.group(1), re.M)
+    if not found:
+        return None
+    value = found.group(1).strip()
+    if value.startswith('"'):
+        try:
+            return json.loads(value)
+        except ValueError:
+            pass
+    return value.strip('"').strip("'")
+
+
+def validate_descriptions(root, metrics):
+    """Keep project skill descriptions short and record the listing size per tool."""
+    errors = []
+    for directory in DESCRIPTION_DIRS:
+        total = 0
+        for path in sorted((root / directory).glob("*/SKILL.md")):
+            description = skill_description(path.read_text(encoding="utf-8-sig"))
+            if description is None:
+                continue
+            total += len(description)
+            if not path.parent.name.startswith(VENDOR_PREFIX) and len(description) > DESCRIPTION_LIMIT:
+                errors.append(f"description too long: {path.relative_to(root)}: "
+                              f"{len(description)} > {DESCRIPTION_LIMIT} characters")
+        metrics[f"{directory} descriptions (total)"] = total
+    return errors
 
 
 def validate_notion_map(root):
@@ -120,7 +160,8 @@ def validate_notion_map(root):
 def main():
     metrics, errors = validate(ROOT)
     for path, size in metrics.items():
-        print(f"{path}: {size}/{LIMITS[path]} characters")
+        limit = LIMITS.get(path)
+        print(f"{path}: {size}/{limit} characters" if limit else f"{path}: {size} characters")
     for error in errors:
         print(error, file=sys.stderr)
     print(f"Harness check: {len(errors)} error(s)")
