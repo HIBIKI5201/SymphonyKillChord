@@ -1,6 +1,6 @@
 ---
 name: skc-issue-report
-description: "Turn problems and open challenges that surfaced while running an skc-/uloop- skill into GitHub Issues: collect the evidence, check for duplicates, draft the body in this repo's Issue format (`[TODO] ...` title, 概要 / 背景・根拠 / やること / 完了条件 / 関連), and create it with `gh issue create`. Use when the user says things like '出てきた問題をIssueにして', '課題をIssue化して', '残論点をIssueに起こして', 'これ後でやるからIssue切って', or when a skill run (audit, QA, spec diff check, feature flow, Codex delegation, importers, autobuilder) ends with findings or blockers that are out of scope for the current change. Does not fix the problem itself; it only records it."
+description: "Record out-of-scope findings or blockers from a skc-/uloop- skill run as GitHub Issues in this repo's `[TODO]` format after a duplicate check. Use for requests like 「Issueにして」「課題をIssue化して」. Records only; does not fix."
 ---
 
 # skc-issue-report

@@ -1,6 +1,6 @@
 ---
 name: skc-notion-spec-write
-description: "Write to the Notion game specification from Claude — create a new spec page or update an existing one — using the NotionMarkdownWriter CLI (SinfoniaOperator/NotionMarkdownWriter.exe). Use whenever the user asks to add, edit, update, fix, or document something in the Notion spec (プロジェクト ドキュメント), reflect an implementation into the spec, write up a system's documentation to Notion, or act on the findings of a spec/implementation diff report. Covers the pull → edit → dry-run → confirm → push loop, the write allowlist, and conflict handling. Do NOT use for read-only spec questions — read Docs/NotionSpecifications directly for those."
+description: "Create or update Notion project-doc (プロジェクト ドキュメント) pages with NotionMarkdownWriter: pull, edit, dry-run, push, within the write allowlist. Use when asked to write, fix, or reflect implementation into the docs. Not for read-only questions."
 ---
 
 # Notion のプロジェクト ドキュメントへの書き込み

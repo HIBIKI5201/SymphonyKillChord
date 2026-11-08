@@ -1,6 +1,6 @@
 ---
 name: skc-codex-implement
-description: "Delegate an implementation task to Codex CLI with rate-limit protection, then review the result. Use when the user asks to implement a feature via Codex, or wants to offload coding to Codex/an external model while keeping design and review in Claude. Falls back to implementing directly when Codex quota is low."
+description: "Delegate a well-specified implementation to Codex CLI with quota protection, then review the result. Use when asked to implement via Codex; falls back to Claude when the quota is low."
 ---
 
 # skc-codex-implement
@@ -33,7 +33,12 @@ Codex を呼ぶ前に、Claude が責任を持って設計する。
 - 変更対象ファイル・公開 API・依存関係を確定する
 
 そのうえで **Codex 用プロンプト**を書く。Codex は会話履歴を持たないので、
-プロンプト単体で完結させること。
+タスク固有の情報はプロンプトだけで分かるように書く。
+
+共通の規則は転載しない。Codex CLI は `--cd` の作業ルートにある `AGENTS.md` を起動時に自分で読み、
+`codex_runner.py` はプロンプト末尾に「AGENTS.md と、そこから参照する設計思想・コード規約に従う」を1行だけ足す。
+設計思想・コード規約・ブランチ運用の本文や要約をプロンプトへ貼らず、タスクで特に効く規則があれば
+ファイル名と節名（例: `CodeGuidelines.md` の該当節）だけを書く。
 
 プロンプトに必ず含める要素:
 
@@ -43,8 +48,9 @@ Codex を呼ぶ前に、Claude が責任を持って設計する。
 | 配置 | namespace / アセンブリ / クラス名 |
 | API 仕様 | メソッドシグネチャ、プロパティ、イベント |
 | 参照すべき既存コード | 具体的なファイルパス（模倣させる規約の実例） |
-| 制約 | 使用禁止 API、Unity バージョン、パフォーマンス要件 |
+| 固有の制約 | このタスクだけの使用禁止 API・性能要件・対象レイヤー（共通規約は書かない） |
 | 非対象 | 触ってはいけないファイル |
+| 完了条件 | 何ができていれば完了か（コンパイル・レビューは Claude が行う） |
 
 プロンプトが長い場合は一時ファイルに書き、`--prompt-file` を使う。
 
@@ -124,7 +130,7 @@ python scripts/codex_runner.py --check-only --json
 | 定型的なデータ構造・ユーティリティ | 対話的な調査・デバッグ |
 | テストコードの雛形生成 | 設計判断そのものを含むタスク |
 
-Codex はこのリポジトリの文脈を持たないため、**曖昧な指示ほど品質が落ちる**。
+Codex は会話の文脈を持たないため、**曖昧な指示ほど品質が落ちる**。
 プロンプトを書くコストが自分で実装するコストを上回るなら、委任しない。
 
 ## 環境メモ
