@@ -2,9 +2,9 @@
   "description": "AIのスキル・設定が読むNotionページの参照表（#1955）。パスは載せない。パスは Docs/NotionSpecifications/.notion-export-manifest.json から引く（python scripts/notion/spec_query.py path <id>）。ページを消す・統合する前に readers を確かめる。",
   "pages": [
     { "id": "2a87c2c6-cc02-80f9-a10a-f0b72b95fbb3", "name": "rules/code-guidelines", "title": "コード規定",
-      "readers": [".claude/skills/skc-code-guideline-check/SKILL.md", ".claude/skills/skc-codex-implement/SKILL.md"] },
+      "readers": [".claude/skills/skc-code-guideline-check/SKILL.md"] },
     { "id": "31c7c2c6-cc02-80f3-92c0-e6929d962476", "name": "rules/design-philosophy", "title": "設計思想",
-      "readers": [".claude/skills/skc-code-guideline-check/SKILL.md", ".claude/skills/skc-codex-implement/SKILL.md", ".claude/skills/skc-notion-spec-diff-check/SKILL.md"] },
+      "readers": [".claude/skills/skc-code-guideline-check/SKILL.md", ".claude/skills/skc-notion-spec-diff-check/SKILL.md"] },
     { "id": "2ae7c2c6-cc02-806c-ac67-fa2af79e2a99", "name": "rules/spec-writing", "title": "プロジェクト ドキュメント ライティング規則",
       "readers": [".claude/skills/skc-notion-spec-write/references/writing-rules.md"] },
     { "id": "27d7c2c6-cc02-813b-a93f-e6baf4d4f679", "name": "terms/glossary", "title": "用語",
