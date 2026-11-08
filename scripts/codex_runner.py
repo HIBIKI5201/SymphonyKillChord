@@ -314,6 +314,8 @@ def build_prompt(user_prompt: str, output_path: Path, workdir: Path) -> str:
     return (
         f"{user_prompt}\n\n"
         "---\n"
+        "## 共通の規則\n"
+        "- 作業ルートの AGENTS.md と、そこから参照する設計思想・コード規約に従うこと。\n"
         "## 出力に関する厳守事項\n"
         f"- 生成した実装は必ずファイル `{shown}` に書き込むこと。\n"
         "- 既存ファイルがある場合は内容を置き換えること。\n"
