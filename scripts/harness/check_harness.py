@@ -26,7 +26,6 @@ LINKED = [
     "Assets/Scripts/DesignClassRoles.md", "Assets/Scripts/DesignExamples.md",
     ".claude/skills/skc-feature-flow/SKILL.md",
     ".claude/skills/skc-code-guideline-check/SKILL.md",
-    ".claude/skills/skc-codex-implement/SKILL.md",
     "Docs/agent/README.md", "Docs/agent/index.md",
 ]
 

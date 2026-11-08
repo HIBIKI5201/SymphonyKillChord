@@ -16,7 +16,6 @@ skc 系スキルの実行中に見つかった問題・課題のうち、**今�
 | `skc-notion-spec-diff-check` | 仕様と実装のずれ（「仕様のみ」「実装のみ」「どちらも不足」） |
 | `skc-ai-debug-qa` | QA で再現した不具合、観測できなかった項目 |
 | `skc-feature-flow` | PR の「未確認・残論点」に書いた項目 |
-| `skc-codex-implement` | Codex が止まった・誤った実装を出した原因、運用上の課題 |
 | `skc-sinfonia-importers` / `skc-unity-autobuilder` / `skc-notion-spec-write` | ツールの失敗、手順書と実際の食い違い |
 | スキル自体 | SKILL.md の手順が古い・足りない・間違っている |
 
