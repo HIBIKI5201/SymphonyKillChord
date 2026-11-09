@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.Sequence;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Result;
@@ -11,6 +12,7 @@ using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem.UI;
@@ -76,11 +78,17 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             _battlePauseController = sequenceModuleContainer.BattlePauseController;
             _stageResultController = stageResultModuleContainer.Controller;
+            // 遷移はInGameシーン自身を閉じるため、InGameの破棄では取り消されない常駐シーンの寿命で動かす。
+            CancellationToken transitionLifetimeToken =
+                ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController)
+                    ? sceneTransitionController.PersistentLifetimeToken
+                    : default;
             _returnToTitleController = new ReturnToTitleController(
                 sceneTransitionUsecase,
                 selectedBattleStageState,
                 selectedMissionState,
-                TITLE_SCENE_NAME);
+                TITLE_SCENE_NAME,
+                transitionLifetimeToken);
 
             _battlePauseController.OnPaused += HandlePaused;
             _battlePauseController.OnResumed += HandleResumed;
@@ -190,7 +198,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private void HandleRestartRequested()
         {
             // シーン遷移の実処理はUsecase側にあるため、ここでは多重実行だけを防ぐ。
-            _ = ExecuteTransitionAsync(() => _stageResultController.RetryAsync(destroyCancellationToken), "ステージのリスタート");
+            _ = ExecuteTransitionAsync(() => _stageResultController.RetryAsync(), "ステージのリスタート");
         }
 
         /// <summary>
@@ -199,9 +207,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private void HandleReturnToTitleRequested()
         {
             _ = ExecuteTransitionAsync(
-                () => _returnToTitleController.ReturnToTitleAsync(
-                    gameObject.scene.name,
-                    destroyCancellationToken),
+                () => _returnToTitleController.ReturnToTitleAsync(gameObject.scene.name),
                 "タイトルへの復帰");
         }
 
