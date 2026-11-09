@@ -202,6 +202,49 @@ class SpecQueryTests(unittest.TestCase):
         self.assertIn("| 日付 | 案 |\n|---|---|\n| 2026-10-30 | キーコンフィグ |", text)
         self.assertIn("](<SKC/仕様概要/仕様リスト/回避/実装.md>)", text)
 
+    def write_decision(self, name, page_id, status, date, conclusion, relation="反映先"):
+        forum = self.root / "SKC" / "仕様検討フォーラム"
+        forum.mkdir(exist_ok=True)
+        (forum / "_database.md").write_text(database("仕様検討フォーラム"), encoding="utf-8")
+        (forum / f"{name}.md").write_text(f"""<!-- NotionMarkdownExporterによる自動生成ファイルです。 -->
+# {name}
+
+[Notionで開く](https://app.notion.com/p/{page_id})
+
+## プロパティ
+
+| プロパティ | 値 |
+|---|---|
+| ステータス | {status} |
+| 決定日 | {date} |
+| 結論 | {conclusion} |
+| {relation} | 33a7c2c6-cc02-8053-a4fb-f138ffac7b74 |
+
+---
+
+# 結論
+{conclusion}
+""", encoding="utf-8")
+
+    def test_get_rationale_lists_forum_decisions(self):
+        self.write_decision("無敵時間の長さ", "4137c2c6cc0281aab8fcdd2b5301b001", "適用済", "2026-10-01", "無敵は0.2秒にする")
+        self.write_decision("入力の受付", "4137c2c6cc0281aab8fcdd2b5301b002", "検討中", "2026-10-20", "先行入力を受け付けるか",
+                            relation="反映先（システム）")
+        self.write_decision("関係ない決定", "4137c2c6cc0281aab8fcdd2b5301b003", "却下", "2026-10-25", "別の話")
+        (self.root / "SKC" / "仕様検討フォーラム" / "関係ない決定.md").write_text(
+            (self.root / "SKC" / "仕様検討フォーラム" / "関係ない決定.md").read_text(encoding="utf-8").replace(
+                "33a7c2c6-cc02-8053-a4fb-f138ffac7b74", "3127c2c6-cc02-8082-acb4-e96f7532687d"), encoding="utf-8")
+        self.assertNotIn("decisions", self.get(DODGE_ID))
+        decisions = self.get(DODGE_ID, "--rationale")["decisions"]
+        self.assertEqual([(item["title"], item["date"], item["status"]) for item in decisions],
+                         [("入力の受付", "2026-10-20", "検討中"), ("無敵時間の長さ", "2026-10-01", "適用済")])
+        self.assertEqual(decisions[1]["conclusion"], "無敵は0.2秒にする")
+        code, out, _ = self.run_cli("get", DODGE_ID, "--rationale")
+        self.assertEqual(code, 0)
+        self.assertIn("## 決定の記録（仕様検討フォーラム）", out)
+        self.assertIn("〔2026-10-01 / 適用済〕", out)
+        self.assertIn("  - 結論: 無敵は0.2秒にする", out)
+
     def test_get_status_reads_implementation_list(self):
         result = self.get("SKC/仕様概要/仕様リスト/回避.md", "--status")
         self.assertEqual([item["page_id"] for item in result["status"]], [STATUS_ID])

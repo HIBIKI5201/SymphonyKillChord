@@ -157,8 +157,7 @@ class BuildSpecCatalogTests(unittest.TestCase):
         broken = SPEC_PAGE.replace("| サマリー | プレイヤーが発動するスキル |", "| サマリー |  |") + (
             "[無いページ](無い.md) [外](https://example.com/a.md)\n"
             "<mention-page url=\"https://app.notion.com/p/0123456789abcdef0123456789abcdef\"/>\n"
-            "## 経緯\n<table header-row=\"true\">\n<tr>\n<td>日付</td>\n<td>種別</td>\n</tr>\n"
-            "<tr>\n<td>2026-10-01</td>\n<td>変更</td>\n</tr>\n<tr>\n<td>2026-10-02</td>\n<td>検討</td>\n</tr>\n</table>\n")
+            "## 経緯\n- 2026-10-01 変更\n```\n# 却下・保留した案\n```\n")
         self.write("SKC/仕様概要/仕様リスト/スキル.md", broken)
         (self.root / "SKC/用語/キルコード.md").rename(self.root / "SKC/用語/キルコード（改名）.md")
         code, output = self.lint("--previous", str(previous))
@@ -166,7 +165,7 @@ class BuildSpecCatalogTests(unittest.TestCase):
         self.assertIn("切れたリンク 2 件", output)  # 無い.md と、改名で切れた用語へのリンク
         self.assertIn("範囲外のメンション 1 件", output)
         self.assertIn("必須属性の空き 1 件", output)
-        self.assertIn("経緯の種別がW-09以外 1 件", output)
+        self.assertIn("経緯の節の残り 1 件", output)  # コードブロックの中の見出しは数えない
         self.assertIn("移動したページ 1 件、消えたページ 0 件", output)
         self.assertNotIn("無い.md", output)
         self.assertIn("無い.md", self.lint("--details")[1])
