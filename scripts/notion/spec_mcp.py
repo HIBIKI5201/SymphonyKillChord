@@ -63,13 +63,13 @@ TOOLS = [
         "name": "spec_get",
         "description": (
             "プロジェクト ドキュメントの1ページから、仕様の節（仕様概要・詳細説明）と、親仕様・子仕様・関連ページを返す。"
-            "rationale で仕様意図（経緯・却下・保留した案）を、status で実装リストの実装状態を足す。"
+            "rationale で仕様意図と、仕様検討フォーラムの決定の記録を、status で実装リストの実装状態を足す。"
         ),
         "inputSchema": {
             "type": "object",
             "properties": {
                 "target": {"type": "string", "description": "ページID・Notion URL・パス・タイトル"},
-                "rationale": {"type": "boolean", "description": "仕様意図（経緯・却下・保留した案）も返す"},
+                "rationale": {"type": "boolean", "description": "仕様意図と、仕様検討フォーラムの決定の記録（反映先がこのページの行）も返す"},
                 "status": {"type": "boolean", "description": "実装リストの実装状態も返す"},
             },
             "required": ["target"],
