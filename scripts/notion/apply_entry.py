@@ -277,12 +277,13 @@ class NotionReader:
 
 
 def read_token():
-    """NotionMarkdownWriter と同じく、秘密設定ファイル → 環境変数の順で NOTION_TOKEN を読む。"""
-    secrets = OPERATOR_DIR / "sinfonia-operator.secrets.json"
-    if secrets.exists():
-        token = json.loads(secrets.read_text(encoding="utf-8")).get("NOTION_TOKEN")
-        if token:
-            return token.strip()
+    """NotionMarkdownWriter と同じく、共通の秘密設定ファイル → 移行前の秘密設定ファイル → 環境変数の順で NOTION_TOKEN を読む。"""
+    for secrets in (REPO_ROOT / "UserSettings" / "KillChord" / "secrets.json",
+                    OPERATOR_DIR / "sinfonia-operator.secrets.json"):
+        if secrets.exists():
+            token = json.loads(secrets.read_text(encoding="utf-8-sig")).get("NOTION_TOKEN")
+            if token:
+                return token.strip()
     return os.environ.get("NOTION_TOKEN", "").strip()
 
 
