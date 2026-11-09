@@ -32,6 +32,7 @@
 | `reports/2026-10-27_tutorial-kill-step-deadlock.md` | チュートリアルの敵撃破ステップで敵が1体足りず進めなくなる不具合の原因調査（無敵バフを確定ダメージが貫通） |
 | `reports/2026-11-03_spec-query-eval.md` | 仕様書の窓口（spec_query）と全文検索を評価セット40問で比べた結果（#2396 段階3） |
 | `handoffs/2026-11-03_logic-graph-debugger-plan.md` | ゲームロジックをグラフ表示するデバッグウィンドウの実装計画（Unity 6.x の Graph Toolkit・GraphView の比較と決めてほしいこと） |
+| `handoffs/2026-11-09_background-vertex-color-bake.md` | 背景の頂点カラーをテクスチャへベイクしLOD対応する企画（現行シェーダーの頂点カラー用途・ベイクツールの実現性・未確認点） |
 | `reports/2026-11-08_harness-context-budget.md` | ハーネスのコンテキスト・トークン消費の棚卸しと削減（読み込みタイミング・`/context` の実測・スキル選択の確認・Codex 委任プロンプト。Issue #2753） |
 
 ## 旧置き場から移したもの（Issue #2081）
