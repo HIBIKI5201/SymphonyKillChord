@@ -314,7 +314,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             try
             {
                 bool success =
-                    await _stageResultController.CompleteAsync(destroyCancellationToken);
+                    await _stageResultController.CompleteAsync();
 
                 if (success)
                 {
