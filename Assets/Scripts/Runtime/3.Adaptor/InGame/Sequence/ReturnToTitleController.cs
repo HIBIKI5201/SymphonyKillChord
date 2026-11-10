@@ -19,11 +19,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
         /// <param name="selectedBattleStageState"> 選択中バトルステージの状態。 </param>
         /// <param name="selectedMissionState"> 選択中ミッションの状態。省略可。 </param>
         /// <param name="titleSceneName"> 遷移先となるタイトルシーン名。 </param>
+        /// <param name="transitionLifetimeToken">
+        ///     遷移の寿命。遷移はInGameシーン自身を閉じるため、InGameのオブジェクトの破棄では取り消されない常駐シーンの寿命を渡す。
+        /// </param>
         public ReturnToTitleController(
             SceneTransitionUseCase usecase,
             SelectedBattleStageState selectedBattleStageState,
             SelectedMissionState selectedMissionState,
-            string titleSceneName)
+            string titleSceneName,
+            CancellationToken transitionLifetimeToken = default)
         {
             _usecase = usecase
                 ?? throw new ArgumentNullException(nameof(usecase));
@@ -39,6 +43,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
             }
 
             _titleSceneName = titleSceneName;
+            _transitionLifetimeToken = transitionLifetimeToken;
         }
 
         /// <summary>
@@ -47,11 +52,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
         /// <param name="fallbackFromSceneName">
         ///     バトルステージが選択されていない場合に遷移元とするシーン名。
         /// </param>
-        /// <param name="cancellationToken"> キャンセルトークン。 </param>
         /// <returns> 遷移に成功した場合はtrue。 </returns>
-        public async Task<bool> ReturnToTitleAsync(
-            string fallbackFromSceneName,
-            CancellationToken cancellationToken)
+        public async Task<bool> ReturnToTitleAsync(string fallbackFromSceneName)
         {
             bool success;
 
@@ -62,7 +64,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
                     _selectedBattleStageState.BattleSceneName,
                     _selectedBattleStageState.InGameSceneName,
                     _titleSceneName,
-                    cancellationToken);
+                    _transitionLifetimeToken);
             }
             else
             {
@@ -70,7 +72,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
                 success = await _usecase.ChangeSceneAsync(
                     fallbackFromSceneName,
                     _titleSceneName,
-                    cancellationToken);
+                    _transitionLifetimeToken);
             }
 
             if (!success)
@@ -92,5 +94,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Sequence
         private readonly SelectedBattleStageState _selectedBattleStageState;
         private readonly SelectedMissionState _selectedMissionState;
         private readonly string _titleSceneName;
+        private readonly CancellationToken _transitionLifetimeToken;
     }
 }

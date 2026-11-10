@@ -1,12 +1,14 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Result;
 using SymphonyFrameWork.System.ServiceLocate;
+using System.Threading;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Result
@@ -73,6 +75,12 @@ namespace KillChord.Runtime.Composition.InGame.Result
                 return false;
             }
 
+            // 遷移はInGameシーン自身を閉じるため、InGameの破棄では取り消されない常駐シーンの寿命で動かす。
+            CancellationToken transitionLifetimeToken =
+                ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController)
+                    ? sceneTransitionController.PersistentLifetimeToken
+                    : default;
+
             // リザルトのプレゼンター・コントローラーを作り、ビューを初期化する。
             StageResultViewModel viewModel = new();
             _container.Presenter = new StageResultPresenter(
@@ -85,7 +93,8 @@ namespace KillChord.Runtime.Composition.InGame.Result
                 selectedMissionState,
                 ServiceLocator.TryGetInstance(out IStageResultExitPolicy exitPolicy)
                     ? exitPolicy
-                    : null);
+                    : null,
+                transitionLifetimeToken);
             _container.View.Initialize(viewModel, _container.Controller);
             return true;
         }

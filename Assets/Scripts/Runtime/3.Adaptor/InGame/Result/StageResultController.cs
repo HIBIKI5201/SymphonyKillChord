@@ -13,13 +13,16 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
     public class StageResultController
     {
         /// <summary>
-        ///     シーン遷移・選択中のステージとミッション・リザルト終了時の遷移方針を指定して生成する。
+        ///     シーン遷移・選択中のステージとミッション・リザルト終了時の遷移方針・遷移の寿命を指定して生成する。
+        ///     遷移はInGameシーン自身を閉じるため、InGameのオブジェクトの破棄では取り消されない
+        ///     常駐シーンの寿命（<paramref name="transitionLifetimeToken"/>）で動かす。
         /// </summary>
         public StageResultController(
             SceneTransitionUseCase usecase,
             SelectedBattleStageState selectedBattleStageState,
             SelectedMissionState selectedMissionState,
-            IStageResultExitPolicy exitPolicy = null)
+            IStageResultExitPolicy exitPolicy = null,
+            CancellationToken transitionLifetimeToken = default)
         {
             _usecase = usecase
                 ?? throw new ArgumentNullException(
@@ -34,14 +37,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                     nameof(selectedMissionState));
 
             _exitPolicy = exitPolicy;
+            _transitionLifetimeToken = transitionLifetimeToken;
         }
 
         /// <summary>
         ///     戦闘を完了してOutGameへ戻る。
         /// </summary>
-        /// <param name="cancellationToken"> キャンセルトークン。 </param>
         /// <returns>遷移に成功した場合はtrue。</returns>
-        public async Task<bool> CompleteAsync(CancellationToken cancellationToken)
+        public async Task<bool> CompleteAsync()
         {
             string destinationSceneName = ResolveDestinationScene(
                 StageResultExitAction.Complete,
@@ -52,7 +55,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                         _selectedBattleStageState.BattleSceneName,
                         _selectedBattleStageState.InGameSceneName,
                         destinationSceneName,
-                        cancellationToken);
+                        _transitionLifetimeToken);
 
             if (!success)
             {
@@ -68,9 +71,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         /// <summary>
         ///     同じステージへ再出撃する。
         /// </summary>
-        /// <param name="cancellationToken"> キャンセルトークン。 </param>
         /// <returns>再出撃に成功した場合はtrue。</returns>
-        public async Task<bool> RetryAsync(CancellationToken cancellationToken)
+        public async Task<bool> RetryAsync()
         {
             if (!TryResolvePolicyDestination(
                     StageResultExitAction.Retry,
@@ -80,14 +82,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                     .UnloadThenReloadSceneAsync(
                         _selectedBattleStageState.BattleSceneName,
                         _selectedBattleStageState.InGameSceneName,
-                        cancellationToken);
+                        _transitionLifetimeToken);
             }
 
             bool success = await _usecase.UnloadThenChangeSceneAsync(
                 _selectedBattleStageState.BattleSceneName,
                 _selectedBattleStageState.InGameSceneName,
                 destinationSceneName,
-                cancellationToken);
+                _transitionLifetimeToken);
             if (success)
             {
                 _selectedBattleStageState.Clear();
@@ -132,5 +134,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         private readonly SelectedBattleStageState _selectedBattleStageState;
         private readonly SelectedMissionState _selectedMissionState;
         private readonly IStageResultExitPolicy _exitPolicy;
+        private readonly CancellationToken _transitionLifetimeToken;
     }
 }

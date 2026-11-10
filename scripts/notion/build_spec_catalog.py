@@ -21,7 +21,8 @@
   - 切れたリンク: ページ内の相対リンクの先が、目録に無い
   - 範囲外のメンション: メンションの先が、書き出した範囲に無い（Notion 上で消えたか、範囲の外のページ）
   - 必須属性の空き: 仕様リストの行で「カテゴリー」「サマリー」が空
-  - 経緯の種別: 「経緯」の表の種別が、ライティング規則 W-09 の値（提案・変更・決定・却下）以外
+  - 経緯の節の残り: 仕様リスト・システムリストの行に「経緯」「却下・保留した案」の節が残っている
+    （経緯・却下・保留は仕様検討フォーラムの 1 行 1 決定で持つ。ライティング規則 W-09、2026-11-09）
   - ページの移動・消失: --previous の目録と比べて、同じ page id のパスが変わった・page id が消えた
 ログには件数だけを出す。パスを見るときは --details を付けて手元で実行する（同期のログは公開されるため）。
 --strict を付けると、切れたリンクがあるとき終了コード1にする。
@@ -62,9 +63,8 @@ TAG_RE = re.compile(r"<[^>]+>")
 
 # 検査（--lint）で使う値。
 REQUIRED_PROPERTIES = {"仕様リスト": ("カテゴリー", "サマリー")}
-HISTORY_HEADING = "経緯"
-HISTORY_KINDS = {"提案", "変更", "決定", "却下"}
-TABLE_CELL_RE = re.compile(r"<td>(?P<value>.*?)</td>", re.DOTALL)
+HISTORY_DATABASES = ("仕様リスト", "システムリスト")
+HISTORY_HEADINGS = ("経緯", "却下・保留した案")
 
 
 @dataclass
@@ -395,33 +395,30 @@ def compare_catalog(source, markdown, jsonl):
     }
 
 
-def history_kinds(text):
-    """「経緯」見出しの直後の表から、種別の列（2列目）の値を見出し行を除いて返す。"""
-    kinds = []
-    lines = text.replace("\r\n", "\n").split("\n")
-    index = 0
-    while index < len(lines):
-        heading = HEADING_RE.match(lines[index])
-        index += 1
-        if not heading or clean_text(heading.group("text")) != HISTORY_HEADING:
+def history_sections(text):
+    """本文に残っている「経緯」「却下・保留した案」の見出しを返す。コードブロックの中は数えない。"""
+    found = []
+    fence = None
+    for line in text.replace("\r\n", "\n").split("\n"):
+        marker = FENCE_RE.match(line)
+        if marker:
+            mark = marker.group("fence")
+            if fence is None:
+                fence = mark
+            elif mark[0] == fence[0] and len(mark) >= len(fence):
+                fence = None
             continue
-        table = []
-        while index < len(lines) and not HEADING_RE.match(lines[index]):
-            table.append(lines[index])
-            index += 1
-        rows = re.findall(r"<tr>(.*?)</tr>", "\n".join(table), re.DOTALL)
-        for row in rows[1:]:
-            cells = [clean_text(cell) for cell in TABLE_CELL_RE.findall(row)]
-            if len(cells) >= 2:
-                kinds.append(cells[1])
-    return kinds
+        heading = None if fence else HEADING_RE.match(line)
+        if heading and clean_text(heading.group("text")) in HISTORY_HEADINGS:
+            found.append(clean_text(heading.group("text")))
+    return found
 
 
 def lint_catalog(source, pages, databases, previous_rows=None):
     """プロジェクト ドキュメントの書き方の崩れを数え、件数と該当パスを返す（#2359 P9）。"""
     known_paths = {page.path for page in pages} | {database.path for database in databases}
     known_ids = {page.page_id for page in pages if page.page_id}
-    found = {"broken_links": [], "outside_mentions": [], "missing_properties": [], "history_kinds": [],
+    found = {"broken_links": [], "outside_mentions": [], "missing_properties": [], "history_sections": [],
              "moved_pages": [], "removed_pages": []}
     for page in pages:
         for kind, value in page.raw_links:
@@ -438,10 +435,10 @@ def lint_catalog(source, pages, databases, previous_rows=None):
         for name in REQUIRED_PROPERTIES.get(page.database, ()):
             if not page.properties.get(name, "").strip():
                 found["missing_properties"].append(f"{page.path} ({name})")
-        text = (source / page.path).read_text(encoding="utf-8")
-        for value in history_kinds(text):
-            if value not in HISTORY_KINDS:
-                found["history_kinds"].append(f"{page.path} ({value or '空'})")
+        if page.database in HISTORY_DATABASES:
+            text = (source / page.path).read_text(encoding="utf-8")
+            for heading in history_sections(text):
+                found["history_sections"].append(f"{page.path} ({heading})")
     if previous_rows is not None:
         current = {page.page_id: page.path for page in pages if page.page_id}
         for row in previous_rows:
@@ -459,7 +456,7 @@ LINT_LABELS = {
     "broken_links": "切れたリンク",
     "outside_mentions": "範囲外のメンション",
     "missing_properties": "必須属性の空き",
-    "history_kinds": "経緯の種別がW-09以外",
+    "history_sections": "経緯の節の残り",
     "moved_pages": "移動したページ",
     "removed_pages": "消えたページ",
 }
