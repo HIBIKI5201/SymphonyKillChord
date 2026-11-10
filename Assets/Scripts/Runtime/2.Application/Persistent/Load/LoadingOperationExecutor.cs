@@ -15,23 +15,15 @@ namespace KillChord.Runtime.Application.Persistent.Load
         ///     ロードセッション生成元を指定して生成する。
         /// </summary>
         /// <param name="loadingSessionFactory"> ロードセッションを生成するファクトリー。 </param>
-        /// <param name="minimumDisplayTime"> ロード画面の最低限表示する時間。 </param>
+        /// <param name="waitTimeResolver"> 遷移元と遷移先からロード画面の最低表示時間を決める機能。 </param>
         public LoadingOperationExecutor(
-            ILoadingSessionFactory loadingSessionFactory
-            , float minimumDisplayTime)
+            ILoadingSessionFactory loadingSessionFactory,
+            ILoadingWaitTimeResolver waitTimeResolver)
         {
             _sessionFactory = loadingSessionFactory
                 ?? throw new ArgumentNullException(nameof(loadingSessionFactory));
-
-            if (!float.IsFinite(minimumDisplayTime) || minimumDisplayTime < 0f)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(minimumDisplayTime),
-                    minimumDisplayTime,
-                    "最低限表示時間は非負の有限の数でなければなりません。");
-            }
-
-            _minimumDisplayTime = minimumDisplayTime;
+            _waitTimeResolver = waitTimeResolver
+                ?? throw new ArgumentNullException(nameof(waitTimeResolver));
         }
 
         /// <summary>
@@ -66,6 +58,14 @@ namespace KillChord.Runtime.Application.Persistent.Load
             if (!options.ReuseActiveSession || _loadingTimeStamp == 0L)
             {
                 _loadingTimeStamp = Stopwatch.GetTimestamp();
+                _fromSceneName = options.FromSceneName;
+                _toSceneName = options.ToSceneName;
+            }
+            else
+            {
+                // 引き継いだセッションでは、最初の遷移元を保ったまま遷移先だけを更新する。
+                _fromSceneName ??= options.FromSceneName;
+                _toSceneName = options.ToSceneName ?? _toSceneName;
             }
 
             // 進捗範囲の変換。
@@ -80,6 +80,9 @@ namespace KillChord.Runtime.Application.Persistent.Load
 
                 // 開始地点の通知。
                 progress.Report(0f);
+
+                // 画面が暗転し切ってからシーンを触り、シーンの無い画面を見せない。
+                await session.WaitUntilScreenCoveredAsync(cancellationToken);
 
                 // 実際のロード処理の実行。
                 bool success = await operation(progress);
@@ -97,7 +100,8 @@ namespace KillChord.Runtime.Application.Persistent.Load
                 {
                     await WaitForMinimumDisplayTimeAsync(cancellationToken);
 
-                    session.Complete();
+                    // ロード画面の上を暗転させてから閉じ、遷移先を暗転から表示する。
+                    await session.CompleteAsync(cancellationToken);
                     _loadingTimeStamp = 0L;
                 }
 
@@ -118,7 +122,16 @@ namespace KillChord.Runtime.Application.Persistent.Load
         /// <returns></returns>
         private async Task WaitForMinimumDisplayTimeAsync(CancellationToken cancellationToken)
         {
-            if (_minimumDisplayTime <= 0f || _loadingTimeStamp == 0L)
+            if (_loadingTimeStamp == 0L)
+            {
+                return;
+            }
+
+            // 遷移の組み合わせごとの設定から最低表示時間を決める。
+            float minimumDisplayTime = _waitTimeResolver.ResolveMinimumDisplayTime(
+                _fromSceneName,
+                _toSceneName);
+            if (!float.IsFinite(minimumDisplayTime) || minimumDisplayTime <= 0f)
             {
                 return;
             }
@@ -128,7 +141,7 @@ namespace KillChord.Runtime.Application.Persistent.Load
             double elapsedTime =
                 (Stopwatch.GetTimestamp() - _loadingTimeStamp) / (double)Stopwatch.Frequency;
 
-            double remainingTime = _minimumDisplayTime - elapsedTime;
+            double remainingTime = minimumDisplayTime - elapsedTime;
 
             if (remainingTime <= 0d)
             {
@@ -139,8 +152,10 @@ namespace KillChord.Runtime.Application.Persistent.Load
         }
 
         private readonly ILoadingSessionFactory _sessionFactory;
-        private readonly float _minimumDisplayTime;
+        private readonly ILoadingWaitTimeResolver _waitTimeResolver;
 
         private long _loadingTimeStamp;
+        private string _fromSceneName;
+        private string _toSceneName;
     }
 }
