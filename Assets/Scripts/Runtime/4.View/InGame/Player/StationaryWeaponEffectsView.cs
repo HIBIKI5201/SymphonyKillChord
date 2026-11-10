@@ -56,14 +56,15 @@ namespace KillChord.Runtime.View.InGame.Player
                 return;
             }
 
-            Shot shot = FindAvailableShot();
+            // 連射で空きが無くなっても銃声を省略しないよう、SEを鳴らし終えた古い発射の残り演出を回収して使う。
+            Shot shot = FindAvailableShot() ?? ReclaimOldestSilentShot();
             if (shot == null)
             {
                 if (!_hasReportedPoolExhaustion)
                 {
                     _hasReportedPoolExhaustion = true;
                     Debug.LogWarning(
-                        $"[{nameof(StationaryWeaponEffectsView)}] 発射演出の全スロットを使用中のため、今回の演出を省略します。", this);
+                        $"[{nameof(StationaryWeaponEffectsView)}] 発射演出の全スロットでSEを再生中のため、今回の演出を省略します。", this);
                 }
                 return;
             }
@@ -267,6 +268,38 @@ namespace KillChord.Runtime.View.InGame.Player
         }
 
         /// <summary>
+        ///     SEを鳴らし終え、粒子やライトだけが残っている最古の発射を回収して返します。
+        ///     古い発射の残り演出より、新しい発射のSEを優先するために使います。
+        /// </summary>
+        /// <returns> 回収した発射です。SEを再生中の発射しか無い場合はnullです。 </returns>
+        private Shot ReclaimOldestSilentShot()
+        {
+            Shot oldestShot = null;
+            for (int i = 0; i < _shots.Length; i++)
+            {
+                Shot shot = _shots[i];
+                // CRIの再生開始要求が処理される前の発射は、停止中に見えても回収しない。
+                if (shot == null || shot.Root == null || !shot.IsActive
+                    || shot.StartFrame == Time.frameCount || IsSoundPlaying(shot.Audio))
+                {
+                    continue;
+                }
+
+                if (oldestShot == null || shot.StartTime < oldestShot.StartTime)
+                {
+                    oldestShot = shot;
+                }
+            }
+
+            if (oldestShot != null)
+            {
+                // SEは鳴り終えているため停止要求を出さず、直後の再生要求と競合させない。
+                ReleaseEffects(oldestShot);
+            }
+            return oldestShot;
+        }
+
+        /// <summary>
         ///     CRIの準備中と再生中は、停止要求後もスロットを再利用しません。
         /// </summary>
         private static bool IsSoundPlaying(CriAtomSource source)
@@ -322,16 +355,25 @@ namespace KillChord.Runtime.View.InGame.Player
         /// </summary>
         private void ReleaseShot(Shot shot)
         {
+            ReleaseEffects(shot);
+            if (shot.Sound != null)
+            {
+                shot.Sound.Stop();
+            }
+        }
+
+        /// <summary>
+        ///     SEには触れず、粒子・ライト・遅延処理を止めて発射を返却済みにします。
+        /// </summary>
+        /// <param name="shot"> 返却する発射です。 </param>
+        private void ReleaseEffects(Shot shot)
+        {
             if (_lastShot == shot)
             {
                 _lastShot = null;
             }
             shot.IsActive = false;
             shot.IsEffectPending = false;
-            if (shot.Sound != null)
-            {
-                shot.Sound.Stop();
-            }
             if (shot.Particle != null)
             {
                 shot.Particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
