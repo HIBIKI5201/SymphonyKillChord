@@ -89,6 +89,114 @@
 			"holder": "",
 			"license": "",
 			"text": "上記の MIT License のライブラリに共通する許諾表示です。\n\nMIT License\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE."
+		},
+		{
+			"name": "Soldier-AAA-Pack.vol2",
+			"holder": "stasdzuba18",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/3d/characters/soldier-aaa-pack-vol2-326560"
+		},
+		{
+			"name": "Low Poly Weapon Series 4 - WWII 1",
+			"holder": "CASTLE BRAVO",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/3d/props/guns/low-poly-weapon-series-4-wwii-1-344628"
+		},
+		{
+			"name": "Human Soldier Animations FREE",
+			"holder": "Kevin Iglesias",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/3d/animations/human-soldier-animations-free-340690"
+		},
+		{
+			"name": "Rapier Anim Set",
+			"holder": "Unity Asset Store",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/3d/animations/rapier-anim-set-148084"
+		},
+		{
+			"name": "Platform Animation",
+			"holder": "Shinabro",
+			"license": "Unity Asset Store EULA",
+			"text": "Unity Asset Store"
+		},
+		{
+			"name": "50 Female Animations",
+			"holder": "Unity Asset Store",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/3d/animations/50-female-animations-263626"
+		},
+		{
+			"name": "Free Sample Animation Set",
+			"holder": "VanillaLoopStudio",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/3d/animations/free-sample-animation-set-321560"
+		},
+		{
+			"name": "War FX",
+			"holder": "Jean Moreno (JMO)",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/vfx/particles/war-fx-5669"
+		},
+		{
+			"name": "52 Special Effects Pack",
+			"holder": "Unity Asset Store",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/vfx/particles/spells/52-special-effects-pack-10419"
+		},
+		{
+			"name": "Farming Game FX - Mission",
+			"holder": "Unity Asset Store",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/vfx/particles/environment/farming-game-fx-mission-236550"
+		},
+		{
+			"name": "Free Fire VFX - URP",
+			"holder": "Vefects",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/vfx/particles/fire-explosions/free-fire-vfx-urp-266226"
+		},
+		{
+			"name": "Free Quick Effects Vol. 1",
+			"holder": "Gabriel Aguiar Prod.",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/vfx/particles/free-quick-effects-vol-1-304424"
+		},
+		{
+			"name": "Hits Effects FREE / Status and Auras FREE",
+			"holder": "Matthew Guz",
+			"license": "Unity Asset Store EULA",
+			"text": "Unity Asset Store"
+		},
+		{
+			"name": "Hit Impact Effects",
+			"holder": "Travis Game Assets",
+			"license": "Unity Asset Store EULA",
+			"text": "Unity Asset Store"
+		},
+		{
+			"name": "Unity Particle Pack",
+			"holder": "Unity Technologies",
+			"license": "Unity Asset Store EULA",
+			"text": "Unity Asset Store"
+		},
+		{
+			"name": "Bullets Pack",
+			"holder": "DuNguyn",
+			"license": "Unity Asset Store EULA",
+			"text": "Unity Asset Store"
+		},
+		{
+			"name": "8K Skybox Pack Free",
+			"holder": "BG Studio",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/2d/textures-materials/sky/8k-skybox-pack-free-150926"
+		},
+		{
+			"name": "GamePad and Keyboard Input Sprites for TextMesh Pro",
+			"holder": "Unity Asset Store",
+			"license": "Unity Asset Store EULA",
+			"text": "https://assetstore.unity.com/packages/2d/gui/icons/gamepad-and-keyboard-input-sprites-for-textmesh-pro-310114"
 		}
 	]
 }
