@@ -620,6 +620,42 @@ jobs:
           # Library の削除可否は直前の事前クリーンアップで判断するため、checkout では削除しない。
           clean: false
 
+      # 素材サブモジュール（Assets/AssetStoreTools）を、本体が記録しているコミットで取得する（#2771）。
+      # Deploy Key はリポジトリごとなので、本体とは別に取得する（ValidateUnityEditMode.yml と同じ形）。
+      # 以前は取得しておらず、ランナーに手で置いた古いコピーのままビルドしていたため、後から足した素材
+      # （チュートリアルのポップアップ画像など）がビルドに入らず白く表示された。
+      # Secret ASSET_STORE_TOOLS_DEPLOY_KEY が未登録のときは警告を出し、ランナーにある既存の内容でビルドする。
+      - name: 素材サブモジュールのコミットを確認
+        id: asset_store_tools
+        env:
+          HAS_DEPLOY_KEY: ${{ secrets.ASSET_STORE_TOOLS_DEPLOY_KEY != '' }}
+        run: |
+          $Sha = git rev-parse HEAD:Assets/AssetStoreTools
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($Sha)) {
+            Write-Host "::error::Assets/AssetStoreTools のサブモジュールのコミットを読めませんでした。"
+            exit 1
+          }
+          $Sha = $Sha.Trim()
+          "sha=$Sha" | Add-Content -Path $env:GITHUB_OUTPUT
+          "has_key=$env:HAS_DEPLOY_KEY" | Add-Content -Path $env:GITHUB_OUTPUT
+          if ($env:HAS_DEPLOY_KEY -eq 'true') {
+            Write-Host "[INFO]: 素材サブモジュールを $Sha で取得します。"
+          } else {
+            Write-Host "::warning::Secret ASSET_STORE_TOOLS_DEPLOY_KEY が未登録のため、素材サブモジュール ($Sha) を取得せず、ランナーにある既存の Assets/AssetStoreTools でビルドします。後から足した素材が入らないおそれがあります。"
+          }
+
+      - name: 素材サブモジュールをチェックアウト
+        if: steps.asset_store_tools.outputs.has_key == 'true'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: ${{ github.repository_owner }}/SymphonyKillChord_AssetStoreTools
+          ref: ${{ steps.asset_store_tools.outputs.sha }}
+          path: Assets/AssetStoreTools
+          ssh-key: ${{ secrets.ASSET_STORE_TOOLS_DEPLOY_KEY }}
+          persist-credentials: false
+          # 取得し直すたびに全素材を消さないよう、既存の取得結果は残して差分だけ更新する。
+          clean: false
+
 # ==================================================================================================
 
       # Unity は 260 文字を超えるパスを扱えず、作業フォルダが深いと Library\PackageCache の深いファイルで
