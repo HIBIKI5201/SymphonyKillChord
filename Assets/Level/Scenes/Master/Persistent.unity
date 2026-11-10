@@ -2361,6 +2361,8 @@ MonoBehaviour:
   _debugView: {fileID: 0}
   _sceneInitializationTimeoutFrameCount: 3600
   _minimumLoadingScreenDisplayTime: 4
+  _loadingWaitTimeSettings: {fileID: 11400000, guid: 1a6bfa27ff824d47bb250d5c62339238, type: 2}
+  _screenFadeDuration: 0.3
 --- !u!1 &2129858558
 GameObject:
   m_ObjectHideFlags: 0
