@@ -644,9 +644,20 @@ jobs:
             Write-Host "::warning::Secret ASSET_STORE_TOOLS_DEPLOY_KEY が未登録のため、素材サブモジュール ($Sha) を取得せず、ランナーにある既存の Assets/AssetStoreTools でビルドします。後から足した素材が入らないおそれがあります。"
           }
 
+      # 素材には 260 文字を超えるパスのファイルがあり、Windows の git は core.longpaths なしでは
+      # "Filename too long" で作れない（2026-11-11 の ReleaseMaster で失敗）。checkout が中で使う git にも
+      # 確実に効くよう、ランナーの git 設定と環境変数（GIT_CONFIG_COUNT/KEY/VALUE）の両方で有効にする。
+      - name: 素材サブモジュール用に長いパスを有効にする
+        if: steps.asset_store_tools.outputs.has_key == 'true'
+        run: git config --global core.longpaths true
+
       - name: 素材サブモジュールをチェックアウト
         if: steps.asset_store_tools.outputs.has_key == 'true'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        env:
+          GIT_CONFIG_COUNT: '1'
+          GIT_CONFIG_KEY_0: core.longpaths
+          GIT_CONFIG_VALUE_0: 'true'
         with:
           repository: ${{ github.repository_owner }}/SymphonyKillChord_AssetStoreTools
           ref: ${{ steps.asset_store_tools.outputs.sha }}
