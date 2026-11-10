@@ -76,6 +76,9 @@ namespace KillChord.Runtime.View.Persistent.Load
             _controller.LoadingCompleted +=
                 HandleLoadingCompleted;
 
+            _controller.OnLoadingFinishing +=
+                HandleLoadingFinishing;
+
             _isSubscribed = true;
         }
 
@@ -98,19 +101,40 @@ namespace KillChord.Runtime.View.Persistent.Load
             _controller.LoadingCompleted -=
                 HandleLoadingCompleted;
 
+            _controller.OnLoadingFinishing -=
+                HandleLoadingFinishing;
+
             _isSubscribed = false;
         }
 
         /// <summary>
-        ///     ロード開始時に画面を表示する。
+        ///     ロード開始時に、画面を暗転させてからロード画面を表示する。
         /// </summary>
         private void HandleLoadingStarted()
         {
             ApplyProgress(0f);
             ApplyRandomTip();
-            SetVisible(true);
+            ShowWithFade();
             StartMedalRotation();
             StartLoadingTextAnimation();
+        }
+
+        /// <summary>
+        ///     正常終了の前に、ロード画面の上を暗転させる。
+        /// </summary>
+        private void HandleLoadingFinishing()
+        {
+            if (_fadeImage == null)
+            {
+                return;
+            }
+
+            _handle.TryCancel();
+            _visibilityHandle.TryCancel();
+
+            _visibilityHandle = LMotion.Create(_fadeImage.fillAmount, 1f, GetScreenFadeDuration())
+                .WithEase(Ease.InCirc)
+                .BindToFillAmount(_fadeImage);
         }
 
         /// <summary>
@@ -333,6 +357,61 @@ namespace KillChord.Runtime.View.Persistent.Load
         }
 
         /// <summary>
+        ///     画面を暗転させた後、暗転を払ってロード画面を表示する。
+        ///     暗転の間に遷移元のシーンが破棄されるので、シーンの無い画面を見せない。
+        /// </summary>
+        private void ShowWithFade()
+        {
+            _isVisible = true;
+
+            if (_canvasGroup == null)
+            {
+                return;
+            }
+
+            _handle.TryCancel();
+            _visibilityHandle.TryCancel();
+
+            _canvasGroup.interactable = true;
+            _canvasGroup.blocksRaycasts = true;
+
+            if (_fadeImage == null)
+            {
+                _canvasGroup.alpha = 1f;
+                return;
+            }
+
+            // 最前面の黒い画像でロード画面を覆ったまま、全体を表示して暗転させる。
+            _fadeImage.fillAmount = 1f;
+            float screenFadeDuration = GetScreenFadeDuration();
+            if (screenFadeDuration <= 0f)
+            {
+                _canvasGroup.alpha = 1f;
+                _visibilityHandle = LMotion.Create(1f, 0f, LOADING_SCREEN_REVEAL_DURATION)
+                    .WithEase(Ease.OutCirc)
+                    .BindToFillAmount(_fadeImage);
+                return;
+            }
+
+            _visibilityHandle = LSequence.Create()
+                .Append(LMotion.Create(_canvasGroup.alpha, 1f, screenFadeDuration)
+                    .BindToAlpha(_canvasGroup))
+                .Append(LMotion.Create(1f, 0f, LOADING_SCREEN_REVEAL_DURATION)
+                    .WithEase(Ease.OutCirc)
+                    .BindToFillAmount(_fadeImage))
+                .Run();
+        }
+
+        /// <summary>
+        ///     ロード画面の前後で画面を暗転させる時間を取得する。
+        /// </summary>
+        /// <returns> 暗転にかける時間（秒）。コントローラーが無い場合は0。 </returns>
+        private float GetScreenFadeDuration()
+        {
+            return _controller != null ? _controller.ScreenFadeDuration : 0f;
+        }
+
+        /// <summary>
         ///     ロード完了時に、ロード画面をアルファフェードで非表示にする。
         /// </summary>
         private void HideWithFade()
@@ -364,6 +443,9 @@ namespace KillChord.Runtime.View.Persistent.Load
         ///     文字ジャンプ1回分（往路・復路）を表すループ回数。
         /// </summary>
         private const int JUMP_LOOP_COUNT = 2;
+
+        /// <summary> 暗転の後、黒い画像を払ってロード画面を見せる時間（秒）。 </summary>
+        private const float LOADING_SCREEN_REVEAL_DURATION = 0.3f;
 
         [SerializeField, Tooltip("ロード画面のCanvasGroup")]
         private CanvasGroup _canvasGroup;

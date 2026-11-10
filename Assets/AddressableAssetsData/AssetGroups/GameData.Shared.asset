@@ -60,6 +60,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a6bfa27ff824d47bb250d5c62339238
+    m_Address: LoadingWaitTimeSettings
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1c411bf35748d284584af4d0f16a0ccc
     m_Address: TitleScreenRuleData
     m_ReadOnly: 0

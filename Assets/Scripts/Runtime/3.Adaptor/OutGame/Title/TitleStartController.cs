@@ -39,21 +39,16 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
 
             try
             {
-                isSuccess =
-                    await _sceneTransitionController.LoadAdditiveAsync(targetSceneName, token);
-
-                if (!isSuccess)
-                {
-                    _isActivate = false;
-                    return false;
-                }
-
+                // 遷移先の読み込みと Title のアンロードを1回のロード画面で行い、途中で画面を開けない。
                 // Title のアンロードは自身の View を破棄するため、View のトークンでは待機しない。
                 // 常駐シーンの寿命で完了を待機し、ロードセッションとシーン初期化追跡を正常終了させる。
-                bool unloadSuccess = await _sceneTransitionController
-                    .UnloadWithPersistentLifetimeAsync(currentSceneName);
+                isSuccess = await _sceneTransitionController
+                    .LoadAdditiveThenUnloadWithPersistentLifetimeAsync(
+                        targetSceneName,
+                        currentSceneName,
+                        token);
 
-                if (!unloadSuccess)
+                if (!isSuccess)
                 {
                     _isActivate = false;
                     return false;

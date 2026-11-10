@@ -46,6 +46,7 @@ MonoBehaviour:
     - TitleScreenRuleData
     - OutGameScreenRuleData
     - LoadingTipsConfig
+    - LoadingWaitTimeSettings
     _collectionCategories:
     - TitleScreenRule
     - OutGameScreenRule
