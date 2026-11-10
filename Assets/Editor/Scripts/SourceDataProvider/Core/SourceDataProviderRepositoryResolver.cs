@@ -281,11 +281,12 @@ namespace KillChord.Editor.SourceDataProvider.Core
 
             if (useRootObject)
             {
-                CollectFromObject(dataAsset, collectionKey, options, visitedInstanceIds);
+                CollectFromObject(dataAsset, dataAsset, collectionKey, options, visitedInstanceIds);
             }
             else if (rootProperty != null)
             {
                 CollectFromProperty(
+                    dataAsset,
                     serializedObject,
                     rootProperty,
                     collectionKey,
@@ -372,11 +373,13 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <summary>
         ///     Unityオブジェクト内から指定カテゴリのDataIDを収集します。
         /// </summary>
+        /// <param name="dataAsset"> 走査起点のDataAssetです。 </param>
         /// <param name="target"> 走査対象のUnityオブジェクトです。 </param>
         /// <param name="collectionKey"> 収集するCollectionKeyです。 </param>
         /// <param name="options"> 収集結果です。 </param>
         /// <param name="visitedInstanceIds"> 走査済みオブジェクトのInstanceID一覧です。 </param>
         private static void CollectFromObject(
+            ScriptableObject dataAsset,
             UnityEngine.Object target,
             string collectionKey,
             List<SourceDataIDOption> options,
@@ -395,6 +398,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 enterChildren = true;
                 CollectCurrentProperty(
+                    dataAsset,
                     serializedObject,
                     iterator,
                     collectionKey,
@@ -406,12 +410,14 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <summary>
         ///     指定プロパティとその子要素からDataIDを収集します。
         /// </summary>
+        /// <param name="dataAsset"> 走査起点のDataAssetです。 </param>
         /// <param name="serializedObject"> プロパティを所有するSerializedObjectです。 </param>
         /// <param name="rootProperty"> 走査起点のプロパティです。 </param>
         /// <param name="collectionKey"> 収集するCollectionKeyです。 </param>
         /// <param name="options"> 収集結果です。 </param>
         /// <param name="visitedInstanceIds"> 走査済みオブジェクトのInstanceID一覧です。 </param>
         private static void CollectFromProperty(
+            ScriptableObject dataAsset,
             SerializedObject serializedObject,
             SerializedProperty rootProperty,
             string collectionKey,
@@ -420,7 +426,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
         {
             SerializedProperty iterator = rootProperty.Copy();
             SerializedProperty endProperty = iterator.GetEndProperty();
-            CollectCurrentProperty(serializedObject, iterator, collectionKey, options, visitedInstanceIds);
+            CollectCurrentProperty(dataAsset, serializedObject, iterator, collectionKey, options, visitedInstanceIds);
             bool enterChildren = true;
 
             while (iterator.NextVisible(enterChildren)
@@ -428,6 +434,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 enterChildren = true;
                 CollectCurrentProperty(
+                    dataAsset,
                     serializedObject,
                     iterator,
                     collectionKey,
@@ -439,12 +446,14 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <summary>
         ///     現在のSerializedPropertyからDataIDまたは参照先オブジェクトを収集します。
         /// </summary>
+        /// <param name="dataAsset"> 走査起点のDataAssetです。 </param>
         /// <param name="serializedObject"> プロパティを所有するSerializedObjectです。 </param>
         /// <param name="property"> 走査対象のプロパティです。 </param>
         /// <param name="collectionKey"> 収集するCollectionKeyです。 </param>
         /// <param name="options"> 収集結果です。 </param>
         /// <param name="visitedInstanceIds"> 走査済みオブジェクトのInstanceID一覧です。 </param>
         private static void CollectCurrentProperty(
+            ScriptableObject dataAsset,
             SerializedObject serializedObject,
             SerializedProperty property,
             string collectionKey,
@@ -456,8 +465,16 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 if (property.objectReferenceValue is ScriptableObject scriptableObject)
                 {
-                    CollectFromObject(scriptableObject, collectionKey, options, visitedInstanceIds);
+                    CollectFromObject(dataAsset, scriptableObject, collectionKey, options, visitedInstanceIds);
                 }
+                return;
+            }
+
+            // 参照先の要素アセット内の配列は、ほかの要素を指す参照側（例: スキルノードの親ノードID）なので登録IDに含めない。
+            // IsAuthoringProperty と同じ基準にそろえる。
+            if (serializedObject.targetObject != dataAsset
+                && property.propertyPath.Contains(".Array.data[", StringComparison.Ordinal))
+            {
                 return;
             }
 
