@@ -175,7 +175,9 @@ namespace KillChord.Demo
             }
 
             int currentStageId = selectedBattleStageState.CurrentStageDefinition.StageId.Value;
-            bool isFinalStageCleared = _hasFinalStage
+            // 最後のステージは「完了」を選んだときだけ体験版を終える。「再挑戦」ではもう一度遊べる。
+            bool isFinalStageCleared = action == StageResultExitAction.Complete
+                && _hasFinalStage
                 && currentStageId == _finalStageId.Value
                 && SaveStore.IsLoaded<SaveData>()
                 && SaveStore.Get<SaveData>().StageProgress.IsStageCleared(currentStageId);

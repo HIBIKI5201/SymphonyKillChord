@@ -1,10 +1,12 @@
 using KillChord.Runtime.Adaptor.Persistent.Environment;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Savedata;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Persistent.Savedata;
 using KillChord.Runtime.View.Persistent.Environment;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Threading;
 using UnityEngine;
 
@@ -28,6 +30,7 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
         {
             _environmentSettingsRepository = new EnvironmentSettingsRepository(_defaultAsset);
             _environmentSettingsService = new EnvironmentSettingsService(_environmentSettingsRepository);
+            _environmentSettingsService.OnSaveFailed += HandleSaveFailed;
             _loadedSettings = await _environmentSettingsService.LoadAsync(cancellationToken);
             return _loadedSettings != null;
         }
@@ -93,6 +96,15 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
 
         [SerializeField, Tooltip("セーブデータが存在しない初回起動時に適用する環境設定の既定値")]
         private EnvironmentSettingsDefaultAsset _defaultAsset;
+
+        /// <summary>
+        ///     保存が上限回数まで失敗したときに、ほかのセーブデータと同じ通知でプレイヤーへ伝える。
+        /// </summary>
+        /// <param name="exception"> 最後の保存で起きた例外。 </param>
+        private void HandleSaveFailed(Exception exception)
+        {
+            _ = SaveFailureNotification.ShowAsync(this, destroyCancellationToken);
+        }
 
         private IEnvironmentSettingsRepository _environmentSettingsRepository;
         private EnvironmentSettingsService _environmentSettingsService;
