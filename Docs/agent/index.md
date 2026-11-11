@@ -31,6 +31,7 @@
 | `reports/2026-10-01_design-review-release.md` | 全体設計レビュー: ビルド・署名・ストア・性能・権利・セーブ互換（Issue #2418） |
 | `reports/2026-10-27_tutorial-kill-step-deadlock.md` | チュートリアルの敵撃破ステップで敵が1体足りず進めなくなる不具合の原因調査（無敵バフを確定ダメージが貫通） |
 | `reports/2026-11-03_spec-query-eval.md` | 仕様書の窓口（spec_query）と全文検索を評価セット40問で比べた結果（#2396 段階3） |
+| `reports/2026-11-11_gameplay-spec-coverage.md` | 現行仕様リスト47ページと主要ゲーム実行経路・公式サイト/ストア領域のページ別突合。記載不足、実装状態差分、判断待ち、未確認範囲をClaude向けに整理 |
 | `handoffs/2026-11-03_logic-graph-debugger-plan.md` | ゲームロジックをグラフ表示するデバッグウィンドウの実装計画（Unity 6.x の Graph Toolkit・GraphView の比較と決めてほしいこと） |
 | `reports/2026-11-08_harness-context-budget.md` | ハーネスのコンテキスト・トークン消費の棚卸しと削減（読み込みタイミング・`/context` の実測・スキル選択の確認・Codex 委任プロンプト。Issue #2753） |
 
