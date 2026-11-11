@@ -59,6 +59,8 @@ namespace DevelopProducts.ToonShader
 
         private readonly List<DrawCall> _frameDrawCalls = new();
         private readonly Dictionary<Material, (Shader Shader, int PassIndex)> _shadowPassIndexCache = new();
+        // sharedMaterialsは呼ぶたびに配列を確保するため、毎フレームの収集では使い回すバッファへ取得する
+        private readonly List<Material> _materialBuffer = new();
 
         private int _resolution = 1024;
         private float _depthBias = 1.0f;
@@ -254,10 +256,10 @@ namespace DevelopProducts.ToonShader
                 {
                     if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy) continue;
 
-                    Material[] materials = renderer.sharedMaterials;
-                    for (int submeshIndex = 0; submeshIndex < materials.Length; submeshIndex++)
+                    renderer.GetSharedMaterials(_materialBuffer);
+                    for (int submeshIndex = 0; submeshIndex < _materialBuffer.Count; submeshIndex++)
                     {
-                        Material material = materials[submeshIndex];
+                        Material material = _materialBuffer[submeshIndex];
                         if (material == null) continue;
 
                         int passIndex = GetShadowCasterPassIndex(material);

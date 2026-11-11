@@ -23,3 +23,5 @@
 - マテリアルはFBX既定ではなく `Player.prefab` 側で上書きしているため、ツール実行時は `Player.prefab` を参照元として選ぶ。
 - 統合メッシュは読み取り不可(`m_IsReadable: 0`)で保存している。
 - `SilToonRenderController._skinnedMeshRenderers` は `SetUpRenderer` の実行時にだけ更新される。統合Rendererを含めるなら再実行する。
+- `SilToonShadowCaster._renderers` は保存済みの配列。統合後は有効な9個へ設定し直した(旧52個のままだとキャラ影が描かれない)。モデルを再統合したら `Collect Renderers` で更新する。
+- `SilToonShadowRenderPass` は毎フレームの `sharedMaterials` 配列確保をやめ、再利用バッファへ取得する。
