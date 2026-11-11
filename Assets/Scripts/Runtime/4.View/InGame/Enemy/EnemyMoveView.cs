@@ -18,6 +18,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     ///     敵の移動ロジックはEnemyMoveControllerに委譲される。
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
+    [AddComponentMenu("KillChord/View/Enemy/EnemyMoveView")]
     public class EnemyMoveView : MonoBehaviour, IEnemyMoveView, IGameplayControllable
     {
         /// <summary>

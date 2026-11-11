@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     ///     プレイヤー位置から、エフェクト原点まわりの円周上へ高速移動させるLitMotion演出のストラテジー。
     ///     プレイヤーの粒子が対象の周囲へ飛来し、その場で実体化するような表現に使用する。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/ScatterTravelSkillEffectPresentation")]
     public sealed class ScatterTravelSkillEffectPresentation : MotionSkillEffectPresentationBase
     {
         [SerializeField, Tooltip("移動させる対象のTransformです。未設定時は自身を使用します。")]

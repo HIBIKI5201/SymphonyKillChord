@@ -23,6 +23,7 @@ namespace KillChord.Runtime.Composition.OutGame
     ///     アウトゲーム共通 Signal を生成して公開するクラスです。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
+    [AddComponentMenu("KillChord/Composition/OutGame/OutGameSceneInitializer")]
     public sealed class OutGameSceneInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

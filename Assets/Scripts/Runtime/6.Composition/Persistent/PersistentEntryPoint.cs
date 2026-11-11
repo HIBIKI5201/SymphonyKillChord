@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Composition.Persistent
     /// <summary>
     ///     常駐シーン起動時のエントリーポイントとなるクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Persistent/PersistentEntryPoint")]
     public sealed class PersistentEntryPoint : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

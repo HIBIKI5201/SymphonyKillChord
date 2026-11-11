@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.Persistent.Voice
     ///     Voice再生用のCRI Atom SourceをVoice音量管理へ登録するView。
     /// </summary>
     [RequireComponent(typeof(CriAtomSource))]
+    [AddComponentMenu("KillChord/View/Voice/VoiceSource")]
     public sealed class VoiceSource : MonoBehaviour, IPlayableAudioSource, IVolumeApplicable, IControllableVoiceSource
     {
         /// <inheritdoc />

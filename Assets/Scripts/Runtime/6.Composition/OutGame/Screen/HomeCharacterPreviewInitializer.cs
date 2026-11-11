@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
     ///     ホーム画面に表示する3Dキャラクタープレビューの依存を解決するクラス。
     ///     シーンに既に存在するキャラクターを専用カメラでレンダーテクスチャへ描画し、HomeScreenViewへ反映します。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Screen/HomeCharacterPreviewInitializer")]
     public sealed class HomeCharacterPreviewInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
     ///     シナリオシーン専用の初期化ライフサイクルを起動するクラスです。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
+    [AddComponentMenu("KillChord/Composition/Scenario/OutGameScenarioSceneInitializer")]
     public sealed class OutGameScenarioSceneInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

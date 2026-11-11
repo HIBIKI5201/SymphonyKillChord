@@ -15,6 +15,7 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
     /// <summary>
     ///     環境設定を読み込み、Persistentシーンへ公開するモジュール。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Environment/EnvironmentSettingsInitializer")]
     public sealed class EnvironmentSettingsInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名。 </summary>

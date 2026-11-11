@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.InGame.UI
     ///     ポーズ中に表示するウィンドウのView。
     ///     ボタン操作をイベントとして通知するだけで、実際の処理は持たない。
     /// </summary>
+    [AddComponentMenu("KillChord/View/UI/PauseWindowView")]
     public class PauseWindowView : MonoBehaviour
     {
         /// <summary> ステージのリスタートが要求された時に発火するイベント。 </summary>

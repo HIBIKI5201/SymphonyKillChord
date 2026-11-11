@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     ///     ボスAI用ファサード：状態判定系。
     ///     ボスはスタンしない仕様のため、硬直系のメンバーは何もしない。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/BossStateFacade")]
     public class BossStateFacade : StateFacadeBase
     {
         /// <summary> 硬直中か。ボスはスタンしないため常に false。 </summary>

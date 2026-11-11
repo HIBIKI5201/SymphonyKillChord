@@ -6,6 +6,7 @@ namespace KillChord.Runtime.View.InGame.Player
     /// <summary>
     ///     攻撃BeatTypeに応じた武器モデル表示と攻撃SE再生を担当するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Player/PlayerAttackWeaponView")]
     public sealed class PlayerAttackWeaponView : MonoBehaviour, ISkillEffectWeaponSource
     {
         /// <summary> 現在構えている武器のTransformです。武器が無い場合はnull。 </summary>

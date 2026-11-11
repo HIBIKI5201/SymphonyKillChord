@@ -27,6 +27,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
     /// <summary>
     ///     シーン遷移機能の初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/SceneManagement/SceneTransitionInitializer")]
     public sealed class SceneTransitionInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

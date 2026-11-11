@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     砲弾を生成するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/ShellSpawner")]
     public class ShellSpawner : MonoBehaviour, IShellSpawner
     {
         /// <summary>

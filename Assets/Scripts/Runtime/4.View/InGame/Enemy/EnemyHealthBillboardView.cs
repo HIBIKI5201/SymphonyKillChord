@@ -5,6 +5,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     敵のHP表示を常にカメラの方に向けるためのViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/EnemyHealthBillboardView")]
     public class EnemyHealthBillboardView : MonoBehaviour
     {
         /// <summary>

@@ -6,6 +6,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     /// <summary>
     ///     ステージ開始演出における環境音（Ambience）の再生を管理するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Sequence/AmbienceSoundView")]
     public class AmbienceSoundView : MonoBehaviour
     {
         /// <summary>

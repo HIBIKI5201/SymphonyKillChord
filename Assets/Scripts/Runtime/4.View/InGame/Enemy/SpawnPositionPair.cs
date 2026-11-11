@@ -6,6 +6,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     敵生成関連の位置情報を保持するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/SpawnPositionPair")]
     public class SpawnPositionPair : MonoBehaviour
     {
         /// <summary> 敵を生成する位置。 </summary>

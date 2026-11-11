@@ -8,6 +8,7 @@ namespace KillChord.Demo.End
     /// <summary>
     ///     体験版終了時のデモムービーTimelineを再生するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/Demo/End/DemoEndMovieView")]
     public sealed class DemoEndMovieView : MonoBehaviour
     {
         /// <summary>

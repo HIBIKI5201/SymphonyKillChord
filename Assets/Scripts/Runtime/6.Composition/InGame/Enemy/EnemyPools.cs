@@ -14,6 +14,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     敵のインスタンスプーリングを行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/EnemyPools")]
     public class EnemyPools : MonoBehaviour, IShellPool
     {
         /// <summary>

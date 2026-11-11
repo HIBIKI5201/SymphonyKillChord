@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Character
     /// <summary>
      ///     ParticleSystemのワンショット再生をプールで管理するViewです。
      /// </summary>
+    [AddComponentMenu("KillChord/View/Character/ParticleSystemPoolView")]
     public sealed class ParticleSystemPoolView : ReusableParticleSystemView
     {
         /// <summary>

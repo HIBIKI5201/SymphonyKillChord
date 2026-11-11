@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.Persistent.Load
     /// <summary>
     ///     操作を保留する中央通知を、非スケール時間で表示してからフェードアウトします。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Load/EventNotificationView")]
     public sealed class EventNotificationView : MonoBehaviour
     {
         /// <summary> 通知による入力抑止状態が変わった時に通知します。 </summary>

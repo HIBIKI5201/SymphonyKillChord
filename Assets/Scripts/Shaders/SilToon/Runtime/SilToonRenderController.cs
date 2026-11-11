@@ -3,6 +3,7 @@ using UnityEngine;
 namespace DevelopProducts.ToonShader
 {
     [ExecuteInEditMode]
+    [AddComponentMenu("KillChord/Rendering/SilToon/SilToonRenderController")]
     public sealed class SilToonRenderController : MonoBehaviour
     {
         [SerializeField] private Material[] _materials;

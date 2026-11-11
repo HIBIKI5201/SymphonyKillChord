@@ -40,6 +40,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
     /// <summary>
     ///     インゲームにおけるミッションシステムの初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Mission/InGameMissionInitializer")]
     public class InGameMissionInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

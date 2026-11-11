@@ -22,6 +22,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     ///     ポーズウィンドウを戦闘ポーズとシーン遷移に結合するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/PauseWindowInitializer")]
     public sealed class PauseWindowInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

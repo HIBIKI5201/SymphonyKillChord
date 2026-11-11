@@ -37,6 +37,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
     /// <summary>
     ///     スキルツリーを初期化するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/SkillTree/SkillTreeInitializer")]
     public sealed class SkillTreeInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

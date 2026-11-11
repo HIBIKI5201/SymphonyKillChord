@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Mission
     /// <summary>
     ///     色指定攻撃の結果を、事前生成した表示枠でゲージ上へ表示します。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Mission/TutorialAttackFeedbackView")]
     public sealed class TutorialAttackFeedbackView : MonoBehaviour, ITutorialAttackFeedbackView
     {
         /// <inheritdoc />

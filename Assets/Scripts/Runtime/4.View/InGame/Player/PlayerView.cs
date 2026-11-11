@@ -22,6 +22,7 @@ namespace KillChord.Runtime.View.InGame.Player
     ///     プレイヤー入力を受け取り、移動と攻撃を更新するViewクラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.MOVEMENT)]
+    [AddComponentMenu("KillChord/View/Player/PlayerView")]
     public sealed class PlayerView : MonoBehaviour, IDamageable, IGameplayControllable
     {
         [SerializeField, Tooltip("移動のブレンドに使う Animator のパラメーター名。")] private string _blendName;

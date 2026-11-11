@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Composition.InGame.Result
     /// <summary>
     ///     リザルト表示を初期化して公開するモジュールです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Result/StageResultInitializationModule")]
     public sealed class StageResultInitializationModule : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     敵のHP表示関連View。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/EnemyHealthView")]
     public class EnemyHealthView : MonoBehaviour, IDamageNumber
     {
         /// <summary>

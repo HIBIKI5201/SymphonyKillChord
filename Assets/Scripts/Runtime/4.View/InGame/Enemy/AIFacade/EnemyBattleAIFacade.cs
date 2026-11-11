@@ -1,10 +1,12 @@
 using KillChord.Runtime.Utility.Diagnostics;
+using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
 {
     /// <summary>
     ///     敵AI用ファサード：戦闘系。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/EnemyBattleAIFacade")]
     public class EnemyBattleAIFacade : BattleAIFacadeBase
     {
         /// <summary>

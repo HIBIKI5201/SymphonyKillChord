@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
     ///     カメラシステムに関するクラスの生成と依存関係の解決を行う初期化クラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
+    [AddComponentMenu("KillChord/Composition/Camera/CameraSystemInitializer")]
     public sealed class CameraSystemInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

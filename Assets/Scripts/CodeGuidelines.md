@@ -121,6 +121,15 @@ public bool Complete()
 SerializeFieldのみで変更できるようにする
 - CG-071 View層では `FindObjectsByType` / `FindFirstObjectByType` / `FindAnyObjectByType` でシーンを走査して依存を探さない。参照は `[SerializeField]` か、Composition層から渡す。Composition層で走査する場合も、取得に失敗したらログを出す
 - CG-072 `Camera.main` を直接参照しない。カメラはカメラの所有者（CameraSystemView）から受け取る
+- CG-073 シーンやプレハブに置くコンポーネント（MonoBehaviour の具象クラス）には `[AddComponentMenu("KillChord/<役割>/<機能>/<クラス名>")]` を付け、Add Component の一覧で役割ごとに並ぶようにする。コードから `AddComponent` するだけのもの、abstract クラスには付けない
+  - 役割は置き場所で決める: `View`（4.View）、`Composition`（6.Composition）、`Debug`（DebugWorld）、`Demo`（Demo）、`Rendering`（Shaders）
+  - 機能は、層・シーン区分（InGame / OutGame / Persistent）のフォルダを除いた最初のフォルダ名にする。機能のフォルダが無いときは、シーン区分の直下ならその名前、それ以外は `Common` にする
+  - 最後の段はクラス名にする
+  - CI（Component Menu Check）が付け忘れ・形の違いを警告する。`python scripts/component-menu/check_component_menu.py --fix` で付いていないものへ自動で付けられる
+```csharp
+[AddComponentMenu("KillChord/View/Enemy/EnemyView")]
+public sealed class EnemyView : MonoBehaviour
+```
 
 ## ログ出力
 

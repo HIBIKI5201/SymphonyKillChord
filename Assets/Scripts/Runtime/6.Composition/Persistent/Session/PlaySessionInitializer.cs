@@ -34,6 +34,9 @@ namespace KillChord.Runtime.Composition.Persistent.Session
     ///         起動後は画面の切り替わりを監視し、最後にいた画面と選択中のステージをセーブデータへ記録する。
     ///     </para>
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Session/PlaySessionInitializer")]
+    [AddComponentMenu("KillChord/Composition/Session/PlaySessionInitializer")]
+    [AddComponentMenu("KillChord/Composition/Session/PlaySessionInitializer")]
     public sealed class PlaySessionInitializer : PersistentInitializationModuleBase, IPlaySessionResumeProvider
     {
         /// <summary> モジュール名です。 </summary>

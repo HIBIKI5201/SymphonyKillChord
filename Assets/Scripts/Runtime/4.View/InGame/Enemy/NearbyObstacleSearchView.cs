@@ -6,6 +6,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     周囲の障害物を検索するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/NearbyObstacleSearchView")]
     public class NearbyObstacleSearchView : MonoBehaviour, IObstacleSearchViewModel
     {
         /// <summary>

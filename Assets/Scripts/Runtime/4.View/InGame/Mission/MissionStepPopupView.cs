@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Mission
     ///     ステップごとのポップアップPrefabを生成して表示します。
     ///     入力を受け付けないパッシブな表示のため、スマートフォンのタッチ操作UIを妨げません。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Mission/MissionStepPopupView")]
     public class MissionStepPopupView : MonoBehaviour, IMissionStepPopupView
     {
         /// <inheritdoc />

@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Result
     /// <summary>
     ///    ステージ結果のサブミッション項目を表示するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Result/StageResultMissionItemView")]
     public class StageResultMissionItemView : MonoBehaviour
     {
         /// <summary>

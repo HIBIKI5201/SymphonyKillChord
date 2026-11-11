@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
     /// <summary>
     ///     共通音量設定を読み込み、Persistentシーンへ公開するモジュール。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Music/AudioSettingsInitializer")]
     public sealed class AudioSettingsInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名。 </summary>

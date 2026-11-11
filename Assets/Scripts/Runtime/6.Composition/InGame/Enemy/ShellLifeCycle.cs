@@ -23,6 +23,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     砲弾のライフサイクルを管理するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/ShellLifeCycle")]
     public class ShellLifeCycle : MonoBehaviour, IShellLifeCycle
     {
         /// <summary>
