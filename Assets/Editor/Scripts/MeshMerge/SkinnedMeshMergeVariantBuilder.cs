@@ -7,7 +7,7 @@ namespace KillChord.Editor.MeshMerge
 {
     /// <summary>
     ///     モデルのSkinnedMeshRendererをマテリアル単位で統合し、Prefab Variantとして保存します。
-    ///     元のRendererは削除できないため無効化し、統合Rendererを子として追加します。
+    ///     元のRendererは削除できないため無効化(GameObjectも非アクティブ化)し、統合Rendererを子として追加します。
     /// </summary>
     public static class SkinnedMeshMergeVariantBuilder
     {
@@ -180,6 +180,12 @@ namespace KillChord.Editor.MeshMerge
             foreach (SkinnedMeshRenderer source in group)
             {
                 source.enabled = false;
+                // アニメーションのm_Enabledカーブで再有効化されても描画されないよう、GameObjectごと止める。
+                // Rendererを載せたGameObjectに子が無い前提のため、子を持つ場合は止めない。
+                if (source.transform.childCount == 0)
+                {
+                    source.gameObject.SetActive(false);
+                }
             }
             return true;
         }

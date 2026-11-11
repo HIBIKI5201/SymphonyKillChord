@@ -28,3 +28,4 @@
 - Player.prefab のモデルをVariantへ差し替えると、モデルルートTransformとAnimatorのfileIDが変わる。`OutGame.unity` と `DemoEnd.unity` の参照(2種類)を新IDへ張り替えた。モデルを差し替え直すときは、`Player.prefab` を参照する全シーンで参照切れを確認する。
 - 統合Rendererのレイヤーを元と同じ `Player` に設定した(`Default` のままだとホーム画面のプレビューカメラに映らず、肌しか見えなかった)。ツールは参照元Prefabの同名Rendererのレイヤーを引き継ぐ。
 - PlayModeのOutGameで、統合Rendererが全て表示され、元Rendererが `enabled=false` のままであることを確認した。InGameのPlayは未確認。
+- 攻撃ポーズのFBXアニメーション(`Symphony_ARpose_*`・`Symphony_HGpose_*` の `Take 001`)は、元の階層パスの51個のRendererに `m_Enabled=1` のカーブを持つ。攻撃で再生されると、`enabled=false` にした元Rendererが再び有効になる。元RendererのGameObjectを非アクティブにして、有効になっても描画されないようにした(PlayModeのInGameで攻撃後も描画されるRendererが9個のままであることを確認)。コンポーネントの `enabled` はカーブで1に戻るため、Inspector上ではONに見える。
