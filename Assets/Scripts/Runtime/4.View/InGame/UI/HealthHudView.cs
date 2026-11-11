@@ -25,7 +25,9 @@ namespace KillChord.Runtime.View.InGame.UI
         {
             if (vm == null) throw new ArgumentNullException(nameof(vm), "HP HUDのViewModelがNULL。");
             _vm = vm;
-            _vm.HealthHudDTO.Subscribe(UpdateHpHud).RegisterTo(destroyCancellationToken);
+            _vm.CurrentHealth.Subscribe(UpdateCurrentHealthText).RegisterTo(destroyCancellationToken);
+            _vm.MaxHealth.Subscribe(UpdateMaxHealthText).RegisterTo(destroyCancellationToken);
+            _vm.HealthRatio.Subscribe(PlayHealthBarMotion).RegisterTo(destroyCancellationToken);
         }
 
         /// <summary>
@@ -61,6 +63,8 @@ namespace KillChord.Runtime.View.InGame.UI
         private float _healthBarTransitionDur = 0.5f;
         [SerializeField, Tooltip("HP変化後アニメーション開始までの間隔（秒）")]
         private float _animationStartDelay = 0.5f;
+        [SerializeField, Tooltip("赤いバーが緑のバーに追いつくときのイージング。")]
+        private Ease _healthBarEase = Ease.OutExpo;
 
 #if UNITY_EDITOR
         [Header("デバッグ用")]
@@ -77,35 +81,53 @@ namespace KillChord.Runtime.View.InGame.UI
         private MotionHandle _healthBarDamageMotion;
 
         /// <summary>
-        ///     HUDを更新する。
+        ///     現在HPのテキストを更新する。
         /// </summary>
-        /// <param name="dto">HP HUD用のDTO</param>
-        private void UpdateHpHud(HealthHudDTO dto)
+        /// <param name="currentHealth"> 現在HP。 </param>
+        private void UpdateCurrentHealthText(float currentHealth)
         {
-            if (_healthBarImage == null || _healthBarImageRed == null || _currentHealthText == null || _maxHealthText == null) return;
+            if (_currentHealthText == null) { return; }
 
-            PlayHealthHudDamageMotion(dto);
+            // 端数を切り上げて整数表示にする。
+            _currentHealthText.SetText("{0}", Mathf.CeilToInt(currentHealth));
         }
 
         /// <summary>
-        ///     ダメージ時のHUDアニメーションを再生する。
+        ///     最大HPのテキストを更新する。
         /// </summary>
-        private void PlayHealthHudDamageMotion(in HealthHudDTO dto)
+        /// <param name="maxHealth"> 最大HP。 </param>
+        private void UpdateMaxHealthText(float maxHealth)
         {
-            // UIの数値を更新
-            _currentHealthText.SetText("{0}", Mathf.CeilToInt(dto.CurrentHealth));
-            _maxHealthText.SetText("{0}", Mathf.CeilToInt(dto.MaxHealth));
+            if (_maxHealthText == null) { return; }
+
+            _maxHealthText.SetText("{0}", Mathf.CeilToInt(maxHealth));
+        }
+
+        /// <summary>
+        ///     HPの割合をバーへ反映し、赤いバーが遅れて追いつくアニメーションを再生する。
+        /// </summary>
+        /// <param name="healthRatio"> 最大HPに対する現在HPの割合。 </param>
+        private void PlayHealthBarMotion(float healthRatio)
+        {
+            if (_healthBarImage == null || _healthBarImageRed == null) { return; }
 
             // 緑ゲージ即減少
-            _healthBarImage.fillAmount = dto.MaxHealth > 0f ?
-                Mathf.Clamp01(dto.CurrentHealth / dto.MaxHealth) : 0f;
+            _healthBarImage.fillAmount = healthRatio;
 
             // 赤ゲージが追いつく
             // 連続ダメージの場合、再生中のアニメーションを停止し、新たにアニメーションを開始する
+            PlayRedBarCatchUpMotion();
+        }
+
+        /// <summary>
+        ///     赤いバーを緑のバーの位置まで遅れて縮めるアニメーションを再生する。
+        /// </summary>
+        private void PlayRedBarCatchUpMotion()
+        {
             _healthBarDamageMotion.TryCancel();
             _healthBarDamageMotion = LMotion.Create(_healthBarImageRed.fillAmount, _healthBarImage.fillAmount, _healthBarTransitionDur)
                 .WithDelay(_animationStartDelay)
-                .WithEase(Ease.OutExpo)
+                .WithEase(_healthBarEase)
                 .BindToFillAmount(_healthBarImageRed);
         }
 
@@ -120,11 +142,7 @@ namespace KillChord.Runtime.View.InGame.UI
             if (Keyboard.current.zKey.wasPressedThisFrame)
             {
                 _healthBarImage.fillAmount = _healthBarImage.fillAmount < _decreasePercent ? 0f : _healthBarImage.fillAmount - _decreasePercent;
-                _healthBarDamageMotion.TryCancel();
-                _healthBarDamageMotion = LMotion.Create(_healthBarImageRed.fillAmount, _healthBarImage.fillAmount, _healthBarTransitionDur)
-                    .WithDelay(_animationStartDelay)
-                    .WithEase(Ease.OutExpo)
-                    .BindToFillAmount(_healthBarImageRed);
+                PlayRedBarCatchUpMotion();
             }
             else if (Keyboard.current.xKey.wasPressedThisFrame)
             {
