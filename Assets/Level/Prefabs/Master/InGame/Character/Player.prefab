@@ -1601,6 +1601,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 472435975582899509, guid: b082f4b5625cd874485248c07707b7dd, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 499662577542983036, guid: b082f4b5625cd874485248c07707b7dd, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -2541,6 +2545,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: 7ae216c1a3af31a4a9dc150bbfa2176d, type: 2}
+    - target: {fileID: 6097525979121293598, guid: b082f4b5625cd874485248c07707b7dd, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6109929112256279802, guid: b082f4b5625cd874485248c07707b7dd, type: 3}
       propertyPath: m_UpdateWhenOffscreen
       value: 1

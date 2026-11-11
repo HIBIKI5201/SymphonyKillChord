@@ -26,3 +26,5 @@
 - `SilToonShadowCaster._renderers` は保存済みの配列。統合後は有効な9個へ設定し直した(旧52個のままだとキャラ影が描かれない)。モデルを再統合したら `Collect Renderers` で更新する。
 - `SilToonShadowRenderPass` は毎フレームの `sharedMaterials` 配列確保をやめ、再利用バッファへ取得する。
 - Player.prefab のモデルをVariantへ差し替えると、モデルルートTransformとAnimatorのfileIDが変わる。`OutGame.unity` と `DemoEnd.unity` の参照(2種類)を新IDへ張り替えた。モデルを差し替え直すときは、`Player.prefab` を参照する全シーンで参照切れを確認する。
+- 統合Rendererのレイヤーを元と同じ `Player` に設定した(`Default` のままだとホーム画面のプレビューカメラに映らず、肌しか見えなかった)。ツールは参照元Prefabの同名Rendererのレイヤーを引き継ぐ。
+- PlayModeのOutGameで、統合Rendererが全て表示され、元Rendererが `enabled=false` のままであることを確認した。InGameのPlayは未確認。

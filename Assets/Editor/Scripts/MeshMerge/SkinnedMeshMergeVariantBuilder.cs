@@ -17,7 +17,7 @@ namespace KillChord.Editor.MeshMerge
         /// <param name="sourceAsset"> 元のモデル(FBXまたはPrefab)です。 </param>
         /// <param name="outputFolder"> Variantと統合メッシュの保存先フォルダです。 </param>
         /// <param name="materialReference">
-        ///     マテリアルの参照元Prefabです。同名のRendererのマテリアルを元モデルへ反映してから統合します。
+        ///     マテリアルの参照元Prefabです。同名のRendererのマテリアルとレイヤーを元モデルへ反映してから統合します。
         ///     モデルを使う側のPrefabでマテリアルを差し替えている場合に指定します。
         /// </param>
         /// <returns> 作成したVariantのアセットパスです。失敗した場合は空文字です。 </returns>
@@ -65,15 +65,21 @@ namespace KillChord.Editor.MeshMerge
             }
 
             Dictionary<string, Material[]> referenceMaterials = new();
+            Dictionary<string, int> referenceLayers = new();
             foreach (SkinnedMeshRenderer reference in materialReference.GetComponentsInChildren<SkinnedMeshRenderer>(true))
             {
                 referenceMaterials.TryAdd(reference.name, reference.sharedMaterials);
+                referenceLayers.TryAdd(reference.name, reference.gameObject.layer);
             }
             foreach (SkinnedMeshRenderer renderer in instance.GetComponentsInChildren<SkinnedMeshRenderer>(true))
             {
                 if (referenceMaterials.TryGetValue(renderer.name, out Material[] materials))
                 {
                     renderer.sharedMaterials = materials;
+                }
+                if (referenceLayers.TryGetValue(renderer.name, out int layer))
+                {
+                    renderer.gameObject.layer = layer;
                 }
             }
         }

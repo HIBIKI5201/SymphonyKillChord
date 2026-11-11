@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5232145302321314332}
   - component: {fileID: 5475399540625499622}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Symphony_0828_Merged_03_SilToonEye
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -235,7 +235,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5219744951680929490}
   - component: {fileID: 8748924081876543039}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Symphony_0828_Merged_02_SilToonEye
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -460,7 +460,7 @@ GameObject:
   m_Component:
   - component: {fileID: 17406682485803747}
   - component: {fileID: 3812325584673669889}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Symphony_0828_Merged_00_SilToonTop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -684,7 +684,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8713950802378697601}
   - component: {fileID: 6797368247509841562}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Symphony_0828_Merged_01_SilToon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -908,7 +908,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2022504256638994518}
   - component: {fileID: 2239396508801899274}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Symphony_0828_Merged_04_SilToonHair
   m_TagString: Untagged
   m_Icon: {fileID: 0}
