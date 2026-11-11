@@ -2152,7 +2152,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &2057136855 stripped
 Animator:
-  m_CorrespondingSourceObject: {fileID: 7554209699097654958, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
+  m_CorrespondingSourceObject: {fileID: 8446418960943113669, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
   m_PrefabInstance: {fileID: 2057136853}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &2057136856 stripped
