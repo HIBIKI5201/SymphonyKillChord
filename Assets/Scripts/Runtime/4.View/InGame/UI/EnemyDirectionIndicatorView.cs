@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View.InGame.UI
     ///     プレイヤーの任意の位置で画面外の敵方向を3Dマーカーとして描画する。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.HUD)]
+    [AddComponentMenu("KillChord/View/UI/EnemyDirectionIndicatorView")]
     public sealed class EnemyDirectionIndicatorView : MonoBehaviour
     {
         /// <summary> 表示更新タイミングを通知する。 </summary>

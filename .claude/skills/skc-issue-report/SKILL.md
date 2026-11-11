@@ -1,6 +1,6 @@
 ---
 name: skc-issue-report
-description: "Turn problems and open challenges that surfaced while running an skc-/uloop- skill into GitHub Issues: collect the evidence, check for duplicates, draft the body in this repo's Issue format (`[TODO] ...` title, 概要 / 背景・根拠 / やること / 完了条件 / 関連), and create it with `gh issue create`. Use when the user says things like '出てきた問題をIssueにして', '課題をIssue化して', '残論点をIssueに起こして', 'これ後でやるからIssue切って', or when a skill run (audit, QA, spec diff check, feature flow, Codex delegation, importers, autobuilder) ends with findings or blockers that are out of scope for the current change. Does not fix the problem itself; it only records it."
+description: "Record out-of-scope findings or blockers from a skc-/uloop- skill run as GitHub Issues in this repo's `[TODO]` format after a duplicate check. Use for requests like 「Issueにして」「課題をIssue化して」. Records only; does not fix."
 ---
 
 # skc-issue-report
@@ -16,7 +16,6 @@ skc 系スキルの実行中に見つかった問題・課題のうち、**今�
 | `skc-notion-spec-diff-check` | 仕様と実装のずれ（「仕様のみ」「実装のみ」「どちらも不足」） |
 | `skc-ai-debug-qa` | QA で再現した不具合、観測できなかった項目 |
 | `skc-feature-flow` | PR の「未確認・残論点」に書いた項目 |
-| `skc-codex-implement` | Codex が止まった・誤った実装を出した原因、運用上の課題 |
 | `skc-sinfonia-importers` / `skc-unity-autobuilder` / `skc-notion-spec-write` | ツールの失敗、手順書と実際の食い違い |
 | スキル自体 | SKILL.md の手順が古い・足りない・間違っている |
 

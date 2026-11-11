@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Composition.OutGame.Music
     /// <summary>
     ///     Sceneに設定されたBGM CueをPersistentのMusicPlayerへ通知する。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Music/OutGameBgmInitializer")]
     public sealed class OutGameBgmInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名。 </summary>

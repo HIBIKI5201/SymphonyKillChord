@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.Persistent.Input
     ///     入力イベントを受け取り、InputContextを生成して外部に通知するクラス。
     /// </summary>
     [RequireComponent(typeof(PlayerInput), typeof(EventSystem), typeof(InputSystemUIInputModule))]
+    [AddComponentMenu("KillChord/View/Input/PlayerInputView")]
     public class PlayerInputView : MonoBehaviour
     {
         /// <summary>

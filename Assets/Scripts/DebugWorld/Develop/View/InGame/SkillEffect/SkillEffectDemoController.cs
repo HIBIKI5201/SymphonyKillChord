@@ -10,6 +10,7 @@ namespace KillChord.Develop.View.InGame.SkillEffect
     /// <summary>
     ///     デモシーンでスキルエフェクトを手動再生し、配置方式の挙動を確認するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Debug/SkillEffect/SkillEffectDemoController")]
     public sealed class SkillEffectDemoController : MonoBehaviour
     {
         [SerializeField, Tooltip("初期化完了を待機するデモ用ブートです。")]

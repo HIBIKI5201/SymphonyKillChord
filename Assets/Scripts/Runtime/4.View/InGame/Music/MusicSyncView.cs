@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Music
     ///     音楽との同期タイミングを管理するViewクラス。
     /// </summary>
     [DefaultExecutionOrder(-900)]
+    [AddComponentMenu("KillChord/View/Music/MusicSyncView")]
     public class MusicSyncView : MonoBehaviour
     {
         /// <summary> 音楽同期状態。 </summary>

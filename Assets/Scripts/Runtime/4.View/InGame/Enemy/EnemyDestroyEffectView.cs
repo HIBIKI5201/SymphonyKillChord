@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     敵の死亡演出を再生するビュー。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/EnemyDestroyEffectView")]
     public sealed class EnemyDestroyEffectView : MonoBehaviour
     {
         /// <summary>

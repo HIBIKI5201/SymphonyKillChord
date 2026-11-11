@@ -55,6 +55,16 @@ class HarnessValidationTests(unittest.TestCase):
         (self.root / "AGENTS.md").unlink()
         self.assertTrue(any("missing entrypoint" in e for e in validate(self.root)[1]))
 
+    def test_long_project_description_is_rejected(self):
+        self.write(".claude/skills/skc-long/SKILL.md",
+                   f"---\nname: skc-long\ndescription: \"{'a' * 301}\"\n---\n")
+        self.assertTrue(any("description too long" in e for e in validate(self.root)[1]))
+
+    def test_vendor_description_is_not_limited(self):
+        self.write(".claude/skills/uloop-long/SKILL.md",
+                   f"---\nname: uloop-long\ndescription: {'a' * 400}\n---\n")
+        self.assertEqual([], validate(self.root)[1])
+
     def test_claude_entry_without_agents_import_is_rejected(self):
         self.write("CLAUDE.md", "AGENTS.md を読む")
         self.assertTrue(any("must import AGENTS.md" in e for e in validate(self.root)[1]))

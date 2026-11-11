@@ -28,6 +28,7 @@ namespace KillChord.Demo
     /// <summary>
     ///     体験版セッションを常駐させ、二つのタイマーと専用終了遷移を制御します。
     /// </summary>
+    [AddComponentMenu("KillChord/Demo/Common/DemoRuntimeBootstrap")]
     public sealed class DemoRuntimeBootstrap : MonoBehaviour
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

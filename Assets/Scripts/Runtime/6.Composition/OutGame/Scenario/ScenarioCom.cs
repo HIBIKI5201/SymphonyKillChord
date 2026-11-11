@@ -33,6 +33,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
     /// <summary>
     /// シナリオ再生に必要な依存関係を組み立てて起動する。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Scenario/ScenarioCom")]
     public sealed class ScenarioCom : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

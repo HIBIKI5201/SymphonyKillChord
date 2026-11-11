@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.InGame.Combo
     /// <summary>
     ///     コンボを表示するビュークラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Combo/ComboHudView")]
     public class ComboHudView : MonoBehaviour
     {
         /// <summary>

@@ -5,7 +5,7 @@
 
   search  目録（_catalog.jsonl）をキーワードとプロパティで絞り込み、ページID・タイトル・サマリーを返す
   get     1ページの「仕様」の節（仕様概要・詳細説明）を返す。親仕様・子仕様・関連ページを添える
-          --rationale で仕様意図（経緯・却下・保留した案）を、--status で実装リストの実装状態を足す
+          --rationale で仕様意図と、仕様検討フォーラムの決定の記録を、--status で実装リストの実装状態を足す
 
 目録がない版のプロジェクト ドキュメントのミラーでも動くよう、そのときは build_spec_catalog.py と同じ処理で目録をその場で作る。
 本文の <mention-page> はページ名とパスに置き換えて返す（書き出すとページ名が落ちる問題 #2483 D-14 を読む側で補う）。
@@ -56,11 +56,17 @@ PARENT_PROPERTIES = ("親仕様", "親")
 STATUS_DATABASE = "実装リスト"
 STATUS_RELATION = "仕様"
 STATUS_PAGE_SUFFIX = " 実装状況"
+# 決定の記録（ADR）。仕様検討フォーラムの行が、反映先のリレーションで仕様・システムのページを指す（2026-11-09）。
+# 仕様意図には最終的な理由だけを書き、経緯・却下・保留はフォーラムの 1 行 1 決定で持つ。
+DECISION_DATABASE = "仕様検討フォーラム"
+DECISION_RELATIONS = ("反映先", "反映先（システム）")
+DECISION_DATE_PROPERTIES = ("決定日", "作成日")
 
 # W-09 のページ構成。H1の見出しで節の種別を決める（#2396 段階1の判定規則）。
 SPEC_HEADINGS = ("仕様概要", "詳細説明")
 RATIONALE_HEADINGS = ("仕様意図",)
-# 仕様の節の中にあっても、制作意図として扱う見出し。
+# 仕様の節の中にあっても、制作意図として扱う見出し。経緯・却下・保留はフォーラムへ移した（2026-11-09）が、
+# 写しが古いときのために残す。
 RATIONALE_SUBHEADINGS = ("経緯", "却下", "保留した案", "変更履歴")
 KIND_SPEC = "仕様"
 KIND_RATIONALE = "制作意図"
@@ -147,6 +153,21 @@ class Catalog:
         if result:
             return result
         return [child for child in self.children(row) if child["title"] == row["title"] + STATUS_PAGE_SUFFIX]
+
+    def decision_rows(self, row):
+        """仕様検討フォーラムの行のうち、反映先でこのページを指すもの。決定日の新しい順。"""
+        result = [
+            other for other in self.rows
+            if other.get("database") == DECISION_DATABASE
+            and any(row["path"] in other.get("relations", {}).get(name, []) for name in DECISION_RELATIONS)
+        ]
+        return sorted(result, key=lambda other: (decision_date(other), other["title"]), reverse=True)
+
+
+def decision_date(row):
+    """決定日（無ければ作成日）の日付の部分。"""
+    value = first_property(row, DECISION_DATE_PROPERTIES)
+    return value[:10] if value else ""
 
 
 def load_catalog(source):
@@ -464,6 +485,15 @@ def get(catalog, row, include_rationale, include_status):
                 "text": replace_mentions(catalog, "\n".join(status_body).strip("\n"), status_row["path"]),
             })
         result["status"] = status
+    if include_rationale:
+        result["decisions"] = [
+            brief(catalog, decision) | {
+                "status": decision.get("properties", {}).get("ステータス", ""),
+                "date": decision_date(decision),
+                "conclusion": decision.get("properties", {}).get("結論", ""),
+            }
+            for decision in catalog.decision_rows(row)
+        ]
     result["returned_characters"] = sum(len(section["text"]) for section in result["sections"]) + sum(
         len(item["text"]) for item in result.get("status", []))
     return result
@@ -503,6 +533,15 @@ def format_get(result):
             lines.extend(f"  - {name}: {value}" for name, value in item["properties"].items())
             if item["text"]:
                 lines.extend(["", item["text"], ""])
+    if "decisions" in result:
+        lines.extend(["", "## 決定の記録（仕様検討フォーラム）", ""])
+        if not result["decisions"]:
+            lines.append("仕様検討フォーラムに、このページを反映先にした行がありません。")
+        for item in result["decisions"]:
+            head = " / ".join(value for value in (item["date"], item["status"]) if value)
+            lines.append(f"- {item['title']} ({item['page_id'] or 'IDなし'}) <{item['path']}>" + (f" 〔{head}〕" if head else ""))
+            if item["conclusion"]:
+                lines.append(f"  - 結論: {item['conclusion']}")
     if result["omitted_sections"]:
         lines.extend(["", "省いた節: " + "、".join(result["omitted_sections"]) + "（--rationale で読めます）"])
     lines.append(f"返した本文: {result['returned_characters']} 文字 / ページ全体: {page['characters']} 文字")
@@ -527,7 +566,7 @@ def build_parser():
 
     get_parser = commands.add_parser("get", help="1ページの仕様の節を読む")
     get_parser.add_argument("target", help="ページID・Notion URL・パス・タイトル")
-    get_parser.add_argument("--rationale", action="store_true", help="仕様意図（経緯・却下・保留した案）も返す")
+    get_parser.add_argument("--rationale", action="store_true", help="仕様意図と、仕様検討フォーラムの決定の記録（反映先がこのページの行）も返す")
     get_parser.add_argument("--status", action="store_true", help="実装リストの実装状態も返す")
 
     path_parser = commands.add_parser("path", help="ページID・データベースIDからミラー内のパスを引く")

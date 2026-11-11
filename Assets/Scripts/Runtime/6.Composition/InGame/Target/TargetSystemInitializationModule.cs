@@ -7,6 +7,7 @@ namespace KillChord.Runtime.Composition.InGame.Target
     /// <summary>
     ///     ターゲットシステムを初期化して公開するモジュールです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Target/TargetSystemInitializationModule")]
     public sealed class TargetSystemInitializationModule : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

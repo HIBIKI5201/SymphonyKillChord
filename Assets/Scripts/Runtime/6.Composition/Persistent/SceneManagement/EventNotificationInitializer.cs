@@ -8,6 +8,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
     /// <summary>
     ///     常駐通知Viewを入力初期化前に公開し、常駐終了時に解除します。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/SceneManagement/EventNotificationInitializer")]
     public sealed class EventNotificationInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

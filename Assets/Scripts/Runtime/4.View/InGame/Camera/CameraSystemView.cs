@@ -14,6 +14,7 @@ namespace KillChord.Runtime.View.InGame.Camera
     ///     カメラシステムの挙動を管理するViewクラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
+    [AddComponentMenu("KillChord/View/Camera/CameraSystemView")]
     public sealed class CameraSystemView : MonoBehaviour
     {
         /// <summary> ロックオン入力で対象を捉えたとき（手動ロックの開始と、次の敵への切り替え）に発火します。解除では発火しません。 </summary>

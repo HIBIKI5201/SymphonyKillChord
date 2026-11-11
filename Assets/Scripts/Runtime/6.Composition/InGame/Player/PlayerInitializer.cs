@@ -50,6 +50,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
     ///     プレイヤーに関するクラスの生成と依存関係の解決を行う初期化クラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
+    [AddComponentMenu("KillChord/Composition/Player/PlayerInitializer")]
     public sealed class PlayerInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

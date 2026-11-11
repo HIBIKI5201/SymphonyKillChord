@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     /// <summary>
     ///     スキル一覧UIの、コマンド1拍分の表示を管理するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillListStepView")]
     public sealed class SkillListStepView : MonoBehaviour
     {
         /// <summary>

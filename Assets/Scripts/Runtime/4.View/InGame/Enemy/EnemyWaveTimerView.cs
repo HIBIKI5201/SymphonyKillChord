@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     敵生成用のタイマーを管理するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/EnemyWaveTimerView")]
     public class EnemyWaveTimerView : MonoBehaviour, IGameplayControllable, IEnemyWaveTimerView
     {
         /// <summary>

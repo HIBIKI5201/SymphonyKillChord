@@ -13,6 +13,7 @@ namespace KillChord.Runtime.View.InGame.Reticle
     ///     注目/候補の強調表示は既存の HUDEnemyHealthView が担当するため干渉しない。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
+    [AddComponentMenu("KillChord/View/Reticle/ReticleHudView")]
     public sealed class ReticleHudView : MonoBehaviour
     {
         /// <summary>

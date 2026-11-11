@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     ///     クリティカル成立時のみ追加演出を再生するストラテジー。
     ///     ダメージ通知を購読し、フレーム精度で分岐する。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/CriticalBranchSkillEffectPresentation")]
     public sealed class CriticalBranchSkillEffectPresentation : SkillEffectPresentationBase
     {
         [SerializeField, Tooltip("クリティカル時に再生するParticleSystemです。")]

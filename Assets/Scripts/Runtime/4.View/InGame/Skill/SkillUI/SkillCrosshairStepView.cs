@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     ///     クロスヘア上のリズムコマンドUIの拍子ごとの表示を管理するクラス。
     ///     下部の入力進行UIと異なり、クールダウン表現やアニメーションは持たず、点灯/消灯のみを扱う。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillCrosshairStepView")]
     public sealed class SkillCrosshairStepView : MonoBehaviour
     {
         /// <summary>

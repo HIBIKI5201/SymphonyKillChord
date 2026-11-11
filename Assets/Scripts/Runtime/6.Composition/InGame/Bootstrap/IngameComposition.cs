@@ -25,6 +25,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
     ///     インゲーム初期化ライフサイクルを実行するクラスです。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
+    [AddComponentMenu("KillChord/Composition/Bootstrap/IngameComposition")]
     public sealed class IngameComposition : MonoBehaviour
     {
         /// <summary>

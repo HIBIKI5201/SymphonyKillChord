@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     ///     InGameのHUDを初期化するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/InGameHudInitializer")]
     public sealed class InGameHudInitializer : InGameInitializationModuleBase
     {
         /// <inheritdoc/>

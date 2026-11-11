@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     ///     コマンドの全拍を並べて表示し、入力済みの拍を点灯させる。
     ///     クールダウン中はゲージで進捗を示す。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillListRowView")]
     public sealed class SkillListRowView : MonoBehaviour, ISkillInputProgressRowView
     {
         /// <summary> StepViewを並べる親Transform。 </summary>

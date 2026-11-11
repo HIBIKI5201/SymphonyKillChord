@@ -9,6 +9,7 @@ namespace KillChord.Demo
     /// <summary>
     ///     体験版のホームタイマーと全体タイマーを表示します。
     /// </summary>
+    [AddComponentMenu("KillChord/Demo/Common/DemoTimerView")]
     public sealed class DemoTimerView : MonoBehaviour
     {
         /// <summary>

@@ -14,6 +14,7 @@ namespace KillChord.Runtime.View.InGame.UI
     /// <summary>
     ///     HPバーHUDのViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/UI/HealthHudView")]
     public class HealthHudView : MonoBehaviour
     {
         /// <summary>

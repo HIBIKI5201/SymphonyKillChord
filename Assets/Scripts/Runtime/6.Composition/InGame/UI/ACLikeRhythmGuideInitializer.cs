@@ -28,6 +28,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     ///     AC風リズムガイドを初期化するモジュールです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/ACLikeRhythmGuideInitializer")]
     public sealed class ACLikeRhythmGuideInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

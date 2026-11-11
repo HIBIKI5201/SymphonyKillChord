@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     /// <summary>
     ///     銃口から対象へ弾道を一瞬だけ描く曳光弾の演出ストラテジー。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/TracerSkillEffectPresentation")]
     public sealed class TracerSkillEffectPresentation : SkillEffectPresentationBase
     {
         private const float MINIMUM_SQR_MAGNITUDE = 0.0001f;

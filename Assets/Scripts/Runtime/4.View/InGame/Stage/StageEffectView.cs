@@ -10,6 +10,7 @@ namespace KillChord.Runtime.View.InGame.Stage
     /// <summary>
     ///     ステージ演出IDに対応するワンショット演出を再生します。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Stage/StageEffectView")]
     public sealed class StageEffectView : MonoBehaviour
     {
         /// <summary>

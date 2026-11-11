@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     /// プラットフォームによってUIの表示/非表示を切り替えるクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/PlatformSpecificUI")]
     public class PlatformSpecificUI : MonoBehaviour
     {
         [Header("スマホ用のUIをEditorで表示するか")] [SerializeField, Tooltip("エディタ上でスマホ用の UI を表示するか。")]

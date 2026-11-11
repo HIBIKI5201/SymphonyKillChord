@@ -15,6 +15,7 @@ namespace KillChord.Runtime.View.InGame.Result
     /// <summary>
     ///    ステージリザルト画面の表示を制御するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Result/StageResultView")]
     public class StageResultView : MonoBehaviour
     {
         /// <summary>
@@ -98,7 +99,7 @@ namespace KillChord.Runtime.View.InGame.Result
 
             try
             {
-                bool success = await _controller.CompleteAsync(destroyCancellationToken);
+                bool success = await _controller.CompleteAsync();
 
                 if (!success)
                 {
@@ -130,7 +131,7 @@ namespace KillChord.Runtime.View.InGame.Result
 
             try
             {
-                bool success = await _controller.RetryAsync(destroyCancellationToken);
+                bool success = await _controller.RetryAsync();
 
                 if (!success)
                 {

@@ -10,6 +10,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     /// <summary>
     ///     スキル発動時のエフェクトと効果音を再生するビュー。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillView")]
     public class SkillView : MonoBehaviour, ISkillVisual
     {
         /// <summary> スキル ID。 </summary>

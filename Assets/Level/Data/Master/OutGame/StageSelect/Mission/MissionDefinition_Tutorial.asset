@@ -105,14 +105,6 @@ MonoBehaviour:
     _guideMessageText: "\u9EC4\u8272\u306E\u30BF\u30A4\u30DF\u30F3\u30B0\u3067\u3082\u653B\u6483(<size=24>{input.attack_button}</size>)\u3057\u3066\u307F\u3088\u3046\u3002"
     _entryActions: []
   - _condition:
-      rid: 900300000000000001
-    _guideMessageText: "\u30ED\u30C3\u30AF\u30AA\u30F3(<size=24>{input.lock_on}</size>)\u3067\u6575\u3092\u6349\u3048\u3088\u3046\u3002"
-    _entryActions: []
-  - _condition:
-      rid: 900300000000000005
-    _guideMessageText: "\u9EC4\u8272\u306E\u7DDA\u306B\u5408\u308F\u305B\u3066Just\u653B\u6483(<size=24>{input.attack_button}</size>)\u3057\u3088\u3046\u3002"
-    _entryActions: []
-  - _condition:
       rid: 900169900000000037
     _guideMessageText: "\u30AD\u30EB\u30B3\u30FC\u30C9\u306B\u3064\u3044\u3066"
     _entryActions:
@@ -123,11 +115,6 @@ MonoBehaviour:
     _entryActions:
     - rid: 4364854031301738870
     - rid: 900248100000000001
-  - _condition:
-      rid: 900300000000000008
-    _guideMessageText: "\u6575\u306B\u3064\u3044\u3066"
-    _entryActions:
-    - rid: 900300000000000011
   - _condition:
       rid: 4420578705146136
     _guideMessageText: "\u6575\u3092\u6483\u7834\u3057\u3088\u3046\u3002"
@@ -381,34 +368,19 @@ MonoBehaviour:
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _continueAfterStepChange: 1
-        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A2\u4EF6"
+        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
         - _textEntryKey: triad.tutorial.09
           _text: "\u3055\u3066\u5B9F\u8DF5\u3060\u3002\u6559\u3048\u305F\u3053\u3068\u3092\u5B58\u5206\u306B\u6D3B\u7528\u3057\u3066\u66B4\u308C\u308B\u3093\u3060"
           _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
           _voiceCueName: VOICE_Triad_Tutorial9
           _silentDuration: 0.1
-        - _textEntryKey: triad.tutorial.11
-          _text: "\u5927\u4E08\u592B\u3060\u3001\u3053\u306E\u6226\u95D8\u4E2D\u306F\u4FFA\u304C\u652F\u63F4\u3057\u3088\u3046\u3002"
-          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
-          _voiceCueName: VOICE_Triad_Tutorial11
-          _silentDuration: 0.1
     - rid: 4309480265444753537
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _continueAfterStepChange: 1
-        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A3\u4EF6"
+        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
-        - _textEntryKey: triad.tutorial.01
-          _text: "\u6226\u5834\u3067\u4F1A\u3046\u306E\u306F\u4E45\u3057\u3076\u308A\u3060\u306ASymphony"
-          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
-          _voiceCueName: VOICE_Triad_Tutorial1
-          _silentDuration: 0.1
-        - _textEntryKey: triad.tutorial.02
-          _text: "\u4E0D\u8981\u3060\u3068\u601D\u3046\u304C\u3001\u57FA\u672C\u7684\u306A\u3053\u3068\u306B\u3064\u3044\u3066\u8AAC\u660E\u3055\u305B\u3066\u3082\u3089\u3046\u305E"
-          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
-          _voiceCueName: VOICE_Triad_Tutorial2
-          _silentDuration: 0.1
         - _textEntryKey: triad.tutorial.06
           _text: "\u307E\u305A\u79FB\u52D5\u3068\u56DE\u907F\u306B\u3064\u3044\u3066\u3060\u3002\u6226\u5834\u306E\u79FB\u52D5\u3084\u6575\u306E\u653B\u6483\u306E\u56DE\u907F\u306B\u4F7F\u3046\u304B\u3089\u899A\u3048\u3066\u3044\u3066\u304F\u308C\u3002"
           _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
@@ -449,13 +421,8 @@ MonoBehaviour:
       type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
       data:
         _continueAfterStepChange: 1
-        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A2\u4EF6"
+        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
         _lines:
-        - _textEntryKey: triad.tutorial.10
-          _text: "\u8155\u304C\u8A1B\u3063\u3066\u3044\u306A\u3044\u3088\u3046\u3067\u5B89\u5FC3\u3057\u305F\u3088\u3002"
-          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
-          _voiceCueName: VOICE_Triad_Tutorial10
-          _silentDuration: 0.1
         - _textEntryKey: triad.tutorial.08
           _text: "\u6700\u5F8C\u306B\u304A\u524D\u306E\u7279\u6B8A\u80FD\u529B\u3001\u30AD\u30EB\u30B3\u30FC\u30C9\u306B\u3064\u3044\u3066\u3060\u3002\u30D5\u30EC\u30FC\u30BA\u3092\u594F\u3067\u308B\u3053\u3068\u3067\u767A\u52D5\u3059\u308B\u7279\u6B8A\u306A\u529B\u3001\u4F7F\u3044\u3053\u306A\u305B\u308B\u304B\u306F\u304A\u524D\u6B21\u7B2C\u3060\uFF01"
           _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
@@ -740,79 +707,3 @@ MonoBehaviour:
       data:
         _inspectorSummary: "\u6575\u306E\u7121\u6575\u72B6\u614B\u3092\u89E3\u9664\u3059\u308B"
         _isInvincible: 0
-    - rid: 900300000000000001
-      type: {class: PlayerBuffClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FCBuff\u4ED8\u4E0E(1\u4EF6) + PopupClearConditionAsset"
-        _innerCondition:
-          rid: 900300000000000002
-        _buffs:
-        - rid: 900300000000000004
-    - rid: 900300000000000002
-      type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + ActionRepeatCountClearConditionAsset"
-        _innerCondition:
-          rid: 900300000000000003
-        _popupPrefab: {fileID: 4864697550259413893, guid: a8f1c3353f174ecea4bbb4a915ebe61e, type: 3}
-    - rid: 900300000000000003
-      type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _inspectorSummary: "LockOn\u30921\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
-        _actionKind: 4
-        _requiredCount: 1
-    - rid: 900300000000000004
-      type: {class: DamageReductionBuffAsset, ns: KillChord.Runtime.InfraStructure.InGame.Buff, asm: KillChord.Structure}
-      data:
-        _reapplyPolicy: 4
-        _reductionRate: 1
-    - rid: 900300000000000005
-      type: {class: PlayerBuffClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FCBuff\u4ED8\u4E0E(1\u4EF6) + ActionRepeatCountClearConditionAsset"
-        _innerCondition:
-          rid: 900300000000000006
-        _buffs:
-        - rid: 900300000000000007
-    - rid: 900300000000000006
-      type: {class: ActionRepeatCountClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _inspectorSummary: "JustAttack\u30923\u56DE\u4EE5\u4E0A\u884C\u3046\u6761\u4EF6"
-        _actionKind: 13
-        _requiredCount: 3
-    - rid: 900300000000000007
-      type: {class: DamageReductionBuffAsset, ns: KillChord.Runtime.InfraStructure.InGame.Buff, asm: KillChord.Structure}
-      data:
-        _reapplyPolicy: 4
-        _reductionRate: 1
-    - rid: 900300000000000008
-      type: {class: PlayerBuffClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _inspectorSummary: "\u30D7\u30EC\u30A4\u30E4\u30FCBuff\u4ED8\u4E0E(1\u4EF6) + PopupClearConditionAsset"
-        _innerCondition:
-          rid: 900300000000000009
-        _buffs:
-        - rid: 900300000000000010
-    - rid: 900300000000000009
-      type: {class: PopupClearConditionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _inspectorSummary: "\u30DD\u30C3\u30D7\u30A2\u30C3\u30D7\u8868\u793A + \u6C7A\u5B9A\u5165\u529B\u3067\u9589\u3058\u308B"
-        _innerCondition:
-          rid: -2
-        _popupPrefab: {fileID: 3782568683917547373, guid: a648873cc14949e99a56e933af18eea5, type: 3}
-    - rid: 900300000000000010
-      type: {class: DamageReductionBuffAsset, ns: KillChord.Runtime.InfraStructure.InGame.Buff, asm: KillChord.Structure}
-      data:
-        _reapplyPolicy: 4
-        _reductionRate: 1
-    - rid: 900300000000000011
-      type: {class: PlayDialogueStepEntryActionAsset, ns: KillChord.Runtime.InfraStructure.InGame.Mission, asm: KillChord.Structure}
-      data:
-        _continueAfterStepChange: 1
-        _inspectorSummary: "\u4F1A\u8A71\u3092\u518D\u751F\u3059\u308B\uFF1A1\u4EF6"
-        _lines:
-        - _textEntryKey: triad.tutorial.03
-          _text: "\u305D\u3057\u3066\u6575\u306B\u95A2\u3057\u3066\u3060\u304C...\u3053\u306E\u8CC7\u6599\u3092\u898B\u3066\u304F\u308C\u3002"
-          _portrait: {fileID: 21300000, guid: 378e757fd0e546729433635d52b30d2c, type: 3}
-          _voiceCueName: VOICE_Triad_Tutorial3
-          _silentDuration: 3

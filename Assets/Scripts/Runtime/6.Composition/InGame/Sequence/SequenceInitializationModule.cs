@@ -11,6 +11,7 @@ using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Result;
+using KillChord.Runtime.Composition.Persistent.Savedata;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.View.InGame.Result;
@@ -28,6 +29,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
     /// <summary>
     ///     インゲームシーケンスの構築と進行を担うモジュールです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Sequence/SequenceInitializationModule")]
     public sealed class SequenceInitializationModule : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -314,7 +316,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             try
             {
                 bool success =
-                    await _stageResultController.CompleteAsync(destroyCancellationToken);
+                    await _stageResultController.CompleteAsync();
 
                 if (success)
                 {
@@ -441,7 +443,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
             catch (Exception exception)
             {
+                // 保存に失敗してもリザルトは表示し、ほかのセーブデータと同じ通知で失敗を伝える。
                 Debug.LogException(exception, this);
+                _ = SaveFailureNotification.ShowAsync(this, destroyCancellationToken);
             }
         }
 

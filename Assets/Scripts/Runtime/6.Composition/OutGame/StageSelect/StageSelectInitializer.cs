@@ -37,6 +37,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
     ///     ステージ選択画面の依存を解決するクラス。
     ///     StageTreeから作戦画面のノードと接続線を生成して各機能を紐付ける。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/StageSelect/StageSelectInitializer")]
     public sealed class StageSelectInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

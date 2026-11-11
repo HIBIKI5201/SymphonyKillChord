@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
     /// <summary>
     ///     アウトゲームチュートリアルの開始条件を判定し、実行ライフサイクルを管理します。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Tutorial/OutGameTutorialInitializer")]
     public sealed class OutGameTutorialInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
