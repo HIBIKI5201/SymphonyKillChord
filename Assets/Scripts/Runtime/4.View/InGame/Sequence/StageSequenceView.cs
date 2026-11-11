@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     ///     ステージの開始と終了演出を再生するViewクラス。
     ///     現在はTimeline専用のクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Sequence/StageSequenceView")]
     public class StageSequenceView : MonoBehaviour
     {
         /// <summary>

@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
     ///     スキルエフェクトをプールから生成して再生するSpawner。
     ///     シーンロード時に装備スキル分のインスタンスを事前生成し、実行時のGCを抑える。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillEffectSpawner")]
     public sealed class SkillEffectSpawner : MonoBehaviour, ISkillEffectSpawner
     {
         /// <summary>

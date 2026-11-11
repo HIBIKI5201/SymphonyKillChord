@@ -15,6 +15,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// シナリオの表示状態を Unity UI に反映するビュー。
     /// </summary>
     [DefaultExecutionOrder(10)]
+    [AddComponentMenu("KillChord/View/Scenario/ScenarioView")]
     public class ScenarioView : MonoBehaviour
     {
         /// <summary>

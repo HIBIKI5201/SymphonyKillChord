@@ -13,6 +13,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect
     ///     プールで再利用されるスキルエフェクト1つ分のルートView。
     ///     配置の異なる構成要素をまとめて保持し、全再生の完了を待機してプールへの返却を通知する。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillEffectInstance")]
     public sealed class SkillEffectInstance : MonoBehaviour, ISkillEffectHandle
     {
         /// <summary> 再生中かどうかです。 </summary>

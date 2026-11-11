@@ -5,6 +5,7 @@ namespace KillChord.Runtime.View.InGame.Character
     /// <summary>
     ///     ParticleSystemのワンショット再生をRingBufferで管理するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Character/ParticleSystemRingBufferView")]
     public sealed class ParticleSystemRingBufferView : ReusableParticleSystemView
     {
         /// <summary>

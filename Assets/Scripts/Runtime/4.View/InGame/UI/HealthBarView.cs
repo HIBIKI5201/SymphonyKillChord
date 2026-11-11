@@ -13,6 +13,7 @@ namespace KillChord.Runtime.View.InGame.UI
     ///     被弾時は減った分を赤い残像として残して遅れて縮め、ゲージを白く点滅させる。
     ///     回復時は緑のフラッシュを重ねて増加を伝える。
     /// </summary>
+    [AddComponentMenu("KillChord/View/UI/HealthBarView")]
     public sealed class HealthBarView : MonoBehaviour
     {
         /// <summary>

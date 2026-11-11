@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// <summary>
     /// プレイヤー入力をシナリオ操作へ変換する入力ビュー。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Scenario/ScenarioInputView")]
     public class ScenarioInputView : MonoBehaviour
     {
         /// <summary>

@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
     ///     カメラの初期化を担当するクラス。
     ///     ServiceLocator に <see cref="ICameraTransform"/> を登録する。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Camera/CameraInitializer")]
     public sealed class CameraInitializer : PersistentInitializationModuleBase, ICameraTransform
     {
         /// <summary> モジュール名です。 </summary>

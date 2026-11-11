@@ -37,6 +37,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
     /// <summary>
     ///     Skillモジュールを初期化して公開するモジュールです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Skill/SkillInitializer")]
     public sealed class SkillInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

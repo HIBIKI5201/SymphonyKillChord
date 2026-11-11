@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
     /// <summary>
     ///     敵AI用ファサード：状態判定系。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/EnemyStateFacade")]
     public class EnemyStateFacade : StateFacadeBase
     {
         /// <summary>

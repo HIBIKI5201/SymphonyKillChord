@@ -15,6 +15,7 @@ namespace KillChord.Runtime.View.InGame.Result
     /// <summary>
     ///    ステージリザルト画面の表示を制御するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Result/StageResultView")]
     public class StageResultView : MonoBehaviour
     {
         /// <summary>

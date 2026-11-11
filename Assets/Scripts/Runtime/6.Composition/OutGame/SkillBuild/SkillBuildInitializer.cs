@@ -35,6 +35,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
     /// <summary>
     ///     改造画面の依存解決と初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/SkillBuild/SkillBuildInitializer")]
     public sealed class SkillBuildInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

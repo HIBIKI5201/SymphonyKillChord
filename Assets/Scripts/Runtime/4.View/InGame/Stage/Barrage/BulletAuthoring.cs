@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
     ///     弾のプレハブをEntityへ変換します。
     /// </summary>
     /// <remarks> 速度の向きは発射時にタレットが決めるため、ここでは速さだけを持ちます。 </remarks>
+    [AddComponentMenu("KillChord/View/Stage/BulletAuthoring")]
     public sealed class BulletAuthoring : MonoBehaviour
     {
         [SerializeField, Tooltip("弾の初速です。")]

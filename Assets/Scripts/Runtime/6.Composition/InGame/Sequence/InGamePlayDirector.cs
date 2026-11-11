@@ -7,6 +7,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
     /// <summary>
     ///    ゲームプレイの開始と終了の演出を制御するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Sequence/InGamePlayDirector")]
     public class InGamePlayDirector : MonoBehaviour, IGameplayControllable
     {
         /// <summary>

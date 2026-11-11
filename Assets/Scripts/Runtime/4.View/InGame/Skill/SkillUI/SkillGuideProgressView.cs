@@ -14,6 +14,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     ///     ACLikeRhythmGuideViewの同じ拍のジャストタイミング位置に左右対称に表示する。
     ///     クールダウン中はゲージで進捗を示す。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillGuideProgressView")]
     public sealed class SkillGuideProgressView : MonoBehaviour, ISkillInputProgressRowView
     {
         /// <summary>

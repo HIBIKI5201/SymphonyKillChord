@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.Persistent.Music
     ///     SE再生用のCRI Atom Sourceを管理システムへ登録するView。
     /// </summary>
     [RequireComponent(typeof(CriAtomSource))]
+    [AddComponentMenu("KillChord/View/Music/SoundEffectSource")]
     public class SoundEffectSource : MonoBehaviour, IPlayableAudioSource, IVolumeApplicable
     {
         /// <summary>

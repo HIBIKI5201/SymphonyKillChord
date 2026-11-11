@@ -41,6 +41,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
     /// <summary>
     ///     タイトルシーンの初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Title/TitleSceneInitializer")]
     public sealed class TitleSceneInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

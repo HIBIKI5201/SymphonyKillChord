@@ -10,6 +10,7 @@ namespace KillChord.Runtime.View.Persistent.Load
     /// <summary>
     ///     ロード画面をロード進捗を表示するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Load/LoadingScreenView")]
     public sealed class LoadingScreenView : MonoBehaviour
     {
         /// <summary>

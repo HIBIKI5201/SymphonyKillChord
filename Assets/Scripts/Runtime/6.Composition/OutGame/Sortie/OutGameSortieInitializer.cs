@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
     /// <summary>
     ///     アウトゲームの出撃機能の初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Sortie/OutGameSortieInitializer")]
     public sealed class OutGameSortieInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

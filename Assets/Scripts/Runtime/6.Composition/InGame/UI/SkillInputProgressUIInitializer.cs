@@ -12,6 +12,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
     /// <summary>
     ///     リズムGUI下部のスキル入力進行UIを初期化するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/SkillInputProgressUIInitializer")]
     public class SkillInputProgressUIInitializer : InGameInitializationModuleBase
     {
         /// <summary> 全スキルのコマンド表示を横断的に制御するコントローラー。 </summary>

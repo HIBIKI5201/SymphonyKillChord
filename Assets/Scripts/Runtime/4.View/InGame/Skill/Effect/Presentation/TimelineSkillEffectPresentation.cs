@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     ///     Timelineでスキルエフェクトを再生するストラテジー。
     ///     再生は投げっぱなしにせず、Timelineの終了まで待機して完了を通知する。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/TimelineSkillEffectPresentation")]
     public sealed class TimelineSkillEffectPresentation : SkillEffectPresentationBase
     {
         [SerializeField, Tooltip("再生するPlayableDirectorです。未設定時は自身から取得します。")]

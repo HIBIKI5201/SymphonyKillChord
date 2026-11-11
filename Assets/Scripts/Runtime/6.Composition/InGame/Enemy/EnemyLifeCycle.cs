@@ -38,6 +38,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     敵の依存関係を構築する。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/EnemyLifeCycle")]
     public class EnemyLifeCycle : MonoBehaviour, IGameplayControllable
     {
         /// <summary>

@@ -5,6 +5,7 @@ namespace KillChord.Runtime.View.InGame.Player
     /// <summary>
     ///     プレイヤーの見た目を地面の高さに合わせて上下させる。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Player/PlayerGroundOffsetView")]
     public sealed class PlayerGroundOffsetView : MonoBehaviour
     {
         /// <summary>

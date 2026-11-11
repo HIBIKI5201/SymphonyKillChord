@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Character
     /// <summary>
     ///     足音演出を再生するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Character/FootStepView")]
     public sealed class FootStepView : MonoBehaviour
     {
         /// <summary>

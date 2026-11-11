@@ -20,6 +20,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
     ///     入力の初期化クラス。
     /// </summary>
     [RequireComponent(typeof(PlayerInputView), typeof(PlayerInput))]
+    [AddComponentMenu("KillChord/Composition/Input/InputComposition")]
     public sealed class InputComposition : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

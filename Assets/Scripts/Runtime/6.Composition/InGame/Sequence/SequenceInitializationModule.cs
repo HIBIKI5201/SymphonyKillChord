@@ -29,6 +29,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
     /// <summary>
     ///     インゲームシーケンスの構築と進行を担うモジュールです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Sequence/SequenceInitializationModule")]
     public sealed class SequenceInitializationModule : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

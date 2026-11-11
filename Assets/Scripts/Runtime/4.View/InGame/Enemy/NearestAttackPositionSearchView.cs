@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     最も近い攻撃可能な場所を検索するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/NearestAttackPositionSearchView")]
     public class NearestAttackPositionSearchView : MonoBehaviour, INearestAttackPositionSearchViewModel
     {
         /// <summary>

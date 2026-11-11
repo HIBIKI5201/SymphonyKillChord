@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
     ///     装備スキル構成に応じたBGMループの初期化を行うクラス。
     ///     BGMの演出機能であり、失敗してもゲーム本体の初期化は止めない。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Music/EquipmentBgmInitializer")]
     public class EquipmentBgmInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

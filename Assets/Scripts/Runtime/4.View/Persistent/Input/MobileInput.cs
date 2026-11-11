@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View.Persistent.Input
     /// <summary>
     ///     モバイルの視点操作領域からドラッグとフリック入力を通知する。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Input/MobileInput")]
     public class MobileInput : MonoBehaviour
     {
         [SerializeField, Tooltip("視点操作領域のUIレイキャストに使用するGraphicRaycaster。")]

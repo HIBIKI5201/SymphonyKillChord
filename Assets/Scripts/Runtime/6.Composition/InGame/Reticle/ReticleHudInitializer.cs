@@ -13,6 +13,7 @@ namespace KillChord.Runtime.Composition.InGame.Reticle
     ///     全敵レティクル表示に関するクラスの生成と依存解決を行う初期化クラス。
     ///     注目/候補の強調表示を担う HUDEnemyHealthInitializer(Order 650) の後に実行する。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Reticle/ReticleHudInitializer")]
     public sealed class ReticleHudInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

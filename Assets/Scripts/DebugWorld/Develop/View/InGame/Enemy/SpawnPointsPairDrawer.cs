@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace KillChord.Develop
 {
+    [AddComponentMenu("KillChord/Debug/Enemy/SpawnPointsPairDrawer")]
     public class SpawnPointsPairDrawer : MonoBehaviour
     {
         [SerializeField]

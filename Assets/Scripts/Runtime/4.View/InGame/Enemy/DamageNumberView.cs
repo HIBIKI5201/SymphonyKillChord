@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     ダメージ数値を表示するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/DamageNumberView")]
     public class DamageNumberView : MonoBehaviour
     {
         /// <summary>

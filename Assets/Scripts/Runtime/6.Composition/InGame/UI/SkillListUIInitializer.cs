@@ -13,6 +13,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
     ///     リズムGUI下部の <see cref="Skill.SkillInputProgressUIInitializer"/>（次の1拍のみ表示）や
     ///     クロスヘア用UIとは独立した、常時表示の一覧UIを担当する。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/SkillListUIInitializer")]
     public sealed class SkillListUIInitializer : InGameInitializationModuleBase
     {
         /// <inheritdoc/>

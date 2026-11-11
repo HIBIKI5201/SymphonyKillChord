@@ -16,6 +16,7 @@ namespace KillChord.Demo.End
     /// <summary>
     ///     体験版終了演出の再生順序と、タイトルへの復帰入力を制御するクラスです。
     /// </summary>
+    [AddComponentMenu("KillChord/Demo/End/DemoEndSequenceInitializer")]
     public sealed class DemoEndSequenceInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
