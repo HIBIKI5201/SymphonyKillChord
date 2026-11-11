@@ -232,7 +232,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
         }
 
         /// <summary>
-        ///     装備スキル構成からスキルID列（スロット順）を収集する。
+        ///     装備スキル構成からスキルID列を収集し、スキル番号(ID)の昇順で返す。
+        ///     装備の順番には左右されない。
         ///     SkillBuildDefinitionはOutGameで登録されるため、Title→InGame直行等では
         ///     未登録の場合がある。その場合は装備なしとして扱う。
         /// </summary>
@@ -262,7 +263,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 skillIds.Add(skillId);
                 _skillDisplayNames[skillId] = equippedSkill.SkillTemplate.DisplayName;
             }
-            // 研究で装備したスロットの左から順に流すため、並べ替えない。
+            // 装備の順番に左右されないよう、スキルの番号の小さい順に並べる。
+            skillIds.Sort();
             return skillIds;
         }
 
