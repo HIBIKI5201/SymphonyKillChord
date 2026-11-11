@@ -35,8 +35,6 @@ namespace KillChord.Runtime.Composition.Persistent.Session
     ///     </para>
     /// </summary>
     [AddComponentMenu("KillChord/Composition/Session/PlaySessionInitializer")]
-    [AddComponentMenu("KillChord/Composition/Session/PlaySessionInitializer")]
-    [AddComponentMenu("KillChord/Composition/Session/PlaySessionInitializer")]
     public sealed class PlaySessionInitializer : PersistentInitializationModuleBase, IPlaySessionResumeProvider
     {
         /// <summary> モジュール名です。 </summary>

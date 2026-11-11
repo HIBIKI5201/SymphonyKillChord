@@ -78,7 +78,8 @@ class ClassInfo:
 def git_files(root: Path, *patterns: str) -> list[str]:
     """Git で管理されているファイルを列挙する。"""
     out = subprocess.check_output(["git", "ls-files", "-z", *patterns], cwd=root)
-    return [p for p in out.decode("utf-8").split("\0") if p]
+    # 衝突中は同じファイルが段ごとに並ぶため、重複を除く。
+    return list(dict.fromkeys(p for p in out.decode("utf-8").split("\0") if p))
 
 
 def read_text(path: Path) -> str:
