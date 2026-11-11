@@ -25,3 +25,4 @@
 - `SilToonRenderController._skinnedMeshRenderers` は `SetUpRenderer` の実行時にだけ更新される。統合Rendererを含めるなら再実行する。
 - `SilToonShadowCaster._renderers` は保存済みの配列。統合後は有効な9個へ設定し直した(旧52個のままだとキャラ影が描かれない)。モデルを再統合したら `Collect Renderers` で更新する。
 - `SilToonShadowRenderPass` は毎フレームの `sharedMaterials` 配列確保をやめ、再利用バッファへ取得する。
+- Player.prefab のモデルをVariantへ差し替えると、モデルルートTransformとAnimatorのfileIDが変わる。`OutGame.unity` と `DemoEnd.unity` の参照(2種類)を新IDへ張り替えた。モデルを差し替え直すときは、`Player.prefab` を参照する全シーンで参照切れを確認する。

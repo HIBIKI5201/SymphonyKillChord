@@ -1320,12 +1320,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &1331111600 stripped
 Animator:
-  m_CorrespondingSourceObject: {fileID: 7554209699097654958, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
+  m_CorrespondingSourceObject: {fileID: 8446418960943113669, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
   m_PrefabInstance: {fileID: 1331111598}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1331111604 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 4482732434491403476, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
+  m_CorrespondingSourceObject: {fileID: 2582701822625890239, guid: 85e4d6417f0f1bf4e8d3bb1a10e81051, type: 3}
   m_PrefabInstance: {fileID: 1331111598}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1480631845
