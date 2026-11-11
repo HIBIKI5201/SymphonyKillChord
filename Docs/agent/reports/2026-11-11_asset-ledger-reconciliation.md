@@ -16,7 +16,7 @@
 
 ## A. Unity に残る旧称（Drive・台帳の正式名 → Unity のファイル名）
 
-同じ実体（同サイズ、または同じ中身と確認できたもの）。発注・検索は左の正式名で行い、右はコード・Prefab 上の旧称として扱う。
+同じ実体とみられる組。根拠は同サイズ、または名前・用途・参照先の一致で、ファイル内容のハッシュは比べていない（同サイズの組も「同一の候補」として扱う）。発注・検索は左の正式名で行い、右はコード・Prefab 上の旧称として扱う。
 
 | 区分 | 台帳・Drive の正式名 | Unity の名前 | 備考 |
 | --- | --- | --- | --- |
@@ -69,11 +69,11 @@ Drive の Export が新しい版なのか、Unity が後で手直しした版な
 - `UI_ButtonFrame`、`ENV_BG_Camp`
 - `ENV_Field.unitypackage`: `STG_City` と `ENV_Ground_*` を含むパッケージなので、ファイル単位では照合できない。
 
-## E. 台帳にあって Drive にフォルダがないもの（21行）
+## E. 台帳にあって Drive にフォルダがないもの（21行）と、フォルダが空のもの（1行）
 
-- 未制作（14行）: `EMB_Kapellmeister`、`UI_ComboCounter`、`VFX_Skill`、`VEH_Car_Generic`、`UI_BuffDebuffIcon`、`MOT_IdleHome`、`MOT_IdleBattle`、`UI_MissionWindow`、`CHS_Voronov`、`VFX_Dodge`、`VFX_Knockback`、`VFX_FieldFogDust`、`VFX_EnemyDefeat`、`MOT_Idle/Attack/Move_Enemy`
+- 未制作（16行）: `EMB_Kapellmeister`、`UI_ComboCounter`、`VFX_Skill`、`VEH_Car_Generic`、`UI_BuffDebuffIcon`、`MOT_IdleHome`、`MOT_IdleBattle`、`UI_MissionWindow`、`CHS_Voronov`、`VFX_Dodge`、`VFX_Knockback`、`VFX_FieldFogDust`、`VFX_EnemyDefeat`、`MOT_Idle_Enemy`、`MOT_Attack_Enemy`、`MOT_Move_Enemy`
 - 03_Art の外、または対象外（5行）: `UI_AppIcon_Symphony`、`UI_StoreBanner`、`GamePV.mp4`、`Anton-Regular`（フォント）、`StageStart`
-- フォルダはあるが空: `CHS_Soldier14`
+- フォルダはあるが空（1行）: `CHS_Soldier14`
 
 ## F. サウンド
 
@@ -84,7 +84,7 @@ Drive の Export が新しい版なのか、Unity が後で手直しした版な
 - ACB にあるが未使用の Cue: `SE_Enemy_Alert_First/Second`（旧称）、`SE_Symphony_Damage_Light/Heavy`（未接続）。
 - `SE_Cursor` は台帳にも ACB にもない。`SE_Just` も ACB にまだない（#2540 待ち）。
 - ボイス（`キャラクターボイス` ページ）が古い。
-  - ページでは「14号とシナリオのボイスは Cue なし」だが、ACB には `VOICE_Soldier14_*`（7）と `VOICE_Symphony/Triad_Scenario*`（39）がある。
+  - ページでは「14号とシナリオのボイスは Cue なし」だが、ACB には `VOICE_Soldier14_*`（7）と `VOICE_Symphony_Scenario*`（16）・`VOICE_Triad_Scenario*`（15）の計31がある。
   - `VOICE_Symphony_Home2` がページに載っていない。
   - `Player.prefab` は旧称 `VOICE_Battlestart`、`VOICE_Damage_Light`、`VOICE_Skill` を使っている。クリアボイスは `VOICE_Symphony_Gameclear1`〜`3`。
   - トライアドの `Tutorial1`〜`3`、`10`、`11` は未使用（#2074）。`Tutorial4`〜`9` は `MissionDefinition_Tutorial` から使われている。
