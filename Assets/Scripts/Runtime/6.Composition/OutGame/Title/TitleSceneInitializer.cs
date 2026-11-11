@@ -5,6 +5,7 @@ using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Adaptor.Persistent.Session;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -711,6 +712,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 await SaveStore.DeleteAsync<SaveData>();
                 lifetimeToken.ThrowIfCancellationRequested();
 
+                // セーブデータを消したら、前回のプレイの途中からは再開しない。
+                if (ServiceLocator.TryGetInstance(out IPlaySessionResumeProvider resumeProvider))
+                {
+                    resumeProvider.DiscardResume();
+                }
+
                 // セーブデータをロードして、初期状態に戻す。
                 _loadedSaveData = await LoadSaveData();
                 lifetimeToken.ThrowIfCancellationRequested();
@@ -804,16 +811,29 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///     チュートリアル進行状態に応じてタイトルからの遷移先を設定します。
+        ///     途中復帰先とチュートリアル進行状態に応じてタイトルからの遷移先を設定します。
         /// </summary>
         /// <returns> 遷移先を設定できた場合はtrueです。 </returns>
         private bool ApplyStartDestination()
         {
-            // チュートリアルを始めている場合は、通常の遷移先へ進む。
-            if (_titleSceneView == null || _loadedSaveData == null)
+            if (_titleSceneView == null || _loadedSaveData == null || _titleStartController == null)
             {
                 return false;
             }
+
+            // 前回シナリオパート・バトルパートにいた場合は、そのステージの開始地点へ進む。
+            // 再開に必要な選択状態は用意済みのため、ここでは消さない。
+            if (ServiceLocator.TryGetInstance(out IPlaySessionResumeProvider resumeProvider)
+                && resumeProvider.TryGetResumeDestination(out string resumeSceneName, out bool isResumeKeepLoading))
+            {
+                _titleSceneView.SetTargetSceneName(resumeSceneName);
+                _titleStartController.SetKeepLoadingOnStart(isResumeKeepLoading);
+                return true;
+            }
+
+            _titleStartController.SetKeepLoadingOnStart(false);
+
+            // チュートリアルを始めている場合は、通常の遷移先へ進む。
 
             if (_loadedSaveData.Tutorial.Phase != TutorialPhase.NotStarted)
             {
