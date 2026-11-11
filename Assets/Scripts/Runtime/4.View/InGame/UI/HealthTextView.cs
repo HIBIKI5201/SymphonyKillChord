@@ -21,8 +21,11 @@ namespace KillChord.Runtime.View.InGame.UI
         public void Bind(IHealthHudViewModel vm)
         {
             if (vm == null) throw new ArgumentNullException(nameof(vm), "HPテキストのViewModelがNULL。");
-            vm.HealthHudDTO
-                .Subscribe(UpdateHealthText)
+            vm.CurrentHealth
+                .Subscribe(UpdateCurrentHealthText)
+                .RegisterTo(destroyCancellationToken);
+            vm.MaxHealth
+                .Subscribe(UpdateMaxHealthText)
                 .RegisterTo(destroyCancellationToken);
         }
 
@@ -54,18 +57,29 @@ namespace KillChord.Runtime.View.InGame.UI
         }
 
         /// <summary>
-        ///     HPテキストを更新する。
+        ///     最大HPのテキストを更新する。
         /// </summary>
-        /// <param name="dto">HP HUD用のDTO</param>
-        private void UpdateHealthText(HealthHudDTO dto)
+        /// <param name="maxHealth"> 最大HP。 </param>
+        private void UpdateMaxHealthText(float maxHealth)
         {
             // 参照欠落時は更新しない
-            if (_currentHealthText == null || _maxHealthText == null) return;
+            if (_maxHealthText == null) { return; }
 
-            int health = Mathf.CeilToInt(dto.CurrentHealth);
+            _maxHealthText.SetText("{0}", Mathf.CeilToInt(maxHealth));
+        }
+
+        /// <summary>
+        ///     現在HPのテキストを更新し、増減に応じた演出を再生する。
+        /// </summary>
+        /// <param name="currentHealth"> 現在HP。 </param>
+        private void UpdateCurrentHealthText(float currentHealth)
+        {
+            // 参照欠落時は更新しない
+            if (_currentHealthText == null) { return; }
+
+            int health = Mathf.CeilToInt(currentHealth);
             // 端数を切り上げて整数表示にする
             _currentHealthText.SetText("{0}", health);
-            _maxHealthText.SetText("{0}", Mathf.CeilToInt(dto.MaxHealth));
 
             if (health == _health)
             {

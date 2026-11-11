@@ -5,15 +5,15 @@ using System;
 namespace KillChord.Runtime.Domain.InGame.Music
 {
     /// <summary>
-    ///     リズム入力の履歴を管理するクラス。
+    ///     リズム入力の履歴を一定数だけ保持する入力バッファ。
     /// </summary>
-    public class RhythmState
+    public class RhythmInputBuffer
     {
         /// <summary>
         ///     指定された容量で履歴管理クラスを生成する。
         /// </summary>
         /// <param name="capacity"> バッファの容量。 </param>
-        public RhythmState(int capacity)
+        public RhythmInputBuffer(int capacity)
         {
             if (capacity <= 0)
             {
