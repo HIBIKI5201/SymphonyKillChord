@@ -468,8 +468,8 @@ namespace KillChord.Editor.SpecViewer
         /// </summary>
         private void RefreshNavigationButtons()
         {
-            _backButton.SetEnabled(_history.CanGoBack);
-            _forwardButton.SetEnabled(_history.CanGoForward);
+            _backButton.SetEnabled(_history.HasPrevious);
+            _forwardButton.SetEnabled(_history.HasNext);
             bool hasUrl = _catalog != null && _catalog.TryGetByPath(_currentPath, out SpecCatalogEntry entry) && !string.IsNullOrEmpty(entry.Url);
             _notionButton.SetEnabled(hasUrl);
         }

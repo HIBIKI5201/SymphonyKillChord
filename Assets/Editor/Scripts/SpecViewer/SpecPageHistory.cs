@@ -7,11 +7,11 @@ namespace KillChord.Editor.SpecViewer
     /// </summary>
     public sealed class SpecPageHistory
     {
-        /// <summary> 戻れるか。 </summary>
-        public bool CanGoBack => _index > 0;
+        /// <summary> 戻れるページがあるか。 </summary>
+        public bool HasPrevious => _index > 0;
 
-        /// <summary> 進めるか。 </summary>
-        public bool CanGoForward => _index < _paths.Count - 1;
+        /// <summary> 進めるページがあるか。 </summary>
+        public bool HasNext => _index < _paths.Count - 1;
 
         /// <summary>
         ///     新しく開いたページを積む。今より先の履歴は捨てる。
@@ -32,7 +32,7 @@ namespace KillChord.Editor.SpecViewer
         /// <returns>戻った先のページ。戻れなければ null。</returns>
         public string GoBack()
         {
-            if (!CanGoBack) { return null; }
+            if (!HasPrevious) { return null; }
 
             _index--;
             return _paths[_index];
@@ -44,7 +44,7 @@ namespace KillChord.Editor.SpecViewer
         /// <returns>進んだ先のページ。進めなければ null。</returns>
         public string GoForward()
         {
-            if (!CanGoForward) { return null; }
+            if (!HasNext) { return null; }
 
             _index++;
             return _paths[_index];
