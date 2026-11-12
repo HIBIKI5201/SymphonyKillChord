@@ -112,7 +112,7 @@ SOFTWARE.
 
 ## 載せていないもの
 
-- エディタでだけ使うもの（Google.Apis、System.CodeDom、System.Management、NuGetForUnity、unity-cli-loop、CopyComponentsByRegex、graph-visualizer など）は実行ファイルに含まれないため載せていない
+- エディタでだけ使うもの（Google.Apis、System.CodeDom、System.Management、NuGetForUnity、unity-cli-loop、CopyComponentsByRegex、graph-visualizer、Markdig など）は実行ファイルに含まれないため載せていない。Markdig（BSD-2-Clause、仕様書ビューアが使う）のライセンス全文は `Assets/Editor/Plugins/Markdig/LICENSE.txt` に置いている
 - Unity 公式パッケージは Unity の利用規約に従う
 - `ShaderGraph_Dissolve`（スキルエフェクトのディゾルブ）は入手元を特定できていないため、まだ載せていない
 - 自作の素材（プレイヤーの武器、Soldier14、`AssetStoreTools/WIP` の UI 画像）は載せない
