@@ -120,7 +120,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return false;
             }
 
-            float now = Time.unscaledTime;
+            // ポーズ中に止まる戦闘の時計で、スキルのクールダウンを計る。
+            float now = _skillController.GetCurrentTime();
             float musicTime = (float)_musicSyncState.PlayTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
 

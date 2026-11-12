@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Skill;
@@ -59,6 +60,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         public ISkillInputProgressRowView CreateSkillListRow(SkillDefinition definition, Sprite skillIcon)
         {
             SkillListRowView rowView = Instantiate(_rowViewPrefab, _rowRoot);
+            rowView.SetTimeProvider(BattlePlayTimeProvider.Create());
             rowView.Initialize(_viewSetting.AnimationSetting, skillIcon);
 
             SkillListStepView[] stepViews = new SkillListStepView[definition.SkillPattern.Signatures.Length];
