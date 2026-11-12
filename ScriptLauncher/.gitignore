@@ -1,0 +1,5 @@
+# 生成物（CMake・Visual Studio の「フォルダーを開く」）
+/build/
+/out/
+/.vs/
+/CMakeUserPresets.json
