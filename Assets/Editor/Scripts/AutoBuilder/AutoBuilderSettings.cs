@@ -9,7 +9,7 @@ namespace KillChord.Editor.AutoBuilder
 {
     /// <summary>
     ///     オートビルダーの設定を保持するクラス。
-    ///     ゲームデータ種別（Release / Demo）とビルドモード（Master / Develop）の組み合わせごとに枠を持ちます。
+    ///     ゲームデータ種別（Release / Demo）とビルドモード（Master / Develop、体験版は展示版 Exhibition も）の組み合わせごとに枠を持ちます。
     /// </summary>
     [FilePath(
         ProviderConst.PROJECT_SETTINGS_PATH + nameof(AutoBuilderSettings) + ProviderConst.ASSET_EXT,
@@ -37,6 +37,9 @@ namespace KillChord.Editor.AutoBuilder
         public string DemoDevelopPath;
         public BuildProfile[] DemoDevelopBuildProfiles;
 
+        public string DemoExhibitionPath;
+        public BuildProfile[] DemoExhibitionBuildProfiles;
+
         /// <summary> 画面表示とCLIで扱う自動ビルドの枠一覧です。 </summary>
         internal static readonly AutoBuildSlot[] SLOTS =
         {
@@ -44,6 +47,7 @@ namespace KillChord.Editor.AutoBuilder
             new(GameDataVariant.Release, AutoBuildMode.Development, nameof(ReleaseDevelopPath), nameof(ReleaseDevelopBuildProfiles)),
             new(GameDataVariant.Demo, AutoBuildMode.Master, nameof(DemoMasterPath), nameof(DemoMasterBuildProfiles)),
             new(GameDataVariant.Demo, AutoBuildMode.Development, nameof(DemoDevelopPath), nameof(DemoDevelopBuildProfiles)),
+            new(GameDataVariant.Demo, AutoBuildMode.Exhibition, nameof(DemoExhibitionPath), nameof(DemoExhibitionBuildProfiles)),
         };
 
         /// <summary>
@@ -163,6 +167,7 @@ namespace KillChord.Editor.AutoBuilder
                 (GameDataVariant.Release, AutoBuildMode.Development) => ReleaseDevelopPath,
                 (GameDataVariant.Demo, AutoBuildMode.Master) => DemoMasterPath,
                 (GameDataVariant.Demo, AutoBuildMode.Development) => DemoDevelopPath,
+                (GameDataVariant.Demo, AutoBuildMode.Exhibition) => DemoExhibitionPath,
                 _ => null,
             };
         }
@@ -180,6 +185,7 @@ namespace KillChord.Editor.AutoBuilder
                 (GameDataVariant.Release, AutoBuildMode.Development) => ReleaseDevelopBuildProfiles,
                 (GameDataVariant.Demo, AutoBuildMode.Master) => DemoMasterBuildProfiles,
                 (GameDataVariant.Demo, AutoBuildMode.Development) => DemoDevelopBuildProfiles,
+                (GameDataVariant.Demo, AutoBuildMode.Exhibition) => DemoExhibitionBuildProfiles,
                 _ => null,
             };
         }

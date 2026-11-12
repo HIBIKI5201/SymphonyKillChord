@@ -771,7 +771,12 @@ namespace KillChord.Demo
             _isOutGameUiEventSubscribed = true;
         }
 
+#if KILLCHORD_DEMO_EXHIBITION
+        // 展示版はタイマーとデータリセットを有効にした設定を読む。
+        private const string CONFIG_ADDRESS = "DemoExperienceConfig.Exhibition";
+#else
         private const string CONFIG_ADDRESS = nameof(DemoExperienceConfig);
+#endif
         private const string PREFAB_ADDRESS = "DemoRuntime";
 
         private readonly DemoSessionState _sessionState = new();
