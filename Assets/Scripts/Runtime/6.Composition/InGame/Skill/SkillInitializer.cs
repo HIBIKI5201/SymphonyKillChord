@@ -234,7 +234,9 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 targetSystemContainer.TargetSystemViewModel,
                 playbackSpeed);
 
-            _skillController = new SkillController(musicSyncContainer.MusicSyncService, () => Time.unscaledTime);
+            // ポーズ中とポーズ解除のカウントダウン中は、クールダウンを進めない時計を使う。
+            Func<float> getPlayTime = BattlePlayTimeProvider.Create();
+            _skillController = new SkillController(musicSyncContainer.MusicSyncService, getPlayTime);
             _skillController.Initialize(BuildSkillExecutionControllers(
                 equippedSkills,
                 skillVisuals,

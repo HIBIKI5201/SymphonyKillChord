@@ -2345,6 +2345,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KillChord.Composition::KillChord.Runtime.Composition.PersistentEntryPoint
   _active: 1
   _firstSceneName: Title
+  _startupFailureNotificationView: {fileID: 918700004}
 --- !u!114 &1924775720
 MonoBehaviour:
   m_ObjectHideFlags: 0
