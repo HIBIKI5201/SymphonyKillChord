@@ -61,8 +61,8 @@ class HarnessValidationTests(unittest.TestCase):
         self.assertTrue(any("description too long" in e for e in validate(self.root)[1]))
 
     def test_vendor_description_is_not_limited(self):
-        self.write(".claude/skills/uloop-long/SKILL.md",
-                   f"---\nname: uloop-long\ndescription: {'a' * 400}\n---\n")
+        self.write(".claude/skills/unity-cli/SKILL.md",
+                   f"---\nname: unity-cli\ndescription: {'a' * 400}\n---\n")
         self.assertEqual([], validate(self.root)[1])
 
     def test_claude_entry_without_agents_import_is_rejected(self):

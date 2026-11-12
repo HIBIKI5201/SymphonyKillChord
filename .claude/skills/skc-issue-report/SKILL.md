@@ -1,6 +1,6 @@
 ---
 name: skc-issue-report
-description: "Record out-of-scope findings or blockers from a skc-/uloop- skill run as GitHub Issues in this repo's `[TODO]` format after a duplicate check. Use for requests like 「Issueにして」「課題をIssue化して」. Records only; does not fix."
+description: "Record out-of-scope findings or blockers from a skc- skill or Unity CLI run as GitHub Issues in this repo's `[TODO]` format after a duplicate check. Use for requests like 「Issueにして」「課題をIssue化して」. Records only; does not fix."
 ---
 
 # skc-issue-report
