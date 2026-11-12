@@ -581,7 +581,24 @@ namespace KillChord.Editor.AutoBuilder
 
                         SyncSelectedBuildTargetGroupWithActiveTarget();
 
-                        BuildReport report = BuildPipeline.BuildPlayer(options);
+                        // Android はアップロード鍵の設定があれば署名する。Master で鍵が無ければここで止める。
+                        if (!AndroidReleaseSigning.TryApply(target, profile.name))
+                        {
+                            TryDeleteFailedBuildOutput(buildDir, profile.name);
+                            NextSession(true);
+                            return;
+                        }
+
+                        BuildReport report;
+                        try
+                        {
+                            report = BuildPipeline.BuildPlayer(options);
+                        }
+                        finally
+                        {
+                            AndroidReleaseSigning.Restore();
+                        }
+
                         hasFailure = report.summary.result != BuildResult.Succeeded;
 
                         if (hasFailure)
