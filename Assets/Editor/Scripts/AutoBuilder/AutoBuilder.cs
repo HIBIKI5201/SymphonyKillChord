@@ -16,7 +16,8 @@ namespace KillChord.Editor.AutoBuilder
         /// <summary>
         /// 【GitHub Actions 用エントリポイント】
         /// Unity -batchMode -executeMethod KillChord.Editor.AutoBuilder.AutoBuilder.RunFromCli
-        ///     -gameDataVariant release|demo [-buildMode Development|Master] [-selectedProfiles Windows,Android]
+        ///     -gameDataVariant release|demo [-buildMode Development|Master|Exhibition] [-selectedProfiles Windows,Android]
+        ///     Exhibition（展示版）は demo とだけ組み合わせます。
         /// </summary>
         public static void RunFromCli()
         {
@@ -110,7 +111,7 @@ namespace KillChord.Editor.AutoBuilder
         /// </summary>
         /// <param name="isBatchMode"> true の場合、バッチモードでの実行と判定し、ビルド完了後にエディタを終了する。 </param>
         /// <param name="gameDataVariant"> release または demo。必須です。 </param>
-        /// <param name="buildMode"> "Development" または "Master"。null または空文字時は指定種別の両モードをビルドする。 </param>
+        /// <param name="buildMode"> "Development"、"Master"、"Exhibition"（体験版の展示版）。null または空文字時は Development と Master をビルドする。 </param>
         /// <param name="selectedProfiles"> カンマ区切りのプロファイル名。指定時は該当名のみへさらに絞り込む。 </param>
         private static void PerformMultipleBuilds(
             bool isBatchMode,
@@ -203,9 +204,9 @@ namespace KillChord.Editor.AutoBuilder
         }
 
         /// <summary>
-        ///     コマンドライン引数のビルドモードを解釈します。未指定時は両モードを対象にします。
+        ///     コマンドライン引数のビルドモードを解釈します。未指定時は Development と Master を対象にします。
         /// </summary>
-        /// <param name="buildMode"> Development または Master です。 </param>
+        /// <param name="buildMode"> Development、Master、Exhibition のいずれかです。 </param>
         /// <param name="modes"> 対象のビルドモード一覧です。 </param>
         /// <returns> 解釈できた場合は true です。 </returns>
         private static bool TryResolveModes(string buildMode, out AutoBuildMode[] modes)

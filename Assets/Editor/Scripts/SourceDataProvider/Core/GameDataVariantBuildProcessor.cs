@@ -57,6 +57,10 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 ValidateEntry(group, "DemoRuntime");
                 ValidateEntry(group, "DemoExperienceConfig");
+#if KILLCHORD_DEMO_EXHIBITION
+                // 展示版はタイマーとデータリセットを有効にした設定を読むため、その設定も確認する。
+                ValidateEntry(group, "DemoExperienceConfig.Exhibition");
+#endif
             }
 
             Debug.Log($"[{nameof(GameDataVariantBuildProcessor)}] Addressables build variant: {variant}, group: {group.Name}");
