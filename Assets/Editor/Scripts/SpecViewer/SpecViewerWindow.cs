@@ -50,6 +50,7 @@ namespace KillChord.Editor.SpecViewer
         private SpecMirror _mirror;
         private SpecCatalog _catalog;
         private SpecLinkResolver _resolver;
+        private SpecInlineFormatter _formatter;
         private SpecDocumentRenderer _renderer;
         private CancellationTokenSource _searchCancellation;
         private IVisualElementScheduledItem _pendingSearch;
@@ -83,8 +84,9 @@ namespace KillChord.Editor.SpecViewer
         {
             string repositoryRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
             _mirror = new SpecMirror(repositoryRoot);
-            SpecInlineFormatter formatter = new(SpecViewerStyles.LinkColorHex, SpecViewerStyles.InlineCodeBackgroundHex);
-            _renderer = new SpecDocumentRenderer(formatter, HandleLinkClicked, LoadImage, element => _pageScroll.ScrollTo(element));
+            _formatter = new SpecInlineFormatter(SpecViewerStyles.LinkColorHex, SpecViewerStyles.InlineCodeBackgroundHex);
+            _formatter.SetPageTitleResolver(ResolvePageTitle);
+            _renderer = new SpecDocumentRenderer(_formatter, HandleLinkClicked, LoadImage, element => _pageScroll.ScrollTo(element));
 
             rootVisualElement.Clear();
             rootVisualElement.Add(CreateToolbar());
@@ -412,6 +414,16 @@ namespace KillChord.Editor.SpecViewer
             }
 
             _resultList.Rebuild();
+        }
+
+        /// <summary>
+        ///     NotionのページIDから、写しにあるページのタイトルを引く。
+        /// </summary>
+        /// <param name="pageId">ページID。</param>
+        /// <returns>タイトル。写しに無ければ null。</returns>
+        private string ResolvePageTitle(string pageId)
+        {
+            return _catalog != null && _catalog.TryGetByPageId(pageId, out SpecCatalogEntry entry) ? entry.Title : null;
         }
 
         /// <summary>

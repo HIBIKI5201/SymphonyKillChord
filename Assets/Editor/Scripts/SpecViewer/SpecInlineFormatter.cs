@@ -1,6 +1,7 @@
 using Markdig;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -23,6 +24,16 @@ namespace KillChord.Editor.SpecViewer
         {
             _linkColor = linkColor;
             _codeBackgroundColor = codeBackgroundColor;
+        }
+
+        /// <summary>
+        ///     NotionのページIDからページのタイトルを引く処理を設定する。
+        ///     設定すると、本文に裸で書かれたページID（データベースのリレーションなど）と、タイトルの無いメンションをページ名のリンクにする。
+        /// </summary>
+        /// <param name="pageTitleResolver">ページIDからタイトルを返す処理。写しに無ければ null を返す。</param>
+        public void SetPageTitleResolver(Func<string, string> pageTitleResolver)
+        {
+            _pageTitleResolver = pageTitleResolver;
         }
 
         /// <summary>
@@ -95,26 +106,61 @@ namespace KillChord.Editor.SpecViewer
         private static readonly Regex SELF_CLOSING_MENTION = new(@"<mention-[a-z]+\s+url=""([^""]*)""[^>]*/>");
         private static readonly Regex LINE_BREAK = new(@"<br\s*/?>");
         private static readonly Regex DECORATION_TAG = new(@"</?(span|u|color)[^>]*>");
+        private static readonly Regex BARE_PAGE_ID = new(@"(?<![\w/-])([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?![\w-])");
+        private static readonly Regex ISO_DATE_TIME = new(@"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})");
+        private const string NOTION_PAGE_URL_PREFIX = "https://app.notion.com/p/";
+        private const string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";
+        private const string UNTITLED_MENTION = "Notion のページ";
 
         private readonly string _linkColor;
         private readonly string _codeBackgroundColor;
+        private Func<string, string> _pageTitleResolver;
 
         /// <summary>
         ///     Notion 独自のタグを、Markdown の書き方に置き換える。
         /// </summary>
         /// <param name="text">元の本文。</param>
         /// <returns>置き換えた本文。</returns>
-        private static string ReplaceNotionTags(string text)
+        private string ReplaceNotionTags(string text)
         {
-            // ページ・DBへのメンションはリンクにする。
+            // ページ・DBへのメンションはリンクにする。タイトルの無いメンションは、写しのページ名を引く。
             string replaced = MENTION.Replace(text, match => $"[{match.Groups[2].Value}](<{match.Groups[1].Value}>)");
-            replaced = SELF_CLOSING_MENTION.Replace(replaced, match => $"[↗](<{match.Groups[1].Value}>)");
+            replaced = SELF_CLOSING_MENTION.Replace(replaced, match =>
+            {
+                string url = match.Groups[1].Value;
+                string title = ResolveTitle(SpecLinkResolver.ExtractPageId(url)) ?? UNTITLED_MENTION;
+                return $"[{title}](<{url}>)";
+            });
+
+            // リレーションなどで裸で書かれたページIDは、写しにあればページ名のリンクにする。
+            replaced = BARE_PAGE_ID.Replace(replaced, match =>
+            {
+                string title = ResolveTitle(match.Groups[1].Value);
+                return title == null ? match.Value : $"[{title}](<{NOTION_PAGE_URL_PREFIX}{SpecCatalog.NormalizePageId(match.Groups[1].Value)}>)";
+            });
+
+            // 日時（最終更新など）は、ローカル時刻の読みやすい形にする。
+            replaced = ISO_DATE_TIME.Replace(replaced, match =>
+                DateTimeOffset.TryParse(match.Value, out DateTimeOffset time) ? time.ToLocalTime().ToString(DATE_TIME_FORMAT) : match.Value);
 
             // 改行は、段落の中の改行として扱う。
             replaced = LINE_BREAK.Replace(replaced, "  \n");
 
             // 色・下線・コメントの印は表示しない。
             return DECORATION_TAG.Replace(replaced, string.Empty);
+        }
+
+        /// <summary>
+        ///     ページIDからタイトルを引く。
+        /// </summary>
+        /// <param name="pageId">ページID。</param>
+        /// <returns>タイトル。引けなければ null。</returns>
+        private string ResolveTitle(string pageId)
+        {
+            if (_pageTitleResolver == null || string.IsNullOrEmpty(pageId)) { return null; }
+
+            string title = _pageTitleResolver(pageId);
+            return string.IsNullOrEmpty(title) ? null : title.Replace("[", "\\[").Replace("]", "\\]");
         }
 
         /// <summary>

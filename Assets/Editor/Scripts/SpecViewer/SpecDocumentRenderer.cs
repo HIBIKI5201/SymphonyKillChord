@@ -50,7 +50,7 @@ namespace KillChord.Editor.SpecViewer
         }
 
         private const int MAX_TABLE_ROWS = 300;
-        private const float MIN_TABLE_CELL_WIDTH = 110f;
+        private const float MIN_TABLE_CELL_WIDTH = 60f;
         private const float MAX_IMAGE_WIDTH = 640f;
         private const float BLOCK_MARGIN = 3f;
         private const float CHILD_INDENT = 16f;
@@ -337,8 +337,9 @@ namespace KillChord.Editor.SpecViewer
         /// <returns>要素。</returns>
         private VisualElement RenderNotionOnly(SpecBlock block)
         {
-            string label = string.IsNullOrEmpty(block.Caption) ? "Notion の要素" : block.Caption;
-            return RenderFileLink(block.Text, $"Notion で開く（{label}）");
+            // 別ページへのエイリアスやブックマークは写しに中身が無いので、目立たない小さなリンクにする。
+            string kind = block.Caption switch { "alias" => "ページへのリンク", "bookmark" => "ブックマーク", _ => "Notion の要素" };
+            return CreateRichLabel($"[{kind}（写しでは表示できません。Notion で開く）](<{block.Text}>)");
         }
 
         /// <summary>
