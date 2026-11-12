@@ -59,6 +59,8 @@ namespace KillChord.Editor.SpecViewer
         private const float BOX_PADDING = 6f;
         private const float EMPTY_BLOCK_HEIGHT = 8f;
         private const int BASE_FONT_SIZE = 13;
+        private const int SMALL_FONT_SIZE = 11;
+        private const float SUBTLE_OPACITY = 0.7f;
         private static readonly int[] HEADING_FONT_SIZES = { 22, 18, 15, 14, 13, 13 };
 
         private readonly SpecInlineFormatter _formatter;
@@ -339,7 +341,11 @@ namespace KillChord.Editor.SpecViewer
         {
             // 別ページへのエイリアスやブックマークは写しに中身が無いので、目立たない小さなリンクにする。
             string kind = block.Caption switch { "alias" => "ページへのリンク", "bookmark" => "ブックマーク", _ => "Notion の要素" };
-            return CreateRichLabel($"[{kind}（写しでは表示できません。Notion で開く）](<{block.Text}>)");
+            Label label = CreateRichLabel($"[↗ {kind}（Notion で開く）](<{block.Text}>)");
+            label.style.fontSize = SMALL_FONT_SIZE;
+            label.style.opacity = SUBTLE_OPACITY;
+            label.tooltip = "写しには中身が無いため、Notion で開きます";
+            return label;
         }
 
         /// <summary>
