@@ -1,0 +1,32 @@
+// Resources: the manifest and version information. Kept ASCII-only so rc.exe reads it the same on any code page.
+#include <windows.h>
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "ScriptLauncher.manifest"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+ FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041104b0"
+        BEGIN
+            VALUE "CompanyName", "Sinfonia Studio"
+            VALUE "FileDescription", "SymphonyKillChord Script Launcher"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "ScriptLauncher"
+            VALUE "OriginalFilename", "ScriptLauncher.exe"
+            VALUE "ProductName", "SymphonyKillChord"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x411, 1200
+    END
+END
