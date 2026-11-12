@@ -702,17 +702,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "io.github.hatayama.uloopmcp": {
-      "version": "https://github.com/hatayama/unity-cli-loop.git?path=/Packages/src",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.ugui": "1.0.0",
-        "com.unity.nuget.newtonsoft-json": "3.2.1",
-        "com.unity.nuget.mono-cecil": "1.11.6"
-      },
-      "hash": "4fdd112593ba7508b3fa2211f67bd8f97cefe1ee"
-    },
     "symphonyframework": {
       "version": "https://github.com/HIBIKI5201/SymphonyFramework.git",
       "depth": 0,

@@ -114,7 +114,9 @@ Packages/com.singularitygroup.hotreload/
 Assets/SceneDependencyCache/
 Assets/SceneDependencyCache.meta
 
-# uloop-cli の出力
+# AI デバッグ QA の証跡（skc-ai-debug-attack-queue）
+.ai-debug-qa/
+# 以前の uloop の出力
 .uloop/
 
 # IDE(Unity/Rider)が自動生成するソリューションファイル
