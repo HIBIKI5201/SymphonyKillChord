@@ -71,8 +71,11 @@ namespace KillChord.Editor.ProjectSetup
                 problems.Add($"クローン先のフォルダ名が「{folderName}」です。Unity と IDE を閉じてから「{config.RepositoryFolderName}」に変えてください。");
             }
 
+            // 必須でないサブモジュール（サウンドの元データ・プロジェクト ドキュメントの写し）は、無くても作業できるので警告しない。
             foreach (string submodulePath in ReadSubmodulePaths(Path.Combine(root, ".gitmodules")))
             {
+                if (!IsRequiredSubmodule(config, submodulePath)) { continue; }
+
                 string directory = Path.Combine(root, submodulePath);
                 if (!Directory.Exists(directory) || !Directory.EnumerateFileSystemEntries(directory).Any())
                 {
@@ -106,6 +109,19 @@ namespace KillChord.Editor.ProjectSetup
 
             Debug.LogWarning($"[{nameof(ProjectSetupChecker)}] プロジェクトのセットアップが済んでいません。\n{string.Join("\n", problems)}");
             ProjectSetupWindow.Open(problems);
+        }
+
+        /// <summary>
+        ///     サブモジュールが必須かを返す。必須の一覧が無い古い設定では、すべて必須として扱う。
+        /// </summary>
+        /// <param name="config">project-setup.json の内容。</param>
+        /// <param name="submodulePath">サブモジュールのパス。</param>
+        /// <returns>必須なら true。</returns>
+        private static bool IsRequiredSubmodule(SetupJson config, string submodulePath)
+        {
+            if (config.RequiredSubmodules == null || config.RequiredSubmodules.Length == 0) { return true; }
+
+            return config.RequiredSubmodules.Contains(submodulePath, StringComparer.Ordinal);
         }
 
         /// <summary>
@@ -156,6 +172,9 @@ namespace KillChord.Editor.ProjectSetup
 
             /// <summary> クローン先のフォルダ名（project-setup.json だけが持つ）。 </summary>
             public string RepositoryFolderName = string.Empty;
+
+            /// <summary> 取得できないとセットアップ未完了になるサブモジュールのパス（project-setup.json だけが持つ）。 </summary>
+            public string[] RequiredSubmodules = Array.Empty<string>();
         }
     }
 }
