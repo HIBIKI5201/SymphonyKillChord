@@ -36,6 +36,7 @@
 | `reports/2026-11-11_july-review-leftovers.md` | 2026-07 コードレビューの残り 8 件の処置（直した 3 件・直さない理由・PC で行うシーン整理。Issue #2757） |
 | `handoffs/2026-11-03_logic-graph-debugger-plan.md` | ゲームロジックをグラフ表示するデバッグウィンドウの実装計画（Unity 6.x の Graph Toolkit・GraphView の比較と決めてほしいこと） |
 | `reports/2026-11-08_harness-context-budget.md` | ハーネスのコンテキスト・トークン消費の棚卸しと削減（読み込みタイミング・`/context` の実測・スキル選択の確認・Codex 委任プロンプト。Issue #2753） |
+| `reports/2026-11-12_cli-launcher-and-spec-viewer.md` | CLIスクリプト（bat / command）を管理する Win32・C++ ツールと、仕様書の写しを表示する EditorWindow の設計検討（スクリプト一覧・管理者権限の評価・決定事項） |
 
 ## 旧置き場から移したもの（Issue #2081）
 
