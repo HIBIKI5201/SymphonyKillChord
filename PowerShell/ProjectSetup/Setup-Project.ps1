@@ -7,6 +7,7 @@
     - クローン先のパス（日本語・空白が無いか）とフォルダ名（SymphonyKillChord か）
     - git の設定（submodule.recurse / core.longpaths）
     - サブモジュールの取得（閲覧権限が無ければ招待を頼むよう案内する）
+      project-setup.json の RequiredSubmodules にあるものだけ必須。ほかは取れなくても警告に留める
     - Unity エディタのバージョンと Android Build Support
     - Unity CLI（unity コマンド。無ければ公式のスクリプトで入れる）
     必須の項目がすべて通ったら、UserSettings/KillChord/ProjectSetupState.json に記録する。
@@ -107,7 +108,15 @@ foreach ($key in $gitSettings.Keys) {
 # --- サブモジュール --------------------------------------------------------
 $submodulePaths = (Invoke-Git @('config', '-f', '.gitmodules', '--get-regexp', '^submodule\..*\.path$')).Output -split "`n" |
     Where-Object { $_ } | ForEach-Object { ($_ -split ' ', 2)[1] }
+# 必須でないもの（サウンドの元データ・プロジェクト ドキュメントの写し）は、閲覧権限が無い役職でも作業できるので警告に留める。
+$requiredSubmodules = @($Config.RequiredSubmodules | Where-Object { $_ })
+function Get-SubmoduleFailureStatus([string]$Path) {
+    if ($requiredSubmodules.Count -eq 0 -or $requiredSubmodules -contains $Path) { return 'Error' }
+    return 'Warn'
+}
 foreach ($path in $submodulePaths) {
+    $failureStatus = Get-SubmoduleFailureStatus $path
+    $optionalNote = if ($failureStatus -eq 'Warn') { '必須ではないので、このまま作業できます。' } else { '' }
     $status = (Invoke-Git @('submodule', 'status', '--', $path)).Output
     $fullPath = Join-Path $RepoRoot $path
     $hasContent = (Test-Path $fullPath) -and ((Get-ChildItem $fullPath -Force | Measure-Object).Count -gt 0)
@@ -116,7 +125,7 @@ foreach ($path in $submodulePaths) {
         continue
     }
     if ($Check) {
-        Add-Result "サブモジュール $path" 'Error' 'まだ取得していません。'
+        Add-Result "サブモジュール $path" $failureStatus "まだ取得していません。$optionalNote"
         continue
     }
 
@@ -139,7 +148,7 @@ foreach ($path in $submodulePaths) {
         Add-Result "サブモジュール $path" 'Fixed' '取得しました。'
     }
     else {
-        Add-Result "サブモジュール $path" 'Error' '取得できませんでした。上に出た git のエラーを確認してください。認証や「Repository not found」のエラーなら、非公開リポジトリの閲覧権限がありません。リードに GitHub の招待を頼んでください。'
+        Add-Result "サブモジュール $path" $failureStatus "取得できませんでした。上に出た git のエラーを確認してください。認証や「Repository not found」のエラーなら、非公開リポジトリの閲覧権限がありません。必要ならリードに GitHub の招待を頼んでください。$optionalNote"
     }
 }
 

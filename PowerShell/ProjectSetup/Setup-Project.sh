@@ -5,6 +5,7 @@
 # - クローン先のパス（日本語・空白が無いか）とフォルダ名（SymphonyKillChord か）
 # - git の設定（submodule.recurse / core.longpaths）
 # - サブモジュールの取得（閲覧権限が無ければ招待を頼むよう案内する）
+#   project-setup.json の RequiredSubmodules にあるものだけ必須。ほかは取れなくても警告に留める
 # - Unity エディタのバージョンと Android Build Support
 # - Unity CLI（unity コマンド。無ければ公式のスクリプトで入れる）
 # 必須の項目がすべて通ったら、UserSettings/KillChord/ProjectSetupState.json に記録する。
@@ -106,8 +107,20 @@ done
 # --- サブモジュール --------------------------------------------------------
 # git が認証を尋ねられるよう標準入力は空けておき、一覧は別の記述子（3）から読む。
 SUBMODULE_LINES="$(git_in_repo config -f .gitmodules --get-regexp '^submodule\..*\.path$')"
+# 必須でないもの（サウンドの元データ・プロジェクト ドキュメントの写し）は、閲覧権限が無い役職でも作業できるので警告に留める。
+REQUIRED_SUBMODULES_LINE="$(grep '"RequiredSubmodules"' "$CONFIG_PATH")"
+submodule_failure_status() {
+    if [ -z "$REQUIRED_SUBMODULES_LINE" ] || printf '%s' "$REQUIRED_SUBMODULES_LINE" | grep -qF "\"$1\""; then
+        echo 'Error'
+    else
+        echo 'Warn'
+    fi
+}
 while read -r key path <&3; do
     [ -n "$path" ] || continue
+    failure_status="$(submodule_failure_status "$path")"
+    optional_note=''
+    if [ "$failure_status" = 'Warn' ]; then optional_note='必須ではないので、このまま作業できます。'; fi
     name="${key%.path}"
     status="$(git_in_repo submodule status -- "$path" 2> /dev/null)"
     full_path="$REPO_ROOT/$path"
@@ -116,7 +129,7 @@ while read -r key path <&3; do
         continue
     fi
     if [ "$CHECK" -eq 1 ]; then
-        add_result "サブモジュール $path" 'Error' 'まだ取得していません。'
+        add_result "サブモジュール $path" "$failure_status" "まだ取得していません。$optional_note"
         continue
     fi
 
@@ -131,7 +144,7 @@ while read -r key path <&3; do
     if git_in_repo "${arguments[@]}" -- "$path"; then
         add_result "サブモジュール $path" 'Fixed' '取得しました。'
     else
-        add_result "サブモジュール $path" 'Error' '取得できませんでした。上に出た git のエラーを確認してください。認証や「Repository not found」のエラーなら、非公開リポジトリの閲覧権限がありません。リードに GitHub の招待を頼んでください。'
+        add_result "サブモジュール $path" "$failure_status" "取得できませんでした。上に出た git のエラーを確認してください。認証や「Repository not found」のエラーなら、非公開リポジトリの閲覧権限がありません。必要ならリードに GitHub の招待を頼んでください。$optional_note"
     fi
 done 3<<< "$SUBMODULE_LINES"
 
