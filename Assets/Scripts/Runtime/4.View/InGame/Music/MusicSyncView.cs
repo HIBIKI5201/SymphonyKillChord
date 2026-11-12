@@ -74,7 +74,12 @@ namespace KillChord.Runtime.View.InGame.Music
                 || _musicSyncState == null
                 || _musicSyncController == null
                 || _musicSyncState.Bpm <= 0
-                || _musicSyncState.BeatLength <= 0) return;
+                || _musicSyncState.BeatLength <= 0)
+            {
+                // 同期を進められない間にカウントダウンが止まったままにならないよう、停止を取り消す。
+                _musicSyncController?.CancelResumeHold();
+                return;
+            }
 
             double playbackTime = _musicPlayer.Time;
             if (playbackTime < 0d)
@@ -83,7 +88,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            _musicSyncController.Tick(playbackTime);
+            _musicSyncController.Tick(playbackTime, Time.unscaledDeltaTime);
         }
 
         /// <summary>
