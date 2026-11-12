@@ -1,6 +1,6 @@
 # Editor QA JSON API v1
 
-窓口は KillChord.Editor.AIDebugPlay.AIDebugQaApi。既存uloopの execute-dynamic-code で呼ぶ。専用HTTPサーバー、RuntimeのAPI、ビルドへの組み込みは追加しない。
+窓口は KillChord.Editor.AIDebugPlay.AIDebugQaApi。Unity CLI の `unity command script eval` で呼ぶ（`--result-only`、型は `KillChord.Editor.AIDebugPlay.` から書く）。専用HTTPサーバー、RuntimeのAPI、ビルドへの組み込みは追加しない。
 
 ## スナップショット
 
@@ -52,4 +52,4 @@ buttonはButton.onClickの発行。completionVerifiedとinputDeviceVerifiedはfa
 
 runは標準出力にJSON、診断を標準エラーへ出す。通信/API拒否・観測失敗・キャンセル・後始末失敗では非ゼロ終了。終了コード0もQA合格ではない。summary.jsonのqaVerdictは常にUnverified。
 
-リズムの時間制御はEditor内で行う。Nodeの待機は観測頻度だけに使用する。[uloop公式v3移行資料](https://github.com/hatayama/unity-cli-loop/blob/main/Packages/src/Documentation~/whats-new-v3.md)も参照。
+リズムの時間制御はEditor内で行う。Nodeの待機は観測頻度だけに使用する。
