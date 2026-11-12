@@ -1479,8 +1479,74 @@ jobs:
 
 # ==================================================================================================
 
+      - name: Android 署名鍵の準備
+        # Google Play はデバッグ署名の APK/AAB を受け付けないため、Android はアップロード鍵で署名する。
+        # 鍵は Secret ANDROID_KEYSTORE_BASE64（base64）をランナーの一時フォルダへ復元するか、
+        # 変数 ANDROID_KEYSTORE_PATH（ランナーPC上の鍵ファイルの絶対パス）を使う。パスワードは Unity ビルドの手順にだけ渡す。
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PATH: ${{ vars.ANDROID_KEYSTORE_PATH }}
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+          $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+          function Write-Host($Object) {
+            if ($Object -match '\[WARN\]|\[ERROR\]|::warning::|::error::') { Add-Content -Path (Join-Path $env:RUNNER_TEMP 'workflow_issues.log') -Value $Object }
+            Microsoft.PowerShell.Utility\Write-Host $Object
+          }
+
+          Write-Host "::group::Android 署名鍵の準備"
+
+          if ($env:SELECTED_PROFILES -notmatch '(?i)android') {
+            Write-Host "[INFO]: Android をビルドしないため、署名鍵の準備を省略します（対象: $env:SELECTED_PROFILES）。"
+            Write-Host "::endgroup::"
+            exit 0
+          }
+
+          # Master の Android はリリース署名を必須にし、鍵が無ければ Unity 側でビルドを止める。
+          if ($env:BUILD_MODE -eq 'Master') {
+            "SKC_ANDROID_SIGNING_REQUIRED=true" | Add-Content -Path $env:GITHUB_ENV
+          }
+
+          $KeystorePath = ''
+          if ($env:ANDROID_KEYSTORE_BASE64) {
+            $KeystorePath = Join-Path $env:RUNNER_TEMP 'skc-upload.keystore'
+            try {
+              [System.IO.File]::WriteAllBytes($KeystorePath, [System.Convert]::FromBase64String($env:ANDROID_KEYSTORE_BASE64.Trim()))
+              Write-Host "[INFO]: Secret ANDROID_KEYSTORE_BASE64 から署名鍵を一時フォルダへ復元しました。"
+            } catch {
+              Write-Host "::error::ANDROID_KEYSTORE_BASE64 を base64 として読めませんでした: $($_.Exception.Message)"
+              exit 1
+            }
+          } elseif ($env:ANDROID_KEYSTORE_PATH) {
+            $KeystorePath = $env:ANDROID_KEYSTORE_PATH.Trim('"').Trim("'")
+            if (-not (Test-Path -LiteralPath $KeystorePath -PathType Leaf)) {
+              Write-Host "::error::変数 ANDROID_KEYSTORE_PATH の鍵ファイルが見つかりません: $KeystorePath"
+              exit 1
+            }
+            Write-Host "[INFO]: 変数 ANDROID_KEYSTORE_PATH の署名鍵を使います。"
+          } else {
+            if ($env:BUILD_MODE -eq 'Master') {
+              Write-Host "::error::Master の Android はリリース署名が必要ですが、Secret ANDROID_KEYSTORE_BASE64 も変数 ANDROID_KEYSTORE_PATH もありません。Android はビルドされません（BuildRunner/README.md の「Android の署名」）。"
+            } else {
+              Write-Host "[INFO]: 署名鍵の設定が無いため、Android はデバッグ署名でビルドします。"
+            }
+            Write-Host "::endgroup::"
+            exit 0
+          }
+
+          "SKC_ANDROID_KEYSTORE_PATH=$KeystorePath" | Add-Content -Path $env:GITHUB_ENV
+          Write-Host "::endgroup::"
+
+# ==================================================================================================
+
       - name: Unityビルドの実行
         id: unity_build
+        env:
+          # 署名のパスワードはこの手順の Unity プロセスにだけ渡す（ProjectSettings には保存しない）。
+          SKC_ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          SKC_ANDROID_KEYALIAS_NAME: ${{ secrets.ANDROID_KEYALIAS_NAME || vars.ANDROID_KEYALIAS_NAME }}
+          SKC_ANDROID_KEYALIAS_PASS: ${{ secrets.ANDROID_KEYALIAS_PASS }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -2332,7 +2398,9 @@ jobs:
           $Targets = @(
             (Join-Path $Workspace "Builds"),
             (Join-Path $env:RUNNER_TEMP "src_assets.zip"),
-            (Join-Path $env:RUNNER_TEMP "UnityPackages")
+            (Join-Path $env:RUNNER_TEMP "UnityPackages"),
+            # Secret から復元した Android の署名鍵（ランナーに残さない）。
+            (Join-Path $env:RUNNER_TEMP "skc-upload.keystore")
           )
 
           if ($CleanBuild) {
