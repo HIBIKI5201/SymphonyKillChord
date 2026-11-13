@@ -1,21 +1,19 @@
-using KillChord.Editor.SourceDataProvider.Core;
-
 namespace KillChord.Editor.AutoBuilder
 {
     /// <summary>
-    ///     ゲームデータ種別とビルドモードの組み合わせで決まる、自動ビルドの設定枠です。
+    ///     種別とビルドモードの組み合わせで決まる、自動ビルドの設定枠です。
     /// </summary>
     internal readonly struct AutoBuildSlot
     {
         /// <summary>
         ///     設定枠を生成します。
         /// </summary>
-        /// <param name="variant"> この枠でビルドするゲームデータ種別です。 </param>
+        /// <param name="variant"> この枠でビルドする種別です。 </param>
         /// <param name="mode"> この枠のビルドモードです。 </param>
         /// <param name="pathPropertyName"> 出力先パスを保持するフィールド名です。 </param>
         /// <param name="profilesPropertyName"> Build Profile一覧を保持するフィールド名です。 </param>
         public AutoBuildSlot(
-            GameDataVariant variant,
+            AutoBuildVariant variant,
             AutoBuildMode mode,
             string pathPropertyName,
             string profilesPropertyName)
@@ -26,8 +24,8 @@ namespace KillChord.Editor.AutoBuilder
             ProfilesPropertyName = profilesPropertyName;
         }
 
-        /// <summary> この枠でビルドするゲームデータ種別です。 </summary>
-        public GameDataVariant Variant { get; }
+        /// <summary> この枠でビルドする種別です。 </summary>
+        public AutoBuildVariant Variant { get; }
 
         /// <summary> この枠のビルドモードです。 </summary>
         public AutoBuildMode Mode { get; }

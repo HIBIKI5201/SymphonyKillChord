@@ -9,7 +9,7 @@ namespace KillChord.Editor.AutoBuilder
 {
     /// <summary>
     ///     オートビルダーの設定を保持するクラス。
-    ///     ゲームデータ種別（Release / Demo）とビルドモード（Master / Develop、体験版は展示版 Exhibition も）の組み合わせごとに枠を持ちます。
+    ///     種別（Release / Demo / Exhibition）とビルドモード（Master / Develop、展示版は Master だけ）の組み合わせごとに枠を持ちます。
     /// </summary>
     [FilePath(
         ProviderConst.PROJECT_SETTINGS_PATH + nameof(AutoBuilderSettings) + ProviderConst.ASSET_EXT,
@@ -37,17 +37,20 @@ namespace KillChord.Editor.AutoBuilder
         public string DemoDevelopPath;
         public BuildProfile[] DemoDevelopBuildProfiles;
 
-        public string DemoExhibitionPath;
-        public BuildProfile[] DemoExhibitionBuildProfiles;
+        [FormerlySerializedAs("DemoExhibitionPath")]
+        public string ExhibitionMasterPath;
+
+        [FormerlySerializedAs("DemoExhibitionBuildProfiles")]
+        public BuildProfile[] ExhibitionMasterBuildProfiles;
 
         /// <summary> 画面表示とCLIで扱う自動ビルドの枠一覧です。 </summary>
         internal static readonly AutoBuildSlot[] SLOTS =
         {
-            new(GameDataVariant.Release, AutoBuildMode.Master, nameof(ReleaseMasterPath), nameof(ReleaseMasterBuildProfiles)),
-            new(GameDataVariant.Release, AutoBuildMode.Development, nameof(ReleaseDevelopPath), nameof(ReleaseDevelopBuildProfiles)),
-            new(GameDataVariant.Demo, AutoBuildMode.Master, nameof(DemoMasterPath), nameof(DemoMasterBuildProfiles)),
-            new(GameDataVariant.Demo, AutoBuildMode.Development, nameof(DemoDevelopPath), nameof(DemoDevelopBuildProfiles)),
-            new(GameDataVariant.Demo, AutoBuildMode.Exhibition, nameof(DemoExhibitionPath), nameof(DemoExhibitionBuildProfiles)),
+            new(AutoBuildVariant.Release, AutoBuildMode.Master, nameof(ReleaseMasterPath), nameof(ReleaseMasterBuildProfiles)),
+            new(AutoBuildVariant.Release, AutoBuildMode.Development, nameof(ReleaseDevelopPath), nameof(ReleaseDevelopBuildProfiles)),
+            new(AutoBuildVariant.Demo, AutoBuildMode.Master, nameof(DemoMasterPath), nameof(DemoMasterBuildProfiles)),
+            new(AutoBuildVariant.Demo, AutoBuildMode.Development, nameof(DemoDevelopPath), nameof(DemoDevelopBuildProfiles)),
+            new(AutoBuildVariant.Exhibition, AutoBuildMode.Master, nameof(ExhibitionMasterPath), nameof(ExhibitionMasterBuildProfiles)),
         };
 
         /// <summary>
@@ -135,11 +138,11 @@ namespace KillChord.Editor.AutoBuilder
         /// <summary>
         ///     種別とモードに対応する枠を取得します。
         /// </summary>
-        /// <param name="variant"> ゲームデータ種別です。 </param>
+        /// <param name="variant"> 種別です。 </param>
         /// <param name="mode"> ビルドモードです。 </param>
         /// <param name="slot"> 見つかった枠です。 </param>
         /// <returns> 枠が見つかった場合はtrueです。 </returns>
-        internal static bool TryGetSlot(GameDataVariant variant, AutoBuildMode mode, out AutoBuildSlot slot)
+        internal static bool TryGetSlot(AutoBuildVariant variant, AutoBuildMode mode, out AutoBuildSlot slot)
         {
             foreach (AutoBuildSlot candidate in SLOTS)
             {
@@ -163,11 +166,11 @@ namespace KillChord.Editor.AutoBuilder
         {
             return (slot.Variant, slot.Mode) switch
             {
-                (GameDataVariant.Release, AutoBuildMode.Master) => ReleaseMasterPath,
-                (GameDataVariant.Release, AutoBuildMode.Development) => ReleaseDevelopPath,
-                (GameDataVariant.Demo, AutoBuildMode.Master) => DemoMasterPath,
-                (GameDataVariant.Demo, AutoBuildMode.Development) => DemoDevelopPath,
-                (GameDataVariant.Demo, AutoBuildMode.Exhibition) => DemoExhibitionPath,
+                (AutoBuildVariant.Release, AutoBuildMode.Master) => ReleaseMasterPath,
+                (AutoBuildVariant.Release, AutoBuildMode.Development) => ReleaseDevelopPath,
+                (AutoBuildVariant.Demo, AutoBuildMode.Master) => DemoMasterPath,
+                (AutoBuildVariant.Demo, AutoBuildMode.Development) => DemoDevelopPath,
+                (AutoBuildVariant.Exhibition, AutoBuildMode.Master) => ExhibitionMasterPath,
                 _ => null,
             };
         }
@@ -181,11 +184,11 @@ namespace KillChord.Editor.AutoBuilder
         {
             return (slot.Variant, slot.Mode) switch
             {
-                (GameDataVariant.Release, AutoBuildMode.Master) => ReleaseMasterBuildProfiles,
-                (GameDataVariant.Release, AutoBuildMode.Development) => ReleaseDevelopBuildProfiles,
-                (GameDataVariant.Demo, AutoBuildMode.Master) => DemoMasterBuildProfiles,
-                (GameDataVariant.Demo, AutoBuildMode.Development) => DemoDevelopBuildProfiles,
-                (GameDataVariant.Demo, AutoBuildMode.Exhibition) => DemoExhibitionBuildProfiles,
+                (AutoBuildVariant.Release, AutoBuildMode.Master) => ReleaseMasterBuildProfiles,
+                (AutoBuildVariant.Release, AutoBuildMode.Development) => ReleaseDevelopBuildProfiles,
+                (AutoBuildVariant.Demo, AutoBuildMode.Master) => DemoMasterBuildProfiles,
+                (AutoBuildVariant.Demo, AutoBuildMode.Development) => DemoDevelopBuildProfiles,
+                (AutoBuildVariant.Exhibition, AutoBuildMode.Master) => ExhibitionMasterBuildProfiles,
                 _ => null,
             };
         }

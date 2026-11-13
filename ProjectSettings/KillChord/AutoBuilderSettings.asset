@@ -32,7 +32,7 @@ MonoBehaviour:
   DemoDevelopBuildProfiles:
   - {fileID: 11400000, guid: d44dc55631184810aa39170da8509ff9, type: 2}
   - {fileID: 11400000, guid: 5de3ca8383e740ff99c8dd04f4da4ac0, type: 2}
-  DemoExhibitionPath: Builds/Demo/Exhibition/
-  DemoExhibitionBuildProfiles:
+  ExhibitionMasterPath: Builds/Exhibition/Master/
+  ExhibitionMasterBuildProfiles:
   - {fileID: 11400000, guid: 792e8441176449ffb8c8ec2bbc09cd2e, type: 2}
   - {fileID: 11400000, guid: b809d977acb546359932318d21f2f371, type: 2}

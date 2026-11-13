@@ -148,7 +148,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 gh workflow run BuildAndRelease.yml --repo HIBIKI5201/SymphonyKillChord --ref develop -f build_mode=Development -f build_variant=demo -f profile_android=false -f profile_windows=true -f profile_macos=false -f profile_ios=false -f cpu_usage_percent=100%
 ```
 
-- `build_variant` は `demo`（配布用体験版）、`release`（製品版）、`exhibition`（展示版）から選ぶ。展示版は体験版にタイマーとデータリセットを付けたもので、出展イベントの試遊台に入れる。`build_mode=Master` のときだけ選べ、AutoBuilder の DemoExhibition 枠（`Demo_Exhibition_Windows` / `Demo_Exhibition_Android`、出力先 `Builds/Demo/Exhibition/`）でビルドする。Android は試遊台へ直接入れられるよう APK を作る。
+- `build_variant` は `demo`（配布用体験版）、`release`（製品版）、`exhibition`（展示版）から選ぶ。展示版は体験版にタイマーとデータリセットを付けたもので、出展イベントの試遊台に入れる。`build_mode=Master` のときだけ選べ、AutoBuilder の Exhibition Master 枠（`Exhibition_Master_Windows` / `Exhibition_Master_Android`、出力先 `Builds/Exhibition/Master/`）でビルドする。体験版のゲームデータを使い、プロファイルにだけ `KILLCHORD_DEMO_EXHIBITION` を付ける。Android は試遊台へ直接入れられるよう APK を作る。
 - `clean_build=true` を付けると Unity の Library を消して作り直す。トラブルのときだけ使う（Windows でも1時間以上延びる）。
 - タイムアウト: Android は 180 分、ほかは 120 分。
 

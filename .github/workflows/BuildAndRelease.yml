@@ -763,14 +763,9 @@ jobs:
           Write-Host "ビルドモード: $BuildMode, ビルド種別: $BuildVariant, タグの接頭辞: $TagPrefix, 版: ${{ needs.prepare.outputs.version }}"
           "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
           "BUILD_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
-          # Unity へ渡す種別・モード。展示版は体験版データ（demo）を AutoBuilder の Exhibition 枠でビルドする。
-          if ($BuildVariant -eq "exhibition") {
-            "UNITY_GAME_DATA_VARIANT=demo" | Add-Content -Path $env:GITHUB_ENV
-            "UNITY_BUILD_MODE=Exhibition"  | Add-Content -Path $env:GITHUB_ENV
-          } else {
-            "UNITY_GAME_DATA_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
-            "UNITY_BUILD_MODE=$BuildMode"           | Add-Content -Path $env:GITHUB_ENV
-          }
+          # Unity へ渡す種別・モード。展示版も種別 exhibition のまま渡し、AutoBuilder の Exhibition Master 枠でビルドする。
+          "UNITY_GAME_DATA_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
+          "UNITY_BUILD_MODE=$BuildMode"           | Add-Content -Path $env:GITHUB_ENV
           "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
           "CURRENT_BUILD_VERSION=${{ needs.prepare.outputs.version }}" | Add-Content -Path $env:GITHUB_ENV
           # Unity（BuildVersionSettings.cs）がプレイヤーの版と versionCode に入れる数字だけの版。
@@ -805,8 +800,9 @@ jobs:
 
           # AutoBuilderSettings はゲームデータ種別×ビルドモードごとに出力先パスを持つ（例: DemoMasterPath）。
           switch ($env:UNITY_GAME_DATA_VARIANT) {
-            "demo"    { $VariantKey = "Demo" }
-            "release" { $VariantKey = "Release" }
+            "demo"       { $VariantKey = "Demo" }
+            "release"    { $VariantKey = "Release" }
+            "exhibition" { $VariantKey = "Exhibition" }
             default {
               Write-Host "::error::未知の BUILD_VARIANT です: $env:BUILD_VARIANT"
               exit 1
@@ -816,7 +812,6 @@ jobs:
           switch ($env:UNITY_BUILD_MODE) {
             "Master"      { $TargetKey = "${VariantKey}MasterPath" }
             "Development" { $TargetKey = "${VariantKey}DevelopPath" }
-            "Exhibition"  { $TargetKey = "${VariantKey}ExhibitionPath" }
             default {
               Write-Host "::error::未知の BUILD_MODE です: $env:BUILD_MODE"
               exit 1
@@ -2241,7 +2236,7 @@ jobs:
             5. **Unity ビルド処理**: ${{ steps.determine_mode.outputs.build_mode }} ビルドプロファイルをプロファイルごとに別の Unity バッチプロセスで実行（各プロファイルのタイムアウトは2時間）。
 
             **ビルド対象プロファイル:**
-            - ビルドプロファイル枠: ${{ steps.determine_mode.outputs.build_variant == 'exhibition' && 'DemoExhibition' || format('{0}{1}', steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release', steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master') }}BuildProfiles
+            - ビルドプロファイル枠: ${{ format('{0}{1}', steps.determine_mode.outputs.build_variant == 'exhibition' && 'Exhibition' || steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release', steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master') }}BuildProfiles
           files: "${{ steps.tag_gen.outputs.ASSET_PREFIX }}-*-${{ steps.tag_gen.outputs.VERSION }}.zip"
           fail_on_unmatched_files: true
           overwrite_files: true
