@@ -12,12 +12,13 @@ https://hibiki5201.github.io/SymphonyKillChord/home/
    - 直せない項目は、直し方を表示する。確認だけをするときは `Setup.bat -Check`（macOS / Linux は `./Setup.command -Check`）。
 4. Unity Hub からプロジェクトを開く。セットアップが済んでいないと、起動時に「プロジェクトのセットアップ」ウィンドウが出る。
 
-サブモジュールは次の2つで、どちらも private リポジトリである（閲覧権限が必要。無ければリードに GitHub の招待を頼む）。
+サブモジュールは次の3つで、どれも private リポジトリである（閲覧権限が必要。無ければリードに GitHub の招待を頼む）。必須は `Assets/AssetStoreTools` だけで、ほかは取得できなくてもセットアップは警告に留めて完了する（必須の一覧は `PowerShell/ProjectSetup/project-setup.json` の `RequiredSubmodules`）。
 
-| パス | リポジトリ | 中身 |
-| --- | --- | --- |
-| `Assets/AssetStoreTools` | [SymphonyKillChord_AssetStoreTools](https://github.com/HIBIKI5201/SymphonyKillChord_AssetStoreTools) | 外部アセットと NuGet パッケージ。無いとコンパイルエラーになる |
-| `Docs/NotionSpecifications` | [SymphonyKillChord_Specifications](https://github.com/HIBIKI5201/SymphonyKillChord_Specifications) | Notion のプロジェクト ドキュメントの写し。CI が3時間ごとに更新する |
+| パス | リポジトリ | 中身 | 必須 |
+| --- | --- | --- | --- |
+| `Assets/AssetStoreTools` | [SymphonyKillChord_AssetStoreTools](https://github.com/HIBIKI5201/SymphonyKillChord_AssetStoreTools) | 外部アセットと NuGet パッケージ。無いとコンパイルエラーになる | 必須 |
+| `Docs/NotionSpecifications` | [SymphonyKillChord_Specifications](https://github.com/HIBIKI5201/SymphonyKillChord_Specifications) | Notion のプロジェクト ドキュメントの写し。CI が3時間ごとに更新する。仕様書ビューア・仕様検索で使う | 任意（警告） |
+| `Sound/CRIAtomCraft` | [SymphonyKillChord_CriAtomCraft](https://github.com/HIBIKI5201/SymphonyKillChord_CriAtomCraft) | CRI Atom Craft のサウンドの元データ。サウンドを編集する人だけ使う | 任意（警告） |
 
 セットアップの手順を増やしたら、`PowerShell/ProjectSetup/project-setup.json` の `SetupVersion` を上げる。既存のメンバーも、次に Unity を開いたときに再実行を促される。
 

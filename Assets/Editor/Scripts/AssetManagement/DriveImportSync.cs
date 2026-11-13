@@ -297,6 +297,14 @@ namespace KillChord.Editor.AssetManagement
                 }
                 else
                 {
+                    if (IsScriptFile(node.Name))
+                    {
+                        Debug.LogWarning(
+                            $"[{nameof(DriveImportSync)}] Driveにスクリプトが置かれているため同期しません。" +
+                            $"コードはリポジトリで管理してください。File: {node.Name}, Folder: {localFolderAbsPath}");
+                        continue;
+                    }
+
                     if (IsFileExcluded(node.Name, settings))
                     {
                         continue;
@@ -325,6 +333,31 @@ namespace KillChord.Editor.AssetManagement
             {
                 if (!string.IsNullOrEmpty(excludedName)
                     && string.Equals(excludedName, folderName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     コンパイル対象になるスクリプト類か判定する。
+        ///     Driveはアセットの取り込み用のため、設定に関係なく常に同期しない。
+        /// </summary>
+        /// <param name="fileName"> 判定対象のファイル名。 </param>
+        /// <returns> スクリプト類であれば true。 </returns>
+        private static bool IsScriptFile(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return false;
+            }
+
+            string ext = Path.GetExtension(fileName).TrimStart('.');
+            foreach (string scriptExt in SCRIPT_EXTENSIONS)
+            {
+                if (string.Equals(ext, scriptExt, StringComparison.OrdinalIgnoreCase))
                 {
                     return true;
                 }
@@ -401,5 +434,8 @@ namespace KillChord.Editor.AssetManagement
         {
             return Path.GetInvalidFileNameChars().Aggregate(name, (current, c) => current.Replace(c, '_'));
         }
+
+        /// <summary> Driveから同期しないスクリプト類の拡張子です。Assets配下に置くとコンパイル対象になります。 </summary>
+        private static readonly string[] SCRIPT_EXTENSIONS = { "cs", "asmdef", "asmref", "dll", "rsp" };
     }
 }
