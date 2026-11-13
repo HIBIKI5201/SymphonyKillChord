@@ -23,6 +23,7 @@ using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using KillChord.Runtime.View.Persistent.Load;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -38,6 +39,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
     /// <summary>
     ///     スキルツリーを初期化するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/SkillTree/SkillTreeInitializer")]
     public sealed class SkillTreeInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -493,7 +495,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _researchPoint,
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
-            _skillTreeService = new SkillTreeService(_skillNodeEntities, _clearedStageIds);
+            // 体験版などで解放を禁止するノードがある場合だけ、判定が登録されている。
+            ServiceLocator.TryGetInstance(out ISkillNodeLockPolicy skillNodeLockPolicy);
+            _skillTreeService = new SkillTreeService(_skillNodeEntities, skillNodeLockPolicy, _clearedStageIds);
             if (_skillTreeService.AreAllNodesUnlocked())
             {
                 SetAllNodesUnlockedPhasesVisible();
@@ -518,6 +522,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 GetBaseCriticalDamageMultiplier(),
                 GetBaseAreaAttackRange());
             _playerStatusPresenter.Push();
+            UiCommonTextProvider uiTextProvider = new UiCommonTextProvider();
             _skillTreeController = new SkillTreeController(
                 _skillDetailScreenView,
                 _skillDetailPresenter,
@@ -536,7 +541,8 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 skillTreeEntity,
                 () => _outGameUIEvent.OnOwnedSkillChanged?.Invoke(),
                 _loadedSkillRepository,
-                new SkillDisplayTextFormatter(new SkillEffectDescriptionFormatter()),
+                new SkillDisplayTextFormatter(
+                    new SkillEffectDescriptionFormatter(uiTextProvider), textProvider: uiTextProvider),
                 _skillGenreIcons,
                 _skillBeatColors,
                 _skillTreeScreenView.SetPoints,

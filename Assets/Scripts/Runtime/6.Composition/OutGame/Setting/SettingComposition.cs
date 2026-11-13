@@ -14,6 +14,7 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
     /// <summary>
     ///     設定画面を初期化するモジュールです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Setting/SettingComposition")]
     public sealed class SettingComposition : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

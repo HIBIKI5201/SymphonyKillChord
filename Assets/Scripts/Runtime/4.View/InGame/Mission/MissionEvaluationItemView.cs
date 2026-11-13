@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Mission
     /// <summary>
     ///     ミッションの評価項目を表示するビュークラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Mission/MissionEvaluationItemView")]
     public class MissionEvaluationItemView : MonoBehaviour
     {
         /// <summary>

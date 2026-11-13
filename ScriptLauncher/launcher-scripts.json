@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "scripts": [
+    {
+      "id": "setup",
+      "name": "プロジェクトの初期化",
+      "category": "初期化",
+      "windows": "Setup.bat",
+      "mac": "Setup.command",
+      "description": "クローンしたあとに1回動かす。サブモジュールの取得・git の設定・Unity と Android Build Support の確認をし、直せるものは確認してから直す。",
+      "mode": "console",
+      "presets": [
+        { "label": "初期化する", "args": [] },
+        { "label": "確認だけ（何も変えない）", "args": ["-Check"], "mode": "capture" }
+      ]
+    },
+    {
+      "id": "clean-branches",
+      "name": "マージ済みのブランチを消す",
+      "category": "Git",
+      "windows": "Clean-Branches.bat",
+      "mac": "Clean-Branches.command",
+      "description": "origin/develop に取り込み済みのローカルブランチを消す。消す前に一覧を出して確認する。",
+      "mode": "console",
+      "presets": [
+        { "label": "消す（確認あり）", "args": [] },
+        { "label": "候補を見るだけ", "args": ["--dry-run"], "mode": "capture" }
+      ]
+    },
+    {
+      "id": "install-app",
+      "name": "Android 端末へアプリを入れる",
+      "category": "Android",
+      "windows": "Builds/Install_App.ps1",
+      "localOnly": true,
+      "description": "ビルドしたアプリを、USB でつないだ Android 端末へ入れる。Builds フォルダは git の管理外なので、この PC に置いてあるときだけ使える。",
+      "confirm": "端末のアプリと署名が合わないときは、アプリを自動でアンインストールしてから入れ直します。そのときアプリのデータ（セーブデータなど）は消えます。\n\n続けますか？",
+      "mode": "console"
+    },
+    {
+      "id": "runner-menu",
+      "name": "ビルドランナーの管理",
+      "category": "ビルドランナー",
+      "windows": "BuildRunner/runner-menu.bat",
+      "mac": "BuildRunner/runner-menu.command",
+      "description": "セルフホストランナーの状態・CPU 割合・実行履歴・ログを見る。",
+      "mode": "console",
+      "presets": [
+        { "label": "メニューを開く", "args": [] },
+        { "label": "状態を見る", "args": ["status"], "mode": "capture" }
+      ]
+    },
+    {
+      "id": "start-runner",
+      "name": "ビルドランナーを起動する",
+      "category": "ビルドランナー",
+      "windows": "BuildRunner/start-runner.bat",
+      "mac": "BuildRunner/start-runner.command",
+      "description": "起動前の確認のあと、開いたウィンドウがそのままランナーになる。ビルド中はそのウィンドウを閉じたり Ctrl+C を押したりしない。管理者では動かさない（ジョブが管理者の権限で動いてしまうため）。",
+      "mode": "console"
+    },
+    {
+      "id": "homepage-dev",
+      "name": "ホームページをプレビューする",
+      "category": "ホームページ",
+      "windows": "HomePage/dev.bat",
+      "mac": "HomePage/dev.command",
+      "description": "ホームページをローカルで動かしてブラウザで確認する。止めるときは開いたウィンドウで Ctrl+C。",
+      "mode": "console"
+    }
+  ],
+  "ignored": [
+  ]
+}

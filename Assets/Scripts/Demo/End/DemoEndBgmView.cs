@@ -10,6 +10,7 @@ namespace KillChord.Demo.End
     /// <summary>
     ///     体験版終了演出のBGM再生とフェードアウトを行うViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/Demo/End/DemoEndBgmView")]
     public sealed class DemoEndBgmView : MonoBehaviour
     {
         /// <summary>

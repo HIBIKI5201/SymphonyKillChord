@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Mission
     /// <summary>
     ///     ミッションの定期更新を処理するビュークラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Mission/MissionLoopView")]
     public class MissionLoopView : MonoBehaviour, IGameplayControllable
     {
         /// <summary>

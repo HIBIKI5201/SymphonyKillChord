@@ -8,8 +8,8 @@ using System.Text;
 namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
 {
     /// <summary>
-    ///     仕様書ミラーの目録（_catalog.jsonl）から、ページ本文に無い属性を補う。
-    ///     仕様書の窓口（scripts/notion/spec_query.py）と同じ目録を読み、所属DB・実装状態の解釈を揃える（#2396）。
+    ///     プロジェクト ドキュメントのミラーの目録（_catalog.jsonl）から、ページ本文に無い属性を補う。
+    ///     プロジェクト ドキュメントの窓口（scripts/notion/spec_query.py）と同じ目録を読み、所属DB・実装状態の解釈を揃える（#2396）。
     /// </summary>
     internal sealed class SpecCatalog
     {
@@ -23,7 +23,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         }
 
         /// <summary>
-        ///     仕様書ルートの目録を読む。目録が無い版では何も補わない。
+        ///     プロジェクト ドキュメントのルートの目録を読む。目録が無い版では何も補わない。
         /// </summary>
         internal static SpecCatalog Load(string specificationRootPath)
         {
@@ -63,7 +63,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         /// <summary>
         ///     ページ自身のプロパティ表に無い値だけを、目録の値で補う。
         /// </summary>
-        /// <param name="relativePath">仕様書ルートからの相対パス（区切りは / ）。</param>
+        /// <param name="relativePath">プロジェクト ドキュメントのルートからの相対パス（区切りは / ）。</param>
         /// <param name="metadata">ページ本文から読んだ属性。</param>
         internal SpecPageMetadata Complete(string relativePath, SpecPageMetadata metadata)
         {

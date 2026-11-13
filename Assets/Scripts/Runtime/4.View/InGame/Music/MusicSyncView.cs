@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Music
     ///     音楽との同期タイミングを管理するViewクラス。
     /// </summary>
     [DefaultExecutionOrder(-900)]
+    [AddComponentMenu("KillChord/View/Music/MusicSyncView")]
     public class MusicSyncView : MonoBehaviour
     {
         /// <summary> 音楽同期状態。 </summary>
@@ -73,7 +74,12 @@ namespace KillChord.Runtime.View.InGame.Music
                 || _musicSyncState == null
                 || _musicSyncController == null
                 || _musicSyncState.Bpm <= 0
-                || _musicSyncState.BeatLength <= 0) return;
+                || _musicSyncState.BeatLength <= 0)
+            {
+                // 同期を進められない間にカウントダウンが止まったままにならないよう、停止を取り消す。
+                _musicSyncController?.CancelResumeHold();
+                return;
+            }
 
             double playbackTime = _musicPlayer.Time;
             if (playbackTime < 0d)
@@ -82,7 +88,7 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            _musicSyncController.Tick(playbackTime);
+            _musicSyncController.Tick(playbackTime, Time.unscaledDeltaTime);
         }
 
         /// <summary>

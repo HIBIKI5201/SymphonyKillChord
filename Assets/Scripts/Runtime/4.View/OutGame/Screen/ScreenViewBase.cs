@@ -31,6 +31,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RootElement.RegisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
         }
 
+        /// <summary> フェードインを終えて、操作を受け付けられる状態になったときに発火します。 </summary>
+        public event Action OnShowCompleted;
+
+        /// <summary> チュートリアルのオーバーレイを配置する、OutGame全体のルート要素を取得します。 </summary>
+        public VisualElement OutGameRootElement => RootElement.panel?.visualTree ?? RootElement.parent;
+
         /// <summary> この画面内で現在フォーカスされている要素を取得します。 </summary>
         public VisualElement FocusedElement
         {
@@ -135,6 +141,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RootElement.UnregisterCallback<FocusOutEvent>(HandleFocusOutDebugHandler);
             RootElement.UnregisterCallback<NavigationMoveEvent>(HandleNavigationMoveDebugHandler, TrickleDown.TrickleDown);
             RootElement.UnregisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
+        }
+
+        /// <summary>
+        ///     チュートリアルのハイライト対象要素を名前で検索します。
+        /// </summary>
+        /// <param name="elementName"> 検索する要素の名前です。 </param>
+        /// <returns> 見つかった要素。見つからない場合はnullです。 </returns>
+        public VisualElement FindTutorialTarget(string elementName)
+        {
+            return RootElement.Q<VisualElement>(elementName);
         }
 
         /// <summary>
@@ -272,6 +288,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _isShowCompleted = true;
             RemoveBrocker();
             RestoreFocus();
+            OnShowCompleted?.Invoke();
         }
 
         /// <summary>

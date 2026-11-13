@@ -1,3 +1,6 @@
 # シェルスクリプトは bash が CRLF を読めないため、どの OS でチェックアウトしても LF にする。
 *.sh text eol=lf
 *.command text eol=lf
+
+# 実行ファイルは改行を変換しない。
+*.exe binary

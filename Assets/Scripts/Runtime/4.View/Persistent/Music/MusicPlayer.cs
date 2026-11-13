@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.Persistent.Music
     ///     音楽再生の実装を行うViewクラス。
     /// </summary>
     [RequireComponent(typeof(CriAtomSource)), DefaultExecutionOrder(-1000)]
+    [AddComponentMenu("KillChord/View/Music/MusicPlayer")]
     public class MusicPlayer : MonoBehaviour, IVolumeManager, IBgmCuePlayer, IBgmSelectorPlayer
     {
         /// <summary> 音楽用ビューモデル。 </summary>

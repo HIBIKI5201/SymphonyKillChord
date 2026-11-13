@@ -85,8 +85,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+## アセットストアの素材
+
+製品データから参照している Unity Asset Store の素材。どれも Standard Unity Asset Store EULA で、クレジット表記は必須ではないが、ゲーム内の「使用アセット」タブに載せる。権利者が分からないものは「Unity Asset Store」としている。
+
+| 素材 | 権利者 | 使っている場所 |
+| --- | --- | --- |
+| Soldier-AAA-Pack.vol2 | stasdzuba18 | 敵兵のモデル・素材（`AssetStoreTools/Soldiers-Pack`） |
+| Low Poly Weapon Series 4 - WWII 1 | CASTLE BRAVO | 敵兵の銃（`AssetStoreTools/WeaponsAsset/WWII_*`） |
+| Human Soldier Animations FREE | Kevin Iglesias | 敵のアニメーション、体験版の終了ムービー |
+| Rapier Anim Set | Unity Asset Store | 敵のアニメーション |
+| Platform Animation | Shinabro | プレイヤーのアニメーション（`AssetStoreTools/AKITO`） |
+| 50 Female Animations | Unity Asset Store | アウトゲームのループ演出 |
+| Free Sample Animation Set | VanillaLoopStudio | プレイヤーの Animator |
+| War FX | Jean Moreno (JMO) | 発砲エフェクト |
+| 52 Special Effects Pack | Unity Asset Store | 被弾エフェクト（改造品の `AssetStoreTools/Unknowns/Effect` を含む） |
+| Farming Game FX - Mission | Unity Asset Store | 走る・歩く時の砂煙 |
+| Free Fire VFX - URP | Vefects | 炎 |
+| Free Quick Effects Vol. 1 | Gabriel Aguiar Prod. | 走る時のスピード線 |
+| Hits Effects FREE / Status and Auras FREE | Matthew Guz | スキルエフェクト |
+| Hit Impact Effects | Travis Game Assets | スキルエフェクト |
+| Unity Particle Pack | Unity Technologies | スキルエフェクト |
+| Bullets Pack | DuNguyn | 薬莢 |
+| 8K Skybox Pack Free | BG Studio | Stage_01 の空（`AssetStoreTools/Unknowns/Skyboxes`） |
+| GamePad and Keyboard Input Sprites for TextMesh Pro | Unity Asset Store | 操作ガイドのボタン画像 |
+
 ## 載せていないもの
 
-- エディタでだけ使うもの（Google.Apis、System.CodeDom、System.Management、NuGetForUnity、unity-cli-loop、CopyComponentsByRegex、graph-visualizer など）は実行ファイルに含まれないため載せていない
+- エディタでだけ使うもの（Google.Apis、System.CodeDom、System.Management、NuGetForUnity、unity-cli-loop、CopyComponentsByRegex、graph-visualizer、Markdig など）は実行ファイルに含まれないため載せていない。Markdig（BSD-2-Clause、仕様書ビューアが使う）のライセンス全文は `Assets/Editor/Plugins/Markdig/LICENSE.txt` に置いている
+- ゲームの外で使う開発ツールのスクリプト管理ツール（`ScriptLauncher.exe`）は、JSON の読み込みに nlohmann/json（MIT License、Copyright (c) 2013-2022 Niels Lohmann）を使う。全文は `ScriptLauncher/third_party/nlohmann/LICENSE.MIT`
 - Unity 公式パッケージは Unity の利用規約に従う
-- アセットストア・外部の素材は、出所と表記義務の確認が済んでから載せる（#1970）
+- `ShaderGraph_Dissolve`（スキルエフェクトのディゾルブ）は入手元を特定できていないため、まだ載せていない
+- 自作の素材（プレイヤーの武器、Soldier14、`AssetStoreTools/WIP` の UI 画像）は載せない

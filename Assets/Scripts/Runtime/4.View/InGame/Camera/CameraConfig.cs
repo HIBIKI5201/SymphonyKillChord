@@ -32,6 +32,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary> ロックオン時の最大回転速度へ到達する角度差。 </summary>
         public float LockOnRotationSpeedAngleRange => _lockOnRotationSpeedAngleRange;
 
+        /// <summary> ロックオンによるカメラ回転（ボーン・注視点）の速度に掛ける倍率。 </summary>
+        public float LockOnRotationSpeedScale => _lockOnRotationSpeedScale;
+
+        /// <summary> ロックオン中の視点入力で、ロックオンによるカメラ回転を止めるしきい値。 </summary>
+        public float LockOnLookInputCancelThreshold => _lockOnLookInputCancelThreshold;
+
+        /// <summary> 視点入力が止まってから、ロックオンによるカメラ回転を再開するまでの秒数。 </summary>
+        public float LockOnLookInputResumeDelay => _lockOnLookInputResumeDelay;
+
         /// <summary> ロックオン時の角度許容範囲。 </summary>
         public float LockOnAngleMargin => _lockOnAngleMargin;
 
@@ -64,6 +73,9 @@ namespace KillChord.Runtime.View.InGame.Camera
 
         /// <summary> 画面外の敵へ自動ロックオンした直後に視野外解除を猶予する秒数。 </summary>
         public float AutoLockOnViewportGraceDuration => _autoLockOnViewportGraceDuration;
+
+        /// <summary> 視野外の敵へオートロックオンした直後、カメラが向き終わるまで視野外解除を猶予する最大秒数。 </summary>
+        public float AutoLockOnOutOfViewGraceDuration => _autoLockOnOutOfViewGraceDuration;
 
         /// <summary> 衝突判定半径。 </summary>
         public float CollisionRadius => _collisionRadius;
@@ -101,6 +113,15 @@ namespace KillChord.Runtime.View.InGame.Camera
         [SerializeField] private float _lockOnRotationMinSpeed = 0.35f;
         [Tooltip("ロックオン時の最大回転速度へ到達する角度差")]
         [SerializeField] private float _lockOnRotationSpeedAngleRange = 60f;
+        [Tooltip("ロックオンによるカメラ回転（ボーン・注視点）の速度に掛ける倍率。0.7で約30%遅くなる")]
+        [Min(0f)]
+        [SerializeField] private float _lockOnRotationSpeedScale = 0.7f;
+        [Tooltip("ロックオン中、この大きさ以上の視点入力があればロックオンによるカメラ回転を止めて視点入力で回す")]
+        [Min(0f)]
+        [SerializeField] private float _lockOnLookInputCancelThreshold = 0.01f;
+        [Tooltip("視点入力が止まってから、ロックオンによるカメラ回転を再開するまでの秒数")]
+        [Min(0f)]
+        [SerializeField] private float _lockOnLookInputResumeDelay = 0.2f;
         [Tooltip("ロックオン状態でのカメラとターゲットの角度差の許容範囲")]
         [SerializeField] private float _lockOnAngleMargin = 10f;
         [Tooltip("非ロックオン時のカメラボーンの回転速度")]
@@ -137,6 +158,10 @@ namespace KillChord.Runtime.View.InGame.Camera
         [Min(0f)]
         [SerializeField, Tooltip("画面外の敵へ自動ロックオンした直後に視野外解除を猶予する秒数。")]
         private float _autoLockOnViewportGraceDuration = 0.35f;
+
+        [Min(0f)]
+        [SerializeField, Tooltip("視野外の敵へオートロックオンした直後、カメラが向き終わるまで視野外解除を猶予する最大秒数。対象が視野に入った時点で通常の猶予へ戻す。")]
+        private float _autoLockOnOutOfViewGraceDuration = 1.5f;
 
         [Header("Collision")]
         [Tooltip("カメラの衝突判定に使用する球の半径")]

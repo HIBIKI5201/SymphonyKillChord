@@ -8,6 +8,7 @@ using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.Persistent.Savedata;
+using KillChord.Runtime.InfraStructure.Persistent.Load;
 using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Load;
@@ -26,6 +27,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
     /// <summary>
     ///     シーン遷移機能の初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/SceneManagement/SceneTransitionInitializer")]
     public sealed class SceneTransitionInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -104,10 +106,14 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 return true;
             }
 
-            _loadingScreenController = new LoadingScreenController();
+            _loadingScreenController = new LoadingScreenController(_screenFadeDuration);
 
+            // 遷移ごとの待機時間の設定が無い場合は、全遷移で同じ最低表示時間を使う。
+            ILoadingWaitTimeResolver waitTimeResolver = _loadingWaitTimeSettings != null
+                ? _loadingWaitTimeSettings
+                : new FixedLoadingWaitTimeResolver(_minimumLoadingScreenDisplayTime);
             _loadingOperationExecutor = new LoadingOperationExecutor(
-                _loadingScreenController, _minimumLoadingScreenDisplayTime);
+                _loadingScreenController, waitTimeResolver);
             _sceneTransitionService = new SceneTransitionService();
             _sceneInitializationReadiness = new SceneInitializationReadinessRegistry(
                 _sceneInitializationTimeoutFrameCount);
@@ -234,6 +240,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
 
         private const int DEFAULT_SCENE_INITIALIZATION_TIMEOUT_FRAME_COUNT = 3600;
         private const string RECOVERY_TITLE_SCENE_NAME = "Title";
+        private const float DEFAULT_SCREEN_FADE_DURATION = 0.3f;
 
         [SerializeField, Tooltip("シーン遷移中に表示するロード画面")]
         private LoadingScreenView _loadingScreenView;
@@ -245,8 +252,14 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
         private int _sceneInitializationTimeoutFrameCount =
             DEFAULT_SCENE_INITIALIZATION_TIMEOUT_FRAME_COUNT;
 
-        [SerializeField, Min(0f), Tooltip("ロード画面の最低表示時間")]
+        [SerializeField, Min(0f), Tooltip("ロード画面の最低表示時間。遷移ごとの待機時間の設定が無いときだけ使う")]
         private float _minimumLoadingScreenDisplayTime = 0.8f;
+
+        [SerializeField, Tooltip("遷移元と遷移先の組み合わせごとのロード画面の最低表示時間の設定")]
+        private LoadingWaitTimeSettings _loadingWaitTimeSettings;
+
+        [SerializeField, Min(0f), Tooltip("ロード画面の前後で画面を暗転させる時間（秒）")]
+        private float _screenFadeDuration = DEFAULT_SCREEN_FADE_DURATION;
 
         private OutGameInitializationFailureView _recoveryView;
         private string _recoveryInGameSceneName;

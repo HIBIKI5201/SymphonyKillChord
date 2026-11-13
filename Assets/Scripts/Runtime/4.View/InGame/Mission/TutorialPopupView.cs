@@ -14,6 +14,7 @@ namespace KillChord.Runtime.View.InGame.Mission
     ///         閉じる案内は、閉じる入力と現在の入力機器に合わせてアイコンを切り替えます。
     ///     </para>
     /// </summary>
+    [AddComponentMenu("KillChord/View/Mission/TutorialPopupView")]
     public sealed class TutorialPopupView : MonoBehaviour
     {
         /// <summary>

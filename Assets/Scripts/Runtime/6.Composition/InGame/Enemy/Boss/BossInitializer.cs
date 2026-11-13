@@ -19,6 +19,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     ///     BossLifeCycle を Initialize → Activate → StartGameplay する。
     ///     ※テスト専用。本番では通常敵と同様にスポナー/ブートストラップへ統合する想定。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/BossInitializer")]
     public class BossInitializer : MonoBehaviour
     {
         /// <summary>

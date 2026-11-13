@@ -19,6 +19,7 @@ namespace KillChord.DebugWorld.Hub
     /// <summary>
     ///     裏世界のハブシーンを初期化し、ハブ画面とシーン遷移をつなぐクラスです。
     /// </summary>
+    [AddComponentMenu("KillChord/Debug/Hub/DebugHubInitializer")]
     public sealed class DebugHubInitializer : MonoBehaviour
     {
         [SerializeField, Tooltip("ハブ画面を表示するUIDocument。")]

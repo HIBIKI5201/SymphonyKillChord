@@ -57,6 +57,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         }
 
         /// <summary>
+        ///     クールダウンやUI表示に使う、ゲーム側の現在時刻を取得します。
+        /// </summary>
+        /// <returns> 現在時刻（秒）です。 </returns>
+        public float GetCurrentTime()
+        {
+            return _getUnscaledTime();
+        }
+
+        /// <summary>
         ///     指定された行動と入力でスキルの発動判定を行い、発動した場合は実行する。
         /// </summary>
         /// <param name="actionType"> 行動種別です。 </param>

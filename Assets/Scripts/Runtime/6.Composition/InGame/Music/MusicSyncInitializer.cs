@@ -23,6 +23,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
     /// <summary>
     ///     音楽同期機能の初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Music/MusicSyncInitializer")]
     public class MusicSyncInitializer : InGameInitializationModuleBase, IGameplayControllable
     {
         /// <summary> モジュール名です。 </summary>

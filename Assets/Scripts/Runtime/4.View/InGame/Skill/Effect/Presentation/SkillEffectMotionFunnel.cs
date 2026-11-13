@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View
     /// <summary>
     ///     エフェクトを螺旋状に回しながら到達点へ移動させるスキル演出。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillEffectMotionFunnel")]
     public class SkillEffectMotionFunnel : MotionSkillEffectPresentationBase
     {
         [SerializeField, Tooltip("到達点の高さです。エフェクト原点からのローカル値で固定されます。")]

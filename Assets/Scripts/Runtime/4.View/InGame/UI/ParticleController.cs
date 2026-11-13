@@ -5,6 +5,7 @@ namespace KillChord.Runtime.View.InGame.UI
     /// <summary>
     ///     パーティクルエフェクトの再生を担当するコンポーネント。
     /// </summary>
+    [AddComponentMenu("KillChord/View/UI/ParticleController")]
     public class ParticleController : MonoBehaviour
     {
         #region インスペクター表示フィールド

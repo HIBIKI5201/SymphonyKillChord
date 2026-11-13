@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     ///     敵方向表示の生成とTarget、Player、Cameraへの依存解決を行う。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/EnemyDirectionIndicatorInitializer")]
     public sealed class EnemyDirectionIndicatorInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名。 </summary>

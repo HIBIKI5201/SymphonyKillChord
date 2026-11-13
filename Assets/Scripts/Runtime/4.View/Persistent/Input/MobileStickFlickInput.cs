@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.Persistent.Input
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(RectTransform), typeof(OnScreenStick))]
+    [AddComponentMenu("KillChord/View/Input/MobileStickFlickInput")]
     public sealed class MobileStickFlickInput : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
     {
         /// <summary>

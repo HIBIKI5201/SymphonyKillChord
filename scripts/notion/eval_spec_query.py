@@ -1,4 +1,4 @@
-"""仕様書の窓口（spec_query の search / get）と、現行のMarkdown全文検索を評価セットで比べる（#2396 段階3）。
+"""プロジェクト ドキュメントの窓口（spec_query の search / get）と、現行のMarkdown全文検索を評価セットで比べる（#2396 段階3）。
 
 測るもの（質問ごとに数え、全体を平均する）:
   再現率   上位1件・上位5件に、正解ページのどれかが入った割合
@@ -92,8 +92,8 @@ def summarize(results, key):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="仕様書の窓口と全文検索を評価セットで比べる。")
-    parser.add_argument("--source", type=Path, default=Path("Docs/NotionSpecifications"), help="仕様書ミラーのルート")
+    parser = argparse.ArgumentParser(description="プロジェクト ドキュメントの窓口と全文検索を評価セットで比べる。")
+    parser.add_argument("--source", type=Path, default=Path("Docs/NotionSpecifications"), help="プロジェクト ドキュメントのミラーのルート")
     parser.add_argument("--set", type=Path, default=DEFAULT_SET, help="評価セットのJSON")
     parser.add_argument("--json", action="store_true", help="結果をJSONで出す")
     args = parser.parse_args(argv)

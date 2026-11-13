@@ -11,6 +11,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     ///     ロックオン中の敵HP HUDに関するクラスの生成と依存関係の解決を行う初期化クラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/HUDEnemyHealthInitializer")]
     public sealed class HUDEnemyHealthInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

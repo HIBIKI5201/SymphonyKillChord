@@ -1,5 +1,5 @@
 {
-  "description": "仕様書の窓口（spec_query）と現行のMarkdown検索を比べる評価セット（#2396 段階3）。question は人が聞く形、keywords はエージェントが最初に検索する語、expected はどれか1つが上位に来れば正解とするページID。",
+  "description": "プロジェクト ドキュメントの窓口（spec_query）と現行のMarkdown検索を比べる評価セット（#2396 段階3）。question は人が聞く形、keywords はエージェントが最初に検索する語、expected はどれか1つが上位に来れば正解とするページID。",
   "baseline_tag": "spec-overview-db-2026-10-20",
   "items": [
     {"id": "q01", "question": "回避の入力受付と無敵時間はどう決まっている？", "keywords": ["回避"], "expected": ["33a7c2c6cc028053a4fbf138ffac7b74"]},

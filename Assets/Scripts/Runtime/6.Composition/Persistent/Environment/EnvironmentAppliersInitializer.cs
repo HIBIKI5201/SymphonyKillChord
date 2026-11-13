@@ -8,6 +8,7 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
     /// <summary>
     ///     解像度・画質・明るさ・表示言語をデバイスへ適用するAdaptorの初期化をする。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Environment/EnvironmentAppliersInitializer")]
     public sealed class EnvironmentAppliersInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

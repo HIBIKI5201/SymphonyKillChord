@@ -635,6 +635,74 @@ MonoBehaviour:
     m_Key: ui.setting.cancel_reset_to_defaults
     m_Metadata:
       m_Items: []
+  - m_Id: 2096000000
+    m_Key: ui.skill.combo_label_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000001
+    m_Key: ui.skill.type_attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000002
+    m_Key: ui.skill.type_buff
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000003
+    m_Key: ui.skill.type_debuff
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000004
+    m_Key: ui.skill.value_multiplier_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000005
+    m_Key: ui.skill.value_count_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000006
+    m_Key: ui.skill.value_seconds_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000007
+    m_Key: ui.skill.value_grown_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000008
+    m_Key: ui.mission.progress_count_format
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100001
+    m_Key: ui.screen_guide.skill_tree.points
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100002
+    m_Key: ui.screen_guide.skill_tree.first_node
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100003
+    m_Key: ui.screen_guide.skill_tree.next
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100004
+    m_Key: ui.screen_guide.skill_build.formation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100005
+    m_Key: ui.screen_guide.skill_build.list
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100006
+    m_Key: ui.screen_guide.skill_build.save
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100007
+    m_Key: ui.screen_guide.stage_select.unlock
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100008
+    m_Key: ui.screen_guide.stage_select.reward
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     /// <summary>
     ///     連撃スキルのヒット適用を定期更新するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillHitLoopView")]
     public sealed class SkillHitLoopView : MonoBehaviour, IGameplayControllable
     {
         /// <summary>

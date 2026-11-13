@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     ///     Rendererのマテリアルfloatプロパティを補間するLitMotion演出のストラテジー。
     ///     Dissolveによる実体化や消滅の表現に使用する。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/MaterialFloatMotionSkillEffectPresentation")]
     public sealed class MaterialFloatMotionSkillEffectPresentation : MotionSkillEffectPresentationBase
     {
         [SerializeField, Tooltip("対象のRenderer一覧です。未設定時は自身の子階層から取得します。")]

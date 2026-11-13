@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Composition.OutGame.Audio
     /// <summary>
     ///     SceneのUIDocumentへUI操作音のイベント監視を接続する。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Audio/OutGameUISoundEffectInitializer")]
     public sealed class OutGameUISoundEffectInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名。 </summary>

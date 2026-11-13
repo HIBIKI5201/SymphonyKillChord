@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.Persistent.SceneManagement
     /// <summary>
     ///     デバッグ用のボタンなどにつけるシーン遷移のView。
     /// </summary>
+    [AddComponentMenu("KillChord/View/SceneManagement/SceneTransitionView")]
     public class SceneTransitionView : MonoBehaviour
     {
         /// <summary>

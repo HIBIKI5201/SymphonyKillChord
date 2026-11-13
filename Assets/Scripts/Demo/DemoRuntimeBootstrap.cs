@@ -4,6 +4,7 @@ using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.OutGame.Screen;
+using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
@@ -28,6 +29,7 @@ namespace KillChord.Demo
     /// <summary>
     ///     体験版セッションを常駐させ、二つのタイマーと専用終了遷移を制御します。
     /// </summary>
+    [AddComponentMenu("KillChord/Demo/Common/DemoRuntimeBootstrap")]
     public sealed class DemoRuntimeBootstrap : MonoBehaviour
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -139,6 +141,7 @@ namespace KillChord.Demo
                 }
                 _exitPolicy = new DemoStageResultExitPolicy(_sessionState, _config);
                 _isExitPolicyOwner = ServiceLocator.RegisterInstance<IStageResultExitPolicy>(_exitPolicy);
+                RegisterSkillNodeLockPolicy();
                 SceneManager.sceneLoaded += HandleSceneLoaded;
                 _isSceneLoadedSubscribed = true;
                 HandleSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
@@ -243,6 +246,13 @@ namespace KillChord.Demo
                 && ReferenceEquals(registeredPolicy, _exitPolicy))
             {
                 ServiceLocator.UnregisterInstance<IStageResultExitPolicy>();
+            }
+
+            if (_isSkillNodeLockPolicyOwner
+                && ServiceLocator.TryGetInstance(out ISkillNodeLockPolicy registeredLockPolicy)
+                && ReferenceEquals(registeredLockPolicy, _skillNodeLockPolicy))
+            {
+                ServiceLocator.UnregisterInstance<ISkillNodeLockPolicy>();
             }
 
             if (_isSessionOwner
@@ -743,6 +753,30 @@ namespace KillChord.Demo
         }
 
         /// <summary>
+        ///     体験版設定で指定したスキルノードを解放させない判定を登録します。
+        ///     指定が無い場合は登録せず、製品版と同じく全ノードを解放できます。
+        /// </summary>
+        private void RegisterSkillNodeLockPolicy()
+        {
+            DemoSkillNodeLockPolicy lockPolicy =
+                new DemoSkillNodeLockPolicy(_config.GetLockedSkillNodeIdValues());
+            if (!lockPolicy.HasLockedNodes)
+            {
+                return;
+            }
+
+            _skillNodeLockPolicy = lockPolicy;
+            _isSkillNodeLockPolicyOwner =
+                ServiceLocator.RegisterInstance<ISkillNodeLockPolicy>(_skillNodeLockPolicy);
+            if (!_isSkillNodeLockPolicyOwner)
+            {
+                Debug.LogError(
+                    $"[{nameof(DemoRuntimeBootstrap)}] {nameof(ISkillNodeLockPolicy)} を登録できませんでした。",
+                    this);
+            }
+        }
+
+        /// <summary>
         ///     OutGameサービスの構築後にHomeチュートリアル開始通知を購読します。
         /// </summary>
         /// <param name="isOutGameActive"> OutGame内にいる場合はtrueです。 </param>
@@ -770,7 +804,12 @@ namespace KillChord.Demo
             _isOutGameUiEventSubscribed = true;
         }
 
+#if KILLCHORD_DEMO_EXHIBITION
+        // 展示版はタイマーとデータリセットを有効にした設定を読む。
+        private const string CONFIG_ADDRESS = "DemoExperienceConfig_Exhibition";
+#else
         private const string CONFIG_ADDRESS = nameof(DemoExperienceConfig);
+#endif
         private const string PREFAB_ADDRESS = "DemoRuntime";
 
         private readonly DemoSessionState _sessionState = new();
@@ -779,8 +818,10 @@ namespace KillChord.Demo
 
         private DemoExperienceConfig _config;
         private DemoStageResultExitPolicy _exitPolicy;
+        private DemoSkillNodeLockPolicy _skillNodeLockPolicy;
         private OutGameUIEvent _outGameUIEvent;
         private bool _isExitPolicyOwner;
+        private bool _isSkillNodeLockPolicyOwner;
         private bool _isSessionOwner;
         private bool _isSceneLoadedSubscribed;
         private bool _isOutGameUiEventSubscribed;

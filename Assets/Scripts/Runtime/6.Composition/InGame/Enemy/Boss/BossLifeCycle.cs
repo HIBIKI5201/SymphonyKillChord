@@ -38,6 +38,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     ///     View / Facade / AIController は Boss 専用型を使う。
     ///     複数攻撃パターンを保持し、攻撃ごとに専用 BattleState + Controller を持つ。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/BossLifeCycle")]
     public class BossLifeCycle : MonoBehaviour, IGameplayControllable
     {
         /// <summary> ボスが撃破されたときに呼ばれます。 </summary>

@@ -35,7 +35,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         {
             if (!Directory.Exists(_specificationRootPath))
             {
-                throw new DirectoryNotFoundException($"仕様書キャッシュが見つかりません: {_specificationRootPath}");
+                throw new DirectoryNotFoundException($"プロジェクト ドキュメントのキャッシュが見つかりません: {_specificationRootPath}");
             }
             EnumerationOptions options = new()
             {

@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     ///     ステージシーケンスにおけるVoice再生を管理するView。
     ///     Playerが動的に生成されるため、Bindingsでの参照ができないため、StageSequenceViewからPlayerViewを受け取る形でVoice再生を行う。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Sequence/StageSequenceVoiceView")]
     public class StageSequenceVoiceView : MonoBehaviour
     {
         /// <summary>

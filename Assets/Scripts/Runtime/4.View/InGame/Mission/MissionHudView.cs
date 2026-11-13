@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.InGame.Mission
     /// <summary>
     ///     ミッションHUDの表示を制御するビュークラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Mission/MissionHudView")]
     public class MissionHudView : MonoBehaviour
     {
         /// <summary>

@@ -20,6 +20,7 @@ using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.Scenario;
 using KillChord.Runtime.Utility.Identity;
+using KillChord.Runtime.View.Persistent.Localization;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Combo;
 using KillChord.Runtime.View.InGame.Mission;
@@ -39,6 +40,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
     /// <summary>
     ///     インゲームにおけるミッションシステムの初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Mission/InGameMissionInitializer")]
     public class InGameMissionInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -290,7 +292,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
             MissionHudPresenter missionHudPresenter = new MissionHudPresenter(
                 missionRuntimeService,
-                missionHudViewModel);
+                missionHudViewModel,
+                new UiCommonTextProvider());
 
             MissionEventController missionEventController = new MissionEventController(
                 missionRuntimeService,

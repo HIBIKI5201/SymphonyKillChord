@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     敵の生成位置を探索するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/EnemySpawnPositionSearcher")]
     public class EnemySpawnPositionSearcher : MonoBehaviour
     {
         /// <summary>

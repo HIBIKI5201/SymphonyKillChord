@@ -1,5 +1,6 @@
 """Validate the repository's lightweight agent entrypoints without external dependencies."""
 from pathlib import Path
+import json
 import re
 import sys
 import unicodedata
@@ -12,14 +13,24 @@ LIMITS = {
     ".agents/skills/skc-feature-flow/SKILL.md": 1400,
     ".claude/skills/skc-feature-flow/SKILL.md": 500,
     ".claude/skills/skc-code-guideline-check/SKILL.md": 2000,
+    "Docs/agent/README.md": 4500,
 }
+# Skill descriptions stay in every session's listing; bodies load only when used.
+# Skills the Unity CLI installs (`unity skill install --local`) are not edited here.
+DESCRIPTION_LIMIT = 300
+DESCRIPTION_DIRS = [".claude/skills", ".agents/skills", ".codex/skills"]
+VENDOR_PREFIXES = ("unity-", "new-unity-project")
 LINKED = [
     "AGENTS.md", "Assets/Scripts/DesignPhilosophy.md",
     "Assets/Scripts/CodeGuidelines.md",
     "Assets/Scripts/DesignClassRoles.md", "Assets/Scripts/DesignExamples.md",
     ".claude/skills/skc-feature-flow/SKILL.md",
     ".claude/skills/skc-code-guideline-check/SKILL.md",
+    "Docs/agent/README.md", "Docs/agent/index.md",
 ]
+
+NOTION_MAP = "SinfoniaOperator/notion-cache-map.json"
+UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 
 
 def heading_anchor(heading):
@@ -63,6 +74,8 @@ def validate(root):
                                       destination.read_text(encoding="utf-8-sig"), re.M)
                 if fragment not in {heading_anchor(h) for h in headings}:
                     errors.append(f"broken heading link: {path.relative_to(root)} -> {target}#{fragment}")
+    errors.extend(validate_notion_map(root))
+    errors.extend(validate_descriptions(root, metrics))
     names = {}
     for directory in [".agents/skills", ".codex/skills"]:
         for path in sorted((root / directory).glob("*/SKILL.md")):
@@ -85,10 +98,70 @@ def validate(root):
     return metrics, errors
 
 
+def skill_description(text):
+    """Return the one-line description in a SKILL.md frontmatter, or None."""
+    match = re.match(r"---\n(.*?)\n---", text, re.S)
+    found = match and re.search(r"^description: *([^\n]+)", match.group(1), re.M)
+    if not found:
+        return None
+    value = found.group(1).strip()
+    if value.startswith('"'):
+        try:
+            return json.loads(value)
+        except ValueError:
+            pass
+    return value.strip('"').strip("'")
+
+
+def validate_descriptions(root, metrics):
+    """Keep project skill descriptions short and record the listing size per tool."""
+    errors = []
+    for directory in DESCRIPTION_DIRS:
+        total = 0
+        for path in sorted((root / directory).glob("*/SKILL.md")):
+            description = skill_description(path.read_text(encoding="utf-8-sig"))
+            if description is None:
+                continue
+            total += len(description)
+            if not path.parent.name.startswith(VENDOR_PREFIXES) and len(description) > DESCRIPTION_LIMIT:
+                errors.append(f"description too long: {path.relative_to(root)}: "
+                              f"{len(description)} > {DESCRIPTION_LIMIT} characters")
+        metrics[f"{directory} descriptions (total)"] = total
+    return errors
+
+
+def validate_notion_map(root):
+    """Notionページの参照表で、page idの形・呼び名の重複・readersのファイルにidが書かれているかを確かめる。"""
+    path = root / NOTION_MAP
+    if not path.is_file():
+        return []
+    try:
+        pages = json.loads(path.read_text(encoding="utf-8-sig"))["pages"]
+    except (ValueError, KeyError) as error:
+        return [f"invalid notion map: {NOTION_MAP}: {error}"]
+    errors, seen = [], set()
+    for page in pages:
+        page_id, name = page.get("id", ""), page.get("name", "")
+        if not UUID_RE.fullmatch(page_id) or not name or not page.get("readers"):
+            errors.append(f"invalid notion map entry: {name or page_id}")
+            continue
+        if page_id in seen or name in seen:
+            errors.append(f"duplicate notion map entry: {name}")
+        seen.update((page_id, name))
+        for reader in page["readers"]:
+            reader_path = root / reader
+            if not reader_path.is_file():
+                errors.append(f"missing notion map reader: {name} -> {reader}")
+            elif page_id not in reader_path.read_text(encoding="utf-8-sig"):
+                errors.append(f"notion map reader lacks page id: {name} -> {reader}")
+    return errors
+
+
 def main():
     metrics, errors = validate(ROOT)
     for path, size in metrics.items():
-        print(f"{path}: {size}/{LIMITS[path]} characters")
+        limit = LIMITS.get(path)
+        print(f"{path}: {size}/{limit} characters" if limit else f"{path}: {size} characters")
     for error in errors:
         print(error, file=sys.stderr)
     print(f"Harness check: {len(errors)} error(s)")

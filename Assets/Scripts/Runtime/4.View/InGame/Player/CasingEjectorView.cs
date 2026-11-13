@@ -5,6 +5,7 @@ namespace KillChord.Runtime.View.InGame.Player
     /// <summary>
     ///     銃の発砲に合わせて薬莢モデルを排出するView。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Player/CasingEjectorView")]
     public sealed class CasingEjectorView : MonoBehaviour
     {
         /// <summary>

@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
     ///     シーンに設置したタレットをEntityへ変換します。
     /// </summary>
     /// <remarks> SubSceneへ配置して使用します。 </remarks>
+    [AddComponentMenu("KillChord/View/Stage/TurretAuthoring")]
     public sealed class TurretAuthoring : MonoBehaviour
     {
         [SerializeField, SourceDataCollection(TurretId.COLLECTION_KEY, true),

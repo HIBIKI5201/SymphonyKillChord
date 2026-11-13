@@ -14,6 +14,7 @@ namespace KillChord.Runtime.View.InGame.Music
     /// <summary>
     ///     AC風リズムガイドのビート表示と判定ゾーンを描画するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Music/ACLikeRhythmGuideView")]
     public sealed class ACLikeRhythmGuideView : MonoBehaviour, IGameplayControllable, IRhythmGuideBeatViewModel, IRhythmGuideTargetFeedbackViewModel,
         IRhythmGuideJustHitFeedbackViewModel
     {

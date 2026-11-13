@@ -1,6 +1,6 @@
-"""Notion仕様書ミラーから、LLM・エージェントが最初に読む目録を生成する。
+"""Notionのプロジェクト ドキュメントのミラーから、LLM・エージェントが最初に読む目録を生成する。
 
-仕様書リポジトリ（Docs/NotionSpecifications）の全ページを走査し、次の2ファイルを仕様書の
+仕様書リポジトリ（Docs/NotionSpecifications）の全ページを走査し、次の2ファイルをプロジェクト ドキュメントの
 ルートへ書き出す。どちらもページの内容が変わらなければ同じ出力になる（生成日時を含めない）。
 
   _catalog.md     1ページ1行。タイトル・パス・所属DB・プロパティ・見出しを並べる。rgで当たりを付ける用
@@ -15,6 +15,17 @@
 
 --check は書き込まずに、目録ファイルが今のページから作り直した目録と同じ版かを確かめる（#2396 段階1）。
 目録の生成だけが失敗して古い目録が残った、手でページだけを直した、などのずれを見つける。
+
+--lint は書き込まずに、プロジェクト ドキュメントの書き方の崩れを数える（#2359 P9）。
+  python scripts/notion/build_spec_catalog.py --source Docs/NotionSpecifications --lint [--previous 前回の_catalog.jsonl] [--details]
+  - 切れたリンク: ページ内の相対リンクの先が、目録に無い
+  - 範囲外のメンション: メンションの先が、書き出した範囲に無い（Notion 上で消えたか、範囲の外のページ）
+  - 必須属性の空き: 仕様リストの行で「カテゴリー」「サマリー」が空
+  - 経緯の節の残り: 仕様リスト・システムリストの行に「経緯」「却下・保留した案」の節が残っている
+    （経緯・却下・保留は仕様検討フォーラムの 1 行 1 決定で持つ。ライティング規則 W-09、2026-11-09）
+  - ページの移動・消失: --previous の目録と比べて、同じ page id のパスが変わった・page id が消えた
+ログには件数だけを出す。パスを見るときは --details を付けて手元で実行する（同期のログは公開されるため）。
+--strict を付けると、切れたリンクがあるとき終了コード1にする。
 """
 import argparse
 import json
@@ -49,6 +60,11 @@ MENTION_RE = re.compile(r'<mention-(?:page|database)\s+url="(?P<url>[^"]+)"')
 RELATIVE_LINK_RE = re.compile(r"\]\((?P<target>[^)\s]+\.md)\)")
 ATTRIBUTE_RE = re.compile(r"\s*\{[a-z_]+=\"[^\"]*\"\}\s*$")
 TAG_RE = re.compile(r"<[^>]+>")
+
+# 検査（--lint）で使う値。
+REQUIRED_PROPERTIES = {"仕様リスト": ("カテゴリー", "サマリー")}
+HISTORY_DATABASES = ("仕様リスト", "システムリスト")
+HISTORY_HEADINGS = ("経緯", "却下・保留した案")
 
 
 @dataclass
@@ -196,7 +212,7 @@ def is_catalog_target(relative):
 
 
 def collect(source):
-    """仕様書ルートからページとDB索引を集め、所属DBとリンク先を解決する。"""
+    """プロジェクト ドキュメントのルートからページとDB索引を集め、所属DBとリンク先を解決する。"""
     pages = []
     databases = []
     for file in sorted(source.rglob("*.md"), key=lambda path: path.relative_to(source).as_posix()):
@@ -246,7 +262,7 @@ def resolve_links(pages):
 
 
 def normalize_path(path):
-    """`..` を含む相対パスを仕様書ルートからのパスへ畳む。"""
+    """`..` を含む相対パスをプロジェクト ドキュメントのルートからのパスへ畳む。"""
     parts = []
     for part in path.split("/"):
         if part in ("", "."):
@@ -280,15 +296,15 @@ def escape_inline(text):
 
 
 def build_markdown(pages, databases, resolved):
-    """セクション（仕様書ルート直下の2階層目）ごとに、1ページ1行の目録を作る。"""
+    """セクション（プロジェクト ドキュメントのルート直下の2階層目）ごとに、1ページ1行の目録を作る。"""
     title_by_path = {page.path: page.title for page in pages}
     lines = [
         "<!-- build_spec_catalog.py による自動生成ファイルです。手で編集しないでください。 -->",
-        "# 仕様書目録",
+        "# プロジェクト ドキュメントの目録",
         "",
         f"形式バージョン: {CATALOG_VERSION} / ページ数: {len(pages)} / DB数: {len(databases)}",
         "",
-        "Notion仕様書の全ページを1行ずつ並べた目録です。`rg` でキーワード・プロパティ値を検索して当たりを付け、"
+        "Notionのプロジェクト ドキュメントの全ページを1行ずつ並べた目録です。`rg` でキーワード・プロパティ値を検索して当たりを付け、"
         "該当ページだけを開いて読んでください。",
         "",
         "- 1行の形式: `- [タイトル](<パス>) 〔所属DB〕 プロパティ名: 値 ／ … § 見出し / 見出し`",
@@ -379,20 +395,109 @@ def compare_catalog(source, markdown, jsonl):
     }
 
 
+def history_sections(text):
+    """本文に残っている「経緯」「却下・保留した案」の見出しを返す。コードブロックの中は数えない。"""
+    found = []
+    fence = None
+    for line in text.replace("\r\n", "\n").split("\n"):
+        marker = FENCE_RE.match(line)
+        if marker:
+            mark = marker.group("fence")
+            if fence is None:
+                fence = mark
+            elif mark[0] == fence[0] and len(mark) >= len(fence):
+                fence = None
+            continue
+        heading = None if fence else HEADING_RE.match(line)
+        if heading and clean_text(heading.group("text")) in HISTORY_HEADINGS:
+            found.append(clean_text(heading.group("text")))
+    return found
+
+
+def lint_catalog(source, pages, databases, previous_rows=None):
+    """プロジェクト ドキュメントの書き方の崩れを数え、件数と該当パスを返す（#2359 P9）。"""
+    known_paths = {page.path for page in pages} | {database.path for database in databases}
+    known_ids = {page.page_id for page in pages if page.page_id}
+    found = {"broken_links": [], "outside_mentions": [], "missing_properties": [], "history_sections": [],
+             "moved_pages": [], "removed_pages": []}
+    for page in pages:
+        for kind, value in page.raw_links:
+            if kind == "id":
+                page_id = extract_page_id(value)
+                if page_id and page_id not in known_ids:
+                    found["outside_mentions"].append(page.path)
+                continue
+            if "://" in value or value.startswith("mailto:"):
+                continue
+            target = normalize_path((Path(page.path).parent / urllib.parse.unquote(value)).as_posix())
+            if target not in known_paths:
+                found["broken_links"].append(f"{page.path} -> {target}")
+        for name in REQUIRED_PROPERTIES.get(page.database, ()):
+            if not page.properties.get(name, "").strip():
+                found["missing_properties"].append(f"{page.path} ({name})")
+        if page.database in HISTORY_DATABASES:
+            text = (source / page.path).read_text(encoding="utf-8")
+            for heading in history_sections(text):
+                found["history_sections"].append(f"{page.path} ({heading})")
+    if previous_rows is not None:
+        current = {page.page_id: page.path for page in pages if page.page_id}
+        for row in previous_rows:
+            page_id, path = row.get("page_id", ""), row.get("path", "")
+            if not page_id:
+                continue
+            if page_id not in current:
+                found["removed_pages"].append(path)
+            elif current[page_id] != path:
+                found["moved_pages"].append(f"{path} -> {current[page_id]}")
+    return found
+
+
+LINT_LABELS = {
+    "broken_links": "切れたリンク",
+    "outside_mentions": "範囲外のメンション",
+    "missing_properties": "必須属性の空き",
+    "history_sections": "経緯の節の残り",
+    "moved_pages": "移動したページ",
+    "removed_pages": "消えたページ",
+}
+
+
+def read_jsonl(path):
+    """目録のJSONLを読む。ファイルが無いか空ならNone。"""
+    if not path or not path.is_file():
+        return None
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return rows or None
+
+
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Notion仕様書ミラーの目録を生成する。")
+    parser = argparse.ArgumentParser(description="Notionのプロジェクト ドキュメントのミラーの目録を生成する。")
     parser.add_argument("--source", required=True, type=Path, help="仕様書リポジトリのルート")
     parser.add_argument("--check", action="store_true",
                         help="書き込まず、目録ファイルが今のページと同じ版かを確かめる（ずれていれば終了コード1）")
+    parser.add_argument("--lint", action="store_true", help="書き込まず、プロジェクト ドキュメントの書き方の崩れを数える（#2359 P9）")
+    parser.add_argument("--previous", type=Path, help="--lint で比べる前回の _catalog.jsonl（ページの移動・消失を数える）")
+    parser.add_argument("--details", action="store_true", help="--lint で該当パスも表示する（公開ログでは付けない）")
+    parser.add_argument("--strict", action="store_true", help="--lint で切れたリンクがあれば終了コード1にする")
     args = parser.parse_args(argv)
     source = args.source.resolve()
     if not source.is_dir():
-        print(f"仕様書のディレクトリが見つかりません: {args.source}", file=sys.stderr)
+        print(f"プロジェクト ドキュメントのディレクトリが見つかりません: {args.source}", file=sys.stderr)
         return 1
 
     pages, databases = collect(source)
     resolved = resolve_links(pages)
     markdown, jsonl = build_markdown(pages, databases, resolved), build_jsonl(pages, resolved)
+    if args.lint:
+        found = lint_catalog(source, pages, databases, read_jsonl(args.previous))
+        summary = "、".join(f"{LINT_LABELS[key]} {len(items)} 件" for key, items in found.items()
+                           if args.previous or key not in ("moved_pages", "removed_pages"))
+        print(f"プロジェクト ドキュメントの検査（ページ {len(pages)} 件）: {summary}。")
+        if args.details:
+            for key, items in found.items():
+                for item in items:
+                    print(f"  {LINT_LABELS[key]}: {item}")
+        return 1 if args.strict and found["broken_links"] else 0
     if args.check:
         diff = compare_catalog(source, markdown, jsonl)
         if diff["no_file"]:

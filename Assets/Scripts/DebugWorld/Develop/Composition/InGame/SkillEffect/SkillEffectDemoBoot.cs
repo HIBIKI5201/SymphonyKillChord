@@ -12,6 +12,7 @@ namespace KillChord.Develop.Composition.InGame.SkillEffect
     ///     デモシーン向けに、常駐シーンのフローを介さずインゲーム初期化モジュールを実行するブートクラス。
     ///     ロード画面やステージシーンの読み込みを伴わないため、単体シーンで動作確認ができる。
     /// </summary>
+    [AddComponentMenu("KillChord/Debug/SkillEffect/SkillEffectDemoBoot")]
     public sealed class SkillEffectDemoBoot : MonoBehaviour
     {
         /// <summary> 初期化が完了しているかどうかです。 </summary>

@@ -12,6 +12,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     ///     コマンドの全拍を並べて表示し、入力済みの拍を点灯させる。
     ///     クールダウン中はゲージで進捗を示す。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillListRowView")]
     public sealed class SkillListRowView : MonoBehaviour, ISkillInputProgressRowView
     {
         /// <summary> StepViewを並べる親Transform。 </summary>
@@ -37,6 +38,16 @@ namespace KillChord.Runtime.View.InGame.Skill
             // スキルアイコンは入力進捗によらず不変のため、初期化時に一度だけ適用する。
             ApplySkillIcon(skillIcon);
             SetCooldownFillAmount(1);
+        }
+
+        /// <summary>
+        ///     クールダウン表示に使う現在時刻の取得元を設定する。
+        ///     ポーズ中に止まる戦闘の時計を渡すと、ポーズ中はゲージが進まない。
+        /// </summary>
+        /// <param name="getCurrentTime"> 現在時刻（秒）を返す関数。nullなら実時間を使う。 </param>
+        public void SetTimeProvider(Func<float> getCurrentTime)
+        {
+            _getCurrentTime = getCurrentTime;
         }
 
         /// <summary>
@@ -113,7 +124,7 @@ namespace KillChord.Runtime.View.InGame.Skill
                 return;
             }
 
-            float fillAmount = (Time.unscaledTime - _skillTriggeredTimestamp) / cooldownDuration;
+            float fillAmount = (GetCurrentTime() - _skillTriggeredTimestamp) / cooldownDuration;
             if (fillAmount >= 1)
             {
                 SetCooldownFillAmount(1);
@@ -146,6 +157,7 @@ namespace KillChord.Runtime.View.InGame.Skill
         private bool _isSkillCoolingDown;
         private int _patternMatchCount;
         private float _skillTriggeredTimestamp;
+        private Func<float> _getCurrentTime;
         private float _skillReadyTimestamp;
         private float _stepRootBaseAnchoredPositionX;
 
@@ -263,6 +275,15 @@ namespace KillChord.Runtime.View.InGame.Skill
                     .WithOnComplete(() => _rhythmResetFlareImage.enabled = false)
                     .BindToColorA(_rhythmResetFlareImage);
             _rhythmResetFlareImage.enabled = true;
+        }
+
+        /// <summary>
+        ///     クールダウン表示に使う現在時刻を取得する。
+        /// </summary>
+        /// <returns> 現在時刻（秒）。 </returns>
+        private float GetCurrentTime()
+        {
+            return _getCurrentTime != null ? _getCurrentTime() : Time.unscaledTime;
         }
     }
 }

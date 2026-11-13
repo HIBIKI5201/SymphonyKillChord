@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.Persistent.Audio
     /// <summary>
     ///     永続音量管理の登録窓口を提供するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Audio/PersistentAudioVolumeRegistryView")]
     public sealed class PersistentAudioVolumeRegistryView : MonoBehaviour
     {
         /// <summary>

@@ -1,0 +1,93 @@
+name: "[Git] Tag Build Version"
+
+# develop・main へのマージコミットに版タグ（v<メジャー>.<マイナー>.<パッチ>）を打つ。
+# 版は Development ビルドと Master ビルドで共通の1本で、BuildAndRelease.yml はビルドするコミットのタグから版を読む。
+# - main へのマージ: メジャーを1つ上げ、マイナーとパッチを0に戻す。
+# - develop へのマージ: PR にラベル version:minor があればマイナーを上げてパッチを0に戻す。無ければパッチを上げる。
+# 次の版は、どのブランチにあるかを問わず、既存の v タグのうち最大の版から決める。
+# v タグがまだ無いときは INITIAL_VERSION をそのまま使う。
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    types: [ closed ]
+    # ゲーム内容（Unityプロジェクト）を変えたPRだけ版を上げる。範囲は BuildAndRelease.yml のトリガーと揃える。
+    paths:
+      - 'Assets/**'
+      - 'Packages/**'
+      - 'ProjectSettings/**'
+
+permissions: {}
+
+# 同時にマージされても同じ版を2回使わないよう、1回ずつ順に実行する。
+concurrency:
+  group: tag-build-version
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  tag:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # タグの作成に必要な権限。
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      BASE_REF: ${{ github.base_ref }}
+      MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      HAS_MINOR_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'version:minor') }}
+      INITIAL_VERSION: v3.2.0
+    steps:
+      - name: 版タグを打つ
+        run: |
+          set -euo pipefail
+          echo "マージ先: ${BASE_REF}, PR: #${PR_NUMBER}, マージコミット: ${MERGE_SHA}, version:minor ラベル: ${HAS_MINOR_LABEL}"
+
+          # v<数>.<数>.<数> の形のタグを「タグ名 コミット」で列挙する（軽量タグなので object.sha がコミット）。
+          list_version_tags() {
+            gh api --paginate "repos/${REPO}/git/matching-refs/tags/v" \
+              --jq '.[] | select(.ref | test("^refs/tags/v[0-9]+\\.[0-9]+\\.[0-9]+$")) | "\(.ref | ltrimstr("refs/tags/")) \(.object.sha)"'
+          }
+
+          for ATTEMPT in 1 2 3 4 5; do
+            TAGS=$(list_version_tags)
+
+            # 再実行などで、このマージコミットに版タグが既にあれば何もしない。
+            EXISTING=$(echo "${TAGS}" | awk -v sha="${MERGE_SHA}" '$2 == sha { print $1 }' | head -n 1)
+            if [ -n "${EXISTING}" ]; then
+              echo "::notice::このマージコミットには版タグ ${EXISTING} が既にあります。"
+              exit 0
+            fi
+
+            LATEST=$(echo "${TAGS}" | awk 'NF { print $1 }' | sort -V | tail -n 1)
+            if [ -z "${LATEST}" ]; then
+              NEXT="${INITIAL_VERSION}"
+              echo "[INFO]: 版タグがまだ無いため、初期値 ${NEXT} を使います。"
+            else
+              IFS=. read -r MAJOR MINOR PATCH <<< "${LATEST#v}"
+              if [ "${BASE_REF}" = "main" ]; then
+                NEXT="v$((MAJOR + 1)).0.0"
+              elif [ "${HAS_MINOR_LABEL}" = "true" ]; then
+                NEXT="v${MAJOR}.$((MINOR + 1)).0"
+              else
+                NEXT="v${MAJOR}.${MINOR}.$((PATCH + 1))"
+              fi
+              echo "[INFO]: 最新の版 ${LATEST} → 次の版 ${NEXT}"
+            fi
+
+            # 別の実行が同じ名前のタグを先に作っていたら、一覧を取り直して次の版でやり直す。
+            if gh api -X POST "repos/${REPO}/git/refs" -f ref="refs/tags/${NEXT}" -f sha="${MERGE_SHA}" > /dev/null; then
+              echo "::notice::${MERGE_SHA} に版タグ ${NEXT} を付けました（PR #${PR_NUMBER}）。"
+              echo "### 版タグ ${NEXT}" >> "$GITHUB_STEP_SUMMARY"
+              echo "PR #${PR_NUMBER} のマージコミット ${MERGE_SHA} に付けました。" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "[WARN]: ${NEXT} を作れませんでした（${ATTEMPT} 回目）。少し待って取り直します。"
+            sleep $((ATTEMPT * 5))
+          done
+
+          echo "::error::版タグを作れませんでした。"
+          exit 1

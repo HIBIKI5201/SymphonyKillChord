@@ -10,6 +10,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     砲弾のView。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/ShellView")]
     public class ShellView : MonoBehaviour, IShellView
     {
         /// <summary>

@@ -6,6 +6,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     /// <summary>
     ///     戦闘ステージが開始された時のDollyCameraの向く方向を取得するためのクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Sequence/StageStartConstraintView")]
     public class StageStartConstraintView : MonoBehaviour
     {
         /// <summary>
