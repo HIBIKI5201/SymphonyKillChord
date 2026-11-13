@@ -21,6 +21,16 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# 使うコアの指定（プロセッサアフィニティ）は Windows にしかないため、macOS では切り替えられない。
+# Unity のスレッド数（-job-worker-count）は、ジョブ開始時の設定どおりに macOS でも効く。
+if ($IsMacOS -eq $true) {
+    Write-Host "macOS のランナーでは、実行中の CPU 使用率の切り替えはできません（使うコアを指定する仕組みが macOS にないため）。"
+    Write-Host "Unity のスレッド数は、ジョブ開始時の設定（自動ビルドは 50%、手動実行は cpu_usage_percent）で決まります。"
+    if ($Mode -ne "status") { exit 1 }
+    return
+}
+
 $CpuModeFile = Join-Path $env:ProgramData "SymphonyKillChord\build-cpu-mode.json"
 
 function Show-Status {

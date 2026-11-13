@@ -5,10 +5,18 @@
 
 # コーディング規則と仕様
 - C#変更・レビュー時: [設計思想](Assets/Scripts/DesignPhilosophy.md)、[コード規約](Assets/Scripts/CodeGuidelines.md)、設計思想から参照する対象レイヤーのクラス責務を読む。実装例は必要時だけ読む。
-- 機能仕様は `Docs/NotionSpecifications` の対象機能・用語だけを読む。`NotionSpecifications_old` は現在の仕様の根拠にしない。
+- 機能仕様は `Docs/NotionSpecifications` の対象機能・用語だけを読む。移行の台帳 `Docs/NotionMigration` は現在の仕様の根拠にしない。
 
 # エージェントの出力
 - 解析・監査・調査・引継ぎは `Docs/agent/` に置いてコミットする。構成・命名は [README](Docs/agent/README.md) に従う。構成外の出力フォルダは作らない。
+
+# 作業の許可範囲
+- コードの実装・修正は、依頼者が明示的に頼んだときに行う（[コード規約](Assets/Scripts/CodeGuidelines.md)のCG-002）。レビュー・調査だけの依頼ではコードを変更せず、結果は `Docs/agent/` に出す。
+- 依頼で指定された出力先・Git操作・Unity操作・外部送信の制限は、それぞれ独立した条件として守る。作業を委任するときも、そのまま渡す。
+
+# Unity検証の前に
+- Unityの操作はUnity CLI（`unity`）で行う。起動は `unity open` →`unity status --until-ready`、コンパイル確認は `unity recompile`（対象は `--project-path`）。
+- recompile・テスト・Playの開始の前に `node scripts/harness/unity-preflight.mjs` を実行する（Claudeはhookで自動実行）。未保存のScene・Prefab、またはPlay中を検知したら止まり、保存・破棄・停止をユーザーに確認する。自分が始めたPlayは止めてよい。
 
 # ブランチ・PR
 - 編集・コミットは指定された作業ブランチで行う。指定がなければ `feature/[段階]/[作業名]/agent`。新規ブランチは編集前に空pushし、同階層masterの生成を確認する。

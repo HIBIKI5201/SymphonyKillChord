@@ -48,7 +48,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416006
-    m_Localized: Display Settings
+    m_Localized: Settings
     m_Metadata:
       m_Items: []
   - m_Id: 1724416007
@@ -124,7 +124,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416025
-    m_Localized: 'Unlock Skill (Required Points: {0})'
+    m_Localized: "Unlock Kill Chord (Required Points: {0})"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416026
@@ -132,7 +132,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416027
-    m_Localized: Show Skill Video
+    m_Localized: "Show Kill Chord Video"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416028
@@ -168,15 +168,19 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416036
-    m_Localized: Please select a skill
+    m_Localized: "Please select a Kill Chord"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1724416900
+    m_Localized: Collected
     m_Metadata:
       m_Items: []
   - m_Id: 1724416037
-    m_Localized: Skill Type
+    m_Localized: "Kill Chord Type"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416038
-    m_Localized: Skill Effect
+    m_Localized: "Kill Chord Effect"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416039
@@ -192,7 +196,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416042
-    m_Localized: Your equipped skill changes haven't been saved. Save them?
+    m_Localized: "Your equipped Kill Chord changes haven't been saved. Save them?"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416043
@@ -232,11 +236,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416052
-    m_Localized: 'Skill Genre:'
+    m_Localized: "Kill Chord Genre:"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416053
-    m_Localized: ' Skill Effect'
+    m_Localized: " Kill Chord Effect"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416054
@@ -244,7 +248,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416055
-    m_Localized: Unlock this skill?
+    m_Localized: "Unlock this node?"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416056
@@ -252,7 +256,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416057
-    m_Localized: Skills to Unlock
+    m_Localized: "Kill Chords to Unlock"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416058
@@ -264,11 +268,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416060
-    m_Localized: Equipped Skills
+    m_Localized: "Equipped Kill Chords"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416061
-    m_Localized: Equipped Skill Details
+    m_Localized: "Equipped Kill Chord Details"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416062
@@ -320,7 +324,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416074
-    m_Localized: 'Skill Type: '
+    m_Localized: "Kill Chord Type: "
     m_Metadata:
       m_Items: []
   - m_Id: 1724416075
@@ -328,23 +332,23 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1724416076
-    m_Localized: "Reset the skill tree?\n\u8FD4\u5374\u3055\u308C\u308B\u7814\u7A76\u30DD\u30A4\u30F3\u30C8\uFF1A{0}"
+    m_Localized: "Reset the skill tree?\nUnlock Points refunded: {0}"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416077
-    m_Localized: "\u7814\u7A76P\uFF1A{0} \u2192 {1}"
+    m_Localized: "Unlock Points: {0} \u2192 {1}"
     m_Metadata:
       m_Items: []
   - m_Id: 1724416078
-    m_Localized: "\u8A00\u8A9E"
+    m_Localized: Language
     m_Metadata:
       m_Items: []
   - m_Id: 1724416079
-    m_Localized: "\u632F\u52D5"
+    m_Localized: Vibration
     m_Metadata:
       m_Items: []
   - m_Id: 1724416080
-    m_Localized: "\u30EA\u30BA\u30E0\u5224\u5B9A\u30BF\u30A4\u30DF\u30F3\u30B0"
+    m_Localized: Rhythm Timing
     m_Metadata:
       m_Items: []
   - m_Id: 1724416081
@@ -435,6 +439,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 1870000003
     m_Localized: Save data has been reset.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1870000005
+    m_Localized: The save data could not be loaded, so the game starts from the beginning.
     m_Metadata:
       m_Items: []
   - m_Id: 1880000001
@@ -556,6 +564,190 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 7215909566452859023
+  - m_Id: 2081000100
+    m_Localized: "Overall"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000101
+    m_Localized: "Home"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000102
+    m_Localized: "Mission Start!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000103
+    m_Localized: "Stage Clear!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000104
+    m_Localized: "Game Over!"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000105
+    m_Localized: "Mission Complete"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000106
+    m_Localized: "Mission Failed"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000107
+    m_Localized: "Cleared"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000108
+    m_Localized: "Failed"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000109
+    m_Localized: "Achieved"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000110
+    m_Localized: "Not Achieved"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000111
+    m_Localized: "Watch the enemy's attacks closely, and strike in the opening after you dodge."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000112
+    m_Localized: "Success"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000113
+    m_Localized: "Miss"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000114
+    m_Localized: "Perfect"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000115
+    m_Localized: "Choose a stage to sortie to and head into battle from here."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000116
+    m_Localized: "Advance your research to unlock new Kill Chords and upgrades."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000117
+    m_Localized: "Combine the Kill Chords you have unlocked to customize your weapons."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000118
+    m_Localized: "Change settings such as volume and controls."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000119
+    m_Localized: "All"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000120
+    m_Localized: "Battle Time"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000121
+    m_Localized: "Max Combo"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000122
+    m_Localized: "Complete"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000123
+    m_Localized: "Retry"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2081000124
+    m_Localized: "{0}  Lv.{1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000001
+    m_Localized: Reset to Defaults
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000002
+    m_Localized: "Reset these settings to their defaults?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000003
+    m_Localized: Reset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2090000004
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000000
+    m_Localized: "Activation Combo: {0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000001
+    m_Localized: "Attack"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000002
+    m_Localized: "Buff"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000003
+    m_Localized: "Debuff"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000004
+    m_Localized: "{0}x"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000005
+    m_Localized: "{0}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000006
+    m_Localized: "{0}s"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000007
+    m_Localized: "({0})"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096000008
+    m_Localized: "{0} ({1}/{2})"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100001
+    m_Localized: "Spend Unlock Points on research to unlock Kill Chords and upgrades. You earn Unlock Points by clearing stages for the first time, among other ways."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100002
+    m_Localized: "Start by unlocking this node to get a new Kill Chord."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100003
+    m_Localized: "Kill Chords you unlock can be equipped in Customize."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100004
+    m_Localized: "The Kill Chords you take into battle are lined up here."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100005
+    m_Localized: "Pick from the Kill Chords you own to swap them in."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100006
+    m_Localized: "After swapping, save to confirm your loadout."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100007
+    m_Localized: "Clearing a stage unlocks the next one."
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2096100008
+    m_Localized: "Clearing a stage for the first time earns rewards such as Unlock Points. Select a stage to check its rewards."
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.Persistent.Localization;
 using KillChord.Runtime.Domain.InGame.Skill;
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,28 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
     /// </summary>
     public sealed class SkillEffectDescriptionFormatter
     {
+        /// <summary>
+        ///     フォーマッターを初期化します。
+        /// </summary>
+        /// <param name="textProvider"> 単位（倍・回・秒）と成長値の括弧の文言の取得元です。nullなら日本語で表示します。 </param>
+        public SkillEffectDescriptionFormatter(IUiTextProvider textProvider = null)
+        {
+            _textProvider = textProvider;
+        }
+
         private const double PERCENT_SCALE = 100d;
         private const int INITIAL_BUILDER_CAPACITY = 256;
-        private const string GROWN_VALUE_OPEN = "（";
-        private const string GROWN_VALUE_CLOSE = "）";
+        private const string GROWN_VALUE_FORMAT_KEY = "ui.skill.value_grown_format";
+        private const string GROWN_VALUE_FORMAT_FALLBACK = "（{0}）";
+        private const string MULTIPLIER_FORMAT_KEY = "ui.skill.value_multiplier_format";
+        private const string MULTIPLIER_FORMAT_FALLBACK = "{0}倍";
+        private const string COUNT_FORMAT_KEY = "ui.skill.value_count_format";
+        private const string COUNT_FORMAT_FALLBACK = "{0}回";
+        private const string SECONDS_FORMAT_KEY = "ui.skill.value_seconds_format";
+        private const string SECONDS_FORMAT_FALLBACK = "{0}秒";
 
         private readonly StringBuilder _builder = new(INITIAL_BUILDER_CAPACITY);
+        private readonly IUiTextProvider _textProvider;
 
         /// <summary>
         ///     効果説明テンプレートへ、ゲーム処理と共有する数値パラメータを埋め込みます。
@@ -58,7 +75,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
                 string formattedValue = FormatValue(parameter);
                 if (IsGrowable(parameter.Id, growths))
                 {
-                    formattedValue = $"{GROWN_VALUE_OPEN}{formattedValue}{GROWN_VALUE_CLOSE}";
+                    formattedValue = UiText.Format(
+                        _textProvider, GROWN_VALUE_FORMAT_KEY, GROWN_VALUE_FORMAT_FALLBACK, formattedValue);
                 }
 
                 _builder.Replace(GetPlaceholder(parameter.Id), formattedValue);
@@ -147,9 +165,15 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
                 SkillEffectValueFormat.Integer => Math.Round(parameter.Value).ToString("0", CultureInfo.InvariantCulture),
                 SkillEffectValueFormat.Percent =>
                     $"{Math.Round(parameter.Value * PERCENT_SCALE).ToString("0", CultureInfo.InvariantCulture)}%",
-                SkillEffectValueFormat.Multiplier => $"{FormatNumber(parameter.Value)}倍",
-                SkillEffectValueFormat.Count => $"{Math.Round(parameter.Value).ToString("0", CultureInfo.InvariantCulture)}回",
-                SkillEffectValueFormat.Seconds => $"{FormatNumber(parameter.Value)}秒",
+                SkillEffectValueFormat.Multiplier => UiText.Format(
+                    _textProvider, MULTIPLIER_FORMAT_KEY, MULTIPLIER_FORMAT_FALLBACK, FormatNumber(parameter.Value)),
+                SkillEffectValueFormat.Count => UiText.Format(
+                    _textProvider,
+                    COUNT_FORMAT_KEY,
+                    COUNT_FORMAT_FALLBACK,
+                    Math.Round(parameter.Value).ToString("0", CultureInfo.InvariantCulture)),
+                SkillEffectValueFormat.Seconds => UiText.Format(
+                    _textProvider, SECONDS_FORMAT_KEY, SECONDS_FORMAT_FALLBACK, FormatNumber(parameter.Value)),
                 SkillEffectValueFormat.Meter => $"{FormatNumber(parameter.Value)}m",
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(parameter),

@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View
     ///     射撃時にマズルフラッシュのライトを一瞬点灯させる。
     /// </summary>
     [RequireComponent(typeof(Light))]
+    [AddComponentMenu("KillChord/View/Player/MuzzleFlashLight")]
     public class MuzzleFlashLight : MonoBehaviour
     {
         /// <summary> ライトが現在点灯しているかを取得します。 </summary>

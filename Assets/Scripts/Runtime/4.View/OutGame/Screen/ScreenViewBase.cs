@@ -31,6 +31,12 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RootElement.RegisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
         }
 
+        /// <summary> フェードインを終えて、操作を受け付けられる状態になったときに発火します。 </summary>
+        public event Action OnShowCompleted;
+
+        /// <summary> チュートリアルのオーバーレイを配置する、OutGame全体のルート要素を取得します。 </summary>
+        public VisualElement OutGameRootElement => RootElement.panel?.visualTree ?? RootElement.parent;
+
         /// <summary> この画面内で現在フォーカスされている要素を取得します。 </summary>
         public VisualElement FocusedElement
         {
@@ -63,6 +69,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
             RootElement.style.display = DisplayStyle.Flex;
             RootElement.BringToFront();
+            OnShowStarted();
 
             // フェード中は入力を受け付けないようブロッカーを最前面に配置する。
             RootElement.Add(_brocker);
@@ -112,6 +119,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             SetOpacity(0f);
             RootElement.style.display = DisplayStyle.None;
             RemoveBrocker();
+            OnHidden();
         }
 
         /// <summary>
@@ -133,6 +141,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RootElement.UnregisterCallback<FocusOutEvent>(HandleFocusOutDebugHandler);
             RootElement.UnregisterCallback<NavigationMoveEvent>(HandleNavigationMoveDebugHandler, TrickleDown.TrickleDown);
             RootElement.UnregisterCallback<NavigationSubmitEvent>(HandleNavigationSubmitDebugHandler, TrickleDown.TrickleDown);
+        }
+
+        /// <summary>
+        ///     チュートリアルのハイライト対象要素を名前で検索します。
+        /// </summary>
+        /// <param name="elementName"> 検索する要素の名前です。 </param>
+        /// <returns> 見つかった要素。見つからない場合はnullです。 </returns>
+        public VisualElement FindTutorialTarget(string elementName)
+        {
+            return RootElement.Q<VisualElement>(elementName);
         }
 
         /// <summary>
@@ -253,6 +271,16 @@ namespace KillChord.Runtime.View.OutGame.Screen
         protected virtual VisualElement CancelTargetElement => null;
 
         /// <summary>
+        ///     表示を開始した直後(フェードイン開始時)に呼び出されます。
+        /// </summary>
+        protected virtual void OnShowStarted() { }
+
+        /// <summary>
+        ///     フェードアウト完了または即時非表示により、画面がレイアウトから外れた直後に呼び出されます。
+        /// </summary>
+        protected virtual void OnHidden() { }
+
+        /// <summary>
         ///     フェードイン完了後に呼び出され、ブロッカーを取り除いて初期フォーカスを設定します。
         /// </summary>
         private void HandleShowCompleted()
@@ -260,6 +288,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
             _isShowCompleted = true;
             RemoveBrocker();
             RestoreFocus();
+            OnShowCompleted?.Invoke();
         }
 
         /// <summary>
@@ -405,6 +434,7 @@ namespace KillChord.Runtime.View.OutGame.Screen
         {
             RootElement.style.display = DisplayStyle.None;
             RemoveBrocker();
+            OnHidden();
         }
 
         /// <summary>

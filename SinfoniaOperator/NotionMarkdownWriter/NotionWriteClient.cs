@@ -168,6 +168,29 @@ namespace SinfoniaStudio.NotionMarkdownWriter
     }
 
     /// <summary>
+    ///     ワークスペースのユーザーを表すクラス。
+    /// </summary>
+    internal sealed class NotionUserInfo
+    {
+        /// <summary>
+        ///     ユーザー情報を生成する。
+        /// </summary>
+        /// <param name="id">ユーザーID。</param>
+        /// <param name="name">表示名。</param>
+        /// <param name="type">person または bot。</param>
+        internal NotionUserInfo(string id, string name, string type)
+        {
+            Id = id;
+            Name = name;
+            Type = type;
+        }
+
+        internal string Id { get; }
+        internal string Name { get; }
+        internal string Type { get; }
+    }
+
+    /// <summary>
     ///     Markdown Content APIを用いてNotionページを取得・作成・更新するクライアント。
     /// </summary>
     internal sealed class NotionWriteClient : IDisposable
@@ -428,6 +451,33 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         }
 
         /// <summary>
+        ///     データベースの親ページを変更する。行・ビュー・スキーマには触れない。
+        ///     データベースIDは移動後も変わらないため、リレーションや既存のリンクはそのまま使える。
+        /// </summary>
+        /// <param name="databaseId">対象データベースID。</param>
+        /// <param name="pageId">移動先ページID。</param>
+        /// <returns>応答に含まれる更新後の親への参照。</returns>
+        internal async Task<NotionParentReference> UpdateDatabaseParentAsync(string databaseId, string pageId)
+        {
+            Dictionary<string, object> requestBody = new()
+            {
+                ["parent"] = new Dictionary<string, string>
+                {
+                    ["type"] = "page_id",
+                    ["page_id"] = pageId
+                }
+            };
+            string json = JsonSerializer.Serialize(requestBody, _requestJsonOptions);
+            string responseBody = await SendAsync(
+                HttpMethod.Patch,
+                $"{API_BASE_URL}/databases/{Uri.EscapeDataString(databaseId)}",
+                json,
+                false);
+            using JsonDocument document = JsonDocument.Parse(responseBody);
+            return ParseParent(document.RootElement);
+        }
+
+        /// <summary>
         ///     ブロックのメタデータとリッチテキストを取得する。
         ///     Markdown Content APIでは文字列一致でしか編集できない箇所（巨大な画像ブロックに挟まれた短文、
         ///     同名のトグルなど）を、ブロックIDで直接特定して編集するために使う。
@@ -673,6 +723,50 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             }
 
             return count;
+        }
+
+        /// <summary>
+        ///     インテグレーションから見えるワークスペースのユーザーを取得する。
+        ///     people型プロパティへ名前で指定された値をユーザーIDへ解決するために使う。
+        /// </summary>
+        /// <returns>ユーザーの一覧。</returns>
+        internal async Task<IReadOnlyList<NotionUserInfo>> ListUsersAsync()
+        {
+            List<NotionUserInfo> users = new();
+            string? cursor = null;
+            do
+            {
+                string url = $"{API_BASE_URL}/users?page_size=100";
+                if (cursor != null)
+                {
+                    url += $"&start_cursor={Uri.EscapeDataString(cursor)}";
+                }
+
+                string responseBody = await SendAsync(HttpMethod.Get, url, null, true);
+                using JsonDocument document = JsonDocument.Parse(responseBody);
+                JsonElement root = document.RootElement;
+                if (root.TryGetProperty("results", out JsonElement results) && results.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (JsonElement user in results.EnumerateArray())
+                    {
+                        string id = user.TryGetProperty("id", out JsonElement idElement) ? idElement.GetString() ?? string.Empty : string.Empty;
+                        string name = user.TryGetProperty("name", out JsonElement nameElement) &&
+                                      nameElement.ValueKind == JsonValueKind.String
+                            ? nameElement.GetString() ?? string.Empty
+                            : string.Empty;
+                        string type = user.TryGetProperty("type", out JsonElement typeElement) ? typeElement.GetString() ?? string.Empty : string.Empty;
+                        users.Add(new NotionUserInfo(id, name, type));
+                    }
+                }
+
+                cursor = root.TryGetProperty("has_more", out JsonElement hasMore) && hasMore.ValueKind == JsonValueKind.True &&
+                         root.TryGetProperty("next_cursor", out JsonElement next) && next.ValueKind == JsonValueKind.String
+                    ? next.GetString()
+                    : null;
+            }
+            while (cursor != null);
+
+            return users;
         }
 
         /// <summary>

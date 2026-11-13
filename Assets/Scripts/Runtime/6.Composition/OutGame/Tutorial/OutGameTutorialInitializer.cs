@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
     /// <summary>
     ///     アウトゲームチュートリアルの開始条件を判定し、実行ライフサイクルを管理します。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Tutorial/OutGameTutorialInitializer")]
     public sealed class OutGameTutorialInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -29,15 +30,19 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
         {
             new HomeTutorialStep(
                 "StageSelect",
+                "ui.home_tutorial.stage_select",
                 "ここから出撃するステージを選んで戦闘に挑みます。"),
             new HomeTutorialStep(
                 "SkillTree",
+                "ui.home_tutorial.skill_tree",
                 "研究を進めて新しいスキルや強化を解放できます。"),
             new HomeTutorialStep(
                 "SkillBuild",
+                "ui.home_tutorial.skill_build",
                 "解放したスキルを組み合わせて武装を改造します。"),
             new HomeTutorialStep(
                 "OptionIcon",
+                "ui.home_tutorial.option",
                 "音量や操作方法などの各種設定を変更できます。"),
         };
 
@@ -46,6 +51,8 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
         private TutorialOverlayView _activeOverlayView;
         /// <summary> ホーム画面の表示要素を提供するViewです。 </summary>
         private HomeScreenView _homeScreenView;
+        /// <summary> 各画面を初めて開いたときの案内です。 </summary>
+        private OutGameScreenGuideRunner _screenGuideRunner;
         private SaveData _loadedSaveData;
         private bool _isWaitingForLoadingCompleted;
         private bool _isTutorialRunning;
@@ -86,6 +93,18 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             ServiceLocator.TryGetInstance(out _loadingScreenController);
             ServiceLocator.TryGetInstance(out HomeScreenView homeScreenView);
             _homeScreenView = homeScreenView;
+
+            // 研究・改造・作戦の各画面を初めて開いたときの案内をつなぐ。
+            ServiceLocator.TryGetInstance(out SkillTreeScreenView skillTreeScreenView);
+            ServiceLocator.TryGetInstance(out SkillBuildScreenView skillBuildScreenView);
+            ServiceLocator.TryGetInstance(out StageSelectScreenView stageSelectScreenView);
+            _screenGuideRunner?.Dispose();
+            _screenGuideRunner = new OutGameScreenGuideRunner(
+                _loadedSaveData,
+                skillTreeScreenView,
+                skillBuildScreenView,
+                stageSelectScreenView,
+                destroyCancellationToken);
             _isInitialized = true;
             return true;
         }
@@ -117,6 +136,8 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                     HandleHomeTutorialForceCompleteRequested;
             }
 
+            _screenGuideRunner?.Dispose();
+            _screenGuideRunner = null;
             _outGameUIEvent = null;
             _loadingScreenController = null;
             _activeOverlayView = null;
@@ -260,7 +281,8 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                         continue;
                     }
 
-                    await overlayView.ShowStepAsync(target, step.Message, cancellationToken);
+                    await overlayView.ShowStepAsync(
+                        target, step.MessageEntry, step.FallbackMessage, cancellationToken);
 
                     if (_isForceCompleteRequested)
                     {
@@ -305,18 +327,23 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             ///     ホームチュートリアルの1手順を初期化します。
             /// </summary>
             /// <param name="targetElementName"> 対象要素の名前です。 </param>
-            /// <param name="message"> 表示する説明文です。 </param>
-            public HomeTutorialStep(string targetElementName, string message)
+            /// <param name="messageEntry"> 表示する説明文のUICommonのキーです。 </param>
+            /// <param name="fallbackMessage"> 翻訳を取得できない場合の説明文です。 </param>
+            public HomeTutorialStep(string targetElementName, string messageEntry, string fallbackMessage)
             {
                 TargetElementName = targetElementName;
-                Message = message;
+                MessageEntry = messageEntry;
+                FallbackMessage = fallbackMessage;
             }
 
             /// <summary> 対象要素の名前を取得します。 </summary>
             public string TargetElementName { get; }
 
-            /// <summary> 表示する説明文を取得します。 </summary>
-            public string Message { get; }
+            /// <summary> 表示する説明文のUICommonのキーを取得します。 </summary>
+            public string MessageEntry { get; }
+
+            /// <summary> 翻訳を取得できない場合の説明文を取得します。 </summary>
+            public string FallbackMessage { get; }
         }
     }
 }

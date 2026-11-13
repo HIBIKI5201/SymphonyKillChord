@@ -7,6 +7,7 @@
     - クローン先のパス（日本語・空白が無いか）とフォルダ名（SymphonyKillChord か）
     - git の設定（submodule.recurse / core.longpaths）
     - サブモジュールの取得（閲覧権限が無ければ招待を頼むよう案内する）
+      project-setup.json の RequiredSubmodules にあるものだけ必須。ほかは取れなくても警告に留める
     - Unity エディタのバージョンと Android Build Support
     - Unity CLI（unity コマンド。無ければ公式のスクリプトで入れる）
     必須の項目がすべて通ったら、UserSettings/KillChord/ProjectSetupState.json に記録する。
@@ -107,7 +108,15 @@ foreach ($key in $gitSettings.Keys) {
 # --- サブモジュール --------------------------------------------------------
 $submodulePaths = (Invoke-Git @('config', '-f', '.gitmodules', '--get-regexp', '^submodule\..*\.path$')).Output -split "`n" |
     Where-Object { $_ } | ForEach-Object { ($_ -split ' ', 2)[1] }
+# 必須でないもの（サウンドの元データ・プロジェクト ドキュメントの写し）は、閲覧権限が無い役職でも作業できるので警告に留める。
+$requiredSubmodules = @($Config.RequiredSubmodules | Where-Object { $_ })
+function Get-SubmoduleFailureStatus([string]$Path) {
+    if ($requiredSubmodules.Count -eq 0 -or $requiredSubmodules -contains $Path) { return 'Error' }
+    return 'Warn'
+}
 foreach ($path in $submodulePaths) {
+    $failureStatus = Get-SubmoduleFailureStatus $path
+    $optionalNote = if ($failureStatus -eq 'Warn') { '必須ではないので、このまま作業できます。' } else { '' }
     $status = (Invoke-Git @('submodule', 'status', '--', $path)).Output
     $fullPath = Join-Path $RepoRoot $path
     $hasContent = (Test-Path $fullPath) -and ((Get-ChildItem $fullPath -Force | Measure-Object).Count -gt 0)
@@ -116,11 +125,11 @@ foreach ($path in $submodulePaths) {
         continue
     }
     if ($Check) {
-        Add-Result "サブモジュール $path" 'Error' 'まだ取得していません。'
+        Add-Result "サブモジュール $path" $failureStatus "まだ取得していません。$optionalNote"
         continue
     }
 
-    # 仕様書のように本体の記録を気にせず最新を読むもの（ignore = all）は、ブランチの最新を取る。
+    # プロジェクト ドキュメントのように本体の記録を気にせず最新を読むもの（ignore = all）は、ブランチの最新を取る。
     $name = (Invoke-Git @('config', '-f', '.gitmodules', '--get-regexp', '^submodule\..*\.path$')).Output -split "`n" |
         Where-Object { $_ -match " $([regex]::Escape($path))$" } | ForEach-Object { ($_ -split ' ', 2)[0] -replace '\.path$', '' }
     $ignore = (Invoke-Git @('config', '-f', '.gitmodules', '--get', "$name.ignore")).Output
@@ -139,7 +148,7 @@ foreach ($path in $submodulePaths) {
         Add-Result "サブモジュール $path" 'Fixed' '取得しました。'
     }
     else {
-        Add-Result "サブモジュール $path" 'Error' '取得できませんでした。上に出た git のエラーを確認してください。認証や「Repository not found」のエラーなら、非公開リポジトリの閲覧権限がありません。リードに GitHub の招待を頼んでください。'
+        Add-Result "サブモジュール $path" $failureStatus "取得できませんでした。上に出た git のエラーを確認してください。認証や「Repository not found」のエラーなら、非公開リポジトリの閲覧権限がありません。必要ならリードに GitHub の招待を頼んでください。$optionalNote"
     }
 }
 
@@ -149,9 +158,15 @@ $unityVersion = [regex]::Match($versionText, 'm_EditorVersion:\s*(\S+)').Groups[
 $unityRevision = [regex]::Match($versionText, 'm_EditorVersionWithRevision:\s*\S+\s*\((\w+)\)').Groups[1].Value
 $hubInstallUri = "unityhub://$unityVersion/$unityRevision"
 
-# Unity Hub の既定のインストール先と、Hub で変更したインストール先を探す。
+# Unity Hub の既定のインストール先（.github\unity-paths.json の editorRoots。CI と同じ）と、
+# Hub で変更したインストール先を探す。unity-paths.json を読めないときは固定のパスを使う。
 $editorRoots = New-Object System.Collections.Generic.List[string]
-$editorRoots.Add((Join-Path $env:ProgramFiles 'Unity\Hub\Editor'))
+$unityPathsFile = Join-Path $RepoRoot '.github\unity-paths.json'
+if (Test-Path -LiteralPath $unityPathsFile) {
+    $unityPaths = Get-Content -LiteralPath $unityPathsFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    foreach ($root in @($unityPaths.Windows.editorRoots)) { if ($root) { $editorRoots.Add($root) } }
+}
+if ($editorRoots.Count -eq 0) { $editorRoots.Add((Join-Path $env:ProgramFiles 'Unity\Hub\Editor')) }
 $secondaryPathFile = Join-Path $env:APPDATA 'UnityHub\secondaryInstallPath.json'
 if (Test-Path $secondaryPathFile) {
     $secondary = (Get-Content $secondaryPathFile -Raw | ConvertFrom-Json)
@@ -161,7 +176,7 @@ $editorPath = $editorRoots | ForEach-Object { Join-Path $_ $unityVersion } |
     Where-Object { Test-Path (Join-Path $_ 'Editor\Unity.exe') } | Select-Object -First 1
 
 if (-not $editorPath) {
-    Add-Result "Unity $unityVersion" 'Error' "インストールされていません。Unity Hub で $hubInstallUri を開き、Android Build Support を付けて入れてください。"
+    Add-Result "Unity $unityVersion" 'Error' "インストールされていません（探した場所: $($editorRoots -join ', ')）。Unity Hub で $hubInstallUri を開き、Android Build Support を付けて入れてください。"
 }
 else {
     Add-Result "Unity $unityVersion" 'OK' $editorPath

@@ -11,10 +11,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
     /// </summary>
     public class StageResultPresenter
     {
-        private const string MAIN_MISSION_CLEAR_TEXT = "達成";
-        private const string MAIN_MISSION_FAIL_TEXT = "失敗";
-        private const string DEFAULT_DEFEAT_TIP_TEXT = "敵の攻撃をよくみて、回避後の隙に攻撃しましょう。";
-
         /// <summary>
         ///    ステージ結果画面の表示を行うプレゼンターを初期化する。
         /// </summary>
@@ -59,7 +55,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                 StageResultType.Victory,
                 _selectedBattleStageState.StageName,
                 _missionRuntimeService.MissionDefinition.MainMissionText,
-                MAIN_MISSION_CLEAR_TEXT,
                 subMissionItems,
                 _missionRuntimeService.MissionProgress.ElapsedTime.Value,
                 _missionRuntimeService.MissionProgress.MaxCombo.Value,
@@ -78,7 +73,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
                 StageResultType.Defeat,
                 _selectedBattleStageState.StageName,
                 _missionRuntimeService.MissionDefinition.MainMissionText,
-                MAIN_MISSION_FAIL_TEXT,
                 Array.Empty<StageResultMissionItemDTO>(),
                 _missionRuntimeService.MissionProgress.ElapsedTime.Value,
                 _missionRuntimeService.MissionProgress.MaxCombo.Value,
@@ -118,13 +112,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Result
         ///     敗北時のヒントをランダムに選択する。
         /// </summary>
         /// <param name="defeatTips">敗北時のヒントのリスト。</param>
-        /// <returns></returns>
+        /// <returns> 選んだヒント。ヒントが無い場合は空文字列で、View が既定のヒントを表示する。 </returns>
         private string SelectDefeatTip(
             IReadOnlyList<string> defeatTips)
         {
             if (defeatTips == null || defeatTips.Count == 0)
             {
-                return DEFAULT_DEFEAT_TIP_TEXT;
+                return string.Empty;
             }
 
             int selectedIndex = UnityEngine.Random.Range(0, defeatTips.Count);

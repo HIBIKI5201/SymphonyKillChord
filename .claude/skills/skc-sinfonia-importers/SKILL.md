@@ -1,13 +1,13 @@
 ---
 name: skc-sinfonia-importers
-description: "Fetch project data into the repo with the SinfoniaOperator importers: NotionMarkdownExporter (Notion spec pages -> Docs/NotionSpecifications) and DiscordLogExporter (Discord channel/forum logs -> Docs/DiscordLog). Use when you need current Notion specification text or Discord discussion history and the local snapshot may be stale or missing — e.g. 'refresh the spec export', 'what did the team decide in Discord about X', 'check the design doc for Y', or any question whose answer lives in Notion or Discord rather than in code."
+description: "Refresh repo snapshots with the SinfoniaOperator importers: Notion docs to Docs/NotionSpecifications, Discord logs to Docs/DiscordLog. Use when the local copy is stale or missing, or the answer lives in Discord discussions."
 ---
 
 # SinfoniaOperator Importers
 
 Two CLI tools pull external project data into the repo as local files.
 Both read config from `SinfoniaOperator/sinfonia-operator.env.json` (shared, in git) and
-secrets from `SinfoniaOperator/sinfonia-operator.secrets.json` (gitignored), in that order.
+secrets from `UserSettings/KillChord/secrets.json` (gitignored, shared with the Unity editor tools; the old `SinfoniaOperator/sinfonia-operator.secrets.json` is still read during migration), in that order.
 
 | Tool | Source | Destination | Token |
 |---|---|---|---|
@@ -44,6 +44,11 @@ update by hand:
 ```bash
 git submodule update --init --remote --depth 1 -- Docs/NotionSpecifications
 ```
+
+To read a page after pulling, use its page id, not its path: `python scripts/notion/spec_query.py get <page id>`
+(or `path <id>` for a database), as in the [reading steps](../../../Docs/agent/README.md#必要な資料だけを読む).
+The canonical rules for the mirror are the Notion page "Notion プロジェクト ドキュメントの運用"
+(page id `3e37c2c6-cc02-815b-9dac-f6b834c1e56b`).
 
 Check freshness with `git -C Docs/NotionSpecifications log -1`. Only run the exporter locally
 when the user needs changes newer than the last sync; it writes into the submodule's working

@@ -80,7 +80,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// </summary>
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
         /// <param name="direction"> 選択基準に使用する方向。 </param>
-        void ChangeTarget(in Vector3 playerPosition, in Vector3 direction);
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。入力によらない付け替えではfalseを指定する。 </param>
+        /// <param name="allowOutOfView">
+        ///     視界範囲内に候補がいないとき、視界範囲外の敵からも選ぶかどうか。攻撃時のオートロックオンで true を指定する。
+        /// </param>
+        void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true, bool allowOutOfView = false);
 
         /// <summary>
         ///     プレイヤー位置と方向をもとに候補ターゲットを更新する。
@@ -98,6 +102,22 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         bool TrySwitchTarget(in Vector3 playerPosition, in Vector3 direction);
 
         /// <summary>
+        ///     現在のターゲットを候補から外して評価し、次のターゲットへの切り替えを試みる。
+        /// </summary>
+        /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
+        /// <param name="direction"> 選択基準に使用する方向。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。 </returns>
+        bool TrySwitchToNextTarget(in Vector3 playerPosition, in Vector3 direction);
+
+        /// <summary>
+        ///     画面上で現在の対象から指定方向にいる敵のうち、画面中心に最も近い敵への切り替えを試みる。
+        /// </summary>
+        /// <param name="screenDirection"> 画面上の方向。右と上を正とする。 </param>
+        /// <param name="worldToViewport"> ワールド座標をビューポート座標（z はカメラからの奥行き）へ変換する処理。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。その方向に敵がいない場合はfalse。 </returns>
+        bool TrySwitchTargetInScreenDirection(in Vector2 screenDirection, Func<Vector3, Vector3> worldToViewport);
+
+        /// <summary>
         ///     指定IDのターゲットを現在のターゲットとして設定することを試みる。
         /// </summary>
         /// <param name="targetId"> 設定対象のターゲットID。 </param>
@@ -109,5 +129,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         ///     現在のターゲット選択を解除する。
         /// </summary>
         void ClearTarget();
+
+        /// <summary>
+        ///     ロックオン対象を選ぶときに、視界範囲内かどうかを判定する関数を設定する。
+        ///     未設定の場合は、すべての対象を視界範囲内として扱う。
+        /// </summary>
+        /// <param name="isWithinView"> 対象位置が視界範囲内ならtrueを返す関数。 </param>
+        void SetViewFilter(Func<Vector3, bool> isWithinView);
     }
 }

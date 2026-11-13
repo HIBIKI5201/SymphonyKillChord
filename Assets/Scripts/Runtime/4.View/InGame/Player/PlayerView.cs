@@ -22,6 +22,7 @@ namespace KillChord.Runtime.View.InGame.Player
     ///     プレイヤー入力を受け取り、移動と攻撃を更新するViewクラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.MOVEMENT)]
+    [AddComponentMenu("KillChord/View/Player/PlayerView")]
     public sealed class PlayerView : MonoBehaviour, IDamageable, IGameplayControllable
     {
         [SerializeField, Tooltip("移動のブレンドに使う Animator のパラメーター名。")] private string _blendName;
@@ -198,6 +199,11 @@ namespace KillChord.Runtime.View.InGame.Player
                 _healthHudPresenter?.Dispose();
             }
 
+            if (PlayerAttackController != null)
+            {
+                PlayerAttackController.OnFollowUpShotFired -= HandleFollowUpShotFired;
+            }
+
             _dodgeMaterialEffectHandle.TryCancel();
             _damageEffectHandle.TryCancel();
         }
@@ -234,6 +240,10 @@ namespace KillChord.Runtime.View.InGame.Player
             _cacheTransform = transform;
             _healthHudPresenter = healthHudPresenter;
             _healthHudPresenter.OnDamaged += PlayDamageFeedback;
+            if (PlayerAttackController != null)
+            {
+                PlayerAttackController.OnFollowUpShotFired += HandleFollowUpShotFired;
+            }
             EventBus<EOnTakeDamage>.Register(HandleTakeDamage);
             EventBus<EOnLockOnAcquired>.Register(HandleLockOnAcquired);
 
@@ -908,6 +918,15 @@ namespace KillChord.Runtime.View.InGame.Player
             {
                 PlaySound(_hitSoundSource, null);
             }
+        }
+
+        /// <summary>
+        ///     多段攻撃の2発目以降の発射演出を再生します。
+        ///     対象がいなくても1射ごとにSE・マズルフラッシュ・薬莢を出し、3点バーストに見せます。
+        /// </summary>
+        private void HandleFollowUpShotFired()
+        {
+            _attackWeaponView?.PlayCurrentWeaponAttackEffects();
         }
 
         /// <summary>

@@ -196,9 +196,20 @@ namespace KillChord.Runtime.View.InGame.Target
         /// </summary>
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
         /// <param name="direction"> 選択基準に使用する方向。 </param>
-        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
+        /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。入力によらない付け替えではfalseを指定する。 </param>
+        /// <param name="allowOutOfView">
+        ///     視界範囲内に候補がいないとき、視界範囲外の敵からも選ぶかどうか。攻撃時のオートロックオンで true を指定する。
+        /// </param>
+        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true, bool allowOutOfView = false)
         {
-            SetCurrentTarget(EvaluateBestTarget(playerPosition, direction));
+            ITargetableViewModel target = EvaluateLockOnTarget(playerPosition);
+            if (target == null && allowOutOfView)
+            {
+                // 正面（視界範囲内）に敵がいなければ、見えない所にいる敵から同じ基準で選ぶ。
+                target = EvaluateLockOnTarget(playerPosition, ignoreView: true);
+            }
+
+            SetCurrentTarget(target, notifyLockOn);
             _currentCandidate = null;
         }
 
@@ -209,7 +220,7 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <param name="direction"> 選択基準に使用する方向。 </param>
         public void UpdateCandidate(in Vector3 playerPosition, in Vector3 direction)
         {
-            _currentCandidate = EvaluateBestTarget(playerPosition, direction);
+            _currentCandidate = EvaluateLockOnTarget(playerPosition);
         }
 
         /// <summary>
@@ -220,13 +231,99 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <returns> 別ターゲットへ切り替えた場合はtrue。 </returns>
         public bool TrySwitchTarget(in Vector3 playerPosition, in Vector3 direction)
         {
-            ITargetableViewModel target = EvaluateBestTarget(playerPosition, direction);
+            ITargetableViewModel target = EvaluateAlignedTarget(playerPosition, direction);
             if (target == null || ReferenceEquals(target, _currentTarget))
             {
                 return false;
             }
 
             SetCurrentTarget(target);
+            _currentCandidate = null;
+            return true;
+        }
+
+        /// <summary>
+        ///     現在のターゲットを候補から外して評価し、次のターゲットへの切り替えを試みる。
+        ///     選び方はロックオン時と同じく、視界範囲内で最も近い敵(距離がほぼ同じならHPが低い敵)を用いる。
+        /// </summary>
+        /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
+        /// <param name="direction"> 選択基準に使用する方向。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。 </returns>
+        public bool TrySwitchToNextTarget(in Vector3 playerPosition, in Vector3 direction)
+        {
+            ITargetableViewModel target = EvaluateLockOnTarget(playerPosition, _currentTarget);
+            if (target == null)
+            {
+                return false;
+            }
+
+            SetCurrentTarget(target);
+            _currentCandidate = null;
+            return true;
+        }
+
+        /// <summary>
+        ///     画面上で現在の対象から指定方向にいる敵のうち、画面中心に最も近い敵への切り替えを試みる。
+        ///     候補はロックオン時と同じく視界範囲内の敵に限る。スマホの強い視点操作による切り替えに使う。
+        /// </summary>
+        /// <param name="screenDirection"> 画面上の方向。右と上を正とする。 </param>
+        /// <param name="worldToViewport"> ワールド座標をビューポート座標（z はカメラからの奥行き）へ変換する処理。 </param>
+        /// <returns> 別ターゲットへ切り替えた場合はtrue。その方向に敵がいない場合はfalse。 </returns>
+        public bool TrySwitchTargetInScreenDirection(in Vector2 screenDirection, Func<Vector3, Vector3> worldToViewport)
+        {
+            if (worldToViewport == null || screenDirection.sqrMagnitude <= float.Epsilon)
+            {
+                return false;
+            }
+
+            // 方向の基準は現在の対象の画面位置。カメラの後ろなどで取れない場合は画面中心にする。
+            Vector2 origin = VIEWPORT_CENTER;
+            if (IsSelectableTarget(_currentTarget))
+            {
+                Vector3 currentViewport = worldToViewport.Invoke(_currentTarget.Position);
+                if (currentViewport.z > 0f)
+                {
+                    origin = currentViewport;
+                }
+            }
+
+            ITargetableViewModel bestTarget = null;
+            float bestSqrDistance = float.PositiveInfinity;
+            foreach (ITargetableViewModel targetable in _targets)
+            {
+                if (!IsLockOnCandidate(targetable, _currentTarget))
+                {
+                    continue;
+                }
+
+                // カメラの後ろにいる敵は画面上の位置が反転するため外す。
+                Vector3 viewport = worldToViewport.Invoke(targetable.Position);
+                if (viewport.z <= 0f)
+                {
+                    continue;
+                }
+
+                // 操作した向きと反対側（または真横より後ろ側）にいる敵は外す。
+                Vector2 screenPosition = viewport;
+                if (Vector2.Dot(screenPosition - origin, screenDirection) <= 0f)
+                {
+                    continue;
+                }
+
+                float sqrDistance = (screenPosition - VIEWPORT_CENTER).sqrMagnitude;
+                if (sqrDistance < bestSqrDistance)
+                {
+                    bestSqrDistance = sqrDistance;
+                    bestTarget = targetable;
+                }
+            }
+
+            if (bestTarget == null)
+            {
+                return false;
+            }
+
+            SetCurrentTarget(bestTarget);
             _currentCandidate = null;
             return true;
         }
@@ -269,6 +366,16 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
+        ///     ロックオン対象を選ぶときに、視界範囲内かどうかを判定する関数を設定する。
+        ///     未設定の場合は、すべての対象を視界範囲内として扱う。
+        /// </summary>
+        /// <param name="isWithinView"> 対象位置が視界範囲内ならtrueを返す関数。 </param>
+        public void SetViewFilter(Func<Vector3, bool> isWithinView)
+        {
+            _isWithinView = isWithinView;
+        }
+
+        /// <summary>
         ///     現在のターゲットを更新する。既存のターゲットと異なる敵へ新たにロックオンした場合、捕捉イベントを発火する。
         /// </summary>
         /// <param name="newTarget"> 新たに設定するターゲット。null の場合はロックオン解除として扱う。 </param>
@@ -284,6 +391,9 @@ namespace KillChord.Runtime.View.InGame.Target
             }
         }
 
+        /// <summary> ビューポート座標での画面中心。 </summary>
+        private static readonly Vector2 VIEWPORT_CENTER = new(0.5f, 0.5f);
+
         /// <summary> NormalizeDot で使用するゼロ除算回避の下限閾値。 </summary>
         private const float NORMALIZE_DOT_EPSILON = 1E-15f;
 
@@ -293,9 +403,13 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <summary> 正面判定に使用する閾値。 </summary>
         private const float DOT_FORWARD_THRESHOLD = 0f;
 
+        /// <summary> 距離がほぼ同じとみなし、HPの低さで選ぶ距離差(m)。 </summary>
+        private const float DISTANCE_TIE_TOLERANCE = 0.5f;
+
         private readonly HashSet<ITargetableViewModel> _targets = new();
         private ITargetableViewModel _currentTarget;
         private ITargetableViewModel _currentCandidate;
+        private Func<Vector3, bool> _isWithinView;
 
         /// <summary>
         ///     ターゲットが選択可能な状態かを判定する。
@@ -313,13 +427,91 @@ namespace KillChord.Runtime.View.InGame.Target
         }
 
         /// <summary>
-        ///     優先順位に従って最適なターゲットを選択する。
+        ///     ロックオン対象を選ぶ。視界範囲内で最も近い敵を選び、距離がほぼ同じならHPが低い敵を選ぶ。
+        /// </summary>
+        /// <param name="center"> 距離の基準位置。 </param>
+        /// <param name="excludedTarget"> 候補から外すターゲット。外さない場合は null。 </param>
+        /// <param name="ignoreView"> 視界範囲の判定を行わず、すべての敵を候補にする場合は true。 </param>
+        /// <returns> 選択されたターゲット。候補がない場合は null。 </returns>
+        private ITargetableViewModel EvaluateLockOnTarget(
+            in Vector3 center,
+            ITargetableViewModel excludedTarget = null,
+            bool ignoreView = false)
+        {
+            // 1パス目: 視界範囲内で最も近い敵までの距離を求める。
+            float nearestDistance = float.PositiveInfinity;
+            foreach (ITargetableViewModel targetable in _targets)
+            {
+                if (!IsLockOnCandidate(targetable, excludedTarget, ignoreView))
+                {
+                    continue;
+                }
+
+                nearestDistance = Mathf.Min(nearestDistance, Vector3.Distance(targetable.Position, center));
+            }
+
+            if (float.IsPositiveInfinity(nearestDistance))
+            {
+                return null;
+            }
+
+            // 2パス目: 最も近い敵から許容差以内の敵のうち、HPが低い敵を選ぶ。HPが同じなら近い敵を選ぶ。
+            float distanceLimit = nearestDistance + DISTANCE_TIE_TOLERANCE;
+            ITargetableViewModel bestTarget = null;
+            float bestDistance = float.PositiveInfinity;
+            float bestHealth = float.PositiveInfinity;
+            foreach (ITargetableViewModel targetable in _targets)
+            {
+                if (!IsLockOnCandidate(targetable, excludedTarget, ignoreView))
+                {
+                    continue;
+                }
+
+                float distance = Vector3.Distance(targetable.Position, center);
+                if (distance > distanceLimit)
+                {
+                    continue;
+                }
+
+                float health = targetable.CurrentHealth;
+                bool isWeaker = health < bestHealth;
+                bool isSameHealthAndCloser = Mathf.Approximately(health, bestHealth) && distance < bestDistance;
+                if (bestTarget == null || isWeaker || isSameHealthAndCloser)
+                {
+                    bestTarget = targetable;
+                    bestDistance = distance;
+                    bestHealth = health;
+                }
+            }
+
+            return bestTarget;
+        }
+
+        /// <summary>
+        ///     ロックオン対象の候補になるかを判定する。
+        /// </summary>
+        /// <param name="targetable"> 判定するターゲット。 </param>
+        /// <param name="excludedTarget"> 候補から外すターゲット。外さない場合は null。 </param>
+        /// <param name="ignoreView"> 視界範囲の判定を行わない場合は true。 </param>
+        /// <returns> 選択可能で、除外対象でなく、視界範囲内にある（または判定しない）場合は true。 </returns>
+        private bool IsLockOnCandidate(ITargetableViewModel targetable, ITargetableViewModel excludedTarget, bool ignoreView = false)
+        {
+            if (!IsSelectableTarget(targetable) || ReferenceEquals(targetable, excludedTarget))
+            {
+                return false;
+            }
+
+            return ignoreView || _isWithinView == null || _isWithinView.Invoke(targetable.Position);
+        }
+
+        /// <summary>
+        ///     指定方向に最も近い向きのターゲットを選択する。左右の切り替えに使う。
         /// </summary>
         /// <param name="center"> 基準位置。 </param>
         /// <param name="direction"> 基準方向。 </param>
         /// <returns> 選択されたターゲット。候補がない場合は null。 </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ITargetableViewModel EvaluateBestTarget(in Vector3 center, in Vector3 direction)
+        private ITargetableViewModel EvaluateAlignedTarget(in Vector3 center, in Vector3 direction)
         {
             ITargetableViewModel shortestTarget = null;
             ITargetableViewModel bestAlignedTarget = null;

@@ -6,6 +6,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     /// <summary>
     ///     ステージシーケンスにおけるSE再生を管理するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Sequence/StageSequenceSoundEffectView")]
     public class StageSequenceSoundEffectView : MonoBehaviour
     {
         /// <summary>

@@ -10,6 +10,7 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
     /// <summary>
     ///     セーブデータを読み込み、旧IDの移行を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Savedata/SavedataSystemInitializer")]
     public sealed class SavedataSystemInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

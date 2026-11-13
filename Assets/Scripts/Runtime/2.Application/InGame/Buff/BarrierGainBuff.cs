@@ -10,8 +10,9 @@ namespace KillChord.Runtime.Application.InGame.Buff
 {
     /// <summary>
     ///     与えたダメージに応じてバリアを獲得するバフです。
+    ///     効果時間が切れたら、獲得したバリアを全て消す。
     /// </summary>
-    public class BarrierGainBuff : StatusEffectBase, IDamageDealtHandler
+    public class BarrierGainBuff : StatusEffectBase, IDamageDealtHandler, IStatusEffectExpiredHandler
     {
         /// <summary>
         ///     所有者・バリア獲得率・持続時間・再付与時の扱いを指定して生成する。
@@ -66,6 +67,22 @@ namespace KillChord.Runtime.Application.InGame.Buff
 
 
             DevLog.Log($"[Skill04] バリア獲得: {barrierAmount}");
+        }
+
+        /// <summary>
+        ///     効果時間が切れたら所有者のバリアを全て消す。
+        ///     重ねがけした同じバフがまだ残っている場合は消さない。
+        /// </summary>
+        public void OnExpired()
+        {
+            if (_owner.StatusEffectSystem.TryGet(EFFECT_ID, out _))
+            {
+                return;
+            }
+
+            _owner.ClearBarrier();
+
+            DevLog.Log("[Skill04] バフの効果時間が切れたためバリアを消去");
         }
 
         private static readonly StatusEffectId EFFECT_ID =

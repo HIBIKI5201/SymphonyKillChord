@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a08faf39c6359b340bbf11966fd059d3, type: 3}
+  m_Name: EnemyDefinition_Boss
+  m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.InGame.Enemy.EnemyDefinitionAsset
+  _id:
+    _id: enemy_boss
+    _hashId: -2066056925
+  _enemyType: 2
+  _viewPrefab: {fileID: 0}
+  _characterDefinition: {fileID: 0}
+  _moveSpec: {fileID: 0}
+  _postAttackBehaviorSpec: {fileID: 0}
+  _encounterMusicSpec: {fileID: 0}
+  _battleMusicSpec: {fileID: 0}
+  _missionKey: {fileID: 0}
+  _attackIndex: 0
+  _defaultPoolSize: 1
+  _maxPoolSize: 1

@@ -14,6 +14,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     敵のインスタンスプーリングを行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/EnemyPools")]
     public class EnemyPools : MonoBehaviour, IShellPool
     {
         /// <summary>
@@ -38,8 +39,10 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             for (int i = 0; i < definitions.Count; i++)
             {
                 EnemyDefinitionAsset definition = definitions[i];
+                // ボスはシーンに配置したボスを使うため、プールを作らない。
                 if (definition == null
                     || definition.Id.Value == 0
+                    || definition.EnemyType == EnemyType.Boss
                     || definition.ViewPrefab == null
                     || _enemyPools.ContainsKey(definition.Id))
                 {

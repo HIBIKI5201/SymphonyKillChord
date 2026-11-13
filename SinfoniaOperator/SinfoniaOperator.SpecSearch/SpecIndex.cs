@@ -8,14 +8,14 @@ using System.Text;
 namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
 {
     /// <summary>
-    ///     仕様書チャンクとページ属性を保持し、索引の永続化を提供する。
+    ///     プロジェクト ドキュメントのチャンクとページ属性を保持し、索引の永続化を提供する。
     /// </summary>
     public sealed class SpecIndex
     {
         /// <summary>
-        ///     仕様書チャンクから検索インデックスを生成する。
+        ///     プロジェクト ドキュメントのチャンクから検索インデックスを生成する。
         /// </summary>
-        /// <param name="records">保持する仕様書チャンク。</param>
+        /// <param name="records">保持するプロジェクト ドキュメントのチャンク。</param>
         public SpecIndex(SpecChunkRecord[] records)
         {
             ArgumentNullException.ThrowIfNull(records);
@@ -23,7 +23,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
             ValidateVectors(_records);
         }
 
-        /// <summary> 保持している仕様書チャンク。 </summary>
+        /// <summary> 保持しているプロジェクト ドキュメントのチャンク。 </summary>
         public IReadOnlyList<SpecChunkRecord> Records => _records;
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace SinfoniaStudio.SinfoniaOperator.SpecSearch
         /// <summary>
         ///     すべての埋め込みベクトルが有効で同一次元か検証する。
         /// </summary>
-        /// <param name="records">検証する仕様書チャンク。</param>
+        /// <param name="records">検証するプロジェクト ドキュメントのチャンク。</param>
         private static void ValidateVectors(SpecChunkRecord[] records)
         {
             if (records.Length == 0)

@@ -62,18 +62,11 @@ namespace KillChord.Runtime.View.OutGame.Screen
             RegisterButtonCallbacks();
         }
 
-        /// <summary> チュートリアルのオーバーレイを配置する、OutGame全体のルート要素を取得します。 </summary>
-        public VisualElement OutGameRootElement => RootElement.panel?.visualTree ?? RootElement.parent;
+        /// <summary> 画面の表示状態が変わったときに発火します。表示開始時はtrue、非表示完了時はfalseです。 </summary>
+        public event Action<bool> VisibilityChanged;
 
-        /// <summary>
-        ///     チュートリアルのハイライト対象要素を名前で検索します。
-        /// </summary>
-        /// <param name="elementName"> 検索する要素の名前です。 </param>
-        /// <returns> 見つかった要素。見つからない場合はnullです。 </returns>
-        public VisualElement FindTutorialTarget(string elementName)
-        {
-            return RootElement.Q<VisualElement>(elementName);
-        }
+        /// <summary> 画面が表示中(表示開始から非表示完了まで)かどうかです。 </summary>
+        public bool IsVisible { get; private set; }
 
         /// <summary>
         ///     トップバーに表示するポイントを更新します。
@@ -269,6 +262,24 @@ namespace KillChord.Runtime.View.OutGame.Screen
 
         /// <inheritdoc />
         protected override VisualElement InitialFocusElement => _stageSelectButton;
+
+        /// <summary>
+        ///     表示開始を通知します。
+        /// </summary>
+        protected override void OnShowStarted()
+        {
+            IsVisible = true;
+            VisibilityChanged?.Invoke(true);
+        }
+
+        /// <summary>
+        ///     非表示完了を通知します。
+        /// </summary>
+        protected override void OnHidden()
+        {
+            IsVisible = false;
+            VisibilityChanged?.Invoke(false);
+        }
 
         private const string STAGE_SELECT_BUTTON_NAME = "StageSelect";
         private const string SKILL_TREE_BUTTON_NAME = "SkillTree";

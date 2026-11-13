@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
     ///     カメラシステムに関するクラスの生成と依存関係の解決を行う初期化クラス。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
+    [AddComponentMenu("KillChord/Composition/Camera/CameraSystemInitializer")]
     public sealed class CameraSystemInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -47,7 +48,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
 
             Initialize(targetContainer.TargetSystemViewModel, targetContainer.TargetSystemController);
 
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
             MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
             PlayerInputView playerInputView = ServiceLocator.GetInstance<PlayerInputView>();
             if (mobileInput != null && playerInputView != null)
@@ -88,6 +89,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             CameraFollowCalculator followCalculator = new(_config);
             CameraLockOnRangeChecker lockOnRangeChecker = new(_config);
             CameraAutoLockOnReleaseTracker autoLockOnReleaseTracker = new(_config, new CameraLockOnBreakTracker(_config));
+            CameraLookInputOverrideTracker lookInputOverrideTracker = new(_config);
             CameraShakeCalculator shakeCalculator = new();
 
             PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
@@ -98,16 +100,16 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             }
 
             _cameraSystem.Initialize(
-                (playerPosition, direction) =>
+                (playerPosition, direction, notifyLockOn, allowOutOfView) =>
                 {
-                    // ロックオン入力はコントローラーを通し、OnTargetLocked（ミッションの LockOn 行動の計上など）を発火させる。
+                    // ターゲットの切り替えはコントローラーを通す。ミッションの LockOn 行動はロックオン入力の通知（OnLockOnInputPerformed）で数える。
                     if (targetSystemController != null)
                     {
-                        targetSystemController.ChangeTarget(playerPosition, direction);
+                        targetSystemController.ChangeTarget(playerPosition, direction, notifyLockOn, allowOutOfView);
                         return;
                     }
 
-                    targetingSystem.ChangeTarget(playerPosition, direction);
+                    targetingSystem.ChangeTarget(playerPosition, direction, notifyLockOn, allowOutOfView);
                 },
                 () => targetingSystem.ClearTarget(),
                 () =>
@@ -117,12 +119,31 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 },
                 (playerPosition, direction) => targetingSystem.UpdateCandidate(playerPosition, direction),
                 (playerPosition, direction) => targetingSystem.TrySwitchTarget(playerPosition, direction),
+                (playerPosition, direction) => targetingSystem.TrySwitchToNextTarget(playerPosition, direction),
+                (screenDirection, worldToViewport) => targetingSystem.TrySwitchTargetInScreenDirection(screenDirection, worldToViewport),
                 // 被弾による自動再ターゲットはロックオン成立イベントを発火させない（AoE/継続ダメージでのロックオンSE多重発火防止）。
                 targetId => targetingSystem.TrySetCurrentTarget(targetId, notifyLockOn: false),
                 followCalculator, lockOnRotationCalculator,
                 freeLookRotationCalculator, lookAtRotationCalculator, lockOnRangeChecker, autoLockOnReleaseTracker,
-                shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
+                lookInputOverrideTracker, shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
+
+            // ロックオン対象はカメラの視界範囲内の敵から選ぶ。
+            targetingSystem.SetViewFilter(_cameraSystem.IsWithinLockOnView);
+
+            // ロックオン入力で対象を捉えたことを、コントローラー経由でミッションなどへ通知する。
+            // 初期化をやり直したときに二重に数えないよう、前の購読を外してからつなぐ。
+            if (_lockOnInputController != null)
+            {
+                _cameraSystem.OnLockOnInputPerformed -= _lockOnInputController.NotifyLockOnInput;
+                _lockOnInputController = null;
+            }
+
+            if (targetSystemController != null)
+            {
+                _lockOnInputController = targetSystemController;
+                _cameraSystem.OnLockOnInputPerformed += _lockOnInputController.NotifyLockOnInput;
+            }
 
             // 設定画面のカメラ感度・反転・オートロックオンを反映する。取得できない場合は既定の挙動で続行する。
             if (ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
@@ -135,10 +156,27 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             }
         }
 
+        /// <summary>
+        ///     ロックオン入力の通知の購読を解除する。
+        /// </summary>
+        public override void Shutdown()
+        {
+            if (_lockOnInputController != null && _cameraSystem != null)
+            {
+                _cameraSystem.OnLockOnInputPerformed -= _lockOnInputController.NotifyLockOnInput;
+            }
+
+            _lockOnInputController = null;
+            base.Shutdown();
+        }
+
         [SerializeField, Tooltip("カメラシステムの挙動を管理する View コンポーネント。")]
         private CameraSystemView _cameraSystem;
 
         [SerializeField, Tooltip("カメラシステムのパラメータを定義するコンフィグ。")]
         private CameraConfig _config;
+
+        /// <summary> ロックオン入力を通知する先のコントローラーです。 </summary>
+        private TargetSystemController _lockOnInputController;
     }
 }

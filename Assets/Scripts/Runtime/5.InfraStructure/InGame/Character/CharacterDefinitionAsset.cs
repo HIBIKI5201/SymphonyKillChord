@@ -22,7 +22,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         /// <summary> キャラクター名を取得する。 </summary>
         public string CharacterName => _characterName;
 
-        /// <summary> キャラクターの攻撃硬直時間を取得する。 </summary>
+        /// <summary> エディタのステータス表示に使う攻撃間隔(秒)を取得する。プレイヤーの攻撃硬直には使わない。 </summary>
         public float AttackInterval => _attackInterval;
 
         /// <summary> 最大HPを取得する。 </summary>
@@ -44,7 +44,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         [SerializeField, Tooltip("キャラクターの名前。")]
         private string _characterName;
 
-        [SerializeField, Tooltip("キャラクターの攻撃硬直時間")]
+        [SerializeField, Tooltip("エディタのステータス表示（攻撃速度）に使う攻撃間隔(秒)。プレイヤーの攻撃硬直には使わず、PlayerConfigの拍数で決まる。")]
         private float _attackInterval = 0.5f;
 
         [SerializeField, Tooltip("キャラクターの最大体力。")]
@@ -56,7 +56,7 @@ namespace KillChord.Runtime.InfraStructure.InGame.Character
         private int _baseDamage;
 
         [SerializeField, Range(0f, 1f),
-        Tooltip("キャラクターの会心率。0〜1で指定する。仕様書の％表記とは単位が違うので注意（仕様書の「クリティカル率5」は 0.05 を指定）。" +
+        Tooltip("キャラクターの会心率。0〜1で指定する。プロジェクト ドキュメントの％表記とは単位が違うので注意（プロジェクト ドキュメントの「クリティカル率5」は 0.05 を指定）。" +
             "会心ダメージ倍率は武器ごとに攻撃定義側で設定する。")]
         private float _criticalChance;
     }

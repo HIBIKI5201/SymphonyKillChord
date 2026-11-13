@@ -204,13 +204,33 @@ namespace KillChord.Runtime.Application.InGame.StatusEffect
         /// <param name="currentTime"> 現在の時間。 </param>
         private void RemoveExpiredEffects(float currentTime)
         {
+            List<IStatusEffectExpiredHandler> expiredHandlers = null;
+
             for (int i = _statusEffects.Count - 1; i >= 0; i--)
             {
                 if (_statusEffects[i].IsExpired(currentTime))
                 {
                     DevLog.Log($"{_statusEffects[i].Effect.Id}の状態効果が期限切れのため削除されました。");
+
+                    if (_statusEffects[i].Effect is IStatusEffectExpiredHandler handler)
+                    {
+                        expiredHandlers ??= new List<IStatusEffectExpiredHandler>();
+                        expiredHandlers.Add(handler);
+                    }
+
                     _statusEffects.RemoveAt(i);
                 }
+            }
+
+            if (expiredHandlers == null)
+            {
+                return;
+            }
+
+            // 通知先がこのシステムを参照しても一覧が崩れないよう、削除を終えてから通知する。
+            for (int i = 0; i < expiredHandlers.Count; i++)
+            {
+                expiredHandlers[i].OnExpired();
             }
         }
 

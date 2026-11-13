@@ -1,6 +1,6 @@
+using KillChord.Runtime.View.InGame.Enemy.BehaviorGraphNode.Condition;
 using System;
 using Unity.Behavior;
-using UnityEngine;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
@@ -9,32 +9,14 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// </summary>
     [Serializable, Unity.Properties.GeneratePropertyBag]
     [Condition(name: "BossIsTargetInAttackRange", story: "敵が攻撃範囲内にいる(Boss) [Bool] [State]", category: "Conditions/Boss", id: "e5b4a6c7d8f9504123ef56ab78cd9a45")]
-    public partial class BossIsTargetInAttackRangeCondition : Unity.Behavior.Condition
+    public partial class BossIsTargetInAttackRangeCondition : StateConditionBase<BossStateFacade>
     {
-        [SerializeReference] public BlackboardVariable<BossStateFacade> State;
-        [SerializeReference] public BlackboardVariable<bool> Bool;
-
         /// <summary>
-        ///     射程内にいるかが Bool の値と一致するかを返す。
+        ///     射程内にいるかを返す。
         /// </summary>
-        public override bool IsTrue()
+        protected override bool ReadState(BossStateFacade state)
         {
-            if (State?.Value == null) return false;
-            return State.Value.IsTargetInAttackRange == Bool.Value;
-        }
-
-        /// <summary>
-        ///     条件評価の開始時の処理。現在は何もしない。
-        /// </summary>
-        public override void OnStart()
-        {
-        }
-
-        /// <summary>
-        ///     条件評価の終了時の処理。現在は何もしない。
-        /// </summary>
-        public override void OnEnd()
-        {
+            return state.IsTargetInAttackRange;
         }
     }
 }

@@ -192,8 +192,6 @@ MonoBehaviour:
   _stateText: {fileID: 7802630919707720996}
   _completedRoot: {fileID: 0}
   _failedRoot: {fileID: 0}
-  _completedText: "\u9054\u6210"
-  _failedText: "\u672A\u9054\u6210"
 --- !u!114 &-7126917688396015326
 MonoBehaviour:
   m_ObjectHideFlags: 0

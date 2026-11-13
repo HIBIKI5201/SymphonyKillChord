@@ -16,7 +16,7 @@ MonoBehaviour:
     _id: enemy_artillery_marked
     _hashId: -1476855641
   _enemyType: 1
-  _viewPrefab: {fileID: 1465007639519197220, guid: 1ab6a5de809632041ab1e245aa451b28, type: 3}
+  _viewPrefab: {fileID: 1465007639519197220, guid: 0fab21c83b4a4964a86adff8a592bb65, type: 3}
   _characterDefinition: {fileID: 11400000, guid: b66d3fbff34b143458ba52a436e06d6f, type: 2}
   _moveSpec: {fileID: 11400000, guid: 71243b714fe682a479522c36402275ac, type: 2}
   _postAttackBehaviorSpec: {fileID: 11400000, guid: eef6c8692532494da44b8b2a62c9930e, type: 2}

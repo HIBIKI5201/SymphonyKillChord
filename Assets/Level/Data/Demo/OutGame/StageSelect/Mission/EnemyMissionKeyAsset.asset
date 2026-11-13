@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: EnemyMissionKeyAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.EnemyMissionKeyAsset
   _id:
-    _id: enemy_red
-    _hashId: 1401557065
-  _displayName: "\u8D64\u3044\u5175\u58EB"
+    _id: enemy_soldier
+    _hashId: -1976604850
+  _displayName: "\u6575\u5175"

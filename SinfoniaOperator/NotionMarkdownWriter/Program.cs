@@ -40,6 +40,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
                     "set-properties" => await PropertiesCommand.RunAsync(commandArguments),
                     "rename" => await RenameCommand.RunAsync(commandArguments),
                     "move" => await MoveCommand.RunAsync(commandArguments),
+                    "move-database" => await MoveDatabaseCommand.RunAsync(commandArguments),
                     "archive" => await ArchiveCommand.RunAsync(commandArguments),
                     "edit-block" => await EditBlockCommand.RunAsync(commandArguments),
                     "append" => await AppendCommand.RunAsync(commandArguments),
@@ -76,7 +77,7 @@ namespace SinfoniaStudio.NotionMarkdownWriter
         private static void WriteHelp()
         {
             Console.WriteLine("Notion Markdown Writer");
-            Console.WriteLine("仕様書ページへMarkdownで書き込むツールです。書き込みは部分置換のみで、全文置換は行いません。");
+            Console.WriteLine("プロジェクト ドキュメントのページへMarkdownで書き込むツールです。書き込みは部分置換のみで、全文置換は行いません。");
             Console.WriteLine();
             Console.WriteLine("使用方法:");
             Console.WriteLine("  NotionMarkdownWriter.exe pull <Markdownパス|URL|ID> [--out <ファイル>]");
@@ -94,6 +95,9 @@ namespace SinfoniaStudio.NotionMarkdownWriter
             Console.WriteLine("      既存ページのタイトルだけを変更する。本文には触れない。");
             Console.WriteLine("  NotionMarkdownWriter.exe move <Markdownパス|URL|ID> --to <移動先データベースのMarkdownパス|URL|ID> [--confirm]");
             Console.WriteLine("      既存ページを子ページからデータベースの行へ移動する。ページIDは変わらない。プロパティと本文には触れない。");
+            Console.WriteLine("  NotionMarkdownWriter.exe move-database <データベースのMarkdownパス|URL|ID> --to <移動先ページのMarkdownパス|URL|ID> [--confirm]");
+            Console.WriteLine("      データベースの実体を別ページの直下へ移動する。データベースID・行・ビュー・リレーションは変わらない。");
+            Console.WriteLine("      リンクドビューは対象外。元の位置へのリンクドビュー作成はNotion上で手作業する。");
             Console.WriteLine("  NotionMarkdownWriter.exe archive <Markdownパス|URL|ID> [--with-children] [--confirm]");
             Console.WriteLine("      既存ページをゴミ箱へ移す。完全削除ではなく、Notion上で復元できる。書き込み許可ルート自身は対象外。");
             Console.WriteLine("      直下に子ページ・子データベースがある場合は、一緒に移ってよいと確認したうえで --with-children を付ける。");

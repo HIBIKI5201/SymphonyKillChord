@@ -1,0 +1,40 @@
+name: "[CI/CD] Demo Master Diff"
+
+# Demo/ と Master/ が並ぶフォルダーで、同じ相対パス（ファイル名の Demo は Master と読み替え）の
+# アセットを対として比べ、内容が違えば警告を出す（#2075）。Demo と Master は違ってよいので、失敗にはしない。
+# GUID の参照はアセットのパスに直し、Demo 側の参照は対になる Master に読み替えてから比べる。
+on:
+  pull_request:
+    paths:
+      - 'Assets/**/Demo/**'
+      - 'Assets/**/Master/**'
+      - 'scripts/demo-master/**'
+      - '.github/workflows/DemoMasterDiff.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 比較ツールのテスト
+        run: python -m unittest discover -s scripts/demo-master -p 'test_*.py'
+      - name: Demo と Master の差分を警告で出す
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # PR ではこのPRで変わった対だけ、手動実行では全ての対を見る。
+          if [ -n "$BASE_SHA" ]; then
+            git diff --name-only "$BASE_SHA...HEAD" > "$RUNNER_TEMP/changed.txt"
+            python scripts/demo-master/diff_demo_master.py --changed "$RUNNER_TEMP/changed.txt"
+          else
+            python scripts/demo-master/diff_demo_master.py
+          fi

@@ -3,11 +3,9 @@ using KillChord.Runtime.Domain.OutGame.Screen;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace KillChord.Runtime.InfraStructure.OutGame.Screen
 {
@@ -45,7 +43,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Screen
         /// <exception cref="IOException"> ファイルを読み込めなかった場合に発生します。 </exception>
         public static async ValueTask<MemberJsonRepository> LoadAsync(CancellationToken ct)
         {
-            string jsonText = await ReadCreditJsonAsync(ct);
+            string jsonText = await StreamingAssetsTextReader.ReadAllTextAsync(CREDIT_DIRECTORY_NAME, CREDIT_FILE_NAME, ct);
             return new MemberJsonRepository(jsonText);
         }
 
@@ -64,50 +62,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.Screen
         /// <summary> クレジット JSON のファイル名です。 </summary>
         private const string CREDIT_FILE_NAME = "credits.json";
 
-        /// <summary> StreamingAssets のパスが URL 形式かどうかを判別する区切り文字です。 </summary>
-        private const string URL_SCHEME_SEPARATOR = "://";
-
         private readonly IReadOnlyList<MemberData> _members;
-
-        /// <summary>
-        ///     StreamingAssets からクレジット JSON の全文を読み込みます。
-        /// </summary>
-        /// <param name="ct"> キャンセルトークンです。 </param>
-        /// <returns> クレジット JSON の全文です。 </returns>
-        private static async ValueTask<string> ReadCreditJsonAsync(CancellationToken ct)
-        {
-            string root = UnityEngine.Application.streamingAssetsPath;
-
-            // Android では StreamingAssets が APK 内にあり、File API では読めないため UnityWebRequest で読む。
-            if (!root.Contains(URL_SCHEME_SEPARATOR, StringComparison.Ordinal))
-            {
-                string path = Path.Combine(root, CREDIT_DIRECTORY_NAME, CREDIT_FILE_NAME);
-                if (!File.Exists(path))
-                {
-                    throw new FileNotFoundException($"クレジット JSON が見つかりません。path={path}", path);
-                }
-
-                return await File.ReadAllTextAsync(path, Encoding.UTF8, ct);
-            }
-
-            string url = $"{root.TrimEnd('/')}/{CREDIT_DIRECTORY_NAME}/{CREDIT_FILE_NAME}";
-            using UnityWebRequest request = UnityWebRequest.Get(url);
-            using CancellationTokenRegistration registration = ct.Register(s => ((UnityWebRequest)s).Abort(), request);
-            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
-            while (!operation.isDone)
-            {
-                ct.ThrowIfCancellationRequested();
-                await Task.Yield();
-            }
-
-            ct.ThrowIfCancellationRequested();
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                throw new IOException($"クレジット JSON を読み込めませんでした。url={url}, error={request.error}");
-            }
-
-            return request.downloadHandler != null ? request.downloadHandler.text : string.Empty;
-        }
 
         /// <summary>
         ///     クレジット JSON を制作メンバー情報の一覧へ解析します。

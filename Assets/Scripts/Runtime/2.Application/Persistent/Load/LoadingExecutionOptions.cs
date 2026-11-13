@@ -20,6 +20,26 @@ namespace KillChord.Runtime.Application.Persistent.Load
             float endProgress,
             bool reuseActiveSession,
             bool completeOnSuccess)
+            : this(startProgress, endProgress, reuseActiveSession, completeOnSuccess, null, null)
+        {
+        }
+
+        /// <summary>
+        ///     遷移元と遷移先のシーンを含めてロード実行設定を生成する。
+        /// </summary>
+        /// <param name="startProgress"> 全体進捗上の開始位置。 </param>
+        /// <param name="endProgress"> 全体進捗上の終了位置。 </param>
+        /// <param name="reuseActiveSession"> 実行中のロードセッションを再利用するかどうか。 </param>
+        /// <param name="completeOnSuccess"> 処理成功時にロードセッションを終了するかどうか。 </param>
+        /// <param name="fromSceneName"> 遷移元のシーン名。不明な場合はnull。 </param>
+        /// <param name="toSceneName"> 遷移先のシーン名。不明な場合はnull。 </param>
+        public LoadingExecutionOptions(
+            float startProgress,
+            float endProgress,
+            bool reuseActiveSession,
+            bool completeOnSuccess,
+            string fromSceneName,
+            string toSceneName)
         {
             // 例外処理。
             if (startProgress < 0f || startProgress > 1f)
@@ -48,6 +68,8 @@ namespace KillChord.Runtime.Application.Persistent.Load
             EndProgress = endProgress;
             ReuseActiveSession = reuseActiveSession;
             CompleteOnSuccess = completeOnSuccess;
+            FromSceneName = fromSceneName;
+            ToSceneName = toSceneName;
         }
 
         /// <summary>
@@ -69,6 +91,12 @@ namespace KillChord.Runtime.Application.Persistent.Load
         ///     処理成功時にロード画面を閉じるかどうか。
         /// </summary>
         public bool CompleteOnSuccess { get; }
+
+        /// <summary> ロード画面の最低表示時間を決めるための遷移元のシーン名。不明な場合はnull。 </summary>
+        public string FromSceneName { get; }
+
+        /// <summary> ロード画面の最低表示時間を決めるための遷移先のシーン名。不明な場合はnull。 </summary>
+        public string ToSceneName { get; }
 
         /// <summary>
         ///     単独で完結するロード設定を生成する。
@@ -115,6 +143,23 @@ namespace KillChord.Runtime.Application.Persistent.Load
         }
 
         /// <summary>
+        ///     遷移元と遷移先のシーンを設定した複製を生成する。
+        /// </summary>
+        /// <param name="fromSceneName"> 遷移元のシーン名。不明な場合はnull。 </param>
+        /// <param name="toSceneName"> 遷移先のシーン名。不明な場合はnull。 </param>
+        /// <returns> 遷移元と遷移先を設定したロード実行設定。 </returns>
+        public LoadingExecutionOptions WithRoute(string fromSceneName, string toSceneName)
+        {
+            return new LoadingExecutionOptions(
+                StartProgress,
+                EndProgress,
+                ReuseActiveSession,
+                CompleteOnSuccess,
+                fromSceneName,
+                toSceneName);
+        }
+
+        /// <summary>
         ///     他の値と等しいか判定する。
         /// </summary>
         /// <param name="other"> 比較対象。 </param>
@@ -124,7 +169,9 @@ namespace KillChord.Runtime.Application.Persistent.Load
             return StartProgress.Equals(other.StartProgress)
                 && EndProgress.Equals(other.EndProgress)
                 && ReuseActiveSession == other.ReuseActiveSession
-                && CompleteOnSuccess == other.CompleteOnSuccess;
+                && CompleteOnSuccess == other.CompleteOnSuccess
+                && string.Equals(FromSceneName, other.FromSceneName, StringComparison.Ordinal)
+                && string.Equals(ToSceneName, other.ToSceneName, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -148,7 +195,9 @@ namespace KillChord.Runtime.Application.Persistent.Load
                 StartProgress,
                 EndProgress,
                 ReuseActiveSession,
-                CompleteOnSuccess);
+                CompleteOnSuccess,
+                FromSceneName,
+                ToSceneName);
         }
     }
 }

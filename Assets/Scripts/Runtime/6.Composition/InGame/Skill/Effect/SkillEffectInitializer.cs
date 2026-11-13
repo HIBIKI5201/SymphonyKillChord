@@ -14,6 +14,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill.Effect
     /// <summary>
     ///     スキルエフェクトのプールをシーンロード時に構築して公開するモジュール。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Skill/SkillEffectInitializer")]
     public sealed class SkillEffectInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

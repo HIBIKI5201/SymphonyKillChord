@@ -435,7 +435,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
                 "Skill" => "Assets/Level/Data/Master/Skill/Templates",
                 "Wave" => "Assets/Level/Data/Master/InGame/Enemy",
                 "EnemyData" => "Assets/Level/Data/Master/InGame/Enemy/Definitions",
-                "BossAttackEntry" => "Assets/Level/Data/Develop/Boss",
+                "BossAttackEntry" => "Assets/Level/Data/Master/InGame/Enemy/Boss",
                 "EnemyMissionKey" => "Assets/Level/Data/Master/OutGame/StageSelect/Mission",
                 "Character" => "Assets/Level/Data/Master/Character",
                 "Mission" => "Assets/Level/Data/Master/OutGame/StageSelect/Mission",

@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.Persistent.Load
     /// <summary>
     ///     操作を保留する中央通知を、非スケール時間で表示してからフェードアウトします。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Load/EventNotificationView")]
     public sealed class EventNotificationView : MonoBehaviour
     {
         /// <summary> 通知による入力抑止状態が変わった時に通知します。 </summary>
@@ -131,6 +132,12 @@ namespace KillChord.Runtime.View.Persistent.Load
                 "ui.notification.save_failed" => isEnglish
                     ? "Failed to save data."
                     : "データの保存に失敗しました。",
+                "ui.notification.startup_failed" => isEnglish
+                    ? "The game failed to start and will now close."
+                    : "起動に失敗したため、ゲームを終了します。",
+                "ui.notification.save_recovered" => isEnglish
+                    ? "The save data could not be loaded, so the game starts from the beginning."
+                    : "セーブデータを読み込めなかったため、初期状態から始めます。",
                 _ => throw new ArgumentOutOfRangeException(nameof(entry), entry, "未定義の通知です。"),
             };
         }

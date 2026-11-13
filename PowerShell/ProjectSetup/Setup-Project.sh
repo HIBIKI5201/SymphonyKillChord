@@ -5,6 +5,7 @@
 # - クローン先のパス（日本語・空白が無いか）とフォルダ名（SymphonyKillChord か）
 # - git の設定（submodule.recurse / core.longpaths）
 # - サブモジュールの取得（閲覧権限が無ければ招待を頼むよう案内する）
+#   project-setup.json の RequiredSubmodules にあるものだけ必須。ほかは取れなくても警告に留める
 # - Unity エディタのバージョンと Android Build Support
 # - Unity CLI（unity コマンド。無ければ公式のスクリプトで入れる）
 # 必須の項目がすべて通ったら、UserSettings/KillChord/ProjectSetupState.json に記録する。
@@ -106,8 +107,20 @@ done
 # --- サブモジュール --------------------------------------------------------
 # git が認証を尋ねられるよう標準入力は空けておき、一覧は別の記述子（3）から読む。
 SUBMODULE_LINES="$(git_in_repo config -f .gitmodules --get-regexp '^submodule\..*\.path$')"
+# 必須でないもの（サウンドの元データ・プロジェクト ドキュメントの写し）は、閲覧権限が無い役職でも作業できるので警告に留める。
+REQUIRED_SUBMODULES_LINE="$(grep '"RequiredSubmodules"' "$CONFIG_PATH")"
+submodule_failure_status() {
+    if [ -z "$REQUIRED_SUBMODULES_LINE" ] || printf '%s' "$REQUIRED_SUBMODULES_LINE" | grep -qF "\"$1\""; then
+        echo 'Error'
+    else
+        echo 'Warn'
+    fi
+}
 while read -r key path <&3; do
     [ -n "$path" ] || continue
+    failure_status="$(submodule_failure_status "$path")"
+    optional_note=''
+    if [ "$failure_status" = 'Warn' ]; then optional_note='必須ではないので、このまま作業できます。'; fi
     name="${key%.path}"
     status="$(git_in_repo submodule status -- "$path" 2> /dev/null)"
     full_path="$REPO_ROOT/$path"
@@ -116,11 +129,11 @@ while read -r key path <&3; do
         continue
     fi
     if [ "$CHECK" -eq 1 ]; then
-        add_result "サブモジュール $path" 'Error' 'まだ取得していません。'
+        add_result "サブモジュール $path" "$failure_status" "まだ取得していません。$optional_note"
         continue
     fi
 
-    # 仕様書のように本体の記録を気にせず最新を読むもの（ignore = all）は、ブランチの最新を取る。
+    # プロジェクト ドキュメントのように本体の記録を気にせず最新を読むもの（ignore = all）は、ブランチの最新を取る。
     arguments=(submodule update --init --recursive)
     if [ "$(git_in_repo config -f .gitmodules --get "$name.ignore")" = 'all' ]; then
         arguments+=(--remote --depth 1)
@@ -131,7 +144,7 @@ while read -r key path <&3; do
     if git_in_repo "${arguments[@]}" -- "$path"; then
         add_result "サブモジュール $path" 'Fixed' '取得しました。'
     else
-        add_result "サブモジュール $path" 'Error' '取得できませんでした。上に出た git のエラーを確認してください。認証や「Repository not found」のエラーなら、非公開リポジトリの閲覧権限がありません。リードに GitHub の招待を頼んでください。'
+        add_result "サブモジュール $path" "$failure_status" "取得できませんでした。上に出た git のエラーを確認してください。認証や「Repository not found」のエラーなら、非公開リポジトリの閲覧権限がありません。必要ならリードに GitHub の招待を頼んでください。$optional_note"
     fi
 done 3<<< "$SUBMODULE_LINES"
 
@@ -141,20 +154,45 @@ UNITY_VERSION="$(sed -n 's/^m_EditorVersion:[[:space:]]*\([^[:space:]]*\).*/\1/p
 UNITY_REVISION="$(sed -n 's/^m_EditorVersionWithRevision:[[:space:]]*[^[:space:]]*[[:space:]]*(\([[:alnum:]]*\)).*/\1/p' "$VERSION_FILE")"
 HUB_INSTALL_URI="unityhub://$UNITY_VERSION/$UNITY_REVISION"
 
-# Unity Hub の既定のインストール先と、Hub で変更したインストール先を探す。
+# Unity Hub の既定のインストール先（.github/unity-paths.json の editorRoots。CI と同じ）と、
+# Hub で変更したインストール先を探す。unity-paths.json を読めないときは固定のパスを使う。
 # macOS: <ルート>/<版>/Unity.app と <ルート>/<版>/PlaybackEngines
 # Linux: <ルート>/<版>/Editor/Unity と <ルート>/<版>/Editor/Data/PlaybackEngines
+UNITY_PATHS_FILE="$REPO_ROOT/.github/unity-paths.json"
+
+# unity-paths.json から、指定した OS の editorRoots を1行に1つずつ出す（1要素1行で書かれた単純なファイル専用）。
+unity_editor_roots() {
+    [ -f "$UNITY_PATHS_FILE" ] || return 0
+    awk -v os="\"$1\"" '
+        index($0, os) { in_os = 1 }
+        in_os && /"editorRoots"/ { in_roots = 1; next }
+        in_roots && /\]/ { exit }
+        in_roots && match($0, /"[^"]*"/) { print substr($0, RSTART + 1, RLENGTH - 2) }
+    ' "$UNITY_PATHS_FILE"
+}
+
 if [ "$(uname -s)" = 'Darwin' ]; then
-    EDITOR_ROOTS=('/Applications/Unity/Hub/Editor')
+    UNITY_PATHS_OS='macOS'
+    DEFAULT_EDITOR_ROOTS=("$HOME/Applications/Unity/Hub/Editor" '/Applications/Unity/Hub/Editor')
     SECONDARY_PATH_FILE="$HOME/Library/Application Support/UnityHub/secondaryInstallPath.json"
     EDITOR_EXECUTABLE='Unity.app'
     ANDROID_PLAYER='PlaybackEngines/AndroidPlayer'
 else
-    EDITOR_ROOTS=("$HOME/Unity/Hub/Editor")
+    UNITY_PATHS_OS='Linux'
+    DEFAULT_EDITOR_ROOTS=("$HOME/Unity/Hub/Editor")
     SECONDARY_PATH_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/UnityHub/secondaryInstallPath.json"
     EDITOR_EXECUTABLE='Editor/Unity'
     ANDROID_PLAYER='Editor/Data/PlaybackEngines/AndroidPlayer'
 fi
+EDITOR_ROOTS=()
+while IFS= read -r root; do
+    case "$root" in
+        '~') root="$HOME" ;;
+        '~/'*) root="$HOME/${root#\~/}" ;;
+    esac
+    if [ -n "$root" ]; then EDITOR_ROOTS+=("$root"); fi
+done < <(unity_editor_roots "$UNITY_PATHS_OS")
+if [ "${#EDITOR_ROOTS[@]}" -eq 0 ]; then EDITOR_ROOTS=("${DEFAULT_EDITOR_ROOTS[@]}"); fi
 if [ -f "$SECONDARY_PATH_FILE" ]; then
     # 中身は JSON の文字列1つ（例: "/Volumes/Data/Unity"）。
     secondary="$(sed -e 's/^[[:space:]]*"//' -e 's/"[[:space:]]*$//' "$SECONDARY_PATH_FILE")"
@@ -169,7 +207,8 @@ for root in "${EDITOR_ROOTS[@]}"; do
 done
 
 if [ -z "$EDITOR_PATH" ]; then
-    add_result "Unity $UNITY_VERSION" 'Error' "インストールされていません。Unity Hub で $HUB_INSTALL_URI を開き、Android Build Support を付けて入れてください。"
+    searched="$(printf '%s, ' "${EDITOR_ROOTS[@]}")"
+    add_result "Unity $UNITY_VERSION" 'Error' "インストールされていません（探した場所: ${searched%, }）。Unity Hub で $HUB_INSTALL_URI を開き、Android Build Support を付けて入れてください。"
 else
     add_result "Unity $UNITY_VERSION" 'OK' "$EDITOR_PATH"
     # ビルドターゲットが Android なので、ビルドしない役職でも無いとプロジェクトを開いたときに警告が出る。

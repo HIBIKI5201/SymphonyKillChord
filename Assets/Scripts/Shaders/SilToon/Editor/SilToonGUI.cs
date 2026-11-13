@@ -12,6 +12,8 @@ namespace DevelopProducts.ToonShader
         static bool showNormal = true;
         static bool showFresnel = true;
         static bool showPBR = true;
+        static bool showSheen = true;
+        static bool showAniso = true;
         static bool showSSS = true;
         static bool showOutline = true;
         static bool showSmears = true;
@@ -67,6 +69,19 @@ namespace DevelopProducts.ToonShader
             MaterialProperty roughness = Find("_Roughness", props);
             MaterialProperty specularIntensity = Find("_SpecularIntensity", props);
             MaterialProperty envReflectionIntensity = Find("_EnvReflectionIntensity", props);
+
+            MaterialProperty sheenOn = Find("_SheenOn", props);
+            MaterialProperty sheerColor = Find("_SheerColor", props);
+            MaterialProperty sheerAmount = Find("_SheerAmount", props);
+            MaterialProperty sheerPower = Find("_SheerPower", props);
+            MaterialProperty sheenColor = Find("_SheenColor", props);
+            MaterialProperty sheenPower = Find("_SheenPower", props);
+
+            MaterialProperty anisoOn = Find("_AnisoOn", props);
+            MaterialProperty anisoColor = Find("_AnisoColor", props);
+            MaterialProperty anisoExponent = Find("_AnisoExponent", props);
+            MaterialProperty anisoShift = Find("_AnisoShift", props);
+            MaterialProperty anisoAround = Find("_AnisoAround", props);
 
             MaterialProperty sssOn = Find("_SSSOn", props);
             MaterialProperty sssColor = Find("_SSSColor", props);
@@ -160,6 +175,37 @@ namespace DevelopProducts.ToonShader
                     materialEditor.TexturePropertySingleLine(new GUIContent("Roughness", "粗さマップ(未設定時は白=マット)"), roughnessMap, roughness);
                     materialEditor.ShaderProperty(specularIntensity, new GUIContent("Specular Intensity", "直接スペキュラの強度"));
                     materialEditor.ShaderProperty(envReflectionIntensity, new GUIContent("Env Reflection", "リフレクションプローブ反射の強度"));
+                    EditorGUI.indentLevel--;
+                }
+            });
+
+            DrawSection("Sheer & Sheen (布・タイツ)", ref showSheen, () =>
+            {
+                materialEditor.ShaderProperty(sheenOn, new GUIContent("Enable", "薄手生地の透けと、布の輪郭光沢を有効化"));
+                if (sheenOn.floatValue == 1)
+                {
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.LabelField("Sheer (透け)", EditorStyles.boldLabel);
+                    materialEditor.ShaderProperty(sheerColor, new GUIContent("Color", "生地越しに透ける下地の色 (肌色)"));
+                    materialEditor.ShaderProperty(sheerAmount, new GUIContent("Amount", "透け具合。0で透けない"));
+                    materialEditor.ShaderProperty(sheerPower, new GUIContent("Power", "大きいほど透ける範囲が正面に絞られる"));
+                    EditorGUILayout.LabelField("Sheen (輪郭光沢)", EditorStyles.boldLabel);
+                    materialEditor.ShaderProperty(sheenColor, new GUIContent("Color", "輪郭に乗る光沢の色と強さ。黒で無効"));
+                    materialEditor.ShaderProperty(sheenPower, new GUIContent("Power", "大きいほど光沢が輪郭に絞られる"));
+                    EditorGUI.indentLevel--;
+                }
+            });
+
+            DrawSection("Anisotropic Highlight (髪・タイツ)", ref showAniso, () =>
+            {
+                materialEditor.ShaderProperty(anisoOn, new GUIContent("Enable", "繊維方向に伸びるハイライトを有効化。繊維方向はUVから取るため、UVを毛流れ/生地の目に沿って展開したメッシュが必要"));
+                if (anisoOn.floatValue == 1)
+                {
+                    EditorGUI.indentLevel++;
+                    materialEditor.ShaderProperty(anisoColor, new GUIContent("Color", "ハイライトの色と強さ"));
+                    materialEditor.ShaderProperty(anisoExponent, new GUIContent("Exponent", "大きいほど帯が細くなる"));
+                    materialEditor.ShaderProperty(anisoShift, new GUIContent("Shift", "帯の位置を上下にずらす"));
+                    materialEditor.ShaderProperty(anisoAround, new GUIContent("Fiber Along U (Tights)", "OFF: 繊維 = V方向(髪。毛先を -V に向けた展開で天使の輪) / ON: 繊維 = U方向(タイツ。脚の周方向を U に展開して縦筋)"));
                     EditorGUI.indentLevel--;
                 }
             });
@@ -362,6 +408,10 @@ namespace DevelopProducts.ToonShader
                 material.HasProperty("_CharShadowOn") && material.GetFloat("_CharShadowOn") > 0);
             SetKeyword(material, "_PBR_ON",
                 material.HasProperty("_PBROn") && material.GetFloat("_PBROn") > 0);
+            SetKeyword(material, "_SHEEN_ON",
+                material.HasProperty("_SheenOn") && material.GetFloat("_SheenOn") > 0);
+            SetKeyword(material, "_ANISO_ON",
+                material.HasProperty("_AnisoOn") && material.GetFloat("_AnisoOn") > 0);
         }
 
         private static void SetKeyword(Material material, string keyword, bool enabled)

@@ -9,6 +9,7 @@ namespace KillChord.Demo.End
     /// <summary>
     ///     体験版終了画面の暗転と案内UIの表示を行うViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/Demo/End/DemoEndView")]
     public sealed class DemoEndView : MonoBehaviour
     {
         /// <summary>

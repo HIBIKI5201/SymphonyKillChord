@@ -9,8 +9,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
     /// </summary>
     public sealed class TargetSystemController
     {
-        /// <summary> 有効なターゲットをロックオンした時に発火します。 </summary>
-        public event Action OnTargetLocked;
+        /// <summary> ロックオン入力で有効なターゲットを捉えた時に発火します。攻撃時の自動ロックオンや付け替えでは発火しません。 </summary>
+        public event Action OnLockOnInputPerformed;
 
         /// <summary>
         ///     ターゲット選択ViewModelとレジストリを受け取り、コントローラーを初期化する。
@@ -123,10 +123,22 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// </summary>
         /// <param name="playerPosition"> プレイヤー位置。 </param>
         /// <param name="direction"> 基準方向。 </param>
-        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction)
+        /// <param name="notifyLockOn"> ロックオン成立を通知するかどうか。入力によらない付け替えではfalseを指定する。 </param>
+        /// <param name="allowOutOfView"> 視界範囲内に候補がいないとき、視界範囲外の敵からも選ぶかどうか。 </param>
+        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true, bool allowOutOfView = false)
         {
-            _targetSystemViewModel.ChangeTarget(playerPosition, direction);
-            NotifyTargetLockedIfAvailable();
+            _targetSystemViewModel.ChangeTarget(playerPosition, direction, notifyLockOn, allowOutOfView);
+        }
+
+        /// <summary>
+        ///     ロックオン入力の後に、有効なターゲットを捉えていればそれを通知する。
+        /// </summary>
+        public void NotifyLockOnInput()
+        {
+            if (_targetSystemViewModel.TryGetCurrentTarget(out _))
+            {
+                OnLockOnInputPerformed?.Invoke();
+            }
         }
 
         /// <summary>
@@ -157,13 +169,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// <returns> 設定に成功した場合は true。 </returns>
         public bool TrySetCurrentTarget(Guid targetId)
         {
-            bool succeeded = _targetSystemViewModel.TrySetCurrentTarget(targetId);
-            if (succeeded)
-            {
-                OnTargetLocked?.Invoke();
-            }
-
-            return succeeded;
+            return _targetSystemViewModel.TrySetCurrentTarget(targetId);
         }
 
         /// <summary>
@@ -176,16 +182,5 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
 
         private readonly ITargetSystemViewModel _targetSystemViewModel;
         private readonly TargetEntityRegistry _targetEntityRegistry;
-
-        /// <summary>
-        ///     現在のターゲットが有効な場合にロックオン成立を通知します。
-        /// </summary>
-        private void NotifyTargetLockedIfAvailable()
-        {
-            if (_targetSystemViewModel.TryGetCurrentTarget(out _))
-            {
-                OnTargetLocked?.Invoke();
-            }
-        }
     }
 }

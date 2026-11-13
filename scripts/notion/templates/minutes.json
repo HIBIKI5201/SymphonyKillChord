@@ -1,0 +1,21 @@
+{
+  "type": "minutes",
+  "label": "議事録",
+  "database": "27d7c2c6-cc02-814f-8a42-dd9d4739a3c5",
+  "title_property": "名前",
+  "properties": {
+    "日付": { "type": "date", "required": true, "default": "@today" },
+    "議題": { "type": "rich_text", "required": true }
+  },
+  "sections": {
+    "決定": { "default": "なし" },
+    "ログ": { "required": true }
+  },
+  "body": [
+    "<table_of_contents color=\"gray\"/>",
+    "# 決定",
+    "{{決定}}",
+    "# ログ",
+    "{{ログ}}"
+  ]
+}

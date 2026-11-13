@@ -1,12 +1,12 @@
 using KillChord.Runtime.Adaptor.InGame.Enemy;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 
 namespace KillChord.Runtime.View.InGame.Enemy
 {
     /// <summary>
     ///     ボスの3方向攻撃用レイキャストと警告ライン表示を担当するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/TripleShotRaycastDetectView")]
     public partial class TripleShotRaycastDetectView : MonoBehaviour, IEnemyRaycastDetectViewModel, IRaycastDetectView
     {
 

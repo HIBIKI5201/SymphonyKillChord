@@ -1,0 +1,4 @@
+# Codex のプロジェクト設定。プロジェクト ドキュメントの窓口（scripts/notion/spec_mcp.py）を MCP サーバーとして使う（#2396）。
+[mcp_servers.spec]
+command = "python"
+args = ["scripts/notion/spec_mcp.py"]

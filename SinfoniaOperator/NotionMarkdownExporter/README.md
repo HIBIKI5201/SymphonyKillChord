@@ -2,6 +2,7 @@
 
 Notionのルートページ以下をEnhanced Markdown APIで再帰取得するWindows向けツールです。
 子ページ、データベース行、画像、添付ファイルをローカルへ保存し、子ページ参照を相対リンクへ変換します。
+ページ名の無いメンション（`<mention-page url="..."/>`）には、書き出したページ・データベースのタイトルを補います（`<mention-page url="...">タイトル</mention-page>`）。書き出し範囲の外のページは元のまま残します。
 ブロック背景色の装飾マーカー（例: `**{color="gray\_bg"}**` や見出し末尾の `{color="gray_bg"}`）は出力時に削除します。
 
 ## 初期設定
@@ -9,7 +10,7 @@ Notionのルートページ以下をEnhanced Markdown APIで再帰取得するWi
 1. Notionで内部インテグレーションを作成し、コンテンツの読み取り権限を有効にします。
 2. ルートページの`•••`メニューから`接続`を開き、作成したインテグレーションを追加します。
 3. 公開設定`SinfoniaOperator/sinfonia-operator.env.json`の`NOTION_EXPORT_ROOT_PAGE`と、必要に応じて`NOTION_EXPORT_OUTPUT`を設定します。
-4. `SinfoniaOperator/sinfonia-operator.secrets.sample.json`を`sinfonia-operator.secrets.json`としてコピーし、`NOTION_TOKEN`と`DISCORD_BOT_TOKEN`を設定します。
+4. `SinfoniaOperator/secrets.sample.json`をリポジトリルートの`UserSettings/KillChord/secrets.json`としてコピーし、`NOTION_TOKEN`と`DISCORD_BOT_TOKEN`を設定します。
 
 ```json
 {
@@ -19,7 +20,9 @@ Notionのルートページ以下をEnhanced Markdown APIで再帰取得するWi
 ```
 
 `sinfonia-operator.env.json`はGitで共有する設定です。トークンは記載しないでください。
-`sinfonia-operator.secrets.json`はGitの除外対象です。Notion・Discordのトークンはこのファイルだけに保存します。
+`UserSettings/KillChord/secrets.json`はGitの除外対象です。Notion・Discordのトークンはこのファイルだけに保存します。
+このファイルはUnityのエディタツール（Google Drive取り込み、チケットシステム）の秘密設定と共用します。
+旧パス`SinfoniaOperator/sinfonia-operator.secrets.json`も移行期間中は読み込みますが、読み込んだときは移行を促すログを出します。
 
 ## 実行
 

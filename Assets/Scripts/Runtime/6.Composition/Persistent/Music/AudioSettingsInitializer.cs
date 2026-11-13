@@ -1,11 +1,13 @@
 using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
+using KillChord.Runtime.Composition.Persistent.Savedata;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Persistent.Savedata;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
 using System.Threading;
 using UnityEngine;
 
@@ -14,6 +16,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
     /// <summary>
     ///     共通音量設定を読み込み、Persistentシーンへ公開するモジュール。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Music/AudioSettingsInitializer")]
     public sealed class AudioSettingsInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名。 </summary>
@@ -29,6 +32,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         {
             _audioSettingsRepository = new AudioSettingsRepository();
             _audioSettingsService = new AudioSettingsService(_audioSettingsRepository);
+            _audioSettingsService.OnSaveFailed += HandleSaveFailed;
             _loadedSettings = await _audioSettingsService.LoadAsync(cancellationToken);
             return _loadedSettings != null;
         }
@@ -88,6 +92,15 @@ namespace KillChord.Runtime.Composition.Persistent.Music
             _audioSettingsService = null;
             _audioSettingsRepository = null;
             _loadedSettings = null;
+        }
+
+        /// <summary>
+        ///     保存が上限回数まで失敗したときに、ほかのセーブデータと同じ通知でプレイヤーへ伝える。
+        /// </summary>
+        /// <param name="exception"> 最後の保存で起きた例外。 </param>
+        private void HandleSaveFailed(Exception exception)
+        {
+            _ = SaveFailureNotification.ShowAsync(this, destroyCancellationToken);
         }
 
         private IAudioSettingsRepository _audioSettingsRepository;

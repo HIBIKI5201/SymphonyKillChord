@@ -1,4 +1,5 @@
 using KillChord.Editor.Utility;
+using SinfoniaStudio.SinfoniaOperator;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -23,6 +24,7 @@ namespace KillChord.Editor.SinfoniaOperator
         public string EnvironmentConfigJsonPath = DEFAULT_ENVIRONMENT_CONFIG_JSON_PATH;
 
         [Tooltip("NotionとDiscordのトークンを保持する秘密JSON設定ファイルへのパスです。" +
+            "既定ではUnityのほかのエディタツールと共用するUserSettings/KillChord/secrets.jsonを使います。" +
             "プロジェクトルートからの相対パス、または絶対パスで指定します。")]
         public string SecretsConfigJsonPath = DEFAULT_SECRETS_CONFIG_JSON_PATH;
 
@@ -32,8 +34,11 @@ namespace KillChord.Editor.SinfoniaOperator
         /// <summary> 公開設定ファイルの既定パス（プロジェクトルートからの相対パス）。 </summary>
         public const string DEFAULT_ENVIRONMENT_CONFIG_JSON_PATH = "SinfoniaOperator/sinfonia-operator.env.json";
 
-        /// <summary> 秘密設定ファイルの既定パス（プロジェクトルートからの相対パス）。 </summary>
-        public const string DEFAULT_SECRETS_CONFIG_JSON_PATH = "SinfoniaOperator/sinfonia-operator.secrets.json";
+        /// <summary> 秘密設定ファイルの既定パス（プロジェクトルートからの相対パス）。Unityのほかのツールと共用する。 </summary>
+        public const string DEFAULT_SECRETS_CONFIG_JSON_PATH = OperatorConfig.SHARED_SECRETS_CONFIG_RELATIVE_PATH;
+
+        /// <summary> 共通ファイルへ移す前の秘密設定ファイルのパス。移行期間中だけ読む。 </summary>
+        public const string LEGACY_SECRETS_CONFIG_JSON_PATH = "SinfoniaOperator/sinfonia-operator.secrets.json";
 
         /// <summary> 分割前の設定ファイルのパス。 </summary>
         public const string LEGACY_CONFIG_JSON_PATH = "SinfoniaOperator/sinfonia-operator.settings.json";

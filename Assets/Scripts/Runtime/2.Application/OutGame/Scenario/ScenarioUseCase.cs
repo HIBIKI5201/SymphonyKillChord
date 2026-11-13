@@ -1,6 +1,7 @@
 using KillChord.Runtime.Domain.OutGame.Scenario;
 using System;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application.OutGame.Scenario
@@ -33,7 +34,9 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         /// <summary>
         /// 設定されたシナリオを先頭から順に再生する。
         /// </summary>
-        public async ValueTask PlayScenario(string scenarioId)
+        /// <param name="scenarioId"> 再生するシナリオID。 </param>
+        /// <param name="cancellationToken"> キャンセルされた場合はスキップと同じく再生を終える。 </param>
+        public async ValueTask PlayScenario(string scenarioId, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(scenarioId))
             {
@@ -45,7 +48,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                 throw new InvalidOperationException("シナリオは既に再生中です。");
             }
             ResetPlaybackState();
-            using CancellationTokenSource source = new CancellationTokenSource();
+            using CancellationTokenSource source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _playCts = source;
             CancellationToken token = source.Token;
             bool skipped = false;
@@ -96,7 +99,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                     _playCts = null;
                     ResetPlaybackState();
                 }
-                await _completionNotifier.NotifyCompletedAsync(skipped, CancellationToken.None);
+                await _completionNotifier.NotifyCompletedAsync(skipped, cancellationToken);
             }
         }
 
@@ -165,6 +168,8 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
         public bool IsAutoAdvance { get; private set; }
 
         private static readonly TimeSpan MINIMUM_PAUSE_POLL_INTERVAL = TimeSpan.FromMilliseconds(10);
+        /// <summary> 次送り待機で Auto の待ち時間が先に終わったことを表す WhenAny の添字。 </summary>
+        private const int AUTO_ADVANCE_DELAY_INDEX = 2;
 
         private CancellationTokenSource _playCts;
         private int _autoAdvanceVersion;
@@ -187,7 +192,7 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                 TimeSpan interval = _settingsRepository.PausePollInterval > TimeSpan.Zero
                     ? _settingsRepository.PausePollInterval
                     : MINIMUM_PAUSE_POLL_INTERVAL;
-                await Task.Delay(interval, ct);
+                await UniTask.Delay(interval, DelayType.Realtime, cancellationToken: ct);
             }
             ct.ThrowIfCancellationRequested();
         }
@@ -232,13 +237,14 @@ namespace KillChord.Runtime.Application.OutGame.Scenario
                     : MINIMUM_PAUSE_POLL_INTERVAL;
                 TimeSpan delay = remainingDelay < interval ? remainingDelay : interval;
                 using CancellationTokenSource delaySource = CancellationTokenSource.CreateLinkedTokenSource(ct);
-                Task delayTask = Task.Delay(delay, delaySource.Token);
-                Task completedTask = await Task.WhenAny(advanceTask, stateChangedTask, delayTask);
+                int completedIndex = await UniTask.WhenAny(
+                    advanceTask.AsUniTask(),
+                    stateChangedTask.AsUniTask(),
+                    UniTask.Delay(delay, DelayType.Realtime, cancellationToken: delaySource.Token));
                 delaySource.Cancel();
-                if (ReferenceEquals(completedTask, delayTask)
+                if (completedIndex == AUTO_ADVANCE_DELAY_INDEX
                     && IsAutoAdvance && !IsPaused && autoAdvanceVersion == _autoAdvanceVersion)
                 {
-                    await delayTask;
                     remainingDelay -= delay;
                 }
             }

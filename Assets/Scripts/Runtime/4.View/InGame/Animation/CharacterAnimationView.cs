@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View
     /// <summary>
     ///     キャラクターアニメーションの再生と計算をView層で完結させる。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Animation/CharacterAnimationView")]
     public sealed class CharacterAnimationView : MonoBehaviour
     {
         /// <summary>
@@ -16,13 +17,16 @@ namespace KillChord.Runtime.View
         /// <param name="context"> アニメーションのView側依存。 </param>
         /// <param name="clips"> 再生対象のアニメーションクリップ一覧。 </param>
         /// <param name="musicSyncState"> BPM参照元。 </param>
+        /// <param name="justSlowMotionViewModel"> ジャスト成立時のスローモーションの再生倍率の参照元。未指定ならスローをかけない。 </param>
         public void Initialize(
             CharacterAnimationViewContext context,
             AnimationClip[] clips,
-            MusicSyncState musicSyncState)
+            MusicSyncState musicSyncState,
+            JustSlowMotionViewModel justSlowMotionViewModel = null)
         {
             _context = context;
             _musicSyncState = musicSyncState;
+            _justSlowMotionViewModel = justSlowMotionViewModel;
             _locomotionCalculator = new CharacterAnimationLocomotionCalculator();
             _oneShotTimingCalculator = new CharacterAnimationOneShotTimingCalculator();
             _weights = clips != null
@@ -60,6 +64,8 @@ namespace KillChord.Runtime.View
 
             _locomotionCalculator.SetBpm(_musicSyncState != null ? (float)_musicSyncState.Bpm : 60f);
             _locomotionCalculator.SetVelocity(_context.ViewModel.Velocity);
+            _locomotionCalculator.UpdateWalkWeight(Time.deltaTime, _locomotionBlendSeconds);
+            TrySyncLocomotionPhase();
             Array.Clear(_weights, 0, _weights.Length);
             _locomotionCalculator.ApplyBaseWeights(_weights);
 
@@ -79,7 +85,11 @@ namespace KillChord.Runtime.View
 
             ApplyOverlayWeight();
 
-            _playableController.SetAnimationSpeed(_locomotionCalculator.AnimationSpeed);
+            // ジャストのスローモーションは再生速度だけにかけ、ワンショットの終了判定などの時間は変えない。
+            float slowMotionScale = _justSlowMotionViewModel != null
+                ? _justSlowMotionViewModel.GetCurrentPlaybackScale()
+                : 1f;
+            _playableController.SetAnimationSpeed(_locomotionCalculator.AnimationSpeed * slowMotionScale);
             for (int i = 0; i < _weights.Length; i++)
             {
                 _playableController.SetWeight(i, _weights[i]);
@@ -209,12 +219,15 @@ namespace KillChord.Runtime.View
         private Animator _animator;
         [SerializeField, Tooltip("予約ブレンド時間です。")]
         private float _reserveBlendSeconds = 0.1f;
+        [SerializeField, Tooltip("IdleとWalkを切り替えるブレンド時間（秒）です。")]
+        private float _locomotionBlendSeconds = 0.15f;
 
         private PlayableAnimationController _playableController;
         private CharacterAnimationLocomotionCalculator _locomotionCalculator;
         private CharacterAnimationOneShotTimingCalculator _oneShotTimingCalculator;
         private ICharacterAnimationViewContext _context;
         private MusicSyncState _musicSyncState;
+        private JustSlowMotionViewModel _justSlowMotionViewModel;
         private float[] _weights;
         private bool _isInitialized;
         private float _overlayBaseDuration;
@@ -230,6 +243,7 @@ namespace KillChord.Runtime.View
         private bool _isOverlayCancelling;
         private bool _hasStoppedSinceOverlayStarted;
         private bool _hasNotifiedOneShotEnded;
+        private bool _hasSyncedLocomotionPhase;
 
         /// <summary>
         ///     ワンショットオーバーレイが有効か判定する。
@@ -242,6 +256,38 @@ namespace KillChord.Runtime.View
                 && _overlayIndex >= 0
                 && _overlayIndex < _weights.Length
                 && (_isOverlayCancelling || _overlayElapsedBaseTime < _overlayBaseDuration);
+        }
+
+        /// <summary>
+        ///     曲の再生が始まっていれば、IdleとWalkのクリップを曲の現在の拍位置へ一度だけ頭出しする。
+        ///     曲の途中で生成した敵でも、歩きの位相が拍に合うようにする。
+        /// </summary>
+        private void TrySyncLocomotionPhase()
+        {
+            if (_hasSyncedLocomotionPhase
+                || _musicSyncState == null
+                || _musicSyncState.BeatLength <= 0d
+                || _musicSyncState.PlayTime <= 0d)
+            {
+                return;
+            }
+
+            // 小節頭より前でも位相を求められるよう、AccurateBeatではなく再生時間から拍数を求める。
+            double beat = (_musicSyncState.PlayTime - _musicSyncState.BeatOffsetSeconds) / _musicSyncState.BeatLength;
+            SyncClipPhase((int)CharacterAnimationClipType.Idle, beat);
+            SyncClipPhase((int)CharacterAnimationClipType.Walk, beat);
+            _hasSyncedLocomotionPhase = true;
+        }
+
+        /// <summary>
+        ///     指定クリップの再生位置を拍位置に合わせる。
+        /// </summary>
+        /// <param name="index"> クリップのインデックス。 </param>
+        /// <param name="beat"> 最初の小節頭からの拍数。 </param>
+        private void SyncClipPhase(int index, double beat)
+        {
+            float clipLength = _playableController.GetClipLength(index);
+            _playableController.SetClipTime(index, _locomotionCalculator.CalculateClipTime(beat, clipLength));
         }
 
         /// <summary>

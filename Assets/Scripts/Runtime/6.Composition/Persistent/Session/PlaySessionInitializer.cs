@@ -1,6 +1,9 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
+using KillChord.Runtime.Adaptor.Persistent.Session;
+using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
@@ -22,14 +25,17 @@ using UnityEngine.SceneManagement;
 namespace KillChord.Runtime.Composition.Persistent.Session
 {
     /// <summary>
-    ///     プレイセッションのセーブデータから起動時に開くシーンを決め、シーン間で持ち込む選択状態を用意する。
+    ///     プレイセッションのセーブデータから途中復帰先を決め、シーン間で持ち込む選択状態を用意する。
     ///     <para>
-    ///         シーン間の選択状態（バトル・ミッション・シナリオ）は常駐シーンが登録するため、
+    ///         シーン間の選択状態（バトル・ミッション・シナリオ・予約済み遷移）は常駐シーンが登録するため、
     ///         どのシーンから開始しても各シーンの初期化に必要な状態が揃う。
+    ///         起動時は常にタイトル画面から始め、シナリオパート・バトルパートにいた場合は、
+    ///         タイトル画面でゲームを始めたときにそのステージの開始地点へ進めるよう途中復帰先を提供する。
     ///         起動後は画面の切り替わりを監視し、最後にいた画面と選択中のステージをセーブデータへ記録する。
     ///     </para>
     /// </summary>
-    public sealed class PlaySessionInitializer : PersistentInitializationModuleBase, IPersistentFirstSceneProvider
+    [AddComponentMenu("KillChord/Composition/Session/PlaySessionInitializer")]
+    public sealed class PlaySessionInitializer : PersistentInitializationModuleBase, IPlaySessionResumeProvider
     {
         /// <summary> モジュール名です。 </summary>
         public override string ModuleName => nameof(PlaySessionInitializer);
@@ -39,7 +45,7 @@ namespace KillChord.Runtime.Composition.Persistent.Session
 
         /// <summary>
         ///     プレイセッションを読み込み、再開するステージの定義を解決します。
-        ///     <para> 再開できない内容でも起動は止めず、タイトルから始めます。 </para>
+        ///     <para> 再開できない内容でも起動は止めず、途中復帰せずにタイトル画面の通常の遷移先から始めます。 </para>
         /// </summary>
         /// <param name="cancellationToken"> キャンセルトークン。 </param>
         /// <returns> 常にtrue。 </returns>
@@ -62,7 +68,7 @@ namespace KillChord.Runtime.Composition.Persistent.Session
         }
 
         /// <summary>
-        ///     シーン間の選択状態を登録し、再開地点に合わせて選択状態と最初に開くシーンを決めます。
+        ///     シーン間の選択状態を登録し、再開地点に合わせて選択状態と途中復帰先を決めます。
         /// </summary>
         /// <returns> 選択状態を登録できた場合はtrue。 </returns>
         public override bool Build()
@@ -70,13 +76,22 @@ namespace KillChord.Runtime.Composition.Persistent.Session
             _selectedBattleStageState = GetOrRegister<SelectedBattleStageState>(ref _ownsBattleStageState);
             _selectedMissionState = GetOrRegister<SelectedMissionState>(ref _ownsMissionState);
             _selectedScenarioState = GetOrRegister<SelectedScenarioState>(ref _ownsScenarioState);
-            if (_selectedBattleStageState == null || _selectedMissionState == null || _selectedScenarioState == null)
+            _pendingNodeTransitionState = GetOrRegister<PendingNodeTransitionState>(ref _ownsPendingNodeTransitionState);
+            if (_selectedBattleStageState == null || _selectedMissionState == null || _selectedScenarioState == null
+                || _pendingNodeTransitionState == null)
             {
                 Debug.LogError($"[{nameof(PlaySessionInitializer)}] シーン間の選択状態を登録できませんでした。", this);
                 return false;
             }
 
-            ResolveFirstScene();
+            ResolveResumeDestination();
+            if (!ServiceLocator.RegisterInstance<IPlaySessionResumeProvider>(this))
+            {
+                Debug.LogWarning(
+                    $"[{nameof(PlaySessionInitializer)}] 途中復帰先を登録できないため、タイトル画面からの途中復帰を行いません。",
+                    this);
+            }
+
             return true;
         }
 
@@ -126,30 +141,55 @@ namespace KillChord.Runtime.Composition.Persistent.Session
                 _selectedScenarioState.OnSelectionChanged -= SelectionChangedHandler;
             }
 
+            ServiceLocator.UnregisterInstance<IPlaySessionResumeProvider>(this);
             UnregisterIfOwned(_selectedBattleStageState, ref _ownsBattleStageState);
             UnregisterIfOwned(_selectedMissionState, ref _ownsMissionState);
             UnregisterIfOwned(_selectedScenarioState, ref _ownsScenarioState);
+            UnregisterIfOwned(_pendingNodeTransitionState, ref _ownsPendingNodeTransitionState);
             _selectedBattleStageState = null;
+            _pendingNodeTransitionState = null;
+            _resumeStageTree = null;
             _selectedMissionState = null;
             _selectedScenarioState = null;
             _sessionData = null;
             _resumeStageDefinition = null;
+            ClearResumeDestination();
         }
 
         /// <summary>
-        ///     最初に開くシーンを取得します。
+        ///     途中復帰先のシーンを取得します。
         /// </summary>
-        /// <param name="sceneName"> 最初に開くシーン名です。 </param>
-        /// <param name="isKeepLoading"> 読み込んだシーンがロード画面を引き継いで閉じる場合はtrueです。 </param>
-        /// <returns> 再開するシーンがある場合はtrueです。 </returns>
-        public bool TryGetFirstScene(out string sceneName, out bool isKeepLoading)
+        /// <param name="sceneName"> 途中復帰先のシーン名です。 </param>
+        /// <param name="isKeepLoading"> 遷移先の初期化がロード画面を引き継いで閉じる場合はtrueです。 </param>
+        /// <returns> 途中復帰先がある場合はtrueです。 </returns>
+        public bool TryGetResumeDestination(out string sceneName, out bool isKeepLoading)
         {
-            sceneName = _firstSceneName;
-            isKeepLoading = _isFirstSceneKeepLoading;
-            return !string.IsNullOrWhiteSpace(sceneName);
+            sceneName = _resumeSceneName;
+            isKeepLoading = _isResumeKeepLoading;
+            return HasResumeDestination;
         }
 
-        [SerializeField, SceneNameSelector, Tooltip("タイトルのシーン名。このシーンに戻るとプレイセッションを消去する。")]
+        /// <summary>
+        ///     途中復帰先と前回のプレイの記録を破棄します。
+        /// </summary>
+        public void DiscardResume()
+        {
+            if (HasResumeDestination)
+            {
+                // 再開用に用意した選択状態を、通常の開始へ持ち込まない。
+                _selectedBattleStageState?.Clear();
+                _selectedScenarioState?.Clear();
+                _pendingNodeTransitionState?.Clear();
+            }
+
+            ClearResumeDestination();
+            if (_sessionData != null && _sessionData.Clear())
+            {
+                _ = SaveSessionAsync();
+            }
+        }
+
+        [SerializeField, SceneNameSelector, Tooltip("タイトルのシーン名。途中復帰先へ進まずにこのシーンへ戻るとプレイセッションを消去する。")]
         private string _titleSceneName = "Title";
 
         [SerializeField, SceneNameSelector, Tooltip("アウトゲームのシーン名。バトル終了後の帰還先にも使う。")]
@@ -163,17 +203,23 @@ namespace KillChord.Runtime.Composition.Persistent.Session
 
         private PlaySessionData _sessionData;
         private StageDefinition _resumeStageDefinition;
+        private StageTree _resumeStageTree;
         private SelectedBattleStageState _selectedBattleStageState;
         private SelectedMissionState _selectedMissionState;
         private SelectedScenarioState _selectedScenarioState;
+        private PendingNodeTransitionState _pendingNodeTransitionState;
         private ISceneInitializationNotifier _sceneInitializationNotifier;
-        private string _firstSceneName;
-        private bool _isFirstSceneKeepLoading;
+        private string _resumeSceneName;
+        private bool _isResumeKeepLoading;
         private bool _ownsBattleStageState;
         private bool _ownsMissionState;
         private bool _ownsScenarioState;
+        private bool _ownsPendingNodeTransitionState;
         private bool _isSaving;
         private bool _hasPendingSave;
+
+        /// <summary> 途中復帰先がある場合はtrueです。 </summary>
+        private bool HasResumeDestination => !string.IsNullOrWhiteSpace(_resumeSceneName);
 
         /// <summary>
         ///     シーンの初期化完了に合わせて再開地点を記録します。
@@ -181,9 +227,21 @@ namespace KillChord.Runtime.Composition.Persistent.Session
         /// <param name="sceneName"> 初期化が完了したシーン名。 </param>
         private void SceneInitializedHandler(string sceneName)
         {
-            // タイトルへ戻ったら、次回もタイトルから始める。
+            // 途中復帰先へ進んだら、以降は通常どおり記録する。
+            if (HasResumeDestination && string.Equals(sceneName, _resumeSceneName, StringComparison.Ordinal))
+            {
+                ClearResumeDestination();
+            }
+
             if (string.Equals(sceneName, _titleSceneName, StringComparison.Ordinal))
             {
+                // 起動直後のタイトルでは、途中復帰できるよう記録を残す。
+                if (HasResumeDestination)
+                {
+                    return;
+                }
+
+                // プレイ中にタイトルへ戻ったら、次回は途中復帰しない。
                 if (_sessionData != null && _sessionData.Clear())
                 {
                     _ = SaveSessionAsync();
@@ -222,16 +280,17 @@ namespace KillChord.Runtime.Composition.Persistent.Session
                 if (stageTreeAsset == null || waveDefinitionRepository == null)
                 {
                     Debug.LogWarning(
-                        $"[{nameof(PlaySessionInitializer)}] ステージツリーを読み込めないため、タイトルから始めます。",
+                        $"[{nameof(PlaySessionInitializer)}] ステージツリーを読み込めないため、途中復帰しません。",
                         this);
                     return null;
                 }
 
                 StageTree stageTree = stageTreeAsset.Create(waveDefinitionRepository);
+                _resumeStageTree = stageTree;
                 if (!stageTree.TryGetDefinition(stageId, out StageDefinition stageDefinition))
                 {
                     Debug.LogWarning(
-                        $"[{nameof(PlaySessionInitializer)}] 再開するステージが見つからないため、タイトルから始めます。StageId: {stageId}",
+                        $"[{nameof(PlaySessionInitializer)}] 再開するステージが見つからないため、途中復帰しません。StageId: {stageId}",
                         this);
                     return null;
                 }
@@ -247,13 +306,15 @@ namespace KillChord.Runtime.Composition.Persistent.Session
         }
 
         /// <summary>
-        ///     再開地点に合わせて選択状態を用意し、最初に開くシーンを決めます。
-        ///     <para> 再開できない場合は最初に開くシーンを決めず、常駐シーンの既定（タイトル）に任せます。 </para>
+        ///     再開地点に合わせて選択状態を用意し、途中復帰先を決めます。
+        ///     <para>
+        ///         ホーム画面（アウトゲーム）にいた場合と再開できない場合は途中復帰先を決めず、
+        ///         タイトル画面の通常の遷移先に任せます。
+        ///     </para>
         /// </summary>
-        private void ResolveFirstScene()
+        private void ResolveResumeDestination()
         {
-            _firstSceneName = null;
-            _isFirstSceneKeepLoading = false;
+            ClearResumeDestination();
             if (_sessionData == null)
             {
                 return;
@@ -262,20 +323,28 @@ namespace KillChord.Runtime.Composition.Persistent.Session
             switch (_sessionData.Scene)
             {
                 case PlaySessionScene.OutGame:
-                    _firstSceneName = _outGameSceneName;
+                    // ホーム画面はタイトル画面の通常の遷移先と同じため、途中復帰先にしない。
                     return;
 
                 case PlaySessionScene.Scenario when _resumeStageDefinition is ScenarioStageDefinition scenarioStage:
                     if (_sessionData.IsOpeningTutorialScenario)
                     {
+                        // タイトルから始めた場合と同じく、完了後はチュートリアル戦闘へ直接進む。
                         _selectedScenarioState.SelectOpeningTutorialScenario(scenarioStage);
+                        if (!OpeningTutorialRoute.TryReserveTutorialBattle(
+                                _resumeStageTree, scenarioStage, _pendingNodeTransitionState, _outGameSceneName))
+                        {
+                            Debug.LogWarning(
+                                $"[{nameof(PlaySessionInitializer)}] チュートリアル戦闘を予約できないため、OutGame から開始します。",
+                                this);
+                        }
                     }
                     else
                     {
                         _selectedScenarioState.SelectScenario(scenarioStage);
                     }
 
-                    _firstSceneName = scenarioStage.TargetSceneName;
+                    _resumeSceneName = scenarioStage.TargetSceneName;
                     return;
 
                 case PlaySessionScene.InGame when _resumeStageDefinition is BattleStageDefinition battleStage:
@@ -283,14 +352,14 @@ namespace KillChord.Runtime.Composition.Persistent.Session
                             .TryPrepareBattleSortie(battleStage, _outGameSceneName))
                     {
                         Debug.LogWarning(
-                            $"[{nameof(PlaySessionInitializer)}] 再開するバトルステージを選択できないため、タイトルから始めます。",
+                            $"[{nameof(PlaySessionInitializer)}] 再開するバトルステージを選択できないため、途中復帰しません。",
                             this);
                         return;
                     }
 
                     // インゲームは初期化の完了時にロード画面を閉じるため、開いたまま引き渡す。
-                    _firstSceneName = battleStage.TargetSceneName;
-                    _isFirstSceneKeepLoading = true;
+                    _resumeSceneName = battleStage.TargetSceneName;
+                    _isResumeKeepLoading = true;
                     return;
 
                 case PlaySessionScene.None:
@@ -298,11 +367,20 @@ namespace KillChord.Runtime.Composition.Persistent.Session
 
                 default:
                     Debug.LogWarning(
-                        $"[{nameof(PlaySessionInitializer)}] 再開地点とステージの種類が一致しないため、タイトルから始めます。" +
+                        $"[{nameof(PlaySessionInitializer)}] 再開地点とステージの種類が一致しないため、途中復帰しません。" +
                         $" Scene: {_sessionData.Scene}, StageId: {_sessionData.StageId}",
                         this);
                     return;
             }
+        }
+
+        /// <summary>
+        ///     途中復帰先を無くします。
+        /// </summary>
+        private void ClearResumeDestination()
+        {
+            _resumeSceneName = null;
+            _isResumeKeepLoading = false;
         }
 
         /// <summary>
@@ -311,6 +389,13 @@ namespace KillChord.Runtime.Composition.Persistent.Session
         private void RecordCurrentScreen()
         {
             if (_sessionData == null)
+            {
+                return;
+            }
+
+            // 保存を止める状態が登録されている間は、再開地点を書き換えない。
+            if (ServiceLocator.TryGetInstance(out ISaveSuppression saveSuppression)
+                && saveSuppression.IsSaveSuppressed)
             {
                 return;
             }

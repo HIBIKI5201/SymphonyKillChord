@@ -581,7 +581,34 @@ namespace KillChord.Editor.AutoBuilder
 
                         SyncSelectedBuildTargetGroupWithActiveTarget();
 
-                        BuildReport report = BuildPipeline.BuildPlayer(options);
+                        // Android はアップロード鍵の設定があれば署名する。Master で鍵が無ければここで止める。
+                        if (!AndroidReleaseSigning.TryApply(target, profile.name))
+                        {
+                            TryDeleteFailedBuildOutput(buildDir, profile.name);
+                            NextSession(true);
+                            return;
+                        }
+
+                        // CI から版が渡されていれば、プレイヤーの版番号に入れる。形式が正しくなければここで止める。
+                        if (!BuildVersionSettings.TryApply(profile.name))
+                        {
+                            AndroidReleaseSigning.Restore();
+                            TryDeleteFailedBuildOutput(buildDir, profile.name);
+                            NextSession(true);
+                            return;
+                        }
+
+                        BuildReport report;
+                        try
+                        {
+                            report = BuildPipeline.BuildPlayer(options);
+                        }
+                        finally
+                        {
+                            AndroidReleaseSigning.Restore();
+                            BuildVersionSettings.Restore();
+                        }
+
                         hasFailure = report.summary.result != BuildResult.Succeeded;
 
                         if (hasFailure)

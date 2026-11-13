@@ -43,7 +43,12 @@ namespace SinfoniaStudio.SinfoniaOperator
             Console.WriteLine("[Main] SinfoniaOperator 起動中...");
 
             // 設定ソースを選択する。JSON設定があれば優先し、なければ環境変数を使用する。
-            if (!TryLoadConfig(args)) { return; }
+            // 設定の失敗は「通知対象なし」と区別できるよう、非0で終了する。
+            if (!TryLoadConfig(args))
+            {
+                Environment.ExitCode = 1;
+                return;
+            }
 
             DiscordEnvironment discordEnv = default;
             NotionEnvironment notionEnv = default;
@@ -66,6 +71,7 @@ namespace SinfoniaStudio.SinfoniaOperator
             catch (Exception ex)
             {
                 Console.WriteLine($"[Main] 環境変数の読み込み中にエラーが発生しました: {ex.Message}");
+                Environment.ExitCode = 1;
                 return;
             }
 
@@ -133,7 +139,11 @@ namespace SinfoniaStudio.SinfoniaOperator
         private static void LoadConfigFromDefaultLocations()
         {
             string? environmentConfigPath = FindConfigFile(OperatorConfig.ENVIRONMENT_CONFIG_FILE_NAME);
-            string? secretsConfigPath = FindConfigFile(OperatorConfig.SECRETS_CONFIG_FILE_NAME);
+            string? secretsConfigPath = OperatorConfig.FindSecretsConfigFile(new[]
+            {
+                Directory.GetCurrentDirectory(),
+                AppContext.BaseDirectory
+            });
             string? legacyConfigPath = FindConfigFile(OperatorConfig.LEGACY_CONFIG_FILE_NAME);
 
             if (environmentConfigPath != null)
@@ -159,7 +169,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                         OperatorConfigKeys.NOTION_TOKEN);
                 }
 
-                Console.WriteLine($"[Main] 旧設定ファイルを読み込みました。{OperatorConfig.SECRETS_CONFIG_FILE_NAME}への移行を推奨します。");
+                Console.WriteLine($"[Main] 旧設定ファイルを読み込みました。{OperatorConfig.SHARED_SECRETS_CONFIG_RELATIVE_PATH}への移行を推奨します。");
             }
 
             if (environmentConfigPath == null && secretsConfigPath == null && legacyConfigPath == null)
@@ -257,7 +267,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     仕様書を埋め込み、検索インデックスを生成する。
+        ///     プロジェクト ドキュメントを埋め込み、検索インデックスを生成する。
         /// </summary>
         /// <param name="args">"index"を除いたJSON設定ファイルのパス。</param>
         private static async Task RunIndexCommandAsync(string[] args)
@@ -503,7 +513,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     仕様書ディレクトリを含むリポジトリルートを探索する。
+        ///     プロジェクト ドキュメントのディレクトリを含むリポジトリルートを探索する。
         /// </summary>
         /// <returns>リポジトリルートの絶対パス。</returns>
         private static string FindRepositoryRoot()
@@ -517,8 +527,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                     string specificationPath = Path.Combine(directory.FullName, "Docs", "NotionSpecifications");
                     if (Directory.Exists(Path.Combine(directory.FullName, ".git"))
                         || File.Exists(Path.Combine(directory.FullName, ".git"))
-                        || Directory.Exists(specificationPath)
-                        || Directory.Exists(Path.Combine(directory.FullName, "Library", "NotionSpecifications")))
+                        || Directory.Exists(specificationPath))
                     {
                         return directory.FullName;
                     }
@@ -527,7 +536,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 }
             }
 
-            throw new DirectoryNotFoundException("仕様書キャッシュまたは.gitを含むリポジトリルートが見つかりません。");
+            throw new DirectoryNotFoundException("プロジェクト ドキュメントのキャッシュまたは.gitを含むリポジトリルートが見つかりません。");
         }
 
         /// <summary>

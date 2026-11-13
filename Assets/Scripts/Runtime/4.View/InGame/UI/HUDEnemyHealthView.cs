@@ -13,6 +13,7 @@ namespace KillChord.Runtime.View.InGame.UI
     ///     ロックオン候補または確定対象のHUDを表示する。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.CAMERA_FOLLOW)]
+    [AddComponentMenu("KillChord/View/UI/HUDEnemyHealthView")]
     public sealed class HUDEnemyHealthView : MonoBehaviour
     {
         /// <summary> HUD位置の更新タイミングを通知する。 </summary>

@@ -3,6 +3,7 @@ using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.OutGame.Scenario;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -68,6 +69,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
             _isDisposed = true;
             _missionRuntimeService.OnObjectiveStepChanged -= HandleObjectiveStepChanged;
+            _disposeCancellationSource.Cancel();
+            _disposeCancellationSource.Dispose();
 
             if (_isPlaybackInProgress)
             {
@@ -124,7 +127,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 isScenarioPlaybackStarted = true;
                 OnScenarioPlaybackStarted?.Invoke();
 
-                await _scenarioPlaybackService.PlayScenario(condition.ScenarioId);
+                await _scenarioPlaybackService.PlayScenario(condition.ScenarioId, _disposeCancellationSource.Token);
                 if (!_isDisposed)
                 {
                     condition.CompletePlayback();
@@ -156,6 +159,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private readonly IScenarioPlaybackService _scenarioPlaybackService;
         private readonly IScenarioBattlePauseController _battlePauseController;
         private readonly IScenarioInputModeController _inputModeController;
+        private readonly CancellationTokenSource _disposeCancellationSource = new();
         private bool _isPlaybackInProgress;
         private bool _isStarted;
         private bool _isDisposed;

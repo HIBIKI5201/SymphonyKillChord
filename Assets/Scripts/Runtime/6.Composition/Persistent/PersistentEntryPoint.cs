@@ -2,8 +2,8 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.SceneManagement;
-using KillChord.Runtime.Composition.Persistent.Session;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -18,6 +18,7 @@ namespace KillChord.Runtime.Composition.Persistent
     /// <summary>
     ///     常駐シーン起動時のエントリーポイントとなるクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Persistent/PersistentEntryPoint")]
     public sealed class PersistentEntryPoint : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -26,8 +27,13 @@ namespace KillChord.Runtime.Composition.Persistent
         /// <summary> 実行順です。 </summary>
         public override int Order => 1000;
 
+        /// <summary> 起動の失敗を伝える通知のUICommonエントリ。 </summary>
+        private const string STARTUP_FAILED_NOTIFICATION_ENTRY = "ui.notification.startup_failed";
+
         [SerializeField, Tooltip("起動時に最初のシーンを読み込むか。")] private bool _active = true;
         [SerializeField, Tooltip("起動時に最初に読み込むシーン名。"), SceneNameSelector] private string _firstSceneName;
+        [SerializeField, Tooltip("起動に失敗したことを伝える通知。未設定のときは登録済みの通知を使う。")]
+        private EventNotificationView _startupFailureNotificationView;
 
         private CancellationTokenSource _cancellationTokenSource;
         private List<IPersistentInitializationModule> _modules;
@@ -38,6 +44,7 @@ namespace KillChord.Runtime.Composition.Persistent
         private async void Start()
         {
             bool isSuccess = false;
+            bool isCanceled = false;
 
             try
             {
@@ -56,6 +63,7 @@ namespace KillChord.Runtime.Composition.Persistent
             }
             catch (OperationCanceledException)
             {
+                isCanceled = true;
             }
             catch (Exception exception)
             {
@@ -64,6 +72,12 @@ namespace KillChord.Runtime.Composition.Persistent
             finally
             {
                 CompleteSceneInitialization(isSuccess);
+            }
+
+            // 初期化に失敗したら、タイトル画面を出さずにエラーを伝えて終了する。
+            if (!isSuccess && !isCanceled)
+            {
+                await ShowStartupFailureAndQuitAsync();
             }
         }
 
@@ -135,23 +149,13 @@ namespace KillChord.Runtime.Composition.Persistent
                 return;
             }
 
-            // プレイセッションに再開地点があればそのシーンを、無ければ既定のシーンを開く。
+            // 途中復帰はタイトル画面でゲームを始めたときに行うため、起動時は常に既定のシーンを開く。
             string firstSceneName = _firstSceneName;
-            bool isKeepLoading = false;
-            IPersistentFirstSceneProvider provider = _modules?.OfType<IPersistentFirstSceneProvider>().FirstOrDefault();
-            if (provider != null && provider.TryGetFirstScene(out string resumeSceneName, out bool isResumeKeepLoading))
-            {
-                firstSceneName = resumeSceneName;
-                isKeepLoading = isResumeKeepLoading;
-            }
-
             try
             {
-                bool success = isKeepLoading
-                    ? await controller.LoadAdditiveKeepingLoadingWithPersistentLifetimeAsync(firstSceneName)
-                    : await controller.LoadAdditiveAsync(
-                        firstSceneName,
-                        _cancellationTokenSource.Token);
+                bool success = await controller.LoadAdditiveAsync(
+                    firstSceneName,
+                    _cancellationTokenSource.Token);
 
                 if (!success)
                 {
@@ -165,6 +169,52 @@ namespace KillChord.Runtime.Composition.Persistent
             {
                 Debug.LogException(exception, this);
             }
+        }
+
+        /// <summary>
+        ///     起動に失敗したことを通知してから、ゲームを終了する。
+        ///     通知を表示できないときは、そのまま終了する。
+        /// </summary>
+        private async Awaitable ShowStartupFailureAndQuitAsync()
+        {
+            try
+            {
+                // 初期化の途中で失敗すると通知が未登録のことがあるため、直接参照する通知を優先する。
+                EventNotificationView notificationView = _startupFailureNotificationView;
+                if (notificationView == null)
+                {
+                    ServiceLocator.TryGetInstance(out notificationView);
+                }
+
+                if (notificationView != null
+                    && notificationView.isActiveAndEnabled
+                    && !notificationView.IsVisible)
+                {
+                    await notificationView.ShowAsync(STARTUP_FAILED_NOTIFICATION_ENTRY, destroyCancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception, this);
+            }
+
+            QuitGame();
+        }
+
+        /// <summary>
+        ///     ゲームを終了する。エディターでは再生を止める。
+        /// </summary>
+        private static void QuitGame()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.ExitPlaymode();
+#else
+            UnityEngine.Application.Quit();
+#endif
         }
 
         /// <summary>

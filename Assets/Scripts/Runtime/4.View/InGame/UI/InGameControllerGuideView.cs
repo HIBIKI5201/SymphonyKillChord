@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.UI
     /// <summary>
     ///     ゲームプレイ中のコントローラー操作説明を表示するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/UI/InGameControllerGuideView")]
     public sealed class InGameControllerGuideView : MonoBehaviour
     {
         private const int ICON_FONT_SIZE = 22;

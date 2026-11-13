@@ -13,6 +13,7 @@ namespace KillChord.Runtime.View.Persistent.PostEffect
     ///     Configは同時に何個でも起動でき、Volumeは重ねて適用される。
     /// </summary>
     [RequireComponent(typeof(Camera))]
+    [AddComponentMenu("KillChord/View/PostEffect/PostEffectOverlayCamera")]
     public sealed class PostEffectOverlayCamera : MonoBehaviour, IPostEffectOverlayPlayer
     {
         /// <summary>

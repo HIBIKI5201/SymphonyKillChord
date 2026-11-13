@@ -18,7 +18,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
     ///     敵の移動ロジックはEnemyMoveControllerに委譲される。
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
-    public class EnemyMoveView : MonoBehaviour, IGameplayControllable
+    [AddComponentMenu("KillChord/View/Enemy/EnemyMoveView")]
+    public class EnemyMoveView : MonoBehaviour, IEnemyMoveView, IGameplayControllable
     {
         /// <summary>
         ///     初期化処理。
@@ -172,7 +173,8 @@ namespace KillChord.Runtime.View.InGame.Enemy
             }
 
             EnemyMoveInstruction intruction = _enemyAIController.GetMoveInstruction(transform.position, _target.position);
-            if (intruction.ShouldMove)
+            // 予兆が出た攻撃は、射程外でも終わるまでその場で行う。終わったら移動に戻る。
+            if (intruction.ShouldMove && !_enemyAIController.IsAttackCommitted)
             {
                 _navMeshAgent.speed = intruction.MoveSpeed * _speedVarianceMultiplier;
                 _navMeshAgent.isStopped = false;

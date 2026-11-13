@@ -5,6 +5,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
 {
     /// <summary>
     ///     クリティカルヒットを処理する攻撃処理ステップ。
+    ///     会心率が100%を超える場合はクリティカルが重なり、ダメージは「クリティカル倍率×クリティカル数」倍になる。
     /// </summary>
     [Serializable]
     public class CriticalStep : IAttackStep
@@ -16,15 +17,21 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <returns></returns>
         public AttackStepContext Execute(in AttackStepContext context)
         {
-            if (!context.IsCriticalForced)
-            {
-                // 会心率は攻撃者、会心ダメージ倍率は武器（攻撃定義）が持つ。
-                float chance = context.Attacker == null ? 0f : context.Attacker.CriticalChance.Value;
+            // 会心率は攻撃者、会心ダメージ倍率は武器（攻撃定義）が持つ。
+            // 会心率の整数部は確定、小数部は確率でクリティカルの回数が決まる。
+            int criticalCount = context.Attacker == null
+                ? 0
+                : context.Attacker.CriticalChance.RollCriticalCount(UnityEngine.Random.value);
 
-                if (UnityEngine.Random.value >= chance)
-                {
-                    return context;
-                }
+            // 確定クリティカルの場合は、最低1回クリティカルにする。
+            if (context.IsCriticalForced)
+            {
+                criticalCount = Math.Max(criticalCount, 1);
+            }
+
+            if (criticalCount <= 0)
+            {
+                return context;
             }
 
             // クリティカルダメージ倍率を取得する。
@@ -41,8 +48,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
                         context.Attacker, context.Defender, criticalDamageMultiplier);
             }
 
-            float criticalDamage = context.Damage.Value * criticalDamageMultiplier;
-            int nextCriticalCount = context.CriticalCount + 1;
+            float criticalDamage = context.Damage.Value * criticalDamageMultiplier * criticalCount;
+            int nextCriticalCount = context.CriticalCount + criticalCount;
 
             return new AttackStepContext(new Damage(criticalDamage), nextCriticalCount, context);
         }

@@ -88,6 +88,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _hasSkill = true;
             _currentLevel = data.Level;
             _maxLevel = data.MaxLevel;
+            _levelUpCost = data.LevelUpCost;
             RefreshLevelDisplay();
         }
 
@@ -125,6 +126,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
             _hasSkill = false;
             _currentLevel = 0;
             _maxLevel = 0;
+            _levelUpCost = 0;
             RefreshLevelDisplay();
         }
 
@@ -148,11 +150,10 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private const string TIPS_LABEL_NAME = "skill-tips-label";
         private const string LEVEL_LABEL_NAME = "skill-level-label";
         private const string LEVELUP_POINT_LABEL_NAME = "skill-levelup-point-label";
-        private const string EMPTY_SELECTION_LABEL = "スキルを選択してください";
+        private const string EMPTY_SELECTION_LABEL = "キルコードを選択してください";
         private const string EMPTY_VALUE_LABEL = "—";
         private const string MAX_LEVEL_LABEL = "レベルMax";
         private const string NO_LEVELUP_COST_LABEL = "ー";
-        private const int MIN_LEVEL_UP_COST = 1;
 
         private readonly Image _icon;
         private readonly Label _nameLabel;
@@ -173,6 +174,7 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
         private int _lastOwnedPoints;
         private int _currentLevel;
         private int _maxLevel;
+        private int _levelUpCost;
 
         /// <summary>
         ///     現在の表示状態(スキル選択有無・所持ポイント・レベル)から、
@@ -197,12 +199,12 @@ namespace KillChord.Runtime.View.OutGame.SkillBuild
                 return;
             }
 
-            CanLevelUp = _lastOwnedPoints >= MIN_LEVEL_UP_COST;
+            CanLevelUp = _lastOwnedPoints >= _levelUpCost;
             _levelLabel.text = CanLevelUp
                 ? $"{_currentLevel} → {_currentLevel + 1}"
                 : $"{_currentLevel}";
             _levelupPointLabel.text = CanLevelUp
-                ? $"{_lastOwnedPoints} → {_lastOwnedPoints - 1}"
+                ? $"{_lastOwnedPoints} → {_lastOwnedPoints - _levelUpCost}"
                 : $"{_lastOwnedPoints}";
         }
 

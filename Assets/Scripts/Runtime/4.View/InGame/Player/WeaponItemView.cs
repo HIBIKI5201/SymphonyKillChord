@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Player
     /// <summary>
     ///     武器一つのSE再生、表示切替、Effect再生などを行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Player/WeaponItemView")]
     public sealed class WeaponItemView : MonoBehaviour
     {
         /// <summary>

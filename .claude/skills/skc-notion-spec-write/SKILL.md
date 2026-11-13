@@ -1,23 +1,23 @@
 ---
 name: skc-notion-spec-write
-description: "Write to the Notion game specification from Claude — create a new spec page or update an existing one — using the NotionMarkdownWriter CLI (SinfoniaOperator/NotionMarkdownWriter.exe). Use whenever the user asks to add, edit, update, fix, or document something in the Notion spec (仕様書), reflect an implementation into the spec, write up a system's documentation to Notion, or act on the findings of a spec/implementation diff report. Covers the pull → edit → dry-run → confirm → push loop, the write allowlist, and conflict handling. Do NOT use for read-only spec questions — read Docs/NotionSpecifications directly for those."
+description: "Create or update Notion project-doc (プロジェクト ドキュメント) pages with NotionMarkdownWriter: pull, edit, dry-run, push, within the write allowlist. Use when asked to write, fix, or reflect implementation into the docs. Not for read-only questions."
 ---
 
-# Notion 仕様書への書き込み
+# Notion のプロジェクト ドキュメントへの書き込み
 
-このリポジトリはNotionの仕様書を`Docs/NotionSpecifications/`へミラーしているが、そちらは**読み取り専用のコピー**。
+このリポジトリはNotionのプロジェクト ドキュメントを`Docs/NotionSpecifications/`へミラーしているが、そちらは**読み取り専用のコピー**。
 Notion本体を更新するには`SinfoniaOperator/NotionMarkdownWriter.exe`を使う。
 macOS / Linuxではexeが動かないため、以下の`./SinfoniaOperator/NotionMarkdownWriter.exe`を
 `./SinfoniaOperator/run-tool.sh NotionMarkdownWriter`に読み替える（.NET 10 SDKで`dotnet run`する。引数は同じ）。ツールの詳細は
 [SinfoniaOperator/NotionMarkdownWriter/README.md](../../../SinfoniaOperator/NotionMarkdownWriter/README.md)。
 
-`skc-notion-spec-diff-check`（差分の発見）の続きとして使うことが多い。差分レポートの指摘を仕様書側へ反映するのがこのスキル。
+`skc-notion-spec-diff-check`（差分の発見）の続きとして使うことが多い。差分レポートの指摘をプロジェクト ドキュメント側へ反映するのがこのスキル。
 
 ## 書く前に読むもの
 
 | 参照先 | いつ読むか |
 | --- | --- |
-| [references/writing-rules.md](./references/writing-rules.md) | 仕様書のページを書く・直すとき。**である調**、句点、H1の背景色 |
+| [references/writing-rules.md](./references/writing-rules.md) | プロジェクト ドキュメントのページを書く・直すとき。**である調**、句点、H1の背景色 |
 | [references/notion-markdown.md](./references/notion-markdown.md) | 表・トグル・子ページ・Mermaidを含む本文を書くとき |
 | [references/module-docs.md](./references/module-docs.md) | システムリストのモジュール文書を書くとき |
 
@@ -35,6 +35,8 @@ macOS / Linuxではexeが動かないため、以下の`./SinfoniaOperator/Notio
 - Notion APIの`replace_content`と完全削除はツールが実装していない。ページを消す要求は`archive`でゴミ箱へ移す
   （Notion上で復元できる）。書き込み許可ルート自身は対象外で、子ページがあるページは`--with-children`が要る。
   `archive`も`--confirm`の前にユーザーの承認を取る。
+- データベースの実体を別ページへ移すときは`move-database <データベース> --to <ページ>`を使う。IDと行は変わらない。
+  リンクドビューはAPIで作れないため、元の位置へのリンクドビュー作成はユーザーにNotion上で頼む。`--confirm`の前に承認を取る。
 - データベースへ行を作るときは`create --parent <データベース> --set "名前=..." --set "ステータス=..."`の形にする。
   `status`・`select`は選択肢の名前を完全一致で書く。本文の先頭の見出しが`--set`のタイトルと同じなら、ツールが取り除く。
 - 本文を全面的に書き換える場合は`push --whole`を使う。`update_content`の枠内で、本文全体を1件の置換として
@@ -52,7 +54,7 @@ macOS / Linuxではexeが動かないため、以下の`./SinfoniaOperator/Notio
 ## 既存ページを更新する
 
 ```bash
-./SinfoniaOperator/NotionMarkdownWriter.exe pull "<Docs/NotionSpecifications配下の.mdパス|URL|ページID>"
+./SinfoniaOperator/NotionMarkdownWriter.exe pull "<ページID|URL|Docs/NotionSpecifications配下の.mdパス>"
 ```
 
 1. リポジトリルートから実行する。出力された作業ファイルのパスを控える。
@@ -95,6 +97,7 @@ Notion側の書式正規化が入っている。作業ファイルが最新本�
 | `pull以降にNotion側が更新されています` | 他の人が編集した。`pull`し直して編集をやり直す。作業ファイルを上書きするので、必要なら編集内容を退避してから。 |
 | `一意に特定できる置換範囲を作れませんでした` | 同一文面の繰り返し。編集箇所を分けて複数回pushするか、周辺の文面ごと書き換える。 |
 | `書き込み許可ページの配下にありません` | 範囲外。許可リストの追加はユーザーの判断を仰ぐ。 |
+| データベースの行をミラーのパスで渡すと `エクスポート済みのプロジェクト ドキュメントのツリー上、…配下にありません` | 親のデータベースが許可リストにあっても出るなら、`_database.md` を祖先として読めない古いexe（#2539 の修正前）。最新のdevelopのexeを使うか、同じページをNotionのURLで渡す。 |
 | `ページが大きすぎて…分割しました` | APIの上限。そのページはNotion上で直接編集してもらう。 |
 | 403 / `insert_content`などの権限エラー | インテグレーションに書き込み権限が無い。Notion側の設定変更が必要なので、ユーザーに依頼する。 |
 
@@ -107,7 +110,7 @@ Notion側の書式正規化が入っている。作業ファイルが最新本�
 
 ## 報告する（必須）
 
-`create`・`push`・`rename`・`move`・`set-properties`・`append`・`edit-block`など、Notionへ書き込む操作を1回でも実行したら、
+`create`・`push`・`rename`・`move`・`move-database`・`set-properties`・`append`・`edit-block`など、Notionへ書き込む操作を1回でも実行したら、
 作業の最後に、変更・追加したページの一覧を次の形の表で報告する。書き込みの件数が多いときも、省略しない。
 
 | 操作 | ページ | 配置 | 内容 | 状態 |

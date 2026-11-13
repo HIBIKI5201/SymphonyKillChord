@@ -39,3 +39,35 @@
     color: rgb(255, 255, 255);
     -unity-text-align: middle-center;
 }
+
+.notice-item {
+    align-items: center;
+    width: 100%;
+    padding-left: 48px;
+    padding-right: 48px;
+    margin-bottom: 32px;
+}
+
+.notice-name-label {
+    -unity-font-style: bold;
+    color: yellow;
+    font-size: 32px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+}
+
+.notice-detail-label {
+    font-size: 24px;
+    color: rgb(255, 255, 255);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.notice-text-label {
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-top: 8px;
+}

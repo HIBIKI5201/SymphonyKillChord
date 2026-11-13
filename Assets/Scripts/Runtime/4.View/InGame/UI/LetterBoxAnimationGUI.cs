@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.UI
     /// <summary>
     ///     画面上下のレターボックスを表示・非表示にするアニメーション。
     /// </summary>
+    [AddComponentMenu("KillChord/View/UI/LetterBoxAnimationGUI")]
     public sealed class LetterBoxAnimationGUI : MonoBehaviour
     {
         /// <summary>

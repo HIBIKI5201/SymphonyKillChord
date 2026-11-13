@@ -15,7 +15,8 @@ MonoBehaviour:
   _resolutionWidth: 1920
   _resolutionHeight: 1080
   _isFullScreen: 1
-  _qualityLevel: 3
+  _pcQualityLevel: 5
+  _mobileQualityLevel: 2
   _brightness: 5
   _language: 0
   _vibrationStrength: 0

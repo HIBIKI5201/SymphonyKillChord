@@ -1,3 +1,4 @@
+using KillChord.Runtime.View.Persistent.Localization;
 using System;
 using UnityEngine;
 
@@ -10,10 +11,10 @@ namespace KillChord.Runtime.View.Persistent.Load
     public struct LoadingTip
     {
         /// <summary> Tipsのタイトル（例：「○○について」）。 </summary>
-        public string Title => _title;
+        public string Title => MasterTextLocalizer.Localize(_title);
 
         /// <summary> Tipsの本文（例：「○○はなんとかかんとかである」）。 </summary>
-        public string Body => _body;
+        public string Body => MasterTextLocalizer.Localize(_body);
 
         [SerializeField, Tooltip("Tipsのタイトル（例：「○○について」）")]
         private string _title;

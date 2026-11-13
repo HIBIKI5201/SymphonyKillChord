@@ -62,7 +62,7 @@ namespace KillChord.Editor.AssetStorePackagePipeline
             }
 
             ServiceAccountCredential credential =
-                DriveAuthProvider.GetCredential(DriveImportSecrets.instance.serviceAccountJsonKey, Scopes);
+                DriveAuthProvider.GetCredential(DriveImportSecrets.instance.GetServiceAccountJsonKey(), Scopes);
 
             foreach (string target in targets)
             {

@@ -12,10 +12,11 @@ namespace KillChord.Runtime.Domain.InGame.Character
         public float CurrentValue { get; private set; }
 
         /// <summary>
-        ///     バリアを追加する。
+        ///     上限を超えない範囲でバリアを追加する。
         /// </summary>
         /// <param name="amount"> 追加するバリアの量。 </param>
-        public void Add(float amount)
+        /// <param name="maxValue"> バリアの上限。 </param>
+        public void Add(float amount, float maxValue)
         {
             if (!float.IsFinite(amount) || amount < 0)
             {
@@ -24,7 +25,15 @@ namespace KillChord.Runtime.Domain.InGame.Character
                     "バリアの追加量は有限の非負の数でなければなりません。");
             }
 
-            CurrentValue += amount;
+            if (!float.IsFinite(maxValue) || maxValue < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(maxValue),
+                    "バリアの上限は有限の非負の数でなければなりません。");
+            }
+
+            // 上限を超えた分は捨てる。すでに上限を超えている場合は減らさない。
+            CurrentValue = Math.Max(CurrentValue, Math.Min(CurrentValue + amount, maxValue));
         }
 
         /// <summary>

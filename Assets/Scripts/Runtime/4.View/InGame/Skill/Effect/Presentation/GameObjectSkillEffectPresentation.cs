@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     /// <summary>
     ///     GameObjectの表示切り替えのみでスキルエフェクトを表現するストラテジー。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/GameObjectSkillEffectPresentation")]
     public sealed class GameObjectSkillEffectPresentation : SkillEffectPresentationBase
     {
         [SerializeField, Tooltip("表示を切り替える対象のGameObjectです。自身以外を指定します。")]

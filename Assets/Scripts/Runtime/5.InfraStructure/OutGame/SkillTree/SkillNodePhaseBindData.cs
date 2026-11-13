@@ -16,9 +16,16 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         public string PhaseName;
         /// <summary> 段階を解放するために必要なノードID。 </summary>
         public SkillNodeId RequiredSkillNodeId => new SkillNodeId(_requiredSkillNodeId.Id);
+        /// <summary>
+        ///     全ノードの解放で段階を開くか。trueの場合は <see cref="RequiredSkillNodeId"/> を使わない。
+        /// </summary>
+        public bool RequiresAllNodesUnlocked => _requiresAllNodesUnlocked;
 
         [SerializeField, Tooltip("段階を解放するために必要なノードID。")]
         [SourceDataCollection("SkillNode")]
         private DataID _requiredSkillNodeId;
+
+        [SerializeField, Tooltip("全ノード（全ノードの解放が条件のノードを除く）の解放で段階を開くか。trueの場合は必要ノードIDを使わない。")]
+        private bool _requiresAllNodesUnlocked;
     }
 }

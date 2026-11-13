@@ -30,7 +30,7 @@ dotnet --info
 
 `REPOSITORY_URL`は実際のGitリポジトリURLへ置き換えてください。partial cloneとsparse-checkoutを組み合わせ、Unityの`Assets/`全体を取得せず、Botだけを作業ツリーへ展開します。
 
-仕様書のキャッシュ（`Docs/NotionSpecifications`）はgitで追跡していないため、cloneでは取得できません。NotionMarkdownExporterで生成したキャッシュを、作業ツリーの`Library/NotionSpecifications`へ別途コピーしてください（インデックス生成は`Library/NotionSpecifications`を優先し、無ければ`Docs/NotionSpecifications`を読みます）。
+プロジェクト ドキュメント（`Docs/NotionSpecifications`）は、VMへコピーする必要はありません。デプロイのワークフローが非公開の仕様書リポジトリから取得し、パッケージに同梱します（#2329）。
 
 ```bash
 sudo -u sinfonia git clone --filter=blob:none --no-checkout --sparse REPOSITORY_URL \
@@ -84,7 +84,7 @@ SPEC_SEARCH_TOP_K=3
 sudo bash -c 'set -a; source /etc/sinfonia-specsearch.env; set +a; exec runuser -u sinfonia -- /opt/sinfonia-specsearch/publish/SinfoniaOperator index'
 ```
 
-仕様書を更新した場合は、Botを再起動する前に同じ`index`コマンドを再実行してください。
+プロジェクト ドキュメントを更新した場合は、Botを再起動する前に同じ`index`コマンドを再実行してください。
 
 ## 6. systemdへ登録する
 
@@ -127,7 +127,7 @@ VMはx86-64なので、Environment Variableの`ORACLE_RUNTIME`には`linux-x64`�
 
 公開envの`SPEC_SEARCH`だけをデプロイ対象に含めます。DiscordやGitHubのトークンはOracle VMにだけ保存します。新リリースの`spec-search.release.json`には検索設定・専用索引の絶対パス・モデルの絶対パスを保存し、serve時はVM側の同名設定より優先します。自動デプロイは`/spec`と`/branches`の登録ログをヘルスチェックに使うため、Botへ渡すJSONまたは環境ファイルに`GITHUB_REPOSITORY`を必ず設定してください。
 
-索引生成はSSHユーザー権限で実行します。既存キャッシュ（`repository/Library/NotionSpecifications`優先、旧`repository/Docs/NotionSpecifications`へフォールバック）と`models/multilingual-e5-small`のモデル・トークナイザーを読み取れることが必要です。キャッシュは自動取得しません。更新手順と検索設定は[仕様検索README](../SinfoniaOperator.SpecSearch/README.md)を参照してください。
+索引生成はSSHユーザー権限で実行します。パッケージに同梱したプロジェクト ドキュメント（`specifications/Docs/NotionSpecifications`）と`models/multilingual-e5-small`のモデル・トークナイザーを読み取れることが必要です。プロジェクト ドキュメントは索引を作った後にリリースから消します。更新手順と検索設定は[仕様検索README](../SinfoniaOperator.SpecSearch/README.md)を参照してください。
 
 ```json
 "GITHUB_REPOSITORY": "HIBIKI5201/SymphonyKillChord"

@@ -6,6 +6,7 @@ namespace KillChord.Runtime.View.InGame.Player
     /// <summary>
     ///     攻撃BeatTypeに応じた武器モデル表示と攻撃SE再生を担当するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Player/PlayerAttackWeaponView")]
     public sealed class PlayerAttackWeaponView : MonoBehaviour, ISkillEffectWeaponSource
     {
         /// <summary> 現在構えている武器のTransformです。武器が無い場合はnull。 </summary>
@@ -34,6 +35,15 @@ namespace KillChord.Runtime.View.InGame.Player
             HideWeaponsImmediateExcept(definition.WeaponItem);
             _currentWeaponView = definition.WeaponItem;
             _currentWeaponView.Play();
+        }
+
+        /// <summary>
+        ///     表示中の武器の表示を変えず、SE・銃口演出・薬莢だけを再生します。
+        ///     多段攻撃の2発目以降に使います。武器が表示されていない場合は何もしません。
+        /// </summary>
+        public void PlayCurrentWeaponAttackEffects()
+        {
+            _currentWeaponView?.PlayAttackEffects();
         }
 
         /// <summary>

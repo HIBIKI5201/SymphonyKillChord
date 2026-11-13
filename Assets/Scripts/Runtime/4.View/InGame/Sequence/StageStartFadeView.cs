@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     /// <summary>
     ///     ステージ開始時の黒画面とフェードアウトを表示するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Sequence/StageStartFadeView")]
     public sealed class StageStartFadeView : MonoBehaviour
     {
         /// <summary>

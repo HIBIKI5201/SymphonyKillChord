@@ -2,6 +2,8 @@
 
 このプロジェクトでは、以下のサードパーティ素材を使用しています。
 
+ゲーム内のクレジット「使用アセット」タブは、この内容をまとめた `Assets/StreamingAssets/Credits/third-party-notices.json` を表示する。素材を足したときは両方を更新する。
+
 ## Google Fonts — Material Symbols / Material Icons
 
 - **提供元**: Google
@@ -24,3 +26,94 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+## CRIWARE（CRI ADX LE）
+
+- **提供元**: 株式会社CRI・ミドルウェア
+- **ライセンス**: CRI ADX LE 使用許諾
+- **表記義務**: 配信紹介ページ（iOS・Android ではストアの詳細テキスト）の末尾などに著作表記を載せる。日本国以外の地域では英語版を使う。ロゴ表示は推奨（必須ではない）。決定 R39 により、ゲーム内のクレジットにも載せる
+
+```
+本ソフトウェアには、(株)CRI・ミドルウェアの「CRIWARE」が使用されています。
+This software uses "CRIWARE (TM)" by CRI Middleware Co., Ltd.
+```
+
+## フォント
+
+フォントのライセンス全文は、各フォントと同じフォルダに置いている。
+
+| フォント | 権利者 | ライセンス | 全文 |
+| --- | --- | --- | --- |
+| IBM Plex Serif | Copyright © 2017 IBM Corp. with Reserved Font Name "Plex" | SIL Open Font License 1.1 | `Assets/Arts/Fonts/IBMPlexSerif-OFL.txt` |
+| Inria Serif | Copyright 2017 The Inria Serif Project Authors (https://github.com/BlackFoundryCom/InriaFonts) | SIL Open Font License 1.1 | `Assets/Arts/Fonts/InriaSerif-OFL.txt` |
+| Kosugi Maru | Copyright 2010 The Kosugi Maru Project Authors (https://github.com/googlefonts/kosugi-maru) | Apache License 2.0 | `Assets/Arts/Fonts/KosugiMaru-LICENSE.txt` |
+| Anton | Copyright 2020 The Anton Project Authors (https://github.com/googlefonts/AntonFont) | SIL Open Font License 1.1 | `Assets/Arts/Fonts/Anton/OFL.txt` |
+
+## オープンソースライブラリ（MIT License）
+
+ランタイム用に導入しているパッケージ（コードから使っていないものも、ビルドに含まれうるため載せる）。どれも MIT License で、全文は下にまとめて載せる。
+
+| ライブラリ | 権利者 | 配布元 |
+| --- | --- | --- |
+| LitMotion | Copyright (c) 2023 Yusuke Nakada | https://github.com/annulusgames/LitMotion |
+| UniTask | Copyright (c) 2019 Yoshifumi Kawai / Cysharp, Inc. | https://github.com/Cysharp/UniTask |
+| R3 | Copyright (c) 2024 Cysharp, Inc. | https://github.com/Cysharp/R3 |
+| ZLinq | Copyright (c) Yoshifumi Kawai, Copyright (c) Cysharp, Inc. | https://github.com/Cysharp/ZLinq |
+| ZString | Copyright (c) 2020 Cysharp, Inc. | https://github.com/Cysharp/ZString |
+| BitonicPixelSorter | Copyright (c) 2020 ruccho | https://github.com/ruccho/BitonicPixelSorter |
+| UnityChanSpringBone | Copyright (c) 2018 Unity Technologies | https://github.com/unity3d-jp/UnityChanSpringBone |
+| Microsoft.Bcl.AsyncInterfaces、Microsoft.Bcl.TimeProvider、System.ComponentModel.Annotations、System.Runtime.CompilerServices.Unsafe、System.Threading.Channels（R3 の依存） | Copyright (c) .NET Foundation and Contributors | https://github.com/dotnet/runtime |
+
+```
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## アセットストアの素材
+
+製品データから参照している Unity Asset Store の素材。どれも Standard Unity Asset Store EULA で、クレジット表記は必須ではないが、ゲーム内の「使用アセット」タブに載せる。権利者が分からないものは「Unity Asset Store」としている。
+
+| 素材 | 権利者 | 使っている場所 |
+| --- | --- | --- |
+| Soldier-AAA-Pack.vol2 | stasdzuba18 | 敵兵のモデル・素材（`AssetStoreTools/Soldiers-Pack`） |
+| Low Poly Weapon Series 4 - WWII 1 | CASTLE BRAVO | 敵兵の銃（`AssetStoreTools/WeaponsAsset/WWII_*`） |
+| Human Soldier Animations FREE | Kevin Iglesias | 敵のアニメーション、体験版の終了ムービー |
+| Rapier Anim Set | Unity Asset Store | 敵のアニメーション |
+| Platform Animation | Shinabro | プレイヤーのアニメーション（`AssetStoreTools/AKITO`） |
+| 50 Female Animations | Unity Asset Store | アウトゲームのループ演出 |
+| Free Sample Animation Set | VanillaLoopStudio | プレイヤーの Animator |
+| War FX | Jean Moreno (JMO) | 発砲エフェクト |
+| 52 Special Effects Pack | Unity Asset Store | 被弾エフェクト（改造品の `AssetStoreTools/Unknowns/Effect` を含む） |
+| Farming Game FX - Mission | Unity Asset Store | 走る・歩く時の砂煙 |
+| Free Fire VFX - URP | Vefects | 炎 |
+| Free Quick Effects Vol. 1 | Gabriel Aguiar Prod. | 走る時のスピード線 |
+| Hits Effects FREE / Status and Auras FREE | Matthew Guz | スキルエフェクト |
+| Hit Impact Effects | Travis Game Assets | スキルエフェクト |
+| Unity Particle Pack | Unity Technologies | スキルエフェクト |
+| Bullets Pack | DuNguyn | 薬莢 |
+| 8K Skybox Pack Free | BG Studio | Stage_01 の空（`AssetStoreTools/Unknowns/Skyboxes`） |
+| GamePad and Keyboard Input Sprites for TextMesh Pro | Unity Asset Store | 操作ガイドのボタン画像 |
+
+## 載せていないもの
+
+- エディタでだけ使うもの（Google.Apis、System.CodeDom、System.Management、NuGetForUnity、unity-cli-loop、CopyComponentsByRegex、graph-visualizer、Markdig など）は実行ファイルに含まれないため載せていない。Markdig（BSD-2-Clause、仕様書ビューアが使う）のライセンス全文は `Assets/Editor/Plugins/Markdig/LICENSE.txt` に置いている
+- ゲームの外で使う開発ツールのスクリプト管理ツール（`ScriptLauncher.exe`）は、JSON の読み込みに nlohmann/json（MIT License、Copyright (c) 2013-2022 Niels Lohmann）を使う。全文は `ScriptLauncher/third_party/nlohmann/LICENSE.MIT`
+- Unity 公式パッケージは Unity の利用規約に従う
+- `ShaderGraph_Dissolve`（スキルエフェクトのディゾルブ）は入手元を特定できていないため、まだ載せていない
+- 自作の素材（プレイヤーの武器、Soldier14、`AssetStoreTools/WIP` の UI 画像）は載せない

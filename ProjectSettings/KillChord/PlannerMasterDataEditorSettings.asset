@@ -46,6 +46,7 @@ MonoBehaviour:
     - TitleScreenRuleData
     - OutGameScreenRuleData
     - LoadingTipsConfig
+    - LoadingWaitTimeSettings
     _collectionCategories:
     - TitleScreenRule
     - OutGameScreenRule
@@ -53,6 +54,7 @@ MonoBehaviour:
   - _displayName: Enemy
     _dataAssetAddressableKeys:
     - ExampleEnemyMoveData
+    - InfantryEnemyMoveData
     - ShellAttackData
     - BossAttackEntryRepo
     - EnemyDefinitionRepository

@@ -1,16 +1,27 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.Sequence;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
+using KillChord.Runtime.Adaptor.InGame.UI;
+using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Mission;
+using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Result;
 using KillChord.Runtime.Composition.InGame.Sequence;
+using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Composition.Persistent.Input;
+using KillChord.Runtime.Composition.Persistent.Music;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Localization;
+using R3;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem.UI;
@@ -20,6 +31,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
     /// <summary>
     ///     ポーズウィンドウを戦闘ポーズとシーン遷移に結合するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/PauseWindowInitializer")]
     public sealed class PauseWindowInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -76,19 +88,46 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             _battlePauseController = sequenceModuleContainer.BattlePauseController;
             _stageResultController = stageResultModuleContainer.Controller;
+            // 遷移はInGameシーン自身を閉じるため、InGameの破棄では取り消されない常駐シーンの寿命で動かす。
+            CancellationToken transitionLifetimeToken =
+                ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController)
+                    ? sceneTransitionController.PersistentLifetimeToken
+                    : default;
             _returnToTitleController = new ReturnToTitleController(
                 sceneTransitionUsecase,
                 selectedBattleStageState,
                 selectedMissionState,
-                TITLE_SCENE_NAME);
+                TITLE_SCENE_NAME,
+                transitionLifetimeToken);
+
+            // 文言とミッション欄は、ポーズを開くたびに最新の言語と達成状況で作り直す。
+            _pauseWindowViewModel = new PauseWindowViewModel();
+            MissionRuntimeService missionRuntimeService =
+                ServiceLocator.TryGetInstance(out MissionModuleContainer missionModuleContainer)
+                    ? missionModuleContainer.MissionRuntimeService
+                    : null;
+            _pauseWindowPresenter = new PauseWindowPresenter(
+                _pauseWindowViewModel,
+                new UiCommonTextProvider(),
+                missionRuntimeService);
+            _pauseWindowView.Bind(_pauseWindowViewModel);
+            if (_missionPanelView != null)
+            {
+                _missionPanelView.Bind(_pauseWindowViewModel);
+            }
 
             _battlePauseController.OnPaused += HandlePaused;
             _battlePauseController.OnResumed += HandleResumed;
+            _battlePauseController.OnResumeCountdownStarted += HandleResumeCountdownStarted;
             _battlePauseController.OnScenarioPauseEnded += HandleScenarioPauseEnded;
             _pauseWindowView.OnRestartRequested += HandleRestartRequested;
             _pauseWindowView.OnReturnToTitleRequested += HandleReturnToTitleRequested;
             _pauseWindowView.OnCancelRequested += HandleCancelRequested;
+            _pauseWindowView.OnOptionRequested += HandleOptionRequested;
             _isSubscribed = true;
+
+            BindOptionPanel();
+            BindCountdown();
 
             _inputMapController = ServiceLocator.TryGetInstance(out InputComposition inputComposition)
                 ? inputComposition.GetInputMapController
@@ -104,6 +143,10 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 inputModule = inputView.GetComponent<InputSystemUIInputModule>();
             }
             _pauseWindowView.BindCancelInput(inputModule);
+            if (_optionPanelView != null)
+            {
+                _optionPanelView.BindCancelInput(inputModule);
+            }
             if (inputModule == null || inputModule.cancel == null || inputModule.cancel.action == null)
             {
                 Debug.LogWarning($"[{nameof(PauseWindowInitializer)}] UI取消入力を取得できないため、既存のポーズ操作を使用します。", this);
@@ -125,6 +168,19 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
         [SerializeField, Tooltip("ポーズ中に表示するウィンドウのViewです。")]
         private PauseWindowView _pauseWindowView;
+
+        [SerializeField, Tooltip("ポーズ中にミッションの達成状況を出すViewです。")]
+        private PauseMissionPanelView _missionPanelView;
+
+        [SerializeField, Tooltip("オプションボタンで開く、音量と判定調整の設定パネルのViewです。")]
+        private PauseOptionPanelView _optionPanelView;
+
+        [SerializeField, Tooltip("ポーズ解除までの拍を出すカウントダウンのViewです。")]
+        private ResumeCountdownView _countdownView;
+
+        private PauseWindowViewModel _pauseWindowViewModel;
+        private PauseWindowPresenter _pauseWindowPresenter;
+        private IDisposable _countdownSubscription;
 
         private BattlePauseController _battlePauseController;
         private UnityInputMapController _inputMapController;
@@ -151,6 +207,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return;
             }
 
+            _pauseWindowPresenter.Present();
             _pauseWindowView.Show();
         }
 
@@ -159,7 +216,45 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// </summary>
         private void HandleResumed()
         {
+            CloseOptionPanel();
             _pauseWindowView.Hide();
+        }
+
+        /// <summary>
+        ///     カウントダウンの開始時にウィンドウを閉じ、拍の表示だけを残します。
+        /// </summary>
+        private void HandleResumeCountdownStarted()
+        {
+            CloseOptionPanel();
+            _pauseWindowView.Hide();
+        }
+
+        /// <summary>
+        ///     オプションボタンで設定パネルを開き、閉じるまでポーズ操作による解除を止めます。
+        /// </summary>
+        private void HandleOptionRequested()
+        {
+            if (_optionPanelView == null || _isTransitioning || !_battlePauseController.IsPaused)
+            {
+                return;
+            }
+
+            _battlePauseController.SetResumeLocked(true);
+            _pauseWindowView.SetInteractionEnabled(false);
+            _optionPanelView.Open();
+        }
+
+        /// <summary>
+        ///     設定パネルを閉じた後に、ポーズ画面の操作へ戻します。
+        /// </summary>
+        private void HandleOptionPanelClosed()
+        {
+            _battlePauseController.SetResumeLocked(false);
+            if (_battlePauseController.IsPaused && !_battlePauseController.IsResumeCountingDown && !_isTransitioning)
+            {
+                _pauseWindowView.SetInteractionEnabled(true);
+                _pauseWindowView.SelectOptionButton();
+            }
         }
 
         /// <summary>
@@ -180,7 +275,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
         {
             if (!_isTransitioning && _battlePauseController.IsPaused)
             {
-                _battlePauseController.Resume();
+                // 拍に合わせたカウントダウンを経て戦闘へ戻す。
+                _battlePauseController.RequestResume();
             }
         }
 
@@ -199,9 +295,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private void HandleReturnToTitleRequested()
         {
             _ = ExecuteTransitionAsync(
-                () => _returnToTitleController.ReturnToTitleAsync(
-                    gameObject.scene.name,
-                    destroyCancellationToken),
+                () => _returnToTitleController.ReturnToTitleAsync(gameObject.scene.name),
                 "タイトルへの復帰");
         }
 
@@ -263,6 +357,67 @@ namespace KillChord.Runtime.Composition.InGame.UI
         }
 
         /// <summary>
+        ///     設定パネルを、設定画面と同じ音量・環境設定のViewModelとCommandへ結びつけます。
+        /// </summary>
+        private void BindOptionPanel()
+        {
+            if (_optionPanelView == null)
+            {
+                Debug.LogWarning($"[{nameof(PauseWindowInitializer)}] {nameof(PauseOptionPanelView)} が設定されていないため、オプションを開けません。", this);
+                return;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out AudioSettingsModuleContainer audioSettingsContainer)
+                || !ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
+            {
+                Debug.LogWarning($"[{nameof(PauseWindowInitializer)}] 音量・環境設定が見つからないため、オプションを開けません。", this);
+                _optionPanelView = null;
+                return;
+            }
+
+            _optionPanelView.Bind(
+                _pauseWindowViewModel,
+                audioSettingsContainer.ViewModel,
+                audioSettingsContainer.Command,
+                environmentSettingsContainer.ViewModel,
+                environmentSettingsContainer.Command);
+            _optionPanelView.OnClosed += HandleOptionPanelClosed;
+        }
+
+        /// <summary>
+        ///     ポーズ解除までの残り拍数を、カウントダウンの表示へ結びつけます。
+        /// </summary>
+        private void BindCountdown()
+        {
+            if (_countdownView == null)
+            {
+                Debug.LogWarning($"[{nameof(PauseWindowInitializer)}] {nameof(ResumeCountdownView)} が設定されていないため、カウントダウンを表示しません。", this);
+                return;
+            }
+
+            if (!ServiceLocator.TryGetInstance(out MusicSyncModuleContainer musicSyncContainer)
+                || musicSyncContainer.MusicSyncController == null)
+            {
+                Debug.LogWarning($"[{nameof(PauseWindowInitializer)}] {nameof(MusicSyncController)} が見つからないため、カウントダウンを表示しません。", this);
+                return;
+            }
+
+            _countdownSubscription = musicSyncContainer.MusicSyncController.ResumeRemainingBeatCount
+                .Subscribe(_countdownView.SetRemainingBeatCount);
+        }
+
+        /// <summary>
+        ///     開いている設定パネルを閉じます。
+        /// </summary>
+        private void CloseOptionPanel()
+        {
+            if (_optionPanelView != null && _optionPanelView.IsOpen)
+            {
+                _optionPanelView.Close();
+            }
+        }
+
+        /// <summary>
         ///     イベント購読を解除します。
         /// </summary>
         private void Unsubscribe()
@@ -274,11 +429,31 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             _battlePauseController.OnPaused -= HandlePaused;
             _battlePauseController.OnResumed -= HandleResumed;
+            _battlePauseController.OnResumeCountdownStarted -= HandleResumeCountdownStarted;
             _battlePauseController.OnScenarioPauseEnded -= HandleScenarioPauseEnded;
             _pauseWindowView.OnRestartRequested -= HandleRestartRequested;
             _pauseWindowView.OnReturnToTitleRequested -= HandleReturnToTitleRequested;
             _pauseWindowView.OnCancelRequested -= HandleCancelRequested;
+            _pauseWindowView.OnOptionRequested -= HandleOptionRequested;
             _pauseWindowView.UnbindCancelInput();
+            _pauseWindowView.Unbind();
+            if (_missionPanelView != null)
+            {
+                _missionPanelView.Unbind();
+            }
+
+            if (_optionPanelView != null)
+            {
+                _optionPanelView.OnClosed -= HandleOptionPanelClosed;
+                _optionPanelView.UnbindCancelInput();
+                _optionPanelView.Unbind();
+            }
+
+            _countdownSubscription?.Dispose();
+            _countdownSubscription = null;
+            _pauseWindowViewModel?.Dispose();
+            _pauseWindowViewModel = null;
+            _pauseWindowPresenter = null;
             _inputMapController = null;
             _isSubscribed = false;
         }

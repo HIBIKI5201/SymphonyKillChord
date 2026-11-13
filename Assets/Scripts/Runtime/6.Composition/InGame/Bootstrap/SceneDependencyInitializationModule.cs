@@ -11,6 +11,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
     /// <summary>
     ///     シーン依存サービスの待機と公開を行うモジュールです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Bootstrap/SceneDependencyInitializationModule")]
     public sealed class SceneDependencyInitializationModule : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

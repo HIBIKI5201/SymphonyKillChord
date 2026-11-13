@@ -18,7 +18,7 @@ git push -u origin feature/<段階>/<作業名>/agent
 
 編集の**前に** push する。`AutoCreateMasterBranch.yml` が、push 時点の内容で `feature/<段階>/<作業名>/master` を自動作成する。先に編集してから push すると、作業ブランチと `master` が同じコミットになってしまい、手順 5 の例外ケースに入る。
 
-作成されたかどうかの確認（ワークフローは約10秒待ってから作成する）:
+作成されたかどうかの確認（ワークフローはブランチ作成時点のコミットから作るので、確認を待たずに編集を始めてもよい）:
 
 ```bash
 gh run watch $(gh run list --workflow AutoCreateMasterBranch.yml --branch feature/<段階>/<作業名>/agent --limit 1 --json databaseId -q '.[0].databaseId')

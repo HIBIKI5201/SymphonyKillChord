@@ -1,6 +1,6 @@
 # Notion Markdown Writer
 
-Notionの仕様書ページへMarkdownで書き込むツールです。
+Notionのプロジェクト ドキュメントページへMarkdownで書き込むツールです。
 `NotionMarkdownExporter`が読み取り専用なのに対して、こちらは作成と部分更新を担当します。
 
 Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSONを組み立てる必要はありません。
@@ -33,7 +33,7 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 }
 ```
 
-`NOTION_TOKEN`は`sinfonia-operator.secrets.json`または環境変数から読み取ります。
+`NOTION_TOKEN`は秘密設定`UserSettings/KillChord/secrets.json`または環境変数から読み取ります。旧パス`SinfoniaOperator/sinfonia-operator.secrets.json`も移行期間中は読み込みますが、読み込んだときは移行を促すログを出します。
 この公開設定はGitで共有されるため、許可ページの追加はレビュー対象になります。
 
 ## 使い方
@@ -65,6 +65,10 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 データベースへ行を追加するときは、`--set`でタイトルを含むプロパティを指定します。
 `select`・`status`・`multi_select`などは、選択肢の名前を完全一致で書きます。
 本文の先頭の見出しが`--set`のタイトルと同じ場合は、本文から取り除かれます。違う見出しは本文として残ります。
+`people`（担当者など）は、カンマ区切りのNotionの表示名かユーザーIDで書きます。名前は空白の有無を無視して照合し、
+インテグレーションから見えるユーザー（`GET /users`）の中から探します。
+
+タスク・議事録・仕様検討フォーラムの行は、JSONから`scripts/notion/apply_entry.py`で作れます（`.claude/skills/skc-notion-entry`）。
 
 ```powershell
 ./NotionMarkdownWriter.exe create row.md --parent "<データベースのURL|ID>" --set "名前=ページ名" --set "ステータス=検討中" --confirm
@@ -75,6 +79,15 @@ Notion API `2026-03-11` のMarkdown Content APIを使うため、ブロックJSO
 ```powershell
 ./NotionMarkdownWriter.exe archive "<Markdownパス|URL|ID>" --confirm
 ```
+
+データベースの実体を別ページの直下へ移す（確認だけなら`--confirm`を付けない）:
+
+```powershell
+./NotionMarkdownWriter.exe move-database "<データベースの_database.mdパス|URL|ID>" --to "<移動先ページのMarkdownパス|URL|ID>" --confirm
+```
+
+データベースID・行・ビュー・リレーションは変わりません。移動元と移動先の両方が許可ページの配下にある必要があります。
+リンクドビューはデータソースを持たないため対象外です。元の位置へのリンクドビュー作成と、移動先ページ内での並べ替えはNotion上で行います。
 
 ### macOS / Linuxで実行する
 
@@ -134,5 +147,7 @@ Windowsで実行した場合は、Git Bashなどからでもexeをそのまま�
 - 設定ファイルとリポジトリルートの探索は、エクスポーターの`ExporterOptions`と同じ規則を`WriterEnvironment`へ実装しています。
 - ページの移動（`move`）は`PATCH /pages/{id}`ではなく`POST /pages/{id}/move`でしか効かない（前者は200を返すが親を変更しない）。
   `MoveCommand`は送信後に親を再取得し、実際に変わったか検証してから成功と報告する。
+- データベースの移動（`move-database`）は`PATCH /databases/{id}`の`parent`で送る。`MoveDatabaseCommand`は
+  応答の親が移動先ページになったかを検証してから成功と報告する。
 - `edit-block`・`append`は`GET/PATCH /blocks/{id}`・`PATCH /blocks/{id}/children`（classic Blocks API）を使う。
   Markdown Content API（`update_content`）と併用できる。

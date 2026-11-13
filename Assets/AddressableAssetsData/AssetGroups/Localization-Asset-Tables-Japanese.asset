@@ -14,13 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: Localization-Asset-Tables-Japanese
   m_GUID: 4eaf83854fc91864ca35c0640efbf3d0
-  m_SerializeEntries:
-  - m_GUID: 0bb8e14736cb48a4380bed86e89d470b
-    m_Address: TutorialPopupImages_ja
-    m_ReadOnly: 1
-    m_SerializedLabels:
-    - Locale-ja
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 1
   m_Settings: {fileID: 11400000, guid: d50a7120a39130c4f981d12c9d268c81, type: 2}
   m_SchemaSet:

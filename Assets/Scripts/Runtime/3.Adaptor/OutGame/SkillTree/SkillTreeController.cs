@@ -36,6 +36,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             Dictionary<int, string[]> skillNodeConnBinds,
             Dictionary<string, ISkillNodeConnViewModel> nodeConns,
             Dictionary<int, VisualElement> unlockPhases,
+            List<VisualElement> allNodesUnlockedPhases,
             Dictionary<int, VideoClip> videoClipBinds,
             SkillTreeStatusEntity skillTreeStatusEntity,
             Action ownedSkillChanged,
@@ -65,6 +66,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             _previewVideoScreenViewShowable = previewVideoScreenViewShowable;
             _nodeConns = nodeConns;
             _unlockPhases = unlockPhases;
+            _allNodesUnlockedPhases = allNodesUnlockedPhases;
             _videoClipBinds = videoClipBinds;
             _skillTreeStatusEntity = skillTreeStatusEntity;
             _ownedSkillChanged = ownedSkillChanged;
@@ -124,7 +126,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             int nodeId = _selectedNodeId;
             SkillNodeEntity entity = _skillNodeEntities[new SkillNodeId(nodeId)];
             int currentPoints = _skillTreeStatusEntity.CurrentPoints;
-            bool canUnlock = _costToUnlock >= 0 && currentPoints >= _costToUnlock && !entity.IsUnlocked;
+            bool canUnlock = _costToUnlock >= 0 && currentPoints >= _costToUnlock && entity.IsLevelUpAvailable;
             bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(nodeId);
             SkillDetailDTO dto = new SkillDetailDTO(
                 entity.SkillNodeIdVO.Id,
@@ -137,9 +139,11 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                 entity.SkillDetail,
                 _costToUnlock,
                 canUnlock,
-                entity.IsUnlocked,
+                !entity.IsLevelUpAvailable,
                 hasVideo,
-                ResolveComboStepColors(entity.UnlockSkillIds));
+                ResolveComboStepColors(entity.UnlockSkillIds),
+                entity.IsUnlimitedLevel || entity.MaxLevel > SkillNodeEntity.DEFAULT_MAX_LEVEL,
+                entity.Level);
             // スキル詳細の表示を更新する。
             _skillDetailPresenter.Push(dto);
         }
@@ -268,12 +272,13 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             List<SkillNodeEntity> unlockOrder = BuildUnlockOrder(_nodesOnPath);
             foreach (SkillNodeEntity entity in unlockOrder)
             {
-                // TODO 実装待ち：スキル効果をプレイヤーに反映する処理
-                entity.Unlock();
-                if (!_skillTreeStatusEntity.UnlockedNodes.Contains(entity.SkillNodeIdVO))
+                // 強化回数を1つ進め、セーブ用に強化回数分だけIDを記録する。
+                if (!entity.Unlock())
                 {
-                    _skillTreeStatusEntity.AddUnlockedNode(entity.SkillNodeIdVO);
+                    continue;
                 }
+
+                _skillTreeStatusEntity.AddUnlockedNode(entity.SkillNodeIdVO);
                 _skillTreeStatusEntity.AddUnlockedSkillIds(entity.UnlockSkillIds);
             }
             _skillTreeStatusEntity.ModifyPoint(-_costToUnlock);
@@ -284,23 +289,10 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
 
             _ = SaveUnlockDataAsync();
 
-            SkillNodeEntity selectedNode = _skillNodeEntities[new SkillNodeId(_selectedNodeId)];
-            bool hasVideo = _videoClipBinds != null && _videoClipBinds.ContainsKey(_selectedNodeId);
-            SkillDetailDTO dto = new SkillDetailDTO(
-                selectedNode.SkillNodeIdVO.Id,
-                HasUnlockSkill(selectedNode.UnlockSkillIds),
-                ResolveSkillName(selectedNode.UnlockSkillIds),
-                ResolveSkillCommand(selectedNode.UnlockSkillIds),
-                ResolveSkillGenre(selectedNode.UnlockSkillIds),
-                ResolveSkillGenreIcon(selectedNode.UnlockSkillIds),
-                ResolveSkillIcon(selectedNode.UnlockSkillIds),
-                selectedNode.SkillDetail,
-                -1,
-                false,
-                selectedNode.IsUnlocked,
-                hasVideo,
-                ResolveComboStepColors(selectedNode.UnlockSkillIds));
-            _skillDetailPresenter.Push(dto);
+            // 無限強化ノードは続けて強化できるため、選択中ノードの次の強化コストを求め直して表示する。
+            _nodesOnPath.Clear();
+            _costToUnlock = _skillTreeService.TryGetTotalCost(new SkillNodeId(_selectedNodeId), _nodesOnPath);
+            RefreshSelectedText();
             _showCurrentPoints(_skillTreeStatusEntity.CurrentPoints);
             _playerStatusPresenter.Push();
             _ownedSkillChanged?.Invoke();
@@ -401,6 +393,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
         private Dictionary<int, ISkillNodeViewModel> _skillNodeViews;
         private HashSet<SkillNodeEntity> _nodesOnPath;
         private Dictionary<int, VisualElement> _unlockPhases;
+        private List<VisualElement> _allNodesUnlockedPhases;
         private Dictionary<int, string[]> _skillNodeConnBinds;
         private Dictionary<string, ISkillNodeConnViewModel> _nodeConns;
         private Dictionary<int, VideoClip> _videoClipBinds;
@@ -790,6 +783,28 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             {
                 _unlockPhases[nodeId].visible = true;
             }
+
+            // 全ノードの解放で開く段階は、どのノードが最後でも開くよう毎回判定する。
+            if (_skillTreeService.AreAllNodesUnlocked())
+            {
+                SetAllNodesUnlockedPhasesVisible(true);
+            }
+        }
+
+        /// <summary>
+        ///     全ノードの解放で開く段階の表示を切り替える。
+        /// </summary>
+        /// <param name="visible"> 表示する場合はtrue。 </param>
+        private void SetAllNodesUnlockedPhasesVisible(bool visible)
+        {
+            for (int i = 0; i < _allNodesUnlockedPhases.Count; i++)
+            {
+                VisualElement phase = _allNodesUnlockedPhases[i];
+                if (phase != null)
+                {
+                    phase.visible = visible;
+                }
+            }
         }
 
         /// <summary>
@@ -834,6 +849,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
                     unlockPhase.visible = false;
                 }
             }
+
+            SetAllNodesUnlockedPhasesVisible(false);
 
             // リセット後も解放済みのノードだけを解放し直す。
             ReadOnlySpan<SkillNodeId> unlockedNodeIds = result.UnlockedNodeIds.Span;

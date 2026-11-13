@@ -1,0 +1,29 @@
+name: "[CI/CD] Component Menu Check"
+
+# コード規約 CG-073: シーン・プレハブに置くコンポーネントに AddComponentMenu が付いているかを調べ、
+# 付いていないもの・パスの形が違うものを PR の警告として出す。
+on:
+  pull_request:
+    paths:
+      - 'Assets/**/*.cs'
+      - 'Assets/**/*.unity'
+      - 'Assets/**/*.prefab'
+      - 'scripts/component-menu/**'
+      - '.github/workflows/ComponentMenuCheck.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test the checker
+        run: python -m unittest discover -s scripts/component-menu -p 'test_*.py'
+      - name: Check AddComponentMenu on scene-placed components
+        run: python scripts/component-menu/check_component_menu.py

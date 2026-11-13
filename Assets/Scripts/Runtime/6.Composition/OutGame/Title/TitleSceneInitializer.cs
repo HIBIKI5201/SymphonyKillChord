@@ -1,9 +1,11 @@
 using KillChord.Runtime.Adaptor.Persistent.Load;
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Adaptor.OutGame.Screen;
+using KillChord.Runtime.Adaptor.OutGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.Title;
 using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
+using KillChord.Runtime.Adaptor.Persistent.Session;
 using KillChord.Runtime.Application.OutGame.Screen;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
@@ -39,6 +41,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
     /// <summary>
     ///     タイトルシーンの初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Title/TitleSceneInitializer")]
     public sealed class TitleSceneInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -84,6 +87,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private SaveData _loadedSaveData;
         private IMemberRepository _loadedMemberRepository;
+        private IThirdPartyNoticeRepository _loadedThirdPartyNoticeRepository;
         private AudioSettingsModuleContainer _audioSettingsContainer;
         private EnvironmentSettingsModuleContainer _environmentSettingsContainer;
         private VolumeSettingsTabView _volumeSettingsTabView;
@@ -116,6 +120,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 ? SaveStore.Get<SaveData>()
                 : await SaveStore.LoadAsync<SaveData>();
             _loadedMemberRepository = await LoadMemberRepositoryAsync(cancellationToken);
+            _loadedThirdPartyNoticeRepository = await LoadThirdPartyNoticeRepositoryAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (!await ApplyInitialSkillLoadoutAsync())
             {
@@ -243,6 +248,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _titleScreenViewRegistry = new TitleScreenViewRegistry(_titleSceneView, menuScreenView, creditScreenView);
 
             BuildMemberList(creditScreenView);
+            BuildThirdPartyNoticeList(creditScreenView);
 
             IScreenStateRepository screenStateRepository = new ScreenStateRepository();
             IScreenRuleRepository screenRuleRepository = new ScreenRuleRepository(_loadedRuleData);
@@ -570,6 +576,48 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
+        ///     StreamingAssets のサードパーティ素材の表記 JSON を読み込みます。
+        /// </summary>
+        /// <param name="cancellationToken"> キャンセルトークンです。 </param>
+        /// <returns> 読み込んだリポジトリです。読み込めなかった場合は null です。 </returns>
+        private async ValueTask<IThirdPartyNoticeRepository> LoadThirdPartyNoticeRepositoryAsync(
+            CancellationToken cancellationToken)
+        {
+            // 使用アセットが読めなくてもタイトル画面は使えるようにするため、失敗は警告にとどめる。
+            try
+            {
+                return await ThirdPartyNoticeJsonRepository.LoadAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning(
+                    $"[{nameof(TitleSceneInitializer)}] 使用アセットの JSON を読み込めなかったため、クレジット画面の使用アセット一覧は空になります。{exception.Message}",
+                    this);
+                return null;
+            }
+        }
+
+        /// <summary>
+        ///     読み込み済みのサードパーティ素材の表記を、クレジット画面の「使用アセット」へ一覧として反映します。
+        /// </summary>
+        /// <param name="creditScreenView"> 一覧の反映先となるクレジット画面 View です。 </param>
+        private void BuildThirdPartyNoticeList(CreditScreenView creditScreenView)
+        {
+            if (_loadedThirdPartyNoticeRepository == null)
+            {
+                return;
+            }
+
+            IThirdPartyNoticeListPresenter noticeListPresenter = new ThirdPartyNoticeListPresenter(creditScreenView);
+            ShowThirdPartyNoticeListUseCase showNoticeListUseCase = new(_loadedThirdPartyNoticeRepository, noticeListPresenter);
+            showNoticeListUseCase.Execute();
+        }
+
+        /// <summary>
         ///    OutGameUIEventのコールバックを登録する。
         /// </summary>
         private void RegisterUIEventCallbacks()
@@ -665,6 +713,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 await SaveStore.DeleteAsync<SaveData>();
                 lifetimeToken.ThrowIfCancellationRequested();
 
+                // セーブデータを消したら、前回のプレイの途中からは再開しない。
+                if (ServiceLocator.TryGetInstance(out IPlaySessionResumeProvider resumeProvider))
+                {
+                    resumeProvider.DiscardResume();
+                }
+
                 // セーブデータをロードして、初期状態に戻す。
                 _loadedSaveData = await LoadSaveData();
                 lifetimeToken.ThrowIfCancellationRequested();
@@ -758,16 +812,29 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         }
 
         /// <summary>
-        ///     チュートリアル進行状態に応じてタイトルからの遷移先を設定します。
+        ///     途中復帰先とチュートリアル進行状態に応じてタイトルからの遷移先を設定します。
         /// </summary>
         /// <returns> 遷移先を設定できた場合はtrueです。 </returns>
         private bool ApplyStartDestination()
         {
-            // チュートリアルを始めている場合は、通常の遷移先へ進む。
-            if (_titleSceneView == null || _loadedSaveData == null)
+            if (_titleSceneView == null || _loadedSaveData == null || _titleStartController == null)
             {
                 return false;
             }
+
+            // 前回シナリオパート・バトルパートにいた場合は、そのステージの開始地点へ進む。
+            // 再開に必要な選択状態は用意済みのため、ここでは消さない。
+            if (ServiceLocator.TryGetInstance(out IPlaySessionResumeProvider resumeProvider)
+                && resumeProvider.TryGetResumeDestination(out string resumeSceneName, out bool isResumeKeepLoading))
+            {
+                _titleSceneView.SetTargetSceneName(resumeSceneName);
+                _titleStartController.SetKeepLoadingOnStart(isResumeKeepLoading);
+                return true;
+            }
+
+            _titleStartController.SetKeepLoadingOnStart(false);
+
+            // チュートリアルを始めている場合は、通常の遷移先へ進む。
 
             if (_loadedSaveData.Tutorial.Phase != TutorialPhase.NotStarted)
             {
@@ -776,12 +843,18 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                     existingScenarioState.Clear();
                 }
 
+                // 初回ルートの予約が残っていても、OutGame へ持ち込まない。
+                if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState existingPendingState))
+                {
+                    existingPendingState.Clear();
+                }
+
                 _titleSceneView.SetTargetSceneName(_targetSceneName);
                 return true;
             }
 
             // 初回はチュートリアルのシナリオを遷移先にする。
-            if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario))
+            if (!TryGetOpeningScenario(out ScenarioStageDefinition openingScenario, out StageTree stageTree))
             {
                 Debug.LogError(
                     $"[{nameof(TitleSceneInitializer)}] 起点となるチュートリアルシナリオがありません。",
@@ -802,24 +875,55 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             }
 
             selectedScenarioState.SelectOpeningTutorialScenario(openingScenario);
+            ReserveOpeningTutorialBattle(stageTree, openingScenario);
             _titleSceneView.SetTargetSceneName(openingScenario.TargetSceneName);
             return true;
+        }
+
+        /// <summary>
+        ///     初回シナリオの完了後に、OutGame を経由せずチュートリアル戦闘へ進むよう予約します。
+        ///     <para> 予約できない場合は、従来どおり OutGame へ戻ってからチュートリアル戦闘を始めます。 </para>
+        /// </summary>
+        /// <param name="stageTree"> 初回シナリオを取得したステージツリーです。 </param>
+        /// <param name="openingScenario"> 初回シナリオです。 </param>
+        private void ReserveOpeningTutorialBattle(StageTree stageTree, ScenarioStageDefinition openingScenario)
+        {
+            if (!ServiceLocator.TryGetInstance(out PendingNodeTransitionState pendingState))
+            {
+                pendingState = new PendingNodeTransitionState();
+                if (!ServiceLocator.RegisterInstance(pendingState))
+                {
+                    Debug.LogWarning(
+                        $"[{nameof(TitleSceneInitializer)}] {nameof(PendingNodeTransitionState)} を登録できないため、チュートリアル戦闘は OutGame から開始します。",
+                        this);
+                    return;
+                }
+            }
+
+            if (!OpeningTutorialRoute.TryReserveTutorialBattle(stageTree, openingScenario, pendingState, _targetSceneName))
+            {
+                Debug.LogWarning(
+                    $"[{nameof(TitleSceneInitializer)}] チュートリアル戦闘を予約できないため、OutGame から開始します。",
+                    this);
+            }
         }
 
         /// <summary>
         ///     選択中のゲームデータから前提ノードを持たない最初のシナリオを取得します。
         /// </summary>
         /// <param name="scenarioStageDefinition"> 取得したシナリオステージです。 </param>
+        /// <param name="stageTree"> 取得に使ったステージツリーです。 </param>
         /// <returns> 対象を取得できた場合はtrueです。 </returns>
-        private bool TryGetOpeningScenario(out ScenarioStageDefinition scenarioStageDefinition)
+        private bool TryGetOpeningScenario(out ScenarioStageDefinition scenarioStageDefinition, out StageTree stageTree)
         {
             scenarioStageDefinition = null;
+            stageTree = null;
             if (_loadedStageTreeAsset == null || _loadedEnemyWaveDefinitionRepository == null)
             {
                 return false;
             }
 
-            StageTree stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
+            stageTree = _loadedStageTreeAsset.Create(_loadedEnemyWaveDefinitionRepository);
             for (int i = 0; i < stageTree.Nodes.Count; i++)
             {
                 StageNode node = stageTree.Nodes[i];

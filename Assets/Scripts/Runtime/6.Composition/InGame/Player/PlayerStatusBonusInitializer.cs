@@ -15,6 +15,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
     /// <summary>
     ///     InGame で使用するプレイヤーステータスボーナスを初期化するクラスです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Player/PlayerStatusBonusInitializer")]
     public sealed class PlayerStatusBonusInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

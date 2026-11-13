@@ -253,9 +253,20 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <returns> 登録済みのDataID一覧です。 </returns>
         public static IReadOnlyList<SourceDataIDOption> GetOptions(string collectionKey)
         {
+            return GetOptions(collectionKey, GameDataVariantEditorState.SelectedVariant);
+        }
+
+        /// <summary>
+        ///     ゲームデータ種別を指定して、指定カテゴリへ登録済みのDataID一覧を取得します。
+        /// </summary>
+        /// <param name="collectionKey"> 取得するCollectionKeyです。 </param>
+        /// <param name="variant"> 解決対象のゲームデータ種別です。 </param>
+        /// <returns> 登録済みのDataID一覧です。 </returns>
+        public static IReadOnlyList<SourceDataIDOption> GetOptions(string collectionKey, GameDataVariant variant)
+        {
             List<SourceDataIDOption> options = new();
             if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out SourceDataProviderSettings.SourceCollectionMapping mapping)
-                || !TryResolveAsset(mapping.DataAssetAddressableKey, out ScriptableObject dataAsset))
+                || !TryResolveAsset(mapping.DataAssetAddressableKey, variant, out ScriptableObject dataAsset, out _, out _))
             {
                 return options;
             }
@@ -270,11 +281,12 @@ namespace KillChord.Editor.SourceDataProvider.Core
 
             if (useRootObject)
             {
-                CollectFromObject(dataAsset, collectionKey, options, visitedInstanceIds);
+                CollectFromObject(dataAsset, dataAsset, collectionKey, options, visitedInstanceIds);
             }
             else if (rootProperty != null)
             {
                 CollectFromProperty(
+                    dataAsset,
                     serializedObject,
                     rootProperty,
                     collectionKey,
@@ -299,8 +311,29 @@ namespace KillChord.Editor.SourceDataProvider.Core
             UnityEngine.Object target,
             string propertyPath)
         {
+            return IsAuthoringProperty(
+                collectionKey,
+                GameDataVariantEditorState.SelectedVariant,
+                target,
+                propertyPath);
+        }
+
+        /// <summary>
+        ///     ゲームデータ種別を指定して、対象DataIDが生成側フィールドか判定します。
+        /// </summary>
+        /// <param name="collectionKey"> DataIDのCollectionKeyです。 </param>
+        /// <param name="variant"> 解決対象のゲームデータ種別です。 </param>
+        /// <param name="target"> DataIDを保持するUnityオブジェクトです。 </param>
+        /// <param name="propertyPath"> DataIDのプロパティパスです。 </param>
+        /// <returns> 生成側フィールドの場合はtrueです。 </returns>
+        public static bool IsAuthoringProperty(
+            string collectionKey,
+            GameDataVariant variant,
+            UnityEngine.Object target,
+            string propertyPath)
+        {
             if (!SourceDataProviderSettings.instance.TryGetCollectionMapping(collectionKey, out SourceDataProviderSettings.SourceCollectionMapping mapping)
-                || !TryResolveAsset(mapping.DataAssetAddressableKey, out ScriptableObject dataAsset))
+                || !TryResolveAsset(mapping.DataAssetAddressableKey, variant, out ScriptableObject dataAsset, out _, out _))
             {
                 return true;
             }
@@ -340,11 +373,13 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <summary>
         ///     Unityオブジェクト内から指定カテゴリのDataIDを収集します。
         /// </summary>
+        /// <param name="dataAsset"> 走査起点のDataAssetです。 </param>
         /// <param name="target"> 走査対象のUnityオブジェクトです。 </param>
         /// <param name="collectionKey"> 収集するCollectionKeyです。 </param>
         /// <param name="options"> 収集結果です。 </param>
         /// <param name="visitedInstanceIds"> 走査済みオブジェクトのInstanceID一覧です。 </param>
         private static void CollectFromObject(
+            ScriptableObject dataAsset,
             UnityEngine.Object target,
             string collectionKey,
             List<SourceDataIDOption> options,
@@ -363,6 +398,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 enterChildren = true;
                 CollectCurrentProperty(
+                    dataAsset,
                     serializedObject,
                     iterator,
                     collectionKey,
@@ -374,12 +410,14 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <summary>
         ///     指定プロパティとその子要素からDataIDを収集します。
         /// </summary>
+        /// <param name="dataAsset"> 走査起点のDataAssetです。 </param>
         /// <param name="serializedObject"> プロパティを所有するSerializedObjectです。 </param>
         /// <param name="rootProperty"> 走査起点のプロパティです。 </param>
         /// <param name="collectionKey"> 収集するCollectionKeyです。 </param>
         /// <param name="options"> 収集結果です。 </param>
         /// <param name="visitedInstanceIds"> 走査済みオブジェクトのInstanceID一覧です。 </param>
         private static void CollectFromProperty(
+            ScriptableObject dataAsset,
             SerializedObject serializedObject,
             SerializedProperty rootProperty,
             string collectionKey,
@@ -388,7 +426,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
         {
             SerializedProperty iterator = rootProperty.Copy();
             SerializedProperty endProperty = iterator.GetEndProperty();
-            CollectCurrentProperty(serializedObject, iterator, collectionKey, options, visitedInstanceIds);
+            CollectCurrentProperty(dataAsset, serializedObject, iterator, collectionKey, options, visitedInstanceIds);
             bool enterChildren = true;
 
             while (iterator.NextVisible(enterChildren)
@@ -396,6 +434,7 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 enterChildren = true;
                 CollectCurrentProperty(
+                    dataAsset,
                     serializedObject,
                     iterator,
                     collectionKey,
@@ -407,12 +446,14 @@ namespace KillChord.Editor.SourceDataProvider.Core
         /// <summary>
         ///     現在のSerializedPropertyからDataIDまたは参照先オブジェクトを収集します。
         /// </summary>
+        /// <param name="dataAsset"> 走査起点のDataAssetです。 </param>
         /// <param name="serializedObject"> プロパティを所有するSerializedObjectです。 </param>
         /// <param name="property"> 走査対象のプロパティです。 </param>
         /// <param name="collectionKey"> 収集するCollectionKeyです。 </param>
         /// <param name="options"> 収集結果です。 </param>
         /// <param name="visitedInstanceIds"> 走査済みオブジェクトのInstanceID一覧です。 </param>
         private static void CollectCurrentProperty(
+            ScriptableObject dataAsset,
             SerializedObject serializedObject,
             SerializedProperty property,
             string collectionKey,
@@ -424,8 +465,16 @@ namespace KillChord.Editor.SourceDataProvider.Core
             {
                 if (property.objectReferenceValue is ScriptableObject scriptableObject)
                 {
-                    CollectFromObject(scriptableObject, collectionKey, options, visitedInstanceIds);
+                    CollectFromObject(dataAsset, scriptableObject, collectionKey, options, visitedInstanceIds);
                 }
+                return;
+            }
+
+            // 参照先の要素アセット内の配列は、ほかの要素を指す参照側（例: スキルノードの親ノードID）なので登録IDに含めない。
+            // IsAuthoringProperty と同じ基準にそろえる。
+            if (serializedObject.targetObject != dataAsset
+                && property.propertyPath.Contains(".Array.data[", StringComparison.Ordinal))
+            {
                 return;
             }
 

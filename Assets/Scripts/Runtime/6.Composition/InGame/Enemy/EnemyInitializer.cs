@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.InGame.Target;
+using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
@@ -33,6 +34,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     ///     Buildフェーズで公開するEnemyModuleContainerはStageEffectInitializerから参照されるため、
     ///     StageEffectInitializerより先に実行される必要があります。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/EnemyInitializer")]
     public class EnemyInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -114,6 +116,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
+            // 差し替えが登録されていれば、ステージのWaveの代わりに使う。演出の一覧はステージのものを使う。
+            if (ServiceLocator.TryGetInstance(out IEnemyWavesOverride enemyWavesOverride))
+            {
+                EnemyWaves overriddenWaves = enemyWavesOverride.CreateEnemyWaves();
+                if (overriddenWaves != null)
+                {
+                    _loadedEnemyWaves = overriddenWaves;
+                }
+            }
+
             // 敵とボスのアセットを読み込む。
             if (_enemyPools == null || !await _enemyPools.LoadAddressableAssetsAsync(cancellationToken))
             {
@@ -121,7 +133,18 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
-            BossInitializer bossInitializer = GameObject.FindFirstObjectByType<BossInitializer>();
+            // ウェーブにボスがいる場合は、非表示で置いたシーンのボスも探す。
+            _hasWaveBoss = HasBossInWaves();
+            BossInitializer bossInitializer = FindBossInitializer();
+            _waveBossInitializer = _hasWaveBoss ? bossInitializer : null;
+            if (_hasWaveBoss && bossInitializer == null)
+            {
+                Debug.LogError(
+                    $"[{nameof(EnemyInitializer)}] ウェーブにボスがいますが、シーンにボスが見つかりません。",
+                    this);
+                return false;
+            }
+
             if (bossInitializer != null && !await bossInitializer.ResourceLoadAsync(cancellationToken))
             {
                 Debug.LogError($"[{nameof(EnemyInitializer)}] ボス用アセットのロードに失敗しました。", this);
@@ -148,6 +171,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _isModuleRegistered = true;
             _battleAIRegistry = new EnemyAIControllerRegistry();
             _moduleContainer.EnemyBattleAIRegistry = _battleAIRegistry;
+            _invincibilityRegistry = new EnemyInvincibilityRegistry();
+            _moduleContainer.EnemyInvincibilityRegistry = _invincibilityRegistry;
             return true;
         }
 
@@ -203,12 +228,32 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             bool isMissionControlledWave = hasMissionWaveSequence
                 && objectiveSequence.HasStepWithCondition<WaveStartClearCondition>();
 
+            // ウェーブにボスがいれば、ボスをウェーブで出現させるスポナーを作る。
+            InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
+            if (_hasWaveBoss)
+            {
+                BossInitializer bossInitializer = _waveBossInitializer;
+                TargetSystemController targetSystemController = targetSystemContainer.TargetSystemController;
+                _bossWaveSpawner = new BossWaveSpawner(
+                    bossInitializer,
+                    _enemySpawnPositionSearcher,
+                    _moduleContainer.EnemyWaveSpawnerState,
+                    () => bossInitializer.Initialize(
+                        targetSystemController,
+                        _enemyPools,
+                        _damageNumberPoolView,
+                        _damageEffectView));
+                _moduleContainer.BossInitializer = bossInitializer;
+                inGamePlayDirector?.AddGamePlayControllable(_bossWaveSpawner);
+            }
+
             // Wave の生成と進行を制御するコントローラーを作る。
             _moduleContainer.StageEffectCatalog = _loadedStageEffectCatalog;
             EnemySpawnerRouter enemySpawner = new EnemySpawnerRouter(
                 _loadedEnemyDefinitionRepository,
                 _enemyInfantrySpawner,
-                _enemyArtillerySpawner);
+                _enemyArtillerySpawner,
+                _bossWaveSpawner);
             _moduleContainer.EnemyWaveSpawnerController = new EnemyWaveSpawnerController(
                 _loadedEnemyWaves,
                 _moduleContainer.EnemyWaveSpawnerState,
@@ -227,12 +272,14 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                     _enemyWaveTimerView);
             }
 
-            // ボスがいれば初期化し、ゲームの開始・終了の制御対象に加える。
-            _moduleContainer.BossInitializer = TryInitializeBoss(targetSystemContainer.TargetSystemController, _enemyPools, _damageEffectView);
-            if (_moduleContainer.BossInitializer != null)
+            // ウェーブにボスがいないときは、シーンに表示したまま置いたボスを初期化し、ゲームの開始・終了の制御対象に加える。
+            if (!_hasWaveBoss)
             {
-                InGamePlayDirector inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
-                inGamePlayDirector?.AddGamePlayControllable(_moduleContainer.BossInitializer.LifeCycle);
+                _moduleContainer.BossInitializer = TryInitializeBoss(targetSystemContainer.TargetSystemController, _enemyPools, _damageEffectView);
+                if (_moduleContainer.BossInitializer != null)
+                {
+                    inGamePlayDirector?.AddGamePlayControllable(_moduleContainer.BossInitializer.LifeCycle);
+                }
             }
 
             return true;
@@ -307,7 +354,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             lifeCycle.Initialize(_playerView.transform, _playerInitializer.PlayerEntity,
                 _musicSyncState, _musicSyncService, _targetingSystem, attackControllerGenerator,
-                shellPool, _damageNumberPoolView, _damageEffectView, _waveSpawnState, releaseCallback, enemyType, _battleAIRegistry);
+                shellPool, _damageNumberPoolView, _damageEffectView, _waveSpawnState, releaseCallback, enemyType, _battleAIRegistry,
+                _invincibilityRegistry);
         }
 
         /// <summary>
@@ -317,6 +365,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             _enemyInfantrySpawner?.Shutdown();
             _enemyArtillerySpawner?.Shutdown();
+            _bossWaveSpawner?.Dispose();
+            _bossWaveSpawner = null;
+            _waveBossInitializer = null;
 
             _missionWaveController?.Dispose();
             _missionWaveController = null;
@@ -377,12 +428,16 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         private bool _isModuleRegistered;
         private EnemyModuleContainer _moduleContainer;
         private EnemyAIControllerRegistry _battleAIRegistry;
+        private EnemyInvincibilityRegistry _invincibilityRegistry;
         private EnemyWaveDefinitionRepository _loadedEnemyWaveDefinitionRepository;
         private EnemyDefinitionRepository _loadedEnemyDefinitionRepository;
         private EnemyWaves _loadedEnemyWaves;
         private IReadOnlyDictionary<int, IStageEffectDefinition> _loadedStageEffectCatalog;
         private MissionWaveController _missionWaveController;
         private ReusableParticleSystemView _damageEffectView;
+        private BossWaveSpawner _bossWaveSpawner;
+        private bool _hasWaveBoss;
+        private BossInitializer _waveBossInitializer;
 
         /// <summary>
         ///     敵Waveの開始・全滅通知を結合するMissionの目標シーケンスを取得します。
@@ -406,6 +461,37 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             objectiveSequence = sequence;
             return true;
+        }
+
+        /// <summary>
+        ///     今回のステージのウェーブにボスの敵定義があるかを調べます。
+        /// </summary>
+        /// <returns> ボスがいる場合はtrue。 </returns>
+        private bool HasBossInWaves()
+        {
+            IReadOnlyList<EnemyDefinitionId> enemyDefinitionIds = _loadedEnemyWaves.GetAllEnemyDefinitionIds();
+            for (int i = 0; i < enemyDefinitionIds.Count; i++)
+            {
+                if (_loadedEnemyDefinitionRepository.TryGetDefinition(enemyDefinitionIds[i], out EnemyDefinitionAsset definition)
+                    && definition.EnemyType == EnemyType.Boss)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        ///     シーンのボスを探します。ウェーブにボスがいる場合は、非表示のボスも対象にします。
+        /// </summary>
+        /// <returns> 見つかったボスの初期化ドライバ。見つからない場合はnull。 </returns>
+        private BossInitializer FindBossInitializer()
+        {
+            FindObjectsInactive findObjectsInactive = _hasWaveBoss
+                ? FindObjectsInactive.Include
+                : FindObjectsInactive.Exclude;
+            return FindFirstObjectByType<BossInitializer>(findObjectsInactive);
         }
 
         /// <summary>

@@ -32,5 +32,8 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
         /// <summary> 敵AIを管理するクラスです。 </summary>
         public EnemyAIControllerRegistry EnemyBattleAIRegistry { get; set; }
+
+        /// <summary> 敵の無敵状態を管理するクラスです。 </summary>
+        public EnemyInvincibilityRegistry EnemyInvincibilityRegistry { get; set; }
     }
 }

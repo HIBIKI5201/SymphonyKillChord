@@ -78,6 +78,28 @@ namespace KillChord.Runtime.Adaptor.Persistent.SceneManagement
         }
 
         /// <summary>
+        ///     シーンをAdditiveロードしてから、遷移元のシーンをアンロードする。
+        ///     1回のロード画面の間に両方を行う。アンロードは常駐シーンの寿命に従い、
+        ///     呼び出し元のシーンが破棄されても後処理まで実行する。
+        /// </summary>
+        /// <param name="loadSceneName"> 読み込むシーン名。 </param>
+        /// <param name="unloadSceneName"> 読み込み後にアンロードするシーン名。 </param>
+        /// <param name="loadCancellationToken"> 読み込みに使うキャンセルトークン。 </param>
+        /// <returns> 読み込みとアンロードの両方に成功した場合はtrue。 </returns>
+        public Task<bool> LoadAdditiveThenUnloadWithPersistentLifetimeAsync(
+            string loadSceneName,
+            string unloadSceneName,
+            CancellationToken loadCancellationToken)
+        {
+            _persistentLifetimeToken.ThrowIfCancellationRequested();
+            return _useCase.LoadAdditiveThenUnloadAsync(
+                loadSceneName,
+                unloadSceneName,
+                loadCancellationToken,
+                _persistentLifetimeToken);
+        }
+
+        /// <summary>
         ///     常駐シーンの寿命に従って、ロード画面を閉じずにシーンをAdditiveロードする。
         ///     読み込んだシーンの初期化がロード画面を引き継いで閉じる場合に使用する。
         /// </summary>

@@ -9,8 +9,8 @@ using Debug = UnityEngine.Debug;
 namespace KillChord.Editor.SinfoniaOperator
 {
     /// <summary>
-    ///     エディタ起動時に、Notion仕様書のサブモジュール（Docs/NotionSpecifications）を裏で最新化するクラス。
-    ///     仕様書はCIだけがNotionから取得して仕様書リポジトリへpushするため、各自はpullするだけでよい。
+    ///     エディタ起動時に、Notionのプロジェクト ドキュメントのサブモジュール（Docs/NotionSpecifications）を裏で最新化するクラス。
+    ///     プロジェクト ドキュメントはCIだけがNotionから取得して仕様書リポジトリへpushするため、各自はpullするだけでよい。
     /// </summary>
     [InitializeOnLoad]
     internal static class NotionSpecificationsAutoPull
@@ -31,6 +31,41 @@ namespace KillChord.Editor.SinfoniaOperator
             _ = Task.Run(() => PullSafely(repositoryRoot));
         }
 
+        /// <summary>
+        ///     今すぐサブモジュールを最新化する（仕様書ビューアの更新ボタン用）。時間がかかるので、メインスレッド以外から呼ぶ。
+        /// </summary>
+        /// <param name="repositoryRoot">本体リポジトリのルート。</param>
+        /// <returns>失敗したときの説明。成功したら空文字。</returns>
+        internal static string PullNow(string repositoryRoot)
+        {
+            try
+            {
+                return Pull(repositoryRoot);
+            }
+            catch (Exception exception)
+            {
+                return exception.Message;
+            }
+        }
+
+        /// <summary>
+        ///     写しの最新コミットの日時を返す（Notion から取得した時点の目安）。
+        /// </summary>
+        /// <param name="repositoryRoot">本体リポジトリのルート。</param>
+        /// <returns>ISO 8601 形式の日時。取得できなければ空文字。</returns>
+        internal static string ReadLastCommitDate(string repositoryRoot)
+        {
+            try
+            {
+                GitResult result = RunGit(repositoryRoot, $"-C \"{SPECIFICATIONS_PATH}\" log -1 --format=%cI", true);
+                return result.ExitCode == 0 ? result.Output : string.Empty;
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
+        }
+
         private const string SESSION_KEY = "KillChord.NotionSpecificationsAutoPull.HasRun";
         private const string SPECIFICATIONS_PATH = "Docs/NotionSpecifications";
         private const string BACKUP_SUFFIX_FORMAT = "yyyyMMddHHmmss";
@@ -44,11 +79,15 @@ namespace KillChord.Editor.SinfoniaOperator
         {
             try
             {
-                Pull(repositoryRoot);
+                string error = Pull(repositoryRoot);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    Debug.LogWarning($"[{nameof(NotionSpecificationsAutoPull)}] {error}");
+                }
             }
             catch (Exception exception)
             {
-                Debug.LogWarning($"[{nameof(NotionSpecificationsAutoPull)}] 仕様書を更新できませんでした: {exception.Message}");
+                Debug.LogWarning($"[{nameof(NotionSpecificationsAutoPull)}] プロジェクト ドキュメントを更新できませんでした: {exception.Message}");
             }
         }
 
@@ -56,7 +95,8 @@ namespace KillChord.Editor.SinfoniaOperator
         ///     サブモジュールを取得し、仕様書リポジトリのmainの最新へ合わせる。
         /// </summary>
         /// <param name="repositoryRoot">本体リポジトリのルート。</param>
-        private static void Pull(string repositoryRoot)
+        /// <returns>失敗したときの説明。成功したら空文字。</returns>
+        private static string Pull(string repositoryRoot)
         {
             MoveLegacyExportAside(repositoryRoot);
 
@@ -67,20 +107,21 @@ namespace KillChord.Editor.SinfoniaOperator
                 false);
             if (result.ExitCode != 0)
             {
-                Debug.LogWarning($"[{nameof(NotionSpecificationsAutoPull)}] 仕様書を更新できませんでした。" +
-                                 $"仕様書リポジトリへのアクセス権と、{SPECIFICATIONS_PATH} に手元の変更が残っていないかを確認してください。\n{result.Output}");
-                return;
+                return "プロジェクト ドキュメントを更新できませんでした。" +
+                       $"仕様書リポジトリへのアクセス権と、{SPECIFICATIONS_PATH} に手元の変更が残っていないかを確認してください。\n{result.Output}";
             }
 
             string after = RunGit(repositoryRoot, $"-C \"{SPECIFICATIONS_PATH}\" rev-parse --short HEAD", true).Output;
             if (before != after)
             {
-                Debug.Log($"[{nameof(NotionSpecificationsAutoPull)}] 仕様書を最新に更新しました（{after}）。");
+                Debug.Log($"[{nameof(NotionSpecificationsAutoPull)}] プロジェクト ドキュメントを最新に更新しました（{after}）。");
             }
+
+            return string.Empty;
         }
 
         /// <summary>
-        ///     サブモジュール化する前に手元で書き出した仕様書があれば、消さずに別名で退避する。
+        ///     サブモジュール化する前に手元で書き出したプロジェクト ドキュメントがあれば、消さずに別名で退避する。
         ///     中身が残っているとサブモジュールを取得できないため。
         /// </summary>
         /// <param name="repositoryRoot">本体リポジトリのルート。</param>

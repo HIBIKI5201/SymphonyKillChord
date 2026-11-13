@@ -29,5 +29,9 @@ namespace KillChord.Runtime.Domain.InGame.Mission
         AttackSixBeat,
         /// <summary> 敵の攻撃実行。 </summary>
         EnemyAttack,
+        /// <summary> 説明ポップアップを閉じる決定入力(PCのUI決定ボタン、スマホの画面タップ)。 </summary>
+        PopupConfirm,
+        /// <summary> Just攻撃（拍子の色は問わない）。 </summary>
+        JustAttack,
     }
 }

@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Battle
     /// <summary>
     ///     攻撃結果を表示するビュークラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Battle/AttackResultView")]
     public class AttackResultView : MonoBehaviour
     {
         /// <summary>

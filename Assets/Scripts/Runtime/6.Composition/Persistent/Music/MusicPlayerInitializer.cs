@@ -10,6 +10,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
     ///     音楽再生機能の初期化を行うクラス。
     /// </summary>
     [RequireComponent(typeof(MusicPlayer))]
+    [AddComponentMenu("KillChord/Composition/Music/MusicPlayerInitializer")]
     public sealed class MusicPlayerInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

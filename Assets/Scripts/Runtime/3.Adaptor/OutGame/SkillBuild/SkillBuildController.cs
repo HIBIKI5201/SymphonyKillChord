@@ -70,7 +70,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillBuild
         }
 
         /// <summary>
-        ///     指定したスキルのレベルを1上げ、改造Pを1消費する。
+        ///     指定したスキルのレベルを1上げ、スキルごとのコスト分の改造Pを消費する。
         /// </summary>
         /// <param name="skillId"> 対象スキルID。 </param>
         /// <returns> 改造Pが不足している等の理由で実行できなかった場合は false。 </returns>

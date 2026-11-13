@@ -1,0 +1,37 @@
+{
+  "type": "task",
+  "label": "タスク",
+  "database": "27d7c2c6-cc02-81fb-83ca-c832098a8b37",
+  "title_property": "名前",
+  "properties": {
+    "ステータス": { "type": "status", "options": ["未着手", "進行中", "確認中", "却下", "完了"], "default": "未着手" },
+    "日付": { "type": "date" },
+    "担当者": { "type": "people" },
+    "タグ": { "type": "multi_select", "options": ["ディレクター", "プランナー", "プログラマー", "デザイナー", "シナリオ", "サウンド"] },
+    "スプリント": {
+      "type": "relation",
+      "database": "2ee7c2c6-cc02-80f2-9c20-c926a60f871b",
+      "title_property": "スプリント名",
+      "aliases": {
+        "現在": { "property": "スプリントステータス", "status": "現在" },
+        "次": { "property": "スプリントステータス", "status": "次" }
+      },
+      "default": "現在"
+    },
+    "親タスク": { "type": "relation", "database": "27d7c2c6-cc02-81fb-83ca-c832098a8b37", "title_property": "名前" },
+    "次のタスクにより保留中：": { "type": "relation", "database": "27d7c2c6-cc02-81fb-83ca-c832098a8b37", "title_property": "名前" }
+  },
+  "sections": {
+    "担当": {},
+    "内容": { "required": true },
+    "バックログ": {}
+  },
+  "body": [
+    "# 担当 {color=\"gray_bg\"}",
+    "{{担当}}",
+    "# 内容 {color=\"gray_bg\"}",
+    "{{内容}}",
+    "# バックログ {color=\"gray_bg\"}",
+    "{{バックログ}}"
+  ]
+}

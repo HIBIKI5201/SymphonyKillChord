@@ -20,7 +20,7 @@ namespace KillChord.Runtime.Application.InGame.Music
             RhythmDefinition rhythmDefinition,
             RhythmJudgmentDefinition rhythmJudgmentDefinition)
         {
-            _rhythmState = new(BUFFER_SIZE);
+            _rhythmInputBuffer = new(BUFFER_SIZE);
             _rhythmDefinition = rhythmDefinition;
             _rhythmJudgmentDefinition = rhythmJudgmentDefinition;
             _scheduledActions = new PriorityQueue<ScheduledAction, double>();
@@ -100,7 +100,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// </summary>
         public void ResetPlayback()
         {
-            _rhythmState.Clear();
+            _rhythmInputBuffer.Clear();
             _scheduledActions.Clear();
             _gaugeStartPlayTime = null;
             _currentPlayTime = 0d;
@@ -112,9 +112,9 @@ namespace KillChord.Runtime.Application.InGame.Music
         private void TimeOutRhythm()
         {
             _gaugeStartPlayTime = _currentPlayTime;
-            if (_rhythmState.Count > 0)
+            if (_rhythmInputBuffer.Count > 0)
             {
-                _rhythmState.Clear();
+                _rhythmInputBuffer.Clear();
                 OnRhythmTimedOut?.Invoke();
             }
         }
@@ -125,7 +125,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <returns> 履歴の数。 </returns>
         public int GetHistoryLength()
         {
-            return _rhythmState.Count;
+            return _rhythmInputBuffer.Count;
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <returns> 拍の種類の読み取り専用スパン。 </returns>
         public ReadOnlySpan<BeatType> GetBeatTypeHistory()
         {
-            return _rhythmState.GetHistoryBeatType();
+            return _rhythmInputBuffer.GetHistoryBeatType();
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <returns> タイミングの読み取り専用スパン。 </returns>
         public ReadOnlySpan<float> GetBeatTypeTiming()
         {
-            return _rhythmState.GetHistoryTiming();
+            return _rhythmInputBuffer.GetHistoryTiming();
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace KillChord.Runtime.Application.InGame.Music
         /// <returns> アクション種類の読み取り専用スパン。 </returns>
         public ReadOnlySpan<BattleActionType> GetActionHistory()
         {
-            return _rhythmState.GetHistoryActionType();
+            return _rhythmInputBuffer.GetHistoryActionType();
         }
 
         /// <summary>
@@ -202,13 +202,16 @@ namespace KillChord.Runtime.Application.InGame.Music
 
         /// <summary>
         ///     バトルアクションの履歴を登録する。
+        ///     記録時刻とゲージの基準は、曲の8拍子・6拍子のタイミングのうち最も近いものへクオンタイズする。
         /// </summary>
         /// <param name="actionType"> アクションの種類。 </param>
         /// <param name="beatType"> 拍の種類。 </param>
         public void RegisterBattleActionHistory(BattleActionType actionType, BeatType beatType)
         {
-            _rhythmState.Enqueue(beatType, (float)_currentPlayTime, actionType);
-            _gaugeStartPlayTime = _currentPlayTime;
+            // 押した時刻のままだとJust幅の中のずれが次の基準へ積み重なるため、曲の拍へ揃える。
+            double quantizedPlayTime = MusicTimingCalculator.QuantizePlayTime(_rhythmDefinition, _currentPlayTime);
+            _rhythmInputBuffer.Enqueue(beatType, (float)quantizedPlayTime, actionType);
+            _gaugeStartPlayTime = quantizedPlayTime;
         }
 
         /// <summary>
@@ -241,7 +244,7 @@ namespace KillChord.Runtime.Application.InGame.Music
 
         private const int BUFFER_SIZE = 64;
         private const double PLAYBACK_REWIND_TOLERANCE_SECONDS = 0.01d;
-        private readonly RhythmState _rhythmState;
+        private readonly RhythmInputBuffer _rhythmInputBuffer;
         private readonly RhythmDefinition _rhythmDefinition;
         private readonly RhythmJudgmentDefinition _rhythmJudgmentDefinition;
         private readonly PriorityQueue<ScheduledAction, double> _scheduledActions = new();

@@ -110,7 +110,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.SkillTree
             return (
                 _baseHealth * bonus.MaxHealthMultiplier,
                 _baseAttack * bonus.AttackPowerMultiplier,
-                Math.Min(1f, _baseCriticalChance + bonus.CriticalChanceAddition),
+                // 100% を超えた分はクリティカルの重複になるため、上限を設けない。
+                Math.Max(0f, _baseCriticalChance + bonus.CriticalChanceAddition),
                 _baseCriticalDamageMultiplier - 1f + bonus.CriticalMultiplierAddition,
                 areaAttackRangeMultiplier);
         }

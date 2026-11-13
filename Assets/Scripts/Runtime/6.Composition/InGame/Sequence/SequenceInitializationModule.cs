@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.Sequence;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
@@ -8,9 +9,12 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.InGame.Mission;
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.InGame.Result;
+using KillChord.Runtime.Composition.Persistent.Savedata;
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.View.InGame.Result;
@@ -28,6 +32,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
     /// <summary>
     ///     インゲームシーケンスの構築と進行を担うモジュールです。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Sequence/SequenceInitializationModule")]
     public sealed class SequenceInitializationModule : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -48,7 +53,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageResultView = FindFirstObjectByType<StageResultView>();
             _inGamePlayDirector = FindFirstObjectByType<InGamePlayDirector>();
             _stageSequenceVoiceView = FindFirstObjectByType<StageSequenceVoiceView>();
-            _stageSequenceMusicView = FindFirstObjectByType<StageSequenceMusicView>();
             _stageStartConstraintView = FindFirstObjectByType<StageStartConstraintView>();
             _playerInputView = FindFirstObjectByType<PlayerInputView>();
             _musicPlayer = FindFirstObjectByType<MusicPlayer>();
@@ -60,7 +64,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 || _stageResultView == null
                 || _inGamePlayDirector == null
                 || _stageSequenceVoiceView == null
-                || _stageSequenceMusicView == null
                 || _stageStartConstraintView == null
                 || _playerInputView == null
                 || _musicPlayer == null)
@@ -83,9 +86,21 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             ServiceLocator.RegisterInstance(_container);
             _isRegistered = true;
 
-            _battlePauseModule = new BattlePauseModule(_musicPlayer);
+            // 音楽同期はカウントダウンに使う。取得できない場合はカウントダウンせずに再開する。
+            MusicSyncController musicSyncController =
+                ServiceLocator.TryGetInstance(out MusicSyncModuleContainer musicSyncContainer)
+                    ? musicSyncContainer.MusicSyncController
+                    : null;
+            if (musicSyncController == null)
+            {
+                Debug.LogWarning($"[{nameof(SequenceInitializationModule)}] {nameof(MusicSyncController)} が見つからないため、ポーズ解除のカウントダウンを行いません。", this);
+            }
+
+            PausableClock playClock = new PausableClock();
+            _battlePauseModule = new BattlePauseModule(_musicPlayer, playClock, musicSyncController);
             _battlePauseController = new BattlePauseController(_battlePauseModule);
             _container.BattlePauseController = _battlePauseController;
+            _container.PlayClock = playClock;
 
             return true;
         }
@@ -148,9 +163,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 playerContainer.PlayerView);
 
             _stageSequenceView.InitializeClearCamera(playerContainer.PlayerView.transform);
-
-            _stageSequenceMusicView.Initialize(
-                _musicPlayer);
 
             _stageResultController = stageResultContainer.Controller;
 
@@ -229,6 +241,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 _isRegistered = false;
             }
 
+            _battlePauseModule?.Dispose();
+            _battlePauseModule = null;
             _container = null;
             _selectedBattleStageState = null;
             _stageProgressSaveDataService = null;
@@ -422,6 +436,13 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// <param name="evaluationResult"> 保存する評価結果です。 </param>
         private async Task SaveClearResultAsync(MissionEvaluationResult evaluationResult)
         {
+            // 保存を止める状態が登録されていれば、進捗も報酬も書き込まない。
+            if (ServiceLocator.TryGetInstance(out ISaveSuppression saveSuppression)
+                && saveSuppression.IsSaveSuppressed)
+            {
+                return;
+            }
+
             try
             {
                 BattleStageDefinition stageDefinition =
@@ -439,7 +460,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
             catch (Exception exception)
             {
+                // 保存に失敗してもリザルトは表示し、ほかのセーブデータと同じ通知で失敗を伝える。
                 Debug.LogException(exception, this);
+                _ = SaveFailureNotification.ShowAsync(this, destroyCancellationToken);
             }
         }
 
@@ -482,7 +505,6 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private PendingNodeTransitionState _pendingNodeTransitionState;
         private LoadingScreenController _loadingScreenController;
         private StageSequenceVoiceView _stageSequenceVoiceView;
-        private StageSequenceMusicView _stageSequenceMusicView;
         private StageStartConstraintView _stageStartConstraintView;
         private MusicPlayer _musicPlayer;
         private AmbienceSoundView _ambienceSoundView;

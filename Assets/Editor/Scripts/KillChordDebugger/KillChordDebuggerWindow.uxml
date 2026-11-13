@@ -6,6 +6,7 @@
         <ui:VisualElement name="kcd-body" class="kcd-body">
             <ui:VisualElement name="kcd-nav" class="kcd-nav">
                 <ui:Button name="kcd-nav-savedata" text="セーブデータ" class="kcd-nav__button kcd-nav__button--active" />
+                <ui:Button name="kcd-nav-logicgraph" text="ロジック" class="kcd-nav__button" />
             </ui:VisualElement>
             <ui:VisualElement name="kcd-content" class="kcd-content" />
         </ui:VisualElement>

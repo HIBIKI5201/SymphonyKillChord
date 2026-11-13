@@ -5,6 +5,7 @@ using KillChord.Runtime.View.InGame.Sequence;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Cysharp.Threading.Tasks;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -13,6 +14,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     砲兵のスポナークラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/EnemyArtillerySpawner")]
     public class EnemyArtillerySpawner : MonoBehaviour, IGameplayControllable, IEnemySpawner
     {
         /// <summary>
@@ -253,7 +255,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         {
             do
             {
-                await Task.Delay(SPAWN_RETRY_DELAY_MILLISECONDS, cancellationToken);
+                await UniTask.Delay(SPAWN_RETRY_DELAY_MILLISECONDS, DelayType.Realtime, cancellationToken: cancellationToken);
             }
             while (!_isPlaying || Time.timeScale <= 0f);
         }

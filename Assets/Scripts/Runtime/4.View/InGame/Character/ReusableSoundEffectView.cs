@@ -10,6 +10,7 @@ namespace KillChord.Runtime.View.InGame.Character
     ///     再生元のGameObjectが即座に非アクティブ化されても
     ///     再生中のSEが途切れないよう、複製したSoundEffectSourceを外部で保持して再生します。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Character/ReusableSoundEffectView")]
     public class ReusableSoundEffectView : MonoBehaviour
     {
         /// <summary>

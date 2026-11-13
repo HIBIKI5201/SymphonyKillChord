@@ -40,7 +40,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         {
             value = entry;
             id = entry.RequiredSkillNodeId;
-            return true;
+            // 全ノードの解放で開く段階は、特定のノードIDでは引かない。
+            return !entry.RequiresAllNodesUnlocked;
         }
     }
 }

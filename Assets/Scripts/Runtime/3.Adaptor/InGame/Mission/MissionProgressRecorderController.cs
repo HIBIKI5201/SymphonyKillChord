@@ -3,6 +3,7 @@ using KillChord.Runtime.Adaptor.InGame.Player;
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Adaptor.InGame.Target;
 using KillChord.Runtime.Application.InGame.Music;
+using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Music;
@@ -69,13 +70,13 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 ?? throw new ArgumentNullException(nameof(musicSyncService));
 
             // ミッションの進行に関わるイベントを購読する。
-            _playerEntity.OnHealthChanged += HandleHealthChanged;
+            _playerEntity.OnDamageTaken += HandleDamageTaken;
             _playerController.OnMoved += HandleMoved;
             _playerController.OnDodgeSucceeded += HandleDodgeSucceeded;
             _attackController.OnAttackExecuted += HandleAttackExecuted;
             _attackController.OnAttackBeatExecuted += HandleAttackBeatExecuted;
             _skillController.OnSkillAnimationRequested += HandleSkillAnimationRequested;
-            _targetSystemController.OnTargetLocked += HandleTargetLocked;
+            _targetSystemController.OnLockOnInputPerformed += HandleLockOnInputPerformed;
             _musicSyncService.OnRhythmTimedOut += HandleRhythmTimedOutHandler;
         }
 
@@ -86,10 +87,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         {
             // 保留中の攻撃の種類を消し、各イベントの購読を解除する。
             _pendingAttackBeatKind = null;
+            _isPendingAttackJust = false;
 
             if (_playerEntity != null)
             {
-                _playerEntity.OnHealthChanged -= HandleHealthChanged;
+                _playerEntity.OnDamageTaken -= HandleDamageTaken;
             }
 
             if (_attackController != null)
@@ -111,7 +113,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
 
             if (_targetSystemController != null)
             {
-                _targetSystemController.OnTargetLocked -= HandleTargetLocked;
+                _targetSystemController.OnLockOnInputPerformed -= HandleLockOnInputPerformed;
             }
 
             if (_musicSyncService != null)
@@ -147,6 +149,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private ComboHudPresenter _comboHudPresenter;
         /// <summary> <see cref="HandleAttackExecuted"/>と一緒に通知する、保留中の拍子攻撃です。 </summary>
         private MissionActionKind? _pendingAttackBeatKind;
+        /// <summary> 保留中の攻撃がJust攻撃だった場合はtrueです。 </summary>
+        private bool _isPendingAttackJust;
         private readonly List<MissionActionKind> _attackActionBuffer = new();
 
         /// <summary>
@@ -172,8 +176,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
             _missionEventController.NotifyActionPerformed(MissionActionKind.Move);
         }
 
-        /// <summary> ロックオン成立をMissionへ通知します。 </summary>
-        private void HandleTargetLocked()
+        /// <summary> ロックオン入力で対象を捉えたことをMissionへ通知します。攻撃時の自動ロックオンは数えません。 </summary>
+        private void HandleLockOnInputPerformed()
         {
             _missionEventController.NotifyActionPerformed(MissionActionKind.LockOn);
         }
@@ -188,8 +192,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         ///     </para>
         /// </summary>
         /// <param name="beatType"> 実行した攻撃の拍子です。 </param>
-        private void HandleAttackBeatExecuted(BeatType beatType)
+        /// <param name="isJustHit"> Just攻撃だった場合はtrueです。 </param>
+        private void HandleAttackBeatExecuted(BeatType beatType, bool isJustHit)
         {
+            _isPendingAttackJust = isJustHit;
             _pendingAttackBeatKind = beatType switch
             {
                 BeatType.One => MissionActionKind.AttackOneBeat,
@@ -203,22 +209,15 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         }
 
         /// <summary>
-        ///     プレイヤーHP変化を記録します。
+        ///     被弾によるダメージを記録し、コンボを破棄します。
         /// </summary>
-        /// <param name="currentHealth"> 現在HPです。 </param>
-        /// <param name="maximumHealth"> 最大HPです。 </param>
-        /// <param name="amountChanged"> HP変化量です。 </param>
-        private void HandleHealthChanged(
-            float currentHealth,
-            float maximumHealth,
-            float amountChanged)
+        /// <remarks>
+        ///     スキルのHP消費は被ダメージとして扱わないため、HP変化ではなく被弾のイベントを使います。
+        /// </remarks>
+        /// <param name="damage"> 実際に減ったHPです。 </param>
+        private void HandleDamageTaken(Damage damage)
         {
-            if (amountChanged >= 0f)
-            {
-                return;
-            }
-
-            _missionProgress.RecordDamageTaken(-amountChanged);
+            _missionProgress.RecordDamageTaken(damage.Value);
             _missionProgress.ResetCombo();
             _comboHudPresenter.Present(_missionProgress.ComboCount.Value);
         }
@@ -256,7 +255,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
                 _attackActionBuffer.Add(_pendingAttackBeatKind.Value);
             }
 
+            // Just攻撃は拍子の色を問わずに数える。
+            if (_isPendingAttackJust)
+            {
+                _attackActionBuffer.Add(MissionActionKind.JustAttack);
+            }
+
             _pendingAttackBeatKind = null;
+            _isPendingAttackJust = false;
             _attackActionBuffer.Add(MissionActionKind.Attack);
             _missionEventController.NotifyActionsPerformed(_attackActionBuffer);
         }
