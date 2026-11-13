@@ -41,7 +41,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b6ad6365688245ff99a5ab3a539cbaa2
-    m_Address: DemoExperienceConfig.Exhibition
+    m_Address: DemoExperienceConfig_Exhibition
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
