@@ -38,8 +38,12 @@ namespace KillChord.Runtime.View.InGame.Camera
         )
         {
             Quaternion target = Quaternion.identity;
+            float rotationSpeed = Mathf.Max(0f, _parameter.LockOnRotationSpeed);
             if (isLockOn)
             {
+                // ロックオンで対象へ向ける回転だけを倍率で遅くする。解除後に戻す回転は従来の速さのままにする。
+                rotationSpeed *= Mathf.Max(0f, _parameter.LockOnRotationSpeedScale);
+
                 // プレイヤーのモデル中心位置を求める
                 Vector3 playerCenter = context.FollowPosition + _parameter.CharacterCenterOffset;
 
@@ -53,8 +57,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 }
             }
 
-            float interpolationRatio = 1f - Mathf.Exp(
-                -Mathf.Max(0f, _parameter.LockOnRotationSpeed) * Mathf.Max(0f, context.DeltaTime));
+            float interpolationRatio = 1f - Mathf.Exp(-rotationSpeed * Mathf.Max(0f, context.DeltaTime));
             rotation = Quaternion.Slerp(rotation, target, interpolationRatio);
         }
 

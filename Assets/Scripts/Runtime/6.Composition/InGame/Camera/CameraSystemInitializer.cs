@@ -89,6 +89,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             CameraFollowCalculator followCalculator = new(_config);
             CameraLockOnRangeChecker lockOnRangeChecker = new(_config);
             CameraAutoLockOnReleaseTracker autoLockOnReleaseTracker = new(_config, new CameraLockOnBreakTracker(_config));
+            CameraLookInputOverrideTracker lookInputOverrideTracker = new(_config);
             CameraShakeCalculator shakeCalculator = new();
 
             PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
@@ -99,16 +100,16 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             }
 
             _cameraSystem.Initialize(
-                (playerPosition, direction, notifyLockOn) =>
+                (playerPosition, direction, notifyLockOn, allowOutOfView) =>
                 {
                     // ターゲットの切り替えはコントローラーを通す。ミッションの LockOn 行動はロックオン入力の通知（OnLockOnInputPerformed）で数える。
                     if (targetSystemController != null)
                     {
-                        targetSystemController.ChangeTarget(playerPosition, direction, notifyLockOn);
+                        targetSystemController.ChangeTarget(playerPosition, direction, notifyLockOn, allowOutOfView);
                         return;
                     }
 
-                    targetingSystem.ChangeTarget(playerPosition, direction, notifyLockOn);
+                    targetingSystem.ChangeTarget(playerPosition, direction, notifyLockOn, allowOutOfView);
                 },
                 () => targetingSystem.ClearTarget(),
                 () =>
@@ -124,7 +125,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 targetId => targetingSystem.TrySetCurrentTarget(targetId, notifyLockOn: false),
                 followCalculator, lockOnRotationCalculator,
                 freeLookRotationCalculator, lookAtRotationCalculator, lockOnRangeChecker, autoLockOnReleaseTracker,
-                shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
+                lookInputOverrideTracker, shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
                 ServiceLocator.GetInstance<PlayerInputView>());
 
             // ロックオン対象はカメラの視界範囲内の敵から選ぶ。
