@@ -29,7 +29,9 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <summary>
         ///     依存オブジェクトを受け取り、カメラシステム View を初期化する。
         /// </summary>
-        /// <param name="changeTargetAction"> ターゲット切り替え処理。第3引数はロックオン成立を通知するかどうか。</param>
+        /// <param name="changeTargetAction">
+        ///     ターゲット切り替え処理。第3引数はロックオン成立を通知するかどうか、第4引数は視界範囲内に敵がいないとき視界範囲外の敵も選ぶかどうか。
+        /// </param>
         /// <param name="clearTargetAction"> ターゲット解除処理。</param>
         /// <param name="getCurrentTargetPositionFunc"> 現在ターゲット位置の取得処理。</param>
         /// <param name="updateCandidateAction"> 候補ターゲット更新処理。</param>
@@ -45,12 +47,13 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="lookAtRotationCalculator"> カメラ回転計算クラス。</param>
         /// <param name="lockOnRangeChecker"> 自動ロックオン対象の視野内判定クラス。</param>
         /// <param name="autoLockOnReleaseTracker"> オートロックオンの解除条件の判定クラス。</param>
+        /// <param name="lookInputOverrideTracker"> 視点入力中にロックオンによる回転を止めるかの判定クラス。</param>
         /// <param name="shakeCalculator"> カメラシェイクの揺れ量計算クラス。</param>
         /// <param name="viewSettings"> View が利用するカメラ設定値。</param>
         /// <param name="playerT"> プレイヤーの Transform。</param>
         /// <param name="playerInputView"> プレイヤー入力の View クラス。</param>
         public void Initialize(
-            Action<Vector3, Vector3, bool> changeTargetAction,
+            Action<Vector3, Vector3, bool, bool> changeTargetAction,
             Action clearTargetAction,
             Func<(bool HasTarget, Vector3 TargetPosition)> getCurrentTargetPositionFunc,
             Action<Vector3, Vector3> updateCandidateAction,
@@ -64,6 +67,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             CameraLookAtRotationCalculator lookAtRotationCalculator,
             CameraLockOnRangeChecker lockOnRangeChecker,
             CameraAutoLockOnReleaseTracker autoLockOnReleaseTracker,
+            CameraLookInputOverrideTracker lookInputOverrideTracker,
             CameraShakeCalculator shakeCalculator,
             CameraConfig viewSettings,
             Transform playerT,
@@ -84,6 +88,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _lookAtRotationCalculator = lookAtRotationCalculator;
             _lockOnRangeChecker = lockOnRangeChecker;
             _autoLockOnReleaseTracker = autoLockOnReleaseTracker;
+            _lookInputOverrideTracker = lookInputOverrideTracker;
             _shakeCalculator = shakeCalculator;
             _viewSettings = viewSettings;
             _playerT = playerT;
@@ -130,6 +135,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 && _updateCandidateAction != null && _trySetTargetByIdFunc != null && _followCalculator != null
                 && _lockOnRotationCalculator != null && _freeLookRotationCalculator != null
                 && _lookAtRotationCalculator != null && _lockOnRangeChecker != null && _autoLockOnReleaseTracker != null
+                && _lookInputOverrideTracker != null
                 && _viewSettings != null && _playerT != null && _cameraT != null)
             {
                 return true;
@@ -260,8 +266,9 @@ namespace KillChord.Runtime.View.InGame.Camera
         private CameraLookAtRotationCalculator _lookAtRotationCalculator;
         private CameraLockOnRangeChecker _lockOnRangeChecker;
         private CameraAutoLockOnReleaseTracker _autoLockOnReleaseTracker;
+        private CameraLookInputOverrideTracker _lookInputOverrideTracker;
         private CameraShakeCalculator _shakeCalculator;
-        private Action<Vector3, Vector3, bool> _changeTargetAction;
+        private Action<Vector3, Vector3, bool, bool> _changeTargetAction;
         private Action<Vector3, Vector3> _updateCandidateAction;
         private Action _clearTargetAction;
         private Func<(bool HasTarget, Vector3 TargetPosition)> _getCurrentTargetPositionFunc;
@@ -496,6 +503,7 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             _lockOnState = CameraLockOnState.LockOnAuto;
             _autoLockOnReleaseTracker.ResetOnHit();
+            BeginOutOfViewGraceIfNeeded();
         }
 
         /// <summary>
@@ -571,7 +579,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _followCalculator.Update(ref _cameraCenterOffset, frame.Context);
 
             Quaternion boneTargetRotation = _cameraBoneRotation;
-            if (frame.IsLockOn)
+            if (frame.IsLockOnRotationActive)
             {
                 _lockOnRotationCalculator.TryGetTargetRotation(
                     frame.Context.FollowPosition,
@@ -589,13 +597,17 @@ namespace KillChord.Runtime.View.InGame.Camera
                 ? cameraAnchorPosition - _cameraCenterOffset + cameraDirection * _currentDistance
                 : position;
 
-            _lookAtRotationCalculator.Update(
-                frame.IsLockOn,
-                ref _cameraRotation,
-                boneTargetRotation,
-                cameraPositionForRotation,
-                frame.Context,
-                frame.TargetPosition);
+            // 視点入力でロックオンの回転を止めている間は、注視点の回転も今の向きのまま止める。
+            if (!frame.IsLockOnRotationSuppressed)
+            {
+                _lookAtRotationCalculator.Update(
+                    frame.IsLockOn,
+                    ref _cameraRotation,
+                    boneTargetRotation,
+                    cameraPositionForRotation,
+                    frame.Context,
+                    frame.TargetPosition);
+            }
 
             Quaternion rotation = _cameraBoneRotation * _cameraRotation;
 
@@ -628,7 +640,22 @@ namespace KillChord.Runtime.View.InGame.Camera
 
             _lockOnState = CameraLockOnState.LockOnAuto;
             _autoLockOnReleaseTracker.Reset();
-            _changeTargetAction.Invoke(currentPosition, direction, true);
+
+            // 正面に敵がいなければ、見えない所にいる敵へもロックオンしてそちらへ向く。
+            _changeTargetAction.Invoke(currentPosition, direction, true, true);
+            BeginOutOfViewGraceIfNeeded();
+        }
+
+        /// <summary>
+        ///     現在のロックオン対象が視野外にいる場合、カメラが向き終わるまで視野外による解除を猶予する。
+        /// </summary>
+        private void BeginOutOfViewGraceIfNeeded()
+        {
+            var targetResult = _getCurrentTargetPositionFunc.Invoke();
+            if (targetResult.HasTarget && !IsTargetWithinViewport(targetResult.TargetPosition))
+            {
+                _autoLockOnReleaseTracker.BeginOutOfViewGrace();
+            }
         }
 
         /// <summary>
@@ -643,7 +670,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             {
                 _lockOnState = CameraLockOnState.LockOnManual;
                 _autoLockOnReleaseTracker.Reset();
-                _changeTargetAction.Invoke(currentPosition, direction, true);
+                _changeTargetAction.Invoke(currentPosition, direction, true, false);
                 OnLockOnInputPerformed?.Invoke();
                 return;
             }
@@ -684,12 +711,21 @@ namespace KillChord.Runtime.View.InGame.Camera
         /// <param name="frame"> 1フレーム分のカメラ状態。</param>
         private void UpdateCameraBone(in CameraUpdateFrame frame)
         {
-            if (frame.IsLockOn)
+            if (frame.IsLockOnRotationActive)
             {
                 _lockOnRotationCalculator.Update(
                     ref _cameraBoneRotation,
                     frame.Context,
                     frame.TargetPosition);
+            }
+            else if (frame.IsLockOnRotationSuppressed)
+            {
+                // ロックオン中の視点入力では、ロックオンの回転を止めて入力どおりに回す。
+                // 入力が止まって再開を待つ間は、移動入力で回らないよう今の向きを保つ。
+                if (_lookInputOverrideTracker.IsLookInputActive(frame.Context))
+                {
+                    _freeLookRotationCalculator.Update(ref _cameraBoneRotation, frame.Context);
+                }
             }
             else
             {
@@ -715,7 +751,7 @@ namespace KillChord.Runtime.View.InGame.Camera
                 {
                     // マニュアルロックオンの対象が倒れたら、視界範囲内の次の敵へ付け替える。
                     // 入力による操作ではないため、ロックオン成立は通知しない（ロックオンSE・ミッションの計上を防ぐ）。
-                    _changeTargetAction.Invoke(_playerT.position, GetCurrentForward(), false);
+                    _changeTargetAction.Invoke(_playerT.position, GetCurrentForward(), false, false);
                     targetResult = _getCurrentTargetPositionFunc.Invoke();
                 }
 
@@ -750,7 +786,18 @@ namespace KillChord.Runtime.View.InGame.Camera
                 _updateCandidateAction.Invoke(_playerT.position, GetCurrentForward());
             }
 
-            return new CameraUpdateFrame(context, targetPosition, IsLockOn());
+            // ロックオン中に視点入力があれば、ロックオンによるカメラ回転を止める。
+            bool isLockOnRotationSuppressed = false;
+            if (IsLockOn())
+            {
+                isLockOnRotationSuppressed = _lookInputOverrideTracker.Update(context);
+            }
+            else
+            {
+                _lookInputOverrideTracker.Reset();
+            }
+
+            return new CameraUpdateFrame(context, targetPosition, IsLockOn(), isLockOnRotationSuppressed);
         }
 
         /// <summary>
