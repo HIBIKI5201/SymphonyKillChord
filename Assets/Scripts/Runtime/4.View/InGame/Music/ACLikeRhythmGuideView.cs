@@ -749,6 +749,8 @@ namespace KillChord.Runtime.View.InGame.Music
             CreateJustOutlines();
             RebuildTargetBeatFrames();
             _currentOpenIndex = -1;
+            // 作り直したブロックは全て表示されているため、消した数も戻す。
+            _vanishedBlockCount = 0;
             SynchronizeProgressImageWidths();
             OnLayoutChanged?.Invoke();
         }
