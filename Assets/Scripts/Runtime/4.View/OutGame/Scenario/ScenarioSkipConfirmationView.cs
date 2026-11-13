@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using KillChord.Runtime.View.OutGame.Navigation;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -117,6 +118,13 @@ namespace KillChord.Runtime.View.OutGame.Scenario
                 _skipButton.interactable = true;
                 _cancelButton.interactable = true;
             }
+            // マウス・タッチ操作中は選択を付けず、コントローラー・キーボードへ切り替えたときの再開先だけを決める。
+            if (!NavigationFocusVisibility.IsNavigationActive)
+            {
+                NavigationFocusVisibility.RememberUguiSelection(_cancelButton.gameObject);
+                return;
+            }
+
             GameObject selected = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
             if (selected != _skipButton.gameObject && selected != _cancelButton.gameObject)
             {

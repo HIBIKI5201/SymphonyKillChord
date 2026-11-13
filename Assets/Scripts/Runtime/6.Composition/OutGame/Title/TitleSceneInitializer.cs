@@ -22,6 +22,7 @@ using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Title;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Layout;
 using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFrameWork.Attribute;
@@ -101,6 +102,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private EventNotificationView _eventNotificationView;
         private CancellationTokenSource _resetCancellation;
         private VisualElement _boundTitleRoot;
+        private UIDocumentAspectRatioLimiter _aspectRatioLimiter;
 
         /// <summary>
         ///     タイトル画面に必要なアセットをロードします。
@@ -156,6 +158,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 #endif
                 return false;
             }
+
+            // 横長の画面でUIが引き延ばされないよう、16:9 の範囲に収める。
+            _aspectRatioLimiter?.Dispose();
+            _aspectRatioLimiter = new UIDocumentAspectRatioLimiter(root);
 
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
@@ -376,6 +382,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _titleScreenViewRegistry = null;
             _titleSceneView = null;
             _boundTitleRoot = null;
+            _aspectRatioLimiter?.Dispose();
+            _aspectRatioLimiter = null;
         }
 
         /// <summary>
