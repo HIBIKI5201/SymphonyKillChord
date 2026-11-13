@@ -7,8 +7,5 @@ namespace KillChord.Editor.AutoBuilder
     {
         Development,
         Master,
-
-        /// <summary> 出展イベント用の展示版です。体験版でだけ使い、タイマーとデータリセットを有効にします。 </summary>
-        Exhibition,
     }
 }

@@ -589,6 +589,15 @@ namespace KillChord.Editor.AutoBuilder
                             return;
                         }
 
+                        // CI から版が渡されていれば、プレイヤーの版番号に入れる。形式が正しくなければここで止める。
+                        if (!BuildVersionSettings.TryApply(profile.name))
+                        {
+                            AndroidReleaseSigning.Restore();
+                            TryDeleteFailedBuildOutput(buildDir, profile.name);
+                            NextSession(true);
+                            return;
+                        }
+
                         BuildReport report;
                         try
                         {
@@ -597,6 +606,7 @@ namespace KillChord.Editor.AutoBuilder
                         finally
                         {
                             AndroidReleaseSigning.Restore();
+                            BuildVersionSettings.Restore();
                         }
 
                         hasFailure = report.summary.result != BuildResult.Succeeded;

@@ -273,7 +273,8 @@ jobs:
     if: needs.check.outputs.should_run == 'true' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     environment: 'AutoBuildAndRelease'
-    permissions: {}
+    permissions:
+      contents: read  # 版タグを読むチェックアウトのため。
     defaults:
       run:
         shell: pwsh
@@ -283,7 +284,7 @@ jobs:
       tag_prefix: ${{ steps.determine_mode.outputs.tag_prefix }}
       matrix: ${{ steps.determine_hosts.outputs.matrix }}
       version: ${{ steps.resolve_version.outputs.version }}
-      version_var_name: ${{ steps.resolve_version.outputs.version_var_name }}
+      player_version: ${{ steps.resolve_version.outputs.player_version }}
     env:
       AUTO_BUILD_VARIANT: ${{ vars.BUILD_VARIANT }}
       MACOS_RUNNER_ENABLED: ${{ vars.MACOS_RUNNER_ENABLED }}
@@ -373,70 +374,75 @@ jobs:
           $Matrix = @{ include = $Include } | ConvertTo-Json -Depth 5 -Compress
           "matrix=$Matrix" | Add-Content -Path $env:GITHUB_OUTPUT
 
-      # 変数更新用の GitHub App（sinfonia-variable-updater）からトークンを発行する。
-      # App と権限の詳細は .github/apps/README.md を参照。
-      - name: 変数更新用トークンの発行（バージョン解決）
-        id: variable_token_resolve
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      # 版は develop・main へのマージコミットに TagBuildVersion.yml が打つ v タグから読む（Dev と Master で共通の1本）。
+      # - PR のマージで動いたとき: そのマージコミットのタグを待って使う（タグ付けと同時に起動するため）。
+      # - 手動実行や、タグの無いコミット: いちばん近い祖先の v タグを使う。そのタグからUnityプロジェクトが
+      #   変わっていなければ同じ版、変わっていれば v1.2.3-<短いSHA> とし、どのコミットのビルドかを残す。
+      - name: 版を読むためのチェックアウト
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          client-id: ${{ vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID }}
-          private-key: ${{ secrets.SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY }}
+          ref: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+          fetch-depth: 0
+          # コミット履歴だけを取り、差分を見るときに必要なツリーだけ後から取る（認証情報は後の取得に使う）。
+          filter: tree:0
+          submodules: false
+          lfs: false
 
-      - name: 現行ビルドバージョンの解決
+      - name: 版の解決
         id: resolve_version
+        shell: bash
         env:
-          VAR_UPDATE_TOKEN: ${{ steps.variable_token_resolve.outputs.token }}
-          BUILD_MODE: ${{ steps.determine_mode.outputs.build_mode }}
+          TARGET_SHA: ${{ github.event.pull_request.merge_commit_sha || github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          # 外部 API の例外は、公開ログに応答本文や URL を出さないよう、HTTP 状態と例外の種類だけに要約する。
-          function Get-ApiErrorSummary($ErrorRecord) {
-            $Ex = $ErrorRecord.Exception
-            if (-not $Ex.Response -and $Ex.InnerException) { $Ex = $Ex.InnerException }
-            if ($Ex.Response -and $Ex.Response.StatusCode) { return "HTTP $([int]$Ex.Response.StatusCode)" }
-            return $Ex.GetType().Name
+          set -euo pipefail
+          TAG_PATTERN='v[0-9]*.[0-9]*.[0-9]*'
+          is_version_tag() { [[ "$1" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; }
+
+          exact_tag() {
+            git tag --points-at "${TARGET_SHA}" --list "${TAG_PATTERN}" | while read -r T; do
+              if is_version_tag "$T"; then echo "$T"; fi
+            done | sort -V | tail -n 1
           }
 
-          # VERSION_{BuildMode}（例: VERSION_DEVELOPMENT）に、次にビルドする版を v<メジャー>.<マイナー>.<パッチ> で格納する。
-          # リリースに成功すると finalize ジョブがパッチ番号を1つ進めて書き戻す。メジャー・マイナーを上げるときは変数を手で書き換える。
-          # 未設定時は v1.0.0 で作成する。
-          $VarName = "VERSION_$env:BUILD_MODE"
-          $Headers = @{
-              "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
-              "Accept"        = "application/vnd.github+json"
-              "X-GitHub-Api-Version" = "2022-11-28"
-          }
-          $GetUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
+          TAG=$(exact_tag)
+          if [ -z "${TAG}" ] && [ "${EVENT_NAME}" = "pull_request" ]; then
+            # TagBuildVersion.yml が版タグを打つのを最大15分待つ。
+            for i in $(seq 1 30); do
+              sleep 30
+              git fetch --quiet --force origin "+refs/tags/v*:refs/tags/v*" || true
+              TAG=$(exact_tag)
+              [ -n "${TAG}" ] && break
+              echo "[INFO]: 版タグを待っています（$((i * 30)) 秒経過）..."
+            done
+            if [ -z "${TAG}" ]; then
+              echo "::warning::マージコミット ${TARGET_SHA} に版タグが付かなかったため、祖先のタグから版を決めます。[Git] Tag Build Version の実行を確認してください。"
+            fi
+          fi
 
-          try {
-              $VersionString = (Invoke-RestMethod -Uri $GetUrl -Method GET -Headers $Headers).value
-          } catch {
-              if ($_.Exception.Response.StatusCode.value__ -eq 404) {
-                  Write-Host "::warning::リポジトリ変数 '$VarName' が見つかりません。デフォルト値 'v1.0.0' で作成します。"
-                  $CreateUrl = "https://api.github.com/repos/${{ github.repository }}/actions/variables"
-                  $Body = @{ "name" = $VarName; "value" = "v1.0.0" } | ConvertTo-Json
-                  try {
-                      Invoke-RestMethod -Uri $CreateUrl -Method POST -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
-                      $VersionString = "v1.0.0"
-                  } catch {
-                      Write-Host "::error::リポジトリ変数 '$VarName' の作成に失敗しました: $(Get-ApiErrorSummary $_)"
-                      exit 1
-                  }
-              } else {
-                  Write-Host "::error::リポジトリ変数 '$VarName' の取得に失敗しました: $(Get-ApiErrorSummary $_)"
-                  exit 1
-              }
-          }
-
-          # 手で設定したときに紛れ込んだ前後の空白・改行は取り除く
-          $VersionString = "$VersionString".Trim()
-          if ($VersionString -notmatch '^v\d+\.\d+\.\d+$') {
-              Write-Host "::error::'$VarName' の値 '$VersionString' が期待される形式 (例: v1.0.0) と一致しません。"
+          if [ -n "${TAG}" ]; then
+            VERSION="${TAG}"
+            echo "[INFO]: ビルドするコミットの版タグ: ${TAG}"
+          else
+            BASE_TAG=$(git describe --tags --abbrev=0 --match "${TAG_PATTERN}" "${TARGET_SHA}" 2>/dev/null || true)
+            if [ -z "${BASE_TAG}" ] || ! is_version_tag "${BASE_TAG}"; then
+              echo "::error::${TARGET_SHA} の祖先に版タグ（v<メジャー>.<マイナー>.<パッチ>）がありません。develop へのマージで版タグが付くまでビルドできません。"
               exit 1
-          }
+            fi
+            if git diff --quiet "${BASE_TAG}" "${TARGET_SHA}" -- Assets Packages ProjectSettings; then
+              VERSION="${BASE_TAG}"
+              echo "[INFO]: ${BASE_TAG} からUnityプロジェクトに変更が無いため、同じ版 ${VERSION} でビルドします。"
+            else
+              VERSION="${BASE_TAG}-$(git rev-parse --short=7 "${TARGET_SHA}")"
+              echo "::notice::${BASE_TAG} のあとにUnityプロジェクトの変更があるコミットのため、版を ${VERSION} とします。"
+            fi
+          fi
 
-          "version_var_name=$VarName" | Add-Content -Path $env:GITHUB_OUTPUT
-          "version=$VersionString"    | Add-Content -Path $env:GITHUB_OUTPUT
-          Write-Host "[INFO]: 現行ビルドバージョンが解決されました: $VersionString"
+          # Unity のプレイヤーへ入れる版は数字だけ（例: 3.2.4）。
+          PLAYER_VERSION=$(echo "${VERSION}" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "player_version=${PLAYER_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "[INFO]: 版: ${VERSION}（プレイヤーの版: ${PLAYER_VERSION}）"
 
   build-and-release:
     needs: [check, prepare]
@@ -757,16 +763,13 @@ jobs:
           Write-Host "ビルドモード: $BuildMode, ビルド種別: $BuildVariant, タグの接頭辞: $TagPrefix, 版: ${{ needs.prepare.outputs.version }}"
           "BUILD_MODE=$BuildMode"   | Add-Content -Path $env:GITHUB_ENV
           "BUILD_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
-          # Unity へ渡す種別・モード。展示版は体験版データ（demo）を AutoBuilder の Exhibition 枠でビルドする。
-          if ($BuildVariant -eq "exhibition") {
-            "UNITY_GAME_DATA_VARIANT=demo" | Add-Content -Path $env:GITHUB_ENV
-            "UNITY_BUILD_MODE=Exhibition"  | Add-Content -Path $env:GITHUB_ENV
-          } else {
-            "UNITY_GAME_DATA_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
-            "UNITY_BUILD_MODE=$BuildMode"           | Add-Content -Path $env:GITHUB_ENV
-          }
+          # Unity へ渡す種別・モード。展示版も種別 exhibition のまま渡し、AutoBuilder の Exhibition Master 枠でビルドする。
+          "UNITY_GAME_DATA_VARIANT=$BuildVariant" | Add-Content -Path $env:GITHUB_ENV
+          "UNITY_BUILD_MODE=$BuildMode"           | Add-Content -Path $env:GITHUB_ENV
           "TAG_PREFIX=$TagPrefix"   | Add-Content -Path $env:GITHUB_ENV
           "CURRENT_BUILD_VERSION=${{ needs.prepare.outputs.version }}" | Add-Content -Path $env:GITHUB_ENV
+          # Unity（BuildVersionSettings.cs）がプレイヤーの版と versionCode に入れる数字だけの版。
+          "SKC_BUILD_VERSION=${{ needs.prepare.outputs.player_version }}" | Add-Content -Path $env:GITHUB_ENV
           "build_mode=$BuildMode"   | Add-Content -Path $env:GITHUB_OUTPUT
           "build_variant=$BuildVariant" | Add-Content -Path $env:GITHUB_OUTPUT
           "tag_prefix=$TagPrefix"   | Add-Content -Path $env:GITHUB_OUTPUT
@@ -797,8 +800,9 @@ jobs:
 
           # AutoBuilderSettings はゲームデータ種別×ビルドモードごとに出力先パスを持つ（例: DemoMasterPath）。
           switch ($env:UNITY_GAME_DATA_VARIANT) {
-            "demo"    { $VariantKey = "Demo" }
-            "release" { $VariantKey = "Release" }
+            "demo"       { $VariantKey = "Demo" }
+            "release"    { $VariantKey = "Release" }
+            "exhibition" { $VariantKey = "Exhibition" }
             default {
               Write-Host "::error::未知の BUILD_VARIANT です: $env:BUILD_VARIANT"
               exit 1
@@ -808,7 +812,6 @@ jobs:
           switch ($env:UNITY_BUILD_MODE) {
             "Master"      { $TargetKey = "${VariantKey}MasterPath" }
             "Development" { $TargetKey = "${VariantKey}DevelopPath" }
-            "Exhibition"  { $TargetKey = "${VariantKey}ExhibitionPath" }
             default {
               Write-Host "::error::未知の BUILD_MODE です: $env:BUILD_MODE"
               exit 1
@@ -2233,7 +2236,7 @@ jobs:
             5. **Unity ビルド処理**: ${{ steps.determine_mode.outputs.build_mode }} ビルドプロファイルをプロファイルごとに別の Unity バッチプロセスで実行（各プロファイルのタイムアウトは2時間）。
 
             **ビルド対象プロファイル:**
-            - ビルドプロファイル枠: ${{ steps.determine_mode.outputs.build_variant == 'exhibition' && 'DemoExhibition' || format('{0}{1}', steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release', steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master') }}BuildProfiles
+            - ビルドプロファイル枠: ${{ format('{0}{1}', steps.determine_mode.outputs.build_variant == 'exhibition' && 'Exhibition' || steps.determine_mode.outputs.build_variant == 'demo' && 'Demo' || 'Release', steps.determine_mode.outputs.build_mode == 'Development' && 'Develop' || 'Master') }}BuildProfiles
           files: "${{ steps.tag_gen.outputs.ASSET_PREFIX }}-*-${{ steps.tag_gen.outputs.VERSION }}.zip"
           fail_on_unmatched_files: true
           overwrite_files: true
@@ -2268,7 +2271,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 公開確認を従来のcreate_release成功ゲートとし、失敗を成功扱いしない（版数は finalize ジョブが進める）。
+      # 公開確認を従来のcreate_release成功ゲートとし、失敗を成功扱いしない。
       - name: リリースアセットの公開確認
         id: create_release
         if: ${{ !cancelled() && (steps.release_attempt_1.outcome == 'success' || steps.release_attempt_1.outcome == 'failure') }}
@@ -2471,91 +2474,3 @@ jobs:
           }
 
           Write-Host "::endgroup::"
-
-  # OSごとのビルドジョブがすべて終わったあとで、リリースに成果物が1つでも公開されていれば版のパッチ番号を進める。
-  # 各ジョブで進めると、片方のジョブが後から始まったときに別の版でリリースを作ってしまうため、ここで1回だけ行う。
-  finalize:
-    needs: [prepare, build-and-release]
-    if: always() && needs.prepare.result == 'success'
-    runs-on: ubuntu-latest
-    environment: 'AutoBuildAndRelease'
-    permissions:
-      contents: read
-    defaults:
-      run:
-        shell: pwsh
-
-    steps:
-      - name: リリースの公開状態の確認
-        id: release_state
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ needs.prepare.outputs.tag_prefix }}-${{ needs.prepare.outputs.build_variant }}-${{ needs.prepare.outputs.version }}
-        run: |
-          $Headers = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
-          $Tag = [Uri]::EscapeDataString($env:RELEASE_TAG)
-          try {
-            $Release = Invoke-RestMethod -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/releases/tags/$Tag" -Headers $Headers -TimeoutSec 60
-          } catch {
-            if ($_.Exception.Response.StatusCode.value__ -eq 404) {
-              Write-Host "::warning::リリース $env:RELEASE_TAG は作られていないため、版は進めません。"
-              "published=false" | Add-Content -Path $env:GITHUB_OUTPUT
-              exit 0
-            }
-            throw
-          }
-          $Uploaded = @(Invoke-RestMethod -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/releases/$($Release.id)/assets?per_page=100" -Headers $Headers -TimeoutSec 60 |
-            Where-Object { $_.state -eq 'uploaded' })
-          Write-Host "[INFO]: リリース $env:RELEASE_TAG の公開済み成果物: $($Uploaded.Count) 件"
-          $Uploaded | ForEach-Object { Write-Host "  - $($_.name)" }
-          "published=$(if ($Uploaded.Count -gt 0) { 'true' } else { 'false' })" | Add-Content -Path $env:GITHUB_OUTPUT
-
-      # トークンの有効期限は1時間のため、prepare ジョブではなく使用する直前に改めて発行する。
-      - name: 変数更新用トークンの発行（パッチ番号更新）
-        id: variable_token_increment
-        if: steps.release_state.outputs.published == 'true'
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          client-id: ${{ vars.SINFONIA_VARIABLE_UPDATER_CLIENT_ID }}
-          private-key: ${{ secrets.SINFONIA_VARIABLE_UPDATER_PRIVATE_KEY }}
-
-      - name: リリースのパッチ番号のインクリメント
-        if: steps.release_state.outputs.published == 'true'
-        env:
-          VAR_UPDATE_TOKEN: ${{ steps.variable_token_increment.outputs.token }}
-          VERSION_VAR_NAME: ${{ needs.prepare.outputs.version_var_name }}
-          CURRENT_BUILD_VERSION: ${{ needs.prepare.outputs.version }}
-        run: |
-          # 外部 API の例外は、公開ログに応答本文や URL を出さないよう、HTTP 状態と例外の種類だけに要約する。
-          function Get-ApiErrorSummary($ErrorRecord) {
-            $Ex = $ErrorRecord.Exception
-            if (-not $Ex.Response -and $Ex.InnerException) { $Ex = $Ex.InnerException }
-            if ($Ex.Response -and $Ex.Response.StatusCode) { return "HTTP $([int]$Ex.Response.StatusCode)" }
-            return $Ex.GetType().Name
-          }
-
-          $VarName        = $env:VERSION_VAR_NAME
-          $CurrentVersion = $env:CURRENT_BUILD_VERSION
-          if ($CurrentVersion -notmatch '^(v\d+\.\d+\.)(\d+)$') {
-              Write-Host "::error::現行ビルドバージョン '$CurrentVersion' が期待される形式 (例: v1.0.0) と一致しません。"
-              exit 1
-          }
-          $NextVersion = "$($Matches[1])$([int]$Matches[2] + 1)"
-          Write-Host "変数名: $VarName"
-          Write-Host "現在のバージョン: $CurrentVersion"
-          Write-Host "次のバージョン: $NextVersion"
-
-          $Headers = @{
-              "Authorization" = "Bearer $env:VAR_UPDATE_TOKEN"
-              "Accept"        = "application/vnd.github+json"
-              "X-GitHub-Api-Version" = "2022-11-28"
-          }
-          $Url = "https://api.github.com/repos/${{ github.repository }}/actions/variables/$VarName"
-          $Body = @{ "name" = $VarName; "value" = $NextVersion } | ConvertTo-Json
-          try {
-              Invoke-RestMethod -Uri $Url -Method PATCH -Headers $Headers -Body $Body -ContentType "application/json" | Out-Null
-              Write-Host "[INFO]: $VarName を $NextVersion に更新しました。"
-          } catch {
-              Write-Host "::error::$VarName の更新に失敗しました: $(Get-ApiErrorSummary $_)"
-              exit 1
-          }

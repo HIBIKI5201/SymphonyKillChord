@@ -27,7 +27,20 @@
 - Unity は Windows 向け（IL2CPP）を macOS で、macOS・iOS 向けを Windows でビルドできない。Android はどちらでもビルドできるが、二重にビルドしないよう Windows の担当にしている。
 - macOS のビルドは、`MACOS_RUNNER_ENABLED` が `true` でないと作られない。起動中の Mac がないのに macOS のジョブを作ると、ジョブが最大24時間待ち続け、後に予約されたビルドも止まるため。常時起動の Mac を用意したら、オーナーが Settings → Secrets and variables → Actions → Variables で `true` にする。Mac を止めるときは `false` に戻す。
 - 手動実行では、選んだプラットフォームがある OS のジョブだけが作られる（例: Android だけなら Windows のジョブだけ）。
-- 版（`VERSION_DEVELOPMENT` など）は実行の最初に1回だけ決め、リリースに成果物が1つでも上がれば、全部のジョブが終わったあとで1つ進める。
+- 版は実行の最初に1回だけ決める（下の「版の決まり方」）。
+
+## 版の決まり方
+
+版は Development ビルドと Master ビルドで共通の1本で、`v<メジャー>.<マイナー>.<パッチ>` の git タグで持つ。
+
+- `[Git] Tag Build Version`（`.github/workflows/TagBuildVersion.yml`）が、Unityプロジェクト（`Assets`・`Packages`・`ProjectSettings`）を変えた PR のマージコミットにタグを打つ。docs やワークフローだけの PR では版は上がらない。
+  - `main` へのマージ: メジャーを1つ上げ、マイナーとパッチを0に戻す。
+  - `develop` へのマージ: PR にラベル `version:minor` があればマイナーを上げてパッチを0に戻す。無ければパッチを上げる。
+  - 次の版は、既存の v タグのうち最大の版から決める。同時にマージされても、1回ずつ順に実行するので同じ版は使わない。
+- `BuildAndRelease.yml` は、ビルドするコミットの v タグを版にする。PR のマージで動いたときはタグが付くのを最大15分待つ。
+  - 手動実行でタグの無いコミットをビルドするときは、いちばん近い祖先の v タグを使う。そこから Unityプロジェクトが変わっていなければ同じ版、変わっていれば `v3.2.4-ab12cd3` のように短い SHA を付ける。
+- リリースのタグは今までどおり `<dev|master>-<ゲームデータ種別>-<版>`。同じ版を作り直すと、同じリリースの成果物を上書きする。
+- Unity には数字だけの版（例 `3.2.4`）を環境変数 `SKC_BUILD_VERSION` で渡す。`BuildVersionSettings.cs` が `bundleVersion` と、Android の `versionCode`・iOS/macOS のビルド番号（メジャー×1000000＋マイナー×1000＋パッチ）をビルドの間だけ入れる。手元のビルドでは何もしない。
 
 ## 初めてランナーを作る人へ
 
@@ -135,7 +148,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 gh workflow run BuildAndRelease.yml --repo HIBIKI5201/SymphonyKillChord --ref develop -f build_mode=Development -f build_variant=demo -f profile_android=false -f profile_windows=true -f profile_macos=false -f profile_ios=false -f cpu_usage_percent=100%
 ```
 
-- `build_variant` は `demo`（配布用体験版）、`release`（製品版）、`exhibition`（展示版）から選ぶ。展示版は体験版にタイマーとデータリセットを付けたもので、出展イベントの試遊台に入れる。`build_mode=Master` のときだけ選べ、AutoBuilder の DemoExhibition 枠（`Demo_Exhibition_Windows` / `Demo_Exhibition_Android`、出力先 `Builds/Demo/Exhibition/`）でビルドする。Android は試遊台へ直接入れられるよう APK を作る。
+- `build_variant` は `demo`（配布用体験版）、`release`（製品版）、`exhibition`（展示版）から選ぶ。展示版は体験版にタイマーとデータリセットを付けたもので、出展イベントの試遊台に入れる。`build_mode=Master` のときだけ選べ、AutoBuilder の Exhibition Master 枠（`Exhibition_Master_Windows` / `Exhibition_Master_Android`、出力先 `Builds/Exhibition/Master/`）でビルドする。体験版のゲームデータを使い、プロファイルにだけ `KILLCHORD_DEMO_EXHIBITION` を付ける。Android は試遊台へ直接入れられるよう APK を作る。
 - `clean_build=true` を付けると Unity の Library を消して作り直す。トラブルのときだけ使う（Windows でも1時間以上延びる）。
 - タイムアウト: Android は 180 分、ほかは 120 分。
 
