@@ -15,6 +15,7 @@ using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using KillChord.Runtime.View.Persistent.Input;
+using KillChord.Runtime.View.Persistent.Layout;
 using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFrameWork.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
@@ -152,6 +153,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             ServiceLocator.UnregisterInstance<SettingScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
+            _aspectRatioLimiter?.Dispose();
+            _aspectRatioLimiter = null;
             // 自身が登録した画面状態のリポジトリだけを解除する。
             if (_registeredScreenStateRepository != null
                 && ServiceLocator.TryGetInstance(out IScreenStateRepository registeredRepository)
@@ -299,6 +302,10 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             // View 層
             VisualElement rootElement = _uiDocument.rootVisualElement;
+
+            // 横長の画面でUIが引き延ばされないよう、16:9 の範囲に収める。
+            _aspectRatioLimiter?.Dispose();
+            _aspectRatioLimiter = new UIDocumentAspectRatioLimiter(rootElement);
 
             VisualElement homeRoot = rootElement.Q<VisualElement>(HOMESCREEN_NAME);
             VisualElement stageSelectRoot = rootElement.Q<VisualElement>(STAGESELECTSCREEN_NAME);
@@ -788,6 +795,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         private PlayerInputView _playerInputView;
         private IScreenStateRepository _screenStateRepository;
         private IScreenStateRepository _registeredScreenStateRepository;
+        private UIDocumentAspectRatioLimiter _aspectRatioLimiter;
         private bool _isSceneTransitioning = false;
 
     }
