@@ -35,7 +35,8 @@ namespace KillChord.Runtime.View.InGame.Camera
             }
 
             float speedRatio = Mathf.Clamp01(angle / _parameter.LockOnRotationSpeedAngleRange);
-            float effectiveSpeed = Mathf.Lerp(_parameter.LockOnRotationMinSpeed, _parameter.BoneRotateSpeed, speedRatio);
+            float effectiveSpeed = Mathf.Lerp(_parameter.LockOnRotationMinSpeed, _parameter.BoneRotateSpeed, speedRatio)
+                * Mathf.Max(0f, _parameter.LockOnRotationSpeedScale);
             cameraBoneRotation = Quaternion.Slerp(cameraBoneRotation, target, 1f - Mathf.Exp(-effectiveSpeed * context.DeltaTime));
         }
 
