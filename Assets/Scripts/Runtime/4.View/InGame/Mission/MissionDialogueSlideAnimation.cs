@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Mission
     /// <summary>
     ///     会話UI演出を管理するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Mission/MissionDialogueSlideAnimation")]
     public sealed class MissionDialogueSlideAnimation : MissionDialogueAnimationBase
     {
         /// <inheritdoc />

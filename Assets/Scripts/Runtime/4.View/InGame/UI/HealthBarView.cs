@@ -13,6 +13,7 @@ namespace KillChord.Runtime.View.InGame.UI
     ///     被弾時は減った分を赤い残像として残して遅れて縮め、ゲージを白く点滅させる。
     ///     回復時は緑のフラッシュを重ねて増加を伝える。
     /// </summary>
+    [AddComponentMenu("KillChord/View/UI/HealthBarView")]
     public sealed class HealthBarView : MonoBehaviour
     {
         /// <summary>
@@ -27,7 +28,8 @@ namespace KillChord.Runtime.View.InGame.UI
                 throw new ArgumentNullException(nameof(vm), "HPバーのViewModelがNULL。");
             }
 
-            vm.HealthHudDTO
+            _viewModel = vm;
+            vm.HealthRatio
                 .Subscribe(UpdateHealthBar)
                 .RegisterTo(destroyCancellationToken);
         }
@@ -59,6 +61,7 @@ namespace KillChord.Runtime.View.InGame.UI
         [SerializeField, Tooltip("被弾時にゲージへ重ねて白く点滅させるImage。ゲージの前に置く")]
         private Image _damageFlashImage;
 
+        private IHealthHudViewModel _viewModel;
         private MotionHandle _handle;
         private MotionHandle _trailHandle;
 
@@ -95,8 +98,8 @@ namespace KillChord.Runtime.View.InGame.UI
         /// <summary>
         ///     HPの変化をゲージの充填量とフラッシュ演出へ反映する。
         /// </summary>
-        /// <param name="dto"> HP HUDの表示データ。 </param>
-        private void UpdateHealthBar(HealthHudDTO dto)
+        /// <param name="healthRatio"> 最大HPに対する現在HPの割合。 </param>
+        private void UpdateHealthBar(float healthRatio)
         {
             // 参照欠落時は更新しない。
             if (_healthBarImage == null)
@@ -105,7 +108,7 @@ namespace KillChord.Runtime.View.InGame.UI
             }
 
             // 最大HPが未設定(0以下)の場合はゼロ除算になるため、空表示にして抜ける。
-            if (dto.MaxHealth <= 0f)
+            if (_viewModel.MaxHealth.CurrentValue <= 0f)
             {
                 _handle.TryComplete();
                 _trailHandle.TryCancel();
@@ -114,7 +117,7 @@ namespace KillChord.Runtime.View.InGame.UI
                 return;
             }
 
-            float newFillAmount = Mathf.Clamp01(dto.CurrentHealth / dto.MaxHealth);
+            float newFillAmount = healthRatio;
             float currentFillAmount = _healthBarImage.fillAmount;
 
             if (currentFillAmount == newFillAmount)

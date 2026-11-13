@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
     ///     装備スキル構成に応じたBGMループの初期化を行うクラス。
     ///     BGMの演出機能であり、失敗してもゲーム本体の初期化は止めない。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Music/EquipmentBgmInitializer")]
     public class EquipmentBgmInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -233,7 +234,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
 
         /// <summary>
         ///     装備スキル構成からスキルID列を収集し、スキル番号(ID)の昇順で返す。
-        ///     装備スキル構成からスキルID列（スロット順）を収集する。
+        ///     装備の順番には左右されない。
         ///     SkillBuildDefinitionはOutGameで登録されるため、Title→InGame直行等では
         ///     未登録の場合がある。その場合は装備なしとして扱う。
         /// </summary>
@@ -263,6 +264,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 skillIds.Add(skillId);
                 _skillDisplayNames[skillId] = equippedSkill.SkillTemplate.DisplayName;
             }
+            // 装備の順番に左右されないよう、スキルの番号の小さい順に並べる。
             skillIds.Sort();
             return skillIds;
         }

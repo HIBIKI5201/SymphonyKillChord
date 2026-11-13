@@ -6,6 +6,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// <summary>
     ///    シナリオUIの表示・非表示を制御するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Scenario/ScenarioUIHideView")]
     public class ScenarioUIHideView : MonoBehaviour
     {
         /// <summary> UIが非表示かどうかを示します。 </summary>

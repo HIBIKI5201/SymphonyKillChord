@@ -10,6 +10,7 @@ namespace DevelopProducts.ToonShader
     /// Rendererの Cast Shadows 設定は変更しないこと。
     /// </summary>
     [ExecuteAlways]
+    [AddComponentMenu("KillChord/Rendering/SilToon/SilToonShadowCaster")]
     public sealed class SilToonShadowCaster : MonoBehaviour
     {
         private static readonly List<SilToonShadowCaster> _instances = new();

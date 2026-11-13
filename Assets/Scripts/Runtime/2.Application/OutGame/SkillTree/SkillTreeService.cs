@@ -20,12 +20,15 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         ///     スキルツリー処理で使用する依存関係を初期化する。
         /// </summary>
         /// <param name="skillNodeEntityDict"> ノード一覧です。 </param>
+        /// <param name="lockPolicy"> 解放を禁止するノードの判定です。nullの場合は全ノードを解放できます。 </param>
         /// <param name="clearedStageIds"> クリア済みのステージIDです。ステージのクリアを条件にするノードの判定に使います。 </param>
         public SkillTreeService(
             Dictionary<SkillNodeId, SkillNodeEntity> skillNodeEntityDict,
+            ISkillNodeLockPolicy lockPolicy = null,
             IReadOnlyCollection<StageId> clearedStageIds = null)
         {
             _skillNodeEntityDict = skillNodeEntityDict ?? throw new ArgumentNullException(nameof(skillNodeEntityDict));
+            _lockPolicy = lockPolicy;
             _clearedStageIds = clearedStageIds == null ? new HashSet<StageId>() : new HashSet<StageId>(clearedStageIds);
             _visitedNodes = new();
         }
@@ -72,12 +75,14 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 nodesOnPath.Add(node);
                 return node.NextUnlockCost;
             }
+            // 全ノード解放の判定で探索記録を使うため、経路探索の直前に空にする。
+            _visitedNodes.Clear();
             FindNodesOnPath(node, nodesOnPath);
 
-            // ステージのクリアが条件のノードは、条件を満たすまで経路ごと解放できない。
+            // 経路に解放を禁止されたノード、またはステージのクリア条件を満たしていないノードがある場合は、まとめて解放できない。
             foreach (SkillNodeEntity nodeOnPath in nodesOnPath)
             {
-                if (!IsClearedStageConditionMet(nodeOnPath))
+                if (IsLocked(nodeOnPath) || !IsClearedStageConditionMet(nodeOnPath))
                 {
                     nodesOnPath.Clear();
                     return -1;
@@ -112,13 +117,14 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
 
         /// <summary>
         ///     <see cref="SkillNodeEntity.RequiresAllNodesUnlocked"/> を持たない全ノードが解放済みか判定する。
+        ///     解放を禁止されたノードと、それを経由しないと届かないノードは判定に含めない。
         /// </summary>
         /// <returns> 全て解放済みの場合はtrue。 </returns>
         public bool AreAllNodesUnlocked()
         {
             foreach (SkillNodeEntity node in _skillNodeEntityDict.Values)
             {
-                if (!node.RequiresAllNodesUnlocked && !node.IsUnlocked)
+                if (!node.RequiresAllNodesUnlocked && !node.IsUnlocked && !IsPathLocked(node))
                 {
                     return false;
                 }
@@ -446,6 +452,42 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         }
 
         /// <summary>
+        ///     指定ノードの解放が禁止されているか判定する。
+        /// </summary>
+        /// <param name="node"> 判定するノード。 </param>
+        /// <returns> 解放が禁止されている場合はtrue。 </returns>
+        private bool IsLocked(SkillNodeEntity node)
+        {
+            return _lockPolicy != null && _lockPolicy.IsLocked(node.SkillNodeIdVO);
+        }
+
+        /// <summary>
+        ///     指定ノードまでの未解放の経路に、解放を禁止されたノードがあるか判定する。
+        /// </summary>
+        /// <param name="node"> 判定するノード。 </param>
+        /// <returns> 経路に解放を禁止されたノードがある場合はtrue。 </returns>
+        private bool IsPathLocked(SkillNodeEntity node)
+        {
+            if (_lockPolicy == null)
+            {
+                return false;
+            }
+
+            _visitedNodes.Clear();
+            HashSet<SkillNodeEntity> nodesOnPath = new HashSet<SkillNodeEntity>();
+            FindNodesOnPath(node, nodesOnPath);
+            foreach (SkillNodeEntity nodeOnPath in nodesOnPath)
+            {
+                if (IsLocked(nodeOnPath))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         ///     指定されたノードまでの経路を取得する。
         /// </summary>
         /// <param name="node"></param>
@@ -622,6 +664,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         private const int EMPTY_SKILL_ID = -1;
 
         private readonly Dictionary<SkillNodeId, SkillNodeEntity> _skillNodeEntityDict;
+        private readonly ISkillNodeLockPolicy _lockPolicy;
         private readonly HashSet<SkillNodeEntity> _visitedNodes;
         private readonly HashSet<StageId> _clearedStageIds;
 

@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Skill.Effect.Presentation
     /// <summary>
     ///     ParticleSystemでスキルエフェクトを再生するストラテジー。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/ParticleSystemSkillEffectPresentation")]
     public sealed class ParticleSystemSkillEffectPresentation : SkillEffectPresentationBase
     {
         [SerializeField, Tooltip("再生するParticleSystemです。未設定時は自身から取得します。")]

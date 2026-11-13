@@ -1,3 +1,4 @@
+using R3;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,6 +12,7 @@ namespace KillChord.Runtime.View.InGame.UI
     ///     ポーズ中に表示するウィンドウのView。
     ///     ボタン操作をイベントとして通知するだけで、実際の処理は持たない。
     /// </summary>
+    [AddComponentMenu("KillChord/View/UI/PauseWindowView")]
     public class PauseWindowView : MonoBehaviour
     {
         /// <summary> ステージのリスタートが要求された時に発火するイベント。 </summary>
@@ -21,6 +23,45 @@ namespace KillChord.Runtime.View.InGame.UI
 
         /// <summary> ポーズを取り消して戦闘へ戻ることが要求された時に発火するイベント。 </summary>
         public event Action OnCancelRequested;
+
+        /// <summary> 設定パネルを開くことが要求された時に発火するイベント。 </summary>
+        public event Action OnOptionRequested;
+
+        /// <summary>
+        ///     ViewModelを購読し、ボタンの文言を表示へ反映します。
+        /// </summary>
+        /// <param name="viewModel"> ポーズ画面のViewModelです。 </param>
+        public void Bind(PauseWindowViewModel viewModel)
+        {
+            Unbind();
+            if (viewModel == null)
+            {
+                throw new ArgumentNullException(nameof(viewModel));
+            }
+
+            _subscriptions = new CompositeDisposable();
+            SubscribeLabel(viewModel.ResumeLabel, _resumeLabelText);
+            SubscribeLabel(viewModel.OptionLabel, _optionLabelText);
+            SubscribeLabel(viewModel.RetryLabel, _restartLabelText);
+            SubscribeLabel(viewModel.GiveUpLabel, _returnToTitleLabelText);
+        }
+
+        /// <summary>
+        ///     ViewModelの購読を解除します。
+        /// </summary>
+        public void Unbind()
+        {
+            _subscriptions?.Dispose();
+            _subscriptions = null;
+        }
+
+        /// <summary>
+        ///     設定パネルを閉じた後に、オプションボタンへフォーカスを戻します。
+        /// </summary>
+        public void SelectOptionButton()
+        {
+            SelectButton(_optionButton != null ? _optionButton : GetFirstButton());
+        }
 
         /// <summary>
         ///     既存UI入力モジュールの取消操作を購読します。
@@ -103,6 +144,11 @@ namespace KillChord.Runtime.View.InGame.UI
                 _resumeButton.interactable = isEnabled;
             }
 
+            if (_optionButton != null)
+            {
+                _optionButton.interactable = isEnabled;
+            }
+
             if (_restartButton != null)
             {
                 _restartButton.interactable = isEnabled;
@@ -129,11 +175,28 @@ namespace KillChord.Runtime.View.InGame.UI
         [SerializeField, Tooltip("ポーズを解除して戦闘へ戻るボタンです。表示時に最初に選択されます。")]
         private Button _resumeButton;
 
+        [SerializeField, Tooltip("音量と判定調整の設定パネルを開くボタンです。")]
+        private Button _optionButton;
+
         [SerializeField, Tooltip("ステージをリスタートするボタンです。")]
         private Button _restartButton;
 
         [SerializeField, Tooltip("タイトルへ戻るボタンです。")]
         private Button _returnToTitleButton;
+
+        [SerializeField, Tooltip("「ゲームに戻る」ボタンの文言のテキストです。")]
+        private Text _resumeLabelText;
+
+        [SerializeField, Tooltip("「オプション」ボタンの文言のテキストです。")]
+        private Text _optionLabelText;
+
+        [SerializeField, Tooltip("「ステージを再挑戦する」ボタンの文言のテキストです。")]
+        private Text _restartLabelText;
+
+        [SerializeField, Tooltip("「ステージをあきらめる」ボタンの文言のテキストです。")]
+        private Text _returnToTitleLabelText;
+
+        private CompositeDisposable _subscriptions;
 
         private InputSystemUIInputModule _inputModule;
         private InputAction _cancelAction;
@@ -196,7 +259,11 @@ namespace KillChord.Runtime.View.InGame.UI
             }
 
             GameObject selected = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
-            return selected == null || selected == _resumeButton?.gameObject || selected == _restartButton?.gameObject || selected == _returnToTitleButton?.gameObject;
+            return selected == null
+                || selected == _resumeButton?.gameObject
+                || selected == _optionButton?.gameObject
+                || selected == _restartButton?.gameObject
+                || selected == _returnToTitleButton?.gameObject;
         }
 
         /// <summary>
@@ -225,6 +292,15 @@ namespace KillChord.Runtime.View.InGame.UI
                 Debug.LogWarning($"[{nameof(PauseWindowView)}] ゲームに戻るボタンが設定されていません。", this);
             }
 
+            if (_optionButton != null)
+            {
+                _optionButton.onClick.AddListener(HandleOptionButtonClicked);
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(PauseWindowView)}] オプションボタンが設定されていません。", this);
+            }
+
             _restartButton.onClick.AddListener(HandleRestartButtonClicked);
             _returnToTitleButton.onClick.AddListener(HandleReturnToTitleButtonClicked);
 
@@ -238,9 +314,15 @@ namespace KillChord.Runtime.View.InGame.UI
         private void OnDestroy()
         {
             UnbindCancelInput();
+            Unbind();
             if (_resumeButton != null)
             {
                 _resumeButton.onClick.RemoveListener(HandleResumeButtonClicked);
+            }
+
+            if (_optionButton != null)
+            {
+                _optionButton.onClick.RemoveListener(HandleOptionButtonClicked);
             }
 
             if (_restartButton != null)
@@ -262,6 +344,17 @@ namespace KillChord.Runtime.View.InGame.UI
             if (_isInteractionEnabled)
             {
                 OnCancelRequested?.Invoke();
+            }
+        }
+
+        /// <summary>
+        ///     オプションボタンのクリックを、設定パネルを開く要求として通知する。
+        /// </summary>
+        private void HandleOptionButtonClicked()
+        {
+            if (_isInteractionEnabled)
+            {
+                OnOptionRequested?.Invoke();
             }
         }
 
@@ -325,6 +418,21 @@ namespace KillChord.Runtime.View.InGame.UI
             }
 
             eventSystem.SetSelectedGameObject(null);
+        }
+
+        /// <summary>
+        ///     文言の変化をボタンのテキストへ反映する。
+        /// </summary>
+        /// <param name="label"> 文言の通知元。 </param>
+        /// <param name="text"> 反映先のテキスト。 </param>
+        private void SubscribeLabel(ReadOnlyReactiveProperty<string> label, Text text)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            label.Subscribe(value => text.text = value).AddTo(_subscriptions);
         }
     }
 }

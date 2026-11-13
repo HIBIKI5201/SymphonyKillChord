@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View
     /// <summary>
     ///     キャラクターアニメーションの再生と計算をView層で完結させる。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Animation/CharacterAnimationView")]
     public sealed class CharacterAnimationView : MonoBehaviour
     {
         /// <summary>

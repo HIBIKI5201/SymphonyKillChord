@@ -14,6 +14,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
     /// </summary>
     [RequireComponent(typeof(PersistentAudioVolumeRegistryView))]
     [DefaultExecutionOrder(-1000)]
+    [AddComponentMenu("KillChord/Composition/Music/SoundEffectInitializer")]
     public sealed class SoundEffectInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

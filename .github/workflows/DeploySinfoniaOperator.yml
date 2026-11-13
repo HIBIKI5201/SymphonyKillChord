@@ -12,7 +12,7 @@ on:
       - 'SinfoniaOperator/deploy/**'
       - 'SinfoniaOperator/sinfonia-operator.env.json'
   schedule:
-    # 仕様書はNotion Specifications Syncが3時間ごとに更新する。毎日1回デプロイし直して、索引を最新の仕様書から作り直す。
+    # プロジェクト ドキュメントはNotion Specifications Syncが3時間ごとに更新する。毎日1回デプロイし直して、索引を最新のプロジェクト ドキュメントから作り直す。
     - cron: '0 19 * * *'  # 毎日 04:00 JST
   workflow_dispatch:
 
@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 仕様書リポジトリを取得
-        # 索引の元になる仕様書（非公開リポジトリ）を取り、パッケージに同梱する。VMで手でコピーしない（#2329）。
+        # 索引の元になるプロジェクト ドキュメント（非公開リポジトリ）を取り、パッケージに同梱する。VMで手でコピーしない（#2329）。
         uses: actions/checkout@v4
         with:
           repository: HIBIKI5201/SymphonyKillChord_Specifications
@@ -75,7 +75,7 @@ jobs:
           (cd Docs/NotionSpecifications && find . -name '*.md' -not -path './.git/*' -not -path '*/assets/*' -print0 \
             | tar --create --null --files-from - --file - ) \
             | tar --extract --file - --directory artifacts/publish/specifications/Docs/NotionSpecifications
-          echo "仕様書を同梱しました（$(find artifacts/publish/specifications -name '*.md' | wc -l) ページ、$(git -C Docs/NotionSpecifications log -1 --format=%cI)）"
+          echo "プロジェクト ドキュメントを同梱しました（$(find artifacts/publish/specifications -name '*.md' | wc -l) ページ、$(git -C Docs/NotionSpecifications log -1 --format=%cI)）"
           tar --create --gzip --file artifacts/sinfonia-operator.tar.gz \
             --directory artifacts/publish .
 

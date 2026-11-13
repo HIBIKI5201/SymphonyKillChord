@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Reticle
     ///     スクリーン座標の反映と表示/非表示の切り替えのみを担い、ロジックは持たない。
     /// </summary>
     [DisallowMultipleComponent]
+    [AddComponentMenu("KillChord/View/Reticle/ReticleMarkerView")]
     public sealed class ReticleMarkerView : MonoBehaviour
     {
         /// <summary>

@@ -197,9 +197,19 @@ namespace KillChord.Runtime.View.InGame.Target
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
         /// <param name="direction"> 選択基準に使用する方向。 </param>
         /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。入力によらない付け替えではfalseを指定する。 </param>
-        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true)
+        /// <param name="allowOutOfView">
+        ///     視界範囲内に候補がいないとき、視界範囲外の敵からも選ぶかどうか。攻撃時のオートロックオンで true を指定する。
+        /// </param>
+        public void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true, bool allowOutOfView = false)
         {
-            SetCurrentTarget(EvaluateLockOnTarget(playerPosition), notifyLockOn);
+            ITargetableViewModel target = EvaluateLockOnTarget(playerPosition);
+            if (target == null && allowOutOfView)
+            {
+                // 正面（視界範囲内）に敵がいなければ、見えない所にいる敵から同じ基準で選ぶ。
+                target = EvaluateLockOnTarget(playerPosition, ignoreView: true);
+            }
+
+            SetCurrentTarget(target, notifyLockOn);
             _currentCandidate = null;
         }
 
@@ -421,14 +431,18 @@ namespace KillChord.Runtime.View.InGame.Target
         /// </summary>
         /// <param name="center"> 距離の基準位置。 </param>
         /// <param name="excludedTarget"> 候補から外すターゲット。外さない場合は null。 </param>
-        /// <returns> 選択されたターゲット。視界範囲内に候補がない場合は null。 </returns>
-        private ITargetableViewModel EvaluateLockOnTarget(in Vector3 center, ITargetableViewModel excludedTarget = null)
+        /// <param name="ignoreView"> 視界範囲の判定を行わず、すべての敵を候補にする場合は true。 </param>
+        /// <returns> 選択されたターゲット。候補がない場合は null。 </returns>
+        private ITargetableViewModel EvaluateLockOnTarget(
+            in Vector3 center,
+            ITargetableViewModel excludedTarget = null,
+            bool ignoreView = false)
         {
             // 1パス目: 視界範囲内で最も近い敵までの距離を求める。
             float nearestDistance = float.PositiveInfinity;
             foreach (ITargetableViewModel targetable in _targets)
             {
-                if (!IsLockOnCandidate(targetable, excludedTarget))
+                if (!IsLockOnCandidate(targetable, excludedTarget, ignoreView))
                 {
                     continue;
                 }
@@ -448,7 +462,7 @@ namespace KillChord.Runtime.View.InGame.Target
             float bestHealth = float.PositiveInfinity;
             foreach (ITargetableViewModel targetable in _targets)
             {
-                if (!IsLockOnCandidate(targetable, excludedTarget))
+                if (!IsLockOnCandidate(targetable, excludedTarget, ignoreView))
                 {
                     continue;
                 }
@@ -478,15 +492,16 @@ namespace KillChord.Runtime.View.InGame.Target
         /// </summary>
         /// <param name="targetable"> 判定するターゲット。 </param>
         /// <param name="excludedTarget"> 候補から外すターゲット。外さない場合は null。 </param>
-        /// <returns> 選択可能で、除外対象でなく、視界範囲内にある場合は true。 </returns>
-        private bool IsLockOnCandidate(ITargetableViewModel targetable, ITargetableViewModel excludedTarget)
+        /// <param name="ignoreView"> 視界範囲の判定を行わない場合は true。 </param>
+        /// <returns> 選択可能で、除外対象でなく、視界範囲内にある（または判定しない）場合は true。 </returns>
+        private bool IsLockOnCandidate(ITargetableViewModel targetable, ITargetableViewModel excludedTarget, bool ignoreView = false)
         {
             if (!IsSelectableTarget(targetable) || ReferenceEquals(targetable, excludedTarget))
             {
                 return false;
             }
 
-            return _isWithinView == null || _isWithinView.Invoke(targetable.Position);
+            return ignoreView || _isWithinView == null || _isWithinView.Invoke(targetable.Position);
         }
 
         /// <summary>

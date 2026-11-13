@@ -19,8 +19,18 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
         }
 
         /// <summary>
+        ///     遷移先の初期化がロード画面を引き継いで閉じるかを設定します。
+        ///     <para> 途中復帰でバトルパートへ進む場合のように、遷移先がロード画面を閉じる場合にtrueにします。 </para>
+        /// </summary>
+        /// <param name="isKeepLoading"> 遷移先がロード画面を閉じる場合はtrueです。 </param>
+        public void SetKeepLoadingOnStart(bool isKeepLoading)
+        {
+            _isKeepLoadingOnStart = isKeepLoading;
+        }
+
+        /// <summary>
         ///     ゲームを開始する。
-        ///     アウトゲームシーンに遷移する。
+        ///     設定された遷移先シーン（アウトゲーム・シナリオ・途中復帰先など）に遷移する。
         /// </summary>
         /// <param name="currentSceneName"> 現在のシーン名。 </param>
         /// <param name="targetSceneName"> 遷移先のシーン名。 </param>
@@ -39,21 +49,22 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
 
             try
             {
-                isSuccess =
-                    await _sceneTransitionController.LoadAdditiveAsync(targetSceneName, token);
-
-                if (!isSuccess)
-                {
-                    _isActivate = false;
-                    return false;
-                }
-
+                // 遷移先の読み込みと Title のアンロードを1回のロード画面で行い、途中で画面を開けない。
                 // Title のアンロードは自身の View を破棄するため、View のトークンでは待機しない。
                 // 常駐シーンの寿命で完了を待機し、ロードセッションとシーン初期化追跡を正常終了させる。
-                bool unloadSuccess = await _sceneTransitionController
-                    .UnloadWithPersistentLifetimeAsync(currentSceneName);
+                // 遷移先がロード画面を閉じる場合は、開いたまま引き渡す。
+                isSuccess = _isKeepLoadingOnStart
+                    ? await _sceneTransitionController
+                        .ChangeSceneKeepingLoadingWithPersistentLifetimeAsync(
+                            currentSceneName,
+                            targetSceneName)
+                    : await _sceneTransitionController
+                        .LoadAdditiveThenUnloadWithPersistentLifetimeAsync(
+                            targetSceneName,
+                            currentSceneName,
+                            token);
 
-                if (!unloadSuccess)
+                if (!isSuccess)
                 {
                     _isActivate = false;
                     return false;
@@ -75,5 +86,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Title
         ///    多重呼び出しを防ぐために使用する。
         /// </summary>
         private bool _isActivate = false;
+
+        /// <summary> 遷移先がロード画面を引き継いで閉じる場合はtrueです。 </summary>
+        private bool _isKeepLoadingOnStart;
     }
 }

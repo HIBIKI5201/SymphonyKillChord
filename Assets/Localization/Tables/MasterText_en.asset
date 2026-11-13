@@ -231,7 +231,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1900000053
-    m_Localized: "Performs a triple-beat normal attack.\nThe enemy hit and every enemy within {InfectionRange} of it become Infected.\n(The effect ends after spreading {InfectionTriggerCount}.)\n\n[Infected]\nWhen an Infected enemy takes a hit, every Infected enemy takes {InfectionDamageRate} of the damage that enemy received.\nDamage dealt to other Infected enemies is judged the same way as a normal attack.\n(Critical and Just judgments apply, along with their multipliers.)"
+    m_Localized: "Performs a triple-beat normal attack.\nThe enemy hit and every enemy within {InfectionRange} of it become Infected.\n(The effect ends after spreading {InfectionTriggerCount} times.)\n\n[Infected]\nWhen an Infected enemy takes a hit, every Infected enemy takes {InfectionDamageRate} of the damage that enemy received.\nDamage dealt to other Infected enemies is judged the same way as a normal attack.\n(Critical and Just judgments apply, along with their multipliers.)"
     m_Metadata:
       m_Items: []
   - m_Id: 1900000054
@@ -247,7 +247,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1900000057
-    m_Localized: "Grants yourself a buff that reduces damage by {DamageReductionRate} for up to {DamageReductionHitCount}. (Does not stack.)"
+    m_Localized: "Grants yourself a buff that reduces damage by {DamageReductionRate} for up to {DamageReductionHitCount} hits. (Does not stack.)"
     m_Metadata:
       m_Items: []
   - m_Id: 1900000058

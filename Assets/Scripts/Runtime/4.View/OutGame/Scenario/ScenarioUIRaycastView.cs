@@ -9,6 +9,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// <summary>
     ///     シナリオUIのヒット判定を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Scenario/ScenarioUIRaycastView")]
     public class ScenarioUIRaycastView : MonoBehaviour
     {
         /// <summary>

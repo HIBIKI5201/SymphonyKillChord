@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Skill
     ///     クロスヘア（ロックオンHUD）上にリズムコマンドの拍子アイコンを表示するView。
     ///     下部の入力進行UI（RowView）とは異なり、クールダウン表現やリセット演出は持たない専用実装。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillCrosshairProgressView")]
     public sealed class SkillCrosshairProgressView : MonoBehaviour, ISkillCrosshairProgressView
     {
         /// <summary> 毎フレームの更新時に発火するイベント。 </summary>

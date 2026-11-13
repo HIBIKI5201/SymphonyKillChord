@@ -15,6 +15,7 @@ namespace KillChord.Demo.End
     ///     体験版終了シーンの背景ステージ読み込みと初期化ライフサイクルを起動するクラスです。
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrderConst.INITIALIZATION)]
+    [AddComponentMenu("KillChord/Demo/End/DemoEndSceneInitializer")]
     public sealed class DemoEndSceneInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

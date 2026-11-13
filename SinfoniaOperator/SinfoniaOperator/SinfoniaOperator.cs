@@ -267,7 +267,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     仕様書を埋め込み、検索インデックスを生成する。
+        ///     プロジェクト ドキュメントを埋め込み、検索インデックスを生成する。
         /// </summary>
         /// <param name="args">"index"を除いたJSON設定ファイルのパス。</param>
         private static async Task RunIndexCommandAsync(string[] args)
@@ -513,7 +513,7 @@ namespace SinfoniaStudio.SinfoniaOperator
         }
 
         /// <summary>
-        ///     仕様書ディレクトリを含むリポジトリルートを探索する。
+        ///     プロジェクト ドキュメントのディレクトリを含むリポジトリルートを探索する。
         /// </summary>
         /// <returns>リポジトリルートの絶対パス。</returns>
         private static string FindRepositoryRoot()
@@ -536,7 +536,7 @@ namespace SinfoniaStudio.SinfoniaOperator
                 }
             }
 
-            throw new DirectoryNotFoundException("仕様書キャッシュまたは.gitを含むリポジトリルートが見つかりません。");
+            throw new DirectoryNotFoundException("プロジェクト ドキュメントのキャッシュまたは.gitを含むリポジトリルートが見つかりません。");
         }
 
         /// <summary>

@@ -22,6 +22,7 @@ namespace KillChord.Runtime.Composition.InGame.Stage
     ///     EnemyModuleContainerがEnemyInitializerのBuildフェーズで登録されるため、
     ///     OrderはEnemyInitializerより大きい値である必要があります。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Stage/StageEffectInitializer")]
     public sealed class StageEffectInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

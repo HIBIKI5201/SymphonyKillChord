@@ -8,7 +8,10 @@ CI で使う GitHub App の設定を記録したもの。
 
 ## sinfonia-variable-updater
 
-`BuildAndRelease.yml` がリポジトリ変数（`VERSION_*`）を読み書きするための App。
+> **2026-11-13 から未使用。** 版を Dev・Master 共通の v タグ（`TagBuildVersion.yml`）に移したため、どのワークフローもこの App を使っていない。
+> App・Client ID・秘密鍵は、不要と判断したら削除してよい。
+
+`BuildAndRelease.yml` がリポジトリ変数（`VERSION_*`）を読み書きするための App だった。
 `GITHUB_TOKEN` にはリポジトリ変数を書き換える権限がないため、以前は個人の Fine-grained token（`VAR_UPDATE_TOKEN`、2026-09-29 に削除）を使っていた。
 App に切り替えると、トークンの期限切れや、発行した個人のアカウントへの依存がなくなる。
 

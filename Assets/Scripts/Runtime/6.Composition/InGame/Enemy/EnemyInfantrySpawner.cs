@@ -14,6 +14,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     /// <summary>
     ///     歩兵のスポナークラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/EnemyInfantrySpawner")]
     public class EnemyInfantrySpawner : MonoBehaviour, IGameplayControllable, IEnemySpawner
     {
         /// <summary>

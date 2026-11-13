@@ -1,6 +1,6 @@
 ---
 name: skc-architecture-audit
-description: "Audit whether the whole Symphony Kill Chord codebase (Assets/Scripts/Runtime and related) follows the project's design philosophy (Assets/Scripts/DesignPhilosophy.md): module dependencies, class responsibilities, DI in the Composition layer, cross-module references only through the Adaptor layer, circular dependencies, and an architecture quality score with concrete improvement proposals. Use when the user asks for an architecture audit, a design-philosophy compliance check, a refactoring survey, or a module/layer dependency analysis across the project (not a review of one diff — use skc-code-guideline-check for that)."
+description: "Audit the whole codebase against DesignPhilosophy.md (layer and module dependencies, class roles, Composition DI, Adaptor-only cross-module refs, cycles) with a score and fixes. Use for project-wide architecture audits or refactoring surveys; for one diff use skc-code-guideline-check."
 ---
 
 # Architecture Audit
@@ -14,8 +14,6 @@ description: "Audit whether the whole Symphony Kill Chord codebase (Assets/Scrip
 
 - `Assets/Scripts/DesignPhilosophy.md`（レイヤー構成・責務・DI・モジュール間公開の規則）
 - `Assets/Scripts/CodeGuidelines.md`（命名・クラスの種類）
-
-`Assets/Docs/ScriptsDocs/Architecture.txt` は設計思想の写しなので、正本と食い違うときは正本を優先する。
 
 対象レイヤーのクラス責務は `Assets/Scripts/DesignClassRoles.md` の該当節で確認する。実装例は必要時だけ読む。
 

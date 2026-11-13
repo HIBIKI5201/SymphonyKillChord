@@ -34,6 +34,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
     ///     Buildフェーズで公開するEnemyModuleContainerはStageEffectInitializerから参照されるため、
     ///     StageEffectInitializerより先に実行される必要があります。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Enemy/EnemyInitializer")]
     public class EnemyInitializer : InGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

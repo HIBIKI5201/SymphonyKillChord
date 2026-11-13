@@ -79,7 +79,7 @@ namespace KillChord.Tests.EditMode.SkillTree
                 { locked.SkillNodeIdVO, locked },
                 { child.SkillNodeIdVO, child },
             };
-            return new SkillTreeService(nodes, clearedStageIds);
+            return new SkillTreeService(nodes, clearedStageIds: clearedStageIds);
         }
     }
 }

@@ -7,9 +7,9 @@ import { csharpString } from './qa-transport.mjs';
 /** 有限の観測と攻撃列の反復を行い、項目IDに結び付いた証跡を追記保存する。 */
 export async function runAging(call, { seconds, repeat, queue, qa, signal }, root = process.cwd()) {
   const runId = randomUUID();
-  const directory = join(root, '.uloop/qa', runId);
+  const directory = join(root, '.ai-debug-qa/runs', runId);
   await mkdir(directory, { recursive: true });
-  const lockPath = join(root, '.uloop/qa-session.lock');
+  const lockPath = join(root, '.ai-debug-qa/session.lock');
   const lock = await open(lockPath, 'wx');
   try { await lock.writeFile(JSON.stringify({ runId, pid: process.pid, directory })); }
   finally { await lock.close(); }

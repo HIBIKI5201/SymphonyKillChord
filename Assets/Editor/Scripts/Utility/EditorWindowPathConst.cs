@@ -9,6 +9,7 @@ namespace KillChord.Editor.Utility
         public const string TICKET_SYSTEM_PATH = KILL_CHORD_WINDOW_PATH + "TicketSystem";
         public const string PLANNER_MASTER_DATA_WINDOW_PATH = KILL_CHORD_WINDOW_PATH + "PlannerMasterDataWindow";
         public const string SINFONIA_OPERATOR_PATH = KILL_CHORD_WINDOW_PATH + "SinfoniaOperator";
+        public const string SPEC_VIEWER_PATH = KILL_CHORD_WINDOW_PATH + "SpecViewer";
 
 
         private const string KILL_CHORD_WINDOW_PATH = "Window/KillChord/";

@@ -13,6 +13,7 @@ namespace KillChord.Runtime.View.InGame.Mission
     /// <summary>
     ///     会話UIのViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Mission/MissionDialogueView")]
     public sealed class MissionDialogueView : MonoBehaviour, IGameplayControllable
     {
         private const string TUTORIAL_SUBTITLES_TABLE = "TutorialSubtitles";

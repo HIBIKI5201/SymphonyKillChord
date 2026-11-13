@@ -14,7 +14,9 @@
 | 資料・CI・運用の修正 | 対象ファイルとその参照元 | C#・Unity挙動を変更しなければUnity起動・全規約・全仕様読込は不要 |
 | 調査・引継ぎ | このREADMEの配置規則 | 対象テーマの既存レポートだけ。過去の全レポートを読まない |
 
+- C#の例: 敵の攻撃処理を直すなら、`rg -n` で対象の型と呼び出し元を特定し、そのファイルの層（Domain・Application・Adaptor など）に当たる `DesignClassRoles.md` の節と、`spec_search` で絞った敵・攻撃の仕様の節だけを読む。ほかの機能の仕様や過去レポートは読まない。
 - 探索はファイル名 → 見出し・一致行 → 該当節の順に進める。`Docs/NotionSpecifications` はまず MCP サーバー `spec` の `spec_search`（使えないときは `python scripts/notion/spec_query.py search <語>`）でページを絞り、`spec_get`（`get <ID・タイトル>`）で仕様の節だけを読む（経緯・却下案は `rationale`、実装状態は `status`）。窓口を使えないときはルートの目録 `_catalog.md`（1ページ1行。同期CIが生成）を `rg` で引き、目録がない版では機能に対応するサブフォルダから絞る。大量一致は `rg -l`、必要な一致行は `rg -n -m` を使う（`-m` はファイルごとの上限）。
+- スキル・設定が読む決まったNotionページは、パスではなくpage idで書く（#1955）。一覧は参照表 `SinfoniaOperator/notion-cache-map.json`（page id・呼び名・`readers`）。読む手順: ① `git submodule update --init --remote --depth 1 -- Docs/NotionSpecifications` で写しを最新にする（セッション開始時に済んでいれば省く） ② 作業に要るページを参照表か `search` で選ぶ ③ `python scripts/notion/spec_query.py get <page id>`（データベースは `path <id>` でパスを引いて読む） ④ 読んだページと `git -C Docs/NotionSpecifications log -1 --format=%cI` の日時を報告に書く。pullできなければ手元の写しで続けてその旨を伝え、写しも無ければ止めて仕様書リポジトリの閲覧権限を頼む。ページを消す・統合する前に参照表の `readers` を確かめる。運用の正本はNotion「Notion プロジェクト ドキュメントの運用」（`3e37c2c6-cc02-815b-9dac-f6b834c1e56b`）と「AIエージェント向け参照先一覧」（`3e37c2c6-cc02-812f-94e0-dbf07db926f8`）である。
 - 同じセッションで読んだ同じ版の資料は再読しない。編集・ブランチ変更・同期があれば対象資料を再確認する。
 - ログや階層は件数・期間・ルートを絞る。出力が切れたら上限を増やす前に探索範囲を狭める。
 - 外部サービスの読取・更新は依頼に必要なときだけ。報告用の巨大な生ログはコミットしない。
@@ -31,7 +33,8 @@
 
 ```
 Docs/agent/
-├── README.md                              … このファイル（構成と命名規則）
+├── README.md                              … このファイル（資料の選び方・構成・命名規則）
+├── index.md                               … 収録済みの成果物と旧置き場からの移動の一覧
 ├── analysis/                              … 解析ツールが一括生成する成果物
 │   └── <tool>/
 │       └── <YYYY-MM-DD>_<target>/         … 1回の解析実行 = 1フォルダ
@@ -61,48 +64,4 @@ Docs/agent/
 - 再生成できる大きな生ログ・キャッシュ。必要な部分だけをレポートに要約して残す。
 - Unity プロジェクトから参照されるアセット（`Assets/` 配下に置く）。
 
-## 収録済み
-
-| パス | 内容 |
-| --- | --- |
-| `analysis/omnipotens/2026-07-18_symphony-kill-chord/` | Omnipotens 最終解析（アーキテクチャレビュー・仕様起点ドメインモデル・UX レビュー）。旧 `Docs/G-Lab/` |
-| `analysis/anatomia-augur/2026-09-06_symphony-kill-chord/` | Anatomia / Augur の解析結果とドメイン突き合わせ・QA テストケース。旧 `spec/analysis/2026-09-06/`（Issue #2081） |
-| `analysis/runtime-audit/2026-09-17_runtime-scripts/` | ランタイムコード監査（購読解除漏れ・GC・設計原則など 18 観点）。旧 `Docs/RuntimeAudit/`（Issue #2081） |
-| `reports/2026-09-28_event-exhibition-meeting.md` | 今後のイベント出展・コンテスト応募の検討会議の議事録（候補の規約調査と決定） |
-| `reports/2026-09-29_homepage-news-meeting.md` | ホームページのお知らせ追加（TGS出展・ファミ通掲載）の議事録（Issue #2321 / #2322、タスク） |
-| `reports/2026-09-24_spec-implementation-diff.md` | Notion仕様書と `Assets/Scripts/Runtime` 実装の全体差分レポート（10ドメイン・実質18件、根拠の file:line つき） |
-| `handoffs/2026-10-05_spec-implementation-diff-notion-update.md` | 上記差分を受けた Notion 仕様書更新の引継ぎ（16ページ分の追記・修正内容と再開手順） |
-| `handoffs/2026-10-05_notion-spec-overview-cleanup.md` | Notion「仕様概要（仕様リスト）」の整理の引継ぎ（設定画面のパイロットで決めた書き方と残りの作業） |
-| `handoffs/2026-10-05_spec-guide-reinforcement.md` | Notion「仕様書 ガイド」全ページの補強兼要約の引継ぎ（決定事項・作成済みの貼り付け用本文・残りの作業） |
-| `handoffs/2026-10-21_store-release-preparation.md` | Google Play・Steam のストア公開準備の引継ぎ（申告・仕様書・素材・アップロード鍵の状況、10/31 に出せるストアページ、クローズドテストまでの手順、道具の注意点） |
-| `reports/2026-10-01_design-review-summary.md` | 全体設計レビューの総括（10 観点の評価・観点をまたぐ問題・優先順位・限界。Issue #2358〜#2363・#2415〜#2418） |
-| `reports/2026-10-01_design-review-google-drive.md` | 全体設計レビュー: Google Drive の構成・命名・所有権・共有権限・ID 依存（Issue #2358） |
-| `reports/2026-10-01_design-review-notion-spec.md` | 全体設計レビュー: Notion 仕様書の情報設計・規則の競合・仕様とコードの差（Issue #2359） |
-| `reports/2026-10-01_design-review-game.md` | 全体設計レビュー: コアループ・メタループ・チュートリアル・スコープ（Issue #2360） |
-| `reports/2026-10-01_design-review-code.md` | 全体設計レビュー: コード・アーキテクチャ（設計思想への準拠・モジュール境界・テスト）（Issue #2361） |
-| `reports/2026-10-01_design-review-ops.md` | 全体設計レビュー: ブランチ・PR・CI・ドキュメント・引継ぎの運用（Issue #2362） |
-| `reports/2026-10-01_design-review-harness.md` | 全体設計レビュー: AI エージェントの運用基盤（指示・スキル・道具・検証・記憶）（Issue #2363） |
-| `reports/2026-10-01_design-review-asset-pipeline.md` | 全体設計レビュー: Drive → Assets → Addressables のアセットパイプラインと命名（Issue #2415） |
-| `reports/2026-10-14_director-decisions.md` | ディレクター判断 21 件の決定一覧（判定の正本・報酬・チュートリアル・用語・運用・公開条件・Drive） |
-| `reports/2026-10-16_lead-programmer-decisions.md` | リードプログラマー判断の決定一覧（開発用処理の除外・DataID 検証・固定 ID・保存互換・モジュール境界・CI・Codex・rc タグ・性能） |
-| `reports/2026-10-01_design-review-ui-ux.md` | 全体設計レビュー: 画面遷移・入力・オンボーディング・アクセシビリティ（Issue #2416） |
-| `reports/2026-10-01_design-review-qa.md` | 全体設計レビュー: 自動テスト・QA シート・再検証・リリース判定（Issue #2417） |
-| `reports/2026-10-01_design-review-release.md` | 全体設計レビュー: ビルド・署名・ストア・性能・権利・セーブ互換（Issue #2418） |
-| `reports/2026-10-27_tutorial-kill-step-deadlock.md` | チュートリアルの敵撃破ステップで敵が1体足りず進めなくなる不具合の原因調査（無敵バフを確定ダメージが貫通） |
-| `reports/2026-11-03_spec-query-eval.md` | 仕様書の窓口（spec_query）と全文検索を評価セット40問で比べた結果（#2396 段階3） |
-| `handoffs/2026-11-03_logic-graph-debugger-plan.md` | ゲームロジックをグラフ表示するデバッグウィンドウの実装計画（Unity 6.x の Graph Toolkit・GraphView の比較と決めてほしいこと） |
-
-## 旧置き場から移したもの（Issue #2081）
-
-命名規則より前に作られたため、ファイル名は元のまま（日本語名・日付が末尾）にしている。
-
-| 旧パス | 新パス |
-| --- | --- |
-| `Docs/AI資料まとめ/*.md` | `reports/`（同名ファイル） |
-| `Docs/AI資料まとめ/仕様更新ドラフト_2026-08-03/` | `handoffs/仕様更新ドラフト_2026-08-03/` |
-| `Docs/` 直下の調査・差分分析・発注書・権利確認一覧（5 件） | `reports/`（同名ファイル） |
-| `Docs/` 直下の引継ぎ資料・計画・Notion 下書き（9 件） | `handoffs/`（同名ファイル） |
-| `Docs/アセット名リスト_命名規則提案.md`・`Docs/用語集_追加候補.md` | `Docs/AI資料まとめ/` の同内容ファイルと重複していたため削除し、`reports/` 側に一本化 |
-| `Docs/RuntimeAudit/` | `analysis/runtime-audit/2026-09-17_runtime-scripts/report/` |
-| `spec/analysis/2026-09-06/` | `analysis/anatomia-augur/2026-09-06_symphony-kill-chord/spec/` |
-
+収録済みの成果物の一覧は [index.md](index.md)。新しい成果物を置いたら、そちらに1行足す。

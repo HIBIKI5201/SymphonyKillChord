@@ -1,4 +1,4 @@
-"""仕様書の窓口（search / get）を、小さな仕様書ミラーで確かめる。"""
+"""プロジェクト ドキュメントの窓口（search / get）を、小さなプロジェクト ドキュメントのミラーで確かめる。"""
 import contextlib
 import io
 import json
@@ -123,7 +123,7 @@ class SpecQueryTests(unittest.TestCase):
         (specs / "回避" / "実装.md").write_text(
             "# 回避アクション 実装状況\n\n[Notionで開く](https://app.notion.com/p/3fb7c2c6cc0281fba598f659c3a93542)\n\n---\n\n古い置き場\n",
             encoding="utf-8")
-        (specs / "旧回避.md").write_text(spec_page("旧回避メモ", DEV_ID, "開発用", "回避の古い案"), encoding="utf-8")
+        (specs / "旧回避.md").write_text(spec_page("旧回避メモ", DEV_ID, "開発用（旧版・参考）", "回避の古い案"), encoding="utf-8")
         (status / "回避アクション.md").write_text(STATUS_PAGE, encoding="utf-8")
         (terms / "回避アクション.md").write_text(TERM_PAGE, encoding="utf-8")
 
@@ -184,6 +184,16 @@ class SpecQueryTests(unittest.TestCase):
         self.assertNotIn("爽快感", text)
         self.assertEqual(result["omitted_sections"], ["詳細説明 > 経緯", "仕様意図"])
 
+    def test_replace_mentions_reads_titled_mentions(self):
+        from spec_query import replace_mentions
+
+        class EmptyCatalog:
+            by_id = {}
+            by_path = {}
+
+        text = replace_mentions(EmptyCatalog(), '<mention-page url="https://app.notion.com/p/0123456789abcdef0123456789abcdef">A&amp;B</mention-page> と <mention-page url="https://app.notion.com/p/fedcba9876543210fedcba9876543210"/>')
+        self.assertEqual(text, "[A&B](https://app.notion.com/p/0123456789abcdef0123456789abcdef) と [目録に無いページ](https://app.notion.com/p/fedcba9876543210fedcba9876543210)")
+
     def test_get_rationale_converts_tables_and_links(self):
         result = self.get(DODGE_ID, "--rationale")
         rationale = [section for section in result["sections"] if section["kind"] == "制作意図"]
@@ -191,6 +201,49 @@ class SpecQueryTests(unittest.TestCase):
         text = rationale[-1]["text"]
         self.assertIn("| 日付 | 案 |\n|---|---|\n| 2026-10-30 | キーコンフィグ |", text)
         self.assertIn("](<SKC/仕様概要/仕様リスト/回避/実装.md>)", text)
+
+    def write_decision(self, name, page_id, status, date, conclusion, relation="反映先"):
+        forum = self.root / "SKC" / "仕様検討フォーラム"
+        forum.mkdir(exist_ok=True)
+        (forum / "_database.md").write_text(database("仕様検討フォーラム"), encoding="utf-8")
+        (forum / f"{name}.md").write_text(f"""<!-- NotionMarkdownExporterによる自動生成ファイルです。 -->
+# {name}
+
+[Notionで開く](https://app.notion.com/p/{page_id})
+
+## プロパティ
+
+| プロパティ | 値 |
+|---|---|
+| ステータス | {status} |
+| 決定日 | {date} |
+| 結論 | {conclusion} |
+| {relation} | 33a7c2c6-cc02-8053-a4fb-f138ffac7b74 |
+
+---
+
+# 結論
+{conclusion}
+""", encoding="utf-8")
+
+    def test_get_rationale_lists_forum_decisions(self):
+        self.write_decision("無敵時間の長さ", "4137c2c6cc0281aab8fcdd2b5301b001", "適用済", "2026-10-01", "無敵は0.2秒にする")
+        self.write_decision("入力の受付", "4137c2c6cc0281aab8fcdd2b5301b002", "検討中", "2026-10-20", "先行入力を受け付けるか",
+                            relation="反映先（システム）")
+        self.write_decision("関係ない決定", "4137c2c6cc0281aab8fcdd2b5301b003", "却下", "2026-10-25", "別の話")
+        (self.root / "SKC" / "仕様検討フォーラム" / "関係ない決定.md").write_text(
+            (self.root / "SKC" / "仕様検討フォーラム" / "関係ない決定.md").read_text(encoding="utf-8").replace(
+                "33a7c2c6-cc02-8053-a4fb-f138ffac7b74", "3127c2c6-cc02-8082-acb4-e96f7532687d"), encoding="utf-8")
+        self.assertNotIn("decisions", self.get(DODGE_ID))
+        decisions = self.get(DODGE_ID, "--rationale")["decisions"]
+        self.assertEqual([(item["title"], item["date"], item["status"]) for item in decisions],
+                         [("入力の受付", "2026-10-20", "検討中"), ("無敵時間の長さ", "2026-10-01", "適用済")])
+        self.assertEqual(decisions[1]["conclusion"], "無敵は0.2秒にする")
+        code, out, _ = self.run_cli("get", DODGE_ID, "--rationale")
+        self.assertEqual(code, 0)
+        self.assertIn("## 決定の記録（仕様検討フォーラム）", out)
+        self.assertIn("〔2026-10-01 / 適用済〕", out)
+        self.assertIn("  - 結論: 無敵は0.2秒にする", out)
 
     def test_get_status_reads_implementation_list(self):
         result = self.get("SKC/仕様概要/仕様リスト/回避.md", "--status")
@@ -216,6 +269,20 @@ class SpecQueryTests(unittest.TestCase):
         code, out, err = self.run_cli("search", "回避")
         self.assertEqual((code, err), (0, ""))
         self.assertIn(DODGE_ID, out)
+
+    def test_path_reads_pages_and_databases_from_manifest(self):
+        code, _, err = self.run_cli("path", DODGE_ID)
+        self.assertEqual(code, 2)
+        self.assertIn("にこのIDがありません", err)
+        manifest = {
+            "Pages": [{"Id": "33a7c2c6-cc02-8053-a4fb-f138ffac7b74", "File": "SKC/仕様概要/仕様リスト/回避.md"}],
+            "Databases": [{"Id": "3567c2c6-cc02-80d1-bd4e-e6dea0d41181", "File": "SKC/用語/用語リスト/_database.md"}],
+        }
+        (self.root / ".notion-export-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+        self.assertEqual(self.run_cli("path", "https://app.notion.com/p/33a7c2c6cc028053a4fbf138ffac7b74")[:2],
+                         (0, "SKC/仕様概要/仕様リスト/回避.md\n"))
+        code, out, _ = self.run_cli("--json", "path", "3567c2c6cc0280d1bd4ee6dea0d41181")
+        self.assertEqual((code, json.loads(out)), (0, {"path": "SKC/用語/用語リスト/_database.md"}))
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.PostEffect
     /// <summary>
     ///     リズムガイドの全画面演出Materialを操作するViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/PostEffect/RhythmGuidePostEffectView")]
     public sealed class RhythmGuidePostEffectView : MonoBehaviour
     {
         /// <summary>

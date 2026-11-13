@@ -16,6 +16,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
     /// <summary>
     ///     アウトゲームチュートリアルの開始条件を判定し、実行ライフサイクルを管理します。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Tutorial/OutGameTutorialInitializer")]
     public sealed class OutGameTutorialInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -50,6 +51,8 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
         private TutorialOverlayView _activeOverlayView;
         /// <summary> ホーム画面の表示要素を提供するViewです。 </summary>
         private HomeScreenView _homeScreenView;
+        /// <summary> 各画面を初めて開いたときの案内です。 </summary>
+        private OutGameScreenGuideRunner _screenGuideRunner;
         private SaveData _loadedSaveData;
         private bool _isWaitingForLoadingCompleted;
         private bool _isTutorialRunning;
@@ -90,6 +93,18 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
             ServiceLocator.TryGetInstance(out _loadingScreenController);
             ServiceLocator.TryGetInstance(out HomeScreenView homeScreenView);
             _homeScreenView = homeScreenView;
+
+            // 研究・改造・作戦の各画面を初めて開いたときの案内をつなぐ。
+            ServiceLocator.TryGetInstance(out SkillTreeScreenView skillTreeScreenView);
+            ServiceLocator.TryGetInstance(out SkillBuildScreenView skillBuildScreenView);
+            ServiceLocator.TryGetInstance(out StageSelectScreenView stageSelectScreenView);
+            _screenGuideRunner?.Dispose();
+            _screenGuideRunner = new OutGameScreenGuideRunner(
+                _loadedSaveData,
+                skillTreeScreenView,
+                skillBuildScreenView,
+                stageSelectScreenView,
+                destroyCancellationToken);
             _isInitialized = true;
             return true;
         }
@@ -121,6 +136,8 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                     HandleHomeTutorialForceCompleteRequested;
             }
 
+            _screenGuideRunner?.Dispose();
+            _screenGuideRunner = null;
             _outGameUIEvent = null;
             _loadingScreenController = null;
             _activeOverlayView = null;

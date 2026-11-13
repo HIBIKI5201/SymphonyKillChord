@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.InGame.Enemy
     /// <summary>
     ///     ダメージ表示のプールを管理するView。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/DamageNumberPoolView")]
     public class DamageNumberPoolView : MonoBehaviour
     {
         /// <summary>

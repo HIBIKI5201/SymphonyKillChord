@@ -1,0 +1,111 @@
+/*
+ * KillChord Debugger「ロジック」パネルのスタイル。
+ * 暗い背景と役割ごとの枠色で、処理の流れを見分けやすくする。
+ */
+
+.lgd-panel {
+    flex-grow: 1;
+    background-color: #16181d;
+}
+
+.lgd-toolbar {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: #2c313a;
+    background-color: #1d2027;
+}
+
+.lgd-toolbar__title {
+    color: #e8c07a;
+    -unity-font-style: bold;
+    margin-right: 12px;
+}
+
+.lgd-toolbar__item {
+    margin-right: 8px;
+}
+
+.lgd-toolbar__status {
+    flex-grow: 1;
+    -unity-text-align: middle-right;
+    color: #8a93a3;
+}
+
+.lgd-body {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.lgd-log {
+    width: 280px;
+    border-right-width: 1px;
+    border-right-color: #2c313a;
+    background-color: #1a1d22;
+}
+
+.lgd-log__item {
+    color: #c9d1dc;
+    padding-left: 6px;
+    -unity-text-align: middle-left;
+}
+
+.lgd-graph-host {
+    flex-grow: 1;
+}
+
+.lgd-graph GridBackground {
+    --grid-background-color: #16181d;
+    --line-color: rgba(255, 255, 255, 0.04);
+    --thick-line-color: rgba(255, 255, 255, 0.08);
+    --spacing: 20;
+}
+
+.lgd-node {
+    min-width: 220px;
+}
+
+.lgd-node #node-border {
+    border-width: 2px;
+    border-radius: 4px;
+    border-color: #4a5160;
+}
+
+.lgd-node #title {
+    background-color: #20242c;
+}
+
+.lgd-node #title-label {
+    color: #e6e9ef;
+    -unity-font-style: bold;
+}
+
+.lgd-node__body {
+    padding: 6px 8px;
+    background-color: #1b1e24;
+}
+
+.lgd-node__line {
+    color: #c9d1dc;
+}
+
+.lgd-node--start #node-border {
+    border-color: #e08a5a;
+}
+
+.lgd-node--changed #node-border {
+    border-color: #5fd17a;
+}
+
+.lgd-node--unchanged #node-border {
+    border-color: #4a5160;
+}
+
+.lgd-node--result #node-border {
+    border-color: #a98be0;
+}
+
+.lgd-node--incomplete #node-border {
+    border-color: #d95b5b;
+}

@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
     /// <summary>
     ///     PersistentのUI操作音Sourceを使用可能にしてContainerを公開する。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Music/UISoundEffectInitializer")]
     public sealed class UISoundEffectInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名。 </summary>

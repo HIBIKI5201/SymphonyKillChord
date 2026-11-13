@@ -11,6 +11,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// <summary>
     ///     シナリオスキップの確認画面と、開始入力の解放待ちを管理する。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Scenario/ScenarioSkipConfirmationView")]
     public sealed class ScenarioSkipConfirmationView : MonoBehaviour
     {
         /// <summary> スキップが確定されたときの通知。 </summary>

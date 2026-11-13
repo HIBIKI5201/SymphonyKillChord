@@ -57,6 +57,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                         ct),
                     fromSceneName,
                     ct),
+                LoadingExecutionOptions.Default.WithRoute(fromSceneName, toSceneName),
                 ct);
         }
 
@@ -78,6 +79,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                         null,
                         cancellationToken);
                 },
+                LoadingExecutionOptions.Default.WithRoute(sceneName, sceneName),
                 cancellationToken);
         }
 
@@ -102,6 +104,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 : LoadingExecutionOptions.KeepOpen(
                     0f,
                     LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS);
+            options = options.WithRoute(fromSceneName, toSceneName);
 
             return _executor.ExecuteAsync(
                 progress => LoadSceneAndWaitForReadyAsync(
@@ -136,7 +139,65 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                         ct),
                     null,
                     ct),
+                LoadingExecutionOptions.Default.WithRoute(null, sceneName),
                 ct);
+        }
+
+        /// <summary>
+        ///     Additiveシーンを読み込んでから、遷移元のシーンをアンロードする。
+        ///     1回のロード画面の間に両方を行い、途中でロード画面を閉じない。
+        /// </summary>
+        /// <param name="loadSceneName"> 読み込むAdditiveシーン名。 </param>
+        /// <param name="unloadSceneName"> 読み込み後にアンロードする遷移元のシーン名。 </param>
+        /// <param name="loadCancellationToken"> 読み込みに使うキャンセルトークン。 </param>
+        /// <param name="unloadCancellationToken">
+        ///     アンロードとロード画面の待機に使うキャンセルトークン。
+        ///     遷移元のシーンと一緒に破棄されない寿命のものを渡す。
+        /// </param>
+        /// <returns> 読み込みとアンロードの両方に成功した場合はtrue。 </returns>
+        public Task<bool> LoadAdditiveThenUnloadAsync(
+            string loadSceneName,
+            string unloadSceneName,
+            CancellationToken loadCancellationToken,
+            CancellationToken unloadCancellationToken)
+        {
+            return _executor.ExecuteAsync(
+                async progress =>
+                {
+                    // 進捗の大半で遷移先を読み込み、初期化の完了を待つ。
+                    bool loadSuccess = await LoadSceneAndWaitForReadyAsync(
+                        loadSceneName,
+                        () => _service.LoadAdditiveAsync(
+                            loadSceneName,
+                            new LoadingProgressRange(
+                                progress,
+                                0f,
+                                LoadingConstants.SCENE_LOAD_END_PROGRESS),
+                            loadCancellationToken),
+                        null,
+                        loadCancellationToken);
+                    if (!loadSuccess)
+                    {
+                        return false;
+                    }
+
+                    // 残りの進捗で遷移元をアンロードし、その初期化状態を消す。
+                    bool unloadSuccess = await _service.UnloadAsync(
+                        unloadSceneName,
+                        new LoadingProgressRange(
+                            progress,
+                            LoadingConstants.SCENE_LOAD_END_PROGRESS,
+                            1f),
+                        unloadCancellationToken);
+                    if (unloadSuccess)
+                    {
+                        _sceneInitializationReadiness.Clear(unloadSceneName);
+                    }
+
+                    return unloadSuccess;
+                },
+                LoadingExecutionOptions.Default.WithRoute(unloadSceneName, loadSceneName),
+                unloadCancellationToken);
         }
 
         /// <summary>
@@ -161,7 +222,8 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                     ct),
                 LoadingExecutionOptions.KeepOpen(
                     0f,
-                    LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS),
+                    LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS)
+                    .WithRoute(null, sceneName),
                 ct);
         }
 
@@ -190,6 +252,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
 
                     return isSuccess;
                 },
+                LoadingExecutionOptions.Default.WithRoute(sceneName, null),
                 ct);
         }
 
@@ -226,6 +289,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
 
                     return isSuccess;
                 },
+                LoadingExecutionOptions.Default.WithRoute(unloadSceneName, activeSceneName),
                 ct);
         }
 
@@ -288,6 +352,7 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                         fromSceneName,
                         cancellationToken);
                 },
+                LoadingExecutionOptions.Default.WithRoute(fromSceneName, toSceneName),
                 cancellationToken);
         }
 
@@ -308,7 +373,8 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                 LoadingExecutionOptions.KeepOpen(
                     0f,
                     LoadingConstants
-                        .IN_GAME_SCENE_LOAD_END_PROGRESS);
+                        .IN_GAME_SCENE_LOAD_END_PROGRESS)
+                    .WithRoute(reloadSceneName, reloadSceneName);
 
             return _executor.ExecuteAsync(
                 async progress =>
@@ -455,7 +521,8 @@ namespace KillChord.Runtime.Application.Persistent.SceneManagement
                             cancellationToken),
                         null, cancellationToken);
                 },
-                LoadingExecutionOptions.KeepOpen(0f, LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS),
+                LoadingExecutionOptions.KeepOpen(0f, LoadingConstants.IN_GAME_SCENE_LOAD_END_PROGRESS)
+                    .WithRoute(scenarioSceneName, inGameSceneName),
                 cancellationToken);
         }
 

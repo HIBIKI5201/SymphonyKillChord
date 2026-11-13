@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     ///     シナリオの自動送り状態をAutoボタンの配色へ反映する。
     /// </summary>
     [DisallowMultipleComponent, RequireComponent(typeof(Button))]
+    [AddComponentMenu("KillChord/View/Scenario/ScenarioAutoButtonView")]
     public sealed class ScenarioAutoButtonView : MonoBehaviour
     {
         /// <summary>

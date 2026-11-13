@@ -109,8 +109,7 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
                         continue;
                     }
 
-                    ApplyInfectionDamage(
-                        member.Character, infectionBaseDamage, context.AttackResult.IsJustHit);
+                    ApplyInfectionDamage(member.Character, infectionBaseDamage);
                 }
             }
             finally
@@ -162,15 +161,16 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
         /// </summary>
         /// <param name="target"> 伝染ダメージを適用する対象のキャラクター </param>
         /// <param name="baseDamage"> 伝染ダメージの基礎値 </param>
-        /// <param name="isJustHit"> ジャストヒットかどうかを示すフラグ </param>
-        private void ApplyInfectionDamage(CharacterEntity target, Damage baseDamage, bool isJustHit)
+        private void ApplyInfectionDamage(CharacterEntity target, Damage baseDamage)
         {
+            // 基礎値は、Just倍率とクリティカルがかかった後のダメージから作っている。
+            // Just倍率とクリティカルを二重にかけないよう、Justとしては扱わない。
             AttackResult result =
                 AttackCalculator.Calculate(
                     _infectionAttackDefinition,
                     _attacker,
                     target,
-                    isJustHit,
+                    isJustHit: false,
                     baseDamage,
                     applyAttackerModifiers: false);
 
@@ -201,16 +201,14 @@ namespace KillChord.Runtime.Application.InGame.SkillEffect
 
         /// <summary>
         ///     伝染ダメージ用のAttackDefinitionを作成します。
+        ///     伝染ダメージは元の攻撃のダメージに倍率をかけるだけなので、
+        ///     武器倍率・Just倍率・クリティカルの処理を持たない。
         /// </summary>
         /// <param name="attackDefinition"> 元となるAttackDefinition </param>
         /// <returns> 伝染ダメージ用のAttackDefinition </returns>
         private static AttackDefinition CreateInfectionAttackDefinition(AttackDefinition attackDefinition)
         {
-            AttackPipeline attackPipeline = new AttackPipeline(new IAttackStep[]
-            {
-                new WeaponDamageStep(),
-                new CriticalStep()
-            });
+            AttackPipeline attackPipeline = new AttackPipeline(Array.Empty<IAttackStep>());
 
             return new AttackDefinition(
                 "Skill08.Infection",

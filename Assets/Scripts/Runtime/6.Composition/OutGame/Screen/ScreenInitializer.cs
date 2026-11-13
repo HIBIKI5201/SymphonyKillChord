@@ -30,6 +30,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
     /// <summary>
     ///     アウトゲーム画面の依存を解決するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Screen/ScreenInitializer")]
     public sealed class ScreenInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

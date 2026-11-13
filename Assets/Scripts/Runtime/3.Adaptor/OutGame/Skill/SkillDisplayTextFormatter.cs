@@ -1,3 +1,4 @@
+using KillChord.Runtime.Adaptor.Persistent.Localization;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.Player;
@@ -18,14 +19,17 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         /// </summary>
         /// <param name="descriptionFormatter"> 効果説明フォーマッター。 </param>
         /// <param name="beatColors"> 発動コマンドの拍子(BeatType)と色の対応表。 </param>
+        /// <param name="textProvider"> 発動コンボ・スキル種類の文言の取得元。nullなら日本語で表示する。 </param>
         /// <exception cref="ArgumentNullException"></exception>
         public SkillDisplayTextFormatter(
             SkillEffectDescriptionFormatter descriptionFormatter,
-            IReadOnlyDictionary<int, Color> beatColors = null)
+            IReadOnlyDictionary<int, Color> beatColors = null,
+            IUiTextProvider textProvider = null)
         {
             _descriptionFormatter = descriptionFormatter ??
                 throw new ArgumentNullException(nameof(descriptionFormatter));
             _beatColors = beatColors;
+            _textProvider = textProvider;
         }
 
         /// <summary>
@@ -62,8 +66,14 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
                 BuildComboStepColors(skillTemplate.Pattern));
         }
 
-        private const string EMPTY_COMBO_LABEL = "発動コンボ: —";
-        private const string COMBO_LABEL_PREFIX = "発動コンボ: ";
+        private const string COMBO_LABEL_FORMAT_KEY = "ui.skill.combo_label_format";
+        private const string COMBO_LABEL_FORMAT_FALLBACK = "発動コンボ: {0}";
+        private const string SKILL_TYPE_ATTACK_KEY = "ui.skill.type_attack";
+        private const string SKILL_TYPE_BUFF_KEY = "ui.skill.type_buff";
+        private const string SKILL_TYPE_DEBUFF_KEY = "ui.skill.type_debuff";
+        private const string SKILL_TYPE_ATTACK_FALLBACK = "攻撃";
+        private const string SKILL_TYPE_BUFF_FALLBACK = "バフ";
+        private const string SKILL_TYPE_DEBUFF_FALLBACK = "デバフ";
         private const string COMBO_SEPARATOR = " → ";
         private const string SKILL_TYPE_SEPARATOR = " / ";
         private const string EMPTY_VALUE_LABEL = "—";
@@ -71,6 +81,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
 
         private readonly SkillEffectDescriptionFormatter _descriptionFormatter;
         private readonly IReadOnlyDictionary<int, Color> _beatColors;
+        private readonly IUiTextProvider _textProvider;
         private readonly StringBuilder _comboBuilder = new();
         private readonly StringBuilder _skillTypeBuilder = new();
 
@@ -83,11 +94,12 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         {
             if (pattern == null || pattern.Count == 0)
             {
-                return EMPTY_COMBO_LABEL;
+                return UiText.Format(
+                    _textProvider, COMBO_LABEL_FORMAT_KEY, COMBO_LABEL_FORMAT_FALLBACK, EMPTY_VALUE_LABEL);
             }
 
+            // 拍子の並びだけを組み立て、「発動コンボ: 」などの文言は選択中の言語の書式で付ける。
             _comboBuilder.Clear();
-            _comboBuilder.Append(COMBO_LABEL_PREFIX);
             for (int i = 0; i < pattern.Count; i++)
             {
                 if (i > 0)
@@ -98,7 +110,8 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
                 _comboBuilder.Append((int)pattern[i]);
             }
 
-            return _comboBuilder.ToString();
+            return UiText.Format(
+                _textProvider, COMBO_LABEL_FORMAT_KEY, COMBO_LABEL_FORMAT_FALLBACK, _comboBuilder.ToString());
         }
 
         /// <summary>
@@ -151,7 +164,7 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         }
 
         /// <summary>
-        ///     スキル種類を日本語の表示名へ変換する。
+        ///     スキル種類を選択中の言語の表示名へ変換する。
         /// </summary>
         /// <param name="skillType"> スキル種類。 </param>
         /// <returns> 表示名。 </returns>
@@ -159,9 +172,9 @@ namespace KillChord.Runtime.Adaptor.OutGame.Skill
         {
             return skillType switch
             {
-                SkillType.Attack => "攻撃",
-                SkillType.Buff => "バフ",
-                SkillType.Debuff => "デバフ",
+                SkillType.Attack => UiText.Get(_textProvider, SKILL_TYPE_ATTACK_KEY, SKILL_TYPE_ATTACK_FALLBACK),
+                SkillType.Buff => UiText.Get(_textProvider, SKILL_TYPE_BUFF_KEY, SKILL_TYPE_BUFF_FALLBACK),
+                SkillType.Debuff => UiText.Get(_textProvider, SKILL_TYPE_DEBUFF_KEY, SKILL_TYPE_DEBUFF_FALLBACK),
                 _ => skillType.ToString(),
             };
         }

@@ -19,6 +19,7 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
     ///         （ステージ単体の直接再生など）でも初期スキル状態を保証する。
     ///     </para>
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Savedata/InitialSkillLoadoutInitializer")]
     public sealed class InitialSkillLoadoutInitializer : PersistentInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>

@@ -81,7 +81,10 @@ namespace KillChord.Runtime.Adaptor.InGame.Target
         /// <param name="playerPosition"> プレイヤーの現在位置。 </param>
         /// <param name="direction"> 選択基準に使用する方向。 </param>
         /// <param name="notifyLockOn"> ロックオン成立イベントを発火するかどうか。入力によらない付け替えではfalseを指定する。 </param>
-        void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true);
+        /// <param name="allowOutOfView">
+        ///     視界範囲内に候補がいないとき、視界範囲外の敵からも選ぶかどうか。攻撃時のオートロックオンで true を指定する。
+        /// </param>
+        void ChangeTarget(in Vector3 playerPosition, in Vector3 direction, bool notifyLockOn = true, bool allowOutOfView = false);
 
         /// <summary>
         ///     プレイヤー位置と方向をもとに候補ターゲットを更新する。

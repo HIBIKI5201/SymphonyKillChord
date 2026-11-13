@@ -1,9 +1,12 @@
+using UnityEngine;
+
 namespace KillChord.Runtime.View.InGame.Enemy.AIFacade
 {
     /// <summary>
     ///     敵AI用ファサード：移動系。
     ///     共通の移動指示に加えて、攻撃待機中の横移動を扱う。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Enemy/EnemyMovementAIFacade")]
     public class EnemyMovementAIFacade : MovementAIFacadeBase<EnemyMoveView>
     {
         /// <summary>

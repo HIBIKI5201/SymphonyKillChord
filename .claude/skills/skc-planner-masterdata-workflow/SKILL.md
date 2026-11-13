@@ -1,6 +1,6 @@
 ---
 name: skc-planner-masterdata-workflow
-description: "Add, edit, or troubleshoot planner-facing master data via the SourceDataProvider system (Assets/Editor/Scripts/SourceDataProvider) and the Planner Master Data window. Use whenever the user wants to add a new master data type/entry, register a ScriptableObject with Addressables for planner editing, work with DataID/CollectionKey/hash IDs, debug 'not registered in SourceDataProvider' or hash-mismatch warnings, or extend the Planner Master Data window's pages. Also covers adding a brand-new SourceData collection type from scratch."
+description: "Add or debug planner master data in SourceDataProvider and the Planner Master Data window: new data types or entries, Addressables registration, DataID/CollectionKey/hash IDs, and 'not registered' or hash-mismatch warnings."
 ---
 
 # Planner Master Data Workflow

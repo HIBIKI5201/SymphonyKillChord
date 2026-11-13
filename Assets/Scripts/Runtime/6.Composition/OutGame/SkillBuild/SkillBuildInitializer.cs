@@ -20,6 +20,7 @@ using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
+using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
@@ -34,6 +35,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
     /// <summary>
     ///     改造画面の依存解決と初期化を行うクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/SkillBuild/SkillBuildInitializer")]
     public sealed class SkillBuildInitializer : OutGameInitializationModuleBase
     {
         /// <summary> モジュール名です。 </summary>
@@ -291,10 +293,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 new(_skillBuildDefinition, _loadedSkillBuildRepository);
             _skillBuildController = new(skillBuildUseCase, _loadedOwnedSkillTemplates);
             _skillBuildViewModel = new(_skillBuildController);
+            UiCommonTextProvider uiTextProvider = new UiCommonTextProvider();
             SkillEffectDescriptionFormatter skillEffectDescriptionFormatter =
-                new SkillEffectDescriptionFormatter();
+                new SkillEffectDescriptionFormatter(uiTextProvider);
             SkillDisplayTextFormatter textFormatter =
-                new SkillDisplayTextFormatter(skillEffectDescriptionFormatter, _skillBeatColors);
+                new SkillDisplayTextFormatter(skillEffectDescriptionFormatter, _skillBeatColors, uiTextProvider);
             _skillBuildPresenter = new(_skillBuildViewModel, textFormatter, _skillGenreIcons);
 
             _skillElementDragAndDropSetup = new SkillElementDragAndDropSetup(

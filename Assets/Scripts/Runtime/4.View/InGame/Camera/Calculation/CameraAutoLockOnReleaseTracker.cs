@@ -36,6 +36,7 @@ namespace KillChord.Runtime.View.InGame.Camera
             _breakTracker.Reset();
             _idleTimer = 0f;
             _viewportGraceTimer = 0f;
+            _isWaitingForTargetInView = false;
         }
 
         /// <summary>
@@ -54,6 +55,16 @@ namespace KillChord.Runtime.View.InGame.Camera
         public void ExtendViewportGrace()
         {
             _viewportGraceTimer = _config.AutoLockOnViewportGraceDuration;
+        }
+
+        /// <summary>
+        ///     視野外の敵へオートロックオンした直後に、カメラが向き終わるまで視野外解除を猶予する。
+        ///     対象が視野に入った時点で、猶予を通常の長さへ戻す。
+        /// </summary>
+        public void BeginOutOfViewGrace()
+        {
+            _viewportGraceTimer = Mathf.Max(_viewportGraceTimer, _config.AutoLockOnOutOfViewGraceDuration);
+            _isWaitingForTargetInView = true;
         }
 
         /// <summary>
@@ -77,6 +88,13 @@ namespace KillChord.Runtime.View.InGame.Camera
             _idleTimer += context.DeltaTime;
             _viewportGraceTimer = Mathf.Max(0f, _viewportGraceTimer - context.DeltaTime);
 
+            // 視野外の敵へ向き終わったら、長い猶予を通常の長さまで縮める。
+            if (_isWaitingForTargetInView && isTargetWithinViewport)
+            {
+                _isWaitingForTargetInView = false;
+                _viewportGraceTimer = Mathf.Min(_viewportGraceTimer, _config.AutoLockOnViewportGraceDuration);
+            }
+
             if (_idleTimer >= _config.AutoLockOnReleaseDelay)
             {
                 return CameraAutoLockOnReleaseReason.Idle;
@@ -97,5 +115,6 @@ namespace KillChord.Runtime.View.InGame.Camera
         private readonly CameraLockOnBreakTracker _breakTracker;
         private float _idleTimer;
         private float _viewportGraceTimer;
+        private bool _isWaitingForTargetInView;
     }
 }

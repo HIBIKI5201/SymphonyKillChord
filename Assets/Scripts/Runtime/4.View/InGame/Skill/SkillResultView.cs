@@ -5,6 +5,7 @@ using UnityEngine;
 namespace KillChord.Runtime.View.InGame.Skill
 {
     /// <summary> スキル結果を表示するビュークラス。 </summary>
+    [AddComponentMenu("KillChord/View/Skill/SkillResultView")]
     public class SkillResultView : MonoBehaviour
     {
         /// <summary> ViewModelをバインドして変更イベントを購読する。 </summary>

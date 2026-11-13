@@ -5,6 +5,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     /// <summary>
     ///     ステージ開始演出中にインゲームHUDの表示を切り替えるViewです。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Sequence/InGameHudVisibilityView")]
     public sealed class InGameHudVisibilityView : MonoBehaviour
     {
         /// <summary> HUDを非表示にします。 </summary>

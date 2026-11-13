@@ -9,6 +9,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
     /// <summary>
     ///     入力のゲームプレイ制御クラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/Sequence/InputGamePlayControllable")]
     public class InputGamePlayControllable : MonoBehaviour, IGameplayControllable
     {
         /// <summary>

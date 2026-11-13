@@ -5,6 +5,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     /// <summary>
     ///     クリアTimelineの合図で、プレイヤー正面へカメラを移動します。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Sequence/StageClearCameraView")]
     public sealed class StageClearCameraView : MonoBehaviour
     {
         /// <summary>

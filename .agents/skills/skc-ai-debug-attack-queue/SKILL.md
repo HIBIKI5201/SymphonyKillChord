@@ -9,7 +9,7 @@ Use the bundled script to register an entire attack sequence in one call. Timing
 
 This implementation is shared by Claude and Codex. Read `references/qa-coverage.md` before selecting a QA case and `references/json-api.md` for response semantics.
 
-Run from the same project checkout opened in Unity. Every request checks `Application.dataPath`. Use an already installed uloop; these scripts never install it or launch Unity. Windows native executables and standard npm shims are supported without shell evaluation. If discovery fails, set `ULOOP_EXECUTABLE` to the native executable or `ULOOP_CLI_JS` to its Node entry point.
+Run from the same project checkout opened in Unity. Every request checks `Application.dataPath`. Calls go through the Unity CLI (`unity command script eval`, needs the project's `com.unity.pipeline`); these scripts never install it or launch Unity. Open the Editor with `unity open <project>` and wait with `unity status --until-ready` first. If `unity` is not on PATH, set `UNITY_CLI_EXECUTABLE` to its executable.
 
 ## JSON state and bounded observations
 
@@ -22,7 +22,7 @@ node .agents/skills/skc-ai-debug-attack-queue/scripts/ai-debug-qa.mjs run --qa C
 
 Snapshots include scene/frame/time, HP, rhythm history, targets, mission progress, loaded save data and active UI. Uninitialized sections are `available: false`. Current timing windows are not past input judgments. Start a monitor to capture actual attack judgments, weapon hits, skill IDs and damage events.
 
-`run` writes request.json, observations.jsonl and summary.json under `.uloop/qa/<runId>/`. Every attack queue is primed. It stops on duration, repeat limit, mission end, Unity error, interruption or Ctrl+C. Without --queue it only observes; ordinary gameplay/input must be provided separately. The --qa value labels evidence; it is not an executable assertion. qaVerdict remains Unverified. Inspect the evidence and fill the original QA sheet separately.
+`run` writes request.json, observations.jsonl and summary.json under `.ai-debug-qa/runs/<runId>/`. Every attack queue is primed. It stops on duration, repeat limit, mission end, Unity error, interruption or Ctrl+C. Without --queue it only observes; ordinary gameplay/input must be provided separately. The --qa value labels evidence; it is not an executable assertion. qaVerdict remains Unverified. Inspect the evidence and fill the original QA sheet separately.
 
 `monitor-start --run-id <UUID> --seconds 900`, `monitor-status`, and `monitor-stop --run-id <UUID>` expose observation without the JS loop. Export evidence before starting another monitor, which resets bounded history. The monitor and attack queue each enforce deadlines even if JS disconnects.
 
@@ -70,4 +70,4 @@ Accepted names are `purple/One/1`, `blue/Two/2`, `cyan/Three/3`, `green/Four/4`,
 
 enqueue also accepts --run-id UUID for idempotent retries and --timeout 120 (1–3600 seconds). Maximum total queue size is 1000. Active queues are rejected rather than replaced. After an unknown transport outcome, query status and reuse the same ID; never blindly resend with a new ID.
 
-If a killed JS process leaves `.uloop/qa-session.lock`, read its runId/pid and inspect monitor/attack status. Stop only owned IDs. Remove that exact lock only after confirming the owner is gone; do not take over a live run.
+If a killed JS process leaves `.ai-debug-qa/session.lock`, read its runId/pid and inspect monitor/attack status. Stop only owned IDs. Remove that exact lock only after confirming the owner is gone; do not take over a live run.

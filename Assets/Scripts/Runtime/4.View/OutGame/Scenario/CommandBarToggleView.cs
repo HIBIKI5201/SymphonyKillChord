@@ -8,6 +8,7 @@ namespace KillChord.Runtime.View.OutGame.Scenario
     /// <summary>
     ///     シナリオ操作バーの開閉演出を制御するViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Scenario/CommandBarToggleView")]
     public class CommandBarToggleView : MonoBehaviour
     {
         /// <summary>

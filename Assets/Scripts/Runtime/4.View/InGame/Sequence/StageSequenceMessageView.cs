@@ -7,6 +7,7 @@ namespace KillChord.Runtime.View.InGame.Sequence
     /// <summary>
     ///     ステージの結果表示やシーケンス用メッセージ表示を行うViewクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/View/Sequence/StageSequenceMessageView")]
     public class StageSequenceMessageView : MonoBehaviour
     {
         /// <summary>

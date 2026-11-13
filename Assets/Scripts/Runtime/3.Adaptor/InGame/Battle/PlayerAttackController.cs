@@ -79,8 +79,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
         /// <summary> プレイヤーが攻撃を実行したときに発火します。入力1回につき1回だけ発火します。 </summary>
         public event Action<string, bool> OnAttackExecuted;
 
-        /// <summary> ミッション記録向けに成立した攻撃の拍種を通知します。 </summary>
-        public event Action<BeatType> OnAttackBeatExecuted;
+        /// <summary> ミッション記録向けに成立した攻撃の拍種と、Just攻撃だったかどうかを通知します。 </summary>
+        public event Action<BeatType, bool> OnAttackBeatExecuted;
 
         /// <summary>
         ///     多段攻撃の2発目以降を撃ったときに発火します。
@@ -120,7 +120,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
                 return false;
             }
 
-            float now = Time.unscaledTime;
+            // ポーズ中に止まる戦闘の時計で、スキルのクールダウンを計る。
+            float now = _skillController.GetCurrentTime();
             float musicTime = (float)_musicSyncState.PlayTime;
             BeatType beatType = _musicSyncService.GetCurrentBeatType(out bool isJustHit);
 
@@ -139,7 +140,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Battle
 
             // スキルが発動した攻撃はスキルの硬直、それ以外は通常攻撃の硬直を拍数で使う。
             StartAttackInterval(skillRecoveryBeats ?? _attackRecoveryBeats);
-            OnAttackBeatExecuted?.Invoke(beatType);
+            OnAttackBeatExecuted?.Invoke(beatType, isJustHit);
             _attackPresenter.Push(beatType, isJustHit);
             resultBeatType = (int)beatType;
 

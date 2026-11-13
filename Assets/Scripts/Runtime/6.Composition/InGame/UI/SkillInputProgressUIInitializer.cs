@@ -1,5 +1,6 @@
 using KillChord.Runtime.Adaptor.InGame.Skill;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
+using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Music;
@@ -12,6 +13,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
     /// <summary>
     ///     リズムGUI下部のスキル入力進行UIを初期化するクラス。
     /// </summary>
+    [AddComponentMenu("KillChord/Composition/UI/SkillInputProgressUIInitializer")]
     public class SkillInputProgressUIInitializer : InGameInitializationModuleBase
     {
         /// <summary> 全スキルのコマンド表示を横断的に制御するコントローラー。 </summary>
@@ -60,6 +62,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         public ISkillInputProgressRowView CreateInputProgressRow(SkillDefinition definition, Sprite skillIcon)
         {
             SkillGuideProgressView view = Instantiate(_viewPrefab, _viewRoot);
+            view.SetTimeProvider(BattlePlayTimeProvider.Create());
             SkillBeatVisualSetting[] stepSettings = new SkillBeatVisualSetting[definition.SkillPattern.Signatures.Length];
             for (int i = 0; i < definition.SkillPattern.Signatures.Length; i++)
             {
