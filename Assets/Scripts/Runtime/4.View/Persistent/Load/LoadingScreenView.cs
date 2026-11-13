@@ -135,6 +135,7 @@ namespace KillChord.Runtime.View.Persistent.Load
 
             _visibilityHandle = LMotion.Create(_fadeImage.fillAmount, 1f, GetScreenFadeDuration())
                 .WithEase(Ease.InCirc)
+                .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
                 .BindToFillAmount(_fadeImage);
         }
 
@@ -367,6 +368,7 @@ namespace KillChord.Runtime.View.Persistent.Load
 
             if (_canvasGroup == null)
             {
+                NotifyScreenCovered();
                 return;
             }
 
@@ -379,28 +381,44 @@ namespace KillChord.Runtime.View.Persistent.Load
             if (_fadeImage == null)
             {
                 _canvasGroup.alpha = 1f;
+                NotifyScreenCovered();
                 return;
             }
 
             // 最前面の黒い画像でロード画面を覆ったまま、全体を表示して暗転させる。
+            // ポーズ中などでも暗転し切るよう、timeScaleに左右されないで動かす。
             _fadeImage.fillAmount = 1f;
             float screenFadeDuration = GetScreenFadeDuration();
             if (screenFadeDuration <= 0f)
             {
                 _canvasGroup.alpha = 1f;
+                NotifyScreenCovered();
                 _visibilityHandle = LMotion.Create(1f, 0f, LOADING_SCREEN_REVEAL_DURATION)
                     .WithEase(Ease.OutCirc)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
                     .BindToFillAmount(_fadeImage);
                 return;
             }
 
+            // 暗転し切ったことを通知し、ロード処理が遷移元のシーンを触れるようにする。
             _visibilityHandle = LSequence.Create()
                 .Append(LMotion.Create(_canvasGroup.alpha, 1f, screenFadeDuration)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
+                    .WithOnComplete(NotifyScreenCovered)
                     .BindToAlpha(_canvasGroup))
                 .Append(LMotion.Create(1f, 0f, LOADING_SCREEN_REVEAL_DURATION)
                     .WithEase(Ease.OutCirc)
+                    .WithScheduler(MotionScheduler.UpdateIgnoreTimeScale)
                     .BindToFillAmount(_fadeImage))
                 .Run();
+        }
+
+        /// <summary>
+        ///     画面が暗転し切ったことをコントローラーへ通知する。
+        /// </summary>
+        private void NotifyScreenCovered()
+        {
+            _controller?.NotifyScreenCovered();
         }
 
         /// <summary>
