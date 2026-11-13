@@ -13,7 +13,9 @@ using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Domain.InGame.Character;
+using KillChord.Runtime.Domain.Persistent.Experiment;
 using KillChord.Runtime.InfraStructure.Addressables;
+using KillChord.Runtime.InfraStructure.Persistent.Experiment;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Haptics;
 using KillChord.Runtime.View.InGame.Music;
@@ -145,6 +147,13 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 GetPlayerRecoveryBeats
             );
 
+            // 試遊で切り替えるゲージ注視の改善案（ゲージの波を小さく・1小節のゲージ）を、最初の描画の前に反映する。
+            GaugeGazeExperimentSettings experimentSettings = new GaugeGazeExperimentSettingsStore().Load();
+            _rhythmGuideView.SetWaveScale(
+                experimentSettings.IsEnabled(GaugeGazeExperimentFeature.GaugeWaveReduction) ? _reducedWaveScale : 1f);
+            _rhythmGuideView.SetOneBarGaugeMode(
+                experimentSettings.IsEnabled(GaugeGazeExperimentFeature.OneBarGauge));
+
             _rhythmGuideViewModel?.Dispose();
             _rhythmGuideViewModel = new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
 
@@ -268,6 +277,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
         [SerializeField] private ACLikeRhythmGuideEffectConfig _effectConfig;
         [Tooltip("ゲームパッド振動ConfigのAddressablesキー。")]
         [SerializeField, SourceDataAddress] private string _hapticsConfigKey;
+        [Tooltip("試遊の案（ゲージの波を小さく）で、ブロックの伸び縮みの差に掛ける倍率。")]
+        [SerializeField, Range(0f, 1f)] private float _reducedWaveScale = 0.35f;
 
         private bool _isRegisteredToPlayDirector;
         private ACLikeRhythmGuideViewModel _rhythmGuideViewModel;

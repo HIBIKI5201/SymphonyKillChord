@@ -93,6 +93,26 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
+        ///     ゲージの波（ブロックの伸び縮み）の大きさに倍率を掛ける。試遊の案（ゲージの波を小さく）で使う。
+        ///     判定の情報量は保つため、伸び縮みの差だけを小さくし、色や範囲は変えない。
+        /// </summary>
+        /// <param name="waveScale"> 伸び縮みの差に掛ける倍率（0〜1）。 </param>
+        public void SetWaveScale(float waveScale)
+        {
+            _waveScale = Mathf.Clamp01(waveScale);
+        }
+
+        /// <summary>
+        ///     ゲージの長さを1小節にし、伸びきったあとはタイムアウトまで中央から消していく表示にするかを設定する。
+        ///     試遊の案（1小節のゲージとタイムアウト）で使う。<see cref="ConfigureZones"/> より前に呼ぶ。
+        /// </summary>
+        /// <param name="isEnabled"> 1小節のゲージにする場合はtrue。 </param>
+        public void SetOneBarGaugeMode(bool isEnabled)
+        {
+            _isOneBarGauge = isEnabled;
+        }
+
+        /// <summary>
         ///     チュートリアル対象拍の攻撃成功時に赤枠の拡縮演出を再生する。
         /// </summary>
         public void PlayTargetBeatSuccessFeedback()
@@ -315,15 +335,18 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <param name="guideLengthInBars"> 判定側と共有するタイムアウト小節数。 </param>
         public void ConfigureZones(IReadOnlyList<RhythmGuideZoneDto> zones, float guideLengthInBars)
         {
+            // 1小節のゲージでは、ゲージの長さを1小節にし、残りのタイムアウトまでは中央から消す表示に使う。
+            _timeoutBarCount = guideLengthInBars;
+            float layoutLengthInBars = _isOneBarGauge ? Mathf.Min(ONE_BAR, guideLengthInBars) : guideLengthInBars;
             float halfWidth = CalculateHalfWidth();
             bool layoutChanged = !Mathf.Approximately(_layout.HalfWidth, halfWidth)
-                || !Mathf.Approximately(_layout.LengthInBars, guideLengthInBars);
+                || !Mathf.Approximately(_layout.LengthInBars, layoutLengthInBars);
             if (!layoutChanged && !NeedsRebuild(zones))
             {
                 return;
             }
 
-            _layout = new RhythmGuideLayout(halfWidth, _beatWidth, guideLengthInBars, zones);
+            _layout = new RhythmGuideLayout(halfWidth, _beatWidth, layoutLengthInBars, zones);
             CacheZones(zones);
             RebuildBeatRectTransforms();
         }
@@ -351,6 +374,11 @@ namespace KillChord.Runtime.View.InGame.Music
             for (int i = 0; i < _beatPositionImages.Length; i++)
             {
                 _beatPositionImages[i].fillAmount = gaugeNormalized;
+            }
+
+            if (_isOneBarGauge)
+            {
+                UpdateVanish(normalizeOffset);
             }
 
             int activeIndex = _layout.GetBlockIndex(normalizeOffset);
@@ -459,7 +487,7 @@ namespace KillChord.Runtime.View.InGame.Music
 
             // ジャストタイミングは上で処理済みのため、ここは常に通常タイミングの縮小モーション。
             Ease ease = _effectConfig.NormalTimingEase;
-            _handles[openIndex] = CreateNormalTimingMotion(openIndex, _inTimingSizeDelta, ease);
+            _handles[openIndex] = CreateNormalTimingMotion(openIndex, ScaleWave(_inTimingSizeDelta), ease);
         }
 
         /// <summary>
@@ -554,8 +582,13 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary> チュートリアル対象枠の色。 </summary>
         private static readonly Color TARGET_BEAT_FRAME_COLOR = Color.red;
 
-        [Space]
+        /// <summary> 1小節のゲージの長さ（小節）。 </summary>
+        private const float ONE_BAR = 1f;
 
+        /// <summary> 横の塗りの、塗り始めの位置の数（左と右）。 </summary>
+        private const int HORIZONTAL_FILL_ORIGIN_COUNT = 2;
+
+        [Space]
         [SerializeField, Tooltip("ジャストタイミング演出の設定。")]
         private ACLikeRhythmGuideEffectConfig _effectConfig;
 
@@ -637,6 +670,15 @@ namespace KillChord.Runtime.View.InGame.Music
         private float _lockedBarProgress;
         private RhythmGuideLayout _layout;
         private Canvas _rootCanvas;
+        /// <summary> 波の伸び縮みの差に掛ける倍率。1なら設定どおりの大きさ。 </summary>
+        private float _waveScale = 1f;
+        private bool _isOneBarGauge;
+        private float _timeoutBarCount;
+        /// <summary> 1小節のゲージで、中央から消したブロックの数。 </summary>
+        private int _vanishedBlockCount;
+        /// <summary> 1小節のゲージで、消す向きへ変える前の進捗Imageの塗り始めの位置。 </summary>
+        private int[] _originalFillOrigins;
+        private bool _isVanishing;
 
         /// <summary>
         ///     演出設定の設定漏れを検知し、ビートGUIを構築する。
@@ -819,6 +861,118 @@ namespace KillChord.Runtime.View.InGame.Music
         }
 
         /// <summary>
+        ///     ブロックの高さを、波の倍率に合わせて通常の高さへ近づける。
+        /// </summary>
+        /// <param name="sizeDelta"> 設定どおりの高さ。 </param>
+        /// <returns> 倍率を反映した高さ。 </returns>
+        private float ScaleWave(float sizeDelta)
+        {
+            return _outTimingSizeDelta + (sizeDelta - _outTimingSizeDelta) * _waveScale;
+        }
+
+        /// <summary>
+        ///     1小節のゲージで、伸びきったあとからタイムアウトまで、ゲージを中央から消していく。
+        /// </summary>
+        /// <param name="barProgress"> 前回の入力からの経過（小節単位）。 </param>
+        private void UpdateVanish(float barProgress)
+        {
+            float vanishLength = _timeoutBarCount - _layout.LengthInBars;
+            float vanishRatio = vanishLength > 0f
+                ? Mathf.Clamp01((barProgress - _layout.LengthInBars) / vanishLength)
+                : 0f;
+            bool isVanishing = vanishRatio > 0f;
+            UpdateVanishProgressImages(isVanishing, vanishRatio);
+
+            // 中央から消えた距離までにあるブロックと、そこにあるJustの枠・帯を隠す。
+            float vanishDistance = vanishRatio * _layout.HalfWidth;
+            int vanishedCount = 0;
+            while (vanishedCount < _totalBeatBoxCount && _layout.GetBlockBoundary(vanishedCount + 1) <= vanishDistance)
+            {
+                vanishedCount++;
+            }
+
+            if (vanishedCount == _vanishedBlockCount)
+            {
+                return;
+            }
+
+            _vanishedBlockCount = vanishedCount;
+            for (int i = 0; i < _totalBeatBoxCount; i++)
+            {
+                bool isVisible = i >= vanishedCount;
+                _leftBeatImages[i].enabled = isVisible;
+                _rightBeatImages[i].enabled = isVisible;
+            }
+
+            for (int i = 0; i < _justBandRectTransforms.Length; i++)
+            {
+                bool isVisible = !IsZoneVanished(_justBandZoneIndices[i], vanishDistance);
+                _justBandRectTransforms[i].gameObject.SetActive(isVisible);
+            }
+
+            for (int i = 0; i < _justOutlineImages.Length; i++)
+            {
+                _justOutlineImages[i].enabled = !IsZoneVanished(_justOutlineZoneIndices[i], vanishDistance);
+            }
+        }
+
+        /// <summary>
+        ///     進捗Imageを、消えている間は外側から残りを示す向きにし、伸びている間は元の向きに戻す。
+        /// </summary>
+        /// <param name="isVanishing"> 中央から消している間はtrue。 </param>
+        /// <param name="vanishRatio"> 消えた割合（0〜1）。 </param>
+        private void UpdateVanishProgressImages(bool isVanishing, float vanishRatio)
+        {
+            if (_originalFillOrigins == null || _originalFillOrigins.Length != _beatPositionImages.Length)
+            {
+                _originalFillOrigins = new int[_beatPositionImages.Length];
+                for (int i = 0; i < _beatPositionImages.Length; i++)
+                {
+                    _originalFillOrigins[i] = _beatPositionImages[i].fillOrigin;
+                }
+            }
+
+            if (isVanishing != _isVanishing)
+            {
+                _isVanishing = isVanishing;
+                for (int i = 0; i < _beatPositionImages.Length; i++)
+                {
+                    // 横の塗りは0が左・1が右のため、反対側から塗ると中央から消えて見える。
+                    _beatPositionImages[i].fillOrigin = isVanishing
+                        ? HORIZONTAL_FILL_ORIGIN_COUNT - 1 - _originalFillOrigins[i]
+                        : _originalFillOrigins[i];
+                }
+            }
+
+            if (!isVanishing)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _beatPositionImages.Length; i++)
+            {
+                _beatPositionImages[i].fillAmount = 1f - vanishRatio;
+            }
+        }
+
+        /// <summary>
+        ///     判定ゾーンのJustの位置が、中央から消えた距離の内側にあるか判定する。
+        /// </summary>
+        /// <param name="zoneIndex"> 判定ゾーンの番号。 </param>
+        /// <param name="vanishDistance"> 中央から消えた距離。 </param>
+        /// <returns> 消えている場合はtrue。 </returns>
+        private bool IsZoneVanished(int zoneIndex, float vanishDistance)
+        {
+            if (zoneIndex < 0 || zoneIndex >= _justStarts.Length)
+            {
+                return false;
+            }
+
+            float justCenter = (_justStarts[zoneIndex] + _justEnds[zoneIndex]) * 0.5f;
+            return _layout.GetPosition(justCenter) <= vanishDistance;
+        }
+
+        /// <summary>
         ///     ジャストタイミング専用のオーバーシュートと色フラッシュを生成する。
         /// </summary>
         /// <param name="index"> 対象ブロック番号。 </param>
@@ -827,17 +981,18 @@ namespace KillChord.Runtime.View.InGame.Music
         private MotionHandle CreateJustTimingMotion(int index, Color beatColor)
         {
             // 各演出の長さは 0 にならないよう下限を設ける。
-            float overshootSizeDelta = _justTimingSizeDelta + Mathf.Max(0f, _effectConfig.JustOvershootAmount);
+            float justSizeDelta = ScaleWave(_justTimingSizeDelta);
+            float overshootSizeDelta = justSizeDelta + Mathf.Max(0f, _effectConfig.JustOvershootAmount) * _waveScale;
             float overshootDuration = Mathf.Max(0.01f, _effectConfig.JustOvershootDuration);
             float returnDuration = Mathf.Max(0.01f, _effectConfig.JustReturnDuration);
             float flashDuration = Mathf.Max(0.01f, _effectConfig.FlashDuration);
 
             // 左右の枠を一度大きく伸ばしながら色をフラッシュさせ、その後で通常の大きさへ戻す。
             return LSequence.Create()
-                .Append(LMotion.Create(_justTimingSizeDelta, overshootSizeDelta, overshootDuration)
+                .Append(LMotion.Create(justSizeDelta, overshootSizeDelta, overshootDuration)
                     .WithEase(_effectConfig.JustOvershootEase)
                     .BindToSizeDeltaY(_leftBeatRectTransforms[index]))
-                .Join(LMotion.Create(_justTimingSizeDelta, overshootSizeDelta, overshootDuration)
+                .Join(LMotion.Create(justSizeDelta, overshootSizeDelta, overshootDuration)
                     .WithEase(_effectConfig.JustOvershootEase)
                     .BindToSizeDeltaY(_rightBeatRectTransforms[index]))
                 .Join(LMotion.Create(_effectConfig.FlashColor, beatColor, flashDuration)
