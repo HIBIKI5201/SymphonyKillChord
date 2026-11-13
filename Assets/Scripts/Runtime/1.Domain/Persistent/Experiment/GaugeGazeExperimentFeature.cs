@@ -28,5 +28,23 @@ namespace KillChord.Runtime.Domain.Persistent.Experiment
 
         /// <summary> リズムゲージの長さを1小節にし、伸びきったあと中央から消えてタイムアウトする。 </summary>
         OneBarGauge = 1 << 5,
+
+        /// <summary> リズムUIの見た目の案：リズムゲージを画面の中央に置く。 </summary>
+        CenteredGauge = 1 << 6,
+
+        /// <summary> リズムUIの見た目の案：ゲージを外側から内側へ向かって伸ばす。 </summary>
+        InwardGauge = 1 << 7,
+
+        /// <summary> リズムUIの見た目の案：1本のバーの横幅を広げ、1小節を24段階にする。 </summary>
+        TwentyFourStepGauge = 1 << 8,
+
+        /// <summary> リズムUIの見た目の案：Justがあるバーを特別なデザインにし、今のJustの範囲のUIをなくす。 </summary>
+        JustBarDesign = 1 << 9,
+
+        /// <summary> リズムUIの見た目の案：旧リズムUIのリング型を大きくして、画面の中央に出す。 </summary>
+        LargeRing = 1 << 10,
+
+        /// <summary> リズムUIの見た目の案：画面全体の外周に沿ったリングを出す。 </summary>
+        ScreenEdgeRing = 1 << 11,
     }
 }

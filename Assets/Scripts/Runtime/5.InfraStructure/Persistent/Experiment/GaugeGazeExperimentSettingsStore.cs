@@ -10,14 +10,14 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Experiment
     public sealed class GaugeGazeExperimentSettingsStore
     {
         /// <summary>
-        ///     保存した設定を読みます。保存していない場合は全ての案を有効にした設定を返します。
+        ///     保存した設定を読みます。保存していない場合は戦闘とゲージの案を有効にし、見た目の案を無効にした設定を返します。
         /// </summary>
         /// <returns> 読んだ設定です。 </returns>
         public GaugeGazeExperimentSettings Load()
         {
             if (!PlayerPrefs.HasKey(PREFS_KEY))
             {
-                return GaugeGazeExperimentSettings.CreateAllEnabled();
+                return GaugeGazeExperimentSettings.CreateDefault();
             }
 
             return new GaugeGazeExperimentSettings((GaugeGazeExperimentFeature)PlayerPrefs.GetInt(PREFS_KEY));
