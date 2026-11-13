@@ -773,7 +773,7 @@ namespace KillChord.Demo
 
 #if KILLCHORD_DEMO_EXHIBITION
         // 展示版はタイマーとデータリセットを有効にした設定を読む。
-        private const string CONFIG_ADDRESS = "DemoExperienceConfig.Exhibition";
+        private const string CONFIG_ADDRESS = "DemoExperienceConfig_Exhibition";
 #else
         private const string CONFIG_ADDRESS = nameof(DemoExperienceConfig);
 #endif
