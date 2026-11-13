@@ -16,10 +16,12 @@ using KillChord.Runtime.Composition.InGame.UI;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
+using KillChord.Runtime.Domain.Persistent.Experiment;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
+using KillChord.Runtime.InfraStructure.Persistent.Experiment;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Identity;
@@ -435,6 +437,9 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 return Array.Empty<SkillExecutionController>();
             }
 
+            // 試遊で切り替えるゲージ注視の改善案のうち、スキル入力のJustボーナスを使うか。
+            bool isJustBonusEnabled = new GaugeGazeExperimentSettingsStore().Load()
+                .IsEnabled(GaugeGazeExperimentFeature.SkillJustBonus);
             List<SkillExecutionController> executionControllers = new List<SkillExecutionController>(equippedSkills.Count);
             for (int i = 0; i < equippedSkills.Count; i++)
             {
@@ -467,7 +472,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                     checkService,
                     view,
                     definition,
-                    rhythmState);
+                    rhythmState,
+                    isJustBonusEnabled);
                 executionControllers.Add(executionController);
             }
 

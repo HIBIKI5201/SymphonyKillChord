@@ -31,7 +31,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             SkillCheckService skillCheckService,
             ISkillVisual skillVisual,
             SkillDefinition skillDefinition,
-            SkillRhythmState skillRhythmState)
+            SkillRhythmState skillRhythmState,
+            bool isJustBonusEnabled = false)
         {
             _presenter = presenter;
             _progressController = progressController;
@@ -41,6 +42,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             _skillVisual = skillVisual;
             _skillDefinition = skillDefinition;
             _skillRhythmState = skillRhythmState;
+            _isJustBonusEnabled = isJustBonusEnabled;
         }
 
         /// <summary>
@@ -67,7 +69,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 _skillRhythmState.Clear();
             }
 
-            _skillRhythmState.Enqueue(beatType, musicTime, battleActionType);
+            _skillRhythmState.Enqueue(beatType, musicTime, battleActionType, isJustHit);
             ReadOnlySpan<BeatType> inputHistory = _skillRhythmState.GetHistoryBeatType();
             bool isInputMatch = _skillCheckService.CheckInput(_skillDefinition, inputHistory);
 
@@ -77,7 +79,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                 return new SkillExecutionResult(SkillExecutionResultType.InputProgressed);
             }
 
-            bool canExecute = _skillUseCase.TryExecuteSkill(_skillDefinition, beatType, isJustHit);
+            float? justBonusEffectRate = CalculateJustBonusEffectRate();
+            bool canExecute = _skillUseCase.TryExecuteSkill(_skillDefinition, beatType, isJustHit, justBonusEffectRate);
             if (canExecute)
             {
                 ExecuteVisual();
@@ -113,6 +116,25 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         {
             _skillRhythmState.Clear();
             _progressController.ResetProgress(now, _skillCooldownState.SkillReadyTimestamp);
+        }
+
+        /// <summary>
+        ///     コマンドの入力のうちJustで入力した割合から、Justボーナスの効果の割合を求めます。
+        /// </summary>
+        /// <returns> 効果の割合です。Justボーナスを使わない場合はnullです。 </returns>
+        private float? CalculateJustBonusEffectRate()
+        {
+            if (!_isJustBonusEnabled)
+            {
+                return null;
+            }
+
+            // 一致したコマンドは入力履歴の新しい方からパターンの長さ分にあたる。
+            int inputCount = _skillDefinition.SkillPattern.Signatures.Length;
+            int justCount = _skillRhythmState.CountRecentJust(inputCount);
+            float effectRate = _skillDefinition.JustBonus.CalculateEffectRate(justCount, inputCount);
+            DevLog.Log($"[{nameof(SkillExecutionController)}] Justボーナス。ID：{_skillDefinition.Id.Value}, Just：{justCount}/{inputCount}, 効果：{effectRate:P0}");
+            return effectRate;
         }
 
         /// <summary>
@@ -153,5 +175,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private readonly ISkillVisual _skillVisual;
         private readonly SkillDefinition _skillDefinition;
         private readonly SkillRhythmState _skillRhythmState;
+        private readonly bool _isJustBonusEnabled;
     }
 }

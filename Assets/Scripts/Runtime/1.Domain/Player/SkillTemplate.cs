@@ -63,6 +63,9 @@ namespace KillChord.Runtime.Domain.Player
         /// <summary> スキル発動時の攻撃硬直（拍数）です。 </summary>
         public AttackRecoveryBeats RecoveryBeats { get; }
 
+        /// <summary> スキル入力のJustの割合で効果を強くする設定です。 </summary>
+        public SkillJustBonus JustBonus { get; }
+
         /// <summary>
         ///     スキルテンプレートを初期化します。
         /// </summary>
@@ -82,6 +85,7 @@ namespace KillChord.Runtime.Domain.Player
         /// <param name="icon"> アウトゲーム画面で表示するアイコンです。 </param>
         /// <param name="effectDisplayMode"> アウトゲーム画面でのスキル効果表示モードです。 </param>
         /// <param name="recoveryBeats"> スキル発動時の攻撃硬直（拍数）です。 </param>
+        /// <param name="justBonus"> スキル入力のJustの割合で効果を強くする設定です。nullの場合は既定値です。 </param>
         public SkillTemplate(
             SkillId id,
             BeatType[] pattern,
@@ -98,7 +102,8 @@ namespace KillChord.Runtime.Domain.Player
             string tips,
             Sprite icon,
             SkillEffectDisplayMode effectDisplayMode,
-            AttackRecoveryBeats recoveryBeats)
+            AttackRecoveryBeats recoveryBeats,
+            SkillJustBonus justBonus = null)
         {
             if (cooldownDenomimator <= 0)
             {
@@ -125,6 +130,7 @@ namespace KillChord.Runtime.Domain.Player
             Icon = icon;
             EffectDisplayMode = effectDisplayMode;
             RecoveryBeats = recoveryBeats;
+            JustBonus = justBonus ?? SkillJustBonus.CreateDefault();
         }
 
         /// <summary>
@@ -144,7 +150,8 @@ namespace KillChord.Runtime.Domain.Player
                 GetEffectSpec(currentLevel),
                 bpm,
                 AnimationKey,
-                RecoveryBeats);
+                RecoveryBeats,
+                JustBonus);
         }
 
         /// <summary>

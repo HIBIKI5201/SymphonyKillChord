@@ -30,8 +30,12 @@ namespace KillChord.Runtime.Application.InGame.Skill
         /// <param name="skillDefinition"> 対象スキルです。 </param>
         /// <param name="beatType"> 入力の拍子種類です。 </param>
         /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうか。 </param>
+        /// <param name="justBonusEffectRate">
+        ///     スキル入力のJustボーナスによる効果の割合です。値がある場合は、強くするパラメータにこの割合を掛け、
+        ///     キルコードのJust倍率は使いません。nullの場合は従来どおり、最後の入力がJustならJust倍率を掛けます。
+        /// </param>
         /// <returns> 発動できた場合はtrue。 </returns>
-        public bool TryExecuteSkill(SkillDefinition skillDefinition, BeatType beatType, bool isJustHit)
+        public bool TryExecuteSkill(SkillDefinition skillDefinition, BeatType beatType, bool isJustHit, float? justBonusEffectRate = null)
         {
             if (!_targetResolver.TryResolveTargets(skillDefinition.EffectSpec.TargetingType, out SkillTargetResolveResult targetResult))
             {
@@ -45,13 +49,18 @@ namespace KillChord.Runtime.Application.InGame.Skill
                     $"対応するスキル実行器が見つかりません。EffectType: {skillDefinition.EffectSpec.EffectType}");
             }
 
+            // Justボーナスがある場合は、強くするパラメータに効果の割合を掛けた効果定義で発動する。
+            SkillEffectSpec effectSpec = justBonusEffectRate.HasValue
+                ? skillDefinition.JustBonus.ApplyTo(skillDefinition.EffectSpec, justBonusEffectRate.Value)
+                : skillDefinition.EffectSpec;
             SkillEffectContext context = new SkillEffectContext(
                 targetResult.PrimaryTargetEntity,
                 _playerEntity,
                 beatType,
                 targetResult.TargetEntities,
-                skillDefinition.EffectSpec,
-                isJustHit);
+                effectSpec,
+                isJustHit,
+                applyJustDamageMultiplier: !justBonusEffectRate.HasValue);
             executor.Execute(context);
             return true;
         }
