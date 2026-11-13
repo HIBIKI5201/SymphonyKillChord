@@ -1,0 +1,62 @@
+name: "[CI/CD] Script Launcher"
+
+# スクリプト管理ツール（ScriptLauncher/）の検査。
+# - 登録ファイルの書き方と、.bat / .command の登録漏れを調べる（登録漏れは警告）。
+# - core の単体テストを Linux と Windows で動かし、Windows では MSVC で exe を作って成果物に置く。
+#   リポジトリに置く ルートの ScriptLauncher.exe は、この成果物か PC の MSVC で作ったものに差し替える。
+on:
+  pull_request:
+    paths:
+      - 'ScriptLauncher/**'
+      - 'scripts/launcher/**'
+      - '**/*.bat'
+      - '**/*.command'
+      - '.github/workflows/ScriptLauncher.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registry:
+    name: 登録ファイルを調べる
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 検査のテスト
+        run: python -m unittest discover -s scripts/launcher -p 'test_*.py'
+      - name: 登録漏れ・書き方の誤りを調べる
+        run: python scripts/launcher/check_launcher_scripts.py
+
+  core-linux:
+    name: core の単体テスト（Linux）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ビルド
+        run: |
+          cmake -S ScriptLauncher -B build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --parallel
+      - name: テスト
+        run: ctest --test-dir build --output-on-failure
+
+  windows:
+    name: Windows でビルド（MSVC）
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ビルド
+        run: |
+          cmake -S ScriptLauncher -B build -A x64
+          cmake --build build --config Release --parallel
+      - name: テスト
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: exe を成果物に置く
+        uses: actions/upload-artifact@v4
+        with:
+          name: ScriptLauncher
+          path: build/Release/ScriptLauncher.exe
+          if-no-files-found: error
