@@ -491,7 +491,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _researchPoint,
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
-            _skillTreeService = new SkillTreeService(_skillNodeEntities);
+            // 体験版などで解放を禁止するノードがある場合だけ、判定が登録されている。
+            ServiceLocator.TryGetInstance(out ISkillNodeLockPolicy skillNodeLockPolicy);
+            _skillTreeService = new SkillTreeService(_skillNodeEntities, skillNodeLockPolicy);
             if (_skillTreeService.AreAllNodesUnlocked())
             {
                 SetAllNodesUnlockedPhasesVisible();

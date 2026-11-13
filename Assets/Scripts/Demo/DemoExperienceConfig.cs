@@ -1,5 +1,6 @@
 using KillChord.Runtime.Utility.Identity;
 using SymphonyFrameWork.Attribute;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Demo
@@ -40,6 +41,31 @@ namespace KillChord.Demo
         /// </summary>
         public string TitleSceneName => _titleSceneName;
 
+        /// <summary>
+        ///     体験版で解放を禁止するスキルノードIDの数値一覧を取得します。
+        ///     未設定の要素は含めません。
+        /// </summary>
+        /// <returns> 解放を禁止するノードIDの数値一覧です。 </returns>
+        public IReadOnlyList<int> GetLockedSkillNodeIdValues()
+        {
+            List<int> values = new List<int>();
+            if (_lockedSkillNodeIds == null)
+            {
+                return values;
+            }
+
+            foreach (DataID nodeId in _lockedSkillNodeIds)
+            {
+                // 未設定の要素は無視する。
+                if (nodeId.Id != 0)
+                {
+                    values.Add(nodeId.Id);
+                }
+            }
+
+            return values;
+        }
+
         [Header("Timer")]
         [SerializeField, Tooltip("オフにすると、ホームタイマーと全体タイマーを表示・計時せず、時間切れによる強制出撃や体験版終了も行いません。")]
         private bool _isTimerEnabled = true;
@@ -66,5 +92,10 @@ namespace KillChord.Demo
 
         [SerializeField, SceneNameSelector, Tooltip("体験版セッションをリセットするタイトルシーンです。DemoEndSequenceConfigと同じシーンを設定します。")]
         private string _titleSceneName = "Title";
+
+        [Header("Skill Tree")]
+        [SerializeField, SourceDataCollection("SkillNode")]
+        [Tooltip("体験版で解放できなくするスキルノードです。このノードを経由しないと届かない先のノードも解放できなくなります。")]
+        private DataID[] _lockedSkillNodeIds;
     }
 }

@@ -19,3 +19,8 @@ MonoBehaviour:
   _isSaveDataResetOnEnd: 1
   _endSceneName: DemoEnd
   _titleSceneName: Title
+  _lockedSkillNodeIds:
+  - _id: node_n2
+    _hashId: 1668731980
+  - _id: node_n3
+    _hashId: 343008474
