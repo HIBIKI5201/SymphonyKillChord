@@ -22,9 +22,11 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.Persistent.Experiment;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Character;
 using KillChord.Runtime.InfraStructure.InGame.Player;
+using KillChord.Runtime.InfraStructure.Persistent.Experiment;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.Utility.Persistent;
@@ -136,6 +138,11 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
         /// <summary> テスト用装備スキルID一覧です。 </summary>
         public SkillId[] EquippedSkillIds => ConvertToSkillIds(_equippedSkills);
+
+        /// <summary> 試遊の案（移動・回避・硬直の調整）で、スキルの攻撃硬直に掛ける倍率です。案が無効なら1です。 </summary>
+        public float SkillRecoveryBeatsRate => _playerConfig != null && IsMovementTuningEnabled()
+            ? _playerConfig.TunedRecoveryBeatsRate
+            : 1f;
 
         /// <summary>
         ///     ServiceLocatorへ自身を登録します。
@@ -313,7 +320,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return;
             }
 
-            PlayerMoveSpec parameter = _playerConfig.ToDomain();
+            // 試遊の案（移動・回避・硬直の調整）が有効なら、調整した値を使う。
+            PlayerMoveSpec parameter = IsMovementTuningEnabled()
+                ? _playerConfig.ToTunedDomain(musicSyncState.Bpm)
+                : _playerConfig.ToDomain();
             ICameraTransform cameraTransform = ServiceLocator.GetInstance<ICameraTransform>();
             PlayerInputView inputView = ServiceLocator.GetInstance<PlayerInputView>();
             if (cameraTransform == null || inputView == null)
@@ -737,6 +747,16 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             characterAnimationView = animator.gameObject.AddComponent<CharacterAnimationView>();
             return characterAnimationView != null;
+        }
+
+        /// <summary>
+        ///     試遊の案（移動・回避・硬直の調整）が有効か判定する。
+        /// </summary>
+        /// <returns> 有効な場合はtrue。 </returns>
+        private static bool IsMovementTuningEnabled()
+        {
+            return new GaugeGazeExperimentSettingsStore().Load()
+                .IsEnabled(GaugeGazeExperimentFeature.MovementTuning);
         }
     }
 }

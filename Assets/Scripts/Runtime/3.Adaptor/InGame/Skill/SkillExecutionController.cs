@@ -32,7 +32,8 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             ISkillVisual skillVisual,
             SkillDefinition skillDefinition,
             SkillRhythmState skillRhythmState,
-            bool isJustBonusEnabled = false)
+            bool isJustBonusEnabled = false,
+            float recoveryBeatsRate = 1f)
         {
             _presenter = presenter;
             _progressController = progressController;
@@ -43,6 +44,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
             _skillDefinition = skillDefinition;
             _skillRhythmState = skillRhythmState;
             _isJustBonusEnabled = isJustBonusEnabled;
+            _recoveryBeats = new AttackRecoveryBeats(skillDefinition.RecoveryBeats.Value * recoveryBeatsRate);
         }
 
         /// <summary>
@@ -97,7 +99,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
                     _skillDefinition.AnimationKey,
                     _skillDefinition.EffectSpec.SkillNormalAttackDamagePolicy,
                     ResolveWeaponBeatType(),
-                    _skillDefinition.RecoveryBeats);
+                    _recoveryBeats);
             }
 
             ResetProgressOnFailure(now);
@@ -176,5 +178,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Skill
         private readonly SkillDefinition _skillDefinition;
         private readonly SkillRhythmState _skillRhythmState;
         private readonly bool _isJustBonusEnabled;
+        /// <summary> 発動時の攻撃硬直（拍数）。試遊の案（移動・回避・硬直の調整）の倍率を掛けたもの。 </summary>
+        private readonly AttackRecoveryBeats _recoveryBeats;
     }
 }

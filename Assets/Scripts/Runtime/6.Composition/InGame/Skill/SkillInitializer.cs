@@ -245,7 +245,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 musicSyncContainer.MusicSyncState,
                 skillResultPresenter,
                 skillCheckService,
-                skillUsecase));
+                skillUsecase,
+                playerModuleContainer.PlayerInitializer));
             _skillController.OnSkillAnimationRequested += playerModuleContainer.PlayerView.PlaySkillAnimation;
 
             // スキル発動中も、その拍に対応した武器を構えさせる。
@@ -430,7 +431,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             MusicSyncState musicSyncState,
             SkillResultPresenter skillResultPresenter,
             SkillCheckService checkService,
-            SkillUseCase skillUsecase)
+            SkillUseCase skillUsecase,
+            PlayerInitializer playerInitializer)
         {
             if (equippedSkills == null || equippedSkills.Count == 0)
             {
@@ -440,6 +442,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             // 試遊で切り替えるゲージ注視の改善案のうち、スキル入力のJustボーナスを使うか。
             bool isJustBonusEnabled = new GaugeGazeExperimentSettingsStore().Load()
                 .IsEnabled(GaugeGazeExperimentFeature.SkillJustBonus);
+            // 試遊の案（移動・回避・硬直の調整）で、スキルの攻撃硬直に掛ける倍率。
+            float recoveryBeatsRate = playerInitializer != null ? playerInitializer.SkillRecoveryBeatsRate : 1f;
             List<SkillExecutionController> executionControllers = new List<SkillExecutionController>(equippedSkills.Count);
             for (int i = 0; i < equippedSkills.Count; i++)
             {
@@ -473,7 +477,8 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                     view,
                     definition,
                     rhythmState,
-                    isJustBonusEnabled);
+                    isJustBonusEnabled,
+                    recoveryBeatsRate);
                 executionControllers.Add(executionController);
             }
 
