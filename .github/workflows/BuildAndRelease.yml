@@ -1485,11 +1485,14 @@ jobs:
       - name: Android 署名鍵の準備
         # Google Play はデバッグ署名の APK/AAB を受け付けないため、Android はアップロード鍵で署名する。
         # 鍵は Secret ANDROID_KEYSTORE_BASE64（base64）をランナーの一時フォルダへ復元するか、
-        # 変数 ANDROID_KEYSTORE_PATH（ランナーPC上の鍵ファイルの絶対パス）を使う。パスワードは Unity ビルドの手順にだけ渡す。
+        # 変数 ANDROID_KEYSTORE_PATH（ランナーPC上の鍵ファイルの絶対パス）を使う。
+        # パスワードは keytool で鍵が開けるかを確かめるためだけに使い、値はログに出さない。
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PATH: ${{ vars.ANDROID_KEYSTORE_PATH }}
-          # パスワードの値はこの手順へ渡さず、登録されているかだけを見る。
+          SKC_CHECK_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          SKC_CHECK_KEYALIAS_NAME: ${{ secrets.ANDROID_KEYALIAS_NAME || vars.ANDROID_KEYALIAS_NAME }}
+          SKC_CHECK_KEYALIAS_PASS: ${{ secrets.ANDROID_KEYALIAS_PASS }}
           HAS_ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS != '' }}
           HAS_ANDROID_KEYALIAS_NAME: ${{ secrets.ANDROID_KEYALIAS_NAME != '' || vars.ANDROID_KEYALIAS_NAME != '' }}
           HAS_ANDROID_KEYALIAS_PASS: ${{ secrets.ANDROID_KEYALIAS_PASS != '' }}
@@ -1542,8 +1545,6 @@ jobs:
             exit 0
           }
 
-          "SKC_ANDROID_KEYSTORE_PATH=$KeystorePath" | Add-Content -Path $env:GITHUB_ENV
-
           # 鍵のほかに要る Secret が、このジョブから見えているかを確かめる。
           # 名前の違い・Variables への登録・別の Environment への登録だと、ここで空になる。
           $Missing = @()
@@ -1559,7 +1560,61 @@ jobs:
             }
           } else {
             Write-Host "[INFO]: 署名に要る Secret はすべて登録されています。"
+
+            # 鍵・別名・パスワードの組み合わせで本当に鍵が開けるかを、Unity ビルドの前に確かめる。
+            # 合わないと Gradle の signReleaseBundle で約1時間後に失敗し、理由もログに残らないため。
+            $Keytool = $null
+            if ($env:UNITY_EXE_PATH) {
+              $EditorDir = Split-Path $env:UNITY_EXE_PATH -Parent
+              $Candidates = @(
+                (Join-Path $EditorDir 'Data/PlaybackEngines/AndroidPlayer/OpenJDK/bin/keytool.exe'),
+                (Join-Path (Split-Path $EditorDir -Parent) 'PlaybackEngines/AndroidPlayer/OpenJDK/bin/keytool.exe')
+              )
+              $Keytool = $Candidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+            }
+            if (-not $Keytool) {
+              $Command = Get-Command keytool -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+              if ($Command) { $Keytool = $Command.Source }
+            }
+
+            if (-not $Keytool) {
+              Write-Host "[WARN]: keytool が見つからないため、署名鍵が開けるかの確認を省略します。"
+            } else {
+              # パスワードはコマンドラインに載せず、:env で環境変数から読ませる。
+              # keytool の標準エラーを例外にしないよう、この間だけ Continue にする。
+              $PreviousErrorAction = $ErrorActionPreference
+              $ErrorActionPreference = 'Continue'
+              $KeyCheckErrors = @()
+              $ListOutput = & $Keytool -list -keystore $KeystorePath -storepass:env SKC_CHECK_KEYSTORE_PASS -alias $env:SKC_CHECK_KEYALIAS_NAME 2>&1 | Out-String
+              if ($LASTEXITCODE -ne 0) {
+                $KeyCheckErrors += "鍵ファイル・ANDROID_KEYSTORE_PASS・ANDROID_KEYALIAS_NAME の組み合わせで開けません（keytool: $($ListOutput.Trim())）"
+              } else {
+                # 秘密鍵まで読めるかを、署名要求を作って確かめる（ANDROID_KEYALIAS_PASS の確認）。
+                $CsrPath = Join-Path $env:RUNNER_TEMP 'skc-keycheck.csr'
+                $CsrOutput = & $Keytool -certreq -keystore $KeystorePath -storepass:env SKC_CHECK_KEYSTORE_PASS -alias $env:SKC_CHECK_KEYALIAS_NAME -keypass:env SKC_CHECK_KEYALIAS_PASS -file $CsrPath 2>&1 | Out-String
+                if ($LASTEXITCODE -ne 0) {
+                  $KeyCheckErrors += "ANDROID_KEYALIAS_PASS で秘密鍵を読めません（keytool: $($CsrOutput.Trim())）"
+                }
+                Remove-Item -LiteralPath $CsrPath -Force -ErrorAction SilentlyContinue
+              }
+              $ErrorActionPreference = $PreviousErrorAction
+
+              if ($KeyCheckErrors.Count -gt 0) {
+                $KeyCheckText = $KeyCheckErrors -join ' / '
+                if ($env:BUILD_MODE -eq 'Master') {
+                  Write-Host "::error::署名鍵を開けません: $KeyCheckText。Secret の値（前後の空白・改行も含む）と、ANDROID_KEYSTORE_BASE64 の元のファイルを確かめてください。Android はビルドしません。"
+                  Write-Host "::endgroup::"
+                  exit 1
+                }
+                Write-Host "[WARN]: 署名鍵を開けないため、Android はデバッグ署名でビルドします: $KeyCheckText"
+                Write-Host "::endgroup::"
+                exit 0
+              }
+              Write-Host "[INFO]: 署名鍵・別名・パスワードの組み合わせで鍵を開けることを確かめました。"
+            }
           }
+
+          "SKC_ANDROID_KEYSTORE_PATH=$KeystorePath" | Add-Content -Path $env:GITHUB_ENV
           Write-Host "::endgroup::"
 
 # ==================================================================================================
