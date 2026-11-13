@@ -1,7 +1,7 @@
 // unity-preflight.mjs の判定部分のテスト。Unity は使わない。
 import assert from "node:assert/strict";
 import test from "node:test";
-import { extractEvalResult, findGuardedCommand, parseProbe } from "./unity-preflight.mjs";
+import { extractEvalResult, findGuardedCommand, parseProbe, readHookCommand } from "./unity-preflight.mjs";
 
 test("Unity でコンパイル・テスト・Play を始める呼び出しを見つける", () => {
     assert.equal(findGuardedCommand("unity recompile --project-path C:/p --format json"), "recompile");
@@ -36,6 +36,22 @@ test("eval の出力から C# の戻り値を取り出す", () => {
     assert.equal(extractEvalResult(JSON.stringify({ success: true, data: { result: "x" } })), "x");
     assert.equal(extractEvalResult(JSON.stringify({ success: false, result: "x" })), null);
     assert.equal(extractEvalResult("not json"), null);
+});
+
+test("Unity CLI 1.0.0-beta.17・Pipeline 1.0.0 の実際の eval 出力を読む", () => {
+    // `unity command script eval --result-only -- --code 'return "playing=0";'` の標準出力そのまま。
+    assert.equal(extractEvalResult("\"playing=0\"\n"), "playing=0");
+    // 複数行の戻り値は JSON 文字列の \n で来る。
+    assert.equal(extractEvalResult("\"playing=0\\nScene: Assets/A.unity\"\n"), "playing=0\nScene: Assets/A.unity");
+});
+
+test("hook の標準入力からコマンドを読む", () => {
+    const input = JSON.stringify({ tool_input: { command: "unity recompile" } });
+    assert.equal(readHookCommand(input), "unity recompile");
+    // Windows PowerShell 5.1 のパイプは BOM と CRLF を付ける。
+    assert.equal(readHookCommand(`\uFEFF${input}\r\n`), "unity recompile");
+    assert.equal(readHookCommand("not json"), null);
+    assert.equal(readHookCommand("{}"), null);
 });
 
 test("Unity の状態から止まる理由を作る", () => {

@@ -67,6 +67,14 @@ export function extractEvalResult(stdout) {
     return null;
 }
 
+/**
+ * hook の標準入力（PreToolUse の JSON）から Bash コマンドを取り出す。読めなければ null。
+ * Windows PowerShell 5.1 のパイプは先頭に BOM を付けるので、外してから読む。
+ */
+export function readHookCommand(text) {
+    try { return JSON.parse(String(text ?? "").replace(/^\uFEFF/, ""))?.tool_input?.command ?? null; } catch { return null; }
+}
+
 /** 調べた結果から、止まる理由を返す。問題がなければ空の配列。 */
 export function parseProbe(result) {
     const lines = String(result ?? "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
@@ -111,9 +119,7 @@ async function readStdin() {
 async function main() {
     let tool = null;
     if (process.argv.includes("--hook")) {
-        let input = {};
-        try { input = JSON.parse(await readStdin()); } catch { return 0; }
-        tool = findGuardedCommand(input?.tool_input?.command);
+        tool = findGuardedCommand(readHookCommand(await readStdin()));
         if (!tool) { return 0; }
     }
     const reasons = probeUnity();
