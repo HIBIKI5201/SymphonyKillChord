@@ -1486,6 +1486,10 @@ jobs:
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PATH: ${{ vars.ANDROID_KEYSTORE_PATH }}
+          # パスワードの値はこの手順へ渡さず、登録されているかだけを見る。
+          HAS_ANDROID_KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS != '' }}
+          HAS_ANDROID_KEYALIAS_NAME: ${{ secrets.ANDROID_KEYALIAS_NAME != '' || vars.ANDROID_KEYALIAS_NAME != '' }}
+          HAS_ANDROID_KEYALIAS_PASS: ${{ secrets.ANDROID_KEYALIAS_PASS != '' }}
         run: |
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -1536,6 +1540,23 @@ jobs:
           }
 
           "SKC_ANDROID_KEYSTORE_PATH=$KeystorePath" | Add-Content -Path $env:GITHUB_ENV
+
+          # 鍵のほかに要る Secret が、このジョブから見えているかを確かめる。
+          # 名前の違い・Variables への登録・別の Environment への登録だと、ここで空になる。
+          $Missing = @()
+          if ($env:HAS_ANDROID_KEYSTORE_PASS -ne 'true') { $Missing += 'ANDROID_KEYSTORE_PASS' }
+          if ($env:HAS_ANDROID_KEYALIAS_NAME -ne 'true') { $Missing += 'ANDROID_KEYALIAS_NAME' }
+          if ($env:HAS_ANDROID_KEYALIAS_PASS -ne 'true') { $Missing += 'ANDROID_KEYALIAS_PASS' }
+          if ($Missing.Count -gt 0) {
+            $MissingText = $Missing -join '、'
+            if ($env:BUILD_MODE -eq 'Master') {
+              Write-Host "::error::署名に要る Secret がこのジョブから見えません: $MissingText。リポジトリの Secrets（Actions）か Environment「AutoBuildAndRelease」の Secrets に、この名前で登録してください。Android はビルドされません。"
+            } else {
+              Write-Host "[WARN]: 署名に要る Secret が見えないため、Android はデバッグ署名でビルドします: $MissingText"
+            }
+          } else {
+            Write-Host "[INFO]: 署名に要る Secret はすべて登録されています。"
+          }
           Write-Host "::endgroup::"
 
 # ==================================================================================================

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -34,24 +35,24 @@ namespace KillChord.Editor.AutoBuilder
                 "true",
                 StringComparison.OrdinalIgnoreCase);
 
-            bool hasAllValues = !string.IsNullOrEmpty(keystorePath)
-                && !string.IsNullOrEmpty(keystorePass)
-                && !string.IsNullOrEmpty(keyaliasName)
-                && !string.IsNullOrEmpty(keyaliasPass);
+            // 空の環境変数の名前を集める。値はログに出さない。
+            string missingNames = string.Join("・", new[]
+            {
+                string.IsNullOrEmpty(keystorePath) ? KEYSTORE_PATH_ENV : null,
+                string.IsNullOrEmpty(keystorePass) ? KEYSTORE_PASS_ENV : null,
+                string.IsNullOrEmpty(keyaliasName) ? KEYALIAS_NAME_ENV : null,
+                string.IsNullOrEmpty(keyaliasPass) ? KEYALIAS_PASS_ENV : null,
+            }.Where(name => name != null));
 
-            if (!hasAllValues)
+            if (missingNames.Length > 0)
             {
                 if (isRequired)
                 {
-                    Debug.LogError(
-                        $"[{nameof(AndroidReleaseSigning)}] {profileName} はリリース署名が必須ですが、署名の設定が足りません。" +
-                        $"{KEYSTORE_PATH_ENV}・{KEYSTORE_PASS_ENV}・{KEYALIAS_NAME_ENV}・{KEYALIAS_PASS_ENV} を確認してください。" +
-                        "デバッグ署名の APK/AAB は Google Play に提出できないため、ビルドを止めます。");
+                    Debug.LogError($"[{nameof(AndroidReleaseSigning)}] {profileName} はリリース署名が必須ですが、次の設定が空です: {missingNames}。デバッグ署名の APK/AAB は Google Play に提出できないため、ビルドを止めます。");
                     return false;
                 }
 
-                Debug.LogWarning(
-                    $"[{nameof(AndroidReleaseSigning)}] {profileName} は署名の設定が無いため、デバッグ署名でビルドします。");
+                Debug.LogWarning($"[{nameof(AndroidReleaseSigning)}] {profileName} は署名の設定が空のため（{missingNames}）、デバッグ署名でビルドします。");
                 return true;
             }
 
@@ -64,9 +65,7 @@ namespace KillChord.Editor.AutoBuilder
                     return false;
                 }
 
-                Debug.LogWarning(
-                    $"[{nameof(AndroidReleaseSigning)}] {profileName} の署名に使う鍵ファイルが見つからないため、" +
-                    $"デバッグ署名でビルドします: {keystorePath}");
+                Debug.LogWarning($"[{nameof(AndroidReleaseSigning)}] {profileName} の署名に使う鍵ファイルが見つからないため、デバッグ署名でビルドします: {keystorePath}");
                 return true;
             }
 
