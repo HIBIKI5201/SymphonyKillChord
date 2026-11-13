@@ -139,6 +139,31 @@ gh workflow run BuildAndRelease.yml --repo HIBIKI5201/SymphonyKillChord --ref de
 - `clean_build=true` を付けると Unity の Library を消して作り直す。トラブルのときだけ使う（Windows でも1時間以上延びる）。
 - タイムアウト: Android は 180 分、ほかは 120 分。
 
+## Android の署名
+
+Google Play はデバッグ署名の AAB/APK を受け付けない。Master の Android はアップロード鍵で署名し、鍵の設定が無いときは Android をビルドせずに失敗にする（Development はデバッグ署名のまま）。
+
+GitHub の Environment `AutoBuildAndRelease`（または リポジトリ）の Secrets・Variables に次を登録する。パスワードはここ以外に書かない。
+
+| 名前 | 種類 | 中身 |
+|---|---|---|
+| `ANDROID_KEYSTORE_BASE64` | Secret | 鍵ファイル（`.jks` / `.keystore`）を base64 にした文字列。`ANDROID_KEYSTORE_PATH` を使うなら不要 |
+| `ANDROID_KEYSTORE_PATH` | Variable | ランナーPC上の鍵ファイルの絶対パス（例: `C:\Users\…\Keys\upload.jks`）。鍵を GitHub に預けたくないときに使う。両方あれば Secret を優先 |
+| `ANDROID_KEYSTORE_PASS` | Secret | 鍵ファイルのパスワード |
+| `ANDROID_KEYALIAS_NAME` | Secret または Variable | 鍵の別名 |
+| `ANDROID_KEYALIAS_PASS` | Secret | 別名のパスワード |
+
+base64 にするには PowerShell で次を実行し、出たファイルの中身を Secret に貼る（ファイルは貼ったら消す）。
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\path\to\upload.jks")) | Set-Content upload.b64
+```
+
+- 名前は表のとおりに登録する。名前が違う、Secret でなく Variable にした（`ANDROID_KEYALIAS_NAME` 以外）、別の Environment に入れた、のどれかだとジョブから見えない。「Android 署名鍵の準備」の手順が、見えない名前を出す。
+- Secret から復元した鍵はランナーの一時フォルダに置き、ビルド後に消す。
+- Unity にはビルドの直前に環境変数（`SKC_ANDROID_KEYSTORE_PATH` など）で渡し、ビルド後に元の Player Settings に戻す。ProjectSettings には保存しない。
+- 手元の AutoBuilder でも、同じ環境変数を設定して Unity を起動すれば署名される。
+
 ## 作業フォルダを短い場所に移す
 
 Windows だけの話（macOS にはパスの長さの上限がないので不要）。ふだんは不要（パスが長くても、ワークフローが短い別名を作って Unity を起動する）。ビルドが「短い別名（…）を作ろうとしましたが、失敗しました」というエラーで止まったときだけ、作業フォルダを短い場所に移す。登録し直す必要はない。

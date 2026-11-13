@@ -109,6 +109,15 @@ namespace KillChord.Runtime.Adaptor.Persistent.Load
         }
 
         /// <summary>
+        ///     ロード開始時の暗転が終わり、画面が覆われたことを表示側から通知する。
+        ///     ロード処理はこの通知を待ってから遷移元のシーンを触る。
+        /// </summary>
+        public void NotifyScreenCovered()
+        {
+            _activeSession?.MarkScreenCovered();
+        }
+
+        /// <summary>
         ///     セッションから通知された進捗を反映する。
         /// </summary>
         /// <param name="session"> 通知元セッション。 </param>
@@ -214,7 +223,6 @@ namespace KillChord.Runtime.Adaptor.Persistent.Load
             {
                 _owner = owner
                     ?? throw new ArgumentNullException(nameof(owner));
-                _beginTimestamp = Stopwatch.GetTimestamp();
             }
 
             /// <summary>
@@ -267,17 +275,52 @@ namespace KillChord.Runtime.Adaptor.Persistent.Load
 
             /// <summary>
             ///     ロード開始時の暗転が終わり、画面が覆われるまで待つ。
+            ///     表示側からの通知を待ち、覆われた画面を1フレーム描画してから返す。
+            ///     通知が来ない場合に備え、暗転時間に余裕を足した実時間で打ち切る。
             /// </summary>
             /// <param name="cancellationToken"> キャンセルトークン。 </param>
             /// <returns> 画面が覆われるまでを表すタスク。 </returns>
-            public Task WaitUntilScreenCoveredAsync(CancellationToken cancellationToken)
+            public async Task WaitUntilScreenCoveredAsync(CancellationToken cancellationToken)
             {
                 if (_isEnded)
                 {
-                    return Task.CompletedTask;
+                    return;
                 }
 
-                return _owner.WaitForScreenFadeAsync(_beginTimestamp, cancellationToken);
+                if (!_screenCoveredSource.Task.IsCompleted)
+                {
+                    using var timeoutSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    double timeout = _owner._screenFadeDuration + SCREEN_COVER_TIMEOUT_MARGIN;
+                    Task timeoutTask = UniTask.Delay(
+                            TimeSpan.FromSeconds(timeout),
+                            DelayType.Realtime,
+                            cancellationToken: timeoutSource.Token)
+                        .AsTask();
+
+                    Task finishedTask = await Task.WhenAny(_screenCoveredSource.Task, timeoutTask);
+                    if (finishedTask == timeoutTask)
+                    {
+                        // キャンセルされた場合はここで例外として伝える。
+                        await timeoutTask;
+                        UnityEngine.Debug.LogWarning(
+                            $"[{nameof(LoadingScreenController)}] 暗転完了の通知が {timeout} 秒以内に来なかったため、ロード処理を進めます。");
+                    }
+                    else
+                    {
+                        timeoutSource.Cancel();
+                    }
+                }
+
+                // 覆われた画面が描画されてから遷移元のシーンを触る。
+                await UniTask.NextFrame(cancellationToken);
+            }
+
+            /// <summary>
+            ///     画面が覆われたことを記録する。
+            /// </summary>
+            public void MarkScreenCovered()
+            {
+                _screenCoveredSource.TrySetResult(true);
             }
 
             /// <summary>
@@ -303,8 +346,12 @@ namespace KillChord.Runtime.Adaptor.Persistent.Load
                 _owner.End(this, success);
             }
 
+            /// <summary> 暗転完了の通知を待つ時間に、暗転時間へ足す余裕（秒）。 </summary>
+            private const double SCREEN_COVER_TIMEOUT_MARGIN = 1d;
+
             private readonly LoadingScreenController _owner;
-            private readonly long _beginTimestamp;
+            private readonly TaskCompletionSource<bool> _screenCoveredSource =
+                new(TaskCreationOptions.RunContinuationsAsynchronously);
             private bool _isEnded;
 
         }

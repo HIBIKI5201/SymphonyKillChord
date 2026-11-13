@@ -16,10 +16,10 @@ LIMITS = {
     "Docs/agent/README.md": 4500,
 }
 # Skill descriptions stay in every session's listing; bodies load only when used.
-# uloop-* skills are installed by the uloop tool and are not edited here.
+# Skills the Unity CLI installs (`unity skill install --local`) are not edited here.
 DESCRIPTION_LIMIT = 300
 DESCRIPTION_DIRS = [".claude/skills", ".agents/skills", ".codex/skills"]
-VENDOR_PREFIX = "uloop-"
+VENDOR_PREFIXES = ("unity-", "new-unity-project")
 LINKED = [
     "AGENTS.md", "Assets/Scripts/DesignPhilosophy.md",
     "Assets/Scripts/CodeGuidelines.md",
@@ -123,7 +123,7 @@ def validate_descriptions(root, metrics):
             if description is None:
                 continue
             total += len(description)
-            if not path.parent.name.startswith(VENDOR_PREFIX) and len(description) > DESCRIPTION_LIMIT:
+            if not path.parent.name.startswith(VENDOR_PREFIXES) and len(description) > DESCRIPTION_LIMIT:
                 errors.append(f"description too long: {path.relative_to(root)}: "
                               f"{len(description)} > {DESCRIPTION_LIMIT} characters")
         metrics[f"{directory} descriptions (total)"] = total

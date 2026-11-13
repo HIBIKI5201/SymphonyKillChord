@@ -1,4 +1,5 @@
 {
   "SetupVersion": 2,
-  "RepositoryFolderName": "SymphonyKillChord"
+  "RepositoryFolderName": "SymphonyKillChord",
+  "RequiredSubmodules": ["Assets/AssetStoreTools"]
 }
