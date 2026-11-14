@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.SceneManagement;
+using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFrameWork.Attribute;
@@ -153,6 +154,11 @@ namespace KillChord.Runtime.Composition.Persistent
             string firstSceneName = _firstSceneName;
             try
             {
+#if UNITY_EDITOR
+                // 保存していない空のシーンからPlayしたとき、そのシーンのカメラが残らないように破棄する。
+                await UntitledSceneUnloader.UnloadAsync(_cancellationTokenSource.Token);
+#endif
+
                 bool success = await controller.LoadAdditiveAsync(
                     firstSceneName,
                     _cancellationTokenSource.Token);
