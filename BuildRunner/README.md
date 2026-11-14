@@ -173,6 +173,7 @@ base64 にするには PowerShell で次を実行し、出たファイルの中�
 ```
 
 - 名前は表のとおりに登録する。名前が違う、Secret でなく Variable にした（`ANDROID_KEYALIAS_NAME` 以外）、別の Environment に入れた、のどれかだとジョブから見えない。「Android 署名鍵の準備」の手順が、見えない名前を出す。
+- 「Android 署名鍵の準備」の手順は、Unity ビルドの前に keytool で鍵ファイル・別名・パスワードの組み合わせで鍵が開けるかを確かめる。開けないと Master は Android をビルドせずに失敗にし（Development はデバッグ署名でビルドする）、keytool の理由（パスワードが違う・別名が無いなど）を出す。値はログに出さない。
 - Secret から復元した鍵はランナーの一時フォルダに置き、ビルド後に消す。
 - Unity にはビルドの直前に環境変数（`SKC_ANDROID_KEYSTORE_PATH` など）で渡し、ビルド後に元の Player Settings に戻す。ProjectSettings には保存しない。
 - 手元の AutoBuilder でも、同じ環境変数を設定して Unity を起動すれば署名される。
