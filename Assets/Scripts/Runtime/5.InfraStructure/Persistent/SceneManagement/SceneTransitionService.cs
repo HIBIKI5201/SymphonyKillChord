@@ -428,9 +428,12 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             {
                 Scene scene = SceneManager.GetSceneAt(i);
 
+                // 名前の無いシーンやSceneLoaderが追跡していないシーンはActiveにできないため除く。
                 if (!scene.IsValid()
                     || !scene.isLoaded
-                    || string.Equals(scene.name, reloadSceneName, StringComparison.Ordinal))
+                    || string.IsNullOrEmpty(scene.name)
+                    || string.Equals(scene.name, reloadSceneName, StringComparison.Ordinal)
+                    || !SceneLoader.GetExistScene(scene.name, out _))
                 {
                     continue;
                 }
