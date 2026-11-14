@@ -507,6 +507,8 @@ jobs:
           $Workspace = "${{ github.workspace }}"
           $CleanBuild = $env:CLEAN_BUILD -eq 'true'
           $MinimumBuildFreeSpaceGB = 40
+          # Library を残すときも、ビルド中の Library の増分・成果物・Gradle のために最低限この空きを要る。
+          $MinimumFreeSpaceWithLibraryGB = 15
           Write-Host "対象プロジェクトフォルダ: $Workspace"
           Write-Host "[INFO]: clean_build = $CleanBuild"
 
@@ -519,8 +521,18 @@ jobs:
                 $WorkspaceDrive = (Get-Item -LiteralPath $Workspace).PSDrive
                 $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
                 $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
-                $ShouldRemoveLibrary = $CleanBuild -or $FreeSpaceGB -lt $MinimumBuildFreeSpaceGB
-                Write-Host "[INFO]: クリーンアップ前の空き容量: $FreeSpaceGB GB（ビルド開始必要量: $MinimumBuildFreeSpaceGB GB）"
+                # 40 GB は Library を一から作るときの必要量。Library が残っていれば、その大きさのぶんは作り直さずに済むので、
+                # 「空き + Library の大きさ」で判定する。消すと毎回1時間ほどかけて作り直しになるため。
+                $LibraryGB = 0
+                $ExistingLibraryPath = Join-Path $Workspace 'Library'
+                if (-not $CleanBuild -and (Test-Path -LiteralPath $ExistingLibraryPath)) {
+                  $LibraryBytes = (Get-ChildItem -LiteralPath $ExistingLibraryPath -Recurse -File -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+                  $LibraryGB = [Math]::Round([double]$LibraryBytes / 1GB, 2)
+                }
+                $ShouldRemoveLibrary = $CleanBuild -or
+                  ($FreeSpaceGB + $LibraryGB) -lt $MinimumBuildFreeSpaceGB -or
+                  $FreeSpaceGB -lt $MinimumFreeSpaceWithLibraryGB
+                Write-Host "[INFO]: クリーンアップ前の空き容量: $FreeSpaceGB GB、既存の Library: $LibraryGB GB（ビルド開始必要量: 空き + Library で $MinimumBuildFreeSpaceGB GB、かつ空き $MinimumFreeSpaceWithLibraryGB GB 以上）"
 
                 if ($ShouldRemoveLibrary) {
                   if ($CleanBuild) {
@@ -545,7 +557,8 @@ jobs:
                 $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
                 $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
                 Write-Host "[INFO]: クリーンアップ後の空き容量: $FreeSpaceGB GB"
-                if ($FreeSpaceGB -lt $MinimumBuildFreeSpaceGB) {
+                $RemainingLibraryGB = if ($ShouldRemoveLibrary) { 0 } else { $LibraryGB }
+                if (($FreeSpaceGB + $RemainingLibraryGB) -lt $MinimumBuildFreeSpaceGB -or $FreeSpaceGB -lt $MinimumFreeSpaceWithLibraryGB) {
                   Write-Host "[ERROR]: Library 清掃後も必要な空き容量 $MinimumBuildFreeSpaceGB GBを確保できません。"
                   exit 1
                 }
@@ -1107,7 +1120,16 @@ jobs:
           Write-Host "プロジェクトが配置されているドライブ ($($WorkspaceDrive.Name):) の残り空き容量: $FreeSpaceGB GB"
 
           $MinRequiredGB = 40
-          if ($FreeSpaceGB -lt $MinRequiredGB) {
+          # 事前クリーンアップと同じく、残っている Library の大きさを空きに足して判定する（作り直さずに済むぶん）。
+          $MinFreeWithLibraryGB = 15
+          $KeptLibraryPath = Join-Path "${{ github.workspace }}" 'Library'
+          $KeptLibraryGB = 0
+          if (Test-Path -LiteralPath $KeptLibraryPath) {
+            $KeptLibraryBytes = (Get-ChildItem -LiteralPath $KeptLibraryPath -Recurse -File -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+            $KeptLibraryGB = [Math]::Round([double]$KeptLibraryBytes / 1GB, 2)
+            Write-Host "[INFO]: 残っている Library: $KeptLibraryGB GB"
+          }
+          if (($FreeSpaceGB + $KeptLibraryGB) -lt $MinRequiredGB -or $FreeSpaceGB -lt $MinFreeWithLibraryGB) {
             $WorkspaceRoot = [System.IO.Path]::GetFullPath("${{ github.workspace }}").TrimEnd(
               [System.IO.Path]::DirectorySeparatorChar,
               [System.IO.Path]::AltDirectorySeparatorChar)
@@ -1124,10 +1146,11 @@ jobs:
               $DriveInfo = Get-PSDrive -Name $WorkspaceDrive.Name
               $FreeSpaceGB = [Math]::Round($DriveInfo.Free / 1GB, 2)
               Write-Host "[INFO]: Library 清掃後の空き容量: $FreeSpaceGB GB"
+              $KeptLibraryGB = 0
             }
           }
 
-          if ($FreeSpaceGB -lt $MinRequiredGB) {
+          if (($FreeSpaceGB + $KeptLibraryGB) -lt $MinRequiredGB -or $FreeSpaceGB -lt $MinFreeWithLibraryGB) {
             Write-Host "[ERROR]: ビルドに必要な空き容量 $MinRequiredGB GBを確保できません。現在の空き容量: $FreeSpaceGB GB"
             exit 1
           } else {
