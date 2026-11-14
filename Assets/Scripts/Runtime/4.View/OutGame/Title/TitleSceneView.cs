@@ -6,6 +6,7 @@ using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Localization;
 using LitMotion;
+using R3;
 using System;
 using System.Threading;
 using TMPro;
@@ -125,7 +126,8 @@ namespace KillChord.Runtime.View.OutGame.Title
         ///     開始案内の決定ボタンの画像を、現在の入力機器のアイコンへ切り替えます。
         /// </summary>
         /// <param name="spriteAsset"> 入力アイコンを収めたSprite Assetです。nullの場合はUXMLの画像のままにします。 </param>
-        public void BindStartButtonGlyph(TMP_SpriteAsset spriteAsset)
+        /// <param name="isJapaneseButtonLayout"> ゲームパッドのボタン配置が日本式かです。nullの場合は既定の日本式として表示します。 </param>
+        public void BindStartButtonGlyph(TMP_SpriteAsset spriteAsset, ReadOnlyReactiveProperty<bool> isJapaneseButtonLayout)
         {
             _startButtonGlyph?.Dispose();
             _startButtonGlyph = null;
@@ -137,7 +139,7 @@ namespace KillChord.Runtime.View.OutGame.Title
 
             Image icon = _instructionElement.Q<Image>(START_BUTTON_ICON_NAME)
                 ?? throw new NullReferenceException($"{nameof(TitleSceneView)}: {START_BUTTON_ICON_NAME}の取得に失敗しました。");
-            _startButtonGlyph = new InputGlyphImage(icon, spriteAsset, START_BUTTON_GLYPH_KEY);
+            _startButtonGlyph = new InputGlyphImage(icon, spriteAsset, START_BUTTON_GLYPH_KEY, isJapaneseButtonLayout);
         }
 
         /// <inheritdoc />

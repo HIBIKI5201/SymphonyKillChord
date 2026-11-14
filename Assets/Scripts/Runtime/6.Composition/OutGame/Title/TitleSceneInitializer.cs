@@ -220,7 +220,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             _boundTitleRoot = titleRoot;
             _titleSceneView = new(titleRoot, _outGameUIEvent, _titleStartController, _currentSceneName, _targetSceneName);
-            _titleSceneView.BindStartButtonGlyph(_inputGlyphSpriteAsset);
+            _titleSceneView.BindStartButtonGlyph(
+                _inputGlyphSpriteAsset,
+                _environmentSettingsContainer?.ViewModel?.IsJapaneseButtonLayout);
             InitializeIdleVideo(titleRoot);
 
             HierarchicalNavigationScope creditNavgationScope = new(creditRoot);
