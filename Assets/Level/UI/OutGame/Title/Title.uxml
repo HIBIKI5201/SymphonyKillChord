@@ -10,7 +10,7 @@
                 <ui:Label text="- Tap to Start -" name="MobileInstruction" picking-mode="Ignore" class="title-start-text" style="display: none;"/>
                 <ui:VisualElement name="ControllerInstruction" picking-mode="Ignore" class="title-controller-instruction">
                     <ui:Label text="Press" picking-mode="Ignore" class="title-start-text"/>
-                    <ui:Image name="ConfirmButtonIcon" source="project://database/Assets/AssetStoreTools/Input Sprites for TextMesh Pro/all_input.png?fileID=-725581648&amp;guid=069a00c4a21d8654bbe27600f3ba7103&amp;type=3#xa" picking-mode="Ignore" class="title-start-button-icon"/>
+                    <ui:Image name="ConfirmButtonIcon" source="project://database/Assets/AssetStoreTools/Input Sprites for TextMesh Pro/all_input.png?fileID=-666183619&amp;guid=069a00c4a21d8654bbe27600f3ba7103&amp;type=3#xb" picking-mode="Ignore" class="title-start-button-icon"/>
                     <ui:Label text="To Start" picking-mode="Ignore" class="title-start-text"/>
                 </ui:VisualElement>
             </ui:VisualElement>

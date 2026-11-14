@@ -126,7 +126,7 @@ namespace KillChord.Runtime.View.OutGame.Title
         ///     開始案内の決定ボタンの画像を、現在の入力機器のアイコンへ切り替えます。
         /// </summary>
         /// <param name="spriteAsset"> 入力アイコンを収めたSprite Assetです。nullの場合はUXMLの画像のままにします。 </param>
-        /// <param name="isJapaneseButtonLayout"> ゲームパッドのボタン配置が日本式かです。nullの場合は既定の海外式として表示します。 </param>
+        /// <param name="isJapaneseButtonLayout"> ゲームパッドのボタン配置が日本式かです。nullの場合は既定の日本式として表示します。 </param>
         public void BindStartButtonGlyph(TMP_SpriteAsset spriteAsset, ReadOnlyReactiveProperty<bool> isJapaneseButtonLayout)
         {
             _startButtonGlyph?.Dispose();

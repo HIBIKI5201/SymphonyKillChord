@@ -111,7 +111,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
 
         /// <summary>
         ///     ゲームパッドの決定・キャンセルの配置を環境設定に合わせる。
-        ///     環境設定を取得できない場合は既定の海外式で固定する。
+        ///     環境設定を取得できない場合は既定の日本式で固定する。
         /// </summary>
         private void BindGamepadButtonLayout()
         {

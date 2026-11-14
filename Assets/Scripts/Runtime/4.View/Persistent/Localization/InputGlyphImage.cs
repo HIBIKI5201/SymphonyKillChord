@@ -23,7 +23,7 @@ namespace KillChord.Runtime.View.Persistent.Localization
         /// <param name="image"> 表示先のImageです。 </param>
         /// <param name="spriteAsset"> 入力アイコンを収めたSprite Assetです。 </param>
         /// <param name="glyphKey"> 入力アイコンの翻訳キー末尾です。 </param>
-        /// <param name="isJapaneseButtonLayout"> ゲームパッドのボタン配置が日本式かです。nullの場合は既定の海外式として扱います。 </param>
+        /// <param name="isJapaneseButtonLayout"> ゲームパッドのボタン配置が日本式かです。nullの場合は既定の日本式として扱います。 </param>
         /// <exception cref="ArgumentNullException"> 表示先またはSprite Assetがnullの場合に発生します。 </exception>
         /// <exception cref="ArgumentException"> 翻訳キー末尾が空の場合に発生します。 </exception>
         public InputGlyphImage(
@@ -88,7 +88,7 @@ namespace KillChord.Runtime.View.Persistent.Localization
         private LocalizedElementText _localizedText;
         private IDisposable _layoutSubscription;
         private string _currentGlyph;
-        private bool _isJapaneseButtonLayout;
+        private bool _isJapaneseButtonLayout = true;
         private bool _isDisposed;
 
         /// <summary>
