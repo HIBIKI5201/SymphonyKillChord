@@ -1,4 +1,6 @@
+using R3;
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
@@ -9,6 +11,8 @@ namespace KillChord.Runtime.View.Persistent.Localization
     /// <summary>
     ///     UI ToolkitのImageに、現在の入力機器の入力アイコンを表示します。
     ///     UICommonの <c>ui.input.glyph.キー</c> が返すスプライト名を、TMPのSprite Assetから切り出して使います。
+    ///     翻訳は日本式（決定=右ボタン、キャンセル=下ボタン）で書かれているため、
+    ///     海外式のときは右ボタンと下ボタンのアイコンを入れ替えて表示します。
     /// </summary>
     public sealed class InputGlyphImage : IDisposable
     {
@@ -19,9 +23,14 @@ namespace KillChord.Runtime.View.Persistent.Localization
         /// <param name="image"> 表示先のImageです。 </param>
         /// <param name="spriteAsset"> 入力アイコンを収めたSprite Assetです。 </param>
         /// <param name="glyphKey"> 入力アイコンの翻訳キー末尾です。 </param>
+        /// <param name="isJapaneseButtonLayout"> ゲームパッドのボタン配置が日本式かです。nullの場合は既定の海外式として扱います。 </param>
         /// <exception cref="ArgumentNullException"> 表示先またはSprite Assetがnullの場合に発生します。 </exception>
         /// <exception cref="ArgumentException"> 翻訳キー末尾が空の場合に発生します。 </exception>
-        public InputGlyphImage(Image image, TMP_SpriteAsset spriteAsset, string glyphKey)
+        public InputGlyphImage(
+            Image image,
+            TMP_SpriteAsset spriteAsset,
+            string glyphKey,
+            ReadOnlyReactiveProperty<bool> isJapaneseButtonLayout = null)
         {
             _image = image ?? throw new ArgumentNullException(nameof(image));
             _spriteAsset = spriteAsset ?? throw new ArgumentNullException(nameof(spriteAsset));
@@ -29,6 +38,8 @@ namespace KillChord.Runtime.View.Persistent.Localization
             {
                 throw new ArgumentException("翻訳キー末尾を指定してください。", nameof(glyphKey));
             }
+
+            _layoutSubscription = isJapaneseButtonLayout?.Subscribe(HandleButtonLayoutChanged);
 
             LocalizationInitializer.RunWhenInitialized(isReady =>
             {
@@ -53,6 +64,8 @@ namespace KillChord.Runtime.View.Persistent.Localization
 
             _localizedText?.Dispose();
             _localizedText = null;
+            _layoutSubscription?.Dispose();
+            _layoutSubscription = null;
             _isDisposed = true;
         }
 
@@ -61,10 +74,35 @@ namespace KillChord.Runtime.View.Persistent.Localization
         private const string NO_GLYPH = "-";
         private static readonly Regex SPRITE_NAME_PATTERN = new("<sprite name=\"([^\"]+)\">", RegexOptions.Compiled);
 
+        /// <summary> 日本式と海外式で入れ替える、右ボタンと下ボタンのスプライト名の組です。 </summary>
+        private static readonly Dictionary<string, string> FACE_BUTTON_SWAP = new()
+        {
+            { "xb", "xa" }, { "xa", "xb" },
+            { "po", "px" }, { "px", "po" },
+            { "na", "nb" }, { "nb", "na" },
+            { "fe", "fs" }, { "fs", "fe" },
+        };
+
         private readonly Image _image;
         private readonly TMP_SpriteAsset _spriteAsset;
         private LocalizedElementText _localizedText;
+        private IDisposable _layoutSubscription;
+        private string _currentGlyph;
+        private bool _isJapaneseButtonLayout;
         private bool _isDisposed;
+
+        /// <summary>
+        ///     ボタン配置の変化に合わせて、表示中のアイコンを切り替えます。
+        /// </summary>
+        /// <param name="isJapaneseButtonLayout"> 日本式の場合はtrueです。 </param>
+        private void HandleButtonLayoutChanged(bool isJapaneseButtonLayout)
+        {
+            _isJapaneseButtonLayout = isJapaneseButtonLayout;
+            if (_currentGlyph != null)
+            {
+                HandleGlyphChanged(_currentGlyph);
+            }
+        }
 
         /// <summary>
         ///     入力アイコンの翻訳が変わったときに、Imageの画像を切り替えます。
@@ -72,6 +110,8 @@ namespace KillChord.Runtime.View.Persistent.Localization
         /// <param name="glyph"> TMPのスプライトタグを含む入力アイコンの翻訳です。 </param>
         private void HandleGlyphChanged(string glyph)
         {
+            _currentGlyph = glyph;
+
             // 割り当てがない機器では、案内の画像を出さない。
             if (glyph == NO_GLYPH)
             {
@@ -81,7 +121,7 @@ namespace KillChord.Runtime.View.Persistent.Localization
 
             // 複数のアイコンを並べる操作は1枚の画像にできないため、先頭のアイコンを使う。
             Match match = SPRITE_NAME_PATTERN.Match(glyph ?? string.Empty);
-            if (!match.Success || !TryGetSpriteRect(match.Groups[1].Value, out Rect sourceRect))
+            if (!match.Success || !TryGetSpriteRect(ResolveSpriteName(match.Groups[1].Value), out Rect sourceRect))
             {
                 Debug.LogWarning($"[{nameof(InputGlyphImage)}] 入力アイコンの画像が見つかりませんでした。Glyph: {glyph}");
                 return;
@@ -91,6 +131,22 @@ namespace KillChord.Runtime.View.Persistent.Localization
             _image.sprite = null;
             _image.image = _spriteAsset.spriteSheet;
             _image.sourceRect = sourceRect;
+        }
+
+        /// <summary>
+        ///     ボタン配置に合わせてスプライト名を決めます。
+        ///     翻訳は日本式で書かれているため、海外式のときだけ右ボタンと下ボタンを入れ替えます。
+        /// </summary>
+        /// <param name="spriteName"> 翻訳に書かれたスプライト名です。 </param>
+        /// <returns> 表示するスプライト名です。 </returns>
+        private string ResolveSpriteName(string spriteName)
+        {
+            if (_isJapaneseButtonLayout || !FACE_BUTTON_SWAP.TryGetValue(spriteName, out string swapped))
+            {
+                return spriteName;
+            }
+
+            return swapped;
         }
 
         /// <summary>
