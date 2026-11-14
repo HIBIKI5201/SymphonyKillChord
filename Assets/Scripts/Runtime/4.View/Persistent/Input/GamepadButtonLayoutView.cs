@@ -16,14 +16,14 @@ namespace KillChord.Runtime.View.Persistent.Input
         ///     配置の反映を開始する。
         /// </summary>
         /// <param name="actions"> 上書きをかける入力アセット。 </param>
-        /// <param name="environmentSettingsViewModel"> 環境設定のViewModel。nullの場合は既定の海外式で固定する。 </param>
+        /// <param name="environmentSettingsViewModel"> 環境設定のViewModel。nullの場合は既定の日本式で固定する。 </param>
         public GamepadButtonLayoutView(InputActionAsset actions, IEnvironmentSettingsViewModel environmentSettingsViewModel)
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
 
             if (environmentSettingsViewModel == null)
             {
-                Apply(false);
+                Apply(true);
                 return;
             }
 

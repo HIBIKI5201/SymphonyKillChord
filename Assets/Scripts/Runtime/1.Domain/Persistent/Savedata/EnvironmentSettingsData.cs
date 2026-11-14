@@ -130,8 +130,8 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         /// <summary> オートロックオンの既定値。 </summary>
         public const bool DEFAULT_IS_AUTO_LOCK_ON_ENABLED = true;
 
-        /// <summary> ゲームパッドの決定・キャンセルの既定値。海外式（決定=下ボタン）。 </summary>
-        public const bool DEFAULT_IS_JAPANESE_BUTTON_LAYOUT = false;
+        /// <summary> ゲームパッドの決定・キャンセルの既定値。日本式（決定=右ボタン）。 </summary>
+        public const bool DEFAULT_IS_JAPANESE_BUTTON_LAYOUT = true;
 
         /// <summary> 明るさの既定値。 </summary>
         public const int DEFAULT_BRIGHTNESS = 5;
@@ -297,7 +297,7 @@ namespace KillChord.Runtime.Domain.Persistent.Savedata
         [SerializeField, Tooltip("攻撃時のオートロックオンを使わないかどうか")]
         private bool _isAutoLockOnDisabled = !DEFAULT_IS_AUTO_LOCK_ON_ENABLED;
 
-        // 項目追加前のセーブデータでは既定値の海外式（false）になる。
+        // 項目追加前のセーブデータでは既定値の日本式（true）になる。
         [SerializeField, Tooltip("ゲームパッドの決定・キャンセルを日本式（決定=右ボタン）にするかどうか")]
         private bool _isJapaneseButtonLayout = DEFAULT_IS_JAPANESE_BUTTON_LAYOUT;
 
