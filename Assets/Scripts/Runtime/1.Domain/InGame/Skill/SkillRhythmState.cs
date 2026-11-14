@@ -40,10 +40,32 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <param name="beatType"> 計算済みの拍子。 </param>
         /// <param name="timing"> 登録時の音源再生タイミング。 </param>
         /// <param name="actionType"> アクションの種類。 </param>
-        public void Enqueue(BeatType beatType, float timing, BattleActionType actionType)
+        /// <param name="isJust"> Justで入力したかどうか。 </param>
+        public void Enqueue(BeatType beatType, float timing, BattleActionType actionType, bool isJust = false)
         {
-            RhythmInputRecord record = new RhythmInputRecord(beatType, timing, actionType);
+            RhythmInputRecord record = new RhythmInputRecord(beatType, timing, actionType, isJust);
             _recordBuffer.Enqueue(record);
+        }
+
+        /// <summary>
+        ///     新しい方から指定した数の入力のうち、Justで入力した数を数える。
+        /// </summary>
+        /// <param name="recentCount"> 数える入力の数。履歴の数より多い場合は履歴の全てを数える。 </param>
+        /// <returns> Justで入力した数。 </returns>
+        public int CountRecentJust(int recentCount)
+        {
+            ReadOnlySpan<RhythmInputRecord> records = _recordBuffer.AsReadonlySpan();
+            int start = Math.Max(0, records.Length - recentCount);
+            int justCount = 0;
+            for (int i = start; i < records.Length; i++)
+            {
+                if (records[i].IsJust)
+                {
+                    justCount++;
+                }
+            }
+
+            return justCount;
         }
 
         /// <summary>

@@ -4,9 +4,11 @@ using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.Domain.Persistent.Experiment;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
+using KillChord.Runtime.InfraStructure.Persistent.Experiment;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Threading;
@@ -35,6 +37,8 @@ namespace KillChord.DebugWorld.Hub
         private string _enemyDefinitionRepositoryKey = "EnemyDefinitionRepository";
 
         private DebugHubView _view;
+        private DebugExperimentPanelView _experimentPanelView;
+        private readonly GaugeGazeExperimentSettingsStore _experimentSettingsStore = new();
         private DebugBattleCatalog _catalog;
         private bool _isTransitioning;
 
@@ -68,6 +72,13 @@ namespace KillChord.DebugWorld.Hub
             _enemyWaveDefinitionRepositoryKey.ReleaseLoadedAsset(this);
             _enemyDefinitionRepositoryKey.ReleaseLoadedAsset(this);
 
+            if (_experimentPanelView != null)
+            {
+                _experimentPanelView.OnSettingsChanged -= HandleExperimentSettingsChanged;
+                _experimentPanelView.Dispose();
+                _experimentPanelView = null;
+            }
+
             if (_view == null)
             {
                 return;
@@ -79,6 +90,15 @@ namespace KillChord.DebugWorld.Hub
             _view.OnReturnRequested -= HandleReturnRequested;
             _view.Dispose();
             _view = null;
+        }
+
+        /// <summary>
+        ///     切り替えたゲージ注視の改善案を保存し、次の戦闘から使います。
+        /// </summary>
+        /// <param name="settings"> 切り替えた後の設定です。 </param>
+        private void HandleExperimentSettingsChanged(GaugeGazeExperimentSettings settings)
+        {
+            _experimentSettingsStore.Save(settings);
         }
 
         /// <summary>
@@ -261,6 +281,12 @@ namespace KillChord.DebugWorld.Hub
             _view.OnEnemyTestRequested += HandleEnemyTestRequested;
             _view.OnBossTestRequested += HandleBossTestRequested;
             _view.OnReturnRequested += HandleReturnRequested;
+
+            // 試遊で案ごとに比べられるよう、ゲージ注視の改善案の切り替え欄を出す。
+            _experimentPanelView = new DebugExperimentPanelView(
+                _uiDocument.rootVisualElement,
+                _experimentSettingsStore.Load());
+            _experimentPanelView.OnSettingsChanged += HandleExperimentSettingsChanged;
             return true;
         }
 
