@@ -3,6 +3,8 @@ using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.Persistent.Experiment;
+using KillChord.Runtime.InfraStructure.Persistent.Experiment;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.Skill;
 using SymphonyFrameWork.System.ServiceLocate;
@@ -40,6 +42,14 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
 
             _inputProgressViewSetting = _skillInputProgressUIConfig.Create();
+
+            // 試遊の案：スキルゲージをリズムゲージの上に置き、アイコンを大きくして目立たせる。
+            _isEmphasisEnabled = new GaugeGazeExperimentSettingsStore().Load()
+                .IsEnabled(GaugeGazeExperimentFeature.SkillGaugeEmphasis);
+            if (_isEmphasisEnabled)
+            {
+                SkillGuideProgressLayout.MoveAboveGauge(_viewRoot, _rhythmGuideView.transform, _emphasisGap);
+            }
             ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
             _isRegistered = true;
 
@@ -62,6 +72,10 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         public ISkillInputProgressRowView CreateInputProgressRow(SkillDefinition definition, Sprite skillIcon)
         {
             SkillGuideProgressView view = Instantiate(_viewPrefab, _viewRoot);
+            if (_isEmphasisEnabled)
+            {
+                view.MultiplyIconScale(_emphasisIconScale);
+            }
             view.SetTimeProvider(BattlePlayTimeProvider.Create());
             SkillBeatVisualSetting[] stepSettings = new SkillBeatVisualSetting[definition.SkillPattern.Signatures.Length];
             for (int i = 0; i < definition.SkillPattern.Signatures.Length; i++)
@@ -82,9 +96,14 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private Transform _viewRoot;
         [SerializeField, Tooltip("アイコンのX座標をジャストタイミング位置に合わせるためのリズムガイドView。")]
         private ACLikeRhythmGuideView _rhythmGuideView;
+        [SerializeField, Min(1f), Tooltip("試遊の案（スキルゲージを目立たせる）で、拍子アイコンに掛ける大きさの倍率。")]
+        private float _emphasisIconScale = 1.5f;
+        [SerializeField, Tooltip("試遊の案（スキルゲージをリズムゲージの上に置く）で、ゲージとの間に足す余白。")]
+        private float _emphasisGap = 8f;
 
         private SkillInputProgressViewSetting _inputProgressViewSetting;
         private readonly SkillGuideProgressController _guideProgressController = new();
         private bool _isRegistered;
+        private bool _isEmphasisEnabled;
     }
 }

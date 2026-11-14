@@ -31,7 +31,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 context.TargetEntity,
                 context.IsJustHit,
                 context.PlayerEntity.BaseDamage,
-                applyWeaponDamageMultiplier: false);
+                applyWeaponDamageMultiplier: false,
+                applyJustDamageMultiplier: context.ApplyJustDamageMultiplier);
             result = result.WithFinalDamage(result.FinalDamage * multiplier);
 
             // ダメージを与える。

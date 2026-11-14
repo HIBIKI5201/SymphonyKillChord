@@ -1,5 +1,6 @@
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.Persistent.Localization;
 using SymphonyFrameWork.Attribute;
@@ -47,6 +48,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
         [Header("解放条件")]
         [SerializeField, Tooltip("親ノードに加えて、この条件を持たない全ノードの解放を必要とするか。")]
         private bool _requiresAllNodesUnlocked;
+        [SerializeField, Tooltip("親ノードに加えて、このステージのクリアを必要とする。未設定なら条件なし。3・6拍子を使うスキルはセカンドチュートリアルを指定する。")]
+        [SourceDataCollection("StageAsset")]
+        private DataID _requiredClearedStageId;
 
         /// <summary>
         ///     保持するデータよりEntityを生成する。
@@ -76,7 +80,8 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
                 _maxLevel,
                 _isUnlimitedLevel,
                 _unlockCostIncreasePerLevel,
-                _requiresAllNodesUnlocked);
+                _requiresAllNodesUnlocked,
+                new StageId(_requiredClearedStageId.Id));
         }
 
         /// <summary>
