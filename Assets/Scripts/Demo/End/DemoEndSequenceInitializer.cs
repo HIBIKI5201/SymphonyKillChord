@@ -265,12 +265,24 @@ namespace KillChord.Demo.End
             SubscribeAttackInput();
             _endView.SetPromptVisible(true);
 
-            while (!_isAttackRequested)
+            // スマホには攻撃ボタンが無いため、画面のタップでも受け付ける。
+            while (!_isAttackRequested && !IsScreenTappedThisFrame())
             {
                 await Awaitable.NextFrameAsync(cancellationToken);
             }
 
             UnsubscribeAttackInput();
+        }
+
+        /// <summary>
+        ///     このフレームで画面がタップされたかを返します。
+        /// </summary>
+        /// <returns> タッチスクリーンが押され始めた場合はtrueです。 </returns>
+        private static bool IsScreenTappedThisFrame()
+        {
+            Touchscreen touchscreen = Touchscreen.current;
+            return touchscreen != null
+                && touchscreen.primaryTouch.press.wasPressedThisFrame;
         }
 
         /// <summary>
