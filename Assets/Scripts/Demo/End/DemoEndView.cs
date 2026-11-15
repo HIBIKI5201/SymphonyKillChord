@@ -2,6 +2,7 @@ using LitMotion;
 using LitMotion.Extensions;
 using System;
 using System.Threading;
+using TMPro;
 using UnityEngine;
 
 namespace KillChord.Demo.End
@@ -89,6 +90,12 @@ namespace KillChord.Demo.End
         [SerializeField, Tooltip("タイトルへ戻る操作を促すプロンプトのCanvasGroupです。")]
         private CanvasGroup _promptCanvasGroup;
 
+        [SerializeField, Tooltip("タイトルへ戻る操作を促すプロンプトのテキストです。")]
+        private TMP_Text _promptText;
+
+        [SerializeField, Tooltip("スマホで表示するプロンプトの文言です。")]
+        private string _mobilePromptText = "画面をタップしてタイトルへ戻る";
+
         private MotionHandle _endUiFadeHandle;
 
         /// <summary>
@@ -100,6 +107,12 @@ namespace KillChord.Demo.End
             SetAlpha(_blackoutCanvasGroup, 1.0f);
             SetAlpha(_endUiCanvasGroup, 0.0f);
             SetPromptVisible(false);
+
+            // スマホには攻撃ボタンが無いため、タップで戻れることを案内する。
+            if (UnityEngine.Application.isMobilePlatform && _promptText != null)
+            {
+                _promptText.text = _mobilePromptText;
+            }
         }
 
         /// <summary>
