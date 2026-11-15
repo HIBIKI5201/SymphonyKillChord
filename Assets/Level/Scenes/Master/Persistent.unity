@@ -242,6 +242,7 @@ GameObject:
   - component: {fileID: 147177597}
   - component: {fileID: 147177599}
   - component: {fileID: 147177598}
+  - component: {fileID: 1370189489}
   m_Layer: 5
   m_Name: BackGround_1
   m_TagString: Untagged
@@ -2776,6 +2777,20 @@ Transform:
   - {fileID: 1085968910}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1370189489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 147177596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e8f5e25a44d4f36be5b70a9d0b9da7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KillChord.View::KillChord.Runtime.View.Persistent.Layout.RectTransformCoverFitterView
+  _imageAspectRatio: 1.7777778
+  _focus: {x: 0.19, y: 0.38}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
