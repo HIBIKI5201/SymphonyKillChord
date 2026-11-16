@@ -54,6 +54,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private const string TITLE_SCREEN_NAME = "TitleContainer";
         private const string MENU_SCREEN_NAME = "MenuContainer";
         private const string CREDIT_SCREEN_NAME = "CreditContainer";
+        private const string KEY_VISUAL_NAME = "KeyVisual";
 
         [SerializeField, Tooltip("UI Document")]
         private UIDocument _uiDocument;
@@ -103,6 +104,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         private CancellationTokenSource _resetCancellation;
         private VisualElement _boundTitleRoot;
         private UIDocumentAspectRatioLimiter _aspectRatioLimiter;
+        private VisualElementCoverFitter _keyVisualCoverFitter;
 
         /// <summary>
         ///     タイトル画面に必要なアセットをロードします。
@@ -162,6 +164,20 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             // 横長の画面でUIが引き延ばされないよう、16:9 の範囲に収める。
             _aspectRatioLimiter?.Dispose();
             _aspectRatioLimiter = new UIDocumentAspectRatioLimiter(root);
+
+            // キービジュアルだけは画面全体を覆い、横長の画面では手前のキャラクターの上半身を軸に上下を切り取る。
+            _keyVisualCoverFitter?.Dispose();
+            _keyVisualCoverFitter = null;
+            VisualElement keyVisual = root.Q<VisualElement>(KEY_VISUAL_NAME);
+            if (keyVisual != null)
+            {
+                _keyVisualCoverFitter = new VisualElementCoverFitter(keyVisual,
+                    KeyVisualCoverLayout.KEY_VISUAL_ASPECT_RATIO, KeyVisualCoverLayout.KEY_VISUAL_FOCUS);
+            }
+            else
+            {
+                Debug.LogWarning($"[{nameof(TitleSceneInitializer)}] {KEY_VISUAL_NAME} が見つかりません。", this);
+            }
 
             if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
             {
@@ -386,6 +402,8 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             _boundTitleRoot = null;
             _aspectRatioLimiter?.Dispose();
             _aspectRatioLimiter = null;
+            _keyVisualCoverFitter?.Dispose();
+            _keyVisualCoverFitter = null;
         }
 
         /// <summary>
