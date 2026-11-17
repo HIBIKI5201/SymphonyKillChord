@@ -48,6 +48,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             CharacterEntity playerEntity = context.PlayerEntity;
             CharacterEntity targetEntity = context.TargetEntity;
             bool isJustHit = context.IsJustHit;
+            bool applyJustDamageMultiplier = context.ApplyJustDamageMultiplier;
 
             // ダメージのタイミングはマスタデータが持ち、エフェクトの生成可否には依存させない。
             _hitScheduler.Schedule(
@@ -59,6 +60,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                     playerEntity,
                     targetEntity,
                     isJustHit,
+                    applyJustDamageMultiplier,
                     damageMultiplier,
                     criticalMultiplier,
                     hitIndex));
@@ -71,6 +73,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
         /// <param name="playerEntity"> 攻撃側のエンティティです。 </param>
         /// <param name="targetEntity"> 対象のエンティティです。 </param>
         /// <param name="isJustHit"> ジャスト入力かどうかです。 </param>
+        /// <param name="applyJustDamageMultiplier"> ジャスト入力時のダメージ倍率を適用するかどうかです。 </param>
         /// <param name="damageMultiplier"> ダメージ倍率です。 </param>
         /// <param name="criticalMultiplier"> クリティカル倍率です。 </param>
         /// <param name="hitIndex"> 何発目かです。 </param>
@@ -80,6 +83,7 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
             CharacterEntity playerEntity,
             CharacterEntity targetEntity,
             bool isJustHit,
+            bool applyJustDamageMultiplier,
             float damageMultiplier,
             float criticalMultiplier,
             int hitIndex)
@@ -96,7 +100,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 targetEntity,
                 isJustHit,
                 playerEntity.BaseDamage,
-                criticalDamageMultiplierOverride: criticalMultiplier);
+                criticalDamageMultiplierOverride: criticalMultiplier,
+                applyJustDamageMultiplier: applyJustDamageMultiplier);
 
             result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
             result = DamageExecutor.Execute(

@@ -23,11 +23,14 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         /// <param name="missionProgress"> 記録対象です。 </param>
         /// <param name="missionEventController"> ミッション行動を通知するControllerです。 </param>
         /// <param name="comboHudPresenter"> コンボHUDへ現在のコンボ数を反映するPresenterです。 </param>
+        /// <param name="isJustOnlyCombo"> Justのときだけコンボを増やし、Justを外すとコンボを終える場合はtrueです。 </param>
         public MissionProgressRecorderController(
             MissionProgress missionProgress,
             MissionEventController missionEventController,
-            ComboHudPresenter comboHudPresenter)
+            ComboHudPresenter comboHudPresenter,
+            bool isJustOnlyCombo = false)
         {
+            _isJustOnlyCombo = isJustOnlyCombo;
             _missionProgress = missionProgress
                 ?? throw new ArgumentNullException(nameof(missionProgress));
             _missionEventController = missionEventController
@@ -147,6 +150,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private TargetSystemController _targetSystemController;
         private IMusicSyncService _musicSyncService;
         private ComboHudPresenter _comboHudPresenter;
+        private readonly bool _isJustOnlyCombo;
         /// <summary> <see cref="HandleAttackExecuted"/>と一緒に通知する、保留中の拍子攻撃です。 </summary>
         private MissionActionKind? _pendingAttackBeatKind;
         /// <summary> 保留中の攻撃がJust攻撃だった場合はtrueです。 </summary>
@@ -230,9 +234,12 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private void HandleAttackExecuted(string weaponId, bool hasHit)
         {
             _missionProgress.RecordWeaponUse(weaponId);
+            // 通知で保留中のJustの状態が消えるため、先に取っておく。
+            bool isJust = _isPendingAttackJust;
             NotifyAttackActions();
 
-            if (!hasHit)
+            // Justのときだけコンボを増やす案では、Justを外した攻撃でコンボを終える。
+            if (!hasHit || (_isJustOnlyCombo && !isJust))
             {
                 _missionProgress.ResetCombo();
                 _comboHudPresenter.Present(_missionProgress.ComboCount.Value);

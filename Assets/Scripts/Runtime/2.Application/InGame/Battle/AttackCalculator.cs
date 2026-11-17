@@ -17,6 +17,7 @@ namespace KillChord.Runtime.Application.InGame.Battle
         /// <param name="isOutOfRange"> 対象が射程外にいる場合はtrue。ダメージ減衰の判定に使う。 </param>
         /// <param name="isCriticalForced"> クリティカルヒットが強制されている場合はtrue。 </param>
         /// <param name="criticalDamageMultiplierOverride"> この攻撃特有のクリティカルダメージ倍率のオーバーライド。 </param>
+        /// <param name="applyJustDamageMultiplier"> ジャスト入力時のダメージ倍率を適用する場合はtrue。スキル入力のJustボーナスを使うスキルではfalse。 </param>
         /// <returns> 攻撃結果。 </returns>
         public static AttackResult Calculate(
             AttackDefinition attackDefinition,
@@ -28,7 +29,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
             bool isCriticalForced = false,
             float? criticalDamageMultiplierOverride = null,
             bool applyAttackerModifiers = true,
-            bool applyWeaponDamageMultiplier = true
+            bool applyWeaponDamageMultiplier = true,
+            bool applyJustDamageMultiplier = true
             )
         {
             Damage modifiedDamage = baseDamage;
@@ -48,7 +50,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 isOutOfRange,
                 isCriticalForced,
                 criticalDamageMultiplierOverride,
-                applyWeaponDamageMultiplier);
+                applyWeaponDamageMultiplier,
+                applyJustDamageMultiplier);
             return attackDefinition.AttackPipeline.Execute(stepContext);
         }
     }

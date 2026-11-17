@@ -19,6 +19,9 @@ MonoBehaviour:
   _unlockSkills:
   - _id: skill_06
     _hashId: 581027398
+  _requiredClearedStageId:
+    _id: stage_Tutorial2
+    _hashId: -562443898
   _nodeId:
     _id: node_n6
     _hashId: 1679495253

@@ -1,4 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Skill;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using System;
 using System.Collections.Generic;
 
@@ -20,7 +21,8 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             int maxLevel = DEFAULT_MAX_LEVEL,
             bool isUnlimitedLevel = false,
             int unlockCostIncreasePerLevel = 0,
-            bool requiresAllNodesUnlocked = false)
+            bool requiresAllNodesUnlocked = false,
+            StageId requiredClearedStageId = default)
         {
             if (!isUnlimitedLevel && maxLevel < DEFAULT_MAX_LEVEL)
             {
@@ -45,6 +47,7 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
             IsUnlimitedLevel = isUnlimitedLevel;
             UnlockCostIncreasePerLevel = unlockCostIncreasePerLevel;
             RequiresAllNodesUnlocked = requiresAllNodesUnlocked;
+            RequiredClearedStageId = requiredClearedStageId;
         }
 
         /// <summary> ノードのID。 </summary>
@@ -91,6 +94,15 @@ namespace KillChord.Runtime.Domain.OutGame.SkillTree
         ///     親ノードの解放に加えて求める条件。
         /// </summary>
         public bool RequiresAllNodesUnlocked { get; }
+
+        /// <summary>
+        ///     解放に必要なクリア済みのステージ。値が0の場合は条件なし。
+        ///     親ノードの解放に加えて求める条件。
+        /// </summary>
+        public StageId RequiredClearedStageId { get; }
+
+        /// <summary> 解放にステージのクリアが必要か。 </summary>
+        public bool HasRequiredClearedStage => RequiredClearedStageId.Value != 0;
 
         /// <summary> 強化上限の既定値。通常のノードは1回だけ解放できる。 </summary>
         public const int DEFAULT_MAX_LEVEL = 1;

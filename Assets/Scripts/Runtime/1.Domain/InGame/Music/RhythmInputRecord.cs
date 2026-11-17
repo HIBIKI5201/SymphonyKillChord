@@ -13,11 +13,13 @@ namespace KillChord.Runtime.Domain.InGame.Music
         /// <param name="beatType"> 拍の種類。 </param>
         /// <param name="timing"> タイミング。 </param>
         /// <param name="actionType"> アクションの種類。 </param>
-        public RhythmInputRecord(BeatType beatType, float timing, BattleActionType actionType)
+        /// <param name="isJust"> Justで入力したかどうか。 </param>
+        public RhythmInputRecord(BeatType beatType, float timing, BattleActionType actionType, bool isJust = false)
         {
             BeatType = beatType;
             Timing = timing;
             ActionType = actionType;
+            IsJust = isJust;
         }
 
         /// <summary> 判定された拍子。 </summary>
@@ -28,5 +30,8 @@ namespace KillChord.Runtime.Domain.InGame.Music
 
         /// <summary> アクションの種類。 </summary>
         public BattleActionType ActionType { get; }
+
+        /// <summary> Justで入力したかどうか。 </summary>
+        public bool IsJust { get; }
     }
 }

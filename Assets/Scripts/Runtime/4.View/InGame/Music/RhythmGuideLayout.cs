@@ -13,14 +13,23 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary>
         ///     指定幅を隙間なく分割する描画基準を生成する。
         /// </summary>
+        /// <param name="halfWidth"> 中心から片側の末端までの実描画幅。 </param>
+        /// <param name="preferredBlockWidth"> 1ブロックの目安の幅。 </param>
+        /// <param name="lengthInBars"> 末端までの小節数。 </param>
+        /// <param name="zones"> 判定ゾーンの一覧。ブロックを判定の切り替わる位置でも分ける。 </param>
+        /// <param name="fixedGridCount"> 片側を等分する数。0以下なら目安の幅から求める。 </param>
         public RhythmGuideLayout(float halfWidth, float preferredBlockWidth, float lengthInBars,
-            IReadOnlyList<RhythmGuideZoneDto> zones)
+            IReadOnlyList<RhythmGuideZoneDto> zones, int fixedGridCount = 0)
         {
             HalfWidth = Mathf.Max(0f, halfWidth);
             LengthInBars = lengthInBars;
-            int gridCount = HalfWidth > 0f && lengthInBars > 0f
-                ? Mathf.Max(1, Mathf.CeilToInt(HalfWidth / Mathf.Max(1f, preferredBlockWidth)))
-                : 0;
+            int gridCount = 0;
+            if (HalfWidth > 0f && lengthInBars > 0f)
+            {
+                gridCount = fixedGridCount > 0
+                    ? fixedGridCount
+                    : Mathf.Max(1, Mathf.CeilToInt(HalfWidth / Mathf.Max(1f, preferredBlockWidth)));
+            }
             var boundaries = new List<float> { 0f };
             for (int i = 1; i <= gridCount; i++)
             {

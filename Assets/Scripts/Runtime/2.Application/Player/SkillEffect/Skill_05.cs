@@ -45,7 +45,8 @@ namespace KillChord.Runtime.Application.Player.SkillEffect
                 context.IsJustHit,
                 new Damage(consumedHealth.Value * PLAYER_DAMAGE_UNIT_MULTIPLIER),
                 applyAttackerModifiers: false,
-                applyWeaponDamageMultiplier: false);
+                applyWeaponDamageMultiplier: false,
+                applyJustDamageMultiplier: context.ApplyJustDamageMultiplier);
             result = result.WithFinalDamage(result.FinalDamage * damageMultiplier);
             result = DamageExecutor.Execute(
                 context.PlayerEntity, context.TargetEntity, result, DamageAttackType.Skill);

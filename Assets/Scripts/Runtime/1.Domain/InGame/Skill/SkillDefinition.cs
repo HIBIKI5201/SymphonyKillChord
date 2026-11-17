@@ -34,12 +34,16 @@ namespace KillChord.Runtime.Domain.InGame.Skill
         /// <summary> スキル発動時の攻撃硬直（拍数）。通常攻撃の硬直の代わりに使う。 </summary>
         public AttackRecoveryBeats RecoveryBeats { get; }
 
+        /// <summary> スキル入力のJustの割合で効果を強くする設定です。 </summary>
+        public SkillJustBonus JustBonus { get; }
+
         private const int MIN_PATTERN_LENGTH = 1;
 
         /// <summary>
         ///     コンストラクタ。ID・パターン・効果を指定して初期化する。
         /// </summary>
-        public SkillDefinition(SkillId id, SkillPattern skillPattern, SkillType[] type, SkillLevel level, double cooldownBarRatio, SkillEffectSpec effectSpec, double bpm, string animationKey, AttackRecoveryBeats recoveryBeats)
+        /// <param name="justBonus"> スキル入力のJustの割合で効果を強くする設定です。nullの場合は既定値です。 </param>
+        public SkillDefinition(SkillId id, SkillPattern skillPattern, SkillType[] type, SkillLevel level, double cooldownBarRatio, SkillEffectSpec effectSpec, double bpm, string animationKey, AttackRecoveryBeats recoveryBeats, SkillJustBonus justBonus = null)
         {
             if (!double.IsFinite(bpm) || bpm <= 0d)
             {
@@ -58,6 +62,7 @@ namespace KillChord.Runtime.Domain.InGame.Skill
             EffectSpec = effectSpec;
             AnimationKey = animationKey;
             RecoveryBeats = recoveryBeats;
+            JustBonus = justBonus ?? SkillJustBonus.CreateDefault();
             CooldownTime = new SkillCooldownTime(CalcCooldownTime(cooldownBarRatio, bpm));
         }
 

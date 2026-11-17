@@ -12,34 +12,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cd809c71f001dd4fa08e46580c963da, type: 3}
   m_Name: RhythmJudgmentDefinitionAsset
   m_EditorClassIdentifier: KillChord.Structure::KillChord.Runtime.InfraStructure.RhythmGuideDefinitionAsset
-  _rangeData:
+  _beatSettings:
   - BeatType: 8
-    StartNormalized: 0
-    EndNormalized: 0.148
     JustStartNormalized: 0.121875
     JustEndNormalized: 0.153125
+    IsNarrowRange: 0
+    UnlockStageId:
+      _id: 
+      _hashId: 0
   - BeatType: 6
-    StartNormalized: 0.1458
-    EndNormalized: 0.2083
     JustStartNormalized: 0.146875
     JustEndNormalized: 0.178125
+    IsNarrowRange: 1
+    UnlockStageId:
+      _id: stage_Tutorial2
+      _hashId: -562443898
   - BeatType: 4
-    StartNormalized: 0.2083
-    EndNormalized: 0.3
     JustStartNormalized: 0.246875
     JustEndNormalized: 0.278125
+    IsNarrowRange: 0
+    UnlockStageId:
+      _id: 
+      _hashId: 0
   - BeatType: 3
-    StartNormalized: 0.3
-    EndNormalized: 0.4167
     JustStartNormalized: 0.321875
     JustEndNormalized: 0.353125
+    IsNarrowRange: 1
+    UnlockStageId:
+      _id: stage_Tutorial2
+      _hashId: -562443898
   - BeatType: 2
-    StartNormalized: 0.4167
-    EndNormalized: 0.75
     JustStartNormalized: 0.496875
     JustEndNormalized: 0.528125
+    IsNarrowRange: 0
+    UnlockStageId:
+      _id: 
+      _hashId: 0
   - BeatType: 1
-    StartNormalized: 0.75
-    EndNormalized: 1
     JustStartNormalized: 0.996875
     JustEndNormalized: 1.028125
+    IsNarrowRange: 0
+    UnlockStageId:
+      _id: 
+      _hashId: 0
+  _narrowRangeJustWidthRatio: 1.5

@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         public static int? GetTargetBeatCount(SelectedBattleStageState stageState, MissionRuntimeService mission)
         {
             if (stageState == null || !stageState.HasSelectedBattleStage
-                || !stageState.CurrentStageDefinition.IsTutorial
+                || !stageState.CurrentStageDefinition.HasTutorialGuide
                 || mission == null || mission.MissionProgress.IsFinished)
             {
                 return null;

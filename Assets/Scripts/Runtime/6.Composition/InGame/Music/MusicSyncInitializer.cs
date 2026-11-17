@@ -1,14 +1,21 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
+using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.Persistent.Environment;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
+using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.InGame.Music;
+using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Music;
+using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Music
@@ -65,7 +72,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
             MusicSyncService = new MusicSyncService(
                 new RhythmDefinition(_testBpm, _testBeatOffsetSeconds),
-                _rhythmJudgmentDefinitionAsset.ToDefinition());
+                CreateRhythmJudgmentDefinition());
 
             // 環境設定（リズム判定オフセット）は未ロードでも同期機能自体は成立させるため、
             // 取得できない場合はnull（オフセット0秒）のままコントローラーへ渡す。
@@ -172,6 +179,30 @@ namespace KillChord.Runtime.Composition.InGame.Music
             MusicSyncState?.Dispose();
 
             _isRegistered = false;
+        }
+
+        /// <summary>
+        ///     挑戦中のステージとクリア済みのステージから使える拍子を決め、リズム判定の定義を作る。
+        ///     ステージを選ばずにシーンを開いたとき（開発用のシーンなど）は、全ての拍子を使える。
+        /// </summary>
+        /// <returns> 使える拍子だけで作ったリズム判定の定義。 </returns>
+        private RhythmJudgmentDefinition CreateRhythmJudgmentDefinition()
+        {
+            RhythmJudgmentDefinitionFactory factory = _rhythmJudgmentDefinitionAsset.ToFactory();
+            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
+                || !selectedBattleStageState.HasSelectedBattleStage)
+            {
+                return factory.Create(factory.AllBeatTypes);
+            }
+
+            // セーブデータが未ロードの場合は、クリア済みのステージが無いものとして扱う。
+            IReadOnlyList<StageId> clearedStageIds = SaveStore.IsLoaded<SaveData>()
+                ? new SaveDataClearStageRepository(SaveStore.Get<SaveData>().StageProgress).GetClearedStageIds()
+                : Array.Empty<StageId>();
+            IReadOnlyList<BeatType> availableBeatTypes = factory.ResolveAvailableBeatTypes(
+                clearedStageIds,
+                selectedBattleStageState.CurrentStageDefinition.StageId);
+            return factory.Create(availableBeatTypes);
         }
     }
 }

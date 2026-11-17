@@ -18,13 +18,16 @@ namespace KillChord.Runtime.Domain.Player
         /// <param name="currentBeatType"> 現在ビートです。 </param>
         /// <param name="targetEntities"> 解決済み対象一覧です。 </param>
         /// <param name="effectSpec"> 発動するスキルの効果定義です。 </param>
+        /// <param name="isJustHit"> ジャスト入力によるスキル発動かどうかです。 </param>
+        /// <param name="applyJustDamageMultiplier"> ジャスト入力時のダメージ倍率を適用するかどうかです。スキル入力のJustボーナスを使うときはfalseです。 </param>
         public SkillEffectContext(
             CharacterEntity targetEntity,
             CharacterEntity playerEntity,
             BeatType currentBeatType,
             ReadOnlyMemory<CharacterEntity> targetEntities,
             SkillEffectSpec effectSpec,
-            bool isJustHit)
+            bool isJustHit,
+            bool applyJustDamageMultiplier = true)
         {
             TargetEntity = targetEntity;
             PlayerEntity = playerEntity;
@@ -32,6 +35,7 @@ namespace KillChord.Runtime.Domain.Player
             TargetEntities = targetEntities;
             EffectSpec = effectSpec;
             IsJustHit = isJustHit;
+            ApplyJustDamageMultiplier = applyJustDamageMultiplier;
         }
 
         /// <summary> 被スキル者です。 </summary>
@@ -51,5 +55,8 @@ namespace KillChord.Runtime.Domain.Player
 
         /// <summary> ジャスト入力によるスキル発動かどうか。 </summary>
         public bool IsJustHit { get; }
+
+        /// <summary> ジャスト入力時のダメージ倍率を適用するかどうか。スキル入力のJustボーナスを使うときはfalseです。 </summary>
+        public bool ApplyJustDamageMultiplier { get; }
     }
 }

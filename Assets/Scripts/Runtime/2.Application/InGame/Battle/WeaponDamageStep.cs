@@ -25,7 +25,8 @@ namespace KillChord.Runtime.Application.InGame.Battle
                 resultDamage *= context.AttackDefinition.WeaponDamageMultiplier;
             }
 
-            if (context.IsJustHit)
+            // スキル入力のJustボーナスを使うスキルは、Just倍率の代わりにJustの割合で効果が決まる。
+            if (context.IsJustHit && context.ApplyJustDamageMultiplier)
             {
                 resultDamage *= context.AttackDefinition.JustDamageMultiplier;
             }

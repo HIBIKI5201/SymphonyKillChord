@@ -55,7 +55,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Mission
         private void HandleSkillExecutedHandler(EOnSkillExecuted eventData)
         {
             if (_isDisposed || !_selectedStage.HasSelectedBattleStage
-                || !_selectedStage.CurrentStageDefinition.IsTutorial)
+                || !_selectedStage.CurrentStageDefinition.HasTutorialGuide)
             {
                 return;
             }

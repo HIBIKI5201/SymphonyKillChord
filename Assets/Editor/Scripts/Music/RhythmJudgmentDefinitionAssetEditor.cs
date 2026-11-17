@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using KillChord.Runtime.Domain.InGame.Music;
+using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.InGame.Music;
 using UnityEditor;
 using UnityEngine;
@@ -16,32 +19,43 @@ namespace KillChord.Editor.Music
         /// </summary>
         public override void OnInspectorGUI()
         {
-            serializedObject.Update();
+            DrawDefaultInspector();
 
-            SerializedProperty rangeData = serializedObject.FindProperty(RANGE_DATA_PROPERTY_NAME);
-            EditorGUILayout.PropertyField(rangeData, true);
-
-            serializedObject.ApplyModifiedProperties();
+            // 入力が不正な場合は範囲を作れないため、理由だけを表示する。
+            RhythmJudgmentDefinitionFactory factory;
+            try
+            {
+                factory = ((RhythmJudgmentDefinitionAsset)target).ToFactory();
+            }
+            catch (Exception exception)
+            {
+                EditorGUILayout.HelpBox($"判定範囲を作れません: {exception.Message}", MessageType.Warning);
+                return;
+            }
 
             EditorGUILayout.Space(SECTION_SPACING);
             EditorGUILayout.LabelField("判定ゾーン / ジャスト範囲（1.2小節まで表示）", EditorStyles.boldLabel);
 
-            DrawGauge(rangeData);
+            EditorGUILayout.LabelField("解放条件のある拍子が未解放のとき", EditorStyles.miniBoldLabel);
+            DrawGauge(factory.Create(factory.ResolveAvailableBeatTypes(Array.Empty<StageId>(), null)));
+
+            EditorGUILayout.Space(SECTION_SPACING);
+            EditorGUILayout.LabelField("全ての拍子を解放したとき", EditorStyles.miniBoldLabel);
+            DrawGauge(factory.Create(factory.AllBeatTypes));
         }
 
         /// <summary>
         ///     判定ゾーンとJust位置のゲージを描画する。
         /// </summary>
-        /// <param name="rangeData"> 判定範囲データの配列プロパティ。 </param>
-        private void DrawGauge(SerializedProperty rangeData)
+        /// <param name="definition"> 描画するリズム判定の定義。 </param>
+        private static void DrawGauge(RhythmJudgmentDefinition definition)
         {
-            if (rangeData == null || !rangeData.isArray || rangeData.arraySize == 0)
+            IReadOnlyList<RhythmJudgmentRange> ranges = definition.JudgmentRanges;
+            if (ranges.Count == 0)
             {
                 EditorGUILayout.HelpBox("判定ゾーンが設定されていません。", MessageType.Info);
                 return;
             }
-
-            int zoneCount = rangeData.arraySize;
 
             // ゲージ本体とラベル表示の領域を確保し、背景と目盛りを描く。
             Rect fullRect = GUILayoutUtility.GetRect(
@@ -58,51 +72,31 @@ namespace KillChord.Editor.Music
             EditorGUI.DrawRect(gaugeRect, BACKGROUND_COLOR);
             DrawScaleTicks(gaugeRect);
 
-            List<string> warnings = new();
-
             // 判定ゾーンごとに、範囲・ジャスト範囲・ラベルを描く。
-            for (int i = 0; i < zoneCount; i++)
+            for (int i = 0; i < ranges.Count; i++)
             {
-                SerializedProperty element = rangeData.GetArrayElementAtIndex(i);
-                int beatType = element.FindPropertyRelative(BEAT_TYPE_PROPERTY_NAME).intValue;
-                float start = element.FindPropertyRelative(START_NORMALIZED_PROPERTY_NAME).floatValue;
-                float end = element.FindPropertyRelative(END_NORMALIZED_PROPERTY_NAME).floatValue;
-                float justStart = element.FindPropertyRelative(JUST_START_PROPERTY_NAME).floatValue;
-                float justEnd = element.FindPropertyRelative(JUST_END_PROPERTY_NAME).floatValue;
+                RhythmJudgmentRange range = ranges[i];
+                int beatType = (int)range.BeatType;
 
                 Rect zoneRect = new Rect(
-                    gaugeRect.x + gaugeRect.width * Mathf.Clamp01(start / GAUGE_LENGTH_IN_BARS),
+                    gaugeRect.x + gaugeRect.width * Mathf.Clamp01(range.StartNormalized / GAUGE_LENGTH_IN_BARS),
                     gaugeRect.y,
-                    gaugeRect.width * Mathf.Max(0f, Mathf.Clamp01(end / GAUGE_LENGTH_IN_BARS) - Mathf.Clamp01(start / GAUGE_LENGTH_IN_BARS)),
+                    gaugeRect.width * Mathf.Max(0f, Mathf.Clamp01(range.EndNormalized / GAUGE_LENGTH_IN_BARS) - Mathf.Clamp01(range.StartNormalized / GAUGE_LENGTH_IN_BARS)),
                     gaugeRect.height);
                 EditorGUI.DrawRect(zoneRect, GetZoneColor(beatType));
+                DrawJustMarker(gaugeRect, range.JustStartNormalized, range.JustEndNormalized);
 
-                bool isJustRangeValid = justStart >= 0f && justEnd > justStart
-                    && !float.IsInfinity(justStart) && !float.IsInfinity(justEnd);
-                DrawJustMarker(gaugeRect, justStart, justEnd, isJustRangeValid);
-
+                // 狭いゾーンのラベルが重ならないよう、偶数番目と奇数番目で段を分ける。
+                float labelHeight = LABEL_AREA_HEIGHT * 0.5f;
                 Rect labelRect = new Rect(
                     zoneRect.x,
-                    labelAreaRect.y,
+                    labelAreaRect.y + (i % 2) * labelHeight,
                     Mathf.Max(zoneRect.width, MIN_LABEL_WIDTH),
-                    LABEL_AREA_HEIGHT);
+                    labelHeight);
                 GUI.Label(
                     labelRect,
-                    $"n={beatType}\n[{start:0.###}, {end:0.###}]\nJust=[{justStart:0.###}, {justEnd:0.###})",
+                    $"n={beatType} [{range.StartNormalized:0.###}, {range.EndNormalized:0.###}]",
                     EditorStyles.miniLabel);
-
-                // ジャスト範囲が不正な場合は警告を溜めておき、最後にまとめて表示する。
-                if (!isJustRangeValid)
-                {
-                    warnings.Add(
-                        $"BeatType {beatType}: ジャスト開始・終了には有限値を指定し、0 ≦ 開始 < 終了としてください。");
-                }
-            }
-
-            EditorGUILayout.Space(WARNING_SPACING);
-            for (int i = 0; i < warnings.Count; i++)
-            {
-                EditorGUILayout.HelpBox(warnings[i], MessageType.Warning);
             }
         }
 
@@ -127,14 +121,8 @@ namespace KillChord.Editor.Music
         /// <param name="gaugeRect"> ゲージの描画領域。 </param>
         /// <param name="justStart"> ジャスト開始位置。 </param>
         /// <param name="justEnd"> ジャスト終了位置。 </param>
-        /// <param name="isValid"> 有効なジャスト範囲か。 </param>
-        private static void DrawJustMarker(Rect gaugeRect, float justStart, float justEnd, bool isValid)
+        private static void DrawJustMarker(Rect gaugeRect, float justStart, float justEnd)
         {
-            if (!isValid)
-            {
-                return;
-            }
-
             float start = Mathf.Clamp01(justStart / GAUGE_LENGTH_IN_BARS);
             float end = Mathf.Clamp01(justEnd / GAUGE_LENGTH_IN_BARS);
             Rect markerRect = new Rect(
@@ -156,16 +144,8 @@ namespace KillChord.Editor.Music
             return Color.HSVToRGB(hue, ZONE_COLOR_SATURATION, ZONE_COLOR_VALUE);
         }
 
-        private const string RANGE_DATA_PROPERTY_NAME = "_rangeData";
-        private const string BEAT_TYPE_PROPERTY_NAME = "BeatType";
-        private const string START_NORMALIZED_PROPERTY_NAME = "StartNormalized";
-        private const string END_NORMALIZED_PROPERTY_NAME = "EndNormalized";
-        private const string JUST_START_PROPERTY_NAME = "JustStartNormalized";
-        private const string JUST_END_PROPERTY_NAME = "JustEndNormalized";
-
         private const float GAUGE_LENGTH_IN_BARS = 1.2f;
         private const float SECTION_SPACING = 12f;
-        private const float WARNING_SPACING = 4f;
         private const float GAUGE_HEIGHT = 32f;
         private const float LABEL_AREA_HEIGHT = 40f;
         private const float MIN_LABEL_WIDTH = 70f;

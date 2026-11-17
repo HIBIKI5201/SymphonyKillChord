@@ -75,7 +75,8 @@ namespace KillChord.Runtime.InfraStructure.Player
                 Id, _pattern, _skillType, Level, _cooldownNumerator, _cooldownDenomimator,
                 EffectSpec, EffectParameterGrowths, _levelUpCosts, _animationKey,
                 MasterTextLocalizer.Localize(_displayName), MasterTextLocalizer.Localize(_skillDetail), MasterTextLocalizer.Localize(_tips), _icon, _effectDisplayMode,
-                new AttackRecoveryBeats(_recoveryBeats));
+                new AttackRecoveryBeats(_recoveryBeats),
+                BuildJustBonus());
         }
 
         /// <summary> スキルの攻撃硬直の既定値（拍数）。設定していないスキルはこの値を使う。 </summary>
@@ -142,6 +143,12 @@ namespace KillChord.Runtime.InfraStructure.Player
         [SerializeField, Min(0f), Tooltip("スキル発動時の攻撃硬直（拍数）。通常攻撃の硬直の代わりに使い、この間は移動・攻撃できない。")]
         private float _recoveryBeats = DEFAULT_RECOVERY_BEATS;
 
+        [SerializeField, Range(0f, 1f), Tooltip("Justボーナス：コマンドを全部通常で入力したときの効果の割合（n）。全部Justなら100%になり、その間はJustの数の割合で直線的に決まる。")]
+        private float _justBonusBaseRate = SkillJustBonus.DEFAULT_BASE_RATE;
+
+        [SerializeField, Tooltip("Justボーナスで強くするパラメータ。空欄の場合は、レベルアップで成長するパラメータ（成長設定が無ければダメージ倍率）を強くする。")]
+        private SkillEffectParameterId[] _justBonusTargetParameters = Array.Empty<SkillEffectParameterId>();
+
         /// <summary>
         ///     Inspector 設定からドメイン用パラメータ一覧を構築します。
         /// </summary>
@@ -160,6 +167,35 @@ namespace KillChord.Runtime.InfraStructure.Player
             }
 
             return result;
+        }
+
+        /// <summary>
+        ///     Inspector 設定からスキル入力のJustボーナスを構築します。
+        /// </summary>
+        /// <returns> Justボーナスの設定です。 </returns>
+        private SkillJustBonus BuildJustBonus()
+        {
+            if (_justBonusTargetParameters != null && _justBonusTargetParameters.Length > 0)
+            {
+                return new SkillJustBonus(_justBonusBaseRate, _justBonusTargetParameters);
+            }
+
+            // 指定が無い場合は、スキルの主な値として、レベルアップで成長するパラメータを強くする。
+            List<SkillEffectParameterId> targets = new();
+            if (_effectParameterGrowths != null)
+            {
+                for (int i = 0; i < _effectParameterGrowths.Length; i++)
+                {
+                    targets.Add(_effectParameterGrowths[i].Id);
+                }
+            }
+
+            if (targets.Count == 0)
+            {
+                targets.Add(SkillEffectParameterId.DamageMultiplier);
+            }
+
+            return new SkillJustBonus(_justBonusBaseRate, targets);
         }
 
         /// <summary>

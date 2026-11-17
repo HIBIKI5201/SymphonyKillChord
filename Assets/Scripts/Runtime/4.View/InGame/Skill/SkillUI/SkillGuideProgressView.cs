@@ -62,6 +62,17 @@ namespace KillChord.Runtime.View.InGame.Skill
             _getCurrentTime = getCurrentTime;
         }
 
+        /// <summary>
+        ///     拍子アイコンの大きさに倍率を掛ける。<see cref="Initialize"/> より前に呼ぶ。
+        ///     スキルゲージをリズムゲージより目立たせる試遊の案で使う。
+        /// </summary>
+        /// <param name="multiplier"> 掛ける倍率です。 </param>
+        public void MultiplyIconScale(float multiplier)
+        {
+            _leftIconImage.rectTransform.localScale *= multiplier;
+            _rightIconImage.rectTransform.localScale *= multiplier;
+        }
+
         /// <inheritdoc />
         public void SetVisible(bool visible)
         {

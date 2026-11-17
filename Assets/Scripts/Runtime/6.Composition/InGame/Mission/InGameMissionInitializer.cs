@@ -16,9 +16,11 @@ using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.Mission.StepEntryAction;
 using KillChord.Runtime.Domain.OutGame.Scenario;
+using KillChord.Runtime.Domain.Persistent.Experiment;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Mission;
 using KillChord.Runtime.InfraStructure.OutGame.Scenario;
+using KillChord.Runtime.InfraStructure.Persistent.Experiment;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.Persistent.Localization;
 using KillChord.Runtime.View;
@@ -191,7 +193,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 new MissionProgressRecorderController(
                     _moduleContainer.MissionRuntimeService.MissionProgress,
                     _moduleContainer.MissionEventController,
-                    _comboHudPresenter);
+                    _comboHudPresenter,
+                    IsExperimentEnabled(GaugeGazeExperimentFeature.JustOnlyCombo));
             recorderController.Bind(
                 playerModuleContainer.PlayerEntity,
                 playerModuleContainer.PlayerController,
@@ -304,7 +307,10 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
             _missionHudView.Initialize(missionHudViewModel);
             _missionLoopView.Initialize(missionEventController);
-            _comboHudView.Initialize(comboHudViewModel, _comboVisibleCount);
+            _comboHudView.Initialize(
+                comboHudViewModel,
+                _comboVisibleCount,
+                IsExperimentEnabled(GaugeGazeExperimentFeature.JustOnlyCombo));
 
             missionHudPresenter.Present();
 
@@ -530,6 +536,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private MissionDialogueViewModel _dialogueViewModel;
         private MissionScenarioController _scenarioController;
         private ComboHudPresenter _comboHudPresenter;
+        /// <summary> 試遊で切り替えるゲージ注視の改善案です。初めて使うときに読みます。 </summary>
+        private GaugeGazeExperimentSettings? _experimentSettings;
         private MissionDefinitionRepository _loadedMissionDefinitionRepository;
         private EnemyMissionKeyRepository _loadedEnemyMissionKeyRepository;
         private MissionDefinition _resolvedMissionDefinition;
@@ -925,6 +933,18 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     試遊で切り替えるゲージ注視の改善案が有効か判定します。設定は初めて使うときに読みます。
+        /// </summary>
+        /// <param name="feature"> 判定する案です。 </param>
+        /// <returns> 有効な場合はtrue。 </returns>
+        private bool IsExperimentEnabled(GaugeGazeExperimentFeature feature)
+        {
+            // PlayerPrefsはMonoBehaviourの生成中に読めないため、使う時点で読む。
+            _experimentSettings ??= new GaugeGazeExperimentSettingsStore().Load();
+            return _experimentSettings.Value.IsEnabled(feature);
         }
     }
 }

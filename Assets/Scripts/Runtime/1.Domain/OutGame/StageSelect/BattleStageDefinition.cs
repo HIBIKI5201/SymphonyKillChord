@@ -22,6 +22,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         /// <param name="missionId"> ミッションID。 </param>
         /// <param name="isTutorial"> チュートリアルステージの場合はtrue。 </param>
         /// <param name="enemyWaveDefinitionId"> 敵Wave定義ID。 </param>
+        /// <param name="hasTutorialGuide"> チュートリアルと同じ課題の案内（攻撃する拍子の強調など）を出す場合はtrue。 </param>
         public BattleStageDefinition(
             StageId stageId,
             string stageName,
@@ -32,7 +33,8 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             string battleSceneName,
             MissionId missionId,
             bool isTutorial,
-            EnemyWaveDefinitionId enemyWaveDefinitionId)
+            EnemyWaveDefinitionId enemyWaveDefinitionId,
+            bool hasTutorialGuide = false)
             : base(stageId, stageName, flavorText, firstClearReward, clearReward, targetSceneName)
         {
             if (string.IsNullOrWhiteSpace(battleSceneName))
@@ -56,6 +58,7 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
             _missionId = missionId;
             _isTutorial = isTutorial;
             _enemyWaveDefinitionId = enemyWaveDefinitionId;
+            _hasTutorialGuide = hasTutorialGuide;
         }
 
         /// <summary> ステージの種類。 </summary>
@@ -66,6 +69,11 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         public MissionId MissionId => _missionId;
         /// <summary> チュートリアルステージの場合はtrue。 </summary>
         public override bool IsTutorial => _isTutorial;
+        /// <summary>
+        ///     チュートリアルと同じ課題の案内を出す場合はtrue。
+        ///     最初のチュートリアルのほか、途中で新しい操作を教えるステージ（セカンドチュートリアル）も含む。
+        /// </summary>
+        public bool HasTutorialGuide => _isTutorial || _hasTutorialGuide;
         /// <summary> 敵Wave定義ID。 </summary>
         public EnemyWaveDefinitionId EnemyWaveDefinitionId => _enemyWaveDefinitionId;
 
@@ -73,5 +81,6 @@ namespace KillChord.Runtime.Domain.OutGame.StageSelect
         private readonly MissionId _missionId;
         private readonly bool _isTutorial;
         private readonly EnemyWaveDefinitionId _enemyWaveDefinitionId;
+        private readonly bool _hasTutorialGuide;
     }
 }
