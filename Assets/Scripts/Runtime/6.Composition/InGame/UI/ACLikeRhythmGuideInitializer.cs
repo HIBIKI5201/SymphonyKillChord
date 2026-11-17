@@ -153,9 +153,10 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 experimentSettings.IsEnabled(GaugeGazeExperimentFeature.GaugeWaveReduction) ? _reducedWaveScale : 1f);
             _rhythmGuideView.SetOneBarGaugeMode(
                 experimentSettings.IsEnabled(GaugeGazeExperimentFeature.OneBarGauge));
+            ApplyLookExperiment(experimentSettings);
 
             _rhythmGuideViewModel?.Dispose();
-            _rhythmGuideViewModel = new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter);
+            _rhythmGuideViewModel = new ACLikeRhythmGuideViewModel(_rhythmGuideView, presenter, _ringView);
 
             if (_rhythmGuidePostEffectView == null || _effectConfig == null)
             {
@@ -259,6 +260,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             _playerDamageHapticsPresenter?.Dispose();
             _playerDamageHapticsPresenter = null;
             ReleaseLoadedHapticsConfig();
+            DestroyRingView();
 
             if (_gamepadHapticsView != null)
             {
@@ -289,6 +291,67 @@ namespace KillChord.Runtime.Composition.InGame.UI
         private PlayerDamageHapticsPresenter _playerDamageHapticsPresenter;
         private GamepadHapticsView _gamepadHapticsView;
         private GamepadHapticsConfig _loadedHapticsConfig;
+        private RhythmGuideRingView _ringView;
+
+        /// <summary>
+        ///     試遊で見比べるリズムUIの見た目の案を、最初の描画の前に反映する。
+        /// </summary>
+        /// <param name="experimentSettings"> 試遊の案の設定。 </param>
+        private void ApplyLookExperiment(GaugeGazeExperimentSettings experimentSettings)
+        {
+            _rhythmGuideView.SetLookOptions(
+                experimentSettings.IsEnabled(GaugeGazeExperimentFeature.InwardGauge),
+                experimentSettings.IsEnabled(GaugeGazeExperimentFeature.TwentyFourStepGauge),
+                experimentSettings.IsEnabled(GaugeGazeExperimentFeature.JustBarDesign));
+
+            // スキル入力の表示の初期化で動かし済みの場合、ここでは動かない。
+            if (experimentSettings.IsEnabled(GaugeGazeExperimentFeature.CenteredGauge))
+            {
+                _rhythmGuideView.MoveToScreenCenter();
+            }
+
+            DestroyRingView();
+            bool isLargeRing = experimentSettings.IsEnabled(GaugeGazeExperimentFeature.LargeRing);
+            bool isScreenEdgeRing = experimentSettings.IsEnabled(GaugeGazeExperimentFeature.ScreenEdgeRing);
+            _rhythmGuideView.SetGaugeHidden(isLargeRing || isScreenEdgeRing);
+            if (!isLargeRing && !isScreenEdgeRing)
+            {
+                return;
+            }
+
+            // リングは画面全体を使うため、ゲージと同じキャンバスの一番上の階層に置く。
+            Canvas canvas = _rhythmGuideView.GetComponentInParent<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogWarning($"[{nameof(ACLikeRhythmGuideInitializer)}] キャンバスが見つからないため、リング型の案を出せません。", this);
+                _rhythmGuideView.SetGaugeHidden(false);
+                return;
+            }
+
+            GameObject ringObject = new GameObject(nameof(RhythmGuideRingView), typeof(RectTransform));
+            ringObject.layer = _rhythmGuideView.gameObject.layer;
+            ringObject.transform.SetParent(canvas.rootCanvas.transform, false);
+            _ringView = ringObject.AddComponent<RhythmGuideRingView>();
+            _ringView.Initialize(
+                isScreenEdgeRing ? RhythmGuideRingShape.ScreenEdge : RhythmGuideRingShape.LargeCircle,
+                _rhythmGuideView.BeatColors,
+                _rhythmGuideView.LockedColor,
+                experimentSettings.IsEnabled(GaugeGazeExperimentFeature.OneBarGauge));
+        }
+
+        /// <summary>
+        ///     リング型の案で作ったViewを破棄する。
+        /// </summary>
+        private void DestroyRingView()
+        {
+            if (_ringView == null)
+            {
+                return;
+            }
+
+            Destroy(_ringView.gameObject);
+            _ringView = null;
+        }
 
         /// <summary>
         ///     リズムガイドViewをゲームプレイ開始対象へ登録します。

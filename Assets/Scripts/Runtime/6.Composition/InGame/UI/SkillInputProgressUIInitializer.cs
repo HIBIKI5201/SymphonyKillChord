@@ -43,9 +43,16 @@ namespace KillChord.Runtime.Composition.InGame.Skill
 
             _inputProgressViewSetting = _skillInputProgressUIConfig.Create();
 
+            GaugeGazeExperimentSettings experimentSettings = new GaugeGazeExperimentSettingsStore().Load();
+
+            // 試遊の案：リズムゲージを画面の中央に置く。スキル入力の表示はゲージと同じだけ動かして、並びを保つ。
+            if (experimentSettings.IsEnabled(GaugeGazeExperimentFeature.CenteredGauge))
+            {
+                _viewRoot.position += _rhythmGuideView.MoveToScreenCenter();
+            }
+
             // 試遊の案：スキルゲージをリズムゲージの上に置き、アイコンを大きくして目立たせる。
-            _isEmphasisEnabled = new GaugeGazeExperimentSettingsStore().Load()
-                .IsEnabled(GaugeGazeExperimentFeature.SkillGaugeEmphasis);
+            _isEmphasisEnabled = experimentSettings.IsEnabled(GaugeGazeExperimentFeature.SkillGaugeEmphasis);
             if (_isEmphasisEnabled)
             {
                 SkillGuideProgressLayout.MoveAboveGauge(_viewRoot, _rhythmGuideView.transform, _emphasisGap);

@@ -12,10 +12,15 @@ namespace KillChord.Runtime.View.InGame.Music
         /// <summary>
         ///     ビューとプレゼンターを指定して生成し、ビューの更新イベントを購読する。
         /// </summary>
-        public ACLikeRhythmGuideViewModel(ACLikeRhythmGuideView view, RhythmGuidePresenter presenter)
+        /// <param name="view"> バーのリズムガイドのViewです。 </param>
+        /// <param name="presenter"> リズムガイドの表示内容を作るPresenterです。 </param>
+        /// <param name="ringView"> 試遊で見比べるリング型のViewです。使わない場合はnull。 </param>
+        public ACLikeRhythmGuideViewModel(ACLikeRhythmGuideView view, RhythmGuidePresenter presenter,
+            RhythmGuideRingView ringView = null)
         {
             this._view = view;
             this._presenter = presenter;
+            this._ringView = ringView;
 
             view.OnUpdate += Update;
             view.OnStartGameplay += StartGameplay;
@@ -78,6 +83,18 @@ namespace KillChord.Runtime.View.InGame.Music
             _view.ConfigureZones(dto.Zones, dto.GuideLengthInBars);
             _view.SetAlpha(dto.HasTarget);
             _view.SetBeatsOffset(dto.IndicatorNormalized, dto.IsJustTiming, dto.CurrentBeatCount);
+
+            // リング型の案では、同じ表示内容をリングにも渡す。
+            if (_ringView == null)
+            {
+                return;
+            }
+
+            _ringView.SetTargetBeatCount(dto.TargetBeatCount);
+            _ringView.SetLockedRange(dto.LockedBarProgress);
+            _ringView.ConfigureZones(dto.Zones, dto.GuideLengthInBars);
+            _ringView.SetAlpha(dto.HasTarget);
+            _ringView.SetBeatsOffset(dto.IndicatorNormalized, dto.IsJustTiming);
         }
 
         private bool _isPlaying;
@@ -85,5 +102,6 @@ namespace KillChord.Runtime.View.InGame.Music
 
         private readonly ACLikeRhythmGuideView _view;
         private readonly RhythmGuidePresenter _presenter;
+        private readonly RhythmGuideRingView _ringView;
     }
 }
