@@ -9,102 +9,97 @@ namespace KillChord.Tests.EditMode.Music
     public sealed class MusicPlaybackHoldTests
     {
         /// <summary>
-        ///     開始すると、ずれに1小節分が加わり停止状態になることを確認します。
+        ///     開始すると、再開する時刻を覚えて停止状態になることを確認します。
         /// </summary>
         [Test]
-        public void Begin_AddsShiftAndHolds()
+        public void Begin_HoldsUntilResumeTime()
         {
             MusicPlaybackHold hold = new();
 
-            hold.Begin(HELD_PLAY_TIME, BAR_LENGTH, TIMEOUT);
+            hold.Begin(RESUME_PLAY_TIME, TIMEOUT);
 
             Assert.That(hold.IsHolding, Is.True);
-            Assert.That(hold.ShiftSeconds, Is.EqualTo(BAR_LENGTH).Within(TOLERANCE));
-            Assert.That(hold.HeldPlayTime, Is.EqualTo(HELD_PLAY_TIME).Within(TOLERANCE));
+            Assert.That(hold.ResumePlayTime, Is.EqualTo(RESUME_PLAY_TIME).Within(TOLERANCE));
         }
 
         /// <summary>
-        ///     止めた時刻へ届く前は解除せず、届いたときに解除してずれを残すことを確認します。
+        ///     再開する時刻へ届く前は解除せず、届いたときに解除することを確認します。
         /// </summary>
         [Test]
-        public void TryRelease_ReleasesWhenPlayTimeReachesHeldTime()
+        public void TryRelease_ReleasesWhenPlayTimeReachesResumeTime()
         {
             MusicPlaybackHold hold = new();
-            hold.Begin(HELD_PLAY_TIME, BAR_LENGTH, TIMEOUT);
+            hold.Begin(RESUME_PLAY_TIME, TIMEOUT);
 
-            Assert.That(hold.TryRelease(HELD_PLAY_TIME - BEAT_LENGTH, FRAME), Is.False);
+            Assert.That(hold.TryRelease(RESUME_PLAY_TIME - BEAT_LENGTH, FRAME), Is.False);
             Assert.That(hold.IsHolding, Is.True);
 
-            Assert.That(hold.TryRelease(HELD_PLAY_TIME, FRAME), Is.True);
+            Assert.That(hold.TryRelease(RESUME_PLAY_TIME, FRAME), Is.True);
             Assert.That(hold.IsHolding, Is.False);
-            Assert.That(hold.ShiftSeconds, Is.EqualTo(BAR_LENGTH).Within(TOLERANCE));
         }
 
         /// <summary>
-        ///     実時間の制限を過ぎたら、加えたずれを取り消して解除することを確認します。
+        ///     実時間の制限を過ぎたら、届いていなくても解除することを確認します。
         /// </summary>
         [Test]
-        public void TryRelease_CancelsShiftAfterTimeout()
+        public void TryRelease_ReleasesAfterTimeout()
         {
             MusicPlaybackHold hold = new();
-            hold.Begin(HELD_PLAY_TIME, BAR_LENGTH, TIMEOUT);
+            hold.Begin(RESUME_PLAY_TIME, TIMEOUT);
 
-            bool isReleased = hold.TryRelease(HELD_PLAY_TIME - BAR_LENGTH, TIMEOUT);
+            bool isReleased = hold.TryRelease(RESUME_PLAY_TIME - BAR_LENGTH, TIMEOUT);
 
             Assert.That(isReleased, Is.True);
             Assert.That(hold.IsHolding, Is.False);
-            Assert.That(hold.ShiftSeconds, Is.EqualTo(0d).Within(TOLERANCE));
         }
 
         /// <summary>
-        ///     ずれは解除後も積み重なり、取り消しは直前に加えた分だけを戻すことを確認します。
+        ///     取りやめると停止状態が消え、もう一度開始できることを確認します。
         /// </summary>
         [Test]
-        public void Cancel_RevertsOnlyLatestShift()
+        public void Cancel_AllowsBeginAgain()
         {
             MusicPlaybackHold hold = new();
-            hold.Begin(HELD_PLAY_TIME, BAR_LENGTH, TIMEOUT);
-            hold.TryRelease(HELD_PLAY_TIME, FRAME);
+            hold.Begin(RESUME_PLAY_TIME, TIMEOUT);
 
-            hold.Begin(HELD_PLAY_TIME + BAR_LENGTH, BAR_LENGTH, TIMEOUT);
             hold.Cancel();
+            hold.Begin(RESUME_PLAY_TIME + BAR_LENGTH, TIMEOUT);
 
-            Assert.That(hold.IsHolding, Is.False);
-            Assert.That(hold.ShiftSeconds, Is.EqualTo(BAR_LENGTH).Within(TOLERANCE));
+            Assert.That(hold.IsHolding, Is.True);
+            Assert.That(hold.ResumePlayTime, Is.EqualTo(RESUME_PLAY_TIME + BAR_LENGTH).Within(TOLERANCE));
         }
 
         /// <summary>
-        ///     初期化でずれと停止状態が消えることを確認します。
+        ///     初期化で停止状態が消えることを確認します。
         /// </summary>
         [Test]
-        public void Reset_ClearsShiftAndHold()
+        public void Reset_ClearsHold()
         {
             MusicPlaybackHold hold = new();
-            hold.Begin(HELD_PLAY_TIME, BAR_LENGTH, TIMEOUT);
+            hold.Begin(RESUME_PLAY_TIME, TIMEOUT);
 
             hold.Reset();
 
             Assert.That(hold.IsHolding, Is.False);
-            Assert.That(hold.ShiftSeconds, Is.EqualTo(0d).Within(TOLERANCE));
+            Assert.That(hold.ResumePlayTime, Is.EqualTo(0d).Within(TOLERANCE));
         }
 
         /// <summary>
-        ///     止めた時刻までに通過する拍の数を、3・2・1・0の順に返すことを確認します。
-        ///     止めた時刻は拍の途中（2拍目の0.25拍後）とします。
+        ///     小節の頭から1小節鳴らすとき、残りの拍の数を4・3・2・1・0の順に返すことを確認します。
         /// </summary>
         [Test]
-        public void CalculateRemainingBeatCount_CountsBeatBoundariesUntilHeldTime()
+        public void CalculateRemainingBeatCount_CountsBeatsOfOneBar()
         {
             MusicPlaybackHold hold = new();
-            double heldPlayTime = BEAT_LENGTH * 2.25d;
-            hold.Begin(heldPlayTime, BAR_LENGTH, TIMEOUT);
+            double resumePlayTime = BAR_LENGTH * 3d;
+            hold.Begin(resumePlayTime, TIMEOUT);
 
-            // 1小節前（-2拍目の0.25拍後）は、まだ最初の拍を通過していない。
-            Assert.That(hold.CalculateRemainingBeatCount(heldPlayTime - BAR_LENGTH, BEAT_LENGTH, 0d), Is.EqualTo(4));
-            Assert.That(hold.CalculateRemainingBeatCount(BEAT_LENGTH * -1d, BEAT_LENGTH, 0d), Is.EqualTo(3));
-            Assert.That(hold.CalculateRemainingBeatCount(0d, BEAT_LENGTH, 0d), Is.EqualTo(2));
-            Assert.That(hold.CalculateRemainingBeatCount(BEAT_LENGTH, BEAT_LENGTH, 0d), Is.EqualTo(1));
-            Assert.That(hold.CalculateRemainingBeatCount(BEAT_LENGTH * 2d, BEAT_LENGTH, 0d), Is.EqualTo(0));
+            double start = resumePlayTime - BAR_LENGTH;
+            Assert.That(hold.CalculateRemainingBeatCount(start, BEAT_LENGTH, 0d), Is.EqualTo(4));
+            Assert.That(hold.CalculateRemainingBeatCount(start + BEAT_LENGTH, BEAT_LENGTH, 0d), Is.EqualTo(3));
+            Assert.That(hold.CalculateRemainingBeatCount(start + BEAT_LENGTH * 2d, BEAT_LENGTH, 0d), Is.EqualTo(2));
+            Assert.That(hold.CalculateRemainingBeatCount(start + BEAT_LENGTH * 3d, BEAT_LENGTH, 0d), Is.EqualTo(1));
+            Assert.That(hold.CalculateRemainingBeatCount(resumePlayTime, BEAT_LENGTH, 0d), Is.EqualTo(0));
         }
 
         /// <summary>
@@ -120,7 +115,7 @@ namespace KillChord.Tests.EditMode.Music
 
         private const double BEAT_LENGTH = 0.5d;
         private const double BAR_LENGTH = BEAT_LENGTH * 4d;
-        private const double HELD_PLAY_TIME = 10.3d;
+        private const double RESUME_PLAY_TIME = 12d;
         private const double TIMEOUT = 5d;
         private const double FRAME = 0.016d;
         private const double TOLERANCE = 1e-9d;

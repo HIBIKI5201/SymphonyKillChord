@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Adaptor.InGame.Sequence;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Domain.InGame.Battle;
+using KillChord.Runtime.View.Persistent.Audio;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using R3;
@@ -49,6 +50,9 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         {
             _holdSubscription?.Dispose();
             _holdSubscription = null;
+
+            // ポーズ中に戦闘を抜けても、ボイスを止めたままにしない。
+            _categoryPauser.Dispose();
         }
 
         /// <inheritdoc/>
@@ -61,6 +65,8 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             // UIと既存Optionを残し、決定・取消と同じボタンの攻撃・回避入力を停止する。
             _inputMapController?.EnableOnly(InputMapNames.Common);
             _musicPlayer.PauseBGM();
+            _categoryPauser.Pause();
+            _hasRestartedBgmSincePause = false;
             Time.timeScale = 0f;
             _playClock?.Stop(Time.unscaledTime);
             _isPaused = true;
@@ -80,11 +86,20 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 // 先に状態を戻し、同期再開の通知で二重に再開しないようにする。
                 _isCountingDown = false;
                 _musicSyncController?.CancelResumeHold();
-                ResumeGameplay();
-                return;
             }
 
-            _musicPlayer.ResumeBGM();
+            // 鳴らし直した後は、BGMがポーズした位置からずれているので、その位置から鳴らし直す。
+            if (_hasRestartedBgmSincePause
+                && _musicSyncController != null
+                && _musicSyncController.TryGetCurrentSongPosition(out double songPositionSeconds))
+            {
+                _musicPlayer.RestartBGMAt(songPositionSeconds);
+            }
+            else
+            {
+                _musicPlayer.ResumeBGM();
+            }
+
             ResumeGameplay();
         }
 
@@ -97,13 +112,15 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
 
             // 予約済みの行動やゲージを進めないよう、BGMを鳴らす前に同期を止める。
-            if (!_musicSyncController.TryBeginResumeHold())
+            if (!_musicSyncController.TryBeginResumeHold(out double restartSongPositionSeconds))
             {
                 return false;
             }
 
+            // 再開する小節の1小節前から鳴らし直し、カウントダウンを曲の拍に乗せる。
             _isCountingDown = true;
-            _musicPlayer.ResumeBGM();
+            _hasRestartedBgmSincePause = true;
+            _musicPlayer.RestartBGMAt(restartSongPositionSeconds);
             return true;
         }
 
@@ -120,8 +137,13 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _musicPlayer.PauseBGM();
         }
 
+        /// <summary> ポーズ中にまとめて止めるCRIのカテゴリ。効果音はポーズ画面の操作音と同じカテゴリなので止めない。 </summary>
+        private static readonly string[] PAUSED_AUDIO_CATEGORIES = { "VOICE" };
+
         private bool _isPaused;
         private bool _isCountingDown;
+        private bool _hasRestartedBgmSincePause;
+        private readonly AudioCategoryPauser _categoryPauser = new(PAUSED_AUDIO_CATEGORIES);
         private readonly UnityInputMapController _inputMapController;
         private readonly MusicPlayer _musicPlayer;
         private readonly PausableClock _playClock;
@@ -152,6 +174,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             // シナリオ終了経路もExitScenarioInputModeの後にここへ到達する。
             _inputMapController?.EnableCommonWith(InputMapNames.InGame);
             Time.timeScale = 1f;
+            _categoryPauser.Resume();
             _playClock?.Start(Time.unscaledTime);
             _isPaused = false;
         }

@@ -58,6 +58,7 @@ namespace KillChord.Runtime.View.InGame.Music
         private bool _hasMusicCue;
         private double _testBpm;
         private double _beatOffsetSeconds;
+        private double _appliedLoopLengthSeconds = double.NaN;
         private MusicPlayer _musicPlayer;
         private MusicViewModel _musicViewModel;
         private MusicSyncState _musicSyncState;
@@ -81,14 +82,21 @@ namespace KillChord.Runtime.View.InGame.Music
                 return;
             }
 
-            double playbackTime = _musicPlayer.Time;
-            if (playbackTime < 0d)
+            if (!_musicPlayer.TryGetSongPosition(out double songPositionSeconds))
             {
                 _musicSyncController.ResetPlayback();
                 return;
             }
 
-            _musicSyncController.Tick(playbackTime, Time.unscaledDeltaTime);
+            // ループの長さはBGMの切り替え後に決まるため、変わったときに同期へ反映する。
+            double loopLengthSeconds = _musicPlayer.LoopLengthSeconds;
+            if (loopLengthSeconds != _appliedLoopLengthSeconds)
+            {
+                _appliedLoopLengthSeconds = loopLengthSeconds;
+                _musicSyncController.SetLoopLength(loopLengthSeconds);
+            }
+
+            _musicSyncController.Tick(songPositionSeconds, Time.unscaledDeltaTime);
         }
 
         /// <summary>
@@ -100,6 +108,9 @@ namespace KillChord.Runtime.View.InGame.Music
             _hasMusicCue = !string.IsNullOrEmpty(cueName);
             _musicSyncController.ResetPlayback();
             _musicSyncState.SetRhythm(_testBpm, _beatOffsetSeconds);
+
+            // BPMを設定し直したので、次のフレームでループの長さから小節のグリッドを作り直す。
+            _appliedLoopLengthSeconds = double.NaN;
         }
     }
 }

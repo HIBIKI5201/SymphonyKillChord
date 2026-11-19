@@ -3,11 +3,13 @@ using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Constant;
 using R3;
+using System;
 
 namespace KillChord.Runtime.Adaptor.InGame.Music
 {
     /// <summary>
     ///     音楽との同期タイミングの更新を制御するコントローラークラス。
+    ///     曲の再生位置をゲーム側の音楽時間へ換算し、同期状態と判定処理へ渡す。
     /// </summary>
     public class MusicSyncController
     {
@@ -37,31 +39,46 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         public ReadOnlyReactiveProperty<int> ResumeRemainingBeatCount => _resumeRemainingBeatCount;
 
         /// <summary>
-        ///     毎フレームの更新処理を行う。
-        ///     ユーザー設定のリズム判定オフセットを再生時間へ加算してから同期状態・判定処理へ渡す。
-        ///     ポーズ解除のカウントダウン中は、ゲーム側の時間がポーズした時刻へ戻るまで同期を止める。
+        ///     再生中の曲のループの長さを設定する。小節の長さは同期状態のBPMから求める。
+        ///     ゲーム側の拍のグリッドは、ループの頭が来るたびに小節の頭へそろえ直す。
         /// </summary>
-        /// <param name="playTime"> 現在の再生時間。 </param>
-        /// <param name="unscaledDeltaSeconds"> 前フレームからの実時間の経過秒数。 </param>
-        public void Tick(double playTime, double unscaledDeltaSeconds = 0d)
+        /// <param name="loopLengthSeconds"> ループの長さ（秒）。0以下ならループしない曲として扱う。 </param>
+        public void SetLoopLength(double loopLengthSeconds)
         {
+            _timeline = new MusicLoopTimeline(loopLengthSeconds, GetBarLength());
+        }
+
+        /// <summary>
+        ///     毎フレームの更新処理を行う。
+        ///     曲の再生位置をゲーム側の音楽時間へ換算し、ユーザー設定のオフセットを加えてから同期状態・判定処理へ渡す。
+        ///     ポーズ解除のカウントダウン中は、ゲーム側の時間が再開する時刻へ届くまで同期を止める。
+        /// </summary>
+        /// <param name="songPositionSeconds"> 曲の頭からの通しの再生位置（秒）。 </param>
+        /// <param name="unscaledDeltaSeconds"> 前フレームからの実時間の経過秒数。 </param>
+        public void Tick(double songPositionSeconds, double unscaledDeltaSeconds = 0d)
+        {
+            double adjustedPlayTime = ToAdjustedPlayTime(songPositionSeconds);
+
             if (_hold.IsHolding)
             {
-                double holdPlayTime = ToAdjustedPlayTime(playTime);
-                if (!_hold.TryRelease(holdPlayTime, unscaledDeltaSeconds))
+                if (!_hold.TryRelease(adjustedPlayTime, unscaledDeltaSeconds))
                 {
                     _resumeRemainingBeatCount.Value = _hold.CalculateRemainingBeatCount(
-                        holdPlayTime,
+                        adjustedPlayTime,
                         _musicSyncState.BeatLength,
                         _musicSyncState.BeatOffsetSeconds);
                     return;
                 }
 
-                // 解除したフレームは、ポーズした時刻から続けて同期を進める。
                 PublishHoldState();
             }
 
-            double adjustedPlayTime = ToAdjustedPlayTime(playTime);
+            // ループの継ぎ目や再生し直しの誤差でゲーム側の時間が戻らないよう、前回の時刻より前へは進めない。
+            if (_hasTicked && adjustedPlayTime < _lastAdjustedPlayTime)
+            {
+                adjustedPlayTime = _lastAdjustedPlayTime;
+            }
+
             _lastAdjustedPlayTime = adjustedPlayTime;
             _hasTicked = true;
 
@@ -70,27 +87,41 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         }
 
         /// <summary>
-        ///     BGMを先に再生してカウントダウンするために、ゲーム側の同期を止める。
-        ///     BGMが1小節進む間に、ゲーム側の時間がポーズした時刻へ戻るよう換算をずらす。
+        ///     ポーズ解除のカウントダウンのために、ゲーム側の同期を止める。
+        ///     再開はポーズした時刻の次の小節の頭とし、その1小節前からBGMを鳴らし直す。
         /// </summary>
+        /// <param name="restartSongPositionSeconds"> BGMを鳴らし直す曲の再生位置（秒）。 </param>
         /// <returns> 同期を止めた場合はtrue。拍を求められない、またはすでに止めている場合はfalse。 </returns>
-        public bool TryBeginResumeHold()
+        public bool TryBeginResumeHold(out double restartSongPositionSeconds)
         {
-            double beatLength = _musicSyncState.BeatLength;
-            if (_hold.IsHolding || !_hasTicked || beatLength <= 0d)
+            restartSongPositionSeconds = 0d;
+            double barLength = GetBarLength();
+            if (_hold.IsHolding || !_hasTicked || barLength <= 0d)
             {
                 return false;
             }
 
-            // 小節単位でずらし、曲の小節頭とゲーム側の小節頭を揃えたままにする。
-            double barLength = beatLength * MusicConstants.STANDARD_BEATS_PER_BAR;
-            _hold.Begin(_lastAdjustedPlayTime, barLength, barLength * HOLD_TIMEOUT_BAR_COUNT + HOLD_TIMEOUT_MARGIN_SECONDS);
+            double resumePlayTime = ResolveResumePlayTime(_lastAdjustedPlayTime, barLength);
+            restartSongPositionSeconds = ToSongPosition(resumePlayTime - barLength);
+            _hold.Begin(resumePlayTime, barLength * HOLD_TIMEOUT_BAR_COUNT + HOLD_TIMEOUT_MARGIN_SECONDS);
             PublishHoldState();
             return true;
         }
 
         /// <summary>
-        ///     カウントダウンを取りやめ、加えたずれを取り消して同期の停止を解除する。
+        ///     いまのゲーム側の時刻に当たる曲の再生位置を求める。
+        ///     カウントダウンを取りやめたあと、カウントダウンなしで再開するときに使う。
+        /// </summary>
+        /// <param name="songPositionSeconds"> 曲の再生位置（秒）。 </param>
+        /// <returns> 一度でも同期を進めていればtrue。 </returns>
+        public bool TryGetCurrentSongPosition(out double songPositionSeconds)
+        {
+            songPositionSeconds = _hasTicked ? ToSongPosition(_lastAdjustedPlayTime) : 0d;
+            return _hasTicked;
+        }
+
+        /// <summary>
+        ///     カウントダウンを取りやめ、同期の停止を解除する。ゲーム側の時刻はポーズした時刻のまま残す。
         /// </summary>
         public void CancelResumeHold()
         {
@@ -111,14 +142,18 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             _musicSyncService.ResetPlayback();
             _hold.Reset();
             _hasTicked = false;
+            _lastAdjustedPlayTime = 0d;
             PublishHoldState();
         }
 
-        /// <summary> 実時間でこの小節数を過ぎても同期が戻らないときは、ずれを取り消して再開する。 </summary>
+        /// <summary> 実時間でこの小節数を過ぎても同期が戻らないときは、そのまま再開する。 </summary>
         private const double HOLD_TIMEOUT_BAR_COUNT = 2d;
 
         /// <summary> 同期の停止を打ち切るまでの時間へ加える余裕（秒）。 </summary>
         private const double HOLD_TIMEOUT_MARGIN_SECONDS = 1d;
+
+        /// <summary> 小節の頭とみなす誤差（小節単位）。 </summary>
+        private const double BAR_SNAP_EPSILON = 1e-6d;
 
         private readonly MusicSyncState _musicSyncState;
         private readonly IMusicSyncService _musicSyncService;
@@ -126,18 +161,61 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         private readonly MusicPlaybackHold _hold = new();
         private readonly ReactiveProperty<bool> _isResumeHolding = new(false);
         private readonly ReactiveProperty<int> _resumeRemainingBeatCount = new(0);
+        private MusicLoopTimeline _timeline;
         private double _lastAdjustedPlayTime;
         private bool _hasTicked;
 
         /// <summary>
-        ///     音源の再生時間を、ずれと判定オフセットを反映したゲーム側の時間へ換算する。
+        ///     ポーズした時刻から、ゲーム側の同期を再開する時刻を決める。
+        ///     カウントダウンが小節の1〜4拍目に乗るよう、次の小節の頭へそろえる。
         /// </summary>
-        /// <param name="playTime"> 音源の再生時間。 </param>
-        /// <returns> ゲーム側の再生時間。 </returns>
-        private double ToAdjustedPlayTime(double playTime)
+        /// <param name="pausedPlayTime"> ポーズした時刻（ゲーム側の音楽時間）。 </param>
+        /// <param name="barLength"> 1小節の長さ（秒）。 </param>
+        /// <returns> 同期を再開する時刻。 </returns>
+        private double ResolveResumePlayTime(double pausedPlayTime, double barLength)
         {
-            double rhythmOffsetSeconds = _environmentSettingsViewModel?.RhythmOffsetSeconds.CurrentValue ?? 0d;
-            return playTime - _hold.ShiftSeconds + rhythmOffsetSeconds;
+            double beatOffsetSeconds = _musicSyncState.BeatOffsetSeconds;
+            double barCount = Math.Ceiling((pausedPlayTime - beatOffsetSeconds) / barLength - BAR_SNAP_EPSILON);
+            return beatOffsetSeconds + Math.Max(0d, barCount) * barLength;
+        }
+
+        /// <summary>
+        ///     曲の再生位置を、ループと判定オフセットを反映したゲーム側の時間へ換算する。
+        /// </summary>
+        /// <param name="songPositionSeconds"> 曲の頭からの通しの再生位置（秒）。 </param>
+        /// <returns> ゲーム側の音楽時間。 </returns>
+        private double ToAdjustedPlayTime(double songPositionSeconds)
+        {
+            return _timeline.ToGameTime(songPositionSeconds) + GetRhythmOffsetSeconds();
+        }
+
+        /// <summary>
+        ///     ゲーム側の時間を、曲の再生位置へ換算する。曲の頭より前は頭として扱う。
+        /// </summary>
+        /// <param name="adjustedPlayTime"> ゲーム側の音楽時間。 </param>
+        /// <returns> 曲の頭からの通しの再生位置（秒）。 </returns>
+        private double ToSongPosition(double adjustedPlayTime)
+        {
+            double songPosition = _timeline.ToSongPosition(adjustedPlayTime - GetRhythmOffsetSeconds());
+            return Math.Max(0d, songPosition);
+        }
+
+        /// <summary>
+        ///     ユーザー設定のリズム判定オフセットを取得する。BGMとゲーム全体の時間の差として使う。
+        /// </summary>
+        /// <returns> オフセット（秒）。 </returns>
+        private double GetRhythmOffsetSeconds()
+        {
+            return _environmentSettingsViewModel?.RhythmOffsetSeconds.CurrentValue ?? 0d;
+        }
+
+        /// <summary>
+        ///     同期状態のBPMから1小節の長さを求める。
+        /// </summary>
+        /// <returns> 1小節の長さ（秒）。BPMが未設定なら0。 </returns>
+        private double GetBarLength()
+        {
+            return _musicSyncState.BeatLength * MusicConstants.STANDARD_BEATS_PER_BAR;
         }
 
         /// <summary>

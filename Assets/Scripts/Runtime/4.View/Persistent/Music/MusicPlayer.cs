@@ -3,12 +3,14 @@ using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Music;
 using R3;
+using System;
 using UnityEngine;
 
 namespace KillChord.Runtime.View.Persistent.Music
 {
     /// <summary>
     ///     音楽再生の実装を行うViewクラス。
+    ///     BGMは音声同期タイマー付きのプレーヤーで鳴らし、実際に鳴った位置を曲の再生位置として返す。
     /// </summary>
     [RequireComponent(typeof(CriAtomSource)), DefaultExecutionOrder(-1000)]
     [AddComponentMenu("KillChord/View/Music/MusicPlayer")]
@@ -17,8 +19,8 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// <summary> 音楽用ビューモデル。 </summary>
         public MusicViewModel MusicVM => _musicVm;
 
-        /// <summary> 現在の曲の累計再生時間を取得。 </summary>
-        public double Time => _playback.time / MILLISECONDS_PER_SECOND;
+        /// <summary> 再生中の曲のループの長さ（秒）。分からない場合は0。 </summary>
+        public double LoopLengthSeconds => _loopLengthSeconds;
 
         /// <summary>
         ///     ビューモデルをバインドする。
@@ -32,12 +34,20 @@ namespace KillChord.Runtime.View.Persistent.Music
 
         /// <summary>
         ///     初期化処理を行う。
+        ///     CriAtomSourceはキューシート名と元の音量の設定に使い、再生は音声同期タイマー付きのプレーヤーで行う。
         /// </summary>
         public void Initialize()
         {
             _cri = GetComponent<CriAtomSource>();
-            _cri.player?.SetVoicePriority(255);
+            if (_player == null)
+            {
+                CriAtomPlugin.InitializeLibrary();
+                _player = new CriAtomExPlayer(true);
+                _player.SetVoicePriority(VOICE_PRIORITY);
+            }
+
             CaptureBaseVolume();
+            ApplyVolume();
         }
 
         /// <summary>
@@ -79,25 +89,67 @@ namespace KillChord.Runtime.View.Persistent.Music
 
         /// <summary>
         ///     再生中BGMのセレクターラベルを設定する。
-        ///     実際の音の切り替えはCRI側のブロック境界で反映される。
+        ///     実際の音の切り替えはCRI側の遷移の設定に従って反映される。
         /// </summary>
         /// <param name="selectorName"> セレクター名。 </param>
         /// <param name="labelName"> 設定するセレクターラベル名。 </param>
         public void SetSelectorLabel(string selectorName, string labelName)
         {
-            if (_cri == null || string.IsNullOrEmpty(selectorName) || string.IsNullOrEmpty(labelName))
+            if (_player == null || string.IsNullOrEmpty(selectorName) || string.IsNullOrEmpty(labelName))
             {
                 return;
             }
 
-            _cri.player.SetSelectorLabel(selectorName, labelName);
+            _player.SetSelectorLabel(selectorName, labelName);
 
-            // 再生中のプレイバックへ反映する。未再生時はUpdateの対象が無く、
-            // 設定値は次のPlayに引き継がれるため呼び出さない。
+            // 再生中のプレイバックへ反映する。未再生時は設定値が次の再生に引き継がれる。
             if (_isPlaying)
             {
-                _cri.player.Update(_playback);
+                _player.Update(_playback);
             }
+        }
+
+        /// <summary>
+        ///     曲の頭からの通しの再生位置を取得する。ループしても巻き戻らない。
+        ///     実際に鳴った位置に合わせた時刻を使い、取れない場合は再生開始からの経過時間で代える。
+        /// </summary>
+        /// <param name="songPositionSeconds"> 曲の再生位置（秒）。 </param>
+        /// <returns> BGMを再生している場合はtrue。 </returns>
+        public bool TryGetSongPosition(out double songPositionSeconds)
+        {
+            songPositionSeconds = 0d;
+            if (!_isPlaying || _playback.GetStatus() == CriAtomExPlayback.Status.Removed)
+            {
+                return false;
+            }
+
+            long elapsedMilliseconds = _playback.GetTimeSyncedWithAudio();
+            if (elapsedMilliseconds < 0L)
+            {
+                // 発音前や同期タイマーが使えないときは、経過時間で代える。準備中は0になる。
+                elapsedMilliseconds = Math.Max(0L, _playback.GetTime());
+            }
+
+            // 同じ再生の中では、時刻を戻さない。
+            double songPosition = _startSongPositionSeconds + elapsedMilliseconds / MILLISECONDS_PER_SECOND;
+            _lastSongPositionSeconds = Math.Max(_lastSongPositionSeconds, songPosition);
+            songPositionSeconds = _lastSongPositionSeconds;
+            return true;
+        }
+
+        /// <summary>
+        ///     BGMを指定した曲の再生位置から鳴らし直す。ポーズ解除のカウントダウンで使う。
+        /// </summary>
+        /// <param name="songPositionSeconds"> 曲の頭からの通しの再生位置（秒）。 </param>
+        public void RestartBGMAt(double songPositionSeconds)
+        {
+            if (_player == null || string.IsNullOrEmpty(_currentCueName))
+            {
+                return;
+            }
+
+            StopPlayback();
+            StartPlayback(Math.Max(0d, songPositionSeconds));
         }
 
         /// <summary>
@@ -105,7 +157,10 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         public void PauseBGM()
         {
-            _cri.Pause(true);
+            if (_isPlaying)
+            {
+                _playback.Pause();
+            }
         }
 
         /// <summary>
@@ -113,28 +168,60 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         public void ResumeBGM()
         {
-            _cri.Pause(false);
+            if (_isPlaying)
+            {
+                _playback.Resume(CriAtomEx.ResumeMode.PausedPlayback);
+            }
         }
 
         private const double MILLISECONDS_PER_SECOND = 1000d;
+        private const double MICROSECONDS_PER_SECOND = 1000000d;
+        private const int VOICE_PRIORITY = 255;
 
         private CriAtomSource _cri;
+        private CriAtomExPlayer _player;
         private CriAtomExPlayback _playback;
         private MusicViewModel _musicVm;
+        private string _currentCueName = string.Empty;
         private bool _isPlaying;
+        private double _loopLengthSeconds;
+        private double _startSongPositionSeconds;
+        private double _lastSongPositionSeconds;
         private float _baseVolume = 1f;
         private float _volumeRatio = 1f;
         private float _presentationVolumeRatio = 1f;
         private bool _baseVolumeCaptured;
 
         /// <summary>
+        ///     プレーヤーを破棄する。
+        /// </summary>
+        private void OnDestroy()
+        {
+            if (_player == null)
+            {
+                return;
+            }
+
+            StopPlayback();
+            _player.Dispose();
+            _player = null;
+            CriAtomPlugin.FinalizeLibrary();
+        }
+
+        /// <summary>
         ///     最新の音量設定に演出用倍率を掛けてBGMへ反映します。
         /// </summary>
         private void ApplyVolume()
         {
-            if (_cri != null)
+            if (_player == null)
             {
-                _cri.volume = _baseVolume * _volumeRatio * _presentationVolumeRatio;
+                return;
+            }
+
+            _player.SetVolume(_baseVolume * _volumeRatio * _presentationVolumeRatio);
+            if (_isPlaying)
+            {
+                _player.Update(_playback);
             }
         }
 
@@ -144,12 +231,10 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// <param name="cueName"> 新しいキュー名。 </param>
         private void ChangeBgm(string cueName)
         {
-            if (_cri == null)
+            if (_player == null)
             {
                 return;
             }
-
-            string currentCueName = _cri.cueName;
 
             if (string.IsNullOrEmpty(cueName))
             {
@@ -158,7 +243,7 @@ namespace KillChord.Runtime.View.Persistent.Music
                 return;
             }
 
-            if (cueName == currentCueName)
+            if (cueName == _currentCueName)
             {
                 DevLog.Log("cueNameが元と同じです。");
                 return;
@@ -166,9 +251,17 @@ namespace KillChord.Runtime.View.Persistent.Music
 
             StopBgm();
 
-            _cri.cueName = cueName;
-            _playback = _cri.Play();
-            _isPlaying = true;
+            CriAtomExAcb acb = CriAtom.GetAcb(_cri.cueSheet);
+            if (acb == null)
+            {
+                Debug.LogError($"[{nameof(MusicPlayer)}] キューシート「{_cri.cueSheet}」を読めないため、BGM「{cueName}」を再生できません。", this);
+                return;
+            }
+
+            _player.SetCue(acb, cueName);
+            _currentCueName = cueName;
+            _loopLengthSeconds = ResolveLoopLengthSeconds(acb, cueName);
+            StartPlayback(0d);
         }
 
         /// <summary>
@@ -176,14 +269,62 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         private void StopBgm()
         {
-            if (_cri == null)
+            StopPlayback();
+            _currentCueName = string.Empty;
+            _loopLengthSeconds = 0d;
+        }
+
+        /// <summary>
+        ///     設定済みのキューを、指定した曲の再生位置から再生する。
+        /// </summary>
+        /// <param name="songPositionSeconds"> 曲の頭からの通しの再生位置（秒）。 </param>
+        private void StartPlayback(double songPositionSeconds)
+        {
+            // ループする曲は、ループの中の位置へ折り返してから開始位置にする。
+            double positionInLoop = _loopLengthSeconds > 0d
+                ? songPositionSeconds % _loopLengthSeconds
+                : songPositionSeconds;
+            _player.SetStartTimeMicro((long)Math.Round(positionInLoop * MICROSECONDS_PER_SECOND));
+            _playback = _player.Start();
+            _player.SetStartTimeMicro(0L);
+
+            _startSongPositionSeconds = songPositionSeconds;
+            _lastSongPositionSeconds = songPositionSeconds;
+            _isPlaying = true;
+        }
+
+        /// <summary>
+        ///     再生中のプレイバックを止める。
+        /// </summary>
+        private void StopPlayback()
+        {
+            if (!_isPlaying)
             {
                 return;
             }
 
-            _playback.Stop();
-            _cri.cueName = string.Empty;
+            _playback.Stop(true);
             _isPlaying = false;
+        }
+
+        /// <summary>
+        ///     キューの波形の長さから、ループの長さを求める。
+        ///     インゲームのBGMは波形全体をループする前提とする。
+        /// </summary>
+        /// <param name="acb"> キューシート。 </param>
+        /// <param name="cueName"> キュー名。 </param>
+        /// <returns> ループの長さ（秒）。取得できない場合は0。 </returns>
+        private double ResolveLoopLengthSeconds(CriAtomExAcb acb, string cueName)
+        {
+            if (!acb.GetWaveFormInfo(cueName, out CriAtomEx.WaveformInfo info)
+                || info.samplingRate <= 0
+                || info.numSamples <= 0L)
+            {
+                Debug.LogWarning($"[{nameof(MusicPlayer)}] BGM「{cueName}」の波形の長さを取得できないため、ループを考えずに同期します。", this);
+                return 0d;
+            }
+
+            return (double)info.numSamples / info.samplingRate;
         }
 
         /// <summary>
