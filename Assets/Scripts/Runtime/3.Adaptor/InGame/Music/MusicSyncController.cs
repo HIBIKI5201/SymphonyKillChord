@@ -88,7 +88,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
 
         /// <summary>
         ///     ポーズ解除のカウントダウンのために、ゲーム側の同期を止める。
-        ///     再開はポーズした時刻の次の小節の頭とし、その1小節前からBGMを鳴らし直す。
+        ///     再開はポーズした時刻のままとし、その1小節前からBGMを鳴らし直す。
         /// </summary>
         /// <param name="restartSongPositionSeconds"> BGMを鳴らし直す曲の再生位置（秒）。 </param>
         /// <returns> 同期を止めた場合はtrue。拍を求められない、またはすでに止めている場合はfalse。 </returns>
@@ -101,7 +101,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
                 return false;
             }
 
-            double resumePlayTime = ResolveResumePlayTime(_lastAdjustedPlayTime, barLength);
+            double resumePlayTime = _lastAdjustedPlayTime;
             restartSongPositionSeconds = ToSongPosition(resumePlayTime - barLength);
             _hold.Begin(resumePlayTime, barLength * HOLD_TIMEOUT_BAR_COUNT + HOLD_TIMEOUT_MARGIN_SECONDS);
             PublishHoldState();
@@ -152,9 +152,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <summary> 同期の停止を打ち切るまでの時間へ加える余裕（秒）。 </summary>
         private const double HOLD_TIMEOUT_MARGIN_SECONDS = 1d;
 
-        /// <summary> 小節の頭とみなす誤差（小節単位）。 </summary>
-        private const double BAR_SNAP_EPSILON = 1e-6d;
-
         private readonly MusicSyncState _musicSyncState;
         private readonly IMusicSyncService _musicSyncService;
         private readonly IEnvironmentSettingsViewModel _environmentSettingsViewModel;
@@ -164,20 +161,6 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         private MusicLoopTimeline _timeline;
         private double _lastAdjustedPlayTime;
         private bool _hasTicked;
-
-        /// <summary>
-        ///     ポーズした時刻から、ゲーム側の同期を再開する時刻を決める。
-        ///     カウントダウンが小節の1〜4拍目に乗るよう、次の小節の頭へそろえる。
-        /// </summary>
-        /// <param name="pausedPlayTime"> ポーズした時刻（ゲーム側の音楽時間）。 </param>
-        /// <param name="barLength"> 1小節の長さ（秒）。 </param>
-        /// <returns> 同期を再開する時刻。 </returns>
-        private double ResolveResumePlayTime(double pausedPlayTime, double barLength)
-        {
-            double beatOffsetSeconds = _musicSyncState.BeatOffsetSeconds;
-            double barCount = Math.Ceiling((pausedPlayTime - beatOffsetSeconds) / barLength - BAR_SNAP_EPSILON);
-            return beatOffsetSeconds + Math.Max(0d, barCount) * barLength;
-        }
 
         /// <summary>
         ///     曲の再生位置を、ループと判定オフセットを反映したゲーム側の時間へ換算する。

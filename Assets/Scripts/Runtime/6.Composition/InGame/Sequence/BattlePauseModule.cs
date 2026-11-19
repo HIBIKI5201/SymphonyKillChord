@@ -117,7 +117,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
-            // 再開する小節の1小節前から鳴らし直し、カウントダウンを曲の拍に乗せる。
+            // ポーズした位置の1小節前から鳴らし直し、その1小節をカウントダウンにする。
             _isCountingDown = true;
             _hasRestartedBgmSincePause = true;
             _musicPlayer.RestartBGMAt(restartSongPositionSeconds);
