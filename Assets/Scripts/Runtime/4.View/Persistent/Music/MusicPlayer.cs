@@ -123,6 +123,8 @@ namespace KillChord.Runtime.View.Persistent.Music
                 return false;
             }
 
+            TryResolveLoopLength();
+
             long elapsedMilliseconds = _playback.GetTimeSyncedWithAudio();
             if (elapsedMilliseconds < 0L)
             {
@@ -185,6 +187,7 @@ namespace KillChord.Runtime.View.Persistent.Music
         private string _currentCueName = string.Empty;
         private bool _isPlaying;
         private double _loopLengthSeconds;
+        private bool _isLoopResolved;
         private double _startSongPositionSeconds;
         private double _lastSongPositionSeconds;
         private float _baseVolume = 1f;
@@ -251,16 +254,12 @@ namespace KillChord.Runtime.View.Persistent.Music
 
             StopBgm();
 
-            CriAtomExAcb acb = CriAtom.GetAcb(_cri.cueSheet);
-            if (acb == null)
-            {
-                Debug.LogError($"[{nameof(MusicPlayer)}] キューシート「{_cri.cueSheet}」を読めないため、BGM「{cueName}」を再生できません。", this);
-                return;
-            }
-
+            // キューシート名が空のときは、CRIが読み込み済みのキューシートからキュー名で探す。
+            CriAtomExAcb acb = string.IsNullOrEmpty(_cri.cueSheet) ? null : CriAtom.GetAcb(_cri.cueSheet);
             _player.SetCue(acb, cueName);
             _currentCueName = cueName;
-            _loopLengthSeconds = ResolveLoopLengthSeconds(acb, cueName);
+            _loopLengthSeconds = 0d;
+            _isLoopResolved = false;
             StartPlayback(0d);
         }
 
@@ -272,6 +271,7 @@ namespace KillChord.Runtime.View.Persistent.Music
             StopPlayback();
             _currentCueName = string.Empty;
             _loopLengthSeconds = 0d;
+            _isLoopResolved = false;
         }
 
         /// <summary>
@@ -308,23 +308,29 @@ namespace KillChord.Runtime.View.Persistent.Music
         }
 
         /// <summary>
-        ///     キューの波形の長さから、ループの長さを求める。
-        ///     インゲームのBGMは波形全体をループする前提とする。
+        ///     再生中の波形のループ情報から、ループの長さを求める。発音前は取れないので、取れるまで毎回試す。
+        ///     頭からループする波形だけを対象にし、途中からループする波形はループを考えずに同期する。
         /// </summary>
-        /// <param name="acb"> キューシート。 </param>
-        /// <param name="cueName"> キュー名。 </param>
-        /// <returns> ループの長さ（秒）。取得できない場合は0。 </returns>
-        private double ResolveLoopLengthSeconds(CriAtomExAcb acb, string cueName)
+        private void TryResolveLoopLength()
         {
-            if (!acb.GetWaveFormInfo(cueName, out CriAtomEx.WaveformInfo info)
-                || info.samplingRate <= 0
-                || info.numSamples <= 0L)
+            if (_isLoopResolved || !_playback.GetFormatInfo(out CriAtomEx.FormatInfo info))
             {
-                Debug.LogWarning($"[{nameof(MusicPlayer)}] BGM「{cueName}」の波形の長さを取得できないため、ループを考えずに同期します。", this);
-                return 0d;
+                return;
             }
 
-            return (double)info.numSamples / info.samplingRate;
+            _isLoopResolved = true;
+            if (info.samplingRate <= 0 || info.loopLength <= 0L)
+            {
+                return;
+            }
+
+            if (info.loopOffset != 0L)
+            {
+                Debug.LogWarning($"[{nameof(MusicPlayer)}] BGM「{_currentCueName}」は途中からループするため、ループを考えずに同期します。", this);
+                return;
+            }
+
+            _loopLengthSeconds = (double)info.loopLength / info.samplingRate;
         }
 
         /// <summary>
