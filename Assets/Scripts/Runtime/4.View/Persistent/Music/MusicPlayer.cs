@@ -130,6 +130,12 @@ namespace KillChord.Runtime.View.Persistent.Music
                 if (_hasRestartedAfterRemoval
                     && _lastSongPositionSeconds - _restartedAfterRemovalPosition < MIN_PROGRESS_FOR_RESTART_SECONDS)
                 {
+                    if (!_hasLoggedGiveUp)
+                    {
+                        Debug.LogWarning($"[{nameof(MusicPlayer)}] BGM「{_currentCueName}」を鳴らし直してもすぐ止まるため、鳴らし直しをやめます。", this);
+                        _hasLoggedGiveUp = true;
+                    }
+
                     return false;
                 }
 
@@ -161,7 +167,9 @@ namespace KillChord.Runtime.View.Persistent.Music
                 return;
             }
 
+            // 鳴らし直しはポーズの解除を兼ねる。
             StopPlayback();
+            _isBgmPaused = false;
             StartPlayback(Math.Max(0d, songPositionSeconds));
         }
 
@@ -170,10 +178,9 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         public void PauseBGM()
         {
-            if (_isPlaying)
-            {
-                _playback.Pause();
-            }
+            _isBgmPaused = true;
+            _player?.Pause(true);
+            DevLog.Log($"[{nameof(MusicPlayer)}] BGMを一時停止します。位置: {_lastSongPositionSeconds:F3}秒");
         }
 
         /// <summary>
@@ -181,10 +188,9 @@ namespace KillChord.Runtime.View.Persistent.Music
         /// </summary>
         public void ResumeBGM()
         {
-            if (_isPlaying)
-            {
-                _playback.Resume(CriAtomEx.ResumeMode.PausedPlayback);
-            }
+            _isBgmPaused = false;
+            _player?.Pause(false);
+            DevLog.Log($"[{nameof(MusicPlayer)}] BGMの一時停止を解除します。位置: {_lastSongPositionSeconds:F3}秒");
         }
 
         private const double MILLISECONDS_PER_SECOND = 1000d;
@@ -209,6 +215,8 @@ namespace KillChord.Runtime.View.Persistent.Music
         private PlaybackTimeSource _timeSource;
         private double _elapsedBaseMilliseconds;
         private bool _hasRestartedAfterRemoval;
+        private bool _hasLoggedGiveUp;
+        private bool _isBgmPaused;
         private double _restartedAfterRemovalPosition;
         private double _startSongPositionSeconds;
         private double _lastSongPositionSeconds;
@@ -283,6 +291,8 @@ namespace KillChord.Runtime.View.Persistent.Music
             _loopLengthSeconds = 0d;
             _isLoopResolved = false;
             _hasRestartedAfterRemoval = false;
+            _hasLoggedGiveUp = false;
+            _isBgmPaused = false;
             StartPlayback(0d);
         }
 
@@ -307,9 +317,17 @@ namespace KillChord.Runtime.View.Persistent.Music
             double positionInLoop = _loopLengthSeconds > 0d
                 ? songPositionSeconds % _loopLengthSeconds
                 : songPositionSeconds;
+            // プレーヤーのポーズを解いてから鳴らし、ポーズ中に鳴らし直したときだけ止め直す。
+            _player.Pause(false);
             _player.SetStartTimeMicro((long)Math.Round(positionInLoop * MICROSECONDS_PER_SECOND));
             _playback = _player.Start();
             _player.SetStartTimeMicro(0L);
+            if (_isBgmPaused)
+            {
+                _player.Pause(true);
+            }
+
+            DevLog.Log($"[{nameof(MusicPlayer)}] BGM「{_currentCueName}」を{songPositionSeconds:F3}秒（ループ内{positionInLoop:F3}秒）から鳴らします。");
 
             _startPositionInWaveMilliseconds = positionInLoop * MILLISECONDS_PER_SECOND;
             _timeSource = PlaybackTimeSource.Unknown;
@@ -366,6 +384,7 @@ namespace KillChord.Runtime.View.Persistent.Music
                 _elapsedBaseMilliseconds = firstMilliseconds + START_POSITION_TOLERANCE_MILLISECONDS >= _startPositionInWaveMilliseconds
                     ? _startPositionInWaveMilliseconds
                     : 0d;
+                DevLog.Log($"[{nameof(MusicPlayer)}] 時刻の読み方: {_timeSource}、最初の値 {firstMilliseconds}ms、差し引く量 {_elapsedBaseMilliseconds:F0}ms");
             }
 
             long milliseconds = _timeSource == PlaybackTimeSource.SyncedWithAudio

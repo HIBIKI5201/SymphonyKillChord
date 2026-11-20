@@ -2,6 +2,7 @@ using KillChord.Runtime.Adaptor.Persistent.Environment;
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Constant;
+using KillChord.Runtime.Utility.Diagnostics;
 using R3;
 using System;
 
@@ -70,13 +71,24 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
                     return;
                 }
 
+                DevLog.Log($"[{nameof(MusicSyncController)}] カウントダウンを終えて同期を再開します。ゲーム側の時刻: {adjustedPlayTime:F3}秒、再開する時刻: {_hold.ResumePlayTime:F3}秒");
                 PublishHoldState();
             }
 
             // ループの継ぎ目や再生し直しの誤差でゲーム側の時間が戻らないよう、前回の時刻より前へは進めない。
             if (_hasTicked && adjustedPlayTime < _lastAdjustedPlayTime)
             {
+                if (_lastAdjustedPlayTime - adjustedPlayTime > CLAMP_LOG_THRESHOLD_SECONDS && !_hasLoggedClamp)
+                {
+                    DevLog.Log($"[{nameof(MusicSyncController)}] 曲の位置がゲーム側の時刻より遅れているため、時刻を止めています。曲: {adjustedPlayTime:F3}秒、ゲーム: {_lastAdjustedPlayTime:F3}秒");
+                    _hasLoggedClamp = true;
+                }
+
                 adjustedPlayTime = _lastAdjustedPlayTime;
+            }
+            else
+            {
+                _hasLoggedClamp = false;
             }
 
             _lastAdjustedPlayTime = adjustedPlayTime;
@@ -104,6 +116,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
             double resumePlayTime = _lastAdjustedPlayTime;
             restartSongPositionSeconds = ToSongPosition(resumePlayTime - barLength);
             _hold.Begin(resumePlayTime, barLength * HOLD_TIMEOUT_BAR_COUNT + HOLD_TIMEOUT_MARGIN_SECONDS);
+            DevLog.Log($"[{nameof(MusicSyncController)}] カウントダウンを始めます。再開する時刻: {resumePlayTime:F3}秒、鳴らし直す曲の位置: {restartSongPositionSeconds:F3}秒");
             PublishHoldState();
             return true;
         }
@@ -139,6 +152,11 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// </summary>
         public void ResetPlayback()
         {
+            if (_hasTicked || _hold.IsHolding)
+            {
+                DevLog.Log($"[{nameof(MusicSyncController)}] 同期をリセットします。最後の時刻: {_lastAdjustedPlayTime:F3}秒、カウントダウン中: {_hold.IsHolding}");
+            }
+
             _musicSyncService.ResetPlayback();
             _hold.Reset();
             _hasTicked = false;
@@ -152,6 +170,9 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         /// <summary> 同期の停止を打ち切るまでの時間へ加える余裕（秒）。 </summary>
         private const double HOLD_TIMEOUT_MARGIN_SECONDS = 1d;
 
+        /// <summary> 時刻を止めたことを記録する遅れの大きさ（秒）。 </summary>
+        private const double CLAMP_LOG_THRESHOLD_SECONDS = 0.05d;
+
         private readonly MusicSyncState _musicSyncState;
         private readonly IMusicSyncService _musicSyncService;
         private readonly IEnvironmentSettingsViewModel _environmentSettingsViewModel;
@@ -161,6 +182,7 @@ namespace KillChord.Runtime.Adaptor.InGame.Music
         private MusicLoopTimeline _timeline;
         private double _lastAdjustedPlayTime;
         private bool _hasTicked;
+        private bool _hasLoggedClamp;
 
         /// <summary>
         ///     曲の再生位置を、ループと判定オフセットを反映したゲーム側の時間へ換算する。
