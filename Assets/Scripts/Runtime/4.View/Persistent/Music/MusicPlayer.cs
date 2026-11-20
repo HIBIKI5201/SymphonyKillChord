@@ -118,22 +118,33 @@ namespace KillChord.Runtime.View.Persistent.Music
         public bool TryGetSongPosition(out double songPositionSeconds)
         {
             songPositionSeconds = 0d;
-            if (!_isPlaying || _playback.GetStatus() == CriAtomExPlayback.Status.Removed)
+            if (!_isPlaying || _player == null)
             {
                 return false;
             }
 
-            TryResolveLoopLength();
-
-            long elapsedMilliseconds = _playback.GetTimeSyncedWithAudio();
-            if (elapsedMilliseconds < 0L)
+            // 止めていないのにBGMが消えた（発音数の制御やエディタの再読み込みなど）ときは、最後の位置から鳴らし直す。
+            if (_playback.GetStatus() == CriAtomExPlayback.Status.Removed)
             {
-                // 発音前や同期タイマーが使えないときは、経過時間で代える。準備中は0になる。
-                elapsedMilliseconds = Math.Max(0L, _playback.GetTime());
+                // 鳴らし直してもすぐ消える場合は、繰り返さずに止まったものとして扱う。
+                if (_hasRestartedAfterRemoval
+                    && _lastSongPositionSeconds - _restartedAfterRemovalPosition < MIN_PROGRESS_FOR_RESTART_SECONDS)
+                {
+                    return false;
+                }
+
+                Debug.LogWarning($"[{nameof(MusicPlayer)}] BGM「{_currentCueName}」が止まったため、{_lastSongPositionSeconds:F3}秒の位置から鳴らし直します。", this);
+                _hasRestartedAfterRemoval = true;
+                _restartedAfterRemovalPosition = _lastSongPositionSeconds;
+                StartPlayback(_lastSongPositionSeconds);
             }
 
+            TryResolveLoopLength();
+
+            double elapsedSeconds = ReadElapsedSeconds();
+
             // 同じ再生の中では、時刻を戻さない。
-            double songPosition = _startSongPositionSeconds + elapsedMilliseconds / MILLISECONDS_PER_SECOND;
+            double songPosition = _startSongPositionSeconds + elapsedSeconds;
             _lastSongPositionSeconds = Math.Max(_lastSongPositionSeconds, songPosition);
             songPositionSeconds = _lastSongPositionSeconds;
             return true;
@@ -180,6 +191,12 @@ namespace KillChord.Runtime.View.Persistent.Music
         private const double MICROSECONDS_PER_SECOND = 1000000d;
         private const int VOICE_PRIORITY = 255;
 
+        /// <summary> 開始位置を含めた時刻かどうかを見分けるときの余裕（ミリ秒）。 </summary>
+        private const double START_POSITION_TOLERANCE_MILLISECONDS = 50d;
+
+        /// <summary> 消えたBGMを再び鳴らし直すのに必要な、前回からの進み（秒）。 </summary>
+        private const double MIN_PROGRESS_FOR_RESTART_SECONDS = 0.5d;
+
         private CriAtomSource _cri;
         private CriAtomExPlayer _player;
         private CriAtomExPlayback _playback;
@@ -188,6 +205,11 @@ namespace KillChord.Runtime.View.Persistent.Music
         private bool _isPlaying;
         private double _loopLengthSeconds;
         private bool _isLoopResolved;
+        private double _startPositionInWaveMilliseconds;
+        private PlaybackTimeSource _timeSource;
+        private double _elapsedBaseMilliseconds;
+        private bool _hasRestartedAfterRemoval;
+        private double _restartedAfterRemovalPosition;
         private double _startSongPositionSeconds;
         private double _lastSongPositionSeconds;
         private float _baseVolume = 1f;
@@ -260,6 +282,7 @@ namespace KillChord.Runtime.View.Persistent.Music
             _currentCueName = cueName;
             _loopLengthSeconds = 0d;
             _isLoopResolved = false;
+            _hasRestartedAfterRemoval = false;
             StartPlayback(0d);
         }
 
@@ -288,6 +311,10 @@ namespace KillChord.Runtime.View.Persistent.Music
             _playback = _player.Start();
             _player.SetStartTimeMicro(0L);
 
+            _startPositionInWaveMilliseconds = positionInLoop * MILLISECONDS_PER_SECOND;
+            _timeSource = PlaybackTimeSource.Unknown;
+            _elapsedBaseMilliseconds = 0d;
+
             _startSongPositionSeconds = songPositionSeconds;
             _lastSongPositionSeconds = songPositionSeconds;
             _isPlaying = true;
@@ -305,6 +332,51 @@ namespace KillChord.Runtime.View.Persistent.Music
 
             _playback.Stop(true);
             _isPlaying = false;
+        }
+
+        /// <summary>
+        ///     再生を始めてからの経過秒数を読む。発音前は0を返す。
+        ///     音声同期タイマーが使えればそれを、使えなければ再生時刻を使う。
+        ///     開始位置を指定した再生では、CRIは開始位置を含めた時刻を返すため、最初に読めた値で差し引く量を決める。
+        /// </summary>
+        /// <returns> 経過秒数。 </returns>
+        private double ReadElapsedSeconds()
+        {
+            if (_timeSource == PlaybackTimeSource.Unknown)
+            {
+                long syncedMilliseconds = _playback.GetTimeSyncedWithAudio();
+                long timeMilliseconds = _playback.GetTime();
+                long firstMilliseconds;
+                if (syncedMilliseconds >= 0L)
+                {
+                    _timeSource = PlaybackTimeSource.SyncedWithAudio;
+                    firstMilliseconds = syncedMilliseconds;
+                }
+                else if (timeMilliseconds >= 0L)
+                {
+                    _timeSource = PlaybackTimeSource.PlaybackTime;
+                    firstMilliseconds = timeMilliseconds;
+                }
+                else
+                {
+                    return 0d;
+                }
+
+                // 最初の値が開始位置以上なら、開始位置を含めた時刻とみなして差し引く。
+                _elapsedBaseMilliseconds = firstMilliseconds + START_POSITION_TOLERANCE_MILLISECONDS >= _startPositionInWaveMilliseconds
+                    ? _startPositionInWaveMilliseconds
+                    : 0d;
+            }
+
+            long milliseconds = _timeSource == PlaybackTimeSource.SyncedWithAudio
+                ? _playback.GetTimeSyncedWithAudio()
+                : _playback.GetTime();
+            if (milliseconds < 0L)
+            {
+                return Math.Max(0d, _lastSongPositionSeconds - _startSongPositionSeconds);
+            }
+
+            return Math.Max(0d, (milliseconds - _elapsedBaseMilliseconds) / MILLISECONDS_PER_SECOND);
         }
 
         /// <summary>
@@ -345,6 +417,21 @@ namespace KillChord.Runtime.View.Persistent.Music
 
             _baseVolume = _cri.volume;
             _baseVolumeCaptured = true;
+        }
+
+        /// <summary>
+        ///     再生位置を読むときに使う時刻の種類です。
+        /// </summary>
+        private enum PlaybackTimeSource
+        {
+            /// <summary> まだ決めていない。 </summary>
+            Unknown,
+
+            /// <summary> 実際に鳴った音に合わせた時刻。 </summary>
+            SyncedWithAudio,
+
+            /// <summary> 再生を始めてからの時刻。 </summary>
+            PlaybackTime,
         }
     }
 }
