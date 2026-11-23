@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.View.InGame.UI;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
@@ -30,14 +30,14 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <inheritdoc/>
         public override bool Build()
         {
-            ServiceLocator.RegisterInstance<InGameHudInitializer>(this, LocateTypeEnum.Locator);
+            Partitura.Register<InGameHudInitializer>(this, ServiceLifetimeEnum.Scene);
             return true;
         }
 
         /// <inheritdoc/>
         public override void Shutdown()
         {
-            ServiceLocator.UnregisterInstance<InGameHudInitializer>(this);
+            Partitura.Unregister<InGameHudInitializer>(this);
         }
 
         [SerializeField, Tooltip("プレイヤーのHPテキスト表示のView")] private HealthTextView _playerHealthTextView;

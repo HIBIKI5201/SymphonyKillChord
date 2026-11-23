@@ -25,7 +25,8 @@ using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -117,7 +118,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _battleAIRegistry = battleAiRegistry;
             _invincibilityRegistry = invincibilityRegistry;
 
-            MissionModuleContainer missionModuleContainer = ServiceLocator.GetInstance<MissionModuleContainer>();
+            MissionModuleContainer missionModuleContainer = ServiceLookup.GetOrNull<MissionModuleContainer>();
             _missionEventController = missionModuleContainer?.MissionEventController;
             _attackControllerGenerator = attackControllerGenerator;
             _releaseCallback = releaseCallback;
@@ -191,7 +192,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             // View接続
             // ジャストのスローモーションはプレイヤーと共有する。プレイヤーがいない場面ではスローをかけない。
             JustSlowMotionViewModel justSlowMotionViewModel =
-                ServiceLocator.TryGetInstance(out PlayerModuleContainer playerModuleContainer)
+                Partitura.TryGet(out PlayerModuleContainer playerModuleContainer)
                     ? playerModuleContainer.JustSlowMotionViewModel
                     : null;
             var animationComposition = new AnimationComposition();

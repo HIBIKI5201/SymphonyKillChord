@@ -20,7 +20,7 @@ using KillChord.Runtime.View.OutGame.Scenario;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Input;
 using SymphonyFramework.Attribute;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -194,23 +194,23 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _inputComposition))
+            if (!Partitura.TryGet(out _inputComposition))
             {
                 Debug.LogError($"[{nameof(ScenarioCom)}] InputComposition が取得できませんでした。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _selectedScenarioState))
+            if (!Partitura.TryGet(out _selectedScenarioState))
             {
                 Debug.LogError($"[{nameof(ScenarioCom)}] SelectedScenarioState が取得できませんでした。", this);
                 return false;
             }
 
             // 無くても動作するサービスは、あれば取得する。
-            ServiceLocator.TryGetInstance(out _outGameUIEvent);
-            ServiceLocator.TryGetInstance(out _outGameSortieController);
+            Partitura.TryGet(out _outGameUIEvent);
+            Partitura.TryGet(out _outGameSortieController);
 
-            if (!ServiceLocator.TryGetInstance(out _sceneTransitionController))
+            if (!Partitura.TryGet(out _sceneTransitionController))
             {
                 Debug.LogError($"[{nameof(ScenarioCom)}] SceneTransitionController が取得できませんでした。", this);
                 return false;
@@ -219,10 +219,10 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             // セーブと、次のノードへの遷移の予約を用意する。
             _stageProgressSaveDataService = new StageProgressSaveDataService();
 
-            if (!ServiceLocator.TryGetInstance(out _pendingNodeTransitionState))
+            if (!Partitura.TryGet(out _pendingNodeTransitionState))
             {
                 _pendingNodeTransitionState = new PendingNodeTransitionState();
-                ServiceLocator.RegisterInstance(_pendingNodeTransitionState);
+                Partitura.Register(_pendingNodeTransitionState, ServiceLifetimeEnum.Persistent);
             }
 
             // 入力を初期化し、シナリオの入力を有効にしてから再生を始める。
@@ -466,7 +466,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             {
                 return ScenarioTransitionResult.None;
             }
-            if (ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+            if (Partitura.TryGet(out SceneTransitionController transition)
                 && transition.HasScenarioBattleSortie)
             {
                 return ScenarioTransitionResult.EndRun;
@@ -528,8 +528,8 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
             PendingNodeTransitionState pending, PendingNodeTransition candidate,
             string sceneName, int selectionRevision)
         {
-            if (!ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var loadingExecutor)
-                || !ServiceLocator.TryGetInstance(out SceneTransitionInitializer transitionInitializer))
+            if (!Partitura.TryGet<ILoadingOperationExecutor>(out var loadingExecutor)
+                || !Partitura.TryGet(out SceneTransitionInitializer transitionInitializer))
             {
                 Debug.LogWarning(
                     $"[{nameof(ScenarioCom)}] 出撃に必要な常駐サービスが無いため、OutGame へ戻ってから出撃します。",

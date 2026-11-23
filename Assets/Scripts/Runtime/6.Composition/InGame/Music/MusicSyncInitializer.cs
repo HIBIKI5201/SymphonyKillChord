@@ -8,7 +8,8 @@ using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Music
@@ -49,7 +50,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 MusicSyncController,
                 MusicSyncService,
                 MusicSyncState);
-            ServiceLocator.RegisterInstance(_moduleContainer);
+            Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
             _isModuleRegistered = true;
             return _musicPlayer != null
                 && MusicSyncService != null
@@ -62,7 +63,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         public void Initialize()
         {
             MusicSyncState = new();
-            _musicPlayer = ServiceLocator.GetInstance<MusicPlayer>();
+            _musicPlayer = ServiceLookup.GetOrNull<MusicPlayer>();
             MusicSyncService = new MusicSyncService(
                 new RhythmDefinition(_testBpm, _testBeatOffsetSeconds),
                 _rhythmJudgmentDefinitionAsset.ToDefinition());
@@ -70,7 +71,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
             // 環境設定（リズム判定オフセット）は未ロードでも同期機能自体は成立させるため、
             // 取得できない場合はnull（オフセット0秒）のままコントローラーへ渡す。
             IEnvironmentSettingsViewModel environmentSettingsViewModel =
-                ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
+                Partitura.TryGet(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
                     ? environmentSettingsContainer.ViewModel
                     : null;
             if (environmentSettingsViewModel == null)
@@ -89,8 +90,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 _testBeatOffsetSeconds
             );
 
-            ServiceLocator.RegisterInstance<IMusicSyncService>(MusicSyncService);
-            ServiceLocator.RegisterInstance<MusicSyncState>(MusicSyncState);
+            Partitura.Register<IMusicSyncService>(MusicSyncService, ServiceLifetimeEnum.Persistent);
+            Partitura.Register<MusicSyncState>(MusicSyncState, ServiceLifetimeEnum.Persistent);
 
             _isRegistered = true;
         }
@@ -106,7 +107,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<MusicSyncModuleContainer>();
+            Partitura.Unregister<MusicSyncModuleContainer>();
             _moduleContainer = null;
             _isModuleRegistered = false;
         }
@@ -165,8 +166,8 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<IMusicSyncService>();
-            ServiceLocator.UnregisterInstance<MusicSyncState>();
+            Partitura.Unregister<IMusicSyncService>();
+            Partitura.Unregister<MusicSyncState>();
 
             // 拍の通知ストリームを破棄する。購読側は先にShutdownで解除されている想定。
             MusicSyncState?.Dispose();

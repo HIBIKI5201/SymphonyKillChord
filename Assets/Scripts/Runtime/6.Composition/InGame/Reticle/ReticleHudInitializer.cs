@@ -2,7 +2,8 @@ using KillChord.Runtime.Adaptor.InGame.Reticle;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.View.InGame.Reticle;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Reticle
@@ -34,7 +35,7 @@ namespace KillChord.Runtime.Composition.InGame.Reticle
                 return false;
             }
 
-            TargetSystemModuleContainer targetSystemModuleContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
+            TargetSystemModuleContainer targetSystemModuleContainer = ServiceLookup.GetOrNull<TargetSystemModuleContainer>();
             if (targetSystemModuleContainer == null)
             {
                 Debug.LogError($"[{nameof(ReticleHudInitializer)}] {nameof(TargetSystemModuleContainer)} が見つかりません。", this);

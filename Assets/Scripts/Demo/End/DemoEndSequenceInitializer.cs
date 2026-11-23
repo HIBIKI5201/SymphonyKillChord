@@ -5,7 +5,7 @@ using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -36,7 +36,7 @@ namespace KillChord.Demo.End
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out MusicPlayer musicPlayer))
+            if (!Partitura.TryGet(out MusicPlayer musicPlayer))
             {
                 Debug.LogError(
                     $"[{nameof(DemoEndSequenceInitializer)}] {nameof(MusicPlayer)} が取得できません。",
@@ -44,7 +44,7 @@ namespace KillChord.Demo.End
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _sceneTransitionUsecase))
+            if (!Partitura.TryGet(out _sceneTransitionUsecase))
             {
                 Debug.LogError(
                     $"[{nameof(DemoEndSequenceInitializer)}] " +
@@ -53,7 +53,7 @@ namespace KillChord.Demo.End
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _playerInputView))
+            if (!Partitura.TryGet(out _playerInputView))
             {
                 Debug.LogError(
                     $"[{nameof(DemoEndSequenceInitializer)}] {nameof(PlayerInputView)} が取得できません。",
@@ -61,7 +61,7 @@ namespace KillChord.Demo.End
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _inputComposition)
+            if (!Partitura.TryGet(out _inputComposition)
                 || _inputComposition.GetInputMapController == null)
             {
                 Debug.LogError(
@@ -71,7 +71,7 @@ namespace KillChord.Demo.End
             }
 
             // ロード画面が閉じるまで演出開始を待つために参照する。取得できなくても再生は続行する。
-            ServiceLocator.TryGetInstance(out _loadingScreenController);
+            Partitura.TryGet(out _loadingScreenController);
 
             // MusicPlayerはCue切り替えと音量制御の両方の実装を兼ねる。
             _bgmView.Initialize(musicPlayer, musicPlayer);

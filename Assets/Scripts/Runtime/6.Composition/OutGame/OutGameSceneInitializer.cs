@@ -8,9 +8,9 @@ using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.OutGame.Screen;
-using SymphonyFrameWork.System.SceneLoad;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Scenes;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -38,7 +38,7 @@ namespace KillChord.Runtime.Composition.OutGame
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Init()
         {
-            return SceneLoader.RegisterLoadedScene(
+            return Attacca.RegisterLoadedScene(
                 gameObject.scene.name,
                 ScenePriorityResolver.Resolve(gameObject.scene.name));
         }
@@ -98,13 +98,13 @@ namespace KillChord.Runtime.Composition.OutGame
         /// </summary>
         public override bool Build()
         {
-            if (ServiceLocator.TryGetInstance(out OutGameUIEvent _))
+            if (Partitura.TryGet(out OutGameUIEvent _))
             {
-                ServiceLocator.UnregisterInstance<OutGameUIEvent>();
+                Partitura.Unregister<OutGameUIEvent>();
             }
 
             _outGameUiEvent = new OutGameUIEvent();
-            _isOwner = ServiceLocator.RegisterInstance(_outGameUiEvent, LocateTypeEnum.Locator);
+            _isOwner = Partitura.Register(_outGameUiEvent, ServiceLifetimeEnum.Scene);
             return _isOwner;
         }
 
@@ -150,10 +150,10 @@ namespace KillChord.Runtime.Composition.OutGame
                 return;
             }
 
-            if (ServiceLocator.TryGetInstance(out OutGameUIEvent registeredOutGameUiEvent)
+            if (Partitura.TryGet(out OutGameUIEvent registeredOutGameUiEvent)
                 && ReferenceEquals(registeredOutGameUiEvent, _outGameUiEvent))
             {
-                ServiceLocator.UnregisterInstance<OutGameUIEvent>();
+                Partitura.Unregister<OutGameUIEvent>();
             }
 
             _outGameUiEvent = null;
@@ -205,7 +205,7 @@ namespace KillChord.Runtime.Composition.OutGame
         /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
         private void CompleteSceneInitialization(bool isSuccess)
         {
-            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+            if (!Partitura.TryGet<ISceneInitializationReadiness>(out var readiness))
             {
                 Debug.LogError(
                     $"[{nameof(OutGameSceneInitializer)}] " +
@@ -234,8 +234,8 @@ namespace KillChord.Runtime.Composition.OutGame
             if (_failureView != null) { return; }
             _failureView = gameObject.AddComponent<OutGameInitializationFailureView>();
             // Localization自体の初期化失敗でも復帰できるよう、ロード済みの言語設定だけを参照する。
-            bool isEnglish = SaveStore.IsLoaded<SaveData>()
-                && SaveStore.Get<SaveData>().EnvironmentSettings.Language == GameLanguage.English;
+            bool isEnglish = Manuscript.IsLoaded<SaveData>()
+                && Manuscript.Get<SaveData>().EnvironmentSettings.Language == GameLanguage.English;
             string actionLabel = gameObject.scene.name == _titleSceneName
                 ? isEnglish ? "Reload" : "もう一度読み込む"
                 : isEnglish ? "Return to Title" : "タイトルへ戻る";
@@ -258,24 +258,24 @@ namespace KillChord.Runtime.Composition.OutGame
             }
 
             // 常駐側の専用失敗処理から Title の既存画面へ委ねるまでは、独自復帰を開始しません。
-            if (ServiceLocator.TryGetInstance(out SceneTransitionController owner)
+            if (Partitura.TryGet(out SceneTransitionController owner)
                 && owner.HasScenarioBattleSortie) { return; }
 
             // 初期化失敗を受け取った元のロード処理が終了するまでは、次のロードを開始しません。
-            if (ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var executor)
+            if (Partitura.TryGet<ILoadingOperationExecutor>(out var executor)
                 && executor.IsSessionActive)
             {
                 return;
             }
 
-            CancellationToken lifetime = ServiceLocator.TryGetInstance(out SceneTransitionController lifetimeOwner)
+            CancellationToken lifetime = Partitura.TryGet(out SceneTransitionController lifetimeOwner)
                 ? lifetimeOwner.PersistentLifetimeToken : default;
             if (lifetime.IsCancellationRequested) { return; }
             _isRecovering = true;
             _failureView.SetBusy(true);
             try
             {
-                if (!ServiceLocator.TryGetInstance<SceneTransitionController>(out var transition))
+                if (!Partitura.TryGet<SceneTransitionController>(out var transition))
                 {
                     Debug.LogError($"[{nameof(OutGameSceneInitializer)}] シーン遷移サービスが取得できませんでした。", this);
                     _failureView.ShowRecoveryFailed();

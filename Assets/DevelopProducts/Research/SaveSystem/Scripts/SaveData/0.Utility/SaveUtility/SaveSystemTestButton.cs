@@ -1,4 +1,4 @@
-using SymphonyFrameWork.System.SceneLoad;
+using SymphonyFramework.Scenes;
 using UnityEngine;
 
 namespace DevelopProducts.SaveSystem
@@ -27,7 +27,7 @@ namespace DevelopProducts.SaveSystem
 
         public void SceneLoad(string sceneName)
         {
-            SceneLoader.LoadSceneAsync(sceneName);
+            Attacca.LoadAsync(sceneName);
         }
     }
 }

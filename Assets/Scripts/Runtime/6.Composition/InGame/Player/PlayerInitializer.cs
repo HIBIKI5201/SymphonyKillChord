@@ -36,7 +36,8 @@ using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -142,7 +143,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void Awake()
         {
-            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
+            Partitura.Register(this, ServiceLifetimeEnum.Scene);
         }
 
         /// <summary>
@@ -191,7 +192,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out PlayerStatusBonusModuleContainer playerStatusBonusContainer))
+            if (!Partitura.TryGet(out PlayerStatusBonusModuleContainer playerStatusBonusContainer))
             {
                 Debug.LogError(
                     $"[{nameof(PlayerInitializer)}] {nameof(PlayerStatusBonusModuleContainer)} が見つかりません。",
@@ -228,7 +229,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _damageEffectView,
                 _playerAttackSignal,
                 _justSlowMotionViewModel);
-            ServiceLocator.RegisterInstance(_moduleContainer);
+            Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
             _isModuleRegistered = true;
             return _player != null && _playerEntity != null;
         }
@@ -239,14 +240,14 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
-            SceneDependencyModuleContainer sceneDependencyContainer = ServiceLocator.GetInstance<SceneDependencyModuleContainer>();
+            SceneDependencyModuleContainer sceneDependencyContainer = ServiceLookup.GetOrNull<SceneDependencyModuleContainer>();
             if (sceneDependencyContainer == null)
             {
                 Debug.LogError($"[{nameof(PlayerInitializer)}] {nameof(SceneDependencyModuleContainer)} が見つかりません。", this);
                 return false;
             }
 
-            SkillModuleContainer skillModuleContainer = ServiceLocator.GetInstance<SkillModuleContainer>();
+            SkillModuleContainer skillModuleContainer = ServiceLookup.GetOrNull<SkillModuleContainer>();
             if (skillModuleContainer == null ||
                 skillModuleContainer.SkillController == null ||
                 skillModuleContainer.PendingAttackEffectService == null)
@@ -286,20 +287,20 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return;
             }
 
-            _inGameHudInitializer = ServiceLocator.GetInstance<InGameHudInitializer>();
+            _inGameHudInitializer = ServiceLookup.GetOrNull<InGameHudInitializer>();
             if (_inGameHudInitializer == null)
             {
                 Debug.LogError($"{nameof(InGameHudInitializer)} が見つかりません。シーン内に配置されていることを確認してください。", this);
                 return;
             }
 
-            _missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            _missionEventController = ServiceLookup.GetOrNull<MissionEventController>();
             if (_missionEventController != null)
             {
                 _playerEntity.OnDied += HandlePlayerDied;
             }
 
-            MusicSyncModuleContainer musicSyncContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
+            MusicSyncModuleContainer musicSyncContainer = ServiceLookup.GetOrNull<MusicSyncModuleContainer>();
             if (musicSyncContainer == null)
             {
                 Debug.LogError($"{nameof(MusicSyncModuleContainer)} が見つかりません。", this);
@@ -314,8 +315,8 @@ namespace KillChord.Runtime.Composition.InGame.Player
             }
 
             PlayerMoveSpec parameter = _playerConfig.ToDomain();
-            ICameraTransform cameraTransform = ServiceLocator.GetInstance<ICameraTransform>();
-            PlayerInputView inputView = ServiceLocator.GetInstance<PlayerInputView>();
+            ICameraTransform cameraTransform = ServiceLookup.GetOrNull<ICameraTransform>();
+            PlayerInputView inputView = ServiceLookup.GetOrNull<PlayerInputView>();
             if (cameraTransform == null || inputView == null)
             {
                 Debug.LogError($"[{nameof(PlayerInitializer)}] カメラまたは入力Viewが見つかりません。", this);
@@ -325,7 +326,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
             // 位置リセット入力を購読する。
             _playerInputView = inputView;
 
-            TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
+            TargetSystemModuleContainer targetSystemContainer = ServiceLookup.GetOrNull<TargetSystemModuleContainer>();
             if (targetSystemContainer == null || targetSystemContainer.TargetSystemController == null)
             {
                 Debug.LogError($"{nameof(TargetSystemModuleContainer)} が見つかりません。", this);
@@ -538,10 +539,10 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 _characterAnimationSignal = null;
             }
 
-            ServiceLocator.UnregisterInstance(this);
+            Partitura.Unregister(this);
             if (_isModuleRegistered)
             {
-                ServiceLocator.UnregisterInstance<PlayerModuleContainer>();
+                Partitura.Unregister<PlayerModuleContainer>();
                 _moduleContainer = null;
                 _isModuleRegistered = false;
             }
@@ -577,7 +578,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<PlayerModuleContainer>();
+            Partitura.Unregister<PlayerModuleContainer>();
             _moduleContainer = null;
             _isModuleRegistered = false;
         }
@@ -700,7 +701,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         {
             spawnPointTransform = null;
 
-            IStageSceneInstance stageSceneInstance = ServiceLocator.GetInstance<IStageSceneInstance>();
+            IStageSceneInstance stageSceneInstance = ServiceLookup.GetOrNull<IStageSceneInstance>();
             if (stageSceneInstance == null || stageSceneInstance.PlayerSpawnPointTransform == null)
             {
                 return false;

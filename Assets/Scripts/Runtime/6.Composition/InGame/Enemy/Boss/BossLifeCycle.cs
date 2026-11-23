@@ -22,7 +22,8 @@ using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -128,7 +129,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _targetingSystem = targetingSystem;
             _enemyEntity = CharacterFactory.Create(_loadedEnemyData);
 
-            MissionModuleContainer missionModuleContainer = ServiceLocator.GetInstance<MissionModuleContainer>();
+            MissionModuleContainer missionModuleContainer = ServiceLookup.GetOrNull<MissionModuleContainer>();
             _missionEventController = missionModuleContainer?.MissionEventController;
             _releaseCallback = releaseCallback;
 

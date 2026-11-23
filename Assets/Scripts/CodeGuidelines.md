@@ -106,9 +106,9 @@ public bool Complete()
 - CG-054 一行のブロックの場合でも以下のように、波カッコを使用する
 { Console.WriteLine("message"); }
 - CG-055 1ファイルには1つの公開型（class / struct / interface / enum）のみを定義し、ファイル名を型名と一致させる。同じファイルに複数の型が要る場合は、片方をもう一方のプライベートなネスト型にする
-- CG-056 ServiceLocatorから依存を取得するときは、必須の依存は `GetInstance`、無くてもよい依存は `TryGetInstance` を使う（設計思想の DP-302 を参照）
-- CG-057 ServiceLocatorからの取得と失敗時のログの定型が続く場合は、ヘルパーメソッドにまとめる
-- CG-058 静的シングルトン（`static Instance`）を作らない。サービスはComposition層で生成してServiceLocatorへ登録するか、必要な箇所へ注入する
+- CG-056 Partitura（SymphonyFramework 7.0.0、旧ServiceLocator）から依存を取得するときは、必須の依存は `ServiceLookup.GetOrNull`（Composition層。未登録ならnull）、無くてもよい依存は `Partitura.TryGet` を使う（設計思想の DP-302 を参照）
+- CG-057 Partituraからの取得と失敗時のログの定型が続く場合は、ヘルパーメソッドにまとめる
+- CG-058 静的シングルトン（`static Instance`）を作らない。サービスはComposition層で生成してPartituraへ登録するか、必要な箇所へ注入する
 - CG-059 Composition層は依存をつなぐことに専念する。業務ロジックやUIレイアウトの計算はViewまたはAdaptorのクラスに切り出す
 - CG-060 1ファイルが400行、1メソッドが60行を超えたら、責務を分けて分割することを検討する
 - CG-061 他のオブジェクトのメンバーを3段以上たどらない（`a.B.C.D` のような呼び出し）。必要な値は引数やメソッドで受け取る

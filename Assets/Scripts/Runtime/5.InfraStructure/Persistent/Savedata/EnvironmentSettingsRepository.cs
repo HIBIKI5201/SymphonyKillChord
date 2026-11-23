@@ -1,6 +1,6 @@
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,10 +28,10 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
         public async ValueTask<EnvironmentSettingsData> LoadAsync(
             CancellationToken cancellationToken = default)
         {
-            bool hasExistingSave = SaveStore.Exists<SaveData>();
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>(cancellationToken);
+            bool hasExistingSave = Manuscript.Exists<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>(cancellationToken);
 
             if (!hasExistingSave && _defaultAsset != null)
             {
@@ -89,9 +89,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
             }
 
             // セーブデータを取得し、失敗時に戻せるよう現在の設定を控えておく。
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>(cancellationToken);
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>(cancellationToken);
             EnvironmentSettingsData previousSettings = saveData.EnvironmentSettings.Copy();
 
             // 新しい設定を反映する。
@@ -112,7 +112,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
             // 保存に失敗した場合は、反映前の設定に戻してから例外を投げ直す。
             try
             {
-                await SaveStore.SaveAsync<SaveData>(cancellationToken);
+                await Manuscript.SaveAsync<SaveData>(cancellationToken);
             }
             catch
             {

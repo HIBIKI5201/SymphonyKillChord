@@ -22,8 +22,8 @@ using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.Persistent.Localization;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -262,9 +262,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 _loadedSkillInputProgressUIConfig = null;
             }
 
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             if (saveData == null)
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] SaveData が取得できませんでした。", this);
@@ -308,7 +308,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         {
             // 購読とルート要素の操作の登録を解除する。
             Unsubscribe();
-            ServiceLocator.UnregisterInstance<SkillTreeStatusEntity>();
+            Partitura.Unregister<SkillTreeStatusEntity>();
             if (_rootElement != null)
             {
                 _rootElement.UnregisterCallback<PointerDownEvent>(HandleRootPointerDown, TrickleDown.TrickleDown);
@@ -401,13 +401,13 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            if (!Partitura.TryGet(out _outGameUIEvent))
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] OutGameUIEvent が取得できませんでした。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _skillTreeScreenView))
+            if (!Partitura.TryGet(out _skillTreeScreenView))
             {
                 Debug.LogError($"[{nameof(SkillTreeInitializer)}] SkillTreeScreenView が取得できませんでした。", this);
                 return false;
@@ -492,7 +492,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
                 CreateSkillNodeIds(_skillUnlockData.UnlockedSkillNodeIds),
                 CreateSkillIds(_skillUnlockData.UnlockedSkillIds));
             // 体験版などで解放を禁止するノードがある場合だけ、判定が登録されている。
-            ServiceLocator.TryGetInstance(out ISkillNodeLockPolicy skillNodeLockPolicy);
+            Partitura.TryGet(out ISkillNodeLockPolicy skillNodeLockPolicy);
             _skillTreeService = new SkillTreeService(_skillNodeEntities, skillNodeLockPolicy);
             if (_skillTreeService.AreAllNodesUnlocked())
             {
@@ -500,7 +500,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
             }
             skillTreeEntity.SetSkillSlotBonus(
                 _skillTreeService.CalculateSkillSlotBonus(skillTreeEntity.UnlockedNodes));
-            ServiceLocator.RegisterInstance(skillTreeEntity);
+            Partitura.Register(skillTreeEntity, ServiceLifetimeEnum.Persistent);
             PlayerStatusBonusCalculator playerStatusBonusCalculator =
                 new PlayerStatusBonusCalculator(_loadedSkillNodeDataRepo.GetAll());
 
@@ -1061,7 +1061,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillTree
         private async void HandleUnlockSaveFailed()
         {
             // 通知を表示できない場合は、コントローラー側のログだけに任せる。
-            if (!ServiceLocator.TryGetInstance(out EventNotificationView notificationView)
+            if (!Partitura.TryGet(out EventNotificationView notificationView)
                 || notificationView == null
                 || notificationView.IsVisible
                 || !notificationView.isActiveAndEnabled)

@@ -6,7 +6,7 @@ using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Domain.Player;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -48,9 +48,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         public async ValueTask<IReadOnlyList<EquippedSkill>> LoadSkillBuild()
         {
             ValidateDependencies();
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             BuildEquippedSkills(saveData.SkillBuild.EquipmentSkillIDs);
             return _equippedSkills.AsReadOnly();
         }
@@ -94,15 +94,15 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
             }
 
             List<int> skillIds = BuildSkillIds(equippedSkills);
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             List<int> previousSkillIds = new(saveData.SkillBuild.EquipmentSkillIDs);
 
             saveData.SkillBuild.SetEquipmentSkillIDs(skillIds);
             try
             {
-                await SaveStore.SaveAsync<SaveData>();
+                await Manuscript.SaveAsync<SaveData>();
             }
             catch
             {
@@ -120,9 +120,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         /// </summary>
         public async ValueTask<IReadOnlyDictionary<int, int>> GetSkillLevelsAsync()
         {
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
 
             Dictionary<int, int> result = new();
             foreach (SkillLevelEntry entry in saveData.SkillBuild.SkillLevels)
@@ -144,9 +144,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
         /// <returns> 改造Pが不足している等の理由で実行できなかった場合は false。 </returns>
         public async Task<bool> TryLevelUpSkillAsync(int skillId, int baseLevel)
         {
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
 
             int previousPoint = saveData.ResourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint);
             int previousLevel = saveData.SkillBuild.GetSkillLevel(skillId, baseLevel);
@@ -164,7 +164,7 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillBuild
 
             try
             {
-                await SaveStore.SaveAsync<SaveData>();
+                await Manuscript.SaveAsync<SaveData>();
             }
             catch
             {

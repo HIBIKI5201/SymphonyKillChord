@@ -14,8 +14,8 @@ using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
 using SymphonyFramework.Attribute;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,9 +51,9 @@ namespace KillChord.Runtime.Composition.Persistent.Session
         /// <returns> 常にtrue。 </returns>
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
-            _sessionData = SaveStore.IsLoaded<PlaySessionData>()
-                ? SaveStore.Get<PlaySessionData>()
-                : await SaveStore.LoadAsync<PlaySessionData>(cancellationToken);
+            _sessionData = Manuscript.IsLoaded<PlaySessionData>()
+                ? Manuscript.Get<PlaySessionData>()
+                : await Manuscript.LoadAsync<PlaySessionData>(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
             // ステージを伴う再開地点だけ、ステージツリーから定義を引く。
@@ -85,7 +85,7 @@ namespace KillChord.Runtime.Composition.Persistent.Session
             }
 
             ResolveResumeDestination();
-            if (!ServiceLocator.RegisterInstance<IPlaySessionResumeProvider>(this))
+            if (!Partitura.Register<IPlaySessionResumeProvider>(this, ServiceLifetimeEnum.Persistent))
             {
                 Debug.LogWarning(
                     $"[{nameof(PlaySessionInitializer)}] 途中復帰先を登録できないため、タイトル画面からの途中復帰を行いません。",
@@ -101,7 +101,7 @@ namespace KillChord.Runtime.Composition.Persistent.Session
         /// <returns> 常にtrue。 </returns>
         public override bool Ready()
         {
-            if (ServiceLocator.TryGetInstance(out ISceneInitializationReadiness readiness))
+            if (Partitura.TryGet(out ISceneInitializationReadiness readiness))
             {
                 _sceneInitializationNotifier = readiness as ISceneInitializationNotifier;
             }
@@ -141,7 +141,7 @@ namespace KillChord.Runtime.Composition.Persistent.Session
                 _selectedScenarioState.OnSelectionChanged -= SelectionChangedHandler;
             }
 
-            ServiceLocator.UnregisterInstance<IPlaySessionResumeProvider>(this);
+            Partitura.Unregister<IPlaySessionResumeProvider>(this);
             UnregisterIfOwned(_selectedBattleStageState, ref _ownsBattleStageState);
             UnregisterIfOwned(_selectedMissionState, ref _ownsMissionState);
             UnregisterIfOwned(_selectedScenarioState, ref _ownsScenarioState);
@@ -394,7 +394,7 @@ namespace KillChord.Runtime.Composition.Persistent.Session
             }
 
             // 保存を止める状態が登録されている間は、再開地点を書き換えない。
-            if (ServiceLocator.TryGetInstance(out ISaveSuppression saveSuppression)
+            if (Partitura.TryGet(out ISaveSuppression saveSuppression)
                 && saveSuppression.IsSaveSuppressed)
             {
                 return;
@@ -451,7 +451,7 @@ namespace KillChord.Runtime.Composition.Persistent.Session
                 do
                 {
                     _hasPendingSave = false;
-                    await SaveStore.SaveAsync<PlaySessionData>(destroyCancellationToken);
+                    await Manuscript.SaveAsync<PlaySessionData>(destroyCancellationToken);
                 }
                 while (_hasPendingSave);
             }
@@ -476,13 +476,13 @@ namespace KillChord.Runtime.Composition.Persistent.Session
         /// <returns> 登録済みの状態。登録できない場合はnull。 </returns>
         private static T GetOrRegister<T>(ref bool isOwned) where T : class, new()
         {
-            if (ServiceLocator.TryGetInstance(out T instance))
+            if (Partitura.TryGet(out T instance))
             {
                 return instance;
             }
 
             instance = new T();
-            isOwned = ServiceLocator.RegisterInstance(instance);
+            isOwned = Partitura.Register(instance, ServiceLifetimeEnum.Persistent);
             return isOwned ? instance : null;
         }
 
@@ -499,9 +499,9 @@ namespace KillChord.Runtime.Composition.Persistent.Session
                 return;
             }
 
-            if (ServiceLocator.TryGetInstance(out T registered) && ReferenceEquals(registered, instance))
+            if (Partitura.TryGet(out T registered) && ReferenceEquals(registered, instance))
             {
-                ServiceLocator.UnregisterInstance<T>();
+                Partitura.Unregister<T>();
             }
 
             isOwned = false;

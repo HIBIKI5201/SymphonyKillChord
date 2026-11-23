@@ -1,4 +1,4 @@
-using SymphonyFrameWork.System.SceneLoad;
+using SymphonyFramework.Scenes;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -18,9 +18,9 @@ namespace DevelopProducts.Persistent.Composition
         {
             _cancellationTokenSource = new CancellationTokenSource();
 
-            if (!SceneLoader.GetExistScene(_firstSceneName, out _))
+            if (!Attacca.TryGetScene(_firstSceneName, out _))
             {
-                bool success = await SceneLoader.LoadSceneAsync(_firstSceneName,
+                bool success = await Attacca.LoadAsync(_firstSceneName,
                     null,
                     LoadSceneMode.Additive,
                     token: _cancellationTokenSource.Token
@@ -33,7 +33,7 @@ namespace DevelopProducts.Persistent.Composition
                 }
             }
 
-            SceneLoader.SetActiveScene(_firstSceneName);
+            Attacca.SetActiveScene(_firstSceneName);
         }
 
         private void OnDestroy()

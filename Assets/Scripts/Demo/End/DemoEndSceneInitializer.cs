@@ -2,8 +2,8 @@ using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
-using SymphonyFrameWork.System.SceneLoad;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Scenes;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,7 +30,7 @@ namespace KillChord.Demo.End
         /// <returns> 成功した場合はtrueです。 </returns>
         public override bool Init()
         {
-            return SceneLoader.RegisterLoadedScene(
+            return Attacca.RegisterLoadedScene(
                 gameObject.scene.name,
                 ScenePriorityResolver.Resolve(gameObject.scene.name));
         }
@@ -106,7 +106,7 @@ namespace KillChord.Demo.End
         ///     常駐シーンの初期化を経てこのシーンが起動されたかを示します。
         /// </summary>
         private static bool IsBootedThroughPersistentFlow =>
-            ServiceLocator.IsExistInstance<ISceneInitializationReadiness>();
+            Partitura.IsRegistered<ISceneInitializationReadiness>();
 
         /// <summary>
         ///     登録順の逆順でモジュールを終了します。
@@ -143,7 +143,7 @@ namespace KillChord.Demo.End
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out ISceneTransitionService sceneTransitionService))
+            if (!Partitura.TryGet(out ISceneTransitionService sceneTransitionService))
             {
                 Debug.LogError(
                     $"[{nameof(DemoEndSceneInitializer)}] " +
@@ -231,7 +231,7 @@ namespace KillChord.Demo.End
         /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
         private void CompleteSceneInitialization(bool isSuccess)
         {
-            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+            if (!Partitura.TryGet<ISceneInitializationReadiness>(out var readiness))
             {
                 Debug.LogError(
                     $"[{nameof(DemoEndSceneInitializer)}] " +

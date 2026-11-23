@@ -5,7 +5,7 @@ using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.Domain.InGame.Character;
 using KillChord.Runtime.Domain.InGame.Mission;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,7 +23,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         internal static T Require<T>() where T : class
         {
-            if (!ServiceLocator.TryGetInstance<T>(out T service) || service == null)
+            if (!Partitura.TryGet<T>(out T service) || service == null)
             {
                 throw new InvalidOperationException(typeof(T).Name + " is not initialized");
             }

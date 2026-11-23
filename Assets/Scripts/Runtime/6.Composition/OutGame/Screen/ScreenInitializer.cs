@@ -18,8 +18,8 @@ using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Layout;
 using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFramework.Attribute;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -84,7 +84,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _loadingScreenController))
+            if (!Partitura.TryGet(out _loadingScreenController))
             {
                 Debug.LogError($"[{nameof(ScreenInitializer)}] LoadingScreenControllerを取得できませんでした。", this);
                 return false;
@@ -99,7 +99,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
             if (!_isOptionInputSubscribed)
             {
-                if (ServiceLocator.TryGetInstance(out _playerInputView))
+                if (Partitura.TryGet(out _playerInputView))
                 {
                     _playerInputView.OnOptionInput += HandleOptionInputHandler;
                     _isOptionInputSubscribed = true;
@@ -113,7 +113,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 }
             }
 
-            if (!ServiceLocator.TryGetInstance(out InputComposition inputComposition))
+            if (!Partitura.TryGet(out InputComposition inputComposition))
             {
                 Debug.LogError($"[{nameof(ScreenInitializer)}] InputCompositionを取得できませんでした。", this);
                 return false;
@@ -125,8 +125,8 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             inputComposition.GetInputMapController.EnableCommonWith(InputMapNames.OutGame);
 
             ApplyInteractionEnabled(!_loadingScreenController.IsLoading);
-            if (!SaveStore.IsLoaded<SaveData>()
-                || SaveStore.Get<SaveData>().Tutorial.Phase >= TutorialPhase.BattleCompleted)
+            if (!Manuscript.IsLoaded<SaveData>()
+                || Manuscript.Get<SaveData>().Tutorial.Phase >= TutorialPhase.BattleCompleted)
             {
                 _screenController.ShowHome();
                 RefreshHeaderPointsAsync();
@@ -146,21 +146,21 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             _isSubscribed = false;
 
             // 各画面の登録を解除して破棄する。
-            ServiceLocator.UnregisterInstance<SkillBuildScreenView>();
-            ServiceLocator.UnregisterInstance<SkillTreeScreenView>();
-            ServiceLocator.UnregisterInstance<StageSelectScreenView>();
-            ServiceLocator.UnregisterInstance<HomeScreenView>();
-            ServiceLocator.UnregisterInstance<SettingScreenView>();
+            Partitura.Unregister<SkillBuildScreenView>();
+            Partitura.Unregister<SkillTreeScreenView>();
+            Partitura.Unregister<StageSelectScreenView>();
+            Partitura.Unregister<HomeScreenView>();
+            Partitura.Unregister<SettingScreenView>();
             _screenViewRegistry?.Dispose();
             _screenViewRegistry = null;
             _aspectRatioLimiter?.Dispose();
             _aspectRatioLimiter = null;
             // 自身が登録した画面状態のリポジトリだけを解除する。
             if (_registeredScreenStateRepository != null
-                && ServiceLocator.TryGetInstance(out IScreenStateRepository registeredRepository)
+                && Partitura.TryGet(out IScreenStateRepository registeredRepository)
                 && ReferenceEquals(registeredRepository, _registeredScreenStateRepository))
             {
-                ServiceLocator.UnregisterInstance<IScreenStateRepository>();
+                Partitura.Unregister<IScreenStateRepository>();
             }
             _registeredScreenStateRepository = null;
             _homeScreenView = null;
@@ -269,7 +269,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <returns> 成功した場合はtrue。 </returns>
         private bool Initialize()
         {
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            if (!Partitura.TryGet(out _outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] OutGameUIEvent が取得できませんでした.", this);
@@ -292,7 +292,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _sceneTransitionController))
+            if (!Partitura.TryGet(out _sceneTransitionController))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(ScreenInitializer)}] SceneTransitionController が取得できませんでした.", this);
@@ -369,17 +369,17 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             SettingScreenView settingScreenView = new SettingScreenView(
                 settingRoot,
                 _outGameUIEvent,
-                ServiceLocator.TryGetInstance(out PlayerInputView playerInputView) ? playerInputView : null);
+                Partitura.TryGet(out PlayerInputView playerInputView) ? playerInputView : null);
 
             // SkillBuild 専用 Initializer から取得できるように登録する。
-            ServiceLocator.RegisterInstance(skillBuildScreenView);
-            ServiceLocator.RegisterInstance(skillTreeScreenView);
+            Partitura.Register(skillBuildScreenView, ServiceLifetimeEnum.Persistent);
+            Partitura.Register(skillTreeScreenView, ServiceLifetimeEnum.Persistent);
             // StageSelectモジュールから強制出撃中の戻る操作を制限する。
-            ServiceLocator.RegisterInstance(stageSelectScreenView);
+            Partitura.Register(stageSelectScreenView, ServiceLifetimeEnum.Persistent);
             // HomeCharacterPreviewInitializer から取得できるように登録する。
-            ServiceLocator.RegisterInstance(homeScreenView);
+            Partitura.Register(homeScreenView, ServiceLifetimeEnum.Persistent);
             // SettingComposition から取得できるように登録する。
-            ServiceLocator.RegisterInstance(settingScreenView);
+            Partitura.Register(settingScreenView, ServiceLifetimeEnum.Persistent);
 
             ScreenViewRegistry screenViewRegistry = new(
                 homeScreenView,
@@ -419,9 +419,9 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 closeCurrentScreenUseCase,
                 resetToHomeScreenUseCase);
 
-            if (!ServiceLocator.TryGetInstance(out IScreenStateRepository registeredRepository))
+            if (!Partitura.TryGet(out IScreenStateRepository registeredRepository))
             {
-                if (ServiceLocator.RegisterInstance<IScreenStateRepository>(screenStateRepository))
+                if (Partitura.Register<IScreenStateRepository>(screenStateRepository, ServiceLifetimeEnum.Persistent))
                 {
                     _registeredScreenStateRepository = screenStateRepository;
                 }
@@ -508,7 +508,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
                 if (!SaveDataRecoveryRecord.HasPending) { return; }
 
                 // 通知を出せないときは記録を残し、次にホーム画面を開いたときに知らせる。
-                if (!ServiceLocator.TryGetInstance(out EventNotificationView notificationView)
+                if (!Partitura.TryGet(out EventNotificationView notificationView)
                     || notificationView == null
                     || notificationView.IsVisible
                     || !notificationView.isActiveAndEnabled)
@@ -620,7 +620,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
             if (_isSceneTransitioning || _sceneTransitionController.HasScenarioBattleSortie
                 || _sceneTransitionController.PersistentLifetimeToken.IsCancellationRequested) { return; }
 
-            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
+            if (!Partitura.TryGet(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage
                 || string.IsNullOrWhiteSpace(selectedBattleStageState.InGameSceneName))
             {
@@ -752,7 +752,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
 
         /// <summary> 作戦画面が強制出撃の操作制限中の場合はtrueです。 </summary>
         private bool IsForcedSortieMode =>
-            ServiceLocator.TryGetInstance(out StageSelectScreenView screenView)
+            Partitura.TryGet(out StageSelectScreenView screenView)
             && screenView.IsForcedSortieMode;
 
         private const string HOMESCREEN_NAME = "HomeContainer";

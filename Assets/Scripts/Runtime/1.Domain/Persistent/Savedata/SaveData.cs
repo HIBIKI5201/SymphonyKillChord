@@ -1,5 +1,5 @@
 using KillChord.Runtime.Domain.OutGame.Resource;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using UnityEngine;
 

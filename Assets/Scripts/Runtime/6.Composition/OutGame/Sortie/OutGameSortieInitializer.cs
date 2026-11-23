@@ -10,7 +10,7 @@ using KillChord.Runtime.Composition.OutGame.StageSelect;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.Composition.Persistent.SceneManagement;
 using KillChord.Runtime.View.OutGame.Screen;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Sortie
@@ -33,7 +33,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
-            if (!ServiceLocator.TryGetInstance(out OutGameUIEvent outGameUIEvent))
+            if (!Partitura.TryGet(out OutGameUIEvent outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(OutGameSortieInitializer)}] OutGameUIEvent が取得できませんでした。", this);
@@ -41,7 +41,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out InputComposition inputComposition))
+            if (!Partitura.TryGet(out InputComposition inputComposition))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(OutGameSortieInitializer)}] InputComposition が取得できませんでした。", this);
@@ -49,7 +49,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionUseCase sceneTransitionUseCase))
+            if (!Partitura.TryGet(out SceneTransitionUseCase sceneTransitionUseCase))
             {
 #if UNITY_EDITOR
                 Debug.LogError(
@@ -60,9 +60,9 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionController transition)
-                || !ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var executor)
-                || !ServiceLocator.TryGetInstance(out SceneTransitionInitializer transitionInitializer))
+            if (!Partitura.TryGet(out SceneTransitionController transition)
+                || !Partitura.TryGet<ILoadingOperationExecutor>(out var executor)
+                || !Partitura.TryGet(out SceneTransitionInitializer transitionInitializer))
             {
                 Debug.LogError($"[{nameof(OutGameSortieInitializer)}] 常駐出撃サービスを取得できませんでした。", this);
                 return false;
@@ -80,7 +80,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
             OutGameSortieController controller = new OutGameSortieController(useCase);
 
             // ステージ詳細画面の出撃ボタンを押した時の処理を外部で呼び出せるようにするため、ServiceLocatorに登録しておく。
-            return ServiceLocator.RegisterInstance(controller);
+            return Partitura.Register(controller, ServiceLifetimeEnum.Persistent);
         }
 
         /// <summary>
@@ -89,8 +89,8 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         public override bool Ready()
         {
             if (_outputPort == null
-                || !ServiceLocator.TryGetInstance(out PendingNodeTransitionState pendingState)
-                || !ServiceLocator.TryGetInstance(out SelectedScenarioState selectedState))
+                || !Partitura.TryGet(out PendingNodeTransitionState pendingState)
+                || !Partitura.TryGet(out SelectedScenarioState selectedState))
             {
                 Debug.LogError($"[{nameof(OutGameSortieInitializer)}] 専用出撃のStateを取得できませんでした。", this);
                 return false;
@@ -104,7 +104,7 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         /// </summary>
         public override void Shutdown()
         {
-            ServiceLocator.UnregisterInstance<OutGameSortieController>();
+            Partitura.Unregister<OutGameSortieController>();
             _outputPort = null;
         }
 

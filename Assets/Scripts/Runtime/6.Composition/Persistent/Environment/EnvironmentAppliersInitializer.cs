@@ -1,6 +1,6 @@
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.View.Persistent.Environment;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.Persistent.Environment
@@ -28,10 +28,10 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
             _brightnessApplier = new BrightnessApplier(transform);
             _languageApplier = new LanguageApplier();
 
-            if (!ServiceLocator.RegisterInstance(_resolutionApplier)
-                || !ServiceLocator.RegisterInstance(_qualityApplier)
-                || !ServiceLocator.RegisterInstance(_brightnessApplier)
-                || !ServiceLocator.RegisterInstance(_languageApplier))
+            if (!Partitura.Register(_resolutionApplier, ServiceLifetimeEnum.Persistent)
+                || !Partitura.Register(_qualityApplier, ServiceLifetimeEnum.Persistent)
+                || !Partitura.Register(_brightnessApplier, ServiceLifetimeEnum.Persistent)
+                || !Partitura.Register(_languageApplier, ServiceLifetimeEnum.Persistent))
             {
                 Debug.LogError(
                     $"[{nameof(EnvironmentAppliersInitializer)}] 環境設定の適用先を登録できませんでした。",
@@ -47,28 +47,28 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
         /// </summary>
         public override void Shutdown()
         {
-            if (ServiceLocator.TryGetInstance(out ResolutionApplier registeredResolutionApplier)
+            if (Partitura.TryGet(out ResolutionApplier registeredResolutionApplier)
                 && ReferenceEquals(registeredResolutionApplier, _resolutionApplier))
             {
-                ServiceLocator.UnregisterInstance<ResolutionApplier>();
+                Partitura.Unregister<ResolutionApplier>();
             }
 
-            if (ServiceLocator.TryGetInstance(out QualityApplier registeredQualityApplier)
+            if (Partitura.TryGet(out QualityApplier registeredQualityApplier)
                 && ReferenceEquals(registeredQualityApplier, _qualityApplier))
             {
-                ServiceLocator.UnregisterInstance<QualityApplier>();
+                Partitura.Unregister<QualityApplier>();
             }
 
-            if (ServiceLocator.TryGetInstance(out BrightnessApplier registeredBrightnessApplier)
+            if (Partitura.TryGet(out BrightnessApplier registeredBrightnessApplier)
                 && ReferenceEquals(registeredBrightnessApplier, _brightnessApplier))
             {
-                ServiceLocator.UnregisterInstance<BrightnessApplier>();
+                Partitura.Unregister<BrightnessApplier>();
             }
 
-            if (ServiceLocator.TryGetInstance(out LanguageApplier registeredLanguageApplier)
+            if (Partitura.TryGet(out LanguageApplier registeredLanguageApplier)
                 && ReferenceEquals(registeredLanguageApplier, _languageApplier))
             {
-                ServiceLocator.UnregisterInstance<LanguageApplier>();
+                Partitura.Unregister<LanguageApplier>();
             }
 
             _resolutionApplier = null;

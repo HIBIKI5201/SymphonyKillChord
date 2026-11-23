@@ -130,7 +130,7 @@ Composition層にある初期化やDIを実行するクラス。
 
 Composition層にあるモジュールのサービスを包括して保持し、他サービスに伝達するクラス。
 
-`ServiceLocator.RegisterInstance`で登録し、他モジュールは`ServiceLocator.TryGetInstance<T>()`で取得する。モジュール間連携はコンストラクタDIではなく、この Container を介した ServiceLocator 経由の公開が標準になっている。
+`Partitura.Register`で登録し、他モジュールは`Partitura.TryGet<T>()`で取得する（SymphonyFramework 7.0.0 で ServiceLocator から改名）。モジュール間連携はコンストラクタDIではなく、この Container を介した Partitura 経由の公開が標準になっている。
 
 ### Debugger
 

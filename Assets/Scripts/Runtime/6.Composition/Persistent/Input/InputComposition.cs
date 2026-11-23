@@ -9,7 +9,7 @@ using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.Persistent.Localization;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -72,8 +72,8 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             InitializeInputMaps();
             BindViewToAdaptor();
             InitializeDeviceKind();
-            ServiceLocator.RegisterInstance(_playerInputView);
-            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
+            Partitura.Register(_playerInputView, ServiceLifetimeEnum.Persistent);
+            Partitura.Register(this, ServiceLifetimeEnum.Scene);
             return true;
         }
 
@@ -84,8 +84,8 @@ namespace KillChord.Runtime.Composition.Persistent.Input
         {
             if (_playerInputView == null || !_playerInputView.HasUIInputModule
                 || _inputMapController == null
-                || !ServiceLocator.TryGetInstance(out _loadingScreenController)
-                || !ServiceLocator.TryGetInstance(out _notificationView))
+                || !Partitura.TryGet(out _loadingScreenController)
+                || !Partitura.TryGet(out _notificationView))
             {
                 Debug.LogError($"[{nameof(InputComposition)}] ロード中の入力制御に必要な依存を取得できませんでした。", this);
                 return false;
@@ -121,7 +121,7 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             }
 
             IEnvironmentSettingsViewModel environmentSettingsViewModel =
-                ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
+                Partitura.TryGet(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
                     ? environmentSettingsContainer.ViewModel
                     : null;
             if (environmentSettingsViewModel == null)
@@ -159,16 +159,16 @@ namespace KillChord.Runtime.Composition.Persistent.Input
             _gamepadButtonLayoutView = null;
             DisposeDeviceKind();
 
-            if (ServiceLocator.TryGetInstance(out PlayerInputView registeredInputView)
+            if (Partitura.TryGet(out PlayerInputView registeredInputView)
                 && ReferenceEquals(registeredInputView, _playerInputView))
             {
-                ServiceLocator.UnregisterInstance<PlayerInputView>();
+                Partitura.Unregister<PlayerInputView>();
             }
 
-            if (ServiceLocator.TryGetInstance(out InputComposition registeredInputComposition)
+            if (Partitura.TryGet(out InputComposition registeredInputComposition)
                 && ReferenceEquals(registeredInputComposition, this))
             {
-                ServiceLocator.UnregisterInstance(this);
+                Partitura.Unregister(this);
             }
         }
 

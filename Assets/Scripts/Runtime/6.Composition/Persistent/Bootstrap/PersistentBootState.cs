@@ -1,5 +1,5 @@
 using KillChord.Runtime.Application.Persistent.SceneManagement;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 
 namespace KillChord.Runtime.Composition.Persistent.Bootstrap
 {
@@ -15,6 +15,6 @@ namespace KillChord.Runtime.Composition.Persistent.Bootstrap
     {
         /// <summary> 常駐シーンの初期化を経て起動された場合はtrue。 </summary>
         public static bool IsBootedThroughPersistentFlow =>
-            ServiceLocator.IsExistInstance<ISceneInitializationReadiness>();
+            Partitura.IsRegistered<ISceneInitializationReadiness>();
     }
 }

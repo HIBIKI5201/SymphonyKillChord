@@ -4,8 +4,8 @@ using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillBuild;
 using KillChord.Runtime.Utility.Identity;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -50,9 +50,9 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
                 _loadedInitialSkillLoadout.GetEquippedSkillIds());
 
             cancellationToken.ThrowIfCancellationRequested();
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
             int[] previousUnlockedSkillIds = (int[])saveData.SkillUnlock.UnlockedSkillIds.Clone();
@@ -62,7 +62,7 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
             {
                 try
                 {
-                    await SaveStore.SaveAsync<SaveData>();
+                    await Manuscript.SaveAsync<SaveData>();
                 }
                 catch
                 {
@@ -83,7 +83,7 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
-            _isServiceRegistered = ServiceLocator.RegisterInstance(_initialSkillLoadoutService);
+            _isServiceRegistered = Partitura.Register(_initialSkillLoadoutService, ServiceLifetimeEnum.Persistent);
             return true;
         }
 
@@ -94,7 +94,7 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
         {
             if (_isServiceRegistered)
             {
-                ServiceLocator.UnregisterInstance<InitialSkillLoadoutService>();
+                Partitura.Unregister<InitialSkillLoadoutService>();
                 _isServiceRegistered = false;
             }
 

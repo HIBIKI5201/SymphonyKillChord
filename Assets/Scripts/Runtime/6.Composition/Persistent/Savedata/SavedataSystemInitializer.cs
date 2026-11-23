@@ -1,7 +1,7 @@
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Utility.Diagnostics;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System.Threading;
 using UnityEngine;
 
@@ -27,11 +27,11 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            SaveData saveData = await SaveStore.LoadAsync<SaveData>(cancellationToken);
+            SaveData saveData = await Manuscript.LoadAsync<SaveData>(cancellationToken);
 
             if (LegacyDataIdMigration.TryMigrate(saveData))
             {
-                await SaveStore.SaveAsync<SaveData>(cancellationToken);
+                await Manuscript.SaveAsync<SaveData>(cancellationToken);
                 DevLog.Log($"[{nameof(SavedataSystemInitializer)}] 旧IDを統一IDへ移行しました。", this);
             }
 

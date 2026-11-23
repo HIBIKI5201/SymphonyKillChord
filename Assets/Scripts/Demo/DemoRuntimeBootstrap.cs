@@ -14,8 +14,8 @@ using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Load;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,7 +43,7 @@ namespace KillChord.Demo
         private static async void CreateInstance()
         {
             if (_isCreating
-                || ServiceLocator.TryGetInstance<IDemoSession>(out _)
+                || Partitura.TryGet<IDemoSession>(out _)
                 || FindAnyObjectByType<DemoRuntimeBootstrap>() != null)
             {
                 return;
@@ -67,7 +67,7 @@ namespace KillChord.Demo
                     return;
                 }
 
-                if (ServiceLocator.TryGetInstance<IDemoSession>(out _)
+                if (Partitura.TryGet<IDemoSession>(out _)
                     || FindAnyObjectByType<DemoRuntimeBootstrap>() != null)
                 {
                     return;
@@ -119,7 +119,7 @@ namespace KillChord.Demo
 
                 _sessionState.Configure(_config);
                 _isSessionOwner =
-                    ServiceLocator.RegisterInstance<IDemoSession>(_sessionState);
+                    Partitura.Register<IDemoSession>(_sessionState, ServiceLifetimeEnum.Persistent);
                 if (!_isSessionOwner)
                 {
                     Debug.LogError(
@@ -140,7 +140,7 @@ namespace KillChord.Demo
                     _timerView.Initialize(_sessionState);
                 }
                 _exitPolicy = new DemoStageResultExitPolicy(_sessionState, _config);
-                _isExitPolicyOwner = ServiceLocator.RegisterInstance<IStageResultExitPolicy>(_exitPolicy);
+                _isExitPolicyOwner = Partitura.Register<IStageResultExitPolicy>(_exitPolicy, ServiceLifetimeEnum.Persistent);
                 RegisterSkillNodeLockPolicy();
                 SceneManager.sceneLoaded += HandleSceneLoaded;
                 _isSceneLoadedSubscribed = true;
@@ -162,7 +162,7 @@ namespace KillChord.Demo
                 return;
             }
 
-            bool isOutGameActive = ServiceLocator.TryGetInstance(
+            bool isOutGameActive = Partitura.TryGet(
                 out StageSelectModuleContainer stageSelectContainer);
             ResetHomeTimerOnEntry(isOutGameActive);
 
@@ -213,15 +213,15 @@ namespace KillChord.Demo
         /// <param name="isOutGameActive"> OutGame内にいる場合はtrueです。 </param>
         private void UpdateTimerPosition(bool isOutGameActive)
         {
-            ScreenId? screenId = ServiceLocator.TryGetInstance(
+            ScreenId? screenId = Partitura.TryGet(
                 out IScreenStateRepository screenStateRepository)
                 ? screenStateRepository.TransitionState.CurrentScreenId
                 : null;
-            bool isResultActive = ServiceLocator.TryGetInstance(
+            bool isResultActive = Partitura.TryGet(
                 out SequenceModuleContainer sequenceContainer)
                 && sequenceContainer.SequenceDirector != null
                 && sequenceContainer.SequenceDirector.IsResultActive;
-            bool isScenarioActive = ServiceLocator.TryGetInstance(
+            bool isScenarioActive = Partitura.TryGet(
                 out SelectedScenarioState selectedScenarioState)
                 && selectedScenarioState.HasSelectedScenario
                 && IsSceneLoaded(selectedScenarioState.CurrentStageDefinition.TargetSceneName);
@@ -242,24 +242,24 @@ namespace KillChord.Demo
             }
 
             if (_isExitPolicyOwner
-                && ServiceLocator.TryGetInstance(out IStageResultExitPolicy registeredPolicy)
+                && Partitura.TryGet(out IStageResultExitPolicy registeredPolicy)
                 && ReferenceEquals(registeredPolicy, _exitPolicy))
             {
-                ServiceLocator.UnregisterInstance<IStageResultExitPolicy>();
+                Partitura.Unregister<IStageResultExitPolicy>();
             }
 
             if (_isSkillNodeLockPolicyOwner
-                && ServiceLocator.TryGetInstance(out ISkillNodeLockPolicy registeredLockPolicy)
+                && Partitura.TryGet(out ISkillNodeLockPolicy registeredLockPolicy)
                 && ReferenceEquals(registeredLockPolicy, _skillNodeLockPolicy))
             {
-                ServiceLocator.UnregisterInstance<ISkillNodeLockPolicy>();
+                Partitura.Unregister<ISkillNodeLockPolicy>();
             }
 
             if (_isSessionOwner
-                && ServiceLocator.TryGetInstance<IDemoSession>(out var registeredSession)
+                && Partitura.TryGet<IDemoSession>(out var registeredSession)
                 && ReferenceEquals(registeredSession, _sessionState))
             {
-                ServiceLocator.UnregisterInstance<IDemoSession>();
+                Partitura.Unregister<IDemoSession>();
             }
 
             CONFIG_ADDRESS.ReleaseLoadedAsset(this);
@@ -277,11 +277,11 @@ namespace KillChord.Demo
         {
             if (_sessionState.IsStarted
                 || _config.OverallTimerStartPoint != DemoTimerStartPoint.OpeningScenario
-                || !ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState)
+                || !Partitura.TryGet(out SelectedScenarioState selectedScenarioState)
                 || !selectedScenarioState.HasSelectedScenario
                 || !selectedScenarioState.IsOpeningTutorialScenario
                 || !IsSceneLoaded(selectedScenarioState.CurrentStageDefinition.TargetSceneName)
-                || !ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+                || !Partitura.TryGet(out LoadingScreenController loadingScreenController)
                 || loadingScreenController.IsLoading)
             {
                 return;
@@ -298,11 +298,11 @@ namespace KillChord.Demo
             if (_sessionState.IsStarted
                 || (_config.OverallTimerStartPoint != DemoTimerStartPoint.OpeningScenario
                     && _config.OverallTimerStartPoint != DemoTimerStartPoint.TutorialBattle)
-                || !ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
+                || !Partitura.TryGet(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage
                 || !selectedBattleStageState.CurrentStageDefinition.IsTutorial
                 || !TryGetLoadedBattleScenes(out _, out _)
-                || !ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+                || !Partitura.TryGet(out LoadingScreenController loadingScreenController)
                 || loadingScreenController.IsLoading)
             {
                 return;
@@ -325,9 +325,9 @@ namespace KillChord.Demo
             int sessionRevision = _sessionRevision;
             try
             {
-                SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                    ? SaveStore.Get<SaveData>()
-                    : await SaveStore.LoadAsync<SaveData>(destroyCancellationToken);
+                SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                    ? Manuscript.Get<SaveData>()
+                    : await Manuscript.LoadAsync<SaveData>(destroyCancellationToken);
                 // Titleへ戻る前に始まった読み込み結果で、次のセッションを開始しない。
                 if (sessionRevision != _sessionRevision
                     || IsSceneLoaded(_config.TitleSceneName)
@@ -374,7 +374,7 @@ namespace KillChord.Demo
             }
 
             // 満了状態を保留として維持し、ロード後の最新の解放状態から選び直す。
-            if (ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController)
+            if (Partitura.TryGet(out LoadingScreenController loadingScreenController)
                 && loadingScreenController.IsLoading)
             {
                 return;
@@ -506,7 +506,7 @@ namespace KillChord.Demo
                 _timerView?.Refresh(false);
                 return;
             }
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionUseCase sceneTransitionUsecase))
+            if (!Partitura.TryGet(out SceneTransitionUseCase sceneTransitionUsecase))
             {
                 Debug.LogError(
                     $"[{nameof(DemoRuntimeBootstrap)}] {nameof(SceneTransitionUseCase)} が取得できません。",
@@ -589,7 +589,7 @@ namespace KillChord.Demo
                 if (revision != _sessionRevision || homeRevision != _homeTimerRevision
                     || !_sessionState.IsStarted || _sessionState.IsOverallTimeExpired
                     || IsSceneLoaded(_config.TitleSceneName)
-                    || !ServiceLocator.TryGetInstance(out StageSelectModuleContainer current)
+                    || !Partitura.TryGet(out StageSelectModuleContainer current)
                     || !ReferenceEquals(current, container))
                 {
                     return;
@@ -638,7 +638,7 @@ namespace KillChord.Demo
         /// </summary>
         private bool TryGetNotificationView(out EventNotificationView notification)
         {
-            if (ServiceLocator.TryGetInstance(out notification) && notification != null)
+            if (Partitura.TryGet(out notification) && notification != null)
             {
                 _hasLoggedMissingNotificationView = false;
                 return true;
@@ -658,8 +658,8 @@ namespace KillChord.Demo
         /// </summary>
         private static bool IsSceneTransitionBusy()
         {
-            return (ServiceLocator.TryGetInstance(out LoadingScreenController loading) && loading.IsLoading)
-                || (ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+            return (Partitura.TryGet(out LoadingScreenController loading) && loading.IsLoading)
+                || (Partitura.TryGet(out SceneTransitionController transition)
                     && transition.HasScenarioBattleSortie);
         }
 
@@ -673,7 +673,7 @@ namespace KillChord.Demo
             battleSceneName = string.Empty;
             inGameSceneName = string.Empty;
 
-            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
+            if (!Partitura.TryGet(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage)
             {
                 return false;
@@ -718,12 +718,12 @@ namespace KillChord.Demo
             try
             {
                 // 削除の前に、引き継ぐ言語と音量を控える。
-                bool hasPreservedSettings = SaveStore.IsLoaded<SaveData>();
+                bool hasPreservedSettings = Manuscript.IsLoaded<SaveData>();
                 AudioSettingsData preservedAudioSettings = null;
                 GameLanguage preservedLanguage = EnvironmentSettingsData.DEFAULT_LANGUAGE;
                 if (hasPreservedSettings)
                 {
-                    SaveData currentSaveData = SaveStore.Get<SaveData>();
+                    SaveData currentSaveData = Manuscript.Get<SaveData>();
                     preservedAudioSettings = new AudioSettingsData(
                         currentSaveData.AudioSettings.BgmVolume,
                         currentSaveData.AudioSettings.SoundEffectVolume,
@@ -732,17 +732,17 @@ namespace KillChord.Demo
                 }
 
                 // 終了シーンの初期化完了通知は DemoEndSceneInitializer が行う。
-                await SaveStore.DeleteAsync<SaveData>();
+                await Manuscript.DeleteAsync<SaveData>();
 
                 if (hasPreservedSettings)
                 {
-                    SaveData resetSaveData = await SaveStore.LoadAsync<SaveData>(destroyCancellationToken);
+                    SaveData resetSaveData = await Manuscript.LoadAsync<SaveData>(destroyCancellationToken);
                     resetSaveData.AudioSettings.SetVolumes(
                         preservedAudioSettings.BgmVolume,
                         preservedAudioSettings.SoundEffectVolume,
                         preservedAudioSettings.VoiceVolume);
                     resetSaveData.EnvironmentSettings.SetLanguage(preservedLanguage);
-                    await SaveStore.SaveAsync<SaveData>();
+                    await Manuscript.SaveAsync<SaveData>();
                 }
             }
             catch (Exception exception)
@@ -767,7 +767,7 @@ namespace KillChord.Demo
 
             _skillNodeLockPolicy = lockPolicy;
             _isSkillNodeLockPolicyOwner =
-                ServiceLocator.RegisterInstance<ISkillNodeLockPolicy>(_skillNodeLockPolicy);
+                Partitura.Register<ISkillNodeLockPolicy>(_skillNodeLockPolicy, ServiceLifetimeEnum.Persistent);
             if (!_isSkillNodeLockPolicyOwner)
             {
                 Debug.LogError(
@@ -783,7 +783,7 @@ namespace KillChord.Demo
         private void TrySubscribeHomeTutorialStarted(bool isOutGameActive)
         {
             if (!isOutGameActive
-                || !ServiceLocator.TryGetInstance(out OutGameUIEvent currentOutGameUIEvent))
+                || !Partitura.TryGet(out OutGameUIEvent currentOutGameUIEvent))
             {
                 return;
             }

@@ -2,7 +2,7 @@ using KillChord.Develop.Composition.InGame.SkillEffect;
 using KillChord.Runtime.Adaptor.InGame.Skill.Effect;
 using KillChord.Runtime.Composition.InGame.Skill.Effect;
 using KillChord.Runtime.Utility.Identity;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Develop.View.InGame.SkillEffect
@@ -54,7 +54,7 @@ namespace KillChord.Develop.View.InGame.SkillEffect
                 }
             }
 
-            if (!ServiceLocator.TryGetInstance(out SkillEffectModuleContainer moduleContainer))
+            if (!Partitura.TryGet(out SkillEffectModuleContainer moduleContainer))
             {
                 Debug.LogError(
                     $"[{nameof(SkillEffectDemoController)}] {nameof(SkillEffectModuleContainer)} が取得できませんでした。",

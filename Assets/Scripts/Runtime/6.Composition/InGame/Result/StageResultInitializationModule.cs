@@ -7,7 +7,8 @@ using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Mission;
 using KillChord.Runtime.View;
 using KillChord.Runtime.View.InGame.Result;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System.Threading;
 using UnityEngine;
 
@@ -39,7 +40,7 @@ namespace KillChord.Runtime.Composition.InGame.Result
             }
 
             _container = new StageResultModuleContainer(view);
-            ServiceLocator.RegisterInstance(_container);
+            Partitura.Register(_container, ServiceLifetimeEnum.Persistent);
             _isRegistered = true;
             return true;
         }
@@ -51,26 +52,26 @@ namespace KillChord.Runtime.Composition.InGame.Result
         public override bool Ready()
         {
             // 依存するコンテナと状態を取得する。
-            MissionModuleContainer missionContainer = ServiceLocator.GetInstance<MissionModuleContainer>();
+            MissionModuleContainer missionContainer = ServiceLookup.GetOrNull<MissionModuleContainer>();
             if (missionContainer == null)
             {
                 Debug.LogError($"[{nameof(StageResultInitializationModule)}] {nameof(MissionModuleContainer)} が見つかりません。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            if (!Partitura.TryGet(out SelectedBattleStageState selectedBattleStageState))
             {
                 Debug.LogError($"[{nameof(StageResultInitializationModule)}] {nameof(SelectedBattleStageState)} が見つかりません。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState))
+            if (!Partitura.TryGet(out SelectedMissionState selectedMissionState))
             {
                 Debug.LogError($"[{nameof(StageResultInitializationModule)}] {nameof(SelectedMissionState)} が見つかりません。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionUseCase sceneTransitionUsecase))
+            if (!Partitura.TryGet(out SceneTransitionUseCase sceneTransitionUsecase))
             {
                 Debug.LogError($"[{nameof(StageResultInitializationModule)}] {nameof(SceneTransitionUseCase)} が見つかりません。", this);
                 return false;
@@ -78,7 +79,7 @@ namespace KillChord.Runtime.Composition.InGame.Result
 
             // 遷移はInGameシーン自身を閉じるため、InGameの破棄では取り消されない常駐シーンの寿命で動かす。
             CancellationToken transitionLifetimeToken =
-                ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController)
+                Partitura.TryGet(out SceneTransitionController sceneTransitionController)
                     ? sceneTransitionController.PersistentLifetimeToken
                     : default;
 
@@ -92,7 +93,7 @@ namespace KillChord.Runtime.Composition.InGame.Result
                 sceneTransitionUsecase,
                 selectedBattleStageState,
                 selectedMissionState,
-                ServiceLocator.TryGetInstance(out IStageResultExitPolicy exitPolicy)
+                Partitura.TryGet(out IStageResultExitPolicy exitPolicy)
                     ? exitPolicy
                     : null,
                 transitionLifetimeToken);
@@ -110,7 +111,7 @@ namespace KillChord.Runtime.Composition.InGame.Result
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<StageResultModuleContainer>();
+            Partitura.Unregister<StageResultModuleContainer>();
             _container = null;
             _isRegistered = false;
         }

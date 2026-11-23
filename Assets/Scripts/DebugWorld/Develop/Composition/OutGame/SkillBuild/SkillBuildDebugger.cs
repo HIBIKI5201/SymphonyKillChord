@@ -1,6 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Player;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using UnityEngine;
 
@@ -54,7 +54,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return;
             }
 
-            ServiceLocator.TryGetInstance(out _skillBuildDefinition);
+            Partitura.TryGet(out _skillBuildDefinition);
         }
 
         /// <summary>
