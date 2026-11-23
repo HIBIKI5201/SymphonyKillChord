@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.Utility.Identity;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System;
 using UnityEngine;
 using Cysharp.Text;

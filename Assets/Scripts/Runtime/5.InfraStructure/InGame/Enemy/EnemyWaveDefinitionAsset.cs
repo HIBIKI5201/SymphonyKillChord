@@ -3,7 +3,7 @@ using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.InfraStructure.InGame.Stage;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Enemy;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

@@ -1,5 +1,5 @@
 using KillChord.Runtime.Utility.Identity;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System.Collections.Generic;
 using UnityEngine;
 

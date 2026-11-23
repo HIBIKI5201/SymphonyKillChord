@@ -1,7 +1,7 @@
 using Mock.MusicBattle.Battle;
 using Mock.MusicBattle.Character;
 using Mock.MusicBattle.MusicSync;
-using SymphonyFrameWork.Utility;
+using SymphonyFramework.Utility;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;

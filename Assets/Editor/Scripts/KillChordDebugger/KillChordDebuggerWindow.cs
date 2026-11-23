@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using KillChord.Editor.Debugger.LogicGraph;
 using KillChord.Editor.Utility;
-using SymphonyFrameWork.Editor;
+using SymphonyFramework.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;

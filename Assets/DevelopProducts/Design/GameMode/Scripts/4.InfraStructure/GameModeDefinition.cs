@@ -1,6 +1,6 @@
 using DevelopProducts.Design.GameMode.Domain;
 using DevelopProducts.Design.GameMode.Utility;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System.Collections.Generic;
 using UnityEngine;
 

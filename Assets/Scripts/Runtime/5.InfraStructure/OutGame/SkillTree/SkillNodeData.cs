@@ -2,7 +2,7 @@ using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.Persistent.Localization;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;

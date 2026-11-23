@@ -1,4 +1,4 @@
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System;
 using System.Collections.Generic;
 using System.Text;

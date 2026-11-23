@@ -1,5 +1,5 @@
 using KillChord.Runtime.Application.InGame.Battle;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using UnityEngine;
 
 namespace KillChord.Runtime.InfraStructure.InGame.Battle
