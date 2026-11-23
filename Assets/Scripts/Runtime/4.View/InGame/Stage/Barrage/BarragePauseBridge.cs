@@ -1,4 +1,4 @@
-using SymphonyFrameWork.Exceptions;
+using SymphonyFramework.Exceptions;
 using SymphonyFrameWork.System;
 using Unity.Entities;
 using UnityEngine;

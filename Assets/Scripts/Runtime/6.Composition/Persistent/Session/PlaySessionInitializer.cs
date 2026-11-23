@@ -13,7 +13,7 @@ using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
 using KillChord.Runtime.Utility.Identity;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;

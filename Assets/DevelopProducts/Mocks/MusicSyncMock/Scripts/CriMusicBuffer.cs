@@ -1,5 +1,5 @@
 ﻿using CriWare;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using UnityEngine;
 
 namespace Mock.MusicSyncMock

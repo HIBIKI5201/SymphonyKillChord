@@ -8,7 +8,7 @@
         "KillChord.Adaptor",
         "KillChord.Composition",
         "KillChord.View",
-        "SymphonyFrameWork",
+        "SymphonyFramework",
         "Unity.TextMeshPro",
         "UnityEngine.UI",
         "Unity.InputSystem"

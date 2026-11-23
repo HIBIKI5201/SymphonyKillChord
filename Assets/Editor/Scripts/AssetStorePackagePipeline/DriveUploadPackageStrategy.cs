@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using Google.Apis.Auth.OAuth2;
 using KillChord.Editor.AssetManagement;
-using SymphonyFrameWork.Debugger.Logger;
-using SymphonyFrameWork.Editor;
+using SymphonyFramework.Debugger.Logger;
+using SymphonyFramework.Editor;
 using UnityEngine;
 
 namespace KillChord.Editor.AssetStorePackagePipeline

@@ -2,7 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.UI;
 using LitMotion;
 using LitMotion.Extensions;
 using R3;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System;
 using TMPro;
 using UnityEngine;

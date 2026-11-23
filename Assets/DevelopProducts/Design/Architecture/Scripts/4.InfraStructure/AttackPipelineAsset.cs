@@ -1,6 +1,6 @@
 using DevelopProducts.Architecture.Application;
 using DevelopProducts.Architecture.Utility;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using UnityEngine;
 
 namespace DevelopProducts.Architecture.InfraStructure

@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Mission;
 using KillChord.Runtime.Domain.InGame.Mission.EvaluationCondition;
 using KillChord.Runtime.View.Persistent.Localization;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System;
 using UnityEngine;
 

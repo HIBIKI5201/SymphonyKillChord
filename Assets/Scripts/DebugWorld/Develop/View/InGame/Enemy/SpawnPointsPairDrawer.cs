@@ -1,5 +1,5 @@
 using KillChord.Runtime.View.InGame.Enemy;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using UnityEngine;
 
 namespace KillChord.Develop

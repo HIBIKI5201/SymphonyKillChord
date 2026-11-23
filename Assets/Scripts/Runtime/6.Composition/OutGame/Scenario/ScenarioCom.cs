@@ -19,7 +19,7 @@ using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Scenario;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Input;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;
 using System.Collections.Generic;
