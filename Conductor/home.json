@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "roles": [
+    { "id": "programmer", "label": "プログラマー" },
+    { "id": "planner", "label": "プランナー" },
+    { "id": "designer", "label": "デザイナー" },
+    { "id": "sound", "label": "サウンド" },
+    { "id": "lead", "label": "リード" }
+  ],
+  "tiles": [
+    {
+      "id": "setup-check",
+      "title": "初期化できているか確かめる",
+      "note": "サブモジュール・git の設定・Unity を確かめるだけ。何も変えない",
+      "script": "setup",
+      "preset": "確認だけ（何も変えない）",
+      "roles": ["programmer", "planner", "designer", "sound", "lead"]
+    },
+    {
+      "id": "setup",
+      "title": "プロジェクトを初期化する",
+      "note": "クローンしたあとに1回。足りないものを確認してから入れる",
+      "script": "setup",
+      "preset": "初期化する"
+    },
+    {
+      "id": "install-app",
+      "title": "Android 端末へアプリを入れる",
+      "note": "ビルドしたアプリを USB でつないだ端末へ入れて試す",
+      "script": "install-app",
+      "roles": ["planner", "designer", "sound", "lead"]
+    },
+    {
+      "id": "clean-branches",
+      "title": "マージ済みのブランチを消す",
+      "note": "develop に取り込み済みのローカルブランチを片付ける",
+      "script": "clean-branches",
+      "preset": "消す（確認あり）",
+      "roles": ["programmer", "lead"]
+    },
+    {
+      "id": "runner-menu",
+      "title": "ビルドランナーの管理",
+      "note": "セルフホストランナーの状態・ログを見る",
+      "script": "runner-menu",
+      "preset": "メニューを開く",
+      "roles": ["lead"]
+    },
+    {
+      "id": "github-collaborators",
+      "title": "GitHub のコラボレーターを見る",
+      "note": "KillChord 系列のリポジトリに誰が入っているかを表で出す",
+      "script": "github-collaborators",
+      "preset": "一覧を表で見る",
+      "roles": ["lead"]
+    },
+    {
+      "id": "homepage-dev",
+      "title": "ホームページをプレビューする",
+      "note": "ホームページをローカルで動かしてブラウザで確かめる",
+      "script": "homepage-dev",
+      "roles": ["lead"]
+    },
+    {
+      "id": "all-scripts",
+      "title": "すべてのスクリプト",
+      "note": "登録したスクリプトを一覧から選んで動かす",
+      "page": "scripts"
+    }
+  ]
+}

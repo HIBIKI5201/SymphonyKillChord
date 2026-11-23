@@ -1,0 +1,65 @@
+name: "[CI/CD] Conductor"
+
+# KillChord Conductor（Conductor/）の検査。
+# - スクリプト登録ファイルの書き方と、.bat / .command の登録漏れを調べる（登録漏れは警告）。
+# - core の単体テストと CLI のテスト（登録ファイル・home.json を実際に読む）を Linux と Windows で動かす。
+# - Windows では MSVC で conductor.exe（CLI）と KillChordConductor.exe（GUI）を作って成果物に置く。
+#   リポジトリのルートに置く2つの exe は、この成果物か PC の MSVC で作ったものに差し替える。
+on:
+  pull_request:
+    paths:
+      - 'Conductor/**'
+      - 'scripts/conductor/**'
+      - '**/*.bat'
+      - '**/*.command'
+      - '.github/workflows/Conductor.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registry:
+    name: 登録ファイルを調べる
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: 検査のテスト
+        run: python -m unittest discover -s scripts/conductor -p 'test_*.py'
+      - name: 登録漏れ・書き方の誤りを調べる
+        run: python scripts/conductor/check_launcher_scripts.py
+
+  linux:
+    name: core と CLI のテスト（Linux）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ビルド
+        run: |
+          cmake -S Conductor -B build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --parallel
+      - name: テスト
+        run: ctest --test-dir build --output-on-failure
+
+  windows:
+    name: Windows でビルド（MSVC）
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: ビルド
+        run: |
+          cmake -S Conductor -B build -A x64
+          cmake --build build --config Release --parallel
+      - name: テスト
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: exe を成果物に置く
+        uses: actions/upload-artifact@v4
+        with:
+          name: KillChordConductor
+          path: |
+            build/Release/conductor.exe
+            build/Release/KillChordConductor.exe
+          if-no-files-found: error
