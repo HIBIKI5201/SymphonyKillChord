@@ -1,8 +1,7 @@
 #include "CliClient.h"
 
+#include "PipeReader.h"
 #include "TextConvert.h"
-
-#include <thread>
 
 namespace skc::conductor::gui
 {
@@ -11,21 +10,8 @@ namespace skc::conductor::gui
         using win32::Utf8ToWide;
         using win32::WideToUtf8;
 
-        /// <summary>1回に読むバイト数。</summary>
-        constexpr DWORD READ_BUFFER_SIZE = 4096;
-
-        /// <summary>
-        ///     パイプを終わりまで読む。
-        /// </summary>
-        std::string ReadAll(HANDLE pipe)
-        {
-            std::string text;
-            char data[READ_BUFFER_SIZE];
-            DWORD read = 0;
-            while (ReadFile(pipe, data, READ_BUFFER_SIZE, &read, nullptr) && read > 0) { text.append(data, read); }
-
-            return text;
-        }
+        /// <summary>conductor が終わるのを待つ長さ（ミリ秒）。Unity のメニューを動かすものでも足りる長さにする。</summary>
+        constexpr DWORD RUN_TIMEOUT_MS = 180000;
 
         /// <summary>
         ///     Windows のエラー番号を文にする。
@@ -134,15 +120,19 @@ namespace skc::conductor::gui
 
         CloseHandle(process.hThread);
 
-        // 標準エラーは別のスレッドで読む（片方のパイプが詰まって止まらないように）。
+        // パイプの終わりは待たず、conductor が終わるまで読む（孫が書く側を持ったままでも止まらない）。終わらなければ止める。
         std::string errorText;
-        std::thread errorReader([&errorText, errRead]() { errorText = ReadAll(errRead); });
-        result.Output = ReadAll(outRead);
-        errorReader.join();
+        bool isExited = win32::ReadPipesUntilExit(process.hProcess, { { outRead, &result.Output }, { errRead, &errorText } }, RUN_TIMEOUT_MS);
         CloseHandle(outRead);
         CloseHandle(errRead);
+        if (!isExited)
+        {
+            TerminateProcess(process.hProcess, 1);
+            CloseHandle(process.hProcess);
+            result.Error = "conductor.exe が " + std::to_string(RUN_TIMEOUT_MS / 1000) + " 秒たっても終わらないので止めました。";
+            return result;
+        }
 
-        WaitForSingleObject(process.hProcess, INFINITE);
         GetExitCodeProcess(process.hProcess, &result.ExitCode);
         CloseHandle(process.hProcess);
         result.IsStarted = true;

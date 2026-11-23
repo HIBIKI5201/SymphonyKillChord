@@ -2,6 +2,7 @@
 #include "Platform.h"
 
 #include "CommandLine.h"
+#include "PipeReader.h"
 #include "TextConvert.h"
 
 #include <windows.h>
@@ -104,6 +105,9 @@ namespace skc::conductor::cli
         /// <summary>
         ///     プロセスが終わるのを待ち、終了コードを返す。
         /// </summary>
+        /// <summary>出力を受けて動かすもの（git など）を待つ長さ（ミリ秒）。</summary>
+        constexpr DWORD CAPTURE_TIMEOUT_MS = 60000;
+
         int WaitExitCode(HANDLE process)
         {
             WaitForSingleObject(process, INFINITE);
@@ -190,12 +194,22 @@ namespace skc::conductor::cli
         SetHandleInformation(readPipe, HANDLE_FLAG_INHERIT, 0);
         HANDLE nullDevice = CreateFileW(L"NUL", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &inheritable, OPEN_EXISTING, 0, nullptr);
 
-        STARTUPINFOW startup{};
-        startup.cb = sizeof(startup);
-        startup.dwFlags = STARTF_USESTDHANDLES;
-        startup.hStdInput = nullDevice;
-        startup.hStdOutput = writePipe;
-        startup.hStdError = nullDevice;
+        // 子へ渡すハンドルを、この2つだけに絞る（GUI から渡された標準出力などを、git の常駐プロセスに持たせない）。
+        HANDLE inherited[] = { writePipe, nullDevice };
+        SIZE_T attributeSize = 0;
+        InitializeProcThreadAttributeList(nullptr, 1, 0, &attributeSize);
+        std::vector<unsigned char> attributeBuffer(attributeSize);
+        auto* attributes = reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(attributeBuffer.data());
+        bool hasAttributes = nullDevice != INVALID_HANDLE_VALUE && InitializeProcThreadAttributeList(attributes, 1, 0, &attributeSize) &&
+            UpdateProcThreadAttribute(attributes, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST, inherited, sizeof(inherited), nullptr, nullptr);
+
+        STARTUPINFOEXW startup{};
+        startup.StartupInfo.cb = sizeof(startup);
+        startup.StartupInfo.dwFlags = STARTF_USESTDHANDLES;
+        startup.StartupInfo.hStdInput = nullDevice;
+        startup.StartupInfo.hStdOutput = writePipe;
+        startup.StartupInfo.hStdError = nullDevice;
+        startup.lpAttributeList = hasAttributes ? attributes : nullptr;
 
         std::vector<std::string> arguments(argv.begin() + 1, argv.end());
         std::wstring application = Utf8ToWide(*program);
@@ -205,8 +219,11 @@ namespace skc::conductor::cli
         std::wstring directory = workingDirectory.wstring();
         PROCESS_INFORMATION process{};
         BOOL isCreated = CreateProcessW(application.c_str(), commandLine.data(), nullptr, nullptr, TRUE,
-            CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, nullptr, directory.empty() ? nullptr : directory.c_str(), &startup, &process);
+            CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT | (hasAttributes ? EXTENDED_STARTUPINFO_PRESENT : 0), nullptr,
+            directory.empty() ? nullptr : directory.c_str(), &startup.StartupInfo, &process);
         DWORD createError = GetLastError();
+        if (hasAttributes) { DeleteProcThreadAttributeList(attributes); }
+
         CloseHandle(writePipe);
         if (nullDevice != INVALID_HANDLE_VALUE) { CloseHandle(nullDevice); }
 
@@ -218,14 +235,18 @@ namespace skc::conductor::cli
         }
 
         CloseHandle(process.hThread);
-        char data[READ_BUFFER_SIZE];
-        DWORD read = 0;
-        while (ReadFile(readPipe, data, READ_BUFFER_SIZE, &read, nullptr) && read > 0)
+
+        // パイプの終わりは待たず、子が終わるまで読む（孫が書く側を持ったままでも止まらない）。終わらなければ止める。
+        bool isExited = win32::ReadPipesUntilExit(process.hProcess, { { readPipe, &result.Output } }, CAPTURE_TIMEOUT_MS);
+        CloseHandle(readPipe);
+        if (!isExited)
         {
-            result.Output.append(data, read);
+            TerminateProcess(process.hProcess, 1);
+            CloseHandle(process.hProcess);
+            result.Error = argv[0] + " が " + std::to_string(CAPTURE_TIMEOUT_MS / 1000) + " 秒たっても終わらないので止めました。";
+            return result;
         }
 
-        CloseHandle(readPipe);
         result.IsStarted = true;
         result.ExitCode = WaitExitCode(process.hProcess);
         return result;
