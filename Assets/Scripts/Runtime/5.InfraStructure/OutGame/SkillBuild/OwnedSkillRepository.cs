@@ -4,7 +4,7 @@ using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Player;
 using KillChord.Runtime.Utility.Constant;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -45,9 +45,9 @@ namespace KillChord.Runtime.InfraStructure
         public async ValueTask<IReadOnlyList<EquippedSkill>> LoadOwnedSkillsAsync()
         {
             ValidateDependencies();
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             BuildOwnedSkills(saveData.SkillUnlock.UnlockedSkillIds);
 
             // 入手済みスキルのコピーを返す。

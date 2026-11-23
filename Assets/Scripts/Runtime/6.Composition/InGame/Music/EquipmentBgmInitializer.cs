@@ -6,7 +6,7 @@ using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.InfraStructure.InGame.Music;
 using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -103,7 +103,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 onLabelApplied);
 
             _moduleContainer = new EquipmentBgmModuleContainer(EquipmentBgmController, EquipmentBgmService);
-            ServiceLocator.RegisterInstance(_moduleContainer);
+            Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
             _isModuleRegistered = true;
 
             return true;
@@ -202,7 +202,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<EquipmentBgmModuleContainer>();
+            Partitura.Unregister<EquipmentBgmModuleContainer>();
             _moduleContainer = null;
             _isModuleRegistered = false;
         }
@@ -217,13 +217,13 @@ namespace KillChord.Runtime.Composition.InGame.Music
         {
             musicSyncState = null;
 
-            if (!ServiceLocator.TryGetInstance(out musicPlayer))
+            if (!Partitura.TryGet(out musicPlayer))
             {
                 Debug.LogWarning($"[{ModuleName}] {nameof(MusicPlayer)} が未登録のため、BGM切り替えを行いません。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out musicSyncState))
+            if (!Partitura.TryGet(out musicSyncState))
             {
                 Debug.LogWarning($"[{ModuleName}] {nameof(MusicSyncState)} が未登録のため、BGM切り替えを行いません。", this);
                 return false;
@@ -242,7 +242,7 @@ namespace KillChord.Runtime.Composition.InGame.Music
         /// <returns> 装備中スキルのID列。 </returns>
         private IReadOnlyList<int> CollectEquippedSkillIds(out string skillSource)
         {
-            if (!ServiceLocator.TryGetInstance(out SkillBuildDefinition skillBuild)
+            if (!Partitura.TryGet(out SkillBuildDefinition skillBuild)
                 || skillBuild?.EquippedSkills == null)
             {
                 skillSource = $"{nameof(SkillBuildDefinition)}未登録のため装備なし扱い";

@@ -1,6 +1,6 @@
 using KillChord.Runtime.View.Persistent.PostEffect;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.Persistent.Camera
@@ -30,14 +30,14 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
-            ServiceLocator.RegisterInstance<ICameraTransform>(this, LocateTypeEnum.Locator);
+            Partitura.Register<ICameraTransform>(this, ServiceLifetimeEnum.Scene);
 
             // ポストプロセスの適用は、同じカメラ上のコンポーネントが担う。
             _postEffectOverlayCamera = GetComponent<PostEffectOverlayCamera>();
             if (_postEffectOverlayCamera != null)
             {
-                ServiceLocator.RegisterInstance<IPostEffectOverlayPlayer>(
-                    _postEffectOverlayCamera, LocateTypeEnum.Locator);
+                Partitura.Register<IPostEffectOverlayPlayer>(
+                    _postEffectOverlayCamera, ServiceLifetimeEnum.Scene);
             }
 
             return true;
@@ -48,15 +48,15 @@ namespace KillChord.Runtime.Composition.Persistent.Camera
         /// </summary>
         public override void Shutdown()
         {
-            if (ServiceLocator.TryGetInstance<ICameraTransform>(out var registeredCameraTransform)
+            if (Partitura.TryGet<ICameraTransform>(out var registeredCameraTransform)
                 && ReferenceEquals(registeredCameraTransform, this))
             {
-                ServiceLocator.UnregisterInstance<ICameraTransform>();
+                Partitura.Unregister<ICameraTransform>();
             }
 
             if (_postEffectOverlayCamera != null)
             {
-                ServiceLocator.UnregisterInstance<IPostEffectOverlayPlayer>();
+                Partitura.Unregister<IPostEffectOverlayPlayer>();
                 _postEffectOverlayCamera = null;
             }
         }

@@ -3,7 +3,7 @@ using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Utility.Diagnostics;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -40,9 +40,9 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             }
 
             List<string> achievedEvaluationIds = BuildAchievedEvaluationIds(result);
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             SaveDataSnapshot snapshot = new(saveData);
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
@@ -73,9 +73,9 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
             StageReward clearReward,
             bool completesOpeningScenario)
         {
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             SaveDataSnapshot snapshot = new(saveData);
             bool isFirstClear = !saveData.StageProgress.IsStageCleared(stageId.Value);
             bool stageProgressChanged =
@@ -100,9 +100,9 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
         /// </summary>
         public async ValueTask<StageProgressData> LoadAsync()
         {
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             return saveData.StageProgress;
         }
 
@@ -183,7 +183,7 @@ namespace KillChord.Runtime.Application.Persistent.Savedata
 
                 GrantReward(inventory, clearReward);
 
-                await SaveStore.SaveAsync<SaveData>();
+                await Manuscript.SaveAsync<SaveData>();
 
                 DevLog.Log(
                     $"<color=#FFFF00>[{nameof(StageProgressSaveDataService)}] "

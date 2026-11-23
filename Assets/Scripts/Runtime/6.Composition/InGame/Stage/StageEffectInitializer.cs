@@ -9,7 +9,8 @@ using KillChord.Runtime.Domain.InGame.Enemy;
 using KillChord.Runtime.Domain.InGame.Stage;
 using KillChord.Runtime.InfraStructure.InGame.Stage;
 using KillChord.Runtime.View.InGame.Stage;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -56,9 +57,9 @@ namespace KillChord.Runtime.Composition.InGame.Stage
         public override bool Ready()
         {
             EnemyModuleContainer enemyContainer =
-                ServiceLocator.GetInstance<EnemyModuleContainer>();
+                ServiceLookup.GetOrNull<EnemyModuleContainer>();
             MusicSyncModuleContainer musicContainer =
-                ServiceLocator.GetInstance<MusicSyncModuleContainer>();
+                ServiceLookup.GetOrNull<MusicSyncModuleContainer>();
             if (enemyContainer?.EnemyWaveSpawnerState == null
                 || musicContainer?.MusicSyncService == null
                 || musicContainer.MusicSyncState == null)

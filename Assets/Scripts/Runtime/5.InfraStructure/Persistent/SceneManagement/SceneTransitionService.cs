@@ -1,7 +1,7 @@
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Application.Persistent.SceneManagement;
 using KillChord.Runtime.Utility.Constant;
-using SymphonyFrameWork.System.SceneLoad;
+using SymphonyFramework.Scenes;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +34,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             }
 
             // 遷移先がまだ読み込まれていなければ追加で読み込む。
-            if (!SceneLoader.GetExistScene(toSceneName, out Scene destinationScene)
+            if (!Attacca.TryGetScene(toSceneName, out Scene destinationScene)
                 || !destinationScene.isLoaded)
             {
                 var loadProgress = CreateProgressRange(
@@ -42,8 +42,8 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     0f,
                     LoadingConstants.SCENE_LOAD_END_PROGRESS);
 
-                bool loadSuccess = await SceneLoader.LoadSceneAsync(toSceneName,
-                    CreateProgressCallback(loadProgress),
+                bool loadSuccess = await Attacca.LoadAsync(toSceneName,
+                    loadProgress,
                     LoadSceneMode.Additive,
                     ScenePriorityResolver.Resolve(toSceneName),
                     token: cancellationToken);
@@ -60,16 +60,16 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             // 遷移元が別のシーンとして読み込まれていれば破棄する。
             if (!string.IsNullOrEmpty(fromSceneName) &&
                 !string.Equals(fromSceneName, toSceneName, StringComparison.Ordinal) &&
-                SceneLoader.GetExistScene(fromSceneName, out Scene sourceScene) && sourceScene.isLoaded)
+                Attacca.TryGetScene(fromSceneName, out Scene sourceScene) && sourceScene.isLoaded)
             {
                 var unloadProgress = CreateProgressRange(
                     progress,
                     LoadingConstants.SCENE_LOAD_END_PROGRESS,
                     1f);
 
-                bool unloadSuccess = await SceneLoader.UnloadSceneAsync(
+                bool unloadSuccess = await Attacca.UnloadAsync(
                     fromSceneName,
-                    CreateProgressCallback(unloadProgress),
+                    unloadProgress,
                     token: cancellationToken);
                 if (!unloadSuccess)
                 {
@@ -98,15 +98,15 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return false;
             }
 
-            if (SceneLoader.GetExistScene(sceneName, out Scene loadedScene) && loadedScene.isLoaded)
+            if (Attacca.TryGetScene(sceneName, out Scene loadedScene) && loadedScene.isLoaded)
             {
                 progress?.Report(1f);
                 return true;
             }
 
-            bool loadSuccess = await SceneLoader.LoadSceneAsync(
+            bool loadSuccess = await Attacca.LoadAsync(
                 sceneName,
-                CreateProgressCallback(progress),
+                progress,
                 LoadSceneMode.Additive,
                 ScenePriorityResolver.Resolve(sceneName),
                 cancellationToken);
@@ -138,7 +138,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             }
 
             // 読み込まれていないシーンは、破棄済みとして成功を返す。
-            if (!SceneLoader.GetExistScene(
+            if (!Attacca.TryGetScene(
                     sceneName,
                     out Scene loadedScene)
                 || !loadedScene.isLoaded)
@@ -147,9 +147,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return true;
             }
 
-            bool unloadSuccess = await SceneLoader.UnloadSceneAsync(
+            bool unloadSuccess = await Attacca.UnloadAsync(
                    sceneName,
-                   CreateProgressCallback(progress),
+                   progress,
                    cancellationToken);
 
             if (!unloadSuccess)
@@ -190,7 +190,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             if (!string.IsNullOrWhiteSpace(unloadSceneName)
                 && !string.IsNullOrWhiteSpace(activeSceneName)
                 && !string.Equals(unloadSceneName, activeSceneName, StringComparison.Ordinal)
-                && SceneLoader.GetExistScene(unloadSceneName, out Scene loadedScene)
+                && Attacca.TryGetScene(unloadSceneName, out Scene loadedScene)
                 && loadedScene.isLoaded)
             {
                 var unloadProgress = CreateProgressRange(
@@ -198,9 +198,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     LoadingConstants.ACTIVE_SCENE_PROGRESS,
                     1f);
 
-                bool unloadSuccess = await SceneLoader.UnloadSceneAsync(
+                bool unloadSuccess = await Attacca.UnloadAsync(
                     unloadSceneName,
-                    CreateProgressCallback(unloadProgress),
+                    unloadProgress,
                     token: cancellationToken);
 
                 if (!unloadSuccess)
@@ -235,7 +235,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             }
 
             // 読み込み済みの場合は、先に破棄する。
-            if (SceneLoader.GetExistScene(
+            if (Attacca.TryGetScene(
                 sceneName,
                 out Scene loadedScene)
                 && loadedScene.isLoaded)
@@ -269,9 +269,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     CreateProgressRange(progress, 0f, LoadingConstants.SCENE_RELOAD_UNLOAD_END_PROGRESS);
 
                 bool unloadSuccess =
-                    await SceneLoader.UnloadSceneAsync(
+                    await Attacca.UnloadAsync(
                         sceneName,
-                        CreateProgressCallback(unloadProgress),
+                        unloadProgress,
                         cancellationToken);
 
                 if (!unloadSuccess)
@@ -310,9 +310,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     1f);
 
             bool loadSuccess =
-                await SceneLoader.LoadSceneAsync(
+                await Attacca.LoadAsync(
                     sceneName,
-                    CreateProgressCallback(loadProgress),
+                    loadProgress,
                     LoadSceneMode.Additive,
                     ScenePriorityResolver.Resolve(sceneName),
                     cancellationToken);
@@ -389,7 +389,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
         /// <returns> ActiveSceneの設定または追跡情報の同期に成功した場合はtrueです。 </returns>
         private static bool TrySetActiveScene(string sceneName)
         {
-            if (!SceneLoader.GetExistScene(sceneName, out Scene scene)
+            if (!Attacca.TryGetScene(sceneName, out Scene scene)
                 || !scene.isLoaded)
             {
                 return false;
@@ -399,7 +399,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
             if (activeScene.IsValid()
                 && activeScene.handle == scene.handle)
             {
-                return SceneLoader.RegisterLoadedScene(
+                return Attacca.RegisterLoadedScene(
                     sceneName,
                     ScenePriorityResolver.Resolve(sceneName));
             }
@@ -409,7 +409,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                 return false;
             }
 
-            return SceneLoader.RegisterLoadedScene(
+            return Attacca.RegisterLoadedScene(
                 sceneName,
                 ScenePriorityResolver.Resolve(sceneName));
         }
@@ -433,7 +433,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
                     || !scene.isLoaded
                     || string.IsNullOrEmpty(scene.name)
                     || string.Equals(scene.name, reloadSceneName, StringComparison.Ordinal)
-                    || !SceneLoader.GetExistScene(scene.name, out _))
+                    || !Attacca.TryGetScene(scene.name, out _))
                 {
                     continue;
                 }
@@ -444,19 +444,6 @@ namespace KillChord.Runtime.InfraStructure.Persistent.SceneManagement
 
             fallbackScene = default;
             return false;
-        }
-
-        /// <summary>
-        ///     進捗通知先をSceneLoaderへ渡せるコールバックへ変換する。
-        /// </summary>
-        /// <param name="progress"> 進捗通知先。 </param>
-        /// <returns> 進捗通知先が存在する場合は通知処理、存在しない場合はnull。 </returns>
-        private static Action<float> CreateProgressCallback(
-            IProgress<float> progress)
-        {
-            return progress == null
-                ? null
-                : new Action<float>(progress.Report);
         }
     }
 }

@@ -1,6 +1,6 @@
 using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System.Threading.Tasks;
 
 namespace KillChord.Runtime.Application.OutGame.Screen
@@ -15,9 +15,9 @@ namespace KillChord.Runtime.Application.OutGame.Screen
         /// </summary>
         public async ValueTask<HomePoints> ExecuteAsync()
         {
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
 
             return new HomePoints(
                 saveData.ResourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint),

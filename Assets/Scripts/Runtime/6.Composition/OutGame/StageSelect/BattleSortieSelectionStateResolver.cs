@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Mission;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Adaptor.OutGame.StageSelect;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 
 namespace KillChord.Runtime.Composition.OutGame.StageSelect
 {
@@ -25,13 +25,13 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <returns> 解決した状態です。 </returns>
         private static SelectedBattleStageState ResolveSelectedBattleStageState()
         {
-            if (ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            if (Partitura.TryGet(out SelectedBattleStageState selectedBattleStageState))
             {
                 return selectedBattleStageState;
             }
 
             selectedBattleStageState = new SelectedBattleStageState();
-            ServiceLocator.RegisterInstance(selectedBattleStageState);
+            Partitura.Register(selectedBattleStageState, ServiceLifetimeEnum.Persistent);
             return selectedBattleStageState;
         }
 
@@ -41,13 +41,13 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// <returns> 解決した状態です。 </returns>
         private static SelectedMissionState ResolveSelectedMissionState()
         {
-            if (ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState))
+            if (Partitura.TryGet(out SelectedMissionState selectedMissionState))
             {
                 return selectedMissionState;
             }
 
             selectedMissionState = new SelectedMissionState();
-            ServiceLocator.RegisterInstance(selectedMissionState);
+            Partitura.Register(selectedMissionState, ServiceLifetimeEnum.Persistent);
             return selectedMissionState;
         }
     }

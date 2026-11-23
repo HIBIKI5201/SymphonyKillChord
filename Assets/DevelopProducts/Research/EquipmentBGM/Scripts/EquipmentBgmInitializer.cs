@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Music;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace DevelopProducts.EquipmentBGM
@@ -27,12 +27,12 @@ namespace DevelopProducts.EquipmentBGM
         /// </summary>
         private async void Start()
         {
-            MusicPlayer musicPlayer = await ServiceLocator.GetInstanceAsync<MusicPlayer>();
-            SkillBuildDefinition skillBuild = await ServiceLocator.GetInstanceAsync<SkillBuildDefinition>();
-            _musicSyncState = await ServiceLocator.GetInstanceAsync<MusicSyncState>();
+            MusicPlayer musicPlayer = await Partitura.GetAsync<MusicPlayer>();
+            SkillBuildDefinition skillBuild = await Partitura.GetAsync<SkillBuildDefinition>();
+            _musicSyncState = await Partitura.GetAsync<MusicSyncState>();
 
             _service = new EquipmentBgmService(musicPlayer, _table, skillBuild, _measuresPerStep);
-            ServiceLocator.RegisterInstance(_service);
+            Partitura.Register(_service, ServiceLifetimeEnum.Persistent);
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace DevelopProducts.EquipmentBGM
         /// </summary>
         private void OnDestroy()
         {
-            ServiceLocator.UnregisterInstance<EquipmentBgmService>();
+            Partitura.Unregister<EquipmentBgmService>();
         }
     }
 }

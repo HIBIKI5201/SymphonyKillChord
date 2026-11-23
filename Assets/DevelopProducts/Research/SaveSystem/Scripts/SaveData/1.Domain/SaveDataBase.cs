@@ -1,5 +1,5 @@
 using System;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 
 namespace Research.SaveSystem
 {

@@ -1,7 +1,7 @@
 using KillChord.Runtime.Application.OutGame.SkillTree;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -23,9 +23,9 @@ namespace KillChord.Runtime.InfraStructure.OutGame.SkillTree
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
             if (saveData?.SkillUnlock == null)

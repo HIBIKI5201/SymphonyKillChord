@@ -18,7 +18,8 @@ using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Haptics;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.PostEffect;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -88,8 +89,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            if (ServiceLocator.GetInstance<MusicSyncModuleContainer>() == null
-                || ServiceLocator.GetInstance<TargetSystemModuleContainer>() == null)
+            if (ServiceLookup.GetOrNull<MusicSyncModuleContainer>() == null
+                || ServiceLookup.GetOrNull<TargetSystemModuleContainer>() == null)
             {
                 Debug.LogError($"[{nameof(ACLikeRhythmGuideInitializer)}] 必要なContainerが見つかりません。", this);
                 return false;
@@ -112,7 +113,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         {
             Debug.Assert(_rhythmGuideView != null, "RhythmGuideView の参照が未設定です。RhythmGuideView を設定してください。");
 
-            IMusicSyncService musicSyncService = ServiceLocator.GetInstance<MusicSyncModuleContainer>()?.MusicSyncService;
+            IMusicSyncService musicSyncService = ServiceLookup.GetOrNull<MusicSyncModuleContainer>()?.MusicSyncService;
 
             if (musicSyncService == null)
             {
@@ -120,7 +121,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            TargetSystemController targetingSystem = ServiceLocator.GetInstance<TargetSystemModuleContainer>()?.TargetSystemController;
+            TargetSystemController targetingSystem = ServiceLookup.GetOrNull<TargetSystemModuleContainer>()?.TargetSystemController;
 
             if (targetingSystem == null)
             {
@@ -128,12 +129,12 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            ServiceLocator.TryGetInstance(out KillChord.Runtime.Adaptor.InGame.StageSelect.SelectedBattleStageState selectedBattleStageState);
+            Partitura.TryGet(out KillChord.Runtime.Adaptor.InGame.StageSelect.SelectedBattleStageState selectedBattleStageState);
 
             // MissionModuleContainer自体がミッション切り替えのたびに再生成・再登録される可能性があるため、
             // Container参照ではなくServiceLocatorへの問い合わせそのものをデリゲート化し、呼び出しの都度最新状態を取得する。
             System.Func<KillChord.Runtime.Application.InGame.Mission.MissionRuntimeService> missionRuntimeServiceProvider =
-                () => ServiceLocator.GetInstance<KillChord.Runtime.Composition.InGame.Mission.MissionModuleContainer>()?.MissionRuntimeService;
+                () => ServiceLookup.GetOrNull<KillChord.Runtime.Composition.InGame.Mission.MissionModuleContainer>()?.MissionRuntimeService;
 
             // ガイド表示と判定は、音楽同期・ターゲット状態・ミッション進行状況を参照するためPresenterへ集約する。
             RhythmGuidePresenter presenter = new RhythmGuidePresenter(
@@ -155,7 +156,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             IPlayerAttackSignal playerAttackSignal =
-                ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerAttackSignal;
+                ServiceLookup.GetOrNull<PlayerModuleContainer>()?.PlayerAttackSignal;
 
             if (playerAttackSignal == null)
             {
@@ -192,7 +193,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             IEnvironmentSettingsViewModel environmentSettingsViewModel =
-                ServiceLocator.GetInstance<EnvironmentSettingsModuleContainer>()?.ViewModel;
+                ServiceLookup.GetOrNull<EnvironmentSettingsModuleContainer>()?.ViewModel;
             if (environmentSettingsViewModel == null)
             {
                 Debug.LogWarning(
@@ -218,7 +219,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             _playerDamageHapticsPresenter?.Dispose();
             _playerDamageHapticsPresenter = null;
-            CharacterEntity playerEntity = ServiceLocator.GetInstance<PlayerModuleContainer>()?.PlayerEntity;
+            CharacterEntity playerEntity = ServiceLookup.GetOrNull<PlayerModuleContainer>()?.PlayerEntity;
             if (playerEntity == null)
             {
                 Debug.LogWarning(
@@ -317,7 +318,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         /// <returns> 攻撃硬直の拍数。プレイヤーが未初期化の場合は0。 </returns>
         private static float GetPlayerRecoveryBeats()
         {
-            if (!ServiceLocator.TryGetInstance(out PlayerModuleContainer playerModuleContainer)
+            if (!Partitura.TryGet(out PlayerModuleContainer playerModuleContainer)
                 || playerModuleContainer.PlayerAttackController == null)
             {
                 return 0f;

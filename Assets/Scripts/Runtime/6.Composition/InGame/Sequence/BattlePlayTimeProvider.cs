@@ -1,5 +1,5 @@
 using KillChord.Runtime.Domain.InGame.Battle;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using UnityEngine;
 
@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         public static Func<float> Create()
         {
             PausableClock playClock =
-                ServiceLocator.TryGetInstance(out SequenceModuleContainer sequenceModuleContainer)
+                Partitura.TryGet(out SequenceModuleContainer sequenceModuleContainer)
                     ? sequenceModuleContainer.PlayClock
                     : null;
             if (playClock == null)

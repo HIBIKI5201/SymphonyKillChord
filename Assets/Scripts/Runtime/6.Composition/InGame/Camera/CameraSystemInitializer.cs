@@ -6,7 +6,8 @@ using KillChord.Runtime.Composition.Persistent.Environment;
 using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.View.InGame.Camera;
 using KillChord.Runtime.View.Persistent.Input;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -39,7 +40,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 return false;
             }
 
-            TargetSystemModuleContainer targetContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
+            TargetSystemModuleContainer targetContainer = ServiceLookup.GetOrNull<TargetSystemModuleContainer>();
             if (targetContainer == null)
             {
                 Debug.LogError($"[{nameof(CameraSystemInitializer)}] {nameof(TargetSystemModuleContainer)} が見つかりません。", this);
@@ -50,7 +51,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
 
 #if UNITY_ANDROID || UNITY_IOS
             MobileInput mobileInput = FindFirstObjectByType<MobileInput>();
-            PlayerInputView playerInputView = ServiceLocator.GetInstance<PlayerInputView>();
+            PlayerInputView playerInputView = ServiceLookup.GetOrNull<PlayerInputView>();
             if (mobileInput != null && playerInputView != null)
             {
                 mobileInput.Initialize(playerInputView);
@@ -92,7 +93,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             CameraLookInputOverrideTracker lookInputOverrideTracker = new(_config);
             CameraShakeCalculator shakeCalculator = new();
 
-            PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            PlayerModuleContainer playerModuleContainer = ServiceLookup.GetOrNull<PlayerModuleContainer>();
             if (playerModuleContainer == null || playerModuleContainer.PlayerView == null)
             {
                 Debug.LogError($"{nameof(PlayerModuleContainer)} が見つかりません。");
@@ -126,7 +127,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
                 followCalculator, lockOnRotationCalculator,
                 freeLookRotationCalculator, lookAtRotationCalculator, lockOnRangeChecker, autoLockOnReleaseTracker,
                 lookInputOverrideTracker, shakeCalculator, _config, playerModuleContainer.PlayerView.transform,
-                ServiceLocator.GetInstance<PlayerInputView>());
+                ServiceLookup.GetOrNull<PlayerInputView>());
 
             // ロックオン対象はカメラの視界範囲内の敵から選ぶ。
             targetingSystem.SetViewFilter(_cameraSystem.IsWithinLockOnView);
@@ -146,7 +147,7 @@ namespace KillChord.Runtime.Composition.InGame.Camera
             }
 
             // 設定画面のカメラ感度・反転・オートロックオンを反映する。取得できない場合は既定の挙動で続行する。
-            if (ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
+            if (Partitura.TryGet(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
             {
                 _cameraSystem.BindEnvironmentSettings(environmentSettingsContainer.ViewModel);
             }

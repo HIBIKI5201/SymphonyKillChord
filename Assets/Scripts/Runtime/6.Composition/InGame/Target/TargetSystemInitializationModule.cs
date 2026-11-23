@@ -1,5 +1,5 @@
 using KillChord.Runtime.Composition.InGame.Bootstrap;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Target
@@ -43,7 +43,7 @@ namespace KillChord.Runtime.Composition.InGame.Target
                 _initializer.TargetingSystemViewModel,
                 _initializer.TargetEntityRegistry,
                 _initializer.TargetAreaQuery);
-            ServiceLocator.RegisterInstance(_container);
+            Partitura.Register(_container, ServiceLifetimeEnum.Persistent);
             _isRegistered = true;
             return true;
         }
@@ -58,7 +58,7 @@ namespace KillChord.Runtime.Composition.InGame.Target
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<TargetSystemModuleContainer>();
+            Partitura.Unregister<TargetSystemModuleContainer>();
             _initializer?.Dispose();
             _initializer = null;
             _container = null;

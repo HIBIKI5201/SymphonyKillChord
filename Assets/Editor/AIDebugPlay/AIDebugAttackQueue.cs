@@ -1,7 +1,7 @@
 using KillChord.Runtime.Application.InGame.Music;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using UnityEditor;
@@ -225,9 +225,9 @@ namespace KillChord.Editor.AIDebugPlay
                 Fail("攻撃キュー全体の待機期限を超えました。");
                 return false;
             }
-            if (!ServiceLocator.TryGetInstance<PlayerModuleContainer>(out var currentPlayer)
+            if (!Partitura.TryGet<PlayerModuleContainer>(out var currentPlayer)
                 || !ReferenceEquals(currentPlayer, _playerModule)
-                || !ServiceLocator.TryGetInstance<IMusicSyncService>(out var currentMusic)
+                || !Partitura.TryGet<IMusicSyncService>(out var currentMusic)
                 || !ReferenceEquals(currentMusic, _musicSyncService))
             {
                 Fail("シーン遷移またはサービスの破棄により停止しました。");
@@ -517,14 +517,14 @@ namespace KillChord.Editor.AIDebugPlay
         /// <returns> 全て取得できた場合はtrue。 </returns>
         private static bool TryResolveDependencies(out string error)
         {
-            if (!ServiceLocator.TryGetInstance(out _playerModule)
+            if (!Partitura.TryGet(out _playerModule)
                 || _playerModule?.PlayerAttackController == null || _playerModule.PlayerAttackSignal == null)
             {
                 error = "PlayerModuleContainerまたはPlayerAttackControllerが初期化されていません。";
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance<IMusicSyncService>(out IMusicSyncService musicSyncService)
+            if (!Partitura.TryGet<IMusicSyncService>(out IMusicSyncService musicSyncService)
                 || musicSyncService is not MusicSyncService concreteService)
             {
                 error = "MusicSyncServiceが初期化されていません。";

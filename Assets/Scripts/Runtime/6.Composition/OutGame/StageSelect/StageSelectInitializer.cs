@@ -22,8 +22,8 @@ using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillTree;
 using KillChord.Runtime.View.OutGame.StageSelect;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -268,9 +268,9 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return false;
             }
 
-            _loadedSaveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            _loadedSaveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             if (_loadedSaveData == null)
             {
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] {nameof(SaveData)} が取得できませんでした。", this);
@@ -327,7 +327,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private bool TryForceBattleSortie(StageId stageId)
         {
             if (IsSortieBlocked() || !_isSubscribed
-                || !ServiceLocator.TryGetInstance(out StageSelectScreenView screenView))
+                || !Partitura.TryGet(out StageSelectScreenView screenView))
             {
                 return false;
             }
@@ -764,7 +764,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             try
             {
                 VisualElement initialFocusBefore = _initialStageFocusElement;
-                ServiceLocator.TryGetInstance(out StageSelectScreenView screenView);
+                Partitura.TryGet(out StageSelectScreenView screenView);
                 VisualElement focusedBefore = screenView?.FocusedElement;
 
                 // 改造画面での編成変更が反映されるよう、表示のたびに装備スキルアイコンを最新化する。
@@ -848,30 +848,30 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private bool Initialize()
         {
-            if (!ServiceLocator.TryGetInstance(out _selectedBattleStageState))
+            if (!Partitura.TryGet(out _selectedBattleStageState))
             {
                 _selectedBattleStageState = new SelectedBattleStageState();
 
-                ServiceLocator.RegisterInstance(_selectedBattleStageState);
+                Partitura.Register(_selectedBattleStageState, ServiceLifetimeEnum.Persistent);
             }
 
-            if (!ServiceLocator.TryGetInstance(out _selectedMissionState))
+            if (!Partitura.TryGet(out _selectedMissionState))
             {
                 _selectedMissionState = new SelectedMissionState();
 
-                ServiceLocator.RegisterInstance(_selectedMissionState);
+                Partitura.Register(_selectedMissionState, ServiceLifetimeEnum.Persistent);
             }
 
-            if (!ServiceLocator.TryGetInstance(out _pendingNodeTransitionState))
+            if (!Partitura.TryGet(out _pendingNodeTransitionState))
             {
                 _pendingNodeTransitionState = new PendingNodeTransitionState();
-                ServiceLocator.RegisterInstance(_pendingNodeTransitionState);
+                Partitura.Register(_pendingNodeTransitionState, ServiceLifetimeEnum.Persistent);
             }
 
             _battleSortieSelectionService = BattleSortieSelectionStateResolver.CreateSelectionService();
             _missionSelectController = new OutGameMissionSelectController(_selectedMissionState);
 
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            if (!Partitura.TryGet(out _outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameUIEvent が取得できませんでした。", this);
@@ -879,7 +879,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _outGameSortieController))
+            if (!Partitura.TryGet(out _outGameSortieController))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] OutGameSortieController が取得できませんでした。", this);
@@ -887,7 +887,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _selectedScenarioState))
+            if (!Partitura.TryGet(out _selectedScenarioState))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(StageSelectInitializer)}] SelectedScenarioState が取得できませんでした。", this);
@@ -1000,7 +1000,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
                 _battleSortieSelectionService,
                 _currentSceneName,
                 TryForceBattleSortie);
-            _isModuleContainerRegistered = ServiceLocator.RegisterInstance(_moduleContainer);
+            _isModuleContainerRegistered = Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
             if (!_isModuleContainerRegistered)
             {
                 Debug.LogError(
@@ -1024,10 +1024,10 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
             Unsubscribe();
             _isSubscribed = false;
             if (_isModuleContainerRegistered
-                && ServiceLocator.TryGetInstance(out StageSelectModuleContainer registeredContainer)
+                && Partitura.TryGet(out StageSelectModuleContainer registeredContainer)
                 && ReferenceEquals(registeredContainer, _moduleContainer))
             {
-                ServiceLocator.UnregisterInstance<StageSelectModuleContainer>();
+                Partitura.Unregister<StageSelectModuleContainer>();
             }
 
             _moduleContainer = null;
@@ -1093,7 +1093,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         /// </summary>
         private void StartAutomaticTutorialFlowAfterLoading()
         {
-            if (!ServiceLocator.TryGetInstance(out _loadingScreenController)
+            if (!Partitura.TryGet(out _loadingScreenController)
                 || !_loadingScreenController.IsLoading)
             {
                 ExecuteAutomaticTutorialFlow();
@@ -1828,7 +1828,7 @@ namespace KillChord.Runtime.Composition.OutGame.StageSelect
         private bool IsSortieBlocked()
         {
             if (!_isInitialized || _isSortieRequesting) { return true; }
-            if (ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+            if (Partitura.TryGet(out SceneTransitionController transition)
                 && (transition.HasScenarioBattleSortie || transition.PersistentLifetimeToken.IsCancellationRequested))
             {
                 return true;

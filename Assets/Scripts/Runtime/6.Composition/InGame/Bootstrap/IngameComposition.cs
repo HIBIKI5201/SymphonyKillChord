@@ -9,8 +9,8 @@ using KillChord.Runtime.Utility.Collections;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.InGame.Camera;
-using SymphonyFrameWork.System.SceneLoad;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Scenes;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +34,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         private void Start()
         {
             string sceneName = gameObject.scene.name;
-            ServiceLocator.TryGetInstance(out SceneTransitionController transition);
+            Partitura.TryGet(out SceneTransitionController transition);
             bool isDedicated = transition != null
                 && transition.TryGetScenarioBattleInitialization(sceneName, out _);
             CancellationToken initializationToken = destroyCancellationToken;
@@ -161,7 +161,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                     isSuccess = false;
                     FailActiveLoadingSession();
                 }
-                if (ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+                if (Partitura.TryGet<ISceneInitializationReadiness>(out var readiness))
                 {
                     readiness.Complete(sceneName, isSuccess);
                 }
@@ -173,7 +173,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         /// </summary>
         private void RegisterCurrentScenePriority()
         {
-            bool isRegistered = SceneLoader.RegisterLoadedScene(
+            bool isRegistered = Attacca.RegisterLoadedScene(
                 gameObject.scene.name,
                 ScenePriorityResolver.Resolve(gameObject.scene.name));
             if (!isRegistered)
@@ -229,19 +229,19 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             operationExecutor = null;
             sceneTransitionService = null;
 
-            if (!ServiceLocator.TryGetInstance(out selectedBattleStageState))
+            if (!Partitura.TryGet(out selectedBattleStageState))
             {
                 Debug.LogError($"[{nameof(IngameComposition)}] {nameof(SelectedBattleStageState)} が取得できませんでした。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out operationExecutor))
+            if (!Partitura.TryGet(out operationExecutor))
             {
                 Debug.LogError($"[{nameof(IngameComposition)}] {nameof(ILoadingOperationExecutor)} が取得できませんでした。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out sceneTransitionService))
+            if (!Partitura.TryGet(out sceneTransitionService))
             {
                 Debug.LogError($"[{nameof(IngameComposition)}] {nameof(ISceneTransitionService)} が取得できませんでした。", this);
                 return false;
@@ -255,7 +255,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         /// </summary>
         private void FailActiveLoadingSession()
         {
-            if (!ServiceLocator.TryGetInstance(out LoadingScreenController loadingScreenController))
+            if (!Partitura.TryGet(out LoadingScreenController loadingScreenController))
             {
                 return;
             }
@@ -284,7 +284,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
 
                 Scene stageScene = SceneManager.GetSceneByName(stageSceneName);
                 if (stageScene.isLoaded
-                    && ServiceLocator.TryGetInstance(out IStageSceneInstance stageSceneInstance)
+                    && Partitura.TryGet(out IStageSceneInstance stageSceneInstance)
                     && stageSceneInstance != null
                     && stageSceneInstance.PlayerSpawnPointTransform != null)
                 {

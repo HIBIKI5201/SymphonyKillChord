@@ -6,8 +6,8 @@ using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.View.Persistent.Load;
 using SymphonyFramework.Attribute;
-using SymphonyFrameWork.System.SceneLoad;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Scenes;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,7 +88,7 @@ namespace KillChord.Runtime.Composition.Persistent
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Init()
         {
-            return SceneLoader.RegisterLoadedScene(
+            return Attacca.RegisterLoadedScene(
                 gameObject.scene.name,
                 ScenePriorityResolver.Resolve(gameObject.scene.name));
         }
@@ -140,7 +140,7 @@ namespace KillChord.Runtime.Composition.Persistent
         /// </summary>
         private async Awaitable LoadFirstSceneAsync()
         {
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionController controller))
+            if (!Partitura.TryGet(out SceneTransitionController controller))
             {
                 Debug.LogError(
                     $"[{nameof(PersistentEntryPoint)}] " +
@@ -189,7 +189,7 @@ namespace KillChord.Runtime.Composition.Persistent
                 EventNotificationView notificationView = _startupFailureNotificationView;
                 if (notificationView == null)
                 {
-                    ServiceLocator.TryGetInstance(out notificationView);
+                    Partitura.TryGet(out notificationView);
                 }
 
                 if (notificationView != null
@@ -244,7 +244,7 @@ namespace KillChord.Runtime.Composition.Persistent
         /// <param name="isSuccess"> 初期化に成功した場合はtrue。 </param>
         private void CompleteSceneInitialization(bool isSuccess)
         {
-            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+            if (!Partitura.TryGet<ISceneInitializationReadiness>(out var readiness))
             {
                 Debug.LogError(
                     $"[{nameof(PersistentEntryPoint)}] " +

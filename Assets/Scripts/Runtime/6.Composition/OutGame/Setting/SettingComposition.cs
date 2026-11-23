@@ -4,7 +4,7 @@ using KillChord.Runtime.Composition.Persistent.Music;
 using KillChord.Runtime.View.OutGame.Navigation;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Setting;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -38,10 +38,10 @@ namespace KillChord.Runtime.Composition.OutGame.Setting
         {
             // 必要な参照と、設定画面のルート要素を取得する。
             if (_uiDocument == null
-                || !ServiceLocator.TryGetInstance(out AudioSettingsModuleContainer audioSettingsContainer)
-                || !ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
-                || !ServiceLocator.TryGetInstance(out _outGameUIEvent)
-                || !ServiceLocator.TryGetInstance(out _settingScreenView))
+                || !Partitura.TryGet(out AudioSettingsModuleContainer audioSettingsContainer)
+                || !Partitura.TryGet(out EnvironmentSettingsModuleContainer environmentSettingsContainer)
+                || !Partitura.TryGet(out _outGameUIEvent)
+                || !Partitura.TryGet(out _settingScreenView))
             {
                 Debug.LogError(
                     $"[{nameof(SettingComposition)}] 設定画面の構築に必要な参照を取得できませんでした。",

@@ -1,7 +1,7 @@
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.Utility.Identity;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -37,9 +37,9 @@ namespace KillChord.Develop.Composition.OutGame
                 return true;
             }
 
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             cancellationToken.ThrowIfCancellationRequested();
 
             if (saveData == null)
@@ -53,7 +53,7 @@ namespace KillChord.Develop.Composition.OutGame
                 return true;
             }
 
-            await SaveStore.SaveAsync<SaveData>();
+            await Manuscript.SaveAsync<SaveData>();
             return true;
         }
 

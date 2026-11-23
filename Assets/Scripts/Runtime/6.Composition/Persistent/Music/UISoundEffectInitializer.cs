@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.Persistent.Music
@@ -67,7 +67,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
             // UI 操作音のプレイヤーとしてコンテナを登録する。
             _player = _soundEffectSource;
             _moduleContainer = new UISoundEffectModuleContainer(_player);
-            if (!ServiceLocator.RegisterInstance(_moduleContainer))
+            if (!Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent))
             {
                 Debug.LogError(
                     $"[{nameof(UISoundEffectInitializer)}] " +
@@ -118,10 +118,10 @@ namespace KillChord.Runtime.Composition.Persistent.Music
                 _soundEffectSource.gameObject.SetActive(false);
             }
 
-            if (ServiceLocator.TryGetInstance(out UISoundEffectModuleContainer registeredContainer)
+            if (Partitura.TryGet(out UISoundEffectModuleContainer registeredContainer)
                 && ReferenceEquals(registeredContainer, _moduleContainer))
             {
-                ServiceLocator.UnregisterInstance<UISoundEffectModuleContainer>();
+                Partitura.Unregister<UISoundEffectModuleContainer>();
             }
 
             _isBuilt = false;

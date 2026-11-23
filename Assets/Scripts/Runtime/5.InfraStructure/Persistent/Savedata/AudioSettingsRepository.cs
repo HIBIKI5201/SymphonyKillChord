@@ -1,6 +1,6 @@
 using KillChord.Runtime.Application.Persistent.Savedata;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,9 +18,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
         public async ValueTask<AudioSettingsData> LoadAsync(
             CancellationToken cancellationToken = default)
         {
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>(cancellationToken);
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>(cancellationToken);
             return saveData.AudioSettings.Copy();
         }
 
@@ -37,9 +37,9 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
                 throw new ArgumentNullException(nameof(audioSettings));
             }
 
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>(cancellationToken);
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>(cancellationToken);
             AudioSettingsData previousSettings = saveData.AudioSettings.Copy();
 
             saveData.AudioSettings.SetVolumes(
@@ -49,7 +49,7 @@ namespace KillChord.Runtime.InfraStructure.Persistent.Savedata
 
             try
             {
-                await SaveStore.SaveAsync<SaveData>(cancellationToken);
+                await Manuscript.SaveAsync<SaveData>(cancellationToken);
             }
             catch
             {

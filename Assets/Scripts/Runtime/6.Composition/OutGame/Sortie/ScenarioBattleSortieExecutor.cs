@@ -7,7 +7,7 @@ using KillChord.Runtime.Application.OutGame.Sortie;
 using KillChord.Runtime.Application.Persistent.Load;
 using KillChord.Runtime.Composition.Persistent.SceneManagement;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -174,11 +174,11 @@ namespace KillChord.Runtime.Composition.OutGame.Sortie
         private static void ClearFailedSelection(PendingNodeTransitionState pending, BattleStageDefinition definition)
         {
             pending?.Clear();
-            if (ServiceLocator.TryGetInstance(out SelectedBattleStageState battle)
+            if (Partitura.TryGet(out SelectedBattleStageState battle)
                 && battle.HasSelectedBattleStage && ReferenceEquals(battle.CurrentStageDefinition, definition))
             {
                 battle.Clear();
-                if (ServiceLocator.TryGetInstance(out SelectedMissionState mission)
+                if (Partitura.TryGet(out SelectedMissionState mission)
                     && mission.HasSelectedMission && mission.CurrentMissionId.Value == definition.MissionId.Value)
                 {
                     mission.Clear();

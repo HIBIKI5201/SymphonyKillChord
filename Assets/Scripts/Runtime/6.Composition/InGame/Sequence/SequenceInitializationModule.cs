@@ -21,7 +21,8 @@ using KillChord.Runtime.View.InGame.Result;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -83,12 +84,12 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             }
 
             _container = new SequenceModuleContainer();
-            ServiceLocator.RegisterInstance(_container);
+            Partitura.Register(_container, ServiceLifetimeEnum.Persistent);
             _isRegistered = true;
 
             // 音楽同期はカウントダウンに使う。取得できない場合はカウントダウンせずに再開する。
             MusicSyncController musicSyncController =
-                ServiceLocator.TryGetInstance(out MusicSyncModuleContainer musicSyncContainer)
+                Partitura.TryGet(out MusicSyncModuleContainer musicSyncContainer)
                     ? musicSyncContainer.MusicSyncController
                     : null;
             if (musicSyncController == null)
@@ -113,13 +114,13 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         {
             // 依存するコンテナと、その中身が初期化済みかを確認する。
             StageResultModuleContainer stageResultContainer =
-                ServiceLocator.GetInstance<StageResultModuleContainer>();
+                ServiceLookup.GetOrNull<StageResultModuleContainer>();
 
             MissionModuleContainer missionContainer =
-                ServiceLocator.GetInstance<MissionModuleContainer>();
+                ServiceLookup.GetOrNull<MissionModuleContainer>();
 
             PlayerModuleContainer playerContainer =
-                ServiceLocator.GetInstance<PlayerModuleContainer>();
+                ServiceLookup.GetOrNull<PlayerModuleContainer>();
 
             if (stageResultContainer == null
                 || missionContainer == null
@@ -194,7 +195,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _selectedBattleStageState))
+            if (!Partitura.TryGet(out _selectedBattleStageState))
             {
                 Debug.LogError(
                     $"[{nameof(SequenceInitializationModule)}] "
@@ -207,7 +208,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageProgressSaveDataService =
                 new StageProgressSaveDataService();
 
-            ServiceLocator.TryGetInstance(out _pendingNodeTransitionState);
+            Partitura.TryGet(out _pendingNodeTransitionState);
 
             // ポーズ入力とミッションの終了を購読し、ロード完了後にゲームを開始する。
             _playerInputView.OnOptionInput += HandlePauseInput;
@@ -237,7 +238,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
 
             if (_isRegistered)
             {
-                ServiceLocator.UnregisterInstance<SequenceModuleContainer>();
+                Partitura.Unregister<SequenceModuleContainer>();
                 _isRegistered = false;
             }
 
@@ -260,7 +261,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         /// </summary>
         private void StartAfterLoadingCompleted()
         {
-            if (!ServiceLocator.TryGetInstance(out _loadingScreenController)
+            if (!Partitura.TryGet(out _loadingScreenController)
                 || !_loadingScreenController.IsLoading)
             {
                 StartStageSequence();
@@ -318,7 +319,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             _stageStartFadeView.ShowBlackImmediate();
 
             // 専用出撃の失敗はPersistentが所有し、Sequenceから別の帰還を開始しません。
-            if (ServiceLocator.TryGetInstance(out SceneTransitionController transition)
+            if (Partitura.TryGet(out SceneTransitionController transition)
                 && transition.HasScenarioBattleSortie)
             {
                 transition.StopScenarioBattleInitialization();
@@ -437,7 +438,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
         private async Task SaveClearResultAsync(MissionEvaluationResult evaluationResult)
         {
             // 保存を止める状態が登録されていれば、進捗も報酬も書き込まない。
-            if (ServiceLocator.TryGetInstance(out ISaveSuppression saveSuppression)
+            if (Partitura.TryGet(out ISaveSuppression saveSuppression)
                 && saveSuppression.IsSaveSuppressed)
             {
                 return;

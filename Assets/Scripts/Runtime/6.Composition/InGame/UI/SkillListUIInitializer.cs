@@ -4,7 +4,7 @@ using KillChord.Runtime.Composition.InGame.Sequence;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Skill;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
@@ -38,7 +38,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             _viewSetting = _uiConfig.Create();
-            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
+            Partitura.Register(this, ServiceLifetimeEnum.Scene);
             _isRegistered = true;
 
             return true;
@@ -48,7 +48,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         public override void Shutdown()
         {
             if (_isRegistered)
-                ServiceLocator.UnregisterInstance(this);
+                Partitura.Unregister(this);
         }
 
         /// <summary>

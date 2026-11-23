@@ -2,7 +2,8 @@ using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System.Threading;
 using UnityEngine;
 
@@ -29,7 +30,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         {
             // 常駐サービスの登録を待つ。期限超過はfalse、キャンセルは例外として伝播する。
             (bool isStageSceneLocated, IStageSceneInstance stageSceneInstance) =
-                await ServiceLocator.TryGetInstanceAsync<IStageSceneInstance>(
+                await Partitura.TryGetAsync<IStageSceneInstance>(
                     SERVICE_WAIT_SECONDS,
                     cancellationToken);
             _stageSceneInstance = stageSceneInstance;
@@ -41,7 +42,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
             }
 
             (bool isMusicPlayerLocated, MusicPlayer musicPlayer) =
-                await ServiceLocator.TryGetInstanceAsync<MusicPlayer>(
+                await Partitura.TryGetAsync<MusicPlayer>(
                     SERVICE_WAIT_SECONDS,
                     cancellationToken);
             _musicPlayer = musicPlayer;
@@ -62,14 +63,14 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
         public override bool Build()
         {
             // 依存するサービスとメインカメラを取得する。
-            InputComposition inputComposition = ServiceLocator.GetInstance<InputComposition>();
+            InputComposition inputComposition = ServiceLookup.GetOrNull<InputComposition>();
             if (inputComposition == null)
             {
                 Debug.LogError($"[{nameof(SceneDependencyInitializationModule)}] {nameof(InputComposition)} の取得に失敗しました。", this);
                 return false;
             }
 
-            PlayerInitializer playerInitializer = ServiceLocator.GetInstance<PlayerInitializer>();
+            PlayerInitializer playerInitializer = ServiceLookup.GetOrNull<PlayerInitializer>();
             if (playerInitializer == null)
             {
                 Debug.LogError($"[{nameof(SceneDependencyInitializationModule)}] {nameof(PlayerInitializer)} の取得に失敗しました。", this);
@@ -90,7 +91,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 inputComposition,
                 playerInitializer,
                 mainCamera);
-            ServiceLocator.RegisterInstance(_container);
+            Partitura.Register(_container, ServiceLifetimeEnum.Persistent);
             _container.InputComposition.GetInputMapController.EnableOnly(InputMapNames.Common);
             _isRegistered = true;
             return true;
@@ -106,7 +107,7 @@ namespace KillChord.Runtime.Composition.InGame.Bootstrap
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<SceneDependencyModuleContainer>();
+            Partitura.Unregister<SceneDependencyModuleContainer>();
             _isRegistered = false;
             _container = null;
             _stageSceneInstance = null;

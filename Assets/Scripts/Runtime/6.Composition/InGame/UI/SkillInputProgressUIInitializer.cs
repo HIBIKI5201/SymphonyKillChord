@@ -5,7 +5,7 @@ using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.InGame.Skill;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Skill
@@ -40,7 +40,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
 
             _inputProgressViewSetting = _skillInputProgressUIConfig.Create();
-            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
+            Partitura.Register(this, ServiceLifetimeEnum.Scene);
             _isRegistered = true;
 
             return true;
@@ -50,7 +50,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         public override void Shutdown()
         {
             if (_isRegistered)
-                ServiceLocator.UnregisterInstance(this);
+                Partitura.Unregister(this);
         }
 
         /// <summary>

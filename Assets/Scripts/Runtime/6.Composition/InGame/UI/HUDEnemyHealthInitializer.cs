@@ -2,7 +2,8 @@ using KillChord.Runtime.Adaptor.InGame.UI;
 using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.View.InGame.UI;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
@@ -32,7 +33,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            TargetSystemModuleContainer targetSystemModuleContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
+            TargetSystemModuleContainer targetSystemModuleContainer = ServiceLookup.GetOrNull<TargetSystemModuleContainer>();
             if (targetSystemModuleContainer == null)
             {
                 Debug.LogError($"[{nameof(HUDEnemyHealthInitializer)}] {nameof(TargetSystemModuleContainer)} が見つかりません。", this);

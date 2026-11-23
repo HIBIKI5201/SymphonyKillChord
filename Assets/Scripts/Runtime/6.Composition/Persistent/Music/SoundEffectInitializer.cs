@@ -3,7 +3,7 @@ using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.View.Persistent.Audio;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using UnityEngine;
 
@@ -49,8 +49,8 @@ namespace KillChord.Runtime.Composition.Persistent.Music
                 return false;
             }
 
-            ServiceLocator.RegisterInstance(_soundEffectVolumeManager);
-            ServiceLocator.RegisterInstance(_voiceVolumeManager);
+            Partitura.Register(_soundEffectVolumeManager, ServiceLifetimeEnum.Persistent);
+            Partitura.Register(_voiceVolumeManager, ServiceLifetimeEnum.Persistent);
             _initialized = true;
             return true;
         }
@@ -74,16 +74,16 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         /// </summary>
         public override void Shutdown()
         {
-            if (ServiceLocator.TryGetInstance(out VoiceVolumeManager registeredVoiceVolumeManager)
+            if (Partitura.TryGet(out VoiceVolumeManager registeredVoiceVolumeManager)
                 && ReferenceEquals(registeredVoiceVolumeManager, _voiceVolumeManager))
             {
-                ServiceLocator.UnregisterInstance<VoiceVolumeManager>();
+                Partitura.Unregister<VoiceVolumeManager>();
             }
 
-            if (ServiceLocator.TryGetInstance(out SoundEffectVolumeManager registeredSoundEffectVolumeManager)
+            if (Partitura.TryGet(out SoundEffectVolumeManager registeredSoundEffectVolumeManager)
                 && ReferenceEquals(registeredSoundEffectVolumeManager, _soundEffectVolumeManager))
             {
-                ServiceLocator.UnregisterInstance<SoundEffectVolumeManager>();
+                Partitura.Unregister<SoundEffectVolumeManager>();
             }
 
             _initialized = false;
