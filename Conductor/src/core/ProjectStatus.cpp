@@ -119,4 +119,30 @@ namespace skc::conductor
 
         return std::string();
     }
+
+    std::string ParseUnityRevision(const std::string& text)
+    {
+        std::istringstream stream(text);
+        std::string line;
+        while (std::getline(stream, line))
+        {
+            line = TrimRight(line);
+            if (!StartsWith(line, "m_EditorVersionWithRevision: ")) { continue; }
+
+            std::size_t open = line.find('(');
+            std::size_t close = line.find(')', open == std::string::npos ? 0 : open);
+            if (open == std::string::npos || close == std::string::npos) { return std::string(); }
+
+            return line.substr(open + 1, close - open - 1);
+        }
+
+        return std::string();
+    }
+
+    std::string UnityHubInstallUrl(const std::string& version, const std::string& revision)
+    {
+        if (version.empty() || revision.empty()) { return std::string(); }
+
+        return "unityhub://" + version + "/" + revision;
+    }
 }

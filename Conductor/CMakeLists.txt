@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.25)
 # KillChord Conductor（プロジェクト管理アプリ）。
 # - core: 設定の読込・コマンドの組立・出力の整形・JSON の出し入れ。OS に依存しないので、どの OS でもテストできる。
 # - conductor（CLI）: どの OS でもビルドできる。Windows はコンソールのプログラム。
-# - KillChordConductor（GUI）: Windows のときだけ作る。自分では何も実行せず、conductor を呼ぶ。
+# - KillChordConductor（GUI）: Windows のときだけ作る。画面は ui/ の HTML を WebView2 で出し、自分では何も実行せず conductor を呼ぶ。
 project(Conductor LANGUAGES CXX)
 if(WIN32)
     enable_language(RC)
@@ -23,6 +23,7 @@ else()
 endif()
 
 add_library(ConductorCore STATIC
+    src/core/Actions.cpp
     src/core/CliArgs.cpp
     src/core/CliJson.cpp
     src/core/CommandLine.cpp
@@ -80,14 +81,21 @@ set_tests_properties(CliUnknownCommand PROPERTIES WILL_FAIL TRUE)
 
 if(WIN32)
     # GUI。conductor.exe と同じフォルダに置いて使う。
+    # 画面は Conductor/ui の HTML を WebView2 で出す。WebView2Loader.dll は実行時に読む（静的リンクしない）。
     add_executable(KillChordConductor WIN32
         src/gui/CliClient.cpp
+        src/gui/HostWindow.cpp
         src/gui/Main.cpp
-        src/gui/MainWindow.cpp
         src/gui/ProcessRunner.cpp
         src/gui/KillChordConductor.rc
     )
-    target_link_libraries(KillChordConductor PRIVATE ConductorWin32 comctl32 shell32 uxtheme)
+    target_include_directories(KillChordConductor PRIVATE third_party third_party/webview2/include)
+    if(NOT MSVC)
+        # MinGW には EventToken.h が無いので、同じ中身の小さなヘッダーで補う。
+        target_include_directories(KillChordConductor PRIVATE third_party/webview2/mingw)
+        target_compile_options(KillChordConductor PRIVATE -Wno-unknown-pragmas)
+    endif()
+    target_link_libraries(KillChordConductor PRIVATE ConductorWin32 shell32 ole32 user32 advapi32 dwmapi)
     if(MSVC)
         # manifest は .rc で埋め込むので、リンカーの自動生成は止める。
         target_link_options(KillChordConductor PRIVATE /MANIFEST:NO)

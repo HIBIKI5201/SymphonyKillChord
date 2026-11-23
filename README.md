@@ -24,9 +24,9 @@ https://hibiki5201.github.io/SymphonyKillChord/home/
 
 ## プロジェクト管理アプリ KillChord Conductor（Windows）
 
-ルートの `KillChordConductor.exe` をダブルクリックすると、全役職の入口になる管理アプリが開く。ホームにプロジェクトの状態（ブランチ・未コミット・サブモジュール・Unity の版）と、役職ごとによく使う操作のボタンが並ぶ。スクリプト一覧（初期化・ブランチの掃除・Android 端末へのインストール・ビルドランナーなど）は「スクリプト一覧」ページにある。初めて開いたときは「設定」で役職を選ぶ。
+ルートの `KillChordConductor.exe` をダブルクリックすると、全役職の入口になる管理アプリが開く。ホームから Unity・CRI Atom Craft・Drive の素材・ドキュメント（Notion）を開け、プロジェクトの状態（ブランチ・未コミット・サブモジュール・Unity）と、直すべきことが並ぶ。役職を選ぶと、その役職がよく使う操作が前に並ぶ。スクリプト（初期化・ブランチの掃除・Android 端末へのインストール・ビルドランナーなど）は「すべての操作」にあり、`Ctrl+K` で言葉から探して動かせる。
 
-アプリは自分では何も実行せず、同じフォルダの CLI `conductor.exe` を呼ぶ。画面の下に同じことをするコマンドが出るので、PowerShell から直接打っても動く（`.\conductor.exe --help`）。管理者が要るスクリプトだけ、実行のときに UAC の確認が出る。新しい `.bat` / `.command` を足したら `Conductor/launcher-scripts.json` にも登録する（詳しくは [Conductor/README.md](Conductor/README.md)）。
+アプリは自分では何も実行せず、同じフォルダの CLI `conductor.exe` を呼ぶ。操作ごとに同じことをするコマンドが出るので、PowerShell から直接打っても動く（`.\conductor.exe --help`）。画面は Windows の WebView2 で出す。管理者が要るスクリプトだけ、実行のときに UAC の確認が出る。新しい `.bat` / `.command` を足したら `Conductor/launcher-scripts.json` にも登録する（詳しくは [Conductor/README.md](Conductor/README.md)）。
 
 ## Gemini CLI を使う
 

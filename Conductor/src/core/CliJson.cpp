@@ -1,5 +1,7 @@
 #include "CliJson.h"
 
+#include "Actions.h"
+
 #include <nlohmann/json.hpp>
 
 namespace skc::conductor
@@ -136,7 +138,15 @@ namespace skc::conductor
                 { "note", tile.Note },
                 { "roles", tile.Roles },
             };
-            if (tile.Page.empty())
+            if (!tile.Action.empty())
+            {
+                const BuiltinAction* action = FindBuiltinAction(tile.Action);
+                std::vector<std::string> args = action != nullptr ? action->Args : std::vector<std::string>();
+                node["action"] = tile.Action;
+                node["args"] = args;
+                node["command"] = FormatConductorCommand(args);
+            }
+            else if (tile.Page.empty())
             {
                 node["script"] = tile.ScriptId;
                 node["presetIndex"] = tile.PresetIndex;
@@ -150,7 +160,13 @@ namespace skc::conductor
             tiles.push_back(std::move(node));
         }
 
-        return Json{ { "role", view.Role }, { "roles", roles }, { "tiles", tiles } }.dump(2);
+        Json links = Json::array();
+        for (const HomeLink& link : view.Links)
+        {
+            links.push_back({ { "id", link.Id }, { "title", link.Title }, { "note", link.Note }, { "url", link.Url } });
+        }
+
+        return Json{ { "role", view.Role }, { "roles", roles }, { "tiles", tiles }, { "links", links } }.dump(2);
     }
 
     bool HomeViewFromJson(const std::string& text, HomeView& view, std::string& error)
@@ -170,8 +186,17 @@ namespace skc::conductor
                 tile.ScriptId = StringOr(node, "script");
                 tile.PresetIndex = node.value("presetIndex", static_cast<std::size_t>(0));
                 tile.Page = StringOr(node, "page");
+                tile.Action = StringOr(node, "action");
                 tile.Roles = node.value("roles", std::vector<std::string>());
                 view.Tiles.push_back(std::move(tile));
+            }
+
+            if (auto links = root.find("links"); links != root.end())
+            {
+                for (const Json& node : *links)
+                {
+                    view.Links.push_back(HomeLink{ StringOr(node, "id"), StringOr(node, "title"), StringOr(node, "note"), StringOr(node, "url") });
+                }
             }
         });
     }
@@ -197,7 +222,21 @@ namespace skc::conductor
             { "submodules", submodules },
             { "unity", {
                 { "projectVersion", status.UnityVersion },
+                { "revision", status.UnityRevision },
                 { "cli", status.UnityCliPath },
+                { "editor", status.UnityEditorPath },
+                { "isOpen", status.IsUnityOpen },
+                { "hubInstallUrl", UnityHubInstallUrl(status.UnityVersion, status.UnityRevision) },
+            } },
+            { "cri", {
+                { "project", status.CriProjectPath },
+                { "app", status.CriAppPath },
+            } },
+            { "assets", {
+                { "driveFolder", status.DriveFolder },
+            } },
+            { "docs", {
+                { "hasSpecMirror", status.HasSpecMirror },
             } },
         }.dump(2);
     }
@@ -223,6 +262,17 @@ namespace skc::conductor
             const Json& unity = root.at("unity");
             status.UnityVersion = StringOr(unity, "projectVersion");
             status.UnityCliPath = StringOr(unity, "cli");
+            status.UnityRevision = StringOr(unity, "revision");
+            status.UnityEditorPath = StringOr(unity, "editor");
+            status.IsUnityOpen = unity.value("isOpen", false);
+            if (auto cri = root.find("cri"); cri != root.end())
+            {
+                status.CriProjectPath = StringOr(*cri, "project");
+                status.CriAppPath = StringOr(*cri, "app");
+            }
+
+            if (auto assets = root.find("assets"); assets != root.end()) { status.DriveFolder = StringOr(*assets, "driveFolder"); }
+            if (auto docs = root.find("docs"); docs != root.end()) { status.HasSpecMirror = docs->value("hasSpecMirror", false); }
         });
     }
 

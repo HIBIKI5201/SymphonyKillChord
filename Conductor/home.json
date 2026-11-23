@@ -1,20 +1,100 @@
 {
   "version": 1,
   "roles": [
-    { "id": "programmer", "label": "プログラマー" },
-    { "id": "planner", "label": "プランナー" },
-    { "id": "designer", "label": "デザイナー" },
-    { "id": "sound", "label": "サウンド" },
-    { "id": "lead", "label": "リード" }
+    {
+      "id": "programmer",
+      "label": "プログラマー"
+    },
+    {
+      "id": "planner",
+      "label": "プランナー"
+    },
+    {
+      "id": "designer",
+      "label": "デザイナー"
+    },
+    {
+      "id": "sound",
+      "label": "サウンド"
+    },
+    {
+      "id": "lead",
+      "label": "リード"
+    }
   ],
   "tiles": [
+    {
+      "id": "unity-open",
+      "title": "Unity を開く",
+      "note": "このプロジェクトを、決められた版の Unity で開く",
+      "action": "unity-open",
+      "roles": [
+        "programmer",
+        "planner",
+        "designer",
+        "sound",
+        "lead"
+      ]
+    },
+    {
+      "id": "cri-open",
+      "title": "CRI Atom Craft を開く",
+      "note": "サウンドのプロジェクト（Sound/CRIAtomCraft）を開く",
+      "action": "cri-open",
+      "roles": [
+        "sound"
+      ]
+    },
+    {
+      "id": "assets-open",
+      "title": "Drive の素材フォルダを開く",
+      "note": "Google Drive の SymphonyKillChord フォルダを開く",
+      "action": "assets-open",
+      "roles": [
+        "designer",
+        "sound",
+        "planner"
+      ]
+    },
+    {
+      "id": "assets-import",
+      "title": "Drive の素材を Unity へ取り込む",
+      "note": "開いている Unity で、Drive の素材を同期する",
+      "action": "assets-import",
+      "roles": [
+        "designer",
+        "sound"
+      ]
+    },
+    {
+      "id": "docs-viewer",
+      "title": "仕様書ビューアを開く",
+      "note": "開いている Unity で、リポジトリの仕様書を読む",
+      "action": "docs-viewer",
+      "roles": [
+        "planner",
+        "programmer"
+      ]
+    },
+    {
+      "id": "repo-open",
+      "title": "リポジトリのフォルダを開く",
+      "note": "エクスプローラーでプロジェクトのフォルダを開く",
+      "action": "repo-open"
+    },
     {
       "id": "setup-check",
       "title": "初期化できているか確かめる",
       "note": "サブモジュール・git の設定・Unity を確かめるだけ。何も変えない",
       "script": "setup",
       "preset": "確認だけ（何も変えない）",
-      "roles": ["programmer", "planner", "designer", "sound", "lead"]
+      "roles": [
+        "programmer",
+        "planner",
+        "designer",
+        "sound",
+        "lead"
+      ]
     },
     {
       "id": "setup",
@@ -28,7 +108,12 @@
       "title": "Android 端末へアプリを入れる",
       "note": "ビルドしたアプリを USB でつないだ端末へ入れて試す",
       "script": "install-app",
-      "roles": ["planner", "designer", "sound", "lead"]
+      "roles": [
+        "planner",
+        "designer",
+        "sound",
+        "lead"
+      ]
     },
     {
       "id": "clean-branches",
@@ -36,7 +121,10 @@
       "note": "develop に取り込み済みのローカルブランチを片付ける",
       "script": "clean-branches",
       "preset": "消す（確認あり）",
-      "roles": ["programmer", "lead"]
+      "roles": [
+        "programmer",
+        "lead"
+      ]
     },
     {
       "id": "runner-menu",
@@ -44,7 +132,9 @@
       "note": "セルフホストランナーの状態・ログを見る",
       "script": "runner-menu",
       "preset": "メニューを開く",
-      "roles": ["lead"]
+      "roles": [
+        "lead"
+      ]
     },
     {
       "id": "github-collaborators",
@@ -52,20 +142,56 @@
       "note": "KillChord 系列のリポジトリに誰が入っているかを表で出す",
       "script": "github-collaborators",
       "preset": "一覧を表で見る",
-      "roles": ["lead"]
+      "roles": [
+        "lead"
+      ]
     },
     {
       "id": "homepage-dev",
       "title": "ホームページをプレビューする",
       "note": "ホームページをローカルで動かしてブラウザで確かめる",
       "script": "homepage-dev",
-      "roles": ["lead"]
+      "roles": [
+        "lead"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "id": "specs",
+      "title": "仕様リスト",
+      "note": "機能ごとの仕様（Notion のプロジェクト ドキュメント）",
+      "url": "https://www.notion.so/27d7c2c6cc028131aee3cf5d08b0b03a"
     },
     {
-      "id": "all-scripts",
-      "title": "すべてのスクリプト",
-      "note": "登録したスクリプトを一覧から選んで動かす",
-      "page": "scripts"
+      "id": "systems",
+      "title": "システムリスト",
+      "note": "インゲーム・アウトゲーム・共通基盤などのシステム",
+      "url": "https://www.notion.so/27d7c2c6cc0281ee963ff0e4195b52e0"
+    },
+    {
+      "id": "glossary",
+      "title": "用語",
+      "note": "プロジェクトで使う言葉の決まり",
+      "url": "https://www.notion.so/27d7c2c6cc02813ba93fe6baf4d4f679"
+    },
+    {
+      "id": "qa",
+      "title": "QA",
+      "note": "QA の進め方とシート",
+      "url": "https://www.notion.so/3e37c2c6cc0281988919e7d9fba1f7b8"
+    },
+    {
+      "id": "code-guidelines",
+      "title": "コード規定",
+      "note": "プログラマー向けの書き方の決まり",
+      "url": "https://www.notion.so/2a87c2c6cc0280f9a10af0b72b95fbb3"
+    },
+    {
+      "id": "github",
+      "title": "GitHub リポジトリ",
+      "note": "Issue・プルリクエスト・Actions",
+      "url": "https://github.com/HIBIKI5201/SymphonyKillChord"
     }
   ]
 }

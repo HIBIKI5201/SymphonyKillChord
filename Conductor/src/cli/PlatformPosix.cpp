@@ -239,6 +239,89 @@ namespace skc::conductor::cli
         return result;
     }
 
+    bool LaunchDetached(const std::string& program, const std::vector<std::string>& args,
+        const std::filesystem::path& workingDirectory, std::string& error)
+    {
+        std::vector<std::string> all = { program };
+        all.insert(all.end(), args.begin(), args.end());
+        pid_t child = fork();
+        if (child < 0)
+        {
+            error = std::strerror(errno);
+            return false;
+        }
+
+        if (child == 0)
+        {
+            // 孫を起動して子はすぐ終わる（起動したプログラムが、こちらの終わりに巻き込まれないように）。
+            setsid();
+            if (fork() != 0) { _exit(0); }
+            if (!workingDirectory.empty() && chdir(workingDirectory.c_str()) != 0) { _exit(127); }
+
+            std::vector<char*> argv = ToArgv(all);
+            execv(argv[0], argv.data());
+            _exit(127);
+        }
+
+        int status = 0;
+        while (waitpid(child, &status, 0) < 0 && errno == EINTR) {}
+        return true;
+    }
+
+    bool OpenWithShell(const std::string& target, std::string& error)
+    {
+#if defined(__APPLE__)
+        const char* opener = "/usr/bin/open";
+#else
+        std::optional<std::string> found = FindOnPath("xdg-open");
+        if (!found.has_value())
+        {
+            error = "xdg-open が見つかりません。";
+            return false;
+        }
+
+        std::string openerPath = *found;
+        const char* opener = openerPath.c_str();
+#endif
+        return LaunchDetached(opener, { target }, std::filesystem::path(), error);
+    }
+
+    std::vector<std::filesystem::path> UnityEditorCandidates(const std::string& version)
+    {
+#if defined(__APPLE__)
+        return { std::filesystem::path("/Applications/Unity/Hub/Editor") / version / "Unity.app" / "Contents" / "MacOS" / "Unity" };
+#else
+        const char* home = std::getenv("HOME");
+        if (home == nullptr) { return {}; }
+
+        return { std::filesystem::path(home) / "Unity" / "Hub" / "Editor" / version / "Editor" / "Unity" };
+#endif
+    }
+
+    std::optional<std::filesystem::path> FindCriAtomCraft()
+    {
+        return std::nullopt;
+    }
+
+    std::vector<std::filesystem::path> DriveFolderCandidates()
+    {
+        std::vector<std::filesystem::path> candidates;
+        const char* home = std::getenv("HOME");
+        if (home == nullptr) { return candidates; }
+
+        std::error_code error;
+        std::filesystem::path cloud = std::filesystem::path(home) / "Library" / "CloudStorage";
+        for (std::filesystem::directory_iterator it(cloud, error), end; !error && it != end; it.increment(error))
+        {
+            if (it->path().filename().string().rfind("GoogleDrive", 0) != 0) { continue; }
+
+            candidates.push_back(it->path() / "マイドライブ" / "SymphonyKillChord");
+            candidates.push_back(it->path() / "My Drive" / "SymphonyKillChord");
+        }
+
+        return candidates;
+    }
+
     void WriteOut(const std::string& text)
     {
         std::cout << text << std::flush;
