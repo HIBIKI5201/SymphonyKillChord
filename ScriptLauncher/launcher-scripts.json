@@ -33,11 +33,11 @@
       "category": "Git",
       "windows": "GitHub-Collaborators.bat",
       "mac": "GitHub-Collaborators.command",
-      "description": "gh（GitHub CLI）でログインしたアカウントが持つ全リポジトリ（アーカイブ済み・フォークを除く）について、どのアカウントがコラボレーターかを表で出す。招待では、入力したアカウントを全リポジトリへ招待する（対象の一覧を出してから確認する）。先に gh auth login でログインしておく。",
+      "description": "KillChord 系列（このリポジトリと .gitmodules のサブモジュール）について、どのアカウントがコラボレーターかを表で出す。招待では、入力したアカウントをそのすべてへ招待する（対象の一覧を出してから確認する）。ほかのリポジトリには触らない。先に gh auth login でログインしておく。",
       "mode": "console",
       "presets": [
         { "label": "一覧を表で見る", "args": ["list"], "mode": "capture" },
-        { "label": "アカウントを全リポジトリへ招待する（確認あり）", "args": ["invite"] }
+        { "label": "アカウントを KillChord 系列へ招待する（確認あり）", "args": ["invite"] }
       ]
     },
     {
