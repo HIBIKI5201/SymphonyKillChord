@@ -1,6 +1,6 @@
 @echo off
 rem Double-click to see which GitHub accounts are collaborators on each repository (list),
-rem or pass "invite" to invite one account to all repositories (asks for the account and confirms).
+rem or pass "invite" to invite one account to this repository and its submodules (asks for the account and confirms).
 rem The logic is scripts\github\collaborators.sh, run with the bash bundled in Git for Windows
 rem (the bash on PATH may be the WSL stub). Needs gh (GitHub CLI) logged in with "gh auth login".
 setlocal

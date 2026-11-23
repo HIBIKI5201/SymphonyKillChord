@@ -1,20 +1,18 @@
 #!/bin/bash
 # GitHub のコラボレーターを管理する。gh（GitHub CLI）でログインしたアカウントの権限で動く。
 #
-# 使い方: collaborators.sh <list|invite> [--owner <アカウント>] [--include-forks]
+# 使い方: collaborators.sh <list|invite>
 #   list    リポジトリごとに、どのアカウントがコラボレーターかを表で出す（何も変えない）
 #   invite  入力したアカウントを、対象の全リポジトリへコラボレーターとして招待する（確認あり）
 #           invite <アカウント> [--yes] で、入力と確認を省ける
 #
-# 対象: --owner のアカウント（省略時は gh でログインしているアカウント）が持つリポジトリ。
-#       アーカイブ済みは除く。フォークは --include-forks を付けたときだけ含める。
+# 対象: このリポジトリ（origin）と、.gitmodules に書いたサブモジュールのリポジトリ（KillChord 系列）。
+#       ほかのリポジトリには触らない。
 # 招待の権限: 個人アカウントのリポジトリでは GitHub の仕様で常に write（書き込み）になる。
 #             組織のリポジトリでは --permission <read|triage|write|maintain|admin>（既定 write）で選べる。
 
 mode=""
-owner=""
 target=""
-include_forks=0
 assume_yes=0
 permission="push"
 
@@ -25,8 +23,6 @@ usage() {
 while [ $# -gt 0 ]; do
     case "$1" in
         list|invite) mode="$1" ;;
-        --owner) shift; owner="$1" ;;
-        --include-forks) include_forks=1 ;;
         --yes|-y) assume_yes=1 ;;
         --permission)
             shift
@@ -67,24 +63,47 @@ if [ -z "$me" ]; then
     echo "ターミナルで gh auth login を実行してログインしてから、もう一度動かす。"
     exit 1
 fi
-[ -n "$owner" ] || owner="$me"
 
 # --- 対象のリポジトリ ------------------------------------------------------
-repo_query='.[] | select(.isArchived | not)'
-[ $include_forks -eq 1 ] || repo_query="$repo_query | select(.isFork | not)"
-repos=$(gh repo list "$owner" --limit 1000 --json nameWithOwner,isArchived,isFork \
-    --jq "$repo_query | .nameWithOwner" | sort -f)
-if [ -z "$repos" ]; then
-    echo "$owner のリポジトリが見つからない（アーカイブ済み・フォークは除外している）。"
+cd "$(dirname "$0")/../.." || exit 1
+
+# GitHub の URL（https / ssh）から owner/name を取り出す。GitHub 以外なら空を返す。
+github_slug() {
+    printf '%s\n' "$1" | sed -E -n 's#^(https?://([^@/]+@)?github\.com/|git@github\.com:|ssh://git@github\.com/)([^/]+/[^/]+)$#\3#p' | sed -E 's#\.git$##; s#/$##'
+}
+
+origin_url=$(git remote get-url origin 2> /dev/null)
+main_repo=$(github_slug "$origin_url")
+if [ -z "$main_repo" ]; then
+    echo "origin（$origin_url）が GitHub のリポジトリではないため、対象を決められない。"
     exit 1
 fi
+owner=${main_repo%%/*}
+
+repos="$main_repo"
+while read -r _ url; do
+    [ -n "$url" ] || continue
+    case "$url" in
+        ../../*) slug="" ;;
+        ../*) slug="$owner/${url#../}" ;;          # 例: ../SymphonyKillChord_Specifications.git
+        *) slug=$(github_slug "$url") ;;
+    esac
+    slug=${slug%.git}
+    if [ -z "$slug" ] || [ "${slug#*/*/}" != "$slug" ]; then
+        echo "警告: サブモジュールの URL \"$url\" から GitHub のリポジトリを決められないので、対象から外した。" >&2
+        continue
+    fi
+    repos="$repos
+$slug"
+done < <(git config -f .gitmodules --get-regexp '^submodule\..*\.url$' 2> /dev/null)
+repos=$(printf '%s\n' "$repos" | awk '!seen[tolower($0)]++')
 repo_count=$(printf '%s\n' "$repos" | wc -l | tr -d ' ')
 
 # --- list: 表を出す --------------------------------------------------------
 list_collaborators() {
     local data rows failed=0
     data=$(mktemp) || exit 1
-    echo "コラボレーターを集めている（$owner のリポジトリ $repo_count 件、ログイン: $me）..."
+    echo "コラボレーターを集めている（$main_repo とサブモジュール、計 $repo_count 件、ログイン: $me）..."
     while IFS= read -r repo; do
         printf '%s\t\t\n' "$repo" >> "$data"
         if rows=$(gh api --paginate "repos/$repo/collaborators?affiliation=direct&per_page=100" \
