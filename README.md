@@ -22,9 +22,11 @@ https://hibiki5201.github.io/SymphonyKillChord/home/
 
 セットアップの手順を増やしたら、`PowerShell/ProjectSetup/project-setup.json` の `SetupVersion` を上げる。既存のメンバーも、次に Unity を開いたときに再実行を促される。
 
-## スクリプト管理ツール（Windows）
+## プロジェクト管理アプリ KillChord Conductor（Windows）
 
-ルートの `ScriptLauncher.exe` をダブルクリックすると、初期化・ブランチの掃除・Android 端末へのインストール・ビルドランナーなどのスクリプトを一覧から動かせる。ツールは通常の権限で動き、管理者が要るスクリプトだけ実行のときに UAC の確認が出る。新しい `.bat` / `.command` を足したら `ScriptLauncher/launcher-scripts.json` にも登録する（詳しくは [ScriptLauncher/README.md](ScriptLauncher/README.md)）。
+ルートの `KillChordConductor.exe` をダブルクリックすると、全役職の入口になる管理アプリが開く。ホームにプロジェクトの状態（ブランチ・未コミット・サブモジュール・Unity の版）と、役職ごとによく使う操作のボタンが並ぶ。スクリプト一覧（初期化・ブランチの掃除・Android 端末へのインストール・ビルドランナーなど）は「スクリプト一覧」ページにある。初めて開いたときは「設定」で役職を選ぶ。
+
+アプリは自分では何も実行せず、同じフォルダの CLI `conductor.exe` を呼ぶ。画面の下に同じことをするコマンドが出るので、PowerShell から直接打っても動く（`.\conductor.exe --help`）。管理者が要るスクリプトだけ、実行のときに UAC の確認が出る。新しい `.bat` / `.command` を足したら `Conductor/launcher-scripts.json` にも登録する（詳しくは [Conductor/README.md](Conductor/README.md)）。
 
 ## Gemini CLI を使う
 
