@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src 'self'">
+  <title>KillChord Conductor</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M9 25V8l14 8.5L9 25Z" fill="currentColor" opacity=".9"/><path d="M23 7v18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+        </span>
+        <span class="brand-text"><strong>KillChord</strong><span>Conductor</span></span>
+      </div>
+
+      <button class="search-trigger" data-action="palette" title="Ctrl+K">
+        <span class="icon" data-icon="search"></span>
+        <span>探す・動かす</span>
+        <kbd>Ctrl K</kbd>
+      </button>
+
+      <nav class="nav" aria-label="ページ">
+        <button class="nav-item" data-page="home"><span class="icon" data-icon="home"></span><span>ホーム</span></button>
+        <button class="nav-item" data-page="tools"><span class="icon" data-icon="grid"></span><span>すべての操作</span></button>
+        <button class="nav-item" data-page="runs"><span class="icon" data-icon="history"></span><span>実行の記録</span><span class="nav-badge" id="runs-badge" hidden></span></button>
+        <button class="nav-item" data-page="settings"><span class="icon" data-icon="settings"></span><span>設定</span></button>
+      </nav>
+
+      <div class="sidebar-foot" id="sidebar-foot"></div>
+    </aside>
+
+    <main class="main" id="main" tabindex="-1"></main>
+  </div>
+
+  <section class="drawer" id="drawer" aria-label="実行の出力" hidden></section>
+  <div class="palette-backdrop" id="palette" hidden></div>
+  <div class="modal-backdrop" id="modal" hidden></div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="icons.js"></script>
+  <script src="dev-mock.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -16,6 +16,9 @@ namespace skc::conductor
     {
         static const std::vector<SettingKey> KEYS = {
             { SETTING_ROLE, "役職。ホーム画面で、この役職がよく使うボタンを前に並べる（conductor home で役職の一覧が出る）" },
+            { SETTING_CRI_APP, "CRI Atom Craft の exe の場所。空なら、よくある場所を探し、無ければプロジェクトのファイルを関連付けで開く" },
+            { SETTING_DRIVE_FOLDER, "Google Drive（パソコン版）の SymphonyKillChord フォルダの場所。空なら G:\\マイドライブ などを探す" },
+            { SETTING_UNITY_EDITOR, "Unity エディタ（Unity.exe）の場所。空なら Unity CLI か Unity Hub の場所を使う" },
         };
         return KEYS;
     }

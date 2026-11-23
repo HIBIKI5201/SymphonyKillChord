@@ -44,11 +44,32 @@ namespace skc::conductor
         /// <summary>引数の組の添字（PresetLabel から読むときに決める）。</summary>
         std::size_t PresetIndex = 0;
 
+        /// <summary>組み込みの操作の名前（unity-open など）。スクリプト・ページのボタンなら空。</summary>
+        std::string Action;
+
         /// <summary>開くページ（scripts・settings）。スクリプトを動かすボタンなら空。</summary>
         std::string Page;
 
         /// <summary>このボタンをよく使う役職。前に並べるのに使う（隠しはしない）。</summary>
         std::vector<std::string> Roles;
+    };
+
+    /// <summary>
+    ///     ホーム画面の「ドキュメント」に並べるリンク1つ分（Notion のページなど）。
+    /// </summary>
+    struct HomeLink
+    {
+        /// <summary>重複しない識別子（conductor docs open &lt;id&gt; で使う）。</summary>
+        std::string Id;
+
+        /// <summary>画面に出す名前。</summary>
+        std::string Title;
+
+        /// <summary>説明。</summary>
+        std::string Note;
+
+        /// <summary>開く URL（https:// で始まる）。</summary>
+        std::string Url;
     };
 
     /// <summary>
@@ -64,6 +85,9 @@ namespace skc::conductor
 
         /// <summary>ボタン（ファイルに書いた順）。</summary>
         std::vector<HomeTile> Tiles;
+
+        /// <summary>ドキュメントのリンク（ファイルに書いた順）。</summary>
+        std::vector<HomeLink> Links;
 
         /// <summary>
         ///     役職を id で探す。

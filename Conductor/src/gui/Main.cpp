@@ -1,36 +1,28 @@
-// スクリプト管理ツールの入口。
-#include "MainWindow.h"
+// KillChord Conductor（GUI）の入口。画面は Conductor/ui の HTML を WebView2 で出す。
+#include "HostWindow.h"
 
 #include <windows.h>
-#include <commctrl.h>
 #include <objbase.h>
 
-/// <summary>
-///     ウィンドウを作り、メッセージを回す。
-/// </summary>
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int showCommand)
 {
-    INITCOMMONCONTROLSEX controls{ sizeof(INITCOMMONCONTROLSEX), ICC_LISTVIEW_CLASSES | ICC_BAR_CLASSES | ICC_STANDARD_CLASSES };
-    InitCommonControlsEx(&controls);
-
-    // ShellExecuteEx（管理者での起動・フォルダを開く）のために COM を初期化する。
+    // WebView2 とファイルを選ぶ画面は、STA の COM を要る。
     HRESULT com = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
     int exitCode = 1;
-    skc::conductor::gui::MainWindow window;
-    if (skc::conductor::gui::MainWindow::RegisterWindowClass(instance) && window.Create(instance, showCommand))
     {
-        MSG message{};
-        while (GetMessageW(&message, nullptr, 0, 0) > 0)
+        skc::conductor::gui::HostWindow window;
+        if (window.Create(instance, showCommand))
         {
-            // Tab でのフォーカス移動と Enter での実行を、ダイアログと同じように効かせる。
-            if (IsDialogMessageW(window.Handle(), &message)) { continue; }
+            MSG message{};
+            while (GetMessageW(&message, nullptr, 0, 0) > 0)
+            {
+                TranslateMessage(&message);
+                DispatchMessageW(&message);
+            }
 
-            TranslateMessage(&message);
-            DispatchMessageW(&message);
+            exitCode = static_cast<int>(message.wParam);
         }
-
-        exitCode = static_cast<int>(message.wParam);
     }
 
     if (SUCCEEDED(com)) { CoUninitialize(); }

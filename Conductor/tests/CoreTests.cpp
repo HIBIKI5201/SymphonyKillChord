@@ -1,4 +1,5 @@
 // core（設定読込・コマンドの組立・出力の整形・JSON の出し入れ）の単体テスト。外部のテストライブラリは使わない。
+#include "Actions.h"
 #include "CliArgs.h"
 #include "CliJson.h"
 #include "CommandLine.h"
@@ -376,6 +377,73 @@ namespace
         Expect(!StatusFromJson("{", readStatus, error), "壊れた JSON は失敗");
     }
 
+    void ParsesHomeActionsAndLinks()
+    {
+        ScriptConfig scripts = MakeScripts();
+        HomeConfigResult result = ParseHomeConfig(R"({"version":1,
+            "roles":[{"id":"sound","label":"サウンド"}],
+            "tiles":[{"id":"u","title":"Unity","action":"unity-open","roles":["sound"]}],
+            "links":[{"id":"spec","title":"仕様","url":"https://example.com/a"}]})", scripts);
+        Expect(result.IsSuccess(), "組み込みの操作とリンクを読める: " + result.Error);
+        if (!result.IsSuccess()) { return; }
+
+        ExpectEqual("unity-open", result.Config.Tiles.at(0).Action, "操作の名前");
+        ExpectEqual("https://example.com/a", result.Config.Links.at(0).Url, "リンクの URL");
+
+        HomeView view;
+        view.Tiles = result.Config.Tiles;
+        view.Links = result.Config.Links;
+        std::string json = HomeViewToJson(view);
+        Expect(json.find("\"conductor unity open\"") != std::string::npos, "操作のコマンドを JSON に入れる");
+        HomeView read;
+        std::string error;
+        Expect(HomeViewFromJson(json, read, error) && read.Links.size() == 1 && read.Tiles.at(0).Action == "unity-open", "操作とリンクの JSON を読める");
+
+        const std::vector<std::pair<const char*, const char*>> cases = {
+            { "知らない操作", R"({"version":1,"roles":[{"id":"r","label":"R"}],"tiles":[{"id":"a","title":"A","action":"x"}]})" },
+            { "操作と script の両方", R"({"version":1,"roles":[{"id":"r","label":"R"}],"tiles":[{"id":"a","title":"A","action":"unity-open","script":"setup"}]})" },
+            { "https でないリンク", R"({"version":1,"roles":[{"id":"r","label":"R"}],"tiles":[],"links":[{"id":"a","title":"A","url":"http://x"}]})" },
+            { "リンクの id の重複", R"({"version":1,"roles":[{"id":"r","label":"R"}],"tiles":[],"links":[{"id":"a","title":"A","url":"https://x"},{"id":"a","title":"B","url":"https://y"}]})" },
+        };
+        for (const auto& [name, text] : cases)
+        {
+            Expect(!ParseHomeConfig(text, scripts).IsSuccess(), std::string("ホーム画面の登録を読めないこと: ") + name);
+        }
+    }
+
+    void BuildsActionCommands()
+    {
+        ExpectEqual("conductor unity open", FormatConductorCommand({ "unity", "open" }), "コマンドの1行");
+        ExpectEqual("conductor unity menu \"Tools/A B\"", FormatConductorCommand({ "unity", "menu", "Tools/A B" }), "空白は囲む");
+        Expect(FindBuiltinAction("cri-open") != nullptr && FindBuiltinAction("nothing") == nullptr, "操作を名前で探す");
+        ExpectEqual("UnityEditor.EditorApplication.ExecuteMenuItem(\"Window/A\")", BuildMenuItemCode("Window/A"), "メニューを動かす式");
+        Expect(BuildMenuItemCode("a\"); x(\"").empty() && BuildMenuItemCode("").empty(), "危ない文字を含むパスは断る");
+    }
+
+    void ReadsUnityRevision()
+    {
+        const char* text = "m_EditorVersion: 6000.3.10f1\r\nm_EditorVersionWithRevision: 6000.3.10f1 (e35f0c77bd8e)\r\n";
+        ExpectEqual("e35f0c77bd8e", ParseUnityRevision(text), "リビジョン");
+        ExpectEqual("", ParseUnityRevision("m_EditorVersion: 6000.3.10f1\n"), "リビジョンが無い");
+        ExpectEqual("unityhub://6000.3.10f1/e35f0c77bd8e", UnityHubInstallUrl("6000.3.10f1", "e35f0c77bd8e"), "Unity Hub の URL");
+        ExpectEqual("", UnityHubInstallUrl("6000.3.10f1", ""), "リビジョンが無ければ空");
+
+        ProjectStatus status;
+        status.UnityVersion = "6000.3.10f1";
+        status.UnityRevision = "e35f0c77bd8e";
+        status.IsUnityOpen = true;
+        status.CriProjectPath = "Sound/CRIAtomCraft/a.atmcproject";
+        status.DriveFolder = "G:/マイドライブ/SymphonyKillChord";
+        status.HasSpecMirror = true;
+        ProjectStatus read;
+        std::string error;
+        std::string json = StatusToJson(status);
+        Expect(StatusFromJson(json, read, error), "状態の JSON を読める: " + error);
+        Expect(read.IsUnityOpen && read.UnityRevision == "e35f0c77bd8e" && read.CriProjectPath == status.CriProjectPath
+            && read.DriveFolder == status.DriveFolder && read.HasSpecMirror, "Unity・CRI・Drive・仕様書の状態");
+        Expect(json.find("unityhub://6000.3.10f1/e35f0c77bd8e") != std::string::npos, "Unity Hub の URL を JSON に入れる");
+    }
+
     void RepositoryHomeConfigIsValid(const std::filesystem::path& configPath, const std::filesystem::path& homePath)
     {
         ScriptConfigResult scripts = ParseScriptConfig(ReadFile(configPath));
@@ -410,6 +478,9 @@ int main(int argc, char** argv)
         { "ReadsAndWritesSettings", ReadsAndWritesSettings },
         { "ParsesGitStatus", ParsesGitStatus },
         { "RoundTripsCliJson", RoundTripsCliJson },
+        { "ParsesHomeActionsAndLinks", ParsesHomeActionsAndLinks },
+        { "BuildsActionCommands", BuildsActionCommands },
+        { "ReadsUnityRevision", ReadsUnityRevision },
     };
 
     for (const auto& [name, test] : tests)

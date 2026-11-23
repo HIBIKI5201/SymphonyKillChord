@@ -8,6 +8,9 @@
 #include <shellapi.h>
 
 #include <cstdlib>
+#include <cwctype>
+#include <fstream>
+#include <sstream>
 
 namespace skc::conductor::cli
 {
@@ -78,6 +81,16 @@ namespace skc::conductor::cli
             }
 
             WriteFile(handle, text.data(), static_cast<DWORD>(text.size()), &written, nullptr);
+        }
+
+        /// <summary>
+        ///     環境変数を読む。無ければ空。
+        /// </summary>
+        std::wstring GetEnvironment(const wchar_t* name)
+        {
+            wchar_t buffer[32768];
+            DWORD length = GetEnvironmentVariableW(name, buffer, 32768);
+            return length > 0 && length < 32768 ? std::wstring(buffer, length) : std::wstring();
         }
 
         /// <summary>
@@ -291,6 +304,158 @@ namespace skc::conductor::cli
         SetConsoleCtrlHandler(IgnoreControlEvent, TRUE);
         result.ExitCode = WaitExitCode(process.hProcess);
         return result;
+    }
+
+    bool OpenWithShell(const std::string& target, std::string& error)
+    {
+        std::wstring wide = Utf8ToWide(target);
+        HINSTANCE result = ShellExecuteW(nullptr, L"open", wide.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+        if (reinterpret_cast<INT_PTR>(result) > 32) { return true; }
+
+        error = DescribeError(GetLastError());
+        return false;
+    }
+
+    bool LaunchDetached(const std::string& program, const std::vector<std::string>& args,
+        const std::filesystem::path& workingDirectory, std::string& error)
+    {
+        std::wstring application = Utf8ToWide(program);
+        std::wstring commandLine = L"\"" + application + L"\"";
+        if (!args.empty()) { commandLine += L" " + Utf8ToWide(JoinArguments(args)); }
+
+        // .cmd・.bat は CreateProcess で直に動かせないので、cmd.exe /d /s /c に渡す。
+        std::wstring extension = std::filesystem::path(application).extension().wstring();
+        for (wchar_t& c : extension) { c = static_cast<wchar_t>(towlower(c)); }
+        if (extension == L".cmd" || extension == L".bat")
+        {
+            std::wstring shell = GetEnvironment(L"ComSpec");
+            if (shell.empty()) { shell = L"cmd.exe"; }
+
+            commandLine = L"\"" + shell + L"\" /d /s /c \"" + commandLine + L"\"";
+            application = shell;
+        }
+
+        std::wstring directory = workingDirectory.wstring();
+        STARTUPINFOW startup{};
+        startup.cb = sizeof(startup);
+        PROCESS_INFORMATION process{};
+        // コンソールのプログラムでも黒い窓を出さない（GUI のプログラムには効かないので、そのまま窓が出る）。
+        if (!CreateProcessW(application.c_str(), commandLine.data(), nullptr, nullptr, FALSE,
+                CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP | CREATE_UNICODE_ENVIRONMENT, nullptr,
+                directory.empty() ? nullptr : directory.c_str(), &startup, &process))
+        {
+            error = DescribeError(GetLastError());
+            return false;
+        }
+
+        CloseHandle(process.hThread);
+        CloseHandle(process.hProcess);
+        return true;
+    }
+
+    std::vector<std::filesystem::path> UnityEditorCandidates(const std::string& version)
+    {
+        std::vector<std::filesystem::path> candidates;
+        std::wstring wideVersion = Utf8ToWide(version);
+        for (const wchar_t* variable : { L"ProgramFiles", L"ProgramW6432" })
+        {
+            std::wstring folder = GetEnvironment(variable);
+            if (!folder.empty())
+            {
+                candidates.push_back(std::filesystem::path(folder) / L"Unity" / L"Hub" / L"Editor" / wideVersion / L"Editor" / L"Unity.exe");
+            }
+        }
+
+        // Unity Hub で入れ先を変えたときは、%APPDATA%\UnityHub\secondaryInstallPath.json に JSON の文字列で入っている。
+        std::wstring appData = GetEnvironment(L"APPDATA");
+        if (!appData.empty())
+        {
+            std::ifstream stream(std::filesystem::path(appData) / L"UnityHub" / L"secondaryInstallPath.json", std::ios::binary);
+            std::ostringstream buffer;
+            buffer << stream.rdbuf();
+            std::string text = buffer.str();
+            std::size_t first = text.find('"');
+            std::size_t last = text.rfind('"');
+            if (first != std::string::npos && last != std::string::npos && last > first + 1)
+            {
+                std::string folder = text.substr(first + 1, last - first - 1);
+                std::string unescaped;
+                for (std::size_t i = 0; i < folder.size(); ++i)
+                {
+                    if (folder[i] == '\\' && i + 1 < folder.size() && folder[i + 1] == '\\') { ++i; }
+                    unescaped.push_back(folder[i]);
+                }
+
+                candidates.push_back(Utf8ToPath(unescaped) / wideVersion / L"Editor" / L"Unity.exe");
+            }
+        }
+
+        return candidates;
+    }
+
+    std::optional<std::filesystem::path> FindCriAtomCraft()
+    {
+        // 名前に cri を含むフォルダの下を、浅く探す（Program Files 全体は重いので探さない）。
+        std::vector<std::filesystem::path> roots;
+        for (const wchar_t* variable : { L"ProgramFiles", L"ProgramFiles(x86)", L"LOCALAPPDATA" })
+        {
+            std::wstring folder = GetEnvironment(variable);
+            if (!folder.empty()) { roots.push_back(folder); }
+        }
+
+        std::wstring systemDrive = GetEnvironment(L"SystemDrive");
+        roots.push_back(std::filesystem::path((systemDrive.empty() ? std::wstring(L"C:") : systemDrive) + L"\\"));
+
+        auto isCriFolder = [](const std::filesystem::path& path)
+        {
+            std::wstring name = path.filename().wstring();
+            for (wchar_t& c : name) { c = static_cast<wchar_t>(towlower(c)); }
+            return name.find(L"cri") != std::wstring::npos;
+        };
+
+        auto isAtomCraft = [](const std::filesystem::path& path)
+        {
+            std::wstring name = path.filename().wstring();
+            for (wchar_t& c : name) { c = static_cast<wchar_t>(towlower(c)); }
+            return name.find(L"atom") != std::wstring::npos && name.find(L"craft") != std::wstring::npos && path.extension() == L".exe";
+        };
+
+        for (const std::filesystem::path& root : roots)
+        {
+            std::error_code error;
+            for (std::filesystem::directory_iterator it(root, std::filesystem::directory_options::skip_permission_denied, error), end;
+                 !error && it != end; it.increment(error))
+            {
+                if (!it->is_directory(error) || !isCriFolder(it->path())) { continue; }
+
+                std::filesystem::recursive_directory_iterator walk(it->path(), std::filesystem::directory_options::skip_permission_denied, error);
+                for (std::filesystem::recursive_directory_iterator walkEnd; !error && walk != walkEnd; walk.increment(error))
+                {
+                    if (walk.depth() > 4) { walk.disable_recursion_pending(); continue; }
+                    if (walk->is_regular_file(error) && isAtomCraft(walk->path())) { return walk->path(); }
+                }
+
+                error.clear();
+            }
+        }
+
+        return std::nullopt;
+    }
+
+    std::vector<std::filesystem::path> DriveFolderCandidates()
+    {
+        std::vector<std::filesystem::path> candidates;
+        DWORD drives = GetLogicalDrives();
+        for (int i = 3; i < 26; ++i)
+        {
+            if ((drives & (1u << i)) == 0) { continue; }
+
+            std::wstring root = std::wstring(1, static_cast<wchar_t>(L'A' + i)) + L":\\";
+            candidates.push_back(std::filesystem::path(root) / L"マイドライブ" / L"SymphonyKillChord");
+            candidates.push_back(std::filesystem::path(root) / L"My Drive" / L"SymphonyKillChord");
+        }
+
+        return candidates;
     }
 
     void WriteOut(const std::string& text)

@@ -114,6 +114,7 @@ SOFTWARE.
 
 - エディタでだけ使うもの（Google.Apis、System.CodeDom、System.Management、NuGetForUnity、unity-cli-loop、CopyComponentsByRegex、graph-visualizer、Markdig など）は実行ファイルに含まれないため載せていない。Markdig（BSD-2-Clause、仕様書ビューアが使う）のライセンス全文は `Assets/Editor/Plugins/Markdig/LICENSE.txt` に置いている
 - ゲームの外で使う開発ツールのプロジェクト管理アプリ（`KillChordConductor.exe`・`conductor.exe`）は、JSON の読み込みに nlohmann/json（MIT License、Copyright (c) 2013-2022 Niels Lohmann）を使う。全文は `Conductor/third_party/nlohmann/LICENSE.MIT`
+- 同じアプリの画面は、Microsoft の WebView2 SDK 1.0.2903.40（BSD 3-Clause License、Copyright (C) Microsoft Corporation）のヘッダーと `WebView2Loader.dll` を使う。全文は `Conductor/third_party/webview2/LICENSE.txt`。画面を出す WebView2 ランタイム本体は Windows に入っているものを使い、同梱しない
 - Unity 公式パッケージは Unity の利用規約に従う
 - `ShaderGraph_Dissolve`（スキルエフェクトのディゾルブ）は入手元を特定できていないため、まだ載せていない
 - 自作の素材（プレイヤーの武器、Soldier14、`AssetStoreTools/WIP` の UI 画像）は載せない

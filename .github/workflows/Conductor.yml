@@ -3,6 +3,7 @@ name: "[CI/CD] Conductor"
 # KillChord Conductor（Conductor/）の検査。
 # - スクリプト登録ファイルの書き方と、.bat / .command の登録漏れを調べる（登録漏れは警告）。
 # - core の単体テストと CLI のテスト（登録ファイル・home.json を実際に読む）を Linux と Windows で動かす。
+# - 画面（Conductor/ui）の JavaScript の文法を調べる。
 # - Windows では MSVC で conductor.exe（CLI）と KillChordConductor.exe（GUI）を作って成果物に置く。
 #   リポジトリのルートに置く2つの exe は、この成果物か PC の MSVC で作ったものに差し替える。
 on:
@@ -43,6 +44,8 @@ jobs:
           cmake --build build --parallel
       - name: テスト
         run: ctest --test-dir build --output-on-failure
+      - name: 画面の JavaScript の文法を調べる
+        run: for file in Conductor/ui/*.js; do node --check "$file"; done
 
   windows:
     name: Windows でビルド（MSVC）

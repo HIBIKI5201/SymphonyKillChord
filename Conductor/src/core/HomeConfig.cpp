@@ -1,5 +1,7 @@
 #include "HomeConfig.h"
 
+#include "Actions.h"
+
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -85,13 +87,27 @@ namespace skc::conductor
             tile.ScriptId = OptionalString(node, "script", where);
             tile.PresetLabel = OptionalString(node, "preset", where);
             tile.Page = OptionalString(node, "page", where);
+            tile.Action = OptionalString(node, "action", where);
 
-            if (tile.ScriptId.empty() == tile.Page.empty())
+            int kinds = (tile.ScriptId.empty() ? 0 : 1) + (tile.Page.empty() ? 0 : 1) + (tile.Action.empty() ? 0 : 1);
+            if (kinds != 1)
             {
-                throw std::runtime_error(where + " には \"script\" と \"page\" のどちらか1つだけを書いてください。");
+                throw std::runtime_error(where + " には \"script\"・\"page\"・\"action\" のどれか1つだけを書いてください。");
             }
 
-            if (!tile.Page.empty())
+            if (!tile.Action.empty())
+            {
+                if (FindBuiltinAction(tile.Action) == nullptr)
+                {
+                    std::string names;
+                    for (const BuiltinAction& action : BuiltinActions()) { names += (names.empty() ? "" : "・") + action.Id; }
+
+                    throw std::runtime_error(where + " の \"action\" \"" + tile.Action + "\" はありません（" + names + " のどれか）。");
+                }
+
+                if (!tile.PresetLabel.empty()) { throw std::runtime_error(where + " は組み込みの操作なので \"preset\" は書けません。"); }
+            }
+            else if (!tile.Page.empty())
             {
                 bool isKnown = std::any_of(std::begin(KNOWN_PAGES), std::end(KNOWN_PAGES), [&](const char* page) { return tile.Page == page; });
                 if (!isKnown) { throw std::runtime_error(where + " の \"page\" は \"scripts\" か \"settings\" です（\"" + tile.Page + "\" と書かれています）。"); }
@@ -162,6 +178,27 @@ namespace skc::conductor
 
             auto tiles = root.find("tiles");
             if (tiles == root.end() || !tiles->is_array()) { throw std::runtime_error("\"tiles\"（配列）がありません。"); }
+
+            auto links = root.find("links");
+            if (links != root.end() && !links->is_null())
+            {
+                if (!links->is_array()) { throw std::runtime_error("\"links\" は配列で書いてください。"); }
+
+                std::set<std::string> linkIds;
+                for (std::size_t i = 0; i < links->size(); ++i)
+                {
+                    const Json& node = (*links)[i];
+                    std::string where = "links[" + std::to_string(i) + "]";
+                    if (!node.is_object()) { throw std::runtime_error(where + " はオブジェクトで書いてください。"); }
+
+                    HomeLink link{ RequireString(node, "id", where), RequireString(node, "title", where),
+                        OptionalString(node, "note", where), RequireString(node, "url", where) };
+                    if (link.Url.rfind("https://", 0) != 0) { throw std::runtime_error(where + " の \"url\" は https:// で始めてください。"); }
+                    if (!linkIds.insert(link.Id).second) { throw std::runtime_error("リンクの id \"" + link.Id + "\" が2回以上使われています。"); }
+
+                    result.Config.Links.push_back(std::move(link));
+                }
+            }
 
             std::set<std::string> ids;
             for (std::size_t i = 0; i < tiles->size(); ++i)

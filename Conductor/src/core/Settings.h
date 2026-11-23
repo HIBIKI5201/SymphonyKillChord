@@ -37,6 +37,15 @@ namespace skc::conductor
     /// <summary>役職のキー。</summary>
     inline constexpr const char* SETTING_ROLE = "role";
 
+    /// <summary>CRI Atom Craft の exe の場所のキー。</summary>
+    inline constexpr const char* SETTING_CRI_APP = "criAtomCraftPath";
+
+    /// <summary>Google Drive の SymphonyKillChord フォルダの場所のキー。</summary>
+    inline constexpr const char* SETTING_DRIVE_FOLDER = "driveFolder";
+
+    /// <summary>Unity エディタの場所のキー（自動で見つからないとき用）。</summary>
+    inline constexpr const char* SETTING_UNITY_EDITOR = "unityEditorPath";
+
     /// <summary>
     ///     書けるキーの一覧を返す。
     /// </summary>
