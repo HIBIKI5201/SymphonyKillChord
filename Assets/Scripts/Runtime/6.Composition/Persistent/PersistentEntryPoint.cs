@@ -5,7 +5,7 @@ using KillChord.Runtime.Composition.Persistent.SceneManagement;
 using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.View.Persistent.Load;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using SymphonyFrameWork.System.SceneLoad;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;

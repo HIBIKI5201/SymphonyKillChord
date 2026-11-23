@@ -1,5 +1,5 @@
 using UnityEngine;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 
 namespace DevelopProducts.Achievement
 {

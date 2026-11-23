@@ -25,7 +25,7 @@ using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Layout;
 using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using SymphonyFrameWork.System.SaveSystem;
 using SymphonyFrameWork.System.ServiceLocate;
 using System;

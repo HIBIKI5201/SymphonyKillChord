@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.InGame.Stage;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Character;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System;
 using UnityEngine;
 

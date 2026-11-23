@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.InGame.Mission.ClearCondition;
 using KillChord.Runtime.Domain.InGame.StatusEffect;
 using KillChord.Runtime.InfraStructure.InGame.Buff;
-using SymphonyFrameWork.Attribute;
+using SymphonyFramework.Attribute;
 using System;
 using System.Collections.Generic;
 using UnityEngine;

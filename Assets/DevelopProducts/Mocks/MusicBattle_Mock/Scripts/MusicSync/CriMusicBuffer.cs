@@ -1,5 +1,4 @@
 using CriWare;
-using SymphonyFrameWork.Attribute;
 using System;
 using UnityEngine;
 
