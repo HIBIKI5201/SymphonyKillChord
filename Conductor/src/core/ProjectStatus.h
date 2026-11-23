@@ -52,6 +52,27 @@ namespace skc::conductor
 
         /// <summary>Unity CLI（unity）の場所。無ければ空。</summary>
         std::string UnityCliPath;
+
+        /// <summary>このプロジェクトの Unity の版のリビジョン（Unity Hub で入れるときに使う）。</summary>
+        std::string UnityRevision;
+
+        /// <summary>この版の Unity エディタの場所。見つからなければ空。</summary>
+        std::string UnityEditorPath;
+
+        /// <summary>Unity でこのプロジェクトを開いているか（Temp/UnityLockfile があるか）。</summary>
+        bool IsUnityOpen = false;
+
+        /// <summary>CRI Atom Craft のプロジェクト（.atmcproject）の場所。サブモジュールが無ければ空。</summary>
+        std::string CriProjectPath;
+
+        /// <summary>CRI Atom Craft の exe の場所。見つからなければ空（そのときはファイルの関連付けで開く）。</summary>
+        std::string CriAppPath;
+
+        /// <summary>Google Drive（パソコン版）の SymphonyKillChord フォルダの場所。見つからなければ空。</summary>
+        std::string DriveFolder;
+
+        /// <summary>仕様書の写し（Docs/NotionSpecifications）を取ってあるか。</summary>
+        bool HasSpecMirror = false;
     };
 
     /// <summary>
@@ -74,4 +95,19 @@ namespace skc::conductor
     /// <param name="text">ファイルの中身。</param>
     /// <returns>版。読めなければ空。</returns>
     std::string ParseUnityProjectVersion(const std::string& text);
+
+    /// <summary>
+    ///     ProjectVersion.txt から Unity の版のリビジョン（m_EditorVersionWithRevision の括弧の中）を読む。
+    /// </summary>
+    /// <param name="text">ファイルの中身。</param>
+    /// <returns>リビジョン。読めなければ空。</returns>
+    std::string ParseUnityRevision(const std::string& text);
+
+    /// <summary>
+    ///     Unity Hub でこの版を入れる画面を開く URL を作る（unityhub://版/リビジョン）。
+    /// </summary>
+    /// <param name="version">版。</param>
+    /// <param name="revision">リビジョン。</param>
+    /// <returns>URL。どちらかが空なら空。</returns>
+    std::string UnityHubInstallUrl(const std::string& version, const std::string& revision);
 }

@@ -34,6 +34,9 @@ namespace skc::conductor
 
         /// <summary>役職に合わせて並べたボタン。</summary>
         std::vector<HomeTile> Tiles;
+
+        /// <summary>ドキュメントのリンク。</summary>
+        std::vector<HomeLink> Links;
     };
 
     /// <summary>

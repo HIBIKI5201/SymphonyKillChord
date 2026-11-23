@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <assemblyIdentity type="win32" name="SymphonyKillChord.Conductor.Cli" version="1.0.0.0" processorArchitecture="*"/>
+  <assemblyIdentity type="win32" name="SymphonyKillChord.Conductor.Cli" version="1.1.0.0" processorArchitecture="*"/>
   <description>KillChord Conductor CLI</description>
   <!-- 通常の権限で動かす。管理者が要るスクリプトだけ、実行のときに UAC で昇格する。 -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">

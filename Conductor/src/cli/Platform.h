@@ -110,6 +110,44 @@ namespace skc::conductor::cli
     std::string ScriptPathForThisOs(const ScriptEntry& entry);
 
     /// <summary>
+    ///     ファイル・フォルダ・URL を、OS の既定のアプリで開く（Windows は ShellExecute、mac は open）。
+    /// </summary>
+    /// <param name="target">開くもの（UTF-8）。</param>
+    /// <param name="error">開けなかった理由。</param>
+    /// <returns>開けたら true。</returns>
+    bool OpenWithShell(const std::string& target, std::string& error);
+
+    /// <summary>
+    ///     プログラムを起動し、終わるのを待たない（Unity・CRI Atom Craft など）。
+    /// </summary>
+    /// <param name="program">プログラムの場所（UTF-8）。</param>
+    /// <param name="args">引数。</param>
+    /// <param name="workingDirectory">作業フォルダ。</param>
+    /// <param name="error">起動できなかった理由。</param>
+    /// <returns>起動できたら true。</returns>
+    bool LaunchDetached(const std::string& program, const std::vector<std::string>& args,
+        const std::filesystem::path& workingDirectory, std::string& error);
+
+    /// <summary>
+    ///     Unity Hub が入れたエディタの、ありそうな場所を返す（存在は確かめない）。
+    /// </summary>
+    /// <param name="version">Unity の版。</param>
+    /// <returns>候補。</returns>
+    std::vector<std::filesystem::path> UnityEditorCandidates(const std::string& version);
+
+    /// <summary>
+    ///     CRI Atom Craft の exe を、よくある場所から探す。
+    /// </summary>
+    /// <returns>見つかった場所。無ければ空。</returns>
+    std::optional<std::filesystem::path> FindCriAtomCraft();
+
+    /// <summary>
+    ///     Google Drive（パソコン版）の SymphonyKillChord フォルダの、ありそうな場所を返す（存在は確かめない）。
+    /// </summary>
+    /// <returns>候補。</returns>
+    std::vector<std::filesystem::path> DriveFolderCandidates();
+
+    /// <summary>
     ///     標準出力へ UTF-8 の文字列を書く（コンソールなら文字化けしないよう UTF-16 で書く）。
     /// </summary>
     /// <param name="text">文字列。</param>

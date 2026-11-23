@@ -101,3 +101,14 @@ conductor config get|set <key> <value> … この PC だけの設定（CRI Atom 
 | Unity CLI が無い PC | Unity Hub で開く方へ戻し、`Setup.bat` で CLI を入れる案内を出す |
 | 改名で古い exe が残る | 旧 exe はコミットから消す。各 PC で pull すれば消える |
 | 全役職が使う | 文言は今の README と同じく専門用語を避ける。危ない操作（アンインストール等）は今の `confirm` をそのまま使う |
+
+## 7. 第2段階で変えたこと（2026-11-23）
+
+ユーザーの指示「画面はもっとリッチに分かりやすく。前のスクリプトランチャーの画面は無くなってもよい。UX が一番よい使い心地に」と、決定「C++＋WebView2 で画面は HTML」による。
+
+- 画面を Win32 のボタン並べから、`Conductor/ui` の HTML（WebView2）に作り直した。C++ の GUI は画面を出して、画面の頼みを conductor.exe に渡すだけにした（層の構造は変えない）。
+- 段階 2・3（Unity・CRI・アセット）を同じ段階で入れた。CLI に `unity open|install|menu`・`cri open`・`assets open|import`・`docs list|open|viewer`・`repo open` を足し、`status` に Unity エディタ・開いているか・CRI・Drive・仕様書の写しを足した。
+- ホームは「起動する」カード（Unity・CRI・素材・ドキュメント）、「気をつけること」（直すボタンつき）、役職のよく使う操作。前のスクリプト一覧は「すべての操作」（検索・分類・右の詳細）に置き換えた。`Ctrl+K` のパレット、実行の記録、出力の引き出しを足した。
+- home.json に `action`（組み込みの操作）と `links`（ドキュメント）を足した。
+- WebView2Loader.dll は静的リンクせず実行時に読む（MinGW でもビルドでき、exe はシステムの dll だけに依存する）。ランタイムが無い PC では、入れるページへの案内と、CLI で同じことができる旨を出す。
+- 残り: ビルドのページ（段階 4）、mac 用 GUI（段階 5）。実機の Windows で画面を開いての確認はまだ（クラウドでは Windows の exe を動かせないため、ブラウザと仮の答えで画面を確かめた）。

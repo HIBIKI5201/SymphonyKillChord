@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <assemblyIdentity type="win32" name="SymphonyKillChord.Conductor" version="1.0.0.0" processorArchitecture="*"/>
+  <assemblyIdentity type="win32" name="SymphonyKillChord.Conductor" version="1.1.0.0" processorArchitecture="*"/>
   <description>KillChord Conductor</description>
   <!-- GUI は通常の権限で動かす。管理者が要るスクリプトだけ、CLI が実行のときに UAC で昇格する。 -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
@@ -10,7 +10,7 @@
       </requestedPrivileges>
     </security>
   </trustInfo>
-  <!-- ListView のグループ表示・盾アイコン・コマンドリンクのボタンに Common Controls v6 を使う。 -->
+  <!-- 確認の窓（MessageBox）を今の見た目で出すため、Common Controls v6 を使う。 -->
   <dependency>
     <dependentAssembly>
       <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/>
