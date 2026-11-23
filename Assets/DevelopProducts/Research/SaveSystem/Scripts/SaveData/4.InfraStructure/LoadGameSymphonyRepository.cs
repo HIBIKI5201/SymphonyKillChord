@@ -1,4 +1,4 @@
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using UnityEngine;
 namespace Research.SaveSystem
@@ -28,7 +28,7 @@ namespace Research.SaveSystem
         public async Awaitable Load()
         {
             // SaveStore.Getは暗黙ロードを行わないため、LoadAsyncで実体を取得する。
-            TSaveType saveData = await SaveStore.LoadAsync<TSaveType>();
+            TSaveType saveData = await Manuscript.LoadAsync<TSaveType>();
             await _saveDataMigration.DoMigration(saveData);
             _saveDataEntity.AssignData(saveData);
         }

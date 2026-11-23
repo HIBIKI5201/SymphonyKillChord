@@ -26,8 +26,8 @@ using KillChord.Runtime.View.Persistent.Layout;
 using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.Persistent.Music;
 using SymphonyFramework.Attribute;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -120,9 +120,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 await _enemyWaveDefinitionRepositoryKey.LoadAssetAsync<EnemyWaveDefinitionRepository>(
                     this,
                     cancellationToken);
-            _loadedSaveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            _loadedSaveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             _loadedMemberRepository = await LoadMemberRepositoryAsync(cancellationToken);
             _loadedThirdPartyNoticeRepository = await LoadThirdPartyNoticeRepositoryAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
@@ -179,7 +179,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 Debug.LogWarning($"[{nameof(TitleSceneInitializer)}] {KEY_VISUAL_NAME} が見つかりません。", this);
             }
 
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            if (!Partitura.TryGet(out _outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: OutGameUIEvent が ServiceLocator に登録されていません。");
@@ -199,7 +199,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _eventNotificationView))
+            if (!Partitura.TryGet(out _eventNotificationView))
             {
                 Debug.LogError($"[{nameof(TitleSceneInitializer)}] 常駐通知Viewを取得できませんでした。", this);
                 return false;
@@ -247,7 +247,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             // コントローラーのOptionsボタンでオプション画面を開閉できるようにする。
             // 表示中の画面だけが入力を受け付けるため、開く側と閉じる側を別々の View が担当する。
-            if (ServiceLocator.TryGetInstance(out PlayerInputView playerInputView))
+            if (Partitura.TryGet(out PlayerInputView playerInputView))
             {
                 _titleSceneView.BindOptionInput(playerInputView);
                 menuScreenView.BindOptionInput(playerInputView);
@@ -318,7 +318,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _loadingScreenController))
+            if (!Partitura.TryGet(out _loadingScreenController))
             {
                 Debug.LogError($"[{nameof(TitleSceneInitializer)}] LoadingScreenControllerを取得できませんでした。", this);
                 return false;
@@ -444,7 +444,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// </summary>
         private void InitializeIdleVideo(VisualElement titleRoot)
         {
-            if (!ServiceLocator.TryGetInstance(out MusicPlayer musicPlayer))
+            if (!Partitura.TryGet(out MusicPlayer musicPlayer))
             {
                 Debug.LogWarning($"[{nameof(TitleSceneInitializer)}] BGMが取得できないためPV演出を無効にします。", this);
                 return;
@@ -535,7 +535,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             audioSettingsContainer = null;
             environmentSettingsContainer = null;
 
-            if (!ServiceLocator.TryGetInstance(out sceneTransitionController))
+            if (!Partitura.TryGet(out sceneTransitionController))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: SceneTransitionController が ServiceLocator に登録されていません。");
@@ -543,7 +543,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out audioSettingsContainer))
+            if (!Partitura.TryGet(out audioSettingsContainer))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: AudioSettingsModuleContainer が ServiceLocator に登録されていません。");
@@ -551,7 +551,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out environmentSettingsContainer))
+            if (!Partitura.TryGet(out environmentSettingsContainer))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"{nameof(TitleSceneInitializer)}: EnvironmentSettingsModuleContainer が ServiceLocator に登録されていません。");
@@ -738,11 +738,11 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             try
             {
-                await SaveStore.DeleteAsync<SaveData>();
+                await Manuscript.DeleteAsync<SaveData>();
                 lifetimeToken.ThrowIfCancellationRequested();
 
                 // セーブデータを消したら、前回のプレイの途中からは再開しない。
-                if (ServiceLocator.TryGetInstance(out IPlaySessionResumeProvider resumeProvider))
+                if (Partitura.TryGet(out IPlaySessionResumeProvider resumeProvider))
                 {
                     resumeProvider.DiscardResume();
                 }
@@ -852,7 +852,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             // 前回シナリオパート・バトルパートにいた場合は、そのステージの開始地点へ進む。
             // 再開に必要な選択状態は用意済みのため、ここでは消さない。
-            if (ServiceLocator.TryGetInstance(out IPlaySessionResumeProvider resumeProvider)
+            if (Partitura.TryGet(out IPlaySessionResumeProvider resumeProvider)
                 && resumeProvider.TryGetResumeDestination(out string resumeSceneName, out bool isResumeKeepLoading))
             {
                 _titleSceneView.SetTargetSceneName(resumeSceneName);
@@ -866,13 +866,13 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             if (_loadedSaveData.Tutorial.Phase != TutorialPhase.NotStarted)
             {
-                if (ServiceLocator.TryGetInstance(out SelectedScenarioState existingScenarioState))
+                if (Partitura.TryGet(out SelectedScenarioState existingScenarioState))
                 {
                     existingScenarioState.Clear();
                 }
 
                 // 初回ルートの予約が残っていても、OutGame へ持ち込まない。
-                if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState existingPendingState))
+                if (Partitura.TryGet(out PendingNodeTransitionState existingPendingState))
                 {
                     existingPendingState.Clear();
                 }
@@ -890,10 +890,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SelectedScenarioState selectedScenarioState))
+            if (!Partitura.TryGet(out SelectedScenarioState selectedScenarioState))
             {
                 selectedScenarioState = new SelectedScenarioState();
-                if (!ServiceLocator.RegisterInstance(selectedScenarioState))
+                if (!Partitura.Register(selectedScenarioState, ServiceLifetimeEnum.Persistent))
                 {
                     Debug.LogError(
                         $"[{nameof(TitleSceneInitializer)}] {nameof(SelectedScenarioState)} を登録できませんでした。",
@@ -916,10 +916,10 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <param name="openingScenario"> 初回シナリオです。 </param>
         private void ReserveOpeningTutorialBattle(StageTree stageTree, ScenarioStageDefinition openingScenario)
         {
-            if (!ServiceLocator.TryGetInstance(out PendingNodeTransitionState pendingState))
+            if (!Partitura.TryGet(out PendingNodeTransitionState pendingState))
             {
                 pendingState = new PendingNodeTransitionState();
-                if (!ServiceLocator.RegisterInstance(pendingState))
+                if (!Partitura.Register(pendingState, ServiceLifetimeEnum.Persistent))
                 {
                     Debug.LogWarning(
                         $"[{nameof(TitleSceneInitializer)}] {nameof(PendingNodeTransitionState)} を登録できないため、チュートリアル戦闘は OutGame から開始します。",
@@ -981,7 +981,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out InitialSkillLoadoutService initialSkillLoadoutService))
+            if (!Partitura.TryGet(out InitialSkillLoadoutService initialSkillLoadoutService))
             {
                 Debug.LogError(
                     $"[{nameof(TitleSceneInitializer)}] {nameof(InitialSkillLoadoutService)} が取得できませんでした。",
@@ -998,7 +998,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             try
             {
-                await SaveStore.SaveAsync<SaveData>();
+                await Manuscript.SaveAsync<SaveData>();
                 return true;
             }
             catch (Exception ex)
@@ -1041,12 +1041,12 @@ namespace KillChord.Runtime.Composition.OutGame.Title
         /// <returns> 現在の環境設定の写し。 </returns>
         private EnvironmentSettingsData GetPreservedEnvironmentSettings()
         {
-            if (!SaveStore.IsLoaded<SaveData>())
+            if (!Manuscript.IsLoaded<SaveData>())
             {
                 return null;
             }
 
-            return SaveStore.Get<SaveData>().EnvironmentSettings.Copy();
+            return Manuscript.Get<SaveData>().EnvironmentSettings.Copy();
         }
 
         /// <summary>
@@ -1079,7 +1079,7 @@ namespace KillChord.Runtime.Composition.OutGame.Title
 
             try
             {
-                await SaveStore.SaveAsync<SaveData>();
+                await Manuscript.SaveAsync<SaveData>();
             }
             catch (Exception ex)
             {
@@ -1096,9 +1096,9 @@ namespace KillChord.Runtime.Composition.OutGame.Title
             SaveData saveData = null;
             try
             {
-                saveData = SaveStore.IsLoaded<SaveData>()
-                    ? SaveStore.Get<SaveData>()
-                    : await SaveStore.LoadAsync<SaveData>();
+                saveData = Manuscript.IsLoaded<SaveData>()
+                    ? Manuscript.Get<SaveData>()
+                    : await Manuscript.LoadAsync<SaveData>();
                 return saveData;
             }
             catch (Exception ex)

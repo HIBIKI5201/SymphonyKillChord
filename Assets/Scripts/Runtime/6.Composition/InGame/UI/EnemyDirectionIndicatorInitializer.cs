@@ -5,7 +5,8 @@ using KillChord.Runtime.Composition.InGame.Target;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.UI;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -90,9 +91,9 @@ namespace KillChord.Runtime.Composition.InGame.UI
             {
                 // 依存するターゲット・プレイヤー・カメラを取得する。
                 TargetSystemModuleContainer targetContainer =
-                    ServiceLocator.GetInstance<TargetSystemModuleContainer>();
+                    ServiceLookup.GetOrNull<TargetSystemModuleContainer>();
                 PlayerModuleContainer playerContainer =
-                    ServiceLocator.GetInstance<PlayerModuleContainer>();
+                    ServiceLookup.GetOrNull<PlayerModuleContainer>();
                 UnityCamera mainCamera = UnityCamera.main;
 
                 if (targetContainer?.TargetSystemViewModel == null

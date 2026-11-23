@@ -1,6 +1,6 @@
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.View.Persistent.Load;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.Persistent.SceneManagement
@@ -28,7 +28,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 return false;
             }
             if (!_view.Initialize()) { return false; }
-            return ServiceLocator.RegisterInstance(_view);
+            return Partitura.Register(_view, ServiceLifetimeEnum.Persistent);
         }
 
         /// <summary>
@@ -37,10 +37,10 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
         public override void Shutdown()
         {
             if (_view != null) { _view.Cancel(); }
-            if (ServiceLocator.TryGetInstance(out EventNotificationView registered)
+            if (Partitura.TryGet(out EventNotificationView registered)
                 && ReferenceEquals(registered, _view))
             {
-                ServiceLocator.UnregisterInstance<EventNotificationView>();
+                Partitura.Unregister<EventNotificationView>();
             }
         }
 

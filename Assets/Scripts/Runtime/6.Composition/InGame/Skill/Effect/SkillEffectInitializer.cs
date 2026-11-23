@@ -5,7 +5,8 @@ using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.SkillBuild;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Skill.Effect;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -36,11 +37,11 @@ namespace KillChord.Runtime.Composition.InGame.Skill.Effect
             }
 
             // ポストプロセスの適用先は常駐カメラ側が持つため、存在する場合のみ注入する。
-            ServiceLocator.TryGetInstance(out IPostEffectOverlayPlayer postEffectOverlayPlayer);
+            Partitura.TryGet(out IPostEffectOverlayPlayer postEffectOverlayPlayer);
             _skillEffectSpawner.Initialize(postEffectOverlayPlayer);
 
             _moduleContainer = new SkillEffectModuleContainer(_skillEffectSpawner);
-            ServiceLocator.RegisterInstance(_moduleContainer);
+            Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
             _isRegistered = true;
             return true;
         }
@@ -72,7 +73,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill.Effect
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<SkillEffectModuleContainer>();
+            Partitura.Unregister<SkillEffectModuleContainer>();
             _moduleContainer = null;
             _isRegistered = false;
         }
@@ -95,7 +96,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill.Effect
             _equippedSkillIdBuffer.Clear();
 
             // 改造画面を経由した場合は、そのビルド内容を最優先で使用する。
-            if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition)
+            if (Partitura.TryGet(out SkillBuildDefinition buildDefinition)
                 && buildDefinition.EquippedSkills != null)
             {
                 IReadOnlyList<EquippedSkill> equippedSkills = buildDefinition.EquippedSkills;
@@ -116,7 +117,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill.Effect
             }
 
             // 改造画面を経由していない場合は、Player側のテスト装備設定を使用する。
-            PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            PlayerModuleContainer playerModuleContainer = ServiceLookup.GetOrNull<PlayerModuleContainer>();
             SkillId[] playerSkillIds = playerModuleContainer?.PlayerInitializer?.EquippedSkillIds;
             if (playerSkillIds != null)
             {

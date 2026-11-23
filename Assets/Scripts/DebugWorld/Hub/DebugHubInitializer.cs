@@ -7,7 +7,7 @@ using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.InGame.Enemy;
 using KillChord.Runtime.InfraStructure.OutGame.StageSelect;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -300,7 +300,7 @@ namespace KillChord.DebugWorld.Hub
         /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
         private void CompleteSceneInitialization(bool isSuccess)
         {
-            if (!ServiceLocator.TryGetInstance(out ISceneInitializationReadiness readiness))
+            if (!Partitura.TryGet(out ISceneInitializationReadiness readiness))
             {
                 Debug.LogWarning(
                     $"[{nameof(DebugHubInitializer)}] {nameof(ISceneInitializationReadiness)}が取得できません。"

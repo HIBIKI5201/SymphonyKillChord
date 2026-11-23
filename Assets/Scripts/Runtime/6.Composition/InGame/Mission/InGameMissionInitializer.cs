@@ -27,7 +27,8 @@ using KillChord.Runtime.View.InGame.Mission;
 using KillChord.Runtime.View.OutGame.Scenario;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Voice;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -57,7 +58,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
             // アウトゲームで選択されたミッションが必要。
-            if (!ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState)
+            if (!Partitura.TryGet(out SelectedMissionState selectedMissionState)
                 || !selectedMissionState.HasSelectedMission)
             {
                 Debug.LogError(
@@ -144,7 +145,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return false;
             }
 
-            MissionEventController missionEventController = ServiceLocator.GetInstance<MissionEventController>();
+            MissionEventController missionEventController = ServiceLookup.GetOrNull<MissionEventController>();
             if (missionEventController == null)
             {
                 Debug.LogError($"[{nameof(InGameMissionInitializer)}] {nameof(MissionEventController)} を取得できませんでした。", this);
@@ -152,7 +153,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             }
 
             _moduleContainer = new MissionModuleContainer(missionRuntimeService, missionEventController);
-            ServiceLocator.RegisterInstance(_moduleContainer);
+            Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
             _isModuleRegistered = true;
             return true;
         }
@@ -167,18 +168,18 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             DisposeTutorialFeedback();
 
             PlayerModuleContainer playerModuleContainer =
-                ServiceLocator.GetInstance<PlayerModuleContainer>();
+                ServiceLookup.GetOrNull<PlayerModuleContainer>();
             SkillModuleContainer skillModuleContainer =
-                ServiceLocator.GetInstance<SkillModuleContainer>();
+                ServiceLookup.GetOrNull<SkillModuleContainer>();
             MusicSyncModuleContainer musicSyncModuleContainer =
-                ServiceLocator.GetInstance<MusicSyncModuleContainer>();
+                ServiceLookup.GetOrNull<MusicSyncModuleContainer>();
             if (playerModuleContainer == null
                 || playerModuleContainer.PlayerEntity == null
                 || playerModuleContainer.PlayerController == null
                 || playerModuleContainer.PlayerAttackController == null
                 || skillModuleContainer?.SkillController == null
                 || musicSyncModuleContainer?.MusicSyncService == null
-                || !ServiceLocator.TryGetInstance(out TargetSystemController targetSystemController))
+                || !Partitura.TryGet(out TargetSystemController targetSystemController))
             {
                 Debug.LogError(
                     $"[{nameof(InGameMissionInitializer)}] プレイヤー戦闘モジュールまたは音楽同期サービスを取得できませんでした。",
@@ -219,7 +220,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 playerModuleContainer.PlayerEntity);
 
             // ステップ開始時のアクションを実行する処理を用意する。会話がある場合は会話の処理も加える。
-            EnemyModuleContainer enemyModuleContainer = ServiceLocator.GetInstance<EnemyModuleContainer>();
+            EnemyModuleContainer enemyModuleContainer = ServiceLookup.GetOrNull<EnemyModuleContainer>();
             List<IMissionStepEntryActionExecutor> entryActionExecutors = new()
             {
                 new SetSkillExecutionEnabledStepEntryActionExecutor(playerModuleContainer.PlayerActionRestrictionState),
@@ -309,8 +310,8 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             missionHudPresenter.Present();
 
             // 他のモジュールから使えるよう登録する。
-            ServiceLocator.RegisterInstance(missionRuntimeService);
-            ServiceLocator.RegisterInstance(missionEventController);
+            Partitura.Register(missionRuntimeService, ServiceLifetimeEnum.Persistent);
+            Partitura.Register(missionEventController, ServiceLifetimeEnum.Persistent);
 
             _registeredMissionRuntimeService = true;
             _registeredMissionEventController = true;
@@ -375,7 +376,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<MissionModuleContainer>();
+            Partitura.Unregister<MissionModuleContainer>();
             _moduleContainer = null;
             _isModuleRegistered = false;
         }
@@ -388,7 +389,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         {
             if (_tutorialAttackFeedbackView == null
                 || playerModuleContainer.PlayerAttackSignal == null
-                || !ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+                || !Partitura.TryGet(out SelectedBattleStageState selectedBattleStageState))
             {
                 Debug.LogWarning($"[{nameof(InGameMissionInitializer)}] 色指定攻撃の表示参照を取得できないため、フィードバック表示を省略します。", this);
                 return;
@@ -396,11 +397,11 @@ namespace KillChord.Runtime.Composition.InGame.Mission
 
             _tutorialAttackFeedbackPresenter = new TutorialAttackFeedbackPresenter(
                 playerModuleContainer.PlayerAttackSignal,
-                () => ServiceLocator.TryGetInstance(out MissionRuntimeService mission) ? mission : null,
+                () => Partitura.TryGet(out MissionRuntimeService mission) ? mission : null,
                 selectedBattleStageState,
                 _tutorialAttackFeedbackView);
             _tutorialSkillFeedbackPresenter = new TutorialSkillFeedbackPresenter(
-                () => ServiceLocator.TryGetInstance(out MissionRuntimeService mission) ? mission : null,
+                () => Partitura.TryGet(out MissionRuntimeService mission) ? mission : null,
                 selectedBattleStageState,
                 _tutorialAttackFeedbackView);
         }
@@ -445,7 +446,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         /// </summary>
         private void BindPopupConfirmInputs()
         {
-            if (ServiceLocator.TryGetInstance(out PlayerInputView playerInputView)
+            if (Partitura.TryGet(out PlayerInputView playerInputView)
                 && playerInputView.TryGetComponent(out PlayerInput playerInput))
             {
                 _popupSubmitInput = new PopupSubmitInput(playerInput);
@@ -573,7 +574,7 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             // 会話に必要なビュー・ボイス・ポーズの参照を確認する。
             InGamePlayDirector playDirector = FindFirstObjectByType<InGamePlayDirector>();
             if (_missionDialogueView == null || _missionVoiceSource == null || playDirector == null
-                || !ServiceLocator.TryGetInstance(out SequenceModuleContainer sequenceContainer)
+                || !Partitura.TryGet(out SequenceModuleContainer sequenceContainer)
                 || sequenceContainer.BattlePauseController == null)
             {
                 Debug.LogError($"[{nameof(InGameMissionInitializer)}] 会話View、VoiceSource、ゲーム開始またはポーズの参照が不足しています。", this);
@@ -687,10 +688,10 @@ namespace KillChord.Runtime.Composition.InGame.Mission
         private bool TryInitializeMissionScenarioController()
         {
             // 入力とバトルのポーズの制御を取得する。
-            if (!ServiceLocator.TryGetInstance(out InputComposition inputComposition)
+            if (!Partitura.TryGet(out InputComposition inputComposition)
                 || inputComposition.GetInputView == null
                 || inputComposition.GetInputMapController == null
-                || !ServiceLocator.TryGetInstance(out SequenceModuleContainer sequenceModuleContainer)
+                || !Partitura.TryGet(out SequenceModuleContainer sequenceModuleContainer)
                 || sequenceModuleContainer.BattlePauseController == null)
             {
                 Debug.LogError(
@@ -878,13 +879,13 @@ namespace KillChord.Runtime.Composition.InGame.Mission
             DisposeTutorialFeedback();
             if (_registeredMissionRuntimeService)
             {
-                ServiceLocator.UnregisterInstance<MissionRuntimeService>();
+                Partitura.Unregister<MissionRuntimeService>();
                 _registeredMissionRuntimeService = false;
             }
 
             if (_registeredMissionEventController)
             {
-                ServiceLocator.UnregisterInstance<MissionEventController>();
+                Partitura.Unregister<MissionEventController>();
                 _registeredMissionEventController = false;
             }
         }

@@ -12,7 +12,8 @@ using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -71,7 +72,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
             if (_playerModuleContainer == null)
             {
-                _playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+                _playerModuleContainer = ServiceLookup.GetOrNull<PlayerModuleContainer>();
             }
 
             if (_playerModuleContainer == null || _playerModuleContainer.PlayerView == null)

@@ -6,8 +6,8 @@ using KillChord.Runtime.Utility.Constant;
 using KillChord.Runtime.Utility.Diagnostics;
 using System;
 using System.Collections.Generic;
-using SymphonyFrameWork.System.SceneLoad;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Scenes;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Scenario
@@ -31,7 +31,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Init()
         {
-            return SceneLoader.RegisterLoadedScene(
+            return Attacca.RegisterLoadedScene(
                 gameObject.scene.name,
                 ScenePriorityResolver.Resolve(gameObject.scene.name));
         }
@@ -142,7 +142,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         /// <param name="isSuccess"> 初期化に成功した場合はtrueです。 </param>
         private void CompleteSceneInitialization(bool isSuccess)
         {
-            if (!ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var readiness))
+            if (!Partitura.TryGet<ISceneInitializationReadiness>(out var readiness))
             {
                 Debug.LogError(
                     $"[{nameof(OutGameScenarioSceneInitializer)}] " +

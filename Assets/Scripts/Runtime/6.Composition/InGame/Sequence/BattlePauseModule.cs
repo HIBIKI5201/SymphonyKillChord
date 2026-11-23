@@ -5,7 +5,8 @@ using KillChord.Runtime.Domain.InGame.Battle;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Music;
 using R3;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using UnityEngine;
 
@@ -27,7 +28,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
             PausableClock playClock,
             MusicSyncController musicSyncController)
         {
-            InputComposition inputComposition = ServiceLocator.GetInstance<InputComposition>();
+            InputComposition inputComposition = ServiceLookup.GetOrNull<InputComposition>();
             if (inputComposition == null || inputComposition.GetInputMapController == null)
             {
                 Debug.LogError($"[{nameof(BattlePauseModule)}] InputComposition の取得に失敗しました。");

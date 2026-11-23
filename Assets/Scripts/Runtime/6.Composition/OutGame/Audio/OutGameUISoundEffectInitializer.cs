@@ -5,7 +5,7 @@ using KillChord.Runtime.Composition.Persistent.Music;
 using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.OutGame.Audio;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -133,7 +133,7 @@ namespace KillChord.Runtime.Composition.OutGame.Audio
             }
 
             // 効果音の再生を行うプレイヤーを取得する。
-            if (!ServiceLocator.TryGetInstance(out UISoundEffectModuleContainer moduleContainer)
+            if (!Partitura.TryGet(out UISoundEffectModuleContainer moduleContainer)
                 || moduleContainer?.Player == null)
             {
                 Debug.LogError(
@@ -147,13 +147,13 @@ namespace KillChord.Runtime.Composition.OutGame.Audio
             _player = moduleContainer.Player;
             _command = new UISoundEffectCommand(_config, _player);
 
-            if (ServiceLocator.TryGetInstance(out OutGameUISoundEffectModuleContainer _))
+            if (Partitura.TryGet(out OutGameUISoundEffectModuleContainer _))
             {
-                ServiceLocator.UnregisterInstance<OutGameUISoundEffectModuleContainer>();
+                Partitura.Unregister<OutGameUISoundEffectModuleContainer>();
             }
 
             _moduleContainer = new OutGameUISoundEffectModuleContainer(_command);
-            if (!ServiceLocator.RegisterInstance(_moduleContainer))
+            if (!Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent))
             {
                 Debug.LogError(
                     $"[{nameof(OutGameUISoundEffectInitializer)}] " +
@@ -202,11 +202,11 @@ namespace KillChord.Runtime.Composition.OutGame.Audio
             _binder?.Dispose();
             _binder = null;
 
-            if (ServiceLocator.TryGetInstance(
+            if (Partitura.TryGet(
                     out OutGameUISoundEffectModuleContainer registeredContainer)
                 && ReferenceEquals(registeredContainer, _moduleContainer))
             {
-                ServiceLocator.UnregisterInstance<OutGameUISoundEffectModuleContainer>();
+                Partitura.Unregister<OutGameUISoundEffectModuleContainer>();
             }
 
             _uiSoundEffectConfigKey.ReleaseLoadedAsset(this);

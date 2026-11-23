@@ -6,7 +6,7 @@ using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Persistent.Savedata;
 using KillChord.Runtime.View.Persistent.Music;
 using KillChord.Runtime.View.Persistent.Voice;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -43,9 +43,9 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         public override bool Build()
         {
             // 音量を適用する先を取得する。
-            if (!ServiceLocator.TryGetInstance(out MusicPlayer musicPlayer)
-                || !ServiceLocator.TryGetInstance(out SoundEffectVolumeManager soundEffectVolumeManager)
-                || !ServiceLocator.TryGetInstance(out VoiceVolumeManager voiceVolumeManager))
+            if (!Partitura.TryGet(out MusicPlayer musicPlayer)
+                || !Partitura.TryGet(out SoundEffectVolumeManager soundEffectVolumeManager)
+                || !Partitura.TryGet(out VoiceVolumeManager voiceVolumeManager))
             {
                 Debug.LogError(
                     $"[{nameof(AudioSettingsInitializer)}] 音量管理サービスを取得できませんでした。",
@@ -69,7 +69,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
                 _audioSettingsViewModel,
                 _audioSettingsController);
 
-            return ServiceLocator.RegisterInstance(_moduleContainer);
+            return Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
         }
 
         /// <summary>
@@ -77,10 +77,10 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         /// </summary>
         public override void Shutdown()
         {
-            if (ServiceLocator.TryGetInstance(out AudioSettingsModuleContainer registeredContainer)
+            if (Partitura.TryGet(out AudioSettingsModuleContainer registeredContainer)
                 && ReferenceEquals(registeredContainer, _moduleContainer))
             {
-                ServiceLocator.UnregisterInstance<AudioSettingsModuleContainer>();
+                Partitura.Unregister<AudioSettingsModuleContainer>();
             }
 
             _audioSettingsViewModel?.Dispose();

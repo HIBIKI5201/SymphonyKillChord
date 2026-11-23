@@ -6,7 +6,8 @@ using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -65,7 +66,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
                 return false;
             }
 
-            MusicSyncModuleContainer musicSyncModuleContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
+            MusicSyncModuleContainer musicSyncModuleContainer = ServiceLookup.GetOrNull<MusicSyncModuleContainer>();
             if (musicSyncModuleContainer == null || musicSyncModuleContainer.MusicSyncService == null)
             {
                 Debug.LogError("MusicSyncInitializerが見つかりません。", this);
@@ -80,7 +81,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             _musicSyncService = musicSyncModuleContainer.MusicSyncService;
             _musicSyncState = musicSyncModuleContainer.MusicSyncState;
             _targetingSystem = targetingSystem;
-            PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            PlayerModuleContainer playerModuleContainer = ServiceLookup.GetOrNull<PlayerModuleContainer>();
             _playerInitializer = playerModuleContainer?.PlayerInitializer;
             _playerView = playerModuleContainer?.PlayerView;
             if (_playerInitializer == null || _playerView == null)

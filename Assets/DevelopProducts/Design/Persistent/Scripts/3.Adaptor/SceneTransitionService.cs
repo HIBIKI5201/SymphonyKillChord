@@ -1,4 +1,4 @@
-using SymphonyFrameWork.System.SceneLoad;
+using SymphonyFramework.Scenes;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -22,9 +22,9 @@ namespace DevelopProducts.Persistent.Adaptor
                 return false;
             }
 
-            if (!SceneLoader.GetExistScene(toSceneName, out _))
+            if (!Attacca.TryGetScene(toSceneName, out _))
             {
-                bool loadSuccess = await SceneLoader.LoadSceneAsync(toSceneName,
+                bool loadSuccess = await Attacca.LoadAsync(toSceneName,
                     null,
                     LoadSceneMode.Additive,
                     token: cancellationToken);
@@ -35,11 +35,11 @@ namespace DevelopProducts.Persistent.Adaptor
                 }
             }
 
-            SceneLoader.SetActiveScene(toSceneName);
+            Attacca.SetActiveScene(toSceneName);
 
-            if (!string.IsNullOrEmpty(fromSceneName) && SceneLoader.GetExistScene(fromSceneName, out _))
+            if (!string.IsNullOrEmpty(fromSceneName) && Attacca.TryGetScene(fromSceneName, out _))
             {
-                bool unloadSuccess = await SceneLoader.UnloadSceneAsync(fromSceneName,
+                bool unloadSuccess = await Attacca.UnloadAsync(fromSceneName,
                     null,
                     cancellationToken);
                 if (!unloadSuccess)

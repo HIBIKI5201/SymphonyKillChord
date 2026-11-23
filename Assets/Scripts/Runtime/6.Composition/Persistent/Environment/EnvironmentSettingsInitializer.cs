@@ -5,7 +5,7 @@ using KillChord.Runtime.Composition.Persistent.Savedata;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.InfraStructure.Persistent.Savedata;
 using KillChord.Runtime.View.Persistent.Environment;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -42,10 +42,10 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
         public override bool Build()
         {
             // 各設定の適用先を取得する。
-            if (!ServiceLocator.TryGetInstance(out ResolutionApplier resolutionApplier)
-                || !ServiceLocator.TryGetInstance(out QualityApplier qualityApplier)
-                || !ServiceLocator.TryGetInstance(out BrightnessApplier brightnessApplier)
-                || !ServiceLocator.TryGetInstance(out LanguageApplier languageApplier))
+            if (!Partitura.TryGet(out ResolutionApplier resolutionApplier)
+                || !Partitura.TryGet(out QualityApplier qualityApplier)
+                || !Partitura.TryGet(out BrightnessApplier brightnessApplier)
+                || !Partitura.TryGet(out LanguageApplier languageApplier))
             {
                 Debug.LogError(
                     $"[{nameof(EnvironmentSettingsInitializer)}] 環境設定の適用先を取得できませんでした。",
@@ -70,7 +70,7 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
                 _environmentSettingsViewModel,
                 _environmentSettingsController);
 
-            return ServiceLocator.RegisterInstance(_moduleContainer);
+            return Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
         }
 
         /// <summary>
@@ -78,10 +78,10 @@ namespace KillChord.Runtime.Composition.Persistent.Environment
         /// </summary>
         public override void Shutdown()
         {
-            if (ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer registeredContainer)
+            if (Partitura.TryGet(out EnvironmentSettingsModuleContainer registeredContainer)
                 && ReferenceEquals(registeredContainer, _moduleContainer))
             {
-                ServiceLocator.UnregisterInstance<EnvironmentSettingsModuleContainer>();
+                Partitura.Unregister<EnvironmentSettingsModuleContainer>();
             }
 
             _environmentSettingsViewModel?.Dispose();

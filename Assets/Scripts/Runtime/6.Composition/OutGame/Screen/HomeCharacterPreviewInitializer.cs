@@ -1,6 +1,6 @@
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.View.OutGame.Screen;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Screen
@@ -68,7 +68,7 @@ namespace KillChord.Runtime.Composition.OutGame.Screen
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
-            if (!ServiceLocator.TryGetInstance(out HomeScreenView homeScreenView))
+            if (!Partitura.TryGet(out HomeScreenView homeScreenView))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(HomeCharacterPreviewInitializer)}] HomeScreenView が取得できませんでした。", this);

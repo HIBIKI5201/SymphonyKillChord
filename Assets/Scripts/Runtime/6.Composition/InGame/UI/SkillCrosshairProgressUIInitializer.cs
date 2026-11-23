@@ -4,7 +4,7 @@ using KillChord.Runtime.Composition.InGame.Bootstrap;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.View.InGame.Skill;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.UI
@@ -44,10 +44,10 @@ namespace KillChord.Runtime.Composition.InGame.UI
 
             _viewSetting = _uiConfig.Create();
             _controller = new SkillCrosshairProgressController(
-                () => ServiceLocator.TryGetInstance(out TargetSystemController targetSystemController)
+                () => Partitura.TryGet(out TargetSystemController targetSystemController)
                     ? targetSystemController
                     : null);
-            ServiceLocator.RegisterInstance(this, LocateTypeEnum.Locator);
+            Partitura.Register(this, ServiceLifetimeEnum.Scene);
             _isRegistered = true;
             return true;
         }
@@ -59,7 +59,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
         {
             if (_isRegistered)
             {
-                ServiceLocator.UnregisterInstance(this);
+                Partitura.Unregister(this);
             }
 
             if (_progressView is not null)

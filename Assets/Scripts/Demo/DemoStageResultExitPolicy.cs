@@ -2,7 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Result;
 using KillChord.Runtime.Adaptor.InGame.StageSelect;
 using KillChord.Runtime.Domain.OutGame.StageSelect;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -179,8 +179,8 @@ namespace KillChord.Demo
             bool isFinalStageCleared = action == StageResultExitAction.Complete
                 && _hasFinalStage
                 && currentStageId == _finalStageId.Value
-                && SaveStore.IsLoaded<SaveData>()
-                && SaveStore.Get<SaveData>().StageProgress.IsStageCleared(currentStageId);
+                && Manuscript.IsLoaded<SaveData>()
+                && Manuscript.Get<SaveData>().StageProgress.IsStageCleared(currentStageId);
             if (!_sessionState.IsOverallTimeExpired && !isFinalStageCleared)
             {
                 return false;

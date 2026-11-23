@@ -1,7 +1,8 @@
 using KillChord.Runtime.Composition.Persistent.Input;
 using KillChord.Runtime.View.InGame.Sequence;
 using KillChord.Runtime.View.Persistent.Input;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.InGame.Sequence
@@ -54,7 +55,7 @@ namespace KillChord.Runtime.Composition.InGame.Sequence
                 return _inputComposition;
             }
 
-            _inputComposition = ServiceLocator.GetInstance<InputComposition>();
+            _inputComposition = ServiceLookup.GetOrNull<InputComposition>();
 
             if (_inputComposition == null)
             {

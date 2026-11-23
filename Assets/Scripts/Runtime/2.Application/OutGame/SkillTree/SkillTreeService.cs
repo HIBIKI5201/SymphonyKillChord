@@ -2,7 +2,7 @@ using KillChord.Runtime.Domain.InGame.Skill;
 using KillChord.Runtime.Domain.OutGame.Resource;
 using KillChord.Runtime.Domain.OutGame.SkillTree;
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -214,9 +214,9 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
         /// <returns></returns>
         public async ValueTask<SkillUnlockData> LoadSkillUnlockData()
         {
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             return saveData.SkillUnlock;
         }
 
@@ -231,9 +231,9 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             IReadOnlyList<SkillId> unlockedSkillIds,
             int currentPoints)
         {
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             int[] unlockedNodeValues = new int[unlockedNodes.Count];
             for (int i = 0; i < unlockedNodes.Count; i++)
             {
@@ -256,7 +256,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
 
             try
             {
-                await SaveStore.SaveAsync<SaveData>();
+                await Manuscript.SaveAsync<SaveData>();
             }
             catch
             {
@@ -396,9 +396,9 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
             SkillId[] remainingSkills = new SkillId[remainingSkillSet.Count];
             remainingSkillSet.CopyTo(remainingSkills);
             int resetPoints = checked(currentPoints + refundPoints);
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             int previousPoints = saveData.ResourceInventory.GetAmount(GameResourceIds.ResearchPoint);
             int[] previousNodeIds = (int[])saveData.SkillUnlock.UnlockedSkillNodeIds.Clone();
             int[] previousSkillIds = (int[])saveData.SkillUnlock.UnlockedSkillIds.Clone();
@@ -411,7 +411,7 @@ namespace KillChord.Runtime.Application.OutGame.SkillTree
                 saveData.SkillBuild.SetEquipmentSkillIDs(FilterEquippedSkillIds(
                     saveData.SkillBuild.EquipmentSkillIDs,
                     remainingSkillSet));
-                await SaveStore.SaveAsync<SaveData>();
+                await Manuscript.SaveAsync<SaveData>();
             }
             catch
             {

@@ -1,6 +1,6 @@
 using KillChord.Runtime.Application.InGame.Enemy;
 using KillChord.Runtime.Application.Persistent.Savedata;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 
 namespace KillChord.DebugWorld.Battle
@@ -19,8 +19,8 @@ namespace KillChord.DebugWorld.Battle
             if (overrides == null) { throw new ArgumentNullException(nameof(overrides)); }
 
             End();
-            ServiceLocator.RegisterInstance<IEnemyWavesOverride>(overrides);
-            ServiceLocator.RegisterInstance<ISaveSuppression>(overrides);
+            Partitura.Register<IEnemyWavesOverride>(overrides, ServiceLifetimeEnum.Persistent);
+            Partitura.Register<ISaveSuppression>(overrides, ServiceLifetimeEnum.Persistent);
         }
 
         /// <summary>
@@ -28,16 +28,16 @@ namespace KillChord.DebugWorld.Battle
         /// </summary>
         public static void End()
         {
-            if (ServiceLocator.TryGetInstance(out IEnemyWavesOverride wavesOverride)
+            if (Partitura.TryGet(out IEnemyWavesOverride wavesOverride)
                 && wavesOverride is DebugBattleOverrides)
             {
-                ServiceLocator.UnregisterInstance<IEnemyWavesOverride>();
+                Partitura.Unregister<IEnemyWavesOverride>();
             }
 
-            if (ServiceLocator.TryGetInstance(out ISaveSuppression saveSuppression)
+            if (Partitura.TryGet(out ISaveSuppression saveSuppression)
                 && saveSuppression is DebugBattleOverrides)
             {
-                ServiceLocator.UnregisterInstance<ISaveSuppression>();
+                Partitura.Unregister<ISaveSuppression>();
             }
         }
     }

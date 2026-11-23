@@ -1,7 +1,7 @@
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Tutorial;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -190,7 +190,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                 // 最後まで出したときだけ、案内を出し終えたことを保存する。
                 if (!_isDisposed && tutorialData.CompleteScreenGuide(kind))
                 {
-                    await SaveStore.SaveAsync<SaveData>(_cancellationToken);
+                    await Manuscript.SaveAsync<SaveData>(_cancellationToken);
                 }
             }
             catch (OperationCanceledException)

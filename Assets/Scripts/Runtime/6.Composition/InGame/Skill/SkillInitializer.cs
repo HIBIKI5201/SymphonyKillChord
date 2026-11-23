@@ -26,7 +26,8 @@ using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Player;
 using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.InGame.Skill.Effect;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -116,11 +117,11 @@ namespace KillChord.Runtime.Composition.InGame.Skill
 
                 // 全ResourceLoadの後にBGM等のBuildが走るため、同じ最新構成を先に公開する。
                 // 装備定義はOutGameと同様にシーン間で保持し、次の戦闘開始時にも再同期する。
-                if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition))
+                if (Partitura.TryGet(out SkillBuildDefinition buildDefinition))
                 {
                     buildDefinition.UpdateEquippedSkills(currentEquipment);
                 }
-                else if (!ServiceLocator.RegisterInstance(new SkillBuildDefinition(currentEquipment)))
+                else if (!Partitura.Register(new SkillBuildDefinition(currentEquipment), ServiceLifetimeEnum.Persistent))
                 {
                     Debug.LogError($"[{nameof(SkillInitializer)}] 装備スキル定義を登録できませんでした。", this);
                     return false;
@@ -152,7 +153,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             skillResultView?.Bind(_skillResultViewModel);
 
             _moduleContainer = new SkillModuleContainer(_skillResultViewModel);
-            ServiceLocator.RegisterInstance(_moduleContainer);
+            Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
             _isRegistered = true;
             return true;
         }
@@ -163,36 +164,36 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Ready()
         {
-            PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            PlayerModuleContainer playerModuleContainer = ServiceLookup.GetOrNull<PlayerModuleContainer>();
             if (playerModuleContainer == null)
             {
                 Debug.LogError($"[{nameof(SkillInitializer)}] {nameof(PlayerModuleContainer)} が見つかりません。", this);
                 return false;
             }
 
-            TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
+            TargetSystemModuleContainer targetSystemContainer = ServiceLookup.GetOrNull<TargetSystemModuleContainer>();
             if (targetSystemContainer == null)
             {
                 Debug.LogError($"[{nameof(SkillInitializer)}] {nameof(TargetSystemModuleContainer)} が見つかりません。", this);
                 return false;
             }
 
-            MusicSyncModuleContainer musicSyncContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
+            MusicSyncModuleContainer musicSyncContainer = ServiceLookup.GetOrNull<MusicSyncModuleContainer>();
             if (musicSyncContainer == null || musicSyncContainer.MusicSyncState == null || musicSyncContainer.MusicSyncService == null)
             {
                 Debug.LogError($"[{nameof(SkillInitializer)}] MusicSyncモジュールが見つかりません。", this);
                 return false;
             }
 
-            _skillInputProgressUIInitializer = ServiceLocator.GetInstance<SkillInputProgressUIInitializer>();
+            _skillInputProgressUIInitializer = ServiceLookup.GetOrNull<SkillInputProgressUIInitializer>();
             if (_skillInputProgressUIInitializer == null)
             {
                 Debug.LogError($"[{nameof(SkillInitializer)}] {nameof(SkillInputProgressUIInitializer)} が見つかりません。", this);
                 return false;
             }
 
-            _skillCrosshairProgressUIInitializer = ServiceLocator.GetInstance<SkillCrosshairProgressUIInitializer>();
-            _skillListUIInitializer = ServiceLocator.GetInstance<SkillListUIInitializer>();
+            _skillCrosshairProgressUIInitializer = ServiceLookup.GetOrNull<SkillCrosshairProgressUIInitializer>();
+            _skillListUIInitializer = ServiceLookup.GetOrNull<SkillListUIInitializer>();
 
             SkillTemplate[] equippedSkills = ResolveEquippedSkills(playerModuleContainer.PlayerInitializer);
             SkillResultPresenter skillResultPresenter = new SkillResultPresenter(_skillResultViewModel);
@@ -316,7 +317,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
 
             // ミッション中だけ差し替えた装備を、保存されている装備へ戻す。
             if (_equipmentToRestore != null
-                && ServiceLocator.TryGetInstance(out SkillBuildDefinition skillBuildDefinition))
+                && Partitura.TryGet(out SkillBuildDefinition skillBuildDefinition))
             {
                 skillBuildDefinition.UpdateEquippedSkills(_equipmentToRestore);
             }
@@ -333,7 +334,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 return;
             }
 
-            ServiceLocator.UnregisterInstance<SkillModuleContainer>();
+            Partitura.Unregister<SkillModuleContainer>();
             _moduleContainer = null;
             _isRegistered = false;
         }
@@ -368,7 +369,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
             }
 
             // エフェクトモジュールは任意のため、未登録のシーンでもスキル自体は成立させる。
-            SkillEffectModuleContainer skillEffectContainer = ServiceLocator.GetInstance<SkillEffectModuleContainer>();
+            SkillEffectModuleContainer skillEffectContainer = ServiceLookup.GetOrNull<SkillEffectModuleContainer>();
             if (skillEffectContainer == null)
             {
                 Debug.LogWarning(
@@ -517,7 +518,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
                 return _saveDataEquippedSkills;
             }
 
-            if (ServiceLocator.TryGetInstance(out SkillBuildDefinition buildDefinition) &&
+            if (Partitura.TryGet(out SkillBuildDefinition buildDefinition) &&
                 buildDefinition.EquippedSkills != null &&
                 buildDefinition.EquippedSkills.Count > 0)
             {
@@ -596,7 +597,7 @@ namespace KillChord.Runtime.Composition.InGame.Skill
         private async Awaitable<IReadOnlyList<int>> LoadMissionOverrideSkillIdsAsync(CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(_missionDefinitionRepositoryKey)
-                || !ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState)
+                || !Partitura.TryGet(out SelectedMissionState selectedMissionState)
                 || !selectedMissionState.HasSelectedMission)
             {
                 return Array.Empty<int>();

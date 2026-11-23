@@ -1,7 +1,7 @@
 using KillChord.Runtime.Composition.Persistent.Bootstrap;
 using KillChord.Runtime.View.InGame.Music;
 using KillChord.Runtime.View.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.Persistent.Music
@@ -30,7 +30,7 @@ namespace KillChord.Runtime.Composition.Persistent.Music
             // Bind時に現在のCue名が即時通知されるため、再生コンポーネントを先に初期化します。
             _musicPlayer.Initialize();
             _musicPlayer.Bind(musicViewModel);
-            if (!ServiceLocator.RegisterInstance(_musicPlayer, LocateTypeEnum.Locator))
+            if (!Partitura.Register(_musicPlayer, ServiceLifetimeEnum.Scene))
             {
                 Debug.LogError(
                     $"[{nameof(MusicPlayerInitializer)}] {nameof(MusicPlayer)}を登録できませんでした。",
@@ -40,13 +40,13 @@ namespace KillChord.Runtime.Composition.Persistent.Music
             }
 
             _moduleContainer = new MusicPlayerModuleContainer(_musicPlayer);
-            if (!ServiceLocator.RegisterInstance(_moduleContainer))
+            if (!Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent))
             {
                 Debug.LogError(
                     $"[{nameof(MusicPlayerInitializer)}] " +
                     $"{nameof(MusicPlayerModuleContainer)}を登録できませんでした。",
                     this);
-                ServiceLocator.UnregisterInstance<MusicPlayer>();
+                Partitura.Unregister<MusicPlayer>();
                 _moduleContainer = null;
                 _musicPlayer = null;
                 return false;
@@ -60,16 +60,16 @@ namespace KillChord.Runtime.Composition.Persistent.Music
         /// </summary>
         public override void Shutdown()
         {
-            if (ServiceLocator.TryGetInstance(out MusicPlayerModuleContainer registeredContainer)
+            if (Partitura.TryGet(out MusicPlayerModuleContainer registeredContainer)
                 && ReferenceEquals(registeredContainer, _moduleContainer))
             {
-                ServiceLocator.UnregisterInstance<MusicPlayerModuleContainer>();
+                Partitura.Unregister<MusicPlayerModuleContainer>();
             }
 
-            if (ServiceLocator.TryGetInstance(out MusicPlayer registeredMusicPlayer)
+            if (Partitura.TryGet(out MusicPlayer registeredMusicPlayer)
                 && ReferenceEquals(registeredMusicPlayer, _musicPlayer))
             {
-                ServiceLocator.UnregisterInstance<MusicPlayer>();
+                Partitura.Unregister<MusicPlayer>();
             }
 
             _moduleContainer = null;

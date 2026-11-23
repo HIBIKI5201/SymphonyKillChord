@@ -1,5 +1,5 @@
 using KillChord.Runtime.Domain.Persistent.Savedata;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,9 +17,9 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         internal static object Read()
         {
-            if (!SaveStore.IsLoaded<SaveData>()) { throw new InvalidOperationException("SaveData is not loaded"); }
+            if (!Manuscript.IsLoaded<SaveData>()) { throw new InvalidOperationException("SaveData is not loaded"); }
             // SaveDataのgetterはnull時に値を生成するため、必ずコピーを参照する。
-            var copy = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(SaveStore.Get<SaveData>()));
+            var copy = JsonUtility.FromJson<SaveData>(JsonUtility.ToJson(Manuscript.Get<SaveData>()));
             var stages = new List<object>();
             foreach (var stage in copy.StageProgress.ClearDatas)
             {

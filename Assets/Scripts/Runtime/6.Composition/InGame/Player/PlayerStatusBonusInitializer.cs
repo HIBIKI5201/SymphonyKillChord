@@ -5,7 +5,7 @@ using KillChord.Runtime.InfraStructure.Addressables;
 using KillChord.Runtime.InfraStructure.OutGame.SkillTree;
 using KillChord.Runtime.Utility.Diagnostics;
 using KillChord.Runtime.Utility.Identity;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -115,7 +115,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                 return false;
             }
 
-            if (ServiceLocator.TryGetInstance<PlayerStatusBonusModuleContainer>(out _))
+            if (Partitura.TryGet<PlayerStatusBonusModuleContainer>(out _))
             {
 #if UNITY_EDITOR
                 Debug.LogError(
@@ -127,7 +127,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
 
             // ステータスボーナスのコンテナを登録する。
             _moduleContainer = new PlayerStatusBonusModuleContainer(_playerStatusBonus);
-            ServiceLocator.RegisterInstance(_moduleContainer);
+            Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
             return true;
         }
 
@@ -137,7 +137,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         public override void Shutdown()
         {
             if (_moduleContainer != null
-                && ServiceLocator.TryGetInstance<PlayerStatusBonusModuleContainer>(out var registeredContainer)
+                && Partitura.TryGet<PlayerStatusBonusModuleContainer>(out var registeredContainer)
                 && ReferenceEquals(registeredContainer, _moduleContainer))
             {
 #if UNITY_EDITOR
@@ -145,7 +145,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
                     $"[{nameof(PlayerStatusBonusInitializer)}] {nameof(PlayerStatusBonusModuleContainer)} の登録を解除します。",
                     this);
 #endif
-                ServiceLocator.UnregisterInstance<PlayerStatusBonusModuleContainer>();
+                Partitura.Unregister<PlayerStatusBonusModuleContainer>();
             }
 
             ReleaseLoadedSkillNodeDataRepo();

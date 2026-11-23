@@ -1,5 +1,5 @@
 using KillChord.Runtime.View.Persistent.Load;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -23,7 +23,7 @@ namespace KillChord.Runtime.Composition.Persistent.Savedata
             try
             {
                 // 通知を表示できない場合は、保存処理側のログだけに任せる。
-                if (!ServiceLocator.TryGetInstance(out EventNotificationView notificationView)
+                if (!Partitura.TryGet(out EventNotificationView notificationView)
                     || notificationView == null
                     || notificationView.IsVisible
                     || !notificationView.isActiveAndEnabled)

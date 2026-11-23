@@ -1,5 +1,5 @@
 using KillChord.Runtime.Adaptor.Persistent.SceneManagement;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -53,7 +53,7 @@ namespace KillChord.DebugWorld.Common
         /// <returns> 遷移に成功した場合はtrueです。 </returns>
         private static async Task<bool> ChangeSceneAsync(string fromSceneName, string toSceneName, bool isKeepLoading)
         {
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionController controller))
+            if (!Partitura.TryGet(out SceneTransitionController controller))
             {
                 Debug.LogError(
                     $"[{nameof(DebugWorldSceneChanger)}] {nameof(SceneTransitionController)}が取得できません。"

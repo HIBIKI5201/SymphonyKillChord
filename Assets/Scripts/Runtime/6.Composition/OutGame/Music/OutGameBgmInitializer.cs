@@ -1,7 +1,7 @@
 using KillChord.Runtime.Adaptor.Persistent.Music;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Composition.Persistent.Music;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Music
@@ -41,7 +41,7 @@ namespace KillChord.Runtime.Composition.OutGame.Music
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out MusicPlayerModuleContainer moduleContainer)
+            if (!Partitura.TryGet(out MusicPlayerModuleContainer moduleContainer)
                 || moduleContainer?.CuePlayer == null)
             {
                 Debug.LogError(

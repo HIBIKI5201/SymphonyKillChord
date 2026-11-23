@@ -21,8 +21,8 @@ using KillChord.Runtime.View.InGame.Skill;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.SkillBuild;
 using KillChord.Runtime.View.Persistent.Localization;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -250,7 +250,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            if (!Partitura.TryGet(out _outGameUIEvent))
             {
 #if UNITY_EDITOR
                 Debug.LogError($"[{nameof(SkillBuildInitializer)}] OutGameUIEvent が取得できませんでした。", this);
@@ -258,11 +258,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
                 return false;
             }
 
-            ServiceLocator.TryGetInstance(
+            Partitura.TryGet(
                 out OutGameUISoundEffectModuleContainer soundEffectContainer);
             IUISoundEffectCommand soundEffectCommand = soundEffectContainer?.Command;
 
-            if (!ServiceLocator.TryGetInstance(out _skillBuildScreenView))
+            if (!Partitura.TryGet(out _skillBuildScreenView))
             {
                 _skillBuildScreenView = CreateSkillBuildScreenView();
                 if (_skillBuildScreenView == null)
@@ -275,11 +275,11 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
             }
 
             int baseSlotCount = SkillBuildDefinition.INITIAL_SLOT_COUNT + ResolveSkillSlotBonus();
-            if (!ServiceLocator.TryGetInstance(out _skillBuildDefinition))
+            if (!Partitura.TryGet(out _skillBuildDefinition))
             {
                 _skillBuildDefinition = new SkillBuildDefinition(ToArray(_loadedEquippedSkills));
                 _skillBuildDefinition.EnsureSlotCount(baseSlotCount);
-                ServiceLocator.RegisterInstance(_skillBuildDefinition);
+                Partitura.Register(_skillBuildDefinition, ServiceLifetimeEnum.Persistent);
             }
             else
             {
@@ -461,9 +461,9 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns> 現在の所持ポイントです。 </returns>
         private async ValueTask<int> GetOwnedPointsAsync()
         {
-            SaveData saveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>();
+            SaveData saveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>();
             return saveData.ResourceInventory.GetAmount(GameResourceIds.SkillLevelupPoint);
         }
 
@@ -657,7 +657,7 @@ namespace KillChord.Runtime.Composition.OutGame.SkillBuild
         /// <returns> 未登録の場合は0。 </returns>
         private int ResolveSkillSlotBonus()
         {
-            return ServiceLocator.TryGetInstance(out SkillTreeStatusEntity skillTreeStatus)
+            return Partitura.TryGet(out SkillTreeStatusEntity skillTreeStatus)
                 ? skillTreeStatus.SkillSlotBonus
                 : 0;
         }

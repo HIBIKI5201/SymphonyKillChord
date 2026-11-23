@@ -21,7 +21,8 @@ using KillChord.Runtime.Utility.Identity;
 using KillChord.Runtime.View.InGame.Character;
 using KillChord.Runtime.View.InGame.Enemy;
 using KillChord.Runtime.View.InGame.Player;
-using SymphonyFrameWork.System.ServiceLocate;
+using KillChord.Runtime.Composition.Bootstrap;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -51,7 +52,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public override async Awaitable<bool> ResourceLoadAsync(CancellationToken cancellationToken)
         {
             // 選択中のバトルステージと、読み込むリポジトリのキーを確認する。
-            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState)
+            if (!Partitura.TryGet(out SelectedBattleStageState selectedBattleStageState)
                 || !selectedBattleStageState.HasSelectedBattleStage)
             {
                 Debug.LogError(
@@ -117,7 +118,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
 
             // 差し替えが登録されていれば、ステージのWaveの代わりに使う。演出の一覧はステージのものを使う。
-            if (ServiceLocator.TryGetInstance(out IEnemyWavesOverride enemyWavesOverride))
+            if (Partitura.TryGet(out IEnemyWavesOverride enemyWavesOverride))
             {
                 EnemyWaves overriddenWaves = enemyWavesOverride.CreateEnemyWaves();
                 if (overriddenWaves != null)
@@ -167,7 +168,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             _enemyPools.Initialize(_loadedEnemyDefinitionRepository);
             _moduleContainer = new EnemyModuleContainer(new EnemyWaveSpawnerState());
-            ServiceLocator.RegisterInstance(_moduleContainer);
+            Partitura.Register(_moduleContainer, ServiceLifetimeEnum.Persistent);
             _isModuleRegistered = true;
             _battleAIRegistry = new EnemyAIControllerRegistry();
             _moduleContainer.EnemyBattleAIRegistry = _battleAIRegistry;
@@ -183,9 +184,9 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         public override bool Ready()
         {
             // 依存するコンテナを取得する。
-            TargetSystemModuleContainer targetSystemContainer = ServiceLocator.GetInstance<TargetSystemModuleContainer>();
-            MusicSyncModuleContainer musicSyncContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
-            PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            TargetSystemModuleContainer targetSystemContainer = ServiceLookup.GetOrNull<TargetSystemModuleContainer>();
+            MusicSyncModuleContainer musicSyncContainer = ServiceLookup.GetOrNull<MusicSyncModuleContainer>();
+            PlayerModuleContainer playerModuleContainer = ServiceLookup.GetOrNull<PlayerModuleContainer>();
 
             if (targetSystemContainer == null
                 || musicSyncContainer == null
@@ -291,7 +292,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
         /// <param name="enemyPools"></param>
         public void Initialize(TargetSystemController targetingSystem, EnemyPools enemyPools, EnemyWaveSpawnerState waveSpawnerState)
         {
-            MusicSyncModuleContainer musicSyncContainer = ServiceLocator.GetInstance<MusicSyncModuleContainer>();
+            MusicSyncModuleContainer musicSyncContainer = ServiceLookup.GetOrNull<MusicSyncModuleContainer>();
             if (musicSyncContainer == null || musicSyncContainer.MusicSyncService == null)
             {
                 Debug.LogError("MusicSyncInitializerが見つかりません。", this);
@@ -306,7 +307,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             }
             _musicSyncState = musicSyncContainer.MusicSyncState;
             _targetingSystem = targetingSystem;
-            PlayerModuleContainer playerModuleContainer = ServiceLocator.GetInstance<PlayerModuleContainer>();
+            PlayerModuleContainer playerModuleContainer = ServiceLookup.GetOrNull<PlayerModuleContainer>();
             _playerInitializer = playerModuleContainer?.PlayerInitializer;
             _playerView = playerModuleContainer?.PlayerView;
             if (_playerInitializer == null || _playerView == null)
@@ -380,7 +381,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
 
             if (_isModuleRegistered)
             {
-                ServiceLocator.UnregisterInstance<EnemyModuleContainer>();
+                Partitura.Unregister<EnemyModuleContainer>();
                 _isModuleRegistered = false;
             }
 
@@ -450,7 +451,7 @@ namespace KillChord.Runtime.Composition.InGame.Enemy
             out ObjectiveSequenceClearCondition objectiveSequence)
         {
             MissionModuleContainer missionModuleContainer =
-                ServiceLocator.GetInstance<MissionModuleContainer>();
+                ServiceLookup.GetOrNull<MissionModuleContainer>();
             missionRuntimeService = missionModuleContainer?.MissionRuntimeService;
             ObjectiveSequenceClearCondition sequence = missionRuntimeService?.MissionDefinition.ClearCondition;
             if (sequence == null)

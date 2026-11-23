@@ -3,8 +3,8 @@ using KillChord.Runtime.Composition.OutGame.Bootstrap;
 using KillChord.Runtime.Domain.Persistent.Savedata;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.OutGame.Tutorial;
-using SymphonyFrameWork.System.SaveSystem;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -67,9 +67,9 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
         public override async Awaitable<bool> ResourceLoadAsync(
             CancellationToken cancellationToken)
         {
-            _loadedSaveData = SaveStore.IsLoaded<SaveData>()
-                ? SaveStore.Get<SaveData>()
-                : await SaveStore.LoadAsync<SaveData>(cancellationToken);
+            _loadedSaveData = Manuscript.IsLoaded<SaveData>()
+                ? Manuscript.Get<SaveData>()
+                : await Manuscript.LoadAsync<SaveData>(cancellationToken);
             return _loadedSaveData != null;
         }
 
@@ -79,7 +79,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
         /// <returns> 依存解決に成功した場合はtrueです。 </returns>
         public override bool Build()
         {
-            if (!ServiceLocator.TryGetInstance(out _outGameUIEvent))
+            if (!Partitura.TryGet(out _outGameUIEvent))
             {
                 Debug.LogError(
                     $"[{nameof(OutGameTutorialInitializer)}] "
@@ -90,14 +90,14 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
 
             _outGameUIEvent.OnHomeTutorialForceCompleteRequested +=
                 HandleHomeTutorialForceCompleteRequested;
-            ServiceLocator.TryGetInstance(out _loadingScreenController);
-            ServiceLocator.TryGetInstance(out HomeScreenView homeScreenView);
+            Partitura.TryGet(out _loadingScreenController);
+            Partitura.TryGet(out HomeScreenView homeScreenView);
             _homeScreenView = homeScreenView;
 
             // 研究・改造・作戦の各画面を初めて開いたときの案内をつなぐ。
-            ServiceLocator.TryGetInstance(out SkillTreeScreenView skillTreeScreenView);
-            ServiceLocator.TryGetInstance(out SkillBuildScreenView skillBuildScreenView);
-            ServiceLocator.TryGetInstance(out StageSelectScreenView stageSelectScreenView);
+            Partitura.TryGet(out SkillTreeScreenView skillTreeScreenView);
+            Partitura.TryGet(out SkillBuildScreenView skillBuildScreenView);
+            Partitura.TryGet(out StageSelectScreenView stageSelectScreenView);
             _screenGuideRunner?.Dispose();
             _screenGuideRunner = new OutGameScreenGuideRunner(
                 _loadedSaveData,
@@ -219,7 +219,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                 // 開始を記録してから、ホーム画面のチュートリアルを進める。
                 if (_loadedSaveData.Tutorial.StartHome())
                 {
-                    await SaveStore.SaveAsync<SaveData>(destroyCancellationToken);
+                    await Manuscript.SaveAsync<SaveData>(destroyCancellationToken);
                 }
 
                 _outGameUIEvent.OnHomeTutorialStarted?.Invoke();
@@ -228,7 +228,7 @@ namespace KillChord.Runtime.Composition.OutGame.Tutorial
                 // 完了を記録して通知する。
                 if (_loadedSaveData.Tutorial.Complete())
                 {
-                    await SaveStore.SaveAsync<SaveData>(destroyCancellationToken);
+                    await Manuscript.SaveAsync<SaveData>(destroyCancellationToken);
                 }
 
                 _outGameUIEvent.OnHomeTutorialCompleted?.Invoke();

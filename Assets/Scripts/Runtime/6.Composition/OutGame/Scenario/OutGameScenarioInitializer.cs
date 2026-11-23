@@ -1,6 +1,6 @@
 using KillChord.Runtime.Adaptor.OutGame.Scenario;
 using KillChord.Runtime.Composition.OutGame.Bootstrap;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 
 namespace KillChord.Runtime.Composition.OutGame.Scenario
@@ -23,12 +23,12 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         /// <returns> 成功した場合はtrue。 </returns>
         public override bool Build()
         {
-            if (ServiceLocator.TryGetInstance<SelectedScenarioState>(out _))
+            if (Partitura.TryGet<SelectedScenarioState>(out _))
             {
                 return true;
             }
 
-            _registeredByThisInitializer = ServiceLocator.RegisterInstance(new SelectedScenarioState());
+            _registeredByThisInitializer = Partitura.Register(new SelectedScenarioState(), ServiceLifetimeEnum.Persistent);
             return _registeredByThisInitializer;
         }
 
@@ -39,7 +39,7 @@ namespace KillChord.Runtime.Composition.OutGame.Scenario
         {
             if (_registeredByThisInitializer)
             {
-                ServiceLocator.UnregisterInstance<SelectedScenarioState>();
+                Partitura.Unregister<SelectedScenarioState>();
                 _registeredByThisInitializer = false;
             }
         }

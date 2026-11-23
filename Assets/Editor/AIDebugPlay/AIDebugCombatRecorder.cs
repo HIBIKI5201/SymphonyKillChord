@@ -2,7 +2,7 @@ using KillChord.Runtime.Adaptor.InGame.Battle;
 using KillChord.Runtime.Composition.InGame.Player;
 using KillChord.Runtime.Domain.InGame.Music;
 using KillChord.Runtime.Utility.Persistent;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,7 +31,7 @@ namespace KillChord.Editor.AIDebugPlay
         /// </summary>
         internal void RefreshPlayer()
         {
-            ServiceLocator.TryGetInstance<PlayerModuleContainer>(out var module);
+            Partitura.TryGet<PlayerModuleContainer>(out var module);
             var next = module?.PlayerAttackController;
             if (ReferenceEquals(_player, next) && ReferenceEquals(_signal, module?.PlayerAttackSignal)) { return; }
             UnbindPlayer();

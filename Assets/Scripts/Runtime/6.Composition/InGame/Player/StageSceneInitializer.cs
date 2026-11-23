@@ -1,4 +1,4 @@
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using UnityEngine;
 using KillChord.Runtime.View.InGame.Player;
 
@@ -18,7 +18,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// <summary> サービスロケーターへシーン参照を登録する。 </summary>
         private void Awake()
         {
-            ServiceLocator.RegisterInstance<IStageSceneInstance>(this, LocateTypeEnum.Locator);
+            Partitura.Register<IStageSceneInstance>(this, ServiceLifetimeEnum.Scene);
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace KillChord.Runtime.Composition.InGame.Player
         /// </summary>
         private void OnDestroy()
         {
-            ServiceLocator.UnregisterInstance<IStageSceneInstance>(this);
+            Partitura.Unregister<IStageSceneInstance>(this);
         }
     }
 }

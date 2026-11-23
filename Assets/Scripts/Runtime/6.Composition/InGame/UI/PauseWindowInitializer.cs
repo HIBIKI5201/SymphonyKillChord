@@ -19,7 +19,7 @@ using KillChord.Runtime.View.InGame.UI;
 using KillChord.Runtime.View.Persistent.Input;
 using KillChord.Runtime.View.Persistent.Localization;
 using R3;
-using SymphonyFrameWork.System.ServiceLocate;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,40 +57,40 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SequenceModuleContainer sequenceModuleContainer)
+            if (!Partitura.TryGet(out SequenceModuleContainer sequenceModuleContainer)
                 || sequenceModuleContainer.BattlePauseController == null)
             {
                 Debug.LogError($"[{nameof(PauseWindowInitializer)}] {nameof(BattlePauseController)} が見つかりません。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out StageResultModuleContainer stageResultModuleContainer)
+            if (!Partitura.TryGet(out StageResultModuleContainer stageResultModuleContainer)
                 || stageResultModuleContainer.Controller == null)
             {
                 Debug.LogError($"[{nameof(PauseWindowInitializer)}] リスタート用のコントローラーが見つかりません。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SceneTransitionUseCase sceneTransitionUsecase))
+            if (!Partitura.TryGet(out SceneTransitionUseCase sceneTransitionUsecase))
             {
                 Debug.LogError($"[{nameof(PauseWindowInitializer)}] {nameof(SceneTransitionUseCase)} が見つかりません。", this);
                 return false;
             }
 
-            if (!ServiceLocator.TryGetInstance(out SelectedBattleStageState selectedBattleStageState))
+            if (!Partitura.TryGet(out SelectedBattleStageState selectedBattleStageState))
             {
                 Debug.LogError($"[{nameof(PauseWindowInitializer)}] {nameof(SelectedBattleStageState)} が見つかりません。", this);
                 return false;
             }
 
             // ミッション状態は存在すればクリア対象とするため、取得できない場合もnullで許容する。
-            ServiceLocator.TryGetInstance(out SelectedMissionState selectedMissionState);
+            Partitura.TryGet(out SelectedMissionState selectedMissionState);
 
             _battlePauseController = sequenceModuleContainer.BattlePauseController;
             _stageResultController = stageResultModuleContainer.Controller;
             // 遷移はInGameシーン自身を閉じるため、InGameの破棄では取り消されない常駐シーンの寿命で動かす。
             CancellationToken transitionLifetimeToken =
-                ServiceLocator.TryGetInstance(out SceneTransitionController sceneTransitionController)
+                Partitura.TryGet(out SceneTransitionController sceneTransitionController)
                     ? sceneTransitionController.PersistentLifetimeToken
                     : default;
             _returnToTitleController = new ReturnToTitleController(
@@ -103,7 +103,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             // 文言とミッション欄は、ポーズを開くたびに最新の言語と達成状況で作り直す。
             _pauseWindowViewModel = new PauseWindowViewModel();
             MissionRuntimeService missionRuntimeService =
-                ServiceLocator.TryGetInstance(out MissionModuleContainer missionModuleContainer)
+                Partitura.TryGet(out MissionModuleContainer missionModuleContainer)
                     ? missionModuleContainer.MissionRuntimeService
                     : null;
             _pauseWindowPresenter = new PauseWindowPresenter(
@@ -129,7 +129,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             BindOptionPanel();
             BindCountdown();
 
-            _inputMapController = ServiceLocator.TryGetInstance(out InputComposition inputComposition)
+            _inputMapController = Partitura.TryGet(out InputComposition inputComposition)
                 ? inputComposition.GetInputMapController
                 : null;
             if (_inputMapController == null)
@@ -138,7 +138,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
             }
 
             InputSystemUIInputModule inputModule = null;
-            if (ServiceLocator.TryGetInstance(out PlayerInputView inputView))
+            if (Partitura.TryGet(out PlayerInputView inputView))
             {
                 inputModule = inputView.GetComponent<InputSystemUIInputModule>();
             }
@@ -367,8 +367,8 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return;
             }
 
-            if (!ServiceLocator.TryGetInstance(out AudioSettingsModuleContainer audioSettingsContainer)
-                || !ServiceLocator.TryGetInstance(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
+            if (!Partitura.TryGet(out AudioSettingsModuleContainer audioSettingsContainer)
+                || !Partitura.TryGet(out EnvironmentSettingsModuleContainer environmentSettingsContainer))
             {
                 Debug.LogWarning($"[{nameof(PauseWindowInitializer)}] 音量・環境設定が見つからないため、オプションを開けません。", this);
                 _optionPanelView = null;
@@ -395,7 +395,7 @@ namespace KillChord.Runtime.Composition.InGame.UI
                 return;
             }
 
-            if (!ServiceLocator.TryGetInstance(out MusicSyncModuleContainer musicSyncContainer)
+            if (!Partitura.TryGet(out MusicSyncModuleContainer musicSyncContainer)
                 || musicSyncContainer.MusicSyncController == null)
             {
                 Debug.LogWarning($"[{nameof(PauseWindowInitializer)}] {nameof(MusicSyncController)} が見つからないため、カウントダウンを表示しません。", this);

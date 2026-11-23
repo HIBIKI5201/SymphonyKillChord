@@ -13,8 +13,8 @@ using KillChord.Runtime.InfraStructure.Persistent.SceneManagement;
 using KillChord.Runtime.View.OutGame.Screen;
 using KillChord.Runtime.View.Persistent.Load;
 using KillChord.Runtime.View.Persistent.SceneManagement;
-using SymphonyFrameWork.System.ServiceLocate;
-using SymphonyFrameWork.System.SaveSystem;
+using SymphonyFramework.SaveData;
+using SymphonyFramework.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,7 +48,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
             if (_recoveryView != null) { return; }
             _recoveryInGameSceneName = inGameSceneName;
             _recoveryScenes = ownedScenes;
-            if (ServiceLocator.TryGetInstance(out InputComposition input))
+            if (Partitura.TryGet(out InputComposition input))
             {
                 input.GetInputMapController.DisableAll();
             }
@@ -57,8 +57,8 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 if (Array.IndexOf(ownedScenes, document.gameObject.scene.name) >= 0) { document.enabled = false; }
             }
             _recoveryView = gameObject.AddComponent<OutGameInitializationFailureView>();
-            bool isEnglish = SaveStore.IsLoaded<SaveData>()
-                && SaveStore.Get<SaveData>().EnvironmentSettings.Language == GameLanguage.English;
+            bool isEnglish = Manuscript.IsLoaded<SaveData>()
+                && Manuscript.Get<SaveData>().EnvironmentSettings.Language == GameLanguage.English;
             _recoveryView.Initialize(
                 isEnglish ? "Return to Title" : "タイトルへ戻る",
                 isEnglish ? "Failed to load the screen." : "画面の読み込みに失敗しました。",
@@ -75,15 +75,15 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
         {
             // 既に SceneTransitionController が存在する場合はそれを使用し、存在しない場合は新たに作成して登録する。
             bool hasExistingController =
-                ServiceLocator.TryGetInstance<SceneTransitionController>(out var existingController);
+                Partitura.TryGet<SceneTransitionController>(out var existingController);
             bool hasExistingLoadingController =
-                ServiceLocator.TryGetInstance(out LoadingScreenController existingLoadingScreenController);
+                Partitura.TryGet(out LoadingScreenController existingLoadingScreenController);
 
             if (hasExistingController || hasExistingLoadingController)
             {
                 if (!hasExistingController
                     || !hasExistingLoadingController
-                    || !ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var existingReadiness))
+                    || !Partitura.TryGet<ISceneInitializationReadiness>(out var existingReadiness))
                 {
                     Debug.LogError(
                         $"[{nameof(SceneTransitionInitializer)}] " +
@@ -94,7 +94,7 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
 
                 _sceneInitializationReadiness = existingReadiness;
                 _sceneTransitionController = existingController;
-                ServiceLocator.RegisterInstance(this);
+                Partitura.Register(this, ServiceLifetimeEnum.Persistent);
 
                 if (_loadingScreenView != null)
                 {
@@ -126,14 +126,14 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                 _sceneTransitionUsecase,
                 _persistentLifetimeCancellation.Token, _sceneInitializationTimeoutFrameCount);
 
-            ServiceLocator.RegisterInstance(_loadingScreenController);
-            ServiceLocator.RegisterInstance<ILoadingSessionFactory>(_loadingScreenController);
-            ServiceLocator.RegisterInstance<ILoadingOperationExecutor>(_loadingOperationExecutor);
-            ServiceLocator.RegisterInstance<ISceneTransitionService>(_sceneTransitionService);
-            ServiceLocator.RegisterInstance<ISceneInitializationReadiness>(_sceneInitializationReadiness);
-            ServiceLocator.RegisterInstance(_sceneTransitionUsecase);
-            ServiceLocator.RegisterInstance(_sceneTransitionController);
-            ServiceLocator.RegisterInstance(this);
+            Partitura.Register(_loadingScreenController, ServiceLifetimeEnum.Persistent);
+            Partitura.Register<ILoadingSessionFactory>(_loadingScreenController, ServiceLifetimeEnum.Persistent);
+            Partitura.Register<ILoadingOperationExecutor>(_loadingOperationExecutor, ServiceLifetimeEnum.Persistent);
+            Partitura.Register<ISceneTransitionService>(_sceneTransitionService, ServiceLifetimeEnum.Persistent);
+            Partitura.Register<ISceneInitializationReadiness>(_sceneInitializationReadiness, ServiceLifetimeEnum.Persistent);
+            Partitura.Register(_sceneTransitionUsecase, ServiceLifetimeEnum.Persistent);
+            Partitura.Register(_sceneTransitionController, ServiceLifetimeEnum.Persistent);
+            Partitura.Register(this, ServiceLifetimeEnum.Persistent);
             _ownsRegistrations = true;
 
             if (_loadingScreenView == null)
@@ -163,10 +163,10 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
             if (_ownsRegistrations) { _sceneTransitionController?.EndScenarioBattleSortie(); }
             ClearRecoveryView();
             // 自身の登録を解除する。登録を所有していない場合はここで終える。
-            if (ServiceLocator.TryGetInstance(out SceneTransitionInitializer registeredInitializer)
+            if (Partitura.TryGet(out SceneTransitionInitializer registeredInitializer)
                 && ReferenceEquals(registeredInitializer, this))
             {
-                ServiceLocator.UnregisterInstance<SceneTransitionInitializer>();
+                Partitura.Unregister<SceneTransitionInitializer>();
             }
             if (!_ownsRegistrations)
             {
@@ -174,56 +174,56 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
             }
 
             // 自身が登録したサービスだけを解除する。
-            if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState pending))
+            if (Partitura.TryGet(out PendingNodeTransitionState pending))
             {
                 pending.Clear();
-                if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState current)
+                if (Partitura.TryGet(out PendingNodeTransitionState current)
                     && ReferenceEquals(current, pending))
                 {
-                    ServiceLocator.UnregisterInstance<PendingNodeTransitionState>();
+                    Partitura.Unregister<PendingNodeTransitionState>();
                 }
             }
 
-            if (ServiceLocator.TryGetInstance(out SceneTransitionController registeredController)
+            if (Partitura.TryGet(out SceneTransitionController registeredController)
                 && ReferenceEquals(registeredController, _sceneTransitionController))
             {
-                ServiceLocator.UnregisterInstance<SceneTransitionController>();
+                Partitura.Unregister<SceneTransitionController>();
             }
 
-            if (ServiceLocator.TryGetInstance(out SceneTransitionUseCase registeredUsecase)
+            if (Partitura.TryGet(out SceneTransitionUseCase registeredUsecase)
                 && ReferenceEquals(registeredUsecase, _sceneTransitionUsecase))
             {
-                ServiceLocator.UnregisterInstance<SceneTransitionUseCase>();
+                Partitura.Unregister<SceneTransitionUseCase>();
             }
 
-            if (ServiceLocator.TryGetInstance<ISceneTransitionService>(out var registeredService)
+            if (Partitura.TryGet<ISceneTransitionService>(out var registeredService)
                 && ReferenceEquals(registeredService, _sceneTransitionService))
             {
-                ServiceLocator.UnregisterInstance<ISceneTransitionService>();
+                Partitura.Unregister<ISceneTransitionService>();
             }
 
-            if (ServiceLocator.TryGetInstance<ISceneInitializationReadiness>(out var registeredReadiness)
+            if (Partitura.TryGet<ISceneInitializationReadiness>(out var registeredReadiness)
                 && ReferenceEquals(registeredReadiness, _sceneInitializationReadiness))
             {
-                ServiceLocator.UnregisterInstance<ISceneInitializationReadiness>();
+                Partitura.Unregister<ISceneInitializationReadiness>();
             }
 
-            if (ServiceLocator.TryGetInstance<ILoadingOperationExecutor>(out var registeredLoadingOperationExecutor)
+            if (Partitura.TryGet<ILoadingOperationExecutor>(out var registeredLoadingOperationExecutor)
                 && ReferenceEquals(registeredLoadingOperationExecutor, _loadingOperationExecutor))
             {
-                ServiceLocator.UnregisterInstance<ILoadingOperationExecutor>();
+                Partitura.Unregister<ILoadingOperationExecutor>();
             }
 
-            if (ServiceLocator.TryGetInstance<ILoadingSessionFactory>(out var registeredLoadingSessionFactory)
+            if (Partitura.TryGet<ILoadingSessionFactory>(out var registeredLoadingSessionFactory)
                 && ReferenceEquals(registeredLoadingSessionFactory, _loadingScreenController))
             {
-                ServiceLocator.UnregisterInstance<ILoadingSessionFactory>();
+                Partitura.Unregister<ILoadingSessionFactory>();
             }
 
-            if (ServiceLocator.TryGetInstance(out LoadingScreenController registeredLoadingScreenController)
+            if (Partitura.TryGet(out LoadingScreenController registeredLoadingScreenController)
                 && ReferenceEquals(registeredLoadingScreenController, _loadingScreenController))
             {
-                ServiceLocator.UnregisterInstance<LoadingScreenController>();
+                Partitura.Unregister<LoadingScreenController>();
             }
 
             // 参照を消す。
@@ -342,9 +342,9 @@ namespace KillChord.Runtime.Composition.Persistent.SceneManagement
                     || SceneManager.GetSceneByName(sceneName).isLoaded) { return false; }
             }
             // 専用受付を保持したまま失敗選択を整理し、Title の新しい選択を消しません。
-            if (ServiceLocator.TryGetInstance(out PendingNodeTransitionState pending)) { pending.Clear(); }
-            if (ServiceLocator.TryGetInstance(out SelectedBattleStageState battle)) { battle.Clear(); }
-            if (ServiceLocator.TryGetInstance(out SelectedMissionState mission)) { mission.Clear(); }
+            if (Partitura.TryGet(out PendingNodeTransitionState pending)) { pending.Clear(); }
+            if (Partitura.TryGet(out SelectedBattleStageState battle)) { battle.Clear(); }
+            if (Partitura.TryGet(out SelectedMissionState mission)) { mission.Clear(); }
 
             bool success = SceneManager.GetSceneByName(RECOVERY_TITLE_SCENE_NAME).isLoaded
                 ? await transition.ReloadSceneWithPersistentLifetimeAsync(RECOVERY_TITLE_SCENE_NAME)

@@ -1,5 +1,5 @@
 using SymphonyFramework.Exceptions;
-using SymphonyFrameWork.System;
+using SymphonyFramework.Pause;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.Playables;
@@ -9,7 +9,7 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
     /// <summary>
     ///     ポーズ状態を弾幕システムグループとPlayableDirectorへ伝えます。
     /// </summary>
-    public sealed class BarragePauseBridge : MonoBehaviour, PauseManager.IPausable
+    public sealed class BarragePauseBridge : MonoBehaviour, IPausable
     {
         /// <summary>
         ///     ポーズ開始時に弾幕演出を停止します。
@@ -37,7 +37,7 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
         {
             try
             {
-                PauseManager.IPausable.RegisterPauseManager(this);
+                Fermata.Register(this);
             }
             catch (SymphonyNotInitializedException)
             {
@@ -54,7 +54,7 @@ namespace KillChord.Runtime.View.InGame.Stage.Barrage
         {
             try
             {
-                PauseManager.IPausable.UnregisterPauseManager(this);
+                Fermata.Unregister(this);
             }
             catch (SymphonyNotInitializedException)
             {
