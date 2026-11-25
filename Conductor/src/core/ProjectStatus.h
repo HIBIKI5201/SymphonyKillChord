@@ -83,11 +83,44 @@ namespace skc::conductor
     void ParseGitStatusPorcelain(const std::string& output, ProjectStatus& status);
 
     /// <summary>
-    ///     git submodule status の出力を読む。
+    ///     インデックスに記録されたサブモジュール（gitlink）1つ分。
     /// </summary>
-    /// <param name="output">出力。</param>
-    /// <returns>サブモジュールの状態。</returns>
-    std::vector<SubmoduleState> ParseSubmoduleStatus(const std::string& output);
+    struct GitlinkEntry
+    {
+        /// <summary>リポジトリのルートからのパス。</summary>
+        std::string Path;
+
+        /// <summary>記録されているコミット。</summary>
+        std::string Commit;
+
+        /// <summary>ステージ番号（0 なら普通、1〜3 なら衝突中）。</summary>
+        int Stage = 0;
+    };
+
+    /// <summary>
+    ///     git config -f .gitmodules --get-regexp の出力から、サブモジュールのパスを取り出す。
+    ///     git submodule status はシェルスクリプトで動き、Windows でたまに止まるので使わない。
+    /// </summary>
+    /// <param name="output">出力（"submodule.名前.path パス" の行）。</param>
+    /// <returns>パス。</returns>
+    std::vector<std::string> ParseGitmodulesPaths(const std::string& output);
+
+    /// <summary>
+    ///     git ls-files --stage の出力から、サブモジュール（モード 160000）の行だけを取り出す。
+    /// </summary>
+    /// <param name="output">出力（"モード コミット ステージ<TAB>パス" の行）。</param>
+    /// <returns>サブモジュールの行。</returns>
+    std::vector<GitlinkEntry> ParseGitlinkEntries(const std::string& output);
+
+    /// <summary>
+    ///     サブモジュール1つの状態を決める。
+    /// </summary>
+    /// <param name="path">パス。</param>
+    /// <param name="entries">インデックスの行（全部渡してよい。パスが合うものだけを見る）。</param>
+    /// <param name="checkedOutCommit">取ってあるフォルダの HEAD のコミット。取っていなければ空。</param>
+    /// <returns>状態（ok・missing・modified・conflict）。</returns>
+    std::string DecideSubmoduleState(const std::string& path, const std::vector<GitlinkEntry>& entries,
+        const std::optional<std::string>& checkedOutCommit);
 
     /// <summary>
     ///     ProjectVersion.txt から Unity の版を読む。

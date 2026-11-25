@@ -323,16 +323,21 @@ namespace
         Expect(status.Ahead == 1 && status.Behind == 3, "進み・遅れ");
         Expect(status.Changes == 2, "変更の数（無視されたものは数えない）");
 
-        std::vector<SubmoduleState> submodules = ParseSubmoduleStatus(
-            " 1234 Assets/AssetStoreTools (heads/main)\n-5678 Sound/CRIAtomCraft\n+9abc Docs/NotionSpecifications (x)\n");
-        Expect(submodules.size() == 3, "サブモジュールの数");
-        if (submodules.size() == 3)
-        {
-            ExpectEqual("ok", submodules[0].State, "取ってある");
-            ExpectEqual("Sound/CRIAtomCraft", submodules[1].Path, "パス");
-            ExpectEqual("missing", submodules[1].State, "取っていない");
-            ExpectEqual("modified", submodules[2].State, "記録と違う");
-        }
+        std::vector<std::string> paths = ParseGitmodulesPaths(
+            "submodule.Assets/AssetStoreTools.path Assets/AssetStoreTools\nsubmodule.cri.path Sound/CRIAtomCraft\n"
+            "submodule.spec.path Docs/NotionSpecifications\n");
+        Expect(paths.size() == 3, "サブモジュールの数");
+        if (paths.size() == 3) { ExpectEqual("Sound/CRIAtomCraft", paths[1], "パス"); }
+
+        std::vector<GitlinkEntry> entries = ParseGitlinkEntries(
+            "160000 1234 0\tAssets/AssetStoreTools\n160000 5678 0\tSound/CRIAtomCraft\n100644 ffff 0\tREADME.md\n"
+            "160000 9abc 0\tDocs/NotionSpecifications\n160000 aaaa 2\tX/Conflict\n160000 bbbb 3\tX/Conflict\n");
+        Expect(entries.size() == 5, "gitlink の行だけ取る");
+        ExpectEqual("ok", DecideSubmoduleState("Assets/AssetStoreTools", entries, std::string("1234")), "取ってある");
+        ExpectEqual("missing", DecideSubmoduleState("Sound/CRIAtomCraft", entries, std::nullopt), "取っていない");
+        ExpectEqual("modified", DecideSubmoduleState("Docs/NotionSpecifications", entries, std::string("0000")), "記録と違う");
+        ExpectEqual("conflict", DecideSubmoduleState("X/Conflict", entries, std::string("aaaa")), "衝突");
+        ExpectEqual("missing", DecideSubmoduleState("Not/Recorded", entries, std::string("1234")), "記録に無い");
 
         ExpectEqual("6000.3.10f1", ParseUnityProjectVersion("m_EditorVersion: 6000.3.10f1\r\nm_EditorVersionWithRevision: x\r\n"), "Unity の版");
     }
