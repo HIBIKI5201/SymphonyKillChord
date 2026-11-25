@@ -16,7 +16,7 @@
 
 # Unity検証の前に
 - Unityの操作はUnity CLI（`unity`）で行う。起動は `unity open` →`unity status --until-ready`、コンパイル確認は `unity recompile`（対象は `--project-path`）。
-- recompile・テスト・Playの開始の前に `node scripts/harness/unity-preflight.mjs` を実行する（Claudeはhookで自動実行）。未保存のScene・Prefab、またはPlay中を検知したら止まり、保存・破棄・停止をユーザーに確認する。自分が始めたPlayは止めてよい。
+- recompile・テスト・Playの開始の前に `node scripts/harness/unity-preflight.mjs` を実行する（対応環境はhookで自動実行）。未保存のScene・Prefab、またはPlay中を検知したら止まり、保存・破棄・停止をユーザーに確認する。自分が始めたPlayは止めてよい。
 
 # ブランチ・PR
 - 編集・コミットは指定された作業ブランチで行う。指定がなければ `feature/[段階]/[作業名]/agent`。新規ブランチは編集前に空pushし、同階層masterの生成を確認する。

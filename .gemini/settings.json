@@ -3,9 +3,47 @@
     "autoAccept": false
   },
   "context": {
-    "fileName": "GEMINI.md"
+    "fileName": [
+      "AGENTS.md",
+      "GEMINI.md"
+    ]
   },
   "ui": {
     "theme": "GitHub"
+  },
+  "mcpServers": {
+    "spec": {
+      "command": "python",
+      "args": [
+        "scripts/notion/spec_mcp.py"
+      ]
+    }
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "name": "notion-spec-sync",
+            "type": "command",
+            "command": "node scripts/harness/session-start.mjs"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "name": "unity-preflight",
+            "type": "command",
+            "command": "node scripts/harness/unity-preflight.mjs --hook --target=gemini",
+            "timeout": 90000
+          }
+        ]
+      }
+    ]
   }
 }

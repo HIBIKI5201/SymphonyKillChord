@@ -7,7 +7,7 @@ description: Inspect Symphony Kill Chord gameplay as JSON, record combat and sta
 
 Use the bundled script to register an entire attack sequence in one call. Timing-critical work runs inside the Unity Editor; do not approximate just timing with repeated CLI sleeps or individual LLM tool calls.
 
-This implementation is shared by Claude and Codex. Read `references/qa-coverage.md` before selecting a QA case and `references/json-api.md` for response semantics.
+This implementation is shared across agents. Read `references/qa-coverage.md` before selecting a QA case and `references/json-api.md` for response semantics.
 
 Run from the same project checkout opened in Unity. Every request checks `Application.dataPath`. Calls go through the Unity CLI (`unity command script eval`, needs the project's `com.unity.pipeline`); these scripts never install it or launch Unity. Open the Editor with `unity open <project>` and wait with `unity status --until-ready` first. If `unity` is not on PATH, set `UNITY_CLI_EXECUTABLE` to its executable.
 
