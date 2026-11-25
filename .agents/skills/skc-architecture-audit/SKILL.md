@@ -1,12 +1,12 @@
 ---
 name: skc-architecture-audit
-description: "Audit the whole codebase against DesignPhilosophy.md (layer and module dependencies, class roles, Composition DI, Adaptor-only cross-module refs, cycles) with a score and fixes. Use for project-wide architecture audits or refactoring surveys; for one diff use skc-code-review."
+description: "Audit the whole codebase against DesignPhilosophy.md (layer and module dependencies, class roles, Composition DI, Adaptor-only cross-module refs, cycles) with a score and fixes. Use for project-wide architecture audits or refactoring surveys; for one diff use skc-code-guideline-check."
 ---
 
 # Architecture Audit
 
 プロジェクト全体が設計思想に従って実装されているかを、ソフトウェアアーキテクトとして調査する。
-差分のレビューではなく、モジュール・レイヤー単位の横断的な監査に使う（1 つの変更のレビューは `skc-code-review` を使う）。
+差分のレビューではなく、モジュール・レイヤー単位の横断的な監査に使う（1 つの変更のレビューは `skc-code-guideline-check` を使う）。
 
 ## 必須参照
 

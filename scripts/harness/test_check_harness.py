@@ -1,4 +1,5 @@
 """Exercise failures that would silently damage agent routing."""
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,8 +13,24 @@ class HarnessValidationTests(unittest.TestCase):
         for relative in set(LIMITS) | set(LINKED):
             self.write(relative, "short document")
         self.write("CLAUDE.md", "@AGENTS.md\n")
+        self.write(".gemini/GEMINI.md", "@../AGENTS.md\n")
+        self.write(".gemini/settings.json", json.dumps({
+            "context": {"fileName": ["AGENTS.md", "GEMINI.md"]},
+            "mcpServers": {"spec": {"command": "python", "args": ["scripts/notion/spec_mcp.py"]}},
+            "hooks": {"SessionStart": [{}], "BeforeTool": [{}]},
+        }))
+        self.write(".agents/hooks.json", json.dumps({
+            "notion-spec-sync": {"SessionStart": [{}]},
+            "unity-preflight": {"PreToolUse": [{}]},
+        }))
+        self.write(".agents/mcp_config.json", json.dumps({
+            "mcpServers": {"spec": {"command": "python", "args": ["scripts/notion/spec_mcp.py"]}},
+        }))
         self.skill(".agents", "shared")
         self.skill(".agents", "skc-feature-flow")
+        self.skill(".agents", "skc-code-guideline-check")
+        self.skill(".claude", "skc-feature-flow")
+        self.skill(".claude", "skc-code-guideline-check")
 
     def tearDown(self):
         self.temp.cleanup()
@@ -32,6 +49,10 @@ class HarnessValidationTests(unittest.TestCase):
 
     def test_duplicate_skill_is_rejected(self):
         self.skill(".codex", "shared")
+        self.assertTrue(any("duplicate skill" in e for e in validate(self.root)[1]))
+
+    def test_duplicate_gemini_skill_is_rejected(self):
+        self.skill(".gemini", "shared")
         self.assertTrue(any("duplicate skill" in e for e in validate(self.root)[1]))
 
     def test_broken_link_and_escape_are_rejected(self):
@@ -68,6 +89,19 @@ class HarnessValidationTests(unittest.TestCase):
     def test_claude_entry_without_agents_import_is_rejected(self):
         self.write("CLAUDE.md", "AGENTS.md を読む")
         self.assertTrue(any("must import AGENTS.md" in e for e in validate(self.root)[1]))
+
+    def test_gemini_entry_without_agents_import_is_rejected(self):
+        self.write(".gemini/GEMINI.md", "AGENTS.md を読む")
+        self.assertTrue(any("must import ../AGENTS.md" in e for e in validate(self.root)[1]))
+
+    def test_invalid_agent_configs_are_rejected(self):
+        self.write(".gemini/settings.json", "{}")
+        self.write(".agents/hooks.json", "{}")
+        self.write(".agents/mcp_config.json", "{}")
+        errors = validate(self.root)[1]
+        self.assertTrue(any(".gemini/settings.json" in e for e in errors))
+        self.assertTrue(any(".agents/hooks.json" in e for e in errors))
+        self.assertTrue(any(".agents/mcp_config.json" in e for e in errors))
 
     def test_malformed_skill_is_rejected(self):
         self.write(".agents/skills/shared/SKILL.md", "no metadata")

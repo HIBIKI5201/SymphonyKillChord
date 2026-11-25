@@ -24,7 +24,7 @@
 
 ## ハーネスの保守
 
-- Codex共通スキルは `.agents/skills/`、Codex専用は `.codex/skills/`。同名を両方に置かない。Claudeの独自入口は `.claude/skills/` に置き、共有可能な手順は共通本体へリンクする。
+- 共通スキル（Codex・Gemini・Antigravity）は `.agents/skills/`、Codex専用は `.codex/skills/`、Gemini専用設定は `.gemini/` に置く。同名を重複させない。Claudeの独自入口は `.claude/skills/` に置き、共有可能な手順は共通本体へリンクする。
 - 現在のセッションで削除前のスキル一覧が残っている場合は `.agents/skills/<name>/SKILL.md` を参照する。次のセッションで一覧の重複解消を確認する。
 - 正本の規則をスキル本文へ転載しない。短い入口に対象・必須条件・条件付きの参照先を置き、モード固有の詳細をreferencesへ分ける。
 - `python scripts/harness/check_harness.py` で入口の文字数上限、リンク、スキル名の再重複を確認する。CIでも同じチェックを実行する。数字はトークン実測ではなくUTF-8本文の文字数である。

@@ -9,21 +9,25 @@ ROOT = Path(__file__).resolve().parents[2]
 LIMITS = {
     "AGENTS.md": 1600,
     "CLAUDE.md": 300,
+    ".gemini/GEMINI.md": 300,
     "Assets/Scripts/DesignPhilosophy.md": 2000,
     ".agents/skills/skc-feature-flow/SKILL.md": 1400,
     ".claude/skills/skc-feature-flow/SKILL.md": 500,
-    ".claude/skills/skc-code-guideline-check/SKILL.md": 2000,
+    ".agents/skills/skc-code-guideline-check/SKILL.md": 2000,
+    ".claude/skills/skc-code-guideline-check/SKILL.md": 500,
     "Docs/agent/README.md": 4500,
 }
 # Skill descriptions stay in every session's listing; bodies load only when used.
 # Skills the Unity CLI installs (`unity skill install --local`) are not edited here.
 DESCRIPTION_LIMIT = 300
 DESCRIPTION_DIRS = [".claude/skills", ".agents/skills", ".codex/skills"]
+SHARED_SKILL_DIRS = [".agents/skills", ".codex/skills", ".gemini/skills"]
 VENDOR_PREFIXES = ("unity-", "new-unity-project")
 LINKED = [
     "AGENTS.md", "Assets/Scripts/DesignPhilosophy.md",
     "Assets/Scripts/CodeGuidelines.md",
     "Assets/Scripts/DesignClassRoles.md", "Assets/Scripts/DesignExamples.md",
+    ".agents/skills/skc-code-guideline-check/SKILL.md",
     ".claude/skills/skc-feature-flow/SKILL.md",
     ".claude/skills/skc-code-guideline-check/SKILL.md",
     "Docs/agent/README.md", "Docs/agent/index.md",
@@ -55,9 +59,18 @@ def validate(root):
     claude = root / "CLAUDE.md"
     if claude.is_file() and not re.search(r"^@AGENTS\.md$", claude.read_text(encoding="utf-8-sig"), re.M):
         errors.append("CLAUDE.md must import AGENTS.md with a line '@AGENTS.md'")
+    gemini_md = root / ".gemini/GEMINI.md"
+    if gemini_md.is_file() and not re.search(r"^@\.\./AGENTS\.md$", gemini_md.read_text(encoding="utf-8-sig"), re.M):
+        errors.append(".gemini/GEMINI.md must import ../AGENTS.md with a line '@../AGENTS.md'")
     linked = [root / p for p in LINKED]
     linked.extend((root / ".agents/skills/skc-feature-flow").rglob("*.md"))
+    linked.extend(sorted((root / ".claude/skills").glob("*/SKILL.md")))
+    seen_linked = set()
     for path in linked:
+        resolved = path.resolve()
+        if resolved in seen_linked:
+            continue
+        seen_linked.add(resolved)
         if not path.is_file():
             errors.append(f"missing document: {path.relative_to(root)}")
             continue
@@ -74,11 +87,15 @@ def validate(root):
                                       destination.read_text(encoding="utf-8-sig"), re.M)
                 if fragment not in {heading_anchor(h) for h in headings}:
                     errors.append(f"broken heading link: {path.relative_to(root)} -> {target}#{fragment}")
+    errors.extend(validate_agent_configs(root))
     errors.extend(validate_notion_map(root))
     errors.extend(validate_descriptions(root, metrics))
     names = {}
-    for directory in [".agents/skills", ".codex/skills"]:
-        for path in sorted((root / directory).glob("*/SKILL.md")):
+    for directory in SHARED_SKILL_DIRS:
+        skills_dir = root / directory
+        if not skills_dir.is_dir():
+            continue
+        for path in sorted(skills_dir.glob("*/SKILL.md")):
             text = path.read_text(encoding="utf-8-sig")
             match = re.match(r"---\n(.*?)\n---", text, re.S)
             if not match:
@@ -96,6 +113,50 @@ def validate(root):
                 errors.append(f"duplicate skill: {key}: {names[key]} and {path.relative_to(root)}")
             names[key] = path.relative_to(root)
     return metrics, errors
+
+
+def read_json(path, errors, label):
+    """Load JSON config or record an error when missing or malformed."""
+    if not path.is_file():
+        errors.append(f"missing config: {label}")
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8-sig"))
+    except ValueError as error:
+        errors.append(f"invalid json: {label}: {error}")
+        return None
+    if not isinstance(data, dict):
+        errors.append(f"invalid json object: {label}")
+        return None
+    return data
+
+
+def validate_agent_configs(root):
+    """Validate Gemini CLI and Antigravity JSON configs stay wired to AGENTS.md, spec MCP, and hooks."""
+    errors = []
+    gemini_settings = read_json(root / ".gemini/settings.json", errors, ".gemini/settings.json")
+    if gemini_settings is not None:
+        file_name = gemini_settings.get("context", {}).get("fileName")
+        names = file_name if isinstance(file_name, list) else [file_name]
+        if "AGENTS.md" not in names:
+            errors.append(".gemini/settings.json context.fileName must include AGENTS.md")
+        if "spec" not in gemini_settings.get("mcpServers", {}):
+            errors.append(".gemini/settings.json must register mcpServers.spec")
+        hooks = gemini_settings.get("hooks", {})
+        if not hooks.get("SessionStart") or not hooks.get("BeforeTool"):
+            errors.append(".gemini/settings.json must define SessionStart and BeforeTool hooks")
+
+    agy_hooks = read_json(root / ".agents/hooks.json", errors, ".agents/hooks.json")
+    if agy_hooks is not None:
+        events = {event for spec in agy_hooks.values() if isinstance(spec, dict) for event in spec}
+        if "SessionStart" not in events or "PreToolUse" not in events:
+            errors.append(".agents/hooks.json must define SessionStart and PreToolUse hooks")
+
+    agy_mcp = read_json(root / ".agents/mcp_config.json", errors, ".agents/mcp_config.json")
+    if agy_mcp is not None and "spec" not in agy_mcp.get("mcpServers", {}):
+        errors.append(".agents/mcp_config.json must register mcpServers.spec")
+
+    return errors
 
 
 def skill_description(text):
@@ -118,14 +179,16 @@ def validate_descriptions(root, metrics):
     errors = []
     for directory in DESCRIPTION_DIRS:
         total = 0
-        for path in sorted((root / directory).glob("*/SKILL.md")):
-            description = skill_description(path.read_text(encoding="utf-8-sig"))
-            if description is None:
-                continue
-            total += len(description)
-            if not path.parent.name.startswith(VENDOR_PREFIXES) and len(description) > DESCRIPTION_LIMIT:
-                errors.append(f"description too long: {path.relative_to(root)}: "
-                              f"{len(description)} > {DESCRIPTION_LIMIT} characters")
+        skills_dir = root / directory
+        if skills_dir.is_dir():
+            for path in sorted(skills_dir.glob("*/SKILL.md")):
+                description = skill_description(path.read_text(encoding="utf-8-sig"))
+                if description is None:
+                    continue
+                total += len(description)
+                if not path.parent.name.startswith(VENDOR_PREFIXES) and len(description) > DESCRIPTION_LIMIT:
+                    errors.append(f"description too long: {path.relative_to(root)}: "
+                                  f"{len(description)} > {DESCRIPTION_LIMIT} characters")
         metrics[f"{directory} descriptions (total)"] = total
     return errors
 

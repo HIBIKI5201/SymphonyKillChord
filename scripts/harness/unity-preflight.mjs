@@ -3,9 +3,10 @@
 // 開いている Editor が無いときは、守る作業も無いので通す。
 //
 //   node scripts/harness/unity-preflight.mjs          手動で確認する（Codex など）
-//   node scripts/harness/unity-preflight.mjs --hook   Claude Code の PreToolUse hook として、標準入力の Bash コマンドを見て確認する
+//   node scripts/harness/unity-preflight.mjs --hook   Claude Code / Gemini CLI / Antigravity の hook として確認する
+//   --target=claude|gemini|antigravity                出力形式を明示する（省略時は標準入力 JSON から自動判定）
 //
-// ユーザーに確認したうえで続けるときは、コマンドの先頭に SKC_UNITY_PREFLIGHT=confirmed を付ける（hook のときだけ有効）。
+// ユーザーに確認したうえで続けるときは、コマンドの先頭などに SKC_UNITY_PREFLIGHT=confirmed を付ける（hook のときだけ有効）。
 import { spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -15,7 +16,7 @@ const BLOCK = 2;
 const UNITY_TIMEOUT_MS = 60000;
 // Unity CLI の終了コード 12（EDITOR_UNREACHABLE）: 対象の Editor が動いていない。
 const NO_EDITOR = 12;
-const CONFIRMED = /\bSKC_UNITY_PREFLIGHT=confirmed\b/;
+const CONFIRMED = /\bSKC_UNITY_PREFLIGHT\s*=\s*["']?confirmed["']?/;
 // コマンドの先頭（環境変数の代入の後を含む）に来た unity だけを対象にし、grep の引数などは除く。
 const UNITY_CALL = /(?:^|[;&|(\n])\s*(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*(?:&\s*)?unity(?:\.exe)?\s+([^;&|\n]*)/g;
 // Editor でコンパイル・テスト・Play を始める呼び出し。止める・一時停止・状態の確認は人の作業を壊さないので含めない。
@@ -68,11 +69,30 @@ export function extractEvalResult(stdout) {
 }
 
 /**
- * hook の標準入力（PreToolUse の JSON）から Bash コマンドを取り出す。読めなければ null。
+ * hook の標準入力（Claude / Gemini CLI / Antigravity の JSON）から対象とコマンドを取り出す。
  * Windows PowerShell 5.1 のパイプは先頭に BOM を付けるので、外してから読む。
  */
+export function parseHookInput(text, explicitTarget = null) {
+    let data = null;
+    try {
+        data = JSON.parse(String(text ?? "").replace(/^\uFEFF/, ""));
+    } catch {
+        return { target: explicitTarget ?? "claude", command: null };
+    }
+    const target = explicitTarget ?? detectHookTarget(data);
+    const args = data?.toolCall?.args;
+    const command = args?.CommandLine ?? args?.commandLine ?? args?.command ?? data?.tool_input?.command ?? null;
+    return { target, command: typeof command === "string" ? command : null };
+}
+
+function detectHookTarget(data) {
+    if (data?.toolCall || data?.hookEventName === "PreToolUse") { return "antigravity"; }
+    if (data?.hook_event_name === "BeforeTool" || data?.tool_name === "run_shell_command") { return "gemini"; }
+    return "claude";
+}
+
 export function readHookCommand(text) {
-    try { return JSON.parse(String(text ?? "").replace(/^\uFEFF/, ""))?.tool_input?.command ?? null; } catch { return null; }
+    return parseHookInput(text).command;
 }
 
 /** 調べた結果から、止まる理由を返す。問題がなければ空の配列。 */
@@ -99,15 +119,32 @@ function probeUnity() {
     return parseProbe(result);
 }
 
-function report(reasons, tool) {
+export function buildBlockMessage(reasons, tool) {
     const target = tool ? `unity ${tool} の前の確認` : "Unity 検証の前の確認";
-    console.error([
+    return [
         `[unity-preflight] ${target}で止まった。`,
         ...reasons.map((reason) => `- ${reason}`),
         "人の作業かもしれないので、勝手に保存・破棄・停止しない。ユーザーに確認すること。",
         "自分が始めた Play なら `unity command editor.playmode stop` で止めてよい。",
-        "ユーザーの了承を得て続けるときは、コマンドの先頭に SKC_UNITY_PREFLIGHT=confirmed を付ける。",
-    ].join("\n"));
+        "ユーザーの了承を得て続けるときは、コマンドの先頭に SKC_UNITY_PREFLIGHT=confirmed を付ける（PowerShell では `$env:SKC_UNITY_PREFLIGHT=\"confirmed\";`）。",
+    ].join("\n");
+}
+
+export function formatHookResult(target, allowed, reason = "") {
+    if (target === "antigravity" || target === "gemini") {
+        const payload = allowed ? { decision: "allow" } : { decision: "deny", reason };
+        return { exitCode: 0, stdout: JSON.stringify(payload), stderr: null };
+    }
+    return allowed
+        ? { exitCode: 0, stdout: null, stderr: null }
+        : { exitCode: BLOCK, stdout: null, stderr: reason };
+}
+
+function readExplicitTarget(argv) {
+    const flag = argv.find((arg) => arg.startsWith("--target="));
+    if (!flag) { return null; }
+    const target = flag.slice("--target=".length);
+    return target === "claude" || target === "gemini" || target === "antigravity" ? target : null;
 }
 
 async function readStdin() {
@@ -117,17 +154,38 @@ async function readStdin() {
 }
 
 async function main() {
+    const isHook = process.argv.includes("--hook");
+    const explicitTarget = readExplicitTarget(process.argv.slice(2));
+    let hookTarget = explicitTarget ?? "claude";
     let tool = null;
-    if (process.argv.includes("--hook")) {
-        tool = findGuardedCommand(readHookCommand(await readStdin()));
-        if (!tool) { return 0; }
+    if (isHook) {
+        const parsed = parseHookInput(await readStdin(), explicitTarget);
+        hookTarget = parsed.target;
+        tool = findGuardedCommand(parsed.command);
+        if (!tool) {
+            const out = formatHookResult(hookTarget, true);
+            if (out.stdout !== null) { console.log(out.stdout); }
+            return out.exitCode;
+        }
     }
     const reasons = probeUnity();
     if (reasons.length === 0) {
-        if (!tool) { console.log("[unity-preflight] 未保存の Scene・Prefab なし、Play 中でない（または Editor が開いていない）。"); }
+        if (isHook) {
+            const out = formatHookResult(hookTarget, true);
+            if (out.stdout !== null) { console.log(out.stdout); }
+            return out.exitCode;
+        }
+        console.log("[unity-preflight] 未保存の Scene・Prefab なし、Play 中でない（または Editor が開いていない）。");
         return 0;
     }
-    report(reasons, tool);
+    const message = buildBlockMessage(reasons, tool);
+    if (isHook) {
+        const out = formatHookResult(hookTarget, false, message);
+        if (out.stdout !== null) { console.log(out.stdout); }
+        if (out.stderr !== null) { console.error(out.stderr); }
+        return out.exitCode;
+    }
+    console.error(message);
     return BLOCK;
 }
 

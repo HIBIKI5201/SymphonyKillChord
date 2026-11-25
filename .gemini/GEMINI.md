@@ -1,1 +1,5 @@
-コードを生成する場合は"AGENTS.md"のコード規定に従う。
+# .gemini/GEMINI.md
+
+作業の規則は AGENTS.md にまとめている。ここには規則を書かず、AGENTS.md だけを直す。
+
+@../AGENTS.md
