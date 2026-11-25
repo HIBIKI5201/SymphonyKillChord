@@ -3,6 +3,7 @@
 
 #include "CommandLine.h"
 #include "PipeReader.h"
+#include "ProcessTree.h"
 #include "TextConvert.h"
 
 #include <windows.h>
@@ -219,7 +220,7 @@ namespace skc::conductor::cli
         std::wstring directory = workingDirectory.wstring();
         PROCESS_INFORMATION process{};
         BOOL isCreated = CreateProcessW(application.c_str(), commandLine.data(), nullptr, nullptr, TRUE,
-            CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT | (hasAttributes ? EXTENDED_STARTUPINFO_PRESENT : 0), nullptr,
+            CREATE_NO_WINDOW | CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT | (hasAttributes ? EXTENDED_STARTUPINFO_PRESENT : 0), nullptr,
             directory.empty() ? nullptr : directory.c_str(), &startup.StartupInfo, &process);
         DWORD createError = GetLastError();
         if (hasAttributes) { DeleteProcThreadAttributeList(attributes); }
@@ -234,14 +235,18 @@ namespace skc::conductor::cli
             return result;
         }
 
+        // 孫ごと止められるようにまとめてから動かす。
+        win32::ProcessTree tree;
+        tree.Assign(process.hProcess);
+        ResumeThread(process.hThread);
         CloseHandle(process.hThread);
 
-        // パイプの終わりは待たず、子が終わるまで読む（孫が書く側を持ったままでも止まらない）。終わらなければ止める。
+        // パイプの終わりは待たず、子が終わるまで読む（孫が書く側を持ったままでも止まらない）。終わらなければ孫ごと止める。
         bool isExited = win32::ReadPipesUntilExit(process.hProcess, { { readPipe, &result.Output } }, CAPTURE_TIMEOUT_MS);
         CloseHandle(readPipe);
         if (!isExited)
         {
-            TerminateProcess(process.hProcess, 1);
+            tree.Terminate(process.hProcess);
             CloseHandle(process.hProcess);
             result.Error = argv[0] + " が " + std::to_string(CAPTURE_TIMEOUT_MS / 1000) + " 秒たっても終わらないので止めました。";
             return result;

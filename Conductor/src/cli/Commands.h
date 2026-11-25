@@ -6,7 +6,7 @@
 namespace skc::conductor::cli
 {
     /// <summary>CLI の版。</summary>
-    inline constexpr const char* CONDUCTOR_VERSION = "1.0.0";
+    inline constexpr const char* CONDUCTOR_VERSION = "1.1.1";
 
     /// <summary>
     ///     CLI のコマンドを動かす。

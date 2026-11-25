@@ -705,6 +705,52 @@ namespace skc::conductor::cli
         }
 
         /// <summary>
+        ///     サブモジュールの状態を調べる。git submodule status（シェルスクリプトで動き、Windows でたまに止まる）は使わず、
+        ///     .gitmodules・インデックス・各フォルダの HEAD を、それぞれ git 本体のコマンドで読む。
+        /// </summary>
+        /// <param name="root">リポジトリのルート。</param>
+        /// <returns>サブモジュールの状態。調べられなければ空。</returns>
+        std::vector<SubmoduleState> ReadSubmodules(const std::filesystem::path& root)
+        {
+            std::vector<SubmoduleState> submodules;
+            if (!std::filesystem::exists(root / ".gitmodules")) { return submodules; }
+
+            CaptureResult config = RunAndCapture({ "git", "config", "--file", ".gitmodules", "--get-regexp", "^submodule\\..*\\.path$" }, root);
+            if (!config.IsStarted || config.ExitCode != 0) { return submodules; }
+
+            std::vector<std::string> paths = ParseGitmodulesPaths(config.Output);
+            if (paths.empty()) { return submodules; }
+
+            std::vector<std::string> lsFiles = { "git", "-c", "core.quotepath=false", "ls-files", "--stage", "--" };
+            lsFiles.insert(lsFiles.end(), paths.begin(), paths.end());
+            CaptureResult index = RunAndCapture(lsFiles, root);
+            std::vector<GitlinkEntry> entries = index.IsStarted && index.ExitCode == 0 ? ParseGitlinkEntries(index.Output) : std::vector<GitlinkEntry>();
+
+            for (const std::string& path : paths)
+            {
+                std::filesystem::path folder = root / Utf8ToPath(path);
+                std::optional<std::string> checkedOut;
+
+                // .git が無いフォルダで rev-parse すると親のリポジトリの HEAD を返すので、先に確かめる。
+                std::error_code error;
+                if (std::filesystem::exists(folder / ".git", error))
+                {
+                    CaptureResult head = RunAndCapture({ "git", "rev-parse", "HEAD" }, folder);
+                    if (head.IsStarted && head.ExitCode == 0)
+                    {
+                        std::string commit;
+                        std::istringstream(head.Output) >> commit;
+                        checkedOut = commit;
+                    }
+                }
+
+                submodules.push_back(SubmoduleState{ path, DecideSubmoduleState(path, entries, checkedOut) });
+            }
+
+            return submodules;
+        }
+
+        /// <summary>
         ///     conductor status。
         /// </summary>
         int Status(const Context& context)
@@ -718,8 +764,7 @@ namespace skc::conductor::cli
             else
             {
                 ParseGitStatusPorcelain(git.Output, status);
-                CaptureResult submodules = RunAndCapture({ "git", "submodule", "status" }, context.Root);
-                if (submodules.IsStarted && submodules.ExitCode == 0) { status.Submodules = ParseSubmoduleStatus(submodules.Output); }
+                status.Submodules = ReadSubmodules(context.Root);
             }
 
             FillToolStatus(context, status);
