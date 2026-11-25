@@ -78,33 +78,63 @@ namespace skc::conductor
         }
     }
 
-    std::vector<SubmoduleState> ParseSubmoduleStatus(const std::string& output)
+    std::vector<std::string> ParseGitmodulesPaths(const std::string& output)
     {
-        std::vector<SubmoduleState> submodules;
+        std::vector<std::string> paths;
         std::istringstream stream(output);
         std::string line;
         while (std::getline(stream, line))
         {
             line = TrimRight(line);
-            if (line.size() < 2) { continue; }
+            std::size_t space = line.find(' ');
+            if (space == std::string::npos || space + 1 >= line.size()) { continue; }
 
-            // 形式: <状態の1文字><コミット> <パス> [(<説明>)]
-            char mark = line[0];
-            std::istringstream fields(line.substr(1));
-            std::string commit;
-            std::string path;
-            fields >> commit >> path;
-            if (path.empty()) { continue; }
-
-            std::string state = "ok";
-            if (mark == '-') { state = "missing"; }
-            else if (mark == '+') { state = "modified"; }
-            else if (mark == 'U') { state = "conflict"; }
-
-            submodules.push_back(SubmoduleState{ path, state });
+            paths.push_back(line.substr(space + 1));
         }
 
-        return submodules;
+        return paths;
+    }
+
+    std::vector<GitlinkEntry> ParseGitlinkEntries(const std::string& output)
+    {
+        std::vector<GitlinkEntry> entries;
+        std::istringstream stream(output);
+        std::string line;
+        while (std::getline(stream, line))
+        {
+            line = TrimRight(line);
+            std::size_t tab = line.find('\t');
+            if (tab == std::string::npos) { continue; }
+
+            std::istringstream fields(line.substr(0, tab));
+            std::string mode;
+            GitlinkEntry entry;
+            fields >> mode >> entry.Commit >> entry.Stage;
+            if (mode != "160000" || entry.Commit.empty()) { continue; }
+
+            entry.Path = line.substr(tab + 1);
+            entries.push_back(entry);
+        }
+
+        return entries;
+    }
+
+    std::string DecideSubmoduleState(const std::string& path, const std::vector<GitlinkEntry>& entries,
+        const std::optional<std::string>& checkedOutCommit)
+    {
+        const GitlinkEntry* recorded = nullptr;
+        for (const GitlinkEntry& entry : entries)
+        {
+            if (entry.Path != path) { continue; }
+            if (entry.Stage != 0) { return "conflict"; }
+
+            recorded = &entry;
+        }
+
+        if (!checkedOutCommit.has_value() || checkedOutCommit->empty()) { return "missing"; }
+        if (recorded == nullptr) { return "missing"; }
+
+        return *checkedOutCommit == recorded->Commit ? "ok" : "modified";
     }
 
     std::string ParseUnityProjectVersion(const std::string& text)

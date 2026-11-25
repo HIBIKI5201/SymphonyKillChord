@@ -47,7 +47,7 @@ add_test(NAME CoreTests COMMAND ConductorCoreTests ${CMAKE_CURRENT_SOURCE_DIR}/l
 set(WINDOWS_DEFINITIONS UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX _WIN32_WINNT=0x0A00 WINVER=0x0A00 NTDDI_VERSION=0x0A000006)
 
 if(WIN32)
-    add_library(ConductorWin32 STATIC src/win32/PipeReader.cpp src/win32/TextConvert.cpp)
+    add_library(ConductorWin32 STATIC src/win32/PipeReader.cpp src/win32/ProcessTree.cpp src/win32/TextConvert.cpp)
     target_include_directories(ConductorWin32 PUBLIC src/win32)
     target_compile_definitions(ConductorWin32 PUBLIC ${WINDOWS_DEFINITIONS})
     target_link_libraries(ConductorWin32 PUBLIC ConductorCore)
