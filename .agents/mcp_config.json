@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "spec": {
+      "command": "python",
+      "args": [
+        "scripts/notion/spec_mcp.py"
+      ]
+    }
+  }
+}

@@ -1,0 +1,103 @@
+---
+name: skc-sinfonia-importers
+description: "Refresh repo snapshots with the SinfoniaOperator importers: Notion docs to Docs/NotionSpecifications, Discord logs to Docs/DiscordLog. Use when the local copy is stale or missing, or the answer lives in Discord discussions."
+---
+
+# SinfoniaOperator Importers
+
+Two CLI tools pull external project data into the repo as local files.
+Both read config from `SinfoniaOperator/sinfonia-operator.env.json` (shared, in git) and
+secrets from `UserSettings/KillChord/secrets.json` (gitignored, shared with the Unity editor tools; the old `SinfoniaOperator/sinfonia-operator.secrets.json` is still read during migration), in that order.
+
+| Tool | Source | Destination | Token |
+|---|---|---|---|
+| `NotionMarkdownExporter` | Notion root page + subtree | `Docs/NotionSpecifications/` | `NOTION_TOKEN` |
+| `DiscordLogExporter` | channels in `DISCORD_LOG_CHANNEL_IDS` | `Docs/DiscordLog/` | `DISCORD_BOT_TOKEN` |
+
+Both outputs are snapshots, not live data. `Docs/DiscordLog/` is gitignored; check its staleness
+with file mtimes (`ls -l`). `Docs/NotionSpecifications/` is a submodule synced by CI — see below.
+Read them first; only run an importer when the snapshot is missing, or is old enough to matter
+for the question.
+
+**Running on macOS / Linux:** the `.exe` files are Windows-only. Everywhere else, call the same tool
+through `./SinfoniaOperator/run-tool.sh <ToolName> [args]` — it runs the source with `dotnet run`
+(needs the .NET 10 SDK; it also finds `~/.dotnet/dotnet`) and keeps the caller's CWD, so arguments
+behave exactly like the exe. On Windows (Git Bash) it just launches the `.exe`.
+
+## Before running either
+
+Both hit live APIs, take minutes, and bulk-overwrite their output directory.
+**Confirm with the user before running**, and say which tool and roughly how much it will rewrite.
+Never hardcode a token; if one is missing the tool says so — ask the user to fill in the secrets file.
+
+## Notion → Docs/NotionSpecifications
+
+~1,800 Markdown pages plus downloaded images/attachments.
+
+**Normally, do not run the exporter — pull instead.** `Docs/NotionSpecifications` is a git
+submodule (private repo `SymphonyKillChord_Specifications`). The
+`[Bot] Notion Specifications Sync` workflow (`.github/workflows/NotionSpecificationsSync.yml`)
+is the only thing that fetches from Notion (every 3 hours) and pushes there, so the team does not
+spend Notion API quota. Unity pulls it on editor start (`NotionSpecificationsAutoPull`). To
+update by hand:
+
+```bash
+git submodule update --init --remote --depth 1 -- Docs/NotionSpecifications
+```
+
+To read a page after pulling, use its page id, not its path: `python scripts/notion/spec_query.py get <page id>`
+(or `path <id>` for a database), as in the [reading steps](../../../Docs/agent/README.md#必要な資料だけを読む).
+The canonical rules for the mirror are the Notion page "Notion プロジェクト ドキュメントの運用"
+(page id `3e37c2c6-cc02-815b-9dac-f6b834c1e56b`).
+
+Check freshness with `git -C Docs/NotionSpecifications log -1`. Only run the exporter locally
+when the user needs changes newer than the last sync; it writes into the submodule's working
+tree, so afterwards discard those local changes (`git -C Docs/NotionSpecifications checkout -- . && git -C Docs/NotionSpecifications clean -fd`)
+after confirming with the user, or the next pull will fail.
+
+```bash
+./SinfoniaOperator/NotionMarkdownExporter.exe --output "Docs/NotionSpecifications"
+# macOS / Linux:
+./SinfoniaOperator/run-tool.sh NotionMarkdownExporter --output "Docs/NotionSpecifications"
+```
+
+- `NOTION_EXPORT_OUTPUT` is a **CWD-relative** path. Run from the repository root, or pass
+  `--output` explicitly as above — otherwise it silently writes a second copy under
+  `SinfoniaOperator/Docs/NotionSpecifications/`.
+- Re-runs are incremental: it compares each page's Notion `last_edited_time` against
+  `.notion-export-manifest.json` and only re-fetches changed/new pages. Manually added files
+  under the output dir are left alone. A corrupted manifest aborts the export by design.
+- `--root "<page URL or id>"` overrides `NOTION_EXPORT_ROOT_PAGE`; `--no-assets` skips
+  image/attachment downloads (much faster when you only need text).
+- If it appears to hang, see the memory note on the stall watchdog / environmental freezes
+  before assuming the tool is broken.
+
+For comparing this export against the implementation, use the `skc-notion-spec-diff-check` skill —
+it owns the categorization scheme and the precedent report.
+
+## Discord → Docs/DiscordLog
+
+One `.txt` per channel, and per forum thread for forum channels; messages oldest-first with
+body, attachment URLs, and embed text.
+
+```bash
+./SinfoniaOperator/DiscordLogExporter.exe
+# macOS / Linux:
+./SinfoniaOperator/run-tool.sh DiscordLogExporter
+```
+
+- Output is fixed at `<repo root>/Docs/DiscordLog/`; the tool locates the git root itself,
+  so CWD does not matter.
+- It exports **only** the channels listed in `DISCORD_LOG_CHANNEL_IDS`. To pull a channel that
+  isn't listed, add its id to `sinfonia-operator.env.json` first (that file is committed —
+  mention the config change to the user).
+- `--config <PATH>` points at an alternate settings JSON. `--help` for usage.
+- If it errors about empty message bodies, the bot is missing `Message Content Intent` in the
+  Discord Developer Portal — a setup problem for the user, not something to work around.
+  The tool deliberately refuses to overwrite existing logs with empty ones.
+
+## Reading the output
+
+Both directories are large. Prefer `grep -ril` over the tree to find the relevant files, then
+read only those. Filenames encode the source: `<channel>_<id>.txt`,
+`<forum>_<thread>_<id>.txt`, and Notion pages keep their page titles.

@@ -3,5 +3,6 @@ name: skc-ai-debug-qa
 description: Symphony Kill ChordのQAシートに沿ってJSON状態取得、戦闘イベント記録、有限時間の観測、拍指定攻撃を行う。
 ---
 
-プロジェクトルートの .agents/skills/skc-ai-debug-attack-queue/SKILL.md を読み、共有JSとEditor APIを使用する。
-QA項目との対応はNotion「QA」配下の「AI QAツール対応表」（page id `40e7c2c6-cc02-8113-bbf6-ec2c67e38112`）を参照する。QAの進め方とQAシートの正本は Notion「QA」（page id `3e37c2c6-cc02-8198-8919-e7d9fba1f7b8`）で、`python scripts/notion/spec_query.py get <page id>` で写しを読む（手順は Docs/agent/README.md「必要な資料だけを読む」）。QAシートは「CBT QAシート」（page id `40e7c2c6-cc02-815f-9284-cf9e9b1e300f`）と「PC版 QAシート」（page id `40e7c2c6-cc02-8170-91ba-c48d598ab529`）。実行成功とQA合格を区別し、実機確認をEditor結果だけで合格にしない。
+# AI Debug QA
+
+共通本体 [.agents/skills/skc-ai-debug-qa/SKILL.md](../../../.agents/skills/skc-ai-debug-qa/SKILL.md) を読んで実行する。共通本体の相対リンクは共通本体のディレクトリ基準で解決する。
