@@ -1,6 +1,8 @@
 // Resources: the manifest and version information. Kept ASCII-only so rc.exe reads it the same on any code page.
 #include <windows.h>
 
+1 ICON "KillChordConductor.ico"
+
 CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "KillChordConductor.manifest"
 
 VS_VERSION_INFO VERSIONINFO
